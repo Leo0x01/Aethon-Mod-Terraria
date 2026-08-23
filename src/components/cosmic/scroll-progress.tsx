@@ -6,7 +6,7 @@ import { motion, useScroll, useSpring } from "framer-motion";
 const SECTIONS = [
   { id: "top", label: "Inicio" },
   { id: "lore", label: "Lore" },
-  { id: "weapons", label: "Armas" },
+  { id: "weapons", label: "Ramas" },
   { id: "progression", label: "Progresión" },
   { id: "presets", label: "Presets" },
   { id: "skill-tree", label: "Árbol" },

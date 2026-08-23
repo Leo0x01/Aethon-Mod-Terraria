@@ -3,25 +3,25 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { WEAPONS, type WeaponId } from "@/lib/mod-data";
+import { BRANCHES, type BranchId } from "@/lib/mod-data";
 import { SectionHeading } from "./lore-section";
 import { cn } from "@/lib/utils";
 
 export function WeaponsSection() {
-  const [active, setActive] = useState<WeaponId | null>(null);
-  const weapon = active ? WEAPONS.find((w) => w.id === active)! : null;
+  const [active, setActive] = useState<BranchId | null>(null);
+  const branch = active ? BRANCHES.find((b) => b.id === active)! : null;
 
   return (
     <section id="weapons" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
-          kicker="Las Cuatro Formas"
+          kicker="Las Tres Ramas"
           title={
             <>
-              Una luz, <span className="text-glow-gold">cuatro destinos</span>
+              Una luz, <span className="text-glow-gold">tres caminos</span>
             </>
           }
-          subtitle="El Genesis Shard se presenta como un m mote brillante. Al bondéate a él, eliges su forma — permanente para ese personaje. Cada forma abre una progresión completamente distinta."
+          subtitle="El Fragmento Génesis se presenta como un mote brillante sin forma fija. Su forma se adapta a la primera rama de combate que desarrolles — Distancia, Cuerpo a Cuerpo o Artes Mágicas. Cada rama abre una progresión completamente distinta."
         />
 
         <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -32,7 +32,7 @@ export function WeaponsSection() {
             </div>
 
             <AnimatePresence mode="wait">
-              {!weapon ? (
+              {!branch ? (
                 <motion.div
                   key="light"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -57,15 +57,15 @@ export function WeaponsSection() {
                     <span className="relative text-5xl">✦</span>
                   </div>
                   <p className="mt-6 font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                    Genesis Shard
+                    Fragmento Génesis
                   </p>
                   <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                    Elige una forma para bondéate al fragmento
+                    Elige una rama para vincular el fragmento
                   </p>
                 </motion.div>
               ) : (
                 <motion.div
-                  key={weapon.id}
+                  key={branch.id}
                   initial={{ opacity: 0, scale: 0.7, rotate: -8 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   exit={{ opacity: 0, scale: 0.7 }}
@@ -75,16 +75,16 @@ export function WeaponsSection() {
                   <div
                     className="relative flex h-44 w-44 items-center justify-center sm:h-64 sm:w-64"
                     style={{
-                      boxShadow: `0 0 60px -10px ${weapon.accent}66`,
+                      boxShadow: `0 0 60px -10px ${branch.accent}66`,
                     }}
                   >
                     <div
                       className="absolute inset-0 animate-pulse-glow rounded-full blur-2xl"
-                      style={{ background: weapon.accentSoft }}
+                      style={{ background: branch.accentSoft }}
                     />
                     <Image
-                      src={weapon.image}
-                      alt={weapon.name}
+                      src={branch.image}
+                      alt={branch.name}
                       width={280}
                       height={280}
                       className="relative animate-float-slow object-contain"
@@ -92,24 +92,24 @@ export function WeaponsSection() {
                   </div>
                   <p
                     className="mt-4 font-mono text-xs uppercase tracking-[0.25em]"
-                    style={{ color: weapon.accent }}
+                    style={{ color: branch.accent }}
                   >
-                    {weapon.classLabel}
+                    {branch.classLabel}
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-glow-gold sm:text-3xl">
-                    {weapon.name}
+                    {branch.name}
                   </h3>
                   <p className="text-sm italic text-muted-foreground">
-                    {weapon.epithet}
+                    {branch.epithet}
                   </p>
                   <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                    {weapon.fantasy}
+                    {branch.fantasy}
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {weapon && (
+            {branch && (
               <button
                 onClick={() => setActive(null)}
                 className="absolute right-4 top-4 z-20 rounded-full border border-border/60 bg-card/70 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/50 hover:text-primary"
@@ -122,33 +122,33 @@ export function WeaponsSection() {
           {/* RIGHT: selector + details */}
           <div className="flex flex-col gap-4">
             {/* selector */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {WEAPONS.map((w) => (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {BRANCHES.map((b) => (
                 <button
-                  key={w.id}
-                  onClick={() => setActive(w.id)}
+                  key={b.id}
+                  onClick={() => setActive(b.id)}
                   className={cn(
                     "group relative overflow-hidden rounded-xl border p-3 text-left transition",
-                    active === w.id
+                    active === b.id
                       ? "border-transparent"
                       : "border-border/60 bg-card/40 hover:border-primary/40",
                   )}
                   style={
-                    active === w.id
+                    active === b.id
                       ? {
-                          borderColor: w.accent,
-                          boxShadow: `0 0 24px -6px ${w.accent}66`,
+                          borderColor: b.accent,
+                          boxShadow: `0 0 24px -6px ${b.accent}66`,
                         }
                       : undefined
                   }
                 >
                   <div
                     className="mb-2 h-1 w-8 rounded-full transition group-hover:w-12"
-                    style={{ background: w.accent }}
+                    style={{ background: b.accent }}
                   />
-                  <div className="text-sm font-semibold">{w.name}</div>
+                  <div className="text-sm font-semibold">{b.name}</div>
                   <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {w.classLabel}
+                    {b.classLabel}
                   </div>
                 </button>
               ))}
@@ -156,7 +156,7 @@ export function WeaponsSection() {
 
             {/* details */}
             <AnimatePresence mode="wait">
-              {!weapon ? (
+              {!branch ? (
                 <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
@@ -165,13 +165,13 @@ export function WeaponsSection() {
                   className="flex flex-1 flex-col justify-center rounded-2xl border border-dashed border-border/60 p-6 text-center"
                 >
                   <p className="text-sm text-muted-foreground">
-                    Selecciona una forma de arma arriba para ver sus
-                    estadísticas, ramas de habilidades y descripción.
+                    Selecciona una rama arriba para ver sus estadísticas,
+                    sub-ramas de habilidades y descripción.
                   </p>
                 </motion.div>
               ) : (
                 <motion.div
-                  key={weapon.id}
+                  key={branch.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
@@ -180,7 +180,7 @@ export function WeaponsSection() {
                 >
                   {/* stats */}
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {weapon.stats.map((s) => (
+                    {branch.stats.map((s) => (
                       <div
                         key={s.label}
                         className="rounded-xl border border-border/50 bg-card/40 p-3"
@@ -190,7 +190,7 @@ export function WeaponsSection() {
                         </div>
                         <div
                           className="mt-1 text-sm font-semibold"
-                          style={{ color: weapon.accent }}
+                          style={{ color: branch.accent }}
                         >
                           {s.value}
                         </div>
@@ -204,11 +204,11 @@ export function WeaponsSection() {
                       Proyectiles base
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {weapon.baseProjectiles.map((p) => (
+                      {branch.baseProjectiles.map((p) => (
                         <span
                           key={p}
                           className="rounded-full border border-border/60 bg-secondary/40 px-3 py-1 text-xs"
-                          style={{ color: weapon.accent }}
+                          style={{ color: branch.accent }}
                         >
                           {p}
                         </span>
@@ -216,18 +216,18 @@ export function WeaponsSection() {
                     </div>
                   </div>
 
-                  {/* branches */}
+                  {/* sub-branches */}
                   <div className="rounded-2xl border border-border/50 bg-card/30 p-4">
                     <div className="flex items-center justify-between">
                       <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Ramas del árbol
+                        Sub-ramas del árbol
                       </div>
                       <span className="font-mono text-[10px] text-muted-foreground">
-                        6 ramas
+                        {branch.branches.length} ramas
                       </span>
                     </div>
                     <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {weapon.branches.map((b) => (
+                      {branch.branches.map((b) => (
                         <li
                           key={b.id}
                           className="flex items-start gap-2.5 rounded-lg border border-border/40 bg-card/40 p-2.5"
@@ -235,8 +235,8 @@ export function WeaponsSection() {
                           <span
                             className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-sm"
                             style={{
-                              background: weapon.accentSoft,
-                              color: weapon.accent,
+                              background: branch.accentSoft,
+                              color: branch.accent,
                             }}
                           >
                             {b.icon}
@@ -265,23 +265,23 @@ export function WeaponsSection() {
                   <div
                     className="rounded-2xl border p-4"
                     style={{
-                      borderColor: `${weapon.accent}55`,
-                      background: weapon.accentSoft,
+                      borderColor: `${branch.accent}55`,
+                      background: branch.accentSoft,
                     }}
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                        style={{ background: weapon.accent, color: "#0a0a1a" }}
+                        style={{ background: branch.accent, color: "#0a0a1a" }}
                       >
                         ⭐
                       </span>
                       <span className="text-sm font-semibold">
-                        Lore Absorption — capstone
+                        Absorción de Lore — capstone
                       </span>
                     </div>
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      {weapon.loreAbsorption}
+                      {branch.loreAbsorption}
                     </p>
                   </div>
                 </motion.div>

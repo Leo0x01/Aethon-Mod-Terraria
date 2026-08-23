@@ -4,9 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   cumulativeSkillPoints,
-  WEAPONS,
+  BRANCHES,
   type SkillNode,
-  type WeaponId,
+  type BranchId,
 } from "@/lib/mod-data";
 import {
   codexIdsFromIndices,
@@ -61,50 +61,49 @@ interface PlacedNode extends SkillNode {
 }
 
 function readInitialBuild(): {
-  weaponId: WeaponId;
+  branchId: BranchId;
   seed: number;
   allocated: Set<string>;
 } {
   if (typeof window === "undefined") {
     return {
-      weaponId: "book" as WeaponId,
+      branchId: "magic" as BranchId,
       seed: 1337,
       allocated: new Set<string>(),
     };
   }
-  // Decode using the weapon encoded IN the hash (its node list). We don't
-  // need to probe every weapon — the hash itself declares which weapon it's for.
+  // Decode using the branch encoded IN the hash (its node list). We don't
+  // need to probe every branch — the hash itself declares which branch it's for.
   const hash = window.location.hash;
-  if (!hash || !hash.startsWith("#v1.")) {
+  if (!hash || (!hash.startsWith("#v1.") && !hash.startsWith("#v2."))) {
     return {
-      weaponId: "book" as WeaponId,
+      branchId: "magic" as BranchId,
       seed: 1337,
       allocated: new Set<string>(),
     };
   }
-  // Peek the weapon code to find the matching weapon definition.
+  // Peek the branch code to find the matching branch definition.
   const parts = hash.slice(4).split(".");
-  const wCode = parts[0];
-  const WEAPON_FROM_CODE: Record<string, WeaponId> = {
-    b: "bow",
-    s: "sword",
-    c: "cannon",
-    m: "book",
+  const bCode = parts[0];
+  const BRANCH_FROM_CODE: Record<string, BranchId> = {
+    d: "distance",
+    c: "melee",
+    a: "magic",
   };
-  const wid = WEAPON_FROM_CODE[wCode];
-  if (!wid) {
+  const bid = BRANCH_FROM_CODE[bCode];
+  if (!bid) {
     return {
-      weaponId: "book" as WeaponId,
+      branchId: "magic" as BranchId,
       seed: 1337,
       allocated: new Set<string>(),
     };
   }
-  const w = WEAPONS.find((x) => x.id === wid)!;
+  const w = BRANCHES.find((x) => x.id === bid)!;
   const ids = w.skillTree.map((n) => n.id);
   const shared = decodeBuild(hash, ids);
   if (!shared) {
     return {
-      weaponId: "book" as WeaponId,
+      branchId: "magic" as BranchId,
       seed: 1337,
       allocated: new Set<string>(),
     };
@@ -115,7 +114,7 @@ function readInitialBuild(): {
     if (id) alloc.add(id);
   }
   return {
-    weaponId: shared.weaponId,
+    branchId: shared.branchId,
     seed: shared.seed,
     allocated: alloc,
   };
@@ -123,7 +122,7 @@ function readInitialBuild(): {
 
 export function SkillTreeView() {
   // SSR-safe defaults; the shared build is restored in a mount effect below.
-  const [weaponId, setWeaponId] = useState<WeaponId>("book");
+  const [branchId, setBranchId] = useState<BranchId>("magic");
   const [seed, setSeed] = useState(1337);
   const [allocated, setAllocated] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<string | null>(null);
@@ -148,7 +147,7 @@ export function SkillTreeView() {
   const SNAPSHOT_KEY = "aethon:build-snapshot-a";
   const [snapshotA, setSnapshotA] = useState<string | null>(null);
 
-  const weapon = WEAPONS.find((w) => w.id === weaponId)!;
+  const weapon = BRANCHES.find((w) => w.id === branchId)!;
 
   // Procedurally (re)place nodes using the seed → jitter + occasional extra branch arcs
   const placed = useMemo<PlacedNode[]>(() => {
@@ -177,9 +176,9 @@ export function SkillTreeView() {
     });
   }, [weapon, seed]);
 
-  // reset allocations when weapon changes
-  const onWeaponChange = (id: WeaponId) => {
-    setWeaponId(id);
+  // reset allocations when branch changes
+  const onWeaponChange = (id: BranchId) => {
+    setBranchId(id);
     setAllocated(new Set());
     setSelected(null);
   };
@@ -211,7 +210,7 @@ export function SkillTreeView() {
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
     const restored = readInitialBuild();
-    setWeaponId(restored.weaponId);
+    setBranchId(restored.branchId);
     setSeed(restored.seed);
     setAllocated(restored.allocated);
     // Restore the build-compare snapshot from localStorage (if any).
@@ -227,16 +226,16 @@ export function SkillTreeView() {
     const onImported = (e: Event) => {
       const detail = (e as CustomEvent<{ hash: string }>).detail;
       if (!detail?.hash) return;
-      for (const w of WEAPONS) {
+      for (const w of BRANCHES) {
         const ids = w.skillTree.map((n) => n.id);
         const shared = decodeBuild(detail.hash, ids);
-        if (shared && shared.weaponId === w.id) {
+        if (shared && shared.branchId === w.id) {
           const alloc = new Set<string>();
           for (const idx of shared.nodeIndices) {
             const id = w.skillTree[idx]?.id;
             if (id) alloc.add(id);
           }
-          setWeaponId(shared.weaponId);
+          setBranchId(shared.branchId);
           setSeed(shared.seed);
           setAllocated(alloc);
           setSelected(null);
@@ -308,20 +307,20 @@ export function SkillTreeView() {
       const shared = decodeBuild(existingHash, allNodeIds);
       if (shared && shared.codexIndices.length > 0) {
         codexIds = codexIdsFromIndices(
-          shared.weaponId,
+          shared.branchId,
           shared.codexIndices,
         );
       }
     }
     const enc = encodeBuild(
-      weaponId,
+      branchId,
       seed,
       [...allocated],
       allNodeIds,
       codexIds,
     );
     writeHashBuild(enc);
-  }, [allocated, weaponId, seed, allNodeIds, hydrated]);
+  }, [allocated, branchId, seed, allNodeIds, hydrated]);
 
   const [shareStatus, setShareStatus] = useState<
     "idle" | "copied" | "error"
@@ -333,11 +332,11 @@ export function SkillTreeView() {
     if (existingHash) {
       const shared = decodeBuild(existingHash, allNodeIds);
       if (shared && shared.codexIndices.length > 0) {
-        codexIds = codexIdsFromIndices(shared.weaponId, shared.codexIndices);
+        codexIds = codexIdsFromIndices(shared.branchId, shared.codexIndices);
       }
     }
     const enc = encodeBuild(
-      weaponId,
+      branchId,
       seed,
       [...allocated],
       allNodeIds,
@@ -365,22 +364,22 @@ export function SkillTreeView() {
       window.setTimeout(() => setImportStatus("idle"), 2400);
       return;
     }
-    // Decode against every weapon to find the matching one.
-    for (const w of WEAPONS) {
+    // Decode against every branch to find the matching one.
+    for (const w of BRANCHES) {
       const ids = w.skillTree.map((n) => n.id);
       const shared = decodeBuild(hash, ids);
-      if (shared && shared.weaponId === w.id) {
+      if (shared && shared.branchId === w.id) {
         const alloc = new Set<string>();
         for (const idx of shared.nodeIndices) {
           const id = w.skillTree[idx]?.id;
           if (id) alloc.add(id);
         }
-        setWeaponId(shared.weaponId);
+        setBranchId(shared.branchId);
         setSeed(shared.seed);
         setAllocated(alloc);
         setSelected(null);
         writeHashBuild(hash);
-        // Notify the Memory Codex to sync its class + loadout to the imported build.
+        // Notify the Memory Codex to sync its branch + loadout to the imported build.
         window.dispatchEvent(
           new CustomEvent("aethon:build-imported", {
             detail: { hash },
@@ -465,22 +464,22 @@ export function SkillTreeView() {
               <span className="text-glow-violet">procedurales</span>
             </>
           }
-          subtitle="Cada arma genera su propio árbol con un seed. Las ramas irradian como estrellas conectadas por puentes de luz. Haz clic en un nodo para asignarlo; respeta prerrequisitos y tu presupuesto de puntos."
+          subtitle="Cada rama genera su propio árbol con un seed. Las sub-ramas irradian como estrellas conectadas por puentes de luz. Haz clic en un nodo para asignarlo; respeta prerrequisitos y tu presupuesto de puntos."
         />
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
-          {WEAPONS.map((w) => (
+          {BRANCHES.map((w) => (
             <button
               key={w.id}
               onClick={() => onWeaponChange(w.id)}
               className={cn(
                 "flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
-                weaponId === w.id
+                branchId === w.id
                   ? "border-transparent"
                   : "border-border/60 text-muted-foreground hover:text-foreground",
               )}
               style={
-                weaponId === w.id
+                branchId === w.id
                   ? {
                       borderColor: w.accent,
                       color: w.accent,
@@ -598,7 +597,7 @@ export function SkillTreeView() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") onImport();
                       }}
-                      placeholder="Pega un enlace o hash (#v1.m.1b9.0,1,2…)"
+                      placeholder="Pega un enlace o hash (#v1.a.1b9.0,1,2…)"
                       className="w-full flex-1 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
                       aria-label="Enlace o hash de build compartido"
                     />
@@ -967,7 +966,7 @@ export function SkillTreeView() {
             snapshotA={snapshotA}
             onSaveSnapshot={() => {
               const ids = weapon.skillTree.map((n) => n.id);
-              const enc = encodeBuild(weaponId, seed, [...allocated], ids);
+              const enc = encodeBuild(branchId, seed, [...allocated], ids);
               setSnapshotA(enc);
               saveString(SNAPSHOT_KEY, enc);
             }}
@@ -987,7 +986,7 @@ function BuildSummary({
   allocated,
   placed,
 }: {
-  weapon: (typeof WEAPONS)[number];
+  weapon: (typeof BRANCHES)[number];
   allocated: Set<string>;
   placed: PlacedNode[];
 }) {
@@ -1052,7 +1051,7 @@ function BuildSummary({
       ) : (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[...byBranch.entries()].map(([branch, nodes]) => {
-            const branchMeta = weapon.branches.find((b) => b.name === branch);
+            const branchMeta = weapon.branches.find((b) => b.id === branch);
             return (
               <div
                 key={branch}
@@ -1244,7 +1243,7 @@ function BuildCompare({
   onSaveSnapshot,
   onClearSnapshot,
 }: {
-  weapon: (typeof WEAPONS)[number];
+  weapon: (typeof BRANCHES)[number];
   currentAllocated: Set<string>;
   placed: PlacedNode[];
   snapshotA: string | null;
@@ -1256,7 +1255,7 @@ function BuildCompare({
   const snapshotAllocated = useMemo(() => {
     if (!snapshotA) return null;
     const shared = decodeBuild(snapshotA, allNodeIds);
-    if (!shared || shared.weaponId !== weapon.id) return null;
+    if (!shared || shared.branchId !== weapon.id) return null;
     const ids = new Set<string>();
     for (const idx of shared.nodeIndices) {
       const id = weapon.skillTree[idx]?.id;
@@ -1284,7 +1283,7 @@ function BuildCompare({
     if (!snapshotA) return null;
     const shared = decodeBuild(snapshotA, allNodeIds);
     if (!shared) return null;
-    const snapWeapon = WEAPONS.find((w) => w.id === shared.weaponId);
+    const snapWeapon = BRANCHES.find((w) => w.id === shared.branchId);
     return snapWeapon
       ? { name: snapWeapon.name, count: shared.nodeIndices.length }
       : null;
@@ -1338,7 +1337,7 @@ function BuildCompare({
                 title={
                   sameWeapon
                     ? "Sobrescribir snapshot A"
-                    : "Cambia al arma de la snapshot para sobrescribir"
+                    : "Cambia a la rama de la snapshot para sobrescribir"
                 }
               >
                 ↻ actualizar
@@ -1360,10 +1359,10 @@ function BuildCompare({
           <span className="text-foreground">
             {(() => {
               const shared = decodeBuild(snapshotA, allNodeIds);
-              return shared ? WEAPONS.find((w) => w.id === shared.weaponId)?.name : "?";
+              return shared ? BRANCHES.find((w) => w.id === shared.branchId)?.name : "?";
             })()}
           </span>
-          . Cambia a esa arma para comparar, o borra la snapshot.
+          . Cambia a esa rama para comparar, o borra la snapshot.
         </div>
       )}
 

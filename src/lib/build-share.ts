@@ -1,4 +1,4 @@
-import type { WeaponId } from "@/lib/mod-data";
+import type { BranchId } from "@/lib/mod-data";
 import { CODEX } from "@/lib/mod-data";
 
 /**
@@ -6,38 +6,36 @@ import { CODEX } from "@/lib/mod-data";
  * Memory Codex rune loadout) to a compact URL hash.
  *
  * Formats (URL hash, after '#'):
- *   v1.<weaponId>.<seed>.<nodeIndices>          (skill tree only — backward compat)
- *   v2.<weaponId>.<seed>.<nodeIndices>.<codexIndices>
+ *   v1.<branchId>.<seed>.<nodeIndices>          (skill tree only — backward compat)
+ *   v2.<branchId>.<seed>.<nodeIndices>.<codexIndices>
  *
  * Where:
- *   - weaponId: 1 char (b=bow, s=sword, c=cannon, m=book / magic)
+ *   - branchId: 1 char (d=distance, c=melee/cuerpo, a=magic/arcano)
  *   - seed: base36 number
- *   - nodeIndices: comma-separated indices into the weapon's skillTree (base36)
+ *   - nodeIndices: comma-separated indices into the branch's skillTree (base36)
  *   - codexIndices (v2 only): comma-separated indices into the CODEX array
- *     filtered to the weapon's class (base36). Represents memorized rune IDs.
+ *     filtered to the branch (base36). Represents memorized rune IDs.
  *
  * v1 hashes still decode (codexIndices defaults to []). v2 is emitted when the
  * codex loadout is non-empty.
  */
 
-const WEAPON_CODE: Record<WeaponId, string> = {
-  bow: "b",
-  sword: "s",
-  cannon: "c",
-  book: "m",
+const BRANCH_CODE: Record<BranchId, string> = {
+  distance: "d",
+  melee: "c", // 'c' de cuerpo
+  magic: "a", // 'a' de arcano
 };
-const WEAPON_FROM_CODE: Record<string, WeaponId> = {
-  b: "bow",
-  s: "sword",
-  c: "cannon",
-  m: "book",
+const BRANCH_FROM_CODE: Record<string, BranchId> = {
+  d: "distance",
+  c: "melee",
+  a: "magic",
 };
 
 export interface SharedBuild {
-  weaponId: WeaponId;
+  branchId: BranchId;
   seed: number;
-  nodeIndices: number[]; // indices into the weapon's skillTree array
-  codexIndices: number[]; // indices into the class-filtered CODEX array
+  nodeIndices: number[]; // indices into the branch's skillTree array
+  codexIndices: number[]; // indices into the branch-filtered CODEX array
 }
 
 function encodeIndices(allocatedIds: string[], allIds: string[]): string {
@@ -60,13 +58,13 @@ function decodeIndices(
     .filter((i) => !Number.isNaN(i) && i >= 0 && i < maxLen);
 }
 
-/** Codex IDs for a given weapon class (in CODEX array order). */
-function codexIdsForClass(cls: WeaponId): string[] {
-  return CODEX.filter((c) => c.class === cls).map((c) => c.id);
+/** Codex IDs for a given branch (in CODEX array order). */
+function codexIdsForBranch(cls: BranchId): string[] {
+  return CODEX.filter((c) => c.branch === cls).map((c) => c.id);
 }
 
 export function encodeBuild(
-  weaponId: WeaponId,
+  branchId: BranchId,
   seed: number,
   allocatedNodeIds: string[],
   allNodeIds: string[],
@@ -75,11 +73,11 @@ export function encodeBuild(
   const nodeStr = encodeIndices(allocatedNodeIds, allNodeIds);
   // v2 only if codex loadout is provided and non-empty.
   if (codexIds && codexIds.length > 0) {
-    const classCodexIds = codexIdsForClass(weaponId);
+    const classCodexIds = codexIdsForBranch(branchId);
     const codexStr = encodeIndices(codexIds, classCodexIds);
-    return `v2.${WEAPON_CODE[weaponId]}.${seed.toString(36)}.${nodeStr}.${codexStr}`;
+    return `v2.${BRANCH_CODE[branchId]}.${seed.toString(36)}.${nodeStr}.${codexStr}`;
   }
-  return `v1.${WEAPON_CODE[weaponId]}.${seed.toString(36)}.${nodeStr}`;
+  return `v1.${BRANCH_CODE[branchId]}.${seed.toString(36)}.${nodeStr}`;
 }
 
 export function decodeBuild(hash: string, allNodeIds: string[]): SharedBuild | null {
@@ -89,18 +87,18 @@ export function decodeBuild(hash: string, allNodeIds: string[]): SharedBuild | n
   if (!isV1 && !isV2) return null;
   const parts = raw.slice(3).split(".");
   if (parts.length < 3) return null;
-  const [wCode, seedStr, idxStr, codexStr] = parts;
-  const weaponId = WEAPON_FROM_CODE[wCode];
-  if (!weaponId) return null;
+  const [bCode, seedStr, idxStr, codexStr] = parts;
+  const branchId = BRANCH_FROM_CODE[bCode];
+  if (!branchId) return null;
   const seed = parseInt(seedStr, 36);
   if (Number.isNaN(seed)) return null;
   const nodeIndices = decodeIndices(idxStr, allNodeIds.length);
   let codexIndices: number[] = [];
   if (isV2 && codexStr !== undefined) {
-    const classCodexIds = codexIdsForClass(weaponId);
+    const classCodexIds = codexIdsForBranch(branchId);
     codexIndices = decodeIndices(codexStr, classCodexIds.length);
   }
-  return { weaponId, seed, nodeIndices, codexIndices };
+  return { branchId, seed, nodeIndices, codexIndices };
 }
 
 /** Read the build hash from the current URL (without the leading '#'). */
@@ -125,12 +123,12 @@ export function clearHashBuild() {
   window.history.replaceState(null, "", window.location.pathname);
 }
 
-/** Resolve codex indices → codex IDs for a given weapon class. */
+/** Resolve codex indices → codex IDs for a given branch. */
 export function codexIdsFromIndices(
-  cls: WeaponId,
+  cls: BranchId,
   indices: number[],
 ): string[] {
-  const classCodexIds = codexIdsForClass(cls);
+  const classCodexIds = codexIdsForBranch(cls);
   return indices
     .map((i) => classCodexIds[i])
     .filter((id): id is string => Boolean(id));

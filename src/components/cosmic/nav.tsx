@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "#lore", label: "Lore" },
-  { href: "#weapons", label: "Armas" },
+  { href: "#weapons", label: "Ramas" },
   { href: "#progression", label: "Progresión" },
   { href: "#presets", label: "Presets" },
   { href: "#skill-tree", label: "Árbol" },

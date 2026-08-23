@@ -8,7 +8,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { WEAPONS } from "@/lib/mod-data";
+import { BRANCHES } from "@/lib/mod-data";
 
 export function Hero() {
   return (
@@ -58,7 +58,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.16 }}
             className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           >
-            Encuentra un altar antiguo. Bondéate a un{" "}
+            Encuentra un altar antiguo. Vincúlate a un{" "}
             <span className="text-foreground">fragmento de luz</span> de una
             entidad cósmica. Sube de nivel{" "}
             <span className="text-primary">infinitamente</span> matando
@@ -78,7 +78,7 @@ export function Hero() {
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:box-glow-gold"
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              Elegir tu arma
+              Elegir tu rama
               <span aria-hidden>→</span>
             </a>
             <a
@@ -97,8 +97,8 @@ export function Hero() {
           >
             {[
               { v: "∞", l: "Niveles" },
-              { v: "4", l: "Armas únicas" },
-              { v: "6", l: "Ramas por arma" },
+              { v: "3", l: "Ramas únicas" },
+              { v: "6+", l: "Sub-ramas por árbol" },
             ].map((s) => (
               <div
                 key={s.l}
@@ -179,25 +179,22 @@ function HeroEntity() {
           className="animate-float-slow rounded-[2rem] object-cover"
         />
       </motion.div>
-      {/* floating weapon chips */}
+      {/* floating branch chips */}
       <div className="absolute -left-2 top-8 hidden rotate-[-8deg] sm:block">
-        <WeaponChip id="bow" />
+        <WeaponChip id="distance" />
       </div>
       <div className="absolute -right-2 top-1/3 hidden rotate-[6deg] sm:block">
-        <WeaponChip id="book" />
+        <WeaponChip id="magic" />
       </div>
       <div className="absolute bottom-6 left-6 hidden rotate-[4deg] sm:block">
-        <WeaponChip id="sword" />
-      </div>
-      <div className="absolute bottom-10 right-4 hidden rotate-[-5deg] sm:block">
-        <WeaponChip id="cannon" />
+        <WeaponChip id="melee" />
       </div>
     </motion.div>
   );
 }
 
-function WeaponChip({ id }: { id: (typeof WEAPONS)[number]["id"] }) {
-  const w = WEAPONS.find((x) => x.id === id)!;
+function WeaponChip({ id }: { id: (typeof BRANCHES)[number]["id"] }) {
+  const w = BRANCHES.find((x) => x.id === id)!;
   return (
     <div
       className="glass-panel flex items-center gap-2 rounded-full border border-border/70 px-3 py-1.5 text-xs shadow-lg"

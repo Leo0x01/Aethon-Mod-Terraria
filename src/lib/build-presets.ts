@@ -1,9 +1,9 @@
-import type { WeaponId } from "@/lib/mod-data";
+import type { BranchId } from "@/lib/mod-data";
 
 /**
  * Curated build presets — one-click example builds that showcase the skill-tree
- * system. Each preset specifies a weapon, a fixed seed, and a set of allocated
- * node indices (into the weapon's skillTree array). Encoded as v1 build hashes
+ * system. Each preset specifies a branch, a fixed seed, and a set of allocated
+ * node indices (into the branch's skillTree array). Encoded as v1 build hashes
  * so they load via the existing build-import infrastructure.
  */
 
@@ -11,9 +11,9 @@ export interface BuildPreset {
   id: string;
   name: string;
   archetype: string; // e.g. "Glass Cannon", "Tank"
-  weaponId: WeaponId;
+  branchId: BranchId;
   seed: number;
-  /** Indices into the weapon's skillTree array. */
+  /** Indices into the branch's skillTree array. */
   nodeIndices: number[];
   description: string;
   difficulty: "easy" | "medium" | "hard";
@@ -23,79 +23,79 @@ export interface BuildPreset {
 export const BUILD_PRESETS: BuildPreset[] = [
   {
     id: "arcane-storm",
-    name: "Arcane Storm",
+    name: "Tormenta Arcana",
     archetype: "Glass Cannon",
-    weaponId: "book",
+    branchId: "magic",
     seed: 1337,
-    // Mana Flow (0-4) + Projectile Evolution (10-14) + Cosmic Spells (20-24)
+    // Flujo de Maná (0-4) + Evolución de Proyectiles (10-14) + Hechizos Cósmicos (20-24)
     nodeIndices: [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24],
     description:
-      "Maximum magical carnage. Bottomless mana, splitting homing bolts, and Black Holes pulling enemies into Supernovas. Dies if sneezed on.",
+      "Carnage mágico máximo. Maná inagotable, bolts homing que se dividen, y Agujeros Negros atrayendo enemigos hacia Supernovas. Muere si le estornudan.",
     difficulty: "hard",
     accent: "#b388ff",
   },
   {
     id: "eternal-sustainer",
-    name: "Eternal Sustainer",
+    name: "Sustentador Eterno",
     archetype: "Lifesteal Tank",
-    weaponId: "book",
+    branchId: "magic",
     seed: 4242,
-    // Mana Flow (0-4) + Arcane Conversion (15-19)
+    // Flujo de Maná (0-4) + Conversión Arcana (15-19)
     nodeIndices: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19],
     description:
-      "Mana shield + lifesteal + desperation scaling. The lower your mana, the harder you hit. Nearly unkillable once online.",
+      "Escudo de maná + lifesteal + escalado por desesperación. Cuanto menor tu maná, más duro golpeas. Casi inmortal una vez armado.",
     difficulty: "medium",
     accent: "#3dd6c4",
   },
   {
     id: "starfall-marksman",
-    name: "Starfall Marksman",
+    name: "Tirador de la Lluvia Estelar",
     archetype: "Ranged DPS",
-    weaponId: "bow",
+    branchId: "distance",
     seed: 2718,
-    // Quiver Mastery (5-9) + Celestial Shots (15-19)
+    // Maestría de Carcaj (5-9) + Disparos Celestiales (15-19)
     nodeIndices: [5, 6, 7, 8, 9, 15, 16, 17, 18, 19],
     description:
-      "Endless Quiver + Starfall Storm + Supernova charged shots. Rain cosmic death from range while never running dry.",
+      "Carcaj infinito + Tormenta de estrellas + Supernova cargada. Llueve muerte cósmica desde lejos sin quedarte sin munición.",
     difficulty: "easy",
     accent: "#f5c451",
   },
   {
     id: "dawnbreaker",
-    name: "Dawnbreaker",
+    name: "Rompealbas",
     archetype: "Combo Brawler",
-    weaponId: "sword",
+    branchId: "melee",
     seed: 1618,
-    // Combo Mastery (5-9) + Solar Wrath (10-14)
+    // Maestría de Combo (5-9) + Ira Solar (10-14)
     nodeIndices: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
     description:
-      "Escalating combo meter into a Supernova Strike finisher. Solar aura burns everything around you while you dance through enemies.",
+      "Medidor de combo escalando hacia un remate de Golpe de supernova. Aura solar quema todo a tu alrededor mientras danzas entre enemigos.",
     difficulty: "medium",
     accent: "#ff9a3c",
   },
   {
     id: "bulwark-of-dawn",
-    name: "Bulwark of Dawn",
+    name: "Baluarte del Alba",
     archetype: "Parry Tank",
-    weaponId: "sword",
+    branchId: "melee",
     seed: 9090,
-    // Aegis of Dawn (15-19) + Blade Genesis (0-4)
+    // Égida del Alba (15-19) + Génesis de Hoja (0-4)
     nodeIndices: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19],
     description:
-      "Parry frames, damage reflection, invuln dashes. Become untouchable — every blocked projectile fires back at +50% damage.",
+      "Frames de parry, reflexión de daño, dashes invulnerables. Vuelve intocable — cada proyectil bloqueado rebota con +50% daño.",
     difficulty: "hard",
     accent: "#3dd6c4",
   },
   {
     id: "void-artillery",
-    name: "Void Artillery",
+    name: "Artillería del Vacío",
     archetype: "Heavy Ordnance",
-    weaponId: "cannon",
+    branchId: "distance",
     seed: 3141,
-    // Heavy Ordnance (15-19) + Slug Genesis (0-4)
+    // Génesis de Proyectiles (0-4) + Disparos Celestiales (15-19)
     nodeIndices: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19],
     description:
-      "Charged shots, artillery mode, orbital strikes. Deploy, overcharge, and call satellite beams from above.",
+      "Disparos cargados, salva de meteoros, supernovas. Dispara virotes de vacío y haz que el cielo llueva fuego cósmico.",
     difficulty: "medium",
     accent: "#3dd6c4",
   },
@@ -103,7 +103,7 @@ export const BUILD_PRESETS: BuildPreset[] = [
 
 // ---------------------------------------------------------------------------
 // User-saved presets — stored in localStorage as a JSON array of {id, name, hash, createdAt}.
-// The hash is a v1/v2 build-share hash (encodes weapon + seed + nodes + codex).
+// The hash is a v1/v2 build-share hash (encodes branch + seed + nodes + codex).
 // ---------------------------------------------------------------------------
 
 export interface UserPreset {

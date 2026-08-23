@@ -1,0 +1,1487 @@
+     1→"use client";
+     2→
+     3→import { useEffect, useMemo, useRef, useState } from "react";
+     4→import { AnimatePresence, motion } from "framer-motion";
+     5→import {
+     6→  cumulativeSkillPoints,
+     7→  WEAPONS,
+     8→  type SkillNode,
+     9→  type WeaponId,
+    10→} from "@/lib/mod-data";
+    11→import {
+    12→  codexIdsFromIndices,
+    13→  copyShareUrl,
+    14→  decodeBuild,
+    15→  encodeBuild,
+    16→  writeHashBuild,
+    17→} from "@/lib/build-share";
+    18→import { loadString, removeKey, saveString } from "@/lib/storage";
+    19→import { SectionHeading } from "./lore-section";
+    20→import { cn } from "@/lib/utils";
+    21→
+    22→const RARITY_STYLE: Record<
+    23→  SkillNode["rarity"],
+    24→  { fill: string; ring: string; glow: string; label: string }
+    25→> = {
+    26→  common: {
+    27→    fill: "rgba(180,180,210,0.35)",
+    28→    ring: "rgba(200,200,230,0.7)",
+    29→    glow: "rgba(200,200,230,0.35)",
+    30→    label: "Common",
+    31→  },
+    32→  rare: {
+    33→    fill: "rgba(120,170,255,0.4)",
+    34→    ring: "rgba(140,180,255,0.95)",
+    35→    glow: "rgba(120,170,255,0.6)",
+    36→    label: "Rare",
+    37→  },
+    38→  legendary: {
+    39→    fill: "rgba(245,196,81,0.45)",
+    40→    ring: "rgba(255,220,140,1)",
+    41→    glow: "rgba(245,196,81,0.85)",
+    42→    label: "Legendary",
+    43→  },
+    44→};
+    45→
+    46→/**
+    47→ * Deterministic pseudo-random from a seed (mulberry32).
+    48→ */
+    49→function mulberry32(seed: number) {
+    50→  return function () {
+    51→    let t = (seed += 0x6d2b79f5);
+    52→    t = Math.imul(t ^ (t >>> 15), t | 1);
+    53→    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    54→    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    55→  };
+    56→}
+    57→
+    58→interface PlacedNode extends SkillNode {
+    59→  px: number; // pixel coords
+    60→  py: number;
+    61→}
+    62→
+    63→function readInitialBuild(): {
+    64→  weaponId: WeaponId;
+    65→  seed: number;
+    66→  allocated: Set<string>;
+    67→} {
+    68→  if (typeof window === "undefined") {
+    69→    return {
+    70→      weaponId: "book" as WeaponId,
+    71→      seed: 1337,
+    72→      allocated: new Set<string>(),
+    73→    };
+    74→  }
+    75→  // Decode using the weapon encoded IN the hash (its node list). We don't
+    76→  // need to probe every weapon — the hash itself declares which weapon it's for.
+    77→  const hash = window.location.hash;
+    78→  if (!hash || !hash.startsWith("#v1.")) {
+    79→    return {
+    80→      weaponId: "book" as WeaponId,
+    81→      seed: 1337,
+    82→      allocated: new Set<string>(),
+    83→    };
+    84→  }
+    85→  // Peek the weapon code to find the matching weapon definition.
+    86→  const parts = hash.slice(4).split(".");
+    87→  const wCode = parts[0];
+    88→  const WEAPON_FROM_CODE: Record<string, WeaponId> = {
+    89→    b: "bow",
+    90→    s: "sword",
+    91→    c: "cannon",
+    92→    m: "book",
+    93→  };
+    94→  const wid = WEAPON_FROM_CODE[wCode];
+    95→  if (!wid) {
+    96→    return {
+    97→      weaponId: "book" as WeaponId,
+    98→      seed: 1337,
+    99→      allocated: new Set<string>(),
+   100→    };
+   101→  }
+   102→  const w = WEAPONS.find((x) => x.id === wid)!;
+   103→  const ids = w.skillTree.map((n) => n.id);
+   104→  const shared = decodeBuild(hash, ids);
+   105→  if (!shared) {
+   106→    return {
+   107→      weaponId: "book" as WeaponId,
+   108→      seed: 1337,
+   109→      allocated: new Set<string>(),
+   110→    };
+   111→  }
+   112→  const alloc = new Set<string>();
+   113→  for (const idx of shared.nodeIndices) {
+   114→    const id = w.skillTree[idx]?.id;
+   115→    if (id) alloc.add(id);
+   116→  }
+   117→  return {
+   118→    weaponId: shared.weaponId,
+   119→    seed: shared.seed,
+   120→    allocated: alloc,
+   121→  };
+   122→}
+   123→
+   124→export function SkillTreeView() {
+   125→  // SSR-safe defaults; the shared build is restored in a mount effect below.
+   126→  const [weaponId, setWeaponId] = useState<WeaponId>("book");
+   127→  const [seed, setSeed] = useState(1337);
+   128→  const [allocated, setAllocated] = useState<Set<string>>(new Set());
+   129→  const [selected, setSelected] = useState<string | null>(null);
+   130→  const [hydrated, setHydrated] = useState(false);
+   131→  // Hovered node for the floating tooltip overlay (HTML, so text wraps nicely).
+   132→  const [hovered, setHovered] = useState<string | null>(null);
+   133→
+   134→  // Node search: filters/highlights nodes in the constellation by name.
+   135→  const [nodeQuery, setNodeQuery] = useState("");
+   136→  const searchInputRef = useRef<HTMLInputElement | null>(null);
+   137→
+   138→  // Build import panel state (declared early so the keyboard handler can close it).
+   139→  const [showImport, setShowImport] = useState(false);
+   140→  const [importValue, setImportValue] = useState("");
+   141→  const [importStatus, setImportStatus] = useState<
+   142→    "idle" | "ok" | "error"
+   143→  >("idle");
+   144→
+   145→  // Build comparison: snapshot "build A" to diff against the current build.
+   146→  // Stored as a serialized hash string; persisted to localStorage so it
+   147→  // survives reloads. null = no snapshot saved.
+   148→  const SNAPSHOT_KEY = "aethon:build-snapshot-a";
+   149→  const [snapshotA, setSnapshotA] = useState<string | null>(null);
+   150→
+   151→  const weapon = WEAPONS.find((w) => w.id === weaponId)!;
+   152→
+   153→  // Procedurally (re)place nodes using the seed → jitter + occasional extra branch arcs
+   154→  const placed = useMemo<PlacedNode[]>(() => {
+   155→    const rng = mulberry32(seed);
+   156→    const W = 720;
+   157→    const H = 620;
+   158→    const cx = W / 2;
+   159→    const cy = H / 2;
+   160→    return weapon.skillTree.map((n) => {
+   161→      const jx = (rng() - 0.5) * 0.08;
+   162→      const jy = (rng() - 0.5) * 0.08;
+   163→      const px = (n.x + jx) * W;
+   164→      const py = (n.y + jy) * H;
+   165→      // nudge toward center if too far out
+   166→      const dx = px - cx;
+   167→      const dy = py - cy;
+   168→      const dist = Math.hypot(dx, dy);
+   169→      const maxR = Math.min(W, H) / 2 - 40;
+   170→      let fx = px;
+   171→      let fy = py;
+   172→      if (dist > maxR) {
+   173→        fx = cx + (dx / dist) * maxR;
+   174→        fy = cy + (dy / dist) * maxR;
+   175→      }
+   176→      return { ...n, px: fx, py: fy };
+   177→    });
+   178→  }, [weapon, seed]);
+   179→
+   180→  // reset allocations when weapon changes
+   181→  const onWeaponChange = (id: WeaponId) => {
+   182→    setWeaponId(id);
+   183→    setAllocated(new Set());
+   184→    setSelected(null);
+   185→  };
+   186→
+   187→  const onReroll = () => {
+   188→    setSeed(Math.floor(Math.random() * 1_000_000));
+   189→    setAllocated(new Set());
+   190→    setSelected(null);
+   191→  };
+   192→
+   193→  // available points = a demo level (say 60) → cumulative
+   194→  const demoLevel = 60;
+   195→  const totalPoints = cumulativeSkillPoints(demoLevel);
+   196→  const spent = useMemo(
+   197→    () =>
+   198→      placed
+   199→        .filter((n) => allocated.has(n.id))
+   200→        .reduce((sum, n) => sum + n.cost, 0),
+   201→    [allocated, placed],
+   202→  );
+   203→  const available = totalPoints - spent;
+   204→
+   205→  // All node ids (in tree order) — used by build-share codec.
+   206→  const allNodeIds = useMemo(() => weapon.skillTree.map((n) => n.id), [weapon]);
+   207→
+   208→  // Restore a shared build from the URL hash ONCE on mount (client-only,
+   209→  // so SSR + hydration match — server renders empty defaults). This is a
+   210→  // legitimate one-time hydration of browser-only state.
+   211→  useEffect(() => {
+   212→    /* eslint-disable react-hooks/set-state-in-effect */
+   213→    const restored = readInitialBuild();
+   214→    setWeaponId(restored.weaponId);
+   215→    setSeed(restored.seed);
+   216→    setAllocated(restored.allocated);
+   217→    // Restore the build-compare snapshot from localStorage (if any).
+   218→    setSnapshotA(loadString(SNAPSHOT_KEY));
+   219→    setHydrated(true);
+   220→    /* eslint-enable react-hooks/set-state-in-effect */
+   221→  }, []);
+   222→
+   223→  // Listen for external build-import events (from BuildPresets or other
+   224→  // components) to re-load the skill-tree state from the hash. This makes
+   225→  // the skill tree reactive to one-click preset loads.
+   226→  useEffect(() => {
+   227→    const onImported = (e: Event) => {
+   228→      const detail = (e as CustomEvent<{ hash: string }>).detail;
+   229→      if (!detail?.hash) return;
+   230→      for (const w of WEAPONS) {
+   231→        const ids = w.skillTree.map((n) => n.id);
+   232→        const shared = decodeBuild(detail.hash, ids);
+   233→        if (shared && shared.weaponId === w.id) {
+   234→          const alloc = new Set<string>();
+   235→          for (const idx of shared.nodeIndices) {
+   236→            const id = w.skillTree[idx]?.id;
+   237→            if (id) alloc.add(id);
+   238→          }
+   239→          setWeaponId(shared.weaponId);
+   240→          setSeed(shared.seed);
+   241→          setAllocated(alloc);
+   242→          setSelected(null);
+   243→          break;
+   244→        }
+   245→      }
+   246→    };
+   247→    window.addEventListener("aethon:build-imported", onImported);
+   248→    return () => window.removeEventListener("aethon:build-imported", onImported);
+   249→  }, []);
+   250→
+   251→  // Global keyboard shortcuts:
+   252→  //  - "/" focuses the node search box (unless already typing in an input)
+   253→  //  - "Escape" blurs the focused node / clears the search / closes the import panel
+   254→  useEffect(() => {
+   255→    const onKeyDown = (e: KeyboardEvent) => {
+   256→      const target = e.target as HTMLElement | null;
+   257→      const isTyping =
+   258→        target &&
+   259→        (target.tagName === "INPUT" ||
+   260→          target.tagName === "TEXTAREA" ||
+   261→          target.isContentEditable);
+   262→
+   263→      if (e.key === "/" && !isTyping) {
+   264→        // Only act when the skill-tree section is in view.
+   265→        const section = document.querySelector("#skill-tree");
+   266→        if (!section) return;
+   267→        const rect = section.getBoundingClientRect();
+   268→        if (rect.top < window.innerHeight && rect.bottom > 0) {
+   269→          e.preventDefault();
+   270→          searchInputRef.current?.focus();
+   271→        }
+   272→      } else if (e.key === "Escape") {
+   273→        if (isTyping) {
+   274→          // Clear the focused input's value if it's our search box.
+   275→          if (target?.getAttribute("aria-label") === "Buscar nodo por nombre") {
+   276→            setNodeQuery("");
+   277→            (target as HTMLInputElement).blur();
+   278→          }
+   279→        } else {
+   280→          // When not typing, Escape clears any active search query + closes
+   281→          // the import panel + tooltips (if the skill-tree is in view).
+   282→          const section = document.querySelector("#skill-tree");
+   283→          if (section) {
+   284→            const rect = section.getBoundingClientRect();
+   285→            if (rect.top < window.innerHeight && rect.bottom > 0) {
+   286→              if (nodeQuery) setNodeQuery("");
+   287→              setShowImport(false);
+   288→              setHovered(null);
+   289→            }
+   290→          }
+   291→        }
+   292→      }
+   293→    };
+   294→    window.addEventListener("keydown", onKeyDown);
+   295→    return () => window.removeEventListener("keydown", onKeyDown);
+   296→  }, [nodeQuery]);
+   297→
+   298→  // Persist current build to URL hash — but only AFTER hydration so we don't
+   299→  // overwrite the shared hash we just restored with empty defaults. Preserves
+   300→  // any codex loadout already in the hash so the two features coexist.
+   301→  useEffect(() => {
+   302→    if (!hydrated) return;
+   303→    // Read existing codex segment from the hash (if any) to preserve it.
+   304→    let codexIds: string[] | undefined;
+   305→    const existingHash =
+   306→      typeof window !== "undefined" ? window.location.hash : "";
+   307→    if (existingHash) {
+   308→      const shared = decodeBuild(existingHash, allNodeIds);
+   309→      if (shared && shared.codexIndices.length > 0) {
+   310→        codexIds = codexIdsFromIndices(
+   311→          shared.weaponId,
+   312→          shared.codexIndices,
+   313→        );
+   314→      }
+   315→    }
+   316→    const enc = encodeBuild(
+   317→      weaponId,
+   318→      seed,
+   319→      [...allocated],
+   320→      allNodeIds,
+   321→      codexIds,
+   322→    );
+   323→    writeHashBuild(enc);
+   324→  }, [allocated, weaponId, seed, allNodeIds, hydrated]);
+   325→
+   326→  const [shareStatus, setShareStatus] = useState<
+   327→    "idle" | "copied" | "error"
+   328→  >("idle");
+   329→  const onShare = async () => {
+   330→    // Preserve codex loadout from the existing hash so sharing includes it.
+   331→    let codexIds: string[] | undefined;
+   332→    const existingHash = window.location.hash;
+   333→    if (existingHash) {
+   334→      const shared = decodeBuild(existingHash, allNodeIds);
+   335→      if (shared && shared.codexIndices.length > 0) {
+   336→        codexIds = codexIdsFromIndices(shared.weaponId, shared.codexIndices);
+   337→      }
+   338→    }
+   339→    const enc = encodeBuild(
+   340→      weaponId,
+   341→      seed,
+   342→      [...allocated],
+   343→      allNodeIds,
+   344→      codexIds,
+   345→    );
+   346→    writeHashBuild(enc);
+   347→    const ok = await copyShareUrl(enc);
+   348→    setShareStatus(ok ? "copied" : "error");
+   349→    window.setTimeout(() => setShareStatus("idle"), 2200);
+   350→  };
+   351→
+   352→  // Build import: paste a share URL or hash to load someone else's build.
+   353→  const onImport = () => {
+   354→    // Accept either a full URL (...#v1.x.y.z / ...#v2.x.y.z.w) or a bare hash.
+   355→    const raw = importValue.trim();
+   356→    if (!raw) return;
+   357→    let hash = "";
+   358→    const v1Idx = raw.indexOf("#v1.");
+   359→    const v2Idx = raw.indexOf("#v2.");
+   360→    if (v1Idx >= 0) hash = raw.slice(v1Idx);
+   361→    else if (v2Idx >= 0) hash = raw.slice(v2Idx);
+   362→    else if (raw.startsWith("v1.") || raw.startsWith("v2.")) hash = `#${raw}`;
+   363→    if (!hash) {
+   364→      setImportStatus("error");
+   365→      window.setTimeout(() => setImportStatus("idle"), 2400);
+   366→      return;
+   367→    }
+   368→    // Decode against every weapon to find the matching one.
+   369→    for (const w of WEAPONS) {
+   370→      const ids = w.skillTree.map((n) => n.id);
+   371→      const shared = decodeBuild(hash, ids);
+   372→      if (shared && shared.weaponId === w.id) {
+   373→        const alloc = new Set<string>();
+   374→        for (const idx of shared.nodeIndices) {
+   375→          const id = w.skillTree[idx]?.id;
+   376→          if (id) alloc.add(id);
+   377→        }
+   378→        setWeaponId(shared.weaponId);
+   379→        setSeed(shared.seed);
+   380→        setAllocated(alloc);
+   381→        setSelected(null);
+   382→        writeHashBuild(hash);
+   383→        // Notify the Memory Codex to sync its class + loadout to the imported build.
+   384→        window.dispatchEvent(
+   385→          new CustomEvent("aethon:build-imported", {
+   386→            detail: { hash },
+   387→          }),
+   388→        );
+   389→        setImportStatus("ok");
+   390→        setImportValue("");
+   391→        setShowImport(false);
+   392→        window.setTimeout(() => setImportStatus("idle"), 2400);
+   393→        return;
+   394→      }
+   395→    }
+   396→    setImportStatus("error");
+   397→    window.setTimeout(() => setImportStatus("idle"), 2400);
+   398→  };
+   399→
+   400→  const onRandomize = () => {
+   401→    // Greedy random allocation: pick random valid nodes until we run out of
+   402→    // points or all eligible nodes are taken. Respects prereqs + budget.
+   403→    const rng = mulberry32(Math.floor(Math.random() * 1_000_000));
+   404→    const next = new Set<string>();
+   405→    let remaining = totalPoints;
+   406→    const order = [...weapon.skillTree];
+   407→    const maxPasses = order.length;
+   408→    for (let pass = 0; pass < maxPasses; pass++) {
+   409→      const pool = [...order]
+   410→        .map((n) => ({ n, r: rng() }))
+   411→        .sort((a, b) => a.r - b.r)
+   412→        .map((x) => x.n);
+   413→      let progressed = false;
+   414→      for (const n of pool) {
+   415→        if (next.has(n.id)) continue;
+   416→        if (n.cost > remaining) continue;
+   417→        if (n.prereq && !next.has(n.prereq)) continue;
+   418→        // 70% chance to take each eligible node → organic, not full, builds
+   419→        if (rng() < 0.7) {
+   420→          next.add(n.id);
+   421→          remaining -= n.cost;
+   422→          progressed = true;
+   423→        }
+   424→      }
+   425→      if (!progressed || remaining <= 0) break;
+   426→    }
+   427→    setAllocated(next);
+   428→    setSelected(null);
+   429→  };
+   430→
+   431→  const canAllocate = (n: PlacedNode) => {
+   432→    if (allocated.has(n.id)) return false;
+   433→    if (available < n.cost) return false;
+   434→    if (n.prereq && !allocated.has(n.prereq)) return false;
+   435→    return true;
+   436→  };
+   437→
+   438→  const toggle = (n: PlacedNode) => {
+   439→    setSelected(n.id);
+   440→    if (!canAllocate(n) && !allocated.has(n.id)) return;
+   441→    setAllocated((prev) => {
+   442→      const next = new Set(prev);
+   443→      if (next.has(n.id)) {
+   444→        // deallocate only if nothing depends on it
+   445→        const hasDep = placed.some((p) => p.prereq === n.id && next.has(p.id));
+   446→        if (hasDep) return next;
+   447→        next.delete(n.id);
+   448→      } else {
+   449→        next.add(n.id);
+   450→      }
+   451→      return next;
+   452→    });
+   453→  };
+   454→
+   455→  const sel = placed.find((n) => n.id === selected) ?? null;
+   456→
+   457→  return (
+   458→    <section id="skill-tree" className="relative py-24 sm:py-32">
+   459→      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+   460→        <SectionHeading
+   461→          kicker="Árbol de Habilidades"
+   462→          title={
+   463→            <>
+   464→              Constelaciones{" "}
+   465→              <span className="text-glow-violet">procedurales</span>
+   466→            </>
+   467→          }
+   468→          subtitle="Cada arma genera su propio árbol con un seed. Las ramas irradian como estrellas conectadas por puentes de luz. Haz clic en un nodo para asignarlo; respeta prerrequisitos y tu presupuesto de puntos."
+   469→        />
+   470→
+   471→        <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+   472→          {WEAPONS.map((w) => (
+   473→            <button
+   474→              key={w.id}
+   475→              onClick={() => onWeaponChange(w.id)}
+   476→              className={cn(
+   477→                "flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
+   478→                weaponId === w.id
+   479→                  ? "border-transparent"
+   480→                  : "border-border/60 text-muted-foreground hover:text-foreground",
+   481→              )}
+   482→              style={
+   483→                weaponId === w.id
+   484→                  ? {
+   485→                      borderColor: w.accent,
+   486→                      color: w.accent,
+   487→                      boxShadow: `0 0 20px -6px ${w.accent}88`,
+   488→                    }
+   489→                  : undefined
+   490→              }
+   491→            >
+   492→              <span
+   493→                className="h-2 w-2 rounded-full"
+   494→                style={{ background: w.accent }}
+   495→              />
+   496→              {w.name}
+   497→            </button>
+   498→          ))}
+   499→        </div>
+   500→
+   501→        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+   502→          {/* CANVAS */}
+   503→          <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/30 p-2">
+   504→            <div className="pointer-events-none absolute inset-0 bg-cosmic-grid opacity-25" />
+   505→            <div className="pointer-events-none absolute inset-0">
+   506→              <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+   507→            </div>
+   508→
+   509→            {/* node search (top-left) */}
+   510→            <div className="absolute left-3 top-3 z-10 flex items-center gap-2">
+   511→              <div className="relative">
+   512→                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+   513→                  ⌕
+   514→                </span>
+   515→                <input
+   516→                  ref={searchInputRef}
+   517→                  value={nodeQuery}
+   518→                  onChange={(e) => setNodeQuery(e.target.value)}
+   519→                  placeholder="buscar nodo…  ( / )"
+   520→                  className="w-36 rounded-full border border-border/60 bg-card/80 py-1.5 pl-7 pr-7 text-xs text-foreground backdrop-blur placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 sm:w-48"
+   521→                  aria-label="Buscar nodo por nombre"
+   522→                />
+   523→                {nodeQuery && (
+   524→                  <button
+   525→                    onClick={() => setNodeQuery("")}
+   526→                    className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+   527→                    aria-label="Limpiar búsqueda"
+   528→                  >
+   529→                    ✕
+   530→                  </button>
+   531→                )}
+   532→              </div>
+   533→              {nodeQuery && (
+   534→                <span className="hidden rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] text-primary sm:inline">
+   535→                  {placed.filter((n) =>
+   536→                    n.name.toLowerCase().includes(nodeQuery.toLowerCase()),
+   537→                  ).length}{" "}
+   538→                  / {placed.length}
+   539→                </span>
+   540→              )}
+   541→            </div>
+   542→
+   543→            {/* controls */}
+   544→            <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+   545→              <button
+   546→                onClick={onReroll}
+   547→                className="rounded-full border border-border/60 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur transition hover:border-primary/50 hover:text-primary"
+   548→              >
+   549→                ↻ re-generar (seed {seed.toString(36)})
+   550→              </button>
+   551→              <button
+   552→                onClick={onRandomize}
+   553→                className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs text-accent backdrop-blur transition hover:border-accent hover:bg-accent/20"
+   554→              >
+   555→                🎲 build aleatorio
+   556→              </button>
+   557→              <button
+   558→                onClick={onShare}
+   559→                className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs text-primary backdrop-blur transition hover:border-primary hover:bg-primary/20"
+   560→              >
+   561→                {shareStatus === "copied"
+   562→                  ? "✓ enlace copiado"
+   563→                  : shareStatus === "error"
+   564→                    ? "✕ error"
+   565→                    : "↗ compartir build"}
+   566→              </button>
+   567→              <button
+   568→                onClick={() => setShowImport((s) => !s)}
+   569→                className={cn(
+   570→                  "rounded-full border px-3 py-1.5 text-xs backdrop-blur transition",
+   571→                  showImport
+   572→                    ? "border-accent bg-accent/20 text-accent"
+   573→                    : "border-border/60 bg-card/80 text-muted-foreground hover:border-accent/50 hover:text-accent",
+   574→                )}
+   575→              >
+   576→                {importStatus === "ok"
+   577→                  ? "✓ importado"
+   578→                  : importStatus === "error"
+   579→                    ? "✕ inválido"
+   580→                    : "⤓ importar"}
+   581→              </button>
+   582→            </div>
+   583→
+   584→            {/* import panel (collapsible) */}
+   585→            <AnimatePresence>
+   586→              {showImport && (
+   587→                <motion.div
+   588→                  initial={{ opacity: 0, height: 0 }}
+   589→                  animate={{ opacity: 1, height: "auto" }}
+   590→                  exit={{ opacity: 0, height: 0 }}
+   591→                  transition={{ duration: 0.2 }}
+   592→                  className="overflow-hidden"
+   593→                >
+   594→                  <div className="mx-3 mt-3 flex flex-col gap-2 rounded-2xl border border-border/60 bg-card/80 p-3 backdrop-blur sm:flex-row sm:items-center">
+   595→                    <input
+   596→                      value={importValue}
+   597→                      onChange={(e) => setImportValue(e.target.value)}
+   598→                      onKeyDown={(e) => {
+   599→                        if (e.key === "Enter") onImport();
+   600→                      }}
+   601→                      placeholder="Pega un enlace o hash (#v1.m.1b9.0,1,2…)"
+   602→                      className="w-full flex-1 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+   603→                      aria-label="Enlace o hash de build compartido"
+   604→                    />
+   605→                    <div className="flex gap-2">
+   606→                      <button
+   607→                        onClick={onImport}
+   608→                        className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition hover:opacity-90"
+   609→                      >
+   610→                        cargar
+   611→                      </button>
+   612→                      <button
+   613→                        onClick={() => {
+   614→                          setShowImport(false);
+   615→                          setImportValue("");
+   616→                          setImportStatus("idle");
+   617→                        }}
+   618→                        className="rounded-full border border-border/60 px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
+   619→                      >
+   620→                        ✕
+   621→                      </button>
+   622→                    </div>
+   623→                  </div>
+   624→                </motion.div>
+   625→              )}
+   626→            </AnimatePresence>
+   627→
+   628→            <svg
+   629→              viewBox="0 0 720 620"
+   630→              className="relative h-[440px] w-full sm:h-[560px]"
+   631→            >
+   632→              {/* edges */}
+   633→              {placed.map((n) => {
+   634→                if (!n.prereq) return null;
+   635→                const p = placed.find((x) => x.id === n.prereq);
+   636→                if (!p) return null;
+   637→                const active = allocated.has(n.id);
+   638→                return (
+   639→                  <line
+   640→                    key={`e-${n.id}`}
+   641→                    x1={p.px}
+   642→                    y1={p.py}
+   643→                    x2={n.px}
+   644→                    y2={n.py}
+   645→                    stroke={
+   646→                      active
+   647→                        ? (weapon.accent)
+   648→                        : "rgba(180,180,210,0.18)"
+   649→                    }
+   650→                    strokeWidth={active ? 2 : 1}
+   651→                    strokeDasharray={active ? "0" : "4 4"}
+   652→                    style={
+   653→                      active
+   654→                        ? { filter: `drop-shadow(0 0 4px ${weapon.accent})` }
+   655→                        : undefined
+   656→                    }
+   657→                  />
+   658→                );
+   659→              })}
+   660→
+   661→              {/* center hub */}
+   662→              <g>
+   663→                <circle
+   664→                  cx={360}
+   665→                  cy={310}
+   666→                  r={28}
+   667→                  fill={weapon.accentSoft}
+   668→                  stroke={weapon.accent}
+   669→                  strokeWidth={1.5}
+   670→                />
+   671→                <circle
+   672→                  cx={360}
+   673→                  cy={310}
+   674→                  r={14}
+   675→                  fill={weapon.accent}
+   676→                  opacity={0.6}
+   677→                  className="animate-pulse-glow"
+   678→                />
+   679→                <text
+   680→                  x={360}
+   681→                  y={316}
+   682→                  textAnchor="middle"
+   683→                  fontSize={14}
+   684→                  fill="#fff"
+   685→                  fontWeight={700}
+   686→                >
+   687→                  ✦
+   688→                </text>
+   689→                <text
+   690→                  x={360}
+   691→                  y={356}
+   692→                  textAnchor="middle"
+   693→                  fontSize={9}
+   694→                  fill="rgba(200,200,230,0.7)"
+   695→                  className="font-mono"
+   696→                >
+   697→                  {weapon.name.toUpperCase()}
+   698→                </text>
+   699→              </g>
+   700→
+   701→              {/* nodes */}
+   702→              {placed.map((n) => {
+   703→                const r = n.rarity === "legendary" ? 12 : n.rarity === "rare" ? 10 : 8;
+   704→                const rs = RARITY_STYLE[n.rarity];
+   705→                const isAllocated = allocated.has(n.id);
+   706→                const isSel = selected === n.id;
+   707→                const can = canAllocate(n);
+   708→                const blocked = !isAllocated && !can;
+   709→                // Search: a node matches if the query is empty OR its name contains it.
+   710→                const q = nodeQuery.trim().toLowerCase();
+   711→                const matches = !q || n.name.toLowerCase().includes(q);
+   712→                // Dim non-matches when searching; highlight matches with a ring.
+   713→                const dimmed = !matches;
+   714→                return (
+   715→                  <g
+   716→                    key={n.id}
+   717→                    transform={`translate(${n.px},${n.py})`}
+   718→                    onClick={() => toggle(n)}
+   719→                    onMouseEnter={() => setHovered(n.id)}
+   720→                    onMouseLeave={() => setHovered(null)}
+   721→                    onFocus={() => setHovered(n.id)}
+   722→                    onBlur={() => setHovered(null)}
+   723→                    onKeyDown={(e) => {
+   724→                      if (e.key === "Enter" || e.key === " ") {
+   725→                        e.preventDefault();
+   726→                        toggle(n);
+   727→                      }
+   728→                    }}
+   729→                    tabIndex={0}
+   730→                    role="button"
+   731→                    aria-label={`${n.name}, ${RARITY_STYLE[n.rarity].label}, costo ${n.cost} puntos${isAllocated ? ", asignado" : blocked ? ", bloqueado" : ""}`}
+   732→                    aria-pressed={isAllocated}
+   733→                    className="cursor-pointer outline-none transition-opacity focus-visible:[&>circle]:stroke-white focus-visible:[&>circle]:stroke-[3]"
+   734→                    opacity={dimmed ? 0.2 : 1}
+   735→                  >
+   736→                    {/* search-match highlight ring */}
+   737→                    {matches && q && (
+   738→                      <circle
+   739→                        r={r + 5}
+   740→                        fill="none"
+   741→                        stroke={weapon.accent}
+   742→                        strokeWidth={1.5}
+   743→                        opacity={0.8}
+   744→                        className="animate-pulse-glow"
+   745→                      />
+   746→                    )}
+   747→                    {/* glow halo */}
+   748→                    {(isAllocated || isSel) && (
+   749→                      <circle
+   750→                        r={r + 8}
+   751→                        fill={rs.glow}
+   752→                        opacity={0.5}
+   753→                        className="animate-pulse-glow"
+   754→                      />
+   755→                    )}
+   756→                    {/* node body */}
+   757→                    <circle
+   758→                      r={r}
+   759→                      fill={isAllocated ? weapon.accent : rs.fill}
+   760→                      stroke={isSel ? "#fff" : rs.ring}
+   761→                      strokeWidth={isSel ? 2.5 : 1.5}
+   762→                      opacity={blocked ? 0.35 : 1}
+   763→                    />
+   764→                    {/* rarity pip */}
+   765→                    {n.rarity !== "common" && (
+   766→                      <circle
+   767→                        cx={r - 2}
+   768→                        cy={-(r - 2)}
+   769→                        r={2.5}
+   770→                        fill={rs.ring}
+   771→                      />
+   772→                    )}
+   773→                    {/* cost */}
+   774→                    <text
+   775→                      y={3}
+   776→                      textAnchor="middle"
+   777→                      fontSize={9}
+   778→                      fontWeight={700}
+   779→                      fill={isAllocated ? "#0a0a1a" : "#fff"}
+   780→                    >
+   781→                      {n.cost}
+   782→                    </text>
+   783→                  </g>
+   784→                );
+   785→              })}
+   786→            </svg>
+   787→
+   788→            {/* Hover tooltip (HTML overlay positioned over the hovered node) */}
+   789→            <NodeTooltip
+   790→              node={placed.find((p) => p.id === hovered) ?? null}
+   791→              accent={weapon.accent}
+   792→              accentSoft={weapon.accentSoft}
+   793→              allocated={allocated}
+   794→              blocked={(n) => !allocated.has(n.id) && !canAllocate(n)}
+   795→            />
+   796→
+   797→            {/* legend */}
+   798→            <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 border-t border-border/40 px-4 py-2.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+   799→              {(["common", "rare", "legendary"] as const).map((r) => (
+   800→                <span key={r} className="flex items-center gap-1.5">
+   801→                  <span
+   802→                    className="h-2.5 w-2.5 rounded-full"
+   803→                    style={{
+   804→                      background: RARITY_STYLE[r].ring,
+   805→                      boxShadow: `0 0 6px ${RARITY_STYLE[r].glow}`,
+   806→                    }}
+   807→                  />
+   808→                  {RARITY_STYLE[r].label}
+   809→                </span>
+   810→              ))}
+   811→              <span className="text-border">·</span>
+   812→              <span>número = costo</span>
+   813→            </div>
+   814→          </div>
+   815→
+   816→          {/* SIDE: points + selected node */}
+   817→          <div className="flex flex-col gap-4">
+   818→            {/* budget */}
+   819→            <div className="glass-panel rounded-2xl border border-border/60 p-5">
+   820→              <div className="flex items-center justify-between">
+   821→                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+   822→                  Presupuesto (demo Lv {demoLevel})
+   823→                </span>
+   824→                <span className="font-mono text-[10px] text-muted-foreground">
+   825→                  seed {seed}
+   826→                </span>
+   827→              </div>
+   828→              <div className="mt-2 flex items-end justify-between">
+   829→                <div>
+   830→                  <div className="text-3xl font-bold tabular-nums text-glow-gold">
+   831→                    {available}
+   832→                  </div>
+   833→                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+   834→                    disponibles
+   835→                  </div>
+   836→                </div>
+   837→                <div className="text-right">
+   838→                  <div className="text-sm tabular-nums text-muted-foreground">
+   839→                    {spent} / {totalPoints}
+   840→                  </div>
+   841→                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+   842→                    gastados
+   843→                  </div>
+   844→                </div>
+   845→              </div>
+   846→              <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/60">
+   847→                <motion.div
+   848→                  className="h-full rounded-full"
+   849→                  style={{ background: weapon.accent }}
+   850→                  animate={{
+   851→                    width: `${(spent / totalPoints) * 100}%`,
+   852→                  }}
+   853→                  transition={{ duration: 0.4 }}
+   854→                />
+   855→              </div>
+   856→              <button
+   857→                onClick={() => setAllocated(new Set())}
+   858→                className="mt-3 w-full rounded-full border border-border/60 py-1.5 text-xs text-muted-foreground transition hover:border-destructive/50 hover:text-destructive"
+   859→              >
+   860→                resetear asignación
+   861→              </button>
+   862→            </div>
+   863→
+   864→            {/* selected node */}
+   865→            <div className="glass-panel min-h-[220px] rounded-2xl border border-border/60 p-5">
+   866→              <AnimatePresence mode="wait">
+   867→                {sel ? (
+   868→                  <motion.div
+   869→                    key={sel.id}
+   870→                    initial={{ opacity: 0, y: 8 }}
+   871→                    animate={{ opacity: 1, y: 0 }}
+   872→                    exit={{ opacity: 0, y: -8 }}
+   873→                    transition={{ duration: 0.2 }}
+   874→                  >
+   875→                    <div className="flex items-center gap-2">
+   876→                      <span
+   877→                        className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+   878→                        style={{
+   879→                          background: RARITY_STYLE[sel.rarity].fill,
+   880→                          color: RARITY_STYLE[sel.rarity].ring,
+   881→                        }}
+   882→                      >
+   883→                        {RARITY_STYLE[sel.rarity].label}
+   884→                      </span>
+   885→                      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+   886→                        {sel.branch}
+   887→                      </span>
+   888→                    </div>
+   889→                    <h4 className="mt-2 text-lg font-semibold text-glow-gold">
+   890→                      {sel.name}
+   891→                    </h4>
+   892→                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+   893→                      {sel.effect}
+   894→                    </p>
+   895→                    <div className="mt-4 flex items-center justify-between text-xs">
+   896→                      <span className="text-muted-foreground">
+   897→                        Costo:{" "}
+   898→                        <span className="font-semibold text-foreground">
+   899→                          {sel.cost} pts
+   900→                        </span>
+   901→                      </span>
+   902→                      {sel.prereq && (
+   903→                        <span className="text-muted-foreground">
+   904→                          req:{" "}
+   905→                          <span
+   906→                            className={
+   907→                              allocated.has(sel.prereq)
+   908→                                ? "text-primary"
+   909→                                : "text-destructive"
+   910→                            }
+   911→                          >
+   912→                            {
+   913→                              placed.find((p) => p.id === sel.prereq)?.name
+   914→                            }
+   915→                          </span>
+   916→                        </span>
+   917→                      )}
+   918→                    </div>
+   919→                    <button
+   920→                      onClick={() => toggle(sel)}
+   921→                      disabled={!canAllocate(sel) && !allocated.has(sel.id)}
+   922→                      className="mt-4 w-full rounded-full py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40"
+   923→                      style={{
+   924→                        background: allocated.has(sel.id)
+   925→                          ? "transparent"
+   926→                          : weapon.accent,
+   927→                        color: allocated.has(sel.id)
+   928→                          ? "var(--muted-foreground)"
+   929→                          : "#0a0a1a",
+   930→                        border: allocated.has(sel.id)
+   931→                          ? "1px solid var(--border)"
+   932→                          : "none",
+   933→                      }}
+   934→                    >
+   935→                      {allocated.has(sel.id)
+   936→                        ? "✓ asignado — clic para quitar"
+   937→                        : canAllocate(sel)
+   938→                          ? "asignar nodo"
+   939→                          : "requisitos insuficientes"}
+   940→                    </button>
+   941→                  </motion.div>
+   942→                ) : (
+   943→                  <div className="flex h-full min-h-[180px] flex-col items-center justify-center text-center">
+   944→                    <span className="text-3xl opacity-50">✦</span>
+   945→                    <p className="mt-3 text-sm text-muted-foreground">
+   946→                      Selecciona un nodo en la constelación para ver su efecto
+   947→                      y asignarlo.
+   948→                    </p>
+   949→                  </div>
+   950→                )}
+   951→              </AnimatePresence>
+   952→            </div>
+   953→          </div>
+   954→
+   955→          {/* Build summary — full width */}
+   956→          <BuildSummary
+   957→            weapon={weapon}
+   958→            allocated={allocated}
+   959→            placed={placed}
+   960→          />
+   961→
+   962→          {/* Build comparison — snapshot vs current */}
+   963→          <BuildCompare
+   964→            weapon={weapon}
+   965→            currentAllocated={allocated}
+   966→            placed={placed}
+   967→            snapshotA={snapshotA}
+   968→            onSaveSnapshot={() => {
+   969→              const ids = weapon.skillTree.map((n) => n.id);
+   970→              const enc = encodeBuild(weaponId, seed, [...allocated], ids);
+   971→              setSnapshotA(enc);
+   972→              saveString(SNAPSHOT_KEY, enc);
+   973→            }}
+   974→            onClearSnapshot={() => {
+   975→              setSnapshotA(null);
+   976→              removeKey(SNAPSHOT_KEY);
+   977→            }}
+   978→          />
+   979→        </div>
+   980→      </div>
+   981→    </section>
+   982→  );
+   983→}
+   984→
+   985→function BuildSummary({
+   986→  weapon,
+   987→  allocated,
+   988→  placed,
+   989→}: {
+   990→  weapon: (typeof WEAPONS)[number];
+   991→  allocated: Set<string>;
+   992→  placed: PlacedNode[];
+   993→}) {
+   994→  const allocatedNodes = placed.filter((n) => allocated.has(n.id));
+   995→  const byBranch = new Map<string, PlacedNode[]>();
+   996→  for (const n of allocatedNodes) {
+   997→    const arr = byBranch.get(n.branch) ?? [];
+   998→    arr.push(n);
+   999→    byBranch.set(n.branch, arr);
+  1000→  }
+  1001→  const totalCost = allocatedNodes.reduce((s, n) => s + n.cost, 0);
+  1002→  const rarityCount = {
+  1003→    common: allocatedNodes.filter((n) => n.rarity === "common").length,
+  1004→    rare: allocatedNodes.filter((n) => n.rarity === "rare").length,
+  1005→    legendary: allocatedNodes.filter((n) => n.rarity === "legendary").length,
+  1006→  };
+  1007→
+  1008→  return (
+  1009→    <motion.div
+  1010→      initial={{ opacity: 0, y: 16 }}
+  1011→      whileInView={{ opacity: 1, y: 0 }}
+  1012→      viewport={{ once: true }}
+  1013→      transition={{ duration: 0.4 }}
+  1014→      className="glass-panel mt-6 rounded-3xl border border-border/60 p-6"
+  1015→    >
+  1016→      <div className="flex flex-wrap items-center justify-between gap-3">
+  1017→        <div className="flex items-center gap-3">
+  1018→          <span
+  1019→            className="flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+  1020→            style={{
+  1021→              background: weapon.accentSoft,
+  1022→              color: weapon.accent,
+  1023→            }}
+  1024→          >
+  1025→            ✦
+  1026→          </span>
+  1027→          <div>
+  1028→            <h3 className="text-base font-semibold">
+  1029→              Resumen de build — {weapon.name}
+  1030→            </h3>
+  1031→            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+  1032→              {allocatedNodes.length} nodos · {totalCost} pts invertidos
+  1033→            </p>
+  1034→          </div>
+  1035→        </div>
+  1036→        <div className="flex items-center gap-3 text-xs">
+  1037→          <RarityPip label="Común" count={rarityCount.common} color="rgba(200,200,230,0.9)" />
+  1038→          <RarityPip label="Raro" count={rarityCount.rare} color="rgba(140,180,255,0.95)" />
+  1039→          <RarityPip
+  1040→            label="Legendario"
+  1041→            count={rarityCount.legendary}
+  1042→            color="rgba(255,220,140,1)"
+  1043→          />
+  1044→        </div>
+  1045→      </div>
+  1046→
+  1047→      {allocatedNodes.length === 0 ? (
+  1048→        <p className="mt-4 rounded-xl border border-dashed border-border/50 p-4 text-center text-sm text-muted-foreground">
+  1049→          Ningún nodo asignado aún. Haz clic en estrellas de la constelación
+  1050→          para construir tu build.
+  1051→        </p>
+  1052→      ) : (
+  1053→        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  1054→          {[...byBranch.entries()].map(([branch, nodes]) => {
+  1055→            const branchMeta = weapon.branches.find((b) => b.name === branch);
+  1056→            return (
+  1057→              <div
+  1058→                key={branch}
+  1059→                className="rounded-2xl border border-border/50 bg-card/30 p-3"
+  1060→              >
+  1061→                <div className="flex items-center gap-2">
+  1062→                  <span
+  1063→                    className="flex h-6 w-6 items-center justify-center rounded-md text-xs"
+  1064→                    style={{
+  1065→                      background: weapon.accentSoft,
+  1066→                      color: weapon.accent,
+  1067→                    }}
+  1068→                  >
+  1069→                    {branchMeta?.icon ?? "•"}
+  1070→                  </span>
+  1071→                  <span className="text-xs font-semibold">{branch}</span>
+  1072→                  <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+  1073→                    {nodes.length}
+  1074→                  </span>
+  1075→                </div>
+  1076→                <ul className="mt-2 space-y-1">
+  1077→                  {nodes.map((n) => (
+  1078→                    <li
+  1079→                      key={n.id}
+  1080→                      className="flex items-start gap-1.5 text-[11px] leading-snug"
+  1081→                    >
+  1082→                      <span
+  1083→                        className="mt-1 h-1 w-1 shrink-0 rounded-full"
+  1084→                        style={{
+  1085→                          background:
+  1086→                            n.rarity === "legendary"
+  1087→                              ? "rgba(255,220,140,1)"
+  1088→                              : n.rarity === "rare"
+  1089→                                ? "rgba(140,180,255,0.95)"
+  1090→                                : "rgba(200,200,230,0.7)",
+  1091→                        }}
+  1092→                      />
+  1093→                      <span className="text-muted-foreground">
+  1094→                        <span className="text-foreground">{n.name}</span>
+  1095→                      </span>
+  1096→                    </li>
+  1097→                  ))}
+  1098→                </ul>
+  1099→              </div>
+  1100→            );
+  1101→          })}
+  1102→        </div>
+  1103→      )}
+  1104→    </motion.div>
+  1105→  );
+  1106→}
+  1107→
+  1108→function RarityPip({
+  1109→  label,
+  1110→  count,
+  1111→  color,
+  1112→}: {
+  1113→  label: string;
+  1114→  count: number;
+  1115→  color: string;
+  1116→}) {
+  1117→  return (
+  1118→    <span className="flex items-center gap-1.5">
+  1119→      <span
+  1120→        className="h-2 w-2 rounded-full"
+  1121→        style={{
+  1122→          background: color,
+  1123→          boxShadow: count > 0 ? `0 0 6px ${color}` : "none",
+  1124→          opacity: count > 0 ? 1 : 0.3,
+  1125→        }}
+  1126→      />
+  1127→      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+  1128→        {label}
+  1129→      </span>
+  1130→      <span className="tabular-nums text-foreground">{count}</span>
+  1131→    </span>
+  1132→  );
+  1133→}
+  1134→
+  1135→/**
+  1136→ * Floating HTML tooltip that appears over the hovered skill-tree node.
+  1137→ * Positioned using the node's normalized SVG coords (px/720, py/620) as
+  1138→ * percentages, so it tracks the SVG box regardless of render size.
+  1139→ */
+  1140→function NodeTooltip({
+  1141→  node,
+  1142→  accent,
+  1143→  accentSoft,
+  1144→  allocated,
+  1145→  blocked,
+  1146→}: {
+  1147→  node: PlacedNode | null;
+  1148→  accent: string;
+  1149→  accentSoft: string;
+  1150→  allocated: Set<string>;
+  1151→  blocked: (n: PlacedNode) => boolean;
+  1152→}) {
+  1153→  if (!node) return null;
+  1154→  const leftPct = (node.px / 720) * 100;
+  1155→  const topPct = (node.py / 620) * 100;
+  1156→  const isAllocated = allocated.has(node.id);
+  1157→  const isBlocked = blocked(node);
+  1158→  const rs = RARITY_STYLE[node.rarity];
+  1159→  // Flip the tooltip to the left/right of the node depending on which side
+  1160→  // of the canvas it's on, so it doesn't overflow the container.
+  1161→  const isRight = leftPct > 50;
+  1162→  const isBottom = topPct > 50;
+  1163→
+  1164→  return (
+  1165→    <AnimatePresence>
+  1166→      <motion.div
+  1167→        initial={{ opacity: 0, scale: 0.9 }}
+  1168→        animate={{ opacity: 1, scale: 1 }}
+  1169→        exit={{ opacity: 0, scale: 0.9 }}
+  1170→        transition={{ duration: 0.15 }}
+  1171→        className="pointer-events-none absolute z-30 w-56"
+  1172→        style={{
+  1173→          left: `${leftPct}%`,
+  1174→          top: `${topPct}%`,
+  1175→          transform: `translate(${isRight ? "-110%" : "10%"}, ${isBottom ? "-110%" : "10%"})`,
+  1176→        }}
+  1177→      >
+  1178→        <div
+  1179→          className="rounded-xl border p-3 shadow-2xl backdrop-blur-md"
+  1180→          style={{
+  1181→            borderColor: `${accent}66`,
+  1182→            background: "oklch(0.16 0.035 285 / 92%)",
+  1183→            boxShadow: `0 8px 32px -8px ${accent}44, 0 0 0 1px ${accent}33`,
+  1184→          }}
+  1185→        >
+  1186→          <div className="flex items-center gap-2">
+  1187→            <span
+  1188→              className="rounded-full px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider"
+  1189→              style={{ background: accentSoft, color: accent }}
+  1190→            >
+  1191→              {rs.label}
+  1192→            </span>
+  1193→            {isAllocated && (
+  1194→              <span className="rounded-full bg-primary/20 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-primary">
+  1195→                ✓ asignado
+  1196→              </span>
+  1197→            )}
+  1198→            {isBlocked && !isAllocated && (
+  1199→              <span className="rounded-full bg-destructive/20 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-destructive">
+  1200→                bloqueado
+  1201→              </span>
+  1202→            )}
+  1203→          </div>
+  1204→          <h4 className="mt-1.5 text-sm font-semibold text-foreground">
+  1205→            {node.name}
+  1206→          </h4>
+  1207→          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+  1208→            {node.effect}
+  1209→          </p>
+  1210→          <div className="mt-2 flex items-center justify-between border-t border-border/40 pt-1.5 font-mono text-[10px] text-muted-foreground">
+  1211→            <span>
+  1212→              costo{" "}
+  1213→              <span className="font-semibold text-primary">{node.cost} pts</span>
+  1214→            </span>
+  1215→            {node.prereq && (
+  1216→              <span
+  1217→                className={
+  1218→                  allocated.has(node.prereq) ? "text-primary" : "text-destructive"
+  1219→                }
+  1220→              >
+  1221→                req: {node.prereq.replace(/-\d+$/, "")}
+  1222→              </span>
+  1223→            )}
+  1224→          </div>
+  1225→        </div>
+  1226→      </motion.div>
+  1227→    </AnimatePresence>
+  1228→  );
+  1229→}
+  1230→
+  1231→/**
+  1232→ * Build comparison panel: lets users snapshot the current build ("build A"),
+  1233→ * then compare it against the live build. Highlights nodes that are:
+  1234→ *  - added (in current, not in A) — green
+  1235→ *  - removed (in A, not in current) — red
+  1236→ *  - unchanged — dim
+  1237→ * Only compares when the snapshot's weapon matches the current weapon.
+  1238→ */
+  1239→function BuildCompare({
+  1240→  weapon,
+  1241→  currentAllocated,
+  1242→  placed,
+  1243→  snapshotA,
+  1244→  onSaveSnapshot,
+  1245→  onClearSnapshot,
+  1246→}: {
+  1247→  weapon: (typeof WEAPONS)[number];
+  1248→  currentAllocated: Set<string>;
+  1249→  placed: PlacedNode[];
+  1250→  snapshotA: string | null;
+  1251→  onSaveSnapshot: () => void;
+  1252→  onClearSnapshot: () => void;
+  1253→}) {
+  1254→  const allNodeIds = weapon.skillTree.map((n) => n.id);
+  1255→
+  1256→  const snapshotAllocated = useMemo(() => {
+  1257→    if (!snapshotA) return null;
+  1258→    const shared = decodeBuild(snapshotA, allNodeIds);
+  1259→    if (!shared || shared.weaponId !== weapon.id) return null;
+  1260→    const ids = new Set<string>();
+  1261→    for (const idx of shared.nodeIndices) {
+  1262→      const id = weapon.skillTree[idx]?.id;
+  1263→      if (id) ids.add(id);
+  1264→    }
+  1265→    return ids;
+  1266→  }, [snapshotA, allNodeIds, weapon]);
+  1267→
+  1268→  const diff = useMemo(() => {
+  1269→    if (!snapshotAllocated) return null;
+  1270→    const added: string[] = [];
+  1271→    const removed: string[] = [];
+  1272→    const unchanged: string[] = [];
+  1273→    for (const n of placed) {
+  1274→      const inCur = currentAllocated.has(n.id);
+  1275→      const inSnap = snapshotAllocated.has(n.id);
+  1276→      if (inCur && !inSnap) added.push(n.id);
+  1277→      else if (!inCur && inSnap) removed.push(n.id);
+  1278→      else if (inCur && inSnap) unchanged.push(n.id);
+  1279→    }
+  1280→    return { added, removed, unchanged: unchanged.length };
+  1281→  }, [snapshotAllocated, currentAllocated, placed]);
+  1282→
+  1283→  const snapshotMeta = useMemo(() => {
+  1284→    if (!snapshotA) return null;
+  1285→    const shared = decodeBuild(snapshotA, allNodeIds);
+  1286→    if (!shared) return null;
+  1287→    const snapWeapon = WEAPONS.find((w) => w.id === shared.weaponId);
+  1288→    return snapWeapon
+  1289→      ? { name: snapWeapon.name, count: shared.nodeIndices.length }
+  1290→      : null;
+  1291→  }, [snapshotA, allNodeIds]);
+  1292→
+  1293→  const sameWeapon = snapshotAllocated !== null;
+  1294→
+  1295→  return (
+  1296→    <motion.div
+  1297→      initial={{ opacity: 0, y: 16 }}
+  1298→      whileInView={{ opacity: 1, y: 0 }}
+  1299→      viewport={{ once: true }}
+  1300→      transition={{ duration: 0.4 }}
+  1301→      className="glass-panel mt-6 rounded-3xl border border-border/60 p-6"
+  1302→    >
+  1303→      <div className="flex flex-wrap items-center justify-between gap-3">
+  1304→        <div className="flex items-center gap-3">
+  1305→          <span
+  1306→            className="flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+  1307→            style={{
+  1308→              background: weapon.accentSoft,
+  1309→              color: weapon.accent,
+  1310→            }}
+  1311→          >
+  1312→            ⚖
+  1313→          </span>
+  1314→          <div>
+  1315→            <h3 className="text-base font-semibold">Comparar builds</h3>
+  1316→            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+  1317→              Guarda una snapshot y compara contra la build actual
+  1318→            </p>
+  1319→          </div>
+  1320→        </div>
+  1321→        <div className="flex items-center gap-2">
+  1322→          {!snapshotA ? (
+  1323→            <button
+  1324→              onClick={onSaveSnapshot}
+  1325→              className="rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold text-accent transition hover:border-accent hover:bg-accent/20"
+  1326→            >
+  1327→              📸 guardar build A
+  1328→            </button>
+  1329→          ) : (
+  1330→            <>
+  1331→              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+  1332→                A: {snapshotMeta?.name} · {snapshotMeta?.count} nodos
+  1333→              </span>
+  1334→              <button
+  1335→                onClick={onSaveSnapshot}
+  1336→                disabled={!sameWeapon}
+  1337→                className="rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-accent/50 hover:text-accent disabled:opacity-40"
+  1338→                title={
+  1339→                  sameWeapon
+  1340→                    ? "Sobrescribir snapshot A"
+  1341→                    : "Cambia al arma de la snapshot para sobrescribir"
+  1342→                }
+  1343→              >
+  1344→                ↻ actualizar
+  1345→              </button>
+  1346→              <button
+  1347→                onClick={onClearSnapshot}
+  1348→                className="rounded-full border border-destructive/40 px-3 py-1.5 text-xs text-destructive transition hover:bg-destructive/10"
+  1349→              >
+  1350→                ✕ borrar
+  1351→              </button>
+  1352→            </>
+  1353→          )}
+  1354→        </div>
+  1355→      </div>
+  1356→
+  1357→      {snapshotA && !sameWeapon && (
+  1358→        <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-muted-foreground">
+  1359→          ⚠ La snapshot A es para{" "}
+  1360→          <span className="text-foreground">
+  1361→            {(() => {
+  1362→              const shared = decodeBuild(snapshotA, allNodeIds);
+  1363→              return shared ? WEAPONS.find((w) => w.id === shared.weaponId)?.name : "?";
+  1364→            })()}
+  1365→          </span>
+  1366→          . Cambia a esa arma para comparar, o borra la snapshot.
+  1367→        </div>
+  1368→      )}
+  1369→
+  1370→      {diff && sameWeapon && (
+  1371→        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+  1372→          <DiffStat
+  1373→            label="Añadidos"
+  1374→            count={diff.added.length}
+  1375→            color="#7ee3c4"
+  1376→            icon="+"
+  1377→          />
+  1378→          <DiffStat
+  1379→            label="Quitados"
+  1380→            count={diff.removed.length}
+  1381→            color="#ff7a7a"
+  1382→            icon="−"
+  1383→          />
+  1384→          <DiffStat
+  1385→            label="Sin cambios"
+  1386→            count={diff.unchanged}
+  1387→            color="rgba(200,200,230,0.7)"
+  1388→            icon="="
+  1389→          />
+  1390→        </div>
+  1391→      )}
+  1392→
+  1393→      {diff && sameWeapon && (diff.added.length > 0 || diff.removed.length > 0) && (
+  1394→        <div className="mt-4 space-y-2">
+  1395→          {diff.added.length > 0 && (
+  1396→            <DiffList
+  1397→              title="Nodos añadidos (en actual, no en A)"
+  1398→              ids={diff.added}
+  1399→              placed={placed}
+  1400→              color="#7ee3c4"
+  1401→              sign="+"
+  1402→            />
+  1403→          )}
+  1404→          {diff.removed.length > 0 && (
+  1405→            <DiffList
+  1406→              title="Nodos quitados (en A, no en actual)"
+  1407→              ids={diff.removed}
+  1408→              placed={placed}
+  1409→              color="#ff7a7a"
+  1410→              sign="−"
+  1411→            />
+  1412→          )}
+  1413→        </div>
+  1414→      )}
+  1415→      {diff && sameWeapon && diff.added.length === 0 && diff.removed.length === 0 && (
+  1416→        <p className="mt-4 rounded-xl border border-border/50 bg-card/30 p-3 text-center text-xs text-muted-foreground">
+  1417→          ✓ Las builds son idénticas
+  1418→        </p>
+  1419→      )}
+  1420→    </motion.div>
+  1421→  );
+  1422→}
+  1423→
+  1424→function DiffStat({
+  1425→  label,
+  1426→  count,
+  1427→  color,
+  1428→  icon,
+  1429→}: {
+  1430→  label: string;
+  1431→  count: number;
+  1432→  color: string;
+  1433→  icon: string;
+  1434→}) {
+  1435→  return (
+  1436→    <div className="rounded-2xl border border-border/50 bg-card/30 p-3 text-center">
+  1437→      <div
+  1438→        className="text-2xl font-bold tabular-nums"
+  1439→        style={{ color, textShadow: count > 0 ? `0 0 12px ${color}66` : "none" }}
+  1440→      >
+  1441→        {icon}
+  1442→        {count}
+  1443→      </div>
+  1444→      <div className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+  1445→        {label}
+  1446→      </div>
+  1447→    </div>
+  1448→  );
+  1449→}
+  1450→
+  1451→function DiffList({
+  1452→  title,
+  1453→  ids,
+  1454→  placed,
+  1455→  color,
+  1456→  sign,
+  1457→}: {
+  1458→  title: string;
+  1459→  ids: string[];
+  1460→  placed: PlacedNode[];
+  1461→  color: string;
+  1462→  sign: string;
+  1463→}) {
+  1464→  const nodes = ids
+  1465→    .map((id) => placed.find((p) => p.id === id))
+  1466→    .filter((n): n is PlacedNode => Boolean(n));
+  1467→  return (
+  1468→    <div className="rounded-2xl border border-border/40 bg-card/20 p-3">
+  1469→      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+  1470→        {title}
+  1471→      </div>
+  1472→      <div className="mt-2 flex flex-wrap gap-1.5">
+  1473→        {nodes.map((n) => (
+  1474→          <span
+  1475→            key={n.id}
+  1476→            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+  1477→            style={{ background: `${color}1a`, color, border: `1px solid ${color}44` }}
+  1478→          >
+  1479→            <span className="font-bold">{sign}</span>
+  1480→            {n.name}
+  1481→          </span>
+  1482→        ))}
+  1483→      </div>
+  1484→    </div>
+  1485→  );
+  1486→}
+  1487→

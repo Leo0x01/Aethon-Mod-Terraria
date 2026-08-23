@@ -37,13 +37,13 @@ const FEATURES = [
   {
     icon: "🎨",
     title: "Evolución visual",
-    desc: "El arma cambia de forma con cada hito: m mote → orbe → runa → estrella → galaxia en miniatura.",
+    desc: "El fragmento cambia de forma con cada hito: mote tenue → orbe → artefacto rúnico → reliquia estelar → galaxia en miniatura.",
     accent: "#3dd6c4",
   },
   {
     icon: "🎯",
-    title: "4 clases, 4 progresiones",
-    desc: "Arco, espada, cañón y libro. Cada una con 6 ramas únicas, 30+ nodos y un capstone de absorción.",
+    title: "3 ramas, 3 progresiones",
+    desc: "Distancia, Cuerpo a Cuerpo y Artes Mágicas. Cada una con 6 o 7 sub-ramas únicas, 30+ nodos y un capstone de absorción.",
     accent: "#f5c451",
   },
   {
@@ -119,19 +119,20 @@ export function FeaturesSection() {
         >
           <div className="mx-auto max-w-2xl">
             <h3 className="text-2xl font-bold text-glow-gold sm:text-3xl">
-              ¿Bondéate al shard?
+              ¿Vincularte al fragmento?
             </h3>
             <p className="mt-3 text-muted-foreground">
-              Una vez eliges una forma, no hay vuelta atrás para ese personaje.
-              Elige con cuidado — o sube a varios personajes y experimenta las
-              cuatro progresiones.
+              Una vez se imprime la rama de tu fragmento, puedes cambiar más
+              adelante invirtiendo Fragmentos de Resonancia — el árbol procedural
+              original se conserva como “linaje”. Experimenta las tres
+              progresiones en un mismo personaje.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <a
                 href="#weapons"
                 className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:box-glow-gold"
               >
-                Elegir forma
+                Elegir rama
               </a>
               <a
                 href="#skill-tree"

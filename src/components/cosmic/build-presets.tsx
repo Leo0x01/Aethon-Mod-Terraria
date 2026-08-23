@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { WEAPONS } from "@/lib/mod-data";
+import { BRANCHES } from "@/lib/mod-data";
 import {
   BUILD_PRESETS,
   deleteUserPreset,
@@ -55,10 +55,10 @@ export function BuildPresets() {
   };
 
   const loadPreset = (preset: BuildPreset) => {
-    const weapon = WEAPONS.find((w) => w.id === preset.weaponId)!;
+    const weapon = BRANCHES.find((w) => w.id === preset.branchId)!;
     const ids = weapon.skillTree.map((n) => n.id);
     const enc = encodeBuild(
-      preset.weaponId,
+      preset.branchId,
       preset.seed,
       preset.nodeIndices.map((idx) => ids[idx]).filter(Boolean),
       ids,
@@ -140,7 +140,7 @@ export function BuildPresets() {
         {/* Curated presets grid */}
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {BUILD_PRESETS.map((preset, i) => {
-            const weapon = WEAPONS.find((w) => w.id === preset.weaponId)!;
+            const weapon = BRANCHES.find((w) => w.id === preset.branchId)!;
             const diff = DIFFICULTY_META[preset.difficulty];
             const isLoaded = loadedId === preset.id;
             return (
@@ -174,13 +174,11 @@ export function BuildPresets() {
                       boxShadow: `0 0 20px -6px ${preset.accent}`,
                     }}
                   >
-                    {preset.weaponId === "book"
+                    {preset.branchId === "magic"
                       ? "📖"
-                      : preset.weaponId === "bow"
+                      : preset.branchId === "distance"
                         ? "🏹"
-                        : preset.weaponId === "sword"
-                          ? "⚔"
-                          : "🔫"}
+                        : "⚔"}
                   </span>
                   <span
                     className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider"

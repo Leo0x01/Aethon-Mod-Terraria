@@ -4,11 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CODEX,
-  getCodexForClass,
-  WEAPONS,
+  getCodexForBranch,
+  BRANCHES,
   runeSlotsForLevel,
   type CodexWeapon,
-  type WeaponId,
+  type BranchId,
 } from "@/lib/mod-data";
 import {
   codexIdsFromIndices,
@@ -29,27 +29,27 @@ const TIER_META: Record<
 };
 
 function readInitialCodex(): {
-  cls: WeaponId;
+  cls: BranchId;
   memorized: Set<string>;
 } {
   if (typeof window === "undefined") {
-    return { cls: "book", memorized: new Set() };
+    return { cls: "magic", memorized: new Set() };
   }
   const hash = window.location.hash;
-  // Try to decode against every weapon to find the matching shared build.
-  for (const w of WEAPONS) {
+  // Try to decode against every branch to find the matching shared build.
+  for (const w of BRANCHES) {
     const ids = w.skillTree.map((n) => n.id);
     const shared = decodeBuild(hash, ids);
     if (shared && shared.codexIndices.length > 0) {
-      const codexIds = codexIdsFromIndices(shared.weaponId, shared.codexIndices);
-      return { cls: shared.weaponId, memorized: new Set(codexIds) };
+      const codexIds = codexIdsFromIndices(shared.branchId, shared.codexIndices);
+      return { cls: shared.branchId, memorized: new Set(codexIds) };
     }
   }
-  return { cls: "book", memorized: new Set() };
+  return { cls: "magic", memorized: new Set() };
 }
 
 export function MemoryCodex() {
-  const [cls, setCls] = useState<WeaponId>("book");
+  const [cls, setCls] = useState<BranchId>("magic");
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<"all" | CodexWeapon["tier"]>("all");
   const [level, setLevel] = useState(100);
@@ -67,20 +67,20 @@ export function MemoryCodex() {
   }, []);
 
   // Listen for build-import events from the skill-tree component so the codex
-  // syncs its class + loadout when a shared build is imported.
+  // syncs its branch + loadout when a shared build is imported.
   useEffect(() => {
     const onImported = (e: Event) => {
       const detail = (e as CustomEvent<{ hash: string }>).detail;
       if (!detail?.hash) return;
-      for (const w of WEAPONS) {
+      for (const w of BRANCHES) {
         const ids = w.skillTree.map((n) => n.id);
         const shared = decodeBuild(detail.hash, ids);
-        if (shared && shared.weaponId === w.id) {
+        if (shared && shared.branchId === w.id) {
           const codexIds = codexIdsFromIndices(
-            shared.weaponId,
+            shared.branchId,
             shared.codexIndices,
           );
-          setCls(shared.weaponId);
+          setCls(shared.branchId);
           setMemorized(new Set(codexIds));
           setTier("all");
           setQuery("");
@@ -105,21 +105,21 @@ export function MemoryCodex() {
     lastCodexSig.current = codexSig;
     const hash = window.location.hash;
     // Decode the existing skill-tree state from the hash so we preserve it.
-    let skillWeapon: WeaponId = cls;
+    let skillBranch: BranchId = cls;
     let skillSeed = 1337;
     let skillNodeIds: string[] = [];
-    for (const w of WEAPONS) {
+    for (const w of BRANCHES) {
       const ids = w.skillTree.map((n) => n.id);
       const shared = decodeBuild(hash, ids);
-      if (shared) {
-        skillWeapon = shared.weaponId;
+      if (shared && shared.branchId === w.id) {
+        skillBranch = shared.branchId;
         skillSeed = shared.seed;
         skillNodeIds = shared.nodeIndices.map((i) => ids[i]).filter(Boolean);
         break;
       }
     }
-    const effectiveCls = hash ? skillWeapon : cls;
-    const allNodeIds = WEAPONS.find((w) => w.id === effectiveCls)!.skillTree.map(
+    const effectiveCls = hash ? skillBranch : cls;
+    const allNodeIds = BRANCHES.find((w) => w.id === effectiveCls)!.skillTree.map(
       (n) => n.id,
     );
     const codexIds = [...memorized];
@@ -136,7 +136,7 @@ export function MemoryCodex() {
   const slots = runeSlotsForLevel(level);
   const list = useMemo(() => {
     const q = query.toLowerCase();
-    return getCodexForClass(cls)
+    return getCodexForBranch(cls)
       .filter((c) => tier === "all" || c.tier === tier)
       .filter(
         (c) =>
@@ -148,7 +148,7 @@ export function MemoryCodex() {
       );
   }, [cls, tier, query]);
 
-  const weapon = WEAPONS.find((w) => w.id === cls)!;
+  const weapon = BRANCHES.find((w) => w.id === cls)!;
 
   const toggle = (c: CodexWeapon) => {
     setMemorized((prev) => {
@@ -178,18 +178,18 @@ export function MemoryCodex() {
               <span className="text-glow-violet">cada arma del juego</span>
             </>
           }
-          subtitle="El capstone Lore Absorption. Tu Genesis Shard memoriza el comportamiento de armas reales de Terraria — y las equipa simultáneamente como Memory Runes. Explora el codex por clase."
+          subtitle="El capstone Absorción de Lore. Tu Fragmento Génesis memoriza el comportamiento de armas reales de Terraria — y las equipa simultáneamente como Runas de Memoria. Explora el códex por rama."
         />
 
-        {/* class tabs */}
+        {/* branch tabs */}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
-          {WEAPONS.map((w) => (
+          {BRANCHES.map((w) => (
             <button
               key={w.id}
               onClick={() => {
                 setCls(w.id);
                 setMemorized(new Set());
-                setQuery(""); // clear search when switching classes (tier filter persists)
+                setQuery(""); // clear search when switching branches (tier filter persists)
               }}
               className={cn(
                 "flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
@@ -342,13 +342,11 @@ export function MemoryCodex() {
                           color: TIER_META[c.tier].color,
                         }}
                       >
-                        {c.class === "book"
+                        {c.branch === "magic"
                           ? "📖"
-                          : c.class === "bow"
+                          : c.branch === "distance"
                             ? "🏹"
-                            : c.class === "sword"
-                              ? "⚔"
-                              : "🔫"}
+                            : "⚔"}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -429,13 +427,11 @@ export function MemoryCodex() {
                               color: TIER_META[c.tier].color,
                             }}
                           >
-                            {c.class === "book"
+                            {c.branch === "magic"
                               ? "📖"
-                              : c.class === "bow"
+                              : c.branch === "distance"
                                 ? "🏹"
-                                : c.class === "sword"
-                                  ? "⚔"
-                                  : "🔫"}
+                                : "⚔"}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-xs font-semibold">

@@ -892,3 +892,122 @@ Task: Assess project status, QA test, then add new features + improve styling.
   summary for sharing on forums/Discord.
 - **User preset rename**: let users rename a saved preset (currently delete + re-save only).
 - **Preset export to hash**: add a "copy link" button on each saved preset for sharing.
+
+---
+Task ID: 11
+Agent: full-stack-developer
+Task: Refactor del sitio web de 4 armas a 3 ramas principales.
+
+Work Log:
+- Leí `DISEÑO_DEL_MOD.md` (secciones §4-§7) y `src/lib/mod-data.ts` para entender la estructura actual (4 armas: arco/espada/cañón/libro) y el nuevo diseño de 3 ramas (Distancia/Cuerpo a Cuerpo/Artes Mágicas) con sus sub-ramas (6/6/7).
+- Reescribí completamente `src/lib/mod-data.ts`:
+  * Cambié el tipo `WeaponId` → `BranchId = "distance" | "melee" | "magic"`.
+  * Cambié la interfaz `Weapon` → `Branch`, la constante `WEAPONS` → `BRANCHES`, y la función `getWeapon` → `getBranch`.
+  * Definí las 3 ramas con datos completos: Lumina, la Arcoestelar (Distancia, accent `#f5c451`, imagen `/cosmic/weapon-bow.png`, 6 sub-ramas), Solbrand, Filo del Alba (Cuerpo a Cuerpo, accent `#ff9a3c`, imagen `/cosmic/weapon-sword.png`, 6 sub-ramas), Grimorio del Eterno (Artes Mágicas, accent `#b388ff`, imagen `/cosmic/weapon-book.png`, 7 sub-ramas — una más por la fusión Magic+Summoner).
+  * Cada sub-rama tiene 5 nodos generados por `buildTree`, con nombres y efectos en español según §5/§6/§7.
+  * Reorganicé el `CODEX`: 60 armas totales conservadas, reasignando los campos `class: WeaponId` → `branch: BranchId`. Las 12 armas de `bow` + 16 de `cannon` → `distance` (28 totales); las 16 de `sword` → `melee`; las 16 de `book` → `magic`. Añadí alias `getCodexForClass = getCodexForBranch` para compatibilidad.
+  * Mantuve sin cambios: `SkillNode`, `SkillBranch`, `NodeRarity`, `Boss`, `BOSSES`, `LORE` (lo traduje al español), `SKILL_TIERS`, `cumulativeSkillPoints`, `pointsForLevel`, `xpForNextLevel`, `cumulativeXp`, `MILESTONES` (traducido al español), `runeSlotsForLevel`.
+- Actualicé `src/lib/build-share.ts`:
+  * Renombré `WEAPON_CODE`/`WEAPON_FROM_CODE` → `BRANCH_CODE`/`BRANCH_FROM_CODE`.
+  * Nuevos códigos de rama: `distance: "d"`, `melee: "c"` (cuerpo), `magic: "a"` (arcano).
+  * Actualicé `SharedBuild.weaponId` → `branchId`, y todas las referencias en `encodeBuild`/`decodeBuild`/`codexIdsFromIndices`/`codexIdsForBranch`.
+- Actualicé `src/lib/build-presets.ts`:
+  * Cambié `weaponId: WeaponId` → `branchId: BranchId` en la interfaz `BuildPreset`.
+  * Renombré los 6 presets al español y los asigné a ramas: Tormenta Arcana (magic), Sustentador Eterno (magic), Tirador de la Lluvia Estelar (distance), Rompealbas (melee), Baluarte del Alba (melee), Artillería del Vacío (distance).
+  * Los `nodeIndices` se mantienen válidos porque las sub-ramas 0-4 (Flujo de Maná), 5-9 (Carcaj/Combo), 10-14 (Proyectiles/Solar), 15-19 (Conversión/Celestial/Égida) ocupan las mismas posiciones en los árboles nuevos.
+- Actualicé `src/components/cosmic/weapons-section.tsx`:
+  * Cambié selector de 4 armas a 3 ramas (grid `sm:grid-cols-3`).
+  * Cambié el kicker a "Las Tres Ramas" y el título a "Una luz, tres caminos".
+  * Subtitle actualizado para reflejar el fragmento adaptable. Etiquetas en español.
+- Actualicé `src/components/cosmic/skill-tree.tsx`:
+  * Reemplacé todas las referencias `WEAPONS` → `BRANCHES`, `WeaponId` → `BranchId`, `weaponId` → `branchId`, `getWeapon` → `getBranch`.
+  * Actualicé el codec local `WEAPON_FROM_CODE` a `BRANCH_FROM_CODE` con los nuevos códigos d/c/a.
+  * Acepto tanto `v1.` como `v2.` en `readInitialBuild` (no solo `v1.` como antes).
+  * En `BuildSummary`, cambié el lookup de branch metadata de `b.name === branch` a `b.id === branch` (fix de consistencia).
+  * Actualicé textos: subtitle "Cada rama genera su propio árbol...", tooltip "Cambia a la rama de la snapshot", placeholder de import "(#v1.a.1b9.0,1,2…)".
+- Actualicé `src/components/cosmic/memory-codex.tsx`:
+  * Cambié `WEAPONS` → `BRANCHES`, `WeaponId` → `BranchId`, `getCodexForClass` → `getCodexForBranch`.
+  * Default `cls` cambió de `"book"` a `"magic"`.
+  * Actualicé los emojis condicionales de `c.class === "book"/"bow"/"sword"/"cannon"` → `c.branch === "magic"/"distance"/"melee"` (3 emojis: 📖/🏹/⚔).
+  * **Bug fix pre-existente:** en el persist effect que sincroniza el códex con el hash, cambié la condición `if (shared)` → `if (shared && shared.branchId === w.id)`. Antes, el for-loop aceptaba la primera decodificación válida (siempre la primera rama=distance) y usaba SUS node ids para mapear los índices del hash — produciendo `skillNodeIds` erróneos y un hash reescrito con nodos vacíos cuando la rama del skill-tree era distinta a distance. Ahora se selecciona correctamente la rama correspondiente antes de mapear.
+- Actualicé `src/components/cosmic/build-presets.tsx`: referencias `WEAPONS` → `BRANCHES` y `preset.weaponId` → `preset.branchId`. Emojis por rama.
+- Actualicé `src/components/cosmic/hero.tsx`:
+  * Cambié `WEAPONS` → `BRANCHES`.
+  * Los 3 chips flotantes ahora usan IDs "distance", "magic", "melee" (antes "bow", "book", "sword", "cannon" — eliminé el chip del cañón).
+  * Stats card cambió de "4 Armas únicas / 6 Ramas por arma" a "3 Ramas únicas / 6+ Sub-ramas por árbol".
+  * CTA "Elegir tu arma" → "Elegir tu rama". Texto del párrafo "Bondéate" → "Vincúlate".
+- Actualicé `src/components/cosmic/features-section.tsx`:
+  * Feature "4 clases, 4 progresiones" → "3 ramas, 3 progresiones" con descripción actualizada.
+  * Feature "Evolución visual": cambié descripción del fragmento a español.
+  * CTA strip: cambié "Bondéate al shard" → "Vincularte al fragmento", descripción actualizada para mencionar el cambio de rama con Fragmentos de Resonancia.
+  * CTA "Elegir forma" → "Elegir rama".
+- Actualicé `src/components/cosmic/nav.tsx` y `scroll-progress.tsx`: cambié el label "Armas" → "Ramas" en el menú y en el dot navigator lateral.
+- Verifiqué con `bun run lint`: 0 errores.
+- Verifiqué con `agent-browser`:
+  * La página `/` carga sin errores de runtime.
+  * Nav muestra "Ramas", hero muestra "3 Ramas únicas", título "Una luz, tres caminos".
+  * Selector de armas muestra 3 botones (Lumina/Solbrand/Grimorio).
+  * Skill-tree muestra 30 nodos para distance (6×5) y melee (6×5), y 35 nodos para magic (7×5) — corresponden a las sub-ramas del diseño.
+  * Memory codex filtra correctamente: distance=28 armas (12 bows + 16 guns), melee=16, magic=16.
+  * Codec v1 round-trip verificado: build aleatorio (melee) → URL `#v1.c.115.0,1,2,...,t` → reload restaura los 30 nodos como "asignado".
+  * Codec v2 round-trip verificado: switch skill-tree a distance + memorizar Wooden Bow → URL `#v2.d.115..0` → reload restaura el códex como "✓ asignado".
+  * Preset round-trip verificado: click en "Rompealbas" (Dawnbreaker→melee) → URL `#v1.c.18y.5,6,7,8,9,a,b,c,d,e` (10 nodos correctamente codificados) → reload restaura los 10 nodos asignados + branch Solbrand. El fix del bug del codex persist effect fue crítico aquí.
+
+Stage Summary:
+- Sistema refactorizado completamente de 4 armas (arco/espada/cañón/libro) a 3 ramas principales (Distancia/Cuerpo a Cuerpo/Artes Mágicas) según el DISEÑO_DEL_MOD v2.0.
+- Tipo `BranchId`, constante `BRANCHES`, función `getBranch` reemplazan al sistema `WeaponId`/`WEAPONS`/`getWeapon`.
+- Codec de build-share actualizado con códigos d/c/a (distance/melee/magic), retro-compatible con v1/v2.
+- 6 presets curadas renombradas y reasignadas a las ramas correctas.
+- CODEX reorganizado: 60 armas absorbibles conservadas (28 distance + 16 melee + 16 magic), ninguna eliminada.
+- Bug pre-existente corregido en el persist effect del codex: ahora usa `shared.branchId === w.id` para seleccionar correctamente los node ids antes de mapear los índices del hash — esto asegura que el códex no sobreescriba el hash con nodos vacíos cuando el skill-tree está en una rama distinta a la primera del array.
+- `bun run lint` limpio (0 errores).
+- Página `/` carga sin errores y muestra las 3 ramas correctamente en todos los componentes (hero, weapons-section, skill-tree, memory-codex, build-presets, nav, scroll-progress, features-section).
+- Sin cambios en: `tts-button.tsx`, `tts/route.ts`, `starfield.tsx`, `back-to-top.tsx`, `section-divider.tsx`, `footer.tsx`, `lore-section.tsx` (salvo SectionHeading), `storage.ts`, `calculator.tsx`, `bosses-section.tsx` (estos últimos no referencian WeaponId/WEAPONS).
+
+---
+Task ID: 12 (rediseño del sistema de armas → 3 ramas)
+Agent: Lead Developer (Z.ai Code)
+Task: Cambiar el sistema de 4 armas a 3 ramas principales + crear documentos de diseño y roadmap.
+
+## Cambios del usuario (nuevo diseño v2)
+El usuario pidió cambiar el sistema de armas:
+- **ANTES**: 4 armas fijas (arco, espada, cañón, libro).
+- **AHORA**: 3 ramas principales basadas en clases de combate de Terraria:
+  1. **Distancia** (Ranged: arcos, munición, arrojadizas) — Lumina, la Arcoestelar
+  2. **Cuerpo a Cuerpo** (Melee: espadas) — Solbrand, Filo del Alba
+  3. **Artes Mágicas** (Magic + Summoner fusionadas) — Grimorio del Eterno
+
+El fragmento evoluciona según la rama que el jugador desarrolle primero en combate. Magic + Summoner se fusionan porque ambas usan maná.
+
+## Entregables creados
+
+### Documento de diseño ultra detallado (en español)
+- `DISEÑO_DEL_MOD.md` — 18 secciones cubriendo: visión, entidad cósmica, altar/fragmento, sistema de 3 ramas con sub-ramas detalladas (6/6/7), niveles infinitos, árboles procedurales, absorción de lore, sistemas del mundo, jefe final Aethon (5 fases), jefes secundarios, economía de resonancia, NPCs, QoL, compatibilidad, identidad visual.
+
+### Roadmap de implementación (en español)
+- `ROADMAP_DE_IMPLEMENTACION.md` — guía completa para crear el mod real en C# con tModLoader:
+  - 15 fases secuenciales (44–61 días estimados)
+  - ~40 archivos C# a crear (items, armas, NPCs, biomas, UI, systems)
+  - APIs de tModLoader clave (ModItem, ModPlayer, ModNPC, ModProjectile, ModBiome, UIState, etc.)
+  - Tabla de riesgos y mitigaciones
+
+### Análisis de documentación de tModLoader
+- Fetch de `docs.tmodloader.net/docs/stable/annotated.html` (v2026.06).
+- Identificadas clases base: ModItem, ModPlayer, ModNPC, ModProjectile, ModBuff, ModBiome, ModTile, ModSystem, GlobalNPC, GlobalItem, ModDamageClass, UIState, ModPrefix, ModRarity.
+
+## Refactor del sitio web (delegado a subagente full-stack-developer, Task ID 11)
+- `src/lib/mod-data.ts` reescrito: `WeaponId` → `BranchId = "distance" | "melee" | "magic"`. 3 ramas con sub-ramas 6/6/7. CODEX reorganizado (60 armas conservadas, redistribuidas por rama).
+- `src/lib/build-share.ts`: códigos nuevos `d`/`c`/`a` (distance/cuerpo/arcano).
+- `src/lib/build-presets.ts`: 6 presets reasignados a las 3 ramas.
+- Componentes actualizados: weapons-section ("Una luz, tres caminos"), skill-tree, memory-codex, build-presets, hero, nav, scroll-progress, features-section.
+- **Bug fix**: en memory-codex persist effect, `if (shared)` → `if (shared && shared.branchId === w.id)` que causaba hash vacío.
+
+## Verificación
+- ESLint: 0 errores.
+- agent-browser: las 3 ramas aparecen (Lumina/Solbrand/Grimorio), sin errores, sin overflow móvil.
+- Build-share round-trips verificados (v1 y v2) por el subagente.
+
+## Estado actual
+- El sitio web refleja el nuevo diseño de 3 ramas.
+- Los documentos DISEÑO_DEL_MOD.md y ROADMAP_DE_IMPLEMENTACION.md están listos para guiar la creación del mod real cuando el usuario dé luz verde.
+- El mod real NO se ha creado todavía (el usuario dijo explícitamente "no crees el mod todavía").
