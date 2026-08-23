@@ -30,7 +30,7 @@ export default function Home() {
         <SkillTreeView />
         <SectionDivider variant="shards" />
         <MemoryCodex />
-        <SectionDivider variant="sigil" />
+        <SectionDivider variant="nebula" />
         <BossesSection />
         <SectionDivider variant="sigil" />
         <FeaturesSection />

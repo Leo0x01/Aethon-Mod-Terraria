@@ -66,6 +66,32 @@ export function MemoryCodex() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
+  // Listen for build-import events from the skill-tree component so the codex
+  // syncs its class + loadout when a shared build is imported.
+  useEffect(() => {
+    const onImported = (e: Event) => {
+      const detail = (e as CustomEvent<{ hash: string }>).detail;
+      if (!detail?.hash) return;
+      for (const w of WEAPONS) {
+        const ids = w.skillTree.map((n) => n.id);
+        const shared = decodeBuild(detail.hash, ids);
+        if (shared && shared.weaponId === w.id) {
+          const codexIds = codexIdsFromIndices(
+            shared.weaponId,
+            shared.codexIndices,
+          );
+          setCls(shared.weaponId);
+          setMemorized(new Set(codexIds));
+          setTier("all");
+          setQuery("");
+          break;
+        }
+      }
+    };
+    window.addEventListener("aethon:build-imported", onImported);
+    return () => window.removeEventListener("aethon:build-imported", onImported);
+  }, []);
+
   // Persist codex loadout to URL hash (merging with the skill-tree state
   // already in the hash). Only after hydration to avoid clobbering the
   // restored hash with empty defaults pre-hydration.

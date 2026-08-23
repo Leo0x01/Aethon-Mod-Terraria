@@ -130,6 +130,10 @@ export function SkillTreeView() {
   // Hovered node for the floating tooltip overlay (HTML, so text wraps nicely).
   const [hovered, setHovered] = useState<string | null>(null);
 
+  // Build comparison: snapshot "build A" to diff against the current build.
+  // Stored as a serialized hash string; null = no snapshot saved.
+  const [snapshotA, setSnapshotA] = useState<string | null>(null);
+
   const weapon = WEAPONS.find((w) => w.id === weaponId)!;
 
   // Procedurally (re)place nodes using the seed → jitter + occasional extra branch arcs
@@ -261,12 +265,15 @@ export function SkillTreeView() {
     "idle" | "ok" | "error"
   >("idle");
   const onImport = () => {
-    // Accept either a full URL (...#v1.x.y.z) or a bare hash (v1.x.y.z / #v1.x.y.z).
+    // Accept either a full URL (...#v1.x.y.z / ...#v2.x.y.z.w) or a bare hash.
     const raw = importValue.trim();
     if (!raw) return;
-    const hashIdx = raw.indexOf("#v1.");
-    const hash =
-      hashIdx >= 0 ? raw.slice(hashIdx) : raw.startsWith("v1.") ? `#${raw}` : "";
+    let hash = "";
+    const v1Idx = raw.indexOf("#v1.");
+    const v2Idx = raw.indexOf("#v2.");
+    if (v1Idx >= 0) hash = raw.slice(v1Idx);
+    else if (v2Idx >= 0) hash = raw.slice(v2Idx);
+    else if (raw.startsWith("v1.") || raw.startsWith("v2.")) hash = `#${raw}`;
     if (!hash) {
       setImportStatus("error");
       window.setTimeout(() => setImportStatus("idle"), 2400);
@@ -287,6 +294,12 @@ export function SkillTreeView() {
         setAllocated(alloc);
         setSelected(null);
         writeHashBuild(hash);
+        // Notify the Memory Codex to sync its class + loadout to the imported build.
+        window.dispatchEvent(
+          new CustomEvent("aethon:build-imported", {
+            detail: { hash },
+          }),
+        );
         setImportStatus("ok");
         setImportValue("");
         setShowImport(false);
@@ -808,6 +821,20 @@ export function SkillTreeView() {
             allocated={allocated}
             placed={placed}
           />
+
+          {/* Build comparison — snapshot vs current */}
+          <BuildCompare
+            weapon={weapon}
+            currentAllocated={allocated}
+            placed={placed}
+            snapshotA={snapshotA}
+            onSaveSnapshot={() => {
+              const ids = weapon.skillTree.map((n) => n.id);
+              const enc = encodeBuild(weaponId, seed, [...allocated], ids);
+              setSnapshotA(enc);
+            }}
+            onClearSnapshot={() => setSnapshotA(null)}
+          />
         </div>
       </div>
     </section>
@@ -1057,5 +1084,262 @@ function NodeTooltip({
         </div>
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+/**
+ * Build comparison panel: lets users snapshot the current build ("build A"),
+ * then compare it against the live build. Highlights nodes that are:
+ *  - added (in current, not in A) — green
+ *  - removed (in A, not in current) — red
+ *  - unchanged — dim
+ * Only compares when the snapshot's weapon matches the current weapon.
+ */
+function BuildCompare({
+  weapon,
+  currentAllocated,
+  placed,
+  snapshotA,
+  onSaveSnapshot,
+  onClearSnapshot,
+}: {
+  weapon: (typeof WEAPONS)[number];
+  currentAllocated: Set<string>;
+  placed: PlacedNode[];
+  snapshotA: string | null;
+  onSaveSnapshot: () => void;
+  onClearSnapshot: () => void;
+}) {
+  const allNodeIds = weapon.skillTree.map((n) => n.id);
+
+  const snapshotAllocated = useMemo(() => {
+    if (!snapshotA) return null;
+    const shared = decodeBuild(snapshotA, allNodeIds);
+    if (!shared || shared.weaponId !== weapon.id) return null;
+    const ids = new Set<string>();
+    for (const idx of shared.nodeIndices) {
+      const id = weapon.skillTree[idx]?.id;
+      if (id) ids.add(id);
+    }
+    return ids;
+  }, [snapshotA, allNodeIds, weapon]);
+
+  const diff = useMemo(() => {
+    if (!snapshotAllocated) return null;
+    const added: string[] = [];
+    const removed: string[] = [];
+    const unchanged: string[] = [];
+    for (const n of placed) {
+      const inCur = currentAllocated.has(n.id);
+      const inSnap = snapshotAllocated.has(n.id);
+      if (inCur && !inSnap) added.push(n.id);
+      else if (!inCur && inSnap) removed.push(n.id);
+      else if (inCur && inSnap) unchanged.push(n.id);
+    }
+    return { added, removed, unchanged: unchanged.length };
+  }, [snapshotAllocated, currentAllocated, placed]);
+
+  const snapshotMeta = useMemo(() => {
+    if (!snapshotA) return null;
+    const shared = decodeBuild(snapshotA, allNodeIds);
+    if (!shared) return null;
+    const snapWeapon = WEAPONS.find((w) => w.id === shared.weaponId);
+    return snapWeapon
+      ? { name: snapWeapon.name, count: shared.nodeIndices.length }
+      : null;
+  }, [snapshotA, allNodeIds]);
+
+  const sameWeapon = snapshotAllocated !== null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="glass-panel mt-6 rounded-3xl border border-border/60 p-6"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+            style={{
+              background: weapon.accentSoft,
+              color: weapon.accent,
+            }}
+          >
+            ⚖
+          </span>
+          <div>
+            <h3 className="text-base font-semibold">Comparar builds</h3>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              Guarda una snapshot y compara contra la build actual
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {!snapshotA ? (
+            <button
+              onClick={onSaveSnapshot}
+              className="rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold text-accent transition hover:border-accent hover:bg-accent/20"
+            >
+              📸 guardar build A
+            </button>
+          ) : (
+            <>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                A: {snapshotMeta?.name} · {snapshotMeta?.count} nodos
+              </span>
+              <button
+                onClick={onSaveSnapshot}
+                disabled={!sameWeapon}
+                className="rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-accent/50 hover:text-accent disabled:opacity-40"
+                title={
+                  sameWeapon
+                    ? "Sobrescribir snapshot A"
+                    : "Cambia al arma de la snapshot para sobrescribir"
+                }
+              >
+                ↻ actualizar
+              </button>
+              <button
+                onClick={onClearSnapshot}
+                className="rounded-full border border-destructive/40 px-3 py-1.5 text-xs text-destructive transition hover:bg-destructive/10"
+              >
+                ✕ borrar
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {snapshotA && !sameWeapon && (
+        <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-muted-foreground">
+          ⚠ La snapshot A es para{" "}
+          <span className="text-foreground">
+            {(() => {
+              const shared = decodeBuild(snapshotA, allNodeIds);
+              return shared ? WEAPONS.find((w) => w.id === shared.weaponId)?.name : "?";
+            })()}
+          </span>
+          . Cambia a esa arma para comparar, o borra la snapshot.
+        </div>
+      )}
+
+      {diff && sameWeapon && (
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <DiffStat
+            label="Añadidos"
+            count={diff.added.length}
+            color="#7ee3c4"
+            icon="+"
+          />
+          <DiffStat
+            label="Quitados"
+            count={diff.removed.length}
+            color="#ff7a7a"
+            icon="−"
+          />
+          <DiffStat
+            label="Sin cambios"
+            count={diff.unchanged}
+            color="rgba(200,200,230,0.7)"
+            icon="="
+          />
+        </div>
+      )}
+
+      {diff && sameWeapon && (diff.added.length > 0 || diff.removed.length > 0) && (
+        <div className="mt-4 space-y-2">
+          {diff.added.length > 0 && (
+            <DiffList
+              title="Nodos añadidos (en actual, no en A)"
+              ids={diff.added}
+              placed={placed}
+              color="#7ee3c4"
+              sign="+"
+            />
+          )}
+          {diff.removed.length > 0 && (
+            <DiffList
+              title="Nodos quitados (en A, no en actual)"
+              ids={diff.removed}
+              placed={placed}
+              color="#ff7a7a"
+              sign="−"
+            />
+          )}
+        </div>
+      )}
+      {diff && sameWeapon && diff.added.length === 0 && diff.removed.length === 0 && (
+        <p className="mt-4 rounded-xl border border-border/50 bg-card/30 p-3 text-center text-xs text-muted-foreground">
+          ✓ Las builds son idénticas
+        </p>
+      )}
+    </motion.div>
+  );
+}
+
+function DiffStat({
+  label,
+  count,
+  color,
+  icon,
+}: {
+  label: string;
+  count: number;
+  color: string;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-card/30 p-3 text-center">
+      <div
+        className="text-2xl font-bold tabular-nums"
+        style={{ color, textShadow: count > 0 ? `0 0 12px ${color}66` : "none" }}
+      >
+        {icon}
+        {count}
+      </div>
+      <div className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function DiffList({
+  title,
+  ids,
+  placed,
+  color,
+  sign,
+}: {
+  title: string;
+  ids: string[];
+  placed: PlacedNode[];
+  color: string;
+  sign: string;
+}) {
+  const nodes = ids
+    .map((id) => placed.find((p) => p.id === id))
+    .filter((n): n is PlacedNode => Boolean(n));
+  return (
+    <div className="rounded-2xl border border-border/40 bg-card/20 p-3">
+      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+        {title}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {nodes.map((n) => (
+          <span
+            key={n.id}
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+            style={{ background: `${color}1a`, color, border: `1px solid ${color}44` }}
+          >
+            <span className="font-bold">{sign}</span>
+            {n.name}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }

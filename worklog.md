@@ -549,3 +549,74 @@ Task: Assess project status, QA test, then add new features + improve styling.
 - **Codex class sync**: when a shared build is loaded via the skill-tree import, the codex
   class should auto-switch to match the imported weapon (currently only restores if the
   codex segment's weapon matches).
+
+---
+Task ID: 6 (webDevReview cron round 5)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 5 prior rounds (hover tooltips, codex build share v2 codec, build
+  share/import/randomize, TTS lore+boss, shard economy, starfield perf+a11y, keyboard a11y,
+  back-to-top, focus-visible rings, reduced-motion). ESLint clean, no errors, no mobile overflow.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Build comparison/diff** (`skill-tree.tsx` — new `BuildCompare` + `DiffStat` + `DiffList`):
+   - "📸 guardar build A" button snapshots the current build (weapon + seed + allocated nodes)
+     into a serialized hash string in component state.
+   - Once a snapshot exists, the panel shows 3 diff stats: Añadidos (added, green), Quitados
+     (removed, red), Sin cambios (unchanged, dim) — with counts + glow.
+   - Below the stats, two DiffList chips show the names of added/removed nodes (color-coded
+     pills with +/− signs).
+   - "✓ Las builds son idénticas" message when no diffs.
+   - Weapon-mismatch guard: if the snapshot's weapon differs from the current weapon, shows
+     a warning ("⚠ La snapshot A es para X. Cambia a esa arma para comparar") and disables
+     the "actualizar" button until the user switches weapons.
+   - Verified: snapshot empty build → allocate "Mana Pool" → diff shows "+1 Añadidos,
+     Nodos añadidos: +Mana Pool".
+2. **Codex class sync on import** (`skill-tree.tsx` + `memory-codex.tsx`):
+   - When a build is imported via the skill-tree import UI, the skill-tree now dispatches a
+     `window` CustomEvent `aethon:build-imported` with the hash.
+   - The Memory Codex listens for this event and syncs its class + memorized loadout to
+     match the imported build (decodes the v2 codex segment if present).
+   - Fixed the import parser to accept v2 hashes (previously only accepted v1).
+   - Verified: imported `#v2.s.1b9.0,1,2.0,1` (sword + 2 codex runes) → skill tree switched
+     to Solbrand → codex auto-synced to Solbrand with Wooden Sword + Blade of Grass memorized.
+
+### Styling Improvements
+3. **Nebula section divider variant** (`section-divider.tsx`): a 4th divider variant with a
+   dual-tone (accent→primary) gradient line, a larger ◈ sigil with an inner ring + glow.
+   Used between the Memory Codex and Bosses sections for visual variety.
+4. Build compare panel: glass-panel with ⚖ icon in weapon-accent, color-coded diff stats
+   (green/red/dim with glow), pill-shaped node chips with colored borders.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Build compare**: snapshot empty → allocate Mana Pool → "+1 Añadidos, +Mana Pool" ✓.
+  - **Codex sync on import**: imported sword+codex hash → codex switched to Solbrand with
+    Wooden Sword + Blade of Grass memorized ✓.
+- VLM verdict: "compare panel clearly visible and readable; layout very clean; no visible
+  UI issues."
+
+## Unresolved Issues / Risks
+- None blocking. The build-compare snapshot is in-memory (lost on reload) by design — it's
+  a temporary working state for comparing two builds during a session.
+
+## Priority Recommendations for Next Phase
+- **Pre-warm TTS cache** (still deferred): on requestIdleCallback, generate audio for the
+  first lore + boss entries so first-click is instant. Gate behind a setting.
+- **Theme toggle (dawn variant)**: the site is dark-only; a light variant would be a nice
+  touch. Would require theme-aware color tokens.
+- **Persistent snapshots**: store build-compare snapshots in localStorage so they survive
+  reloads (currently in-memory only).
+- **Node search in skill tree**: add a search/filter box to find a specific node by name
+  in the constellation (useful for the 30-node trees).
+- **Codex tier filter persistence**: remember the user's tier filter when switching classes.
