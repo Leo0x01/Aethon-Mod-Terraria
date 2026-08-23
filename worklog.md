@@ -620,3 +620,71 @@ Task: Assess project status, QA test, then add new features + improve styling.
 - **Node search in skill tree**: add a search/filter box to find a specific node by name
   in the constellation (useful for the 30-node trees).
 - **Codex tier filter persistence**: remember the user's tier filter when switching classes.
+
+---
+Task ID: 7 (webDevReview cron round 6)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 6 prior rounds (hover tooltips, codex build share v2, build
+  compare/diff, codex class sync on import, TTS lore+boss, shard economy, starfield perf+a11y,
+  keyboard a11y, back-to-top, focus-visible rings, reduced-motion, nebula divider). ESLint clean,
+  no errors, no mobile overflow. All prior features verified working.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Node search in skill tree** (`skill-tree.tsx`):
+   - Search box in the top-left of the constellation canvas (⌕ icon, placeholder "buscar nodo…").
+   - Live-filter: matching nodes get a glowing weapon-accent highlight ring; non-matches are
+     dimmed to 20% opacity.
+   - Match-count badge ("N / 30") appears next to the search box when a query is active.
+   - Clear (✕) button inside the input to reset the query.
+   - Verified: typing "star" → 1 match (Starfall Storm) highlighted, 29 dimmed, badge "1 / 30".
+2. **Persistent build-compare snapshot via localStorage** (`storage.ts` + `skill-tree.tsx`):
+   - New `src/lib/storage.ts` with SSR-safe `loadString`/`saveString`/`removeKey` helpers
+     (guarded by typeof window + try/catch for private mode).
+   - The build-compare snapshot now persists to `localStorage` key `aethon:build-snapshot-a`
+     and restores on mount — survives page reloads.
+   - Save/clear handlers update both state and localStorage.
+   - Verified: saved snapshot → localStorage has `v1.m.115.` → reload → compare panel shows
+     "A: Grimoire ..." restored.
+3. **Codex search-clear on class switch** (`memory-codex.tsx`):
+   - Switching codex class now clears the search query (so a stale search like "lunar" doesn't
+     persist when switching from magic to sword). The tier filter already persisted by design
+     (independent state), so this completes the "tier filter persistence" recommendation.
+
+### Styling Improvements
+4. Node search input: rounded-full with ⌕ icon, backdrop-blur, focus ring in primary color;
+   match-count badge in primary/10 bg.
+5. Search highlight ring: animated pulse-glow stroke in weapon-accent color around matches;
+   dimmed nodes use `transition-opacity` for smooth fade.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Node search**: "mana" → 6 matches + 6 rings; "star" → 1 match (Starfall Storm), 29
+    dimmed, badge "1 / 30" ✓.
+  - **Persistent snapshot**: save → localStorage → reload → "A: Grimoire" restored ✓.
+  - **Codex query-clear**: switching class resets the search box ✓.
+- VLM verdict: "search box visible with 'star'; one node highlighted with glowing purple ring,
+  others dimmed; match-count badge '1 / 30' displayed."
+
+## Unresolved Issues / Risks
+- None blocking. localStorage is best-effort (silently ignored in private mode / when full).
+
+## Priority Recommendations for Next Phase
+- **Pre-warm TTS cache** (still deferred): on requestIdleCallback, generate audio for the first
+  lore + boss entries so first-click is instant. Gate behind a setting.
+- **Theme toggle (dawn variant)**: the site is dark-only; a light variant would be a nice touch.
+- **Keyboard shortcut for search**: press "/" to focus the node search box (common pattern).
+- **Export build as image**: let users download a PNG of their skill-tree constellation + build
+  summary for sharing on forums/Discord.
+- **Codex search by effect text**: currently searches name + signature; could also search the
+  effect description for deeper discovery.

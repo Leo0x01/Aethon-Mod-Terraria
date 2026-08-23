@@ -15,6 +15,7 @@ import {
   encodeBuild,
   writeHashBuild,
 } from "@/lib/build-share";
+import { loadString, removeKey, saveString } from "@/lib/storage";
 import { SectionHeading } from "./lore-section";
 import { cn } from "@/lib/utils";
 
@@ -130,8 +131,13 @@ export function SkillTreeView() {
   // Hovered node for the floating tooltip overlay (HTML, so text wraps nicely).
   const [hovered, setHovered] = useState<string | null>(null);
 
+  // Node search: filters/highlights nodes in the constellation by name.
+  const [nodeQuery, setNodeQuery] = useState("");
+
   // Build comparison: snapshot "build A" to diff against the current build.
-  // Stored as a serialized hash string; null = no snapshot saved.
+  // Stored as a serialized hash string; persisted to localStorage so it
+  // survives reloads. null = no snapshot saved.
+  const SNAPSHOT_KEY = "aethon:build-snapshot-a";
   const [snapshotA, setSnapshotA] = useState<string | null>(null);
 
   const weapon = WEAPONS.find((w) => w.id === weaponId)!;
@@ -200,6 +206,8 @@ export function SkillTreeView() {
     setWeaponId(restored.weaponId);
     setSeed(restored.seed);
     setAllocated(restored.allocated);
+    // Restore the build-compare snapshot from localStorage (if any).
+    setSnapshotA(loadString(SNAPSHOT_KEY));
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
@@ -420,6 +428,39 @@ export function SkillTreeView() {
               <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
             </div>
 
+            {/* node search (top-left) */}
+            <div className="absolute left-3 top-3 z-10 flex items-center gap-2">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  ⌕
+                </span>
+                <input
+                  value={nodeQuery}
+                  onChange={(e) => setNodeQuery(e.target.value)}
+                  placeholder="buscar nodo…"
+                  className="w-36 rounded-full border border-border/60 bg-card/80 py-1.5 pl-7 pr-7 text-xs text-foreground backdrop-blur placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 sm:w-44"
+                  aria-label="Buscar nodo por nombre"
+                />
+                {nodeQuery && (
+                  <button
+                    onClick={() => setNodeQuery("")}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {nodeQuery && (
+                <span className="hidden rounded-full bg-primary/10 px-2 py-1 font-mono text-[10px] text-primary sm:inline">
+                  {placed.filter((n) =>
+                    n.name.toLowerCase().includes(nodeQuery.toLowerCase()),
+                  ).length}{" "}
+                  / {placed.length}
+                </span>
+              )}
+            </div>
+
             {/* controls */}
             <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
               <button
@@ -586,6 +627,11 @@ export function SkillTreeView() {
                 const isSel = selected === n.id;
                 const can = canAllocate(n);
                 const blocked = !isAllocated && !can;
+                // Search: a node matches if the query is empty OR its name contains it.
+                const q = nodeQuery.trim().toLowerCase();
+                const matches = !q || n.name.toLowerCase().includes(q);
+                // Dim non-matches when searching; highlight matches with a ring.
+                const dimmed = !matches;
                 return (
                   <g
                     key={n.id}
@@ -605,8 +651,20 @@ export function SkillTreeView() {
                     role="button"
                     aria-label={`${n.name}, ${RARITY_STYLE[n.rarity].label}, costo ${n.cost} puntos${isAllocated ? ", asignado" : blocked ? ", bloqueado" : ""}`}
                     aria-pressed={isAllocated}
-                    className="cursor-pointer outline-none focus-visible:[&>circle]:stroke-white focus-visible:[&>circle]:stroke-[3]"
+                    className="cursor-pointer outline-none transition-opacity focus-visible:[&>circle]:stroke-white focus-visible:[&>circle]:stroke-[3]"
+                    opacity={dimmed ? 0.2 : 1}
                   >
+                    {/* search-match highlight ring */}
+                    {matches && q && (
+                      <circle
+                        r={r + 5}
+                        fill="none"
+                        stroke={weapon.accent}
+                        strokeWidth={1.5}
+                        opacity={0.8}
+                        className="animate-pulse-glow"
+                      />
+                    )}
                     {/* glow halo */}
                     {(isAllocated || isSel) && (
                       <circle
@@ -832,8 +890,12 @@ export function SkillTreeView() {
               const ids = weapon.skillTree.map((n) => n.id);
               const enc = encodeBuild(weaponId, seed, [...allocated], ids);
               setSnapshotA(enc);
+              saveString(SNAPSHOT_KEY, enc);
             }}
-            onClearSnapshot={() => setSnapshotA(null)}
+            onClearSnapshot={() => {
+              setSnapshotA(null);
+              removeKey(SNAPSHOT_KEY);
+            }}
           />
         </div>
       </div>

@@ -183,6 +183,7 @@ export function MemoryCodex() {
               onClick={() => {
                 setCls(w.id);
                 setMemorized(new Set());
+                setQuery(""); // clear search when switching classes (tier filter persists)
               }}
               className={cn(
                 "flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
