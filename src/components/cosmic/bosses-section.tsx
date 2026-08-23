@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BOSSES, type Boss } from "@/lib/mod-data";
 import { SectionHeading } from "./lore-section";
+import { TtsButton } from "./tts-button";
 import { cn } from "@/lib/utils";
 
 const TIER_META: Record<
@@ -152,9 +153,17 @@ export function BossesSection() {
                       className="overflow-hidden"
                     >
                       <div className="border-t border-border/40 px-4 pb-4 pt-3">
-                        <p className="text-sm leading-relaxed text-muted-foreground">
-                          {b.description}
-                        </p>
+                        <div className="flex items-start gap-3">
+                          <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+                            {b.description}
+                          </p>
+                          <TtsButton
+                            text={`${b.name}. ${b.description}`}
+                            voice="tongtong"
+                            speed={1.0}
+                            className="shrink-0"
+                          />
+                        </div>
                         <div className="mt-3">
                           <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
                             Mecánicas

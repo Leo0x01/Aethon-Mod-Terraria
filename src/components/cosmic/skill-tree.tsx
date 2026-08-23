@@ -216,6 +216,50 @@ export function SkillTreeView() {
     window.setTimeout(() => setShareStatus("idle"), 2200);
   };
 
+  // Build import: paste a share URL or hash to load someone else's build.
+  const [showImport, setShowImport] = useState(false);
+  const [importValue, setImportValue] = useState("");
+  const [importStatus, setImportStatus] = useState<
+    "idle" | "ok" | "error"
+  >("idle");
+  const onImport = () => {
+    // Accept either a full URL (...#v1.x.y.z) or a bare hash (v1.x.y.z / #v1.x.y.z).
+    const raw = importValue.trim();
+    if (!raw) return;
+    const hashIdx = raw.indexOf("#v1.");
+    const hash =
+      hashIdx >= 0 ? raw.slice(hashIdx) : raw.startsWith("v1.") ? `#${raw}` : "";
+    if (!hash) {
+      setImportStatus("error");
+      window.setTimeout(() => setImportStatus("idle"), 2400);
+      return;
+    }
+    // Decode against every weapon to find the matching one.
+    for (const w of WEAPONS) {
+      const ids = w.skillTree.map((n) => n.id);
+      const shared = decodeBuild(hash, ids);
+      if (shared && shared.weaponId === w.id) {
+        const alloc = new Set<string>();
+        for (const idx of shared.nodeIndices) {
+          const id = w.skillTree[idx]?.id;
+          if (id) alloc.add(id);
+        }
+        setWeaponId(shared.weaponId);
+        setSeed(shared.seed);
+        setAllocated(alloc);
+        setSelected(null);
+        writeHashBuild(hash);
+        setImportStatus("ok");
+        setImportValue("");
+        setShowImport(false);
+        window.setTimeout(() => setImportStatus("idle"), 2400);
+        return;
+      }
+    }
+    setImportStatus("error");
+    window.setTimeout(() => setImportStatus("idle"), 2400);
+  };
+
   const onRandomize = () => {
     // Greedy random allocation: pick random valid nodes until we run out of
     // points or all eligible nodes are taken. Respects prereqs + budget.
@@ -349,7 +393,66 @@ export function SkillTreeView() {
                     ? "✕ error"
                     : "↗ compartir build"}
               </button>
+              <button
+                onClick={() => setShowImport((s) => !s)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs backdrop-blur transition",
+                  showImport
+                    ? "border-accent bg-accent/20 text-accent"
+                    : "border-border/60 bg-card/80 text-muted-foreground hover:border-accent/50 hover:text-accent",
+                )}
+              >
+                {importStatus === "ok"
+                  ? "✓ importado"
+                  : importStatus === "error"
+                    ? "✕ inválido"
+                    : "⤓ importar"}
+              </button>
             </div>
+
+            {/* import panel (collapsible) */}
+            <AnimatePresence>
+              {showImport && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mx-3 mt-3 flex flex-col gap-2 rounded-2xl border border-border/60 bg-card/80 p-3 backdrop-blur sm:flex-row sm:items-center">
+                    <input
+                      value={importValue}
+                      onChange={(e) => setImportValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") onImport();
+                      }}
+                      placeholder="Pega un enlace o hash (#v1.m.1b9.0,1,2…)"
+                      className="w-full flex-1 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                      aria-label="Enlace o hash de build compartido"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={onImport}
+                        className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition hover:opacity-90"
+                      >
+                        cargar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowImport(false);
+                          setImportValue("");
+                          setImportStatus("idle");
+                        }}
+                        className="rounded-full border border-border/60 px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <svg
               viewBox="0 0 720 620"
@@ -437,7 +540,17 @@ export function SkillTreeView() {
                     key={n.id}
                     transform={`translate(${n.px},${n.py})`}
                     onClick={() => toggle(n)}
-                    className="cursor-pointer"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggle(n);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${n.name}, ${RARITY_STYLE[n.rarity].label}, costo ${n.cost} puntos${isAllocated ? ", asignado" : blocked ? ", bloqueado" : ""}`}
+                    aria-pressed={isAllocated}
+                    className="cursor-pointer outline-none focus-visible:[&>circle]:stroke-white focus-visible:[&>circle]:stroke-[3]"
                   >
                     {/* glow halo */}
                     {(isAllocated || isSel) && (

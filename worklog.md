@@ -395,3 +395,83 @@ Task: Assess project status, QA test, then add new features + improve styling.
   save battery on mobile (mentioned in round 2 recs, still pending).
 - **Keyboard navigation**: skill-tree nodes are SVG `<g>` clickable but not keyboard-focusable;
   add tabindex + Enter handler for accessibility.
+
+---
+Task ID: 4 (webDevReview cron round 3)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 3 prior rounds (10 sections incl. Memory Codex, build share/randomize,
+  TTS lore narration, shard economy, scroll progress, hero parallax). ESLint clean, no errors,
+  no mobile overflow. All prior features verified working.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Starfield performance & accessibility** (`starfield.tsx`):
+   - **Page Visibility API**: pauses the canvas RAF loop when the tab is hidden and resumes
+     on visibility — saves battery on mobile and desktop when users switch tabs.
+   - **prefers-reduced-motion**: when the user has reduced-motion enabled, renders a STATIC
+     starfield (no drift, no twinkle animation, no shooting stars) — accessibility + perf.
+2. **Keyboard accessibility for skill-tree SVG nodes** (`skill-tree.tsx`):
+   - Each node `<g>` now has `tabIndex={0}`, `role="button"`, descriptive `aria-label`
+     (name, rarity, cost, allocated/blocked state), `aria-pressed`, and an `onKeyDown`
+     handler for Enter/Space → toggle.
+   - Focus-visible style: focused nodes get a white 3px stroke ring via Tailwind arbitrary
+     variant `focus-visible:[&>circle]:stroke-white focus-visible:[&>circle]:stroke-[3]`.
+   - Verified: 30 nodes focusable, Tab cycles through, Enter allocates/deallocates.
+3. **Build Import UI** (`skill-tree.tsx` + `build-share.ts`):
+   - New "⤓ importar" button next to share; reveals a collapsible input panel where users
+     paste a share URL or bare hash (`#v1.m.1b9.0,1,2…` or `v1.m.1b9.…` or full URL).
+   - `onImport` parses the input, decodes against every weapon to find the match, loads the
+     build (sets weapon + seed + allocated), writes the hash, shows "✓ importado" / "✕ inválido"
+     status for 2.4s. Enter key submits.
+   - Verified: pasted `#v1.s.1b9.0,1,2,3,4` → weapon switched to Solbrand, 5 nodes / 7 pts
+     allocated correctly.
+4. **TTS for boss descriptions** (`bosses-section.tsx`):
+   - Each expanded boss card now has a TtsButton next to its description, narrating
+     `${boss.name}. ${boss.description}` via the existing `/api/tts` endpoint.
+   - Reuses the cached TTS infrastructure (LRU cache → repeat narrations instant).
+   - Verified: Aethon boss TTS POST returns 200, button cycles idle→loading→playing→idle.
+5. **Back-to-top floating button** (`back-to-top.tsx` + `page.tsx`):
+   - Appears after scrolling 600px; smooth-scrolls to top (respects reduced-motion → instant).
+   - Animated entrance/exit via Framer Motion AnimatePresence.
+
+### Styling Improvements
+6. **Global focus-visible ring** (`globals.css`): all focusable elements get a 2px gold outline
+   with 2px offset on keyboard focus; default outline removed when focus-visible isn't triggered
+   (mouse clicks don't show rings).
+7. **Reduced-motion media query** (`globals.css`): globally caps animation/transition durations
+   to 0.01ms and disables smooth-scroll for users with prefers-reduced-motion.
+8. Import panel: glass-panel card with backdrop blur, input with focus ring, "cargar" button
+   in accent color, "✕" dismiss button.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Back-to-top**: appears after scrolling 1200px, aria-label "Volver arriba" ✓.
+  - **Keyboard a11y**: 30 SVG nodes have tabindex + aria-labels; focus + Enter selects node ✓.
+  - **Build import**: paste `#v1.s.1b9.0,1,2,3,4` → weapon→Solbrand, 5 nodes/7 pts ✓.
+  - **Boss TTS**: Aethon card TTS button → POST 200 (4.9s first, cached after) ✓.
+  - **Starfield**: no errors; visibility-change + reduced-motion logic confirmed in code.
+- VLM verdict: "all 4 control buttons clearly visible; constellation visible; no major issues."
+
+## Unresolved Issues / Risks
+- None blocking. The starfield visibility-pause and reduced-motion are passive optimizations
+  (no user-visible behavior change unless tab is hidden or motion is reduced).
+
+## Priority Recommendations for Next Phase
+- **Build comparison/diff**: let users save 2 builds and highlight which nodes differ.
+- **Pre-warm TTS cache**: on idle (requestIdleCallback), generate audio for the first lore +
+  boss entries so first-click is instant. Weighs 6-12 upstream calls; gate behind a setting.
+- **Codex build share**: extend the build-share codec to also serialize the Memory Codex
+  rune loadout (currently only the skill tree is shared).
+- **Tooltips on skill-tree nodes**: show a small hover tooltip with the node's effect text
+  (currently the effect only shows in the side inspector after clicking).
+- **Theme toggle**: the site is dark-only; a light "dawn" variant could be a nice touch.

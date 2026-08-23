@@ -38,6 +38,11 @@ export function Starfield() {
     let shooters: ShootingStar[] = [];
     let w = 0;
     let h = 0;
+    // Respect users who prefer reduced motion: render a static starfield
+    // (no drift, no twinkle animation, no shooting stars) for accessibility.
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -94,7 +99,9 @@ export function Starfield() {
 
       // stars
       for (const s of stars) {
-        s.twinkle += 0.02 * s.z;
+        if (!reduceMotion) {
+          s.twinkle += 0.02 * s.z;
+        }
         const tw = 0.5 + Math.sin(s.twinkle) * 0.5;
         const alpha = (0.35 + tw * 0.6) * s.z;
         const color =
@@ -107,16 +114,18 @@ export function Starfield() {
         ctx.fillStyle = color;
         ctx.arc(s.x, s.y, s.size * s.z, 0, Math.PI * 2);
         ctx.fill();
-        // drift
-        s.y += 0.05 * s.z;
-        if (s.y > h) {
-          s.y = 0;
-          s.x = Math.random() * w;
+        if (!reduceMotion) {
+          // drift
+          s.y += 0.05 * s.z;
+          if (s.y > h) {
+            s.y = 0;
+            s.x = Math.random() * w;
+          }
         }
       }
 
-      // shooting stars
-      if (now - lastShoot > 4500 && Math.random() < 0.04) {
+      // shooting stars (skip under reduced-motion)
+      if (!reduceMotion && now - lastShoot > 4500 && Math.random() < 0.04) {
         spawnShooter();
         lastShoot = now;
       }
@@ -148,11 +157,27 @@ export function Starfield() {
 
     resize();
     window.addEventListener("resize", resize);
+
+    // Pause the animation loop when the tab is hidden (battery + perf),
+    // and resume when it becomes visible again.
+    const onVisibility = () => {
+      if (document.hidden) {
+        if (raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
+      } else if (!raf) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

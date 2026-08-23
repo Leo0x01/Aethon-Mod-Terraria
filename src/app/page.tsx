@@ -11,6 +11,7 @@ import { BossesSection } from "@/components/cosmic/bosses-section";
 import { FeaturesSection } from "@/components/cosmic/features-section";
 import { CosmicFooter } from "@/components/cosmic/footer";
 import { SectionDivider } from "@/components/cosmic/section-divider";
+import { BackToTop } from "@/components/cosmic/back-to-top";
 
 export default function Home() {
   return (
@@ -35,6 +36,7 @@ export default function Home() {
         <FeaturesSection />
       </main>
       <CosmicFooter />
+      <BackToTop />
     </div>
   );
 }
