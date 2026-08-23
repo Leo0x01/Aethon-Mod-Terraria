@@ -100,3 +100,63 @@ export const BUILD_PRESETS: BuildPreset[] = [
     accent: "#3dd6c4",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// User-saved presets — stored in localStorage as a JSON array of {id, name, hash, createdAt}.
+// The hash is a v1/v2 build-share hash (encodes weapon + seed + nodes + codex).
+// ---------------------------------------------------------------------------
+
+export interface UserPreset {
+  id: string;
+  name: string;
+  hash: string; // encoded build hash (v1 or v2)
+  createdAt: number; // epoch ms
+}
+
+const USER_PRESETS_KEY = "aethon:user-presets";
+
+export function loadUserPresets(): UserPreset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(USER_PRESETS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p): p is UserPreset =>
+        p &&
+        typeof p.id === "string" &&
+        typeof p.name === "string" &&
+        typeof p.hash === "string" &&
+        typeof p.createdAt === "number",
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function saveUserPreset(name: string, hash: string): UserPreset {
+  const presets = loadUserPresets();
+  const preset: UserPreset = {
+    id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: name.slice(0, 40) || "Mi build",
+    hash,
+    createdAt: Date.now(),
+  };
+  presets.unshift(preset);
+  try {
+    window.localStorage.setItem(USER_PRESETS_KEY, JSON.stringify(presets));
+  } catch {
+    // storage full or disabled — silently ignore
+  }
+  return preset;
+}
+
+export function deleteUserPreset(id: string): void {
+  const presets = loadUserPresets().filter((p) => p.id !== id);
+  try {
+    window.localStorage.setItem(USER_PRESETS_KEY, JSON.stringify(presets));
+  } catch {
+    // ignore
+  }
+}

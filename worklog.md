@@ -818,3 +818,77 @@ Task: Assess project status, QA test, then add new features + improve styling.
 - **Preset sharing**: let users turn their current build into a preset (saved to localStorage)
   alongside the curated ones.
 - **A11y: aria-live region** for preset-load confirmation (announce "build cargado" to screen readers).
+
+---
+Task ID: 10 (webDevReview cron round 9)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 9 prior rounds (build presets, skip-to-content, keyboard shortcuts,
+  codex effect search, node search, persistent snapshots, hover tooltips, codex build share v2,
+  build compare/diff, codex class sync, TTS, shard economy, starfield perf+a11y, etc.).
+  ESLint clean, no errors, no mobile overflow. All prior features verified working.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- **Bug found & fixed: codex persist effect racing with skill-tree persist.** When a build was
+  loaded (via preset or import), both the skill-tree and codex persist effects wrote to the URL
+  hash. The codex effect sometimes ran first with stale state, clobbering the skill-tree nodes
+  from the hash (resulting in `v1.m.115.` with empty node segment even though the skill tree
+  had 15 nodes in state). Fixed by adding a `lastCodexSig` ref to the codex persist effect that
+  tracks the last-written codex signature (`cls|memorized|level`); the effect now skips writing
+  if the codex didn't change, eliminating the race. Verified: loading Arcane Storm now correctly
+  produces hash `v1.m.115.0,1,2,3,4,a,b,c,d,e,k,l,m,n,o` (15 nodes preserved).
+
+## Completed Modifications (this round)
+
+### New Features
+1. **User-saved presets** (`build-presets.ts` data helpers + `build-presets.tsx` component):
+   - New `UserPreset` type + `loadUserPresets()`/`saveUserPreset()`/`deleteUserPreset()` helpers
+     that persist to localStorage key `aethon:user-presets` as a JSON array.
+   - "Guardar build actual" panel at the top of the presets section: a 💾 icon, title, name input
+     (maxLength 40), and "guardar" button. Saves the current URL hash (which encodes the full
+     skill-tree + codex build). Enter key submits.
+   - "Mis builds guardados" section appears below the curated presets when user presets exist,
+     showing each saved build as a card with name, creation date, a "cargar" button, and a "✕"
+     delete button. Animated entrance/exit via AnimatePresence + layout animations.
+   - Verified: loaded Arcane Storm → saved as "Arcane Snapshot" → localStorage has correct hash
+     with 15 nodes → "Mis builds" section appears → loading the saved preset restores 15 nodes
+     → deleting removes it and hides the section.
+2. **aria-live region for confirmations** (`build-presets.tsx`):
+   - A `sr-only` `aria-live="polite"` div announces preset-load + save + delete confirmations
+     to screen readers ("Build cargado", '"name" guardado', "Build eliminado").
+   - A visible toast (fixed bottom-center pill) mirrors the announcement for sighted users.
+
+### Bug Fixes
+3. **Codex persist race** (see QA Findings above): added `lastCodexSig` ref to skip redundant
+   writes. This was a real bug that would have corrupted saved presets (empty node segments).
+
+### Styling Improvements
+4. Save panel: gradient bg (primary→accent), 💾 icon in gold, input with focus ring, gold button.
+5. User preset cards: smaller compact cards with name, date, load + delete buttons; animated
+   entrance/exit; accent border + glow when loaded.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Hash race fixed**: Arcane Storm load → hash `v1.m.115.0,1,2,...,o` (15 nodes) ✓.
+  - **Save**: "Arcane Snapshot" saved to localStorage with full 15-node hash ✓.
+  - **Load saved preset**: restores 15 nodes / 26 pts ✓.
+  - **Delete**: removes from localStorage + hides "Mis builds" section ✓.
+- VLM verdict: "save panel clearly visible with 💾 icon, title, input, guardar button; preset
+  cards visible below; layout clean, text legible, no major issues."
+
+## Unresolved Issues / Risks
+- None blocking. The codex persist race fix is robust (ref-based signature comparison).
+
+## Priority Recommendations for Next Phase
+- **Pre-warm TTS cache** (still deferred): on requestIdleCallback, generate audio for the first
+  lore + boss entries so first-click is instant. Gate behind a setting.
+- **Theme toggle (dawn variant)**: the site is dark-only; a light variant would be a nice touch.
+- **Export build as image**: let users download a PNG of their skill-tree constellation + build
+  summary for sharing on forums/Discord.
+- **User preset rename**: let users rename a saved preset (currently delete + re-save only).
+- **Preset export to hash**: add a "copy link" button on each saved preset for sharing.

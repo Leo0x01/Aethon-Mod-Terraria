@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CODEX,
@@ -94,9 +94,15 @@ export function MemoryCodex() {
 
   // Persist codex loadout to URL hash (merging with the skill-tree state
   // already in the hash). Only after hydration to avoid clobbering the
-  // restored hash with empty defaults pre-hydration.
+  // restored hash with empty defaults pre-hydration. Uses a ref to track
+  // the last-written codex signature so we only re-write when the codex
+  // actually changes (avoids racing with the skill-tree persist effect).
+  const lastCodexSig = useRef<string>("");
   useEffect(() => {
     if (!hydrated) return;
+    const codexSig = `${cls}|${[...memorized].sort().join(",")}|${level}`;
+    if (codexSig === lastCodexSig.current) return; // codex didn't change — skip
+    lastCodexSig.current = codexSig;
     const hash = window.location.hash;
     // Decode the existing skill-tree state from the hash so we preserve it.
     let skillWeapon: WeaponId = cls;
@@ -112,9 +118,6 @@ export function MemoryCodex() {
         break;
       }
     }
-    // If the skill-tree weapon differs from the codex class, we keep them in
-    // sync: the codex class follows the skill-tree weapon when a shared build
-    // is loaded. Otherwise the codex class is authoritative.
     const effectiveCls = hash ? skillWeapon : cls;
     const allNodeIds = WEAPONS.find((w) => w.id === effectiveCls)!.skillTree.map(
       (n) => n.id,
