@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   cumulativeSkillPoints,
@@ -8,6 +8,12 @@ import {
   type SkillNode,
   type WeaponId,
 } from "@/lib/mod-data";
+import {
+  copyShareUrl,
+  decodeBuild,
+  encodeBuild,
+  writeHashBuild,
+} from "@/lib/build-share";
 import { SectionHeading } from "./lore-section";
 import { cn } from "@/lib/utils";
 
@@ -52,11 +58,74 @@ interface PlacedNode extends SkillNode {
   py: number;
 }
 
+function readInitialBuild(): {
+  weaponId: WeaponId;
+  seed: number;
+  allocated: Set<string>;
+} {
+  if (typeof window === "undefined") {
+    return {
+      weaponId: "book" as WeaponId,
+      seed: 1337,
+      allocated: new Set<string>(),
+    };
+  }
+  // Decode using the weapon encoded IN the hash (its node list). We don't
+  // need to probe every weapon — the hash itself declares which weapon it's for.
+  const hash = window.location.hash;
+  if (!hash || !hash.startsWith("#v1.")) {
+    return {
+      weaponId: "book" as WeaponId,
+      seed: 1337,
+      allocated: new Set<string>(),
+    };
+  }
+  // Peek the weapon code to find the matching weapon definition.
+  const parts = hash.slice(4).split(".");
+  const wCode = parts[0];
+  const WEAPON_FROM_CODE: Record<string, WeaponId> = {
+    b: "bow",
+    s: "sword",
+    c: "cannon",
+    m: "book",
+  };
+  const wid = WEAPON_FROM_CODE[wCode];
+  if (!wid) {
+    return {
+      weaponId: "book" as WeaponId,
+      seed: 1337,
+      allocated: new Set<string>(),
+    };
+  }
+  const w = WEAPONS.find((x) => x.id === wid)!;
+  const ids = w.skillTree.map((n) => n.id);
+  const shared = decodeBuild(hash, ids);
+  if (!shared) {
+    return {
+      weaponId: "book" as WeaponId,
+      seed: 1337,
+      allocated: new Set<string>(),
+    };
+  }
+  const alloc = new Set<string>();
+  for (const idx of shared.nodeIndices) {
+    const id = w.skillTree[idx]?.id;
+    if (id) alloc.add(id);
+  }
+  return {
+    weaponId: shared.weaponId,
+    seed: shared.seed,
+    allocated: alloc,
+  };
+}
+
 export function SkillTreeView() {
+  // SSR-safe defaults; the shared build is restored in a mount effect below.
   const [weaponId, setWeaponId] = useState<WeaponId>("book");
   const [seed, setSeed] = useState(1337);
   const [allocated, setAllocated] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   const weapon = WEAPONS.find((w) => w.id === weaponId)!;
 
@@ -111,6 +180,72 @@ export function SkillTreeView() {
     [allocated, placed],
   );
   const available = totalPoints - spent;
+
+  // All node ids (in tree order) — used by build-share codec.
+  const allNodeIds = useMemo(() => weapon.skillTree.map((n) => n.id), [weapon]);
+
+  // Restore a shared build from the URL hash ONCE on mount (client-only,
+  // so SSR + hydration match — server renders empty defaults). This is a
+  // legitimate one-time hydration of browser-only state.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const restored = readInitialBuild();
+    setWeaponId(restored.weaponId);
+    setSeed(restored.seed);
+    setAllocated(restored.allocated);
+    setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  // Persist current build to URL hash — but only AFTER hydration so we don't
+  // overwrite the shared hash we just restored with empty defaults.
+  useEffect(() => {
+    if (!hydrated) return;
+    const enc = encodeBuild(weaponId, seed, [...allocated], allNodeIds);
+    writeHashBuild(enc);
+  }, [allocated, weaponId, seed, allNodeIds, hydrated]);
+
+  const [shareStatus, setShareStatus] = useState<
+    "idle" | "copied" | "error"
+  >("idle");
+  const onShare = async () => {
+    const enc = encodeBuild(weaponId, seed, [...allocated], allNodeIds);
+    writeHashBuild(enc);
+    const ok = await copyShareUrl(enc);
+    setShareStatus(ok ? "copied" : "error");
+    window.setTimeout(() => setShareStatus("idle"), 2200);
+  };
+
+  const onRandomize = () => {
+    // Greedy random allocation: pick random valid nodes until we run out of
+    // points or all eligible nodes are taken. Respects prereqs + budget.
+    const rng = mulberry32(Math.floor(Math.random() * 1_000_000));
+    const next = new Set<string>();
+    let remaining = totalPoints;
+    const order = [...weapon.skillTree];
+    const maxPasses = order.length;
+    for (let pass = 0; pass < maxPasses; pass++) {
+      const pool = [...order]
+        .map((n) => ({ n, r: rng() }))
+        .sort((a, b) => a.r - b.r)
+        .map((x) => x.n);
+      let progressed = false;
+      for (const n of pool) {
+        if (next.has(n.id)) continue;
+        if (n.cost > remaining) continue;
+        if (n.prereq && !next.has(n.prereq)) continue;
+        // 70% chance to take each eligible node → organic, not full, builds
+        if (rng() < 0.7) {
+          next.add(n.id);
+          remaining -= n.cost;
+          progressed = true;
+        }
+      }
+      if (!progressed || remaining <= 0) break;
+    }
+    setAllocated(next);
+    setSelected(null);
+  };
 
   const canAllocate = (n: PlacedNode) => {
     if (allocated.has(n.id)) return false;
@@ -191,12 +326,28 @@ export function SkillTreeView() {
             </div>
 
             {/* controls */}
-            <div className="absolute right-3 top-3 z-10 flex gap-2">
+            <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
               <button
                 onClick={onReroll}
                 className="rounded-full border border-border/60 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur transition hover:border-primary/50 hover:text-primary"
               >
-                ↻ re-generar (seed {seed})
+                ↻ re-generar (seed {seed.toString(36)})
+              </button>
+              <button
+                onClick={onRandomize}
+                className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs text-accent backdrop-blur transition hover:border-accent hover:bg-accent/20"
+              >
+                🎲 build aleatorio
+              </button>
+              <button
+                onClick={onShare}
+                className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs text-primary backdrop-blur transition hover:border-primary hover:bg-primary/20"
+              >
+                {shareStatus === "copied"
+                  ? "✓ enlace copiado"
+                  : shareStatus === "error"
+                    ? "✕ error"
+                    : "↗ compartir build"}
               </button>
             </div>
 

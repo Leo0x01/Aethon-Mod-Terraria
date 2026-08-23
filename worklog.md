@@ -301,3 +301,97 @@ Task: Assess project status, QA test, then add new features + improve styling.
 - Could add **TTS narration** of the lore timeline using the TTS skill for an immersive touch.
 - Performance: the starfield canvas runs ~220 stars at 60fps — fine, but could pause when tab
   is off-screen via IntersectionObserver to save battery on mobile.
+
+---
+Task ID: 3 (webDevReview cron round 2)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project was stable from rounds 1–2 (8 sections, cosmic theme, Memory Codex, build summary,
+  scroll progress, section dividers, hero parallax). ESLint clean, no errors, no mobile overflow.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions found in existing flows (weapon transforms, calculator, skill-tree allocation,
+  codex memorize/cap, build summary).
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Build Share (URL hash serialization)** — `src/lib/build-share.ts` + skill-tree integration:
+   - Encodes weapon + seed + allocated-node-indices into a compact `#v1.<w>.<seed>.<idx...>` hash.
+   - On mount, restores the shared build from the URL hash (SSR-safe via mount effect + hydrated flag,
+     so server renders empty defaults and client hydrates the shared state without mismatch).
+   - Live-persists the current build to the URL hash on every change (replaceState, no history pollution).
+   - "↗ compartir build" button copies the full shareable URL to clipboard (with fallback for
+     non-secure contexts), shows "✓ enlace copiado" confirmation for 2.2s.
+   - **Bug found & fixed during development**: initial lazy-initializer approach caused hydration
+     mismatch (server renders empty, client reads hash) → React discarded client state → 0 nodes
+     restored after reload. Fixed by using SSR-safe defaults + a mount effect for restore, gated
+     by a `hydrated` flag so the persist effect doesn't overwrite the restored hash with empty
+     defaults before hydration completes. Verified: randomize → 30 nodes → reload → all 30 restored.
+   - Second **bug found & fixed**: `readInitialBuild` originally probed every weapon's node-id list;
+     since all weapons have 30 nodes, the FIRST weapon (bow) decoded successfully and returned
+     `weaponId: "book"` (from hash) but allocated using the BOW's node ids → mismatch → 0 shown.
+     Fixed by peeking the weapon code from the hash and decoding only against that weapon's list.
+2. **Randomize Build button** (🎲 build aleatorio):
+   - Greedy random allocation respecting prereqs + point budget. 70% take-chance per eligible node
+     produces organic (not full) builds. Multiple passes ensure deep nodes get a chance.
+   - Sets allocated + clears selection; URL hash auto-updates via the persist effect.
+3. **TTS Lore Narration** — `src/app/api/tts/route.ts` + `src/components/cosmic/tts-button.tsx`:
+   - Next.js API route proxies z-ai-web-dev-sdk TTS with an in-memory LRU cache (64 entries) so
+     repeat narrations are instant. First call ~8.6s (upstream), cached call ~13ms.
+   - Self-contained TtsButton component: idle / loading / playing / paused / error states,
+     play-pause toggle, live progress bar, stop button, hidden `<audio>` element with
+     blob-URL management (revoke on unmount). Voice "tongtong" @ 0.95 speed for atmospheric narration.
+   - Integrated into every lore card (6 entries) next to the era label.
+4. **Resonance Shard economy** — data + UI:
+   - Added `shardDrop` (first defeat) + `repeatDrop` (repeatable) to all 6 bosses in mod-data
+     (Aethon: 250/40, Echoes: 120/18 & 110/16, Rift-Keeper: 45/8, Hollow Titan: 8/2, Witness: 0/0).
+   - Boss card headers now show "✦ N shards" badge next to HP.
+   - Expanded boss cards show a "Drops" row with first-defeat + repeatable counts.
+   - New **ShardEconomyBanner** at the top of the bosses section: summarizes total farmable shards
+     (533 first-defeat, 84 repeatable), a progress bar showing % of full Codex unlock (61%),
+     and a caption. Connects the boss economy to the Memory Codex feature.
+
+### Styling Improvements
+5. Boss card headers: shard badge uses `var(--primary)` gold with ✦ glyph; flex-wrap for mobile.
+6. Expanded boss cards: dedicated "Drops" row with gold-tinted border + bg for visual emphasis.
+7. Economy banner: gradient bg (primary→accent), icon, 3-up stat grid, animated progress bar.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Build share round-trip**: randomize → 30 nodes/58 pts → reload → hash preserved →
+    30 nodes restored ✓ (tested with controlled 10-node hash too: restored exactly 10).
+  - **Randomize**: produces valid builds (30 nodes, 5 common/18 rare/legendary), URL hash updates.
+  - **Share button**: "✓ enlace copiado" confirmation shows; clipboard write succeeds (read blocked
+    by browser permission, expected).
+  - **TTS**: POST /api/tts returns 200; first call 8.6s, cached call 13ms; button cycles
+    idle→loading→playing→idle correctly.
+  - **Shard economy banner**: renders 533/84/61% with progress bar.
+  - **Boss drops**: Aethon expanded shows "Drops: ✦ 250 (primera derrota) · 40 ✦ (repetibles)".
+- VLM verdicts:
+  - Skill tree: "all 3 control buttons clearly visible; constellation clear; no critical issues."
+  - Lore TTS: "🔊 Narrar buttons clearly visible; clear interactive controls; no major issues."
+  - Bosses economy: "banner highly effective; progress bar renders correctly; layout clean."
+
+## Unresolved Issues / Risks
+- None blocking. TTS first-call latency (~8.6s) is upstream API behavior; the LRU cache makes
+  repeat narrations instant. Could pre-warm the cache for all 6 lore entries on idle, but that
+  would consume 6 upstream calls on every page load — not worth it.
+- The `react-hooks/set-state-in-effect` lint rule is disabled (with justification comment) for
+  the one-time hydration restore effect — this is the documented escape hatch for browser-only
+  state restoration and is correct.
+
+## Priority Recommendations for Next Phase
+- **Build import UI**: add a text-input / paste-URL field to explicitly import a shared build
+  (currently restore only happens on page-load with a hash). Could also add a "copy seed" button.
+- **Build comparison**: let users save 2 builds and diff them (which nodes differ).
+- **TTS for bosses**: narrate boss descriptions too (extend TtsButton usage to boss cards).
+- **Starfield IntersectionObserver**: pause the canvas animation when the hero is off-screen to
+  save battery on mobile (mentioned in round 2 recs, still pending).
+- **Keyboard navigation**: skill-tree nodes are SVG `<g>` clickable but not keyboard-focusable;
+  add tabindex + Enter handler for accessibility.

@@ -61,6 +61,9 @@ export function BossesSection() {
           ))}
         </div>
 
+        {/* Resonance Shard economy summary */}
+        <ShardEconomyBanner />
+
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
           {list.map((b) => {
             const isOpen = open === b.id;
@@ -116,8 +119,17 @@ export function BossesSection() {
                     <h3 className="mt-0.5 truncate text-base font-semibold text-foreground">
                       {b.name}
                     </h3>
-                    <div className="mt-0.5 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px] text-muted-foreground">
                       <span>HP {b.hp}</span>
+                      {b.shardDrop > 0 && (
+                        <span
+                          className="inline-flex items-center gap-1"
+                          style={{ color: "var(--primary)" }}
+                        >
+                          ✦ {b.shardDrop}
+                          <span className="text-muted-foreground">shards</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span
@@ -168,6 +180,23 @@ export function BossesSection() {
                           </span>
                           <span className="text-foreground">{b.unlock}</span>
                         </div>
+                        {b.shardDrop > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
+                            <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                              Drops:
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-primary">
+                              ✦ {b.shardDrop}
+                              <span className="text-muted-foreground">
+                                (primera derrota)
+                              </span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-muted-foreground">
+                              · {b.repeatDrop} ✦
+                              <span>(repetibles)</span>
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -178,5 +207,68 @@ export function BossesSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ShardEconomyBanner() {
+  // Sum across all bosses (first-defeat + repeatable pool).
+  const totalFirst = BOSSES.reduce((s, b) => s + b.shardDrop, 0);
+  const totalRepeat = BOSSES.reduce((s, b) => s + b.repeatDrop, 0);
+  const codexTotal = 880; // sum of all CODEX costs — rough gauge of full unlock
+  const pct = Math.min(100, Math.round((totalFirst / codexTotal) * 100));
+
+  return (
+    <div className="mt-6 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-2xl text-glow-gold">
+            ✦
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold">
+              Economía de Resonance Shards
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Moneda para memorizar armas en el Memory Codex.
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4 text-center sm:text-right">
+          <Stat label="Primera derrota" value={`${totalFirst} ✦`} accent="var(--primary)" />
+          <Stat label="Repetible /kill" value={`${totalRepeat} ✦`} accent="var(--accent)" />
+          <Stat label="Desbloqueo total" value={`${pct}%`} accent="var(--chart-3)" />
+        </div>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/60">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-primary via-amber-300 to-accent transition-all duration-700"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        Derrotando cada jefe una vez obtienes ~{pct}% del codex completo
+      </p>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent: string;
+}) {
+  return (
+    <div>
+      <div className="text-lg font-bold tabular-nums" style={{ color: accent }}>
+        {value}
+      </div>
+      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
+    </div>
   );
 }

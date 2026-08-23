@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { LORE } from "@/lib/mod-data";
+import { TtsButton } from "./tts-button";
 
 export function LoreSection() {
   return (
@@ -49,13 +50,19 @@ export function LoreSection() {
                   }`}
                 >
                   <div
-                    className={`flex items-center gap-2 ${
+                    className={`flex flex-wrap items-center gap-2 ${
                       i % 2 === 1 ? "sm:justify-end" : ""
                     }`}
                   >
                     <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary/80">
                       {entry.era}
                     </span>
+                    <TtsButton
+                      text={`${entry.title}. ${entry.body}`}
+                      voice="tongtong"
+                      speed={0.95}
+                      className="ml-auto sm:ml-0"
+                    />
                   </div>
                   <h3 className="mt-1.5 text-xl font-semibold text-glow-gold">
                     {entry.title}

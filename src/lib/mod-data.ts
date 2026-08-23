@@ -52,6 +52,8 @@ export interface Boss {
   mechanics: string[];
   unlock: string;
   accent: string;
+  shardDrop: number; // Resonance Shards dropped on first defeat
+  repeatDrop: number; // Shards dropped on repeat kills
 }
 
 export interface LoreEntry {
@@ -482,6 +484,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Genesis Shard reaches Lv 150 (The Awakening)",
     accent: "#f5c451",
+    shardDrop: 250,
+    repeatDrop: 40,
   },
   {
     id: "echo-blade",
@@ -498,6 +502,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Genesis Shard reaches Lv 100",
     accent: "#ff9a3c",
+    shardDrop: 120,
+    repeatDrop: 18,
   },
   {
     id: "echo-archer",
@@ -514,6 +520,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Genesis Shard reaches Lv 110",
     accent: "#f5c451",
+    shardDrop: 110,
+    repeatDrop: 16,
   },
   {
     id: "witness",
@@ -530,6 +538,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Genesis Shard reaches Lv 50 (The Hollowing)",
     accent: "#b388ff",
+    shardDrop: 0,
+    repeatDrop: 0,
   },
   {
     id: "rift-keeper",
@@ -546,6 +556,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Genesis Shard reaches Lv 75 (Dimensional Rifts)",
     accent: "#3dd6c4",
+    shardDrop: 45,
+    repeatDrop: 8,
   },
   {
     id: "hollow-titan",
@@ -562,6 +574,8 @@ export const BOSSES: Boss[] = [
     ],
     unlock: "Discover the Hollow Sanctum biome (post 200 max HP)",
     accent: "#7ee3c4",
+    shardDrop: 8,
+    repeatDrop: 2,
   },
 ];
 
