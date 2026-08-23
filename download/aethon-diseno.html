@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aethon, la Luz Primordial — Documento de Diseño del Mod</title>
+<style>
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0d0a1a;
+  color: #e8e4f0;
+  font-family: "Noto Sans", "DejaVu Sans", "Helvetica Neue", Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, h4 {
+  color: #f5c451;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 1.4em;
+  margin-bottom: 0.5em;
+  break-after: avoid;
+}
+h1 {
+  font-size: 22pt;
+  border-bottom: 2px solid #f5c451;
+  padding-bottom: 0.3em;
+  margin-top: 0.6em;
+}
+h2 {
+  font-size: 16pt;
+  color: #b388ff;
+  border-left: 4px solid #b388ff;
+  padding-left: 0.5em;
+}
+h3 {
+  font-size: 13pt;
+  color: #ff9a3c;
+}
+h4 {
+  font-size: 11pt;
+  color: #3dd6c4;
+}
+p { margin: 0.5em 0; text-align: justify; }
+strong { color: #fff; }
+em { color: #c9b8e6; }
+code {
+  background: rgba(179,136,255,0.15);
+  color: #d4b8ff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: "JetBrains Mono","DejaVu Sans Mono", monospace;
+  font-size: 9pt;
+}
+blockquote {
+  border-left: 3px solid #f5c451;
+  background: rgba(245,196,81,0.08);
+  padding: 0.6em 1em;
+  margin: 0.8em 0;
+  border-radius: 0 6px 6px 0;
+  color: #d4c8a0;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgba(245,196,81,0.3);
+  margin: 1.5em 0;
+}
+ul, ol { margin: 0.5em 0; padding-left: 1.5em; }
+li { margin: 0.25em 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 9.5pt;
+  break-inside: avoid;
+}
+th, td {
+  border: 1px solid rgba(179,136,255,0.3);
+  padding: 6px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  background: rgba(245,196,81,0.15);
+  color: #f5c451;
+  font-weight: 700;
+}
+tbody tr:nth-child(even) {
+  background: rgba(179,136,255,0.06);
+}
+.cover {
+  page-break-after: always;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #1a1030 0%, #0d0a1a 70%);
+  padding: 0 20mm;
+}
+.cover .sigil { font-size: 60pt; color: #f5c451; margin-bottom: 0.2em; text-shadow: 0 0 30px rgba(245,196,81,0.6); }
+.cover h1 { border: none; font-size: 30pt; margin: 0.2em 0; }
+.cover .subtitle { color: #b388ff; font-size: 14pt; margin: 0.5em 0 2em; }
+.cover .meta { color: #7a6b9a; font-size: 10pt; font-family: monospace; }
+.cover .tags { margin-top: 2em; }
+.cover .tag { display: inline-block; background: rgba(245,196,81,0.1); color: #f5c451; border: 1px solid rgba(245,196,81,0.3); padding: 4px 12px; border-radius: 999px; font-size: 9pt; margin: 3px; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="sigil">✦</div>
+  <h1>Aethon, la Luz Primordial</h1>
+  <div class="subtitle">Documento de Diseño del Mod + Roadmap de Implementación</div>
+  <div class="tags">
+    <span class="tag">Terraria · tModLoader</span>
+    <span class="tag">3 Ramas Principales</span>
+    <span class="tag">Niveles Infinitos</span>
+    <span class="tag">Árboles Procedurales</span>
+    <span class="tag">Absorción de Lore</span>
+  </div>
+  <div class="meta">Concepto de mod · v2.0 · Idioma: Español</div>
+</div>
+
+<h1>📜 Documento de Diseño del Mod — "Aethon, la Luz Primordial"</h1>
+<blockquote>Terraria Mod · Concepto de diseño completo (v2.0) Idioma: Español · Última actualización: documento unificado</blockquote>
+<hr/>
+<h2>📑 Índice</h2>
+<ol><li>[Visión general del mod](#1-visión-general-del-mod)</li><li>[La entidad cósmica — Aethon](#2-la-entidad-cósmica--aethon)</li><li>[El descubrimiento — Altar y Fragmento Génesis](#3-el-descubrimiento--altar-y-fragmento-génesis)</li><li>[Sistema de 3 ramas principales (NUEVO)](#4-sistema-de-3-ramas-principales-nuevo)</li><li>[Rama de Distancia (Ranged)](#5-rama-de-distancia-ranged)</li><li>[Rama de Cuerpo a Cuerpo (Melee)](#6-rama-de-cuerpo-a-cuerpo-melee)</li><li>[Rama de Artes Mágicas (Magic + Invocador fusionadas)](#7-rama-de-artes-mágicas-magic--invocador-fusionadas)</li><li>[Sistema de niveles infinito](#8-sistema-de-niveles-infinito)</li><li>[Árboles de habilidades procedurales](#9-árboles-de-habilidades-procedurales)</li><li>[Absorción de Lore (capstone)](#10-absorción-de-lore-capstone)</li><li>[Sistemas del mundo](#11-sistemas-del-mundo)</li><li>[Jefe final — Aethon](#12-jefe-final--aethon)</li><li>[Jefes secundarios y ecos](#13-jefes-secundarios-y-ecos)</li><li>[Economía de Fragmentos de Resonancia](#14-economía-de-fragmentos-de-resonancia)</li><li>[NPCs](#15-npcs)</li><li>[Calidad de vida y configuración](#16-calidad-de-vida-y-configuración)</li><li>[Compatibilidad con mods](#17-compatibilidad-con-mods)</li><li>[Identidad visual y audio](#18-identidad-visual-y-audio)</li></ol>
+<hr/>
+<h2>1. Visión general del mod</h2>
+<p><strong>Aethon, la Luz Primordial</strong> es un mod de historia final para Terraria (vía tModLoader) que añade:</p>
+<ul><li><strong>Una entidad cósmica antigua</strong> como jefe final opcional, con lore profundo.</li><li><strong>Un item único (Fragmento Génesis)</strong> que el jugador encuentra en un altar subterráneo.</li><li>El fragmento <strong>se transforma según la rama principal de combate</strong> que el jugador elija, y <strong>crece infinitamente</strong> con cada enemigo eliminado.</li><li><strong>Árboles de habilidades procedurales</strong> únicos por rama, con nodos comunes / raros / legendarios.</li><li>Un capstone de <strong>Absorción de Lore</strong>: el arma puede memorizar el comportamiento de cualquier arma del mismo tipo en el juego base y en otros mods cargados.</li><li><strong>Eventos cósmicos</strong> por niveles, <strong>ecos de portadores anteriores</strong> como jefes, y una economía de <strong>Fragmentos de Resonancia</strong>.</li></ul>
+<h3>Principios de diseño</h3>
+<ol><li><strong>Progresión infinita pero con curva suave</strong> — nunca se siente como grind muerto.</li><li><strong>Rejugabilidad</strong> — cada personaje obtiene un árbol procedural distinto.</li><li><strong>Integración con el mundo</strong> — el mod afecta biomas, eventos y NPCs existentes.</li><li><strong>Compatibilidad</strong> — Funciona con Calamity, Thorium, Fargo's y otros mods grandes.</li><li><strong>Accesibilidad</strong> — Config options para desactivar eventos, ajustar XP, etc.</li></ol>
+<hr/>
+<h2>2. La entidad cósmica — Aethon</h2>
+<p><strong>Aethon, la Luz Primordial</strong> es un ser anterior al universo de Terraria. Su cuerpo ES una galaxia; sus pensamientos son mareas gravitacionales. Hace eones se fragmentó a sí misma para sembrar toda la creación — cada estrella, cada alma, es una astilla de Aethon.</p>
+<p>Un fragmento de su verdadera consciencia quedó dormido dentro del mundo de Terraria, enterrado en piedra. Civilizaciones florecieron y cayeron adorándolo; solo quedan altares en ruinas.</p>
+<p><strong>El jefe final:</strong> cuando el arma-fragmento del jugador alcanza un umbral de resonancia, Aethon despierta. Derrotarla no la destruye — te <em>reconoce</em> como una consciencia par.</p>
+<h3>Fases de Aethon (5)</h3>
+<table><thead><tr><th>Fase</th><th>Tema</th><th>Mecánica clave</th></tr></thead><tbody><tr><td>1 — Polvo estelar</td><td>Stardust</td><td>Dispara pernos en espiral</td></tr><tr><td>2 — Nebulosa</td><td>Nebula</td><td>Nubes AoE ciegan y queman; arena se deforma</td></tr><tr><td>3 — Gravedad</td><td>Gravity</td><td>La gravedad se invierte cada 8s</td></tr><tr><td>4 — Agujero negro</td><td>Black Hole</td><td>Una singularidad te atrae mientras genera adds</td></tr><tr><td>5 — Reconocimiento</td><td>Acknowledgment</td><td>Aethon empuña TUS propias habilidades absorbidas contra ti</td></tr></tbody></table>
+<h3>Recompensa de derrota</h3>
+<ul><li>El Fragmento Génesis se despierta por completo: forma "Ascendida" cosmética.</li><li>Se desbloquea dificultad cósmica New Game+.</li><li>Aethon deja de ser hostil (se vuelve neutral como el NPC Testigo).</li></ul>
+<hr/>
+<h2>3. El descubrimiento — Altar y Fragmento Génesis</h2>
+<h3>Bioma: El Sagrario Hueco (The Hollow Sanctum)</h3>
+<ul><li>Sub-bioma cristalino que puede generarse en cualquier lugar subterráneo <strong>después de que el jugador tenga 200 HP máx</strong>.</li><li>Genera cristales bioluminiscentes, polvo iluminado, y runas antiguas en las paredes.</li><li>Música ambiental única (tono bajo, reverberante).</li></ul>
+<h3>El Altar</h3>
+<ul><li>Estructura de piedra pequeña con runas grabadas que brillan al acercarse.</li><li>Al interactuar, ofrece un único mote flotante de luz pura: <strong>el Fragmento Génesis</strong>.</li><li>Un solo fragmento por personaje (alma-vinculada).</li></ul>
+<h3>Evolución visual del fragmento</h3>
+<p>El fragmento cambia de forma visualmente según el nivel:</p>
+<table><thead><tr><th>Nivel</th><th>Forma visual</th></tr></thead><tbody><tr><td>1–10</td><td>Mote tenue de luz</td></tr><tr><td>11–25</td><td>Orbe brillante</td></tr><tr><td>26–50</td><td>Artefacto con runas</td></tr><tr><td>51–100</td><td>Reliquia forjada en estrellas</td></tr><tr><td>101–150</td><td>Miniatura de galaxia en las manos del jugador</td></tr><tr><td>151+</td><td>Forma Ascendida (post-Aethon)</td></tr></tbody></table>
+<hr/>
+<h2>4. Sistema de 3 ramas principales (NUEVO)</h2>
+<blockquote>⚠️ <strong>CAMBIO IMPORTANTE vs. versión anterior:</strong> El sistema anterior tenía 4 armas separadas (arco, espada, cañón, libro). El nuevo sistema tiene <strong>3 ramas principales</strong> basadas en las clases de combate de Terraria. El Fragmento Génesis evoluciona según la rama que el jugador desarrolla primero.</blockquote>
+<h3>Las 3 ramas principales</h3>
+<table><thead><tr><th>Rama</th><th>Clases de Terraria incluidas</th><th>Forma del fragmento</th><th>Color de acento</th></tr></thead><tbody><tr><td><strong>🎨 Distancia</strong></td><td>Ranged (arcos, armas de munición, armas arrojadizas)</td><td>Arma de distancia adaptable</td><td>Dorado estelar <code>#f5c451</code></td></tr><tr><td><strong>⚔️ Cuerpo a Cuerpo</strong></td><td>Melee (espadas, lanzas, etc.)</td><td>Hoja de luz condensada</td><td>Naranja solar <code>#ff9a3c</code></td></tr><tr><td><strong>🔮 Artes Mágicas</strong></td><td>Magic + Summoner (fusionadas)</td><td>Grimorio flotante</td><td>Violeta arcano <code>#b388ff</code></td></tr></tbody></table>
+<h3>Cómo funciona la elección de rama</h3>
+<ol><li>El jugador encuentra el Fragmento Génesis (un mote de luz sin forma definida).</li><li>El fragmento <strong>no tiene forma fija</strong> — se adapta a cómo el jugador combate.</li><li>Al usar el fragmento por primera vez en combate, el juego detecta la <strong>primera rama principal</strong> que el jugador desarrolla (basado en el tipo de daño infligido / arma sostenida).</li><li>Una vez la rama se "imprime" (al matar N enemigos con esa clase de daño), el fragmento <strong>se transforma permanentemente</strong> en la forma de esa rama.</li><li>Sin embargo, el jugador puede <strong>cambiar de rama</strong> más adelante invirtiendo Fragmentos de Resonancia (ver §14), pero el árbol procedural de la rama original se conserva como "linaje".</li></ol>
+<h3>Fusión Magic + Summoner</h3>
+<p>Las ramas de Mago e Invocador <strong>se fusionan</strong> en "Artes Mágicas" porque:</p>
+<ul><li>Ambas usan maná como recurso.</li><li>El capstone de absorción puede memorizar tanto armas mágicas (Last Prism, Lunar Flare) como armas de invocador (Tempest Staff, Stardust Dragon).</li><li>El árbol fusionado tiene sub-ramas que se especializan en magia pura vs. invocación pura, pero comparten el tronco de maná/proyectiles.</li></ul>
+<h3>Armas que puede tomar cada rama (expandido)</h3>
+<h4>🎨 Rama de Distancia (Ranged)</h4>
+<p>El fragmento se transforma en un <strong>arma de distancia adaptable</strong> que puede ser:</p>
+<ul><li><strong>Arco</strong>: dispara flechas de luz estelar (gratis, no consume munición base).</li><li><strong>Arma de munición (pistola/escopeta/rifle)</strong>: usa balas de plasma cinético.</li><li><strong>Arma arrojadiza</strong>: cuchillos/shuriken de energía que regresan.</li></ul>
+<p>El jugador elige la sub-forma dentro de la rama de Distancia (también permanente, pero se puede cambiar con resonancia).</p>
+<h4>⚔️ Rama de Cuerpo a Cuerpo (Melee)</h4>
+<p>El fragmento se transforma en una <strong>hoja de luz condensada</strong>:</p>
+<ul><li><strong>Espada</strong>: cortes en arco + ondas de energía.</li><li><strong>Lanza/Alabarda</strong>: empujes + ataques de empuje (thrust) con alcance largo.</li><li><strong>Yoyo</strong>: giro continuo con control de dirección.</li></ul>
+<h4>🔮 Rama de Artes Mágicas (Magic + Summoner)</h4>
+<p>El fragmento se transforma en un <strong>grimorio flotante</strong>:</p>
+<ul><li><strong>Grimorio de hechizos</strong>: proyectiles mágicos (bolts, rayos, lluvia).</li><li><strong>Grimorio de invocación</strong>: invoca minions permanentes que heredan el poder del fragmento.</li><li>El jugador puede mezclar ambos (lanzar hechizos Y mantener minions).</li></ul>
+<hr/>
+<h2>5. Rama de Distancia (Ranged)</h2>
+<h3>Nombre del arma: <strong>Lumina, la Arcoestelar</strong> (forma adaptable)</h3>
+<h3>Sub-ramas del árbol (6 ramas, cada una con 5 nodos)</h3>
+<h4>Rama 1 — Génesis de Proyectiles</h4>
+<p>Nuevos tipos de munición/proyectil:</p>
+<ul><li><strong>Flecha estelar</strong> (base): ignora 5 de defensa.</li><li><strong>Virote de vacío</strong>: +30% daño, drena 4 maná.</li><li><strong>Disparo dividido</strong>: 2 proyectiles en abanico.</li><li><strong>Estrella guiada</strong>: los proyectiles curvan hacia enemigos.</li><li><strong>Salva triple</strong> (legendario): cada 3er disparo lanza 3 virotes buscadores.</li></ul>
+<h4>Rama 2 — Maestría de Carcaj</h4>
+<ul><li><strong>Tiro rápido</strong>: -15% tiempo de tensión/carga.</li><li><strong>Cuerda doble</strong>: +1 proyectil por disparo.</li><li><strong>Carcaj infinito</strong>: no consume munición.</li><li><strong>Ráfaga</strong>: mantén para disparar 6 proyectiles en secuencia.</li><li><strong>Tormenta de estrellas</strong> (legendario): disparo cargado llueve 12 proyectiles.</li></ul>
+<h4>Rama 3 — Marca del Cazador</h4>
+<ul><li><strong>Etiqueta</strong>: los golpes marcan enemigos (+10% daño).</li><li><strong>Acumulación de crítico</strong>: +4% crítico por golpe (máx 40%).</li><li><strong>Punto débil</strong>: los enemigos marcados muestran un punto débil (siempre crítico).</li><li><strong>Foco del cazador</strong>: estar quieto 1s duplica el crítico.</li><li><strong>Marca letal</strong> (legendario): matar a un enemigo marcado resetea cooldowns.</li></ul>
+<h4>Rama 4 — Disparos Celestiales</h4>
+<ul><li><strong>Salva de meteoros</strong>: alt-fuego: 3 meteoros caen en el cursor.</li><li><strong>Destello solar</strong>: los proyectiles incendian (DoT quemadura).</li><li><strong>Eclipse</strong>: disparo cargado ciega + quema (10s cd).</li><li><strong>Cascada estelar</strong>: cada golpe genera 2 mini-estrellas.</li><li><strong>Supernova</strong> (legendario): proyectil cargado explota en supernova de 12 tiles.</li></ul>
+<h4>Rama 5 — Carcaj Fantasma</h4>
+<ul><li><strong>Disparo fase</strong>: los proyectiles atraviesan 3 tiles.</li><li><strong>Ricochet</strong>: rebota en paredes hasta 2 veces.</li><li><strong>Betty rebotadora</strong>: los fallos generan minas de luz estacionarias.</li><li><strong>Cadena fantasma</strong>: rebota entre 3 enemigos.</li><li><strong>Forma etérea</strong> (legendario): todos los proyectiles fasan terreno Y perforan 5 enemigos.</li></ul>
+<h4>Rama 6 — Absorción de Lore ⭐ (capstone)</h4>
+<ul><li><strong>Códex de memoria I/II/III</strong>: desbloquea 3 slots de Runa de Memoria.</li><li><strong>Afinación de resonancia</strong>: memoriza el comportamiento de cualquier arma de distancia del juego base + mods.</li><li><strong>Carcaj omnisciente</strong> (legendario): equipa 5 Runas simultáneamente; fusiona dos en una.</li></ul>
+<hr/>
+<h2>6. Rama de Cuerpo a Cuerpo (Melee)</h2>
+<h3>Nombre del arma: <strong>Solbrand, Filo del Alba</strong> (hoja de luz condensada)</h3>
+<h3>Sub-ramas del árbol (6 ramas)</h3>
+<h4>Rama 1 — Génesis de Hoja</h4>
+<ul><li><strong>Onda de corte</strong>: cada golpe emite onda frontal (6 tiles).</li><li><strong>Corte de rayo</strong>: golpe cargado dispara rayo de 12 tiles.</li><li><strong>Remolino</strong>: alt-fuego: giro que golpea alrededor.</li><li><strong>Combo de estocada</strong>: combo de 3 golpes termina en estocada perforante.</li><li><strong>Corte de realidad</strong> (legendario): corte cargado corta terreno Y enemigos.</li></ul>
+<h4>Rama 2 — Maestría de Combo</h4>
+<ul><li><strong>Medidor de combo</strong>: golpes consecutivos acumulan combo (máx 10).</li><li><strong>Remate</strong>: a combo 10, +200% daño en el siguiente golpe.</li><li><strong>Impulso</strong>: el combo no decae al moverse.</li><li><strong>Parry-Riposte</strong>: bloquear + contraataque resetea combo y suma 5.</li><li><strong>Filo infinito</strong> (legendario): sin tope de combo; +5% daño por golpe más allá de 10.</li></ul>
+<h4>Rama 3 — Ira Solar</h4>
+<ul><li><strong>Corte de destello solar</strong>: los golpes incendian (ciego + DoT).</li><li><strong>Corte de eclipse</strong>: corte pesado oscurece la pantalla, +50% daño.</li><li><strong>Aura de corona</strong>: aura pasiva que quema (3 tiles).</li><li><strong>Ignición solar</strong>: enemigos quemados explotan al morir.</li><li><strong>Golpe de supernova</strong> (legendario): remate detona supernova de 10 tiles.</li></ul>
+<h4>Rama 4 — Égida del Alba</h4>
+<ul><li><strong>Frames de parry</strong>: los primeros 4 frames del golpe dan invulnerabilidad.</li><li><strong>Reflexión de daño</strong>: los proyectiles parry rebotan con +50% daño.</li><li><strong>Dash del alba</strong>: dash con i-frames (3s cd).</li><li><strong>Baluarte</strong>: estar quieto 1s otorga +20 defensa.</li><li><strong>Guardia eterna</strong> (legendario): ventana de parry duplicada; refleja también cuerpo a cuerpo.</li></ul>
+<h4>Rama 5 — Peso de Estrellas</h4>
+<ul><li><strong>Golpes pesados</strong>: +50% knockback, -10% velocidad.</li><li><strong>Golpe al suelo</strong>: golpe hacia abajo genera onda de choque.</li><li><strong>Cráter</strong>: el golpe al suelo deja un cráter dañino (5s).</li><li><strong>Caída de meteorito</strong>: golpe aéreo llueve meteoritos.</li><li><strong>Pozo de gravedad</strong> (legendario): los golpes al suelo atraen enemigos antes de estallar.</li></ul>
+<h4>Rama 6 — Absorción de Lore ⭐ (capstone)</h4>
+<ul><li><strong>Códex de memoria I/II/III</strong>: 3 slots de Runa.</li><li><strong>Afinación de resonancia</strong>: memoriza cualquier espada/lanza/yoyo del juego base + mods.</li><li><strong>Alma del maestro de hojas</strong> (legendario): 5 Runas; fusiona dos golpes en uno híbrido.</li></ul>
+<hr/>
+<h2>7. Rama de Artes Mágicas (Magic + Invocador fusionadas)</h2>
+<h3>Nombre del arma: <strong>Grimorio del Eterno</strong> (grimorio flotante)</h3>
+<h3>Sub-ramas del árbol (7 ramas — una más que las demás, por la fusión)</h3>
+<h4>Rama 1 — Flujo de Maná</h4>
+<ul><li><strong>Reserva de maná</strong>: +40 maná máximo.</li><li><strong>Maná fluyente</strong>: regeneración +50%.</li><li><strong>Lanzamiento eficiente</strong>: -25% coste de maná.</li><li><strong>Pozo de maná</strong>: pasivo: restaura 5 maná/seg quieto.</li><li><strong>Reserva inagotable</strong> (legendario): lanzar con <20 maná es gratis.</li></ul>
+<h4>Rama 2 — Génesis Elemental</h4>
+<ul><li><strong>Bolt de fuego</strong>: los bolts incendian.</li><li><strong>Esquirla de escarcha</strong>: los bolts ralentizan 40% por 3s.</li><li><strong>Arco de tormenta</strong>: los bolts saltan a 2 enemigos.</li><li><strong>Virote de vacío</strong>: los bolts perforan 3, +30% daño.</li><li><strong>Convergencia elemental</strong> (legendario): los bolts rotan elementos cada lanzamiento; todos a la vez.</li></ul>
+<h4>Rama 3 — Evolución de Proyectiles</h4>
+<ul><li><strong>Bolt dividido</strong>: los bolts se dividen en 2 al impactar.</li><li><strong>Chispa guiada</strong>: los bolts homing al enemigo más cercano.</li><li><strong>Cadena de lanzamiento</strong>: los bolts saltan entre 3 enemigos.</li><li><strong>Orbe familiar</strong>: genera un familiar orbital (3 bolts/seg).</li><li><strong>Multilanzamiento</strong> (legendario): cada lanzamiento dispara 3 bolts extra gratis.</li></ul>
+<h4>Rama 4 — Conversión Arcana</h4>
+<ul><li><strong>Escudo de maná</strong>: el daño drena maná antes que HP.</li><li><strong>Maná → HP</strong>: lanzar cura 2 HP por 10 maná.</li><li><strong>HP → Maná</strong>: pierde 5 HP para restaurar 30 maná.</li><li><strong>Desesperación</strong>: el daño escala con % de maná faltante.</li><li><strong>Ciclo eterno</strong> (legendario): matar restaura 30% maná + 10% HP.</li></ul>
+<h4>Rama 5 — Hechizos Cósmicos (sub-rama de magia pura)</h4>
+<ul><li><strong>Agujero negro</strong>: lanzamiento cargado genera pozo gravitacional de 4s.</li><li><strong>Supernova</strong>: lanzamiento cargado: explosión cósmica de 10 tiles.</li><li><strong>Dilatación temporal</strong>: lanzamiento cargado: ralentiza enemigos 60% por 4s.</li><li><strong>Lluvia de estrellas</strong>: pasivo: una estrella cae cada 3s.</li><li><strong>Desgarro de realidad</strong> (legendario): cargado abre portal; los bolts salen de un 2º portal.</li></ul>
+<h4>Rama 6 — Maestría de Invocación (sub-rama de invocador puro)</h4>
+<ul><li><strong>Minion base</strong>: invoca 1 minion del fragmento (estrella orbitante que dispara).</li><li><strong>Minion +1</strong>: +1 slot de minion.</li><li><strong>Minion empoderado</strong>: los minions heredan +10% del daño del grimorio.</li><li><strong>Minion torre</strong>: los minions pueden estacionarse (modo defensivo).</li><li><strong>Enjambre estelar</strong> (legendario): +3 slots; los minions disparan bolts al atacar.</li></ul>
+<h4>Rama 7 — Absorción de Lore ⭐ (capstone)</h4>
+<ul><li><strong>Códex de memoria I/II/III</strong>: 3 slots de Runa.</li><li><strong>Afinación de resonancia</strong>: memoriza cualquier arma mágica O de invocador del juego base + mods.</li><li><strong>Grimorio omnisciente</strong> (legendario): 5 Runas; lanza todos simultáneamente en una tormenta.</li></ul>
+<hr/>
+<h2>8. Sistema de niveles infinito</h2>
+<h3>XP por enemigo</h3>
+<p>Cada enemigo eliminado otorga XP según su tier:</p>
+<ul><li>Slime: 1 XP</li><li>Zombi: 3 XP</li><li>Demon Eye: 4 XP</li><li>Jefe Pre-Hardmode (Eye of Cthulhu): 5000 XP</li><li>Jefe Hardmode (Plantera): 25000 XP</li><li>Jefe Endgame (Moon Lord): 100000 XP</li><li>Jefes del mod (Echoes, Aethon): 50000–500000 XP</li></ul>
+<h3>Curva de XP</h3>
+<p><code>xpParaSiguienteNivel(n) = 80 × n^1.5</code> (exponencial suave). Niveles ilimitados.</p>
+<h3>Puntos de habilidad por nivel</h3>
+<table><thead><tr><th>Rango de nivel</th><th>Puntos / nivel</th><th>Acumulado al final del rango</th></tr></thead><tbody><tr><td>1 – 10</td><td>1</td><td>10</td></tr><tr><td>11 – 20</td><td>2</td><td>30</td></tr><tr><td>21 – 30</td><td>3</td><td>60</td></tr><tr><td>31 – 40</td><td>4</td><td>100</td></tr><tr><td>41 – 50</td><td>5</td><td>150</td></tr><tr><td>51 – 60</td><td>6</td><td>210</td></tr><tr><td>61 – 70</td><td>7</td><td>280</td></tr><tr><td>71 – 80</td><td>8</td><td>360</td></tr><tr><td>81 – 90</td><td>9</td><td>450</td></tr><tr><td>91 – 100</td><td>10</td><td>550</td></tr><tr><td>101+</td><td>10 (fijo)</td><td>+10 por nivel, para siempre</td></tr></tbody></table>
+<h3>Evolución del arma por nivel</h3>
+<p>El daño base escala con el nivel:</p>
+<ul><li>Distancia: <code>daño = nivel × 2.4</code></li><li>Cuerpo a cuerpo: <code>daño = nivel × 3.1</code></li><li>Artes mágicas: <code>daño = nivel × 2.6 + (% maná faltante × 0.5)</code></li></ul>
+<h3>Hitos cósmicos por nivel</h3>
+<table><thead><tr><th>Nivel</th><th>Evento</th></tr></thead><tbody><tr><td>10</td><td>Primer despertar — el fragmento se solidifica con glifo rúnico</td></tr><tr><td>25</td><td>Lluvia de luz estelar (evento ambiental, mineral raro)</td></tr><tr><td>50</td><td>El Sagrario Hueco se extiende, nuevos mobs</td></tr><tr><td>75</td><td>Rifts dimensionales (mini-mazmorras con loot)</td></tr><tr><td>100</td><td>El agitar de Aethon (Ecos de portadores anteriores aparecen)</td></tr><tr><td>150</td><td>El despertar (jefe final Aethon disponible)</td></tr><tr><td>200</td><td>Forma Ascendida (cosmético)</td></tr></tbody></table>
+<hr/>
+<h2>9. Árboles de habilidades procedurales</h2>
+<p>Cada rama genera su <strong>propio árbol</strong> usando un algoritmo procedural con seed:</p>
+<ul><li><strong>Tema visual de constelación</strong>: nodos = estrellas, aristas = puentes de luz.</li><li><strong>6 ramas por arma</strong> (7 para Artes Mágicas por la fusión).</li><li><strong>3 rarezas de nodo</strong>: Común (sólido), Raro (brillante), Legendario (supernova pulsante).</li><li><strong>Algunos nodos están cerrados</strong> por inversión total de puntos o nivel del arma.</li><li><strong>El layout y las rarezas se randomizan por seed del personaje</strong> → rejugar es distinto.</li></ul>
+<h3>Algoritmo procedural (resumen)</h3>
+<ol><li>Se toma el seed del personaje (o un seed manual configurable).</li><li>Para cada rama, se colocan 5 nodos en una línea radial desde el centro.</li><li>Se aplica jitter aleatorio (±0.08 en coordenadas normalizadas).</li><li>Se asignan rarezas con probabilidad: 60% común, 30% raro, 10% legendario.</li><li>Los nodos legendarios siempre son los 5º de cada rama (capstones).</li><li>Se generan aristas de prerrequisito (cada nodo requiere el anterior de su rama).</li></ol>
+<h3>Interfaz en el juego</h3>
+<ul><li>Panel de árbol accesible via tecla (configurable, default 'K').</li><li>Vista de constelación con zoom/pan.</li><li>Click en nodo para asignar (respeta prerrequisitos + presupuesto).</li><li>Botón "re-generar" (consume Fragmentos de Resonancia, nuevo seed).</li></ul>
+<hr/>
+<h2>10. Absorción de Lore (capstone)</h2>
+<p>El capstone de cada rama deja al arma <strong>absorber habilidades</strong> de cualquier arma del mismo tipo en el juego base y mods cargados.</p>
+<h3>Cómo funciona</h3>
+<ol><li>Al invertir en la rama 6 (o 7 para Artes Mágicas), se desbloquea el <strong>Códex de Memoria</strong>.</li><li>El códex lista todas las armas del tipo correspondiente (del juego base + mods).</li><li>El jugador invierte <strong>Fragmentos de Resonancia</strong> (ver §14) para "memorizar" el comportamiento de un arma.</li><li>Los comportamientos memorizados se equipan como <strong>Runas de Memoria</strong> — hasta N a la vez (N crece con el nivel del arma).</li><li>Las runas se manifiestan <strong>simultáneamente</strong> — no es "una o la otra".</li></ol>
+<h3>Ejemplos</h3>
+<ul><li><strong>Artes Mágicas</strong> memoriza: el rayo convergente del Last Prism, la lluvia del Lunar Flare, el bumerán del Demon Scythe — TODOS a la vez.</li><li><strong>Distancia</strong> memoriza: la ráfaga del Megashark, la lluvia del Daedalus Stormbow, los pétalos del Stormbow — simultáneos.</li><li><strong>Cuerpo a Cuerpo</strong> memoriza: el rayo verde del Terra Blade, el doble corte del Influx Waver, las calabazas del Horseman's Blade.</li></ul>
+<h3>Códex de armas absorbibles (por rama)</h3>
+<h4>Distancia — 12 armas base</h4>
+<p>Wooden Bow, Demon Bow, Molten Fury, The Bee's Knees, Hellwing Bow, Daedalus Stormbow, Ice Bow, Shadowflame Bow, Tsunami, Phantasm, Eventide, Aerial Bane.</p>
+<h4>Cuerpo a Cuerpo — 16 armas base</h4>
+<p>Wooden Sword, Blade of Grass, Muramasa, Phaseblade, Fiery Greatsword, Breaker Blade, Cobalt Sword, Cutlass, Ice Sickle, Keybrand, Terra Blade, Influx Waver, Horseman's Blade, Seedler, Star Wrath, Zenith.</p>
+<h4>Artes Mágicas (magia) — 16 armas base</h4>
+<p>Magic Dagger, Demon Scythe, Aqua Scepter, Flower of Fire, Space Gun, Magic Missile, Book of Skulls, Crimson Rod, Sky Fracture, Magnet Sphere, Leaf Blower, Razorblade Typhoon, Lunar Flare, Last Prism, Nebula Blaze, Blizzard Staff.</p>
+<h4>Artes Mágicas (invocación) — 12 armas base</h4>
+<p>Slime Staff, Hornet Staff, Imp Staff, Spider Staff, Optic Staff, Pirate Staff, Tempest Staff, Xeno Staff, Stardust Dragon Staff, Terraprisma, Desert Tiger Staff, Tavernkeep's sentry weapons.</p>
+<blockquote><strong>Total: 56 armas absorbibles</strong> en el códex base (más las de mods cargados).</blockquote>
+<hr/>
+<h2>11. Sistemas del mundo</h2>
+<h3>Eventos cósmicos (por nivel del arma)</h3>
+<ul><li><strong>Lv 25 — Lluvia de luz estelar</strong>: meteoros ambientales, mineral raro (Aethonita).</li><li><strong>Lv 50 — El Sagrario Hueco se extiende</strong>: el bioma se propaga, nuevos mobs (Cristales huecos, Centinelas rúnicos).</li><li><strong>Lv 75 — Rifts dimensionales</strong>: mini-mazmorras que aparecen con loot único.</li><li><strong>Lv 100 — El agitar de Aethon</strong>: los Ecos de portadores anteriores aparecen como jefes.</li><li><strong>Lv 150 — El despertar</strong>: el jefe final Aethon se vuelve disponible.</li></ul>
+<h3>Resonancia zonal</h3>
+<p>El fragmento gana bonos por bioma:</p>
+<ul><li><strong>Espacio</strong> (alto del mapa): +20% XP.</li><li><strong>Inframundo</strong>: +15% daño.</li><li><strong>Sagrario Hueco</strong>: +25% XP + regeneración de maná.</li><li><strong>Jungla</strong>: +10% velocidad de ataque.</li></ul>
+<h3>Ecos de portadores</h3>
+<ul><li>Sombras de almas pasadas que también portaron el fragmento.</li><li>Jefes opcionales con builds plausibles de tu árbol (miman tu progreso).</li><li>2 Echoes por rama (6 total).</li></ul>
+<hr/>
+<h2>12. Jefe final — Aethon</h2>
+<p>Ver §2 para las 5 fases. Detalles de combate:</p>
+<ul><li><strong>HP</strong>: 2,400,000 por fase (12M total).</li><li><strong>Arena</strong>: arena cósmica colapsante (se reforman las plataformas entre fases).</li><li><strong>Mecánica única (fase 5)</strong>: Aethon empuña TUS habilidades absorbidas contra ti — si memorizaste el Last Prism, Aethon te dispara un rayo convergente.</li><li><strong>Derrota</strong>: Aethon "reconoce" al jugador; el Fragmento Génesis se despierta (forma Ascendida), New Game+ cósmico desbloqueado.</li></ul>
+<hr/>
+<h2>13. Jefes secundarios y ecos</h2>
+<table><thead><tr><th>Jefe</th><th>Tipo</th><th>HP</th><th>Desbloqueo</th><th>Drop de resonancia</th></tr></thead><tbody><tr><td>El Titán Hueco</td><td>Mini</td><td>42,000</td><td>Descubrir Sagrario Hueco</td><td>8 (2 repetible)</td></tr><tr><td>El Guardián del Rift</td><td>Cósmico</td><td>95,000</td><td>Lv 75 (Rifts dimensionales)</td><td>45 (8)</td></tr><tr><td>El Testigo</td><td>NPC/Cósmico</td><td>—</td><td>Lv 50</td><td>0 (vende)</td></tr><tr><td>Eco del Primer Portador</td><td>Eco</td><td>180,000</td><td>Lv 100</td><td>120 (18)</td></tr><tr><td>Eco de la Arquera Estelar</td><td>Eco</td><td>160,000</td><td>Lv 110</td><td>110 (16)</td></tr><tr><td>Aethon, la Luz Primordial</td><td>Final</td><td>2.4M/fase</td><td>Lv 150</td><td>250 (40)</td></tr></tbody></table>
+<hr/>
+<h2>14. Economía de Fragmentos de Resonancia</h2>
+<p><strong>Fragmentos de Resonancia</strong> = moneda secundaria para memorizar armas en el Códex.</p>
+<h3>Fuentes</h3>
+<ul><li>Jefes cósmicos (primera derrota + repetible).</li><li>Eventos cósmicos (minerales).</li><li>El Testigo (NPC) vende algunos.</li></ul>
+<h3>Total farmeable</h3>
+<ul><li><strong>533</strong> de primera derrota de todos los jefes.</li><li><strong>84</strong> repetible por kill.</li><li><strong>~61%</strong> del códex completo con una pasada de jefes.</li></ul>
+<h3>Slots de Runa por nivel</h3>
+<table><thead><tr><th>Nivel del arma</th><th>Slots de Runa</th></tr></thead><tbody><tr><td>< 50</td><td>0</td></tr><tr><td>50–74</td><td>1</td></tr><tr><td>75–99</td><td>2</td></tr><tr><td>100–124</td><td>3</td></tr><tr><td>125–149</td><td>4</td></tr><tr><td>150+</td><td>5</td></tr></tbody></table>
+<hr/>
+<h2>15. NPCs</h2>
+<h3>El Testigo</h3>
+<ul><li>Entidad cósmica errante que observa tu progreso.</li><li><strong>No hostil</strong> por defecto; narra lore mientras subes de nivel.</li><li>Vende Fragmentos de Resonancia y Runas de Memoria.</li><li>Si lo atacas → superboss opcional de 3 fases (drop cosmético "Ojo del Testigo").</li></ul>
+<hr/>
+<h2>16. Calidad de vida y configuración</h2>
+<ul><li><strong>Integración con Boss Checklist</strong> y <strong>Recipe Browser</strong>.</li><li>Opciones de configuración:</li><li>Desactivar nivel infinito (fijar tope).</li><li>Ajustar multiplicador de XP (0.5x – 5x).</li><li>Desactivar eventos cósmicos.</li><li>Cambiar la tecla del árbol de habilidades.</li><li>Elegir seed manual del árbol procedural.</li><li><strong>Multijugador-friendly</strong>: cada jugador tiene su fragmento; bonos de resonancia de grupo.</li></ul>
+<hr/>
+<h2>17. Compatibilidad con mods</h2>
+<ul><li><strong>Calamity Mod</strong>: el códex incluye armas de Calamity si está cargado.</li><li><strong>Thorium</strong>: lo mismo (incluye las clases Bard y Healer de Thorium como sub-ramas optativas).</li><li><strong>Fargo's Souls</strong>: integración con el mod de Souls.</li><li><strong>Boss Checklist</strong>: registro de jefes.</li><li><strong>Recipe Browser</strong>: recetas visibles.</li></ul>
+<hr/>
+<h2>18. Identidad visual y audio</h2>
+<h3>Paleta de colores</h3>
+<ul><li><strong>Fondo</strong>: espacio profundo (azul-negro <code>oklch(0.13 0.025 280)</code>).</li><li><strong>Primario (starlight gold)</strong>: <code>#f5c451</code> — para acentos de Distancia y UI.</li><li><strong>Acento (violeta arcano)</strong>: <code>#b388ff</code> — para Artes Mágicas.</li><li><strong>Solar (cuerpo a cuerpo)</strong>: <code>#ff9a3c</code>.</li><li><strong>Vacío teal</strong>: <code>#3dd6c4</code>.</li></ul>
+<h3>Tipografía</h3>
+<ul><li>UI del juego: fuente pixel-art consistente con Terraria.</li><li>Web showcase: Geist Sans + Geist Mono.</li></ul>
+<h3>Audio</h3>
+<ul><li>Música ambiental del Sagrario Hueco (tono bajo, reverberante).</li><li>Música de jefe Aethon (5 pistas, una por fase, escalando en intensidad).</li><li>SFX de absorción de memoria (campana cósmica).</li></ul>
+<hr/>
+<h2>📌 Resumen de cambios vs. versión anterior</h2>
+<table><thead><tr><th>Aspecto</th><th>Antes (v1)</th><th>Ahora (v2)</th></tr></thead><tbody><tr><td>Armas</td><td>4 fijas (arco, espada, cañón, libro)</td><td>3 ramas principales adaptables</td></tr><tr><td>Cañón</td><td>Era arma separada</td><td>Se fusiona en rama de Distancia (sub-forma munición)</td></tr><tr><td>Mago + Invocador</td><td>Separados</td><td><strong>Fusionados en Artes Mágicas</strong></td></tr><tr><td>Árboles</td><td>6 ramas × 4 armas</td><td>6 ramas (Distancia/Melee) + 7 ramas (Artes Mágicas)</td></tr><tr><td>Códex</td><td>64 armas (16 × 4 clases)</td><td>56 armas (12 + 16 + 16 + 12) organizadas por rama</td></tr><tr><td>Elección de arma</td><td>Al bondéate al fragmento</td><td>Al desarrollar la primera rama en combate</td></tr><tr><td>Cambio de rama</td><td>No posible</td><td>Posible con Fragmentos de Resonancia</td></tr></tbody></table>
+<p><div style="page-break-after:always"></div></p>
+<h1>📦 ROADMAP DE IMPLEMENTACIÓN (Anexo)</h1>
+<h1>🛠️ Roadmap de Implementación del Mod — "Aethon, la Luz Primordial"</h1>
+<blockquote>Guía completa para crear el mod desde cero en tModLoader (C#) Idioma: Español · Basado en la documentación de tModLoader v2026.06</blockquote>
+<hr/>
+<h2>📑 Índice</h2>
+<ol><li>[Requisitos previos y entorno](#1-requisitos-previos-y-entorno)</li><li>[Arquitectura del proyecto C#](#2-arquitectura-del-proyecto-c)</li><li>[Fases de desarrollo (orden recomendado)](#3-fases-de-desarrollo-orden-recomendado)</li><li>[Lista completa de archivos a crear](#4-lista-completa-de-archivos-a-crear)</li><li>[Dependencias y APIs de tModLoader clave](#5-dependencias-y-apis-de-tmodloader-clave)</li><li>[Estimación de esfuerzo](#6-estimación-de-esfuerzo)</li><li>[Riesgos y mitigaciones](#7-riesgos-y-mitigaciones)</li></ol>
+<hr/>
+<h2>1. Requisitos previos y entorno</h2>
+<h3>Software necesario</h3>
+<ul><li><strong>.NET SDK 8.0</strong> (o el que requiera la versión de tModLoader).</li><li><strong>tModLoader</strong> instalado vía Steam (rama <code>1.4-stable</code> o <code>preview</code>).</li><li><strong>Visual Studio 2022</strong> o <strong>JetBrains Rider</strong> (recomendado) o <strong>VS Code</strong> con extensión C#.</li><li><strong>Git</strong> para control de versiones.</li><li><strong>GIMP / Aseprite / Paint.NET</strong> para sprites pixel-art.</li></ul>
+<h3>Conocimientos requeridos</h3>
+<ul><li><strong>C# intermedio</strong> (clases, herencia, eventos, LINQ).</li><li>Conceptos de <strong>Terraria modding</strong> (items, NPCs, projectiles, buffs).</li><li>Estructura del <strong>tModLoader API</strong> (ver §5).</li></ul>
+<h3>Configuración inicial</h3>
+<ol><li>Instalar tModLoader desde Steam.</li><li>Lanzar tModLoader una vez para generar las carpetas de mods.</li><li>Usar el <strong>tModLoader Example Mod</strong> como referencia (viene con el instalador).</li><li>Crear el esqueleto del mod con la plantilla <code>mod build</code> del tModLoader.</li></ol>
+<hr/>
+<h2>2. Arquitectura del proyecto C#</h2>
+<p>``<code> AethonMod/ ├── build.txt                  # Metadatos del mod (nombre, versión, autor) ├── description.txt           # Descripción para el navegador de mods ├── icon.png                   # Icono del mod (80×80) │ ├── Content/ │   ├── Items/ │   │   ├── GenesisShard.cs          # El item fragmento principal │   │   ├── ResonanceShard.cs       # Moneda secundaria │   │   └── MemoryRune.cs           # Item runa memorizada │   │ │   ├── Weapons/ │   │   ├── LuminaStarbow.cs        # Arma de distancia (arco) │   │   ├── SolbrandEdge.cs         # Arma cuerpo a cuerpo (espada) │   │   ├── GrimoireEternal.cs      # Arma de artes mágicas (grimorio) │   │   └── Projectiles/ │   │       ├── StarlightArrow.cs │   │       ├── DawnSlash.cs │   │       ├── ArcaneBolt.cs │   │       └── StellarMinion.cs │   │ │   ├── NPCs/ │   │   ├── AethonBoss.cs            # Jefe final │   │   ├── AethonBossPhase*.cs     # Una clase por fase (5) │   │   ├── EchoBlade.cs            # Eco del primer portador │   │   ├── EchoArcher.cs           # Eco de la arquera estelar │   │   ├── TheWitness.cs           # NPC/Testigo (hostil opcional) │   │   ├── RiftKeeper.cs           # Guardián del rift │   │   ├── HollowTitan.cs          # Mini-jefe del Sagrario │   │   └── Mobs/ │   │       ├── HollowCrystal.cs    # Mob del bioma │   │       └── RuneSentinel.cs      # Mob del bioma │   │ │   ├── Biomes/ │   │   ├── HollowSanctumBiome.cs   # ModBiome │   │   └── HollowSanctumPlayer.cs  # ModPlayer (efectos del bioma) │   │ │   ├── Tiles/ │   │   ├── AncientAltar.cs          # Altar del fragmento (ModTile) │   │   ├── AethoniteOre.cs          # Mineral raro │   │   └── HollowCrystal.cs        # Cristal decorativo │   │ │   ├── Buffs/ │   │   ├── StarMarked.cs           # Marca del cazador │   │   ├── SolarBurn.cs            # Quemadura solar │   │   └── ManaShield.cs           # Escudo de maná │   │ │   ├── DamageClasses/ │   │   └── StellarDamage.cs        # Clase de daño personalizada (opcional) │   │ │   ├── UI/ │   │   ├── SkillTreeUI.cs          # Estado UI del árbol │   │   ├── SkillTreePanel.cs       # Panel principal │   │   ├── SkillNodeElement.cs     # Botón de nodo │   │   ├── MemoryCodexUI.cs        # Códex de absorción │   │   └── ProgressionBarUI.cs     # Barra de XP │   │ │   ├── Systems/ │   │   ├── ShardLevelSystem.cs     # ModSystem — lógica de niveles/XP │   │   ├── CosmicEventSystem.cs    # ModSystem — eventos por nivel │   │   └── BuildShareSystem.cs     # Importar/exportar builds │   │ │   ├── Players/ │   │   └── ShardPlayer.cs          # ModPlayer — datos del jugador + fragmento │   │ │   ├── Globals/ │   │   ├── GlobalNPCXP.cs          # GlobalNPC — otorgar XP al morir │   │   └── GlobalItemMemory.cs    # GlobalItem — registrar armas absorbibles │   │ │   ├── Items/Placeables/ │   │   ├── AncientAltarItem.cs     # Item-colocable del altar │   │   └── AethoniteOreItem.cs │   │ │   └── Prefixes/ │       └── StellarPrefix.cs       # Prefijo personalizado (opcional) │ ├── UI/                              # Assets de UI (PNG) │   ├── SkillTreeBackground.png │   ├── NodeCommon.png │   ├── NodeRare.png │   └── NodeLegendary.png │ ├── Textures/                        # Sprites (PNG) │   ├── Items/ │   │   ├── GenesisShard.png │   │   ├── ResonanceShard.png │   │   └── MemoryRune.png │   ├── Weapons/ │   │   ├── LuminaStarbow.png │   │   ├── SolbrandEdge.png │   │   └── GrimoireEternal.png │   ├── NPCs/ │   │   ├── AethonBoss.png │   │   └── ... │   └── Projectiles/ │       └── ... │ └── Localization/                    # Traducciones (ES + EN)     ├── en-US_Mods.AethonMod.hjson     └── es-ES_Mods.AethonMod.hjson </code>``</p>
+<hr/>
+<h2>3. Fases de desarrollo (orden recomendado)</h2>
+<blockquote>⚠️ <strong>Orden crítico</strong>: cada fase depende de la anterior. No saltes fases.</blockquote>
+<h3>🟢 Fase 0 — Esqueleto y compilación (1–2 días)</h3>
+<p><strong>Objetivo</strong>: el mod compila y aparece en tModLoader sin errores.</p>
+<ul><li>[ ] Crear <code>build.txt</code> con metadatos:</li></ul>
+<p>  ``<code>   author = TuNombre   version = 0.1   displayName = Aethon, la Luz Primordial   </code>``</p>
+<ul><li>[ ] Crear <code>description.txt</code> (1 párrafo).</li><li>[ ] Crear <code>icon.png</code> (80×80).</li><li>[ ] Crear clase <code>AethonMod : Mod</code> (punto de entrada).</li><li>[ ] Compilar con <code>tModLoader -build</code>.</li><li>[ ] Verificar que aparece en el navegador de mods.</li></ul>
+<h3>🟡 Fase 1 — Item básico "Fragmento Génesis" (2–3 días)</h3>
+<p><strong>Objetivo</strong>: el jugador puede obtener el item y usarlo.</p>
+<ul><li>[ ] Crear <code>GenesisShard.cs : ModItem</code> con:</li><li><code>SetDefaults()</code>: daño 10, useTime 20, autoReuse.</li><li><code>SetStaticDefaults()</code>: tooltip, rareza.</li><li>Sprite placeholder (cuadrado brillante).</li><li>[ ] Añadir receta de debug (1 Wood → Genesis Shard) para testear.</li><li>[ ] Implementar <code>UseItem()</code> que determine la rama (detectar daño infligido).</li><li>[ ] Crear <code>ShardPlayer.cs : ModPlayer</code> con:</li><li><code>int shardLevel = 1</code></li><li><code>int shardXP = 0</code></li><li><code>WeaponBranch activeBranch</code> (enum: None/Distance/Melee/Magic)</li><li><code>SetDefaults()</code>, <code>SaveData()</code>, <code>LoadData()</code>.</li><li>[ ] Implementar barra de XP básica en UI.</li></ul>
+<h3>🟡 Fase 2 — Sistema de XP y niveles (2–3 días)</h3>
+<p><strong>Objetivo</strong>: el fragmento sube de nivel al matar enemigos.</p>
+<ul><li>[ ] Crear <code>GlobalNPCXP.cs : GlobalNPC</code> con:</li><li><code>OnKill()</code>: calcular XP por tier del NPC, dar al jugador.</li><li>Tabla de XP por tipo de NPC (NPC.type → XP).</li><li>[ ] Crear <code>ShardLevelSystem.cs : ModSystem</code> con:</li><li>Función <code>GainXP(Player player, int amount)</code>.</li><li>Función <code>CheckLevelUp(Player player)</code>.</li><li>Tabla de puntos por nivel (1-10 → +1, etc.).</li><li>[ ] Implementar evolución visual del item por nivel (cambiar sprite).</li><li>[ ] Añadir notificación de nivel subido (texto flotante).</li></ul>
+<h3>🟠 Fase 3 — Transformación por rama (3–4 días)</h3>
+<p><strong>Objetivo</strong>: el fragmento se transforma en el arma de la rama elegida.</p>
+<ul><li>[ ] Definir <code>enum WeaponBranch { None, Distance, Melee, Magic }</code>.</li><li>[ ] En <code>GenesisShard.UseItem()</code>:</li><li>Detectar el <code>DamageClass</code> del último daño infligido.</li><li>Tras N kills con la misma clase, fijar <code>activeBranch</code>.</li><li>Reemplazar el item por el arma correspondiente (o cambiar su comportamiento).</li><li>[ ] Crear las 3 clases de arma:</li><li><code>LuminaStarbow.cs</code> (Distancia) — arco que dispara flechas de luz.</li><li><code>SolbrandEdge.cs</code> (Melee) — espada con onda de corte.</li><li><code>GrimoireEternal.cs</code> (Artes Mágicas) — grimorio con bolts mágicos.</li><li>[ ] Crear los proyectiles base de cada arma (4 clases <code>ModProjectile</code>).</li><li>[ ] Implementar daño escalado por nivel (nivel × multiplicador).</li></ul>
+<h3>🟠 Fase 4 — Árbol de habilidades básico (4–5 días)</h3>
+<p><strong>Objetivo</strong>: UI funcional del árbol con nodos asignables.</p>
+<ul><li>[ ] Definir estructuras de datos:</li><li><code>SkillNode</code> (id, nombre, rama, rareza, coste, efecto, prerrequisito).</li><li><code>SkillTree</code> (lista de nodos + aristas).</li><li>Datos de los 3 árboles (Distancia/Melee/Magic) — exportar desde el TS del sitio web.</li><li>[ ] Crear <code>SkillTreeUI.cs : UIState</code> con:</li><li>Panel principal (closable con tecla K).</li><li>Renderizado de nodos como botones.</li><li>Zoom/pan con rueda del ratón.</li><li>[ ] Crear <code>SkillNodeElement.cs : UIElement</code> (botón de nodo):</li><li>Estados: bloqueado / disponible / asignado.</li><li>Click para asignar (respeta prerrequisitos + presupuesto).</li><li>[ ] Persistir nodos asignados en <code>ShardPlayer.SaveData()</code>.</li><li>[ ] Implementar generación procedural (seed → jitter + rarezas).</li></ul>
+<h3>🟠 Fase 5 — Efectos de los nodos (5–7 días)</h3>
+<p><strong>Objetivo</strong>: cada nodo asignado modifica el comportamiento del arma.</p>
+<ul><li>[ ] Implementar 6 ramas × 3 armas = 18 ramas de efectos.</li><li>[ ] Por cada nodo, crear un método que aplique su efecto:</li><li>Ej: <code>ApplyManaPool(player)</code> → +40 maná máximo.</li><li>Ej: <code>ApplySplitShot(projectile)</code> → al impactar, generar 2 proyectiles.</li><li>[ ] Enganchar los efectos en:</li><li><code>ModPlayer.PostUpdate()</code> (pasivos: maná, HP, defensa).</li><li><code>ModItem.UseItem()</code> / <code>Shoot()</code> (proyectiles, alteraciones).</li><li><code>ModProjectile.AI()</code> (homing, split, chain).</li><li><code>GlobalNPC.OnHitByItem()</code> (marcas, quemaduras).</li><li>[ ] Implementar los capstones legendarios (supernova, agujero negro, etc.).</li></ul>
+<h3>🔴 Fase 6 — Bioma Sagrario Hueco (3–4 días)</h3>
+<p><strong>Objetivo</strong>: el bioma se genera y tiene mobs propios.</p>
+<ul><li>[ ] Crear <code>HollowSanctumBiome.cs : ModBiome</code>:</li><li><code>IsBiomeActive()</code>: detectar presencia de cristales del bioma cerca.</li><li>Música, color de fondo, partículas.</li><li>[ ] Crear <code>AncientAltar.cs : ModTile</code> + <code>AncientAltarItem.cs</code> (colocable).</li><li>[ ] Crear <code>AethoniteOre.cs : ModTile</code> (mineral raro).</li><li>[ ] Crear mobs del bioma:</li><li><code>HollowCrystal.cs</code> (cristal flotante hostil).</li><li><code>RuneSentinel.cs</code> (centinela de piedra).</li><li>[ ] Crear <code>HollowTitan.cs : ModNPC</code> (mini-jefe del bioma).</li><li>[ ] Generación del bioma en <code>ModWorld.genAfter()</code> o via <code>WorldGen</code>.</li></ul>
+<h3>🔴 Fase 7 — Jefes cósmicos (4–5 días)</h3>
+<p><strong>Objetivo</strong>: todos los jefes del mod funcionan.</p>
+<ul><li>[ ] <code>RiftKeeper.cs : ModNPC</code> (Guardián del rift).</li><li>[ ] <code>EchoBlade.cs : ModNPC</code> (Eco del primer portador — mimica un árbol de Melee).</li><li>[ ] <code>EchoArcher.cs : ModNPC</code> (Eco de la arquera — mimica un árbol de Distancia).</li><li>[ ] <code>TheWitness.cs : ModNPC</code> (NPC hostil-opcional, 3 fases si atacado).</li><li>[ ] Para cada jefe:</li><li><code>SetDefaults()</code> (HP, daño, AIStyle custom).</li><li><code>AI()</code> (patrones de ataque por fase).</li><li><code>OnKill()</code> (drops: Fragmentos de Resonancia + loot único).</li><li><code>BossHeadSlot()</code> (icono en mapa).</li><li>Música custom.</li><li>[ ] Integrar con <strong>Boss Checklist</strong> (<code>BossChecklistData</code> callback).</li></ul>
+<h3>🔴 Fase 8 — Jefe final Aethon (5–7 días)</h3>
+<p><strong>Objetivo</strong>: la pelea de 5 fases contra Aethon.</p>
+<ul><li>[ ] <code>AethonBoss.cs : ModNPC</code> con máquina de estados de 5 fases.</li><li>[ ] Una clase auxiliar por fase (<code>AethonBossPhase1.cs</code> ... <code>Phase5.cs</code>).</li><li>[ ] Mecánicas por fase:</li><li>F1: espiral de pernos estelares.</li><li>F2: nubes AoE que ciegan + queman; arena se deforma.</li><li>F3: inversión de gravedad cada 8s.</li><li>F4: agujero negro (atracción + adds).</li><li>F5: <strong>Aethon empuña tus runas memorizadas contra ti</strong> (lee las Runas del jugador).</li><li>[ ] Drops: Forma Ascendida (cosmético), acceso a New Game+.</li><li>[ ] Música: 5 pistas (una por fase), escalando intensidad.</li><li>[ ] Arena custom (plataformas que se reforman entre fases).</li></ul>
+<h3>🔴 Fase 9 — Absorción de Lore (Códex de Memoria) (4–5 días)</h3>
+<p><strong>Objetivo</strong>: el capstone funciona — memoriza armas del juego base.</p>
+<ul><li>[ ] Crear <code>MemoryCodexUI.cs : UIState</code> (panel del códex).</li><li>[ ] Crear <code>GlobalItemMemory.cs : GlobalItem</code>:</li><li><code>OnCreate()</code> / <code>SetDefaults()</code>: registrar items absorbibles por clase.</li><li>Construir lista de armas base (12 distancia + 16 melee + 16 magia + 12 invocación).</li><li>[ ] Crear <code>MemoryRune.cs : ModItem</code> (runa equipable).</li><li>[ ] Lógica de memorización:</li><li>UI lista armas → click → consume Fragmentos de Resonancia → crea Runa.</li><li>Runa se equipa en slot (hasta N por nivel del arma).</li><li>[ ] Las Runas activas modifican el comportamiento del arma:</li><li>Ej: memorizar Last Prism → el grimorio dispara rayos convergentes además.</li><li>Implementar via flags en <code>ShardPlayer</code> que los proyectiles leen.</li><li>[ ] Soporte para mods cargados (escanear items de Calamity/Thorium si presentes).</li></ul>
+<h3>🔴 Fase 10 — Eventos cósmicos (2–3 días)</h3>
+<p><strong>Objetivo</strong>: eventos por nivel del fragmento.</p>
+<ul><li>[ ] <code>CosmicEventSystem.cs : ModSystem</code>:</li><li>Verificar nivel del fragmento de cada jugador.</li><li>Trigger eventos: Lluvia de luz estelar (Lv25), extensión del Sagrario (Lv50), Rifts (Lv75), Ecos (Lv100), Despertar (Lv150).</li><li>[ ] Lluvia de luz estelar: <code>ModPlayer.PreUpdate()</code> genera meteoros ambientales.</li><li>[ ] Rifts dimensionales: generar mini-estructuras con loot.</li></ul>
+<h3>🟣 Fase 11 — Economía y NPC Testigo (2 días)</h3>
+<p><strong>Objetivo</strong>: el Testigo vende runas y narra lore.</p>
+<ul><li>[ ] <code>TheWitness.cs</code> (versión NPC): <code>ModNPC</code> no-hostil, vende Fragmentos de Resonancia.</li><li><code>GetChat()</code> muestra texto de lore escalado por nivel del fragmento.</li><li><code>NPCShop</code> con runas y consumibles.</li><li>[ ] Fragmentos de Resonancia como drops de jefes (ya hecho en Fase 7).</li></ul>
+<h3>🟣 Fase 12 — Persistencia y multi-jugador (2–3 días)</h3>
+<p><strong>Objetivo</strong>: el progreso se guarda y funciona en servidor.</p>
+<ul><li>[ ] <code>ShardPlayer.SaveData()</code> / <code>LoadData()</code> (TagCompound).</li><li>[ ] <code>ShardLevelSystem</code> sync en servidor (<code>NetMessage</code>, <code>SendData</code>).</li><li>[ ] Testear en servidor dedicado con 2+ jugadores.</li><li>[ ] Manejar disconnects (no perder progreso).</li></ul>
+<h3>🟣 Fase 13 — Localización ES/EN (1–2 días)</h3>
+<p><strong>Objetivo</strong>: todo el texto traducido.</p>
+<ul><li>[ ] Crear <code>Localization/en-US_Mods.AethonMod.hjson</code> (inglés).</li><li>[ ] Crear <code>Localization/es-ES_Mods.AethonMod.hjson</code> (español).</li><li>[ ] Reemplazar todos los <code>string</code> hardcodeados con <code>Language.GetTextValue("Mods.AethonMod.X")</code>.</li><li>[ ] Testear cambio de idioma en tModLoader.</li></ul>
+<h3>🟣 Fase 14 — Pulido y balance (3–4 días)</h3>
+<p><strong>Objetivo</strong>: el mod es jugable y balanceado.</p>
+<ul><li>[ ] Playtest completo (Pre-Hardmode → Hardmode → Endgame → Aethon).</li><li>[ ] Balance de XP (¿sube muy lento/rápido?).</li><li>[ ] Balance de daño (¿el arma es muy OP?).</li><li>[ ] Balance de jefes (HP, daño, duración de la pelea).</li><li>[ ] Corregir bugs de edge case (muerte del jugador, server crash, etc.).</li><li>[ ] Optimización (pool de proyectiles, reducir allocations).</li></ul>
+<h3>🟣 Fase 15 — Documentación y publicación (1–2 días)</h3>
+<p><strong>Objetivo</strong>: el mod está listo para el Steam Workshop.</p>
+<ul><li>[ ] Escribir <code>description.txt</code> detallado.</li><li>[ ] Crear imágenes de preview (4–6 capturas).</li><li>[ ] Escribir wiki / guía en GitHub.</li><li>[ ] Publicar en Steam Workshop (<code>tModLoader -publish</code>).</li><li>[ ] Anunciar en Reddit (r/Terraria) y Discord de modding.</li></ul>
+<hr/>
+<h2>4. Lista completa de archivos a crear</h2>
+<h3>Items (3)</h3>
+<ol><li><code>GenesisShard.cs</code> — el fragmento principal</li><li><code>ResonanceShard.cs</code> — moneda secundaria</li><li><code>MemoryRune.cs</code> — runa de absorción</li></ol>
+<h3>Armas (3) + Proyectiles (4+)</h3>
+<ol><li><code>LuminaStarbow.cs</code> — arma de distancia</li><li><code>SolbrandEdge.cs</code> — arma cuerpo a cuerpo</li><li><code>GrimoireEternal.cs</code> — arma de artes mágicas</li><li><code>StarlightArrow.cs</code> — proyectil de distancia</li><li><code>DawnSlash.cs</code> — proyectil de melee (onda de corte)</li><li><code>ArcaneBolt.cs</code> — proyectil mágico</li><li><code>StellarMinion.cs</code> — minion de invocación</li></ol>
+<h3>NPCs (7)</h3>
+<ol><li><code>AethonBoss.cs</code> — jefe final (+ 5 clases de fase)</li><li><code>EchoBlade.cs</code></li><li><code>EchoArcher.cs</code></li><li><code>TheWitness.cs</code></li><li><code>RiftKeeper.cs</code></li><li><code>HollowTitan.cs</code></li><li><code>HollowCrystal.cs</code> (mob)</li><li><code>RuneSentinel.cs</code> (mob)</li></ol>
+<h3>Bioma y Tiles (4)</h3>
+<ol><li><code>HollowSanctumBiome.cs</code></li><li><code>AncientAltar.cs</code> (ModTile)</li><li><code>AethoniteOre.cs</code> (ModTile)</li><li><code>HollowCrystalTile.cs</code> (ModTile decorativo)</li></ol>
+<h3>Buffs (3)</h3>
+<ol><li><code>StarMarked.cs</code></li><li><code>SolarBurn.cs</code></li><li><code>ManaShield.cs</code></li></ol>
+<h3>UI (5)</h3>
+<ol><li><code>SkillTreeUI.cs</code></li><li><code>SkillTreePanel.cs</code></li><li><code>SkillNodeElement.cs</code></li><li><code>MemoryCodexUI.cs</code></li><li><code>ProgressionBarUI.cs</code></li></ol>
+<h3>Systems (3)</h3>
+<ol><li><code>ShardLevelSystem.cs</code></li><li><code>CosmicEventSystem.cs</code></li><li><code>BuildShareSystem.cs</code></li></ol>
+<h3>Player + Globals (3)</h3>
+<ol><li><code>ShardPlayer.cs</code> (ModPlayer)</li><li><code>GlobalNPCXP.cs</code> (GlobalNPC)</li><li><code>GlobalItemMemory.cs</code> (GlobalItem)</li></ol>
+<h3>Placeables (2)</h3>
+<ol><li><code>AncientAltarItem.cs</code></li><li><code>AethoniteOreItem.cs</code></li></ol>
+<h3>Localización (2)</h3>
+<ol><li><code>en-US_Mods.AethonMod.hjson</code></li><li><code>es-ES_Mods.AethonMod.hjson</code></li></ol>
+<p><strong>Total: ~40 archivos C# + assets PNG + 2 archivos de localización.</strong></p>
+<hr/>
+<h2>5. Dependencias y APIs de tModLoader clave</h2>
+<p>Basado en el análisis de <code>docs.tmodloader.net/docs/stable/annotated.html</code>:</p>
+<h3>Clases base a heredar</h3>
+<table><thead><tr><th>Funcionalidad</th><th>Clase base de tModLoader</th></tr></thead><tbody><tr><td>Item personalizado</td><td><code>ModItem</code></td></tr><tr><td>Arma</td><td><code>ModItem</code> + <code>DamageClass</code> (Ranged/Melee/Magic/Summon)</td></tr><tr><td>NPC / Jefe</td><td><code>ModNPC</code> + <code>BossHeadSlot</code></td></tr><tr><td>Proyectil</td><td><code>ModProjectile</code></td></tr><tr><td>Buff</td><td><code>ModBuff</code></td></tr><tr><td>Bioma</td><td><code>ModBiome</code></td></tr><tr><td>Tile (bloque)</td><td><code>ModTile</code></td></tr><tr><td>Sistema global</td><td><code>ModSystem</code></td></tr><tr><td>Datos del jugador</td><td><code>ModPlayer</code></td></tr><tr><td>Modificación global de NPCs</td><td><code>GlobalNPC</code></td></tr><tr><td>Modificación global de items</td><td><code>GlobalItem</code></td></tr><tr><td>Daño personalizado</td><td><code>ModDamageClass</code></td></tr><tr><td>UI estado</td><td><code>UIState</code> + <code>UIElement</code></td></tr><tr><td>Prefijo</td><td><code>ModPrefix</code></td></tr><tr><td>Rareza</td><td><code>ModRarity</code></td></tr></tbody></table>
+<h3>APIs clave a usar</h3>
+<ul><li><strong><code>Main.LocalPlayer</code></strong>: acceso al jugador local.</li><li><strong><code>Player.GetModPlayer<T>()</code></strong>: acceder al <code>ShardPlayer</code>.</li><li><strong><code>NPC.lifeMax</code></strong>, <strong><code>NPC.ai[]</code></strong>: controlar jefes.</li><li><strong><code>Projectile.NewProjectile()</code></strong>: spawn de proyectiles.</li><li><strong><code>Item.DamageType</code></strong>: <code>DamageClass.Ranged</code> / <code>Melee</code> / <code>Magic</code> / <code>Summon</code>.</li><li><strong><code>Language.GetTextValue()</code></strong>: localización.</li><li><strong><code>ModContent.GetInstance<T>()</code></strong>: singleton del mod.</li><li><strong><code>NetMessage.SendData()</code></strong>: sync multi-jugador.</li></ul>
+<h3>Patrones recomendados</h3>
+<ol><li><strong>Singleton pattern</strong> para sistemas (<code>ShardLevelSystem.Instance</code>).</li><li><strong>Data-driven</strong> para nodos del árbol (archivo JSON cargado en <code>Load()</code>).</li><li><strong>Object pooling</strong> para proyectiles (evitar lag con muchos proyectiles).</li><li><strong>TagCompound</strong> para guardar/cargar progreso del jugador.</li></ol>
+<hr/>
+<h2>6. Estimación de esfuerzo</h2>
+<table><thead><tr><th>Fase</th><th>Días</th><th>Notas</th></tr></thead><tbody><tr><td>0 — Esqueleto</td><td>1–2</td><td>Rápido, plantilla</td></tr><tr><td>1 — Item básico</td><td>2–3</td><td>UI de barra de XP</td></tr><tr><td>2 — Sistema de XP</td><td>2–3</td><td>GlobalNPC + ModSystem</td></tr><tr><td>3 — Transformación</td><td>3–4</td><td>Detección de clase de daño</td></tr><tr><td>4 — Árbol de habilidades</td><td>4–5</td><td>UIState complejo</td></tr><tr><td>5 — Efectos de nodos</td><td>5–7</td><td>El grueso del trabajo</td></tr><tr><td>6 — Bioma</td><td>3–4</td><td>ModBiome + ModTile</td></tr><tr><td>7 — Jefes cósmicos</td><td>4–5</td><td>5 NPCs con AI custom</td></tr><tr><td>8 — Aethon jefe final</td><td>5–7</td><td>5 fases + arena</td></tr><tr><td>9 — Absorción de Lore</td><td>4–5</td><td>Códex + Runas</td></tr><tr><td>10 — Eventos cósmicos</td><td>2–3</td><td>ModSystem</td></tr><tr><td>11 — NPC Testigo</td><td>2</td><td>NPCShop + diálogo</td></tr><tr><td>12 — Persistencia/MP</td><td>2–3</td><td>NetMessage</td></tr><tr><td>13 — Localización</td><td>1–2</td><td>hjson ES/EN</td></tr><tr><td>14 — Pulido/balance</td><td>3–4</td><td>Playtest</td></tr><tr><td>15 — Publicación</td><td>1–2</td><td>Steam Workshop</td></tr><tr><td><strong>TOTAL</strong></td><td><strong>44–61 días</strong></td><td><strong>~2–3 meses a tiempo parcial</strong></td></tr></tbody></table>
+<hr/>
+<h2>7. Riesgos y mitigaciones</h2>
+<table><thead><tr><th>Riesgo</th><th>Impacto</th><th>Mitigación</th></tr></thead><tbody><tr><td>UI del árbol muy compleja</td><td>Alto</td><td>Reusar patrones del Example Mod; prototipar en web primero</td></tr><tr><td>Performance con muchos proyectiles</td><td>Medio</td><td>Object pooling; limitar partículas</td></tr><tr><td>Balance roto (arma muy OP)</td><td>Medio</td><td>Config options; playtest extenso</td></tr><tr><td>Incompatibilidad con Calamity/Thorium</td><td>Bajo</td><td>Detectar mods via <code>ModLoader.TryGetMod()</code></td></tr><tr><td>Sync multi-jugador roto</td><td>Alto</td><td>Testear en servidor dedicado desde Fase 12</td></tr><tr><td>Update de tModLoader rompe el mod</td><td>Medio</td><td>Pin a versión estable; seguir changelog</td></tr><tr><td>Assets pixel-art requieren skill</td><td>Medio</td><td>Usar placeholders; contratar artista si presupuesto</td></tr><tr><td>Capstone de absorción muy complejo</td><td>Alto</td><td>Implementar subconjunto primero (10 armas base, no 56)</td></tr></tbody></table>
+<hr/>
+<h2>📋 Resumen ejecutivo</h2>
+<ul><li><strong>~40 archivos C#</strong> + assets + localización.</li><li><strong>15 fases</strong> secuenciales (~2–3 meses a tiempo parcial).</li><li><strong>Fase crítica</strong>: Fase 5 (efectos de nodos) es el grueso del trabajo.</li><li><strong>Fase más arriesgada</strong>: Fase 8 (Aethon) y Fase 9 (absorción) por complejidad.</li><li><strong>Recomendación</strong>: empezar por Fase 0–3 para tener un MVP jugable (item que sube de nivel y se transforma), luego iterar.</li></ul>
+<blockquote><strong>Próximo paso</strong>: cuando el usuario dé luz verde, crear el proyecto C# esqueleto (Fase 0) y empezar la implementación.</blockquote>
+
+</body>
+</html>
