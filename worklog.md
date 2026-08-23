@@ -475,3 +475,77 @@ Task: Assess project status, QA test, then add new features + improve styling.
 - **Tooltips on skill-tree nodes**: show a small hover tooltip with the node's effect text
   (currently the effect only shows in the side inspector after clicking).
 - **Theme toggle**: the site is dark-only; a light "dawn" variant could be a nice touch.
+
+---
+Task ID: 5 (webDevReview cron round 4)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 4 prior rounds (build share/randomize/import, TTS lore+boss, shard
+  economy, starfield perf+a11y, keyboard a11y, back-to-top, focus-visible rings, reduced-motion).
+  ESLint clean, no errors, no mobile overflow. All prior features verified working.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Hover tooltips on skill-tree nodes** (`skill-tree.tsx` — new `NodeTooltip` component):
+   - Floating HTML overlay that appears when a node is hovered OR keyboard-focused.
+   - Positioned using the node's normalized SVG coords (px/720, py/620) as percentages, so it
+     tracks the SVG box regardless of render size.
+   - Auto-flips to the left/right and top/bottom of the node based on canvas position to
+     avoid overflow.
+   - Shows: rarity badge, "✓ asignado" / "bloqueado" status, node name, effect text, cost,
+     and prerequisite (colored green if met, red if not).
+   - Animated entrance/exit via Framer Motion; glass-panel with weapon-accent border + glow.
+   - Verified: hovering "Mana Pool" shows "Common, Mana Pool, +40 max mana, costo 1 pts".
+2. **Codex build share** (`build-share.ts` v2 codec + `memory-codex.tsx` + `skill-tree.tsx`):
+   - Extended the build-share codec to a **v2 format**: `#v2.<w>.<seed>.<nodes>.<codexIndices>`
+     that includes the Memory Codex rune loadout. v1 hashes (skill-tree only) still decode
+     for backward compatibility (codexIndices defaults to []).
+   - Memory Codex now restores its rune loadout from the URL hash on mount (SSR-safe via
+     mount effect + hydrated flag), and persists the codex segment to the hash on change.
+   - The skill-tree persist/share effects now READ the existing codex segment from the hash
+     and re-emit it, so the two features coexist without clobbering each other.
+   - Added `codexIdsFromIndices()` helper to resolve codex indices → IDs for a weapon class.
+   - Verified round-trip: memorize Magic Dagger + Demon Scythe → hash becomes
+     `#v2.m.115..0,1` → reload → codex restores 2 rune slots filled correctly.
+   - Added a "✓ loadout incluido en el enlace compartido" hint in the codex panel when
+     weapons are memorized, so users know their loadout is being shared.
+
+### Styling Improvements
+3. NodeTooltip: glass-panel with weapon-accent border, glow shadow, backdrop blur; rarity
+   badge + status badges with semantic colors (green=allocated, red=blocked).
+4. Codex "how it works" box: adds a share-status footer when loadout is non-empty.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Hover tooltip**: appears on hover + keyboard focus, shows node details, well-positioned.
+  - **Codex share round-trip**: memorize 2 → hash `#v2.m.115..0,1` → reload → 2 slots
+    restored (Magic Dagger + Demon Scythe) ✓.
+  - **Skill-tree + codex coexistence**: both persist to the same hash without clobbering.
+- VLM verdicts:
+  - Tooltip: "highly readable; well-positioned; no major issues."
+  - Canvas: "constellation clearly visible; all 4 control buttons visible; no major issues."
+
+## Unresolved Issues / Risks
+- None blocking. The two persist effects (skill-tree + codex) both read-then-write the hash,
+  so there's a theoretical race if both fire in the same tick — but in practice they fire on
+  different user actions (node click vs codex memorize), so no conflict observed.
+
+## Priority Recommendations for Next Phase
+- **Pre-warm TTS cache** (deferred from prior recs): on requestIdleCallback, generate audio
+  for the first lore + boss entries so first-click is instant. Gate behind a setting to
+  avoid unnecessary upstream calls.
+- **Build comparison/diff**: let users save 2 builds and highlight which nodes differ.
+- **Theme toggle (dawn variant)**: the site is dark-only; a light variant could be a nice
+  touch. Would require theme-aware color tokens in globals.css.
+- **Codex class sync**: when a shared build is loaded via the skill-tree import, the codex
+  class should auto-switch to match the imported weapon (currently only restores if the
+  codex segment's weapon matches).

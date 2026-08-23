@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CODEX,
@@ -10,6 +10,12 @@ import {
   type CodexWeapon,
   type WeaponId,
 } from "@/lib/mod-data";
+import {
+  codexIdsFromIndices,
+  decodeBuild,
+  encodeBuild,
+  writeHashBuild,
+} from "@/lib/build-share";
 import { SectionHeading } from "./lore-section";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +28,81 @@ const TIER_META: Record<
   endgame: { label: "Endgame", color: "#b388ff" },
 };
 
+function readInitialCodex(): {
+  cls: WeaponId;
+  memorized: Set<string>;
+} {
+  if (typeof window === "undefined") {
+    return { cls: "book", memorized: new Set() };
+  }
+  const hash = window.location.hash;
+  // Try to decode against every weapon to find the matching shared build.
+  for (const w of WEAPONS) {
+    const ids = w.skillTree.map((n) => n.id);
+    const shared = decodeBuild(hash, ids);
+    if (shared && shared.codexIndices.length > 0) {
+      const codexIds = codexIdsFromIndices(shared.weaponId, shared.codexIndices);
+      return { cls: shared.weaponId, memorized: new Set(codexIds) };
+    }
+  }
+  return { cls: "book", memorized: new Set() };
+}
+
 export function MemoryCodex() {
   const [cls, setCls] = useState<WeaponId>("book");
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<"all" | CodexWeapon["tier"]>("all");
   const [level, setLevel] = useState(100);
   const [memorized, setMemorized] = useState<Set<string>>(new Set());
+  const [hydrated, setHydrated] = useState(false);
+
+  // Restore codex loadout from URL hash on mount (client-only, SSR-safe).
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const restored = readInitialCodex();
+    setCls(restored.cls);
+    setMemorized(restored.memorized);
+    setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  // Persist codex loadout to URL hash (merging with the skill-tree state
+  // already in the hash). Only after hydration to avoid clobbering the
+  // restored hash with empty defaults pre-hydration.
+  useEffect(() => {
+    if (!hydrated) return;
+    const hash = window.location.hash;
+    // Decode the existing skill-tree state from the hash so we preserve it.
+    let skillWeapon: WeaponId = cls;
+    let skillSeed = 1337;
+    let skillNodeIds: string[] = [];
+    for (const w of WEAPONS) {
+      const ids = w.skillTree.map((n) => n.id);
+      const shared = decodeBuild(hash, ids);
+      if (shared) {
+        skillWeapon = shared.weaponId;
+        skillSeed = shared.seed;
+        skillNodeIds = shared.nodeIndices.map((i) => ids[i]).filter(Boolean);
+        break;
+      }
+    }
+    // If the skill-tree weapon differs from the codex class, we keep them in
+    // sync: the codex class follows the skill-tree weapon when a shared build
+    // is loaded. Otherwise the codex class is authoritative.
+    const effectiveCls = hash ? skillWeapon : cls;
+    const allNodeIds = WEAPONS.find((w) => w.id === effectiveCls)!.skillTree.map(
+      (n) => n.id,
+    );
+    const codexIds = [...memorized];
+    const enc = encodeBuild(
+      effectiveCls,
+      skillSeed,
+      skillNodeIds,
+      allNodeIds,
+      codexIds,
+    );
+    writeHashBuild(enc);
+  }, [memorized, cls, level, hydrated]);
 
   const slots = runeSlotsForLevel(level);
   const list = useMemo(() => {
@@ -425,6 +500,11 @@ export function MemoryCodex() {
                 <li>• Las Runes equipadas se manifiestan simultáneamente.</li>
                 <li>• Resonancia Shards se obtienen de jefes cósmicos.</li>
               </ul>
+              {memorized.size > 0 && (
+                <p className="mt-3 border-t border-border/40 pt-2 font-mono text-[10px] uppercase tracking-wider text-primary/80">
+                  ✓ loadout incluido en el enlace compartido
+                </p>
+              )}
             </div>
           </div>
         </div>

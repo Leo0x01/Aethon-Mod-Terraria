@@ -9,6 +9,7 @@ import {
   type WeaponId,
 } from "@/lib/mod-data";
 import {
+  codexIdsFromIndices,
   copyShareUrl,
   decodeBuild,
   encodeBuild,
@@ -126,6 +127,8 @@ export function SkillTreeView() {
   const [allocated, setAllocated] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  // Hovered node for the floating tooltip overlay (HTML, so text wraps nicely).
+  const [hovered, setHovered] = useState<string | null>(null);
 
   const weapon = WEAPONS.find((w) => w.id === weaponId)!;
 
@@ -198,10 +201,30 @@ export function SkillTreeView() {
   }, []);
 
   // Persist current build to URL hash — but only AFTER hydration so we don't
-  // overwrite the shared hash we just restored with empty defaults.
+  // overwrite the shared hash we just restored with empty defaults. Preserves
+  // any codex loadout already in the hash so the two features coexist.
   useEffect(() => {
     if (!hydrated) return;
-    const enc = encodeBuild(weaponId, seed, [...allocated], allNodeIds);
+    // Read existing codex segment from the hash (if any) to preserve it.
+    let codexIds: string[] | undefined;
+    const existingHash =
+      typeof window !== "undefined" ? window.location.hash : "";
+    if (existingHash) {
+      const shared = decodeBuild(existingHash, allNodeIds);
+      if (shared && shared.codexIndices.length > 0) {
+        codexIds = codexIdsFromIndices(
+          shared.weaponId,
+          shared.codexIndices,
+        );
+      }
+    }
+    const enc = encodeBuild(
+      weaponId,
+      seed,
+      [...allocated],
+      allNodeIds,
+      codexIds,
+    );
     writeHashBuild(enc);
   }, [allocated, weaponId, seed, allNodeIds, hydrated]);
 
@@ -209,7 +232,22 @@ export function SkillTreeView() {
     "idle" | "copied" | "error"
   >("idle");
   const onShare = async () => {
-    const enc = encodeBuild(weaponId, seed, [...allocated], allNodeIds);
+    // Preserve codex loadout from the existing hash so sharing includes it.
+    let codexIds: string[] | undefined;
+    const existingHash = window.location.hash;
+    if (existingHash) {
+      const shared = decodeBuild(existingHash, allNodeIds);
+      if (shared && shared.codexIndices.length > 0) {
+        codexIds = codexIdsFromIndices(shared.weaponId, shared.codexIndices);
+      }
+    }
+    const enc = encodeBuild(
+      weaponId,
+      seed,
+      [...allocated],
+      allNodeIds,
+      codexIds,
+    );
     writeHashBuild(enc);
     const ok = await copyShareUrl(enc);
     setShareStatus(ok ? "copied" : "error");
@@ -540,6 +578,10 @@ export function SkillTreeView() {
                     key={n.id}
                     transform={`translate(${n.px},${n.py})`}
                     onClick={() => toggle(n)}
+                    onMouseEnter={() => setHovered(n.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    onFocus={() => setHovered(n.id)}
+                    onBlur={() => setHovered(null)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -592,6 +634,15 @@ export function SkillTreeView() {
                 );
               })}
             </svg>
+
+            {/* Hover tooltip (HTML overlay positioned over the hovered node) */}
+            <NodeTooltip
+              node={placed.find((p) => p.id === hovered) ?? null}
+              accent={weapon.accent}
+              accentSoft={weapon.accentSoft}
+              allocated={allocated}
+              blocked={(n) => !allocated.has(n.id) && !canAllocate(n)}
+            />
 
             {/* legend */}
             <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 border-t border-border/40 px-4 py-2.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
@@ -910,5 +961,101 @@ function RarityPip({
       </span>
       <span className="tabular-nums text-foreground">{count}</span>
     </span>
+  );
+}
+
+/**
+ * Floating HTML tooltip that appears over the hovered skill-tree node.
+ * Positioned using the node's normalized SVG coords (px/720, py/620) as
+ * percentages, so it tracks the SVG box regardless of render size.
+ */
+function NodeTooltip({
+  node,
+  accent,
+  accentSoft,
+  allocated,
+  blocked,
+}: {
+  node: PlacedNode | null;
+  accent: string;
+  accentSoft: string;
+  allocated: Set<string>;
+  blocked: (n: PlacedNode) => boolean;
+}) {
+  if (!node) return null;
+  const leftPct = (node.px / 720) * 100;
+  const topPct = (node.py / 620) * 100;
+  const isAllocated = allocated.has(node.id);
+  const isBlocked = blocked(node);
+  const rs = RARITY_STYLE[node.rarity];
+  // Flip the tooltip to the left/right of the node depending on which side
+  // of the canvas it's on, so it doesn't overflow the container.
+  const isRight = leftPct > 50;
+  const isBottom = topPct > 50;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.15 }}
+        className="pointer-events-none absolute z-30 w-56"
+        style={{
+          left: `${leftPct}%`,
+          top: `${topPct}%`,
+          transform: `translate(${isRight ? "-110%" : "10%"}, ${isBottom ? "-110%" : "10%"})`,
+        }}
+      >
+        <div
+          className="rounded-xl border p-3 shadow-2xl backdrop-blur-md"
+          style={{
+            borderColor: `${accent}66`,
+            background: "oklch(0.16 0.035 285 / 92%)",
+            boxShadow: `0 8px 32px -8px ${accent}44, 0 0 0 1px ${accent}33`,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="rounded-full px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider"
+              style={{ background: accentSoft, color: accent }}
+            >
+              {rs.label}
+            </span>
+            {isAllocated && (
+              <span className="rounded-full bg-primary/20 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-primary">
+                ✓ asignado
+              </span>
+            )}
+            {isBlocked && !isAllocated && (
+              <span className="rounded-full bg-destructive/20 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-destructive">
+                bloqueado
+              </span>
+            )}
+          </div>
+          <h4 className="mt-1.5 text-sm font-semibold text-foreground">
+            {node.name}
+          </h4>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+            {node.effect}
+          </p>
+          <div className="mt-2 flex items-center justify-between border-t border-border/40 pt-1.5 font-mono text-[10px] text-muted-foreground">
+            <span>
+              costo{" "}
+              <span className="font-semibold text-primary">{node.cost} pts</span>
+            </span>
+            {node.prereq && (
+              <span
+                className={
+                  allocated.has(node.prereq) ? "text-primary" : "text-destructive"
+                }
+              >
+                req: {node.prereq.replace(/-\d+$/, "")}
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
