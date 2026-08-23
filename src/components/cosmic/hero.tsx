@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { WEAPONS } from "@/lib/mod-data";
 
 export function Hero() {
@@ -10,14 +16,14 @@ export function Hero() {
       id="top"
       className="relative flex min-h-screen items-center overflow-hidden pt-24 pb-16"
     >
-      {/* orbiting rings */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-0 -translate-x-1/2 -translate-y-1/2">
+      {/* orbiting rings (hidden on mobile to avoid overflow) */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-0 hidden -translate-x-1/2 -translate-y-1/2 sm:block">
         <div className="animate-orbit h-[520px] w-[520px] rounded-full border border-primary/10 sm:h-[760px] sm:w-[760px]" />
         <div className="animate-orbit-rev absolute inset-0 m-auto h-[420px] w-[420px] rounded-full border border-accent/10 sm:h-[620px] sm:w-[620px]" />
         <div className="animate-orbit absolute inset-0 m-auto h-[320px] w-[320px] rounded-full border border-primary/10 sm:h-[460px] sm:w-[460px]" />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
         {/* LEFT: copy */}
         <div>
           <motion.span
@@ -108,40 +114,85 @@ export function Hero() {
         </div>
 
         {/* RIGHT: entity image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.1 }}
-          className="relative mx-auto aspect-square w-full max-w-md"
-        >
-          <div className="absolute inset-0 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute inset-0 animate-pulse-glow rounded-full bg-accent/15 blur-2xl" />
-          <Image
-            src="/cosmic/entity.png"
-            alt="Aethon, the Primordial Light — cosmic entity"
-            fill
-            priority
-            sizes="(max-width: 768px) 90vw, 480px"
-            className="relative animate-float-slow rounded-[2rem] object-cover"
-          />
-          {/* floating weapon chips */}
-          <div className="absolute -left-2 top-8 hidden rotate-[-8deg] sm:block">
-            <WeaponChip id="bow" />
-          </div>
-          <div className="absolute -right-2 top-1/3 hidden rotate-[6deg] sm:block">
-            <WeaponChip id="book" />
-          </div>
-          <div className="absolute bottom-6 left-6 hidden rotate-[4deg] sm:block">
-            <WeaponChip id="sword" />
-          </div>
-          <div className="absolute bottom-10 right-4 hidden rotate-[-5deg] sm:block">
-            <WeaponChip id="cannon" />
-          </div>
-        </motion.div>
+        <HeroEntity />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
     </section>
+  );
+}
+
+function HeroEntity() {
+  // Mouse-parallax tilt: the entity image leans toward the cursor for depth.
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [8, -8]), {
+    stiffness: 120,
+    damping: 18,
+  });
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 120,
+    damping: 18,
+  });
+  const glowX = useTransform(mx, [-0.5, 0.5], ["30%", "70%"]);
+  const glowY = useTransform(my, [-0.5, 0.5], ["30%", "70%"]);
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mx.set((e.clientX - rect.left) / rect.width - 0.5);
+    my.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const onLeave = () => {
+    mx.set(0);
+    my.set(0);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.9, delay: 0.1 }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ perspective: 1000 }}
+      className="relative mx-auto aspect-square w-full max-w-md"
+    >
+      <div className="absolute inset-0 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute inset-0 animate-pulse-glow rounded-full bg-accent/15 blur-2xl" />
+      {/* cursor-following glow */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-[2rem] opacity-60"
+        style={{
+          background: useMotionTemplate`radial-gradient(circle at ${glowX} ${glowY}, rgba(245,196,81,0.35), transparent 55%)`,
+        }}
+      />
+      <motion.div
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="relative h-full w-full"
+      >
+        <Image
+          src="/cosmic/entity.png"
+          alt="Aethon, the Primordial Light — cosmic entity"
+          fill
+          priority
+          sizes="(max-width: 768px) 90vw, 480px"
+          className="animate-float-slow rounded-[2rem] object-cover"
+        />
+      </motion.div>
+      {/* floating weapon chips */}
+      <div className="absolute -left-2 top-8 hidden rotate-[-8deg] sm:block">
+        <WeaponChip id="bow" />
+      </div>
+      <div className="absolute -right-2 top-1/3 hidden rotate-[6deg] sm:block">
+        <WeaponChip id="book" />
+      </div>
+      <div className="absolute bottom-6 left-6 hidden rotate-[4deg] sm:block">
+        <WeaponChip id="sword" />
+      </div>
+      <div className="absolute bottom-10 right-4 hidden rotate-[-5deg] sm:block">
+        <WeaponChip id="cannon" />
+      </div>
+    </motion.div>
   );
 }
 

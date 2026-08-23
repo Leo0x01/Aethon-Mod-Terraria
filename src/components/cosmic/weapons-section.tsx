@@ -24,7 +24,7 @@ export function WeaponsSection() {
           subtitle="El Genesis Shard se presenta como un m mote brillante. Al bondéate a él, eliges su forma — permanente para ese personaje. Cada forma abre una progresión completamente distinta."
         />
 
-        <div className="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           {/* LEFT: the light / weapon display */}
           <div className="relative flex min-h-[420px] items-center justify-center rounded-3xl border border-border/60 bg-card/30 p-6 sm:min-h-[520px]">
             <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">

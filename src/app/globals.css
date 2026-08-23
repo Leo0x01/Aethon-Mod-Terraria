@@ -124,9 +124,11 @@
   }
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
     background-image:
       radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.35 0.15 300 / 35%), transparent),
       radial-gradient(ellipse 60% 50% at 90% 20%, oklch(0.3 0.12 180 / 20%), transparent),

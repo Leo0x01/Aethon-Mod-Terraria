@@ -53,7 +53,7 @@ export function ProgressionCalculator() {
           subtitle="Cada enemigo que matas otorga XP. Los puntos de habilidad se aceleran por tramos de 10 niveles — hasta +10 por nivel post-100, para siempre."
         />
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+        <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_0.9fr]">
           {/* LEFT: slider + readout */}
           <div className="glass-panel rounded-3xl border border-border/60 p-6 sm:p-8">
             <div className="flex items-end justify-between">

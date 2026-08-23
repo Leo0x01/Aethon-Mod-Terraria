@@ -219,3 +219,85 @@ Stage Summary:
   all verified working via agent-browser on desktop and mobile.
 - No lint errors, no runtime errors, dev server returns 200.
 - Images generated and wired. Ready for the recurring 15-min webDevReview cron.
+
+---
+Task ID: 2 (webDevReview cron round 1)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project was COMPLETE and stable from Task ID 1 (7 sections, cosmic theme, all interactive
+  flows verified). No bugs found in initial QA (the one apparent "weapon selector bug" was a
+  test artifact from `find text` matching the wrong element).
+- ESLint: clean. Dev server: 200, no runtime errors. Console: clean.
+
+## QA Findings
+- Initial tests: all weapon transforms, calculator (Lv100→550pts/80kXP), skill-tree allocation
+  & reroll, boss filters, footer sticky — all working on desktop + mobile.
+- **Bug found & fixed: mobile horizontal overflow.** `document.body.scrollWidth` was 498px on a
+  390px viewport. Root cause: multiple grids used `grid lg:grid-cols-[...]` WITHOUT an explicit
+  `grid-cols-1`, so on mobile `display:grid` auto-sized columns to the widest child's min-content,
+  stretching the layout. The hero's 520px orbit rings also contributed. Fixed by:
+  - Adding `grid-cols-1` to 5 affected grids (codex, calculator, skill-tree, weapons, hero).
+  - Hiding hero orbit rings on mobile (`hidden sm:block`).
+  - Adding global `overflow-x: hidden` on html+body as a safety net.
+  Verified: scrollW now equals viewportW on both 390px and 1440px.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Memory Codex** (`src/components/cosmic/memory-codex.tsx`) — the centerpiece new feature,
+   directly realizing the user's "Lore Absorption" vision:
+   - Interactive database of 64 real base-game Terraria weapons (16 per class: magic/bow/sword/gun)
+     with signature behavior, effect-on-equip, resonance cost, and source location.
+   - Class tabs (Lumina/Solbrand/Voidcannon/Grimoire), tier filter (Pre/Hardmode/Endgame),
+     live search box, and a level slider (50–160) that unlocks rune slots (0→5) progressively.
+   - Click-to-memorize weapons into Memory Rune slots (enforced cap = slots available;
+     memorized auto-pruned when lowering level below a slot threshold).
+   - Right panel: live rune loadout (slot grid), resonance total invested, animated active-effects
+     list, and a "how it works" hint box.
+   - Data added to `src/lib/mod-data.ts`: `CodexWeapon` interface, `CODEX` array (64 entries),
+     `getCodexForClass()`, `runeSlotsForLevel()`.
+2. **Scroll Progress + Section Spy** (`src/components/cosmic/scroll-progress.tsx`):
+   - Top gradient progress bar (framer-motion useScroll + useSpring).
+   - Right-side dot navigator (xl-only, appears after scroll, active section highlighted,
+     hover reveals labels). Subtle opacity-70, hover full.
+3. **Build Summary** (in `skill-tree.tsx`): full-width card below the constellation showing
+   allocated node count, points invested, rarity breakdown (common/rare/legendary pips), and
+   per-branch grouping of allocated nodes with their names. Empty state included.
+
+### Styling Improvements
+4. **Section Dividers** (`section-divider.tsx`): 3 variants (sigil / line / shards) placed
+   between all major sections for visual rhythm.
+5. **Hero parallax tilt**: entity image now leans toward the cursor (3D rotateX/rotateY via
+   framer-motion useMotionValue + useSpring) with a cursor-following radial glow.
+6. **Memory Codex polish** (per VLM feedback):
+   - Active class tab now has stronger highlight (border + glow + tinted bg).
+   - Card signature text brightened to `text-foreground`; cost colored `text-primary/90`.
+   - Side-dot navigator made more subtle (xl-only, opacity-70, smaller gap).
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors.
+- agent-browser desktop (1440×900): all features verified — codex search/filter/class-switch/
+  memorize/cap-enforcement, build summary updates on allocation, scroll progress bar + dots.
+- agent-browser mobile (390×844): no horizontal overflow (390=390); codex stacks to single column;
+  hero orbit rings hidden.
+- VLM verdict on Memory Codex: "Grimoire tab clearly highlighted; card text highly readable;
+  right-side rune panel balanced; layout cohesive." Final full-page VLM: "integrates seamlessly,
+  dividers tasteful, no regressions."
+
+## Unresolved Issues / Risks
+- None blocking. The `⚠ Cross origin request detected` in dev.log is an expected Next.js preview
+  environment warning (not a bug).
+- The `⚠ Fast Refresh had to perform a full reload due to a runtime error` warnings in earlier
+  dev.log were transient HMR artifacts during the previous dev session editing — confirmed not
+  reproducible on clean reload.
+
+## Priority Recommendations for Next Phase
+- Consider a **build export/share** feature: let users serialize their allocated skill-tree +
+  memory-codex loadout into a shareable URL hash (no backend needed) so builds can be shared.
+- Add a **"randomize build"** button to the skill tree (auto-allocate random valid nodes up to a
+  point budget) — fun engagement feature.
+- Could add **TTS narration** of the lore timeline using the TTS skill for an immersive touch.
+- Performance: the starfield canvas runs ~220 stars at 60fps — fine, but could pause when tab
+  is off-screen via IntersectionObserver to save battery on mobile.

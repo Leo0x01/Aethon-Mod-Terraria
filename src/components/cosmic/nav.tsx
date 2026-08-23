@@ -8,6 +8,7 @@ const LINKS = [
   { href: "#weapons", label: "Armas" },
   { href: "#progression", label: "Progresión" },
   { href: "#skill-tree", label: "Árbol" },
+  { href: "#codex", label: "Codex" },
   { href: "#bosses", label: "Jefes" },
   { href: "#features", label: "Features" },
 ];

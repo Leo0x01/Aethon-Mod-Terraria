@@ -182,7 +182,7 @@ export function SkillTreeView() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_0.6fr]">
           {/* CANVAS */}
           <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/30 p-2">
             <div className="pointer-events-none absolute inset-0 bg-cosmic-grid opacity-25" />
@@ -486,8 +486,165 @@ export function SkillTreeView() {
               </AnimatePresence>
             </div>
           </div>
+
+          {/* Build summary — full width */}
+          <BuildSummary
+            weapon={weapon}
+            allocated={allocated}
+            placed={placed}
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+function BuildSummary({
+  weapon,
+  allocated,
+  placed,
+}: {
+  weapon: (typeof WEAPONS)[number];
+  allocated: Set<string>;
+  placed: PlacedNode[];
+}) {
+  const allocatedNodes = placed.filter((n) => allocated.has(n.id));
+  const byBranch = new Map<string, PlacedNode[]>();
+  for (const n of allocatedNodes) {
+    const arr = byBranch.get(n.branch) ?? [];
+    arr.push(n);
+    byBranch.set(n.branch, arr);
+  }
+  const totalCost = allocatedNodes.reduce((s, n) => s + n.cost, 0);
+  const rarityCount = {
+    common: allocatedNodes.filter((n) => n.rarity === "common").length,
+    rare: allocatedNodes.filter((n) => n.rarity === "rare").length,
+    legendary: allocatedNodes.filter((n) => n.rarity === "legendary").length,
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="glass-panel mt-6 rounded-3xl border border-border/60 p-6"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+            style={{
+              background: weapon.accentSoft,
+              color: weapon.accent,
+            }}
+          >
+            ✦
+          </span>
+          <div>
+            <h3 className="text-base font-semibold">
+              Resumen de build — {weapon.name}
+            </h3>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              {allocatedNodes.length} nodos · {totalCost} pts invertidos
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <RarityPip label="Común" count={rarityCount.common} color="rgba(200,200,230,0.9)" />
+          <RarityPip label="Raro" count={rarityCount.rare} color="rgba(140,180,255,0.95)" />
+          <RarityPip
+            label="Legendario"
+            count={rarityCount.legendary}
+            color="rgba(255,220,140,1)"
+          />
+        </div>
+      </div>
+
+      {allocatedNodes.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border/50 p-4 text-center text-sm text-muted-foreground">
+          Ningún nodo asignado aún. Haz clic en estrellas de la constelación
+          para construir tu build.
+        </p>
+      ) : (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[...byBranch.entries()].map(([branch, nodes]) => {
+            const branchMeta = weapon.branches.find((b) => b.name === branch);
+            return (
+              <div
+                key={branch}
+                className="rounded-2xl border border-border/50 bg-card/30 p-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-xs"
+                    style={{
+                      background: weapon.accentSoft,
+                      color: weapon.accent,
+                    }}
+                  >
+                    {branchMeta?.icon ?? "•"}
+                  </span>
+                  <span className="text-xs font-semibold">{branch}</span>
+                  <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                    {nodes.length}
+                  </span>
+                </div>
+                <ul className="mt-2 space-y-1">
+                  {nodes.map((n) => (
+                    <li
+                      key={n.id}
+                      className="flex items-start gap-1.5 text-[11px] leading-snug"
+                    >
+                      <span
+                        className="mt-1 h-1 w-1 shrink-0 rounded-full"
+                        style={{
+                          background:
+                            n.rarity === "legendary"
+                              ? "rgba(255,220,140,1)"
+                              : n.rarity === "rare"
+                                ? "rgba(140,180,255,0.95)"
+                                : "rgba(200,200,230,0.7)",
+                        }}
+                      />
+                      <span className="text-muted-foreground">
+                        <span className="text-foreground">{n.name}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+function RarityPip({
+  label,
+  count,
+  color,
+}: {
+  label: string;
+  count: number;
+  color: string;
+}) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span
+        className="h-2 w-2 rounded-full"
+        style={{
+          background: color,
+          boxShadow: count > 0 ? `0 0 6px ${color}` : "none",
+          opacity: count > 0 ? 1 : 0.3,
+        }}
+      />
+      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="tabular-nums text-foreground">{count}</span>
+    </span>
   );
 }

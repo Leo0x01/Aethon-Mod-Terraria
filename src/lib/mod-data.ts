@@ -607,3 +607,102 @@ export const LORE: LoreEntry[] = [
     body: "At Lv 150, the shard's resonance reaches Aethon's slumbering consciousness. It stirs. The sky tears open. The final confrontation begins — not as a war, but as an acknowledgment. Aethon fights you with your own absorbed abilities, to prove you are worthy of being called its peer.",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Memory Codex — base-game weapons the Genesis Shard can absorb
+// ---------------------------------------------------------------------------
+
+export interface CodexWeapon {
+  id: string;
+  name: string;
+  class: WeaponId;
+  tier: "pre" | "hardmode" | "endgame";
+  signature: string; // the signature behavior memorized as a Memory Rune
+  effect: string; // what it does once equipped as a rune
+  cost: number; // Resonance Shards needed to memorize
+  source: string; // where in the game it comes from
+}
+
+export const CODEX: CodexWeapon[] = [
+  // ---- Magic (book) ----
+  { id: "magic-dagger", name: "Magic Dagger", class: "book", tier: "pre", signature: "Throwing Arc", effect: "Cast throws a spinning dagger that returns to you.", cost: 5, source: "Dropped by Goblin Tinkerer (after Goblin Army)" },
+  { id: "demon-scythe", name: "Demon Scythe", class: "book", tier: "pre", signature: "Boomerang Spin", effect: "Cast fires a spinning scythe that pierces and returns.", cost: 8, source: "Underworld demons / voodoo demons" },
+  { id: "aqua-scepter", name: "Aqua Scepter", class: "book", tier: "pre", signature: "Water Jet", effect: "Cast sprays a continuous jet of damaging water.", cost: 8, source: "Jungle shrine chests" },
+  { id: "flower-of-fire", name: "Flower of Fire", class: "book", tier: "pre", signature: "Fireball", effect: "Cast lobs a bouncing fireball that explodes.", cost: 10, source: "Underworld shadow chests" },
+  { id: "space-gun", name: "Space Gun", class: "book", tier: "pre", signature: "Laser Beam", effect: "Cast fires a fast piercing energy laser (low mana).", cost: 10, source: "Meteorite craft" },
+  { id: "magic-missile", name: "Magic Missile", class: "book", tier: "pre", signature: "Guided Orb", effect: "Cast releases an orb steered by your cursor.", cost: 12, source: "Dungeon (Skeletron)" },
+  { id: "book-of-skulls", name: "Book of Skulls", class: "book", tier: "hardmode", signature: "Skull Spray", effect: "Cast sprays bouncing skulls that ignite enemies.", cost: 18, source: "Skeletron drop (hardmode)" },
+  { id: "crimson-rod", name: "Crimson Rod", class: "book", tier: "hardmode", signature: "Blood Cloud", effect: "Cast summons a raining blood cloud overhead.", cost: 18, source: "Crimson hearts" },
+  { id: "sky-fracture", name: "Sky Fracture", class: "book", tier: "hardmode", signature: "Triple Shard", effect: "Cast fires 3 homing sky shards in a fan.", cost: 22, source: "Hardmode Hallowed craft" },
+  { id: "magnet-sphere", name: "Magnet Sphere", class: "book", tier: "hardmode", signature: "Orbit Discharge", effect: "Cast deploys a sphere that fires lasers at nearby foes.", cost: 24, source: "Dungeon hardmode mobs" },
+  { id: "leaf-blaster", name: "Leaf Blower", class: "book", tier: "hardmode", signature: "Leaf Storm", effect: "Cast fires a rapid stream of homing leaves.", cost: 24, source: "Plantera drop" },
+  { id: "demon-horn", name: "Demon Horn (Razorblade Typhoon)", class: "book", tier: "endgame", signature: "Typhoon Ring", effect: "Cast fires homing water rings that bounce 4 times.", cost: 35, source: "Duke Fishron drop" },
+  { id: "lunar-flare", name: "Lunar Flare", class: "book", tier: "endgame", signature: "Lunar Rain", effect: "Cast calls lunar flares to rain on the cursor.", cost: 40, source: "Lunar fragments (Nebula)" },
+  { id: "last-prism", name: "Last Prism", class: "book", tier: "endgame", signature: "Converging Beam", effect: "Cast fires 6 beams that converge into one devastating ray.", cost: 45, source: "Moon Lord drop" },
+  { id: "nebula-blaze", name: "Nebula Blaze", class: "book", tier: "endgame", signature: "Chaos Bolts", effect: "Cast alternates small and large chaos bolts (high variance).", cost: 40, source: "Nebula fragments" },
+  { id: "blizzard-staff", name: "Blizzard Staff", class: "book", tier: "endgame", signature: "Ice Rain", effect: "Cast rains shards of ice from above.", cost: 35, source: "Frost Moon drop" },
+
+  // ---- Bow (ranged) ----
+  { id: "wooden-bow", name: "Wooden Bow", class: "bow", tier: "pre", signature: "Basic Shot", effect: "Arrows fly straight; +1 arrow per shot baseline.", cost: 3, source: "Crafted from wood" },
+  { id: "demon-bow", name: "Demon Bow", class: "bow", tier: "pre", signature: "Heavy Draw", effect: "Arrows deal +15% knockback and pierce 1 enemy.", cost: 8, source: "Demonite craft" },
+  { id: "molten-fury", name: "Molten Fury", class: "bow", tier: "pre", signature: "Ignite Arrows", effect: "Wooden arrows become flaming arrows on fire.", cost: 12, source: "Hellstone craft" },
+  { id: "bee-knee", name: "The Bee's Knees", class: "bow", tier: "hardmode", signature: "Bee Swarm", effect: "Arrows spawn 3-5 homing bees on hit.", cost: 18, source: "Queen Bee drop" },
+  { id: "hellwing-bow", name: "Hellwing Bow", class: "bow", tier: "hardmode", signature: "Bat Conversion", effect: "Wooden arrows convert to flaming bats.", cost: 20, source: "Shadow chests (hardmode)" },
+  { id: "daedalus-stormbow", name: "Daedalus Stormbow", class: "bow", tier: "hardmode", signature: "Sky Rain", effect: "Arrows rain down from the sky instead of flying forward.", cost: 30, source: "Hallowed Mimic drop" },
+  { id: "ice-bow", name: "Ice Bow", class: "bow", tier: "hardmode", signature: "Frost Arrow", effect: "Arrows become piercing ice bolts that slow.", cost: 22, source: "Ice Mimic drop" },
+  { id: "shadowflame-bow", name: "Shadowflame Bow", class: "bow", tier: "hardmode", signature: "Shadowflame", effect: "Arrows inflict shadowflame DoT and pierce 2.", cost: 25, source: "Goblin Summoner drop" },
+  { id: "tsunami", name: "Tsunami", class: "bow", tier: "endgame", signature: "5-Arrow Volley", effect: "Fires 5 arrows in a close fan per shot.", cost: 40, source: "Duke Fishron drop" },
+  { id: "phantasm", name: "Phantasm", class: "bow", tier: "endgame", signature: "Phantom Arrows", effect: "Each hit spawns extra phantom arrows (stacking).", cost: 45, source: "Vortex fragments" },
+  { id: "eventide", name: "Eventide", class: "bow", tier: "endgame", signature: "Convert-Arrow", effect: "Converts any ammo to a 4-shot rainbow volley.", cost: 42, source: "Empress of Light drop" },
+  { id: "aerial-bane", name: "Aerial Bane", class: "bow", tier: "endgame", signature: "Anti-Air Splash", effect: "Arrows deal +50% to airborne foes and splash.", cost: 35, source: "Betsy (Ogre) drop" },
+
+  // ---- Sword (melee) ----
+  { id: "wooden-sword", name: "Wooden Sword", class: "sword", tier: "pre", signature: "Basic Swing", effect: "+10% swing speed baseline.", cost: 3, source: "Crafted from wood" },
+  { id: "blade-of-grass", name: "Blade of Grass", class: "sword", tier: "pre", signature: "Poison Edge", effect: "Hits inflict poison for 5s.", cost: 10, source: "Jungle craft" },
+  { id: "muramasa", name: "Muramasa", class: "sword", tier: "pre", signature: "Fast Auto-Swing", effect: "Enables auto-swing; +20% attack speed.", cost: 12, source: "Dungeon (Skeletron)" },
+  { id: "phaseblade", name: "Phaseblade", class: "sword", tier: "pre", signature: "Energy Blade", effect: "Swing emits light; +15% crit.", cost: 10, source: "Meteorite craft" },
+  { id: "fiery-greatsword", name: "Fiery Greatsword", class: "sword", tier: "pre", signature: "Fire On-Hit", effect: "Hits ignite enemies (burn DoT).", cost: 14, source: "Hellstone craft" },
+  { id: "break-blade", name: "Breaker Blade", class: "sword", tier: "hardmode", signature: "Heavy Cleave", effect: "+50% size, +30% knockback, wider arc.", cost: 20, source: "Wall of Flesh drop" },
+  { id: "cobalt-sword", name: "Cobalt Sword", class: "sword", tier: "hardmode", signature: "Thrust Combo", effect: "3rd swing becomes a piercing thrust.", cost: 22, source: "Cobalt craft" },
+  { id: "cutlass", name: "Cutlass", class: "sword", tier: "hardmode", signature: "Pirate's Edge", effect: "+10% damage, auto-swing.", cost: 20, source: "Pirate Invasion drop" },
+  { id: "ice-sickle", name: "Ice Sickle", class: "sword", tier: "hardmode", signature: "Sickle Wave", effect: "Swing emits a large piercing frost wave.", cost: 25, source: "Ice Mimic drop" },
+  { id: "keybrand", name: "Keybrand", class: "sword", tier: "hardmode", signature: "Critical Strike", effect: "+25% crit damage, +10% crit chance.", cost: 24, source: "Dungeon hardmode mobs" },
+  { id: "terra-blade", name: "Terra Blade", class: "sword", tier: "hardmode", signature: "Beam Slash", effect: "Swing fires a piercing green beam.", cost: 35, source: "True Excalibur + True Night's Edge craft" },
+  { id: "influx-waver", name: "Influx Waver", class: "sword", tier: "endgame", signature: "Double Slash", effect: "Swing fires a beam that splits into 2 on hit.", cost: 40, source: "Martian Saucer drop" },
+  { id: "horseman-blade", name: "Horseman's Blade", class: "sword", tier: "endgame", signature: "Pumpkin Summon", effect: "Swing summons homing flaming pumpkins.", cost: 38, source: "Pumpkin Moon drop" },
+  { id: "seedler", name: "Seedler", class: "sword", tier: "endgame", signature: "Leaf Burst", effect: "Swing spawns leaf projectiles on hit.", cost: 38, source: "Plantera drop" },
+  { id: "star-wrath", name: "Star Wrath", class: "sword", tier: "endgame", signature: "Star Fall", effect: "Swing rains stars from the sky onto cursor.", cost: 42, source: "Moon Lord drop" },
+  { id: "zenith", name: "Zenith", class: "sword", tier: "endgame", signature: "Blade Storm", effect: "Swing summons a trail of every sword you've held.", cost: 50, source: "Craft (endgame)" },
+
+  // ---- Cannon (guns / bullets) ----
+  { id: "flintlock-pistol", name: "Flintlock Pistol", class: "cannon", tier: "pre", signature: "Quick Shot", effect: "+25% fire rate, -25% damage.", cost: 4, source: "Merchant (after Skeletron)" },
+  { id: "minishark", name: "Minishark", class: "cannon", tier: "pre", signature: "Rapid Spray", effect: "33% chance to not consume ammo.", cost: 12, source: "Arms Dealer (purchase)" },
+  { id: "musket", name: "Musket", class: "cannon", tier: "pre", signature: "High Impact", effect: "+50% knockback, +20% crit chance.", cost: 8, source: "Shadow orb / crimson heart" },
+  { id: "boomstick", name: "Boomstick", class: "cannon", tier: "pre", signature: "3-Pellet Spread", effect: "Fires 3 pellets in a spread.", cost: 10, source: "Jungle (underground)" },
+  { id: "quad-barrel", name: "Quad-Barrel Shotgun", class: "cannon", tier: "hardmode", signature: "4-Pellet Burst", effect: "Fires 4 pellets; close-range devastation.", cost: 20, source: "Arms Dealer (post-WoF)" },
+  { id: "clockwork-assault", name: "Clockwork Assault Rifle", class: "cannon", tier: "hardmode", signature: "3-Round Burst", effect: "Fires 3 rounds per trigger pull.", cost: 22, source: "Wall of Flesh drop" },
+  { id: "megashark", name: "Megashark", class: "cannon", tier: "hardmode", signature: "Hyperfire", effect: "50% chance to not consume ammo; very fast.", cost: 28, source: "Hallowed craft" },
+  { id: "on-off-zero", name: "Onyx Blaster", class: "cannon", tier: "hardmode", signature: "Onyx Slug", effect: "Fires a piercing onyx crystal + 2 pellets.", cost: 26, source: "Craft (post-2nd orb)" },
+  { id: "shotgun", name: "Shotgun", class: "cannon", tier: "hardmode", signature: "Pellet Spread", effect: "Fires 4 pellets in a wide spread.", cost: 18, source: "Arms Dealer (hardmode)" },
+  { id: "sniper-rifle", name: "Sniper Rifle", class: "cannon", tier: "hardmode", signature: "Scope Headshot", effect: "Right-click zoom; massive crit multiplier.", cost: 30, source: "Hardmode Dungeon mobs" },
+  { id: " Tactical-shotgun", name: "Tactical Shotgun", class: "cannon", tier: "hardmode", signature: "Tactical Spread", effect: "Fires 6 tight pellets; auto-fire.", cost: 26, source: "Hardmode Dungeon mobs" },
+  { id: "chain-gun", name: "Chain Gun", class: "cannon", tier: "endgame", signature: "Bullet Hose", effect: "Insane fire rate; spread is high.", cost: 38, source: "Frost Moon drop" },
+  { id: "s-d-m-g", name: "SDMG", class: "cannon", tier: "endgame", signature: "Space Dolphin", effect: "+15% damage, +5% crit, fast.", cost: 45, source: "Moon Lord drop" },
+  { id: "phantasm-blast", name: "Vortex Beater", class: "cannon", tier: "endgame", signature: "Rocket-Alt", effect: "Rounds home; alt-fire shoots a rocket.", cost: 45, source: "Vortex fragments" },
+  { id: "xenopopper", name: "Xenopopper", class: "cannon", tier: "endgame", signature: "Bubble Pop", effect: "Fires bubbles that pop into homing bullets.", cost: 40, source: "Martian Saucer drop" },
+  { id: "chain-gun-2", name: "Snowman Cannon", class: "cannon", tier: "endgame", signature: "Homing Rocket", effect: "Fires homing rockets that track foes.", cost: 38, source: "Frost Moon drop" },
+];
+
+export function getCodexForClass(cls: WeaponId): CodexWeapon[] {
+  return CODEX.filter((c) => c.class === cls);
+}
+
+// Rune slot count grows with weapon level (Memory Codex branch investment)
+export function runeSlotsForLevel(level: number): number {
+  if (level < 50) return 0;
+  if (level < 75) return 1;
+  if (level < 100) return 2;
+  if (level < 125) return 3;
+  if (level < 150) return 4;
+  return 5; // capped at 5 for balance
+}
