@@ -750,3 +750,71 @@ Task: Assess project status, QA test, then add new features + improve styling.
   that users can load with one click to see the system in action.
 - **A11y: skip-to-content link**: add a visually-hidden "skip to main content" link for screen
   readers / keyboard users to bypass the nav.
+
+---
+Task ID: 9 (webDevReview cron round 8)
+Agent: Lead Developer (Z.ai Code) — automated review
+Task: Assess project status, QA test, then add new features + improve styling.
+
+## Current Project Status (assessment)
+- Project stable through 8 prior rounds (keyboard shortcuts, codex effect search, node search,
+  persistent snapshots, codex query-clear, hover tooltips, codex build share v2, build compare/diff,
+  codex class sync, TTS, shard economy, starfield perf+a11y, keyboard a11y, back-to-top,
+  focus-visible, reduced-motion, nebula divider). ESLint clean, no errors, no mobile overflow.
+- Initial QA this round: lint clean, dev server 200, no console/runtime errors, mobile 390=390.
+  No regressions.
+
+## QA Findings
+- No bugs in existing features. All prior functionality intact.
+
+## Completed Modifications (this round)
+
+### New Features
+1. **Build presets** (`build-presets.ts` data + `build-presets.tsx` component + `skill-tree.tsx`):
+   - 6 curated example builds spanning all 4 weapons: Arcane Storm (glass cannon magic),
+     Eternal Sustainer (lifesteal tank magic), Starfall Marksman (ranged DPS bow), Dawnbreaker
+     (combo brawler sword), Bulwark of Dawn (parry tank sword), Void Artillery (heavy ordnance cannon).
+   - Each preset specifies weapon + seed + node indices + description + difficulty (Fácil/Medio/Difícil).
+   - One-click load: clicking a preset card encodes it as a v1 build hash, writes it to the URL,
+     dispatches the `aethon:build-imported` CustomEvent (which the skill tree + codex both listen
+     for), shows a "✓ cargado" confirmation for 2.4s, and smooth-scrolls to the skill tree so users
+     see the loaded build immediately.
+   - Added a self-listener in the skill tree for `aethon:build-imported` so it re-loads its state
+     from the hash when an external component (presets) triggers the event.
+   - Verified: clicking "Arcane Storm" → skill tree switches to Grimoire with 15 nodes/26 pts;
+     clicking "Starfall Marksman" → switches to Lumina (bow) with 10 nodes/17 pts + codex syncs.
+2. **Skip-to-content link** (`page.tsx`):
+   - Visually-hidden "Saltar al contenido" link that becomes visible on focus (standard a11y pattern)
+     for screen-reader + keyboard users to bypass the nav and jump straight to main content.
+   - Verified: focusing the link makes it appear as a pill in the top-left corner.
+
+### Styling Improvements
+3. Preset cards: glass-panel with weapon-accent icon, color-coded difficulty badge, hover glow,
+   animated entrance (staggered), "✓ cargado" confirmation state with accent border + glow.
+4. Nav + scroll-progress: added "Presets" to both the nav links and the side-dot navigator.
+
+## Verification Results
+- ESLint: 0 errors. Dev server: 200, no console/runtime errors. Mobile: 390=390 (no overflow).
+- agent-browser verified:
+  - **Preset load (same weapon)**: Arcane Storm → Grimoire, 15 nodes/26 pts ✓.
+  - **Preset load (cross-weapon)**: Starfall Marksman → Lumina (bow), 10 nodes/17 pts, codex
+    synced to Lumina ✓.
+  - **Skip link**: focuses + appears as a pill in top-left ✓.
+- VLM verdicts:
+  - Presets: "cards clearly visible and well-organized; distinct visual hierarchy; no significant
+    issues; design is clean and intuitive."
+  - Skip link: "clearly visible in top-left; highly readable."
+
+## Unresolved Issues / Risks
+- None blocking. Presets use fixed seeds (not the user's current seed), so loading a preset
+  changes the seed — this is by design (presets are complete build snapshots).
+
+## Priority Recommendations for Next Phase
+- **Pre-warm TTS cache** (still deferred): on requestIdleCallback, generate audio for the first
+  lore + boss entries so first-click is instant. Gate behind a setting.
+- **Theme toggle (dawn variant)**: the site is dark-only; a light variant would be a nice touch.
+- **Export build as image**: let users download a PNG of their skill-tree constellation + build
+  summary for sharing on forums/Discord.
+- **Preset sharing**: let users turn their current build into a preset (saved to localStorage)
+  alongside the curated ones.
+- **A11y: aria-live region** for preset-load confirmation (announce "build cargado" to screen readers).

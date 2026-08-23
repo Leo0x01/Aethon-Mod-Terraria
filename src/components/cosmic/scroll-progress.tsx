@@ -8,6 +8,7 @@ const SECTIONS = [
   { id: "lore", label: "Lore" },
   { id: "weapons", label: "Armas" },
   { id: "progression", label: "Progresión" },
+  { id: "presets", label: "Presets" },
   { id: "skill-tree", label: "Árbol" },
   { id: "codex", label: "Codex" },
   { id: "bosses", label: "Jefes" },

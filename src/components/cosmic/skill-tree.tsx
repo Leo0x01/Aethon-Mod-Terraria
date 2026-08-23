@@ -220,6 +220,34 @@ export function SkillTreeView() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
+  // Listen for external build-import events (from BuildPresets or other
+  // components) to re-load the skill-tree state from the hash. This makes
+  // the skill tree reactive to one-click preset loads.
+  useEffect(() => {
+    const onImported = (e: Event) => {
+      const detail = (e as CustomEvent<{ hash: string }>).detail;
+      if (!detail?.hash) return;
+      for (const w of WEAPONS) {
+        const ids = w.skillTree.map((n) => n.id);
+        const shared = decodeBuild(detail.hash, ids);
+        if (shared && shared.weaponId === w.id) {
+          const alloc = new Set<string>();
+          for (const idx of shared.nodeIndices) {
+            const id = w.skillTree[idx]?.id;
+            if (id) alloc.add(id);
+          }
+          setWeaponId(shared.weaponId);
+          setSeed(shared.seed);
+          setAllocated(alloc);
+          setSelected(null);
+          break;
+        }
+      }
+    };
+    window.addEventListener("aethon:build-imported", onImported);
+    return () => window.removeEventListener("aethon:build-imported", onImported);
+  }, []);
+
   // Global keyboard shortcuts:
   //  - "/" focuses the node search box (unless already typing in an input)
   //  - "Escape" blurs the focused node / clears the search / closes the import panel
