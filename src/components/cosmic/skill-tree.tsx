@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   cumulativeSkillPoints,
@@ -133,6 +133,14 @@ export function SkillTreeView() {
 
   // Node search: filters/highlights nodes in the constellation by name.
   const [nodeQuery, setNodeQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Build import panel state (declared early so the keyboard handler can close it).
+  const [showImport, setShowImport] = useState(false);
+  const [importValue, setImportValue] = useState("");
+  const [importStatus, setImportStatus] = useState<
+    "idle" | "ok" | "error"
+  >("idle");
 
   // Build comparison: snapshot "build A" to diff against the current build.
   // Stored as a serialized hash string; persisted to localStorage so it
@@ -212,6 +220,53 @@ export function SkillTreeView() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
+  // Global keyboard shortcuts:
+  //  - "/" focuses the node search box (unless already typing in an input)
+  //  - "Escape" blurs the focused node / clears the search / closes the import panel
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      if (e.key === "/" && !isTyping) {
+        // Only act when the skill-tree section is in view.
+        const section = document.querySelector("#skill-tree");
+        if (!section) return;
+        const rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          e.preventDefault();
+          searchInputRef.current?.focus();
+        }
+      } else if (e.key === "Escape") {
+        if (isTyping) {
+          // Clear the focused input's value if it's our search box.
+          if (target?.getAttribute("aria-label") === "Buscar nodo por nombre") {
+            setNodeQuery("");
+            (target as HTMLInputElement).blur();
+          }
+        } else {
+          // When not typing, Escape clears any active search query + closes
+          // the import panel + tooltips (if the skill-tree is in view).
+          const section = document.querySelector("#skill-tree");
+          if (section) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+              if (nodeQuery) setNodeQuery("");
+              setShowImport(false);
+              setHovered(null);
+            }
+          }
+        }
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [nodeQuery]);
+
   // Persist current build to URL hash — but only AFTER hydration so we don't
   // overwrite the shared hash we just restored with empty defaults. Preserves
   // any codex loadout already in the hash so the two features coexist.
@@ -267,11 +322,6 @@ export function SkillTreeView() {
   };
 
   // Build import: paste a share URL or hash to load someone else's build.
-  const [showImport, setShowImport] = useState(false);
-  const [importValue, setImportValue] = useState("");
-  const [importStatus, setImportStatus] = useState<
-    "idle" | "ok" | "error"
-  >("idle");
   const onImport = () => {
     // Accept either a full URL (...#v1.x.y.z / ...#v2.x.y.z.w) or a bare hash.
     const raw = importValue.trim();
@@ -435,10 +485,11 @@ export function SkillTreeView() {
                   ⌕
                 </span>
                 <input
+                  ref={searchInputRef}
                   value={nodeQuery}
                   onChange={(e) => setNodeQuery(e.target.value)}
-                  placeholder="buscar nodo…"
-                  className="w-36 rounded-full border border-border/60 bg-card/80 py-1.5 pl-7 pr-7 text-xs text-foreground backdrop-blur placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 sm:w-44"
+                  placeholder="buscar nodo…  ( / )"
+                  className="w-36 rounded-full border border-border/60 bg-card/80 py-1.5 pl-7 pr-7 text-xs text-foreground backdrop-blur placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 sm:w-48"
                   aria-label="Buscar nodo por nombre"
                 />
                 {nodeQuery && (

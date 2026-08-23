@@ -132,13 +132,16 @@ export function MemoryCodex() {
 
   const slots = runeSlotsForLevel(level);
   const list = useMemo(() => {
+    const q = query.toLowerCase();
     return getCodexForClass(cls)
       .filter((c) => tier === "all" || c.tier === tier)
       .filter(
         (c) =>
-          !query ||
-          c.name.toLowerCase().includes(query.toLowerCase()) ||
-          c.signature.toLowerCase().includes(query.toLowerCase()),
+          !q ||
+          c.name.toLowerCase().includes(q) ||
+          c.signature.toLowerCase().includes(q) ||
+          c.effect.toLowerCase().includes(q) ||
+          c.source.toLowerCase().includes(q),
       );
   }, [cls, tier, query]);
 
