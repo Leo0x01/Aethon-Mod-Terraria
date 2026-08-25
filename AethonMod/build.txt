@@ -1,0 +1,8 @@
+author = AethonModTeam
+version = 0.1
+displayName = Aethon, la Luz Primordial
+homepage = https://github.com/aethon-mod
+modReferences =
+weakReferences = BossChecklist
+side = Both
+unloadLayer = PostSetupContent

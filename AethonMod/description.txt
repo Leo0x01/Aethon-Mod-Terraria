@@ -1,0 +1,16 @@
+Aethon, la Luz Primordial — un mod de historia final para Terraria centrado en una entidad cósmica antigua.
+
+Encuentra un altar subterráneo en el nuevo bioma "Sagrario Hueco". Bondéate a un fragmento de luz que evoluciona según tu rama de combate (Distancia, Cuerpo a Cuerpo, o Artes Mágicas). Sube de nivel infinitamente, desbloquea un árbol de habilidades procedural, y absorbe las habilidades de cualquier arma del juego.
+
+Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
+
+Funciones principales:
+- Fragmento Génesis con niveles infinitos y 3 ramas principales.
+- Árboles de habilidades procedurales (6/6/7 sub-ramas).
+- Capstone de Absorción de Lore (memoriza armas del juego base + mods).
+- Bioma Sagrario Hueco con altar, mineral y mobs propios.
+- 6 jefes (mini-jefe, ecos, cósmicos, jefe final Aethon de 5 fases).
+- Eventos cósmicos por nivel (Lv 25, 50, 75, 100, 150).
+- Economía de Fragmentos de Resonancia.
+- NPC "El Testigo" que narra lore y vende runas.
+- Localización ES/EN.

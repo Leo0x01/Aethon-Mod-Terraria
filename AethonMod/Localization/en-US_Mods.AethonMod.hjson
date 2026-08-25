@@ -1,0 +1,33 @@
+{
+	"Mods.AethonMod.DisplayName": "Aethon, the Primordial Light",
+
+	"Items.GenesisShard.DisplayName": "Genesis Shard",
+	"Items.GenesisShard.Tooltip": "A mote of pure light from an ancient cosmic entity.\nFight enemies to imprint your branch.",
+
+	"Items.ResonanceShard.DisplayName": "Resonance Shard",
+	"Items.ResonanceShard.Tooltip": "Currency for memorizing weapons in the Memory Codex.\nDropped by cosmic bosses.",
+
+	"Items.LuminaStarbow.DisplayName": "Lumina, the Starbowed",
+	"Items.LuminaStarbow.Tooltip": "Distance branch weapon.\nFires arrows of starlight that seek their mark.\nDamage scales with shard level.",
+
+	"Items.SolbrandEdge.DisplayName": "Solbrand, Edge of Dawn",
+	"Items.SolbrandEdge.Tooltip": "Melee branch weapon.\nA blade of condensed light that cuts reality.\nDamage scales with shard level.",
+
+	"Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
+	"Items.GrimoireEternal.Tooltip": "Arcane Arts branch weapon.\nFires arcane bolts and can summon stellar minions.\nDamage scales with level + % missing mana.",
+
+	"Projectiles.StarlightArrow.DisplayName": "Starlight Arrow",
+	"Projectiles.DawnSlash.DisplayName": "Dawn Slash",
+	"Projectiles.ArcaneBolt.DisplayName": "Arcane Bolt",
+
+	"NPCs.HollowTitan.DisplayName": "The Hollow Titan",
+	"NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
+	"NPCs.TheWitness.DisplayName": "The Witness",
+	"NPCs.EchoBlade.DisplayName": "Echo of the First Wielder",
+	"NPCs.EchoArcher.DisplayName": "Echo of the Star-Archer",
+	"NPCs.RiftKeeper.DisplayName": "The Rift-Keeper",
+
+	"Common.Imprinting": "Your Genesis Shard has imprinted with the {0} branch!",
+	"Common.LevelUp": "Your Genesis Shard has reached level {0}!",
+	"Common.Milestone": "Cosmic milestone reached: {0}",
+}

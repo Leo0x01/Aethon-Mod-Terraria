@@ -1,0 +1,33 @@
+{
+	"Mods.AethonMod.DisplayName": "Aethon, la Luz Primordial",
+
+	"Items.GenesisShard.DisplayName": "Fragmento Génesis",
+	"Items.GenesisShard.Tooltip": "Un mote de luz pura de una entidad cósmica antigua.\nCombate enemigos para imprprimir tu rama.",
+
+	"Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
+	"Items.ResonanceShard.Tooltip": "Moneda para memorizar armas en el Códex de Memoria.\nSe obtiene de jefes cósmicos.",
+
+	"Items.LuminaStarbow.DisplayName": "Lumina, la Arcoestelar",
+	"Items.LuminaStarbow.Tooltip": "Arco de la rama de Distancia.\nDispara flechas de luz estelar que buscan su marca.\nEl daño escala con el nivel del fragmento.",
+
+	"Items.SolbrandEdge.DisplayName": "Solbrand, Filo del Alba",
+	"Items.SolbrandEdge.Tooltip": "Hoja de la rama de Cuerpo a Cuerpo.\nUna espada de luz condensada que corta la realidad.\nEl daño escala con el nivel del fragmento.",
+
+	"Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
+	"Items.GrimoireEternal.Tooltip": "Grimorio de la rama de Artes Mágicas.\nLanza bolts arcanos y puede invocar minions estelares.\nEl daño escala con el nivel + % maná faltante.",
+
+	"Projectiles.StarlightArrow.DisplayName": "Flecha de Luz Estelar",
+	"Projectiles.DawnSlash.DisplayName": "Onda del Alba",
+	"Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
+
+	"NPCs.HollowTitan.DisplayName": "El Titán Hueco",
+	"NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
+	"NPCs.TheWitness.DisplayName": "El Testigo",
+	"NPCs.EchoBlade.DisplayName": "Eco del Primer Portador",
+	"NPCs.EchoArcher.DisplayName": "Eco de la Arquera Estelar",
+	"NPCs.RiftKeeper.DisplayName": "El Guardián del Rift",
+
+	"Common.Imprinting": "El Fragmento Génesis se ha imprpreso con tu rama de {0}!",
+	"Common.LevelUp": "Tu Fragmento Génesis ha alcanzado el nivel {0}!",
+	"Common.Milestone": "Hito cósmico alcanzado: {0}",
+}

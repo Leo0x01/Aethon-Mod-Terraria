@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>AethonMod</AssemblyName>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RootNamespace>AethonMod</RootNamespace>
+    <AssemblyTitle>AethonMod</AssemblyTitle>
+    <Company>AethonModTeam</Company>
+    <Version>0.1.0.0</Version>
+    <Configurations>Debug;Release;Server</Configurations>
+    <NoWarn>CS1591;CS0649;CS0169;CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    Referencias a tModLoader.
+    Ajusta TModLoaderPath a tu instalación de Steam.
+    Por defecto: %STEAM%/steamapps/common/tModLoader
+  -->
+  <PropertyGroup>
+    <TModLoaderPath Condition="!Exists('$(TModLoaderPath)')">$(HOME)/.steam/steam/steamapps/common/tModLoader</TModLoaderPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="tModLoader">
+      <HintPath>$(TModLoaderPath)/tModLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Terraria">
+      <HintPath>$(TModLoaderPath)/Terraria.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FNA">
+      <HintPath>$(TModLoaderPath)/lib/FNA/FNA.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RailSDK.Net">
+      <HintPath>$(TModLoaderPath)/lib/NET6/RailSDK.Net.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Steamworks.NET">
+      <HintPath>$(TModLoaderPath)/lib/NET6/Steamworks.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Contenido del mod (imágenes, archivos) -->
+  <ItemGroup>
+    <None Update="build.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="description.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
