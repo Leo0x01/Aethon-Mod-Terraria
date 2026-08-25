@@ -45,12 +45,28 @@ namespace AethonMod.Content.Weapons
                 // Escalado: daño = nivel × 2.4 (aplicado como multiplicador sobre el daño base).
                 damage += sp.ShardLevel * 2.4f;
             }
+            // Aplicar efectos de nodos del árbol de Distancia.
+            float crit = 0;
+            Systems.NodeEffectSystem.ApplyDistanceEffects(player, ref damage, ref crit);
+            player.GetCritChance(DamageClass.Ranged) += crit;
+        }
+
+        public override float UseTimeMultiplier(Player player)
+        {
+            return Systems.NodeEffectSystem.GetUseSpeedMultiplier(player);
         }
 
         public override bool? CanConsumeAmmo(Player player)
         {
-            // El arco de luz estelar no consume munición base (pero requiere flechas equipadas).
+            // El arco de luz estelar no consume munición base.
+            // Si tiene Carcaj infinito, tampoco consume munición equipada.
             return false;
+        }
+
+        public override void ModifyShootStats(Player player, ref Vector2 position, ref Vector2 velocity, ref int type, ref int damage, ref float knockback)
+        {
+            // Proyectiles extra (Cuerda doble, etc.)
+            // (tModLoader dispara 1 por defecto; los extras se manejan en Shoot.)
         }
 
         public override Vector2? HoldoutOffset()

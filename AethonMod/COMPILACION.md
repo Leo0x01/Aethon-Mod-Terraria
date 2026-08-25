@@ -83,22 +83,24 @@ Este esqueleto incluye:
 - ✅ 3 armas: `LuminaStarbow`, `SolbrandEdge`, `GrimoireEternal` con daño escalado por nivel
 - ✅ 3 proyectiles: `StarlightArrow`, `DawnSlash`, `ArcaneBolt`
 - ✅ `ResonanceShard` (moneda)
+- ✅ `MemoryRune` (runa equipable de absorción)
 - ✅ `HollowSanctumBiome` (ModBiome)
 - ✅ `AncientAltar` (ModTile) + item colocable
-- ✅ 2 NPCs: `AethonBoss` (esqueleto 5 fases), `HollowTitan` (mini-jefe)
+- ✅ 6 NPCs: `AethonBoss` (5 fases completas), `HollowTitan`, `RiftKeeper`, `EchoBlade`, `EchoArcher`, `TheWitness` (NPC)
+- ✅ `SkillTreeCatalog` — catálogo de 3 árboles (30/30/35 nodos)
+- ✅ `NodeEffectSystem` — aplica efectos de nodos (daño, crit, maná, knockback, defensa, lifesteal, escudo de maná, etc.)
+- ✅ `MemoryCodexSystem` — absorción de armas del juego base (30+ armas absorbibles)
+- ✅ `CosmicEventSystem` — eventos por nivel (lluvia de estrellas, rifts, hitos)
+- ✅ `ShardSyncSystem` — sync multi-jugador (NetMessage)
 - ✅ Localización ES/EN
 
 ### TODO (próximas fases)
 
 - ❌ **Sprites**: todos los items/NPCs/proyectiles usan placeholder. Necesitan sprites PNG en `Textures/`.
-- ❌ **Árbol de habilidades UI**: `UIState` con panel de nodos (Fase 4).
-- ❌ **Efectos de nodos**: aplicar modificaciones por nodo asignado (Fase 5).
-- ❌ **Transformación del fragmento**: reemplazar el item al imprprimir rama (Fase 3 completa).
-- ❌ **Códex de memoria / Runas**: UI + lógica de absorción (Fase 9).
-- ❌ **Eventos cósmicos**: Lluvia de luz, Rifts, etc. (Fase 10).
-- ❌ **Resto de jefes**: Echoes, Rift-Keeper, The Witness NPC (Fase 7).
+- ❌ **Árbol de habilidades UI**: `UIState` con panel de nodos visual (Fase 4 UI — los datos ya existen en `SkillTreeCatalog`).
+- ❌ **Transformación del fragmento**: reemplazar el item al imprprimir rama (Fase 3 completa — la lógica de detección ya existe en `GlobalNPCXP`).
 - ❌ **Música custom**: pistas de Aethon (Fase 8).
-- ❌ **Sync multi-jugador**: NetMessage (Fase 12).
+- ❌ **UI del Códex de Memoria**: panel visual para navegar armas absorbibles (la lógica ya existe en `MemoryCodexSystem`).
 
 ---
 

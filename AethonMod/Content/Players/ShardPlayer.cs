@@ -151,5 +151,23 @@ namespace AethonMod.Content.Players
             AllocatedNodes = new HashSet<string>(tag.GetList<string>("allocatedNodes"));
             MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
         }
+
+        // --- Aplicar efectos pasivos cada tick ---
+        public override void PostUpdateEquips()
+        {
+            Systems.NodeEffectSystem.ApplyPassiveEffects(Player);
+        }
+
+        // --- Manejar daño entrante (escudo de maná) ---
+        public override void ModifyHurt(ref Player.HurtModifiers modifiers)
+        {
+            // convert-0: Escudo de maná — el daño drena maná antes que HP
+            if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0)
+            {
+                int manaAbsorb = System.Math.Min(Player.statMana, modifiers.FinalDamage.Value.Round());
+                Player.statMana -= manaAbsorb;
+                modifiers.FinalDamage -= manaAbsorb;
+            }
+        }
     }
 }

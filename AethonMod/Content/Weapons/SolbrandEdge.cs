@@ -43,6 +43,15 @@ namespace AethonMod.Content.Weapons
             {
                 damage += sp.ShardLevel * 3.1f;
             }
+            // Aplicar efectos de nodos del árbol de Melee.
+            float crit = 0;
+            Systems.NodeEffectSystem.ApplyMeleeEffects(player, ref damage, ref crit);
+            player.GetCritChance(DamageClass.Melee) += crit;
+        }
+
+        public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
+        {
+            knockback *= Systems.NodeEffectSystem.GetMeleeKnockbackMult(player);
         }
 
         public override Vector2? HoldoutOffset()

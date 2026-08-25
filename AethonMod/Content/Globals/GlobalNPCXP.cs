@@ -103,6 +103,8 @@ namespace AethonMod.Content.Globals
                     if (dist < 3000f) // ~150 tiles
                     {
                         Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
+                        // Aplicar efectos de nodos al matar (lifesteal, reset, explosión).
+                        Systems.NodeEffectSystem.OnKillNPC(player, npc);
                     }
                 }
             }

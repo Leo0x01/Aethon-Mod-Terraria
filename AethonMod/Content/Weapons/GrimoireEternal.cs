@@ -43,15 +43,24 @@ namespace AethonMod.Content.Weapons
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
                 damage += sp.ShardLevel * 2.6f;
-                // Bono por maná faltante (desesperación).
-                float missingManaPct = 1f - (float)player.statMana / player.statManaMax2;
-                damage += missingManaPct * 0.5f;
             }
+            // Aplicar efectos de nodos del árbol de Artes Mágicas.
+            float crit = 0;
+            Systems.NodeEffectSystem.ApplyMagicEffects(player, ref damage, ref crit);
+            player.GetCritChance(DamageClass.Magic) += crit;
+        }
+
+        public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
+        {
+            float reduction = Systems.NodeEffectSystem.GetManaCostReduction(player);
+            mult *= (1f - reduction);
         }
 
         public override bool CanUseItem(Player player)
         {
-            // Consume maná.
+            // Reserva inagotable: lanzar con <20 maná es gratis.
+            if (Systems.NodeEffectSystem.HasNode(player, "mana-4") && player.statMana < 20)
+                return true;
             return player.statMana >= Item.mana;
         }
     }
