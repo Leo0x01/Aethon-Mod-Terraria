@@ -51,7 +51,7 @@ namespace AethonMod.Content.Systems
         /// <summary>
         /// Procesa un paquete recibido.
         /// </summary>
-        public static void HandlePacket(Terraria.IO.BinaryReader reader)
+        public static void HandlePacket(System.IO.BinaryReader reader)
         {
             byte msgType = reader.ReadByte();
             switch (msgType)

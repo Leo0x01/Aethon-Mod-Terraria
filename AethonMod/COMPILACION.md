@@ -91,16 +91,17 @@ Este esqueleto incluye:
 - ✅ `NodeEffectSystem` — aplica efectos de nodos (daño, crit, maná, knockback, defensa, lifesteal, escudo de maná, etc.)
 - ✅ `MemoryCodexSystem` — absorción de armas del juego base (30+ armas absorbibles)
 - ✅ `CosmicEventSystem` — eventos por nivel (lluvia de estrellas, rifts, hitos)
-- ✅ `ShardSyncSystem` — sync multi-jugador (NetMessage)
+- ✅ `ShardSyncSystem` — sync multi-jugador (NetMessage + HandlePacket wiring)
+- ✅ `UISystem` — registra y gestiona las UI (tecla K = árbol, J = códex)
+- ✅ `SkillTreeUI` — panel visual del árbol con nodos asignables (constelación)
+- ✅ `MemoryCodexUI` — panel visual del códex con lista de armas absorbibles
+- ✅ **19 sprites pixel-art** generados (items, armas, proyectiles, NPCs, tiles, UI)
 - ✅ Localización ES/EN
 
 ### TODO (próximas fases)
 
-- ❌ **Sprites**: todos los items/NPCs/proyectiles usan placeholder. Necesitan sprites PNG en `Textures/`.
-- ❌ **Árbol de habilidades UI**: `UIState` con panel de nodos visual (Fase 4 UI — los datos ya existen en `SkillTreeCatalog`).
-- ❌ **Transformación del fragmento**: reemplazar el item al imprprimir rama (Fase 3 completa — la lógica de detección ya existe en `GlobalNPCXP`).
-- ❌ **Música custom**: pistas de Aethon (Fase 8).
-- ❌ **UI del Códex de Memoria**: panel visual para navegar armas absorbibles (la lógica ya existe en `MemoryCodexSystem`).
+- ❌ **Música custom**: pistas de Aethon (Fase 8 audio — los NPCs ya usan música vanilla).
+- ❌ **Transformación del fragmento**: reemplazar el item al imprprimir rama (Fase 3 completa — la lógica de detección ya existe en `GlobalNPCXP`, falta el reemplazo físico del item).
 
 ---
 

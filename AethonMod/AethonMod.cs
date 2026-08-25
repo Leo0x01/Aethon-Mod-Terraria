@@ -1,5 +1,7 @@
+using System.IO;
 using Terraria;
 using Terraria.ModLoader;
+using AethonMod.Content.Systems;
 
 namespace AethonMod
 {
@@ -14,13 +16,20 @@ namespace AethonMod
 
         public override void Load()
         {
-            // Cargar assets, registrar UI, etc.
             // Los sistemas se cargan automáticamente por reflexión de tModLoader.
         }
 
         public override void Unload()
         {
             // Limpiar referencias estáticas para permitir hot-reload.
+        }
+
+        /// <summary>
+        /// Procesa paquetes de red recibidos (sync multi-jugador).
+        /// </summary>
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        {
+            ShardSyncSystem.HandlePacket(reader);
         }
 
         /// <summary>
