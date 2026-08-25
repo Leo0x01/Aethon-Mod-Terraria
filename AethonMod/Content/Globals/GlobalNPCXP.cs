@@ -69,8 +69,9 @@ namespace AethonMod.Content.Globals
                 // Generar seed del árbol procedural.
                 if (sp.SkillTreeSeed == 0)
                     sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
-                // TODO: reemplazar el item del jugador por el arma correspondiente,
-                // o transformar el Fragmento Génesis en el arma.
+
+                // Reemplazar el Fragmento Génesis por el arma de la rama.
+                ReplaceShardWithWeapon(player, sp.ActiveBranch);
             }
         }
 
@@ -106,6 +107,37 @@ namespace AethonMod.Content.Globals
                         // Aplicar efectos de nodos al matar (lifesteal, reset, explosión).
                         Systems.NodeEffectSystem.OnKillNPC(player, npc);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reemplaza el Fragmento Génesis en el inventario del jugador
+        /// por el arma correspondiente a la rama imprpresa.
+        /// </summary>
+        private void ReplaceShardWithWeapon(Player player, Players.BranchType branch)
+        {
+            int weaponType = branch switch
+            {
+                Players.BranchType.Distance => ModContent.ItemType<Weapons.LuminaStarbow>(),
+                Players.BranchType.Melee => ModContent.ItemType<Weapons.SolbrandEdge>(),
+                Players.BranchType.Magic => ModContent.ItemType<Weapons.GrimoireEternal>(),
+                _ => ModContent.ItemType<Items.GenesisShard>(),
+            };
+
+            // Buscar el Fragmento Génesis en el inventario y reemplazarlo.
+            for (int i = 0; i < Main.InventoryItemSlotsCount; i++)
+            {
+                if (player.inventory[i].type == ModContent.ItemType<Items.GenesisShard>())
+                {
+                    // Preservar prefijo (reforge).
+                    int prefix = player.inventory[i].prefix;
+                    player.inventory[i].SetDefaults(weaponType);
+                    player.inventory[i].prefix = (byte)prefix;
+                    Main.NewText($"El Fragmento Génesis se ha transformado en {player.inventory[i].Name}!",
+                        new Microsoft.Xna.Framework.Color(245, 196, 81));
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4, player.Center);
+                    break;
                 }
             }
         }

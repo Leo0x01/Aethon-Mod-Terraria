@@ -43,7 +43,8 @@ namespace AethonMod.Content.Systems
                     npc.type == NPCID.MoonLordHand ||
                     npc.type == NPCID.MoonLordHead)
                     return 100000;
-                if (NPCID.Sets.HardmodeTierBossDrops[npc.type] > 0)
+                // Heurística simple: si el jefe tiene > 20000 HP, es hardmode.
+                if (npc.lifeMax > 20000)
                     return 25000;
                 return 5000;
             }

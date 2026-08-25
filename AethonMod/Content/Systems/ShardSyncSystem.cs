@@ -1,3 +1,4 @@
+using System.IO;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -8,8 +9,8 @@ namespace AethonMod.Content.Systems
     /// del fragmento de cada jugador entre cliente y servidor.
     ///
     /// Mensajes:
-    /// - Sync nivel/XP/rama del jugador (cliente → servidor → otros).
-    /// - sync resonancia (cliente → servidor).
+    /// - sync nivel/XP/rama del jugador (cliente -> servidor -> otros).
+    /// - sync resonancia (cliente -> servidor).
     /// </summary>
     public class ShardSyncSystem : ModSystem
     {
@@ -17,19 +18,19 @@ namespace AethonMod.Content.Systems
         public const byte SyncShardState = 1;
         public const byte SyncResonance = 2;
 
-        public override void NetSend(Terraria.IO.BinaryWriter writer)
+        public override void NetSend(BinaryWriter writer)
         {
             // Enviar estado del servidor al cliente al conectarse.
             // (No necesario por ahora: cada jugador persiste su propio estado.)
         }
 
-        public override void NetReceive(Terraria.IO.BinaryReader reader)
+        public override void NetReceive(BinaryReader reader)
         {
             // Recibir estado del servidor.
         }
 
         /// <summary>
-        /// Envía el estado del fragmento del jugador al servidor (y luego a otros clientes).
+        /// Envia el estado del fragmento del jugador al servidor (y luego a otros clientes).
         /// Llamado cuando el nivel cambia.
         /// </summary>
         public static void SendShardState(Player player)
@@ -51,7 +52,7 @@ namespace AethonMod.Content.Systems
         /// <summary>
         /// Procesa un paquete recibido.
         /// </summary>
-        public static void HandlePacket(System.IO.BinaryReader reader)
+        public static void HandlePacket(BinaryReader reader)
         {
             byte msgType = reader.ReadByte();
             switch (msgType)

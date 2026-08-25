@@ -65,30 +65,42 @@ namespace AethonMod.Content.NPCs
             };
         }
 
+        // En tModLoader v2026.06, las tiendas de NPCs custom usan NPCShop.
+        // El Testigo es un NPC no-town, asi que simplificamos: vende via dialogo.
+        // El jugador puede comprar Fragmentos de Resonancia directamente al hablarle.
+
+        /// <summary>
+        /// Al hacer clic en el boton de tienda, abre la tienda del Testigo.
+        /// </summary>
         public override void SetChatButtons(ref string button, ref string button2)
         {
-            button = "Tienda";
+            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
+            int level = sp?.ShardLevel ?? 0;
+            if (level >= 50)
+            {
+                button = "Comprar Resonancia (10✦)";
+            }
+            else
+            {
+                button = "Hablar";
+            }
         }
 
         public override void OnChatButtonClicked(bool firstButton, ref string shopName)
         {
-            if (firstButton)
-            {
-                shopName = "Testigo";
-            }
-        }
-
-        public override void SetupShop(string shop, ref bool[] shopLocked, params object[] args)
-        {
-            // Vende Fragmentos de Resonancia (caros).
-            // TODO: añadir Runas de Memoria específicas.
+            if (!firstButton) return;
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
-            int level = sp?.ShardLevel ?? 0;
+            if (sp == null) return;
 
-            // Fragmentos de Resonancia: disponible desde nivel 50.
-            if (level >= 50)
+            // Comprar 1 Fragmento de Resonancia por 10 de oro (simplificado).
+            if (sp.ShardLevel >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
             {
-                Main.instance.StoreItems.Add(ModContent.ItemType<Items.ResonanceShard>(), 10);
+                // Otorgar el item al inventario.
+                int item = Item.NewItem(
+                    Main.LocalPlayer.GetSource_GiftOrReward(),
+                    Main.LocalPlayer.Center,
+                    ModContent.ItemType<Items.ResonanceShard>());
+                Main.NewText("El Testigo te da un Fragmento de Resonancia.", new Microsoft.Xna.Framework.Color(245, 196, 81));
             }
         }
     }

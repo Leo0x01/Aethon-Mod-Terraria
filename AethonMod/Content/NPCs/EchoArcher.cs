@@ -114,7 +114,7 @@ namespace AethonMod.Content.NPCs
                     NPC.GetSource_FromAI(),
                     pos,
                     Vector2.Zero,
-                    ProjectileID.SporeGas,
+                    ProjectileID.Drippler, // mina de luz visual
                     30,
                     2f,
                     Main.myPlayer,

@@ -205,7 +205,7 @@ namespace AethonMod.Content.NPCs
                 Projectile.NewProjectile(
                     NPC.GetSource_FromAI(),
                     target.Center + new Vector2(0, -200), Vector2.Zero,
-                    ProjectileID.BlackBolt,
+                    ProjectileID.CultistBossLightningOrbArc, // agujero negro visual
                     0, 0f, Main.myPlayer,
                     0, 240); // 4 segundos
             }
