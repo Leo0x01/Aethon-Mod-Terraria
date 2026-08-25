@@ -39,7 +39,7 @@ namespace AethonMod.Content.Systems
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return;
 
-            var packet = ModContent.GetInstance<AethonMod>().GetPacket();
+            var packet = ModContent.GetInstance<AethonModMod>().GetPacket();
             packet.Write((byte)SyncShardState);
             packet.Write((byte)player.whoAmI);
             packet.Write(sp.ShardLevel);

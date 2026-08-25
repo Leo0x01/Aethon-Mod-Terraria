@@ -5,36 +5,32 @@ using AethonMod.Content.Systems;
 
 namespace AethonMod
 {
+    // En tModLoader, la clase Mod debe estar en un namespace
+    // que coincida con el nombre del mod (carpeta).
+    // La clase NO debe tener el mismo nombre que el namespace.
+    // tModLoader busca la clase que hereda de Mod dentro del namespace.
+
     /// <summary>
     /// Punto de entrada del mod "Aethon, la Luz Primordial".
-    /// Carga todos los sistemas, items, NPCs y UI del mod.
     /// </summary>
-    public class AethonMod : Mod
+    public class AethonModMod : Mod
     {
         public const string ModName = "AethonMod";
-        public static AethonMod Instance => ModContent.GetInstance<AethonMod>();
+        public static AethonModMod Instance => ModContent.GetInstance<AethonModMod>();
 
         public override void Load()
         {
-            // Los sistemas se cargan automáticamente por reflexión de tModLoader.
         }
 
         public override void Unload()
         {
-            // Limpiar referencias estáticas para permitir hot-reload.
         }
 
-        /// <summary>
-        /// Procesa paquetes de red recibidos (sync multi-jugador).
-        /// </summary>
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
             ShardSyncSystem.HandlePacket(reader);
         }
 
-        /// <summary>
-        /// Helper para obtener rutas de texturas de forma tipada.
-        /// </summary>
         public static string TexturePath(string path)
         {
             return $"{ModName}/Content/{path}";
