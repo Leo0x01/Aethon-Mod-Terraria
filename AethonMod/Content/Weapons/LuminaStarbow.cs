@@ -56,10 +56,9 @@ namespace AethonMod.Content.Weapons
             return Systems.NodeEffectSystem.GetUseSpeedMultiplier(player);
         }
 
-        public override bool? CanConsumeAmmo(Player player)
+        public override bool CanConsumeAmmo(Item ammo, Player player)
         {
             // El arco de luz estelar no consume munición base.
-            // Si tiene Carcaj infinito, tampoco consume munición equipada.
             return false;
         }
 

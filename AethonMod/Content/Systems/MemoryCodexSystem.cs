@@ -1,3 +1,4 @@
+using AethonMod.Content.Players;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -67,7 +68,7 @@ namespace AethonMod.Content.Systems
                     list.Add(New(ItemID.IceSickle, "Guadaña de Hielo", "Onda de escarcha perforante", 25));
                     list.Add(New(ItemID.TerraBlade, "Hoja Terra", "Rayo verde perforante", 35));
                     list.Add(New(ItemID.InfluxWaver, "Onda Influx", "Rayo se divide en 2 al impacto", 40));
-                    list.Add(New(ItemID.HorsemanBlade, "Hoja del Jinete", "Calabazas homing flaming", 38));
+                    list.Add(New(ItemID.BladedGlove, "Hoja del Jinete", "Calabazas homing flaming", 38));
                     list.Add(New(ItemID.Seedler, "Sembrador", "Hojas al impacto", 38));
                     list.Add(New(ItemID.StarWrath, "Ira Estelar", "Lluvia de estrellas al swing", 42));
                     list.Add(New(ItemID.Zenith, "Zenith", "Tormenta de todas las espadas", 50));
@@ -86,14 +87,14 @@ namespace AethonMod.Content.Systems
                     list.Add(New(ItemID.MagnetSphere, "Esfera Magnética", "Orbe que dispara láseres", 24));
                     list.Add(New(ItemID.Razorpine, "Pino Navaja", "Ráfaga de hojas homing", 24));
                     list.Add(New(ItemID.RazorbladeTyphoon, "Tifón de Cuchillas", "Anillos homing rebotantes", 35));
-                    list.Add(New(ItemID.LunarFlare, "Destello Lunar", "Lluvia lunar en cursor", 40));
+                    list.Add(New(ItemID.LunarFlareBook, "Destello Lunar", "Lluvia lunar en cursor", 40));
                     list.Add(New(ItemID.LastPrism, "Último Prisma", "6 rayos convergentes", 45));
                     list.Add(New(ItemID.NebulaBlaze, "Destello Nebulosa", "Bolts alternos pequeños/grandes", 40));
                     list.Add(New(ItemID.BlizzardStaff, "Bastón de Ventura", "Lluvia de hielo", 35));
                     // Invocación
                     list.Add(New(ItemID.TempestStaff, "Bastón Tempestad", "Tiburones homing minions", 30));
                     list.Add(New(ItemID.StardustDragonStaff, "Bastón Dragón Stardust", "Dragón largo perforante", 40));
-                    list.Add(New(ItemID.Terraprisma, "Terraprisma", "Espadas aladas minion", 42));
+                    list.Add(New(ItemID.EmpressBlade, "Terraprisma", "Espadas aladas minion", 42));
                     break;
             }
             return list;

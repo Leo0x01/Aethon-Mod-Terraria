@@ -114,7 +114,7 @@ namespace AethonMod.Content.NPCs
                     NPC.GetSource_FromAI(),
                     pos,
                     Vector2.Zero,
-                    ProjectileID.Drippler, // mina de luz visual
+                    ProjectileID.Bullet, // mina de luz visual
                     30,
                     2f,
                     Main.myPlayer,
@@ -133,7 +133,7 @@ namespace AethonMod.Content.NPCs
                 Projectile.NewProjectile(
                     NPC.GetSource_FromAI(),
                     pos, vel,
-                    ProjectileID.StarVeil,
+                    ProjectileID.StarCannonStar,
                     40, 2f,
                     Main.myPlayer);
             }

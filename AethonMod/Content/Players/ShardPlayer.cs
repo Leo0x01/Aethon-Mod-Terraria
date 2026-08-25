@@ -164,7 +164,7 @@ namespace AethonMod.Content.Players
             // convert-0: Escudo de maná — el daño drena maná antes que HP
             if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0)
             {
-                int manaAbsorb = System.Math.Min(Player.statMana, modifiers.FinalDamage.Value.Round());
+                int manaAbsorb = System.Math.Min(Player.statMana, (int)modifiers.FinalDamage.ApplyTo(0));
                 Player.statMana -= manaAbsorb;
                 modifiers.FinalDamage -= manaAbsorb;
             }

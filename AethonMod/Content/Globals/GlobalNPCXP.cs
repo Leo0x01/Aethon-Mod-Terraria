@@ -43,10 +43,10 @@ namespace AethonMod.Content.Globals
             else if (damageClass == DamageClass.Magic || damageClass == DamageClass.Summon)
                 sp.MagicKills++;
             // Verificar si alguna rama alcanzó el umbral.
-            CheckImprint(sp);
+            CheckImprint(player, sp);
         }
 
-        private void CheckImprint(Players.ShardPlayer sp)
+        private void CheckImprint(Player player, Players.ShardPlayer sp)
         {
             int threshold = Players.ShardPlayer.KILLS_TO_IMPRINT;
             if (sp.DistanceKills >= threshold)

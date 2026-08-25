@@ -25,6 +25,7 @@ namespace AethonMod.Content.UI
         private UIPanel _panel = null!;
         private UIText _titleText = null!;
         private UIText _pointsText = null!;
+        public bool IsVisible = false;
         private List<SkillNodeButton> _nodeButtons = new();
         public SkillTreeData? CurrentTree;
 
@@ -124,12 +125,12 @@ namespace AethonMod.Content.UI
             if (sp == null || !sp.IsImprinted) return;
             var tree = SkillTreeCatalog.GetTree(sp.ActiveBranch);
             BuildTree(tree);
-            Visible = true;
+            IsVisible = true;
         }
 
         public void Hide()
         {
-            Visible = false;
+            IsVisible = false;
         }
 
         public override void Update(GameTime gameTime)

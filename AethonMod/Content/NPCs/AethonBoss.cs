@@ -46,7 +46,7 @@ namespace AethonMod.Content.NPCs
             NPC.boss = true;
             NPC.npcSlots = 30f;
             NPC.aiStyle = -1;
-            Music = MusicID.LunarPillar;
+            Music = MusicID.Boss5;
             SceneEffectPriority = SceneEffectPriority.BossHigh;
         }
 

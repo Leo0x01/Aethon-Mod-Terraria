@@ -18,6 +18,7 @@ namespace AethonMod.Content.UI
     /// </summary>
     public class MemoryCodexUIState : UIState
     {
+        public bool IsVisible = false;
         public const int PanelWidth = 700;
         public const int PanelHeight = 500;
 
@@ -96,12 +97,12 @@ namespace AethonMod.Content.UI
 
             // Construir lista de entradas para la rama activa.
             BuildEntries(sp);
-            Visible = true;
+            IsVisible = true;
         }
 
         public void Hide()
         {
-            Visible = false;
+            IsVisible = false;
         }
 
         private void BuildEntries(ShardPlayer sp)

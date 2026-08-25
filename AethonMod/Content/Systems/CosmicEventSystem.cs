@@ -97,7 +97,7 @@ namespace AethonMod.Content.Systems
                 Projectile.NewProjectile(
                     player.GetSource_FromThis(),
                     pos, vel,
-                    ProjectileID.StarVeil, // visual, no daña
+                    ProjectileID.StarCannonStar, // visual, no daña
                     0, 0f,
                     Main.myPlayer);
             }

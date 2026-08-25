@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -42,9 +43,9 @@ namespace AethonMod.Content.Systems
 
         public override void UpdateUI(GameTime gameTime)
         {
-            if (SkillTreeUI?.Visible == true)
+            if (SkillTreeUI?.IsVisible == true)
                 _skillTreeInterface?.Update(gameTime);
-            if (CodexUI?.Visible == true)
+            if (CodexUI?.IsVisible == true)
                 _codexInterface?.Update(gameTime);
         }
 
@@ -57,7 +58,7 @@ namespace AethonMod.Content.Systems
                     "AethonMod: SkillTreeUI",
                     delegate
                     {
-                        if (SkillTreeUI?.Visible == true)
+                        if (SkillTreeUI?.IsVisible == true)
                             _skillTreeInterface?.Draw(Main.spriteBatch, new GameTime());
                         return true;
                     },
@@ -66,7 +67,7 @@ namespace AethonMod.Content.Systems
                     "AethonMod: CodexUI",
                     delegate
                     {
-                        if (CodexUI?.Visible == true)
+                        if (CodexUI?.IsVisible == true)
                             _codexInterface?.Draw(Main.spriteBatch, new GameTime());
                         return true;
                     },
@@ -83,7 +84,7 @@ namespace AethonMod.Content.Systems
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted)
                 {
-                    if (SkillTreeUI?.Visible == true)
+                    if (SkillTreeUI?.IsVisible == true)
                     {
                         SkillTreeUI.Hide();
                     }
@@ -100,7 +101,7 @@ namespace AethonMod.Content.Systems
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted)
                 {
-                    if (CodexUI?.Visible == true)
+                    if (CodexUI?.IsVisible == true)
                         CodexUI.Hide();
                     else
                         CodexUI?.Show();
