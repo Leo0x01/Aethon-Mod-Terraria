@@ -126,7 +126,7 @@ namespace AethonMod.Content.Globals
             };
 
             // Buscar el Fragmento Génesis en el inventario y reemplazarlo.
-            for (int i = 0; i < Main.InventoryItemSlotsCount; i++)
+            for (int i = 0; i < 58; i++)
             {
                 if (player.inventory[i].type == ModContent.ItemType<Items.GenesisShard>())
                 {

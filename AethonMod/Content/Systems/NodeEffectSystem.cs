@@ -220,13 +220,15 @@ namespace AethonMod.Content.Systems
             // solar-3: Ignición solar — enemigos quemados explotan
             if (HasNode(player, "solar-3") && npc.onFire)
             {
-                // Explosión visual (simplificado: daño en área)
+                // Explosión: daño directo a enemigos cercanos (sin SimpleStrikeNPC que es fragil)
                 foreach (NPC nearby in Main.ActiveNPCs)
                 {
                     if (nearby.whoAmI == npc.whoAmI || !nearby.active || nearby.friendly) continue;
                     if (Vector2.Distance(nearby.Center, npc.Center) < 100f)
                     {
-                        nearby.SimpleStrikeNPC(npc.lifeMax / 10, 0, false, 0, DamageClass.Generic, true, 0);
+                        nearby.life -= npc.lifeMax / 10;
+                        nearby.HitEffect(0, npc.lifeMax / 10);
+                        if (nearby.life <= 0) nearby.checkDead();
                     }
                 }
                 for (int i = 0; i < 20; i++)

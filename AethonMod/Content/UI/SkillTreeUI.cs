@@ -26,7 +26,7 @@ namespace AethonMod.Content.UI
         private UIText _titleText = null!;
         private UIText _pointsText = null!;
         private List<SkillNodeButton> _nodeButtons = new();
-        private SkillTreeData? _currentTree;
+        public SkillTreeData? CurrentTree;
 
         public override void OnInitialize()
         {
@@ -77,7 +77,7 @@ namespace AethonMod.Content.UI
         /// <summary>Construye los botones de nodos para el árbol actual.</summary>
         public void BuildTree(SkillTreeData tree)
         {
-            _currentTree = tree;
+            CurrentTree = tree;
             // Limpiar botones anteriores
             foreach (var btn in _nodeButtons)
             {
@@ -109,7 +109,7 @@ namespace AethonMod.Content.UI
             if (sp == null) return;
             int total = sp.CumulativeSkillPoints();
             int spent = 0;
-            foreach (var node in _currentTree?.Nodes ?? new List<SkillNodeData>())
+            foreach (var node in CurrentTree?.Nodes ?? new List<SkillNodeData>())
             {
                 if (sp.AllocatedNodes.Contains(node.Id))
                     spent += node.Cost;
@@ -169,7 +169,7 @@ namespace AethonMod.Content.UI
                 {
                     // Desasignar (solo si nada depende de él)
                     bool hasDep = false;
-                    foreach (var n in (Parent as SkillTreeUIState)?.GetTree()?.Nodes ?? new List<SkillNodeData>())
+                    foreach (var n in (Parent as SkillTreeUIState)?.CurrentTree?.Nodes ?? new List<SkillNodeData>())
                     {
                         if (n.PrereqId == _node.Id && sp.AllocatedNodes.Contains(n.Id))
                         {
@@ -207,8 +207,8 @@ namespace AethonMod.Content.UI
         {
             var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
             UpdateState(sp);
-            Calculations.Style.GetDrawRectangle(out var rect);
-            var center = rect.Center();
+            var rect = GetDimensions().ToRectangle();
+            var center = rect.Center;
 
             // Color según rareza
             Color color = _node.Rarity switch
@@ -240,17 +240,6 @@ namespace AethonMod.Content.UI
             Utils.DrawBorderString(spriteBatch, _node.Cost.ToString(),
                 new Vector2(center.X, center.Y - 4),
                 _isAllocated ? Color.Black : Color.White, 0.8f, 0.5f, 0.5f);
-        }
-    }
-
-    /// <summary>Extensión para acceder al árbol actual del UIState.</summary>
-    public static class SkillTreeUIStateExtensions
-    {
-        public static SkillTreeData? GetTree(this SkillTreeUIState state)
-        {
-            var field = typeof(SkillTreeUIState).GetField("_currentTree",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return field?.GetValue(state) as SkillTreeData;
         }
     }
 }

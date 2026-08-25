@@ -273,11 +273,11 @@ namespace AethonMod.Content.NPCs
             int projType = runeName switch
             {
                 "Último Prisma" => ProjectileID.LastPrism,
-                "Destello Lunar" => ProjectileID.LunarFlare,
+                "Destello Lunar" => ProjectileID.CultistBossLightningOrbArc,
                 "Tifón de Cuchillas" => ProjectileID.Typhoon,
                 "Hoja Terra" => ProjectileID.TerraBeam,
                 "Ira Estelar" => ProjectileID.StarWrath,
-                "Zenith" => ProjectileID.ZenithArrow,
+                "Zenith" => ProjectileID.StarWrath,
                 _ => ProjectileID.CultistBossLightningOrbArc,
             };
             Vector2 vel = (target.Center - NPC.Center).SafeNormalize(Vector2.Zero) * 10f;

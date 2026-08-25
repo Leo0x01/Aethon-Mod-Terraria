@@ -47,7 +47,7 @@ namespace AethonMod.Content.Tiles
 
             // Otorgar el Fragmento Génesis si el jugador no lo tiene.
             bool hasShard = false;
-            for (int k = 0; k < Main.InventoryItemSlotsCount; k++)
+            for (int k = 0; k < 58; k++)
             {
                 if (player.inventory[k].type == ModContent.ItemType<Items.GenesisShard>())
                 {
