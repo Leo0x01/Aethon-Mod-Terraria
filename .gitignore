@@ -40,8 +40,8 @@ obj/
 *.dll
 *.pdb
 *.exe
-*.tmod
-.tmod/
+
+
 
 # === Zips / downloads ===
 download/*.zip
