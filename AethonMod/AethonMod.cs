@@ -3,20 +3,23 @@ using Terraria;
 using Terraria.ModLoader;
 using AethonMod.Content.Systems;
 
+// En tModLoader, la clase Mod debe:
+// 1. Heredar de Terraria.ModLoader.Mod
+// 2. Estar en un namespace que coincida con el nombre de la carpeta del mod
+// 3. tModLoader busca CUALQUIER clase que herede de Mod dentro del namespace raiz
+//
+// IMPORTANTE: Si la clase se llama igual que el namespace, C# la omite del DLL.
+// Solucion: usar un namespace diferente para la clase, pero tModLoader
+// requiere que el namespace raiz sea "AethonMod".
+//
+// La solucion correcta es: la clase debe estar en el namespace AethonMod,
+// pero NO llamarse AethonMod. tModLoader busca cualquier subclase de Mod.
+
 namespace AethonMod
 {
-    // En tModLoader, la clase Mod debe estar en un namespace
-    // que coincida con el nombre del mod (carpeta).
-    // La clase NO debe tener el mismo nombre que el namespace.
-    // tModLoader busca la clase que hereda de Mod dentro del namespace.
-
-    /// <summary>
-    /// Punto de entrada del mod "Aethon, la Luz Primordial".
-    /// </summary>
-    public class AethonModMod : Mod
+    public class AethonMod : Mod
     {
-        public const string ModName = "AethonMod";
-        public static AethonModMod Instance => ModContent.GetInstance<AethonModMod>();
+        public static AethonMod Instance => ModContent.GetInstance<AethonMod>();
 
         public override void Load()
         {
@@ -29,11 +32,6 @@ namespace AethonMod
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
             ShardSyncSystem.HandlePacket(reader);
-        }
-
-        public static string TexturePath(string path)
-        {
-            return $"{ModName}/Content/{path}";
         }
     }
 }
