@@ -57,12 +57,13 @@ namespace AethonMod.Content.Systems
 
         public override void UpdateUI(GameTime gameTime)
         {
+            // La barra de XP siempre se actualiza (ella misma decide si es visible).
+            _xpBarInterface?.Update(gameTime);
+
             if (SkillTreeUI?.IsVisible == true)
                 _skillTreeInterface?.Update(gameTime);
             if (CodexUI?.IsVisible == true)
                 _codexInterface?.Update(gameTime);
-            if (XPBarUI?.IsVisible == true)
-                _xpBarInterface?.Update(gameTime);
             if (BranchChoiceUI?.IsVisible == true)
                 _branchChoiceInterface?.Update(gameTime);
         }

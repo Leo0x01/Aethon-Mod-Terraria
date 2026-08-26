@@ -7,14 +7,15 @@ namespace AethonMod.Content.Weapons
 {
     /// <summary>
     /// Solbrand, Filo del Alba — arma de la rama de Cuerpo a Cuerpo.
-    /// Hoja de luz condensada que corta la realidad.
-    /// Daño escala con el nivel: daño = nivel × 3.1.
+    ///
+    /// PROYECTILES: Base NO dispara proyectiles (melee puro).
+    /// Los proyectiles se desbloquean con nodos Notable/Keystone del árbol.
+    /// Ej: nodo "blade-1" (Corte de rayo) desbloquea el proyectil DawnSlash.
     /// </summary>
     public class SolbrandEdge : ModItem
     {
         public override void SetStaticDefaults()
         {
-            // DisplayName / Tooltip cargados desde Localization.
         }
 
         public override void SetDefaults()
@@ -31,9 +32,11 @@ namespace AethonMod.Content.Weapons
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item1;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<Projectiles.DawnSlash>();
+            // Base: NO dispara proyectiles (melee puro).
+            Item.shoot = ProjectileID.None;
             Item.shootSpeed = 12f;
-            Item.noMelee = true;
+            // Permitir daño melee directo (no solo proyectil).
+            Item.noMelee = false;
         }
 
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
@@ -43,7 +46,6 @@ namespace AethonMod.Content.Weapons
             {
                 damage += sp.ShardLevel * 3.1f;
             }
-            // Aplicar efectos de nodos del árbol de Melee.
             float crit = 0;
             Systems.NodeEffectSystem.ApplyMeleeEffects(player, ref damage, ref crit);
             player.GetCritChance(DamageClass.Melee) += crit;
@@ -52,6 +54,33 @@ namespace AethonMod.Content.Weapons
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
         {
             knockback *= Systems.NodeEffectSystem.GetMeleeKnockbackMult(player);
+        }
+
+        public override bool CanShoot(Player player)
+        {
+            // Solo disparar proyectiles si el jugador tiene nodos que los desbloquean.
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp == null) return false;
+
+            // Nodo "blade-1-notable" (Corte de rayo) desbloquea el proyectil.
+            bool hasBladeNotable = sp.AllocatedNodes.Contains("blade-notable");
+            if (hasBladeNotable)
+            {
+                Item.shoot = ModContent.ProjectileType<Projectiles.DawnSlash>();
+                return true;
+            }
+
+            // Nodo "celestial-notable" desbloquea onda solar.
+            bool hasCelestialNotable = sp.AllocatedNodes.Contains("celestial-notable");
+            if (hasCelestialNotable)
+            {
+                Item.shoot = ModContent.ProjectileType<Projectiles.DawnSlash>();
+                return true;
+            }
+
+            // Sin nodos: no disparar.
+            Item.shoot = ProjectileID.None;
+            return false;
         }
 
         public override Vector2? HoldoutOffset()

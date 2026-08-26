@@ -6,15 +6,18 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
-    /// Grimorio del Eterno — arma de la rama de Artes Mágicas (Magic + Summoner fusionadas).
-    /// Lanza proyectiles mágicos de luz y puede invocar minions estelares.
-    /// Daño escala con el nivel: daño = nivel × 2.6 + (% maná faltante × 0.5).
+    /// Grimorio del Eterno — arma de la rama de Artes Mágicas.
+    ///
+    /// MANA: Base 0 (no consume mana sin nodos).
+    /// Cada nodo Notable del árbol aumenta el costo de mana en 5.
+    /// Máximo: 20 de mana por uso (4 notables = 4×5 = 20).
+    ///
+    /// DAÑO: Escala con el nivel del fragmento.
     /// </summary>
     public class GrimoireEternal : ModItem
     {
         public override void SetStaticDefaults()
         {
-            // DisplayName / Tooltip cargados desde Localization.
         }
 
         public override void SetDefaults()
@@ -33,7 +36,7 @@ namespace AethonMod.Content.Weapons
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<Projectiles.ArcaneBolt>();
             Item.shootSpeed = 12f;
-            Item.mana = 8;
+            Item.mana = 0; // Base: NO consume mana.
             Item.noMelee = true;
         }
 
@@ -44,7 +47,6 @@ namespace AethonMod.Content.Weapons
             {
                 damage += sp.ShardLevel * 2.6f;
             }
-            // Aplicar efectos de nodos del árbol de Artes Mágicas.
             float crit = 0;
             Systems.NodeEffectSystem.ApplyMagicEffects(player, ref damage, ref crit);
             player.GetCritChance(DamageClass.Magic) += crit;
@@ -52,7 +54,30 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
         {
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp == null) return;
+
+            // Base: 0 mana. Cada Notable asignado suma 5 de mana, hasta max 20.
+            int notableCount = 0;
+            // Contar nodos Notable del árbol PoE asignados.
+            var tree = Systems.PoETreeCatalog.GetTree(Players.BranchType.Magic);
+            foreach (var node in tree.Nodes)
+            {
+                if (node.Type == Systems.NodeType.Notable && sp.AllocatedNodes.Contains(node.Id))
+                    notableCount++;
+            }
+
+            int baseManaCost = System.Math.Min(notableCount * 5, 20);
+
+            // Aplicar reducción de mana de nodos específicos (eficiencia, etc).
             float reduction = Systems.NodeEffectSystem.GetManaCostReduction(player);
+            int finalCost = (int)(baseManaCost * (1f - reduction));
+            finalCost = System.Math.Max(0, finalCost);
+
+            // Forzar el costo de mana del item.
+            Item.mana = finalCost;
+
+            // Aplicar reducción al multiplicador también.
             mult *= (1f - reduction);
         }
 

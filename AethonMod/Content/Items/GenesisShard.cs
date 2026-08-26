@@ -46,7 +46,7 @@ namespace AethonMod.Content.Items
 
                 if (totalKills < threshold)
                 {
-                    Main.NewText($"El Fragmento Genesis aun no tiene forma. Mata {threshold - totalKills} enemigos mas para despertarlo.",
+                    Main.NewText($"El Fragmento Genesis aun no tiene forma. Gana {threshold - totalKills} de experiencia mas para despertarlo.",
                         new Color(180, 160, 220));
                 }
                 else
