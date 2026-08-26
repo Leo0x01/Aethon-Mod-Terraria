@@ -28,6 +28,10 @@ namespace AethonMod.Content.Systems
         {
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null || !sp.IsImprinted) return;
+            // Aplicar multiplicador de XP de la configuracion.
+            var config = ModContent.GetInstance<Content.AethonConfig>();
+            if (config != null)
+                amount = (int)(amount * config.XPMultiplier);
             sp.GrantXP(amount);
         }
 

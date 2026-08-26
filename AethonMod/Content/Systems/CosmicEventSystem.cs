@@ -63,20 +63,25 @@ namespace AethonMod.Content.Systems
                 AnnounceMilestone("El Despertar — Aethon disponible");
             }
 
+            var config = ModContent.GetInstance<Content.AethonConfig>();
+            bool eventsEnabled = config?.EnableCosmicEvents ?? true;
+            bool starlightEnabled = config?.EnableStarlightRain ?? true;
+            bool riftsEnabled = config?.EnableDimensionalRifts ?? true;
+
             // --- Evento continuo: Lluvia de Luz Estelar (Lv 25+) ---
-            if (level >= 25)
+            if (eventsEnabled && starlightEnabled && level >= 25)
             {
                 UpdateStarlightRain(player);
             }
 
             // --- Evento continuo: extensión del Sagrario (Lv 50+) ---
-            if (level >= 50)
+            if (eventsEnabled && level >= 50)
             {
-                // El bioma se activa automáticamente vía HollowSanctumBiome.IsBiomeActive.
+                // El bioma se activa automaticamente via HollowSanctumBiome.IsBiomeActive.
             }
 
             // --- Evento continuo: Rifts dimensionales (Lv 75+) ---
-            if (level >= 75)
+            if (eventsEnabled && riftsEnabled && level >= 75)
             {
                 UpdateDimensionalRifts(player);
             }

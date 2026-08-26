@@ -77,26 +77,25 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateInput()
         {
-            // Tecla 'K' para abrir/cerrar el árbol de habilidades.
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.K) &&
-                !Main.oldKeyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.K))
+            var config = ModContent.GetInstance<Content.AethonConfig>();
+            if (config == null) return;
+
+            // Tecla configurable para abrir/cerrar el árbol de habilidades.
+            if (Main.keyState.IsKeyDown(config.SkillTreeKey) &&
+                !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
             {
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted)
                 {
                     if (SkillTreeUI?.IsVisible == true)
-                    {
                         SkillTreeUI.Hide();
-                    }
                     else
-                    {
                         SkillTreeUI?.Show();
-                    }
                 }
             }
-            // Tecla 'J' para el códex de memoria.
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.J) &&
-                !Main.oldKeyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.J))
+            // Tecla configurable para el códex de memoria.
+            if (Main.keyState.IsKeyDown(config.CodexKey) &&
+                !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted)
