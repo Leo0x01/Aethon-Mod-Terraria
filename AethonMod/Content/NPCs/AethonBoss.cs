@@ -182,14 +182,11 @@ namespace AethonMod.Content.NPCs
 
         private void FlipGravity(Player player)
         {
-            // Invertir gravedad del jugador por 3 segundos.
-            player.gravDir = -player.gravDir;
+            // Invertir gravedad del jugador por 3 segundos usando el buff de gravitacion (no mutacion permanente).
+            // Antes: player.gravDir = -player.gravDir (era permanente — bug).
+            player.AddBuff(BuffID.Gravitation, 180); // 3 segundos
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, player.Center);
             Main.NewText("Aethon distorsiona la gravedad!", new Color(179, 136, 255));
-
-            // Programar el reset.
-            // (tModLoader no tiene timer directo; usamos un buff temporal o reset en PostUpdate.)
-            // Simplificado: el jugador se recupera cuando toca el suelo.
         }
 
         // ====================================================================
@@ -311,14 +308,33 @@ namespace AethonMod.Content.NPCs
 
         public override void OnKill()
         {
-            // Drops: Fragmentos de Resonancia + acceso a New Game+.
-            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
-            if (sp != null)
+            // Otorgar resonancia al jugador que mato al NPC (no a LocalPlayer — bug en MP).
+            int killerWho = NPC.lastInteraction;
+            if (killerWho < 0 || killerWho >= Main.player.Length)
             {
-                sp.ResonanceShards += 250;
+                for (int i = 0; i < Main.player.Length; i++)
+                {
+                    if (Main.player[i] != null && Main.player[i].active && NPC.playerInteraction[i])
+                    {
+                        killerWho = i;
+                        break;
+                    }
+                }
+            }
+            if (killerWho >= 0 && killerWho < Main.player.Length)
+            {
+                Player player = Main.player[killerWho];
+                if (player != null && player.active)
+                {
+                    var sp = player.GetModPlayer<Players.ShardPlayer>();
+                    if (sp != null)
+                    {
+                        sp.ResonanceShards += 250;
+                    }
+                }
             }
             Main.NewText("Aethon te reconoce como un par. El Fragmento se despierta.", new Color(245, 196, 81));
-            // TODO: drop de Forma Ascendida (cosmético).
+            // TODO: drop de Forma Ascendida (cosmetico).
         }
     }
 }

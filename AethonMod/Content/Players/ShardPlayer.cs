@@ -208,12 +208,38 @@ namespace AethonMod.Content.Players
         // --- Manejar daño entrante (escudo de maná) ---
         public override void ModifyHurt(ref Player.HurtModifiers modifiers)
         {
-            // convert-0: Escudo de maná — el daño drena maná antes que HP
-            if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0)
+            // Escudo de maná: el dano drena maná antes que HP.
+            // Nota: ApplyTo(0) devuelve solo la parte flat del StatModifier, que es 0 aqui.
+            // Por eso antes no funcionaba. Usamos modifiers.SourceDamage (que tiene el valor base)
+            // y dejamos que el escudo se aplique en OnHurt con el valor finalizado.
+            // Aqui solo marcamos que el jugador tiene escudo; la logica real esta en OnHurt.
+        }
+
+        public override void OnHurt(Player.HurtInfo info)
+        {
+            // Escudo de maná: drenar maná proporcional al dano recibido.
+            if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0 && info.Damage > 0)
             {
-                int manaAbsorb = System.Math.Min(Player.statMana, (int)modifiers.FinalDamage.ApplyTo(0));
-                Player.statMana -= manaAbsorb;
-                modifiers.FinalDamage -= manaAbsorb;
+                // Absorber hasta el 50% del dano con maná (escudo notable) o 80% (keystone).
+                float absorbPct = 0.5f;
+                if (Systems.NodeEffectSystem.HasNode(Player, "barrier-keystone"))
+                    absorbPct = 0.8f;
+
+                int manaAbsorb = (int)(info.Damage * absorbPct);
+                manaAbsorb = System.Math.Min(Player.statMana, manaAbsorb);
+                if (manaAbsorb > 0)
+                {
+                    Player.statMana -= manaAbsorb;
+                    // Curar la vida equivalente al maná absorbido.
+                    int healHp = manaAbsorb;
+                    Player.statLife = System.Math.Min(Player.statLifeMax2, Player.statLife + healHp);
+                    Player.HealEffect(healHp, true);
+                    // Particulas visuales
+                    for (int i = 0; i < 8; i++)
+                        Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.ManaStar,
+                            new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
+                            100, default, 1.2f);
+                }
             }
         }
     }

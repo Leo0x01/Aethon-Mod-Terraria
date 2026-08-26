@@ -6,49 +6,104 @@ namespace AethonMod.Content.Globals
 {
     /// <summary>
     /// GlobalNPC que otorga XP al fragmento del jugador cuando mata un NPC.
-    /// También rastrea el tipo de daño para detectar la rama a imprimir.
+    /// Tambien rastrea el tipo de dano para detectar la rama a imprimir.
     /// </summary>
     public class GlobalNPCXP : GlobalNPC
     {
         public override bool InstancePerEntity => true;
 
-        /// <summary>Tipo de daño del último golpe recibido (para tracking de rama).</summary>
+        /// <summary>Tipo de dano del ultimo golpe recibido (para tracking de rama).</summary>
         public int LastDamageClass = 0;
 
         public override void OnHitByItem(NPC npc, Player player, Item item, NPC.HitInfo hit, int damageDone)
         {
-            TrackDamageClass(player, item.DamageType);
-            // Lifesteal: regeneración de salud por daño causado (Keystone de Ascendancy).
+            // Lifesteal: regeneracion de salud por dano causado (Keystone de Ascendancy).
+            // Solo si el dano es de fuente no-minion (melee/distancia).
             Systems.NodeEffectSystem.OnHitNPC(player, npc, damageDone, false);
         }
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
         {
-            Player player = Main.player[projectile.owner];
-            if (player != null)
+            Player? player = Main.player[projectile.owner];
+            if (player != null && player.active)
             {
-                TrackDamageClass(player, projectile.DamageType);
-                // Lifesteal para proyectiles (determina si es de invocación).
+                // Lifesteal para proyectiles (determina si es de invocacion).
                 Systems.NodeEffectSystem.OnProjectileHitNPC(player, npc, damageDone, projectile);
             }
         }
 
+        public override void OnKill(NPC npc)
+        {
+            // No contar NPCs amistosos (town NPCs, etc.)
+            if (npc.friendly || npc.townNPC) return;
+
+            // Buscar al jugador que mato al NPC (usando npc.lastInteraction como indicador primario).
+            // En SP, npc.lastInteraction contiene el whoAmI del ultimo jugador que golpeo al NPC.
+            // En MP, solo el servidor deberia ejecutar OnKill logic; pero para SP y splitscreen esto funciona.
+            int killerWho = -1;
+            // Priorizar npc.lastInteraction (jugador que dio el golpe final).
+            if (npc.lastInteraction >= 0 && npc.lastInteraction < Main.player.Length)
+            {
+                Player last = Main.player[npc.lastInteraction];
+                if (last != null && last.active && !last.dead)
+                    killerWho = npc.lastInteraction;
+            }
+            // Fallback: buscar el primer jugador que interactuo con el NPC.
+            if (killerWho == -1)
+            {
+                for (int i = 0; i < Main.player.Length; i++)
+                {
+                    Player p = Main.player[i];
+                    if (p != null && p.active && !p.dead && npc.playerInteraction[i])
+                    {
+                        killerWho = i;
+                        break;
+                    }
+                }
+            }
+
+            if (killerWho == -1) return;
+            Player player = Main.player[killerWho];
+            if (player == null) return;
+
+            // Otorgar XP al jugador que mato al NPC.
+            int xp = Systems.ShardLevelSystem.XPForNPC(npc);
+            Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
+            Systems.NodeEffectSystem.OnKillNPC(player, npc);
+
+            // Tracking de kills por rama (solo si el jugador no ha elegido rama aun).
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp != null && !sp.IsImprinted)
+            {
+                TrackDamageClass(player, npc);
+            }
+        }
+
         /// <summary>
-        /// Rastrea la clase de daño para el conteo de kills por rama.
-        /// Cuando se alcanza KILLS_TO_IMPRINT, imprime el fragmento.
+        /// Rastrea la clase de dano del golpe que mato al NPC para el conteo de kills por rama.
+        /// Cuando se alcanza KILLS_TO_IMPRINT, imprime el fragmento (muestra la UI de eleccion).
         /// </summary>
-        private void TrackDamageClass(Player player, DamageClass damageClass)
+        private void TrackDamageClass(Player player, NPC npc)
         {
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null || sp.IsImprinted) return;
-            // Contar kills por tipo de daño para tracking.
-            if (damageClass == DamageClass.Ranged)
+
+            // Usar la clase de dano del ultimo golpe recibido (LastDamageClass).
+            // Esta se establece en OnHitByItem/OnHitByProjectile via el DamageType.
+            // Como no tenemos acceso directo aqui, inferimos del arma equipada del jugador.
+            // Solucion simple: usar el DamageType del arma sostenida actualmente.
+            Item weapon = player.HeldItem;
+            if (weapon == null) return;
+            var damageClass = weapon.DamageType;
+
+            // Usar CountsAsClass para detectar hibridos correctamente.
+            if (damageClass.CountsAsClass(DamageClass.Ranged))
                 sp.DistanceKills++;
-            else if (damageClass == DamageClass.Melee)
+            else if (damageClass.CountsAsClass(DamageClass.Melee))
                 sp.MeleeKills++;
-            else if (damageClass == DamageClass.Magic || damageClass == DamageClass.Summon)
+            else if (damageClass.CountsAsClass(DamageClass.Magic) || damageClass.CountsAsClass(DamageClass.Summon))
                 sp.MagicKills++;
-            // Verificar si el total de kills alcanza el umbral para mostrar la elección.
+
             CheckImprintReady(player, sp);
         }
 
@@ -56,11 +111,8 @@ namespace AethonMod.Content.Globals
         {
             int totalKills = sp.DistanceKills + sp.MeleeKills + sp.MagicKills;
             int threshold = Players.ShardPlayer.KILLS_TO_IMPRINT;
-            // Cuando el total de kills alcanza el umbral, mostrar las tarjetas de elección.
-            // NO elegir automaticamente — el jugador decide.
             if (totalKills >= threshold && !sp.IsImprinted)
             {
-                // Mostrar la UI de elección de rama.
                 var ui = ModContent.GetInstance<Content.Systems.UISystem>();
                 if (ui != null && ui.BranchChoiceUI != null && !ui.BranchChoiceUI.IsVisible)
                 {
@@ -70,49 +122,5 @@ namespace AethonMod.Content.Globals
                 }
             }
         }
-
-        public override void OnKill(NPC npc)
-        {
-            // SOLO otorgar XP si el NPC fue matado por el jugador o sus invocaciones.
-            // npc.SpawnedFromPlayer indica si el jugador interactuo con el.
-            // Verificamos npc.playerInteraction que es true si el jugador o sus proyectiles dañaron al NPC.
-            // Pero eso no distingue entre NPCs hostiles y NPCs amistosos.
-            // Solucion: usar npc.lastInteraction que es el whoAmI del ultimo jugador que golpeo al NPC.
-
-            // No contar NPCs amistosos (town NPCs, etc.)
-            if (npc.friendly || npc.townNPC) return;
-
-            // No contar NPCs que fueron matados por otros NPCs (no por el jugador).
-            // npc.lastInteraction contiene el whoAmI del ultimo jugador que interactuo.
-            // Si fue un NPC el que mato, lastInteraction sera -1 o un indice de NPC.
-            // Aceptamos solo si un jugador real interactuo con el NPC.
-            bool playerKilled = false;
-            foreach (Player player in Main.ActivePlayers)
-            {
-                if (player.active && !player.dead)
-                {
-                    // Verificar si este jugador causo el golpe final o daño al NPC.
-                    // Usar npc.playerInteraction que es true si el jugador interactuo con el NPC.
-                    if (npc.playerInteraction[player.whoAmI])
-                    {
-                        playerKilled = true;
-                        // Otorgar XP SOLO al jugador que mato al NPC.
-                        int xp = Systems.ShardLevelSystem.XPForNPC(npc);
-                        Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
-                        Systems.NodeEffectSystem.OnKillNPC(player, npc);
-
-                        // Tambien contar kills para la deteccion de rama.
-                        var sp = player.GetModPlayer<Players.ShardPlayer>();
-                        if (sp != null && !sp.IsImprinted)
-                        {
-                            // El tracking de kills ya se hace en OnHitByItem/OnHitByProjectile.
-                        }
-                        break; // Solo el primer jugador que interactuo.
-                    }
-                }
-            }
-        }
-
-        // El reemplazo del item ahora lo hace la BranchCard en la UI de elección.
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.DataStructures;
 
 namespace AethonMod.Content.Weapons
 {
@@ -9,8 +10,8 @@ namespace AethonMod.Content.Weapons
     /// Solbrand, Filo del Alba — arma de la rama de Cuerpo a Cuerpo.
     ///
     /// PROYECTILES: Base NO dispara proyectiles (melee puro).
-    /// Los proyectiles se desbloquean con nodos Notable/Keystone del árbol.
-    /// Ej: nodo "blade-1" (Corte de rayo) desbloquea el proyectil DawnSlash.
+    /// Los proyectiles se desbloquean con nodos Notable/Keystone del arbol.
+    /// Ej: nodo "blade-notable" (Corte de rayo) desbloquea el proyectil DawnSlash.
     /// </summary>
     public class SolbrandEdge : ModItem
     {
@@ -56,31 +57,27 @@ namespace AethonMod.Content.Weapons
             knockback *= Systems.NodeEffectSystem.GetMeleeKnockbackMult(player);
         }
 
-        public override bool CanShoot(Player player)
+        /// <summary>
+        /// Dispara el proyectil DawnSlash solo si el jugador tiene nodos que lo desbloquean.
+        /// NO mutamos Item.shoot (eso causaba bugs de estado).
+        /// </summary>
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // Solo disparar proyectiles si el jugador tiene nodos que los desbloquean.
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return false;
 
-            // Nodo "blade-1-notable" (Corte de rayo) desbloquea el proyectil.
-            bool hasBladeNotable = sp.AllocatedNodes.Contains("blade-notable");
-            if (hasBladeNotable)
-            {
-                Item.shoot = ModContent.ProjectileType<Projectiles.DawnSlash>();
-                return true;
-            }
+            // Nodos que desbloquean proyectiles.
+            bool hasBladeNotable = sp.AllocatedNodes.Contains("blade-notable") ||
+                                   sp.AllocatedNodes.Contains("blade-keystone");
+            bool hasCelestialNotable = sp.AllocatedNodes.Contains("celestial-notable") ||
+                                        sp.AllocatedNodes.Contains("celestial-keystone");
 
-            // Nodo "celestial-notable" desbloquea onda solar.
-            bool hasCelestialNotable = sp.AllocatedNodes.Contains("celestial-notable");
-            if (hasCelestialNotable)
-            {
-                Item.shoot = ModContent.ProjectileType<Projectiles.DawnSlash>();
-                return true;
-            }
+            if (!hasBladeNotable && !hasCelestialNotable) return false;
 
-            // Sin nodos: no disparar.
-            Item.shoot = ProjectileID.None;
-            return false;
+            // Disparar manualmente el proyectil DawnSlash.
+            int projType = ModContent.ProjectileType<Projectiles.DawnSlash>();
+            Projectile.NewProjectile(source, position, velocity, projType, damage, knockback, player.whoAmI);
+            return false; // ya disparamos manualmente.
         }
 
         public override Vector2? HoldoutOffset()
@@ -89,3 +86,4 @@ namespace AethonMod.Content.Weapons
         }
     }
 }
+

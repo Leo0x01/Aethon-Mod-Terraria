@@ -31,9 +31,12 @@ namespace AethonMod.Content.Weapons.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            target.defense -= 5;
+            // Aplicar Ichor (reduccion temporal de defensa) en vez de mutar permanentemente.
+            // Antes: target.defense -= 5; // BUG: se acumulaba infinitamente.
+            // Ahora: debuff de 5 segundos (300 ticks) que reduce defensa.
+            target.AddBuff(BuffID.Ichor, 300);
 
-            // Explosión de estrellas doradas al impactar.
+            // Explosion de estrellas doradas al impactar.
             for (int i = 0; i < 15; i++)
             {
                 Dust.NewDustPerfect(target.Center, DustID.GoldFlame,

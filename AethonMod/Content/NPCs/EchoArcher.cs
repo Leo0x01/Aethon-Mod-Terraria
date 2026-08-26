@@ -141,10 +141,29 @@ namespace AethonMod.Content.NPCs
 
         public override void OnKill()
         {
-            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
+            // Otorgar resonancia al jugador que mato al NPC (no a LocalPlayer — bug en MP).
+            int killerWho = NPC.lastInteraction;
+            if (killerWho < 0 || killerWho >= Main.player.Length)
+            {
+                // Fallback: buscar primer jugador que interactuo.
+                for (int i = 0; i < Main.player.Length; i++)
+                {
+                    if (Main.player[i] != null && Main.player[i].active && NPC.playerInteraction[i])
+                    {
+                        killerWho = i;
+                        break;
+                    }
+                }
+            }
+            if (killerWho < 0 || killerWho >= Main.player.Length) return;
+            Player player = Main.player[killerWho];
+            if (player == null || !player.active) return;
+
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null)
             {
                 sp.ResonanceShards += 110;
+                Main.NewText($"Has absorbido 110 fragmentos de resonancia de {NPC.FullName}!", new Color(245, 196, 81));
             }
         }
     }

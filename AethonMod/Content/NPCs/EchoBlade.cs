@@ -84,25 +84,51 @@ namespace AethonMod.Content.NPCs
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item1, NPC.Center);
         }
 
-        public override void OnHitByItem(Player player, Item item, NPC.HitInfo hit, int damageDone)
+        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
         {
-            // 20% chance de parry (inmune al golpe).
+            // 20% chance de parry (inmune al golpe) con cooldown de 120 ticks.
+            // Usamos ModifyIncomingHit en vez de revertir daño en OnHitByItem (que era buggy).
             if (ParryCooldown <= 0 && Main.rand.NextBool(5))
             {
                 ParryCooldown = 120;
-                NPC.life += damageDone; // revertir daño
+                modifiers.Null(); // anular el golpe por completo (i-frame)
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item37, NPC.Center);
                 for (int i = 0; i < 15; i++)
                     Dust.NewDust(NPC.Center, 20, 20, DustID.YellowStarDust);
             }
         }
 
+        public override void OnHitByItem(Player player, Item item, NPC.HitInfo hit, int damageDone)
+        {
+            // El parry ahora se maneja en ModifyIncomingHit.
+            // Aqui solo efectos visuales secundarios.
+        }
+
         public override void OnKill()
         {
-            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
+            // Otorgar resonancia al jugador que mato al NPC (no a LocalPlayer — bug en MP).
+            int killerWho = NPC.lastInteraction;
+            if (killerWho < 0 || killerWho >= Main.player.Length)
+            {
+                // Fallback: buscar primer jugador que interactuo.
+                for (int i = 0; i < Main.player.Length; i++)
+                {
+                    if (Main.player[i] != null && Main.player[i].active && NPC.playerInteraction[i])
+                    {
+                        killerWho = i;
+                        break;
+                    }
+                }
+            }
+            if (killerWho < 0 || killerWho >= Main.player.Length) return;
+            Player player = Main.player[killerWho];
+            if (player == null || !player.active) return;
+
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null)
             {
                 sp.ResonanceShards += 120;
+                Main.NewText($"Has absorbido 120 fragmentos de resonancia de {NPC.FullName}!", new Color(245, 196, 81));
             }
         }
     }

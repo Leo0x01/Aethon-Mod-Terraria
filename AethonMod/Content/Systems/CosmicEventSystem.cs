@@ -29,61 +29,60 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateWorld()
         {
-            Player? player = Main.LocalPlayer;
-            if (player == null) return;
-            var sp = player.GetModPlayer<Players.ShardPlayer>();
-            if (sp == null || !sp.IsImprinted) return;
+            // Iterar todos los jugadores activos (no solo LocalPlayer — necesario para servidores).
+            foreach (Player player in Main.ActivePlayers)
+            {
+                if (player == null || !player.active || player.dead) continue;
+                var sp = player.GetModPlayer<Players.ShardPlayer>();
+                if (sp == null || !sp.IsImprinted) continue;
 
-            int level = sp.ShardLevel;
+                int level = sp.ShardLevel;
 
-            // --- Hitos de un solo disparo ---
-            if (level >= 25 && !_milestone25Triggered)
-            {
-                _milestone25Triggered = true;
-                AnnounceMilestone("Lluvia de Luz Estelar");
-            }
-            if (level >= 50 && !_milestone50Triggered)
-            {
-                _milestone50Triggered = true;
-                AnnounceMilestone("El Sagrario Hueco se extiende");
-            }
-            if (level >= 75 && !_milestone75Triggered)
-            {
-                _milestone75Triggered = true;
-                AnnounceMilestone("Rifts Dimensionales");
-            }
-            if (level >= 100 && !_milestone100Triggered)
-            {
-                _milestone100Triggered = true;
-                AnnounceMilestone("Aethon se agita — Ecos despiertan");
-            }
-            if (level >= 150 && !_milestone150Triggered)
-            {
-                _milestone150Triggered = true;
-                AnnounceMilestone("El Despertar — Aethon disponible");
-            }
+                // --- Hitos de un solo disparo (por jugador, en SP) ---
+                // Nota: estos flags son globales; en MP deberian ser por-jugador.
+                if (level >= 25 && !_milestone25Triggered)
+                {
+                    _milestone25Triggered = true;
+                    AnnounceMilestone("Lluvia de Luz Estelar");
+                }
+                if (level >= 50 && !_milestone50Triggered)
+                {
+                    _milestone50Triggered = true;
+                    AnnounceMilestone("El Sagrario Hueco se extiende");
+                }
+                if (level >= 75 && !_milestone75Triggered)
+                {
+                    _milestone75Triggered = true;
+                    AnnounceMilestone("Rifts Dimensionales");
+                }
+                if (level >= 100 && !_milestone100Triggered)
+                {
+                    _milestone100Triggered = true;
+                    AnnounceMilestone("Aethon se agita — Ecos despiertan");
+                }
+                if (level >= 150 && !_milestone150Triggered)
+                {
+                    _milestone150Triggered = true;
+                    AnnounceMilestone("El Despertar — Aethon disponible");
+                }
 
-            var config = ModContent.GetInstance<Content.AethonConfig>();
-            bool eventsEnabled = config?.EnableCosmicEvents ?? true;
-            bool starlightEnabled = config?.EnableStarlightRain ?? true;
-            bool riftsEnabled = config?.EnableDimensionalRifts ?? true;
+                var config = ModContent.GetInstance<Content.AethonConfig>();
+                bool eventsEnabled = config?.EnableCosmicEvents ?? true;
+                bool starlightEnabled = config?.EnableStarlightRain ?? true;
+                bool riftsEnabled = config?.EnableDimensionalRifts ?? true;
 
-            // --- Evento continuo: Lluvia de Luz Estelar (Lv 25+) ---
-            if (eventsEnabled && starlightEnabled && level >= 25)
-            {
-                UpdateStarlightRain(player);
-            }
+                // --- Evento continuo: Lluvia de Luz Estelar (Lv 25+) ---
+                if (eventsEnabled && starlightEnabled && level >= 25)
+                {
+                    UpdateStarlightRain(player);
+                }
 
-            // --- Evento continuo: extensión del Sagrario (Lv 50+) ---
-            if (eventsEnabled && level >= 50)
-            {
-                // El bioma se activa automaticamente via HollowSanctumBiome.IsBiomeActive.
-            }
-
-            // --- Evento continuo: Rifts dimensionales (Lv 75+) ---
-            if (eventsEnabled && riftsEnabled && level >= 75)
-            {
-                UpdateDimensionalRifts(player);
+                // --- Evento continuo: Rifts dimensionales (Lv 75+) ---
+                // Solo el servidor spawnea NPCs para evitar duplicados en MP.
+                if (eventsEnabled && riftsEnabled && level >= 75 && Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
+                {
+                    UpdateDimensionalRifts(player);
+                }
             }
         }
 
@@ -133,7 +132,7 @@ namespace AethonMod.Content.Systems
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, Main.LocalPlayer.Center);
         }
 
-        /// <summary>Resetea los flags de hitos (para testeo).</summary>
+        /// <summary>Resetea los flags de hitos (para testeo o nueva partida).</summary>
         public static void ResetMilestones()
         {
             _milestone25Triggered = false;
@@ -141,6 +140,17 @@ namespace AethonMod.Content.Systems
             _milestone75Triggered = false;
             _milestone100Triggered = false;
             _milestone150Triggered = false;
+        }
+
+        public override void OnWorldLoad()
+        {
+            // Resetear hitos al cargar un mundo nuevo (evita que se queden "ya triggered").
+            ResetMilestones();
+        }
+
+        public override void OnWorldUnload()
+        {
+            ResetMilestones();
         }
     }
 }

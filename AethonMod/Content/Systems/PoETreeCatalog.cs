@@ -77,20 +77,30 @@ namespace AethonMod.Content.Systems
     }
 
     /// <summary>
-    /// Catálogo de árboles de habilidades estilo PoE.
-    /// Cada rama tiene un árbol extenso y complejo.
+    /// Catalogo de arboles de habilidades estilo PoE.
+    /// Cada rama tiene un arbol extenso y complejo.
+    /// Los arboles se construyen una sola vez y se cachean (son read-only).
     /// </summary>
     public static class PoETreeCatalog
     {
+        // Cache de arboles construidos (son read-only despues de Build)
+        private static PoESkillTree? _distanceTree;
+        private static PoESkillTree? _meleeTree;
+        private static PoESkillTree? _magicTree;
+        private static readonly object _lock = new();
+
         public static PoESkillTree GetTree(BranchType branch)
         {
-            return branch switch
+            lock (_lock)
             {
-                BranchType.Distance => BuildDistanceTree(),
-                BranchType.Melee => BuildMeleeTree(),
-                BranchType.Magic => BuildMagicTree(),
-                _ => new PoESkillTree { Branch = branch },
-            };
+                return branch switch
+                {
+                    BranchType.Distance => _distanceTree ??= BuildDistanceTree(),
+                    BranchType.Melee => _meleeTree ??= BuildMeleeTree(),
+                    BranchType.Magic => _magicTree ??= BuildMagicTree(),
+                    _ => new PoESkillTree { Branch = branch },
+                };
+            }
         }
 
         // ====================================================================
@@ -272,6 +282,18 @@ namespace AethonMod.Content.Systems
             float clusterX = cx + (float)Math.Cos(rad) * dist;
             float clusterY = cy + (float)Math.Sin(rad) * dist;
 
+            // Helper local para añadir bidireccional (con null check)
+            void ConnectBidirectional(string fromId, string toId)
+            {
+                var fromNode = tree.Nodes.Find(n => n.Id == fromId);
+                var toNode = tree.Nodes.Find(n => n.Id == toId);
+                if (fromNode != null && toNode != null)
+                {
+                    if (!fromNode.Connections.Contains(toId)) fromNode.Connections.Add(toId);
+                    if (!toNode.Connections.Contains(fromId)) toNode.Connections.Add(fromId);
+                }
+            }
+
             // Nodo de entrada del cluster (conectado al camino principal)
             string entryId = $"{clusterId}-entry";
             var entryNode = new PoESkillNode
@@ -298,7 +320,7 @@ namespace AethonMod.Content.Systems
                     X = nx, Y = ny,
                 };
                 node.Connections.Add(prevId);
-                tree.Nodes.Find(n => n.Id == prevId)!.Connections.Add(nodeId);
+                ConnectBidirectional(prevId, nodeId);
                 tree.Nodes.Add(node);
                 prevId = nodeId;
             }
@@ -313,7 +335,7 @@ namespace AethonMod.Content.Systems
                 X = clusterX + 20f, Y = clusterY + 80f,
             };
             notable.Connections.Add(prevId);
-            tree.Nodes.Find(n => n.Id == prevId)!.Connections.Add(notableId);
+            ConnectBidirectional(prevId, notableId);
             tree.Nodes.Add(notable);
 
             // Keystone del cluster (opcional)
@@ -328,7 +350,7 @@ namespace AethonMod.Content.Systems
                     X = clusterX + 60f, Y = clusterY + 130f,
                 };
                 keystone.Connections.Add(notableId);
-                tree.Nodes.Find(n => n.Id == notableId)!.Connections.Add(keystoneId);
+                ConnectBidirectional(notableId, keystoneId);
                 tree.Nodes.Add(keystone);
             }
         }
@@ -338,13 +360,17 @@ namespace AethonMod.Content.Systems
         {
             string fromId = $"{fromCluster}-entry";
             string toId = $"{toCluster}-entry";
+            ConnectBidirectionalTree(tree, fromId, toId);
+        }
+
+        /// <summary>Conecta dos nodos bidireccionalmente (null-safe, evita duplicados).</summary>
+        private static void ConnectBidirectionalTree(PoESkillTree tree, string fromId, string toId)
+        {
             var from = tree.Nodes.Find(n => n.Id == fromId);
             var to = tree.Nodes.Find(n => n.Id == toId);
-            if (from != null && to != null)
-            {
-                from.Connections.Add(toId);
-                to.Connections.Add(fromId);
-            }
+            if (from == null || to == null) return;
+            if (!from.Connections.Contains(toId)) from.Connections.Add(toId);
+            if (!to.Connections.Contains(fromId)) to.Connections.Add(fromId);
         }
 
         // ====================================================================
@@ -362,9 +388,8 @@ namespace AethonMod.Content.Systems
                 X = cx, Y = cy,
             };
             tree.Nodes.Add(ascendEntry);
-            // Conectar al nodo inicial
-            tree.Nodes.Find(n => n.Id == "start")!.Connections.Add(ascendEntryId);
-            ascendEntry.Connections.Add("start");
+            // Conectar al nodo inicial (null-safe)
+            ConnectBidirectionalTree(tree, "start", ascendEntryId);
 
             // 6 potenciadores procedurales base (se generan más al subir de nivel)
             string[] ascendNames = {
@@ -387,7 +412,7 @@ namespace AethonMod.Content.Systems
                     Y = cy + (float)Math.Sin(angle) * 200f,
                 };
                 node.Connections.Add(prevAscendId);
-                tree.Nodes.Find(n => n.Id == prevAscendId)!.Connections.Add(nodeId);
+                ConnectBidirectionalTree(tree, prevAscendId, nodeId);
                 tree.Nodes.Add(node);
                 prevAscendId = nodeId;
             }
@@ -408,7 +433,7 @@ namespace AethonMod.Content.Systems
                 X = cx + 100f, Y = cy + 250f,
             };
             regenKeystone.Connections.Add(prevAscendId);
-            tree.Nodes.Find(n => n.Id == prevAscendId)!.Connections.Add(regenKeystoneId);
+            ConnectBidirectionalTree(tree, prevAscendId, regenKeystoneId);
             tree.Nodes.Add(regenKeystone);
 
             // Potenciadores adicionales que se generan proceduralmente
@@ -426,7 +451,7 @@ namespace AethonMod.Content.Systems
                     Y = cy + (float)Math.Sin(angle) * 300f,
                 };
                 node.Connections.Add(prevAscendId);
-                tree.Nodes.Find(n => n.Id == prevAscendId)!.Connections.Add(nodeId);
+                ConnectBidirectionalTree(tree, prevAscendId, nodeId);
                 tree.Nodes.Add(node);
                 prevAscendId = nodeId;
             }

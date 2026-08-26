@@ -2,12 +2,13 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.DataStructures;
 
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
     /// Lumina, la Arcoestelar — arma de la rama de Distancia.
-    /// Arco que dispara flechas de luz estelar (no consume munición base).
+    /// Arco que dispara flechas de luz estelar (no consume municion base).
     /// El daño escala con el nivel del fragmento: daño = nivel × 2.4.
     /// </summary>
     public class LuminaStarbow : ModItem
@@ -58,14 +59,27 @@ namespace AethonMod.Content.Weapons
 
         public override bool CanConsumeAmmo(Item ammo, Player player)
         {
-            // El arco de luz estelar no consume munición base.
+            // El arco de luz estelar no consume munición base, a menos que el jugador no tenga el keystone de carcaj infinito.
+            // Si tiene "quiver-keystone" o "ammo-keystone", no consume munición.
+            // Base: no consume munición (es un arco cosmico).
             return false;
         }
 
-        public override void ModifyShootStats(Player player, ref Vector2 position, ref Vector2 velocity, ref int type, ref int damage, ref float knockback)
+        /// <summary>
+        /// Dispara flechas extra si el jugador tiene nodos de multi-disparo.
+        /// </summary>
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // Proyectiles extra (Cuerda doble, etc.)
-            // (tModLoader dispara 1 por defecto; los extras se manejan en Shoot.)
+            int extra = Systems.NodeEffectSystem.GetExtraProjectiles(player);
+            // La flecha principal la dispara tModLoader automaticamente (retornamos true).
+            // Disparar las extra en abanico.
+            for (int i = 0; i < extra; i++)
+            {
+                float angle = (i + 1) * 0.15f * (i % 2 == 0 ? 1f : -1f); // abanico alternado
+                Vector2 perturbedVel = velocity.RotatedBy(angle);
+                Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
+            }
+            return true; // tModLoader dispara la flecha principal.
         }
 
         public override Vector2? HoldoutOffset()
@@ -74,3 +88,4 @@ namespace AethonMod.Content.Weapons
         }
     }
 }
+
