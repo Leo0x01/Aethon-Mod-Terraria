@@ -4,7 +4,7 @@
     <RootNamespace>AethonMod</RootNamespace>
     <AssemblyName>AethonMod</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <NoWarn>CS1591;CS8618;CS0168;CS0219;CS8632</NoWarn>
+    <NoWarn>CS1591;CS8618;CS0168;CS0219;CS8632;CS0414</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="tModLoader"><HintPath>/tmp/tmodloader/tModLoader.dll</HintPath><Private>false</Private></Reference>

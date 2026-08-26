@@ -3,20 +3,24 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
-using Terraria.UI;
 using AethonMod.Content.Players;
 using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// Arbol de habilidades como PANTALLA COMPLETA (estilo mapa de Terraria).
-    /// Se abre con K, pausa el juego, y se cierra con K o Esc.
-    /// Todo se dibuja directamente en DrawFullscreen().
+    /// Arbol de habilidades a PANTALLA COMPLETA con estetica cosmica.
+    /// Se dibuja en PostDrawInterface (garantizado que se llama cada frame).
+    ///
+    /// Estetica (basada en la pagina web del mod):
+    /// - Fondo: espacio profundo (#0d0a1a) con radiales purpura/dorado
+    /// - Estrellas: 120 puntos brillantes en dorado/violeta/blanco
+    /// - Nodos: circulos con borde dorado/violeta, glow al asignar
+    /// - Conexiones: lineas doradas (activas) / grises (inactivas)
+    /// - Layout: radial desde centro, clusters tematicos
     /// </summary>
-    public class SkillTreeUIState : UIState
+    public class SkillTreeUIState
     {
         public bool IsVisible;
         public PoESkillTree? CurrentTree;
@@ -25,17 +29,12 @@ namespace AethonMod.Content.UI
         private Vector2 _panOffset = Vector2.Zero;
         private bool _isDragging = false;
         private Vector2 _dragStart;
-        private int _lastScrollValue = 0;
         private bool _mouseLeftPressed = false;
 
         private List<PoESkillNode> _allNodes = new();
         private List<(int fromIdx, int toIdx)> _allConnections = new();
         private Dictionary<string, int> _nodeIndex = new();
         private float _minX, _maxX, _minY, _maxY, _rangeX, _rangeY;
-
-        public override void OnInitialize()
-        {
-        }
 
         public void BuildPoETree(PoESkillTree tree)
         {
@@ -49,10 +48,8 @@ namespace AethonMod.Content.UI
             {
                 int fromIdx = _nodeIndex[node.Id];
                 foreach (var connId in node.Connections)
-                {
                     if (_nodeIndex.TryGetValue(connId, out int j))
                         _allConnections.Add((fromIdx, j));
-                }
             }
             _minX = float.MaxValue; _maxX = float.MinValue;
             _minY = float.MaxValue; _maxY = float.MinValue;
@@ -78,24 +75,21 @@ namespace AethonMod.Content.UI
             IsVisible = true;
         }
 
-        public void Hide()
-        {
-            IsVisible = false;
-        }
+        public void Hide() { IsVisible = false; }
 
         private Vector2 NodeToScreen(PoESkillNode node)
         {
             float cx = Main.screenWidth / 2f;
             float cy = Main.screenHeight / 2f;
             float scale = System.Math.Min(Main.screenWidth / _rangeX, Main.screenHeight / _rangeY) * 0.5f * _zoom;
-            float x = (node.X - _minX) * scale - (_rangeX * scale / 2f) + cx + _panOffset.X;
-            float y = (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y;
-            return new Vector2(x, y);
+            return new Vector2(
+                (node.X - _minX) * scale - (_rangeX * scale / 2f) + cx + _panOffset.X,
+                (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y);
         }
 
         private PoESkillNode? FindHoveredNode()
         {
-            Vector2 mouse = new Vector2(Main.mouseX, Main.mouseY);
+            Vector2 mouse = new(Main.mouseX, Main.mouseY);
             PoESkillNode? closest = null;
             float closestDist = float.MaxValue;
             foreach (var node in _allNodes)
@@ -103,181 +97,170 @@ namespace AethonMod.Content.UI
                 Vector2 pos = NodeToScreen(node);
                 float dist = Vector2.Distance(pos, mouse);
                 float radius = node.Radius * 2.2f * _zoom + 8f;
-                if (dist < radius && dist < closestDist)
-                {
-                    closestDist = dist;
-                    closest = node;
-                }
+                if (dist < radius && dist < closestDist) { closestDist = dist; closest = node; }
             }
             return closest;
         }
 
-        /// <summary>
-        /// Dibuja el arbol a pantalla completa. Llamado directamente desde UISystem.
-        /// </summary>
-        public void DrawFullscreen(SpriteBatch spriteBatch)
+        /// <summary>Dibuja el arbol. Llamado desde PostDrawInterface cada frame.</summary>
+        public void Draw()
         {
-            if (!IsVisible) return;
+            if (!IsVisible || CurrentTree == null) return;
             var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-            if (sp == null || CurrentTree == null) return;
+            if (sp == null) return;
 
-            // --- FONDO ---
-            // Pantalla completa negra
-            spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+            var sb = Main.spriteBatch;
+
+            // === FONDO COSMICO (estetica de la web) ===
+            sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Color(6, 4, 14, 250));
+                new Color(13, 10, 26, 250));
 
-            // Estrellas
+            // Radiales: purpura arriba-izquierda, dorado abajo-derecha
+            DrawRadial(sb, 0.2f, 0.1f, 0.5f, new Color(120, 80, 200, 25));
+            DrawRadial(sb, 0.9f, 0.8f, 0.45f, new Color(245, 196, 81, 20));
+            DrawRadial(sb, 0.5f, 1.0f, 0.4f, new Color(179, 136, 255, 22));
+
+            // Estrellas (dorado, violeta, blanco)
             for (int i = 0; i < 120; i++)
             {
                 int seed = i * 73856093;
-                float baseX = (seed % Main.screenWidth);
-                float baseY = ((seed * 19349663) % Main.screenHeight);
-                float sx = (baseX + _panOffset.X * 0.2f) % Main.screenWidth;
-                float sy = (baseY + _panOffset.Y * 0.2f) % Main.screenHeight;
+                float bx = (seed % 1920);
+                float by = ((seed * 19349663) % 1080);
+                float sx = (bx + _panOffset.X * 0.15f) % Main.screenWidth;
+                float sy = (by + _panOffset.Y * 0.15f) % Main.screenHeight;
                 if (sx < 0) sx += Main.screenWidth;
                 if (sy < 0) sy += Main.screenHeight;
-                int bright = 30 + ((seed * 83492791) % 40);
+                int bright = 40 + ((seed * 83492791) % 50);
                 int sz = 1 + ((seed * 1299721) % 2);
-                spriteBatch.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle((int)sx, (int)sy, sz, sz),
-                    new Color(bright, bright, bright + 10, bright + 15));
+                int colorType = (seed * 3) % 3;
+                Color starColor = colorType == 0 ? new Color(bright, bright, bright + 15, bright + 20)
+                               : colorType == 1 ? new Color(bright + 20, (int)(bright * 0.8f), (int)(bright * 0.4f), bright + 20)
+                               : new Color((int)(bright * 0.5f), (int)(bright * 0.4f), bright + 20, bright + 20);
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)sx, (int)sy, sz, sz), starColor);
             }
 
-            // Vignette radial
-            for (int r = 350; r > 0; r -= 25)
+            // Vignette radial central
+            for (int r = 300; r > 0; r -= 20)
             {
-                int alpha = (350 - r) / 12;
-                spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                int alpha = (300 - r) / 15;
+                sb.Draw(TextureAssets.MagicPixel.Value,
                     new Rectangle(Main.screenWidth / 2 - r, Main.screenHeight / 2 - r, r * 2, r * 2),
                     new Color(20, 12, 40, alpha));
             }
 
-            // --- CONEXIONES ---
+            // === CONEXIONES ===
             foreach (var (fromIdx, toIdx) in _allConnections)
             {
-                var fromNode = _allNodes[fromIdx];
-                var toNode = _allNodes[toIdx];
-                Vector2 from = NodeToScreen(fromNode);
-                Vector2 to = NodeToScreen(toNode);
-                bool bothActive = sp.AllocatedNodes.Contains(fromNode.Id) && sp.AllocatedNodes.Contains(toNode.Id);
-                Color lineColor = bothActive ? new Color(245, 196, 81, 220) : new Color(50, 45, 75, 70);
-                float thickness = bothActive ? 3f : 1.5f;
-                DrawLine(spriteBatch, from, to, lineColor, thickness);
+                Vector2 from = NodeToScreen(_allNodes[fromIdx]);
+                Vector2 to = NodeToScreen(_allNodes[toIdx]);
+                bool bothActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) && sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
+                Color lc = bothActive ? new Color(245, 196, 81, 220) : new Color(50, 45, 75, 60);
+                float th = bothActive ? 3f : 1.5f;
+                DrawLine(sb, from, to, lc, th);
             }
 
-            // --- NODOS ---
-            var hoveredNode = FindHoveredNode();
+            // === NODOS ===
+            var hovered = FindHoveredNode();
             foreach (var node in _allNodes)
             {
                 Vector2 pos = NodeToScreen(node);
                 bool allocated = sp.AllocatedNodes.Contains(node.Id);
-                bool canAllocate = false;
-                if (!allocated)
-                {
-                    if (node.Id == "start" || node.Cost == 0) canAllocate = true;
-                    else foreach (var aid in sp.AllocatedNodes)
-                        if (node.Connections.Contains(aid)) { canAllocate = true; break; }
-                }
-                bool isHovered = hoveredNode != null && hoveredNode.Id == node.Id;
-                DrawNode(spriteBatch, pos, node, allocated, canAllocate, isHovered);
+                bool canAlloc = CanAllocate(node, sp);
+                bool isHover = hovered != null && hovered.Id == node.Id;
+                DrawNode(sb, pos, node, allocated, canAlloc, isHover);
             }
 
-            // --- INPUT ---
+            // === INPUT ===
             // Pan con click derecho
             if (Main.mouseRight)
             {
-                if (!_isDragging)
-                {
-                    _isDragging = true;
-                    _dragStart = new Vector2(Main.mouseX, Main.mouseY);
-                }
-                else
-                {
-                    _panOffset += new Vector2(Main.mouseX, Main.mouseY) - _dragStart;
-                    _dragStart = new Vector2(Main.mouseX, Main.mouseY);
-                }
+                if (!_isDragging) { _isDragging = true; _dragStart = new(Main.mouseX, Main.mouseY); }
+                else { _panOffset += new Vector2(Main.mouseX, Main.mouseY) - _dragStart; _dragStart = new(Main.mouseX, Main.mouseY); }
             }
             else _isDragging = false;
 
-            // Zoom con rueda (usar Main.scrollDelta que es el delta acumulado de scroll)
-            // En tModLoader/FNA, el scroll se maneja via Main.mouseState.ScrollValue
-            // Simplificado: usar un campo estatico que UISystem actualiza
-            // Por ahora, sin zoom (el pan con click derecho funciona)
-            // TODO: implementar zoom cuando encontremos la API correcta de scroll
-
             // Click izquierdo para asignar
-            if (Main.mouseLeft && !_mouseLeftPressed && hoveredNode != null && !_isDragging)
+            if (Main.mouseLeft && !_mouseLeftPressed && hovered != null && !_isDragging)
             {
                 _mouseLeftPressed = true;
-                bool allocated = sp.AllocatedNodes.Contains(hoveredNode.Id);
-                if (allocated)
+                if (sp.AllocatedNodes.Contains(hovered.Id))
                 {
-                    sp.AllocatedNodes.Remove(hoveredNode.Id);
+                    sp.AllocatedNodes.Remove(hovered.Id);
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
                 }
-                else
+                else if (CanAllocate(hovered, sp))
                 {
-                    bool canAlloc = false;
-                    if (hoveredNode.Id == "start" || hoveredNode.Cost == 0) canAlloc = true;
-                    else foreach (var aid in sp.AllocatedNodes)
-                        if (hoveredNode.Connections.Contains(aid)) { canAlloc = true; break; }
-                    if (canAlloc)
-                    {
-                        sp.AllocatedNodes.Add(hoveredNode.Id);
-                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-                    }
+                    sp.AllocatedNodes.Add(hovered.Id);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
                 }
             }
             if (!Main.mouseLeft) _mouseLeftPressed = false;
 
-            // --- TOOLTIP ---
-            if (hoveredNode != null)
+            // === TOOLTIP ===
+            if (hovered != null)
             {
-                string typeStr = hoveredNode.Type switch
+                string ts = hovered.Type switch
                 {
-                    NodeType.Small => "[Small]",
-                    NodeType.Notable => "[Notable]",
-                    NodeType.Keystone => "[KEYSTONE]",
-                    NodeType.Ascendancy => "[Ascendancy]",
-                    _ => "",
+                    NodeType.Small => "[Small]", NodeType.Notable => "[Notable]",
+                    NodeType.Keystone => "[KEYSTONE]", NodeType.Ascendancy => "[Ascendancy]", _ => "",
                 };
-                bool alloc = sp.AllocatedNodes.Contains(hoveredNode.Id);
-                string status = alloc ? "(Asignado)" : "(Disponible)";
-                Main.instance.MouseText($"{typeStr} {hoveredNode.Name}\n{hoveredNode.Effect}\nCoste: {hoveredNode.Cost} pts {status}");
+                bool alloc = sp.AllocatedNodes.Contains(hovered.Id);
+                Main.instance.MouseText($"{ts} {hovered.Name}\n{hovered.Effect}\nCoste: {hovered.Cost} pts {(alloc ? "(Asignado)" : "(Disponible)")}");
             }
 
-            // --- UI OVERLAY ---
+            // === UI OVERLAY ===
             int total = sp.CumulativeSkillPoints();
             int spent = sp.AllocatedNodes.Count;
-            int available = total - spent;
+            int avail = total - spent;
 
             // Barra superior
-            spriteBatch.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(0, 0, Main.screenWidth, 50),
-                new Color(10, 8, 20, 230));
-            Utils.DrawBorderString(spriteBatch, "ARBOL DE HABILIDADES",
-                new Vector2(Main.screenWidth / 2f, 15), new Color(245, 196, 81), 1.2f, 0.5f, 0.5f);
-            Utils.DrawBorderString(spriteBatch, $"Puntos: {available} | Asignados: {spent}/{total}",
-                new Vector2(Main.screenWidth / 2f, 35), new Color(179, 136, 255), 0.9f, 0.5f, 0.5f);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, 55),
+                new Color(10, 8, 20, 235));
+            Utils.DrawBorderString(sb, "ARBOL DE HABILIDADES",
+                new(Main.screenWidth / 2f, 15), new Color(245, 196, 81), 1.3f, 0.5f, 0.5f);
+            Utils.DrawBorderString(sb, $"Puntos: {avail}  |  Asignados: {spent}/{total}",
+                new(Main.screenWidth / 2f, 38), new Color(179, 136, 255), 0.9f, 0.5f, 0.5f);
 
             // Ayuda abajo
-            Utils.DrawBorderString(spriteBatch,
-                "Click izq: asignar | Click der: mover | Rueda: zoom | K/Esc: cerrar",
-                new Vector2(Main.screenWidth / 2f, Main.screenHeight - 15),
+            Utils.DrawBorderString(sb,
+                "Click izq: asignar  |  Click der: mover  |  K/Esc: cerrar",
+                new(Main.screenWidth / 2f, Main.screenHeight - 15),
                 new Color(100, 95, 120), 0.8f, 0.5f, 0.5f);
 
             // Cerrar con Escape
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
-                Hide();
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape)) Hide();
         }
 
-        private void DrawNode(SpriteBatch sb, Vector2 pos, PoESkillNode node,
-            bool allocated, bool canAllocate, bool hovered)
+        private bool CanAllocate(PoESkillNode node, ShardPlayer sp)
+        {
+            if (sp.AllocatedNodes.Contains(node.Id)) return false;
+            if (node.Id == "start" || node.Cost == 0) return true;
+            foreach (var aid in sp.AllocatedNodes)
+                if (node.Connections.Contains(aid)) return true;
+            return false;
+        }
+
+        private void DrawRadial(SpriteBatch sb, float xPct, float yPct, float radiusPct, Color color)
+        {
+            float cx = Main.screenWidth * xPct;
+            float cy = Main.screenHeight * yPct;
+            float r = Main.screenWidth * radiusPct;
+            for (int i = (int)r; i > 0; i -= 15)
+            {
+                int alpha = (int)(color.A * (1f - (float)i / r) * 0.3f);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)(cx - i), (int)(cy - i), i * 2, i * 2),
+                    new Color(color.R, color.G, color.B, alpha));
+            }
+        }
+
+        private void DrawNode(SpriteBatch sb, Vector2 pos, PoESkillNode node, bool allocated, bool canAlloc, bool hovered)
         {
             int radius = (int)(node.Radius * 2.0f * _zoom);
             radius = System.Math.Max(6, radius);
 
+            // Color base por tipo (estetica web: dorado/violeta/teal)
             Color baseColor = node.Type switch
             {
                 NodeType.Small => new Color(90, 90, 120),
@@ -287,20 +270,20 @@ namespace AethonMod.Content.UI
                 _ => Color.White,
             };
 
-            if (!allocated && !canAllocate) baseColor *= 0.12f;
+            if (!allocated && !canAlloc) baseColor *= 0.12f;
 
-            // Glow si asignado
+            // Glow dorado si asignado (estetica web: text-glow-gold)
             if (allocated)
                 for (int i = 3; i > 0; i--)
                 {
                     int gr = radius + i * 5;
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(245, 196, 81, 10 - i * 2));
+                        new Color(245, 196, 81, 8 - i * 2));
                 }
 
-            // Glow hover
-            if (hovered && (canAllocate || allocated))
+            // Glow blanco al hover
+            if (hovered && (canAlloc || allocated))
                 for (int i = 2; i > 0; i--)
                 {
                     int gr = radius + i * 4;
@@ -310,28 +293,28 @@ namespace AethonMod.Content.UI
                 }
 
             // Relleno
-            Color fill = allocated ? new Color(255, 225, 140) : (canAllocate ? baseColor : baseColor * 0.08f);
+            Color fill = allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.08f);
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, radius * 2), fill);
 
             // Borde
-            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 30, baseColor.G + 30, baseColor.B + 30);
+            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new(baseColor.R + 30, baseColor.G + 30, baseColor.B + 30);
             int b = 2;
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, b), border);
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y + radius - b, radius * 2, b), border);
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, b, radius * 2), border);
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X + radius - b, (int)pos.Y - radius, b, radius * 2), border);
 
-            // Punto interior small
+            // Punto interior small nodes
             if (node.Type == NodeType.Small)
             {
                 int dr = radius / 3;
                 sb.Draw(TextureAssets.MagicPixel.Value,
                     new Rectangle((int)pos.X - dr, (int)pos.Y - dr, dr * 2, dr * 2),
-                    allocated ? new Color(255, 245, 200) : new Color(baseColor.R + 50, baseColor.G + 50, baseColor.B + 50));
+                    allocated ? new Color(255, 245, 200) : new(baseColor.R + 50, baseColor.G + 50, baseColor.B + 50));
             }
 
-            // Costo
+            // Costo debajo
             if (node.Cost > 0)
                 Utils.DrawBorderString(sb, node.Cost.ToString(),
                     new Vector2(pos.X, pos.Y + radius + 5),

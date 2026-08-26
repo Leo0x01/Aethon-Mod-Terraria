@@ -1,258 +1,161 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Terraria.GameContent.UI.Elements;
 using AethonMod.Content.Players;
 using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// Barra de XP del Fragmento Génesis que aparece en pantalla.
-    /// Muestra el nivel actual, la barra de progreso hacia el siguiente nivel,
-    /// y la XP actual / XP necesaria.
+    /// Barra de XP del Fragmento Genesis.
+    /// Se dibuja directamente en PostDrawInterface.
     /// </summary>
-    public class ShardXPBarUI : UIState
+    public class ShardXPBarUI
     {
         public bool IsVisible;
-        private UIText _levelText = null!;
-        private UIText _xpText = null!;
-        private UIPanel _barBg = null!;
-        private UIPanel _barFill = null!;
 
-        public override void OnInitialize()
-        {
-            // Fondo de la barra
-            _barBg = new UIPanel();
-            _barBg.Width.Set(200f, 0f);
-            _barBg.Height.Set(20f, 0f);
-            _barBg.Top.Set(60f, 0f);
-            _barBg.Left.Set(-210f, 1f);
-            _barBg.BackgroundColor = new Color(20, 15, 40, 200);
-            _barBg.BorderColor = new Color(245, 196, 81, 150);
-            Append(_barBg);
-
-            // Relleno de la barra (escala con XP)
-            _barFill = new UIPanel();
-            _barFill.Width.Set(0f, 0f);
-            _barFill.Height.Set(16f, 0f);
-            _barFill.Top.Set(2f, 0f);
-            _barFill.Left.Set(2f, 0f);
-            _barFill.BackgroundColor = new Color(245, 196, 81, 220);
-            _barFill.BorderColor = Color.Transparent;
-            _barBg.Append(_barFill);
-
-            // Texto de nivel
-            _levelText = new UIText("Fragmento Lv 1", 0.8f);
-            _levelText.Width.Set(200f, 0f);
-            _levelText.Height.Set(16f, 0f);
-            _levelText.Top.Set(42f, 0f);
-            _levelText.Left.Set(-210f, 1f);
-            _levelText.TextColor = new Color(245, 196, 81);
-            Append(_levelText);
-
-            // Texto de XP
-            _xpText = new UIText("0 / 80 XP", 0.7f);
-            _xpText.Width.Set(200f, 0f);
-            _xpText.Height.Set(14f, 0f);
-            _xpText.Top.Set(82f, 0f);
-            _xpText.Left.Set(-210f, 1f);
-            _xpText.TextColor = new Color(179, 136, 255);
-            Append(_xpText);
-        }
-
-        public override void Update(GameTime gameTime)
+        public void Update()
         {
             var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-            if (sp == null || !sp.IsImprinted)
-            {
-                IsVisible = false;
-                return;
-            }
-            IsVisible = true;
+            IsVisible = sp != null && sp.IsImprinted;
+        }
 
-            // Actualizar textos
-            _levelText.SetText($"Fragmento Lv {sp.ShardLevel}");
+        public void Draw()
+        {
+            if (!IsVisible) return;
+            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+
+            var sb = Main.spriteBatch;
+            int barX = Main.screenWidth - 220;
+            int barY = 80;
+            int barW = 210;
+            int barH = 22;
+
+            // Fondo
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX, barY, barW, barH), new Color(20, 15, 40, 210));
+
+            // Borde dorado
+            int b = 2;
+            Color border = new(245, 196, 81, 160);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX, barY, barW, b), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX, barY + barH - b, barW, b), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX, barY, b, barH), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX + barW - b, barY, b, barH), border);
+
+            // Relleno (dorado, escala con XP)
             int xpNeeded = sp.XPForNextLevel();
-            _xpText.SetText($"{sp.ShardXP} / {xpNeeded} XP");
-
-            // Actualizar barra de progreso
             float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
             pct = System.Math.Clamp(pct, 0f, 1f);
-            _barFill.Width.Set(System.Math.Max(2f, 196f * pct), 0f);
+            int fillW = (int)((barW - 4) * pct);
+            if (fillW > 0)
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(barX + 2, barY + 2, fillW, barH - 4), new Color(245, 196, 81, 220));
 
-            base.Update(gameTime);
+            // Textos
+            Utils.DrawBorderString(sb, $"Fragmento Lv {sp.ShardLevel}", new(barX + barW / 2f, barY - 16), new Color(245, 196, 81), 0.85f, 0.5f, 0.5f);
+            Utils.DrawBorderString(sb, $"{sp.ShardXP} / {xpNeeded} XP", new(barX + barW / 2f, barY + barH + 6), new Color(179, 136, 255), 0.75f, 0.5f, 0.5f);
         }
     }
 
     /// <summary>
-    /// Tarjetas flotantes de elección de rama.
-    /// Cuando el fragmento está listo para imprimirse (tras suficientes kills),
-    /// aparecen 3 tarjetas flotantes sobre el jugador: Distancia, Cuerpo a Cuerpo, Artes Mágicas.
-    /// El jugador hace clic en una para elegir su rama.
+    /// Tarjetas de eleccion de rama.
+    /// Se dibuja directamente en PostDrawInterface.
     /// </summary>
-    public class BranchChoiceUI : UIState
+    public class BranchChoiceUI
     {
         public bool IsVisible;
-        private UIText _titleText = null!;
-        private List<BranchCard> _cards = new();
 
-        public override void OnInitialize()
+        private struct CardInfo { public string Name; public string Desc; public Color Color; public BranchType Type; }
+        private CardInfo[] _cards = new CardInfo[]
         {
+            new() { Name = "DISTANCIA", Desc = "Arcos, municion\ny armas arrojadizas\n\nLumina,\nla Arcoestelar", Color = new(245, 196, 81), Type = BranchType.Distance },
+            new() { Name = "CUERPO A CUERPO", Desc = "Espadas, lanzas\ny yoyos\n\nSolbrand,\nFilo del Alba", Color = new(255, 154, 60), Type = BranchType.Melee },
+            new() { Name = "ARTES MAGICAS", Desc = "Magia + Invocacion\nfusionadas\n\nGrimorio\ndel Eterno", Color = new(179, 136, 255), Type = BranchType.Magic },
+        };
+
+        public void Show() { IsVisible = true; }
+        public void Hide() { IsVisible = false; }
+
+        public void Draw()
+        {
+            if (!IsVisible) return;
+            var sb = Main.spriteBatch;
+            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+
+            // Fondo oscuro
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), new Color(6, 4, 14, 200));
+
             // Titulo
-            _titleText = new UIText("Elige la rama de tu Fragmento Genesis", 1.1f);
-            _titleText.HAlign = 0.5f;
-            _titleText.VAlign = 0.15f;
-            _titleText.TextColor = new Color(245, 196, 81);
-            Append(_titleText);
+            Utils.DrawBorderString(sb, "Elige la rama de tu Fragmento Genesis",
+                new(Main.screenWidth / 2f, Main.screenHeight * 0.15f),
+                new Color(245, 196, 81), 1.2f, 0.5f, 0.5f);
 
-            // Contenedor centrado para las 3 tarjetas
-            float cardWidth = 220f;
-            float cardHeight = 280f;
-            float gap = 20f;
-            float totalWidth = cardWidth * 3 + gap * 2;
-
-            _cards.Clear();
-            var branches = new (string name, string desc, Color color, BranchType type)[]
-            {
-                ("DISTANCIA", "Arcos, municion\ny armas arrojadizas\n\nLumina,\nla Arcoestelar", new Color(245, 196, 81), BranchType.Distance),
-                ("CUERPO A CUERPO", "Espadas, lanzas\ny yoyos\n\nSolbrand,\nFilo del Alba", new Color(255, 154, 60), BranchType.Melee),
-                ("ARTES MAGICAS", "Magia + Invocacion\nfusionadas\n\nGrimorio\ndel Eterno", new Color(179, 136, 255), BranchType.Magic),
-            };
+            // 3 tarjetas centradas
+            float cw = 220f, ch = 280f, gap = 20f;
+            float totalW = cw * 3 + gap * 2;
+            float startX = (Main.screenWidth - totalW) / 2f;
+            float startY = Main.screenHeight * 0.3f;
 
             for (int i = 0; i < 3; i++)
             {
-                var card = new BranchCard(branches[i].name, branches[i].desc, branches[i].color, branches[i].type);
-                card.Width.Set(cardWidth, 0f);
-                card.Height.Set(cardHeight, 0f);
-                // Centrar las 3 tarjetas horizontalmente
-                card.Left.Set((Main.screenWidth / 2f) - (totalWidth / 2f) + i * (cardWidth + gap), 0f);
-                card.Top.Set(Main.screenHeight * 0.3f, 0f);
-                Append(card);
-                _cards.Add(card);
+                float cx = startX + i * (cw + gap);
+                var card = _cards[i];
+                bool hovered = Main.mouseX >= cx && Main.mouseX <= cx + cw &&
+                               Main.mouseY >= startY && Main.mouseY <= startY + ch;
+                bool clicked = hovered && Main.mouseLeft && Main.mouseLeftRelease;
+
+                // Tarjeta
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)cx, (int)startY, (int)cw, (int)ch),
+                    new Color(20, 15, 40, 235));
+                // Borde
+                Color bc = hovered ? Color.White : card.Color;
+                int b = 2;
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)cx, (int)startY, (int)cw, b), bc);
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)cx, (int)(startY + ch - b), (int)cw, b), bc);
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)cx, (int)startY, b, (int)ch), bc);
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)(cx + cw - b), (int)startY, b, (int)ch), bc);
+
+                // Nombre
+                Utils.DrawBorderString(sb, card.Name, new(cx + cw / 2f, startY + 20), card.Color, 0.9f, 0.5f, 0.5f);
+                // Desc
+                string[] lines = card.Desc.Split('\n');
+                for (int j = 0; j < lines.Length; j++)
+                    Utils.DrawBorderString(sb, lines[j], new(cx + cw / 2f, startY + 55 + j * 18), new Color(200, 200, 220), 0.75f, 0.5f, 0.5f);
+
+                // Boton Elegir
+                float btnX = cx + (cw - 120) / 2f;
+                float btnY = startY + ch - 45;
+                Color btnBg = hovered ? new(card.Color.R, card.Color.G, card.Color.B, 180) : new(card.Color.R / 3, card.Color.G / 3, card.Color.B / 3, 200);
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)btnX, (int)btnY, 120, 32), btnBg);
+                Utils.DrawBorderString(sb, "Elegir", new(btnX + 60, btnY + 10), hovered ? Color.White : card.Color, 0.85f, 0.5f, 0.5f);
+
+                // Click
+                if (clicked)
+                {
+                    sp.ActiveBranch = card.Type;
+                    sp.SubForm = card.Type switch
+                    {
+                        BranchType.Distance => WeaponSubForm.Bow,
+                        BranchType.Melee => WeaponSubForm.Sword,
+                        BranchType.Magic => WeaponSubForm.Spellbook,
+                        _ => WeaponSubForm.None,
+                    };
+                    if (sp.SkillTreeSeed == 0) sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
+                    Main.NewText($"✦ El Fragmento Genesis se ha transformado — {card.Name}!", card.Color);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item169);
+                    for (int p = 0; p < 60; p++)
+                        Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.GoldFlame, new(Main.rand.NextFloat(-8, 8), Main.rand.NextFloat(-8, 8)), 100, card.Color, 2f);
+                    ReplaceShardWithWeapon(Main.LocalPlayer, card.Type);
+                    Hide();
+                }
             }
-        }
-
-        public void Show()
-        {
-            IsVisible = true;
-        }
-
-        public void Hide()
-        {
-            IsVisible = false;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            // Repositionar tarjetas centradas en pantalla
-            float cardWidth = 160f;
-            float gap = 20f;
-            float totalWidth = cardWidth * 3 + gap * 2;
-            float startX = (Main.screenWidth - totalWidth) / 2f;
-
-            for (int i = 0; i < _cards.Count; i++)
-            {
-                _cards[i].Left.Set(startX + i * (cardWidth + gap), 0f);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Tarjeta individual de elección de rama.
-    /// Click para seleccionar esa rama.
-    /// </summary>
-    public class BranchCard : UIPanel
-    {
-        private string _name;
-        private string _desc;
-        private Color _color;
-        private BranchType _type;
-
-        public BranchCard(string name, string desc, Color color, BranchType type)
-        {
-            _name = name;
-            _desc = desc;
-            _color = color;
-            _type = type;
-        }
-
-        public override void OnInitialize()
-        {
-            BackgroundColor = new Color(20, 15, 40, 230);
-            BorderColor = _color;
-
-            var nameText = new UIText(_name, 0.9f);
-            nameText.HAlign = 0.5f;
-            nameText.Top.Set(15f, 0f);
-            nameText.TextColor = _color;
-            Append(nameText);
-
-            var descText = new UIText(_desc, 0.75f);
-            descText.HAlign = 0.5f;
-            descText.Top.Set(60f, 0f);
-            descText.TextColor = new Color(200, 200, 220);
-            Append(descText);
-
-            var chooseBtn = new UITextPanel<string>("Elegir");
-            chooseBtn.Width.Set(120f, 0f);
-            chooseBtn.Height.Set(32f, 0f);
-            chooseBtn.HAlign = 0.5f;
-            chooseBtn.Top.Set(220f, 0f);
-            chooseBtn.BackgroundColor = new Color(_color.R / 3, _color.G / 3, _color.B / 3, 220);
-            chooseBtn.BorderColor = _color;
-            chooseBtn.OnMouseOver += (evt, el) =>
-            {
-                // Efecto de partículas al hacer hover.
-                for (int i = 0; i < 5; i++)
-                {
-                    Dust.NewDustPerfect(Main.LocalPlayer.Center + new Vector2(Main.rand.NextFloat(-200, 200), Main.rand.NextFloat(-100, 100)),
-                        Terraria.ID.DustID.YellowStarDust, Vector2.Zero, 100, _color, 1f);
-                }
-            };
-            chooseBtn.OnLeftClick += (evt, el) =>
-            {
-                var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-                if (sp == null) return;
-                sp.ActiveBranch = _type;
-                sp.SubForm = _type switch
-                {
-                    BranchType.Distance => WeaponSubForm.Bow,
-                    BranchType.Melee => WeaponSubForm.Sword,
-                    BranchType.Magic => WeaponSubForm.Spellbook,
-                    _ => WeaponSubForm.None,
-                };
-                if (sp.SkillTreeSeed == 0)
-                    sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
-
-                Main.NewText($"✦ El Fragmento Genesis se ha transformado — {_name}!", _color);
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item169);
-
-                // Explosión de partículas épica.
-                for (int i = 0; i < 60; i++)
-                {
-                    Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.GoldFlame,
-                        new Vector2(Main.rand.NextFloat(-8, 8), Main.rand.NextFloat(-8, 8)),
-                        100, _color, 2f);
-                }
-                for (int i = 0; i < 30; i++)
-                {
-                    Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.Enchanted_Pink,
-                        new Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
-                        150, default, 1.5f);
-                }
-
-                ReplaceShardWithWeapon(Main.LocalPlayer, _type);
-
-                var ui = ModContent.GetInstance<UISystem>();
-                ui?.BranchChoiceUI?.Hide();
-            };
-            Append(chooseBtn);
         }
 
         private void ReplaceShardWithWeapon(Player player, BranchType branch)
@@ -265,15 +168,8 @@ namespace AethonMod.Content.UI
                 _ => ModContent.ItemType<Items.GenesisShard>(),
             };
             for (int i = 0; i < 58; i++)
-            {
                 if (player.inventory[i].type == ModContent.ItemType<Items.GenesisShard>())
-                {
-                    int prefix = player.inventory[i].prefix;
-                    player.inventory[i].SetDefaults(weaponType);
-                    player.inventory[i].prefix = (byte)prefix;
-                    break;
-                }
-            }
+                { int p = player.inventory[i].prefix; player.inventory[i].SetDefaults(weaponType); player.inventory[i].prefix = (byte)p; break; }
         }
     }
 }
