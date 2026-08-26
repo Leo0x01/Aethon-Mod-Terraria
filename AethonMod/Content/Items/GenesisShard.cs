@@ -39,6 +39,32 @@ namespace AethonMod.Content.Items
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return null;
 
+            // Si el jugador YA tiene un fragmento evolucionado Y tiene un Fragmento Génesis
+            // en el inventario, es un fragmento NUEVO. Resetear su estado para que empiece de cero.
+            if (sp.IsImprinted && player.whoAmI == Main.myPlayer)
+            {
+                // Verificar si hay un arma evolucionada en el inventario.
+                bool hasEvolvedWeapon = false;
+                for (int i = 0; i < 58; i++)
+                {
+                    if (player.inventory[i].type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
+                        player.inventory[i].type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
+                        player.inventory[i].type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                    {
+                        hasEvolvedWeapon = true;
+                        break;
+                    }
+                }
+                // Si tiene un arma evolucionada Y un Fragmento Génesis, es un nuevo fragmento.
+                if (hasEvolvedWeapon)
+                {
+                    Main.NewText("Nuevo Fragmento Genesis detectado. Iniciando nueva progresion...", new Color(180, 160, 220));
+                    // NO resetear el estado — cada fragmento mantiene su propia progresion.
+                    // El ShardPlayer ya tiene su nivel, XP, rama, etc.
+                    // El nuevo Fragmento Génesis solo muestra info del estado actual.
+                }
+            }
+
             if (!sp.IsImprinted)
             {
                 int totalKills = sp.DistanceKills + sp.MeleeKills + sp.MagicKills;

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -45,35 +47,44 @@ namespace AethonMod.Content.Systems
 
         public override void Unload()
         {
-            SkillTreeUI = null;
-            _skillTreeInterface = null;
-            CodexUI = null;
-            _codexInterface = null;
-            XPBarUI = null;
-            _xpBarInterface = null;
-            BranchChoiceUI = null;
-            _branchChoiceInterface = null;
+            SkillTreeUI = null; _skillTreeInterface = null;
+            CodexUI = null; _codexInterface = null;
+            XPBarUI = null; _xpBarInterface = null;
+            BranchChoiceUI = null; _branchChoiceInterface = null;
         }
 
         public override void UpdateUI(GameTime gameTime)
         {
-            // La barra de XP siempre se actualiza (ella misma decide si es visible).
             _xpBarInterface?.Update(gameTime);
-
-            if (SkillTreeUI?.IsVisible == true)
-                _skillTreeInterface?.Update(gameTime);
-            if (CodexUI?.IsVisible == true)
-                _codexInterface?.Update(gameTime);
-            if (BranchChoiceUI?.IsVisible == true)
-                _branchChoiceInterface?.Update(gameTime);
+            if (SkillTreeUI?.IsVisible == true) _skillTreeInterface?.Update(gameTime);
+            if (CodexUI?.IsVisible == true) _codexInterface?.Update(gameTime);
+            if (BranchChoiceUI?.IsVisible == true) _branchChoiceInterface?.Update(gameTime);
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
+            // Insertar el arbol DEBAJO de todo (pantalla completa como el mapa)
+            int mapIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Map"));
+            if (mapIndex != -1)
+            {
+                layers.Insert(mapIndex, new LegacyGameInterfaceLayer(
+                    "AethonMod: SkillTreeFullscreen",
+                    delegate
+                    {
+                        if (SkillTreeUI?.IsVisible == true)
+                        {
+                            // Dibujar directamente con spriteBatch (pantalla completa)
+                            SkillTreeUI.DrawFullscreen(Main.spriteBatch);
+                        }
+                        return true;
+                    },
+                    InterfaceScaleType.Game));
+            }
+
             int inventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
             if (inventoryIndex != -1)
             {
-                // Barra de XP (siempre visible cuando el fragmento está imprintado)
+                // Barra de XP (siempre visible)
                 layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer(
                     "AethonMod: XPBar",
                     delegate
@@ -84,7 +95,7 @@ namespace AethonMod.Content.Systems
                     },
                     InterfaceScaleType.UI));
 
-                // Elección de rama (tarjetas flotantes)
+                // Elección de rama
                 layers.Insert(inventoryIndex + 2, new LegacyGameInterfaceLayer(
                     "AethonMod: BranchChoice",
                     delegate
@@ -95,19 +106,8 @@ namespace AethonMod.Content.Systems
                     },
                     InterfaceScaleType.UI));
 
-                // Árbol de habilidades
+                // Códex
                 layers.Insert(inventoryIndex + 3, new LegacyGameInterfaceLayer(
-                    "AethonMod: SkillTreeUI",
-                    delegate
-                    {
-                        if (SkillTreeUI?.IsVisible == true)
-                            _skillTreeInterface?.Draw(Main.spriteBatch, new GameTime());
-                        return true;
-                    },
-                    InterfaceScaleType.UI));
-
-                // Códex de memoria
-                layers.Insert(inventoryIndex + 4, new LegacyGameInterfaceLayer(
                     "AethonMod: CodexUI",
                     delegate
                     {
@@ -131,9 +131,16 @@ namespace AethonMod.Content.Systems
                 if (sp != null && sp.IsImprinted)
                 {
                     if (SkillTreeUI?.IsVisible == true)
+                    {
                         SkillTreeUI.Hide();
+                        // Pausar el juego como el mapa
+                        Main.playerInventory = false;
+                    }
                     else
+                    {
                         SkillTreeUI?.Show();
+                        Main.playerInventory = false;
+                    }
                 }
             }
             if (Main.keyState.IsKeyDown(config.CodexKey) &&
@@ -142,10 +149,8 @@ namespace AethonMod.Content.Systems
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted)
                 {
-                    if (CodexUI?.IsVisible == true)
-                        CodexUI.Hide();
-                    else
-                        CodexUI?.Show();
+                    if (CodexUI?.IsVisible == true) CodexUI.Hide();
+                    else CodexUI?.Show();
                 }
             }
         }
