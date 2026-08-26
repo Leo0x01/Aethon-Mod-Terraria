@@ -109,9 +109,9 @@ namespace AethonMod.Content.UI
             Append(_titleText);
 
             // Contenedor centrado para las 3 tarjetas
-            float cardWidth = 170f;
-            float cardHeight = 210f;
-            float gap = 15f;
+            float cardWidth = 220f;
+            float cardHeight = 280f;
+            float gap = 20f;
             float totalWidth = cardWidth * 3 + gap * 2;
 
             _cards.Clear();

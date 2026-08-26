@@ -51,7 +51,6 @@ namespace AethonMod.Content.Items
                 }
                 else
                 {
-                    // Mostrar la UI de eleccion de rama.
                     var ui = ModContent.GetInstance<Content.Systems.UISystem>();
                     if (ui != null && ui.BranchChoiceUI != null)
                     {
@@ -60,7 +59,6 @@ namespace AethonMod.Content.Items
                     }
                     else
                     {
-                        // Fallback: si la UI no carga, elegir automaticamente la rama con mas kills.
                         Main.NewText("El Fragmento Genesis despierta!", new Color(245, 196, 81));
                         if (sp.DistanceKills >= sp.MeleeKills && sp.DistanceKills >= sp.MagicKills)
                         {
@@ -86,7 +84,8 @@ namespace AethonMod.Content.Items
             }
 
             // Si ya esta imprintado, mostrar info del nivel.
-            Main.NewText($"Fragmento Genesis — Nivel {sp.ShardLevel} | XP: {sp.ShardXP}/{sp.XPForNextLevel()} | Rama: {sp.ActiveBranch}",
+            int xpNeeded = sp.XPForNextLevel();
+            Main.NewText($"Fragmento Genesis — Nivel {sp.ShardLevel} | XP: {sp.ShardXP}/{xpNeeded} | Rama: {sp.ActiveBranch} | Pulsa K para el arbol de habilidades",
                 new Color(245, 196, 81));
             return true;
         }
