@@ -240,5 +240,51 @@ namespace AethonMod.Content.Systems
 
         /// <summary>True si el jugador tiene escudo de maná (mana shield).</summary>
         public static bool HasManaShield(Player player) => HasNode(player, "convert-0");
+
+        // ====================================================================
+        // REGENERACIÓN DE SALUD POR DAÑO (Lifesteal Keystone - Ascendancy Lv 100+)
+        // Distancia y Melee: 0.01% del daño causado = regen de salud.
+        // Magia: igual pero el daño de INVOCACIONES NO cuenta.
+        // ====================================================================
+
+        /// <summary>
+        /// Llamado cuando el jugador causa daño a un NPC.
+        /// Si tiene el Keystone de Regeneración Vital, cura al jugador.
+        /// </summary>
+        public static void OnHitNPC(Player player, NPC target, int damage, bool isFromMinion)
+        {
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp == null || !sp.IsImprinted) return;
+
+            // Verificar si tiene el Keystone de regeneración vital (Ascendancy).
+            // El keystone usa el PoETreeCatalog: "ascend-regen-keystone"
+            if (!HasNode(player, "ascend-regen-keystone")) return;
+
+            // Magia: si el daño viene de una invocación (minion), NO aplica regeneración.
+            if (sp.ActiveBranch == Players.BranchType.Magic && isFromMinion) return;
+
+            // Regenerar 0.01% de la salud máxima del jugador por cada punto de daño causado.
+            // Esto significa: healAmount = damage * (player.statLifeMax2 * 0.0001)
+            // Ejemplo: si el jugador tiene 400 HP y causa 100 daño:
+            // healAmount = 100 * (400 * 0.0001) = 100 * 0.04 = 4 HP por golpe
+            float healPct = 0.0001f; // 0.01% de la vida máxima por punto de daño
+            int healAmount = (int)(damage * player.statLifeMax2 * healPct);
+
+            if (healAmount > 0)
+            {
+                player.statLife = System.Math.Min(player.statLifeMax2, player.statLife + healAmount);
+                player.HealEffect(healAmount, true);
+            }
+        }
+
+        /// <summary>
+        /// Versión para proyectiles: determina si el proyectil es de invocación.
+        /// </summary>
+        public static void OnProjectileHitNPC(Player player, NPC target, int damage, Projectile projectile)
+        {
+            // Si el proyectil es minion/summon, marcar como isFromMinion.
+            bool isFromMinion = projectile.minion || projectile.sentry || projectile.DamageType == DamageClass.Summon;
+            OnHitNPC(player, target, damage, isFromMinion);
+        }
     }
 }

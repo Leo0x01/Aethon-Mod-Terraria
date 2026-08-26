@@ -18,13 +18,19 @@ namespace AethonMod.Content.Globals
         public override void OnHitByItem(NPC npc, Player player, Item item, NPC.HitInfo hit, int damageDone)
         {
             TrackDamageClass(player, item.DamageType);
+            // Lifesteal: regeneración de salud por daño causado (Keystone de Ascendancy).
+            Systems.NodeEffectSystem.OnHitNPC(player, npc, damageDone, false);
         }
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
         {
             Player player = Main.player[projectile.owner];
             if (player != null)
+            {
                 TrackDamageClass(player, projectile.DamageType);
+                // Lifesteal para proyectiles (determina si es de invocación).
+                Systems.NodeEffectSystem.OnProjectileHitNPC(player, npc, damageDone, projectile);
+            }
         }
 
         /// <summary>
