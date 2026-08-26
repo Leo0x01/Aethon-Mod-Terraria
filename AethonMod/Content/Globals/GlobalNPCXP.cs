@@ -35,43 +35,33 @@ namespace AethonMod.Content.Globals
         {
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null || sp.IsImprinted) return;
-            // Almacenar temporalmente la última clase para contar al morir.
+            // Contar kills por tipo de daño para tracking.
             if (damageClass == DamageClass.Ranged)
                 sp.DistanceKills++;
             else if (damageClass == DamageClass.Melee)
                 sp.MeleeKills++;
             else if (damageClass == DamageClass.Magic || damageClass == DamageClass.Summon)
                 sp.MagicKills++;
-            // Verificar si alguna rama alcanzó el umbral.
-            CheckImprint(player, sp);
+            // Verificar si el total de kills alcanza el umbral para mostrar la elección.
+            CheckImprintReady(player, sp);
         }
 
-        private void CheckImprint(Player player, Players.ShardPlayer sp)
+        private void CheckImprintReady(Player player, Players.ShardPlayer sp)
         {
+            int totalKills = sp.DistanceKills + sp.MeleeKills + sp.MagicKills;
             int threshold = Players.ShardPlayer.KILLS_TO_IMPRINT;
-            if (sp.DistanceKills >= threshold)
+            // Cuando el total de kills alcanza el umbral, mostrar las tarjetas de elección.
+            // NO elegir automaticamente — el jugador decide.
+            if (totalKills >= threshold && !sp.IsImprinted)
             {
-                sp.ActiveBranch = Players.BranchType.Distance;
-                sp.SubForm = Players.WeaponSubForm.Bow;
-            }
-            else if (sp.MeleeKills >= threshold)
-            {
-                sp.ActiveBranch = Players.BranchType.Melee;
-                sp.SubForm = Players.WeaponSubForm.Sword;
-            }
-            else if (sp.MagicKills >= threshold)
-            {
-                sp.ActiveBranch = Players.BranchType.Magic;
-                sp.SubForm = Players.WeaponSubForm.Spellbook;
-            }
-            if (sp.IsImprinted)
-            {
-                // Generar seed del árbol procedural.
-                if (sp.SkillTreeSeed == 0)
-                    sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
-
-                // Reemplazar el Fragmento Génesis por el arma de la rama.
-                ReplaceShardWithWeapon(player, sp.ActiveBranch);
+                // Mostrar la UI de elección de rama.
+                var ui = ModContent.GetInstance<Content.Systems.UISystem>();
+                if (ui != null && ui.BranchChoiceUI != null && !ui.BranchChoiceUI.IsVisible)
+                {
+                    ui.BranchChoiceUI.Show();
+                    Main.NewText("Tu Fragmento Genesis esta listo. Elige tu rama!", new Microsoft.Xna.Framework.Color(245, 196, 81));
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                }
             }
         }
 
@@ -111,35 +101,6 @@ namespace AethonMod.Content.Globals
             }
         }
 
-        /// <summary>
-        /// Reemplaza el Fragmento Génesis en el inventario del jugador
-        /// por el arma correspondiente a la rama imprpresa.
-        /// </summary>
-        private void ReplaceShardWithWeapon(Player player, Players.BranchType branch)
-        {
-            int weaponType = branch switch
-            {
-                Players.BranchType.Distance => ModContent.ItemType<Weapons.LuminaStarbow>(),
-                Players.BranchType.Melee => ModContent.ItemType<Weapons.SolbrandEdge>(),
-                Players.BranchType.Magic => ModContent.ItemType<Weapons.GrimoireEternal>(),
-                _ => ModContent.ItemType<Items.GenesisShard>(),
-            };
-
-            // Buscar el Fragmento Génesis en el inventario y reemplazarlo.
-            for (int i = 0; i < 58; i++)
-            {
-                if (player.inventory[i].type == ModContent.ItemType<Items.GenesisShard>())
-                {
-                    // Preservar prefijo (reforge).
-                    int prefix = player.inventory[i].prefix;
-                    player.inventory[i].SetDefaults(weaponType);
-                    player.inventory[i].prefix = (byte)prefix;
-                    Main.NewText($"El Fragmento Génesis se ha transformado en {player.inventory[i].Name}!",
-                        new Microsoft.Xna.Framework.Color(245, 196, 81));
-                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4, player.Center);
-                    break;
-                }
-            }
-        }
+        // El reemplazo del item ahora lo hace la BranchCard en la UI de elección.
     }
 }

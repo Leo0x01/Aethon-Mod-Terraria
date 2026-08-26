@@ -8,16 +8,16 @@ using AethonMod.Content.Players;
 
 namespace AethonMod.Content.Systems
 {
-    /// <summary>
-    /// Sistema que registra y gestiona las UI del mod (árbol de habilidades + códex).
-    /// Maneja la tecla 'K' para abrir/cerrar el árbol.
-    /// </summary>
     public class UISystem : ModSystem
     {
         private UserInterface? _skillTreeInterface;
         internal UI.SkillTreeUIState? SkillTreeUI;
         private UserInterface? _codexInterface;
         internal UI.MemoryCodexUIState? CodexUI;
+        private UserInterface? _xpBarInterface;
+        internal UI.ShardXPBarUI? XPBarUI;
+        private UserInterface? _branchChoiceInterface;
+        internal UI.BranchChoiceUI? BranchChoiceUI;
 
         public override void Load()
         {
@@ -31,6 +31,16 @@ namespace AethonMod.Content.Systems
             CodexUI = new UI.MemoryCodexUIState();
             CodexUI.Activate();
             _codexInterface.SetState(CodexUI);
+
+            _xpBarInterface = new UserInterface();
+            XPBarUI = new UI.ShardXPBarUI();
+            XPBarUI.Activate();
+            _xpBarInterface.SetState(XPBarUI);
+
+            _branchChoiceInterface = new UserInterface();
+            BranchChoiceUI = new UI.BranchChoiceUI();
+            BranchChoiceUI.Activate();
+            _branchChoiceInterface.SetState(BranchChoiceUI);
         }
 
         public override void Unload()
@@ -39,6 +49,10 @@ namespace AethonMod.Content.Systems
             _skillTreeInterface = null;
             CodexUI = null;
             _codexInterface = null;
+            XPBarUI = null;
+            _xpBarInterface = null;
+            BranchChoiceUI = null;
+            _branchChoiceInterface = null;
         }
 
         public override void UpdateUI(GameTime gameTime)
@@ -47,6 +61,10 @@ namespace AethonMod.Content.Systems
                 _skillTreeInterface?.Update(gameTime);
             if (CodexUI?.IsVisible == true)
                 _codexInterface?.Update(gameTime);
+            if (XPBarUI?.IsVisible == true)
+                _xpBarInterface?.Update(gameTime);
+            if (BranchChoiceUI?.IsVisible == true)
+                _branchChoiceInterface?.Update(gameTime);
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -54,7 +72,30 @@ namespace AethonMod.Content.Systems
             int inventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
             if (inventoryIndex != -1)
             {
+                // Barra de XP (siempre visible cuando el fragmento está imprintado)
                 layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer(
+                    "AethonMod: XPBar",
+                    delegate
+                    {
+                        if (XPBarUI?.IsVisible == true)
+                            _xpBarInterface?.Draw(Main.spriteBatch, new GameTime());
+                        return true;
+                    },
+                    InterfaceScaleType.UI));
+
+                // Elección de rama (tarjetas flotantes)
+                layers.Insert(inventoryIndex + 2, new LegacyGameInterfaceLayer(
+                    "AethonMod: BranchChoice",
+                    delegate
+                    {
+                        if (BranchChoiceUI?.IsVisible == true)
+                            _branchChoiceInterface?.Draw(Main.spriteBatch, new GameTime());
+                        return true;
+                    },
+                    InterfaceScaleType.UI));
+
+                // Árbol de habilidades
+                layers.Insert(inventoryIndex + 3, new LegacyGameInterfaceLayer(
                     "AethonMod: SkillTreeUI",
                     delegate
                     {
@@ -63,7 +104,9 @@ namespace AethonMod.Content.Systems
                         return true;
                     },
                     InterfaceScaleType.UI));
-                layers.Insert(inventoryIndex + 2, new LegacyGameInterfaceLayer(
+
+                // Códex de memoria
+                layers.Insert(inventoryIndex + 4, new LegacyGameInterfaceLayer(
                     "AethonMod: CodexUI",
                     delegate
                     {
@@ -80,7 +123,6 @@ namespace AethonMod.Content.Systems
             var config = ModContent.GetInstance<Content.AethonConfig>();
             if (config == null) return;
 
-            // Tecla configurable para abrir/cerrar el árbol de habilidades.
             if (Main.keyState.IsKeyDown(config.SkillTreeKey) &&
                 !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
             {
@@ -93,7 +135,6 @@ namespace AethonMod.Content.Systems
                         SkillTreeUI?.Show();
                 }
             }
-            // Tecla configurable para el códex de memoria.
             if (Main.keyState.IsKeyDown(config.CodexKey) &&
                 !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
