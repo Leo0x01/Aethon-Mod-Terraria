@@ -74,19 +74,54 @@ namespace AethonMod.Content.Players
         private void OnLevelUp()
         {
             // Notificacion visual de nivel subido.
-            Main.NewText($"Fragmento Genesis ha alcanzado el nivel {ShardLevel}!",
+            Main.NewText($"✦ Fragmento Genesis ha alcanzado el nivel {ShardLevel}!",
                 new Microsoft.Xna.Framework.Color(245, 196, 81));
             Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
 
-            // Hitos cosmicos.
+            // Explosion de particulas doradas alrededor del jugador.
+            for (int i = 0; i < 40; i++)
+            {
+                Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
+                    new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
+                    100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
+            }
+            // Estrellas brillantes.
+            for (int i = 0; i < 20; i++)
+            {
+                Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.YellowStarDust,
+                    new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-5, 5), Main.rand.NextFloat(-5, 5)),
+                    150, default, 1.3f);
+            }
+
+            // Hitos cosmicos con efectos especiales.
             if (ShardLevel == 10)
-                Main.NewText("Hito: Primer despertar. El fragmento se solidifica.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            {
+                Main.NewText("✦ Hito: Primer despertar. El fragmento se solidifica.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+                for (int i = 0; i < 60; i++)
+                    Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.PurpleTorch,
+                        new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-8, 8), Main.rand.NextFloat(-8, 8)),
+                        100, new Microsoft.Xna.Framework.Color(179, 136, 255), 2f);
+            }
             if (ShardLevel == 25)
-                Main.NewText("Hito: Lluvia de Luz Estelar activada.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            {
+                Main.NewText("✦ Hito: Lluvia de Luz Estelar activada.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Thunder);
+            }
             if (ShardLevel == 50)
-                Main.NewText("Hito: El Sagrario Hueco se extiende.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            {
+                Main.NewText("✦ Hito: El Sagrario Hueco se extiende.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Roar);
+            }
             if (ShardLevel == 100)
-                Main.NewText("Hito: Aethon se agita. Zona de Ascendancy desbloqueada.", new Microsoft.Xna.Framework.Color(245, 196, 81));
+            {
+                Main.NewText("✦✦ HITO CRITICO: Aethon se agita. Zona de Ascendancy desbloqueada. ✦✦", new Microsoft.Xna.Framework.Color(245, 196, 81));
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
+                // Explosion masiva de particulas.
+                for (int i = 0; i < 100; i++)
+                    Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
+                        new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-12, 12), Main.rand.NextFloat(-12, 12)),
+                        100, new Microsoft.Xna.Framework.Color(245, 196, 81), 3f);
+            }
         }
 
         /// <summary>Puntos de habilidad acumulados según el nivel (tabla por tramos).</summary>

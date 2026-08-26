@@ -199,17 +199,25 @@ namespace AethonMod.Content.UI
             Append(descText);
 
             var chooseBtn = new UITextPanel<string>("Elegir");
-            chooseBtn.Width.Set(100f, 0f);
-            chooseBtn.Height.Set(28f, 0f);
+            chooseBtn.Width.Set(120f, 0f);
+            chooseBtn.Height.Set(32f, 0f);
             chooseBtn.HAlign = 0.5f;
-            chooseBtn.Top.Set(155f, 0f);
-            chooseBtn.BackgroundColor = new Color(_color.R / 3, _color.G / 3, _color.B / 3, 200);
+            chooseBtn.Top.Set(220f, 0f);
+            chooseBtn.BackgroundColor = new Color(_color.R / 3, _color.G / 3, _color.B / 3, 220);
             chooseBtn.BorderColor = _color;
+            chooseBtn.OnMouseOver += (evt, el) =>
+            {
+                // Efecto de partículas al hacer hover.
+                for (int i = 0; i < 5; i++)
+                {
+                    Dust.NewDustPerfect(Main.LocalPlayer.Center + new Vector2(Main.rand.NextFloat(-200, 200), Main.rand.NextFloat(-100, 100)),
+                        Terraria.ID.DustID.YellowStarDust, Vector2.Zero, 100, _color, 1f);
+                }
+            };
             chooseBtn.OnLeftClick += (evt, el) =>
             {
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp == null) return;
-                // Forzar la elección del jugador (no aleatorio).
                 sp.ActiveBranch = _type;
                 sp.SubForm = _type switch
                 {
@@ -221,13 +229,26 @@ namespace AethonMod.Content.UI
                 if (sp.SkillTreeSeed == 0)
                     sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
 
-                Main.NewText($"Has elegido la rama de {_name}!", _color);
+                Main.NewText($"✦ El Fragmento Genesis se ha transformado — {_name}!", _color);
                 Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item169);
 
-                // Reemplazar el item del inventario.
+                // Explosión de partículas épica.
+                for (int i = 0; i < 60; i++)
+                {
+                    Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.GoldFlame,
+                        new Vector2(Main.rand.NextFloat(-8, 8), Main.rand.NextFloat(-8, 8)),
+                        100, _color, 2f);
+                }
+                for (int i = 0; i < 30; i++)
+                {
+                    Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.Enchanted_Pink,
+                        new Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
+                        150, default, 1.5f);
+                }
+
                 ReplaceShardWithWeapon(Main.LocalPlayer, _type);
 
-                // Cerrar la UI de elección.
                 var ui = ModContent.GetInstance<UISystem>();
                 ui?.BranchChoiceUI?.Hide();
             };
