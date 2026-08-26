@@ -60,7 +60,7 @@ namespace AethonMod.Content.Players
         /// <summary>Otorga XP al fragmento. Si pasa el umbral, sube de nivel (recursivo).</summary>
         public void GrantXP(int amount)
         {
-            if (!IsImprinted) return; // El fragmento no gana XP hasta imprprimirse.
+            if (!IsImprinted) return; // El fragmento no gana XP hasta imprimirse.
             ShardXP += amount;
             while (ShardXP >= XPForNextLevel())
             {
@@ -73,8 +73,20 @@ namespace AethonMod.Content.Players
         /// <summary>Llamado cuando el fragmento sube de nivel.</summary>
         private void OnLevelUp()
         {
-            // TODO: notificación visual (texto flotante), evento cósmico por hito.
-            // TODO: desbloquear slots de runa por nivel (runeSlotsForLevel).
+            // Notificacion visual de nivel subido.
+            Main.NewText($"Fragmento Genesis ha alcanzado el nivel {ShardLevel}!",
+                new Microsoft.Xna.Framework.Color(245, 196, 81));
+            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+
+            // Hitos cosmicos.
+            if (ShardLevel == 10)
+                Main.NewText("Hito: Primer despertar. El fragmento se solidifica.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            if (ShardLevel == 25)
+                Main.NewText("Hito: Lluvia de Luz Estelar activada.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            if (ShardLevel == 50)
+                Main.NewText("Hito: El Sagrario Hueco se extiende.", new Microsoft.Xna.Framework.Color(179, 136, 255));
+            if (ShardLevel == 100)
+                Main.NewText("Hito: Aethon se agita. Zona de Ascendancy desbloqueada.", new Microsoft.Xna.Framework.Color(245, 196, 81));
         }
 
         /// <summary>Puntos de habilidad acumulados según el nivel (tabla por tramos).</summary>

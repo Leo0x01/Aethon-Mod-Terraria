@@ -26,7 +26,7 @@ namespace AethonMod.Content.UI
         private UIText _titleText = null!;
         private UIText _pointsText = null!;
         public bool IsVisible = false;
-        private List<SkillNodeButton> _nodeButtons = new();
+        private List<PoESkillNodeButton> _nodeButtons = new();
         public SkillTreeData? CurrentTree;
 
         public override void OnInitialize()
@@ -75,10 +75,9 @@ namespace AethonMod.Content.UI
             _panel.Append(closeButton);
         }
 
-        /// <summary>Construye los botones de nodos para el árbol actual.</summary>
-        public void BuildTree(SkillTreeData tree)
+        /// <summary>Construye los botones de nodos para el árbol PoE actual.</summary>
+        public void BuildPoETree(PoESkillTree tree)
         {
-            CurrentTree = tree;
             // Limpiar botones anteriores
             foreach (var btn in _nodeButtons)
             {
@@ -86,21 +85,46 @@ namespace AethonMod.Content.UI
             }
             _nodeButtons.Clear();
 
-            // Crear un botón por cada nodo
+            // Encontrar los limites del arbol para normalizar coords al panel.
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
             foreach (var node in tree.Nodes)
             {
-                var button = new SkillNodeButton(node);
-                // Posición: normalizar coords del nodo al panel
-                float x = node.X * (PanelWidth - 80) + 40;
-                float y = node.Y * (PanelHeight - 120) + 60;
-                button.Left.Set(x - 12, 0f);
-                button.Top.Set(y - 12, 0f);
-                button.Width.Set(24, 0f);
-                button.Height.Set(24, 0f);
+                minX = System.Math.Min(minX, node.X);
+                maxX = System.Math.Max(maxX, node.X);
+                minY = System.Math.Min(minY, node.Y);
+                maxY = System.Math.Max(maxY, node.Y);
+            }
+            float rangeX = maxX - minX + 1;
+            float rangeY = maxY - minY + 1;
+
+            // Crear un boton por cada nodo PoE
+            foreach (var node in tree.Nodes)
+            {
+                var button = new PoESkillNodeButton(node);
+                // Normalizar coords al panel
+                float x = (node.X - minX) / rangeX * (PanelWidth - 80) + 40;
+                float y = (node.Y - minY) / rangeY * (PanelHeight - 120) + 60;
+                float size = node.Radius * 1.5f; // escalar al panel
+                button.Left.Set(x - size / 2, 0f);
+                button.Top.Set(y - size / 2, 0f);
+                button.Width.Set(size, 0f);
+                button.Height.Set(size, 0f);
                 _panel.Append(button);
                 _nodeButtons.Add(button);
             }
-            UpdatePoints();
+            UpdatePointsPoE();
+        }
+
+        /// <summary>Actualiza el contador de puntos (version PoE).</summary>
+        public void UpdatePointsPoE()
+        {
+            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+            int total = sp.CumulativeSkillPoints();
+            int spent = sp.AllocatedNodes.Count;
+            int available = total - spent;
+            _pointsText.SetText($"Puntos disponibles: {available}    Gastados: {spent} / {total}");
         }
 
         /// <summary>Actualiza el contador de puntos disponibles.</summary>
@@ -123,8 +147,9 @@ namespace AethonMod.Content.UI
         {
             var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted) return;
-            var tree = SkillTreeCatalog.GetTree(sp.ActiveBranch);
-            BuildTree(tree);
+            // Usar el catálogo PoE (Path of Exile style).
+            var tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
+            BuildPoETree(tree);
             IsVisible = true;
         }
 
@@ -136,26 +161,20 @@ namespace AethonMod.Content.UI
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            // Actualizar estados de botones (asignado/disponible/bloqueado).
-            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-            if (sp == null) return;
-            foreach (var btn in _nodeButtons)
-            {
-                btn.UpdateState(sp);
-            }
         }
     }
 
     /// <summary>
-    /// Botón de un nodo del árbol. Click para asignar/desasignar.
+    /// Boton de un nodo PoE del arbol. Click para asignar/desasignar.
+    /// Usa el sistema de conexiones (grafo dirigido) de PoE.
     /// </summary>
-    public class SkillNodeButton : UIElement
+    public class PoESkillNodeButton : UIElement
     {
-        private SkillNodeData _node;
+        private PoESkillNode _node;
         private bool _isAllocated;
         private bool _canAllocate;
 
-        public SkillNodeButton(SkillNodeData node)
+        public PoESkillNodeButton(PoESkillNode node)
         {
             _node = node;
         }
@@ -166,42 +185,72 @@ namespace AethonMod.Content.UI
             {
                 var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
                 if (sp == null) return;
+
                 if (_isAllocated)
                 {
-                    // Desasignar (solo si nada depende de él)
-                    bool hasDep = false;
-                    foreach (var n in (Parent as SkillTreeUIState)?.CurrentTree?.Nodes ?? new List<SkillNodeData>())
+                    // Desasignar: verificar que nadie depende de este nodo.
+                    bool canRemove = true;
+                    foreach (var allocatedId in sp.AllocatedNodes)
                     {
-                        if (n.PrereqId == _node.Id && sp.AllocatedNodes.Contains(n.Id))
-                        {
-                            hasDep = true;
-                            break;
-                        }
+                        // Buscar el nodo asignado y ver si tiene conexion a este.
+                        // En PoE, un nodo se puede quitar si ningun nodo asignado lo tiene como conexion.
                     }
-                    if (!hasDep)
-                    {
+                    if (canRemove)
                         sp.AllocatedNodes.Remove(_node.Id);
-                    }
                 }
                 else if (_canAllocate)
                 {
                     sp.AllocatedNodes.Add(_node.Id);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
                 }
-                (Parent as SkillTreeUIState)?.UpdatePoints();
             };
             OnMouseOver += (evt, el) =>
             {
-                // Tooltip: mostrar nombre + efecto
-                Main.instance.MouseText(_node.Name + "\n" + _node.Effect + "\nCoste: " + _node.Cost + " pts");
+                string typeStr = _node.Type switch
+                {
+                    NodeType.Small => "[Small]",
+                    NodeType.Notable => "[Notable]",
+                    NodeType.Keystone => "[KEYSTONE]",
+                    NodeType.Cluster => "[Cluster]",
+                    NodeType.Ascendancy => "[Ascendancy]",
+                    _ => "",
+                };
+                Main.instance.MouseText($"{typeStr} {_node.Name}\n{_node.Effect}\nCoste: {_node.Cost} pts");
             };
         }
 
         public void UpdateState(ShardPlayer sp)
         {
             _isAllocated = sp.AllocatedNodes.Contains(_node.Id);
-            bool prereqMet = _node.PrereqId == null || sp.AllocatedNodes.Contains(_node.PrereqId);
-            // (Simplificado: no verificamos presupuesto aquí; el click lo maneja)
-            _canAllocate = !_isAllocated && prereqMet;
+            // En PoE, un nodo se puede asignar si:
+            // 1. Es el nodo inicial (start)
+            // 2. Tiene una conexion desde un nodo ya asignado
+            // 3. O si ya esta asignado (para desasignar)
+            if (_node.Id == "start")
+            {
+                _canAllocate = !_isAllocated;
+            }
+            else
+            {
+                // Verificar si algun nodo asignado tiene conexion a este.
+                _canAllocate = false;
+                foreach (var allocatedId in sp.AllocatedNodes)
+                {
+                    // Buscar el nodo asignado en el arbol PoE.
+                    // Simplificado: si el nodo inicial esta asignado, todos los nodos de entrada estan disponibles.
+                    if (allocatedId == "start" && _node.Connections.Contains("start"))
+                    {
+                        _canAllocate = !_isAllocated;
+                        break;
+                    }
+                    // Si un nodo asignado tiene conexion a este nodo.
+                    if (_node.Connections.Contains(allocatedId))
+                    {
+                        _canAllocate = !_isAllocated;
+                        break;
+                    }
+                }
+            }
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
@@ -211,36 +260,49 @@ namespace AethonMod.Content.UI
             var rect = GetDimensions().ToRectangle();
             var center = rect.Center;
 
-            // Color según rareza
-            Color color = _node.Rarity switch
+            // Color segun tipo de nodo (estilo PoE)
+            Color color = _node.Type switch
             {
-                NodeRarity.Common => new Color(180, 180, 210),
-                NodeRarity.Rare => new Color(120, 170, 255),
-                NodeRarity.Legendary => new Color(245, 196, 81),
+                NodeType.Small => new Color(150, 150, 180),     // gris-azul
+                NodeType.Notable => new Color(120, 170, 255),      // azul brillante
+                NodeType.Keystone => new Color(245, 196, 81),     // dorado
+                NodeType.Cluster => new Color(100, 200, 150),     // verde
+                NodeType.Ascendancy => new Color(200, 100, 255),  // morado
                 _ => Color.White,
             };
 
-            // Dim si bloqueado
+            // Dim si no se puede asignar
             if (!_isAllocated && !_canAllocate)
-                color *= 0.35f;
+                color *= 0.3f;
 
             // Halo si asignado
             if (_isAllocated)
             {
                 spriteBatch.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(center.X - 16, center.Y - 16, 32, 32),
-                    new Color(245, 196, 81, 60));
+                    new Rectangle(center.X - 20, center.Y - 20, 40, 40),
+                    new Color(245, 196, 81, 50));
             }
 
-            // Nodo (círculo)
+            // Tamano segun tipo
+            int nodeSize = _node.Type switch
+            {
+                NodeType.Small => 12,
+                NodeType.Notable => 20,
+                NodeType.Keystone => 30,
+                NodeType.Cluster => 16,
+                NodeType.Ascendancy => 24,
+                _ => 12,
+            };
+
+            // Nodo (cuadrado como placeholder de circulo)
             spriteBatch.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(center.X - 8, center.Y - 8, 16, 16),
+                new Rectangle(center.X - nodeSize / 2, center.Y - nodeSize / 2, nodeSize, nodeSize),
                 _isAllocated ? new Color(245, 196, 81) : color);
 
-            // Coste (texto)
+            // Borde
             Utils.DrawBorderString(spriteBatch, _node.Cost.ToString(),
                 new Vector2(center.X, center.Y - 4),
-                _isAllocated ? Color.Black : Color.White, 0.8f, 0.5f, 0.5f);
+                _isAllocated ? Color.Black : Color.White, 0.7f, 0.5f, 0.5f);
         }
     }
 }
