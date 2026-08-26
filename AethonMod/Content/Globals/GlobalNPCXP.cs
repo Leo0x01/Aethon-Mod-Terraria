@@ -73,35 +73,41 @@ namespace AethonMod.Content.Globals
 
         public override void OnKill(NPC npc)
         {
-            // Otorgar XP a cada jugador que haya dañado al NPC.
-            // Simplificación: otorga al Main.LocalPlayer (en single-player es suficiente).
-            if (Main.netMode == NetmodeID.SinglePlayer)
-            {
-                GrantXPToPlayers(npc);
-            }
-            else
-            {
-                // En multi-jugador, cada cliente procesa su propio daño.
-                GrantXPToPlayers(npc);
-            }
-        }
+            // SOLO otorgar XP si el NPC fue matado por el jugador o sus invocaciones.
+            // npc.SpawnedFromPlayer indica si el jugador interactuo con el.
+            // Verificamos npc.playerInteraction que es true si el jugador o sus proyectiles dañaron al NPC.
+            // Pero eso no distingue entre NPCs hostiles y NPCs amistosos.
+            // Solucion: usar npc.lastInteraction que es el whoAmI del ultimo jugador que golpeo al NPC.
 
-        private void GrantXPToPlayers(NPC npc)
-        {
-            int xp = Systems.ShardLevelSystem.XPForNPC(npc);
+            // No contar NPCs amistosos (town NPCs, etc.)
+            if (npc.friendly || npc.townNPC) return;
+
+            // No contar NPCs que fueron matados por otros NPCs (no por el jugador).
+            // npc.lastInteraction contiene el whoAmI del ultimo jugador que interactuo.
+            // Si fue un NPC el que mato, lastInteraction sera -1 o un indice de NPC.
+            // Aceptamos solo si un jugador real interactuo con el NPC.
+            bool playerKilled = false;
             foreach (Player player in Main.ActivePlayers)
             {
-                // Verificar si el jugador dañó a este NPC (npc.playerInteraction).
-                // Simplificación: otorga a todos los jugadores activos cercanos.
                 if (player.active && !player.dead)
                 {
-                    float dist = System.Math.Abs(player.Center.X - npc.Center.X) +
-                                 System.Math.Abs(player.Center.Y - npc.Center.Y);
-                    if (dist < 3000f) // ~150 tiles
+                    // Verificar si este jugador causo el golpe final o daño al NPC.
+                    // Usar npc.playerInteraction que es true si el jugador interactuo con el NPC.
+                    if (npc.playerInteraction[player.whoAmI])
                     {
+                        playerKilled = true;
+                        // Otorgar XP SOLO al jugador que mato al NPC.
+                        int xp = Systems.ShardLevelSystem.XPForNPC(npc);
                         Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
-                        // Aplicar efectos de nodos al matar (lifesteal, reset, explosión).
                         Systems.NodeEffectSystem.OnKillNPC(player, npc);
+
+                        // Tambien contar kills para la deteccion de rama.
+                        var sp = player.GetModPlayer<Players.ShardPlayer>();
+                        if (sp != null && !sp.IsImprinted)
+                        {
+                            // El tracking de kills ya se hace en OnHitByItem/OnHitByProjectile.
+                        }
+                        break; // Solo el primer jugador que interactuo.
                     }
                 }
             }

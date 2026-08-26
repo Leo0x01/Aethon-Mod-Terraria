@@ -102,34 +102,34 @@ namespace AethonMod.Content.UI
         public override void OnInitialize()
         {
             // Titulo
-            _titleText = new UIText("Elige la rama de tu Fragmento Génesis", 1.1f);
+            _titleText = new UIText("Elige la rama de tu Fragmento Genesis", 1.1f);
             _titleText.HAlign = 0.5f;
-            _titleText.VAlign = 0.25f;
+            _titleText.VAlign = 0.15f;
             _titleText.TextColor = new Color(245, 196, 81);
             Append(_titleText);
 
-            // 3 tarjetas
-            float cardWidth = 160f;
-            float gap = 20f;
+            // Contenedor centrado para las 3 tarjetas
+            float cardWidth = 170f;
+            float cardHeight = 210f;
+            float gap = 15f;
             float totalWidth = cardWidth * 3 + gap * 2;
-            float startX = (Main.screenWidth - totalWidth) / 2f;
 
             _cards.Clear();
             var branches = new (string name, string desc, Color color, BranchType type)[]
             {
-                ("DISTANCIA", "Arcos, munición\ny armas arrojadizas\n\nLumina, la Arcoestelar", new Color(245, 196, 81), BranchType.Distance),
-                ("CUERPO A CUERPO", "Espadas, lanzas\ny yoyos\n\nSolbrand, Filo del Alba", new Color(255, 154, 60), BranchType.Melee),
-                ("ARTES MÁGICAS", "Magia + Invocación\nfusionadas\n\nGrimorio del Eterno", new Color(179, 136, 255), BranchType.Magic),
+                ("DISTANCIA", "Arcos, municion\ny armas arrojadizas\n\nLumina,\nla Arcoestelar", new Color(245, 196, 81), BranchType.Distance),
+                ("CUERPO A CUERPO", "Espadas, lanzas\ny yoyos\n\nSolbrand,\nFilo del Alba", new Color(255, 154, 60), BranchType.Melee),
+                ("ARTES MAGICAS", "Magia + Invocacion\nfusionadas\n\nGrimorio\ndel Eterno", new Color(179, 136, 255), BranchType.Magic),
             };
 
             for (int i = 0; i < 3; i++)
             {
                 var card = new BranchCard(branches[i].name, branches[i].desc, branches[i].color, branches[i].type);
                 card.Width.Set(cardWidth, 0f);
-                card.Height.Set(200f, 0f);
-                card.HAlign = 0.5f;
-                card.VAlign = 0.4f;
-                card.Left.Set((i - 1) * (cardWidth + gap), 0f);
+                card.Height.Set(cardHeight, 0f);
+                // Centrar las 3 tarjetas horizontalmente
+                card.Left.Set((Main.screenWidth / 2f) - (totalWidth / 2f) + i * (cardWidth + gap), 0f);
+                card.Top.Set(Main.screenHeight * 0.3f, 0f);
                 Append(card);
                 _cards.Add(card);
             }
