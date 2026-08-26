@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
@@ -12,189 +12,167 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// Estado de UI del Códex de Memoria.
-    /// Lista las armas absorbibles del juego base y permite memorizarlas.
-    /// Se abre/cierra con la tecla 'J'.
+    /// Códex de Memoria — pantalla completa estilo árbol.
+    /// Se dibuja directamente con Draw().
     /// </summary>
-    public class MemoryCodexUIState : UIState
+    public class MemoryCodexUIState
     {
         public bool IsVisible = false;
-        public const int PanelWidth = 700;
-        public const int PanelHeight = 500;
-
-        private UIPanel _panel = null!;
-        private UIText _titleText = null!;
-        private UIText _infoText = null!;
-        private UIList _entryList = null!;
-        private UIScrollbar _scrollbar = null!;
-
-        public override void OnInitialize()
-        {
-            _panel = new UIPanel();
-            _panel.Width.Set(PanelWidth, 0f);
-            _panel.Height.Set(PanelHeight, 0f);
-            _panel.HAlign = 0.5f;
-            _panel.VAlign = 0.5f;
-            _panel.BackgroundColor = new Color(20, 15, 40, 240);
-            _panel.BorderColor = new Color(179, 136, 255, 180);
-            Append(_panel);
-
-            _titleText = new UIText("Códex de Memoria — Absorción de Lore", 1.2f)
-            {
-                HAlign = 0.5f,
-                Top = { Pixels = 10 },
-                TextColor = new Color(179, 136, 255),
-            };
-            _panel.Append(_titleText);
-
-            _infoText = new UIText("", 0.85f)
-            {
-                HAlign = 0.5f,
-                Top = { Pixels = 40 },
-                TextColor = new Color(245, 196, 81),
-            };
-            _panel.Append(_infoText);
-
-            // Lista de entradas con scroll
-            _entryList = new UIList
-            {
-                Width = { Pixels = PanelWidth - 60 },
-                Height = { Pixels = PanelHeight - 120 },
-                Top = { Pixels = 70 },
-                Left = { Pixels = 20 },
-                ListPadding = 4f,
-            };
-            _panel.Append(_entryList);
-
-            _scrollbar = new UIScrollbar
-            {
-                Height = { Pixels = PanelHeight - 120 },
-                Top = { Pixels = 70 },
-                Left = { Pixels = PanelWidth - 30 },
-            };
-            _panel.Append(_scrollbar);
-            _entryList.SetScrollbar(_scrollbar);
-
-            // Botón cerrar
-            var closeButton = new UITextPanel<string>("Cerrar (J)")
-            {
-                Width = { Pixels = 120 },
-                Height = { Pixels = 30 },
-                HAlign = 1f,
-                Top = { Pixels = 8 },
-                Left = { Pixels = -8 },
-                BackgroundColor = new Color(60, 40, 80, 200),
-                BorderColor = new Color(180, 120, 255, 120),
-            };
-            closeButton.OnLeftClick += (evt, el) => Hide();
-            _panel.Append(closeButton);
-        }
+        private int _scrollY = 0;
+        private bool _mouseLeftPressed = false;
 
         public void Show()
         {
             var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted) return;
-
-            // Construir lista de entradas para la rama activa.
-            BuildEntries(sp);
+            _scrollY = 0;
             IsVisible = true;
         }
 
-        public void Hide()
-        {
-            IsVisible = false;
-        }
+        public void Hide() { IsVisible = false; }
 
-        private void BuildEntries(ShardPlayer sp)
+        public void Draw()
         {
-            _entryList.Clear();
+            if (!IsVisible) return;
+            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+
+            var sb = Main.spriteBatch;
             var entries = MemoryCodexSystem.GetCodexForBranch(sp.ActiveBranch);
             int slots = sp.RuneSlots();
 
-            _infoText.SetText($"Runas equipadas: {sp.MemorizedRunes.Count} / {slots}    " +
-                              $"Resonancia: {sp.ResonanceShards} ✦");
+            // Fondo oscuro
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+                new Color(6, 4, 14, 245));
 
-            foreach (var entry in entries)
+            // Radiales
+            DrawRadial(sb, 0.5f, 0.3f, 0.4f, new Color(120, 80, 200, 20));
+            DrawRadial(sb, 0.8f, 0.7f, 0.35f, new Color(245, 196, 81, 15));
+
+            // Titulo
+            Utils.DrawBorderString(sb, "CODEX DE MEMORIA",
+                new Vector2(Main.screenWidth / 2f, 20), new Color(179, 136, 255), 1.3f, 0.5f, 0.5f);
+            Utils.DrawBorderString(sb, $"Runas: {sp.MemorizedRunes.Count}/{slots}  |  Resonancia: {sp.ResonanceShards} ✦",
+                new Vector2(Main.screenWidth / 2f, 45), new Color(245, 196, 81), 0.9f, 0.5f, 0.5f);
+
+            // Panel central
+            int panelX = Main.screenWidth / 2 - 350;
+            int panelY = 70;
+            int panelW = 700;
+            int panelH = Main.screenHeight - 100;
+
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle(panelX, panelY, panelW, panelH),
+                new Color(15, 10, 30, 230));
+
+            // Borde
+            Color border = new(179, 136, 255, 150);
+            int b = 2;
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(panelX, panelY, panelW, b), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(panelX, panelY + panelH - b, panelW, b), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(panelX, panelY, b, panelH), border);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(panelX + panelW - b, panelY, b, panelH), border);
+
+            // Lista de entradas
+            int entryH = 36;
+            int startY = panelY + 10 - _scrollY;
+            int visibleStart = System.Math.Max(0, _scrollY / entryH);
+            int visibleEnd = System.Math.Min(entries.Count, visibleStart + panelH / entryH + 2);
+
+            for (int i = visibleStart; i < visibleEnd; i++)
             {
-                var row = new CodexEntryRow(entry, sp.MemorizedRunes.Contains(entry.Name));
-                _entryList.Add(row);
-            }
-        }
+                var entry = entries[i];
+                int ey = startY + i * entryH;
+                if (ey < panelY - entryH || ey > panelY + panelH) continue;
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            // Actualizar info text
-            var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-            if (sp != null)
-            {
-                _infoText.SetText($"Runas equipadas: {sp.MemorizedRunes.Count} / {sp.RuneSlots()}    " +
-                                  $"Resonancia: {sp.ResonanceShards} ✦");
-            }
-        }
-    }
+                bool memorized = sp.MemorizedRunes.Contains(entry.Name);
+                bool hovered = Main.mouseX >= panelX + 10 && Main.mouseX <= panelX + panelW - 10 &&
+                               Main.mouseY >= ey && Main.mouseY <= ey + entryH - 4;
+                bool clicked = hovered && Main.mouseLeft && !_mouseLeftPressed;
 
-    /// <summary>Fila del códex: muestra un arma absorbible + botón memorizar.</summary>
-    public class CodexEntryRow : UIElement
-    {
-        private MemoryCodexSystem.CodexEntry _entry;
-        private bool _memorized;
+                // Fila
+                Color rowColor = memorized ? new Color(245, 196, 81, 30) : (hovered ? new Color(179, 136, 255, 25) : new Color(20, 15, 40, 100));
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(panelX + 10, ey, panelW - 20, entryH - 4), rowColor);
 
-        public CodexEntryRow(MemoryCodexSystem.CodexEntry entry, bool memorized)
-        {
-            _entry = entry;
-            _memorized = memorized;
-            Width.Set(0, 1f);
-            Height.Set(32, 0f);
-            MarginTop = 2f;
-        }
+                // Icono
+                string icon = sp.ActiveBranch == BranchType.Distance ? "🏹" : sp.ActiveBranch == BranchType.Melee ? "⚔" : "📖";
+                Utils.DrawBorderString(sb, icon, new Vector2(panelX + 25, ey + 10),
+                    memorized ? new Color(245, 196, 81) : Color.White, 1.0f);
 
-        public override void OnInitialize()
-        {
-            var nameText = new UIText($"{_entry.Name} — {_entry.Signature}", 0.85f)
-            {
-                Left = { Pixels = 8 },
-                Top = { Pixels = 6 },
-                TextColor = _memorized ? new Color(245, 196, 81) : Color.White,
-            };
-            Append(nameText);
+                // Nombre + descripción
+                Utils.DrawBorderString(sb, entry.Name, new Vector2(panelX + 50, ey + 8),
+                    memorized ? new Color(245, 196, 81) : Color.White, 0.85f);
+                Utils.DrawBorderString(sb, entry.Signature, new Vector2(panelX + 50, ey + 22),
+                    new Color(150, 140, 170), 0.7f);
 
-            var costText = new UIText($"{_entry.ResonanceCost} ✦", 0.8f)
-            {
-                HAlign = 1f,
-                Top = { Pixels = 6 },
-                Left = { Pixels = -120 },
-                TextColor = new Color(245, 196, 81),
-            };
-            Append(costText);
+                // Costo
+                Utils.DrawBorderString(sb, $"{entry.ResonanceCost} ✦", new Vector2(panelX + panelW - 120, ey + 12),
+                    new Color(245, 196, 81), 0.8f);
 
-            var button = new UITextPanel<string>(_memorized ? "✓" : "Memorizar")
-            {
-                Width = { Pixels = 80 },
-                Height = { Pixels = 24 },
-                HAlign = 1f,
-                Top = { Pixels = 4 },
-                Left = { Pixels = -8 },
-                BackgroundColor = _memorized
-                    ? new Color(60, 80, 60, 200)
-                    : new Color(60, 40, 80, 200),
-                BorderColor = new Color(180, 120, 255, 120),
-            };
-            if (!_memorized)
-            {
-                button.OnLeftClick += (evt, el) =>
+                // Botón
+                Color btnColor = memorized ? new Color(60, 80, 60, 200) : (hovered ? new Color(179, 136, 255, 200) : new Color(60, 40, 80, 180));
+                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(panelX + panelW - 90, ey + 6, 70, 24), btnColor);
+                Utils.DrawBorderString(sb, memorized ? "✓" : "Memorizar",
+                    new Vector2(panelX + panelW - 55, ey + 14),
+                    memorized ? new Color(100, 200, 100) : (hovered ? Color.White : new Color(179, 136, 255)),
+                    0.75f, 0.5f, 0.5f);
+
+                // Click
+                if (clicked && !memorized)
                 {
-                    var sp = Main.LocalPlayer.GetModPlayer<ShardPlayer>();
-                    if (sp == null) return;
-                    if (MemoryCodexSystem.Memorize(Main.LocalPlayer, _entry))
+                    if (sp.ResonanceShards >= entry.ResonanceCost && sp.MemorizedRunes.Count < slots)
                     {
-                        // Refrescar la UI
-                        var codexUI = ModContent.GetInstance<UISystem>()?.CodexUI;
-                        codexUI?.Show();
+                        MemoryCodexSystem.Memorize(Main.LocalPlayer, entry);
+                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
                     }
-                };
+                    else if (sp.ResonanceShards < entry.ResonanceCost)
+                    {
+                        Main.NewText("No tienes suficiente resonancia.", new Color(255, 100, 100));
+                    }
+                    else
+                    {
+                        Main.NewText("No hay slots de runa disponibles.", new Color(255, 100, 100));
+                    }
+                }
             }
-            Append(button);
+
+            // Scroll
+            int totalH = entries.Count * entryH;
+            if (totalH > panelH - 20)
+            {
+                int scrollBarH = (panelH - 20) * (panelH - 20) / totalH;
+                int scrollBarY = panelY + 10 + (_scrollY * (panelH - 20 - scrollBarH) / (totalH - panelH + 20));
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle(panelX + panelW - 12, scrollBarY, 6, scrollBarH),
+                    new Color(179, 136, 255, 150));
+            }
+
+            if (Main.mouseLeft) _mouseLeftPressed = true;
+            else _mouseLeftPressed = false;
+
+            // Cerrar con Esc o J
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape)) Hide();
+
+            // Ayuda
+            Utils.DrawBorderString(sb, "Click: memorizar  |  J/Esc: cerrar",
+                new Vector2(Main.screenWidth / 2f, Main.screenHeight - 15),
+                new Color(100, 95, 120), 0.8f, 0.5f, 0.5f);
+        }
+
+        private void DrawRadial(SpriteBatch sb, float xPct, float yPct, float rPct, Color color)
+        {
+            float cx = Main.screenWidth * xPct;
+            float cy = Main.screenHeight * yPct;
+            float r = Main.screenWidth * rPct;
+            for (int i = (int)r; i > 0; i -= 15)
+            {
+                int alpha = (int)(color.A * (1f - (float)i / r) * 0.3f);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)(cx - i), (int)(cy - i), i * 2, i * 2),
+                    new Color(color.R, color.G, color.B, alpha));
+            }
         }
     }
 }

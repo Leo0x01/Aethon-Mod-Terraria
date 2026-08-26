@@ -70,7 +70,7 @@ namespace AethonMod.Content.Systems
                     XPBarUI?.Draw();
                     BranchChoiceUI?.Draw();
                     SkillTreeUI?.Draw();
-                    // CodexUI usa UIState propio, no Draw directo
+                    CodexUI?.Draw();
                     return true;
                 },
                 InterfaceScaleType.UI));
