@@ -9,24 +9,41 @@ namespace AethonMod.Content.Systems
 {
     /// <summary>
     /// Sistema central de UI del mod Aethon.
-    /// Maneja:
-    /// - Carga/descarga de las UIs (SkillTree, Codex, XPBar, BranchChoice)
-    /// - Input de teclas (K = arbol, J = codex)
-    /// - Capa de renderizado (ModifyInterfaceLayers)
+    /// Usa UserInterface + UIState para cada UI (patron correcto de tModLoader).
+    /// Esto garantiza que el renderizado funcione (no mas pantalla blanca).
     /// </summary>
     public class UISystem : ModSystem
     {
+        // UserInterfaces (gestionan el estado y el renderizado)
+        private UserInterface? _skillTreeInterface;
+        private UserInterface? _codexInterface;
+
+        // Estados (contienen los UIElements)
         internal UI.SkillTreeUIState? SkillTreeUI;
         internal UI.MemoryCodexUIState? CodexUI;
-        internal UI.ShardXPBarUI? XPBarUI;
+        internal UI.FragmentInfoBoxUI? FragmentInfoBoxUI;
         internal UI.BranchChoiceUI? BranchChoiceUI;
 
         public override void Load()
         {
             if (Main.dedServ) return;
+
+            // Crear UserInterfaces
+            _skillTreeInterface = new UserInterface();
+            _codexInterface = new UserInterface();
+
+            // Crear estados y activarlos
             SkillTreeUI = new UI.SkillTreeUIState();
+            SkillTreeUI.Activate();
+
             CodexUI = new UI.MemoryCodexUIState();
-            XPBarUI = new UI.ShardXPBarUI();
+            CodexUI.Activate();
+
+            // La caja de info del fragmento (no usa UserInterface, se dibuja directamente)
+            FragmentInfoBoxUI = new UI.FragmentInfoBoxUI();
+            FragmentInfoBoxUI.Activate();
+
+            // La eleccion de rama (sigue siendo directa, solo aparece una vez)
             BranchChoiceUI = new UI.BranchChoiceUI();
         }
 
@@ -34,17 +51,17 @@ namespace AethonMod.Content.Systems
         {
             SkillTreeUI = null;
             CodexUI = null;
-            XPBarUI = null;
+            FragmentInfoBoxUI = null;
             BranchChoiceUI = null;
+            _skillTreeInterface = null;
+            _codexInterface = null;
         }
 
         public override void PostUpdateInput()
         {
-            // Input de teclas (K = arbol, J = codex)
             var config = ModContent.GetInstance<Content.AethonConfig>();
             if (config == null) return;
 
-            // Si alguna UI principal esta abierta, no procesar apertura de otra (evita conflictos)
             bool anyFullscreenUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
 
             // Toggle del arbol de habilidades (K)
@@ -55,7 +72,11 @@ namespace AethonMod.Content.Systems
                 if (sp != null && sp.IsImprinted && !anyFullscreenUIOpenExcept(SkillTreeUI))
                 {
                     if (SkillTreeUI?.IsVisible == true) SkillTreeUI.Hide();
-                    else SkillTreeUI?.Show();
+                    else
+                    {
+                        SkillTreeUI?.Show();
+                        if (SkillTreeUI != null) _skillTreeInterface?.SetState(SkillTreeUI);
+                    }
                 }
                 else if (sp != null && !sp.IsImprinted)
                 {
@@ -64,7 +85,7 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            // Toggle del codex de memoria (J)
+            // Toggle del codex (J)
             if (Main.keyState.IsKeyDown(config.CodexKey) &&
                 !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
@@ -72,7 +93,11 @@ namespace AethonMod.Content.Systems
                 if (sp != null && sp.IsImprinted && !anyFullscreenUIOpenExcept(CodexUI))
                 {
                     if (CodexUI?.IsVisible == true) CodexUI.Hide();
-                    else CodexUI?.Show();
+                    else
+                    {
+                        CodexUI?.Show();
+                        if (CodexUI != null) _codexInterface?.SetState(CodexUI);
+                    }
                 }
                 else if (sp != null && !sp.IsImprinted)
                 {
@@ -81,11 +106,20 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            // Update de la barra de XP (siempre visible)
-            XPBarUI?.Update();
+            // Update de las UserInterfaces (procesa input de la UI)
+            if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
+                _skillTreeInterface.Update(Main._drawInterfaceGameTime);
+            if (_codexInterface != null && CodexUI?.IsVisible == true)
+                _codexInterface.Update(Main._drawInterfaceGameTime);
+
+            // Limpiar el estado de la UserInterface cuando la UI se oculta
+            if (SkillTreeUI?.IsVisible != true) _skillTreeInterface?.SetState(null);
+            if (CodexUI?.IsVisible != true) _codexInterface?.SetState(null);
+
+            // BranchChoice update
+            BranchChoiceUI?.Update();
         }
 
-        /// <summary>True si hay una UI abierta que NO sea la especificada.</summary>
         private bool anyFullscreenUIOpenExcept(object? except)
         {
             if (except != SkillTreeUI && (SkillTreeUI?.IsVisible ?? false)) return true;
@@ -96,7 +130,7 @@ namespace AethonMod.Content.Systems
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            // Insertar despues del cursor del mouse para que se dibuje encima de todo.
+            // Insertar despues del cursor del mouse para que se dibuje encima de todo
             int mouseLayerIdx = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
             if (mouseLayerIdx == -1) mouseLayerIdx = layers.Count;
 
@@ -106,10 +140,28 @@ namespace AethonMod.Content.Systems
                 {
                     try
                     {
-                        XPBarUI?.Draw();
+                        // Caja de info del fragmento (siempre visible)
+                        if (FragmentInfoBoxUI != null && FragmentInfoBoxUI.IsVisible)
+                        {
+                            FragmentInfoBoxUI.Draw(Main.spriteBatch);
+                        }
+
+                        // Eleccion de rama (modal)
                         BranchChoiceUI?.Draw();
-                        SkillTreeUI?.Draw();
-                        CodexUI?.Draw();
+
+                        // Arbol de habilidades (via UserInterface — patron correcto)
+                        if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
+                        {
+                            var gt = Main._drawInterfaceGameTime;
+                            if (gt != null) _skillTreeInterface.Draw(Main.spriteBatch, gt);
+                        }
+
+                        // Codex de memoria (via UserInterface)
+                        if (_codexInterface != null && CodexUI?.IsVisible == true)
+                        {
+                            var gt = Main._drawInterfaceGameTime;
+                            if (gt != null) _codexInterface.Draw(Main.spriteBatch, gt);
+                        }
                     }
                     catch (System.Exception ex)
                     {
