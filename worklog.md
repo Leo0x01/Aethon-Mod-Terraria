@@ -1816,3 +1816,37 @@ Stage Summary:
 - Game interface fully disabled when UI open (like bestiary)
 - Player cannot interact with world while UI is open (no attacking, no movement, no item use)
 - Inventory auto-closes when opening mod UI
+
+---
+Task ID: HYBRID-DAMAGE-BUFF-MINION-1
+Agent: Lead Developer (Z.ai Code)
+Task: Make Grimoire hybrid Magic+Summon damage, make minion appear in buff zone.
+
+Work Log:
+- GrimoireEternal: now truly hybrid Magic + Summon damage
+  * ModifyWeaponDamage applies:
+    - +2.2% magic damage per level (left click / ArcaneBolt)
+    - +1% summon damage per level (right click / CosmicOrbMinion)
+    - Bonus minion slots from tree nodes (GetBonusMinionSlots)
+    - Summon crit chance (50% of magic crit)
+  * The weapon benefits both spells and minions (as requested)
+- Created CosmicOrbBuff: buff that appears in player's buff zone
+  * buffNoTimeDisplay = true (no timer, like vanilla minions)
+  * buffNoSave = true (not saved, recreated when equipping grimoire)
+  * Update: maintains buff while minion is active, removes when minion dies
+  * Icon CosmicOrbBuff.png (32x32) generated with Python — gold orb with violet glow
+- CosmicOrbMinion: now adds buff to player on summon
+  * GrimoireEternal.Shoot adds player.AddBuff(CosmicOrbBuff, 18000)
+  * CheckMinionBuff renews the buff while grimoire is equipped
+  * If grimoire is unequipped, minion dies and buff disappears
+- Removed SetDefault calls (deprecated in tModLoader v2026.06)
+- Removed Projectile.buffType (not a valid field in this version)
+- Removed BuffID.Sets.MinionPet (doesn't exist)
+- Build: 0 Errors, 0 Warnings
+- .tmod: 205KB (includes new buff icon)
+- Pushed to GitHub: commit 6f1ef78
+
+Stage Summary:
+- Grimoire now has hybrid damage: benefits both Magic and Summon
+- Minion appears in buff zone with custom icon (gold orb with violet glow)
+- Buff persists while grimoire is equipped, disappears when unequipped
