@@ -1513,3 +1513,47 @@ Unresolved issues (non-blocking):
 - TheWitness.cs still has townNPC=false with town NPC hooks (design issue).
 - Boss AI state in ModNPC fields (not NPC.ai[]) — won't sync in MP.
 - The mod is ready for the user to recompile and test in tModLoader.
+
+---
+Task ID: UI-ART-BACKGROUNDS-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix codex missing magic weapons, skill tree nodes too big, no art backgrounds. Create cosmic background images.
+
+Work Log:
+- Analyzed user screenshots: codex had giant pink box + text overlap, skill tree had giant square nodes + label stacking
+- Generated 2 artistic background PNG textures with Python/PIL:
+  * SkillTree_Background.png (400x300): deep space with purple/gold nebula, spiral galaxy arms, 300 stars, 15 glowing stars
+  * Codex_Background.png (400x300): ancient parchment with cosmic runes (5 rune circles), vignette, stars
+- Created MagicWeaponScanner.cs: dynamically scans ALL game weapons by DamageType
+  * Uses ContentSamples.ItemsByType to iterate every item
+  * Checks CountsAsClass(DamageClass.Magic/Summon/Ranged/Melee)
+  * Calculates resonance cost from damage + rarity
+  * Generates description from item properties (useTime, knockBack, crit, shoot, mana, autoReuse)
+  * Caches results (runs once at first access)
+  * Limits to 30 weapons per branch, sorted by cost
+- Rewrote SkillTreeView (SkillTreeUI.cs):
+  * Nodes now SMALL (5-12px) instead of giant squares (16-22px)
+  * Nodes are CIRCULAR (DrawCircle method) not square
+  * Labels only shown on hover or allocated (eliminates text stacking)
+  * Background texture loaded via ModContent.Request<Texture2D>
+  * Zoom initial 0.7 for better overview
+  * Info bar at bottom showing available points
+  * Thinner connection lines (1-2px)
+- Rewrote CodexListView (MemoryCodexUI.cs):
+  * Background texture (grimorio) loaded via ModContent.Request<Texture2D>
+  * Dynamic weapon list from MagicWeaponScanner (not hardcoded)
+  * Zebra striping for readability
+  * Footer with help text
+  * Better scrollbar
+- Updated MemoryCodexSystem.GetCodexForBranch to use MagicWeaponScanner
+- Added using ReLogic.Content for AssetRequestMode
+- Build: 0 Errors, 0 Warnings
+- .tmod: 172KB (includes both background textures as .rawimg)
+- Pushed to GitHub: commit c3f1c65
+
+Stage Summary:
+- Codex now includes ALL magic+summon weapons from the game (dynamically scanned, not hardcoded)
+- Skill tree nodes are small circles (5-12px) with proper glow effects
+- Both UIs have artistic cosmic background textures (PNG)
+- Label overlap fixed (only shown on hover/allocated)
+- Textures packaged in .tmod as .rawimg
