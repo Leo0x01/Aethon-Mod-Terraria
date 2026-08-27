@@ -1653,3 +1653,25 @@ Stage Summary:
 - Minion improvements integrated into skill tree (summon-keystone, ascend-3)
 - Scroll inventory bug fixed (ScrollWheelValue reset when UI open)
 - All 8 new textures included in .tmod
+
+---
+Task ID: FIX-OVERLAY-SCROLL-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix background box overlay and inventory scroll bug.
+
+Work Log:
+- User reported: skill tree still has big colored background boxes, scroll still affects inventory.
+- Root cause 1 (background boxes): DraggablePanel drew an opaque dark background (alpha 245), then SkillTreeView/CodexListView drew ANOTHER opaque background on top, creating visible "white boxes" behind the window.
+- Fix 1: SkillTreeView and CodexListView now only draw the cosmic texture SEMI-TRANSPARENT (alpha 120) over the DraggablePanel's background. Removed the redundant opaque fallback background and the dark overlay.
+- Root cause 2 (scroll inventory): PostUpdateInput runs AFTER the game already processed the scroll wheel. The reset was too late.
+- Fix 2: Created UIScrollBlockPlayer (ModPlayer) with PreUpdate hook that resets ScrollWheelValue BEFORE the game processes it. This runs every frame before vanilla input handling.
+- Also added PreUpdateMovement that slows the player while UI is open (velocity.X *= 0.8) to prevent accidental movement.
+- Made UISystem fields public (SkillTreeUI, CodexUI, FragmentInfoBoxUI, BranchChoiceUI) so the ModPlayer can access them.
+- Build: 0 Errors, 0 Warnings
+- .tmod: 203KB
+- Pushed to GitHub: commit e789c4b
+
+Stage Summary:
+- No more big colored background boxes (removed duplicate opaque backgrounds)
+- Scroll inventory fully blocked via PreUpdate hook (runs before vanilla input)
+- Player movement slowed while UI open
