@@ -18,7 +18,7 @@ namespace AethonMod.Content.UI
         public Color TitleColor = new(245, 196, 81);
         public Color BorderColor = new(179, 136, 255);
         public Color HeaderColor = new(20, 15, 40, 240);
-        public Color BodyColor = new(10, 8, 20, 245);
+        public Color BodyColor = new(10, 8, 20, 220);
 
         private bool _isDragging = false;
         private Vector2 _dragOffset = Vector2.Zero;

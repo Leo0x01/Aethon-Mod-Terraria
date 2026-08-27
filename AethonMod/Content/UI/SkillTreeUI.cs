@@ -271,16 +271,12 @@ namespace AethonMod.Content.UI
             var dims = GetDimensions();
             Rectangle viewRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
 
-            // === FONDO ARTÍSTICO (textura PNG cósmica) ===
-            // El DraggablePanel ya dibuja el fondo del panel. Aqui solo dibujamos
-            // la textura cosmica SEMI-TRANSPARENTE para no crear una superposicion opaca.
-            if (_bgTexture != null)
-            {
-                // Textura cosmica semi-transparente (alpha 180, no 255)
-                sb.Draw(_bgTexture, viewRect, new Color(255, 255, 255, 120));
-            }
+            // === NO DIBUJAR FONDO AQUI ===
+            // El DraggablePanel (padre) ya dibuja el fondo del panel.
+            // Antes dibujabamos un rectangulo que se veia como "cuadro blanco".
+            // Ahora solo dibujamos el contenido (nodos, conexiones, estrellas).
 
-            // Estrellas animadas (sutiles, encima del fondo)
+            // Estrellas animadas sutiles (pocas, encima del fondo del panel)
             DrawAnimatedStars(sb, viewRect);
 
             if (_allNodes.Count == 0)

@@ -87,12 +87,9 @@ namespace AethonMod.Content.UI
             var dims = GetDimensions();
             Rectangle viewRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
 
-            // === FONDO ARTÍSTICO (textura grimorio, semi-transparente) ===
-            // El DraggablePanel ya dibuja el fondo. Aqui solo la textura cosmica.
-            if (_bgTexture != null)
-            {
-                sb.Draw(_bgTexture, viewRect, new Color(255, 255, 255, 120));
-            }
+            // === NO DIBUJAR FONDO AQUI ===
+            // El DraggablePanel (padre) ya dibuja el fondo del panel.
+            // Antes dibujabamos un rectangulo que se veia como "cuadro blanco".
 
             // Estrellas sutiles
             DrawAnimatedStars(sb, viewRect);

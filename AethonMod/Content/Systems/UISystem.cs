@@ -144,7 +144,25 @@ namespace AethonMod.Content.Systems
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            // Insertar despues del cursor del mouse para que se dibuje encima de todo
+            bool anyUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
+
+            // === DESACTIVAR INTERFAZ DEL JUEGO (como el bestiario) ===
+            // Cuando una UI del mod esta abierta, ocultar las capas de interfaz vanilla
+            // para que no interfieran con la interaccion.
+            if (anyUIOpen)
+            {
+                // Remover/ocultar capas especificas del juego
+                layers.RemoveAll(layer =>
+                    layer.Name == "Vanilla: Mouse Text" ? false :
+                    layer.Name.Contains("Vanilla: Hotbar") ||
+                    layer.Name.Contains("Vanilla: Inventory") ||
+                    layer.Name.Contains("Vanilla: Player Buffs") ||
+                    layer.Name.Contains("Vanilla: Resource Bars") ||
+                    layer.Name.Contains("Vanilla: Tooltip") ||
+                    false);
+            }
+
+            // Insertar DESPUES de todo (al final) para que se dibuje encima de todo
             int mouseLayerIdx = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
             if (mouseLayerIdx == -1) mouseLayerIdx = layers.Count;
 
