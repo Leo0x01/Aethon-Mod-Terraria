@@ -84,12 +84,21 @@ namespace AethonMod.Content.UI
             // === BLOQUEAR INTERACCION CON EL JUEGO ===
             // Mientras el panel este abierto, consumir el input del mouse para que
             // el jugador no pueda atacar/moverse/usar items en el juego.
-            if (dims.ToRectangle().Contains(Main.mouseX, Main.mouseY) || _isDragging)
+            // PERO NO consumir mouseLeft si NO estamos arrastrando, para que los
+            // hijos (SkillTreeView, CodexListView) puedan procesar clicks.
+            if (dims.ToRectangle().Contains(Main.mouseX, Main.mouseY))
             {
-                Main.mouseLeft = false;
+                // Solo consumir mouseRight (para que no ataque con click derecho)
                 Main.mouseRight = false;
                 // Evitar que la rueda afecte el inventario (scroll del hotbar)
                 Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+                // NO consumir mouseLeft aqui — los hijos lo necesitan
+            }
+
+            // Si estamos arrastrando, consumir mouseLeft
+            if (_isDragging)
+            {
+                Main.mouseLeft = false;
             }
         }
 

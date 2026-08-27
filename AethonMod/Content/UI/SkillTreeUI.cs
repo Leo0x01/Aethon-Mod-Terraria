@@ -205,10 +205,9 @@ namespace AethonMod.Content.UI
                 }
             }
 
-            // Bloquear input del juego dentro de la vista
+            // Bloquear input del juego dentro de la vista (pero NO mouseLeft — los nodos lo necesitan)
             if (mouseInView)
             {
-                Main.mouseLeft = false;
                 Main.mouseRight = false;
             }
         }
