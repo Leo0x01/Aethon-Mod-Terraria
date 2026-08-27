@@ -245,20 +245,15 @@ namespace AethonMod.Content.UI
             Rectangle viewRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
 
             // === FONDO ARTÍSTICO (textura PNG cósmica) ===
+            // El DraggablePanel ya dibuja el fondo del panel. Aqui solo dibujamos
+            // la textura cosmica SEMI-TRANSPARENTE para no crear una superposicion opaca.
             if (_bgTexture != null)
             {
-                sb.Draw(_bgTexture, viewRect, new Color(255, 255, 255, 200));
-            }
-            else
-            {
-                // Fallback: fondo oscuro si la textura no carga
-                sb.Draw(TextureAssets.MagicPixel.Value, viewRect, new Color(8, 6, 16, 245));
+                // Textura cosmica semi-transparente (alpha 180, no 255)
+                sb.Draw(_bgTexture, viewRect, new Color(255, 255, 255, 120));
             }
 
-            // Overlay oscuro semi-transparente para legibilidad
-            sb.Draw(TextureAssets.MagicPixel.Value, viewRect, new Color(5, 3, 15, 100));
-
-            // Estrellas animadas (pocas, sutiles)
+            // Estrellas animadas (sutiles, encima del fondo)
             DrawAnimatedStars(sb, viewRect);
 
             if (_allNodes.Count == 0)

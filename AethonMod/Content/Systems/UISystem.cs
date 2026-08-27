@@ -19,10 +19,10 @@ namespace AethonMod.Content.Systems
         private UserInterface? _codexInterface;
 
         // Estados (contienen los UIElements)
-        internal UI.SkillTreeUIState? SkillTreeUI;
-        internal UI.MemoryCodexUIState? CodexUI;
-        internal UI.FragmentInfoBoxUI? FragmentInfoBoxUI;
-        internal UI.BranchChoiceUI? BranchChoiceUI;
+        public UI.SkillTreeUIState? SkillTreeUI;
+        public UI.MemoryCodexUIState? CodexUI;
+        public UI.FragmentInfoBoxUI? FragmentInfoBoxUI;
+        public UI.BranchChoiceUI? BranchChoiceUI;
 
         public override void Load()
         {
