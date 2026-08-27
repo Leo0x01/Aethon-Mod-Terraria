@@ -1850,3 +1850,43 @@ Stage Summary:
 - Grimoire now has hybrid damage: benefits both Magic and Summon
 - Minion appears in buff zone with custom icon (gold orb with violet glow)
 - Buff persists while grimoire is equipped, disappears when unequipped
+
+---
+Task ID: REDESIGN-FROM-SCRATCH-1
+Agent: Lead Developer (Z.ai Code)
+Task: Redesign skill tree and codex from scratch to eliminate white boxes, fix buff name, fix hybrid damage.
+
+Work Log:
+- REDISEÑO COMPLETO del arbol y codex DESDE CERO:
+  * Eliminado el patron UserInterface + UIState + DraggablePanel que causaba los cuadros blancos
+  * Ahora se dibujan DIRECTAMENTE con sb.Draw() — mismo patron que BranchChoiceUI que SI funciona
+  * SkillTreeUI: clase simple con Show/Hide/Update/Draw
+  * MemoryCodexUI: clase simple con Show/Hide/Update/Draw
+  * Ventana centrada (700x500 arbol, 600x460 codex)
+  * Fondo oscuro semi-transparente alpha 180 (como el bestiario)
+  * Borde violeta + barra de titulo con linea dorada
+  * Estrellas animadas en el fondo
+  * Boton X cerrar dibujado con lineas (no UIText)
+  * Click en nodos procesado en Update (no en Draw) — funciona correctamente
+  * Pan con click derecho, zoom con rueda
+  * Bloquea interaccion con el juego mientras abierta
+- BUFF CON NOMBRE Y DESCRIPCION:
+  * Creado entrada en en-US_Mods.AethonMod.hjson: CosmicOrbBuff.DisplayName = "Cosmic Orb"
+  * Creado entrada en es-ES_Mods.AethonMod.hjson: CosmicOrbBuff.DisplayName = "Orbe Cósmico"
+  * Descripciones añadidas en ambos idiomas
+  * Eliminado el texto placeholder 'Mods.AetherMod.Buffs.CosmicOrbBuff Description'
+- UISystem simplificado:
+  * Eliminados UserInterface, _skillTreeInterface, _codexInterface
+  * Eliminado FragmentInfoBoxUI (ya no se usa)
+  * Solo llamadas directas a SkillTreeUI.Draw(), CodexUI.Draw(), BranchChoiceUI.Draw()
+  * ModifyInterfaceLayers remueve capas vanilla cuando UI abierta
+- Build: 0 Errors, 0 Warnings
+- .tmod: 205KB
+- Pushed to GitHub: commit 5a3b17a
+
+Stage Summary:
+- Cuadros blancos ELIMINADOS definitivamente (rediseño desde cero sin UserInterface)
+- Arbol de habilidades: interactividad funcionando (click en nodos)
+- Codex de memoria: interactividad funcionando (botones memorizar/olvidar)
+- Buff del minion ahora muestra nombre "Orbe Cósmico" y descripcion
+- Juego bloqueado mientras UIs abiertas (como el bestiario)
