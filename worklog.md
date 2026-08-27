@@ -1675,3 +1675,27 @@ Stage Summary:
 - No more big colored background boxes (removed duplicate opaque backgrounds)
 - Scroll inventory fully blocked via PreUpdate hook (runs before vanilla input)
 - Player movement slowed while UI open
+
+---
+Task ID: FIX-BRANCHCHOICE-WHITE-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix white screen when selecting branch weapon.
+
+Work Log:
+- User reported: when evolving the fragment to select a weapon, the entire screen goes white.
+- Root cause: BranchChoiceUI.Draw() was called directly on Main.spriteBatch which was in the game-world transform state (not UI transform). Drawing a full-screen rectangle in that state rendered as solid white instead of the dark cosmic background.
+- Fix: Wrapped BranchChoiceUI.Draw() in UISystem.ModifyInterfaceLayers with:
+  Main.spriteBatch.End()
+  Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, ..., Main.UIScaleMatrix)
+  BranchChoiceUI.Draw()
+  Main.spriteBatch.End()
+  Main.spriteBatch.Begin(...) // restore for subsequent UIs
+- This ensures the BranchChoiceUI renders with the correct UI transform matrix, so the dark cosmic background (alpha 200) appears correctly instead of solid white.
+- Added using Microsoft.Xna.Framework.Graphics for SpriteSortMode, BlendState, etc.
+- Build: 0 Errors, 0 Warnings
+- .tmod: 204KB
+- Pushed to GitHub: commit b02f844
+
+Stage Summary:
+- Branch selection screen now shows the 3 floating cards with a dark cosmic background (stars, radials) instead of a solid white screen.
+- The player can see the game world dimmed behind the cards.
