@@ -1,0 +1,713 @@
+     1→     1→using System;
+     2→     2→using System.Collections.Generic;
+     3→     3→using System.Linq;
+     4→     4→using Terraria.ModLoader;
+     5→     5→using AethonMod.Content.Players;
+     6→     6→
+     7→     7→namespace AethonMod.Content.Systems
+     8→     8→{
+     9→     9→    /// <summary>
+    10→    10→    /// TIPOS DE NODOS (estilo Path of Exile):
+    11→    11→    /// - Small: bono menor (ej: +5 vida, +2 daño)
+    12→    12→    /// - Notable: bono mediano potente (ej: +15% daño de fuego, +10% velocidad)
+    13→    13→    /// - Keystone: cambia la build completamente (ej: lifesteal, regen de mana)
+    14→    14→    /// - Cluster: grupo de small+notable alrededor de un nodo central
+    15→    15→    /// - Ascendancy: potenciadores procedurales post-nivel 100
+    16→    16→    /// </summary>
+    17→    17→    public enum NodeType { Small, Notable, Keystone, Cluster, Ascendancy }
+    18→    18→
+    19→    19→    /// <summary>
+    20→    20→    /// Nodo del árbol de habilidades estilo PoE.
+    21→    21→    /// En PoE, los nodos forman un GRAFO DIRIGIDO (no radial).
+    22→    22→    /// Cada nodo tiene conexiones (aristas) a otros nodos.
+    23→    23→    /// El jugador debe seguir caminos desde su punto de partida.
+    24→    24→    /// </summary>
+    25→    25→    public class PoESkillNode
+    26→    26→    {
+    27→    27→        public string Id;
+    28→    28→        public string Name;
+    29→    29→        public string Branch;       // sub-rama temática
+    30→    30→        public NodeType Type;
+    31→    31→        public int Cost;             // puntos de habilidad
+    32→    32→        public string Effect;        // descripción del efecto
+    33→    33→        public List<string> Connections = new(); // IDs de nodos adyacentes
+    34→    34→        // Posición en el canvas (coordenadas absolutas, no normalizadas)
+    35→    35→        public float X;
+    36→    36→        public float Y;
+    37→    37→        // Tamaño visual según tipo
+    38→    38→        public float Radius => Type switch
+    39→    39→        {
+    40→    40→            NodeType.Small => 8f,
+    41→    41→            NodeType.Notable => 14f,
+    42→    42→            NodeType.Keystone => 22f,
+    43→    43→            NodeType.Cluster => 12f,
+    44→    44→            NodeType.Ascendancy => 18f,
+    45→    45→            _ => 8f,
+    46→    46→        };
+    47→    47→    }
+    48→    48→
+    49→    49→    /// <summary>
+    50→    50→    /// Sub-rama temática del árbol (cluster de PoE).
+    51→    51→    /// Cada cluster tiene un grupo de small nodes + 1 notable + opcionalmente 1 keystone.
+    52→    52→    /// </summary>
+    53→    53→    public class PoECluster
+    54→    54→    {
+    55→    55→        public string Id;
+    56→    56→        public string Name;
+    57→    57→        public string Icon;
+    58→    58→        public string Description;
+    59→    59→        public bool HasKeystone;
+    60→    60→    }
+    61→    61→
+    62→    62→    /// <summary>
+    63→    63→    /// Árbol de habilidades estilo Path of Exile.
+    64→    64→    /// Estructura: grafo dirigido con:
+    65→    65→    /// - Punto de partida central (uno por rama)
+    66→    66→    /// - Clusters temáticos radiando desde el centro
+    67→    67→    /// - Cada cluster: 3-5 small nodes → 1 notable → opcional keystone
+    68→    68→    /// - Caminos entre clusters
+    69→    69→    /// - Zona de Ascendancy (potenciadores procedurales) post-nivel 100
+    70→    70→    /// </summary>
+    71→    71→    public class PoESkillTree
+    72→    72→    {
+    73→    73→        public BranchType Branch;
+    74→    74→        public List<PoECluster> Clusters = new();
+    75→    75→        public List<PoESkillNode> Nodes = new();
+    76→    76→        public string StartNodeId; // nodo inicial (punto de partida)
+    77→    77→    }
+    78→    78→
+    79→    79→    /// <summary>
+    80→    80→    /// Catalogo de arboles de habilidades estilo PoE.
+    81→    81→    /// Cada rama tiene un arbol extenso y complejo.
+    82→    82→    /// Los arboles se construyen una sola vez y se cachean (son read-only).
+    83→    83→    /// </summary>
+    84→    84→    public static class PoETreeCatalog
+    85→    85→    {
+    86→    86→        // Cache de arboles construidos (son read-only despues de Build)
+    87→    87→        private static PoESkillTree? _distanceTree;
+    88→    88→        private static PoESkillTree? _meleeTree;
+    89→    89→        private static PoESkillTree? _magicTree;
+    90→    90→        private static readonly object _lock = new();
+    91→    91→
+    92→    92→        public static PoESkillTree GetTree(BranchType branch)
+    93→    93→        {
+    94→    94→            lock (_lock)
+    95→    95→            {
+    96→    96→                return branch switch
+    97→    97→                {
+    98→    98→                    BranchType.Distance => _distanceTree ??= BuildDistanceTree(),
+    99→    99→                    BranchType.Melee => _meleeTree ??= BuildMeleeTree(),
+   100→   100→                    BranchType.Magic => _magicTree ??= BuildMagicTree(),
+   101→   101→                    _ => new PoESkillTree { Branch = branch },
+   102→   102→                };
+   103→   103→            }
+   104→   104→        }
+   105→   105→
+   106→   106→        // ====================================================================
+   107→   107→        // DISTANCIA — Lumina, la Arcoestelar
+   108→   108→        // 12 clusters + zona de Ascendancy
+   109→   109→        // ====================================================================
+   110→   110→        private static PoESkillTree BuildDistanceTree()
+   111→   111→        {
+   112→   112→            var tree = new PoESkillTree { Branch = BranchType.Distance };
+   113→   113→            float cx = 4000f, cy = 3000f; // centro del canvas
+   114→   114→
+   115→   115→            // Nodo inicial central
+   116→   116→            var start = new PoESkillNode
+   117→   117→            {
+   118→   118→                Id = "start", Name = "Fragmento Génesis", Branch = "Núcleo",
+   119→   119→                Type = NodeType.Keystone, Cost = 0,
+   120→   120→                Effect = "Punto de partida. El fragmento despierta.",
+   121→   121→                X = cx, Y = cy,
+   122→   122→            };
+   123→   123→            tree.StartNodeId = "start";
+   124→   124→            tree.Nodes.Add(start);
+   125→   125→
+   126→   126→            // 12 clusters temáticos (estilo PoE)
+   127→   127→            var clusterDefs = new (string id, string name, string icon, string desc, bool keystone, float angle, float dist)[]
+   128→   128→            {
+   129→   129→                ("proj-power", "Poder de Proyectiles", "➶", "Daño y velocidad de proyectiles", true, 0f, 500f),
+   130→   130→                ("quiver", "Maestría de Carcaj", "🎒", "Munición y multi-disparo", true, 30f, 480f),
+   131→   131→                ("hunter", "Cazador", "◎", "Crítico y marca", true, 60f, 520f),
+   132→   132→                ("celestial", "Disparos Celestiales", "✦", "Meteoros y supernovas", true, 90f, 550f),
+   133→   133→                ("phantom", "Carcaj Fantasma", "◈", "Fase y ricochet", true, 120f, 490f),
+   134→   134→                ("velocity", "Velocidad", "⚡", "Cadencia y movilidad", false, 150f, 450f),
+   135→   135→                ("piercing", "Perforación", "→", "Perforar enemigos y terrain", true, 180f, 510f),
+   136→   136→                ("elemental", "Daño Elemental", "🔥", "Fuego, hielo, veneno", true, 210f, 530f),
+   137→   137→                ("range", "Alcance", "↔", "Distancia y área de efecto", false, 240f, 470f),
+   138→   138→                ("ammo", "Munición Especial", "⊕", "Tipos de munición única", true, 270f, 500f),
+   139→   139→                ("survival", "Supervivencia", "❤", "Vida y defensa del arquero", true, 300f, 460f),
+   140→   140→                ("absorption", "Absorción de Lore", "⭐", "Capstone: memorizar armas", true, 330f, 600f),
+   141→   141→            };
+   142→   142→
+   143→   143→            foreach (var (id, name, icon, desc, keystone, angle, dist) in clusterDefs)
+   144→   144→            {
+   145→   145→                tree.Clusters.Add(new PoECluster
+   146→   146→                {
+   147→   147→                    Id = id, Name = name, Icon = icon, Description = desc, HasKeystone = keystone,
+   148→   148→                });
+   149→   149→                BuildCluster(tree, id, name, icon, desc, keystone, angle, dist, cx, cy, BranchType.Distance);
+   150→   150→            }
+   151→   151→
+   152→   152→            // Conexiones entre clusters adyacentes (caminos del grafo)
+   153→   153→            for (int i = 0; i < clusterDefs.Length - 1; i++)
+   154→   154→            {
+   155→   155→                ConnectClusters(tree, clusterDefs[i].id, clusterDefs[i + 1].id);
+   156→   156→            }
+   157→   157→            // Conexión circular (último al primero)
+   158→   158→            ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
+   159→   159→
+   160→   160→            // Zona de Ascendancy (potenciadores procedurales post-100)
+   161→   161→            BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Distance);
+   162→   162→
+   163→   163→            return tree;
+   164→   164→        }
+   165→   165→
+   166→   166→        // ====================================================================
+   167→   167→        // CUERPO A CUERPO — Solbrand, Filo del Alba
+   168→   168→        // ====================================================================
+   169→   169→        private static PoESkillTree BuildMeleeTree()
+   170→   170→        {
+   171→   171→            var tree = new PoESkillTree { Branch = BranchType.Melee };
+   172→   172→            float cx = 4000f, cy = 3000f;
+   173→   173→
+   174→   174→            var start = new PoESkillNode
+   175→   175→            {
+   176→   176→                Id = "start", Name = "Fragmento Génesis", Branch = "Núcleo",
+   177→   177→                Type = NodeType.Keystone, Cost = 0,
+   178→   178→                Effect = "Punto de partida. El fragmento despierta.",
+   179→   179→                X = cx, Y = cy,
+   180→   180→            };
+   181→   181→            tree.StartNodeId = "start";
+   182→   182→            tree.Nodes.Add(start);
+   183→   183→
+   184→   184→            var clusterDefs = new (string id, string name, string icon, string desc, bool keystone, float angle, float dist)[]
+   185→   185→            {
+   186→   186→                ("blade", "Génesis de Hoja", "⚔", "Tipos de corte y ondas", true, 0f, 500f),
+   187→   187→                ("combo", "Combo", "🔥", "Medidor de combo y remates", true, 30f, 510f),
+   188→   188→                ("solar", "Ira Solar", "☀", "Quemadura y eclipse", true, 60f, 520f),
+   189→   189→                ("aegis", "Égida del Alba", "🛡", "Parry y defensa", true, 90f, 530f),
+   190→   190→                ("weight", "Peso de Estrellas", "★", "Golpes pesados y ondas de choque", true, 120f, 490f),
+   191→   191→                ("berserk", "Furia", "💢", "Velocidad de ataque y daño", true, 150f, 480f),
+   192→   192→                ("vampire", "Vampírico", "🩸", "Lifesteal y regeneración", true, 180f, 550f),
+   193→   193→                ("whirlwind", "Torbellino", "🌀", "AoE y ataques giratorios", true, 210f, 500f),
+   194→   194→                ("thrust", "Estocada", "➹", "Alcance y perforación", false, 240f, 460f),
+   195→   195→                ("ground", "Tierra", "⛰", "Slam y terremotos", true, 270f, 520f),
+   196→   196→                ("survival", "Supervivencia", "❤", "Vida y defensa", true, 300f, 470f),
+   197→   197→                ("absorption", "Absorción de Lore", "⭐", "Capstone: memorizar armas", true, 330f, 600f),
+   198→   198→            };
+   199→   199→
+   200→   200→            foreach (var (id, name, icon, desc, keystone, angle, dist) in clusterDefs)
+   201→   201→            {
+   202→   202→                tree.Clusters.Add(new PoECluster
+   203→   203→                {
+   204→   204→                    Id = id, Name = name, Icon = icon, Description = desc, HasKeystone = keystone,
+   205→   205→                });
+   206→   206→                BuildCluster(tree, id, name, icon, desc, keystone, angle, dist, cx, cy, BranchType.Melee);
+   207→   207→            }
+   208→   208→
+   209→   209→            for (int i = 0; i < clusterDefs.Length - 1; i++)
+   210→   210→                ConnectClusters(tree, clusterDefs[i].id, clusterDefs[i + 1].id);
+   211→   211→            ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
+   212→   212→
+   213→   213→            BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Melee);
+   214→   214→
+   215→   215→            return tree;
+   216→   216→        }
+   217→   217→
+   218→   218→        // ====================================================================
+   219→   219→        // ARTES MÁGICAS — Grimorio del Eterno
+   220→   220→        // ====================================================================
+   221→   221→        private static PoESkillTree BuildMagicTree()
+   222→   222→        {
+   223→   223→            var tree = new PoESkillTree { Branch = BranchType.Magic };
+   224→   224→            float cx = 4000f, cy = 3000f;
+   225→   225→
+   226→   226→            var start = new PoESkillNode
+   227→   227→            {
+   228→   228→                Id = "start", Name = "Fragmento Génesis", Branch = "Núcleo",
+   229→   229→                Type = NodeType.Keystone, Cost = 0,
+   230→   230→                Effect = "Punto de partida. El fragmento despierta.",
+   231→   231→                X = cx, Y = cy,
+   232→   232→            };
+   233→   233→            tree.StartNodeId = "start";
+   234→   234→            tree.Nodes.Add(start);
+   235→   235→
+   236→   236→            var clusterDefs = new (string id, string name, string icon, string desc, bool keystone, float angle, float dist)[]
+   237→   237→            {
+   238→   238→                ("mana", "Flujo de Maná", "💧", "Maná máximo y regen", true, 0f, 500f),
+   239→   239→                ("element", "Génesis Elemental", "🔥", "Fuego, hielo, tormenta", true, 25f, 510f),
+   240→   240→                ("proj", "Evolución de Proyectiles", "✺", "Split, homing, chain", true, 50f, 520f),
+   241→   241→                ("convert", "Conversión Arcana", "☯", "Maná↔HP, lifesteal", true, 75f, 530f),
+   242→   242→                ("cosmic", "Hechizos Cósmicos", "🌌", "Agujero negro, supernova", true, 100f, 540f),
+   243→   243→                ("summon", "Maestría de Invocación", "🐉", "Minions del fragmento", true, 125f, 500f),
+   244→   244→                ("cast-speed", "Velocidad de Lanzamiento", "⚡", "Cadencia y costo", false, 150f, 470f),
+   245→   245→                ("area", "Área de Efecto", "◉", "Radio y penetración", true, 175f, 490f),
+   246→   246→                ("debuff", "Debilitamiento", "☠", "Veneno, maldiciones", true, 200f, 510f),
+   247→   247→                ("barrier", "Barrera Arcana", "🛡", "Escudo de maná y defensa", true, 225f, 530f),
+   248→   248→                ("survival", "Supervivencia", "❤", "Vida y regeneración", true, 250f, 480f),
+   249→   249→                ("vampire", "Vampírico Arcano", "🩸", "Lifesteal mágico", true, 275f, 550f),
+   250→   250→                ("critical", "Crítico Mágico", "✦", "Crítico y daño crítico", true, 300f, 500f),
+   251→   251→                ("absorption", "Absorción de Lore", "⭐", "Capstone: memorizar armas", true, 330f, 600f),
+   252→   252→            };
+   253→   253→
+   254→   254→            foreach (var (id, name, icon, desc, keystone, angle, dist) in clusterDefs)
+   255→   255→            {
+   256→   256→                tree.Clusters.Add(new PoECluster
+   257→   257→                {
+   258→   258→                    Id = id, Name = name, Icon = icon, Description = desc, HasKeystone = keystone,
+   259→   259→                });
+   260→   260→                BuildCluster(tree, id, name, icon, desc, keystone, angle, dist, cx, cy, BranchType.Magic);
+   261→   261→            }
+   262→   262→
+   263→   263→            for (int i = 0; i < clusterDefs.Length - 1; i++)
+   264→   264→                ConnectClusters(tree, clusterDefs[i].id, clusterDefs[i + 1].id);
+   265→   265→            ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
+   266→   266→
+   267→   267→            BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Magic);
+   268→   268→
+   269→   269→            return tree;
+   270→   270→        }
+   271→   271→
+   272→   272→        // ====================================================================
+   273→   273→        // HELPER: Construir un cluster completo (estilo PoE)
+   274→   274→        // Cada cluster tiene: 3-5 small nodes → 1 notable → opcional keystone
+   275→   275→        // ====================================================================
+   276→   276→        private static void BuildCluster(
+   277→   277→            PoESkillTree tree, string clusterId, string clusterName, string icon,
+   278→   278→            string desc, bool hasKeystone, float angleDeg, float dist,
+   279→   279→            float cx, float cy, BranchType branch)
+   280→   280→        {
+   281→   281→            float rad = angleDeg * (float)Math.PI / 180f;
+   282→   282→            float clusterX = cx + (float)Math.Cos(rad) * dist;
+   283→   283→            float clusterY = cy + (float)Math.Sin(rad) * dist;
+   284→   284→
+   285→   285→            // Helper local para añadir bidireccional (con null check)
+   286→   286→            void ConnectBidirectional(string fromId, string toId)
+   287→   287→            {
+   288→   288→                var fromNode = tree.Nodes.Find(n => n.Id == fromId);
+   289→   289→                var toNode = tree.Nodes.Find(n => n.Id == toId);
+   290→   290→                if (fromNode != null && toNode != null)
+   291→   291→                {
+   292→   292→                    if (!fromNode.Connections.Contains(toId)) fromNode.Connections.Add(toId);
+   293→   293→                    if (!toNode.Connections.Contains(fromId)) toNode.Connections.Add(fromId);
+   294→   294→                }
+   295→   295→            }
+   296→   296→
+   297→   297→            // Nodo de entrada del cluster (conectado al camino principal)
+   298→   298→            string entryId = $"{clusterId}-entry";
+   299→   299→            var entryNode = new PoESkillNode
+   300→   300→            {
+   301→   301→                Id = entryId, Name = $"{clusterName} (Entrada)", Branch = clusterName,
+   302→   302→                Type = NodeType.Small, Cost = 1,
+   303→   303→                Effect = GetSmallEffect(clusterId, branch, 0),
+   304→   304→                X = clusterX - 40f, Y = clusterY,
+   305→   305→            };
+   306→   306→            tree.Nodes.Add(entryNode);
+   307→   307→
+   308→   308→            // 3 small nodes en línea
+   309→   309→            string prevId = entryId;
+   310→   310→            for (int i = 0; i < 3; i++)
+   311→   311→            {
+   312→   312→                string nodeId = $"{clusterId}-small-{i}";
+   313→   313→                float nx = clusterX + (i - 1) * 40f;
+   314→   314→                float ny = clusterY + 30f;
+   315→   315→                var node = new PoESkillNode
+   316→   316→                {
+   317→   317→                    Id = nodeId, Name = $"{clusterName} (Nodo {i+1})", Branch = clusterName,
+   318→   318→                    Type = NodeType.Small, Cost = 1,
+   319→   319→                    Effect = GetSmallEffect(clusterId, branch, i + 1),
+   320→   320→                    X = nx, Y = ny,
+   321→   321→                };
+   322→   322→                node.Connections.Add(prevId);
+   323→   323→                ConnectBidirectional(prevId, nodeId);
+   324→   324→                tree.Nodes.Add(node);
+   325→   325→                prevId = nodeId;
+   326→   326→            }
+   327→   327→
+   328→   328→            // Notable del cluster
+   329→   329→            string notableId = $"{clusterId}-notable";
+   330→   330→            var notable = new PoESkillNode
+   331→   331→            {
+   332→   332→                Id = notableId, Name = GetNotableName(clusterId, branch),
+   333→   333→                Branch = clusterName, Type = NodeType.Notable, Cost = 2,
+   334→   334→                Effect = GetNotableEffect(clusterId, branch),
+   335→   335→                X = clusterX + 20f, Y = clusterY + 80f,
+   336→   336→            };
+   337→   337→            notable.Connections.Add(prevId);
+   338→   338→            ConnectBidirectional(prevId, notableId);
+   339→   339→            tree.Nodes.Add(notable);
+   340→   340→
+   341→   341→            // Keystone del cluster (opcional)
+   342→   342→            if (hasKeystone)
+   343→   343→            {
+   344→   344→                string keystoneId = $"{clusterId}-keystone";
+   345→   345→                var keystone = new PoESkillNode
+   346→   346→                {
+   347→   347→                    Id = keystoneId, Name = GetKeystoneName(clusterId, branch),
+   348→   348→                    Branch = clusterName, Type = NodeType.Keystone, Cost = 3,
+   349→   349→                    Effect = GetKeystoneEffect(clusterId, branch),
+   350→   350→                    X = clusterX + 60f, Y = clusterY + 130f,
+   351→   351→                };
+   352→   352→                keystone.Connections.Add(notableId);
+   353→   353→                ConnectBidirectional(notableId, keystoneId);
+   354→   354→                tree.Nodes.Add(keystone);
+   355→   355→            }
+   356→   356→        }
+   357→   357→
+   358→   358→        // Conectar dos clusters (camino entre ellos)
+   359→   359→        private static void ConnectClusters(PoESkillTree tree, string fromCluster, string toCluster)
+   360→   360→        {
+   361→   361→            string fromId = $"{fromCluster}-entry";
+   362→   362→            string toId = $"{toCluster}-entry";
+   363→   363→            ConnectBidirectionalTree(tree, fromId, toId);
+   364→   364→        }
+   365→   365→
+   366→   366→        /// <summary>Conecta dos nodos bidireccionalmente (null-safe, evita duplicados).</summary>
+   367→   367→        private static void ConnectBidirectionalTree(PoESkillTree tree, string fromId, string toId)
+   368→   368→        {
+   369→   369→            var from = tree.Nodes.Find(n => n.Id == fromId);
+   370→   370→            var to = tree.Nodes.Find(n => n.Id == toId);
+   371→   371→            if (from == null || to == null) return;
+   372→   372→            if (!from.Connections.Contains(toId)) from.Connections.Add(toId);
+   373→   373→            if (!to.Connections.Contains(fromId)) to.Connections.Add(fromId);
+   374→   374→        }
+   375→   375→
+   376→   376→        // ====================================================================
+   377→   377→        // ZONA DE ASCENDANCY — Potenciadores procedurales post-nivel 100
+   378→   378→        // ====================================================================
+   379→   379→        private static void BuildAscendancyZone(PoESkillTree tree, float cx, float cy, BranchType branch)
+   380→   380→        {
+   381→   381→            // Nodo de entrada a la zona de Ascendancy
+   382→   382→            string ascendEntryId = "ascend-entry";
+   383→   383→            var ascendEntry = new PoESkillNode
+   384→   384→            {
+   385→   385→                Id = ascendEntryId, Name = "Ascendencia (Lv 100+)", Branch = "Ascendancy",
+   386→   386→                Type = NodeType.Keystone, Cost = 0,
+   387→   387→                Effect = "Desbloquea potenciadores procedurales. Genera nuevos nodos cada nivel.",
+   388→   388→                X = cx, Y = cy,
+   389→   389→            };
+   390→   390→            tree.Nodes.Add(ascendEntry);
+   391→   391→            // Conectar al nodo inicial (null-safe)
+   392→   392→            ConnectBidirectionalTree(tree, "start", ascendEntryId);
+   393→   393→
+   394→   394→            // 6 potenciadores procedurales base (se generan más al subir de nivel)
+   395→   395→            string[] ascendNames = {
+   396→   396→                "Potenciador Estelar I", "Potenciador Estelar II", "Potenciador Estelar III",
+   397→   397→                "Potenciador Cósmico I", "Potenciador Cósmico II", "Potenciador Cósmico III",
+   398→   398→            };
+   399→   399→            string[] ascendEffects = GetAscendancyEffects(branch);
+   400→   400→
+   401→   401→            string prevAscendId = ascendEntryId;
+   402→   402→            for (int i = 0; i < 6; i++)
+   403→   403→            {
+   404→   404→                float angle = i * 60f * (float)Math.PI / 180f;
+   405→   405→                string nodeId = $"ascend-{i}";
+   406→   406→                var node = new PoESkillNode
+   407→   407→                {
+   408→   408→                    Id = nodeId, Name = ascendNames[i], Branch = "Ascendancy",
+   409→   409→                    Type = NodeType.Ascendancy, Cost = 5,
+   410→   410→                    Effect = ascendEffects[i],
+   411→   411→                    X = cx + (float)Math.Cos(angle) * 200f,
+   412→   412→                    Y = cy + (float)Math.Sin(angle) * 200f,
+   413→   413→                };
+   414→   414→                node.Connections.Add(prevAscendId);
+   415→   415→                ConnectBidirectionalTree(tree, prevAscendId, nodeId);
+   416→   416→                tree.Nodes.Add(node);
+   417→   417→                prevAscendId = nodeId;
+   418→   418→            }
+   419→   419→
+   420→   420→            // KEYSTONE DE REGENERACIÓN DE SALUD (nivel 100+)
+   421→   421→            // Distancia y Melee: regenera 0.01% del daño causado como salud
+   422→   422→            // Magia: igual pero las invocaciones NO cuentan
+   423→   423→            string regenKeystoneId = "ascend-regen-keystone";
+   424→   424→            string regenEffect = branch == BranchType.Magic
+   425→   425→                ? "REGENERACIÓN VITAL: Regenera el 0.01% de tu salud máxima por cada punto de daño mágico causado. El daño de invocaciones NO cuenta para esta regeneración."
+   426→   426→                : "REGENERACIÓN VITAL: Regenera el 0.01% de tu salud máxima por cada punto de daño causado al enemigo. Lifesteal pasivo permanente.";
+   427→   427→
+   428→   428→            var regenKeystone = new PoESkillNode
+   429→   429→            {
+   430→   430→                Id = regenKeystoneId, Name = "Regeneración Vital (Keystone)",
+   431→   431→                Branch = "Ascendancy", Type = NodeType.Keystone, Cost = 10,
+   432→   432→                Effect = regenEffect,
+   433→   433→                X = cx + 100f, Y = cy + 250f,
+   434→   434→            };
+   435→   435→            regenKeystone.Connections.Add(prevAscendId);
+   436→   436→            ConnectBidirectionalTree(tree, prevAscendId, regenKeystoneId);
+   437→   437→            tree.Nodes.Add(regenKeystone);
+   438→   438→
+   439→   439→            // Potenciadores adicionales que se generan proceduralmente
+   440→   440→            // (el sistema generará más nodos en runtime cuando el jugador suba de nivel post-100)
+   441→   441→            for (int i = 6; i < 12; i++)
+   442→   442→            {
+   443→   443→                float angle = i * 60f * (float)Math.PI / 180f;
+   444→   444→                string nodeId = $"ascend-proc-{i}";
+   445→   445→                var node = new PoESkillNode
+   446→   446→                {
+   447→   447→                    Id = nodeId, Name = $"Potenciador Procedural {i-5}",
+   448→   448→                    Branch = "Ascendancy", Type = NodeType.Ascendancy, Cost = 5,
+   449→   449→                    Effect = GetProceduralEffect(branch, i),
+   450→   450→                    X = cx + (float)Math.Cos(angle) * 300f,
+   451→   451→                    Y = cy + (float)Math.Sin(angle) * 300f,
+   452→   452→                };
+   453→   453→                node.Connections.Add(prevAscendId);
+   454→   454→                ConnectBidirectionalTree(tree, prevAscendId, nodeId);
+   455→   455→                tree.Nodes.Add(node);
+   456→   456→                prevAscendId = nodeId;
+   457→   457→            }
+   458→   458→        }
+   459→   459→
+   460→   460→        // ====================================================================
+   461→   461→        // GENERADORES DE EFECTOS
+   462→   462→        // ====================================================================
+   463→   463→
+   464→   464→        private static string GetSmallEffect(string cluster, BranchType branch, int index)
+   465→   465→        {
+   466→   466→            return (cluster, branch) switch
+   467→   467→            {
+   468→   468→                ("proj-power", _) => $"+{5 + index * 2}% daño de proyectiles",
+   469→   469→                ("quiver", _) => $"+{3 + index}% velocidad de disparo",
+   470→   470→                ("hunter", _) => $"+{4 + index * 2}% probabilidad de crítico",
+   471→   471→                ("celestial", _) => $"+{5 + index * 3}% daño solar",
+   472→   472→                ("phantom", _) => $"+{3 + index}% probabilidad de fase",
+   473→   473→                ("velocity", _) => $"+{5 + index * 2}% velocidad de movimiento",
+   474→   474→                ("piercing", _) => $"+1 perforación de enemigos",
+   475→   475→                ("elemental", _) => $"+{5 + index * 3}% daño elemental",
+   476→   476→                ("range", _) => $"+{10 + index * 5} tiles de alcance",
+   477→   477→                ("ammo", _) => $"+{5 + index * 2}% probabilidad de no consumir munición",
+   478→   478→                ("survival", _) => $"+{10 + index * 5} vida máxima",
+   479→   479→                ("absorption", _) => $"+1 slot de runa de memoria",
+   480→   480→
+   481→   481→                ("blade", _) => $"+{5 + index * 2}% daño de corte",
+   482→   482→                ("combo", _) => $"+{3 + index}% velocidad de combo",
+   483→   483→                ("solar", _) => $"+{5 + index * 3}% daño solar",
+   484→   484→                ("aegis", _) => $"+{3 + index}% probabilidad de parry",
+   485→   485→                ("weight", _) => $"+{10 + index * 5}% knockback",
+   486→   486→                ("berserk", _) => $"+{5 + index * 2}% velocidad de ataque",
+   487→   487→                ("vampire", _) => $"+{1 + index}% lifesteal",
+   488→   488→                ("whirlwind", _) => $"+{5 + index * 3}% daño AoE",
+   489→   489→                ("thrust", _) => $"+{5 + index * 2} tiles de alcance",
+   490→   490→                ("ground", _) => $"+{5 + index * 3}% daño de slam",
+   491→   491→
+   492→   492→                ("mana", _) => $"+{20 + index * 10} maná máximo",
+   493→   493→                ("element", _) => $"+{5 + index * 3}% daño elemental",
+   494→   494→                ("proj", _) => $"+{3 + index}% velocidad de proyectil mágico",
+   495→   495→                ("convert", _) => $"+{2 + index}% eficiencia de conversión",
+   496→   496→                ("cosmic", _) => $"+{5 + index * 3}% daño cósmico",
+   497→   497→                ("summon", _) => $"+1 slot de minion",
+   498→   498→                ("cast-speed", _) => $"+{3 + index}% velocidad de lanzamiento",
+   499→   499→                ("area", _) => $"+{5 + index * 2} tiles de AoE",
+   500→   500→                ("debuff", _) => $"+{5 + index * 3}% duración de debuffs",
+   501→   501→                ("barrier", _) => $"+{10 + index * 5} escudo de maná",
+   502→   502→                ("critical", _) => $"+{4 + index * 2}% crítico mágico",
+   503→   503→                _ => $"+{5}% bono",
+   504→   504→            };
+   505→   505→        }
+   506→   506→
+   507→   507→        private static string GetNotableName(string cluster, BranchType branch) =>
+   508→   508→            cluster switch
+   509→   509→            {
+   510→   510→                "proj-power" => "Poder Letal de Proyectiles",
+   511→   511→                "quiver" => "Carcaj Infinito",
+   512→   512→                "hunter" => "Ojo de Halcón",
+   513→   513→                "celestial" => "Lluvia de Meteoros",
+   514→   514→                "phantom" => "Forma Etérea",
+   515→   515→                "piercing" => "Perforación Total",
+   516→   516→                "elemental" => "Maestría Elemental",
+   517→   517→                "ammo" => "Munición Cósmica",
+   518→   518→                "survival" => "Constitución del Arquero",
+   519→   519→                "absorption" => "Códex de Memoria",
+   520→   520→                "blade" => "Corte de Realidad",
+   521→   521→                "combo" => "Filo Infinito",
+   522→   522→                "solar" => "Corona Solar",
+   523→   523→                "aegis" => "Guardia Eterna",
+   524→   524→                "weight" => "Pozo de Gravedad",
+   525→   525→                "berserk" => "Furia Sangrienta",
+   526→   526→                "vampire" => "Sangre de Aethon",
+   527→   527→                "whirlwind" => "Torbellino Estelar",
+   528→   528→                "ground" => "Terremoto Cósmico",
+   529→   529→                "mana" => "Reserva Inagotable",
+   530→   530→                "element" => "Convergencia Elemental",
+   531→   531→                "proj" => "Multilanzamiento",
+   532→   532→                "convert" => "Ciclo Eterno",
+   533→   533→                "cosmic" => "Desgarro de Realidad",
+   534→   534→                "summon" => "Enjambre Estelar",
+   535→   535→                "cast-speed" => "Velocidad Arcana",
+   536→   536→                "area" => "Expansión Cósmica",
+   537→   537→                "barrier" => "Barrera Absoluta",
+   538→   538→                "critical" => "Toque Crítico",
+   539→   539→                _ => "Notable",
+   540→   540→            };
+   541→   541→
+   542→   542→        private static string GetNotableEffect(string cluster, BranchType branch) =>
+   543→   543→            cluster switch
+   544→   544→            {
+   545→   545→                "proj-power" => "+25% daño de proyectiles, +10% velocidad de proyectil",
+   546→   546→                "quiver" => "No consume munición base, +1 proyectil por disparo",
+   547→   547→                "hunter" => "+20% crítico, golpes marcan enemigos (+10% daño)",
+   548→   548→                "celestial" => "Cada disparo cargado genera meteoros, +50% daño solar",
+   549→   549→                "phantom" => "Proyectiles atraviesan terreno, +2 rebotes",
+   550→   550→                "piercing" => "Proyectiles perforan 5 enemigos, +15% daño",
+   551→   551→                "elemental" => "+30% daño de fuego/hielo/veneno",
+   552→   552→                "ammo" => "Genera munición cósmica única, +20% daño de munición",
+   553→   553→                "survival" => "+50 vida, +5 regen de vida/seg",
+   554→   554→                "absorption" => "+2 slots de runa de memoria",
+   555→   555→                "blade" => "Ondas de corte perforan terreno, +30% daño de corte",
+   556→   556→                "combo" => "Combo sin tope, +5% daño por combo acumulado",
+   557→   557→                "solar" => "Aura de quemadura 3 tiles, enemigos quemados explotan",
+   558→   558→                "aegis" => "Parry x2 ventana, refleja proyectiles +50% daño",
+   559→   559→                "weight" => "Golpes al suelo atraen enemigos, +50% knockback",
+   560→   560→                "berserk" => "+30% velocidad de ataque cuando HP < 50%",
+   561→   561→                "vampire" => "+5% lifesteal de todo daño cuerpo a cuerpo",
+   562→   562→                "whirlwind" => "Remolino golpea 360°, +40% daño AoE",
+   563→   563→                "ground" => "Slam genera terremoto 10 tiles, +35% daño de slam",
+   564→   564→                "mana" => "+60 maná, lanzar con <20 maná es gratis",
+   565→   565→                "element" => "Bolts rotan elementos, todos activos simultáneamente",
+   566→   566→                "proj" => "+3 bolts por lanzamiento gratis",
+   567→   567→                "convert" => "Matar restaura 30% maná + 10% HP",
+   568→   568→                "cosmic" => "Cargado abre portal, bolts salen de 2º portal",
+   569→   569→                "summon" => "+3 slots de minion, minions disparan bolts",
+   570→   570→                "cast-speed" => "+25% velocidad de lanzamiento, -20% costo de maná",
+   571→   571→                "area" => "+8 tiles de AoE, +20% daño de área",
+   572→   572→                "barrier" => "Escudo de maná absorbe 50% del daño",
+   573→   573→                "critical" => "+15% crítico mágico, +50% daño crítico",
+   574→   574→                _ => "+15% bono general",
+   575→   575→            };
+   576→   576→
+   577→   577→        private static string GetKeystoneName(string cluster, BranchType branch) =>
+   578→   578→            cluster switch
+   579→   579→            {
+   580→   580→                "proj-power" => "DESTRUCCIÓN TOTAL",
+   581→   581→                "quiver" => "CARCAJ OMNISCIENTE",
+   582→   582→                "hunter" => "MARCA LETAL",
+   583→   583→                "celestial" => "SUPERNOVA",
+   584→   584→                "phantom" => "EXISTENCIA ETÉREA",
+   585→   585→                "piercing" => "PERFORACIÓN ABSOLUTA",
+   586→   586→                "elemental" => "APOCALIPSIS ELEMENTAL",
+   587→   587→                "ammo" => "MUNICIÓN INFINITA",
+   588→   588→                "survival" => "INMORTALIDAD DEL ARQUERO",
+   589→   589→                "absorption" => "ARSENAL DEL ETERNO",
+   590→   590→                "blade" => "CORTE DE REALIDAD",
+   591→   591→                "combo" => "COMBO INFINITO",
+   592→   592→                "solar" => "EXPLOSIÓN SOLAR",
+   593→   593→                "aegis" => "BULWARK ETERNO",
+   594→   594→                "weight" => "POZO GRAVITACIONAL",
+   595→   595→                "berserk" => "FURIA DE SANGRE",
+   596→   596→                "vampire" => "SANGRE DE AETHON",
+   597→   597→                "whirlwind" => "TORMENTA ESTELAR",
+   598→   598→                "ground" => "CATACLISMO",
+   599→   599→                "mana" => "MANA INFINITO",
+   600→   600→                "element" => "CONVERGENCIA TOTAL",
+   601→   601→                "proj" => "TORMENTA DE BOLTS",
+   602→   602→                "convert" => "CICLO ETERNO",
+   603→   603→                "cosmic" => "DESGARRO DE REALIDAD",
+   604→   604→                "summon" => "ENJAMBRE ESTELAR",
+   605→   605→                "cast-speed" => "VELOCIDAD ARCANA",
+   606→   606→                "barrier" => "BARRERA ABSOLUTA",
+   607→   607→                "critical" => "TOQUE DE LA MUERTE",
+   608→   608→                _ => "KEYSTONE",
+   609→   609→            };
+   610→   610→
+   611→   611→        private static string GetKeystoneEffect(string cluster, BranchType branch) =>
+   612→   612→            cluster switch
+   613→   613→            {
+   614→   614→                "proj-power" => "Cada proyectil genera 2 mini-estrellas al impactar. +50% daño total de proyectiles.",
+   615→   615→                "quiver" => "Equipa 5 Runas simultáneamente. Fusiona dos tipos de munición en una.",
+   616→   616→                "hunter" => "Matar enemigos marcados resetea todos los cooldowns. +40% crítico en enemigos marcados.",
+   617→   617→                "celestial" => "Disparo cargado: supernova de 12 tiles. Ciegga + quema a todos en pantalla.",
+   618→   618→                "phantom" => "Todos los proyectiles fasan terreno Y perforan 5 enemigos. Inmunidad a proyectiles enemigos.",
+   619→   619→                "piercing" => "Proyectiles perforan TODOS los enemigos. +25% daño por cada enemigo perforado.",
+   620→   620→                "elemental" => "Cada proyectil aplica TODOS los elementos simultáneamente. +40% daño total.",
+   621→   621→                "ammo" => "Nunca se acaba la munición. Genera munición cósmica única cada 10s.",
+   622→   622→                "survival" => "+100 vida. Inmune a veneno y fuego. 5% regen de vida/seg.",
+   623→   623→                "absorption" => "Memoriza cualquier arma de distancia del juego base + mods. 5 Runas equipables.",
+   624→   624→                "blade" => "Cortes atraviesan terreno y enemigos. Ondas de corte +100% daño.",
+   625→   625→                "combo" => "Sin tope de combo. Cada combo acumulado: +5% daño y +2% velocidad de ataque.",
+   626→   626→                "solar" => "Corte cargado: explosión solar 10 tiles. Enemigos quemados explotan en cadena.",
+   627→   627→                "aegis" => "Parry window x3. Refleja proyectiles Y daño cuerpo a cuerpo. Invuln al parry.",
+   628→   628→                "weight" => "Golpe al suelo: pozos gravitacionales múltiples. Atrae enemigos desde 20 tiles.",
+   629→   629→                "berserk" => "Velocidad de ataque +50%. Daño +100% cuando HP < 30%. Sin penalización.",
+   630→   630→                "vampire" => "LIFESTEAL PERMANENTE: +10% de todo daño causado se convierte en salud. Regen 5 HP/seg.",
+   631→   631→                "whirlwind" => "Remolino continuo: golpea todo a 360° cada 0.5s. +60% daño AoE.",
+   632→   632→                "ground" => "Slam: terremoto 15 tiles que dura 10s. Grietas que dañan enemigos que las cruzan.",
+   633→   633→                "mana" => "+100 maná. Lanzar con <20 maná es gratis. Regen 10 maná/seg siempre.",
+   634→   634→                "element" => "Cada lanzamiento aplica TODOS los elementos. +50% daño elemental total.",
+   635→   635→                "proj" => "+5 bolts por lanzamiento gratis. Bolts se dividen al impactar 3 veces.",
+   636→   636→                "convert" => "Matar: restaura 50% maná + 20% HP. Maná nunca baja de 10%.",
+   637→   637→                "cosmic" => "Portal permanente: bolts salen de 2 portales simultáneamente. Agujero negro pasivo.",
+   638→   638→                "summon" => "+5 slots de minion. Minions heredan +30% daño del grimorio. Minions disparan bolts.",
+   639→   639→                "cast-speed" => "+50% velocidad de lanzamiento. -50% costo de maná. Sin cooldown entre hechizos.",
+   640→   640→                "barrier" => "Escudo de maná absorbe 80% del daño. Regen de maná x2 cuando recibes daño.",
+   641→   641→                "critical" => "+30% crítico mágico. +100% daño crítico. Cada crítico genera un bolt extra gratis.",
+   642→   642→                _ => "Efecto poderoso.",
+   643→   643→            };
+   644→   644→
+   645→   645→        // Efectos de la zona de Ascendancy
+   646→   646→        private static string[] GetAscendancyEffects(BranchType branch) =>
+   647→   647→            branch switch
+   648→   648→            {
+   649→   649→                BranchType.Distance => new[]
+   650→   650→                {
+   651→   651→                    "+50% daño de proyectiles (Ascendancy)",
+   652→   652→                    "Proyectiles buscan enemigos automáticamente (Ascendancy)",
+   653→   653→                    "+3 proyectiles por disparo (Ascendancy)",
+   654→   654→                    "Cada disparo genera una supernova menor (Ascendancy)",
+   655→   655→                    "Proyectiles perforan TODO (Ascendancy)",
+   656→   656→                    "+100% velocidad de disparo (Ascendancy)",
+   657→   657→                },
+   658→   658→                BranchType.Melee => new[]
+   659→   659→                {
+   660→   660→                    "+50% daño cuerpo a cuerpo (Ascendancy)",
+   661→   661→                    "Cada golpe genera onda de choque (Ascendancy)",
+   662→   662→                    "+3 combo por golpe (Ascendancy)",
+   663→   663→                    "Cada golpe genera explosión solar (Ascendancy)",
+   664→   664→                    "Parry automático cada 5s (Ascendancy)",
+   665→   665→                    "+100% velocidad de ataque (Ascendancy)",
+   666→   666→                },
+   667→   667→                BranchType.Magic => new[]
+   668→   668→                {
+   669→   669→                    "+50% daño mágico (Ascendancy)",
+   670→   670→                    "Bolts se dividen al impactar (Ascendancy)",
+   671→   671→                    "+5 bolts por lanzamiento (Ascendancy)",
+   672→   672→                    "Cada lanzamiento genera supernova (Ascendancy)",
+   673→   673→                    "Maná infinito (Ascendancy)",
+   674→   674→                    "+100% velocidad de lanzamiento (Ascendancy)",
+   675→   675→                },
+   676→   676→                _ => new[] { "Bono (Ascendancy)" },
+   677→   677→            };
+   678→   678→
+   679→   679→        private static string GetProceduralEffect(BranchType branch, int seed) =>
+   680→   680→            branch switch
+   681→   681→            {
+   682→   682→                BranchType.Distance => (seed % 6) switch
+   683→   683→                {
+   684→   684→                    0 => "+15% daño de proyectiles (procedural)",
+   685→   685→                    1 => "+10% velocidad de disparo (procedural)",
+   686→   686→                    2 => "+5% crítico de proyectiles (procedural)",
+   687→   687→                    3 => "+1 proyectil por disparo (procedural)",
+   688→   688→                    4 => "+20% perforación (procedural)",
+   689→   689→                    _ => "+25% daño solar (procedural)",
+   690→   690→                },
+   691→   691→                BranchType.Melee => (seed % 6) switch
+   692→   692→                {
+   693→   693→                    0 => "+15% daño cuerpo a cuerpo (procedural)",
+   694→   694→                    1 => "+10% velocidad de ataque (procedural)",
+   695→   695→                    2 => "+5% crítico cuerpo a cuerpo (procedural)",
+   696→   696→                    3 => "+1 combo por golpe (procedural)",
+   697→   697→                    4 => "+20% knockback (procedural)",
+   698→   698→                    _ => "+25% daño solar (procedural)",
+   699→   699→                },
+   700→   700→                BranchType.Magic => (seed % 6) switch
+   701→   701→                {
+   702→   702→                    0 => "+15% daño mágico (procedural)",
+   703→   703→                    1 => "+10% velocidad de lanzamiento (procedural)",
+   704→   704→                    2 => "+5% crítico mágico (procedural)",
+   705→   705→                    3 => "+1 bolt por lanzamiento (procedural)",
+   706→   706→                    4 => "+20 maná máximo (procedural)",
+   707→   707→                    _ => "+25% daño cósmico (procedural)",
+   708→   708→                },
+   709→   709→                _ => "+10% bono (procedural)",
+   710→   710→            };
+   711→   711→    }
+   712→   712→}
+   713→   713→

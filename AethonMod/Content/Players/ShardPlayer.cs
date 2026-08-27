@@ -236,7 +236,7 @@ namespace AethonMod.Content.Players
                     Player.HealEffect(healHp, true);
                     // Particulas visuales
                     for (int i = 0; i < 8; i++)
-                        Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.ManaStar,
+                        Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.Enchanted_Pink,
                             new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
                             100, default, 1.2f);
                 }

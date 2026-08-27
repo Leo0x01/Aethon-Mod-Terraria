@@ -13,6 +13,7 @@ namespace AethonMod.Content.NPCs
     {
         private int AttackTimer = 0;
         private int MineTimer = 0;
+        private int StarfallTimer = 0;
 
         public override void SetStaticDefaults()
         {
@@ -81,10 +82,15 @@ namespace AethonMod.Content.NPCs
                 LayLightMines(target);
             }
 
-            // Fase 2: Starfall Storm cada 360 ticks.
-            if (phase2 && MineTimer % 360 == 0)
+            // Fase 2: Starfall Storm cada 360 ticks (con timer propio).
+            if (phase2)
             {
-                StarfallStorm(target);
+                StarfallTimer++;
+                if (StarfallTimer >= 360)
+                {
+                    StarfallTimer = 0;
+                    StarfallStorm(target);
+                }
             }
 
             Lighting.AddLight(NPC.Center, new Vector3(0.5f, 0.4f, 0.1f));

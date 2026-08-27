@@ -106,8 +106,9 @@ namespace AethonMod.Content.Systems
             if (HasNode(player, "velocity-small-2")) mult *= 0.91f;
             // Velocidad Arcana (notable)
             if (HasNode(player, "velocity-notable")) mult *= 0.85f;
-            // MUNICION INFINITA (Keystone): +100% velocidad de disparo
-            if (HasNode(player, "velocity-keystone")) mult *= 0.50f;
+            // (velocity-keystone no existe — el cluster velocity no tiene keystone en PoETreeCatalog)
+            // Ascendancy: +100% velocidad de disparo (ascend-5)
+            if (HasNode(player, "ascend-5")) mult *= 0.50f;
             return mult;
         }
 
@@ -322,10 +323,13 @@ namespace AethonMod.Content.Systems
             float reduction = 0f;
             // Velocidad Arcana (cast-speed): notable da -20% costo
             if (HasNode(player, "cast-speed-notable")) reduction += 0.20f;
-            // VELOCIDAD ARCANA (Keystone): -50% costo
-            if (HasNode(player, "cast-speed-keystone")) reduction += 0.50f;
+            // (cast-speed-keystone no existe — el cluster cast-speed no tiene keystone en PoETreeCatalog)
             // Reserva Inagotable (Notable): si maná < 20, gratis
             if (HasNode(player, "mana-notable")) reduction += 0.10f;
+            // MANA INFINITO (Keystone): -50% costo
+            if (HasNode(player, "mana-keystone")) reduction += 0.50f;
+            // Ascendancy: maná infinito (ascend-4)
+            if (HasNode(player, "ascend-4")) reduction += 0.50f;
             return MathF.Min(reduction, 1f);
         }
 
@@ -384,18 +388,8 @@ namespace AethonMod.Content.Systems
                     player.statMana = Math.Min(player.statManaMax2, player.statMana + 1);
             }
 
-            // Defensa bonus (Melee + Survival de cualquier rama)
+            // Defensa bonus (Survival aplica a todas las ramas; GetMeleeDefenseBonus ya lo incluye)
             int defBonus = GetMeleeDefenseBonus(player);
-            // Survival para todas las ramas (algunos clusters compartidos)
-            if (sp.ActiveBranch == Players.BranchType.Distance ||
-                sp.ActiveBranch == Players.BranchType.Magic)
-            {
-                if (HasNode(player, "survival-small-0")) defBonus += 2;
-                if (HasNode(player, "survival-small-1")) defBonus += 3;
-                if (HasNode(player, "survival-small-2")) defBonus += 4;
-                if (HasNode(player, "survival-notable")) defBonus += 10;
-                if (HasNode(player, "survival-keystone")) defBonus += 30;
-            }
             player.statDefense += defBonus;
 
             // Bonus de vida por Survival (Notable/Keystone)
@@ -446,7 +440,12 @@ namespace AethonMod.Content.Systems
                     if (Vector2.Distance(nearby.Center, npc.Center) < 100f)
                     {
                         int dmg = npc.lifeMax / 10;
-                        nearby.SimpleStrikeNPC(dmg, player.whoAmI, true, 0, DamageClass.Melee, hit: out _, fromNet: false);
+                        // SimpleStrikeNPC en tModLoader v2026.06 signature:
+                        //   SimpleStrikeNPC(int damage, int hitDirection, bool ?, float critChance?,
+                        //     DamageClass damageType, bool noEffects, float knockbackScale, bool fromNet)
+                        // Args: dmg, player.whoAmI (hitDirection), true (avoid interrupt), 0f (critChance),
+                        //       DamageClass.Melee, false (noEffects), 0f (knockbackScale), false (fromNet)
+                        _ = nearby.SimpleStrikeNPC(dmg, player.whoAmI, true, 0f, DamageClass.Melee, false, 0f, false);
                     }
                 }
                 for (int i = 0; i < 20; i++)

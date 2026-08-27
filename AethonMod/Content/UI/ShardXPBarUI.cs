@@ -144,6 +144,7 @@ namespace AethonMod.Content.UI
         private float _time = 0f;
         private float _appearProgress = 0f;
         private int _hoveredCard = -1;
+        private bool _mouseLeftPressed = false;
 
         private struct CardInfo
         {
@@ -328,10 +329,11 @@ namespace AethonMod.Content.UI
                         hovered ? Color.Black : new Color(card.Color.R, card.Color.G, card.Color.B, (int)(255 * cardAlpha)),
                         0.95f, 0.5f, 0.5f);
 
-                    // Click
-                    bool clicked = hovered && Main.mouseLeft && Main.mouseLeftRelease;
+                    // Click — usar edge detection manual (mouseLeftRelease es siempre true cuando no se presiona).
+                    bool clicked = hovered && Main.mouseLeft && !_mouseLeftPressed;
                     if (clicked)
                     {
+                        _mouseLeftPressed = true;
                         sp.ActiveBranch = card.Type;
                         sp.SubForm = card.Type switch
                         {
@@ -349,12 +351,18 @@ namespace AethonMod.Content.UI
                                 new(Main.rand.NextFloat(-10, 10), Main.rand.NextFloat(-10, 10)),
                                 100, card.Color, 2.2f);
                         ReplaceShardWithWeapon(Main.LocalPlayer, card.Type);
+                        // Consumir el click ANTES de ocultar la UI.
+                        Main.mouseLeft = false;
+                        Main.mouseRight = false;
                         Hide();
                         return;
                     }
                 }
 
-                // Consumir clicks
+                // Update manual de mouse pressed
+                if (!Main.mouseLeft) _mouseLeftPressed = false;
+
+                // Consumir clicks del mouse para no atacar
                 Main.mouseLeft = false;
                 Main.mouseRight = false;
             }

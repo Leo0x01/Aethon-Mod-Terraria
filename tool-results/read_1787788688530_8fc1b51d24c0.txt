@@ -1,0 +1,773 @@
+     1→     1→using System;
+     2→     2→using System.Collections.Generic;
+     3→     3→using Microsoft.Xna.Framework;
+     4→     4→using Microsoft.Xna.Framework.Graphics;
+     5→     5→using Microsoft.Xna.Framework.Input;
+     6→     6→using Terraria;
+     7→     7→using Terraria.GameContent;
+     8→     8→using Terraria.ModLoader;
+     9→     9→using Terraria.UI;
+    10→    10→using AethonMod.Content.Players;
+    11→    11→using AethonMod.Content.Systems;
+    12→    12→
+    13→    13→namespace AethonMod.Content.UI
+    14→    14→{
+    15→    15→    /// <summary>
+    16→    16→    /// Arbol de habilidades a PANTALLA COMPLETA con estetica cosmica.
+    17→    17→    /// Implementado como UIState real (patron del Bestiario de Terraria):
+    18→    18→    /// - Ciclo de vida adecuado (OnActivate/OnDeactivate)
+    19→    19→    /// - Manejo de input via UIElement
+    20→    20→    /// - Estrellas animadas como fondo (parallax con pan)
+    21→    21→    /// - Nodos clicables con tooltips
+    22→    22→    /// - Pan/zoom con click derecho y rueda
+    23→    23→    ///
+    24→    24→    /// Estetica (basada en la pagina web del mod):
+    25→    25→    /// - Fondo: espacio profundo (#0d0a1a) con radiales purpura/dorado
+    26→    26→    /// - Estrellas: capas con parallax, brillo pulsante
+    27→    27→    /// - Nodos: circulos con borde dorado/violeta, glow al asignar
+    28→    28→    /// - Conexiones: lineas doradas (activas) / grises (inactivas)
+    29→    29→    /// </summary>
+    30→    30→    public class SkillTreeUIState : UIState
+    31→    31→    {
+    32→    32→        public bool IsVisible;
+    33→    33→        public PoESkillTree? CurrentTree;
+    34→    34→
+    35→    35→        private float _zoom = 1f;
+    36→    36→        private Vector2 _panOffset = Vector2.Zero;
+    37→    37→        private bool _isDragging = false;
+    38→    38→        private Vector2 _dragStart = Vector2.Zero;
+    39→    39→        private Vector2 _lastMouse = Vector2.Zero;
+    40→    40→        private bool _mouseLeftPressed = false;
+    41→    41→
+    42→    42→        private List<PoESkillNode> _allNodes = new();
+    43→    43→        private List<(int fromIdx, int toIdx)> _allConnections = new();
+    44→    44→        private Dictionary<string, int> _nodeIndex = new();
+    45→    45→        private float _minX, _maxX, _minY, _maxY, _rangeX, _rangeY;
+    46→    46→
+    47→    47→        // Estrellas de fondo (pre-generadas, con parallax)
+    48→    48→        private struct Star
+    49→    49→        {
+    50→    50→            public Vector2 Pos;     // posicion base en pantalla (0..1)
+    51→    51→            public float Size;      // tamano en px
+    52→    52→            public float Twinkle;   // velocidad de parpadeo
+    53→    53→            public float Phase;     // fase inicial
+    54→    54→            public int Layer;        // capa de parallax (0=lejos, 2=cerca)
+    55→    55→            public Color Color;     // tinte
+    56→    56→        }
+    57→    57→        private Star[]? _stars;
+    58→    58→        private float _time = 0f;
+    59→    59→
+    60→    60→        // Meteoros (efecto cosmico de fondo)
+    61→    61→        private struct Meteor
+    62→    62→        {
+    63→    63→            public Vector2 Pos;
+    64→    64→            public Vector2 Vel;
+    65→    65→            public float Life;
+    66→    66→            public float MaxLife;
+    67→    67→            public Color Color;
+    68→    68→        }
+    69→    69→        private List<Meteor> _meteors = new();
+    70→    70→        private int _meteorTimer = 0;
+    71→    71→
+    72→    72→        // Nodo hovered (para tooltip)
+    73→    73→        private PoESkillNode? _hoveredNode;
+    74→    74→        private float _hoverAlpha = 0f;
+    75→    75→
+    76→    76→        public override void OnActivate()
+    77→    77→        {
+    78→    78→            // Llamado cuando el UIState se añade a la lista de interfaces.
+    79→    79→            // Inicializar estrellas de fondo.
+    80→    80→            InitStars();
+    81→    81→            _meteors.Clear();
+    82→    82→            _meteorTimer = 0;
+    83→    83→        }
+    84→    84→
+    85→    85→        public override void OnDeactivate()
+    86→    86→        {
+    87→    87→            _isDragging = false;
+    88→    88→            _mouseLeftPressed = false;
+    89→    89→        }
+    90→    90→
+    91→    91→        private void InitStars()
+    92→    92→        {
+    93→    93→            if (_stars != null) return;
+    94→    94→            var rand = new Random(42); // seed fijo para consistencia
+    95→    95→            _stars = new Star[200];
+    96→    96→            for (int i = 0; i < _stars.Length; i++)
+    97→    97→            {
+    98→    98→                int layer = rand.Next(3); // 0, 1, 2
+    99→    99→                _stars[i] = new Star
+   100→   100→                {
+   101→   101→                    Pos = new Vector2((float)rand.NextDouble(), (float)rand.NextDouble()),
+   102→   102→                    Size = 1f + (float)rand.NextDouble() * (layer == 2 ? 2.5f : layer == 1 ? 1.8f : 1.2f),
+   103→   103→                    Twinkle = 0.5f + (float)rand.NextDouble() * 2f,
+   104→   104→                    Phase = (float)rand.NextDouble() * MathF.PI * 2f,
+   105→   105→                    Layer = layer,
+   106→   106→                    Color = layer == 2
+   107→   107→                        ? new Color(245, 196, 81)   // dorado (cerca)
+   108→   108→                        : layer == 1
+   109→   109→                            ? new Color(179, 136, 255) // violeta (medio)
+   110→   110→                            : new Color(200, 220, 255), // blanco-azul (lejos)
+   111→   111→                };
+   112→   112→            }
+   113→   113→        }
+   114→   114→
+   115→   115→        public void BuildPoETree(PoESkillTree tree)
+   116→   116→        {
+   117→   117→            CurrentTree = tree;
+   118→   118→            _allNodes = tree.Nodes ?? new List<PoESkillNode>();
+   119→   119→            _allConnections.Clear();
+   120→   120→            _nodeIndex.Clear();
+   121→   121→            for (int i = 0; i < _allNodes.Count; i++)
+   122→   122→                _nodeIndex[_allNodes[i].Id] = i;
+   123→   123→            foreach (var node in _allNodes)
+   124→   124→            {
+   125→   125→                if (!_nodeIndex.TryGetValue(node.Id, out int fromIdx)) continue;
+   126→   126→                foreach (var connId in node.Connections)
+   127→   127→                    if (_nodeIndex.TryGetValue(connId, out int j))
+   128→   128→                        _allConnections.Add((fromIdx, j));
+   129→   129→            }
+   130→   130→            if (_allNodes.Count == 0)
+   131→   131→            {
+   132→   132→                _minX = _maxX = _minY = _maxY = 0;
+   133→   133→                _rangeX = _rangeY = 1;
+   134→   134→                return;
+   135→   135→            }
+   136→   136→            _minX = float.MaxValue; _maxX = float.MinValue;
+   137→   137→            _minY = float.MaxValue; _maxY = float.MinValue;
+   138→   138→            foreach (var node in _allNodes)
+   139→   139→            {
+   140→   140→                _minX = Math.Min(_minX, node.X);
+   141→   141→                _maxX = Math.Max(_maxX, node.X);
+   142→   142→                _minY = Math.Min(_minY, node.Y);
+   143→   143→                _maxY = Math.Max(_maxY, node.Y);
+   144→   144→            }
+   145→   145→            _rangeX = Math.Max(1, _maxX - _minX + 1);
+   146→   146→            _rangeY = Math.Max(1, _maxY - _minY + 1);
+   147→   147→        }
+   148→   148→
+   149→   149→        public void Show()
+   150→   150→        {
+   151→   151→            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+   152→   152→            if (sp == null || !sp.IsImprinted)
+   153→   153→            {
+   154→   154→                Main.NewText("El Fragmento Genesis aun no tiene una rama. Derrota enemigos para despertarlo.", new Color(180, 160, 220));
+   155→   155→                return;
+   156→   156→            }
+   157→   157→            try
+   158→   158→            {
+   159→   159→                var tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
+   160→   160→                BuildPoETree(tree);
+   161→   161→            }
+   162→   162→            catch (Exception ex)
+   163→   163→            {
+   164→   164→                ModContent.GetInstance<AethonMod>()?.Logger?.Error("SkillTreeUI.Show: error al construir arbol", ex);
+   165→   165→                Main.NewText("Error al cargar el arbol de habilidades. Revisa el registro del mod.", new Color(255, 120, 120));
+   166→   166→                return;
+   167→   167→            }
+   168→   168→            _zoom = 1f;
+   169→   169→            _panOffset = Vector2.Zero;
+   170→   170→            IsVisible = true;
+   171→   171→            // Inicializar estrellas si no estaban
+   172→   172→            InitStars();
+   173→   173→            OnActivate();
+   174→   174→            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+   175→   175→        }
+   176→   176→
+   177→   177→        public void Hide()
+   178→   178→        {
+   179→   179→            IsVisible = false;
+   180→   180→            _isDragging = false;
+   181→   181→            _mouseLeftPressed = false;
+   182→   182→            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+   183→   183→        }
+   184→   184→
+   185→   185→        private Vector2 NodeToScreen(PoESkillNode node)
+   186→   186→        {
+   187→   187→            if (_rangeX <= 0 || _rangeY <= 0) return new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
+   188→   188→            float cx = Main.screenWidth / 2f;
+   189→   189→            float cy = Main.screenHeight / 2f;
+   190→   190→            float scale = Math.Min(Main.screenWidth / _rangeX, Main.screenHeight / _rangeY) * 0.45f * _zoom;
+   191→   191→            return new Vector2(
+   192→   192→                (node.X - _minX) * scale - (_rangeX * scale / 2f) + cx + _panOffset.X,
+   193→   193→                (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y);
+   194→   194→        }
+   195→   195→
+   196→   196→        private PoESkillNode? FindHoveredNode()
+   197→   197→        {
+   198→   198→            Vector2 mouse = new(Main.mouseX, Main.mouseY);
+   199→   199→            PoESkillNode? closest = null;
+   200→   200→            float closestDist = float.MaxValue;
+   201→   201→            foreach (var node in _allNodes)
+   202→   202→            {
+   203→   203→                Vector2 pos = NodeToScreen(node);
+   204→   204→                float dist = Vector2.Distance(pos, mouse);
+   205→   205→                float radius = node.Radius * 2.2f * _zoom + 8f;
+   206→   206→                if (dist < radius && dist < closestDist) { closestDist = dist; closest = node; }
+   207→   207→            }
+   208→   208→            return closest;
+   209→   209→        }
+   210→   210→
+   211→   211→        public void Draw()
+   212→   212→        {
+   213→   213→            if (!IsVisible) return;
+   214→   214→            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+   215→   215→            if (sp == null) return;
+   216→   216→
+   217→   217→            _time += 0.016f; // ~60fps
+   218→   218→            var sb = Main.spriteBatch;
+   219→   219→
+   220→   220→            try
+   221→   221→            {
+   222→   222→                DrawBackground(sb);
+   223→   223→                DrawStars(sb);
+   224→   224→                UpdateMeteors();
+   225→   225→                DrawMeteors(sb);
+   226→   226→
+   227→   227→                if (CurrentTree == null || _allNodes.Count == 0)
+   228→   228→                {
+   229→   229→                    Utils.DrawBorderString(sb, "No hay arbol disponible para esta rama.",
+   230→   230→                        new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f),
+   231→   231→                        new Color(255, 200, 100), 1.0f, 0.5f, 0.5f);
+   232→   232→                    DrawTopBar(sb, sp, 0, 0);
+   233→   233→                    DrawBottomHelp(sb);
+   234→   234→                    HandleInput(sp);
+   235→   235→                    return;
+   236→   236→                }
+   237→   237→
+   238→   238→                DrawConnections(sb, sp);
+   239→   239→                _hoveredNode = FindHoveredNode();
+   240→   240→                _hoverAlpha = MathHelper.Lerp(_hoverAlpha, _hoveredNode != null ? 1f : 0f, 0.2f);
+   241→   241→                DrawNodes(sb, sp);
+   242→   242→                DrawTooltip(sb, sp);
+   243→   243→                DrawTopBar(sb, sp, sp.CumulativeSkillPoints(), sp.AllocatedNodes.Count);
+   244→   244→                DrawBottomHelp(sb);
+   245→   245→                HandleInput(sp);
+   246→   246→            }
+   247→   247→            catch (Exception ex)
+   248→   248→            {
+   249→   249→                // Nunca propagar excepciones desde Draw — podria romper el render loop.
+   250→   250→                ModContent.GetInstance<AethonMod>()?.Logger?.Error("SkillTreeUI.Draw error", ex);
+   251→   251→                IsVisible = false;
+   252→   252→            }
+   253→   253→        }
+   254→   254→
+   255→   255→        // ====================================================================
+   256→   256→        // FONDO Y EFECTOS COSMICOS
+   257→   257→        // ====================================================================
+   258→   258→        private void DrawBackground(SpriteBatch sb)
+   259→   259→        {
+   260→   260→            // Fondo base: espacio profundo (#0d0a1a)
+   261→   261→            sb.Draw(TextureAssets.MagicPixel.Value,
+   262→   262→                new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+   263→   263→                new Color(13, 10, 26, 250));
+   264→   264→
+   265→   265→            // Radiales cosmicos (estetica de la web)
+   266→   266→            DrawRadial(sb, 0.2f, 0.1f, 0.5f, new Color(120, 80, 200, 25));
+   267→   267→            DrawRadial(sb, 0.9f, 0.8f, 0.45f, new Color(245, 196, 81, 20));
+   268→   268→            DrawRadial(sb, 0.5f, 1.0f, 0.4f, new Color(179, 136, 255, 22));
+   269→   269→
+   270→   270→            // Nebulosa central pulsante
+   271→   271→            float pulse = 0.85f + (float)Math.Sin(_time * 0.5) * 0.15f;
+   272→   272→            DrawRadial(sb, 0.5f, 0.5f, 0.3f * pulse, new Color(80, 40, 160, 18));
+   273→   273→
+   274→   274→            // Vignette radial central (oscurece los bordes)
+   275→   275→            for (int r = 320; r > 0; r -= 20)
+   276→   276→            {
+   277→   277→                int alpha = (320 - r) / 15;
+   278→   278→                sb.Draw(TextureAssets.MagicPixel.Value,
+   279→   279→                    new Rectangle(Main.screenWidth / 2 - r, Main.screenHeight / 2 - r, r * 2, r * 2),
+   280→   280→                    new Color(20, 12, 40, alpha));
+   281→   281→            }
+   282→   282→        }
+   283→   283→
+   284→   284→        private void DrawStars(SpriteBatch sb)
+   285→   285→        {
+   286→   286→            if (_stars == null) return;
+   287→   287→            for (int i = 0; i < _stars.Length; i++)
+   288→   288→            {
+   289→   289→                var s = _stars[i];
+   290→   290→                // Parallax: las estrellas cercanas (layer 2) se mueven mas con el pan
+   291→   291→                float parallax = s.Layer == 2 ? 0.4f : s.Layer == 1 ? 0.2f : 0.08f;
+   292→   292→                float sx = (s.Pos.X * Main.screenWidth + _panOffset.X * parallax) % Main.screenWidth;
+   293→   293→                float sy = (s.Pos.Y * Main.screenHeight + _panOffset.Y * parallax) % Main.screenHeight;
+   294→   294→                if (sx < 0) sx += Main.screenWidth;
+   295→   295→                if (sy < 0) sy += Main.screenHeight;
+   296→   296→
+   297→   297→                // Twinkle (parpadeo)
+   298→   298→                float twinkle = 0.6f + 0.4f * (float)Math.Sin(_time * s.Twinkle + s.Phase);
+   299→   299→                int alpha = (int)(255 * twinkle * (s.Layer == 2 ? 0.95f : s.Layer == 1 ? 0.7f : 0.45f));
+   300→   300→                alpha = MathHelper.Clamp(alpha, 0, 255);
+   301→   301→                Color c = new Color(s.Color.R, s.Color.G, s.Color.B, alpha);
+   302→   302→
+   303→   303→                // Estrella con glow para las cercanas
+   304→   304→                if (s.Layer == 2 && s.Size > 2f)
+   305→   305→                {
+   306→   306→                    sb.Draw(TextureAssets.MagicPixel.Value,
+   307→   307→                        new Rectangle((int)sx - 2, (int)sy - 2, 5, 5),
+   308→   308→                        new Color(c.R, c.G, c.B, alpha / 4));
+   309→   309→                }
+   310→   310→                sb.Draw(TextureAssets.MagicPixel.Value,
+   311→   311→                    new Rectangle((int)sx, (int)sy, (int)s.Size, (int)s.Size), c);
+   312→   312→            }
+   313→   313→        }
+   314→   314→
+   315→   315→        private void UpdateMeteors()
+   316→   316→        {
+   317→   317→            _meteorTimer++;
+   318→   318→            if (_meteorTimer > 180 + Main.rand.Next(120) && _meteors.Count < 3)
+   319→   319→            {
+   320→   320→                _meteorTimer = 0;
+   321→   321→                var meteor = new Meteor
+   322→   322→                {
+   323→   323→                    Pos = new Vector2(Main.rand.NextFloat(Main.screenWidth), -20),
+   324→   324→                    Vel = new Vector2(Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(4, 8)),
+   325→   325→                    Life = 0,
+   326→   326→                    MaxLife = 60 + Main.rand.Next(40),
+   327→   327→                    Color = Main.rand.NextBool() ? new Color(245, 196, 81) : new Color(179, 136, 255),
+   328→   328→                };
+   329→   329→                _meteors.Add(meteor);
+   330→   330→            }
+   331→   331→
+   332→   332→            for (int i = _meteors.Count - 1; i >= 0; i--)
+   333→   333→            {
+   334→   334→                var m = _meteors[i];
+   335→   335→                m.Pos += m.Vel;
+   336→   336→                m.Life++;
+   337→   337→                _meteors[i] = m;
+   338→   338→                if (m.Life > m.MaxLife || m.Pos.Y > Main.screenHeight + 50)
+   339→   339→                    _meteors.RemoveAt(i);
+   340→   340→            }
+   341→   341→        }
+   342→   342→
+   343→   343→        private void DrawMeteors(SpriteBatch sb)
+   344→   344→        {
+   345→   345→            foreach (var m in _meteors)
+   346→   346→            {
+   347→   347→                float fade = 1f;
+   348→   348→                if (m.Life < 5) fade = m.Life / 5f;
+   349→   349→                else if (m.Life > m.MaxLife - 10) fade = (m.MaxLife - m.Life) / 10f;
+   350→   350→                fade = MathHelper.Clamp(fade, 0, 1);
+   351→   351→                // Cola del meteoro
+   352→   352→                for (int i = 0; i < 8; i++)
+   353→   353→                {
+   354→   354→                    var trailPos = m.Pos - m.Vel * i * 1.5f;
+   355→   355→                    int a = (int)(fade * (255 - i * 28));
+   356→   356→                    if (a < 0) a = 0;
+   357→   357→                    sb.Draw(TextureAssets.MagicPixel.Value,
+   358→   358→                        new Rectangle((int)trailPos.X - 1, (int)trailPos.Y - 1, 3, 3),
+   359→   359→                        new Color(m.Color.R, m.Color.G, m.Color.B, a));
+   360→   360→                }
+   361→   361→                // Cabeza
+   362→   362→                sb.Draw(TextureAssets.MagicPixel.Value,
+   363→   363→                    new Rectangle((int)m.Pos.X - 2, (int)m.Pos.Y - 2, 4, 4),
+   364→   364→                    new Color(m.Color.R, m.Color.G, m.Color.B, (int)(fade * 255)));
+   365→   365→            }
+   366→   366→        }
+   367→   367→
+   368→   368→        // ====================================================================
+   369→   369→        // CONEXIONES Y NODOS
+   370→   370→        // ====================================================================
+   371→   371→        private void DrawConnections(SpriteBatch sb, ShardPlayer sp)
+   372→   372→        {
+   373→   373→            foreach (var (fromIdx, toIdx) in _allConnections)
+   374→   374→            {
+   375→   375→                if (fromIdx < 0 || fromIdx >= _allNodes.Count || toIdx < 0 || toIdx >= _allNodes.Count) continue;
+   376→   376→                Vector2 from = NodeToScreen(_allNodes[fromIdx]);
+   377→   377→                Vector2 to = NodeToScreen(_allNodes[toIdx]);
+   378→   378→                bool bothActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) && sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
+   379→   379→                bool oneActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) || sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
+   380→   380→
+   381→   381→                Color lc;
+   382→   382→                float th;
+   383→   383→                if (bothActive) { lc = new Color(245, 196, 81, 230); th = 3.5f; }
+   384→   384→                else if (oneActive) { lc = new Color(180, 140, 80, 160); th = 2.2f; }
+   385→   385→                else { lc = new Color(60, 50, 90, 90); th = 1.5f; }
+   386→   386→
+   387→   387→                DrawLine(sb, from, to, lc, th);
+   388→   388→            }
+   389→   389→        }
+   390→   390→
+   391→   391→        private void DrawNodes(SpriteBatch sb, ShardPlayer sp)
+   392→   392→        {
+   393→   393→            foreach (var node in _allNodes)
+   394→   394→            {
+   395→   395→                Vector2 pos = NodeToScreen(node);
+   396→   396→                bool allocated = sp.AllocatedNodes.Contains(node.Id);
+   397→   397→                bool canAlloc = CanAllocate(node, sp);
+   398→   398→                bool isHover = _hoveredNode != null && _hoveredNode.Id == node.Id;
+   399→   399→                DrawNode(sb, pos, node, allocated, canAlloc, isHover);
+   400→   400→            }
+   401→   401→        }
+   402→   402→
+   403→   403→        private void DrawTooltip(SpriteBatch sb, ShardPlayer sp)
+   404→   404→        {
+   405→   405→            if (_hoveredNode == null) return;
+   406→   406→            var node = _hoveredNode;
+   407→   407→            if (node == null) return;
+   408→   408→            bool alloc = sp.AllocatedNodes.Contains(node.Id);
+   409→   409→
+   410→   410→            string typeStr = node.Type switch
+   411→   411→            {
+   412→   412→                NodeType.Small => "[Menor]",
+   413→   413→                NodeType.Notable => "[Notable]",
+   414→   414→                NodeType.Keystone => "[KEYSTONE]",
+   415→   415→                NodeType.Ascendancy => "[Ascendencia]",
+   416→   416→                NodeType.Cluster => "[Cluster]",
+   417→   417→                _ => "",
+   418→   418→            };
+   419→   419→
+   420→   420→            // Tooltip con fondo
+   421→   421→            string[] lines = {
+   422→   422→                $"{typeStr} {node.Name}",
+   423→   423→                node.Effect ?? "",
+   424→   424→                $"Rama: {node.Branch}",
+   425→   425→                $"Coste: {node.Cost} pts",
+   426→   426→                alloc ? "(Asignado — click para quitar)" : (CanAllocate(node, sp) ? "(Click para asignar)" : "(Requiere nodo adyacente)"),
+   427→   427→            };
+   428→   428→
+   429→   429→            // Medir el tooltip
+   430→   430→            float maxW = 0;
+   431→   431→            foreach (var line in lines)
+   432→   432→            {
+   433→   433→                var size = FontAssets.MouseText.Value.MeasureString(line);
+   434→   434→                if (size.X > maxW) maxW = size.X;
+   435→   435→            }
+   436→   436→            float lineH = 18f;
+   437→   437→            int padX = 10, padY = 8;
+   438→   438→            int tw = (int)maxW + padX * 2;
+   439→   439→            int th = (int)(lines.Length * lineH) + padY * 2;
+   440→   440→
+   441→   441→            // Posicionar tooltip cerca del cursor sin salirse de pantalla
+   442→   442→            int tx = Main.mouseX + 16;
+   443→   443→            int ty = Main.mouseY + 16;
+   444→   444→            if (tx + tw > Main.screenWidth) tx = Main.mouseX - tw - 8;
+   445→   445→            if (ty + th > Main.screenHeight) ty = Main.screenHeight - th - 4;
+   446→   446→            if (ty < 0) ty = 4;
+   447→   447→
+   448→   448→            // Fondo
+   449→   449→            sb.Draw(TextureAssets.MagicPixel.Value,
+   450→   450→                new Rectangle(tx, ty, tw, th),
+   451→   451→                new Color(15, 10, 30, 245));
+   452→   452→            // Borde dorado/violeta segun tipo
+   453→   453→            Color border = node.Type == NodeType.Keystone ? new Color(245, 196, 81)
+   454→   454→                          : node.Type == NodeType.Ascendancy ? new Color(179, 136, 255)
+   455→   455→                          : new Color(120, 100, 160);
+   456→   456→            int b = 2;
+   457→   457→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, tw, b), border);
+   458→   458→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty + th - b, tw, b), border);
+   459→   459→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, b, th), border);
+   460→   460→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx + tw - b, ty, b, th), border);
+   461→   461→
+   462→   462→            // Texto
+   463→   463→            for (int i = 0; i < lines.Length; i++)
+   464→   464→            {
+   465→   465→                Color col = i == 0 ? new Color(245, 196, 81)
+   466→   466→                          : i == lines.Length - 1 ? (alloc ? new Color(100, 220, 100) : new Color(179, 136, 255))
+   467→   467→                          : new Color(220, 220, 230);
+   468→   468→                Utils.DrawBorderString(sb, lines[i], new Vector2(tx + padX, ty + padY + i * lineH), col, 0.85f);
+   469→   469→            }
+   470→   470→        }
+   471→   471→
+   472→   472→        // ====================================================================
+   473→   473→        // BARRAS SUPERIOR E INFERIOR
+   474→   474→        // ====================================================================
+   475→   475→        private void DrawTopBar(SpriteBatch sb, ShardPlayer sp, int total, int spent)
+   476→   476→        {
+   477→   477→            int avail = total - spent;
+   478→   478→            // Barra superior con gradiente
+   479→   479→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, 60),
+   480→   480→                new Color(8, 6, 16, 240));
+   481→   481→            // Linea dorada inferior
+   482→   482→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 60, Main.screenWidth, 2),
+   483→   483→                new Color(245, 196, 81, 200));
+   484→   484→
+   485→   485→            string branchName = sp.ActiveBranch switch
+   486→   486→            {
+   487→   487→                BranchType.Distance => "DISTANCIA — Lumina, la Arcoestelar",
+   488→   488→                BranchType.Melee => "CUERPO A CUERPO — Solbrand, Filo del Alba",
+   489→   489→                BranchType.Magic => "ARTES MAGICAS — Grimorio del Eterno",
+   490→   490→                _ => "FRAGMENTO GENESIS",
+   491→   491→            };
+   492→   492→
+   493→   493→            Utils.DrawBorderString(sb, "★ ARBOL DE HABILIDADES ★",
+   494→   494→                new Vector2(Main.screenWidth / 2f, 16), new Color(245, 196, 81), 1.3f, 0.5f, 0.5f);
+   495→   495→            Utils.DrawBorderString(sb, branchName,
+   496→   496→                new Vector2(Main.screenWidth / 2f, 38), new Color(179, 136, 255), 0.85f, 0.5f, 0.5f);
+   497→   497→
+   498→   498→            // Puntos de habilidad (lado izquierdo)
+   499→   499→            string ptsText = $"Puntos: {avail}";
+   500→   500→            Utils.DrawBorderString(sb, ptsText, new Vector2(20, 16),
+   501→   501→                avail > 0 ? new Color(120, 255, 150) : new Color(180, 180, 200), 1.0f, 0f, 0f);
+   502→   502→            Utils.DrawBorderString(sb, $"Asignados: {spent}/{total}", new Vector2(20, 38),
+   503→   503→                new Color(179, 136, 255), 0.85f, 0f, 0f);
+   504→   504→
+   505→   505→            // Nivel del fragmento (lado derecho)
+   506→   506→            Utils.DrawBorderString(sb, $"Nivel {sp.ShardLevel}", new Vector2(Main.screenWidth - 20, 16),
+   507→   507→                new Color(245, 196, 81), 1.0f, 1f, 0f);
+   508→   508→            Utils.DrawBorderString(sb, $"XP: {sp.ShardXP}/{sp.XPForNextLevel()}", new Vector2(Main.screenWidth - 20, 38),
+   509→   509→                new Color(179, 136, 255), 0.8f, 1f, 0f);
+   510→   510→
+   511→   511→            // Boton cerrar (X) en la esquina superior derecha
+   512→   512→            int closeX = Main.screenWidth - 50;
+   513→   513→            int closeY = 70;
+   514→   514→            int closeSize = 28;
+   515→   515→            bool hoverClose = Main.mouseX >= closeX && Main.mouseX <= closeX + closeSize &&
+   516→   516→                              Main.mouseY >= closeY && Main.mouseY <= closeY + closeSize;
+   517→   517→            Color closeBg = hoverClose ? new Color(220, 80, 80, 230) : new Color(40, 20, 30, 180);
+   518→   518→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(closeX, closeY, closeSize, closeSize), closeBg);
+   519→   519→            Utils.DrawBorderString(sb, "X", new Vector2(closeX + closeSize / 2f, closeY + closeSize / 2f - 2),
+   520→   520→                hoverClose ? Color.White : new Color(220, 180, 180), 1.1f, 0.5f, 0.5f);
+   521→   521→            if (hoverClose && Main.mouseLeft && !_mouseLeftPressed)
+   522→   522→            {
+   523→   523→                _mouseLeftPressed = true;
+   524→   524→                Hide();
+   525→   525→                return;
+   526→   526→            }
+   527→   527→
+   528→   528→            // Boton Reset (centrar vista)
+   529→   529→            int resetX = Main.screenWidth - 90;
+   530→   530→            int resetY = 70;
+   531→   531→            int resetW = 32, resetH = 28;
+   532→   532→            bool hoverReset = Main.mouseX >= resetX && Main.mouseX <= resetX + resetW &&
+   533→   533→                              Main.mouseY >= resetY && Main.mouseY <= resetY + resetH;
+   534→   534→            Color resetBg = hoverReset ? new Color(120, 100, 200, 230) : new Color(30, 20, 50, 180);
+   535→   535→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(resetX, resetY, resetW, resetH), resetBg);
+   536→   536→            Utils.DrawBorderString(sb, "⟲", new Vector2(resetX + resetW / 2f, resetY + resetH / 2f - 2),
+   537→   537→                hoverReset ? Color.White : new Color(200, 180, 240), 1.0f, 0.5f, 0.5f);
+   538→   538→            if (hoverReset && Main.mouseLeft && !_mouseLeftPressed)
+   539→   539→            {
+   540→   540→                _mouseLeftPressed = true;
+   541→   541→                _zoom = 1f;
+   542→   542→                _panOffset = Vector2.Zero;
+   543→   543→            }
+   544→   544→        }
+   545→   545→
+   546→   546→        private void DrawBottomHelp(SpriteBatch sb)
+   547→   547→        {
+   548→   548→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, Main.screenHeight - 30, Main.screenWidth, 30),
+   549→   549→                new Color(8, 6, 16, 220));
+   550→   550→            Utils.DrawBorderString(sb,
+   551→   551→                "Click izq: asignar/quitar  |  Click der: mover  |  Rueda: zoom  |  K / Esc: cerrar",
+   552→   552→                new Vector2(Main.screenWidth / 2f, Main.screenHeight - 15),
+   553→   553→                new Color(140, 130, 170), 0.8f, 0.5f, 0.5f);
+   554→   554→        }
+   555→   555→
+   556→   556→        // ====================================================================
+   557→   557→        // INPUT
+   558→   558→        // ====================================================================
+   559→   559→        private void HandleInput(ShardPlayer sp)
+   560→   560→        {
+   561→   561→            // Pan con click derecho
+   562→   562→            if (Main.mouseRight)
+   563→   563→            {
+   564→   564→                Vector2 curMouse = new(Main.mouseX, Main.mouseY);
+   565→   565→                if (!_isDragging)
+   566→   566→                {
+   567→   567→                    _isDragging = true;
+   568→   568→                    _dragStart = curMouse;
+   569→   569→                    _lastMouse = curMouse;
+   570→   570→                }
+   571→   571→                else
+   572→   572→                {
+   573→   573→                    _panOffset += curMouse - _lastMouse;
+   574→   574→                    _lastMouse = curMouse;
+   575→   575→                }
+   576→   576→            }
+   577→   577→            else _isDragging = false;
+   578→   578→
+   579→   579→            // Zoom con rueda
+   580→   580→            int scroll = Main.mouseScroll;
+   581→   581→            if (scroll != 0)
+   582→   582→            {
+   583→   583→                float zoomDelta = scroll > 0 ? 0.1f : -0.1f;
+   584→   584→                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.4f, 2.5f);
+   585→   585→            }
+   586→   586→
+   587→   587→            // Click izquierdo para asignar/quitar
+   588→   588→            if (Main.mouseLeft && !_mouseLeftPressed && _hoveredNode != null && !_isDragging)
+   589→   589→            {
+   590→   590→                _mouseLeftPressed = true;
+   591→   591→                var node = _hoveredNode;
+   592→   592→                if (node == null) return;
+   593→   593→                if (sp.AllocatedNodes.Contains(node.Id))
+   594→   594→                {
+   595→   595→                    sp.AllocatedNodes.Remove(node.Id);
+   596→   596→                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+   597→   597→                    // Particulas al quitar
+   598→   598→                    for (int i = 0; i < 8; i++)
+   599→   599→                        Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.PurpleTorch,
+   600→   600→                            new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
+   601→   601→                            100, new Color(179, 136, 255), 1f);
+   602→   602→                }
+   603→   603→                else if (CanAllocate(node, sp))
+   604→   604→                {
+   605→   605→                    int avail = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
+   606→   606→                    if (avail < node.Cost)
+   607→   607→                    {
+   608→   608→                        Main.NewText($"No tienes suficientes puntos. Necesitas {node.Cost}, tienes {avail}.",
+   609→   609→                            new Color(255, 120, 120));
+   610→   610→                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+   611→   611→                    }
+   612→   612→                    else
+   613→   613→                    {
+   614→   614→                        sp.AllocatedNodes.Add(node.Id);
+   615→   615→                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+   616→   616→                        // Particulas de asignacion
+   617→   617→                        Vector2 nodePos = NodeToScreen(node);
+   618→   618→                        for (int i = 0; i < 16; i++)
+   619→   619→                            Dust.NewDustPerfect(nodePos, Terraria.ID.DustID.GoldFlame,
+   620→   620→                                new Vector2(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
+   621→   621→                                100, new Color(245, 196, 81), 1.2f);
+   622→   622→                    }
+   623→   623→                }
+   624→   624→            }
+   625→   625→            if (!Main.mouseLeft) _mouseLeftPressed = false;
+   626→   626→
+   627→   627→            // Cerrar con Escape o K
+   628→   628→            var kb = Main.keyState;
+   629→   629→            var oldKb = Main.oldKeyState;
+   630→   630→            if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();
+   631→   631→
+   632→   632→            var config = ModContent.GetInstance<Content.AethonConfig>();
+   633→   633→            if (config != null && kb.IsKeyDown(config.SkillTreeKey) && !oldKb.IsKeyDown(config.SkillTreeKey))
+   634→   634→                Hide();
+   635→   635→
+   636→   636→            // Bloquear el input del juego del mouse y teclas mientras la UI este abierta
+   637→   637→            // (evita que el jugador ataque/mueva mientras asigna habilidades)
+   638→   638→            Main.mouseLeft = false;
+   639→   639→            Main.mouseRight = false;
+   640→   640→            Main.mouseScroll = 0;
+   641→   641→        }
+   642→   642→
+   643→   643→        private bool CanAllocate(PoESkillNode node, ShardPlayer sp)
+   644→   644→        {
+   645→   645→            if (sp.AllocatedNodes.Contains(node.Id)) return false;
+   646→   646→            if (node.Id == "start" || node.Cost == 0) return true;
+   647→   647→            foreach (var aid in sp.AllocatedNodes)
+   648→   648→                if (node.Connections.Contains(aid)) return true;
+   649→   649→            return false;
+   650→   650→        }
+   651→   651→
+   652→   652→        // ====================================================================
+   653→   653→        // HELPERS DE DIBUJO
+   654→   654→        // ====================================================================
+   655→   655→        private void DrawRadial(SpriteBatch sb, float xPct, float yPct, float radiusPct, Color color)
+   656→   656→        {
+   657→   657→            float cx = Main.screenWidth * xPct;
+   658→   658→            float cy = Main.screenHeight * yPct;
+   659→   659→            float r = Main.screenWidth * radiusPct;
+   660→   660→            if (r <= 0) return;
+   661→   661→            for (int i = (int)r; i > 0; i -= 15)
+   662→   662→            {
+   663→   663→                int alpha = (int)(color.A * (1f - (float)i / r) * 0.3f);
+   664→   664→                sb.Draw(TextureAssets.MagicPixel.Value,
+   665→   665→                    new Rectangle((int)(cx - i), (int)(cy - i), i * 2, i * 2),
+   666→   666→                    new Color(color.R, color.G, color.B, alpha));
+   667→   667→            }
+   668→   668→        }
+   669→   669→
+   670→   670→        private void DrawNode(SpriteBatch sb, Vector2 pos, PoESkillNode node, bool allocated, bool canAlloc, bool hovered)
+   671→   671→        {
+   672→   672→            int radius = (int)(node.Radius * 2.0f * _zoom);
+   673→   673→            radius = Math.Max(6, radius);
+   674→   674→
+   675→   675→            // Color base por tipo (estetica web: dorado/violeta/teal)
+   676→   676→            Color baseColor = node.Type switch
+   677→   677→            {
+   678→   678→                NodeType.Small => new Color(90, 90, 120),
+   679→   679→                NodeType.Notable => new Color(60, 120, 210),
+   680→   680→                NodeType.Keystone => new Color(245, 196, 81),
+   681→   681→                NodeType.Ascendancy => new Color(150, 60, 230),
+   682→   682→                NodeType.Cluster => new Color(120, 80, 180),
+   683→   683→                _ => Color.White,
+   684→   684→            };
+   685→   685→
+   686→   686→            if (!allocated && !canAlloc) baseColor *= 0.18f;
+   687→   687→
+   688→   688→            // Glow pulsante para keystones y ascendancy
+   689→   689→            if (node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
+   690→   690→            {
+   691→   691→                float pulse = 0.7f + 0.3f * (float)Math.Sin(_time * 2f + pos.X * 0.01f);
+   692→   692→                for (int i = 4; i > 0; i--)
+   693→   693→                {
+   694→   694→                    int gr = radius + i * 6;
+   695→   695→                    int a = (int)((allocated ? 10 : 5) * pulse);
+   696→   696→                    sb.Draw(TextureAssets.MagicPixel.Value,
+   697→   697→                        new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
+   698→   698→                        new Color(baseColor.R, baseColor.G, baseColor.B, a));
+   699→   699→                }
+   700→   700→            }
+   701→   701→
+   702→   702→            // Glow dorado si asignado
+   703→   703→            if (allocated)
+   704→   704→                for (int i = 3; i > 0; i--)
+   705→   705→                {
+   706→   706→                    int gr = radius + i * 5;
+   707→   707→                    sb.Draw(TextureAssets.MagicPixel.Value,
+   708→   708→                        new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
+   709→   709→                        new Color(245, 196, 81, 10 - i * 2));
+   710→   710→                }
+   711→   711→
+   712→   712→            // Glow blanco al hover
+   713→   713→            if (hovered && (canAlloc || allocated))
+   714→   714→                for (int i = 2; i > 0; i--)
+   715→   715→                {
+   716→   716→                    int gr = radius + i * 4;
+   717→   717→                    sb.Draw(TextureAssets.MagicPixel.Value,
+   718→   718→                        new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
+   719→   719→                        new Color(255, 255, 255, 8 - i * 2));
+   720→   720→                }
+   721→   721→
+   722→   722→            // Relleno
+   723→   723→            Color fill = allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.12f);
+   724→   724→            sb.Draw(TextureAssets.MagicPixel.Value,
+   725→   725→                new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, radius * 2), fill);
+   726→   726→
+   727→   727→            // Borde
+   728→   728→            Color border = allocated ? new Color(255, 240, 190)
+   729→   729→                          : hovered ? Color.White
+   730→   730→                          : new Color(baseColor.R + 30, baseColor.G + 30, baseColor.B + 30);
+   731→   731→            int b = Math.Max(2, radius / 8);
+   732→   732→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, b), border);
+   733→   733→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y + radius - b, radius * 2, b), border);
+   734→   734→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, b, radius * 2), border);
+   735→   735→            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X + radius - b, (int)pos.Y - radius, b, radius * 2), border);
+   736→   736→
+   737→   737→            // Punto interior para small nodes
+   738→   738→            if (node.Type == NodeType.Small)
+   739→   739→            {
+   740→   740→                int dr = radius / 3;
+   741→   741→                sb.Draw(TextureAssets.MagicPixel.Value,
+   742→   742→                    new Rectangle((int)pos.X - dr, (int)pos.Y - dr, dr * 2, dr * 2),
+   743→   743→                    allocated ? new Color(255, 245, 200) : new Color(baseColor.R + 50, baseColor.G + 50, baseColor.B + 50));
+   744→   744→            }
+   745→   745→
+   746→   746→            // Nombre del notable/keystone/ascendancy
+   747→   747→            if (node.Type == NodeType.Notable || node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
+   748→   748→            {
+   749→   749→                string shortName = node.Name.Length > 18 ? node.Name.Substring(0, 16) + "…" : node.Name;
+   750→   750→                Utils.DrawBorderString(sb, shortName, new Vector2(pos.X, pos.Y - radius - 10),
+   751→   751→                    allocated ? new Color(255, 240, 190) : new Color(220, 200, 240), 0.7f * _zoom, 0.5f, 1f);
+   752→   752→            }
+   753→   753→
+   754→   754→            // Costo debajo
+   755→   755→            if (node.Cost > 0)
+   756→   756→                Utils.DrawBorderString(sb, node.Cost.ToString(),
+   757→   757→                    new Vector2(pos.X, pos.Y + radius + 5),
+   758→   758→                    allocated ? new Color(255, 225, 140) : new Color(120, 110, 140), 0.65f, 0.5f, 0f);
+   759→   759→        }
+   760→   760→
+   761→   761→        private void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color, float thickness)
+   762→   762→        {
+   763→   763→            Vector2 edge = end - start;
+   764→   764→            float angle = (float)Math.Atan2(edge.Y, edge.X);
+   765→   765→            float length = edge.Length();
+   766→   766→            if (length < 1f) return;
+   767→   767→            sb.Draw(TextureAssets.MagicPixel.Value,
+   768→   768→                new Rectangle((int)start.X, (int)start.Y, (int)length, (int)thickness),
+   769→   769→                null, color, angle, new Vector2(0, thickness / 2f), SpriteEffects.None, 0);
+   770→   770→        }
+   771→   771→    }
+   772→   772→}
+   773→   773→

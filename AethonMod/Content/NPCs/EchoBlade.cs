@@ -84,14 +84,15 @@ namespace AethonMod.Content.NPCs
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item1, NPC.Center);
         }
 
-        public override void ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers)
+        public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
         {
             // 20% chance de parry (inmune al golpe) con cooldown de 120 ticks.
             // Usamos ModifyIncomingHit en vez de revertir daño en OnHitByItem (que era buggy).
             if (ParryCooldown <= 0 && Main.rand.NextBool(5))
             {
                 ParryCooldown = 120;
-                modifiers.Null(); // anular el golpe por completo (i-frame)
+                // Anular el daño por completo (i-frame) usando SetMaxDamage(0).
+                modifiers.SetMaxDamage(0);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item37, NPC.Center);
                 for (int i = 0; i < 15; i++)
                     Dust.NewDust(NPC.Center, 20, 20, DustID.YellowStarDust);

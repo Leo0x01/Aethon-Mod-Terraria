@@ -24,6 +24,8 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
         {
+            // Bounds check: projectile.owner puede ser invalido (orphan projectiles).
+            if (projectile.owner < 0 || projectile.owner >= Main.player.Length) return;
             Player? player = Main.player[projectile.owner];
             if (player != null && player.active)
             {

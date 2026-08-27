@@ -38,6 +38,7 @@ namespace AethonMod.Content.UI
         private Vector2 _dragStart = Vector2.Zero;
         private Vector2 _lastMouse = Vector2.Zero;
         private bool _mouseLeftPressed = false;
+        private int _lastScrollValue = 0;
 
         private List<PoESkillNode> _allNodes = new();
         private List<(int fromIdx, int toIdx)> _allConnections = new();
@@ -296,8 +297,8 @@ namespace AethonMod.Content.UI
 
                 // Twinkle (parpadeo)
                 float twinkle = 0.6f + 0.4f * (float)Math.Sin(_time * s.Twinkle + s.Phase);
-                int alpha = (int)(255 * twinkle * (s.Layer == 2 ? 0.95f : s.Layer == 1 ? 0.7f : 0.45f));
-                alpha = MathHelper.Clamp(alpha, 0, 255);
+                int alpha = (int)(255f * twinkle * (s.Layer == 2 ? 0.95f : s.Layer == 1 ? 0.7f : 0.45f));
+                if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
                 Color c = new Color(s.Color.R, s.Color.G, s.Color.B, alpha);
 
                 // Estrella con glow para las cercanas
@@ -576,11 +577,13 @@ namespace AethonMod.Content.UI
             }
             else _isDragging = false;
 
-            // Zoom con rueda
-            int scroll = Main.mouseScroll;
-            if (scroll != 0)
+            // Zoom con rueda (usar PlayerInput.ScrollWheelValue para detectar el delta)
+            int curScroll = Terraria.GameInput.PlayerInput.ScrollWheelValue;
+            int scrollDelta = curScroll - _lastScrollValue;
+            _lastScrollValue = curScroll;
+            if (scrollDelta != 0)
             {
-                float zoomDelta = scroll > 0 ? 0.1f : -0.1f;
+                float zoomDelta = scrollDelta > 0 ? 0.1f : -0.1f;
                 _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.4f, 2.5f);
             }
 
@@ -594,9 +597,10 @@ namespace AethonMod.Content.UI
                 {
                     sp.AllocatedNodes.Remove(node.Id);
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-                    // Particulas al quitar
+                    // Particulas al quitar (en la posicion del nodo)
+                    Vector2 nodePos = NodeToScreen(node);
                     for (int i = 0; i < 8; i++)
-                        Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.PurpleTorch,
+                        Dust.NewDustPerfect(nodePos, Terraria.ID.DustID.PurpleTorch,
                             new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
                             100, new Color(179, 136, 255), 1f);
                 }
@@ -637,7 +641,6 @@ namespace AethonMod.Content.UI
             // (evita que el jugador ataque/mueva mientras asigna habilidades)
             Main.mouseLeft = false;
             Main.mouseRight = false;
-            Main.mouseScroll = 0;
         }
 
         private bool CanAllocate(PoESkillNode node, ShardPlayer sp)

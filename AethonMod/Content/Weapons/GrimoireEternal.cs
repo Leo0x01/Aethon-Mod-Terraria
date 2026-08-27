@@ -59,7 +59,7 @@ namespace AethonMod.Content.Weapons
 
             // Base: 0 mana. Cada Notable asignado suma 5 de mana, hasta max 20.
             int notableCount = 0;
-            // Contar nodos Notable del árbol PoE asignados.
+            // Contar nodos Notable del árbol PoE asignados (cached en PoETreeCatalog).
             var tree = Systems.PoETreeCatalog.GetTree(Players.BranchType.Magic);
             foreach (var node in tree.Nodes)
             {
@@ -70,21 +70,20 @@ namespace AethonMod.Content.Weapons
             int baseManaCost = System.Math.Min(notableCount * 5, 20);
 
             // Aplicar reducción de mana de nodos específicos (eficiencia, etc).
+            // IMPORTANTE: aplicar la reducción SOLO via Item.mana, NO via mult (evitar double-counting).
             float reduction = Systems.NodeEffectSystem.GetManaCostReduction(player);
             int finalCost = (int)(baseManaCost * (1f - reduction));
             finalCost = System.Math.Max(0, finalCost);
 
-            // Forzar el costo de mana del item.
+            // Forzar el costo de mana del item (se recalcula cada uso).
             Item.mana = finalCost;
-
-            // Aplicar reducción al multiplicador también.
-            mult *= (1f - reduction);
+            // NO tocar `mult` ni `reduce` — la reducción ya está aplicada en Item.mana.
         }
 
         public override bool CanUseItem(Player player)
         {
-            // Reserva inagotable: lanzar con <20 maná es gratis.
-            if (Systems.NodeEffectSystem.HasNode(player, "mana-4") && player.statMana < 20)
+            // Reserva Inagotable (Notable): lanzar con <20 maná es gratis.
+            if (Systems.NodeEffectSystem.HasNode(player, "mana-notable") && player.statMana < 20)
                 return true;
             return player.statMana >= Item.mana;
         }

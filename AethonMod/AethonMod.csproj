@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="/tmp/tmodloader/tMLMod.targets" />
+
+  <PropertyGroup>
+    <AssemblyName>AethonMod</AssemblyName>
+    <RootNamespace>AethonMod</RootNamespace>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**/obj/**" />
+    <Compile Remove="**/bin/**" />
+  </ItemGroup>
+</Project>

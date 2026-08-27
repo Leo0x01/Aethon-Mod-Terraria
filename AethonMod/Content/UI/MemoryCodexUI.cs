@@ -22,6 +22,7 @@ namespace AethonMod.Content.UI
         public bool IsVisible = false;
         private int _scrollY = 0;
         private bool _mouseLeftPressed = false;
+        private int _lastScrollValue = 0;
         private float _time = 0f;
 
         // Estrellas de fondo (mismo sistema que el skill tree)
@@ -163,6 +164,9 @@ namespace AethonMod.Content.UI
                 if (hoverClose && Main.mouseLeft && !_mouseLeftPressed)
                 {
                     _mouseLeftPressed = true;
+                    // Consumir el click ANTES de cerrar para evitar input leak.
+                    Main.mouseLeft = false;
+                    Main.mouseRight = false;
                     Hide();
                     return;
                 }
@@ -253,7 +257,7 @@ namespace AethonMod.Content.UI
                                 Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
                                 // Particulas
                                 for (int p = 0; p < 16; p++)
-                                    Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
+                                    Dust.NewDustPerfect(Main.LocalPlayer.Center, Terraria.ID.DustID.GoldFlame,
                                         new(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
                                         100, new Color(245, 196, 81), 1.2f);
                             }
@@ -294,11 +298,13 @@ namespace AethonMod.Content.UI
                         new Rectangle(panelX + panelW - 22, scrollBarY, 8, scrollBarH),
                         new Color(179, 136, 255, 220));
 
-                    // Scroll con rueda
-                    int scroll = Main.mouseScroll;
-                    if (scroll != 0)
+                    // Scroll con rueda (usar PlayerInput.ScrollWheelValue para detectar el delta)
+                    int curScroll = Terraria.GameInput.PlayerInput.ScrollWheelValue;
+                    int scrollDelta = curScroll - _lastScrollValue;
+                    _lastScrollValue = curScroll;
+                    if (scrollDelta != 0)
                     {
-                        _scrollY -= scroll * 30;
+                        _scrollY -= System.Math.Sign(scrollDelta) * 30;
                         _scrollY = Math.Max(0, Math.Min(_scrollY, totalH - listH));
                     }
                 }
@@ -333,7 +339,6 @@ namespace AethonMod.Content.UI
                 // Bloquear input del juego
                 Main.mouseLeft = false;
                 Main.mouseRight = false;
-                Main.mouseScroll = 0;
             }
             catch (Exception ex)
             {
@@ -378,8 +383,8 @@ namespace AethonMod.Content.UI
                 float sy = s.Pos.Y * Main.screenHeight;
 
                 float twinkle = 0.6f + 0.4f * (float)Math.Sin(_time * s.Twinkle + s.Phase);
-                int alpha = (int)(255 * twinkle * (s.Layer == 2 ? 0.95f : s.Layer == 1 ? 0.7f : 0.45f));
-                alpha = MathHelper.Clamp(alpha, 0, 255);
+                int alpha = (int)(255f * twinkle * (s.Layer == 2 ? 0.95f : s.Layer == 1 ? 0.7f : 0.45f));
+                if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
                 Color c = new Color(s.Color.R, s.Color.G, s.Color.B, alpha);
 
                 if (s.Layer == 2 && s.Size > 2f)
