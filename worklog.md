@@ -1726,3 +1726,37 @@ Stage Summary:
 - Codex background is now the same cosmic texture as skill tree
 - Minion only attacks hostile NPCs (not critters, not town NPCs, not friendly)
 - Minion appears in effects zone as a proper minion
+
+---
+Task ID: FIX-DAMAGE-INTERACT-HYBRID-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix damage scaling too fast, fix skill tree interaction, add hybrid Magic+Summon damage, improve visuals.
+
+Work Log:
+- Fix damage scaling: changed from flat (damage += ShardLevel * 2.6) to percentage (damage *= 1 + ShardLevel * 0.02)
+  * LuminaStarbow: +2% per level (lvl 100 = +200% = 3x base damage, not +240 flat)
+  * SolbrandEdge: +2.5% per level
+  * GrimoireEternal: +2.2% per level
+- Fix skill tree interaction: moved click processing from DrawSelf to HandleInput (Update)
+  * The click was being consumed by DraggablePanel/UIScrollBlockPlayer before DrawSelf could process it
+  * Now clicks are processed in HandleInput which runs during Update (before input is consumed)
+  * DrawSelf only draws (no input processing)
+  * _hoveredNode is calculated in HandleInput
+- GrimoireEternal: hybrid Magic + Summon damage
+  * ModifyWeaponDamage now also applies player.GetDamage(DamageClass.Summon) += ShardLevel * 0.01f
+  * The grimorio benefits both spells and minions (as requested for Magic branch)
+- Improved all projectile textures with radial glow:
+  * CosmicOrbMinion: 28x28, white core + gold mid + violet glow
+  * CosmicOrbBolt: 20x20, white core + violet mid
+  * ArcaneBolt: 16x16, improved violet glow
+  * StarlightArrow: 14x14, gold glow
+  * DawnSlash: 18x18, orange glow
+- Build: 0 Errors, 0 Warnings
+- .tmod: 204KB
+- Pushed to GitHub: commit a28245b
+
+Stage Summary:
+- Damage no longer scales exponentially (percentage-based, more balanced)
+- Skill tree nodes are now clickable (click processing moved to Update)
+- GrimoireEternal benefits both Magic and Summon damage (hybrid)
+- All projectile visuals improved with radial glow
