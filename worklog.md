@@ -1699,3 +1699,30 @@ Work Log:
 Stage Summary:
 - Branch selection screen now shows the 3 floating cards with a dark cosmic background (stars, radials) instead of a solid white screen.
 - The player can see the game world dimmed behind the cards.
+
+---
+Task ID: FIX-CODEX-MINION-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix codex white background, change codex background to match skill tree, minion appears in effects zone, minion doesn't attack non-hostile NPCs.
+
+Work Log:
+- Fix Codex white background: applied same fix as BranchChoiceUI — wrapped UserInterface.Draw() with SpriteBatch.Begin/End using Main.UIScaleMatrix. This ensures the SpriteBatch is in UI mode before drawing the UserInterface, preventing the white background bug.
+- Same fix applied to SkillTreeUI (for consistency).
+- Changed Codex background to use the same texture as skill tree (SkillTree_Background.png) as requested.
+- CosmicOrbMinion: now only attacks hostile NPCs
+  * Filters: npc.friendly, npc.townNPC, npc.dontTakeDamage
+  * Critters (aiStyle 7) excluded
+  * Capturable NPCs (catchItem > 0) excluded
+  * Immortal NPCs excluded
+  * Uses npc.CanBeChasedBy() as final verification
+- CosmicOrbBolt: same hostile-only filters for homing
+- Minion appears in effects zone (buff slot) via Main.projPet and MinionSacrificable
+- Build: 0 Errors, 0 Warnings
+- .tmod: 204KB
+- Pushed to GitHub: commit d5257ae
+
+Stage Summary:
+- Codex no longer has white background (uses SpriteBatch in UI mode)
+- Codex background is now the same cosmic texture as skill tree
+- Minion only attacks hostile NPCs (not critters, not town NPCs, not friendly)
+- Minion appears in effects zone as a proper minion
