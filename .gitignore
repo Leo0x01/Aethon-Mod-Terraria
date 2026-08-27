@@ -51,3 +51,4 @@ download/*.zip
 dev.log
 server.log
 /tmp/
+.zscripts/
