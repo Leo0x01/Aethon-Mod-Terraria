@@ -46,7 +46,8 @@ namespace AethonMod.Content.Weapons
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Melee)
             {
-                damage += sp.ShardLevel * 3.1f;
+                // Escalado porcentual moderado: +2.5% por nivel
+                damage *= 1f + sp.ShardLevel * 0.025f;
             }
             float crit = 0;
             Systems.NodeEffectSystem.ApplyMeleeEffects(player, ref damage, ref crit);

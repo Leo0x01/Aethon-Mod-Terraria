@@ -177,6 +177,34 @@ namespace AethonMod.Content.UI
                 Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
             }
 
+            // === PROCESAR CLICK EN NODOS AQUI (en Update, no en Draw) ===
+            // Encontrar nodo hovered
+            _hoveredNode = FindHoveredNode(viewRect);
+
+            // Click izquierdo para asignar/quitar
+            if (Main.mouseLeft && Main.mouseLeftRelease && _hoveredNode != null && !_isPanning && mouseInView)
+            {
+                var node = _hoveredNode;
+                if (sp.AllocatedNodes.Contains(node.Id))
+                {
+                    sp.AllocatedNodes.Remove(node.Id);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+                }
+                else if (CanAllocate(node, sp))
+                {
+                    int availPts = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
+                    if (availPts < node.Cost)
+                    {
+                        Main.NewText($"Necesitas {node.Cost} pts, tienes {availPts}.", new Color(255, 120, 120));
+                    }
+                    else
+                    {
+                        sp.AllocatedNodes.Add(node.Id);
+                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+                    }
+                }
+            }
+
             // Bloquear input del juego dentro de la vista
             if (mouseInView)
             {
@@ -278,7 +306,6 @@ namespace AethonMod.Content.UI
             }
 
             // === NODOS (pequeños, circulares, con glow) ===
-            _hoveredNode = FindHoveredNode(viewRect);
             foreach (var node in _allNodes)
             {
                 Vector2 pos = NodeToScreen(node, viewRect);
@@ -297,30 +324,6 @@ namespace AethonMod.Content.UI
             Utils.DrawBorderString(sb, infoText,
                 new Vector2(viewRect.X + viewRect.Width / 2f, viewRect.Bottom - 16),
                 new Color(140, 130, 170), 0.7f, 0.5f, 0.5f);
-
-            // === CLICK IZQUIERDO PARA ASIGNAR/QUITAR ===
-            if (Main.mouseLeft && Main.mouseLeftRelease && _hoveredNode != null && !_isPanning)
-            {
-                var node = _hoveredNode;
-                if (sp.AllocatedNodes.Contains(node.Id))
-                {
-                    sp.AllocatedNodes.Remove(node.Id);
-                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-                }
-                else if (CanAllocate(node, sp))
-                {
-                    int availPts = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
-                    if (availPts < node.Cost)
-                    {
-                        Main.NewText($"Necesitas {node.Cost} pts, tienes {availPts}.", new Color(255, 120, 120));
-                    }
-                    else
-                    {
-                        sp.AllocatedNodes.Add(node.Id);
-                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-                    }
-                }
-            }
 
             // === TOOLTIP (solo si hay nodo hovered) ===
             if (_hoveredNode != null)

@@ -43,8 +43,9 @@ namespace AethonMod.Content.Weapons
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Distance)
             {
-                // Escalado: daño = nivel × 2.4 (aplicado como multiplicador sobre el daño base).
-                damage += sp.ShardLevel * 2.4f;
+                // Escalado porcentual moderado: +2% por nivel (no +2.4 flat)
+                // En nivel 100 = +200% daño (3x del daño base), no +240 flat
+                damage *= 1f + sp.ShardLevel * 0.02f;
             }
             // Aplicar efectos de nodos del árbol de Distancia.
             float crit = 0;

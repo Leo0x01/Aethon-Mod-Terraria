@@ -52,11 +52,17 @@ namespace AethonMod.Content.Weapons
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
-                damage += sp.ShardLevel * 2.6f;
+                // Escalado porcentual moderado: +2.2% por nivel
+                damage *= 1f + sp.ShardLevel * 0.022f;
             }
             float crit = 0;
             Systems.NodeEffectSystem.ApplyMagicEffects(player, ref damage, ref crit);
             player.GetCritChance(DamageClass.Magic) += crit;
+            // También aplica bonus de daño de invocación (híbrido Magic + Summon)
+            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
+            {
+                player.GetDamage(DamageClass.Summon) += sp.ShardLevel * 0.01f; // +1% summon damage por nivel
+            }
         }
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
