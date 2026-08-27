@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -13,9 +13,8 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// Vista del arbol de habilidades — UIElement que dibuja el fondo de estrellas,
-    /// los nodos y las conexiones. Maneja pan/zoom y click en nodos.
-    /// Se renderiza DENTRO del DraggablePanel (no a pantalla completa).
+    /// Vista del arbol de habilidades — nodos pequeños e interactivos,
+    /// fondo cosmico artístico (textura PNG), layout limpio sin texto superpuesto.
     /// </summary>
     public class SkillTreeView : UIElement
     {
@@ -32,22 +31,13 @@ namespace AethonMod.Content.UI
         private int _lastScrollValue = 0;
         private float _time = 0f;
 
-        // Estrellas de fondo
-        private struct Star
-        {
-            public Vector2 Pos;
-            public float Size;
-            public float Twinkle;
-            public float Phase;
-            public Color Color;
-        }
-        private Star[]? _stars;
+        // Textura de fondo cosmico (PNG cargado)
+        private Texture2D? _bgTexture;
 
         private PoESkillNode? _hoveredNode;
 
         public SkillTreeView()
         {
-            // Margin = despues de la barra de titulo (40px) + padding
             MarginTop = 44;
             MarginBottom = 8;
             MarginLeft = 8;
@@ -86,28 +76,21 @@ namespace AethonMod.Content.UI
             }
             _rangeX = Math.Max(1, _maxX - _minX + 1);
             _rangeY = Math.Max(1, _maxY - _minY + 1);
-            _zoom = 1f;
+            // Zoom inicial ajustado para que todo quepa
+            _zoom = 0.7f;
             _panOffset = Vector2.Zero;
-            InitStars();
         }
 
-        private void InitStars()
+        private void LoadBgTexture()
         {
-            if (_stars != null) return;
-            var rand = new Random(42);
-            _stars = new Star[80];
-            for (int i = 0; i < _stars.Length; i++)
+            if (_bgTexture != null) return;
+            try
             {
-                _stars[i] = new Star
-                {
-                    Pos = new Vector2((float)rand.NextDouble(), (float)rand.NextDouble()),
-                    Size = 1f + (float)rand.NextDouble() * 2f,
-                    Twinkle = 0.5f + (float)rand.NextDouble() * 2f,
-                    Phase = (float)rand.NextDouble() * MathF.PI * 2f,
-                    Color = i % 3 == 0 ? new Color(245, 196, 81)
-                          : i % 3 == 1 ? new Color(179, 136, 255)
-                          : new Color(200, 220, 255),
-                };
+                _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/SkillTree_Background", AssetRequestMode.ImmediateLoad).Value;
+            }
+            catch
+            {
+                _bgTexture = null;
             }
         }
 
@@ -115,6 +98,7 @@ namespace AethonMod.Content.UI
         {
             base.Update(gameTime);
             _time += 0.016f;
+            LoadBgTexture();
             HandleInput();
         }
 
@@ -123,11 +107,11 @@ namespace AethonMod.Content.UI
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null) return;
 
-            // Pan con click derecho (dentro de la vista)
             var dims = GetDimensions();
             Rectangle viewRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
             bool mouseInView = viewRect.Contains(Main.mouseX, Main.mouseY);
 
+            // Pan con click derecho
             if (Main.mouseRight && mouseInView)
             {
                 Vector2 curMouse = new(Main.mouseX, Main.mouseY);
@@ -151,7 +135,7 @@ namespace AethonMod.Content.UI
             if (scrollDelta != 0 && mouseInView)
             {
                 float zoomDelta = scrollDelta > 0 ? 0.1f : -0.1f;
-                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.4f, 2.5f);
+                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.3f, 2.0f);
             }
         }
 
@@ -160,7 +144,7 @@ namespace AethonMod.Content.UI
             float cx = viewRect.X + viewRect.Width / 2f;
             float cy = viewRect.Y + viewRect.Height / 2f;
             if (_rangeX <= 0 || _rangeY <= 0) return new Vector2(cx, cy);
-            float scale = Math.Min(viewRect.Width / _rangeX, viewRect.Height / _rangeY) * 0.4f * _zoom;
+            float scale = Math.Min(viewRect.Width / _rangeX, viewRect.Height / _rangeY) * 0.35f * _zoom;
             return new Vector2(
                 (node.X - _minX) * scale - (_rangeX * scale / 2f) + cx + _panOffset.X,
                 (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y);
@@ -175,10 +159,25 @@ namespace AethonMod.Content.UI
             {
                 Vector2 pos = NodeToScreen(node, viewRect);
                 float dist = Vector2.Distance(pos, mouse);
-                float radius = node.Radius * 2.2f * _zoom + 8f;
-                if (dist < radius && dist < closestDist) { closestDist = dist; closest = node; }
+                // Radio de click pequeño (nodos son pequeños)
+                float clickRadius = GetNodeDrawRadius(node) + 4f;
+                if (dist < clickRadius && dist < closestDist) { closestDist = dist; closest = node; }
             }
             return closest;
+        }
+
+        /// <summary>Radio de dibujo del nodo: PEQUEÑO (no mas cuadros gigantes).</summary>
+        private float GetNodeDrawRadius(PoESkillNode node)
+        {
+            return node.Type switch
+            {
+                NodeType.Small => 5f,        // pequeño
+                NodeType.Notable => 8f,       // mediano
+                NodeType.Keystone => 12f,     // grande
+                NodeType.Ascendancy => 10f,   // mediano-grande
+                NodeType.Cluster => 7f,
+                _ => 5f,
+            };
         }
 
         private bool CanAllocate(PoESkillNode node, ShardPlayer sp)
@@ -199,31 +198,22 @@ namespace AethonMod.Content.UI
             var dims = GetDimensions();
             Rectangle viewRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
 
-            // Fondo oscuro de la vista
-            sb.Draw(TextureAssets.MagicPixel.Value, viewRect, new Color(8, 6, 16, 245));
-
-            // Estrellas de fondo
-            if (_stars != null)
+            // === FONDO ARTÍSTICO (textura PNG cósmica) ===
+            if (_bgTexture != null)
             {
-                for (int i = 0; i < _stars.Length; i++)
-                {
-                    var s = _stars[i];
-                    float sx = viewRect.X + s.Pos.X * viewRect.Width + _panOffset.X * 0.2f;
-                    float sy = viewRect.Y + s.Pos.Y * viewRect.Height + _panOffset.Y * 0.2f;
-                    if (sx < viewRect.X || sx > viewRect.Right || sy < viewRect.Y || sy > viewRect.Bottom) continue;
-
-                    float twinkle = 0.5f + 0.5f * (float)Math.Sin(_time * s.Twinkle + s.Phase);
-                    int alpha = (int)(180 * twinkle * 0.6f);
-                    if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
-                    Color c = new Color(s.Color.R, s.Color.G, s.Color.B, alpha);
-                    sb.Draw(TextureAssets.MagicPixel.Value,
-                        new Rectangle((int)sx, (int)sy, (int)s.Size, (int)s.Size), c);
-                }
+                sb.Draw(_bgTexture, viewRect, new Color(255, 255, 255, 200));
+            }
+            else
+            {
+                // Fallback: fondo oscuro si la textura no carga
+                sb.Draw(TextureAssets.MagicPixel.Value, viewRect, new Color(8, 6, 16, 245));
             }
 
-            // Nebulosa central pulsante
-            float pulse = 0.85f + (float)Math.Sin(_time * 0.5) * 0.15f;
-            DrawRadial(sb, viewRect, 0.5f, 0.5f, 0.3f * pulse, new Color(80, 40, 160, 14));
+            // Overlay oscuro semi-transparente para legibilidad
+            sb.Draw(TextureAssets.MagicPixel.Value, viewRect, new Color(5, 3, 15, 100));
+
+            // Estrellas animadas (pocas, sutiles)
+            DrawAnimatedStars(sb, viewRect);
 
             if (_allNodes.Count == 0)
             {
@@ -233,7 +223,7 @@ namespace AethonMod.Content.UI
                 return;
             }
 
-            // === CONEXIONES ===
+            // === CONEXIONES (líneas finas) ===
             foreach (var (fromIdx, toIdx) in _allConnections)
             {
                 if (fromIdx < 0 || fromIdx >= _allNodes.Count || toIdx < 0 || toIdx >= _allNodes.Count) continue;
@@ -241,12 +231,12 @@ namespace AethonMod.Content.UI
                 Vector2 to = NodeToScreen(_allNodes[toIdx], viewRect);
                 bool bothActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) && sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
                 bool oneActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) || sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
-                Color lc = bothActive ? new Color(245, 196, 81, 220) : oneActive ? new Color(180, 140, 80, 140) : new Color(60, 50, 90, 80);
-                float th = bothActive ? 3f : oneActive ? 2f : 1.5f;
+                Color lc = bothActive ? new Color(245, 196, 81, 200) : oneActive ? new Color(160, 120, 70, 120) : new Color(50, 40, 70, 60);
+                float th = bothActive ? 2f : oneActive ? 1.5f : 1f;
                 DrawLine(sb, from, to, lc, th);
             }
 
-            // === NODOS ===
+            // === NODOS (pequeños, circulares, con glow) ===
             _hoveredNode = FindHoveredNode(viewRect);
             foreach (var node in _allNodes)
             {
@@ -257,6 +247,16 @@ namespace AethonMod.Content.UI
                 DrawNode(sb, pos, node, allocated, canAlloc, isHover);
             }
 
+            // === INFO BAR INFERIOR ===
+            int avail = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
+            string infoText = $"Puntos: {avail}  |  Asignados: {sp.AllocatedNodes.Count}/{sp.CumulativeSkillPoints()}  |  Click izq: asignar  |  Click der: mover  |  Rueda: zoom";
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle(viewRect.X, viewRect.Bottom - 22, viewRect.Width, 22),
+                new Color(8, 6, 16, 200));
+            Utils.DrawBorderString(sb, infoText,
+                new Vector2(viewRect.X + viewRect.Width / 2f, viewRect.Bottom - 16),
+                new Color(140, 130, 170), 0.7f, 0.5f, 0.5f);
+
             // === CLICK IZQUIERDO PARA ASIGNAR/QUITAR ===
             if (Main.mouseLeft && Main.mouseLeftRelease && _hoveredNode != null && !_isPanning)
             {
@@ -265,33 +265,23 @@ namespace AethonMod.Content.UI
                 {
                     sp.AllocatedNodes.Remove(node.Id);
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-                    Vector2 nodePos = NodeToScreen(node, viewRect);
-                    for (int i = 0; i < 8; i++)
-                        Dust.NewDustPerfect(nodePos, Terraria.ID.DustID.PurpleTorch,
-                            new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
-                            100, new Color(179, 136, 255), 1f);
                 }
                 else if (CanAllocate(node, sp))
                 {
-                    int avail = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
-                    if (avail < node.Cost)
+                    int availPts = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
+                    if (availPts < node.Cost)
                     {
-                        Main.NewText($"Necesitas {node.Cost} pts, tienes {avail}.", new Color(255, 120, 120));
+                        Main.NewText($"Necesitas {node.Cost} pts, tienes {availPts}.", new Color(255, 120, 120));
                     }
                     else
                     {
                         sp.AllocatedNodes.Add(node.Id);
                         Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-                        Vector2 nodePos = NodeToScreen(node, viewRect);
-                        for (int i = 0; i < 16; i++)
-                            Dust.NewDustPerfect(nodePos, Terraria.ID.DustID.GoldFlame,
-                                new Vector2(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
-                                100, new Color(245, 196, 81), 1.2f);
                     }
                 }
             }
 
-            // === TOOLTIP ===
+            // === TOOLTIP (solo si hay nodo hovered) ===
             if (_hoveredNode != null)
             {
                 DrawTooltip(sb, sp, viewRect);
@@ -305,31 +295,31 @@ namespace AethonMod.Content.UI
             }
         }
 
+        /// <summary>Dibuja un nodo PEQUEÑO circular con glow (no mas cuadros gigantes).</summary>
         private void DrawNode(SpriteBatch sb, Vector2 pos, PoESkillNode node, bool allocated, bool canAlloc, bool hovered)
         {
-            int radius = (int)(node.Radius * 2.0f * _zoom);
-            radius = Math.Max(6, radius);
+            float radius = GetNodeDrawRadius(node);
 
+            // Color por tipo
             Color baseColor = node.Type switch
             {
-                NodeType.Small => new Color(90, 90, 120),
-                NodeType.Notable => new Color(60, 120, 210),
+                NodeType.Small => new Color(100, 90, 130),
+                NodeType.Notable => new Color(70, 130, 200),
                 NodeType.Keystone => new Color(245, 196, 81),
                 NodeType.Ascendancy => new Color(150, 60, 230),
-                NodeType.Cluster => new Color(120, 80, 180),
-                _ => Color.White,
+                _ => new Color(100, 90, 130),
             };
 
-            if (!allocated && !canAlloc) baseColor *= 0.18f;
+            if (!allocated && !canAlloc) baseColor *= 0.25f;
 
             // Glow pulsante para keystones/ascendancy
             if (node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
             {
                 float pulse = 0.7f + 0.3f * (float)Math.Sin(_time * 2f + pos.X * 0.01f);
-                for (int i = 4; i > 0; i--)
+                for (int i = 3; i > 0; i--)
                 {
-                    int gr = radius + i * 6;
-                    int a = (int)((allocated ? 10 : 5) * pulse);
+                    int gr = (int)(radius + i * 4);
+                    int a = (int)((allocated ? 8 : 4) * pulse);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
                         new Color(baseColor.R, baseColor.G, baseColor.B, a));
@@ -338,59 +328,94 @@ namespace AethonMod.Content.UI
 
             // Glow dorado si asignado
             if (allocated)
-                for (int i = 3; i > 0; i--)
+                for (int i = 2; i > 0; i--)
                 {
-                    int gr = radius + i * 5;
+                    int gr = (int)(radius + i * 3);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(245, 196, 81, 10 - i * 2));
+                        new Color(245, 196, 81, 8 - i * 2));
                 }
 
             // Glow blanco al hover
             if (hovered && (canAlloc || allocated))
                 for (int i = 2; i > 0; i--)
                 {
-                    int gr = radius + i * 4;
+                    int gr = (int)(radius + i * 3);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(255, 255, 255, 8 - i * 2));
+                        new Color(255, 255, 255, 6 - i * 2));
                 }
 
-            // Relleno
-            Color fill = allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.12f);
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, radius * 2), fill);
+            // Relleno circular (dibujar como circulo, no cuadro)
+            DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
 
             // Borde
-            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 30, baseColor.G + 30, baseColor.B + 30);
-            int b = Math.Max(2, radius / 8);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, radius * 2, b), border);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y + radius - b, radius * 2, b), border);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X - radius, (int)pos.Y - radius, b, radius * 2), border);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)pos.X + radius - b, (int)pos.Y - radius, b, radius * 2), border);
+            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
+            DrawCircleOutline(sb, pos, radius, border, 1.5f);
 
             // Punto interior para small nodes
-            if (node.Type == NodeType.Small)
+            if (node.Type == NodeType.Small && allocated)
             {
-                int dr = radius / 3;
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle((int)pos.X - dr, (int)pos.Y - dr, dr * 2, dr * 2),
-                    allocated ? new Color(255, 245, 200) : new Color(baseColor.R + 50, baseColor.G + 50, baseColor.B + 50));
+                DrawCircle(sb, pos, radius * 0.4f, new Color(255, 245, 200));
             }
 
-            // Nombre del notable/keystone/ascendancy
+            // Nombre SOLO para notable/keystone/ascendancy (no para small)
+            // Y solo si NO se solapa con otros (mostrar solo si hovered o allocated)
             if (node.Type == NodeType.Notable || node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
             {
-                string shortName = node.Name.Length > 16 ? node.Name.Substring(0, 14) + "…" : node.Name;
-                Utils.DrawBorderString(sb, shortName, new Vector2(pos.X, pos.Y - radius - 10),
-                    allocated ? new Color(255, 240, 190) : new Color(220, 200, 240), 0.65f * _zoom, 0.5f, 1f);
+                bool showLabel = hovered || allocated;
+                if (showLabel)
+                {
+                    string shortName = node.Name.Length > 14 ? node.Name.Substring(0, 12) + "…" : node.Name;
+                    // Fondo del label
+                    var textSize = FontAssets.MouseText.Value.MeasureString(shortName);
+                    int labelW = (int)textSize.X + 8;
+                    int labelH = 16;
+                    int lx = (int)(pos.X - labelW / 2f);
+                    int ly = (int)(pos.Y - radius - 18);
+                    sb.Draw(TextureAssets.MagicPixel.Value,
+                        new Rectangle(lx, ly, labelW, labelH),
+                        new Color(10, 8, 20, 220));
+                    Color labelBorder = allocated ? new Color(245, 196, 81, 150) : new Color(179, 136, 255, 150);
+                    sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(lx, ly, labelW, 1), labelBorder);
+                    sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(lx, ly + labelH - 1, labelW, 1), labelBorder);
+                    Utils.DrawBorderString(sb, shortName,
+                        new Vector2(pos.X, ly + 4),
+                        allocated ? new Color(255, 240, 190) : new Color(220, 200, 240), 0.6f, 0.5f, 0f);
+                }
             }
+        }
 
-            // Costo debajo
-            if (node.Cost > 0)
-                Utils.DrawBorderString(sb, node.Cost.ToString(),
-                    new Vector2(pos.X, pos.Y + radius + 5),
-                    allocated ? new Color(255, 225, 140) : new Color(120, 110, 140), 0.6f, 0.5f, 0f);
+        /// <summary>Dibuja un círculo relleno (nodos pequeños, no cuadros).</summary>
+        private void DrawCircle(SpriteBatch sb, Vector2 center, float radius, Color color)
+        {
+            int r = (int)radius;
+            if (r < 1) return;
+            // Dibujar como puntos en un patron circular
+            for (int dy = -r; dy <= r; dy++)
+            {
+                int dx = (int)Math.Sqrt(r * r - dy * dy);
+                int w = dx * 2 + 1;
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)center.X - dx, (int)center.Y + dy, w, 1), color);
+            }
+        }
+
+        /// <summary>Dibuja el borde de un círculo.</summary>
+        private void DrawCircleOutline(SpriteBatch sb, Vector2 center, float radius, Color color, float thickness)
+        {
+            int r = (int)radius;
+            if (r < 1) return;
+            // Dibujar circulo como puntos en el perimetro
+            int steps = Math.Max(8, r * 4);
+            for (int i = 0; i < steps; i++)
+            {
+                float angle = (float)(i * Math.PI * 2 / steps);
+                float px = center.X + (float)Math.Cos(angle) * radius;
+                float py = center.Y + (float)Math.Sin(angle) * radius;
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)px, (int)py, (int)thickness, (int)thickness), color);
+            }
         }
 
         private void DrawTooltip(SpriteBatch sb, ShardPlayer sp, Rectangle viewRect)
@@ -405,26 +430,23 @@ namespace AethonMod.Content.UI
                 NodeType.Notable => "[Notable]",
                 NodeType.Keystone => "[KEYSTONE]",
                 NodeType.Ascendancy => "[Ascendencia]",
-                NodeType.Cluster => "[Cluster]",
                 _ => "",
             };
 
             string[] lines = {
                 $"{typeStr} {node.Name}",
                 node.Effect ?? "",
-                $"Rama: {node.Branch}",
                 $"Coste: {node.Cost} pts",
                 alloc ? "(Asignado — click para quitar)" : (CanAllocate(node, sp) ? "(Click para asignar)" : "(Requiere nodo adyacente)"),
             };
 
-            // Medir
             float maxW = 0;
             foreach (var line in lines)
             {
                 var size = FontAssets.MouseText.Value.MeasureString(line);
                 if (size.X > maxW) maxW = size.X;
             }
-            float lineH = 18f;
+            float lineH = 16f;
             int padX = 10, padY = 8;
             int tw = (int)maxW + padX * 2;
             int th = (int)(lines.Length * lineH) + padY * 2;
@@ -435,9 +457,7 @@ namespace AethonMod.Content.UI
             if (ty + th > Main.screenHeight) ty = Main.screenHeight - th - 4;
             if (ty < 0) ty = 4;
 
-            // Fondo
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, tw, th), new Color(15, 10, 30, 245));
-            // Borde
             Color borderC = node.Type == NodeType.Keystone ? new Color(245, 196, 81) : node.Type == NodeType.Ascendancy ? new Color(179, 136, 255) : new Color(120, 100, 160);
             int b = 2;
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, tw, b), borderC);
@@ -452,6 +472,27 @@ namespace AethonMod.Content.UI
             }
         }
 
+        private void DrawAnimatedStars(SpriteBatch sb, Rectangle rect)
+        {
+            // Estrellas animadas sutiles (pocas para no saturar)
+            for (int i = 0; i < 30; i++)
+            {
+                int seed = i * 73856093;
+                float bx = (seed % 1000) / 1000f * rect.Width;
+                float by = ((seed * 19349663) % 1000) / 1000f * rect.Height;
+                float sx = rect.X + bx;
+                float sy = rect.Y + by;
+                float twinkle = 0.4f + 0.6f * (float)Math.Sin(_time * 1.5f + i * 0.3f);
+                int alpha = (int)(100 * twinkle);
+                if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
+                Color c = i % 3 == 0 ? new Color(245, 196, 81, alpha)
+                        : i % 3 == 1 ? new Color(179, 136, 255, alpha)
+                        : new Color(200, 220, 255, alpha);
+                sb.Draw(TextureAssets.MagicPixel.Value,
+                    new Rectangle((int)sx, (int)sy, 1, 1), c);
+            }
+        }
+
         private void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color, float thickness)
         {
             Vector2 edge = end - start;
@@ -462,37 +503,17 @@ namespace AethonMod.Content.UI
                 new Rectangle((int)start.X, (int)start.Y, (int)length, (int)thickness),
                 null, color, angle, new Vector2(0, thickness / 2f), SpriteEffects.None, 0);
         }
-
-        private void DrawRadial(SpriteBatch sb, Rectangle rect, float xPct, float yPct, float rPct, Color color)
-        {
-            float cx = rect.X + rect.Width * xPct;
-            float cy = rect.Y + rect.Height * yPct;
-            float r = rect.Width * rPct;
-            if (r <= 0) return;
-            for (int i = (int)r; i > 0; i -= 12)
-            {
-                int alpha = (int)(color.A * (1f - (float)i / r) * 0.3f);
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle((int)(cx - i), (int)(cy - i), i * 2, i * 2),
-                    new Color(color.R, color.G, color.B, alpha));
-            }
-        }
     }
 
     /// <summary>
     /// Estado del arbol de habilidades — UIState que contiene un DraggablePanel
-    /// con el SkillTreeView dentro. Se gestiona via UserInterface para que el
-    /// renderizado funcione correctamente (no mas pantalla blanca).
+    /// con el SkillTreeView dentro.
     /// </summary>
     public class SkillTreeUIState : UIState
     {
         public bool IsVisible = false;
         private DraggablePanel? _panel;
         private SkillTreeView? _treeView;
-
-        public SkillTreeUIState()
-        {
-        }
 
         public void Show()
         {
@@ -507,7 +528,6 @@ namespace AethonMod.Content.UI
             _panel = new DraggablePanel(700, 520, "★ ARBOL DE HABILIDADES ★");
             _panel.OnCloseClick += (evt, el) => Hide();
 
-            // Vista del arbol dentro del panel
             _treeView = new SkillTreeView();
             _treeView.Width.Set(0, 1f);
             _treeView.Height.Set(0, 1f);
@@ -517,10 +537,6 @@ namespace AethonMod.Content.UI
             _treeView.SetTree(tree);
 
             _panel.Append(_treeView);
-
-            // Info inferior del panel (nivel, puntos)
-            _ = sp; // ya capturado
-
             Append(_panel);
             IsVisible = true;
             Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
@@ -534,19 +550,6 @@ namespace AethonMod.Content.UI
             _panel = null;
             _treeView = null;
             Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            if (IsVisible)
-            {
-                var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-                if (sp != null && (!sp.IsImprinted || !Main.playerInventory))
-                {
-                    // Mantener visible aunque se abra el inventario
-                }
-            }
         }
     }
 }
