@@ -117,6 +117,14 @@ namespace AethonMod.Content.Systems
             if (_codexInterface != null && CodexUI?.IsVisible == true)
                 _codexInterface.Update(Main._drawInterfaceGameTime);
 
+            // === BLOQUEAR SCROLL DEL INVENTARIO MIENTRAS UI ESTA ABIERTA ===
+            // Resetear el valor del scroll para que el juego vanilla no lo procese
+            // (evita que el hotbar se mueva cuando hacemos zoom en el arbol)
+            if ((SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false))
+            {
+                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            }
+
             // Limpiar el estado de la UserInterface cuando la UI se oculta
             if (SkillTreeUI?.IsVisible != true) _skillTreeInterface?.SetState(null);
             if (CodexUI?.IsVisible != true) _codexInterface?.SetState(null);

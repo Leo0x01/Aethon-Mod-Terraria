@@ -41,7 +41,7 @@ namespace AethonMod.Content.Weapons
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<Projectiles.ArcaneBolt>();
+            Item.shoot = ModContent.ProjectileType<global::AethonMod.Content.Weapons.Projectiles.ArcaneBolt>();
             Item.shootSpeed = 12f;
             Item.mana = 0; // Base: NO consume mana.
             Item.noMelee = true;
@@ -125,8 +125,8 @@ namespace AethonMod.Content.Weapons
 
                     if (currentMinions < maxMinions)
                     {
-                        // Invocar un minion cosmico (FlinxMinion como base)
-                        int minionType = ProjectileID.FlinxMinion;
+                        // Invocar el CosmicOrbMinion (esfera de luz cosmica)
+                        int minionType = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>();
                         Projectile.NewProjectile(source, position, Vector2.Zero, minionType, damage, knockback, player.whoAmI);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                         return false; // no disparar el bolt

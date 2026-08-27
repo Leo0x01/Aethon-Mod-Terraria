@@ -34,6 +34,12 @@ namespace AethonMod.Content.UI
         // Textura de fondo cosmico (PNG cargado)
         private Texture2D? _bgTexture;
 
+        // Texturas de nodos circulares (PNG)
+        private Texture2D? _nodeSmallTex;
+        private Texture2D? _nodeNotableTex;
+        private Texture2D? _nodeKeystoneTex;
+        private Texture2D? _nodeAscendancyTex;
+
         private PoESkillNode? _hoveredNode;
 
         public SkillTreeView()
@@ -92,6 +98,36 @@ namespace AethonMod.Content.UI
             {
                 _bgTexture = null;
             }
+        }
+
+        private void LoadNodeTextures()
+        {
+            if (_nodeSmallTex != null) return;
+            try
+            {
+                _nodeSmallTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Small", AssetRequestMode.ImmediateLoad).Value;
+                _nodeNotableTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Notable", AssetRequestMode.ImmediateLoad).Value;
+                _nodeKeystoneTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Keystone", AssetRequestMode.ImmediateLoad).Value;
+                _nodeAscendancyTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Ascendancy", AssetRequestMode.ImmediateLoad).Value;
+            }
+            catch
+            {
+                _nodeSmallTex = null;
+            }
+        }
+
+        private Texture2D? GetNodeTexture(NodeType type)
+        {
+            LoadNodeTextures();
+            return type switch
+            {
+                NodeType.Small => _nodeSmallTex,
+                NodeType.Notable => _nodeNotableTex,
+                NodeType.Keystone => _nodeKeystoneTex,
+                NodeType.Ascendancy => _nodeAscendancyTex,
+                NodeType.Cluster => _nodeNotableTex,
+                _ => _nodeSmallTex,
+            };
         }
 
         public override void Update(GameTime gameTime)
@@ -356,17 +392,25 @@ namespace AethonMod.Content.UI
                         new Color(255, 255, 255, 6 - i * 2));
                 }
 
-            // Relleno circular (dibujar como circulo, no cuadro)
-            DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
-
-            // Borde
-            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
-            DrawCircleOutline(sb, pos, radius, border, 1.5f);
-
-            // Punto interior para small nodes
-            if (node.Type == NodeType.Small && allocated)
+            // === NODO CIRCULAR (usando textura PNG, no cuadrados) ===
+            Texture2D? nodeTex = GetNodeTexture(node.Type);
+            if (nodeTex != null)
             {
-                DrawCircle(sb, pos, radius * 0.4f, new Color(255, 245, 200));
+                // Color de tintado segun estado
+                Color tintColor = allocated ? new Color(255, 225, 140)
+                                : canAlloc ? baseColor
+                                : baseColor * 0.2f;
+                if (!allocated && !canAlloc) tintColor *= 0.3f;
+
+                // Escalar la textura al tamaño del nodo
+                float texScale = (radius * 2f) / nodeTex.Width;
+                Vector2 texOrigin = new Vector2(nodeTex.Width / 2f, nodeTex.Height / 2f);
+                sb.Draw(nodeTex, pos, null, tintColor, 0f, texOrigin, texScale, SpriteEffects.None, 0f);
+            }
+            else
+            {
+                // Fallback: DrawCircle si la textura no carga
+                DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
             }
 
             // Nombre SOLO para notable/keystone/ascendancy (no para small)
