@@ -1557,3 +1557,54 @@ Stage Summary:
 - Both UIs have artistic cosmic background textures (PNG)
 - Label overlap fixed (only shown on hover/allocated)
 - Textures packaged in .tmod as .rawimg
+
+---
+Task ID: UI-BLOCK-UNLOCK-MINION-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix broken UI, block game interaction, unlock codex on magic weapon pickup, minion with right-click, XP bar on weapons.
+
+Work Log:
+- User reported: skill tree still has weird colored squares, zoom affects inventory, codex missing magic weapons (only 30), X button broken, no XP bar on weapon.
+- Rewrote DraggablePanel.cs:
+  * Removed UIText for close button (was causing the double-X rendering bug)
+  * Close button (X) now drawn with lines (DrawX method) — clean single X
+  * Added game interaction blocking: consumes Main.mouseLeft, Main.mouseRight, and resets ScrollWheelValue when panel is open/being dragged
+- Improved SkillTreeView HandleInput:
+  * Zoom range widened: 0.4 to 3.0 (was 0.3 to 2.0)
+  * Zoom step increased: 0.15 (was 0.10)
+  * CRITICAL FIX: consume ScrollWheelValue after zooming to prevent inventory hotbar from scrolling
+  * Added mouse blocking inside the view rect
+- Created GlobalItemCodexUnlock.cs:
+  * OnPickup hook detects when player picks up a magic/summon weapon
+  * Unlocks CodexUnlocked flag on ShardPlayer
+  * Shows "Codex ha despertado" message with sound
+  * Only triggers for Magic branch
+- Added CodexUnlocked field to ShardPlayer:
+  * Persisted in SaveData/LoadData
+  * Codex (J key) only opens if CodexUnlocked == true
+  * Helpful error message if not unlocked yet
+- Removed 30-weapon limit in MagicWeaponScanner:
+  * Now returns ALL magic + summon weapons (no GetRange(0, 30))
+  * CombineMagicAndSummon also without limit
+- GrimoireEternal: added right-click minion summoning:
+  * AltFunctionUse returns true (enables right-click)
+  * Shoot detects player.altFunctionUse == 2 → summons FlinxMinion
+  * Checks minion slots (player.maxMinions + GetBonusMinionSlots)
+  * Error message if slots full
+  * Left-click still fires ArcaneBolt
+- Added XP bar to all 3 weapon tooltips (ModifyTooltips):
+  * LuminaStarbow, SolbrandEdge, GrimoireEternal
+  * Shows: Level (gold), XP bar [████░░░░] (violet), available points (green)
+  * Bar uses block characters █░ with 20 chars total
+- Removed DisplayName.SetDefault/Tooltip.SetDefault calls (deprecated in tModLoader v2026.06)
+- Build: 0 Errors, 0 Warnings
+- .tmod: 173KB
+- Pushed to GitHub: commit b07649c
+
+Stage Summary:
+- Game interaction blocked while skill tree or codex windows are open (mouse + scroll consumed)
+- Codex unlocks dynamically when Magic-branch player picks up any magic/summon weapon
+- Codex shows ALL magic+summon weapons (no 30 limit)
+- GrimoireEternal summons minion with right-click, fires bolts with left-click
+- All 3 weapons show XP bar in their tooltip
+- Close button X is now clean (drawn with lines, no double-rendering bug)
