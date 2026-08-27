@@ -1786,3 +1786,33 @@ Stage Summary:
 - Background is now dimmed like the bestiary (no more white boxes)
 - Skill tree nodes are now clickable (mouseLeft not consumed by DraggablePanel)
 - Game world is visible but darkened behind the UI windows
+
+---
+Task ID: FIX-WHITEBOX-GAMEUI-1
+Agent: Lead Developer (Z.ai Code)
+Task: Eliminate large white boxes, disable game interface like bestiary.
+
+Work Log:
+- ELIMINATED white boxes: removed background drawing from SkillTreeView and CodexListView
+  * These were drawing opaque rectangles that appeared as "white boxes" when the SpriteBatch was in the wrong state
+  * Now only the DraggablePanel draws the panel background
+  * The views only draw their content (nodes, list, stars) on top of the panel
+- DraggablePanel BodyColor alpha reduced from 245 to 220 (less opaque)
+- DESACTIVATED game interface like bestiary:
+  * ModifyInterfaceLayers removes vanilla layers when UI is open:
+    - Hotbar, Inventory, Player Buffs, Resource Bars, Tooltip
+  * UIScrollBlockPlayer now fully blocks game interaction:
+    - Consumes mouseLeft, mouseRight, mouseLeftRelease, mouseRightRelease
+    - Closes inventory if open (Main.playerInventory = false)
+    - Blocks item use (itemTime = 0, itemAnimation = 0)
+    - Blocks player movement (velocity.X *= 0.8)
+  * This replicates the bestiary behavior: game pauses, no world interaction
+- Build: 0 Errors, 0 Warnings
+- .tmod: 204KB
+- Pushed to GitHub: commit b065a11
+
+Stage Summary:
+- No more large white boxes (removed background drawing from views)
+- Game interface fully disabled when UI open (like bestiary)
+- Player cannot interact with world while UI is open (no attacking, no movement, no item use)
+- Inventory auto-closes when opening mod UI
