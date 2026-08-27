@@ -30,6 +30,8 @@ namespace AethonMod.Content.Weapons
         public override void SetDefaults()
         {
             Item.damage = 11;
+            // Daño HÍBRIDO: Magic + Summon fusionados (rama Artes Mágicas)
+            // El item base es Magic, pero aplicamos bonus de Summon en ModifyWeaponDamage
             Item.DamageType = DamageClass.Magic;
             Item.width = 36;
             Item.height = 44;
@@ -47,21 +49,34 @@ namespace AethonMod.Content.Weapons
             Item.noMelee = true;
         }
 
+        /// <summary>
+        /// El Grimorio es un arma HÍBRIDA: aplica tanto daño mágico como de invocación.
+        /// Click izquierdo: daño mágico (ArcaneBolt)
+        /// Click derecho: daño de invocación (CosmicOrbMinion)
+        /// </summary>
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
-                // Escalado porcentual moderado: +2.2% por nivel
+                // Escalado porcentual moderado: +2.2% por nivel (daño mágico)
                 damage *= 1f + sp.ShardLevel * 0.022f;
             }
             float crit = 0;
             Systems.NodeEffectSystem.ApplyMagicEffects(player, ref damage, ref crit);
             player.GetCritChance(DamageClass.Magic) += crit;
-            // También aplica bonus de daño de invocación (híbrido Magic + Summon)
+
+            // === DAÑO HÍBRIDO: también aplica bonus de daño de invocación ===
+            // El grimorio beneficia tanto hechizos como minions
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
-                player.GetDamage(DamageClass.Summon) += sp.ShardLevel * 0.01f; // +1% summon damage por nivel
+                // +1% summon damage por nivel del fragmento
+                player.GetDamage(DamageClass.Summon) += sp.ShardLevel * 0.01f;
+                // Bonus de slots de minion de los nodos del arbol
+                int bonusSlots = Systems.NodeEffectSystem.GetBonusMinionSlots(player);
+                player.maxMinions += bonusSlots;
+                // Crit chance de summon (normalmente 0, pero le damos un poco)
+                player.GetCritChance(DamageClass.Summon) += crit * 0.5f;
             }
         }
 
@@ -133,6 +148,9 @@ namespace AethonMod.Content.Weapons
                     {
                         // Invocar el CosmicOrbMinion (esfera de luz cosmica)
                         int minionType = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>();
+                        int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>();
+                        // Añadir el buff al jugador (aparece en zona de buffs)
+                        player.AddBuff(buffType, 18000);
                         Projectile.NewProjectile(source, position, Vector2.Zero, minionType, damage, knockback, player.whoAmI);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                         return false; // no disparar el bolt

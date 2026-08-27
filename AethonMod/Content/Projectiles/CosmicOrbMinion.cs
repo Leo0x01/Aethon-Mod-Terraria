@@ -27,6 +27,8 @@ namespace AethonMod.Content.Projectiles
             Main.projPet[Projectile.type] = true;
             ProjectileID.Sets.MinionTargettingFeature[Projectile.type] = true;
             ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
+            // Asociar el buff del minion (aparece en la zona de buffs)
+            ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
         }
 
         public override void SetDefaults()
@@ -39,6 +41,8 @@ namespace AethonMod.Content.Projectiles
             Projectile.minionSlots = 1f;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 18000;
+            // Daño HÍBRIDO: tanto Magic como Summon
+            // Usamos Summon como base, pero el grimorio aplica bonus de ambos
             Projectile.DamageType = DamageClass.Summon;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.aiStyle = -1;
@@ -113,7 +117,19 @@ namespace AethonMod.Content.Projectiles
 
         private void CheckMinionBuff(Player owner)
         {
-            // El minion se mantiene mientras el jugador tenga un Grimorio equipado
+            // Verificar que el jugador tenga el buff del minion activo
+            int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>();
+            bool hasBuff = false;
+            for (int i = 0; i < Player.MaxBuffs; i++)
+            {
+                if (owner.buffType[i] == buffType && owner.buffTime[i] > 0)
+                {
+                    hasBuff = true;
+                    break;
+                }
+            }
+
+            // El minion se mantiene mientras el jugador tenga el Grimorio equipado
             bool hasGrimoire = false;
             for (int i = 0; i < 58; i++)
             {
@@ -123,9 +139,23 @@ namespace AethonMod.Content.Projectiles
                     break;
                 }
             }
-            if (!hasGrimoire)
+
+            if (!hasGrimoire || !hasBuff)
             {
-                Projectile.Kill();
+                // Mantener el buff activo mientras el grimorio este equipado
+                if (hasGrimoire && !hasBuff)
+                {
+                    owner.AddBuff(buffType, 18000);
+                }
+                else if (!hasGrimoire)
+                {
+                    Projectile.Kill();
+                }
+            }
+            else
+            {
+                // Renovar el buff
+                owner.AddBuff(buffType, 18000);
             }
         }
 
