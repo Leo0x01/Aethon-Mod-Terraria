@@ -48,7 +48,8 @@ namespace AethonMod.Content.UI
             if (_bgTexture != null) return;
             try
             {
-                _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Codex_Background", AssetRequestMode.ImmediateLoad).Value;
+                // Usar la misma textura de fondo que el arbol de habilidades
+                _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/SkillTree_Background", AssetRequestMode.ImmediateLoad).Value;
             }
             catch
             {

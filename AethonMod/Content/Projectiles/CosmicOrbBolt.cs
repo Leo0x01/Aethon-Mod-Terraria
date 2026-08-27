@@ -31,12 +31,19 @@ namespace AethonMod.Content.Projectiles
 
         public override void AI()
         {
-            // Homing hacia el enemigo mas cercano
+            // Homing hacia el enemigo HOSTIL mas cercano
             NPC? target = null;
             float closestDist = 400f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.active || npc.friendly || npc.townNPC || npc.dontTakeDamage) continue;
+                if (!npc.active) continue;
+                // Solo NPCs hostiles
+                if (npc.friendly || npc.townNPC || npc.dontTakeDamage) continue;
+                if (npc.aiStyle == 7) continue; // critters
+                if (npc.catchItem > 0) continue;
+                if (npc.immortal) continue;
+                if (!npc.CanBeChasedBy()) continue;
+
                 float dist = Vector2.Distance(npc.Center, Projectile.Center);
                 if (dist < closestDist)
                 {

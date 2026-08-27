@@ -8,7 +8,8 @@ namespace AethonMod.Content.Projectiles
 {
     /// <summary>
     /// Cosmic Orb Minion — pequeña esfera de luz que rodea al jugador.
-    /// Dispara proyectiles mágicos a los enemigos cercanos.
+    /// Dispara proyectiles mágicos a los enemigos HOSTILES cercanos.
+    /// Aparece en la zona de efectos (buff slot) como cualquier minion.
     ///
     /// Mejoras del árbol de habilidades (NodeEffectSystem):
     /// - summon-notable: +1 slot de minion
@@ -57,7 +58,7 @@ namespace AethonMod.Content.Projectiles
                 return;
             }
 
-            // Verificar que el owner tiene el buff del minion
+            // Verificar que el owner tiene el buff del minion (aparece en zona de efectos)
             CheckMinionBuff(owner);
 
             // === ORBITAR ALREDEDOR DEL JUGADOR ===
@@ -73,8 +74,8 @@ namespace AethonMod.Content.Projectiles
             Projectile.Center = Vector2.Lerp(Projectile.Center, targetPos, 0.15f);
             Projectile.velocity = Vector2.Zero;
 
-            // === BUSCAR ENEMIGO MAS CERCANO ===
-            NPC? target = FindTarget(owner);
+            // === BUSCAR ENEMIGO HOSTIL MAS CERCANO ===
+            NPC? target = FindHostileTarget(owner);
             if (target != null)
             {
                 shootTimer++;
@@ -116,7 +117,7 @@ namespace AethonMod.Content.Projectiles
             bool hasGrimoire = false;
             for (int i = 0; i < 58; i++)
             {
-                if (owner.inventory[i].type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                if (owner.inventory[i] != null && owner.inventory[i].type == ModContent.ItemType<Weapons.GrimoireEternal>())
                 {
                     hasGrimoire = true;
                     break;
@@ -128,13 +129,35 @@ namespace AethonMod.Content.Projectiles
             }
         }
 
-        private NPC? FindTarget(Player owner)
+        /// <summary>
+        /// Busca el enemigo HOSTIL mas cercano.
+        /// IMPORTANTE: Solo ataca NPCs hostiles (no critters, no town NPCs, no NPCs amistosos).
+        /// </summary>
+        private NPC? FindHostileTarget(Player owner)
         {
             NPC? closest = null;
             float closestDist = 600f; // rango de deteccion
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.active || npc.friendly || npc.townNPC || npc.dontTakeDamage) continue;
+                if (!npc.active) continue;
+
+                // === FILTROS PARA NO ATACAR NPCs NO HOSTILES ===
+                // NPCs amistosos (town NPCs, etc.)
+                if (npc.friendly) continue;
+                // Town NPCs (mercaderes, etc.)
+                if (npc.townNPC) continue;
+                // NPCs que no reciben daño (inmunes)
+                if (npc.dontTakeDamage) continue;
+                // Critters (conejos, pajaros, etc.) — no atacarlos (aiStyle 7 = Bunny/Critter)
+                if (npc.aiStyle == 7) continue;
+                if (npc.catchItem > 0) continue; // capturable con red
+                // NPCs que son partes de un jefe (no objetivos reales)
+                if (npc.realLife >= 0 && npc.realLife != npc.whoAmI) continue;
+                // NPCs tipo proyectil (no son enemigos reales)
+                if (npc.immortal) continue;
+                // Verificar que sea realmente hostil
+                if (!npc.CanBeChasedBy()) continue;
+
                 float dist = Vector2.Distance(npc.Center, owner.Center);
                 if (dist < closestDist)
                 {

@@ -175,15 +175,25 @@ namespace AethonMod.Content.Systems
                         // Arbol de habilidades (via UserInterface — patron correcto)
                         if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
                         {
+                            // Asegurar que el SpriteBatch este en modo UI
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                             var gt = Main._drawInterfaceGameTime;
                             if (gt != null) _skillTreeInterface.Draw(Main.spriteBatch, gt);
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                         }
 
                         // Codex de memoria (via UserInterface)
                         if (_codexInterface != null && CodexUI?.IsVisible == true)
                         {
+                            // Asegurar que el SpriteBatch este en modo UI
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                             var gt = Main._drawInterfaceGameTime;
                             if (gt != null) _codexInterface.Draw(Main.spriteBatch, gt);
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                         }
                     }
                     catch (System.Exception ex)
