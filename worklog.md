@@ -1760,3 +1760,29 @@ Stage Summary:
 - Skill tree nodes are now clickable (click processing moved to Update)
 - GrimoireEternal benefits both Magic and Summon damage (hybrid)
 - All projectile visuals improved with radial glow
+
+---
+Task ID: FIX-BESTIARY-STYLE-CLICKS-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix white background boxes (make it look like Terraria bestiary with dimmed background) and fix skill tree node interaction.
+
+Work Log:
+- User showed reference screenshots of Terraria bestiary: when opened, the game world behind it is DIMMED (darkened with semi-transparent overlay). My UIs were showing white boxes because the background wasn't being dimmed correctly.
+- Fix 1: Added dark overlay when any UI is open (like bestiary):
+  * In ModifyInterfaceLayers, draw a black semi-transparent rectangle (alpha 180) over the entire screen BEFORE drawing any UI
+  * This mimics the bestiary's dimmed background effect
+  * The UI panels then render on top of the dark overlay, so no more white boxes
+- Fix 2: DraggablePanel was consuming Main.mouseLeft = false in Update(), which prevented SkillTreeView from processing clicks on nodes:
+  * DraggablePanel now only consumes mouseRight (not mouseLeft) unless dragging
+  * Only consumes mouseLeft when actually dragging the panel
+  * SkillTreeView no longer consumes mouseLeft (only mouseRight)
+  * Now clicks on nodes work correctly — the click reaches HandleInput before being consumed
+- Fix 3: Removed redundant SpriteBatch.End/Begin calls around UserInterface.Draw() since the overlay already sets the correct mode
+- Build: 0 Errors, 0 Warnings
+- .tmod: 204KB
+- Pushed to GitHub: commit b4294d4
+
+Stage Summary:
+- Background is now dimmed like the bestiary (no more white boxes)
+- Skill tree nodes are now clickable (mouseLeft not consumed by DraggablePanel)
+- Game world is visible but darkened behind the UI windows
