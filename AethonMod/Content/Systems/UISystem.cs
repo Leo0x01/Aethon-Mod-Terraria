@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -159,8 +160,17 @@ namespace AethonMod.Content.Systems
                             FragmentInfoBoxUI.Draw(Main.spriteBatch);
                         }
 
-                        // Eleccion de rama (modal)
-                        BranchChoiceUI?.Draw();
+                        // Eleccion de rama (modal) — con SpriteBatch en modo UI
+                        if (BranchChoiceUI != null && BranchChoiceUI.IsVisible)
+                        {
+                            // Usar un SpriteBatch en modo UI para que el renderizado
+                            // no se vea afectado por la transformacion del mundo.
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+                            BranchChoiceUI.Draw();
+                            Main.spriteBatch.End();
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+                        }
 
                         // Arbol de habilidades (via UserInterface — patron correcto)
                         if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
