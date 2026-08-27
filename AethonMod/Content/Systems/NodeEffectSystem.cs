@@ -440,12 +440,8 @@ namespace AethonMod.Content.Systems
                     if (Vector2.Distance(nearby.Center, npc.Center) < 100f)
                     {
                         int dmg = npc.lifeMax / 10;
-                        // SimpleStrikeNPC en tModLoader v2026.06 signature:
-                        //   SimpleStrikeNPC(int damage, int hitDirection, bool ?, float critChance?,
-                        //     DamageClass damageType, bool noEffects, float knockbackScale, bool fromNet)
-                        // Args: dmg, player.whoAmI (hitDirection), true (avoid interrupt), 0f (critChance),
-                        //       DamageClass.Melee, false (noEffects), 0f (knockbackScale), false (fromNet)
-                        _ = nearby.SimpleStrikeNPC(dmg, player.whoAmI, true, 0f, DamageClass.Melee, false, 0f, false);
+                        // SimpleStrikeNPC: hitDirection debe ser -1 o +1 (direccion del knockback)
+                        _ = nearby.SimpleStrikeNPC(dmg, player.direction, true, 0f, DamageClass.Melee, false, 0f, false);
                     }
                 }
                 for (int i = 0; i < 20; i++)

@@ -111,6 +111,9 @@ namespace AethonMod.Content.Globals
 
         private void CheckImprintReady(Player player, Players.ShardPlayer sp)
         {
+            // Solo procesar para el jugador local (evita abrir UI en otros clientes en MP)
+            if (player.whoAmI != Main.myPlayer) return;
+
             int totalKills = sp.DistanceKills + sp.MeleeKills + sp.MagicKills;
             int threshold = Players.ShardPlayer.KILLS_TO_IMPRINT;
             if (totalKills >= threshold && !sp.IsImprinted)

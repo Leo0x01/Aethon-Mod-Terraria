@@ -59,6 +59,31 @@ namespace AethonMod.Content.Weapons
             knockback *= Systems.NodeEffectSystem.GetMeleeKnockbackMult(player);
         }
 
+        public override float UseTimeMultiplier(Player player)
+        {
+            // Velocidad de ataque de nodos del arbol Melee (combo, berserk, ascend-5)
+            float mult = 1f;
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Melee)
+            {
+                // combo: +3/4/5% velocidad
+                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-0")) mult *= 0.97f;
+                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-1")) mult *= 0.96f;
+                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-2")) mult *= 0.95f;
+                if (Systems.NodeEffectSystem.HasNode(player, "combo-notable")) mult *= 0.85f;
+                if (Systems.NodeEffectSystem.HasNode(player, "combo-keystone")) mult *= 0.70f;
+                // berserk: +5/7/9% velocidad
+                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-0")) mult *= 0.95f;
+                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-1")) mult *= 0.93f;
+                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-2")) mult *= 0.91f;
+                if (Systems.NodeEffectSystem.HasNode(player, "berserk-notable")) mult *= 0.80f;
+                if (Systems.NodeEffectSystem.HasNode(player, "berserk-keystone")) mult *= 0.50f;
+                // ascend-5: +100% velocidad
+                if (Systems.NodeEffectSystem.HasNode(player, "ascend-5")) mult *= 0.50f;
+            }
+            return mult;
+        }
+
         /// <summary>
         /// Dispara el proyectil DawnSlash solo si el jugador tiene nodos que lo desbloquean.
         /// NO mutamos Item.shoot (eso causaba bugs de estado).
@@ -68,13 +93,13 @@ namespace AethonMod.Content.Weapons
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return false;
 
-            // Nodos que desbloquean proyectiles.
+            // Nodos que desbloquean proyectiles (Melee: blade y solar, no celestial).
             bool hasBladeNotable = sp.AllocatedNodes.Contains("blade-notable") ||
                                    sp.AllocatedNodes.Contains("blade-keystone");
-            bool hasCelestialNotable = sp.AllocatedNodes.Contains("celestial-notable") ||
-                                        sp.AllocatedNodes.Contains("celestial-keystone");
+            bool hasSolarNotable = sp.AllocatedNodes.Contains("solar-notable") ||
+                                   sp.AllocatedNodes.Contains("solar-keystone");
 
-            if (!hasBladeNotable && !hasCelestialNotable) return false;
+            if (!hasBladeNotable && !hasSolarNotable) return false;
 
             // Disparar manualmente el proyectil DawnSlash.
             int projType = ModContent.ProjectileType<Projectiles.DawnSlash>();

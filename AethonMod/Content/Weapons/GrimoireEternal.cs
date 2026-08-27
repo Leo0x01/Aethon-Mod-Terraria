@@ -104,6 +104,24 @@ namespace AethonMod.Content.Weapons
             Item.mana = finalCost;
         }
 
+        public override float UseTimeMultiplier(Player player)
+        {
+            // Velocidad de lanzamiento de nodos del arbol Magic (cast-speed, ascend-5)
+            float mult = 1f;
+            var sp = player.GetModPlayer<Players.ShardPlayer>();
+            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
+            {
+                // cast-speed: +3/4/5% velocidad
+                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-0")) mult *= 0.97f;
+                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-1")) mult *= 0.96f;
+                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-2")) mult *= 0.95f;
+                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-notable")) mult *= 0.85f;
+                // ascend-5: +100% velocidad
+                if (Systems.NodeEffectSystem.HasNode(player, "ascend-5")) mult *= 0.50f;
+            }
+            return mult;
+        }
+
         public override bool CanUseItem(Player player)
         {
             // Reserva Inagotable (Notable): lanzar con <20 maná es gratis.
@@ -132,7 +150,8 @@ namespace AethonMod.Content.Weapons
             {
                 // Invocar un minion cosmico (usamos un proyectil vanilla minion como base)
                 // Si el jugador tiene slots de minion disponibles
-                int maxMinions = player.maxMinions + Systems.NodeEffectSystem.GetBonusMinionSlots(player);
+                // NOTA: no sumar GetBonusMinionSlots aqui — ya fue sumado en ModifyWeaponDamage
+                int maxMinions = player.maxMinions;
                 if (player.ownedProjectileCounts.Length > 0)
                 {
                     // Contar minions actuales
