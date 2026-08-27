@@ -86,6 +86,29 @@ namespace AethonMod.Content.Weapons
         {
             return new Vector2(2f, 0f);
         }
+
+        public override void ModifyTooltips(System.Collections.Generic.List<TooltipLine> tooltips)
+        {
+            // Añadir barra de XP del fragmento al tooltip
+            var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
+            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Distance)
+            {
+                int xpNeeded = sp.XPForNextLevel();
+                float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
+                pct = System.Math.Clamp(pct, 0f, 1f);
+
+                int barLen = 20;
+                int filled = (int)(barLen * pct);
+                string bar = "[";
+                for (int i = 0; i < barLen; i++)
+                    bar += i < filled ? "█" : "░";
+                bar += "]";
+
+                tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
+                tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
+                tooltips.Add(new TooltipLine(Mod, "FragmentPts", $"Puntos: {sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count} disponibles") { OverrideColor = new Color(120, 255, 150) });
+            }
+        }
     }
 }
 

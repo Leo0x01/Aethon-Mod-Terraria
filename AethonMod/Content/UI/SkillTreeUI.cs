@@ -128,14 +128,24 @@ namespace AethonMod.Content.UI
             }
             else _isPanning = false;
 
-            // Zoom con rueda
+            // Zoom con rueda — SOLO cuando el mouse esta en la vista Y consumir el delta
+            // para que no afecte el inventario
             int curScroll = Terraria.GameInput.PlayerInput.ScrollWheelValue;
             int scrollDelta = curScroll - _lastScrollValue;
             _lastScrollValue = curScroll;
             if (scrollDelta != 0 && mouseInView)
             {
-                float zoomDelta = scrollDelta > 0 ? 0.1f : -0.1f;
-                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.3f, 2.0f);
+                float zoomDelta = scrollDelta > 0 ? 0.15f : -0.15f;
+                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.4f, 3.0f);
+                // Consumir el scroll para que no afecte el inventario
+                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            }
+
+            // Bloquear input del juego dentro de la vista
+            if (mouseInView)
+            {
+                Main.mouseLeft = false;
+                Main.mouseRight = false;
             }
         }
 
@@ -166,17 +176,17 @@ namespace AethonMod.Content.UI
             return closest;
         }
 
-        /// <summary>Radio de dibujo del nodo: PEQUEÑO (no mas cuadros gigantes).</summary>
+        /// <summary>Radio de dibujo del nodo: pequeño pero visible (circular).</summary>
         private float GetNodeDrawRadius(PoESkillNode node)
         {
             return node.Type switch
             {
-                NodeType.Small => 5f,        // pequeño
-                NodeType.Notable => 8f,       // mediano
-                NodeType.Keystone => 12f,     // grande
-                NodeType.Ascendancy => 10f,   // mediano-grande
-                NodeType.Cluster => 7f,
-                _ => 5f,
+                NodeType.Small => 7f,        // pequeño
+                NodeType.Notable => 11f,     // mediano
+                NodeType.Keystone => 15f,     // grande
+                NodeType.Ascendancy => 13f,  // mediano-grande
+                NodeType.Cluster => 9f,
+                _ => 7f,
             };
         }
 
@@ -526,7 +536,7 @@ namespace AethonMod.Content.UI
             }
             RemoveAllChildren();
             _panel = new DraggablePanel(700, 520, "★ ARBOL DE HABILIDADES ★");
-            _panel.OnCloseClick += (evt, el) => Hide();
+            _panel.OnCloseClick += () => Hide();
 
             _treeView = new SkillTreeView();
             _treeView.Width.Set(0, 1f);

@@ -298,7 +298,7 @@ namespace AethonMod.Content.UI
             }
             RemoveAllChildren();
             _panel = new DraggablePanel(560, 460, "★ CODEX DE MEMORIA ★");
-            _panel.OnCloseClick += (evt, el) => Hide();
+            _panel.OnCloseClick += () => Hide();
 
             _listView = new CodexListView();
             _listView.Width.Set(0, 1f);

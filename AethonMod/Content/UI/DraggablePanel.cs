@@ -2,7 +2,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Terraria.ModLoader;
 
@@ -10,8 +9,8 @@ namespace AethonMod.Content.UI
 {
     /// <summary>
     /// Panel flotante arrastrable — base para el arbol de habilidades y el codex.
-    /// El usuario puede agarrar la barra de titulo y mover la tarjeta por la pantalla.
-    /// Usa el patron correcto de tModLoader (UIElement) para que el renderizado funcione.
+    /// Dibuja TODO manualmente (sin UIText para evitar superposiciones).
+    /// Bloquea la interaccion con el juego mientras esta abierto.
     /// </summary>
     public class DraggablePanel : UIElement
     {
@@ -25,11 +24,10 @@ namespace AethonMod.Content.UI
         private Vector2 _dragOffset = Vector2.Zero;
         private float _time = 0f;
 
-        // Boton cerrar
-        public UIText? CloseButton;
         private bool _closeHovered = false;
+        private bool _closeClicked = false;
 
-        public event UIElement.MouseEvent? OnCloseClick;
+        public event System.Action? OnCloseClick;
 
         public DraggablePanel(int width, int height, string title)
         {
@@ -38,19 +36,6 @@ namespace AethonMod.Content.UI
             Height.Set(height, 0f);
             HAlign = 0.5f;
             VAlign = 0.5f;
-
-            // Boton cerrar
-            CloseButton = new UIText("X", 1.0f)
-            {
-                HAlign = 1f,
-                VAlign = 0f,
-                Left = { Pixels = -30 },
-                Top = { Pixels = 6 },
-            };
-            CloseButton.OnMouseOver += (evt, el) => { _closeHovered = true; };
-            CloseButton.OnMouseOut += (evt, el) => { _closeHovered = false; };
-            CloseButton.OnLeftClick += (evt, el) => { OnCloseClick?.Invoke(evt, el); };
-            Append(CloseButton);
         }
 
         public override void Update(GameTime gameTime)
@@ -58,26 +43,24 @@ namespace AethonMod.Content.UI
             base.Update(gameTime);
             _time += 0.016f;
 
-            // Drag de la barra de titulo (zona superior, 0-40px)
             var dims = GetDimensions();
             Rectangle titleBar = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, 40);
 
-            if (Main.mouseLeft && titleBar.Contains(Main.mouseX, Main.mouseY) && !_isDragging)
+            // Drag de la barra de titulo
+            bool mouseInTitle = titleBar.Contains(Main.mouseX, Main.mouseY);
+            Rectangle closeRect = new Rectangle((int)dims.X + (int)dims.Width - 36, (int)dims.Y + 4, 32, 32);
+            bool mouseInClose = closeRect.Contains(Main.mouseX, Main.mouseY);
+
+            if (Main.mouseLeft && mouseInTitle && !mouseInClose && !_isDragging && Main.mouseLeftRelease)
             {
-                // No iniciar drag si el click fue en el boton cerrar
-                Rectangle closeBtn = new Rectangle((int)dims.X + (int)dims.Width - 40, (int)dims.Y + 2, 36, 36);
-                if (!closeBtn.Contains(Main.mouseX, Main.mouseY))
-                {
-                    _isDragging = true;
-                    _dragOffset = new Vector2(Main.mouseX - dims.X, Main.mouseY - dims.Y);
-                }
+                _isDragging = true;
+                _dragOffset = new Vector2(Main.mouseX - dims.X, Main.mouseY - dims.Y);
             }
 
             if (_isDragging)
             {
                 float newX = Main.mouseX - _dragOffset.X;
                 float newY = Main.mouseY - _dragOffset.Y;
-                // Clamp para mantener la tarjeta dentro de la pantalla
                 newX = MathHelper.Clamp(newX, -dims.Width + 100, Main.screenWidth - 100);
                 newY = MathHelper.Clamp(newY, 0, Main.screenHeight - 50);
                 Left.Set(newX, 0f);
@@ -86,6 +69,28 @@ namespace AethonMod.Content.UI
             }
 
             if (!Main.mouseLeft) _isDragging = false;
+
+            // Hover del boton cerrar
+            _closeHovered = mouseInClose;
+
+            // Click del boton cerrar (edge detection)
+            if (mouseInClose && Main.mouseLeft && Main.mouseLeftRelease && !_closeClicked)
+            {
+                _closeClicked = true;
+                OnCloseClick?.Invoke();
+            }
+            if (!Main.mouseLeft) _closeClicked = false;
+
+            // === BLOQUEAR INTERACCION CON EL JUEGO ===
+            // Mientras el panel este abierto, consumir el input del mouse para que
+            // el jugador no pueda atacar/moverse/usar items en el juego.
+            if (dims.ToRectangle().Contains(Main.mouseX, Main.mouseY) || _isDragging)
+            {
+                Main.mouseLeft = false;
+                Main.mouseRight = false;
+                // Evitar que la rueda afecte el inventario (scroll del hotbar)
+                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            }
         }
 
         protected override void DrawSelf(SpriteBatch sb)
@@ -93,25 +98,24 @@ namespace AethonMod.Content.UI
             var dims = GetDimensions();
             Rectangle panelRect = new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height);
 
-            // === FONDO COSMICO (estrellas + radiales) ===
-            // Sombra
+            // === SOMBRA ===
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(panelRect.X - 4, panelRect.Y - 4, panelRect.Width + 8, panelRect.Height + 8),
-                new Color(0, 0, 0, 120));
+                new Color(0, 0, 0, 100));
 
-            // Fondo base
+            // === FONDO DEL PANEL (oscuro cosmico) ===
             sb.Draw(TextureAssets.MagicPixel.Value, panelRect, BodyColor);
 
-            // Radiales cosmicos dentro del panel
-            DrawRadial(sb, panelRect, 0.3f, 0.2f, 0.5f, new Color(120, 80, 200, 18));
-            DrawRadial(sb, panelRect, 0.7f, 0.8f, 0.4f, new Color(245, 196, 81, 14));
+            // Radiales cosmicos sutiles
+            DrawRadial(sb, panelRect, 0.3f, 0.2f, 0.5f, new Color(120, 80, 200, 12));
+            DrawRadial(sb, panelRect, 0.7f, 0.8f, 0.4f, new Color(245, 196, 81, 10));
 
-            // Estrellas de fondo (efecto cosmico)
+            // Estrellas de fondo
             DrawStars(sb, panelRect);
 
-            // === BORDE DOBLE (violeta externo, dorado interno) ===
+            // === BORDE DOBLE ===
             int bOut = 3;
-            // Externo
+            // Externo (violeta)
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(panelRect.X, panelRect.Y, panelRect.Width, bOut), BorderColor);
             sb.Draw(TextureAssets.MagicPixel.Value,
@@ -123,7 +127,7 @@ namespace AethonMod.Content.UI
 
             // Interno (dorado, pulsante)
             float pulse = 0.7f + 0.3f * (float)System.Math.Sin(_time * 2);
-            Color innerColor = new Color(245, 196, 81, (int)(120 * pulse));
+            Color innerColor = new Color(245, 196, 81, (int)(100 * pulse));
             int bIn = 1;
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(panelRect.X + bOut, panelRect.Y + bOut, panelRect.Width - bOut * 2, bIn), innerColor);
@@ -137,61 +141,70 @@ namespace AethonMod.Content.UI
             // === BARRA DE TITULO ===
             Rectangle titleBar = new Rectangle(panelRect.X + bOut, panelRect.Y + bOut, panelRect.Width - bOut * 2, 36);
             sb.Draw(TextureAssets.MagicPixel.Value, titleBar, HeaderColor);
-
-            // Linea dorada inferior de la barra de titulo
+            // Linea dorada inferior
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(titleBar.X, titleBar.Bottom, titleBar.Width, 2),
                 new Color(245, 196, 81, 150));
 
-            // Texto del titulo (con glow)
+            // Texto del titulo (con glow sutil)
             Vector2 titlePos = new Vector2(titleBar.X + 14, titleBar.Y + 8);
-            // Glow
-            for (int i = 0; i < 3; i++)
-            {
-                Utils.DrawBorderString(sb, Title, titlePos + new Vector2(i, 0),
-                    new Color(TitleColor.R, TitleColor.G, TitleColor.B, 30), 1.0f);
-                Utils.DrawBorderString(sb, Title, titlePos + new Vector2(-i, 0),
-                    new Color(TitleColor.R, TitleColor.G, TitleColor.B, 30), 1.0f);
-            }
-            Utils.DrawBorderString(sb, Title, titlePos, TitleColor, 1.0f);
+            Utils.DrawBorderString(sb, Title, titlePos, TitleColor, 0.95f);
 
-            // Boton cerrar con hover
+            // === BOTON CERRAR (X) ===
             Rectangle closeRect = new Rectangle(panelRect.Right - 36, panelRect.Y + 4, 32, 32);
+            // Fondo del boton
             Color closeBg = _closeHovered ? new Color(220, 80, 80, 230) : new Color(40, 20, 30, 180);
             sb.Draw(TextureAssets.MagicPixel.Value, closeRect, closeBg);
-            Utils.DrawBorderString(sb, "X",
-                new Vector2(closeRect.X + closeRect.Width / 2f, closeRect.Y + closeRect.Height / 2f - 8),
-                _closeHovered ? Color.White : new Color(220, 180, 180), 1.0f, 0.5f, 0.5f);
+            // Borde del boton
+            Color closeBorder = _closeHovered ? Color.White : new Color(180, 80, 80, 150);
+            int cb = 1;
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(closeRect.X, closeRect.Y, closeRect.Width, cb), closeBorder);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(closeRect.X, closeRect.Bottom - cb, closeRect.Width, cb), closeBorder);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(closeRect.X, closeRect.Y, cb, closeRect.Height), closeBorder);
+            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(closeRect.Right - cb, closeRect.Y, cb, closeRect.Height), closeBorder);
+            // X dibujada con lineas (no texto, para evitar superposicion)
+            DrawX(sb, closeRect, _closeHovered ? Color.White : new Color(220, 180, 180), 2f);
+        }
 
-            // Indicador de arrastre (si esta arrastrando)
-            if (_isDragging)
-            {
-                Utils.DrawBorderString(sb, "⋯", new Vector2(panelRect.X + 4, panelRect.Y + 40),
-                    new Color(245, 196, 81, 100), 0.7f);
-            }
+        /// <summary>Dibuja una X con lineas dentro de un rectangulo.</summary>
+        private void DrawX(SpriteBatch sb, Rectangle rect, Color color, float thickness)
+        {
+            int pad = 8;
+            // Linea diagonal 1 (esquina sup-izq a inf-der)
+            DrawLine(sb, new Vector2(rect.X + pad, rect.Y + pad), new Vector2(rect.Right - pad, rect.Bottom - pad), color, thickness);
+            // Linea diagonal 2 (esquina sup-der a inf-izq)
+            DrawLine(sb, new Vector2(rect.Right - pad, rect.Y + pad), new Vector2(rect.X + pad, rect.Bottom - pad), color, thickness);
+        }
+
+        private void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color, float thickness)
+        {
+            Vector2 edge = end - start;
+            float angle = (float)System.Math.Atan2(edge.Y, edge.X);
+            float length = edge.Length();
+            if (length < 1f) return;
+            sb.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle((int)start.X, (int)start.Y, (int)length, (int)thickness),
+                null, color, angle, new Vector2(0, thickness / 2f), SpriteEffects.None, 0);
         }
 
         private void DrawStars(SpriteBatch sb, Rectangle rect)
         {
-            // Estrellas pre-generadas con seed fijo (parallax sutil)
-            for (int i = 0; i < 60; i++)
+            for (int i = 0; i < 40; i++)
             {
                 int seed = i * 73856093;
                 float bx = (seed % 1000) / 1000f * rect.Width;
                 float by = ((seed * 19349663) % 1000) / 1000f * rect.Height;
                 float sx = rect.X + bx;
                 float sy = rect.Y + by;
-
                 float twinkle = 0.5f + 0.5f * (float)System.Math.Sin(_time * 2 + i * 0.5f);
-                int alpha = (int)(180 * twinkle * 0.6f);
+                int alpha = (int)(120 * twinkle * 0.5f);
                 if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
-
                 int sz = 1 + (seed % 2);
-                Color starColor = i % 3 == 0 ? new Color(245, 196, 81, alpha)
-                               : i % 3 == 1 ? new Color(179, 136, 255, alpha)
-                               : new Color(200, 220, 255, alpha);
+                Color c = i % 3 == 0 ? new Color(245, 196, 81, alpha)
+                        : i % 3 == 1 ? new Color(179, 136, 255, alpha)
+                        : new Color(200, 220, 255, alpha);
                 sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle((int)sx, (int)sy, sz, sz), starColor);
+                    new Rectangle((int)sx, (int)sy, sz, sz), c);
             }
         }
 

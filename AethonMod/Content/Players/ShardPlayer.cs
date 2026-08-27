@@ -45,6 +45,9 @@ namespace AethonMod.Content.Players
         /// <summary>IDs de armas memorizadas (Runas de Memoria equipadas).</summary>
         public List<string> MemorizedRunes = new();
 
+        /// <summary>True si el Codex de Memoria ha sido desbloqueado (al conseguir un arma magica/invocacion).</summary>
+        public bool CodexUnlocked = false;
+
         // --- Monedas ---
         /// <summary>Fragmentos de Resonancia (moneda secundaria).</summary>
         public int ResonanceShards = 0;
@@ -181,6 +184,7 @@ namespace AethonMod.Content.Players
             tag["resonanceShards"] = ResonanceShards;
             tag["allocatedNodes"] = new List<string>(AllocatedNodes);
             tag["memorizedRunes"] = MemorizedRunes;
+            tag["codexUnlocked"] = CodexUnlocked;
         }
 
         public override void LoadData(TagCompound tag)
@@ -197,6 +201,7 @@ namespace AethonMod.Content.Players
             ResonanceShards = tag.GetInt("resonanceShards");
             AllocatedNodes = new HashSet<string>(tag.GetList<string>("allocatedNodes"));
             MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
+            CodexUnlocked = tag.GetBool("codexUnlocked");
         }
 
         // --- Aplicar efectos pasivos cada tick ---

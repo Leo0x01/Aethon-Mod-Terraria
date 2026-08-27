@@ -60,16 +60,14 @@ namespace AethonMod.Content.Systems
             return list;
         }
 
-        /// <summary>Combina armas mágicas + de invocación para la rama Magic.</summary>
+        /// <summary>Combina armas mágicas + de invocación para la rama Magic (sin límite).</summary>
         private static List<MagicWeaponScanner.WeaponInfo> CombineMagicAndSummon()
         {
             var result = new List<MagicWeaponScanner.WeaponInfo>();
             result.AddRange(MagicWeaponScanner.GetMagicWeapons());
             result.AddRange(MagicWeaponScanner.GetSummonWeapons());
-            // Ordenar por costo y limitar a 30
+            // Ordenar por costo (sin límite — mostrar todas)
             result.Sort((a, b) => a.ResonanceCost.CompareTo(b.ResonanceCost));
-            if (result.Count > 30)
-                result = result.GetRange(0, 30);
             return result;
         }
 

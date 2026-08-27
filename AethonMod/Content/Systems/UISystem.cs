@@ -85,12 +85,12 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            // Toggle del codex (J)
+            // Toggle del codex (J) — solo si esta desbloqueado
             if (Main.keyState.IsKeyDown(config.CodexKey) &&
                 !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-                if (sp != null && sp.IsImprinted && !anyFullscreenUIOpenExcept(CodexUI))
+                if (sp != null && sp.IsImprinted && sp.CodexUnlocked && !anyFullscreenUIOpenExcept(CodexUI))
                 {
                     if (CodexUI?.IsVisible == true) CodexUI.Hide();
                     else
@@ -98,6 +98,11 @@ namespace AethonMod.Content.Systems
                         CodexUI?.Show();
                         if (CodexUI != null) _codexInterface?.SetState(CodexUI);
                     }
+                }
+                else if (sp != null && sp.IsImprinted && !sp.CodexUnlocked)
+                {
+                    Main.NewText("El Codex de Memoria no esta desbloqueado. Consigue un arma magica o de invocacion para despertarlo.",
+                        new Color(180, 160, 220));
                 }
                 else if (sp != null && !sp.IsImprinted)
                 {

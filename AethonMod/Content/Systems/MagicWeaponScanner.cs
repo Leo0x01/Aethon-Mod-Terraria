@@ -116,10 +116,7 @@ namespace AethonMod.Content.Systems
             // Ordenar por costo (ascendente) para que las baratas salgan primero
             result.Sort((a, b) => a.ResonanceCost.CompareTo(b.ResonanceCost));
 
-            // Limitar a 30 armas por rama (las más relevantes)
-            if (result.Count > 30)
-                result = result.GetRange(0, 30);
-
+            // NO limitar — mostrar TODAS las armas disponibles
             return result;
         }
 
