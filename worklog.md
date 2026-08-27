@@ -1608,3 +1608,48 @@ Stage Summary:
 - GrimoireEternal summons minion with right-click, fires bolts with left-click
 - All 3 weapons show XP bar in their tooltip
 - Close button X is now clean (drawn with lines, no double-rendering bug)
+
+---
+Task ID: COSMIC-ORB-CIRCULAR-NODES-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix square nodes, create custom CosmicOrbMinion, fix scroll inventory bug, improve art.
+
+Work Log:
+- User reported: skill tree still has square nodes, scroll affects inventory, minion should be custom light orb, improve all art.
+- Generated 4 circular node textures (Node_Small, Node_Notable, Node_Keystone, Node_Ascendancy) with Python/PIL
+  * Each has glow exterior and proper circular shape (not squares)
+- Generated improved background textures:
+  * SkillTree_Background: 2 spiral arms, 500 stars, 20 glowing stars, nebula
+  * Codex_Background: 7 cosmic rune circles, 150 gold/violet stars
+- Generated minion textures:
+  * CosmicOrbMinion.png (24x24): white core + gold ring + violet glow
+  * CosmicOrbBolt.png (16x16): white core + violet glow
+- Created CosmicOrbMinion.cs:
+  * Custom minion that orbits the player in a circle
+  * Searches for nearest enemy (600px range)
+  * Shoots CosmicOrbBolt every 60 ticks (40 with summon-keystone)
+  * Tree improvements: summon-keystone (faster + extra bolts), ascend-3 (+5 bolts)
+  * Visual: gold + violet dust, light effect
+  * Stays alive while player has GrimoireEternal equipped
+- Created CosmicOrbBolt.cs:
+  * Homing projectile that targets nearest enemy
+  * Violet/gold trail
+  * Explosion on impact
+- Updated GrimoireEternal to summon CosmicOrbMinion (not FlinxMinion)
+- Updated SkillTreeView to use circular node textures:
+  * GetNodeTexture() loads PNG textures
+  * Tints based on state (allocated=gold, canAlloc=color, disabled=dim)
+  * Fallback to DrawCircle if texture fails
+- Fixed scroll inventory bug:
+  * UISystem.PostUpdateInput now resets ScrollWheelValue when any UI is open
+  * Prevents hotbar from scrolling when zooming skill tree
+- Build: 0 Errors, 0 Warnings
+- .tmod: 203KB (includes all new textures)
+- Pushed to GitHub: commit 35d5e47
+
+Stage Summary:
+- Skill tree nodes are now real circles (using PNG textures, not pixel-drawn squares)
+- Custom CosmicOrbMinion: light orb that orbits player and shoots at enemies
+- Minion improvements integrated into skill tree (summon-keystone, ascend-3)
+- Scroll inventory bug fixed (ScrollWheelValue reset when UI open)
+- All 8 new textures included in .tmod
