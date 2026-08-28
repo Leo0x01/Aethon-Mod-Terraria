@@ -138,9 +138,12 @@ namespace AethonMod.Content.UI
             _lastScrollValue = curScroll;
             if (scrollDelta != 0 && mouseInWindow)
             {
-                float zoomDelta = scrollDelta > 0 ? 0.1f : -0.1f;
-                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.3f, 3.0f);
+                float zoomDelta = scrollDelta > 0 ? 0.15f : -0.15f;
+                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 5.0f);
             }
+
+            // Clamp el pan para que el arbol no se salga de la ventana
+            ClampPanOffset(winRect);
 
             // === CLICK EN NODOS ===
             _hoveredNode = FindHoveredNode(winRect);
@@ -228,14 +231,18 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, titleRect, new Color(20, 15, 40, 240));
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(titleRect.X, titleRect.Bottom, titleRect.Width, 2), new Color(245, 196, 81, 150));
 
-            Utils.DrawBorderString(sb, "★ ARBOL DE HABILIDADES ★",
-                new Vector2(titleRect.X + 14, titleRect.Y + 10), new Color(245, 196, 81), 0.95f);
+            // Titulo centrado verticalmente en la barra
+            string titleText = "★ ARBOL DE HABILIDADES ★";
+            Utils.DrawBorderString(sb, titleText,
+                new Vector2(titleRect.X + 14, titleRect.Y + 12), new Color(245, 196, 81), 0.9f);
 
-            // Info de puntos (derecha)
+            // Info de puntos (derecha) — misma alineacion vertical que el titulo
             int avail = sp.AvailableSkillPoints();
             string ptsText = $"Puntos: {avail}  |  Gastados: {sp.SpentSkillPoints()}";
+            // Medir el texto para alinearlo a la derecha
+            var ptsSize = FontAssets.MouseText.Value.MeasureString(ptsText) * 0.75f;
             Utils.DrawBorderString(sb, ptsText,
-                new Vector2(titleRect.Right - 180, titleRect.Y + 10),
+                new Vector2(titleRect.Right - ptsSize.X - 8, titleRect.Y + 14),
                 avail > 0 ? new Color(120, 255, 150) : new Color(180, 180, 200), 0.75f);
 
             // === BOTON CERRAR ===
@@ -306,6 +313,34 @@ namespace AethonMod.Content.UI
                 (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y);
         }
 
+        /// <summary>Clamp el pan offset para que el arbol no se salga de la ventana.</summary>
+        private void ClampPanOffset(Rectangle treeRect)
+        {
+            if (_rangeX <= 0 || _rangeY <= 0) return;
+            float scale = Math.Min(treeRect.Width / _rangeX, treeRect.Height / _rangeY) * 0.35f * _zoom;
+            float treeW = _rangeX * scale;
+            float treeH = _rangeY * scale;
+            // Si el arbol es mas grande que la ventana, permitir pan dentro de limites
+            if (treeW > treeRect.Width)
+            {
+                float maxPanX = (treeW - treeRect.Width) / 2f;
+                _panOffset.X = MathHelper.Clamp(_panOffset.X, -maxPanX, maxPanX);
+            }
+            else
+            {
+                _panOffset.X = 0; // arbol mas pequeño que ventana, no hay pan
+            }
+            if (treeH > treeRect.Height)
+            {
+                float maxPanY = (treeH - treeRect.Height) / 2f;
+                _panOffset.Y = MathHelper.Clamp(_panOffset.Y, -maxPanY, maxPanY);
+            }
+            else
+            {
+                _panOffset.Y = 0;
+            }
+        }
+
         private PoESkillNode? FindHoveredNode(Rectangle treeRect)
         {
             Vector2 mouse = new(Main.mouseX, Main.mouseY);
@@ -325,11 +360,11 @@ namespace AethonMod.Content.UI
         {
             return node.Type switch
             {
-                NodeType.Small => 7f,
-                NodeType.Notable => 10f,
-                NodeType.Keystone => 14f,
-                NodeType.Ascendancy => 12f,
-                _ => 7f,
+                NodeType.Small => 9f,        // más grande para mejor visibilidad
+                NodeType.Notable => 14f,     // mediano
+                NodeType.Keystone => 18f,    // grande
+                NodeType.Ascendancy => 16f,  // mediano-grande
+                _ => 9f,
             };
         }
 

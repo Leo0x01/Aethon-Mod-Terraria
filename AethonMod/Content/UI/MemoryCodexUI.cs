@@ -80,7 +80,8 @@ namespace AethonMod.Content.UI
             {
                 _scrollY -= Math.Sign(scrollDelta) * 30;
                 int totalH = _entries.Count * 42;
-                int contentH = winRect.Height - TITLE_H - 60;
+                // Usar la misma formula que Draw: listRect.Height
+                int contentH = winRect.Height - TITLE_H - 4 - 24; // listRect = winRect.Height - TITLE_H - b*2 - 24
                 int maxScroll = Math.Max(0, totalH - contentH);
                 _scrollY = Math.Max(0, Math.Min(_scrollY, maxScroll));
             }
@@ -173,13 +174,14 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(titleRect.X, titleRect.Bottom, titleRect.Width, 2), new Color(245, 196, 81, 150));
 
             Utils.DrawBorderString(sb, "★ CODEX DE MEMORIA ★",
-                new Vector2(titleRect.X + 14, titleRect.Y + 10), new Color(245, 196, 81), 0.95f);
+                new Vector2(titleRect.X + 14, titleRect.Y + 12), new Color(245, 196, 81), 0.9f);
 
-            // Stats
+            // Stats (derecha) — alineado verticalmente con el titulo
             int slots = sp.RuneSlots();
             string statsText = $"Runas: {sp.MemorizedRunes.Count}/{slots}  |  Resonancia: {sp.ResonanceShards} ✦  |  Armas: {_entries.Count}";
+            var statsSize = FontAssets.MouseText.Value.MeasureString(statsText) * 0.75f;
             Utils.DrawBorderString(sb, statsText,
-                new Vector2(titleRect.Right - 280, titleRect.Y + 10),
+                new Vector2(titleRect.Right - statsSize.X - 8, titleRect.Y + 14),
                 new Color(179, 136, 255), 0.75f);
 
             // === BOTON CERRAR ===
