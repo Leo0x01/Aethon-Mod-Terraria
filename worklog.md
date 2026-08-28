@@ -1990,3 +1990,41 @@ Stage Summary:
 - Tree stays inside window (ClampPanOffset)
 - Zoom range 0.2-5.0 (much more zoom)
 - Nodes larger and more visible
+
+---
+Task ID: FIX-SCROLL-TREE-ART-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix infinite scroll in skill tree, improve tree art and node distribution.
+
+Work Log:
+- Fix scroll infinito en árbol de habilidades:
+  * Root cause: _lastScrollValue tracked the pre-reset ScrollWheelValue, but the global block reset ScrollWheelValue at end of frame. This created a negative delta on the next frame, causing continuous zoom-out (infinite scroll).
+  * Fix: Removed _lastScrollValue field. Now uses per-frame delta: ScrollWheelValue - ScrollWheelValueOld. Consumes scroll immediately after processing zoom.
+- Generated improved node textures with Python/PIL:
+  * Node_Small.png (28x28): blue-dark with blue glow, bright white core
+  * Node_Notable.png (36x36): bright blue with cyan glow
+  * Node_Keystone.png (44x44): gold with gold glow
+  * Node_Ascendancy.png (40x40): violet with violet glow
+  * Each texture: bright core + colored ring + dark border + radial glow
+- Updated DrawNode to use PNG textures:
+  * Loads textures via ModContent.Request<Texture2D>
+  * Tints based on state (allocated=gold, canAlloc=white, disabled=dim)
+  * Scales texture to node radius * 2.5
+  * Fallback to DrawCircle if texture fails
+- Added cosmic background texture to tree area:
+  * SkillTree_Background.png (400x300): nebula with 3 spiral arms, 600 stars, 25 bright glowing stars
+  * Drawn semi-transparent (alpha 100) over panel background
+- Improved glow effects:
+  * Keystones/Ascendancy: 3 layers, radius+5, alpha 12/6 (pulsating)
+  * Allocated: 3 layers, radius+4, alpha 10-i*2
+  * Hover: 3 layers, radius+4, alpha 8-i*2
+- Added animated stars in tree area
+- Build: 0 Errors, 0 Warnings
+- .tmod: 216KB (includes all new textures)
+- Pushed to GitHub: commit 70b101e
+
+Stage Summary:
+- No more infinite scroll in skill tree (uses per-frame delta, consumes immediately)
+- Nodes now use beautiful PNG textures with glow effects
+- Tree area has cosmic background with nebula and stars
+- Glow effects more pronounced (3 layers, larger radius)
