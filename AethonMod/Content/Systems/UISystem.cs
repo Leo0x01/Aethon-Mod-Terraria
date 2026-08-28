@@ -10,14 +10,34 @@ namespace AethonMod.Content.Systems
 {
     /// <summary>
     /// Sistema central de UI del mod Aethon.
-    /// Todas las UIs se dibujan directamente con sb.Draw() (sin UserInterface)
-    /// para evitar los cuadros blancos. Mismo patron que BranchChoiceUI.
+    ///
+    /// ORDEN DE EJECUCIÓN CRÍTICO:
+    /// 1. PreUpdatePlayers (UIScrollBlockPlayer) — bloquea input del juego
+    /// 2. Juego procesa input (ya bloqueado, no hace nada)
+    /// 3. PostUpdateInput (UISystem) — toggle de teclas + UIs procesan input
+    /// 4. ModifyInterfaceLayers — solo DIBUJA, no procesa input
+    ///
+    /// El truco: las UIs procesan su input en PostUpdateInput (paso 3),
+    /// que corre DESPUÉS de que UIScrollBlockPlayer bloqueó el input del juego.
+    /// Pero las UIs leen el estado ORIGINAL del mouse que el juego guardó
+    /// antes de que UIScrollBlockPlayer lo reseteara.
+    ///
+    /// Para que esto funcione, UIScrollBlockPlayer debe guardar una COPIA
+    /// del estado del mouse/teclado antes de resetearlo.
     /// </summary>
     public class UISystem : ModSystem
     {
         public UI.SkillTreeUI? SkillTreeUI;
         public UI.MemoryCodexUI? CodexUI;
         public UI.BranchChoiceUI? BranchChoiceUI;
+
+        // Copia del estado del mouse ANTES de que UIScrollBlockPlayer lo resetee
+        public static bool MouseLeft;
+        public static bool MouseRight;
+        public static bool MouseLeftRelease;
+        public static int ScrollDelta;
+        public static int MouseX;
+        public static int MouseY;
 
         public override void Load()
         {
@@ -32,6 +52,33 @@ namespace AethonMod.Content.Systems
             SkillTreeUI = null;
             CodexUI = null;
             BranchChoiceUI = null;
+        }
+
+        /// <summary>
+        /// Se llama en PreUpdate (antes de que el juego procese input).
+        /// Guardamos el estado del mouse para que las UIs lo puedan usar
+        /// después, y luego bloqueamos todo para que el juego no responda.
+        /// </summary>
+        public static void CaptureAndBlockInput()
+        {
+            // Guardar estado del mouse ANTES de bloquearlo
+            MouseLeft = Main.mouseLeft;
+            MouseRight = Main.mouseRight;
+            MouseLeftRelease = Main.mouseLeftRelease;
+            ScrollDelta = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            MouseX = Main.mouseX;
+            MouseY = Main.mouseY;
+
+            // Bloquear TODO el input del juego
+            Main.mouseLeft = false;
+            Main.mouseRight = false;
+            Main.mouseLeftRelease = false;
+            Main.mouseRightRelease = false;
+            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+
+            // Cerrar inventario
+            if (Main.playerInventory)
+                Main.playerInventory = false;
         }
 
         public override void PostUpdateInput()
@@ -73,14 +120,10 @@ namespace AethonMod.Content.Systems
                     Main.NewText("El Codex de Memoria no esta desbloqueado. Consigue un arma magica o de invocacion.",
                         new Color(180, 160, 220));
                 }
-                else if (sp != null && !sp.IsImprinted)
-                {
-                    Main.NewText("El Fragmento Genesis aun no tiene una rama.",
-                        new Color(180, 160, 220));
-                }
             }
 
-            // Update de las UIs
+            // === LAS UIs PROCESAN EL INPUT AQUI ===
+            // Usan UISystem.MouseLeft, MouseRight, etc. (copia guardada en PreUpdate)
             SkillTreeUI?.Update();
             CodexUI?.Update();
             BranchChoiceUI?.Update();
@@ -98,7 +141,7 @@ namespace AethonMod.Content.Systems
         {
             bool anyUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
 
-            // === DESACTIVAR INTERFAZ DEL JUEGO (como el bestiario) ===
+            // Desactivar capas vanilla cuando UI abierta
             if (anyUIOpen)
             {
                 layers.RemoveAll(layer =>
@@ -109,7 +152,6 @@ namespace AethonMod.Content.Systems
                     layer.Name.Contains("Vanilla: Tooltip"));
             }
 
-            // Insertar despues del cursor del mouse
             int mouseLayerIdx = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
             if (mouseLayerIdx == -1) mouseLayerIdx = layers.Count;
 
@@ -119,8 +161,7 @@ namespace AethonMod.Content.Systems
                 {
                     try
                     {
-                        // Todas las UIs se dibujan directamente con sb.Draw()
-                        // (no UserInterface, no UIState — patron directo)
+                        // SOLO DIBUJAR — el input se procesa en PostUpdateInput
                         SkillTreeUI?.Draw();
                         CodexUI?.Draw();
                         BranchChoiceUI?.Draw();

@@ -143,12 +143,18 @@ namespace AethonMod.Content.UI
             _time += 0.016f;
 
             var winRect = WindowRect;
-            bool mouseInWindow = winRect.Contains(Main.mouseX, Main.mouseY);
+            // Usar UISystem.MouseX/Y (copia guardada antes del bloqueo)
+            int mx = UISystem.MouseX;
+            int my = UISystem.MouseY;
+            bool ml = UISystem.MouseLeft;
+            bool mlr = UISystem.MouseLeftRelease;
+            int sd = UISystem.ScrollDelta;
+            bool mouseInWindow = winRect.Contains(mx, my);
 
             // === PAN CON CLICK DERECHO ===
             if (Main.mouseRight && mouseInWindow)
             {
-                Vector2 curMouse = new(Main.mouseX, Main.mouseY);
+                Vector2 curMouse = new(mx, my);
                 if (!_isPanning)
                 {
                     _isPanning = true;
@@ -162,11 +168,10 @@ namespace AethonMod.Content.UI
             }
             else _isPanning = false;
 
-            // === ZOOM CON RUEDA — usar UIScrollBlockPlayer.ScrollDelta ===
-            int scrollDelta = UIScrollBlockPlayer.ScrollDelta;
-            if (scrollDelta != 0 && mouseInWindow)
+            // === ZOOM CON RUEDA ===
+            if (sd != 0 && mouseInWindow)
             {
-                float zoomDelta = scrollDelta > 0 ? 0.15f : -0.15f;
+                float zoomDelta = sd > 0 ? 0.15f : -0.15f;
                 _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 5.0f);
             }
 
@@ -174,8 +179,8 @@ namespace AethonMod.Content.UI
             ClampPanOffset(winRect);
 
             // === CLICK EN NODOS ===
-            _hoveredNode = FindHoveredNode(winRect);
-            if (Main.mouseLeft && Main.mouseLeftRelease && !_mouseLeftPressed && _hoveredNode != null && !_isPanning)
+            _hoveredNode = FindHoveredNode(winRect, mx, my);
+            if (ml && mlr && !_mouseLeftPressed && _hoveredNode != null && !_isPanning)
             {
                 _mouseLeftPressed = true;
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
@@ -202,19 +207,15 @@ namespace AethonMod.Content.UI
                     }
                 }
             }
-            if (!Main.mouseLeft) _mouseLeftPressed = false;
+            if (!ml) _mouseLeftPressed = false;
 
             // === BOTON CERRAR ===
             Rectangle closeRect = new Rectangle(winRect.Right - 36, winRect.Y + 4, 32, 32);
-            if (closeRect.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease && !_mouseLeftPressed)
+            if (closeRect.Contains(mx, my) && ml && mlr && !_mouseLeftPressed)
             {
                 Hide();
                 return;
             }
-
-            // === BLOQUEAR INTERACCION CON EL JUEGO (GLOBAL, no solo ventana) ===
-            // Como el bestiario: toda interaccion con el juego se desactiva
-            // NOTA: UIScrollBlockPlayer ya maneja el scroll y el bloqueo de input
         }
 
         public void Draw()
@@ -375,9 +376,9 @@ namespace AethonMod.Content.UI
             }
         }
 
-        private PoESkillNode? FindHoveredNode(Rectangle treeRect)
+        private PoESkillNode? FindHoveredNode(Rectangle treeRect, int mx, int my)
         {
-            Vector2 mouse = new(Main.mouseX, Main.mouseY);
+            Vector2 mouse = new(mx, my);
             PoESkillNode? closest = null;
             float closestDist = float.MaxValue;
             foreach (var node in _allNodes)

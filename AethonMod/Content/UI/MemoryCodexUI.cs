@@ -71,21 +71,26 @@ namespace AethonMod.Content.UI
             _time += 0.016f;
 
             var winRect = WindowRect;
+            // Usar UISystem.MouseX/Y (copia guardada antes del bloqueo)
+            int mx = UISystem.MouseX;
+            int my = UISystem.MouseY;
+            bool ml = UISystem.MouseLeft;
+            bool mlr = UISystem.MouseLeftRelease;
+            int sd = UISystem.ScrollDelta;
 
-            // === SCROLL CON RUEDA — usar UIScrollBlockPlayer.ScrollDelta ===
-            int scrollDelta = UIScrollBlockPlayer.ScrollDelta;
-            if (scrollDelta != 0)
+            // === SCROLL CON RUEDA ===
+            if (sd != 0)
             {
-                _scrollY -= Math.Sign(scrollDelta) * 30;
+                _scrollY -= Math.Sign(sd) * 30;
                 int totalH = _entries.Count * 42;
-                int contentH = WIN_H - TITLE_H - 28; // listRect height
+                int contentH = WIN_H - TITLE_H - 28;
                 int maxScroll = Math.Max(0, totalH - contentH);
                 _scrollY = Math.Max(0, Math.Min(_scrollY, maxScroll));
             }
 
             // === BOTON CERRAR ===
             Rectangle closeRect = new Rectangle(winRect.Right - 36, winRect.Y + 4, 32, 32);
-            if (closeRect.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease && !_mouseLeftPressed)
+            if (closeRect.Contains(mx, my) && ml && mlr && !_mouseLeftPressed)
             {
                 _mouseLeftPressed = true;
                 Hide();
@@ -94,9 +99,9 @@ namespace AethonMod.Content.UI
 
             // === PROCESAR CLICK EN BOTONES MEMORIZAR/OLVIDAR ===
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-            if (sp != null && Main.mouseLeft && Main.mouseLeftRelease && !_mouseLeftPressed)
+            if (sp != null && ml && mlr && !_mouseLeftPressed)
             {
-                _hoveredEntry = FindHoveredButton(winRect);
+                _hoveredEntry = FindHoveredButton(winRect, mx, my);
                 if (_hoveredEntry != null)
                 {
                     _mouseLeftPressed = true;
@@ -124,7 +129,7 @@ namespace AethonMod.Content.UI
                     }
                 }
             }
-            if (!Main.mouseLeft) _mouseLeftPressed = false;
+            if (!ml) _mouseLeftPressed = false;
         }
 
         public void Draw()
@@ -283,7 +288,7 @@ namespace AethonMod.Content.UI
             if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();
         }
 
-        private MemoryCodexSystem.CodexEntry? FindHoveredButton(Rectangle winRect)
+        private MemoryCodexSystem.CodexEntry? FindHoveredButton(Rectangle winRect, int mx, int my)
         {
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null) return null;
@@ -302,8 +307,8 @@ namespace AethonMod.Content.UI
                 int btnW = 80, btnH = 24;
                 int btnX = rowX + rowW - btnW - 4;
                 int btnY = ey + 6;
-                if (Main.mouseX >= btnX && Main.mouseX <= btnX + btnW &&
-                    Main.mouseY >= btnY && Main.mouseY <= btnY + btnH)
+                if (mx >= btnX && mx <= btnX + btnW &&
+                    my >= btnY && my <= btnY + btnH)
                 {
                     return _entries[i];
                 }
