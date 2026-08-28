@@ -2106,3 +2106,29 @@ Changes:
 - Improved all projectile textures (ArcaneBolt, StarlightArrow, DawnSlash, CosmicOrbMinion, CosmicOrbBolt)
 - Build: 0 Errors, 0 Warnings
 - Pushed to GitHub: commit af2ed5d
+
+---
+Task ID: RESEARCH-AND-EPIC-WEAPONS-1
+Agent: Lead Developer (Z.ai Code)
+Task: Research skill trees online, improve weapon art to epic level.
+
+Research Conducted:
+- Searched for "Path of Exile skill tree implementation github tModLoader terraria mod"
+- Found: Exile Tree (Terraria mod inspired by PoE), Path of Terraria (with PassiveTreeEditor), Bismuth Mod skill tree
+- Found: PoE design deep-dive articles on tree layout, cluster design, node placement
+- Key findings from PoE design:
+  * Tree layout uses clock sectors, not a simple circle
+  * "Highways" of attribute nodes (+Str/Dex/Int) connect clusters
+  * Each cluster: 3-5 small nodes → 1 notable → optional keystone
+  * Small nodes are small circles, notables have icons, keystones have special glow
+  * Tree is READ from center outward, with paths that branch in multiple directions
+
+Epic Weapon Art Generated:
+- LuminaStarbow.png (40x60): golden bow with curved body + string + central star + golden glow
+- SolbrandEdge.png (50x50): orange sword with blade + cross guard + hilt + glowing tip + orange glow
+- GrimoireEternal.png (36x44): violet book with cover + central rune + runic lines + violet glow
+- Each weapon has cosmic glow in its branch color (gold/orange/violet)
+
+Build: 0 Errors, 0 Warnings
+- .tmod: 217KB
+- Pushed to GitHub: commit 6955411
