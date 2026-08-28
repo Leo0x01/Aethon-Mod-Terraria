@@ -2069,3 +2069,40 @@ Stage Summary:
 - Headers centered with two lines (title + stats)
 - Player completely frozen while UI open
 - Nodes now work: start auto-allocated, entries free, small/notable/keystone give effects
+
+---
+Task ID: INPUT-SYSTEM-REDESIGN-1
+Agent: Lead Developer (Z.ai Code)
+Task: Redesign the entire input system to fix all interaction issues at once.
+
+Root Cause Analysis:
+- UIScrollBlockPlayer.PreUpdate() runs BEFORE the game processes input
+- UISystem.PostUpdateInput() runs AFTER the game processes input
+- UIs read Main.mouseLeft in PostUpdateInput, but by then the game already consumed it
+- UIScrollBlockPlayer reset Main.mouseLeft=false in PreUpdate, before UIs could read it
+- This created a race condition: UIs never saw the click, game saw it and acted on it
+
+Solution: CAPTURE-BLOCK-READ pattern
+1. UIScrollBlockPlayer.PreUpdate():
+   - Calls UISystem.CaptureAndBlockInput()
+   - CaptureAndBlockInput saves mouse state to static fields (MouseLeft, MouseX, etc.)
+   - Then resets Main.mouseLeft=false, etc. (blocks game)
+   - Then blocks movement, items, inventory
+2. Game processes input (all blocked, does nothing)
+3. UISystem.PostUpdateInput():
+   - UIs read UISystem.MouseLeft, UISystem.MouseX, etc. (the captured copy)
+   - UIs process clicks, zoom, scroll correctly
+4. UISystem.ModifyInterfaceLayers:
+   - Only DRAWS, no input processing
+
+Changes:
+- UISystem: Added static fields MouseLeft, MouseRight, MouseLeftRelease, ScrollDelta, MouseX, MouseY
+- UISystem: Added CaptureAndBlockInput() method
+- UIScrollBlockPlayer: Simplified to call UISystem.CaptureAndBlockInput() + block movement
+- SkillTreeUI.Update: Uses UISystem.MouseLeft/X/Y instead of Main.mouseLeft/X/Y
+- SkillTreeUI.FindHoveredNode: Now takes mx,my parameters
+- MemoryCodexUI.Update: Uses UISystem.MouseLeft/X/Y instead of Main.mouseLeft/X/Y
+- MemoryCodexUI.FindHoveredButton: Now takes mx,my parameters
+- Improved all projectile textures (ArcaneBolt, StarlightArrow, DawnSlash, CosmicOrbMinion, CosmicOrbBolt)
+- Build: 0 Errors, 0 Warnings
+- Pushed to GitHub: commit af2ed5d
