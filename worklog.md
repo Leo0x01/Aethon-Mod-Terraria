@@ -1929,3 +1929,30 @@ Stage Summary:
 - Minion persists until buff is manually canceled (not when weapon changes)
 - Skill points correctly subtract node costs (not count)
 - Mana shield reduces damage before it's applied (prevents lethal damage)
+
+---
+Task ID: VERIFY-AND-FIX-1
+Agent: Lead Developer (Z.ai Code)
+Task: Verify previous fixes and resolve remaining issues from user screenshots.
+
+Work Log:
+- User showed screenshots from BEFORE the last fix, but asked to verify everything is fixed.
+- Verified and fixed 3 remaining issues:
+  1. Daño de invocación en tooltip: ModifyTooltips was missing the summon damage line
+     - Added tooltips.Insert with "X daño de invocación" (violeta) after Damage/Knockback line
+     - Now tooltip shows BOTH magic damage AND summon damage
+  2. Bloqueo de interacción: was only blocking inside window, not globally
+     - Changed from `if (mouseInWindow) { ... }` to unconditional block
+     - Now ALL game interaction is blocked (like the bestiary) — can't click inventory/hotbar/world
+     - Applied to both SkillTreeUI and MemoryCodexUI
+  3. Zoom range: was 0.4-2.5, now 0.3-3.0 for more zoom range
+- Verified minion persistence: CheckMinionBuff correctly only kills when buff is gone (not when weapon changes)
+- Build: 0 Errors, 0 Warnings
+- .tmod: 202KB
+- Pushed to GitHub: commit 18996d2
+
+Stage Summary:
+- Weapon tooltip now shows summon damage (hybrid Magic + Summon)
+- Game interaction fully blocked while UI open (global, not per-window)
+- Zoom range expanded (0.3 to 3.0)
+- Minion persists until buff is manually canceled
