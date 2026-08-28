@@ -1890,3 +1890,42 @@ Stage Summary:
 - Codex de memoria: interactividad funcionando (botones memorizar/olvidar)
 - Buff del minion ahora muestra nombre "Orbe Cósmico" y descripcion
 - Juego bloqueado mientras UIs abiertas (como el bestiario)
+
+---
+Task ID: FULL-BUG-FIX-1
+Agent: Lead Developer (Z.ai Code)
+Task: Full code review and bug fixes.
+
+Work Log:
+- Comprehensive code review found 6 critical bugs, 14 high priority, 10 medium
+- Fixed all 6 critical bugs:
+  1. Skill tree treeRect.Y was below the window — fixed to be inside (winRect.Y + TITLE_H + b)
+  2. Skill tree nodes were NOT connected to 'start' — entire tree was unreachable
+     - Added ConnectBidirectionalTree(tree, "start", "{cluster}-entry") for ALL clusters in all 3 trees
+     - Now the full skill tree is accessible from the start node
+  3. K/J hotkey immediately self-closed the UI
+     - Removed the toggle-key close check from Draw() methods
+     - Only Escape closes (toggle is handled by UISystem.PostUpdateInput)
+  4. Minion was killed when switching weapons — should persist until buff canceled
+     - CheckMinionBuff now only kills if buff is gone (not if weapon changed)
+     - Minion persists when switching weapons
+  5. Skill points subtracted COUNT of nodes instead of SUM of costs
+     - Added ShardPlayer.SpentSkillPoints() that sums actual node costs
+     - Added ShardPlayer.AvailableSkillPoints() = total - spent
+     - Updated all references in SkillTreeUI and weapon tooltips
+  6. Mana shield healed AFTER damage (could kill player on lethal hits)
+     - Moved from OnHurt (post-damage heal) to ModifyHurt (pre-damage reduction)
+     - modifiers.SourceDamage -= manaAbsorb reduces damage BEFORE it's applied
+     - Player no longer dies from lethal hits when mana shield is active
+- Token saved to /home/z/my-project/.zscripts/github-token.txt
+- Build: 0 Errors, 0 Warnings
+- .tmod: 202KB
+- Pushed to GitHub: commit 6d026ac
+
+Stage Summary:
+- Skill tree is now fully accessible (all nodes connected to start)
+- Skill tree renders inside the window (not below it)
+- K/J hotkey works correctly (open/close toggle, no self-close)
+- Minion persists until buff is manually canceled (not when weapon changes)
+- Skill points correctly subtract node costs (not count)
+- Mana shield reduces damage before it's applied (prevents lethal damage)
