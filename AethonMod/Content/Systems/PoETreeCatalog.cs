@@ -312,13 +312,13 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            // Nodo de entrada del cluster (conectado al camino principal)
+            // Nodo de entrada del cluster (conector GRATIS — no da efecto, solo conecta)
             string entryId = $"{clusterId}-entry";
             var entryNode = new PoESkillNode
             {
-                Id = entryId, Name = $"{clusterName} (Entrada)", Branch = clusterName,
-                Type = NodeType.Small, Cost = 1,
-                Effect = GetSmallEffect(clusterId, branch, 0),
+                Id = entryId, Name = $"{clusterName}", Branch = clusterName,
+                Type = NodeType.Small, Cost = 0, // GRATIS: solo es un conector
+                Effect = "Nodo de entrada — conecta al cluster",
                 X = clusterX - 40f, Y = clusterY,
             };
             tree.Nodes.Add(entryNode);

@@ -13,8 +13,8 @@ namespace AethonMod.Content.UI
 {
     /// <summary>
     /// Codex de Memoria — rediseñado desde cero.
-    /// Se dibuja DIRECTAMENTE con sb.Draw() (no UserInterface) para evitar
-    /// los cuadros blancos. Mismo patron que SkillTreeUI y BranchChoiceUI.
+    /// Se dibuja DIRECTAMENTE con sb.Draw() para evitar cuadros blancos.
+    /// Usa UIScrollBlockPlayer.ScrollDelta para el scroll (evita scroll infinito).
     /// </summary>
     public class MemoryCodexUI
     {
@@ -27,7 +27,7 @@ namespace AethonMod.Content.UI
 
         private const int WIN_W = 600;
         private const int WIN_H = 460;
-        private const int TITLE_H = 40;
+        private const int TITLE_H = 60; // Más alto para dos líneas
 
         private MemoryCodexSystem.CodexEntry? _hoveredEntry;
 
@@ -71,17 +71,14 @@ namespace AethonMod.Content.UI
             _time += 0.016f;
 
             var winRect = WindowRect;
-            bool mouseInWindow = winRect.Contains(Main.mouseX, Main.mouseY);
 
-            // === SCROLL CON RUEDA ===
-            int curScroll = Terraria.GameInput.PlayerInput.ScrollWheelValue;
-            int scrollDelta = curScroll - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            if (scrollDelta != 0 && mouseInWindow)
+            // === SCROLL CON RUEDA — usar UIScrollBlockPlayer.ScrollDelta ===
+            int scrollDelta = UIScrollBlockPlayer.ScrollDelta;
+            if (scrollDelta != 0)
             {
                 _scrollY -= Math.Sign(scrollDelta) * 30;
                 int totalH = _entries.Count * 42;
-                // Usar la misma formula que Draw: listRect.Height
-                int contentH = winRect.Height - TITLE_H - 4 - 24; // listRect = winRect.Height - TITLE_H - b*2 - 24
+                int contentH = WIN_H - TITLE_H - 28; // listRect height
                 int maxScroll = Math.Max(0, totalH - contentH);
                 _scrollY = Math.Max(0, Math.Min(_scrollY, maxScroll));
             }
@@ -128,13 +125,6 @@ namespace AethonMod.Content.UI
                 }
             }
             if (!Main.mouseLeft) _mouseLeftPressed = false;
-
-            // === BLOQUEAR INTERACCION CON EL JUEGO (GLOBAL) ===
-            Main.mouseLeft = false;
-            Main.mouseRight = false;
-            Main.mouseLeftRelease = false;
-            Main.mouseRightRelease = false;
-            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
         }
 
         public void Draw()
@@ -146,18 +136,17 @@ namespace AethonMod.Content.UI
             var sb = Main.spriteBatch;
             var winRect = WindowRect;
 
-            // === FONDO OSCURO SEMI-TRANSPARENTE (como el bestiario) ===
+            // === FONDO OSCURO ===
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Color(0, 0, 0, 180));
+                new Color(0, 0, 0, 200));
 
             // === VENTANA ===
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(winRect.X - 4, winRect.Y - 4, winRect.Width + 8, winRect.Height + 8),
                 new Color(0, 0, 0, 100));
-            sb.Draw(TextureAssets.MagicPixel.Value, winRect, new Color(15, 10, 25, 240));
+            sb.Draw(TextureAssets.MagicPixel.Value, winRect, new Color(15, 10, 25, 245));
 
-            // Estrellas
             DrawStars(sb, winRect);
 
             // === BORDE ===
@@ -168,20 +157,24 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.X, winRect.Y, b, winRect.Height), borderColor);
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.Right - b, winRect.Y, b, winRect.Height), borderColor);
 
-            // === BARRA DE TITULO ===
+            // === BARRA DE TITULO (dos líneas) ===
             Rectangle titleRect = new Rectangle(winRect.X + b, winRect.Y + b, winRect.Width - b * 2, TITLE_H);
             sb.Draw(TextureAssets.MagicPixel.Value, titleRect, new Color(20, 15, 40, 240));
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(titleRect.X, titleRect.Bottom, titleRect.Width, 2), new Color(245, 196, 81, 150));
 
-            Utils.DrawBorderString(sb, "★ CODEX DE MEMORIA ★",
-                new Vector2(titleRect.X + 14, titleRect.Y + 12), new Color(245, 196, 81), 0.9f);
+            // Línea 1: Título centrado
+            string titleText = "★ CODEX DE MEMORIA ★";
+            var titleSize = FontAssets.MouseText.Value.MeasureString(titleText) * 0.9f;
+            Utils.DrawBorderString(sb, titleText,
+                new Vector2(titleRect.X + (titleRect.Width - titleSize.X) / 2f, titleRect.Y + 6),
+                new Color(245, 196, 81), 0.9f);
 
-            // Stats (derecha) — alineado verticalmente con el titulo
+            // Línea 2: Stats centrados
             int slots = sp.RuneSlots();
             string statsText = $"Runas: {sp.MemorizedRunes.Count}/{slots}  |  Resonancia: {sp.ResonanceShards} ✦  |  Armas: {_entries.Count}";
             var statsSize = FontAssets.MouseText.Value.MeasureString(statsText) * 0.75f;
             Utils.DrawBorderString(sb, statsText,
-                new Vector2(titleRect.Right - statsSize.X - 8, titleRect.Y + 14),
+                new Vector2(titleRect.X + (titleRect.Width - statsSize.X) / 2f, titleRect.Y + 30),
                 new Color(179, 136, 255), 0.75f);
 
             // === BOTON CERRAR ===
@@ -280,11 +273,11 @@ namespace AethonMod.Content.UI
             // Footer
             Rectangle footerRect = new Rectangle(winRect.X + b, winRect.Bottom - b - 22, winRect.Width - b * 2, 22);
             sb.Draw(TextureAssets.MagicPixel.Value, footerRect, new Color(8, 6, 16, 200));
-            Utils.DrawBorderString(sb, "Click: memorizar/olvidar  |  Rueda: scroll  |  J/Esc: cerrar",
+            Utils.DrawBorderString(sb, "Click: memorizar/olvidar  |  Rueda: scroll  |  Esc: cerrar",
                 new Vector2(footerRect.X + footerRect.Width / 2f, footerRect.Y + 6),
                 new Color(140, 130, 170), 0.7f, 0.5f, 0f);
 
-            // Cerrar SOLO con Esc (el toggle J ya se maneja en UISystem.PostUpdateInput)
+            // Cerrar SOLO con Esc
             var kb = Main.keyState;
             var oldKb = Main.oldKeyState;
             if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();

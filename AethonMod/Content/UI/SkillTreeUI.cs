@@ -44,7 +44,7 @@ namespace AethonMod.Content.UI
         // Dimensiones de la ventana
         private const int WIN_W = 700;
         private const int WIN_H = 500;
-        private const int TITLE_H = 40;
+        private const int TITLE_H = 60; // dos líneas: título + stats
 
         private PoESkillNode? _hoveredNode;
 
@@ -66,7 +66,11 @@ namespace AethonMod.Content.UI
             LoadTextures();
             _tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
             BuildNodeIndex();
-            _zoom = 0.8f;
+            // Auto-asignar el nodo "start" (punto de partida) si no está asignado
+            if (!sp.AllocatedNodes.Contains("start"))
+                sp.AllocatedNodes.Add("start");
+            // Zoom inicial que asegura que todo el arbol quepa en la ventana
+            _zoom = 0.5f;
             _panOffset = Vector2.Zero;
             IsVisible = true;
             Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
@@ -158,14 +162,12 @@ namespace AethonMod.Content.UI
             }
             else _isPanning = false;
 
-            // === ZOOM CON RUEDA (usar delta per-frame, no tracking manual) ===
-            int scrollDelta = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            // === ZOOM CON RUEDA — usar UIScrollBlockPlayer.ScrollDelta ===
+            int scrollDelta = UIScrollBlockPlayer.ScrollDelta;
             if (scrollDelta != 0 && mouseInWindow)
             {
                 float zoomDelta = scrollDelta > 0 ? 0.15f : -0.15f;
                 _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 5.0f);
-                // Consumir el scroll inmediatamente para que no se acumule
-                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
             }
 
             // Clamp el pan para que el arbol no se salga de la ventana
@@ -212,11 +214,7 @@ namespace AethonMod.Content.UI
 
             // === BLOQUEAR INTERACCION CON EL JUEGO (GLOBAL, no solo ventana) ===
             // Como el bestiario: toda interaccion con el juego se desactiva
-            Main.mouseLeft = false;
-            Main.mouseRight = false;
-            Main.mouseLeftRelease = false;
-            Main.mouseRightRelease = false;
-            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            // NOTA: UIScrollBlockPlayer ya maneja el scroll y el bloqueo de input
         }
 
         public void Draw()
@@ -252,23 +250,24 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.X, winRect.Y, b, winRect.Height), borderColor);
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.Right - b, winRect.Y, b, winRect.Height), borderColor);
 
-            // === BARRA DE TITULO ===
+            // === BARRA DE TITULO (dos líneas centradas) ===
             Rectangle titleRect = new Rectangle(winRect.X + b, winRect.Y + b, winRect.Width - b * 2, TITLE_H);
             sb.Draw(TextureAssets.MagicPixel.Value, titleRect, new Color(20, 15, 40, 240));
             sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(titleRect.X, titleRect.Bottom, titleRect.Width, 2), new Color(245, 196, 81, 150));
 
-            // Titulo centrado verticalmente en la barra
+            // Línea 1: Título centrado
             string titleText = "★ ARBOL DE HABILIDADES ★";
+            var titleSize = FontAssets.MouseText.Value.MeasureString(titleText) * 0.9f;
             Utils.DrawBorderString(sb, titleText,
-                new Vector2(titleRect.X + 14, titleRect.Y + 12), new Color(245, 196, 81), 0.9f);
+                new Vector2(titleRect.X + (titleRect.Width - titleSize.X) / 2f, titleRect.Y + 6),
+                new Color(245, 196, 81), 0.9f);
 
-            // Info de puntos (derecha) — misma alineacion vertical que el titulo
+            // Línea 2: Stats centrados
             int avail = sp.AvailableSkillPoints();
-            string ptsText = $"Puntos: {avail}  |  Gastados: {sp.SpentSkillPoints()}";
-            // Medir el texto para alinearlo a la derecha
+            string ptsText = $"Puntos: {avail}  |  Gastados: {sp.SpentSkillPoints()}  |  Nivel {sp.ShardLevel}";
             var ptsSize = FontAssets.MouseText.Value.MeasureString(ptsText) * 0.75f;
             Utils.DrawBorderString(sb, ptsText,
-                new Vector2(titleRect.Right - ptsSize.X - 8, titleRect.Y + 14),
+                new Vector2(titleRect.X + (titleRect.Width - ptsSize.X) / 2f, titleRect.Y + 30),
                 avail > 0 ? new Color(120, 255, 150) : new Color(180, 180, 200), 0.75f);
 
             // === BOTON CERRAR ===
