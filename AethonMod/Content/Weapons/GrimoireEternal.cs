@@ -200,15 +200,41 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyTooltips(System.Collections.Generic.List<TooltipLine> tooltips)
         {
-            // Añadir barra de XP del fragmento al tooltip
             var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
-            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
+            if (sp == null) return;
+
+            // === AÑADIR LÍNEA DE DAÑO DE INVOCACIÓN ===
+            // Encontrar la línea de daño mágico y añadir summon damage después
+            int insertIndex = -1;
+            for (int i = 0; i < tooltips.Count; i++)
+            {
+                if (tooltips[i].Name == "Damage" || tooltips[i].Name == "Knockback")
+                {
+                    insertIndex = i + 1;
+                    break;
+                }
+            }
+
+            // Calcular daño de invocación
+            int summonDmg = Item.damage;
+            if (sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
+            {
+                summonDmg = (int)(Item.damage * (1f + sp.ShardLevel * 0.01f));
+            }
+
+            if (insertIndex >= 0)
+            {
+                tooltips.Insert(insertIndex, new TooltipLine(Mod, "SummonDamage",
+                    $"[c/BE78FD:{summonDmg} daño de invocación]"));
+            }
+
+            // === BARRA DE XP DEL FRAGMENTO ===
+            if (sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
                 int xpNeeded = sp.XPForNextLevel();
                 float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
                 pct = System.Math.Clamp(pct, 0f, 1f);
 
-                // Barra de XP visual con caracteres
                 int barLen = 20;
                 int filled = (int)(barLen * pct);
                 string bar = "[";
@@ -216,9 +242,12 @@ namespace AethonMod.Content.Weapons
                     bar += i < filled ? "█" : "░";
                 bar += "]";
 
-                tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
-                tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
-                tooltips.Add(new TooltipLine(Mod, "FragmentPts", $"Puntos: {sp.AvailableSkillPoints()} disponibles") { OverrideColor = new Color(120, 255, 150) });
+                tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]"));
+                tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"[c/B388FF:{bar} {sp.ShardXP}/{xpNeeded} XP]"));
+                tooltips.Add(new TooltipLine(Mod, "FragmentPts",
+                    sp.AvailableSkillPoints() > 0
+                    ? $"[c/78FF96:Puntos: {sp.AvailableSkillPoints()} disponibles]"
+                    : "[c/78788C:Sin puntos disponibles]"));
             }
         }
     }

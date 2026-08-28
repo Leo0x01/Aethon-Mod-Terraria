@@ -128,15 +128,12 @@ namespace AethonMod.Content.UI
             }
             if (!Main.mouseLeft) _mouseLeftPressed = false;
 
-            // === BLOQUEAR INTERACCION CON EL JUEGO ===
-            if (mouseInWindow)
-            {
-                Main.mouseLeft = false;
-                Main.mouseRight = false;
-                Main.mouseLeftRelease = false;
-                Main.mouseRightRelease = false;
-                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            }
+            // === BLOQUEAR INTERACCION CON EL JUEGO (GLOBAL) ===
+            Main.mouseLeft = false;
+            Main.mouseRight = false;
+            Main.mouseLeftRelease = false;
+            Main.mouseRightRelease = false;
+            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
         }
 
         public void Draw()

@@ -139,7 +139,7 @@ namespace AethonMod.Content.UI
             if (scrollDelta != 0 && mouseInWindow)
             {
                 float zoomDelta = scrollDelta > 0 ? 0.1f : -0.1f;
-                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.4f, 2.5f);
+                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.3f, 3.0f);
             }
 
             // === CLICK EN NODOS ===
@@ -181,15 +181,13 @@ namespace AethonMod.Content.UI
                 return;
             }
 
-            // === BLOQUEAR INTERACCION CON EL JUEGO ===
-            if (mouseInWindow)
-            {
-                Main.mouseLeft = false;
-                Main.mouseRight = false;
-                Main.mouseLeftRelease = false;
-                Main.mouseRightRelease = false;
-                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            }
+            // === BLOQUEAR INTERACCION CON EL JUEGO (GLOBAL, no solo ventana) ===
+            // Como el bestiario: toda interaccion con el juego se desactiva
+            Main.mouseLeft = false;
+            Main.mouseRight = false;
+            Main.mouseLeftRelease = false;
+            Main.mouseRightRelease = false;
+            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
         }
 
         public void Draw()
