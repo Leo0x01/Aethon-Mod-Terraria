@@ -1956,3 +1956,37 @@ Stage Summary:
 - Game interaction fully blocked while UI open (global, not per-window)
 - Zoom range expanded (0.3 to 3.0)
 - Minion persists until buff is manually canceled
+
+---
+Task ID: FIX-SCROLL-ALIGN-ZOOM-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix infinite scroll, text misalignment, tree clipping, zoom range, node visibility.
+
+Work Log:
+- Fix scroll infinito en codex:
+  * contentH in Update used different formula than Draw (60 vs 24)
+  * Unified to use same formula: winRect.Height - TITLE_H - 4 - 24
+  * Scroll now stops at the correct position
+- Fix text misalignment in title bars (both tree and codex):
+  * Title and stats now use the same Y offset (titleRect.Y + 12/14)
+  * Stats text aligned to right edge using MeasureString
+  * Both now appear on the same vertical baseline
+- Fix tree clipping outside window:
+  * Added ClampPanOffset method that limits pan offset to tree bounds
+  * Tree can no longer be dragged outside the visible window
+  * When zoom makes tree smaller than window, pan resets to 0
+- Zoom range expanded:
+  * Was 0.3-3.0, now 0.2-5.0 (10x more zoom range as requested)
+  * Zoom step increased from 0.1 to 0.15 for faster zooming
+- Node sizes increased for better visibility:
+  * Small: 7→9px, Notable: 10→14px, Keystone: 14→18px, Ascendancy: 12→16px
+- Build: 0 Errors, 0 Warnings
+- .tmod: 203KB
+- Pushed to GitHub: commit 729cdd1
+
+Stage Summary:
+- Codex scroll no longer infinite (stops at correct position)
+- Title bar texts aligned correctly (same baseline)
+- Tree stays inside window (ClampPanOffset)
+- Zoom range 0.2-5.0 (much more zoom)
+- Nodes larger and more visible
