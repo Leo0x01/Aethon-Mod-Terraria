@@ -107,7 +107,7 @@ namespace AethonMod.Content.Weapons
 
                 tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
                 tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
-                tooltips.Add(new TooltipLine(Mod, "FragmentPts", $"Puntos: {sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count} disponibles") { OverrideColor = new Color(120, 255, 150) });
+                tooltips.Add(new TooltipLine(Mod, "FragmentPts", $"Puntos: {sp.AvailableSkillPoints()} disponibles") { OverrideColor = new Color(120, 255, 150) });
             }
         }
     }

@@ -158,6 +158,25 @@ namespace AethonMod.Content.Players
             return total;
         }
 
+        /// <summary>Puntos de habilidad gastados (suma de costos de nodos asignados).</summary>
+        public int SpentSkillPoints()
+        {
+            int spent = 0;
+            var tree = Systems.PoETreeCatalog.GetTree(ActiveBranch);
+            foreach (var nodeId in AllocatedNodes)
+            {
+                var node = tree.Nodes.Find(n => n.Id == nodeId);
+                if (node != null) spent += node.Cost;
+            }
+            return spent;
+        }
+
+        /// <summary>Puntos de habilidad disponibles (total ganado - gastado).</summary>
+        public int AvailableSkillPoints()
+        {
+            return CumulativeSkillPoints() - SpentSkillPoints();
+        }
+
         /// <summary>Slots de Runa de Memoria disponibles según el nivel.</summary>
         public int RuneSlots()
         {
@@ -213,38 +232,47 @@ namespace AethonMod.Content.Players
         // --- Manejar daño entrante (escudo de maná) ---
         public override void ModifyHurt(ref Player.HurtModifiers modifiers)
         {
-            // Escudo de maná: el dano drena maná antes que HP.
-            // Nota: ApplyTo(0) devuelve solo la parte flat del StatModifier, que es 0 aqui.
-            // Por eso antes no funcionaba. Usamos modifiers.SourceDamage (que tiene el valor base)
-            // y dejamos que el escudo se aplique en OnHurt con el valor finalizado.
-            // Aqui solo marcamos que el jugador tiene escudo; la logica real esta en OnHurt.
-        }
-
-        public override void OnHurt(Player.HurtInfo info)
-        {
-            // Escudo de maná: drenar maná proporcional al dano recibido.
-            if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0 && info.Damage > 0)
+            // Escudo de maná: reducir el daño ANTES de que se aplique (no curar después).
+            if (Systems.NodeEffectSystem.HasManaShield(Player) && Player.statMana > 0)
             {
-                // Absorber hasta el 50% del dano con maná (escudo notable) o 80% (keystone).
+                // Calcular cuanto maná podemos absorber
                 float absorbPct = 0.5f;
                 if (Systems.NodeEffectSystem.HasNode(Player, "barrier-keystone"))
                     absorbPct = 0.8f;
 
-                int manaAbsorb = (int)(info.Damage * absorbPct);
+                // El daño base antes de modificadores
+                float baseDamage = modifiers.SourceDamage.ApplyTo(0);
+                if (baseDamage <= 0) baseDamage = 1;
+
+                int manaAbsorb = (int)(baseDamage * absorbPct);
                 manaAbsorb = System.Math.Min(Player.statMana, manaAbsorb);
+
                 if (manaAbsorb > 0)
                 {
+                    // Drenar maná
                     Player.statMana -= manaAbsorb;
-                    // Curar la vida equivalente al maná absorbido.
-                    int healHp = manaAbsorb;
-                    Player.statLife = System.Math.Min(Player.statLifeMax2, Player.statLife + healHp);
-                    Player.HealEffect(healHp, true);
+                    // Reducir el daño (antes de que se aplique)
+                    modifiers.SourceDamage -= manaAbsorb;
                     // Particulas visuales
                     for (int i = 0; i < 8; i++)
                         Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.Enchanted_Pink,
                             new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
                             100, default, 1.2f);
                 }
+            }
+        }
+
+        public override void OnHurt(Player.HurtInfo info)
+        {
+            // El escudo de maná ahora se maneja en ModifyHurt (antes del daño).
+            // Aqui solo efectos visuales si el jugador tiene el escudo.
+            if (Systems.NodeEffectSystem.HasManaShield(Player))
+            {
+                // Polvo adicional al recibir daño con escudo activo
+                for (int i = 0; i < 4; i++)
+                    Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.Enchanted_Pink,
+                        new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                        80, default, 1f);
             }
         }
     }

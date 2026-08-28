@@ -285,12 +285,10 @@ namespace AethonMod.Content.UI
                 new Vector2(footerRect.X + footerRect.Width / 2f, footerRect.Y + 6),
                 new Color(140, 130, 170), 0.7f, 0.5f, 0f);
 
-            // Cerrar con J o Esc
+            // Cerrar SOLO con Esc (el toggle J ya se maneja en UISystem.PostUpdateInput)
             var kb = Main.keyState;
             var oldKb = Main.oldKeyState;
             if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();
-            var config = ModContent.GetInstance<Content.AethonConfig>();
-            if (config != null && kb.IsKeyDown(config.CodexKey) && !oldKb.IsKeyDown(config.CodexKey)) Hide();
         }
 
         private MemoryCodexSystem.CodexEntry? FindHoveredButton(Rectangle winRect)

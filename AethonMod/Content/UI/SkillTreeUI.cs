@@ -158,7 +158,7 @@ namespace AethonMod.Content.UI
                     }
                     else if (CanAllocate(node, sp))
                     {
-                        int avail = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
+                        int avail = sp.AvailableSkillPoints();
                         if (avail < node.Cost)
                         {
                             Main.NewText($"Necesitas {node.Cost} pts, tienes {avail}.", new Color(255, 120, 120));
@@ -234,8 +234,8 @@ namespace AethonMod.Content.UI
                 new Vector2(titleRect.X + 14, titleRect.Y + 10), new Color(245, 196, 81), 0.95f);
 
             // Info de puntos (derecha)
-            int avail = sp.CumulativeSkillPoints() - sp.AllocatedNodes.Count;
-            string ptsText = $"Puntos: {avail}  |  Asignados: {sp.AllocatedNodes.Count}";
+            int avail = sp.AvailableSkillPoints();
+            string ptsText = $"Puntos: {avail}  |  Gastados: {sp.SpentSkillPoints()}";
             Utils.DrawBorderString(sb, ptsText,
                 new Vector2(titleRect.Right - 180, titleRect.Y + 10),
                 avail > 0 ? new Color(120, 255, 150) : new Color(180, 180, 200), 0.75f);
@@ -248,7 +248,7 @@ namespace AethonMod.Content.UI
             DrawX(sb, closeRect, closeHover ? Color.White : new Color(220, 180, 180), 2f);
 
             // === AREA DEL ARBOL ===
-            Rectangle treeRect = new Rectangle(winRect.X + b, winRect.Bottom - b - 24, winRect.Width - b * 2, winRect.Height - TITLE_H - b * 2 - 24);
+            Rectangle treeRect = new Rectangle(winRect.X + b, winRect.Y + TITLE_H + b, winRect.Width - b * 2, winRect.Height - TITLE_H - b * 2 - 24);
 
             if (_allNodes.Count > 0)
             {
@@ -289,12 +289,12 @@ namespace AethonMod.Content.UI
                 new Vector2(footerRect.X + footerRect.Width / 2f, footerRect.Y + 6),
                 new Color(140, 130, 170), 0.7f, 0.5f, 0f);
 
-            // === CERRAR CON K O ESC ===
+            // === CERRAR SOLO CON ESC ===
+            // NOTA: El toggle K/J ya se maneja en UISystem.PostUpdateInput.
+            // Si lo cerramos aqui tambien, se cierra en el mismo frame que se abre.
             var kb = Main.keyState;
             var oldKb = Main.oldKeyState;
             if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();
-            var config = ModContent.GetInstance<Content.AethonConfig>();
-            if (config != null && kb.IsKeyDown(config.SkillTreeKey) && !oldKb.IsKeyDown(config.SkillTreeKey)) Hide();
         }
 
         private Vector2 NodeToScreen(PoESkillNode node, Rectangle treeRect)

@@ -157,6 +157,12 @@ namespace AethonMod.Content.Systems
             // Conexión circular (último al primero)
             ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
 
+            // === CONECTAR START A CADA CLUSTER (para que el arbol sea accesible) ===
+            foreach (var (id, _, _, _, _, _, _) in clusterDefs)
+            {
+                ConnectBidirectionalTree(tree, "start", $"{id}-entry");
+            }
+
             // Zona de Ascendancy (potenciadores procedurales post-100)
             BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Distance);
 
@@ -209,6 +215,12 @@ namespace AethonMod.Content.Systems
             for (int i = 0; i < clusterDefs.Length - 1; i++)
                 ConnectClusters(tree, clusterDefs[i].id, clusterDefs[i + 1].id);
             ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
+
+            // === CONECTAR START A CADA CLUSTER (para que el arbol sea accesible) ===
+            foreach (var (id, _, _, _, _, _, _) in clusterDefs)
+            {
+                ConnectBidirectionalTree(tree, "start", $"{id}-entry");
+            }
 
             BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Melee);
 
@@ -263,6 +275,12 @@ namespace AethonMod.Content.Systems
             for (int i = 0; i < clusterDefs.Length - 1; i++)
                 ConnectClusters(tree, clusterDefs[i].id, clusterDefs[i + 1].id);
             ConnectClusters(tree, clusterDefs[^1].id, clusterDefs[0].id);
+
+            // === CONECTAR START A CADA CLUSTER (para que el arbol sea accesible) ===
+            foreach (var (id, _, _, _, _, _, _) in clusterDefs)
+            {
+                ConnectBidirectionalTree(tree, "start", $"{id}-entry");
+            }
 
             BuildAscendancyZone(tree, cx, cy - 800f, BranchType.Magic);
 

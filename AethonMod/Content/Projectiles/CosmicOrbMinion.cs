@@ -129,17 +129,15 @@ namespace AethonMod.Content.Projectiles
                 }
             }
 
-            // El minion se mantiene mientras el jugador tenga el Grimorio EN LA MANO (no en cualquier slot)
-            bool hasGrimoire = owner.HeldItem != null &&
-                               owner.HeldItem.type == ModContent.ItemType<Weapons.GrimoireEternal>();
-
-            if (!hasGrimoire)
+            // El minion SOLO se elimina si el buff fue cancelado (click derecho en el icono del buff)
+            // NO se elimina al cambiar de arma — persiste hasta que el jugador cancele el buff.
+            if (!hasBuff)
             {
                 Projectile.Kill();
             }
-            else if (hasGrimoire)
+            else
             {
-                // Renovar el buff mientras el grimorio este equipado
+                // Renovar el buff (que no se agote)
                 owner.AddBuff(buffType, 18000);
             }
         }
