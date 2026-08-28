@@ -2028,3 +2028,44 @@ Stage Summary:
 - Nodes now use beautiful PNG textures with glow effects
 - Tree area has cosmic background with nebula and stars
 - Glow effects more pronounced (3 layers, larger radius)
+
+---
+Task ID: FIX-ALL-ISSUES-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix scroll infinite, text alignment, character movement, node effects.
+
+Work Log:
+- Fix scroll infinito (árbol y codex):
+  * Root cause: UIScrollBlockPlayer.PreUpdate() reset ScrollWheelValue before the UIs could read it in PostUpdateInput, making the delta always 0 or causing infinite scroll
+  * Solution: UIScrollBlockPlayer now SAVES the scroll delta (ScrollWheelValue - ScrollWheelValueOld) in a static field BEFORE resetting
+  * UIs use UIScrollBlockPlayer.ScrollDelta instead of reading ScrollWheelValue directly
+  * Removed redundant scroll reset from SkillTreeUI.Update()
+- Fix texts overlapping and misaligned (codex and tree):
+  * TITLE_H increased from 40 to 60 (two lines)
+  * Line 1: Title centered using MeasureString
+  * Line 2: Stats centered using MeasureString
+  * Both codex and tree now have centered, non-overlapping headers
+- Fix character moves when interacting with UI:
+  * UIScrollBlockPlayer now blocks ALL movement:
+    - velocity.X = 0 (was *= 0.8 which still allowed drift)
+    - controlLeft/Right/Up/Down/Jump = false
+    - controlUseItem/UseTile = false
+    - grappling[0] = -1 (cancel grapple)
+  * PreUpdateMovement also blocks movement
+  * Player is now completely frozen while UI is open (like bestiary)
+- Fix nodes don't do anything:
+  * Root cause 1: 'start' node was not auto-allocated, so no nodes were accessible
+    - Fix: Auto-allocate 'start' when tree opens
+  * Root cause 2: Entry nodes cost 1 point but gave no effect (NodeEffectSystem doesn't check 'entry' IDs)
+    - Fix: Entry nodes now Cost = 0 (free, just connectors, no effect text)
+  * Root cause 3: Nodes were not connected to 'start' (fixed in previous commit)
+  * Now: start is free and auto-allocated → entry nodes are free → small-0/1/2/notable/keystone give real effects
+- Build: 0 Errors, 0 Warnings
+- .tmod: 216KB
+- Pushed to GitHub: commit 5b1219f
+
+Stage Summary:
+- No more infinite scroll (UIScrollBlockPlayer.ScrollDelta pattern)
+- Headers centered with two lines (title + stats)
+- Player completely frozen while UI open
+- Nodes now work: start auto-allocated, entries free, small/notable/keystone give effects
