@@ -2132,3 +2132,38 @@ Epic Weapon Art Generated:
 Build: 0 Errors, 0 Warnings
 - .tmod: 217KB
 - Pushed to GitHub: commit 6955411
+
+---
+Task ID: DEEP-ANALYSIS-FIX-1
+Agent: Lead Developer (Z.ai Code)
+Task: Deep analysis and fix of scroll infinite, character interaction, and pan issues.
+
+Deep Analysis:
+1. SCROLL INFINITO:
+   - Root cause: CaptureAndBlockInput reset ScrollWheelValue in PreUpdate
+   - But the OS kept reporting the same delta next frame
+   - ScrollDelta was never 0 because the reset created a cycle
+   - Fix: Don't reset ScrollWheelValue in PreUpdate. Reset ScrollDelta=0 AFTER UIs read it in PostUpdateInput. Reset ScrollWheelValue in PostUpdateInput too.
+
+2. INTERACCIÓN LLEGA AL PERSONAJE:
+   - Root cause: SkillTreeUI used Main.mouseRight (line 155) for pan
+   - But Main.mouseRight was already reset to false by CaptureAndBlockInput
+   - The right-click never reached the UI, went to the game instead
+   - Fix: Changed Main.mouseRight to UISystem.MouseRight (captured copy)
+   - Also: Use Main.playerInventory=true to put game in 'menu mode' (like bestiary)
+   - In menu mode, the game doesn't process world clicks for attacking/placing
+
+3. PAN CON CLICK DERECHO:
+   - Same root cause as #2 — used Main.mouseRight instead of UISystem.MouseRight
+   - Fixed by using the captured copy
+
+Research:
+- Searched for Path of Terraria source code on GitHub
+- Found PassiveTreeEditor (Lua, not useful for C#)
+- Found Exile Tree mod (Terraria, PoE-inspired)
+- Found PoE design articles about tree layout
+- Key insight: Main.playerInventory=true is how Terraria blocks world interaction
+
+Build: 0 Errors, 0 Warnings
+- .tmod: 217KB
+- Pushed to GitHub: commit e8dded7
