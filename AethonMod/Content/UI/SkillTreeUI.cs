@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -25,8 +26,14 @@ namespace AethonMod.Content.UI
         private Vector2 _panOffset = Vector2.Zero;
         private bool _isPanning = false;
         private Vector2 _lastMouse = Vector2.Zero;
-        private int _lastScrollValue = 0;
         private bool _mouseLeftPressed = false;
+
+        // Texturas PNG para nodos y fondo
+        private Texture2D? _bgTexture;
+        private Texture2D? _nodeSmallTex;
+        private Texture2D? _nodeNotableTex;
+        private Texture2D? _nodeKeystoneTex;
+        private Texture2D? _nodeAscendancyTex;
 
         private PoESkillTree? _tree;
         private List<PoESkillNode> _allNodes = new();
@@ -56,12 +63,31 @@ namespace AethonMod.Content.UI
                 Main.NewText("El Fragmento Genesis aun no tiene una rama.", new Color(180, 160, 220));
                 return;
             }
+            LoadTextures();
             _tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
             BuildNodeIndex();
             _zoom = 0.8f;
             _panOffset = Vector2.Zero;
             IsVisible = true;
             Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+        }
+
+        private void LoadTextures()
+        {
+            try
+            {
+                if (_bgTexture == null)
+                    _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/SkillTree_Background", AssetRequestMode.ImmediateLoad).Value;
+                if (_nodeSmallTex == null)
+                    _nodeSmallTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Small", AssetRequestMode.ImmediateLoad).Value;
+                if (_nodeNotableTex == null)
+                    _nodeNotableTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Notable", AssetRequestMode.ImmediateLoad).Value;
+                if (_nodeKeystoneTex == null)
+                    _nodeKeystoneTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Keystone", AssetRequestMode.ImmediateLoad).Value;
+                if (_nodeAscendancyTex == null)
+                    _nodeAscendancyTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Ascendancy", AssetRequestMode.ImmediateLoad).Value;
+            }
+            catch { /* fallback a DrawCircle si las texturas no cargan */ }
         }
 
         public void Hide()
@@ -132,14 +158,14 @@ namespace AethonMod.Content.UI
             }
             else _isPanning = false;
 
-            // === ZOOM CON RUEDA ===
-            int curScroll = Terraria.GameInput.PlayerInput.ScrollWheelValue;
-            int scrollDelta = curScroll - _lastScrollValue;
-            _lastScrollValue = curScroll;
+            // === ZOOM CON RUEDA (usar delta per-frame, no tracking manual) ===
+            int scrollDelta = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
             if (scrollDelta != 0 && mouseInWindow)
             {
                 float zoomDelta = scrollDelta > 0 ? 0.15f : -0.15f;
                 _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 5.0f);
+                // Consumir el scroll inmediatamente para que no se acumule
+                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
             }
 
             // Clamp el pan para que el arbol no se salga de la ventana
@@ -254,6 +280,15 @@ namespace AethonMod.Content.UI
 
             // === AREA DEL ARBOL ===
             Rectangle treeRect = new Rectangle(winRect.X + b, winRect.Y + TITLE_H + b, winRect.Width - b * 2, winRect.Height - TITLE_H - b * 2 - 24);
+
+            // === FONDO COSMICO TEXTURIZADO ===
+            if (_bgTexture != null)
+            {
+                sb.Draw(_bgTexture, treeRect, new Color(255, 255, 255, 100));
+            }
+
+            // Estrellas animadas sutiles
+            DrawStars(sb, treeRect);
 
             if (_allNodes.Count > 0)
             {
@@ -381,6 +416,16 @@ namespace AethonMod.Content.UI
         {
             float radius = GetNodeRadius(node);
 
+            // Seleccionar textura segun tipo de nodo
+            Texture2D? nodeTex = node.Type switch
+            {
+                NodeType.Small => _nodeSmallTex,
+                NodeType.Notable => _nodeNotableTex,
+                NodeType.Keystone => _nodeKeystoneTex,
+                NodeType.Ascendancy => _nodeAscendancyTex,
+                _ => _nodeSmallTex,
+            };
+
             Color baseColor = node.Type switch
             {
                 NodeType.Small => new Color(100, 90, 130),
@@ -392,14 +437,14 @@ namespace AethonMod.Content.UI
 
             if (!allocated && !canAlloc) baseColor *= 0.25f;
 
-            // Glow para keystones
+            // Glow pulsante para keystones/ascendancy
             if (node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
             {
                 float pulse = 0.7f + 0.3f * (float)Math.Sin(_time * 2f + pos.X * 0.01f);
                 for (int i = 3; i > 0; i--)
                 {
-                    int gr = (int)(radius + i * 4);
-                    int a = (int)((allocated ? 8 : 4) * pulse);
+                    int gr = (int)(radius + i * 5);
+                    int a = (int)((allocated ? 12 : 6) * pulse);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
                         new Color(baseColor.R, baseColor.G, baseColor.B, a));
@@ -408,34 +453,47 @@ namespace AethonMod.Content.UI
 
             // Glow dorado si asignado
             if (allocated)
-                for (int i = 2; i > 0; i--)
+                for (int i = 3; i > 0; i--)
                 {
-                    int gr = (int)(radius + i * 3);
+                    int gr = (int)(radius + i * 4);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(245, 196, 81, 8 - i * 2));
+                        new Color(245, 196, 81, 10 - i * 2));
                 }
 
             // Glow blanco al hover
             if (hovered && (canAlloc || allocated))
-                for (int i = 2; i > 0; i--)
+                for (int i = 3; i > 0; i--)
                 {
-                    int gr = (int)(radius + i * 3);
+                    int gr = (int)(radius + i * 4);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(255, 255, 255, 6 - i * 2));
+                        new Color(255, 255, 255, 8 - i * 2));
                 }
 
-            // Relleno circular
-            DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
+            // === DIBUJAR NODO CON TEXTURA PNG ===
+            if (nodeTex != null)
+            {
+                // Color de tintado segun estado
+                Color tintColor = allocated ? new Color(255, 240, 190)
+                                : canAlloc ? Color.White
+                                : baseColor * 0.3f;
+                if (!allocated && !canAlloc) tintColor *= 0.4f;
 
-            // Borde
-            Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
-            DrawCircleOutline(sb, pos, radius, border);
-
-            // Punto interior para small allocated
-            if (node.Type == NodeType.Small && allocated)
-                DrawCircle(sb, pos, radius * 0.4f, new Color(255, 245, 200));
+                // Escalar la textura al tamaño del nodo (radio * 2 = diametro)
+                float texScale = (radius * 2.5f) / nodeTex.Width;
+                Vector2 texOrigin = new Vector2(nodeTex.Width / 2f, nodeTex.Height / 2f);
+                sb.Draw(nodeTex, pos, null, tintColor, 0f, texOrigin, texScale, SpriteEffects.None, 0f);
+            }
+            else
+            {
+                // Fallback: DrawCircle si la textura no carga
+                DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
+                Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
+                DrawCircleOutline(sb, pos, radius, border);
+                if (node.Type == NodeType.Small && allocated)
+                    DrawCircle(sb, pos, radius * 0.4f, new Color(255, 245, 200));
+            }
 
             // Label solo para notable/keystone/ascendancy y solo si hover/allocated
             if ((node.Type == NodeType.Notable || node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy) && (hovered || allocated))
