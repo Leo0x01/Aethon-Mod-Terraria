@@ -61,7 +61,7 @@ namespace AethonMod.Content.Systems
         /// </summary>
         public static void CaptureAndBlockInput()
         {
-            // Guardar estado del mouse ANTES de bloquearlo
+            // Guardar estado del mouse ANTES de que el juego lo procese
             MouseLeft = Main.mouseLeft;
             MouseRight = Main.mouseRight;
             MouseLeftRelease = Main.mouseLeftRelease;
@@ -69,16 +69,9 @@ namespace AethonMod.Content.Systems
             MouseX = Main.mouseX;
             MouseY = Main.mouseY;
 
-            // Bloquear TODO el input del juego
-            Main.mouseLeft = false;
-            Main.mouseRight = false;
-            Main.mouseLeftRelease = false;
-            Main.mouseRightRelease = false;
-            Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-
-            // Cerrar inventario
-            if (Main.playerInventory)
-                Main.playerInventory = false;
+            // NO resetear Main.mouseLeft/Right aqui — el flag Main.playerInventory=true
+            // se encarga de que el juego no procese clicks del mundo.
+            // Las UIs leen UISystem.MouseLeft/Right que es la copia guardada.
         }
 
         public override void PostUpdateInput()
@@ -127,6 +120,18 @@ namespace AethonMod.Content.Systems
             SkillTreeUI?.Update();
             CodexUI?.Update();
             BranchChoiceUI?.Update();
+
+            // === RESETEAR SCROLL DELTA DESPUES DE QUE LAS UIs LO LEAN ===
+            // Esto evita que el scroll se procese multiples veces
+            ScrollDelta = 0;
+
+            // === BLOQUEAR SCROLL DEL JUEGO ===
+            // Resetear aqui (despues de que las UIs ya leyeron ScrollDelta)
+            // para que el hotbar no se mueva
+            if (anyFullscreenUIOpen)
+            {
+                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
+            }
         }
 
         private bool anyFullscreenUIOpenExcept(object? except)

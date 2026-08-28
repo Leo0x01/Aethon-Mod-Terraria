@@ -147,12 +147,13 @@ namespace AethonMod.Content.UI
             int mx = UISystem.MouseX;
             int my = UISystem.MouseY;
             bool ml = UISystem.MouseLeft;
+            bool mr = UISystem.MouseRight;
             bool mlr = UISystem.MouseLeftRelease;
             int sd = UISystem.ScrollDelta;
             bool mouseInWindow = winRect.Contains(mx, my);
 
-            // === PAN CON CLICK DERECHO ===
-            if (Main.mouseRight && mouseInWindow)
+            // === PAN CON CLICK DERECHO (usar UISystem.MouseRight, no Main.mouseRight) ===
+            if (mr && mouseInWindow)
             {
                 Vector2 curMouse = new(mx, my);
                 if (!_isPanning)
