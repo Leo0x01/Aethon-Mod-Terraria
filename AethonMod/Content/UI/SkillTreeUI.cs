@@ -6,429 +6,66 @@ using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
+using Terraria.UI;
 using AethonMod.Content.Players;
 using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// Arbol de habilidades — rediseñado desde cero.
-    /// Se dibuja DIRECTAMENTE con sb.Draw() (no UserInterface) para evitar
-    /// los cuadros blancos que causaba el UserInterface.Draw().
-    /// Patron: igual que BranchChoiceUI que SI funciona.
+    /// Nodo del árbol de habilidades — UIElement clickeable.
+    /// Basado en el patrón de AnRPG (SkillPanel).
     /// </summary>
-    public class SkillTreeUI
+    public class SkillNodeElement : UIElement
     {
-        public bool IsVisible = false;
-        private float _time = 0f;
-        private float _zoom = 0.8f;
-        private Vector2 _panOffset = Vector2.Zero;
-        private bool _isPanning = false;
-        private Vector2 _lastMouse = Vector2.Zero;
-        private bool _mouseLeftPressed = false;
+        public PoESkillNode Node;
+        public Vector2 BasePos;
+        public bool Allocated;
+        public bool CanAlloc;
+        private float _time;
 
-        // Texturas PNG para nodos y fondo
-        private Texture2D? _bgTexture;
-        private Texture2D? _nodeSmallTex;
-        private Texture2D? _nodeNotableTex;
-        private Texture2D? _nodeKeystoneTex;
-        private Texture2D? _nodeAscendancyTex;
-
-        private PoESkillTree? _tree;
-        private List<PoESkillNode> _allNodes = new();
-        private List<(int fromIdx, int toIdx)> _allConnections = new();
-        private Dictionary<string, int> _nodeIndex = new();
-        private float _minX, _maxX, _minY, _maxY, _rangeX, _rangeY;
-
-        // Dimensiones de la ventana
-        private const int WIN_W = 700;
-        private const int WIN_H = 500;
-        private const int TITLE_H = 60; // dos líneas: título + stats
-
-        private PoESkillNode? _hoveredNode;
-
-        // Posicion de la ventana (centrada)
-        private Rectangle WindowRect => new Rectangle(
-            (Main.screenWidth - WIN_W) / 2,
-            (Main.screenHeight - WIN_H) / 2,
-            WIN_W, WIN_H);
-
-        public void Show()
+        public SkillNodeElement(PoESkillNode node, Vector2 basePos, float sizeMultiplier)
         {
-            if (IsVisible) { Hide(); return; }
-            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-            if (sp == null || !sp.IsImprinted)
-            {
-                Main.NewText("El Fragmento Genesis aun no tiene una rama.", new Color(180, 160, 220));
-                return;
-            }
-            LoadTextures();
-            _tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
-            BuildNodeIndex();
-            // Auto-asignar el nodo "start" (punto de partida) si no está asignado
-            if (!sp.AllocatedNodes.Contains("start"))
-                sp.AllocatedNodes.Add("start");
-            // Zoom inicial que asegura que todo el arbol quepa en la ventana
-            _zoom = 0.5f;
-            _panOffset = Vector2.Zero;
-            IsVisible = true;
-            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+            Node = node;
+            BasePos = basePos;
+            float size = GetNodeSize(node) * 2 * sizeMultiplier;
+            Width.Set(size, 0f);
+            Height.Set(size, 0f);
+            // Margen para el glow
+            MarginTop = 10;
+            MarginBottom = 10;
+            MarginLeft = 10;
+            MarginRight = 10;
         }
 
-        private void LoadTextures()
-        {
-            try
-            {
-                if (_bgTexture == null)
-                    _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/SkillTree_Background", AssetRequestMode.ImmediateLoad).Value;
-                if (_nodeSmallTex == null)
-                    _nodeSmallTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Small", AssetRequestMode.ImmediateLoad).Value;
-                if (_nodeNotableTex == null)
-                    _nodeNotableTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Notable", AssetRequestMode.ImmediateLoad).Value;
-                if (_nodeKeystoneTex == null)
-                    _nodeKeystoneTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Keystone", AssetRequestMode.ImmediateLoad).Value;
-                if (_nodeAscendancyTex == null)
-                    _nodeAscendancyTex = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/Node_Ascendancy", AssetRequestMode.ImmediateLoad).Value;
-            }
-            catch { /* fallback a DrawCircle si las texturas no cargan */ }
-        }
-
-        public void Hide()
-        {
-            if (!IsVisible) return;
-            IsVisible = false;
-            _isPanning = false;
-            _mouseLeftPressed = false;
-            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-        }
-
-        private void BuildNodeIndex()
-        {
-            if (_tree == null) return;
-            _allNodes = _tree.Nodes ?? new List<PoESkillNode>();
-            _allConnections.Clear();
-            _nodeIndex.Clear();
-            for (int i = 0; i < _allNodes.Count; i++)
-                _nodeIndex[_allNodes[i].Id] = i;
-            foreach (var node in _allNodes)
-            {
-                if (!_nodeIndex.TryGetValue(node.Id, out int fromIdx)) continue;
-                foreach (var connId in node.Connections)
-                    if (_nodeIndex.TryGetValue(connId, out int j))
-                        _allConnections.Add((fromIdx, j));
-            }
-            if (_allNodes.Count == 0)
-            {
-                _minX = _maxX = _minY = _maxY = 0;
-                _rangeX = _rangeY = 1;
-                return;
-            }
-            _minX = float.MaxValue; _maxX = float.MinValue;
-            _minY = float.MaxValue; _maxY = float.MinValue;
-            foreach (var node in _allNodes)
-            {
-                _minX = Math.Min(_minX, node.X);
-                _maxX = Math.Max(_maxX, node.X);
-                _minY = Math.Min(_minY, node.Y);
-                _maxY = Math.Max(_maxY, node.Y);
-            }
-            _rangeX = Math.Max(1, _maxX - _minX + 1);
-            _rangeY = Math.Max(1, _maxY - _minY + 1);
-        }
-
-        public void Update()
-        {
-            if (!IsVisible) return;
-            _time += 0.016f;
-
-            var winRect = WindowRect;
-            // Como Player.mouseInterface = true, el juego NO consumió los clicks.
-            // Las UIs pueden leer Main.mouseLeft/mouseRight directamente.
-            int mx = Main.mouseX;
-            int my = Main.mouseY;
-            bool ml = Main.mouseLeft;
-            bool mr = Main.mouseRight;
-            bool mlr = Main.mouseLeftRelease;
-            int sd = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            bool mouseInWindow = winRect.Contains(mx, my);
-
-            // === PAN CON CLICK DERECHO ===
-            if (mr && mouseInWindow)
-            {
-                Vector2 curMouse = new(mx, my);
-                if (!_isPanning)
-                {
-                    _isPanning = true;
-                    _lastMouse = curMouse;
-                }
-                else
-                {
-                    _panOffset += curMouse - _lastMouse;
-                    _lastMouse = curMouse;
-                }
-            }
-            else _isPanning = false;
-
-            // === ZOOM CON RUEDA ===
-            if (sd != 0 && mouseInWindow)
-            {
-                float zoomDelta = sd > 0 ? 0.15f : -0.15f;
-                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 5.0f);
-            }
-
-            // Clamp el pan para que el arbol no se salga de la ventana
-            ClampPanOffset(winRect);
-
-            // === CLICK EN NODOS ===
-            _hoveredNode = FindHoveredNode(winRect, mx, my);
-            if (ml && mlr && !_mouseLeftPressed && _hoveredNode != null && !_isPanning)
-            {
-                _mouseLeftPressed = true;
-                var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-                if (sp != null)
-                {
-                    var node = _hoveredNode;
-                    if (sp.AllocatedNodes.Contains(node.Id))
-                    {
-                        sp.AllocatedNodes.Remove(node.Id);
-                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-                    }
-                    else if (CanAllocate(node, sp))
-                    {
-                        int avail = sp.AvailableSkillPoints();
-                        if (avail < node.Cost)
-                        {
-                            Main.NewText($"Necesitas {node.Cost} pts, tienes {avail}.", new Color(255, 120, 120));
-                        }
-                        else
-                        {
-                            sp.AllocatedNodes.Add(node.Id);
-                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-                        }
-                    }
-                }
-            }
-            if (!ml) _mouseLeftPressed = false;
-
-            // === BOTON CERRAR ===
-            Rectangle closeRect = new Rectangle(winRect.Right - 36, winRect.Y + 4, 32, 32);
-            if (closeRect.Contains(mx, my) && ml && mlr && !_mouseLeftPressed)
-            {
-                Hide();
-                return;
-            }
-        }
-
-        public void Draw()
-        {
-            if (!IsVisible) return;
-            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-            if (sp == null) return;
-
-            var sb = Main.spriteBatch;
-            var winRect = WindowRect;
-
-            // === FONDO OSCURO SEMI-TRANSPARENTE (como el bestiario) ===
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Color(0, 0, 0, 180));
-
-            // === VENTANA ===
-            // Sombra
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(winRect.X - 4, winRect.Y - 4, winRect.Width + 8, winRect.Height + 8),
-                new Color(0, 0, 0, 100));
-            // Fondo
-            sb.Draw(TextureAssets.MagicPixel.Value, winRect, new Color(15, 10, 25, 240));
-
-            // Estrellas de fondo
-            DrawStars(sb, winRect);
-
-            // === BORDE ===
-            Color borderColor = new(179, 136, 255);
-            int b = 2;
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.X, winRect.Y, winRect.Width, b), borderColor);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.X, winRect.Bottom - b, winRect.Width, b), borderColor);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.X, winRect.Y, b, winRect.Height), borderColor);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(winRect.Right - b, winRect.Y, b, winRect.Height), borderColor);
-
-            // === BARRA DE TITULO (dos líneas centradas) ===
-            Rectangle titleRect = new Rectangle(winRect.X + b, winRect.Y + b, winRect.Width - b * 2, TITLE_H);
-            sb.Draw(TextureAssets.MagicPixel.Value, titleRect, new Color(20, 15, 40, 240));
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(titleRect.X, titleRect.Bottom, titleRect.Width, 2), new Color(245, 196, 81, 150));
-
-            // Línea 1: Título centrado
-            string titleText = "★ ARBOL DE HABILIDADES ★";
-            var titleSize = FontAssets.MouseText.Value.MeasureString(titleText) * 0.9f;
-            Utils.DrawBorderString(sb, titleText,
-                new Vector2(titleRect.X + (titleRect.Width - titleSize.X) / 2f, titleRect.Y + 6),
-                new Color(245, 196, 81), 0.9f);
-
-            // Línea 2: Stats centrados
-            int avail = sp.AvailableSkillPoints();
-            string ptsText = $"Puntos: {avail}  |  Gastados: {sp.SpentSkillPoints()}  |  Nivel {sp.ShardLevel}";
-            var ptsSize = FontAssets.MouseText.Value.MeasureString(ptsText) * 0.75f;
-            Utils.DrawBorderString(sb, ptsText,
-                new Vector2(titleRect.X + (titleRect.Width - ptsSize.X) / 2f, titleRect.Y + 30),
-                avail > 0 ? new Color(120, 255, 150) : new Color(180, 180, 200), 0.75f);
-
-            // === BOTON CERRAR ===
-            Rectangle closeRect = new Rectangle(winRect.Right - 36, winRect.Y + 4, 32, 32);
-            bool closeHover = closeRect.Contains(Main.mouseX, Main.mouseY);
-            sb.Draw(TextureAssets.MagicPixel.Value, closeRect, closeHover ? new Color(220, 80, 80, 230) : new Color(40, 20, 30, 180));
-            // X con lineas
-            DrawX(sb, closeRect, closeHover ? Color.White : new Color(220, 180, 180), 2f);
-
-            // === AREA DEL ARBOL ===
-            Rectangle treeRect = new Rectangle(winRect.X + b, winRect.Y + TITLE_H + b, winRect.Width - b * 2, winRect.Height - TITLE_H - b * 2 - 24);
-
-            // === FONDO COSMICO TEXTURIZADO ===
-            if (_bgTexture != null)
-            {
-                sb.Draw(_bgTexture, treeRect, new Color(255, 255, 255, 100));
-            }
-
-            // Estrellas animadas sutiles
-            DrawStars(sb, treeRect);
-
-            if (_allNodes.Count > 0)
-            {
-                // Conexiones
-                foreach (var (fromIdx, toIdx) in _allConnections)
-                {
-                    if (fromIdx < 0 || fromIdx >= _allNodes.Count || toIdx < 0 || toIdx >= _allNodes.Count) continue;
-                    Vector2 from = NodeToScreen(_allNodes[fromIdx], treeRect);
-                    Vector2 to = NodeToScreen(_allNodes[toIdx], treeRect);
-                    bool bothActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) && sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
-                    bool oneActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) || sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
-                    Color lc = bothActive ? new Color(245, 196, 81, 200) : oneActive ? new Color(160, 120, 70, 120) : new Color(50, 40, 70, 60);
-                    float th = bothActive ? 2f : oneActive ? 1.5f : 1f;
-                    DrawLine(sb, from, to, lc, th);
-                }
-
-                // Nodos
-                foreach (var node in _allNodes)
-                {
-                    Vector2 pos = NodeToScreen(node, treeRect);
-                    bool allocated = sp.AllocatedNodes.Contains(node.Id);
-                    bool canAlloc = CanAllocate(node, sp);
-                    bool isHover = _hoveredNode != null && _hoveredNode.Id == node.Id;
-                    DrawNode(sb, pos, node, allocated, canAlloc, isHover);
-                }
-            }
-
-            // === TOOLTIP ===
-            if (_hoveredNode != null)
-            {
-                DrawTooltip(sb, sp);
-            }
-
-            // === BARRA INFERIOR ===
-            Rectangle footerRect = new Rectangle(winRect.X + b, winRect.Bottom - b - 22, winRect.Width - b * 2, 22);
-            sb.Draw(TextureAssets.MagicPixel.Value, footerRect, new Color(8, 6, 16, 200));
-            Utils.DrawBorderString(sb, "Click izq: asignar  |  Click der: mover  |  Rueda: zoom  |  K/Esc: cerrar",
-                new Vector2(footerRect.X + footerRect.Width / 2f, footerRect.Y + 6),
-                new Color(140, 130, 170), 0.7f, 0.5f, 0f);
-
-            // === CERRAR SOLO CON ESC ===
-            // NOTA: El toggle K/J ya se maneja en UISystem.PostUpdateInput.
-            // Si lo cerramos aqui tambien, se cierra en el mismo frame que se abre.
-            var kb = Main.keyState;
-            var oldKb = Main.oldKeyState;
-            if (kb.IsKeyDown(Keys.Escape) && !oldKb.IsKeyDown(Keys.Escape)) Hide();
-        }
-
-        private Vector2 NodeToScreen(PoESkillNode node, Rectangle treeRect)
-        {
-            float cx = treeRect.X + treeRect.Width / 2f;
-            float cy = treeRect.Y + treeRect.Height / 2f;
-            if (_rangeX <= 0 || _rangeY <= 0) return new Vector2(cx, cy);
-            float scale = Math.Min(treeRect.Width / _rangeX, treeRect.Height / _rangeY) * 0.35f * _zoom;
-            return new Vector2(
-                (node.X - _minX) * scale - (_rangeX * scale / 2f) + cx + _panOffset.X,
-                (node.Y - _minY) * scale - (_rangeY * scale / 2f) + cy + _panOffset.Y);
-        }
-
-        /// <summary>Clamp el pan offset para que el arbol no se salga de la ventana.</summary>
-        private void ClampPanOffset(Rectangle treeRect)
-        {
-            if (_rangeX <= 0 || _rangeY <= 0) return;
-            float scale = Math.Min(treeRect.Width / _rangeX, treeRect.Height / _rangeY) * 0.35f * _zoom;
-            float treeW = _rangeX * scale;
-            float treeH = _rangeY * scale;
-            // Si el arbol es mas grande que la ventana, permitir pan dentro de limites
-            if (treeW > treeRect.Width)
-            {
-                float maxPanX = (treeW - treeRect.Width) / 2f;
-                _panOffset.X = MathHelper.Clamp(_panOffset.X, -maxPanX, maxPanX);
-            }
-            else
-            {
-                _panOffset.X = 0; // arbol mas pequeño que ventana, no hay pan
-            }
-            if (treeH > treeRect.Height)
-            {
-                float maxPanY = (treeH - treeRect.Height) / 2f;
-                _panOffset.Y = MathHelper.Clamp(_panOffset.Y, -maxPanY, maxPanY);
-            }
-            else
-            {
-                _panOffset.Y = 0;
-            }
-        }
-
-        private PoESkillNode? FindHoveredNode(Rectangle treeRect, int mx, int my)
-        {
-            Vector2 mouse = new(mx, my);
-            PoESkillNode? closest = null;
-            float closestDist = float.MaxValue;
-            foreach (var node in _allNodes)
-            {
-                Vector2 pos = NodeToScreen(node, treeRect);
-                float dist = Vector2.Distance(pos, mouse);
-                float radius = GetNodeRadius(node) + 4f;
-                if (dist < radius && dist < closestDist) { closestDist = dist; closest = node; }
-            }
-            return closest;
-        }
-
-        private float GetNodeRadius(PoESkillNode node)
+        public static float GetNodeSize(PoESkillNode node)
         {
             return node.Type switch
             {
-                NodeType.Small => 9f,        // más grande para mejor visibilidad
-                NodeType.Notable => 14f,     // mediano
-                NodeType.Keystone => 18f,    // grande
-                NodeType.Ascendancy => 16f,  // mediano-grande
-                _ => 9f,
+                NodeType.Small => 10f,
+                NodeType.Notable => 16f,
+                NodeType.Keystone => 20f,
+                NodeType.Ascendancy => 18f,
+                _ => 10f,
             };
         }
 
-        private bool CanAllocate(PoESkillNode node, ShardPlayer sp)
+        public void UpdateState(bool allocated, bool canAlloc, float time)
         {
-            if (sp.AllocatedNodes.Contains(node.Id)) return false;
-            if (node.Id == "start" || node.Cost == 0) return true;
-            foreach (var aid in sp.AllocatedNodes)
-                if (node.Connections.Contains(aid)) return true;
-            return false;
+            Allocated = allocated;
+            CanAlloc = canAlloc;
+            _time = time;
         }
 
-        private void DrawNode(SpriteBatch sb, Vector2 pos, PoESkillNode node, bool allocated, bool canAlloc, bool hovered)
+        protected override void DrawSelf(SpriteBatch sb)
         {
-            float radius = GetNodeRadius(node);
+            var dims = GetDimensions();
+            Vector2 pos = dims.Center();
+            float radius = Width.Pixels / 2f;
 
-            // Seleccionar textura segun tipo de nodo
-            Texture2D? nodeTex = node.Type switch
-            {
-                NodeType.Small => _nodeSmallTex,
-                NodeType.Notable => _nodeNotableTex,
-                NodeType.Keystone => _nodeKeystoneTex,
-                NodeType.Ascendancy => _nodeAscendancyTex,
-                _ => _nodeSmallTex,
-            };
-
-            Color baseColor = node.Type switch
+            Color baseColor = Node.Type switch
             {
                 NodeType.Small => new Color(100, 90, 130),
                 NodeType.Notable => new Color(70, 130, 200),
@@ -437,16 +74,16 @@ namespace AethonMod.Content.UI
                 _ => new Color(100, 90, 130),
             };
 
-            if (!allocated && !canAlloc) baseColor *= 0.25f;
+            if (!Allocated && !CanAlloc) baseColor *= 0.25f;
 
-            // Glow pulsante para keystones/ascendancy
-            if (node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy)
+            // Glow para keystones
+            if (Node.Type == NodeType.Keystone || Node.Type == NodeType.Ascendancy)
             {
                 float pulse = 0.7f + 0.3f * (float)Math.Sin(_time * 2f + pos.X * 0.01f);
                 for (int i = 3; i > 0; i--)
                 {
                     int gr = (int)(radius + i * 5);
-                    int a = (int)((allocated ? 12 : 6) * pulse);
+                    int a = (int)((Allocated ? 12 : 6) * pulse);
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
                         new Color(baseColor.R, baseColor.G, baseColor.B, a));
@@ -454,7 +91,7 @@ namespace AethonMod.Content.UI
             }
 
             // Glow dorado si asignado
-            if (allocated)
+            if (Allocated)
                 for (int i = 3; i > 0; i--)
                 {
                     int gr = (int)(radius + i * 4);
@@ -463,56 +100,16 @@ namespace AethonMod.Content.UI
                         new Color(245, 196, 81, 10 - i * 2));
                 }
 
-            // Glow blanco al hover
-            if (hovered && (canAlloc || allocated))
-                for (int i = 3; i > 0; i--)
-                {
-                    int gr = (int)(radius + i * 4);
-                    sb.Draw(TextureAssets.MagicPixel.Value,
-                        new Rectangle((int)pos.X - gr, (int)pos.Y - gr, gr * 2, gr * 2),
-                        new Color(255, 255, 255, 8 - i * 2));
-                }
+            // Relleno circular
+            DrawCircle(sb, pos, radius * 0.8f, Allocated ? new Color(255, 225, 140) : (CanAlloc ? baseColor : baseColor * 0.1f));
 
-            // === DIBUJAR NODO CON TEXTURA PNG ===
-            if (nodeTex != null)
-            {
-                // Color de tintado segun estado
-                Color tintColor = allocated ? new Color(255, 240, 190)
-                                : canAlloc ? Color.White
-                                : baseColor * 0.3f;
-                if (!allocated && !canAlloc) tintColor *= 0.4f;
+            // Borde
+            Color border = Allocated ? new Color(255, 240, 190) : IsMouseHovering ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
+            DrawCircleOutline(sb, pos, radius * 0.8f, border);
 
-                // Escalar la textura al tamaño del nodo (radio * 2 = diametro)
-                float texScale = (radius * 2.5f) / nodeTex.Width;
-                Vector2 texOrigin = new Vector2(nodeTex.Width / 2f, nodeTex.Height / 2f);
-                sb.Draw(nodeTex, pos, null, tintColor, 0f, texOrigin, texScale, SpriteEffects.None, 0f);
-            }
-            else
-            {
-                // Fallback: DrawCircle si la textura no carga
-                DrawCircle(sb, pos, radius, allocated ? new Color(255, 225, 140) : (canAlloc ? baseColor : baseColor * 0.1f));
-                Color border = allocated ? new Color(255, 240, 190) : hovered ? Color.White : new Color(baseColor.R + 40, baseColor.G + 40, baseColor.B + 40);
-                DrawCircleOutline(sb, pos, radius, border);
-                if (node.Type == NodeType.Small && allocated)
-                    DrawCircle(sb, pos, radius * 0.4f, new Color(255, 245, 200));
-            }
-
-            // Label solo para notable/keystone/ascendancy y solo si hover/allocated
-            if ((node.Type == NodeType.Notable || node.Type == NodeType.Keystone || node.Type == NodeType.Ascendancy) && (hovered || allocated))
-            {
-                string shortName = node.Name.Length > 14 ? node.Name.Substring(0, 12) + "…" : node.Name;
-                var textSize = FontAssets.MouseText.Value.MeasureString(shortName);
-                int labelW = (int)textSize.X + 8;
-                int labelH = 16;
-                int lx = (int)(pos.X - labelW / 2f);
-                int ly = (int)(pos.Y - radius - 18);
-                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(lx, ly, labelW, labelH), new Color(10, 8, 20, 220));
-                Color labelBorder = allocated ? new Color(245, 196, 81, 150) : new Color(179, 136, 255, 150);
-                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(lx, ly, labelW, 1), labelBorder);
-                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(lx, ly + labelH - 1, labelW, 1), labelBorder);
-                Utils.DrawBorderString(sb, shortName, new Vector2(pos.X, ly + 4),
-                    allocated ? new Color(255, 240, 190) : new Color(220, 200, 240), 0.6f, 0.5f, 0f);
-            }
+            // Punto interior para small allocated
+            if (Node.Type == NodeType.Small && Allocated)
+                DrawCircle(sb, pos, radius * 0.3f, new Color(255, 245, 200));
         }
 
         private void DrawCircle(SpriteBatch sb, Vector2 center, float radius, Color color)
@@ -542,93 +139,324 @@ namespace AethonMod.Content.UI
                     new Rectangle((int)px, (int)py, 2, 2), color);
             }
         }
+    }
 
-        private void DrawTooltip(SpriteBatch sb, ShardPlayer sp)
+    /// <summary>
+    /// Conexión entre nodos — UIElement que dibuja una línea.
+    /// </summary>
+    public class SkillConnectionElement : UIElement
+    {
+        public Vector2 BasePos;
+        public float Rotation;
+        public float Length;
+        public Color LineColor;
+        public float SizeMultiplier;
+
+        public SkillConnectionElement(Vector2 basePos, float rotation, float length, float sizeMultiplier)
         {
-            if (_hoveredNode == null) return;
-            var node = _hoveredNode;
-            bool alloc = sp.AllocatedNodes.Contains(node.Id);
-
-            string typeStr = node.Type switch
-            {
-                NodeType.Small => "[Menor]",
-                NodeType.Notable => "[Notable]",
-                NodeType.Keystone => "[KEYSTONE]",
-                NodeType.Ascendancy => "[Ascendencia]",
-                _ => "",
-            };
-
-            string[] lines = {
-                $"{typeStr} {node.Name}",
-                node.Effect ?? "",
-                $"Coste: {node.Cost} pts",
-                alloc ? "(Asignado — click para quitar)" : (CanAllocate(node, sp) ? "(Click para asignar)" : "(Requiere nodo adyacente)"),
-            };
-
-            float maxW = 0;
-            foreach (var line in lines)
-            {
-                var size = FontAssets.MouseText.Value.MeasureString(line);
-                if (size.X > maxW) maxW = size.X;
-            }
-            int tw = (int)maxW + 20;
-            int th = lines.Length * 16 + 16;
-
-            int tx = Main.mouseX + 16;
-            int ty = Main.mouseY + 16;
-            if (tx + tw > Main.screenWidth) tx = Main.mouseX - tw - 8;
-            if (ty + th > Main.screenHeight) ty = Main.screenHeight - th - 4;
-            if (ty < 0) ty = 4;
-
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, tw, th), new Color(15, 10, 30, 245));
-            Color borderC = node.Type == NodeType.Keystone ? new Color(245, 196, 81) : node.Type == NodeType.Ascendancy ? new Color(179, 136, 255) : new Color(120, 100, 160);
-            int b = 2;
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, tw, b), borderC);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty + th - b, tw, b), borderC);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx, ty, b, th), borderC);
-            sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tx + tw - b, ty, b, th), borderC);
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                Color col = i == 0 ? new Color(245, 196, 81) : i == lines.Length - 1 ? (alloc ? new Color(100, 220, 100) : new Color(179, 136, 255)) : new Color(220, 220, 230);
-                Utils.DrawBorderString(sb, lines[i], new Vector2(tx + 10, ty + 8 + i * 16), col, 0.8f);
-            }
+            BasePos = basePos;
+            Rotation = rotation;
+            Length = length;
+            SizeMultiplier = sizeMultiplier;
+            Width.Set(length * sizeMultiplier, 0f);
+            Height.Set(3f * sizeMultiplier, 0f);
+            LineColor = new Color(50, 40, 70, 60);
         }
 
-        private void DrawStars(SpriteBatch sb, Rectangle rect)
+        protected override void DrawSelf(SpriteBatch sb)
         {
-            for (int i = 0; i < 40; i++)
-            {
-                int seed = i * 73856093;
-                float bx = (seed % 1000) / 1000f * rect.Width;
-                float by = ((seed * 19349663) % 1000) / 1000f * rect.Height;
-                float sx = rect.X + bx;
-                float sy = rect.Y + by;
-                float twinkle = 0.5f + 0.5f * (float)Math.Sin(_time * 2 + i * 0.5f);
-                int alpha = (int)(100 * twinkle);
-                if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
-                int sz = 1 + (seed % 2);
-                Color c = i % 3 == 0 ? new Color(245, 196, 81, alpha) : i % 3 == 1 ? new Color(179, 136, 255, alpha) : new Color(200, 220, 255, alpha);
-                sb.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)sx, (int)sy, sz, sz), c);
-            }
-        }
-
-        private void DrawX(SpriteBatch sb, Rectangle rect, Color color, float thickness)
-        {
-            int pad = 8;
-            DrawLine(sb, new Vector2(rect.X + pad, rect.Y + pad), new Vector2(rect.Right - pad, rect.Bottom - pad), color, thickness);
-            DrawLine(sb, new Vector2(rect.Right - pad, rect.Y + pad), new Vector2(rect.X + pad, rect.Bottom - pad), color, thickness);
-        }
-
-        private void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color, float thickness)
-        {
-            Vector2 edge = end - start;
-            float angle = (float)Math.Atan2(edge.Y, edge.X);
-            float length = edge.Length();
-            if (length < 1f) return;
+            var dims = GetDimensions();
             sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)start.X, (int)start.Y, (int)length, (int)thickness),
-                null, color, angle, new Vector2(0, thickness / 2f), SpriteEffects.None, 0);
+                new Rectangle((int)dims.X, (int)dims.Y, (int)dims.Width, (int)dims.Height),
+                null, LineColor, Rotation, new Vector2(0, dims.Height / 2f), SpriteEffects.None, 0f);
+        }
+    }
+
+    /// <summary>
+    /// Árbol de habilidades usando UIState + UIElement (patrón de AnRPG).
+    /// Los clicks funcionan nativamente porque UIElement maneja OnClick.
+    /// </summary>
+    public class SkillTreeUIState : UIState
+    {
+        public bool IsVisible = false;
+        private float _time = 0f;
+        private float _zoom = 0.5f;
+        private Vector2 _offset = Vector2.Zero;
+        private bool _isDragging = false;
+        private Vector2 _dragStart = Vector2.Zero;
+        private float _sizeMultiplier = 1f;
+
+        private PoESkillTree? _tree;
+        private List<PoESkillNode> _allNodes = new();
+        private List<(int fromIdx, int toIdx)> _allConnections = new();
+        private Dictionary<string, int> _nodeIndex = new();
+        private float _minX, _maxX, _minY, _maxY, _rangeX, _rangeY;
+
+        private UIPanel? _background;
+        private List<SkillNodeElement> _nodeElements = new();
+        private List<SkillConnectionElement> _connectionElements = new();
+        private UIText? _pointsText;
+        private UIText? _closeButton;
+        private bool _closeHovered = false;
+
+        // Textura de fondo
+        private Texture2D? _bgTexture;
+
+        public void Show()
+        {
+            if (IsVisible) { Hide(); return; }
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted)
+            {
+                Main.NewText("El Fragmento Genesis aun no tiene una rama.", new Color(180, 160, 220));
+                return;
+            }
+            LoadBgTexture();
+            _tree = PoETreeCatalog.GetTree(sp.ActiveBranch);
+            BuildNodeIndex();
+            if (!sp.AllocatedNodes.Contains("start"))
+                sp.AllocatedNodes.Add("start");
+            _zoom = 0.5f;
+            _offset = new Vector2(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
+            InitUI();
+            IsVisible = true;
+            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+        }
+
+        public void Hide()
+        {
+            if (!IsVisible) return;
+            IsVisible = false;
+            _isDragging = false;
+            RemoveAllChildren();
+            _background = null;
+            _nodeElements.Clear();
+            _connectionElements.Clear();
+            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+        }
+
+        private void LoadBgTexture()
+        {
+            if (_bgTexture != null) return;
+            try
+            {
+                _bgTexture = ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/SkillTree_Background", AssetRequestMode.ImmediateLoad).Value;
+            }
+            catch { _bgTexture = null; }
+        }
+
+        private void BuildNodeIndex()
+        {
+            if (_tree == null) return;
+            _allNodes = _tree.Nodes ?? new List<PoESkillNode>();
+            _allConnections.Clear();
+            _nodeIndex.Clear();
+            for (int i = 0; i < _allNodes.Count; i++)
+                _nodeIndex[_allNodes[i].Id] = i;
+            foreach (var node in _allNodes)
+            {
+                if (!_nodeIndex.TryGetValue(node.Id, out int fromIdx)) continue;
+                foreach (var connId in node.Connections)
+                    if (_nodeIndex.TryGetValue(connId, out int j))
+                        _allConnections.Add((fromIdx, j));
+            }
+            if (_allNodes.Count == 0) { _rangeX = _rangeY = 1; return; }
+            _minX = float.MaxValue; _maxX = float.MinValue;
+            _minY = float.MaxValue; _maxY = float.MinValue;
+            foreach (var node in _allNodes)
+            {
+                _minX = Math.Min(_minX, node.X);
+                _maxX = Math.Max(_maxX, node.X);
+                _minY = Math.Min(_minY, node.Y);
+                _maxY = Math.Max(_maxY, node.Y);
+            }
+            _rangeX = Math.Max(1, _maxX - _minX + 1);
+            _rangeY = Math.Max(1, _maxY - _minY + 1);
+        }
+
+        private void InitUI()
+        {
+            RemoveAllChildren();
+            _nodeElements.Clear();
+            _connectionElements.Clear();
+            _sizeMultiplier = _zoom;
+
+            // Fondo
+            _background = new UIPanel();
+            _background.SetPadding(0);
+            _background.Left.Set(0, 0f);
+            _background.Top.Set(0, 0f);
+            _background.Width.Set(Main.screenWidth, 0f);
+            _background.Height.Set(Main.screenHeight, 0f);
+            _background.BackgroundColor = new Color(10, 8, 20, 200);
+            _background.OnMouseDown += (evt, el) => { _isDragging = true; _dragStart = new Vector2(Main.mouseX, Main.mouseY) - _offset; };
+            _background.OnMouseUp += (evt, el) => { _isDragging = false; };
+            _background.OnScrollWheel += (evt) =>
+            {
+                float zoomDelta = evt.ScrollWheelValue > 0 ? 0.1f : -0.1f;
+                _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 3.0f);
+                _sizeMultiplier = _zoom;
+                UpdatePositions();
+            };
+            Append(_background);
+
+            // Texto de puntos
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            int avail = sp?.AvailableSkillPoints() ?? 0;
+            _pointsText = new UIText($"★ ARBOL DE HABILIDADES ★  |  Puntos: {avail}  |  Nivel {sp?.ShardLevel ?? 1}", 0.9f);
+            _pointsText.Left.Set(Main.screenWidth / 2f - 200, 0f);
+            _pointsText.Top.Set(20, 0f);
+            _pointsText.TextColor = new Color(245, 196, 81);
+            _background.Append(_pointsText);
+
+            // Botón cerrar
+            _closeButton = new UIText("X", 1.2f);
+            _closeButton.Left.Set(Main.screenWidth - 50, 0f);
+            _closeButton.Top.Set(10, 0f);
+            _closeButton.TextColor = new Color(220, 80, 80);
+            _closeButton.OnMouseOver += (evt, el) => { _closeHovered = true; _closeButton.TextColor = Color.White; };
+            _closeButton.OnMouseOut += (evt, el) => { _closeHovered = false; _closeButton.TextColor = new Color(220, 80, 80); };
+            _closeButton.OnClick += (evt, el) => { Hide(); };
+            _background.Append(_closeButton);
+
+            // Crear nodos
+            foreach (var node in _allNodes)
+            {
+                Vector2 basePos = NodeToBasePos(node);
+                var nodeEl = new SkillNodeElement(node, basePos, _sizeMultiplier);
+                nodeEl.OnClick += (evt, el) => { OnNodeClick(node); };
+                _background.Append(nodeEl);
+                _nodeElements.Add(nodeEl);
+            }
+
+            // Crear conexiones
+            foreach (var (fromIdx, toIdx) in _allConnections)
+            {
+                if (fromIdx < 0 || fromIdx >= _allNodes.Count || toIdx < 0 || toIdx >= _allNodes.Count) continue;
+                Vector2 from = NodeToBasePos(_allNodes[fromIdx]);
+                Vector2 to = NodeToBasePos(_allNodes[toIdx]);
+                Vector2 diff = to - from;
+                float rotation = (float)Math.Atan2(diff.Y, diff.X);
+                float length = diff.Length();
+                var connEl = new SkillConnectionElement(from, rotation, length, _sizeMultiplier);
+                _background.Append(connEl);
+                _connectionElements.Add(connEl);
+            }
+
+            UpdatePositions();
+            UpdateNodeStates();
+        }
+
+        private Vector2 NodeToBasePos(PoESkillNode node)
+        {
+            float scale = 0.35f;
+            return new Vector2(
+                (node.X - _minX) * scale - (_rangeX * scale / 2f),
+                (node.Y - _minY) * scale - (_rangeY * scale / 2f));
+        }
+
+        private void UpdatePositions()
+        {
+            foreach (var nodeEl in _nodeElements)
+            {
+                float x = (nodeEl.BasePos.X + _offset.X) * _sizeMultiplier;
+                float y = (nodeEl.BasePos.Y + _offset.Y) * _sizeMultiplier;
+                nodeEl.Left.Set(x - nodeEl.Width.Pixels / 2f, 0f);
+                nodeEl.Top.Set(y - nodeEl.Height.Pixels / 2f, 0f);
+            }
+            foreach (var connEl in _connectionElements)
+            {
+                float x = (connEl.BasePos.X + _offset.X) * _sizeMultiplier;
+                float y = (connEl.BasePos.Y + _offset.Y) * _sizeMultiplier;
+                connEl.Left.Set(x, 0f);
+                connEl.Top.Set(y, 0f);
+                connEl.Width.Set(connEl.Length * _sizeMultiplier, 0f);
+                connEl.Height.Set(3f * _sizeMultiplier, 0f);
+            }
+            Recalculate();
+        }
+
+        private void UpdateNodeStates()
+        {
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+            foreach (var nodeEl in _nodeElements)
+            {
+                bool allocated = sp.AllocatedNodes.Contains(nodeEl.Node.Id);
+                bool canAlloc = CanAllocate(nodeEl.Node, sp);
+                nodeEl.UpdateState(allocated, canAlloc, _time);
+            }
+            // Actualizar colores de conexiones
+            for (int i = 0; i < _connectionElements.Count && i < _allConnections.Count; i++)
+            {
+                var (fromIdx, toIdx) = _allConnections[i];
+                if (fromIdx < 0 || fromIdx >= _allNodes.Count || toIdx < 0 || toIdx >= _allNodes.Count) continue;
+                bool bothActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) && sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
+                bool oneActive = sp.AllocatedNodes.Contains(_allNodes[fromIdx].Id) || sp.AllocatedNodes.Contains(_allNodes[toIdx].Id);
+                _connectionElements[i].LineColor = bothActive ? new Color(245, 196, 81, 200) : oneActive ? new Color(160, 120, 70, 120) : new Color(50, 40, 70, 60);
+            }
+        }
+
+        private bool CanAllocate(PoESkillNode node, ShardPlayer sp)
+        {
+            if (sp.AllocatedNodes.Contains(node.Id)) return false;
+            if (node.Id == "start" || node.Cost == 0) return true;
+            foreach (var aid in sp.AllocatedNodes)
+                if (node.Connections.Contains(aid)) return true;
+            return false;
+        }
+
+        private void OnNodeClick(PoESkillNode node)
+        {
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            if (sp == null) return;
+            if (sp.AllocatedNodes.Contains(node.Id))
+            {
+                sp.AllocatedNodes.Remove(node.Id);
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+            }
+            else if (CanAllocate(node, sp))
+            {
+                int avail = sp.AvailableSkillPoints();
+                if (avail < node.Cost)
+                {
+                    Main.NewText($"Necesitas {node.Cost} pts, tienes {avail}.", new Color(255, 120, 120));
+                }
+                else
+                {
+                    sp.AllocatedNodes.Add(node.Id);
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+                }
+            }
+            UpdateNodeStates();
+            // Actualizar texto de puntos
+            if (_pointsText != null && sp != null)
+            {
+                _pointsText.SetText($"★ ARBOL DE HABILIDADES ★  |  Puntos: {sp.AvailableSkillPoints()}  |  Nivel {sp.ShardLevel}", 0.9f);
+            }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            _time += 0.016f;
+
+            // Drag (pan)
+            if (_isDragging)
+            {
+                _offset = new Vector2(Main.mouseX, Main.mouseY) - _dragStart;
+                UpdatePositions();
+            }
+
+            // Actualizar estados de nodos
+            UpdateNodeStates();
+
+            // Cerrar con Esc
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape) &&
+                !Main.oldKeyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
+            {
+                Hide();
+            }
         }
     }
 }

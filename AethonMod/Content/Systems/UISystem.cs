@@ -10,26 +10,22 @@ namespace AethonMod.Content.Systems
 {
     /// <summary>
     /// Sistema central de UI del mod Aethon.
-    ///
-    /// PATRÓN CORRECTO (descubierto tras investigación):
-    /// 1. UIScrollBlockPlayer.PreUpdate() setea Player.mouseInterface = true
-    ///    — Esto hace que Terraria NO procese clicks del mouse como input del juego
-    ///    — El juego no ataca, no coloca bloques, no usa items
-    /// 2. PostUpdateInput() — las UIs leen Main.mouseLeft/mouseRight directamente
-    ///    — Como mouseInterface = true, el juego ya no consumió el click
-    ///    — Las UIs pueden usar Main.mouseLeft normalmente
-    /// 3. ModifyInterfaceLayers — solo DIBUJA
+    /// Usa UserInterface + UIState (patrón nativo de tModLoader).
+    /// Player.mouseInterface = true bloquea el input del juego.
     /// </summary>
     public class UISystem : ModSystem
     {
-        public UI.SkillTreeUI? SkillTreeUI;
+        private UserInterface? _skillTreeInterface;
+        public UI.SkillTreeUIState? SkillTreeUI;
         public UI.MemoryCodexUI? CodexUI;
         public UI.BranchChoiceUI? BranchChoiceUI;
 
         public override void Load()
         {
             if (Main.dedServ) return;
-            SkillTreeUI = new UI.SkillTreeUI();
+            _skillTreeInterface = new UserInterface();
+            SkillTreeUI = new UI.SkillTreeUIState();
+            SkillTreeUI.Activate();
             CodexUI = new UI.MemoryCodexUI();
             BranchChoiceUI = new UI.BranchChoiceUI();
         }
@@ -39,6 +35,7 @@ namespace AethonMod.Content.Systems
             SkillTreeUI = null;
             CodexUI = null;
             BranchChoiceUI = null;
+            _skillTreeInterface = null;
         }
 
         public override void PostUpdateInput()
@@ -56,12 +53,11 @@ namespace AethonMod.Content.Systems
                 if (sp != null && sp.IsImprinted && !anyFullscreenUIOpenExcept(SkillTreeUI))
                 {
                     if (SkillTreeUI?.IsVisible == true) SkillTreeUI.Hide();
-                    else SkillTreeUI?.Show();
-                }
-                else if (sp != null && !sp.IsImprinted)
-                {
-                    Main.NewText("El Fragmento Genesis aun no tiene una rama. Derrota enemigos para despertarlo.",
-                        new Color(180, 160, 220));
+                    else
+                    {
+                        SkillTreeUI?.Show();
+                        if (SkillTreeUI != null) _skillTreeInterface?.SetState(SkillTreeUI);
+                    }
                 }
             }
 
@@ -75,23 +71,19 @@ namespace AethonMod.Content.Systems
                     if (CodexUI?.IsVisible == true) CodexUI.Hide();
                     else CodexUI?.Show();
                 }
-                else if (sp != null && sp.IsImprinted && !sp.CodexUnlocked)
-                {
-                    Main.NewText("El Codex de Memoria no esta desbloqueado. Consigue un arma magica o de invocacion.",
-                        new Color(180, 160, 220));
-                }
             }
 
-            // === LAS UIs PROCESAN EL INPUT AQUI ===
-            // Como Player.mouseInterface = true fue seteado en PreUpdate,
-            // el juego NO consumió Main.mouseLeft/mouseRight.
-            // Las UIs pueden leerlos directamente.
-            SkillTreeUI?.Update();
+            // === LAS UIs PROCESAN EL INPUT ===
+            // Como Player.mouseInterface = true, el juego no consumió los clicks.
+            // UserInterface.Update procesa OnClick, OnMouseOver, etc. nativamente.
+            if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
+                _skillTreeInterface.Update(Main._drawInterfaceGameTime);
+            if (SkillTreeUI?.IsVisible != true) _skillTreeInterface?.SetState(null);
+
             CodexUI?.Update();
             BranchChoiceUI?.Update();
 
             // === RESETEAR SCROLL DESPUES DE QUE LAS UIs LO LEAN ===
-            // Esto evita que el scroll del hotbar se mueva
             if (anyFullscreenUIOpen)
             {
                 Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
@@ -110,7 +102,6 @@ namespace AethonMod.Content.Systems
         {
             bool anyUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
 
-            // Desactivar capas vanilla cuando UI abierta
             if (anyUIOpen)
             {
                 layers.RemoveAll(layer =>
@@ -130,7 +121,13 @@ namespace AethonMod.Content.Systems
                 {
                     try
                     {
-                        SkillTreeUI?.Draw();
+                        // Árbol via UserInterface (procesa clicks nativamente)
+                        if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
+                        {
+                            var gt = Main._drawInterfaceGameTime;
+                            if (gt != null) _skillTreeInterface.Draw(Main.spriteBatch, gt);
+                        }
+                        // Codex y BranchChoice via dibujo directo
                         CodexUI?.Draw();
                         BranchChoiceUI?.Draw();
                     }
