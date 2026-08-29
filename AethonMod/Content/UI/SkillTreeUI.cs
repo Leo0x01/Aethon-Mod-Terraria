@@ -289,9 +289,9 @@ namespace AethonMod.Content.UI
             _background.Width.Set(Main.screenWidth, 0f);
             _background.Height.Set(Main.screenHeight, 0f);
             _background.BackgroundColor = new Color(10, 8, 20, 200);
-            _background.OnMouseDown += (evt, el) => { _isDragging = true; _dragStart = new Vector2(Main.mouseX, Main.mouseY) - _offset; };
-            _background.OnMouseUp += (evt, el) => { _isDragging = false; };
-            _background.OnScrollWheel += (evt) =>
+            _background.OnLeftMouseDown += (evt, el) => { _isDragging = true; _dragStart = new Vector2(Main.mouseX, Main.mouseY) - _offset; };
+            _background.OnLeftMouseUp += (evt, el) => { _isDragging = false; };
+            _background.OnScrollWheel += (UIScrollWheelEvent evt, UIElement listeningElement) =>
             {
                 float zoomDelta = evt.ScrollWheelValue > 0 ? 0.1f : -0.1f;
                 _zoom = MathHelper.Clamp(_zoom + zoomDelta, 0.2f, 3.0f);
@@ -316,7 +316,7 @@ namespace AethonMod.Content.UI
             _closeButton.TextColor = new Color(220, 80, 80);
             _closeButton.OnMouseOver += (evt, el) => { _closeHovered = true; _closeButton.TextColor = Color.White; };
             _closeButton.OnMouseOut += (evt, el) => { _closeHovered = false; _closeButton.TextColor = new Color(220, 80, 80); };
-            _closeButton.OnClick += (evt, el) => { Hide(); };
+            _closeButton.OnLeftClick += (evt, el) => { Hide(); };
             _background.Append(_closeButton);
 
             // Crear nodos
@@ -324,7 +324,7 @@ namespace AethonMod.Content.UI
             {
                 Vector2 basePos = NodeToBasePos(node);
                 var nodeEl = new SkillNodeElement(node, basePos, _sizeMultiplier);
-                nodeEl.OnClick += (evt, el) => { OnNodeClick(node); };
+                nodeEl.OnLeftClick += (evt, el) => { OnNodeClick(node); };
                 _background.Append(nodeEl);
                 _nodeElements.Add(nodeEl);
             }
@@ -432,7 +432,7 @@ namespace AethonMod.Content.UI
             // Actualizar texto de puntos
             if (_pointsText != null && sp != null)
             {
-                _pointsText.SetText($"★ ARBOL DE HABILIDADES ★  |  Puntos: {sp.AvailableSkillPoints()}  |  Nivel {sp.ShardLevel}", 0.9f);
+                _pointsText.SetText($"★ ARBOL DE HABILIDADES ★  |  Puntos: {sp.AvailableSkillPoints()}  |  Nivel {sp.ShardLevel}");
             }
         }
 
