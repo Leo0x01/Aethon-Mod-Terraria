@@ -5,12 +5,12 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// ModPlayer que bloquea TODA interaccion con el juego mientras las UIs del mod estan abiertas.
+    /// ModPlayer que bloquea la interacción con el juego mientras las UIs del mod están abiertas.
     ///
-    /// ESTRATEGIA: Usar Main.playerInventory = true que pone el juego en modo "menu"
-    /// (como el bestiario/inventario). En este modo, el juego NO procesa clicks del
-    /// mouse para atacar/colocar bloques, pero las UIs pueden seguir leyendo
-    /// Main.mouseLeft/mouseRight via el sistema de captura.
+    /// SOLUCIÓN CORRECTA: Usar Player.mouseInterface = true
+    /// Esto le dice a Terraria que el mouse está sobre una interfaz de usuario,
+    /// por lo que NO debe interpretar los clicks como input del juego (atacar, colocar bloques, etc.).
+    /// Esto es EXACTAMENTE lo que hace el bestiario nativo de Terraria.
     /// </summary>
     public class UIScrollBlockPlayer : ModPlayer
     {
@@ -19,27 +19,18 @@ namespace AethonMod.Content.Players
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
 
-            bool treeOpen = ui.SkillTreeUI?.IsVisible ?? false;
-            bool codexOpen = ui.CodexUI?.IsVisible ?? false;
-            bool branchOpen = ui.BranchChoiceUI?.IsVisible ?? false;
-            bool anyUIOpen = treeOpen || codexOpen || branchOpen;
+            bool anyUIOpen = (ui.SkillTreeUI?.IsVisible ?? false) ||
+                             (ui.CodexUI?.IsVisible ?? false) ||
+                             (ui.BranchChoiceUI?.IsVisible ?? false);
 
-            if (!anyUIOpen)
-            {
-                // Si no hay UI abierta, asegurar que el inventario este cerrado
-                // (lo abrimos para bloquear el juego, pero lo cerramos cuando no hay UI)
-                return;
-            }
+            if (!anyUIOpen) return;
 
-            // === 1. CAPTURAR ESTADO DEL MOUSE ===
-            UISystem.CaptureAndBlockInput();
+            // === CLAVE: Player.mouseInterface = true ===
+            // Esto hace que Terraria NO interprete los clicks del mouse como input del juego.
+            // El jugador no atacará, no colocará bloques, no usará items con el mouse.
+            Player.mouseInterface = true;
 
-            // === 2. BLOQUEAR EL JUEGO CON Main.playerInventory ===
-            // Esto pone el juego en modo "menu" donde no procesa clicks del mundo
-            // pero las UIs pueden leer el estado del mouse libremente
-            Main.playerInventory = true;
-
-            // === 3. BLOQUEAR MOVIMIENTO ===
+            // Bloquear movimiento del jugador
             Player.controlLeft = false;
             Player.controlRight = false;
             Player.controlUp = false;
@@ -48,6 +39,10 @@ namespace AethonMod.Content.Players
             Player.controlUseItem = false;
             Player.controlUseTile = false;
             Player.grappling[0] = -1;
+
+            // Cerrar inventario si está abierto (para que no se vea la interfaz vanilla)
+            if (Main.playerInventory)
+                Main.playerInventory = false;
         }
 
         public override void PreUpdateMovement()
@@ -55,7 +50,10 @@ namespace AethonMod.Content.Players
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
 
-            bool anyUIOpen = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
+            bool anyUIOpen = (ui.SkillTreeUI?.IsVisible ?? false) ||
+                             (ui.CodexUI?.IsVisible ?? false) ||
+                             (ui.BranchChoiceUI?.IsVisible ?? false);
+
             if (anyUIOpen)
             {
                 Player.velocity.X = 0;

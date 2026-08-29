@@ -71,12 +71,12 @@ namespace AethonMod.Content.UI
             _time += 0.016f;
 
             var winRect = WindowRect;
-            // Usar UISystem.MouseX/Y (copia guardada antes del bloqueo)
-            int mx = UISystem.MouseX;
-            int my = UISystem.MouseY;
-            bool ml = UISystem.MouseLeft;
-            bool mlr = UISystem.MouseLeftRelease;
-            int sd = UISystem.ScrollDelta;
+            // Como Player.mouseInterface = true, el juego NO consumió los clicks.
+            int mx = Main.mouseX;
+            int my = Main.mouseY;
+            bool ml = Main.mouseLeft;
+            bool mlr = Main.mouseLeftRelease;
+            int sd = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
 
             // === SCROLL CON RUEDA ===
             if (sd != 0)

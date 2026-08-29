@@ -143,16 +143,17 @@ namespace AethonMod.Content.UI
             _time += 0.016f;
 
             var winRect = WindowRect;
-            // Usar UISystem.MouseX/Y (copia guardada antes del bloqueo)
-            int mx = UISystem.MouseX;
-            int my = UISystem.MouseY;
-            bool ml = UISystem.MouseLeft;
-            bool mr = UISystem.MouseRight;
-            bool mlr = UISystem.MouseLeftRelease;
-            int sd = UISystem.ScrollDelta;
+            // Como Player.mouseInterface = true, el juego NO consumió los clicks.
+            // Las UIs pueden leer Main.mouseLeft/mouseRight directamente.
+            int mx = Main.mouseX;
+            int my = Main.mouseY;
+            bool ml = Main.mouseLeft;
+            bool mr = Main.mouseRight;
+            bool mlr = Main.mouseLeftRelease;
+            int sd = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
             bool mouseInWindow = winRect.Contains(mx, my);
 
-            // === PAN CON CLICK DERECHO (usar UISystem.MouseRight, no Main.mouseRight) ===
+            // === PAN CON CLICK DERECHO ===
             if (mr && mouseInWindow)
             {
                 Vector2 curMouse = new(mx, my);

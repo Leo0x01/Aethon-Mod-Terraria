@@ -11,33 +11,20 @@ namespace AethonMod.Content.Systems
     /// <summary>
     /// Sistema central de UI del mod Aethon.
     ///
-    /// ORDEN DE EJECUCIÓN CRÍTICO:
-    /// 1. PreUpdatePlayers (UIScrollBlockPlayer) — bloquea input del juego
-    /// 2. Juego procesa input (ya bloqueado, no hace nada)
-    /// 3. PostUpdateInput (UISystem) — toggle de teclas + UIs procesan input
-    /// 4. ModifyInterfaceLayers — solo DIBUJA, no procesa input
-    ///
-    /// El truco: las UIs procesan su input en PostUpdateInput (paso 3),
-    /// que corre DESPUÉS de que UIScrollBlockPlayer bloqueó el input del juego.
-    /// Pero las UIs leen el estado ORIGINAL del mouse que el juego guardó
-    /// antes de que UIScrollBlockPlayer lo reseteara.
-    ///
-    /// Para que esto funcione, UIScrollBlockPlayer debe guardar una COPIA
-    /// del estado del mouse/teclado antes de resetearlo.
+    /// PATRÓN CORRECTO (descubierto tras investigación):
+    /// 1. UIScrollBlockPlayer.PreUpdate() setea Player.mouseInterface = true
+    ///    — Esto hace que Terraria NO procese clicks del mouse como input del juego
+    ///    — El juego no ataca, no coloca bloques, no usa items
+    /// 2. PostUpdateInput() — las UIs leen Main.mouseLeft/mouseRight directamente
+    ///    — Como mouseInterface = true, el juego ya no consumió el click
+    ///    — Las UIs pueden usar Main.mouseLeft normalmente
+    /// 3. ModifyInterfaceLayers — solo DIBUJA
     /// </summary>
     public class UISystem : ModSystem
     {
         public UI.SkillTreeUI? SkillTreeUI;
         public UI.MemoryCodexUI? CodexUI;
         public UI.BranchChoiceUI? BranchChoiceUI;
-
-        // Copia del estado del mouse ANTES de que UIScrollBlockPlayer lo resetee
-        public static bool MouseLeft;
-        public static bool MouseRight;
-        public static bool MouseLeftRelease;
-        public static int ScrollDelta;
-        public static int MouseX;
-        public static int MouseY;
 
         public override void Load()
         {
@@ -52,26 +39,6 @@ namespace AethonMod.Content.Systems
             SkillTreeUI = null;
             CodexUI = null;
             BranchChoiceUI = null;
-        }
-
-        /// <summary>
-        /// Se llama en PreUpdate (antes de que el juego procese input).
-        /// Guardamos el estado del mouse para que las UIs lo puedan usar
-        /// después, y luego bloqueamos todo para que el juego no responda.
-        /// </summary>
-        public static void CaptureAndBlockInput()
-        {
-            // Guardar estado del mouse ANTES de que el juego lo procese
-            MouseLeft = Main.mouseLeft;
-            MouseRight = Main.mouseRight;
-            MouseLeftRelease = Main.mouseLeftRelease;
-            ScrollDelta = Terraria.GameInput.PlayerInput.ScrollWheelValue - Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            MouseX = Main.mouseX;
-            MouseY = Main.mouseY;
-
-            // NO resetear Main.mouseLeft/Right aqui — el flag Main.playerInventory=true
-            // se encarga de que el juego no procese clicks del mundo.
-            // Las UIs leen UISystem.MouseLeft/Right que es la copia guardada.
         }
 
         public override void PostUpdateInput()
@@ -98,7 +65,7 @@ namespace AethonMod.Content.Systems
                 }
             }
 
-            // Toggle del codex (J) — solo si esta desbloqueado
+            // Toggle del codex (J)
             if (Main.keyState.IsKeyDown(config.CodexKey) &&
                 !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
@@ -116,18 +83,15 @@ namespace AethonMod.Content.Systems
             }
 
             // === LAS UIs PROCESAN EL INPUT AQUI ===
-            // Usan UISystem.MouseLeft, MouseRight, etc. (copia guardada en PreUpdate)
+            // Como Player.mouseInterface = true fue seteado en PreUpdate,
+            // el juego NO consumió Main.mouseLeft/mouseRight.
+            // Las UIs pueden leerlos directamente.
             SkillTreeUI?.Update();
             CodexUI?.Update();
             BranchChoiceUI?.Update();
 
-            // === RESETEAR SCROLL DELTA DESPUES DE QUE LAS UIs LO LEAN ===
-            // Esto evita que el scroll se procese multiples veces
-            ScrollDelta = 0;
-
-            // === BLOQUEAR SCROLL DEL JUEGO ===
-            // Resetear aqui (despues de que las UIs ya leyeron ScrollDelta)
-            // para que el hotbar no se mueva
+            // === RESETEAR SCROLL DESPUES DE QUE LAS UIs LO LEAN ===
+            // Esto evita que el scroll del hotbar se mueva
             if (anyFullscreenUIOpen)
             {
                 Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
@@ -166,7 +130,6 @@ namespace AethonMod.Content.Systems
                 {
                     try
                     {
-                        // SOLO DIBUJAR — el input se procesa en PostUpdateInput
                         SkillTreeUI?.Draw();
                         CodexUI?.Draw();
                         BranchChoiceUI?.Draw();
