@@ -2193,3 +2193,42 @@ Removed:
 
 Build: 0 Errors, 0 Warnings
 - Pushed to GitHub: commit df2763d
+
+---
+Task ID: ANRPG-PATTERN-REDESIGN-1
+Agent: Lead Developer (Z.ai Code)
+Task: Redesign skill tree using AnRPG pattern (UIState+UIElement), bump version.
+
+What was done:
+1. Studied AnRPG source code from GitHub (mrshinx/AnRPG-Edited)
+   - SkillTreeUi.cs: UIState with UIPanel, OnMouseDown, OnScrollWheel, OnClick
+   - Shared.cs: SkillPanel (UIPanel), Connection (UIElement), Skill (UIElement)
+   - Pattern: UIState + UserInterface processes clicks NATIVELY
+
+2. Redesigned SkillTreeUI.cs using AnRPG pattern:
+   - SkillNodeElement (UIElement): clickeable node with OnLeftClick
+   - SkillConnectionElement (UIElement): connection line between nodes
+   - SkillTreeUIState (UIState): main state with UserInterface
+   - UIPanel as fullscreen background with OnLeftMouseDown/OnLeftMouseUp for pan
+   - OnScrollWheel (UIScrollWheelEvent) for zoom
+   - OnLeftClick for node clicks and close button
+   - UserInterface.Update() processes clicks NATIVELY
+   - UserInterface.Draw() renders with correct UI transformation
+
+3. Updated UISystem.cs to use UserInterface for SkillTreeUI:
+   - _skillTreeInterface (UserInterface) manages SkillTreeUIState
+   - SetState/Update/Draw called properly
+   - Player.mouseInterface = true (from UIScrollBlockPlayer) blocks game input
+
+4. Fixed tModLoader v2026.06 event names:
+   - OnMouseDown → OnLeftMouseDown
+   - OnMouseUp → OnLeftMouseUp
+   - OnClick → OnLeftClick
+   - OnScrollWheel takes (UIScrollWheelEvent, UIElement) not (UIMouseEvent, UIElement)
+   - SetText takes 1 arg (string) not 2 args (string, float)
+
+5. Version bumped to 3.0
+
+Build: 0 Errors, 35 Warnings (all cosmetic ChangeMagicNumberToID)
+- .tmod: 217KB
+- Pushed to GitHub: commit 96bd14c
