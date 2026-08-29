@@ -2167,3 +2167,29 @@ Research:
 Build: 0 Errors, 0 Warnings
 - .tmod: 217KB
 - Pushed to GitHub: commit e8dded7
+
+---
+Task ID: MOUSEINTERFACE-FIX-1
+Agent: Lead Developer (Z.ai Code)
+Task: Find and implement the correct native Terraria solution for blocking game input when UI is open.
+
+Research:
+- Searched tModLoader documentation for how to block game input when UI is open
+- Found Player Class Reference: "If true, the mouse is currently overlapping with a user interface so any mouse interaction should not be interpreted as gameplay input"
+- That field is Player.mouseInterface = true
+- This is the NATIVE Terraria solution — the game itself uses this for bestiary, inventory, etc.
+
+Solution:
+- UIScrollBlockPlayer.PreUpdate(): set Player.mouseInterface = true when any UI is open
+- This tells Terraria: "the mouse is over a UI, don't process clicks as gameplay"
+- Terraria will NOT attack, place blocks, or use items with the mouse
+- UIs can read Main.mouseLeft/mouseRight DIRECTLY (no capture needed)
+- Scroll is reset in PostUpdateInput AFTER UIs read it
+
+Removed:
+- UISystem.CaptureAndBlockInput() and all static fields (MouseLeft, MouseRight, etc.)
+- Complex capture/block/read pattern
+- Redundant scroll resets
+
+Build: 0 Errors, 0 Warnings
+- Pushed to GitHub: commit df2763d
