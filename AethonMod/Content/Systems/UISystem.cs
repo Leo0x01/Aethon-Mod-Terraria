@@ -83,11 +83,12 @@ namespace AethonMod.Content.Systems
             CodexUI?.Update();
             BranchChoiceUI?.Update();
 
-            // === RESETEAR SCROLL DESPUES DE QUE LAS UIs LO LEAN ===
-            if (anyFullscreenUIOpen)
-            {
-                Terraria.GameInput.PlayerInput.ScrollWheelValue = Terraria.GameInput.PlayerInput.ScrollWheelValueOld;
-            }
+            // === NO RESETEAR SCROLLWHEELVALUE ===
+            // Player.mouseInterface = true ya bloquea el hotbar.
+            // Resetea ScrollWheelValue causaba scroll infinito:
+            // el reset hace que Old=0 pero el SO sigue reportando el valor acumulado,
+            // creando un delta no-zero cada frame.
+            // Sin reset: el delta es 0 naturalmente cuando no hay scroll.
         }
 
         private bool anyFullscreenUIOpenExcept(object? except)
