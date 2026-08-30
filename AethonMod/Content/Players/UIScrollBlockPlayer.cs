@@ -5,12 +5,9 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// ModPlayer que bloquea la interacción con el juego mientras las UIs del mod están abiertas.
-    ///
-    /// SOLUCIÓN CORRECTA: Usar Player.mouseInterface = true
-    /// Esto le dice a Terraria que el mouse está sobre una interfaz de usuario,
-    /// por lo que NO debe interpretar los clicks como input del juego (atacar, colocar bloques, etc.).
-    /// Esto es EXACTAMENTE lo que hace el bestiario nativo de Terraria.
+    /// ModPlayer que bloquea el movimiento del jugador mientras las UIs están abiertas.
+    /// Player.mouseInterface = true se setea dentro de SkillTreeUIState.DrawSelf
+    /// (igual que AnRPG), no aquí.
     /// </summary>
     public class UIScrollBlockPlayer : ModPlayer
     {
@@ -19,18 +16,12 @@ namespace AethonMod.Content.Players
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
 
-            bool anyUIOpen = (ui.SkillTreeUI?.IsVisible ?? false) ||
-                             (ui.CodexUI?.IsVisible ?? false) ||
-                             (ui.BranchChoiceUI?.IsVisible ?? false);
+            bool any = (ui.SkillTreeUI?.IsVisible ?? false) ||
+                       (ui.CodexUI?.IsVisible ?? false) ||
+                       (ui.BranchChoiceUI?.IsVisible ?? false);
+            if (!any) return;
 
-            if (!anyUIOpen) return;
-
-            // === CLAVE: Player.mouseInterface = true ===
-            // Esto hace que Terraria NO interprete los clicks del mouse como input del juego.
-            // El jugador no atacará, no colocará bloques, no usará items con el mouse.
-            Player.mouseInterface = true;
-
-            // Bloquear movimiento del jugador
+            // Bloquear movimiento (igual que AnRPG)
             Player.controlLeft = false;
             Player.controlRight = false;
             Player.controlUp = false;
@@ -40,21 +31,16 @@ namespace AethonMod.Content.Players
             Player.controlUseTile = false;
             Player.grappling[0] = -1;
 
-            // Cerrar inventario si está abierto (para que no se vea la interfaz vanilla)
-            if (Main.playerInventory)
-                Main.playerInventory = false;
+            // Cerrar inventario
+            if (Main.playerInventory) Main.playerInventory = false;
         }
 
         public override void PreUpdateMovement()
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-
-            bool anyUIOpen = (ui.SkillTreeUI?.IsVisible ?? false) ||
-                             (ui.CodexUI?.IsVisible ?? false) ||
-                             (ui.BranchChoiceUI?.IsVisible ?? false);
-
-            if (anyUIOpen)
+            bool any = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
+            if (any)
             {
                 Player.velocity.X = 0;
                 Player.controlLeft = false;

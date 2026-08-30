@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using AethonMod.Content.Players;
@@ -9,13 +10,17 @@ using AethonMod.Content.Players;
 namespace AethonMod.Content.Systems
 {
     /// <summary>
-    /// Sistema central de UI del mod Aethon.
-    /// Usa UserInterface + UIState (patrón nativo de tModLoader).
-    /// Player.mouseInterface = true bloquea el input del juego.
+    /// UISystem — sigue el patrón exacto de AnRPG:
+    /// 1. Crear UserInterface + UIState una sola vez en Load()
+    /// 2. SIEMPRE SetState (nunca null)
+    /// 3. En ModifyInterfaceLayers: si visible, Update() + Draw()
+    /// 4. mouseInterface = true en DrawSelf del UIState (no en ModPlayer)
     /// </summary>
     public class UISystem : ModSystem
     {
-        private UserInterface? _skillTreeInterface;
+        private UserInterface _skillTreeInterface = new();
+        private UserInterface _codexInterface = new();
+
         public UI.SkillTreeUIState? SkillTreeUI;
         public UI.MemoryCodexUI? CodexUI;
         public UI.BranchChoiceUI? BranchChoiceUI;
@@ -23,19 +28,17 @@ namespace AethonMod.Content.Systems
         public override void Load()
         {
             if (Main.dedServ) return;
-            _skillTreeInterface = new UserInterface();
             SkillTreeUI = new UI.SkillTreeUIState();
             SkillTreeUI.Activate();
+            _skillTreeInterface.SetState(SkillTreeUI);
+
             CodexUI = new UI.MemoryCodexUI();
             BranchChoiceUI = new UI.BranchChoiceUI();
         }
 
         public override void Unload()
         {
-            SkillTreeUI = null;
-            CodexUI = null;
-            BranchChoiceUI = null;
-            _skillTreeInterface = null;
+            SkillTreeUI = null; CodexUI = null; BranchChoiceUI = null;
         }
 
         public override void PostUpdateInput()
@@ -43,55 +46,33 @@ namespace AethonMod.Content.Systems
             var config = ModContent.GetInstance<Content.AethonConfig>();
             if (config == null) return;
 
-            bool anyFullscreenUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
-
-            // Toggle del arbol de habilidades (K)
-            if (Main.keyState.IsKeyDown(config.SkillTreeKey) &&
-                !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
+            // Toggle K
+            if (Main.keyState.IsKeyDown(config.SkillTreeKey) && !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
             {
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-                if (sp != null && sp.IsImprinted && !anyFullscreenUIOpenExcept(SkillTreeUI))
+                if (sp != null && sp.IsImprinted && !anyOtherOpen(SkillTreeUI))
                 {
                     if (SkillTreeUI?.IsVisible == true) SkillTreeUI.Hide();
-                    else
-                    {
-                        SkillTreeUI?.Show();
-                        if (SkillTreeUI != null) _skillTreeInterface?.SetState(SkillTreeUI);
-                    }
+                    else SkillTreeUI?.Show();
                 }
             }
-
-            // Toggle del codex (J)
-            if (Main.keyState.IsKeyDown(config.CodexKey) &&
-                !Main.oldKeyState.IsKeyDown(config.CodexKey))
+            // Toggle J
+            if (Main.keyState.IsKeyDown(config.CodexKey) && !Main.oldKeyState.IsKeyDown(config.CodexKey))
             {
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-                if (sp != null && sp.IsImprinted && sp.CodexUnlocked && !anyFullscreenUIOpenExcept(CodexUI))
+                if (sp != null && sp.IsImprinted && sp.CodexUnlocked && !anyOtherOpen(CodexUI))
                 {
                     if (CodexUI?.IsVisible == true) CodexUI.Hide();
                     else CodexUI?.Show();
                 }
             }
 
-            // === LAS UIs PROCESAN EL INPUT ===
-            // Como Player.mouseInterface = true, el juego no consumió los clicks.
-            // UserInterface.Update procesa OnClick, OnMouseOver, etc. nativamente.
-            if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
-                _skillTreeInterface.Update(Main._drawInterfaceGameTime);
-            if (SkillTreeUI?.IsVisible != true) _skillTreeInterface?.SetState(null);
-
+            // Las UIs que usan dibujo directo (Codex, BranchChoice) procesan input aquí
             CodexUI?.Update();
             BranchChoiceUI?.Update();
-
-            // === NO RESETEAR SCROLLWHEELVALUE ===
-            // Player.mouseInterface = true ya bloquea el hotbar.
-            // Resetea ScrollWheelValue causaba scroll infinito:
-            // el reset hace que Old=0 pero el SO sigue reportando el valor acumulado,
-            // creando un delta no-zero cada frame.
-            // Sin reset: el delta es 0 naturalmente cuando no hay scroll.
         }
 
-        private bool anyFullscreenUIOpenExcept(object? except)
+        private bool anyOtherOpen(object? except)
         {
             if (except != SkillTreeUI && (SkillTreeUI?.IsVisible ?? false)) return true;
             if (except != CodexUI && (CodexUI?.IsVisible ?? false)) return true;
@@ -101,44 +82,37 @@ namespace AethonMod.Content.Systems
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            bool anyUIOpen = (SkillTreeUI?.IsVisible ?? false) || (CodexUI?.IsVisible ?? false) || (BranchChoiceUI?.IsVisible ?? false);
+            // AnRPG inserta en "Vanilla: Interface Logic 2" — hacemos lo mismo
+            int insertIdx = layers.FindIndex(l => l.Name.Equals("Vanilla: Interface Logic 2"));
+            if (insertIdx == -1) insertIdx = layers.Count;
 
-            if (anyUIOpen)
-            {
-                layers.RemoveAll(layer =>
-                    layer.Name.Contains("Vanilla: Hotbar") ||
-                    layer.Name.Contains("Vanilla: Inventory") ||
-                    layer.Name.Contains("Vanilla: Player Buffs") ||
-                    layer.Name.Contains("Vanilla: Resource Bars") ||
-                    layer.Name.Contains("Vanilla: Tooltip"));
-            }
-
-            int mouseLayerIdx = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
-            if (mouseLayerIdx == -1) mouseLayerIdx = layers.Count;
-
-            layers.Insert(mouseLayerIdx, new LegacyGameInterfaceLayer(
-                "AethonMod: UIs",
-                delegate
+            layers.Insert(insertIdx, new LegacyGameInterfaceLayer("AethonMod: Skill Tree",
+                () =>
                 {
                     try
                     {
-                        // Árbol via UserInterface (procesa clicks nativamente)
-                        if (_skillTreeInterface != null && SkillTreeUI?.IsVisible == true)
+                        if (SkillTreeUI?.IsVisible == true)
                         {
-                            var gt = Main._drawInterfaceGameTime;
-                            if (gt != null) _skillTreeInterface.Draw(Main.spriteBatch, gt);
+                            // AnRPG patrón: Update + Draw
+                            _skillTreeInterface.Update(Main._drawInterfaceGameTime);
+                            SkillTreeUI.Draw(Main.spriteBatch);
                         }
-                        // Codex y BranchChoice via dibujo directo
+                    }
+                    catch (System.Exception ex) { ModContent.GetInstance<AethonMod>()?.Logger?.Error("SkillTree render error", ex); }
+                    return true;
+                }, InterfaceScaleType.UI));
+
+            layers.Insert(insertIdx, new LegacyGameInterfaceLayer("AethonMod: Codex + Branch",
+                () =>
+                {
+                    try
+                    {
                         CodexUI?.Draw();
                         BranchChoiceUI?.Draw();
                     }
-                    catch (System.Exception ex)
-                    {
-                        ModContent.GetInstance<AethonMod>()?.Logger?.Error("UISystem render error", ex);
-                    }
+                    catch (System.Exception ex) { ModContent.GetInstance<AethonMod>()?.Logger?.Error("Codex render error", ex); }
                     return true;
-                },
-                InterfaceScaleType.UI));
+                }, InterfaceScaleType.UI));
         }
     }
 }
