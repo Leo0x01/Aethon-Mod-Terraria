@@ -2232,3 +2232,33 @@ What was done:
 Build: 0 Errors, 35 Warnings (all cosmetic ChangeMagicNumberToID)
 - .tmod: 217KB
 - Pushed to GitHub: commit 96bd14c
+
+---
+Task ID: SCROLL-INFINITE-FINAL-FIX-1
+Agent: Lead Developer (Z.ai Code)
+Task: Eliminate infinite scroll once and for all.
+
+ROOT CAUSE (finally identified):
+The scroll was infinite because of the ScrollWheelValue RESET in UISystem.PostUpdateInput:
+
+Frame 1: User scrolls. ScrollWheelValue=120, Old=0. Delta=120. UI processes zoom/scroll.
+        PostUpdateInput resets ScrollWheelValue = ScrollWheelValueOld = 0.
+Frame 2: OS still reports ScrollWheelValue=120 (accumulated value).
+        ScrollWheelValueOld was set to 0 (the reset value).
+        Delta = 120 - 0 = 120 AGAIN. → INFINITE SCROLL.
+Frame 3: Same cycle repeats forever.
+
+FIX:
+- REMOVED ALL ScrollWheelValue resets from ALL code (UISystem, UIScrollBlockPlayer).
+- Player.mouseInterface = true already prevents the hotbar from scrolling.
+- The natural delta (ScrollWheelValue - ScrollWheelValueOld) is 0 when no scrolling happens.
+- No manual reset needed.
+
+Verification:
+- grep -rn "ScrollWheelValue" shows only 2 reads (no resets):
+  1. SkillTreeUI.cs: evt.ScrollWheelValue (from OnScrollWheel event, native)
+  2. MemoryCodexUI.cs: ScrollWheelValue - ScrollWheelValueOld (natural delta)
+- No resets anywhere in the codebase.
+
+Build: 0 Errors, 0 Warnings
+- Pushed to GitHub: commit 7839af9
