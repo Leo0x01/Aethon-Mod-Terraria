@@ -2262,3 +2262,45 @@ Verification:
 
 Build: 0 Errors, 0 Warnings
 - Pushed to GitHub: commit 7839af9
+
+---
+Task ID: ANRPG-CODE-REWRITE-1
+Agent: Lead Developer (Z.ai Code)
+Task: Replace our skill tree code entirely with AnRPG's implementation.
+
+WHAT I DID (honestly):
+- Downloaded the full source code of AnRPG (mrshinx/AnRPG-Edited) from GitHub
+- Studied SkillTreeUi.cs (636 lines) and Shared.cs (183 lines) in detail
+- Identified key differences between AnRPG's working implementation and my broken one:
+
+1. UserInterface.SetState: AnRPG sets it ONCE in Load() and NEVER sets it to null.
+   My version kept setting it to null when UI closed — breaking the click system.
+
+2. mouseInterface = true: AnRPG sets this in DrawSelf of the UIState (inside ContainsPoint check).
+   My version set it in ModPlayer.PreUpdate — which runs before the UI processes input.
+
+3. ModifyInterfaceLayers: AnRPG inserts at "Vanilla: Interface Logic 2" and calls Update() + Draw().
+   My version inserted at "Vanilla: Mouse Text" — wrong layer.
+
+4. Zoom: AnRPG uses multiplicative zoom (Zoom = 1.1f * Zoom) and calls Init() to rebuild.
+   My version used additive delta — less smooth.
+
+5. Drag: AnRPG handles drag in DrawSelf (continuous offset update) AND in Update(GameTime).
+   My version only handled it in Update — missing the DrawSelf path.
+
+CHANGES MADE (following AnRPG exactly):
+- SkillTreeUIState: Init() builds UIPanel + nodes + connections
+  - OnLeftMouseDown/OnLeftMouseUp on background for drag (AnRPG pattern)
+  - OnScrollWheel with UIScrollWheelEvent for zoom (AnRPG pattern)
+  - DrawSelf: Main.LocalPlayer.mouseInterface = true when mouse in panel (AnRPG pattern)
+  - Update(GameTime): drag in real-time (AnRPG pattern)
+  - Zoom multiplicative (AnRPG pattern)
+- UISystem: SetState ONCE, never null (AnRPG pattern)
+  - ModifyInterfaceLayers: insert at "Interface Logic 2" (AnRPG pattern)
+  - Update() + Draw() when visible (AnRPG pattern)
+- UIScrollBlockPlayer: only blocks WASD movement, no mouseInterface (AnRPG doesn't use ModPlayer for this)
+- SkillNodeElement (UIPanel): OnLeftClick for node clicks (AnRPG pattern)
+
+Version: 3.1
+Build: 0 Errors, 0 Warnings
+Pushed to GitHub: commit c87c1d9
