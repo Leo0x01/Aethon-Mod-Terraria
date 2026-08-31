@@ -2304,3 +2304,34 @@ CHANGES MADE (following AnRPG exactly):
 Version: 3.1
 Build: 0 Errors, 0 Warnings
 Pushed to GitHub: commit c87c1d9
+
+---
+Task ID: ANRPG-FULL-REWRITE-1
+Agent: Lead Developer (Z.ai Code)
+Task: Delete all previous skill tree code and rewrite following AnRPG exactly.
+
+WHAT I DID (honestly):
+- Deleted ALL previous SkillTreeUI.cs code (my broken implementation)
+- Downloaded AnRPG source from GitHub
+- Rewrote SkillTreeUI.cs following AnRPG's pattern exactly:
+  * SkillPanel (UIPanel) — adapted from AnRPG Shared.cs SkillPanel
+  * Connection (UIElement) — adapted from AnRPG Shared.cs Connection
+  * SkillTreeUIState (UIState) — adapted from AnRPG SkillTreeUi.cs
+
+KEY PATTERNS COPIED FROM ANRPG:
+1. Init() builds UIPanel + nodes + connections (AnRPG.Init)
+2. OnLeftMouseDown/OnLeftMouseUp for drag (AnRPG.DragStart/DragEnd)
+3. OnScrollWheel with UIScrollWheelEvent for zoom (AnRPG.ScrollUpDown)
+4. Zoom = 1.1f * Zoom (multiplicative, AnRPG pattern)
+5. DrawSelf: mouseInterface = true when ContainsPoint (AnRPG.DrawSelf)
+6. DrawSelf: continuous drag update (AnRPG.DrawSelf)
+7. Update(GameTime): recalculate positions (AnRPG.Update)
+8. SkillInit per node with OnLeftClick (AnRPG.SkillInit + OnClick)
+9. Erase() clears everything (AnRPG.Erase)
+10. UISystem: SetState ONCE, never null (AnRPG pattern)
+11. ModifyInterfaceLayers at "Interface Logic 2" (AnRPG pattern)
+12. Update + Draw when visible (AnRPG pattern)
+
+Version: 3.2
+Build: 0 Errors, 0 Warnings
+Pushed to GitHub: commit 77dd2b9
