@@ -5,9 +5,8 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// ModPlayer que bloquea el movimiento del jugador mientras las UIs están abiertas.
-    /// Player.mouseInterface = true se setea dentro de SkillTreeUIState.DrawSelf
-    /// (igual que AnRPG), no aquí.
+    /// Bloquea el movimiento del jugador mientras las UIs están abiertas.
+    /// mouseInterface = true se maneja en SkillTreeUIState.DrawSelf (igual que AnRPG).
     /// </summary>
     public class UIScrollBlockPlayer : ModPlayer
     {
@@ -15,13 +14,8 @@ namespace AethonMod.Content.Players
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-
-            bool any = (ui.SkillTreeUI?.IsVisible ?? false) ||
-                       (ui.CodexUI?.IsVisible ?? false) ||
-                       (ui.BranchChoiceUI?.IsVisible ?? false);
+            bool any = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
             if (!any) return;
-
-            // Bloquear movimiento (igual que AnRPG)
             Player.controlLeft = false;
             Player.controlRight = false;
             Player.controlUp = false;
@@ -30,8 +24,6 @@ namespace AethonMod.Content.Players
             Player.controlUseItem = false;
             Player.controlUseTile = false;
             Player.grappling[0] = -1;
-
-            // Cerrar inventario
             if (Main.playerInventory) Main.playerInventory = false;
         }
 
@@ -40,15 +32,7 @@ namespace AethonMod.Content.Players
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
             bool any = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
-            if (any)
-            {
-                Player.velocity.X = 0;
-                Player.controlLeft = false;
-                Player.controlRight = false;
-                Player.controlUp = false;
-                Player.controlDown = false;
-                Player.controlJump = false;
-            }
+            if (any) { Player.velocity.X = 0; Player.controlLeft = false; Player.controlRight = false; Player.controlJump = false; }
         }
     }
 }
