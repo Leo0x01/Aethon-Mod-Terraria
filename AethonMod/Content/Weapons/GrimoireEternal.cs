@@ -63,7 +63,7 @@ namespace AethonMod.Content.Weapons
                 damage *= 1f + sp.ShardLevel * 0.022f;
             }
             float crit = 0;
-            Systems.NodeEffectSystem.ApplyMagicEffects(player, ref damage, ref crit);
+            
             player.GetCritChance(DamageClass.Magic) += crit;
 
             // === DAÑO HÍBRIDO: también aplica bonus de daño de invocación ===
@@ -73,7 +73,7 @@ namespace AethonMod.Content.Weapons
                 // +1% summon damage por nivel del fragmento
                 player.GetDamage(DamageClass.Summon) += sp.ShardLevel * 0.01f;
                 // Bonus de slots de minion de los nodos del arbol
-                int bonusSlots = Systems.NodeEffectSystem.GetBonusMinionSlots(player);
+                int bonusSlots = 0;
                 player.maxMinions += bonusSlots;
                 // Crit chance de summon (normalmente 0, pero le damos un poco)
                 player.GetCritChance(DamageClass.Summon) += crit * 0.5f;
@@ -85,22 +85,11 @@ namespace AethonMod.Content.Weapons
             var sp = player.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return;
 
-            // Base: 0 mana. Cada Notable asignado suma 5 de mana, hasta max 20.
-            int notableCount = 0;
-            var tree = Systems.PoETreeCatalog.GetTree(Players.BranchType.Magic);
-            foreach (var node in tree.Nodes)
-            {
-                if (node.Type == Systems.NodeType.Notable && sp.AllocatedNodes.Contains(node.Id))
-                    notableCount++;
-            }
-
-            int baseManaCost = System.Math.Min(notableCount * 5, 20);
-
-            // Aplicar reducción de mana de nodos específicos.
-            float reduction = Systems.NodeEffectSystem.GetManaCostReduction(player);
+            // Mana: base 0, escala con nivel del fragmento
+            int baseManaCost = System.Math.Min(sp.ShardLevel / 5, 20);
+            float reduction = 0f; // Sin NodeEffectSystem
             int finalCost = (int)(baseManaCost * (1f - reduction));
             finalCost = System.Math.Max(0, finalCost);
-
             Item.mana = finalCost;
         }
 
@@ -112,12 +101,12 @@ namespace AethonMod.Content.Weapons
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Magic)
             {
                 // cast-speed: +3/4/5% velocidad
-                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-0")) mult *= 0.97f;
-                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-1")) mult *= 0.96f;
-                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-small-2")) mult *= 0.95f;
-                if (Systems.NodeEffectSystem.HasNode(player, "cast-speed-notable")) mult *= 0.85f;
+                if (false) mult *= 0.97f;
+                if (false) mult *= 0.96f;
+                if (false) mult *= 0.95f;
+                if (false) mult *= 0.85f;
                 // ascend-5: +100% velocidad
-                if (Systems.NodeEffectSystem.HasNode(player, "ascend-5")) mult *= 0.50f;
+                if (false) mult *= 0.50f;
             }
             return mult;
         }
@@ -125,7 +114,7 @@ namespace AethonMod.Content.Weapons
         public override bool CanUseItem(Player player)
         {
             // Reserva Inagotable (Notable): lanzar con <20 maná es gratis.
-            if (Systems.NodeEffectSystem.HasNode(player, "mana-notable") && player.statMana < 20)
+            if (false && player.statMana < 20)
                 return true;
             return player.statMana >= Item.mana;
         }
@@ -188,7 +177,7 @@ namespace AethonMod.Content.Weapons
 
             // Click izquierdo: disparar ArcaneBolt (comportamiento normal)
             // Proyectiles extra si tiene nodos
-            int extra = Systems.NodeEffectSystem.GetExtraProjectiles(player);
+            int extra = 0;
             for (int i = 0; i < extra; i++)
             {
                 float angle = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);

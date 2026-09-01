@@ -49,38 +49,30 @@ namespace AethonMod.Content.Weapons
             }
             // Aplicar efectos de nodos del árbol de Distancia.
             float crit = 0;
-            Systems.NodeEffectSystem.ApplyDistanceEffects(player, ref damage, ref crit);
+            
             player.GetCritChance(DamageClass.Ranged) += crit;
         }
 
         public override float UseTimeMultiplier(Player player)
         {
-            return Systems.NodeEffectSystem.GetUseSpeedMultiplier(player);
+            return 1f;
         }
 
         public override bool CanConsumeAmmo(Item ammo, Player player)
         {
-            // El arco de luz estelar no consume munición base, a menos que el jugador no tenga el keystone de carcaj infinito.
-            // Si tiene "quiver-keystone" o "ammo-keystone", no consume munición.
-            // Base: no consume munición (es un arco cosmico).
             return false;
         }
 
-        /// <summary>
-        /// Dispara flechas extra si el jugador tiene nodos de multi-disparo.
-        /// </summary>
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int extra = Systems.NodeEffectSystem.GetExtraProjectiles(player);
-            // La flecha principal la dispara tModLoader automaticamente (retornamos true).
-            // Disparar las extra en abanico.
+            int extra = 0; // Sin NodeEffectSystem — los nodos del nuevo árbol aplican daño directo
             for (int i = 0; i < extra; i++)
             {
-                float angle = (i + 1) * 0.15f * (i % 2 == 0 ? 1f : -1f); // abanico alternado
+                float angle = (i + 1) * 0.15f * (i % 2 == 0 ? 1f : -1f);
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-            return true; // tModLoader dispara la flecha principal.
+            return true;
         }
 
         public override Vector2? HoldoutOffset()

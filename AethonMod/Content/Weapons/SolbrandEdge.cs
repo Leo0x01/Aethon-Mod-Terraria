@@ -50,13 +50,13 @@ namespace AethonMod.Content.Weapons
                 damage *= 1f + sp.ShardLevel * 0.025f;
             }
             float crit = 0;
-            Systems.NodeEffectSystem.ApplyMeleeEffects(player, ref damage, ref crit);
+            
             player.GetCritChance(DamageClass.Melee) += crit;
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
         {
-            knockback *= Systems.NodeEffectSystem.GetMeleeKnockbackMult(player);
+            
         }
 
         public override float UseTimeMultiplier(Player player)
@@ -67,19 +67,8 @@ namespace AethonMod.Content.Weapons
             if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Melee)
             {
                 // combo: +3/4/5% velocidad
-                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-0")) mult *= 0.97f;
-                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-1")) mult *= 0.96f;
-                if (Systems.NodeEffectSystem.HasNode(player, "combo-small-2")) mult *= 0.95f;
-                if (Systems.NodeEffectSystem.HasNode(player, "combo-notable")) mult *= 0.85f;
-                if (Systems.NodeEffectSystem.HasNode(player, "combo-keystone")) mult *= 0.70f;
                 // berserk: +5/7/9% velocidad
-                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-0")) mult *= 0.95f;
-                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-1")) mult *= 0.93f;
-                if (Systems.NodeEffectSystem.HasNode(player, "berserk-small-2")) mult *= 0.91f;
-                if (Systems.NodeEffectSystem.HasNode(player, "berserk-notable")) mult *= 0.80f;
-                if (Systems.NodeEffectSystem.HasNode(player, "berserk-keystone")) mult *= 0.50f;
                 // ascend-5: +100% velocidad
-                if (Systems.NodeEffectSystem.HasNode(player, "ascend-5")) mult *= 0.50f;
             }
             return mult;
         }
@@ -94,10 +83,10 @@ namespace AethonMod.Content.Weapons
             if (sp == null) return false;
 
             // Nodos que desbloquean proyectiles (Melee: blade y solar, no celestial).
-            bool hasBladeNotable = sp.AllocatedNodes.Contains("blade-notable") ||
-                                   sp.AllocatedNodes.Contains("blade-keystone");
-            bool hasSolarNotable = sp.AllocatedNodes.Contains("solar-notable") ||
-                                   sp.AllocatedNodes.Contains("solar-keystone");
+            bool hasBladeNotable = false ||
+                                   false;
+            bool hasSolarNotable = false ||
+                                   false;
 
             if (!hasBladeNotable && !hasSolarNotable) return false;
 

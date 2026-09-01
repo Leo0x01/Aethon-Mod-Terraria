@@ -101,8 +101,6 @@ namespace AethonMod.Content.Items
                             sp.ActiveBranch = Players.BranchType.Magic;
                             sp.SubForm = Players.WeaponSubForm.Spellbook;
                         }
-                        if (sp.SkillTreeSeed == 0)
-                            sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
                         ReplaceShard(player, sp.ActiveBranch);
                     }
                 }

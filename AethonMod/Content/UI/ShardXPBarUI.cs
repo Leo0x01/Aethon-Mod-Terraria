@@ -214,7 +214,7 @@ namespace AethonMod.Content.UI
                             BranchType.Magic => WeaponSubForm.Spellbook,
                             _ => WeaponSubForm.None,
                         };
-                        if (sp.SkillTreeSeed == 0) sp.SkillTreeSeed = Main.rand.Next(1, 1_000_000);
+                        
                         Main.NewText($"✦ El Fragmento Genesis se ha transformado — {card.Name}!", card.Color);
                         Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
                         Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item169);

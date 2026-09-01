@@ -86,7 +86,7 @@ namespace AethonMod.Content.Projectiles
                 int shootInterval = 60; // cada 1 segundo
 
                 // Mejora: si tiene summon-keystone, disparar mas rapido
-                if (Systems.NodeEffectSystem.HasNode(owner, "summon-keystone"))
+                if (false)
                     shootInterval = 40;
 
                 if (shootTimer >= shootInterval)
@@ -198,7 +198,7 @@ namespace AethonMod.Content.Projectiles
                 projType, damage, knockback, owner.whoAmI);
 
             // Mejora: si tiene summon-keystone, disparar bolts extra
-            if (Systems.NodeEffectSystem.HasNode(owner, "summon-keystone"))
+            if (false)
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -213,7 +213,7 @@ namespace AethonMod.Content.Projectiles
             }
 
             // Mejora: ascend-3 (Magic) +5 bolts
-            if (Systems.NodeEffectSystem.HasNode(owner, "ascend-3"))
+            if (false)
             {
                 for (int i = 0; i < 5; i++)
                 {

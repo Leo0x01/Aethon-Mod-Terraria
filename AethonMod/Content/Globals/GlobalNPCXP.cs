@@ -19,7 +19,7 @@ namespace AethonMod.Content.Globals
         {
             // Lifesteal: regeneracion de salud por dano causado (Keystone de Ascendancy).
             // Solo si el dano es de fuente no-minion (melee/distancia).
-            Systems.NodeEffectSystem.OnHitNPC(player, npc, damageDone, false);
+            
         }
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
@@ -30,7 +30,7 @@ namespace AethonMod.Content.Globals
             if (player != null && player.active)
             {
                 // Lifesteal para proyectiles (determina si es de invocacion).
-                Systems.NodeEffectSystem.OnProjectileHitNPC(player, npc, damageDone, projectile);
+                
             }
         }
 
@@ -71,7 +71,7 @@ namespace AethonMod.Content.Globals
             // Otorgar XP al jugador que mato al NPC.
             int xp = Systems.ShardLevelSystem.XPForNPC(npc);
             Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
-            Systems.NodeEffectSystem.OnKillNPC(player, npc);
+            
 
             // Tracking de kills por rama (solo si el jugador no ha elegido rama aun).
             var sp = player.GetModPlayer<Players.ShardPlayer>();
