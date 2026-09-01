@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
-using AethonMod.Content.SkillTree.RPGModule;
+using AethonMod.Content.SkillTree.Entities;
+
 namespace AethonMod.Content.SkillTree.RPGModule
 {
     public class SkillTree
@@ -62,7 +63,7 @@ namespace AethonMod.Content.SkillTree.RPGModule
             int slot = 0;
             if (ActiveClass == null)
                 return 0;
-            slot = 0; // REMOVED: JsonCharacterClass dependency
+            slot = JsonCharacterClass.GetJsonCharList.GetClass(ActiveClass.GetClassType).Summons;
             return slot;
         }
 
@@ -74,13 +75,14 @@ namespace AethonMod.Content.SkillTree.RPGModule
             {
                 return 1;
             }
-            // REMOVED: JsonCharacterClass dependency
+            JsonChrClass actualClass = JsonCharacterClass.GetJsonCharList.GetClass(ActiveClass.GetClassType);
+            value *= 1+actualClass.Damage[(int)_type];
             if (_type == DamageType.Ranged)
             {
-                if (true)
-                    value *= 1; // placeholder
-                if(true && !true)
-                    value *= 1; // placeholder
+                if (false)
+                    value *= 1+actualClass.Damage[5];
+                if(false && !false)
+                    value *= 1+actualClass.Damage[6];
             }
             return value;
         }

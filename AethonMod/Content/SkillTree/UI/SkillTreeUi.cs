@@ -1,5 +1,3 @@
-using Microsoft.Xna.Framework;
-using AethonMod.Content.Players;
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -10,7 +8,7 @@ using Terraria;
 using System;
 using Terraria.ModLoader;
 using System.Collections.Generic;
-using AethonMod.Content.SkillTree.RPGModule;
+using AethonMod.Content.SkillTree.Entities;
 using System.Reflection;
 using Terraria.GameInput;
 using Terraria.Localization;
@@ -57,7 +55,7 @@ namespace AethonMod.Content.SkillTree.UI
 
         private UIText skillPointsLeft;
 
-        private RPGModule.SkillTree skillTree;
+        private global::AethonMod.Content.SkillTree.RPGModule.SkillTree skillTree;
         public static bool visible = false;
 
         public Vector2 offSet = new Vector2(Main.screenWidth*0.5f, Main.screenHeight*0.5f)/ 1f;
@@ -66,7 +64,7 @@ namespace AethonMod.Content.SkillTree.UI
 
         public void LoadSkillTree()
         {
-            skillTree = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>().GetskillTree;
+            skillTree = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>().GetskillTree;
             Init();
         }
 
@@ -136,8 +134,8 @@ namespace AethonMod.Content.SkillTree.UI
         {
             if (!visible)
                 return;
-             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
-            Players.ShardPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>();
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
             rPGPlayer.ResetSkillTree();
             rPGPlayer.GetskillTree.Init();
             dragging = false;
@@ -173,9 +171,9 @@ namespace AethonMod.Content.SkillTree.UI
             backGround.BackgroundColor = new Color(73, 94, 171,150);
             Append(backGround);
 
-            Players.ShardPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>();
+            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
 
-            skillPointsLeft = new UIText("Skill Points : " + rPGPlayer.AvailableSkillPoints() + " / " + (rPGPlayer.ShardLevel-1));
+            skillPointsLeft = new UIText("Skill Points : " + rPGPlayer.GetSkillPoints + " / " + (rPGPlayer.GetLevel()-1));
             skillPointsLeft.Left.Set(150, 0f);
             skillPointsLeft.Top.Set(150, 0f);
             backGround.Append(skillPointsLeft);
@@ -188,22 +186,22 @@ namespace AethonMod.Content.SkillTree.UI
             ResetText.Top.Set(250* ScreenMult, 0f);
             ResetText.Width.Set(0, 0f);
             ResetText.Height.Set(0, 0f);
-            ResetText.OnLeftClick += (UIMouseEvent evt, UIElement el) => { ResetStats(evt, el); };
-            ResetText.OnMouseOver += (UIMouseEvent evt, UIElement el) => { ResetTextHover(evt, el); };
-            ResetText.OnMouseOut += (UIMouseEvent evt, UIElement el) => { ResetTextOut(evt, el); };
+            ResetText.OnLeftClick +=  (UIMouseEvent evt, UIElement el) => { ResetStats(evt, el); };
+            ResetText.OnMouseOver +=  (UIMouseEvent evt, UIElement el) => { ResetTextHover(evt, el); };
+            ResetText.OnMouseOut +=  (UIMouseEvent evt, UIElement el) => { ResetTextOut(evt, el); };
             backGround.Append(ResetText);
 
-            backGround.OnLeftMouseDown += (UIMouseEvent evt, UIElement el) => { DragStart(evt, el); };
-            backGround.OnLeftMouseUp += (UIMouseEvent evt, UIElement el) => { DragEnd(evt, el); };
-            backGround.OnScrollWheel += (UIScrollWheelEvent evt, UIElement el) => { ScrollUpDown(evt, el); };
-            backGround.OnMiddleClick += (UIMouseEvent evt, UIElement el) => { ResetOffset(evt, el); };
+            backGround.OnLeftMouseDown +=  (UIMouseEvent evt, UIElement el) => { DragStart(evt, el); };
+            backGround.OnLeftMouseUp +=  (UIMouseEvent evt, UIElement el) => { DragEnd(evt, el); };
+            backGround.OnScrollWheel +=  (UIScrollWheelEvent evt, UIElement el) => { ScrollUpDown(evt, el); };
+            backGround.OnMiddleClick +=  (UIMouseEvent evt, UIElement el) => { ResetOffset(evt, el); };
 
 
             Instance = this;
             for (int i = 0; i < skillTree.nodeList.nodeList.Count; i++)
             {
                 NodeParent Node = skillTree.nodeList.nodeList[i];
-                if (!(Node.GetNodeType == NodeType.LimitBreak && rPGPlayer.ShardLevel < 1000 || Node.GetNode.GetAscended && !skillTree.IsLimitBreak()))
+                if (!(Node.GetNodeType == NodeType.LimitBreak && rPGPlayer.GetLevel() < 1000 || Node.GetNode.GetAscended && !skillTree.IsLimitBreak()))
                 {
                     SkillInit(skillTree.nodeList.nodeList[i]);
                 }
@@ -233,8 +231,8 @@ namespace AethonMod.Content.SkillTree.UI
                 allBasePanel[i].Top.Set((allBasePanel[i].basePos.Y + offSet.Y)*sizeMultplier, 0);
             }
             
-            Players.ShardPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>();
-            skillPointsLeft.SetText("Skill Points : " + rPGPlayer.AvailableSkillPoints() + " / " + (rPGPlayer.ShardLevel - 1));
+            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+            skillPointsLeft.SetText("Skill Points : " + rPGPlayer.GetSkillPoints + " / " + (rPGPlayer.GetLevel() - 1));
 
             Recalculate();
         }
@@ -244,7 +242,7 @@ namespace AethonMod.Content.SkillTree.UI
             
 
             DrawSkill(node);
-            Players.ShardPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>();
+            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
             NodeParent neightboor;
             for (int j = 0; j < node.GetNeightboor.Count; j++)
             {
@@ -252,7 +250,7 @@ namespace AethonMod.Content.SkillTree.UI
                 if (node.GetNeightboor.Exists(x => x.ID == neightboor.ID) && !(node.connectedNeighboor.Exists(x => x.ID == neightboor.ID)) )
                 {
 
-                    if (!(neightboor.GetNodeType == NodeType.LimitBreak && rPGPlayer.ShardLevel < 1000 || neightboor.GetNode.GetAscended && !skillTree.IsLimitBreak()))
+                    if (!(neightboor.GetNodeType == NodeType.LimitBreak && rPGPlayer.GetLevel() < 1000 || neightboor.GetNode.GetAscended && !skillTree.IsLimitBreak()))
                     {
                         DrawConnection((neightboor.GetActivate || node.GetActivate) ? Color.GreenYellow : Color.Gray, node.menuPos, neightboor.menuPos, node, neightboor);
                         node.connectedNeighboor.Add(neightboor);
@@ -277,12 +275,11 @@ namespace AethonMod.Content.SkillTree.UI
 
         public void DrawSkill(NodeParent node) //Vector2 pos, Texture2D tex,int state)
         {
-            SkillPanel basePanel = new SkillPanel(ModContent.Request<Texture2D>("AethonMod/Textures/UI/skill_blank").Value);
+            SkillPanel basePanel = new SkillPanel(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Textures/UI/skill_blank").Value);
             basePanel.SetPadding(0);
             basePanel.Width.Set(SKILL_SIZE * sizeMultplier, 0f);
             basePanel.Height.Set(SKILL_SIZE * sizeMultplier, 0f);
             Skill skillIcon = new Skill(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>(SkillTextures.GetTexture(node.GetNode)).Value);
-
             skillIcon.Width.Set(SKILL_SIZE * sizeMultplier, 0f);
             skillIcon.Height.Set(SKILL_SIZE * sizeMultplier, 0f);
 
@@ -321,10 +318,10 @@ namespace AethonMod.Content.SkillTree.UI
             levelText.Top.Set(SKILL_SIZE*0.5f* sizeMultplier, 0);
             allText.Add(levelText);
             allBasePanel.Add(basePanel);
-            skillIcon.OnMouseOver += (UIMouseEvent evt, UIElement el) => { OpenToolTip(evt, el, node); };
-            skillIcon.OnLeftClick += (UIMouseEvent evt, UIElement el) => { OnClickNode(evt, el, node); };
-            skillIcon.OnRightClick += (UIMouseEvent evt, UIElement el) => { OnRightClickNode(evt, el, node); };
-            skillIcon.OnMouseOut += (UIMouseEvent evt, UIElement el) => { CloseToolTip(evt, el); };
+            skillIcon.OnMouseOver += new MouseEvent((UIMouseEvent, UIElement) => OpenToolTip(UIMouseEvent, UIElement,node));
+            skillIcon.OnLeftClick += new MouseEvent((UIMouseEvent, UIElement) => OnClickNode(UIMouseEvent, UIElement, node));
+            skillIcon.OnRightClick += new MouseEvent((UIMouseEvent, UIElement) => OnRightClickNode(UIMouseEvent, UIElement, node));
+            skillIcon.OnMouseOut +=  (UIMouseEvent evt, UIElement el) => { CloseToolTip(evt, el); };
             basePanel.Append(skillIcon);
             basePanel.Append(levelText);
         }
@@ -367,12 +364,12 @@ namespace AethonMod.Content.SkillTree.UI
             
             if (evt.ScrollWheelValue > 0)
             {
-                Zoom = MathHelper.Clamp(1.1f * Zoom, zoomMin, zoomMax);
+                Zoom = Mathf.Clamp(1.1f * Zoom, zoomMin, zoomMax);
                 
             }
             else if (evt.ScrollWheelValue < 0)
             {
-                Zoom = MathHelper.Clamp(0.85f * Zoom, zoomMin, zoomMax);
+                Zoom = Mathf.Clamp(0.85f * Zoom, zoomMin, zoomMax);
                 
             }
             float ratio = Zoom / preZoom;
@@ -440,7 +437,8 @@ namespace AethonMod.Content.SkillTree.UI
             if (node.GetNodeType == NodeType.Class)
             {
                 ClassType CT = (node.GetNode as ClassNode).GetClassType;
-                object ClassInfo = null;
+                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+                if (ClassInfo.ManaShield > 0)
                     TTWidth = 750;
             }
             toolTip.Width.Set(TTWidth * unzoomMult, 0);
@@ -484,7 +482,7 @@ namespace AethonMod.Content.SkillTree.UI
             description.Left.Set(50* unzoomMult, 0);
             description.Top.Set(140* unzoomMult, 0);
 
-             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
 
             backGround.Append(toolTip);
             toolTip.Append(Name);
@@ -502,9 +500,9 @@ namespace AethonMod.Content.SkillTree.UI
             {
                 node.GetNode.ToggleEnable();
                 if (node.GetEnable == false)
-                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
                 else
-                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
                 UpdateValue();
             }
             else for (int i = 0; i < 5; i++)
@@ -523,25 +521,25 @@ namespace AethonMod.Content.SkillTree.UI
                     
                     UpdateValue();
                     if (node.GetEnable == false)
-                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
                     else
-                         Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
                     return;
                 }
             }
 
-            Players.ShardPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<Players.ShardPlayer>();
-            switch(node.CanUpgrade(rPGPlayer.AvailableSkillPoints(), rPGPlayer.ShardLevel))
+            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+            switch(node.CanUpgrade(rPGPlayer.GetSkillPoints, rPGPlayer.GetLevel()))
             {
                 case Reason.CanUpgrade:
-                    rPGPlayer.SpentSkillPoints(); // AnRPG original: subtracts points
+                    rPGPlayer.SpentSkillPoints(0);
                     node.Upgrade();
                     UpdateToolTip(node);
                     UpdateValue();
-                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
                     break;
                 default:
-                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
                     break;
             }
             
@@ -563,7 +561,8 @@ namespace AethonMod.Content.SkillTree.UI
             if (node.GetNodeType == NodeType.Class)
             {
                 ClassType CT = (node.GetNode as ClassNode).GetClassType;
-                object ClassInfo = null;
+                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+                if (ClassInfo.ManaShield > 0)
                     TTWidth = 750;
                 
             }
@@ -610,7 +609,7 @@ namespace AethonMod.Content.SkillTree.UI
             description.Left.Set(50* unzoomMult, 0);
             description.Top.Set(170* unzoomMult, 0);
             
-             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
 
             backGround.Append(toolTip);
             toolTip.Append(Name);
