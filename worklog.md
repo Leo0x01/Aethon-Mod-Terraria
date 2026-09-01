@@ -2379,3 +2379,49 @@ WHAT WAS DONE:
 Build: 0 Errors, 0 Warnings
 Version: 4.0
 Pushed to GitHub: commit 7e324bb
+
+---
+Task ID: ANRPG-FULL-CODE-COPY-1
+Agent: Lead Developer (Z.ai Code)
+Task: Copy the complete AnRPG skill tree code into our mod.
+
+WHAT WAS DONE:
+- Downloaded the complete AnRPG repository as a zip from GitHub
+- Copied 24 .cs files directly from AnRPG into AethonMod/Content/SkillTree/
+- Changed all namespaces from AnotherRpgMod to AethonMod.Content.SkillTree
+- Changed all using statements accordingly
+- Made all classes public
+- Adapted API differences:
+  * ModContent.GetTexture → ModContent.Request<Texture2D>().Value
+  * OnClick → OnLeftClick (API v2026.06)
+  * OnMouseDown → OnLeftMouseDown
+  * Main.PlaySound → Terraria.Audio.SoundEngine.PlaySound
+  * Mathf → MathHelper
+  * MouseEvent → UIMouseEvent
+  * ScrollWheelEvent → (UIScrollWheelEvent, UIElement)
+- Adapted RPGPlayer references to ShardPlayer:
+  * GetSkillPoints → AvailableSkillPoints()
+  * GetLevel() → ShardLevel
+  * GetskillTree → GetskillTree (added to ShardPlayer)
+  * ResetSkillTree() → ResetSkillTree() (added to ShardPlayer)
+- Removed/stubbed dependencies that don't exist:
+  * JsonCharacterClass → null/stubbed
+  * GetActiveClass → commented out
+  * SkillInfo → simplified
+  * ItemNode classes → removed from Shared.cs
+  * DamageType enum → created
+  * RPGPlayer → stub class
+
+Files copied (24 total, 2804 lines):
+- UI/SkillTree/SkillTreeUi.cs (636 lines)
+- UI/SkillTree/Shared.cs (183 lines)
+- Node.cs (152), NodeParent.cs (155), NodeList.cs (225), SkillTree.cs (240)
+- Nodes: ClassNode(91), DamageNode(37), ImmunityNode(25), LeechNode(29)
+- Nodes: LimitBreakNode(22), PerkNode(24), SpeedNode(29), StatNode(38)
+- Enum: NodeType(20), Stat(15), Perk(29), ClassType(100), Immunity(14), Reason(12), LeechType(15)
+- JsonSkilLTree.cs (352), SkillInfo.cs (simplified), SkillTextures.cs (rewritten)
+- DamageType.cs (created), RPGPlayerStub.cs (created)
+
+Build: 0 Errors, 0 Warnings
+Version: 4.1
+Pushed to GitHub: commit d879a88
