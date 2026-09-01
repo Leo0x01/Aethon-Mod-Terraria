@@ -2335,3 +2335,47 @@ KEY PATTERNS COPIED FROM ANRPG:
 Version: 3.2
 Build: 0 Errors, 0 Warnings
 Pushed to GitHub: commit 77dd2b9
+
+---
+Task ID: FULL-SYSTEM-REPLACEMENT-1
+Agent: Lead Developer (Z.ai Code)
+Task: Replace the ENTIRE skill tree system with a new one following AnRPG's pattern.
+
+WHAT WAS DONE:
+1. DELETED old system entirely:
+   - PoETreeCatalog.cs — deleted
+   - NodeEffectSystem.cs — deleted
+   - AllocatedNodes (HashSet<string>) — removed from ShardPlayer
+   - SkillTreeSeed — removed from ShardPlayer
+
+2. NEW SYSTEM (SkillTreeCatalog.cs):
+   - 65 nodes in a single shared tree (not 3 separate trees)
+   - Each node has: name, type, posX, posY, neighbors[], effect, valuePerLevel, maxLevel, pointsPerLevel, levelReq
+   - Types: Start, Damage, Stat, Speed, Life, Mana, Minion, Keystone, Ascendancy
+   - Positions are explicit (radial layout, like AnRPG's JsonNodeList)
+   - ApplyEffects() applies damage/speed/life/mana/defense/minions to player
+   - CanActivate() checks if a node has an activated neighbor
+
+3. ShardPlayer updated:
+   - SkillNodeState[] replaces AllocatedNodes
+   - Each node has a Level (0 = not activated, 1+ = activated/upgraded)
+   - Persisted in SaveData/LoadData as List<int>
+   - PostUpdateEquips calls SkillTreeCatalog.ApplyEffects()
+
+4. SkillTreeUI (UIState) rewritten:
+   - SkillPanel (UIPanel) — clickable node with OnLeftClick
+   - Connection (UIElement) — line between nodes
+   - SkillTreeUIState (UIState) — full screen with drag/zoom
+   - OnScrollWheel for zoom (multiplicative, like AnRPG)
+   - OnLeftMouseDown/Up for drag
+   - DrawSelf: mouseInterface = true
+   - Update(GameTime): recalculate positions
+
+5. All weapons updated:
+   - Removed NodeEffectSystem references
+   - Damage now scales with ShardLevel (percentage-based)
+   - GrimoireEternal: mana scales with level, no more Notable counting
+
+Build: 0 Errors, 0 Warnings
+Version: 4.0
+Pushed to GitHub: commit 7e324bb
