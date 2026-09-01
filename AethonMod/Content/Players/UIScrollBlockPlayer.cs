@@ -4,17 +4,15 @@ using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Players
 {
-    /// <summary>
-    /// Bloquea el movimiento del jugador mientras las UIs están abiertas.
-    /// mouseInterface = true se maneja en SkillTreeUIState.DrawSelf (igual que AnRPG).
-    /// </summary>
     public class UIScrollBlockPlayer : ModPlayer
     {
         public override void PreUpdate()
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-            bool any = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
+            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+                       (ui.CodexUI?.IsVisible ?? false) || 
+                       (ui.BranchChoiceUI?.IsVisible ?? false);
             if (!any) return;
             Player.controlLeft = false;
             Player.controlRight = false;
@@ -31,8 +29,16 @@ namespace AethonMod.Content.Players
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-            bool any = (ui.SkillTreeUI?.IsVisible ?? false) || (ui.CodexUI?.IsVisible ?? false) || (ui.BranchChoiceUI?.IsVisible ?? false);
-            if (any) { Player.velocity.X = 0; Player.controlLeft = false; Player.controlRight = false; Player.controlJump = false; }
+            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+                       (ui.CodexUI?.IsVisible ?? false) || 
+                       (ui.BranchChoiceUI?.IsVisible ?? false);
+            if (any)
+            {
+                Player.velocity.X = 0;
+                Player.controlLeft = false;
+                Player.controlRight = false;
+                Player.controlJump = false;
+            }
         }
     }
 }

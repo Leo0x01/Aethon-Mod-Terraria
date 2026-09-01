@@ -17,7 +17,7 @@ namespace AethonMod.Content.Systems
     public class UISystem : ModSystem
     {
         public UserInterface customSkillTree;
-        public UI.SkillTreeUIState SkillTreeUI;
+        public Content.SkillTree.UI.SkillTreeUi SkillTreeUI;
         public UI.MemoryCodexUI? CodexUI;
         public UI.BranchChoiceUI? BranchChoiceUI;
 
@@ -27,7 +27,7 @@ namespace AethonMod.Content.Systems
 
             // Igual que AnRPG: crear una vez, SetState siempre
             customSkillTree = new UserInterface();
-            SkillTreeUI = new UI.SkillTreeUIState();
+            SkillTreeUI = new Content.SkillTree.UI.SkillTreeUi();
             SkillTreeUI.Activate();
             customSkillTree.SetState(SkillTreeUI);
 
@@ -51,8 +51,8 @@ namespace AethonMod.Content.Systems
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted && !anyOtherOpen(SkillTreeUI))
                 {
-                    if (SkillTreeUI.IsVisible) SkillTreeUI.Hide();
-                    else SkillTreeUI.Show();
+                    Content.SkillTree.UI.SkillTreeUi.visible = !Content.SkillTree.UI.SkillTreeUi.visible;
+                    if (Content.SkillTree.UI.SkillTreeUi.visible) Content.SkillTree.UI.SkillTreeUi.Instance.LoadSkillTree();
                 }
             }
 
@@ -62,7 +62,7 @@ namespace AethonMod.Content.Systems
                 var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
                 if (sp != null && sp.IsImprinted && sp.CodexUnlocked && !anyOtherOpen(CodexUI))
                 {
-                    if (CodexUI?.IsVisible == true) CodexUI.Hide();
+                    if (CodexUI?.IsVisible == true) CodexUI?.Hide();
                     else CodexUI?.Show();
                 }
             }
@@ -74,7 +74,7 @@ namespace AethonMod.Content.Systems
 
         private bool anyOtherOpen(object? except)
         {
-            if (except != SkillTreeUI && SkillTreeUI.IsVisible) return true;
+            if (except != SkillTreeUI && Content.SkillTree.UI.SkillTreeUi.visible) return true;
             if (except != CodexUI && (CodexUI?.IsVisible ?? false)) return true;
             if (except != BranchChoiceUI && (BranchChoiceUI?.IsVisible ?? false)) return true;
             return false;
@@ -92,7 +92,7 @@ namespace AethonMod.Content.Systems
                 {
                     try
                     {
-                        if (SkillTreeUI != null && SkillTreeUI.IsVisible)
+                        if (SkillTreeUI != null && Content.SkillTree.UI.SkillTreeUi.visible)
                         {
                             customSkillTree.Update(Main._drawInterfaceGameTime);
                             SkillTreeUI.Draw(Main.spriteBatch);

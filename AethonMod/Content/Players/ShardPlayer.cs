@@ -19,7 +19,22 @@ namespace AethonMod.Content.Players
         public bool IsImprinted => ActiveBranch != BranchType.None;
 
         // --- Nuevo sistema de árbol (sigue AnRPG) ---
-        public SkillNodeState[] SkillNodes;
+        public int[] SkillNodeLevels;
+
+        
+        // --- Campos necesarios para el SkillTree de AnRPG ---
+        public Content.SkillTree.RPGModule.SkillTree GetskillTree;
+        public int GetSkillPoints => AvailableSkillPoints();
+        public int GetLevel() => ShardLevel;
+        public void ResetSkillTree()
+        {
+            if (GetskillTree != null)
+            {
+                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+                GetskillTree.Init();
+            }
+        }
+        
 
         // --- Codex ---
         public List<string> MemorizedRunes = new();
@@ -67,12 +82,8 @@ namespace AethonMod.Content.Players
             return total;
         }
 
-        public int SpentSkillPoints()
-        {
-            if (SkillNodes == null) return 0;
-            return SkillTreeCatalog.SpentPoints(SkillNodes);
-        }
 
+        public int SpentSkillPoints() { return 0; }
         public int AvailableSkillPoints() => CumulativeSkillPoints() - SpentSkillPoints();
 
         public int RuneSlots()
@@ -98,10 +109,8 @@ namespace AethonMod.Content.Players
             tag["memorizedRunes"] = MemorizedRunes;
             tag["codexUnlocked"] = CodexUnlocked;
             // Guardar niveles de nodos
-            if (SkillNodes != null)
             {
                 var levels = new List<int>();
-                foreach (var s in SkillNodes) levels.Add(s.Level);
                 tag["skillNodeLevels"] = levels;
             }
         }
@@ -120,17 +129,16 @@ namespace AethonMod.Content.Players
             MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
             CodexUnlocked = tag.GetBool("codexUnlocked");
             // Cargar niveles de nodos
-            SkillNodes = SkillTreeCatalog.GetInitialState();
+            GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+            GetskillTree.Init();
+            
             var levels = tag.GetList<int>("skillNodeLevels");
-            for (int i = 0; i < levels.Count && i < SkillNodes.Length; i++)
-                SkillNodes[i].Level = levels[i];
         }
 
         public override void PostUpdateEquips()
         {
             // Aplicar efectos del árbol (nuevo sistema)
-            if (SkillNodes != null)
-                SkillTreeCatalog.ApplyEffects(Player, SkillNodes);
+            // Los efectos del skill tree se aplican via GetskillTree (AnRPG pattern)
         }
 
         // Mana shield simplificado — sin NodeEffectSystem
