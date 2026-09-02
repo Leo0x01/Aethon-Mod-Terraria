@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -58,12 +57,19 @@ namespace AethonMod.Content.Systems
         private static Color[] _grainData;
         private const int GrainSize = 64;
 
+        // === MagicPixel cacheado (textura 1x1 blanca de vanilla) ===
+        // Usamos ModContent.Request en vez de TextureAssets.MagicPixel para evitar
+        // dependencias de namespace y ser compatibles con cualquier version de tModLoader.
+        private static Texture2D _magicPixel;
+
         public override void Load()
         {
             // No crear texturas en servidor dedicado (GraphicsDevice es null).
             if (Main.dedServ) return;
             _grainData = new Color[GrainSize * GrainSize];
             _grainTexture = new Texture2D(Main.graphics.GraphicsDevice, GrainSize, GrainSize);
+            // Cachear MagicPixel (textura vanilla 1x1 blanca)
+            _magicPixel = ModContent.Request<Texture2D>("Terraria/Images/MagicPixel").Value;
         }
 
         public override void Unload()
@@ -71,6 +77,7 @@ namespace AethonMod.Content.Systems
             _grainTexture?.Dispose();
             _grainTexture = null;
             _grainData = null;
+            _magicPixel = null;
             IsActive = false;
             Timer = 0;
             ShakeOffset = Vector2.Zero;
@@ -204,7 +211,7 @@ namespace AethonMod.Content.Systems
 
             // === 1. Oscurecimiento (vigneta oscura) ===
             int darkAlpha = (int)(180 * alpha);
-            sb.Draw(TextureAssets.MagicPixel.Value,
+            sb.Draw(_magicPixel,
                 new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
                 new Color(6, 4, 14, darkAlpha));
 
@@ -235,7 +242,7 @@ namespace AethonMod.Content.Systems
             {
                 int a = (int)(8 * pulse * alpha * (1f - (float)r / glowR));
                 if (a < 0) a = 0;
-                sb.Draw(TextureAssets.MagicPixel.Value,
+                sb.Draw(_magicPixel,
                     new Rectangle(Main.screenWidth / 2 - r, Main.screenHeight / 2 - r, r * 2, r * 2),
                     new Color(245, 196, 81, a));
             }
@@ -269,10 +276,10 @@ namespace AethonMod.Content.Systems
             int barH = 4;
             int barX = (Main.screenWidth - barW) / 2;
             int barY = Main.screenHeight - 60;
-            sb.Draw(TextureAssets.MagicPixel.Value,
+            sb.Draw(_magicPixel,
                 new Rectangle(barX, barY, barW, barH),
                 new Color(40, 30, 60, (int)(180 * alpha)));
-            sb.Draw(TextureAssets.MagicPixel.Value,
+            sb.Draw(_magicPixel,
                 new Rectangle(barX, barY, (int)(barW * progress), barH),
                 new Color(245, 196, 81, (int)(255 * alpha)));
         }
