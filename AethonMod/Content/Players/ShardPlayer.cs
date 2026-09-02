@@ -46,9 +46,10 @@ namespace AethonMod.Content.Players
                 Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
                     new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
                     100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
-            if (ShardLevel == 100)
+            // Hito especial cada 50 niveles (infinito)
+            if (ShardLevel % 50 == 0)
             {
-                Main.NewText("✦✦ Ascendencia desbloqueada! ✦✦", new Microsoft.Xna.Framework.Color(245, 196, 81));
+                Main.NewText($"✦✦ Hito nivel {ShardLevel}! El Fragmento Genesis resuena con poder. ✦✦", new Microsoft.Xna.Framework.Color(245, 196, 81));
                 Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
             }
         }
@@ -88,7 +89,26 @@ namespace AethonMod.Content.Players
             }
         }
 
-        public override void PostUpdateEquips() { }
+        /// <summary>
+        /// PostUpdateEquips: aqui aplicamos bonuses que DEBEN stackear con armadura.
+        /// Se ejecuta despues de que la armadura/accesorios ya setearon sus stats,
+        /// asi que player.maxMinions ya incluye los bonuses de armadura de invocador.
+        /// </summary>
+        public override void PostUpdateEquips()
+        {
+            // === GRIMORIO: slots de minion extra por nivel ===
+            // Stackea con armadura de invocador: si una armadura da +10 minions,
+            // y el Grimorio da +2 (nivel 10), el total sera 1(base)+10+2 = 13.
+            // Solo aplica si el jugador tiene el Grimorio en mano.
+            if (IsImprinted && ActiveBranch == BranchType.Magic)
+            {
+                Item held = Player.HeldItem;
+                if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                {
+                    Player.maxMinions += WeaponScaling.BonusMinionSlots(ShardLevel);
+                }
+            }
+        }
         public override void ModifyHurt(ref Player.HurtModifiers modifiers) { }
         public override void OnHurt(Player.HurtInfo info) { }
     }

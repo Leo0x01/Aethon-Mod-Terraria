@@ -65,8 +65,8 @@ namespace AethonMod.Content.Weapons
             // Cada nivel: +0.2% critico magico
             player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(sp.ShardLevel);
 
-            // Slots de minion extra: +1 cada 5 niveles (hito)
-            player.maxMinions += WeaponScaling.BonusMinionSlots(sp.ShardLevel);
+            // NOTA: los slots de minion extra se aplican en ShardPlayer.PostUpdateEquips
+            // para que stackeen correctamente con armadura de invocador.
         }
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
@@ -118,7 +118,7 @@ namespace AethonMod.Content.Weapons
                 else
                 {
                     if (Main.myPlayer == player.whoAmI)
-                        Main.NewText($"Slots de minion llenos: {currentMinions}/{maxMinions}. Sube de nivel para más slots (cada 5 niveles).",
+                        Main.NewText($"Slots de minion llenos: {currentMinions}/{maxMinions}. Sube de nivel (cada 5 niveles da +1 slot) o usa armadura de invocador.",
                             new Color(255, 120, 120));
                     return false;
                 }
@@ -185,6 +185,13 @@ namespace AethonMod.Content.Weapons
                 $"[c/BE78FD:+{(int)(sp.ShardLevel * WeaponScaling.SummonDamagePerLevel * 100)}% summon] " +
                 $"[c/78FF96:+{bonusSlots} slots minion] " +
                 $"[c/FFAA55:+{WeaponScaling.CritBonus(sp.ShardLevel):F1}% crit]"));
+
+            // Nota sobre stack con armadura
+            if (bonusSlots > 0)
+            {
+                tooltips.Add(new TooltipLine(Mod, "MinionStackInfo",
+                    $"[c/78FF96:★ Los {bonusSlots} slots extra se suman a los de tu armadura de invocador]"));
+            }
 
             // Hito alcanzado (cada 5 niveles)
             int nextMilestone = ((sp.ShardLevel / 5) + 1) * 5;
