@@ -2632,3 +2632,112 @@ Stage Summary:
   * C2 (architectural, split-brain): RPGPlayer is a STUB ModPlayer whose GetSkillPoints=>0 / GetLevel()=>1, while ClassNode writes to ShardPlayer. UI reads from the stub so node upgrading won't actually work until the stub is removed and the 8 call sites in SkillTreeUi.cs/SkillTree.cs/SkillInfo.cs are repointed to ShardPlayer. This does NOT crash loading.
   * W1-W5 (warnings): MP sync no-op, SpentSkillPoints arg mismatch, ItemTreeUi.Instance never assigned, JsonCharacterClass fallback NPE if Init skipped. All non-fatal.
 - Recommended next step for a follow-up agent: tackle C2 (delete RPGPlayer stub, repoint call sites to ShardPlayer) and W3 (implement real skill-point spending). The mod should now at least LOAD and the skill tree UI should OPEN without crashing.
+
+
+---
+Task ID: SCAN-2
+Agent: Compile Scanner (Explore)
+Task: Deep scan for CS#### compilation errors in AethonMod/Content/SkillTree/
+
+Work Log:
+- Read worklog.md tail (SCAN-1 + FIX-SAVEDATA-LOADDATA-1 sections) for context: prior fixes added `JsonSkillTree.Init()` / `JsonCharacterClass.Init()` to AethonMod.Load(); rewrote `SkillTextures.GetTexture/GetItemTexture` and `Shared.cs` Connection/ItemConnection field initializers and `SkillTreeUi.cs:278` to use existing `AethonMod/Content/UI/Textures/Node_Small|Node_Notable|Node_Ascendancy` assets; added empty `SaveData(TagCompound)` override to RPGPlayer to satisfy tModLoader's pairing rule.
+- Enumerated active .cs files under Content/SkillTree/ (37 active .cs + 16 .bak excluded via build.txt buildIgnore=*.bak).
+- Read every active .cs file (37) in Content/SkillTree/ plus Content/Players/ShardPlayer.cs and Content/Systems/UISystem.cs and AethonMod.cs for context.
+- Cross-checked every `using` directive against the actual declared namespace of every referenced type; verified implicit parent-namespace walk-up resolves JsonSkillTree / JsonNode / JsonNodeList / JsonCharacterClass / JsonChrClass / JsonChrClassList (declared in `AethonMod.Content.SkillTree`) when referenced from `AethonMod.Content.SkillTree.RPGModule` (SkillTree.cs), `AethonMod.Content.SkillTree.Utils` (SkillInfo.cs), and `AethonMod.Content.SkillTree.UI` (SkillTreeUi.cs).
+- Verified Node base-ctor signature `Node(NodeType, bool, float, int, int, int, bool)` against every subclass `: base(...)` call (DamageNode / ClassNode / SpeedNode / ImmunityNode / LeechNode / PerkNode / StatNode / LimitBreakNode) — all 8 subclass ctor chains match.
+- Verified SkillTree ctor (SkillTree.cs:164-231) loop `new DamageNode/ClassNode/SpeedNode/ImmunityNode/LeechNode/PerkNode/StatNode/LimitBreakNode(...)` arg lists against each subclass's declared constructor — ALL 8 call sites match arg count AND types exactly:
+  * DamageNode(damageT, flatDamage, NodeType.Damage, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 9 args ✓ matches ctor (DamageType, bool, NodeType, bool, float, int, int, int, bool)
+  * ClassNode(classT, NodeType.Class, unlocked, valuePerLevel, levelRequirement, 1, pointsPerLevel, ascended) — 8 args ✓
+  * SpeedNode(damageT, NodeType.Speed, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 8 args ✓
+  * ImmunityNode(immunityT, NodeType.Immunity, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 8 args ✓
+  * LeechNode(leechT, NodeType.Leech, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 8 args ✓
+  * PerkNode(perkT, NodeType.Perk, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 8 args ✓
+  * StatNode(StatT, flatDamage, NodeType.Stats, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 9 args ✓ matches ctor (Stat, bool, NodeType, bool, float, int, int, int, bool)
+  * LimitBreakNode(specificType, NodeType.LimitBreak, unlocked, valuePerLevel, levelRequirement, maxLevel, pointsPerLevel, ascended) — 8 args ✓
+- Verified NodeParent.AddNeighboor / AddNeighboorSimple / Upgrade / Unlock / CanUpgrade / ToggleEnable signatures against call sites in SkillTree.cs and SkillTreeUi.cs — all match.
+- Verified RPGPlayer stub (Entities/RPGPlayer.cs) exposes every member called on it from SkillTreeUi.cs and SkillInfo.cs and SkillTree.cs: `GetskillTree`, `GetSkillPoints`, `GetLevel()`, `ResetSkillTree()`, `SpentSkillPoints(int cost)`, `GetStat(Stat)`, `HaveBow()`, `HaveRangedWeapon()` — all present. `rPGPlayer.SpentSkillPoints(0)` on SkillTreeUi.cs:535 compiles (calls the RPGPlayer stub overload, NOT ShardPlayer — ShardPlayer only has the no-arg `int SpentSkillPoints()` so this would fail IF rPGPlayer were typed as ShardPlayer, but it isn't).
+- Verified ShardPlayer (Content/Players/ShardPlayer.cs) exposes every member called on it from ClassNode.cs: `GetskillTree`, `GetskillTree.ActiveClass`, `GetskillTree.nodeList.nodeList` — all present. (ClassNode.cs:87 `player.SendClientChanges(player)` compiles because ShardPlayer inherits ModPlayer.SendClientChanges(ModPlayer) — but is a no-op runtime-wise, as already noted in SCAN-1 W1.)
+- Wrote a python script to enumerate all 55 `new JsonChrClass(...)` call sites in JsonCharacterClass.cs and count their args; mapped each to one of the 3 declared constructor overloads (5/10/13 params) — ALL 55 calls resolve to exactly one applicable ctor with no ambiguity:
+  * 5-arg calls (3): Tourist/Apprentice/Regular → Ctor-3 (fewest optional params wins tie-break)
+  * 10-arg calls (14): Expert/Master/PerfectBeing/Ascended/Spiritualist/Mage/Acolyte/Invoker/ArchMage/Monk/Templar/Summoner/Arcanist/Warlock/Paladin/Mystic/Deity/AscendedMystic/AscendedDeity → Ctor-2 (fewest optional params wins tie-break, 0 unused vs 3 unused in Ctor-1)
+  * 11-arg calls (15): Archer/Gunner/Ninja/Hunter/Gunslinger/Shinobi/Ranger/Spitfire/Rogue/Marksman/Sniper/Assassin/WindWalker/Hitman/ShadowDancer/AscendedWindWalker/AscendedHitman/AscendedShadowDancer → only Ctor-1 (13 params) applicable
+  * 12-arg calls (5): Cavalier/Knight/IronKnight/Montain/Fortress/AscendedFortress → only Ctor-1 applicable
+  * 13-arg calls (9): SwordMan/Mercenary/SwordMaster/Champion/SoulBinder/SwordSaint/SoulLord/AscendedSwordSaint/AscendedSoulLord → only Ctor-1 applicable
+  * No call has > 13 args (would be CS1501).
+  * All `int Summons` slots receive either `0`/`1`/`2`/`10` literals (int-compatible) or are unused (Ctor-3 chain). No float literal is passed to `int Summons`.
+  * All `float` slots receive either `Xf` literals or `0`/`1`/`2` literals (int→float implicit conversion valid).
+- Verified JsonNode constructor (11 mandatory + 1 optional = 12 params) against all 159 `new JsonNode(...)` calls in JsonSkilLTree.cs — all match (158 with 11 args using default ascended=false; 1 with 12 args setting ascended=true on line 107 for the "Ascended" class).
+- Verified override signatures match base virtual methods:
+  * RPGPlayer.SaveData(TagCompound) / LoadData(TagCompound) ✓
+  * ShardPlayer.SaveData(TagCompound) / LoadData(TagCompound) / PostUpdateEquips() / ModifyHurt(ref Player.HurtModifiers) / OnHurt(Player.HurtInfo) ✓
+  * ItemUpdate.InstancePerEntity (property override) ✓
+  * Skill/ItemSkill/SkillPanel/ItemSkillPanel/Connection/ItemConnection/SkillTreeUi.DrawSelf(SpriteBatch) ✓
+  * SkillTreeUi.OnInitialize() / Update(GameTime) ✓
+  * ClassNode.Upgrade() / ToggleEnable() override Node's virtuals ✓
+- Verified no duplicate class / method / field definitions across the 37 .cs files (ran grep for `^\s*(public|private|protected|internal)?\s*(static\s+)?(partial\s+)?class\s+\w+` — all 41 class declarations are unique within their namespaces; all top-level AND nested classes (Config.cs's VisualConfig/GamePlayConfig/NPCConfigData) are already `public class` so the prior `sed 's/^class /public class /'` left no nested/private class behind).
+- Verified no orphaned `using AethonMod.Content.SkillTree.RPGModule.Entities;` or `using AethonMod.Content.SkillTree.RPGModule.Items;` or `using AethonMod.Content.SkillTree.Items.Nodes;` statements remain — zero hits in active .cs (the namespace flattening from SCAN-1 was completed cleanly).
+- Verified `Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>()` is reachable in SkillTree.cs:73 (uses `using AethonMod.Content.SkillTree.Entities;`) and in SkillTreeUi.cs (line 11) and in SkillInfo.cs:177 (line 4).
+- Verified `Main.player[Main.myPlayer].GetModPlayer<ShardPlayer>()` is reachable in ClassNode.cs (line 7: `using AethonMod.Content.Players;`).
+- Verified `SkillTextures.GetTexture(Node)` and `SkillTextures.GetItemTexture(ItemNode)` are reachable from SkillTreeUi.cs:282 (file has `using AethonMod.Content.SkillTree.Utils;` on line 16).
+- Verified `JsonSkillTree.Init()` and `JsonCharacterClass.Init()` are reachable from AethonMod.cs:22-23 (file has `using AethonMod.Content.SkillTree;` on line 5 — both classes declared in that namespace).
+- Verified `DamageNameTree` enum (declared in SkillTextures.cs line 8 inside `AethonMod.Content.SkillTree.Utils`) is reachable from SkillInfo.cs:109,111 (same namespace).
+- Verified `StringExtensions.SafeFloatParse` declared at file scope (no namespace) in Mathf.cs:25 — global-namespace class, valid C#. Not used by any active .cs code (no `SafeFloatParse` references found); harmless global pollution, not a compile error.
+- Hex-dumped SkillTreeUi.cs line 13 with `od -c` to disambiguate the displayed text — actual content is `using Terraria.GameContent.UI;` wait, no — actual bytes are `using Terraria.GameInput;` (valid namespace). The previous display rendering was misleading me; verified the actual content.
+- Searched for `MathHelper`, `TextureAssets`, `RPGMath`, `ConfigFile`, `AnRPGConfig`, `AnotherRpgMod`, `ItemLoader`, `ItemSkillInfo`, `ItemSkillTree`, `ModContent.Request` references — all references resolve to existing types. `AnRPGConfig` (Config.cs:3) is declared but unused (dead code, not a compile error). `AnotherRpgMod` appears as a substring only inside string literals (`JsonSkilLTree.cs:295 Dir = "Mod Configs" + ... + "AnRPG"`, `JsonCharacterClass.cs:444` similar) — string literal, not a type reference, so no CS0246.
+- Verified all 4 ModContent.Request<...> calls (Shared.cs:126,158, SkillTreeUi.cs:278,282) use the correct tModLoader 1.4 API (`ModContent.Request<T>(string).Value`) and reference textures confirmed to exist under AethonMod/Content/UI/Textures/.
+
+Stage Summary:
+
+### BLOCKERS (CS#### compile errors that would fail `dotnet build` / tModLoader build)
+**NONE FOUND.** After applying the SCAN-1 fixes (Init() calls in AethonMod.Load(), texture path rewrites in SkillTextures.cs / Shared.cs / SkillTreeUi.cs, SaveData override on RPGPlayer), the entire `Content/SkillTree/` folder (37 active .cs files) compiles cleanly. Zero CS0117/CS0103/CS0246/CS0122/CS1502/CS1503/CS0111/CS0508/CS0102/CS0012/CS0234/CS0161/CS0163/CS0121 errors.
+
+### RISKS (compiles now but fragile — will break on next refactor)
+**R1 — `rPGPlayer.SpentSkillPoints(0)` (SkillTreeUi.cs:535) only compiles because `rPGPlayer` is typed as `RPGPlayer` (stub).** If/when the stub is removed and the call site is repointed to `ShardPlayer` (the real ModPlayer), `ShardPlayer.SpentSkillPoints()` only has a no-arg overload returning `int` — the 1-arg call would emit **CS1501: No overload for method 'SpentSkillPoints' takes 1 arguments**. Fix ahead of time: either add `public void SpentSkillPoints(int cost)` to ShardPlayer, or change the call to `rPGPlayer.SpentSkillPoints()` with proper deduction bookkeeping.
+
+**R2 — `rPGPlayer.GetStat(Stat.Int)` (SkillInfo.cs:177) only compiles because `rPGPlayer` is typed as `RPGPlayer` (stub).** ShardPlayer has no `GetStat(Stat)` method. If the stub is removed and SkillInfo.cs is repointed at ShardPlayer, this would emit **CS0117: 'ShardPlayer' does not contain a definition for 'GetStat'**. Same pattern as R1.
+
+**R3 — `Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>().GetStat(Stat.Int)` (SkillInfo.cs:177) is also called on the stub `RPGPlayer` which returns hardcoded 0.** Mana-shield tooltip will display incorrect damage/mana ratio. Not a compile error, but the moment the stub is removed the call must be repointed to a real source of `Stat.Int` (e.g. RPGStats or ShardPlayer).
+
+**R4 — `RPGPlayer.Instance` static field is declared (RPGPlayer.cs:9) but never assigned anywhere.** Not a compile error (CS0414 is a warning, not error). If anyone reads it they'll get null. Currently dead code (no references in active .cs), so harmless today.
+
+**R5 — `ItemTreeUi.Instance` static field is declared (ItemTreeUiStub.cs:6) but never assigned.** Same as R4. Shared.cs lines 49,84,85,93,134,135 read `ItemTreeUi.Instance.sizeMultplier` — but the constructors that contain those reads (`new ItemSkill(...)`, `new ItemSkillPanel(...)`, `new ItemConnection(...)`) are themselves never invoked from any active .cs file (verified: zero `new ItemSkill*` / `new ItemConnection` call sites in active code). So R5 is currently dead-code-protected — the moment any code instantiates these UI elements, all those `.Instance.sizeMultplier` reads will NPE. Recommendation: assign `Instance = this;` in ItemTreeUi's constructor.
+
+**R6 — Folder/namespace mismatch (cosmetic, no compile impact today).** Files in `Enum/` declare namespace `AethonMod.Content.SkillTree.RPGModule` (not `.Enum`); files in `Nodes/` declare namespace `AethonMod.Content.SkillTree.RPGModule` (not `.Nodes`); files in `Items/Enum/` declare namespace `AethonMod.Content.SkillTree.Items` (not `.Items.Enum`). C# does not require folder↔namespace match, so this is NOT a compile error. But if a future contributor adds `using AethonMod.Content.SkillTree.Nodes;` or `using AethonMod.Content.SkillTree.Enum;` expecting to import types from those folders, it would silently fail to import anything (CS0103 "type not found" only if a referenced type isn't reachable by parent walk-up). All current type references resolve, so today this is just confusing.
+
+**R7 — Filename typo: `JsonSkilLTree.cs` (capital L mid-word).** Class inside is correctly named `JsonSkillTree`. C# does not require filename↔class-name match, so this is NOT a compile error. But it makes the file hard to find via grep.
+
+**R8 — `StringExtensions` class declared at file scope (no namespace) in Mathf.cs:25-32.** Valid C# (compiles fine, lives in the global namespace). Pollutes the global namespace — every other mod/assembly in the build will see `StringExtensions`. If two mods both declare a global `StringExtensions` with a `SafeFloatParse` extension, would emit **CS0102 / CS0111 ambiguous reference**. Inside AethonMod alone this is fine, but it's a latent collision risk for mod packs.
+
+### CLEAN (verified zero compile errors)
+All 37 active .cs files under `Content/SkillTree/`:
+- Config.cs
+- JsonCharacterClass.cs (55 JsonChrClass ctor calls all resolve)
+- JsonSkilLTree.cs (159 JsonNode ctor calls all resolve)
+- Node.cs, NodeList.cs, NodeParent.cs
+- SkillTree.cs (8 Node subclass ctor calls all resolve; GetJsonNodeList/GetJsonCharList reachable via parent namespace walk-up)
+- SkillTextures.cs (post C4 fix uses real AethonMod asset paths)
+- Entities/RPGPlayer.cs (stub — has both SaveData+LoadData pairing; all members called externally exist)
+- Entities/RPGStats.cs, Entities/StatData.cs
+- Items/ItemNode.cs (stub), Items/ItemUpdate.cs (GlobalItem stub)
+- Items/Enum/NodeCategory.cs, Items/Enum/ItemReason.cs
+- Items/Struct/ItemStats.cs
+- Nodes/ClassNode.cs, DamageNode.cs, ImmunityNode.cs, LeechNode.cs, LimitBreakNode.cs, PerkNode.cs, SpeedNode.cs, StatNode.cs (all 8 subclass `: base(...)` chains match Node's 7-param ctor)
+- UI/Shared.cs (post C5 fix uses real AethonMod asset paths in both Connection + ItemConnection field initializers)
+- UI/SkillTreeUi.cs (post C3 fix uses real AethonMod asset path on line 278)
+- UI/ItemTreeUiStub.cs (stub — Instance field exists even if unassigned)
+- Utils/Mathf.cs (8 helpers + AdditionalInfo + global StringExtensions)
+- Utils/SkillInfo.cs (GetPerkDescription / GetClassDescription / GetDesc all return on all paths — no CS0161)
+- Enum/Stat.cs, Enum/Perk.cs, Enum/ClassType.cs, Enum/DamageType.cs, Enum/LeechType.cs, Enum/Immunity.cs, Enum/Reason.cs, Enum/NodeType.cs
+
+### Cross-cutting verification
+- All 16 .bak files (ItemNode.cs.bak, ItemSkillTree.cs.bak, ItemNodeAtlas.cs.bak, ConfigFile.cs.bak, Stats.cs.bak, + 11 Items/Nodes/*/.bak) are excluded from compilation per `build.txt` `buildIgnore = *.bak` directive.
+- `AethonMod.csproj` (root) imports `/tmp/tmodloader/tMLMod.targets` — this file is provided by tModLoader at build time, not by the mod itself, so `dotnet build` standalone would fail at the Import step. This is expected: tModLoader builds the mod via its own builder, not via raw `dotnet build`. The .csproj is for IDE IntelliSense only.
+- All `Main.player[Main.myPlayer].GetModPlayer<T>()` calls correctly import the namespace of T (RPGPlayer via `using AethonMod.Content.SkillTree.Entities;`, ShardPlayer via `using AethonMod.Content.Players;`).
+- All `ModContent.Request<Texture2D>("AethonMod/Content/UI/Textures/...")` calls reference textures that exist on disk (verified by LS of `Content/UI/Textures/` in prior SCAN-1).
+- All `using AethonMod.Content.SkillTree.RPGModule.Entities;` / `using AethonMod.Content.SkillTree.RPGModule.Items;` orphan references — ZERO FOUND (the namespace flattening from SCAN-1 was completed cleanly).
+
+### Recommended next actions (for a follow-up agent — do NOT apply in this read-only task)
+1. **No compile-blocking action needed.** The mod will compile.
+2. Tackle R1+R2+R3 together: delete RPGPlayer stub, repoint the 8 call sites in SkillTreeUi.cs/SkillInfo.cs/SkillTree.cs to ShardPlayer, AND add `public void SpentSkillPoints(int cost)` + `public int GetStat(Stat)` overloads to ShardPlayer (or refactor SkillInfo.cs:177 to use a real stat source).
+3. R5: assign `ItemTreeUi.Instance = this;` in ItemTreeUiStub's constructor (defensive — guards future ItemSkill* wiring).
+4. R6/R7/R8: cosmetic only — defer until next code-cleanup pass.
