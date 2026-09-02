@@ -28,10 +28,6 @@ namespace AethonMod.Content.Globals
         /// <summary>XP acumulada hacia el próximo nivel.</summary>
         public int XP = 0;
         // NOTA: FirstLevelUpTriggered vive en ShardPlayer (por-personaje, no por-item).
-
-        // Cache del tipo del item para evitar pasar Item a metodos que no lo reciben
-        private int _itemType = -1;
-
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
             // Solo aplica a las 3 armas Aethon + el FragmentoGenesis (para persistencia).
@@ -40,12 +36,6 @@ namespace AethonMod.Content.Globals
                    item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
                    item.type == ModContent.ItemType<Items.GenesisShard>();
         }
-
-        public override void OnCreate(Item item, ItemCreationContext context)
-        {
-            _itemType = item.type;
-        }
-
         /// <summary>
         /// XP necesaria para subir al próximo nivel.
         /// Nivel 1→2: 1 XP (cualquier kill).
@@ -66,7 +56,6 @@ namespace AethonMod.Content.Globals
             // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
             if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
 
-            _itemType = item.type;
             XP += amount;
             while (XP >= XPForNextLevel())
             {
