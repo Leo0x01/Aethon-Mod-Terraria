@@ -7,9 +7,7 @@ using System.ComponentModel;
 namespace AethonMod.Content
 {
     /// <summary>
-    /// Configuración del mod Aethon (sistema simplificado).
-    /// El árbol de habilidades (K) y el Codex de Memoria (J) fueron eliminados,
-    /// por lo que ya no hay teclas de UI configurables.
+    /// Configuración del mod Aethon.
     /// </summary>
     public class AethonConfig : ModConfig
     {

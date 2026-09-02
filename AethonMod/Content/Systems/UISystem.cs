@@ -8,9 +8,8 @@ using AethonMod.Content.Players;
 namespace AethonMod.Content.Systems
 {
     /// <summary>
-    /// UISystem — Sistema de UI simplificado.
+    /// UISystem — Sistema de UI.
     /// Solo gestiona BranchChoiceUI (la selección de rama/arma del Fragmento Genesis).
-    /// El árbol de habilidades (K) y el Codex de Memoria (J) fueron eliminados.
     /// </summary>
     public class UISystem : ModSystem
     {

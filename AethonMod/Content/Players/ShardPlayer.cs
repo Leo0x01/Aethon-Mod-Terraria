@@ -7,8 +7,7 @@ namespace AethonMod.Content.Players
 {
     /// <summary>
     /// Estado persistente del jugador para el mod Aethon.
-    /// Sistema SIMPLIFICADO: solo fragmento (shard) + selección de arma.
-    /// El árbol de habilidades y el Codex de Memoria fueron eliminados.
+    /// Sistema: fragmento (shard) + selección de arma.
     /// </summary>
     public class ShardPlayer : ModPlayer
     {
@@ -70,8 +69,7 @@ namespace AethonMod.Content.Players
         {
             // CRITICAL DEFENSIVE: LoadData must NEVER throw, or tModLoader marks the
             // whole player save as failed ("UnknownError") and the user loses their
-            // character. Every read is guarded so legacy saves (with SkillTree/Codex
-            // data we no longer care about) still load cleanly.
+            // character. Every read is guarded so legacy saves still load cleanly.
             try
             {
                 ShardLevel = tag.GetInt("shardLevel");
