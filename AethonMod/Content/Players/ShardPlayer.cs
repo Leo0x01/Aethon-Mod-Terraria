@@ -143,13 +143,20 @@ namespace AethonMod.Content.Players
             try
             {
                 GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
-                GetskillTree.Init();
             }
             catch
             {
-                // If the tree still fails to build, fall back to a safe empty tree
-                // instead of letting the exception corrupt the player save.
                 GetskillTree = null;
+            }
+
+            // Init() triggers node[0].Upgrade() -> ClassNode.UpdateClass() which reads
+            // Main.player[Main.myPlayer]. During LoadData, Main.myPlayer may not point
+            // to the player being loaded, which would NPE. Wrap separately so the tree
+            // (already built with all nodes) is kept even if Init fails.
+            if (GetskillTree != null)
+            {
+                try { GetskillTree.Init(); }
+                catch { /* Init skipped — tree is still usable without it */ }
             }
 
             try
