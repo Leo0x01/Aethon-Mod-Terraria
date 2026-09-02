@@ -275,7 +275,7 @@ namespace AethonMod.Content.SkillTree.UI
 
         public void DrawSkill(NodeParent node) //Vector2 pos, Texture2D tex,int state)
         {
-            SkillPanel basePanel = new SkillPanel(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Textures/UI/skill_blank").Value);
+            SkillPanel basePanel = new SkillPanel(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Content/UI/Textures/Node_Small").Value);
             basePanel.SetPadding(0);
             basePanel.Width.Set(SKILL_SIZE * sizeMultplier, 0f);
             basePanel.Height.Set(SKILL_SIZE * sizeMultplier, 0f);

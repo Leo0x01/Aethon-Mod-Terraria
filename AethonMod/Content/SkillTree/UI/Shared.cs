@@ -123,7 +123,7 @@ namespace AethonMod.Content.SkillTree.UI
         public bool Hidden = false;
         public int nodeID;
         public int neighboorID;
-        private Texture2D texture = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AnotherRpgMod/Textures/UI/Blank").Value;
+        private Texture2D texture = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Content/UI/Textures/Node_Small").Value;
         public Color color;
         public Vector2 basePos;
         public bool bg = false;
@@ -155,7 +155,7 @@ namespace AethonMod.Content.SkillTree.UI
     {
         public NodeParent node;
         public NodeParent neighboor;
-        private Texture2D texture = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AnotherRpgMod/Textures/UI/Blank").Value;
+        private Texture2D texture = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Content/UI/Textures/Node_Small").Value;
         public Color color;
         public Vector2 basePos;
         public bool bg = false;

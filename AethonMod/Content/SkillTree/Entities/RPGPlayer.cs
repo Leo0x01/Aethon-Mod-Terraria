@@ -34,5 +34,12 @@ namespace AethonMod.Content.SkillTree.Entities
             skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
             skilltree.Init();
         }
+
+        public override void SaveData(TagCompound tag)
+        {
+            // Stub: no persistent skill tree data is serialized yet.
+            // Kept empty so tModLoader's SaveData/LoadData pairing rule is satisfied.
+            // When real serialization is added to LoadData, mirror it here.
+        }
     }
 }

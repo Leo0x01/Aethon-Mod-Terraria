@@ -1,0 +1,636 @@
+     1→﻿using Microsoft.Xna.Framework;
+     2→using Microsoft.Xna.Framework.Graphics;
+     3→
+     4→using Terraria.GameContent.UI.Elements;
+     5→using Terraria.UI;
+     6→using Terraria.ID;
+     7→using Terraria;
+     8→using System;
+     9→using Terraria.ModLoader;
+    10→using System.Collections.Generic;
+    11→using AethonMod.Content.SkillTree.Entities;
+    12→using System.Reflection;
+    13→using Terraria.GameInput;
+    14→using Terraria.Localization;
+    15→using AethonMod.Content.SkillTree.RPGModule;
+    16→using AethonMod.Content.SkillTree.Utils;
+    17→
+    18→
+    19→
+    20→
+    21→namespace AethonMod.Content.SkillTree.UI
+    22→{
+    23→    public class SkillTreeUi : UIState
+    24→    {
+    25→
+    26→        UIPanel backGround;
+    27→        UIPanel ScrollDetector;
+    28→        UIPanel toolTip;
+    29→
+    30→        List<Connection> allConnection;
+    31→        List<SkillPanel> allBasePanel;
+    32→        List<SkillText> allText;
+    33→
+    34→        UIText ResetText;
+    35→
+    36→
+    37→        float zoomMax = 2f;
+    38→        float zoomMin = 0.25f;
+    39→
+    40→        float Zoom = 1;
+    41→        float UIScale = 1f;
+    42→        float ScreenMult = (Main.screenHeight / 1080f);
+    43→
+    44→        public float sizeMultplier;
+    45→        private void ResetTextHover(UIMouseEvent evt, UIElement listeningElement)
+    46→        {
+    47→            ResetText.TextColor = Color.White;
+    48→        }
+    49→        private void ResetTextOut(UIMouseEvent evt, UIElement listeningElement)
+    50→        {
+    51→            ResetText.TextColor = Color.Gray;
+    52→        }
+    53→
+    54→        public static SkillTreeUi Instance;
+    55→
+    56→        private UIText skillPointsLeft;
+    57→
+    58→        private global::AethonMod.Content.SkillTree.RPGModule.SkillTree skillTree;
+    59→        public static bool visible = false;
+    60→
+    61→        public Vector2 offSet = new Vector2(Main.screenWidth*0.5f, Main.screenHeight*0.5f)/ 1f;
+    62→        const int SKILL_SIZE = 64;
+    63→        const int CONNECTION_WIDTH = 8;
+    64→
+    65→        public void LoadSkillTree()
+    66→        {
+    67→            skillTree = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>().GetskillTree;
+    68→            Init();
+    69→        }
+    70→
+    71→        public override void OnInitialize()
+    72→        {
+    73→            Instance = this;
+    74→        }
+    75→
+    76→        public void Erase()
+    77→        {
+    78→            if (backGround != null) { 
+    79→                backGround.RemoveAllChildren();
+    80→                backGround.Remove();
+    81→                }
+    82→        }
+    83→
+    84→        public void UpdateValue()
+    85→        {
+    86→            int listSize = allConnection.Count;
+    87→            for (int i = 0; i < listSize; i++)
+    88→            {
+    89→                if (!allConnection[i].bg)
+    90→                    allConnection[i].color = (allConnection[i].neighboor.GetActivate || allConnection[i].node.GetActivate) ? Color.GreenYellow : Color.Gray;
+    91→            }
+    92→            listSize = allBasePanel.Count;
+    93→            NodeParent Node;
+    94→            int state = 0; // disactivated and locked
+    95→            for (int i = 0; i < listSize; i++)
+    96→            {
+    97→                Node = allBasePanel[i].node;
+    98→                state = 0;
+    99→                if (Node.GetEnable) //if the node is enabled
+   100→                    state = 3;
+   101→                else if (Node.GetActivate && (Node.GetNodeType == NodeType.Class || Node.GetNodeType == NodeType.Perk))
+   102→                    state = 2; // if node is unlocked , activated but not enable (like perk or class skill)
+   103→                else if (Node.GetUnlock)
+   104→                    state = 1; // if node is just unlocked
+   105→
+   106→                switch (state)
+   107→                {
+   108→                    case 0:
+   109→                        allBasePanel[i].skill.color = new Color(255, 150, 150, 255);
+   110→                        allBasePanel[i].color = new Color(255, 50, 50, 255);
+   111→                        break;
+   112→                    case 1:
+   113→                        allBasePanel[i].skill.color = new Color(220, 220, 120, 255);
+   114→                        allBasePanel[i].color = new Color(160, 180, 50, 255);
+   115→                        break;
+   116→                    case 2:
+   117→                        allBasePanel[i].skill.color = new Color(220, 220, 220, 255);
+   118→                        allBasePanel[i].color = new Color(120, 120, 120, 255);
+   119→                        break;
+   120→                    default:
+   121→                        allBasePanel[i].skill.color = Color.White;
+   122→                        allBasePanel[i].color = new Color(180, 220, 255, 255);
+   123→                        break;
+   124→                }
+   125→            }
+   126→            listSize = allText.Count;
+   127→            for (int i = 0; i < listSize; i++)
+   128→            {
+   129→                allText[i].SetText(allText[i].node.GetLevel + " / " + allText[i].node.GetMaxLevel, sizeMultplier,false);
+   130→            }
+   131→        }
+   132→
+   133→        private void ResetStats(UIMouseEvent evt, UIElement listeningElement)
+   134→        {
+   135→            if (!visible)
+   136→                return;
+   137→            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+   138→            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+   139→            rPGPlayer.ResetSkillTree();
+   140→            rPGPlayer.GetskillTree.Init();
+   141→            dragging = false;
+   142→            LoadSkillTree();
+   143→        }
+   144→
+   145→        private void ResetOffset(UIMouseEvent evt, UIElement listeningElement)
+   146→        {
+   147→            offSet = new Vector2(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f) / 1f;
+   148→            Zoom = 1;
+   149→            Init();
+   150→        }
+   151→
+   152→        public void Init()
+   153→        {
+   154→            //Erase all previous value
+   155→            Erase();
+   156→            sizeMultplier = Zoom * UIScale * ScreenMult;
+   157→            skillTree.ResetConnection();
+   158→            allConnection = new List<Connection>();
+   159→            allBasePanel = new List<SkillPanel>();
+   160→            allText = new List<SkillText>();
+   161→
+   162→
+   163→            
+   164→
+   165→            backGround = new UIPanel();
+   166→            backGround.SetPadding(0);
+   167→            backGround.Left.Set(0, 0f);
+   168→            backGround.Top.Set(0, 0f);
+   169→            backGround.Width.Set(Main.screenWidth, 0f);
+   170→            backGround.Height.Set(Main.screenHeight, 0f);
+   171→            backGround.BackgroundColor = new Color(73, 94, 171,150);
+   172→            Append(backGround);
+   173→
+   174→            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+   175→
+   176→            skillPointsLeft = new UIText("Skill Points : " + rPGPlayer.GetSkillPoints + " / " + (rPGPlayer.GetLevel()-1));
+   177→            skillPointsLeft.Left.Set(150, 0f);
+   178→            skillPointsLeft.Top.Set(150, 0f);
+   179→            backGround.Append(skillPointsLeft);
+   180→
+   181→            ResetText = new UIText("RESET", 1* ScreenMult, true)
+   182→            {
+   183→                TextColor = Color.Gray
+   184→            };
+   185→            ResetText.Left.Set(150* ScreenMult, 0f);
+   186→            ResetText.Top.Set(250* ScreenMult, 0f);
+   187→            ResetText.Width.Set(0, 0f);
+   188→            ResetText.Height.Set(0, 0f);
+   189→            ResetText.OnLeftClick +=  (UIMouseEvent evt, UIElement el) => { ResetStats(evt, el); };
+   190→            ResetText.OnMouseOver +=  (UIMouseEvent evt, UIElement el) => { ResetTextHover(evt, el); };
+   191→            ResetText.OnMouseOut +=  (UIMouseEvent evt, UIElement el) => { ResetTextOut(evt, el); };
+   192→            backGround.Append(ResetText);
+   193→
+   194→            backGround.OnLeftMouseDown +=  (UIMouseEvent evt, UIElement el) => { DragStart(evt, el); };
+   195→            backGround.OnLeftMouseUp +=  (UIMouseEvent evt, UIElement el) => { DragEnd(evt, el); };
+   196→            backGround.OnScrollWheel +=  (UIScrollWheelEvent evt, UIElement el) => { ScrollUpDown(evt, el); };
+   197→            backGround.OnMiddleClick +=  (UIMouseEvent evt, UIElement el) => { ResetOffset(evt, el); };
+   198→
+   199→
+   200→            Instance = this;
+   201→            for (int i = 0; i < skillTree.nodeList.nodeList.Count; i++)
+   202→            {
+   203→                NodeParent Node = skillTree.nodeList.nodeList[i];
+   204→                if (!(Node.GetNodeType == NodeType.LimitBreak && rPGPlayer.GetLevel() < 1000 || Node.GetNode.GetAscended && !skillTree.IsLimitBreak()))
+   205→                {
+   206→                    SkillInit(skillTree.nodeList.nodeList[i]);
+   207→                }
+   208→                 
+   209→                
+   210→            }
+   211→
+   212→
+   213→            
+   214→            //
+   215→
+   216→        }
+   217→
+   218→
+   219→        public override void Update(GameTime gameTime)
+   220→        {
+   221→            int listSize = allConnection.Count;
+   222→            for (int i = 0;i< listSize; i++)
+   223→            {
+   224→                allConnection[i].Left.Set((allConnection[i].basePos.X + offSet.X)* sizeMultplier, 0);
+   225→                allConnection[i].Top.Set((allConnection[i].basePos.Y + offSet.Y)* sizeMultplier, 0);
+   226→            }
+   227→            listSize = allBasePanel.Count;
+   228→            for (int i = 0; i < listSize; i++)
+   229→            {
+   230→                allBasePanel[i].Left.Set((allBasePanel[i].basePos.X + offSet.X)*sizeMultplier, 0);
+   231→                allBasePanel[i].Top.Set((allBasePanel[i].basePos.Y + offSet.Y)*sizeMultplier, 0);
+   232→            }
+   233→            
+   234→            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+   235→            skillPointsLeft.SetText("Skill Points : " + rPGPlayer.GetSkillPoints + " / " + (rPGPlayer.GetLevel() - 1));
+   236→
+   237→            Recalculate();
+   238→        }
+   239→
+   240→        public void SkillInit(NodeParent node)
+   241→        {
+   242→            
+   243→
+   244→            DrawSkill(node);
+   245→            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+   246→            NodeParent neightboor;
+   247→            for (int j = 0; j < node.GetNeightboor.Count; j++)
+   248→            {
+   249→                neightboor = node.GetNeightboor[j];
+   250→                if (node.GetNeightboor.Exists(x => x.ID == neightboor.ID) && !(node.connectedNeighboor.Exists(x => x.ID == neightboor.ID)) )
+   251→                {
+   252→
+   253→                    if (!(neightboor.GetNodeType == NodeType.LimitBreak && rPGPlayer.GetLevel() < 1000 || neightboor.GetNode.GetAscended && !skillTree.IsLimitBreak()))
+   254→                    {
+   255→                        DrawConnection((neightboor.GetActivate || node.GetActivate) ? Color.GreenYellow : Color.Gray, node.menuPos, neightboor.menuPos, node, neightboor);
+   256→                        node.connectedNeighboor.Add(neightboor);
+   257→                        neightboor.connectedNeighboor.Add(node);
+   258→                    }
+   259→
+   260→                    
+   261→                }
+   262→            }
+   263→
+   264→            int listSize = allConnection.Count;
+   265→            for (int i = 0; i < listSize; i++)
+   266→            {
+   267→                backGround.Append(allConnection[i]);
+   268→            }
+   269→            listSize = allBasePanel.Count;
+   270→            for (int i = 0; i < listSize; i++)
+   271→            {
+   272→                backGround.Append(allBasePanel[i]);
+   273→            }
+   274→        }
+   275→
+   276→        public void DrawSkill(NodeParent node) //Vector2 pos, Texture2D tex,int state)
+   277→        {
+   278→            SkillPanel basePanel = new SkillPanel(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Textures/UI/skill_blank").Value);
+   279→            basePanel.SetPadding(0);
+   280→            basePanel.Width.Set(SKILL_SIZE * sizeMultplier, 0f);
+   281→            basePanel.Height.Set(SKILL_SIZE * sizeMultplier, 0f);
+   282→            Skill skillIcon = new Skill(ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>(SkillTextures.GetTexture(node.GetNode)).Value);
+   283→            skillIcon.Width.Set(SKILL_SIZE * sizeMultplier, 0f);
+   284→            skillIcon.Height.Set(SKILL_SIZE * sizeMultplier, 0f);
+   285→
+   286→            int state = 0; // disactivated and locked
+   287→            if (node.GetEnable) //if the node is enabled
+   288→                state = 3;
+   289→            else if (node.GetActivate && (node.GetNodeType == NodeType.Class || node.GetNodeType == NodeType.Perk))
+   290→                state = 2; // if node is unlocked , activated but not enable (like perk or class skill)
+   291→            else if (node.GetUnlock)
+   292→                state = 1; // if node is just unlocked
+   293→
+   294→            switch (state) { 
+   295→                case 0:
+   296→                    skillIcon.color = new Color(255,150,150,255);
+   297→                    basePanel.color = new Color(255, 50, 50, 255);
+   298→                    break;
+   299→                case 1:
+   300→                    skillIcon.color = new Color(220, 220, 120, 255);
+   301→                    basePanel.color = new Color(160, 180, 50, 255);
+   302→                    break;
+   303→                case 2:
+   304→                    skillIcon.color = new Color(220, 220, 220, 255);
+   305→                    basePanel.color = new Color(120, 120, 120, 255);
+   306→                    break;
+   307→                default:
+   308→                    skillIcon.color = Color.White;
+   309→                    basePanel.color = new Color(180, 220, 255, 255);
+   310→                    break;
+   311→            }
+   312→            
+   313→            basePanel.basePos = new Vector2(node.menuPos.X, node.menuPos.Y);
+   314→            basePanel.node = node;
+   315→            basePanel.skill = skillIcon;
+   316→            SkillText levelText = new SkillText(node.GetLevel + " / " + node.GetMaxLevel,node,sizeMultplier,false);
+   317→            levelText.Left.Set(SKILL_SIZE*0.2f* sizeMultplier, 0);
+   318→            levelText.Top.Set(SKILL_SIZE*0.5f* sizeMultplier, 0);
+   319→            allText.Add(levelText);
+   320→            allBasePanel.Add(basePanel);
+   321→            skillIcon.OnMouseOver += new MouseEvent((UIMouseEvent, UIElement) => OpenToolTip(UIMouseEvent, UIElement,node));
+   322→            skillIcon.OnLeftClick += new MouseEvent((UIMouseEvent, UIElement) => OnClickNode(UIMouseEvent, UIElement, node));
+   323→            skillIcon.OnRightClick += new MouseEvent((UIMouseEvent, UIElement) => OnRightClickNode(UIMouseEvent, UIElement, node));
+   324→            skillIcon.OnMouseOut +=  (UIMouseEvent evt, UIElement el) => { CloseToolTip(evt, el); };
+   325→            basePanel.Append(skillIcon);
+   326→            basePanel.Append(levelText);
+   327→        }
+   328→
+   329→        public void DrawConnection(Color _color, Vector2 point1, Vector2 point2,NodeParent node,NodeParent neighboor)
+   330→        {
+   331→            float angle = 0;
+   332→            float distance = 0;
+   333→            //angle = (float)(Math.Atan2(point2.Y- point1.Y, point2.X - point1.X) *(180f/Math.PI));
+   334→            angle = (float)(Math.Atan2(point2.Y - point1.Y, point2.X - point1.X) );
+   335→            distance = (float)Math.Sqrt(Math.Pow(point2.X - point1.X, 2) + Math.Pow(point2.Y - point1.Y, 2));
+   336→            Connection BG = new Connection(angle, distance, 10)
+   337→            {
+   338→                color = Color.DarkSlateGray
+   339→                
+   340→            };
+   341→            
+   342→            Connection connection = new Connection(angle, distance, 6)
+   343→            {
+   344→                color = _color,
+   345→            };
+   346→            BG.basePos = new Vector2(point1.X + SKILL_SIZE * 0.5f, point1.Y + SKILL_SIZE * 0.5f);
+   347→            connection.basePos = new Vector2(point1.X+ SKILL_SIZE*0.5f, point1.Y+ SKILL_SIZE * 0.5f);
+   348→            BG.bg = true;
+   349→            BG.neighboor = neighboor;
+   350→            BG.node = node;
+   351→            connection.neighboor = neighboor;
+   352→            connection.node = node;
+   353→            allConnection.Add(BG);
+   354→            allConnection.Add(connection);
+   355→
+   356→        }
+   357→
+   358→
+   359→        private void ScrollUpDown(UIScrollWheelEvent evt, UIElement listeningElement)
+   360→        {
+   361→            Vector2 Center = new Vector2(Main.screenWidth * .5f, Main.screenHeight * .5f);
+   362→            float preZoom = Zoom;
+   363→            Vector2 mouseoffset = evt.MousePosition - Center;
+   364→            
+   365→            if (evt.ScrollWheelValue > 0)
+   366→            {
+   367→                Zoom = Mathf.Clamp(1.1f * Zoom, zoomMin, zoomMax);
+   368→                
+   369→            }
+   370→            else if (evt.ScrollWheelValue < 0)
+   371→            {
+   372→                Zoom = Mathf.Clamp(0.85f * Zoom, zoomMin, zoomMax);
+   373→                
+   374→            }
+   375→            float ratio = Zoom / preZoom;
+   376→            offSet /= ratio;
+   377→            if (ratio != 1) { 
+   378→                if (evt.ScrollWheelValue > 0)
+   379→                    offSet -= mouseoffset * Zoom * 0.1f;
+   380→               else
+   381→                    offSet += mouseoffset * Zoom * 0.02f;
+   382→            }
+   383→
+   384→            Init();
+   385→        }
+   386→
+   387→        public bool dragging = false;
+   388→        Vector2 regOffSet;
+   389→        private void DragStart(UIMouseEvent evt, UIElement listeningElement)
+   390→        {
+   391→            if (!visible)
+   392→                return;
+   393→            regOffSet = new Vector2(evt.MousePosition.X, evt.MousePosition.Y);
+   394→            dragging = true;
+   395→        }
+   396→
+   397→        private void DragEnd(UIMouseEvent evt, UIElement listeningElement)
+   398→        {
+   399→            if (!visible)
+   400→                return;
+   401→            Vector2 end = evt.MousePosition;
+   402→            dragging = false;
+   403→
+   404→            offSet.X += (end.X - regOffSet.X)/sizeMultplier;
+   405→            offSet.Y += (end.Y - regOffSet.Y)/ sizeMultplier;
+   406→            
+   407→            Recalculate();
+   408→        }
+   409→
+   410→        protected override void DrawSelf(SpriteBatch spriteBatch)
+   411→        {
+   412→            Vector2 MousePosition = new Vector2((float)Main.mouseX, (float)Main.mouseY);
+   413→            if (backGround.ContainsPoint(MousePosition))
+   414→            {
+   415→                Main.LocalPlayer.mouseInterface = true;
+   416→            }
+   417→            if (dragging)
+   418→            {
+   419→                offSet.X += (MousePosition.X - regOffSet.X);
+   420→                offSet.Y += (MousePosition.Y - regOffSet.Y);
+   421→                regOffSet = new Vector2(MousePosition.X, MousePosition.Y);
+   422→                Recalculate();
+   423→            }
+   424→        }
+   425→
+   426→        private void UpdateToolTip(NodeParent node)
+   427→        {
+   428→            toolTip.Remove();
+   429→            toolTip = new UIPanel();
+   430→
+   431→            float unzoomMult = ScreenMult;
+   432→
+   433→            toolTip.Left.Set((node.menuPos.X + SKILL_SIZE * 2 + offSet.X)* sizeMultplier, 0);
+   434→            toolTip.Top.Set((node.menuPos.Y - SKILL_SIZE * 2 + offSet.Y)* sizeMultplier, 0);
+   435→
+   436→            float TTWidth = 500;
+   437→            if (node.GetNodeType == NodeType.Class)
+   438→            {
+   439→                ClassType CT = (node.GetNode as ClassNode).GetClassType;
+   440→                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+   441→                if (ClassInfo.ManaShield > 0)
+   442→                    TTWidth = 750;
+   443→            }
+   444→            toolTip.Width.Set(TTWidth * unzoomMult, 0);
+   445→            toolTip.Height.Set(350 * unzoomMult, 0);
+   446→            toolTip.SetPadding(0);
+   447→            toolTip.BackgroundColor = new Color(73, 94, 171, 150);
+   448→
+   449→            UIText Name = new UIText("", 0.5f* unzoomMult, true);
+   450→            Name.Left.Set(10* unzoomMult, 0);
+   451→            Name.Top.Set(10* unzoomMult, 0);
+   452→            switch (node.GetNodeType)
+   453→            {
+   454→                case NodeType.Class:
+   455→                    Name.SetText("Class : " + (node.GetNode as ClassNode).GetClassType, unzoomMult, false);
+   456→                    break;
+   457→                case NodeType.Perk:
+   458→                    Name.SetText("Perk : " + (node.GetNode as PerkNode).GetPerk + "\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel, unzoomMult, false);
+   459→                    break;
+   460→                case NodeType.Immunity:
+   461→                    Name.SetText("Immunity : " + (node.GetNode as ImmunityNode).GetImmunity, unzoomMult, false);
+   462→                    break;
+   463→                case NodeType.Damage:
+   464→                    Name.SetText("Bonus " + (node.GetNode as DamageNode).GetDamageType + " Damage\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel, unzoomMult, false);
+   465→                    break;
+   466→                case NodeType.Leech:
+   467→                    Name.SetText("Bonus " + (node.GetNode as LeechNode).GetLeechType + " Leech\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel, unzoomMult, false);
+   468→                    break;
+   469→                case NodeType.Speed:
+   470→                    Name.SetText("Bonus " + (node.GetNode as SpeedNode).GetDamageType + " Speed\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel, unzoomMult, false);
+   471→                    break;
+   472→                case NodeType.LimitBreak:
+   473→                    Name.SetText("LIMIT BREAK : " + (node.GetNode as LimitBreakNode).LimitBreakType, unzoomMult, false);
+   474→                    break;
+   475→            }
+   476→
+   477→            UIText info = new UIText("Level Required : " + node.GetLevelRequirement + "\nCost " + node.GetCostPerLevel + " Points Per Level\n");
+   478→            info.Left.Set(50* unzoomMult, 0);
+   479→            info.Top.Set(80* unzoomMult, 0);
+   480→
+   481→            UIText description = new UIText(SkillInfo.GetDesc(node.GetNode));
+   482→            description.Left.Set(50* unzoomMult, 0);
+   483→            description.Top.Set(140* unzoomMult, 0);
+   484→
+   485→            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+   486→
+   487→            backGround.Append(toolTip);
+   488→            toolTip.Append(Name);
+   489→            toolTip.Append(info);
+   490→            toolTip.Append(description);
+   491→
+   492→
+   493→            backGround.Recalculate();
+   494→            Recalculate();
+   495→        }
+   496→
+   497→        private void OnRightClickNode(UIMouseEvent evt, UIElement listeningElement, NodeParent node)
+   498→        {
+   499→            if (node.GetNodeType == NodeType.Perk)
+   500→            {
+   501→                node.GetNode.ToggleEnable();
+   502→                if (node.GetEnable == false)
+   503→                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+   504→                else
+   505→                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+   506→                UpdateValue();
+   507→            }
+   508→            else for (int i = 0; i < 5; i++)
+   509→            {
+   510→                OnClickNode(evt, listeningElement, node);
+   511→            }
+   512→        }
+   513→
+   514→        private void OnClickNode(UIMouseEvent evt, UIElement listeningElement, NodeParent node)
+   515→        {
+   516→            if (node.GetActivate)
+   517→            {
+   518→                if (node.GetNodeType == NodeType.Class)
+   519→                {
+   520→                    node.ToggleEnable();
+   521→                    
+   522→                    UpdateValue();
+   523→                    if (node.GetEnable == false)
+   524→                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+   525→                    else
+   526→                        Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+   527→                    return;
+   528→                }
+   529→            }
+   530→
+   531→            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+   532→            switch(node.CanUpgrade(rPGPlayer.GetSkillPoints, rPGPlayer.GetLevel()))
+   533→            {
+   534→                case Reason.CanUpgrade:
+   535→                    rPGPlayer.SpentSkillPoints(0);
+   536→                    node.Upgrade();
+   537→                    UpdateToolTip(node);
+   538→                    UpdateValue();
+   539→                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
+   540→                    break;
+   541→                default:
+   542→                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
+   543→                    break;
+   544→            }
+   545→            
+   546→        }
+   547→
+   548→        private void OpenToolTip(UIMouseEvent evt, UIElement listeningElement,NodeParent node)
+   549→        {
+   550→            if (node == null)
+   551→            {
+   552→                return;
+   553→            }
+   554→            toolTip = new UIPanel();
+   555→            float unzoomMult = ScreenMult;
+   556→
+   557→            toolTip.Left.Set((node.menuPos.X + SKILL_SIZE*2 + offSet.X)* sizeMultplier, 0);
+   558→            toolTip.Top.Set((node.menuPos.Y - SKILL_SIZE * 2 + offSet.Y)* sizeMultplier, 0);
+   559→
+   560→            float TTWidth = 500;
+   561→            if (node.GetNodeType == NodeType.Class)
+   562→            {
+   563→                ClassType CT = (node.GetNode as ClassNode).GetClassType;
+   564→                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+   565→                if (ClassInfo.ManaShield > 0)
+   566→                    TTWidth = 750;
+   567→                
+   568→            }
+   569→            toolTip.Width.Set(TTWidth * unzoomMult, 0);
+   570→            toolTip.Height.Set(350* unzoomMult, 0);
+   571→            toolTip.SetPadding(0);
+   572→            toolTip.BackgroundColor = new Color(73, 94, 171, 150);
+   573→
+   574→            UIText Name = new UIText("",0.5f,true);
+   575→            Name.Left.Set(10, 0);
+   576→            Name.Top.Set(10, 0);
+   577→            switch (node.GetNodeType) {
+   578→                case NodeType.Class:
+   579→                    Name.SetText("Class : "+(node.GetNode as ClassNode).GetClassType);
+   580→                    break;
+   581→                case NodeType.Perk:
+   582→                    Name.SetText("Perk : " + (node.GetNode as PerkNode).GetPerk + " \nLevel : " + node.GetLevel + " / " + node.GetMaxLevel);
+   583→                    break;
+   584→                case NodeType.Immunity:
+   585→                    Name.SetText("Class : " + (node.GetNode as ImmunityNode).GetImmunity);
+   586→                    break;
+   587→                case NodeType.Damage:
+   588→                    Name.SetText("Bonus "+(node.GetNode as DamageNode).GetDamageType + " Damage\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel);
+   589→                    break;
+   590→                case NodeType.Leech:
+   591→                    Name.SetText("Bonus " + (node.GetNode as LeechNode).GetLeechType + " Leech\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel);
+   592→                    break;
+   593→                case NodeType.Speed:
+   594→                    Name.SetText("Bonus " + (node.GetNode as SpeedNode).GetDamageType + " Speed\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel);
+   595→                    break;
+   596→                case NodeType.Stats:
+   597→                    Name.SetText("Bonus " + (node.GetNode as StatNode).GetStatType + " Stats\nLevel : " + node.GetLevel + " / " + node.GetMaxLevel);
+   598→                    break;
+   599→                case NodeType.LimitBreak:
+   600→                    Name.SetText("LIMIT BREAK : " + (node.GetNode as LimitBreakNode).LimitBreakType, unzoomMult, false);
+   601→                    break;
+   602→            }
+   603→
+   604→            UIText info = new UIText("Level Required : " + node.GetLevelRequirement +"\nCost " + node.GetCostPerLevel + " Points Per Level\n");
+   605→            info.Left.Set(50* unzoomMult, 0);
+   606→            info.Top.Set(100* unzoomMult, 0);
+   607→
+   608→            UIText description = new UIText(SkillInfo.GetDesc(node.GetNode));
+   609→            description.Left.Set(50* unzoomMult, 0);
+   610→            description.Top.Set(170* unzoomMult, 0);
+   611→            
+   612→            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+   613→
+   614→            backGround.Append(toolTip);
+   615→            toolTip.Append(Name);
+   616→            toolTip.Append(info);
+   617→            toolTip.Append(description);
+   618→
+   619→
+   620→            backGround.Recalculate();
+   621→        }
+   622→
+   623→        private void CloseToolTip(UIMouseEvent evt, UIElement listeningElement)
+   624→        {
+   625→            toolTip.Remove();
+   626→
+   627→            Recalculate();
+   628→        }
+   629→
+   630→
+   631→    }
+   632→
+   633→    
+   634→
+   635→}
+   636→

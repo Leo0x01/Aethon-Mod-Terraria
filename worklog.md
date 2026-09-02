@@ -2425,3 +2425,210 @@ Files copied (24 total, 2804 lines):
 Build: 0 Errors, 0 Warnings
 Version: 4.1
 Pushed to GitHub: commit d879a88
+
+---
+Task ID: SCAN-1
+Agent: Code Scanner (Explore)
+Task: Scan AnRPG-copied code in SkillTree folder for tModLoader autoload/compilation errors
+
+Work Log:
+- Read worklog history (prior ANRPG-FULL-CODE-COPY-1 commit d879a88 + v4.2 commit 4abe37f) for context.
+- Read the git diff confirming the SaveData override was just added to RPGPlayer.cs (uncommitted local change). The autoload rule "ModPlayer must override both SaveData/LoadData or neither" is now satisfied.
+- Enumerated 53 files in /home/z/my-project/AethonMod/Content/SkillTree/ (37 active .cs + 16 .bak).
+- Read every active .cs file (37 files) under Content/SkillTree/ plus the related Content/Players/ShardPlayer.cs and Content/Systems/UISystem.cs for context.
+- Cross-checked all `using` directives, namespace declarations, type references, and tModLoader API usage.
+- Verified .bak files are excluded from compilation (build.txt buildIgnore=*.bak + SDK default *.cs glob — confirmed since `ItemSkillTree.cs.bak` etc. have `.bak` extension, not `.cs`).
+- Traced the call chain that fires the moment a player enters a world: tModLoader → ModPlayer.LoadData → RPGPlayer.LoadData / ShardPlayer.LoadData → `new SkillTree()` → `JsonSkillTree.GetJsonNodeList` (null) → `NodeSaved.jsonList` → NullReferenceException.
+- Searched whole AethonMod project for `JsonSkillTree.Init` and `JsonCharacterClass.Init` calls — zero hits in active code (only in ConfigFile.cs.bak which is excluded).
+- Searched for residual `AnotherRpgMod.*` namespace references — zero in .cs files (only as texture asset paths in Shared.cs / SkillTextures.cs / SkillTreeUi.cs).
+- Verified JsonChrClass overloaded constructor resolution: `int Summons` parameter never receives a float literal thanks to Constructor-2 overload (which omits MovementSpeed/Dodge/Ammo) taking precedence for the 10-arg calls where Summons would otherwise be float.
+- Verified Connection field initializer (`ModContent.Request<Texture2D>("AnotherRpgMod/Textures/UI/Blank").Value`) is reachable when Init() reaches DrawConnection — but Init() throws earlier at DrawSkill's "AethonMod/Textures/UI/skill_blank" load (asset also missing).
+
+Stage Summary:
+
+### Tree of SkillTree folder (53 files; 37 active .cs + 16 .bak excluded from build)
+
+```
+Content/SkillTree/
+├── Config.cs                                          [AethonMod.Content.SkillTree]
+├── ConfigFile.cs.bak                                  (excluded)
+├── JsonCharacterClass.cs                              [AethonMod.Content.SkillTree]
+├── JsonSkilLTree.cs  (filename typo: SkilLTree)       [AethonMod.Content.SkillTree]
+├── Node.cs                                            [AethonMod.Content.SkillTree.RPGModule]
+├── NodeList.cs                                        [AethonMod.Content.SkillTree.RPGModule]
+├── NodeParent.cs                                      [AethonMod.Content.SkillTree.RPGModule]
+├── SkillTextures.cs                                   [AethonMod.Content.SkillTree.Utils]
+├── SkillTree.cs                                       [AethonMod.Content.SkillTree.RPGModule]
+├── Entities/
+│   ├── RPGPlayer.cs      (stub ModPlayer)             [AethonMod.Content.SkillTree.Entities]
+│   ├── RPGStats.cs                                    [AethonMod.Content.SkillTree.Entities]
+│   └── StatData.cs                                    [AethonMod.Content.SkillTree.Entities]
+├── Enum/  (folder name ≠ namespace)
+│   ├── ClassType.cs                                   [AethonMod.Content.SkillTree.RPGModule]
+│   ├── DamageType.cs                                  [AethonMod.Content.SkillTree.RPGModule]
+│   ├── Immunity.cs                                    [AethonMod.Content.SkillTree.RPGModule]
+│   ├── LeechType.cs                                   [AethonMod.Content.SkillTree.RPGModule]
+│   ├── NodeType.cs                                    [AethonMod.Content.SkillTree.RPGModule]
+│   ├── Perk.cs                                        [AethonMod.Content.SkillTree.RPGModule]
+│   ├── Reason.cs                                      [AethonMod.Content.SkillTree.RPGModule]
+│   └── Stat.cs                                        [AethonMod.Content.SkillTree.RPGModule]
+├── Items/
+│   ├── ItemNode.cs       (stub class)                 [AethonMod.Content.SkillTree.Items]
+│   ├── ItemUpdate.cs      (GlobalItem stub)           [AethonMod.Content.SkillTree.Items]
+│   ├── ItemNode.cs.bak / ItemNodeAtlas.cs.bak / ItemSkillTree.cs.bak   (excluded)
+│   ├── Enum/
+│   │   ├── ItemReason.cs                              [AethonMod.Content.SkillTree.Items]
+│   │   └── NodeCategory.cs                           [AethonMod.Content.SkillTree.Items]
+│   ├── Struct/ItemStats.cs                           [AethonMod.Content.SkillTree.Items]
+│   └── Nodes/Armor|Common|Weapon/{Common,Magic,Melee,Ranged}/*.cs.bak (all excluded)
+├── Nodes/
+│   ├── ClassNode.cs                                   [AethonMod.Content.SkillTree.RPGModule]
+│   ├── DamageNode.cs                                  [AethonMod.Content.SkillTree.RPGModule]
+│   ├── ImmunityNode.cs                                [AethonMod.Content.SkillTree.RPGModule]
+│   ├── LeechNode.cs                                   [AethonMod.Content.SkillTree.RPGModule]
+│   ├── LimitBreakNode.cs                              [AethonMod.Content.SkillTree.RPGModule]
+│   ├── PerkNode.cs                                    [AethonMod.Content.SkillTree.RPGModule]
+│   ├── SpeedNode.cs                                   [AethonMod.Content.SkillTree.RPGModule]
+│   └── StatNode.cs                                    [AethonMod.Content.SkillTree.RPGModule]
+├── UI/
+│   ├── ItemTreeUiStub.cs                              [AethonMod.Content.SkillTree.UI]
+│   ├── Shared.cs                                      [AethonMod.Content.SkillTree.UI]
+│   ├── SkillTreeUi.cs                                 [AethonMod.Content.SkillTree.UI]
+│   └── Stats.cs.bak                                   (excluded)
+└── Utils/
+    ├── Mathf.cs                                       [AethonMod.Content.SkillTree.Utils]  (+ global StringExtensions)
+    └── SkillInfo.cs                                   [AethonMod.Content.SkillTree.Utils]
+```
+
+### Namespaces declared across active .cs files
+1. `AethonMod.Content.SkillTree` — Config.cs, JsonCharacterClass.cs, JsonSkilLTree.cs
+2. `AethonMod.Content.SkillTree.Entities` — RPGPlayer.cs, RPGStats.cs, StatData.cs
+3. `AethonMod.Content.SkillTree.RPGModule` — SkillTree.cs, Node.cs, NodeList.cs, NodeParent.cs, all Nodes/*.cs (8), all Enum/*.cs (8) — 16 files
+4. `AethonMod.Content.SkillTree.UI` — Shared.cs, SkillTreeUi.cs, ItemTreeUiStub.cs
+5. `AethonMod.Content.SkillTree.Utils` — Mathf.cs, SkillInfo.cs, SkillTextures.cs
+6. `AethonMod.Content.SkillTree.Items` — ItemNode.cs, ItemUpdate.cs, Struct/ItemStats.cs, Enum/ItemReason.cs, Enum/NodeCategory.cs
+7. `global::` (file-scoped) — `StringExtensions` class in Mathf.cs has NO namespace declaration
+
+### `using` directives that reference non-existent namespaces
+- NONE found. Every `using` in active .cs files resolves. (Old `AethonMod.Content.SkillTree.RPGModule.Entities` was correctly flattened; no orphan `using AethonMod.Content.SkillTree.RPGModule.Entities;` or `using AethonMod.Content.SkillTree.Items.Nodes;` references remain.)
+
+### CRITICAL issues (will crash immediately after the SaveData fix)
+
+**C1 — `JsonSkillTree.Init()` and `JsonCharacterClass.Init()` are never called → NullReferenceException on world load.**
+- File: `/home/z/my-project/AethonMod/AethonMod.cs` (the Mod.Load() override is empty) and `/home/z/my-project/AethonMod/Content/Systems/UISystem.cs` (no Init call either).
+- Reachable trigger:
+  - `Content/SkillTree/Entities/RPGPlayer.cs:34` — `skilltree = new SkillTree();` in `LoadData(TagCompound)`
+  - `Content/Players/ShardPlayer.cs:132` — `GetskillTree = new Content.SkillTree.RPGModule.SkillTree();` in `LoadData(TagCompound)`
+- Crash site: `Content/SkillTree/SkillTree.cs:167` — `JsonNodeList NodeSaved = JsonSkillTree.GetJsonNodeList;` returns null (static `jsonSkillList` is never assigned because `Init()` is never called). Then line 178 `foreach (JsonNode actualNode in NodeSaved.jsonList)` throws NullReferenceException.
+- This is the IMMEDIATE NEXT error the user will see after the SaveData fix.
+
+**C2 — `RPGPlayer` (stub ModPlayer) duplicates `ShardPlayer`; both have LoadData that constructs SkillTree.**
+- File: `Content/SkillTree/Entities/RPGPlayer.cs`
+- Issue: Both `RPGPlayer` and `ShardPlayer` extend `ModPlayer`, both have LoadData, both create `new SkillTree()`. tModLoader instantiates BOTH per Player, so BOTH LoadData methods fire on world load — both NPE (see C1). Even after C1 is fixed, the codebase is split: SkillTreeUi / SkillInfo / SkillTree.cs read from `GetModPlayer<RPGPlayer>()` (stub, all-zero values), but ClassNode.cs writes to `GetModPlayer<ShardPlayer>()` (real, persists). They will manipulate two separate SkillTree instances per Player and never see each other's changes.
+- Recommendation: delete RPGPlayer.cs and refactor all 8 `GetModPlayer<RPGPlayer>()` call sites in SkillTreeUi.cs / SkillTree.cs / SkillInfo.cs to use ShardPlayer.
+
+**C3 — SkillTreeUi references a non-existent texture `"AethonMod/Textures/UI/skill_blank"`.**
+- File: `Content/SkillTree/UI/SkillTreeUi.cs:278`
+- Issue: `new SkillPanel(ModContent.Request<Texture2D>("AethonMod/Textures/UI/skill_blank").Value)`. The mod's actual UI textures live under `Content/UI/Textures/` (SkillTree_Background.png, Node_Small.png, Node_Notable.png, Node_Keystone.png, Node_Ascendancy.png, Codex_Background.png). No `skill_blank.png` exists anywhere.
+- Triggered when: User presses K to open skill tree → `UISystem.PostUpdateInput` → `SkillTreeUi.LoadSkillTree` → `Init()` → `SkillInit` (line 201 loop) → `DrawSkill` (line 276) → AssetLoadException at line 278.
+- Note: caught by try/catch in `UISystem.ModifyInterfaceLayers` line 101 — game won't crash, but the skill tree UI silently fails to render.
+
+**C4 — SkillTextures.cs builds asset paths under the wrong mod name `"AnotherRpgMod"`.**
+- File: `Content/SkillTree/SkillTextures.cs:25, 31`
+- Issue: `GetItemTexture` returns `"AnotherRpgMod/Textures/ItemTree/" + node.GetName`; `GetTexture` returns `"AnotherRpgMod/Textures/SkillTree/" + node.GetNodeType + "/" + ...`. `"AnotherRpgMod"` is the original mod name; this mod's name is `AethonMod`. The asset will not be found.
+- Triggered when: SkillTreeUi.cs:282 `new Skill(ModContent.Request<Texture2D>(SkillTextures.GetTexture(node.GetNode)).Value)` — only reached AFTER C3 is fixed (since DrawSkill throws earlier).
+
+**C5 — Shared.cs field initializers request `"AnotherRpgMod/Textures/UI/Blank"`.**
+- File: `Content/SkillTree/UI/Shared.cs:126` (class `Connection`) and `:158` (class `ItemConnection`)
+- Issue: `private Texture2D texture = ModContent.Request<Texture2D>("AnotherRpgMod/Textures/UI/Blank").Value;` — wrong mod name; asset does not exist.
+- Triggered when: `new Connection(angle, distance, ...)` is constructed from `SkillTreeUi.DrawConnection` (lines 336, 342). Reachable only AFTER C3+C4 are fixed.
+
+### WARNING issues (compile & load OK but behavior broken)
+
+**W1 — `ClassNode.ToggleEnable` calls `player.SendClientChanges(player)` which is a no-op.**
+- File: `Content/SkillTree/Nodes/ClassNode.cs:87`
+- Issue: `player` is `ShardPlayer`. `ModPlayer.SendClientChanges(ModPlayer)` is the virtual method you OVERRIDE (default body is empty). Calling it does nothing. To actually send sync packets the call should be `player.Player.SendClientChanges(player)` (Terraria.Player method patched by tModLoader).
+- Impact: Multiplayer clients won't sync class activation to the server.
+
+**W2 — RPGPlayer stub returns hardcoded zeros; SkillTreeUi will show "Skill Points : 0 / 0" and never allow node upgrades.**
+- File: `Content/SkillTree/Entities/RPGPlayer.cs:18-19` (`GetSkillPoints => 0`, `GetLevel() => 1`)
+- Used by: `SkillTreeUi.cs:176, 234, 245, 531` etc.
+- Impact: Even after C1+C2 are fixed, the skill tree UI cannot be used because `rPGPlayer.GetSkillPoints` is always 0 — every `node.CanUpgrade(0, 1)` returns `Reason.NoEnoughtPoints`. (Fix is part of C2: remove RPGPlayer, point UI at ShardPlayer which has the real `AvailableSkillPoints()`.)
+
+**W3 — `SkillTreeUi.OnClickNode:535` calls `rPGPlayer.SpentSkillPoints(0)` which is a stub no-op AND passes 0 cost.**
+- File: `Content/SkillTree/UI/SkillTreeUi.cs:535`
+- Issue: Even if RPGPlayer were replaced by ShardPlayer, `SpentSkillPoints(int)` does not exist on ShardPlayer — only `SpentSkillPoints()` (no arg). And even if it existed, passing 0 means no points are deducted.
+- Impact: Players could upgrade nodes infinitely without consuming skill points.
+
+**W4 — `ItemTreeUi.Instance` is never assigned → any future use of `ItemSkill` / `ItemSkillPanel` / `ItemConnection` would NPE.**
+- File: `Content/SkillTree/UI/ItemTreeUiStub.cs:6` (`public static ItemTreeUi Instance;`) — never assigned.
+- File: `Content/SkillTree/UI/Shared.cs:49, 84, 85, 93, 134, 135` — read `ItemTreeUi.Instance.sizeMultplier`.
+- Impact: Currently dead code (no `new ItemSkill*()` calls in active .cs), but the moment any item-tree UI is wired up these will all NPE. Recommendation: assign `Instance = this;` in the stub's constructor.
+
+**W5 — `JsonChrClass.GetClass` falls back to `jsonList[0]` when class is missing, but `jsonList` itself is null until `Init()` runs.**
+- File: `Content/SkillTree/JsonCharacterClass.cs:31-41`
+- Issue: The `for (int i = 0; i < jsonList.Length; i++)` loop will NPE if `Init()` was never called. Same root cause as C1.
+
+### INFO (organizational / cosmetic, no functional impact)
+
+**I1 — Folder/namespace mismatch.** Files in `Enum/` declare namespace `AethonMod.Content.SkillTree.RPGModule` (not `.Enum`). Files in `Items/Enum/` declare namespace `AethonMod.Content.SkillTree.Items` (not `.Enum`). Files in `Nodes/` declare namespace `AethonMod.Content.SkillTree.RPGModule` (not `.Nodes`). C# doesn't require folder↔namespace match but this hurts navigation.
+
+**I2 — Filename typo:** `JsonSkilLTree.cs` (capital L). Class inside is correctly named `JsonSkillTree`. Rename file to `JsonSkillTree.cs` for consistency.
+
+**I3 — Duplicate `using Newtonsoft.Json;` in `JsonSkilLTree.cs` (lines 1 and 7).** Harmless CS0105 warning at most.
+
+**I4 — Self-referential `using AethonMod.Content.SkillTree.RPGModule;` inside files already in that namespace** (Node.cs:5, NodeList.cs:5, NodeParent.cs:5, all Nodes/*.cs). Harmless but redundant.
+
+**I5 — Dead code:** `HaveBow()`, `HaveRangedWeapon()`, `GetStat(Stat)` on RPGPlayer stub; `AnRPGConfig` static class in Config.cs; `RPGPlayer.Instance` static field (never assigned). None referenced by active code.
+
+**I6 — `StringExtensions.SafeFloatParse` declared at file scope (no namespace) in Mathf.cs.** Compiles fine but pollutes the global namespace. Consider moving into `AethonMod.Content.SkillTree.Utils`.
+
+**I7 — Logic oddity in `SkillInfo.cs:87-95`** (`foreach (float d in ClassInfo.Damage) { id++; if (!allDamage || id > 4) break; ... }`). The `id > 4` check inside a 7-element loop means only the first 4 elements are compared for "allDamage". Looks intentional but is non-obvious.
+
+### Summary table
+
+| ID | Severity | File:Line | One-liner |
+|----|----------|-----------|-----------|
+| C1 | CRITICAL | SkillTree.cs:167 (root cause: AethonMod.cs:12 empty Load) | JsonSkillTree/JsonCharacterClass.Init() never called → NPE in SkillTree ctor → world load fails |
+| C2 | CRITICAL | Entities/RPGPlayer.cs (whole file) | RPGPlayer stub duplicates ShardPlayer; split-brain state |
+| C3 | CRITICAL | UI/SkillTreeUi.cs:278 | Missing texture "AethonMod/Textures/UI/skill_blank" |
+| C4 | CRITICAL | SkillTextures.cs:25,31 | Texture paths use "AnotherRpgMod/" prefix (wrong mod) |
+| C5 | CRITICAL | UI/Shared.cs:126,158 | Field initializer requests "AnotherRpgMod/Textures/UI/Blank" |
+| W1 | WARNING | Nodes/ClassNode.cs:87 | player.SendClientChanges(player) is a no-op; no MP sync |
+| W2 | WARNING | Entities/RPGPlayer.cs:18-19 | Stub returns 0 skill points → UI unusable |
+| W3 | WARNING | UI/SkillTreeUi.cs:535 | SpentSkillPoints(0) no-op + wrong arg count vs ShardPlayer |
+| W4 | WARNING | UI/ItemTreeUiStub.cs:6 + UI/Shared.cs:* | ItemTreeUi.Instance never assigned |
+| W5 | WARNING | JsonCharacterClass.cs:31-41 | GetClass fallback still NPEs if Init() not called |
+| I1-I7 | INFO | various | Cosmetic / dead code / filename typo |
+
+### Recommended fix order (for the next agent — do NOT apply in this read-only task)
+
+1. **C1**: Add `JsonSkillTree.Init(); JsonCharacterClass.Init();` to `AethonMod.Load()` (or to a ModSystem.Load).
+2. **C2**: Delete `Entities/RPGPlayer.cs`; replace 8 call sites in SkillTreeUi.cs / SkillTree.cs / SkillInfo.cs with `ShardPlayer`.
+3. **C3 + C4 + C5**: Either add real textures under `Content/UI/Textures/` and update SkillTextures.cs to use `AethonMod/...` paths, OR temporarily replace `ModContent.Request<...>().Value` calls with `TextureAssets.MagicPixel.Value` so the UI renders without crashing.
+4. **W3**: Add `SpentSkillPoints(int cost)` overload on ShardPlayer (or change the call to `SpentSkillPoints()` with proper bookkeeping).
+5. **W1**: Change `player.SendClientChanges(player)` → `player.Player.SendClientChanges(player)` (or send a custom ModPacket).
+
+
+---
+Task ID: FIX-SAVEDATA-LOADDATA-1
+Agent: Lead Developer (Z.ai Code)
+Task: Fix runtime error "RPGPlayer must override all of (SaveData/LoadData) or none" and proactively fix the next-in-line crashes found by scanning the ported AnRPG code.
+
+Work Log:
+- Analyzed the two error screenshots with VLM: confirmed the crash was tModLoader's ModPlayer validation rule requiring SaveData/LoadData to be overridden together. RPGPlayer.cs only had LoadData.
+- Ran a full SCAN-1 (Explore subagent) of the whole Content/SkillTree/ folder to find OTHER errors that would appear right after this fix. Found 5 CRITICAL issues (C1-C5).
+- FIX (original error): Added an empty `public override void SaveData(TagCompound tag)` to `Content/SkillTree/Entities/RPGPlayer.cs` so the SaveData/LoadData pairing rule is satisfied.
+- FIX C1: Added `JsonSkillTree.Init();` and `JsonCharacterClass.Init();` to `AethonMod.Load()`. Without these, `GetJsonNodeList`/`GetJsonCharList` returned null and the `SkillTree()` ctor NPE'd on `NodeSaved.jsonList` the moment a player loaded (both RPGPlayer.LoadData and ShardPlayer.LoadData construct a SkillTree). Verified Init() is safe: it falls back to the hardcoded default lists (deserialize branch is gated by `if (false)`) and is fully try/catch wrapped. Default jsonList contains 159 nodes.
+- FIX C4: Rewrote `SkillTextures.GetTexture()` / `GetItemTexture()` in `Content/SkillTree/SkillTextures.cs` to return existing AethonMod asset paths (`AethonMod/Content/UI/Textures/Node_Small|Node_Notable|Node_Ascendancy`) instead of the non-existent `"AnotherRpgMod/Textures/..."` paths. Removed the now-broken casts to ClassNode/DamageNode/etc. Mapped NodeType -> texture (Class/LimitBreak->Ascendancy, Stats->Notable, default->Small). Verified NodeType enum has no Keystone member (removed that case to avoid CS0111).
+- FIX C5: Replaced the field initializer `ModContent.Request<Texture2D>("AnotherRpgMod/Textures/UI/Blank").Value` in `Content/SkillTree/UI/Shared.cs` (Connection + ItemConnection, lines 126 & 158) with `"AethonMod/Content/UI/Textures/Node_Small"`. These field initializers throw AssetLoadException at class instantiation time, so they would have crashed the UI the moment it built any connection.
+- FIX C3: Replaced `"AethonMod/Textures/UI/skill_blank"` (line 278 of `Content/SkillTree/UI/SkillTreeUi.cs`) with `"AethonMod/Content/UI/Textures/Node_Small"`.
+
+Stage Summary:
+- Root cause of the reported crash: RPGPlayer (a ModPlayer) overrode LoadData but not SaveData -> tModLoader validation throws at autoload. Fixed.
+- Proactively fixed the 4 follow-on crashes that would have fired immediately after (SkillTree NPE on null JsonNodeList + 3 missing-texture AssetLoadExceptions).
+- Verification: `grep -rn "AnotherRpgMod" Content/SkillTree --include="*.cs"` (excluding .bak) returns CLEAN. All 4 ModContent.Request texture paths now point to textures confirmed to exist under Content/UI/Textures/. RPGPlayer.cs has both SaveData and LoadData. AethonMod.Load() calls both Init methods. build.txt ignores *.bak (16 .bak files excluded from compilation).
+- Remaining known issues (non-blocking, mod will load + UI will render):
+  * C2 (architectural, split-brain): RPGPlayer is a STUB ModPlayer whose GetSkillPoints=>0 / GetLevel()=>1, while ClassNode writes to ShardPlayer. UI reads from the stub so node upgrading won't actually work until the stub is removed and the 8 call sites in SkillTreeUi.cs/SkillTree.cs/SkillInfo.cs are repointed to ShardPlayer. This does NOT crash loading.
+  * W1-W5 (warnings): MP sync no-op, SpentSkillPoints arg mismatch, ItemTreeUi.Instance never assigned, JsonCharacterClass fallback NPE if Init skipped. All non-fatal.
+- Recommended next step for a follow-up agent: tackle C2 (delete RPGPlayer stub, repoint call sites to ShardPlayer) and W3 (implement real skill-point spending). The mod should now at least LOAD and the skill tree UI should OPEN without crashing.
