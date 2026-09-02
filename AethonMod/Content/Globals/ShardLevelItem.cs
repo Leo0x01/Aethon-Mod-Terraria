@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using AethonMod.Content.Players;
-using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
@@ -14,10 +11,6 @@ namespace AethonMod.Content.Globals
     /// - El SolbrandEdge que el jugador elige sube de nivel con kills.
     /// - Las otras 2 armas (Lumina/Grimorio) NO suben hasta que sean elegidas.
     /// - Si el jugador consigue otra copia del mismo item, esa copia empieza en nivel 1.
-    ///
-    /// IMPORTANTE: GlobalItem NO tiene una propiedad 'Item' automática (a diferencia
-    /// de ModItem). Todos los metodos que necesitan acceder al item deben recibirlo
-    /// como parametro.
     /// </summary>
     public class ShardLevelItem : GlobalItem
     {
@@ -27,15 +20,27 @@ namespace AethonMod.Content.Globals
         public int Level = 1;
         /// <summary>XP acumulada hacia el próximo nivel.</summary>
         public int XP = 0;
-        // NOTA: FirstLevelUpTriggered vive en ShardPlayer (por-personaje, no por-item).
+
+        /// <summary>
+        /// Solo aplica a las 3 armas Aethon + el FragmentoGenesis.
+        /// DEFENSIVO: envuelto en try/catch porque se llama durante la carga del mod
+        /// y ModContent.ItemType puede fallar si los items aún no están registrados.
+        /// </summary>
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            // Solo aplica a las 3 armas Aethon + el FragmentoGenesis (para persistencia).
-            return item.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
-                   item.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
-                   item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
-                   item.type == ModContent.ItemType<Items.GenesisShard>();
+            try
+            {
+                return item.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
+                       item.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
+                       item.type == ModContent.ItemType<Weapons.GrimorioEternal>() ||
+                       item.type == ModContent.ItemType<Items.GenesisShard>();
+            }
+            catch
+            {
+                return false;
+            }
         }
+
         /// <summary>
         /// XP necesaria para subir al próximo nivel.
         /// Nivel 1→2: 1 XP (cualquier kill).
@@ -49,7 +54,6 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// Otorga XP a ESTE item específico. Si sube de nivel, dispara OnLevelUp.
-        /// Necesita el Item como parámetro porque GlobalItem no tiene propiedad Item.
         /// </summary>
         public void GrantXP(Item item, int amount)
         {
@@ -84,16 +88,18 @@ namespace AethonMod.Content.Globals
             }
 
             // === EVENTO GLOBAL: primera subida de nivel (solo una vez por PERSONAJE) ===
-            // El flag vive en ShardPlayer (no por-item), asi que aunque el jugador
-            // suba varias armas distintas, el evento solo dispara la primera vez.
             if (owner != null)
             {
-                var sp = owner.GetModPlayer<Players.ShardPlayer>();
-                if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == owner.whoAmI)
+                try
                 {
-                    sp.FirstLevelUpTriggered = true;
-                    LevelUpEventSystem.Trigger();
+                    var sp = owner.GetModPlayer<Players.ShardPlayer>();
+                    if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == owner.whoAmI)
+                    {
+                        sp.FirstLevelUpTriggered = true;
+                        LevelUpEventSystem.Trigger();
+                    }
                 }
+                catch { /* defensivo: nunca lanzar en OnLevelUp */ }
             }
 
             // Hito especial cada 50 niveles (infinito)
@@ -105,7 +111,7 @@ namespace AethonMod.Content.Globals
             }
         }
 
-        // === Persistencia: el nivel/XP se guarda en el TagCompound del item ===
+        // === Persistencia ===
 
         public override void SaveData(Item item, TagCompound tag)
         {
@@ -118,7 +124,6 @@ namespace AethonMod.Content.Globals
 
         public override void LoadData(Item item, TagCompound tag)
         {
-            // Defensivo: si el item no tiene datos guardados, queda en nivel 1.
             try
             {
                 Level = tag.GetInt("aethonLevel");
@@ -130,16 +135,6 @@ namespace AethonMod.Content.Globals
                 Level = 1;
                 XP = 0;
             }
-        }
-
-        /// <summary>
-        /// Los items Aethon pueden stackear? No, porque cada uno tiene su nivel.
-        /// Esto previene que Terraria combine dos SolbrandEdge con niveles distintos.
-        /// </summary>
-        public override bool CanStack(Item item1, Item item2)
-        {
-            // Nunca stackear armas Aethon (cada una tiene su propio nivel)
-            return false;
         }
     }
 }
