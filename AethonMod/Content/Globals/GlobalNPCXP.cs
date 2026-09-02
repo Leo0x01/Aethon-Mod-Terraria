@@ -1,12 +1,15 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Players;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
     /// <summary>
     /// GlobalNPC que otorga XP al fragmento del jugador cuando mata un NPC.
-    /// Tambien rastrea el tipo de dano para detectar la rama a imprimir.
+    /// Tambien aplica LIFESTEAL (curacion por daño causado) si el jugador
+    /// tiene un arma Aethon con nivel de fragmento >= 7.
     /// </summary>
     public class GlobalNPCXP : GlobalNPC
     {
@@ -17,7 +20,7 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitByItem(NPC npc, Player player, Item item, NPC.HitInfo hit, int damageDone)
         {
-            // Tracking de último golpe melee (para conteo de kills por rama).
+            ApplyAethonLifesteal(player, damageDone);
         }
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
@@ -27,8 +30,31 @@ namespace AethonMod.Content.Globals
             Player? player = Main.player[projectile.owner];
             if (player != null && player.active)
             {
-                // Tracking de último golpe por proyectil (para conteo de kills por rama).
+                ApplyAethonLifesteal(player, damageDone);
             }
+        }
+
+        /// <summary>
+        /// Aplica lifesteal al jugador si tiene un arma Aethon con nivel >= 7.
+        /// Funciona tanto para golpes melee como para proyectiles (flechas, bolts,
+        /// minions, blades autoguiadas).
+        /// </summary>
+        private void ApplyAethonLifesteal(Player player, int damageDone)
+        {
+            var sp = player.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted) return;
+            if (!WeaponScaling.HasLifesteal(sp.ShardLevel)) return;
+
+            // Solo aplicar si el jugador sostiene una de las 3 armas Aethon.
+            Item held = player.HeldItem;
+            if (held == null) return;
+            bool isAethonWeapon =
+                held.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
+                held.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
+                held.type == ModContent.ItemType<Weapons.GrimoireEternal>();
+            if (!isAethonWeapon) return;
+
+            WeaponScaling.ApplyLifesteal(player, damageDone, sp.ShardLevel);
         }
 
         public override void OnKill(NPC npc)

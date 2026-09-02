@@ -94,10 +94,16 @@ namespace AethonMod.Content.Weapons
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Distance) return;
 
-            // === OCULTAR LINEA VANILLA "Level: X" ===
+            // === OCULTAR LINEA VANILLA "Level: X" (por contenido de texto) ===
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
-                if (tooltips[i].Name == "Level") tooltips.RemoveAt(i);
+                string t = tooltips[i].Text ?? "";
+                bool isLevelLine =
+                    tooltips[i].Name == "Level" ||
+                    tooltips[i].Name == "ItemLevel" ||
+                    t.StartsWith("Level:") ||
+                    t.StartsWith("Level：");
+                if (isLevelLine) tooltips.RemoveAt(i);
             }
 
             int xpNeeded = sp.XPForNextLevel();
@@ -122,6 +128,21 @@ namespace AethonMod.Content.Weapons
 
             // Hito alcanzado (cada 5 niveles)
             int nextMilestone = ((sp.ShardLevel / 5) + 1) * 5;
+
+            // Lifesteal (desbloqueado a nivel 7)
+            if (WeaponScaling.HasLifesteal(sp.ShardLevel))
+            {
+                float lsPct = WeaponScaling.LifestealPercent(sp.ShardLevel) * 100f;
+                int nextLsLevel = ((sp.ShardLevel / 7) + 1) * 7;
+                tooltips.Add(new TooltipLine(Mod, "LifestealInfo",
+                    $"[c/FF5566:♥ Curación: +{lsPct:F1}% del daño causado (sube +0.1% cada 7 niveles, próximo nivel {nextLsLevel})]"));
+            }
+            else
+            {
+                tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
+                    $"[c/78788C:♥ Curación por ataque se desbloquea en nivel 7]"));
+            }
+
             if (sp.ShardLevel >= 5)
             {
                 tooltips.Add(new TooltipLine(Mod, "MilestoneHeader", "[c/78FF96:★ Hitos alcanzados:]"));

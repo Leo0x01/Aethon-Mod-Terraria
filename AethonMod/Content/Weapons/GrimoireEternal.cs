@@ -74,10 +74,11 @@ namespace AethonMod.Content.Weapons
             // Cada nivel: +0.2% critico magico
             player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(sp.ShardLevel);
 
-            // === BONUS POR MANA FALTANTE ===
+            // === BONUS POR MANA FALTANTE (aplica a magia Y summon) ===
             // A menos mana tengas, mas daño haces (tope +50%).
             float manaMult = WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
             damage *= manaMult;
+            player.GetDamage(DamageClass.Summon) *= manaMult; // TAMBIEN aplica a summon
         }
 
         /// <summary>
@@ -153,14 +154,19 @@ namespace AethonMod.Content.Weapons
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null) return;
 
-            // === OCULTAR LINEA VANILLA "Level: X" ===
-            // tModLoader agrega una linea "Level: N" azul que confunde con nuestro nivel de fragmento.
+            // === OCULTAR LINEA VANILLA "Level: X" (por contenido de texto) ===
+            // tModLoader agrega una linea "Level: N" azul que confunde con nuestro nivel.
+            // El Name del TooltipLine puede variar segun la version, asi que filtramos
+            // tanto por Name como por contenido de texto.
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
-                if (tooltips[i].Name == "Level")
-                {
-                    tooltips.RemoveAt(i);
-                }
+                string t = tooltips[i].Text ?? "";
+                bool isLevelLine =
+                    tooltips[i].Name == "Level" ||
+                    tooltips[i].Name == "ItemLevel" ||
+                    t.StartsWith("Level:") ||
+                    t.StartsWith("Level："); // variante unicode
+                if (isLevelLine) tooltips.RemoveAt(i);
             }
 
             // Línea de daño de invocacion (híbrido)
@@ -220,8 +226,23 @@ namespace AethonMod.Content.Weapons
 
             // Bonus por mana faltante (mecánica activa ahora)
             tooltips.Add(new TooltipLine(Mod, "LowManaBonus",
-                $"[c/FF5555:★ Bonus actual por mana faltante: +{lowManaBonus:F1}% daño] " +
+                $"[c/FF5555:★ Bonus actual por mana faltante: +{lowManaBonus:F1}% daño mágico Y de invocación] " +
                 $"[c/78788C:(tope +50% a mana vacío)]"));
+
+            // Lifesteal (desbloqueado a nivel 7)
+            if (WeaponScaling.HasLifesteal(sp.ShardLevel))
+            {
+                float lsPct = WeaponScaling.LifestealPercent(sp.ShardLevel) * 100f;
+                int nextLsLevel = ((sp.ShardLevel / 7) + 1) * 7;
+                tooltips.Add(new TooltipLine(Mod, "LifestealInfo",
+                    $"[c/FF5566:♥ Curación: +{lsPct:F1}% del daño causado (sube +0.1% cada 7 niveles, próximo nivel {nextLsLevel})]"));
+            }
+            else
+            {
+                int nextLsLevel = 7;
+                tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
+                    $"[c/78788C:♥ Curación por ataque se desbloquea en nivel 7]"));
+            }
 
             // Nota sobre stack con armadura
             if (bonusSlots > 0)

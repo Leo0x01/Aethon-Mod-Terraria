@@ -108,6 +108,45 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  LIFESTEAL — desbloqueado a nivel 7, +0.1% cada 7 niveles (INFINITO)
+        // ================================================================
+
+        /// <summary>
+        /// Porcentaje de lifesteal (curacion por daño causado).
+        /// - Nivel 1-6: 0% (sin lifesteal)
+        /// - Nivel 7-13: 0.1%
+        /// - Nivel 14-20: 0.2%
+        /// - Nivel 21-27: 0.3%
+        /// - ...infinito
+        /// Formula: (level / 7) * 0.001f
+        /// </summary>
+        public static float LifestealPercent(int level)
+        {
+            if (level < 7) return 0f;
+            int tiers = level / 7;
+            return tiers * 0.001f; // 0.1% por tier
+        }
+
+        /// <summary>
+        /// Devuelve true si el lifesteal ya esta desbloqueado (nivel >= 7).
+        /// </summary>
+        public static bool HasLifesteal(int level) => level >= 7;
+
+        /// <summary>
+        /// Cura al jugador segun el daño causado y el porcentaje de lifesteal.
+        /// </summary>
+        public static void ApplyLifesteal(Player player, int damageDone, int level)
+        {
+            float pct = LifestealPercent(level);
+            if (pct <= 0f || damageDone <= 0) return;
+            int heal = (int)System.Math.Max(1, damageDone * pct);
+            player.HealEffect(heal);
+            player.statLife += heal;
+            if (player.statLife > player.statLifeMax2)
+                player.statLife = player.statLifeMax2;
+        }
+
+        // ================================================================
         //  PROYECTILES EXTRA
         // ================================================================
 

@@ -113,10 +113,16 @@ namespace AethonMod.Content.Weapons
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
 
-            // === OCULTAR LINEA VANILLA "Level: X" ===
+            // === OCULTAR LINEA VANILLA "Level: X" (por contenido de texto) ===
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
-                if (tooltips[i].Name == "Level") tooltips.RemoveAt(i);
+                string t = tooltips[i].Text ?? "";
+                bool isLevelLine =
+                    tooltips[i].Name == "Level" ||
+                    tooltips[i].Name == "ItemLevel" ||
+                    t.StartsWith("Level:") ||
+                    t.StartsWith("Level：");
+                if (isLevelLine) tooltips.RemoveAt(i);
             }
 
             // Barra de XP
@@ -147,6 +153,20 @@ namespace AethonMod.Content.Weapons
             {
                 tooltips.Add(new TooltipLine(Mod, "BladeInfo",
                     $"[c/78FF96:★ Cada ataque lanza {bladeCount} espada" + (bladeCount == 1 ? "" : "s") + " autoguiada" + (bladeCount == 1 ? "" : "s") + " que persigue enemigos]"));
+            }
+
+            // Lifesteal (desbloqueado a nivel 7)
+            if (WeaponScaling.HasLifesteal(sp.ShardLevel))
+            {
+                float lsPct = WeaponScaling.LifestealPercent(sp.ShardLevel) * 100f;
+                int nextLsLevel = ((sp.ShardLevel / 7) + 1) * 7;
+                tooltips.Add(new TooltipLine(Mod, "LifestealInfo",
+                    $"[c/FF5566:♥ Curación: +{lsPct:F1}% del daño causado (sube +0.1% cada 7 niveles, próximo nivel {nextLsLevel})]"));
+            }
+            else
+            {
+                tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
+                    $"[c/78788C:♥ Curación por ataque se desbloquea en nivel 7]"));
             }
 
             // Proximo hito de blade (cada 10 niveles)
