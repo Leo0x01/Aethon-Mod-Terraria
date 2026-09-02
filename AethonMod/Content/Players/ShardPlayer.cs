@@ -28,6 +28,12 @@ namespace AethonMod.Content.Players
         public int ResonanceShards = 0;
 
         /// <summary>
+        /// Flag: evento global de PRIMERA subida de nivel (solo una vez por personaje,
+        /// NO por item). Es true si el jugador ya vio el evento cinematográfico.
+        /// </summary>
+        public bool FirstLevelUpTriggered = false;
+
+        /// <summary>
         /// Helper: devuelve el nivel del arma Aethon sostenida, o 0 si no hay ninguna.
         /// El nivel/XP vive por-item (ShardLevelItem), no en el jugador.
         /// </summary>
@@ -51,6 +57,7 @@ namespace AethonMod.Content.Players
             tag["meleeKills"] = MeleeKills;
             tag["magicKills"] = MagicKills;
             tag["resonanceShards"] = ResonanceShards;
+            tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
         }
 
         public override void LoadData(TagCompound tag)
@@ -64,6 +71,7 @@ namespace AethonMod.Content.Players
                 MeleeKills = tag.GetInt("meleeKills");
                 MagicKills = tag.GetInt("magicKills");
                 ResonanceShards = tag.GetInt("resonanceShards");
+                FirstLevelUpTriggered = tag.GetBool("firstLevelUpTriggered");
             }
             catch
             {

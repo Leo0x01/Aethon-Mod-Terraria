@@ -59,6 +59,8 @@ namespace AethonMod.Content.Systems
 
         public override void Load()
         {
+            // No crear texturas en servidor dedicado (GraphicsDevice es null).
+            if (Main.dedServ) return;
             _grainData = new Color[GrainSize * GrainSize];
             _grainTexture = new Texture2D(Main.graphics.GraphicsDevice, GrainSize, GrainSize);
         }

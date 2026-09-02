@@ -27,11 +27,7 @@ namespace AethonMod.Content.Globals
         public int Level = 1;
         /// <summary>XP acumulada hacia el próximo nivel.</summary>
         public int XP = 0;
-        /// <summary>
-        /// True si este item ya disparó su evento global de primera subida.
-        /// Cada item tiene su propio flag (no es global por personaje).
-        /// </summary>
-        public bool FirstLevelUpTriggered = false;
+        // NOTA: FirstLevelUpTriggered vive en ShardPlayer (por-personaje, no por-item).
 
         // Cache del tipo del item para evitar pasar Item a metodos que no lo reciben
         private int _itemType = -1;
@@ -98,11 +94,17 @@ namespace AethonMod.Content.Globals
                         100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
             }
 
-            // === EVENTO GLOBAL: primera subida de nivel (solo una vez por item) ===
-            if (!FirstLevelUpTriggered && Main.myPlayer == owner?.whoAmI)
+            // === EVENTO GLOBAL: primera subida de nivel (solo una vez por PERSONAJE) ===
+            // El flag vive en ShardPlayer (no por-item), asi que aunque el jugador
+            // suba varias armas distintas, el evento solo dispara la primera vez.
+            if (owner != null)
             {
-                FirstLevelUpTriggered = true;
-                LevelUpEventSystem.Trigger();
+                var sp = owner.GetModPlayer<Players.ShardPlayer>();
+                if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == owner.whoAmI)
+                {
+                    sp.FirstLevelUpTriggered = true;
+                    LevelUpEventSystem.Trigger();
+                }
             }
 
             // Hito especial cada 50 niveles (infinito)
@@ -118,11 +120,10 @@ namespace AethonMod.Content.Globals
 
         public override void SaveData(Item item, TagCompound tag)
         {
-            if (Level > 1 || XP > 0 || FirstLevelUpTriggered)
+            if (Level > 1 || XP > 0)
             {
                 tag["aethonLevel"] = Level;
                 tag["aethonXP"] = XP;
-                tag["aethonFirstLU"] = FirstLevelUpTriggered;
             }
         }
 
@@ -134,13 +135,11 @@ namespace AethonMod.Content.Globals
                 Level = tag.GetInt("aethonLevel");
                 if (Level < 1) Level = 1;
                 XP = tag.GetInt("aethonXP");
-                FirstLevelUpTriggered = tag.GetBool("aethonFirstLU");
             }
             catch
             {
                 Level = 1;
                 XP = 0;
-                FirstLevelUpTriggered = false;
             }
         }
 
