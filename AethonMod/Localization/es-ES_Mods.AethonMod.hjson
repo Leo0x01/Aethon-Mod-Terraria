@@ -2,19 +2,19 @@
         "Mods.AethonMod.DisplayName": "Aethon, la Luz Primordial",
 
         "Items.GenesisShard.DisplayName": "Fragmento Génesis",
-        "Items.GenesisShard.Tooltip": "Un mote de luz pura de una entidad cósmica antigua.\nCombate enemigos para imprprimir tu rama.",
+        "Items.GenesisShard.Tooltip": "Un mote de luz pura arrancado del corazón de Aethon,\nla Luz Primordial que existía antes de que las estrellas tuvieran nombre.\nEl Fragmento late con el eco de una guerra olvidada,\ny solo despierta cuando la sangre del portador toca el aire.\n\nCombate enemigos para que el Fragmento imprima tu rama.",
 
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
         "Items.ResonanceShard.Tooltip": "Fragmento de resonancia cósmica.\nSe obtiene de jefes cósmicos y se usa como moneda.",
 
         "Items.LuminaStarbow.DisplayName": "Lumina, la Arcoestelar",
-        "Items.LuminaStarbow.Tooltip": "Arco de la rama de Distancia.\nDispara flechas de luz estelar que buscan su marca.\nEl daño escala con el nivel del fragmento.",
+        "Items.LuminaStarbow.Tooltip": "Lumina fue tensada por primera vez sobre el abismo,\ny su cuerda está hecha del hilo de una constación moribunda.\nCada nivel atrae más luz estelar al arco,\ny cada cinco niveles una flecha fantasma se une a la andanada,\nrepitiendo el momento en que Aethon disparó contra el vacío.",
 
         "Items.SolbrandEdge.DisplayName": "Solbrand, Filo del Alba",
-        "Items.SolbrandEdge.Tooltip": "Hoja de la rama de Cuerpo a Cuerpo.\nUna espada de luz condensada que corta la realidad.\nEl daño escala con el nivel del fragmento.",
+        "Items.SolbrandEdge.Tooltip": "Solbrand fue forjada del primer amanecer,\ncuando Aethon partió la oscuridad primordial con un solo tajo.\nCada nivel graba en su filo el recuerdo de una batalla ancestral,\ny cada diez niveles el arma despierta una hoja fantasma\nque persigue a los enemigos como un eco de la voluntad de Aethon.",
 
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
-        "Items.GrimoireEternal.Tooltip": "Grimorio de la rama de Artes Mágicas.\nLanza bolts arcanos y puede invocar minions estelares.\nEl daño escala con el nivel del fragmento.\nA menor mana, mayor daño (tope +50%).",
+        "Items.GrimoireEternal.Tooltip": "El Grimorio del Eterno contiene las palabras que Aethon pronunció\nantes de que el tiempo comenzara a fluir.\nCada nivel invoca un fragmento de ese idioma olvidado.\n\nA menor mana, mayor daño (tope +50%) —\ncuanto más vacío está el portador, más fuerte resuena\nla voz de la Luz Primordial a través de él.",
 
         "Projectiles.StarlightArrow.DisplayName": "Flecha de Luz Estelar",
         "Projectiles.DawnSlash.DisplayName": "Espada del Alba",

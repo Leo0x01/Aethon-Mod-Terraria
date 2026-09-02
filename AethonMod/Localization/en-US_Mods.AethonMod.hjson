@@ -2,19 +2,19 @@
         "Mods.AethonMod.DisplayName": "Aethon, the Primordial Light",
 
         "Items.GenesisShard.DisplayName": "Genesis Shard",
-        "Items.GenesisShard.Tooltip": "A mote of pure light from an ancient cosmic entity.\nFight enemies to imprint your branch.",
+        "Items.GenesisShard.Tooltip": "A mote of pure light torn from the heart of Aethon,\nthe Primordial Light that existed before stars had names.\nThe Shard pulses with the echo of a forgotten war,\nand awakens only when its bearer's blood touches the air.\n\nFight enemies so the Shard may imprint your branch.",
 
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
         "Items.ResonanceShard.Tooltip": "Cosmic resonance shard.\nDropped by cosmic bosses and used as currency.",
 
         "Items.LuminaStarbow.DisplayName": "Lumina, the Starbowed",
-        "Items.LuminaStarbow.Tooltip": "Distance branch weapon.\nFires arrows of starlight that seek their mark.\nDamage scales with shard level.",
+        "Items.LuminaStarbow.Tooltip": "Lumina was first drawn over the abyss,\nand its string is woven from the thread of a dying constellation.\nEach level draws more starlight into the bow,\nand every five levels a phantom arrow joins the volley,\nrepeating the moment Aethon loosed an arrow into the void.",
 
         "Items.SolbrandEdge.DisplayName": "Solbrand, Edge of Dawn",
-        "Items.SolbrandEdge.Tooltip": "Melee branch weapon.\nA blade of condensed light that cuts reality.\nDamage scales with shard level.",
+        "Items.SolbrandEdge.Tooltip": "Solbrand was forged from the first dawn,\nwhen Aethon split the primordial darkness with a single slash.\nEach level etches the memory of an ancestral battle into its edge,\nand every ten levels the blade awakens a phantom copy\nthat hunts enemies like an echo of Aethon's will.",
 
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
-        "Items.GrimoireEternal.Tooltip": "Arcane Arts branch weapon.\nFires arcane bolts and can summon stellar minions.\nDamage scales with shard level.\nLower mana = higher damage (up to +50%).",
+        "Items.GrimoireEternal.Tooltip": "The Grimoire of the Eternal holds the words Aethon spoke\nbefore time began to flow.\nEach level calls back a fragment of that forgotten tongue.\n\nLower mana = higher damage (up to +50%) —\nthe emptier the bearer, the louder the voice\nof the Primordial Light rings through them.",
 
         "Projectiles.StarlightArrow.DisplayName": "Starlight Arrow",
         "Projectiles.DawnSlash.DisplayName": "Dawn Blade",

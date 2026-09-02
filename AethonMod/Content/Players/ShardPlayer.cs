@@ -24,6 +24,9 @@ namespace AethonMod.Content.Players
         // Moneda conservada (otorgada por NPCs). Sin UI de gasto por ahora.
         public int ResonanceShards = 0;
 
+        // Flag: evento global de PRIMERA subida de nivel (solo una vez por personaje)
+        public bool FirstLevelUpTriggered = false;
+
         public int XPForNextLevel() => (int)(80 * System.Math.Pow(ShardLevel, 1.5));
 
         public void GrantXP(int amount)
@@ -46,6 +49,15 @@ namespace AethonMod.Content.Players
                 Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
                     new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
                     100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
+
+            // === EVENTO GLOBAL: primera subida de nivel (solo una vez por personaje) ===
+            // Dispara temblor + overlay borroso/granulado + texto de lore + time-skip de 1 dia.
+            if (!FirstLevelUpTriggered && Main.myPlayer == Player.whoAmI)
+            {
+                FirstLevelUpTriggered = true;
+                LevelUpEventSystem.Trigger();
+            }
+
             // Hito especial cada 50 niveles (infinito)
             if (ShardLevel % 50 == 0)
             {
@@ -64,6 +76,7 @@ namespace AethonMod.Content.Players
             tag["meleeKills"] = MeleeKills;
             tag["magicKills"] = MagicKills;
             tag["resonanceShards"] = ResonanceShards;
+            tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
         }
 
         public override void LoadData(TagCompound tag)
@@ -82,6 +95,7 @@ namespace AethonMod.Content.Players
                 MeleeKills = tag.GetInt("meleeKills");
                 MagicKills = tag.GetInt("magicKills");
                 ResonanceShards = tag.GetInt("resonanceShards");
+                FirstLevelUpTriggered = tag.GetBool("firstLevelUpTriggered");
             }
             catch
             {
