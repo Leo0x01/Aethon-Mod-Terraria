@@ -1,0 +1,246 @@
+/home/z/my-project/AethonMod/Content/Players/UIScrollBlockPlayer.cs:13:            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+/home/z/my-project/AethonMod/Content/Players/UIScrollBlockPlayer.cs:32:            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:25:        // --- Campos necesarios para el SkillTree de AnRPG ---
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:26:        public Content.SkillTree.RPGModule.SkillTree GetskillTree;
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:29:        public void ResetSkillTree()
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:31:            if (GetskillTree != null)
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:33:                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:34:                GetskillTree.Init();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:86:        public int SpentSkillPoints() { return 0; }
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:87:        public int AvailableSkillPoints() => CumulativeSkillPoints() - SpentSkillPoints();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:122:            // loses access to their character. Every read is guarded; the SkillTree
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:145:                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:149:                GetskillTree = null;
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:156:            if (GetskillTree != null)
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:158:                try { GetskillTree.Init(); }
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:172:            // Los efectos del skill tree se aplican via GetskillTree (AnRPG pattern)
+/home/z/my-project/AethonMod/Content/AethonConfig.cs:17:        public Keys SkillTreeKey = Keys.K;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:19:        public UserInterface customSkillTree;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:20:        public Content.SkillTree.UI.SkillTreeUi SkillTreeUI;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:29:            customSkillTree = new UserInterface();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:30:            SkillTreeUI = new Content.SkillTree.UI.SkillTreeUi();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:31:            SkillTreeUI.Activate();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:32:            customSkillTree.SetState(SkillTreeUI);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:40:            SkillTreeUI = null; CodexUI = null; BranchChoiceUI = null; customSkillTree = null;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:48:            // Toggle K (igual que AnRPG: JustPressed -> visible = !visible -> LoadSkillTree)
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:49:            if (Main.keyState.IsKeyDown(config.SkillTreeKey) && !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:52:                if (sp != null && sp.IsImprinted && !anyOtherOpen(SkillTreeUI))
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:54:                    Content.SkillTree.UI.SkillTreeUi.visible = !Content.SkillTree.UI.SkillTreeUi.visible;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:55:                    if (Content.SkillTree.UI.SkillTreeUi.visible) Content.SkillTree.UI.SkillTreeUi.Instance.LoadSkillTree();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:77:            if (except != SkillTreeUI && Content.SkillTree.UI.SkillTreeUi.visible) return true;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:95:                        if (SkillTreeUI != null && Content.SkillTree.UI.SkillTreeUi.visible)
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:97:                            customSkillTree.Update(Main._drawInterfaceGameTime);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:98:                            SkillTreeUI.Draw(Main.spriteBatch);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:101:                    catch (System.Exception ex) { ModContent.GetInstance<AethonMod>()?.Logger?.Error("SkillTree error", ex); }
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Stat.cs:2:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Perk.cs:3:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/ClassType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/DamageType.cs:1:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/LeechType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Immunity.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Reason.cs:2:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/NodeType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:3:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:5:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:7:    public class RPGPlayer : ModPlayer
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:9:        public static RPGPlayer Instance;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:11:        private global::AethonMod.Content.SkillTree.RPGModule.SkillTree skilltree;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:13:        public global::AethonMod.Content.SkillTree.RPGModule.SkillTree GetskillTree
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:21:        public void ResetSkillTree()
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:23:            skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:29:        public void SpentSkillPoints(int cost) { }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:30:        public int GetStat(Stat stat) { return 0; }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:35:            // player save as "UnknownError" / corrupt. The SkillTree constructor and
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:39:                skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:1:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:5:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:31:        public int GetStat(Stat a)
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/StatData.cs:2:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/StatData.cs:4:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:13:namespace AethonMod.Content.SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:289:    public class JsonSkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Enum/NodeCategory.cs:7:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Enum/ItemReason.cs:7:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs:1:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:11:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:159:    public class ItemSkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:202:        public static string ConvertToString(ItemSkillTree skilltree)
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:227:        public static ItemSkillTree ConvertToTree(string save, ItemUpdate source,int evoPoint,int AscPoint)
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:231:            ItemSkillTree tree = new ItemSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:248:                    AethonMod.Content.SkillTree.Instance.Logger.Error(source.ItemName);
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:249:                    AethonMod.Content.SkillTree.Instance.Logger.Error("Item tree corrupted, reseting tree");
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:250:                    AethonMod.Content.SkillTree.Instance.Logger.Error(nodeSave);
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:251:                    tree = new ItemSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:306:        public ItemSkillTree()
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemSkillTree.cs.bak:539:            AethonMod.Content.SkillTree.Instance.Logger.Info(m_nodeList.Count);
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNodeAtlas.cs.bak:6:using AethonMod.Content.SkillTree.Items;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNodeAtlas.cs.bak:8:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:5:using AethonMod.Content.SkillTree.Entities;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:8:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:18:        protected ItemSkillTree m_SkillTreeParent;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:26:        public ItemSkillTree GetParent { get { return m_SkillTreeParent; } }
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:103:                m_SkillTreeParent.GetNode(Node).AddNeightboor(m_ID);
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:130:                    m_SkillTreeParent.GetNode(ID).UnlockStep(step);
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:182:        virtual public void Init(ItemSkillTree IST,int ID, int maxlevel,int required,Vector2 pos)
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:185:            m_SkillTreeParent = IST;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs.bak:197:            m_SkillTreeParent = new ItemSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Armor/AdditionalDefenceNode.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Armor/AdditionalDefenceNode.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Armor/AscendedAdditionalDefence.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Armor/AscendedAdditionalDefence.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Melee/LifeLeech.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Melee/LifeLeech.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AscendedAdditionalDamageNode.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AscendedAdditionalDamageNode.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/SuperAdditionalDamageNode.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/SuperAdditionalDamageNode.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AscendedAdditionalDamageNodePercent.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AscendedAdditionalDamageNodePercent.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/UseTime.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/UseTime.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AdditionalDamageNodePercent.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AdditionalDamageNodePercent.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AdditionalDamageNode.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Common/AdditionalDamageNode.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Ranged/AdditionalProjectile.cs.bak:6:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Ranged/AdditionalProjectile.cs.bak:10:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Magic/MagicCostReduction.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Weapon/Magic/MagicCostReduction.cs.bak:10:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Common/BonusExpNode.cs.bak:7:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Nodes/Common/BonusExpNode.cs.bak:9:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemUpdate.cs:4:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Struct/ItemStats.cs:3:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Struct/ItemStats.cs:5:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:2:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:3:using AethonMod.Content.SkillTree.Items;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:5:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:7:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:8:using AethonMod.Content.SkillTree.Items;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:10:namespace AethonMod.Content.SkillTree.UI
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:19:            Width.Set(_texture.Width * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:20:            Height.Set(_texture.Height * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:27:            spriteBatch.Draw(_texture, dimensions.Position(), null, color, 0f, Vector2.Zero, SkillTreeUi.Instance.sizeMultplier, SpriteEffects.None, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:39:            Width.Set(_texture.Width * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:40:            Height.Set(_texture.Height * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:108:            Width.Set(_texture.Width * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:109:            Height.Set(_texture.Height * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:116:            spriteBatch.Draw(_texture, dimensions.Position(), null, color, 0f, Vector2.Zero, SkillTreeUi.Instance.sizeMultplier, SpriteEffects.None, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:166:            Width.Set(distance * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:167:            Height.Set(height * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:11:using AethonMod.Content.SkillTree.Entities;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:15:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:16:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:21:namespace AethonMod.Content.SkillTree.UI
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:23:    public class SkillTreeUi : UIState
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:54:        public static SkillTreeUi Instance;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:58:        private global::AethonMod.Content.SkillTree.RPGModule.SkillTree skillTree;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:65:        public void LoadSkillTree()
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:67:            skillTree = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>().GetskillTree;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:138:            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:139:            rPGPlayer.ResetSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:140:            rPGPlayer.GetskillTree.Init();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:142:            LoadSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:174:            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:234:            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:245:            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:440:                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:531:            RPGPlayer rPGPlayer = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:535:                    rPGPlayer.SpentSkillPoints(0);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/SkillTreeUi.cs:564:                JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(CT);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:10:using AethonMod.Content.SkillTree.Entities;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:14:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:17:namespace AethonMod.Content.SkillTree.UI
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:98:            SkillTreeUi.visible = !SkillTreeUi.visible;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:99:            if (SkillTreeUi.visible)
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:100:                SkillTreeUi.Instance.LoadSkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:190:        private RPGPlayer Char;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:195:            Char = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:419:                    UpgradeStatOver[7].SetText("+ " + (RPGPlayer.SECONDARYTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:433:                    UpgradeStatOver[3].SetText("+ " +(RPGPlayer.MAINSTATSMULT * Char.statMultiplier)+ " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:435:                    UpgradeStatOver[5].SetText("+ " + (RPGPlayer.SECONDARYTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:440:                    UpgradeStatOver[4].SetText("+ " + (RPGPlayer.MAINSTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:442:                    UpgradeStatOver[3].SetText("+ " + (RPGPlayer.SECONDARYTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:447:                    UpgradeStatOver[5].SetText("+ " + (RPGPlayer.MAINSTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:449:                    UpgradeStatOver[4].SetText("+ " + (RPGPlayer.SECONDARYTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:454:                    UpgradeStatOver[6].SetText("+ " + (RPGPlayer.MAINSTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:461:                    UpgradeStatOver[7].SetText("+ " + (RPGPlayer.MAINSTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:463:                    UpgradeStatOver[6].SetText("+ " + (RPGPlayer.SECONDARYTATSMULT * Char.statMultiplier) + " Multiplier");
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Stats.cs.bak:644:            RPGPlayer player = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/UI/ItemTreeUiStub.cs:1:namespace AethonMod.Content.SkillTree.UI
+/home/z/my-project/AethonMod/Content/SkillTree/Node.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Node.cs:8:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/Mathf.cs:3:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/Mathf.cs:17:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/SkillInfo.cs:2:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/SkillInfo.cs:4:using AethonMod.Content.SkillTree.Entities;
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/SkillInfo.cs:6:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/SkillInfo.cs:78:            JsonChrClass ClassInfo = JsonCharacterClass.GetJsonCharList.GetClass(classType);
+/home/z/my-project/AethonMod/Content/SkillTree/Utils/SkillInfo.cs:177:                int intelect = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>().GetStat(Stat.Int);
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:18:using AethonMod.Content.SkillTree.UI;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:22:namespace AethonMod.Content.SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:85:            AethonMod.Content.SkillTree.AnRPGAnRPGConfig.vConfig = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:91:                AethonMod.Content.SkillTree.AnRPGAnRPGConfig.vConfig = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:119:        public bool RPGPlayer;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:180:        [Label("Use Custom SkillTree")]
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:181:        [Tooltip("When true, it'll use the JsonSkillTree in \"Documents\\My Games\\Terraria\\ModLoader\\Mod Configs\\AnRPG\" ")]
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:183:        public bool UseCustomSkillTree;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:187:            AethonMod.Content.SkillTree.AnRPGAnRPGConfig.gpConfig = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:191:            AethonMod.Content.SkillTree.AnRPGAnRPGConfig.gpConfig = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:309:            AethonMod.Content.SkillTree.AnRPGAnRPGConfig.NPCConfig2 = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:313:            AethonMod.Content.SkillTree.AnRPGAnRPGConfig.NPCConfig2 = this;
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:315:            JsonSkillTree.Load();
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:316:            JsonCharacterClass.Load();
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:325:            get { return AethonMod.Content.SkillTree.AnRPGAnRPGConfig.vConfig; }
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:329:            get { return AethonMod.Content.SkillTree.AnRPGAnRPGConfig.gpConfig; }
+/home/z/my-project/AethonMod/Content/SkillTree/ConfigFile.cs.bak:333:            get { return AethonMod.Content.SkillTree.AnRPGAnRPGConfig.NPCConfig2; }
+/home/z/my-project/AethonMod/Content/SkillTree/NodeParent.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/NodeParent.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Config.cs:1:namespace AethonMod.Content.SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/Config.cs:10:        public class GamePlayConfig { public bool RPGPlayer = true; public bool UseCustomSkillTree = false; public bool ItemTree = false; }
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/PerkNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/PerkNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ImmunityNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ImmunityNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/StatNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/StatNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/DamageNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/DamageNode.cs:6:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/LimitBreakNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/LimitBreakNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/SpeedNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/SpeedNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:6:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:8:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:38:            if (p == null || p.GetskillTree == null) { enable = false; return; }
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:39:            if (p.GetskillTree.ActiveClass == this)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:40:                p.GetskillTree.ActiveClass = null;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:49:            if (sp == null || sp.GetskillTree == null) { enable = false; return; }
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:50:            if (sp.GetskillTree.ActiveClass == this)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:51:                sp.GetskillTree.ActiveClass = null;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:57:            // Defensive: never NPE on the gameplay path. If GetskillTree isn't ready, bail.
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:61:            if (sp == null || sp.GetskillTree == null || sp.GetskillTree.nodeList == null)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:66:            if (sp.GetskillTree.ActiveClass != null)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:67:                Active = sp.GetskillTree.ActiveClass.GetClassType;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:68:            for (int i = 0; i < sp.GetskillTree.nodeList.nodeList.Count; i++)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:70:                _node = sp.GetskillTree.nodeList.nodeList[i];
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:90:            if (player == null || player.GetskillTree == null)
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:94:                player.GetskillTree.ActiveClass = this;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/ClassNode.cs:97:                player.GetskillTree.ActiveClass = null;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/LeechNode.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Nodes/LeechNode.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/NodeList.cs:5:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/NodeList.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:5:using AethonMod.Content.SkillTree.Entities;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:9:    public class SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:70:            var charList = JsonCharacterClass.GetJsonCharList;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:83:            RPGPlayer pEntity = Main.player[Main.myPlayer].GetModPlayer<RPGPlayer>();
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:88:            var charList = JsonCharacterClass.GetJsonCharList;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:193:        public SkillTree()
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:198:            // (ShardPlayer.LoadData + RPGPlayer.LoadData). If it throws, tModLoader
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTree.cs:203:            JsonNodeList NodeSaved = JsonSkillTree.GetJsonNodeList;
+/home/z/my-project/AethonMod/Content/SkillTree/JsonCharacterClass.cs:1:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/JsonCharacterClass.cs:13:namespace AethonMod.Content.SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/JsonCharacterClass.cs:438:    public class JsonCharacterClass

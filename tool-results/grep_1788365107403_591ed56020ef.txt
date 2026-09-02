@@ -1,0 +1,252 @@
+/home/z/my-project/AethonMod/Content/Players/UIScrollBlockPlayer.cs:13:            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+/home/z/my-project/AethonMod/Content/Players/UIScrollBlockPlayer.cs:32:            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:22:        public int[] SkillNodeLevels;
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:25:        // --- Campos necesarios para el SkillTree de AnRPG ---
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:26:        public Content.SkillTree.RPGModule.SkillTree GetskillTree;
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:29:        public void ResetSkillTree()
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:31:            if (GetskillTree != null)
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:33:                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:34:                GetskillTree.Init();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:86:        public int SpentSkillPoints() { return 0; }
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:87:        public int AvailableSkillPoints() => CumulativeSkillPoints() - SpentSkillPoints();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:122:            // loses access to their character. Every read is guarded; the SkillTree
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:145:                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:149:                GetskillTree = null;
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:156:            if (GetskillTree != null)
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:158:                try { GetskillTree.Init(); }
+/home/z/my-project/AethonMod/Content/Players/ShardPlayer.cs:172:            // Los efectos del skill tree se aplican via GetskillTree (AnRPG pattern)
+/home/z/my-project/AethonMod/Content/AethonConfig.cs:17:        public Keys SkillTreeKey = Keys.K;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:19:        public UserInterface customSkillTree;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:20:        public Content.SkillTree.UI.SkillTreeUi SkillTreeUI;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:29:            customSkillTree = new UserInterface();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:30:            SkillTreeUI = new Content.SkillTree.UI.SkillTreeUi();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:31:            SkillTreeUI.Activate();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:32:            customSkillTree.SetState(SkillTreeUI);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:40:            SkillTreeUI = null; CodexUI = null; BranchChoiceUI = null; customSkillTree = null;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:48:            // Toggle K (igual que AnRPG: JustPressed -> visible = !visible -> LoadSkillTree)
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:49:            if (Main.keyState.IsKeyDown(config.SkillTreeKey) && !Main.oldKeyState.IsKeyDown(config.SkillTreeKey))
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:52:                if (sp != null && sp.IsImprinted && !anyOtherOpen(SkillTreeUI))
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:54:                    Content.SkillTree.UI.SkillTreeUi.visible = !Content.SkillTree.UI.SkillTreeUi.visible;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:55:                    if (Content.SkillTree.UI.SkillTreeUi.visible) Content.SkillTree.UI.SkillTreeUi.Instance.LoadSkillTree();
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:77:            if (except != SkillTreeUI && Content.SkillTree.UI.SkillTreeUi.visible) return true;
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:95:                        if (SkillTreeUI != null && Content.SkillTree.UI.SkillTreeUi.visible)
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:97:                            customSkillTree.Update(Main._drawInterfaceGameTime);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:98:                            SkillTreeUI.Draw(Main.spriteBatch);
+/home/z/my-project/AethonMod/Content/Systems/UISystem.cs:101:                    catch (System.Exception ex) { ModContent.GetInstance<AethonMod>()?.Logger?.Error("SkillTree error", ex); }
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Stat.cs:2:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Perk.cs:3:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/ClassType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/DamageType.cs:1:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/LeechType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Immunity.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/Reason.cs:2:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Enum/NodeType.cs:7:namespace AethonMod.Content.SkillTree.RPGModule
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:3:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:5:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:7:    public class RPGPlayer : ModPlayer
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:9:        public static RPGPlayer Instance;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:11:        private global::AethonMod.Content.SkillTree.RPGModule.SkillTree skilltree;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:13:        public global::AethonMod.Content.SkillTree.RPGModule.SkillTree GetskillTree
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:21:        public void ResetSkillTree()
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:23:            skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:27:        public bool HaveBow() { return false; }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:28:        public bool HaveRangedWeapon() { return false; }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:29:        public void SpentSkillPoints(int cost) { }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:30:        public int GetStat(Stat stat) { return 0; }
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:35:            // player save as "UnknownError" / corrupt. The SkillTree constructor and
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGPlayer.cs:39:                skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:1:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:5:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/RPGStats.cs:31:        public int GetStat(Stat a)
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/StatData.cs:2:using AethonMod.Content.SkillTree.Utils;
+/home/z/my-project/AethonMod/Content/SkillTree/Entities/StatData.cs:4:namespace AethonMod.Content.SkillTree.Entities
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:13:namespace AethonMod.Content.SkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:25:     public class JsonNodeList
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:27:        public JsonNode[] jsonList = {
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:29:            new JsonNode("Class",0,0,true,new int[6]{ 1,2,3,4,5,6},"Tourist",false,0,0,1,0), //0
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:30:            new JsonNode("Class",0,250,false,new int[1]{0},"Apprentice",false,0.1f,10,1,1), //1
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:32:            new JsonNode("Damage",-100,75,false,new int[4]{0,3,7,8},"Melee",false,0.01f,1,20,1), //2
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:33:            new JsonNode("Damage",100,75,false,new int[5]{ 0, 2,4,9,10},"Magic",false,0.01f,1,20,1), //3
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:34:            new JsonNode("Damage",100,-50,false,new int[4]{ 0, 3,5,11},"Summon",false,0.01f,1,20,1), //4
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:35:            new JsonNode("Damage",0,-111,false,new int[5]{ 0, 5,6,12,13},"Ranged",false,0.01f,1,20,1), //5
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:36:            new JsonNode("Damage",-100,-50,false,new int[4]{0,5,2,14},"Throw",false,0.01f,1,20,1), //6
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:38:            new JsonNode("Class",-200,200,false,new int[2]{2,8},"Cavalier",false,0.03f,10,1,1), //7
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:39:            new JsonNode("Class",-300,100,false,new int[2]{2,7},"SwordMan",false,0.03f,10,1,1), //8
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:40:            new JsonNode("Class",300,100,false,new int[2]{3,10},"Mage",false,0.03f,10,1,1), //9
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:41:            new JsonNode("Class",200,300,false,new int[3]{3,9,1},"Acolyte",false,0.03f,10,1,1), //10
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:42:            new JsonNode("Class",200,-200,false,new int[1]{4},"Spiritualist",false,0.03f,10,1,1), //11
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:43:            new JsonNode("Class",-75,-250,false,new int[2]{5,13},"Archer",false,0.03f,10,1,1), //12
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:44:            new JsonNode("Class",75,-250,false,new int[2]{5,12},"Gunner",false,0.03f,10,1,1), //13
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:45:            new JsonNode("Class",-200,-150,false,new int[1]{6},"Ninja",false,0.03f,10,1,1), //14
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:47:            new JsonNode("Leech",0,350,false,new int[2]{1,22},"Life",false,0.001f,25,5,5), //15
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:49:            new JsonNode("Class",0,450,false,new int[1]{15},"Regular",false,0.1f,50,1,1), //16
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:51:            new JsonNode("Stats",-300,300,false,new int[2]{7,8},"Str",false,2,20,15,2), //17
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:52:            new JsonNode("Stats",350,250,false,new int[2]{9,10},"Int",false,2,25,15,2), //18
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:53:            new JsonNode("Stats",300,-50,false,new int[2]{9,11},"Spr",false,2,25,15,2), //19
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:54:            new JsonNode("Stats",0,-325,false,new int[2]{12,13},"Agi",false,2,25,15,2), //20
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:55:            new JsonNode("Stats",-200,-250,false,new int[2]{12,14},"Dex",false,2,25,15,2), //21
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:57:            new JsonNode("Class",-200,400,false,new int[2]{7,17},"Knight",false,0.05f,50,1,5), //22
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:58:            new JsonNode("Class",-400,200,false,new int[2]{8,17},"Mercenary",false,0.05f,50,1,5), //23
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:59:            new JsonNode("Class",400,100,false,new int[2]{9,18},"ArchMage",false,0.05f,50,1,5), //24
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:60:            new JsonNode("Class",200,400,false,new int[2]{10,18},"Monk",false,0.05f,50,1,5), //25
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:61:            new JsonNode("Class",400,-200,false,new int[2]{11,19},"Invoker",false,0.05f,50,1,5), //26
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:62:            new JsonNode("Class",-75,-400,false,new int[2]{12,20},"Hunter",false,0.05f,50,1,5), //27
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:63:            new JsonNode("Class",75,-400,false,new int[2]{13,20},"Gunslinger",false,0.05f,50,1,5), //28
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:64:            new JsonNode("Class",-325,-250,false,new int[2]{14,21},"Shinobi",false,0.05f,50,1,5), //29
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:66:            new JsonNode("Damage",400,400,false,new int[2]{24,25},"Magic",false,0.02f,75,50,4), //30
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:67:            new JsonNode("Damage",450,-50,false,new int[2]{24,26},"Summon",false,0.02f,75,50,4), //31
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:68:            new JsonNode("Damage",0,-475,false,new int[2]{27,28},"Ranged",false,0.02f,75,50,4), //32
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:69:            new JsonNode("Damage",-500,-400,false,new int[2]{27,29},"Throw",false,0.02f,75,50,4), //33
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:70:            new JsonNode("Damage",-400,400,false,new int[2]{22,23},"Melee",false,0.06f,75,80,10),//34
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:71:            new JsonNode("Leech",0,550,false,new int[1]{16},"Both",false,0.001f,100,10,10), //35
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:73:            new JsonNode("Stats",550,550,false,new int[1]{30},"Int",false,10,90,10,5), //36
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:74:            new JsonNode("Stats",600,-50,false,new int[1]{31},"Spr",false,10,90,10,5), //37
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:75:            new JsonNode("Stats",100,-575,false,new int[1]{32},"Agi",false,10,90,10,5), //38
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:76:            new JsonNode("Stats",-625,-400,false,new int[1]{33},"Dex",false,10,90,10,5), //39
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:77:            new JsonNode("Stats",-550,550,false,new int[1]{34},"Str",false,10,90,10,5), //40
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:81:            new JsonNode("Class",0,650,false,new int[1]{35},"Expert",false,0.1f,100,1,3), //41
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:83:            new JsonNode("Stats",-200,750,false,new int[1]{41},"Int",false,50,150,1,10), //42
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:84:            new JsonNode("Stats",-100,750,false,new int[1]{41},"Spr",false,50,150,1,10), //43
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:85:            new JsonNode("Stats",0,750,false,new int[1]{41},"Agi",false,50,150,1,10), //44
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:86:            new JsonNode("Stats",100,750,false,new int[1]{41},"Dex",false,50,150,1,10), //45
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:87:            new JsonNode("Stats",200,750,false,new int[1]{41},"Str",false,50,150,1,10), //46
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:89:            new JsonNode("Class",0,850,false,new int[5]{42,43,44,45,46},"Master",false,0.1f,150,1,3), //47
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:91:            new JsonNode("Damage",-200,950,false,new int[1]{47},"Magic",false,0.2f,200,1,20), //48
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:92:            new JsonNode("Damage",-100,950,false,new int[1]{47},"Summon",false,0.2f,200,1,20), //49
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:93:            new JsonNode("Damage",0,950,false,new int[1]{47},"Ranged",false,0.2f,200,1,20), //50
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:94:            new JsonNode("Damage",100,950,false,new int[1]{47},"Throw",false,0.2f,200,1,20), //51
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:95:            new JsonNode("Damage",200,950,false,new int[1]{47},"Melee",false,0.2f,200,1,20),//52
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:97:            new JsonNode("Stats",-200,1050,false,new int[1]{48},"Int",false,200,225,1,20), //53
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:98:            new JsonNode("Stats",-100,1050,false,new int[1]{49},"Spr",false,200,225,1,20), //54
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:99:            new JsonNode("Stats",0,1050,false,new int[1]{50},"Agi",false,200,225,1,20), //55
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:100:            new JsonNode("Stats",100,1050,false,new int[1]{51},"Dex",false,200,225,1,20), //56
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:101:            new JsonNode("Stats",200,1050,false,new int[1]{52},"Str",false,200,225,1,20), //57
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:103:            new JsonNode("Class",0,1200,false,new int[5]{53,54,55,56,57},"PerfectBeing",false,0.1f,250,1,5), //58
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:105:            new JsonNode("LimitBreak",0,1300,false,new int[1]{58},"ASCEND",false,1000,1000,1,900), //59
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:107:            new JsonNode("Class",0,1400,false,new int[1]{59},"Ascended",false,0.1f,1001,1,1,true), //60
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:109:            new JsonNode("Perk",-200,550,false,new int[1]{22},"Survivalist",false,0.1f,75,5,10), //61
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:112:            new JsonNode("Class",-550,700,false,new int[1]{40},"IronKnight",false,0.05f,100,1,10), //62
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:113:            new JsonNode("Class",-700,550,false,new int[1]{40},"SwordMaster",false,0.05f,100,1,10), //63
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:114:            new JsonNode("Class",700,550,false,new int[1]{36},"Arcanist",false,0.05f,100,1,10), //64
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:115:            new JsonNode("Class",550,700,false,new int[1]{36},"Templar",false,0.05f,100,1,10), //65
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:116:            new JsonNode("Class",700,-50,false,new int[1]{37},"Summoner",false,0.05f,100,1,10), //66
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:117:            new JsonNode("Class",250,-575,false,new int[1]{38},"Ranger",false,0.05f,100,1,10), //67
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:118:            new JsonNode("Class",100,-725,false,new int[1]{38},"Spitfire",false,0.05f,100,1,10), //68
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:119:            new JsonNode("Class",-625,-550,false,new int[1]{39},"Rogue",false,0.05f,100,1,10), //69
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:121:            new JsonNode("Stats",-450,700,false,new int[1]{62},"Vit",false,10,100,10,10), //70
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:122:            new JsonNode("Stats",450,700,false,new int[1]{65},"Vit",false,10,100,10,10), //71
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:124:            new JsonNode("Perk",200,550,false,new int[1]{25},"DemonEater",false,0.1f,75,4,10), //72
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:126:            new JsonNode("Stats",-550,800,false,new int[1]{62},"Cons",false,10,100,10,10), //73
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:127:            new JsonNode("Stats",550,800,false,new int[1]{65},"Cons",false,10,100,10,10), //74
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:128:            new JsonNode("Stats",-700,450,false,new int[1]{63},"Dex",false,10,100,10,10), //75
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:129:            new JsonNode("Stats",-800,550,false,new int[1]{63},"Agi",false,10,100,10,10), //76
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:131:            new JsonNode("Stats",-650,800,false,new int[1]{73},"Str",false,15,120,4,10), //77
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:132:            new JsonNode("Stats",-900,550,false,new int[1]{76},"Str",false,15,120,4,10), //78
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:134:            new JsonNode("Class",-750,800,false,new int[1]{77},"Montain",false,0.05f,150,1,20), //79
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:136:            new JsonNode("Stats",-750,900,false,new int[1]{79},"Vit",false,30,150,3,20), //80
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:137:            new JsonNode("Damage",-750,1000,false,new int[1]{80},"Melee",false,0.1f,170,3,10),//81
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:138:            new JsonNode("Stats",-650,1000,false,new int[1]{81},"Str",false,25,190,5,15), //82
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:139:            new JsonNode("Stats",-650,1100,false,new int[1]{82},"Cons",false,10,220,8,5), //83
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:141:            new JsonNode("Class",-750,1100,false,new int[1]{83},"Fortress",false,0.05f,250,1,50), //84
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:143:            new JsonNode("Leech",-1000,500,false,new int[1]{78},"Life",false,0.002f,100,3,10), //85
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:144:            new JsonNode("Stats",-1000,600,false,new int[1]{78},"Str",false,10,120,5,5), //86
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:146:            new JsonNode("Class",-1100,550,false,new int[2]{85,86},"Champion",false,0.05f,150,1,20), //87
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:148:            new JsonNode("Leech",-1200,650,false,new int[1]{87},"Life",false,0.002f,160,5,20), //88
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:149:            new JsonNode("Stats",-1100,750,false,new int[1]{88},"Str",false,25,190,4,15), //89
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:150:            new JsonNode("Stats",-1200,850,false,new int[1]{89},"Agi",false,10,220,5,10), //90
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:153:            new JsonNode("Class",-1100,950,false,new int[1]{90},"SwordSaint",false,0.05f,250,1,50), //91
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:155:            new JsonNode("Stats",650,900,false,new int[1]{74},"Foc",false,10,120,10,10), //92
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:156:            new JsonNode("Stats",550,1000,false,new int[1]{92},"Int",false,10,120,10,10), //93
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:157:            new JsonNode("Class",650,1100,false,new int[1]{93},"Paladin",false,0.05f,150,1,20), //94
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:159:            new JsonNode("Damage",750,1150,false,new int[1]{94},"Melee",false,0.1f,160,8,10), //95
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:160:            new JsonNode("Damage",700,1250,false,new int[1]{95},"Magic",false,0.2f,190,4,20), //96
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:161:            new JsonNode("Stats",650,1350,false,new int[1]{96},"Cons",false,30,220,5,16), //97
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:162:            new JsonNode("Stats",750,1350,false,new int[1]{96},"Vit",false,15,220,10,8), //98
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:163:            new JsonNode("Class",700,1450,false,new int[2]{98,97},"Deity",false,0.05f,250,1,50), //99
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:167:            new JsonNode("Stats",800,500,false,new int[1]{64},"Foc",false,10,120,10,10), //100
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:168:            new JsonNode("Stats",800,600,false,new int[1]{100},"Int",false,10,120,10,10), //101
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:169:            new JsonNode("Class",900,550,false,new int[1]{101},"Warlock",false,0.05f,150,1,20), //102
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:171:            new JsonNode("Damage",900,700,false,new int[1]{102},"Magic",false,0.15f,160,30,25), //103
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:172:            new JsonNode("Stats",1000,700,false,new int[1]{103},"Int",false,20,190,4,20), //104
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:173:            new JsonNode("Stats",900,800,false,new int[1]{103},"Spr",false,30,220,5,16), //105
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:174:            new JsonNode("Stats",1000,800,false,new int[2]{104,105},"Foc",false,15,220,10,8), //106
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:175:            new JsonNode("Class",1100,900,false,new int[1]{106},"Mystic",false,0.05f,250,1,50), //107
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:179:            new JsonNode("Stats",800,-150,false,new int[1]{66},"Foc",false,10,110,10,10), //108
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:180:            new JsonNode("Damage",900,-250,false,new int[1]{108},"Summon",false,0.05f,120,10,15), //109
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:181:            new JsonNode("Stats",900,-150,false,new int[1]{108},"Spr",false,10,135,10,10), //110
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:182:            new JsonNode("Class",1000,-250,false,new int[2]{109,110},"SoulBinder",false,0.05f,150,1,20), //111
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:184:            new JsonNode("Damage",1100,-150,false,new int[1]{111},"Summon",false,0.05f,160,20,25), //112
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:185:            new JsonNode("Stats",1100,50,false,new int[1]{112},"Spr",false,20,190,4,20), //113
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:186:            new JsonNode("Stats",950,-50,false,new int[1]{113},"Spr",false,30,220,5,16), //114
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:187:            new JsonNode("Stats",800,50,false,new int[1]{114},"Foc",false,15,235,10,8), //115
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:188:            new JsonNode("Class",700,50,false,new int[1]{115},"SoulLord",false,0.05f,250,1,50), //116
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:192:            new JsonNode("Stats",250,-650,false,new int[1]{67},"Dex",false,10,110,10,10), //117
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:193:            new JsonNode("Damage",250,-500,false,new int[1]{67},"Ranged",false,0.1f,120,5,10), //118
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:194:            new JsonNode("Stats",325,-575,false,new int[2]{117,118},"Agi",false,10,135,10,10), //119
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:195:            new JsonNode("Class",400,-575,false,new int[1]{119},"Marksman",false,0.05f,150,1,20), //120
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:197:            new JsonNode("Damage",750,-575,false,new int[1]{120},"Ranged",false,0.15f,160,10,25), //121
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:198:            new JsonNode("Stats",825,-575,false,new int[1]{121},"Vit",false,10,190,10,5), //122
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:199:            new JsonNode("Stats",825,-650,false,new int[1]{122},"Agi",false,30,220,8,15), //123
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:200:            new JsonNode("Stats",825,-500,false,new int[1]{122},"Dex",false,20,220,8,10), //124
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:201:            new JsonNode("Class",925,-575,false,new int[2]{123,124},"WindWalker",false,0.05f,250,1,50), //125
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:205:            new JsonNode("Stats",25,-725,false,new int[1]{68},"Agi",false,10,110,10,10), //126
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:206:            new JsonNode("Stats",175,-725,false,new int[1]{68},"Cons",false,10,110,10,10), //127
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:208:            new JsonNode("Damage",25,-825,false,new int[1]{126},"Ranged",false,0.1f,120,5,10), //128
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:209:            new JsonNode("Stats",25,-900,false,new int[1]{128},"Dex",false,15,135,8,15), //129
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:211:            new JsonNode("Stats",175,-825,false,new int[1]{127},"Cons",false,5,120,10,8), //130
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:212:            new JsonNode("Stats",175,-900,false,new int[1]{130},"Vit",false,15,135,5,12), //131
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:214:            new JsonNode("Class",100,-900,false,new int[2]{129,131},"Sniper",false,0.05f,150,1,20), //132
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:217:            new JsonNode("Damage",175,-975,false,new int[1]{132},"Ranged",false,0.15f,160,10,25), //133
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:218:            new JsonNode("Stats",175,-1100,false,new int[1]{133},"Dex",false,10,190,10,5), //134
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:219:            new JsonNode("Stats",150,-1175,false,new int[1]{134},"Agi",false,10,220,10,5), //135
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:221:            new JsonNode("Stats",25,-975,false,new int[1]{132},"Dex",false,30,160,8,15), //136
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:222:            new JsonNode("Stats",25,-1100,false,new int[1]{136},"Cons",false,20,190,8,10), //137
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:223:            new JsonNode("Stats",50,-1175,false,new int[1]{137},"Vit",false,20,220,8,10), //138
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:225:            new JsonNode("Class",100,-1250,false,new int[2]{135,138},"Hitman",false,0.05f,250,1,50), //139
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:229:            new JsonNode("Stats",-625,-650,false,new int[1]{69},"Dex",false,10,110,10,10), //140
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:230:            new JsonNode("Damage",-725,-650,false,new int[1]{140},"Throw",false,0.1f,120,10,10), //141
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:231:            new JsonNode("Stats",-725,-550,false,new int[1]{141},"Str",false,10,135,10,10), //142
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:232:            new JsonNode("Class",-725,-450,false,new int[1]{142},"Assassin",false,0.05f,150,1,20), //143
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:234:            new JsonNode("Damage",-825,-450,false,new int[1]{143},"Throw",false,0.15f,160,25,25), //144
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:235:            new JsonNode("Stats",-925,-450,false,new int[1]{144},"Dex",false,20,190,4,20), //145
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:236:            new JsonNode("Stats",-925,-350,false,new int[1]{145},"Dex",false,30,220,5,16), //146
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:237:            new JsonNode("Stats",-825,-350,false,new int[1]{146},"Str",false,15,235,10,8), //147
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:238:            new JsonNode("Class",-725,-350,false,new int[1]{147},"ShadowDancer",false,0.05f,250,1,50), //148
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:240:            new JsonNode("Perk",-350,800,false,new int[1]{70},"Biologist",false,0.1f,120,5,8), //149
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:241:            new JsonNode("Perk",-1200,450,false,new int[1]{87},"Vampire",false,0.1f,175,3,20), //150
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:242:            new JsonNode("Perk",750,1000,false,new int[1]{92},"Chlorophyll",false,0.1f,135,3,15), //151
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:243:            new JsonNode("Perk",1100,600,false,new int[1]{104},"BloodMage",false,0.1f,225,3,30), //152
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:244:            new JsonNode("Perk",1200,-250,false,new int[1]{112},"Masochist",false,0.1f,200,3,15), //153
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:245:            new JsonNode("Perk",100,-975,false,new int[1]{132},"Berserk",false,0.1f,175,3,20), //154
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:246:            new JsonNode("Perk",-200,1200,false,new int[1]{58},"TheGambler",false,0.1f,300,1,50), //155
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:248:            new JsonNode("Perk",-800,-725,false,new int[1]{141},"Cupidon",false,0,150,5,8), //156
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:249:            new JsonNode("Perk",500,100,false,new int[1]{24},"StarGatherer",false,0,75,5,8), //157
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:250:            new JsonNode("Perk",800,700,false,new int[1]{101},"ManaOverBurst",false,0,150,3,15), //158
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:255:    public class JsonNode
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:271:        public JsonNode(string baseType,float posX,float posY,bool unlocked, int[] neightboorlist,string specificType,bool flatDamage,float valuePerLevel,int levelRequirement,int maxLevel, int pointsPerLevel, bool ascended = false)
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:289:    public class JsonSkillTree
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:291:        static JsonNodeList jsonSkillList;
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:292:        static public JsonNodeList GetJsonNodeList { get { return jsonSkillList; } }
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:305:                jsonSkillList = new JsonNodeList();
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:320:                jsonSkillList = new JsonNodeList();
+/home/z/my-project/AethonMod/Content/SkillTree/JsonSkilLTree.cs:327:                            jsonSkillList = JsonConvert.DeserializeObject<JsonNodeList>(reader.ReadToEnd());
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Enum/NodeCategory.cs:7:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Enum/ItemReason.cs:7:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemNode.cs:1:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/ItemUpdate.cs:4:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Struct/ItemStats.cs:3:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Struct/ItemStats.cs:5:namespace AethonMod.Content.SkillTree.Items
+/home/z/my-project/AethonMod/Content/SkillTree/Items/Struct/ItemStats.cs:27:        public float GetStat(int key)
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:2:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:3:using AethonMod.Content.SkillTree.Items;
+/home/z/my-project/AethonMod/Content/SkillTree/SkillTextures.cs:5:namespace AethonMod.Content.SkillTree.Utils
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:7:using AethonMod.Content.SkillTree.RPGModule;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:8:using AethonMod.Content.SkillTree.Items;
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:10:namespace AethonMod.Content.SkillTree.UI
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:19:            Width.Set(_texture.Width * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:20:            Height.Set(_texture.Height * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:27:            spriteBatch.Draw(_texture, dimensions.Position(), null, color, 0f, Vector2.Zero, SkillTreeUi.Instance.sizeMultplier, SpriteEffects.None, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:39:            Width.Set(_texture.Width * SkillTreeUi.Instance.sizeMultplier, 0f);
+/home/z/my-project/AethonMod/Content/SkillTree/UI/Shared.cs:40:            Height.Set(_texture.Height * SkillTreeUi.Instance.sizeMultplier, 0f);
+
+[Showing results with pagination = limit: 250]
