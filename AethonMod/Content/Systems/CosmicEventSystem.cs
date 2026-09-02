@@ -36,7 +36,7 @@ namespace AethonMod.Content.Systems
                 var sp = player.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null || !sp.IsImprinted) continue;
 
-                int level = sp.ShardLevel;
+                int level = sp.HeldWeaponLevel;
 
                 // --- Hitos de un solo disparo (por jugador, en SP) ---
                 // Nota: estos flags son globales; en MP deberian ser por-jugador.

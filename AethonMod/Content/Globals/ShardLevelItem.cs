@@ -15,7 +15,9 @@ namespace AethonMod.Content.Globals
     /// - Las otras 2 armas (Lumina/Grimorio) NO suben hasta que sean elegidas.
     /// - Si el jugador consigue otra copia del mismo item, esa copia empieza en nivel 1.
     ///
-    /// El nivel se persiste en el item via SaveData/LoadData del TagCompound.
+    /// IMPORTANTE: GlobalItem NO tiene una propiedad 'Item' automática (a diferencia
+    /// de ModItem). Todos los metodos que necesitan acceder al item deben recibirlo
+    /// como parametro.
     /// </summary>
     public class ShardLevelItem : GlobalItem
     {
@@ -31,13 +33,21 @@ namespace AethonMod.Content.Globals
         /// </summary>
         public bool FirstLevelUpTriggered = false;
 
+        // Cache del tipo del item para evitar pasar Item a metodos que no lo reciben
+        private int _itemType = -1;
+
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            // Solo aplica a las 3 armas Aethon.
+            // Solo aplica a las 3 armas Aethon + el FragmentoGenesis (para persistencia).
             return item.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
                    item.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
                    item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
                    item.type == ModContent.ItemType<Items.GenesisShard>();
+        }
+
+        public override void OnCreate(Item item, ItemCreationContext context)
+        {
+            _itemType = item.type;
         }
 
         /// <summary>
@@ -53,32 +63,33 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// Otorga XP a ESTE item específico. Si sube de nivel, dispara OnLevelUp.
+        /// Necesita el Item como parámetro porque GlobalItem no tiene propiedad Item.
         /// </summary>
-        public void GrantXP(int amount)
+        public void GrantXP(Item item, int amount)
         {
             // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
-            // El FragmentoGenesis no tiene nivel de arma (se transforma al elegir rama).
-            if (Item.type == ModContent.ItemType<Items.GenesisShard>()) return;
+            if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
 
+            _itemType = item.type;
             XP += amount;
             while (XP >= XPForNextLevel())
             {
                 XP -= XPForNextLevel();
                 Level++;
-                OnLevelUp();
+                OnLevelUp(item);
             }
         }
 
         /// <summary>
         /// Se llama cuando ESTE item sube de nivel.
         /// </summary>
-        private void OnLevelUp()
+        private void OnLevelUp(Item item)
         {
             // Efectos visuales en la posición del jugador
             Player? owner = Main.LocalPlayer;
             if (owner != null)
             {
-                Main.NewText($"✦ {Item.Name} alcanzó el nivel {Level}!",
+                Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}!",
                     new Microsoft.Xna.Framework.Color(245, 196, 81));
                 Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
                 for (int i = 0; i < 40; i++)
@@ -97,7 +108,7 @@ namespace AethonMod.Content.Globals
             // Hito especial cada 50 niveles (infinito)
             if (Level % 50 == 0)
             {
-                Main.NewText($"✦✦ Hito nivel {Level}! {Item.Name} resuena con poder. ✦✦",
+                Main.NewText($"✦✦ Hito nivel {Level}! {item.Name} resuena con poder. ✦✦",
                     new Microsoft.Xna.Framework.Color(245, 196, 81));
                 Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
             }

@@ -96,7 +96,8 @@ namespace AethonMod.Content.Globals
 
             // === OTORGAR XP AL ARMA SOSTENIDA (no al jugador) ===
             // El nivel/XP es por-item individual, no compartido entre armas.
-            int xp = Systems.ShardLevelSystem.XPForNPC(npc);
+            int baseXP = Systems.ShardLevelSystem.XPForNPC(npc);
+            int xp = Systems.ShardLevelSystem.ApplyXPMultiplier(baseXP);
             Item heldItem = player.HeldItem;
             if (heldItem != null)
             {
@@ -104,7 +105,7 @@ namespace AethonMod.Content.Globals
                 if (slItem != null)
                 {
                     // Solo otorgar XP si el item es un arma Aethon (AppliesToEntity lo filtra).
-                    slItem.GrantXP(xp);
+                    slItem.GrantXP(heldItem, xp);
                 }
             }
 

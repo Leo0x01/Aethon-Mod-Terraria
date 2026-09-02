@@ -27,6 +27,22 @@ namespace AethonMod.Content.Players
         // Moneda conservada (otorgada por NPCs).
         public int ResonanceShards = 0;
 
+        /// <summary>
+        /// Helper: devuelve el nivel del arma Aethon sostenida, o 0 si no hay ninguna.
+        /// El nivel/XP vive por-item (ShardLevelItem), no en el jugador.
+        /// </summary>
+        public int HeldWeaponLevel
+        {
+            get
+            {
+                Item held = Player.HeldItem;
+                if (held == null) return 0;
+                var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
+                if (sl == null) return 0;
+                return sl.Level;
+            }
+        }
+
         public override void SaveData(TagCompound tag)
         {
             tag["activeBranch"] = (int)ActiveBranch;

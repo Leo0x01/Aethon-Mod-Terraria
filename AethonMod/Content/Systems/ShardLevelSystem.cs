@@ -22,17 +22,16 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
-        /// Otorga XP al fragmento del jugador. Llamado por GlobalNPC al morir un NPC.
+        /// Otorga XP al arma sostenida del jugador (no al jugador directamente).
+        /// Aplica el multiplicador de XP de la configuración.
+        /// Llamado por GlobalNPCXP.OnKill.
         /// </summary>
-        public static void GrantXPToPlayer(Player player, int amount)
+        public static int ApplyXPMultiplier(int amount)
         {
-            var sp = player.GetModPlayer<Players.ShardPlayer>();
-            if (sp == null || !sp.IsImprinted) return;
-            // Aplicar multiplicador de XP de la configuracion.
             var config = ModContent.GetInstance<Content.AethonConfig>();
             if (config != null)
-                amount = (int)(amount * config.XPMultiplier);
-            sp.GrantXP(amount);
+                return (int)(amount * config.XPMultiplier);
+            return amount;
         }
 
         /// <summary>
