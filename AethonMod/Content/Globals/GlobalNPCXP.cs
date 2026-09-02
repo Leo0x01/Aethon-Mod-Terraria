@@ -36,14 +36,12 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// Aplica lifesteal al jugador si tiene un arma Aethon con nivel >= 7.
-        /// Funciona tanto para golpes melee como para proyectiles (flechas, bolts,
-        /// minions, blades autoguiadas).
+        /// El nivel se lee del item sostenido (ShardLevelItem), no del jugador.
         /// </summary>
         private void ApplyAethonLifesteal(Player player, int damageDone)
         {
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted) return;
-            if (!WeaponScaling.HasLifesteal(sp.ShardLevel)) return;
 
             // Solo aplicar si el jugador sostiene una de las 3 armas Aethon.
             Item held = player.HeldItem;
@@ -54,7 +52,12 @@ namespace AethonMod.Content.Globals
                 held.type == ModContent.ItemType<Weapons.GrimoireEternal>();
             if (!isAethonWeapon) return;
 
-            WeaponScaling.ApplyLifesteal(player, damageDone, sp.ShardLevel);
+            // Leer el nivel del item sostenido
+            var sl = held.GetGlobalItem<ShardLevelItem>();
+            if (sl == null) return;
+            if (!WeaponScaling.HasLifesteal(sl.Level)) return;
+
+            WeaponScaling.ApplyLifesteal(player, damageDone, sl.Level);
         }
 
         public override void OnKill(NPC npc)
@@ -91,10 +94,19 @@ namespace AethonMod.Content.Globals
             Player player = Main.player[killerWho];
             if (player == null) return;
 
-            // Otorgar XP al jugador que mato al NPC.
+            // === OTORGAR XP AL ARMA SOSTENIDA (no al jugador) ===
+            // El nivel/XP es por-item individual, no compartido entre armas.
             int xp = Systems.ShardLevelSystem.XPForNPC(npc);
-            Systems.ShardLevelSystem.GrantXPToPlayer(player, xp);
-            
+            Item heldItem = player.HeldItem;
+            if (heldItem != null)
+            {
+                var slItem = heldItem.GetGlobalItem<ShardLevelItem>();
+                if (slItem != null)
+                {
+                    // Solo otorgar XP si el item es un arma Aethon (AppliesToEntity lo filtra).
+                    slItem.GrantXP(xp);
+                }
+            }
 
             // Tracking de kills por rama (solo si el jugador no ha elegido rama aun).
             var sp = player.GetModPlayer<Players.ShardPlayer>();

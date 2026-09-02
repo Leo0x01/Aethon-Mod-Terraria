@@ -6,18 +6,21 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.Players;
 using AethonMod.Content.Systems;
+using AethonMod.Content.Globals;
 
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
     /// Solbrand, Filo del Alba — arma de la rama de Cuerpo a Cuerpo.
     ///
-    /// ESCALADO POR NIVEL DEL FRAGMENTO (INFINITO):
-    /// - Cada nivel: +2.5% daño, +0.2% crit, +0.5% knockback, +0.4% armor pen, -0.3% use time
-    /// - Cada 10 niveles: +1 proyectil "Solbrand Blade" por ataque.
-    ///   Este proyectil COPIA la textura del arma, gira como espada arrojadiza,
-    ///   y persigue (homing) al enemigo hostil mas cercano.
-    ///   Nivel 10 = 1 blade, Nivel 20 = 2 blades, Nivel 100 = 10 blades, etc.
+    /// SISTEMA DE NIVELES POR ITEM:
+    /// - Cada copia de SolbrandEdge tiene su propio nivel/XP independiente.
+    /// - Solo sube de nivel el item sostenido cuando matas enemigos.
+    /// - Las otras armas (Lumina/Grimorio) NO suben hasta que las uses.
+    ///
+    /// ESCALADO POR NIVEL (INFINITO):
+    /// - Cada nivel: +2.5% daño, +0.2% crit, +0.5% knockback, +0.4% armor pen
+    /// - Cada 10 niveles: +1 proyectil "Solbrand Blade" autoguiado (copia el arma)
     /// </summary>
     public class SolbrandEdge : ModItem
     {
@@ -45,75 +48,70 @@ namespace AethonMod.Content.Weapons
             Item.noMelee = false;
         }
 
+        /// <summary>
+        /// Obtiene el GlobalItem que guarda el nivel/XP de este item específico.
+        /// </summary>
+        private ShardLevelItem GetShard(Item item)
+            => item.GetGlobalItem<ShardLevelItem>();
+
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
+            var sl = GetShard(Item);
+            if (sl == null) return;
+            // Solo escala si el jugador eligió esta rama (imprinted Melee)
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
 
-            // Cada nivel: +2.5% daño (infinito)
-            damage *= WeaponScaling.DamageMult(BranchType.Melee, sp.ShardLevel);
-
-            // Cada nivel: +0.2% critico
-            player.GetCritChance(DamageClass.Melee) += WeaponScaling.CritBonus(sp.ShardLevel);
-
-            // Cada nivel: +0.4% armor penetration
-            player.GetArmorPenetration(DamageClass.Melee) += WeaponScaling.ArmorPenBonus(sp.ShardLevel);
+            damage *= WeaponScaling.DamageMult(BranchType.Melee, sl.Level);
+            player.GetCritChance(DamageClass.Melee) += WeaponScaling.CritBonus(sl.Level);
+            player.GetArmorPenetration(DamageClass.Melee) += WeaponScaling.ArmorPenBonus(sl.Level);
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
         {
+            var sl = GetShard(Item);
+            if (sl == null) return;
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
-            // Cada nivel: +0.5% knockback (infinito)
-            knockback *= WeaponScaling.KnockbackMult(sp.ShardLevel);
+            knockback *= WeaponScaling.KnockbackMult(sl.Level);
         }
 
         public override float UseTimeMultiplier(Player player)
         {
+            var sl = GetShard(Item);
+            if (sl == null) return 1f;
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return 1f;
-            // Cada nivel: -0.3% use time, tope -25%
-            return WeaponScaling.UseSpeedMult(sp.ShardLevel);
+            return WeaponScaling.UseSpeedMult(sl.Level);
         }
 
-        /// <summary>
-        /// Cada 10 niveles del fragmento, crea un proyectil "Solbrand Blade" que:
-        /// - Copia la textura del arma
-        /// - Gira como espada arrojadiza
-        /// - Persigue al enemigo mas cercano (homing)
-        /// Nivel 10 = 1 blade, Nivel 20 = 2, ..., Nivel N = N/10 blades.
-        /// </summary>
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            var sl = GetShard(Item);
+            if (sl == null) return false;
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return false;
 
-            // Numero de blades = nivel / 10 (nivel 10+ = 1, 20+ = 2, 30+ = 3, ...)
-            int bladeCount = sp.ShardLevel / 10;
+            int bladeCount = sl.Level / 10;
             if (bladeCount <= 0) return false;
 
             int projType = ModContent.ProjectileType<Projectiles.DawnSlash>();
             for (int i = 0; i < bladeCount; i++)
             {
-                // Cada blade sale en un angulo ligeramente distinto
                 float spread = 0.15f;
                 float angle = (i - (bladeCount - 1) / 2f) * spread;
                 Vector2 vel = velocity.RotatedBy(angle);
-                // Ligeramente mas lento que el swing para que las blades se vean
                 vel *= 0.9f;
                 Projectile.NewProjectile(source, position, vel, projType, damage, knockback, player.whoAmI);
             }
-            return false; // ya disparamos los blades manualmente
+            return false;
         }
 
         public override Vector2? HoldoutOffset() => new Vector2(-2f, 0f);
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
-            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
-
-            // === OCULTAR LINEA VANILLA "Level: X" (por contenido de texto) ===
+            // === OCULTAR LINEA VANILLA "Level: X" ===
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
                 string t = tooltips[i].Text ?? "";
@@ -125,9 +123,14 @@ namespace AethonMod.Content.Weapons
                 if (isLevelLine) tooltips.RemoveAt(i);
             }
 
+            var sl = GetShard(Item);
+            if (sl == null) return;
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
+
             // Barra de XP
-            int xpNeeded = sp.XPForNextLevel();
-            float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
+            int xpNeeded = sl.XPForNextLevel();
+            float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
             pct = System.Math.Clamp(pct, 0f, 1f);
             int barLen = 20;
             int filled = (int)(barLen * pct);
@@ -136,19 +139,18 @@ namespace AethonMod.Content.Weapons
                 bar += i < filled ? "█" : "░";
             bar += "]";
 
-            tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
-            tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
+            tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sl.Level}]") { OverrideColor = new Color(245, 196, 81) });
+            tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sl.XP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
 
-            // Stats actuales por nivel (infinitas)
-            int bladeCount = sp.ShardLevel / 10;
+            // Stats actuales por nivel
+            int bladeCount = sl.Level / 10;
             tooltips.Add(new TooltipLine(Mod, "ScalingStats",
                 $"[c/FFD700:Escalado por nivel:] " +
-                $"[c/FF5555:+{(int)(sp.ShardLevel * WeaponScaling.MeleeDamagePerLevel * 100)}% daño] " +
-                $"[c/FFAA55:+{WeaponScaling.CritBonus(sp.ShardLevel):F1}% crit] " +
-                $"[c/55AAFF:+{sp.ShardLevel * 0.4f:F1}% armor pen] " +
+                $"[c/FF5555:+{(int)(sl.Level * WeaponScaling.MeleeDamagePerLevel * 100)}% daño] " +
+                $"[c/FFAA55:+{WeaponScaling.CritBonus(sl.Level):F1}% crit] " +
+                $"[c/55AAFF:+{sl.Level * 0.4f:F1}% armor pen] " +
                 $"[c/78FF96:+{bladeCount} blade" + (bladeCount == 1 ? "" : "s") + "]"));
 
-            // Linea especial: blades
             if (bladeCount > 0)
             {
                 tooltips.Add(new TooltipLine(Mod, "BladeInfo",
@@ -156,10 +158,10 @@ namespace AethonMod.Content.Weapons
             }
 
             // Lifesteal (desbloqueado a nivel 7)
-            if (WeaponScaling.HasLifesteal(sp.ShardLevel))
+            if (WeaponScaling.HasLifesteal(sl.Level))
             {
-                float lsPct = WeaponScaling.LifestealPercent(sp.ShardLevel) * 100f;
-                int nextLsLevel = ((sp.ShardLevel / 7) + 1) * 7;
+                float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
+                int nextLsLevel = ((sl.Level / 7) + 1) * 7;
                 tooltips.Add(new TooltipLine(Mod, "LifestealInfo",
                     $"[c/FF5566:♥ Curación: +{lsPct:F1}% del daño causado (sube +0.1% cada 7 niveles, próximo nivel {nextLsLevel})]"));
             }
@@ -169,10 +171,10 @@ namespace AethonMod.Content.Weapons
                     $"[c/78788C:♥ Curación por ataque se desbloquea en nivel 7]"));
             }
 
-            // Proximo hito de blade (cada 10 niveles)
-            int nextBladeLevel = ((sp.ShardLevel / 10) + 1) * 10;
+            // Próxima espada
+            int nextBladeLevel = ((sl.Level / 10) + 1) * 10;
             tooltips.Add(new TooltipLine(Mod, "NextBlade",
-                $"[c/78788C:Próxima espada en nivel {nextBladeLevel} ({nextBladeLevel - sp.ShardLevel} niveles)]"));
+                $"[c/78788C:Próxima espada en nivel {nextBladeLevel} ({nextBladeLevel - sl.Level} niveles)]"));
         }
     }
 }

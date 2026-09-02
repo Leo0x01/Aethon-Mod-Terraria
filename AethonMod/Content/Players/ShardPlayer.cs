@@ -2,17 +2,20 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using AethonMod.Content.Systems;
+using AethonMod.Content.Globals;
 
 namespace AethonMod.Content.Players
 {
     /// <summary>
     /// Estado persistente del jugador para el mod Aethon.
     /// Sistema: fragmento (shard) + selección de arma.
+    ///
+    /// NOTA: El nivel/XP del ARMA ya no vive aqui — se guarda por-item
+    /// en ShardLevelItem (GlobalItem). ShardPlayer solo guarda la rama
+    /// elegida y los contadores de kills para el imprinting.
     /// </summary>
     public class ShardPlayer : ModPlayer
     {
-        public int ShardLevel = 1;
-        public int ShardXP = 0;
         public BranchType ActiveBranch = BranchType.None;
         public WeaponSubForm SubForm = WeaponSubForm.None;
         public int DistanceKills = 0;
@@ -21,88 +24,30 @@ namespace AethonMod.Content.Players
         public const int KILLS_TO_IMPRINT = 20;
         public bool IsImprinted => ActiveBranch != BranchType.None;
 
-        // Moneda conservada (otorgada por NPCs). Sin UI de gasto por ahora.
+        // Moneda conservada (otorgada por NPCs).
         public int ResonanceShards = 0;
-
-        // Flag: evento global de PRIMERA subida de nivel (solo una vez por personaje)
-        public bool FirstLevelUpTriggered = false;
-
-        public int XPForNextLevel()
-        {
-            // PRIMER nivel (1→2): requiere solo 1 XP (cualquier kill lo sube).
-            // Así el jugador ve el evento global de primera subida casi de inmediato.
-            // Niveles 2+: fórmula normal (80 * nivel^1.5).
-            if (ShardLevel <= 1) return 1;
-            return (int)(80 * System.Math.Pow(ShardLevel, 1.5));
-        }
-
-        public void GrantXP(int amount)
-        {
-            if (!IsImprinted) return;
-            ShardXP += amount;
-            while (ShardXP >= XPForNextLevel())
-            {
-                ShardXP -= XPForNextLevel();
-                ShardLevel++;
-                OnLevelUp();
-            }
-        }
-
-        private void OnLevelUp()
-        {
-            Main.NewText($"✦ Fragmento Genesis nivel {ShardLevel}!", new Microsoft.Xna.Framework.Color(245, 196, 81));
-            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
-            for (int i = 0; i < 40; i++)
-                Dust.NewDustPerfect(Player.Center, Terraria.ID.DustID.GoldFlame,
-                    new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
-                    100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
-
-            // === EVENTO GLOBAL: primera subida de nivel (solo una vez por personaje) ===
-            // Dispara temblor + overlay borroso/granulado + texto de lore + time-skip de 1 dia.
-            if (!FirstLevelUpTriggered && Main.myPlayer == Player.whoAmI)
-            {
-                FirstLevelUpTriggered = true;
-                LevelUpEventSystem.Trigger();
-            }
-
-            // Hito especial cada 50 niveles (infinito)
-            if (ShardLevel % 50 == 0)
-            {
-                Main.NewText($"✦✦ Hito nivel {ShardLevel}! El Fragmento Genesis resuena con poder. ✦✦", new Microsoft.Xna.Framework.Color(245, 196, 81));
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
-            }
-        }
 
         public override void SaveData(TagCompound tag)
         {
-            tag["shardLevel"] = ShardLevel;
-            tag["shardXP"] = ShardXP;
             tag["activeBranch"] = (int)ActiveBranch;
             tag["subForm"] = (int)SubForm;
             tag["distanceKills"] = DistanceKills;
             tag["meleeKills"] = MeleeKills;
             tag["magicKills"] = MagicKills;
             tag["resonanceShards"] = ResonanceShards;
-            tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
         }
 
         public override void LoadData(TagCompound tag)
         {
-            // CRITICAL DEFENSIVE: LoadData must NEVER throw, or tModLoader marks the
-            // whole player save as failed ("UnknownError") and the user loses their
-            // character. Every read is guarded so legacy saves still load cleanly.
+            // CRITICAL DEFENSIVE: LoadData must NEVER throw.
             try
             {
-                ShardLevel = tag.GetInt("shardLevel");
-                if (ShardLevel < 1) ShardLevel = 1;
-                ShardXP = tag.GetInt("shardXP");
                 ActiveBranch = (BranchType)tag.GetInt("activeBranch");
                 SubForm = (WeaponSubForm)tag.GetInt("subForm");
                 DistanceKills = tag.GetInt("distanceKills");
                 MeleeKills = tag.GetInt("meleeKills");
                 MagicKills = tag.GetInt("magicKills");
                 ResonanceShards = tag.GetInt("resonanceShards");
-                FirstLevelUpTriggered = tag.GetBool("firstLevelUpTriggered");
             }
             catch
             {
@@ -111,25 +56,26 @@ namespace AethonMod.Content.Players
         }
 
         /// <summary>
-        /// PostUpdateEquips: aqui aplicamos bonuses que DEBEN stackear con armadura.
-        /// Se ejecuta despues de que la armadura/accesorios ya setearon sus stats,
-        /// asi que player.maxMinions ya incluye los bonuses de armadura de invocador.
+        /// PostUpdateEquips: aplica bonuses que deben stackear con armadura.
+        /// Los slots de minion del Grimorio se aplican aqui, usando el nivel
+        /// del item Grimorio sostenido (no el nivel del jugador).
         /// </summary>
         public override void PostUpdateEquips()
         {
-            // === GRIMORIO: slots de minion extra por nivel ===
-            // Stackea con armadura de invocador: si una armadura da +10 minions,
-            // y el Grimorio da +2 (nivel 10), el total sera 1(base)+10+2 = 13.
-            // Solo aplica si el jugador tiene el Grimorio en mano.
             if (IsImprinted && ActiveBranch == BranchType.Magic)
             {
                 Item held = Player.HeldItem;
                 if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                 {
-                    Player.maxMinions += WeaponScaling.BonusMinionSlots(ShardLevel);
+                    var sl = held.GetGlobalItem<ShardLevelItem>();
+                    if (sl != null)
+                    {
+                        Player.maxMinions += WeaponScaling.BonusMinionSlots(sl.Level);
+                    }
                 }
             }
         }
+
         public override void ModifyHurt(ref Player.HurtModifiers modifiers) { }
         public override void OnHurt(Player.HurtInfo info) { }
     }

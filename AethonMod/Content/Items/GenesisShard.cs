@@ -107,9 +107,8 @@ namespace AethonMod.Content.Items
                 return true;
             }
 
-            // Si ya esta imprintado, mostrar info del nivel.
-            int xpNeeded = sp.XPForNextLevel();
-            Main.NewText($"Fragmento Genesis — Nivel {sp.ShardLevel} | XP: {sp.ShardXP}/{xpNeeded} | Rama: {sp.ActiveBranch}",
+            // Si ya esta imprintado, mostrar info de la rama (el nivel vive en el arma).
+            Main.NewText($"Fragmento Genesis — Rama: {sp.ActiveBranch} | Sostén tu arma para ver su nivel",
                 new Color(245, 196, 81));
             return true;
         }

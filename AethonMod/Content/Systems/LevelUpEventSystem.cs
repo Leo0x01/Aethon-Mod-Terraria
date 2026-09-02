@@ -9,15 +9,15 @@ using Terraria.UI;
 namespace AethonMod.Content.Systems
 {
     /// <summary>
-    /// Evento global de PRIMERA subida de nivel del Fragmento Génesis.
+    /// Evento global de PRIMERA subida de nivel de un arma.
     ///
     /// Al dispararse:
-    /// 1. Temblor de pantalla (screen shake) durante varios segundos.
+    /// 1. Temblor de pantalla (camera shake manual, compatible con cualquier tModLoader).
     /// 2. Overlay fullscreen borroso + granulado (oscurece + ruido).
     /// 3. Texto de lore profundo centrado en pantalla, con fade in/out.
     /// 4. El tiempo del mundo avanza un día completo (día → noche → día) de forma visible.
     ///
-    /// El evento solo dispara UNA vez por personaje (flag persistente).
+    /// El evento solo dispara UNA vez por personaje (flag persistente en cada item).
     /// </summary>
     public class LevelUpEventSystem : ModSystem
     {
@@ -25,7 +25,10 @@ namespace AethonMod.Content.Systems
         public static bool IsActive = false;
         public static int Timer = 0;          // ticks transcurridos desde el inicio
         public const int Duration = 600;        // ~10 segundos a 60fps
-        public const int DayLength = 54000;     // duración de un día completo en Terraria (ticks)
+
+        // === Offset de cámara manual (reemplaza Main.screenShake que no existe en todas las versiones) ===
+        public static Vector2 ShakeOffset = Vector2.Zero;
+        private static int _shakeIntensity = 0;
 
         // === Lore mostrado (centrado, multilinea) ===
         const string LoreEs =
@@ -56,7 +59,6 @@ namespace AethonMod.Content.Systems
 
         public override void Load()
         {
-            // Generar textura de grano procedural (64x64, recoloreada cada frame)
             _grainData = new Color[GrainSize * GrainSize];
             _grainTexture = new Texture2D(Main.graphics.GraphicsDevice, GrainSize, GrainSize);
         }
@@ -68,19 +70,19 @@ namespace AethonMod.Content.Systems
             _grainData = null;
             IsActive = false;
             Timer = 0;
+            ShakeOffset = Vector2.Zero;
+            _shakeIntensity = 0;
         }
 
         /// <summary>
-        /// Dispara el evento. Solo llamado una vez por personaje (desde ShardPlayer.OnLevelUp
-        /// cuando el nivel pasa de 1 a 2 y el flag FirstLevelUpTriggered es false).
+        /// Dispara el evento. Solo llamado una vez por personaje.
         /// </summary>
         public static void Trigger()
         {
             if (IsActive) return;
             IsActive = true;
             Timer = 0;
-            // Temblor de pantalla fuerte al inicio
-            Main.screenShake = 40;
+            _shakeIntensity = 40; // intensidad inicial del temblor
             // Sonido cósmico
             Terraria.Audio.SoundEngine.PlaySound(SoundID.DD2_EtherianPortalOpen);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar);
@@ -91,14 +93,28 @@ namespace AethonMod.Content.Systems
             if (!IsActive) return;
 
             Timer++;
-            // Mantener temblor durante los primeros 2/3 del evento, decayendo
+
+            // === Temblor de pantalla (offset manual, decae con el tiempo) ===
             if (Timer < Duration * 2 / 3)
             {
-                // Decaimiento gradual del screen shake
                 int intensity = (int)(40f * (1f - (float)Timer / (Duration * 2f / 3f)));
                 if (intensity < 4) intensity = 4;
-                if (Main.screenShake < intensity)
-                    Main.screenShake = intensity;
+                _shakeIntensity = intensity;
+            }
+            else
+            {
+                _shakeIntensity = 0;
+            }
+            // Offset aleatorio para simular el temblor
+            if (_shakeIntensity > 0)
+            {
+                ShakeOffset = new Vector2(
+                    Main.rand.NextFloat(-_shakeIntensity, _shakeIntensity),
+                    Main.rand.NextFloat(-_shakeIntensity, _shakeIntensity));
+            }
+            else
+            {
+                ShakeOffset = Vector2.Zero;
             }
 
             // === Avance acelerado del tiempo (día → noche → día, ciclo completo) ===
@@ -130,11 +146,24 @@ namespace AethonMod.Content.Systems
             {
                 IsActive = false;
                 Timer = 0;
-                Main.screenShake = 0;
+                _shakeIntensity = 0;
+                ShakeOffset = Vector2.Zero;
                 // Asegurar que el día termine en punto razonable (mañana)
                 Main.time = 0;
                 Main.dayTime = true;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
+            }
+        }
+
+        /// <summary>
+        /// Modifica la posición de la cámara para aplicar el temblor.
+        /// Se llama después de que la cámara vanilla ya se calculó.
+        /// </summary>
+        public override void ModifyScreenPosition()
+        {
+            if (IsActive && ShakeOffset != Vector2.Zero)
+            {
+                Main.screenPosition += ShakeOffset;
             }
         }
 
@@ -177,7 +206,6 @@ namespace AethonMod.Content.Systems
                 new Color(6, 4, 14, darkAlpha));
 
             // === 2. Grano (noise) ===
-            // Rellenar _grainData con ruido aleatorio cada frame
             for (int i = 0; i < _grainData.Length; i++)
             {
                 byte v = (byte)Main.rand.Next(0, 80);
@@ -185,7 +213,6 @@ namespace AethonMod.Content.Systems
             }
             _grainTexture.SetData(_grainData);
 
-            // Dibujar el grano repetido sobre toda la pantalla
             int tilesX = (Main.screenWidth / GrainSize) + 2;
             int tilesY = (Main.screenHeight / GrainSize) + 2;
             for (int x = 0; x < tilesX; x++)
@@ -211,7 +238,6 @@ namespace AethonMod.Content.Systems
             }
 
             // === 4. Texto de lore centrado ===
-            // Detección simple de idioma: si Terraria está en español, mostrar lore en es.
             bool isSpanish = Terraria.Localization.Language.ActiveCulture != null &&
                 Terraria.Localization.Language.ActiveCulture.Name != null &&
                 Terraria.Localization.Language.ActiveCulture.Name.StartsWith("es");
@@ -226,10 +252,9 @@ namespace AethonMod.Content.Systems
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                if (string.IsNullOrEmpty(line)) { continue; }
+                if (string.IsNullOrEmpty(line)) continue;
                 Vector2 size = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(line) * scale;
                 Vector2 pos = new Vector2(start.X - size.X / 2f, start.Y + i * lineHeight);
-                // Sombra
                 Utils.DrawBorderString(sb, line, pos + new Vector2(2, 2),
                     new Color(0, 0, 0, (int)(220 * alpha)), scale);
                 Color textColor = new Color(245, 220, 160, (int)(255 * alpha));
