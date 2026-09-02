@@ -53,23 +53,41 @@ namespace AethonMod.Content.Systems
             "as the Shard recognizes its bearer.";
 
         // === Sprites de grano (generados en runtime) ===
+        // INICIALIZACIÓN LAZY: NO se pueden crear Texture2D en Load() porque tModLoader
+        // carga los mods en un hilo secundario y FNA3D prohíbe crear texturas fuera
+        // del main thread (ThreadStateException). Se crean la primera vez que el
+        // evento se dispara (Trigger se llama desde OnLevelUp durante gameplay = main thread).
         private static Texture2D _grainTexture;
         private static Color[] _grainData;
         private const int GrainSize = 64;
 
         // === MagicPixel cacheado (textura 1x1 blanca de vanilla) ===
-        // Usamos ModContent.Request en vez de TextureAssets.MagicPixel para evitar
-        // dependencias de namespace y ser compatibles con cualquier version de tModLoader.
         private static Texture2D _magicPixel;
+
+        private static void EnsureTextures()
+        {
+            if (_magicPixel == null)
+            {
+                // ModContent.Request es seguro desde cualquier hilo (solo carga un asset).
+                _magicPixel = ModContent.Request<Texture2D>("Terraria/Images/MagicPixel").Value;
+            }
+            if (_grainTexture == null && Main.graphics?.GraphicsDevice != null)
+            {
+                // new Texture2D REQUIERE el main thread (GraphicsDevice).
+                // Aseguramos que solo se llame desde Trigger() o DrawEventOverlay()
+                // que se ejecutan durante gameplay (main thread).
+                _grainData = new Color[GrainSize * GrainSize];
+                _grainTexture = new Texture2D(Main.graphics.GraphicsDevice, GrainSize, GrainSize);
+            }
+        }
 
         public override void Load()
         {
-            // No crear texturas en servidor dedicado (GraphicsDevice es null).
-            if (Main.dedServ) return;
-            _grainData = new Color[GrainSize * GrainSize];
-            _grainTexture = new Texture2D(Main.graphics.GraphicsDevice, GrainSize, GrainSize);
-            // Cachear MagicPixel (textura vanilla 1x1 blanca)
-            _magicPixel = ModContent.Request<Texture2D>("Terraria/Images/MagicPixel").Value;
+            // NO crear texturas aqui: Load() se ejecuta en un hilo de carga secundario
+            // y FNA3D prohibe crear Texture2D fuera del main thread.
+            // Las texturas se inicializan lazy en EnsureTextures() (llamado desde Trigger).
+            IsActive = false;
+            Timer = 0;
         }
 
         public override void Unload()
@@ -86,13 +104,16 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// Dispara el evento. Solo llamado una vez por personaje.
+        /// Se llama desde ShardLevelItem.OnLevelUp durante gameplay (main thread).
         /// </summary>
         public static void Trigger()
         {
             if (IsActive) return;
+            // Inicializar texturas aquí (main thread, seguro para GraphicsDevice).
+            EnsureTextures();
             IsActive = true;
             Timer = 0;
-            _shakeIntensity = 40; // intensidad inicial del temblor
+            _shakeIntensity = 40;
             // Sonido cósmico
             Terraria.Audio.SoundEngine.PlaySound(SoundID.DD2_EtherianPortalOpen);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar);
@@ -198,6 +219,9 @@ namespace AethonMod.Content.Systems
         private void DrawEventOverlay()
         {
             if (!IsActive) return;
+            // Asegurar que las texturas estén inicializadas (Draw corre en main thread).
+            EnsureTextures();
+            if (_magicPixel == null || _grainTexture == null) return; // aún no listas
             var sb = Main.spriteBatch;
             float progress = (float)Timer / Duration;
 
