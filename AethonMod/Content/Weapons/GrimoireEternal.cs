@@ -16,7 +16,15 @@ namespace AethonMod.Content.Weapons
     /// - Click izquierdo: dispara ArcaneBolt (magia ofensiva)
     /// - Click derecho: invoca un minion cosmico (invocacion)
     ///
-    /// ESCALADO POR NIVEL DEL FRAGMENTO:
+    /// MANA:
+    /// - Costo FIJO: base 3, +3 cada 20 niveles, tope 30.
+    /// - Nivel 1-19: 3 mana | Nivel 20-39: 6 | Nivel 40-59: 9 | ... | Nivel 200+: 30
+    ///
+    /// BONUS DE DAÑO POR MANA FALTANTE:
+    /// - +0.5% daño por cada 1% de mana faltante (tope +50%).
+    /// - A mana full: sin bonus. A 50% mana: +25% daño. A 10% mana: +45% daño.
+    ///
+    /// ESCALADO POR NIVEL DEL FRAGMENTO (INFINITO):
     /// - Cada nivel: +2.2% daño magico, +1% daño summon, +0.2% crit
     /// - Cada 5 niveles: bonus de hito (slots de minion, bolts extra, velocidad, crit)
     /// </summary>
@@ -44,19 +52,20 @@ namespace AethonMod.Content.Weapons
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<global::AethonMod.Content.Weapons.Projectiles.ArcaneBolt>();
             Item.shootSpeed = 12f;
-            Item.mana = 0;
+            Item.mana = 3; // mana base fijo (se ajusta en ModifyManaCost)
             Item.noMelee = true;
         }
 
         /// <summary>
         /// Daño híbrido: magia + invocacion. Escala con nivel del fragmento.
+        /// Bonus por % mana faltante (a menos mana, mas daño).
         /// </summary>
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Magic) return;
 
-            // Cada nivel: +2.2% daño mágico
+            // Cada nivel: +2.2% daño mágico (infinito)
             damage *= WeaponScaling.DamageMult(BranchType.Magic, sp.ShardLevel);
 
             // Cada nivel: +1% daño de invocacion
@@ -65,15 +74,19 @@ namespace AethonMod.Content.Weapons
             // Cada nivel: +0.2% critico magico
             player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(sp.ShardLevel);
 
-            // NOTA: los slots de minion extra se aplican en ShardPlayer.PostUpdateEquips
-            // para que stackeen correctamente con armadura de invocador.
+            // === BONUS POR MANA FALTANTE ===
+            // A menos mana tengas, mas daño haces (tope +50%).
+            float manaMult = WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
+            damage *= manaMult;
         }
 
+        /// <summary>
+        /// Mana: base 3, +3 cada 20 niveles, tope 30.
+        /// </summary>
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
         {
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null) return;
-            // Mana: +1 cada 5 niveles, tope 20
             Item.mana = WeaponScaling.ManaCost(sp.ShardLevel);
         }
 
@@ -81,7 +94,7 @@ namespace AethonMod.Content.Weapons
         {
             var sp = player.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Magic) return 1f;
-            // Cada nivel: -0.3% use time (mas rapido)
+            // Cada nivel: -0.3% use time (mas rapido), tope -25%
             return WeaponScaling.UseSpeedMult(sp.ShardLevel);
         }
 
@@ -140,6 +153,16 @@ namespace AethonMod.Content.Weapons
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null) return;
 
+            // === OCULTAR LINEA VANILLA "Level: X" ===
+            // tModLoader agrega una linea "Level: N" azul que confunde con nuestro nivel de fragmento.
+            for (int i = tooltips.Count - 1; i >= 0; i--)
+            {
+                if (tooltips[i].Name == "Level")
+                {
+                    tooltips.RemoveAt(i);
+                }
+            }
+
             // Línea de daño de invocacion (híbrido)
             int insertIndex = -1;
             for (int i = 0; i < tooltips.Count; i++)
@@ -151,9 +174,12 @@ namespace AethonMod.Content.Weapons
                 }
             }
             int summonDmg = Item.damage;
+            float lowManaBonus = 0f;
             if (sp.IsImprinted && sp.ActiveBranch == BranchType.Magic)
             {
                 summonDmg = (int)(Item.damage * (1f + sp.ShardLevel * WeaponScaling.SummonDamagePerLevel));
+                // Calcular bonus actual por mana faltante
+                lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
             }
             if (insertIndex >= 0)
             {
@@ -177,6 +203,12 @@ namespace AethonMod.Content.Weapons
             tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]"));
             tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"[c/B388FF:{bar} {sp.ShardXP}/{xpNeeded} XP]"));
 
+            // Info de mana
+            int manaCost = WeaponScaling.ManaCost(sp.ShardLevel);
+            int nextManaLevel = ((sp.ShardLevel / 20) + 1) * 20;
+            tooltips.Add(new TooltipLine(Mod, "ManaInfo",
+                $"[c/55AAFF:Mana: {manaCost} por uso (sube +3 cada 20 niveles, próxima en nivel {nextManaLevel})]"));
+
             // Stats actuales por nivel
             int bonusSlots = WeaponScaling.BonusMinionSlots(sp.ShardLevel);
             tooltips.Add(new TooltipLine(Mod, "ScalingStats",
@@ -185,6 +217,11 @@ namespace AethonMod.Content.Weapons
                 $"[c/BE78FD:+{(int)(sp.ShardLevel * WeaponScaling.SummonDamagePerLevel * 100)}% summon] " +
                 $"[c/78FF96:+{bonusSlots} slots minion] " +
                 $"[c/FFAA55:+{WeaponScaling.CritBonus(sp.ShardLevel):F1}% crit]"));
+
+            // Bonus por mana faltante (mecánica activa ahora)
+            tooltips.Add(new TooltipLine(Mod, "LowManaBonus",
+                $"[c/FF5555:★ Bonus actual por mana faltante: +{lowManaBonus:F1}% daño] " +
+                $"[c/78788C:(tope +50% a mana vacío)]"));
 
             // Nota sobre stack con armadura
             if (bonusSlots > 0)

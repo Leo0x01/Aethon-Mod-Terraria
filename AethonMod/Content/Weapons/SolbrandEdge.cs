@@ -113,6 +113,12 @@ namespace AethonMod.Content.Weapons
             var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
             if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Melee) return;
 
+            // === OCULTAR LINEA VANILLA "Level: X" ===
+            for (int i = tooltips.Count - 1; i >= 0; i--)
+            {
+                if (tooltips[i].Name == "Level") tooltips.RemoveAt(i);
+            }
+
             // Barra de XP
             int xpNeeded = sp.XPForNextLevel();
             float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;

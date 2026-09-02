@@ -30,9 +30,11 @@ namespace AethonMod.Content.Systems
         public const float KnockbackPerLevel = 0.005f;
         public const float ArmorPenPerLevel = 0.004f;
 
-        /// <summary>Mana: +1 por cada 5 niveles (Grimorio). Tope: 20.</summary>
-        public const int ManaPerFiveLevels = 1;
-        public const int ManaMax = 20;
+        /// <summary>Mana: +3 por cada 20 niveles (Grimorio). Tope: 30.</summary>
+        public const int ManaPer20Levels = 3;
+        public const int ManaMax = 30;
+        /// <summary>Mana base del Grimorio (siempre cuesta al menos esto).</summary>
+        public const int ManaBase = 3;
 
         // ================================================================
         //  METODOS DE STATS BASE
@@ -78,13 +80,31 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// Costo de mana del Grimorio segun el nivel.
-        /// +1 mana cada 5 niveles, tope 20.
+        /// Base 3, +3 cada 20 niveles, tope 30.
+        /// Nivel 1-19: 3 mana. Nivel 20-39: 6. Nivel 40-59: 9... Nivel 200: 30.
         /// </summary>
         public static int ManaCost(int level)
         {
-            int cost = (level / 5) * ManaPerFiveLevels;
+            int cost = ManaBase + (level / 20) * ManaPer20Levels;
             if (cost > ManaMax) cost = ManaMax;
             return cost;
+        }
+
+        /// <summary>
+        /// Multiplicador de daño por % de mana FALTANTE.
+        /// A 0% mana faltante (full mana): x1.0 (sin bonus).
+        /// A 50% mana faltante: x1.25 (+25% daño).
+        /// A 90% mana faltante: x1.45 (+45% daño).
+        /// Formula: 1 + (missingFraction * 0.5)
+        /// Tope soft: +50% daño a mana casi vacio.
+        /// </summary>
+        public static float LowManaDamageMult(int currentMana, int maxMana)
+        {
+            if (maxMana <= 0) return 1f;
+            float missing = (float)(maxMana - currentMana) / maxMana;
+            if (missing < 0f) missing = 0f;
+            if (missing > 1f) missing = 1f;
+            return 1f + missing * 0.5f;
         }
 
         // ================================================================

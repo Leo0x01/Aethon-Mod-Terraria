@@ -5,7 +5,7 @@
         "Items.GenesisShard.Tooltip": "Un mote de luz pura de una entidad cósmica antigua.\nCombate enemigos para imprprimir tu rama.",
 
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
-        "Items.ResonanceShard.Tooltip": "Moneda para memorizar armas en el Códex de Memoria.\nSe obtiene de jefes cósmicos.",
+        "Items.ResonanceShard.Tooltip": "Fragmento de resonancia cósmica.\nSe obtiene de jefes cósmicos y se usa como moneda.",
 
         "Items.LuminaStarbow.DisplayName": "Lumina, la Arcoestelar",
         "Items.LuminaStarbow.Tooltip": "Arco de la rama de Distancia.\nDispara flechas de luz estelar que buscan su marca.\nEl daño escala con el nivel del fragmento.",
@@ -14,10 +14,10 @@
         "Items.SolbrandEdge.Tooltip": "Hoja de la rama de Cuerpo a Cuerpo.\nUna espada de luz condensada que corta la realidad.\nEl daño escala con el nivel del fragmento.",
 
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
-        "Items.GrimoireEternal.Tooltip": "Grimorio de la rama de Artes Mágicas.\nLanza bolts arcanos y puede invocar minions estelares.\nEl daño escala con el nivel + % maná faltante.",
+        "Items.GrimoireEternal.Tooltip": "Grimorio de la rama de Artes Mágicas.\nLanza bolts arcanos y puede invocar minions estelares.\nEl daño escala con el nivel del fragmento.\nA menor mana, mayor daño (tope +50%).",
 
         "Projectiles.StarlightArrow.DisplayName": "Flecha de Luz Estelar",
-        "Projectiles.DawnSlash.DisplayName": "Onda del Alba",
+        "Projectiles.DawnSlash.DisplayName": "Espada del Alba",
         "Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
         "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
         "Projectiles.CosmicOrbBolt.DisplayName": "Bolt Cósmico",

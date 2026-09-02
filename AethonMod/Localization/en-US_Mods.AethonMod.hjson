@@ -5,7 +5,7 @@
         "Items.GenesisShard.Tooltip": "A mote of pure light from an ancient cosmic entity.\nFight enemies to imprint your branch.",
 
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
-        "Items.ResonanceShard.Tooltip": "Currency for memorizing weapons in the Memory Codex.\nDropped by cosmic bosses.",
+        "Items.ResonanceShard.Tooltip": "Cosmic resonance shard.\nDropped by cosmic bosses and used as currency.",
 
         "Items.LuminaStarbow.DisplayName": "Lumina, the Starbowed",
         "Items.LuminaStarbow.Tooltip": "Distance branch weapon.\nFires arrows of starlight that seek their mark.\nDamage scales with shard level.",
@@ -14,10 +14,10 @@
         "Items.SolbrandEdge.Tooltip": "Melee branch weapon.\nA blade of condensed light that cuts reality.\nDamage scales with shard level.",
 
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
-        "Items.GrimoireEternal.Tooltip": "Arcane Arts branch weapon.\nFires arcane bolts and can summon stellar minions.\nDamage scales with level + % missing mana.",
+        "Items.GrimoireEternal.Tooltip": "Arcane Arts branch weapon.\nFires arcane bolts and can summon stellar minions.\nDamage scales with shard level.\nLower mana = higher damage (up to +50%).",
 
         "Projectiles.StarlightArrow.DisplayName": "Starlight Arrow",
-        "Projectiles.DawnSlash.DisplayName": "Dawn Slash",
+        "Projectiles.DawnSlash.DisplayName": "Dawn Blade",
         "Projectiles.ArcaneBolt.DisplayName": "Arcane Bolt",
         "Projectiles.CosmicOrbMinion.DisplayName": "Cosmic Orb",
         "Projectiles.CosmicOrbBolt.DisplayName": "Cosmic Bolt",
