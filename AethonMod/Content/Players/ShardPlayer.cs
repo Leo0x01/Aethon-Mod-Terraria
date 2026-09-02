@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -6,6 +5,11 @@ using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Players
 {
+    /// <summary>
+    /// Estado persistente del jugador para el mod Aethon.
+    /// Sistema SIMPLIFICADO: solo fragmento (shard) + selección de arma.
+    /// El árbol de habilidades y el Codex de Memoria fueron eliminados.
+    /// </summary>
     public class ShardPlayer : ModPlayer
     {
         public int ShardLevel = 1;
@@ -18,29 +22,7 @@ namespace AethonMod.Content.Players
         public const int KILLS_TO_IMPRINT = 20;
         public bool IsImprinted => ActiveBranch != BranchType.None;
 
-        // --- Nuevo sistema de árbol (sigue AnRPG) ---
-        public int[] SkillNodeLevels;
-
-        
-        // --- Campos necesarios para el SkillTree de AnRPG ---
-        public Content.SkillTree.RPGModule.SkillTree GetskillTree;
-        public int GetSkillPoints => AvailableSkillPoints();
-        public int GetLevel() => ShardLevel;
-        public void ResetSkillTree()
-        {
-            if (GetskillTree != null)
-            {
-                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
-                GetskillTree.Init();
-            }
-        }
-        
-
-        // --- Codex ---
-        public List<string> MemorizedRunes = new();
-        public bool CodexUnlocked = false;
-
-        // --- Monedas ---
+        // Moneda conservada (otorgada por NPCs). Sin UI de gasto por ahora.
         public int ResonanceShards = 0;
 
         public int XPForNextLevel() => (int)(80 * System.Math.Pow(ShardLevel, 1.5));
@@ -72,30 +54,6 @@ namespace AethonMod.Content.Players
             }
         }
 
-        public int CumulativeSkillPoints()
-        {
-            int total = 0;
-            for (int lvl = 1; lvl <= ShardLevel; lvl++)
-                total += lvl <= 10 ? 1 : lvl <= 20 ? 2 : lvl <= 30 ? 3 : lvl <= 40 ? 4 :
-                         lvl <= 50 ? 5 : lvl <= 60 ? 6 : lvl <= 70 ? 7 : lvl <= 80 ? 8 :
-                         lvl <= 90 ? 9 : lvl <= 100 ? 10 : 10;
-            return total;
-        }
-
-
-        public int SpentSkillPoints() { return 0; }
-        public int AvailableSkillPoints() => CumulativeSkillPoints() - SpentSkillPoints();
-
-        public int RuneSlots()
-        {
-            if (ShardLevel < 50) return 0;
-            if (ShardLevel < 75) return 1;
-            if (ShardLevel < 100) return 2;
-            if (ShardLevel < 125) return 3;
-            if (ShardLevel < 150) return 4;
-            return 5;
-        }
-
         public override void SaveData(TagCompound tag)
         {
             tag["shardLevel"] = ShardLevel;
@@ -106,21 +64,14 @@ namespace AethonMod.Content.Players
             tag["meleeKills"] = MeleeKills;
             tag["magicKills"] = MagicKills;
             tag["resonanceShards"] = ResonanceShards;
-            tag["memorizedRunes"] = MemorizedRunes;
-            tag["codexUnlocked"] = CodexUnlocked;
-            // Guardar niveles de nodos
-            {
-                var levels = new List<int>();
-                tag["skillNodeLevels"] = levels;
-            }
         }
 
         public override void LoadData(TagCompound tag)
         {
-            // CRITICAL DEFENSIVE: LoadData must NEVER throw. If it throws, tModLoader
-            // marks the whole player save as failed ("UnknownError") and the user
-            // loses access to their character. Every read is guarded; the SkillTree
-            // construction is wrapped so a broken tree never corrupts the player.
+            // CRITICAL DEFENSIVE: LoadData must NEVER throw, or tModLoader marks the
+            // whole player save as failed ("UnknownError") and the user loses their
+            // character. Every read is guarded so legacy saves (with SkillTree/Codex
+            // data we no longer care about) still load cleanly.
             try
             {
                 ShardLevel = tag.GetInt("shardLevel");
@@ -132,47 +83,14 @@ namespace AethonMod.Content.Players
                 MeleeKills = tag.GetInt("meleeKills");
                 MagicKills = tag.GetInt("magicKills");
                 ResonanceShards = tag.GetInt("resonanceShards");
-                MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
-                CodexUnlocked = tag.GetBool("codexUnlocked");
             }
             catch
             {
                 // Defensive: legacy / partial saves keep loading with defaults.
             }
-
-            try
-            {
-                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
-            }
-            catch
-            {
-                GetskillTree = null;
-            }
-
-            // Init() triggers node[0].Upgrade() -> ClassNode.UpdateClass() which reads
-            // Main.player[Main.myPlayer]. During LoadData, Main.myPlayer may not point
-            // to the player being loaded, which would NPE. Wrap separately so the tree
-            // (already built with all nodes) is kept even if Init fails.
-            if (GetskillTree != null)
-            {
-                try { GetskillTree.Init(); }
-                catch { /* Init skipped — tree is still usable without it */ }
-            }
-
-            try
-            {
-                var levels = tag.GetList<int>("skillNodeLevels");
-            }
-            catch { /* ignored */ }
         }
 
-        public override void PostUpdateEquips()
-        {
-            // Aplicar efectos del árbol (nuevo sistema)
-            // Los efectos del skill tree se aplican via GetskillTree (AnRPG pattern)
-        }
-
-        // Mana shield simplificado — sin NodeEffectSystem
+        public override void PostUpdateEquips() { }
         public override void ModifyHurt(ref Player.HurtModifiers modifiers) { }
         public override void OnHurt(Player.HurtInfo info) { }
     }

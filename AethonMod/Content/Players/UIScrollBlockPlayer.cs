@@ -4,16 +4,17 @@ using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Players
 {
+    /// <summary>
+    /// Bloquea el movimiento del jugador mientras una UI del mod esté abierta.
+    /// Sistema simplificado: solo BranchChoiceUI (selección de arma).
+    /// </summary>
     public class UIScrollBlockPlayer : ModPlayer
     {
         public override void PreUpdate()
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
-                       (ui.CodexUI?.IsVisible ?? false) || 
-                       (ui.BranchChoiceUI?.IsVisible ?? false);
-            if (!any) return;
+            if (!(ui.BranchChoiceUI?.IsVisible ?? false)) return;
             Player.controlLeft = false;
             Player.controlRight = false;
             Player.controlUp = false;
@@ -29,10 +30,7 @@ namespace AethonMod.Content.Players
         {
             var ui = ModContent.GetInstance<UISystem>();
             if (ui == null) return;
-            bool any = Content.SkillTree.UI.SkillTreeUi.visible || 
-                       (ui.CodexUI?.IsVisible ?? false) || 
-                       (ui.BranchChoiceUI?.IsVisible ?? false);
-            if (any)
+            if (ui.BranchChoiceUI?.IsVisible ?? false)
             {
                 Player.velocity.X = 0;
                 Player.controlLeft = false;

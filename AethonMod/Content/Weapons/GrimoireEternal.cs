@@ -233,10 +233,6 @@ namespace AethonMod.Content.Weapons
 
                 tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]"));
                 tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"[c/B388FF:{bar} {sp.ShardXP}/{xpNeeded} XP]"));
-                tooltips.Add(new TooltipLine(Mod, "FragmentPts",
-                    sp.AvailableSkillPoints() > 0
-                    ? $"[c/78FF96:Puntos: {sp.AvailableSkillPoints()} disponibles]"
-                    : "[c/78788C:Sin puntos disponibles]"));
             }
         }
     }

@@ -226,7 +226,8 @@ namespace AethonMod.Content.NPCs
         }
 
         // ====================================================================
-        // FASE 5 — Reconocimiento: Aethon empuña TUS runas memorizadas
+        // FASE 5 — Reconocimiento: Aethon desata un asalto final
+        // (Sistema simplificado — sin runas memorizadas)
         // ====================================================================
         private void Phase5Acknowledgment(Player target)
         {
@@ -236,53 +237,18 @@ namespace AethonMod.Content.NPCs
             {
                 AttackTimer = 0;
 
-                // Si el jugador tiene runas memorizadas, Aethon las usa contra él.
-                if (sp != null && sp.MemorizedRunes.Count > 0)
+                // Asalto generico potente: abanico de proyectiles arcano
+                Vector2 vel = (target.Center - NPC.Center).SafeNormalize(Vector2.Zero) * 12f;
+                for (int i = -2; i <= 2; i++)
                 {
-                    // Elegir una runa aleatoria y disparar su comportamiento.
-                    string rune = sp.MemorizedRunes[Main.rand.Next(sp.MemorizedRunes.Count)];
-                    FireRuneAttack(target, rune);
-                }
-                else
-                {
-                    // Sin runas: ataque genérico potente.
-                    Vector2 vel = (target.Center - NPC.Center).SafeNormalize(Vector2.Zero) * 12f;
-                    for (int i = -2; i <= 2; i++)
-                    {
-                        Projectile.NewProjectile(
-                            NPC.GetSource_FromAI(),
-                            NPC.Center,
-                            vel.RotatedBy(i * 0.1),
-                            ProjectileID.CultistBossLightningOrbArc,
-                            70, 3f, Main.myPlayer);
-                    }
+                    Projectile.NewProjectile(
+                        NPC.GetSource_FromAI(),
+                        NPC.Center,
+                        vel.RotatedBy(i * 0.1),
+                        ProjectileID.CultistBossLightningOrbArc,
+                        70, 3f, Main.myPlayer);
                 }
             }
-        }
-
-        /// <summary>
-        /// Dispara el ataque correspondiente a una runa memorizada del jugador.
-        /// Aethon refleja el poder del jugador.
-        /// </summary>
-        private void FireRuneAttack(Player target, string runeName)
-        {
-            // Simplificado: mapear nombres a proyectiles.
-            int projType = runeName switch
-            {
-                "Último Prisma" => ProjectileID.LastPrism,
-                "Destello Lunar" => ProjectileID.CultistBossLightningOrbArc,
-                "Tifón de Cuchillas" => ProjectileID.Typhoon,
-                "Hoja Terra" => ProjectileID.TerraBeam,
-                "Ira Estelar" => ProjectileID.StarWrath,
-                "Zenith" => ProjectileID.StarWrath,
-                _ => ProjectileID.CultistBossLightningOrbArc,
-            };
-            Vector2 vel = (target.Center - NPC.Center).SafeNormalize(Vector2.Zero) * 10f;
-            Projectile.NewProjectile(
-                NPC.GetSource_FromAI(),
-                NPC.Center, vel, projType,
-                80, 3f, Main.myPlayer);
-            Main.NewText($"Aethon empuña tu {runeName}!", new Color(255, 100, 100));
         }
 
         private void OnPhaseChange()

@@ -7,17 +7,13 @@ using System.ComponentModel;
 namespace AethonMod.Content
 {
     /// <summary>
-    /// Configuracion del mod Aethon.
+    /// Configuración del mod Aethon (sistema simplificado).
+    /// El árbol de habilidades (K) y el Codex de Memoria (J) fueron eliminados,
+    /// por lo que ya no hay teclas de UI configurables.
     /// </summary>
     public class AethonConfig : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
-
-        [DefaultValue(Keys.K)]
-        public Keys SkillTreeKey = Keys.K;
-
-        [DefaultValue(Keys.J)]
-        public Keys CodexKey = Keys.J;
 
         [DefaultValue(1f)]
         [Range(0.1f, 10f)]
