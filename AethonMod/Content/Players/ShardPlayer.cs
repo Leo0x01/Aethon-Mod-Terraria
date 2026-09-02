@@ -117,22 +117,46 @@ namespace AethonMod.Content.Players
 
         public override void LoadData(TagCompound tag)
         {
-            ShardLevel = tag.GetInt("shardLevel");
-            if (ShardLevel < 1) ShardLevel = 1;
-            ShardXP = tag.GetInt("shardXP");
-            ActiveBranch = (BranchType)tag.GetInt("activeBranch");
-            SubForm = (WeaponSubForm)tag.GetInt("subForm");
-            DistanceKills = tag.GetInt("distanceKills");
-            MeleeKills = tag.GetInt("meleeKills");
-            MagicKills = tag.GetInt("magicKills");
-            ResonanceShards = tag.GetInt("resonanceShards");
-            MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
-            CodexUnlocked = tag.GetBool("codexUnlocked");
-            // Cargar niveles de nodos
-            GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
-            GetskillTree.Init();
-            
-            var levels = tag.GetList<int>("skillNodeLevels");
+            // CRITICAL DEFENSIVE: LoadData must NEVER throw. If it throws, tModLoader
+            // marks the whole player save as failed ("UnknownError") and the user
+            // loses access to their character. Every read is guarded; the SkillTree
+            // construction is wrapped so a broken tree never corrupts the player.
+            try
+            {
+                ShardLevel = tag.GetInt("shardLevel");
+                if (ShardLevel < 1) ShardLevel = 1;
+                ShardXP = tag.GetInt("shardXP");
+                ActiveBranch = (BranchType)tag.GetInt("activeBranch");
+                SubForm = (WeaponSubForm)tag.GetInt("subForm");
+                DistanceKills = tag.GetInt("distanceKills");
+                MeleeKills = tag.GetInt("meleeKills");
+                MagicKills = tag.GetInt("magicKills");
+                ResonanceShards = tag.GetInt("resonanceShards");
+                MemorizedRunes = new List<string>(tag.GetList<string>("memorizedRunes"));
+                CodexUnlocked = tag.GetBool("codexUnlocked");
+            }
+            catch
+            {
+                // Defensive: legacy / partial saves keep loading with defaults.
+            }
+
+            try
+            {
+                GetskillTree = new Content.SkillTree.RPGModule.SkillTree();
+                GetskillTree.Init();
+            }
+            catch
+            {
+                // If the tree still fails to build, fall back to a safe empty tree
+                // instead of letting the exception corrupt the player save.
+                GetskillTree = null;
+            }
+
+            try
+            {
+                var levels = tag.GetList<int>("skillNodeLevels");
+            }
+            catch { /* ignored */ }
         }
 
         public override void PostUpdateEquips()

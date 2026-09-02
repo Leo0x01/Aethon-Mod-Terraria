@@ -31,8 +31,18 @@ namespace AethonMod.Content.SkillTree.Entities
 
         public override void LoadData(TagCompound tag)
         {
-            skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
-            skilltree.Init();
+            // CRITICAL DEFENSIVE: LoadData must NEVER throw, or tModLoader marks the
+            // player save as "UnknownError" / corrupt. The SkillTree constructor and
+            // Init() are themselves defensive, but we guard here too as a final safety net.
+            try
+            {
+                skilltree = new global::AethonMod.Content.SkillTree.RPGModule.SkillTree();
+                skilltree.Init();
+            }
+            catch
+            {
+                skilltree = null;
+            }
         }
 
         public override void SaveData(TagCompound tag)
