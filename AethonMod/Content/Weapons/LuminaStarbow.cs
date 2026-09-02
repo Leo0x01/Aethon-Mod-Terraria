@@ -1,15 +1,21 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
+using AethonMod.Content.Players;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
     /// Lumina, la Arcoestelar — arma de la rama de Distancia.
     /// Arco que dispara flechas de luz estelar (no consume municion base).
-    /// El daño escala con el nivel del fragmento: daño = nivel × 2.4.
+    ///
+    /// ESCALADO POR NIVEL DEL FRAGMENTO:
+    /// - Cada nivel: +2% daño, +0.2% crit, +0.4% armor pen
+    /// - Cada 5 niveles: bonus de hito acumulativo (flecha extra, crit, velocidad, etc.)
     /// </summary>
     public class LuminaStarbow : ModItem
     {
@@ -40,67 +46,85 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
-            var sp = player.GetModPlayer<Players.ShardPlayer>();
-            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Distance)
-            {
-                // Escalado porcentual moderado: +2% por nivel (no +2.4 flat)
-                // En nivel 100 = +200% daño (3x del daño base), no +240 flat
-                damage *= 1f + sp.ShardLevel * 0.02f;
-            }
-            // Aplicar efectos de nodos del árbol de Distancia.
-            float crit = 0;
-            
-            player.GetCritChance(DamageClass.Ranged) += crit;
+            var sp = player.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Distance) return;
+
+            // Cada nivel: +2% daño
+            damage *= WeaponScaling.DamageMult(BranchType.Distance, sp.ShardLevel);
+
+            // Cada nivel: +0.2% critico
+            player.GetCritChance(DamageClass.Ranged) += WeaponScaling.CritBonus(sp.ShardLevel);
+
+            // Cada nivel: +0.4% armor penetration
+            player.GetArmorPenetration(DamageClass.Ranged) += WeaponScaling.ArmorPenBonus(sp.ShardLevel);
         }
 
         public override float UseTimeMultiplier(Player player)
         {
-            return 1f;
+            var sp = player.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Distance) return 1f;
+            // Cada nivel: -0.3% use time (mas rapido)
+            return WeaponScaling.UseSpeedMult(sp.ShardLevel);
         }
 
-        public override bool CanConsumeAmmo(Item ammo, Player player)
-        {
-            return false;
-        }
+        public override bool CanConsumeAmmo(Item ammo, Player player) => false;
 
+        /// <summary>
+        /// Dispara flechas extra segun hitos: +1 cada 5 niveles.
+        /// </summary>
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int extra = 0; // Sin NodeEffectSystem — los nodos del nuevo árbol aplican daño directo
+            var sp = player.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Distance) return true;
+
+            int extra = WeaponScaling.ExtraProjectiles(BranchType.Distance, sp.ShardLevel);
             for (int i = 0; i < extra; i++)
             {
                 float angle = (i + 1) * 0.15f * (i % 2 == 0 ? 1f : -1f);
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-            return true;
+            return true; // tModLoader dispara la flecha principal
         }
 
-        public override Vector2? HoldoutOffset()
-        {
-            return new Vector2(2f, 0f);
-        }
+        public override Vector2? HoldoutOffset() => new Vector2(2f, 0f);
 
-        public override void ModifyTooltips(System.Collections.Generic.List<TooltipLine> tooltips)
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // Añadir barra de XP del fragmento al tooltip
-            var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
-            if (sp != null && sp.IsImprinted && sp.ActiveBranch == Players.BranchType.Distance)
+            var sp = Main.LocalPlayer?.GetModPlayer<ShardPlayer>();
+            if (sp == null || !sp.IsImprinted || sp.ActiveBranch != BranchType.Distance) return;
+
+            int xpNeeded = sp.XPForNextLevel();
+            float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
+            pct = System.Math.Clamp(pct, 0f, 1f);
+            int barLen = 20;
+            int filled = (int)(barLen * pct);
+            string bar = "[";
+            for (int i = 0; i < barLen; i++)
+                bar += i < filled ? "█" : "░";
+            bar += "]";
+
+            tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
+            tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
+
+            // Stats actuales por nivel
+            tooltips.Add(new TooltipLine(Mod, "ScalingStats",
+                $"[c/FFD700:Escalado por nivel:] " +
+                $"[c/FF5555:+{(int)(sp.ShardLevel * WeaponScaling.RangedDamagePerLevel * 100)}% daño] " +
+                $"[c/FFAA55:+{WeaponScaling.CritBonus(sp.ShardLevel):F1}% crit] " +
+                $"[c/55AAFF:+{sp.ShardLevel * 0.4f:F1}% armor pen]"));
+
+            // Hito alcanzado (cada 5 niveles)
+            int nextMilestone = ((sp.ShardLevel / 5) + 1) * 5;
+            if (sp.ShardLevel >= 5)
             {
-                int xpNeeded = sp.XPForNextLevel();
-                float pct = xpNeeded > 0 ? (float)sp.ShardXP / xpNeeded : 0f;
-                pct = System.Math.Clamp(pct, 0f, 1f);
-
-                int barLen = 20;
-                int filled = (int)(barLen * pct);
-                string bar = "[";
-                for (int i = 0; i < barLen; i++)
-                    bar += i < filled ? "█" : "░";
-                bar += "]";
-
-                tooltips.Add(new TooltipLine(Mod, "FragmentLevel", $"[c/FFD700:Nivel {sp.ShardLevel}]") { OverrideColor = new Color(245, 196, 81) });
-                tooltips.Add(new TooltipLine(Mod, "FragmentXP", $"{bar} {sp.ShardXP}/{xpNeeded} XP") { OverrideColor = new Color(179, 136, 255) });
+                tooltips.Add(new TooltipLine(Mod, "MilestoneHeader", "[c/78FF96:★ Hitos alcanzados:]"));
+                var milestones = WeaponScaling.MilestonesReached(BranchType.Distance, sp.ShardLevel);
+                foreach (var m in milestones)
+                    tooltips.Add(new TooltipLine(Mod, "Milestone_" + m, "  " + m));
             }
+            tooltips.Add(new TooltipLine(Mod, "NextMilestone",
+                $"[c/78788C:Próximo hito nivel {nextMilestone}: {WeaponScaling.MilestoneDescription(BranchType.Distance, nextMilestone / 5)}]"));
         }
     }
 }
-

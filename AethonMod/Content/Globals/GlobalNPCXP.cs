@@ -17,9 +17,7 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitByItem(NPC npc, Player player, Item item, NPC.HitInfo hit, int damageDone)
         {
-            // Lifesteal: regeneracion de salud por dano causado (Keystone de Ascendancy).
-            // Solo si el dano es de fuente no-minion (melee/distancia).
-            
+            // Tracking de último golpe melee (para conteo de kills por rama).
         }
 
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
@@ -29,8 +27,7 @@ namespace AethonMod.Content.Globals
             Player? player = Main.player[projectile.owner];
             if (player != null && player.active)
             {
-                // Lifesteal para proyectiles (determina si es de invocacion).
-                
+                // Tracking de último golpe por proyectil (para conteo de kills por rama).
             }
         }
 

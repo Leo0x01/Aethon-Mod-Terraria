@@ -109,7 +109,7 @@ namespace AethonMod.Content.Items
 
             // Si ya esta imprintado, mostrar info del nivel.
             int xpNeeded = sp.XPForNextLevel();
-            Main.NewText($"Fragmento Genesis — Nivel {sp.ShardLevel} | XP: {sp.ShardXP}/{xpNeeded} | Rama: {sp.ActiveBranch} | Pulsa K para el arbol de habilidades",
+            Main.NewText($"Fragmento Genesis — Nivel {sp.ShardLevel} | XP: {sp.ShardXP}/{xpNeeded} | Rama: {sp.ActiveBranch}",
                 new Color(245, 196, 81));
             return true;
         }

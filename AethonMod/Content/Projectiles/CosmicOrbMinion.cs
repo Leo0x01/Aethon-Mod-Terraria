@@ -3,6 +3,8 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
+using AethonMod.Content.Players;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Projectiles
 {
@@ -11,10 +13,9 @@ namespace AethonMod.Content.Projectiles
     /// Dispara proyectiles mágicos a los enemigos HOSTILES cercanos.
     /// Aparece en la zona de efectos (buff slot) como cualquier minion.
     ///
-    /// Mejoras del árbol de habilidades (NodeEffectSystem):
-    /// - summon-notable: +1 slot de minion
-    /// - summon-keystone: +5 slots de minion, minions disparan bolts extra
-    /// - ascend-3 (Magic): +5 bolts por lanzamiento
+    /// ESCALADO (via Grimorio + WeaponScaling):
+    /// - Slots de minion: +1 cada 5 niveles del fragmento (Grimorio los otorga)
+    /// - Bolts extra por lanzamiento: +1 cada 10 niveles (hito Magia)
     /// </summary>
     public class CosmicOrbMinion : ModProjectile
     {
@@ -26,8 +27,6 @@ namespace AethonMod.Content.Projectiles
             Main.projFrames[Projectile.type] = 1;
             Main.projPet[Projectile.type] = true;
             ProjectileID.Sets.MinionTargettingFeature[Projectile.type] = true;
-            ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
-            // Asociar el buff del minion (aparece en la zona de buffs)
             ProjectileID.Sets.MinionSacrificable[Projectile.type] = true;
         }
 
@@ -42,7 +41,6 @@ namespace AethonMod.Content.Projectiles
             Projectile.penetrate = -1;
             Projectile.timeLeft = 18000;
             // Daño HÍBRIDO: tanto Magic como Summon
-            // Usamos Summon como base, pero el grimorio aplica bonus de ambos
             Projectile.DamageType = DamageClass.Summon;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.aiStyle = -1;
@@ -62,7 +60,7 @@ namespace AethonMod.Content.Projectiles
                 return;
             }
 
-            // Verificar que el owner tiene el buff del minion (aparece en zona de efectos)
+            // Verificar que el owner tiene el buff del minion
             CheckMinionBuff(owner);
 
             // === ORBITAR ALREDEDOR DEL JUGADOR ===
@@ -74,7 +72,6 @@ namespace AethonMod.Content.Projectiles
             );
             Vector2 targetPos = owner.Center + orbitOffset;
 
-            // Moverse hacia la posicion orbital
             Projectile.Center = Vector2.Lerp(Projectile.Center, targetPos, 0.15f);
             Projectile.velocity = Vector2.Zero;
 
@@ -85,9 +82,15 @@ namespace AethonMod.Content.Projectiles
                 shootTimer++;
                 int shootInterval = 60; // cada 1 segundo
 
-                // Mejora: si tiene summon-keystone, disparar mas rapido
-                if (false)
-                    shootInterval = 40;
+                // Velocidad de disparo mejora con nivel del fragmento (cada 10 niveles, -10 frames)
+                var sp = owner.GetModPlayer<ShardPlayer>();
+                if (sp != null && sp.IsImprinted && sp.ActiveBranch == BranchType.Magic)
+                {
+                    int speedTier = sp.ShardLevel / 10;
+                    int reduction = speedTier * 5;
+                    if (reduction > 30) reduction = 30;
+                    shootInterval -= reduction;
+                }
 
                 if (shootTimer >= shootInterval)
                 {
@@ -97,7 +100,6 @@ namespace AethonMod.Content.Projectiles
             }
 
             // === EFECTOS VISUALES ===
-            // Polvo cosmico
             if (Main.rand.NextBool(5))
             {
                 Dust.NewDustPerfect(Projectile.Center, Terraria.ID.DustID.GoldFlame,
@@ -111,13 +113,11 @@ namespace AethonMod.Content.Projectiles
                     100, new Color(179, 136, 255), 0.7f);
             }
 
-            // Luz
             Lighting.AddLight(Projectile.Center, new Vector3(0.8f, 0.6f, 1.0f));
         }
 
         private void CheckMinionBuff(Player owner)
         {
-            // Verificar que el jugador tenga el buff del minion activo
             int buffType = ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>();
             bool hasBuff = false;
             for (int i = 0; i < Player.MaxBuffs; i++)
@@ -129,15 +129,12 @@ namespace AethonMod.Content.Projectiles
                 }
             }
 
-            // El minion SOLO se elimina si el buff fue cancelado (click derecho en el icono del buff)
-            // NO se elimina al cambiar de arma — persiste hasta que el jugador cancele el buff.
             if (!hasBuff)
             {
                 Projectile.Kill();
             }
             else
             {
-                // Renovar el buff (que no se agote)
                 owner.AddBuff(buffType, 18000);
             }
         }
@@ -149,26 +146,17 @@ namespace AethonMod.Content.Projectiles
         private NPC? FindHostileTarget(Player owner)
         {
             NPC? closest = null;
-            float closestDist = 600f; // rango de deteccion
+            float closestDist = 600f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.active) continue;
-
-                // === FILTROS PARA NO ATACAR NPCs NO HOSTILES ===
-                // NPCs amistosos (town NPCs, etc.)
                 if (npc.friendly) continue;
-                // Town NPCs (mercaderes, etc.)
                 if (npc.townNPC) continue;
-                // NPCs que no reciben daño (inmunes)
                 if (npc.dontTakeDamage) continue;
-                // Critters (conejos, pajaros, etc.) — no atacarlos (aiStyle 7 = Bunny/Critter)
                 if (npc.aiStyle == 7) continue;
-                if (npc.catchItem > 0) continue; // capturable con red
-                // NPCs que son partes de un jefe (no objetivos reales)
+                if (npc.catchItem > 0) continue;
                 if (npc.realLife >= 0 && npc.realLife != npc.whoAmI) continue;
-                // NPCs tipo proyectil (no son enemigos reales)
                 if (npc.immortal) continue;
-                // Verificar que sea realmente hostil
                 if (!npc.CanBeChasedBy()) continue;
 
                 float dist = Vector2.Distance(npc.Center, owner.Center);
@@ -189,7 +177,6 @@ namespace AethonMod.Content.Projectiles
             int damage = Projectile.damage;
             float knockback = 2f;
 
-            // Proyectil principal
             int projType = ModContent.ProjectileType<CosmicOrbBolt>();
             Projectile.NewProjectile(
                 Projectile.GetSource_FromAI(),
@@ -197,27 +184,14 @@ namespace AethonMod.Content.Projectiles
                 direction * 12f,
                 projType, damage, knockback, owner.whoAmI);
 
-            // Mejora: si tiene summon-keystone, disparar bolts extra
-            if (false)
+            // Bolts extra: +1 cada 10 niveles del fragmento (hito Magia)
+            var sp = owner.GetModPlayer<ShardPlayer>();
+            if (sp != null && sp.IsImprinted && sp.ActiveBranch == BranchType.Magic)
             {
-                for (int i = 0; i < 2; i++)
+                int extraBolts = WeaponScaling.ExtraProjectiles(BranchType.Magic, sp.ShardLevel) / 2;
+                for (int i = 0; i < extraBolts; i++)
                 {
                     float angle = (i + 1) * 0.25f * (i % 2 == 0 ? 1f : -1f);
-                    Vector2 perturbed = direction.RotatedBy(angle);
-                    Projectile.NewProjectile(
-                        Projectile.GetSource_FromAI(),
-                        Projectile.Center,
-                        perturbed * 12f,
-                        projType, damage, knockback, owner.whoAmI);
-                }
-            }
-
-            // Mejora: ascend-3 (Magic) +5 bolts
-            if (false)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    float angle = i * 0.15f - 0.3f;
                     Vector2 perturbed = direction.RotatedBy(angle);
                     Projectile.NewProjectile(
                         Projectile.GetSource_FromAI(),
@@ -232,7 +206,6 @@ namespace AethonMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // Polvo dorado al impactar
             for (int i = 0; i < 8; i++)
             {
                 Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.GoldFlame,
