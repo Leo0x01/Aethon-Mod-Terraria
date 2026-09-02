@@ -27,7 +27,14 @@ namespace AethonMod.Content.Players
         // Flag: evento global de PRIMERA subida de nivel (solo una vez por personaje)
         public bool FirstLevelUpTriggered = false;
 
-        public int XPForNextLevel() => (int)(80 * System.Math.Pow(ShardLevel, 1.5));
+        public int XPForNextLevel()
+        {
+            // PRIMER nivel (1→2): requiere solo 1 XP (cualquier kill lo sube).
+            // Así el jugador ve el evento global de primera subida casi de inmediato.
+            // Niveles 2+: fórmula normal (80 * nivel^1.5).
+            if (ShardLevel <= 1) return 1;
+            return (int)(80 * System.Math.Pow(ShardLevel, 1.5));
+        }
 
         public void GrantXP(int amount)
         {
