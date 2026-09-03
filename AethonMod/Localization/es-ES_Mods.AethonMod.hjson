@@ -4,6 +4,7 @@
         "Items.GenesisShard.DisplayName": "Fragmento Génesis",
         "Items.GenesisShard.Tooltip": "Un mote de luz pura arrancado del corazón de Aethon,\nla Luz Primordial que existía antes de que las estrellas tuvieran nombre.\nEl Fragmento late con el eco de una guerra olvidada,\ny solo despierta cuando la sangre del portador toca el aire.\n\nCombate enemigos para que el Fragmento imprima tu rama.",
 
+        "Items.Placeables.AncientAltarItem.DisplayName": "Altar Antiguo",
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
         "Items.ResonanceShard.Tooltip": "Fragmento de resonancia cósmica.\nSe obtiene de jefes cósmicos y se usa como moneda.",
 
@@ -32,7 +33,7 @@
         "NPCs.EchoArcher.DisplayName": "Eco de la Arquera Estelar",
         "NPCs.RiftKeeper.DisplayName": "El Guardián del Rift",
 
-        "Common.Imprinting": "El Fragmento Génesis se ha imprpreso con tu rama de {0}!",
+        "Common.Imprinting": "El Fragmento Génesis se ha impreso con tu rama de {0}!",
         "Common.LevelUp": "Tu Fragmento Génesis ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito cósmico alcanzado: {0}",
 }

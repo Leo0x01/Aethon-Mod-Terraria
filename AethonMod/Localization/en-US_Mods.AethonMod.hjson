@@ -4,10 +4,11 @@
         "Items.GenesisShard.DisplayName": "Genesis Shard",
         "Items.GenesisShard.Tooltip": "A mote of pure light torn from the heart of Aethon,\nthe Primordial Light that existed before stars had names.\nThe Shard pulses with the echo of a forgotten war,\nand awakens only when its bearer's blood touches the air.\n\nFight enemies so the Shard may imprint your branch.",
 
+        "Items.Placeables.AncientAltarItem.DisplayName": "Ancient Altar",
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
         "Items.ResonanceShard.Tooltip": "Cosmic resonance shard.\nDropped by cosmic bosses and used as currency.",
 
-        "Items.LuminaStarbow.DisplayName": "Lumina, the Starbowed",
+        "Items.LuminaStarbow.DisplayName": "Lumina, the Starbow",
         "Items.LuminaStarbow.Tooltip": "Lumina was first drawn over the abyss,\nand its string is woven from the thread of a dying constellation.\nEach level draws more starlight into the bow,\nand every five levels a phantom arrow joins the volley,\nrepeating the moment Aethon loosed an arrow into the void.",
 
         "Items.SolbrandEdge.DisplayName": "Solbrand, Edge of Dawn",
