@@ -32,7 +32,7 @@ namespace AethonMod.Content.Globals
             {
                 return item.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
                        item.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
-                       item.type == ModContent.ItemType<Weapons.GrimorioEternal>() ||
+                       item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
                        item.type == ModContent.ItemType<Items.GenesisShard>();
             }
             catch
