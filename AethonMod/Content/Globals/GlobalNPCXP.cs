@@ -96,17 +96,36 @@ namespace AethonMod.Content.Globals
 
             // === OTORGAR XP AL ARMA SOSTENIDA (no al jugador) ===
             // El nivel/XP es por-item individual, no compartido entre armas.
-            int baseXP = Systems.ShardLevelSystem.XPForNPC(npc);
-            int xp = Systems.ShardLevelSystem.ApplyXPMultiplier(baseXP);
-            Item heldItem = player.HeldItem;
-            if (heldItem != null)
+            // DEFENSIVO: envolver TODO en try/catch para que un error en el item
+            // NUNCA corrompa el juego (el kill se procesa normalmente, solo se
+            // omite la XP si algo falla).
+            try
             {
-                var slItem = heldItem.GetGlobalItem<ShardLevelItem>();
-                if (slItem != null)
+                int baseXP = Systems.ShardLevelSystem.XPForNPC(npc);
+                int xp = Systems.ShardLevelSystem.ApplyXPMultiplier(baseXP);
+                Item heldItem = player.HeldItem;
+                if (heldItem != null && xp > 0)
                 {
-                    // Solo otorgar XP si el item es un arma Aethon (AppliesToEntity lo filtra).
-                    slItem.GrantXP(heldItem, xp);
+                    // Solo otorgar XP si el item es uno de las 3 armas Aethon.
+                    // Verificamos el tipo directamente para evitar GetGlobalItem en items que no aplican.
+                    bool isAethonWeapon =
+                        heldItem.type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
+                        heldItem.type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
+                        heldItem.type == ModContent.ItemType<Weapons.GrimoireEternal>();
+                    if (isAethonWeapon)
+                    {
+                        var slItem = heldItem.GetGlobalItem<ShardLevelItem>();
+                        if (slItem != null)
+                        {
+                            slItem.GrantXP(heldItem, xp);
+                        }
+                    }
                 }
+            }
+            catch
+            {
+                // Silenciar errores de XP para no corromper el kill.
+                // El jugador simplemente no recibe XP esta vez.
             }
 
             // Tracking de kills por rama (solo si el jugador no ha elegido rama aun).

@@ -55,43 +55,52 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// Otorga XP a ESTE item específico. Si sube de nivel, dispara OnLevelUp.
+        /// DEFENSIVO: envuelto en try/catch para que un error NUNCA corrompa el kill.
         /// </summary>
         public void GrantXP(Item item, int amount)
         {
-            // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
-            if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
-
-            XP += amount;
-            while (XP >= XPForNextLevel())
+            try
             {
-                XP -= XPForNextLevel();
-                Level++;
-                OnLevelUp(item);
+                // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
+                if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
+
+                XP += amount;
+                while (XP >= XPForNextLevel())
+                {
+                    XP -= XPForNextLevel();
+                    Level++;
+                    OnLevelUp(item);
+                }
+            }
+            catch
+            {
+                // Silenciar: nunca lanzar desde GrantXP.
             }
         }
 
         /// <summary>
         /// Se llama cuando ESTE item sube de nivel.
+        /// DEFENSIVO: envuelto en try/catch para que un error NUNCA corrompa el kill.
         /// </summary>
         private void OnLevelUp(Item item)
         {
-            // Efectos visuales en la posición del jugador
-            Player? owner = Main.LocalPlayer;
-            if (owner != null)
+            try
             {
-                Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}!",
-                    new Microsoft.Xna.Framework.Color(245, 196, 81));
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
-                for (int i = 0; i < 40; i++)
-                    Dust.NewDustPerfect(owner.Center, Terraria.ID.DustID.GoldFlame,
-                        new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
-                        100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
-            }
+                // Efectos visuales en la posición del jugador
+                Player? owner = Main.LocalPlayer;
+                if (owner != null)
+                {
+                    Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}!",
+                        new Microsoft.Xna.Framework.Color(245, 196, 81));
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
+                    for (int i = 0; i < 40; i++)
+                        Dust.NewDustPerfect(owner.Center, Terraria.ID.DustID.GoldFlame,
+                            new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
+                            100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
+                }
 
-            // === EVENTO GLOBAL: primera subida de nivel (solo una vez por PERSONAJE) ===
-            if (owner != null)
-            {
-                try
+                // === EVENTO GLOBAL: primera subida de nivel (solo una vez por PERSONAJE) ===
+                if (owner != null)
                 {
                     var sp = owner.GetModPlayer<Players.ShardPlayer>();
                     if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == owner.whoAmI)
@@ -100,15 +109,18 @@ namespace AethonMod.Content.Globals
                         LevelUpEventSystem.Trigger();
                     }
                 }
-                catch { /* defensivo: nunca lanzar en OnLevelUp */ }
-            }
 
-            // Hito especial cada 50 niveles (infinito)
-            if (Level % 50 == 0)
+                // Hito especial cada 50 niveles (infinito)
+                if (Level % 50 == 0)
+                {
+                    Main.NewText($"✦✦ Hito nivel {Level}! {item.Name} resuena con poder. ✦✦",
+                        new Microsoft.Xna.Framework.Color(245, 196, 81));
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
+                }
+            }
+            catch
             {
-                Main.NewText($"✦✦ Hito nivel {Level}! {item.Name} resuena con poder. ✦✦",
-                    new Microsoft.Xna.Framework.Color(245, 196, 81));
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
+                // Silenciar: nunca lanzar desde OnLevelUp.
             }
         }
 
