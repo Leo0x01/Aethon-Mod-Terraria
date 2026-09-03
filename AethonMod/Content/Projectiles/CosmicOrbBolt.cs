@@ -6,8 +6,15 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles
 {
     /// <summary>
-    /// Cosmic Orb Bolt — proyectil mágico disparado por el CosmicOrbMinion.
-    /// Homing hacia el enemigo mas cercano, con estela violeta/dorada.
+    /// Cosmic Orb Bolt — proyectil cósmico disparado por el CosmicOrbMinion.
+    ///
+    /// Diseñado para combinar con el Grimorio del Eterno:
+    /// - Núcleo dorado (#FFD93D) como la galaxia del grimorio
+    /// - Destellos cian (#00FFFF) como la estrella guía
+    /// - Fragmentos magenta (#FF0066) como las gemas
+    /// - Halo índigo (#4B0082) como el fondo del portal
+    ///
+    /// Homing hacia el enemigo hostil más cercano.
     /// </summary>
     public class CosmicOrbBolt : ModProjectile
     {
@@ -31,15 +38,14 @@ namespace AethonMod.Content.Projectiles
 
         public override void AI()
         {
-            // Homing hacia el enemigo HOSTIL mas cercano
+            // === HOMING hacia el enemigo HOSTIL más cercano ===
             NPC? target = null;
             float closestDist = 400f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.active) continue;
-                // Solo NPCs hostiles
                 if (npc.friendly || npc.townNPC || npc.dontTakeDamage) continue;
-                if (npc.aiStyle == 7) continue; // critters
+                if (npc.aiStyle == 7) continue;
                 if (npc.catchItem > 0) continue;
                 if (npc.immortal) continue;
                 if (!npc.CanBeChasedBy()) continue;
@@ -61,49 +67,75 @@ namespace AethonMod.Content.Projectiles
                 }
             }
 
-            // Rotar el proyectil
-            Projectile.rotation = Projectile.velocity.ToRotation();
+            // Rotar el proyectil (como un fragmento de portal girando)
+            Projectile.rotation += 0.15f;
 
-            // Estela violeta/dorada
+            // === ESTELA CÓSMICA (paleta del grimorio) ===
+            // Dorado (núcleo de galaxia) — cada frame
             if (Main.rand.NextBool(2))
             {
-                Dust.NewDustPerfect(Projectile.Center, Terraria.ID.DustID.PurpleTorch,
-                    -Projectile.velocity * 0.1f + new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    100, new Color(179, 136, 255), 0.8f);
-            }
-            if (Main.rand.NextBool(4))
-            {
-                Dust.NewDustPerfect(Projectile.Center, Terraria.ID.DustID.GoldFlame,
+                Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
                     -Projectile.velocity * 0.05f + new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    100, new Color(245, 196, 81), 0.7f);
+                    100, new Color(255, 217, 61), 0.9f);
+            }
+
+            // Cian (estrella guía) — cada 2 frames
+            if (Main.rand.NextBool(2))
+            {
+                Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                    -Projectile.velocity * 0.1f + new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    150, new Color(0, 255, 255), 0.8f);
+            }
+
+            // Magenta (gemas) — cada 3 frames
+            if (Main.rand.NextBool(3))
+            {
+                Dust.NewDustPerfect(Projectile.Center, DustID.RainbowTorch,
+                    -Projectile.velocity * 0.08f + new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, new Color(255, 0, 102), 0.8f);
             }
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // Explosion de polvo violeta
-            for (int i = 0; i < 12; i++)
+            // === EXPLOSIÓN CÓSMICA al impactar ===
+            // Dorado (núcleo)
+            for (int i = 0; i < 10; i++)
             {
-                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.PurpleTorch,
+                Dust.NewDustPerfect(target.Center, DustID.GoldFlame,
                     new Vector2(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
-                    100, new Color(179, 136, 255), 1.2f);
+                    100, new Color(255, 217, 61), 1.2f);
             }
+            // Cian (estrella)
+            for (int i = 0; i < 8; i++)
+            {
+                Dust.NewDustPerfect(target.Center, DustID.CyanTorch,
+                    new Vector2(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
+                    150, new Color(0, 255, 255), 1.0f);
+            }
+            // Magenta (gemas)
             for (int i = 0; i < 6; i++)
             {
-                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.GoldFlame,
+                Dust.NewDustPerfect(target.Center, DustID.RainbowTorch,
                     new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
-                    100, new Color(245, 196, 81), 1f);
+                    200, new Color(255, 0, 102), 1.0f);
             }
         }
 
         public override void Kill(int timeLeft)
         {
-            // Explosion al morir
-            for (int i = 0; i < 8; i++)
+            // Explosión al morir (sin impacto)
+            for (int i = 0; i < 6; i++)
             {
-                Dust.NewDustPerfect(Projectile.Center, Terraria.ID.DustID.PurpleTorch,
+                Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
                     new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
-                    100, new Color(179, 136, 255), 1f);
+                    100, new Color(255, 217, 61), 0.9f);
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                    new Vector2(Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                    150, new Color(0, 255, 255), 0.8f);
             }
         }
     }
