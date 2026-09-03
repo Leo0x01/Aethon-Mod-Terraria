@@ -55,7 +55,7 @@ namespace AethonMod.Content.Weapons.Projectiles
             // Destellos cian (estrella guía del grimorio)
             for (int i = 0; i < 10; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.CyanTorch,
+                Dust.NewDustPerfect(target.Center, DustID.BlueTorch,
                     new Vector2(Main.rand.NextFloat(-5, 5), Main.rand.NextFloat(-5, 5)),
                     150, new Color(0, 255, 255), 1.3f);
             }
@@ -100,7 +100,7 @@ namespace AethonMod.Content.Weapons.Projectiles
             // Cian (estrella guía) — cada 2 frames
             if (Main.rand.NextBool(2))
             {
-                Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
                     new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
                     150, new Color(0, 255, 255), 0.9f);
             }

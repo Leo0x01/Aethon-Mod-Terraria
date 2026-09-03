@@ -182,7 +182,7 @@ namespace AethonMod.Content.Projectiles
                     (float)System.Math.Sin(angle) * dist);
                 Vector2 vel = -offset.SafeNormalize(Vector2.Zero) * 2f;
                 Dust.NewDustPerfect(Projectile.Center + offset,
-                    DustID.CyanTorch, vel, 100, new Color(0, 255, 255), 1.0f);
+                    DustID.BlueTorch, vel, 100, new Color(0, 255, 255), 1.0f);
             }
             for (int i = 0; i < 2; i++)
             {
@@ -233,7 +233,7 @@ namespace AethonMod.Content.Projectiles
                 }
                 for (int i = 0; i < 8; i++)
                 {
-                    Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                    Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
                         new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
                         200, new Color(0, 255, 255), 1.0f);
                 }
@@ -266,7 +266,7 @@ namespace AethonMod.Content.Projectiles
                     }
                     if (Main.rand.NextBool(8))
                     {
-                        Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                        Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
                             new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
                             100, new Color(0, 255, 255), 0.6f);
                     }
@@ -429,7 +429,7 @@ namespace AethonMod.Content.Projectiles
             }
             for (int i = 0; i < 6; i++)
             {
-                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.CyanTorch,
+                Dust.NewDustPerfect(target.Center, Terraria.ID.DustID.BlueTorch,
                     new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
                     150, new Color(0, 255, 255), 0.9f);
             }

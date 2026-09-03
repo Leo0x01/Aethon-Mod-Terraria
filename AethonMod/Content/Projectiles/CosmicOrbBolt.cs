@@ -82,7 +82,7 @@ namespace AethonMod.Content.Projectiles
             // Cian (estrella guía) — cada 2 frames
             if (Main.rand.NextBool(2))
             {
-                Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
                     -Projectile.velocity * 0.1f + new Vector2(Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
                     150, new Color(0, 255, 255), 0.8f);
             }
@@ -109,7 +109,7 @@ namespace AethonMod.Content.Projectiles
             // Cian (estrella)
             for (int i = 0; i < 8; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.CyanTorch,
+                Dust.NewDustPerfect(target.Center, DustID.BlueTorch,
                     new Vector2(Main.rand.NextFloat(-4, 4), Main.rand.NextFloat(-4, 4)),
                     150, new Color(0, 255, 255), 1.0f);
             }
@@ -133,7 +133,7 @@ namespace AethonMod.Content.Projectiles
             }
             for (int i = 0; i < 4; i++)
             {
-                Dust.NewDustPerfect(Projectile.Center, DustID.CyanTorch,
+                Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
                     new Vector2(Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
                     150, new Color(0, 255, 255), 0.8f);
             }
