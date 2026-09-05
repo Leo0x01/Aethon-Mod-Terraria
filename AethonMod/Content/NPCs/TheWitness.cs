@@ -47,7 +47,13 @@ namespace AethonMod.Content.NPCs
         public override string GetChat()
         {
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
-            int level = sp?.HeldWeaponLevel ?? 0;
+            int level = 0;
+            Item? held = Main.LocalPlayer.HeldItem;
+            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            {
+                try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
+                catch { }
+            }
             return level switch
             {
                 0 => "Te he observado. Aun no has reclamado el Fragmento Genesis. Busca el Sagrario Hueco bajo tierra.",
@@ -63,7 +69,13 @@ namespace AethonMod.Content.NPCs
         public override void SetChatButtons(ref string button, ref string button2)
         {
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
-            int level = sp?.HeldWeaponLevel ?? 0;
+            int level = 0;
+            Item? held = Main.LocalPlayer.HeldItem;
+            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            {
+                try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
+                catch { }
+            }
             if (level >= 50)
                 button = "Comprar Resonancia (10 monedas)";
             else
@@ -75,7 +87,7 @@ namespace AethonMod.Content.NPCs
             if (!firstButton) return;
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return;
-            if (sp.HeldWeaponLevel >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
+            if (level >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
             {
                 Item.NewItem(
                     Main.LocalPlayer.GetSource_GiftOrReward(),

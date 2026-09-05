@@ -1,56 +1,47 @@
+using System.Collections.Generic;
 using Terraria;
-using Terraria.ModLoader;
-using AethonMod.Content.Players;
 
 namespace AethonMod.Content.Systems
 {
     /// <summary>
-    /// Sistema de escalado de armas por nivel del Fragmento Genesis (INFINITO).
+    /// Sistema de escalado del Grimorio del Eterno por nivel (INFINITO).
     ///
     /// REGLAS:
-    /// - Cada nivel subido mejora UNA estadistica base del arma (crecimiento lineal, SIN tope).
-    /// - Cada 5 niveles se AGREGA una estadistica extra/bonus (hito acumulativo, infinito).
-    /// - Melee: cada 10 niveles, +1 proyectil "Solbrand Blade" autoguiado por ataque.
-    /// - Grimorio: +1 slot de minion cada 5 niveles (stackea con armadura de invocador).
+    /// - Cada nivel sube estadisticas base (crecimiento lineal).
+    /// - Cada 5 niveles se AGREGA una estadistica extra (hito acumulativo).
+    /// - Sin dependencias de BranchType ni ShardPlayer.
     /// </summary>
     public static class WeaponScaling
     {
-        // ================================================================
-        //  STATS BASE — suben cada nivel (crecimiento lineal INFINITO)
-        // ================================================================
+        // === STATS BASE POR NIVEL ===
+        public const float MagicDamagePerLevel = 0.022f;   // +2.2%
+        public const float SummonDamagePerLevel = 0.01f;   // +1%
+        public const float CritPerLevel = 0.002f;           // +0.2%
+        public const float UseSpeedPerLevel = 0.003f;       // -0.3% (tope -25%)
+        public const float ArmorPenPerLevel = 0.004f;        // +0.4%
 
-        public const float MeleeDamagePerLevel = 0.025f;
-        public const float RangedDamagePerLevel = 0.02f;
-        public const float MagicDamagePerLevel = 0.022f;
-        public const float SummonDamagePerLevel = 0.01f;
-
-        /// <summary>Velocidad de uso: -0.3% por nivel, tope -25%.</summary>
-        public const float UseSpeedPerLevel = 0.003f;
-        public const float CritPerLevel = 0.002f;
-        public const float KnockbackPerLevel = 0.005f;
-        public const float ArmorPenPerLevel = 0.004f;
-
-        /// <summary>Mana: +3 por cada 20 niveles (Grimorio). Tope: 30.</summary>
+        // === MANA ===
+        public const int ManaBase = 3;
         public const int ManaPer20Levels = 3;
         public const int ManaMax = 30;
-        /// <summary>Mana base del Grimorio (siempre cuesta al menos esto).</summary>
-        public const int ManaBase = 3;
 
         // ================================================================
-        //  METODOS DE STATS BASE
+        //  STATS BASE
         // ================================================================
 
-        public static float DamageMult(BranchType branch, int level)
-        {
-            return branch switch
-            {
-                BranchType.Melee => 1f + level * MeleeDamagePerLevel,
-                BranchType.Distance => 1f + level * RangedDamagePerLevel,
-                BranchType.Magic => 1f + level * MagicDamagePerLevel,
-                _ => 1f,
-            };
-        }
+        /// <summary>Multiplicador de daño mágico: 1 + nivel * 0.022</summary>
+        public static float MagicDamageMult(int level) => 1f + level * MagicDamagePerLevel;
 
+        /// <summary>Bonus de daño de invocación: nivel * 0.01 (aditivo)</summary>
+        public static float SummonDamageBonus(int level) => level * SummonDamagePerLevel;
+
+        /// <summary>Bonus de critico: nivel * 0.2%</summary>
+        public static float CritBonus(int level) => level * CritPerLevel * 100f;
+
+        /// <summary>Bonus de armor penetration: nivel * 0.4%</summary>
+        public static float ArmorPenBonus(int level) => level * ArmorPenPerLevel * 100f;
+
+        /// <summary>Multiplicador de use time (menor = mas rapido). Tope -25%.</summary>
         public static float UseSpeedMult(int level)
         {
             float reduction = level * UseSpeedPerLevel;
@@ -58,31 +49,11 @@ namespace AethonMod.Content.Systems
             return 1f - reduction;
         }
 
-        public static float CritBonus(int level) => level * CritPerLevel * 100f;
-        public static float KnockbackMult(int level) => 1f + level * KnockbackPerLevel;
-        public static float ArmorPenBonus(int level) => level * ArmorPenPerLevel * 100f;
-
         // ================================================================
-        //  GRIMORIO — slots de minion (stackea con armadura de invocador)
+        //  MANA
         // ================================================================
 
-        /// <summary>
-        /// Cantidad de slots de minion extra otorgados por el Grimorio.
-        /// +1 slot cada 5 niveles. SIN tope (infinito).
-        /// Estos slots se SUMAN a player.maxMinions, que ya incluye los bonuses
-        /// de armadura de invocador, accesorios y buffs.
-        /// </summary>
-        public static int BonusMinionSlots(int level)
-        {
-            if (level < 5) return 0;
-            return level / 5;
-        }
-
-        /// <summary>
-        /// Costo de mana del Grimorio segun el nivel.
-        /// Base 3, +3 cada 20 niveles, tope 30.
-        /// Nivel 1-19: 3 mana. Nivel 20-39: 6. Nivel 40-59: 9... Nivel 200: 30.
-        /// </summary>
+        /// <summary>Costo de mana del bolt: 3 + nivel/20 * 3, tope 30.</summary>
         public static int ManaCost(int level)
         {
             int cost = ManaBase + (level / 20) * ManaPer20Levels;
@@ -90,13 +61,21 @@ namespace AethonMod.Content.Systems
             return cost;
         }
 
+        /// <summary>Costo de mana del minion: 15 + nivel, tope 100.</summary>
+        public static int MinionManaCost(int level)
+        {
+            int cost = 15 + level;
+            if (cost > 100) cost = 100;
+            return cost;
+        }
+
+        // ================================================================
+        //  BONUS POR MANA FALTANTE
+        // ================================================================
+
         /// <summary>
-        /// Multiplicador de daño por % de mana FALTANTE.
-        /// A 0% mana faltante (full mana): x1.0 (sin bonus).
-        /// A 50% mana faltante: x1.25 (+25% daño).
-        /// A 90% mana faltante: x1.45 (+45% daño).
+        /// +0.5% daño por 1% mana faltante (tope +50%).
         /// Formula: 1 + (missingFraction * 0.5)
-        /// Tope soft: +50% daño a mana casi vacio.
         /// </summary>
         public static float LowManaDamageMult(int currentMana, int maxMana)
         {
@@ -108,33 +87,29 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  LIFESTEAL — desbloqueado a nivel 7, +0.1% cada 7 niveles (INFINITO)
+        //  SLOTS DE MINION
         // ================================================================
 
-        /// <summary>
-        /// Porcentaje de lifesteal (curacion por daño causado).
-        /// - Nivel 1-6: 0% (sin lifesteal)
-        /// - Nivel 7-13: 0.1%
-        /// - Nivel 14-20: 0.2%
-        /// - Nivel 21-27: 0.3%
-        /// - ...infinito
-        /// Formula: (level / 7) * 0.001f
-        /// </summary>
+        /// <summary>+1 slot de minion cada 5 niveles (infinito).</summary>
+        public static int BonusMinionSlots(int level)
+        {
+            if (level < 5) return 0;
+            return level / 5;
+        }
+
+        // ================================================================
+        //  LIFESTEAL
+        // ================================================================
+
+        /// <summary>Lifesteal: 0% hasta nivel 7, luego +0.1% cada 7 niveles.</summary>
         public static float LifestealPercent(int level)
         {
             if (level < 7) return 0f;
-            int tiers = level / 7;
-            return tiers * 0.001f; // 0.1% por tier
+            return (level / 7) * 0.001f;
         }
 
-        /// <summary>
-        /// Devuelve true si el lifesteal ya esta desbloqueado (nivel >= 7).
-        /// </summary>
         public static bool HasLifesteal(int level) => level >= 7;
 
-        /// <summary>
-        /// Cura al jugador segun el daño causado y el porcentaje de lifesteal.
-        /// </summary>
         public static void ApplyLifesteal(Player player, int damageDone, int level)
         {
             float pct = LifestealPercent(level);
@@ -150,82 +125,37 @@ namespace AethonMod.Content.Systems
         //  PROYECTILES EXTRA
         // ================================================================
 
-        /// <summary>
-        /// Cantidad de proyectiles extra que dispara el arma.
-        /// - Melee: +1 Solbrand Blade cada 10 niveles (proyectil autoguiado que copia el arma)
-        /// - Distancia: +1 flecha extra cada 5 niveles
-        /// - Magia: +1 ArcaneBolt extra cada 5 niveles
-        /// INFINITO.
-        /// </summary>
-        public static int ExtraProjectiles(BranchType branch, int level)
-        {
-            return branch switch
-            {
-                BranchType.Melee => level / 10,
-                BranchType.Distance => level / 5,
-                BranchType.Magic => level / 5,
-                _ => 0,
-            };
-        }
+        /// <summary>+1 ArcaneBolt extra cada 5 niveles.</summary>
+        public static int ExtraProjectiles(int level) => level / 5;
 
         // ================================================================
-        //  HITOS — cada 5 niveles (INFINITO, cicla el patron)
+        //  HITOS (cada 5 niveles, cicla patron)
         // ================================================================
 
-        public static System.Collections.Generic.List<string> MilestonesReached(BranchType branch, int level)
+        public static List<string> MilestonesReached(int level)
         {
-            var list = new System.Collections.Generic.List<string>();
+            var list = new List<string>();
             int maxMilestone = level / 5;
-
             for (int m = 1; m <= maxMilestone; m++)
             {
-                int milestoneLevel = m * 5;
-                string? desc = MilestoneDescription(branch, m);
+                string? desc = MilestoneDescription(m);
                 if (desc != null)
-                    list.Add($"[c/78FF96:Nivel {milestoneLevel}] {desc}");
+                    list.Add($"Nivel {m * 5}: {desc}");
             }
             return list;
         }
 
-        /// <summary>
-        /// Descripcion del bonus de hito numero N por rama.
-        /// El patron se cicla cada 5 hitos (25 niveles) para que sea infinito.
-        /// </summary>
-        public static string? MilestoneDescription(BranchType branch, int milestone)
+        public static string? MilestoneDescription(int milestone)
         {
-            // Ciclar el patron cada 5 hitos (m1=m6=m11, m2=m7=m12, ...)
             int cycle = ((milestone - 1) % 5) + 1;
-
-            return branch switch
+            return cycle switch
             {
-                BranchType.Melee => cycle switch
-                {
-                    1 => "+5% velocidad de ataque",
-                    2 => "+10% critico",
-                    3 => "+1 espada autoguiada por ataque",
-                    4 => "+15% knockback",
-                    5 => "+10% armadura penetracion",
-                    _ => "+2% daño",
-                },
-                BranchType.Distance => cycle switch
-                {
-                    1 => "+1 flecha extra por disparo",
-                    2 => "+10% critico",
-                    3 => "+5% velocidad de ataque",
-                    4 => "+5% armadura penetracion",
-                    5 => "+1 flecha extra por disparo",
-                    _ => "+2% daño",
-                },
-                BranchType.Magic => cycle switch
-                {
-                    1 => "+1 slot de minion",
-                    2 => "+1 bolt extra por lanzamiento",
-                    3 => "+5% velocidad de lanzamiento",
-                    4 => "+10% critico magico",
-                    5 => "+1 slot de minion",
-                    _ => "+2% daño",
-                },
-                _ => null,
+                1 => "+1 slot de minion",
+                2 => "+1 bolt extra por lanzamiento",
+                3 => "+5% velocidad de lanzamiento",
+                4 => "+10% critico magico",
+                5 => "+1 slot de minion",
+                _ => "+2% daño",
             };
         }
     }

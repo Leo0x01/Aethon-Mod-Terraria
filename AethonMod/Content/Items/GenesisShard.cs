@@ -7,140 +7,58 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items
 {
     /// <summary>
-    /// El Fragmento Genesis — item central del mod.
-    /// Al usarlo (clic derecho): muestra un mensaje guia.
-    /// Si el jugador ya mato suficientes enemigos, abre la UI de eleccion de rama.
+    /// El Fragmento Génesis — arma de luz y material de crafteo.
+    /// - Dropeado por King Slime o Eye of Cthulhu.
+    /// - Arma de luz que dispara proyectiles autoguiados.
+    /// - Se usa como material para craftear el Grimorio del Eterno.
     /// </summary>
     public class GenesisShard : ModItem
     {
-        public override void SetStaticDefaults()
-        {
-        }
+        public override void SetStaticDefaults() { }
 
         public override void SetDefaults()
         {
-            Item.damage = 8;
+            Item.damage = 18;
             Item.DamageType = DamageClass.Generic;
             Item.width = 28;
             Item.height = 28;
-            Item.useTime = 25;
-            Item.useAnimation = 25;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.knockBack = 4f;
+            Item.useTime = 20;
+            Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.knockBack = 3f;
             Item.value = Item.buyPrice(0, 5, 0, 0);
             Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item4;
+            Item.UseSound = SoundID.Item9;
             Item.noMelee = true;
-            Item.autoReuse = false;
+            Item.autoReuse = true;
+            Item.shoot = ModContent.ProjectileType<Weapons.Projectiles.GenesisLight>();
+            Item.shootSpeed = 14f;
         }
 
-        public override bool? UseItem(Player player)
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            var sp = player.GetModPlayer<Players.ShardPlayer>();
-            if (sp == null) return null;
-
-            // Si el jugador YA tiene un fragmento evolucionado Y tiene un Fragmento Génesis
-            // en el inventario, es un fragmento NUEVO. Resetear su estado para que empiece de cero.
-            if (sp.IsImprinted && player.whoAmI == Main.myPlayer)
+            for (int i = 0; i < 2; i++)
             {
-                // Verificar si hay un arma evolucionada en el inventario.
-                bool hasEvolvedWeapon = false;
-                for (int i = 0; i < 58; i++)
-                {
-                    if (player.inventory[i].type == ModContent.ItemType<Weapons.LuminaStarbow>() ||
-                        player.inventory[i].type == ModContent.ItemType<Weapons.SolbrandEdge>() ||
-                        player.inventory[i].type == ModContent.ItemType<Weapons.GrimoireEternal>())
-                    {
-                        hasEvolvedWeapon = true;
-                        break;
-                    }
-                }
-                // Si tiene un arma evolucionada Y un Fragmento Génesis, es un nuevo fragmento.
-                if (hasEvolvedWeapon)
-                {
-                    Main.NewText("Nuevo Fragmento Genesis detectado. Iniciando nueva progresion...", new Color(180, 160, 220));
-                    // NO resetear el estado — cada fragmento mantiene su propia progresion.
-                    // El ShardPlayer ya tiene su nivel, XP, rama, etc.
-                    // El nuevo Fragmento Génesis solo muestra info del estado actual.
-                }
+                float angle = (i - 0.5f) * 0.15f;
+                Vector2 perturbed = velocity.RotatedBy(angle);
+                Projectile.NewProjectile(source, position, perturbed, type, damage, knockback, player.whoAmI);
             }
-
-            if (!sp.IsImprinted)
-            {
-                int totalKills = sp.DistanceKills + sp.MeleeKills + sp.MagicKills;
-                int threshold = Players.ShardPlayer.KILLS_TO_IMPRINT;
-
-                if (totalKills < threshold)
-                {
-                    Main.NewText($"El Fragmento Genesis aun no tiene forma. Gana {threshold - totalKills} de experiencia mas para despertarlo.",
-                        new Color(180, 160, 220));
-                }
-                else
-                {
-                    var ui = ModContent.GetInstance<Content.Systems.UISystem>();
-                    if (ui != null && ui.BranchChoiceUI != null)
-                    {
-                        ui.BranchChoiceUI.Show();
-                        Main.NewText("Tu Fragmento Genesis esta listo. Elige tu rama!", new Color(245, 196, 81));
-                    }
-                    else
-                    {
-                        Main.NewText("El Fragmento Genesis despierta!", new Color(245, 196, 81));
-                        if (sp.DistanceKills >= sp.MeleeKills && sp.DistanceKills >= sp.MagicKills)
-                        {
-                            sp.ActiveBranch = Players.BranchType.Distance;
-                            sp.SubForm = Players.WeaponSubForm.Bow;
-                        }
-                        else if (sp.MeleeKills >= sp.MagicKills)
-                        {
-                            sp.ActiveBranch = Players.BranchType.Melee;
-                            sp.SubForm = Players.WeaponSubForm.Sword;
-                        }
-                        else
-                        {
-                            sp.ActiveBranch = Players.BranchType.Magic;
-                            sp.SubForm = Players.WeaponSubForm.Spellbook;
-                        }
-                        ReplaceShard(player, sp.ActiveBranch);
-                    }
-                }
-                return true;
-            }
-
-            // Si ya esta imprintado, mostrar info de la rama (el nivel vive en el arma).
-            Main.NewText($"Fragmento Genesis — Rama: {sp.ActiveBranch} | Sostén tu arma para ver su nivel",
-                new Color(245, 196, 81));
-            return true;
+            return false;
         }
 
-        private void ReplaceShard(Player player, Players.BranchType branch)
-        {
-            int weaponType = branch switch
-            {
-                Players.BranchType.Distance => ModContent.ItemType<Weapons.LuminaStarbow>(),
-                Players.BranchType.Melee => ModContent.ItemType<Weapons.SolbrandEdge>(),
-                Players.BranchType.Magic => ModContent.ItemType<Weapons.GrimoireEternal>(),
-                _ => ModContent.ItemType<GenesisShard>(),
-            };
-            for (int i = 0; i < 58; i++)
-            {
-                if (player.inventory[i].type == ModContent.ItemType<GenesisShard>())
-                {
-                    int prefix = player.inventory[i].prefix;
-                    player.inventory[i].SetDefaults(weaponType);
-                    player.inventory[i].prefix = (byte)prefix;
-                    Main.NewText($"El Fragmento Genesis se ha transformado en {player.inventory[i].Name}!",
-                        new Color(245, 196, 81));
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, player.Center);
-                    break;
-                }
-            }
-        }
+        public override bool? UseItem(Player player) => null;
 
         public override void AddRecipes()
         {
-            CreateRecipe()
-                .AddIngredient(ItemID.Wood, 1)
+            // Grimorio del Eterno — se craftea con Fragmento Génesis + lingotes
+            Recipe.Create(ModContent.ItemType<Weapons.GrimoireEternal>())
+                .AddIngredient<GenesisShard>(1)
+                .AddIngredient(ItemID.GoldBar, 5)
+                .Register();
+
+            Recipe.Create(ModContent.ItemType<Weapons.GrimoireEternal>())
+                .AddIngredient<GenesisShard>(1)
+                .AddIngredient(ItemID.PlatinumBar, 5)
                 .Register();
         }
     }

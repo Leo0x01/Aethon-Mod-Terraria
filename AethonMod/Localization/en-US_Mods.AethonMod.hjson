@@ -2,29 +2,32 @@
         "Mods.AethonMod.DisplayName": "Aethon, the Primordial Light",
 
         "Items.GenesisShard.DisplayName": "Genesis Shard",
-        "Items.GenesisShard.Tooltip": "A mote of pure light torn from the heart of Aethon,\nthe Primordial Light that existed before stars had names.\nThe Shard pulses with the echo of a forgotten war,\nand awakens only when its bearer's blood touches the air.\n\nFight enemies so the Shard may imprint your branch.",
+        "Items.GenesisShard.Tooltip": "Light weapon that fires homing particles.\nMaterial to craft the Grimoire of the Eternal.\nDrops from King Slime and Eye of Cthulhu.",
 
         "Items.Placeables.AncientAltarItem.DisplayName": "Ancient Altar",
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
-        "Items.ResonanceShard.Tooltip": "Cosmic resonance shard.\nDropped by cosmic bosses and used as currency.",
-
-        "Items.LuminaStarbow.DisplayName": "Lumina, the Starbow",
-        "Items.LuminaStarbow.Tooltip": "Lumina was first drawn over the abyss,\nand its string is woven from the thread of a dying constellation.\nEach level draws more starlight into the bow,\nand every five levels a phantom arrow joins the volley,\nrepeating the moment Aethon loosed an arrow into the void.",
-
-        "Items.SolbrandEdge.DisplayName": "Solbrand, Edge of Dawn",
-        "Items.SolbrandEdge.Tooltip": "Solbrand was forged from the first dawn,\nwhen Aethon split the primordial darkness with a single slash.\nEach level etches the memory of an ancestral battle into its edge,\nand every ten levels the blade awakens a phantom copy\nthat hunts enemies like an echo of Aethon's will.",
+        "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
-        "Items.GrimoireEternal.Tooltip": "The Grimoire of the Eternal holds the words Aethon spoke\nbefore time began to flow.\nEach level calls back a fragment of that forgotten tongue.\n\nLower mana = higher damage (up to +50%) —\nthe emptier the bearer, the louder the voice\nof the Primordial Light rings through them.",
+        "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.",
 
-        "Projectiles.StarlightArrow.DisplayName": "Starlight Arrow",
-        "Projectiles.DawnSlash.DisplayName": "Dawn Blade",
+        "Items.CosmicPetItem.DisplayName": "Cosmic Pet",
+        "Items.CosmicPetItem.Tooltip": "Summons a cosmic pet that will follow you.",
+        "Items.BossSummonBag.DisplayName": "Summoner Bag",
+        "Items.BossSummonBag.Tooltip": "Contains 999 of every boss summoner.",
+        "Items.TestSlayer.DisplayName": "Test Slayer",
+        "Items.TestSlayer.Tooltip": "Deals 99.99% of max life as damage.\nLeft click: NPC under cursor. Right click: all NPCs.",
+
         "Projectiles.ArcaneBolt.DisplayName": "Arcane Bolt",
+        "Projectiles.GenesisLight.DisplayName": "Genesis Light",
         "Projectiles.CosmicOrbMinion.DisplayName": "Cosmic Orb",
         "Projectiles.CosmicOrbBolt.DisplayName": "Cosmic Bolt",
+        "Projectiles.CosmicPet.DisplayName": "Cosmic Pet",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
+        "Buffs.CosmicPetBuff.DisplayName": "Cosmic Pet",
+        "Buffs.CosmicPetBuff.Description": "A nebula creature follows you",
 
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
@@ -33,7 +36,6 @@
         "NPCs.EchoArcher.DisplayName": "Echo of the Star-Archer",
         "NPCs.RiftKeeper.DisplayName": "The Rift-Keeper",
 
-        "Common.Imprinting": "Your Genesis Shard has imprinted with the {0} branch!",
-        "Common.LevelUp": "Your Genesis Shard has reached level {0}!",
-        "Common.Milestone": "Cosmic milestone reached: {0}",
+        "Common.LevelUp": "Your weapon has reached level {0}!",
+        "Common.Milestone": "Milestone reached: {0}",
 }

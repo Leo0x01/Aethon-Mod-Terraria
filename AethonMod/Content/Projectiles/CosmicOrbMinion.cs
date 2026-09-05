@@ -139,19 +139,21 @@ namespace AethonMod.Content.Projectiles
                 int shootInterval = ShootCooldown;
 
                 // Velocidad de disparo mejora con el nivel del Grimorio sostenido
-                var sp = owner.GetModPlayer<ShardPlayer>();
                 Item? held = owner.HeldItem;
-                if (sp != null && sp.IsImprinted && sp.ActiveBranch == BranchType.Magic &&
-                    held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                 {
-                    var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
-                    if (sl != null)
+                    try
                     {
-                        int speedTier = sl.Level / 10;
-                        int reduction = speedTier * 5;
-                        if (reduction > 30) reduction = 30;
-                        shootInterval -= reduction;
+                        var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
+                        if (sl != null)
+                        {
+                            int speedTier = sl.Level / 10;
+                            int reduction = speedTier * 5;
+                            if (reduction > 30) reduction = 30;
+                            shootInterval -= reduction;
+                        }
                     }
+                    catch { }
                 }
 
                 if (shootTimer >= shootInterval)
@@ -395,15 +397,15 @@ namespace AethonMod.Content.Projectiles
                 projType, damage, knockback, owner.whoAmI);
 
             // Bolts extra: segun nivel del Grimorio sostenido (hito Magia)
-            var sp2 = owner.GetModPlayer<ShardPlayer>();
             Item? held2 = owner.HeldItem;
-            if (sp2 != null && sp2.IsImprinted && sp2.ActiveBranch == BranchType.Magic &&
-                held2 != null && held2.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            if (held2 != null && held2.type == ModContent.ItemType<Weapons.GrimoireEternal>())
             {
-                var sl = held2.GetGlobalItem<Globals.ShardLevelItem>();
-                if (sl != null)
+                try
                 {
-                    int extraBolts = WeaponScaling.ExtraProjectiles(BranchType.Magic, sl.Level) / 2;
+                    var sl = held2.GetGlobalItem<Globals.ShardLevelItem>();
+                    if (sl != null)
+                    {
+                        int extraBolts = WeaponScaling.ExtraProjectiles(sl.Level) / 2;
                     for (int i = 0; i < extraBolts; i++)
                     {
                         float angle = (i + 1) * 0.25f * (i % 2 == 0 ? 1f : -1f);

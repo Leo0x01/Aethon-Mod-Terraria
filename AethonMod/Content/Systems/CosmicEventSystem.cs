@@ -29,14 +29,22 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateWorld()
         {
-            // Iterar todos los jugadores activos (no solo LocalPlayer — necesario para servidores).
+            // Iterar todos los jugadores activos.
             foreach (Player player in Main.ActivePlayers)
             {
                 if (player == null || !player.active || player.dead) continue;
-                var sp = player.GetModPlayer<Players.ShardPlayer>();
-                if (sp == null || !sp.IsImprinted) continue;
 
-                int level = sp.HeldWeaponLevel;
+                // Leer nivel del Grimorio sostenido directamente del item.
+                Item held = player.HeldItem;
+                if (held == null || held.type != ModContent.ItemType<Weapons.GrimoireEternal>()) continue;
+
+                int level = 1;
+                try
+                {
+                    var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
+                    if (sl != null) level = sl.Level;
+                }
+                catch { continue; }
 
                 // --- Hitos de un solo disparo (por jugador, en SP) ---
                 // Nota: estos flags son globales; en MP deberian ser por-jugador.

@@ -2,29 +2,32 @@
         "Mods.AethonMod.DisplayName": "Aethon, la Luz Primordial",
 
         "Items.GenesisShard.DisplayName": "Fragmento Génesis",
-        "Items.GenesisShard.Tooltip": "Un mote de luz pura arrancado del corazón de Aethon,\nla Luz Primordial que existía antes de que las estrellas tuvieran nombre.\nEl Fragmento late con el eco de una guerra olvidada,\ny solo despierta cuando la sangre del portador toca el aire.\n\nCombate enemigos para que el Fragmento imprima tu rama.",
+        "Items.GenesisShard.Tooltip": "Arma de luz que dispara partículas autoguiadas.\nMaterial para craftear el Grimorio del Eterno.\nDropea de King Slime y Eye of Cthulhu.",
 
         "Items.Placeables.AncientAltarItem.DisplayName": "Altar Antiguo",
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
-        "Items.ResonanceShard.Tooltip": "Fragmento de resonancia cósmica.\nSe obtiene de jefes cósmicos y se usa como moneda.",
-
-        "Items.LuminaStarbow.DisplayName": "Lumina, la Arcoestelar",
-        "Items.LuminaStarbow.Tooltip": "Lumina fue tensada por primera vez sobre el abismo,\ny su cuerda está hecha del hilo de una constación moribunda.\nCada nivel atrae más luz estelar al arco,\ny cada cinco niveles una flecha fantasma se une a la andanada,\nrepitiendo el momento en que Aethon disparó contra el vacío.",
-
-        "Items.SolbrandEdge.DisplayName": "Solbrand, Filo del Alba",
-        "Items.SolbrandEdge.Tooltip": "Solbrand fue forjada del primer amanecer,\ncuando Aethon partió la oscuridad primordial con un solo tajo.\nCada nivel graba en su filo el recuerdo de una batalla ancestral,\ny cada diez niveles el arma despierta una hoja fantasma\nque persigue a los enemigos como un eco de la voluntad de Aethon.",
+        "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
 
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
-        "Items.GrimoireEternal.Tooltip": "El Grimorio del Eterno contiene las palabras que Aethon pronunció\nantes de que el tiempo comenzara a fluir.\nCada nivel invoca un fragmento de ese idioma olvidado.\n\nA menor mana, mayor daño (tope +50%) —\ncuanto más vacío está el portador, más fuerte resuena\nla voz de la Luz Primordial a través de él.",
+        "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.",
 
-        "Projectiles.StarlightArrow.DisplayName": "Flecha de Luz Estelar",
-        "Projectiles.DawnSlash.DisplayName": "Espada del Alba",
+        "Items.CosmicPetItem.DisplayName": "Mascota Cósmica",
+        "Items.CosmicPetItem.Tooltip": "Invoca una mascota cósmica que te seguirá.",
+        "Items.BossSummonBag.DisplayName": "Bolsa de Invocadores",
+        "Items.BossSummonBag.Tooltip": "Contiene 999 invocadores de cada jefe.",
+        "Items.TestSlayer.DisplayName": "Verdugo de Pruebas",
+        "Items.TestSlayer.Tooltip": "Hace 99.99% de daño de la vida máxima.\nClick izq: NPC bajo cursor. Click der: todos los NPCs.",
+
         "Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
+        "Projectiles.GenesisLight.DisplayName": "Luz del Génesis",
         "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
         "Projectiles.CosmicOrbBolt.DisplayName": "Bolt Cósmico",
+        "Projectiles.CosmicPet.DisplayName": "Mascota Cósmica",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
+        "Buffs.CosmicPetBuff.DisplayName": "Mascota Cósmica",
+        "Buffs.CosmicPetBuff.Description": "Una criatura de nebulosa te sigue",
 
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
@@ -33,7 +36,6 @@
         "NPCs.EchoArcher.DisplayName": "Eco de la Arquera Estelar",
         "NPCs.RiftKeeper.DisplayName": "El Guardián del Rift",
 
-        "Common.Imprinting": "El Fragmento Génesis se ha impreso con tu rama de {0}!",
-        "Common.LevelUp": "Tu Fragmento Génesis ha alcanzado el nivel {0}!",
-        "Common.Milestone": "Hito cósmico alcanzado: {0}",
+        "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
+        "Common.Milestone": "Hito alcanzado: {0}",
 }
