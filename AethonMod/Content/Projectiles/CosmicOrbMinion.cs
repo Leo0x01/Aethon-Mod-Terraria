@@ -406,17 +406,19 @@ namespace AethonMod.Content.Projectiles
                     if (sl != null)
                     {
                         int extraBolts = WeaponScaling.ExtraProjectiles(sl.Level) / 2;
-                    for (int i = 0; i < extraBolts; i++)
-                    {
-                        float angle = (i + 1) * 0.25f * (i % 2 == 0 ? 1f : -1f);
-                        Vector2 perturbed = direction.RotatedBy(angle);
-                        Projectile.NewProjectile(
-                            Projectile.GetSource_FromAI(),
-                            Projectile.Center,
-                            perturbed * 12f,
-                            projType, damage, knockback, owner.whoAmI);
+                        for (int i = 0; i < extraBolts; i++)
+                        {
+                            float angle = (i + 1) * 0.25f * (i % 2 == 0 ? 1f : -1f);
+                            Vector2 perturbed = direction.RotatedBy(angle);
+                            Projectile.NewProjectile(
+                                Projectile.GetSource_FromAI(),
+                                Projectile.Center,
+                                perturbed * 12f,
+                                projType, damage, knockback, owner.whoAmI);
+                        }
                     }
                 }
+                catch { }
             }
         }
 
