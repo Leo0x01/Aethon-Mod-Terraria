@@ -4289,3 +4289,101 @@ Stage Summary:
 - **Sistemas restantes en Content/Systems/**: 5 (AncientAltarWorldGen, ShardLevelSystem, ShardSyncSystem, UISystem, WeaponScaling)
 - **Archivos .cs totales del mod**: 33 (antes 34 — se elimino CosmicEventSystem.cs)
 - **Siguiente paso usuario**: descargar ZIP nuevo de https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip (opcion B que eligio) y reemplazar su carpeta AethonMod local, luego recompilar. Los mensajes "Hitos cosmico" ya no apareceran.
+
+---
+Task ID: FIX-RESTAURAR-MEJORAS-GRIMORIO
+Agent: main (Z.ai Code)
+Task: Restaurar las 23 funciones de WeaponScaling + sprites del usuario + fixes del commit 48688dd que se perdieron
+
+Work Log:
+- Recibida captura del usuario reportando:
+  1. Sprites se borraron (GrimorioEternal.png y CosmicOrbMinion.png eran genericos generados por mi)
+  2. El Grimorio perdio las estadisticas y mejoras que tenia antes
+  3. El proyectil sigue siendo doble
+  4. Los minions no se invocan
+  5. Todo estaba bien en el commit 48688dd
+- Usuario subio 2 sprites personalizados:
+  * /home/z/my-project/upload/sprite libro.png (344x418) — para GrimoireEternal.png
+  * /home/z/my-project/upload/minion cosmico.png (713x664) — para CosmicOrbMinion.png
+
+Investigacion git:
+- El commit 48688dd fue sobrescrito por force-pushes y ya no existe como objeto git.
+- El commit b70d655 aplico los fixes del 48688dd (autoReuse=false, shoot=931, Mana Flower, etc.)
+  PERO en el proceso perdio las 23 funciones avanzadas del WeaponScaling.
+- El commit f6db599 tenia TODAS las mejoras (WeaponScaling.cs con 377 lineas, 28 funciones)
+  pero usaba ArcaneBolt y autoReuse=true con DoubleShotChance (disparo doble aleatorio).
+- Ningun commit existente tenia AMBAS cosas (las 23 funciones Y los fixes del 48688dd).
+- Solucion: restaurar de f6db599 y aplicar los fixes del 48688dd encima.
+
+Acciones realizadas (7 archivos modificados, +522/-408 lineas):
+
+1. RESTAURADO de f6db599 -> HEAD:
+   - AethonMod/Content/Systems/WeaponScaling.cs (167 -> 377 lineas, 15 -> 28 funciones):
+     * BonusMana, BonusLife (mana/vida max del jugador)
+     * KnockbackMult, ManaRegen, LifeRegen, DamageReduction
+     * DoubleShotChance (dead code, ya no se llama desde Shoot), BoltAreaDamage
+     * MinionHitCooldown, MinionContactDamageMult, MinionSpeedMult, MinionDetectionRange
+     * MilestonesForLevel, MilestoneRewards (lista de mejoras por hito), NextMilestoneSummary
+   - AethonMod/Content/Projectiles/CosmicOrbMinion.cs (167 -> 241 lineas):
+     * Usa Projectile.localNPCHitCooldown = WeaponScaling.MinionHitCooldown(sl.Level)
+     * Usa speedMult = WeaponScaling.MinionSpeedMult(sl.Level)
+     * Usa detectionRange = WeaponScaling.MinionDetectionRange(sl.Level)
+   - AethonMod/Content/Players/ShardPlayer.cs (54 -> 126 lineas):
+     * PostUpdate: aplica ManaRegen, LifeRegen, BonusMana, BonusLife
+     * ModifyHurt: aplica DamageReduction
+   - AethonMod/Content/Weapons/GrimoireEternal.cs base (con ModifyWeaponKnockback y tooltip completo)
+
+2. FIXES DEL 48688dd APLICADOS sobre el GrimoireEternal.cs restaurado:
+   - autoReuse = false (era true) — previene doble disparo
+   - Item.shoot = 931 (Nightglow, era ArcaneBolt) — proyectil vanilla con homing
+   - Eliminado DoubleShotChance del Shoot (causaba disparo doble aleatorio)
+   - Shoot click izq: return true (tModLoader dispara exactamente 1 proyectil principal)
+   - Shoot click izq: añade bolts extra en abanico (1 cada 3 niveles, no cada 5)
+   - CanUseItem click izq: return true (Mana Flower compatible)
+   - CanUseItem click der: permite Mana Flower (return player.statMana >= minionCost || player.manaFlower)
+   - Shoot minion: maneja Mana Flower (if statMana >= minionCost cobra, si no y manaFlower no bloquea)
+   - XPForNextLevel: 80 * nivel^1.5 sin caso especial nivel 1 (ya estaba correcto)
+   - Eliminado OnCraft (evento cinematografico LevelUpEventSystem)
+   - Eliminada ref a sp.ActiveBranch (propiedad inexistente en ShardPlayer)
+   - Tooltip actualizado: Bolts sin 'Doble: X%' (DoubleShotChance eliminado del Shoot)
+
+3. SPRITES DEL USUARIO RESTAURADOS:
+   - AethonMod/Content/Weapons/GrimoireEternal.png = sprite libro.png del usuario (344x418)
+   - AethonMod/Content/Projectiles/CosmicOrbMinion.png = minion cosmico.png del usuario (713x664)
+   - AethonMod/Content/Buffs/CosmicOrbBuff.png = minion cosmico.png (mismo sprite para el buff)
+
+Verificacion:
+- 21 referencias a funciones avanzadas de WeaponScaling (MinionHitCooldown, MinionSpeedMult,
+  MinionDetectionRange, MinionContactDamageMult, KnockbackMult, ManaRegen, LifeRegen,
+  DamageReduction, BoltAreaDamage, BonusMana, BonusLife, MilestoneRewards) — todas resuelven.
+- 0 referencias rotas a LevelUpEventSystem o ActiveBranch en codigo .cs.
+- ExtraProjectiles = level/3 (fix 48688dd correcto).
+- XPForNextLevel = 80 * nivel^1.5 sin caso especial (fix 48688dd correcto).
+- Commiteado como a3ec549: 7 files changed, 522 insertions(+), 408 deletions(-).
+- Push exitoso: e8d9e45..a3ec549 main -> main.
+- Verificado via GitHub API: WeaponScaling.cs tiene 29 public members (28 funciones + 1 clase).
+
+Stage Summary:
+- **Commit pushed**: a3ec5491377dfda79f8e00ec0cd2ec23f7764d86
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/a3ec549
+- **Archivos en el commit (7)**:
+  * AethonMod/Content/Buffs/CosmicOrbBuff.png (sprite usuario restaurado)
+  * AethonMod/Content/Players/ShardPlayer.cs (regen + damage reduction)
+  * AethonMod/Content/Projectiles/CosmicOrbMinion.cs (escalado por nivel)
+  * AethonMod/Content/Projectiles/CosmicOrbMinion.png (sprite usuario restaurado)
+  * AethonMod/Content/Systems/WeaponScaling.cs (28 funciones, 377 lineas)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (fixes 48688dd + tooltip completo)
+  * AethonMod/Content/Weapons/GrimoireEternal.png (sprite usuario restaurado)
+- **Funciones de WeaponScaling restauradas (13 que faltaban)**:
+  BonusMana, BonusLife, KnockbackMult, ManaRegen, LifeRegen, DamageReduction,
+  DoubleShotChance (dead), BoltAreaDamage, MinionHitCooldown, MinionContactDamageMult,
+  MinionSpeedMult, MinionDetectionRange, MilestoneRewards, NextMilestoneSummary, MilestonesForLevel
+- **Fixes del 48688dd aplicados (todos)**:
+  autoReuse=false, shoot=931 Nightglow, ExtraProjectiles=level/3, sin DoubleShotChance en Shoot,
+  return true en Shoot click izq, Mana Flower en CanUseItem y Shoot minion, XPForNextLevel normal,
+  sin OnCraft, sin ActiveBranch.
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  (opcion B que eligio), reemplazar carpeta AethonMod local, recompilar en tModLoader.
+  Deberia tener: Grimorio con todas las mejoras por nivel, sprites del usuario restaurados,
+  disparo unico (no doble), minions invocables con click derecho, mana flower compatible.
