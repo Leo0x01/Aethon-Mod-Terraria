@@ -4605,3 +4605,47 @@ Nota: Esta es la tercera vez que intento corregir la firma de PreDraw:
 2. PreDraw(Color lightColor) — CS0115 (commit 367a85c)
 3. PreDraw(ref Color lightColor) — CORRECTO (commit 43283c5)
 La firma correcta en tModLoader 1.4.4 es 'ref Color lightColor'.
+
+---
+Task ID: FIX-MINION-INVISIBLE
+Agent: main (Z.ai Code)
+Task: Corregir minion invisible (se invoca pero no se ve)
+
+Work Log:
+- Recibido reporte del usuario: 'el minion no se ve, pero si se invoca,
+  solo que esta invisible o la imagen no carga'
+- Causa raiz: el override PreDraw que agregue en commit e6345b1 tenia un bug:
+    lightColor * (Projectile.alpha / 255f)
+  Projectile.alpha por defecto es 0 (totalmente opaco en tModLoader, donde 0=opaco
+  y 255=transparente). Entonces 0/255f = 0f, y lightColor * 0f = Color.Transparent.
+  El sprite se dibujaba completamente transparente → invisible.
+
+- Solucion aplicada: eliminado el override PreDraw completo.
+  Razon: con el sprite redimensionado a 32x32 (cuadrado, commit e6345b1),
+  el draw default de tModLoader YA rota alrededor del centro correctamente.
+  El issue del 'gira por arriba' que el usuario reporto antes era por el tamano
+  gigante del sprite (713x664), no por el pivot de rotacion.
+
+- Verificacion: el draw default de tModLoader 1.4.4 para proyectiles usa como
+  origin el centro del sprite cuando el sprite es cuadrado. Con 32x32 (cuadrado),
+  la rotacion sera correcta.
+
+- Commit ef45714: 1 file changed, 5 insertions(+), 37 deletions(-).
+- Push exitoso: 43283c5..ef45714 main -> main.
+
+Stage Summary:
+- **Commit pushed**: ef45714
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/ef45714
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
+
+Leccion aprendida:
+- Projectile.alpha=0 significa OPACO en tModLoader (no transparente).
+  Multiplicar por alpha/255 cuando alpha=0 da transparente, lo contrario
+  de lo que se quiere. Para futuros PreDraw, usar:
+    lightColor * (1f - Projectile.alpha / 255f)
+  o simplemente 'lightColor' si no se quiere modificar el alpha.
+- Cuando un override de draw causa problemas, considerar si es necesario
+  en absoluto. El draw default de tModLoader 1.4.4 ya maneja la mayoria
+  de los casos correctamente (especialmente con sprites cuadrados).
