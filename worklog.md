@@ -4238,3 +4238,54 @@ Stage Summary:
 - **Sprites totales del mod**: 18/18 (todos los ModItem/Projectile/NPC/Buff/Tile tienen su .png)
 - **Siguiente paso para el usuario**: `git pull origin main` en su PC para recibir los PNGs, luego recompilar en tModLoader.
 - **Token**: usuario autorizo usar el PAT durante 1 semana (se revoca solo en ~7 dias). Se usara solo para operaciones git legitimas.
+
+---
+Task ID: FIX-COSMIC-EVENTS-ELIMINADOS
+Agent: main (Z.ai Code)
+Task: Eliminar CosmicEventSystem.cs que producia los mensajes "Hitos cosmicos" (Lluvia de Luz Estelar, Sagrario Hueco, Rifts Dimensionales) que el usuario reporto como no eliminados
+
+Work Log:
+- Recibida imagen del usuario mostrando mensajes in-game:
+  ◆ Hitos cosmico: Lluvia de Luz Estelar
+  ◆ Hitos cosmico: El Sagrario Hueco se extiende
+  ◆ Hitos cosmico: Rifts Dimensionales
+- El mod YA COMPILABA y CARGABA correctamente (no era un error de compilacion). El usuario indico que estos mensajes debian estar eliminados.
+- Identificado que los mensajes provenian de CosmicEventSystem.cs (NO de LevelUpEventSystem.cs que ya se habia borrado en el commit anterior).
+- CosmicEventSystem.cs era un ModSystem que en PostUpdateWorld:
+  * Iteraba todos los jugadores activos
+  * Leia el nivel del Grimorio sostenido
+  * A niveles 25/50/75/100/150 disparaba AnnounceMilestone() con mensaje dorado + sonido Roar
+  * A nivel 25+ ejecutaba UpdateStarlightRain: spawn de proyectil StarCannonStar cada 10s
+  * A nivel 75+ ejecutaba UpdateDimensionalRifts: chance 1/36000 de spawn de NPC RiftKeeper
+- El usuario tambien menciono "carga el commit 48688dd y aplica las correcciones correspondiente":
+  * 48688dd no existe en el historial git (fue force-pushed away)
+  * Pero el commit b70d655 SI aplica sus correcciones (ya estaban presentes en el codigo)
+  * Verificado: autoReuse=false, Item.shoot=931, ExtraProjectiles=level/3, XPForNextLevel=80*nivel^1.5 sin caso especial — TODAS PRESENTES
+
+Acciones realizadas (1 archivo eliminado, 2 modificados):
+1. ELIMINADO Content/Systems/CosmicEventSystem.cs (165 lineas)
+2. MODIFICADO Content/AethonConfig.cs: eliminadas 3 flags de config que ya no se usan:
+   - EnableCosmicEvents
+   - EnableStarlightRain
+   - EnableDimensionalRifts
+   (Configs antiguos simplemente ignoran esas claves, no rompen saves)
+3. ACTUALIZADOS CARACTERISTICAS.md y CHANGES.md con el nuevo commit
+
+Verificacion:
+- grep -rn "CosmicEventSystem" --include="*.cs" => 0 resultados (exit 1)
+- grep -rn "EnableCosmicEvents|EnableStarlightRain|EnableDimensionalRifts" --include="*.cs" => 0 resultados
+- Commiteado como e8d9e45: 4 files changed, 18 insertions(+), 175 deletions(-)
+- Push exitoso: 2bab66d..e8d9e45 main -> main
+- Verificado via API GitHub: CosmicEventSystem.cs ya no aparece en Contents/Systems/ del repo
+
+Stage Summary:
+- **Commit pushed**: e8d9e455ca51f5562700b6ee5e30a04af3efc1ff
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/e8d9e45
+- **Archivos en el commit (4)**:
+  * AethonMod/CARACTERISTICAS.md (modificado)
+  * AethonMod/CHANGES.md (modificado)
+  * AethonMod/Content/AethonConfig.cs (modificado: -3 flags)
+  * AethonMod/Content/Systems/CosmicEventSystem.cs (ELIMINADO, -165 lineas)
+- **Sistemas restantes en Content/Systems/**: 5 (AncientAltarWorldGen, ShardLevelSystem, ShardSyncSystem, UISystem, WeaponScaling)
+- **Archivos .cs totales del mod**: 33 (antes 34 — se elimino CosmicEventSystem.cs)
+- **Siguiente paso usuario**: descargar ZIP nuevo de https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip (opcion B que eligio) y reemplazar su carpeta AethonMod local, luego recompilar. Los mensajes "Hitos cosmico" ya no apareceran.
