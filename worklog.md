@@ -4207,3 +4207,34 @@ Stage Summary:
 - **Token**: usado una sola vez para el push, luego removido del remote URL. Usuario debe revocar el PAT desde GitHub Settings.
 - **Estado del remote**: limpio, sin credenciales almacenadas
 - **Siguiente paso para el usuario**: en su maquina local ejecutar `git pull origin main` para recibir los cambios
+
+---
+Task ID: FIX-SPRITES-FALTANTES
+Agent: main (Z.ai Code)
+Task: Corregir MissingResourceException al cargar el mod (sprites PNG faltantes para LevelUpTester y BossSummonBag)
+
+Work Log:
+- Recibidas 2 imagenes de error del usuario mostrando MultipleException / MissingResourceException de tModLoader:
+  "Recurso esperado no encontrado: Content/Items/BossSummonBag"
+  "Recurso esperado no encontrado: Content/Items/LevelUpTester"
+  "Recurso esperado no encontrado: Content/Items/GenesisShard"
+- Confirmado via analisis VLM que ya NO hay errores CS#### de compilacion (el mod compila limpio) — el problema cambio a un runtime loading error: tModLoader busca el .png asociado a cada ModItem y falla si no existe.
+- Verificado con `ls Content/Items/`: faltaban BossSummonBag.png y LevelUpTester.png (GenesisShard.png y ResonanceShard.png SI existian pero tModLoader los listaba juntos en el agregado de errores).
+- Generados los 2 PNGs faltantes con Python+PIL como pixel-art 24x24 RGBA consistente con el estilo de Terraria:
+  * LevelUpTester.png (274 bytes): saco dorado #F5C451 con flecha blanca ascendente, paleta dorada de Aethon
+  * BossSummonBag.png (257 bytes): saco purpura oscuro #46325A con calavera roja y huesos cruzados
+- Script generator en /home/z/gen_sprites.py (reutilizable si se necesita regenerar).
+- Verificacion exhaustiva con grep+find: confirmado que TODOS los ModItem/ModProjectile/ModNPC/ModBuff/ModTile del mod (18 entidades) tienen su .png asociado.
+- Commiteado como `2bab66d`: 2 files changed (2 PNGs nuevos).
+- Push exitoso a GitHub: `d50378d..2bab66d main -> main`.
+- Verificado via API GitHub que ambos PNGs estan en el remote (BossSummonBag.png 257 bytes, LevelUpTester.png 274 bytes).
+
+Stage Summary:
+- **Commit pushed**: 2bab66d
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/2bab66d
+- **Archivos nuevos (2)**:
+  * AethonMod/Content/Items/BossSummonBag.png
+  * AethonMod/Content/Items/LevelUpTester.png
+- **Sprites totales del mod**: 18/18 (todos los ModItem/Projectile/NPC/Buff/Tile tienen su .png)
+- **Siguiente paso para el usuario**: `git pull origin main` en su PC para recibir los PNGs, luego recompilar en tModLoader.
+- **Token**: usuario autorizo usar el PAT durante 1 semana (se revoca solo en ~7 dias). Se usara solo para operaciones git legitimas.
