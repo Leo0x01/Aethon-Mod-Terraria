@@ -246,7 +246,7 @@ namespace AethonMod.Content.Projectiles
         /// Esto arregla el issue reportado por el usuario donde el minion "gira
         /// por la parte de arriba".
         /// </summary>
-        public override bool PreDraw(ref Terraria.DataStructures.DrawData drawData)
+        public override bool PreDraw(Color lightColor)
         {
             // Cargar la textura del minion
             Microsoft.Xna.Framework.Graphics.Texture2D texture =
@@ -261,17 +261,12 @@ namespace AethonMod.Content.Projectiles
             // Posición en pantalla: centro del proyectil, ajustada por la cámara
             Microsoft.Xna.Framework.Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            // Color con alpha completo
-            Microsoft.Xna.Framework.Color lightColor = Lighting.GetColor(
-                (int)(Projectile.Center.X / 16f),
-                (int)(Projectile.Center.Y / 16f));
-
             // Dibujar con rotación centrada
             Main.spriteBatch.Draw(
                 texture,
                 drawPos,
                 null,                           // sourceRect: null = sprite completo
-                lightColor * Projectile.alpha / 255f,
+                lightColor * (Projectile.alpha / 255f),
                 Projectile.rotation,             // rotación aplicada
                 origin,                         // ← origen en el CENTRO
                 Projectile.scale,               // escala
