@@ -11,23 +11,18 @@
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
         "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.",
 
-        "Items.CosmicPetItem.DisplayName": "Mascota Cósmica",
-        "Items.CosmicPetItem.Tooltip": "Invoca una mascota cósmica que te seguirá.",
         "Items.BossSummonBag.DisplayName": "Bolsa de Invocadores",
-        "Items.BossSummonBag.Tooltip": "Contiene 999 invocadores de cada jefe.",
-        "Items.TestSlayer.DisplayName": "Verdugo de Pruebas",
-        "Items.TestSlayer.Tooltip": "Hace 99.99% de daño de la vida máxima.\nClick izq: NPC bajo cursor. Click der: todos los NPCs.",
+        "Items.BossSummonBag.Tooltip": "Contiene 999 invocadores de cada jefe.\nItem de testing — eliminar antes de release.",
+        "Items.LevelUpTester.DisplayName": "Verdugo de Niveles",
+        "Items.LevelUpTester.Tooltip": "Da +10 niveles al Grimorio del Eterno.\nBusca en todo el inventario.\nItem de testing — eliminar antes de release.",
 
         "Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
         "Projectiles.GenesisLight.DisplayName": "Luz del Génesis",
         "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
         "Projectiles.CosmicOrbBolt.DisplayName": "Bolt Cósmico",
-        "Projectiles.CosmicPet.DisplayName": "Mascota Cósmica",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
-        "Buffs.CosmicPetBuff.DisplayName": "Mascota Cósmica",
-        "Buffs.CosmicPetBuff.Description": "Una criatura de nebulosa te sigue",
 
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",

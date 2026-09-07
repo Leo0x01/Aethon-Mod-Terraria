@@ -1,7 +1,6 @@
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
@@ -83,7 +82,13 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                // Efectos visuales en la posición del jugador
+                // Efectos visuales en la posición del jugador (mantenidos por request del usuario):
+                // - mensaje dorado con el nivel alcanzado
+                // - sonido corto
+                // - partículas doradas en torno al jugador
+                // (Los eventos cinematográficos — temblor de pantalla, grano, time-skip, lore —
+                //  fueron eliminados por request del usuario. Ver commit de eliminación de
+                //  LevelUpEventSystem.)
                 Player? owner = Main.LocalPlayer;
                 if (owner != null)
                 {
@@ -94,17 +99,6 @@ namespace AethonMod.Content.Globals
                         Dust.NewDustPerfect(owner.Center, Terraria.ID.DustID.GoldFlame,
                             new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
                             100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
-                }
-
-                // === EVENTO GLOBAL: primera subida de nivel (solo una vez por PERSONAJE) ===
-                if (owner != null)
-                {
-                    var sp = owner.GetModPlayer<Players.ShardPlayer>();
-                    if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == owner.whoAmI)
-                    {
-                        sp.FirstLevelUpTriggered = true;
-                        LevelUpEventSystem.Trigger();
-                    }
                 }
 
                 // Hito especial cada 50 niveles (infinito)

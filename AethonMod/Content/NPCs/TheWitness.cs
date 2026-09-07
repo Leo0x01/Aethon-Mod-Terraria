@@ -87,6 +87,16 @@ namespace AethonMod.Content.NPCs
             if (!firstButton) return;
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return;
+
+            // Calcular nivel del Grimorio sostenido (igual que en GetChat/SetChatButtons).
+            int level = 0;
+            Item? held = Main.LocalPlayer.HeldItem;
+            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            {
+                try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
+                catch { }
+            }
+
             if (level >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
             {
                 Item.NewItem(
@@ -94,6 +104,10 @@ namespace AethonMod.Content.NPCs
                     Main.LocalPlayer.Center,
                     ModContent.ItemType<Items.ResonanceShard>());
                 Main.NewText("El Testigo te da un Fragmento de Resonancia.", new Microsoft.Xna.Framework.Color(245, 196, 81));
+            }
+            else if (level < 50)
+            {
+                Main.NewText("El Testigo solo comparte resonancia con portadores de nivel 50+.", new Microsoft.Xna.Framework.Color(150, 150, 180));
             }
         }
     }

@@ -11,23 +11,18 @@
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
         "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.",
 
-        "Items.CosmicPetItem.DisplayName": "Cosmic Pet",
-        "Items.CosmicPetItem.Tooltip": "Summons a cosmic pet that will follow you.",
         "Items.BossSummonBag.DisplayName": "Summoner Bag",
-        "Items.BossSummonBag.Tooltip": "Contains 999 of every boss summoner.",
-        "Items.TestSlayer.DisplayName": "Test Slayer",
-        "Items.TestSlayer.Tooltip": "Deals 99.99% of max life as damage.\nLeft click: NPC under cursor. Right click: all NPCs.",
+        "Items.BossSummonBag.Tooltip": "Contains 999 of every boss summoner.\nTesting item — remove before release.",
+        "Items.LevelUpTester.DisplayName": "Level Slayer",
+        "Items.LevelUpTester.Tooltip": "Grants +10 levels to the Grimoire of the Eternal.\nSearches the whole inventory.\nTesting item — remove before release.",
 
         "Projectiles.ArcaneBolt.DisplayName": "Arcane Bolt",
         "Projectiles.GenesisLight.DisplayName": "Genesis Light",
         "Projectiles.CosmicOrbMinion.DisplayName": "Cosmic Orb",
         "Projectiles.CosmicOrbBolt.DisplayName": "Cosmic Bolt",
-        "Projectiles.CosmicPet.DisplayName": "Cosmic Pet",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
-        "Buffs.CosmicPetBuff.DisplayName": "Cosmic Pet",
-        "Buffs.CosmicPetBuff.Description": "A nebula creature follows you",
 
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",

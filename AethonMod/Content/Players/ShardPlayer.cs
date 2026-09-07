@@ -12,6 +12,10 @@ namespace AethonMod.Content.Players
     public class ShardPlayer : ModPlayer
     {
         public int ResonanceShards = 0;
+
+        // Flag legacy: se persiste para no romper saves antiguos, pero ya no se usa
+        // para disparar ningún evento (LevelUpEventSystem fue eliminado por request
+        // del usuario — se quitó el temblor de pantalla, el grano, el time-skip y el lore).
         public bool FirstLevelUpTriggered = false;
 
         /// <summary>

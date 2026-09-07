@@ -29,17 +29,10 @@ namespace AethonMod.Content.Weapons
     /// </summary>
     public class GrimoireEternal : ModItem
     {
-        public override void OnCraft(Recipe recipe)
-        {
-            // Disparar evento cinematográfico al craftear (solo sin lore por ahora).
-            var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
-            if (sp != null && !sp.FirstLevelUpTriggered && Main.myPlayer == Main.LocalPlayer.whoAmI)
-            {
-                sp.FirstLevelUpTriggered = true;
-                sp.ActiveBranch = Players.BranchType.Magic;
-                LevelUpEventSystem.Trigger(false);
-            }
-        }
+        // Nota: el método OnCraft que disparaba el evento cinematográfico
+        // (LevelUpEventSystem.Trigger) fue eliminado por request del usuario.
+        // El crafteo del Grimorio ya no produce temblor de pantalla, grano,
+        // time-skip ni texto de lore. El jugador simplemente obtiene el item.
 
         public override void SetStaticDefaults() { }
 

@@ -124,9 +124,9 @@
 - GlobalNPCXP — otorga XP al Grimorio + lifesteal + boss drops
 - ShardPlayer — mana/vida max, regen, reducción daño
 - CosmicProjectileFX — partículas cósmicas en Nightglow
-- LevelUpEventSystem — evento cinematográfico (sin lore)
 - AncientAltarWorldGen — genera altares bajo tierra
 - ShardLevelSystem — XP por rareza del bestiario
+- ~~LevelUpEventSystem~~ — ELIMINADO (temblor de pantalla, grano, time-skip y lore quitados por request del usuario)
 
 ---
 

@@ -7,6 +7,12 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// Player de TESTING — da items al entrar al mundo para pruebas.
     /// TEMPORAL: eliminar antes de release oficial.
+    ///
+    /// Items entregados:
+    /// - GenesisShard (arma de luz + material del Grimorio)
+    /// - 100 GoldBar (para craftear el Grimorio)
+    /// - LevelUpTester (+10 niveles al Grimorio por uso)
+    /// - BossSummonBag (999 invocadores de cada jefe)
     /// </summary>
     public class TestingPlayer : ModPlayer
     {
@@ -15,65 +21,40 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // Verificar si ya tiene el CosmicPetItem (para no duplicar)
-            bool hasPet = false;
+            // Verificar si ya tiene el GenesisShard (para no duplicar la entrega).
+            bool alreadyHasKit = false;
             for (int i = 0; i < 58; i++)
             {
                 if (Player.inventory[i] != null &&
-                    Player.inventory[i].type == ModContent.ItemType<CosmicPetItem>())
+                    Player.inventory[i].type == ModContent.ItemType<GenesisShard>())
                 {
-                    hasPet = true;
+                    alreadyHasKit = true;
                     break;
                 }
             }
 
-            if (!hasPet)
+            if (alreadyHasKit) return;
+
+            // Entregar el kit de testing en el primer slot vacío de cada item.
+            GiveItem(ModContent.ItemType<GenesisShard>(), 1);
+            GiveItem(Terraria.ID.ItemID.GoldBar, 100);
+            GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
+            GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
+        }
+
+        /// <summary>
+        /// Coloca un item en el primer slot vacío del inventario.
+        /// </summary>
+        private void GiveItem(int itemType, int stack)
+        {
+            for (int i = 0; i < 58; i++)
             {
-                // CosmicPetItem
-                for (int i = 0; i < 58; i++)
+                if (Player.inventory[i] == null ||
+                    Player.inventory[i].type == Terraria.ID.ItemID.None)
                 {
-                    if (Player.inventory[i] == null || Player.inventory[i].type == Terraria.ID.ItemID.None)
-                    {
-                        Player.inventory[i].SetDefaults(ModContent.ItemType<CosmicPetItem>());
-                        break;
-                    }
-                }
-                // BossSummonBag
-                for (int i = 0; i < 58; i++)
-                {
-                    if (Player.inventory[i] == null || Player.inventory[i].type == Terraria.ID.ItemID.None)
-                    {
-                        Player.inventory[i].SetDefaults(ModContent.ItemType<BossSummonBag>());
-                        break;
-                    }
-                }
-                // TestSlayer
-                for (int i = 0; i < 58; i++)
-                {
-                    if (Player.inventory[i] == null || Player.inventory[i].type == Terraria.ID.ItemID.None)
-                    {
-                        Player.inventory[i].SetDefaults(ModContent.ItemType<TestSlayer>());
-                        break;
-                    }
-                }
-                // GenesisShard
-                for (int i = 0; i < 58; i++)
-                {
-                    if (Player.inventory[i] == null || Player.inventory[i].type == Terraria.ID.ItemID.None)
-                    {
-                        Player.inventory[i].SetDefaults(ModContent.ItemType<GenesisShard>());
-                        break;
-                    }
-                }
-                // 100 GoldBar
-                for (int i = 0; i < 58; i++)
-                {
-                    if (Player.inventory[i] == null || Player.inventory[i].type == Terraria.ID.ItemID.None)
-                    {
-                        Player.inventory[i].SetDefaults(Terraria.ID.ItemID.GoldBar);
-                        Player.inventory[i].stack = 100;
-                        break;
-                    }
+                    Player.inventory[i].SetDefaults(itemType);
+                    Player.inventory[i].stack = stack;
+                    return;
                 }
             }
         }
