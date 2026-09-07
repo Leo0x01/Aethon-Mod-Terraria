@@ -56,8 +56,8 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 10, 0, 0);
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<Projectiles.ArcaneBolt>();
+            Item.autoReuse = false; // Sin autoReuse — previene doble disparo
+            Item.shoot = 931; // Nightglow
             Item.shootSpeed = 12f;
             Item.mana = 3;
             Item.noMelee = true;
