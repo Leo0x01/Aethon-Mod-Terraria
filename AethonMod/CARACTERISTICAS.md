@@ -126,12 +126,13 @@
 - CosmicProjectileFX — partículas cósmicas en Nightglow
 - AncientAltarWorldGen — genera altares bajo tierra
 - ShardLevelSystem — XP por rareza del bestiario
-- ~~LevelUpEventSystem~~ — ELIMINADO (temblor de pantalla, grano, time-skip y lore quitados por request del usuario)
+- ~~LevelUpEventSystem~~ — ELIMINADO (temblor de pantalla, grano, time-skip y lore)
+- ~~CosmicEventSystem~~ — ELIMINADO (anuncios "Hitos cósmicos", Lluvia de Luz Estelar, Rifts Dimensionales)
 
 ---
 
 ## Configuración
-- AethonConfig — multiplicador XP, eventos cósmicos, notificaciones
+- AethonConfig — multiplicador XP, notificaciones de nivel/hitos, debug
 - build.txt — version 5.0, side Both
 
 ---

@@ -22,15 +22,6 @@ namespace AethonMod.Content
         public int MaxShardLevel = 0;
 
         [DefaultValue(true)]
-        public bool EnableCosmicEvents = true;
-
-        [DefaultValue(true)]
-        public bool EnableStarlightRain = true;
-
-        [DefaultValue(true)]
-        public bool EnableDimensionalRifts = true;
-
-        [DefaultValue(true)]
         public bool ShowLevelUpNotifications = true;
 
         [DefaultValue(true)]

@@ -1,5 +1,20 @@
 # AethonMod — Historial de Cambios
 
+## Commit FIX-COSMIC-EVENTS-ELIMINADOS — Quitar sistema de eventos cósmicos (Hitos + Lluvia de Luz + Rifts)
+- CosmicEventSystem.cs ELIMINADO por completo (165 líneas):
+  * Anuncios "Hitos cósmico: Lluvia de Luz Estelar / Sagrario Hueco / Rifts Dimensionales / Aethon se agita / El Despertar" al alcanzar niveles 25/50/75/100/150
+  * UpdateStarlightRain: spawn de meteoros dorados cada 10s al nivel 25+
+  * UpdateDimensionalRifts: spawn de NPC RiftKeeper bajo tierra al nivel 75+
+- AethonConfig.cs: eliminadas flags EnableCosmicEvents, EnableStarlightRain, EnableDimensionalRifts (ya no se usan)
+- Se conservan EnableCosmicEvents/StarlightRain/Rifts eliminados del config (cualquier config.json antiguo simplemente ignora esas claves)
+- Motivo: el usuario reportó que los mensajes "Hitos cósmico" seguían apareciendo en el juego y debían estar eliminados (formaban parte de la misma familia de eventos cinematográficos que ya se quitó)
+
+## Commit FIX-SPRITES-FALTANTES — Agregar sprites PNG para LevelUpTester y BossSummonBag
+- LevelUpTester.png generado (24x24, saco dorado con flecha ascendente)
+- BossSummonBag.png generado (24x24, saco purpura con calavera roja)
+- MissingResourceException al cargar el mod resuelto
+- Verificado: 18/18 ModItem/Projectile/NPC/Buff/Tile tienen su .png
+
 ## Commit FIX-EVENTOS-ELIMINADOS — Quitar lore y eventos cinematográficos de subida de nivel
 - LevelUpEventSystem.cs ELIMINADO por completo (temblor de pantalla, overlay con grano, time-skip de 1 día, texto de lore centrado)
 - ShardLevelItem.OnLevelUp: removido el bloque que llamaba a LevelUpEventSystem.Trigger() en la primera subida de nivel
