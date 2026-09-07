@@ -4421,3 +4421,56 @@ Stage Summary:
   verificar que los 'using' necesarios esten presentes. Un archivo puede haber
   compilado en su momento porque otros archivos del mismo commit aportaban los
   usings via referencias indirectas, pero al mezclar commits diferentes se rompe.
+
+---
+Task ID: FIX-CS0136-HELD-DUPLICADO
+Agent: main (Z.ai Code)
+Task: Corregir CS0136 variable 'held' duplicada en CosmicOrbMinion.cs
+
+Work Log:
+- Recibida imagen de error del usuario: CS0136 en CosmicOrbMinion.cs:19:27
+  'Una variable local o un parametro denominados field no se pueden declarar
+  en este ambito porque ese nombre se esta usando en un ambito local envolvente'
+  (1 error total, 25 warnings)
+- Causa raiz: al restaurar CosmicOrbMinion.cs del commit f6db599 (commit a3ec549),
+  el archivo venia con la variable 'Item? held' declarada 2 veces en ambitos
+  anidados dentro del mismo metodo AI():
+  * Linea 69: Item? held = owner.HeldItem;  (en metodo AI, ambito externo)
+  * Linea 99: Item? held = owner.HeldItem;  (en bloque if(attacking) anidado en AI())
+- El compilador C# prohíbe re-declarar una variable local con el mismo nombre
+  en un ambito anidado (CS0136).
+- Fix aplicado: eliminada la declaracion duplicada en linea 99, se reutiliza
+  la variable 'held' declarada arriba en el mismo metodo AI().
+- Este fix ya estaba documentado en CHANGES.md commit 093826c pero se perdio
+  al restaurar el archivo del commit f6db599.
+- Commit f2858e7: 1 file changed, 1 insertion(+), 1 deletion(-).
+- Push exitoso: d2feb87..f2858e7 main -> main.
+
+Verificacion preventiva realizada:
+- Buscadas todas las declaraciones de 'Item? held' o 'Item held' en todos los
+  archivos .cs. Confirmado que las unicas que existen son:
+  * TheWitness.cs (3 en metodos diferentes — OK, no conflicto)
+  * GlobalNPCXP.cs (2 en metodos diferentes — OK)
+  * CosmicOrbMinion.cs (2: linea 69 en AI, linea 189 en FindHostileTarget — OK, metodos diferentes)
+- Verificado que todos los archivos que usan WeaponScaling tienen el
+  'using AethonMod.Content.Systems;' presente.
+- Verificado que todas las clases referenciadas via ModContent.ItemType<> existen.
+
+Stage Summary:
+- **Commit pushed**: f2858e7
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/f2858e7
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
+
+Leccion aprendida (patron recurrente):
+Cuando restauro un archivo .cs de un commit antiguo (git show OLD:file > file),
+el archivo trae el estado EXACTO de ese commit, lo que puede:
+1. Perder usings que se agregaron despues (CS0103 WeaponScaling)
+2. Perder fixes de variables duplicadas que se aplicaron despues (CS0136 held)
+3. Perder fixes de API que cambiaron despues (CS0117, CS1061)
+Para futuras restauraciones, debo siempre:
+- Comparar el archivo restaurado con el actual (git diff)
+- Verificar que los usings esten presentes
+- Verificar que los fixes previos no se pierdan
+- Compilar mentalmente buscando conflictos de ambito
