@@ -209,7 +209,7 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             if (sl == null) return;
 
-            // Línea de daño de invocación (híbrido)
+            // Línea de daño de invocación (híbrido) — insertada después de Damage/Knockback
             int insertIndex = -1;
             for (int i = 0; i < tooltips.Count; i++)
             {
@@ -226,91 +226,76 @@ namespace AethonMod.Content.Weapons
                     $"[c/BE78FD:{summonDmg} daño de invocación]"));
             }
 
-            // Barra de XP
+            // === TOOLTIP COMPACTO (6 líneas en vez de 12+) ===
+
+            // Línea 1: Nivel + barra de XP
             int xpNeeded = sl.XPForNextLevel();
             float pct = xpNeeded > 0 ? (float)sl.XP / xpNeeded : 0f;
             pct = System.Math.Clamp(pct, 0f, 1f);
-            int barLen = 20;
+            int barLen = 14;
             int filled = (int)(barLen * pct);
-            string bar = "[";
+            string bar = "";
             for (int i = 0; i < barLen; i++)
                 bar += i < filled ? "█" : "░";
-            bar += "]";
+            tooltips.Add(new TooltipLine(Mod, "Level",
+                $"[c/FFD700:Nivel {sl.Level}] [c/B388FF:{bar} {sl.XP}/{xpNeeded}]"));
 
-            tooltips.Add(new TooltipLine(Mod, "Level", $"[c/FFD700:Nivel {sl.Level}]"));
-            tooltips.Add(new TooltipLine(Mod, "XP", $"[c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
-
-            // Stats de escalado
-            int manaCost = WeaponScaling.ManaCost(sl.Level);
-            int minionCost = WeaponScaling.MinionManaCost(sl.Level);
+            // Línea 2: Escalado de daño (mágico + summon + crit + armor pen + minion slots)
             int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
+            tooltips.Add(new TooltipLine(Mod, "Scaling",
+                $"[c/FF5555:+{(int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100)}% mág] " +
+                $"[c/BE78FD:+{(int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100)}% summ] " +
+                $"[c/FFAA55:+{WeaponScaling.CritBonus(sl.Level):F0}% crit] " +
+                $"[c/55FFFF:+{WeaponScaling.ArmorPenBonus(sl.Level):F0}% pen] " +
+                $"[c/78FF96:+{bonusSlots} min]"));
+
+            // Línea 3: Stats del jugador (mana/vida/regen/reducción) — compactadas
             int bonusMana = WeaponScaling.BonusMana(sl.Level);
             int bonusLife = WeaponScaling.BonusLife(sl.Level);
-            float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
-
-            tooltips.Add(new TooltipLine(Mod, "Scaling",
-                $"[c/FFD700:Escalado:] " +
-                $"[c/FF5555:+{(int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100)}% mágico] " +
-                $"[c/BE78FD:+{(int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100)}% summon] " +
-                $"[c/FFAA55:+{WeaponScaling.CritBonus(sl.Level):F1}% crit] " +
-                $"[c/55FFFF:+{WeaponScaling.ArmorPenBonus(sl.Level):F0}% armor pen] " +
-                $"[c/78FF96:+{bonusSlots} slots minion]"));
-
-            // Stats del jugador
-            tooltips.Add(new TooltipLine(Mod, "PlayerStats",
-                $"[c/55AAFF:+{bonusMana} mana max | +{bonusLife} vida max] " +
-                $"[c/55AAFF:+{WeaponScaling.ManaRegen(sl.Level)} mana/seg] " +
-                $"[c/FF5566:+{WeaponScaling.LifeRegen(sl.Level):F1} vida/seg] " +
-                $"[c/FFAA55:-{WeaponScaling.DamageReduction(sl.Level) * 100f:F0}% daño rec.]"));
-
-            // Knockback
+            int manaRegen = WeaponScaling.ManaRegen(sl.Level);
+            float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
+            float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
             float kbMult = WeaponScaling.KnockbackMult(sl.Level);
-            tooltips.Add(new TooltipLine(Mod, "KnockbackLine",
-                $"[c/FFAA55:Knockback: +{(kbMult - 1f) * 100f:F0}%]"));
+            tooltips.Add(new TooltipLine(Mod, "PlayerStats",
+                $"[c/55AAFF:+{bonusMana}mp +{bonusLife}hp +{manaRegen}mp/s +{lifeRegen:F1}hp/s] " +
+                $"[c/FFAA55:-{dmgRed:F0}%rec +{(kbMult - 1f) * 100f:F0}%kb]"));
 
-            // Bolts (fix 48688dd: sin DoubleShotChance, 1 base + extras cada 3 niveles)
+            // Línea 4: Bolts + mana costs
+            int manaCost = WeaponScaling.ManaCost(sl.Level);
+            int minionCost = WeaponScaling.MinionManaCost(sl.Level);
             int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
             int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
             tooltips.Add(new TooltipLine(Mod, "Bolts",
-                $"[c/55AAFF:Bolts: {totalBolts} | Área: {areaDmg}px]"));
+                $"[c/55AAFF:{totalBolts} bolts {areaDmg}px área] " +
+                $"[c/55AAFF:Costo: {manaCost}mp bolt | {minionCost}mp minion]"));
 
-            // Mana
-            tooltips.Add(new TooltipLine(Mod, "ManaLine",
-                $"[c/55AAFF:Bolt: {manaCost} mana | Minion: {minionCost} mana]"));
-
-            // Bonus mana faltante
-            tooltips.Add(new TooltipLine(Mod, "LowMana",
-                $"[c/FF5555:★ Mana faltante: +{lowManaBonus:F1}% daño (tope +50%)]"));
-
-            // Lifesteal
+            // Línea 5: Bonus mana faltante + Lifesteal (combinados)
+            float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
+            string lifestealStr;
             if (WeaponScaling.HasLifesteal(sl.Level))
             {
                 float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
-                int nextLs = ((sl.Level / 7) + 1) * 7;
-                tooltips.Add(new TooltipLine(Mod, "Lifesteal",
-                    $"[c/FF5566:♥ Lifesteal: +{lsPct:F1}% (próximo nivel {nextLs})]"));
+                lifestealStr = $"[c/FF5566:♥ Lifesteal +{lsPct:F1}%]";
             }
             else
             {
-                tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
-                    $"[c/78788C:♥ Lifesteal se desbloquea en nivel 7]"));
+                lifestealStr = $"[c/78788C:♥ Lifesteal nv7+]";
             }
+            tooltips.Add(new TooltipLine(Mod, "Bonuses",
+                $"[c/FF5555:★ Mana bajo +{lowManaBonus:F0}% daño] {lifestealStr}"));
 
-            // Minion stats
+            // Línea 6: Minion stats + próximo hito — compactados
             int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
             float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
             float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
             float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
-            tooltips.Add(new TooltipLine(Mod, "MinionStats",
-                $"[c/78FF96:Minion: {contactDmg:F0}% contacto | {minionSpd:F0}% vel | {detectRange:F0}px rango | {hitCd}f cd]"));
-
-            // Próximo hito con todas sus mejoras
             int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
             int nextMilestoneNum = nextMilestoneLevel / 5;
             var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
             string rewardsStr = string.Join(", ", nextRewards);
-            tooltips.Add(new TooltipLine(Mod, "NextMilestone",
-                $"[c/78788C:Próximo hito nivel {nextMilestoneLevel}: {rewardsStr}]"));
+            tooltips.Add(new TooltipLine(Mod, "MinionAndNext",
+                $"[c/78FF96:Minion: +{contactDmg:F0}%dmg +{minionSpd:F0}%v {detectRange:F0}px {hitCd}f] " +
+                $"[c/78788C:Hito nv{nextMilestoneLevel}]"));
         }
     }
 }

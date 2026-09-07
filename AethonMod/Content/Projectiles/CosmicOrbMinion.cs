@@ -239,5 +239,48 @@ namespace AethonMod.Content.Projectiles
                 d.fadeIn = 0f;
             }
         }
+
+        /// <summary>
+        /// PreDraw — dibuja el minion rotando alrededor del CENTRO del sprite
+        /// (no de la esquina superior-izquierda como hace tModLoader por defecto).
+        /// Esto arregla el issue reportado por el usuario donde el minion "gira
+        /// por la parte de arriba".
+        /// </summary>
+        public override bool PreDraw(ref Terraria.DataStructures.DrawData drawData)
+        {
+            // Cargar la textura del minion
+            Microsoft.Xna.Framework.Graphics.Texture2D texture =
+                Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
+            if (texture == null) return true; // fallback al draw default
+
+            // Origen = centro del sprite (en vez de 0,0 que es la esquina sup-izq)
+            Microsoft.Xna.Framework.Vector2 origin = new Microsoft.Xna.Framework.Vector2(
+                texture.Width / 2f,
+                texture.Height / 2f);
+
+            // Posición en pantalla: centro del proyectil, ajustada por la cámara
+            Microsoft.Xna.Framework.Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            // Color con alpha completo
+            Microsoft.Xna.Framework.Color lightColor = Lighting.GetColor(
+                (int)(Projectile.Center.X / 16f),
+                (int)(Projectile.Center.Y / 16f));
+
+            // Dibujar con rotación centrada
+            Main.spriteBatch.Draw(
+                texture,
+                drawPos,
+                null,                           // sourceRect: null = sprite completo
+                lightColor * Projectile.alpha / 255f,
+                Projectile.rotation,             // rotación aplicada
+                origin,                         // ← origen en el CENTRO
+                Projectile.scale,               // escala
+                Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
+                0f                              // layerDepth
+            );
+
+            // Retornar false para que tModLoader NO haga el draw default (que rota mal)
+            return false;
+        }
     }
 }
