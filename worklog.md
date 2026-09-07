@@ -4539,3 +4539,40 @@ Stage Summary:
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar. Tooltip sera compacto, sprites tendran tamaño correcto de Terraria,
   y el minion rotara sobre su centro.
+
+---
+Task ID: FIX-CS0115-PREDRAW-FIRMA
+Agent: main (Z.ai Code)
+Task: Corregir CS0115 firma incorrecta de PreDraw en CosmicOrbMinion
+
+Work Log:
+- Recibida imagen de error del usuario: CS0115 en CosmicOrbMinion.cs:249:30
+  'CosmicOrbMinion.PreDraw(ref DrawData)': no se encontro ningun miembro adecuado
+  para invalidar. (2 errores totales, 24 warnings)
+- Causa: en el commit anterior (e6345b1) agregue el override PreDraw con la firma
+  'public override bool PreDraw(ref Terraria.DataStructures.DrawData drawData)'
+  que NO existe en tModLoader 1.4.4. La firma correcta es:
+  'public override bool PreDraw(Color lightColor)'.
+- Fix aplicado:
+  * Cambiada la firma a 'public override bool PreDraw(Color lightColor)'
+  * Eliminado el calculo manual de Lighting.GetColor(...) — tModLoader ya pasa
+    el lightColor como parametro al metodo PreDraw.
+  * El resto del metodo (origin = centro del sprite, drawPos = Center - screenPosition,
+    spriteBatch.Draw con rotation + origin) se mantiene igual.
+- Verificado: todos los override del archivo tienen firmas correctas:
+  * SetStaticDefaults(), SetDefaults(), CanCutTiles(), MinionContactDamage(), AI(),
+    OnHitNPC(NPC, HitInfo, int), PreDraw(Color)
+- Commit 367a85c: 1 file changed, 2 insertions(+), 7 deletions(-).
+- Push exitoso: e6345b1..367a85c main -> main.
+
+Stage Summary:
+- **Commit pushed**: 367a85c
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/367a85c
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
+
+Leccion aprendida: antes de agregar un override de un metodo de tModLoader,
+verificar la firma exacta en la documentacion de la version correspondiente
+(1.4.4 en este caso). 'PreDraw(ref DrawData)' era de una version anterior;
+en 1.4.4 es 'PreDraw(Color lightColor)'.
