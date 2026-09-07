@@ -122,14 +122,14 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 
-            // Click derecho (minion): requiere mana del minion
+            // Click derecho (minion): permitir con Mana Flower
             if (player.altFunctionUse == 2)
             {
                 int minionCost = WeaponScaling.MinionManaCost(level);
-                return player.statMana >= minionCost;
+                return player.statMana >= minionCost || player.manaFlower;
             }
-            // Click izquierdo (bolt): requiere mana del grimorio
-            return player.statMana >= Item.mana;
+            // Click izquierdo (bolt): permitir siempre (Terraria maneja mana + Mana Flower)
+            return true;
         }
 
         public override bool AltFunctionUse(Player player) => true;
@@ -161,9 +161,12 @@ namespace AethonMod.Content.Weapons
 
                 // Cobrar mana del minion
                 int minionCost = WeaponScaling.MinionManaCost(level);
-                if (player.statMana < minionCost) return false;
-                player.statMana -= minionCost;
-                if (player.statMana < 0) player.statMana = 0;
+                if (player.statMana < minionCost && !player.manaFlower) return false;
+                if (player.statMana >= minionCost)
+                {
+                    player.statMana -= minionCost;
+                    if (player.statMana < 0) player.statMana = 0;
+                }
 
                 // Invocar minion
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);

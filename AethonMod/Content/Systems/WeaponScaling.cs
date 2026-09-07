@@ -126,7 +126,12 @@ namespace AethonMod.Content.Systems
         // ================================================================
 
         /// <summary>+1 ArcaneBolt extra cada 5 niveles.</summary>
-        public static int ExtraProjectiles(int level) => level / 5;
+        /// <summary>+1 bolt extra cada 3 niveles (nivel 3=1, 6=2, 9=3...).</summary>
+        public static int ExtraProjectiles(int level)
+        {
+            if (level < 3) return 0;
+            return level / 3;
+        }
 
         // ================================================================
         //  HITOS (cada 5 niveles, cicla patron)

@@ -47,7 +47,6 @@ namespace AethonMod.Content.Globals
         /// </summary>
         public int XPForNextLevel()
         {
-            if (Level <= 1) return 1;
             return (int)(80 * System.Math.Pow(Level, 1.5));
         }
 
