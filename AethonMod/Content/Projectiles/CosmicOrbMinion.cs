@@ -246,7 +246,7 @@ namespace AethonMod.Content.Projectiles
         /// Esto arregla el issue reportado por el usuario donde el minion "gira
         /// por la parte de arriba".
         /// </summary>
-        public override bool PreDraw(Color lightColor)
+        public override bool PreDraw(ref Color lightColor)
         {
             // Cargar la textura del minion
             Microsoft.Xna.Framework.Graphics.Texture2D texture =
