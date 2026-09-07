@@ -4474,3 +4474,68 @@ Para futuras restauraciones, debo siempre:
 - Verificar que los usings esten presentes
 - Verificar que los fixes previos no se pierdan
 - Compilar mentalmente buscando conflictos de ambito
+
+---
+Task ID: FIX-TOOLTIP-SPRITES-ROTACION
+Agent: main (Z.ai Code)
+Task: Corregir 3 problemas visuales reportados por el usuario (tooltip enorme, sprites gigantes, rotacion del minion en la parte superior)
+
+Work Log:
+- Recibidas 2 capturas del usuario mostrando:
+  1. Tooltip del Grimorio enorme (12+ lineas separadas, ocupaba 1/6 de la pantalla)
+  2. Sprite del Grimorio gigante (344x418px) y sprite del minion gigante (713x664px)
+  3. Minion rota por la parte de arriba (pivot incorrecto)
+- Analizadas con VLM para confirmar los detalles visuales.
+
+Acciones realizadas (5 archivos modificados):
+
+1. SPRITES REDIMENSIONADOS (script /home/z/resize_sprites.py):
+   - GrimoireEternal.png: 344x418 -> 30x38 (Item.width=30, height=38 en SetDefaults)
+   - CosmicOrbMinion.png: 713x664 -> 32x32 (tamaño estandar de minion en Terraria)
+   - CosmicOrbBuff.png: 713x664 -> 32x32 (mismo sprite para el buff)
+   - Redimension con PIL usando filtro LANCZOS (alta calidad para pixel-art downscale)
+
+2. TOOLTIP COMPACTADO (GrimoireEternal.cs ModifyTooltips):
+   - Antes: 12+ TooltipLine separadas (Level, XP, Scaling, PlayerStats, KnockbackLine,
+     Bolts, ManaLine, LowMana, Lifesteal/LifestealLocked, MinionStats, NextMilestone)
+   - Ahora: 6 lineas compactas:
+     * Linea 1: Nivel + barra XP (en una sola linea, barra de 14 caracteres en vez de 20)
+     * Linea 2: Escalado de daño (mágico + summon + crit + armor pen + minion slots)
+     * Linea 3: Stats del jugador (mana/vida/regen/reduccion/knockback en una linea)
+     * Linea 4: Bolts + mana costs combinados
+     * Linea 5: Bonus mana bajo + Lifesteal combinados
+     * Linea 6: Minion stats + proximo hito combinados
+   - Abreviaturas usadas para ahorrar espacio: mág (mágico), summ (summon), crit,
+     pen (armor pen), min (minion slots), mp (mana), hp (vida), rec (reducción),
+     kb (knockback), v (velocidad), dmg (daño), f (frames), nv (nivel)
+
+3. ROTACION DEL MINION CENTRADA (CosmicOrbMinion.cs PreDraw override):
+   - Problema: tModLoader por defecto rota los proyectiles alrededor de (0,0) = esquina
+     superior-izquierda del sprite. Esto causaba que el minion 'girara por la parte de arriba'.
+   - Fix: agregado override PreDraw que:
+     * Carga la textura via Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value
+     * Calcula origin = Vector2(texture.Width/2f, texture.Height/2f) = CENTRO del sprite
+     * Dibuja con Main.spriteBatch.Draw usando:
+       - drawPos = Projectile.Center - Main.screenPosition (posicion en pantalla)
+       - origin = centro del sprite (rotacion centrada)
+       - rotation = Projectile.rotation
+       - color = Lighting.GetColor * alpha
+     * Retorna false para que tModLoader NO haga el draw default (que rota mal)
+   - Ahora el minion rota sobre su centro como deberia.
+
+- Commit e6345b1: 5 files changed, 82 insertions(+), 54 deletions(-).
+- Push exitoso: f2858e7..e6345b1 main -> main.
+
+Stage Summary:
+- **Commit pushed**: e6345b1
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/e6345b1
+- **Archivos en el commit (5)**:
+  * AethonMod/Content/Buffs/CosmicOrbBuff.png (32x32, redimensionado)
+  * AethonMod/Content/Projectiles/CosmicOrbMinion.cs (PreDraw override agregado)
+  * AethonMod/Content/Projectiles/CosmicOrbMinion.png (32x32, redimensionado)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (tooltip compactado a 6 lineas)
+  * AethonMod/Content/Weapons/GrimoireEternal.png (30x38, redimensionado)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar. Tooltip sera compacto, sprites tendran tamaño correcto de Terraria,
+  y el minion rotara sobre su centro.
