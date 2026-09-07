@@ -6,36 +6,106 @@ using AethonMod.Content.Globals;
 
 namespace AethonMod.Content.Players
 {
-    /// <summary>
-    /// Estado persistente del jugador para el mod Aethon.
-    /// </summary>
     public class ShardPlayer : ModPlayer
     {
         public int ResonanceShards = 0;
-
-        // Flag legacy: se persiste para no romper saves antiguos, pero ya no se usa
-        // para disparar ningún evento (LevelUpEventSystem fue eliminado por request
-        // del usuario — se quitó el temblor de pantalla, el grano, el time-skip y el lore).
         public bool FirstLevelUpTriggered = false;
 
         /// <summary>
-        /// PostUpdateEquips: aplica bonuses que deben stackear con armadura.
-        /// Slots de minion del Grimorio.
+        /// PostUpdateEquips: aplica los bonuses del Grimorio que persisten
+        /// aunque cambies de arma. Busca el Grimorio en TODO el inventario.
         /// </summary>
         public override void PostUpdateEquips()
         {
-            Item held = Player.HeldItem;
-            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            for (int i = 0; i < 58; i++)
             {
+                Item item = Player.inventory[i];
+                if (item == null || item.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                    continue;
+
                 try
                 {
-                    var sl = held.GetGlobalItem<ShardLevelItem>();
+                    var sl = item.GetGlobalItem<ShardLevelItem>();
                     if (sl != null)
-                        Player.maxMinions += WeaponScaling.BonusMinionSlots(sl.Level);
+                    {
+                        int level = sl.Level;
+                        // Slots de minion
+                        Player.maxMinions += WeaponScaling.BonusMinionSlots(level);
+                        // Mana max
+                        Player.statManaMax2 += WeaponScaling.BonusMana(level);
+                        // Vida max
+                        Player.statLifeMax2 += WeaponScaling.BonusLife(level);
+                        break;
+                    }
                 }
                 catch { }
             }
         }
+
+        /// <summary>
+        /// PostUpdate: regeneración de mana y vida + reducción de daño.
+        /// </summary>
+        public override void PostUpdate()
+        {
+            int level = 0;
+            for (int i = 0; i < 58; i++)
+            {
+                Item item = Player.inventory[i];
+                if (item == null || item.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                    continue;
+                try
+                {
+                    var sl = item.GetGlobalItem<ShardLevelItem>();
+                    if (sl != null) { level = sl.Level; break; }
+                }
+                catch { }
+            }
+            if (level == 0) return;
+
+            // Regeneración de mana (por segundo, 60 frames)
+            int manaRegen = WeaponScaling.ManaRegen(level);
+            if (manaRegen > 0 && Player.statMana < Player.statManaMax2)
+            {
+                // Distribuir el regen a lo largo de 60 frames
+                Player.manaRegen += manaRegen * 60 / 60;
+            }
+
+            // Regeneración de vida (por segundo)
+            float lifeRegen = WeaponScaling.LifeRegen(level);
+            if (lifeRegen > 0 && Player.statLife < Player.statLifeMax2)
+            {
+                Player.lifeRegen += (int)(lifeRegen * 2); // lifeRegen es en 1/2 vida/seg
+            }
+        }
+
+        /// <summary>
+        /// Modifica el daño recibido (reducción por nivel del Grimorio).
+        /// </summary>
+        public override void ModifyHurt(ref Player.HurtModifiers modifiers)
+        {
+            int level = 0;
+            for (int i = 0; i < 58; i++)
+            {
+                Item item = Player.inventory[i];
+                if (item == null || item.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                    continue;
+                try
+                {
+                    var sl = item.GetGlobalItem<ShardLevelItem>();
+                    if (sl != null) { level = sl.Level; break; }
+                }
+                catch { }
+            }
+            if (level == 0) return;
+
+            float reduction = WeaponScaling.DamageReduction(level);
+            if (reduction > 0f)
+            {
+                modifiers.FinalDamage *= 1f - reduction;
+            }
+        }
+
+        public override void OnHurt(Player.HurtInfo info) { }
 
         public override void SaveData(TagCompound tag)
         {
@@ -52,8 +122,5 @@ namespace AethonMod.Content.Players
             }
             catch { }
         }
-
-        public override void ModifyHurt(ref Player.HurtModifiers modifiers) { }
-        public override void OnHurt(Player.HurtInfo info) { }
     }
 }

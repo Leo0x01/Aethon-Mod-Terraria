@@ -29,10 +29,9 @@ namespace AethonMod.Content.Weapons
     /// </summary>
     public class GrimoireEternal : ModItem
     {
-        // Nota: el método OnCraft que disparaba el evento cinematográfico
-        // (LevelUpEventSystem.Trigger) fue eliminado por request del usuario.
-        // El crafteo del Grimorio ya no produce temblor de pantalla, grano,
-        // time-skip ni texto de lore. El jugador simplemente obtiene el item.
+        // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
+        // removido por request del usuario. El crafteo del Grimorio ya no produce
+        // temblor de pantalla ni texto de lore.
 
         public override void SetStaticDefaults() { }
 
@@ -49,8 +48,8 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 10, 0, 0);
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.autoReuse = false; // Sin autoReuse — previene doble disparo
-            Item.shoot = 931; // Nightglow
+            Item.autoReuse = false; // Sin autoReuse — previene doble disparo (fix 48688dd)
+            Item.shoot = 931; // Nightglow (fix 48688dd) — proyectil vanilla con homing
             Item.shootSpeed = 12f;
             Item.mana = 3;
             Item.noMelee = true;
@@ -74,22 +73,30 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             if (sl == null) return;
 
-            // +2.2% daño mágico por nivel
+            // +2.2% daño mágico por nivel (Infinito)
             damage *= WeaponScaling.MagicDamageMult(sl.Level);
 
-            // +1% daño de invocación por nivel
+            // +1% daño de invocación por nivel (Infinito)
             player.GetDamage(DamageClass.Summon) += WeaponScaling.SummonDamageBonus(sl.Level);
 
-            // +0.2% critico magico por nivel
+            // +0.2% critico magico por nivel (Máximo 100%)
             player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(sl.Level);
 
-            // +0.4% armor penetration por nivel
+            // Armor penetration +2% cada 5 niveles (Máximo 50%)
             player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(sl.Level);
 
-            // BONUS POR MANA FALTANTE (aplica a magia Y summon)
+            // BONUS POR MANA FALTANTE (aplica a magia Y summon, tope +50%)
             float manaMult = WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
             damage *= manaMult;
             player.GetDamage(DamageClass.Summon) *= manaMult;
+        }
+
+        public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
+        {
+            var sl = GetShard(Item);
+            if (sl == null) return;
+            // +10% knockback cada 10 niveles (tope +100%)
+            knockback *= WeaponScaling.KnockbackMult(sl.Level);
         }
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
@@ -115,13 +122,13 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 
-            // Click derecho (minion): permitir con Mana Flower
+            // Click derecho (minion): permite Mana Flower (fix 48688dd)
             if (player.altFunctionUse == 2)
             {
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 return player.statMana >= minionCost || player.manaFlower;
             }
-            // Click izquierdo (bolt): permitir siempre (Terraria maneja mana + Mana Flower)
+            // Click izquierdo (bolt): return true — Terraria maneja mana + Mana Flower (fix 48688dd)
             return true;
         }
 
@@ -152,7 +159,7 @@ namespace AethonMod.Content.Weapons
                     return false;
                 }
 
-                // Cobrar mana del minion
+                // Cobrar mana del minion (fix 48688dd: maneja Mana Flower)
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 if (player.statMana < minionCost && !player.manaFlower) return false;
                 if (player.statMana >= minionCost)
@@ -170,7 +177,10 @@ namespace AethonMod.Content.Weapons
                 return false;
             }
 
-            // === CLICK IZQUIERDO: ArcaneBolt + bolts extra ===
+            // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
+            // Fix 48688dd: sin DoubleShotChance (causaba disparo doble aleatorio).
+            // tModLoader dispara el proyectil principal (return true), nosotros
+            // añadimos los bolts extra en abanico.
             int extra = WeaponScaling.ExtraProjectiles(level);
             for (int i = 0; i < extra; i++)
             {
@@ -178,7 +188,7 @@ namespace AethonMod.Content.Weapons
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-            return true; // tModLoader dispara el bolt principal
+            return true; // Fix 48688dd: return true → tModLoader dispara exactamente 1 proyectil principal
         }
 
         // ================================================================
@@ -234,6 +244,8 @@ namespace AethonMod.Content.Weapons
             int manaCost = WeaponScaling.ManaCost(sl.Level);
             int minionCost = WeaponScaling.MinionManaCost(sl.Level);
             int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
+            int bonusMana = WeaponScaling.BonusMana(sl.Level);
+            int bonusLife = WeaponScaling.BonusLife(sl.Level);
             float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
 
             tooltips.Add(new TooltipLine(Mod, "Scaling",
@@ -241,13 +253,34 @@ namespace AethonMod.Content.Weapons
                 $"[c/FF5555:+{(int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100)}% mágico] " +
                 $"[c/BE78FD:+{(int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100)}% summon] " +
                 $"[c/FFAA55:+{WeaponScaling.CritBonus(sl.Level):F1}% crit] " +
+                $"[c/55FFFF:+{WeaponScaling.ArmorPenBonus(sl.Level):F0}% armor pen] " +
                 $"[c/78FF96:+{bonusSlots} slots minion]"));
 
-            tooltips.Add(new TooltipLine(Mod, "Mana",
+            // Stats del jugador
+            tooltips.Add(new TooltipLine(Mod, "PlayerStats",
+                $"[c/55AAFF:+{bonusMana} mana max | +{bonusLife} vida max] " +
+                $"[c/55AAFF:+{WeaponScaling.ManaRegen(sl.Level)} mana/seg] " +
+                $"[c/FF5566:+{WeaponScaling.LifeRegen(sl.Level):F1} vida/seg] " +
+                $"[c/FFAA55:-{WeaponScaling.DamageReduction(sl.Level) * 100f:F0}% daño rec.]"));
+
+            // Knockback
+            float kbMult = WeaponScaling.KnockbackMult(sl.Level);
+            tooltips.Add(new TooltipLine(Mod, "KnockbackLine",
+                $"[c/FFAA55:Knockback: +{(kbMult - 1f) * 100f:F0}%]"));
+
+            // Bolts (fix 48688dd: sin DoubleShotChance, 1 base + extras cada 3 niveles)
+            int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
+            int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
+            tooltips.Add(new TooltipLine(Mod, "Bolts",
+                $"[c/55AAFF:Bolts: {totalBolts} | Área: {areaDmg}px]"));
+
+            // Mana
+            tooltips.Add(new TooltipLine(Mod, "ManaLine",
                 $"[c/55AAFF:Bolt: {manaCost} mana | Minion: {minionCost} mana]"));
 
+            // Bonus mana faltante
             tooltips.Add(new TooltipLine(Mod, "LowMana",
-                $"[c/FF5555:★ Bonus mana faltante: +{lowManaBonus:F1}% daño (tope +50%)]"));
+                $"[c/FF5555:★ Mana faltante: +{lowManaBonus:F1}% daño (tope +50%)]"));
 
             // Lifesteal
             if (WeaponScaling.HasLifesteal(sl.Level))
@@ -255,7 +288,7 @@ namespace AethonMod.Content.Weapons
                 float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
                 int nextLs = ((sl.Level / 7) + 1) * 7;
                 tooltips.Add(new TooltipLine(Mod, "Lifesteal",
-                    $"[c/FF5566:♥ Lifesteal: +{lsPct:F1}% (próximo +0.1% en nivel {nextLs})]"));
+                    $"[c/FF5566:♥ Lifesteal: +{lsPct:F1}% (próximo nivel {nextLs})]"));
             }
             else
             {
@@ -263,16 +296,21 @@ namespace AethonMod.Content.Weapons
                     $"[c/78788C:♥ Lifesteal se desbloquea en nivel 7]"));
             }
 
-            // Hitos
-            int nextMilestone = ((sl.Level / 5) + 1) * 5;
-            if (sl.Level >= 5)
-            {
-                tooltips.Add(new TooltipLine(Mod, "Milestones", "[c/78FF96:★ Hitos:]"));
-                foreach (var m in WeaponScaling.MilestonesReached(sl.Level))
-                    tooltips.Add(new TooltipLine(Mod, "MS_" + m, $"  [c/78FF96:{m}]"));
-            }
+            // Minion stats
+            int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
+            float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
+            float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
+            float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
+            tooltips.Add(new TooltipLine(Mod, "MinionStats",
+                $"[c/78FF96:Minion: {contactDmg:F0}% contacto | {minionSpd:F0}% vel | {detectRange:F0}px rango | {hitCd}f cd]"));
+
+            // Próximo hito con todas sus mejoras
+            int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
+            int nextMilestoneNum = nextMilestoneLevel / 5;
+            var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
+            string rewardsStr = string.Join(", ", nextRewards);
             tooltips.Add(new TooltipLine(Mod, "NextMilestone",
-                $"[c/78788C:Próximo hito nivel {nextMilestone}: {WeaponScaling.MilestoneDescription(nextMilestone / 5)}]"));
+                $"[c/78788C:Próximo hito nivel {nextMilestoneLevel}: {rewardsStr}]"));
         }
     }
 }
