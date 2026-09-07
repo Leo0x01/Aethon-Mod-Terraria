@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Systems;
+using AethonMod.Content.Globals;
 
 namespace AethonMod.Content.Projectiles
 {
