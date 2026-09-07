@@ -94,9 +94,9 @@ namespace AethonMod.Content.Projectiles
                 if (dist > 0.1f)
                 {
                     // Velocidad escala con nivel del Grimorio (base 16, +50% cada 30 niveles, tope 3x)
+                    // Nota: 'held' ya fue declarado arriba en AI() — lo reutilizamos (fix CS0136).
                     float baseSpeed = 16f;
                     float speedMult = 1f;
-                    Item? held = owner.HeldItem;
                     if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                     {
                         try
