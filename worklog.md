@@ -4387,3 +4387,37 @@ Stage Summary:
   (opcion B que eligio), reemplazar carpeta AethonMod local, recompilar en tModLoader.
   Deberia tener: Grimorio con todas las mejoras por nivel, sprites del usuario restaurados,
   disparo unico (no doble), minions invocables con click derecho, mana flower compatible.
+
+---
+Task ID: FIX-CS0103-WEAPONSCALING-COSMICORBMINION
+Agent: main (Z.ai Code)
+Task: Corregir CS0103 'WeaponScaling' no existe en CosmicOrbMinion.cs (4 errores)
+
+Work Log:
+- Recibida imagen de error del usuario: CS0103 en CosmicOrbMinion.cs:75:58
+  'WeaponScaling' no existe en el contexto actual (4 errores totales, 25 warnings)
+- Causa raiz: al restaurar CosmicOrbMinion.cs del commit f6db599 en el fix anterior
+  (commit a3ec549), el archivo venia sin el 'using AethonMod.Content.Systems;'
+  que es el namespace donde vive la clase static WeaponScaling.
+- Las 3 (probablemente 4 con alguna sobrante) lineas afectadas:
+  * Linea 77: Projectile.localNPCHitCooldown = WeaponScaling.MinionHitCooldown(sl.Level)
+  * Linea 106: speedMult = WeaponScaling.MinionSpeedMult(sl.Level)
+  * Linea 196: detectionRange = WeaponScaling.MinionDetectionRange(sl.Level)
+- Fix aplicado: agregados 2 usings al inicio del archivo:
+  * using AethonMod.Content.Systems;  (para WeaponScaling)
+  * using AethonMod.Content.Globals;  (para ShardLevelItem — opcional porque se
+    usa con namespace completo Globals.ShardLevelItem, pero deja por claridad)
+- Commit d2feb87: 1 file changed, 2 insertions(+).
+- Push exitoso: a3ec549..d2feb87 main -> main.
+
+Stage Summary:
+- **Commit pushed**: d2feb87
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/d2feb87
+- **Archivos en el commit (1)**: AethonMod/Content/Projectiles/CosmicOrbMinion.cs
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
+- **Leccion aprendida**: al restaurar archivos .cs de commits antiguos, siempre
+  verificar que los 'using' necesarios esten presentes. Un archivo puede haber
+  compilado en su momento porque otros archivos del mismo commit aportaban los
+  usings via referencias indirectas, pero al mezclar commits diferentes se rompe.
