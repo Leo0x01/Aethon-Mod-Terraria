@@ -5347,3 +5347,40 @@ Stage Summary:
   1. Grimorio: vista completa sin SummonDamage
   2. TestStaff v2: click izq → 1 Nightglow, click der → 1 minion
   Si TestStaff v2 funciona (sin doble), migrar shoot=None al Grimorio.
+
+---
+Task ID: V5.12-TESTSTAFF-V3
+Agent: main (Z.ai Code)
+Task: Reescribir TestStaff con lógica anti-doble diferente (v3)
+
+Work Log:
+- Usuario reporto: 'el TestStaff no funciona' (v2 con shoot=None)
+- Reescrito TestStaff v3 con enfoque diferente
+
+Cambios en TestStaff v3:
+- Item.shoot = 931 (Nightglow, mismo que Grimorio)
+  (antes era None, lo que podia hacer que Shoot no se llamara)
+- Item.useStyle = Swing (más estable que HoldUp)
+- Item.autoReuse = false (para ver mejor si hay doble)
+- Item.reuseDelay = 10 (cooldown forzado entre usos)
+- Shoot retorna false SIEMPRE
+  (tModLoader NO crea proyectil default, creamos todo nosotros)
+- Anti-doble con _lastFireFrame (uint) para click izquierdo
+- Anti-doble con _lastMinionFrame (uint) para click derecho
+
+Diferencia con v2:
+- v2: shoot=None → Shoot podia no llamarse
+- v3: shoot=931 → Shoot se llama, pero return false impide doble
+
+Mismo proyectil que Grimorio: Nightglow (931).
+
+Version bump: 5.11 → 5.12
+
+- Commit a969004: 2 files changed, 30 insertions(+), 33 deletions(-)
+- Push exitoso: c471797..a969004 main -> main
+
+Stage Summary:
+- **Commit pushed**: a969004
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/a969004
+- **Version**: 5.11 → 5.12
+- **Siguiente paso usuario**: descargar ZIP y probar TestStaff v3
