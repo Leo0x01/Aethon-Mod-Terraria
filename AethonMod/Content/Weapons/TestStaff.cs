@@ -26,8 +26,9 @@ namespace AethonMod.Content.Weapons
     {
         // Flag estático para evitar que Shoot se procese dos veces en el mismo click
         // (puede pasar con autoReuse=true o con certain use styles)
-        private static int _lastShootFrame = 0;
-        private static int _lastMinionFrame = 0;
+        // Usamos uint porque Main.GameUpdateCount retorna uint (no int)
+        private static uint _lastShootFrame = 0;
+        private static uint _lastMinionFrame = 0;
 
         public override void SetStaticDefaults() { }
 
@@ -67,7 +68,7 @@ namespace AethonMod.Content.Weapons
         {
             // === ANTI-DOBLE: verificar si ya procesamos un Shoot en este frame ===
             // Esto previene que el proyectil se lance 2 veces por click
-            int currentFrame = Main.GameUpdateCount;
+            uint currentFrame = Main.GameUpdateCount;
             if (currentFrame == _lastShootFrame)
             {
                 // Ya procesamos un Shoot en este frame → ignorar (evita doble)
