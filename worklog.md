@@ -5579,3 +5579,52 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP y probar Grimorio:
   - La animación de uso será diferente (swing en vez de holdup)
   - Debería lanzar 1 proyectil por click (no doble)
+
+---
+Task ID: V5.18-ANTI-DOBLE-IDÉNTICO-TESTSTAFF
+Agent: main (Z.ai Code)
+Task: Reescribir Shoot del Grimorio para ser idéntico al TestStaff (que funciona)
+
+Work Log:
+- Usuario reporto: 'el grimorio sigue lanzando disparos dobles' (a pesar de v5.17)
+- Usuario solicito: restaurar HoldUp + revisar bien las diferencias
+
+Animación restaurada: useStyle = HoldUp (original)
+
+DIFERENCIA CRÍTICA ENCONTRADA entre TestStaff (funciona) y Grimorio (no):
+
+TestStaff:
+- Anti-doble del fire (_lastFireFrame) está DESPUÉS del bloque del minion
+- Check del minion está DENTRO del bloque del minion
+
+Grimorio (antes):
+- Anti-doble general (_lastShootFrame) estaba AL INICIO, ANTES del bloque minion
+- Esto causaba que el check general bloqueara el segundo Shoot del minion
+  pero NO bloqueaba correctamente el doble del click izquierdo
+
+Fix aplicado:
+1. Renombrado _lastShootFrame → _lastFireFrame (igual que TestStaff)
+2. Movido el check del fire DESPUÉS del bloque del minion (igual que TestStaff)
+3. Estructura ahora IDÉNTICA al TestStaff:
+   - currentFrame = GameUpdateCount
+   - if (altFunctionUse == 2) { ... check minion ... return false }
+   - if (currentFrame == _lastFireFrame) return false
+   - _lastFireFrame = currentFrame
+   - crear 1 proyectil + extras
+   - return false
+
+No se toco nada mas.
+
+Version bump: 5.17 → 5.18
+
+- Commit ed3d8de: 2 files changed, 16 insertions(+), 16 deletions(-)
+- Push exitoso: c8fb73b..ed3d8de main -> main
+
+Stage Summary:
+- **Commit pushed**: ed3d8de
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/ed3d8de
+- **Version**: 5.17 → 5.18
+- **Siguiente paso usuario**: descargar ZIP y probar Grimorio:
+  - Click izq → 1 proyectil (no doble)
+  - Click der → 1 minion (no doble)
+  - Animación HoldUp restaurada
