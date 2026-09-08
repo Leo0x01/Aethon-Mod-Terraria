@@ -1,5 +1,38 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.1 — autoReuse + tooltip rediseñado + proyectil cósmico
+
+3 mejoras solicitadas por el usuario:
+
+1. DISPARO CONTINUO (mantener click):
+   - Item.autoReuse cambiado de false → true
+   - Ahora se puede mantener el click izquierdo para disparar continuo
+   - El Shoot retorna true (tModLoader dispara 1 proyectil, sin doble)
+
+2. TOOLTIP REDISEÑADO COMPLETAMENTE:
+   - Antes: 6 líneas con abreviaturas crípticas (+4% mag, -20%tb, 13f, Hilo nv25, ump)
+   - Ahora: 6 secciones organizadas con cabeceras de colores y texto claro:
+     * PROGRESIÓN (verde): Nivel + barra XP + próximo hito
+     * DAÑO (dorado): daño mágico/summon + crit + armor pen + minion slots + knockback
+     * RECURSOS (azul): mana/vida max + regen + reducción de daño
+     * PROYECTIL (dorado): bolts + área + costo mana
+     * ORBE CÓSMICO (magenta): contacto + velocidad + rango + cooldown + costo
+     * BONUS (rojo): mana bajo + lifesteal
+   - Sin abreviaturas: todo el texto es legible
+
+3. PROYECTIL CÓSMICO (CosmicProjectileFX.cs — NUEVO):
+   - GlobalProjectile que afecta SOLO al Nightglow (ID 931)
+   - Estela cósmica con paleta del Grimorio:
+     * Dorado (cada frame) — núcleo de galaxia
+     * Cian (cada 2 frames) — estrella guía
+     * Magenta (cada 3 frames) — gemas
+     * Índigo (cada 4 frames) — fondo del portal
+   - Luz cósmica intensa (violeta-dorada)
+   - Explosión cósmica al impactar enemigos (4 colores + supernova blanca)
+   - Explosión al morir sin impacto
+
+Versión bump: 5.0 → 5.1
+
 ## Commit FIX-COSMIC-EVENTS-ELIMINADOS — Quitar sistema de eventos cósmicos (Hitos + Lluvia de Luz + Rifts)
 - CosmicEventSystem.cs ELIMINADO por completo (165 líneas):
   * Anuncios "Hitos cósmico: Lluvia de Luz Estelar / Sagrario Hueco / Rifts Dimensionales / Aethon se agita / El Despertar" al alcanzar niveles 25/50/75/100/150
