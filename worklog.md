@@ -5902,3 +5902,32 @@ Stage Summary:
   - Click izq → 1 proyectil por click (no doble)
   - Mantener click → dispara continuo a velocidad escalada por nivel
   - Debug debería mostrar 1 mensaje por click (no 2)
+
+---
+Task ID: V5.26-USEANIMATIONMULTIPLIER
+Agent: main (Z.ai Code)
+Task: Agregar UseAnimationMultiplier para arreglar el doble Shoot (Opción E)
+
+Work Log:
+- v5.25 no arregló el doble Shoot porque la hipótesis del useTime no entero era incorrecta
+- Revisión exhaustiva reveló la CAUSA RAÍZ REAL:
+  UseTimeMultiplier reducía useTime (22→21) pero NO useAnimation (se quedaba en 22)
+  Cuando useTime efectivo (21) < useAnimation (22) con autoReuse=true,
+  tModLoader dispara Shoot 2 veces por ciclo de animación
+
+Fix v5.26: agregar UseAnimationMultiplier que aplica el mismo multiplier
+a useAnimation:
+  public override float UseAnimationMultiplier(Player player)
+  {
+      return WeaponScaling.UseSpeedMult(sl.Level, Item.useAnimation);
+  }
+
+Ahora ambos tiempos se reducen proporcionalmente:
+- useTime: 22 × 0.9545 = 21
+- useAnimation: 22 × 0.9545 = 21
+- useTime (21) == useAnimation (21) → no hay doble Shoot
+
+Version bump: 5.25 → 5.26
+
+- Commit 8ae6cd1: 2 files changed, 14 insertions(+), 1 deletion(-)
+- Push exitoso: b797e2c..8ae6cd1 main -> main
