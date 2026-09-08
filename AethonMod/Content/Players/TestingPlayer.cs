@@ -41,6 +41,14 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
+            // v5.28: armas de prueba visual
+            GiveItem(ModContent.ItemType<Weapons.TestAura>(), 1); // aura cósmica al sostener
+            GiveItem(ModContent.ItemType<Weapons.TestStarTrail>(), 1); // trail de estrellas
+            GiveItem(ModContent.ItemType<Weapons.TestPortal>(), 1); // portal al disparar
+            GiveItem(ModContent.ItemType<Weapons.TestHaloMinion>(), 1); // minion con halo
+            GiveItem(ModContent.ItemType<Weapons.TestColorGold>(), 1); // color dorado
+            GiveItem(ModContent.ItemType<Weapons.TestColorCyan>(), 1); // color cian
+            GiveItem(ModContent.ItemType<Weapons.TestColorMagenta>(), 1); // color magenta
         }
 
         /// <summary>
