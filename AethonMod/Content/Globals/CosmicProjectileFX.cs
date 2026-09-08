@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
@@ -87,6 +88,49 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // === v5.29: DAÑO EN ÁREA (BoltAreaDamage) ===
+            // Finalmente implementado: daña NPCs cercanos al punto de impacto
+            // según el nivel del Grimorio del jugador que disparó.
+            try
+            {
+                if (projectile.owner >= 0 && projectile.owner < Main.player.Length)
+                {
+                    Player owner = Main.player[projectile.owner];
+                    if (owner != null && owner.active)
+                    {
+                        // Buscar el Grimorio en el inventario del jugador (no solo HeldItem)
+                        int grimorioLevel = 1;
+                        for (int i = 0; i < 58; i++)
+                        {
+                            Item inv = owner.inventory[i];
+                            if (inv != null && inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                            {
+                                var sl = inv.GetGlobalItem<ShardLevelItem>();
+                                if (sl != null) { grimorioLevel = sl.Level; break; }
+                            }
+                        }
+                        int areaRadius = WeaponScaling.BoltAreaDamage(grimorioLevel);
+                        if (areaRadius > 0)
+                        {
+                            int areaDamage = System.Math.Max(1, hit.Damage / 2); // 50% del daño original
+                            foreach (NPC npc in Main.ActiveNPCs)
+                            {
+                                if (!npc.active || npc.whoAmI == target.whoAmI) continue;
+                                if (npc.friendly || npc.townNPC) continue;
+                                if (!npc.CanBeChasedBy()) continue;
+                                float dist = Vector2.Distance(npc.Center, target.Center);
+                                if (dist < areaRadius)
+                                {
+                                    npc.SimpleStrikeNPC(areaDamage, projectile.direction,
+                                        false, 0, DamageClass.Magic, false, 0, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
             // === EXPLOSIÓN CÓSMICA al impactar (v5.3: duración CORTA) ===
             // Mismo fix que la estela: noGravity + fadeIn=0 + alpha alto + scale pequeño
 

@@ -216,9 +216,16 @@ namespace AethonMod.Content.Weapons
 
                 // Invocar minion (EXACTAMENTE una vez)
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
-                Projectile.NewProjectile(source, position, Vector2.Zero,
+                int minionProj = Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
                     damage, knockback, player.whoAmI);
+                // v5.29: Cachear el nivel del Grimorio en ai[2] para que el minion
+                // mantenga sus stats (velocidad, cooldown, rango, daño) aunque
+                // el jugador cambie de arma después de invocarlo.
+                if (minionProj >= 0 && minionProj < Main.maxProjectiles)
+                {
+                    Main.projectile[minionProj].ai[2] = level;
+                }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
             }
