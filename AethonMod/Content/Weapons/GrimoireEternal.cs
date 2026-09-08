@@ -38,6 +38,7 @@ namespace AethonMod.Content.Weapons
         // (igual que TestStaff que funciona).
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
+        private static int _shootCallCount = 0; // v5.20: debug counter
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
@@ -218,8 +219,14 @@ namespace AethonMod.Content.Weapons
 
             // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
             // v5.18: Anti-doble del fire AQUÍ (después del bloque minion, igual que TestStaff)
+            // v5.20: Debug mejorado — contador estático para ver cuántas veces
+            // se llama Shoot por click
+            _shootCallCount++;
             if (currentFrame == _lastFireFrame)
             {
+                if (Main.myPlayer == player.whoAmI)
+                    Main.NewText($"[DEBUG] Shoot #{_shootCallCount} BLOQUEADO (mismo frame {currentFrame})",
+                        new Color(255, 100, 100));
                 return false;
             }
             _lastFireFrame = currentFrame;
@@ -239,7 +246,7 @@ namespace AethonMod.Content.Weapons
 
             // v5.19: Debug para ver cuántos proyectiles se crean por click
             if (Main.myPlayer == player.whoAmI)
-                Main.NewText($"[DEBUG] Grimorio nivel {level}: 1 + {extra} = {1 + extra} proyectiles, frame {currentFrame}",
+                Main.NewText($"[DEBUG] Shoot #{_shootCallCount} Grimorio nv{level}: 1+{extra}={1+extra} proyectiles, frame {currentFrame}",
                     new Color(245, 196, 81));
 
             return false; // return false → tModLoader NO dispara proyectil extra
