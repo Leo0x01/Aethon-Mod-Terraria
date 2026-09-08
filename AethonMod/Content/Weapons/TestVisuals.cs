@@ -28,7 +28,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -73,7 +73,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -110,7 +110,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -166,22 +166,21 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 5; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
         public override bool AltFunctionUse(Player player) => true;
         public override bool CanUseItem(Player player)
         {
-            if (player.altFunctionUse == 2) return player.statMana >= 10;
+            // Sin requisito de mana (arma de prueba)
             return true;
         }
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             if (player.altFunctionUse == 2)
             {
-                // Click derecho: invocar minion con halo
-                player.statMana -= 10;
+                // Click derecho: invocar minion con halo (sin costo de mana)
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
                 int proj = Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
@@ -216,7 +215,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -249,7 +248,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -282,7 +281,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 2; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -316,7 +315,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 3; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -351,7 +350,7 @@ namespace AethonMod.Content.Weapons
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 3; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
