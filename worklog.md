@@ -5017,3 +5017,61 @@ Leccion aprendida:
   3. Usar una tecla dedicada en vez de click derecho
 - El usuario prefiere que NO se experimente mas con el toggle por ahora.
   v5.5 es el estado estable verificado.
+
+---
+Task ID: V5.6-QUITAR-MENSAJE-SEERORB
+Agent: main (Z.ai Code)
+Task: Quitar mensaje spam del toggle + crear item nuevo (SeerOrb) para experimentar con tooltip de 2 ventanas sin tocar el Grimorio
+
+Work Log:
+- Usuario reporto: 'este mensaje al tocar clic derecho es inutil, quita ese mensaje'
+  (se referia al 'Grimorio: vista completa' que spameaba el chat)
+- Usuario solicito: 'para comprobar lo del clic derecho en el item para que tenga
+  2 ventanas de informacion es mejor crear un item nuevo solo para experimentar,
+  asi no tocamos el grimorio ni lo jodemos'
+
+Acciones realizadas (4 archivos modificados/creados):
+
+1. QUITAR MENSAJE SPAM (TooltipToggleItem.cs):
+   - Eliminado el Main.NewText('Grimorio: vista completa/basica') que spameaba
+     el chat cada vez que se hacia click derecho en el Grimorio
+   - Solo queda el sonido MenuOpen como feedback
+
+2. CREAR ITEM NUEVO SeerOrb (Items/SeerOrb.cs — NUEVO):
+   - ModItem 'SeerOrb' (Orbe del Vidente) para probar el toggle SIN tocar el Grimorio
+   - GlobalItem 'SeerOrbToggle' separado del TooltipToggleItem del Grimorio
+   - Enfoque MAS SEGURO que v5.6 anterior (que rompio el mod):
+     * v5.6 anterior modificaba player.inventory[i] dentro de ModifyTooltips
+       → corrompia el estado del jugador → error 134124
+     * SeerOrbToggle usa un flag estatico (ShowExtendedTooltip) que NO toca
+       el inventario → no deberia corromper nada
+   - Vista basica: solo descripcion corta + indicador de click der
+   - Vista completa: seccion ESTADISTICAS con 6 stats de prueba + indicador
+   - No se persiste por-item (flag estatico global) — mas simple para pruebas
+
+3. SPRITE SeerOrb.png (24x24, generado con Python+PIL):
+   - Orbe purpura oscuro con nucleo cian + destellos dorados + borde oscuro
+
+4. KIT DE TESTING (TestingPlayer.cs):
+   - Agregado SeerOrb al kit que se recibe al entrar al mundo
+
+5. VERSION BUMP: 5.5 → 5.6
+
+- Commit 026bf15: 4 files changed, 114 insertions(+), 4 deletions(-)
+- Push exitoso: 145db23..026bf15 main -> main
+
+Stage Summary:
+- **Commit pushed**: 026bf15
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/026bf15
+- **Version**: 5.5 → 5.6
+- **Archivos en el commit (4)**:
+  * AethonMod/Content/Globals/TooltipToggleItem.cs (quitado mensaje spam)
+  * AethonMod/Content/Items/SeerOrb.cs (NUEVO — item de prueba + GlobalItem toggle)
+  * AethonMod/Content/Items/SeerOrb.png (NUEVO — sprite 24x24)
+  * AethonMod/Content/Players/TestingPlayer.cs (SeerOrb en kit de testing)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader. Probar:
+  1. Click derecho en el Grimorio → NO muestra mensaje spam (solo sonido)
+  2. Buscar el SeerOrb en el inventario (orbe purpura) → click derecho
+     alterna entre vista basica y completa
