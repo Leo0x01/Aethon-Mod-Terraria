@@ -31,44 +31,54 @@ namespace AethonMod.Content.Globals
 
         public override void AI(Projectile projectile)
         {
-            // === ESTELA CÓSMICA ===
-            // La paleta del Grimorio: dorado, cian, magenta, índigo
+            // === ESTELA CÓSMICA (v5.2: duración CORTA) ===
+            // El usuario reportó que la estela magenta duraba demasiado.
+            // Fix: configurar cada dust con noGravity=true, fadeIn=0, y alpha alto
+            // para que desaparezcan en ~10-15 frames (0.25 seg) en vez de 60+.
 
             // Dorado (núcleo de galaxia) — cada frame
-            Dust.NewDustPerfect(projectile.Center, DustID.GoldFlame,
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, DustID.GoldFlame,
                 -projectile.velocity * 0.05f + new Vector2(
                     Main.rand.NextFloat(-1f, 1f),
                     Main.rand.NextFloat(-1f, 1f)),
-                100, new Color(255, 217, 61), 0.9f);
+                150, new Color(255, 217, 61), 0.7f);
+            d1.noGravity = true;
+            d1.fadeIn = 0f;
 
             // Cian (estrella guía) — cada 2 frames
             if (Main.rand.NextBool(2))
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.BlueTorch,
+                Dust d2 = Dust.NewDustPerfect(projectile.Center, DustID.BlueTorch,
                     -projectile.velocity * 0.1f + new Vector2(
                         Main.rand.NextFloat(-1.5f, 1.5f),
                         Main.rand.NextFloat(-1.5f, 1.5f)),
-                    150, new Color(0, 255, 255), 0.8f);
+                    180, new Color(0, 255, 255), 0.6f);
+                d2.noGravity = true;
+                d2.fadeIn = 0f;
             }
 
-            // Magenta (gemas) — cada 3 frames
+            // Magenta (gemas) — cada 3 frames — alpha ALTO para que dure poco
             if (Main.rand.NextBool(3))
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
+                Dust d3 = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
                     -projectile.velocity * 0.08f + new Vector2(
                         Main.rand.NextFloat(-1.5f, 1.5f),
                         Main.rand.NextFloat(-1.5f, 1.5f)),
-                    200, new Color(255, 0, 102), 0.8f);
+                    200, new Color(255, 0, 102), 0.5f);
+                d3.noGravity = true;
+                d3.fadeIn = 0f;
             }
 
-            // Índigo (fondo del portal) — cada 4 frames, más sutil
+            // Índigo (fondo del portal) — cada 4 frames, muy sutil
             if (Main.rand.NextBool(4))
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.PurpleTorch,
+                Dust d4 = Dust.NewDustPerfect(projectile.Center, DustID.PurpleTorch,
                     new Vector2(
                         Main.rand.NextFloat(-1f, 1f),
                         Main.rand.NextFloat(-1f, 1f)),
-                    80, new Color(75, 0, 130), 0.7f);
+                    120, new Color(75, 0, 130), 0.5f);
+                d4.noGravity = true;
+                d4.fadeIn = 0f;
             }
 
             // Luz cósmica (más intensa que la default del Nightglow)

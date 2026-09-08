@@ -134,6 +134,36 @@ namespace AethonMod.Content.Weapons
 
         public override bool AltFunctionUse(Player player) => true;
 
+        /// <summary>
+        /// v5.2: Click derecho en el inventario (no en combate) alterna entre
+        /// tooltip básico y tooltip completo. Como la bolsa de vacío.
+        /// Solo funciona cuando el item está en el inventario (no equipado en uso).
+        /// </summary>
+        public override bool? UseItem(Player player)
+        {
+            // UseItem se llama cuando se usa el item. No interferimos aquí.
+            return null;
+        }
+
+        /// <summary>
+        /// v5.2: RightClick en inventario alterna la vista del tooltip.
+        /// </summary>
+        public override void RightClick(Player player)
+        {
+            var sl = GetShard(Item);
+            if (sl != null)
+            {
+                sl.ShowExtendedTooltip = !sl.ShowExtendedTooltip;
+                if (Main.myPlayer == player.whoAmI)
+                {
+                    string mode = sl.ShowExtendedTooltip ? "completa" : "básica";
+                    Main.NewText($"Grimorio: vista {mode}",
+                        new Color(245, 196, 81));
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+                }
+            }
+        }
+
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             var sl = GetShard(Item);
@@ -226,7 +256,9 @@ namespace AethonMod.Content.Weapons
                     $"[c/BE78FD:{summonDmg} daño de invocación]"));
             }
 
-            // === TOOLTIP REDISEÑADO v5.1 — texto claro, organizado por secciones ===
+            // === v5.2: TOOLTIP CON 2 MODOS ===
+            // Modo básico (default): solo nivel + XP + próximo hito (ventana pequeña)
+            // Modo completo (click derecho): todas las estadísticas
 
             // Calcular todos los valores
             int xpNeeded = sl.XPForNextLevel();
@@ -238,104 +270,120 @@ namespace AethonMod.Content.Weapons
             for (int i = 0; i < barLen; i++)
                 bar += i < filled ? "█" : "░";
 
-            int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
-            int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
-            float critPct = WeaponScaling.CritBonus(sl.Level);
-            float armorPenPct = WeaponScaling.ArmorPenBonus(sl.Level);
-            int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
-            int bonusMana = WeaponScaling.BonusMana(sl.Level);
-            int bonusLife = WeaponScaling.BonusLife(sl.Level);
-            int manaRegen = WeaponScaling.ManaRegen(sl.Level);
-            float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
-            float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
-            float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
-            int manaCost = WeaponScaling.ManaCost(sl.Level);
-            int minionCost = WeaponScaling.MinionManaCost(sl.Level);
-            int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
-            int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
-            float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
-            int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
-            float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
-            float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
-            float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
             int nextMilestoneLevel = ((sl.Level / 5) + 1) * 5;
             int nextMilestoneNum = nextMilestoneLevel / 5;
             var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
-            string rewardsStr = string.Join(", ", nextRewards);
 
-            // === SECCIÓN 1: PROGRESIÓN ===
+            // === MODO BÁSICO (siempre visible) ===
             tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
             tooltips.Add(new TooltipLine(Mod, "Level",
                 $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
+
+            // Próximo hito — recompensas una debajo de otra (no en línea)
             tooltips.Add(new TooltipLine(Mod, "NextMilestone",
-                $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel} ({rewardsStr})]"));
-
-            // === SECCIÓN 2: DAÑO ===
-            tooltips.Add(new TooltipLine(Mod, "SectionDamage", "[c/FFD700:═══ DAÑO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "MagicDamage",
-                $"[c/FF5555:+{magicDmgPct}% daño mágico]"));
-            tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
-                $"[c/BE78FD:+{summonDmgPct}% daño de invocación]"));
-            tooltips.Add(new TooltipLine(Mod, "Crit",
-                $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
-            tooltips.Add(new TooltipLine(Mod, "ArmorPen",
-                $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
-            tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                $"[c/78FF96:+{bonusSlots} slot(s) de minion]"));
-            tooltips.Add(new TooltipLine(Mod, "Knockback",
-                $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
-
-            // === SECCIÓN 3: RECURSOS DEL JUGADOR ===
-            tooltips.Add(new TooltipLine(Mod, "SectionResources", "[c/55AAFF:═══ RECURSOS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "ManaMax",
-                $"[c/55AAFF:+{bonusMana} mana máximo]"));
-            tooltips.Add(new TooltipLine(Mod, "LifeMax",
-                $"[c/55AAFF:+{bonusLife} vida máxima]"));
-            tooltips.Add(new TooltipLine(Mod, "ManaRegen",
-                $"[c/55AAFF:+{manaRegen} mana/seg regeneración]"));
-            tooltips.Add(new TooltipLine(Mod, "LifeRegen",
-                $"[c/FF5566:+{lifeRegen:F1} vida/seg regeneración]"));
-            tooltips.Add(new TooltipLine(Mod, "DamageRed",
-                $"[c/FFAA55:-{dmgRed:F0}% daño recibido]"));
-
-            // === SECCIÓN 4: PROYECTIL (CLICK IZQUIERDO) ===
-            tooltips.Add(new TooltipLine(Mod, "SectionProjectile", "[c/FFD700:═══ PROYECTIL ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "Bolts",
-                $"[c/55AAFF:{totalBolts} proyectil(es) por disparo]"));
-            tooltips.Add(new TooltipLine(Mod, "AreaDmg",
-                $"[c/55AAFF:+{areaDmg}px daño en área]"));
-            tooltips.Add(new TooltipLine(Mod, "ManaBolt",
-                $"[c/55AAFF:Costo: {manaCost} mana por disparo]"));
-
-            // === SECCIÓN 5: MINION (CLICK DERECHO) ===
-            tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
-                $"[c/BE78FD:+{contactDmg:F0}% daño de contacto]"));
-            tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
-                $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
-            tooltips.Add(new TooltipLine(Mod, "MinionRange",
-                $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
-            tooltips.Add(new TooltipLine(Mod, "MinionCd",
-                $"[c/BE78FD:{hitCd} frames de cooldown]"));
-            tooltips.Add(new TooltipLine(Mod, "ManaMinion",
-                $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
-
-            // === SECCIÓN 6: BONUS ESPECIALES ===
-            tooltips.Add(new TooltipLine(Mod, "SectionBonus", "[c/FF5566:═══ BONUS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "LowMana",
-                $"[c/FF5555:★ Mana bajo: +{lowManaBonus:F0}% daño (máximo +50%)]"));
-
-            if (WeaponScaling.HasLifesteal(sl.Level))
+                $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
+            foreach (var reward in nextRewards)
             {
-                float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
-                int nextLs = ((sl.Level / 7) + 1) * 7;
-                tooltips.Add(new TooltipLine(Mod, "Lifesteal",
-                    $"[c/FF5566:♥ Robo de vida: +{lsPct:F2}% (próximo nivel {nextLs})]"));
+                tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
+                    $"[c/78FF96:  • {reward}]"));
+            }
+
+            // Indicador de modo (básico/completo)
+            if (sl.ShowExtendedTooltip)
+            {
+                // === MODO COMPLETO: mostrar todas las estadísticas ===
+                int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
+                int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
+                float critPct = WeaponScaling.CritBonus(sl.Level);
+                float armorPenPct = WeaponScaling.ArmorPenBonus(sl.Level);
+                int bonusSlots = WeaponScaling.BonusMinionSlots(sl.Level);
+                int bonusMana = WeaponScaling.BonusMana(sl.Level);
+                int bonusLife = WeaponScaling.BonusLife(sl.Level);
+                int manaRegen = WeaponScaling.ManaRegen(sl.Level);
+                float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
+                float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
+                float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
+                int manaCost = WeaponScaling.ManaCost(sl.Level);
+                int minionCost = WeaponScaling.MinionManaCost(sl.Level);
+                int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
+                int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
+                float lowManaBonus = (WeaponScaling.LowManaDamageMult(Main.LocalPlayer.statMana, Main.LocalPlayer.statManaMax2) - 1f) * 100f;
+                int hitCd = WeaponScaling.MinionHitCooldown(sl.Level);
+                float contactDmg = (WeaponScaling.MinionContactDamageMult(sl.Level) - 1f) * 100f;
+                float minionSpd = (WeaponScaling.MinionSpeedMult(sl.Level) - 1f) * 100f;
+                float detectRange = WeaponScaling.MinionDetectionRange(sl.Level);
+
+                tooltips.Add(new TooltipLine(Mod, "SectionDamage", "[c/FFD700:═══ DAÑO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "MagicDamage",
+                    $"[c/FF5555:+{magicDmgPct}% daño mágico]"));
+                tooltips.Add(new TooltipLine(Mod, "SummonDamageScale",
+                    $"[c/BE78FD:+{summonDmgPct}% daño de invocación]"));
+                tooltips.Add(new TooltipLine(Mod, "Crit",
+                    $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
+                tooltips.Add(new TooltipLine(Mod, "ArmorPen",
+                    $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
+                    $"[c/78FF96:+{bonusSlots} slot(s) de minion]"));
+                tooltips.Add(new TooltipLine(Mod, "Knockback",
+                    $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionResources", "[c/55AAFF:═══ RECURSOS ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaMax",
+                    $"[c/55AAFF:+{bonusMana} mana máximo]"));
+                tooltips.Add(new TooltipLine(Mod, "LifeMax",
+                    $"[c/55AAFF:+{bonusLife} vida máxima]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaRegen",
+                    $"[c/55AAFF:+{manaRegen} mana/seg regeneración]"));
+                tooltips.Add(new TooltipLine(Mod, "LifeRegen",
+                    $"[c/FF5566:+{lifeRegen:F1} vida/seg regeneración]"));
+                tooltips.Add(new TooltipLine(Mod, "DamageRed",
+                    $"[c/FFAA55:-{dmgRed:F0}% daño recibido]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionProjectile", "[c/FFD700:═══ PROYECTIL ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "Bolts",
+                    $"[c/55AAFF:{totalBolts} proyectil(es) por disparo]"));
+                tooltips.Add(new TooltipLine(Mod, "AreaDmg",
+                    $"[c/55AAFF:+{areaDmg}px daño en área]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaBolt",
+                    $"[c/55AAFF:Costo: {manaCost} mana por disparo]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
+                    $"[c/BE78FD:+{contactDmg:F0}% daño de contacto]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
+                    $"[c/BE78FD:+{minionSpd:F0}% velocidad]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionRange",
+                    $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
+                tooltips.Add(new TooltipLine(Mod, "MinionCd",
+                    $"[c/BE78FD:{hitCd} frames de cooldown]"));
+                tooltips.Add(new TooltipLine(Mod, "ManaMinion",
+                    $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
+
+                tooltips.Add(new TooltipLine(Mod, "SectionBonus", "[c/FF5566:═══ BONUS ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "LowMana",
+                    $"[c/FF5555:★ Mana bajo: +{lowManaBonus:F0}% daño (máximo +50%)]"));
+
+                if (WeaponScaling.HasLifesteal(sl.Level))
+                {
+                    float lsPct = WeaponScaling.LifestealPercent(sl.Level) * 100f;
+                    int nextLs = ((sl.Level / 7) + 1) * 7;
+                    tooltips.Add(new TooltipLine(Mod, "Lifesteal",
+                        $"[c/FF5566:♥ Robo de vida: +{lsPct:F2}% (próximo nivel {nextLs})]"));
+                }
+                else
+                {
+                    tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
+                        $"[c/78788C:♥ Robo de vida se desbloquea en nivel 7]"));
+                }
+
+                tooltips.Add(new TooltipLine(Mod, "ModeIndicator",
+                    $"[c/78788C:═══ Click der para vista básica ═══]"));
             }
             else
             {
-                tooltips.Add(new TooltipLine(Mod, "LifestealLocked",
-                    $"[c/78788C:♥ Robo de vida se desbloquea en nivel 7]"));
+                // === MODO BÁSICO: solo indicador de modo ===
+                tooltips.Add(new TooltipLine(Mod, "ModeIndicator",
+                    $"[c/78788C:═══ Click der para vista completa ═══]"));
             }
         }
     }

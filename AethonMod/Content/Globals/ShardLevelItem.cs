@@ -22,6 +22,15 @@ namespace AethonMod.Content.Globals
         public int XP = 0;
 
         /// <summary>
+        /// v5.2: Flag que alterna la vista del tooltip del Grimorio.
+        /// false = tooltip básico (solo nivel + XP + próximo hito)
+        /// true  = tooltip completo (todas las estadísticas)
+        /// Se alterna haciendo click derecho en el item dentro del inventario.
+        /// Como la bolsa de vacio (Void Bag) que abre/cierra con click derecho.
+        /// </summary>
+        public bool ShowExtendedTooltip = false;
+
+        /// <summary>
         /// Solo aplica a las 3 armas Aethon + el FragmentoGenesis.
         /// DEFENSIVO: envuelto en try/catch porque se llama durante la carga del mod
         /// y ModContent.ItemType puede fallar si los items aún no están registrados.

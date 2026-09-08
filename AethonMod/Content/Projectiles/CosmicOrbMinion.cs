@@ -127,12 +127,21 @@ namespace AethonMod.Content.Projectiles
             }
             else
             {
-                // === MODO IDLE: orbitar al jugador ===
-                orbitAngle += 0.04f;
-                float orbitRadius = 45f + Projectile.minionPos * 22f;
+                // === MODO IDLE: orbitar al jugador CERCA ===
+                // v5.2: radio reducido y compacto para muchos minions.
+                // Antes: 45 + minionPos*22 = enorme con muchos minions.
+                // Ahora: radio fijo pequeño + separación angular uniforme.
+                orbitAngle += 0.05f;
+
+                // Radio compacto: 30px base + 4px por minion (tope ~80px con 12+ minions)
+                float orbitRadius = 30f + System.Math.Min(Projectile.minionPos * 4f, 50f);
+
+                // Separación angular uniforme entre minions (360° / numMinions)
+                float angleOffset = orbitAngle + (Projectile.minionPos * MathHelper.TwoPi / 8f);
+
                 Vector2 orbitOffset = new Vector2(
-                    (float)System.Math.Cos(orbitAngle + Projectile.minionPos * 1.5f) * orbitRadius,
-                    (float)System.Math.Sin(orbitAngle + Projectile.minionPos * 1.5f) * orbitRadius * 0.4f
+                    (float)System.Math.Cos(angleOffset) * orbitRadius,
+                    (float)System.Math.Sin(angleOffset) * orbitRadius * 0.5f
                 );
                 Vector2 targetPos = owner.Center + orbitOffset;
 
@@ -140,22 +149,35 @@ namespace AethonMod.Content.Projectiles
                 float distToOrbit = direction.Length();
                 if (distToOrbit > 0.1f)
                 {
-                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, direction * 0.08f, 0.1f);
+                    // Movimiento más responsivo (lerp 0.2 en vez de 0.1)
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, direction * 0.3f, 0.2f);
                 }
                 else
                 {
                     Projectile.velocity *= 0.8f;
                 }
 
-                // Rotación suave en idle
-                Projectile.rotation += 0.04f;
+                // Rotación suave en idle — el minion gira sobre sí mismo
+                Projectile.rotation += 0.06f;
+                // Rotación adicional para que "miren" hacia donde se mueven
+                if (Projectile.velocity.Length() > 0.5f)
+                    Projectile.rotation = Projectile.velocity.ToRotation();
 
-                // Partículas suaves en idle
-                if (Main.rand.NextBool(8))
+                // Partículas suaves en idle (más frecuentes para mejor efecto visual)
+                if (Main.rand.NextBool(5))
                 {
                     Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                        new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), Main.rand.NextFloat(-0.2f, 0.2f)),
-                        250, new Color(255, 217, 61), 0.15f);
+                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f), Main.rand.NextFloat(-0.3f, 0.3f)),
+                        200, new Color(255, 217, 61), 0.2f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+                // Partícula cian ocasional
+                if (Main.rand.NextBool(12))
+                {
+                    Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.BlueTorch,
+                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f), Main.rand.NextFloat(-0.3f, 0.3f)),
+                        200, new Color(0, 255, 255), 0.2f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
