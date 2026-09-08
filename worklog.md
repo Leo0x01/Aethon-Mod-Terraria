@@ -5183,3 +5183,28 @@ Stage Summary:
   y recompilar en tModLoader. Probar:
   1. Grimorio: vista básica tiene 'Próximo hito', vista completa NO
   2. TestStaff: click izq lanza 1 proyectil exacto, click der invoca 1 minion
+
+---
+Task ID: FIX-CS0266-UINT-TESTSTAFF
+Agent: main (Z.ai Code)
+Task: Corregir CS0266 en TestStaff.cs — Main.GameUpdateCount retorna uint
+
+Work Log:
+- Error CS0266 en TestStaff.cs:10: 'No se puede convertir implicitamente
+  el tipo uint en int'
+- Causa: Main.GameUpdateCount retorna uint (unsigned int), no int.
+  Los flags _lastShootFrame y _lastMinionFrame estaban declarados como int.
+- Fix: cambiado el tipo de los flags a uint:
+  - private static uint _lastShootFrame = 0;
+  - private static uint _lastMinionFrame = 0;
+  Y la variable local currentFrame también:
+  - uint currentFrame = Main.GameUpdateCount;
+- Commit 1ada1cd: 1 file changed, 4 insertions(+), 3 deletions(-)
+- Push exitoso: 35f7bf5..1ada1cd main -> main
+
+Stage Summary:
+- **Commit pushed**: 1ada1cd
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/1ada1cd
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
