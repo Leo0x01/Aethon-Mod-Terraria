@@ -5833,3 +5833,22 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP, recompilar, y probar cada staff
   haciendo 1 click. Mirar cuántos mensajes [A], [B], [C], [D] aparecen.
   El que aparezca 2 veces es el culpable.
+
+---
+Task ID: V5.24-TOOLTIPS-TESTSTAFFS
+Agent: main (Z.ai Code)
+Task: Agregar ModifyTooltips distintivo a cada TestStaff para diferenciarlos
+
+Work Log:
+- Usuario reporto: 'todos los bastones que tengo son exactamente iguales y no
+  hay diferencia, mas que cambiar el color'
+- Los TestStaffs A/B/C/D no tenían ModifyTooltips, solo el tooltip default
+- Agregado ModifyTooltips a cada uno con texto que identifica:
+  - Qué override está probando
+  - Qué mensaje debug esperar en el chat
+  - Color distintivo que coincide con el sprite
+
+Version bump: 5.23 → 5.24
+
+- Commit d51fc62: 2 files changed, 33 insertions(+), 1 deletion(-)
+- Push exitoso: acefd83..d51fc62 main -> main
