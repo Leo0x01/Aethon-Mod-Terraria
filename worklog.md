@@ -5670,3 +5670,41 @@ Stage Summary:
 - **Version**: 5.18 → 5.19
 - **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 1 click con el
   Grimorio y decirme qué dice el mensaje [DEBUG] en el chat.
+
+---
+Task ID: V5.20-DEBUG-CONTADOR-SHOOT
+Agent: main (Z.ai Code)
+Task: Mejorar debug para ver cuántas veces se llama Shoot por click
+
+Work Log:
+- Usuario confirmo: Grimorio está a nivel 1 (ExtraProjectiles=0, debería salir 1)
+- Pero no vio el mensaje [DEBUG] en la captura (estaba viendo el inventario, no disparando)
+- Necesito que el usuario dispara en el mundo y mire el chat
+
+Mejorado el debug:
+1. Contador estático _shootCallCount que incrementa cada vez que Shoot se llama
+2. Mensaje cuando Shoot es BLOQUEADO por anti-doble (mismo frame):
+   [DEBUG] Shoot #X BLOQUEADO (mismo frame N) — en ROJO
+3. Mensaje cuando Shoot procede y crea proyectiles:
+   [DEBUG] Shoot #X Grimorio nvY: 1+Z=W proyectiles, frame N — en DORADO
+
+Escenarios posibles al hacer 1 click:
+A) Aparece 1 mensaje dorado 'Shoot #1' → Shoot se llama 1 vez (correcto)
+B) Aparecen 2 mensajes: 'Shoot #1' (dorado) + 'Shoot #2 BLOQUEADO' (rojo)
+   → Shoot se llama 2 veces, anti-doble bloquea la 2da (correcto)
+C) Aparecen 2 mensajes dorados 'Shoot #1' y 'Shoot #2'
+   → Shoot se llama 2 veces en frames diferentes (anti-doble NO funciona)
+D) No aparece ningún mensaje → Shoot no se está llamando
+
+Version bump: 5.19 → 5.20
+
+- Commit 6b1a345: 2 files changed, 9 insertions(+), 2 deletions(-)
+- Push exitoso: 77e63bd..6b1a345 main -> main
+
+Stage Summary:
+- **Commit pushed**: 6b1a345
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/6b1a345
+- **Version**: 5.19 → 5.20
+- **Siguiente paso usuario**: descargar ZIP, recompilar, salir del inventario,
+  hacer 1 click con el Grimorio y mirar el chat. Decirme qué mensajes [DEBUG]
+  aparecen (cuántos, de qué color, qué dicen).
