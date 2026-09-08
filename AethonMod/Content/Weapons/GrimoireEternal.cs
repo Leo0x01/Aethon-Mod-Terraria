@@ -129,6 +129,19 @@ namespace AethonMod.Content.Weapons
             return WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
         }
 
+        /// <summary>
+        /// v5.26: UseAnimationMultiplier — reduce useAnimation proporcionalmente
+        /// al useTime para que NUNCA sea menor. Si useAnimation < useTime efectivo,
+        /// tModLoader dispara Shoot 2 veces por ciclo de animación.
+        /// Aplicar el mismo multiplier a useAnimation lo arregla.
+        /// </summary>
+        public override float UseAnimationMultiplier(Player player)
+        {
+            var sl = GetShard(Item);
+            if (sl == null) return 1f;
+            return WeaponScaling.UseSpeedMult(sl.Level, Item.useAnimation);
+        }
+
         // ================================================================
         //  USO DEL ARMA
         // ================================================================
