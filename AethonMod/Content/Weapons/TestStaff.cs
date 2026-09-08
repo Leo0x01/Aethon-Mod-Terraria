@@ -8,18 +8,20 @@ using Terraria.DataStructures;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
-    /// Báculo de Prueba v2 — arma de TESTEO con lógica anti-doble DIFERENTE.
+    /// Báculo de Prueba v3 — arma de TESTEO con lógica anti-doble DIFERENTE.
     ///
-    /// v5.11: Enfoque nuevo para resolver el doble disparo:
-    /// - Item.shoot = ProjectileID.None (sin proyectil default de tModLoader)
-    /// - Item.reuseDelay = 5 (forza 5 frames de cooldown entre usos)
-    /// - Shoot retorna false SIEMPRE (tModLoader nunca crea proyectil default)
-    /// - Todos los proyectiles se crean manualmente con Projectile.NewProjectile
-    /// - Verificación con player.itemAnimation para evitar re-disparo en la misma animación
+    /// v5.12: Enfoque completamente nuevo:
+    /// - Item.shoot = 931 (Nightglow, mismo que Grimorio)
+    /// - Shoot retorna false SIEMPRE (tModLoader NO crea proyectil default)
+    /// - Creamos TODOS los proyectiles nosotros con Projectile.NewProjectile
+    /// - Item.useTime = Item.useAnimation (evita timing issues)
+    /// - Item.reuseDelay = 10 (cooldown forzado entre usos)
+    /// - Item.useStyle = Swing (más estable que HoldUp para testing)
+    /// - No autoReuse (para ver mejor si hay doble)
     /// </summary>
     public class TestStaff : ModItem
     {
-        // Track del último frame en que se disparó (uint = Main.GameUpdateCount)
+        // Track del último frame en que se disparó
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
 
@@ -31,21 +33,19 @@ namespace AethonMod.Content.Weapons
             Item.DamageType = DamageClass.Magic;
             Item.width = 28;
             Item.height = 30;
-            Item.useTime = 25;
-            Item.useAnimation = 25;
-            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.useTime = 20;
+            Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.Swing;
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(0, 0, 50, 0);
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.autoReuse = true;
-            // v5.11 CLAVE: shoot = None para que tModLoader NO cree proyectil default
-            Item.shoot = ProjectileID.None;
+            Item.autoReuse = false; // v5.12: sin autoReuse para ver mejor si hay doble
+            Item.shoot = 931; // Nightglow (mismo que Grimorio)
             Item.shootSpeed = 12f;
             Item.mana = 2;
             Item.noMelee = true;
-            // v5.11: reuseDelay fuerza un cooldown entre usos
-            Item.reuseDelay = 5;
+            Item.reuseDelay = 10; // v5.12: cooldown forzado entre usos
         }
 
         public override bool AltFunctionUse(Player player) => true;
@@ -62,17 +62,16 @@ namespace AethonMod.Content.Weapons
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // === v5.11: LÓGICA ANTI-DOBLE NUEVA ===
-            // Como Item.shoot = None, el parámetro 'type' será -1 o 0.
-            // tModLoader NO crea ningún proyectil default.
-            // Nosotros creamos TODO aquí y retornamos false.
+            // === v5.12: LÓGICA ANTI-DOBLE v3 ===
+            // Enfoque: return false SIEMPRE. Creamos TODO nosotros.
+            // El anti-doble se basa en frame count + reuseDelay.
 
             uint currentFrame = Main.GameUpdateCount;
 
             // === CLICK DERECHO: invocar minion ===
             if (player.altFunctionUse == 2)
             {
-                // Anti-doble: verificar si ya invocamos un minion en este frame
+                // Anti-doble: si ya invocamos minion en este frame, ignorar
                 if (currentFrame == _lastMinionFrame)
                 {
                     return false;
@@ -97,7 +96,7 @@ namespace AethonMod.Content.Weapons
                     return false;
                 }
 
-                // Cobrar mana EXACTAMENTE UNA vez
+                // Cobrar mana UNA vez
                 int minionCost = 10;
                 if (player.statMana < minionCost && !player.manaFlower) return false;
                 if (player.statMana >= minionCost)
@@ -106,7 +105,7 @@ namespace AethonMod.Content.Weapons
                     if (player.statMana < 0) player.statMana = 0;
                 }
 
-                // Invocar minion EXACTAMENTE UNA vez
+                // Invocar minion UNA vez
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
                 Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
@@ -116,12 +115,11 @@ namespace AethonMod.Content.Weapons
                 if (Main.myPlayer == player.whoAmI)
                     Main.NewText($"Minion invocado ({currentMinions + 1}/{player.maxMinions})",
                         new Color(245, 196, 81));
-                return false;
+                return false; // NO dejar que tModLoader cree proyectil
             }
 
             // === CLICK IZQUIERDO: dispara EXACTAMENTE 1 proyectil ===
-            // v5.11: Anti-doble usando frame count
-            // Solo permitimos 1 disparo por frame (incluso si Shoot se llama 2 veces)
+            // Anti-doble: si ya disparamos en este frame, ignorar
             if (currentFrame == _lastFireFrame)
             {
                 return false;
@@ -129,8 +127,7 @@ namespace AethonMod.Content.Weapons
             _lastFireFrame = currentFrame;
 
             // Crear EXACTAMENTE 1 proyectil (Nightglow = 931, mismo que Grimorio)
-            int projType = 931; // Nightglow
-            Projectile.NewProjectile(source, position, velocity, projType, damage, knockback, player.whoAmI);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
 
             if (Main.myPlayer == player.whoAmI)
                 Main.NewText($"Proyectil lanzado (1) frame {currentFrame}",
@@ -152,15 +149,15 @@ namespace AethonMod.Content.Weapons
                 }
             }
 
-            tooltips.Add(new TooltipLine(Mod, "TestInfo", "[c/78FF96:═══ ARMA DE PRUEBA v2 ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "TestInfo", "[c/78FF96:═══ ARMA DE PRUEBA v3 ═══]"));
             tooltips.Add(new TooltipLine(Mod, "Desc1",
-                "[c/B388FF:Arma para testear lógica anti-doble (v2)]"));
+                "[c/B388FF:Arma para testear lógica anti-doble (v3)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc2",
-                "[c/B388FF:Click izq: 1 Nightglow (shoot=None + return false)]"));
+                "[c/B388FF:Click izq: 1 Nightglow (return false + creamos 1)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc3",
                 "[c/B388FF:Click der: 1 minion (anti-doble con frame count)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc4",
-                "[c/78788C:reuseDelay=5, shoot=None]"));
+                "[c/78788C:useStyle=Swing, reuseDelay=10, autoReuse=false]"));
             tooltips.Add(new TooltipLine(Mod, "Status",
                 $"[c/FFD700:Minions activos: {minionCount}/{(Main.LocalPlayer != null ? Main.LocalPlayer.maxMinions : 0)}]"));
             tooltips.Add(new TooltipLine(Mod, "Cost",
