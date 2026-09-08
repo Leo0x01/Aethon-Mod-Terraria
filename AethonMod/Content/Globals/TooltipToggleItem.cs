@@ -53,14 +53,11 @@ namespace AethonMod.Content.Globals
             }
             _rightMouseLast = rightMouseNow;
 
-            // Alternar el flag
+            // Alternar el flag (sin mensaje de chat — el usuario lo considera inutil)
             var sl = item.GetGlobalItem<ShardLevelItem>();
             if (sl == null) return;
 
             sl.ShowExtendedTooltip = !sl.ShowExtendedTooltip;
-            string mode = sl.ShowExtendedTooltip ? "completa" : "básica";
-            Main.NewText($"Grimorio: vista {mode}",
-                new Microsoft.Xna.Framework.Color(245, 196, 81));
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
     }

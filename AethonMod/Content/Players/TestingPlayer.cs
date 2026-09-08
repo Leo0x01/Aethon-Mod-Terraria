@@ -40,6 +40,7 @@ namespace AethonMod.Content.Players
             GiveItem(Terraria.ID.ItemID.GoldBar, 100);
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
+            GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
         }
 
         /// <summary>
