@@ -29,6 +29,13 @@ namespace AethonMod.Content.Weapons
     /// </summary>
     public class GrimoireEternal : ModItem
     {
+        // v5.10: Anti-doble (migrado del TestStaff que funciona).
+        // Previene que Shoot se procese dos veces en el mismo frame,
+        // lo que causaba que se lanzaran 2 proyectiles y se invocaran
+        // 2 minions por click.
+        private static uint _lastShootFrame = 0;
+        private static uint _lastMinionFrame = 0;
+
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
         // temblor de pantalla ni texto de lore.
@@ -153,12 +160,30 @@ namespace AethonMod.Content.Weapons
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // === v5.10: ANTI-DOBLE (migrado del TestStaff) ===
+            // Previene que Shoot se procese dos veces en el mismo frame.
+            // Causa raíz del problema de doble proyectil y doble minion.
+            uint currentFrame = Main.GameUpdateCount;
+            if (currentFrame == _lastShootFrame)
+            {
+                // Ya procesamos un Shoot en este frame → ignorar (evita doble)
+                return false;
+            }
+            _lastShootFrame = currentFrame;
+
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
 
             // === CLICK DERECHO: invocar minion ===
             if (player.altFunctionUse == 2)
             {
+                // Anti-doble específico para minions
+                if (currentFrame == _lastMinionFrame)
+                {
+                    return false;
+                }
+                _lastMinionFrame = currentFrame;
+
                 int maxMinions = player.maxMinions;
                 int currentMinions = 0;
                 for (int i = 0; i < Main.maxProjectiles; i++)
@@ -185,7 +210,7 @@ namespace AethonMod.Content.Weapons
                     if (player.statMana < 0) player.statMana = 0;
                 }
 
-                // Invocar minion
+                // Invocar minion (EXACTAMENTE una vez)
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
                 Projectile.NewProjectile(source, position, Vector2.Zero,
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
@@ -195,17 +220,22 @@ namespace AethonMod.Content.Weapons
             }
 
             // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
-            // Fix 48688dd: sin DoubleShotChance (causaba disparo doble aleatorio).
-            // tModLoader dispara el proyectil principal (return true), nosotros
-            // añadimos los bolts extra en abanico.
+            // v5.10: return false en vez de return true para que tModLoader
+            // NO dispare el proyectil default (que causaba el doble).
+            // Creamos nosotros TODOS los proyectiles (el principal + extras).
             int extra = WeaponScaling.ExtraProjectiles(level);
+
+            // Proyectil principal (1 exacto)
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+
+            // Bolts extra en abanico
             for (int i = 0; i < extra; i++)
             {
                 float angle = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-            return true; // Fix 48688dd: return true → tModLoader dispara exactamente 1 proyectil principal
+            return false; // v5.10: return false → tModLoader NO dispara proyectil extra
         }
 
         // ================================================================
