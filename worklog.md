@@ -5384,3 +5384,25 @@ Stage Summary:
 - **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/a969004
 - **Version**: 5.11 → 5.12
 - **Siguiente paso usuario**: descargar ZIP y probar TestStaff v3
+
+---
+Task ID: V5.13-TESTSTAFF-AUTOREUSE
+Agent: main (Z.ai Code)
+Task: Habilitar autoReuse en TestStaff para mantener click
+
+Work Log:
+- Usuario confirmo: 'el TestStaff funciona correctamente' (sin doble disparo)
+- Usuario reporto: 'si dejo apretado el click izq no sigue disparando'
+- Causa: autoReuse estaba en false (lo puse así en v5.12 para ver mejor el doble)
+- Fix: cambiado Item.autoReuse de false → true
+- El anti-doble (_lastFireFrame) sigue funcionando con autoReuse=true
+  porque verifica frame count, no estado del click
+
+- Commit 99c71c3: 2 files changed, 3 insertions(+), 3 deletions(-)
+- Push exitoso: a969004..99c71c3 main -> main
+
+Stage Summary:
+- **Commit pushed**: 99c71c3
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/99c71c3
+- **Version**: 5.12 → 5.13
+- **Siguiente paso usuario**: descargar ZIP y probar TestStaff con autoReuse
