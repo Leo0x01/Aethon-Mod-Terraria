@@ -4874,3 +4874,43 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP nuevo de
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader.
+
+---
+Task ID: V5.3-2-CORRECCIONES
+Agent: main (Z.ai Code)
+Task: Corregir partículas de explosión que duran demasiado + CanRightClick para que el click derecho en inventario funcione
+
+Work Log:
+- Usuario reporto 2 problemas:
+  1. Las particulas de la explosion (al impactar enemigo) se quedan en pantalla mucho tiempo
+  2. Click derecho en el Grimorio del inventario no alterna el tooltip
+
+Acciones realizadas (3 archivos modificados):
+
+1. PARTICULAS DE EXPLOSION CORTAS (CosmicProjectileFX.cs):
+   - Causa: OnHitNPC y Kill creaban dusts sin noGravity ni fadeIn=0
+   - Fix aplicado a OnHitNPC (5 tipos de dust) y Kill (3 tipos):
+     * noGravity = true
+     * fadeIn = 0
+     * alpha aumentado: 150-220 (antes 80-200)
+     * scale reducido: 0.5-0.9 (antes 0.8-1.3)
+
+2. CANRIGHTCLICK PARA TOOLTIP 2 MODOS (GrimoireEternal.cs):
+   - Causa: en tModLoader 1.4.4, RightClick solo se llama si CanRightClick
+     retorna true. Sin esta override, el click derecho en inventario no hace nada.
+   - Fix: agregado override CanRightClick() que retorna true
+   - Ahora RightClick(Player) se llama correctamente en el inventario
+
+3. VERSION BUMP: 5.2 -> 5.3
+
+- Commit 2320d3d: 3 files changed, 47 insertions(+), 21 deletions(-)
+- Push exitoso: 26d4a18..2320d3d main -> main
+
+Stage Summary:
+- **Commit pushed**: 2320d3d
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/2320d3d
+- **Version**: 5.2 → 5.3
+- **Archivos en el commit (3)**:
+  * AethonMod/Content/Globals/CosmicProjectileFX.cs (partículas cortas)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (CanRightClick)
+  * AethonMod/build.txt (version 5.3)
