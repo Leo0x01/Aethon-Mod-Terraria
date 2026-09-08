@@ -5852,3 +5852,53 @@ Version bump: 5.23 → 5.24
 
 - Commit d51fc62: 2 files changed, 33 insertions(+), 1 deletion(-)
 - Push exitoso: acefd83..d51fc62 main -> main
+
+---
+Task ID: V5.25-FIX-CAUSA-RAÍZ-DOBLE-SHOOT
+Agent: main (Z.ai Code)
+Task: Arreglar la causa raíz del doble Shoot (useTime no entero) — Opción D
+
+Work Log:
+- Usuario confirmo: TestStaffD (UseTimeMultiplier) es el culpable del doble Shoot
+- Usuario aprobo Opción D: redondear a entero + quitar cooldown
+
+CAUSA RAÍZ:
+UseTimeMultiplier retornaba 0.997 a nivel 1 (no entero).
+useTime efectivo = 22 × 0.997 = 21.934 (no entero).
+tModLoader dispara Shoot 2 veces por ciclo cuando useTime no es entero.
+
+FIX APLICADO (Opción D):
+
+1. WeaponScaling.UseSpeedMult redondea useTime efectivo a ENTERO:
+   int effectiveUseTime = (int)(useTimeBase * (1f - reduction));
+   return (float)effectiveUseTime / useTimeBase;
+   - Nivel 1: 22 × 0.997 = 21.934 → (int)21 → retorna 21/22 = 0.9545
+   - useTime efectivo siempre es entero → no hay doble Shoot
+
+2. GrimoireEternal.UseTimeMultiplier ahora pasa Item.useTime como base:
+   return WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
+
+3. Eliminado FIRE_COOLDOWN de 25 frames (ya no necesario):
+   - Anti-doble vuelve a ser simple (mismo frame check) como TestStaff
+
+4. Debug reducido (mensaje simple sin BLOQUEADO)
+
+RESULTADO:
+- No hay doble Shoot (causa raíz arreglada)
+- El escalado de velocidad sigue funcionando (arma más rápida con nivel)
+- No hay cooldown artificial que limite la cadencia
+- useTime siempre es entero → tModLoader llama Shoot 1 vez por ciclo
+
+Version bump: 5.24 → 5.25
+
+- Commit b797e2c: 3 files changed, 26 insertions(+), 18 deletions(-)
+- Push exitoso: d51fc62..b797e2c main -> main
+
+Stage Summary:
+- **Commit pushed**: b797e2c
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/b797e2c
+- **Version**: 5.24 → 5.25
+- **Siguiente paso usuario**: descargar ZIP, recompilar, y probar el Grimorio:
+  - Click izq → 1 proyectil por click (no doble)
+  - Mantener click → dispara continuo a velocidad escalada por nivel
+  - Debug debería mostrar 1 mensaje por click (no 2)
