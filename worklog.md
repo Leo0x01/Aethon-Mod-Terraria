@@ -5208,3 +5208,46 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP nuevo de
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader.
+
+---
+Task ID: V5.9-PROGRESION-SOLO-BASICA
+Agent: main (Z.ai Code)
+Task: Mover sección PROGRESIÓN a la vista básica (no duplicada en completa) + bump versión
+
+Work Log:
+- Usuario reporto: 'en la segunda ventana también esta la informacion basica
+  de la ventana de info basica, lo que no debe ser'
+- Imagen mostraba la vista completa con sección PROGRESIÓN (Nivel + barra XP)
+  al inicio, lo cual es información básica duplicada.
+- Usuario confirmo: 'la prueba del baston funciono y solo lanza 1 proyectil'
+- Usuario noto: 'se te olvido subir version en el mod'
+
+Causa raiz:
+- Las líneas que agregaban la sección PROGRESIÓN estaban ANTES del
+  if (ShowExtendedTooltip), por lo que se ejecutaban siempre (en ambas vistas).
+- La versión no se bumpió en commits anteriores (se quedó en 5.7).
+
+Fix aplicado:
+1. Movida la sección PROGRESIÓN completa al bloque 'else' (vista básica):
+   - ═══ PROGRESIÓN ═══
+   - Nivel X  [barra] XP
+   - Próximo hito: Nivel Y
+   - • recompensas (una por línea)
+2. La vista completa ahora solo muestra:
+   - DAÑO, RECURSOS, PROYECTIL, ORBE CÓSMICO, BONUS
+   - (sin PROGRESIÓN ni Próximo hito)
+3. Version bump: 5.7 → 5.9 (saltando 5.8 que fue el TestStaff)
+
+- Commit 36bc051: 2 files changed, 7 insertions(+), 7 deletions(-)
+- Push exitoso: 1ada1cd..36bc051 main -> main
+
+Stage Summary:
+- **Commit pushed**: 36bc051
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/36bc051
+- **Version**: 5.7 → 5.9
+- **Archivos en el commit (2)**:
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (PROGRESIÓN solo en básica)
+  * AethonMod/build.txt (version 5.9)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
