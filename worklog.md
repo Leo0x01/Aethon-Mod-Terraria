@@ -4964,3 +4964,56 @@ Stage Summary:
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader. Ahora el click derecho en el Grimorio del
   inventario alternara entre vista basica/completa SIN consumir el item.
+
+---
+Task ID: REVERT-A-V5.5
+Agent: main (Z.ai Code)
+Task: Regresar a la versión 5.5 (última versión que funcionaba) por request del usuario
+
+Work Log:
+- Usuario reporto: 'sigue el mismo error y ademas sale esto al intentar entrar en una partida'
+  + imagen mostrando '¡Error al cargar! Cargar copia'
+- Usuario solicito explicitamente: 'la version 5.5 fue la ultima en donde todo funciono
+  y antes de que hicieras el cambio que daño el mod, regresa a la version 5.5'
+
+- Análisis de lo que rompio:
+  * v5.5 (commit 145db23): TODO FUNCIONABA correctamente
+  * v5.6 (commit d964ee6): cambie el toggle para buscar el item real en el inventario
+    en vez de Main.HoverItem. Esto probablemente introdujo el error 134124.
+  * v5.7 (commit 8b778c0): agregue null check pero el error persistio.
+  * El error 134124 en pantalla de selección de personaje + 'Error al cargar'
+    al entrar a partida indica que algo en v5.6/v5.7 corrompe el estado del jugador.
+
+- Accion realizada:
+  * git reset --hard 145db23 (v5.5)
+  * git push --force origin main
+  * Verificado via GitHub API que el commit 145db23 esta en main
+  * Verificado que build.txt dice version = 5.5
+
+- Commits eliminados (ya no en main):
+  * 8b778c0 v5.7: NullReferenceException en ModifyTooltips
+  * d964ee6 v5.6: toggle tooltip busca item real en inventario
+
+- Estado actual: v5.5 (commit 145db23) — TODO FUNCIONABA según el usuario.
+
+Stage Summary:
+- **Commit actual**: 145db23 (v5.5)
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/145db23
+- **Version**: 5.5
+- **Archivos**: estado exacto de cuando el usuario confirmo que todo funcionaba
+- **Siguiente paso usuario**: descargar ZIP de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
+
+Leccion aprendida:
+- El enfoque de buscar el item real en el inventario dentro de ModifyTooltips
+  (v5.6) probablemente causo un side effect que corrompio el estado del jugador.
+- ModifyTooltips NO deberia modificar el inventario del jugador (solo leer).
+- Para el toggle del tooltip, buscar un enfoque que NO escriba en el inventario
+  durante ModifyTooltips. Opciones:
+  1. Usar Main.HoverItem directamente (aunque sea una copia, el flag se persiste
+     cuando el item se vuelve a cargar)
+  2. Usar un ModSystem con PostUpdate para detectar el click fuera de ModifyTooltips
+  3. Usar una tecla dedicada en vez de click derecho
+- El usuario prefiere que NO se experimente mas con el toggle por ahora.
+  v5.5 es el estado estable verificado.
