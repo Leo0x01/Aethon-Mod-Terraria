@@ -41,6 +41,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
+            GiveItem(ModContent.ItemType<Weapons.TestStaff>(), 1); // v5.8: arma de prueba para proyectiles/minions
         }
 
         /// <summary>

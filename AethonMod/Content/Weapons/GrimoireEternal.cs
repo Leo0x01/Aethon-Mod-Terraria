@@ -261,25 +261,17 @@ namespace AethonMod.Content.Weapons
             int nextMilestoneNum = nextMilestoneLevel / 5;
             var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
 
-            // === MODO BÁSICO (siempre visible) ===
+            // === MODO BÁSICO (siempre visible: sección PROGRESIÓN) ===
             tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
             tooltips.Add(new TooltipLine(Mod, "Level",
                 $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
 
-            // Próximo hito — recompensas una debajo de otra (no en línea)
-            tooltips.Add(new TooltipLine(Mod, "NextMilestone",
-                $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
-            foreach (var reward in nextRewards)
-            {
-                tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
-                    $"[c/78FF96:  • {reward}]"));
-            }
-
             // Indicador de modo (básico/completo)
             // v5.7: Usa flag estático de TooltipToggleItem (mismo patrón que SeerOrb)
+            // v5.8: 'Próximo hito' solo en vista básica (no duplicar en completa)
             if (Globals.TooltipToggleItem.ShowExtendedTooltip)
             {
-                // === MODO COMPLETO: mostrar todas las estadísticas ===
+                // === MODO COMPLETO: mostrar todas las estadísticas (sin Próximo hito) ===
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
                 int summonDmgPct = (int)(sl.Level * WeaponScaling.SummonDamagePerLevel * 100);
                 float critPct = WeaponScaling.CritBonus(sl.Level);
@@ -369,7 +361,15 @@ namespace AethonMod.Content.Weapons
             }
             else
             {
-                // === MODO BÁSICO: solo indicador de modo ===
+                // === MODO BÁSICO: Próximo hito + indicador de modo ===
+                // v5.8: 'Próximo hito' solo aquí (no en vista completa)
+                tooltips.Add(new TooltipLine(Mod, "NextMilestone",
+                    $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
+                foreach (var reward in nextRewards)
+                {
+                    tooltips.Add(new TooltipLine(Mod, "MS_" + reward.GetHashCode(),
+                        $"[c/78FF96:  • {reward}]"));
+                }
                 tooltips.Add(new TooltipLine(Mod, "ModeIndicator",
                     $"[c/78788C:═══ Click der para vista completa ═══]"));
             }
