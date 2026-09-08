@@ -4649,3 +4649,96 @@ Leccion aprendida:
 - Cuando un override de draw causa problemas, considerar si es necesario
   en absoluto. El draw default de tModLoader 1.4.4 ya maneja la mayoria
   de los casos correctamente (especialmente con sprites cuadrados).
+
+---
+Task ID: GUARDAR-ESTADO-ESTABLE
+Agent: main (Z.ai Code)
+Task: Guardar registro completo del estado actual del proyecto (verificado por el usuario como funcionando) para evitar que se pierda o se resetee en el futuro
+
+Work Log:
+- El usuario confirmo: 'justo ahora todo esta bien'
+- Estado actual: TODO FUNCIONA (compila, carga, sprites correctos, minion visible, tooltip compacto, 23 funciones de WeaponScaling, eventos eliminados)
+- Commit actual: 539972053fbe6374ca00ec78646b4cc3c4219803
+
+Acciones realizadas para preservar el estado:
+
+1. TAG DE VERSION ESTABLE:
+   - Creado tag anotado 'stable-v5.0' con mensaje completo del estado verificado
+   - Push del tag al remote: exitoso
+   - URL: https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/stable-v5.0
+
+2. RAMA DE RESPALDO:
+   - Creada rama 'stable-v5.0-backup' apuntando al mismo commit
+   - Push de la rama al remote: exitoso
+   - URL: https://github.com/Leo0x01/Aethon-Mod-Terraria/tree/stable-v5.0-backup
+
+3. ARCHIVO STABLE-SNAPSHOT.md EN EL REPO:
+   - Creado AethonMod/STABLE-SNAPSHOT.md con:
+     * Lista completa de lo que funciona (verificado por el usuario)
+     * Hashes SHA256 de TODOS los archivos del mod (33 .cs + 19 .png + 2 .hjson)
+     * Instrucciones de restauracion via git checkout stable-v5.0
+   - Commit 4a16bb2: 1 file changed, 96 insertions(+)
+   - Push al remote: exitoso
+
+4. SNAPSHOT EN EL WORKLOG (esta seccion):
+   - Registro completo del estado actual con fecha, commit, y contenido clave
+   - 3 capas de proteccion: tag + rama backup + snapshot documental
+
+Stage Summary:
+- **Tag estable**: stable-v5.0 (pushed)
+- **Rama backup**: stable-v5.0-backup (pushed)
+- **Archivo snapshot**: AethonMod/STABLE-SNAPSHOT.md (commit 4a16bb2, pushed)
+- **Commit actual**: 4a16bb2 (en main)
+
+=== INVENTARIO COMPLETO DEL MOD (estado stable-v5.0) ===
+
+Archivos .cs (33 total):
+1.  AethonMod.cs
+2.  Content/AethonConfig.cs
+3.  Content/Biomes/HollowSanctumBiome.cs
+4.  Content/Buffs/CosmicOrbBuff.cs
+5.  Content/Globals/GlobalNPCXP.cs
+6.  Content/Globals/ShardLevelItem.cs
+7.  Content/Items/BossSummonBag.cs
+8.  Content/Items/GenesisShard.cs
+9.  Content/Items/LevelUpTester.cs
+10. Content/Items/Placeables/AncientAltarItem.cs
+11. Content/Items/ResonanceShard.cs
+12. Content/NPCs/AethonBoss.cs
+13. Content/NPCs/EchoArcher.cs
+14. Content/NPCs/EchoBlade.cs
+15. Content/NPCs/HollowTitan.cs
+16. Content/NPCs/RiftKeeper.cs
+17. Content/NPCs/TheWitness.cs
+18. Content/Players/BranchType.cs
+19. Content/Players/ShardPlayer.cs
+20. Content/Players/TestingPlayer.cs
+21. Content/Players/UIScrollBlockPlayer.cs
+22. Content/Projectiles/CosmicOrbBolt.cs
+23. Content/Projectiles/CosmicOrbMinion.cs
+24. Content/Systems/AncientAltarWorldGen.cs
+25. Content/Systems/ShardLevelSystem.cs
+26. Content/Systems/ShardSyncSystem.cs
+27. Content/Systems/UISystem.cs
+28. Content/Systems/WeaponScaling.cs
+29. Content/Tiles/AncientAltar.cs
+30. Content/UI/ShardXPBarUI.cs
+31. Content/Weapons/GrimoireEternal.cs
+32. Content/Weapons/Projectiles/ArcaneBolt.cs
+33. Content/Weapons/Projectiles/GenesisLight.cs
+
+Archivos .png (19 total): todos los sprites de items/projectiles/NPCs/buffs/tiles
+
+Archivos .hjson (2): es-ES e en-US localization
+
+Archivos .txt (2): build.txt + description.txt
+
+=== ESTADO VERIFICADO — NO MODIFICAR SIN CONFIRMACION ===
+
+Si en el futuro se necesita restaurar este estado exacto:
+  git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git
+  cd Aethon-Mod-Terraria
+  git checkout stable-v5.0
+
+O descargar el ZIP del tag:
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/tags/stable-v5.0.zip
