@@ -261,14 +261,10 @@ namespace AethonMod.Content.Weapons
             int nextMilestoneNum = nextMilestoneLevel / 5;
             var nextRewards = WeaponScaling.MilestoneRewards(nextMilestoneNum);
 
-            // === MODO BÁSICO (siempre visible: sección PROGRESIÓN) ===
-            tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "Level",
-                $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
-
             // Indicador de modo (básico/completo)
             // v5.7: Usa flag estático de TooltipToggleItem (mismo patrón que SeerOrb)
             // v5.8: 'Próximo hito' solo en vista básica (no duplicar en completa)
+            // v5.9: Sección PROGRESIÓN también solo en vista básica
             if (Globals.TooltipToggleItem.ShowExtendedTooltip)
             {
                 // === MODO COMPLETO: mostrar todas las estadísticas (sin Próximo hito) ===
@@ -361,8 +357,12 @@ namespace AethonMod.Content.Weapons
             }
             else
             {
-                // === MODO BÁSICO: Próximo hito + indicador de modo ===
+                // === MODO BÁSICO: PROGRESIÓN + Próximo hito + indicador de modo ===
+                // v5.9: Sección PROGRESIÓN (nivel + barra XP) solo aquí (no en vista completa)
                 // v5.8: 'Próximo hito' solo aquí (no en vista completa)
+                tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
+                tooltips.Add(new TooltipLine(Mod, "Level",
+                    $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
                 tooltips.Add(new TooltipLine(Mod, "NextMilestone",
                     $"[c/78788C:Próximo hito: Nivel {nextMilestoneLevel}]"));
                 foreach (var reward in nextRewards)
