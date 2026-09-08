@@ -5751,3 +5751,42 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 1 click y mirar
   el chat. Debería ver 1 mensaje dorado (disparo) + 1 mensaje rojo (BLOQUEADO).
   Y solo 1 proyectil en pantalla (no 2).
+
+---
+Task ID: V5.22-COOLDOWN-25-ELIMINAR-USEITEM
+Agent: main (Z.ai Code)
+Task: Aumentar cooldown a 25 + eliminar UseItem override que podría causar doble
+
+Work Log:
+- Análisis del debug v5.21 (Grimorio, 3 clicks = 6 mensajes):
+  - Frame 681, 702, 1056, 1077, 1100, 1121
+  - Pares: 681→702 = 21 frames, 1056→1077 = 21, 1100→1121 = 21
+  - Cooldown de 15 NO bloqueaba porque diferencia era 21 (> 15)
+  - 0 mensajes BLOQUEADO
+
+- TestStaff (10 clicks = 10 mensajes, NO doble):
+  - Frames con diferencias pequeñas (7, 11 frames) pero SOLO 1 Shoot por click
+  - El TestStaff NO tiene doble porque no llama Shoot 2 veces por click
+
+Diferencia clave encontrada:
+- Grimorio tiene override UseItem (retorna null)
+- TestStaff NO tiene UseItem override
+
+2 fixes aplicados:
+1. FIRE_COOLDOWN cambiado de 15 → 25 (mayor que los 21 frames del doble)
+2. Eliminado UseItem override (el TestStaff no lo tiene y funciona)
+   El UseItem override podría estar causando que tModLoader procese
+   el uso del item 2 veces (una por UseItem, otra por Shoot)
+
+Version bump: 5.21 → 5.22
+
+- Commit beffec3: 2 files changed, 4 insertions(+), 13 deletions(-)
+- Push exitoso: 07ea0a0..beffec3 main -> main
+
+Stage Summary:
+- **Commit pushed**: beffec3
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/beffec3
+- **Version**: 5.21 → 5.22
+- **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 3 clicks y
+  mirar el chat. Debería ver 3 mensajes dorados + 3 mensajes rojos BLOQUEADO
+  (6 total, no 6 dorados). Y solo 3 proyectiles en pantalla.
