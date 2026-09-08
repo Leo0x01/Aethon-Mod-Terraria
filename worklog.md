@@ -4742,3 +4742,70 @@ Si en el futuro se necesita restaurar este estado exacto:
 
 O descargar el ZIP del tag:
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/tags/stable-v5.0.zip
+
+---
+Task ID: V5.1-3-MEJORAS
+Agent: main (Z.ai Code)
+Task: Implementar 3 mejoras solicitadas por el usuario (autoReuse, tooltip rediseñado, proyectil cósmico) con bump de versión
+
+Work Log:
+- Usuario solicito 3 mejoras:
+  1. Disparo del libro debe poder continuar si mantengo el click presionado
+  2. Rediseñar toda la ventana de informacion del Grimorio para mejor entendimiento
+  3. El proyectil del libro es solo azul, deberia ser mas cosmico con efectos
+
+- Recibidas 2 imagenes del usuario:
+  * Imagen 1: tooltip actual — confuso, con abreviaturas cripticas (+4% mag, -20%tb, 13f, Hilo nv25, ump)
+  * Imagen 2: proyectil Nightglow — solo azul/cian, sin aspecto cosmico
+
+Acciones realizadas (3 archivos modificados, 1 creado):
+
+1. DISPARO CONTINUO (GrimoireEternal.cs SetDefaults):
+   - Item.autoReuse cambiado de false → true (linea 51)
+   - El Shoot ya retorna true (linea 191) → tModLoader dispara exactamente 1 proyectil
+   - No hay doble disparo porque return true significa 'tModLoader dispara el proyectil principal una vez'
+   - autoReuse=true solo permite que el uso se repita mientras se mantiene el click
+
+2. TOOLTIP REDISEÑADO (GrimoireEternal.cs ModifyTooltips):
+   - Antes: 6 lineas compactas con abreviaturas ilegibles
+   - Ahora: 6 secciones organizadas con cabeceras de colores:
+     * PROGRESIÓN (verde ═══): Nivel + barra XP 20 chars + próximo hito
+     * DAÑO (dorado ═══): daño mágico, summon, crit, armor pen, minion slots, knockback
+     * RECURSOS (azul ═══): mana max, vida max, mana/seg, vida/seg, reducción daño
+     * PROYECTIL (dorado ═══): bolts, área, costo mana
+     * ORBE CÓSMICO (magenta ═══): contacto, velocidad, rango, cooldown, costo mana
+     * BONUS (rojo ═══): mana bajo + lifesteal
+   - Sin abreviaturas: 'daño mágico' en vez de 'mág', 'penetración de armadura' en vez de 'pen', etc.
+
+3. PROYECTIL CÓSMICO (CosmicProjectileFX.cs — NUEVO):
+   - GlobalProjectile con InstancePerEntity=true
+   - AppliesToEntity: solo projectile.type == 931 (Nightglow)
+   - AI(): añade 4 tipos de partículas cósmicas cada frame:
+     * DustID.GoldFlame dorado cada frame (núcleo de galaxia)
+     * DustID.BlueTorch cian cada 2 frames (estrella guía)
+     * DustID.RainbowTorch magenta cada 3 frames (gemas)
+     * DustID.PurpleTorch índigo cada 4 frames (fondo del portal)
+   - Lighting.AddLight con color violeta-dorado (0.8, 0.6, 1.0)
+   - OnHitNPC(): explosión cósmica con 5 tipos de polvo (dorado, cian, magenta, índigo, blanco supernova)
+   - Kill(): explosión al morir sin impacto
+
+4. VERSION BUMP:
+   - build.txt: version = 5.0 → version = 5.1
+   - CHANGES.md: nuevo commit 'v5.1 — autoReuse + tooltip rediseñado + proyectil cósmico'
+
+- Commit f3a411b: 4 files changed, 281 insertions(+), 44 deletions(-).
+- Push exitoso: 4a16bb2..f3a411b main -> main.
+
+Stage Summary:
+- **Commit pushed**: f3a411b
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/f3a411b
+- **Version**: 5.0 → 5.1
+- **Archivos en el commit (4)**:
+  * AethonMod/CHANGES.md (modificado — nuevo commit v5.1 documentado)
+  * AethonMod/Content/Globals/CosmicProjectileFX.cs (NUEVO — 135 lineas)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (modificado — autoReuse + tooltip)
+  * AethonMod/build.txt (modificado — version 5.1)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader. Deberia poder mantener click para disparar,
+  ver tooltip claro con secciones, y ver proyectil cosmico con estela dorada/cian/magenta.
