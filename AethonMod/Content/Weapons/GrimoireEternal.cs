@@ -40,7 +40,6 @@ namespace AethonMod.Content.Weapons
         // ahora redondea el useTime a entero, evitando el doble Shoot.
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
-        private static int _shootCallCount = 0; // debug counter
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
@@ -225,13 +224,7 @@ namespace AethonMod.Content.Weapons
             }
 
             // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
-            // v5.18: Anti-doble del fire AQUÍ (después del bloque minion, igual que TestStaff)
-            // v5.20: Debug mejorado — contador estático para ver cuántas veces
-            // se llama Shoot por click
-            // v5.25: Anti-doble simple (mismo frame) como TestStaff que funciona.
-            // Ya no necesita cooldown de 25 frames porque UseSpeedMult redondea
-            // el useTime a entero, evitando la causa raíz del doble Shoot.
-            _shootCallCount++;
+            // Anti-doble simple (mismo frame check).
             if (currentFrame == _lastFireFrame)
             {
                 return false;
@@ -250,11 +243,6 @@ namespace AethonMod.Content.Weapons
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-
-            // v5.25: Debug reducido (solo si hay problemas, se puede quitar)
-            if (Main.myPlayer == player.whoAmI)
-                Main.NewText($"[DEBUG] Grimorio nv{level}: 1+{extra}={1+extra} proyectiles, frame {currentFrame}",
-                    new Color(245, 196, 81));
 
             return false; // return false → tModLoader NO dispara proyectil extra
         }

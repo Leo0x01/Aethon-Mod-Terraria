@@ -41,11 +41,6 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
-            GiveItem(ModContent.ItemType<Weapons.TestStaff>(), 1); // v5.8: arma de prueba para proyectiles/minions
-            GiveItem(ModContent.ItemType<Weapons.TestStaffA>(), 1); // v5.23: ModifyWeaponDamage
-            GiveItem(ModContent.ItemType<Weapons.TestStaffB>(), 1); // v5.23: ModifyWeaponKnockback
-            GiveItem(ModContent.ItemType<Weapons.TestStaffC>(), 1); // v5.23: ModifyManaCost
-            GiveItem(ModContent.ItemType<Weapons.TestStaffD>(), 1); // v5.23: UseTimeMultiplier (sospechoso)
         }
 
         /// <summary>
