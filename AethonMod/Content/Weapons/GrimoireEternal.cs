@@ -256,22 +256,8 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             if (sl == null) return;
 
-            // Línea de daño de invocación (híbrido) — insertada después de Damage/Knockback
-            int insertIndex = -1;
-            for (int i = 0; i < tooltips.Count; i++)
-            {
-                if (tooltips[i].Name == "Damage" || tooltips[i].Name == "Knockback")
-                {
-                    insertIndex = i + 1;
-                    break;
-                }
-            }
+            // === v5.11: SummonDamage SOLO en vista básica (no en completa) ===
             int summonDmg = (int)(Item.damage * (1f + sl.Level * WeaponScaling.SummonDamagePerLevel));
-            if (insertIndex >= 0)
-            {
-                tooltips.Insert(insertIndex, new TooltipLine(Mod, "SummonDamage",
-                    $"[c/BE78FD:{summonDmg} daño de invocación]"));
-            }
 
             // === v5.2: TOOLTIP CON 2 MODOS ===
             // Modo básico (default): solo nivel + XP + próximo hito (ventana pequeña)
@@ -387,9 +373,12 @@ namespace AethonMod.Content.Weapons
             }
             else
             {
-                // === MODO BÁSICO: PROGRESIÓN + Próximo hito + indicador de modo ===
+                // === MODO BÁSICO: SummonDamage + PROGRESIÓN + Próximo hito + indicador ===
+                // v5.11: SummonDamage (daño de invocación) solo aquí (no en vista completa)
                 // v5.9: Sección PROGRESIÓN (nivel + barra XP) solo aquí (no en vista completa)
                 // v5.8: 'Próximo hito' solo aquí (no en vista completa)
+                tooltips.Add(new TooltipLine(Mod, "SummonDamage",
+                    $"[c/BE78FD:{summonDmg} daño de invocación]"));
                 tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "Level",
                     $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));

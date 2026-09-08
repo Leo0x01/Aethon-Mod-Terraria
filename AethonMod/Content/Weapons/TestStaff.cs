@@ -8,26 +8,19 @@ using Terraria.DataStructures;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
-    /// Báculo de Prueba — arma de TESTEO para experimentar con lógica de
-    /// lanzamiento de proyectiles e invocación de minions SIN tocar el Grimorio.
+    /// Báculo de Prueba v2 — arma de TESTEO con lógica anti-doble DIFERENTE.
     ///
-    /// v5.8: Creada para resolver 2 problemas reportados por el usuario:
-    /// 1. El Grimorio lanza 2 proyectiles por click (debería ser 1)
-    /// 2. Los minions en niveles altos se invocan doble (gastando el doble de mana)
-    ///
-    /// Enfoque del TestStaff:
-    /// - Click izquierdo: dispara EXACTAMENTE 1 proyectil (return false + crea 1)
-    ///   en vez de return true (que deja que tModLoader dispare +1)
-    /// - Click derecho: invoca minion con verificación estricta de no-duplicación
-    ///   usando un flag estático para evitar que Shoot se procese dos veces
-    /// - Tooltip muestra contadores en tiempo real para debug
+    /// v5.11: Enfoque nuevo para resolver el doble disparo:
+    /// - Item.shoot = ProjectileID.None (sin proyectil default de tModLoader)
+    /// - Item.reuseDelay = 5 (forza 5 frames de cooldown entre usos)
+    /// - Shoot retorna false SIEMPRE (tModLoader nunca crea proyectil default)
+    /// - Todos los proyectiles se crean manualmente con Projectile.NewProjectile
+    /// - Verificación con player.itemAnimation para evitar re-disparo en la misma animación
     /// </summary>
     public class TestStaff : ModItem
     {
-        // Flag estático para evitar que Shoot se procese dos veces en el mismo click
-        // (puede pasar con autoReuse=true o con certain use styles)
-        // Usamos uint porque Main.GameUpdateCount retorna uint (no int)
-        private static uint _lastShootFrame = 0;
+        // Track del último frame en que se disparó (uint = Main.GameUpdateCount)
+        private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
 
         public override void SetStaticDefaults() { }
@@ -45,11 +38,14 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 0, 50, 0);
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.autoReuse = true; // permite mantener click
-            Item.shoot = ProjectileID.WoodenArrowFriendly; // proyectil vanilla simple
+            Item.autoReuse = true;
+            // v5.11 CLAVE: shoot = None para que tModLoader NO cree proyectil default
+            Item.shoot = ProjectileID.None;
             Item.shootSpeed = 12f;
             Item.mana = 2;
             Item.noMelee = true;
+            // v5.11: reuseDelay fuerza un cooldown entre usos
+            Item.reuseDelay = 5;
         }
 
         public override bool AltFunctionUse(Player player) => true;
@@ -66,20 +62,17 @@ namespace AethonMod.Content.Weapons
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // === ANTI-DOBLE: verificar si ya procesamos un Shoot en este frame ===
-            // Esto previene que el proyectil se lance 2 veces por click
+            // === v5.11: LÓGICA ANTI-DOBLE NUEVA ===
+            // Como Item.shoot = None, el parámetro 'type' será -1 o 0.
+            // tModLoader NO crea ningún proyectil default.
+            // Nosotros creamos TODO aquí y retornamos false.
+
             uint currentFrame = Main.GameUpdateCount;
-            if (currentFrame == _lastShootFrame)
-            {
-                // Ya procesamos un Shoot en este frame → ignorar (evita doble)
-                return false;
-            }
-            _lastShootFrame = currentFrame;
 
             // === CLICK DERECHO: invocar minion ===
             if (player.altFunctionUse == 2)
             {
-                // Anti-doble para minions
+                // Anti-doble: verificar si ya invocamos un minion en este frame
                 if (currentFrame == _lastMinionFrame)
                 {
                     return false;
@@ -123,25 +116,30 @@ namespace AethonMod.Content.Weapons
                 if (Main.myPlayer == player.whoAmI)
                     Main.NewText($"Minion invocado ({currentMinions + 1}/{player.maxMinions})",
                         new Color(245, 196, 81));
-                return false; // return false: tModLoader NO dispara proyectil extra
+                return false;
             }
 
             // === CLICK IZQUIERDO: dispara EXACTAMENTE 1 proyectil ===
-            // Enfoque diferente al Grimorio:
-            // - Creamos el proyectil nosotros con Projectile.NewProjectile
-            // - Retornamos FALSE para que tModLoader NO dispare el proyectil default
-            // - Así garantizamos exactamente 1 proyectil por click
-            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            // v5.11: Anti-doble usando frame count
+            // Solo permitimos 1 disparo por frame (incluso si Shoot se llama 2 veces)
+            if (currentFrame == _lastFireFrame)
+            {
+                return false;
+            }
+            _lastFireFrame = currentFrame;
+
+            // Crear EXACTAMENTE 1 proyectil (Nightglow = 931, mismo que Grimorio)
+            int projType = 931; // Nightglow
+            Projectile.NewProjectile(source, position, velocity, projType, damage, knockback, player.whoAmI);
 
             if (Main.myPlayer == player.whoAmI)
-                Main.NewText($"Proyectil lanzado (1)",
+                Main.NewText($"Proyectil lanzado (1) frame {currentFrame}",
                     new Color(245, 196, 81));
-            return false; // return false: tModLoader NO dispara proyectil extra
+            return false; // return false SIEMPRE: tModLoader NO crea proyectil default
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // Tooltip de debug — muestra contadores en tiempo real
             int minionCount = 0;
             if (Main.LocalPlayer != null)
             {
@@ -154,13 +152,15 @@ namespace AethonMod.Content.Weapons
                 }
             }
 
-            tooltips.Add(new TooltipLine(Mod, "TestInfo", "[c/78FF96:═══ ARMA DE PRUEBA ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "TestInfo", "[c/78FF96:═══ ARMA DE PRUEBA v2 ═══]"));
             tooltips.Add(new TooltipLine(Mod, "Desc1",
-                "[c/B388FF:Arma para testear lógica de proyectiles y minions.]"));
+                "[c/B388FF:Arma para testear lógica anti-doble (v2)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc2",
-                "[c/B388FF:Click izq: 1 proyectil exacto (return false)"));
+                "[c/B388FF:Click izq: 1 Nightglow (shoot=None + return false)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc3",
-                "[c/B388FF:Click der: 1 minion exacto (anti-doble)]"));
+                "[c/B388FF:Click der: 1 minion (anti-doble con frame count)]"));
+            tooltips.Add(new TooltipLine(Mod, "Desc4",
+                "[c/78788C:reuseDelay=5, shoot=None]"));
             tooltips.Add(new TooltipLine(Mod, "Status",
                 $"[c/FFD700:Minions activos: {minionCount}/{(Main.LocalPlayer != null ? Main.LocalPlayer.maxMinions : 0)}]"));
             tooltips.Add(new TooltipLine(Mod, "Cost",
@@ -169,7 +169,6 @@ namespace AethonMod.Content.Weapons
 
         public override void AddRecipes()
         {
-            // Crafteable con madera para fácil acceso en testing
             CreateRecipe()
                 .AddIngredient(ItemID.Wood, 10)
                 .Register();
