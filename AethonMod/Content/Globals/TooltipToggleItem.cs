@@ -2,28 +2,24 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using AethonMod.Content.Globals;
 
 namespace AethonMod.Content.Globals
 {
     /// <summary>
     /// TooltipToggleItem — GlobalItem que detecta clicks derechos en el Grimorio
-    /// mientras está en el inventario y alterna el flag ShowExtendedTooltip.
+    /// mientras está en el inventario y alterna entre vista básica/completa.
     ///
-    /// v5.5: En tModLoader 1.4.4 no hay hook directo para interceptar click
-    /// derecho en inventario sin consumir el item. CanRightClick()=true hace
-    /// que el item se consuma (como una poción). Por eso usamos el hook
-    /// ModifyTooltips (que se llama cada frame mientras el tooltip está visible)
-    /// para detectar el flanco de subida del click derecho.
-    ///
-    /// El problema del commit v5.4 era que ModifyTooltips se llama múltiples
-    /// veces (para el item y para el hover item), causando toggles dobles.
-    /// Este GlobalItem solo aplica al Grimorio y trackea el estado del click
-    /// de forma estática para evitar toggles múltiples.
+    /// v5.7: Migrado al patrón del SeerOrb (que funciona correctamente).
+    /// Usa un flag ESTÁTICO (no por-item) en vez de modificar ShardLevelItem.
+    /// Esto evita el error 134124 que ocurría en v5.6 anterior cuando se
+    /// modificaba player.inventory[i] dentro de ModifyTooltips.
     /// </summary>
     public class TooltipToggleItem : GlobalItem
     {
-        public override bool InstancePerEntity => false; // no necesita per-entity
+        public override bool InstancePerEntity => false;
+
+        // Flag estático — NO se persiste por-item (igual que SeerOrbToggle)
+        public static bool ShowExtendedTooltip = false;
 
         private static bool _rightMouseLast = false;
 
@@ -44,6 +40,9 @@ namespace AethonMod.Content.Globals
             // Solo en cliente, con inventario abierto
             if (Main.dedServ || !Main.playerInventory) return;
 
+            // Guard: Main.LocalPlayer puede ser null en pantalla de selección
+            if (Main.LocalPlayer == null) return;
+
             // Detectar flanco de subida del click derecho
             bool rightMouseNow = Main.mouseRight;
             if (!rightMouseNow || _rightMouseLast)
@@ -53,11 +52,8 @@ namespace AethonMod.Content.Globals
             }
             _rightMouseLast = rightMouseNow;
 
-            // Alternar el flag (sin mensaje de chat — el usuario lo considera inutil)
-            var sl = item.GetGlobalItem<ShardLevelItem>();
-            if (sl == null) return;
-
-            sl.ShowExtendedTooltip = !sl.ShowExtendedTooltip;
+            // Alternar el flag ESTÁTICO (NO toca el inventario)
+            ShowExtendedTooltip = !ShowExtendedTooltip;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
     }

@@ -276,7 +276,8 @@ namespace AethonMod.Content.Weapons
             }
 
             // Indicador de modo (básico/completo)
-            if (sl.ShowExtendedTooltip)
+            // v5.7: Usa flag estático de TooltipToggleItem (mismo patrón que SeerOrb)
+            if (Globals.TooltipToggleItem.ShowExtendedTooltip)
             {
                 // === MODO COMPLETO: mostrar todas las estadísticas ===
                 int magicDmgPct = (int)(sl.Level * WeaponScaling.MagicDamagePerLevel * 100);
