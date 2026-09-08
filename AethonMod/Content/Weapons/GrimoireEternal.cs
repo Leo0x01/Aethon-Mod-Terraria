@@ -29,6 +29,11 @@ namespace AethonMod.Content.Weapons
     /// </summary>
     public class GrimoireEternal : ModItem
     {
+        // v5.4: Track del estado del click derecho para detectar flanco de subida
+        // mientras el tooltip está visible. Esto permite alternar entre vista
+        // básica y completa con click derecho SIN consumir el item.
+        private static bool _rightMouseLast = false;
+
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
         // temblor de pantalla ni texto de lore.
@@ -145,34 +150,11 @@ namespace AethonMod.Content.Weapons
             return null;
         }
 
-        /// <summary>
-        /// v5.3: Permite que RightClick se llame cuando se hace click derecho
-        /// en el item DENTRO del inventario. Sin esto, el click derecho solo
-        /// funcionaría en el mundo (no en el inventario).
-        /// </summary>
-        public override bool CanRightClick()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// v5.2: RightClick en inventario alterna la vista del tooltip.
-        /// </summary>
-        public override void RightClick(Player player)
-        {
-            var sl = GetShard(Item);
-            if (sl != null)
-            {
-                sl.ShowExtendedTooltip = !sl.ShowExtendedTooltip;
-                if (Main.myPlayer == player.whoAmI)
-                {
-                    string mode = sl.ShowExtendedTooltip ? "completa" : "básica";
-                    Main.NewText($"Grimorio: vista {mode}",
-                        new Color(245, 196, 81));
-                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
-                }
-            }
-        }
+        // v5.4: Eliminado CanRightClick() y RightClick() porque CanRightClick=true
+        // hacia que tModLoader interpretara el click derecho como 'consumir item'
+        // (como una poción), haciendo que el Grimorio desapareciera del inventario.
+        // La alternancia del tooltip ahora se maneja via ItemSlot.LeftClick en
+        // el GlobalItem TooltipToggleItem (ver Content/Globals/TooltipToggleItem.cs).
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
@@ -237,6 +219,28 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
+            // v5.4: Detectar click derecho mientras el tooltip está visible.
+            // ModifyTooltips se llama cada frame mientras el jugador hace hover
+            // sobre el item. Si detectamos un flanco de subida del click derecho,
+            // alternamos entre vista básica y completa SIN consumir el item.
+            if (!Main.dedServ && Main.myPlayer >= 0)
+            {
+                bool rightMouseNow = Main.mouseRight;
+                if (rightMouseNow && !_rightMouseLast)
+                {
+                    var slToggle = GetShard(Item);
+                    if (slToggle != null)
+                    {
+                        slToggle.ShowExtendedTooltip = !slToggle.ShowExtendedTooltip;
+                        string mode = slToggle.ShowExtendedTooltip ? "completa" : "básica";
+                        Main.NewText($"Grimorio: vista {mode}",
+                            new Color(245, 196, 81));
+                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+                    }
+                }
+                _rightMouseLast = rightMouseNow;
+            }
+
             // Ocultar línea vanilla "Level: X"
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
