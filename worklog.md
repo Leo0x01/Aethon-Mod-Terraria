@@ -5301,3 +5301,49 @@ Stage Summary:
   y recompilar en tModLoader. Probar:
   1. Click izquierdo → 1 proyectil exacto (+ extras por nivel)
   2. Click derecho → 1 minion exacto (sin doble invocación ni doble mana)
+
+---
+Task ID: V5.11-SUMMONDAMAGE-BASICA + TESTSTAFF-V2
+Agent: main (Z.ai Code)
+Task: Arreglar SummonDamage duplicado en vista completa + TestStaff v2 con shoot=None
+
+Work Log:
+- Usuario reporto 2 problemas:
+  1. Vista completa del tooltip todavía muestra info de la vista básica (SummonDamage)
+  2. El Grimorio sigue disparando doble → probar lógica diferente en TestStaff
+
+Cambios realizados:
+
+1. TOOLTIP SummonDamage (GrimoireEternal.cs):
+   - Antes: la línea 'X daño de invocación' se insertaba SIEMPRE antes del if/else
+     → aparecía en ambas vistas (básica y completa)
+   - Ahora: movida al bloque else (vista básica)
+   - La vista completa ya NO muestra SummonDamage
+
+2. TESTSTAFF v2 con lógica anti-doble DIFERENTE:
+   - Item.shoot = ProjectileID.None (antes era WoodenArrowFriendly)
+     → tModLoader NO crea ningún proyectil default
+   - Item.reuseDelay = 5 (fuerza 5 frames de cooldown entre usos)
+   - Shoot retorna false SIEMPRE (tModLoader nunca crea proyectil)
+   - Todos los proyectiles se crean manualmente con Projectile.NewProjectile
+   - Usa Nightglow (931) como proyectil, mismo que Grimorio
+   - Anti-doble con _lastFireFrame (uint) para click izquierdo
+   - Anti-doble con _lastMinionFrame (uint) para click derecho
+
+Diferencia con TestStaff v1:
+- v1: Item.shoot = WoodenArrowFriendly → tModLoader creaba 1 default + nosotros 1
+- v2: Item.shoot = None → tModLoader crea 0, nosotros creamos 1
+
+Version bump: 5.10 → 5.11
+
+- Commit c471797: 3 files changed, 46 insertions(+), 58 deletions(-)
+- Push exitoso: d58e7e5..c471797 main -> main
+
+Stage Summary:
+- **Commit pushed**: c471797
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/c471797
+- **Version**: 5.10 → 5.11
+- **Siguiente paso usuario**: descargar ZIP nuevo y probar:
+  1. Grimorio: vista completa sin SummonDamage
+  2. TestStaff v2: click izq → 1 Nightglow, click der → 1 minion
+  Si TestStaff v2 funciona (sin doble), migrar shoot=None al Grimorio.
