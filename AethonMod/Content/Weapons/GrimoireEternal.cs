@@ -36,9 +36,12 @@ namespace AethonMod.Content.Weapons
         // v5.18: Renombrado _lastShootFrame → _lastFireFrame para coincidir
         // con TestStaff, y movido el check DESPUÉS del bloque del minion
         // (igual que TestStaff que funciona).
+        // v5.21: Cambiado a cooldown de N frames (no mismo frame exacto)
+        // porque tModLoader llama Shoot en frames consecutivos diferentes.
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
         private static int _shootCallCount = 0; // v5.20: debug counter
+        private const uint FIRE_COOLDOWN = 15; // v5.21: mínimo 15 frames entre disparos (0.25 seg)
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
@@ -221,11 +224,13 @@ namespace AethonMod.Content.Weapons
             // v5.18: Anti-doble del fire AQUÍ (después del bloque minion, igual que TestStaff)
             // v5.20: Debug mejorado — contador estático para ver cuántas veces
             // se llama Shoot por click
+            // v5.21: Cooldown de N frames (no mismo frame exacto) porque tModLoader
+            // llama Shoot en frames consecutivos diferentes (1271, 1274, etc.)
             _shootCallCount++;
-            if (currentFrame == _lastFireFrame)
+            if (currentFrame - _lastFireFrame < FIRE_COOLDOWN)
             {
                 if (Main.myPlayer == player.whoAmI)
-                    Main.NewText($"[DEBUG] Shoot #{_shootCallCount} BLOQUEADO (mismo frame {currentFrame})",
+                    Main.NewText($"[DEBUG] Shoot #{_shootCallCount} BLOQUEADO (cooldown, frame {currentFrame}, último {_lastFireFrame})",
                         new Color(255, 100, 100));
                 return false;
             }
