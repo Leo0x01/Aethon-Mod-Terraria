@@ -5972,3 +5972,52 @@ Version bump: 5.26 → 5.27
 
 - Commit e6cd894
 - Push exitoso: 8ae6cd1..e6cd894 main -> main
+
+---
+Task ID: V5.28-REVISIÓN-PROFUNDA + ARMAS-VISUALES
+Agent: main (Z.ai Code)
+Task: Revisión profunda del código + crear 7 armas de prueba visual
+
+Work Log:
+1. REVISIÓN PROFUNDA COMPLETADA (vía subagente Explore):
+   - 20/23 funciones de WeaponScaling funcionan ✅
+   - 3 funciones rotas identificadas:
+     * MinionContactDamageMult: tooltip dice +50% pero NO se aplica al minion
+     * BoltAreaDamage: tooltip dice +Npx área pero NO existe daño en área
+     * DoubleShotChance: función muerta (nunca se llama)
+   - Bug: minion se debilita al cambiar de arma (velocidad, cooldown, rango)
+   - Bug: lifesteal se pierde al cambiar de arma antes del impacto
+   - Dead code: MilestonesForLevel, NextMilestoneSummary, CosmicOrbBolt, ArcaneBolt
+
+2. RESTAURACIÓN DEL REPOSITORIO LOCAL:
+   - El repo local se había reseteado a un estado antiguo (2f88f81)
+   - GitHub tenía el estado correcto (a3fcd07 = stable-v5.27)
+   - git fetch + git reset --hard origin/main → restaurado correctamente
+   - Verificado: autoReuse=true, UseAnimationMultiplier, reuseDelay=10, ShowExtendedTooltip
+
+3. 7 ARMAS DE PRUEBA VISUAL CREADAS:
+   1. TestAura (dorado): brillo dorado pulsante al sostener + partículas
+   2. TestStarTrail (blanco): trail de estrellas doradas/cian en el proyectil
+   3. TestPortal (púrpura): mini-portal cósmico al disparar
+   4. TestHaloMinion (verde): invoca minion con anillo dorado girando
+   5. TestColorGold (dorado): re-tinte dorado del Nightglow
+   6. TestColorCyan (cian): re-tinte cian del Nightglow
+   7. TestColorMagenta (magenta): re-tinte magenta del Nightglow
+
+4. GlobalProjectile TestVisualFX.cs creado para manejar:
+   - Trail de estrellas (ai[1]=9999)
+   - Halo del minion (ai[0]=1): 8 partículas doradas en anillo girando
+   - Color del proyectil (ai[1]=1001/1002/1003): PreDraw con Color.Lerp
+
+5. 7 sprites generados (28x30 cada uno, orbes de colores diferentes)
+6. Agregados al kit de testing del TestingPlayer
+7. Version bump: 5.27 → 5.28
+
+- Commit 1313b70
+- Push exitoso: a3fcd07..1313b70 main -> main
+
+Stage Summary:
+- **Commit pushed**: 1313b70
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/1313b70
+- **Version**: 5.27 → 5.28
+- **Siguiente paso usuario**: descargar ZIP, recompilar, probar cada arma visual
