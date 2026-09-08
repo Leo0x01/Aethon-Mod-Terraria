@@ -33,7 +33,10 @@ namespace AethonMod.Content.Weapons
         // Previene que Shoot se procese dos veces en el mismo frame,
         // lo que causaba que se lanzaran 2 proyectiles y se invocaran
         // 2 minions por click.
-        private static uint _lastShootFrame = 0;
+        // v5.18: Renombrado _lastShootFrame → _lastFireFrame para coincidir
+        // con TestStaff, y movido el check DESPUÉS del bloque del minion
+        // (igual que TestStaff que funciona).
+        private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
@@ -50,7 +53,7 @@ namespace AethonMod.Content.Weapons
             Item.height = 38;
             Item.useTime = 22;
             Item.useAnimation = 22;
-            Item.useStyle = ItemUseStyleID.Swing; // v5.17: Swing (mismo que TestStaff que funciona) — HoldUp causaba doble Shoot
+            Item.useStyle = ItemUseStyleID.HoldUp; // v5.18: restaurado (la animación no era el problema)
             Item.knockBack = 3f;
             Item.value = Item.buyPrice(0, 10, 0, 0);
             Item.rare = ItemRarityID.Quest;
@@ -161,16 +164,9 @@ namespace AethonMod.Content.Weapons
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // === v5.10: ANTI-DOBLE (migrado del TestStaff) ===
-            // Previene que Shoot se procese dos veces en el mismo frame.
-            // Causa raíz del problema de doble proyectil y doble minion.
+            // === v5.18: LÓGICA ANTI-DOBLE IDÉNTICA AL TESTSTAFF (que funciona) ===
+            // El anti-doble del fire está DESPUÉS del bloque del minion (igual que TestStaff)
             uint currentFrame = Main.GameUpdateCount;
-            if (currentFrame == _lastShootFrame)
-            {
-                // Ya procesamos un Shoot en este frame → ignorar (evita doble)
-                return false;
-            }
-            _lastShootFrame = currentFrame;
 
             var sl = GetShard(Item);
             int level = sl?.Level ?? 1;
@@ -221,9 +217,13 @@ namespace AethonMod.Content.Weapons
             }
 
             // === CLICK IZQUIERDO: Nightglow (1 base + extras por nivel) ===
-            // v5.10: return false en vez de return true para que tModLoader
-            // NO dispare el proyectil default (que causaba el doble).
-            // Creamos nosotros TODOS los proyectiles (el principal + extras).
+            // v5.18: Anti-doble del fire AQUÍ (después del bloque minion, igual que TestStaff)
+            if (currentFrame == _lastFireFrame)
+            {
+                return false;
+            }
+            _lastFireFrame = currentFrame;
+
             int extra = WeaponScaling.ExtraProjectiles(level);
 
             // Proyectil principal (1 exacto)
@@ -236,7 +236,7 @@ namespace AethonMod.Content.Weapons
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
-            return false; // v5.10: return false → tModLoader NO dispara proyectil extra
+            return false; // return false → tModLoader NO dispara proyectil extra
         }
 
         // ================================================================
