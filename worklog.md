@@ -5790,3 +5790,46 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 3 clicks y
   mirar el chat. Debería ver 3 mensajes dorados + 3 mensajes rojos BLOQUEADO
   (6 total, no 6 dorados). Y solo 3 proyectiles en pantalla.
+
+---
+Task ID: V5.23-TESTSTAFFS-ABCD
+Agent: main (Z.ai Code)
+Task: Crear 4 TestStaffs para aislar cuál override causa el doble Shoot
+
+Work Log:
+- Usuario solicito: 'usa el baston de prueba, crea un baston de prueba por cada override y veamos cual hace 2 disparos por clic'
+- El Grimorio tiene 4 overrides que el TestStaff original NO tiene:
+  1. ModifyWeaponDamage
+  2. ModifyWeaponKnockback
+  3. ModifyManaCost
+  4. UseTimeMultiplier (sospechoso principal — retorna 0.997 no entero)
+
+Creados 4 TestStaffs (TestStaffsABCD.cs):
+- TestStaffA (rojo): ModifyWeaponDamage (damage *= 1.1f)
+- TestStaffB (verde): ModifyWeaponKnockback (knockback *= 1.2f)
+- TestStaffC (azul): ModifyManaCost (Item.mana = 3)
+- TestStaffD (amarillo): UseTimeMultiplier (return 0.997f) — sospechoso
+
+Todos usan:
+- Mismo useStyle=HoldUp que Grimorio
+- Misma lógica anti-doble (mismo frame check)
+- Mismo proyectil Nightglow 931
+- Mensaje de debug con color distintivo por staff
+
+4 sprites generados con orbes de colores diferentes.
+
+Hipótesis: TestStaffD (UseTimeMultiplier) hará doble Shoot porque retorna
+0.997 que no es entero, causando que tModLoader llame Shoot 2 veces.
+
+Version bump: 5.22 → 5.23
+
+- Commit acefd83
+- Push exitoso: beffec3..acefd83 main -> main
+
+Stage Summary:
+- **Commit pushed**: acefd83
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/acefd83
+- **Version**: 5.22 → 5.23
+- **Siguiente paso usuario**: descargar ZIP, recompilar, y probar cada staff
+  haciendo 1 click. Mirar cuántos mensajes [A], [B], [C], [D] aparecen.
+  El que aparezca 2 veces es el culpable.
