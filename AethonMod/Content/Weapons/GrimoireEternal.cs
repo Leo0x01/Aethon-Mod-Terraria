@@ -265,11 +265,15 @@ namespace AethonMod.Content.Weapons
                 for (int i = tooltips.Count - 1; i >= 0; i--)
                 {
                     string name = tooltips[i].Name ?? "";
-                    // Ocultar TODAS las líneas vanilla excepto el nombre del item
+                    // Ocultar TODAS las líneas vanilla y de modifier
+                    // Líneas vanilla: Damage, CritChance, Speed, Knockback, UseMana, ManaCost, ItemLevel
+                    // Tooltip: "Tooltip0", "Tooltip1", etc. (usar StartsWith)
+                    // Modifier: "PrefixDamage", "PrefixSpeed", "PrefixCrit", etc. (usar StartsWith)
                     if (name == "Damage" || name == "CritChance" || name == "Speed" ||
-                        name == "Knockback" || name == "UseMana" || name == "Tooltip" ||
-                        name == "BestiaryNotes" || name == "Knockback" ||
-                        name == "ManaCost" || name == "ItemLevel")
+                        name == "Knockback" || name == "UseMana" || name == "ManaCost" ||
+                        name == "BestiaryNotes" || name == "ItemLevel" ||
+                        name.StartsWith("Tooltip") ||     // Tooltip0, Tooltip1, etc.
+                        name.StartsWith("Prefix"))        // PrefixDamage, PrefixSpeed, etc.
                     {
                         tooltips.RemoveAt(i);
                     }
