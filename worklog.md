@@ -5931,3 +5931,44 @@ Version bump: 5.25 → 5.26
 
 - Commit 8ae6cd1: 2 files changed, 14 insertions(+), 1 deletion(-)
 - Push exitoso: b797e2c..8ae6cd1 main -> main
+
+---
+Task ID: V5.27-CLEANUP-FINAL
+Agent: main (Z.ai Code)
+Task: Quitar debug + eliminar TestStaffs de prueba (cleanup final)
+
+Work Log:
+- Usuario confirmo: 'ahora esta bien, ya no hace doble proyectil por clic,
+  se puede decir que ya se arreglo'
+
+Limpieza realizada:
+
+1. QUITAR DEBUG del Grimorio:
+   - Eliminado mensaje [DEBUG] que spameaba el chat
+   - Eliminado _shootCallCount (contador de debug)
+   - El anti-doble (mismo frame check) se mantiene como seguridad
+
+2. ELIMINAR TestStaffs de prueba (cumplieron su propósito):
+   - TestStaff.cs + TestStaff.png (original)
+   - TestStaffsABCD.cs (A/B/C/D)
+   - TestStaffA.png, TestStaffB.png, TestStaffC.png, TestStaffD.png
+   - Eliminadas referencias en TestingPlayer.cs
+
+3. Se mantiene:
+   - SeerOrb (item de prueba para toggle tooltip — sigue siendo útil)
+   - LevelUpTester + BossSummonBag (items de testing permanentes)
+   - GenesisShard + GoldBar (kit de testing básico)
+
+ESTADO FINAL DEL GRIMORIO:
+- 1 proyectil por click (no doble) ✅
+- 1 minion por click derecho ✅
+- autoReuse = true (mantener click) ✅
+- UseTimeMultiplier + UseAnimationMultiplier (velocidad escalada) ✅
+- Anti-doble simple (mismo frame) como seguridad ✅
+- Sin debug spameando el chat ✅
+- Sin cooldown artificial ✅
+
+Version bump: 5.26 → 5.27
+
+- Commit e6cd894
+- Push exitoso: 8ae6cd1..e6cd894 main -> main
