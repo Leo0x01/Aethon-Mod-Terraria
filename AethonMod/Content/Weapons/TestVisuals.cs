@@ -382,8 +382,8 @@ namespace AethonMod.Content.Weapons
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
 
-    // === 8. RAYOS CÓSMICOS DESDE EL SUELO ===
-    // Rayos dorados muy pequeños que suben desde el suelo hacia el jugador.
+    // === 8. RELÁMPAGOS CÓSMICOS AL SOSTENER ===
+    // Relámpagos (lightning bolts) cian/eléctrico que caen cerca del jugador.
     public class TestRays : ModItem
     {
         public override void SetStaticDefaults() { }
@@ -401,38 +401,73 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            // v5.32: Rayos dorados que suben desde el suelo hacia el jugador
-            // Usamos DustID.GoldFlame con velocidad hacia arriba
-            if (Main.rand.NextBool(3))
+            // v5.33: Relámpagos cian/eléctrico que caen cerca del jugador
+            // Estilo: jagged, branching, cyan/electric blue como en la imagen de referencia
+            if (Main.rand.NextBool(5))
             {
-                // Posición aleatoria en el suelo, cerca del jugador
-                Vector2 spawnPos = new Vector2(
-                    player.Center.X + Main.rand.NextFloat(-40, 40),
-                    player.Center.Y + Main.rand.NextFloat(30, 50)); // abajo del jugador
+                // Posición aleatoria cerca del jugador (horizontal)
+                float x = player.Center.X + Main.rand.NextFloat(-80, 80);
+                // El relámpago cae desde arriba hacia el suelo
+                float startY = player.Center.Y - Main.rand.NextFloat(100, 180);
+                float endY = player.Center.Y + Main.rand.NextFloat(20, 60);
 
-                // Rayo que sube rápido
-                Dust d = Dust.NewDustPerfect(spawnPos,
-                    DustID.GoldFlame,
-                    new Vector2(0, -2.5f), // sube rápido
-                    100, new Color(255, 217, 61), 0.3f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
+                // Dibujar el relámpago con segmentos jagged (zigzag)
+                Vector2 currentPos = new Vector2(x, startY);
+                float segmentLength = 12f;
+                int numSegments = (int)((endY - startY) / segmentLength);
+
+                for (int i = 0; i < numSegments; i++)
+                {
+                    // Dirección general hacia abajo, con zigzag horizontal
+                    float zigzag = Main.rand.NextFloat(-8f, 8f);
+                    Vector2 nextPos = new Vector2(
+                        currentPos.X + zigzag,
+                        currentPos.Y + segmentLength);
+
+                    // Crear dust a lo largo del segmento (3 puntos por segmento)
+                    for (int j = 0; j < 3; j++)
+                    {
+                        float t = j / 3f;
+                        Vector2 dustPos = Vector2.Lerp(currentPos, nextPos, t);
+                        // Núcleo blanco/cian brillante
+                        Dust d = Dust.NewDustPerfect(dustPos,
+                            DustID.BlueTorch,
+                            Vector2.Zero, 200,
+                            new Color(0, 255, 255), 0.6f);
+                        d.noGravity = true; d.fadeIn = 0f;
+                    }
+
+                    // Branch ocasional (ramificación del relámpago)
+                    if (Main.rand.NextBool(4) && i > 1 && i < numSegments - 2)
+                    {
+                        Vector2 branchEnd = currentPos + new Vector2(
+                            Main.rand.NextFloat(-30, 30),
+                            Main.rand.NextFloat(15, 30));
+                        for (int j = 0; j < 3; j++)
+                        {
+                            float t = j / 3f;
+                            Vector2 dustPos = Vector2.Lerp(currentPos, branchEnd, t);
+                            Dust d = Dust.NewDustPerfect(dustPos,
+                                DustID.BlueTorch,
+                                Vector2.Zero, 180,
+                                new Color(100, 200, 255), 0.4f);
+                            d.noGravity = true; d.fadeIn = 0f;
+                        }
+                    }
+
+                    currentPos = nextPos;
+                }
+
+                // Flash de luz cian en el punto de impacto
+                Lighting.AddLight(currentPos, new Vector3(0.2f, 0.8f, 1.0f));
+
+                // Sonido de relámpago ocasional
+                if (Main.rand.NextBool(3))
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Thunder, currentPos);
             }
-            // Rayo cian ocasional
-            if (Main.rand.NextBool(8))
-            {
-                Vector2 spawnPos = new Vector2(
-                    player.Center.X + Main.rand.NextFloat(-30, 30),
-                    player.Center.Y + Main.rand.NextFloat(30, 50));
-                Dust d = Dust.NewDustPerfect(spawnPos,
-                    DustID.BlueTorch,
-                    new Vector2(0, -3f),
-                    150, new Color(0, 255, 255), 0.25f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-            // Brillo muy tenue
-            Lighting.AddLight(player.Center, new Vector3(0.2f, 0.15f, 0.05f));
+
+            // Brillo tenue del jugador
+            Lighting.AddLight(player.Center, new Vector3(0.1f, 0.1f, 0.2f));
         }
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
@@ -441,8 +476,8 @@ namespace AethonMod.Content.Weapons
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ RAYOS CÓSMICOS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Rayos dorados subiendo desde el suelo]"));
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ RELÁMPAGOS CÓSMICOS ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Relámpagos cian cayendo cerca del jugador]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
