@@ -5406,3 +5406,41 @@ Stage Summary:
 - **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/99c71c3
 - **Version**: 5.12 → 5.13
 - **Siguiente paso usuario**: descargar ZIP y probar TestStaff con autoReuse
+
+---
+Task ID: V5.14-OCULTAR-VANILLA-EN-COMPLETA
+Agent: main (Z.ai Code)
+Task: Ocultar líneas vanilla en la vista completa del tooltip del Grimorio
+
+Work Log:
+- Usuario reporto: 'en el arma principal, todavia aparece la info basica
+  en la ventana avanzada'
+- Imagen mostraba la vista completa con líneas vanilla al inicio:
+  * '8% probabilidad de ataque critico' (CritChance)
+  * 'Veloz' (Speed)
+  * 'Retroceso debil' (Knockback)
+  * 'Usa 6 de mana' (UseMana)
+  * 'Arma hibrida magica/de invocacion.' (Tooltip)
+  * 'Click izq: bolt arcano. Click der: invoca minion.' (Tooltip)
+
+Fix aplicado en GrimoireEternal.cs ModifyTooltips:
+- En la vista completa (ShowExtendedTooltip=true), se eliminan todas las
+  líneas vanilla excepto el nombre del item:
+  - Damage, CritChance, Speed, Knockback, UseMana, Tooltip, BestiaryNotes,
+    ManaCost, ItemLevel
+
+Ahora la vista completa solo muestra:
+- Nombre del item (Grimorio del Eterno)
+- DAÑO, RECURSOS, PROYECTIL, ORBE CÓSMICO, BONUS
+- Click der para vista básica
+
+Version bump: 5.13 → 5.14
+
+- Commit 8f94ae0: 2 files changed, 21 insertions(+), 1 deletion(-)
+- Push exitoso: 99c71c3..8f94ae0 main -> main
+
+Stage Summary:
+- **Commit pushed**: 8f94ae0
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/8f94ae0
+- **Version**: 5.13 → 5.14
+- **Siguiente paso usuario**: descargar ZIP y probar Grimorio vista completa
