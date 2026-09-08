@@ -6021,3 +6021,28 @@ Stage Summary:
 - **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/1313b70
 - **Version**: 5.27 → 5.28
 - **Siguiente paso usuario**: descargar ZIP, recompilar, probar cada arma visual
+
+---
+Task ID: V5.30-FIX-ISSUES + ARMAS-ÁREA
+Agent: main (Z.ai Code)
+Task: Arreglar issues 1+2 de la revisión profunda + crear 2 armas de prueba daño en área
+
+Work Log:
+
+ISSUES ARREGLADOS:
+1. fromNet: true → false en CosmicProjectileFX.cs
+   - SimpleStrikeNPC con fromNet=true podía causar doble daño en MP
+   - Cambiado a false (daño local, no se envía por red)
+2. Agregado check de npc.immune en daño en área
+   - if (npc.immune[projectile.owner] > 0) continue;
+
+2 ARMAS DE PRUEBA CREADAS:
+- TestArea20 (naranja): Nightglow con daño en área 20px (radio estándar)
+- TestArea60 (rojo): Nightglow con daño en área 60px (casi 4 tiles)
+- Ambas usan ai[1] flags (2001/2002) procesados en TestVisualFX.OnHitNPC
+- Efectos visuales: anillo cian del área + partículas doradas en NPCs dañados
+
+Version bump: 5.29 → 5.30
+
+- Commit 2f0854f: 7 files changed, 132 insertions(+), 2 deletions(-)
+- Push exitoso: 930f3d2..2f0854f main -> main
