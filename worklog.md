@@ -5541,3 +5541,41 @@ Stage Summary:
   2. Click der → 1 minion exacto
   3. Mantener click → dispara continuo
   4. Vista básica y completa del tooltip siguen perfectas
+
+---
+Task ID: V5.17-USESTYLE-SWING
+Agent: main (Z.ai Code)
+Task: Cambiar useStyle de HoldUp a Swing en Grimorio (causaba doble Shoot)
+
+Work Log:
+- Usuario reporto: 'el grimorio sigue lanzando disparos dobles' (a pesar de v5.16)
+- Análisis: comparé TestStaff (funciona) vs Grimorio (no funciona)
+- Diferencia encontrada:
+  - TestStaff: useStyle = Swing → funciona (1 proyectil)
+  - Grimorio: useStyle = HoldUp → NO funciona (doble proyectil)
+
+Causa raíz: ItemUseStyleID.HoldUp puede causar que Shoot se llame múltiples
+veces en el mismo uso (el item se 'levanta' y dispara, pero el animation
+cycle puede disparar 2 veces).
+
+Fix: cambiado useStyle de HoldUp a Swing:
+- Item.useStyle = ItemUseStyleID.Swing
+
+Swing es más estable para items que disparan proyectiles porque la animación
+de 'golpe' se completa una vez por useTime, garantizando que Shoot se llame
+exactamente una vez.
+
+No se toco nada mas.
+
+Version bump: 5.16 → 5.17
+
+- Commit c8fb73b: 2 files changed, 2 insertions(+), 2 deletions(-)
+- Push exitoso: ddcb308..c8fb73b main -> main
+
+Stage Summary:
+- **Commit pushed**: c8fb73b
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/c8fb73b
+- **Version**: 5.16 → 5.17
+- **Siguiente paso usuario**: descargar ZIP y probar Grimorio:
+  - La animación de uso será diferente (swing en vez de holdup)
+  - Debería lanzar 1 proyectil por click (no doble)
