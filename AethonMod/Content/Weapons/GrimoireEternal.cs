@@ -29,11 +29,6 @@ namespace AethonMod.Content.Weapons
     /// </summary>
     public class GrimoireEternal : ModItem
     {
-        // v5.4: Track del estado del click derecho para detectar flanco de subida
-        // mientras el tooltip está visible. Esto permite alternar entre vista
-        // básica y completa con click derecho SIN consumir el item.
-        private static bool _rightMouseLast = false;
-
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
         // temblor de pantalla ni texto de lore.
@@ -219,28 +214,6 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            // v5.4: Detectar click derecho mientras el tooltip está visible.
-            // ModifyTooltips se llama cada frame mientras el jugador hace hover
-            // sobre el item. Si detectamos un flanco de subida del click derecho,
-            // alternamos entre vista básica y completa SIN consumir el item.
-            if (!Main.dedServ && Main.myPlayer >= 0)
-            {
-                bool rightMouseNow = Main.mouseRight;
-                if (rightMouseNow && !_rightMouseLast)
-                {
-                    var slToggle = GetShard(Item);
-                    if (slToggle != null)
-                    {
-                        slToggle.ShowExtendedTooltip = !slToggle.ShowExtendedTooltip;
-                        string mode = slToggle.ShowExtendedTooltip ? "completa" : "básica";
-                        Main.NewText($"Grimorio: vista {mode}",
-                            new Color(245, 196, 81));
-                        Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
-                    }
-                }
-                _rightMouseLast = rightMouseNow;
-            }
-
             // Ocultar línea vanilla "Level: X"
             for (int i = tooltips.Count - 1; i >= 0; i--)
             {
