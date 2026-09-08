@@ -5972,3 +5972,25 @@ Version bump: 5.26 → 5.27
 
 - Commit e6cd894
 - Push exitoso: 8ae6cd1..e6cd894 main -> main
+
+---
+Task ID: GUARDAR-SUPER-ESTABLE-V5.27
+Agent: main (Z.ai Code)
+Task: Guardar v5.27 como versión SUPER ESTABLE
+
+Work Log:
+- Usuario confirmo: 'perfecta, esta version es estable, es mejor guardarla
+  como la ultima version super estable'
+
+Acciones realizadas:
+1. Tag anotado stable-v5.27 con mensaje completo del estado verificado
+2. Rama backup stable-v5.27-backup
+3. STABLE-SNAPSHOT.md actualizado con hashes SHA256
+4. Todo pushed a GitHub
+
+URLs:
+- Tag: https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/stable-v5.27
+- Rama: https://github.com/Leo0x01/Aethon-Mod-Terraria/tree/stable-v5.27-backup
+- ZIP: https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/tags/stable-v5.27.zip
+
+Estado: TODO FUNCIONA PERFECTAMENTE. No modificar sin confirmación del usuario.
