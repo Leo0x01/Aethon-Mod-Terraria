@@ -60,6 +60,7 @@ namespace AethonMod.Content.Weapons
             Item.shootSpeed = 12f;
             Item.mana = 3;
             Item.noMelee = true;
+            Item.reuseDelay = 10; // v5.16: cooldown forzado (migrado del TestStaff que funciona)
         }
 
         /// <summary>
