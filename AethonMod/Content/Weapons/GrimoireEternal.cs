@@ -50,7 +50,7 @@ namespace AethonMod.Content.Weapons
             Item.height = 38;
             Item.useTime = 22;
             Item.useAnimation = 22;
-            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.useStyle = ItemUseStyleID.Swing; // v5.17: Swing (mismo que TestStaff que funciona) — HoldUp causaba doble Shoot
             Item.knockBack = 3f;
             Item.value = Item.buyPrice(0, 10, 0, 0);
             Item.rare = ItemRarityID.Quest;
