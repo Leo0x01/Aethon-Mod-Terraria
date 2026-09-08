@@ -22,13 +22,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -67,13 +67,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -104,13 +104,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 25; Item.useAnimation = 25;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -160,13 +160,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 25; Item.useAnimation = 25;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -209,13 +209,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -242,13 +242,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -275,13 +275,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 10; Item.DamageType = DamageClass.Magic;
+            Item.damage = 10; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -309,13 +309,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 15; Item.DamageType = DamageClass.Magic;
+            Item.damage = 15; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
@@ -344,13 +344,13 @@ namespace AethonMod.Content.Weapons
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 15; Item.DamageType = DamageClass.Magic;
+            Item.damage = 15; Item.DamageType = DamageClass.Generic; // v5.31: Generic para no costar mana
             Item.width = 28; Item.height = 30;
             Item.useTime = 20; Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true; // v5.31: sin mana
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
         }
