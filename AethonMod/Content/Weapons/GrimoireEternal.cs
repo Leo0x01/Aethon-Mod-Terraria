@@ -236,6 +236,12 @@ namespace AethonMod.Content.Weapons
                 Vector2 perturbedVel = velocity.RotatedBy(angle);
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
+
+            // v5.19: Debug para ver cuántos proyectiles se crean por click
+            if (Main.myPlayer == player.whoAmI)
+                Main.NewText($"[DEBUG] Grimorio nivel {level}: 1 + {extra} = {1 + extra} proyectiles, frame {currentFrame}",
+                    new Color(245, 196, 81));
+
             return false; // return false → tModLoader NO dispara proyectil extra
         }
 
