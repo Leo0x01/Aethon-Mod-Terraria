@@ -46,12 +46,22 @@ namespace AethonMod.Content.Systems
             return pen;
         }
 
-        /// <summary>Multiplicador de use time (Máximo -25%).</summary>
-        public static float UseSpeedMult(int level)
+        /// <summary>
+        /// Multiplicador de use time (Máximo -25%).
+        /// v5.25: Redondea el useTime efectivo a ENTERO para evitar doble Shoot.
+        /// Causa raíz: si useTime × multiplier no es entero, tModLoader llama
+        /// Shoot 2 veces por ciclo de animación. Redondear a entero lo arregla.
+        /// El multiplier se calcula para que useTimeBase × multiplier sea entero.
+        /// </summary>
+        public static float UseSpeedMult(int level, int useTimeBase = 22)
         {
             float reduction = level * UseSpeedPerLevel;
             if (reduction > 0.25f) reduction = 0.25f;
-            return 1f - reduction;
+            // Calcular useTime efectivo y redondear a entero
+            int effectiveUseTime = (int)(useTimeBase * (1f - reduction));
+            if (effectiveUseTime < 1) effectiveUseTime = 1;
+            // Retornar el multiplier que produce ese useTime entero
+            return (float)effectiveUseTime / useTimeBase;
         }
 
         // ================================================================

@@ -36,13 +36,11 @@ namespace AethonMod.Content.Weapons
         // v5.18: Renombrado _lastShootFrame → _lastFireFrame para coincidir
         // con TestStaff, y movido el check DESPUÉS del bloque del minion
         // (igual que TestStaff que funciona).
-        // v5.21: Cambiado a cooldown de N frames (no mismo frame exacto)
-        // porque tModLoader llama Shoot en frames consecutivos diferentes.
+        // v5.25: Cooldown ELIMINADO — ya no es necesario porque UseSpeedMult
+        // ahora redondea el useTime a entero, evitando el doble Shoot.
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
-        private static int _shootCallCount = 0; // v5.20: debug counter
-        private const uint FIRE_COOLDOWN = 25; // v5.22: mínimo 25 frames entre disparos (0.42 seg)
-                                               // 25 > 21 (la diferencia entre los 2 Shoots del doble)
+        private static int _shootCallCount = 0; // debug counter
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
@@ -126,7 +124,9 @@ namespace AethonMod.Content.Weapons
         {
             var sl = GetShard(Item);
             if (sl == null) return 1f;
-            return WeaponScaling.UseSpeedMult(sl.Level);
+            // v5.25: Pasar Item.useTime como base para que UseSpeedMult
+            // redondee el useTime efectivo a entero (evita doble Shoot)
+            return WeaponScaling.UseSpeedMult(sl.Level, Item.useTime);
         }
 
         // ================================================================
@@ -215,14 +215,12 @@ namespace AethonMod.Content.Weapons
             // v5.18: Anti-doble del fire AQUÍ (después del bloque minion, igual que TestStaff)
             // v5.20: Debug mejorado — contador estático para ver cuántas veces
             // se llama Shoot por click
-            // v5.21: Cooldown de N frames (no mismo frame exacto) porque tModLoader
-            // llama Shoot en frames consecutivos diferentes (1271, 1274, etc.)
+            // v5.25: Anti-doble simple (mismo frame) como TestStaff que funciona.
+            // Ya no necesita cooldown de 25 frames porque UseSpeedMult redondea
+            // el useTime a entero, evitando la causa raíz del doble Shoot.
             _shootCallCount++;
-            if (currentFrame - _lastFireFrame < FIRE_COOLDOWN)
+            if (currentFrame == _lastFireFrame)
             {
-                if (Main.myPlayer == player.whoAmI)
-                    Main.NewText($"[DEBUG] Shoot #{_shootCallCount} BLOQUEADO (cooldown, frame {currentFrame}, último {_lastFireFrame})",
-                        new Color(255, 100, 100));
                 return false;
             }
             _lastFireFrame = currentFrame;
@@ -240,9 +238,9 @@ namespace AethonMod.Content.Weapons
                 Projectile.NewProjectile(source, position, perturbedVel, type, damage, knockback, player.whoAmI);
             }
 
-            // v5.19: Debug para ver cuántos proyectiles se crean por click
+            // v5.25: Debug reducido (solo si hay problemas, se puede quitar)
             if (Main.myPlayer == player.whoAmI)
-                Main.NewText($"[DEBUG] Shoot #{_shootCallCount} Grimorio nv{level}: 1+{extra}={1+extra} proyectiles, frame {currentFrame}",
+                Main.NewText($"[DEBUG] Grimorio nv{level}: 1+{extra}={1+extra} proyectiles, frame {currentFrame}",
                     new Color(245, 196, 81));
 
             return false; // return false → tModLoader NO dispara proyectil extra
