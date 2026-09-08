@@ -5123,3 +5123,63 @@ Stage Summary:
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader. Probar click derecho en el Grimorio del
   inventario → deberia alternar entre vista basica y completa SIN error 134124.
+
+---
+Task ID: V5.8-PROXIMO-HITO-SOLO-BASICA + TESTSTAFF
+Agent: main (Z.ai Code)
+Task: Quitar 'Próximo hito' de la vista completa + crear TestStaff para probar lógica de proyectiles/minions sin tocar el Grimorio
+
+Work Log:
+- Usuario reporto 2 problemas:
+  1. 'Próximo hito' aparece en ambas vistas (básica y completa) — solo debe estar en una
+  2. El Grimorio lanza 2 proyectiles por click (debería ser 1) + minions se invocan doble
+- Usuario solicito: crear arma de prueba para no tocar el Grimorio
+
+Acciones realizadas (4 archivos):
+
+1. PRÓXIMO HITO SOLO EN VISTA BÁSICA (GrimoireEternal.cs ModifyTooltips):
+   - Antes: 'Próximo hito' se agregaba SIEMPRE antes del if (ShowExtendedTooltip)
+   - Ahora: 'Próximo hito' movido al bloque 'else' (vista básica)
+   - El bloque 'if (ShowExtendedTooltip)' ya no incluye Próximo hito
+
+2. CREAR TestStaff (Weapons/TestStaff.cs — NUEVO):
+   - Arma de TESTEO con lógica DIFERENTE al Grimorio:
+     * Click izquierdo: crea 1 proyectil con Projectile.NewProjectile + return false
+       (en vez de return true que deja que tModLoader dispare +1)
+       → garantiza 1 solo proyectil por click
+     * Click derecho: invoca 1 minion con anti-doble usando flags estáticos
+       _lastShootFrame y _lastMinionFrame para evitar procesamiento doble
+       → si Shoot se llama 2 veces en el mismo frame, la 2da se ignora
+     * Verificación de slots de minion antes de invocar
+     * Mana Flower compatible
+     * Tooltip muestra contadores en tiempo real para debug:
+       - Minions activos: X/maxMinions
+       - Costo: 2 mana bolt | 10 mana minion
+   - Crafteable con 10 madera para fácil acceso en testing
+
+3. SPRITE TestStaff.png (28x30, generado con Python+PIL):
+   - Báculo marrón con orbe cian en la punta superior
+   - Brillo cian claro + sombra cian oscuro + destello blanco central
+
+4. KIT DE TESTING (TestingPlayer.cs):
+   - Agregado TestStaff al kit que se recibe al entrar al mundo
+
+5. VERSION BUMP: 5.7 → 5.8
+
+- Commit 35f7bf5: 4 files changed, 190 insertions(+), 12 deletions(-)
+- Push exitoso: 2d60d4b..35f7bf5 main -> main
+
+Stage Summary:
+- **Commit pushed**: 35f7bf5
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/35f7bf5
+- **Version**: 5.7 → 5.8
+- **Archivos en el commit (4)**:
+  * AethonMod/Content/Players/TestingPlayer.cs (TestStaff en kit)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (Próximo hito solo en básica)
+  * AethonMod/Content/Weapons/TestStaff.cs (NUEVO — arma de prueba)
+  * AethonMod/Content/Weapons/TestStaff.png (NUEVO — sprite 28x30)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader. Probar:
+  1. Grimorio: vista básica tiene 'Próximo hito', vista completa NO
+  2. TestStaff: click izq lanza 1 proyectil exacto, click der invoca 1 minion
