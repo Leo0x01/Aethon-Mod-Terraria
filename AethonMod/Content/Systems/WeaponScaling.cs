@@ -205,14 +205,14 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  DAÑO EN ÁREA DEL BOLT (cada 5 niveles, tope 20px)
+        //  DAÑO EN ÁREA DEL BOLT (+1px por nivel, tope 100px)
         // ================================================================
 
-        /// <summary>+1px radio de daño en área cada 5 niveles (tope 20px).</summary>
+        /// <summary>+1px radio de daño en área por nivel (tope 100px).</summary>
         public static int BoltAreaDamage(int level)
         {
-            int area = level / 5;
-            if (area > 20) area = 20;
+            int area = level;
+            if (area > 100) area = 100;
             return area;
         }
 

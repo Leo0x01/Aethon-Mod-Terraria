@@ -34,16 +34,26 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            // AURA: brillo dorado pulsante que ilumina 5 tiles a la redonda
-            float pulse = 0.7f + 0.3f * (float)System.Math.Sin(Main.GameUpdateCount * 0.05f);
-            Lighting.AddLight(player.Center, new Vector3(1.0f * pulse, 0.8f * pulse, 0.3f * pulse));
-            // Partículas doradas sutiles alrededor del jugador
-            if (Main.rand.NextBool(8))
+            // v5.32: Brillo MUY tenue (no ilumina tiles, solo efecto visual cercano)
+            float pulse = 0.3f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.05f);
+            Lighting.AddLight(player.Center, new Vector3(0.3f * pulse, 0.25f * pulse, 0.1f * pulse));
+
+            // v5.32: Más partículas doradas (1/4 en vez de 1/8)
+            if (Main.rand.NextBool(4))
             {
                 Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
-                    Main.rand.NextFloat(-30, 30), Main.rand.NextFloat(-40, 0)),
-                    DustID.GoldFlame, new Vector2(0, -0.5f), 100,
-                    new Color(255, 217, 61), 0.5f);
+                    Main.rand.NextFloat(-25, 25), Main.rand.NextFloat(-30, 10)),
+                    DustID.GoldFlame, new Vector2(0, -0.8f), 100,
+                    new Color(255, 217, 61), 0.4f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
+            // Partícula cian ocasional
+            if (Main.rand.NextBool(12))
+            {
+                Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
+                    Main.rand.NextFloat(-20, 20), Main.rand.NextFloat(-30, 10)),
+                    DustID.BlueTorch, new Vector2(0, -0.6f), 150,
+                    new Color(0, 255, 255), 0.3f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
         }
@@ -368,6 +378,71 @@ namespace AethonMod.Content.Weapons
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FF5555:═══ ÁREA: 60px ═══]"));
             tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Nightglow con daño en área 60px]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Radio ampliado (casi 4 tiles)]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
+
+    // === 8. RAYOS CÓSMICOS DESDE EL SUELO ===
+    // Rayos dorados muy pequeños que suben desde el suelo hacia el jugador.
+    public class TestRays : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true;
+            Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 0; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest;
+            Item.UseSound = SoundID.Item8;
+        }
+        public override void HoldItem(Player player)
+        {
+            // v5.32: Rayos dorados que suben desde el suelo hacia el jugador
+            // Usamos DustID.GoldFlame con velocidad hacia arriba
+            if (Main.rand.NextBool(3))
+            {
+                // Posición aleatoria en el suelo, cerca del jugador
+                Vector2 spawnPos = new Vector2(
+                    player.Center.X + Main.rand.NextFloat(-40, 40),
+                    player.Center.Y + Main.rand.NextFloat(30, 50)); // abajo del jugador
+
+                // Rayo que sube rápido
+                Dust d = Dust.NewDustPerfect(spawnPos,
+                    DustID.GoldFlame,
+                    new Vector2(0, -2.5f), // sube rápido
+                    100, new Color(255, 217, 61), 0.3f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+            // Rayo cian ocasional
+            if (Main.rand.NextBool(8))
+            {
+                Vector2 spawnPos = new Vector2(
+                    player.Center.X + Main.rand.NextFloat(-30, 30),
+                    player.Center.Y + Main.rand.NextFloat(30, 50));
+                Dust d = Dust.NewDustPerfect(spawnPos,
+                    DustID.BlueTorch,
+                    new Vector2(0, -3f),
+                    150, new Color(0, 255, 255), 0.25f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+            // Brillo muy tenue
+            Lighting.AddLight(player.Center, new Vector3(0.2f, 0.15f, 0.05f));
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ RAYOS CÓSMICOS ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Rayos dorados subiendo desde el suelo]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

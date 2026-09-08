@@ -54,6 +54,46 @@ namespace AethonMod.Content.Globals
                 }
             }
 
+            // === v5.32: PARTÍCULAS DE ESTRELLAS PARA PROYECTILES TINTADOS ===
+            // ai[1] == 1001 (dorado), 1002 (cian), 1003 (magenta)
+            // Agrega partículas de estrellas con el color del tinte + glow
+            if (projectile.ai[1] >= 1001 && projectile.ai[1] <= 1003)
+            {
+                Color starColor;
+                int dustType;
+                switch ((int)projectile.ai[1])
+                {
+                    case 1001: // Dorado
+                        starColor = new Color(255, 217, 61);
+                        dustType = DustID.Enchanted_Gold;
+                        break;
+                    case 1002: // Cian
+                        starColor = new Color(0, 255, 255);
+                        dustType = DustID.Enchanted_Pink; // usa pink para forma de estrella
+                        break;
+                    case 1003: // Magenta
+                        starColor = new Color(255, 0, 255);
+                        dustType = DustID.Enchanted_Pink;
+                        break;
+                    default:
+                        return;
+                }
+
+                // Estrella con color del tinte cada frame
+                Dust star = Dust.NewDustPerfect(projectile.Center, dustType,
+                    -projectile.velocity * 0.03f + new Vector2(
+                        Main.rand.NextFloat(-1f, 1f),
+                        Main.rand.NextFloat(-1f, 1f)),
+                    150, starColor, 0.7f);
+                star.noGravity = true; star.fadeIn = 0f;
+
+                // Glow del color del tinte
+                Lighting.AddLight(projectile.Center, new Vector3(
+                    starColor.R / 255f * 0.5f,
+                    starColor.G / 255f * 0.5f,
+                    starColor.B / 255f * 0.5f));
+            }
+
             // === HALO DEL MINION ===
             // ai[0] == 1 en CosmicOrbMinion: anillo dorado girando
             if (projectile.type == ModContent.ProjectileType<Projectiles.CosmicOrbMinion>() &&

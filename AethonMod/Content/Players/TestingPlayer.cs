@@ -51,6 +51,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.TestColorMagenta>(), 1); // color magenta
             GiveItem(ModContent.ItemType<Weapons.TestArea20>(), 1); // área 20px
             GiveItem(ModContent.ItemType<Weapons.TestArea60>(), 1); // área 60px
+            GiveItem(ModContent.ItemType<Weapons.TestRays>(), 1); // rayos cósmicos desde el suelo
         }
 
         /// <summary>
