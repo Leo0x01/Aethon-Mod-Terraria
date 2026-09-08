@@ -5482,3 +5482,62 @@ Stage Summary:
 - **Version**: 5.14 → 5.15
 - **Siguiente paso usuario**: descargar ZIP y probar Grimorio vista completa
 - **Pendiente**: migrar lógica anti-doble del TestStaff al Grimorio (usuario confirmó que funciona)
+
+---
+Task ID: V5.16-MIGRAR-ANTI-DOBLE-CON-REUSEDELAY
+Agent: main (Z.ai Code)
+Task: Migrar lógica anti-doble del TestStaff (que funciona) al Grimorio con cuidado
+
+Work Log:
+- Usuario confirmo: 'el TestStaff funciona perfectamente bien'
+- Usuario solicito: 'pasa la logica al grimorio, ten cuidado con lo que tocas'
+- Usuario solicito: 'antes de hacerlo has un save de esta version que esta perfecta'
+
+1. SAVE DE VERSION ESTABLE (antes de cualquier cambio):
+   - Tag: stable-v5.15 (pushed a GitHub)
+   - Rama backup: stable-v5.15-backup (pushed a GitHub)
+   - URL tag: https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/stable-v5.15
+
+2. ANÁLISIS DE DIFERENCIAS:
+   Comparé SetDefaults del TestStaff (funciona) vs Grimorio (no funciona):
+   - TestStaff: useStyle=Swing, autoReuse=true, reuseDelay=10
+   - Grimorio: useStyle=HoldUp, autoReuse=true, SIN reuseDelay
+   
+   El Grimorio ya tenia (de v5.10):
+   - Anti-doble con _lastShootFrame (uint)
+   - return false en Shoot
+   - shoot=931
+   
+   Pero le faltaba: Item.reuseDelay = 10
+
+3. CAMBIO APLICADO (SOLO 1 LÍNEA):
+   GrimoireEternal.cs línea 63:
+   + Item.reuseDelay = 10; // v5.16: cooldown forzado (migrado del TestStaff que funciona)
+   
+   NO se toco nada mas:
+   - TestStaff.cs: SIN CAMBIOS
+   - TooltipToggleItem.cs: SIN CAMBIOS
+   - CosmicOrbMinion.cs: SIN CAMBIOS
+   - CosmicProjectileFX.cs: SIN CAMBIOS
+   - ModifyTooltips: SIN CAMBIOS
+   - WeaponScaling.cs: SIN CAMBIOS
+   - ShardLevelItem.cs: SIN CAMBIOS
+
+Version bump: 5.15 → 5.16
+
+- Commit ddcb308: 2 files changed, 2 insertions(+), 1 deletion(-)
+- Push exitoso: a4c59c2..ddcb308 main -> main
+
+Stage Summary:
+- **Commit pushed**: ddcb308
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/ddcb308
+- **Version**: 5.15 → 5.16
+- **Archivos modificados (2)**:
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (+1 línea: reuseDelay=10)
+  * AethonMod/build.txt (version 5.16)
+- **Estado estable previo**: stable-v5.15 (tag + rama backup en GitHub)
+- **Siguiente paso usuario**: descargar ZIP y probar Grimorio:
+  1. Click izq → 1 proyectil exacto (+ extras por nivel)
+  2. Click der → 1 minion exacto
+  3. Mantener click → dispara continuo
+  4. Vista básica y completa del tooltip siguen perfectas
