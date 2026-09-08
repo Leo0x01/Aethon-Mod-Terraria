@@ -41,7 +41,8 @@ namespace AethonMod.Content.Weapons
         private static uint _lastFireFrame = 0;
         private static uint _lastMinionFrame = 0;
         private static int _shootCallCount = 0; // v5.20: debug counter
-        private const uint FIRE_COOLDOWN = 15; // v5.21: mínimo 15 frames entre disparos (0.25 seg)
+        private const uint FIRE_COOLDOWN = 25; // v5.22: mínimo 25 frames entre disparos (0.42 seg)
+                                               // 25 > 21 (la diferencia entre los 2 Shoots del doble)
 
         // OnCraft eliminado: el evento cinematográfico (LevelUpEventSystem) fue
         // removido por request del usuario. El crafteo del Grimorio ya no produce
@@ -149,17 +150,7 @@ namespace AethonMod.Content.Weapons
 
         public override bool AltFunctionUse(Player player) => true;
 
-        /// <summary>
-        /// v5.2: Click derecho en el inventario (no en combate) alterna entre
-        /// tooltip básico y tooltip completo. Como la bolsa de vacío.
-        /// Solo funciona cuando el item está en el inventario (no equipado en uso).
-        /// </summary>
-        public override bool? UseItem(Player player)
-        {
-            // UseItem se llama cuando se usa el item. No interferimos aquí.
-            return null;
-        }
-
+        // v5.22: Eliminado UseItem override (el TestStaff no lo tiene y funciona)
         // v5.4: Eliminado CanRightClick() y RightClick() porque CanRightClick=true
         // hacia que tModLoader interpretara el click derecho como 'consumir item'
         // (como una poción), haciendo que el Grimorio desapareciera del inventario.
