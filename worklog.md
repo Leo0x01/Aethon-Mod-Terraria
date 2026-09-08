@@ -5075,3 +5075,51 @@ Stage Summary:
   1. Click derecho en el Grimorio → NO muestra mensaje spam (solo sonido)
   2. Buscar el SeerOrb en el inventario (orbe purpura) → click derecho
      alterna entre vista basica y completa
+
+---
+Task ID: V5.7-MIGRAR-PATRON-SEERORB-A-GRIMORIO
+Agent: main (Z.ai Code)
+Task: Migrar el patrón del toggle del SeerOrb (que funciona) al Grimorio
+
+Work Log:
+- Usuario confirmo: 'como puedes ver en las dos imagenes, el nuevo item de prueba,
+  seerorb funciona perfectamente'
+- Imagenes mostraban el SeerOrb con vista basica Y vista completa funcionando
+- Decision: migrar ese mismo patrón (flag estático) al Grimorio
+
+Acciones realizadas (3 archivos modificados):
+
+1. TooltipToggleItem.cs REESCRITO:
+   - Usa flag ESTÁTICO 'ShowExtendedTooltip' (igual que SeerOrbToggle)
+   - NO modifica ShardLevelItem.ShowExtendedTooltip (que era por-item)
+   - NO toca player.inventory → no corrompe el estado del jugador
+   - Agregado guard: if (Main.LocalPlayer == null) return;
+     para evitar NullReferenceException en pantalla de selección
+
+2. GrimoireEternal.cs ModifyTooltips:
+   - Cambiado 'if (sl.ShowExtendedTooltip)' →
+     'if (Globals.TooltipToggleItem.ShowExtendedTooltip)'
+   - Ahora lee el flag estático en vez del flag por-item
+
+3. VERSION BUMP: 5.5 → 5.7
+
+DIFERENCIA CLAVE con v5.6 anterior (que rompio el mod con error 134124):
+- v5.6 anterior modificaba player.inventory[i] dentro de ModifyTooltips
+  → corrompia el estado del jugador → error 134124 + 'Error al cargar'
+- v5.7 usa flag estático que NO toca el inventario → seguro
+
+- Commit 2d60d4b: 3 files changed, 17 insertions(+), 20 deletions(-)
+- Push exitoso: 026bf15..2d60d4b main -> main
+
+Stage Summary:
+- **Commit pushed**: 2d60d4b
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/2d60d4b
+- **Version**: 5.5 → 5.7
+- **Archivos en el commit (3)**:
+  * AethonMod/Content/Globals/TooltipToggleItem.cs (reescribo con flag estático)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (lee flag estático)
+  * AethonMod/build.txt (version 5.7)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader. Probar click derecho en el Grimorio del
+  inventario → deberia alternar entre vista basica y completa SIN error 134124.
