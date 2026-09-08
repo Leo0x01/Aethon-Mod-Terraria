@@ -58,6 +58,14 @@ namespace AethonMod.Content.Weapons
             damage *= 1.1f; // +10% daño
         }
 
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "Test", "[c/FF5555:═══ TESTSTAFF A ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "Desc", "[c/FF5555:Override: ModifyWeaponDamage]"));
+            tooltips.Add(new TooltipLine(Mod, "Info", "[c/78788C:Si hace 2 disparos por click, este es el culpable]"));
+            tooltips.Add(new TooltipLine(Mod, "Info2", "[c/78788C:Mensaje debug: [A] en rojo]"));
+        }
+
         public override bool AltFunctionUse(Player player) => true;
 
         public override bool CanUseItem(Player player)
@@ -116,6 +124,14 @@ namespace AethonMod.Content.Weapons
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
         {
             knockback *= 1.2f; // +20% knockback
+        }
+
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "Test", "[c/55FF55:═══ TESTSTAFF B ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "Desc", "[c/55FF55:Override: ModifyWeaponKnockback]"));
+            tooltips.Add(new TooltipLine(Mod, "Info", "[c/78788C:Si hace 2 disparos por click, este es el culpable]"));
+            tooltips.Add(new TooltipLine(Mod, "Info2", "[c/78788C:Mensaje debug: [B] en verde]"));
         }
 
         public override bool AltFunctionUse(Player player) => true;
@@ -178,6 +194,14 @@ namespace AethonMod.Content.Weapons
             Item.mana = 3; // cambia mana dinámicamente
         }
 
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "Test", "[c/55AAFF:═══ TESTSTAFF C ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "Desc", "[c/55AAFF:Override: ModifyManaCost]"));
+            tooltips.Add(new TooltipLine(Mod, "Info", "[c/78788C:Si hace 2 disparos por click, este es el culpable]"));
+            tooltips.Add(new TooltipLine(Mod, "Info2", "[c/78788C:Mensaje debug: [C] en azul]"));
+        }
+
         public override bool AltFunctionUse(Player player) => true;
 
         public override bool CanUseItem(Player player)
@@ -238,6 +262,14 @@ namespace AethonMod.Content.Weapons
         public override float UseTimeMultiplier(Player player)
         {
             return 0.997f; // simula nivel 1 del Grimorio
+        }
+
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "Test", "[c/FFFF55:═══ TESTSTAFF D ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "Desc", "[c/FFFF55:Override: UseTimeMultiplier (SOSPECHOSO)]"));
+            tooltips.Add(new TooltipLine(Mod, "Info", "[c/78788C:Retorna 0.997 (no entero) — puede causar doble Shoot]"));
+            tooltips.Add(new TooltipLine(Mod, "Info2", "[c/78788C:Mensaje debug: [D] en amarillo]"));
         }
 
         public override bool AltFunctionUse(Player player) => true;
