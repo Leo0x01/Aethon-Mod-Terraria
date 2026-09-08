@@ -4809,3 +4809,68 @@ Stage Summary:
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader. Deberia poder mantener click para disparar,
   ver tooltip claro con secciones, y ver proyectil cosmico con estela dorada/cian/magenta.
+
+---
+Task ID: V5.2-3-CORRECCIONES
+Agent: main (Z.ai Code)
+Task: Implementar 3 correcciones solicitadas por el usuario (órbita minions, tooltip 2 modos, estela corta) con bump de versión
+
+Work Log:
+- Usuario reporto 3 problemas con imagenes:
+  1. Minions se quedan en circulo muy grande orbitando al jugador (30+ minions muy separados)
+  2. Tooltip del Grimorio muy grande — quiere 2 ventanas (basico/completo) como bolsa de vacio
+  3. Estela cosmica magenta dura demasiado en pantalla
+
+Acciones realizadas (5 archivos modificados):
+
+1. ORBITA DE MINIONS COMPACTA (CosmicOrbMinion.cs):
+   - Antes: orbitRadius = 45f + minionPos * 22f → con 30 minions = 705px (enorme)
+   - Ahora: orbitRadius = 30f + Math.Min(minionPos * 4f, 50f) → tope 80px
+   - Separacion angular uniforme: angleOffset = orbitAngle + minionPos * TwoPi / 8
+   - Movimiento mas responsivo: lerp 0.2 (antes 0.1), velocidad 0.3 (antes 0.08)
+   - Rotacion mejorada: gira sobre si mismo (0.06f) + rota hacia direccion de movimiento
+   - Particulas idle mas frecuentes (1/5 en vez de 1/8) + particula cian ocasional (1/12)
+
+2. TOOLTIP CON 2 MODOS (GrimoireEternal.cs + ShardLevelItem.cs):
+   - Nuevo flag ShowExtendedTooltip en ShardLevelItem (default false = basico)
+   - RightClick override en GrimoireEternal alterna el flag:
+     * Click derecho en inventario → alternar basico/completo
+     * Mensaje 'Grimorio: vista completa/basica' + sonido MenuOpen
+   - ModifyTooltips rediseñado:
+     * MODO BASICO (default): solo seccion PROGRESION
+       - Nivel + barra XP 20 chars
+       - Proximo hito (recompensas en lista vertical con bullet points, no en linea)
+       - Indicador 'Click der para vista completa'
+     * MODO COMPLETO (click derecho): todas las secciones
+       - DAÑO + RECURSOS + PROYECTIL + ORBE COSMICO + BONUS
+       - Indicador 'Click der para vista basica'
+   - Próximo hito arreglado: recompensas una debajo de otra con '•' (no en linea)
+
+3. ESTELA COSMICA DURACION CORTA (CosmicProjectileFX.cs):
+   - Usuario reporto que el rastro magenta se quedaba en pantalla
+   - Fix: cada dust configurado con:
+     * noGravity = true (no cae al suelo, se queda flotando)
+     * fadeIn = 0 (no se desvanece lentamente)
+     * alpha aumentado: 150-200 (antes 80-100) → desaparece mas rapido
+     * scale reducido: 0.5-0.7 (antes 0.8-0.9) → particulas mas pequenas
+   - Magenta (RainbowTorch) era el mas problematico — ahora alpha=200 + scale=0.5
+
+4. VERSION BUMP:
+   - build.txt: version = 5.1 → version = 5.2
+
+- Commit 26d4a18: 5 files changed, 201 insertions(+), 112 deletions(-).
+- Push exitoso: f3a411b..26d4a18 main -> main.
+
+Stage Summary:
+- **Commit pushed**: 26d4a18
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/26d4a18
+- **Version**: 5.1 → 5.2
+- **Archivos en el commit (5)**:
+  * AethonMod/Content/Globals/CosmicProjectileFX.cs (estela corta)
+  * AethonMod/Content/Globals/ShardLevelItem.cs (flag ShowExtendedTooltip)
+  * AethonMod/Content/Projectiles/CosmicOrbMinion.cs (órbita compacta)
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (RightClick + tooltip 2 modos)
+  * AethonMod/build.txt (version 5.2)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader.
