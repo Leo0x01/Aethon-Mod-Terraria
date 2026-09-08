@@ -87,86 +87,102 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // === EXPLOSIÓN CÓSMICA al impactar ===
-            // Paleta del Grimorio: dorado, cian, magenta, índigo
+            // === EXPLOSIÓN CÓSMICA al impactar (v5.3: duración CORTA) ===
+            // Mismo fix que la estela: noGravity + fadeIn=0 + alpha alto + scale pequeño
 
             // Núcleo dorado (supernova)
             for (int i = 0; i < 12; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.GoldFlame,
+                Dust d = Dust.NewDustPerfect(target.Center, DustID.GoldFlame,
                     new Vector2(
                         Main.rand.NextFloat(-5f, 5f),
                         Main.rand.NextFloat(-5f, 5f)),
-                    100, new Color(255, 217, 61), 1.3f);
+                    180, new Color(255, 217, 61), 0.9f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
             // Destellos cian (estrella guía)
             for (int i = 0; i < 10; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.BlueTorch,
+                Dust d = Dust.NewDustPerfect(target.Center, DustID.BlueTorch,
                     new Vector2(
                         Main.rand.NextFloat(-4f, 4f),
                         Main.rand.NextFloat(-4f, 4f)),
-                    150, new Color(0, 255, 255), 1.1f);
+                    200, new Color(0, 255, 255), 0.8f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
-            // Fragmentos magenta (gemas)
+            // Fragmentos magenta (gemas) — alpha alto + scale pequeño = duración corta
             for (int i = 0; i < 8; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.RainbowTorch,
+                Dust d = Dust.NewDustPerfect(target.Center, DustID.RainbowTorch,
                     new Vector2(
                         Main.rand.NextFloat(-4f, 4f),
                         Main.rand.NextFloat(-4f, 4f)),
-                    200, new Color(255, 0, 102), 1.0f);
+                    220, new Color(255, 0, 102), 0.6f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
             // Halo índigo (fondo del portal)
             for (int i = 0; i < 6; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.PurpleTorch,
+                Dust d = Dust.NewDustPerfect(target.Center, DustID.PurpleTorch,
                     new Vector2(
                         Main.rand.NextFloat(-3f, 3f),
                         Main.rand.NextFloat(-3f, 3f)),
-                    100, new Color(75, 0, 130), 0.9f);
+                    150, new Color(75, 0, 130), 0.6f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
             // Destello blanco central (supernova)
             for (int i = 0; i < 5; i++)
             {
-                Dust.NewDustPerfect(target.Center, DustID.Enchanted_Gold,
+                Dust d = Dust.NewDustPerfect(target.Center, DustID.Enchanted_Gold,
                     new Vector2(
                         Main.rand.NextFloat(-2f, 2f),
                         Main.rand.NextFloat(-2f, 2f)),
-                    255, default, 0.8f);
+                    255, default, 0.6f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
         }
 
         public override void Kill(Projectile projectile, int timeLeft)
         {
-            // Explosión cósmica al morir (sin impacto con enemigo)
+            // Explosión cósmica al morir (sin impacto con enemigo) — v5.3: duración corta
             for (int i = 0; i < 8; i++)
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.GoldFlame,
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.GoldFlame,
                     new Vector2(
                         Main.rand.NextFloat(-3f, 3f),
                         Main.rand.NextFloat(-3f, 3f)),
-                    100, new Color(255, 217, 61), 0.9f);
+                    180, new Color(255, 217, 61), 0.7f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
             for (int i = 0; i < 6; i++)
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.BlueTorch,
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.BlueTorch,
                     new Vector2(
                         Main.rand.NextFloat(-2f, 2f),
                         Main.rand.NextFloat(-2f, 2f)),
-                    150, new Color(0, 255, 255), 0.8f);
+                    200, new Color(0, 255, 255), 0.6f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
             for (int i = 0; i < 4; i++)
             {
-                Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
                     new Vector2(
                         Main.rand.NextFloat(-2f, 2f),
                         Main.rand.NextFloat(-2f, 2f)),
-                    200, new Color(255, 0, 102), 0.8f);
+                    220, new Color(255, 0, 102), 0.5f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
         }
     }

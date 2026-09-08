@@ -146,6 +146,16 @@ namespace AethonMod.Content.Weapons
         }
 
         /// <summary>
+        /// v5.3: Permite que RightClick se llame cuando se hace click derecho
+        /// en el item DENTRO del inventario. Sin esto, el click derecho solo
+        /// funcionaría en el mundo (no en el inventario).
+        /// </summary>
+        public override bool CanRightClick()
+        {
+            return true;
+        }
+
+        /// <summary>
         /// v5.2: RightClick en inventario alterna la vista del tooltip.
         /// </summary>
         public override void RightClick(Player player)
