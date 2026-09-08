@@ -40,7 +40,7 @@ namespace AethonMod.Content.Weapons
             Item.value = Item.buyPrice(0, 0, 50, 0);
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.autoReuse = false; // v5.12: sin autoReuse para ver mejor si hay doble
+            Item.autoReuse = true; // v5.13: permite mantener click para disparar continuo
             Item.shoot = 931; // Nightglow (mismo que Grimorio)
             Item.shootSpeed = 12f;
             Item.mana = 2;
@@ -157,7 +157,7 @@ namespace AethonMod.Content.Weapons
             tooltips.Add(new TooltipLine(Mod, "Desc3",
                 "[c/B388FF:Click der: 1 minion (anti-doble con frame count)]"));
             tooltips.Add(new TooltipLine(Mod, "Desc4",
-                "[c/78788C:useStyle=Swing, reuseDelay=10, autoReuse=false]"));
+                "[c/78788C:useStyle=Swing, reuseDelay=10, autoReuse=true]"));
             tooltips.Add(new TooltipLine(Mod, "Status",
                 $"[c/FFD700:Minions activos: {minionCount}/{(Main.LocalPlayer != null ? Main.LocalPlayer.maxMinions : 0)}]"));
             tooltips.Add(new TooltipLine(Mod, "Cost",
