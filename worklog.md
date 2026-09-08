@@ -5628,3 +5628,45 @@ Stage Summary:
   - Click izq → 1 proyectil (no doble)
   - Click der → 1 minion (no doble)
   - Animación HoldUp restaurada
+
+---
+Task ID: V5.19-DEBUG-PROYECTILES
+Agent: main (Z.ai Code)
+Task: Agregar mensaje de debug para diagnosticar el doble disparo del Grimorio
+
+Work Log:
+- Usuario reporto: 'bueno, sigue teniendo disparo doble, que raro, porque sera eso'
+- Hice diff exacto entre TestStaff (funciona) y Grimorio (no funciona)
+- Diferencia encontrada: el Grimorio tiene un bloque de bolts extra que el
+  TestStaff NO tiene:
+    int extra = WeaponScaling.ExtraProjectiles(level);  // level/3
+    for (int i = 0; i < extra; i++) { Projectile.NewProjectile(...) }
+
+- Hipótesis: si el Grimorio está a nivel alto (ej: nivel 21), extra = 21/3 = 7
+  → 1 + 7 = 8 proyectiles por click (parece 'doble' pero son muchos)
+
+- Agregado mensaje de debug al final del Shoot del click izquierdo:
+    [DEBUG] Grimorio nivel X: 1 + Y = Z proyectiles, frame N
+
+- Esto nos dirá exactamente:
+  1. A qué nivel está el Grimorio
+  2. Cuántos proyectiles dice el debug que se crean
+  3. Si el número del debug coincide con lo que ve en pantalla
+
+Posibles escenarios:
+A) Debug dice '1 + 0 = 1' pero el usuario ve 2 → el doble viene de tModLoader
+   (Shoot se llama 2 veces)
+B) Debug dice '1 + 7 = 8' → no es doble, son los extras por nivel
+C) Debug aparece 2 veces en el chat por click → Shoot se llama 2 veces
+
+Version bump: 5.18 → 5.19
+
+- Commit 77e63bd: 2 files changed, 7 insertions(+), 1 deletion(-)
+- Push exitoso: ed3d8de..77e63bd main -> main
+
+Stage Summary:
+- **Commit pushed**: 77e63bd
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/77e63bd
+- **Version**: 5.18 → 5.19
+- **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 1 click con el
+  Grimorio y decirme qué dice el mensaje [DEBUG] en el chat.
