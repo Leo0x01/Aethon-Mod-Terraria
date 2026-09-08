@@ -256,6 +256,26 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             if (sl == null) return;
 
+            // === v5.14: En vista COMPLETA, ocultar líneas vanilla (básicas) ===
+            // Las líneas vanilla (Damage, CritChance, Knockback, UseMana, Tooltip, etc.)
+            // son info básica que ya no se necesita en la vista completa porque
+            // tenemos secciones detalladas (DAÑO, RECURSOS, etc.)
+            if (Globals.TooltipToggleItem.ShowExtendedTooltip)
+            {
+                for (int i = tooltips.Count - 1; i >= 0; i--)
+                {
+                    string name = tooltips[i].Name ?? "";
+                    // Ocultar TODAS las líneas vanilla excepto el nombre del item
+                    if (name == "Damage" || name == "CritChance" || name == "Speed" ||
+                        name == "Knockback" || name == "UseMana" || name == "Tooltip" ||
+                        name == "BestiaryNotes" || name == "Knockback" ||
+                        name == "ManaCost" || name == "ItemLevel")
+                    {
+                        tooltips.RemoveAt(i);
+                    }
+                }
+            }
+
             // === v5.11: SummonDamage SOLO en vista básica (no en completa) ===
             int summonDmg = (int)(Item.damage * (1f + sl.Level * WeaponScaling.SummonDamagePerLevel));
 
