@@ -5708,3 +5708,46 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP, recompilar, salir del inventario,
   hacer 1 click con el Grimorio y mirar el chat. Decirme qué mensajes [DEBUG]
   aparecen (cuántos, de qué color, qué dicen).
+
+---
+Task ID: V5.21-COOLDOWN-15-FRAMES
+Agent: main (Z.ai Code)
+Task: Cambiar anti-doble a cooldown de 15 frames (no mismo frame exacto)
+
+Work Log:
+- Diagnóstico del debug v5.20:
+  - Usuario hizo 13 clicks
+  - Debug mostró Shoot #21 al #26 (6 disparos)
+  - Cada Shoot creó 1 proyectil (1+0=1) ✅
+  - PERO cada Shoot ocurrió en frame DIFERENTE (1271, 1274, 1311, etc.)
+  - NO aparecieron mensajes BLOQUEADO
+  - Conclusión: tModLoader llama Shoot 2 veces por click en frames
+    consecutivos diferentes (no en el mismo frame)
+
+CAUSA RAÍZ:
+El anti-doble anterior comparaba si era el MISMO frame:
+  if (currentFrame == _lastFireFrame) return false;
+Como tModLoader llama Shoot en frames diferentes (1271, 1274),
+el anti-doble nunca bloqueaba el segundo disparo.
+
+FIX v5.21:
+Cambiar a cooldown de N frames (no mismo frame exacto):
+  if (currentFrame - _lastFireFrame < FIRE_COOLDOWN) return false;
+FIRE_COOLDOWN = 15 (mínimo 15 frames entre disparos = 0.25 seg)
+
+Ahora si tModLoader llama Shoot en frame 1271 y otra vez en frame 1274:
+- 1274 - 1271 = 3 < 15 → BLOQUEADO (segundo disparo bloqueado)
+- El usuario verá 1 proyectil por click + 1 mensaje BLOQUEADO rojo
+
+Version bump: 5.20 → 5.21
+
+- Commit 07ea0a0: 2 files changed, 8 insertions(+), 3 deletions(-)
+- Push exitoso: 6b1a345..07ea0a0 main -> main
+
+Stage Summary:
+- **Commit pushed**: 07ea0a0
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/07ea0a0
+- **Version**: 5.20 → 5.21
+- **Siguiente paso usuario**: descargar ZIP, recompilar, hacer 1 click y mirar
+  el chat. Debería ver 1 mensaje dorado (disparo) + 1 mensaje rojo (BLOQUEADO).
+  Y solo 1 proyectil en pantalla (no 2).
