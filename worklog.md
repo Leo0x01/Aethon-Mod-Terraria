@@ -5251,3 +5251,53 @@ Stage Summary:
 - **Siguiente paso usuario**: descargar ZIP nuevo de
   https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
   y recompilar en tModLoader.
+
+---
+Task ID: V5.10-MIGRAR-ANTI-DOBLE-A-GRIMORIO
+Agent: main (Z.ai Code)
+Task: Migrar la lógica anti-doble del TestStaff (que funciona) al Grimorio
+
+Work Log:
+- Usuario confirmo: 'la prueba del baston funciono y solo lanza 1 proyectil'
+- Usuario solicito: 'entonces adelante con la migracion'
+
+Cambios realizados en GrimoireEternal.cs:
+
+1. AGREGADOS flags anti-doble (mismos que TestStaff):
+   - private static uint _lastShootFrame = 0;
+   - private static uint _lastMinionFrame = 0;
+
+2. Shoot modificado con ANTI-DOBLE:
+   - Al inicio: verifica si ya procesamos Shoot en este frame
+     if (currentFrame == _lastShootFrame) return false;
+   - Click derecho (minion): anti-doble específico con _lastMinionFrame
+   - Click izquierdo (bolt): anti-doble general con _lastShootFrame
+
+3. CAMBIO CLAVE en click izquierdo:
+   - ANTES: return true → tModLoader disparaba 1 proyectil + nosotros creábamos extras
+     (esto causaba el doble: 1 de tModLoader + 1 nuestro)
+   - AHORA: return false + creamos TODOS los proyectiles nosotros
+     (1 principal + N extras en abanico)
+   - Esto garantiza exactamente 1+N proyectiles por click (no 2+N)
+
+Problema resuelto:
+- Doble proyectil por click (causado por return true + Projectile.NewProjectile)
+- Doble minion por click (causado por Shoot procesándose 2 veces en el frame)
+
+Version bump: 5.9 → 5.10
+
+- Commit d58e7e5: 2 files changed, 36 insertions(+), 6 deletions(-)
+- Push exitoso: 36bc051..d58e7e5 main -> main
+
+Stage Summary:
+- **Commit pushed**: d58e7e5
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/d58e7e5
+- **Version**: 5.9 → 5.10
+- **Archivos en el commit (2)**:
+  * AethonMod/Content/Weapons/GrimoireEternal.cs (anti-doble + return false)
+  * AethonMod/build.txt (version 5.10)
+- **Siguiente paso usuario**: descargar ZIP nuevo de
+  https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/heads/main.zip
+  y recompilar en tModLoader. Probar:
+  1. Click izquierdo → 1 proyectil exacto (+ extras por nivel)
+  2. Click derecho → 1 minion exacto (sin doble invocación ni doble mana)
