@@ -118,11 +118,13 @@ namespace AethonMod.Content.Globals
                                 if (!npc.active || npc.whoAmI == target.whoAmI) continue;
                                 if (npc.friendly || npc.townNPC) continue;
                                 if (!npc.CanBeChasedBy()) continue;
+                                // v5.30: Check de inmunidad para no dañar NPCs ya golpeados
+                                if (npc.immune[projectile.owner] > 0) continue;
                                 float dist = Vector2.Distance(npc.Center, target.Center);
                                 if (dist < areaRadius)
                                 {
                                     npc.SimpleStrikeNPC(areaDamage, projectile.direction,
-                                        false, 0, DamageClass.Magic, false, 0, true);
+                                        false, 0, DamageClass.Magic, false, 0, false);
                                 }
                             }
                         }

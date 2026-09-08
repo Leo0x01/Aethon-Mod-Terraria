@@ -302,4 +302,74 @@ namespace AethonMod.Content.Weapons
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
+
+    // === 6. DAÑO EN ÁREA — RADIO 20 (estándar del Grimorio) ===
+    // Dispara Nightglow con daño en área de 20px (radio estándar del Grimorio).
+    public class TestArea20 : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 15; Item.DamageType = DamageClass.Magic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true;
+            Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 3; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest;
+            Item.UseSound = SoundID.Item8;
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            if (proj >= 0 && proj < Main.maxProjectiles)
+            {
+                Main.projectile[proj].ai[1] = 2001; // flag: daño en área radio 20
+            }
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFAA55:═══ ÁREA: 20px ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Nightglow con daño en área 20px]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Radio estándar del Grimorio (tope actual)]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
+
+    // === 7. DAÑO EN ÁREA — RADIO 60 (ampliado) ===
+    // Dispara Nightglow con daño en área de 60px (casi 4 tiles).
+    public class TestArea60 : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 15; Item.DamageType = DamageClass.Magic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true;
+            Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 3; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest;
+            Item.UseSound = SoundID.Item8;
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            if (proj >= 0 && proj < Main.maxProjectiles)
+            {
+                Main.projectile[proj].ai[1] = 2002; // flag: daño en área radio 60
+            }
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF5555:═══ ÁREA: 60px ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Nightglow con daño en área 60px]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Radio ampliado (casi 4 tiles)]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
 }

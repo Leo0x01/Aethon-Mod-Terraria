@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
 {
@@ -117,6 +118,61 @@ namespace AethonMod.Content.Globals
                 SpriteEffects.None, 0f);
 
             return false; // no dibujar default
+        }
+
+        /// <summary>
+        /// v5.30: Daño en área para las armas de prueba TestArea20 y TestArea60.
+        /// ai[1] == 2001: radio 20px (estándar del Grimorio)
+        /// ai[1] == 2002: radio 60px (ampliado, casi 4 tiles)
+        /// </summary>
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            // Solo procesar flags de daño en área (2001/2002)
+            if (projectile.ai[1] != 2001 && projectile.ai[1] != 2002) return;
+
+            int areaRadius = (int)projectile.ai[1] == 2001 ? 20 : 60;
+            int areaDamage = System.Math.Max(1, hit.Damage / 2); // 50% del daño
+
+            try
+            {
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.active || npc.whoAmI == target.whoAmI) continue;
+                    if (npc.friendly || npc.townNPC) continue;
+                    if (!npc.CanBeChasedBy()) continue;
+                    if (npc.immune[projectile.owner] > 0) continue;
+
+                    float dist = Vector2.Distance(npc.Center, target.Center);
+                    if (dist < areaRadius)
+                    {
+                        npc.SimpleStrikeNPC(areaDamage, projectile.direction,
+                            false, 0, DamageClass.Magic, false, 0, false);
+
+                        // Partículas visuales del daño en área
+                        for (int i = 0; i < 5; i++)
+                        {
+                            Dust d = Dust.NewDustPerfect(npc.Center, DustID.GoldFlame,
+                                new Vector2(Main.rand.NextFloat(-3, 3), Main.rand.NextFloat(-3, 3)),
+                                150, new Color(255, 217, 61), 0.7f);
+                            d.noGravity = true; d.fadeIn = 0f;
+                        }
+                    }
+                }
+
+                // Anillo visual del área de daño
+                for (int i = 0; i < 12; i++)
+                {
+                    float angle = (System.MathF.PI * 2 / 12) * i;
+                    Vector2 offset = new Vector2(
+                        (float)System.Math.Cos(angle) * areaRadius,
+                        (float)System.Math.Sin(angle) * areaRadius);
+                    Dust d = Dust.NewDustPerfect(target.Center + offset,
+                        DustID.BlueTorch, Vector2.Zero, 200,
+                        new Color(0, 255, 255), 0.6f);
+                    d.noGravity = true; d.fadeIn = 0f;
+                }
+            }
+            catch { }
         }
     }
 }

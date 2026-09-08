@@ -49,6 +49,8 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.TestColorGold>(), 1); // color dorado
             GiveItem(ModContent.ItemType<Weapons.TestColorCyan>(), 1); // color cian
             GiveItem(ModContent.ItemType<Weapons.TestColorMagenta>(), 1); // color magenta
+            GiveItem(ModContent.ItemType<Weapons.TestArea20>(), 1); // área 20px
+            GiveItem(ModContent.ItemType<Weapons.TestArea60>(), 1); // área 60px
         }
 
         /// <summary>
