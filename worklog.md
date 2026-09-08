@@ -5444,3 +5444,41 @@ Stage Summary:
 - **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/8f94ae0
 - **Version**: 5.13 → 5.14
 - **Siguiente paso usuario**: descargar ZIP y probar Grimorio vista completa
+
+---
+Task ID: V5.15-OCULTAR-TOOLTIPS-Y-MODIFIERS
+Agent: main (Z.ai Code)
+Task: Ocultar líneas de tooltip y modifier (Furioso, +18% daño, etc.) en vista completa
+
+Work Log:
+- Usuario confirmo: 'el TestStaff funciona perfectamente bien' (anti-doble funciona)
+- Usuario reporto: en la vista avanzada aparecen:
+  1. Líneas de tooltip del item ('Arma híbrida...', 'Click izq...')
+  2. Líneas de modifier/prefix ('+18% daño', '+15% velocidad' del 'Furioso')
+
+Causa raiz:
+- Las líneas de tooltip se llaman 'Tooltip0', 'Tooltip1', etc. (no solo 'Tooltip')
+  Mi filtro solo buscaba 'Tooltip' exacto, no 'Tooltip0'
+- Las líneas de modifier (PrefixDamage, PrefixSpeed, etc.) no estaban filtradas
+
+Fix aplicado: cambiado el filtro a StartsWith para cubrir todos los casos:
+- name.StartsWith("Tooltip")  → Tooltip0, Tooltip1, etc.
+- name.StartsWith("Prefix")   → PrefixDamage, PrefixSpeed, PrefixCrit, PrefixKnockback,
+                                 PrefixUseMana, PrefixShootSpeed, PrefixScale
+
+Ahora la vista completa solo muestra:
+- Nombre del item (con el modifier entre paréntesis, eso es parte del ItemName)
+- DAÑO, RECURSOS, PROYECTIL, ORBE CÓSMICO, BONUS
+- Click der para vista básica
+
+Version bump: 5.14 → 5.15
+
+- Commit a4c59c2: 2 files changed, 9 insertions(+), 5 deletions(-)
+- Push exitoso: 8f94ae0..a4c59c2 main -> main
+
+Stage Summary:
+- **Commit pushed**: a4c59c2
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/a4c59c2
+- **Version**: 5.14 → 5.15
+- **Siguiente paso usuario**: descargar ZIP y probar Grimorio vista completa
+- **Pendiente**: migrar lógica anti-doble del TestStaff al Grimorio (usuario confirmó que funciona)
