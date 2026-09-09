@@ -8,26 +8,22 @@ using AethonMod.Content.Weapons;
 namespace AethonMod.Content.UI
 {
     /// <summary>
-    /// AuraDrawLayer — PlayerDrawLayer que dibuja efectos de aura alrededor del
-    /// jugador cuando sostiene items de prueba.
+    /// AuraDrawLayer v5.43 — REESCRITO
     ///
-    /// ESTO ES LA SOLUCIÓN CORRECTA: PlayerDrawLayer se ejecuta durante el
-    /// RENDERIZADO, por lo que spriteBatch ESTÁ activo y se puede usar
-    /// additive blending.
+    /// Auras que SÍ funcionaban (mantenidas):
+    /// TestAura, TestRays, AuraBloom, AuraCosmic
     ///
-    /// HoldItem NO es un hook de renderizado → spriteBatch no está activo.
-    /// PreDraw de proyectiles SÍ es de renderizado → funciona.
-    /// PlayerDrawLayer SÍ es de renderizado → funciona.
+    /// Auras REESCRITAS con efectos completamente diferentes:
+    /// AuraShield: escudo con ShieldCyan + HexCyan rotando + glow doble
+    /// AuraSphere: esfera con 3 glows concéntricos + BeamCyan
+    /// AuraDivine: aura con rayos rotando (BeamCyan en 8 direcciones) + glow púrpura
     /// </summary>
     public class AuraDrawLayer : PlayerDrawLayer
     {
         public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.HeldItem);
 
         public override bool GetDefaultVisibility(PlayerDrawSet drawInfo)
-        {
-            // Siempre visible; el check del item se hace dentro de Draw
-            return true;
-        }
+        { return true; }
 
         protected override void Draw(ref PlayerDrawSet drawInfo)
         {
@@ -42,42 +38,63 @@ namespace AethonMod.Content.UI
             float t = Main.GameUpdateCount;
             int type = held.type;
 
-            // === TEST AURA — glow dorado pulsante ===
+            // === TEST AURA — MANTIENE: glow dorado pulsante ===
             if (type == ModContent.ItemType<TestAura>())
             {
                 float pulse = 0.5f + 0.1f * (float)System.Math.Sin(t * 0.05f);
                 DrawGlow("AethonMod/Content/Effects/GlowCircleGold", center, pulse, new Color(255, 217, 61, 80), 0f);
             }
-            // === TEST RAYS — glow cian tenue ===
+            // === TEST RAYS — MANTIENE: glow cian tenue ===
             else if (type == ModContent.ItemType<TestRays>())
             {
                 float pulse = 0.4f + 0.08f * (float)System.Math.Sin(t * 0.08f);
                 DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, pulse, new Color(0, 255, 255, 50), 0f);
             }
-            // === AURA SHIELD — escudo hexagonal cian ===
+            // === AURA SHIELD — REESCRITO: escudo + hexágono + 2 glows ===
             else if (type == ModContent.ItemType<AuraShield>())
             {
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.03f);
-                DrawGlow("AethonMod/Content/Effects/ShieldCyan", center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
-                DrawGlow("AethonMod/Content/Effects/HexCyan", center, 0.9f, new Color(0, 255, 255, 80), t * 0.02f);
-                DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, 0.5f * pulse, new Color(0, 255, 255, 60), 0f);
+                float pulse = 0.9f + 0.1f * (float)System.Math.Sin(t * 0.03f);
+                // Escudo principal
+                DrawGlow("AethonMod/Content/Effects/ShieldCyan", center, 1.0f * pulse, new Color(100, 200, 255, 120), 0f);
+                // Hexágono rotando
+                DrawGlow("AethonMod/Content/Effects/HexCyan", center, 1.1f * pulse, new Color(0, 255, 255, 100), t * 0.02f);
+                // Glow interior
+                DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, 0.6f * pulse, new Color(0, 255, 255, 80), 0f);
+                // Glow exterior blanco
+                DrawGlow("AethonMod/Content/Effects/GlowCircleWhite", center, 0.3f * pulse, new Color(255, 255, 255, 60), 0f);
             }
-            // === AURA SPHERE — esfera cian + núcleo blanco + rayo vertical ===
+            // === AURA SPHERE — REESCRITO: 3 glows concéntricos + beam ===
             else if (type == ModContent.ItemType<AuraSphere>())
             {
-                float pulse = 0.7f + 0.3f * (float)System.Math.Sin(t * 0.04f);
-                DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, 1.5f * pulse, new Color(0, 200, 255, 80), 0f);
-                DrawGlow("AethonMod/Content/Effects/GlowCircleWhite", center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
-                DrawGlow("AethonMod/Content/Effects/BeamCyan", center + new Vector2(0, -60), 1f, new Color(100, 200, 255, 100), 0f);
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.04f);
+                // Esfera exterior cian grande
+                DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, 1.8f * pulse, new Color(0, 200, 255, 60), 0f);
+                // Esfera media cian
+                DrawGlow("AethonMod/Content/Effects/GlowCircleCyan", center, 1.0f * pulse, new Color(0, 255, 255, 100), 0f);
+                // Núcleo blanco
+                DrawGlow("AethonMod/Content/Effects/GlowCircleWhite", center, 0.6f * pulse, new Color(255, 255, 255, 180), 0f);
+                // 3 rayos verticales BeamCyan
+                DrawGlow("AethonMod/Content/Effects/BeamCyan", center + new Vector2(0, -50), 1.2f, new Color(100, 200, 255, 120), 0f);
+                DrawGlow("AethonMod/Content/Effects/BeamCyan", center + new Vector2(-20, -40), 0.8f, new Color(0, 255, 255, 80), 0.1f);
+                DrawGlow("AethonMod/Content/Effects/BeamCyan", center + new Vector2(20, -40), 0.8f, new Color(0, 255, 255, 80), -0.1f);
             }
-            // === AURA DIVINE — púrpura + anillo girando ===
+            // === AURA DIVINE — REESCRITO: 8 rayos rotando + glow púrpura ===
             else if (type == ModContent.ItemType<AuraDivine>())
             {
-                float pulse = 0.6f + 0.4f * (float)System.Math.Sin(t * 0.02f);
-                DrawGlow("AethonMod/Content/Effects/GlowCirclePurple", center, 1.3f * pulse, new Color(200, 50, 255, 70), 0f);
-                DrawGlow("AethonMod/Content/Effects/MagicRing", center, 1.0f * pulse, new Color(200, 50, 255, 120), t * 0.03f);
+                float pulse = 0.7f + 0.3f * (float)System.Math.Sin(t * 0.02f);
+                // Glow púrpura grande
+                DrawGlow("AethonMod/Content/Effects/GlowCirclePurple", center, 1.5f * pulse, new Color(200, 50, 255, 60), 0f);
+                // 8 rayos BeamCyan rotando (color púrpura)
+                for (int i = 0; i < 8; i++)
+                {
+                    float angle = (System.MathF.PI * 2 / 8) * i + t * 0.015f;
+                    DrawGlow("AethonMod/Content/Effects/BeamCyan", center, 1.0f * pulse,
+                        new Color(200, 50, 255, 100), angle);
+                }
+                // Núcleo blanco
+                DrawGlow("AethonMod/Content/Effects/GlowCircleWhite", center, 0.4f * pulse, new Color(255, 255, 255, 100), 0f);
             }
-            // === AURA BLOOM — 3 anillos expandiéndose ===
+            // === AURA BLOOM — MANTIENE: 3 anillos expandiéndose ===
             else if (type == ModContent.ItemType<AuraBloom>())
             {
                 for (int i = 0; i < 3; i++)
@@ -89,7 +106,7 @@ namespace AethonMod.Content.UI
                 }
                 DrawGlow("AethonMod/Content/Effects/GlowCircleGreen", center, 0.6f, new Color(50, 255, 100, 100), 0f);
             }
-            // === AURA COSMIC — 2 anillos girando ===
+            // === AURA COSMIC — MANTIENE: 2 anillos girando ===
             else if (type == ModContent.ItemType<AuraCosmic>())
             {
                 float rot = t * 0.03f;
@@ -99,10 +116,6 @@ namespace AethonMod.Content.UI
             }
         }
 
-        /// <summary>
-        /// Dibuja una textura con additive blending.
-        /// SEGURO en PlayerDrawLayer.Draw porque spriteBatch está activo.
-        /// </summary>
         private void DrawGlow(string path, Vector2 pos, float scale, Color color, float rotation)
         {
             try
