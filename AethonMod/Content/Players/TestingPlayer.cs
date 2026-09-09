@@ -52,6 +52,11 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.TestArea20>(), 1); // área 20px
             GiveItem(ModContent.ItemType<Weapons.TestArea60>(), 1); // área 60px
             GiveItem(ModContent.ItemType<Weapons.TestRays>(), 1); // rayos cósmicos desde el suelo
+            // v5.34: armas de prueba avanzadas (PreDraw + additive blending)
+            GiveItem(ModContent.ItemType<Weapons.TestGlow>(), 1); // glow circle
+            GiveItem(ModContent.ItemType<Weapons.TestTrail>(), 1); // trail personalizado
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1); // anillo mágico
+            GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1); // sparkle stars
         }
 
         /// <summary>
