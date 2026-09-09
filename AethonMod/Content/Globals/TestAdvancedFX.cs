@@ -53,25 +53,18 @@ namespace AethonMod.Content.Globals
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorRainbow (5004) — estela con color del hue + tintar sprite
-            if (projectile.ai[1] == 5004)
+            // ColorRainbow (5004) — estela arcoíris
+            // NO usa projectile.color (interfiere con los colores nativos del Nightglow)
+            // Solo agrega Dust de estela arcoíris
+            if (projectile.ai[1] == 5004 && Main.rand.NextBool(2))
             {
                 float hue = (Main.GameUpdateCount * 0.01f) % 1f;
                 Color c = Main.hslToRgb(hue, 1f, 0.5f);
-
-                // Tintar el sprite del proyectil con projectile.color
-                // tModLoader multiplica el sprite por este color automáticamente
-                projectile.color = c;
-
-                // Estela con color del hue
-                if (Main.rand.NextBool(2))
-                {
-                    Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
-                        -projectile.velocity * 0.1f + new Vector2(
-                            Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                        200, c, 0.7f);
-                    d.noGravity = true; d.fadeIn = 0f;
-                }
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
+                    -projectile.velocity * 0.1f + new Vector2(
+                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, c, 0.7f);
+                d.noGravity = true; d.fadeIn = 0f;
             }
         }
 
@@ -128,25 +121,26 @@ namespace AethonMod.Content.Globals
                 return true;
             }
 
-            // === COLOR RAINBOW (5004) — NO retorna false ===
-            // Deja que tModLoader dibuje el sprite original (con todo su glow/bloom natural)
-            // y solo agrega efectos encima con additive blending.
-            // El color del proyectil se cambia con projectile.color en AI().
+            // === COLOR RAINBOW (5004) — puramente aditivo ===
+            // NO toca el sprite del Nightglow (mantiene TODOS sus efectos nativos:
+            // colores arcoíris, partículas, glow, bloom).
+            // Solo agrega GlowOrb + GlowRay con additive blending encima como
+            // capa adicional de brillo arcoíris.
             if (projectile.ai[1] == 5004)
             {
                 float hue = (t * 0.01f) % 1f;
-                Color tintColor = Main.hslToRgb(hue, 1f, 0.5f);
+                Color c = Main.hslToRgb(hue, 1f, 0.5f);
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
 
-                // GlowOrb con additive (núcleo blanco + halo del color del hue)
-                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.6f * pulse,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, 200), 0f);
+                // GlowOrb blanco tintado con el color del hue (additive)
+                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
+                    new Color(c.R, c.G, c.B, 180), 0f);
 
-                // Rayo de luz rotando con color del hue
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, 100), t * 0.03f);
+                // Rayo de luz rotando con color del hue (additive)
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
+                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
 
-                return true; // tModLoader dibuja el sprite original (con su glow/bloom natural)
+                return true; // tModLoader dibuja el sprite original del Nightglow
             }
 
             return true; // default: dibujar sprite original
