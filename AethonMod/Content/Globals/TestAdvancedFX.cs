@@ -150,11 +150,7 @@ namespace AethonMod.Content.Globals
                 return true;
             }
 
-            // === COLOR RAINBOW (5004) — puramente aditivo ===
-            // NO toca el sprite del Nightglow (mantiene TODOS sus efectos nativos:
-            // colores arcoíris, partículas, glow, bloom).
-            // Solo agrega GlowOrb + GlowRay con additive blending encima como
-            // capa adicional de brillo arcoíris.
+            // === COLOR RAINBOW (5004) ===
             if (projectile.ai[1] == 5004)
             {
                 float hue = (t * 0.01f) % 1f;
@@ -164,51 +160,57 @@ namespace AethonMod.Content.Globals
                 // GlowOrb blanco tintado con el color del hue (additive)
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
                     new Color(c.R, c.G, c.B, 180), 0f);
-
                 // Rayo de luz rotando con color del hue (additive)
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
                     new Color(c.R, c.G, c.B, 80), t * 0.03f);
-
-                return true; // tModLoader dibuja el sprite original del Nightglow
+                // Dibujar sprite del Nightglow con color del hue (reemplaza el azul nativo)
+                DrawColoredSprite(projectile, c);
+                return false; // NO dibujar sprite azul nativo
             }
 
             // === COLOR ROJO (5005) ===
             if (projectile.ai[1] == 5005)
             {
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                Color c = new Color(255, 50, 50);
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(255, 50, 50, 180), 0f);
+                    new Color(c.R, c.G, c.B, 180), 0f);
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(255, 50, 50, 80), t * 0.03f);
-                return true;
+                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
+                DrawColoredSprite(projectile, c);
+                return false;
             }
 
             // === COLOR AMARILLO (5006) ===
             if (projectile.ai[1] == 5006)
             {
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                Color c = new Color(255, 255, 50);
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(255, 255, 50, 180), 0f);
+                    new Color(c.R, c.G, c.B, 180), 0f);
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(255, 255, 50, 80), t * 0.03f);
-                return true;
+                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
+                DrawColoredSprite(projectile, c);
+                return false;
             }
 
             // === COLOR VERDE (5007) ===
             if (projectile.ai[1] == 5007)
             {
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                Color c = new Color(50, 255, 50);
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(50, 255, 50, 180), 0f);
+                    new Color(c.R, c.G, c.B, 180), 0f);
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(50, 255, 50, 80), t * 0.03f);
-                return true;
+                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
+                DrawColoredSprite(projectile, c);
+                return false;
             }
 
             return true; // default: dibujar sprite original
         }
 
-        // === HELPER ===
+        // === HELPER: dibuja textura con additive blending ===
         private void DrawTex(string path, Vector2 worldPos, float scale, Color color, float rotation)
         {
             try
@@ -222,6 +224,38 @@ namespace AethonMod.Content.Globals
                 Main.spriteBatch.Draw(tex, drawPos, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Dibuja el sprite del proyectil con un color de tinte.
+        /// Usa Main.EntitySpriteDraw (método recomendado por tModLoader).
+        /// Multiplica el sprite por el color del tinte.
+        /// </summary>
+        private void DrawColoredSprite(Projectile projectile, Color tintColor)
+        {
+            try
+            {
+                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
+                if (tex == null) return;
+
+                // Calcular el frame correcto (el Nightglow tiene animación de frames)
+                int frameCount = Main.projFrames[projectile.type];
+                Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height / (frameCount > 0 ? frameCount : 1));
+                if (frameCount > 0)
+                {
+                    int frameY = projectile.frame % frameCount;
+                    frame.Y = frameY * (tex.Height / frameCount);
+                }
+
+                Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
+                Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+                // Dibujar con AlphaBlend y color del tinte (multiplica el sprite por el color)
+                Main.EntitySpriteDraw(tex, drawPos, frame,
+                    new Color(tintColor.R, tintColor.G, tintColor.B, 255),
+                    projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
             }
             catch { }
         }
