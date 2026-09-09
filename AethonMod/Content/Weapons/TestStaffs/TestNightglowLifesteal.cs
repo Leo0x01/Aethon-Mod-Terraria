@@ -60,5 +60,15 @@ namespace AethonMod.Content.Weapons.TestStaffs
                 d.fadeIn = 0f;
             }
         }
+
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
+            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            // v5.59: añadido Shoot override para consistencia con los demás bastones
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            // Aura magenta en el cursor al disparar
+            CosmicEffects.SpawnMagicRing(Main.MouseWorld, CosmicEffects.Magenta, 16, 50f, 3f);
+            return false;
+        }
     }
 }

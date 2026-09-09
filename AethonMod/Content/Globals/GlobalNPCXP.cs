@@ -63,7 +63,9 @@ namespace AethonMod.Content.Globals
 
             if (lifestealPercent <= 0f) return;
 
-            int healAmount = (int)(damageDone * lifestealPercent);
+            // v5.59: Math.Max(1, ...) para garantizar al menos 1 de heal
+            // (sin esto, daño<100 con 1% lifesteal trunca a 0 y nunca healea)
+            int healAmount = System.Math.Max(1, (int)(damageDone * lifestealPercent));
             if (healAmount > 0 && player.statLife < player.statLifeMax2)
             {
                 player.HealEffect(healAmount, true);

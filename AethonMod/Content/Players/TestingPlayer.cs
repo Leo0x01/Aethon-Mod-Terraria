@@ -83,6 +83,11 @@ namespace AethonMod.Content.Players
                     return;
                 }
             }
+            // v5.59: si el inventario está lleno, spawn el item en el suelo
+            // (previene que el kit se pierda o se duplique en re-entry)
+            int drop = Item.NewItem(Player.GetSource_GiftOrReward(), Player.Center, itemType, stack);
+            if (drop >= 0 && drop < Main.item.Length)
+                Main.item[drop].noGrabDelay = 0;
         }
     }
 }

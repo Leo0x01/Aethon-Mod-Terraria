@@ -42,6 +42,14 @@ namespace AethonMod.Content.NPCs
             if (!target.active || target.dead)
             {
                 NPC.TargetClosest(false);
+                target = Main.player[NPC.target]; // re-leer después de TargetClosest
+                // v5.59: si sigue sin target válido, despawn
+                if (!target.active || target.dead)
+                {
+                    NPC.life = 0;
+                    NPC.active = false;
+                    return;
+                }
                 return;
             }
 

@@ -29,7 +29,7 @@ namespace AethonMod.Content.NPCs
             NPC.noGravity = true;
             NPC.noTileCollide = false;
             NPC.friendly = true;
-            NPC.townNPC = false;
+            NPC.townNPC = true; // v5.59: debe ser townNPC=true para que GetChat/SetChatButtons/OnChatButtonClicked funcionen
             NPC.npcSlots = 1f;
             NPC.aiStyle = 0;
             NPC.immortal = true;

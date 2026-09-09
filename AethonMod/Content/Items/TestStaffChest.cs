@@ -79,7 +79,7 @@ namespace AethonMod.Content.Items
             GiveItem(player, ModContent.ItemType<SeerOrb>(), 1);
 
             // Mensaje + efectos visuales
-            Main.NewText("✦ Cofre de Pruebas Cósmico desplegado: 16 bastones + 6 items ceremoniales.",
+            Main.NewText("✦ Cofre de Pruebas Cósmico desplegado: 24 bastones + 5 items ceremoniales.",
                 new Color(245, 196, 81));
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
             for (int d = 0; d < 40; d++)

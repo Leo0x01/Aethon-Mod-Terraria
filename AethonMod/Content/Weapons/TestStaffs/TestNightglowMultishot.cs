@@ -46,8 +46,8 @@ namespace AethonMod.Content.Weapons.TestStaffs
                 Projectile.NewProjectile(source, position, perturbed, type, damage, knockback, player.whoAmI);
             }
 
-            // Anillo cósmico pequeño en cada disparo
-            CosmicEffects.SpawnMagicRing(position, CosmicEffects.Cyan, 12, 30f, 2f);
+            // Anillo cósmico en el cursor (consistencia con los demás bastones)
+            CosmicEffects.SpawnMagicRing(Main.MouseWorld, CosmicEffects.Cyan, 12, 30f, 2f);
             return false; // nosotros disparamos los proyectiles manualmente
         }
     }

@@ -62,7 +62,8 @@ namespace AethonMod.Content.Tiles
                     player.GetSource_GiftOrReward(),
                     player.Center,
                     ModContent.ItemType<Items.GenesisShard>());
-                Main.item[item].noGrabDelay = 0;
+                if (item >= 0 && item < Main.item.Length) // v5.59: bounds check
+                    Main.item[item].noGrabDelay = 0;
                 Main.NewText("Has reclamado el Fragmento Génesis. Combate para imprprimir tu rama.", new Color(245, 196, 81));
             }
             else

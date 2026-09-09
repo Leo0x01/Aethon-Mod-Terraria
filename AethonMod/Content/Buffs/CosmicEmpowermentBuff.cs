@@ -42,8 +42,9 @@ namespace AethonMod.Content.Buffs
                 sp.HasCosmicEmpowerment = true;
             }
 
-            // Resetear timer para que no se agote (lo refresca el UpdateAccessory)
-            player.buffTime[buffIndex] = 60;
+            // NOTA: NO resetear buffTime aqui. El AethonSigil.UpdateAccessory
+            // llama AddBuff(..., 60) cada frame que refresca el timer.
+            // Si resetearamos aqui, el buff nunca expiraria al desequipar el sello.
         }
     }
 }
