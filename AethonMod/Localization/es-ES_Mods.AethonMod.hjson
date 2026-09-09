@@ -8,6 +8,12 @@
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
         "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
 
+        "Items.StellarDust.DisplayName": "Polvo Estelar",
+        "Items.StellarDust.Tooltip": "Material cósmico fino. Dropea de jefes y enemigos del Sagrario Hueco.\nSe usa para craftear el Sello de Aethon y ceremoniales.",
+
+        "Items.AethonSigil.DisplayName": "Sello de Aethon",
+        "Items.AethonSigil.Tooltip": "Accesorio ceremonial del culto de Aethon.\n+5% daño mágico y de invocación\n+1 slot de minion\n+5/s regeneración de mana\nConfiere Empoderamiento Cósmico:\n  +10% daño, +5% crítico, +5% velocidad de ataque, 1% lifesteal",
+
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
         "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.",
 
@@ -23,6 +29,9 @@
 
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
+
+        "Buffs.CosmicEmpowermentBuff.DisplayName": "Empoderamiento Cósmico",
+        "Buffs.CosmicEmpowermentBuff.Description": "+10% daño, +5% crítico, +5% velocidad de ataque, 1% lifesteal",
 
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",

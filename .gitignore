@@ -52,3 +52,7 @@ dev.log
 server.log
 /tmp/
 .zscripts/
+
+# === Temp work files (improvements phase) ===
+tmp_scripts/
+tool-results/

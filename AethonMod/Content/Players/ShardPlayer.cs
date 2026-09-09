@@ -12,6 +12,22 @@ namespace AethonMod.Content.Players
         public bool FirstLevelUpTriggered = false;
 
         /// <summary>
+        /// Flag activado por el buff "Empoderamiento Cósmico" (Sello de Aethon).
+        /// Se resetea en ResetEffects. El lifesteal se aplica en
+        /// GlobalNPCXP.ApplyCosmicEmpowermentLifesteal (OnHitByItem / OnHitByProjectile).
+        /// </summary>
+        public bool HasCosmicEmpowerment = false;
+
+        /// <summary>
+        /// ResetEffects: al inicio de cada frame, reseteamos los flags
+        /// que son aplicados por buffs/equipamiento.
+        /// </summary>
+        public override void ResetEffects()
+        {
+            HasCosmicEmpowerment = false;
+        }
+
+        /// <summary>
         /// PostUpdateEquips: aplica los bonuses del Grimorio que persisten
         /// aunque cambies de arma. Busca el Grimorio en TODO el inventario.
         /// </summary>

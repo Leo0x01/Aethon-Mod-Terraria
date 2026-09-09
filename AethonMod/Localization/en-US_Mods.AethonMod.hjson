@@ -8,6 +8,12 @@
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
         "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
+        "Items.StellarDust.DisplayName": "Stellar Dust",
+        "Items.StellarDust.Tooltip": "Fine cosmic material. Dropped by bosses and Hollow Sanctum enemies.\nUsed to craft the Aethon Sigil and ceremonial items.",
+
+        "Items.AethonSigil.DisplayName": "Aethon Sigil",
+        "Items.AethonSigil.Tooltip": "Ceremonial accessory of the Aethon cult.\n+5% magic and summon damage\n+1 minion slot\n+5/s mana regeneration\nGrants Cosmic Empowerment:\n  +10% damage, +5% crit, +5% attack speed, 1% lifesteal",
+
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
         "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.",
 
@@ -23,6 +29,9 @@
 
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
+
+        "Buffs.CosmicEmpowermentBuff.DisplayName": "Cosmic Empowerment",
+        "Buffs.CosmicEmpowermentBuff.Description": "+10% damage, +5% crit, +5% attack speed, 1% lifesteal",
 
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",

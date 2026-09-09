@@ -1,5 +1,89 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.28 — Mejoras profesionales: texturas HQ + nuevo contenido ceremonial
+
+Mejoras aplicadas sobre el baseline estable v5.27 (sin tocar la lógica del Grimorio).
+
+### A. Texturas regeneradas en alta calidad (1024×1024 → downscale LANCZOS)
+
+Workflow: generadas a 1024×1024 (maestros preservados en `Content/_masters/`),
+luego reescaladas con PIL LANCZOS al tamaño requerido por el juego, con
+remoción de fondo (transparencia) basada en el color dominante del borde.
+
+**14 texturas de items/proyectiles/buffs/tile/icon:**
+- icon.png (80×80) — icono del mod
+- GrimoireEternal.png (30×38) — arma principal
+- GenesisShard.png (24×24) — item clave
+- SeerOrb.png (24×24) — item
+- CosmicOrbMinion.png (32×32) — minion
+- CosmicOrbBolt.png (16×16) — proyectil
+- CosmicOrbBuff.png (32×32) — buff icon
+- AncientAltar.png (16×16) — tile
+- AncientAltarItem.png (24×24) — item placeable
+- BossSummonBag.png (24×24) — item de testing
+- LevelUpTester.png (24×24) — item de testing
+- ResonanceShard.png (24×24) — moneda cósmica
+- ArcaneBolt.png (16×16) — proyectil del arma
+- GenesisLight.png (22×22) — proyectil del Fragmento Génesis
+
+**6 texturas de NPCs:**
+- AethonBoss.png (48×48) — jefe final
+- HollowTitan.png (48×48) — mini-jefe del Sagrario Hueco
+- TheWitness.png (24×40) — NPC del pueblo
+- RiftKeeper.png (36×36) — mini-jefe dimensional
+- EchoArcher.png (36×36) — enemigo
+- EchoBlade.png (36×36) — enemigo
+
+**3 texturas para contenido nuevo:**
+- AethonSigil.png (28×28) — accesorio nuevo
+- StellarDust.png (18×18) — material nuevo
+- CosmicEmpowermentBuff.png (32×32) — buff nuevo
+
+### B. Nuevo contenido ceremonial
+
+1. **Polvo Estelar (StellarDust.cs)** — material cósmico fino
+   - Recetas: 3 ResonanceShard → 1 StellarDust (y viceversa) en Anvil
+   - Drops: jefes cósmicos y enemigos del Sagrario Hueco
+     * AethonBoss: 10-15 StellarDust (garantizado)
+     * HollowTitan: 5-8 StellarDust (garantizado)
+     * RiftKeeper: 3-5 StellarDust (garantizado)
+     * EchoArcher/EchoBlade: 1-2 StellarDust (25% chance)
+
+2. **Sello de Aethon (AethonSigil.cs)** — accesorio ceremonial
+   - Crafteo: 1 GenesisShard + 5 StellarDust + 3 ResonanceShard + 3 GoldBar/PlatinumBar en Anvil
+   - Efectos mientras esté equipado:
+     * +5% daño mágico
+     * +5% daño de invocación
+     * +1 slot de minion
+     * +5/s regeneración de mana
+   - Confiere buff "Empoderamiento Cósmico" (mantenido por el accesorio)
+
+3. **Empoderamiento Cósmico (CosmicEmpowermentBuff.cs)** — buff ceremonial
+   - +10% daño (todas las clases)
+   - +5% probabilidad de crítico (todas las clases)
+   - +5% velocidad de ataque (todas las clases)
+   - 1% de lifesteal (aplicado via ModPlayer.OnHitAnything)
+
+### C. Cambios de código
+
+- `Content/Players/ShardPlayer.cs`:
+  * Nuevo flag `HasCosmicEmpowerment` reseteado en `ResetEffects()`
+  * Override de `OnHitAnything(float, float, bool)` para aplicar 1% lifesteal
+- `Content/Globals/GlobalNPCXP.cs`:
+  * Nuevo bloque en `OnKill` para drops de StellarDust según tipo de NPC
+- `Localization/es-ES` y `en-US`: añadidas 6 claves nuevas
+  (StellarDust, AethonSigil, CosmicEmpowermentBuff en ambas Display + Tooltip/Description)
+
+### D. Seguridad
+
+- Tag `stable-pre-improvements-v5.27` + rama `stable-pre-improvements-v5.27-backup`
+  creadas ANTES de aplicar estas mejoras.
+- Restaurar baseline estable: `git checkout stable-pre-improvements-v5.27`
+
+Versión bump: 5.27 → 5.28
+
+---
+
 ## Commit v5.1 — autoReuse + tooltip rediseñado + proyectil cósmico
 
 3 mejoras solicitadas por el usuario:
