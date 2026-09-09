@@ -127,8 +127,8 @@ namespace AethonMod.Content.Weapons
         public override void HoldItem(Player player)
         {
             float pulse = 0.8f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.03f);
-            VFXHelper.VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
-            VFXHelper.VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
+            VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
+            VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
             // Partículas eléctricas
             if (Main.rand.NextBool(6))
             {
