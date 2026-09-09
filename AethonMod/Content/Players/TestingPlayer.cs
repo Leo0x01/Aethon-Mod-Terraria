@@ -21,12 +21,13 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // Verificar si ya tiene el GenesisShard (para no duplicar la entrega).
+            // Verificar si ya tiene el TestStaffChest (para no duplicar la entrega).
+            // v5.29: cambió de GenesisShard a TestStaffChest como marcador del kit.
             bool alreadyHasKit = false;
             for (int i = 0; i < 58; i++)
             {
                 if (Player.inventory[i] != null &&
-                    Player.inventory[i].type == ModContent.ItemType<GenesisShard>())
+                    Player.inventory[i].type == ModContent.ItemType<Items.TestStaffChest>())
                 {
                     alreadyHasKit = true;
                     break;
@@ -41,6 +42,14 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
+
+            // v5.29: items ceremoniales creados (para pruebas)
+            GiveItem(ModContent.ItemType<Items.StellarDust>(), 50);
+            GiveItem(ModContent.ItemType<Items.AethonSigil>(), 1);
+            GiveItem(ModContent.ItemType<Items.ResonanceShard>(), 20);
+
+            // v5.29: cofre con TODOS los bastones de prueba
+            GiveItem(ModContent.ItemType<Items.TestStaffChest>(), 1);
         }
 
         /// <summary>

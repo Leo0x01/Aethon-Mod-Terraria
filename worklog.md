@@ -6294,3 +6294,149 @@ existentes del mod).
 
 Siguiente paso sugerido: usuario recompila el mod en tModLoader y prueba
 el Sello de Aethon + Polvo Estelar. Si todo OK, marcar v5.28 como estable.
+
+---
+Task ID: MEJORAS-PROFESIONALES-V5.29-D
+Agent: Subagent D (texturas bastones de prueba)
+Task: Generar 17 texturas HQ para bastones de prueba + cofre
+
+Work Log:
+- Leído worklog.md para entender lo hecho por Subagent A/B/C y la función
+  `make_background_transparent_v2()` (2px border strip, Counter.most_common,
+  RGB cuantizado a múltiplos de 4, tolerancia Euclidiana 70) que ya funcionó
+  perfectamente para Subagent C en V5.28-C.
+- Verificado entorno:
+  - z-ai CLI en /usr/local/bin/z-ai (soporta 1024x1024)
+  - python3 + Pillow 11.3.0
+  - /home/z/my-project/AethonMod/Content/_masters/ ya existía (creado por
+    Subagent A). Ejecutado `mkdir -p` idempotente.
+  - Confirmados los 16 .cs de TestStaffs/ + TestStaffChest.cs. NO se tocaron.
+- Paso 1: 17 masters generados a 1024x1024 con `z-ai image`:
+  - Intento 1: script `gen_staff_masters.sh` (idempotente con retries x3 y
+    sleep 5s) generó 10/17 antes de que el bash session agotara timeout
+    externo a los 10 min (script sigue siendo válido; el problema fue solo
+    el timeout del shell padre, no del z-ai).
+  - Intento 2: generé los 7 restantes (TestNightglowStarfall, Lifesteal,
+    Empower, Multishot, RainbowTrail, Supernova, TestStaffChest) uno por
+    uno con `timeout 90 z-ai image ...`, todos exitosos al primer intento.
+  - Total 17/17 masters OK.
+- Paso 2: Escrito `/home/z/my-project/tmp_scripts/downscale_staffs.py`
+  reutilizando exactamente la misma `make_background_transparent_v2()`
+  que Subagent C (umbral Euclidiano RGB ≤ 70, muestreo de borde 2px,
+  Counter.most_common sobre RGB cuantizado a múltiplos de 4):
+  - 16 staffs -> 30x30 (Content/Weapons/TestStaffs/)
+  - 1 chest   -> 32x32 (Content/Items/)
+  - LANCZOS resize, 8-bit RGBA, non-interlaced PNG
+  - Script con CLI flag `--tolerance` y `--only` para reintentar selectivo
+    si algún sprite fallara la verificación de esquinas.
+- Paso 3: Ejecutado el script: 17/17 archivos OK en una sola pasada con
+  threshold=70. NO fue necesario subir a 90.
+- Paso 4: Verificación externa con `file` + PIL script independiente:
+  - 16 staffs: 30x30 8-bit RGBA non-interlaced
+  - 1 chest:   32x32 8-bit RGBA non-interlaced
+  - Todas con 4/4 esquinas alpha=0 (transparente)
+  - Sanity check: todos los sprites preservan contenido (entre 9% y 59%
+    de pixeles opacos, mezcla sana — ninguno "comido" por el threshold).
+- NO se tocaron:
+  - Las 23 texturas previas de Subagent A/B/C
+  - Ningún archivo .cs
+  - Ningún otro directorio (NPCs, Projectiles, Buffs, Tile, etc.)
+- Masters 1024x1024 PRESERVADOS en /home/z/my-project/AethonMod/Content/_masters/
+- Script reutilizable guardado en:
+  - /home/z/my-project/tmp_scripts/gen_staff_masters.sh
+  - /home/z/my-project/tmp_scripts/downscale_staffs.py
+  - /home/z/my-project/tmp_scripts/verify_staff_textures.py
+
+Stage Summary:
+- 17 texturas nuevas generadas (todas OK en primera pasada con tol=70):
+
+  STAFFS (16 archivos, 30x30, Content/Weapons/TestStaffs/):
+  | Archivo final                          | Tamaño | Bytes | Modo                |
+  |----------------------------------------|--------|------|---------------------|
+  | TestMagicRing.png                      | 30x30  | 1033 | 8-bit RGBA non-int  |
+  | TestSparkle.png                        | 30x30  |  797 | 8-bit RGBA non-int  |
+  | ProjBeam.png                           | 30x30  | 1013 | 8-bit RGBA non-int  |
+  | TestMagicRingV2.png                    | 30x30  | 1015 | 8-bit RGBA non-int  |
+  | TestNightglowBasic.png                 | 30x30  |  558 | 8-bit RGBA non-int  |
+  | TestNightglowCosmicTrail.png           | 30x30  | 1422 | 8-bit RGBA non-int  |
+  | TestNightglowStarWrath.png            | 30x30  | 1408 | 8-bit RGBA non-int  |
+  | TestNightglowRingBurst.png             | 30x30  | 1756 | 8-bit RGBA non-int  |
+  | TestNightglowSparkleTrail.png          | 30x30  |  748 | 8-bit RGBA non-int  |
+  | TestNightglowLightBeams.png            | 30x30  | 2248 | 8-bit RGBA non-int  |
+  | TestNightglowStarfall.png              | 30x30  | 1092 | 8-bit RGBA non-int  |
+  | TestNightglowLifesteal.png             | 30x30  |  721 | 8-bit RGBA non-int  |
+  | TestNightglowEmpower.png               | 30x30  |  874 | 8-bit RGBA non-int  |
+  | TestNightglowMultishot.png             | 30x30  |  642 | 8-bit RGBA non-int  |
+  | TestNightglowRainbowTrail.png          | 30x30  |  886 | 8-bit RGBA non-int  |
+  | TestNightglowSupernova.png             | 30x30  | 1156 | 8-bit RGBA non-int  |
+
+  CHEST (1 archivo, 32x32, Content/Items/):
+  | TestStaffChest.png                      | 32x32  | 2242 | 8-bit RGBA non-int  |
+
+  Todas con fondo transparente (4/4 esquinas alpha=0) y contenido preservado.
+
+- Masters 1024x1024 archivados en /home/z/my-project/AethonMod/Content/_masters/:
+  | Archivo master                  | Bytes   |
+  |---------------------------------|---------|
+  | TestMagicRing.png               |  64136  |
+  | TestSparkle.png                 |  70843  |
+  | ProjBeam.png                    |  47418  |
+  | TestMagicRingV2.png             |  67829  |
+  | TestNightglowBasic.png          |  46384  |
+  | TestNightglowCosmicTrail.png    |  91024  |
+  | TestNightglowStarWrath.png      | 113142  |
+  | TestNightglowRingBurst.png      |  64994  |
+  | TestNightglowSparkleTrail.png    | 170281  |
+  | TestNightglowLightBeams.png     |  85448  |
+  | TestNightglowStarfall.png       |  67107  |
+  | TestNightglowLifesteal.png      |  53788  |
+  | TestNightglowEmpower.png        | 135231  |
+  | TestNightglowMultishot.png      |  50410  |
+  | TestNightglowRainbowTrail.png   |  99648  |
+  | TestNightglowSupernova.png      |  74975  |
+  | TestStaffChest.png              | 137106  |
+
+- Issues encontrados y resueltos:
+  1. El primer run del script bash de generación de masters (`gen_staff_masters.sh`)
+     agotó el timeout externo de 10 minutos del shell a mitad de camino
+     (había generado 10/17, atascado en TestNightglowStarfall porque el
+     proceso nohup se huérfanizó cuando el shell padre terminó).
+     Resolución: como el script es idempotente (skip si master ya existe con
+     size>0), no hubo que rerun todo. Para los 7 restantes invoqué z-ai image
+     uno por uno con `timeout 90`, todos exitosos al primer intento.
+     El script `gen_staff_masters.sh` queda disponible para futuros runs.
+  2. NO fue necesario subir el threshold a 90: con tol=70 funcionaron los 17
+     a la primera (4/4 esquinas transparentes en todos).
+- Ready para commit por parte del main agent.
+
+---
+Task ID: MEJORAS-PROFESIONALES-V5.29-FINAL
+Agent: main (Z.ai Code)
+Task: Bastones de prueba + efectos cósmicos + recreación Star Wrath
+
+Work Log:
+- Paso 1 (Helper CosmicEffects): Creado Content/Globals/CosmicEffects.cs con 10 metodos estaticos reutilizables
+- Paso 2 (4 bastones protegidos): TestMagicRing, TestSparkle, ProjBeam, TestMagicRingV2
+- Paso 3 (12 bastones Nightglow): Basic, CosmicTrail, StarWrath, RingBurst, SparkleTrail, LightBeams, Starfall, Lifesteal, Empower, Multishot, RainbowTrail, Supernova
+- Paso 4 (TestStaffChest): Cofre que despliega 16 bastones + 6 items al usarlo
+- Paso 5 (TestingPlayer): Actualizado para dar StellarDust, AethonSigil, ResonanceShard, TestStaffChest
+- Paso 6 (ShardPlayer + GlobalNPCXP): HasEnhancedLifesteal flag + lifesteal combinado 1%+4%=5%
+- Paso 7 (Texturas): 17 texturas generadas por Subagent D (1024x1024 -> LANCZOS 30x30/32x32)
+- Paso 8 (Localization): 34 claves nuevas (ES + EN)
+- Paso 9 (build.txt): version 5.28 -> 5.29
+
+Efecto Star Wrath recreado (TestNightglowStarWrath):
+- Esfera de impacto central aditiva (blanco/cian/azul real)
+- Estrellas cayendo del cielo (4-6 con estela cian)
+- Destellos ambientales (15 sparkles)
+- Rayos de luz radiantes (6 rayos)
+- Anillo magico dorado secundario (24 particulas)
+
+Stage Summary:
+- 16 bastones de prueba creados (4 protegidos + 12 Nightglow #931)
+- 1 cofre de pruebas (TestStaffChest)
+- 10 efectos cosmicos reutilizables en CosmicEffects.cs
+- 17 texturas HQ con transparencia
+- 34 claves de localization
+- Items ceremoniales dados al jugador via TestingPlayer
+- Version bumped: 5.28 -> 5.29

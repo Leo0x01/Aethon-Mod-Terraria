@@ -1,5 +1,89 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.29 — Bastones de prueba + efectos cósmicos + recreación Star Wrath
+
+Sistema completo de bastones de prueba para testear todos los efectos cósmicos
+aprendidos. Todos usan el proyectil Nightglow (#931) como base.
+
+### A. Helper de efectos cósmicos reutilizables (CosmicEffects.cs)
+
+Nuevo archivo `Content/Globals/CosmicEffects.cs` con métodos estáticos:
+- `SpawnCosmicTrail(center, velocity, scale)` — estela dorada/cian/magenta/índigo
+- `SpawnMagicRing(center, color, count, radius, speed)` — anillo expansivo
+- `SpawnMagicRingMulti(center, speed)` — 4 anillos cósmicos de colores
+- `SpawnSparkles(center, count, spread)` — destellos ambientales
+- `SpawnLightBeams(center, count, length)` — rayos de luz radiantes
+- `SpawnStarfall(target, count, spread)` — estrellas cayendo del cielo
+- `SpawnImpactSphere(center, intensity)` — esfera aditiva blanco/cian/azul
+- `SpawnSupernova(center, scale)` — explosión cósmica completa (4 colores + blanco)
+- `SpawnStarWrathEffect(center)` — EFECTO COMPLETO (combina todos los anteriores)
+- `SpawnRainbowTrail(center, velocity)` — estela arcoíris cambiante
+
+### B. 4 bastones protegidos (baseline, no modificar)
+
+En `Content/Weapons/TestStaffs/`:
+1. **TestMagicRing** — Nightglow + anillo dorado básico
+2. **TestSparkle** — Nightglow + sparkles ambientales (+ HoldItem aura)
+3. **ProjBeam** — Nightglow + rayo concentrado jugador→cursor
+4. **TestMagicRingV2** — Nightglow + múltiples anillos cósmicos
+
+### C. 12 bastones nuevos con Nightglow #931
+
+1. **TestNightglowBasic** — baseline vanilla sin efectos (comparación)
+2. **TestNightglowCosmicTrail** — estela cósmica densa
+3. **TestNightglowStarWrath** ⭐ — RECREA EL EFECTO DE LA IMAGEN:
+   esfera de impacto + starfall + sparkles + light beams + anillo dorado
+4. **TestNightglowRingBurst** — 4 anillos cósmicos expansivos
+5. **TestNightglowSparkleTrail** — estela continua de sparkles
+6. **TestNightglowLightBeams** — rayos de luz radiantes (8 rayos)
+7. **TestNightglowStarfall** — 5-7 estrellas cayendo del cielo
+8. **TestNightglowLifesteal** — 5% lifesteal mientras se sostiene
+9. **TestNightglowEmpower** — concede Empoderamiento Cósmico (+10% dmg, +5% crit, 1% lifesteal)
+10. **TestNightglowMultishot** — 3 proyectiles en abanico
+11. **TestNightglowRainbowTrail** — estela arcoíris cambiante
+12. **TestNightglowSupernova** — supernova cósmica completa + esfera de impacto
+
+### D. Cofre de Pruebas Cósmico (TestStaffChest)
+
+Nuevo item `Content/Items/TestStaffChest.cs`:
+- Al usarlo, despliega en el inventario: 16 bastones + 6 items ceremoniales
+- Items incluidos: 4 bastones protegidos + 12 Nightglow + StellarDust x50 +
+  AethonSigil + ResonanceShard x20 + GenesisShard + SeerOrb
+- Reutilizable (no consumible)
+- Efectos visuales al abrir (40 partículas doradas + sonido)
+
+### E. Cambios en TestingPlayer
+
+- Cambió el marcador de "kit ya entregado" de GenesisShard → TestStaffChest
+- Ahora entrega: GenesisShard, 100 GoldBar, LevelUpTester, BossSummonBag, SeerOrb,
+  StellarDust x50, AethonSigil, ResonanceShard x20, TestStaffChest
+- El jugador recibe TODOS los items al entrar al mundo
+
+### F. Lifesteal mejorado (ShardPlayer + GlobalNPCXP)
+
+- Nuevo flag `HasEnhancedLifesteal` en ShardPlayer (resetado en ResetEffects)
+- `ApplyCosmicEmpowermentLifesteal` ahora soporta lifesteal combinado:
+  - 1% si HasCosmicEmpowerment (Sello de Aethon)
+  - +4% si HasEnhancedLifesteal (TestNightglowLifesteal)
+  - Total máximo: 5%
+
+### G. Texturas (17 nuevas)
+
+Generadas a 1024×1024 con z-ai image, downscale LANCZOS a 30×30 (bastones)
+y 32×32 (cofre), con background transparency:
+- 4 texturas bastones protegidos
+- 12 texturas bastones Nightglow
+- 1 textura TestStaffChest
+- Maestros preservados en Content/_masters/
+
+### H. Localization ES/EN
+
+Añadidas 34 claves nuevas (17 Display + 17 Tooltip) en ambos idiomas.
+
+Versión bump: 5.28 → 5.29
+
+---
+
 ## Commit v5.28 — Mejoras profesionales: texturas HQ + nuevo contenido ceremonial
 
 Mejoras aplicadas sobre el baseline estable v5.27 (sin tocar la lógica del Grimorio).

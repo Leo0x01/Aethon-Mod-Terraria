@@ -47,16 +47,23 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// Aplica 1% de lifesteal si el jugador tiene el buff "Empoderamiento Cósmico"
-        /// (conferido por el Sello de Aethon equipado).
+        /// (conferido por el Sello de Aethon equipado), más 4% extra si tiene
+        /// lifesteal mejorado (bastones de prueba).
         /// </summary>
         private void ApplyCosmicEmpowermentLifesteal(Player player, int damageDone)
         {
             if (damageDone <= 0) return;
 
             var sp = player.GetModPlayer<Players.ShardPlayer>();
-            if (sp == null || !sp.HasCosmicEmpowerment) return;
+            if (sp == null) return;
 
-            int healAmount = (int)(damageDone * 0.01f); // 1% lifesteal
+            float lifestealPercent = 0f;
+            if (sp.HasCosmicEmpowerment) lifestealPercent += 0.01f; // 1%
+            if (sp.HasEnhancedLifesteal) lifestealPercent += 0.04f; // +4% = 5% total
+
+            if (lifestealPercent <= 0f) return;
+
+            int healAmount = (int)(damageDone * lifestealPercent);
             if (healAmount > 0 && player.statLife < player.statLifeMax2)
             {
                 player.HealEffect(healAmount, true);

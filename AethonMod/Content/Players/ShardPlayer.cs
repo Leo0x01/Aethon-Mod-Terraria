@@ -19,12 +19,19 @@ namespace AethonMod.Content.Players
         public bool HasCosmicEmpowerment = false;
 
         /// <summary>
+        /// Flag activado por bastones de prueba con lifesteal mejorado.
+        /// Aplica 4% de lifesteal extra (total 5% combinado con CosmicEmpowerment).
+        /// </summary>
+        public bool HasEnhancedLifesteal = false;
+
+        /// <summary>
         /// ResetEffects: al inicio de cada frame, reseteamos los flags
         /// que son aplicados por buffs/equipamiento.
         /// </summary>
         public override void ResetEffects()
         {
             HasCosmicEmpowerment = false;
+            HasEnhancedLifesteal = false;
         }
 
         /// <summary>
