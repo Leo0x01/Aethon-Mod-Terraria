@@ -53,45 +53,46 @@ namespace AethonMod.Content.Globals
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorRainbow (5004) — estela arcoíris
-            if (projectile.ai[1] == 5004 && Main.rand.NextBool(2))
+            // ColorRainbow (5004) — estela arcoíris densa (cubre la azul nativa)
+            if (projectile.ai[1] == 5004)
             {
                 float hue = (Main.GameUpdateCount * 0.01f) % 1f;
                 Color c = Main.hslToRgb(hue, 1f, 0.5f);
                 Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
-                    -projectile.velocity * 0.1f + new Vector2(
-                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    200, c, 0.7f);
+                    -projectile.velocity * 0.15f + new Vector2(
+                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                    0, c, 1.0f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorRed (5005) — estela roja
-            if (projectile.ai[1] == 5005 && Main.rand.NextBool(2))
+            // ColorRed (5005) — estela roja Densa (cubre la azul nativa)
+            if (projectile.ai[1] == 5005)
             {
+                // Dust denso cada frame para cubrir la estela nativa azul
                 Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RedTorch,
-                    -projectile.velocity * 0.1f + new Vector2(
-                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    200, new Color(255, 50, 50), 0.7f);
+                    -projectile.velocity * 0.15f + new Vector2(
+                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                    0, new Color(255, 50, 50), 1.0f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorYellow (5006) — estela amarilla
-            if (projectile.ai[1] == 5006 && Main.rand.NextBool(2))
+            // ColorYellow (5006) — estela amarilla densa
+            if (projectile.ai[1] == 5006)
             {
                 Dust d = Dust.NewDustPerfect(projectile.Center, DustID.YellowTorch,
-                    -projectile.velocity * 0.1f + new Vector2(
-                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    200, new Color(255, 255, 50), 0.7f);
+                    -projectile.velocity * 0.15f + new Vector2(
+                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                    0, new Color(255, 255, 50), 1.0f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorGreen (5007) — estela verde
-            if (projectile.ai[1] == 5007 && Main.rand.NextBool(2))
+            // ColorGreen (5007) — estela verde densa
+            if (projectile.ai[1] == 5007)
             {
                 Dust d = Dust.NewDustPerfect(projectile.Center, DustID.GreenTorch,
-                    -projectile.velocity * 0.1f + new Vector2(
-                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    200, new Color(50, 255, 50), 0.7f);
+                    -projectile.velocity * 0.15f + new Vector2(
+                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
+                    0, new Color(50, 255, 50), 1.0f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
         }
