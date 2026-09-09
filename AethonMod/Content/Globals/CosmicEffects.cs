@@ -94,7 +94,9 @@ namespace AethonMod.Content.Globals
             {
                 float angle = (MathHelper.TwoPi / particleCount) * i;
                 Vector2 dir = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-                Dust d = Dust.NewDustPerfect(center, DustID.GoldFlame,
+                // v5.60: usar radius para spawn dusts en center + dir*radius (anillo visual real)
+                Vector2 spawnPos = center + dir * radius;
+                Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
                     dir * speed,
                     180, color, 0.9f);
                 d.noGravity = true;
@@ -243,8 +245,11 @@ namespace AethonMod.Content.Globals
                 d.fadeIn = 0f;
             }
 
-            // Luz intensa
-            Lighting.AddLight(center, new Vector3(1.5f, 1.8f, 2.5f) * intensity);
+            // Luz intensa (v5.60: clamp a <=1.0 — valores >1 se truncan a blanco plano)
+            float lr = Math.Min(1f, 1.5f * intensity);
+            float lg = Math.Min(1f, 1.8f * intensity);
+            float lb = Math.Min(1f, 2.5f * intensity);
+            Lighting.AddLight(center, new Vector3(lr, lg, lb));
         }
 
         // ================================================================
@@ -307,7 +312,7 @@ namespace AethonMod.Content.Globals
                     new Vector2(
                         Main.rand.NextFloat(-2f, 2f),
                         Main.rand.NextFloat(-2f, 2f)),
-                    255, default, 0.6f);
+                    255, PureWhite, 0.6f); // v5.60: default → PureWhite (default tiene alpha 0 = invisible)
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

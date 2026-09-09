@@ -4,7 +4,6 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Globals;
-using AethonMod.Content.Buffs;
 
 namespace AethonMod.Content.Weapons.TestStaffs
 {
@@ -31,7 +30,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
             Item.autoReuse = true;
-            Item.shoot = 931;
+            Item.shoot = ProjectileID.FairyQueenMagicItemShot; // Nightglow
             Item.shootSpeed = 12f;
             Item.mana = 0; // bastón de prueba: sin costo de mana
             Item.noMelee = true;
@@ -65,7 +64,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             // v5.59: añadido Shoot override para consistencia con los demás bastones
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
             // Aura magenta en el cursor al disparar
             CosmicEffects.SpawnMagicRing(Main.MouseWorld, CosmicEffects.Magenta, 16, 50f, 3f);
             return false;

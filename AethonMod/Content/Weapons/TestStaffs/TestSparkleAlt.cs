@@ -31,7 +31,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
             Item.autoReuse = true;
-            Item.shoot = 931; // Nightglow
+            Item.shoot = ProjectileID.FairyQueenMagicItemShot; // Nightglow
             Item.shootSpeed = 12f;
             Item.mana = 0; // bastón de prueba: sin costo de mana
             Item.noMelee = true;
@@ -41,7 +41,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             // Disparar el proyectil manualmente (como el remote)
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
 
             // Destellos ambientales alrededor del cursor
             CosmicEffects.SpawnSparkles(Main.MouseWorld, count: 12, spread: 40f);

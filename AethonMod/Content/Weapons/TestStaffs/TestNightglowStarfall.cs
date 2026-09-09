@@ -30,7 +30,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item68; // sonido estrella
             Item.autoReuse = true;
-            Item.shoot = 931;
+            Item.shoot = ProjectileID.FairyQueenMagicItemShot; // Nightglow
             Item.shootSpeed = 12f;
             Item.mana = 0; // bastón de prueba: sin costo de mana
             Item.noMelee = true;
@@ -40,7 +40,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             // Disparar el proyectil manualmente (como el remote)
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
 
             // 5-7 estrellas cayendo del cielo
             CosmicEffects.SpawnStarfall(Main.MouseWorld, count: Main.rand.Next(5, 8), spread: 120f);

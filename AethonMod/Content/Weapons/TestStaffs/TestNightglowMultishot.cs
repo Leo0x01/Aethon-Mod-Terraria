@@ -29,9 +29,9 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
             Item.autoReuse = true;
-            Item.shoot = 931;
+            Item.shoot = ProjectileID.FairyQueenMagicItemShot; // Nightglow
             Item.shootSpeed = 12f;
-            Item.mana = 0; // bastón de prueba: sin costo de mana // más mana por los 3 proyectiles
+            Item.mana = 0; // bastón de prueba: sin costo de mana
             Item.noMelee = true;
         }
 
