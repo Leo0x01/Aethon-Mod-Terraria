@@ -54,8 +54,6 @@ namespace AethonMod.Content.Globals
             }
 
             // ColorRainbow (5004) — estela arcoíris
-            // NO usa projectile.color (interfiere con los colores nativos del Nightglow)
-            // Solo agrega Dust de estela arcoíris
             if (projectile.ai[1] == 5004 && Main.rand.NextBool(2))
             {
                 float hue = (Main.GameUpdateCount * 0.01f) % 1f;
@@ -64,6 +62,36 @@ namespace AethonMod.Content.Globals
                     -projectile.velocity * 0.1f + new Vector2(
                         Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
                     200, c, 0.7f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
+
+            // ColorRed (5005) — estela roja
+            if (projectile.ai[1] == 5005 && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RedTorch,
+                    -projectile.velocity * 0.1f + new Vector2(
+                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, new Color(255, 50, 50), 0.7f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
+
+            // ColorYellow (5006) — estela amarilla
+            if (projectile.ai[1] == 5006 && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.YellowTorch,
+                    -projectile.velocity * 0.1f + new Vector2(
+                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, new Color(255, 255, 50), 0.7f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
+
+            // ColorGreen (5007) — estela verde
+            if (projectile.ai[1] == 5007 && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.GreenTorch,
+                    -projectile.velocity * 0.1f + new Vector2(
+                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, new Color(50, 255, 50), 0.7f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
         }
@@ -141,6 +169,39 @@ namespace AethonMod.Content.Globals
                     new Color(c.R, c.G, c.B, 80), t * 0.03f);
 
                 return true; // tModLoader dibuja el sprite original del Nightglow
+            }
+
+            // === COLOR ROJO (5005) ===
+            if (projectile.ai[1] == 5005)
+            {
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
+                    new Color(255, 50, 50, 180), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
+                    new Color(255, 50, 50, 80), t * 0.03f);
+                return true;
+            }
+
+            // === COLOR AMARILLO (5006) ===
+            if (projectile.ai[1] == 5006)
+            {
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
+                    new Color(255, 255, 50, 180), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
+                    new Color(255, 255, 50, 80), t * 0.03f);
+                return true;
+            }
+
+            // === COLOR VERDE (5007) ===
+            if (projectile.ai[1] == 5007)
+            {
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
+                    new Color(50, 255, 50, 180), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
+                    new Color(50, 255, 50, 80), t * 0.03f);
+                return true;
             }
 
             return true; // default: dibujar sprite original

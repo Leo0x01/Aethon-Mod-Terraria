@@ -47,6 +47,9 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
             GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorRainbow>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
         }
 
         /// <summary>

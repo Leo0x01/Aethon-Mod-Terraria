@@ -166,4 +166,88 @@ namespace AethonMod.Content.Weapons
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
+
+    // === COLOR ROJO — GlowOrb rojo + estela roja ===
+    public class ColorRed : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 0; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5005;
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF0000:═══ COLOR ROJO ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con brillo rojo + estela roja]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
+
+    // === COLOR AMARILLO — GlowOrb amarillo + estela amarilla ===
+    public class ColorYellow : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 0; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5006;
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFFF00:═══ COLOR AMARILLO ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con brillo amarillo + estela amarilla]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
+
+    // === COLOR VERDE — GlowOrb verde + estela verde ===
+    public class ColorGreen : ModItem
+    {
+        public override void SetStaticDefaults() { }
+        public override void SetDefaults()
+        {
+            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+            Item.width = 28; Item.height = 30;
+            Item.useTime = 20; Item.useAnimation = 20;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+            Item.mana = 0; Item.noMelee = true;
+            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+        }
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5007;
+            return false;
+        }
+        public override void ModifyTooltips(List<TooltipLine> tooltips)
+        {
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/00FF00:═══ COLOR VERDE ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con brillo verde + estela verde]"));
+        }
+        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    }
 }
