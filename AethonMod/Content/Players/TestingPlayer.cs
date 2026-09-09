@@ -41,24 +41,16 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1);
-            // v5.35: armas de prueba visual (solo las que se mantienen)
-            GiveItem(ModContent.ItemType<Weapons.TestAura>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestRays>(), 1);
+            // v5.44: armas de prueba (solo las que funcionan + nuevas de color)
             GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1);
             GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
-            // 5 auras nuevas
-            GiveItem(ModContent.ItemType<Weapons.AuraShield>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.AuraSphere>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.AuraDivine>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.AuraBloom>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.AuraCosmic>(), 1);
-            // 5 proyectiles nuevos
             GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ProjElectric>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ProjImpact>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ProjRainbow>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ProjLightning>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
+            // Nuevos: color del proyectil
+            GiveItem(ModContent.ItemType<Weapons.ColorGold>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorCyan>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorMagenta>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorRainbow>(), 1);
         }
 
         /// <summary>
