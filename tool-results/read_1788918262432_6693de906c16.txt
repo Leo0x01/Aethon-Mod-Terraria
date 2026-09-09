@@ -1,0 +1,488 @@
+     1→using System.Collections.Generic;
+     2→using Microsoft.Xna.Framework;
+     3→using Microsoft.Xna.Framework.Graphics;
+     4→using Terraria;
+     5→using Terraria.ID;
+     6→using Terraria.ModLoader;
+     7→using Terraria.DataStructures;
+     8→
+     9→namespace AethonMod.Content.Weapons
+    10→{
+    11→    // ================================================================
+    12→    //  ARMAS AVANZADAS v5.35 — PreDraw + additive blending + texturas custom
+    13→    //  NO tocan el Grimorio.
+    14→    // ================================================================
+    15→
+    16→    // === TEST MAGIC RING (original, mantener) ===
+    17→    public class TestMagicRing : ModItem
+    18→    {
+    19→        public override void SetStaticDefaults() { }
+    20→        public override void SetDefaults()
+    21→        {
+    22→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+    23→            Item.width = 28; Item.height = 30;
+    24→            Item.useTime = 20; Item.useAnimation = 20;
+    25→            Item.useStyle = ItemUseStyleID.HoldUp;
+    26→            Item.autoReuse = true;
+    27→            Item.shoot = 931; Item.shootSpeed = 12f;
+    28→            Item.mana = 0; Item.noMelee = true;
+    29→            Item.rare = ItemRarityID.Quest;
+    30→            Item.UseSound = SoundID.Item8;
+    31→        }
+    32→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+    33→        {
+    34→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+    35→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 3003;
+    36→            return false;
+    37→        }
+    38→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+    39→        {
+    40→            tooltips.Add(new TooltipLine(Mod, "T", "[c/BE78FD:═══ ANILLO MÁGICO ═══]"));
+    41→            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Anillo cósmico girando alrededor del proyectil]"));
+    42→        }
+    43→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    44→    }
+    45→
+    46→    // === TEST SPARKLE (original, mantener) ===
+    47→    public class TestSparkle : ModItem
+    48→    {
+    49→        public override void SetStaticDefaults() { }
+    50→        public override void SetDefaults()
+    51→        {
+    52→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+    53→            Item.width = 28; Item.height = 30;
+    54→            Item.useTime = 20; Item.useAnimation = 20;
+    55→            Item.useStyle = ItemUseStyleID.HoldUp;
+    56→            Item.autoReuse = true;
+    57→            Item.shoot = 931; Item.shootSpeed = 12f;
+    58→            Item.mana = 0; Item.noMelee = true;
+    59→            Item.rare = ItemRarityID.Quest;
+    60→            Item.UseSound = SoundID.Item8;
+    61→        }
+    62→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+    63→        {
+    64→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+    65→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 3004;
+    66→            return false;
+    67→        }
+    68→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+    69→        {
+    70→            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ SPARKLE STARS ═══]"));
+    71→            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrellas de 4 puntas con textura custom]"));
+    72→        }
+    73→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+    74→    }
+    75→
+    76→    // ================================================================
+    77→    //  TEST MAGIC RING V2 — versión mejorada y profesional
+    78→    //  3 anillos girando + hue shift + sparkles + múltiples glows
+    79→    // ================================================================
+    80→    public class TestMagicRingV2 : ModItem
+    81→    {
+    82→        public override void SetStaticDefaults() { }
+    83→        public override void SetDefaults()
+    84→        {
+    85→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+    86→            Item.width = 28; Item.height = 30;
+    87→            Item.useTime = 20; Item.useAnimation = 20;
+    88→            Item.useStyle = ItemUseStyleID.HoldUp;
+    89→            Item.autoReuse = true;
+    90→            Item.shoot = 931; Item.shootSpeed = 12f;
+    91→            Item.mana = 0; Item.noMelee = true;
+    92→            Item.rare = ItemRarityID.Quest;
+    93→            Item.UseSound = SoundID.Item8;
+    94→        }
+    95→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+    96→        {
+    97→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+    98→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4006;
+    99→            return false;
+   100→        }
+   101→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   102→        {
+   103→            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF00FF:═══ MAGIC RING V2 ═══]"));
+   104→            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:3 anillos + hue shift + sparkles + multi-glow]"));
+   105→        }
+   106→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   107→    }
+   108→
+   109→    // ================================================================
+   110→    //  5 AURAS NUEVAS (efectos al sostener)
+   111→    // ================================================================
+   112→
+   113→    // === 1. AURA SHIELD — escudo de energía con hexágonos ===
+   114→    public class AuraShield : ModItem
+   115→    {
+   116→        public override void SetStaticDefaults() { }
+   117→        public override void SetDefaults()
+   118→        {
+   119→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   120→            Item.width = 28; Item.height = 30;
+   121→            Item.useTime = 20; Item.useAnimation = 20;
+   122→            Item.useStyle = ItemUseStyleID.HoldUp;
+   123→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   124→            Item.mana = 0; Item.noMelee = true;
+   125→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   126→        }
+   127→        public override void HoldItem(Player player)
+   128→        {
+   129→            float pulse = 0.8f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.03f);
+   130→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
+   131→            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
+   132→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
+   133→            // Partículas eléctricas
+   134→            if (Main.rand.NextBool(6))
+   135→            {
+   136→                float angle = Main.rand.NextFloat(0, System.MathF.PI * 2);
+   137→                float dist = 40f;
+   138→                Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
+   139→                    (float)System.Math.Cos(angle) * dist, (float)System.Math.Sin(angle) * dist),
+   140→                    DustID.BlueTorch, Vector2.Zero, 200, new Color(0, 255, 255), 0.5f);
+   141→                d.noGravity = true; d.fadeIn = 0f;
+   142→            }
+   143→        }
+   144→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   145→        { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }
+   146→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   147→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ AURA SHIELD ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Escudo de energía cian con hexágonos]")); }
+   148→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   149→    }
+   150→
+   151→    // === 2. AURA SPHERE — esfera de energía con rayo hacia arriba ===
+   152→    public class AuraSphere : ModItem
+   153→    {
+   154→        public override void SetStaticDefaults() { }
+   155→        public override void SetDefaults()
+   156→        {
+   157→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   158→            Item.width = 28; Item.height = 30;
+   159→            Item.useTime = 20; Item.useAnimation = 20;
+   160→            Item.useStyle = ItemUseStyleID.HoldUp;
+   161→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   162→            Item.mana = 0; Item.noMelee = true;
+   163→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   164→        }
+   165→        public override void HoldItem(Player player)
+   166→        {
+   167→            float pulse = 0.7f + 0.3f * (float)System.Math.Sin(Main.GameUpdateCount * 0.04f);
+   168→            // Esfera grande
+   169→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleCyan", player.Center, 1.5f * pulse, new Color(0, 200, 255, 80), 0f);
+   170→            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
+   171→            // Núcleo blanco
+   172→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleWhite", player.Center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
+   173→            // Rayo hacia arriba
+   174→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/BeamCyan", player.Center + new Vector2(0, -60), 1f, new Color(100, 200, 255, 100), 0f);
+   175→            // Sparkles cuadrados blancos
+   176→            if (Main.rand.NextBool(4))
+   177→            {
+   178→                Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
+   179→                    Main.rand.NextFloat(-50, 50), Main.rand.NextFloat(-50, 50)),
+   180→                    DustID.BlueTorch, new Vector2(0, -1f), 200, new Color(255, 255, 255), 0.3f);
+   181→                d.noGravity = true; d.fadeIn = 0f;
+   182→            }
+   183→        }
+   184→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   185→        { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }
+   186→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   187→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ AURA SPHERE ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Esfera de energía cian con rayo vertical]")); }
+   188→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   189→    }
+   190→
+   191→    // === 3. AURA DIVINE — aura divina con rayos de luz ===
+   192→    public class AuraDivine : ModItem
+   193→    {
+   194→        public override void SetStaticDefaults() { }
+   195→        public override void SetDefaults()
+   196→        {
+   197→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   198→            Item.width = 28; Item.height = 30;
+   199→            Item.useTime = 20; Item.useAnimation = 20;
+   200→            Item.useStyle = ItemUseStyleID.HoldUp;
+   201→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   202→            Item.mana = 0; Item.noMelee = true;
+   203→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   204→        }
+   205→        public override void HoldItem(Player player)
+   206→        {
+   207→            float pulse = 0.6f + 0.4f * (float)System.Math.Sin(Main.GameUpdateCount * 0.02f);
+   208→            // Glow púrpura/magenta
+   209→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCirclePurple", player.Center, 1.3f * pulse, new Color(200, 50, 255, 70), 0f);
+   210→            Lighting.AddLight(player.Center, new Vector3(0.3f, 0.1f, 0.3f));
+   211→            // Rayos de luz emanando del jugador
+   212→            int numRays = 8;
+   213→            for (int i = 0; i < numRays; i++)
+   214→            {
+   215→                float angle = (System.MathF.PI * 2 / numRays) * i + Main.GameUpdateCount * 0.01f;
+   216→                Vector2 rayEnd = player.Center + new Vector2(
+   217→                    (float)System.Math.Cos(angle) * 60f,
+   218→                    (float)System.Math.Sin(angle) * 60f);
+   219→                // Dibujar rayo como serie de dust
+   220→                for (int j = 0; j < 5; j++)
+   221→                {
+   222→                    float t = j / 5f;
+   223→                    Vector2 pos = Vector2.Lerp(player.Center, rayEnd, t);
+   224→                    if (Main.rand.NextBool(2))
+   225→                    {
+   226→                        Dust d = Dust.NewDustPerfect(pos, DustID.PurpleTorch,
+   227→                            Vector2.Zero, 150, new Color(200, 50, 255), 0.4f);
+   228→                        d.noGravity = true; d.fadeIn = 0f;
+   229→                    }
+   230→                }
+   231→            }
+   232→            // Stardust
+   233→            if (Main.rand.NextBool(3))
+   234→            {
+   235→                Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
+   236→                    Main.rand.NextFloat(-60, 60), Main.rand.NextFloat(-60, 60)),
+   237→                    DustID.Enchanted_Pink, Vector2.Zero, 200, new Color(255, 100, 255), 0.3f);
+   238→                d.noGravity = true; d.fadeIn = 0f;
+   239→            }
+   240→        }
+   241→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   242→        { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }
+   243→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   244→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/FF00FF:═══ AURA DIVINE ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Aura divina púrpura con rayos de luz]")); }
+   245→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   246→    }
+   247→
+   248→    // === 4. AURA BLOOM — expansión radial pulsante ===
+   249→    public class AuraBloom : ModItem
+   250→    {
+   251→        public override void SetStaticDefaults() { }
+   252→        public override void SetDefaults()
+   253→        {
+   254→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   255→            Item.width = 28; Item.height = 30;
+   256→            Item.useTime = 20; Item.useAnimation = 20;
+   257→            Item.useStyle = ItemUseStyleID.HoldUp;
+   258→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   259→            Item.mana = 0; Item.noMelee = true;
+   260→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   261→        }
+   262→        public override void HoldItem(Player player)
+   263→        {
+   264→            // Anillos expandiéndose (3 fases)
+   265→            for (int i = 0; i < 3; i++)
+   266→            {
+   267→                float phase = ((Main.GameUpdateCount + i * 20) % 60) / 60f;
+   268→                float scale = 0.3f + phase * 1.5f;
+   269→                int alpha = (int)(150 * (1f - phase));
+   270→// NO SE PUEDE USAR EN HoldItem:                 VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, scale, new Color(255, 217, 61, alpha), 0f);
+   271→            }
+   272→            // Glow central verde
+   273→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGreen", player.Center, 0.6f, new Color(50, 255, 100, 100), 0f);
+   274→            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.25f, 0.1f));
+   275→            // Partículas verdes
+   276→            if (Main.rand.NextBool(5))
+   277→            {
+   278→                float angle = Main.rand.NextFloat(0, System.MathF.PI * 2);
+   279→                float dist = 30f + Main.rand.NextFloat(0, 30f);
+   280→                Dust d = Dust.NewDustPerfect(player.Center + new Vector2(
+   281→                    (float)System.Math.Cos(angle) * dist, (float)System.Math.Sin(angle) * dist),
+   282→                    DustID.GreenTorch, new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)), 200, new Color(50, 255, 100), 0.4f);
+   283→                d.noGravity = true; d.fadeIn = 0f;
+   284→            }
+   285→        }
+   286→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   287→        { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }
+   288→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   289→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/50FF64:═══ AURA BLOOM ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Anillos expandiéndose + glow verde]")); }
+   290→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   291→    }
+   292→
+   293→    // === 5. AURA COSMIC — anillo cósmico con partículas que gotean ===
+   294→    public class AuraCosmic : ModItem
+   295→    {
+   296→        public override void SetStaticDefaults() { }
+   297→        public override void SetDefaults()
+   298→        {
+   299→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   300→            Item.width = 28; Item.height = 30;
+   301→            Item.useTime = 20; Item.useAnimation = 20;
+   302→            Item.useStyle = ItemUseStyleID.HoldUp;
+   303→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   304→            Item.mana = 0; Item.noMelee = true;
+   305→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   306→        }
+   307→        public override void HoldItem(Player player)
+   308→        {
+   309→            // Anillo cósmico girando
+   310→            float rot = Main.GameUpdateCount * 0.03f;
+   311→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, 1.0f, new Color(255, 217, 61, 100), rot);
+   312→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
+   313→            // Partículas que gotean del anillo (hacia abajo)
+   314→            if (Main.rand.NextBool(3))
+   315→            {
+   316→                float angle = Main.rand.NextFloat(0, System.MathF.PI * 2);
+   317→                float dist = 50f;
+   318→                Vector2 dripPos = player.Center + new Vector2(
+   319→                    (float)System.Math.Cos(angle) * dist,
+   320→                    (float)System.Math.Sin(angle) * dist);
+   321→                Dust d = Dust.NewDustPerfect(dripPos, DustID.GoldFlame,
+   322→                    new Vector2(0, 1.5f), 150, new Color(255, 217, 61), 0.3f);
+   323→                d.noGravity = false; d.fadeIn = 0f;
+   324→            }
+   325→            // Glow central
+   326→            Lighting.AddLight(player.Center, new Vector3(0.25f, 0.2f, 0.05f));
+   327→// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGold", player.Center, 0.4f, new Color(255, 217, 61, 60), 0f);
+   328→        }
+   329→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   330→        { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }
+   331→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   332→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ AURA COSMIC ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Anillo cósmico + partículas que gotean]")); }
+   333→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   334→    }
+   335→
+   336→    // ================================================================
+   337→    //  5 EFECTOS DE PROYECTIL NUEVOS
+   338→    // ================================================================
+   339→
+   340→    // === 1. PROJ BEAM — rayo de energía con lens flare ===
+   341→    public class ProjBeam : ModItem
+   342→    {
+   343→        public override void SetStaticDefaults() { }
+   344→        public override void SetDefaults()
+   345→        {
+   346→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   347→            Item.width = 28; Item.height = 30;
+   348→            Item.useTime = 20; Item.useAnimation = 20;
+   349→            Item.useStyle = ItemUseStyleID.HoldUp;
+   350→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   351→            Item.mana = 0; Item.noMelee = true;
+   352→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   353→        }
+   354→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   355→        {
+   356→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+   357→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4001;
+   358→            return false;
+   359→        }
+   360→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   361→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ PROJ BEAM ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Rayo de energía con lens flare y bloom]")); }
+   362→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   363→    }
+   364→
+   365→    // === 2. PROJ ELECTRIC — trail eléctrico jagged ===
+   366→    public class ProjElectric : ModItem
+   367→    {
+   368→        public override void SetStaticDefaults() { }
+   369→        public override void SetDefaults()
+   370→        {
+   371→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   372→            Item.width = 28; Item.height = 30;
+   373→            Item.useTime = 20; Item.useAnimation = 20;
+   374→            Item.useStyle = ItemUseStyleID.HoldUp;
+   375→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   376→            Item.mana = 0; Item.noMelee = true;
+   377→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   378→        }
+   379→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   380→        {
+   381→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+   382→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4002;
+   383→            return false;
+   384→        }
+   385→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   386→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ PROJ ELECTRIC ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Trail eléctrico jagged con sparkles]")); }
+   387→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   388→    }
+   389→
+   390→    // === 3. PROJ IMPACT — explosión multicolor al impactar ===
+   391→    public class ProjImpact : ModItem
+   392→    {
+   393→        public override void SetStaticDefaults() { }
+   394→        public override void SetDefaults()
+   395→        {
+   396→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   397→            Item.width = 28; Item.height = 30;
+   398→            Item.useTime = 20; Item.useAnimation = 20;
+   399→            Item.useStyle = ItemUseStyleID.HoldUp;
+   400→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   401→            Item.mana = 0; Item.noMelee = true;
+   402→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   403→        }
+   404→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   405→        {
+   406→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+   407→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4003;
+   408→            return false;
+   409→        }
+   410→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   411→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/50FF64:═══ PROJ IMPACT ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Explosión multicolor al impactar]")); }
+   412→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   413→    }
+   414→
+   415→    // === 4. PROJ RAINBOW — trail arcoíris ===
+   416→    public class ProjRainbow : ModItem
+   417→    {
+   418→        public override void SetStaticDefaults() { }
+   419→        public override void SetDefaults()
+   420→        {
+   421→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   422→            Item.width = 28; Item.height = 30;
+   423→            Item.useTime = 20; Item.useAnimation = 20;
+   424→            Item.useStyle = ItemUseStyleID.HoldUp;
+   425→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   426→            Item.mana = 0; Item.noMelee = true;
+   427→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   428→        }
+   429→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   430→        {
+   431→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+   432→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4004;
+   433→            return false;
+   434→        }
+   435→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   436→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/FF00FF:═══ PROJ RAINBOW ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Trail arcoíris con hue rotation]")); }
+   437→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   438→    }
+   439→
+   440→    // === 5. PROJ LIGHTNING — relámpago alrededor del proyectil ===
+   441→    public class ProjLightning : ModItem
+   442→    {
+   443→        public override void SetStaticDefaults() { }
+   444→        public override void SetDefaults()
+   445→        {
+   446→            Item.damage = 10; Item.DamageType = DamageClass.Generic;
+   447→            Item.width = 28; Item.height = 30;
+   448→            Item.useTime = 20; Item.useAnimation = 20;
+   449→            Item.useStyle = ItemUseStyleID.HoldUp;
+   450→            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
+   451→            Item.mana = 0; Item.noMelee = true;
+   452→            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
+   453→        }
+   454→        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+   455→        {
+   456→            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+   457→            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 4005;
+   458→            return false;
+   459→        }
+   460→        public override void ModifyTooltips(List<TooltipLine> tooltips)
+   461→        { tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ PROJ LIGHTNING ═══]")); tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Relámpagos alrededor del proyectil]")); }
+   462→        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
+   463→    }
+   464→
+   465→    // ================================================================
+   466→    //  HELPER: DrawAdditive — dibuja una textura con additive blending
+   467→    // ================================================================
+   468→    public static class VFXHelper
+   469→    {
+   470→        public static void DrawAdditive(string texturePath, Vector2 center, float scale, Color color, float rotation)
+   471→        {
+   472→            try
+   473→            {
+   474→                Texture2D tex = ModContent.Request<Texture2D>(texturePath).Value;
+   475→                if (tex == null) return;
+   476→                Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
+   477→                Vector2 drawPos = center - Main.screenPosition;
+   478→                Main.spriteBatch.End();
+   479→                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+   480→                Main.spriteBatch.Draw(tex, drawPos, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
+   481→                Main.spriteBatch.End();
+   482→                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+   483→            }
+   484→            catch { }
+   485→        }
+   486→    }
+   487→}
+   488→
