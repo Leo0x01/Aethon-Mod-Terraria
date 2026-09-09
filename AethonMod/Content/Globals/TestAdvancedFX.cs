@@ -53,16 +53,25 @@ namespace AethonMod.Content.Globals
                 d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // ColorRainbow (5004) — estela con color del hue
-            if (projectile.ai[1] == 5004 && Main.rand.NextBool(2))
+            // ColorRainbow (5004) — estela con color del hue + tintar sprite
+            if (projectile.ai[1] == 5004)
             {
                 float hue = (Main.GameUpdateCount * 0.01f) % 1f;
                 Color c = Main.hslToRgb(hue, 1f, 0.5f);
-                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
-                    -projectile.velocity * 0.1f + new Vector2(
-                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
-                    200, c, 0.7f);
-                d.noGravity = true; d.fadeIn = 0f;
+
+                // Tintar el sprite del proyectil con projectile.color
+                // tModLoader multiplica el sprite por este color automáticamente
+                projectile.color = c;
+
+                // Estela con color del hue
+                if (Main.rand.NextBool(2))
+                {
+                    Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
+                        -projectile.velocity * 0.1f + new Vector2(
+                            Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                        200, c, 0.7f);
+                    d.noGravity = true; d.fadeIn = 0f;
+                }
             }
         }
 
@@ -119,43 +128,25 @@ namespace AethonMod.Content.Globals
                 return true;
             }
 
-            // === COLOR RAINBOW (5004) — REESCRITO ===
-            // PreDraw retorna FALSE: tModLoader NO dibuja el sprite original.
-            // Nosotros dibujamos el sprite con el color del hue + GlowOrb.
+            // === COLOR RAINBOW (5004) — NO retorna false ===
+            // Deja que tModLoader dibuje el sprite original (con todo su glow/bloom natural)
+            // y solo agrega efectos encima con additive blending.
+            // El color del proyectil se cambia con projectile.color en AI().
             if (projectile.ai[1] == 5004)
             {
                 float hue = (t * 0.01f) % 1f;
                 Color tintColor = Main.hslToRgb(hue, 1f, 0.5f);
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
 
-                // 1. Dibujar el sprite del Nightglow con el color del hue
-                // Usamos AlphaBlend (no additive) para que reemplace el color
-                try
-                {
-                    Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
-                    if (tex != null)
-                    {
-                        Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
-                        Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-                        // Dibujar con el color del hue (multiplica el sprite por el color)
-                        // AlphaBlend para que el sprite se vea tintado, no sumado
-                        Main.spriteBatch.Draw(tex, drawPos, null,
-                            new Color(tintColor.R, tintColor.G, tintColor.B, 255),
-                            projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
-                    }
-                }
-                catch { }
-
-                // 2. Dibujar GlowOrb con additive blending encima
+                // GlowOrb con additive (núcleo blanco + halo del color del hue)
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.6f * pulse,
                     new Color(tintColor.R, tintColor.G, tintColor.B, 200), 0f);
 
-                // 3. Rayo de luz rotando con color del hue
+                // Rayo de luz rotando con color del hue
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse,
                     new Color(tintColor.R, tintColor.G, tintColor.B, 100), t * 0.03f);
 
-                return false; // NO dibujar el sprite original de tModLoader
+                return true; // tModLoader dibuja el sprite original (con su glow/bloom natural)
             }
 
             return true; // default: dibujar sprite original
