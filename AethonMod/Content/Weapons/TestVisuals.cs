@@ -65,7 +65,7 @@ namespace AethonMod.Content.Weapons
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ AURA CÓSMICA ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Brillo tenue + partículas + glow additive]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Brillo tenue + partículas doradas]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
@@ -145,7 +145,7 @@ namespace AethonMod.Content.Weapons
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ RELÁMPAGOS CÓSMICOS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Relámpagos cian + glow additive]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Relámpagos cian cayendo cerca del jugador]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

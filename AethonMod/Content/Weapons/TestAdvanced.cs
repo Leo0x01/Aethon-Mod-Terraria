@@ -126,7 +126,7 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            float pulse = 0.8f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.03f);
+            // pulse removido (VFXHelper.DrawAdditive no se puede usar en HoldItem)
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
             Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
@@ -164,7 +164,7 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            float pulse = 0.7f + 0.3f * (float)System.Math.Sin(Main.GameUpdateCount * 0.04f);
+            // pulse removido (VFXHelper.DrawAdditive no se puede usar en HoldItem)
             // Esfera grande
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleCyan", player.Center, 1.5f * pulse, new Color(0, 200, 255, 80), 0f);
             Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
@@ -204,7 +204,7 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            float pulse = 0.6f + 0.4f * (float)System.Math.Sin(Main.GameUpdateCount * 0.02f);
+            // pulse removido (VFXHelper.DrawAdditive no se puede usar en HoldItem)
             // Glow púrpura/magenta
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCirclePurple", player.Center, 1.3f * pulse, new Color(200, 50, 255, 70), 0f);
             Lighting.AddLight(player.Center, new Vector3(0.3f, 0.1f, 0.3f));
@@ -261,16 +261,9 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            // Anillos expandiéndose (3 fases)
-            for (int i = 0; i < 3; i++)
-            {
-                float phase = ((Main.GameUpdateCount + i * 20) % 60) / 60f;
-                //                 float scale = 0.3f + phase * 1.5f;
-                //                 int alpha = (int)(150 * (1f - phase));
-// NO SE PUEDE USAR EN HoldItem:                 VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, scale, new Color(255, 217, 61, alpha), 0f);
-            }
+            // Anillos expandiéndose (removido — VFXHelper no se puede usar en HoldItem)
+            // Solo partículas + Lighting
             // Glow central verde
-// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGreen", player.Center, 0.6f, new Color(50, 255, 100, 100), 0f);
             Lighting.AddLight(player.Center, new Vector3(0.15f, 0.25f, 0.1f));
             // Partículas verdes
             if (Main.rand.NextBool(5))
@@ -307,7 +300,7 @@ namespace AethonMod.Content.Weapons
         public override void HoldItem(Player player)
         {
             // Anillo cósmico girando
-            float rot = Main.GameUpdateCount * 0.03f;
+            // rot removido (VFXHelper.DrawAdditive no se puede usar en HoldItem)
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, 1.0f, new Color(255, 217, 61, 100), rot);
             // // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
             // Partículas que gotean del anillo (hacia abajo)
