@@ -229,9 +229,9 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// Dibuja el sprite del proyectil con un color de tinte.
-        /// Usa Main.EntitySpriteDraw (método recomendado por tModLoader).
-        /// Multiplica el sprite por el color del tinte.
+        /// Dibuja el sprite del proyectil con un color de tinte + bloom.
+        /// 1. AlphaBlend + tinte: reemplaza el color azul del sprite
+        /// 2. Additive + tinte: agrega brillo/bloom (el "destello" que falta)
         /// </summary>
         private void DrawColoredSprite(Projectile projectile, Color tintColor)
         {
@@ -240,7 +240,7 @@ namespace AethonMod.Content.Globals
                 Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
                 if (tex == null) return;
 
-                // Calcular el frame correcto (el Nightglow tiene animación de frames)
+                // Calcular el frame correcto
                 int frameCount = Main.projFrames[projectile.type];
                 Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height / (frameCount > 0 ? frameCount : 1));
                 if (frameCount > 0)
@@ -252,10 +252,19 @@ namespace AethonMod.Content.Globals
                 Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
                 Vector2 drawPos = projectile.Center - Main.screenPosition;
 
-                // Dibujar con AlphaBlend y color del tinte (multiplica el sprite por el color)
+                // 1. Dibujar sprite con AlphaBlend + color del tinte (reemplaza el azul)
                 Main.EntitySpriteDraw(tex, drawPos, frame,
                     new Color(tintColor.R, tintColor.G, tintColor.B, 255),
                     projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
+
+                // 2. Dibujar sprite OTRA VEZ con Additive + color del tinte (agrega bloom/destello)
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Draw(tex, drawPos, frame,
+                    new Color(tintColor.R, tintColor.G, tintColor.B, 128), // 50% alpha para no saturar
+                    projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
             catch { }
         }
