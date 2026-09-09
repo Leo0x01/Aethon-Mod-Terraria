@@ -8,12 +8,6 @@
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
         "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
 
-        "Items.StellarDust.DisplayName": "Polvo Estelar",
-        "Items.StellarDust.Tooltip": "Material cósmico fino. Dropea de jefes y enemigos del Sagrario Hueco.\nSe usa para craftear el Sello de Aethon y ceremoniales.",
-
-        "Items.AethonSigil.DisplayName": "Sello de Aethon",
-        "Items.AethonSigil.Tooltip": "Accesorio ceremonial del culto de Aethon.\n+5% daño mágico y de invocación\n+1 slot de minion\n+5/s regeneración de mana\nConfiere Empoderamiento Cósmico:\n  +10% daño, +5% crítico, +5% velocidad de ataque, 1% lifesteal",
-
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
         "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.",
 
@@ -30,9 +24,6 @@
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
 
-        "Buffs.CosmicEmpowermentBuff.DisplayName": "Empoderamiento Cósmico",
-        "Buffs.CosmicEmpowermentBuff.Description": "+10% daño, +5% crítico, +5% velocidad de ataque, 1% lifesteal",
-
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
         "NPCs.TheWitness.DisplayName": "El Testigo",
@@ -42,50 +33,4 @@
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
-
-        "Items.TestStaffChest.DisplayName": "Cofre de Pruebas Cósmico",
-        "Items.TestStaffChest.Tooltip": "Contiene TODOS los bastones de prueba + items ceremoniales.\nÚsalo para desplegar 16 bastones + 6 items en tu inventario.\nItem de testing — eliminar antes de release.",
-
-        "Items.TestMagicRing.DisplayName": "Bastón Anillo Mágico",
-        "Items.TestMagicRing.Tooltip": "Bastón de prueba. Nightglow + anillo dorado.",
-        "Items.TestSparkle.DisplayName": "Bastón Destellos",
-        "Items.TestSparkle.Tooltip": "Bastón de prueba. Nightglow + sparkles ambientales.",
-        "Items.ProjBeam.DisplayName": "Bastón Rayo",
-        "Items.ProjBeam.Tooltip": "Bastón de prueba. Nightglow + rayo concentrado.",
-        "Items.TestMagicRingV2.DisplayName": "Bastón Anillo Mágico V2",
-        "Items.TestMagicRingV2.Tooltip": "Bastón de prueba. Nightglow + anillos cósmicos múltiples.",
-
-        "Items.TestMagicRingAlt.DisplayName": "Bastón Anillo (Alt)",
-        "Items.TestMagicRingAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnMagicRing.\nComparar con el original.",
-        "Items.TestSparkleAlt.DisplayName": "Bastón Destellos (Alt)",
-        "Items.TestSparkleAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnSparkles.\nComparar con el original.",
-        "Items.ProjBeamAlt.DisplayName": "Bastón Rayo (Alt)",
-        "Items.ProjBeamAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnLightBeams.\nComparar con el original.",
-        "Items.TestMagicRingV2Alt.DisplayName": "Bastón Anillo V2 (Alt)",
-        "Items.TestMagicRingV2Alt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnMagicRingMulti.\nComparar con el original.",
-
-        "Items.TestNightglowBasic.DisplayName": "Nightglow Básico",
-        "Items.TestNightglowBasic.Tooltip": "Nightglow vanilla sin efectos. Baseline de comparación.",
-        "Items.TestNightglowCosmicTrail.DisplayName": "Nightglow Estela Cósmica",
-        "Items.TestNightglowCosmicTrail.Tooltip": "Nightglow + estela cósmica densa (oro/cian/magenta/índigo).",
-        "Items.TestNightglowStarWrath.DisplayName": "Nightglow Star Wrath",
-        "Items.TestNightglowStarWrath.Tooltip": "Recrea el efecto de la imagen:\nesfera de impacto + estrellas cayendo + sparkles + rayos de luz.",
-        "Items.TestNightglowRingBurst.DisplayName": "Nightglow Anillos Múltiples",
-        "Items.TestNightglowRingBurst.Tooltip": "Nightglow + 4 anillos cósmicos expansivos.",
-        "Items.TestNightglowSparkleTrail.DisplayName": "Nightglow Estela de Destellos",
-        "Items.TestNightglowSparkleTrail.Tooltip": "Nightglow + estela continua de sparkles.",
-        "Items.TestNightglowLightBeams.DisplayName": "Nightglow Rayos de Luz",
-        "Items.TestNightglowLightBeams.Tooltip": "Nightglow + rayos de luz radiantes.",
-        "Items.TestNightglowStarfall.DisplayName": "Nightglow Lluvia de Estrellas",
-        "Items.TestNightglowStarfall.Tooltip": "Nightglow + estrellas cayendo del cielo.",
-        "Items.TestNightglowLifesteal.DisplayName": "Nightglow Robavidas",
-        "Items.TestNightglowLifesteal.Tooltip": "Nightglow + 5% lifesteal mientras se sostiene.",
-        "Items.TestNightglowEmpower.DisplayName": "Nightglow Empoderador",
-        "Items.TestNightglowEmpower.Tooltip": "Nightglow + Empoderamiento Cósmico (+10% daño, +5% crit, 1% lifesteal).",
-        "Items.TestNightglowMultishot.DisplayName": "Nightglow Multidisparo",
-        "Items.TestNightglowMultishot.Tooltip": "Nightglow + 3 proyectiles en abanico.",
-        "Items.TestNightglowRainbowTrail.DisplayName": "Nightglow Estela Arcoíris",
-        "Items.TestNightglowRainbowTrail.Tooltip": "Nightglow + estela arcoíris cambiante.",
-        "Items.TestNightglowSupernova.DisplayName": "Nightglow Supernova",
-        "Items.TestNightglowSupernova.Tooltip": "Nightglow + explosión de supernova cósmica completa.",
 }

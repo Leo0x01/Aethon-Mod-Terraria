@@ -21,13 +21,12 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // Verificar si ya tiene el TestStaffChest (para no duplicar la entrega).
-            // v5.29: cambió de GenesisShard a TestStaffChest como marcador del kit.
+            // Verificar si ya tiene el GenesisShard (para no duplicar la entrega).
             bool alreadyHasKit = false;
             for (int i = 0; i < 58; i++)
             {
                 if (Player.inventory[i] != null &&
-                    Player.inventory[i].type == ModContent.ItemType<Items.TestStaffChest>())
+                    Player.inventory[i].type == ModContent.ItemType<GenesisShard>())
                 {
                     alreadyHasKit = true;
                     break;
@@ -42,8 +41,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1);
-
-            // v5.46: armas de prueba del remote (TestAdvanced.cs + ColorRainbow/Red/Yellow/Green)
+            // v5.46: armas de prueba (solo las que funcionan)
             GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1);
             GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
@@ -52,20 +50,6 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-
-            // v5.54: versiones Alt (mi implementación alternativa para comparar)
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestMagicRingAlt>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestSparkleAlt>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.ProjBeamAlt>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestMagicRingV2Alt>(), 1);
-
-            // v5.53: items ceremoniales nuevos (de mi trabajo local)
-            GiveItem(ModContent.ItemType<Items.StellarDust>(), 50);
-            GiveItem(ModContent.ItemType<Items.AethonSigil>(), 1);
-            GiveItem(ModContent.ItemType<Items.ResonanceShard>(), 20);
-
-            // v5.53: cofre con los 12 bastones Nightglow nuevos
-            GiveItem(ModContent.ItemType<Items.TestStaffChest>(), 1);
         }
 
         /// <summary>
@@ -84,7 +68,6 @@ namespace AethonMod.Content.Players
                 }
             }
             // v5.59: si el inventario está lleno, spawn el item en el suelo
-            // (previene que el kit se pierda o se duplique en re-entry)
             int drop = Item.NewItem(Player.GetSource_GiftOrReward(), Player.Center, itemType, stack);
             if (drop >= 0 && drop < Main.item.Length)
                 Main.item[drop].noGrabDelay = 0;

@@ -8,12 +8,6 @@
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
         "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
-        "Items.StellarDust.DisplayName": "Stellar Dust",
-        "Items.StellarDust.Tooltip": "Fine cosmic material. Dropped by bosses and Hollow Sanctum enemies.\nUsed to craft the Aethon Sigil and ceremonial items.",
-
-        "Items.AethonSigil.DisplayName": "Aethon Sigil",
-        "Items.AethonSigil.Tooltip": "Ceremonial accessory of the Aethon cult.\n+5% magic and summon damage\n+1 minion slot\n+5/s mana regeneration\nGrants Cosmic Empowerment:\n  +10% damage, +5% crit, +5% attack speed, 1% lifesteal",
-
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
         "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.",
 
@@ -30,9 +24,6 @@
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
 
-        "Buffs.CosmicEmpowermentBuff.DisplayName": "Cosmic Empowerment",
-        "Buffs.CosmicEmpowermentBuff.Description": "+10% damage, +5% crit, +5% attack speed, 1% lifesteal",
-
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
         "NPCs.TheWitness.DisplayName": "The Witness",
@@ -42,50 +33,4 @@
 
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
-
-        "Items.TestStaffChest.DisplayName": "Cosmic Test Chest",
-        "Items.TestStaffChest.Tooltip": "Contains ALL test staffs + ceremonial items.\nUse to deploy 16 staffs + 6 items into your inventory.\nTesting item — remove before release.",
-
-        "Items.TestMagicRing.DisplayName": "Magic Ring Staff",
-        "Items.TestMagicRing.Tooltip": "Test staff. Nightglow + golden ring.",
-        "Items.TestSparkle.DisplayName": "Sparkle Staff",
-        "Items.TestSparkle.Tooltip": "Test staff. Nightglow + ambient sparkles.",
-        "Items.ProjBeam.DisplayName": "Beam Staff",
-        "Items.ProjBeam.Tooltip": "Test staff. Nightglow + concentrated beam.",
-        "Items.TestMagicRingV2.DisplayName": "Magic Ring V2 Staff",
-        "Items.TestMagicRingV2.Tooltip": "Test staff. Nightglow + multiple cosmic rings.",
-
-        "Items.TestMagicRingAlt.DisplayName": "Magic Ring Staff (Alt)",
-        "Items.TestMagicRingAlt.Tooltip": "Alternative version using CosmicEffects.SpawnMagicRing.\nCompare with the original.",
-        "Items.TestSparkleAlt.DisplayName": "Sparkle Staff (Alt)",
-        "Items.TestSparkleAlt.Tooltip": "Alternative version using CosmicEffects.SpawnSparkles.\nCompare with the original.",
-        "Items.ProjBeamAlt.DisplayName": "Beam Staff (Alt)",
-        "Items.ProjBeamAlt.Tooltip": "Alternative version using CosmicEffects.SpawnLightBeams.\nCompare with the original.",
-        "Items.TestMagicRingV2Alt.DisplayName": "Magic Ring V2 Staff (Alt)",
-        "Items.TestMagicRingV2Alt.Tooltip": "Alternative version using CosmicEffects.SpawnMagicRingMulti.\nCompare with the original.",
-
-        "Items.TestNightglowBasic.DisplayName": "Basic Nightglow",
-        "Items.TestNightglowBasic.Tooltip": "Vanilla Nightglow with no extra effects. Comparison baseline.",
-        "Items.TestNightglowCosmicTrail.DisplayName": "Cosmic Trail Nightglow",
-        "Items.TestNightglowCosmicTrail.Tooltip": "Nightglow + dense cosmic trail (gold/cyan/magenta/indigo).",
-        "Items.TestNightglowStarWrath.DisplayName": "Star Wrath Nightglow",
-        "Items.TestNightglowStarWrath.Tooltip": "Recreates the image effect:\nimpact sphere + falling stars + sparkles + light beams.",
-        "Items.TestNightglowRingBurst.DisplayName": "Ring Burst Nightglow",
-        "Items.TestNightglowRingBurst.Tooltip": "Nightglow + 4 expanding cosmic rings.",
-        "Items.TestNightglowSparkleTrail.DisplayName": "Sparkle Trail Nightglow",
-        "Items.TestNightglowSparkleTrail.Tooltip": "Nightglow + continuous sparkle trail.",
-        "Items.TestNightglowLightBeams.DisplayName": "Light Beams Nightglow",
-        "Items.TestNightglowLightBeams.Tooltip": "Nightglow + radiating light beams.",
-        "Items.TestNightglowStarfall.DisplayName": "Starfall Nightglow",
-        "Items.TestNightglowStarfall.Tooltip": "Nightglow + stars falling from the sky.",
-        "Items.TestNightglowLifesteal.DisplayName": "Lifesteal Nightglow",
-        "Items.TestNightglowLifesteal.Tooltip": "Nightglow + 5% lifesteal while held.",
-        "Items.TestNightglowEmpower.DisplayName": "Empower Nightglow",
-        "Items.TestNightglowEmpower.Tooltip": "Nightglow + Cosmic Empowerment (+10% damage, +5% crit, 1% lifesteal).",
-        "Items.TestNightglowMultishot.DisplayName": "Multishot Nightglow",
-        "Items.TestNightglowMultishot.Tooltip": "Nightglow + 3 projectiles in a spread.",
-        "Items.TestNightglowRainbowTrail.DisplayName": "Rainbow Trail Nightglow",
-        "Items.TestNightglowRainbowTrail.Tooltip": "Nightglow + shifting rainbow trail.",
-        "Items.TestNightglowSupernova.DisplayName": "Supernova Nightglow",
-        "Items.TestNightglowSupernova.Tooltip": "Nightglow + full cosmic supernova explosion.",
 }
