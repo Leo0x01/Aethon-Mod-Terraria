@@ -9,7 +9,8 @@ using Terraria.DataStructures;
 namespace AethonMod.Content.Weapons
 {
     // ================================================================
-    //  ARMAS DE PRUEBA v5.44 — Solo las que funcionan + nuevas de color
+    //  ARMAS DE PRUEBA v5.46
+    //  Solo lo que funciona + ColorRainbow reescrito
     // ================================================================
 
     // === TEST MAGIC RING (funciona) ===
@@ -131,96 +132,14 @@ namespace AethonMod.Content.Weapons
     }
 
     // ================================================================
-    //  NUEVOS BASTONES DE COLOR — cambian el color del proyectil
-    //  El Nightglow (931) tiene colores arcoíris que cambian.
-    //  Usamos PreDraw con additive blending para re-tintar el sprite.
+    //  COLOR RAINBOW — REESCRITO
+    //  Cambia el color del sprite del proyectil COMPLETO + estela.
+    //
+    //  Técnica: PreDraw retorna FALSE para que tModLoader NO dibuje
+    //  el sprite original. Nosotros dibujamos el sprite nosotros
+    //  con el color del hue actual usando AlphaBlend normal.
+    //  Luego dibujamos el GlowOrb con additive blending encima.
     // ================================================================
-
-    // === COLOR DORADO ===
-    public class ColorGold : ModItem
-    {
-        public override void SetStaticDefaults() { }
-        public override void SetDefaults()
-        {
-            Item.damage = 10; Item.DamageType = DamageClass.Generic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 20; Item.useAnimation = 20;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
-        }
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5001;
-            return false;
-        }
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ COLOR DORADO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con tinte dorado + glow]"));
-        }
-        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
-    }
-
-    // === COLOR CIAN ===
-    public class ColorCyan : ModItem
-    {
-        public override void SetStaticDefaults() { }
-        public override void SetDefaults()
-        {
-            Item.damage = 10; Item.DamageType = DamageClass.Generic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 20; Item.useAnimation = 20;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
-        }
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5002;
-            return false;
-        }
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/00FFFF:═══ COLOR CIAN ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con tinte cian + glow]"));
-        }
-        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
-    }
-
-    // === COLOR MAGENTA ===
-    public class ColorMagenta : ModItem
-    {
-        public override void SetStaticDefaults() { }
-        public override void SetDefaults()
-        {
-            Item.damage = 10; Item.DamageType = DamageClass.Generic;
-            Item.width = 28; Item.height = 30;
-            Item.useTime = 20; Item.useAnimation = 20;
-            Item.useStyle = ItemUseStyleID.HoldUp;
-            Item.autoReuse = true; Item.shoot = 931; Item.shootSpeed = 12f;
-            Item.mana = 0; Item.noMelee = true;
-            Item.rare = ItemRarityID.Quest; Item.UseSound = SoundID.Item8;
-        }
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            if (proj >= 0 && proj < Main.maxProjectiles) Main.projectile[proj].ai[1] = 5003;
-            return false;
-        }
-        public override void ModifyTooltips(List<TooltipLine> tooltips)
-        {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF00FF:═══ COLOR MAGENTA ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con tinte magenta + glow]"));
-        }
-        public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
-    }
-
-    // === COLOR ARCOÍRIS (hue shift continuo) ===
     public class ColorRainbow : ModItem
     {
         public override void SetStaticDefaults() { }
@@ -243,7 +162,7 @@ namespace AethonMod.Content.Weapons
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FF00FF:═══ COLOR ARCOÍRIS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil con hue shift continuo + glow]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Proyectil + estela con hue shift continuo]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

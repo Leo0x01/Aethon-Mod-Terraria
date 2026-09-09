@@ -8,23 +8,21 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Globals
 {
     /// <summary>
-    /// TestAdvancedFX v5.44
+    /// TestAdvancedFX v5.46
     ///
-    /// Flags que funcionan (mantenidos):
+    /// Flags:
     /// 3003 = TestMagicRing
     /// 3004 = TestSparkle
     /// 4001 = ProjBeam
     /// 4006 = TestMagicRingV2
+    /// 5004 = ColorRainbow (REESCRITO: cambia el sprite + estela completos)
     ///
-    /// Nuevos flags de color (re-tintan el sprite del Nightglow):
-    /// 5001 = ColorGold (dorado)
-    /// 5002 = ColorCyan (cian)
-    /// 5003 = ColorMagenta (magenta)
-    /// 5004 = ColorRainbow (arcoíris hue shift)
-    ///
-    /// Técnica: PreDraw dibuja el sprite original con Color.Lerp
-    /// hacia el color del tinte, luego dibuja un glow circle
-    /// del mismo color con additive blending.
+    /// TÉCNICA ColorRainbow:
+    /// PreDraw retorna FALSE → tModLoader NO dibuja el sprite original.
+    /// Nosotros dibujamos:
+    /// 1. El sprite del Nightglow con el color del hue (AlphaBlend)
+    /// 2. El GlowOrb con additive blending encima
+    /// 3. Dust de estela con el color del hue
     /// </summary>
     public class TestAdvancedFX : GlobalProjectile
     {
@@ -54,6 +52,18 @@ namespace AethonMod.Content.Globals
                 Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Gold, Vector2.Zero, 200, new Color(255, 255, 255), 0.5f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
+
+            // ColorRainbow (5004) — estela con color del hue
+            if (projectile.ai[1] == 5004 && Main.rand.NextBool(2))
+            {
+                float hue = (Main.GameUpdateCount * 0.01f) % 1f;
+                Color c = Main.hslToRgb(hue, 1f, 0.5f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
+                    -projectile.velocity * 0.1f + new Vector2(
+                        Main.rand.NextFloat(-1, 1), Main.rand.NextFloat(-1, 1)),
+                    200, c, 0.7f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -66,12 +76,14 @@ namespace AethonMod.Content.Globals
                 DrawTex("AethonMod/Content/Effects/MagicRing", projectile.Center, 0.6f, new Color(0, 255, 255, 180), t * 0.05f);
                 DrawTex("AethonMod/Content/Effects/MagicRingGold", projectile.Center, 0.8f, new Color(255, 217, 61, 100), -t * 0.035f);
                 DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.5f, new Color(255, 217, 61, 120), 0f);
+                return true; // dibujar sprite original
             }
 
             // === TEST SPARKLE (3004) ===
             if (projectile.ai[1] == 3004)
             {
                 DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.7f, new Color(255, 217, 61, 130), 0f);
+                return true;
             }
 
             // === PROJ BEAM (4001) ===
@@ -86,6 +98,7 @@ namespace AethonMod.Content.Globals
                     DrawTex("AethonMod/Content/Effects/BeamCyan", projectile.Center, 0.8f * pulse,
                         new Color(0, 255, 255, 80), angle);
                 }
+                return true;
             }
 
             // === TEST MAGIC RING V2 (4006) ===
@@ -103,94 +116,52 @@ namespace AethonMod.Content.Globals
                 float pulse = 0.7f + 0.3f * (float)System.Math.Sin(t * 0.1f);
                 DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
                 DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.3f * pulse, new Color(255, 217, 61, 80), 0f);
+                return true;
             }
 
-            // ================================================================
-            //  COLOR DEL PROYECTIL (5001-5004)
-            //  Usan GlowOrb (esfera de energía con núcleo blanco + halo de color)
-            //  + GlowRay (rayo de luz radial) para lens flare
-            //  + re-tinte del sprite con additive blending
-            // ================================================================
-
-            // === COLOR DORADO (5001) ===
-            if (projectile.ai[1] == 5001)
-            {
-                Color tintColor = new Color(255, 217, 61, 255);
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                // Esfera de energía dorada (núcleo blanco + halo dorado)
-                DrawTex("AethonMod/Content/Effects/GlowOrbGold", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
-                // Rayo de luz dorado rotando (lens flare)
-                DrawTex("AethonMod/Content/Effects/GlowRayGold", projectile.Center, 0.5f * pulse, new Color(255, 217, 61, 100), t * 0.03f);
-                // Re-tintar el sprite
-                DrawTintedProjectile(projectile, tintColor, 0.6f);
-            }
-
-            // === COLOR CIAN (5002) ===
-            if (projectile.ai[1] == 5002)
-            {
-                Color tintColor = new Color(0, 255, 255, 255);
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                DrawTex("AethonMod/Content/Effects/GlowOrbCyan", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
-                DrawTex("AethonMod/Content/Effects/GlowRayCyan", projectile.Center, 0.5f * pulse, new Color(0, 255, 255, 100), t * 0.03f);
-                DrawTintedProjectile(projectile, tintColor, 0.6f);
-            }
-
-            // === COLOR MAGENTA (5003) ===
-            if (projectile.ai[1] == 5003)
-            {
-                Color tintColor = new Color(255, 0, 255, 255);
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                DrawTex("AethonMod/Content/Effects/GlowOrbMagenta", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse, new Color(255, 0, 255, 100), t * 0.03f);
-                DrawTintedProjectile(projectile, tintColor, 0.6f);
-            }
-
-            // === COLOR ARCOÍRIS (5004) — hue shift continuo ===
+            // === COLOR RAINBOW (5004) — REESCRITO ===
+            // PreDraw retorna FALSE: tModLoader NO dibuja el sprite original.
+            // Nosotros dibujamos el sprite con el color del hue + GlowOrb.
             if (projectile.ai[1] == 5004)
             {
                 float hue = (t * 0.01f) % 1f;
                 Color tintColor = Main.hslToRgb(hue, 1f, 0.5f);
                 float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                // Esfera blanca con tinte del hue
+
+                // 1. Dibujar el sprite del Nightglow con el color del hue
+                // Usamos AlphaBlend (no additive) para que reemplace el color
+                try
+                {
+                    Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
+                    if (tex != null)
+                    {
+                        Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
+                        Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+                        // Dibujar con el color del hue (multiplica el sprite por el color)
+                        // AlphaBlend para que el sprite se vea tintado, no sumado
+                        Main.spriteBatch.Draw(tex, drawPos, null,
+                            new Color(tintColor.R, tintColor.G, tintColor.B, 255),
+                            projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
+                    }
+                }
+                catch { }
+
+                // 2. Dibujar GlowOrb con additive blending encima
                 DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.6f * pulse,
                     new Color(tintColor.R, tintColor.G, tintColor.B, 200), 0f);
-                // Rayo de luz rotando con color del hue
+
+                // 3. Rayo de luz rotando con color del hue
                 DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse,
                     new Color(tintColor.R, tintColor.G, tintColor.B, 100), t * 0.03f);
-                // Re-tintar el sprite con el color del hue
-                DrawTintedProjectile(projectile, tintColor, 0.6f);
+
+                return false; // NO dibujar el sprite original de tModLoader
             }
 
-            return true;
+            return true; // default: dibujar sprite original
         }
 
-        /// <summary>
-        /// Dibuja el sprite del proyectil con un tinte de color.
-        /// Usa Color.Lerp para mezclar la luz natural con el color del tinte.
-        /// </summary>
-        private void DrawTintedProjectile(Projectile projectile, Color tintColor, float tintAmount)
-        {
-            try
-            {
-                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
-                if (tex == null) return;
-                Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
-                Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-                // Dibujar el sprite original con tinte (mezcla aditiva del color)
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                // Tinte: dibuja el sprite multiplicado por el color del tinte
-                Main.spriteBatch.Draw(tex, drawPos, null,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, (int)(255 * tintAmount)),
-                    projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            }
-            catch { }
-        }
-
-        // === HELPER: dibuja textura con additive blending ===
+        // === HELPER ===
         private void DrawTex(string path, Vector2 worldPos, float scale, Color color, float rotation)
         {
             try

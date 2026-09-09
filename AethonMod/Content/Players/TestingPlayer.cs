@@ -41,15 +41,11 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
             GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1);
-            // v5.44: armas de prueba (solo las que funcionan + nuevas de color)
+            // v5.46: armas de prueba (solo las que funcionan)
             GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1);
             GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
             GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
-            // Nuevos: color del proyectil
-            GiveItem(ModContent.ItemType<Weapons.ColorGold>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ColorCyan>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.ColorMagenta>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorRainbow>(), 1);
         }
 
