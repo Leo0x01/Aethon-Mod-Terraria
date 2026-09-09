@@ -127,8 +127,9 @@ namespace AethonMod.Content.Weapons
         public override void HoldItem(Player player)
         {
             float pulse = 0.8f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.03f);
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/ShieldCyan", player.Center, 1.2f * pulse, new Color(100, 200, 255, 100), 0f);
+            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/HexCyan", player.Center, 0.9f, new Color(0, 255, 255, 80), Main.GameUpdateCount * 0.02f);
             // Partículas eléctricas
             if (Main.rand.NextBool(6))
             {
@@ -165,11 +166,12 @@ namespace AethonMod.Content.Weapons
         {
             float pulse = 0.7f + 0.3f * (float)System.Math.Sin(Main.GameUpdateCount * 0.04f);
             // Esfera grande
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleCyan", player.Center, 1.5f * pulse, new Color(0, 200, 255, 80), 0f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleCyan", player.Center, 1.5f * pulse, new Color(0, 200, 255, 80), 0f);
+            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.2f, 0.25f));
             // Núcleo blanco
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleWhite", player.Center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleWhite", player.Center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
             // Rayo hacia arriba
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/BeamCyan", player.Center + new Vector2(0, -60), 1f, new Color(100, 200, 255, 100), 0f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/BeamCyan", player.Center + new Vector2(0, -60), 1f, new Color(100, 200, 255, 100), 0f);
             // Sparkles cuadrados blancos
             if (Main.rand.NextBool(4))
             {
@@ -204,7 +206,8 @@ namespace AethonMod.Content.Weapons
         {
             float pulse = 0.6f + 0.4f * (float)System.Math.Sin(Main.GameUpdateCount * 0.02f);
             // Glow púrpura/magenta
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCirclePurple", player.Center, 1.3f * pulse, new Color(200, 50, 255, 70), 0f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCirclePurple", player.Center, 1.3f * pulse, new Color(200, 50, 255, 70), 0f);
+            Lighting.AddLight(player.Center, new Vector3(0.3f, 0.1f, 0.3f));
             // Rayos de luz emanando del jugador
             int numRays = 8;
             for (int i = 0; i < numRays; i++)
@@ -264,10 +267,11 @@ namespace AethonMod.Content.Weapons
                 float phase = ((Main.GameUpdateCount + i * 20) % 60) / 60f;
                 float scale = 0.3f + phase * 1.5f;
                 int alpha = (int)(150 * (1f - phase));
-                VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, scale, new Color(255, 217, 61, alpha), 0f);
+// NO SE PUEDE USAR EN HoldItem:                 VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, scale, new Color(255, 217, 61, alpha), 0f);
             }
             // Glow central verde
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGreen", player.Center, 0.6f, new Color(50, 255, 100, 100), 0f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGreen", player.Center, 0.6f, new Color(50, 255, 100, 100), 0f);
+            Lighting.AddLight(player.Center, new Vector3(0.15f, 0.25f, 0.1f));
             // Partículas verdes
             if (Main.rand.NextBool(5))
             {
@@ -304,8 +308,8 @@ namespace AethonMod.Content.Weapons
         {
             // Anillo cósmico girando
             float rot = Main.GameUpdateCount * 0.03f;
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, 1.0f, new Color(255, 217, 61, 100), rot);
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, 1.0f, new Color(255, 217, 61, 100), rot);
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
             // Partículas que gotean del anillo (hacia abajo)
             if (Main.rand.NextBool(3))
             {
@@ -319,7 +323,8 @@ namespace AethonMod.Content.Weapons
                 d.noGravity = false; d.fadeIn = 0f;
             }
             // Glow central
-            VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGold", player.Center, 0.4f, new Color(255, 217, 61, 60), 0f);
+            Lighting.AddLight(player.Center, new Vector3(0.25f, 0.2f, 0.05f));
+// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/GlowCircleGold", player.Center, 0.4f, new Color(255, 217, 61, 60), 0f);
         }
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         { Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI); return false; }

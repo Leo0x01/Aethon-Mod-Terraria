@@ -32,7 +32,9 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            // v5.35: Brillo MUY tenue + partículas + glow circle con additive blending
+            // v5.35: Brillo MUY tenue + partículas
+            // NOTA: No se puede usar additive blending en HoldItem porque el
+            // spriteBatch no está activo (solo se puede en PreDraw/PostDraw).
             float pulse = 0.3f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.05f);
             Lighting.AddLight(player.Center, new Vector3(0.3f * pulse, 0.25f * pulse, 0.1f * pulse));
 
@@ -54,25 +56,6 @@ namespace AethonMod.Content.Weapons
                     new Color(0, 255, 255), 0.3f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
-
-            // v5.35: Glow circle con additive blending detrás del jugador
-            try
-            {
-                Texture2D glow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleGold").Value;
-                if (glow != null)
-                {
-                    Vector2 origin = new Vector2(glow.Width / 2f, glow.Height / 2f);
-                    Vector2 drawPos = player.Center - Main.screenPosition;
-                    float scale = 0.5f + 0.1f * (float)System.Math.Sin(Main.GameUpdateCount * 0.05f);
-
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                    Main.spriteBatch.Draw(glow, drawPos, null, new Color(255, 217, 61, 60), 0f, origin, scale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                }
-            }
-            catch { }
         }
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
@@ -106,7 +89,8 @@ namespace AethonMod.Content.Weapons
         }
         public override void HoldItem(Player player)
         {
-            // v5.35: Relámpagos cian + glow cian additive detrás del jugador
+            // v5.35: Relámpagos cian
+            // NOTA: No se puede usar additive blending en HoldItem (solo en PreDraw)
             if (Main.rand.NextBool(5))
             {
                 float x = player.Center.X + Main.rand.NextFloat(-80, 80);
@@ -150,24 +134,8 @@ namespace AethonMod.Content.Weapons
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Thunder, currentPos);
             }
 
-            // v5.35: Glow circle cian con additive blending
-            try
-            {
-                Texture2D glow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleCyan").Value;
-                if (glow != null)
-                {
-                    Vector2 origin = new Vector2(glow.Width / 2f, glow.Height / 2f);
-                    Vector2 drawPos = player.Center - Main.screenPosition;
-                    float scale = 0.4f + 0.08f * (float)System.Math.Sin(Main.GameUpdateCount * 0.08f);
-
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                    Main.spriteBatch.Draw(glow, drawPos, null, new Color(0, 255, 255, 40), 0f, origin, scale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                }
-            }
-            catch { }
+            // Brillo tenue del jugador
+            Lighting.AddLight(player.Center, new Vector3(0.1f, 0.1f, 0.2f));
         }
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
