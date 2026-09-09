@@ -31,7 +31,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.autoReuse = true;
             Item.shoot = 931;
             Item.shootSpeed = 12f;
-            Item.mana = 9; // más mana por los 3 proyectiles
+            Item.mana = 0; // bastón de prueba: sin costo de mana // más mana por los 3 proyectiles
             Item.noMelee = true;
         }
 

@@ -36,7 +36,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.autoReuse = true;
             Item.shoot = 931; // Nightglow
             Item.shootSpeed = 14f;
-            Item.mana = 15;
+            Item.mana = 0; // bastón de prueba: sin costo de mana
             Item.noMelee = true;
         }
 
