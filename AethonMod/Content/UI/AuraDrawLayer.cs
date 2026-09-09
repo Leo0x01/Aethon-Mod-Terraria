@@ -29,7 +29,7 @@ namespace AethonMod.Content.UI
             return true;
         }
 
-        public override void Draw(ref PlayerDrawSet drawInfo)
+        protected override void Draw(ref PlayerDrawSet drawInfo)
         {
             Player player = drawInfo.drawPlayer;
             if (player == null || !player.active || player.dead) return;
