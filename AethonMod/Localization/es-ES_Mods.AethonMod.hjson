@@ -55,6 +55,15 @@
         "Items.TestMagicRingV2.DisplayName": "Bastón Anillo Mágico V2",
         "Items.TestMagicRingV2.Tooltip": "Bastón de prueba. Nightglow + anillos cósmicos múltiples.",
 
+        "Items.TestMagicRingAlt.DisplayName": "Bastón Anillo (Alt)",
+        "Items.TestMagicRingAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnMagicRing.\nComparar con el original.",
+        "Items.TestSparkleAlt.DisplayName": "Bastón Destellos (Alt)",
+        "Items.TestSparkleAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnSparkles.\nComparar con el original.",
+        "Items.ProjBeamAlt.DisplayName": "Bastón Rayo (Alt)",
+        "Items.ProjBeamAlt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnLightBeams.\nComparar con el original.",
+        "Items.TestMagicRingV2Alt.DisplayName": "Bastón Anillo V2 (Alt)",
+        "Items.TestMagicRingV2Alt.Tooltip": "Versión alternativa usando CosmicEffects.SpawnMagicRingMulti.\nComparar con el original.",
+
         "Items.TestNightglowBasic.DisplayName": "Nightglow Básico",
         "Items.TestNightglowBasic.Tooltip": "Nightglow vanilla sin efectos. Baseline de comparación.",
         "Items.TestNightglowCosmicTrail.DisplayName": "Nightglow Estela Cósmica",

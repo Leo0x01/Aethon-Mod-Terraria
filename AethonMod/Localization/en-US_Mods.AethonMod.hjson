@@ -55,6 +55,15 @@
         "Items.TestMagicRingV2.DisplayName": "Magic Ring V2 Staff",
         "Items.TestMagicRingV2.Tooltip": "Test staff. Nightglow + multiple cosmic rings.",
 
+        "Items.TestMagicRingAlt.DisplayName": "Magic Ring Staff (Alt)",
+        "Items.TestMagicRingAlt.Tooltip": "Alternative version using CosmicEffects.SpawnMagicRing.\nCompare with the original.",
+        "Items.TestSparkleAlt.DisplayName": "Sparkle Staff (Alt)",
+        "Items.TestSparkleAlt.Tooltip": "Alternative version using CosmicEffects.SpawnSparkles.\nCompare with the original.",
+        "Items.ProjBeamAlt.DisplayName": "Beam Staff (Alt)",
+        "Items.ProjBeamAlt.Tooltip": "Alternative version using CosmicEffects.SpawnLightBeams.\nCompare with the original.",
+        "Items.TestMagicRingV2Alt.DisplayName": "Magic Ring V2 Staff (Alt)",
+        "Items.TestMagicRingV2Alt.Tooltip": "Alternative version using CosmicEffects.SpawnMagicRingMulti.\nCompare with the original.",
+
         "Items.TestNightglowBasic.DisplayName": "Basic Nightglow",
         "Items.TestNightglowBasic.Tooltip": "Vanilla Nightglow with no extra effects. Comparison baseline.",
         "Items.TestNightglowCosmicTrail.DisplayName": "Cosmic Trail Nightglow",

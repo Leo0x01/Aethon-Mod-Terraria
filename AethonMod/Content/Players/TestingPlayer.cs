@@ -53,6 +53,12 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
 
+            // v5.54: versiones Alt (mi implementación alternativa para comparar)
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestMagicRingAlt>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestSparkleAlt>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.ProjBeamAlt>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.TestMagicRingV2Alt>(), 1);
+
             // v5.53: items ceremoniales nuevos (de mi trabajo local)
             GiveItem(ModContent.ItemType<Items.StellarDust>(), 50);
             GiveItem(ModContent.ItemType<Items.AethonSigil>(), 1);
