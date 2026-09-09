@@ -6046,3 +6046,30 @@ Version bump: 5.29 → 5.30
 
 - Commit 2f0854f: 7 files changed, 132 insertions(+), 2 deletions(-)
 - Push exitoso: 930f3d2..2f0854f main -> main
+
+---
+Task ID: V5.34-ARMAS-AVANZADAS-ADDITIVE-BLENDING
+Agent: main (Z.ai Code)
+Task: Crear 4 armas de prueba con técnicas avanzadas (PreDraw + additive blending + texturas custom)
+
+Work Log:
+- Investigación profunda completada sobre cómo los mods profesionales logran efectos hermosos
+- 7 técnicas identificadas: PreDraw, additive blending, trails, texturas custom, partículas custom, bloom, anillos mágicos
+- Implementadas 4 de las 7 técnicas en armas de prueba
+
+4 ARMAS AVANZADAS CREADAS:
+1. TestGlow: Glow circle con additive blending (BlendState.Additive)
+2. TestTrail: Trail personalizado (15 posiciones + TrailGlow.png)
+3. TestMagicRing: Anillo mágico giratorio (2 anillos + MagicRing.png)
+4. TestSparkle: Sparkle stars con textura custom
+
+8 TEXTURAS PNG CUSTOM GENERADAS (Content/Effects/):
+- GlowCircle.png, GlowCircleGold.png, GlowCircleCyan.png, GlowCircleMagenta.png
+- SparkleStar.png, MagicRing.png, MagicRingGold.png, TrailGlow.png
+
+NO se tocó el Grimorio ni las armas de prueba existentes.
+
+Version bump: 5.33 → 5.34
+
+- Commit c93a0a0
+- Push exitoso: 87e7918..c93a0a0 main -> main
