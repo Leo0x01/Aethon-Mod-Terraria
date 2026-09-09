@@ -6073,3 +6073,21 @@ Version bump: 5.33 → 5.34
 
 - Commit c93a0a0
 - Push exitoso: 87e7918..c93a0a0 main -> main
+
+---
+Task ID: V5.35-LIMPIEZA + 10-ARMAS-NUEVAS + MAGICRING-V2
+Agent: main (Z.ai Code)
+Task: Limpiar bastones no deseados, crear 10 armas nuevas (5 auras + 5 proyectiles), MagicRingV2, aplicar additive blending a TestAura/TestRays
+
+Work Log:
+- Limpieza: eliminados 10 bastones viejos + TestVisualFX.cs
+- Mejoras: TestAura y TestRays ahora usan additive blending + glow textures
+- 10 armas nuevas con efectos profesionales (additive blending, glow textures, hue shift)
+- MagicRingV2 con 3 anillos + hue shift + sparkles + multi-glow
+- 10 texturas nuevas (glow circles, shields, beams, hexágons)
+- VFXHelper.DrawAdditive helper reutilizable
+- TestAdvancedFX.cs maneja todos los flags (3003-3004, 4001-4006)
+
+Version bump: 5.34 → 5.35
+- Commit 3085134
+- Push exitoso: c93a0a0..3085134 main -> main
