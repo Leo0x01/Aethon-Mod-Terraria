@@ -462,7 +462,7 @@ namespace AethonMod.Content.Weapons
     // ================================================================
     public static class VFXHelper
     {
-        public static void VFXHelper.DrawAdditive(string texturePath, Vector2 center, float scale, Color color, float rotation)
+        public static void DrawAdditive(string texturePath, Vector2 center, float scale, Color color, float rotation)
         {
             try
             {
