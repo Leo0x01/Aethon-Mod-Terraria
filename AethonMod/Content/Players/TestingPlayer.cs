@@ -41,14 +41,24 @@ namespace AethonMod.Content.Players
             GiveItem(Terraria.ID.ItemID.GoldBar, 100);
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
-            GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
+            GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1);
 
-            // v5.29: items ceremoniales creados (para pruebas)
+            // v5.46: armas de prueba del remote (TestAdvanced.cs + ColorRainbow/Red/Yellow/Green)
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorRainbow>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
+
+            // v5.53: items ceremoniales nuevos (de mi trabajo local)
             GiveItem(ModContent.ItemType<Items.StellarDust>(), 50);
             GiveItem(ModContent.ItemType<Items.AethonSigil>(), 1);
             GiveItem(ModContent.ItemType<Items.ResonanceShard>(), 20);
 
-            // v5.29: cofre con TODOS los bastones de prueba
+            // v5.53: cofre con los 12 bastones Nightglow nuevos
             GiveItem(ModContent.ItemType<Items.TestStaffChest>(), 1);
         }
 

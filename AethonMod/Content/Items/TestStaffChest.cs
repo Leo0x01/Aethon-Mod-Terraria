@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Weapons;
 using AethonMod.Content.Weapons.TestStaffs;
 
 namespace AethonMod.Content.Items
@@ -12,6 +13,10 @@ namespace AethonMod.Content.Items
     ///
     /// Al usarlo (click izquierdo), despliega todos los items en el inventario del jugador.
     /// Es la forma más rápida de probar todos los efectos sin tener que craftear nada.
+    ///
+    /// NOTA v5.53: Los bastones TestMagicRing/TestSparkle/ProjBeam/TestMagicRingV2
+    /// vienen del remote (TestAdvanced.cs, namespace Weapons). Los TestNightglow*
+    /// son nuevos (mi trabajo local, namespace Weapons.TestStaffs).
     /// </summary>
     public class TestStaffChest : ModItem
     {
@@ -35,14 +40,18 @@ namespace AethonMod.Content.Items
         {
             if (Main.myPlayer != player.whoAmI) return null;
 
-            // === TODOS LOS BASTONES DE PRUEBA ===
-            // 4 protegidos (baseline)
+            // === BASTONES DEL REMOTE (TestAdvanced.cs) ===
             GiveItem(player, ModContent.ItemType<TestMagicRing>(), 1);
             GiveItem(player, ModContent.ItemType<TestSparkle>(), 1);
             GiveItem(player, ModContent.ItemType<ProjBeam>(), 1);
             GiveItem(player, ModContent.ItemType<TestMagicRingV2>(), 1);
+            // Armas de color del remote
+            GiveItem(player, ModContent.ItemType<ColorRainbow>(), 1);
+            GiveItem(player, ModContent.ItemType<ColorRed>(), 1);
+            GiveItem(player, ModContent.ItemType<ColorYellow>(), 1);
+            GiveItem(player, ModContent.ItemType<ColorGreen>(), 1);
 
-            // 12 bastones nuevos con Nightglow #931
+            // === 12 BASTONES NUEVOS (mi trabajo local, namespace Weapons.TestStaffs) ===
             GiveItem(player, ModContent.ItemType<TestNightglowBasic>(), 1);
             GiveItem(player, ModContent.ItemType<TestNightglowCosmicTrail>(), 1);
             GiveItem(player, ModContent.ItemType<TestNightglowStarWrath>(), 1); // recrea la imagen

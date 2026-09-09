@@ -5974,6 +5974,162 @@ Version bump: 5.26 → 5.27
 - Push exitoso: 8ae6cd1..e6cd894 main -> main
 
 ---
+Task ID: V5.28-REVISIÓN-PROFUNDA + ARMAS-VISUALES
+Agent: main (Z.ai Code)
+Task: Revisión profunda del código + crear 7 armas de prueba visual
+
+Work Log:
+1. REVISIÓN PROFUNDA COMPLETADA (vía subagente Explore):
+   - 20/23 funciones de WeaponScaling funcionan ✅
+   - 3 funciones rotas identificadas:
+     * MinionContactDamageMult: tooltip dice +50% pero NO se aplica al minion
+     * BoltAreaDamage: tooltip dice +Npx área pero NO existe daño en área
+     * DoubleShotChance: función muerta (nunca se llama)
+   - Bug: minion se debilita al cambiar de arma (velocidad, cooldown, rango)
+   - Bug: lifesteal se pierde al cambiar de arma antes del impacto
+   - Dead code: MilestonesForLevel, NextMilestoneSummary, CosmicOrbBolt, ArcaneBolt
+
+2. RESTAURACIÓN DEL REPOSITORIO LOCAL:
+   - El repo local se había reseteado a un estado antiguo (2f88f81)
+   - GitHub tenía el estado correcto (a3fcd07 = stable-v5.27)
+   - git fetch + git reset --hard origin/main → restaurado correctamente
+   - Verificado: autoReuse=true, UseAnimationMultiplier, reuseDelay=10, ShowExtendedTooltip
+
+3. 7 ARMAS DE PRUEBA VISUAL CREADAS:
+   1. TestAura (dorado): brillo dorado pulsante al sostener + partículas
+   2. TestStarTrail (blanco): trail de estrellas doradas/cian en el proyectil
+   3. TestPortal (púrpura): mini-portal cósmico al disparar
+   4. TestHaloMinion (verde): invoca minion con anillo dorado girando
+   5. TestColorGold (dorado): re-tinte dorado del Nightglow
+   6. TestColorCyan (cian): re-tinte cian del Nightglow
+   7. TestColorMagenta (magenta): re-tinte magenta del Nightglow
+
+4. GlobalProjectile TestVisualFX.cs creado para manejar:
+   - Trail de estrellas (ai[1]=9999)
+   - Halo del minion (ai[0]=1): 8 partículas doradas en anillo girando
+   - Color del proyectil (ai[1]=1001/1002/1003): PreDraw con Color.Lerp
+
+5. 7 sprites generados (28x30 cada uno, orbes de colores diferentes)
+6. Agregados al kit de testing del TestingPlayer
+7. Version bump: 5.27 → 5.28
+
+- Commit 1313b70
+- Push exitoso: a3fcd07..1313b70 main -> main
+
+Stage Summary:
+- **Commit pushed**: 1313b70
+- **URL**: https://github.com/Leo0x01/Aethon-Mod-Terraria/commit/1313b70
+- **Version**: 5.27 → 5.28
+- **Siguiente paso usuario**: descargar ZIP, recompilar, probar cada arma visual
+
+---
+Task ID: V5.30-FIX-ISSUES + ARMAS-ÁREA
+Agent: main (Z.ai Code)
+Task: Arreglar issues 1+2 de la revisión profunda + crear 2 armas de prueba daño en área
+
+Work Log:
+
+ISSUES ARREGLADOS:
+1. fromNet: true → false en CosmicProjectileFX.cs
+   - SimpleStrikeNPC con fromNet=true podía causar doble daño en MP
+   - Cambiado a false (daño local, no se envía por red)
+2. Agregado check de npc.immune en daño en área
+   - if (npc.immune[projectile.owner] > 0) continue;
+
+2 ARMAS DE PRUEBA CREADAS:
+- TestArea20 (naranja): Nightglow con daño en área 20px (radio estándar)
+- TestArea60 (rojo): Nightglow con daño en área 60px (casi 4 tiles)
+- Ambas usan ai[1] flags (2001/2002) procesados en TestVisualFX.OnHitNPC
+- Efectos visuales: anillo cian del área + partículas doradas en NPCs dañados
+
+Version bump: 5.29 → 5.30
+
+- Commit 2f0854f: 7 files changed, 132 insertions(+), 2 deletions(-)
+- Push exitoso: 930f3d2..2f0854f main -> main
+
+---
+Task ID: V5.34-ARMAS-AVANZADAS-ADDITIVE-BLENDING
+Agent: main (Z.ai Code)
+Task: Crear 4 armas de prueba con técnicas avanzadas (PreDraw + additive blending + texturas custom)
+
+Work Log:
+- Investigación profunda completada sobre cómo los mods profesionales logran efectos hermosos
+- 7 técnicas identificadas: PreDraw, additive blending, trails, texturas custom, partículas custom, bloom, anillos mágicos
+- Implementadas 4 de las 7 técnicas en armas de prueba
+
+4 ARMAS AVANZADAS CREADAS:
+1. TestGlow: Glow circle con additive blending (BlendState.Additive)
+2. TestTrail: Trail personalizado (15 posiciones + TrailGlow.png)
+3. TestMagicRing: Anillo mágico giratorio (2 anillos + MagicRing.png)
+4. TestSparkle: Sparkle stars con textura custom
+
+8 TEXTURAS PNG CUSTOM GENERADAS (Content/Effects/):
+- GlowCircle.png, GlowCircleGold.png, GlowCircleCyan.png, GlowCircleMagenta.png
+- SparkleStar.png, MagicRing.png, MagicRingGold.png, TrailGlow.png
+
+NO se tocó el Grimorio ni las armas de prueba existentes.
+
+Version bump: 5.33 → 5.34
+
+- Commit c93a0a0
+- Push exitoso: 87e7918..c93a0a0 main -> main
+
+---
+Task ID: V5.35-LIMPIEZA + 10-ARMAS-NUEVAS + MAGICRING-V2
+Agent: main (Z.ai Code)
+Task: Limpiar bastones no deseados, crear 10 armas nuevas (5 auras + 5 proyectiles), MagicRingV2, aplicar additive blending a TestAura/TestRays
+
+Work Log:
+- Limpieza: eliminados 10 bastones viejos + TestVisualFX.cs
+- Mejoras: TestAura y TestRays ahora usan additive blending + glow textures
+- 10 armas nuevas con efectos profesionales (additive blending, glow textures, hue shift)
+- MagicRingV2 con 3 anillos + hue shift + sparkles + multi-glow
+- 10 texturas nuevas (glow circles, shields, beams, hexágons)
+- VFXHelper.DrawAdditive helper reutilizable
+- TestAdvancedFX.cs maneja todos los flags (3003-3004, 4001-4006)
+
+Version bump: 5.34 → 5.35
+- Commit 3085134
+- Push exitoso: c93a0a0..3085134 main -> main
+---
+Task ID: SYNC-LOCAL-REMOTE-V5.53
+Agent: main (Z.ai Code)
+Task: Sincronizar trabajo local con GitHub remote (origin/main v5.52)
+
+Work Log:
+- DESCUBRIMIENTO: el remote origin/main estaba en v5.52 (24 commits que NO estaban en local)
+  Mi local estaba basado en commit 3d65864 (v5.27) e hice v5.28 + v5.29 sin conocer
+  el trabajo paralelo que otra sesión/agente subió a GitHub (v5.28 a v5.52).
+
+- PROBLEMA IDENTIFICADO:
+  * El remote ya tiene TestMagicRing, TestSparkle, ProjBeam, TestMagicRingV2
+    (en Content/Weapons/TestAdvanced.cs, namespace AethonMod.Content.Weapons)
+    con diseño basado en ai[1] flags + TestAdvancedFX.cs (GlobalProjectile)
+  * Mi local los recreó en Content/Weapons/TestStaffs/ (namespace diferente)
+    = DUPLICACIÓN de clases con mismo nombre
+
+- RESOLUCIÓN:
+  1. Backup tag: backup-local-v5.29-pre-sync (rama + tag)
+  2. Merge origin/main (24 commits traídos)
+  3. Conflictos resueltos: TestingPlayer.cs, build.txt, worklog.md
+  4. ELIMINADOS mis 4 bastones duplicados en TestStaffs/
+     (TestMagicRing.cs, TestSparkle.cs, ProjBeam.cs, TestMagicRingV2.cs + .png)
+     porque ya existen en Content/Weapons/ del remote
+  5. MANTENIDOS mis 12 bastones TestNightglow* (nuevos, no en remote)
+  6. MANTENIDOS: CosmicEffects.cs, StellarDust, AethonSigil, CosmicEmpowermentBuff,
+     TestStaffChest (mi trabajo nuevo)
+  7. TestingPlayer actualizado para dar: 8 bastones del remote + items ceremoniales
+     + TestStaffChest (con los 12 Nightglow nuevos)
+  8. TestStaffChest actualizado para referenciar Weapons.TestMagicRing (remote)
+     en vez de Weapons.TestStaffs.TestMagicRing (local eliminado)
+
+Stage Summary:
+- 24 commits del remote integrados (v5.30 a v5.52)
+- 4 bastones duplicados eliminados
+- 12 bastones Nightglow nuevos preservados
+- Items ceremoniales + helper CosmicEffects preservados
+- Version bumped: 5.52 -> 5.53 (merge sync)
+
 Task ID: GUARDAR-SUPER-ESTABLE-V5.27
 Agent: main (Z.ai Code)
 Task: Guardar v5.27 como versión SUPER ESTABLE

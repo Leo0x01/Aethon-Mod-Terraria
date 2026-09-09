@@ -64,24 +64,31 @@ namespace AethonMod.Content.Projectiles
 
             CheckMinionBuff(owner);
 
-            // === ACTUALIZAR HIT COOLDOWN SEGÚN NIVEL DEL GRIMORIO ===
-            // Base 15, -1 cada 10 niveles, mínimo 1.
-            Item? held = owner.HeldItem;
-            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            // v5.29: Obtener nivel del Grimorio cacheado en ai[2].
+            // Si ai[2] > 0, usar el nivel cacheado (no depende de HeldItem).
+            // Si ai[2] == 0 (minion viejo o invocado sin cache), intentar leer HeldItem.
+            int level = (int)Projectile.ai[2];
+            if (level < 1)
             {
-                try
+                // Fallback: leer HeldItem (comportamiento legacy)
+                Item? held = owner.HeldItem;
+                if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                 {
-                    var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
-                    if (sl != null)
+                    try
                     {
-                        Projectile.localNPCHitCooldown = WeaponScaling.MinionHitCooldown(sl.Level);
+                        var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
+                        if (sl != null) level = sl.Level;
                     }
+                    catch { }
                 }
-                catch { }
+                if (level < 1) level = 1;
             }
 
+            // === ACTUALIZAR HIT COOLDOWN SEGÚN NIVEL CACHEADO ===
+            Projectile.localNPCHitCooldown = WeaponScaling.MinionHitCooldown(level);
+
             // === BUSCAR ENEMIGO ===
-            NPC? target = FindHostileTarget(owner);
+            NPC? target = FindHostileTarget(owner, level);
             attacking = target != null;
             currentTarget = target;
 
@@ -93,20 +100,9 @@ namespace AethonMod.Content.Projectiles
 
                 if (dist > 0.1f)
                 {
-                    // Velocidad escala con nivel del Grimorio (base 16, +50% cada 30 niveles, tope 3x)
-                    // Nota: 'held' ya fue declarado arriba en AI() — lo reutilizamos (fix CS0136).
+                    // v5.29: Velocidad escala con nivel cacheado (no HeldItem)
                     float baseSpeed = 16f;
-                    float speedMult = 1f;
-                    if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-                    {
-                        try
-                        {
-                            var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
-                            if (sl != null)
-                                speedMult = WeaponScaling.MinionSpeedMult(sl.Level);
-                        }
-                        catch { }
-                    }
+                    float speedMult = WeaponScaling.MinionSpeedMult(level);
                     Vector2 desiredVel = toTarget.SafeNormalize(Vector2.Zero) * (baseSpeed * speedMult);
                     Projectile.velocity = Vector2.Lerp(Projectile.velocity, desiredVel, 0.25f);
                 }
@@ -204,21 +200,10 @@ namespace AethonMod.Content.Projectiles
             else owner.AddBuff(buffType, 18000);
         }
 
-        private NPC? FindHostileTarget(Player owner)
+        private NPC? FindHostileTarget(Player owner, int level)
         {
-            // Rango de detección escala con nivel del Grimorio (base 500, +100 cada 10 niveles, tope 1500)
-            float detectionRange = 500f;
-            Item? held = owner.HeldItem;
-            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-            {
-                try
-                {
-                    var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
-                    if (sl != null)
-                        detectionRange = WeaponScaling.MinionDetectionRange(sl.Level);
-                }
-                catch { }
-            }
+            // v5.29: Usar nivel cacheado (pasado como parámetro) en vez de leer HeldItem
+            float detectionRange = WeaponScaling.MinionDetectionRange(level);
 
             NPC? closest = null;
             float closestDist = detectionRange;
@@ -240,6 +225,18 @@ namespace AethonMod.Content.Projectiles
                 }
             }
             return closest;
+        }
+
+        /// <summary>
+        /// v5.29: Apply MinionContactDamageMult — multiplica el daño de contacto
+        /// del minion según el nivel cacheado del Grimorio.
+        /// +50% cada 15 niveles (tope +500%).
+        /// </summary>
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
+        {
+            int level = (int)Projectile.ai[2];
+            if (level < 1) level = 1;
+            modifiers.SourceDamage *= WeaponScaling.MinionContactDamageMult(level);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
