@@ -40,23 +40,25 @@ namespace AethonMod.Content.Players
             GiveItem(Terraria.ID.ItemID.GoldBar, 100);
             GiveItem(ModContent.ItemType<LevelUpTester>(), 1);
             GiveItem(ModContent.ItemType<BossSummonBag>(), 1);
-            GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1); // v5.6: item de prueba para toggle tooltip
-            // v5.28: armas de prueba visual
-            GiveItem(ModContent.ItemType<Weapons.TestAura>(), 1); // aura cósmica al sostener
-            GiveItem(ModContent.ItemType<Weapons.TestStarTrail>(), 1); // trail de estrellas
-            GiveItem(ModContent.ItemType<Weapons.TestPortal>(), 1); // portal al disparar
-            GiveItem(ModContent.ItemType<Weapons.TestHaloMinion>(), 1); // minion con halo
-            GiveItem(ModContent.ItemType<Weapons.TestColorGold>(), 1); // color dorado
-            GiveItem(ModContent.ItemType<Weapons.TestColorCyan>(), 1); // color cian
-            GiveItem(ModContent.ItemType<Weapons.TestColorMagenta>(), 1); // color magenta
-            GiveItem(ModContent.ItemType<Weapons.TestArea20>(), 1); // área 20px
-            GiveItem(ModContent.ItemType<Weapons.TestArea60>(), 1); // área 60px
-            GiveItem(ModContent.ItemType<Weapons.TestRays>(), 1); // rayos cósmicos desde el suelo
-            // v5.34: armas de prueba avanzadas (PreDraw + additive blending)
-            GiveItem(ModContent.ItemType<Weapons.TestGlow>(), 1); // glow circle
-            GiveItem(ModContent.ItemType<Weapons.TestTrail>(), 1); // trail personalizado
-            GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1); // anillo mágico
-            GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1); // sparkle stars
+            GiveItem(ModContent.ItemType<Items.SeerOrb>(), 1);
+            // v5.35: armas de prueba visual (solo las que se mantienen)
+            GiveItem(ModContent.ItemType<Weapons.TestAura>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestRays>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRing>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
+            // 5 auras nuevas
+            GiveItem(ModContent.ItemType<Weapons.AuraShield>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.AuraSphere>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.AuraDivine>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.AuraBloom>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.AuraCosmic>(), 1);
+            // 5 proyectiles nuevos
+            GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ProjElectric>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ProjImpact>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ProjRainbow>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.ProjLightning>(), 1);
         }
 
         /// <summary>

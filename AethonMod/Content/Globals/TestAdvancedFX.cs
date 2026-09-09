@@ -4,205 +4,236 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.DataStructures;
 
 namespace AethonMod.Content.Globals
 {
     /// <summary>
-    /// TestAdvancedFX — GlobalProjectile que maneja los efectos visuales
-    /// avanzados de las armas de prueba (TestAdvanced.cs).
-    ///
-    /// Técnicas usadas (de la investigación profunda):
-    /// 1. PreDraw con additive blending para glow circles
-    /// 2. Trail personalizado guardando posiciones anteriores
-    /// 3. Anillo mágico giratorio con textura custom
-    /// 4. Sparkle stars con textura custom
+    /// TestAdvancedFX — GlobalProjectile que maneja TODOS los efectos visuales
+    /// avanzados de las armas de prueba.
     ///
     /// Flags ai[1]:
-    /// 3001 = Glow circle con additive blending
-    /// 3002 = Trail personalizado
-    /// 3003 = Anillo mágico giratorio
-    /// 3004 = Sparkle stars
+    /// 3003 = Anillo mágico (original)
+    /// 3004 = Sparkle stars (original)
+    /// 4001 = ProjBeam (lens flare + bloom)
+    /// 4002 = ProjElectric (trail jagged)
+    /// 4003 = ProjImpact (explosión multicolor en OnHitNPC)
+    /// 4004 = ProjRainbow (trail arcoíris)
+    /// 4005 = ProjLightning (relámpagos alrededor)
+    /// 4006 = MagicRingV2 (3 anillos + hue shift + sparkles)
     /// </summary>
     public class TestAdvancedFX : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
-
-        // Lista de posiciones anteriores para el trail
-        private List<Vector2> _trailPositions = new List<Vector2>();
+        private List<Vector2> _trail = new List<Vector2>();
 
         public override bool AppliesToEntity(Projectile projectile, bool lateInstantiation)
-        {
-            return projectile.type == 931; // Nightglow
-        }
+        { return projectile.type == 931; }
 
         public override void AI(Projectile projectile)
         {
-            // === SPARKLE STARS (ai[1] == 3004) ===
-            if (projectile.ai[1] == 3004)
+            // Guardar posiciones para trails
+            if (projectile.ai[1] == 4002 || projectile.ai[1] == 4004)
             {
-                // Generar estrellas con textura custom cada 3 frames
-                if (Main.rand.NextBool(3))
+                _trail.Add(projectile.Center);
+                if (_trail.Count > 20) _trail.RemoveAt(0);
+            }
+
+            // Sparkle stars (3004)
+            if (projectile.ai[1] == 3004 && Main.rand.NextBool(3))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.Enchanted_Gold,
+                    new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
+                    200, new Color(255, 255, 255), 0.8f);
+                d.noGravity = true; d.fadeIn = 1.5f;
+            }
+
+            // ProjElectric (4002) — sparkles eléctricos
+            if (projectile.ai[1] == 4002 && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center + new Vector2(
+                    Main.rand.NextFloat(-8, 8), Main.rand.NextFloat(-8, 8)),
+                    DustID.BlueTorch, Vector2.Zero, 200, new Color(0, 255, 255), 0.5f);
+                d.noGravity = true; d.fadeIn = 0f;
+            }
+
+            // ProjLightning (4005) — relámpagos alrededor del proyectil
+            if (projectile.ai[1] == 4005 && Main.rand.NextBool(4))
+            {
+                float angle = Main.rand.NextFloat(0, System.MathF.PI * 2);
+                float dist = 20f;
+                Vector2 start = projectile.Center + new Vector2(
+                    (float)System.Math.Cos(angle) * dist, (float)System.Math.Sin(angle) * dist);
+                Vector2 end = start + new Vector2(
+                    Main.rand.NextFloat(-15, 15), Main.rand.NextFloat(5, 20));
+                for (int j = 0; j < 4; j++)
                 {
-                    // Usar DustID.Enchanted_Gold pero con la forma de estrella
-                    Dust d = Dust.NewDustPerfect(projectile.Center, DustID.Enchanted_Gold,
-                        new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
-                        200, new Color(255, 255, 255), 0.8f);
-                    d.noGravity = true;
-                    d.fadeIn = 1.5f; // las estrellas crecen un poco
+                    float t = j / 4f;
+                    Vector2 pos = Vector2.Lerp(start, end, t);
+                    Dust d = Dust.NewDustPerfect(pos, DustID.BlueTorch, Vector2.Zero, 220, new Color(0, 255, 255), 0.4f);
+                    d.noGravity = true; d.fadeIn = 0f;
                 }
             }
 
-            // === TRAIL PERSONALIZADO (ai[1] == 3002) ===
-            if (projectile.ai[1] == 3002)
+            // MagicRingV2 (4006) — sparkles a lo largo del anillo
+            if (projectile.ai[1] == 4006 && Main.rand.NextBool(5))
             {
-                // Guardar posiciones para el trail
-                _trailPositions.Add(projectile.Center);
-                if (_trailPositions.Count > 15)
-                    _trailPositions.RemoveAt(0);
+                float angle = Main.rand.NextFloat(0, System.MathF.PI * 2);
+                float dist = 35f;
+                Vector2 pos = projectile.Center + new Vector2(
+                    (float)System.Math.Cos(angle) * dist, (float)System.Math.Sin(angle) * dist);
+                Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Gold, Vector2.Zero, 200, new Color(255, 255, 255), 0.5f);
+                d.noGravity = true; d.fadeIn = 0f;
             }
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            // === GLOW CIRCLE con ADDITIVE BLENDING (ai[1] == 3001) ===
-            if (projectile.ai[1] == 3001)
-            {
-                DrawGlowCircle(projectile, "AethonMod/Content/Effects/GlowCircleCyan", 0.8f, new Color(0, 255, 255, 150));
-            }
-
-            // === TRAIL PERSONALIZADO (ai[1] == 3002) ===
-            if (projectile.ai[1] == 3002)
-            {
-                DrawTrail(projectile);
-                // También dibujar glow circle
-                DrawGlowCircle(projectile, "AethonMod/Content/Effects/GlowCircleCyan", 0.6f, new Color(0, 255, 255, 100));
-            }
-
-            // === ANILLO MÁGICO GIRATORIO (ai[1] == 3003) ===
+            // === ANILLO MÁGICO (3003) ===
             if (projectile.ai[1] == 3003)
             {
-                DrawMagicRing(projectile);
-                // También glow circle dorado
-                DrawGlowCircle(projectile, "AethonMod/Content/Effects/GlowCircleGold", 0.5f, new Color(255, 217, 61, 120));
+                DrawTex("AethonMod/Content/Effects/MagicRing", projectile.Center, 0.6f, new Color(0, 255, 255, 180), Main.GameUpdateCount * 0.05f);
+                DrawTex("AethonMod/Content/Effects/MagicRingGold", projectile.Center, 0.8f, new Color(255, 217, 61, 100), -Main.GameUpdateCount * 0.035f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.5f, new Color(255, 217, 61, 120), 0f);
             }
 
-            // === SPARKLE STARS (ai[1] == 3004) ===
+            // === SPARKLE STARS (3004) ===
             if (projectile.ai[1] == 3004)
+            { DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.7f, new Color(255, 217, 61, 130), 0f); }
+
+            // === PROJ BEAM (4001) — lens flare + bloom radial ===
+            if (projectile.ai[1] == 4001)
             {
-                // Glow dorado detrás
-                DrawGlowCircle(projectile, "AethonMod/Content/Effects/GlowCircleGold", 0.7f, new Color(255, 217, 61, 130));
-            }
-
-            return true; // dibujar el sprite original encima
-        }
-
-        /// <summary>
-        /// Dibuja un glow circle con additive blending detrás del proyectil.
-        /// </summary>
-        private void DrawGlowCircle(Projectile projectile, string texturePath, float scaleMult, Color color)
-        {
-            try
-            {
-                Texture2D glow = ModContent.Request<Texture2D>(texturePath).Value;
-                if (glow == null) return;
-
-                Vector2 origin = new Vector2(glow.Width / 2f, glow.Height / 2f);
-                Vector2 drawPos = projectile.Center - Main.screenPosition;
-                float scale = scaleMult + 0.1f * (float)System.Math.Sin(Main.GameUpdateCount * 0.1f); // pulso
-
-                // Cambiar a additive blending
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-
-                Main.spriteBatch.Draw(glow, drawPos, null, color, 0f, origin, scale, SpriteEffects.None, 0f);
-
-                // Volver a alpha blending
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// Dibuja un trail conectando las posiciones anteriores del proyectil.
-        /// Usa additive blending para que se vea brillante.
-        /// </summary>
-        private void DrawTrail(Projectile projectile)
-        {
-            try
-            {
-                if (_trailPositions.Count < 2) return;
-
-                Texture2D trailTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/TrailGlow").Value;
-                if (trailTex == null) return;
-
-                Vector2 origin = new Vector2(trailTex.Width / 2f, trailTex.Height / 2f);
-
-                // Cambiar a additive blending
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-
-                // Dibujar el trail desde la posición más vieja a la más nueva
-                for (int i = 0; i < _trailPositions.Count - 1; i++)
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(Main.GameUpdateCount * 0.15f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 1.2f * pulse, new Color(255, 255, 255, 180), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleCyan", projectile.Center, 0.8f * pulse, new Color(0, 255, 255, 100), 0f);
+                // Lens flare rays
+                for (int i = 0; i < 6; i++)
                 {
-                    float progress = (float)i / _trailPositions.Count;
-                    float alpha = progress * 0.8f; // las posiciones viejas son más transparentes
-                    float scale = progress * 0.5f + 0.2f;
-
-                    Vector2 drawPos = _trailPositions[i] - Main.screenPosition;
-
-                    // Rotar hacia la siguiente posición
-                    Vector2 dir = _trailPositions[i + 1] - _trailPositions[i];
-                    float rotation = dir.ToRotation();
-
-                    Main.spriteBatch.Draw(trailTex, drawPos, null,
-                        new Color(0, 255, 255, (int)(255 * alpha)),
-                        rotation, origin, scale, SpriteEffects.None, 0f);
+                    float angle = (System.MathF.PI * 2 / 6) * i + Main.GameUpdateCount * 0.02f;
+                    float len = 25f * pulse;
+                    Vector2 end = projectile.Center + new Vector2((float)System.Math.Cos(angle) * len, (float)System.Math.Sin(angle) * len);
+                    for (int j = 0; j < 4; j++)
+                    {
+                        float t = j / 4f;
+                        Vector2 pos = Vector2.Lerp(projectile.Center, end, t);
+                        Dust d = Dust.NewDustPerfect(pos, DustID.BlueTorch, Vector2.Zero, 220, new Color(0, 255, 255), 0.3f);
+                        d.noGravity = true; d.fadeIn = 0f;
+                    }
                 }
+            }
 
-                // Volver a alpha blending
+            // === PROJ ELECTRIC (4002) — trail jagged ===
+            if (projectile.ai[1] == 4002 && _trail.Count > 2)
+            {
+                DrawTex("AethonMod/Content/Effects/GlowCircleCyan", projectile.Center, 0.5f, new Color(0, 255, 255, 100), 0f);
+                // Dibujar trail jagged con dust
+                for (int i = 0; i < _trail.Count - 1; i += 2)
+                {
+                    float alpha = (float)i / _trail.Count * 0.6f;
+                    Vector2 jitter = new Vector2(Main.rand.NextFloat(-5, 5), Main.rand.NextFloat(-5, 5));
+                    Dust d = Dust.NewDustPerfect(_trail[i] + jitter, DustID.BlueTorch, Vector2.Zero,
+                        (int)(200 * alpha), new Color(0, 255, 255, (int)(255 * alpha)), 0.4f);
+                    d.noGravity = true; d.fadeIn = 0f;
+                }
+            }
+
+            // === PROJ RAINBOW (4004) — trail arcoíris ===
+            if (projectile.ai[1] == 4004 && _trail.Count > 2)
+            {
+                DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 0.6f, new Color(255, 255, 255, 120), 0f);
+                // Trail con hue rotation
+                for (int i = 0; i < _trail.Count - 1; i++)
+                {
+                    float hue = (float)i / _trail.Count + (Main.GameUpdateCount * 0.01f) % 1f;
+                    Color c = HueToColor(hue);
+                    float alpha = (float)i / _trail.Count * 0.7f;
+                    Dust d = Dust.NewDustPerfect(_trail[i], DustID.RainbowTorch, Vector2.Zero,
+                        (int)(200 * alpha), c, 0.5f);
+                    d.noGravity = true; d.fadeIn = 0f;
+                }
+            }
+
+            // === PROJ LIGHTNING (4005) — glow cian ===
+            if (projectile.ai[1] == 4005)
+            {
+                float pulse = 0.7f + 0.3f * (float)System.Math.Sin(Main.GameUpdateCount * 0.2f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleCyan", projectile.Center, 0.8f * pulse, new Color(0, 255, 255, 150), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 0.4f * pulse, new Color(255, 255, 255, 100), 0f);
+            }
+
+            // === MAGIC RING V2 (4006) — 3 anillos + hue shift + multi-glow ===
+            if (projectile.ai[1] == 4006)
+            {
+                float t = Main.GameUpdateCount;
+                float hue = (t * 0.005f) % 1f;
+                Color c1 = HueToColor(hue);
+                Color c2 = HueToColor((hue + 0.33f) % 1f);
+                Color c3 = HueToColor((hue + 0.66f) % 1f);
+
+                // 3 anillos a diferentes velocidades
+                DrawTex("AethonMod/Content/Effects/MagicRing", projectile.Center, 0.6f, c1 * 0.8f, t * 0.05f);
+                DrawTex("AethonMod/Content/Effects/MagicRingGold", projectile.Center, 0.85f, c2 * 0.6f, -t * 0.035f);
+                DrawTex("AethonMod/Content/Effects/MagicRing", projectile.Center, 1.1f, c3 * 0.4f, t * 0.025f);
+
+                // Multi-glow
+                float pulse = 0.7f + 0.3f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 0.5f * pulse, new Color(255, 255, 255, 150), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.3f * pulse, new Color(255, 217, 61, 80), 0f);
+            }
+
+            return true;
+        }
+
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            // === PROJ IMPACT (4003) — explosión multicolor ===
+            if (projectile.ai[1] == 4003)
+            {
+                // 3 colores de sparkles
+                for (int i = 0; i < 15; i++)
+                {
+                    Dust d = Dust.NewDustPerfect(target.Center, DustID.RainbowTorch,
+                        new Vector2(Main.rand.NextFloat(-5, 5), Main.rand.NextFloat(-5, 5)),
+                        200, Main.hslToRgb(Main.rand.NextFloat(0, 1), 1f, 0.5f), 1f);
+                    d.noGravity = true; d.fadeIn = 0f;
+                }
+                // Glow explosion
+                try
+                {
+                    Texture2D glow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleWhite").Value;
+                    Vector2 origin = new Vector2(glow.Width / 2f, glow.Height / 2f);
+                    Vector2 drawPos = target.Center - Main.screenPosition;
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                    Main.spriteBatch.Draw(glow, drawPos, null, new Color(255, 255, 255, 200), 0f, origin, 2f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                }
+                catch { }
+            }
+        }
+
+        // === HELPERS ===
+        private void DrawTex(string path, Vector2 center, float scale, Color color, float rotation)
+        {
+            try
+            {
+                Texture2D tex = ModContent.Request<Texture2D>(path).Value;
+                if (tex == null) return;
+                Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
+                Vector2 drawPos = center - Main.screenPosition;
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Draw(tex, drawPos, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
             catch { }
         }
 
-        /// <summary>
-        /// Dibuja un anillo mágico girando alrededor del proyectil.
-        /// Usa additive blending.
-        /// </summary>
-        private void DrawMagicRing(Projectile projectile)
+        private static Color HueToColor(float hue)
         {
-            try
-            {
-                Texture2D ring = ModContent.Request<Texture2D>("AethonMod/Content/Effects/MagicRing").Value;
-                if (ring == null) return;
-
-                Vector2 origin = new Vector2(ring.Width / 2f, ring.Height / 2f);
-                Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-                // Rotación que cambia con el tiempo
-                float rotation = Main.GameUpdateCount * 0.05f;
-                float scale = 0.6f + 0.1f * (float)System.Math.Sin(Main.GameUpdateCount * 0.08f);
-
-                // Cambiar a additive blending
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-
-                // Anillo cian
-                Main.spriteBatch.Draw(ring, drawPos, null,
-                    new Color(0, 255, 255, 180), rotation, origin, scale, SpriteEffects.None, 0f);
-
-                // Segundo anillo más grande girando en sentido contrario
-                Main.spriteBatch.Draw(ring, drawPos, null,
-                    new Color(255, 217, 61, 100), -rotation * 0.7f, origin, scale * 1.3f, SpriteEffects.None, 0f);
-
-                // Volver a alpha blending
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            }
-            catch { }
+            return Main.hslToRgb(hue % 1f, 1f, 0.5f);
         }
     }
 }
