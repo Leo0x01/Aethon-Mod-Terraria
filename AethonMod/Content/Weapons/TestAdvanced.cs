@@ -265,8 +265,8 @@ namespace AethonMod.Content.Weapons
             for (int i = 0; i < 3; i++)
             {
                 float phase = ((Main.GameUpdateCount + i * 20) % 60) / 60f;
-                float scale = 0.3f + phase * 1.5f;
-                int alpha = (int)(150 * (1f - phase));
+                //                 float scale = 0.3f + phase * 1.5f;
+                //                 int alpha = (int)(150 * (1f - phase));
 // NO SE PUEDE USAR EN HoldItem:                 VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, scale, new Color(255, 217, 61, alpha), 0f);
             }
             // Glow central verde
@@ -309,7 +309,7 @@ namespace AethonMod.Content.Weapons
             // Anillo cósmico girando
             float rot = Main.GameUpdateCount * 0.03f;
 // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRingGold", player.Center, 1.0f, new Color(255, 217, 61, 100), rot);
-// NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
+            // // NO SE PUEDE USAR EN HoldItem:             VFXHelper.DrawAdditive("AethonMod/Content/Effects/MagicRing", player.Center, 1.2f, new Color(0, 255, 255, 80), -rot * 0.7f);
             // Partículas que gotean del anillo (hacia abajo)
             if (Main.rand.NextBool(3))
             {

@@ -197,19 +197,9 @@ namespace AethonMod.Content.Globals
                         200, Main.hslToRgb(Main.rand.NextFloat(0, 1), 1f, 0.5f), 1f);
                     d.noGravity = true; d.fadeIn = 0f;
                 }
-                // Glow explosion
-                try
-                {
-                    Texture2D glow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleWhite").Value;
-                    Vector2 origin = new Vector2(glow.Width / 2f, glow.Height / 2f);
-                    Vector2 drawPos = target.Center - Main.screenPosition;
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                    Main.spriteBatch.Draw(glow, drawPos, null, new Color(255, 255, 255, 200), 0f, origin, 2f, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                }
-                catch { }
+                // NOTA: No se puede usar spriteBatch en OnHitNPC (no es hook de render).
+                // El glow explosion se hace solo con Dust + Lighting.
+                Lighting.AddLight(target.Center, new Vector3(1f, 1f, 1f));
             }
         }
 
