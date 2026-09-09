@@ -106,37 +106,43 @@ namespace AethonMod.Content.Globals
             }
 
             // ================================================================
-            //  NUEVOS: COLOR DEL PROYECTIL (5001-5004)
-            //  Re-tintan el sprite del Nightglow + dibujan un glow del color.
+            //  COLOR DEL PROYECTIL (5001-5004)
+            //  Usan GlowOrb (esfera de energía con núcleo blanco + halo de color)
+            //  + GlowRay (rayo de luz radial) para lens flare
+            //  + re-tinte del sprite con additive blending
             // ================================================================
 
             // === COLOR DORADO (5001) ===
             if (projectile.ai[1] == 5001)
             {
                 Color tintColor = new Color(255, 217, 61, 255);
-                float pulse = 0.7f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                // Glow dorado con additive
-                DrawTex("AethonMod/Content/Effects/GlowCircleGold", projectile.Center, 0.8f * pulse, new Color(255, 217, 61, 150), 0f);
-                // Re-tintar el sprite del proyectil
-                DrawTintedProjectile(projectile, tintColor, 0.7f);
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                // Esfera de energía dorada (núcleo blanco + halo dorado)
+                DrawTex("AethonMod/Content/Effects/GlowOrbGold", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
+                // Rayo de luz dorado rotando (lens flare)
+                DrawTex("AethonMod/Content/Effects/GlowRayGold", projectile.Center, 0.5f * pulse, new Color(255, 217, 61, 100), t * 0.03f);
+                // Re-tintar el sprite
+                DrawTintedProjectile(projectile, tintColor, 0.6f);
             }
 
             // === COLOR CIAN (5002) ===
             if (projectile.ai[1] == 5002)
             {
                 Color tintColor = new Color(0, 255, 255, 255);
-                float pulse = 0.7f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                DrawTex("AethonMod/Content/Effects/GlowCircleCyan", projectile.Center, 0.8f * pulse, new Color(0, 255, 255, 150), 0f);
-                DrawTintedProjectile(projectile, tintColor, 0.7f);
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowOrbCyan", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowRayCyan", projectile.Center, 0.5f * pulse, new Color(0, 255, 255, 100), t * 0.03f);
+                DrawTintedProjectile(projectile, tintColor, 0.6f);
             }
 
             // === COLOR MAGENTA (5003) ===
             if (projectile.ai[1] == 5003)
             {
                 Color tintColor = new Color(255, 0, 255, 255);
-                float pulse = 0.7f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                DrawTex("AethonMod/Content/Effects/GlowCircleMagenta", projectile.Center, 0.8f * pulse, new Color(255, 0, 255, 150), 0f);
-                DrawTintedProjectile(projectile, tintColor, 0.7f);
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                DrawTex("AethonMod/Content/Effects/GlowOrbMagenta", projectile.Center, 0.6f * pulse, new Color(255, 255, 255, 200), 0f);
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse, new Color(255, 0, 255, 100), t * 0.03f);
+                DrawTintedProjectile(projectile, tintColor, 0.6f);
             }
 
             // === COLOR ARCOÍRIS (5004) — hue shift continuo ===
@@ -144,12 +150,15 @@ namespace AethonMod.Content.Globals
             {
                 float hue = (t * 0.01f) % 1f;
                 Color tintColor = Main.hslToRgb(hue, 1f, 0.5f);
-                float pulse = 0.7f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                // Glow del color actual del hue
-                DrawTex("AethonMod/Content/Effects/GlowCircleWhite", projectile.Center, 0.8f * pulse,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, 150), 0f);
+                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
+                // Esfera blanca con tinte del hue
+                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.6f * pulse,
+                    new Color(tintColor.R, tintColor.G, tintColor.B, 200), 0f);
+                // Rayo de luz rotando con color del hue
+                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.5f * pulse,
+                    new Color(tintColor.R, tintColor.G, tintColor.B, 100), t * 0.03f);
                 // Re-tintar el sprite con el color del hue
-                DrawTintedProjectile(projectile, tintColor, 0.7f);
+                DrawTintedProjectile(projectile, tintColor, 0.6f);
             }
 
             return true;
