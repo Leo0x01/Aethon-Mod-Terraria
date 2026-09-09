@@ -23,7 +23,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.height = 30;
             Item.useTime = 26;
             Item.useAnimation = 26;
-            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.useStyle = ItemUseStyleID.HoldUp;
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(0, 0, 50, 0);
             Item.rare = ItemRarityID.Quest;
@@ -38,8 +38,12 @@ namespace AethonMod.Content.Weapons.TestStaffs
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // Disparar el proyectil manualmente (como el remote)
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+
             CosmicEffects.SpawnLightBeams(Main.MouseWorld, count: 8, length: 120f);
-            return true;
+            return false;
+        
         }
     }
 }

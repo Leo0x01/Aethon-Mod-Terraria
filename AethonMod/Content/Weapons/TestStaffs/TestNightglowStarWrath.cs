@@ -28,7 +28,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.height = 30;
             Item.useTime = 25;
             Item.useAnimation = 25;
-            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.useStyle = ItemUseStyleID.HoldUp;
             Item.knockBack = 4f;
             Item.value = Item.buyPrice(0, 5, 0, 0);
             Item.rare = ItemRarityID.Quest;
@@ -43,13 +43,17 @@ namespace AethonMod.Content.Weapons.TestStaffs
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // Disparar el proyectil manualmente (como el remote)
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
+
             // === EFECTO COMPLETO STAR WRATH en el cursor ===
             Vector2 target = Main.MouseWorld;
             CosmicEffects.SpawnStarWrathEffect(target);
 
             // Sonido adicional de impacto cósmico
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, target);
-            return true;
+            return false;
+        
         }
 
         public override void HoldItem(Player player)

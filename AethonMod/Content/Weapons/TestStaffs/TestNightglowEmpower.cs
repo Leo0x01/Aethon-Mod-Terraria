@@ -24,7 +24,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.height = 30;
             Item.useTime = 22;
             Item.useAnimation = 22;
-            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.useStyle = ItemUseStyleID.HoldUp;
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(0, 2, 0, 0);
             Item.rare = ItemRarityID.Quest;

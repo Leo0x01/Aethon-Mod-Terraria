@@ -28,7 +28,7 @@ namespace AethonMod.Content.Weapons.TestStaffs
             Item.height = 30;
             Item.useTime = 25;
             Item.useAnimation = 25;
-            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.useStyle = ItemUseStyleID.HoldUp;
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(0, 0, 50, 0);
             Item.rare = ItemRarityID.Quest;
@@ -43,10 +43,12 @@ namespace AethonMod.Content.Weapons.TestStaffs
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // Disparar el proyectil manualmente (como el remote)
+            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
             // Anillo mágico dorado en la posición del cursor
             Vector2 target = Main.MouseWorld;
             CosmicEffects.SpawnMagicRing(target, CosmicEffects.Gold, particleCount: 24, radius: 60f, speed: 3f);
-            return true; // tModLoader dispara el Nightglow vanilla
+            return false; // nosotros disparamos el proyectil
         }
     }
 }
