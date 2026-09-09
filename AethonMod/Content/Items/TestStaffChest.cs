@@ -52,10 +52,10 @@ namespace AethonMod.Content.Items
             GiveItem(player, ModContent.ItemType<ColorGreen>(), 1);
 
             // === VERSIONES ALT (mi implementación alternativa para comparar) ===
-            GiveItem(player, ModContent.ItemType<TestStaffs.TestMagicRingAlt>(), 1);
-            GiveItem(player, ModContent.ItemType<TestStaffs.TestSparkleAlt>(), 1);
-            GiveItem(player, ModContent.ItemType<TestStaffs.ProjBeamAlt>(), 1);
-            GiveItem(player, ModContent.ItemType<TestStaffs.TestMagicRingV2Alt>(), 1);
+            GiveItem(player, ModContent.ItemType<TestMagicRingAlt>(), 1);
+            GiveItem(player, ModContent.ItemType<TestSparkleAlt>(), 1);
+            GiveItem(player, ModContent.ItemType<ProjBeamAlt>(), 1);
+            GiveItem(player, ModContent.ItemType<TestMagicRingV2Alt>(), 1);
 
             // === 12 BASTONES NUEVOS (mi trabajo local, namespace Weapons.TestStaffs) ===
             GiveItem(player, ModContent.ItemType<TestNightglowBasic>(), 1);

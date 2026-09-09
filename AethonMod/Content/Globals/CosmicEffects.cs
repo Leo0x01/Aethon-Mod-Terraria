@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -92,7 +93,7 @@ namespace AethonMod.Content.Globals
             for (int i = 0; i < particleCount; i++)
             {
                 float angle = (MathHelper.TwoPi / particleCount) * i;
-                Vector2 dir = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                Vector2 dir = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
                 Dust d = Dust.NewDustPerfect(center, DustID.GoldFlame,
                     dir * speed,
                     180, color, 0.9f);
@@ -125,13 +126,14 @@ namespace AethonMod.Content.Globals
                     Main.rand.NextFloat(-spread, spread),
                     Main.rand.NextFloat(-spread, spread));
                 // Alternar colores
-                Color c = i % 4 switch
+                Color c;
+                switch (i % 4)
                 {
-                    0 => PureWhite,
-                    1 => Cyan,
-                    2 => Gold,
-                    _ => Magenta,
-                };
+                    case 0: c = PureWhite; break;
+                    case 1: c = Cyan; break;
+                    case 2: c = Gold; break;
+                    default: c = Magenta; break;
+                }
                 Dust d = Dust.NewDustPerfect(center + offset, DustID.Enchanted_Gold,
                     new Vector2(
                         Main.rand.NextFloat(-0.5f, 0.5f),
@@ -150,7 +152,7 @@ namespace AethonMod.Content.Globals
             for (int i = 0; i < count; i++)
             {
                 float angle = (MathHelper.TwoPi / count) * i + Main.rand.NextFloat(-0.2f, 0.2f);
-                Vector2 dir = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                Vector2 dir = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
                 // Línea de dust desde el centro hacia afuera
                 for (int j = 0; j < 8; j++)
                 {
@@ -209,7 +211,7 @@ namespace AethonMod.Content.Globals
                 Vector2 dir = new Vector2(
                     Main.rand.NextFloat(-1f, 1f),
                     Main.rand.NextFloat(-1f, 1f));
-                dir.Normalize();
+                if (dir.Length() > 0.1f) dir.Normalize();
                 Dust d = Dust.NewDustPerfect(center, DustID.Silver,
                     dir * (2f * intensity),
                     255, PureWhite, 1.2f * intensity);
@@ -221,7 +223,7 @@ namespace AethonMod.Content.Globals
             for (int i = 0; i < 16; i++)
             {
                 float angle = (MathHelper.TwoPi / 16) * i;
-                Vector2 dir = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                Vector2 dir = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
                 Dust d = Dust.NewDustPerfect(center, DustID.BlueTorch,
                     dir * (3f * intensity),
                     200, Cyan, 1.0f * intensity);
@@ -233,7 +235,7 @@ namespace AethonMod.Content.Globals
             for (int i = 0; i < 20; i++)
             {
                 float angle = (MathHelper.TwoPi / 20) * i;
-                Vector2 dir = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                Vector2 dir = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
                 Dust d = Dust.NewDustPerfect(center, DustID.PurpleTorch,
                     dir * (4f * intensity),
                     150, DeepBlue, 0.8f * intensity);
