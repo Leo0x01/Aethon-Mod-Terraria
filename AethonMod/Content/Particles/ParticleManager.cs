@@ -149,33 +149,36 @@ namespace AethonMod.Content.Particles
             var particles = _buffer.RawData;
             var sb = Main.spriteBatch;
 
-            // Batching: recoger partículas por blend mode
-            // BlendMode 0 = Alpha, 1 = Additive
-            // Primero Alpha, luego Additive
+            // v5.73: PostDrawTiles se llama cuando el spriteBatch NO está en Begin.
+            // NO llamar sb.End() al inicio — solo Begin/End nuestros propios passes.
 
-            // === Pass 1: AlphaBlend ===
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            for (int i = 0; i < _buffer.Capacity; i++)
+            try
             {
-                ref ParticleData p = ref particles[i];
-                if (!p.IsActive || p.BlendMode != 0) continue;
-                DrawParticle(sb, ref p);
-            }
-            sb.End();
+                // === Pass 1: AlphaBlend ===
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                for (int i = 0; i < _buffer.Capacity; i++)
+                {
+                    ref ParticleData p = ref particles[i];
+                    if (!p.IsActive || p.BlendMode != 0) continue;
+                    DrawParticle(sb, ref p);
+                }
+                sb.End();
 
-            // === Pass 2: Additive ===
-            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-            for (int i = 0; i < _buffer.Capacity; i++)
+                // === Pass 2: Additive ===
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                for (int i = 0; i < _buffer.Capacity; i++)
+                {
+                    ref ParticleData p = ref particles[i];
+                    if (!p.IsActive || p.BlendMode != 1) continue;
+                    DrawParticle(sb, ref p);
+                }
+                sb.End();
+            }
+            catch
             {
-                ref ParticleData p = ref particles[i];
-                if (!p.IsActive || p.BlendMode != 1) continue;
-                DrawParticle(sb, ref p);
+                // Si algo falla con el estado del spriteBatch, asegurarse de restaurarlo
+                try { sb.End(); } catch { }
             }
-            sb.End();
-
-            // Restaurar estado
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
         }
 
         private void DrawParticle(SpriteBatch sb, ref ParticleData p)
