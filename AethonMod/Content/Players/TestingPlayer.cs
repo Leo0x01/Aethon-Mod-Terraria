@@ -53,6 +53,11 @@ namespace AethonMod.Content.Players
             // v5.69: armas con sistema de partículas data-oriented
             GiveItem(ModContent.ItemType<Weapons.Particle.TrailStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.Particle.CalamityBlade>(), 1);
+            // v5.72: armas avanzadas con shaders + partículas + trails
+            GiveItem(ModContent.ItemType<Weapons.Advanced.VortexWeapon>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Advanced.ChromaticBlade>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Advanced.ShockwaveWeapon>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Advanced.StarfallWeapon>(), 1);
         }
 
         /// <summary>
