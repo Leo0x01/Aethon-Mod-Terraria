@@ -57,10 +57,13 @@ namespace AethonMod.Content.Projectiles.V20
                 float age = Projectile.ai[0];
                 Projectile.ai[0] += 1f;
 
-                // Spawn de Torch dust en todas las direcciones (3 por frame)
-                for (int i = 0; i < 3; i++)
+                // v5.78: spawn dust solo en cliente (no en server)
+                if (Main.netMode != NetmodeID.Server)
                 {
-                    SpawnTorchDust(age);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        SpawnTorchDust(age);
+                    }
                 }
 
                 // Iluminación cálida intensa (más intensa en el pico frame 30)

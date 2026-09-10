@@ -55,6 +55,8 @@ namespace AethonMod.Content.Systems
         /// </summary>
         public static float UseSpeedMult(int level, int useTimeBase = 22)
         {
+            // v5.78: guard contra division by zero
+            if (useTimeBase <= 0) return 1f;
             float reduction = level * UseSpeedPerLevel;
             if (reduction > 0.25f) reduction = 0.25f;
             // Calcular useTime efectivo y redondear a entero

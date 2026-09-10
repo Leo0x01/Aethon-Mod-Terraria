@@ -55,8 +55,16 @@ namespace AethonMod.Content.Particles
         public static ushort RegisterTexture(string path)
         {
             if (_textures == null || _textureCount >= _textures.Length) return 0;
-            _textures[_textureCount] = ModContent.Request<Texture2D>(path).Value;
-            return (ushort)(_textureCount++);
+            try
+            {
+                _textures[_textureCount] = ModContent.Request<Texture2D>(path).Value;
+                return (ushort)(_textureCount++);
+            }
+            catch
+            {
+                // v5.78: si la textura no existe, no crashear el mod
+                return 0;
+            }
         }
 
         /// <summary>

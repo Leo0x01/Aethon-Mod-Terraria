@@ -57,14 +57,16 @@ namespace AethonMod.Content.Projectiles.V20
                 Age += 1f;
                 Projectile.velocity *= 0.95f;
 
-                // === Time dilation: nearby enemies' velocity *= 0.5 ===
+                // v5.78: Time dilation via Slow buff (no velocity mutation)
+                // ANTES: npc.velocity *= 0.5f — congelaba enemigos permanentemente
+                // DESPUES: aplicar BuffID.Slow que es la forma correcta de ralentizar
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < 200f)
                     {
-                        npc.velocity *= 0.5f;
+                        npc.AddBuff(BuffID.Slow, 10); // 10 frames = se refresca cada frame
                     }
                 }
 

@@ -125,7 +125,7 @@ namespace AethonMod.Content.Projectiles.V20
                     if (dist < 200f)
                     {
                         npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
-                            true, Projectile.knockBack, DamageClass.Magic);
+                            false, Projectile.knockBack, DamageClass.Magic);
                     }
                 }
 

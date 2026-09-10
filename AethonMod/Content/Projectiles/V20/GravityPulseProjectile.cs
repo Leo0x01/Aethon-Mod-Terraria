@@ -97,7 +97,7 @@ namespace AethonMod.Content.Projectiles.V20
                     float strength = (1f - Math.Abs(dist - currentRadius) / 80f) * 2.5f;
                     if (strength < 0f) strength = 0f;
                     npc.velocity += dir * strength;
-                    if (npc.velocity.Length() > 14f)
+                    // v5.78: removed NPC velocity cap (was capping existing velocity)
                         npc.velocity = Vector2.Normalize(npc.velocity) * 14f;
                 }
 

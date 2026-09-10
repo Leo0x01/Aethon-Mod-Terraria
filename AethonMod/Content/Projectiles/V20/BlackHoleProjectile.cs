@@ -145,7 +145,7 @@ namespace AethonMod.Content.Projectiles.V20
                     toCenter.Normalize();
                     npc.velocity += toCenter * strength;
                     // Cap para evitar teleport
-                    if (npc.velocity.Length() > 12f)
+                    // v5.78: removed NPC velocity cap (was capping existing velocity)
                         npc.velocity = Vector2.Normalize(npc.velocity) * 12f;
                 }
             }

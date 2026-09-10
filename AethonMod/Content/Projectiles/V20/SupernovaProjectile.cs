@@ -72,7 +72,7 @@ namespace AethonMod.Content.Projectiles.V20
                         {
                             toCenter.Normalize();
                             npc.velocity += toCenter * strength;
-                            if (npc.velocity.Length() > 14f)
+                            // v5.78: removed NPC velocity cap (was capping existing velocity)
                                 npc.velocity = Vector2.Normalize(npc.velocity) * 14f;
                         }
                     }
@@ -167,7 +167,7 @@ namespace AethonMod.Content.Projectiles.V20
                     if (dist < 220f)
                     {
                         npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
-                            true, Projectile.knockBack, DamageClass.Magic);
+                            false, Projectile.knockBack, DamageClass.Magic);
                     }
                 }
 
