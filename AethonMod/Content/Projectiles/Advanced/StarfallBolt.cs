@@ -21,7 +21,12 @@ namespace AethonMod.Content.Projectiles.Advanced
     /// </summary>
     public class StarfallBolt : ModProjectile
     {
-        public override void SetStaticDefaults() { Main.projFrames[Projectile.type] = 1; }
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 1;
+            // v5.74: configurar TrailCacheLength para que oldPos tenga 20 elementos
+            ProjectileID.Sets.TrailCacheLength[Type] = 20;
+        }
 
         public override void SetDefaults()
         {
@@ -74,7 +79,8 @@ namespace AethonMod.Content.Projectiles.Advanced
             if (target != null)
             {
                 Vector2 dir = target.Center - Projectile.Center;
-                if (dir != Vector2.Zero)
+                // v5.74: usar LengthSquared > 0.0001f en vez de != Vector2.Zero
+                if (dir.LengthSquared() > 0.0001f)
                 {
                     dir.Normalize();
                     Projectile.velocity = Vector2.Lerp(Projectile.velocity, dir * 14f, 0.05f);
@@ -94,6 +100,8 @@ namespace AethonMod.Content.Projectiles.Advanced
                 if (trailTex != null)
                 {
                     int trailLength = Math.Min(Projectile.oldPos.Length, 20);
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                     for (int i = trailLength - 1; i > 0; i--)
                     {
                         if (Projectile.oldPos[i] == Vector2.Zero) continue;
@@ -111,8 +119,6 @@ namespace AethonMod.Content.Projectiles.Advanced
                         float alpha = (1f - progress) * 0.7f;
                         float scale = (1f - progress * 0.5f) * 0.5f;
 
-                        Main.spriteBatch.End();
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                         Main.spriteBatch.Draw(trailTex,
                             pos - Main.screenPosition, null,
                             new Color(255, 220, 100, (byte)(255 * alpha)),
@@ -120,9 +126,9 @@ namespace AethonMod.Content.Projectiles.Advanced
                             new Vector2(0, trailTex.Height / 2f),
                             new Vector2(dist / trailTex.Width, scale),
                             SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                     }
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 }
 
                 // === 2. ESTRELLA TEXTURIZADA ===

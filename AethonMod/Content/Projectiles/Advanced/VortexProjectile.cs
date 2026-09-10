@@ -20,7 +20,12 @@ namespace AethonMod.Content.Projectiles.Advanced
     /// </summary>
     public class VortexProjectile : ModProjectile
     {
-        public override void SetStaticDefaults() { Main.projFrames[Projectile.type] = 1; }
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 1;
+            // v5.74: configurar TrailCacheLength para que oldPos tenga 15 elementos
+            ProjectileID.Sets.TrailCacheLength[Type] = 15;
+        }
 
         public override void SetDefaults()
         {
@@ -127,11 +132,13 @@ namespace AethonMod.Content.Projectiles.Advanced
                 float pulse = 0.8f + 0.2f * (float)Math.Sin(t * 0.15f);
 
                 // === 1. TRAIL CONTINUO CON oldPos[] ===
-                // Dibujar trail degradado usando el array de posiciones anteriores
+                // v5.74: hoist End/Begin fuera del loop (1 Begin/Additive + 1 End en vez de N)
                 Texture2D trailTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Trail").Value;
                 if (trailTex != null)
                 {
                     int trailLength = Math.Min(Projectile.oldPos.Length, 15);
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                     for (int i = trailLength - 1; i > 0; i--)
                     {
                         if (Projectile.oldPos[i] == Vector2.Zero) continue;
@@ -149,8 +156,6 @@ namespace AethonMod.Content.Projectiles.Advanced
                         float alpha = (1f - progress) * 0.6f;
                         float scale = (1f - progress * 0.5f) * 0.4f;
 
-                        Main.spriteBatch.End();
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                         Main.spriteBatch.Draw(trailTex,
                             pos - Main.screenPosition, null,
                             new Color(180, 80, 255, (byte)(255 * alpha)),
@@ -158,9 +163,9 @@ namespace AethonMod.Content.Projectiles.Advanced
                             new Vector2(0, trailTex.Height / 2f),
                             new Vector2(dist / trailTex.Width, scale),
                             SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                     }
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 }
 
                 // === 2. VÓRTICE TEXTURIZADO ===

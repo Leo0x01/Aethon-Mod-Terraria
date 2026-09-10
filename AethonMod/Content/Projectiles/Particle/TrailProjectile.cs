@@ -22,6 +22,8 @@ namespace AethonMod.Content.Projectiles.Particle
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
+            // v5.74: configurar TrailCacheLength para que oldPos tenga 20 elementos
+            ProjectileID.Sets.TrailCacheLength[Type] = 20;
         }
 
         public override void SetDefaults()
@@ -82,6 +84,10 @@ namespace AethonMod.Content.Projectiles.Particle
                 int trailLength = Math.Min(Projectile.oldPos.Length, 20);
                 if (trailLength < 2) return true;
 
+                // v5.74: hoist End/Begin fuera del loop
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+
                 // Dibujar el trail de atrás hacia adelante
                 for (int i = trailLength - 1; i > 0; i--)
                 {
@@ -103,9 +109,7 @@ namespace AethonMod.Content.Projectiles.Particle
                     float alpha = (1f - progress) * 0.8f;
                     float scale = (1f - progress * 0.7f) * 0.5f;
 
-                    // Dibujar el trail segmento con additive blending
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                    // Dibujar el trail segmento
                     Main.spriteBatch.Draw(trailTex,
                         pos - Main.screenPosition,
                         null,
@@ -114,9 +118,9 @@ namespace AethonMod.Content.Projectiles.Particle
                         new Vector2(0, trailTex.Height / 2f),
                         new Vector2(dist / trailTex.Width, scale),
                         SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 }
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
             catch { }
 

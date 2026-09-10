@@ -54,7 +54,7 @@ namespace AethonMod.Content.Particles
         /// </summary>
         public static ushort RegisterTexture(string path)
         {
-            if (_textureCount >= _textures.Length) return 0;
+            if (_textures == null || _textureCount >= _textures.Length) return 0;
             _textures[_textureCount] = ModContent.Request<Texture2D>(path).Value;
             return (ushort)(_textureCount++);
         }
@@ -76,11 +76,28 @@ namespace AethonMod.Content.Particles
 
         /// <summary>
         /// Spawnea una partícula en el mundo.
+        /// v5.74: automáticamente guarda valores iniciales para FadeOut y ScaleDown
+        /// si el caller no los configuró.
         /// </summary>
         public static void Spawn(ParticleData data)
         {
             if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
-            _buffer?.TrySpawn(data);
+            if (_buffer == null) return;
+
+            // Si tiene FadeOut pero no configuró PackedStartColor, usar PackedColor
+            if (data.HasComponent(ComponentFlag.FadeOut) && data.PackedStartColor == 0)
+            {
+                data.PackedStartColor = data.PackedColor;
+            }
+
+            // Si tiene ScaleDown pero no configuró UserData1/UserData2, usar Scale actual
+            if (data.HasComponent(ComponentFlag.ScaleDown))
+            {
+                if (data.UserData1 == 0) data.UserData1 = data.Scale.X;
+                if (data.UserData2 == 0) data.UserData2 = data.Scale.Y;
+            }
+
+            _buffer.TrySpawn(data);
         }
 
         /// <summary>
@@ -109,23 +126,32 @@ namespace AethonMod.Content.Particles
                 }
 
                 // Component: FadeOut (empieza a fade al 50% de vida)
+                // v5.74: usar PackedStartColor como alpha base (no el alpha actual
+                // que decae exponencialmente cada frame)
                 if (p.HasComponent(ComponentFlag.FadeOut))
                 {
                     float progress = p.LifeProgress;
                     if (progress < 0.5f)
                     {
-                        float fadeAmount = progress / 0.5f;
-                        byte currentAlpha = (byte)(p.PackedColor >> 24);
-                        byte newAlpha = (byte)(currentAlpha * fadeAmount);
+                        float fadeAmount = progress / 0.5f; // 1 -> 0
+                        byte startAlpha = (byte)(p.PackedStartColor >> 24);
+                        byte newAlpha = (byte)(startAlpha * fadeAmount);
+                        // Preservar RGB del color actual, solo cambiar alpha
                         p.PackedColor = (p.PackedColor & 0x00FFFFFF) | ((uint)newAlpha << 24);
                     }
                 }
 
                 // Component: ScaleDown
+                // v5.74: usar UserData1 como scale inicial (no multiplicar el scale
+                // actual que decae exponencialmente cada frame)
                 if (p.HasComponent(ComponentFlag.ScaleDown))
                 {
                     float progress = p.LifeProgress;
-                    p.Scale *= progress;
+                    // UserData1 guarda el scale inicial (X), UserData2 guarda el Y
+                    float startX = p.UserData1 != 0 ? p.UserData1 : 1f;
+                    float startY = p.UserData2 != 0 ? p.UserData2 : 1f;
+                    p.Scale.X = startX * progress;
+                    p.Scale.Y = startY * progress;
                 }
 
                 // Component: Rotation (ya aplicado arriba)
@@ -154,8 +180,11 @@ namespace AethonMod.Content.Particles
 
             try
             {
+                // v5.74: pasar Main.GameViewMatrix.TransformationMatrix para respetar zoom
+                var transform = Main.GameViewMatrix.TransformationMatrix;
+
                 // === Pass 1: AlphaBlend ===
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, transform);
                 for (int i = 0; i < _buffer.Capacity; i++)
                 {
                     ref ParticleData p = ref particles[i];
@@ -165,7 +194,7 @@ namespace AethonMod.Content.Particles
                 sb.End();
 
                 // === Pass 2: Additive ===
-                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null, transform);
                 for (int i = 0; i < _buffer.Capacity; i++)
                 {
                     ref ParticleData p = ref particles[i];
