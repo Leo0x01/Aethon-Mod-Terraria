@@ -50,6 +50,9 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
+            // v5.69: armas con sistema de partículas data-oriented
+            GiveItem(ModContent.ItemType<Weapons.Particle.TrailStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Particle.CalamityBlade>(), 1);
         }
 
         /// <summary>
