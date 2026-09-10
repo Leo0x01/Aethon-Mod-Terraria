@@ -6774,3 +6774,127 @@ Stage Summary:
      8/8 OK manteniendo tol=70 (sin subirlo a 90 como se mencionaba en el
      worklog de Subagent D como alternativa).
 - Ready para commit por parte del main agent.
+
+---
+Task ID: V5.63-TEXTURAS
+Agent: Subagent F (texturas armas custom)
+Task: Generar 13 texturas HQ para armas + proyectiles custom (V5.63)
+
+Work Log:
+- Lei worklog previo (Subagent A-E). Confirmé:
+  * Patron workflow: z-ai image 1024x1024 master -> LANCZOS downscale ->
+    background transparency (most-common border + 4-corner fallback, TOL=70)
+  * Subagent E uso 28x30 para sus 8 staffs nuevos; los .cs nuevos declaran
+    `Item.width = 30; Item.height = 30;` para las 7 armas custom, pero el task
+    spec pide explicitamente 28x30 (siguiendo el patron de Subagent E).
+    Se respeto el task spec: 28x30 para armas.
+  * Los .cs de proyectiles declaran sus sizes exactos: CrescentSlash 40x40,
+    CosmicOrbBolt 30x30, StarShuriken 32x32, VoidOrb 36x36, LightningBolt
+    20x20, PhoenixFeather 24x24. Se respeto el task spec.
+  * Task spec menciona "12 textures" pero lista 13 explicitamente (7 armas
+    + 6 proyectiles) con prompts. Genere los 13. FrostSpear projectile
+    NO se genero (usa PreDraw con BeamCyan+GlowCircle+GlowOrbWhite).
+
+- Paso 1: mkdir -p AethonMod/Content/_masters tmp_scripts (ya existian)
+- Paso 2: Detecte que el master CosmicOrbBolt.png ya existia (generado por
+  Subagent A para el CosmicOrbBolt viejo en Content/Projectiles/). Lo borre
+  para regenerarlo con el prompt nuevo del task spec ("swirling rainbow
+  orb with prismatic colors, white core, magical energy ball").
+- Paso 3: Escrito tmp_scripts/gen_custom_masters_v563.sh (idempotente: skip
+  si master ya existe con size>1024). 13 NOMBRES + 13 PROMPTS alineados.
+  Retry 3x con sleep 5s, timeout 90s por invocacion.
+- Paso 4: Ejecutado el script. El shell timeout de 10 minutos (600s) se
+  agoto tras 12 masters generados (faltaba PhoenixFeather). Genere este
+  ultimo individualmente con `timeout 90 z-ai image ...` -> OK al 1er
+  intento. Total: 13/13 masters OK.
+  Nota: z-ai image guarda los masters como JPEG-encoded .png (mismo
+  comportamiento observado por Subagent A-E). PIL Image.open detecta el
+  formato del contenido, asi que convert("RGBA") funciona sin problemas.
+- Paso 5: Escrito tmp_scripts/downscale_v563.py reutilizando exactamente
+  la misma make_transparent() que Subagent E (TOL=70 Euclidiano RGB,
+  muestreo 2px border, Counter.most_common sobre RGB + fallback a 4
+  colores de esquinas como candidatos adicionales de bg). LANCZOS resize,
+  8-bit RGBA non-interlaced PNG.
+- Paso 6: Ejecutado el script en una sola pasada: 13/13 OK con TOL=70.
+  NO fue necesario subir a 90 ni hacer retry selectivo. El fallback de
+  esquinas resolvio todos los gradientes no uniformes (VoidOrbStaff tenia
+  bg blanco-grisacea detectada como (242,242,240) y aun asi OK 4/4).
+- Paso 7: Verificacion externa independiente:
+  - `file` en los 13 PNGs: todos "PNG image data, WxH, 8-bit/color RGBA,
+    non-interlaced" con las dimensiones esperadas.
+  - Script tmp_scripts/verify_v563.py con PIL: 13/13 dimensiones OK, modo
+    RGBA OK, 4/4 esquinas alpha=0 OK.
+- NO se tocaron:
+  - Las 40+ texturas previas de Subagent A/B/C/D/E
+  - El viejo CosmicOrbBolt.png (20x20) en Content/Projectiles/ (viejo
+    projectile, namespace distinto al nuevo Custom/CosmicOrbBolt.cs)
+  - Ningun archivo .cs
+- Masters 1024x1024 PRESERVADOS en AethonMod/Content/_masters/
+- Scripts reutilizables guardados en:
+  - /home/z/my-project/tmp_scripts/gen_custom_masters_v563.sh
+  - /home/z/my-project/tmp_scripts/downscale_v563.py
+  - /home/z/my-project/tmp_scripts/verify_v563.py
+
+Stage Summary:
+- 13 texturas nuevas generadas (todas OK en primera pasada con tol=70):
+
+  WEAPONS (7 archivos, 28x30, Content/Weapons/Custom/):
+  | Archivo final              | Tamaño | Bytes | Modo                | Corners α=0 |
+  |----------------------------|--------|------|---------------------|-------------|
+  | CrescentBlade.png          | 28x30  | 2035 | 8-bit RGBA non-int  | 4/4         |
+  | CosmicOrbStaff.png         | 28x30  | 1408 | 8-bit RGBA non-int  | 4/4         |
+  | StarShurikenWeapon.png     | 28x30  | 2091 | 8-bit RGBA non-int  | 4/4         |
+  | VoidOrbStaff.png           | 28x30  | 1187 | 8-bit RGBA non-int  | 4/4         |
+  | LightningRod.png           | 28x30  | 1974 | 8-bit RGBA non-int  | 4/4         |
+  | PhoenixFeatherWeapon.png   | 28x30  | 1975 | 8-bit RGBA non-int  | 4/4         |
+  | FrostSpearWeapon.png       | 28x30  | 1910 | 8-bit RGBA non-int  | 4/4         |
+
+  PROJECTILES (6 archivos, Content/Projectiles/Custom/):
+  | Archivo final              | Tamaño | Bytes | Modo                | Corners α=0 |
+  |----------------------------|--------|------|---------------------|-------------|
+  | CrescentSlash.png          | 40x40  | 4242 | 8-bit RGBA non-int  | 4/4         |
+  | CosmicOrbBolt.png          | 30x30  | 2433 | 8-bit RGBA non-int  | 4/4         |
+  | StarShuriken.png           | 32x32  | 2744 | 8-bit RGBA non-int  | 4/4         |
+  | VoidOrb.png                | 36x36  | 2768 | 8-bit RGBA non-int  | 4/4         |
+  | LightningBolt.png          | 20x20  | 1121 | 8-bit RGBA non-int  | 4/4         |
+  | PhoenixFeather.png         | 24x24  | 1563 | 8-bit RGBA non-int  | 4/4         |
+
+  Todas con fondo transparente (4/4 esquinas alpha=0) y contenido preservado.
+
+- Masters 1024x1024 archivados en AethonMod/Content/_masters/:
+  | Archivo master              | Bytes   |
+  |------------------------------|---------|
+  | CrescentBlade.png            |  67082  |
+  | CosmicOrbStaff.png           |  51330  |
+  | StarShurikenWeapon.png       |  58011  |
+  | VoidOrbStaff.png             | 117634  |
+  | LightningRod.png             |  90698  |
+  | PhoenixFeatherWeapon.png     |  76463  |
+  | FrostSpearWeapon.png         |  68884  |
+  | CrescentSlash.png            |  75590  |
+  | CosmicOrbBolt.png            |  86163  |
+  | StarShuriken.png             |  70213  |
+  | VoidOrb.png                  |  77370  |
+  | LightningBolt.png            |  50181  |
+  | PhoenixFeather.png           | 109407  |
+
+- Issues encontrados y resueltos:
+  1. Shell timeout de 10 min agoto el primer run de gen_custom_masters_v563.sh
+     tras generar 12/13 masters (PhoenixFeather era el ultimo en cola).
+     Resolucion: como el script es idempotente (skip si master ya existe
+     con size>0), no hubo que rerun todo. Genere PhoenixFeather con una
+     invocacion individual `timeout 90 z-ai image ...` -> OK al 1er intento.
+  2. El master CosmicOrbBolt.png ya existia (generado por Subagent A para
+     el CosmicOrbBolt viejo en Content/Projectiles/, 20x20 downscale).
+     Como el task spec pide un prompt nuevo ("swirling rainbow orb with
+     prismatic colors, white core") para el CosmicOrbBolt en
+     Content/Projectiles/Custom/ (30x30), borre el master viejo para
+     regenerarlo con el prompt nuevo. El viejo downscale 20x20 en
+     Content/Projectiles/CosmicOrbBolt.png NO se toco (es un .cs
+     distinto, namespace distinto).
+  3. NO fue necesario subir el threshold a 90: con tol=70 + fallback de
+     colores de esquina (Subagent E pattern), los 13 a la primera. El caso
+     mas tricky fue VoidOrbStaff donde el border-most-common era
+     (242,242,240) casi-blanco pero las esquinas tenian colores mas oscuros;
+     el fallback de corners resolvio el gradiente.
+- Ready para commit por parte del main agent.

@@ -50,15 +50,14 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-            // v5.62: nuevos bastones con efectos en AI() del proyectil
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.CosmicTrailStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.StarfallStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.SparkleAuraStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.LightBeamsStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.SupernovaStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.ImpactSphereStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.RainbowTrailStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.TestStaffs.StarWrathStaff>(), 1);
+            // v5.63: 7 nuevas armas con proyectiles propios
+            GiveItem(ModContent.ItemType<Weapons.Custom.CrescentBlade>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.CosmicOrbStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.StarShurikenWeapon>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.VoidOrbStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.LightningRod>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.PhoenixFeatherWeapon>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.FrostSpearWeapon>(), 1);
         }
 
         /// <summary>
