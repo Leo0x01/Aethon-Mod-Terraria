@@ -22,7 +22,7 @@ namespace AethonMod.Content.Weapons.Custom
             Item.useTime = 25; Item.useAnimation = 25;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<CosmicOrbBolt>();
+            Item.shoot = ModContent.ProjectileType<CosmicRainbowBolt>();
             Item.shootSpeed = 12f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;

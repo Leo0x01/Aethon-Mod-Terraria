@@ -7,10 +7,10 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.Custom
 {
     /// <summary>
-    /// CosmicOrbBolt — orbe de energía cósmica que deja estela arcoíris.
+    /// CosmicRainbowBolt — orbe de energía cósmica que deja estela arcoíris.
     /// Usa GlowOrb + GlowCircle rotando + dust arcoíris.
     /// </summary>
-    public class CosmicOrbBolt : ModProjectile
+    public class CosmicRainbowBolt : ModProjectile
     {
         public override void SetStaticDefaults()
         {
