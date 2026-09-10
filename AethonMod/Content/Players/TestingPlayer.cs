@@ -50,14 +50,9 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-            // v5.63: 7 nuevas armas con proyectiles propios
-            GiveItem(ModContent.ItemType<Weapons.Custom.CrescentBlade>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.CosmicOrbStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.StarShurikenWeapon>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.VoidOrbStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.LightningRod>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.PhoenixFeatherWeapon>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.FrostSpearWeapon>(), 1);
+            // v5.67: nuevos bastones creativos
+            GiveItem(ModContent.ItemType<Weapons.Custom.BlackHoleStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.Custom.SkyLightningStaff>(), 1);
         }
 
         /// <summary>
