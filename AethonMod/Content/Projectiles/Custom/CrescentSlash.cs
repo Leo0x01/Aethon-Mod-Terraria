@@ -68,8 +68,12 @@ namespace AethonMod.Content.Projectiles.Custom
             if (target != null)
             {
                 Vector2 dir = target.Center - Projectile.Center;
-                dir.Normalize();
-                Projectile.velocity = Vector2.Lerp(Projectile.velocity, dir * 12f, 0.05f);
+                // v5.66: SafeNormalize para evitar NaN si dir == Vector2.Zero
+                if (dir != Vector2.Zero)
+                {
+                    dir.Normalize();
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity, dir * 12f, 0.05f);
+                }
             }
         }
 

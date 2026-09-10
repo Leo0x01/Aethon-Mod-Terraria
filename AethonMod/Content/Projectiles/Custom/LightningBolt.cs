@@ -33,12 +33,15 @@ namespace AethonMod.Content.Projectiles.Custom
         public override void AI()
         {
             // Zigzag: oscilar perpendicular a la velocidad
-            float zigzag = (float)System.Math.Sin(Main.GameUpdateCount * 0.3f + Projectile.whoAmI) * 3f;
+            // v5.66: usar Projectile.identity (determinista en multiplayer) en vez de whoAmI
+            // y mutar velocity en vez de position para evitar desync + tile clipping
+            float zigzag = (float)System.Math.Sin(Main.GameUpdateCount * 0.3f + Projectile.identity) * 0.3f;
             Vector2 perp = new Vector2(-Projectile.velocity.Y, Projectile.velocity.X);
             if (perp.Length() > 0.1f)
             {
                 perp.Normalize();
-                Projectile.position += perp * zigzag * 0.1f;
+                // Aplicar zigzag a la velocity (no a position) — más seguro para tile collision
+                Projectile.velocity += perp * zigzag * 0.05f;
             }
 
             // Estela eléctrica dorada
