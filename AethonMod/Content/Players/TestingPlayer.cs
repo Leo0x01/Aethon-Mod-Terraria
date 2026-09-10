@@ -37,28 +37,11 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-            // v5.75: 20 nuevas armas
+            // v5.76: armas mantenidas
             GiveItem(ModContent.ItemType<Weapons.V20.BlackHoleStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.LaserBeamStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.ShotgunBlastStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.HomingSwarmStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.ChainLightningStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.FlamethrowerStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.IceNovaStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.StarCannonStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.VoidRiftStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.SolarFlareStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.GravityWellStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.MirrorShardStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.AbyssalTentacleStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.SpectralBladeStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.CosmicRayStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.FrostBlizzardStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.ThunderStormStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.V20.NebulaCloudStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
         }
 
         private void GiveItem(int itemType, int stack)
