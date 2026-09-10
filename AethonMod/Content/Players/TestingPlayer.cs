@@ -50,6 +50,15 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
+            // v5.62: nuevos bastones con efectos en AI() del proyectil
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.CosmicTrailStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.StarfallStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.SparkleAuraStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.LightBeamsStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.SupernovaStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.ImpactSphereStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.RainbowTrailStaff>(), 1);
+            GiveItem(ModContent.ItemType<Weapons.TestStaffs.StarWrathStaff>(), 1);
         }
 
         /// <summary>

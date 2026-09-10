@@ -6693,3 +6693,84 @@ Stage Summary:
 - Push a GitHub exitoso
 - Token limpiado del remote URL por seguridad
 - Estado: local y remote sincronizados en eb951e9
+
+---
+Task ID: V5.62-TEXTURAS
+Agent: Subagent E (texturas bastones nuevos)
+Task: Generar 8 texturas HQ para nuevos bastones (TestStaffs v5.62)
+
+Work Log:
+- Leí worklog previo (Subagent D usó 30x30, scripts tmp_scripts/downscale_staffs.py
+  como referencia). Confirmé que los .cs nuevos declaran `Item.width = 28; Item.height = 30`,
+  así que estas texturas son 28x30 (NO 30x30 como las de Subagent D).
+- Pasos:
+  1. mkdir -p AethonMod/Content/_masters tmp_scripts (ya existían)
+  2. Script `tmp_scripts/gen_staff_masters_v562.sh` con retry 3x (sleep 5s):
+     generó los 8 masters 1024x1024 al primer intento (sin retries) en ~6 min
+  3. Script `tmp_scripts/downscale_new_staffs.py`:
+     - Carga master como RGBA
+     - LANCZOS resize a (28, 30)
+     - Detecta bg = most-common color en border strip 2px
+     - FALLBACK adicional: incluye los 4 colores de las esquinas como
+       candidatos de bg (resuelve gradientes no uniformes que hicieron
+       fallar a 3 imágenes con tol=70 en la primera pasada)
+     - tol=70 Euclidiano RGB -> alpha=0
+     - Guarda PNG 8-bit RGBA non-interlaced
+  4. Primera pasada: 5 OK + 3 FAIL (StarfallStaff, RainbowTrailStaff,
+     StarWrathStaff) — bg detectado era color de borde no uniforme
+  5. Agregué fallback de colores de esquinas -> 8/8 OK en segunda pasada
+  6. Verificación con `file` y corner-alpha check: 8/8 RGBA 28x30, 4/4 corners alpha=0
+- NO se tocaron:
+  - Los 23 sprites previos de Subagent A/B/C/D
+  - Ningún archivo .cs
+  - Ningún otro directorio (NPCs, Projectiles, Buffs, Tile, Items, etc.)
+- Masters 1024x1024 PRESERVADOS en AethonMod/Content/_masters/
+- Scripts reutilizables guardados en:
+  - /home/z/my-project/tmp_scripts/gen_staff_masters_v562.sh
+  - /home/z/my-project/tmp_scripts/downscale_new_staffs.py
+
+Stage Summary:
+- 8 texturas nuevas generadas (todas OK en 2da pasada con tol=70 + fallback corners):
+
+  STAFFS (8 archivos, 28x30, Content/Weapons/TestStaffs/):
+  | Archivo final              | Tamaño | Bytes | Modo                | Corners α=0 |
+  |----------------------------|--------|------|---------------------|-------------|
+  | CosmicTrailStaff.png       | 28x30  | 1121 | 8-bit RGBA non-int  | 4/4         |
+  | StarfallStaff.png          | 28x30  | 2033 | 8-bit RGBA non-int  | 4/4         |
+  | SparkleAuraStaff.png       | 28x30  | 1632 | 8-bit RGBA non-int  | 4/4         |
+  | LightBeamsStaff.png        | 28x30  | 2379 | 8-bit RGBA non-int  | 4/4         |
+  | SupernovaStaff.png         | 28x30  | 2443 | 8-bit RGBA non-int  | 4/4         |
+  | ImpactSphereStaff.png      | 28x30  | 2242 | 8-bit RGBA non-int  | 4/4         |
+  | RainbowTrailStaff.png      | 28x30  | 1797 | 8-bit RGBA non-int  | 4/4         |
+  | StarWrathStaff.png         | 28x30  | 2594 | 8-bit RGBA non-int  | 4/4         |
+
+  Todas con fondo transparente (4/4 esquinas alpha=0) y contenido preservado.
+
+- Masters 1024x1024 archivados en AethonMod/Content/_masters/:
+  | Archivo master            | Bytes   |
+  |---------------------------|---------|
+  | CosmicTrailStaff.png      | 122857  |
+  | StarfallStaff.png         |  71886  |
+  | SparkleAuraStaff.png      |  50431  |
+  | LightBeamsStaff.png       |  89671  |
+  | SupernovaStaff.png        | 105581  |
+  | ImpactSphereStaff.png     | 115267  |
+  | RainbowTrailStaff.png     |  66500  |
+  | StarWrathStaff.png        | 101051  |
+
+- Issues encontrados y resueltos:
+  1. En la 1ra pasada con tol=70 (sin fallback), 3 imágenes fallaron el
+     check de 4/4 esquinas alpha=0:
+     - StarfallStaff: bg más común del border strip = (23,39,101) azul-magenta
+       (no es el negro del fondo real), corners 2/4
+     - RainbowTrailStaff: bg más común del border strip = (121,120,125) gris
+       (por la cola arcoíris que toca bordes), corners 2/4
+     - StarWrathStaff: bg más común = (0,1,6) casi-negro, pero dos esquinas
+       tenían colores de estela/estrellas, corners 2/4
+     Resolución: agregué `get_corner_colors()` + `corner_colors` param en
+     `make_transparent()` que trata cada color de las 4 esquinas como un
+     candidato adicional de bg. Con esto, todo pixel cercano (TOL=70) a
+     cualquiera de los colores candidatos se vuelve transparente. Resultado:
+     8/8 OK manteniendo tol=70 (sin subirlo a 90 como se mencionaba en el
+     worklog de Subagent D como alternativa).
+- Ready para commit por parte del main agent.

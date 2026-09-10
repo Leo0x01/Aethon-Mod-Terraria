@@ -415,10 +415,24 @@ namespace AethonMod.Content.Weapons
             {
                 // === MODO BÁSICO: SummonDamage + PROGRESIÓN + Próximo hito + indicador ===
                 // v5.11: SummonDamage (daño de invocación) solo aquí (no en vista completa)
-                // v5.9: Sección PROGRESIÓN (nivel + barra XP) solo aquí (no en vista completa)
-                // v5.8: 'Próximo hito' solo aquí (no en vista completa)
-                tooltips.Add(new TooltipLine(Mod, "SummonDamage",
-                    $"[c/BE78FD:{summonDmg} daño de invocación]"));
+                // v5.62: SummonDamage en blanco (antes morado BE78FD) y justo después del
+                //        daño mágico vanilla (línea "Damage"), no al final del tooltip.
+                int summonDmgIndex = -1;
+                for (int i = 0; i < tooltips.Count; i++)
+                {
+                    if (tooltips[i].Name == "Damage")
+                    {
+                        summonDmgIndex = i + 1; // insertar después del daño mágico
+                        break;
+                    }
+                }
+                var summonLine = new TooltipLine(Mod, "SummonDamage",
+                    $"{summonDmg} daño de invocación"); // sin [c/...] = color blanco default
+                if (summonDmgIndex >= 0 && summonDmgIndex < tooltips.Count)
+                    tooltips.Insert(summonDmgIndex, summonLine);
+                else
+                    tooltips.Add(summonLine);
+
                 tooltips.Add(new TooltipLine(Mod, "SectionProgress", "[c/78FF96:═══ PROGRESIÓN ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "Level",
                     $"[c/FFD700:Nivel {sl.Level}]  [c/B388FF:{bar} {sl.XP}/{xpNeeded} XP]"));
