@@ -50,9 +50,6 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-            // v5.67: nuevos bastones creativos
-            GiveItem(ModContent.ItemType<Weapons.Custom.BlackHoleStaff>(), 1);
-            GiveItem(ModContent.ItemType<Weapons.Custom.SkyLightningStaff>(), 1);
         }
 
         /// <summary>
