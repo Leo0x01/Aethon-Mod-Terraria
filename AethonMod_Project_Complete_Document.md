@@ -707,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.91 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.92 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `a260673` | v5.92 | **FIX del error del sol** ("el sol dio un error" — reporte del usuario con client.log): `InvalidOperationException: Begin has been called before calling End` en `CosmicShockwaveProjectile.PreDraw` (línea 367 de v5.91), 2 "Excepción silenciosa" por explosión del sol que ABORTABAN el dibujado de todos los proyectiles del frame. Causa raíz: las ondas de fuego del sol nacen con retardo escalonado (edades 0/-8/-16); en el tick EXACTO en que un retardo expira el frente mide 0 px → `DrawWaveVisual` devolvía SIN tocar el spriteBatch → el Begin de restauración INCONDICIONAL del PreDraw re-abría el batch del juego YA ABIERTO (la onda cromática del agujero nace sin retardo → jamás lo disparó, por eso SOLO el sol fallaba). Fix: `DrawWaveVisual` ahora devuelve **bool** (false = no tocó el batch / true = lo dejó CERRADO) y el PreDraw restaura SOLO cuando corresponde; auditoría de Begin/End de sol/nova/agujero/PhoenixNova/lente: ningún otro proyectil tiene el patrón. Compilación: 0 errores, 0 warnings |
 | `2f56660` | v5.91 | **El SOL AUTORITA su explosión final** (la Supernova del SupernovaStaff, verificada en el historial: el OnKill del sol mata la hija EN SU MISMO TICK con TryKillSupernova + genera ÉL las 3 ondas de fuego y el AoE del núcleo → sincronización POR CONSTRUCCIÓN, sin el punto único de fallo del índice ai[1]+clamp de la v5.88; flag ai[2]=1 SunInvoked → la hija no duplica ondas/AoE) + **partículas DEL COLOR DEL SOL** (halo dorado→blanco dorado, sin azul) + **ondas que dañan CADA 0.1 s A MEDIDA QUE AVANZAN** (_nextHitAt cooldowns por banda del frente, daño en área desde el centro; quemadura OnFire 10 s en fuego) + **aberración cromática TRANSPARENTE** (alphas 230→140/150→95) + **agujero negro: materia absorbida ORIENTADA AL CENTRO** (velocidad radial + Rotation=angle+π) con **ACELERACIÓN al explotar** (PullToGlobalBoost hasta ×6, reseteado en OnKill; polvo ×3) + **lente 1.4×** (mismo ángulo ~0.8 rad) + **PhoenixNova DETRÁS del sol** (DrawBehind→drawCacheProjsBehindProjectiles, firma verificada por reflexión; quirúrgico, sin el desastre v5.89) + **FIX del SpriteBatch del PhoenixNova** (restauraba SIN GameViewMatrix.TransformationMatrix → proyectiles vanilla "flotando/subiendo": la causa real de los círculos de v5.89) |
 | `9b5f0a5` | v5.90 | **REVERT del sol a 8781aa4/v5.88** (la v5.89 lo arruinó: humo SoftGlow en círculos que subían + llamaradas tapadas por el cuerpo → sin su onda expansiva) conservando SOLO el fix de la excepción silenciosa + agujero negro: **partículas moradas ELIMINADAS** (succión multicolor, humo púrpura, espiral violeta, halo Noise.png — su único usuario) y **partículas ABSORBIDAS** nuevas (componente PullTo de la librería: aceleran al centro y mueren al llegar; estelas TrailGlow ámbar→blanco + polvo GoldFlame) + **UNA SOLA explosión cromática al desaparecer** (OnKill, estilo 0, daño COMPLETO, radio 620, aberración RGB real + distorsión del fondo; las 4 ondas v5.86 eliminadas) + **LENTE DELGADA** (maxLensingAngle 24→1.5 rad, fuerza 0.62→0.55 → ángulo pico ~14.9→0.8 rad: el shader rota alrededor del centro de pantalla y movía TODA la pantalla; radio 0.75×→1.1×) + **fix del CORTE por los lados** al crecer (canvas del RealBlackHoleShader fijo de 256px con zoom creciente → ahora canvas = 256·scale con zoom constante y disco con tope: nunca cruza el borde) |
 | `ad9641a` | v5.88 | fix CRÍTICO: el mod NO cargaba — faltaba CosmicShockwaveProjectile.png (desde v5.86; la compilación C# pasa sin texturas pero tML las exige al cargar) + auditoría completa 71 clases/21 rutas + bug real de daño corregido (array _hitNPCs compartido por MemberwiseClone entre ondas simultáneas → NewInstance con array fresco) + End defensivo en RestoreSpriteBatch ×3 + Main.Transform deprecado → GameViewMatrix + ParticleManager con Asset<Texture2D> diferido (fix del warning 61ms blocking) + icon_small.png 30x30 + warnings del build limpios (CS0672 ×4 Kill→OnKill, CS8632 ×21) | 
@@ -787,10 +788,37 @@ Commits desde v5.28 hasta v5.91 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.91
-- **Mensaje**: "v5.91: el SOL autorita su explosión final (Supernova sincronizada por construcción) + ondas que dañan cada 0.1 s + quemadura 10 s + agujero negro orientado al centro + lente 1.4× + aberración transparente + PhoenixNova detrás del sol"
+- **Versión**: v5.92
+- **Mensaje**: "fix v5.92: error del sol — Begin has been called before calling End (InvalidOperationException en CosmicShockwaveProjectile.PreDraw)"
 
-### 11.2 Qué se hizo en v5.91 (el sol autorita su explosión final + ondas con daño cada 0.1 s)
+### 11.2 Qué se hizo en v5.92 (fix del error del sol)
+
+**Reporte del usuario**: "el sol dio un error" — el client.log mostraba 2
+"Excepción silenciosa" por cada explosión del sol:
+
+```
+System.InvalidOperationException: Begin has been called before calling End
+   at SpriteBatch.Begin(...)
+   at CosmicShockwaveProjectile.PreDraw(Color& lightColor)
+   at Terraria.Main.DrawProj_Inner / DrawProjectiles / Draw
+```
+
+**Causa raíz** (trazada tick a tick): las ondas de fuego del sol nacen con
+retardo escalonado (edades 0/-8/-16). En el tick EXACTO en que un retardo
+expira, el frente mide 0 px → `DrawWaveVisual` devolvía SIN tocar el
+`spriteBatch` (que seguía ABIERTO, el del pase del mundo) → el `Begin` de
+restauración INCONDICIONAL del `PreDraw` re-abría un batch YA ABIERTO → la
+excepción abortaba el dibujado de TODOS los proyectiles del frame. La onda
+cromática del agujero negro nace SIN retardo (su edad jamás es 0 en el PreDraw)
+→ por eso SOLO el sol disparaba el error.
+
+**Fix**: `DrawWaveVisual` ahora devuelve `bool` (false = no tocó el batch /
+true = lo dejó CERRADO) y el `PreDraw` restaura el batch SOLO cuando
+corresponde. Auditados los Begin/End de sol/nova/agujero/PhoenixNova/lente:
+ingún otro proyectil tiene este patrón. Compilación contra tModLoader
+v2026.07.3.0 real: 0 errores, 0 warnings.
+
+### 11.2.0 Qué se hizo en v5.91 (histórico — el sol autorita su explosión final + ondas con daño cada 0.1 s)
 
 **Peticiones del usuario** (plan aprobado — "ejecuta todo lo demás"): la explosión
 final es la del SupernovaStaff, debe estar SINCRONIZADA y ser la final con
@@ -978,14 +1006,14 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real, 0 errores / 0 warnings)
-- ✅ **v5.90 — SOL COMO EN v5.88** (revert exacto de 8781aa4: dusts vanilla +
-  llamaradas en pase normal + su onda expansiva de fuego intacta)
-- ✅ **v5.90 — AGUJERO NEGRO SIN CORTE**: el canvas del shader escala con el
-  agujero — el disco ya no se recorta al hincharse para morir
-- ✅ **v5.90 — MATERIA ABSORBIDA** (PullTo) y CERO partículas moradas
-- ✅ **v5.90 — UNA SOLA explosión cromática final** con daño completo
-- ✅ **v5.90 — LENTE DELGADA**: solo deforma un anillo estrecho alrededor del
-  agujero (ángulo pico 0.8 rad) — el resto de la pantalla intacta
+- ✅ **v5.92 — SIN el error del sol**: el SpriteBatch nunca queda desbalanceado
+  (las ondas con retardo escalonado ya no re-abren un batch abierto)
+- ✅ **v5.91 — SOL AUTORITA su explosión final**: Supernova sincronizada por
+  construcción + ondas de fuego con daño cada 0.1 s + quemadura 10 s
+- ✅ **v5.91 — AGUJERO NEGRO**: materia absorbida orientada al centro +
+  aceleración al explotar + lente 1.4× + aberración cromática transparente
+- ✅ **v5.91 — PHOENIXNOVA detrás del sol** (DrawBehind) + fix del SpriteBatch
+  del PhoenixNova (los "círculos que subían" de v5.89)
 - ✅ **v5.89 — SIN PANTALLA NEGRA**: la lente va a resolución nativa y se vuelve
   a dibujar a pantalla completa tras el wipe inevitable del backbuffer de FNA
 - ✅ **v5.88 — EL MOD CARGA**: textura del CosmicShockwaveProjectile añadida (el
@@ -1004,19 +1032,20 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 - ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
 - ✅ Build 100% limpio: 0 warnings 0 errores sin supresiones (v5.88)
 - ⚠️ **PENDIENTE**: probar en tModLoader real (recompilar, verificar carga sin
-  error, sol idéntico a v5.88, agujero sin corte al crecer, materia absorbida,
-  UNA explosión cromática final con daño, lente delgada, y desactivación limpia)
+  error, explosión del sol SIN "Excepción silenciosa" en el client.log — fix
+  v5.92 —, ondas con daño cada 0.1 s, agujero con materia absorbida y
+  aceleración final, y desactivación limpia)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
 2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar BlackHoleStaff: materia ámbar/blanca cayendo en ESPIRAL al horizonte
-   (absorbida, SIN nada morado) + atracción 450px + lente DELGADA (solo un anillo
-   estrecho alrededor del agujero se curva — el resto de la pantalla quieta) +
-   al desaparecer: UNA SOLA explosión cromática (anillo RGB) con daño
-4. Disparar SunStaff: DEBE VERSE COMO EN v5.88 (llamaradas cada 2s con su onda
-   expansiva, supernova en el segundo 7, explosión masiva en el segundo 10)
-5. Verificar que el agujero al crecer para morir YA NO se corta por los lados
+3. Disparar SunStaff: llamaradas detrás de la estrella + carga dorada +
+   explosión a los 10 s exactos con 3 ondas que barren daño cada 0.1 s —
+   **SIN error en el client.log** (el fix v5.92 elimina las 2 "Excepción
+   silenciosa" por explosión)
+4. Disparar BlackHoleStaff: materia ámbar cayendo al centro + aceleración
+   final + onda cromática transparente con daño cada 0.1 s
+5. Verificar que el client.log quede LIMPIO tras ambas explosiones
 6. **Desactivar el mod o Mods → Reload: la desactivación debe completarse EN
    SILENCIO** (sin diálogo de error, sin pedir reinicio — fix v5.87)
 7. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
@@ -3709,10 +3738,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.90
-> Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
-> Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
-> cualquier commit o documento nuevo.
+> Última actualización: v5.92
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.
