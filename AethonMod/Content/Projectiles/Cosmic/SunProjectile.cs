@@ -8,13 +8,9 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// SunProjectile — basado en el StarPet de Wrath of the Gods.
-    /// Usa el SunShader.fx para renderizar una estrella con:
-    /// - Textura de fuego con esfericidad (spherePinchFactor)
-    /// - Corona con brillo radial (coronaIntensityFactor)
-    /// - Manchas oscuras (subtractiveAccentFactor)
-    /// - Flujo de lava (uvOffset)
-    /// Se mueve lentamente (velocity *= 0.97f).
+    /// SunProjectile — reescrito siguiendo EXACTAMENTE el código de WoTG StarPet.
+    /// Usa SunShader.fx (esfericidad + corona + manchas + lava) con FireNoiseB
+    /// + RadialShineShader.fx (brillo radial) con WavyBlotchNoise.
     /// </summary>
     public class SunProjectile : ModProjectile
     {
@@ -43,14 +39,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             // Movimiento lento
             Projectile.velocity *= 0.97f;
-
-            // Rotación lenta del sol
             Projectile.rotation += 0.01f;
 
-            // === PARTÍCULAS DE FUEGO (chorona + llamas saliendo) ===
+            // === PARTÍCULAS DE FUEGO ===
             if (Main.netMode != NetmodeID.Server)
             {
-                // Chispas de fuego (DustID.Torch) orbitando
+                // Chispas de fuego orbitando
                 if (Main.rand.NextBool(2))
                 {
                     float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
@@ -59,14 +53,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         (float)Math.Cos(angle) * dist,
                         (float)Math.Sin(angle) * dist);
                     Vector2 vel = -spawnPos + Projectile.Center;
-                    vel.Normalize();
-                    vel *= Main.rand.NextFloat(1f, 3f);
-                    vel += new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-1f, 1f));
-
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Torch,
-                        vel, 150, new Color(255, 150, 50), 1.0f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
+                    if (vel.LengthSquared() > 0.01f)
+                    {
+                        vel.Normalize();
+                        vel *= Main.rand.NextFloat(1f, 3f);
+                        vel += new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-1f, 1f));
+                        Dust d = Dust.NewDustPerfect(spawnPos, DustID.Torch,
+                            vel, 150, new Color(255, 150, 50), 1.0f);
+                        d.noGravity = true; d.fadeIn = 0f;
+                    }
                 }
 
                 // Llamas saliendo del sol
@@ -80,14 +75,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 vel = new Vector2(
                         (float)Math.Cos(angle) * 2f,
                         (float)Math.Sin(angle) * 2f);
-
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
                         vel, 200, new Color(255, 200, 100), 1.2f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
+                    d.noGravity = true; d.fadeIn = 0f;
                 }
 
-                // Humo sutil
+                // Humo
                 if (Main.rand.NextBool(8))
                 {
                     float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
@@ -98,23 +91,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 vel = new Vector2(
                         (float)Math.Cos(angle) * 0.5f,
                         (float)Math.Sin(angle) * 0.5f - 1f);
-
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
                         vel, 60, new Color(100, 60, 30), 0.6f);
-                    d.noGravity = false;
-                    d.fadeIn = 0f;
+                    d.noGravity = false; d.fadeIn = 0f;
                 }
             }
 
-            // === ILUMINACIÓN (muy intensa como el StarPet de WoTG) ===
-            // WoTG usa Vector3.One * 3.2f para luz
+            // === ILUMINACIÓN (exactamente como WoTG: Vector3.One * 3.2f) ===
             float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GameUpdateCount * 0.05f);
             Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse);
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // Cargar shaders
             if (_sunShader == null)
             {
                 try { _sunShader = new Ref<Effect>(ModContent.Request<Effect>("AethonMod/Content/Effects/Shaders/SunShader").Value); }
@@ -129,80 +118,82 @@ namespace AethonMod.Content.Projectiles.Cosmic
             try
             {
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
-                float t = (float)Main.GameUpdateCount;
                 float scale = Projectile.scale;
 
-                // === 1. BACKGLOW (bloom detrás del sol) ===
-                Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                // === 1. BACKGLOW (exactamente como WoTG StarPet.DrawSelf) ===
+                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/BloomCircleSmall").Value;
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                 // Amarillo
-                Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(255, 230, 100, 80),
-                    0f, new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
-                    2.5f * scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
+                    (new Color(255, 230, 100) { A = 0 }) * 0.7f, 0f,
+                    bloomCircle.Size() * 0.5f, scale * 0.95f, 0, 0f);
                 // Rojo
-                Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(200, 50, 0, 50),
-                    0f, new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
-                    3.5f * scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
+                    (new Color(255, 50, 0) { A = 0 }) * 0.45f, 0f,
+                    bloomCircle.Size() * 0.5f, scale * 1.61f, 0, 0f);
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
-                // === 2. SHADER DEL SOL (SunShader.fx) ===
+                // === 2. SHADER SUNSHADER (exactamente como WoTG) ===
                 if (_sunShader != null && _sunShader.Value != null)
                 {
                     Effect shader = _sunShader.Value;
-                    Texture2D noiseTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Noise").Value;
+                    Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/WavyBlotchNoise").Value;
+                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/PsychedelicWingTextureOffsetMap").Value;
 
-                    shader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
+                    // Parámetros EXACTOS de WoTG StarPet.DrawSelf()
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     shader.Parameters["mainColor"].SetValue(new Color(255, 255, 255).ToVector3());
                     shader.Parameters["darkerColor"].SetValue(new Color(204, 92, 25).ToVector3());
                     shader.Parameters["subtractiveAccentFactor"].SetValue(new Color(181, 0, 0).ToVector3());
                     shader.Parameters["sphereSpinTime"].SetValue((float)Main.GameUpdateCount * 0.0167f * 0.9f);
+                    shader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
 
-                    // Configurar texturas de ruido
-                    Main.graphics.GraphicsDevice.Textures[1] = noiseTex;
+                    // Texturas (exactamente como WoTG)
+                    // s0 = fireNoiseTexture (usamos WavyBlotchNoise como base)
+                    // s1 = accentNoiseTexture (usamos WavyBlotchNoise)
+                    // s2 = uvOffsetNoiseTexture (usamos PsychedelicWingTextureOffsetMap)
+                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-                    Main.graphics.GraphicsDevice.Textures[2] = noiseTex;
+                    Main.graphics.GraphicsDevice.Textures[2] = psychedelicWing;
                     Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
 
-                    // v5.81: orden correcto — Begin Immediate → Apply → Draw → End → Begin Deferred
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                    // Canvas: usar WavyBlotchNoise como textura base (s0)
+                    // WoTG usa DendriticNoiseZoomedOut, nosotros usamos WavyBlotchNoise
+                    Vector2 drawScale = Vector2.One * Projectile.width * scale * 1.5f / wavyBlotch.Size();
+
+                    // Orden correcto: Begin(Immediate) → Apply → Draw → End → Begin(Deferred)
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
                     shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
-                        new Vector2(pixel.Width / 2f, pixel.Height / 2f),
-                        3f * scale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null, Color.White, Projectile.rotation,
+                        wavyBlotch.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 }
                 else
                 {
-                    // === FALLBACK: dibujar sol manualmente si el shader no carga ===
-                    DrawFallback(drawPos, scale, t);
+                    DrawFallback(drawPos, scale);
                 }
 
-                // === 3. RADIAL SHINE (brillo radial sobre el sol) ===
+                // === 3. RADIAL SHINE (exactamente como WoTG) ===
                 if (_shineShader != null && _shineShader.Value != null)
                 {
                     Effect shineShader = _shineShader.Value;
-                    Texture2D noiseTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Noise").Value;
+                    Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/WavyBlotchNoise").Value;
                     shineShader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
-                    Main.graphics.GraphicsDevice.Textures[1] = noiseTex;
+                    Vector2 shineScale = Vector2.One * Projectile.width * scale * 2.72f / wavyBlotch.Size();
+
+                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                    // v5.81: orden correcto — Begin Immediate → Apply → Draw → End → Begin Deferred
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                     shineShader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(pixel, drawPos, null,
-                        new Color(252, 212, 112) * 0.3f, Projectile.rotation,
-                        new Vector2(pixel.Width / 2f, pixel.Height / 2f),
-                        2.5f * scale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
+                        new Color(252, 212, 112) * 0.24f, Projectile.rotation,
+                        wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 }
@@ -211,32 +202,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return false;
         }
 
-        private void DrawFallback(Vector2 drawPos, float scale, float t)
+        private void DrawFallback(Vector2 drawPos, float scale)
         {
             Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(t * 0.05f);
+            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GameUpdateCount * 0.05f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-
-            // Núcleo blanco-amarillo
             Main.spriteBatch.Draw(glowTex, drawPos, null,
                 new Color(255, 250, 200, 220), 0f,
                 new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
                 1.5f * scale * pulse, SpriteEffects.None, 0f);
-
-            // Capa naranja
             Main.spriteBatch.Draw(glowTex, drawPos, null,
                 new Color(255, 180, 60, 180), 0f,
                 new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
                 2.0f * scale * pulse, SpriteEffects.None, 0f);
-
-            // Capa roja
             Main.spriteBatch.Draw(glowTex, drawPos, null,
                 new Color(200, 50, 0, 100), 0f,
                 new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
                 2.8f * scale * pulse, SpriteEffects.None, 0f);
-
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
         }
@@ -245,7 +229,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // Explosión solar
             for (int i = 0; i < 30; i++)
             {
                 float angle = (MathHelper.TwoPi / 30) * i;
@@ -254,13 +237,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 10f));
                 Dust d = Dust.NewDustPerfect(target.Center, DustID.GoldFlame,
                     dir, 220, new Color(255, 200, 100), 1.3f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
+                d.noGravity = true; d.fadeIn = 0f;
             }
 
-            // Aplicar OnFire
             target.AddBuff(BuffID.OnFire, 300);
-
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, target.Center);
         }
     }

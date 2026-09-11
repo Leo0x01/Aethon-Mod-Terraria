@@ -11,5 +11,6 @@
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
+    <Compile Remove="Reference_WoTG/**" />
   </ItemGroup>
 </Project>
