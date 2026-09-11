@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
+using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -19,27 +20,44 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   - cameraRotationAxis: (velocity.Y * -0.022 + 1, 0, rotation)
     ///   - cameraAngle: 0.32 / accretionDiskScale: (1, 0.33, 1)
     ///
+    /// v5.86 — LA LENTE VA DETRÁS DEL AGUJERO Y SUS EFECTOS: con la lente
+    /// activa el núcleo NO se dibuja en el pase del mundo (PreDraw se salta);
+    /// el BlackHoleLensSystem lo pinta ENCIMA de la distorsión vía
+    /// DrawCoreVisuals(), de modo que la lente jamás deforma al propio
+    /// agujero. Las partículas de sus efectos pasan a la capa AboveLens
+    /// (también encima de la lente).
+    ///
+    /// v5.86 — SECUENCIA DE MUERTE (explosión → evaporación → implosión):
+    ///   - t-90 (explosión): ONDA EXPANSIVA CROMÁTICA (CosmicShockwaveProjectile
+    ///     estilo 0) que distorsiona el fondo a su paso y hace daño por frente.
+    ///   - t-90..t-36: el ÁREA DE EFECTO crece de forma momentánea (+60% radio
+    ///     de gravedad y +60% escala visual) mientras la onda avanza.
+    ///   - t-36..t-0 (evaporación): colapso acelerado de la escala hacia 0.
+    ///   - t-0 (implosión final): 3 ONDAS EXPANSIVAS CROMÁTICAS INVERSAS
+    ///     (estilo 1, convergentes, desfase RGB invertido), cada una con daño.
+    ///
     /// v5.85 — LENTE GRAVITACIONAL de pantalla (BlackHoleLensSystem): el fondo
     /// real del juego se distorsiona alrededor del horizonte de sucesos con el
     /// shader BlackHoleDistortionShader (formalismo relativista con decaimiento
     /// exponencial). Fuerza gravitatoria aumentada y radio de atracción de 450px.
     ///
-    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
-    /// render en PostDrawTiles = capa de fondo con profundidad): espiral de succión
-    /// multicolor (violeta/cian/magenta/oro) con ColorShift, disco de acreción de
-    /// estelas TrailGlow orbitando (componente Orbit + rotación tangencial
-    /// sincronizada), anillo de fotones pulsante con ScaleUp, halo de distorsión
-    /// con ruido procedural, implosión/explosión con presets y screenshake.
+    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive):
+    /// espiral de succión multicolor (violeta/cian/magenta/oro) con ColorShift,
+    /// disco de acreción de estelas TrailGlow orbitando (componente Orbit +
+    /// rotación tangencial sincronizada), anillo de fotones pulsante con ScaleUp,
+    /// halo de distorsión con ruido procedural, implosión/explosión con presets
+    /// y screenshake.
     ///
-    /// Mejoras propias: pop elástico de aparición, colapso final antes de expirar,
-    /// succión espiral de partículas de colores, atracción gravitacional de
-    /// enemigos Y devoración del polvo cercano, refuerzo del event horizon e
-    /// implosión + doble onda expansiva al morir.
+    /// Mejoras propias: pop elástico de aparición, succión espiral de partículas
+    /// de colores, atracción gravitacional de enemigos Y devoración del polvo
+    /// cercano, refuerzo del event horizon.
     /// </summary>
     public class BlackHoleProjectile : ModProjectile
     {
-        private Ref<Effect> _shader;
-        private bool _shaderFailed;
+        /// <summary>Shader del núcleo — estático: compartido por todas las instancias
+        /// (lo cargan PreDraw y el BlackHoleLensSystem por igual).</summary>
+        private static Ref<Effect> _shader;
+        private static bool _shaderFailed;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
@@ -72,9 +90,58 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
             VisualsTime += 1f;
 
-            // === COLAPSO FINAL: los últimos 40 ticks se encoge dramáticamente ===
-            if (Projectile.timeLeft < 40f)
-                Projectile.scale *= 0.93f;
+            // ================================================================
+            //  v5.86 — SECUENCIA DE MUERTE (explosión → evaporación → implosión)
+            // ================================================================
+            // FASE 1 — EXPLOSIÓN (t-90..t-36): onda expansiva cromática + el área
+            // de efecto crece de forma momentánea mientras la onda avanza.
+            float expansion = 0f;
+            if (Projectile.timeLeft > 36f && Projectile.timeLeft <= 90f)
+            {
+                expansion = 1f - (Projectile.timeLeft - 36f) / 54f; // 0 → 1
+                // La escala visual crece con la onda (hasta +60%): el horizonte
+                // de sucesos se hincha devorando el espacio.
+                Projectile.scale *= 1f + expansion * 0.6f;
+
+                // En el instante de la explosión: estruendo + sacudida en todas las
+                // máquinas (AI corre en todas) y nace la ONDA CROMÁTICA (owner).
+                if ((int)Projectile.timeLeft == 90)
+                {
+                    if (Main.netMode != NetmodeID.Server)
+                    {
+                        try
+                        {
+                            Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
+                                Projectile.Center, new Vector2(1f, 0f), 5f, 8, 14, 0.35f,
+                                "AethonBlackHoleBlast"));
+                        }
+                        catch { }
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
+                    }
+
+                    if (Projectile.owner == Main.myPlayer)
+                    {
+                        int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.75f));
+                        Projectile.NewProjectile(
+                            Projectile.GetSource_FromThis(),
+                            Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                            ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                            waveDamage, 0f, Projectile.owner,
+                            0f,                                      // edad: sin retardo
+                            CosmicShockwaveProjectile.StyleChromatic,
+                            520f);                                   // radio máximo
+                    }
+                }
+            }
+            else if (Projectile.timeLeft <= 36f)
+            {
+                // FASE 2 — EVAPORACIÓN: colapso acelerado hacia la singularidad
+                // (la escala cae a 0 justo cuando llega la implosión final).
+                float collapse = Utils.GetLerpValue(36f, 0f, Projectile.timeLeft, true);
+                Projectile.scale *= 1f - collapse;
+                // El área de efecto se mantiene crecida hasta evaporarse.
+                expansion = 1f;
+            }
 
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
@@ -86,24 +153,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
-                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
+                // Dusts vanilla (capa frontal del mundo: materia cayendo al horizonte;
+                // su leve curvatura por la lente se lee como materia siendo lenteada)
                 SpawnSuctionParticles();
-                SpawnAccretionDiskParticles();
                 SpawnSmokeParticles();
                 SpawnCapturedEnergySparks();
                 AttractNearbyDust();
 
-                // v5.84: partículas de la librería propia (capa de fondo aditiva —
-                // se renderizan en PostDrawTiles, detrás del canvas del agujero,
-                // creando profundidad por capas)
+                // v5.86: partículas de la librería propia en la capa ENCIMA DE LA LENTE
+                // (capa AboveLens: el BlackHoleLensSystem las pinta tras compositar
+                // la distorsión → la lente queda DETRÁS de los efectos del agujero).
                 SpawnLibrarySuctionSpiral();
                 SpawnLibraryAccretionDisk();
                 SpawnLibraryPhotonRing();
                 SpawnLibraryDistortionHalo();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 450, fuerza aumentada) ===
-            const float gravityRadius = 450f;
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS ===
+            // Radio 450 que crece +60% durante la secuencia de muerte (el área de
+            // efecto se expande con la onda cromática hasta la evaporación).
+            float gravityRadius = 450f * (1f + expansion * 0.6f);
             const float gravityStrength = 2.6f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -179,26 +248,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Disco de acreción: GoldFlame orbitando en un plano aplanado.</summary>
-        private void SpawnAccretionDiskParticles()
-        {
-            if (Main.rand.NextBool(2))
-            {
-                float diskAngle = Projectile.rotation * 4f;
-                float diskRadius = Main.rand.NextFloat(10f, 40f);
-                Vector2 diskPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(diskAngle) * diskRadius,
-                    (float)Math.Sin(diskAngle) * diskRadius * 0.25f);
-                Vector2 tangent = new Vector2(
-                    -(float)Math.Sin(diskAngle),
-                    (float)Math.Cos(diskAngle) * 0.25f) * 3f;
-                Dust d = Dust.NewDustPerfect(diskPos, DustID.GoldFlame,
-                    tangent, 220, new Color(255, 210, 100), 1.2f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-        }
-
         /// <summary>Humo púrpura siendo absorbido desde los alrededores.</summary>
         private void SpawnSmokeParticles()
         {
@@ -260,9 +309,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  v5.84 — PARTÍCULAS DE LA LIBRERÍA PROPIA (capa de fondo aditiva)
-        //  Sistema data-oriented de Content/Particles (libro de referencia,
-        //  secciones 10-16): additive blending + ColorShift + Orbit + ScaleUp.
+        //  v5.84/v5.86 — PARTÍCULAS DE LA LIBRERÍA PROPIA (capa AboveLens:
+        //  ENCIMA de la lente gravitacional — la pinta el BlackHoleLensSystem
+        //  tras compositar la distorsión, de modo que la lente quede detrás
+        //  de los efectos del agujero negro)
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -308,7 +358,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Duration = 45,
                     TextureId = ParticleTex.SoftGlow,
                     BlendMode = 1, // Additive
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                    LayerPriority = LayerPriorities.AboveLens,
                 };
                 p.EnableComponent(ComponentFlag.FadeOut);
                 p.EnableComponent(ComponentFlag.ColorShift);
@@ -349,7 +399,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Duration = 48,
                     TextureId = ParticleTex.TrailGlow,
                     BlendMode = 1,
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                    LayerPriority = LayerPriorities.AboveLens,
                 };
                 // Orbit: UserData0/1 = centro, UserData2 = velocidad angular, UserData3 = radio
                 p.UserData0 = Projectile.Center.X;
@@ -382,7 +432,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Duration = 30,
                     TextureId = ParticleTex.Ring,
                     BlendMode = 1,
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                    LayerPriority = LayerPriorities.AboveLens,
                 };
                 p.UserData1 = 1.15f * Projectile.scale; // escala final X
                 p.UserData2 = 1.15f * Projectile.scale; // escala final Y
@@ -413,7 +463,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Duration = 60,
                     TextureId = ParticleTex.Noise,
                     BlendMode = 1,
-                    LayerPriority = LayerPriorities.AboveTiles,
+                    LayerPriority = LayerPriorities.AboveLens,
                 };
                 p.EnableComponent(ComponentFlag.FadeOut);
                 ParticleManager.Spawn(p);
@@ -425,6 +475,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
+        {
+            // v5.86 — LA LENTE VA DETRÁS DEL AGUJERO NEGRO: con la lente activa el
+            // núcleo NO se dibuja en el pase del mundo (quedaría dentro de
+            // screenTarget y la distorsión lo deformaría). El BlackHoleLensSystem
+            // lo pinta ENCIMA de la lente llamando a DrawCoreVisuals.
+            if (BlackHoleLensSystem.LensActive)
+                return false;
+
+            DrawCoreVisuals(Projectile, true);
+
+            RestoreSpriteBatch();
+            return false;
+        }
+
+        /// <summary>
+        /// Dibuja el núcleo completo del agujero negro (halo + RealBlackHoleShader
+        /// + refuerzo del horizonte de sucesos). Compartido entre el pase del
+        /// mundo (PreDraw, con endActiveBatch=true) y el pase posterior a la lente
+        /// (BlackHoleLensSystem, con endActiveBatch=false: el batch llega cerrado).
+        /// </summary>
+        internal static void DrawCoreVisuals(Projectile p, bool endActiveBatch)
         {
             if (!_shaderFailed && _shader == null)
             {
@@ -442,18 +513,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             try
             {
-                Vector2 drawPos = Projectile.Center - Main.screenPosition;
+                Vector2 drawPos = p.Center - Main.screenPosition;
 
                 // === 1. HALO PÚRPURA EXTERIOR (aura cósmica de fondo) ===
                 Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                Main.spriteBatch.End();
+                if (endActiveBatch)
+                    Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
                 float haloPulse = 0.85f + 0.15f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3.5f);
                 Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(60, 20, 90, 40) * haloPulse * Projectile.scale, 0f,
-                    glowTex.Size() * 0.5f, 3.2f * Projectile.scale, SpriteEffects.None, 0f);
+                    new Color(60, 20, 90, 40) * haloPulse * p.scale, 0f,
+                    glowTex.Size() * 0.5f, 3.2f * p.scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
 
                 if (_shader != null && _shader.Value != null)
@@ -463,17 +535,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     // Canvas de 256px (tamaño nativo del lightmarch)
                     float targetSize = 256f;
-                    float resizingScale = Projectile.width / targetSize * Projectile.scale * 2f;
+                    float resizingScale = p.width / targetSize * p.scale * 2f;
 
                     shader.Parameters["blackHoleRadius"].SetValue(0.3f);
                     shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
                     shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
                     shader.Parameters["accretionDiskColor"].SetValue(new Color(245, 105, 61).ToVector3());
                     shader.Parameters["cameraAngle"].SetValue(0.32f);
-                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(Projectile.velocity.Y * -0.022f + 1f, 0f, Projectile.rotation));
+                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(p.velocity.Y * -0.022f + 1f, 0f, p.rotation));
                     shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, 0.33f, 1f));
                     shader.Parameters["zoom"].SetValue(Vector2.One * resizingScale);
-                    shader.Parameters["accretionDiskRadius"].SetValue(Projectile.scale * 0.4f);
+                    shader.Parameters["accretionDiskRadius"].SetValue(p.scale * 0.4f);
                     shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
 
                     // FireNoiseB como textura de ruido del disco de acreción (s1)
@@ -510,13 +582,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 else
                 {
                     // === FALLBACK: dibujado manual si el shader no carga ===
-                    DrawFallback(drawPos);
+                    DrawFallback(p, drawPos);
                 }
             }
             catch { }
-
-            RestoreSpriteBatch();
-            return false;
         }
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
@@ -528,13 +597,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>Dibujado manual de respaldo (vórtice + anillo de fotones + aberración cromática).</summary>
-        private void DrawFallback(Vector2 drawPos)
+        private static void DrawFallback(Projectile p, Vector2 drawPos)
         {
             float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
             Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             Texture2D vortexTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Vortex").Value;
             Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-            float s = Projectile.scale;
+            float s = p.scale;
 
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
@@ -542,17 +611,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // Disco de acreción frontal (elíptico, naranja)
             Main.spriteBatch.Draw(vortexTex, drawPos, null,
-                new Color(255, 180, 80, 200), Projectile.rotation * 2f,
+                new Color(255, 180, 80, 200), p.rotation * 2f,
                 vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
 
             // Disco trasero (anillo de Einstein)
             Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0f, 4f * s), null,
-                new Color(200, 50, 0, 100), -Projectile.rotation * 2f,
+                new Color(200, 50, 0, 100), -p.rotation * 2f,
                 vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.FlipVertically, 0f);
 
             // Beaming relativístico
             Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f * s, 0f), null,
-                new Color(255, 230, 150, 130), Projectile.rotation * 2f,
+                new Color(255, 230, 150, 130), p.rotation * 2f,
                 vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
@@ -645,20 +714,37 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
+            // === v5.86 — 3 ONDAS EXPANSIVAS CROMÁTICAS INVERSAS ===
+            // La implosión final: tres frentes convergentes (con desfase RGB
+            // invertido) que barren el daño hacia el centro. Cada una nace con
+            // un retardo escalonado de 9 ticks. Solo la autoridad las genera
+            // (se sincronizan como proyectil normal a todos los clientes).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                float[] radii = { 460f, 520f, 580f };
+                for (int i = 0; i < 3; i++)
+                {
+                    Projectile.NewProjectile(
+                        Projectile.GetSource_FromThis(),
+                        Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                        ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                        waveDamage, 0f, Projectile.owner,
+                        -i * 9f,                                      // edad: retardo escalonado
+                        CosmicShockwaveProjectile.StyleChromaticInverse,
+                        radii[i]);                                    // radio máximo
+                }
+            }
+
             if (Main.netMode == NetmodeID.Server) return;
 
             // === v5.84: PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===
-            // Implosión: la materia visible colapsa hacia el singularity
+            // Implosión: la materia visible colapsa hacia la singularidad
             ParticlePresets.Implosion(Projectile.Center, 165f, 46,
                 new Color(190, 90, 255), 26);
             // Explosión: liberación de energía del colapso
             ParticlePresets.Explosion(Projectile.Center, 130f, 28,
                 new Color(255, 240, 200), new Color(255, 120, 40), 40);
-            // Onda expansiva: anillo violeta + anillo dorado retardado
-            ParticlePresets.RingPulse(Projectile.Center, 250f,
-                new Color(180, 100, 255, 200), 32);
-            ParticlePresets.RingPulse(Projectile.Center, 320f,
-                new Color(255, 200, 100, 140), 44);
 
             // Screenshake coordinado (sección 8.5 del libro)
             try

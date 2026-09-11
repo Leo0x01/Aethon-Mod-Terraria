@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
+using AethonMod.Content.Projectiles.Cosmic;
 
 namespace AethonMod.Content.Projectiles.V20
 {
@@ -17,15 +18,17 @@ namespace AethonMod.Content.Projectiles.V20
     ///     atrae enemigos con fuerza CRECIENTE (0.5 → 2.2), genera GoldFlame
     ///     en espiral hacia dentro cada vez más rápido, y tiembla con
     ///     sacudidas de cámara que anticipan el estallido.
-    ///   - ONKILL (tick 180): EXPLOSIÓN MASIVA mejorada:
-    ///       * DOBLE onda expansiva (blanca-dorada veloz + naranja profunda retardada)
+    ///   - ONKILL (tick 180): EXPLOSIÓN MASIVA (v5.86):
+    ///       * 3 ONDAS EXPANSIVAS DE FUEGO (CosmicShockwaveProjectile estilo 2,
+    ///         escalonadas): cada una hace daño propio al pasar y aplica
+    ///         QUEMADURA (OnFire, 5 s) a los enemigos alcanzados.
     ///       * Flash blanco gigante + destello de destellos (SparkleStar)
     ///       * 70 lenguas de GoldFlame + 25 chispas blancas + brasas + humo
-    ///       * Daño AoE real en 340px (SimpleStrikeNPC) + OnFire
     ///       * Temblor de cámara fuerte (PunchCameraModifier)
     ///
     /// INTEGRACIÓN CON EL SOL (SunProjectile): el sol lo invoca en su segundo 7,
-    /// lo mantiene centrado y ambos explotan SIMULTÁNEAMENTE en el segundo 10.
+    /// lo mantiene centrado y ambos explotan SIMULTÁNEAMENTE en el segundo 10 —
+    /// estas ondas de fuego SON la onda expansiva final de la explosión del sol.
     /// La fuerza de succión durante la carga se suma a la gravedad creciente
     /// del propio sol → los enemigos son arrastrados al centro de la nova.
     /// </summary>
@@ -143,7 +146,29 @@ namespace AethonMod.Content.Projectiles.V20
         // ================================================================
         public override void OnKill(int timeLeft)
         {
-            // Daño AoE: solo en la autoridad (servidor / singleplayer).
+            // === v5.86 — 3 ONDAS EXPANSIVAS DE FUEGO ===
+            // La onda final de la explosión del sol: tres frentes ardientes
+            // escalonados (retardo de 8 ticks) con triple anillo rojo/naranja/
+            // amarillo y llamas a lo largo del frente. CADA UNA hace daño
+            // cuando su frente alcanza al enemigo y aplica QUEMADURA (OnFire).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                float[] radii = { 360f, 450f, 540f };
+                for (int i = 0; i < 3; i++)
+                {
+                    Projectile.NewProjectile(
+                        Projectile.GetSource_FromThis(),
+                        Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                        ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                        waveDamage, 0f, Projectile.owner,
+                        -i * 8f,                                      // edad: retardo escalonado
+                        CosmicShockwaveProjectile.StyleFire,
+                        radii[i]);                                    // radio máximo
+                }
+            }
+
+            // Daño AoE del núcleo de la nova: solo en la autoridad.
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -160,14 +185,6 @@ namespace AethonMod.Content.Projectiles.V20
             }
 
             if (Main.netMode == NetmodeID.Server) return;
-
-            // === DOBLE ONDA EXPANSIVA DE LA LIBRERÍA ===
-            // Onda 1: blanca-dorada, veloz y agresiva.
-            ParticlePresets.RingPulse(Projectile.Center, 320f,
-                new Color(255, 245, 200, 230), 22);
-            // Onda 2: naranja profunda, más ancha y retardada.
-            ParticlePresets.RingPulse(Projectile.Center, 460f,
-                new Color(255, 120, 40, 160), 44);
 
             // === FLASH BLANCO GIGANTE (SoftGlow aditivo de corta vida) ===
             var flash = new ParticleData

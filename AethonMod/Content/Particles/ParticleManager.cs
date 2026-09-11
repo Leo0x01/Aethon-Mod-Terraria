@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
+using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Particles
 {
@@ -352,6 +353,10 @@ namespace AethonMod.Content.Particles
             // v5.73: PostDrawTiles se llama cuando el spriteBatch NO está en Begin.
             // NO llamar sb.End() al inicio — solo Begin/End nuestros propios passes.
 
+            // v5.86: si la lente gravitacional está activa, las partículas de la capa
+            // AboveLens las pinta el BlackHoleLensSystem ENCIMA de la distorsión.
+            bool lensActive = BlackHoleLensSystem.LensActive;
+
             try
             {
                 // v5.74: pasar Main.GameViewMatrix.TransformationMatrix para respetar zoom
@@ -369,6 +374,7 @@ namespace AethonMod.Content.Particles
                 {
                     ref ParticleData p = ref particles[i];
                     if (!p.IsActive || p.BlendMode != 0) continue;
+                    if (lensActive && p.LayerPriority >= LayerPriorities.AboveLens) continue;
                     if (!bounds.IsVisible(p.Position, cullMargin)) continue;
                     DrawParticle(sb, ref p);
                 }
@@ -380,6 +386,7 @@ namespace AethonMod.Content.Particles
                 {
                     ref ParticleData p = ref particles[i];
                     if (!p.IsActive || p.BlendMode != 1) continue;
+                    if (lensActive && p.LayerPriority >= LayerPriorities.AboveLens) continue;
                     if (!bounds.IsVisible(p.Position, cullMargin)) continue;
                     DrawParticle(sb, ref p);
                 }
@@ -392,7 +399,57 @@ namespace AethonMod.Content.Particles
             }
         }
 
-        private void DrawParticle(SpriteBatch sb, ref ParticleData p)
+        /// <summary>
+        /// v5.86 — Renderiza SOLO la capa AboveLens (partículas de efectos del
+        /// agujero negro) con los mismos pases de batching y culling. La invoca
+        /// el BlackHoleLensSystem después de compositar la distorsión: así la
+        /// lente queda DETRÁS de la animación del agujero negro y sus efectos.
+        /// </summary>
+        public static void RenderAboveLensLayer()
+        {
+            if (Terraria.ID.NetmodeID.Server == Main.netMode || _buffer == null || _textures == null) return;
+
+            var particles = _buffer.RawData;
+            var sb = Main.spriteBatch;
+
+            try
+            {
+                var transform = Main.GameViewMatrix.TransformationMatrix;
+                var bounds = new CameraBounds(Main.screenPosition,
+                    new Vector2(Main.screenWidth, Main.screenHeight));
+                const float cullMargin = 320f;
+
+                // === Pass 1: AlphaBlend ===
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, transform);
+                for (int i = 0; i < _buffer.Capacity; i++)
+                {
+                    ref ParticleData p = ref particles[i];
+                    if (!p.IsActive || p.BlendMode != 0) continue;
+                    if (p.LayerPriority < LayerPriorities.AboveLens) continue;
+                    if (!bounds.IsVisible(p.Position, cullMargin)) continue;
+                    DrawParticle(sb, ref p);
+                }
+                sb.End();
+
+                // === Pass 2: Additive ===
+                sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null, transform);
+                for (int i = 0; i < _buffer.Capacity; i++)
+                {
+                    ref ParticleData p = ref particles[i];
+                    if (!p.IsActive || p.BlendMode != 1) continue;
+                    if (p.LayerPriority < LayerPriorities.AboveLens) continue;
+                    if (!bounds.IsVisible(p.Position, cullMargin)) continue;
+                    DrawParticle(sb, ref p);
+                }
+                sb.End();
+            }
+            catch
+            {
+                try { sb.End(); } catch { }
+            }
+        }
+
+        private static void DrawParticle(SpriteBatch sb, ref ParticleData p)
         {
             if (p.TextureId >= _textureCount) return;
             Texture2D tex = _textures[p.TextureId];

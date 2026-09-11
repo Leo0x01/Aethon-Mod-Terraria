@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.85 |
+| **Versión (build.txt)** | 5.86 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.85 — Sol completo (10s) + lente gravitacional de pantalla + supernova mejorada |
+| **Commit actual** | v5.86 — La lente va DETRÁS del agujero negro + ondas cromáticas/inversas/de fuego con daño real |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.85
+version = 5.86
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -177,7 +177,7 @@ Todos los sprites originales en:
 ## 4. ESTADO ACTUAL DEL PROYECTO
 
 ### 4.1 Conteo de archivos (verificado)
-- **79 archivos .cs** en `Content/` (78 + BlackHoleLensSystem.cs nuevo en v5.85)
+- **80 archivos .cs** en `Content/` (79 + CosmicShockwaveProjectile.cs nuevo en v5.86)
 - **139 archivos .png** (sprites — se añadió DendriticNoiseZoomedOut.png)
 - **8 shaders .fx** en `Content/Effects/Shaders/` (fuente)
 - **5 shaders .fxc** compilados en `Content/Effects/Shaders/`
@@ -705,10 +705,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.85 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.86 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (pendiente) | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
 | `90e987f` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
 | `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
 | `7de559b` | v5.83 | fix: BlackHole + Sun con render de referencia + shaders .fxc (error Asset could not be found) |
@@ -780,50 +781,57 @@ Commits desde v5.28 hasta v5.85 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.85
-- **Mensaje**: "feat v5.85: Sol completo (10s) + lente gravitacional de pantalla + supernova mejorada + limpieza de referencias externas"
+- **Versión**: v5.86
+- **Mensaje**: "fix/feat v5.86: la lente va detrás del agujero negro + ondas cromáticas/inversas/de fuego con daño real"
 
-### 11.2 Qué se hizo en v5.85
+### 11.2 Qué se hizo en v5.86 (reportes del usuario tras probar v5.85)
 
-**Contexto**: el Grimorio será el ARMA DEFINITIVA y estos proyectiles cósmicos son
-su base — el usuario pidió llevarlos al nivel definitivo antes de integrarlos.
+**Reportes**: (1) la lente afectaba al propio agujero negro y debía ir detrás de
+su animación y efectos; (2) faltaba la onda cromática en la explosión del agujero
+con crecimiento momentáneo del área y una implosión final con 3 ondas inversas
+(daño cada una); (3) la primera llamarada del sol salía en la posición del
+jugador; (4) faltaban las 3 ondas de fuego finales con daño + quemadura.
 
-1. **SunProjectile — ciclo completo de 10 segundos**:
-   - Llamaradas solares cada 2s desde t=0 (PhoenixNovaProjectile centrado, daño 50%)
-   - SupernovaProjectile invocado en el segundo 7, centrado tick a tick vía ai[1]
-   - Gravedad del sol: 1/10 de la del agujero negro (0.26 vs 2.6), solo enemigos;
-     durante la carga de la supernova crece progresivamente hasta x4
-   - Nova final simultánea (sol + supernova explotan el mismo tick)
-   - Materia dorada convergiendo en espiral + luz creciente durante la carga
-2. **SupernovaProjectile — reescrito**: 180 ticks de carga con atracción creciente
-   (0.5→2.2, radio 300), sacudidas anticipatorias, anillos de contención; explosión
-   masiva con doble onda expansiva (320px blanca + 460px naranja), flash gigante,
-   70 GoldFlame + AoE real de 340px + OnFire + temblor fuerte
-3. **BlackHoleLensSystem (NUEVO)**: lente gravitacional que distorsiona el FONDO
-   REAL del juego — hook `Terraria.On_TimeLogger.DetailedDrawTime` punto 36
-   (verificado por decompilación: tras EndCapture, antes de la UI), copia
-   `Main.screenTarget` a través de BlackHoleDistortionShader hacia un RT de media
-   resolución y lo devuelve cubriendo la pantalla. Hasta 5 fuentes, intensidad
-   "pequeña" (0.62) ligada a la escala del agujero, try/catch total.
-4. **BlackHoleProjectile**: gravedad 2.0→2.6 y radio 350→**450px**; hitbox 76→96;
-   succión espiral MULTICOLOR (violeta/cian/magenta/oro); devora polvo en 260px
-5. **LIMPIEZA TOTAL de referencias externas**: carpeta renombrada a
-   `Content/Effects/Textures/`, tooltips propios, csproj/gitignore limpios,
-   changelog y este documento neutralizados
-6. **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real
-   (el hook del lens y Main.screenTarget compilan contra TerrariaHooks.dll real)
+1. **ARQUITECTURA DE LENTE INVERTIDA (la lente va DETRÁS)**: con la lente activa
+   el núcleo del agujero NO se dibuja en el pase del mundo
+   (`BlackHoleProjectile.PreDraw` se salta); el `BlackHoleLensSystem` lo pinta
+   ENCIMA de la distorsión vía `DrawCoreVisuals(p, endActiveBatch)` (estático,
+   compartido). Las partículas de efectos del agujero pasan a la capa nueva
+   `AboveLens` (950) que pinta `ParticleManager.RenderAboveLensLayer()` tras
+   compositar. Fallback automático: `LensActive=false` → todo al pase normal.
+2. **COMPOSICIÓN POR REGIONES**: solo la zona ±2.2×radio de cada fuente se
+   re-dibuja distorsionada (antes la pantalla completa a media resolución → todo
+   emborronado; ahora el resto del mundo conserva resolución nativa).
+3. **CosmicShockwaveProjectile (NUEVO)**: 3 estilos — 0 cromática (RGB split +
+   fuente de lente → distorsiona el fondo), 1 cromática INVERSA (convergente, RGB
+   invertido, knockback hacia el centro), 2 fuego (triple anillo + llamas +
+   QUEMADURA). Daño por frente de onda una única vez por NPC (marca reiniciada en
+   SetDefaults), SimpleStrikeNPC con guard de autoridad. ai: edad (negativa =
+   retardo)/estilo/radio máx; duración derivada maxR/20 (API: solo 3 slots ai).
+4. **Secuencia de muerte del agujero negro**: t-90 onda cromática (520px, 75%)
+   + estruendo/sacudida; t-90..t-36 escala +60% y radio de gravedad 450→720px
+   (área de efecto crece con la onda); t-36..t-0 evaporación (escala→0); t-0
+   OnKill = 3 ondas inversas (460/520/580px, retardos 9 ticks, 50% daño cada una).
+   La lente sigue la escala: se enciende con la explosión y muere evaporada.
+5. **Sol**: primera llamarada en t=2s (antes t=0 = posición del jugador); la
+   SupernovaProjectile (explosión final sincronizada del sol, segundo 10) genera
+   3 ondas de fuego (360/450/540px, retardos 8 ticks, 50% daño cada una + OnFire
+   5s) — también aplica al SupernovaStaff standalone.
+6. **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real.
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
   ahora SÍ se usa (lente gravitacional v5.85)
-- ✅ Librería de partículas COMPLETA según el libro (v5.84)
-- ✅ Sol: ciclo completo de 10s con llamaradas + supernova sincronizada (v5.85)
-- ✅ Agujero negro: lente gravitacional de pantalla + gravedad 450px (v5.85)
+- ✅ Librería de partículas COMPLETA según el libro (v5.84) + capa AboveLens (v5.86)
+- ✅ Sol: ciclo completo de 10s con llamaradas (t=2,4,6,8s) + supernova sincronizada (v5.86)
+- ✅ Agujero negro: lente DETRÁS del agujero y sus efectos + secuencia de muerte
+  completa con 4 ondas con daño (v5.86)
 - ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
 - ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
   Develop Mods → Build y probar BlackHoleStaff y SunStaff; verificar que la lente
-  se vea en pantalla sin artefactos)
+  quede detrás del agujero, las 4 ondas del agujero hagan daño y las 3 de fuego
+  quemen)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
@@ -952,9 +960,9 @@ ls /home/z/my-project/AethonMod/Content/Effects/Shaders/ | wc -l   # debe ser 13
 ls /home/z/my-project/AethonMod/Content/Effects/Textures/ | wc -l      # debe ser 10 (con DendriticNoiseZoomedOut)
 ls /home/z/my-project/AethonMod/Content/Weapons/V20/*.cs | wc -l   # debe ser 19
 ls /home/z/my-project/AethonMod/Content/Weapons/Cosmic/*.cs | wc -l # debe ser 1 (CosmicWeapons.cs con 2 clases)
-ls /home/z/my-project/AethonMod/Content/Projectiles/Cosmic/*.cs | wc -l  # debe ser 2 (BlackHole + Sun)
+ls /home/z/my-project/AethonMod/Content/Projectiles/Cosmic/*.cs | wc -l  # debe ser 3 (BlackHole + Sun + CosmicShockwave v5.86)
 ls /home/z/my-project/AethonMod/Content/Particles/*.cs | wc -l     # debe ser 6 (v5.84: + ShapeDescriptor, CameraBounds, ParticlePresets)
-find /home/z/my-project/AethonMod/Content -name '*.cs' | wc -l     # debe ser 81 (+ AethonMod.cs raíz = 82)
+find /home/z/my-project/AethonMod/Content -name '*.cs' | wc -l     # debe ser 82 (+ AethonMod.cs raíz = 83)
 find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 139
 ```
 
@@ -962,7 +970,423 @@ find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 13
 
 ## 13. CÓDIGO FUENTE CLAVE
 
-### 13.1 BlackHoleProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85)
+### 13.0 ⚠️ AVISO v5.86 — ARCHIVOS QUE CAMBIARON TRAS v5.85
+
+El DISCO es la fuente autoritativa (el código embebido de las secciones 13.1-13.4
+corresponde a v5.85 y puede estar desactualizado en las partes señaladas):
+
+| Archivo | Cambio v5.86 |
+|---|---|
+| `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b |
+| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (~366 líneas): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, composición POR REGIONES (±2.2×radio, no pantalla completa), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático |
+| `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles` |
+| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0) |
+| `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas |
+| `Content/Particles/ParticleData.cs` | `LayerPriorities.AboveLens = 950` |
+| `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive` |
+| `Content/Weapons/Cosmic/CosmicWeapons.cs` + `V20/SupernovaStaff.cs` | Tooltips v5.86 |
+
+### 13.1b CosmicShockwaveProjectile.cs — COMPLETO (NUEVO v5.86)
+
+```csharp
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using AethonMod.Content.Effects;
+
+namespace AethonMod.Content.Projectiles.Cosmic
+{
+    /// <summary>
+    /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
+    ///
+    /// v5.86 — Los tres frentes de onda del arsenal cósmico:
+    ///
+    ///   ESTILO 0 — ONDA CROMÁTICA (explosión del agujero negro):
+    ///     Anillo RGB (aberración cromática real: los canales R/G/B se separan
+    ///     radialmente) que se expande desde el centro. Se registra como fuente
+    ///     del BlackHoleLensSystem → el FONDO del juego se distorsiona a su paso
+    ///     ("distorsiona un poco"). Daña a cada NPC cuando el frente lo alcanza.
+    ///
+    ///   ESTILO 1 — ONDA CROMÁTICA INVERSA (implosión del agujero negro):
+    ///     Nace en el radio máximo y CONVERGE hacia el centro (el frente barre
+    ///     el daño hacia dentro). El desfase de color está invertido (azul por
+    ///     delante de rojo) y también distorsiona el fondo al pasar.
+    ///
+    ///   ESTILO 2 — ONDA DE FUEGO (nova final del sol):
+    ///     Triple anillo ardiente (rojo/naranja/amarillo) + llamas a lo largo
+    ///     del frente. Cada onda hace daño y aplica QUEMADURA (OnFire).
+    ///
+    /// Campos AI:
+    ///   ai[0] = edad (negativa = retardo escalonado aún activo)
+    ///   ai[1] = estilo (0 cromática / 1 cromática inversa / 2 fuego)
+    ///   ai[2] = radio máximo en píxeles
+    ///   duración = derivada del radio (maxR/20 ticks ≈ frente de ~40 px/tick)
+    ///   (la API de NewProjectile solo acepta 3 slots de ai: la duración se
+    ///   deriva de forma determinista para que todas las máquinas coincidan)
+    ///
+    /// RENDER: los estilos 0/1 se dibujan ENCIMA de la lente gravitacional
+    /// (el BlackHoleLensSystem los pinta tras compositar la distorsión), de
+    /// modo que la lente nunca deforma sus propios anillos. El estilo 2 se
+    /// dibuja en el pase normal del mundo.
+    /// </summary>
+    public class CosmicShockwaveProjectile : ModProjectile
+    {
+        /// <summary>Estilo: onda cromática expansiva.</summary>
+        public const float StyleChromatic = 0f;
+
+        /// <summary>Estilo: onda cromática inversa (convergente).</summary>
+        public const float StyleChromaticInverse = 1f;
+
+        /// <summary>Estilo: onda de fuego (con quemadura).</summary>
+        public const float StyleFire = 2f;
+
+        /// <summary>Marca de NPCs ya golpeados por esta onda (una sola vez cada uno).</summary>
+        private readonly bool[] _hitNPCs = new bool[Main.maxNPCs];
+
+        private float Age { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+        private float Style => Projectile.ai[1];
+        private float MaxRadius => Projectile.ai[2];
+
+        /// <summary>Duración derivada del radio: frente de ~40 px/tick de pico.</summary>
+        private float Duration => Math.Max(MaxRadius / 20f, 10f);
+
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 1;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 8;
+            Projectile.height = 8;
+            Projectile.tileCollide = false;
+            // Daño manual por frente de onda (SimpleStrikeNPC): sin colisión vanilla.
+            Projectile.friendly = false;
+            Projectile.hostile = false;
+            Projectile.DamageType = DamageClass.Magic;
+            Projectile.penetrate = 1;
+            Projectile.timeLeft = 90;
+            Projectile.light = 0f;
+            Projectile.alpha = 0;
+            Projectile.aiStyle = -1;
+            Projectile.ignoreWater = true;
+
+            // tML puede reutilizar la instancia del ModProjectile: reiniciar la
+            // marca de golpes para que cada onda nueva pueda dañar de nuevo.
+            Array.Clear(_hitNPCs, 0, _hitNPCs.Length);
+        }
+
+        public override bool? CanCutTiles() => false;
+        public override bool? CanDamage() => false;
+
+        // ================================================================
+        //  AI — frente de onda, daño y soporte visual
+        // ================================================================
+        public override void AI()
+        {
+            try
+            {
+                float age = Age;
+                Age += 1f;
+
+                // Retardo escalonado (ondas en secuencia): invisible e inofensiva.
+                if (age < 0f)
+                    return;
+
+                float progress = MathHelper.Clamp(age / Math.Max(Duration, 1f), 0f, 1f);
+                float front = FrontRadius(age, Style, MaxRadius);
+
+                // === DAÑO POR FRENTE DE ONDA (solo autoridad) ===
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    ApplyWaveDamage(front);
+
+                // === SOPORTE VISUAL (solo cliente) ===
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    if (Style == StyleFire)
+                        SpawnFireFrontDusts(front, progress);
+                    else
+                        SpawnChromaticFrontSparks(front, progress);
+                }
+
+                // === LUZ ===
+                float alpha = WaveAlpha(age, Math.Max(Duration, 1f));
+                if (Style == StyleFire)
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(1f, 0.55f, 0.2f) * 1.8f * alpha);
+                else
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(0.6f, 0.5f, 1f) * 0.9f * alpha);
+
+                // Frente completado → la onda se disipa.
+                if (age >= Duration)
+                    Projectile.Kill();
+            }
+            catch { }
+        }
+
+        // ================================================================
+        //  FRENTE DE ONDA (compartido con el sistema de lente)
+        // ================================================================
+
+        /// <summary>Radio del frente en píxeles, o -1 si aún retrasada/inactiva.</summary>
+        public static float GetFrontRadius(Projectile p)
+        {
+            if (p == null || !p.active) return -1f;
+            float age = p.ai[0];
+            if (age < 0f) return -1f;
+            return FrontRadius(age, p.ai[1], p.ai[2]);
+        }
+
+        /// <summary>Progreso 0..1 del frente (o -1 si retrasada).</summary>
+        public static float GetProgress(Projectile p)
+        {
+            if (p == null || !p.active) return -1f;
+            float age = p.ai[0];
+            if (age < 0f) return -1f;
+            return MathHelper.Clamp(age / DurationOf(p.ai[2]), 0f, 1f);
+        }
+
+        /// <summary>Duración del frente derivada del radio máximo (determinista).</summary>
+        private static float DurationOf(float maxR)
+        {
+            return Math.Max(maxR / 20f, 10f);
+        }
+
+        private static float FrontRadius(float age, float style, float maxR)
+        {
+            float duration = DurationOf(maxR);
+            float p = MathHelper.Clamp(age / duration, 0f, 1f);
+            if (style == StyleChromaticInverse)
+            {
+                // Convergencia acelerada: nace en maxR y colapsa hacia el centro.
+                return maxR * (1f - p * p);
+            }
+            // Expansión ease-out: arranque veloz, frenado al final.
+            return maxR * (1f - (1f - p) * (1f - p));
+        }
+
+        /// <summary>Envolvente de alpha: aparición rápida + desvanecimiento final.</summary>
+        private static float WaveAlpha(float age, float duration)
+        {
+            float fadeIn = Utils.GetLerpValue(0f, duration * 0.15f, age, true);
+            float fadeOut = 1f - Utils.GetLerpValue(duration * 0.7f, duration, age, true);
+            return Math.Min(fadeIn, fadeOut);
+        }
+
+        // ================================================================
+        //  DAÑO — el frente barre a los NPC una única vez por onda
+        // ================================================================
+        private void ApplyWaveDamage(float front)
+        {
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                if (_hitNPCs[i]) continue;
+                NPC npc = Main.npc[i];
+                if (npc == null || !npc.active || !npc.CanBeChasedBy()) continue;
+
+                Vector2 toCenter = Projectile.Center - npc.Center;
+                float dist = toCenter.Length();
+
+                bool crossed;
+                if (Style == StyleChromaticInverse)
+                {
+                    // Onda convergente: golpea cuando el frente pasa hacia dentro
+                    // (y solo a quien estaba dentro del radio inicial).
+                    crossed = dist <= MaxRadius * 1.02f && dist >= front;
+                }
+                else
+                {
+                    // Onda expansiva: golpea cuando el frente le alcanza.
+                    crossed = dist <= front;
+                }
+
+                if (!crossed) continue;
+                _hitNPCs[i] = true;
+
+                // Dirección del empuje: hacia fuera en expansivas, hacia el
+                // centro en la inversa (la implosión arrastra hacia dentro).
+                int dir;
+                float knockBack;
+                if (Style == StyleChromaticInverse)
+                {
+                    dir = npc.Center.X < Projectile.Center.X ? 1 : -1;
+                    knockBack = -4f;
+                }
+                else
+                {
+                    dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
+                    knockBack = Style == StyleFire ? 5f : 6f;
+                }
+
+                npc.SimpleStrikeNPC(Projectile.damage, dir, false, knockBack, DamageClass.Magic);
+
+                // La onda de fuego aplica QUEMADURA.
+                if (Style == StyleFire)
+                    npc.AddBuff(BuffID.OnFire, 300);
+            }
+        }
+
+        // ================================================================
+        //  DUSTS DE APOYO
+        // ================================================================
+
+        /// <summary>LLamas vivas a lo largo del frente de la onda de fuego.</summary>
+        private void SpawnFireFrontDusts(float front, float progress)
+        {
+            int count = 4;
+            for (int i = 0; i < count; i++)
+            {
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                Vector2 pos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * front,
+                    (float)Math.Sin(angle) * front);
+                Vector2 vel = new Vector2(
+                    (float)Math.Cos(angle) * Main.rand.NextFloat(1.5f, 3.5f),
+                    (float)Math.Sin(angle) * Main.rand.NextFloat(1.5f, 3.5f));
+                Color color = Main.rand.NextBool(2)
+                    ? new Color(255, 170, 60)
+                    : new Color(255, 100, 30);
+                Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame, vel, 220, color, 1.2f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+        }
+
+        /// <summary>Chispas blancas escasas sobre el frente cromático.</summary>
+        private void SpawnChromaticFrontSparks(float front, float progress)
+        {
+            if (!Main.rand.NextBool(2)) return;
+            float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+            Vector2 pos = Projectile.Center + new Vector2(
+                (float)Math.Cos(angle) * front,
+                (float)Math.Sin(angle) * front);
+            Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Gold,
+                Vector2.Zero, 200, new Color(230, 220, 255), 0.6f);
+            d.noGravity = true;
+            d.fadeIn = 0.2f;
+        }
+
+        // ================================================================
+        //  RENDER
+        // ================================================================
+        public override bool PreDraw(ref Color lightColor)
+        {
+            try
+            {
+                if (Age < 0f) return false;
+
+                // Las ondas cromáticas las pinta el sistema de lente ENCIMA de la
+                // distorsión (para que la lente no las deforme a ellas). Si la
+                // lente no está activa, caemos al dibujado normal del mundo.
+                if ((Style == StyleChromatic || Style == StyleChromaticInverse) &&
+                    BlackHoleLensSystem.LensActive)
+                    return false;
+
+                // Pase del mundo: el spriteBatch del juego está abierto → cerrarlo
+                // antes de nuestros pases (el sistema de lente lo llama en batch
+                // ya cerrado, por eso el parámetro).
+                DrawWaveVisual(Projectile, true);
+            }
+            catch { }
+
+            // Restaurar el SpriteBatch al estado que tML espera tras PreDraw.
+            // (End defensivo: si un error interno dejó un Begin abierto, se cierra
+            // antes de restaurar; si no había nada abierto, se ignora.)
+            try { Main.spriteBatch.End(); } catch { }
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.Transform);
+            return false;
+        }
+
+        /// <summary>
+        /// Dibuja la onda completa (anillos con aberración cromática o triple
+        /// anillo de fuego). Reutilizable desde el pase del mundo (PreDraw) y
+        /// desde el pase posterior a la lente (BlackHoleLensSystem).
+        /// <param name="endActiveBatch">true cuando existe un Begin del juego
+        /// activo (pase del mundo); false en el hook de la lente (batch cerrado).</param>
+        /// </summary>
+        public static void DrawWaveVisual(Projectile p, bool endActiveBatch)
+        {
+            try
+            {
+                if (p == null || !p.active || p.ai[0] < 0f) return;
+
+                float age = p.ai[0];
+                float style = p.ai[1];
+                float duration = DurationOf(p.ai[2]);
+                float front = FrontRadius(age, style, p.ai[2]);
+                if (front <= 1f) return;
+
+                float progress = MathHelper.Clamp(age / duration, 0f, 1f);
+                float alpha = WaveAlpha(age, duration);
+
+                Texture2D ring = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/Ring").Value;
+                Vector2 drawPos = p.Center - Main.screenPosition;
+                float ringUnit = ring.Width / 2f; // radio del anillo a escala 1
+
+                if (endActiveBatch)
+                    Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                if (style == StyleFire)
+                {
+                    // === TRIPLE ANILLO DE FUEGO ===
+                    DrawRing(ring, drawPos, front, ringUnit,
+                        new Color(220, 50, 10, (byte)(alpha * 200f)));
+                    DrawRing(ring, drawPos, front * 0.93f, ringUnit,
+                        new Color(255, 130, 30, (byte)(alpha * 220f)));
+                    DrawRing(ring, drawPos, front * 0.86f, ringUnit,
+                        new Color(255, 230, 130, (byte)(alpha * 230f)));
+                    DrawRing(ring, drawPos, front * 0.8f, ringUnit,
+                        new Color(255, 255, 220, (byte)(alpha * 120f)));
+                }
+                else
+                {
+                    // === ANILLO CROMÁTICO (aberración RGB real) ===
+                    // La separación de canales crece con la edad (dispersión)
+                    // y se INVERTIEn en la onda inversa (azul por delante).
+                    float fringe = (2.5f + 4.5f * progress) *
+                                   (style == StyleChromaticInverse ? -1f : 1f);
+                    byte a = (byte)(alpha * 230f);
+
+                    DrawRing(ring, drawPos, front + fringe, ringUnit, new Color(255, 40, 40, a));
+                    DrawRing(ring, drawPos, front, ringUnit, new Color(60, 255, 90, a));
+                    DrawRing(ring, drawPos, front - fringe, ringUnit, new Color(70, 130, 255, a));
+                    // Núcleo blanco que unifica los tres canales.
+                    DrawRing(ring, drawPos, front, ringUnit,
+                        new Color(255, 255, 255, (byte)(alpha * 150f)));
+                }
+
+                Main.spriteBatch.End();
+            }
+            catch { }
+        }
+
+        /// <summary>Dibuja un anillo centrado en drawPos con el radio dado en píxeles.</summary>
+        private static void DrawRing(Texture2D ring, Vector2 drawPos, float radiusPx,
+            float ringUnit, Color color)
+        {
+            if (radiusPx <= 0.5f || color.A == 0) return;
+            float scale = radiusPx / ringUnit;
+            Main.spriteBatch.Draw(ring, drawPos, null, color, 0f,
+                new Vector2(ring.Width * 0.5f, ring.Height * 0.5f), scale,
+                SpriteEffects.None, 0f);
+        }
+    }
+}
+
+```
+
+
+### 13.1 BlackHoleProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85; ⚠️ v5.86: la AI cambió — ver 13.0)
 > El archivo completo está en el repo (`Content/Projectiles/Cosmic/BlackHoleProjectile.cs`).
 > Aquí: cabecera documental + AI() completa (el corazón del ciclo). Lo demás son
 > las 4+5 capas de partículas, el render del shader y la muerte (sin cambios de
@@ -1103,7 +1527,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 }
 ```
 
-### 13.2 SunProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85, reescrito)
+### 13.2 SunProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85; ⚠️ v5.86: llamaradas desde t=2s — ver 13.0)
 > El archivo completo está en el repo (`Content/Projectiles/Cosmic/SunProjectile.cs`).
 > Aquí: cabecera documental + AI() completa — TODO el ciclo de 10 segundos
 > (llamaradas cada 2s desde t=0, supernova del segundo 7 con centrado tick a tick
@@ -1341,7 +1765,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 }
 ```
 
-### 13.3 BlackHoleLensSystem.cs — COMPLETO (NUEVO v5.85)
+### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.86 — ver 13.0, el disco manda)
 > La lente gravitacional de pantalla: distorsiona el fondo REAL del juego alrededor
 > de hasta 5 agujeros negros. Hook en TimeLogger punto 36 (tras EndCapture del
 > mundo, antes de la UI), Main.screenTarget como fuente, RT a media resolución.
@@ -1571,7 +1995,7 @@ namespace AethonMod.Content.Effects
 }
 ```
 
-### 13.4 SupernovaProjectile.cs — COMPLETO (REESCRITO v5.85)
+### 13.4 SupernovaProjectile.cs — COMPLETO (REESCRITO v5.85; ⚠️ v5.86: OnKill ahora genera 3 ondas de fuego — ver 13.0)
 > 180 ticks de carga con atracción creciente y sacudidas anticipatorias; explosión
 > masiva en OnKill con doble onda expansiva, flash gigante y AoE de 340px.
 > Invocado por el sol en su segundo 7 (sincronizado) y por SupernovaStaff.
@@ -2465,9 +2889,10 @@ Content/
 │   ├── GenesisLight.cs                  (en Weapons/Projectiles/)
 │   ├── GenesisLight.png
 │   │
-│   ├── Cosmic/                          ← Proyectiles cósmicos (2)
+│   ├── Cosmic/                          ← Proyectiles cósmicos (3)
 │   │   ├── BlackHoleProjectile.cs
 │   │   ├── BlackHoleProjectile.png
+│   │   ├── CosmicShockwaveProjectile.cs      ← NUEVO v5.86 (ondas cromáticas/inversas/fuego)
 │   │   ├── SunProjectile.cs
 │   │   └── SunProjectile.png
 │   │

@@ -33,9 +33,10 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/9600FF:═══ AGUJERO NEGRO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lensing gravitacional real de 75 pasos + lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lensing gravitacional real de 75 pasos + lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos (la lente va siempre DETRÁS del agujero y sus efectos)]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción de estelas orbitando + succión espiral con partículas de colores + devora el polvo del entorno]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px y colapsa con implosión, doble onda expansiva y temblor de pantalla]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px; al explotar lanza una onda expansiva cromática que distorsiona el espacio mientras su área de efecto crece]"));
+            tooltips.Add(new TooltipLine(Mod, "D4", "[c/9600FF:Se evapora en una implosión con 3 ondas cromáticas inversas — cada onda hace daño]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
@@ -65,9 +66,10 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ SOL ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrella de plasma de 10 segundos: llamaradas solares cada 2s y supernova que carga desde el segundo 7 hasta el estallido final]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrella de plasma de 10 segundos: llamaradas solares cada 2s (desde el segundo 2) y supernova que carga desde el segundo 7 hasta el estallido final]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Corona de plasma orbitando + viento solar radial + prominencias periódicas + destellos luminosos]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Inflama a los enemigos, atrae a los rivales con su gravedad y muere en una nova masiva con doble onda expansiva y temblor de pantalla]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Inflama a los enemigos, atrae a los rivales con su gravedad y muere en una nova masiva con temblor de pantalla]"));
+            tooltips.Add(new TooltipLine(Mod, "D4", "[c/FF7000:La explosión final libera 3 ondas expansivas de fuego — cada una hace daño y provoca quemadura]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

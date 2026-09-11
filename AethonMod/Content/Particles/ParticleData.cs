@@ -93,6 +93,11 @@ namespace AethonMod.Content.Particles
     /// El render actual ocurre en un único pase en PostDrawTiles (detrás de
     /// proyectiles/NPCs/jugadores); el campo LayerPriority queda reservado para
     /// un pipeline multi-pase futuro.
+    ///
+    /// v5.86 — AboveLens: partículas de efectos propios del agujero negro que
+    /// se dibujan ENCIMA de la lente gravitacional (las pinta el
+    /// BlackHoleLensSystem tras compositar la distorsión, de modo que la lente
+    /// quede DETRÁS de la animación del agujero y sus efectos).
     /// </summary>
     public static class LayerPriorities
     {
@@ -105,6 +110,8 @@ namespace AethonMod.Content.Particles
         public const ushort BeforePlayers = 600;
         public const ushort AfterPlayers = 700;
         public const ushort AboveAll = 900;
+        /// <summary>Encima de la lente gravitacional (la pinta BlackHoleLensSystem).</summary>
+        public const ushort AboveLens = 950;
     }
 
     /// <summary>

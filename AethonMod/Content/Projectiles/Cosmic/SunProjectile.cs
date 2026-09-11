@@ -23,15 +23,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
     ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
-    /// CICLO DE VIDA (v5.85) — el sol como cuerpo celeste completo:
-    ///   - t=0s    : nace con pop elástico y lanza su primera LLAMARADA SOLAR
-    ///               (PhoenixNovaProjectile centrado en el sol).
-    ///   - cada 2s : nueva llamarada solar desde el centro (5 en total: 0, 2, 4, 6, 8s).
+    /// CICLO DE VIDA (v5.85/v5.86) — el sol como cuerpo celeste completo:
+    ///   - t=0s    : nace con pop elástico (SIN llamarada: en t=0 aún está
+    ///               sobre el jugador y la nova estallaría en su posición).
+    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s).
     ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
     ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
     ///               y su luz se intensifica (materia convergiendo en espiral).
     ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE — nova masiva con
-    ///               doble onda expansiva y temblor de pantalla.
+    ///               3 ONDAS EXPANSIVAS DE FUEGO (v5.86), cada una con daño
+    ///               propio y QUEMADURA (OnFire), más el estallido de dusts
+    ///               y temblor de pantalla.
     ///
     /// GRAVEDAD (cuerpo celeste): atrae solo enemigos, con una fuerza ~10 veces
     /// menor que la del agujero negro. Durante la carga de la supernova (últimos
@@ -88,10 +90,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === LLAMARADAS SOLARES (PhoenixNova cada 2 s, DESDE t=0) ===
-            // Se comprueba ANTES del incremento para que el primer disparo
-            // coincida con el mismo tick de nacimiento del sol.
-            if (VisualsTime % FlareInterval == 0f && Projectile.owner == Main.myPlayer)
+            // === LLAMARADAS SOLARES (PhoenixNova cada 2 s, DESDE t=2s) ===
+            // v5.86: la primera llamarada YA NO se lanza en t=0 — en ese instante
+            // el sol aún está sobre el jugador (nace en su posición y deriva con
+            // el disparo), así que la nova explotaba "en la posición del jugador".
+            // Ahora la primera espera al segundo 2, cuando el sol ya se ha alejado:
+            // llamaradas en t=2, 4, 6 y 8 s (4 en total).
+            if (VisualsTime > 0f && VisualsTime % FlareInterval == 0f && Projectile.owner == Main.myPlayer)
             {
                 int flareDamage = (int)(Projectile.damage * 0.5f);
                 if (flareDamage < 1) flareDamage = 1;

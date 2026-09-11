@@ -1,5 +1,126 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.86 — LA LENTE VA DETRÁS DEL AGUJERO NEGRO + ONDAS CROMÁTICAS/DE FUEGO CON DAÑO REAL
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+### A. Arreglos de la lente gravitacional (reportes del usuario)
+
+**Problema reportado**: "la lente gravitacional no puede afectar al agujero negro y
+debe estar detrás de la animación del agujero negro y sus efectos".
+
+**Causa raíz**: en v5.85 la lente volcaba la pantalla distorsionada ENCIMA de todo el
+frame renderizado — y el núcleo del agujero negro (dibujado en el pase del mundo)
+quedaba DENTRO de esa pantalla, así que la lente deformaba al propio agujero negro.
+
+**Solución (arquitectura nueva en el punto 36 del pipeline)**:
+1. Con la lente activa, `BlackHoleProjectile.PreDraw` **se salta el dibujado del
+   núcleo** en el pase del mundo (bandera estática `BlackHoleLensSystem.LensActive`,
+   que refleja "la lente se renderizó en el frame anterior").
+2. El mundo se renderiza en `screenTarget` SIN el núcleo del agujero.
+3. Tras compositar la distorsión, el sistema de lente dibuja ENCIMA, en orden:
+   **a)** partículas de la nueva capa `AboveLens` (los efectos del agujero: disco de
+   acreción, anillo de fotones, espiral de succión, halo de distorsión — ahora la
+   lente queda DETRÁS de los efectos del agujero negro), **b)** el NÚCLEO completo
+   del agujero (`BlackHoleProjectile.DrawCoreVisuals`, refactorizado a método
+   estático compartido: halo + RealBlackHoleShader + refuerzo del horizonte),
+   **c)** los anillos de las ondas cromáticas.
+4. **Fallback automático**: si la lente falla/no hay fuentes, `LensActive` cae a
+   false y todo vuelve al dibujado normal del mundo — el agujero jamás desaparece.
+5. **BONUS de calidad — composición por regiones**: antes la pantalla COMPLETA se
+   volcaba a media resolución (todo el juego quedaba emborronado); ahora solo se
+   re-dibuja distorsionada la zona alrededor de cada fuente (±2.2× su radio), el
+   resto del mundo conserva la resolución nativa.
+6. Se elimina `SpawnAccretionDiskParticles` (GoldFlame a 10-40px del horizonte,
+   redundante con el disco del shader + el disco de la librería y en plena zona de
+   curvatura): los efectos cercanos ahora viven en la capa AboveLens.
+
+### B. CosmicShockwaveProjectile (NUEVO) — ondas expansivas con daño real por frente
+
+Archivo nuevo `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs`. Tres estilos:
+
+1. **ESTILO 0 — ONDA CROMÁTICA (explosión del agujero negro)**: anillo RGB con
+   aberración cromática real (los canales R/G/B se separan radialmente, el desfase
+   crece con la edad = dispersión) + núcleo blanco unificador. Se registra como
+   fuente del sistema de lente → **el fondo del juego se distorsiona a su paso**
+   ("que distorsione un poco"). Daña a cada NPC una única vez cuando el frente lo
+   alcanza (knockback hacia fuera). Se dibuja ENCIMA de la lente.
+2. **ESTILO 1 — ONDA CROMÁTICA INVERSA (implosión del agujero negro)**: nace en el
+   radio máximo y CONVERGE hacia el centro (ease-in cuadrático), con el desfase RGB
+   INVERTIDO (azul por delante de rojo) y knockback NEGATIVO que arrastra hacia el
+   centro. El daño barre hacia dentro (golpea a quien estaba dentro del radio
+   inicial). También distorsiona el fondo al pasar y se dibuja encima de la lente.
+3. **ESTILO 2 — ONDA DE FUEGO (nova final del sol)**: triple anillo ardiente
+   (rojo/naranja/amarillo) + llamas GoldFlame vivas a lo largo del frente + luz
+   cálida. **Cada onda hace daño al pasar y aplica QUEMADURA (OnFire 5s)**.
+
+Detalles técnicos:
+- Campos AI: ai[0]=edad (negativa = retardo escalonado), ai[1]=estilo, ai[2]=radio
+  máximo; la **duración se deriva del radio** (maxR/20 ticks ≈ frente de ~40px/tick)
+  porque la API de NewProjectile solo acepta 3 slots de ai — determinista en todas
+  las máquinas (multiplayer seguro).
+- Daño manual vía `SimpleStrikeNPC` (guard de autoridad) + marca de golpes por NPC
+  reiniciada en SetDefaults (tML puede reutilizar instancias de ModProjectile).
+- `friendly=false` + `CanDamage()=>false`: sin colisión vanilla, solo daño de frente.
+- Render reutilizable desde el pase del mundo (PreDraw) y desde el pase posterior a
+  la lente (parámetro `endActiveBatch` para el estado del SpriteBatch).
+
+### C. BlackHoleProjectile — secuencia de muerte completa (explosión → evaporación → implosión)
+
+Pedido del usuario: "cuando el agujero explota necesita una onda expansiva cromática
+que distorsione un poco, con esta onda expansiva también crece el área de efecto de
+forma momentánea del agujero negro hasta que se evapora en una implosión con 3 ondas
+expansivas cromáticas inversas, cada onda hace daño".
+
+1. **t-90 (EXPLOSIÓN)**: nace la ONDA CROMÁTICA (estilo 0, 520px, daño 75% del
+   agujero) + estruendo (Item88) + sacudida de cámara (5f "AethonBlackHoleBlast").
+2. **t-90..t-36 (crecimiento momentáneo)**: la escala visual del agujero crece
+   hasta **+60%** y el **área de efecto de la gravedad se expande de 450px a 720px**
+   mientras la onda avanza.
+3. **t-36..t-0 (EVAPORACIÓN)**: colapso acelerado de la escala hacia 0 (el área
+   crecida se mantiene hasta evaporarse).
+4. **t-0 (IMPLOSIÓN FINAL)**: OnKill genera **3 ONDAS CROMÁTICAS INVERSAS**
+   (estilo 1, radios 460/520/580px, retardos escalonados de 9 ticks, daño 50% cada
+   una) que barren el daño hacia el centro. Se conservan los presets de
+   implosión/explosión de la librería, dusts convergentes y screenshake (se retiran
+   los 2 RingPulse decorativos, sustituidos por las ondas reales con daño).
+5. La intensidad de la lente sigue la escala del agujero: **se enciende con la
+   explosión, crece con la onda y muere con la evaporación**.
+
+### D. SunProjectile — arreglos del sol
+
+1. **Primera llamarada corregida** (reporte del usuario: "lanza la primera
+   PhoenixNova en la posición del jugador lo cual está mal"): en t=0 el sol aún está
+   sobre el jugador (nace en su posición y deriva con el disparo), así que la nova
+   estallaba "en la posición del jugador". Ahora la primera llamarada espera al
+   **segundo 2**: llamaradas en t=2, 4, 6 y 8s (4 en total).
+2. **3 ONDAS EXPANSIVAS DE FUEGO al final de la explosión del sol** (reporte:
+   "falta la onda expansiva de fuego, debe hacer 3 ondas expansivas de fuego y cada
+   onda debe hacer daño y provocar el debuff quemadura"): la SupernovaProjectile
+   (que ES la explosión final del sol, sincronizada al tick con él en el segundo 10,
+   y también el proyectil del SupernovaStaff standalone) genera 3 ondas de fuego
+   (estilo 2, radios 360/450/540px, retardos de 8 ticks, daño 50% cada una,
+   **quemadura OnFire 5s**). Sustituyen a las 2 RingPulse decorativas anteriores.
+
+### E. Librería de partículas — capa AboveLens
+
+- `LayerPriorities.AboveLens = 950` (encima de AboveAll): partículas que pinta el
+  BlackHoleLensSystem tras compositar la distorsión.
+- `ParticleManager.RenderAboveLensLayer()` (estático): mismos pases de batching por
+  blend + frustum culling que PostDrawTiles, filtrando solo la capa AboveLens.
+- `PostDrawTiles` se salta las partículas AboveLens cuando la lente está activa
+  (si no, las dibuja normalmente — fallback sin lente).
+- `DrawParticle` pasa a estático (compartido por ambos pases).
+
+### F. Otros
+
+- Tooltips actualizados: BlackHoleStaff (lente detrás del agujero + secuencia de
+  muerte con ondas cromáticas), SunStaff (llamaradas desde t=2s + 3 ondas de fuego
+  con quemadura), SupernovaStaff (3 ondas de fuego con daño + quemadura).
+- build.txt: v5.85 → **v5.86**.
+- COMPILACIÓN VERIFICADA: 0 errores contra tModLoader v2026.07.3.0 real (.NET 10,
+  DLLs del release de GitHub) — solo los 4 warnings benignos preexistentes.
+
 ## Commit v5.85 — SOL COMPLETO (10s) + LENTE GRAVITACIONAL + SUPERNOVA MEJORADA + limpieza de referencias
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

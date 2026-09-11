@@ -5,6 +5,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 using AethonMod.Content.Projectiles.Cosmic;
 
 namespace AethonMod.Content.Effects
@@ -12,25 +13,39 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
-    /// Distorsiona el FONDO REAL del juego alrededor de cada agujero negro activo,
-    /// siguiendo la matemática del lensing gravitatorio relativista (formalismo de
-    /// lentes con decaimiento exponencial por distancia). El shader
-    /// BlackHoleDistortionShader recibe hasta 5 fuentes (posiciones UV en pantalla
-    /// y radios) y rota las coordenadas de muestreo de la textura de pantalla,
-    /// curvando la luz que "pasa" cerca del horizonte de sucesos.
+    /// v5.86 — LA LENTE VA DETRÁS DEL AGUJERO NEGRO Y DE SUS EFECTOS.
     ///
-    /// Pipeline (verificado contra el binario real de tModLoader):
-    ///   1. El mundo se renderiza en Main.screenTarget (RenderTargets activos).
-    ///   2. Terraria.Graphics.Effects.Filters.Scene.EndCapture(...) vuelca el mundo.
-    ///   3. TimeLogger.DetailedDrawTime(36) — punto EXACTO entre el fin del mundo
-    ///      y el inicio de la UI: aquí intervenimos con un hook de MonoMod.
-    ///   4. Copiamos screenTarget a través del shader de distorsión hacia un
-    ///      render target a media resolución (rendimiento) y lo volvemos a
-    ///      dibujar cubriendo la pantalla completa → el fondo queda distorsionado.
-    ///   5. La UI se dibuja después, intacta, encima del efecto.
+    /// El error de la v5.85 era que la lente distorsionaba la pantalla YA
+    /// RENDERIZADA, y el núcleo del agujero negro (dibujado en el pase del
+    /// mundo) quedaba DENTRO de esa pantalla → la lente deformaba al propio
+    /// agujero negro. Arquitectura nueva en el punto 36 del pipeline:
     ///
-    /// La intensidad es "pequeña" y elegante: se desvanece con la escala del
-    /// agujero (nacimiento/colapso) y se apaga sola cuando no hay agujeros activos.
+    ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del
+    ///      agujero negro (BlackHoleProjectile.PreDraw se salta su dibujado
+    ///      cuando la lente está activa — ver LensActive).
+    ///   2. Se recopilan hasta 5 fuentes de distorsión: agujeros negros Y
+    ///      ondas cromáticas (CosmicShockwaveProjectile, estilos 0/1) —
+    ///      cada frente de onda curva el fondo a su paso.
+    ///   3. screenTarget se copia a través de BlackHoleDistortionShader hacia
+    ///      un render target a media resolución (lensTarget).
+    ///   4. COMPOSICIÓN POR REGIONES: solo la zona alrededor de cada fuente
+    ///      se re-dibuja distorsionada (el resto del mundo conserva su
+    ///      resolución nativa — la v5.85 volcaba la pantalla completa a media
+    ///      resolución, emborronando todo el juego).
+    ///   5. ENCIMA de la lente, en orden:
+    ///        a) partículas de la capa AboveLens (efectos del agujero negro:
+    ///           disco de acreción, anillo de fotones, espiral de succión...),
+    ///        b) el NÚCLEO del agujero negro (halo + RealBlackHoleShader +
+    ///           refuerzo del horizonte de sucesos),
+    ///        c) los anillos de las ondas cromáticas.
+    ///   6. La UI se dibuja después, intacta.
+    ///
+    /// LensActive: bandera estática que indica "la lente se renderizó en el
+    /// frame anterior". Los proyectiles la consultan en PreDraw (que corre
+    /// ANTES del punto 36) para decidir si se saltan su dibujado del mundo.
+    /// Si la lente falla o no hay fuentes, la bandera cae a false y todo se
+    /// dibuja por el camino normal (fallback automático, el agujero jamás
+    /// desaparece).
     /// </summary>
     [Autoload(Side = ModSide.Client)]
     public class BlackHoleLensSystem : ModSystem
@@ -44,10 +59,25 @@ namespace AethonMod.Content.Effects
         private static Effect _distortionShader;
         private static bool _shaderFailed;
 
+        /// <summary>
+        /// ¿La lente se renderizó en el frame anterior? Los PreDraw de los
+        /// proyectiles cósmicos la consultan para saltarse el pase del mundo.
+        /// </summary>
+        public static bool LensActive { get; private set; }
+
         // Datos de las fuentes (como el shader los espera: arrays de 5)
         private readonly float[] _sourceRadii = new float[MaxSources];
         private readonly Vector2[] _sourcePositions = new Vector2[MaxSources];
         private readonly float[] _strengths = new float[MaxSources];
+
+        // Regiones de composición (pantalla, píxeles) por fuente
+        private readonly Rectangle[] _sourceRegions = new Rectangle[MaxSources];
+
+        // Índices de proyectiles a dibujar encima de la lente
+        private readonly int[] _blackHoleIndices = new int[MaxSources];
+        private int _blackHoleCount;
+        private readonly int[] _waveIndices = new int[MaxSources];
+        private int _waveCount;
 
         public override void Load()
         {
@@ -62,6 +92,7 @@ namespace AethonMod.Content.Effects
             _lensTarget = null;
             _distortionShader = null;
             _shaderFailed = false;
+            LensActive = false;
         }
 
         // ================================================================
@@ -71,10 +102,20 @@ namespace AethonMod.Content.Effects
         {
             try
             {
-                if (detailedDrawType == 36 && CanRender())
-                    RenderLens();
+                if (detailedDrawType == 36)
+                {
+                    if (CanRender())
+                        RenderLens();
+                    else
+                        LensActive = false;
+                }
             }
-            catch { /* la lente jamás puede romper el render del juego */ }
+            catch
+            {
+                // La lente jamás puede romper el render del juego: si algo falla,
+                // el frame siguiente todos vuelven al dibujado normal del mundo.
+                LensActive = false;
+            }
 
             orig(detailedDrawType);
         }
@@ -107,42 +148,83 @@ namespace AethonMod.Content.Effects
         // ================================================================
         private void RenderLens()
         {
-            // === 1. Recopilar agujeros negros activos (máx. 5, como el shader) ===
+            // === 1. Recopilar fuentes: agujeros negros + ondas cromáticas ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
+            int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
             if (screenSize.X <= 0f || screenSize.Y <= 0f)
+            {
+                LensActive = false;
                 return;
+            }
 
             int count = 0;
+            _blackHoleCount = 0;
+            _waveCount = 0;
+
             for (int i = 0; i < Main.maxProjectiles && count < MaxSources; i++)
             {
                 Projectile p = Main.projectile[i];
-                if (p == null || !p.active || p.type != blackHoleType)
-                    continue;
+                if (p == null || !p.active) continue;
 
-                // Posición en UV de pantalla (0..1) — la misma métrica del shader.
-                Vector2 screenPos = p.Center - Main.screenPosition;
-                Vector2 uv = screenPos / screenSize;
+                if (p.type == blackHoleType)
+                {
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
+                        continue;
 
-                // Fuera de pantalla (con margen) → fuente nula.
-                if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
-                    continue;
+                    // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
+                    float radius = p.width * p.scale / screenSize.X * 0.75f;
 
-                // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
-                float radius = p.width * p.scale / screenSize.X * 0.75f;
+                    // La lente es "pequeña": intensidad ligada a la escala del agujero
+                    // (nace con el pop elástico, crece con la expansión final del
+                    // v5.86, muere con la evaporación).
+                    float strength = MathHelper.Clamp(p.scale * 1.1f, 0f, 1f);
 
-                // La lente es "pequeña": intensidad ligada a la escala del agujero
-                // (nace con el pop elástico, muere con el colapso final).
-                float strength = MathHelper.Clamp(p.scale * 1.1f, 0f, 1f);
+                    _sourcePositions[count] = uv;
+                    _sourceRadii[count] = Math.Max(radius, 0.0001f);
+                    _strengths[count] = strength;
+                    _sourceRegions[count] = BuildRegion(screenPos, radius * screenSize.X);
+                    _blackHoleIndices[_blackHoleCount++] = i;
+                    count++;
+                }
+                else if (p.type == waveType)
+                {
+                    // Solo las ondas cromáticas (0/1) distorsionan el fondo.
+                    float style = p.ai[1];
+                    if (style != CosmicShockwaveProjectile.StyleChromatic &&
+                        style != CosmicShockwaveProjectile.StyleChromaticInverse)
+                        continue;
 
-                _sourcePositions[count] = uv;
-                _sourceRadii[count] = Math.Max(radius, 0.0001f);
-                _strengths[count] = strength;
-                count++;
+                    float front = CosmicShockwaveProjectile.GetFrontRadius(p);
+                    if (front <= 1f) continue; // retrasada o disipada
+
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.35f || uv.X > 1.35f || uv.Y < -0.35f || uv.Y > 1.35f)
+                        continue;
+
+                    // El frente de la onda curva el espacio que atraviesa.
+                    float radius = front / screenSize.X;
+                    float progress = CosmicShockwaveProjectile.GetProgress(p);
+                    float strength = MathHelper.Clamp(1f - progress * 0.75f, 0f, 1f);
+
+                    _sourcePositions[count] = uv;
+                    _sourceRadii[count] = Math.Max(radius, 0.0001f);
+                    _strengths[count] = strength;
+                    _sourceRegions[count] = BuildRegion(screenPos, front);
+                    _waveIndices[_waveCount++] = i;
+                    count++;
+                }
             }
 
             if (count <= 0)
+            {
+                // Sin agujeros ni ondas → no hay lente: todo se dibuja normal.
+                LensActive = false;
                 return;
+            }
 
             // Rellenar el resto de slots con fuentes nulas (el shader itera los 5).
             for (int i = count; i < MaxSources; i++)
@@ -154,7 +236,10 @@ namespace AethonMod.Content.Effects
 
             GraphicsDevice gd = Main.graphics.GraphicsDevice;
             if (gd == null)
+            {
+                LensActive = false;
                 return;
+            }
 
             // === 2. Preparar el target de la lente (media resolución) ===
             int lensW = Math.Max(2, Main.screenWidth / 2);
@@ -200,23 +285,81 @@ namespace AethonMod.Content.Effects
                 new Rectangle(0, 0, _lensTarget.Width, _lensTarget.Height), Color.White);
             Main.spriteBatch.End();
 
-            // === 4. Restaurar el render target original y volcar la lente ===
+            // === 4. Restaurar el render target original ===
             if (previousBindings != null && previousBindings.Length > 0)
                 gd.SetRenderTargets(previousBindings);
             else
                 gd.SetRenderTarget(null);
 
+            // === 5. COMPOSICIÓN POR REGIONES ===
+            // Solo la zona alrededor de cada fuente se sustituye por su versión
+            // distorsionada: el resto del mundo conserva la resolución nativa.
             Viewport viewport = gd.Viewport;
-            var destRect = new Rectangle(0, 0, viewport.Width, viewport.Height);
-
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Matrix.Identity);
-            Main.spriteBatch.Draw(_lensTarget, destRect, Color.White);
+            for (int i = 0; i < count; i++)
+            {
+                Rectangle region = _sourceRegions[i];
+                if (region.Width <= 0 || region.Height <= 0) continue;
+                region = ClampRegion(region, viewport);
+                if (region.Width <= 0 || region.Height <= 0) continue;
+
+                // lensTarget está a media resolución: la fuente es la mitad del rect.
+                var srcRect = new Rectangle(
+                    region.X / 2, region.Y / 2,
+                    region.Width / 2, region.Height / 2);
+                Main.spriteBatch.Draw(_lensTarget, region, srcRect, Color.White);
+            }
             Main.spriteBatch.End();
+
+            // === 6. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===
+            // Disco de acreción, anillo de fotones, espiral de succión...
+            // La lente queda DETRÁS de los efectos del agujero negro.
+            ParticleManager.RenderAboveLensLayer();
+
+            // === 7. ENCIMA DE LA LENTE: el núcleo del agujero negro ===
+            // El shader del agujero nunca es deformado por su propia lente.
+            for (int i = 0; i < _blackHoleCount; i++)
+            {
+                Projectile bh = Main.projectile[_blackHoleIndices[i]];
+                if (bh != null && bh.active)
+                    BlackHoleProjectile.DrawCoreVisuals(bh, false);
+            }
+
+            // === 8. ENCIMA DE LA LENTE: anillos de las ondas cromáticas ===
+            for (int i = 0; i < _waveCount; i++)
+            {
+                Projectile wave = Main.projectile[_waveIndices[i]];
+                if (wave != null && wave.active)
+                    CosmicShockwaveProjectile.DrawWaveVisual(wave, false);
+            }
+
+            // Todo renderizado con éxito: el frame siguiente los proyectiles se
+            // saltan el pase del mundo y esta lente se encarga de pintarlos.
+            LensActive = true;
 
             // El pipeline de Terraria continúa con su propio Begin para la UI:
             // dejamos el SpriteBatch CERRADO y los targets tal como estaban.
+        }
+
+        /// <summary>Región de influencia de una fuente: centro ± radio*2.2 (margen del decaimiento exponencial).</summary>
+        private static Rectangle BuildRegion(Vector2 centerPx, float radiusPx)
+        {
+            float r = radiusPx * 2.2f;
+            return new Rectangle(
+                (int)(centerPx.X - r), (int)(centerPx.Y - r),
+                (int)(r * 2f), (int)(r * 2f));
+        }
+
+        /// <summary>Recorta la región al viewport (coordenadas de pantalla).</summary>
+        private static Rectangle ClampRegion(Rectangle region, Viewport viewport)
+        {
+            int x0 = Math.Max(0, region.X);
+            int y0 = Math.Max(0, region.Y);
+            int x1 = Math.Min(viewport.Width, region.X + region.Width);
+            int y1 = Math.Min(viewport.Height, region.Y + region.Height);
+            return new Rectangle(x0, y0, Math.Max(0, x1 - x0), Math.Max(0, y1 - y0));
         }
     }
 }

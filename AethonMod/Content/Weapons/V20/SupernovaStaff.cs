@@ -21,7 +21,8 @@ namespace AethonMod.Content.Weapons.V20
     ///   - Quest rarity, SoundID.Item8, receta 5 Wood
     ///
     /// Dispara SupernovaProjectile (carga con atracción creciente → explosión
-    /// masiva con doble onda expansiva, flash y AoE de 340px).
+    /// masiva con 3 ondas expansivas de fuego que dañan y queman, flash y AoE
+    /// de 340px).
     /// El Sol (SunProjectile) lo invoca centrado en su segundo 7 y ambos
     /// explotan sincronizados en el segundo 10.
     /// </summary>
@@ -62,7 +63,9 @@ namespace AethonMod.Content.Weapons.V20
             tooltips.Add(new TooltipLine(Mod, "SN_Title",
                 "[c/FFD700:═══ SUPERNOVA ═══]"));
             tooltips.Add(new TooltipLine(Mod, "SN_Desc",
-                "[c/FFE0A0:Una estrella que colapsa hacia el blanco calor durante 3 segundos y estalla en una nova de doble onda expansiva]"));
+                "[c/FFE0A0:Una estrella que colapsa hacia el blanco calor durante 3 segundos y estalla en 3 ondas expansivas de fuego]"));
+            tooltips.Add(new TooltipLine(Mod, "SN_Desc2",
+                "[c/78788C:Cada onda hace daño al pasar y provoca quemadura (5 s) a los enemigos alcanzados]"));
         }
 
         public override void AddRecipes()

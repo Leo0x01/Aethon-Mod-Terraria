@@ -1,5 +1,5 @@
 author = AethonModTeam
-version = 5.85
+version = 5.86
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
