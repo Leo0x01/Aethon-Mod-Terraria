@@ -1,5 +1,84 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.87 — FIX: ThreadStateException al desactivar el mod (FNA3D + hilo principal)
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+**Error reportado por el usuario** (captura al desactivar el mod en tModLoader
+v2026.7.3.0):
+
+```
+System.Threading.ThreadStateException: most FNA3D audio/graphics functions must
+be called on the main thread
+  at Microsoft.Xna.Framework.ThreadCheck.CheckThread()
+  at Microsoft.Xna.Framework.Graphics.Texture.Dispose(Boolean)
+  at Microsoft.Xna.Framework.Graphics.RenderTarget2D.Dispose(Boolean)
+  at AethonMod.Content.Effects.BlackHoleLensSystem.Unload()
+  at Terraria.ModLoader.Mod.UnloadContent() → ModContent.UnloadModContent() →
+     ModLoader.Mods.Unload() → ModLoader.Unload()
+```
+
+tModLoader mostraba: "Uno o más errores ocurrieron durante la desactivación y
+tModLoader debe reiniciarse para evitar más problemas. AethonMod no se ha
+desactivado correctamente."
+
+### A. Causa raíz
+
+- tModLoader **descarga los mods en un hilo de carga secundario** (async load).
+- FNA3D exige que **todo Dispose() de recursos gráficos corra en el hilo
+  principal** (ThreadCheck lo lanza y aborta la desactivación del mod).
+- La v5.85 introdujo la lente gravitacional con su `RenderTarget2D` propio, y el
+  `Unload()` de v5.86 hacía `_lensTarget?.Dispose()` directamente → excepción.
+
+### B. Solución (verificada contra el binario real de tModLoader)
+
+- **`Main.QueueMainThreadAction(Action)`** es la API oficial de tML para ejecutar
+  acciones en el hilo principal: encola en `ConcurrentQueue<Action>
+  _mainThreadActions`, que **se drena al final de `Main.Update()` cada frame** —
+  también mientras la pantalla de carga del reload sigue dibujándose (el propio
+  tML la usa para operaciones de ventana). Verificado por reflection +
+  decompilación (ilspycmd) contra `tModLoader.dll` v2026.07.3.0 real:
+  - `Main.QueueRenderAction` NO existe en esta versión; `QueueMainThreadAction` sí.
+  - `ConsumeAllMainThreadActions()` se llama al final de `Main.Update(GameTime)`.
+- `BlackHoleLensSystem.Unload()` ahora:
+  1. Desconecta el hook `On_TimeLogger.DetailedDrawTime` dentro de try/catch.
+  2. **Encola** `target.Dispose()` al hilo principal (el closure captura una
+     variable local, no el ModSystem ni estado estático → acción autosuficiente;
+     la cola mantiene vivo el ensamblado del mod hasta ejecutarla).
+  3. Anula todas las referencias estáticas de inmediato (`_lensTarget`,
+     `_distortionShader`, `_shaderFailed`, `LensActive`).
+- **Programación defensiva total** (como pide el diálogo de tML): el encolado y
+  el propio Dispose van envueltos en try/catch — la desactivación del mod jamás
+  puede volver a romperse, ni siquiera si el juego se está apagando del todo.
+
+### C. Auditoría del mismo patrón de error en todo el mod
+
+- `BlackHoleLensSystem.RenderLens()` re-crea el target al cambiar la resolución
+  con `_lensTarget?.Dispose()` — **seguro**: corre dentro del hook del punto 36
+  (hilo de render), no en el hilo de carga.
+- `ParticleManager.Unload()` solo anula referencias (las texturas son Assets
+  propiedad de tML, no hay que disponerlas). **Seguro**.
+- `AethonMod.Unload()` está vacío. **Seguro**.
+- Único `new RenderTarget2D` del mod: el de la lente. No hay otros recursos GPU
+  propios.
+
+### D. Verificación
+
+- Compilación: **0 errores** contra tModLoader v2026.07.3.0 real (dotnet 10,
+  proyecto de verificación contra las DLLs del release de GitHub). Mismos 4
+  warnings benignos preexistentes (Kill obsoleto en archivos antiguos, sin
+  relación con este fix).
+- APIs confirmadas contra el binario real antes de escribir el código.
+
+### E. Prueba recomendada para el usuario
+
+1. Abrir tModLoader → Develop Mods → Build (recompilar la v5.87).
+2. Activar el mod, entrar al mundo, disparar BlackHoleStaff/SunStaff.
+3. **Desactivar el mod o hacer Mods → Reload**: la desactivación debe completarse
+   en silencio (sin diálogo de error y sin pedir reinicio).
+
+---
+
 ## Commit v5.86 — LA LENTE VA DETRÁS DEL AGUJERO NEGRO + ONDAS CROMÁTICAS/DE FUEGO CON DAÑO REAL
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

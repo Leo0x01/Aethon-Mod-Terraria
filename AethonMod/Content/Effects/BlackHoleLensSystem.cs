@@ -13,7 +13,7 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
-    /// v5.86 — LA LENTE VA DETRÁS DEL AGUJERO NEGRO Y DE SUS EFECTOS.
+    /// v5.87 — FIX del ThreadStateException al desactivar el mod.
     ///
     /// El error de la v5.85 era que la lente distorsionaba la pantalla YA
     /// RENDERIZADA, y el núcleo del agujero negro (dibujado en el pase del
@@ -46,6 +46,13 @@ namespace AethonMod.Content.Effects
     /// Si la lente falla o no hay fuentes, la bandera cae a false y todo se
     /// dibuja por el camino normal (fallback automático, el agujero jamás
     /// desaparece).
+    ///
+    /// v5.87 — Unload() con programación defensiva: tModLoader descarga los
+    /// mods en un hilo de carga secundario, pero FNA3D exige que Dispose()
+    /// de recursos gráficos corra en el hilo principal. El render target se
+    /// destruye vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada
+    /// al final de Main.Update() cada frame — también durante la pantalla de
+    /// carga del reload), verificado contra tModLoader v2026.07.3.0 real.
     /// </summary>
     [Autoload(Side = ModSide.Client)]
     public class BlackHoleLensSystem : ModSystem
@@ -87,8 +94,48 @@ namespace AethonMod.Content.Effects
 
         public override void Unload()
         {
-            Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
-            _lensTarget?.Dispose();
+            try
+            {
+                Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
+            }
+            catch
+            {
+                // Programación defensiva: el detach del hook jamás puede
+                // impedir que la desactivación del mod continúe.
+            }
+
+            // v5.87 — FIX del ThreadStateException:
+            // "most FNA3D audio/graphics functions must be called on the main
+            // thread". Unload() corre en el hilo de carga secundario de tML;
+            // RenderTarget2D.Dispose() ahí lanza y rompía toda la desactivación
+            // del mod. La destrucción se encola al hilo principal: la cola
+            // _mainThreadActions se drena en Main.Update() cada frame, incluso
+            // mientras la pantalla de carga del reload sigue dibujándose.
+            // El closure captura una variable local (no el ModSystem ni estado
+            // estático), así que la acción es autosuficiente.
+            RenderTarget2D target = _lensTarget;
+            if (target != null)
+            {
+                try
+                {
+                    Main.QueueMainThreadAction(() =>
+                    {
+                        try { target.Dispose(); }
+                        catch
+                        {
+                            // Defensivo: una excepción aquí subiría hasta
+                            // Main.Update() y rompería el bucle del juego.
+                        }
+                    });
+                }
+                catch
+                {
+                    // Encolado imposible (p. ej. apagado total del proceso):
+                    // se abandona la referencia — el driver libera los
+                    // recursos del proceso al terminar de todos modos.
+                }
+            }
+
             _lensTarget = null;
             _distortionShader = null;
             _shaderFailed = false;

@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.86 |
+| **Versión (build.txt)** | 5.87 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.86 — La lente va DETRÁS del agujero negro + ondas cromáticas/inversas/de fuego con daño real |
+| **Commit actual** | v5.87 — Fix del ThreadStateException al desactivar (Dispose de la lente encolado al hilo principal) |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.86
+version = 5.87
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -177,7 +177,7 @@ Todos los sprites originales en:
 ## 4. ESTADO ACTUAL DEL PROYECTO
 
 ### 4.1 Conteo de archivos (verificado)
-- **80 archivos .cs** en `Content/` (79 + CosmicShockwaveProjectile.cs nuevo en v5.86)
+- **80 archivos .cs** en `Content/` (79 + CosmicShockwaveProjectile.cs nuevo en v5.86; la v5.87 no añadió archivos — solo el fix de Unload en BlackHoleLensSystem.cs)
 - **139 archivos .png** (sprites — se añadió DendriticNoiseZoomedOut.png)
 - **8 shaders .fx** en `Content/Effects/Shaders/` (fuente)
 - **5 shaders .fxc** compilados en `Content/Effects/Shaders/`
@@ -705,10 +705,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.86 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.87 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (pendiente) | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
 | `6255c88` | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
 | `90e987f` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
 | `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
@@ -781,10 +782,86 @@ Commits desde v5.28 hasta v5.86 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.86
-- **Mensaje**: "fix/feat v5.86: la lente va detrás del agujero negro + ondas cromáticas/inversas/de fuego con daño real"
+- **Versión**: v5.87
+- **Mensaje**: "fix v5.87: ThreadStateException al desactivar el mod — el Dispose del render target de la lente se encola al hilo principal (Main.QueueMainThreadAction)"
 
-### 11.2 Qué se hizo en v5.86 (reportes del usuario tras probar v5.85)
+### 11.2 Qué se hizo en v5.87 (error del usuario al DESACTIVAR el mod tras probar v5.86)
+
+**Error reportado** (captura del diálogo de tModLoader v2026.7.3.0):
+
+```
+System.Threading.ThreadStateException: most FNA3D audio/graphics functions must
+be called on the main thread
+  at Microsoft.Xna.Framework.ThreadCheck.CheckThread()
+  at Microsoft.Xna.Framework.Graphics.Texture.Dispose(Boolean)
+  at Microsoft.Xna.Framework.Graphics.RenderTarget2D.Dispose(Boolean)
+  at AethonMod.Content.Effects.BlackHoleLensSystem.Unload()  (línea 60)
+  at Terraria.ModLoader.Mod.UnloadContent() → ModLoader.Unload()
+```
+
+"Uno o más errores ocurrieron durante la desactivación y tModLoader debe
+reiniciarse... AethonMod no se ha desactivado correctamente."
+
+1. **Causa raíz**: tModLoader descarga los mods en un HILO DE CARGA SECUNDARIO,
+   pero FNA3D exige que el `Dispose()` de recursos gráficos corra en el hilo
+   principal (`ThreadCheck.CheckThread()` lanza y aborta toda la desactivación).
+   La lente gravitacional (v5.85+) tiene su propio `RenderTarget2D` y el
+   `Unload()` de la v5.86 lo disponía directamente → excepción.
+2. **Solución (verificada contra tModLoader.dll v2026.07.3.0 real por reflection +
+   decompilación ilspycmd)**: `Main.QueueMainThreadAction(Action)` encola en
+   `ConcurrentQueue<Action> _mainThreadActions`, drenada por
+   `ConsumeAllMainThreadActions()` al final de `Main.Update()` CADA FRAME —
+   incluso mientras la pantalla de carga del reload sigue dibujándose (el propio
+   tML la usa para operaciones de ventana). OJO: `QueueRenderAction` NO existe
+   en esta versión; `QueueMainThreadAction` SÍ.
+3. **`BlackHoleLensSystem.Unload()` v5.87**: detach del hook en try/catch; el
+   `target.Dispose()` se ENCOLA al hilo principal (el closure captura una
+   variable local, no el ModSystem ni estado estático → acción autosuficiente);
+   las referencias estáticas se anulan de inmediato. **Programación defensiva
+   total**: encolado y Dispose envueltos en try/catch (como pide el propio
+   diálogo de tML).
+4. **Auditoría del patrón en todo el mod**: `RenderLens()` re-crea el target
+   dentro del hook del punto 36 (hilo de render — SEGURO);
+   `ParticleManager.Unload()` solo anula referencias (las texturas son Assets
+   propiedad de tML — SEGURO); `AethonMod.Unload()` vacío (SEGURO); el único
+   `new RenderTarget2D` del mod es el de la lente.
+5. **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real
+   (mismos 4 warnings benignos preexistentes, Kill obsoleto en archivos viejos).
+
+### 11.3 Estado actual del mod
+- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
+- ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
+  ahora SÍ se usa (lente gravitacional v5.85)
+- ✅ Librería de partículas COMPLETA según el libro (v5.84) + capa AboveLens (v5.86)
+- ✅ Sol: ciclo completo de 10s con llamaradas (t=2,4,6,8s) + supernova sincronizada (v5.86)
+- ✅ Agujero negro: lente DETRÁS del agujero y sus efectos + secuencia de muerte
+  completa con 4 ondas con daño (v5.86)
+- ✅ Desactivación del mod LIMPIA: el Dispose del render target de la lente se
+  encola al hilo principal (v5.87 — fix del ThreadStateException de FNA3D)
+- ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
+- ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
+  Develop Mods → Build y probar BlackHoleStaff y SunStaff; verificar que la lente
+  quede detrás del agujero, las 4 ondas del agujero hagan daño, las 3 de fuego
+  quemen, y que la DESACTIVACIÓN del mod / Mods → Reload complete SIN ERROR)
+
+### 11.4 Próximos pasos sugeridos
+1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
+2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
+3. Disparar BlackHoleStaff: el fondo debe CURVARSE alrededor del agujero (lente
+   gravitacional) + espiral multicolor + atracción 450px
+4. Disparar SunStaff: llamaradas cada 2s, en el segundo 7 aparece la supernova
+   (carga con sacudidas), y en el segundo 10 explosión simultánea masiva con doble
+   onda expansiva
+5. **Desactivar el mod o Mods → Reload: la desactivación debe completarse EN
+   SILENCIO** (sin diálogo de error, sin pedir reinicio — fix v5.87)
+6. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
+   puede pasar es que no se dibuje)
+7. FUTURO (Grimorio): quemadura del sol potenciada por daño mágico + integración
+   del proyectil como ataque del arma definitiva
+8. Roadmap natural: compilar Bloom/ChromaticAberration/Shockwave con mgfxc/2MGFX
+   cuando se usen desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig
+
+### 11.5 Qué se hizo en v5.86 (histórico — reportes del usuario tras probar v5.85)
 
 **Reportes**: (1) la lente afectaba al propio agujero negro y debía ir detrás de
 su animación y efectos; (2) faltaba la onda cromática en la explosión del agujero
@@ -819,36 +896,7 @@ jugador; (4) faltaban las 3 ondas de fuego finales con daño + quemadura.
    5s) — también aplica al SupernovaStaff standalone.
 6. **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real.
 
-### 11.3 Estado actual del mod
-- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
-- ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
-  ahora SÍ se usa (lente gravitacional v5.85)
-- ✅ Librería de partículas COMPLETA según el libro (v5.84) + capa AboveLens (v5.86)
-- ✅ Sol: ciclo completo de 10s con llamaradas (t=2,4,6,8s) + supernova sincronizada (v5.86)
-- ✅ Agujero negro: lente DETRÁS del agujero y sus efectos + secuencia de muerte
-  completa con 4 ondas con daño (v5.86)
-- ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
-- ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
-  Develop Mods → Build y probar BlackHoleStaff y SunStaff; verificar que la lente
-  quede detrás del agujero, las 4 ondas del agujero hagan daño y las 3 de fuego
-  quemen)
-
-### 11.4 Próximos pasos sugeridos
-1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
-2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar BlackHoleStaff: el fondo debe CURVARSE alrededor del agujero (lente
-   gravitacional) + espiral multicolor + atracción 450px
-4. Disparar SunStaff: llamaradas cada 2s, en el segundo 7 aparece la supernova
-   (carga con sacudidas), y en el segundo 10 explosión simultánea masiva con doble
-   onda expansiva
-5. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
-   puede pasar es que no se dibuje)
-6. FUTURO (Grimorio): quemadura del sol potenciada por daño mágico + integración
-   del proyectil como ataque del arma definitiva
-7. Roadmap natural: compilar Bloom/ChromaticAberration/Shockwave con mgfxc/2MGFX
-   cuando se usen desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig
-
-### 11.5 Qué se arregló en v5.83 (histórico)
+### 11.6 Qué se arregló en v5.83 (histórico)
 
 **FIX CRÍTICO — el error que el usuario veía al cargar el mod:**
 ```
@@ -877,7 +925,7 @@ Failed to load asset 'Content\Effects\Shaders\RealBlackHoleShader'!
 tModLoader v2026.07.3.0 real con .NET 10 SDK (`dotnet build` con las DLLs del
 release de GitHub). 4 warnings benignos preexistentes.
 
-### 11.6 Estado del mod al cierre de v5.83 (histórico)
+### 11.7 Estado del mod al cierre de v5.83 (histórico)
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix del "Asset could not be found")
 - ✅ Todos los recursos del mod de referencia copiados (10 texturas incl. DendriticNoiseZoomedOut)
@@ -970,15 +1018,15 @@ find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 13
 
 ## 13. CÓDIGO FUENTE CLAVE
 
-### 13.0 ⚠️ AVISO v5.86 — ARCHIVOS QUE CAMBIARON TRAS v5.85
+### 13.0 ⚠️ AVISO v5.86/v5.87 — ARCHIVOS QUE CAMBIARON TRAS v5.85
 
 El DISCO es la fuente autoritativa (el código embebido de las secciones 13.1-13.4
 corresponde a v5.85 y puede estar desactualizado en las partes señaladas):
 
-| Archivo | Cambio v5.86 |
+| Archivo | Cambio v5.86 (+ v5.87 donde se indica) |
 |---|---|
 | `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b |
-| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (~366 líneas): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, composición POR REGIONES (±2.2×radio, no pantalla completa), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático |
+| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (~366 líneas): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, composición POR REGIONES (±2.2×radio, no pantalla completa), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D) |
 | `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles` |
 | `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0) |
 | `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas |
@@ -1765,7 +1813,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 }
 ```
 
-### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.86 — ver 13.0, el disco manda)
+### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.86; v5.87 CAMBIÓ Unload() — ver 13.0, el disco manda)
 > La lente gravitacional de pantalla: distorsiona el fondo REAL del juego alrededor
 > de hasta 5 agujeros negros. Hook en TimeLogger punto 36 (tras EndCapture del
 > mundo, antes de la UI), Main.screenTarget como fuente, RT a media resolución.
@@ -3248,7 +3296,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 ## 16. RESUMEN FINAL
 
-### 16.1 Lo que se ha logrado (hasta v5.85)
+### 16.1 Lo que se ha logrado (hasta v5.87)
 - ✅ Mod completo con 8 armas protegidas del remote
 - ✅ 19 armas V20 creativas sin mana
 - ✅ 2 armas cósmicas (BlackHoleStaff, SunStaff) con shaders reales propios
@@ -3267,6 +3315,14 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
   mejorada (doble onda 320px+460px, flash, AoE 340px, temblor fuerte)
 - ✅ **v5.85 — Cero referencias al mod externo de referencia** en todo el
   proyecto (carpeta Textures/, tooltips, csproj, gitignore, docs)
+- ✅ **v5.86 — La lente va DETRÁS del agujero negro y sus efectos** (capa
+  AboveLens + composición por regiones) + CosmicShockwaveProjectile con 3
+  estilos de onda (cromática/inversa/fuego, daño real por frente de onda) +
+  secuencia de muerte completa del agujero + 3 ondas de fuego con quemadura en
+  la explosión del sol
+- ✅ **v5.87 — Desactivación limpia del mod**: el Dispose del render target de
+  la lente se encola al hilo principal (Main.QueueMainThreadAction) — fix del
+  ThreadStateException de FNA3D que rompía la desactivación
 - ✅ 5 shaders con .fxc compilados + 3 .fx fuente sin usar
 - ✅ 10 texturas del pipeline de efectos + 11 texturas de librería registradas
 - ✅ Compilación estable sin errores (verificada contra tML v2026.07.3.0 real)
@@ -3275,6 +3331,10 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 - ⚠️ **PROBAR** en tModLoader 1.4.4 los 2 armas cósmicas
 - ⚠️ Verificar que la LENTE GRAVITACIONAL se vea en pantalla (fondo curvándose
   alrededor del agujero) y que los shaders carguen sin excepción en runtime
+- ⚠️ Verificar que las 4 ondas del agujero hagan daño y las 3 de fuego apliquen
+  quemadura (v5.86 — aún sin confirmación del usuario)
+- ⚠️ **Verificar que la DESACTIVACIÓN del mod complete sin error** (fix v5.87:
+  desactivar el mod o Mods → Reload debe terminar en silencio, sin diálogo)
 - ⚠️ Si algún shader falla, revisar client.log (la lente tiene try/catch total:
   lo peor que puede pasar es que no se dibuje)
 - ⚠️ FUTURO: integrar SunProjectile en el Grimorio (arma definitiva) con su
@@ -3285,14 +3345,14 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: `90e987f` (v5.85)
+- Commit actual: v5.87 (hash en la tabla de la sección 10)
 - Commit estable del remote: `e826c82`
 
 ---
 
 **Fin del documento.**
 
-> Última actualización: v5.85
+> Última actualización: v5.87
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.
