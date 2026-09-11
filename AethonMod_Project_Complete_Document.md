@@ -709,7 +709,7 @@ Commits desde v5.28 hasta v5.87 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
-| (pendiente) | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
+| `9035888` | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
 | `6255c88` | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
 | `90e987f` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
 | `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
