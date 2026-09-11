@@ -709,7 +709,7 @@ Commits desde v5.28 hasta v5.85 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
-| `(este commit)` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
+| `90e987f` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
 | `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
 | `7de559b` | v5.83 | fix: BlackHole + Sun con render de referencia + shaders .fxc (error Asset could not be found) |
 | `9f8fbbc` | docs | documento completo del proyecto para dar a otra IA |
@@ -2860,7 +2860,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: `(v5.85, pendiente de push)`
+- Commit actual: `90e987f` (v5.85)
 - Commit estable del remote: `e826c82`
 
 ---
