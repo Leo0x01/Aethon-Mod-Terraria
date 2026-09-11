@@ -27,6 +27,9 @@ namespace AethonMod.Content.Particles
     ///   ScaleDown  — escala decae linealmente hacia 0 (base UserData1/UserData2)
     ///   ScaleUp    — escala crece linealmente desde 0 hasta UserData1/UserData2
     ///   ColorShift — interpola PackedStartColor → PackedEndColor durante la vida
+    ///   PullTo     — v5.90 — aceleración hacia un PUNTO fijo (materia absorbida):
+    ///                UserData0/1 = centro XY, UserData3 = fuerza (default 0.08);
+    ///                la partícula MUERE al llegar al centro (absorbida)
     ///   Homing     — persigue un NPC: UserData0 = whoAmI (≤0 = NPC más cercano),
     ///                UserData3 = fuerza (default 0.1)
     ///   Orbit      — orbita un centro: UserData0/1 = centro XY, UserData2 = velocidad
@@ -211,6 +214,29 @@ namespace AethonMod.Content.Particles
                             toTarget.Normalize();
                             p.Velocity = Vector2.Lerp(p.Velocity, toTarget * speed, strength);
                         }
+                    }
+                }
+
+                // Component: PullTo — v5.90 — aceleración hacia un PUNTO fijo
+                // (materia absorbida por el agujero negro): con velocidad
+                // inicial tangencial la partícula cae en espiral cada vez más
+                // rápida y MUERE al llegar al centro (devorada por el horizonte).
+                if (p.HasComponent(ComponentFlag.PullTo) &&
+                    (p.UserData0 != 0f || p.UserData1 != 0f))
+                {
+                    Vector2 pullCenter = new Vector2(p.UserData0, p.UserData1);
+                    Vector2 toCenter = pullCenter - p.Position;
+                    float dist = toCenter.Length();
+                    if (dist < 10f)
+                    {
+                        // Absorbida: la materia cruzó el horizonte de sucesos.
+                        _buffer.Kill(i);
+                        continue;
+                    }
+                    if (dist > 0.001f)
+                    {
+                        float pullStrength = p.UserData3 != 0 ? p.UserData3 : 0.08f;
+                        p.Velocity += toCenter / dist * pullStrength;
                     }
                 }
 

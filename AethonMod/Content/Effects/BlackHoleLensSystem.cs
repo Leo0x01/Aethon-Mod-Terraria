@@ -55,6 +55,15 @@ namespace AethonMod.Content.Effects
     /// dibuja por el camino normal (fallback automático, el agujero jamás
     /// desaparece).
     ///
+    /// v5.90 — LENTE DELGADA: la v5.89 usaba maxLensingAngle=24 rad (×0.62 de
+    /// fuerza → ángulo pico de ~14.9 rad cerca del horizonte): como el shader
+    /// rota las coords de muestreo ALREDEDOR DEL CENTRO DE PANTALLA, cualquier
+    /// ángulo grande desplazaba píxeles lejanos proporcional a su distancia al
+    /// centro → "movía toda la pantalla". Ahora el ángulo pico es ~0.8 rad
+    /// (1.5 × 0.55) con radio 1.1× el tamaño visual: la distorsión vive en un
+    /// anillo estrecho alrededor del agujero y muere a ~3 radios — el resto
+    /// de la pantalla queda INTACTA.
+    ///
     /// v5.87 — Unload() con programación defensiva: tModLoader descarga los
     /// mods en un hilo de carga secundario, pero FNA3D exige que Dispose()
     /// de recursos gráficos corra en el hilo principal. El render target se
@@ -226,8 +235,11 @@ namespace AethonMod.Content.Effects
                     if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
                         continue;
 
-                    // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
-                    float radius = p.width * p.scale / screenSize.X * 0.75f;
+                    // Radio de influencia en UV: v5.90 — 1.1× el tamaño visual
+                    // (antes 0.75): con el ángulo pico reducido a ~0.8 rad el
+                    // anillo de distorsión debe abrazar el borde del núcleo para
+                    // seguir siendo visible, pero muere a ~3 radios: DELGADA.
+                    float radius = p.width * p.scale / screenSize.X * 1.1f;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
                     // (nace con el pop elástico, crece con la expansión final del
@@ -318,8 +330,14 @@ namespace AethonMod.Content.Effects
                 if (_strengths[i] > maxStrength) maxStrength = _strengths[i];
 
             // "Pequeña lente": distorsión contenida (no la fuerza máxima del shader).
-            float distortionStrength = 0.62f * MathHelper.Clamp(maxStrength, 0f, 1f);
-            float maxLensingAngle = 24f;
+            // v5.90 — LENTE DELGADA: 0.55 × maxLensingAngle 1.5 rad → ángulo pico
+            // ~0.8 rad (antes 0.62 × 24 = 14.9 rad: movía TODA la pantalla porque
+            // el shader rota alrededor del centro de pantalla y los píxeles lejanos
+            // se desplazan proporcional a su distancia al centro). Con ~0.8 rad la
+            // deformación queda confinada a un anillo estrecho alrededor de las
+            // fuentes y el resto de la pantalla queda pixel-perfect.
+            float distortionStrength = 0.55f * MathHelper.Clamp(maxStrength, 0f, 1f);
+            float maxLensingAngle = 1.5f;
 
             shader.Parameters["distortionStrength"].SetValue(distortionStrength);
             shader.Parameters["maxLensingAngle"].SetValue(maxLensingAngle);

@@ -15,18 +15,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// (InvisiblePixel 1x1 — el dibujado es 100% manual vía DrawWaveVisual)
     /// y NewInstance con array de golpes fresco por onda.
     ///
-    /// v5.86 — Los tres frentes de onda del arsenal cósmico:
+    /// v5.90 — Los frentes de onda del arsenal cósmico:
     ///
-    ///   ESTILO 0 — ONDA CROMÁTICA (explosión del agujero negro):
+    ///   ESTILO 0 — ONDA CROMÁTICA (LA explosión final del agujero negro):
     ///     Anillo RGB (aberración cromática real: los canales R/G/B se separan
     ///     radialmente) que se expande desde el centro. Se registra como fuente
     ///     del BlackHoleLensSystem → el FONDO del juego se distorsiona a su paso
     ///     ("distorsiona un poco"). Daña a cada NPC cuando el frente lo alcanza.
+    ///     Desde la v5.90 es la ÚNICA onda del agujero: nace en OnKill (cuando
+    ///     el agujero termina de evaporarse) con el daño COMPLETO del proyectil.
     ///
-    ///   ESTILO 1 — ONDA CROMÁTICA INVERSA (implosión del agujero negro):
+    ///   ESTILO 1 — ONDA CROMÁTICA INVERSA (LEGADO, sin uso desde v5.90):
     ///     Nace en el radio máximo y CONVERGE hacia el centro (el frente barre
     ///     el daño hacia dentro). El desfase de color está invertido (azul por
-    ///     delante de rojo) y también distorsiona el fondo al pasar.
+    ///     delante de rojo) y también distorsiona el fondo al pasar. Conservada
+    ///     como parte del arsenal por si un arma futura la invoca (las 3 ondas
+    ///     inversas de la implosión v5.86 se eliminaron a petición del usuario).
     ///
     ///   ESTILO 2 — ONDA DE FUEGO (nova final del sol):
     ///     Triple anillo ardiente (rojo/naranja/amarillo) + llamas a lo largo

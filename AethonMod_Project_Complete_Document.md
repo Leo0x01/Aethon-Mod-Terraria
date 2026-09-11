@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.89 |
+| **Versión (build.txt)** | 5.90 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.89 — Fix crítico de la "pantalla negra" del agujero negro (wipe del backbuffer de FNA) + efectos del sol DETRÁS de la estrella + fin del spam de "Excepción silenciosa" |
+| **Commit actual** | v5.90 — Revert del sol a v5.88 (8781aa4) tras arruinar sus efectos en v5.89 + agujero negro rehecho: sin partículas moradas, partículas ABSORBIDAS (nuevo componente PullTo), UNA sola explosión cromática final con daño, lente DELGADA (ángulo pico 14.9→0.8 rad) y fix del corte del disco al crecer (canvas que escala) |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.89
+version = 5.90
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -223,7 +223,7 @@ de la carpeta del mod; eran JPEGs con extensión .png y disparaban el warning FN
 - `Vortex.png` (ParticleTex.Vortex = 4)
 - `Ring.png` (ParticleTex.Ring = 5)
 - `Crescent.png` (ParticleTex.Crescent = 6)
-- `Noise.png` (ParticleTex.Noise = 7) — **v5.89: REGENERADO suave** (ruido fractal con blur wrap: rugosidad 4.2→0.58)
+- `Noise.png` (ParticleTex.Noise = 7) — **v5.89: REGENERADO suave** (ruido fractal con blur wrap: rugosidad 4.2→0.58); **v5.90: SIN USO en juego** (el halo de distorsión del agujero era su único consumidor y se eliminó — el "efecto que se veía mal" desapareció)
 
 ### 4.5 Texturas de efectos del remote (28 texturas en `Content/Effects/*.png`)
 - GlowOrb, GlowOrbCyan, GlowOrbGold, GlowOrbGreen, GlowOrbMagenta, GlowOrbPurple, GlowOrbWhite
@@ -707,11 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.89 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.90 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
-| `4abeba5` | v5.89 | fix CRÍTICO "pantalla negra": FNA limpia el backbuffer al re-bindearlo (DiscardContents por defecto en PresentationParameters, verificado decompilando FNA.dll) → la composición por regiones destruida el mundo; la lente ahora va a resolución NATIVA y se dibuja a PANTALLA COMPLETA tras el restore (mismo blit que el EndCapture de Terraria) + efectos del sol DETRÁS del cuerpo (dusts→partículas BeforeProjectiles; supernova con ai[1]=1 dibujada por el sol vía DrawChargeVisuals; PhoenixNova con hide+DrawBehind) + "Excepción silenciosa" cada frame eliminada (End defensivo solo en catch) + Noise.png regenerado suave (rugosidad 4.2→0.58) y FireNoiseB suavizado (8.0→2.38, blur wrap tileable) + _masters (23 JPEGs disfrazados de .png, 2.1MB) movidos fuera del mod → adiós al warning FNA "Image loading failed" |
+| `(hash tras el commit)` | v5.90 | **REVERT del sol a 8781aa4/v5.88** (la v5.89 lo arruinó: humo SoftGlow en círculos que subían + llamaradas tapadas por el cuerpo → sin su onda expansiva) conservando SOLO el fix de la excepción silenciosa + agujero negro: **partículas moradas ELIMINADAS** (succión multicolor, humo púrpura, espiral violeta, halo Noise.png — su único usuario) y **partículas ABSORBIDAS** nuevas (componente PullTo de la librería: aceleran al centro y mueren al llegar; estelas TrailGlow ámbar→blanco + polvo GoldFlame) + **UNA SOLA explosión cromática al desaparecer** (OnKill, estilo 0, daño COMPLETO, radio 620, aberración RGB real + distorsión del fondo; las 4 ondas v5.86 eliminadas) + **LENTE DELGADA** (maxLensingAngle 24→1.5 rad, fuerza 0.62→0.55 → ángulo pico ~14.9→0.8 rad: el shader rota alrededor del centro de pantalla y movía TODA la pantalla; radio 0.75×→1.1×) + **fix del CORTE por los lados** al crecer (canvas del RealBlackHoleShader fijo de 256px con zoom creciente → ahora canvas = 256·scale con zoom constante y disco con tope: nunca cruza el borde) |
 | `ad9641a` | v5.88 | fix CRÍTICO: el mod NO cargaba — faltaba CosmicShockwaveProjectile.png (desde v5.86; la compilación C# pasa sin texturas pero tML las exige al cargar) + auditoría completa 71 clases/21 rutas + bug real de daño corregido (array _hitNPCs compartido por MemberwiseClone entre ondas simultáneas → NewInstance con array fresco) + End defensivo en RestoreSpriteBatch ×3 + Main.Transform deprecado → GameViewMatrix + ParticleManager con Asset<Texture2D> diferido (fix del warning 61ms blocking) + icon_small.png 30x30 + warnings del build limpios (CS0672 ×4 Kill→OnKill, CS8632 ×21) | 
 | `9035888` | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
 | `6255c88` | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
@@ -786,10 +786,38 @@ Commits desde v5.28 hasta v5.89 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.89
-- **Mensaje**: "fix v5.89: pantalla negra del agujero negro (wipe FNA del backbuffer) + efectos del sol detrás de la estrella + excepciones silenciosas eliminadas"
+- **Versión**: v5.90
+- **Mensaje**: "v5.90: revert del sol a v5.88 + agujero negro: partículas absorbidas (PullTo), UNA explosión cromática final con daño, lente delgada, sin corte del disco"
 
-### 11.2 Qué se hizo en v5.89 (pantalla negra del agujero + sol + excepciones del log)
+### 11.2 Qué se hizo en v5.90 (revert del sol + agujero negro rehecho a pedido del usuario)
+
+**Reporte del usuario** (tras probar v5.89 en juego): el sol EMPEORÓ (círculos
+SoftGlow subiendo desde la estrella + onda expansiva perdida — las llamaradas
+hide/DrawBehind quedaban tapadas por el cuerpo), el agujero se CORTA por los
+lados al crecer para desaparecer, y pidió: quitar partículas moradas, agregar
+partículas absorbidas, UNA sola explosión cromática al desaparecer (con
+aberración + daño) y lente delgada.
+
+1. **REVERT del sol**: `git checkout 8781aa4 --` SunProjectile + Supernova +
+   PhoenixNova → el sol VOLVIÓ a v5.88 exacto (dusts vanilla, supernova
+   auto-dibujada, llamaradas en pase normal). Se conservó únicamente el fix
+   de la "Excepción silenciosa" (End defensivo solo en catch — invisible).
+2. **Fix del corte del disco**: el canvas del RealBlackHoleShader era FIJO
+   (256px) con zoom interno creciente → al hincharse (scale 1.6) la cobertura
+   caía a 0.83 contra un toro de 1.39 → corte vertical. Ahora canvas =
+   256·max(scale,0.08) con zoom CONSTANTE (width/256·2) y disco con tope
+   (min(scale,1)·0.4): nunca cruza el borde; horizonte en píxeles idéntico.
+3. **Partículas**: fuera TODO lo morado; nuevo componente **PullTo** (bit 13:
+   UserData0/1 = centro, UserData3 = fuerza; muere al llegar) +
+   SpawnLibraryAbsorbedMatter (TrailGlow ámbar→blanco espiral de infalling) +
+   SpawnAbsorbedDusts (GoldFlame); presets y halo recalentados.
+4. **UNA explosión cromática final**: OnKill → UNA onda estilo 0 con daño
+   COMPLETO y radio 620 (RGB separados + distorsión de fondo + daño por
+   frente). Crecimiento y evaporación ya sin ondas.
+5. **Lente delgada**: parámetros 24→1.5 rad / 0.62→0.55 / radio 0.75×→1.1×.
+   El .fxc NO se puede recompilar aquí (sin mgfxc/wine) — fix solo parámetros.
+
+### 11.2.1 Qué se hizo en v5.89 (histórico — pantalla negra del agujero + sol + excepciones del log)
 
 **Errores reportados** (captura + client.log de la v5.88 EN JUEGO — el mod ya cargaba):
 
@@ -903,44 +931,53 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
    (mismos 4 warnings benignos preexistentes, Kill obsoleto en archivos viejos).
 
 ### 11.3 Estado actual del mod
-- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
+- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real, 0 errores / 0 warnings)
+- ✅ **v5.90 — SOL COMO EN v5.88** (revert exacto de 8781aa4: dusts vanilla +
+  llamaradas en pase normal + su onda expansiva de fuego intacta)
+- ✅ **v5.90 — AGUJERO NEGRO SIN CORTE**: el canvas del shader escala con el
+  agujero — el disco ya no se recorta al hincharse para morir
+- ✅ **v5.90 — MATERIA ABSORBIDA** (PullTo) y CERO partículas moradas
+- ✅ **v5.90 — UNA SOLA explosión cromática final** con daño completo
+- ✅ **v5.90 — LENTE DELGADA**: solo deforma un anillo estrecho alrededor del
+  agujero (ángulo pico 0.8 rad) — el resto de la pantalla intacta
 - ✅ **v5.89 — SIN PANTALLA NEGRA**: la lente va a resolución nativa y se vuelve
   a dibujar a pantalla completa tras el wipe inevitable del backbuffer de FNA
-- ✅ **v5.89 — EFECTOS DEL SOL DETRÁS DE LA ESTRELLA**: partículas BeforeProjectiles
-  + supernova dibujada por el sol + llamaradas en capa behindProjectiles
 - ✅ **v5.88 — EL MOD CARGA**: textura del CosmicShockwaveProjectile añadida (el
   MissingResourceException de v5.86/v5.87 estaba bloqueando la carga)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
   ahora SÍ se usa (lente gravitacional v5.85)
 - ✅ Librería de partículas COMPLETA según el libro (v5.84) + capa AboveLens (v5.86)
+  + componente PullTo (v5.90)
   + carga de texturas SIN bloqueo (Asset diferido, v5.88)
 - ✅ Sol: ciclo completo de 10s con llamaradas (t=2,4,6,8s) + supernova sincronizada (v5.86)
 - ✅ Agujero negro: lente DETRÁS del agujero y sus efectos + secuencia de muerte
-  completa con 4 ondas con daño (v5.86) — y cada onda daña EXACTAMENTE una vez
-  por NPC (fix del array compartido, v5.88)
+  (crecimiento → evaporación → UNA explosión cromática final v5.90) y cada onda
+  daña EXACTAMENTE una vez por NPC (fix del array compartido, v5.88)
 - ✅ Desactivación del mod LIMPIA: el Dispose del render target de la lente se
   encola al hilo principal (v5.87 — fix del ThreadStateException de FNA3D)
 - ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
 - ✅ Build 100% limpio: 0 warnings 0 errores sin supresiones (v5.88)
 - ⚠️ **PENDIENTE**: probar en tModLoader real (recompilar, verificar carga sin
-  error, lente detrás del agujero, daño único por onda, quemadura de las 3 de
-  fuego, y desactivación limpia)
+  error, sol idéntico a v5.88, agujero sin corte al crecer, materia absorbida,
+  UNA explosión cromática final con daño, lente delgada, y desactivación limpia)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
 2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar BlackHoleStaff: el fondo debe CURVARSE alrededor del agujero (lente
-   gravitacional) + espiral multicolor + atracción 450px
-4. Disparar SunStaff: llamaradas cada 2s, en el segundo 7 aparece la supernova
-   (carga con sacudidas), y en el segundo 10 explosión simultánea masiva con doble
-   onda expansiva
-5. **Desactivar el mod o Mods → Reload: la desactivación debe completarse EN
+3. Disparar BlackHoleStaff: materia ámbar/blanca cayendo en ESPIRAL al horizonte
+   (absorbida, SIN nada morado) + atracción 450px + lente DELGADA (solo un anillo
+   estrecho alrededor del agujero se curva — el resto de la pantalla quieta) +
+   al desaparecer: UNA SOLA explosión cromática (anillo RGB) con daño
+4. Disparar SunStaff: DEBE VERSE COMO EN v5.88 (llamaradas cada 2s con su onda
+   expansiva, supernova en el segundo 7, explosión masiva en el segundo 10)
+5. Verificar que el agujero al crecer para morir YA NO se corta por los lados
+6. **Desactivar el mod o Mods → Reload: la desactivación debe completarse EN
    SILENCIO** (sin diálogo de error, sin pedir reinicio — fix v5.87)
-6. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
+7. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
    puede pasar es que no se dibuje)
-7. FUTURO (Grimorio): quemadura del sol potenciada por daño mágico + integración
+8. FUTURO (Grimorio): quemadura del sol potenciada por daño mágico + integración
    del proyectil como ataque del arma definitiva
-8. Roadmap natural: compilar Bloom/ChromaticAberration/Shockwave con mgfxc/2MGFX
+9. Roadmap natural: compilar Bloom/ChromaticAberration/Shockwave con mgfxc/2MGFX
    cuando se usen desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig
 
 ### 11.5 Qué se hizo en v5.86 (histórico — reportes del usuario tras probar v5.85)
@@ -1113,12 +1150,12 @@ corresponde a v5.85 y puede estar desactualizado en las partes señaladas):
 | Archivo | Cambio v5.86 (+ v5.87/v5.88 donde se indica) |
 |---|---|
 | `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b. **v5.88**: + textura propia .png (InvisiblePixel 1×1 — antes el mod NO cargaba), override `NewInstance` con array `_hitNPCs` fresco por onda (bug de golpes múltiples), End defensivo + GameViewMatrix en el restore de PreDraw |
-| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (v5.89): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, _lensTarget a RESOLUCIÓN NATIVA + BLIT A PANTALLA COMPLETA tras restaurar el binding (fix de la pantalla negra: FNA limpia el backbuffer al re-bindearlo), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D) |
-| `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles`. **v5.88**: End defensivo en `RestoreSpriteBatch` + `Main.Transform` deprecado → `GameViewMatrix.TransformationMatrix` |
-| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0). **v5.89**: TODOS los efectos ambientales como partículas BeforeProjectiles (detrás del cuerpo — antes dusts vanilla ENCIMA); la carga de la supernova hija (ai[1]=1) se dibuja PRIMERO vía `SupernovaProjectile.DrawChargeVisuals`; End defensivo solo en catch |
+| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (v5.89): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, _lensTarget a RESOLUCIÓN NATIVA + BLIT A PANTALLA COMPLETA tras restaurar el binding (fix de la pantalla negra: FNA limpia el backbuffer al re-bindearlo), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D). **v5.90: LENTE DELGADA** — maxLensingAngle 24→1.5 rad, fuerza 0.62→0.55 (ángulo pico ~14.9→0.8 rad: antes movía TODA la pantalla porque el shader rota alrededor del centro de pantalla), radio de influencia 0.75×→1.1× |
+| `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~800 líneas) | AI: secuencia de muerte v5.90 (crecimiento +60% escala/radio SIN ondas → evaporación → OnKill UNA onda cromática con daño COMPLETO y radio 620); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático (**v5.90**: canvas = 256·scale con zoom CONSTANTE y disco con tope min(scale,1)·0.4 → nunca se corta al crecer); PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens` (**v5.90**: materia absorbida con PullTo, sin morados) |
+| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0). **v5.89**: TODOS los efectos ambientales como partículas BeforeProjectiles + carga de la supernova dibujada por el sol. **v5.90: REVERTIDO A 8781aa4/v5.88** (el usuario reportó el sol arruinado: círculos que subían + onda expansiva perdida) — dusts vanilla y supernova auto-dibujada como siempre; solo se conserva el End defensivo en catch |
 | `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas. **v5.88**: End defensivo en el restore de PreDraw + GameViewMatrix |
-| `Content/Particles/ParticleData.cs` | `LayerPriorities.AboveLens = 950` |
-| `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive`. **v5.88**: `_textures` → `Asset<Texture2D>[]` con resolución DIFERIDA al dibujar (fix del warning "spent 61ms blocking on asset loading") |
+| `Content/Particles/ParticleData.cs` | `LayerPriorities.AboveLens = 950`. **v5.90**: `ComponentFlag.PullTo` (bit 13 — aceleración hacia un punto: materia absorbida) |
+| `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive`. **v5.88**: `_textures` → `Asset<Texture2D>[]` con resolución DIFERIDA al dibujar (fix del warning "spent 61ms blocking on asset loading"). **v5.90**: componente PullTo en el update (acelera hacia UserData0/1, muere a <10px del centro) |
 | `Content/Weapons/Cosmic/CosmicWeapons.cs` + `V20/SupernovaStaff.cs` | Tooltips v5.86 |
 
 ### 13.1b CosmicShockwaveProjectile.cs — COMPLETO (NUEVO v5.86)
@@ -1900,13 +1937,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
 }
 ```
 
-### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.89 — fix de la "pantalla negra"; el repo manda)
+### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.89 — fix de la "pantalla negra"; v5.90: LENTE DELGADA; el repo manda)
 > La lente gravitacional de pantalla: distorsiona el fondo REAL del juego alrededor
 > de hasta 5 fuentes (agujeros + ondas cromáticas). Hook en TimeLogger punto 36
 > (tras EndCapture del mundo, antes de la UI), Main.screenTarget como fuente.
 > v5.89: RT a RESOLUCIÓN NATIVA + blit A PANTALLA COMPLETA tras restaurar el
 > binding (FNA limpia el backbuffer al re-bindearlo con DiscardContents — por eso
 > el propio Terraria redibuja la pantalla entera en su EndCapture). Sin regiones.
+> v5.90: LENTE DELGADA — el shader rota las coords ALREDEDOR DEL CENTRO DE
+> PANTALLA (así que cualquier ángulo grande desplaza píxeles lejanos ∝ su
+> distancia al centro: "movía toda la pantalla"). maxLensingAngle 24→1.5 rad y
+> fuerza 0.62→0.55 (ángulo pico ~14.9→0.8 rad), radio 0.75×→1.1× del tamaño
+> visual. El .fxc NO se recompila (sin mgfxc/wine en el sandbox): tuning solo
+> por parámetros.
 
 ```csharp
 using System;
@@ -3613,14 +3656,14 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: v5.89 (hash en la tabla de la sección 10)
+- Commit actual: v5.90 (hash en la tabla de la sección 10)
 - Commit estable del remote: `e826c82`
 
 ---
 
 **Fin del documento.**
 
-> Última actualización: v5.89
+> Última actualización: v5.90
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

@@ -1,5 +1,126 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.90 — REVERT del sol a v5.88 + agujero negro rehecho (partículas absorbidas, UNA explosión cromática, lente delgada, sin corte)
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+**Reporte del usuario** (tras probar la v5.89 en juego):
+
+1. *"Creo que ahora empeoró ya que arruinaste los efectos del sol"* — la v5.89
+   sustituyó los dusts ambientales del sol por partículas de la librería en la
+   capa BeforeProjectiles: el humo cálido se convirtió en **círculos (SoftGlow)
+   que suben desde el sol** y las llamaradas (PhoenixNova con hide+DrawBehind)
+   quedaron TAPADAS por el cuerpo de la estrella → *"le quitaste su onda
+   expansiva"*. El usuario pidió **volver al commit 8781aa4** (v5.88) para el
+   sol, sin tocarlo, y aplicar el resto de los cambios.
+2. *"En cuanto al agujero negro, al crecer para desaparecer se CORTA por los
+   lados"* — la captura mostraba el anillo naranja/blanco del disco de acreción
+   terminado en **líneas verticales duras** a izquierda y derecha.
+3. Cambios pedidos para el agujero negro: quitar las partículas moradas,
+   agregar partículas que parezcan absorbidas, quitar las explosiones
+   cromáticas (que solo haya UNA al desaparecer, con aberración cromática y
+   daño), y hacer DELGADA la lente gravitacional para que no mueva toda la
+   pantalla.
+
+### A. REVERT DEL SOL A 8781aa4 (v5.88) — SunProjectile, Supernova, PhoenixNova
+
+- `git checkout 8781aa4 -- SunProjectile.cs SupernovaProjectile.cs PhoenixNovaProjectile.cs`
+  — el sol vuelve EXACTAMENTE a su estado de la v5.88: dusts vanilla (llamas
+  GoldFlame, chispas Torch, humo Smoke, twinkles Enchanted_Gold), supernova
+  hija dibujándose por sí misma (sin ai[1]=1), llamaradas PhoenixNova en el
+  pase normal de proyectiles (sin hide/DrawBehind), y su onda expansiva de
+  fuego intacta.
+- Se conservó UNA sola cosa de la v5.89 en esos archivos: el fix de la
+  **"Excepción silenciosa"** (el End defensivo ahora vive SOLO en el catch del
+  path de error, no un try{End} incondicional cada frame) — cambio invisible
+  al juego que mantiene el client.log limpio.
+
+### B. FIX DEL CORTE POR LOS LADOS (disco de acreción al crecer)
+
+**Causa raíz** (verificada contra el .fx): el canvas del RealBlackHoleShader
+era FIJO de 256px y la lupa interna (`zoom = width/256 * scale * 2`) crecía
+con la escala. La cobertura del shader en unidades de mundo es `1/zoom`: al
+hincharse para morir (scale hasta 1.6) la cobertura caía a 0.83 mientras el
+toro del disco de acreción crecía hasta 1.39 → el disco cruzaba el borde del
+canvas y quedaba recortado con líneas verticales duras exactamente donde
+terminaba el quad.
+
+**Fix**: el canvas AHORA CRECE con la escala (`256 * max(scale, 0.08)`) y el
+zoom es CONSTANTE (`width/256*2`). La cobertura del shader ya no cambia y el
+radio del disco lleva un tope (`min(scale,1)*0.4`) → el toro NUNCA cruza el
+borde a ninguna escala. El horizonte de sucesos en píxeles es idéntico a
+antes (0.3 · width · scale): cero cambio visual salvo que el disco ya no se
+corta — el agujero entero crece en pantalla al hincharse.
+
+### C. PARTÍCULAS: FUERA LAS MORADAS, DENTRO LAS ABSORBIDAS
+
+- ELIMINADO: succión espiral multicolor (violeta/cian/magenta con PurpleTorch),
+  humo púrpura, espiral de librería multicolor (end violeta), halo de
+  distorsión violeta (era el ÚNICO usuario de Noise.png en juego — el
+  "efecto que se veía mal" desaparece por completo).
+- NUEVO componente de librería **PullTo** (ComponentFlag bit 13): aceleración
+  hacia un punto fijo (UserData0/1 = centro, UserData3 = fuerza); la partícula
+  MUERE al llegar al centro. Con velocidad inicial tangencial dibuja una
+  espiral de infalling perfecta.
+- NUEVO **SpawnLibraryAbsorbedMatter**: estelas TrailGlow cálidas (ámbar →
+  blanco incandescente vía ColorShift) que nacen a 95-165px con velocidad
+  tangencial y PullTo hacia el centro — caen en espiral cada vez más rápido y
+  desaparecen al cruzar el horizonte: materia siendo ABSORBIDA.
+- NUEVO **SpawnAbsorbedDusts**: polvo GoldFlame ámbar/oro/brasa en espiral
+  (mismo movimiento de la vieja succión, paleta incandescente), blanco
+  incandescente cerca del borde.
+- RECARENTADOS a cálido: halo exterior del núcleo (púrpura → ámbar profundo),
+  presets de OnHitNPC/OnKill (violeta → ámbar/blanco), dusts de implosión
+  (PurpleTorch → GoldFlame).
+- Se conservan: chispas doradas capturadas, disco de acreción naranja
+  (TrailGlow orbital), anillo de fotones blanco-azul, devoración de dusts
+  ambiente, luz naranja pulsante.
+
+### D. UNA SOLA EXPLOSIÓN CROMÁTICA AL DESAPARECER (con daño)
+
+- ELIMINADAS las 4 ondas de la secuencia de muerte v5.86: la onda cromática
+  intermedia (t-90, con estruendo y sacudida) y las 3 ondas cromáticas
+  inversas escalonadas del final. La secuencia ahora es pura: crecimiento
+  (+60% escala y radio de gravedad, SIN ondas) → evaporación (colapso a 0) →
+  explosión.
+- En **OnKill** nace UNA SOLA `CosmicShockwaveProjectile` estilo 0
+  (cromático) con el **daño COMPLETO** del proyectil y radio máximo 620px:
+  anillo con **aberración cromática real** (canales R/G/B separados
+  radialmente, separación creciente con la edad) + **distorsión del fondo a
+  su paso** (se registra como fuente del BlackHoleLensSystem) + **daño por
+  frente de onda** a cada NPC una única vez. Estruendo Item88 y sacudida
+  de cámara acompañan la liberación.
+- El estilo 1 (inverso) queda documentado como LEGADO sin uso.
+
+### E. LENTE GRAVITACIONAL DELGADA (ya no mueve toda la pantalla)
+
+**Causa raíz** (verificada contra el .fx): el shader rota las coordenadas de
+muestreo ALREDEDOR DEL CENTRO DE PANTALLA (`RotatedBy(coords - 0.5, ángulo)`),
+así que un píxel se desplaza proporcional a SU distancia al centro. La v5.89
+usaba `maxLensingAngle = 24 rad` con fuerza 0.62 → ángulo pico ~14.9 rad: a
+2 radios del agujero el ángulo seguía siendo 0.27 rad → píxeles a 800px del
+centro se movían 213px. Eso era "mover toda la pantalla".
+
+**Fix (solo parámetros — el .fxc no se puede recompilar sin mgfxc/wine)**:
+- `maxLensingAngle`: 24 → **1.5 rad** y fuerza 0.62 → **0.55** → ángulo pico
+  **~0.8 rad** (18× menos).
+- Radio de influencia: 0.75× → **1.1×** el tamaño visual (con ángulos sanos,
+  el anillo de distorsión debe abrazar el borde del núcleo para seguir siendo
+  visible; con 0.75 quedaría oculto tras el disco de acreción).
+- Resultado (1080p, agujero a escala 1): deformación visible en el anillo
+  0-180px alrededor del agujero, imperceptible (<1px) más allá de ~3 radios,
+  resto de la pantalla pixel-perfect. La explosión cromática final también
+  distorsiona su interior con el mismo tope sano.
+
+### F. Documentación
+
+- Headers de BlackHoleProjectile/BlackHoleLensSystem/CosmicShockwaveProjectile
+  reescritos para documentar la v5.90 (secuencia de muerte, PullTo, canvas que
+  crece, lente delgada).
+- ParticleData/ParticleManager: PullTo documentado en la lista de componentes.
+
+---
+
 ## Commit v5.89 — FIX CRÍTICO: la "pantalla negra" del agujero negro + efectos del sol DETRÁS de la estrella
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

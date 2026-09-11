@@ -86,6 +86,13 @@ namespace AethonMod.Content.Particles
         public const ulong BounceOnTile = 1UL << 10;
         public const ulong DieOnTile   = 1UL << 11;
         public const ulong EmitLight   = 1UL << 12;
+        /// <summary>v5.90 — atracción hacia un PUNTO fijo (materia absorbida
+        /// por el agujero negro): UserData0/1 = centro XY, UserData3 = fuerza
+        /// (aceleración por tick). La partícula MUERE al llegar al centro.
+        /// Con una velocidad inicial tangencial dibuja una espiral de infalling
+        /// perfecta. Incompatible con Gravity/FadeIn/ScaleDown/ScaleUp/Orbit
+        /// (usan los mismos slots de UserData).</summary>
+        public const ulong PullTo      = 1UL << 13;
     }
 
     /// <summary>
