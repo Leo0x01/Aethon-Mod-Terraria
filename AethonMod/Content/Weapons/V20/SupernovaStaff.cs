@@ -9,18 +9,21 @@ using AethonMod.Content.Projectiles.V20;
 namespace AethonMod.Content.Weapons.V20
 {
     /// <summary>
-    /// SupernovaStaff — bastón que invoca una estrella que colapsa y luego
-    /// explota en una supernova.
+    /// SupernovaStaff — bastón que invoca una estrella que colapsa durante 3
+    /// segundos y luego estalla en una supernova masiva (v5.85 mejorada).
     ///
     /// Especificaciones:
     ///   - damage = 90 (DamageType.Magic)
     ///   - useTime = useAnimation = 45
-    ///   - shootSpeed = 6f (proyectil lento, vive 90 frames)
+    ///   - shootSpeed = 6f (proyectil lento, carga 180 frames = 3 s)
     ///   - mana = 0
     ///   - useStyle = HoldUp, autoReuse = true, noMelee = true
     ///   - Quest rarity, SoundID.Item8, receta 5 Wood
     ///
-    /// Dispara SupernovaProjectile (3 fases: colapso → explosión → fade).
+    /// Dispara SupernovaProjectile (carga con atracción creciente → explosión
+    /// masiva con doble onda expansiva, flash y AoE de 340px).
+    /// El Sol (SunProjectile) lo invoca centrado en su segundo 7 y ambos
+    /// explotan sincronizados en el segundo 10.
     /// </summary>
     public class SupernovaStaff : ModItem
     {
@@ -59,7 +62,7 @@ namespace AethonMod.Content.Weapons.V20
             tooltips.Add(new TooltipLine(Mod, "SN_Title",
                 "[c/FFD700:═══ SUPERNOVA ═══]"));
             tooltips.Add(new TooltipLine(Mod, "SN_Desc",
-                "[c/FFE0A0:Una estrella que colapsa hacia el blanco calor y estalla en una supernova]"));
+                "[c/FFE0A0:Una estrella que colapsa hacia el blanco calor durante 3 segundos y estalla en una nova de doble onda expansiva]"));
         }
 
         public override void AddRecipes()

@@ -10,29 +10,31 @@ using AethonMod.Content.Particles;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// BlackHoleProjectile — réplica fiel del BlackHolePet de Wrath of the Gods.
+    /// BlackHoleProjectile — agujero negro con lensing gravitacional real.
     ///
-    /// Render: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional real)
-    /// con los parámetros EXACTOS del PetBlackHoleRenderer de WoTG:
+    /// RENDER: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional
+    /// real) sobre un canvas de InvisiblePixel de 256px:
     ///   - zoom dinámico: width / 256 * scale * 2
     ///   - accretionDiskRadius: scale * 0.4
     ///   - cameraRotationAxis: (velocity.Y * -0.022 + 1, 0, rotation)
     ///   - cameraAngle: 0.32 / accretionDiskScale: (1, 0.33, 1)
     ///
-    /// El shader se dibuja sobre un canvas de InvisiblePixel de 256px (el mismo tamaño
-    /// del render target que usa WoTG para el pet).
+    /// v5.85 — LENTE GRAVITACIONAL de pantalla (BlackHoleLensSystem): el fondo
+    /// real del juego se distorsiona alrededor del horizonte de sucesos con el
+    /// shader BlackHoleDistortionShader (formalismo relativista con decaimiento
+    /// exponencial). Fuerza gravitatoria aumentada y radio de atracción de 450px.
     ///
     /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
     /// render en PostDrawTiles = capa de fondo con profundidad): espiral de succión
-    /// con ColorShift blanco→violeta, disco de acreción de estelas TrailGlow orbitando
-    /// (componente Orbit + rotación tangencial sincronizada), anillo de fotones pulsante
-    /// con ScaleUp, halo de distorsión con ruido procedural, implosión/explosión con
-    /// presets y screenshake con PunchCameraModifier al morir.
+    /// multicolor (violeta/cian/magenta/oro) con ColorShift, disco de acreción de
+    /// estelas TrailGlow orbitando (componente Orbit + rotación tangencial
+    /// sincronizada), anillo de fotones pulsante con ScaleUp, halo de distorsión
+    /// con ruido procedural, implosión/explosión con presets y screenshake.
     ///
-    /// Mejoras propias: pop elástico de aparición (ElasticOut, como el pet),
-    /// colapso final antes de expirar, succión espiral de partículas,
-    /// atracción gravitacional de enemigos Y de polvo cercano,
-    /// refuerzo del event horizon e implosión + explosión al morir.
+    /// Mejoras propias: pop elástico de aparición, colapso final antes de expirar,
+    /// succión espiral de partículas de colores, atracción gravitacional de
+    /// enemigos Y devoración del polvo cercano, refuerzo del event horizon e
+    /// implosión + doble onda expansiva al morir.
     /// </summary>
     public class BlackHoleProjectile : ModProjectile
     {
@@ -49,8 +51,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            Projectile.width = 76;
-            Projectile.height = 76;
+            // v5.85: área de daño ampliada (76 → 96): el hitbox y el canvas del
+            // shader escalan con width, así que el agujero también se ve mayor.
+            Projectile.width = 96;
+            Projectile.height = 96;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
@@ -62,7 +66,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === POP ELÁSTICO DE APARICIÓN (EasingCurves.Elastic.Out del pet de WoTG) ===
+            // === POP ELÁSTICO DE APARICIÓN ===
             // scale = ElasticOut(0..120) * sqrt(InverseLerp(0..60)) — el agujero "rebota" al nacer.
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 120f, VisualsTime, true)) *
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
@@ -75,7 +79,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
 
-            // Rotación suave hacia velocity.X * 0.04 (igual que el pet de WoTG)
+            // Rotación suave hacia velocity.X * 0.04
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
@@ -98,14 +102,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 SpawnLibraryDistortionHalo();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 350) ===
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 450, fuerza aumentada) ===
+            const float gravityRadius = 450f;
+            const float gravityStrength = 2.6f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.CanBeChasedBy()) continue;
                 Vector2 toCenter = Projectile.Center - npc.Center;
                 float dist = toCenter.Length();
-                if (dist > 350f || dist < 5f) continue;
-                float strength = (1f - dist / 350f) * 2f;
+                if (dist > gravityRadius || dist < 5f) continue;
+                float strength = (1f - dist / gravityRadius) * gravityStrength;
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
@@ -122,33 +128,47 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  PARTÍCULAS
         // ------------------------------------------------------------------
 
-        /// <summary>Partículas que caen en espiral hacia el centro (CircularSuctionPattern de WoTG).</summary>
+        /// <summary>Partículas cayendo en espiral hacia el centro, con paleta multicolor.</summary>
         private void SpawnSuctionParticles()
         {
             for (int i = 0; i < 3; i++)
             {
                 float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 3f);
-                float dist = 90f + 50f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
+                float dist = 100f + 55f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
 
                 Vector2 toCenter = Projectile.Center - spawnPos;
                 // Más rápido cuanto más cerca del horizonte
-                float speed = 4f + 4f * (1f - dist / 140f);
+                float speed = 4f + 4f * (1f - dist / 155f);
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
                     Vector2 velocity = toCenter * speed;
 
-                    // RotateTowards: LA técnica de WoTG que convierte infalling radial en espiral
+                    // RotateTowards: convierte la caída radial en espiral
                     float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
                     velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
 
-                    // Color: caliente cerca del centro, púrpura lejos
-                    Color color = dist < 60f ? new Color(255, 240, 180)
-                               : dist < 100f ? new Color(255, 160, 60)
-                               : new Color(160, 80, 255);
+                    // v5.85 — SUCCIÓN ESPIRAL MULTICOLOR: la materia devorada
+                    // cubre el espectro (violeta, cian, magenta, oro) y se vuelve
+                    // incandescente al acercarse al horizonte.
+                    Color color;
+                    if (dist < 60f)
+                    {
+                        color = new Color(255, 240, 180); // incandescente al borde
+                    }
+                    else
+                    {
+                        switch (Main.rand.Next(4))
+                        {
+                            case 0: color = new Color(160, 80, 255); break;  // violeta
+                            case 1: color = new Color(80, 200, 255); break;  // cian
+                            case 2: color = new Color(255, 80, 220); break;  // magenta
+                            default: color = new Color(255, 200, 80); break; // oro
+                        }
+                    }
 
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
                         velocity, 150, color, 1.3f);
@@ -221,7 +241,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// </summary>
         private void AttractNearbyDust()
         {
-            float radius = 190f;
+            // v5.85: radio de devoración ampliado (190 → 260): el agujero devora
+            // el polvo del entorno en un área mucho mayor.
+            float radius = 260f;
             for (int i = 0; i < Main.maxDust; i++)
             {
                 Dust d = Main.dust[i];
@@ -244,16 +266,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// Espiral de succión con partículas SoftGlow aditivas: nacen en el borde del
-        /// campo gravitatorio con velocidad tangencial + radial y caen en espiral,
-        /// desplazando su color de blanco incandescente a violeta cósmico al morir.
+        /// Espiral de succión multicolor con partículas SoftGlow aditivas: nacen
+        /// en el borde del campo gravitatorio con velocidad tangencial + radial y
+        /// caen en espiral. v5.85: cada partícula nace de un color cósmico
+        /// distinto (violeta/cian/magenta/oro) y muere hacia el blanco-violeta
+        /// del horizonte.
         /// </summary>
         private void SpawnLibrarySuctionSpiral()
         {
             for (int i = 0; i < 2; i++)
             {
                 float angle = Projectile.rotation * 1.5f + VisualsTime * 0.021f + i * MathHelper.Pi;
-                float dist = Main.rand.NextFloat(105f, 150f);
+                float dist = Main.rand.NextFloat(115f, 165f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -263,13 +287,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 toCenter = -new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
                 Vector2 velocity = tangent * 2.1f + toCenter * 1.05f;
 
+                // Color de nacimiento: uno del espectro cósmico.
+                Color start = Main.rand.Next(4) switch
+                {
+                    0 => new Color(190, 120, 255, 190), // violeta
+                    1 => new Color(110, 210, 255, 190), // cian
+                    2 => new Color(255, 110, 230, 190), // magenta
+                    _ => new Color(255, 220, 130, 190), // oro
+                };
+
                 var p = new ParticleData
                 {
                     Position = spawnPos,
                     Velocity = velocity,
                     Scale = Vector2.One * Main.rand.NextFloat(0.7f, 1.1f),
-                    PackedColor = ParticleManager.PackColor(new Color(255, 240, 200, 190)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 200, 190)),
+                    PackedColor = ParticleManager.PackColor(start),
+                    PackedStartColor = ParticleManager.PackColor(start),
                     PackedEndColor = ParticleManager.PackColor(new Color(150, 70, 255, 60)),
                     TimeLeft = 45,
                     Duration = 45,
@@ -425,10 +458,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 if (_shader != null && _shader.Value != null)
                 {
-                    // === 2. REALBLACKHOLESHADER — parámetros EXACTOS del PetBlackHoleRenderer de WoTG ===
+                    // === 2. REALBLACKHOLESHADER — lensing gravitacional de 75 pasos ===
                     Effect shader = _shader.Value;
 
-                    // El pet de WoTG renderiza a un target de 256x256: replicamos ese tamaño de canvas
+                    // Canvas de 256px (tamaño nativo del lightmarch)
                     float targetSize = 256f;
                     float resizingScale = Projectile.width / targetSize * Projectile.scale * 2f;
 
@@ -443,13 +476,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     shader.Parameters["accretionDiskRadius"].SetValue(Projectile.scale * 0.4f);
                     shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
 
-                    // FireNoiseB como textura de ruido del disco de acreción (s1) — igual que WoTG
-                    Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/FireNoiseB").Value;
+                    // FireNoiseB como textura de ruido del disco de acreción (s1)
+                    Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/FireNoiseB").Value;
                     Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                    // InvisiblePixel como canvas (s0) — igual que WoTG
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/InvisiblePixel").Value;
+                    // InvisiblePixel como canvas (s0)
+                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/InvisiblePixel").Value;
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                         SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -460,7 +493,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.spriteBatch.End();
 
                     // === 3. REFUERZO DEL EVENT HORIZON ===
-                    // Sustituye al BlackOnlyShader de WoTG (que requiere render target):
                     // radio del horizonte en píxeles = blackHoleRadius * zoom * (canvas / 2)
                     float eventHorizonPx = 0.3f * resizingScale * targetSize * 0.5f;
                     if (eventHorizonPx > 2f)
@@ -687,7 +719,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  HELPERS
         // ------------------------------------------------------------------
 
-        /// <summary>Elastic ease-out (réplica de EasingCurves.Elastic.Evaluate(EasingType.Out) de WoTG).</summary>
+        /// <summary>Elastic ease-out (curva elástica de aparición).</summary>
         private static float ElasticOut(float t)
         {
             if (t <= 0f) return 0f;

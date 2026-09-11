@@ -1,5 +1,97 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.85 — SOL COMPLETO (10s) + LENTE GRAVITACIONAL + SUPERNOVA MEJORADA + limpieza de referencias
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+### A. SunProjectile — el sol como cuerpo celeste completo (ciclo de 10 segundos)
+
+El sol ahora tiene un ciclo de vida determinista de **10 segundos exactos** (600 ticks)
+y conjuga los proyectiles de dos bastones existentes + gravedad propia:
+
+1. **LLAMARADAS SOLARES cada 2 segundos** — desde t=0 (nace con el sol), se invoca
+   `PhoenixNovaProjectile` (el del PhoenixNovaStaff) **centrado en el sol**:
+   anillos naranjas expansivos + flash + lluvia de Torch + OnFire. 5 llamaradas
+   en total (t=0, 2, 4, 6 y 8s), daño = 50% del sol.
+2. **SUPERNOVA SINCRONIZADA en el segundo 7** — cuando al sol le quedan 180 ticks,
+   invoca `SupernovaProjectile` (el del SupernovaStaff) en su centro y lo mantiene
+   **perfectamente centrado** tick a tick (ai[1] guarda el índice del hijo y el sol
+   le impone su posición y velocidad).
+3. **GRAVEDAD DEL SOL** — como cuerpo celeste atrae enemigos (radio 280px) con una
+   fuerza **10 veces menor que la del agujero negro** (0.26 vs 2.6). Durante la
+   carga de la supernova (segundos 7→10) la fuerza **aumenta progresivamente hasta
+   x4** (1.04 en el pico): los enemigos son arrastrados hacia la nova.
+4. **EXPLOSIÓN SIMULTÁNEA en el segundo 10** — el sol (OnKill) y la supernova
+   (OnKill) estallan el mismo tick: nova masiva combinada con doble onda expansiva.
+5. **QUEMADURA** — inflama enemigos al contacto (OnFire 5s). La variante potenciada
+   por daño mágico se implementará al integrarlo en el Grimorio (arma definitiva).
+6. Visuales de carga: el sol se comprime sutilmente, su luz crece hasta x1.8 y
+   estelas doradas convergen en espiral hacia el núcleo (SpawnSupernovaChargeIntake).
+
+### B. SupernovaProjectile — reescrito: 3 segundos de carga + explosión masiva
+
+- **timeLeft 90 → 180** (3 s exactos, sincronizable con el sol).
+- **Carga (0..180)**: contracción acelerada hacia blanco-azulado, atracción de
+  enemigos con fuerza creciente (0.5 → 2.2, radio 300px), espiral de GoldFlame
+  cada vez más rápida (2→4/frame), **sacudidas de cámara anticipatorias** cada 40
+  ticks (intensidad creciente) y anillos de contención pulsantes.
+- **Explosión (OnKill, mejorada y más vistosa)**:
+  - DOBLE onda expansiva de la librería (blanca-dorada 320px veloz + naranja
+    profunda 460px retardada)
+  - Flash blanco gigante (SoftGlow aditivo x6.5) + Explosion(200px, 46 partículas)
+  - 26 estelas de viento estelar radiales largas
+  - 70 lenguas de GoldFlame + 25 chispas blancas + 18 brasas con gravedad + 14 humos
+  - AoE real de 340px (SimpleStrikeNPC + OnFire, solo en autoridad)
+  - Temblor de cámara fuerte (10f, "AethonSupernovaBlast") + doble sonido
+- `OnHitNPC`: ahora inflama (OnFire 300).
+
+### C. BlackHoleProjectile + LENTE GRAVITACIONAL de pantalla (nuevo sistema)
+
+1. **`BlackHoleLensSystem` (archivo nuevo, `Content/Effects/`)** — la pieza clave:
+   - Hook MonoMod `Terraria.On_TimeLogger.DetailedDrawTime` en el punto 36 —
+     verificado por decompilación contra tModLoader v2026.07.3.0: es el punto
+     EXACTO tras `Filters.Scene.EndCapture` (el mundo ya está en
+     `Main.screenTarget`) y antes de la UI.
+   - Recopila hasta 5 agujeros activos (posición UV de pantalla + radio
+     `width*scale/screenW*0.75`), copia `Main.screenTarget` a través de
+     `BlackHoleDistortionShader` (el .fxc del pipeline propio) hacia un render
+     target a media resolución y lo devuelve cubriendo la pantalla → **el fondo
+     real del juego se curva alrededor del horizonte de sucesos**.
+   - "Pequeña lente" deliberada: distortionStrength 0.62 ligada a la escala del
+     agujero (nace y muere con él), maxLensingAngle 24, decaimiento exponencial.
+   - APIs verificadas por reflexión + decompilación: `Main.screenTarget` ✓,
+     `Main.screenWidth/Height` ✓, hook event `DetailedDrawTime` ✓, RT bindings
+     preservados/restaurados ✓, try/catch total (nunca rompe el render).
+2. **Fuerza gravitatoria mayor**: 2.0 → 2.6 y radio 350 → **450px**.
+3. **Área de daño mayor**: width/height 76 → 96 (hitbox + canvas del shader).
+4. **Succión espiral multicolor**: la materia devorada cubre violeta/cian/
+   magenta/oro (dusts + partículas de librería) y se vuelve incandescente cerca
+   del horizonte.
+5. **Devora el polvo** en radio ampliado 190 → 260px.
+6. disco de acreción de estelas + anillo de fotones + halo de distorsión +
+   implosión/doble onda expansiva al colapsar (de v5.84, intactos).
+
+### D. LIMPIEZA TOTAL de referencias externas
+
+- Carpeta `Content/Effects/WoTG/` renombrada a **`Content/Effects/Textures/`**
+  (10 texturas) y las 6 rutas de código actualizadas.
+- Tooltips de BlackHoleStaff/SunStaff reescritos: describen las capacidades
+  propias (nada de "render idéntico a...").
+- `AethonMod.csproj`: eliminado `Compile Remove="Reference_WoTG/**"` (la carpeta
+  ni existe) y el comentario que citaba al mod externo.
+- `.gitignore`: eliminada la línea `Reference_WoTG/`.
+- `TestingPlayer.cs` y `CHANGES.md`: comentarios/histórico neutralizados
+  ("el mod de shaders de referencia", "render de referencia").
+- `SupernovaStaff.cs`: docblock y tooltip actualizados a la nueva conducta.
+
+### E. Versionado
+
+- `build.txt`: versión 5.84 → **5.85**.
+- **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real
+  (4 warnings benignos preexistentes de `Kill()` obsoleto en archivos viejos).
+
+---
+
 ## Commit v5.84 — LIBRERÍA DE PARTÍCULAS COMPLETA + capas de VFX en BlackHole/Sun
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
@@ -97,7 +189,7 @@ Impacto y muerte:
 
 ---
 
-## Commit v5.83 — AGUJERO NEGRO + SOL idénticos a WoTG + FIX CRÍTICO de shaders
+## Commit v5.83 — AGUJERO NEGRO + SOL con render de referencia + FIX CRÍTICO de shaders
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
 
@@ -107,7 +199,7 @@ Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi vers
 - tModLoader NO compila los archivos `.fx` durante el build (verificado en el código
   fuente de tML y en el issue abierto #3326 de tModLoader).
 - Los mods DEBEN incluir los shaders **ya compilados como `.fxc`** — así lo hace
-  Wrath of the Gods (270 archivos .fxc commiteados en su repo).
+  el mod de shaders de referencia (270 archivos .fxc commiteados en su repo).
 - Nuestros antiguos `.xnb` (generados con dxc en el sandbox) no eran XNB válidos de
   MonoGame: el XnbReader de tML fallaba al parsearlos → "Asset could not be found".
 - Además tML no tiene reader para `.fx` (el FxReader vanilla es solo XNA, verificado
@@ -116,7 +208,7 @@ Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi vers
 
 **Solución aplicada:**
 - Borrados los 8 `.xnb` inválidos de `Content/Effects/Shaders/`.
-- Copiados los 5 `.fxc` compilados de WoTG (nuestros `.fx` son idénticos byte a byte):
+- Copiados los 5 `.fxc` compilados del mod de referencia (nuestros `.fx` son idénticos byte a byte):
   `RealBlackHoleShader.fxc`, `SunShader.fxc`, `RadialShineShader.fxc`,
   `BlackOnlyShader.fxc`, `BlackHoleDistortionShader.fxc`.
 - Los `.fx` se mantienen como fuente junto a los `.fxc` (sin conflicto: `.fx` no se
@@ -128,9 +220,9 @@ Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi vers
   `Terraria.ModLoader.Assets.FxcReader` SÍ existe (`.fxc` se carga con
   `new Effect(device, bytes)`).
 
-### B. BlackHoleProjectile — réplica EXACTA del BlackHolePet de WoTG
+### B. BlackHoleProjectile — réplica EXACTA del agujero negro de referencia
 
-Reescrito siguiendo `PetBlackHoleRenderer.UpdateUI()` de WoTG al pie de la letra:
+Reescrito siguiendo el renderer de referencia al pie de la letra:
 - **Zoom dinámico**: `width / 256 * scale * 2` (antes un 0.12 fijo — el error que
   hacía que no se pareciera en nada al original).
 - **accretionDiskRadius**: `scale * 0.4` (antes 0.33 fijo).
@@ -141,8 +233,8 @@ Reescrito siguiendo `PetBlackHoleRenderer.UpdateUI()` de WoTG al pie de la letra
 - Carga del shader con `AssetRequestMode.ImmediateLoad` + flag anti-reintento.
 
 Mejoras propias añadidas:
-- **Pop elástico de aparición** (ElasticOut — réplica de EasingCurves.Elastic de WoTG):
-  el agujero rebota al nacer, igual que el pet.
+- **Pop elástico de aparición** (ElasticOut — réplica de la curva elástica de referencia):
+  el agujero rebota al nacer.
 - **Colapso final**: los últimos 40 ticks se encoge antes de explotar.
 - **Devora el polvo del entorno**: los dusts cercanos (radio 190) caen en espiral
   hacia el horizonte de sucesos.
@@ -155,12 +247,13 @@ Mejoras propias añadidas:
   `RasterizerState.CullCounterClockwise` — `Main.CullCurrentScissor` NO existe en
   tML 2026, error CS0117 corregido).
 
-### C. SunProjectile — réplica EXACTA del StarPet de WoTG
+### C. SunProjectile — réplica EXACTA de la estrella de referencia
 
-Reescrito siguiendo `StarPet.DrawSelf()` de WoTG al pie de la letra:
-- **Canvas correcto**: `DendriticNoiseZoomedOut.png` (¡la textura que usa WoTG y que
+Reescrito siguiendo el draw de la estrella de referencia al pie de la letra:
+- **Canvas correcto**: `DendriticNoiseZoomedOut.png` (¡la textura de referencia que
   NOS FALTABA! antes usábamos WavyBlotchNoise como canvas — otra razón del parecido
-  nulo). Copiada a `Content/Effects/WoTG/` (10 texturas WoTG ahora).
+  nulo). Copiada a la carpeta de texturas de efectos (10 texturas de referencia ahora;
+  carpeta renombrada a `Content/Effects/Textures/` en v5.85).
 - Backglow doble con BloomCircleSmall (amarillo*0.7 @0.95 + rojo*0.45 @1.61).
 - RadialShine sobre WavyBlotchNoise con color (252,212,112)*0.24 y escala
   `width*scale*2.72` (dibujado en Additive para que el brillo radial sume).
@@ -173,7 +266,7 @@ Mejoras propias añadidas:
 - **Hinchazón previa a la nova**: se expande los últimos 30 ticks antes de morir.
 - **Llamaradas solares periódicas** cada ~0.75s (burst radial de GoldFlame).
 - Chispas Torch orbitando + llamas GoldFlame + humo cálido + destellos Enchanted_Gold.
-- Iluminación `Vector3(1, 0.9, 0.5) * 3.2` con pulso sutil (como StarPet).
+- Iluminación `Vector3(1, 0.9, 0.5) * 3.2` con pulso sutil (como la estrella de referencia).
 - **Nova final**: 60 GoldFlame + 35 Torch + 20 destellos + 15 humos + doble sonido.
 
 ### D. Otros cambios
@@ -188,9 +281,9 @@ Mejoras propias añadidas:
   benignos preexistentes de `Kill()` obsoleto en archivos viejos; los proyectiles
   cósmicos nuevos migrados a `OnKill()`).
 
-## Commit v5.82 — reescribir BlackHole + Sun con recursos exactos de WoTG
+## Commit v5.82 — reescribir BlackHole + Sun con recursos exactos de referencia
 
-## Commit v5.29 — Bastones de prueba + efectos cósmicos + recreación Star Wrath
+## Commit v5.29 — Bastones de prueba + efectos cósmicos + recreación estelar de la imagen de referencia
 
 Sistema completo de bastones de prueba para testear todos los efectos cósmicos
 aprendidos. Todos usan el proyectil Nightglow (#931) como base.
@@ -206,7 +299,7 @@ Nuevo archivo `Content/Globals/CosmicEffects.cs` con métodos estáticos:
 - `SpawnStarfall(target, count, spread)` — estrellas cayendo del cielo
 - `SpawnImpactSphere(center, intensity)` — esfera aditiva blanco/cian/azul
 - `SpawnSupernova(center, scale)` — explosión cósmica completa (4 colores + blanco)
-- `SpawnStarWrathEffect(center)` — EFECTO COMPLETO (combina todos los anteriores)
+- `SpawnStarEffect(center)` — EFECTO COMPLETO (combina todos los anteriores)
 - `SpawnRainbowTrail(center, velocity)` — estela arcoíris cambiante
 
 ### B. 4 bastones protegidos (baseline, no modificar)
@@ -221,7 +314,7 @@ En `Content/Weapons/TestStaffs/`:
 
 1. **TestNightglowBasic** — baseline vanilla sin efectos (comparación)
 2. **TestNightglowCosmicTrail** — estela cósmica densa
-3. **TestNightglowStarWrath** ⭐ — RECREA EL EFECTO DE LA IMAGEN:
+3. **TestNightglowStar** ⭐ — RECREA EL EFECTO DE LA IMAGEN:
    esfera de impacto + starfall + sparkles + light beams + anillo dorado
 4. **TestNightglowRingBurst** — 4 anillos cósmicos expansivos
 5. **TestNightglowSparkleTrail** — estela continua de sparkles

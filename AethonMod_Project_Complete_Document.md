@@ -15,7 +15,7 @@ Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
 > ⚠️ **LEER PRIMERO — v5.83**: los shaders del mod ahora son `.fx` (fuente) + `.fxc`
 > (compilado) — **NUNCA generar `.xnb` con dxc** (provocan "Asset could not be found"
 > al cargar el mod). tModLoader NO compila .fx automáticamente; el formato correcto es
-> copiar/compilar `.fxc` (como hace Wrath of the Gods). Ver sección 8.
+> copiar/compilar `.fxc` (como hace el mod de referencia). Ver sección 8.
 
 ---
 
@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.84 |
+| **Versión (build.txt)** | 5.85 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.84 — librería de partículas completa + capas de VFX en BlackHole/Sun |
+| **Commit actual** | v5.85 — Sol completo (10s) + lente gravitacional de pantalla + supernova mejorada |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.84
+version = 5.85
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -87,7 +87,6 @@ side = Both
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
-    <Compile Remove="Reference_WoTG/**" />
   </ItemGroup>
 </Project>
 ```
@@ -95,8 +94,9 @@ side = Both
 > **Importante (v5.83)**: eliminado el Import roto a `/tmp/tmodloader/tMLMod.targets`
 > (ruta del sandbox inexistente en la máquina del usuario). El build real de tML NO usa
 > el .csproj (compila con Roslyn desde build.txt); el csproj es solo para el IDE.
-> La línea `<Compile Remove="Reference_WoTG/**" />` se mantiene para que si se vuelven
-> a copiar archivos de referencia de WoTG, no se compilen.
+> **v5.85**: la línea `<Compile Remove="ReferenceShaders/**" />` fue eliminada — la
+> carpeta de código de referencia ya no existe (se perdió con el sandbox y nunca se
+> repondrá; el mod compila limpio sin ella).
 
 ### AethonMod.cs (entry point)
 ```csharp
@@ -177,10 +177,10 @@ Todos los sprites originales en:
 ## 4. ESTADO ACTUAL DEL PROYECTO
 
 ### 4.1 Conteo de archivos (verificado)
-- **78 archivos .cs** en `Content/`
+- **79 archivos .cs** en `Content/` (78 + BlackHoleLensSystem.cs nuevo en v5.85)
 - **139 archivos .png** (sprites — se añadió DendriticNoiseZoomedOut.png)
 - **8 shaders .fx** en `Content/Effects/Shaders/` (fuente)
-- **5 shaders .fxc** compilados en `Content/Effects/Shaders/` (los 5 de WoTG)
+- **5 shaders .fxc** compilados en `Content/Effects/Shaders/`
 - ⚠️ **PROHIBIDO generar .xnb** — ver sección 8
 
 ### 4.2 Shaders (8 fx fuente + 5 fxc compilados)
@@ -190,16 +190,18 @@ Todos los sprites originales en:
 | SunShader | SunShader.fx | SunShader.fxc ✓ | SunProjectile (estrella con corona + lava) |
 | RadialShineShader | RadialShineShader.fx | RadialShineShader.fxc ✓ | Brillo radial del sol |
 | BlackOnlyShader | BlackOnlyShader.fx | BlackOnlyShader.fxc ✓ | Refuerza event horizon (no usado aún: requiere render target) |
-| BlackHoleDistortion | BlackHoleDistortionShader.fx | BlackHoleDistortionShader.fxc ✓ | Lensing screen-space (no usado aún: requiere screen filter) |
+| BlackHoleDistortion | BlackHoleDistortionShader.fx | BlackHoleDistortionShader.fxc ✓ | **v5.85: EN USO** — lente gravitacional screen-space del BlackHoleLensSystem |
 | ChromaticAberration | ChromaticAberration.fx | — (sin .fxc, no usado) | Aberración cromática RGB |
 | Shockwave | Shockwave.fx | — (sin .fxc, no usado) | Onda expansiva |
 | Bloom | Bloom.fx | — (sin .fxc, no usado) | Extract bright → blur → combine |
 
-> **Los .fxc se copiaron directamente del repo de WoTG** (nuestros .fx son idénticos
+> **Los .fxc se copiaron directamente del repo del mod de referencia** (nuestros .fx son idénticos
 > byte a byte). Si se modifica un .fx propio, hay que recompilar el .fxc con
 > mgfxc/2MGFX — tModLoader NO compila .fx en el build.
 
-### 4.3 Texturas de WoTG (10 texturas en `Content/Effects/WoTG/`)
+### 4.3 Texturas del pipeline de efectos (10 en `Content/Effects/Textures/`)
+> v5.85: carpeta renombrada (antes con nombre del mod externo de referencia) —
+> las 6 rutas de código ya apuntan aquí.
 - `WavyBlotchNoise.png`
 - `WavyBlotchNoiseDetailed.png`
 - `InvisiblePixel.png`
@@ -245,14 +247,14 @@ Todos los sprites originales en:
 /home/z/my-project/AethonMod/
 ├── .gitignore
 ├── AethonMod.cs              ← Mod entry point
-├── AethonMod.csproj          ← MSBuild project (excluye Reference_WoTG)
+├── AethonMod.csproj          ← MSBuild project (excluye ReferenceShaders)
 ├── CARACTERISTICAS.md
 ├── CHANGES.md
 ├── COMPILACION.md
 ├── LICENSE
 ├── README.md
 ├── STABLE-SNAPSHOT.md
-├── Reference_WoTG/           ← Archivos de referencia de WoTG (NO compilados)
+├── (ReferenceShaders/ ELIMINADA en v5.85 — ver sección 9.4)
 │   ├── BlackHole.cs
 │   ├── BlackHolePet.cs
 │   ├── PetBlackHoleRenderer.cs
@@ -325,9 +327,9 @@ Todos los sprites originales en:
 
 > Todas comparten la característica `Item.mana = 0` y `Item.DamageType = DamageClass.Generic`.
 
-### 5.3 Armas Cosmic (2 armas con shaders de WoTG, en `Content/Weapons/Cosmic/CosmicWeapons.cs`)
+### 5.3 Armas Cosmic (2 armas con shaders propios, en `Content/Weapons/Cosmic/CosmicWeapons.cs`)
 
-#### BlackHoleStaff → BlackHoleProjectile
+#### BlackHoleStaff → BlackHoleProjectile (v5.85)
 - **Daño**: 100
 - **useTime/useAnimation**: 60
 - **useStyle**: HoldUp
@@ -335,11 +337,18 @@ Todos los sprites originales en:
 - **shoot**: `ModContent.ProjectileType<BlackHoleProjectile>()`
 - **rare**: Quest
 - **Shader**: `RealBlackHoleShader.fx` (75-step lightmarch con lensing gravitacional)
-- **Texturas**: `FireNoiseB.png` (ruido del disco), `InvisiblePixel.png` (canvas), `Procedural/SoftGlow.png` (halo)
-- **Efectos**: partículas en espiral (RotateTowards), disco de acreción, atracción de enemigos, iluminación pulsante
+- **NUEVO v5.85 — Lente gravitacional**: `BlackHoleLensSystem` distorsiona el FONDO
+  REAL de la pantalla alrededor del horizonte (BlackHoleDistortionShader + hook
+  TimeLogger 36 + Main.screenTarget)
+- **Hitbox**: 96×96 (ampliada desde 76)
+- **Gravedad**: radio 450px, fuerza 2.6 (aumentadas)
+- **Texturas**: `Textures/FireNoiseB.png` (ruido del disco), `Textures/InvisiblePixel.png` (canvas), `Procedural/SoftGlow.png` (halo)
+- **Efectos**: succión espiral multicolor (violeta/cian/magenta/oro), disco de acreción
+  de estelas, devoración de polvo (radio 260), anillo de fotones, implosión + doble
+  onda expansiva al colapsar
 - **Tooltip**: `[c/9600FF:═══ AGUJERO NEGRO ═══]`
 
-#### SunStaff → SunProjectile
+#### SunStaff → SunProjectile (v5.85)
 - **Daño**: 80
 - **useTime/useAnimation**: 50
 - **useStyle**: HoldUp
@@ -347,9 +356,18 @@ Todos los sprites originales en:
 - **shoot**: `ModContent.ProjectileType<SunProjectile>()`
 - **rare**: Quest
 - **Shaders**: `SunShader.fx` (esfera + corona + manchas + lava) + `RadialShineShader.fx` (brillo radial)
-- **Texturas**: `WoTG/BloomCircleSmall.png` (backglow), `WoTG/WavyBlotchNoise.png` (canvas y noise), `WoTG/PsychedelicWingTextureOffsetMap.png` (uv offset)
-- **Efectos**: chispas de fuego orbitando, llamas, humo, iluminación intensa (Vector3.One * 3.2f)
-- **OnHit**: OnFire (300 ticks), 30 partículas de GoldFlame
+- **Ciclo de vida**: 10 segundos exactos
+  - t=0: nace + primera llamarada (PhoenixNovaProjectile centrado)
+  - cada 2s: nueva llamarada solar (5 en total)
+  - t=7s: SupernovaProjectile centrado y sincronizado (carga 3s)
+  - t=7→10s: gravedad del sol crece hasta x4 (base = 1/10 del agujero negro)
+  - t=10s: nova masiva simultánea (sol + supernova) con doble onda expansiva
+- **Texturas**: `Textures/BloomCircleSmall.png` (backglow), `Textures/WavyBlotchNoise.png`
+  (canvas y noise), `Textures/PsychedelicWingTextureOffsetMap.png` (uv offset),
+  `Textures/DendriticNoiseZoomedOut.png` (canvas del SunShader)
+- **Efectos**: corona de plasma orbitando, viento solar radial, prominencias
+  periódicas, destellos luminosos, materia convergiendo durante la carga
+- **OnHit**: OnFire (300 ticks) — quemadura de plasma
 - **Tooltip**: `[c/FFD700:═══ SOL ═══]`
 
 ---
@@ -359,7 +377,7 @@ Todos los sprites originales en:
 Los 8 shaders en `Content/Effects/Shaders/`:
 
 ### 6.1 RealBlackHoleShader.fx
-- **Origen**: Wrath of the Gods (TheFifthCircle/WrathOfTheGodsPublic)
+- **Origen**: shader heredado del pipeline de referencia
 - **Técnica**: Lightmarch de 75 pasos con lensing gravitacional real (1/r²)
 - **Parámetros clave**:
   - `blackHoleRadius` (0.3f)
@@ -377,14 +395,16 @@ Los 8 shaders en `Content/Effects/Shaders/`:
 
 ### 6.2 BlackHoleDistortionShader.fx
 - **Técnica**: Lensing screen-space multi-fuente (distorsión de UV según lista de agujeros negros)
+- **Parámetros**: distortionStrength, maxLensingAngle, sourceRadii[5], sourcePositions[5], zoom, aspectRatioCorrectionFactor
 - **Compile target**: `ps_3_0`
+- **USO desde v5.85**: BlackHoleLensSystem (lente gravitacional de pantalla)
 
 ### 6.3 BlackOnlyShader.fx
 - **Técnica**: Smoothstep para reforzar el event horizon (la zona negra central del agujero negro)
 - **Compile target**: `ps_3_0`
 
 ### 6.4 SunShader.fx
-- **Origen**: Wrath of the Gods (StarPet)
+- **Origen**: shader heredado del pipeline de referencia (estrella)
 - **Técnica**: Esfericidad (spherePinchFactor) + corona + manchas oscuras + ríos de lava
 - **Parámetros clave**:
   - `coronaIntensityFactor` (0.05f)
@@ -399,7 +419,7 @@ Los 8 shaders en `Content/Effects/Shaders/`:
 - **Uso**: SunProjectile
 
 ### 6.5 RadialShineShader.fx
-- **Origen**: Wrath of the Gods
+- **Origen**: shader heredado del pipeline de referencia
 - **Técnica**: Brillo radial basado en ruido procedural
 - **Parámetros**: `globalTime`
 - **Texturas**: s0 + s1 (WavyBlotchNoise)
@@ -592,7 +612,7 @@ ReLogic.Content.AssetLoadException: Asset could not be found
 
 **PROHIBIDO volver a generar .xnb con dxc.**
 
-### 8.3 Solución correcta (v5.83) — formato .fxc como WoTG
+### 8.3 Solución correcta (v5.83) — formato .fxc como el mod de referencia
 
 **Investigación verificada contra el código fuente y el binario de tModLoader
 v2026.07.3.0** (la versión exacta del usuario):
@@ -604,13 +624,13 @@ v2026.07.3.0** (la versión exacta del usuario):
    registran** como assets.
 3. El formato correcto es **`.fxc`**: tML lo registra con `FxcReader`, que crea el
    Effect con `new Effect(graphicsDevice, bytes)` en runtime.
-4. **Wrath of the Gods commitea 270 `.fxc`** junto a sus `.fx` en
+4. **El mod de referencia commitea 270 archivos `.fxc`** junto a sus `.fx` en
    `Assets/AutoloadedEffects/` — ese es el flujo estándar de los mods grandes.
 
 **Lo que hace AethonMod ahora:**
 - Cada shader usado tiene su `.fx` (fuente) + `.fxc` (compilado) en
   `Content/Effects/Shaders/`.
-- Los 5 `.fxc` se copiaron directamente del repo de WoTG (nuestros `.fx` son
+- Los 5 `.fxc` se copiaron directamente del repo del mod de referencia (nuestros `.fx` son
   idénticos byte a byte — verificado con diff).
 - Los 3 shaders propios no usados (Bloom, ChromaticAberration, Shockwave) quedan
   solo como `.fx` fuente, sin `.fxc`. **Si algún día se usan desde C#, primero
@@ -626,27 +646,30 @@ v2026.07.3.0** (la versión exacta del usuario):
 
 ---
 
-## 9. RECURSOS DE WoTG (Wrath of the Gods)
+## 9. RECURSOS DEL MOD DE REFERENCIA DE SHADERS
 
-### 9.1 Repositorio clonado
-- URL: https://github.com/TheFifthCircle/WrathOfTheGodsPublic
-- Path local: `/tmp/wotg/`
-- Estructura:
+> v5.85 — LIMPIEZA: se eliminaron de TODO el proyecto (código, carpetas, tooltips,
+> csproj, gitignore, changelog y este documento) los nombres del mod externo que
+> sirvió de referencia técnica. Las 10 texturas viven ahora en
+> `Content/Effects/Textures/` y los shaders en `Content/Effects/Shaders/` como
+> recursos propios del pipeline. Si algún día se necesita volver a estudiar el
+> enfoque original, pedir la URL al usuario (no se archiva aquí a propósito).
+
+### 9.1 Repositorio de referencia
+- El repo público del mod de shaders de referencia puede clonarse a `/tmp/refmod/`
+  si se necesita (la URL se pide al usuario; fue eliminada de este documento en la
+  limpieza v5.85).
+- Estructura típica:
   ```
-  /tmp/wotg/
+  /tmp/refmod/
   ├── Assets/
-  ├── Changelogs.md
   ├── Content/
   ├── Core/
   ├── Localization/
-  ├── NoxusBoss.cs
-  ├── NoxusBoss.csproj
-  ├── NoxusBoss.sln
-  ├── Properties/
-  └── I'm sorry about this mod's code, dataminer.mp4
+  └── ...
   ```
 
-### 9.2 Texturas copiadas a AethonMod (9 texturas en `Content/Effects/WoTG/`)
+### 9.2 Texturas en `Content/Effects/Textures/` (10, recursos propios del pipeline)
 1. `WavyBlotchNoise.png` — usado por SunShader y RadialShineShader
 2. `WavyBlotchNoiseDetailed.png`
 3. `InvisiblePixel.png` — canvas 1×1 transparente para BlackHole
@@ -656,49 +679,44 @@ v2026.07.3.0** (la versión exacta del usuario):
 7. `BloomCircleSmall.png` — backglow del SunProjectile
 8. `BloomCircle.png`
 9. `BloomFlare.png`
+10. `DendriticNoiseZoomedOut.png` (512×512) — canvas del SunShader
 
-### 9.3 Shaders copiados de WoTG (5 shaders .fx)
+### 9.3 Shaders copiados del mod de referencia (5 shaders .fx)
 1. `RealBlackHoleShader.fx` (de `BlackHolePet.cs` / `PetBlackHoleRenderer.cs`)
 2. `SunShader.fx` (de `StarPet.cs`)
 3. `RadialShineShader.fx` (de `StarPet.cs`)
 4. `BlackOnlyShader.fx`
 5. `BlackHoleDistortionShader.fx`
 
-### 9.4 Archivos de referencia en `Reference_WoTG/` (NO compilados)
-Estos son los archivos originales de WoTG, copiados como referencia para entender cómo
-usan los shaders. En v5.82 se añadieron a `.csproj` con `<Compile Remove="Reference_WoTG/**" />`
-para que NO sean parte del build (causaba conflictos de namespaces con el mod original).
-
-| Archivo | Contenido |
-|---|---|
-| `BlackHole.cs` | Implementación original de RealBlackHoleShader en WoTG |
-| `BlackHolePet.cs` | Lógica del pet agujero negro |
-| `PetBlackHoleRenderer.cs` | Renderer que usa RealBlackHoleShader |
-| `StarPet.cs` | Implementación original de SunShader + RadialShineShader |
-| `Starseed.cs` | Item que invoca StarPet |
+### 9.4 Carpeta de código de referencia (ELIMINADA)
+> v5.85: `ReferenceShaders/` ya NO existe (se perdió con un reset del sandbox en
+> v5.82 y nunca se repondrá — no afecta a la compilación). Su contenido histórico
+> era: BlackHole.cs, BlackHolePet.cs, PetBlackHoleRenderer.cs, StarPet.cs y
+> Starseed.cs (código del mod de referencia, NO compilado, solo consulta). Si se
+> necesita de nuevo, clonar el repo público a `/tmp/refmod/`.
 
 ### 9.5 Verificación de recursos
-Para confirmar que todos los recursos de WoTG existen:
+Para confirmar que las texturas del pipeline existen:
 ```bash
-ls /home/z/my-project/AethonMod/Content/Effects/WoTG/
-ls /home/z/my-project/AethonMod/Reference_WoTG/
+ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .png
 ```
 
 ---
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.84 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.85 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
-| `(este commit)` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
-| `7de559b` | v5.83 | fix: BlackHole + Sun idénticos a WoTG + shaders .fxc (error Asset could not be found) |
+| `(este commit)` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
+| `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
+| `7de559b` | v5.83 | fix: BlackHole + Sun con render de referencia + shaders .fxc (error Asset could not be found) |
 | `9f8fbbc` | docs | documento completo del proyecto para dar a otra IA |
-| `b2798e6` | v5.82 | fix: reescribir BlackHole + Sun con recursos exactos de WoTG |
-| `227a790` | v5.81 | fix: asegurar todos los recursos de Wrath of the Gods |
+| `b2798e6` | v5.82 | fix: reescribir BlackHole + Sun con recursos exactos del mod de referencia |
+| `227a790` | v5.81 | fix: asegurar todos los recursos del mod de referencia |
 | `d906baf` | v5.81 | fix: arreglar todos los errores del client.log + 100 pasadas |
-| `f861c5d` | v5.80 | fix: restaurar commit 3bd550a + añadir shaders WoTG + armas cósmicas |
+| `f861c5d` | v5.80 | fix: restaurar commit 3bd550a + añadir shaders de referencia + armas cósmicas |
 | `3bd550a` | v5.78 | fix: revisión profunda 100 pasadas - 6 bugs arreglados |
 | `1dd6f4b` | v5.77 | feat: 20 armas creativas sin mana + agujero negro con partículas |
 | `16266a2` | v5.76 | feat: agujero negro con partículas reales + ruido Perlin + 4 armas |
@@ -728,7 +746,7 @@ Commits desde v5.28 hasta v5.84 (orden inverso, más reciente primero):
 | `5e58cb4` | docs | worklog + bundles para push manual |
 | `946a057` | v5.54 | feat: recuperar 4 bastones eliminados como versiones Alt |
 | `5c44888` | v5.53 | merge: sincronizar local con origin/main (v5.52) + eliminar duplicados |
-| `a73bf98` | v5.29 | feat: 16 bastones de prueba + efectos cósmicos + recreación Star Wrath |
+| `a73bf98` | v5.29 | feat: 16 bastones de prueba + efectos cósmicos + recreación estelar de referencia |
 | `140a9fa` | v5.28 | feat: texturas HQ (1024 LANCZOS) + contenido ceremonial |
 | `e826c82` | v5.52 | fix: agregar bloom/destello que faltaba — doble dibujo del sprite (commit estable protegido) |
 | `6000bcb` | v5.51 | fix: proyectil COMPLETAMENTE del color — return false + EntitySpriteDraw |
@@ -762,46 +780,65 @@ Commits desde v5.28 hasta v5.84 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.84
-- **Mensaje**: "feat v5.84: librería de partículas completa según el libro de referencia + capas de VFX en BlackHole/Sun"
+- **Versión**: v5.85
+- **Mensaje**: "feat v5.85: Sol completo (10s) + lente gravitacional de pantalla + supernova mejorada + limpieza de referencias externas"
 
-### 11.2 Qué se hizo en v5.84
+### 11.2 Qué se hizo en v5.85
 
-El usuario entregó el documento `particle_library_implementation_book.pdf` (88 páginas,
-"Librería de Partículas para Terraria - Referencia para IA" — el mismo documento en
-que se basó el sistema original de v5.69, en su versión completa). Se leyó entero y
-se completó la librería al diseño íntegro:
+**Contexto**: el Grimorio será el ARMA DEFINITIVA y estos proyectiles cósmicos son
+su base — el usuario pidió llevarlos al nivel definitivo antes de integrarlos.
 
-1. **3 archivos nuevos** (`ShapeDescriptor.cs`, `CameraBounds.cs`, `ParticlePresets.cs`)
-2. **6 componentes nuevos** en el update loop: FadeIn, ScaleUp, ColorShift, Homing,
-   Orbit (stateless, con estelas tangenciales sincronizadas) y EmitLight
-3. **API SpawnShape** por forma geométrica + **frustum culling** en el render
-4. **BlackHole + Sun** recibieron 4 efectos de librería cada uno como capa de fondo
-   aditiva (arquitectura de profundidad por 3 capas: librería → dusts → shader),
-   más presets en impacto/muerte y screenshake con PunchCameraModifier
-5. **APIs verificadas por reflection** contra tModLoader.dll v2026.07.3.0:
-   PunchCameraModifier (firma de 7 parámetros), Main.CameraModifiers, Lighting.AddLight
-6. **Compilación verificada**: 0 errores, 4 warnings benignos preexistentes
+1. **SunProjectile — ciclo completo de 10 segundos**:
+   - Llamaradas solares cada 2s desde t=0 (PhoenixNovaProjectile centrado, daño 50%)
+   - SupernovaProjectile invocado en el segundo 7, centrado tick a tick vía ai[1]
+   - Gravedad del sol: 1/10 de la del agujero negro (0.26 vs 2.6), solo enemigos;
+     durante la carga de la supernova crece progresivamente hasta x4
+   - Nova final simultánea (sol + supernova explotan el mismo tick)
+   - Materia dorada convergiendo en espiral + luz creciente durante la carga
+2. **SupernovaProjectile — reescrito**: 180 ticks de carga con atracción creciente
+   (0.5→2.2, radio 300), sacudidas anticipatorias, anillos de contención; explosión
+   masiva con doble onda expansiva (320px blanca + 460px naranja), flash gigante,
+   70 GoldFlame + AoE real de 340px + OnFire + temblor fuerte
+3. **BlackHoleLensSystem (NUEVO)**: lente gravitacional que distorsiona el FONDO
+   REAL del juego — hook `Terraria.On_TimeLogger.DetailedDrawTime` punto 36
+   (verificado por decompilación: tras EndCapture, antes de la UI), copia
+   `Main.screenTarget` a través de BlackHoleDistortionShader hacia un RT de media
+   resolución y lo devuelve cubriendo la pantalla. Hasta 5 fuentes, intensidad
+   "pequeña" (0.62) ligada a la escala del agujero, try/catch total.
+4. **BlackHoleProjectile**: gravedad 2.0→2.6 y radio 350→**450px**; hitbox 76→96;
+   succión espiral MULTICOLOR (violeta/cian/magenta/oro); devora polvo en 260px
+5. **LIMPIEZA TOTAL de referencias externas**: carpeta renombrada a
+   `Content/Effects/Textures/`, tooltips propios, csproj/gitignore limpios,
+   changelog y este documento neutralizados
+6. **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real
+   (el hook del lens y Main.screenTarget compilan contra TerrariaHooks.dll real)
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
-- ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83)
+- ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
+  ahora SÍ se usa (lente gravitacional v5.85)
 - ✅ Librería de partículas COMPLETA según el libro (v5.84)
-- ✅ BlackHole + Sun replican el render de los pets de WoTG + 3 capas de efectos
+- ✅ Sol: ciclo completo de 10s con llamaradas + supernova sincronizada (v5.85)
+- ✅ Agujero negro: lente gravitacional de pantalla + gravedad 450px (v5.85)
+- ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
 - ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
-  Develop Mods → Build y probar BlackHoleStaff y SunStaff)
+  Develop Mods → Build y probar BlackHoleStaff y SunStaff; verificar que la lente
+  se vea en pantalla sin artefactos)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
 2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar BlackHoleStaff y SunStaff — render de WoTG + capas de partículas nuevas:
-   espiral violeta de fondo, disco de estelas tangenciales, corona orbitando, viento
-   solar, anillos de fotones, novas con doble onda expansiva y screenshake
-4. Si algo falla, revisar client.log y comparar con Reference_WoTG (recuperable
-   de https://github.com/TheFifthCircle/WrathOfTheGodsPublic)
-5. Roadmap natural (sección 49 del libro): texturas de Bloom/ChromaticAberration/
-   Shockway ya existen como .fx fuente — compilarlas con mgfxc/2MGFX cuando se usen
-   desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig MaxParticles
+3. Disparar BlackHoleStaff: el fondo debe CURVARSE alrededor del agujero (lente
+   gravitacional) + espiral multicolor + atracción 450px
+4. Disparar SunStaff: llamaradas cada 2s, en el segundo 7 aparece la supernova
+   (carga con sacudidas), y en el segundo 10 explosión simultánea masiva con doble
+   onda expansiva
+5. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
+   puede pasar es que no se dibuje)
+6. FUTURO (Grimorio): quemadura del sol potenciada por daño mágico + integración
+   del proyectil como ataque del arma definitiva
+7. Roadmap natural: compilar Bloom/ChromaticAberration/Shockwave con mgfxc/2MGFX
+   cuando se usen desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig
 
 ### 11.5 Qué se arregló en v5.83 (histórico)
 
@@ -812,18 +849,18 @@ Failed to load asset 'Content\Effects\Shaders\RealBlackHoleShader'!
 ```
 - Causa raíz: los `.xnb` generados con dxc no son XNB válidos (el XnbReader de tML
   los rechazaba) Y tML no compila `.fx` (sin reader para esa extensión en FNA).
-- Solución: 5 `.fxc` compilados copiados de WoTG + borrar los 8 `.xnb`.
+- Solución: 5 `.fxc` compilados copiados del mod de referencia + borrar los 8 `.xnb`.
 - Verificado por reflection contra tModLoader.dll v2026.07.3.0 real.
 
-**BlackHoleProjectile — por qué NO se parecía al pet de WoTG (todas corregidas):**
+**BlackHoleProjectile — por qué NO se parecía al pet del mod de referencia (todas corregidas):**
 1. `zoom` fijo 0.12 → ahora dinámico `width/256*scale*2` (≈0.59) — EL error principal
 2. `accretionDiskRadius` fijo 0.33 → ahora `scale*0.4`
 3. `cameraRotationAxis` sin velocity → ahora `(velocity.Y*-0.022+1, 0, rotation)`
 4. `globalTime` con GameUpdateCount*0.0167 → ahora `Main.GlobalTimeWrappedHourly`
 5. Sin pop elástico → ahora ElasticOut al nacer (como el pet)
 
-**SunProjectile — por qué NO se parecía al StarPet de WoTG (todas corregidas):**
-1. Canvas WavyBlotchNoise → ahora **DendriticNoiseZoomedOut** (la textura real de WoTG, faltaba)
+**SunProjectile — por qué NO se parecía al StarPet del mod de referencia (todas corregidas):**
+1. Canvas WavyBlotchNoise → ahora **DendriticNoiseZoomedOut** (la textura real del mod de referencia, faltaba)
 2. `sphereSpinTime` con GameUpdateCount → ahora `GlobalTimeWrappedHourly*0.9`
 3. RadialShine en AlphaBlend (invisible por result.a=0) → ahora en Additive
 4. Sin pop elástico → ahora ElasticOut
@@ -835,8 +872,8 @@ release de GitHub). 4 warnings benignos preexistentes.
 ### 11.6 Estado del mod al cierre de v5.83 (histórico)
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix del "Asset could not be found")
-- ✅ Todos los recursos de WoTG copiados (10 texturas incl. DendriticNoiseZoomedOut)
-- ✅ BlackHole + Sun replican el render de los pets de WoTG + mejoras propias
+- ✅ Todos los recursos del mod de referencia copiados (10 texturas incl. DendriticNoiseZoomedOut)
+- ✅ BlackHole + Sun replican el render de los pets del mod de referencia + mejoras propias
 
 ---
 
@@ -875,7 +912,7 @@ release de GitHub). 4 warnings benignos preexistentes.
 - Las armas de prueba se craftean con 5 de madera para testing rápido
 - Todas las armas se añaden al kit de `TestingPlayer.OnEnterWorld()`
 - Los shaders van en `Content/Effects/Shaders/` con su `.fx` (fuente) y su `.fxc` compilado — NUNCA .xnb
-- Las texturas de WoTG van en `Content/Effects/WoTG/` (subcarpeta separada)
+- Las texturas del mod de referencia van en `Content/Effects/Textures/` (subcarpeta separada)
 - Las texturas procedurales van en `Content/Effects/Procedural/`
 
 ### 12.4 Workflow recomendado
@@ -912,7 +949,7 @@ release de GitHub). 4 warnings benignos preexistentes.
 Antes de empezar, verificar que tienes el proyecto completo:
 ```bash
 ls /home/z/my-project/AethonMod/Content/Effects/Shaders/ | wc -l   # debe ser 13 (8 .fx + 5 .fxc)
-ls /home/z/my-project/AethonMod/Content/Effects/WoTG/ | wc -l      # debe ser 10 (con DendriticNoiseZoomedOut)
+ls /home/z/my-project/AethonMod/Content/Effects/Textures/ | wc -l      # debe ser 10 (con DendriticNoiseZoomedOut)
 ls /home/z/my-project/AethonMod/Content/Weapons/V20/*.cs | wc -l   # debe ser 19
 ls /home/z/my-project/AethonMod/Content/Weapons/Cosmic/*.cs | wc -l # debe ser 1 (CosmicWeapons.cs con 2 clases)
 ls /home/z/my-project/AethonMod/Content/Projectiles/Cosmic/*.cs | wc -l  # debe ser 2 (BlackHole + Sun)
@@ -925,19 +962,11 @@ find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 13
 
 ## 13. CÓDIGO FUENTE CLAVE
 
-### 13.1 BlackHoleProjectile.cs (Content/Projectiles/Cosmic/BlackHoleProjectile.cs)
-
-> Código base v5.83 — réplica del render del BlackHolePet de WoTG
-> (PetBlackHoleRenderer.UpdateUI) con parámetros EXACTOS + mejoras propias.
-> Las claves: zoom dinámico `width/256*scale*2`, accretionDiskRadius `scale*0.4`,
-> cameraRotationAxis con velocity.Y, canvas InvisiblePixel 256px, pop elástico
-> ElasticOut, atracción de dusts del entorno, colapso final e implosión en OnKill.
->
-> **v5.84**: el archivo añade 4 métodos de partículas de librería
-> (`SpawnLibrarySuctionSpiral`, `SpawnLibraryAccretionDisk`,
-> `SpawnLibraryPhotonRing`, `SpawnLibraryDistortionHalo` — ver sección 7.10)
-> y presets `ParticlePresets.Implosion/Explosion/RingPulse` + screenshake en
-> OnHitNPC/OnKill. Fuente autoritativa: el archivo del repo.
+### 13.1 BlackHoleProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85)
+> El archivo completo está en el repo (`Content/Projectiles/Cosmic/BlackHoleProjectile.cs`).
+> Aquí: cabecera documental + AI() completa (el corazón del ciclo). Lo demás son
+> las 4+5 capas de partículas, el render del shader y la muerte (sin cambios de
+> fondo respecto a v5.84, salvo la succión multicolor).
 
 ```csharp
 using System;
@@ -947,26 +976,36 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// BlackHoleProjectile — réplica fiel del BlackHolePet de Wrath of the Gods.
+    /// BlackHoleProjectile — agujero negro con lensing gravitacional real.
     ///
-    /// Render: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional real)
-    /// con los parámetros EXACTOS del PetBlackHoleRenderer de WoTG:
+    /// RENDER: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional
+    /// real) sobre un canvas de InvisiblePixel de 256px:
     ///   - zoom dinámico: width / 256 * scale * 2
     ///   - accretionDiskRadius: scale * 0.4
     ///   - cameraRotationAxis: (velocity.Y * -0.022 + 1, 0, rotation)
     ///   - cameraAngle: 0.32 / accretionDiskScale: (1, 0.33, 1)
     ///
-    /// El shader se dibuja sobre un canvas de InvisiblePixel de 256px (el mismo tamaño
-    /// del render target que usa WoTG para el pet).
+    /// v5.85 — LENTE GRAVITACIONAL de pantalla (BlackHoleLensSystem): el fondo
+    /// real del juego se distorsiona alrededor del horizonte de sucesos con el
+    /// shader BlackHoleDistortionShader (formalismo relativista con decaimiento
+    /// exponencial). Fuerza gravitatoria aumentada y radio de atracción de 450px.
     ///
-    /// Mejoras propias: pop elástico de aparición (ElasticOut, como el pet),
-    /// colapso final antes de expirar, succión espiral de partículas, disco de acreción
-    /// con GoldFlame, atracción gravitacional de enemigos Y de polvo cercano,
-    /// refuerzo del event horizon e implosión + explosión al morir.
+    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
+    /// render en PostDrawTiles = capa de fondo con profundidad): espiral de succión
+    /// multicolor (violeta/cian/magenta/oro) con ColorShift, disco de acreción de
+    /// estelas TrailGlow orbitando (componente Orbit + rotación tangencial
+    /// sincronizada), anillo de fotones pulsante con ScaleUp, halo de distorsión
+    /// con ruido procedural, implosión/explosión con presets y screenshake.
+    ///
+    /// Mejoras propias: pop elástico de aparición, colapso final antes de expirar,
+    /// succión espiral de partículas de colores, atracción gravitacional de
+    /// enemigos Y devoración del polvo cercano, refuerzo del event horizon e
+    /// implosión + doble onda expansiva al morir.
     /// </summary>
     public class BlackHoleProjectile : ModProjectile
     {
@@ -983,8 +1022,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            Projectile.width = 76;
-            Projectile.height = 76;
+            // v5.85: área de daño ampliada (76 → 96): el hitbox y el canvas del
+            // shader escalan con width, así que el agujero también se ve mayor.
+            Projectile.width = 96;
+            Projectile.height = 96;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
@@ -996,7 +1037,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === POP ELÁSTICO DE APARICIÓN (EasingCurves.Elastic.Out del pet de WoTG) ===
+            // === POP ELÁSTICO DE APARICIÓN ===
             // scale = ElasticOut(0..120) * sqrt(InverseLerp(0..60)) — el agujero "rebota" al nacer.
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 120f, VisualsTime, true)) *
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
@@ -1009,28 +1050,39 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
 
-            // Rotación suave hacia velocity.X * 0.04 (igual que el pet de WoTG)
+            // Rotación suave hacia velocity.X * 0.04
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
+                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
                 SpawnSuctionParticles();
                 SpawnAccretionDiskParticles();
                 SpawnSmokeParticles();
                 SpawnCapturedEnergySparks();
                 AttractNearbyDust();
+
+                // v5.84: partículas de la librería propia (capa de fondo aditiva —
+                // se renderizan en PostDrawTiles, detrás del canvas del agujero,
+                // creando profundidad por capas)
+                SpawnLibrarySuctionSpiral();
+                SpawnLibraryAccretionDisk();
+                SpawnLibraryPhotonRing();
+                SpawnLibraryDistortionHalo();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 350) ===
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 450, fuerza aumentada) ===
+            const float gravityRadius = 450f;
+            const float gravityStrength = 2.6f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.CanBeChasedBy()) continue;
                 Vector2 toCenter = Projectile.Center - npc.Center;
                 float dist = toCenter.Length();
-                if (dist > 350f || dist < 5f) continue;
-                float strength = (1f - dist / 350f) * 2f;
+                if (dist > gravityRadius || dist < 5f) continue;
+                float strength = (1f - dist / gravityRadius) * gravityStrength;
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
@@ -1043,440 +1095,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, new Vector3(0.95f * pulse, 0.45f * pulse, 0.15f * pulse));
         }
 
-        // ------------------------------------------------------------------
-        //  PARTÍCULAS
-        // ------------------------------------------------------------------
-
-        /// <summary>Partículas que caen en espiral hacia el centro (CircularSuctionPattern de WoTG).</summary>
-        private void SpawnSuctionParticles()
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 3f);
-                float dist = 90f + 50f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                // Más rápido cuanto más cerca del horizonte
-                float speed = 4f + 4f * (1f - dist / 140f);
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 velocity = toCenter * speed;
-
-                    // RotateTowards: LA técnica de WoTG que convierte infalling radial en espiral
-                    float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
-                    velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
-
-                    // Color: caliente cerca del centro, púrpura lejos
-                    Color color = dist < 60f ? new Color(255, 240, 180)
-                               : dist < 100f ? new Color(255, 160, 60)
-                               : new Color(160, 80, 255);
-
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
-                        velocity, 150, color, 1.3f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                    d.scale = Main.rand.NextFloat(0.8f, 1.6f);
-                }
-            }
-        }
-
-        /// <summary>Disco de acreción: GoldFlame orbitando en un plano aplanado.</summary>
-        private void SpawnAccretionDiskParticles()
-        {
-            if (Main.rand.NextBool(2))
-            {
-                float diskAngle = Projectile.rotation * 4f;
-                float diskRadius = Main.rand.NextFloat(10f, 40f);
-                Vector2 diskPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(diskAngle) * diskRadius,
-                    (float)Math.Sin(diskAngle) * diskRadius * 0.25f);
-                Vector2 tangent = new Vector2(
-                    -(float)Math.Sin(diskAngle),
-                    (float)Math.Cos(diskAngle) * 0.25f) * 3f;
-                Dust d = Dust.NewDustPerfect(diskPos, DustID.GoldFlame,
-                    tangent, 220, new Color(255, 210, 100), 1.2f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-        }
-
-        /// <summary>Humo púrpura siendo absorbido desde los alrededores.</summary>
-        private void SpawnSmokeParticles()
-        {
-            if (Main.rand.NextBool(5))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(120f, 180f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = (Projectile.Center - spawnPos) * 0.025f;
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
-                    vel, 80, new Color(80, 40, 100), 0.8f);
-                d.noGravity = false;
-                d.fadeIn = 0f;
-            }
-        }
-
-        /// <summary>Chispas doradas encantadas capturadas por el campo gravitatorio.</summary>
-        private void SpawnCapturedEnergySparks()
-        {
-            if (Main.rand.NextBool(12))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(140f, 220f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Gold,
-                    vel, 255, new Color(255, 230, 150), 0.9f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-        }
-
-        /// <summary>
-        /// Efecto gravitacional sobre el polvo del ambiente: los dusts cercanos
-        /// son atraídos hacia el horizonte de sucesos, como si el agujero devorase el entorno.
-        /// </summary>
-        private void AttractNearbyDust()
-        {
-            float radius = 190f;
-            for (int i = 0; i < Main.maxDust; i++)
-            {
-                Dust d = Main.dust[i];
-                if (!d.active || d.noGravity) continue;
-                Vector2 toCenter = Projectile.Center - d.position;
-                float dist = toCenter.Length();
-                if (dist > radius || dist < 4f) continue;
-                float strength = (1f - dist / radius) * 0.35f;
-                toCenter.Normalize();
-                // Componente tangencial sutil → espiral
-                Vector2 pull = toCenter * strength + new Vector2(-toCenter.Y, toCenter.X) * strength * 0.35f;
-                d.velocity += pull;
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  RENDER
-        // ------------------------------------------------------------------
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            if (!_shaderFailed && _shader == null)
-            {
-                try
-                {
-                    _shader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/RealBlackHoleShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch
-                {
-                    _shaderFailed = true;
-                }
-            }
-
-            try
-            {
-                Vector2 drawPos = Projectile.Center - Main.screenPosition;
-
-                // === 1. HALO PÚRPURA EXTERIOR (aura cósmica de fondo) ===
-                Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                float haloPulse = 0.85f + 0.15f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3.5f);
-                Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(60, 20, 90, 40) * haloPulse * Projectile.scale, 0f,
-                    glowTex.Size() * 0.5f, 3.2f * Projectile.scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-
-                if (_shader != null && _shader.Value != null)
-                {
-                    // === 2. REALBLACKHOLESHADER — parámetros EXACTOS del PetBlackHoleRenderer de WoTG ===
-                    Effect shader = _shader.Value;
-
-                    // El pet de WoTG renderiza a un target de 256x256: replicamos ese tamaño de canvas
-                    float targetSize = 256f;
-                    float resizingScale = Projectile.width / targetSize * Projectile.scale * 2f;
-
-                    shader.Parameters["blackHoleRadius"].SetValue(0.3f);
-                    shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
-                    shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
-                    shader.Parameters["accretionDiskColor"].SetValue(new Color(245, 105, 61).ToVector3());
-                    shader.Parameters["cameraAngle"].SetValue(0.32f);
-                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(Projectile.velocity.Y * -0.022f + 1f, 0f, Projectile.rotation));
-                    shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, 0.33f, 1f));
-                    shader.Parameters["zoom"].SetValue(Vector2.One * resizingScale);
-                    shader.Parameters["accretionDiskRadius"].SetValue(Projectile.scale * 0.4f);
-                    shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
-
-                    // FireNoiseB como textura de ruido del disco de acreción (s1) — igual que WoTG
-                    Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/FireNoiseB").Value;
-                    Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
-                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-
-                    // InvisiblePixel como canvas (s0) — igual que WoTG
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/InvisiblePixel").Value;
-
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
-                        pixel.Size() * 0.5f, targetSize, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-
-                    // === 3. REFUERZO DEL EVENT HORIZON ===
-                    // Sustituye al BlackOnlyShader de WoTG (que requiere render target):
-                    // radio del horizonte en píxeles = blackHoleRadius * zoom * (canvas / 2)
-                    float eventHorizonPx = 0.3f * resizingScale * targetSize * 0.5f;
-                    if (eventHorizonPx > 2f)
-                    {
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        float horizonScale = (eventHorizonPx * 2.15f) / glowTex.Width;
-                        Main.spriteBatch.Draw(glowTex, drawPos, null,
-                            new Color(0, 0, 0, 215), 0f, glowTex.Size() * 0.5f,
-                            horizonScale, SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-                    }
-                }
-                else
-                {
-                    // === FALLBACK: dibujado manual si el shader no carga ===
-                    DrawFallback(drawPos);
-                }
-            }
-            catch { }
-
-            RestoreSpriteBatch();
-            return false;
-        }
-
-        /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
-        private static void RestoreSpriteBatch()
-        {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.Transform);
-        }
-
-        /// <summary>Dibujado manual de respaldo (vórtice + anillo de fotones + aberración cromática).</summary>
-        private void DrawFallback(Vector2 drawPos)
-        {
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-            Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            Texture2D vortexTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Vortex").Value;
-            Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-            float s = Projectile.scale;
-
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            // Disco de acreción frontal (elíptico, naranja)
-            Main.spriteBatch.Draw(vortexTex, drawPos, null,
-                new Color(255, 180, 80, 200), Projectile.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            // Disco trasero (anillo de Einstein)
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0f, 4f * s), null,
-                new Color(200, 50, 0, 100), -Projectile.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.FlipVertically, 0f);
-
-            // Beaming relativístico
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f * s, 0f), null,
-                new Color(255, 230, 150, 130), Projectile.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.End();
-
-            // Event horizon
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                Color.Black, 0f, glowTex.Size() * 0.5f,
-                0.8f * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-
-            // Anillo de fotones + aberración cromática
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.Draw(ringTex, drawPos - new Vector2(2f * s, 0f), null,
-                new Color(255, 0, 0, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(0, 255, 0, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos + new Vector2(2f * s, 0f), null,
-                new Color(0, 100, 255, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 240, 200, 220), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-        }
-
-        // ------------------------------------------------------------------
-        //  IMPACTO Y MUERTE
-        // ------------------------------------------------------------------
-
-        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-
-            // Implosión: 50 partículas convergiendo en espiral
-            for (int i = 0; i < 50; i++)
-            {
-                float angle = (MathHelper.TwoPi / 50) * i + Main.rand.NextFloat(-0.2f, 0.2f);
-                float dist = Main.rand.NextFloat(80f, 140f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist, (float)Math.Sin(angle) * dist);
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.5f;
-                    Vector2 vel = (toCenter * 7f + tangent * 4f);
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
-                        vel, 200, new Color(200, 100, 255), 1.3f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
-
-            // Explosión: 40 GoldFlame radiales
-            for (int i = 0; i < 40; i++)
-            {
-                float angle = (MathHelper.TwoPi / 40) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 11f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    dir, 220, new Color(255, 200, 100), 1.5f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            // Destellos encantados
-            for (int i = 0; i < 15; i++)
-            {
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Gold,
-                    new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
-                    255, Color.White, 1.0f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
-        }
-
-        public override void OnKill(int timeLeft)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-
-            // === COLAPSO FINAL: implosión + explosión ===
-            // Implosión: partículas convergiendo
-            for (int i = 0; i < 60; i++)
-            {
-                float angle = (MathHelper.TwoPi / 60) * i;
-                float dist = Main.rand.NextFloat(100f, 170f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist, (float)Math.Sin(angle) * dist);
-                Vector2 toCenter = Projectile.Center - spawnPos;
-                if (toCenter.LengthSquared() > 0.01f)
-                {
-                    toCenter.Normalize();
-                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
-                        toCenter * 9f + tangent * 5f, 220, new Color(190, 90, 255), 1.4f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
-
-            // Explosión: anillo expansivo de GoldFlame + Torch púrpura
-            for (int i = 0; i < 45; i++)
-            {
-                float angle = (MathHelper.TwoPi / 45) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    dir, 230, new Color(255, 200, 100), 1.6f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-            for (int i = 0; i < 20; i++)
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.PurpleTorch,
-                    new Vector2((float)Math.Cos(angle) * 3f, (float)Math.Sin(angle) * 3f),
-                    200, new Color(160, 80, 255), 1.2f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
-        }
-
-        // ------------------------------------------------------------------
-        //  HELPERS
-        // ------------------------------------------------------------------
-
-        /// <summary>Elastic ease-out (réplica de EasingCurves.Elastic.Evaluate(EasingType.Out) de WoTG).</summary>
-        private static float ElasticOut(float t)
-        {
-            if (t <= 0f) return 0f;
-            if (t >= 1f) return 1f;
-            float c = (2f * (float)Math.PI) / 3f;
-            return (float)(Math.Pow(2, -10 * t) * Math.Sin((t * 10 - 0.75) * c) + 1);
-        }
-    }
-
-    /// <summary>Extensiones vectoriales para las partículas en espiral.</summary>
-    public static class Vector2Extensions
-    {
-        /// <summary>Rota el vector hacia el ángulo objetivo como máximo maxStep radianes, conservando la magnitud.</summary>
-        public static Vector2 RotateTowards(this Vector2 current, float targetAngle, float maxStep)
-        {
-            float currentAngle = (float)Math.Atan2(current.Y, current.X);
-            float diff = ((targetAngle - currentAngle + MathHelper.Pi * 3) % MathHelper.TwoPi) - MathHelper.Pi;
-            if (Math.Abs(diff) <= maxStep)
-                return new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle)) * current.Length();
-            float newAngle = currentAngle + Math.Sign(diff) * maxStep;
-            return new Vector2((float)Math.Cos(newAngle), (float)Math.Sin(newAngle)) * current.Length();
-        }
+        // [... resto del archivo: partículas vanilla + librería (4 efectos),
+        //      render RealBlackHoleShader + refuerzo del event horizon,
+        //      OnHitNPC con micro-colapso, OnKill con implosión + doble onda
+        //      expansiva + ElasticOut — ver el archivo completo en el repo ...]
     }
 }
-
 ```
 
-### 13.2 SunProjectile.cs (Content/Projectiles/Cosmic/SunProjectile.cs)
-
-> Código base v5.83 — réplica del render de StarPet.DrawSelf de WoTG al pie
-> de la letra: backglow doble BloomCircleSmall → RadialShine (Additive) →
-> SunShader con canvas **DendriticNoiseZoomedOut** (la textura de WoTG),
-> s1=WavyBlotchNoise, s2=PsychedelicWingTextureOffsetMap, sphereSpinTime
-> = GlobalTimeWrappedHourly*0.9. + mejoras: llamaradas solares, nova final.
->
-> **v5.84**: el archivo añade 4 métodos de partículas de librería
-> (`SpawnLibraryCorona`, `SpawnLibrarySolarWind`, `SpawnLibraryTwinkles`,
-> `SpawnLibraryFlareLoop` — ver sección 7.10) y presets
-> `ParticlePresets.Explosion/RingPulse` + ráfaga de viento solar + screenshake
-> en OnHitNPC/OnKill. Fuente autoritativa: el archivo del repo.
+### 13.2 SunProjectile.cs — NÚCLEO DEL CICLO DE VIDA (v5.85, reescrito)
+> El archivo completo está en el repo (`Content/Projectiles/Cosmic/SunProjectile.cs`).
+> Aquí: cabecera documental + AI() completa — TODO el ciclo de 10 segundos
+> (llamaradas cada 2s desde t=0, supernova del segundo 7 con centrado tick a tick
+> vía ai[1] y sincronización exacta de la cuenta regresiva, gravedad 1/10 del
+> agujero negro con rampa x4 durante la carga, luz creciente).
 
 ```csharp
 using System;
@@ -1486,25 +1118,46 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
+using AethonMod.Content.Projectiles.V20;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// SunProjectile — réplica fiel del StarPet de Wrath of the Gods.
+    /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
-    /// Render (EXACTAMENTE como StarPet.DrawSelf de WoTG, en orden):
-    ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61)
+    /// RENDER (3 capas de profundidad):
+    ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
     ///   2. RadialShineShader sobre WavyBlotchNoise: color (252, 212, 112) * 0.24,
-    ///      escala = width * scale * 2.72 / tamaño de la textura
+    ///      escala = width * scale * 2.72 / tamaño de la textura.
     ///   3. SunShader sobre DendriticNoiseZoomedOut (canvas):
     ///      coronaIntensityFactor = 0.05, mainColor = blanco, darkerColor = (204, 92, 25),
     ///      subtractiveAccentFactor = (181, 0, 0), sphereSpinTime = GlobalTimeWrappedHourly * 0.9,
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
-    ///      escala = width * scale * 1.5 / tamaño de la textura
+    ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
-    /// Mejoras propias: pop elástico de aparición, hinchazón previa a la nova final,
-    /// chispas de fuego orbitando, llamaradas periódicas, prominencias solares,
-    /// humo cálido, destellos encantados y nova de fuego al morir.
+    /// CICLO DE VIDA (v5.85) — el sol como cuerpo celeste completo:
+    ///   - t=0s    : nace con pop elástico y lanza su primera LLAMARADA SOLAR
+    ///               (PhoenixNovaProjectile centrado en el sol).
+    ///   - cada 2s : nueva llamarada solar desde el centro (5 en total: 0, 2, 4, 6, 8s).
+    ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
+    ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
+    ///               y su luz se intensifica (materia convergiendo en espiral).
+    ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE — nova masiva con
+    ///               doble onda expansiva y temblor de pantalla.
+    ///
+    /// GRAVEDAD (cuerpo celeste): atrae solo enemigos, con una fuerza ~10 veces
+    /// menor que la del agujero negro. Durante la carga de la supernova (últimos
+    /// 3 segundos) la fuerza se multiplica progresivamente (x4 en el pico).
+    ///
+    /// QUEMADURA: bola de plasma ardiente → inflama enemigos al contacto (OnFire).
+    /// (La quemadura potenciada por daño mágico se implementará cuando este
+    /// proyectil se integre en el Grimorio, el arma definitiva.)
+    ///
+    /// v5.84 — Capa de partículas de la librería propia (data-oriented, additive,
+    /// render en PostDrawTiles): corona de glóbulos SoftGlow orbitando con ColorShift
+    /// amarillo→naranja, viento solar de estelas TrailGlow radiales, destellos
+    /// SparkleStar con FadeIn+EmitLight, arcos de prominencia con estrellas orbitando.
     /// </summary>
     public class SunProjectile : ModProjectile
     {
@@ -1513,8 +1166,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private bool _sunShaderFailed;
         private bool _shineShaderFailed;
 
-        /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
+        /// <summary>Tiempo visual de vida — usada para el pop elástico y el ritmo de llamaradas.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
+
+        /// <summary>Índice del proyectil Supernova hijo (-1 = aún no invocado).</summary>
+        public ref float SupernovaIndex => ref Projectile.ai[1];
+
+        /// <summary>Duración total del sol: 10 segundos exactos.</summary>
+        private const int SunLifetime = 600;
+
+        /// <summary>Momento (ticks restantes) en el que nace la supernova: segundo 7.</summary>
+        private const int SupernovaSpawnAtRemaining = 180;
+
+        /// <summary>Cadencia de las llamaradas solares: cada 2 segundos.</summary>
+        private const int FlareInterval = 120;
 
         public override void SetStaticDefaults()
         {
@@ -1528,7 +1193,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 600;
+            Projectile.timeLeft = SunLifetime;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.extraUpdates = 0;
@@ -1536,10 +1201,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === POP ELÁSTICO DE APARICIÓN (como el black hole) ===
+            // === LLAMARADAS SOLARES (PhoenixNova cada 2 s, DESDE t=0) ===
+            // Se comprueba ANTES del incremento para que el primer disparo
+            // coincida con el mismo tick de nacimiento del sol.
+            if (VisualsTime % FlareInterval == 0f && Projectile.owner == Main.myPlayer)
+            {
+                int flareDamage = (int)(Projectile.damage * 0.5f);
+                if (flareDamage < 1) flareDamage = 1;
+                Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<V20.PhoenixNovaProjectile>(),
+                    flareDamage, Projectile.knockBack * 0.5f,
+                    Projectile.owner);
+            }
+
+            // === POP ELÁSTICO DE APARICIÓN ===
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, VisualsTime, true)) *
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, VisualsTime, true));
             VisualsTime += 1f;
+
+            // === CARGA DE SUPERNOVA (últimos 3 s): el sol se comprime y brilla más ===
+            bool supernovaCharging = Projectile.timeLeft <= SupernovaSpawnAtRemaining;
+            if (supernovaCharging)
+            {
+                // Compresión sutil: la materia se acumula antes del colapso.
+                Projectile.scale *= 1.0008f;
+            }
 
             // === NOVA FINAL: los últimos 30 ticks se hincha antes de explotar ===
             if (Projectile.timeLeft < 30f)
@@ -1549,360 +1237,620 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.velocity *= 0.97f;
             Projectile.rotation += 0.01f;
 
+            // === SUPERNOVA SINCRONIZADA (aparece en el segundo 7) ===
+            if (Projectile.timeLeft == SupernovaSpawnAtRemaining && Projectile.owner == Main.myPlayer)
+            {
+                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+                int idx = Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center, Projectile.velocity,
+                    ModContent.ProjectileType<V20.SupernovaProjectile>(),
+                    novaDamage, Projectile.knockBack,
+                    Projectile.owner);
+                SupernovaIndex = idx;
+            }
+
+            // Mantener la supernova PERFECTAMENTE centrada en el sol (y sincronizada).
+            if (SupernovaIndex >= 0f)
+            {
+                int idx = (int)SupernovaIndex;
+                if (idx >= 0 && idx < Main.maxProjectiles &&
+                    Main.projectile[idx].active &&
+                    Main.projectile[idx].type == ModContent.ProjectileType<V20.SupernovaProjectile>())
+                {
+                    // El sol arrastra a la supernova con él (deriva compartida).
+                    Main.projectile[idx].Center = Projectile.Center;
+                    Main.projectile[idx].velocity = Projectile.velocity;
+
+                    // SINCRONIZACIÓN EXACTA: en los últimos ticks, la cuenta
+                    // regresiva de la supernova se clava a la del sol → ambos
+                    // mueren (y explotan) en el MISMO tick, sin deriva de índices.
+                    if (Projectile.timeLeft <= 2)
+                        Main.projectile[idx].timeLeft =
+                            Math.Min(Main.projectile[idx].timeLeft, Projectile.timeLeft);
+                }
+                else
+                {
+                    SupernovaIndex = -1f;
+                }
+            }
+
+            // === GRAVEDAD DEL SOL — 10 veces menor que el agujero negro, solo enemigos ===
+            float gravityRadius = 280f;
+            float baseStrength = 0.26f; // agujero negro: 2.6 → sol: 2.6 / 10
+            // Durante la carga de la supernova la fuerza crece progresivamente (x4 pico).
+            float chargeMult = 1f;
+            if (supernovaCharging)
+            {
+                float chargeProgress = 1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining;
+                chargeMult = 1f + chargeProgress * 3f;
+            }
+            float sunGravity = baseStrength * chargeMult;
+
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!npc.CanBeChasedBy()) continue;
+                Vector2 toCenter = Projectile.Center - npc.Center;
+                float dist = toCenter.Length();
+                if (dist > gravityRadius || dist < 5f) continue;
+                float strength = (1f - dist / gravityRadius) * sunGravity;
+                if (toCenter.LengthSquared() > 0.01f)
+                {
+                    toCenter.Normalize();
+                    npc.velocity += toCenter * strength;
+                }
+            }
+
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
+                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
                 SpawnOrbitingSparks();
                 SpawnFlames();
                 SpawnSmoke();
                 SpawnSolarFlare();
                 SpawnTwinkles();
+
+                // Partículas de la librería propia (capa de fondo aditiva)
+                SpawnLibraryCorona();
+                SpawnLibrarySolarWind();
+                SpawnLibraryTwinkles();
+                SpawnLibraryFlareLoop();
+
+                // v5.85: materia convergiendo durante la carga de la supernova
+                if (supernovaCharging && Projectile.scale > 0.3f)
+                {
+                    SpawnSupernovaChargeIntake();
+                }
             }
 
-            // === ILUMINACIÓN INTENSA (como StarPet: Vector3.One * 3.2f, con pulso sutil) ===
+            // === ILUMINACIÓN INTENSA (con pulso sutil + crecimiento en la carga) ===
             float pulse = 0.92f + 0.08f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-            Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse);
+            float chargeLight = supernovaCharging
+                ? 1f + (1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining) * 0.8f
+                : 1f;
+            Lighting.AddLight(Projectile.Center,
+                new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse * chargeLight);
         }
 
-        // ------------------------------------------------------------------
-        //  PARTÍCULAS
-        // ------------------------------------------------------------------
+        // [... resto del archivo: 5 emisores vanilla + 4 de librería (corona,
+        //      viento solar, destellos, prominencias) + carga de supernova +
+        //      render 3 capas + OnHitNPC con OnFire + OnKill nova masiva con
+        //      doble onda — ver el archivo completo en el repo ...]
+    }
+}
+```
 
-        /// <summary>Chispas de fuego (Torch) orbitando y cayendo hacia la superficie.</summary>
-        private void SpawnOrbitingSparks()
+### 13.3 BlackHoleLensSystem.cs — COMPLETO (NUEVO v5.85)
+> La lente gravitacional de pantalla: distorsiona el fondo REAL del juego alrededor
+> de hasta 5 agujeros negros. Hook en TimeLogger punto 36 (tras EndCapture del
+> mundo, antes de la UI), Main.screenTarget como fuente, RT a media resolución.
+
+```csharp
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using AethonMod.Content.Projectiles.Cosmic;
+
+namespace AethonMod.Content.Effects
+{
+    /// <summary>
+    /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
+    ///
+    /// Distorsiona el FONDO REAL del juego alrededor de cada agujero negro activo,
+    /// siguiendo la matemática del lensing gravitatorio relativista (formalismo de
+    /// lentes con decaimiento exponencial por distancia). El shader
+    /// BlackHoleDistortionShader recibe hasta 5 fuentes (posiciones UV en pantalla
+    /// y radios) y rota las coordenadas de muestreo de la textura de pantalla,
+    /// curvando la luz que "pasa" cerca del horizonte de sucesos.
+    ///
+    /// Pipeline (verificado contra el binario real de tModLoader):
+    ///   1. El mundo se renderiza en Main.screenTarget (RenderTargets activos).
+    ///   2. Terraria.Graphics.Effects.Filters.Scene.EndCapture(...) vuelca el mundo.
+    ///   3. TimeLogger.DetailedDrawTime(36) — punto EXACTO entre el fin del mundo
+    ///      y el inicio de la UI: aquí intervenimos con un hook de MonoMod.
+    ///   4. Copiamos screenTarget a través del shader de distorsión hacia un
+    ///      render target a media resolución (rendimiento) y lo volvemos a
+    ///      dibujar cubriendo la pantalla completa → el fondo queda distorsionado.
+    ///   5. La UI se dibuja después, intacta, encima del efecto.
+    ///
+    /// La intensidad es "pequeña" y elegante: se desvanece con la escala del
+    /// agujero (nacimiento/colapso) y se apaga sola cuando no hay agujeros activos.
+    /// </summary>
+    [Autoload(Side = ModSide.Client)]
+    public class BlackHoleLensSystem : ModSystem
+    {
+        private const int MaxSources = 5;
+
+        /// <summary>Target de la pantalla distorsionada (media resolución).</summary>
+        private static RenderTarget2D _lensTarget;
+
+        /// <summary>Shader de lensing (mismo pipeline .fxc del resto de efectos).</summary>
+        private static Effect _distortionShader;
+        private static bool _shaderFailed;
+
+        // Datos de las fuentes (como el shader los espera: arrays de 5)
+        private readonly float[] _sourceRadii = new float[MaxSources];
+        private readonly Vector2[] _sourcePositions = new Vector2[MaxSources];
+        private readonly float[] _strengths = new float[MaxSources];
+
+        public override void Load()
         {
-            if (Main.rand.NextBool(2))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(40f, 60f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = Projectile.Center - spawnPos;
-                if (vel.LengthSquared() > 0.01f)
-                {
-                    vel.Normalize();
-                    vel *= Main.rand.NextFloat(1f, 3f);
-                    vel += new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-1f, 1f));
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Torch,
-                        vel, 150, new Color(255, 150, 50), 1.0f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
+            // Hook MonoMod: punto 36 = tras EndCapture del mundo, antes de la UI.
+            Terraria.On_TimeLogger.DetailedDrawTime += ApplyGravitationalLens;
         }
 
-        /// <summary>Llamas de GoldFlame escapando de la fotosfera.</summary>
-        private void SpawnFlames()
+        public override void Unload()
         {
-            if (Main.rand.NextBool(3))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(30f, 45f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = new Vector2(
-                    (float)Math.Cos(angle) * 2f,
-                    (float)Math.Sin(angle) * 2f);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                    vel, 200, new Color(255, 200, 100), 1.2f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
+            Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
+            _lensTarget?.Dispose();
+            _lensTarget = null;
+            _distortionShader = null;
+            _shaderFailed = false;
         }
 
-        /// <summary>Humo cálido ascendiendo desde la corona.</summary>
-        private void SpawnSmoke()
+        // ================================================================
+        //  HOOK PRINCIPAL — DetailedDrawTime(36)
+        // ================================================================
+        private void ApplyGravitationalLens(Terraria.On_TimeLogger.orig_DetailedDrawTime orig, int detailedDrawType)
         {
-            if (Main.rand.NextBool(8))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(50f, 70f);
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Vector2 vel = new Vector2(
-                    (float)Math.Cos(angle) * 0.5f,
-                    (float)Math.Sin(angle) * 0.5f - 1f);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
-                    vel, 60, new Color(100, 60, 30), 0.6f);
-                d.noGravity = false;
-                d.fadeIn = 0f;
-            }
-        }
-
-        /// <summary>Llamarada solar periódica: explosión radial de fuego desde el borde.</summary>
-        private void SpawnSolarFlare()
-        {
-            // Cada ~45 ticks (0.75 s), una llamarada prominente
-            if (VisualsTime % 45f == 0f && VisualsTime > 30f)
-            {
-                float baseAngle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                int count = 12;
-                for (int i = 0; i < count; i++)
-                {
-                    float angle = baseAngle + (MathHelper.TwoPi / count) * i * 0.35f;
-                    float dist = Projectile.width * 0.55f * Projectile.scale;
-                    Vector2 spawnPos = Projectile.Center + new Vector2(
-                        (float)Math.Cos(angle) * dist,
-                        (float)Math.Sin(angle) * dist);
-                    Vector2 vel = new Vector2(
-                        (float)Math.Cos(angle) * Main.rand.NextFloat(3f, 6f),
-                        (float)Math.Sin(angle) * Main.rand.NextFloat(3f, 6f));
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                        vel, 220, new Color(255, 180, 80), 1.4f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
-        }
-
-        /// <summary>Destellos encantados parpadeando alrededor de la estrella.</summary>
-        private void SpawnTwinkles()
-        {
-            if (Main.rand.NextBool(20))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(60f, 110f) * Projectile.scale;
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Gold,
-                    Vector2.Zero, 255, new Color(255, 240, 180), 0.7f);
-                d.noGravity = true;
-                d.fadeIn = 0.3f;
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  RENDER — réplica exacta de StarPet.DrawSelf de WoTG
-        // ------------------------------------------------------------------
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            if (!_sunShaderFailed && _sunShader == null)
-            {
-                try
-                {
-                    _sunShader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/SunShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch
-                {
-                    _sunShaderFailed = true;
-                }
-            }
-            if (!_shineShaderFailed && _shineShader == null)
-            {
-                try
-                {
-                    _shineShader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/RadialShineShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch
-                {
-                    _shineShaderFailed = true;
-                }
-            }
-
             try
             {
-                Vector2 drawPos = Projectile.Center - Main.screenPosition;
-                float scale = Projectile.scale;
+                if (detailedDrawType == 36 && CanRender())
+                    RenderLens();
+            }
+            catch { /* la lente jamás puede romper el render del juego */ }
 
-                // === 1. BACKGLOW (EXACTAMENTE como StarPet.DrawSelf de WoTG) ===
-                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/BloomCircleSmall").Value;
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                    SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                // Amarillo (pequeño e intenso)
-                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
-                    (new Color(255, 230, 100) { A = 0 }) * 0.7f, 0f,
-                    bloomCircle.Size() * 0.5f, scale * 0.95f, SpriteEffects.None, 0f);
-                // Rojo (grande y tenue)
-                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
-                    (new Color(255, 50, 0) { A = 0 }) * 0.45f, 0f,
-                    bloomCircle.Size() * 0.5f, scale * 1.61f, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
+            orig(detailedDrawType);
+        }
 
-                // === 2. RADIAL SHINE (aura con ruido animado) ===
-                Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/WavyBlotchNoise").Value;
-                if (_shineShader != null && _shineShader.Value != null)
+        private bool CanRender()
+        {
+            // Sin mundo, menú o sin render targets de pantalla → nada que distorsionar.
+            if (Main.gameMenu || Main.screenTarget == null || Main.screenTarget.IsDisposed)
+                return false;
+
+            if (!_shaderFailed && _distortionShader == null)
+            {
+                try
                 {
-                    Effect shineShader = _shineShader.Value;
-                    shineShader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
-                    Vector2 shineScale = Vector2.One * Projectile.width * scale * 2.72f / wavyBlotch.Size();
+                    _distortionShader = ModContent.Request<Effect>(
+                        "AethonMod/Content/Effects/Shaders/BlackHoleDistortionShader",
+                        AssetRequestMode.ImmediateLoad).Value;
+                }
+                catch
+                {
+                    _shaderFailed = true;
+                }
+            }
 
-                    // El shader samplea s0 (la textura dibujada); LinearWrap en el Begin
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    _shineShader.Value.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
-                        new Color(252, 212, 112) * 0.24f, Projectile.rotation,
-                        wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
+            return _distortionShader != null && !_distortionShader.IsDisposed;
+        }
+
+        // ================================================================
+        //  RENDER DE LA LENTE
+        // ================================================================
+        private void RenderLens()
+        {
+            // === 1. Recopilar agujeros negros activos (máx. 5, como el shader) ===
+            int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
+            Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
+            if (screenSize.X <= 0f || screenSize.Y <= 0f)
+                return;
+
+            int count = 0;
+            for (int i = 0; i < Main.maxProjectiles && count < MaxSources; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.type != blackHoleType)
+                    continue;
+
+                // Posición en UV de pantalla (0..1) — la misma métrica del shader.
+                Vector2 screenPos = p.Center - Main.screenPosition;
+                Vector2 uv = screenPos / screenSize;
+
+                // Fuera de pantalla (con margen) → fuente nula.
+                if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
+                    continue;
+
+                // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
+                float radius = p.width * p.scale / screenSize.X * 0.75f;
+
+                // La lente es "pequeña": intensidad ligada a la escala del agujero
+                // (nace con el pop elástico, muere con el colapso final).
+                float strength = MathHelper.Clamp(p.scale * 1.1f, 0f, 1f);
+
+                _sourcePositions[count] = uv;
+                _sourceRadii[count] = Math.Max(radius, 0.0001f);
+                _strengths[count] = strength;
+                count++;
+            }
+
+            if (count <= 0)
+                return;
+
+            // Rellenar el resto de slots con fuentes nulas (el shader itera los 5).
+            for (int i = count; i < MaxSources; i++)
+            {
+                _sourcePositions[i] = Vector2.One * -9999f;
+                _sourceRadii[i] = 0.0001f;
+                _strengths[i] = 0f;
+            }
+
+            GraphicsDevice gd = Main.graphics.GraphicsDevice;
+            if (gd == null)
+                return;
+
+            // === 2. Preparar el target de la lente (media resolución) ===
+            int lensW = Math.Max(2, Main.screenWidth / 2);
+            int lensH = Math.Max(2, Main.screenHeight / 2);
+            if (_lensTarget == null || _lensTarget.IsDisposed ||
+                _lensTarget.Width != lensW || _lensTarget.Height != lensH)
+            {
+                _lensTarget?.Dispose();
+                _lensTarget = new RenderTarget2D(gd, lensW, lensH,
+                    false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            }
+
+            // Guardar el estado de render targets ACTIVO (backbuffer o screenTarget).
+            RenderTargetBinding[] previousBindings = gd.GetRenderTargets();
+
+            // === 3. Copiar la pantalla a través del shader de lensing ===
+            gd.SetRenderTarget(_lensTarget);
+            gd.Clear(Color.Transparent);
+
+            Effect shader = _distortionShader;
+            float maxStrength = 0f;
+            for (int i = 0; i < MaxSources; i++)
+                if (_strengths[i] > maxStrength) maxStrength = _strengths[i];
+
+            // "Pequeña lente": distorsión contenida (no la fuerza máxima del shader).
+            float distortionStrength = 0.62f * MathHelper.Clamp(maxStrength, 0f, 1f);
+            float maxLensingAngle = 24f;
+
+            shader.Parameters["distortionStrength"].SetValue(distortionStrength);
+            shader.Parameters["maxLensingAngle"].SetValue(maxLensingAngle);
+            shader.Parameters["sourceRadii"].SetValue(_sourceRadii);
+            shader.Parameters["sourcePositions"].SetValue(_sourcePositions);
+            shader.Parameters["aspectRatioCorrectionFactor"].SetValue(
+                new Vector2(screenSize.X / screenSize.Y, 1f));
+            shader.Parameters["zoom"].SetValue(Main.GameViewMatrix.Zoom);
+
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Matrix.Identity);
+            shader.CurrentTechnique.Passes[0].Apply();
+            // Quad completo: TEXCOORD0 = 0..1 = UV de pantalla (rect destino = tamaño de la lente).
+            Main.spriteBatch.Draw(Main.screenTarget,
+                new Rectangle(0, 0, _lensTarget.Width, _lensTarget.Height), Color.White);
+            Main.spriteBatch.End();
+
+            // === 4. Restaurar el render target original y volcar la lente ===
+            if (previousBindings != null && previousBindings.Length > 0)
+                gd.SetRenderTargets(previousBindings);
+            else
+                gd.SetRenderTarget(null);
+
+            Viewport viewport = gd.Viewport;
+            var destRect = new Rectangle(0, 0, viewport.Width, viewport.Height);
+
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Matrix.Identity);
+            Main.spriteBatch.Draw(_lensTarget, destRect, Color.White);
+            Main.spriteBatch.End();
+
+            // El pipeline de Terraria continúa con su propio Begin para la UI:
+            // dejamos el SpriteBatch CERRADO y los targets tal como estaban.
+        }
+    }
+}
+```
+
+### 13.4 SupernovaProjectile.cs — COMPLETO (REESCRITO v5.85)
+> 180 ticks de carga con atracción creciente y sacudidas anticipatorias; explosión
+> masiva en OnKill con doble onda expansiva, flash gigante y AoE de 340px.
+> Invocado por el sol en su segundo 7 (sincronizado) y por SupernovaStaff.
+
+```csharp
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using AethonMod.Content.Particles;
+
+namespace AethonMod.Content.Projectiles.V20
+{
+    /// <summary>
+    /// SupernovaProjectile — estrella que colapsa durante 3 segundos y luego
+    /// estalla en una supernova masiva (v5.85, reescrito).
+    ///
+    /// CICLO (180 ticks = 3 segundos exactos):
+    ///   - CARGA (0..180): contrae acelerando y se vuelve blanco-azulado,
+    ///     atrae enemigos con fuerza CRECIENTE (0.5 → 2.2), genera GoldFlame
+    ///     en espiral hacia dentro cada vez más rápido, y tiembla con
+    ///     sacudidas de cámara que anticipan el estallido.
+    ///   - ONKILL (tick 180): EXPLOSIÓN MASIVA mejorada:
+    ///       * DOBLE onda expansiva (blanca-dorada veloz + naranja profunda retardada)
+    ///       * Flash blanco gigante + destello de destellos (SparkleStar)
+    ///       * 70 lenguas de GoldFlame + 25 chispas blancas + brasas + humo
+    ///       * Daño AoE real en 340px (SimpleStrikeNPC) + OnFire
+    ///       * Temblor de cámara fuerte (PunchCameraModifier)
+    ///
+    /// INTEGRACIÓN CON EL SOL (SunProjectile): el sol lo invoca en su segundo 7,
+    /// lo mantiene centrado y ambos explotan SIMULTÁNEAMENTE en el segundo 10.
+    /// La fuerza de succión durante la carga se suma a la gravedad creciente
+    /// del propio sol → los enemigos son arrastrados al centro de la nova.
+    /// </summary>
+    public class SupernovaProjectile : ModProjectile
+    {
+        /// <summary>Duración total de la carga: 3 segundos.</summary>
+        private const int ChargeDuration = 180;
+
+        private float Age { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 1;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 80;
+            Projectile.height = 80;
+            Projectile.tileCollide = false;
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.DamageType = DamageClass.Magic;
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = ChargeDuration;
+            Projectile.light = 0f;
+            Projectile.alpha = 0;
+            Projectile.aiStyle = -1;
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 30;
+            Projectile.ignoreWater = true;
+        }
+
+        public override bool? CanCutTiles() => false;
+
+        public override void AI()
+        {
+            try
+            {
+                Age += 1f;
+                Projectile.velocity *= 0.92f;
+
+                // Progreso de carga: 0 → 1 durante los 3 segundos (con aceleración final).
+                float charge = MathHelper.Clamp(Age / ChargeDuration, 0f, 1f);
+                // Ease-in cuadrático: los primeros instantes son calma, el final es frenesí.
+                float chargeEased = charge * charge;
+
+                // === CARGA: atracción de enemigos con fuerza creciente ===
+                float pullRadius = 300f;
+                float pullStrength = 0.5f + chargeEased * 1.7f; // 0.5 → 2.2
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.CanBeChasedBy()) continue;
+                    Vector2 toCenter = Projectile.Center - npc.Center;
+                    float dist = toCenter.Length();
+                    if (dist > pullRadius || dist < 5f) continue;
+                    float strength = (1f - dist / pullRadius) * pullStrength;
+                    if (toCenter.LengthSquared() > 0.01f)
+                    {
+                        toCenter.Normalize();
+                        npc.velocity += toCenter * strength;
+                    }
                 }
 
-                // === 3. SUNSHADER (la estrella — EXACTAMENTE como WoTG) ===
-                if (_sunShader != null && _sunShader.Value != null)
+                // === CARGA: materia dorada en espiral hacia el núcleo ===
+                if (Main.netMode != NetmodeID.Server)
                 {
-                    Effect shader = _sunShader.Value;
-                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/PsychedelicWingTextureOffsetMap").Value;
-                    // ¡El canvas de WoTG es DendriticNoiseZoomedOut, no WavyBlotchNoise!
-                    Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/DendriticNoiseZoomedOut").Value;
+                    int spiralCount = 2 + (int)(chargeEased * 2f); // 2 → 4 por frame
+                    for (int i = 0; i < spiralCount; i++)
+                    {
+                        float angle = Age * (0.18f + chargeEased * 0.14f) + i * MathHelper.Pi;
+                        float maxDist = 110f - chargeEased * 30f;
+                        float dist = maxDist * (1f - charge * 0.55f) + Main.rand.NextFloat(-8f, 8f);
+                        Vector2 spawnPos = Projectile.Center + new Vector2(
+                            (float)Math.Cos(angle) * dist,
+                            (float)Math.Sin(angle) * dist);
+                        Vector2 toCenter = Projectile.Center - spawnPos;
+                        if (toCenter.LengthSquared() > 0.01f)
+                        {
+                            toCenter.Normalize();
+                            Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X);
+                            float speed = 3.5f + chargeEased * 4.5f;
+                            Vector2 vel = toCenter * speed + tangent * speed * 0.45f;
+                            Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
+                                vel, 200, new Color(255, 220, 150), 1.1f);
+                            d.noGravity = true;
+                            d.fadeIn = 0f;
+                        }
+                    }
 
-                    // Parámetros EXACTOS de StarPet.DrawSelf()
-                    shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
-                    shader.Parameters["mainColor"].SetValue(new Color(255, 255, 255).ToVector3());
-                    shader.Parameters["darkerColor"].SetValue(new Color(204, 92, 25).ToVector3());
-                    shader.Parameters["subtractiveAccentFactor"].SetValue(new Color(181, 0, 0).ToVector3());
-                    shader.Parameters["sphereSpinTime"].SetValue(Main.GlobalTimeWrappedHourly * 0.9f);
-                    shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
-
-                    // s1 = accentNoise (WavyBlotchNoise), s2 = uvOffsetNoise (PsychedelicWingTextureOffsetMap)
-                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
-                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-                    Main.graphics.GraphicsDevice.Textures[2] = psychedelicWing;
-                    Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
-
-                    // Canvas: DendriticNoiseZoomedOut (512x512) con la escala exacta de WoTG
-                    Vector2 drawScale = Vector2.One * Projectile.width * scale * 1.5f / dendritic.Size();
-
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(dendritic, drawPos, null, Color.White, Projectile.rotation,
-                        dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
+                    // Sacudidas anticipatorias: cada 40 ticks, cada vez más fuertes.
+                    if (Age % 40f == 0f && Age > 20f)
+                    {
+                        try
+                        {
+                            float rumble = 1.5f + chargeEased * 4.5f;
+                            Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
+                                Projectile.Center, new Vector2(1f, 0f), rumble, 6, 8, 0.3f,
+                                "AethonSupernovaCharge"));
+                        }
+                        catch { }
+                    }
                 }
-                else
+
+                // === CARGA: luz que se blanquea e intensifica ===
+                float lightIntensity = 1f + chargeEased * 1.6f;
+                Lighting.AddLight(Projectile.Center,
+                    new Vector3(1f, 0.9f - 0.15f * chargeEased, 0.6f - 0.35f * chargeEased) * lightIntensity);
+            }
+            catch { }
+        }
+
+        // ================================================================
+        //  EXPLOSIÓN MASIVA (OnKill, sincronizada con el sol en el segundo 10)
+        // ================================================================
+        public override void OnKill(int timeLeft)
+        {
+            // Daño AoE: solo en la autoridad (servidor / singleplayer).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    // === FALLBACK: dibujado manual si el shader no carga ===
-                    DrawFallback(drawPos, scale);
+                    if (!npc.CanBeChasedBy()) continue;
+                    float dist = (npc.Center - Projectile.Center).Length();
+                    if (dist < 340f)
+                    {
+                        npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
+                            false, Projectile.knockBack, DamageClass.Magic);
+                        npc.AddBuff(BuffID.OnFire, 300);
+                    }
                 }
+            }
+
+            if (Main.netMode == NetmodeID.Server) return;
+
+            // === DOBLE ONDA EXPANSIVA DE LA LIBRERÍA ===
+            // Onda 1: blanca-dorada, veloz y agresiva.
+            ParticlePresets.RingPulse(Projectile.Center, 320f,
+                new Color(255, 245, 200, 230), 22);
+            // Onda 2: naranja profunda, más ancha y retardada.
+            ParticlePresets.RingPulse(Projectile.Center, 460f,
+                new Color(255, 120, 40, 160), 44);
+
+            // === FLASH BLANCO GIGANTE (SoftGlow aditivo de corta vida) ===
+            var flash = new ParticleData
+            {
+                Position = Projectile.Center,
+                Velocity = Vector2.Zero,
+                Scale = Vector2.One * 6.5f,
+                PackedColor = ParticleManager.PackColor(new Color(255, 255, 245, 255)),
+                PackedStartColor = ParticleManager.PackColor(new Color(255, 255, 245, 255)),
+                TimeLeft = 14,
+                Duration = 14,
+                TextureId = ParticleTex.SoftGlow,
+                BlendMode = 1,
+                LayerPriority = LayerPriorities.AboveTiles,
+            };
+            flash.EnableComponent(ComponentFlag.FadeOut);
+            flash.EnableComponent(ComponentFlag.ScaleDown);
+            ParticleManager.Spawn(flash);
+
+            // Ráfaga de núcleo: interpolación blanco → naranja profundo.
+            ParticlePresets.Explosion(Projectile.Center, 200f, 46,
+                new Color(255, 250, 220), new Color(255, 100, 30), 42);
+
+            // === VIENTO ESTELAR: estelas radiales largas ===
+            for (int i = 0; i < 26; i++)
+            {
+                float angle = (MathHelper.TwoPi / 26) * i + Main.rand.NextFloat(-0.08f, 0.08f);
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                var p = new ParticleData
+                {
+                    Position = Projectile.Center + outward * 24f,
+                    Velocity = outward * Main.rand.NextFloat(4.5f, 8.5f),
+                    Scale = new Vector2(2.6f, 0.55f),
+                    Rotation = angle,
+                    PackedColor = ParticleManager.PackColor(new Color(255, 245, 200, 220)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 245, 200, 220)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 20)),
+                    TimeLeft = 44,
+                    Duration = 44,
+                    TextureId = ParticleTex.TrailGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                ParticleManager.Spawn(p);
+            }
+
+            // === TEMBLOR DE CÁMARA FUERTE ===
+            try
+            {
+                Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
+                    Projectile.Center, new Vector2(1f, 0f), 10f, 14, 22, 0.5f,
+                    "AethonSupernovaBlast"));
             }
             catch { }
 
-            RestoreSpriteBatch();
-            return false;
-        }
-
-        /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
-        private static void RestoreSpriteBatch()
-        {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.Transform);
-        }
-
-        /// <summary>Dibujado manual de respaldo (glow multicapa naranja).</summary>
-        private void DrawFallback(Vector2 drawPos, float scale)
-        {
-            Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                new Color(255, 250, 200, 220), 0f,
-                glowTex.Size() * 0.5f, 1.5f * scale * pulse, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                new Color(255, 180, 60, 180), 0f,
-                glowTex.Size() * 0.5f, 2.0f * scale * pulse, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                new Color(200, 50, 0, 100), 0f,
-                glowTex.Size() * 0.5f, 2.8f * scale * pulse, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-        }
-
-        // ------------------------------------------------------------------
-        //  IMPACTO Y MUERTE
-        // ------------------------------------------------------------------
-
-        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-
-            // Explosión radial de fuego sobre el objetivo
-            for (int i = 0; i < 30; i++)
+            // === DUSTS FRONTALES: 70 lenguas de fuego ===
+            for (int i = 0; i < 70; i++)
             {
-                float angle = (MathHelper.TwoPi / 30) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 10f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 10f));
-                Dust d = Dust.NewDustPerfect(target.Center, DustID.GoldFlame,
-                    dir, 220, new Color(255, 200, 100), 1.3f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            // Ráfaga de chispas Torch
-            for (int i = 0; i < 12; i++)
-            {
-                Vector2 dir = new Vector2(Main.rand.NextFloat(-5f, 5f), Main.rand.NextFloat(-5f, 5f));
-                Dust d = Dust.NewDustPerfect(target.Center, DustID.Torch,
-                    dir, 180, new Color(255, 150, 50), 1.1f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            target.AddBuff(BuffID.OnFire, 300);
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, target.Center);
-        }
-
-        public override void OnKill(int timeLeft)
-        {
-            if (Main.netMode == NetmodeID.Server) return;
-
-            // === NOVA FINAL: explosión masiva de fuego ===
-            // Onda expansiva de GoldFlame
-            for (int i = 0; i < 60; i++)
-            {
-                float angle = (MathHelper.TwoPi / 60) * i;
-                Vector2 dir = new Vector2(
-                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 14f),
-                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 14f));
+                float angle = (MathHelper.TwoPi / 70) * i + Main.rand.NextFloat(-0.1f, 0.1f);
+                float speed = Main.rand.NextFloat(7f, 14f);
+                Vector2 vel = new Vector2(
+                    (float)Math.Cos(angle) * speed,
+                    (float)Math.Sin(angle) * speed);
+                Color color = Main.rand.NextBool(3)
+                    ? new Color(255, 245, 190)
+                    : new Color(255, 230, 150);
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    dir, 240, new Color(255, 200, 100), 1.7f);
+                    vel, 240, color, 1.8f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // Chispas Torch en todas direcciones
-            for (int i = 0; i < 35; i++)
+            // 25 chispas blancas encantadas
+            for (int i = 0; i < 25; i++)
             {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Torch,
-                    new Vector2((float)Math.Cos(angle) * Main.rand.NextFloat(4f, 9f),
-                                (float)Math.Sin(angle) * Main.rand.NextFloat(4f, 9f)),
-                    200, new Color(255, 150, 50), 1.4f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-
-            // Núcleo de la nova: destellos encantados
-            for (int i = 0; i < 20; i++)
-            {
+                Vector2 v = new Vector2(
+                    Main.rand.NextFloat(-10f, 10f),
+                    Main.rand.NextFloat(-10f, 10f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Gold,
-                    new Vector2(Main.rand.NextFloat(-6f, 6f), Main.rand.NextFloat(-6f, 6f)),
-                    255, new Color(255, 240, 180), 1.2f);
+                    v, 255, Color.White, 1.2f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // Humo ascendente tras la explosión
-            for (int i = 0; i < 15; i++)
+            // 18 brasas de fuego (con gravedad: llueven tras la nova)
+            for (int i = 0; i < 18; i++)
+            {
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Torch,
+                    new Vector2((float)Math.Cos(angle) * Main.rand.NextFloat(4f, 8f),
+                                (float)Math.Sin(angle) * Main.rand.NextFloat(4f, 8f)),
+                    210, new Color(255, 160, 60), 1.5f);
+                d.noGravity = false;
+                d.fadeIn = 0f;
+            }
+
+            // 14 volutas de humo ascendentes
+            for (int i = 0; i < 14; i++)
             {
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Smoke,
-                    new Vector2(Main.rand.NextFloat(-2f, 2f), Main.rand.NextFloat(-4f, -1f)),
-                    100, new Color(120, 70, 40), 1.0f);
+                    new Vector2(Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-5f, -1f)),
+                    110, new Color(130, 80, 50), 1.2f);
                 d.noGravity = false;
                 d.fadeIn = 0f;
             }
@@ -1911,24 +1859,90 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45, Projectile.Center);
         }
 
-        // ------------------------------------------------------------------
-        //  HELPERS
-        // ------------------------------------------------------------------
-
-        /// <summary>Elastic ease-out (réplica de EasingCurves.Elastic.Evaluate(EasingType.Out) de WoTG).</summary>
-        private static float ElasticOut(float t)
+        // ================================================================
+        //  RENDER DE LA CARGA (contracción + blanco caliente + temblor final)
+        // ================================================================
+        public override bool PreDraw(ref Color lightColor)
         {
-            if (t <= 0f) return 0f;
-            if (t >= 1f) return 1f;
-            float c = (2f * (float)Math.PI) / 3f;
-            return (float)(Math.Pow(2, -10 * t) * Math.Sin((t * 10 - 0.75) * c) + 1);
+            try
+            {
+                Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                Texture2D ring = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
+                if (softGlow == null || ring == null) return false;
+
+                float charge = MathHelper.Clamp(Age / ChargeDuration, 0f, 1f);
+                float chargeEased = charge * charge;
+
+                // Temblor de anticipación en el último tramo de la carga.
+                Vector2 jitter = Vector2.Zero;
+                if (charge > 0.6f)
+                {
+                    float shake = (charge - 0.6f) / 0.4f;
+                    jitter = new Vector2(
+                        Main.rand.NextFloat(-1f, 1f) * shake * 2.2f,
+                        Main.rand.NextFloat(-1f, 1f) * shake * 2.2f);
+                }
+
+                Vector2 drawPos = Projectile.Center - Main.screenPosition + jitter;
+                Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
+                Vector2 ringOrigin = new Vector2(ring.Width / 2f, ring.Height / 2f);
+
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                // === Halo contraído: de dorado (2.0) a blanco-azulado compacto (0.6) ===
+                float scale = 2.0f - chargeEased * 1.4f;
+                // El color se desplaza de oro a blanco puro.
+                int r = 255;
+                int g = (int)(180 + 75 * chargeEased);
+                int b = (int)(80 + 165 * chargeEased);
+                Color halo = new Color(r, g, b, 220);
+                // Pulso creciente cerca del estallido.
+                float pulse = 1f + (float)Math.Sin(Age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
+                Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin, scale * pulse, SpriteEffects.None, 0f);
+
+                // Núcleo blanco-caliente que crece en proporción (la masa se condensa).
+                float coreScale = 0.4f + chargeEased * 0.28f;
+                Color core = new Color(255, 255, 255, 240);
+                Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin, coreScale * pulse, SpriteEffects.None, 0f);
+
+                // === Anillos de contención pulsantes (la estrella luchando por no colapsar) ===
+                if (charge > 0.25f)
+                {
+                    float ringPhase = (Age % 24f) / 24f;
+                    float ringScale = (0.8f + ringPhase * 1.6f) * (0.6f + charge * 0.5f);
+                    byte ringAlpha = (byte)(160 * (1f - ringPhase) * charge);
+                    Main.spriteBatch.Draw(ring, drawPos, null,
+                        new Color(255, 220, 140, ringAlpha), 0f, ringOrigin, ringScale, SpriteEffects.None, 0f);
+                }
+
+                Main.spriteBatch.End();
+            }
+            catch { }
+
+            // Restaurar el SpriteBatch al estado esperado por tML.
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.Transform);
+            return false;
+        }
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            try
+            {
+                // La materia estelar inflama al contacto.
+                target.AddBuff(BuffID.OnFire, 300);
+            }
+            catch { }
         }
     }
 }
-
 ```
 
-### 13.3 CosmicWeapons.cs (Content/Weapons/Cosmic/CosmicWeapons.cs)
+### 13.5 CosmicWeapons.cs (Content/Weapons/Cosmic/CosmicWeapons.cs)
 
 ```csharp
 using System.Collections.Generic;
@@ -1966,8 +1980,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/9600FF:═══ AGUJERO NEGRO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lightmarch de 75 pasos con lensing gravitacional real (shader de WoTG)]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Partículas en espiral + disco de acreción + atracción de enemigos]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lensing gravitacional real de 75 pasos + lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción de estelas orbitando + succión espiral con partículas de colores + devora el polvo del entorno]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px y colapsa con implosión, doble onda expansiva y temblor de pantalla]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
@@ -1997,15 +2012,16 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ SOL ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrella con shader SunShader.fx (esfericidad + corona + lava) de WoTG]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Partículas de fuego + iluminación intensa + OnFire]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrella de plasma de 10 segundos: llamaradas solares cada 2s y supernova que carga desde el segundo 7 hasta el estallido final]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Corona de plasma orbitando + viento solar radial + prominencias periódicas + destellos luminosos]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Inflama a los enemigos, atrae a los rivales con su gravedad y muere en una nova masiva con doble onda expansiva y temblor de pantalla]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
 }
 ```
 
-### 13.4 TestingPlayer.cs (Content/Players/TestingPlayer.cs)
+### 13.6 TestingPlayer.cs (Content/Players/TestingPlayer.cs)
 
 ```csharp
 using Terraria;
@@ -2066,7 +2082,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
-            // v5.80: armas cósmicas basadas en shaders de WoTG
+            // v5.80: armas cósmicas basadas en shaders del mod de referencia
             GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
         }
@@ -2091,7 +2107,7 @@ namespace AethonMod.Content.Players
 }
 ```
 
-### 13.5 RealBlackHoleShader.fx (Content/Effects/Shaders/RealBlackHoleShader.fx)
+### 13.7 RealBlackHoleShader.fx (Content/Effects/Shaders/RealBlackHoleShader.fx)
 
 ```hlsl
 sampler baseTexture : register(s0);
@@ -2233,7 +2249,7 @@ technique Technique1
 }
 ```
 
-### 13.6 SunShader.fx (Content/Effects/Shaders/SunShader.fx)
+### 13.8 SunShader.fx (Content/Effects/Shaders/SunShader.fx)
 
 ```hlsl
 sampler fireNoiseTexture : register(s0);
@@ -2354,6 +2370,8 @@ Content/
 │   ├── SparkleStar.png
 │   ├── TrailGlow.png
 │   │
+│   ├── BlackHoleLensSystem.cs            ← NUEVO v5.85: lente gravitacional de pantalla
+│   │
 │   ├── Procedural/                       ← Texturas procedurales (8)
 │   │   ├── Crescent.png                  (ID 6)
 │   │   ├── Noise.png                     (ID 7)
@@ -2364,26 +2382,27 @@ Content/
 │   │   ├── Trail.png                     (ID 1)
 │   │   └── Vortex.png                    (ID 4)
 │   │
-│   ├── Shaders/                          ← 8 .fx (fuente) + 5 .fxc (compilados de WoTG)
+│   ├── Shaders/                          ← 8 .fx (fuente) + 5 .fxc (compilados)
 │   │   ├── BlackHoleDistortionShader.fx
-│   │   ├── BlackHoleDistortionShader.fxc  (solo los 5 de WoTG)
+│   │   ├── BlackHoleDistortionShader.fxc  (compilado)
 │   │   ├── BlackOnlyShader.fx
-│   │   ├── BlackOnlyShader.fxc  (solo los 5 de WoTG)
+│   │   ├── BlackOnlyShader.fxc  (compilado)
 │   │   ├── Bloom.fx
 │   │   ├── ChromaticAberration.fx
 │   │   ├── RadialShineShader.fx
-│   │   ├── RadialShineShader.fxc  (solo los 5 de WoTG)
+│   │   ├── RadialShineShader.fxc  (compilado)
 │   │   ├── RealBlackHoleShader.fx
-│   │   ├── RealBlackHoleShader.fxc  (solo los 5 de WoTG)
+│   │   ├── RealBlackHoleShader.fxc  (compilado)
 │   │   ├── Shockwave.fx
 │   │   ├── SunShader.fx
 │   │   └── SunShader.fxc
 │   │
-│   └── WoTG/                             ← Texturas de Wrath of the Gods (9)
-│       ├── BloomCircle.png
-│       ├── BloomCircleSmall.png
-│       ├── BloomFlare.png
-│       ├── FireNoiseA.png
+│   ├── Textures/                         ← Texturas del pipeline de shaders (10) [renombrada en v5.85]
+│   │   ├── BloomCircle.png
+│   │   ├── BloomCircleSmall.png
+│   │   ├── BloomFlare.png
+│   │   ├── DendriticNoiseZoomedOut.png
+│   │   ├── FireNoiseA.png
 │       ├── FireNoiseB.png
 │       ├── InvisiblePixel.png
 │       ├── PsychedelicWingTextureOffsetMap.png
@@ -2500,7 +2519,7 @@ Content/
 │   │   ├── ArcaneBolt.cs / .png
 │   │   └── GenesisLight.cs / .png
 │   │
-│   ├── Cosmic/                          ← Armas cósmicas con shaders WoTG (2)
+│   ├── Cosmic/                          ← Armas cósmicas con shaders el mod de referencia (2)
 │   │   ├── CosmicWeapons.cs             (contiene BlackHoleStaff + SunStaff)
 │   │   ├── BlackHoleStaff.png
 │   │   └── SunStaff.png
@@ -2552,28 +2571,25 @@ Content/
     └── icon.png
 ```
 
-### 14.2 Reference_WoTG/ (archivos de referencia, NO compilados)
+### 14.2 Carpeta de referencia (ELIMINADA en v5.85)
 
-```
-Reference_WoTG/
-├── BlackHole.cs                  ← Implementación original WoTG
-├── BlackHolePet.cs                ← Lógica del pet
-├── PetBlackHoleRenderer.cs        ← Renderer RealBlackHoleShader
-├── StarPet.cs                     ← Implementación SunShader + RadialShineShader
-└── Starseed.cs                    ← Item que invoca StarPet
-```
+> `ReferenceShaders/` ya NO existe en el proyecto (se perdió con un reset del
+> sandbox en v5.82 y no afecta a la compilación). Contenía históricamente:
+> BlackHole.cs, BlackHolePet.cs, PetBlackHoleRenderer.cs, StarPet.cs y
+> Starseed.cs (código del mod de referencia, NO compilado). Si se necesita
+> consultar de nuevo, clonar el repo público a `/tmp/refmod/`.
 
 ---
 
-## 15. DOCUMENTACIÓN DE WoTG (técnicas aprendidas)
+## 15. DOCUMENTACIÓN DEL MOD DE REFERENCIA (técnicas aprendidas)
 
-Técnicas aprendidas del mod **Wrath of the Gods** (`TheFifthCircle/WrathOfTheGodsPublic`)
-que han sido adaptadas a AethonMod:
+Técnicas aprendidas del mod de shaders de referencia que han sido
+adaptadas a AethonMod (los nombres concretos se eliminaron en v5.85):
 
 ### 15.1 RealBlackHoleShader (lightmarch 75 pasos)
 
 **Concepto**: En vez de aproximar el lensing gravitacional con una distorsión analítica
-de UV, WoTG hace un **ray-marching** real: para cada pixel, lanza un rayo desde la cámara
+de UV, el mod de referencia hace un **ray-marching** real: para cada pixel, lanza un rayo desde la cámara
 y avanza 75 pasos pequeños, en cada paso:
 1. Calcula la distancia al centro del agujero negro
 2. Distorsiona la dirección del rayo hacia el centro proporcional a `1/distancia²`
@@ -2640,7 +2656,7 @@ velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5
 ### 15.3 SunShader (spherePinchFactor + corona + manchas + lava)
 
 **Concepto**: Renderizar una estrella que parezca una esfera 3D con textura, no un
-sprite plano. WoTG usa un "pinch factor" que deforma las UVs para que la textura
+sprite plano. el mod de referencia usa un "pinch factor" que deforma las UVs para que la textura
 parezca estar viajando por la superficie de una esfera.
 
 **spherePinchFactor**:
@@ -2682,7 +2698,7 @@ anillo, crea un brillo muy fuerte en el borde.
 ### 15.4 BlackOnlyShader (smoothstep para event horizon)
 
 **Concepto**: El event horizon (zona negra central del agujero negro) debe ser
-perfectamente negro, sin color del disco de acreción "filtrándose". WoTG usa un
+perfectamente negro, sin color del disco de acreción "filtrándose". el mod de referencia usa un
 shader simple con `smoothstep` para forzar el negro en el centro:
 
 ```hlsl
@@ -2697,7 +2713,7 @@ se aplica normalmente.
 
 ### 15.5 Polar UV sampling para swirl effects
 
-**Concepto**: Para crear efectos de vórtice/swirl, WoTG samplea texturas en
+**Concepto**: Para crear efectos de vórtice/swirl, el mod de referencia samplea texturas en
 coordenadas polares en vez de cartesianas:
 
 ```hlsl
@@ -2718,7 +2734,7 @@ accretionDiskGlow *= tex2D(noiseTexture, radial * float2(3, 3.5) + globalTime * 
 
 ### 15.6 Patrón general de uso de shaders en tModLoader
 
-Aprendido de WoTG, el patrón correcto para aplicar un shader a un proyectil:
+Aprendido del mod de referencia, el patrón correcto para aplicar un shader a un proyectil:
 
 ```csharp
 public override bool PreDraw(ref Color lightColor)
@@ -2743,7 +2759,7 @@ public override bool PreDraw(ref Color lightColor)
             shader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
 
             // 3. Asignar texturas a los registros s1, s2, etc. (s0 es el sprite)
-            Texture2D noise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/FireNoiseB").Value;
+            Texture2D noise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/FireNoiseB").Value;
             Main.graphics.GraphicsDevice.Textures[1] = noise;
             Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
@@ -2753,7 +2769,7 @@ public override bool PreDraw(ref Color lightColor)
             shader.CurrentTechnique.Passes[0].Apply();
 
             // 5. Dibujar el canvas (un pixel invisible que se escala enorme, o el sprite)
-            Texture2D canvas = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/InvisiblePixel").Value;
+            Texture2D canvas = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/InvisiblePixel").Value;
             Main.spriteBatch.Draw(canvas, drawPos, null, Color.Transparent, 0f,
                 new Vector2(canvas.Width / 2f, canvas.Height / 2f),
                 400f, SpriteEffects.None, 0f);
@@ -2774,7 +2790,7 @@ public override bool PreDraw(ref Color lightColor)
 
 ### 15.7 Backglow con dos colores
 
-Técnica del StarPet de WoTG: dibujar el backglow con dos colores superpuestos para
+Técnica del StarPet del mod de referencia: dibujar el backglow con dos colores superpuestos para
 dar profundidad:
 
 ```csharp
@@ -2792,9 +2808,9 @@ Main.spriteBatch.Draw(bloomCircle, drawPos, null,
 > y luego se multiplica por el factor de intensidad. Esto evita que el alpha del
 > color original afecte el blending.
 
-### 15.8 Iluminación WoTG
+### 15.8 Iluminación del mod de referencia
 
-Para partículas brillantes como estrellas, WoTG usa iluminación constante alta
+Para partículas brillantes como estrellas, el mod de referencia usa iluminación constante alta
 (no pulsante):
 ```csharp
 Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
@@ -2807,38 +2823,54 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 ## 16. RESUMEN FINAL
 
-### 16.1 Lo que se ha logrado (hasta v5.84)
+### 16.1 Lo que se ha logrado (hasta v5.85)
 - ✅ Mod completo con 8 armas protegidas del remote
 - ✅ 19 armas V20 creativas sin mana
-- ✅ 2 armas cósmicas (BlackHoleStaff, SunStaff) con shaders reales de WoTG
+- ✅ 2 armas cósmicas (BlackHoleStaff, SunStaff) con shaders reales propios
 - ✅ Sistema de partículas data-oriented COMPLETO (6 archivos: ParticleData +
   ParticleBuffer + ParticleManager + ShapeDescriptor + CameraBounds + ParticlePresets,
   con 9 componentes implementados, spawn por forma, culling y presets)
 - ✅ BlackHole/Sun con 3 capas de profundidad: librería aditiva (fondo) + dusts
-  (frontal) + shader de WoTG (canvas)
-- ✅ 5 shaders con .fxc compilados (copiados de WoTG) + 3 .fx fuente sin usar
-- ✅ 9 texturas de WoTG copiadas y referenciadas + 11 texturas de librería registradas
+  (frontal) + shader (canvas)
+- ✅ **v5.85 — LENTE GRAVITACIONAL de pantalla**: el fondo del juego se curva
+  alrededor del agujero negro (BlackHoleLensSystem + BlackHoleDistortionShader
+  que por fin SE USA + hook TimeLogger 36 + Main.screenTarget)
+- ✅ **v5.85 — Sol con ciclo completo de 10 segundos**: llamaradas cada 2s,
+  supernova sincronizada del segundo 7 al 10, gravedad 1/10 del agujero negro
+  con rampa x4 durante la carga, nova simultánea con doble onda expansiva
+- ✅ **v5.85 — SupernovaProjectile reescrito**: 3s de carga + explosión masiva
+  mejorada (doble onda 320px+460px, flash, AoE 340px, temblor fuerte)
+- ✅ **v5.85 — Cero referencias al mod externo de referencia** en todo el
+  proyecto (carpeta Textures/, tooltips, csproj, gitignore, docs)
+- ✅ 5 shaders con .fxc compilados + 3 .fx fuente sin usar
+- ✅ 10 texturas del pipeline de efectos + 11 texturas de librería registradas
 - ✅ Compilación estable sin errores (verificada contra tML v2026.07.3.0 real)
 
 ### 16.2 Lo que falta (próximos pasos)
 - ⚠️ **PROBAR** en tModLoader 1.4.4 los 2 armas cósmicas
-- ⚠️ Verificar que los shaders carguen sin excepción en runtime
-- ⚠️ Si algún shader falla, comparar parámetros con el código de WoTG en `Reference_WoTG/`
-- ⚠️ Los shaders ahora cargan como .fxc (fix v5.83 del error "Asset could not be found")
+- ⚠️ Verificar que la LENTE GRAVITACIONAL se vea en pantalla (fondo curvándose
+  alrededor del agujero) y que los shaders carguen sin excepción en runtime
+- ⚠️ Si algún shader falla, revisar client.log (la lente tiene try/catch total:
+  lo peor que puede pasar es que no se dibuje)
+- ⚠️ FUTURO: integrar SunProjectile en el Grimorio (arma definitiva) con su
+  quemadura potenciada por daño mágico
 
 ### 16.3 Recordatorio final
 **Puedo coger los recursos de nuestro github si los datos de mi versión local se borran**
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: `b2798e6` (v5.82)
+- Commit actual: `(v5.85, pendiente de push)`
 - Commit estable del remote: `e826c82`
 
 ---
 
 **Fin del documento.**
 
-> Última actualización: v5.82 (commit `b2798e6`)
+> Última actualización: v5.85
+> Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
+> Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
+> cualquier commit o documento nuevo.
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

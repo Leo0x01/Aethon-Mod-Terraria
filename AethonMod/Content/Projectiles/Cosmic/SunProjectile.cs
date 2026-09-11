@@ -6,32 +6,45 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
+using AethonMod.Content.Projectiles.V20;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// SunProjectile — réplica fiel del StarPet de Wrath of the Gods.
+    /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
-    /// Render (EXACTAMENTE como StarPet.DrawSelf de WoTG, en orden):
-    ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61)
+    /// RENDER (3 capas de profundidad):
+    ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
     ///   2. RadialShineShader sobre WavyBlotchNoise: color (252, 212, 112) * 0.24,
-    ///      escala = width * scale * 2.72 / tamaño de la textura
+    ///      escala = width * scale * 2.72 / tamaño de la textura.
     ///   3. SunShader sobre DendriticNoiseZoomedOut (canvas):
     ///      coronaIntensityFactor = 0.05, mainColor = blanco, darkerColor = (204, 92, 25),
     ///      subtractiveAccentFactor = (181, 0, 0), sphereSpinTime = GlobalTimeWrappedHourly * 0.9,
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
-    ///      escala = width * scale * 1.5 / tamaño de la textura
+    ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
-    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
-    /// render en PostDrawTiles = capa de fondo con profundidad): corona de glóbulos
-    /// SoftGlow orbitando (componente Orbit) con ColorShift amarillo→naranja, viento
-    /// solar de estelas TrailGlow radiales, destellos SparkleStar con FadeIn y
-    /// emisión de luz (EmitLight), arcos de prominencia con estrellas orbitando y
-    /// nova final con presets (Explosion + RingPulse) y screenshake.
+    /// CICLO DE VIDA (v5.85) — el sol como cuerpo celeste completo:
+    ///   - t=0s    : nace con pop elástico y lanza su primera LLAMARADA SOLAR
+    ///               (PhoenixNovaProjectile centrado en el sol).
+    ///   - cada 2s : nueva llamarada solar desde el centro (5 en total: 0, 2, 4, 6, 8s).
+    ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
+    ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
+    ///               y su luz se intensifica (materia convergiendo en espiral).
+    ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE — nova masiva con
+    ///               doble onda expansiva y temblor de pantalla.
     ///
-    /// Mejoras propias: pop elástico de aparición, hinchazón previa a la nova final,
-    /// chispas de fuego orbitando, llamaradas periódicas, prominencias solares,
-    /// humo cálido, destellos encantados y nova de fuego al morir.
+    /// GRAVEDAD (cuerpo celeste): atrae solo enemigos, con una fuerza ~10 veces
+    /// menor que la del agujero negro. Durante la carga de la supernova (últimos
+    /// 3 segundos) la fuerza se multiplica progresivamente (x4 en el pico).
+    ///
+    /// QUEMADURA: bola de plasma ardiente → inflama enemigos al contacto (OnFire).
+    /// (La quemadura potenciada por daño mágico se implementará cuando este
+    /// proyectil se integre en el Grimorio, el arma definitiva.)
+    ///
+    /// v5.84 — Capa de partículas de la librería propia (data-oriented, additive,
+    /// render en PostDrawTiles): corona de glóbulos SoftGlow orbitando con ColorShift
+    /// amarillo→naranja, viento solar de estelas TrailGlow radiales, destellos
+    /// SparkleStar con FadeIn+EmitLight, arcos de prominencia con estrellas orbitando.
     /// </summary>
     public class SunProjectile : ModProjectile
     {
@@ -40,8 +53,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private bool _sunShaderFailed;
         private bool _shineShaderFailed;
 
-        /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
+        /// <summary>Tiempo visual de vida — usada para el pop elástico y el ritmo de llamaradas.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
+
+        /// <summary>Índice del proyectil Supernova hijo (-1 = aún no invocado).</summary>
+        public ref float SupernovaIndex => ref Projectile.ai[1];
+
+        /// <summary>Duración total del sol: 10 segundos exactos.</summary>
+        private const int SunLifetime = 600;
+
+        /// <summary>Momento (ticks restantes) en el que nace la supernova: segundo 7.</summary>
+        private const int SupernovaSpawnAtRemaining = 180;
+
+        /// <summary>Cadencia de las llamaradas solares: cada 2 segundos.</summary>
+        private const int FlareInterval = 120;
 
         public override void SetStaticDefaults()
         {
@@ -55,7 +80,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 600;
+            Projectile.timeLeft = SunLifetime;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.extraUpdates = 0;
@@ -63,10 +88,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === POP ELÁSTICO DE APARICIÓN (como el black hole) ===
+            // === LLAMARADAS SOLARES (PhoenixNova cada 2 s, DESDE t=0) ===
+            // Se comprueba ANTES del incremento para que el primer disparo
+            // coincida con el mismo tick de nacimiento del sol.
+            if (VisualsTime % FlareInterval == 0f && Projectile.owner == Main.myPlayer)
+            {
+                int flareDamage = (int)(Projectile.damage * 0.5f);
+                if (flareDamage < 1) flareDamage = 1;
+                Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<V20.PhoenixNovaProjectile>(),
+                    flareDamage, Projectile.knockBack * 0.5f,
+                    Projectile.owner);
+            }
+
+            // === POP ELÁSTICO DE APARICIÓN ===
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, VisualsTime, true)) *
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, VisualsTime, true));
             VisualsTime += 1f;
+
+            // === CARGA DE SUPERNOVA (últimos 3 s): el sol se comprime y brilla más ===
+            bool supernovaCharging = Projectile.timeLeft <= SupernovaSpawnAtRemaining;
+            if (supernovaCharging)
+            {
+                // Compresión sutil: la materia se acumula antes del colapso.
+                Projectile.scale *= 1.0008f;
+            }
 
             // === NOVA FINAL: los últimos 30 ticks se hincha antes de explotar ===
             if (Projectile.timeLeft < 30f)
@@ -75,6 +123,70 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === MOVIMIENTO: deriva lenta y frenado ===
             Projectile.velocity *= 0.97f;
             Projectile.rotation += 0.01f;
+
+            // === SUPERNOVA SINCRONIZADA (aparece en el segundo 7) ===
+            if (Projectile.timeLeft == SupernovaSpawnAtRemaining && Projectile.owner == Main.myPlayer)
+            {
+                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+                int idx = Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center, Projectile.velocity,
+                    ModContent.ProjectileType<V20.SupernovaProjectile>(),
+                    novaDamage, Projectile.knockBack,
+                    Projectile.owner);
+                SupernovaIndex = idx;
+            }
+
+            // Mantener la supernova PERFECTAMENTE centrada en el sol (y sincronizada).
+            if (SupernovaIndex >= 0f)
+            {
+                int idx = (int)SupernovaIndex;
+                if (idx >= 0 && idx < Main.maxProjectiles &&
+                    Main.projectile[idx].active &&
+                    Main.projectile[idx].type == ModContent.ProjectileType<V20.SupernovaProjectile>())
+                {
+                    // El sol arrastra a la supernova con él (deriva compartida).
+                    Main.projectile[idx].Center = Projectile.Center;
+                    Main.projectile[idx].velocity = Projectile.velocity;
+
+                    // SINCRONIZACIÓN EXACTA: en los últimos ticks, la cuenta
+                    // regresiva de la supernova se clava a la del sol → ambos
+                    // mueren (y explotan) en el MISMO tick, sin deriva de índices.
+                    if (Projectile.timeLeft <= 2)
+                        Main.projectile[idx].timeLeft =
+                            Math.Min(Main.projectile[idx].timeLeft, Projectile.timeLeft);
+                }
+                else
+                {
+                    SupernovaIndex = -1f;
+                }
+            }
+
+            // === GRAVEDAD DEL SOL — 10 veces menor que el agujero negro, solo enemigos ===
+            float gravityRadius = 280f;
+            float baseStrength = 0.26f; // agujero negro: 2.6 → sol: 2.6 / 10
+            // Durante la carga de la supernova la fuerza crece progresivamente (x4 pico).
+            float chargeMult = 1f;
+            if (supernovaCharging)
+            {
+                float chargeProgress = 1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining;
+                chargeMult = 1f + chargeProgress * 3f;
+            }
+            float sunGravity = baseStrength * chargeMult;
+
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!npc.CanBeChasedBy()) continue;
+                Vector2 toCenter = Projectile.Center - npc.Center;
+                float dist = toCenter.Length();
+                if (dist > gravityRadius || dist < 5f) continue;
+                float strength = (1f - dist / gravityRadius) * sunGravity;
+                if (toCenter.LengthSquared() > 0.01f)
+                {
+                    toCenter.Normalize();
+                    npc.velocity += toCenter * strength;
+                }
+            }
 
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
@@ -86,22 +198,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 SpawnSolarFlare();
                 SpawnTwinkles();
 
-                // v5.84: partículas de la librería propia (capa de fondo aditiva —
-                // se renderizan en PostDrawTiles, detrás del canvas de la estrella,
-                // creando profundidad por capas)
+                // Partículas de la librería propia (capa de fondo aditiva)
                 SpawnLibraryCorona();
                 SpawnLibrarySolarWind();
                 SpawnLibraryTwinkles();
                 SpawnLibraryFlareLoop();
+
+                // v5.85: materia convergiendo durante la carga de la supernova
+                if (supernovaCharging && Projectile.scale > 0.3f)
+                {
+                    SpawnSupernovaChargeIntake();
+                }
             }
 
-            // === ILUMINACIÓN INTENSA (como StarPet: Vector3.One * 3.2f, con pulso sutil) ===
+            // === ILUMINACIÓN INTENSA (con pulso sutil + crecimiento en la carga) ===
             float pulse = 0.92f + 0.08f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-            Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse);
+            float chargeLight = supernovaCharging
+                ? 1f + (1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining) * 0.8f
+                : 1f;
+            Lighting.AddLight(Projectile.Center,
+                new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse * chargeLight);
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS
+        //  PARTÍCULAS VANILLA (capa frontal)
         // ------------------------------------------------------------------
 
         /// <summary>Chispas de fuego (Torch) orbitando y cayendo hacia la superficie.</summary>
@@ -168,10 +288,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Llamarada solar periódica: explosión radial de fuego desde el borde.</summary>
+        /// <summary>Prominencias periódicas: explosión radial de fuego desde el borde (~0.75 s).</summary>
         private void SpawnSolarFlare()
         {
-            // Cada ~45 ticks (0.75 s), una llamarada prominente
             if (VisualsTime % 45f == 0f && VisualsTime > 30f)
             {
                 float baseAngle = Main.rand.NextFloat(0, MathHelper.TwoPi);
@@ -212,23 +331,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  v5.84 — PARTÍCULAS DE LA LIBRERÍA PROPIA (capa de fondo aditiva)
-        //  Sistema data-oriented de Content/Particles (libro de referencia,
-        //  secciones 10-16): additive blending + ColorShift + Orbit + EmitLight.
+        //  PARTÍCULAS DE LA LIBRERÍA PROPIA (capa de fondo aditiva)
         // ------------------------------------------------------------------
 
-        /// <summary>
-        /// Corona de glóbulos orbitando: SoftGlow con el componente Orbit alrededor del
-        /// centro de la estrella, desplazando su color de amarillo incandescente a
-        /// naranja profundo — materia de la corona girando lentamente.
-        /// </summary>
+        /// <summary>Corona de plasma orbitando: SoftGlow con Orbit y ColorShift amarillo→naranja.</summary>
         private void SpawnLibraryCorona()
         {
             if (Main.rand.NextBool(2))
             {
                 float radius = Main.rand.NextFloat(48f, 60f) * MathHelper.Max(Projectile.scale, 0.4f);
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float angVel = Main.rand.NextFloat(0.045f, 0.075f); // deriva lenta de la corona
+                float angVel = Main.rand.NextFloat(0.045f, 0.075f);
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
@@ -245,10 +358,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     TimeLeft = 55,
                     Duration = 55,
                     TextureId = ParticleTex.SoftGlow,
-                    BlendMode = 1, // Additive
+                    BlendMode = 1,
                     LayerPriority = LayerPriorities.BeforeProjectiles,
                 };
-                // Orbit: UserData0/1 = centro, UserData2 = velocidad angular, UserData3 = radio
                 p.UserData0 = Projectile.Center.X;
                 p.UserData1 = Projectile.Center.Y;
                 p.UserData2 = angVel;
@@ -260,10 +372,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>
-        /// Viento solar: estelas TrailGlow alineadas radialmente que fluyen hacia
-        /// fuera desde la fotosfera, desvaneciéndose de blanco-amarillo a naranja.
-        /// </summary>
+        /// <summary>Viento solar radial: estelas TrailGlow fluyendo hacia fuera desde la fotosfera.</summary>
         private void SpawnLibrarySolarWind()
         {
             if (Main.rand.NextBool(3))
@@ -279,8 +388,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     Position = spawnPos,
                     Velocity = outward * Main.rand.NextFloat(1.2f, 2.2f),
-                    Scale = new Vector2(1.5f, 0.4f), // estirada radialmente (TrailGlow 32x8)
-                    Rotation = angle, // alineada al flujo radial
+                    Scale = new Vector2(1.5f, 0.4f),
+                    Rotation = angle,
                     PackedColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
                     PackedStartColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
                     PackedEndColor = ParticleManager.PackColor(new Color(255, 120, 40, 20)),
@@ -296,10 +405,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>
-        /// Destellos de la librería: SparkleStar con FadeIn + FadeOut e intensidad
-        /// de luz (EmitLight) — puntas de brillo parpadeando en la corona lejana.
-        /// </summary>
+        /// <summary>Destellos luminosos: SparkleStar con FadeIn + FadeOut + EmitLight.</summary>
         private void SpawnLibraryTwinkles()
         {
             if (Main.rand.NextBool(8))
@@ -325,19 +431,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     BlendMode = 1,
                     LayerPriority = LayerPriorities.BeforeProjectiles,
                 };
-                p.UserData0 = 8f;   // FadeIn durante 8 ticks
+                p.UserData0 = 8f;
                 p.EnableComponent(ComponentFlag.FadeIn);
                 p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.EmitLight); // intensidad derivada de la escala
+                p.EnableComponent(ComponentFlag.EmitLight);
                 ParticleManager.Spawn(p);
             }
         }
 
-        /// <summary>
-        /// Arcos de prominencia: coincide con el ritmo de SpawnSolarFlare (cada ~45
-        /// ticks) y anade estrellas de la librería orbitando en el borde de la
-        /// llamarada — materia eyectada que queda brevemente atrapada en el campo.
-        /// </summary>
+        /// <summary>Arcos de prominencia: estrellas orbitando en el borde de cada llamarada (~0.75 s).</summary>
         private void SpawnLibraryFlareLoop()
         {
             if (VisualsTime % 45f == 0f && VisualsTime > 30f && Projectile.scale > 0.3f)
@@ -381,8 +483,54 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
+        /// <summary>
+        /// v5.85 — Materia convergiendo durante la carga de la supernova:
+        /// estelas doradas cayendo en espiral hacia el sol mientras la fuerza
+        /// gravitatoria crece (los 3 segundos previos a la nova final).
+        /// </summary>
+        private void SpawnSupernovaChargeIntake()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                float dist = Main.rand.NextFloat(90f, 150f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+
+                Vector2 toCenter = Projectile.Center - spawnPos;
+                if (toCenter.LengthSquared() < 0.01f) continue;
+                toCenter.Normalize();
+                Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X);
+
+                // Cuanto más avanzada la carga, más rápido converge la materia.
+                float chargeProgress = 1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining;
+                float speed = 2.2f + chargeProgress * 3.5f;
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = toCenter * speed + tangent * speed * 0.55f,
+                    Scale = new Vector2(1.6f, 0.4f),
+                    Rotation = (float)Math.Atan2(toCenter.Y, toCenter.X),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 240, 170, 190)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 170, 190)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 140, 40, 40)),
+                    TimeLeft = 38,
+                    Duration = 38,
+                    TextureId = ParticleTex.TrailGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                p.EnableComponent(ComponentFlag.ScaleDown);
+                ParticleManager.Spawn(p);
+            }
+        }
+
         // ------------------------------------------------------------------
-        //  RENDER — réplica exacta de StarPet.DrawSelf de WoTG
+        //  RENDER
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
@@ -419,8 +567,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 float scale = Projectile.scale;
 
-                // === 1. BACKGLOW (EXACTAMENTE como StarPet.DrawSelf de WoTG) ===
-                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/BloomCircleSmall").Value;
+                // === 1. BACKGLOW ===
+                Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -436,14 +584,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Main.spriteBatch.End();
 
                 // === 2. RADIAL SHINE (aura con ruido animado) ===
-                Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/WavyBlotchNoise").Value;
+                Texture2D wavyBlotch = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
                 if (_shineShader != null && _shineShader.Value != null)
                 {
                     Effect shineShader = _shineShader.Value;
                     shineShader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
                     Vector2 shineScale = Vector2.One * Projectile.width * scale * 2.72f / wavyBlotch.Size();
 
-                    // El shader samplea s0 (la textura dibujada); LinearWrap en el Begin
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                         SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);
@@ -454,15 +601,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.spriteBatch.End();
                 }
 
-                // === 3. SUNSHADER (la estrella — EXACTAMENTE como WoTG) ===
+                // === 3. SUNSHADER (la estrella) ===
                 if (_sunShader != null && _sunShader.Value != null)
                 {
                     Effect shader = _sunShader.Value;
-                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/PsychedelicWingTextureOffsetMap").Value;
-                    // ¡El canvas de WoTG es DendriticNoiseZoomedOut, no WavyBlotchNoise!
-                    Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/DendriticNoiseZoomedOut").Value;
+                    Texture2D psychedelicWing = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
+                    Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
 
-                    // Parámetros EXACTOS de StarPet.DrawSelf()
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     shader.Parameters["mainColor"].SetValue(new Color(255, 255, 255).ToVector3());
                     shader.Parameters["darkerColor"].SetValue(new Color(204, 92, 25).ToVector3());
@@ -470,13 +615,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     shader.Parameters["sphereSpinTime"].SetValue(Main.GlobalTimeWrappedHourly * 0.9f);
                     shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
 
-                    // s1 = accentNoise (WavyBlotchNoise), s2 = uvOffsetNoise (PsychedelicWingTextureOffsetMap)
+                    // s1 = accentNoise, s2 = uvOffsetNoise
                     Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
                     Main.graphics.GraphicsDevice.Textures[2] = psychedelicWing;
                     Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
 
-                    // Canvas: DendriticNoiseZoomedOut (512x512) con la escala exacta de WoTG
                     Vector2 drawScale = Vector2.One * Projectile.width * scale * 1.5f / dendritic.Size();
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
@@ -536,7 +680,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // v5.84: estallido solar de la librería sobre el objetivo
+            // Estallido solar de la librería sobre el objetivo
             ParticlePresets.Explosion(target.Center, 60f, 14,
                 new Color(255, 240, 170), new Color(255, 110, 30), 26);
             ParticlePresets.RingPulse(target.Center, 85f, new Color(255, 200, 90, 180), 20);
@@ -564,6 +708,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.fadeIn = 0f;
             }
 
+            // QUEMADURA: el sol es una bola de plasma ardiente → inflama al enemigo.
             target.AddBuff(BuffID.OnFire, 300);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, target.Center);
         }
@@ -572,11 +717,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === v5.84: PRESETS DE LA LIBRERÍA — nova masiva ===
+            // === NOVA MASIVA (segundo 10, sincronizada con la explosión de la Supernova) ===
             // Ráfaga principal con interpolación blanco→naranja
             ParticlePresets.Explosion(Projectile.Center, 170f, 40,
                 new Color(255, 245, 200), new Color(255, 90, 20), 50);
-            // Ondas expansivas dobles (dorada + roja retardada)
+            // DOBLE ONDA EXPANSIVA (dorada rápida + roja retardada)
             ParticlePresets.RingPulse(Projectile.Center, 280f,
                 new Color(255, 210, 100, 210), 34);
             ParticlePresets.RingPulse(Projectile.Center, 380f,
@@ -606,7 +751,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 ParticleManager.Spawn(p);
             }
 
-            // Screenshake coordinado (sección 8.5 del libro)
+            // Screenshake coordinado
             try
             {
                 Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
@@ -616,7 +761,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
             catch { }
 
             // === NOVA FINAL: explosión masiva de fuego (dusts, capa frontal) ===
-            // Onda expansiva de GoldFlame
             for (int i = 0; i < 60; i++)
             {
                 float angle = (MathHelper.TwoPi / 60) * i;
@@ -669,7 +813,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  HELPERS
         // ------------------------------------------------------------------
 
-        /// <summary>Elastic ease-out (réplica de EasingCurves.Elastic.Evaluate(EasingType.Out) de WoTG).</summary>
+        /// <summary>Elastic ease-out (curva elástica de aparición).</summary>
         private static float ElasticOut(float t)
         {
             if (t <= 0f) return 0f;

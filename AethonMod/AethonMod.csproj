@@ -9,7 +9,7 @@
     NOTA: el build real del mod NO usa este archivo. tModLoader compila los .cs con
     Roslyn y empaqueta el .tmod a partir de build.txt (Develop Mods -> Build).
     Los shaders .fx NO se compilan automáticamente: se empaquetan los .fxc
-    precompilados que están junto a cada .fx (igual que hace Wrath of the Gods).
+    precompilados que están junto a cada .fx (pipeline propio del mod).
   -->
   <Import Project="..\tModLoader.targets" Condition="Exists('..\tModLoader.targets')" />
 
@@ -25,6 +25,5 @@
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
-    <Compile Remove="Reference_WoTG/**" />
   </ItemGroup>
 </Project>

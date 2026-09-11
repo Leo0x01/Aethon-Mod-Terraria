@@ -56,7 +56,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
-            // v5.80: armas cósmicas basadas en shaders de WoTG
+            // v5.80: armas cósmicas basadas en shaders de lensing gravitacional
             GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
         }
