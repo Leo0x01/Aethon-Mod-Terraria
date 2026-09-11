@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -8,7 +9,29 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.V20
 {
     /// <summary>
-    /// PhoenixNovaProjectile — nova/explosión centrada en el jugador.
+    /// PhoenixNovaProjectile — nova/explosión centrada en el jugador (llamarada
+    /// solar cuando la invoca el SunProjectile).
+    ///
+    /// v5.91 — DETRÁS DEL SOL (DrawBehind): el Sol invoca esta nova cada 2 s como
+    /// LLAMARADA SOLAR. En DrawProjectiles tML dibuja los proyectiles en orden
+    /// ASCENDENTE de índice, así que la llamarada (invocada DESPUÉS del sol, índice
+    /// mayor) quedaba pintada ENCIMA del cuerpo de la estrella. Ahora el hook
+    /// DrawBehind la registra en drawCacheProjsBehindProjectiles: tML dibuja esa
+    /// cache ANTES de DrawProjectiles() → la llamarada queda DETRÁS del sol (y
+    /// por delante de los NPC): el disco de la estrella tapa el NÚCLEO de los
+    /// anillos y estos se abren alrededor de la silueta — una llamarada real
+    /// ERUPCIONANDO POR DETRÁS de la estrella (petición del usuario). El destello
+    /// blanco queda como un backlight dramático alrededor del disco.
+    ///
+    /// v5.91 — FIX CRÍTICO DEL SPRITEBATCH (bug presente desde v5.88): este
+    /// PreDraw abría/cerraba el batch SIN Main.GameViewMatrix.TransformationMatrix
+    /// (y sin sampler/rasterizer) — sus anillos se dibujaban sin el transform del
+    /// mundo (mal posicionados con zoom ≠ 1) y el Begin(Deferred) final dejaba el
+    /// batch SIN TRANSFORMAR para TODOS los proyectiles vanilla posteriores del
+    /// frame: dibujados en coordenadas de mundo sin la vista → "círculos que
+    /// subían" flotando por la pantalla (el reporte del usuario en v5.89). Ahora
+    /// todos los Begin llevan el transform del mundo y el estado exacto que tML
+    /// espera (Deferred, AlphaBlend, DefaultSamplerState, CullCounterClockwise).
     ///
     /// Visuales (60 frames total):
     ///   - Se dibuja múltiple Ring.png a escalas crecientes con colores
@@ -28,6 +51,19 @@ namespace AethonMod.Content.Projectiles.V20
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
+        }
+
+        /// <summary>
+        /// v5.91 — LA LLAMARADA VA DETRÁS DEL SOL: registrarse en la cache
+        /// drawCacheProjsBehindProjectiles hace que tML dibuje este proyectil
+        /// ANTES del pase principal de proyectiles (verificado decompilando
+        /// Main.DrawCachedProjs: se llama justo antes de DrawProjectiles) →
+        /// queda detrás del cuerpo del sol y de cualquier proyectil posterior.
+        /// </summary>
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,
+            List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            behindProjectiles.Add(index);
         }
 
         public override void SetDefaults()
@@ -121,8 +157,14 @@ namespace AethonMod.Content.Projectiles.V20
                 float age = Projectile.ai[0];
                 float progress = age / 60f; // 0..1
 
+                // v5.91 — Begin CON el transform del mundo (Main.GameViewMatrix):
+                // antes iba SIN matrix → los anillos se dibujaban en coords de
+                // pantalla puras (mal con zoom ≠ 1) y el restore final dejaba el
+                // batch corrupto para los proyectiles vanilla posteriores.
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
 
                 // === Múltiples Ring.png a escalas crecientes ===
                 // Cada anillo más grande que el anterior, colores de naranja → rojo profundo
@@ -173,11 +215,18 @@ namespace AethonMod.Content.Projectiles.V20
                 }
 
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                // v5.91 — Restauración EXACTA del estado que tML espera tras
+                // PreDraw (igual que el resto de proyectiles del mod): Deferred,
+                // AlphaBlend, DefaultSamplerState, CullCounterClockwise y el
+                // TRANSFORM DEL MUNDO. El Begin(Deferred, AlphaBlend) pelado de
+                // v5.88 corrompía el dibujado de todo proyectil posterior.
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                    null, Main.GameViewMatrix.TransformationMatrix);
             }
             catch
             {
-                // v5.90 — cierre defensivo solo si una excepción cortó el Begin
+                // v5.90/v5.91 — cierre defensivo solo si una excepción cortó el Begin
                 // (path de error exclusivamente: el path normal deja el batch
                 // balanceado — sin excepciones first-chance por frame).
                 try { Main.spriteBatch.End(); } catch { }

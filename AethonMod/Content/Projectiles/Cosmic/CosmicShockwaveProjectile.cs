@@ -21,9 +21,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     Anillo RGB (aberración cromática real: los canales R/G/B se separan
     ///     radialmente) que se expande desde el centro. Se registra como fuente
     ///     del BlackHoleLensSystem → el FONDO del juego se distorsiona a su paso
-    ///     ("distorsiona un poco"). Daña a cada NPC cuando el frente lo alcanza.
-    ///     Desde la v5.90 es la ÚNICA onda del agujero: nace en OnKill (cuando
-    ///     el agujero termina de evaporarse) con el daño COMPLETO del proyectil.
+    ///     ("distorsiona un poco"). Desde la v5.90 es la ÚNICA onda del agujero:
+    ///     nace en OnKill (cuando el agujero termina de evaporarse) con el daño
+    ///     COMPLETO del proyectil.
+    ///     v5.91 — Daña A MEDIDA QUE AVANZA: cada NPC dentro de la BANDA del
+    ///     frente recibe daño cada 0.1 s (6 ticks) mientras la onda lo barre.
+    ///     v5.91 — TRANSPARENTE: los anillos RGB bajaron de alpha 230 → 140 y
+    ///     el núcleo blanco de 150 → 95 (petición del usuario).
     ///
     ///   ESTILO 1 — ONDA CROMÁTICA INVERSA (LEGADO, sin uso desde v5.90):
     ///     Nace en el radio máximo y CONVERGE hacia el centro (el frente barre
@@ -32,9 +36,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     como parte del arsenal por si un arma futura la invoca (las 3 ondas
     ///     inversas de la implosión v5.86 se eliminaron a petición del usuario).
     ///
-    ///   ESTILO 2 — ONDA DE FUEGO (nova final del sol):
+    ///   ESTILO 2 — ONDA DE FUEGO (nova final del sol / SupernovaStaff):
     ///     Triple anillo ardiente (rojo/naranja/amarillo) + llamas a lo largo
-    ///     del frente. Cada onda hace daño y aplica QUEMADURA (OnFire).
+    ///     del frente. v5.91 — Daña A MEDIDA QUE AVANZA cada 0.1 s (6 ticks)
+    ///     mientras el frente barre al enemigo, y aplica QUEMADURA de 10 s
+    ///     (OnFire, 600 ticks — antes 5 s) a cada golpe.
     ///
     /// Campos AI:
     ///   ai[0] = edad (negativa = retardo escalonado aún activo)
@@ -61,27 +67,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public const float StyleFire = 2f;
 
         /// <summary>
-        /// Marca de NPCs ya golpeados por esta onda (una sola vez cada uno).
-        /// v5.88 — UNA por proyectil: tML crea cada proyectil clonando el
-        /// prototipo (MemberwiseClone), así que un array inicializado en el
-        /// campo se COMPARTIRÍA entre todas las ondas simultáneas del mismo
-        /// tipo (las 3 ondas inversas de la implosión se borrarían las marcas
-        /// de daño unas a otras al nacer escalonadas). NewInstance le da a
-        /// cada onda su propio array.
+        /// v5.91 — Intervalo de daño por tick: 6 ticks = 0.1 segundos EXACTOS
+        /// (petición del usuario: "daño en area y daño por cada 0.1 segundo").
+        /// SimpleStrikeNPC NO usa los immunity frames del NPC, así que cada
+        /// tick de la banda registra su propio golpe limpio.
         /// </summary>
-        private bool[] _hitNPCs = new bool[Main.maxNPCs];
+        private const int DamageTickInterval = 6;
 
         /// <summary>
-        /// v5.88 — Cada proyectil nuevo recibe un array de marcas FRESCO.
+        /// v5.91 — Próximo tick (edad de la onda) en el que cada NPC puede
+        /// volver a recibir daño: mientras el frente de la onda lo BARRA, el
+        /// enemigo recibe daño cada 0.1 s (antes era UN solo golpe por NPC en
+        /// toda la vida de la onda — v5.90 usaba un bool[] de "ya golpeado").
+        /// tML crea cada proyectil clonando el prototipo (MemberwiseClone):
+        /// un array inicializado en el campo se COMPARTIRÍA entre todas las
+        /// ondas simultáneas del mismo tipo. NewInstance le da a cada onda su
+        /// propio array fresco.
+        /// </summary>
+        private int[] _nextHitAt = new int[Main.maxNPCs];
+
+        /// <summary>
+        /// v5.88/v5.91 — Cada proyectil nuevo recibe un array FRESCO de cooldowns.
         /// Sin esto, MemberwiseClone haría que todas las ondas activas del
-        /// mismo tipo compartieran el MISMO array (bug de daño en cascada:
-        /// cada onda nueva borraba las marcas de sus hermanas y estas podían
-        /// golpear varias veces a los mismos NPC).
+        /// mismo tipo compartieran el MISMO array (bug de daño en cascada).
         /// </summary>
         public override ModProjectile NewInstance(Projectile entity)
         {
             CosmicShockwaveProjectile inst = (CosmicShockwaveProjectile)base.NewInstance(entity);
-            inst._hitNPCs = new bool[Main.maxNPCs];
+            inst._nextHitAt = new int[Main.maxNPCs];
             return inst;
         }
 
@@ -115,7 +128,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // tML reutiliza instancias clonadas del prototipo: además del
             // array fresco de NewInstance, se limpia por si el clon se recicla.
-            Array.Clear(_hitNPCs, 0, _hitNPCs.Length);
+            Array.Clear(_nextHitAt, 0, _nextHitAt.Length);
         }
 
         public override bool? CanCutTiles() => false;
@@ -217,34 +230,45 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ================================================================
-        //  DAÑO — el frente barre a los NPC una única vez por onda
+        //  DAÑO — v5.91: el frente BARRA a los NPC dañando cada 0.1 s
         // ================================================================
+        // La zona activa es la BANDA del anillo visible (el frente de la onda
+        // "a medida que avanza"): cualquier enemigo dentro de ella recibe
+        // daño de área cada DamageTickInterval ticks (0.1 s exactos). La onda
+        // expansiva nace en el centro (radio 0) y barre hacia fuera → todo
+        // el área del disco queda cubierta; la convergente barre hacia dentro.
         private void ApplyWaveDamage(float front)
         {
+            // Banda de daño = grosor del anillo visible que avanza.
+            float bandInner, bandOuter;
+            if (Style == StyleChromaticInverse)
+            {
+                // Convergente: el frente baja hacia el centro — la banda va
+                // POR DELANTE del frente (entre el frente y el radio exterior).
+                bandInner = front * 0.98f;
+                bandOuter = front * 1.25f;
+            }
+            else
+            {
+                // Expansiva: la banda va POR DETRÁS del frente — coincide con
+                // los anillos dibujados (front, 0.93·front, 0.86·front, 0.8·front
+                // en fuego; fringe ±7 px en cromática) más un margen de barrido.
+                bandInner = front * 0.72f;
+                bandOuter = front * 1.02f;
+            }
+            if (bandOuter < 4f) return; // frente aún diminuto: nada que barrer
+
+            int ageNow = (int)Age;
             for (int i = 0; i < Main.maxNPCs; i++)
             {
-                if (_hitNPCs[i]) continue;
+                // Cooldown de 0.1 s por NPC: "daño por cada 0.1 segundo".
+                if (ageNow < _nextHitAt[i]) continue;
                 NPC npc = Main.npc[i];
                 if (npc == null || !npc.active || !npc.CanBeChasedBy()) continue;
 
-                Vector2 toCenter = Projectile.Center - npc.Center;
-                float dist = toCenter.Length();
-
-                bool crossed;
-                if (Style == StyleChromaticInverse)
-                {
-                    // Onda convergente: golpea cuando el frente pasa hacia dentro
-                    // (y solo a quien estaba dentro del radio inicial).
-                    crossed = dist <= MaxRadius * 1.02f && dist >= front;
-                }
-                else
-                {
-                    // Onda expansiva: golpea cuando el frente le alcanza.
-                    crossed = dist <= front;
-                }
-
-                if (!crossed) continue;
-                _hitNPCs[i] = true;
+                float dist = (npc.Center - Projectile.Center).Length();
+                if (dist < bandInner || dist > bandOuter) continue;
+                _nextHitAt[i] = ageNow + DamageTickInterval;
 
                 // Dirección del empuje: hacia fuera en expansivas, hacia el
                 // centro en la inversa (la implosión arrastra hacia dentro).
@@ -263,9 +287,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 npc.SimpleStrikeNPC(Projectile.damage, dir, false, knockBack, DamageClass.Magic);
 
-                // La onda de fuego aplica QUEMADURA.
+                // La onda de fuego aplica QUEMADURA de 10 s (v5.91: era 5 s).
                 if (Style == StyleFire)
-                    npc.AddBuff(BuffID.OnFire, 300);
+                    npc.AddBuff(BuffID.OnFire, 600);
             }
         }
 
@@ -393,19 +417,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else
                 {
-                    // === ANILLO CROMÁTICO (aberración RGB real) ===
+                    // === ANILLO CROMÁTICO (aberración RGB real) — v5.91 TRANSPARENTE ===
                     // La separación de canales crece con la edad (dispersión)
-                    // y se INVERTIEn en la onda inversa (azul por delante).
+                    // y se INVIERTEn en la onda inversa (azul por delante).
+                    // v5.91: alpha 230 → 140 (canales) y 150 → 95 (núcleo):
+                    // la aberración cromática debe verse TRANSPARENTE, un velo
+                    // que deja ver el mundo a través del anillo (antes era un
+                    // anillo aditivo casi opaco de alpha 230).
                     float fringe = (2.5f + 4.5f * progress) *
                                    (style == StyleChromaticInverse ? -1f : 1f);
-                    byte a = (byte)(alpha * 230f);
+                    byte a = (byte)(alpha * 140f);
 
                     DrawRing(ring, drawPos, front + fringe, ringUnit, new Color(255, 40, 40, a));
                     DrawRing(ring, drawPos, front, ringUnit, new Color(60, 255, 90, a));
                     DrawRing(ring, drawPos, front - fringe, ringUnit, new Color(70, 130, 255, a));
-                    // Núcleo blanco que unifica los tres canales.
+                    // Núcleo blanco que unifica los tres canales (velo tenue).
                     DrawRing(ring, drawPos, front, ringUnit,
-                        new Color(255, 255, 255, (byte)(alpha * 150f)));
+                        new Color(255, 255, 255, (byte)(alpha * 95f)));
                 }
 
                 Main.spriteBatch.End();

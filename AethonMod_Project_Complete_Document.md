@@ -786,10 +786,55 @@ Commits desde v5.28 hasta v5.90 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.90
-- **Mensaje**: "v5.90: revert del sol a v5.88 + agujero negro: partículas absorbidas (PullTo), UNA explosión cromática final con daño, lente delgada, sin corte del disco"
+- **Versión**: v5.91
+- **Mensaje**: "v5.91: el SOL autorita su explosión final (Supernova sincronizada por construcción) + ondas que dañan cada 0.1 s + quemadura 10 s + agujero negro orientado al centro + lente 1.4× + aberración transparente + PhoenixNova detrás del sol"
 
-### 11.2 Qué se hizo en v5.90 (revert del sol + agujero negro rehecho a pedido del usuario)
+### 11.2 Qué se hizo en v5.91 (el sol autorita su explosión final + ondas con daño cada 0.1 s)
+
+**Peticiones del usuario** (plan aprobado — "ejecuta todo lo demás"): la explosión
+final es la del SupernovaStaff, debe estar SINCRONIZADA y ser la final con
+partículas DEL COLOR DEL SOL; partículas absorbidas del agujero negro UBICADAS
+EN DIRECCIÓN AL CENTRO; lente ligeramente MÁS GRANDE; aberración cromática
+TRANSPARENTE; partículas ACELERÁNDOSE al explotar; ondas que dañan A MEDIDA QUE
+AVANZAN (área + cada 0.1 s); PhoenixNova DETRÁS del sol; quemadura 10 s; el
+agujero negro tiene 10× MÁS fuerza de atracción que el sol (2.6 vs 0.26).
+
+1. **SOL — explosión final autoritaria**: el OnKill del sol (muerte EXACTA a
+   los 10 s, timeLeft fijo) ahora (a) mata la Supernova hija EN EL MISMO TICK
+   (`TryKillSupernova` — flash + estallido sincronizados POR CONSTRUCCIÓN, sin
+   depender del índice ai[1] ni del clamp de timeLeft de la v5.88, el punto
+   único de fallo de la "onda que no se procesaba"), (b) genera LAS 3 ONDAS DE
+   FUEGO (360/450/540, daño sol × 1.25 × 0.5) y (c) el AoE del núcleo (340 px,
+   daño sol × 1.25) + quemadura 10 s. La nova hija nace con flag `ai[2]=1`
+   (SunInvoked) → NO genera ondas/AoE propios (cero dobles); la
+   SupernovaStaff standalone (`ai[2]=0`) conserva su explosión completa.
+2. **PARTÍCULAS DEL COLOR DEL SOL**: la carga de la nova ya no vira al azul —
+   halo dorado (255,200,90) → BLANCO DORADO (255,235,115), núcleo (255,250,215),
+   luz en la familia cálida; quemadura de contacto 5 s → 10 s.
+3. **ONDAS CON DAÑO CADA 0.1 s** (CosmicShockwave): `_hitNPCs` (bool, un golpe
+   por NPC) → `_nextHitAt` (int, cooldown): cada NPC en la BANDA del frente
+   ([0.72·front, 1.02·front] expansivas) recibe daño cada 6 ticks = 0.1 s
+   EXACTOS mientras la onda lo barre; el disco completo queda cubierto desde
+   el centro ("daño en área"). Fuego: quemadura 600 ticks (10 s). Cromática:
+   alphas RGB 230 → 140 y núcleo 150 → 95 (TRANSPARENTE).
+4. **AGUJERO NEGRO**: materia absorbida con velocidad RADIAL hacia el centro y
+   eje largo apuntando AL CENTRO (Rotation = angle + π); nuevo
+   `ParticleManager.PullToGlobalBoost` (1 + expansion·5, hasta ×6) dispara la
+   aceleración de TODA la materia absorbida durante la secuencia de muerte
+   ("acelerarse en el momento de explotar"), reseteado en OnKill; el polvo
+   dorado también acelera (hasta ×3); lente 1.1× → 1.4× (mismo ángulo pico
+   ~0.8 rad — delgada); vida 10 s (600) y gravedad 2.6 = 10× el sol (0.26)
+   confirmados y documentados.
+5. **PHOENIXNOVA DETRÁS DEL SOL + FIX CRÍTICO DEL BATCH**: hook `DrawBehind`
+   → `drawCacheProjsBehindProjectiles` (firma verificada por reflexión contra
+   tML real; DrawCachedProjs se dibuja ANTES de DrawProjectiles) → la
+   llamarada erupciona POR DETRÁS del cuerpo de la estrella. Y el bug REAL de
+   los "círculos que subían" (presente desde v5.88): el PreDraw del PhoenixNova
+   restauraba el SpriteBatch SIN Main.GameViewMatrix.TransformationMatrix (ni
+   sampler/rasterizer) → todos los proyectiles vanilla posteriores se dibujaban
+   sin el transform del mundo. Ahora el restore es EXACTO al estado de tML.
+
+### 11.2.1 Qué se hizo en v5.90 (histórico — revert del sol + agujero negro rehecho)
 
 **Reporte del usuario** (tras probar v5.89 en juego): el sol EMPEORÓ (círculos
 SoftGlow subiendo desde la estrella + onda expansiva perdida — las llamaradas
@@ -817,7 +862,7 @@ aberración + daño) y lente delgada.
 5. **Lente delgada**: parámetros 24→1.5 rad / 0.62→0.55 / radio 0.75×→1.1×.
    El .fxc NO se puede recompilar aquí (sin mgfxc/wine) — fix solo parámetros.
 
-### 11.2.1 Qué se hizo en v5.89 (histórico — pantalla negra del agujero + sol + excepciones del log)
+### 11.2.2 Qué se hizo en v5.89 (histórico — pantalla negra del agujero + sol + excepciones del log)
 
 **Errores reportados** (captura + client.log de la v5.88 EN JUEGO — el mod ya cargaba):
 

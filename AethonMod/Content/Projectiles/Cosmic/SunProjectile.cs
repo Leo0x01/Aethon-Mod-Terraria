@@ -26,14 +26,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// CICLO DE VIDA (v5.85/v5.86) — el sol como cuerpo celeste completo:
     ///   - t=0s    : nace con pop elástico (SIN llamarada: en t=0 aún está
     ///               sobre el jugador y la nova estallaría en su posición).
-    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s).
+    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s) —
+    ///               v5.91: la llamarada (PhoenixNova) se dibuja DETRÁS del
+    ///               cuerpo del sol (DrawBehind → drawCacheProjsBehindProjectiles).
     ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
     ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
     ///               y su luz se intensifica (materia convergiendo en espiral).
+    ///               v5.91: nace con el flag ai[2]=1 ("invocada por el sol") para
+    ///               NO duplicar ondas al morir — las ondas de fuego las genera
+    ///               EL SOL (autoridad absoluta de la sincronización).
     ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE — nova masiva con
-    ///               3 ONDAS EXPANSIVAS DE FUEGO (v5.86), cada una con daño
-    ///               propio y QUEMADURA (OnFire), más el estallido de dusts
-    ///               y temblor de pantalla.
+    ///               3 ONDAS EXPANSIVAS DE FUEGO que BARRIAN dañando cada 0.1 s
+    ///               (v5.91) y aplicando QUEMADURA de 10 s, más el estallido de
+    ///               dusts y temblor de pantalla.
+    ///
+    /// v5.91 — LA EXPLOSIÓN FINAL ES LA SUPERNOVA (SupernovaStaff), SINCRONIZADA
+    /// POR CONSTRUCCIÓN: el OnKill del sol es ahora la AUTORIDAD de la explosión
+    /// final — (1) mata la Supernova hija EN EL MISMO TICK (su flash + partículas
+    /// estallan exactamente con el sol, sin depender de la sincronización por
+    /// índice de la v5.88, que era el punto único de fallo de la "onda expansiva
+    /// que no se procesaba"), (2) genera las 3 ondas de fuego y (3) el AoE del
+    /// núcleo con el daño de la nova (daño del sol × 1.25). La Supernova hija
+    /// (ai[2]=1) se salta sus propias ondas/AoE: CERO doble explosión — su
+    /// papel es ser EL ESPECTÁCULO FINAL (flash + estallido + viento estelar).
     ///
     /// GRAVEDAD (cuerpo celeste): atrae solo enemigos, con una fuerza ~10 veces
     /// menor que la del agujero negro. Durante la carga de la supernova (últimos
@@ -133,12 +148,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.timeLeft == SupernovaSpawnAtRemaining && Projectile.owner == Main.myPlayer)
             {
                 int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+                // v5.91 — ai[2] = 1: flag "invocada por el sol". La Supernova
+                // hija NO generará sus propias ondas/AoE al morir (el OnKill del
+                // SOL es la autoridad de la explosión final: ondas + AoE salen
+                // del sol, la hija aporta el espectáculo visual sincronizado).
+                // Así jamás hay doble explosión ni dependencia frágil de índices.
                 int idx = Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center, Projectile.velocity,
                     ModContent.ProjectileType<V20.SupernovaProjectile>(),
                     novaDamage, Projectile.knockBack,
-                    Projectile.owner);
+                    Projectile.owner,
+                    0f, 0f, 1f); // ai[0]=edad, ai[1]=libre, ai[2]=SunInvoked
                 SupernovaIndex = idx;
             }
 
@@ -732,6 +753,58 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
+            // ================================================================
+            //  v5.91 — LA EXPLOSIÓN FINAL ES LA SUPERNOVA, SINCRONIZADA POR
+            //  CONSTRUCCIÓN: el OnKill del sol es la AUTORIDAD (el sol muere
+            //  EXACTAMENTE a los 10 s — timeLeft fijo, nada lo mata antes).
+            //  ================================================================
+            //  1. Mata la Supernova hija EN ESTE MISMO TICK → su flash + estallido
+            //     + viento estelar ocurren EXACTAMENTE con la muerte del sol
+            //     (la v5.88 dependía de la sincronización por índice ai[1] + un
+            //     clamp de timeLeft — punto único de fallo del "la onda no se
+            //     procesó correctamente": si el índice cambiaba o el clamp no
+            //     llegaba a aplicar, la nova moría antes/después del sol y la
+            //     ola se perdía o descuadraba).
+            //  2. Genera LAS 3 ONDAS EXPANSIVAS DE FUEGO (las mismas de la nova
+            //     v5.88: radii 360/450/540, retardo escalonado de 8 ticks) con el
+            //     daño de la nova (sol × 1.25 × 0.5) — cada una BARRA dañando
+            //     cada 0.1 s a medida que avanza y aplicando QUEMADURA 10 s.
+            //  3. AoE del núcleo (340 px) con el daño de la nova + quemadura 10 s.
+            //  La Supernova hija (ai[2]=1) NO genera ondas/AoE propios → cero
+            //  dobles. La SupernovaStaff standalone conserva su explosión completa.
+            TryKillSupernova();
+
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+                int waveDamage = Math.Max(1, (int)(novaDamage * 0.5f));
+                float[] radii = { 360f, 450f, 540f };
+                for (int i = 0; i < 3; i++)
+                {
+                    Projectile.NewProjectile(
+                        Projectile.GetSource_FromThis(),
+                        Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                        ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                        waveDamage, 0f, Projectile.owner,
+                        -i * 8f,                                      // edad: retardo escalonado
+                        CosmicShockwaveProjectile.StyleFire,
+                        radii[i]);                                    // radio máximo
+                }
+
+                // Daño AoE del núcleo de la nova (el epicentro de la explosión).
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.CanBeChasedBy()) continue;
+                    float dist = (npc.Center - Projectile.Center).Length();
+                    if (dist < 340f)
+                    {
+                        npc.SimpleStrikeNPC(novaDamage, npc.direction,
+                            false, Projectile.knockBack, DamageClass.Magic);
+                        npc.AddBuff(BuffID.OnFire, 600); // quemadura 10 s
+                    }
+                }
+            }
+
             if (Main.netMode == NetmodeID.Server) return;
 
             // === NOVA MASIVA (segundo 10, sincronizada con la explosión de la Supernova) ===
@@ -826,9 +899,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45, Projectile.Center);
         }
 
-        // ------------------------------------------------------------------
-        //  HELPERS
-        // ------------------------------------------------------------------
+        /// <summary>
+        /// v5.91 — Mata la Supernova hija EN EL MISMO TICK que el sol (si sigue
+        /// viva): su OnKill visual (flash + estallido + viento) estalla
+        /// EXACTAMENTE con la muerte del sol — sincronización perfecta POR
+        /// CONSTRUCCIÓN, sin depender de índices ni clamps de timeLeft. La
+        /// hija detecta el flag ai[2]=1 y NO genera ondas/AoE (el sol ya lo
+        /// hizo): cero dobles explosiones.
+        /// </summary>
+        private void TryKillSupernova()
+        {
+            if (SupernovaIndex < 0f) return;
+            int idx = (int)SupernovaIndex;
+            if (idx >= 0 && idx < Main.maxProjectiles &&
+                Main.projectile[idx].active &&
+                Main.projectile[idx].type == ModContent.ProjectileType<V20.SupernovaProjectile>())
+            {
+                // Kill() dispara su OnKill AHORA — mismo tick que el sol.
+                Main.projectile[idx].Kill();
+            }
+            SupernovaIndex = -1f;
+        }
 
         /// <summary>Elastic ease-out (curva elástica de aparición).</summary>
         private static float ElasticOut(float t)

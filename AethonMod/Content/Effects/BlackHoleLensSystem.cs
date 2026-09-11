@@ -64,6 +64,13 @@ namespace AethonMod.Content.Effects
     /// anillo estrecho alrededor del agujero y muere a ~3 radios — el resto
     /// de la pantalla queda INTACTA.
     ///
+    /// v5.91 — LENTE LIGERAMENTE MÁS GRANDE: radio 1.1× → 1.4× el tamaño
+    /// visual del agujero (petición del usuario: "la lente gravitacional debe
+    /// ser ligeramente más grande"). El ángulo pico SE MANTIENE en ~0.8 rad
+    /// (sigue siendo delgada): solo el ANILLO donde vive la deformación se
+    /// ensancha — abraza el disco de acreción completo y muere a ~3 radios
+    /// (≈ 4.2× el tamaño visual), el resto de la pantalla sigue intacta.
+    ///
     /// v5.87 — Unload() con programación defensiva: tModLoader descarga los
     /// mods en un hilo de carga secundario, pero FNA3D exige que Dispose()
     /// de recursos gráficos corra en el hilo principal. El render target se
@@ -235,11 +242,12 @@ namespace AethonMod.Content.Effects
                     if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
                         continue;
 
-                    // Radio de influencia en UV: v5.90 — 1.1× el tamaño visual
-                    // (antes 0.75): con el ángulo pico reducido a ~0.8 rad el
-                    // anillo de distorsión debe abrazar el borde del núcleo para
-                    // seguir siendo visible, pero muere a ~3 radios: DELGADA.
-                    float radius = p.width * p.scale / screenSize.X * 1.1f;
+                    // Radio de influencia en UV: v5.91 — 1.4× el tamaño visual
+                    // (antes 1.1×, petición del usuario: "ligeramente más grande").
+                    // Con el ángulo pico reducido a ~0.8 rad el anillo de
+                    // distorsión sigue siendo DELGADO (no mueve toda la pantalla):
+                    // solo abraza el disco de acreción completo y muere a ~3 radios.
+                    float radius = p.width * p.scale / screenSize.X * 1.4f;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
                     // (nace con el pop elástico, crece con la expansión final del

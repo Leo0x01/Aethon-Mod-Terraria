@@ -48,6 +48,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// polvo dorado en espiral, chispas capturadas, disco de acreción naranja y
     /// anillo de fotones. El halo exterior pasó de púrpura a ámbar profundo.
     ///
+    /// v5.91 — MATERIA ABSORBIDA ORIENTADA AL CENTRO: las estelas ya no viajan
+    /// tangenciales — nacen con velocidad RADIAL hacia el centro y su eje largo
+    /// apunta AL CENTRO del agujero (petición del usuario: "deben estar ubicadas
+    /// en dirección hacia el centro"), con una componente tangencial sutil que
+    /// mantiene la caída en espiral del infalling. La ACELERACIÓN de absorción
+    /// (PullTo) se dispara durante la secuencia de muerte (PullToGlobalBoost,
+    /// hasta ×6 en el instante de explotar: "la velocidad de las partículas debe
+    /// acelerarse en el momento de explotar").
+    ///
+    /// v5.91 — VIDA = 10 SEGUNDOS EXACTOS (600 ticks, ya estaba en 600 desde
+    /// v5.86: t=0 pop elástico → t-90 crece hinchándose → t-36 evaporación →
+    /// t-0 UNA explosión cromática). GRAVEDAD: fuerza 2.6 — el agujero negro
+    /// tiene 10 VECES MÁS fuerza de atracción que el sol (0.26, ver
+    /// SunProjectile): el sol nunca lo iguala ni en su pico de carga (×4 =
+    /// 1.04 < 2.6).
+    ///
     /// v5.85 — LENTE GRAVITACIONAL de pantalla (BlackHoleLensSystem): el fondo
     /// real del juego se distorsiona alrededor del horizonte de sucesos con el
     /// shader BlackHoleDistortionShader (formalismo relativista con decaimiento
@@ -123,6 +139,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 expansion = 1f;
             }
 
+            // === v5.91 — ACELERACIÓN DE LA MATERIA ABSORBIDA HACIA LA EXPLOSIÓN ===
+            // La fuerza PullTo de TODAS las partículas absorbidas se multiplica
+            // por 1 + expansion·5 (hasta ×6 al evaporarse): la materia literalmente
+            // ACELERA hacia el centro en el momento de explotar (petición del
+            // usuario). El OnKill la resetea a 1f — jamás queda acelerada "colgada".
+            // (Con dos agujeros simultáneos escribe el más avanzado por frame —
+            // el boost es visual y no acumulativo.)
+            ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
+
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
 
@@ -152,8 +177,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS ===
             // Radio 450 que crece +60% durante la secuencia de muerte (el área de
             // efecto se expande con la hinchazón final hasta la evaporación).
+            // v5.91 — Fuerza 2.6: el agujero negro tiene 10× MÁS fuerza de
+            // atracción que el sol (SunProjectile usa 2.6/10 = 0.26, e incluso
+            // su pico de carga ×4 = 1.04 queda por debajo).
             float gravityRadius = 450f * (1f + expansion * 0.6f);
-            const float gravityStrength = 2.6f;
+            const float gravityStrength = 2.6f; // sol: 0.26 (10 veces menos)
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.CanBeChasedBy()) continue;
@@ -185,6 +213,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// </summary>
         private void SpawnAbsorbedDusts()
         {
+            // v5.91 — Aceleración de la materia en la secuencia de muerte:
+            // el polvo dorado también se acelera hacia el centro cuando el
+            // agujero se hincha para explotar (hasta ×3 en la evaporación).
+            float deathSpeedBoost = 1f;
+            if (Projectile.timeLeft <= 90f)
+                deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
+
             for (int i = 0; i < 2; i++)
             {
                 float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 2f) +
@@ -195,8 +230,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Sin(angle) * dist);
 
                 Vector2 toCenter = Projectile.Center - spawnPos;
-                // Más rápido cuanto más cerca del horizonte
-                float speed = 4f + 4f * (1f - dist / 155f);
+                // Más rápido cuanto más cerca del horizonte (y acelerado por
+                // la muerte: la materia se precipita a la implosión).
+                float speed = (4f + 4f * (1f - dist / 155f)) * deathSpeedBoost;
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
@@ -282,12 +318,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// v5.90 — MATERIA ABSORBIDA por el agujero negro: estelas TrailGlow
+        /// v5.91 — MATERIA ABSORBIDA por el agujero negro: estelas TrailGlow
         /// cálidas (ámbar → blanco incandescente) que nacen en el borde del
-        /// campo gravitatorio con velocidad TANGENCIAL y usan el componente
-        /// PullTo para acelerar hacia el centro — caen en espiral cada vez más
-        /// rápido y MUEREN al llegar al horizonte (devoradas). Sin morados:
+        /// campo gravitatorio ORIENTADAS HACIA EL CENTRO — su eje largo apunta
+        /// al centro del agujero y su velocidad inicial es RADIAL hacia dentro
+        /// (con una componente tangencial sutil que mantiene la caída en
+        /// espiral) — y usan el componente PullTo para acelerar hacia el
+        /// centro, MURIENDO al llegar al horizonte (devoradas). Sin morados:
         /// la materia se calienta al caer, como un disco de acreción real.
+        /// v5.91: durante la secuencia de muerte la fuerza de succión se
+        /// dispara (PullToGlobalBoost — la materia ACELERA hacia el centro
+        /// justo en el momento de explotar, petición del usuario).
         /// </summary>
         private void SpawnLibraryAbsorbedMatter()
         {
@@ -299,10 +340,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
 
-                // Velocidad inicial TANGENCIAL (órbita): la gravedad del
-                // componente PullTo la curva hacia dentro → espiral de infalling.
+                // v5.91 — Velocidad inicial RADIAL HACIA EL CENTRO (la
+                // orientación que pidió el usuario): el vector unitario que
+                // apunta al centro es -(cos θ, sin θ). Una componente
+                // tangencial SUTIL mantiene la espiral de infalling, pero el
+                // movimiento dominante es "hacia el centro del agujero".
+                Vector2 inward = new Vector2(-(float)Math.Cos(angle), -(float)Math.Sin(angle));
                 Vector2 tangent = new Vector2(-(float)Math.Sin(angle), (float)Math.Cos(angle));
-                Vector2 velocity = tangent * Main.rand.NextFloat(1.2f, 2.0f);
+                Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
+                                   tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
                 // Materia fría lejana → incandescente al rozar el horizonte.
                 Color start = new Color(255, 185, 95, 190);
@@ -313,7 +359,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Position = spawnPos,
                     Velocity = velocity,
                     Scale = new Vector2(1.35f, 0.42f), // estela estirada al movimiento
-                    Rotation = angle + MathHelper.PiOver2, // alineada a la tangente
+                    // v5.91 — el eje largo de la estela APUNTA AL CENTRO
+                    // (angle + π: la dirección de la caída, "ubicadas en
+                    // dirección hacia el centro del agujero").
+                    Rotation = angle + MathHelper.Pi,
                     PackedColor = ParticleManager.PackColor(start),
                     PackedStartColor = ParticleManager.PackColor(start),
                     PackedEndColor = ParticleManager.PackColor(end),
@@ -324,7 +373,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     LayerPriority = LayerPriorities.AboveLens,
                 };
                 // PullTo: UserData0/1 = centro del agujero, UserData3 = fuerza
-                // de succión (aceleración por tick hacia el centro).
+                // de succión (aceleración por tick hacia el centro). La fuerza
+                // EFECTIVA se multiplica por PullToGlobalBoost en la librería
+                // (×6 durante la evaporación: aceleración al explotar).
                 p.UserData0 = Projectile.Center.X;
                 p.UserData1 = Projectile.Center.Y;
                 p.UserData3 = 0.09f;
@@ -703,6 +754,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     CosmicShockwaveProjectile.StyleChromatic,
                     620f);                                   // radio máximo
             }
+
+            // v5.91 — reset del boost de succión: la materia absorbida ya no
+            // acelera (el agujero explotó; la librería vuelve a su fuerza base).
+            ParticleManager.PullToGlobalBoost = 1f;
 
             if (Main.netMode == NetmodeID.Server) return;
 

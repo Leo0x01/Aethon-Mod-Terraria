@@ -59,6 +59,16 @@ namespace AethonMod.Content.Particles
         public static int ActiveCount => _buffer?.ActiveCount ?? 0;
         public static int Capacity => _buffer?.Capacity ?? 0;
 
+        /// <summary>
+        /// v5.91 — multiplicador GLOBAL de la fuerza PullTo. Lo impulsa el
+        /// agujero negro durante su secuencia de muerte (crecimiento →
+        /// evaporación): la materia absorbida ACELERA hacia el centro justo
+        /// antes de la explosión final (hasta ×6 en el instante de explotar).
+        /// 1f = sin boost (comportamiento v5.90). El agujero lo resetea a 1f
+        /// en su OnKill — la librería nunca queda acelerada "colgada".
+        /// </summary>
+        public static float PullToGlobalBoost { get; set; } = 1f;
+
         public override void OnModLoad()
         {
             if (Terraria.ID.NetmodeID.Server == Main.netMode) return;
@@ -221,6 +231,10 @@ namespace AethonMod.Content.Particles
                 // (materia absorbida por el agujero negro): con velocidad
                 // inicial tangencial la partícula cae en espiral cada vez más
                 // rápida y MUERE al llegar al centro (devorada por el horizonte).
+                // v5.91 — la fuerza se multiplica por PullToGlobalBoost: el
+                // agujero la dispara durante su secuencia de muerte para que
+                // la materia ABSORBIDA SE ACELERE hacia el centro en el momento
+                // de explotar (petición explícita del usuario).
                 if (p.HasComponent(ComponentFlag.PullTo) &&
                     (p.UserData0 != 0f || p.UserData1 != 0f))
                 {
@@ -235,7 +249,7 @@ namespace AethonMod.Content.Particles
                     }
                     if (dist > 0.001f)
                     {
-                        float pullStrength = p.UserData3 != 0 ? p.UserData3 : 0.08f;
+                        float pullStrength = (p.UserData3 != 0 ? p.UserData3 : 0.08f) * PullToGlobalBoost;
                         p.Velocity += toCenter / dist * pullStrength;
                     }
                 }

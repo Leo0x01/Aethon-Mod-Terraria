@@ -13,22 +13,39 @@ namespace AethonMod.Content.Projectiles.V20
     /// SupernovaProjectile — estrella que colapsa durante 3 segundos y luego
     /// estalla en una supernova masiva (v5.85, reescrito).
     ///
+    /// v5.91 — LA EXPLOSIÓN FINAL DEL SOL (SupernovaStaff): el SunProjectile
+    /// la invoca en su segundo 7 con el flag ai[2]=1 (SunInvoked) y la mata
+    /// EN SU MISMO TICK de muerte → sincronización POR CONSTRUCCIÓN. Cuando
+    /// es hija del sol, esta supernova NO genera sus propias ondas/AoE (el
+    /// OnKill del SOL es la autoridad: él genera las 3 ondas de fuego con daño
+    /// cada 0.1 s + quemadura 10 s y el AoE del núcleo) — la hija aporta EL
+    /// ESPECTÁCULO FINAL: flash blanco, estallido, viento estelar y temblor.
+    /// Lanzada sola (SupernovaStaff, ai[2]=0) conserva su explosión COMPLETA.
+    ///
+    /// v5.91 — PARTÍCULAS DEL COLOR DEL SOL (petición del usuario): la carga ya
+    /// NO se blanquea hacia el azul — el halo pasa de dorado (255, 200, 90) a
+    /// BLANCO DORADO incandescente (255, 235, 115), el núcleo es blanco-dorado
+    /// (255, 250, 215) y la luz se mantiene en la familia cálida de la estrella
+    /// (amarillo-oro-naranja, como la corona del SunShader).
+    ///
     /// CICLO (180 ticks = 3 segundos exactos):
-    ///   - CARGA (0..180): contrae acelerando y se vuelve blanco-azulado,
+    ///   - CARGA (0..180): contrae acelerando y se vuelve blanco-dorado,
     ///     atrae enemigos con fuerza CRECIENTE (0.5 → 2.2), genera GoldFlame
     ///     en espiral hacia dentro cada vez más rápido, y tiembla con
     ///     sacudidas de cámara que anticipan el estallido.
-    ///   - ONKILL (tick 180): EXPLOSIÓN MASIVA (v5.86):
-    ///       * 3 ONDAS EXPANSIVAS DE FUEGO (CosmicShockwaveProjectile estilo 2,
-    ///         escalonadas): cada una hace daño propio al pasar y aplica
-    ///         QUEMADURA (OnFire, 5 s) a los enemigos alcanzados.
+    ///   - ONKILL (tick 180): EXPLOSIÓN MASIVA (v5.86/v5.91):
+    ///       * [solo standalone] 3 ONDAS EXPANSIVAS DE FUEGO (CosmicShockwaveProjectile
+    ///         estilo 2, escalonadas): cada una BARRA dañando cada 0.1 s a medida
+    ///         que avanza y aplica QUEMADURA (OnFire, 10 s) a los enemigos barridos.
+    ///       * [solo standalone] AoE del núcleo de 340 px + quemadura 10 s.
     ///       * Flash blanco gigante + destello de destellos (SparkleStar)
     ///       * 70 lenguas de GoldFlame + 25 chispas blancas + brasas + humo
     ///       * Temblor de cámara fuerte (PunchCameraModifier)
     ///
-    /// INTEGRACIÓN CON EL SOL (SunProjectile): el sol lo invoca en su segundo 7,
-    /// lo mantiene centrado y ambos explotan SIMULTÁNEAMENTE en el segundo 10 —
-    /// estas ondas de fuego SON la onda expansiva final de la explosión del sol.
+    /// INTEGRACIÓN CON EL SOL (SunProjectile): el sol la invoca en su segundo 7,
+    /// la mantiene centrada y ambos explotan SIMULTÁNEAMENTE en el segundo 10 —
+    /// el sol mata a la nova en su propio OnKill (v5.91) y genera las ondas de
+    /// fuego él mismo: la explosión final SIEMPRE sale sincronizada.
     /// La fuerza de succión durante la carga se suma a la gravedad creciente
     /// del propio sol → los enemigos son arrastrados al centro de la nova.
     /// </summary>
@@ -38,6 +55,15 @@ namespace AethonMod.Content.Projectiles.V20
         private const int ChargeDuration = 180;
 
         private float Age { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
+
+        /// <summary>
+        /// v5.91 — ¿Fue invocada por el sol? (ai[2] = 1). Las hijas del sol NO
+        /// generan ondas/AoE al morir — el OnKill del SOL es la autoridad de la
+        /// explosión final (las genera él, sincronizadas con su muerte). Las
+        /// novas standalone (SupernovaStaff, ai[2] = 0) conservan la explosión
+        /// completa con ondas y AoE propios.
+        /// </summary>
+        private bool SunInvoked => Projectile.ai[2] == 1f;
 
         public override void SetStaticDefaults()
         {
@@ -133,10 +159,12 @@ namespace AethonMod.Content.Projectiles.V20
                     }
                 }
 
-                // === CARGA: luz que se blanquea e intensifica ===
+                // === CARGA: luz que se INTENSIFICA EN LA FAMILIA CÁLIDA DEL SOL ===
+                // v5.91 — sin azul: la luz blanquea dentro de la paleta dorada
+                // de la estrella (partículas del color del sol).
                 float lightIntensity = 1f + chargeEased * 1.6f;
                 Lighting.AddLight(Projectile.Center,
-                    new Vector3(1f, 0.9f - 0.15f * chargeEased, 0.6f - 0.35f * chargeEased) * lightIntensity);
+                    new Vector3(1f, 0.85f - 0.05f * chargeEased, 0.55f - 0.1f * chargeEased) * lightIntensity);
             }
             catch { }
         }
@@ -146,13 +174,20 @@ namespace AethonMod.Content.Projectiles.V20
         // ================================================================
         public override void OnKill(int timeLeft)
         {
-            // === v5.86 — 3 ONDAS EXPANSIVAS DE FUEGO ===
-            // La onda final de la explosión del sol: tres frentes ardientes
-            // escalonados (retardo de 8 ticks) con triple anillo rojo/naranja/
-            // amarillo y llamas a lo largo del frente. CADA UNA hace daño
-            // cuando su frente alcanza al enemigo y aplica QUEMADURA (OnFire).
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === v5.91 — HIJA DEL SOL: SOLO ESPECTÁCULO ===
+            // Cuando el sol la mata (TryKillSupernova en el OnKill del sol),
+            // ESTA nova aporta el flash + estallido + viento estelar — las ONDAS
+            // DE FUEGO y el AoE del núcleo los genera EL SOL (autoridad de la
+            // sincronización): cero dobles explosiones. Las novas standalone
+            // (SupernovaStaff) conservan su explosión completa.
+            if (!SunInvoked && Main.netMode != NetmodeID.MultiplayerClient)
             {
+                // === v5.86/v5.91 — 3 ONDAS EXPANSIVAS DE FUEGO (solo standalone) ===
+                // La onda final de la explosión: tres frentes ardientes
+                // escalonados (retardo de 8 ticks) con triple anillo rojo/naranja/
+                // amarillo y llamas a lo largo del frente. CADA UNA barre daño
+                // de área cada 0.1 s a medida que avanza y aplica QUEMADURA
+                // (OnFire, 10 s — v5.91: era 5 s).
                 int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
                 float[] radii = { 360f, 450f, 540f };
                 for (int i = 0; i < 3; i++)
@@ -166,11 +201,9 @@ namespace AethonMod.Content.Projectiles.V20
                         CosmicShockwaveProjectile.StyleFire,
                         radii[i]);                                    // radio máximo
                 }
-            }
 
-            // Daño AoE del núcleo de la nova: solo en la autoridad.
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
+                // Daño AoE del núcleo de la nova: solo en la autoridad
+                // (standalone — la hija del sol deja este golpe al OnKill del sol).
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
@@ -179,7 +212,7 @@ namespace AethonMod.Content.Projectiles.V20
                     {
                         npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
                             false, Projectile.knockBack, DamageClass.Magic);
-                        npc.AddBuff(BuffID.OnFire, 300);
+                        npc.AddBuff(BuffID.OnFire, 600); // quemadura 10 s (v5.91)
                     }
                 }
             }
@@ -330,20 +363,23 @@ namespace AethonMod.Content.Projectiles.V20
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // === Halo contraído: de dorado (2.0) a blanco-azulado compacto (0.6) ===
+                // === Halo contraído: de dorado (2.0) a BLANCO DORADO compacto (0.6) ===
+                // v5.91 — partículas del color del sol: el halo ya NO se
+                // desplaza al blanco-AZUL (255,255,245 de la v5.88) — se
+                // condensa en BLANCO DORADO (255, 235, 115), la paleta cálida
+                // de la corona del SunShader.
                 float scale = 2.0f - chargeEased * 1.4f;
-                // El color se desplaza de oro a blanco puro.
                 int r = 255;
-                int g = (int)(180 + 75 * chargeEased);
-                int b = (int)(80 + 165 * chargeEased);
+                int g = (int)(200 + 35 * chargeEased);  // 200 → 235 (dorado → dorado claro)
+                int b = (int)(90 + 25 * chargeEased);   // 90 → 115 (sin azul)
                 Color halo = new Color(r, g, b, 220);
                 // Pulso creciente cerca del estallido.
                 float pulse = 1f + (float)Math.Sin(Age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
                 Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin, scale * pulse, SpriteEffects.None, 0f);
 
-                // Núcleo blanco-caliente que crece en proporción (la masa se condensa).
+                // Núcleo BLANCO-DORADO que crece en proporción (la masa se condensa).
                 float coreScale = 0.4f + chargeEased * 0.28f;
-                Color core = new Color(255, 255, 255, 240);
+                Color core = new Color(255, 250, 215, 240);
                 Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin, coreScale * pulse, SpriteEffects.None, 0f);
 
                 // === Anillos de contención pulsantes (la estrella luchando por no colapsar) ===
@@ -376,8 +412,9 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
-                // La materia estelar inflama al contacto.
-                target.AddBuff(BuffID.OnFire, 300);
+                // La materia estellar inflama al contacto (10 s: v5.91 — la
+                // quemadura de la nova final acompaña a la de sus ondas).
+                target.AddBuff(BuffID.OnFire, 600);
             }
             catch { }
         }

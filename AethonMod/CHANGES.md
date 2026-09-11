@@ -1,5 +1,147 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.91 — El SOL autorita su explosión final (Supernova sincronizada) + agujero negro orientado al centro + ondas que dañan cada 0.1 s
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+**Peticiones del usuario** (aprobadas en el plan v5.91, "ejecuta todo lo demás"):
+
+1. *"La explosión final es SupernovaStaff, puedes verificar en commit anteriores,
+   esta debe estar sincronizada y debe ser la explosión final, las partículas
+   deben ser del color del sol"* — verificado en el historial: el sol SIEMPRE
+   invocó `SupernovaProjectile` (la estrella del SupernovaStaff) en su segundo 7.
+   Ahora la sincronización es POR CONSTRUCCIÓN y las partículas son doradas.
+2. *"Las partículas absorbidas por el agujero negro deben estar ubicadas en
+   dirección hacia el centro del agujero"* — antes viajaban TANGENCIALES.
+3. *"La lente gravitacional debe ser ligeramente más grande"* — 1.1× → 1.4×.
+4. *"La aberración cromática debe ser transparente"* — alpha 230 → 140.
+5. *"La velocidad de las partículas debe acelerarse en el momento de explotar"* —
+   PullToGlobalBoost (hasta ×6 en la evaporación).
+6. *"La onda expansiva (del agujero negro y del sol) debe hacer daño a medida
+   que avanza, daño en área y daño por cada 0.1 segundo"* — daño por BANDA del
+   frente cada 6 ticks.
+7. *"El agujero negro tiene más fuerza de atracción que el sol, y el sol solo
+   tiene 10 veces menos fuerza de gravedad"* — confirmado y documentado: 2.6
+   vs 0.26 (el pico de carga del sol ×4 = 1.04 jamás lo alcanza).
+8. *"El efecto PhoenixNovaStaff debe estar detrás del sol"* — DrawBehind.
+9. *"La onda expansiva del sol debe quemar causando el debuff quemadura por
+   10 segundos"* — OnFire 600 ticks en todas las golpes de la explosión final.
+
+### A. SOL — LA EXPLOSIÓN FINAL ES LA SUPERNOVA, SINCRONIZADA POR CONSTRUCCIÓN
+
+**Diagnóstico** (decompilando Terraria.Projectile/Main contra tML v2026.07.3.0):
+el diseño v5.88 hacia depender la onda de fuego del `OnKill` de la Supernova
+hija, que a su vez dependía de la sincronización por ÍNDICE (`ai[1]`) + un clamp
+de `timeLeft` en los últimos 2 ticks — un punto único de fallo: cualquier
+desviación (índice reciclado, clamp que no aplica, muerte descuadrada) y la onda
+se perdía o estallaba fuera de tiempo ("no se procesó correctamente o no se ve").
+
+**Rediseño v5.91** (SunProjectile.OnKill es ahora la AUTORIDAD — el sol muere
+EXACTAMENTE a los 10 s, su timeLeft es fijo y nada lo mata antes):
+
+1. **`TryKillSupernova()`**: el OnKill del sol mata la Supernova hija EN EL MISMO
+   TICK → su flash + estallido + viento estelar ocurren EXACTAMENTE con la muerte
+   del sol. Sincronización perfecta sin depender de índices ni clamps (el clamp
+   `timeLeft <= 2` se conserva como red de seguridad).
+2. **Las 3 ondas de fuego las genera EL SOL** (radii 360/450/540, retardo de 8
+   ticks) con el daño de la nova (sol × 1.25 × 0.5) — cada una barre daño cada
+   0.1 s + quemadura 10 s (ver sección C).
+3. **AoE del núcleo** (340 px) con el daño de la nova (sol × 1.25) + quemadura 10 s.
+4. **Flag `ai[2]=1` (SunInvoked)**: la nova hija NACE marcada como "invocada por
+   el sol" → su OnKill NO genera ondas/AoE propios (cero dobles explosiones);
+   aporta SOLO el espectáculo final (flash + estallido + viento + temblor).
+   La SupernovaStaff standalone (`ai[2]=0`) conserva su explosión COMPLETA.
+
+### B. SOL — PARTÍCULAS DEL COLOR DEL SOL (SupernovaProjectile)
+
+La carga de la nova ya NO se blanquea hacia el azul (255,255,245 de v5.88):
+- Halo: dorado (255,200,90) → **blanco dorado** (255,235,115) — sin canal azul.
+- Núcleo: **blanco-dorado** (255,250,215).
+- Luz de carga: familia cálida (1, 0.85→0.8, 0.55→0.45) — se intensifica sin
+  virar al azul, como la corona del SunShader.
+- Quemadura de la nova al contacto: 5 s → **10 s** (600 ticks).
+
+### C. ONDAS EXPANSIVAS — DAÑO CADA 0.1 s A MEDIDA QUE AVANZAN (ambas armas)
+
+`CosmicShockwaveProjectile.ApplyWaveDamage` reescrito:
+
+- ANTES (v5.90): un bool[] `_hitNPCs` marcaba a cada NPC golpeado UNA sola vez
+  en toda la vida de la onda (daño cuando el frente lo alcanzaba).
+- AHORA (v5.91): un int[] `_nextHitAt` de COOLDOWNS — cada NPC dentro de la
+  **BANDA del frente** (el anillo visible que avanza: [0.72·front, 1.02·front]
+  en expansivas; [0.98·front, 1.25·front] en la convergente legada) recibe
+  daño cada **6 ticks = 0.1 s EXACTOS** mientras la onda lo barre. La onda
+  expansiva nace en el centro (radio 0) → el disco completo queda cubierto
+  ("daño en área"). `SimpleStrikeNPC` no usa immunity frames → cada tick de la
+  banda registra un golpe limpio (verificado decompilando NPC.StrikeNPC).
+- **Estilo Fuego (sol/SupernovaStaff): quemadura 10 s** (OnFire 600, era 300).
+- **Estilo Cromático (agujero negro): TRANSPARENTE** — canales RGB alpha
+  230 → 140, núcleo blanco 150 → 95: un velo que deja ver el mundo a través
+  del anillo (antes era un anillo aditivo casi opaco).
+- `NewInstance`/`SetDefaults` siguen dando a cada onda su array FRESCO
+  (MemberwiseClone comparte arrays del prototipo — bug v5.88 documentado).
+
+### D. AGUJERO NEGRO — MATERIA ORIENTADA AL CENTRO + ACELERACIÓN AL EXPLOTAR
+
+1. **Orientación al centro** (`SpawnLibraryAbsorbedMatter`): las estelas ya no
+   viajan tangenciales — nacen con velocidad RADIAL hacia dentro (inward
+   1.8-2.8 + tangencial sutil 0.25-0.5 para la espiral de infalling) y su eje
+   largo apunta AL CENTRO (`Rotation = angle + π`): "ubicadas en dirección
+   hacia el centro del agujero".
+2. **Aceleración al explotar**: nuevo `ParticleManager.PullToGlobalBoost` —
+   el agujero lo dispara durante su secuencia de muerte
+   (`1 + expansion·5`, hasta ×6 en la evaporación): TODAS las partículas
+   absorbidas aceleran hacia el centro justo en el momento de explotar. El
+   OnKill lo resetea a 1f (nunca queda "colgado"). El polvo dorado también se
+   acelera (deathSpeedBoost hasta ×3).
+3. **Lente ligeramente más grande**: radio 1.1× → **1.4×** el tamaño visual
+   (BlackHoleLensSystem) — el ángulo pico SE MANTIENE en ~0.8 rad: sigue siendo
+   delgada, solo el anillo de deformación abraza el disco de acreción completo.
+4. **Vida 10 s confirmada** (600 ticks, ya estaba) y **gravedad 2.6 = 10× la
+   del sol** (0.26) documentado en el propio código.
+
+### E. PHOENIXNOVA — DETRÁS DEL SOL + FIX CRÍTICO DEL SPRITEBATCH
+
+1. **DrawBehind → `drawCacheProjsBehindProjectiles`** (firma verificada por
+   reflexión contra tModLoader real): tML dibuja esa cache ANTES de
+   `DrawProjectiles()` (verificado decompilando Main.DrawCachedProjs, línea del
+   pipeline: DrawNPCs → … → DrawCachedProjs(BehindProjectiles) →
+   DrawProjectiles) → la llamarada queda DETRÁS del cuerpo del sol y por
+   delante de los NPC. El disco de la estrella tapa el núcleo de los anillos y
+   estos se abren alrededor de la silueta — una llamarada ERUPCIONANDO por
+   detrás (el flash queda como backlight). A diferencia de la v5.89 (que usaba
+   `hide` + movió TODOS los dusts a otra capa y rompió el sol entero), este
+   cambio es quirúrgico: SOLO el orden de dibujado del proyectil llamarada.
+2. **Fix del bug del SpriteBatch (presente desde v5.88 — causa real de los
+   "círculos que subían")**: el PreDraw del PhoenixNova abría el batch SIN
+   `Main.GameViewMatrix.TransformationMatrix` (y sin sampler/rasterizer) y el
+   `Begin(Deferred, AlphaBlend)` final restauraba el batch SIN TRANSFORMAR para
+   TODOS los proyectiles posteriores del frame → dibujados en coordenadas de
+   mundo sin la vista, "flotando/subiendo" por la pantalla. Ahora todos los
+   Begin llevan el transform del mundo y el restore es EXACTO al estado que
+   tML espera (Deferred, AlphaBlend, DefaultSamplerState,
+   CullCounterClockwise, GameViewMatrix) — el mismo patrón del resto del mod.
+
+### F. VERIFICACIÓN
+
+- COMPILACIÓN contra tModLoader v2026.07.3.0 real (/tmp/verify): **0 errores,
+  0 warnings**.
+- Revisión de referencias huérfanas: `_hitNPCs` (renombrado `_nextHitAt`) sin
+  usos restantes; el hook `DrawBehind` existe en esta versión de tML con la
+  firma exacta usada; `Kill()` llama `ProjectileLoader.OnKill` incondicionalmente
+  (la fuerza-kill de la nova dispara su espectáculo en el mismo tick).
+
+**Prueba del usuario**: Develop Mods → Build → lanzar el SunStaff: llamaradas
+ERUPCIONANDO POR DETRÁS de la estrella (t=2,4,6,8 s), carga dorada (t=7-10 s,
+sin azul), y a los 10 s EXACTOS la Supernova estalla con el sol (flash dorado +
+3 ondas de fuego que BARRAN dañando cada 0.1 s + quemadura de 10 s). Lanzar el
+BlackHoleStaff: materia ámbar CAYENDO AL CENTRO (radial), lente más ancha,
+aceleración frenética de la materia al evaporarse y UNA onda cromática
+transparente que barre daño cada 0.1 s. Sin "círculos que suban" con otros
+proyectiles en pantalla.
+
+---
+
 ## Commit v5.90 — REVERT del sol a v5.88 + agujero negro rehecho (partículas absorbidas, UNA explosión cromática, lente delgada, sin corte)
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
