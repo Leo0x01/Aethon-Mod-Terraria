@@ -13,15 +13,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
-    /// RENDER (3 capas de profundidad):
+    /// RENDER (v5.89 — TODOS los efectos DETRÁS del cuerpo del sol):
+    ///   0. Carga de la supernova hija (DrawChargeVisuals): detrás de todo.
     ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
     ///   2. RadialShineShader sobre WavyBlotchNoise: color (252, 212, 112) * 0.24,
     ///      escala = width * scale * 2.72 / tamaño de la textura.
-    ///   3. SunShader sobre DendriticNoiseZoomedOut (canvas):
+    ///   3. SunShader sobre DendriticNoiseZoomedOut (canvas — EL CUERPO, encima):
     ///      coronaIntensityFactor = 0.05, mainColor = blanco, darkerColor = (204, 92, 25),
     ///      subtractiveAccentFactor = (181, 0, 0), sphereSpinTime = GlobalTimeWrappedHourly * 0.9,
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
     ///      escala = width * scale * 1.5 / tamaño de la textura.
+    ///   Los efectos ambientales (chispas, llamas, humo, llamaradas) son
+    ///   partículas de la librería en la capa BeforeProjectiles: se dibujan
+    ///   DETRÁS de este orden, nunca encima del cuerpo de la estrella. Las
+    ///   llamaradas (PhoenixNova) usan hide+DrawBehind para lo mismo.
     ///
     /// CICLO DE VIDA (v5.85/v5.86) — el sol como cuerpo celeste completo:
     ///   - t=0s    : nace con pop elástico (SIN llamarada: en t=0 aún está
@@ -133,12 +138,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.timeLeft == SupernovaSpawnAtRemaining && Projectile.owner == Main.myPlayer)
             {
                 int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+                // ai[1] = 1 → "pertenece al sol": la nova NO se dibuja por sí
+                // misma (su índice es mayor y taparía al sol); el sol pinta su
+                // carga DETRÁS de su propio cuerpo (v5.89).
                 int idx = Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center, Projectile.velocity,
                     ModContent.ProjectileType<V20.SupernovaProjectile>(),
                     novaDamage, Projectile.knockBack,
-                    Projectile.owner);
+                    Projectile.owner,
+                    0f, 1f);
                 SupernovaIndex = idx;
             }
 
@@ -196,12 +205,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
-                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
-                SpawnOrbitingSparks();
-                SpawnFlames();
-                SpawnSmoke();
-                SpawnSolarFlare();
-                SpawnTwinkles();
+                // v5.89 — TODOS los efectos ambientales del sol como partículas de
+                // la librería propia en la capa BeforeProjectiles: se dibujan
+                // DETRÁS del cuerpo del sol. Antes eran dusts vanilla, que se
+                // pintaban en la capa de polvo (DESPUÉS de los proyectiles) y
+                // quedaban ENCIMA de la estrella tapándola.
+                SpawnCoronaSparks();
+                SpawnSurfaceFlames();
+                SpawnWarmSmoke();
+                SpawnSolarFlareBurst();
 
                 // Partículas de la librería propia (capa de fondo aditiva)
                 SpawnLibraryCorona();
@@ -226,75 +238,116 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS VANILLA (capa frontal)
+        //  EFECTOS AMBIENTALES (v5.89: partículas de la librería en la capa
+        //  BeforeProjectiles — DETRÁS del cuerpo del sol)
         // ------------------------------------------------------------------
 
-        /// <summary>Chispas de fuego (Torch) orbitando y cayendo hacia la superficie.</summary>
-        private void SpawnOrbitingSparks()
+        /// <summary>Chispas de plasma cayendo en espiral hacia la fotosfera (TrailGlow naranja).</summary>
+        private void SpawnCoronaSparks()
         {
             if (Main.rand.NextBool(2))
             {
                 float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(40f, 60f);
+                float dist = Main.rand.NextFloat(40f, 60f) * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
-                Vector2 vel = Projectile.Center - spawnPos;
-                if (vel.LengthSquared() > 0.01f)
+                Vector2 toCenter = Projectile.Center - spawnPos;
+                if (toCenter.LengthSquared() > 0.01f)
                 {
-                    vel.Normalize();
-                    vel *= Main.rand.NextFloat(1f, 3f);
-                    vel += new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-1f, 1f));
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Torch,
-                        vel, 150, new Color(255, 150, 50), 1.0f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
+                    toCenter.Normalize();
+                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X);
+                    Vector2 vel = toCenter * Main.rand.NextFloat(1f, 3f) +
+                                  tangent * Main.rand.NextFloat(-1f, 1f);
+
+                    var p = new ParticleData
+                    {
+                        Position = spawnPos,
+                        Velocity = vel,
+                        Scale = new Vector2(1.2f, 0.35f),
+                        Rotation = (float)Math.Atan2(vel.Y, vel.X),
+                        PackedColor = ParticleManager.PackColor(new Color(255, 150, 50, 190)),
+                        PackedStartColor = ParticleManager.PackColor(new Color(255, 150, 50, 190)),
+                        PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 30)),
+                        TimeLeft = 34,
+                        Duration = 34,
+                        TextureId = ParticleTex.TrailGlow,
+                        BlendMode = 1,
+                        LayerPriority = LayerPriorities.BeforeProjectiles,
+                    };
+                    p.EnableComponent(ComponentFlag.FadeOut);
+                    p.EnableComponent(ComponentFlag.ColorShift);
+                    ParticleManager.Spawn(p);
                 }
             }
         }
 
-        /// <summary>Llamas de GoldFlame escapando de la fotosfera.</summary>
-        private void SpawnFlames()
+        /// <summary>Lenguas de plasma dorado escapando de la fotosfera (SoftGlow).</summary>
+        private void SpawnSurfaceFlames()
         {
             if (Main.rand.NextBool(3))
             {
                 float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(30f, 45f);
+                float dist = Main.rand.NextFloat(30f, 45f) * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
-                Vector2 vel = new Vector2(
-                    (float)Math.Cos(angle) * 2f,
-                    (float)Math.Sin(angle) * 2f);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                    vel, 200, new Color(255, 200, 100), 1.2f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = outward * Main.rand.NextFloat(1.4f, 2.4f),
+                    Scale = Vector2.One * Main.rand.NextFloat(0.7f, 1.1f),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 200, 100, 190)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 200, 100, 190)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 110, 30, 25)),
+                    TimeLeft = 40,
+                    Duration = 40,
+                    TextureId = ParticleTex.SoftGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                p.EnableComponent(ComponentFlag.ScaleDown);
+                ParticleManager.Spawn(p);
             }
         }
 
-        /// <summary>Humo cálido ascendiendo desde la corona.</summary>
-        private void SpawnSmoke()
+        /// <summary>Humo cálido ascendiendo desde la corona (SoftGlow en fusión alpha, tenue).</summary>
+        private void SpawnWarmSmoke()
         {
             if (Main.rand.NextBool(8))
             {
                 float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(50f, 70f);
+                float dist = Main.rand.NextFloat(50f, 70f) * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
-                Vector2 vel = new Vector2(
-                    (float)Math.Cos(angle) * 0.5f,
-                    (float)Math.Sin(angle) * 0.5f - 1f);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
-                    vel, 60, new Color(100, 60, 30), 0.6f);
-                d.noGravity = false;
-                d.fadeIn = 0f;
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = new Vector2(Main.rand.NextFloat(-0.3f, 0.3f), -0.9f),
+                    Scale = Vector2.One * Main.rand.NextFloat(0.9f, 1.4f),
+                    PackedColor = ParticleManager.PackColor(new Color(110, 65, 35, 60)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(110, 65, 35, 60)),
+                    TimeLeft = 70,
+                    Duration = 70,
+                    TextureId = ParticleTex.SoftGlow,
+                    BlendMode = 0,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.UserData0 = -0.01f;
+                p.EnableComponent(ComponentFlag.Gravity);
+                p.EnableComponent(ComponentFlag.FadeOut);
+                ParticleManager.Spawn(p);
             }
         }
 
-        /// <summary>Prominencias periódicas: explosión radial de fuego desde el borde (~0.75 s).</summary>
-        private void SpawnSolarFlare()
+        /// <summary>Prominencias periódicas: estallido radial de TrailGlow desde el borde (~0.75 s).</summary>
+        private void SpawnSolarFlareBurst()
         {
             if (VisualsTime % 45f == 0f && VisualsTime > 30f)
             {
@@ -307,31 +360,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 spawnPos = Projectile.Center + new Vector2(
                         (float)Math.Cos(angle) * dist,
                         (float)Math.Sin(angle) * dist);
-                    Vector2 vel = new Vector2(
-                        (float)Math.Cos(angle) * Main.rand.NextFloat(3f, 6f),
-                        (float)Math.Sin(angle) * Main.rand.NextFloat(3f, 6f));
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                        vel, 220, new Color(255, 180, 80), 1.4f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-            }
-        }
+                    Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                    Vector2 vel = outward * Main.rand.NextFloat(3f, 6f);
 
-        /// <summary>Destellos encantados parpadeando alrededor de la estrella.</summary>
-        private void SpawnTwinkles()
-        {
-            if (Main.rand.NextBool(20))
-            {
-                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(60f, 110f) * Projectile.scale;
-                Vector2 spawnPos = Projectile.Center + new Vector2(
-                    (float)Math.Cos(angle) * dist,
-                    (float)Math.Sin(angle) * dist);
-                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Gold,
-                    Vector2.Zero, 255, new Color(255, 240, 180), 0.7f);
-                d.noGravity = true;
-                d.fadeIn = 0.3f;
+                    var p = new ParticleData
+                    {
+                        Position = spawnPos,
+                        Velocity = vel,
+                        Scale = new Vector2(1.6f, 0.45f),
+                        Rotation = angle,
+                        PackedColor = ParticleManager.PackColor(new Color(255, 180, 80, 220)),
+                        PackedStartColor = ParticleManager.PackColor(new Color(255, 180, 80, 220)),
+                        PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 25)),
+                        TimeLeft = 30,
+                        Duration = 30,
+                        TextureId = ParticleTex.TrailGlow,
+                        BlendMode = 1,
+                        LayerPriority = LayerPriorities.BeforeProjectiles,
+                    };
+                    p.EnableComponent(ComponentFlag.FadeOut);
+                    p.EnableComponent(ComponentFlag.ColorShift);
+                    ParticleManager.Spawn(p);
+                }
             }
         }
 
@@ -572,9 +622,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 float scale = Projectile.scale;
 
+                // Cerrar el batch del juego UNA sola vez: cada capa de aquí en
+                // adelante abre y cierra sus propios pases (Begin→End) y todas
+                // quedan balanceadas al terminar.
+                Main.spriteBatch.End();
+
+                // === 0. CARGA DE LA SUPERNOVA HIJA (capa más profunda) ===
+                // v5.89 — los efectos del sol van DETRÁS de su cuerpo: la carga
+                // de la nova se pinta PRIMERO (debajo de backglow, shine y el
+                // cuerpo de la estrella). Antes la dibujaba la propia nova con
+                // un índice de proyectil MAYOR → quedaba ENCIMA del sol.
+                Projectile nova = GetSupernovaProjectile();
+                if (nova != null)
+                    V20.SupernovaProjectile.DrawChargeVisuals(nova, false);
+
                 // === 1. BACKGLOW ===
                 Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
-                Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -642,20 +705,38 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawFallback(drawPos, scale);
                 }
             }
-            catch { }
+            catch
+            {
+                // v5.89 — cierre defensivo SOLO en el path de error: el path
+                // normal deja el batch balanceado (Begin→End en cada capa) y el
+                // try{End} incondicional de antes disparaba una excepción
+                // first-chance cada frame ("Excepción silenciosa" de tML).
+                try { Main.spriteBatch.End(); } catch { }
+            }
 
             RestoreSpriteBatch();
             return false;
         }
 
+        /// <summary>La supernova hija activa y válida (null si no existe o expiró).</summary>
+        private Projectile GetSupernovaProjectile()
+        {
+            if (SupernovaIndex < 0f) return null;
+            int idx = (int)SupernovaIndex;
+            if (idx < 0 || idx >= Main.maxProjectiles) return null;
+            Projectile nova = Main.projectile[idx];
+            if (nova == null || !nova.active ||
+                nova.type != ModContent.ProjectileType<V20.SupernovaProjectile>())
+                return null;
+            return nova;
+        }
+
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
         private static void RestoreSpriteBatch()
         {
-            // v5.88 — End defensivo: si una excepción interna dejó un Begin
-            // abierto, se cierra antes de restaurar (si no había nada abierto,
-            // se ignora) — sin esto, el Begin lanzaría "Begin has already been
-            // called" y rompería el render del frame.
-            try { Main.spriteBatch.End(); } catch { }
+            // v5.89 — Begin directo: el path normal deja el batch CERRADO (todas
+            // las capas están balanceadas); el cierre defensivo de emergencia
+            // vive en el catch del PreDraw, no aquí cada frame.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);

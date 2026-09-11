@@ -326,12 +326,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // ya cerrado, por eso el parámetro).
                 DrawWaveVisual(Projectile, true);
             }
-            catch { }
+            catch
+            {
+                // v5.89 — cierre defensivo solo si una excepción cortó el Begin
+                // (antes el try{End} incondicional disparaba una excepción
+                // first-chance cada frame — "Excepción silenciosa" en el log).
+                try { Main.spriteBatch.End(); } catch { }
+            }
 
-            // Restaurar el SpriteBatch al estado que tML espera tras PreDraw.
-            // (End defensivo: si un error interno dejó un Begin abierto, se cierra
-            // antes de restaurar; si no había nada abierto, se ignora.)
-            try { Main.spriteBatch.End(); } catch { }
+            // Restaurar el SpriteBatch al estado que tML espera tras PreDraw:
+            // el path normal deja el batch CERRADO, basta con re-abrirlo.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -402,7 +406,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Main.spriteBatch.End();
             }
-            catch { }
+            catch
+            {
+                // v5.89 — cierre defensivo solo si una excepción cortó el Begin.
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         /// <summary>Dibuja un anillo centrado en drawPos con el radio dado en píxeles.</summary>

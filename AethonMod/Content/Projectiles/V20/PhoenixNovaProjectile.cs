@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -46,6 +47,14 @@ namespace AethonMod.Content.Projectiles.V20
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 20;
             Projectile.ignoreWater = true;
+
+            // v5.89 — LA LLAMARADA VA DETRÁS DEL SOL: hide=true saca al
+            // proyectil del pase principal de proyectiles y DrawBehind lo
+            // enruta a la capa "behindProjectiles", que Terraria dibuja
+            // ANTES. Así el estallido ilumina ALREDEDOR de la estrella sin
+            // tapar su cuerpo (índice de proyectil mayor = antes se pintaba
+            // ENCIMA del sol que la invocó).
+            Projectile.hide = true;
         }
 
         public override bool? CanCutTiles() => false;
@@ -121,8 +130,12 @@ namespace AethonMod.Content.Projectiles.V20
                 float age = Projectile.ai[0];
                 float progress = age / 60f; // 0..1
 
+                // v5.89 — matriz de vista del juego (antes Begin por defecto:
+                // sin transform, la llamarada se descolocaba con zoom ≠ 1).
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
 
                 // === Múltiples Ring.png a escalas crecientes ===
                 // Cada anillo más grande que el anterior, colores de naranja → rojo profundo
@@ -173,10 +186,31 @@ namespace AethonMod.Content.Projectiles.V20
                 }
 
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
-            catch { }
+            catch
+            {
+                // v5.89 — cierre defensivo solo si una excepción cortó el Begin.
+                try { Main.spriteBatch.End(); } catch { }
+            }
+
+            // Restaurar el batch al estado que tML espera (con transform y
+            // sampler del juego — antes quedaba un Begin por defecto, sin
+            // GameViewMatrix, que descolocaba a los proyectiles siguientes).
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.GameViewMatrix.TransformationMatrix);
             return false;
+        }
+
+        /// <summary>
+        /// v5.89 — enruta el dibujado a la capa de proyectiles de FONDO:
+        /// Terraria pinta esta lista ANTES que los proyectiles normales,
+        /// de modo que la llamarada queda DETRÁS del sol que la invocó.
+        /// </summary>
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,
+            List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            behindProjectiles.Add(index);
         }
     }
 }

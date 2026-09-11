@@ -585,17 +585,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawFallback(p, drawPos);
                 }
             }
-            catch { }
+            catch
+            {
+                // v5.89 — cierre defensivo SOLO en el path de error: si la
+                // excepción interrumpió un Begin a medias, lo cerramos aquí
+                // (si el batch ya estaba cerrado, el End lanza y se ignora —
+                // caso raro y registrado una sola vez por tML, no cada frame).
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
         private static void RestoreSpriteBatch()
         {
-            // v5.88 — End defensivo: si una excepción interna dejó un Begin
-            // abierto, se cierra antes de restaurar (si no había nada abierto,
-            // se ignora) — sin esto, el Begin lanzaría "Begin has already been
-            // called" y rompería el render del frame.
-            try { Main.spriteBatch.End(); } catch { }
+            // v5.89 — el End defensivo se hizo SUMAMENTE costoso: como el path
+            // normal deja el batch CERRADO (todas las capas están balanceadas
+            // Begin→End), el try{End} disparaba una InvalidOperationException
+            // capturada CADA FRAME (tML la registra como "Excepción silenciosa"
+            // vía su handler de first-chance exceptions). Ahora el cierre
+            // defensivo SOLO ocurre en el path de error (catch de DrawCoreVisuals),
+            // donde de verdad puede haber un Begin interrumpido que cerrar.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);

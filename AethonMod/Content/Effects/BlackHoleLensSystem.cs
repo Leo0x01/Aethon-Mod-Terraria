@@ -13,28 +13,36 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
-    /// v5.87 — FIX del ThreadStateException al desactivar el mod.
+    /// v5.89 — FIX CRÍTICO de la "pantalla negra": FNA limpia el backbuffer al
+    /// re-bindearlo. La semántica de FNA (verificada decompilando FNA.dll) es
+    /// que SetRenderTarget(null)/SetRenderTargets(...) ejecuta
+    /// `Clear(Target|Depth|Stencil)` sobre el target recién bindeado cuando su
+    /// RenderTargetUsage es DiscardContents — y el PresentationParameters del
+    /// juego usa DiscardContents por defecto. Por eso el propio Terraria hace
+    /// Clear + redraw completo en su FilterManager.EndCapture.
     ///
-    /// El error de la v5.85 era que la lente distorsionaba la pantalla YA
-    /// RENDERIZADA, y el núcleo del agujero negro (dibujado en el pase del
-    /// mundo) quedaba DENTRO de esa pantalla → la lente deformaba al propio
-    /// agujero negro. Arquitectura nueva en el punto 36 del pipeline:
+    /// La v5.86-v5.88 componía por REGIONES (solo el cuadrado alrededor de cada
+    /// fuente) intentando conservar el backbuffer intacto fuera de ellas... pero
+    /// el restore del binding YA HABÍA BORRADO el backbuffer: el mundo dibujado
+    /// por EndCapture se destruía y solo quedaban las regiones → pantalla negra
+    /// con un cuadrado brillante (exactamente lo que reportó el usuario).
     ///
-    ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del
-    ///      agujero negro (BlackHoleProjectile.PreDraw se salta su dibujado
-    ///      cuando la lente está activa — ver LensActive).
-    ///   2. Se recopilan hasta 5 fuentes de distorsión: agujeros negros Y
-    ///      ondas cromáticas (CosmicShockwaveProjectile, estilos 0/1) —
-    ///      cada frente de onda curva el fondo a su paso.
-    ///   3. screenTarget se copia a través de BlackHoleDistortionShader hacia
-    ///      un render target a media resolución (lensTarget).
-    ///   4. COMPOSICIÓN POR REGIONES: solo la zona alrededor de cada fuente
-    ///      se re-dibuja distorsionada (el resto del mundo conserva su
-    ///      resolución nativa — la v5.85 volcaba la pantalla completa a media
-    ///      resolución, emborronando todo el juego).
+    /// Arquitectura nueva (v5.89), el mismo pipeline del renderer de WoTG que
+    /// inspiró el sistema:
+    ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del agujero
+    ///      (BlackHoleProjectile.PreDraw se salta su dibujado cuando la lente
+    ///      está activa — ver LensActive).
+    ///   2. Se recopilan hasta 5 fuentes de distorsión: agujeros negros Y ondas
+    ///      cromáticas (CosmicShockwaveProjectile, estilos 0/1).
+    ///   3. screenTarget se copia COMPLETO a través de BlackHoleDistortionShader
+    ///      hacia _lensTarget — ahora a RESOLUCIÓN NATIVA (el shader es barato:
+    ///      una sola lectura de textura por píxel, no necesita media resolución).
+    ///   4. Se restaura el binding original (FNA borra el backbuffer — esperado)
+    ///      y se dibuja _lensTarget A PANTALLA COMPLETA: el mundo vuelve a estar
+    ///      en pantalla a resolución nativa, distorsionado solo cerca de las
+    ///      fuentes. Sin regiones, sin bordes duros, sin media resolución.
     ///   5. ENCIMA de la lente, en orden:
-    ///        a) partículas de la capa AboveLens (efectos del agujero negro:
-    ///           disco de acreción, anillo de fotones, espiral de succión...),
+    ///        a) partículas de la capa AboveLens (efectos del agujero negro),
     ///        b) el NÚCLEO del agujero negro (halo + RealBlackHoleShader +
     ///           refuerzo del horizonte de sucesos),
     ///        c) los anillos de las ondas cromáticas.
@@ -59,7 +67,7 @@ namespace AethonMod.Content.Effects
     {
         private const int MaxSources = 5;
 
-        /// <summary>Target de la pantalla distorsionada (media resolución).</summary>
+        /// <summary>Target de la pantalla distorsionada (resolución nativa).</summary>
         private static RenderTarget2D _lensTarget;
 
         /// <summary>Shader de lensing (mismo pipeline .fxc del resto de efectos).</summary>
@@ -76,9 +84,6 @@ namespace AethonMod.Content.Effects
         private readonly float[] _sourceRadii = new float[MaxSources];
         private readonly Vector2[] _sourcePositions = new Vector2[MaxSources];
         private readonly float[] _strengths = new float[MaxSources];
-
-        // Regiones de composición (pantalla, píxeles) por fuente
-        private readonly Rectangle[] _sourceRegions = new Rectangle[MaxSources];
 
         // Índices de proyectiles a dibujar encima de la lente
         private readonly int[] _blackHoleIndices = new int[MaxSources];
@@ -232,7 +237,6 @@ namespace AethonMod.Content.Effects
                     _sourcePositions[count] = uv;
                     _sourceRadii[count] = Math.Max(radius, 0.0001f);
                     _strengths[count] = strength;
-                    _sourceRegions[count] = BuildRegion(screenPos, radius * screenSize.X);
                     _blackHoleIndices[_blackHoleCount++] = i;
                     count++;
                 }
@@ -260,7 +264,6 @@ namespace AethonMod.Content.Effects
                     _sourcePositions[count] = uv;
                     _sourceRadii[count] = Math.Max(radius, 0.0001f);
                     _strengths[count] = strength;
-                    _sourceRegions[count] = BuildRegion(screenPos, front);
                     _waveIndices[_waveCount++] = i;
                     count++;
                 }
@@ -288,9 +291,12 @@ namespace AethonMod.Content.Effects
                 return;
             }
 
-            // === 2. Preparar el target de la lente (media resolución) ===
-            int lensW = Math.Max(2, Main.screenWidth / 2);
-            int lensH = Math.Max(2, Main.screenHeight / 2);
+            // === 2. Preparar el target de la lente (RESOLUCIÓN NATIVA) ===
+            // v5.89: a resolución completa — el shader de distorsión es barato
+            // (una lectura de textura por píxel) y así el mundo lenteado no
+            // pierde nitidez ni muestra píxeles gordos al ampliarse.
+            int lensW = Math.Max(2, Main.screenWidth);
+            int lensH = Math.Max(2, Main.screenHeight);
             if (_lensTarget == null || _lensTarget.IsDisposed ||
                 _lensTarget.Width != lensW || _lensTarget.Height != lensH)
             {
@@ -302,7 +308,7 @@ namespace AethonMod.Content.Effects
             // Guardar el estado de render targets ACTIVO (backbuffer o screenTarget).
             RenderTargetBinding[] previousBindings = gd.GetRenderTargets();
 
-            // === 3. Copiar la pantalla a través del shader de lensing ===
+            // === 3. Copiar la pantalla COMPLETA a través del shader de lensing ===
             gd.SetRenderTarget(_lensTarget);
             gd.Clear(Color.Transparent);
 
@@ -327,37 +333,33 @@ namespace AethonMod.Content.Effects
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Matrix.Identity);
             shader.CurrentTechnique.Passes[0].Apply();
-            // Quad completo: TEXCOORD0 = 0..1 = UV de pantalla (rect destino = tamaño de la lente).
+            // Quad completo 1:1 — la lente está a resolución nativa.
             Main.spriteBatch.Draw(Main.screenTarget,
                 new Rectangle(0, 0, _lensTarget.Width, _lensTarget.Height), Color.White);
             Main.spriteBatch.End();
 
             // === 4. Restaurar el render target original ===
+            // NOTA (v5.89): al volver al backbuffer FNA lo LIMPIA (semántica
+            // DiscardContents de PresentationParameters, verificada contra
+            // FNA.dll). Es lo mismo que hace el EndCapture de Terraria — y por
+            // eso el paso 5 redibuja la pantalla COMPLETA.
             if (previousBindings != null && previousBindings.Length > 0)
                 gd.SetRenderTargets(previousBindings);
             else
                 gd.SetRenderTarget(null);
 
-            // === 5. COMPOSICIÓN POR REGIONES ===
-            // Solo la zona alrededor de cada fuente se sustituye por su versión
-            // distorsionada: el resto del mundo conserva la resolución nativa.
-            Viewport viewport = gd.Viewport;
+            // === 5. VOLCAR LA LENTE A PANTALLA COMPLETA ===
+            // El backbuffer acaba de ser borrado por el restore del binding:
+            // este blit devuelve el mundo entero a pantalla (resolución nativa,
+            // distorsionado solo cerca de las fuentes). Es exactamente el mismo
+            // blit que hace el EndCapture de Terraria con screenTarget — el
+            // pipeline continúa como si la lente nunca hubiera existido, salvo
+            // por la distorsión alrededor de las fuentes.
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Matrix.Identity);
-            for (int i = 0; i < count; i++)
-            {
-                Rectangle region = _sourceRegions[i];
-                if (region.Width <= 0 || region.Height <= 0) continue;
-                region = ClampRegion(region, viewport);
-                if (region.Width <= 0 || region.Height <= 0) continue;
-
-                // lensTarget está a media resolución: la fuente es la mitad del rect.
-                var srcRect = new Rectangle(
-                    region.X / 2, region.Y / 2,
-                    region.Width / 2, region.Height / 2);
-                Main.spriteBatch.Draw(_lensTarget, region, srcRect, Color.White);
-            }
+            Main.spriteBatch.Draw(_lensTarget,
+                new Rectangle(0, 0, gd.Viewport.Width, gd.Viewport.Height), Color.White);
             Main.spriteBatch.End();
 
             // === 6. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===
@@ -388,25 +390,6 @@ namespace AethonMod.Content.Effects
 
             // El pipeline de Terraria continúa con su propio Begin para la UI:
             // dejamos el SpriteBatch CERRADO y los targets tal como estaban.
-        }
-
-        /// <summary>Región de influencia de una fuente: centro ± radio*2.2 (margen del decaimiento exponencial).</summary>
-        private static Rectangle BuildRegion(Vector2 centerPx, float radiusPx)
-        {
-            float r = radiusPx * 2.2f;
-            return new Rectangle(
-                (int)(centerPx.X - r), (int)(centerPx.Y - r),
-                (int)(r * 2f), (int)(r * 2f));
-        }
-
-        /// <summary>Recorta la región al viewport (coordenadas de pantalla).</summary>
-        private static Rectangle ClampRegion(Rectangle region, Viewport viewport)
-        {
-            int x0 = Math.Max(0, region.X);
-            int y0 = Math.Max(0, region.Y);
-            int x1 = Math.Min(viewport.Width, region.X + region.Width);
-            int y1 = Math.Min(viewport.Height, region.Y + region.Height);
-            return new Rectangle(x0, y0, Math.Max(0, x1 - x0), Math.Max(0, y1 - y0));
         }
     }
 }

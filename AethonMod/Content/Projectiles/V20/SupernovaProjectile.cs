@@ -302,13 +302,48 @@ namespace AethonMod.Content.Projectiles.V20
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
+            // v5.89 — CUANDO PERTENECE AL SOL, NO SE DIBUJA POR SÍ MISMA:
+            // dibujaría ENCIMA del cuerpo del sol (índice de proyectil mayor
+            // = se dibuja después). El SunProjectile pinta su carga DETRÁS de
+            // su propio cuerpo vía DrawChargeVisuals (orden correcto: efectos
+            // detrás del sol). Invocada en solitario (SupernovaStaff), sí se
+            // dibuja aquí normalmente.
+            if (Projectile.ai[1] == 1f)
+                return false;
+
+            // Pase del mundo: el spriteBatch del juego está abierto → cerrarlo
+            // antes del pase aditivo de la carga.
+            DrawChargeVisuals(Projectile, true);
+
+            // v5.89 — End defensivo SOLO en el path de error (el normal deja
+            // el batch balanceado; el try{End} incondicional disparaba una
+            // excepción first-chance cada frame que tML registraba como
+            // "Excepción silenciosa").
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            return false;
+        }
+
+        /// <summary>
+        /// Dibuja el halo de carga (contracción + blanco caliente + anillos de
+        /// contención). Reutilizable: la invoca el propio PreDraw (nova suelta)
+        /// y el SunProjectile para pintar la carga de su nova hija DETRÁS de
+        /// su cuerpo. Deja el SpriteBatch CERRADO (como lo encontró tras el
+        /// End inicial del pase del mundo).
+        /// <param name="endActiveBatch">true cuando existe un Begin del juego
+        /// activo (pase del mundo); false si el batch ya llega cerrado.</param>
+        /// </summary>
+        internal static void DrawChargeVisuals(Projectile p, bool endActiveBatch)
+        {
             try
             {
                 Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                 Texture2D ring = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-                if (softGlow == null || ring == null) return false;
+                if (softGlow == null || ring == null) return;
 
-                float charge = MathHelper.Clamp(Age / ChargeDuration, 0f, 1f);
+                float age = p.ai[0];
+                float charge = MathHelper.Clamp(age / ChargeDuration, 0f, 1f);
                 float chargeEased = charge * charge;
 
                 // Temblor de anticipación en el último tramo de la carga.
@@ -321,11 +356,12 @@ namespace AethonMod.Content.Projectiles.V20
                         Main.rand.NextFloat(-1f, 1f) * shake * 2.2f);
                 }
 
-                Vector2 drawPos = Projectile.Center - Main.screenPosition + jitter;
+                Vector2 drawPos = p.Center - Main.screenPosition + jitter;
                 Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
                 Vector2 ringOrigin = new Vector2(ring.Width / 2f, ring.Height / 2f);
 
-                Main.spriteBatch.End();
+                if (endActiveBatch)
+                    Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -338,7 +374,7 @@ namespace AethonMod.Content.Projectiles.V20
                 int b = (int)(80 + 165 * chargeEased);
                 Color halo = new Color(r, g, b, 220);
                 // Pulso creciente cerca del estallido.
-                float pulse = 1f + (float)Math.Sin(Age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
+                float pulse = 1f + (float)Math.Sin(age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
                 Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin, scale * pulse, SpriteEffects.None, 0f);
 
                 // Núcleo blanco-caliente que crece en proporción (la masa se condensa).
@@ -349,7 +385,7 @@ namespace AethonMod.Content.Projectiles.V20
                 // === Anillos de contención pulsantes (la estrella luchando por no colapsar) ===
                 if (charge > 0.25f)
                 {
-                    float ringPhase = (Age % 24f) / 24f;
+                    float ringPhase = (age % 24f) / 24f;
                     float ringScale = (0.8f + ringPhase * 1.6f) * (0.6f + charge * 0.5f);
                     byte ringAlpha = (byte)(160 * (1f - ringPhase) * charge);
                     Main.spriteBatch.Draw(ring, drawPos, null,
@@ -358,14 +394,11 @@ namespace AethonMod.Content.Projectiles.V20
 
                 Main.spriteBatch.End();
             }
-            catch { }
-
-            // v5.88 — End defensivo + GameViewMatrix (Main.Transform está deprecado).
-            try { Main.spriteBatch.End(); } catch { }
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            return false;
+            catch
+            {
+                // v5.89 — cierre defensivo solo si una excepción cortó el Begin.
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)

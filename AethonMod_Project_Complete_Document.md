@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.88 |
+| **Versión (build.txt)** | 5.89 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.88 — Fix crítico: el mod no cargaba (textura del CosmicShockwaveProjectile faltante desde v5.86) + revisión profunda de 10 pasadas |
+| **Commit actual** | v5.89 — Fix crítico de la "pantalla negra" del agujero negro (wipe del backbuffer de FNA) + efectos del sol DETRÁS de la estrella + fin del spam de "Excepción silenciosa" |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.88
+version = 5.89
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -167,7 +167,9 @@ Todos los sprites originales en:
 - `Content/Items/Placeables/AncientAltarItem.png`
 - `Content/Weapons/Projectiles/*.png`
 - `icon.png` (icono del mod)
-- `Content/_masters/*` (sprites maestros en alta resolución)
+- `_masters/*` en la RAÍZ DEL REPO (sprites maestros de referencia — v5.89: fuera
+de la carpeta del mod; eran JPEGs con extensión .png y disparaban el warning FNA
+"Image loading failed" al empaquetar)
 
 > **Regla de oro**: El commit `e826c82` contiene la versión estable de todos los sprites.
 > Si se pierden localmente, ejecutar `git checkout e826c82 -- Content/ icon.png` para restaurarlos.
@@ -177,7 +179,7 @@ Todos los sprites originales en:
 ## 4. ESTADO ACTUAL DEL PROYECTO
 
 ### 4.1 Conteo de archivos (verificado)
-- **80 archivos .cs** en `Content/` (79 + CosmicShockwaveProjectile.cs nuevo en v5.86; la v5.87 no añadió archivos — solo el fix de Unload en BlackHoleLensSystem.cs)
+- **80 archivos .cs** en `Content/` (79 + CosmicShockwaveProjectile.cs nuevo en v5.86; v5.87-v5.89 no añadieron archivos — fixes y reescrituras: Unload en v5.87, texturas en v5.88, lente/sol/batch en v5.89)
 - **139 archivos .png** (sprites — se añadió DendriticNoiseZoomedOut.png)
 - **8 shaders .fx** en `Content/Effects/Shaders/` (fuente)
 - **5 shaders .fxc** compilados en `Content/Effects/Shaders/`
@@ -221,7 +223,7 @@ Todos los sprites originales en:
 - `Vortex.png` (ParticleTex.Vortex = 4)
 - `Ring.png` (ParticleTex.Ring = 5)
 - `Crescent.png` (ParticleTex.Crescent = 6)
-- `Noise.png` (ParticleTex.Noise = 7)
+- `Noise.png` (ParticleTex.Noise = 7) — **v5.89: REGENERADO suave** (ruido fractal con blur wrap: rugosidad 4.2→0.58)
 
 ### 4.5 Texturas de efectos del remote (28 texturas en `Content/Effects/*.png`)
 - GlowOrb, GlowOrbCyan, GlowOrbGold, GlowOrbGreen, GlowOrbMagenta, GlowOrbPurple, GlowOrbWhite
@@ -705,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.88 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.89 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `PENDING` | v5.89 | fix CRÍTICO "pantalla negra": FNA limpia el backbuffer al re-bindearlo (DiscardContents por defecto en PresentationParameters, verificado decompilando FNA.dll) → la composición por regiones destruida el mundo; la lente ahora va a resolución NATIVA y se dibuja a PANTALLA COMPLETA tras el restore (mismo blit que el EndCapture de Terraria) + efectos del sol DETRÁS del cuerpo (dusts→partículas BeforeProjectiles; supernova con ai[1]=1 dibujada por el sol vía DrawChargeVisuals; PhoenixNova con hide+DrawBehind) + "Excepción silenciosa" cada frame eliminada (End defensivo solo en catch) + Noise.png regenerado suave (rugosidad 4.2→0.58) y FireNoiseB suavizado (8.0→2.38, blur wrap tileable) + _masters (23 JPEGs disfrazados de .png, 2.1MB) movidos fuera del mod → adiós al warning FNA "Image loading failed" |
 | `ad9641a` | v5.88 | fix CRÍTICO: el mod NO cargaba — faltaba CosmicShockwaveProjectile.png (desde v5.86; la compilación C# pasa sin texturas pero tML las exige al cargar) + auditoría completa 71 clases/21 rutas + bug real de daño corregido (array _hitNPCs compartido por MemberwiseClone entre ondas simultáneas → NewInstance con array fresco) + End defensivo en RestoreSpriteBatch ×3 + Main.Transform deprecado → GameViewMatrix + ParticleManager con Asset<Texture2D> diferido (fix del warning 61ms blocking) + icon_small.png 30x30 + warnings del build limpios (CS0672 ×4 Kill→OnKill, CS8632 ×21) | 
 | `9035888` | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
 | `6255c88` | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
@@ -783,10 +786,41 @@ Commits desde v5.28 hasta v5.88 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.88
-- **Mensaje**: "fix v5.88: el mod no cargaba (textura del CosmicShockwaveProjectile faltante) + revisión profunda de 10 pasadas"
+- **Versión**: v5.89
+- **Mensaje**: "fix v5.89: pantalla negra del agujero negro (wipe FNA del backbuffer) + efectos del sol detrás de la estrella + excepciones silenciosas eliminadas"
 
-### 11.2 Qué se hizo en v5.88 (error del usuario al CARGAR v5.87 + revisión profunda pedida)
+### 11.2 Qué se hizo en v5.89 (pantalla negra del agujero + sol + excepciones del log)
+
+**Errores reportados** (captura + client.log de la v5.88 EN JUEGO — el mod ya cargaba):
+
+1. **"Toda la pantalla se oscurece"**: la captura mostraba el mundo SOLO dentro de
+   un cuadrado perfecto de 225×225 px centrado en el agujero; el resto era NEGRO
+   PURO. Análisis de píxeles + VLM + decompilación de FNA.dll → causa raíz al 100%:
+   **`SetRenderTarget(null)` de FNA LIMPIA el backbuffer** (semántica
+   DiscardContents por defecto de PresentationParameters — el propio Terraria hace
+   Clear+redraw en su EndCapture). La composición por REGIONES de la v5.86-5.88
+   restauraba el binding (wipe) y solo redibujaba las regiones → el mundo quedaba
+   destruido. FIX: lente a resolución NATIVA + blit a PANTALLA COMPLETA tras el
+   restore (sin regiones, sin media resolución, sin bordes duros).
+2. **"Sus efectos deben estar detrás del sol"**: los dusts vanilla se pintan en la
+   capa de polvo (DESPUÉS de los proyectiles = ENCIMA del sol) y la supernova
+   (índice mayor) tapaba el cuerpo. FIX: efectos ambientales → partículas de la
+   librería (BeforeProjectiles); supernova con `ai[1]=1` dibujada por el sol
+   (DrawChargeVisuals, capa más profunda); PhoenixNova con `hide=true` +
+   `DrawBehind` → capa behindProjectiles (ANTES que los proyectiles).
+3. **"Excepción silenciosa" ×4 en el log**: el `try{End}catch{}` incondicional del
+   restore disparaba una excepción CAPTURADA cada frame (tML las registra vía
+   first-chance handler, deduplicadas). FIX: End defensivo SOLO en los catch.
+4. **Noise.png mejorado**: regenerado como ruido fractal suave con blur WRAP
+   (tileable): rugosidad 4.2→0.58. FireNoiseB (disco de acreción) suavizado
+   8.0→2.38 con blur wrap.
+5. **Warning FNA "Image loading failed"**: los 23 archivos de `Content/_masters/`
+   eran JPEGs disfrazados de .png (2.1MB empaquetados). Movidos a `_masters/` en
+   la raíz del repo (fuera del build).
+6. **Compilación verificada**: 0 errores, 0 warnings contra tModLoader
+   v2026.07.3.0 real.
+
+### 11.6 Qué se hizo en v5.88 (histórico — error del usuario al CARGAR v5.87 + revisión profunda pedida)
 
 **Error reportado** (captura + client.log):
 
@@ -870,6 +904,10 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
+- ✅ **v5.89 — SIN PANTALLA NEGRA**: la lente va a resolución nativa y se vuelve
+  a dibujar a pantalla completa tras el wipe inevitable del backbuffer de FNA
+- ✅ **v5.89 — EFECTOS DEL SOL DETRÁS DE LA ESTRELLA**: partículas BeforeProjectiles
+  + supernova dibujada por el sol + llamaradas en capa behindProjectiles
 - ✅ **v5.88 — EL MOD CARGA**: textura del CosmicShockwaveProjectile añadida (el
   MissingResourceException de v5.86/v5.87 estaba bloqueando la carga)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
@@ -920,9 +958,14 @@ jugador; (4) faltaban las 3 ondas de fuego finales con daño + quemadura.
    compartido). Las partículas de efectos del agujero pasan a la capa nueva
    `AboveLens` (950) que pinta `ParticleManager.RenderAboveLensLayer()` tras
    compositar. Fallback automático: `LensActive=false` → todo al pase normal.
-2. **COMPOSICIÓN POR REGIONES**: solo la zona ±2.2×radio de cada fuente se
-   re-dibuja distorsionada (antes la pantalla completa a media resolución → todo
-   emborronado; ahora el resto del mundo conserva resolución nativa).
+2. **v5.89 — BLIT A PANTALLA COMPLETA (¡NO VOLVER A REGIONES!)**: FNA LIMPIA el
+   backbuffer al re-bindearlo (`SetRenderTarget(null)` con DiscardContents por
+   defecto — verificado decompilando FNA.dll; por eso el EndCapture de Terraria
+   hace Clear+redraw completo). La lente copia screenTarget → _lensTarget
+   (RESOLUCIÓN NATIVA) con el shader de distorsión, restaura el binding y
+   redibuja _lensTarget A PANTALLA COMPLETA: el mundo queda a resolución nativa,
+   distorsionado solo cerca de las fuentes. La composición por regiones de
+   v5.86-5.88 destruía el mundo (pantalla negra con un cuadrado).
 3. **CosmicShockwaveProjectile (NUEVO)**: 3 estilos — 0 cromática (RGB split +
    fuente de lente → distorsiona el fondo), 1 cromática INVERSA (convergente, RGB
    invertido, knockback hacia el centro), 2 fuego (triple anillo + llamas +
@@ -1070,9 +1113,9 @@ corresponde a v5.85 y puede estar desactualizado en las partes señaladas):
 | Archivo | Cambio v5.86 (+ v5.87/v5.88 donde se indica) |
 |---|---|
 | `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b. **v5.88**: + textura propia .png (InvisiblePixel 1×1 — antes el mod NO cargaba), override `NewInstance` con array `_hitNPCs` fresco por onda (bug de golpes múltiples), End defensivo + GameViewMatrix en el restore de PreDraw |
-| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (~366 líneas): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, composición POR REGIONES (±2.2×radio, no pantalla completa), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D) |
+| `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (v5.89): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, _lensTarget a RESOLUCIÓN NATIVA + BLIT A PANTALLA COMPLETA tras restaurar el binding (fix de la pantalla negra: FNA limpia el backbuffer al re-bindearlo), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D) |
 | `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles`. **v5.88**: End defensivo en `RestoreSpriteBatch` + `Main.Transform` deprecado → `GameViewMatrix.TransformationMatrix` |
-| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0). **v5.88**: End defensivo en `RestoreSpriteBatch` + GameViewMatrix |
+| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0). **v5.89**: TODOS los efectos ambientales como partículas BeforeProjectiles (detrás del cuerpo — antes dusts vanilla ENCIMA); la carga de la supernova hija (ai[1]=1) se dibuja PRIMERO vía `SupernovaProjectile.DrawChargeVisuals`; End defensivo solo en catch |
 | `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas. **v5.88**: End defensivo en el restore de PreDraw + GameViewMatrix |
 | `Content/Particles/ParticleData.cs` | `LayerPriorities.AboveLens = 950` |
 | `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive`. **v5.88**: `_textures` → `Asset<Texture2D>[]` con resolución DIFERIDA al dibujar (fix del warning "spent 61ms blocking on asset loading") |
@@ -1857,10 +1900,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
 }
 ```
 
-### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.86; v5.87 CAMBIÓ Unload() — ver 13.0, el disco manda)
+### 13.3 BlackHoleLensSystem.cs — COMPLETO (⚠️ REESCRITO EN v5.89 — fix de la "pantalla negra"; el repo manda)
 > La lente gravitacional de pantalla: distorsiona el fondo REAL del juego alrededor
-> de hasta 5 agujeros negros. Hook en TimeLogger punto 36 (tras EndCapture del
-> mundo, antes de la UI), Main.screenTarget como fuente, RT a media resolución.
+> de hasta 5 fuentes (agujeros + ondas cromáticas). Hook en TimeLogger punto 36
+> (tras EndCapture del mundo, antes de la UI), Main.screenTarget como fuente.
+> v5.89: RT a RESOLUCIÓN NATIVA + blit A PANTALLA COMPLETA tras restaurar el
+> binding (FNA limpia el backbuffer al re-bindearlo con DiscardContents — por eso
+> el propio Terraria redibuja la pantalla entera en su EndCapture). Sin regiones.
 
 ```csharp
 using System;
@@ -1870,6 +1916,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 using AethonMod.Content.Projectiles.Cosmic;
 
 namespace AethonMod.Content.Effects
@@ -1877,42 +1924,83 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
-    /// Distorsiona el FONDO REAL del juego alrededor de cada agujero negro activo,
-    /// siguiendo la matemática del lensing gravitatorio relativista (formalismo de
-    /// lentes con decaimiento exponencial por distancia). El shader
-    /// BlackHoleDistortionShader recibe hasta 5 fuentes (posiciones UV en pantalla
-    /// y radios) y rota las coordenadas de muestreo de la textura de pantalla,
-    /// curvando la luz que "pasa" cerca del horizonte de sucesos.
+    /// v5.89 — FIX CRÍTICO de la "pantalla negra": FNA limpia el backbuffer al
+    /// re-bindearlo. La semántica de FNA (verificada decompilando FNA.dll) es
+    /// que SetRenderTarget(null)/SetRenderTargets(...) ejecuta
+    /// `Clear(Target|Depth|Stencil)` sobre el target recién bindeado cuando su
+    /// RenderTargetUsage es DiscardContents — y el PresentationParameters del
+    /// juego usa DiscardContents por defecto. Por eso el propio Terraria hace
+    /// Clear + redraw completo en su FilterManager.EndCapture.
     ///
-    /// Pipeline (verificado contra el binario real de tModLoader):
-    ///   1. El mundo se renderiza en Main.screenTarget (RenderTargets activos).
-    ///   2. Terraria.Graphics.Effects.Filters.Scene.EndCapture(...) vuelca el mundo.
-    ///   3. TimeLogger.DetailedDrawTime(36) — punto EXACTO entre el fin del mundo
-    ///      y el inicio de la UI: aquí intervenimos con un hook de MonoMod.
-    ///   4. Copiamos screenTarget a través del shader de distorsión hacia un
-    ///      render target a media resolución (rendimiento) y lo volvemos a
-    ///      dibujar cubriendo la pantalla completa → el fondo queda distorsionado.
-    ///   5. La UI se dibuja después, intacta, encima del efecto.
+    /// La v5.86-v5.88 componía por REGIONES (solo el cuadrado alrededor de cada
+    /// fuente) intentando conservar el backbuffer intacto fuera de ellas... pero
+    /// el restore del binding YA HABÍA BORRADO el backbuffer: el mundo dibujado
+    /// por EndCapture se destruía y solo quedaban las regiones → pantalla negra
+    /// con un cuadrado brillante (exactamente lo que reportó el usuario).
     ///
-    /// La intensidad es "pequeña" y elegante: se desvanece con la escala del
-    /// agujero (nacimiento/colapso) y se apaga sola cuando no hay agujeros activos.
+    /// Arquitectura nueva (v5.89), el mismo pipeline del renderer de WoTG que
+    /// inspiró el sistema:
+    ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del agujero
+    ///      (BlackHoleProjectile.PreDraw se salta su dibujado cuando la lente
+    ///      está activa — ver LensActive).
+    ///   2. Se recopilan hasta 5 fuentes de distorsión: agujeros negros Y ondas
+    ///      cromáticas (CosmicShockwaveProjectile, estilos 0/1).
+    ///   3. screenTarget se copia COMPLETO a través de BlackHoleDistortionShader
+    ///      hacia _lensTarget — ahora a RESOLUCIÓN NATIVA (el shader es barato:
+    ///      una sola lectura de textura por píxel, no necesita media resolución).
+    ///   4. Se restaura el binding original (FNA borra el backbuffer — esperado)
+    ///      y se dibuja _lensTarget A PANTALLA COMPLETA: el mundo vuelve a estar
+    ///      en pantalla a resolución nativa, distorsionado solo cerca de las
+    ///      fuentes. Sin regiones, sin bordes duros, sin media resolución.
+    ///   5. ENCIMA de la lente, en orden:
+    ///        a) partículas de la capa AboveLens (efectos del agujero negro),
+    ///        b) el NÚCLEO del agujero negro (halo + RealBlackHoleShader +
+    ///           refuerzo del horizonte de sucesos),
+    ///        c) los anillos de las ondas cromáticas.
+    ///   6. La UI se dibuja después, intacta.
+    ///
+    /// LensActive: bandera estática que indica "la lente se renderizó en el
+    /// frame anterior". Los proyectiles la consultan en PreDraw (que corre
+    /// ANTES del punto 36) para decidir si se saltan su dibujado del mundo.
+    /// Si la lente falla o no hay fuentes, la bandera cae a false y todo se
+    /// dibuja por el camino normal (fallback automático, el agujero jamás
+    /// desaparece).
+    ///
+    /// v5.87 — Unload() con programación defensiva: tModLoader descarga los
+    /// mods en un hilo de carga secundario, pero FNA3D exige que Dispose()
+    /// de recursos gráficos corra en el hilo principal. El render target se
+    /// destruye vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada
+    /// al final de Main.Update() cada frame — también durante la pantalla de
+    /// carga del reload), verificado contra tModLoader v2026.07.3.0 real.
     /// </summary>
     [Autoload(Side = ModSide.Client)]
     public class BlackHoleLensSystem : ModSystem
     {
         private const int MaxSources = 5;
 
-        /// <summary>Target de la pantalla distorsionada (media resolución).</summary>
+        /// <summary>Target de la pantalla distorsionada (resolución nativa).</summary>
         private static RenderTarget2D _lensTarget;
 
         /// <summary>Shader de lensing (mismo pipeline .fxc del resto de efectos).</summary>
         private static Effect _distortionShader;
         private static bool _shaderFailed;
 
+        /// <summary>
+        /// ¿La lente se renderizó en el frame anterior? Los PreDraw de los
+        /// proyectiles cósmicos la consultan para saltarse el pase del mundo.
+        /// </summary>
+        public static bool LensActive { get; private set; }
+
         // Datos de las fuentes (como el shader los espera: arrays de 5)
         private readonly float[] _sourceRadii = new float[MaxSources];
         private readonly Vector2[] _sourcePositions = new Vector2[MaxSources];
         private readonly float[] _strengths = new float[MaxSources];
+
+        // Índices de proyectiles a dibujar encima de la lente
+        private readonly int[] _blackHoleIndices = new int[MaxSources];
+        private int _blackHoleCount;
+        private readonly int[] _waveIndices = new int[MaxSources];
+        private int _waveCount;
 
         public override void Load()
         {
@@ -1922,11 +2010,52 @@ namespace AethonMod.Content.Effects
 
         public override void Unload()
         {
-            Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
-            _lensTarget?.Dispose();
+            try
+            {
+                Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
+            }
+            catch
+            {
+                // Programación defensiva: el detach del hook jamás puede
+                // impedir que la desactivación del mod continúe.
+            }
+
+            // v5.87 — FIX del ThreadStateException:
+            // "most FNA3D audio/graphics functions must be called on the main
+            // thread". Unload() corre en el hilo de carga secundario de tML;
+            // RenderTarget2D.Dispose() ahí lanza y rompía toda la desactivación
+            // del mod. La destrucción se encola al hilo principal: la cola
+            // _mainThreadActions se drena en Main.Update() cada frame, incluso
+            // mientras la pantalla de carga del reload sigue dibujándose.
+            // El closure captura una variable local (no el ModSystem ni estado
+            // estático), así que la acción es autosuficiente.
+            RenderTarget2D target = _lensTarget;
+            if (target != null)
+            {
+                try
+                {
+                    Main.QueueMainThreadAction(() =>
+                    {
+                        try { target.Dispose(); }
+                        catch
+                        {
+                            // Defensivo: una excepción aquí subiría hasta
+                            // Main.Update() y rompería el bucle del juego.
+                        }
+                    });
+                }
+                catch
+                {
+                    // Encolado imposible (p. ej. apagado total del proceso):
+                    // se abandona la referencia — el driver libera los
+                    // recursos del proceso al terminar de todos modos.
+                }
+            }
+
             _lensTarget = null;
             _distortionShader = null;
             _shaderFailed = false;
+            LensActive = false;
         }
 
         // ================================================================
@@ -1936,10 +2065,20 @@ namespace AethonMod.Content.Effects
         {
             try
             {
-                if (detailedDrawType == 36 && CanRender())
-                    RenderLens();
+                if (detailedDrawType == 36)
+                {
+                    if (CanRender())
+                        RenderLens();
+                    else
+                        LensActive = false;
+                }
             }
-            catch { /* la lente jamás puede romper el render del juego */ }
+            catch
+            {
+                // La lente jamás puede romper el render del juego: si algo falla,
+                // el frame siguiente todos vuelven al dibujado normal del mundo.
+                LensActive = false;
+            }
 
             orig(detailedDrawType);
         }
@@ -1972,42 +2111,81 @@ namespace AethonMod.Content.Effects
         // ================================================================
         private void RenderLens()
         {
-            // === 1. Recopilar agujeros negros activos (máx. 5, como el shader) ===
+            // === 1. Recopilar fuentes: agujeros negros + ondas cromáticas ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
+            int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
             if (screenSize.X <= 0f || screenSize.Y <= 0f)
+            {
+                LensActive = false;
                 return;
+            }
 
             int count = 0;
+            _blackHoleCount = 0;
+            _waveCount = 0;
+
             for (int i = 0; i < Main.maxProjectiles && count < MaxSources; i++)
             {
                 Projectile p = Main.projectile[i];
-                if (p == null || !p.active || p.type != blackHoleType)
-                    continue;
+                if (p == null || !p.active) continue;
 
-                // Posición en UV de pantalla (0..1) — la misma métrica del shader.
-                Vector2 screenPos = p.Center - Main.screenPosition;
-                Vector2 uv = screenPos / screenSize;
+                if (p.type == blackHoleType)
+                {
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
+                        continue;
 
-                // Fuera de pantalla (con margen) → fuente nula.
-                if (uv.X < -0.25f || uv.X > 1.25f || uv.Y < -0.25f || uv.Y > 1.25f)
-                    continue;
+                    // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
+                    float radius = p.width * p.scale / screenSize.X * 0.75f;
 
-                // Radio de influencia en UV: el 75% del tamaño visual (métrica del shader).
-                float radius = p.width * p.scale / screenSize.X * 0.75f;
+                    // La lente es "pequeña": intensidad ligada a la escala del agujero
+                    // (nace con el pop elástico, crece con la expansión final del
+                    // v5.86, muere con la evaporación).
+                    float strength = MathHelper.Clamp(p.scale * 1.1f, 0f, 1f);
 
-                // La lente es "pequeña": intensidad ligada a la escala del agujero
-                // (nace con el pop elástico, muere con el colapso final).
-                float strength = MathHelper.Clamp(p.scale * 1.1f, 0f, 1f);
+                    _sourcePositions[count] = uv;
+                    _sourceRadii[count] = Math.Max(radius, 0.0001f);
+                    _strengths[count] = strength;
+                    _blackHoleIndices[_blackHoleCount++] = i;
+                    count++;
+                }
+                else if (p.type == waveType)
+                {
+                    // Solo las ondas cromáticas (0/1) distorsionan el fondo.
+                    float style = p.ai[1];
+                    if (style != CosmicShockwaveProjectile.StyleChromatic &&
+                        style != CosmicShockwaveProjectile.StyleChromaticInverse)
+                        continue;
 
-                _sourcePositions[count] = uv;
-                _sourceRadii[count] = Math.Max(radius, 0.0001f);
-                _strengths[count] = strength;
-                count++;
+                    float front = CosmicShockwaveProjectile.GetFrontRadius(p);
+                    if (front <= 1f) continue; // retrasada o disipada
+
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.35f || uv.X > 1.35f || uv.Y < -0.35f || uv.Y > 1.35f)
+                        continue;
+
+                    // El frente de la onda curva el espacio que atraviesa.
+                    float radius = front / screenSize.X;
+                    float progress = CosmicShockwaveProjectile.GetProgress(p);
+                    float strength = MathHelper.Clamp(1f - progress * 0.75f, 0f, 1f);
+
+                    _sourcePositions[count] = uv;
+                    _sourceRadii[count] = Math.Max(radius, 0.0001f);
+                    _strengths[count] = strength;
+                    _waveIndices[_waveCount++] = i;
+                    count++;
+                }
             }
 
             if (count <= 0)
+            {
+                // Sin agujeros ni ondas → no hay lente: todo se dibuja normal.
+                LensActive = false;
                 return;
+            }
 
             // Rellenar el resto de slots con fuentes nulas (el shader itera los 5).
             for (int i = count; i < MaxSources; i++)
@@ -2019,11 +2197,17 @@ namespace AethonMod.Content.Effects
 
             GraphicsDevice gd = Main.graphics.GraphicsDevice;
             if (gd == null)
+            {
+                LensActive = false;
                 return;
+            }
 
-            // === 2. Preparar el target de la lente (media resolución) ===
-            int lensW = Math.Max(2, Main.screenWidth / 2);
-            int lensH = Math.Max(2, Main.screenHeight / 2);
+            // === 2. Preparar el target de la lente (RESOLUCIÓN NATIVA) ===
+            // v5.89: a resolución completa — el shader de distorsión es barato
+            // (una lectura de textura por píxel) y así el mundo lenteado no
+            // pierde nitidez ni muestra píxeles gordos al ampliarse.
+            int lensW = Math.Max(2, Main.screenWidth);
+            int lensH = Math.Max(2, Main.screenHeight);
             if (_lensTarget == null || _lensTarget.IsDisposed ||
                 _lensTarget.Width != lensW || _lensTarget.Height != lensH)
             {
@@ -2035,7 +2219,7 @@ namespace AethonMod.Content.Effects
             // Guardar el estado de render targets ACTIVO (backbuffer o screenTarget).
             RenderTargetBinding[] previousBindings = gd.GetRenderTargets();
 
-            // === 3. Copiar la pantalla a través del shader de lensing ===
+            // === 3. Copiar la pantalla COMPLETA a través del shader de lensing ===
             gd.SetRenderTarget(_lensTarget);
             gd.Clear(Color.Transparent);
 
@@ -2060,31 +2244,67 @@ namespace AethonMod.Content.Effects
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Matrix.Identity);
             shader.CurrentTechnique.Passes[0].Apply();
-            // Quad completo: TEXCOORD0 = 0..1 = UV de pantalla (rect destino = tamaño de la lente).
+            // Quad completo 1:1 — la lente está a resolución nativa.
             Main.spriteBatch.Draw(Main.screenTarget,
                 new Rectangle(0, 0, _lensTarget.Width, _lensTarget.Height), Color.White);
             Main.spriteBatch.End();
 
-            // === 4. Restaurar el render target original y volcar la lente ===
+            // === 4. Restaurar el render target original ===
+            // NOTA (v5.89): al volver al backbuffer FNA lo LIMPIA (semántica
+            // DiscardContents de PresentationParameters, verificada contra
+            // FNA.dll). Es lo mismo que hace el EndCapture de Terraria — y por
+            // eso el paso 5 redibuja la pantalla COMPLETA.
             if (previousBindings != null && previousBindings.Length > 0)
                 gd.SetRenderTargets(previousBindings);
             else
                 gd.SetRenderTarget(null);
 
-            Viewport viewport = gd.Viewport;
-            var destRect = new Rectangle(0, 0, viewport.Width, viewport.Height);
-
+            // === 5. VOLCAR LA LENTE A PANTALLA COMPLETA ===
+            // El backbuffer acaba de ser borrado por el restore del binding:
+            // este blit devuelve el mundo entero a pantalla (resolución nativa,
+            // distorsionado solo cerca de las fuentes). Es exactamente el mismo
+            // blit que hace el EndCapture de Terraria con screenTarget — el
+            // pipeline continúa como si la lente nunca hubiera existido, salvo
+            // por la distorsión alrededor de las fuentes.
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Matrix.Identity);
-            Main.spriteBatch.Draw(_lensTarget, destRect, Color.White);
+            Main.spriteBatch.Draw(_lensTarget,
+                new Rectangle(0, 0, gd.Viewport.Width, gd.Viewport.Height), Color.White);
             Main.spriteBatch.End();
+
+            // === 6. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===
+            // Disco de acreción, anillo de fotones, espiral de succión...
+            // La lente queda DETRÁS de los efectos del agujero negro.
+            ParticleManager.RenderAboveLensLayer();
+
+            // === 7. ENCIMA DE LA LENTE: el núcleo del agujero negro ===
+            // El shader del agujero nunca es deformado por su propia lente.
+            for (int i = 0; i < _blackHoleCount; i++)
+            {
+                Projectile bh = Main.projectile[_blackHoleIndices[i]];
+                if (bh != null && bh.active)
+                    BlackHoleProjectile.DrawCoreVisuals(bh, false);
+            }
+
+            // === 8. ENCIMA DE LA LENTE: anillos de las ondas cromáticas ===
+            for (int i = 0; i < _waveCount; i++)
+            {
+                Projectile wave = Main.projectile[_waveIndices[i]];
+                if (wave != null && wave.active)
+                    CosmicShockwaveProjectile.DrawWaveVisual(wave, false);
+            }
+
+            // Todo renderizado con éxito: el frame siguiente los proyectiles se
+            // saltan el pase del mundo y esta lente se encarga de pintarlos.
+            LensActive = true;
 
             // El pipeline de Terraria continúa con su propio Begin para la UI:
             // dejamos el SpriteBatch CERRADO y los targets tal como estaban.
         }
     }
 }
+
 ```
 
 ### 13.4 SupernovaProjectile.cs — COMPLETO (REESCRITO v5.85; ⚠️ v5.86: OnKill ahora genera 3 ondas de fuego — ver 13.0)
@@ -3393,14 +3613,14 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: v5.88 (hash en la tabla de la sección 10)
+- Commit actual: v5.89 (hash en la tabla de la sección 10)
 - Commit estable del remote: `e826c82`
 
 ---
 
 **Fin del documento.**
 
-> Última actualización: v5.88
+> Última actualización: v5.89
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

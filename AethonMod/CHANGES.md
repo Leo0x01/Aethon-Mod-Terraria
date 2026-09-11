@@ -1,5 +1,133 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.89 — FIX CRÍTICO: la "pantalla negra" del agujero negro + efectos del sol DETRÁS de la estrella
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+**Errores reportados por el usuario** (captura + client.log de la v5.88 en juego):
+
+1. *"Mira como se ve el agujero negro... toda la pantalla se oscurece y tiene
+   algún problema de transparencia"* — la captura mostraba el mundo visible SOLO
+   dentro de un cuadrado alrededor del agujero; el resto de la pantalla era
+   NEGRO PURO (esquinas a RGB 0,0,0). Además, dentro del cuadrado el mundo se
+   veía pixelado (media resolución) con bordes duros y banding.
+2. *"En el caso del sol, sus efectos deben estar detrás del sol"* — las llamas,
+   chispas, humo y la carga de la supernova se dibujaban ENCIMA del cuerpo de
+   la estrella tapándola.
+3. *"Debes mejorar el archivo Noise.png para que sea más suave"* — el ruido del
+   halo de distorsión era grano duro y se veía mal.
+4. El client.log registraba "Excepción silenciosa:
+   InvalidOperationException: End was called, but Begin has not yet been called"
+   en SupernovaProjectile:364, CosmicShockwaveProjectile:334, SunProjectile:658
+   y BlackHoleProjectile:598.
+5. Warning FNA al empaquetar: "Image loading failed: unknown image type".
+
+### A. LA CAUSA RAÍZ de la pantalla negra (verificada decompilando FNA.dll)
+
+La semántica oculta de FNA: **`GraphicsDevice.SetRenderTarget(null)` LIMPIA el
+backbuffer** al volver a bindearlo. El final del método (decompilado de
+`Microsoft.Xna.Framework.Graphics.GraphicsDevice` en FNA 1.0.0 de tML 2026.7.3):
+
+```csharp
+Viewport = new Viewport(0, 0, width, height);
+if (renderTargetUsage == RenderTargetUsage.DiscardContents)
+    Clear(ClearOptions.Target | DepthBuffer | Stencil, DiscardColor, ...);
+```
+
+Y `PresentationParameters` usa **DiscardContents por defecto** (verificado en
+su constructor). Por eso el propio Terraria hace `Clear` + redraw completo en
+su `FilterManager.EndCapture`: al bindear el backbuffer para presentar el mundo,
+el contenido previo se destruye y hay que redibujarlo entero.
+
+**El bug**: la lente v5.86-5.88 componía por REGIONES para "conservar el
+backbuffer intacto fuera de la zona del agujero"... pero al restaurar el binding
+(`SetRenderTarget(null)`) FNA ya había BORRADO el backbuffer. El mundo que
+EndCapture acababa de dibujar se destruía y solo quedaban nuestras regiones →
+pantalla negra con un cuadrado brillante, EXACTAMENTE lo que mostraba la captura
+(cuadrado perfecto de 225×225 px = radio*2.2 del BuildRegion).
+
+**El FIX (mismo pipeline que el renderer de WoTG que inspiró el sistema)**:
+- `_lensTarget` ahora a **RESOLUCIÓN NATIVA** (el shader de distorsión es barato:
+  una sola lectura de textura por píxel; la media resolución era innecesaria).
+- Tras restaurar el binding (el wipe es inevitable y esperado), se dibuja
+  `_lensTarget` **A PANTALLA COMPLETA**: el mundo vuelve a pantalla a resolución
+  nativa, distorsionado solo cerca de las fuentes. Es exactamente el mismo blit
+  que hace el EndCapture de Terraria con screenTarget.
+- ELIMINADA toda la lógica de regiones (BuildRegion/ClampRegion/srcRect):
+  sin regiones, sin bordes duros, sin pixelado, sin banding de escalado.
+  Código más simple y visual idéntico al pipeline de referencia.
+
+### B. Los efectos del sol ahora van DETRÁS de la estrella
+
+- **Dusts vanilla → partículas de la librería (capa BeforeProjectiles)**: los
+  dusts de Terraria se dibujan en la capa de polvo (DESPUÉS de los proyectiles),
+  es decir, ENCIMA del sol. Todas las partículas ambientales (chispas de la
+  corona, llamas de la superficie, humo cálido, llamarada periódica) son ahora
+  TrailGlow/SoftGlow de la librería propia, que se pintan en PostDrawTiles
+  (ANTES de los proyectiles): se ven igual de bonitas pero DETRÁS del cuerpo.
+- **La carga de la supernova detrás del sol**: la nova se invoca con `ai[1]=1`
+  ("pertenece al sol") y YA NO se dibuja por sí misma (su índice de proyectil
+  es mayor → se pintaba encima del sol). El SunProjectile pinta su carga
+  PRIMERO (capa más profunda) vía el nuevo `SupernovaProjectile.DrawChargeVisuals`
+  (método extraído y reutilizable). Invocada en solitario (SupernovaStaff),
+  se dibuja ella misma como siempre.
+- **Las llamaradas (PhoenixNova) detrás de todo**: `Projectile.hide = true` +
+  override de `DrawBehind` enrutándolas a la capa `behindProjectiles` de
+  Terraria (se dibuja ANTES que los proyectiles normales). El estallido ilumina
+  ALREDEDOR de la estrella sin tapar su cuerpo.
+- De regalo: el Begin aditivo de la llamarada ahora usa
+  `Main.GameViewMatrix.TransformationMatrix` (antes Begin por defecto sin
+  transform: con zoom ≠ 1 se descolocaba) y su restore deja el batch en el
+  estado exacto que tML espera (con sampler y matriz del juego).
+
+### C. "Excepción silenciosa" cada frame — patrón de End defensivo corregido
+
+Las 4 stack traces del log (Supernova:364, CosmicShockwave:334, Sun:658,
+BlackHole:598) venían del `try { Main.spriteBatch.End(); } catch { }` incondicional
+del restore v5.88: el path NORMAL deja el batch CERRADO (todas las capas están
+balanceadas Begin→End), así que el End defensivo lanzaba una
+InvalidOperationException CAPTURADA cada frame. tML la registraba vía su handler
+de first-chance exceptions ("Excepción silenciosa", deduplicada — por eso solo
+4 entradas en todo el log).
+
+**FIX**: el cierre defensivo ahora SOLO vive en los `catch` (el path de error,
+donde de verdad puede haber un Begin interrumpido). El restore normal es un
+Begin directo. Aplicado a BlackHoleProjectile, SunProjectile, SupernovaProjectile,
+CosmicShockwaveProjectile y PhoenixNovaProjectile.
+
+### D. Texturas de ruido suavizadas (Noise.png y FireNoiseB)
+
+- **`Noise.png` REGENERADO** (128×128): antes era ruido gris duro (desviación
+  estándar 42, rugosidad 4.2) con alfa totalmente opaco → grano visible en todo
+  el halo de distorsión. Nuevo: ruido fractal multioctava suavizado con
+  gaussian blur MODO WRAP (tileable sin costuras, el sampler es LinearWrap):
+  stdev 12, rugosidad 0.58 — un halo brumoso y suave.
+- **`FireNoiseB.png` suavizado** (512×512): el ruido del disco de acreción del
+  agujero negro (único usuario de esta textura, verificado) tenía rugosidad
+  8.0 → bandas/motear duro en el disco. Gaussian blur sigma 2.0 con wrap:
+  rugosidad 2.38 — el disco fluye cremoso manteniendo su carácter.
+
+### E. Warning FNA "Image loading failed: unknown image type" — ELIMINADO
+
+Los 23 archivos de `Content/_masters/` eran **JPEGs con extensión .png** (2.1 MB):
+tML los empaquetaba en el .tmod e intentaba cargarlos como PNG → warning de FNA
+en cada build y 2.1 MB de basura dentro del mod. **MOVIDOS a `_masters/` en la
+raíz del repo** (fuera de la carpeta del mod): siguen en git como arte de
+referencia, pero ya no se empaquetan ni rompen el loader.
+
+### F. Prueba del usuario (v5.88 → v5.89)
+
+1. `Develop Mods → Build` (limpio, sin el warning de imagen de FNA).
+2. Lanzar el agujero negro: **la pantalla ya NO se ennegrece** — el mundo se ve
+   entero a resolución nativa con la distorsión gravitacional alrededor del
+   agujero, y el log ya no acumula "Excepción silenciosa".
+3. Lanzar el sol: los efectos (llamas, chispas, humo, llamaradas, carga de la
+   nova) se ven DETRÁS del cuerpo de la estrella — el disco solar queda limpio
+   y visible todo el ciclo.
+4. La supernova del Grimorio/staff suelta sigue viéndose igual.
+
+---
+
 ## Commit v5.88 — FIX CRÍTICO: el mod NO CARGABA (textura faltante) + revisión profunda (10 pasadas)
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
