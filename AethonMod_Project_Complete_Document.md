@@ -707,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.92 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.93 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `PENDING` | v5.93 | **CAMPO DE FUERZA estilo Columna de Nebulosa + anillos de ALTA CALIDAD** (petición del usuario con referencia explícita al Nebula Pillar): el Ring.png era de **64px** (se pixelaba a 620px de radio) → **3 texturas nuevas de 1024px generadas proceduralmente** (Ring reemplazo directo 105KB con misma geometría — los 9 usos existentes ganan calidad; RingShieldNebula = cuerpo de campo con COLOR horneado rosa→magenta→cian + arcos de energía; FireRing = llamas con color propio blanco-amarillo→naranja→rojo y lengüetas fBm) + **DrawForceField** en el agujero negro: burbuja translúcida a 1.9× el horizonte (envuelve el disco) con cuerpo nebula + aros FINOS cian/rosa que "respiran" (±5-6.5% del radio) — vive en DrawCoreVisuals (mundo Y encima-de-lente) y crece con la evaporación → al morir, la onda cromática del OnKill ES el campo expandiéndose (continuidad visual perfecta) + **DrawWaveVisual reescrita**: cromática = cuerpo nebula tenue + 3 AROS FINOS R/G/B separados 3.5→9.5% del frente (aberración VISIBLE sin lavado a blanco — validado por simulación VLM + píxeles: el diseño de 3 pasadas de banda ancha se lavaba porque la base solapaba al 100%); fuego = FireRing ×2 + Ring fino de choque; compensación thinComp=1/0.92. Bugs de generación corregidos: clamp01 sobre canales 0-255 (→textura negra) y corte de borde (contenido ≤0.995 del canvas). RingShield blanca intermedia eliminada (sin usos). Compilación: 0 errores, 0 warnings |
 | `a260673` | v5.92 | **FIX del error del sol** ("el sol dio un error" — reporte del usuario con client.log): `InvalidOperationException: Begin has been called before calling End` en `CosmicShockwaveProjectile.PreDraw` (línea 367 de v5.91), 2 "Excepción silenciosa" por explosión del sol que ABORTABAN el dibujado de todos los proyectiles del frame. Causa raíz: las ondas de fuego del sol nacen con retardo escalonado (edades 0/-8/-16); en el tick EXACTO en que un retardo expira el frente mide 0 px → `DrawWaveVisual` devolvía SIN tocar el spriteBatch → el Begin de restauración INCONDICIONAL del PreDraw re-abría el batch del juego YA ABIERTO (la onda cromática del agujero nace sin retardo → jamás lo disparó, por eso SOLO el sol fallaba). Fix: `DrawWaveVisual` ahora devuelve **bool** (false = no tocó el batch / true = lo dejó CERRADO) y el PreDraw restaura SOLO cuando corresponde; auditoría de Begin/End de sol/nova/agujero/PhoenixNova/lente: ningún otro proyectil tiene el patrón. Compilación: 0 errores, 0 warnings |
 | `2f56660` | v5.91 | **El SOL AUTORITA su explosión final** (la Supernova del SupernovaStaff, verificada en el historial: el OnKill del sol mata la hija EN SU MISMO TICK con TryKillSupernova + genera ÉL las 3 ondas de fuego y el AoE del núcleo → sincronización POR CONSTRUCCIÓN, sin el punto único de fallo del índice ai[1]+clamp de la v5.88; flag ai[2]=1 SunInvoked → la hija no duplica ondas/AoE) + **partículas DEL COLOR DEL SOL** (halo dorado→blanco dorado, sin azul) + **ondas que dañan CADA 0.1 s A MEDIDA QUE AVANZAN** (_nextHitAt cooldowns por banda del frente, daño en área desde el centro; quemadura OnFire 10 s en fuego) + **aberración cromática TRANSPARENTE** (alphas 230→140/150→95) + **agujero negro: materia absorbida ORIENTADA AL CENTRO** (velocidad radial + Rotation=angle+π) con **ACELERACIÓN al explotar** (PullToGlobalBoost hasta ×6, reseteado en OnKill; polvo ×3) + **lente 1.4×** (mismo ángulo ~0.8 rad) + **PhoenixNova DETRÁS del sol** (DrawBehind→drawCacheProjsBehindProjectiles, firma verificada por reflexión; quirúrgico, sin el desastre v5.89) + **FIX del SpriteBatch del PhoenixNova** (restauraba SIN GameViewMatrix.TransformationMatrix → proyectiles vanilla "flotando/subiendo": la causa real de los círculos de v5.89) |
 | `9b5f0a5` | v5.90 | **REVERT del sol a 8781aa4/v5.88** (la v5.89 lo arruinó: humo SoftGlow en círculos que subían + llamaradas tapadas por el cuerpo → sin su onda expansiva) conservando SOLO el fix de la excepción silenciosa + agujero negro: **partículas moradas ELIMINADAS** (succión multicolor, humo púrpura, espiral violeta, halo Noise.png — su único usuario) y **partículas ABSORBIDAS** nuevas (componente PullTo de la librería: aceleran al centro y mueren al llegar; estelas TrailGlow ámbar→blanco + polvo GoldFlame) + **UNA SOLA explosión cromática al desaparecer** (OnKill, estilo 0, daño COMPLETO, radio 620, aberración RGB real + distorsión del fondo; las 4 ondas v5.86 eliminadas) + **LENTE DELGADA** (maxLensingAngle 24→1.5 rad, fuerza 0.62→0.55 → ángulo pico ~14.9→0.8 rad: el shader rota alrededor del centro de pantalla y movía TODA la pantalla; radio 0.75×→1.1×) + **fix del CORTE por los lados** al crecer (canvas del RealBlackHoleShader fijo de 256px con zoom creciente → ahora canvas = 256·scale con zoom constante y disco con tope: nunca cruza el borde) |
@@ -788,10 +789,38 @@ Commits desde v5.28 hasta v5.92 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.92
-- **Mensaje**: "fix v5.92: error del sol — Begin has been called before calling End (InvalidOperationException en CosmicShockwaveProjectile.PreDraw)"
+- **Versión**: v5.93
+- **Mensaje**: "feat v5.93: campo de fuerza estilo Columna de Nebulosa (magenta→cian, aberración en el borde que respira) + anillos 1024px (Ring HD / RingShieldNebula / FireRing con llamas) + onda cromática = el campo expandiéndose con franjas R/G/B separadas"
 
-### 11.2 Qué se hizo en v5.92 (fix del error del sol)
+### 11.2 Qué se hizo en v5.93 (campo de fuerza Nebula + calidad de anillos)
+
+**Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía muy
+baja calidad y era solo blanco; el agujero necesita el CAMPO DE FUERZA de la
+Columna de Nebulosa (burbuja con aberración cromática que al destruirse se
+expande y desaparece); los anillos de fuego del sol también debían mejorar.
+"Si te faltan assets puedes generarlos o buscarlos y recrear tus versiones."
+
+1. **DIAGNÓSTICO**: Ring.png era 64×64 — pixelado al escalarlo a 620px. El
+   escudo real del Nebula Pillar (analizado con búsqueda de imágenes + VLM):
+   borde exterior cian-azul brillante + cuerpo magenta + interior rosado,
+   translúcido, con energía interna — la aberración vive en el BORDE.
+2. **TEXTURAS 1024px** (procedurales, funciones suaves = cero aliasing):
+   Ring.png (reemplazo directo, misma geometría → los 9 usos existentes
+   ganan calidad solos), RingShieldNebula.png (cuerpo del campo con color
+   horneado + arcos de energía), FireRing.png (llamas con color propio).
+3. **CAMPO DE FUERZA del agujero** (DrawForceField, en ambos pases):
+   burbuja a 1.9× el horizonte = cuerpo nebula + aros finos cian/rosa que
+   respiran; crece con la evaporación; al morir la onda lo "expande".
+4. **ONDA CROMÁTICA**: cuerpo nebula tenue + 3 aros finos R/G/B separados
+   (3.5→9.5% del frente, invertidos en la convergente) — aberración clara,
+   sin lavado a blanco (diseño validado por simulación con VLM + píxeles).
+5. **ONDA DE FUEGO del sol**: FireRing ×2 (llamas con lengüetas reales,
+   núcleo incandescente → rojo en puntas) + Ring fino de choque blanco.
+6. Bugs de generación corregidos: clamp01 sobre canales 0-255 (FireRing
+   negra), corte de borde (contenido ≤ 0.995 del canvas), y el preview de
+   simulación (alpha ×255 doble → blanco falso).
+
+### 11.2.0 Qué se hizo en v5.92 (histórico — fix del error del sol)
 
 **Reporte del usuario**: "el sol dio un error" — el client.log mostraba 2
 "Excepción silenciosa" por cada explosión del sol:
@@ -1006,6 +1035,12 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real, 0 errores / 0 warnings)
+- ✅ **v5.93 — CAMPO DE FUERZA estilo Columna de Nebulosa** alrededor del
+  agujero negro (magenta→cian con aberración viva en el borde) que la onda
+  cromática "expande" al morir
+- ✅ **v5.93 — ANILLOS 1024px DE ALTA CALIDAD**: Ring HD (todos los
+  efectos ganan), RingShieldNebula (cuerpo del campo), FireRing (llamas
+  reales con color propio para el sol)
 - ✅ **v5.92 — SIN el error del sol**: el SpriteBatch nunca queda desbalanceado
   (las ondas con retardo escalonado ya no re-abren un batch abierto)
 - ✅ **v5.91 — SOL AUTORITA su explosión final**: Supernova sincronizada por
@@ -1032,20 +1067,19 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 - ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
 - ✅ Build 100% limpio: 0 warnings 0 errores sin supresiones (v5.88)
 - ⚠️ **PENDIENTE**: probar en tModLoader real (recompilar, verificar carga sin
-  error, explosión del sol SIN "Excepción silenciosa" en el client.log — fix
-  v5.92 —, ondas con daño cada 0.1 s, agujero con materia absorbida y
-  aceleración final, y desactivación limpia)
+  error, campo de fuerza Nebula alrededor del agujero + onda R/G/B al
+  explotar — v5.93 —, llamas del sol en HD, log limpio, desactivación limpia)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
 2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar SunStaff: llamaradas detrás de la estrella + carga dorada +
-   explosión a los 10 s exactos con 3 ondas que barren daño cada 0.1 s —
-   **SIN error en el client.log** (el fix v5.92 elimina las 2 "Excepción
-   silenciosa" por explosión)
-4. Disparar BlackHoleStaff: materia ámbar cayendo al centro + aceleración
-   final + onda cromática transparente con daño cada 0.1 s
-5. Verificar que el client.log quede LIMPIO tras ambas explosiones
+3. Disparar BlackHoleStaff: el agujero rodeado por su CAMPO DE FUERZA
+   magenta→cian con aberración en el borde (estilo Nebula Pillar) + al
+   desaparecer, el campo EXPANDIÉNDOSE como onda con franjas R/G/B
+   separadas y daño cada 0.1 s
+4. Disparar SunStaff: ondas de fuego con LLAMAS reales (núcleo
+   incandescente → rojo en las puntas) + anillos de la nova en HD
+5. Verificar que el client.log quede LIMPIO (sin "Excepción silenciosa")
 6. **Desactivar el mod o Mods → Reload: la desactivación debe completarse EN
    SILENCIO** (sin diálogo de error, sin pedir reinicio — fix v5.87)
 7. Si algo falla, revisar client.log (la lente tiene try/catch total: lo peor que
@@ -3738,7 +3772,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.92
+> Última actualización: v5.93
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

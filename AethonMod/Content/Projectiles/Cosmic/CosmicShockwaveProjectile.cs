@@ -423,10 +423,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float progress = MathHelper.Clamp(age / duration, 0f, 1f);
                 float alpha = WaveAlpha(age, duration);
 
+                // v5.93 — Texturas de ALTA CALIDAD (1024px): el Ring.png de
+                // 64px se pixelaba al escalarlo al radio de la onda (hasta
+                // 620px) y su anillo fino teñido se veía BLANCO plano.
+                //   ring (fino)      — anillo blanco nítido (frentes de choque
+                //                      y franjas de aberración cromática)
+                //   ringShieldNebula — cuerpo de campo de fuerza CON COLOR
+                //                      horneado (interior rosa → magenta →
+                //                      borde cian, el escudo del Nebula Pillar)
+                //   fireRing         — llamas con COLOR propio (blanco-amarillo
+                //                      → naranja → rojo en las puntas)
                 Texture2D ring = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/Ring").Value;
+                Texture2D nebulaBody = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/RingShieldNebula").Value;
+                Texture2D fireRing = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/FireRing").Value;
                 Vector2 drawPos = p.Center - Main.screenPosition;
-                float ringUnit = ring.Width / 2f; // radio del anillo a escala 1
+                float ringUnit = ring.Width / 2f;
+                float nebUnit = nebulaBody.Width / 2f;
+                float fireUnit = fireRing.Width / 2f;
+                // El núcleo del Ring fino vive a 0.92 del radio de su textura:
+                // factor de compensación para que un radio pedido R aparezca a R.
+                float thinComp = 1f / 0.92f;
 
                 if (endActiveBatch)
                     Main.spriteBatch.End();
@@ -436,35 +455,48 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 if (style == StyleFire)
                 {
-                    // === TRIPLE ANILLO DE FUEGO ===
-                    DrawRing(ring, drawPos, front, ringUnit,
-                        new Color(220, 50, 10, (byte)(alpha * 200f)));
-                    DrawRing(ring, drawPos, front * 0.93f, ringUnit,
-                        new Color(255, 130, 30, (byte)(alpha * 220f)));
-                    DrawRing(ring, drawPos, front * 0.86f, ringUnit,
-                        new Color(255, 230, 130, (byte)(alpha * 230f)));
-                    DrawRing(ring, drawPos, front * 0.8f, ringUnit,
-                        new Color(255, 255, 220, (byte)(alpha * 120f)));
+                    // === ANILLO DE FUEGO (v5.93: FireRing.png con llamas reales) ===
+                    // La textura trae el COLOR propio (núcleo blanco-amarillo
+                    // incandescente → naranja → ROJO en las puntas de las
+                    // lengüetas): dos pasadas de distinta escala dan cuerpo y
+                    // profundidad, y el Ring fino blanco marca el frente de
+                    // choque caliente. La FireRing lleva su núcleo a 0.80 del
+                    // radio de la textura (fix del corte de borde) → las
+                    // escalas ×1.08/×0.93 cubren la banda de daño 0.72-1.02·front.
+                    DrawRing(fireRing, drawPos, front * 1.08f, fireUnit,
+                        new Color(255, 255, 255, (byte)(alpha * 215f)));
+                    DrawRing(fireRing, drawPos, front * 0.93f, fireUnit,
+                        new Color(255, 225, 170, (byte)(alpha * 195f)));
+                    DrawRing(ring, drawPos, front * 0.97f * thinComp, ringUnit,
+                        new Color(255, 250, 230, (byte)(alpha * 140f)));
                 }
                 else
                 {
-                    // === ANILLO CROMÁTICO (aberración RGB real) — v5.91 TRANSPARENTE ===
-                    // La separación de canales crece con la edad (dispersión)
-                    // y se INVIERTEn en la onda inversa (azul por delante).
-                    // v5.91: alpha 230 → 140 (canales) y 150 → 95 (núcleo):
-                    // la aberración cromática debe verse TRANSPARENTE, un velo
-                    // que deja ver el mundo a través del anillo (antes era un
-                    // anillo aditivo casi opaco de alpha 230).
-                    float fringe = (2.5f + 4.5f * progress) *
+                    // === CAMPO DE FUERZA CROMÁTICO (v5.93 — estilo Columna de Nebulosa) ===
+                    // La onda ES el campo de fuerza del agujero expandiéndose
+                    // al destruirse (petición del usuario). Look validado con
+                    // simulación: CUERPO translúcido magenta→cian (color horneado
+                    // en RingShieldNebula — 1 pasada, sin lavado a blanco) + TRES
+                    // AROS FINOS R/G/B con desfase radial = la aberración
+                    // cromática del escudo del Nebula Pillar, SEPARADA y VISIBLE.
+                    // La separación crece con la edad (dispersión real: el frente
+                    // al desvanecerse dispersa más) y se INVIERTE en la onda
+                    // convergente legada. Transparente: alphas moderados.
+                    float fringe = front * (0.035f + 0.06f * progress) *
                                    (style == StyleChromaticInverse ? -1f : 1f);
-                    byte a = (byte)(alpha * 140f);
 
-                    DrawRing(ring, drawPos, front + fringe, ringUnit, new Color(255, 40, 40, a));
-                    DrawRing(ring, drawPos, front, ringUnit, new Color(60, 255, 90, a));
-                    DrawRing(ring, drawPos, front - fringe, ringUnit, new Color(70, 130, 255, a));
-                    // Núcleo blanco que unifica los tres canales (velo tenue).
-                    DrawRing(ring, drawPos, front, ringUnit,
-                        new Color(255, 255, 255, (byte)(alpha * 95f)));
+                    // Cuerpo del campo (tenue, se desvanece con la envolvente).
+                    DrawRing(nebulaBody, drawPos, front, nebUnit,
+                        new Color(255, 255, 255, (byte)(alpha * 145f)));
+                    // Franja ROJA exterior.
+                    DrawRing(ring, drawPos, (front + fringe) * thinComp, ringUnit,
+                        new Color(255, 60, 70, (byte)(alpha * 175f)));
+                    // Franja VERDE al centro.
+                    DrawRing(ring, drawPos, front * thinComp, ringUnit,
+                        new Color(80, 255, 135, (byte)(alpha * 140f)));
+                    // Franja AZUL interior.
+                    DrawRing(ring, drawPos, (front - fringe) * thinComp, ringUnit,
+                        new Color(75, 155, 255, (byte)(alpha * 175f)));
                 }
 
                 Main.spriteBatch.End();

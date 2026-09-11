@@ -587,6 +587,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // === FALLBACK: dibujado manual si el shader no carga ===
                     DrawFallback(p, drawPos);
                 }
+
+                // === 4. CAMPO DE FUERZA (v5.93 — estilo Columna de Nebulosa) ===
+                // Petición del usuario: el agujero negro necesita el CAMPO DE
+                // FUERZA del Nebula Pillar — burbuja con ABERRACIÓN CROMÁTICA
+                // que al destruirse se EXPANDE y desaparece (esa expansión es
+                // la onda cromática del OnKill, que usa la MISMA RingShield).
+                // Look (referencia del juego): franja exterior CIAN-AZUL +
+                // cuerpo MAGENTA + interior ROSADO, borde suave y brillante,
+                // semitransparente — 3 pasadas de RingShield.png (1024px,
+                // banda ancha con arcos de energía) con desfases radiales
+                // vivos (la separación "respira"). Se dibuja en AMBOS pases
+                // (mundo y encima-de-la-lente) porque vive en DrawCoreVisuals.
+                DrawForceField(p, drawPos);
             }
             catch
             {
@@ -596,6 +609,66 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // caso raro y registrado una sola vez por tML, no cada frame).
                 try { Main.spriteBatch.End(); } catch { }
             }
+        }
+
+        /// <summary>
+        /// v5.93 — Campo de fuerza del agujero negro (estilo Columna de
+        /// Nebulosa): burbuja translúcida con aberración cromática alrededor
+        /// del agujero. Look validado con simulación: CUERPO magenta→cian
+        /// (color horneado en RingShieldNebula.png, 1024px con arcos de
+        /// energía) + aros FINOS cian (exterior) y rosa (interior) cuya
+        /// separación "respira" — el borde del escudo del Nebula Pillar.
+        /// El radio sigue al horizonte (crece con la secuencia de
+        /// evaporación) y al morir el agujero la onda cromática del OnKill
+        /// continúa la historia: el campo "destruido" expandiéndose.
+        /// </summary>
+        private static void DrawForceField(Projectile p, Vector2 drawPos)
+        {
+            // Radio del horizonte en px (= 0.3·zoomBase·canvasPx·0.5, la misma
+            // fórmula de la sección 3) — el campo lo envuelve TODO (disco de
+            // acreción incluido: el toro llega a ~1.4× el horizonte).
+            float horizonPx = 0.3f * p.width * Math.Max(p.scale, 0.08f);
+            float shieldR = horizonPx * 1.9f;
+            if (shieldR < 14f) return;
+
+            Texture2D body = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RingShieldNebula").Value;
+            Texture2D thin = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/Ring").Value;
+            float bodyUnit = body.Width / 2f;
+            float thinUnit = thin.Width / 2f;
+            // El núcleo del Ring fino vive a 0.92 del radio de su textura.
+            float thinComp = 1f / 0.92f;
+
+            float t = Main.GlobalTimeWrappedHourly;
+            // Pulso lento del campo + separación de aberración que "respira"
+            // (±5-6.5% del radio — proporcional, consistente a toda escala).
+            float pulse = 0.72f + 0.28f * (float)Math.Sin(t * 2.1f + p.whoAmI * 0.7f);
+            float aberr = shieldR * (0.05f + 0.015f * (float)Math.Sin(t * 1.4f + 1.9f));
+
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            // Cuerpo del campo: magenta translúcido → borde cian (color horneado).
+            DrawRingTex(body, drawPos, shieldR, bodyUnit,
+                new Color(255, 255, 255, (byte)(215 * pulse)));
+            // Aro fino CIAN exterior (la aberración brillante del borde).
+            DrawRingTex(thin, drawPos, (shieldR + aberr) * thinComp, thinUnit,
+                new Color(120, 225, 255, (byte)(160 * pulse)));
+            // Aro fino ROSA interior.
+            DrawRingTex(thin, drawPos, (shieldR - aberr) * thinComp, thinUnit,
+                new Color(255, 125, 170, (byte)(130 * pulse)));
+            Main.spriteBatch.End();
+        }
+
+        /// <summary>Dibuja una textura de anillo centrada en drawPos con radio en píxeles (v5.93).</summary>
+        private static void DrawRingTex(Texture2D tex, Vector2 drawPos, float radiusPx,
+            float texUnit, Color color)
+        {
+            if (radiusPx <= 0.5f || color.A == 0) return;
+            float scale = radiusPx / texUnit;
+            Main.spriteBatch.Draw(tex, drawPos, null, color, 0f,
+                tex.Size() * 0.5f, scale, SpriteEffects.None, 0f);
         }
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>

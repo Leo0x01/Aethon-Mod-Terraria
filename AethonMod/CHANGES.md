@@ -1,5 +1,75 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.93 — El campo de fuerza de la Columna de Nebulosa + anillos de ALTA CALIDAD
+
+**Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía MUY
+baja calidad y era solo blanco; el agujero negro necesita el CAMPO DE FUERZA
+de la Columna de Nebulosa (https://terraria.wiki.gg/es/wiki/Columna_de_nebulosa)
+— la burbuja con aberración cromática que rodea al pilar y que AL DESTRUIRSE
+SE EXPANDE Y DESAPARECE; los anillos de fuego del sol también debían mejorar
+su calidad. "Si te faltan assets puedes generarlos o buscarlos y recrear tus
+versiones."
+
+### A. DIAGNÓSTICO DE LA CALIDAD
+
+El `Ring.png` era de **64×64 px** — al escalarlo al radio de la onda (hasta
+620 px) se pixelaba y su anillo fino teñido se veía como línea blanca plana.
+Análisis del escudo real del Nebula Pillar (búsqueda de imágenes + VLM sobre
+capturas del juego): burbuja translúcida con **borde exterior cian-azul
+brillante, cuerpo magenta, interior rosado**, textura interna de energía,
+semitransparente — la aberración vive en el BORDE.
+
+### B. TEXTURAS NUEVAS (1024×1024, generadas proceduralmente — funciones suaves, cero aliasing)
+
+1. **`Ring.png` (REEMPLAZO directo, 105 KB)**: misma geometría del viejo
+   (núcleo fino, teñible blanco) pero a 1024 px con halo suave y modulación
+   de energía sutil. Los 9 usos existentes (nova, PhoenixNova, librería de
+   partículas, V20...) ganan calidad automáticamente.
+2. **`RingShieldNebula.png` (nueva)**: el CUERPO del campo de fuerza con
+   COLOR horneado — gradiente radial rosa interior → magenta → cian brillante
+   en el borde + arcos de energía + wisps nebulosos.
+3. **`FireRing.png` (nueva, 356 KB)**: anillo de LLAMAS con color propio
+   (núcleo blanco-amarillo incandescente → naranja → rojo profundo en las
+   puntas) con lengüetas internas/externas moduladas por fBm periódico.
+   Bug de generación corregido en el proceso (clamp01 recortaba los canales
+   0-255 a 1 → textura negra) + fix del corte de borde (todo el contenido
+   queda ≤ 0.995 del canvas).
+
+### C. EL CAMPO DE FUERZA DEL AGUJERO NEGRO (estilo Nebula, durante su vida)
+
+`BlackHoleProjectile.DrawForceField` (llamado desde `DrawCoreVisuals` — funciona
+en el pase del mundo Y encima de la lente): burbuja a 1.9× el horizonte
+(envuelve el disco de acreción) = **cuerpo RingShieldNebula translúcido +
+aros FINOS cian (exterior) y rosa (interior) cuya separación "respira"**
+(±5-6.5% del radio, proporcional). El radio sigue al horizonte → crece con la
+secuencia de evaporación → al morir, la onda cromática del OnKill continúa la
+historia: el campo "destruido" expandiéndose hasta desvanecerse.
+
+### D. LA ONDA CROMÁTICA = EL CAMPO EXPANDIÉNDOSE (y las de fuego del sol)
+
+`DrawWaveVisual` reescrita con el diseño VALIDADO POR SIMULACIÓN (VLM +
+estadísticas de píxel: el primer intento de 3 pasadas RGB de banda ancha se
+LAVABA a blanco porque la base de la banda solapaba al 100% en additive):
+
+- **Cromática (agujero)**: cuerpo translúcido RingShieldNebula (tenue) + TRES
+  AROS FINOS R/G/B con desfase radial 3.5%→9.5% del frente (crece con la
+  edad = dispersión real; invertido en la convergente legada) — franjas de
+  aberración SEPARADAS y VISIBLES sobre el cuerpo, sin lavado.
+- **Fuego (sol)**: FireRing ×2 pasadas (exterior a 1.08·front, interior a
+  0.93·front) + Ring fino blanco como frente de choque — llamas reales con
+  lengüetas y gradiente de color propio.
+- Compensación `thinComp = 1/0.92` (el núcleo del Ring vive a 0.92 del radio
+  de la textura → un radio pedido R aparece exactamente a R).
+
+### E. VERIFICACIÓN
+
+- Simulación del look in-game validada con VLM: campo = "translucent magenta
+  body, bright cyan edge, pink inner ring, Nebula Pillar style, saturated
+  colors"; onda = "red/green/blue rings clearly separated over translucent
+  body". Estadísticas de saturación: 74-79 (colores vivos, no blanco).
+- Compilación contra tModLoader v2026.07.3.0 real: **0 errores, 0 warnings**.
+- `RingShield.png` (versión blanca intermedia) eliminada: sin referencias.
+
 ## Commit v5.92 — FIX: "el sol dio un error" (InvalidOperationException del SpriteBatch)
 
 **Reporte del usuario**: el client.log mostraba 2 "Excepción silenciosa" por cada
