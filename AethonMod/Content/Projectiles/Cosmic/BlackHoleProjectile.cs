@@ -5,6 +5,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -21,9 +22,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// El shader se dibuja sobre un canvas de InvisiblePixel de 256px (el mismo tamaño
     /// del render target que usa WoTG para el pet).
     ///
+    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
+    /// render en PostDrawTiles = capa de fondo con profundidad): espiral de succión
+    /// con ColorShift blanco→violeta, disco de acreción de estelas TrailGlow orbitando
+    /// (componente Orbit + rotación tangencial sincronizada), anillo de fotones pulsante
+    /// con ScaleUp, halo de distorsión con ruido procedural, implosión/explosión con
+    /// presets y screenshake con PunchCameraModifier al morir.
+    ///
     /// Mejoras propias: pop elástico de aparición (ElasticOut, como el pet),
-    /// colapso final antes de expirar, succión espiral de partículas, disco de acreción
-    /// con GoldFlame, atracción gravitacional de enemigos Y de polvo cercano,
+    /// colapso final antes de expirar, succión espiral de partículas,
+    /// atracción gravitacional de enemigos Y de polvo cercano,
     /// refuerzo del event horizon e implosión + explosión al morir.
     /// </summary>
     public class BlackHoleProjectile : ModProjectile
@@ -74,11 +82,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
+                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
                 SpawnSuctionParticles();
                 SpawnAccretionDiskParticles();
                 SpawnSmokeParticles();
                 SpawnCapturedEnergySparks();
                 AttractNearbyDust();
+
+                // v5.84: partículas de la librería propia (capa de fondo aditiva —
+                // se renderizan en PostDrawTiles, detrás del canvas del agujero,
+                // creando profundidad por capas)
+                SpawnLibrarySuctionSpiral();
+                SpawnLibraryAccretionDisk();
+                SpawnLibraryPhotonRing();
+                SpawnLibraryDistortionHalo();
             }
 
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 350) ===
@@ -217,6 +234,156 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // Componente tangencial sutil → espiral
                 Vector2 pull = toCenter * strength + new Vector2(-toCenter.Y, toCenter.X) * strength * 0.35f;
                 d.velocity += pull;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  v5.84 — PARTÍCULAS DE LA LIBRERÍA PROPIA (capa de fondo aditiva)
+        //  Sistema data-oriented de Content/Particles (libro de referencia,
+        //  secciones 10-16): additive blending + ColorShift + Orbit + ScaleUp.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Espiral de succión con partículas SoftGlow aditivas: nacen en el borde del
+        /// campo gravitatorio con velocidad tangencial + radial y caen en espiral,
+        /// desplazando su color de blanco incandescente a violeta cósmico al morir.
+        /// </summary>
+        private void SpawnLibrarySuctionSpiral()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                float angle = Projectile.rotation * 1.5f + VisualsTime * 0.021f + i * MathHelper.Pi;
+                float dist = Main.rand.NextFloat(105f, 150f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+
+                // Velocidad: tangente (órbita) + componente hacia el centro → espiral natural
+                Vector2 tangent = new Vector2(-(float)Math.Sin(angle), (float)Math.Cos(angle));
+                Vector2 toCenter = -new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                Vector2 velocity = tangent * 2.1f + toCenter * 1.05f;
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = velocity,
+                    Scale = Vector2.One * Main.rand.NextFloat(0.7f, 1.1f),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 240, 200, 190)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 200, 190)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(150, 70, 255, 60)),
+                    TimeLeft = 45,
+                    Duration = 45,
+                    TextureId = ParticleTex.SoftGlow,
+                    BlendMode = 1, // Additive
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                p.EnableComponent(ComponentFlag.ScaleDown);
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Disco de acreción con estelas TrailGlow orbitando: usa el componente Orbit
+        /// (centro/radio/velocidad angular) con la rotación sincronizada al mismo
+        /// ritmo (RotationSpeed = angVel) para que las estelas queden siempre
+        /// alineadas tangencialmente, como materia caliente arremolinada.
+        /// </summary>
+        private void SpawnLibraryAccretionDisk()
+        {
+            if (Main.rand.NextBool(4))
+            {
+                float radius = Main.rand.NextFloat(26f, 46f) * MathHelper.Max(Projectile.scale, 0.4f);
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                float angVel = 0.22f; // rad/tick — el disco gira rápido
+
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * radius,
+                    (float)Math.Sin(angle) * radius);
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = Vector2.Zero,
+                    Scale = new Vector2(1.8f, 0.45f), // estirada tangencialmente (TrailGlow 32x8)
+                    Rotation = angle + MathHelper.PiOver2, // alineada a la tangente
+                    RotationSpeed = angVel, // sincronizada con la órbita → siempre tangencial
+                    PackedColor = ParticleManager.PackColor(new Color(255, 190, 90, 200)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 210, 120, 200)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 80, 20, 40)),
+                    TimeLeft = 48,
+                    Duration = 48,
+                    TextureId = ParticleTex.TrailGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                // Orbit: UserData0/1 = centro, UserData2 = velocidad angular, UserData3 = radio
+                p.UserData0 = Projectile.Center.X;
+                p.UserData1 = Projectile.Center.Y;
+                p.UserData2 = angVel;
+                p.UserData3 = radius;
+                p.EnableComponent(ComponentFlag.Orbit);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                p.EnableComponent(ComponentFlag.FadeOut);
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Anillo de fotones pulsante: Ring con ScaleUp + FadeIn + FadeOut — un destello
+        /// circular en el horizonte de sucesos que se expande y desvanece.
+        /// </summary>
+        private void SpawnLibraryPhotonRing()
+        {
+            if (VisualsTime % 36f == 0f && VisualsTime > 20f && Projectile.scale > 0.3f)
+            {
+                var p = new ParticleData
+                {
+                    Position = Projectile.Center,
+                    Velocity = Vector2.Zero,
+                    Scale = Vector2.One,
+                    PackedColor = ParticleManager.PackColor(new Color(200, 220, 255, 170)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(200, 220, 255, 170)),
+                    TimeLeft = 30,
+                    Duration = 30,
+                    TextureId = ParticleTex.Ring,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.UserData1 = 1.15f * Projectile.scale; // escala final X
+                p.UserData2 = 1.15f * Projectile.scale; // escala final Y
+                p.EnableComponent(ComponentFlag.ScaleUp);
+                p.EnableComponent(ComponentFlag.FadeOut);
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Halo de distorsión: ruido procedural rotando lentamente con alpha muy bajo
+        /// y tinte violeta — sugiere la curvatura del espacio alrededor del agujero.
+        /// </summary>
+        private void SpawnLibraryDistortionHalo()
+        {
+            if (Main.rand.NextBool(18))
+            {
+                var p = new ParticleData
+                {
+                    Position = Projectile.Center,
+                    Velocity = Vector2.Zero,
+                    Scale = Vector2.One * 2.6f * MathHelper.Max(Projectile.scale, 0.5f),
+                    Rotation = Main.rand.NextFloat(0f, MathHelper.TwoPi),
+                    RotationSpeed = Main.rand.NextFloat(-0.02f, 0.02f),
+                    PackedColor = ParticleManager.PackColor(new Color(140, 90, 200, 26)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(140, 90, 200, 26)),
+                    TimeLeft = 60,
+                    Duration = 60,
+                    TextureId = ParticleTex.Noise,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.AboveTiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                ParticleManager.Spawn(p);
             }
         }
 
@@ -394,6 +561,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
+            // v5.84: micro-colapso de la librería sobre el objetivo
+            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(200, 100, 255), 18);
+            ParticlePresets.RingPulse(target.Center, 90f, new Color(220, 180, 255, 170), 22);
+
             // Implosión: 50 partículas convergiendo en espiral
             for (int i = 0; i < 50; i++)
             {
@@ -444,7 +615,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === COLAPSO FINAL: implosión + explosión ===
+            // === v5.84: PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===
+            // Implosión: la materia visible colapsa hacia el singularity
+            ParticlePresets.Implosion(Projectile.Center, 165f, 46,
+                new Color(190, 90, 255), 26);
+            // Explosión: liberación de energía del colapso
+            ParticlePresets.Explosion(Projectile.Center, 130f, 28,
+                new Color(255, 240, 200), new Color(255, 120, 40), 40);
+            // Onda expansiva: anillo violeta + anillo dorado retardado
+            ParticlePresets.RingPulse(Projectile.Center, 250f,
+                new Color(180, 100, 255, 200), 32);
+            ParticlePresets.RingPulse(Projectile.Center, 320f,
+                new Color(255, 200, 100, 140), 44);
+
+            // Screenshake coordinado (sección 8.5 del libro)
+            try
+            {
+                Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
+                    Projectile.Center, new Vector2(1f, 0f), 7f, 10, 20, 0.4f,
+                    "AethonBlackHoleCollapse"));
+            }
+            catch { }
+
+            // === COLAPSO FINAL: implosión + explosión (dusts, capa frontal) ===
             // Implosión: partículas convergiendo
             for (int i = 0; i < 60; i++)
             {

@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.81 |
+| **Versión (build.txt)** | 5.84 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.83 — BlackHole + Sun idénticos a WoTG + fix .fxc |
+| **Commit actual** | v5.84 — librería de partículas completa + capas de VFX en BlackHole/Sun |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.83
+version = 5.84
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -212,14 +212,14 @@ Todos los sprites originales en:
 - `DendriticNoiseZoomedOut.png` ← canvas del SunShader (añadida en v5.83)
 
 ### 4.4 Texturas procedurales (8 texturas en `Content/Effects/Procedural/`)
-- `SoftGlow.png` (ID 0 en ParticleManager)
-- `Trail.png` (ID 1)
-- `Star.png` (ID 2)
-- `Slash.png` (ID 3)
-- `Vortex.png` (ID 4)
-- `Ring.png` (ID 5)
-- `Crescent.png` (ID 6)
-- `Noise.png` (ID 7)
+- `SoftGlow.png` (ParticleTex.SoftGlow = ID 0 en ParticleManager)
+- `Trail.png` (ParticleTex.Trail = 1)
+- `Star.png` (ParticleTex.Star = 2)
+- `Slash.png` (ParticleTex.Slash = 3)
+- `Vortex.png` (ParticleTex.Vortex = 4)
+- `Ring.png` (ParticleTex.Ring = 5)
+- `Crescent.png` (ParticleTex.Crescent = 6)
+- `Noise.png` (ParticleTex.Noise = 7)
 
 ### 4.5 Texturas de efectos del remote (28 texturas en `Content/Effects/*.png`)
 - GlowOrb, GlowOrbCyan, GlowOrbGold, GlowOrbGreen, GlowOrbMagenta, GlowOrbPurple, GlowOrbWhite
@@ -232,11 +232,13 @@ Todos los sprites originales en:
 - SparkleStar
 - TrailGlow
 
-### 4.6 Sistema de partículas data-oriented
-3 archivos en `Content/Particles/`:
-- `ParticleData.cs` — struct con `[StructLayout(LayoutKind.Sequential, Pack = 1)]`
-- `ParticleBuffer.cs` — buffer pre-asignado de 2000 partículas (capacidad default), estrategia round-robin
-- `ParticleManager.cs` — `ModSystem` orquestador, actualización en `PreUpdateDusts`, render en `PostDrawTiles`
+### 4.6 Sistema de partículas data-oriented (COMPLETO desde v5.84)
+6 archivos en `Content/Particles/`:
+- `ParticleData.cs` — struct con `[StructLayout(LayoutKind.Sequential, Pack = 1)]` + ComponentFlag + LayerPriorities + constantes ParticleTex
+- `ParticleBuffer.cs` — buffer pre-asignado de 4000 partículas, estrategia round-robin
+- `ParticleManager.cs` — `ModSystem` orquestador, update en `PreUpdateDusts`, render en `PostDrawTiles` con frustum culling
+- `ShapeDescriptor.cs` — API de spawn por forma: Box, Circle, Hollow, Cone, Sphere, Vortex, Line
+- `ParticlePresets.cs` — efectos pre-empaquetados: Explosion, Implosion, RingPulse, VortexSwirl
 
 ### 4.7 Estructura global de carpetas (raíz del proyecto)
 ```
@@ -450,27 +452,33 @@ public struct ParticleData
 }
 ```
 
-Total: ~80 bytes por partícula. Con 2000 partículas = ~160 KB en cache L2.
+Total: ~80 bytes por partícula. Con 4000 partículas = ~320 KB en cache L2.
 
-### 7.2 ComponentFlags (bitmask)
+### 7.2 ComponentFlags (bitmask) — v5.84: TODOS implementados
 
 ```csharp
 public static class ComponentFlag
 {
     public const ulong Gravity     = 1UL << 0;   // UserData0 = gravedad (default 0.2f)
-    public const ulong FadeOut     = 1UL << 1;   // Empieza fade al 50% de vida
-    public const ulong FadeIn      = 1UL << 2;
-    public const ulong ScaleDown   = 1UL << 3;   // UserData1/UserData2 = scale inicial
-    public const ulong ScaleUp     = 1UL << 4;
-    public const ulong Homing      = 1UL << 5;
-    public const ulong Rotation    = 1UL << 6;
-    public const ulong ColorShift  = 1UL << 7;
-    public const ulong Orbit       = 1UL << 8;
-    public const ulong Trail       = 1UL << 9;
-    public const ulong DieOnTile   = 1UL << 11;
-    public const ulong EmitLight   = 1UL << 12;
+    public const ulong FadeOut     = 1UL << 1;   // alpha decae en la 2ª mitad de la vida
+    public const ulong FadeIn      = 1UL << 2;   // UserData0 = ticks de rampa (default 10)
+    public const ulong ScaleDown   = 1UL << 3;   // UserData1/2 = escala inicial → 0
+    public const ulong ScaleUp     = 1UL << 4;   // UserData1/2 = escala final ← 0
+    public const ulong Homing      = 1UL << 5;   // UserData0 = whoAmI (≤0 = más cercano), UserData3 = fuerza
+    public const ulong Rotation    = 1UL << 6;   // siempre activo vía RotationSpeed
+    public const ulong ColorShift  = 1UL << 7;   // PackedStartColor → PackedEndColor
+    public const ulong Orbit       = 1UL << 8;   // UserData0/1 = centro, UserData2 = rad/tick, UserData3 = radio
+    public const ulong Trail       = 1UL << 9;   // reservado (roadmap sección 49.2)
+    public const ulong BounceOnTile = 1UL << 10; // reservado
+    public const ulong DieOnTile   = 1UL << 11;  // reservado
+    public const ulong EmitLight   = 1UL << 12;  // intensidad = f(escala), sin UserData
 }
 ```
+
+**Componente Orbit — diseño stateless:** el ángulo se deriva cada tick de la
+posición actual (`atan2(pos - centro)`), se avanza la velocidad angular y se
+fija la nueva posición. `RotationSpeed` sincronizada con la velocidad angular
+mantiene estelas (TrailGlow) alineadas tangencialmente sin estado extra.
 
 ### 7.3 LayerPriorities
 
@@ -488,7 +496,7 @@ AboveAll = 900;
 
 ### 7.4 ParticleBuffer.cs
 
-- Buffer pre-asignado de `ParticleData[capacity]` (default 2000)
+- Buffer pre-asignado de `ParticleData[capacity]` (default 4000)
 - **Round-robin**: busca slot libre empezando en `_nextSlot`, no recorre desde 0
 - `TrySpawn(data)` → bool (false si buffer lleno)
 - `Kill(index)` → desactiva por índice
@@ -497,17 +505,69 @@ AboveAll = 900;
 
 ### 7.5 ParticleManager.cs (ModSystem)
 
-- `OnModLoad()`: crea buffer (2000), registra 8 texturas procedurales
-- `PreUpdateDusts()`: actualiza todas las partículas activas (posición, rotación, componentes, decrementa vida)
-- `PostDrawTiles()`: renderiza con batching por blend mode:
+- `OnModLoad()`: crea buffer (4000), registra 11 texturas (8 procedurales +
+  GlowOrb + SparkleStar + TrailGlow)
+- `PreUpdateDusts()`: actualiza todas las partículas activas — orden:
+  componentes de comportamiento (Gravity → Homing → Orbit) → movimiento base
+  (omitido si Orbit fijó la posición) → rotación → componentes visuales
+  (ColorShift → FadeIn → FadeOut → ScaleDown → ScaleUp) → EmitLight → vida
+- `PostDrawTiles()`: renderiza con batching por blend mode + frustum culling:
   - Pass 1: AlphaBlend (todas con BlendMode == 0)
   - Pass 2: Additive (todas con BlendMode == 1)
+  - Culling con `CameraBounds` (margen 320px para partículas escaladas grandes)
   - Usa `Main.GameViewMatrix.TransformationMatrix` para respetar zoom
-- Helpers: `Spawn(data)`, `RegisterTexture(path)`, `PackColor(Color)`, `UnpackColor(uint)`
+- API: `Spawn(data)` (con auto-fill de start color/UserData),
+  `SpawnShape(center, shape, count, template)`, `RegisterTexture(path)`,
+  `PackColor(Color)`, `UnpackColor(uint)`, `Clear()`
 
 ### 7.6 Manejo de errores (v5.78+)
 - `RegisterTexture` no crashea si la textura no existe (devuelve ID 0 = SoftGlow)
 - `PostDrawTiles` hace try/catch para restaurar el spriteBatch si algo falla
+
+### 7.7 ShapeDescriptor.cs (v5.84) — API de spawn por forma
+
+Sección 13.3 del libro: en lugar de métodos específicos (SpawnBox, SpawnCircle...),
+un struct readonly con factory methods y `GenerateRandomPoint()`:
+- `Box(w, h)` / `HollowBox(w, h)` — caja sólida o solo bordes
+- `Circle(r)` / `HollowCircle(r)` — círculo sólido o circunferencia (polares)
+- `Cone(length, halfAngle)` — ángulo aleatorio en ±halfAngle
+- `Sphere(r)` — esfera 3D proyectada (sqrt para distribución uniforme en área)
+- `Vortex(r, turns)` — brazos espirales con `turns` vueltas
+- `Line(length)` — línea a lo largo del eje X
+- Campo `Rotation` opcional para formas orientadas (rotación manual, sin
+  dependencias de extensiones de tML)
+
+### 7.8 CameraBounds.cs (v5.84) — frustum culling
+
+Sección 16.1 del libro: struct readonly con `TopLeft`, `Size`, `BottomRight` y
+`IsVisible(worldPos, margin = 64f)`. El render usa margen 320px para no cortar
+partículas grandes escaladas parcialmente fuera de pantalla.
+
+### 7.9 ParticlePresets.cs (v5.84) — efectos pre-empaquetados
+
+Apéndice A del libro (galería de efectos estilo ParticleAnimationLib):
+- `Explosion(center, radius, count, coreColor, edgeColor, duration)` — ráfaga
+  radial con ColorShift + anillo de shockwave con ScaleUp + chispas Star con
+  rotación aleatoria
+- `Implosion(center, radius, count, color, duration)` — partículas convergiendo
+  en espiral (radial + tangencial) — colapso gravitatorio
+- `RingPulse(center, maxRadius, color, duration)` — onda circular expansiva
+- `VortexSwirl(center, radius, count, innerColor, outerColor, duration)` — brazos
+  espirales vía `SpawnShape` con `ShapeDescriptor.Vortex`
+
+### 7.10 Uso en los proyectiles cósmicos (v5.84)
+
+BlackHole/Sun usan la librería como **capa de fondo aditiva** (PostDrawTiles)
+bajo sus dusts vanilla (capa frontal) y el canvas del shader (encima):
+arquitectura de profundidad por 3 capas. Véanse las secciones de cada
+proyectil en el capítulo 13 para el detalle de los 4 efectos de cada uno.
+
+**APIs de tML verificadas por reflection contra tModLoader.dll v2026.07.3.0**
+(los presets usan PunchCameraModifier para screenshake coordinado — sección 8.5
+del libro):
+- `Terraria.Graphics.CameraModifiers.PunchCameraModifier(Vector2, Vector2, float, float, int, float, string)`
+- `Main.CameraModifiers` — campo de instancia, tipo `CameraModifierStack`
+- `Lighting.AddLight(Vector2, Vector3)`
 
 ---
 
@@ -628,10 +688,13 @@ ls /home/z/my-project/AethonMod/Reference_WoTG/
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.82 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.84 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `(este commit)` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
+| `7de559b` | v5.83 | fix: BlackHole + Sun idénticos a WoTG + shaders .fxc (error Asset could not be found) |
+| `9f8fbbc` | docs | documento completo del proyecto para dar a otra IA |
 | `b2798e6` | v5.82 | fix: reescribir BlackHole + Sun con recursos exactos de WoTG |
 | `227a790` | v5.81 | fix: asegurar todos los recursos de Wrath of the Gods |
 | `d906baf` | v5.81 | fix: arreglar todos los errores del client.log + 100 pasadas |
@@ -699,10 +762,48 @@ Commits desde v5.28 hasta v5.82 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.83
-- **Mensaje**: "fix v5.83: BlackHole + Sun idénticos a WoTG (zoom dinámico, DendriticNoiseZoomedOut, parámetros exactos) + FIX shaders .fxc (error Asset could not be found)"
+- **Versión**: v5.84
+- **Mensaje**: "feat v5.84: librería de partículas completa según el libro de referencia + capas de VFX en BlackHole/Sun"
 
-### 11.2 Qué se arregló en v5.83
+### 11.2 Qué se hizo en v5.84
+
+El usuario entregó el documento `particle_library_implementation_book.pdf` (88 páginas,
+"Librería de Partículas para Terraria - Referencia para IA" — el mismo documento en
+que se basó el sistema original de v5.69, en su versión completa). Se leyó entero y
+se completó la librería al diseño íntegro:
+
+1. **3 archivos nuevos** (`ShapeDescriptor.cs`, `CameraBounds.cs`, `ParticlePresets.cs`)
+2. **6 componentes nuevos** en el update loop: FadeIn, ScaleUp, ColorShift, Homing,
+   Orbit (stateless, con estelas tangenciales sincronizadas) y EmitLight
+3. **API SpawnShape** por forma geométrica + **frustum culling** en el render
+4. **BlackHole + Sun** recibieron 4 efectos de librería cada uno como capa de fondo
+   aditiva (arquitectura de profundidad por 3 capas: librería → dusts → shader),
+   más presets en impacto/muerte y screenshake con PunchCameraModifier
+5. **APIs verificadas por reflection** contra tModLoader.dll v2026.07.3.0:
+   PunchCameraModifier (firma de 7 parámetros), Main.CameraModifiers, Lighting.AddLight
+6. **Compilación verificada**: 0 errores, 4 warnings benignos preexistentes
+
+### 11.3 Estado actual del mod
+- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
+- ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83)
+- ✅ Librería de partículas COMPLETA según el libro (v5.84)
+- ✅ BlackHole + Sun replican el render de los pets de WoTG + 3 capas de efectos
+- ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
+  Develop Mods → Build y probar BlackHoleStaff y SunStaff)
+
+### 11.4 Próximos pasos sugeridos
+1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
+2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
+3. Disparar BlackHoleStaff y SunStaff — render de WoTG + capas de partículas nuevas:
+   espiral violeta de fondo, disco de estelas tangenciales, corona orbitando, viento
+   solar, anillos de fotones, novas con doble onda expansiva y screenshake
+4. Si algo falla, revisar client.log y comparar con Reference_WoTG (recuperable
+   de https://github.com/TheFifthCircle/WrathOfTheGodsPublic)
+5. Roadmap natural (sección 49 del libro): texturas de Bloom/ChromaticAberration/
+   Shockway ya existen como .fx fuente — compilarlas con mgfxc/2MGFX cuando se usen
+   desde C#; componentes Trail/BounceOnTile/DieOnTile; ModConfig MaxParticles
+
+### 11.5 Qué se arregló en v5.83 (histórico)
 
 **FIX CRÍTICO — el error que el usuario veía al cargar el mod:**
 ```
@@ -731,20 +832,11 @@ Failed to load asset 'Content\Effects\Shaders\RealBlackHoleShader'!
 tModLoader v2026.07.3.0 real con .NET 10 SDK (`dotnet build` con las DLLs del
 release de GitHub). 4 warnings benignos preexistentes.
 
-### 11.3 Estado actual del mod
+### 11.6 Estado del mod al cierre de v5.83 (histórico)
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix del "Asset could not be found")
 - ✅ Todos los recursos de WoTG copiados (10 texturas incl. DendriticNoiseZoomedOut)
 - ✅ BlackHole + Sun replican el render de los pets de WoTG + mejoras propias
-- ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
-  Develop Mods → Build y probar BlackHoleStaff y SunStaff)
-
-### 11.4 Próximos pasos sugeridos
-1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
-2. Entrar al mundo (el kit de TestingPlayer incluye ambos staves)
-3. Disparar BlackHoleStaff y SunStaff — deben verse como los pets de WoTG
-4. Si algo falla, revisar client.log y comparar con Reference_WoTG (recuperable
-   de https://github.com/TheFifthCircle/WrathOfTheGodsPublic)
 
 ---
 
@@ -824,6 +916,9 @@ ls /home/z/my-project/AethonMod/Content/Effects/WoTG/ | wc -l      # debe ser 10
 ls /home/z/my-project/AethonMod/Content/Weapons/V20/*.cs | wc -l   # debe ser 19
 ls /home/z/my-project/AethonMod/Content/Weapons/Cosmic/*.cs | wc -l # debe ser 1 (CosmicWeapons.cs con 2 clases)
 ls /home/z/my-project/AethonMod/Content/Projectiles/Cosmic/*.cs | wc -l  # debe ser 2 (BlackHole + Sun)
+ls /home/z/my-project/AethonMod/Content/Particles/*.cs | wc -l     # debe ser 6 (v5.84: + ShapeDescriptor, CameraBounds, ParticlePresets)
+find /home/z/my-project/AethonMod/Content -name '*.cs' | wc -l     # debe ser 81 (+ AethonMod.cs raíz = 82)
+find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 139
 ```
 
 ---
@@ -832,11 +927,17 @@ ls /home/z/my-project/AethonMod/Content/Projectiles/Cosmic/*.cs | wc -l  # debe 
 
 ### 13.1 BlackHoleProjectile.cs (Content/Projectiles/Cosmic/BlackHoleProjectile.cs)
 
-> Código completo v5.83 — réplica del render del BlackHolePet de WoTG
+> Código base v5.83 — réplica del render del BlackHolePet de WoTG
 > (PetBlackHoleRenderer.UpdateUI) con parámetros EXACTOS + mejoras propias.
 > Las claves: zoom dinámico `width/256*scale*2`, accretionDiskRadius `scale*0.4`,
 > cameraRotationAxis con velocity.Y, canvas InvisiblePixel 256px, pop elástico
 > ElasticOut, atracción de dusts del entorno, colapso final e implosión en OnKill.
+>
+> **v5.84**: el archivo añade 4 métodos de partículas de librería
+> (`SpawnLibrarySuctionSpiral`, `SpawnLibraryAccretionDisk`,
+> `SpawnLibraryPhotonRing`, `SpawnLibraryDistortionHalo` — ver sección 7.10)
+> y presets `ParticlePresets.Implosion/Explosion/RingPulse` + screenshake en
+> OnHitNPC/OnKill. Fuente autoritativa: el archivo del repo.
 
 ```csharp
 using System;
@@ -1365,11 +1466,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
 ### 13.2 SunProjectile.cs (Content/Projectiles/Cosmic/SunProjectile.cs)
 
-> Código completo v5.83 — réplica del render de StarPet.DrawSelf de WoTG al pie
+> Código base v5.83 — réplica del render de StarPet.DrawSelf de WoTG al pie
 > de la letra: backglow doble BloomCircleSmall → RadialShine (Additive) →
 > SunShader con canvas **DendriticNoiseZoomedOut** (la textura de WoTG),
 > s1=WavyBlotchNoise, s2=PsychedelicWingTextureOffsetMap, sphereSpinTime
 > = GlobalTimeWrappedHourly*0.9. + mejoras: llamaradas solares, nova final.
+>
+> **v5.84**: el archivo añade 4 métodos de partículas de librería
+> (`SpawnLibraryCorona`, `SpawnLibrarySolarWind`, `SpawnLibraryTwinkles`,
+> `SpawnLibraryFlareLoop` — ver sección 7.10) y presets
+> `ParticlePresets.Explosion/RingPulse` + ráfaga de viento solar + screenshake
+> en OnHitNPC/OnKill. Fuente autoritativa: el archivo del repo.
 
 ```csharp
 using System;
@@ -2700,15 +2807,18 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 ## 16. RESUMEN FINAL
 
-### 16.1 Lo que se ha logrado (hasta v5.82)
+### 16.1 Lo que se ha logrado (hasta v5.84)
 - ✅ Mod completo con 8 armas protegidas del remote
 - ✅ 19 armas V20 creativas sin mana
 - ✅ 2 armas cósmicas (BlackHoleStaff, SunStaff) con shaders reales de WoTG
-- ✅ Sistema de partículas data-oriented (ParticleData + ParticleBuffer + ParticleManager)
+- ✅ Sistema de partículas data-oriented COMPLETO (6 archivos: ParticleData +
+  ParticleBuffer + ParticleManager + ShapeDescriptor + CameraBounds + ParticlePresets,
+  con 9 componentes implementados, spawn por forma, culling y presets)
+- ✅ BlackHole/Sun con 3 capas de profundidad: librería aditiva (fondo) + dusts
+  (frontal) + shader de WoTG (canvas)
 - ✅ 5 shaders con .fxc compilados (copiados de WoTG) + 3 .fx fuente sin usar
-- ✅ 9 texturas de WoTG copiadas y referenciadas
-- ✅ 5 shaders .fx copiados de WoTG como referencia
-- ✅ Compilación estable sin errores
+- ✅ 9 texturas de WoTG copiadas y referenciadas + 11 texturas de librería registradas
+- ✅ Compilación estable sin errores (verificada contra tML v2026.07.3.0 real)
 
 ### 16.2 Lo que falta (próximos pasos)
 - ⚠️ **PROBAR** en tModLoader 1.4.4 los 2 armas cósmicas

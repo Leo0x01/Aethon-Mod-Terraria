@@ -5,6 +5,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -20,6 +21,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      subtractiveAccentFactor = (181, 0, 0), sphereSpinTime = GlobalTimeWrappedHourly * 0.9,
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
     ///      escala = width * scale * 1.5 / tamaño de la textura
+    ///
+    /// v5.84 — Capa de partículas de la LIBRERÍA propia (data-oriented, additive,
+    /// render en PostDrawTiles = capa de fondo con profundidad): corona de glóbulos
+    /// SoftGlow orbitando (componente Orbit) con ColorShift amarillo→naranja, viento
+    /// solar de estelas TrailGlow radiales, destellos SparkleStar con FadeIn y
+    /// emisión de luz (EmitLight), arcos de prominencia con estrellas orbitando y
+    /// nova final con presets (Explosion + RingPulse) y screenshake.
     ///
     /// Mejoras propias: pop elástico de aparición, hinchazón previa a la nova final,
     /// chispas de fuego orbitando, llamaradas periódicas, prominencias solares,
@@ -71,11 +79,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
+                // Dusts vanilla (capa frontal, se dibujan encima del canvas del shader)
                 SpawnOrbitingSparks();
                 SpawnFlames();
                 SpawnSmoke();
                 SpawnSolarFlare();
                 SpawnTwinkles();
+
+                // v5.84: partículas de la librería propia (capa de fondo aditiva —
+                // se renderizan en PostDrawTiles, detrás del canvas de la estrella,
+                // creando profundidad por capas)
+                SpawnLibraryCorona();
+                SpawnLibrarySolarWind();
+                SpawnLibraryTwinkles();
+                SpawnLibraryFlareLoop();
             }
 
             // === ILUMINACIÓN INTENSA (como StarPet: Vector3.One * 3.2f, con pulso sutil) ===
@@ -191,6 +208,176 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2.Zero, 255, new Color(255, 240, 180), 0.7f);
                 d.noGravity = true;
                 d.fadeIn = 0.3f;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  v5.84 — PARTÍCULAS DE LA LIBRERÍA PROPIA (capa de fondo aditiva)
+        //  Sistema data-oriented de Content/Particles (libro de referencia,
+        //  secciones 10-16): additive blending + ColorShift + Orbit + EmitLight.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Corona de glóbulos orbitando: SoftGlow con el componente Orbit alrededor del
+        /// centro de la estrella, desplazando su color de amarillo incandescente a
+        /// naranja profundo — materia de la corona girando lentamente.
+        /// </summary>
+        private void SpawnLibraryCorona()
+        {
+            if (Main.rand.NextBool(2))
+            {
+                float radius = Main.rand.NextFloat(48f, 60f) * MathHelper.Max(Projectile.scale, 0.4f);
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                float angVel = Main.rand.NextFloat(0.045f, 0.075f); // deriva lenta de la corona
+
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * radius,
+                    (float)Math.Sin(angle) * radius);
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = Vector2.Zero,
+                    Scale = Vector2.One * Main.rand.NextFloat(0.55f, 0.95f),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 235, 140, 150)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 235, 140, 150)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 110, 30, 30)),
+                    TimeLeft = 55,
+                    Duration = 55,
+                    TextureId = ParticleTex.SoftGlow,
+                    BlendMode = 1, // Additive
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                // Orbit: UserData0/1 = centro, UserData2 = velocidad angular, UserData3 = radio
+                p.UserData0 = Projectile.Center.X;
+                p.UserData1 = Projectile.Center.Y;
+                p.UserData2 = angVel;
+                p.UserData3 = radius;
+                p.EnableComponent(ComponentFlag.Orbit);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                p.EnableComponent(ComponentFlag.FadeOut);
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Viento solar: estelas TrailGlow alineadas radialmente que fluyen hacia
+        /// fuera desde la fotosfera, desvaneciéndose de blanco-amarillo a naranja.
+        /// </summary>
+        private void SpawnLibrarySolarWind()
+        {
+            if (Main.rand.NextBool(3))
+            {
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                float dist = Main.rand.NextFloat(34f, 44f) * MathHelper.Max(Projectile.scale, 0.4f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = outward * Main.rand.NextFloat(1.2f, 2.2f),
+                    Scale = new Vector2(1.5f, 0.4f), // estirada radialmente (TrailGlow 32x8)
+                    Rotation = angle, // alineada al flujo radial
+                    PackedColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 120, 40, 20)),
+                    TimeLeft = 32,
+                    Duration = 32,
+                    TextureId = ParticleTex.TrailGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Destellos de la librería: SparkleStar con FadeIn + FadeOut e intensidad
+        /// de luz (EmitLight) — puntas de brillo parpadeando en la corona lejana.
+        /// </summary>
+        private void SpawnLibraryTwinkles()
+        {
+            if (Main.rand.NextBool(8))
+            {
+                float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                float dist = Main.rand.NextFloat(55f, 100f) * MathHelper.Max(Projectile.scale, 0.4f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+
+                var p = new ParticleData
+                {
+                    Position = spawnPos,
+                    Velocity = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * 0.25f,
+                    Scale = Vector2.One * Main.rand.NextFloat(0.5f, 0.9f),
+                    Rotation = Main.rand.NextFloat(0f, MathHelper.TwoPi),
+                    RotationSpeed = Main.rand.NextFloat(-0.1f, 0.1f),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 250, 210, 200)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 250, 210, 200)),
+                    TimeLeft = 40,
+                    Duration = 40,
+                    TextureId = ParticleTex.SparkleStar,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.UserData0 = 8f;   // FadeIn durante 8 ticks
+                p.EnableComponent(ComponentFlag.FadeIn);
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.EmitLight); // intensidad derivada de la escala
+                ParticleManager.Spawn(p);
+            }
+        }
+
+        /// <summary>
+        /// Arcos de prominencia: coincide con el ritmo de SpawnSolarFlare (cada ~45
+        /// ticks) y anade estrellas de la librería orbitando en el borde de la
+        /// llamarada — materia eyectada que queda brevemente atrapada en el campo.
+        /// </summary>
+        private void SpawnLibraryFlareLoop()
+        {
+            if (VisualsTime % 45f == 0f && VisualsTime > 30f && Projectile.scale > 0.3f)
+            {
+                float flareRadius = Projectile.width * 0.62f * Projectile.scale;
+                for (int i = 0; i < 7; i++)
+                {
+                    float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+                    float radius = flareRadius + Main.rand.NextFloat(-4f, 8f);
+                    float angVel = Main.rand.NextBool(2) ? 0.14f : -0.14f;
+
+                    Vector2 spawnPos = Projectile.Center + new Vector2(
+                        (float)Math.Cos(angle) * radius,
+                        (float)Math.Sin(angle) * radius);
+
+                    var p = new ParticleData
+                    {
+                        Position = spawnPos,
+                        Velocity = Vector2.Zero,
+                        Scale = Vector2.One * Main.rand.NextFloat(0.4f, 0.8f),
+                        Rotation = angle,
+                        RotationSpeed = angVel * 2f,
+                        PackedColor = ParticleManager.PackColor(new Color(255, 210, 110, 210)),
+                        PackedStartColor = ParticleManager.PackColor(new Color(255, 230, 160, 210)),
+                        PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 30)),
+                        TimeLeft = 45,
+                        Duration = 45,
+                        TextureId = ParticleTex.Star,
+                        BlendMode = 1,
+                        LayerPriority = LayerPriorities.BeforeProjectiles,
+                    };
+                    p.UserData0 = Projectile.Center.X;
+                    p.UserData1 = Projectile.Center.Y;
+                    p.UserData2 = angVel;
+                    p.UserData3 = radius;
+                    p.EnableComponent(ComponentFlag.Orbit);
+                    p.EnableComponent(ComponentFlag.ColorShift);
+                    p.EnableComponent(ComponentFlag.FadeOut);
+                    ParticleManager.Spawn(p);
+                }
             }
         }
 
@@ -349,6 +536,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
+            // v5.84: estallido solar de la librería sobre el objetivo
+            ParticlePresets.Explosion(target.Center, 60f, 14,
+                new Color(255, 240, 170), new Color(255, 110, 30), 26);
+            ParticlePresets.RingPulse(target.Center, 85f, new Color(255, 200, 90, 180), 20);
+
             // Explosión radial de fuego sobre el objetivo
             for (int i = 0; i < 30; i++)
             {
@@ -380,7 +572,50 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === NOVA FINAL: explosión masiva de fuego ===
+            // === v5.84: PRESETS DE LA LIBRERÍA — nova masiva ===
+            // Ráfaga principal con interpolación blanco→naranja
+            ParticlePresets.Explosion(Projectile.Center, 170f, 40,
+                new Color(255, 245, 200), new Color(255, 90, 20), 50);
+            // Ondas expansivas dobles (dorada + roja retardada)
+            ParticlePresets.RingPulse(Projectile.Center, 280f,
+                new Color(255, 210, 100, 210), 34);
+            ParticlePresets.RingPulse(Projectile.Center, 380f,
+                new Color(255, 80, 30, 150), 46);
+            // Ráfaga de viento solar radial de la librería
+            for (int i = 0; i < 22; i++)
+            {
+                float angle = (MathHelper.TwoPi / 22) * i + Main.rand.NextFloat(-0.1f, 0.1f);
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                var p = new ParticleData
+                {
+                    Position = Projectile.Center + outward * 30f,
+                    Velocity = outward * Main.rand.NextFloat(3.5f, 7f),
+                    Scale = new Vector2(2.2f, 0.5f),
+                    Rotation = angle,
+                    PackedColor = ParticleManager.PackColor(new Color(255, 240, 180, 190)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 180, 190)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 20)),
+                    TimeLeft = 42,
+                    Duration = 42,
+                    TextureId = ParticleTex.TrailGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ColorShift);
+                ParticleManager.Spawn(p);
+            }
+
+            // Screenshake coordinado (sección 8.5 del libro)
+            try
+            {
+                Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
+                    Projectile.Center, new Vector2(1f, 0f), 8f, 12, 18, 0.45f,
+                    "AethonSunNova"));
+            }
+            catch { }
+
+            // === NOVA FINAL: explosión masiva de fuego (dusts, capa frontal) ===
             // Onda expansiva de GoldFlame
             for (int i = 0; i < 60; i++)
             {

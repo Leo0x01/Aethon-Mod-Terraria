@@ -1,5 +1,102 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.84 — LIBRERÍA DE PARTÍCULAS COMPLETA + capas de VFX en BlackHole/Sun
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+### A. Librería de partículas completada según el libro de referencia
+
+El usuario entregó el documento "particle_library_implementation_book.pdf" (88 páginas,
+"Librería de Partículas para Terraria - Referencia para IA"). El sistema existente desde
+v5.69 (ParticleData + ParticleBuffer + ParticleManager) estaba basado en ese libro pero
+INCOMPLETO. v5.84 lo completa al diseño completo del documento:
+
+**Archivos nuevos en `Content/Particles/`:**
+- `ShapeDescriptor.cs` — API de spawn genérica por forma (sección 13.3 del libro):
+  Box, Circle, HollowBox, HollowCircle, Cone, Sphere, Vortex y Line con
+  `GenerateRandomPoint()` y factory methods estáticos.
+- `CameraBounds.cs` — frustum culling (sección 16.1): rectángulo visible de la cámara
+  con margen para partículas grandes parcialmente fuera de pantalla.
+- `ParticlePresets.cs` — efectos pre-empaquetados (apéndice A del libro):
+  `Explosion()` (ráfaga radial + anillo de shockwave + chispas),
+  `Implosion()` (colapso espiral convergente),
+  `RingPulse()` (onda expansiva) y
+  `VortexSwirl()` (brazos espirales).
+
+**Componentes implementados en el update loop (antes solo había 3):**
+- `FadeIn` — el alpha sube durante los primeros UserData0 ticks (default 10)
+- `ScaleUp` — la escala crece de 0 a UserData1/UserData2 (anillos expansivos)
+- `ColorShift` — interpola PackedStartColor → PackedEndColor durante la vida
+  (¡los campos existían desde v5.69 pero nadie los usaba!)
+- `Homing` — persigue un NPC: explícito por whoAmI o el más cercano (sección 12.2)
+- `Orbit` — orbita un centro (UserData0/1=centro, UserData2=vel. angular,
+  UserData3=radio); stateless: el ángulo se deriva de la posición actual cada tick,
+  y RotationSpeed sincronizada mantiene las estelas alineadas tangencialmente
+- `EmitLight` — emite luz del color de la partícula; la intensidad deriva de la
+  escala (sin UserData → combinable con cualquier otro componente)
+
+**Mejoras del orquestador (ParticleManager):**
+- Capacidad 2000 → 4000 partículas (~320 KB, sigue siendo cero GC)
+- `SpawnShape(center, shape, count, template)` — API genérica (sección 14)
+- Auto-fill de PackedStartColor/UserData en Spawn para todos los componentes nuevos
+- Frustum culling en el render (margen 320px) — no se dibujan partículas
+  fuera de pantalla (sección 16.1)
+- 3 texturas nuevas registradas: GlowOrb (ID 8), SparkleStar (ID 9), TrailGlow (ID 10)
+- Constantes `ParticleTex` (patrón TextureRegistry de la sección 21.2)
+
+**APIs verificadas por reflection contra tModLoader.dll v2026.07.3.0 real:**
+- `Terraria.Graphics.CameraModifiers.PunchCameraModifier(Vector2, Vector2, float, float, int, float, string)` ✓
+- `Main.CameraModifiers` (campo de instancia, tipo CameraModifierStack) ✓
+- `Lighting.AddLight(Vector2, Vector3)` ✓
+
+### B. BlackHoleProjectile — capa de partículas de la librería (4 efectos nuevos)
+
+Arquitectura por capas de profundidad: partículas de la librería (PostDrawTiles,
+fondo aditivo) + dusts vanilla (capa frontal) + canvas del shader (encima):
+1. **Espiral de succión** — 2 partículas/frame SoftGlow aditivas naciendo en el borde
+   del campo gravitatorio con velocidad tangencial+radial (espiral natural) y
+   ColorShift blanco incandescente → violeta cósmico al morir
+2. **Disco de acreción de estelas** — TrailGlow (32x8) estiradas tangencialmente
+   orbitando con el componente Orbit; la rotación avanza al mismo ritmo que la
+   órbita (RotationSpeed = angVel) → las estelas quedan SIEMPRE alineadas con la
+   tangente; ColorShift naranja dorado → rojo profundo
+3. **Anillo de fotones pulsante** — Ring con ScaleUp (0→1.15×scale) + FadeOut cada
+   36 ticks: destello circular azulado expandiéndose en el horizonte de sucesos
+4. **Halo de distorsión** — Noise procedural rotando lento con alpha 26 y tinte
+   violeta: sugiere la curvatura del espacio
+
+Impacto y muerte:
+- `OnHitNPC`: micro-colapso con Implosion + RingPulse sobre el objetivo
+- `OnKill`: Implosion(165px, 46 partículas violetas) + Explosion(130px, blanco→naranja)
+  + doble RingPulse (250px violeta + 320px dorada retardada) + screenshake con
+  PunchCameraModifier ("AethonBlackHoleCollapse")
+
+### C. SunProjectile — capa de partículas de la librería (4 efectos nuevos)
+
+Misma arquitectura de capas (librería al fondo + dusts frontales + canvas del shader):
+1. **Corona de plasma orbitando** — SoftGlow con Orbit (radio 48-60×scale, deriva
+   lenta 0.045-0.075 rad/tick) y ColorShift amarillo incandescente → naranja profundo
+2. **Viento solar** — estelas TrailGlow alineadas radialmente fluyendo hacia fuera
+   desde la fotosfera, desvaneciéndose blanco-amarillo → naranja
+3. **Destellos luminosos** — SparkleStar con FadeIn (8 ticks) + FadeOut + EmitLight
+   (la partícula ILUMINA su entorno, intensidad según escala)
+4. **Arcos de prominencia** — cada 45 ticks (sincronizado con las llamaradas de dust),
+   7 estrellas orbitando en el borde de la llamarada con dirección alternante
+
+Impacto y muerte:
+- `OnHitNPC`: estallido solar con Explosion + RingPulse sobre el objetivo
+- `OnKill`: nova masiva = Explosion(170px, 40 partículas blanco→naranja) + doble
+  RingPulse (280px dorada + 380px roja retardada) + ráfaga de 22 estelas de viento
+  solar radiales (velocidad 3.5-7 px/tick) + screenshake ("AethonSunNova")
+
+### D. Otros cambios
+- Tooltips de BlackHoleStaff y SunStaff actualizados con las nuevas capas de VFX
+- `version = 5.84` en build.txt
+- **Compilación verificada**: 0 errores contra tModLoader v2026.07.3.0 real
+  (mismos 4 warnings benignos preexistentes de Kill() obsoleto en archivos viejos)
+
+---
+
 ## Commit v5.83 — AGUJERO NEGRO + SOL idénticos a WoTG + FIX CRÍTICO de shaders
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

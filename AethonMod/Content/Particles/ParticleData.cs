@@ -69,6 +69,7 @@ namespace AethonMod.Content.Particles
 
     /// <summary>
     /// Bitmask de componentes. Cada componente tiene un bit asignado.
+    /// (Sección 10.3 del libro de referencia)
     /// </summary>
     public static class ComponentFlag
     {
@@ -81,13 +82,17 @@ namespace AethonMod.Content.Particles
         public const ulong Rotation    = 1UL << 6;
         public const ulong ColorShift  = 1UL << 7;
         public const ulong Orbit       = 1UL << 8;
-        public const ulong Trail       = 1UL << 9;
+        public const ulong Trail       = 1UL << 9;   // reservado (sección 49.2 roadmap)
+        public const ulong BounceOnTile = 1UL << 10;
         public const ulong DieOnTile   = 1UL << 11;
         public const ulong EmitLight   = 1UL << 12;
     }
 
     /// <summary>
-    /// Capas de render (prioridades numéricas).
+    /// Capas de render (prioridades numéricas, sección 15.1 del libro).
+    /// El render actual ocurre en un único pase en PostDrawTiles (detrás de
+    /// proyectiles/NPCs/jugadores); el campo LayerPriority queda reservado para
+    /// un pipeline multi-pase futuro.
     /// </summary>
     public static class LayerPriorities
     {
@@ -100,5 +105,35 @@ namespace AethonMod.Content.Particles
         public const ushort BeforePlayers = 600;
         public const ushort AfterPlayers = 700;
         public const ushort AboveAll = 900;
+    }
+
+    /// <summary>
+    /// IDs de las texturas built-in registradas por ParticleManager.OnModLoad
+    /// (patrón TextureRegistry de la sección 21.2 del libro).
+    /// </summary>
+    public static class ParticleTex
+    {
+        /// <summary>Glow radial suave 64x64, ideal para blending aditivo.</summary>
+        public const ushort SoftGlow = 0;
+        /// <summary>Degradado lineal 64x8 para estelas y rayos.</summary>
+        public const ushort Trail = 1;
+        /// <summary>Estrella 32x32 para efectos mágicos.</summary>
+        public const ushort Star = 2;
+        /// <summary>Crescent 96x96 para slash effects.</summary>
+        public const ushort Slash = 3;
+        /// <summary>Espiral 64x64 para portales/vórtices.</summary>
+        public const ushort Vortex = 4;
+        /// <summary>Anillo 64x64 para shockwaves.</summary>
+        public const ushort Ring = 5;
+        /// <summary>Media luna 64x64.</summary>
+        public const ushort Crescent = 6;
+        /// <summary>Ruido procedural 128x128.</summary>
+        public const ushort Noise = 7;
+        /// <summary>Orbe 128x128 con sombreado 3D simulado.</summary>
+        public const ushort GlowOrb = 8;
+        /// <summary>Destello estrella 32x32.</summary>
+        public const ushort SparkleStar = 9;
+        /// <summary>Estela degradada 32x8.</summary>
+        public const ushort TrailGlow = 10;
     }
 }
