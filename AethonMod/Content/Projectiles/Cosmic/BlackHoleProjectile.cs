@@ -203,12 +203,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.graphics.GraphicsDevice.Textures[1] = noiseTex;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                    shader.CurrentTechnique.Passes[0].Apply();
-
-                    // Dibujar un pixel invisible que el shader usa como canvas
+                    // v5.81: orden correcto — Begin Immediate → Apply → Draw → End → Begin Deferred
                     Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                    shader.CurrentTechnique.Passes[0].Apply();
                     Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
                         new Vector2(pixel.Width / 2f, pixel.Height / 2f),
                         5f, SpriteEffects.None, 0f);

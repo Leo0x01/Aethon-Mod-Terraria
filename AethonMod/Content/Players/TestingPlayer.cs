@@ -36,8 +36,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
             GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-            // v5.77: 20 armas creativas
-            GiveItem(ModContent.ItemType<Weapons.V20.BlackHoleStaff>(), 1);
+            // v5.77: 20 armas creativas (BlackHoleStaff movido a Cosmic)
             GiveItem(ModContent.ItemType<Weapons.V20.BlackHoleMiniStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.TornadoStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.PrismBeamStaff>(), 1);

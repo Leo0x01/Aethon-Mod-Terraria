@@ -168,12 +168,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.graphics.GraphicsDevice.Textures[2] = noiseTex;
                     Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
 
-                    shader.CurrentTechnique.Passes[0].Apply();
-
-                    // Dibujar el sol
+                    // v5.81: orden correcto — Begin Immediate → Apply → Draw → End → Begin Deferred
                     Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                    shader.CurrentTechnique.Passes[0].Apply();
                     Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
                         new Vector2(pixel.Width / 2f, pixel.Height / 2f),
                         3f * scale, SpriteEffects.None, 0f);
@@ -194,11 +193,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     shineShader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
                     Main.graphics.GraphicsDevice.Textures[1] = noiseTex;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-                    shineShader.CurrentTechnique.Passes[0].Apply();
 
+                    // v5.81: orden correcto — Begin Immediate → Apply → Draw → End → Begin Deferred
+                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                     Main.spriteBatch.End();
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                    shineShader.CurrentTechnique.Passes[0].Apply();
                     Main.spriteBatch.Draw(pixel, drawPos, null,
                         new Color(252, 212, 112) * 0.3f, Projectile.rotation,
                         new Vector2(pixel.Width / 2f, pixel.Height / 2f),

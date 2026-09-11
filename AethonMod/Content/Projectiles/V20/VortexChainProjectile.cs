@@ -226,7 +226,6 @@ namespace AethonMod.Content.Projectiles.V20
                         float strength = (1f - dist / 100f) * 0.8f;
                         npc.velocity += toCenter * strength;
                         // v5.78: removed NPC velocity cap (was capping existing velocity)
-                            npc.velocity = Vector2.Normalize(npc.velocity) * 10f;
                     }
                 }
 
