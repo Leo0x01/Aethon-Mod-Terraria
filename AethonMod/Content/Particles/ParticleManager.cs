@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ModLoader;
 using AethonMod.Content.Effects;
@@ -40,7 +41,16 @@ namespace AethonMod.Content.Particles
         private const int DEFAULT_CAPACITY = 4000;
 
         private static ParticleBuffer _buffer;
-        private static Texture2D[] _textures;
+
+        /// <summary>
+        /// v5.88 — Texturas como Asset&lt;Texture2D&gt; (resolución DIFERIDA):
+        /// antes se llamaba .Value al registrarlas durante la carga del mod y
+        /// tML avisaba "AethonMod spent 61ms blocking on asset loading" (los
+        /// .Value bloquean la fase async de carga). Ahora solo se guarda el
+        /// Asset y la textura se resuelve al dibujar, ya en juego (para
+        /// entonces la carga de fondo terminó y .Value es instantáneo).
+        /// </summary>
+        private static Asset<Texture2D>[] _textures;
         private static int _textureCount;
 
         public static int ActiveCount => _buffer?.ActiveCount ?? 0;
@@ -50,7 +60,7 @@ namespace AethonMod.Content.Particles
         {
             if (Terraria.ID.NetmodeID.Server == Main.netMode) return;
             _buffer = new ParticleBuffer(DEFAULT_CAPACITY);
-            _textures = new Texture2D[64];
+            _textures = new Asset<Texture2D>[64];
             _textureCount = 0;
 
             // Registrar texturas built-in (IDs = constantes de ParticleTex)
@@ -75,14 +85,16 @@ namespace AethonMod.Content.Particles
         }
 
         /// <summary>
-        /// Registra una textura y devuelve su ID.
+        /// Registra una textura y devuelve su ID. v5.88: guarda el Asset SIN
+        /// resolver .Value (la carga async continúa en background; ver comentario
+        /// del campo _textures).
         /// </summary>
         public static ushort RegisterTexture(string path)
         {
             if (_textures == null || _textureCount >= _textures.Length) return 0;
             try
             {
-                _textures[_textureCount] = ModContent.Request<Texture2D>(path).Value;
+                _textures[_textureCount] = ModContent.Request<Texture2D>(path);
                 return (ushort)(_textureCount++);
             }
             catch
@@ -452,7 +464,15 @@ namespace AethonMod.Content.Particles
         private static void DrawParticle(SpriteBatch sb, ref ParticleData p)
         {
             if (p.TextureId >= _textureCount) return;
-            Texture2D tex = _textures[p.TextureId];
+            var asset = _textures[p.TextureId];
+            if (asset == null) return;
+
+            // v5.88: .Value en juego es instantáneo (la carga async terminó
+            // durante la pantalla de carga del mod). Si algún Asset falló al
+            // cargar, el guard lo salta sin romper el pase entero.
+            Texture2D tex;
+            try { tex = asset.Value; }
+            catch { return; }
             if (tex == null) return;
 
             Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);

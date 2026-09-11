@@ -197,7 +197,7 @@ namespace AethonMod.Content.Globals
             }
         }
 
-        public override void Kill(Projectile projectile, int timeLeft)
+        public override void OnKill(Projectile projectile, int timeLeft)
         {
             // Explosión cósmica al morir (sin impacto con enemigo) — v5.3: duración corta
             for (int i = 0; i < 8; i++)

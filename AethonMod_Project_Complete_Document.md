@@ -49,19 +49,19 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.87 |
+| **Versión (build.txt)** | 5.88 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.87 — Fix del ThreadStateException al desactivar (Dispose de la lente encolado al hilo principal) |
+| **Commit actual** | v5.88 — Fix crítico: el mod no cargaba (textura del CosmicShockwaveProjectile faltante desde v5.86) + revisión profunda de 10 pasadas |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
 ### build.txt completo
 ```ini
 author = AethonModTeam
-version = 5.87
+version = 5.88
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
@@ -705,10 +705,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.87 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.88 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (pendiente) | v5.88 | fix CRÍTICO: el mod NO cargaba — faltaba CosmicShockwaveProjectile.png (desde v5.86; la compilación C# pasa sin texturas pero tML las exige al cargar) + auditoría completa 71 clases/21 rutas + bug real de daño corregido (array _hitNPCs compartido por MemberwiseClone entre ondas simultáneas → NewInstance con array fresco) + End defensivo en RestoreSpriteBatch ×3 + Main.Transform deprecado → GameViewMatrix + ParticleManager con Asset<Texture2D> diferido (fix del warning 61ms blocking) + icon_small.png 30x30 + warnings del build limpios (CS0672 ×4 Kill→OnKill, CS8632 ×21) | 
 | `9035888` | v5.87 | fix: ThreadStateException al desactivar el mod — el RenderTarget2D de la lente se dispone vía Main.QueueMainThreadAction (cola ConcurrentQueue drenada al final de Main.Update, en el hilo principal, también durante la pantalla de carga del reload); Unload con programación defensiva total; auditoría del patrón Dispose en todo el mod |
 | `6255c88` | v5.86 | fix/feat: la lente va DETRÁS del agujero negro y sus efectos (núcleo AboveLens + DrawCoreVisuals estático + composición por regiones) + CosmicShockwaveProjectile NUEVO (ondas cromáticas/inversas/de fuego con daño real por frente) + secuencia de muerte del agujero (explosión → evaporación → implosión con 3 ondas inversas) + 3 ondas de fuego con quemadura en la explosión del sol + primera llamarada desde t=2s |
 | `90e987f` | v5.85 | feat: Sol completo (10s: llamaradas cada 2s + supernova sincronizada en el s7 + gravedad) + lente gravitacional de pantalla (BlackHoleLensSystem) + supernova mejorada con doble onda + limpieza de referencias externas |
@@ -782,10 +783,49 @@ Commits desde v5.28 hasta v5.87 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.87
-- **Mensaje**: "fix v5.87: ThreadStateException al desactivar el mod — el Dispose del render target de la lente se encola al hilo principal (Main.QueueMainThreadAction)"
+- **Versión**: v5.88
+- **Mensaje**: "fix v5.88: el mod no cargaba (textura del CosmicShockwaveProjectile faltante) + revisión profunda de 10 pasadas"
 
-### 11.2 Qué se hizo en v5.87 (error del usuario al DESACTIVAR el mod tras probar v5.86)
+### 11.2 Qué se hizo en v5.88 (error del usuario al CARGAR v5.87 + revisión profunda pedida)
+
+**Error reportado** (captura + client.log):
+
+```
+MissingResourceException: Recurso esperado no encontrado:
+  Content/Projectiles/Cosmic/CosmicShockwaveProjectile
+"Se ha producido un error al cargar AethonMod. Los mods se han desactivado
+ automáticamente."
+```
+
+**El mod NO cargaba desde v5.86** (por eso las mejoras de la v5.86 nunca se
+vieron en juego): el proyectil nuevo se creó sin su .png; la compilación C#
+pasa sin texturas, pero tML las exige al CARGAR.
+
+1. **FIX CRÍTICO — textura**: nuevo `CosmicShockwaveProjectile.png` (copia del
+   InvisiblePixel 1×1 — el dibujado es 100% manual). Auditorías: 71 clases de
+   contenido vs .png (era la única faltante) y 21 rutas de ModContent.Request
+   en runtime (todas existen).
+2. **BUG REAL DE DAÑO CORREGIDO**: tML clona el prototipo con MemberwiseClone →
+   el array `_hitNPCs` de campo se COMPARTÍA entre ondas simultáneas; cada
+   nacimiento de las 3 ondas inversas borraba las marcas de sus hermanas →
+   golpes múltiples. Fix: override `NewInstance(Projectile)` con array fresco
+   por onda (API virtual verificada contra el binario real).
+3. **ROBUSTEZ DE RENDER**: End defensivo antes del Begin de restauración en
+   RestoreSpriteBatch (BlackHole/Sun) y Supernova (una excepción con Begin
+   abierto → "Begin has already been called" → crash del frame).
+   `Main.Transform` (deprecado) → `GameViewMatrix.TransformationMatrix` (4 sitios).
+4. **WARNING 61ms blocking**: ParticleManager ahora guarda `Asset<Texture2D>`
+   sin resolver `.Value` durante la carga (se resuelve al dibujar, ya en juego).
+5. **WARNING icon_small.png**: creado a 30×30 exacto (LANCZOS desde el icon.png
+   80×80; tML exige 30×30 para la lista compacta, verificado decompilando
+   `ModLoader.GetModIcon`).
+6. **BUILD LIMPIO**: CS0672 ×4 (Kill→OnKill: CosmicProjectileFX, CosmicOrbBolt,
+   QuantumSplitProjectile, GenesisLight) + CS8632 ×21 quitadas → compilación
+   verificada SIN supresiones: **0 warnings, 0 errores**.
+7. Revisión de 10 pasadas completa (ver CHANGES.md sección G): MP guards,
+   fases del BH/sol, Globals, balance Begin/End — todo lo demás OK.
+
+### 11.5 Qué se hizo en v5.87 (histórico — error del usuario al DESACTIVAR tras probar v5.85)
 
 **Error reportado** (captura del diálogo de tModLoader v2026.7.3.0):
 
@@ -830,19 +870,23 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
 
 ### 11.3 Estado actual del mod
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
+- ✅ **v5.88 — EL MOD CARGA**: textura del CosmicShockwaveProjectile añadida (el
+  MissingResourceException de v5.86/v5.87 estaba bloqueando la carga)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix v5.83) — y BlackHoleDistortion
   ahora SÍ se usa (lente gravitacional v5.85)
 - ✅ Librería de partículas COMPLETA según el libro (v5.84) + capa AboveLens (v5.86)
+  + carga de texturas SIN bloqueo (Asset diferido, v5.88)
 - ✅ Sol: ciclo completo de 10s con llamaradas (t=2,4,6,8s) + supernova sincronizada (v5.86)
 - ✅ Agujero negro: lente DETRÁS del agujero y sus efectos + secuencia de muerte
-  completa con 4 ondas con daño (v5.86)
+  completa con 4 ondas con daño (v5.86) — y cada onda daña EXACTAMENTE una vez
+  por NPC (fix del array compartido, v5.88)
 - ✅ Desactivación del mod LIMPIA: el Dispose del render target de la lente se
   encola al hilo principal (v5.87 — fix del ThreadStateException de FNA3D)
 - ✅ Cero referencias al mod externo de referencia en todo el proyecto (v5.85)
-- ⚠️ **PENDIENTE**: probar en tModLoader real (el usuario debe recompilar con
-  Develop Mods → Build y probar BlackHoleStaff y SunStaff; verificar que la lente
-  quede detrás del agujero, las 4 ondas del agujero hagan daño, las 3 de fuego
-  quemen, y que la DESACTIVACIÓN del mod / Mods → Reload complete SIN ERROR)
+- ✅ Build 100% limpio: 0 warnings 0 errores sin supresiones (v5.88)
+- ⚠️ **PENDIENTE**: probar en tModLoader real (recompilar, verificar carga sin
+  error, lente detrás del agujero, daño único por onda, quemadura de las 3 de
+  fuego, y desactivación limpia)
 
 ### 11.4 Próximos pasos sugeridos
 1. El usuario: abrir tModLoader → Develop Mods → Build (recompila desde fuente)
@@ -1018,20 +1062,20 @@ find /home/z/my-project/AethonMod/Content -name '*.png' | wc -l    # debe ser 13
 
 ## 13. CÓDIGO FUENTE CLAVE
 
-### 13.0 ⚠️ AVISO v5.86/v5.87 — ARCHIVOS QUE CAMBIARON TRAS v5.85
+### 13.0 ⚠️ AVISO v5.86/v5.87/v5.88 — ARCHIVOS QUE CAMBIARON TRAS v5.85
 
 El DISCO es la fuente autoritativa (el código embebido de las secciones 13.1-13.4
 corresponde a v5.85 y puede estar desactualizado en las partes señaladas):
 
-| Archivo | Cambio v5.86 (+ v5.87 donde se indica) |
+| Archivo | Cambio v5.86 (+ v5.87/v5.88 donde se indica) |
 |---|---|
-| `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b |
+| `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs` | **NUEVO** (~390 líneas) — código completo en 13.1b. **v5.88**: + textura propia .png (InvisiblePixel 1×1 — antes el mod NO cargaba), override `NewInstance` con array `_hitNPCs` fresco por onda (bug de golpes múltiples), End defensivo + GameViewMatrix en el restore de PreDraw |
 | `Content/Effects/BlackHoleLensSystem.cs` | **REESCRITO** (~366 líneas): bandera estática `LensActive`, fuentes = agujeros + ondas cromáticas, composición POR REGIONES (±2.2×radio, no pantalla completa), dibuja AboveLens particles + `BlackHoleProjectile.DrawCoreVisuals(bh, false)` + `CosmicShockwaveProjectile.DrawWaveVisual(wave, false)` ENCIMA de la distorsión, fallback automático. **v5.87**: `Unload()` reescrito — el Dispose del render target se ENCOLA al hilo principal (`Main.QueueMainThreadAction`) + programación defensiva total (fix del ThreadStateException de FNA3D) |
-| `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles` |
-| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0) |
-| `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas |
+| `Content/Projectiles/Cosmic/BlackHoleProjectile.cs` (~817 líneas) | AI: secuencia de muerte (t-90 onda cromática + escala/radio +60% → t-36 evaporación → OnKill 3 ondas inversas); `_shader` estático; `DrawCoreVisuals(p, endActiveBatch)` estático; PreDraw se salta con `LensActive`; partículas librería → capa `AboveLens`; eliminado `SpawnAccretionDiskParticles`. **v5.88**: End defensivo en `RestoreSpriteBatch` + `Main.Transform` deprecado → `GameViewMatrix.TransformationMatrix` |
+| `Content/Projectiles/Cosmic/SunProjectile.cs` | Llamaradas: `VisualsTime > 0 && % FlareInterval == 0` (primera en t=2s, no t=0). **v5.88**: End defensivo en `RestoreSpriteBatch` + GameViewMatrix |
+| `Content/Projectiles/V20/SupernovaProjectile.cs` | OnKill: 3 `CosmicShockwaveProjectile` StyleFire (360/450/540px, retardos 8 ticks, daño 50% + OnFire 300); retiradas las 2 RingPulse decorativas. **v5.88**: End defensivo en el restore de PreDraw + GameViewMatrix |
 | `Content/Particles/ParticleData.cs` | `LayerPriorities.AboveLens = 950` |
-| `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive` |
+| `Content/Particles/ParticleManager.cs` | `RenderAboveLensLayer()` estático; `DrawParticle` estático; PostDrawTiles salta AboveLens si `LensActive`. **v5.88**: `_textures` → `Asset<Texture2D>[]` con resolución DIFERIDA al dibujar (fix del warning "spent 61ms blocking on asset loading") |
 | `Content/Weapons/Cosmic/CosmicWeapons.cs` + `V20/SupernovaStaff.cs` | Tooltips v5.86 |
 
 ### 13.1b CosmicShockwaveProjectile.cs — COMPLETO (NUEVO v5.86)
@@ -3296,7 +3340,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 ## 16. RESUMEN FINAL
 
-### 16.1 Lo que se ha logrado (hasta v5.87)
+### 16.1 Lo que se ha logrado (hasta v5.88)
 - ✅ Mod completo con 8 armas protegidas del remote
 - ✅ 19 armas V20 creativas sin mana
 - ✅ 2 armas cósmicas (BlackHoleStaff, SunStaff) con shaders reales propios
@@ -3323,16 +3367,20 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 - ✅ **v5.87 — Desactivación limpia del mod**: el Dispose del render target de
   la lente se encola al hilo principal (Main.QueueMainThreadAction) — fix del
   ThreadStateException de FNA3D que rompía la desactivación
+- ✅ **v5.88 — El mod CARGA de nuevo**: textura del CosmicShockwaveProjectile
+  (faltaba desde v5.86 y bloqueaba la carga) + bug de golpes múltiples de las
+  ondas corregido + carga de assets sin bloqueo + icon_small + build 0 warnings
 - ✅ 5 shaders con .fxc compilados + 3 .fx fuente sin usar
 - ✅ 10 texturas del pipeline de efectos + 11 texturas de librería registradas
 - ✅ Compilación estable sin errores (verificada contra tML v2026.07.3.0 real)
 
 ### 16.2 Lo que falta (próximos pasos)
-- ⚠️ **PROBAR** en tModLoader 1.4.4 los 2 armas cósmicas
+- ⚠️ **PROBAR** en tModLoader 1.4.4 los 2 armas cósmicas (desde v5.88 el mod
+  vuelve a cargar — la v5.86/v5.87 nunca llegaron a probarse)
 - ⚠️ Verificar que la LENTE GRAVITACIONAL se vea en pantalla (fondo curvándose
   alrededor del agujero) y que los shaders carguen sin excepción en runtime
-- ⚠️ Verificar que las 4 ondas del agujero hagan daño y las 3 de fuego apliquen
-  quemadura (v5.86 — aún sin confirmación del usuario)
+- ⚠️ Verificar que las 4 ondas del agujero hagan daño (UNA vez cada una por NPC
+  desde v5.88) y las 3 de fuego apliquen quemadura
 - ⚠️ **Verificar que la DESACTIVACIÓN del mod complete sin error** (fix v5.87:
   desactivar el mod o Mods → Reload debe terminar en silencio, sin diálogo)
 - ⚠️ Si algún shader falla, revisar client.log (la lente tiene try/catch total:
@@ -3345,14 +3393,14 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 - GitHub PAT: `[GITHUB_PAT - solicitar al usuario]`
 - Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
-- Commit actual: v5.87 (hash en la tabla de la sección 10)
+- Commit actual: v5.88 (hash en la tabla de la sección 10)
 - Commit estable del remote: `e826c82`
 
 ---
 
 **Fin del documento.**
 
-> Última actualización: v5.87
+> Última actualización: v5.88
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

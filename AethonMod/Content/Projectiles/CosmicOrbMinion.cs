@@ -21,7 +21,7 @@ namespace AethonMod.Content.Projectiles
     {
         private float orbitAngle = 0f;
         private bool attacking = false;
-        private NPC? currentTarget = null;
+        private NPC currentTarget = null;
 
         public override void SetStaticDefaults()
         {
@@ -71,7 +71,7 @@ namespace AethonMod.Content.Projectiles
             if (level < 1)
             {
                 // Fallback: leer HeldItem (comportamiento legacy)
-                Item? held = owner.HeldItem;
+                Item held = owner.HeldItem;
                 if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
                 {
                     try
@@ -88,7 +88,7 @@ namespace AethonMod.Content.Projectiles
             Projectile.localNPCHitCooldown = WeaponScaling.MinionHitCooldown(level);
 
             // === BUSCAR ENEMIGO ===
-            NPC? target = FindHostileTarget(owner, level);
+            NPC target = FindHostileTarget(owner, level);
             attacking = target != null;
             currentTarget = target;
 
@@ -200,12 +200,12 @@ namespace AethonMod.Content.Projectiles
             else owner.AddBuff(buffType, 18000);
         }
 
-        private NPC? FindHostileTarget(Player owner, int level)
+        private NPC FindHostileTarget(Player owner, int level)
         {
             // v5.29: Usar nivel cacheado (pasado como parámetro) en vez de leer HeldItem
             float detectionRange = WeaponScaling.MinionDetectionRange(level);
 
-            NPC? closest = null;
+            NPC closest = null;
             float closestDist = detectionRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {

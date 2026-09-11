@@ -162,7 +162,7 @@ namespace AethonMod.Content.Projectiles.V20
             catch { }
         }
 
-        public override void Kill(int timeLeft)
+        public override void OnKill(int timeLeft)
         {
             try
             {

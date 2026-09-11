@@ -11,6 +11,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
     ///
+    /// v5.88 — Fix del MissingResourceException: textura propia añadida
+    /// (InvisiblePixel 1x1 — el dibujado es 100% manual vía DrawWaveVisual)
+    /// y NewInstance con array de golpes fresco por onda.
+    ///
     /// v5.86 — Los tres frentes de onda del arsenal cósmico:
     ///
     ///   ESTILO 0 — ONDA CROMÁTICA (explosión del agujero negro):
@@ -52,8 +56,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Estilo: onda de fuego (con quemadura).</summary>
         public const float StyleFire = 2f;
 
-        /// <summary>Marca de NPCs ya golpeados por esta onda (una sola vez cada uno).</summary>
-        private readonly bool[] _hitNPCs = new bool[Main.maxNPCs];
+        /// <summary>
+        /// Marca de NPCs ya golpeados por esta onda (una sola vez cada uno).
+        /// v5.88 — UNA por proyectil: tML crea cada proyectil clonando el
+        /// prototipo (MemberwiseClone), así que un array inicializado en el
+        /// campo se COMPARTIRÍA entre todas las ondas simultáneas del mismo
+        /// tipo (las 3 ondas inversas de la implosión se borrarían las marcas
+        /// de daño unas a otras al nacer escalonadas). NewInstance le da a
+        /// cada onda su propio array.
+        /// </summary>
+        private bool[] _hitNPCs = new bool[Main.maxNPCs];
+
+        /// <summary>
+        /// v5.88 — Cada proyectil nuevo recibe un array de marcas FRESCO.
+        /// Sin esto, MemberwiseClone haría que todas las ondas activas del
+        /// mismo tipo compartieran el MISMO array (bug de daño en cascada:
+        /// cada onda nueva borraba las marcas de sus hermanas y estas podían
+        /// golpear varias veces a los mismos NPC).
+        /// </summary>
+        public override ModProjectile NewInstance(Projectile entity)
+        {
+            CosmicShockwaveProjectile inst = (CosmicShockwaveProjectile)base.NewInstance(entity);
+            inst._hitNPCs = new bool[Main.maxNPCs];
+            return inst;
+        }
 
         private float Age { get => Projectile.ai[0]; set => Projectile.ai[0] = value; }
         private float Style => Projectile.ai[1];
@@ -83,8 +109,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.aiStyle = -1;
             Projectile.ignoreWater = true;
 
-            // tML puede reutilizar la instancia del ModProjectile: reiniciar la
-            // marca de golpes para que cada onda nueva pueda dañar de nuevo.
+            // tML reutiliza instancias clonadas del prototipo: además del
+            // array fresco de NewInstance, se limpia por si el clon se recicla.
             Array.Clear(_hitNPCs, 0, _hitNPCs.Length);
         }
 
@@ -308,7 +334,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             try { Main.spriteBatch.End(); } catch { }
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.Transform);
+                null, Main.GameViewMatrix.TransformationMatrix);
             return false;
         }
 

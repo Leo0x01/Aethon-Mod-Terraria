@@ -1,5 +1,118 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.88 — FIX CRÍTICO: el mod NO CARGABA (textura faltante) + revisión profunda (10 pasadas)
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+**Error reportado por el usuario** (captura + client.log al cargar v5.87):
+
+```
+Terraria.ModLoader.Exceptions.MissingResourceException: Recurso esperado no
+encontrado: Content/Projectiles/Cosmic/CosmicShockwaveProjectile
+  at Terraria.ModLoader.Mod.TransferAllAssets()
+  at Terraria.ModLoader.ModContent.Load() → ModLoader.Load()
+"Se ha producido un error al cargar AethonMod. Los mods se han desactivado
+automáticamente."
+```
+
+**El mod NO llegaba a cargar desde la v5.86** — el CosmicShockwaveProjectile.cs
+(nuevo en v5.86) se creó SIN su textura .png. La compilación C# pasa sin texturas
+(verificada en sandbox), pero tML las exige al CARGAR el mod → por eso la v5.86
+nunca llegó a probarse en juego (los reportes de la v5.86 nunca pudieron verse).
+
+### A. Fix crítico — textura del proyectil de ondas
+
+- **NUEVO `Content/Projectiles/Cosmic/CosmicShockwaveProjectile.png`** (copia del
+  InvisiblePixel 1x1): el dibujado es 100% manual (DrawWaveVisual), la textura
+  solo necesita existir. Con esto el mod VUELVE A CARGAR.
+- Auditoría COMPLETA de las 71 clases de contenido vs texturas (script propio):
+  **era la única faltante**. Auditoría de las 21 rutas de `ModContent.Request`
+  en runtime: todas existen (png y .fxc).
+
+### B. Bug REAL de daño encontrado en la revisión — marcas de golpe compartidas
+
+- tML crea cada proyectil CLONANDO el prototipo (`MemberwiseClone`) → el array
+  `_hitNPCs` inicializado como campo se COMPARTÍA entre todas las ondas
+  simultáneas del mismo tipo. Con las 3 ondas inversas de la implosión naciendo
+  escalonadas (retardos de 9 ticks): cada nacimiento BORRABA las marcas de sus
+  hermanas → las ondas mayores podían golpear a los mismos NPC 2-3 veces.
+- **FIX**: override de `NewInstance(Projectile)` dando a cada onda su PROPIO
+  array fresco (API verificada contra tModLoader.dll v2026.07.3.0: virtual ✓).
+  El `Array.Clear` de SetDefaults se mantiene como defensa extra.
+
+### C. Robustez de render — End defensivo antes de restaurar el batch
+
+- `RestoreSpriteBatch` (BlackHole, Sun) y el restore de Supernova: si una
+  excepción interna dejaba un `Begin` abierto, el `Begin` de restauración
+  lanzaba "Begin has already been called" y ROMPÍA el frame (crash de render).
+  Ahora: `try { End(); } catch {}` antes del Begin (el patrón que ya usaba
+  CosmicShockwaveProjectile).
+- `Main.Transform` (alias DEPRECADO) → `Main.GameViewMatrix.TransformationMatrix`
+  en los 4 sitios de restauración (verificado por decompilación: Transform es
+  un alias legacy de GameViewMatrix).
+
+### D. Warning del log — "AethonMod spent 61ms blocking on asset loading"
+
+- `ParticleManager.RegisterTexture` llamaba `.Value` al registrar las 11
+  texturas DURANTE la carga del mod (bloquea la fase async de tML).
+- **FIX**: `_textures` ahora es `Asset<Texture2D>[]` — se guarda el Asset sin
+  resolver y la textura se resuelve al DIBUJAR (ya en juego la carga de fondo
+  terminó: `.Value` instantáneo, cero bloqueo de la carga).
+- Guard extra en `DrawParticle`: un Asset fallido se salta sin romper el pase.
+
+### E. Warning del log — "Failed to load icon_small.png"
+
+- **NUEVO `icon_small.png` (30x30 exacto)**, redimensionado del icon.png 80x80
+  con LANCZOS. Verificado contra tML decompilado: `GetModIcon(File, "icon_small.png", 30)`
+  exige 30x30 exacto (y icon.png 80x80 — ya lo era).
+
+### F. Limpieza total de warnings del build del usuario
+
+- CS0672 (Kill obsoleto) ×4: migrados a `OnKill` (hook moderno): CosmicProjectileFX,
+  CosmicOrbBolt, QuantumSplitProjectile, GenesisLight.
+- CS8632 (anotaciones `?` sin contexto nullable) ×21 en 8 archivos: quitadas
+  (neutral: los reference types ya admiten null sin contexto; ningún `Vector2?`
+  de tipo valor fue tocado).
+- **Build verificado SIN supresiones: 0 warnings, 0 errores** contra tModLoader
+  v2026.07.3.0 real.
+
+### G. Pasadas de revisión (lo verificado y quedó OK)
+
+1. Texturas de contenido: 71 clases auditadas → solo faltaba la de arriba.
+2. Rutas de assets en runtime: 21/21 existen.
+3. Render/SpriteBatch: Begin/End balanceados en todos los efectos; lente
+   restaura los render targets y el batch correctamente (verificado v5.86).
+4. Multijugador: daño `SimpleStrikeNPC` solo en autoridad (server/SP), spawns
+   de ondas con guard de owner/netmode correcto, dusts/luz solo cliente.
+5. Fases: explosión BH t-90 → crecimiento 450→720px → evaporación t-36 → 3
+   ondas inversas t-0; sol: llamaradas t=2,4,6,8s, supernova t=7s, explosión
+   simultánea t=10s — todos los timings verificados en código.
+6. `CosmicProjectileFX` (GlobalProjectile, afecta a todos): seguro (AppliesTo
+   Nightglow 931, solo dusts).
+7. `_masters/`: solo sprites maestros png, sin .cs → no interfiere.
+8. `NewInstance`/`SetDefaults` de tML: semántica verificada por decompilación
+   (MemberwiseClone + SetDefaults por spawn → origen del bug B).
+9. `icon.png` 80x80 ✓ requerido por `GetModIcon(iconSize=80)`.
+10. Compilación final limpia contra el binario real.
+
+### H. Nota sobre el aviso "AssemblyLoadContext still using memory"
+
+- Aparecía en el log TRAS la carga fallida (estado parcial del mod). Con el mod
+  cargando correctamente no debería volver. Si reaparece al DESACTIVAR tras
+  usar la lente en juego, es transitorio: el cierre del RenderTarget2D de la
+  lente se encola al hilo principal (v5.87) y se drena en el frame siguiente.
+
+### I. Prueba recomendada para el usuario
+
+1. tModLoader → Develop Mods → Build (v5.88) — debe compilar SIN warnings.
+2. Activar el mod: **debe cargar sin error** (el diálogo de "recurso esperado
+   no encontrado" desaparece).
+3. Probar BlackHoleStaff/SunStaff: las 4 ondas del agujero (cromática + 3
+   inversas) hacen daño UNA vez cada una por NPC; las 3 de fuego queman.
+4. Desactivar/Reload: desactivación limpia (fix v5.87 vigente).
+
+---
+
 ## Commit v5.87 — FIX: ThreadStateException al desactivar el mod (FNA3D + hilo principal)
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

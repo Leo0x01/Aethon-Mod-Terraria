@@ -24,7 +24,7 @@ namespace AethonMod.Content.Globals
         public override void OnHitByProjectile(NPC npc, Projectile projectile, NPC.HitInfo hit, int damageDone)
         {
             if (projectile.owner < 0 || projectile.owner >= Main.player.Length) return;
-            Player? player = Main.player[projectile.owner];
+            Player player = Main.player[projectile.owner];
             if (player != null && player.active)
                 ApplyAethonLifesteal(player, damageDone);
         }
@@ -48,7 +48,7 @@ namespace AethonMod.Content.Globals
             // === DROP DEL FRAGMENTO GÉNESIS ===
             if (npc.type == NPCID.KingSlime || npc.type == NPCID.EyeofCthulhu)
             {
-                Player? killer = FindKiller(npc);
+                Player killer = FindKiller(npc);
                 if (killer != null)
                 {
                     bool hasGrimoire = false;
@@ -72,7 +72,7 @@ namespace AethonMod.Content.Globals
             }
 
             // === OTORGAR XP AL GRIMORIO SOSTENIDO ===
-            Player? player = FindKiller(npc);
+            Player player = FindKiller(npc);
             if (player == null) return;
 
             try
@@ -91,7 +91,7 @@ namespace AethonMod.Content.Globals
             catch { }
         }
 
-        private Player? FindKiller(NPC npc)
+        private Player FindKiller(NPC npc)
         {
             int killerWho = -1;
             if (npc.lastInteraction >= 0 && npc.lastInteraction < Main.player.Length)

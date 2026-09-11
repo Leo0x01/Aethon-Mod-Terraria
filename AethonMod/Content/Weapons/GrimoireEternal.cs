@@ -71,7 +71,7 @@ namespace AethonMod.Content.Weapons
         /// <summary>
         /// Obtiene el ShardLevelItem del arma. Defensivo: try/catch.
         /// </summary>
-        private ShardLevelItem? GetShard(Item item)
+        private ShardLevelItem GetShard(Item item)
         {
             try { return item.GetGlobalItem<ShardLevelItem>(); }
             catch { return null; }

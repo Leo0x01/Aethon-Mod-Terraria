@@ -48,7 +48,7 @@ namespace AethonMod.Content.NPCs
         {
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             int level = 0;
-            Item? held = Main.LocalPlayer.HeldItem;
+            Item held = Main.LocalPlayer.HeldItem;
             if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
             {
                 try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
@@ -70,7 +70,7 @@ namespace AethonMod.Content.NPCs
         {
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             int level = 0;
-            Item? held = Main.LocalPlayer.HeldItem;
+            Item held = Main.LocalPlayer.HeldItem;
             if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
             {
                 try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
@@ -90,7 +90,7 @@ namespace AethonMod.Content.NPCs
 
             // Calcular nivel del Grimorio sostenido (igual que en GetChat/SetChatButtons).
             int level = 0;
-            Item? held = Main.LocalPlayer.HeldItem;
+            Item held = Main.LocalPlayer.HeldItem;
             if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
             {
                 try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }

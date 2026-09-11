@@ -39,7 +39,7 @@ namespace AethonMod.Content.Projectiles
         public override void AI()
         {
             // === HOMING hacia el enemigo HOSTIL más cercano ===
-            NPC? target = null;
+            NPC target = null;
             float closestDist = 400f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -122,7 +122,7 @@ namespace AethonMod.Content.Projectiles
             }
         }
 
-        public override void Kill(int timeLeft)
+        public override void OnKill(int timeLeft)
         {
             // Explosión al morir (sin impacto)
             for (int i = 0; i < 6; i++)

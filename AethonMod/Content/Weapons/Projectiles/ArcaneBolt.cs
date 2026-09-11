@@ -122,7 +122,7 @@ namespace AethonMod.Content.Weapons.Projectiles
             }
 
             // === HOMING LEVE ===
-            NPC? target = FindClosestNPC(15 * 16);
+            NPC target = FindClosestNPC(15 * 16);
             if (target != null)
             {
                 Vector2 direction = (target.Center - Projectile.Center).SafeNormalize(Vector2.Zero);
@@ -130,9 +130,9 @@ namespace AethonMod.Content.Weapons.Projectiles
             }
         }
 
-        private NPC? FindClosestNPC(float maxDetectDistance)
+        private NPC FindClosestNPC(float maxDetectDistance)
         {
-            NPC? closest = null;
+            NPC closest = null;
             float sqrMaxDetect = maxDetectDistance * maxDetectDistance;
             foreach (NPC npc in Main.ActiveNPCs)
             {

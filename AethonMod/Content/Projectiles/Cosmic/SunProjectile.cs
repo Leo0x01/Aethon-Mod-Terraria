@@ -651,9 +651,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
         private static void RestoreSpriteBatch()
         {
+            // v5.88 — End defensivo: si una excepción interna dejó un Begin
+            // abierto, se cierra antes de restaurar (si no había nada abierto,
+            // se ignora) — sin esto, el Begin lanzaría "Begin has already been
+            // called" y rompería el render del frame.
+            try { Main.spriteBatch.End(); } catch { }
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.Transform);
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>Dibujado manual de respaldo (glow multicapa naranja).</summary>

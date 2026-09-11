@@ -98,7 +98,7 @@ namespace AethonMod.Content.Globals
                 // (Los eventos cinematográficos — temblor de pantalla, grano, time-skip, lore —
                 //  fueron eliminados por request del usuario. Ver commit de eliminación de
                 //  LevelUpEventSystem.)
-                Player? owner = Main.LocalPlayer;
+                Player owner = Main.LocalPlayer;
                 if (owner != null)
                 {
                     Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}!",

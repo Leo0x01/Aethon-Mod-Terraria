@@ -360,10 +360,11 @@ namespace AethonMod.Content.Projectiles.V20
             }
             catch { }
 
-            // Restaurar el SpriteBatch al estado esperado por tML.
+            // v5.88 — End defensivo + GameViewMatrix (Main.Transform está deprecado).
+            try { Main.spriteBatch.End(); } catch { }
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.Transform);
+                null, Main.GameViewMatrix.TransformationMatrix);
             return false;
         }
 

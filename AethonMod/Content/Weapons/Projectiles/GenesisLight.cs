@@ -34,7 +34,7 @@ namespace AethonMod.Content.Weapons.Projectiles
             Projectile.rotation += 0.15f;
 
             // Homing hacia el enemigo hostil más cercano
-            NPC? target = FindClosestNPC(400f);
+            NPC target = FindClosestNPC(400f);
             if (target != null)
             {
                 Vector2 direction = (target.Center - Projectile.Center).SafeNormalize(Vector2.Zero);
@@ -55,9 +55,9 @@ namespace AethonMod.Content.Weapons.Projectiles
             }
         }
 
-        private NPC? FindClosestNPC(float maxDist)
+        private NPC FindClosestNPC(float maxDist)
         {
-            NPC? closest = null;
+            NPC closest = null;
             float sqr = maxDist * maxDist;
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -83,7 +83,7 @@ namespace AethonMod.Content.Weapons.Projectiles
             }
         }
 
-        public override void Kill(int timeLeft)
+        public override void OnKill(int timeLeft)
         {
             for (int i = 0; i < 6; i++)
             {
