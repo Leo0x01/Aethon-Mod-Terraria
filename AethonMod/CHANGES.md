@@ -1,5 +1,62 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.92 — FIX: "el sol dio un error" (InvalidOperationException del SpriteBatch)
+
+**Reporte del usuario**: el client.log mostraba 2 "Excepción silenciosa" por cada
+explosión del sol:
+
+```
+System.InvalidOperationException: Begin has been called before calling End after
+the last call to Begin. Begin cannot be called again until End has been
+successfully called.
+   at Microsoft.Xna.Framework.Graphics.SpriteBatch.Begin(...)
+   at AethonMod.Content.Projectiles.Cosmic.CosmicShockwaveProjectile.PreDraw(...)
+   at Terraria.Main.DrawProj_Inner / DrawProjectiles / Draw ...
+```
+
+### A. CAUSA RAÍZ (trazada tick a tick)
+
+1. El `OnKill` del sol genera sus 3 ondas de fuego con **retardo escalonado**
+   (`ai[0] = 0, -8, -16` — así la explosión es una secuencia, no un solo destello).
+2. Mientras la edad es negativa, `PreDraw` retorna temprano (`Age < 0f`) sin tocar
+   el `spriteBatch` → correcto.
+3. **El tick EXACTO en que un retardo expira** (edad pasa de -1 a 0):
+   `FrontRadius(0, estilo, maxR) = maxR·(1-(1-0)²) = 0 px` → `DrawWaveVisual`
+   entra en su salida temprana `if (front <= 1f) return;` y **devuelve SIN tocar
+   el `spriteBatch`** — que sigue ABIERTO (el del pase del mundo de Terraria).
+4. De vuelta en `PreDraw`, el `Begin` de restauración **INCONDICIONAL** (línea 367
+   de v5.91) intentaba re-abrir un batch **YA ABIERTO** → `InvalidOperationException`.
+5. Ese `Begin` estaba FUERA del try/catch → la excepción subía hasta
+   `Main.DrawProjectiles` → tML la registraba como "Excepción silenciosa" y
+   **abortaba el dibujado de TODOS los proyectiles del frame** (parpadeo/pérdida
+   de efectos un frame). Ocurre 2 veces por explosión (ondas con retardo -8 y
+   -16); la onda cromática del agujero negro nace SIN retardo (`ai[0]=0`, su edad
+   jamás es 0 en el PreDraw) → por eso SOLO el sol disparaba el error.
+
+### B. FIX (CosmicShockwaveProjectile.cs)
+
+- `DrawWaveVisual` ahora **devuelve `bool`** en vez de `void`:
+  - `false` = NO tocó el batch (onda inactiva o frente aún invisible) → el
+    llamador NO debe restaurar nada;
+  - `true` = lo tomó y lo dejó **CERRADO** (su `End` propio, o el defensivo del
+    catch) → el llamador debe re-abrirlo con los parámetros estándar de tML.
+- `PreDraw` restaura el batch **SOLO cuando `DrawWaveVisual` devuelve `true`**;
+  cuando devuelve `false` el batch sigue exactamente como tML lo dejó (abierto en
+  el pase del mundo) → no hay nada que re-abrir y el bug desaparece.
+- El `BlackHoleLensSystem` (que llama `DrawWaveVisual(wave, false)` con el batch
+  ya cerrado) sigue siendo compatible: ignora el valor de retorno y en ambos
+  casos recibe el batch cerrado, tal como espera.
+- Invariante nueva verificada en TODOS los caminos: edad negativa / frente
+  invisible / dibujado completo / excepción interceptada → el `spriteBatch` nunca
+  queda desbalanceado.
+
+### C. VERIFICACIÓN
+
+- Compilación contra tModLoader v2026.07.3.0 real: **0 errores, 0 warnings**.
+- Auditados los Begin/End de los demás efectos del arsenal cósmico (sol, nova,
+  agujero, PhoenixNova, lente): sus salidas tempranas ocurren ANTES de tocar el
+  batch → ningún otro proyectil tiene este patrón.
+
 ## Commit v5.91 — El SOL autorita su explosión final (Supernova sincronizada) + agujero negro orientado al centro + ondas que dañan cada 0.1 s
 
 Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran

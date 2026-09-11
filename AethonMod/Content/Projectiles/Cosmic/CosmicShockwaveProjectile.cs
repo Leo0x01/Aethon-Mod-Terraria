@@ -11,6 +11,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
     ///
+    /// v5.92 — FIX del error del sol: "Begin has been called before calling
+    /// End" (InvalidOperationException en PreDraw). Causa raíz: las ondas de
+    /// fuego del sol nacen con retardo escalonado (edades -8/-16); en el tick
+    /// EXACTO en que el retardo expira (edad 0) el frente mide 0 px y
+    /// DrawWaveVisual devolvía SIN tocar el spriteBatch — pero el PreDraw
+    /// restauraba el batch con un Begin INCONDICIONAL, re-abriendo el batch
+    /// del juego YA ABIERTO. La excepción abortaba el dibujado de TODOS los
+    /// proyectiles del frame (2 "Excepción silenciosa" por explosión del sol
+    /// en el client.log). FIX: DrawWaveVisual ahora devuelve si tomó el batch
+    /// (false = no lo tocó / true = lo dejó CERRADO) y el PreDraw solo
+    /// restaura cuando corresponde.
+    ///
     /// v5.88 — Fix del MissingResourceException: textura propia añadida
     /// (InvisiblePixel 1x1 — el dibujado es 100% manual vía DrawWaveVisual)
     /// y NewInstance con array de golpes fresco por onda.
@@ -338,35 +350,38 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            try
+            // Retardo escalonado (ondas en secuencia): invisible e inofensiva.
+            if (Age < 0f) return false;
+
+            // Las ondas cromáticas las pinta el sistema de lente ENCIMA de la
+            // distorsión (para que la lente no las deforme a ellas). Si la
+            // lente no está activa, caemos al dibujado normal del mundo.
+            if ((Style == StyleChromatic || Style == StyleChromaticInverse) &&
+                BlackHoleLensSystem.LensActive)
+                return false;
+
+            // v5.92 — FIX del error del sol ("Begin has been called before
+            // calling End"): DrawWaveVisual SOLO toma el spriteBatch cuando
+            // el frente ya es visible (front > 1 px). En el tick EXACTO en que
+            // expira el retardo escalonado (edad 0 → frente 0 px) devolvía sin
+            // tocar el batch, y el Begin de restauración INCONDICIONAL de la
+            // v5.91 re-abría el batch del juego YA ABIERTO →
+            // InvalidOperationException que abortaba el dibujado de TODOS los
+            // proyectiles del frame ("Excepción silenciosa" ×2 por explosión
+            // del sol: sus ondas de fuego nacen con retardos de -8 y -16
+            // ticks; la onda cromática del agujero nace SIN retardo y por eso
+            // nunca lo disparó). Ahora restauramos SOLO si la onda tomó el
+            // batch (y lo dejó CERRADO); si no, el batch sigue exactamente
+            // como tML lo dejó → nada que hacer.
+            if (DrawWaveVisual(Projectile, true))
             {
-                if (Age < 0f) return false;
-
-                // Las ondas cromáticas las pinta el sistema de lente ENCIMA de la
-                // distorsión (para que la lente no las deforme a ellas). Si la
-                // lente no está activa, caemos al dibujado normal del mundo.
-                if ((Style == StyleChromatic || Style == StyleChromaticInverse) &&
-                    BlackHoleLensSystem.LensActive)
-                    return false;
-
-                // Pase del mundo: el spriteBatch del juego está abierto → cerrarlo
-                // antes de nuestros pases (el sistema de lente lo llama en batch
-                // ya cerrado, por eso el parámetro).
-                DrawWaveVisual(Projectile, true);
+                // Restaurar el SpriteBatch al estado que tML espera tras
+                // PreDraw: el path de dibujado deja el batch CERRADO, basta
+                // con re-abrirlo.
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                    null, Main.GameViewMatrix.TransformationMatrix);
             }
-            catch
-            {
-                // v5.89 — cierre defensivo solo si una excepción cortó el Begin
-                // (antes el try{End} incondicional disparaba una excepción
-                // first-chance cada frame — "Excepción silenciosa" en el log).
-                try { Main.spriteBatch.End(); } catch { }
-            }
-
-            // Restaurar el SpriteBatch al estado que tML espera tras PreDraw:
-            // el path normal deja el batch CERRADO, basta con re-abrirlo.
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
             return false;
         }
 
@@ -376,18 +391,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// desde el pase posterior a la lente (BlackHoleLensSystem).
         /// <param name="endActiveBatch">true cuando existe un Begin del juego
         /// activo (pase del mundo); false en el hook de la lente (batch cerrado).</param>
+        /// v5.92 — Ahora devuelve SI tomó el spriteBatch:
+        ///   false = NO lo tocó (onda inactiva o frente aún invisible, p.ej.
+        ///           edad 0 — el tick exacto en que expira el retardo
+        ///           escalonado): el llamador NO debe restaurar nada;
+        ///   true  = lo tomó y lo dejó CERRADO (End propio, o el defensivo
+        ///           del catch): el llamador debe re-abrirlo con los
+        ///           parámetros estándar de tML.
+        /// (Antes devolvía void y el PreDraw restauraba el batch SIN SABER si
+        /// esta función lo había tocado — la causa raíz del error del sol.)
         /// </summary>
-        public static void DrawWaveVisual(Projectile p, bool endActiveBatch)
+        public static bool DrawWaveVisual(Projectile p, bool endActiveBatch)
         {
             try
             {
-                if (p == null || !p.active || p.ai[0] < 0f) return;
+                if (p == null || !p.active || p.ai[0] < 0f) return false;
 
                 float age = p.ai[0];
                 float style = p.ai[1];
                 float duration = DurationOf(p.ai[2]);
                 float front = FrontRadius(age, style, p.ai[2]);
-                if (front <= 1f) return;
+
+                // v5.92 — Frente aún invisible (front <= 1 px): NO tocamos el
+                // spriteBatch — el batch sigue exactamente como el llamador lo
+                // dejó (abierto en el pase del mundo / cerrado en la lente).
+                // Devolver void aquí dejaba el PreDraw creyendo que lo habíamos
+                // cerrado → su Begin de restauración re-abría un batch YA
+                // ABIERTO ("Begin has been called before calling End").
+                if (front <= 1f) return false;
 
                 float progress = MathHelper.Clamp(age / duration, 0f, 1f);
                 float alpha = WaveAlpha(age, duration);
@@ -437,11 +468,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
 
                 Main.spriteBatch.End();
+                return true; // batch tomado y dejado CERRADO
             }
             catch
             {
-                // v5.89 — cierre defensivo solo si una excepción cortó el Begin.
+                // v5.89/v5.92 — cierre defensivo solo si una excepción cortó el
+                // Begin. Tras este End el batch queda CERRADO en TODOS los casos
+                // (Begin interrumpido → lo cerramos; ya cerrado → el End lanza
+                // y se ignora) → devolvemos true para que el llamador lo
+                // re-abra con los parámetros estándar de tML.
                 try { Main.spriteBatch.End(); } catch { }
+                return true;
             }
         }
 
