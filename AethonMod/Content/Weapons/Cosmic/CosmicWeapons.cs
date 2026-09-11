@@ -33,8 +33,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/9600FF:═══ AGUJERO NEGRO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Lightmarch de 75 pasos con lensing gravitacional real (shader de WoTG)]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Partículas en espiral + disco de acreción + atracción de enemigos]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Render idéntico a la mascota de Wrath of the Gods: lightmarch de 75 pasos con lensing gravitacional real]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción animado + succión espiral de partículas + devora el polvo del entorno]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 350px y colapsa con una implosión]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
@@ -64,8 +65,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FFD700:═══ SOL ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Estrella con shader SunShader.fx (esfericidad + corona + lava) de WoTG]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Partículas de fuego + iluminación intensa + OnFire]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/B388FF:Render idéntico a la mascota estelar de Wrath of the Gods: esfera con corona, manchas y ríos de lava]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Llamaradas solares periódicas + chispas orbitando + iluminación intensa]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Inflama a los enemigos y muere en una nova de fuego]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

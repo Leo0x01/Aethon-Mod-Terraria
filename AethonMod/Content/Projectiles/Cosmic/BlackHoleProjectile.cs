@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -8,14 +9,30 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// BlackHoleProjectile — reescrito siguiendo EXACTAMENTE el código de WoTG.
-    /// Usa RealBlackHoleShader.fx (75-step lightmarch con lensing gravitacional real)
-    /// + FireNoiseB.png como textura de ruido del disco de acreción.
-    /// También spawnea partículas en espiral (CircularSuctionPattern de WoTG).
+    /// BlackHoleProjectile — réplica fiel del BlackHolePet de Wrath of the Gods.
+    ///
+    /// Render: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional real)
+    /// con los parámetros EXACTOS del PetBlackHoleRenderer de WoTG:
+    ///   - zoom dinámico: width / 256 * scale * 2
+    ///   - accretionDiskRadius: scale * 0.4
+    ///   - cameraRotationAxis: (velocity.Y * -0.022 + 1, 0, rotation)
+    ///   - cameraAngle: 0.32 / accretionDiskScale: (1, 0.33, 1)
+    ///
+    /// El shader se dibuja sobre un canvas de InvisiblePixel de 256px (el mismo tamaño
+    /// del render target que usa WoTG para el pet).
+    ///
+    /// Mejoras propias: pop elástico de aparición (ElasticOut, como el pet),
+    /// colapso final antes de expirar, succión espiral de partículas, disco de acreción
+    /// con GoldFlame, atracción gravitacional de enemigos Y de polvo cercano,
+    /// refuerzo del event horizon e implosión + explosión al morir.
     /// </summary>
     public class BlackHoleProjectile : ModProjectile
     {
         private Ref<Effect> _shader;
+        private bool _shaderFailed;
+
+        /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
+        public ref float VisualsTime => ref Projectile.ai[0];
 
         public override void SetStaticDefaults()
         {
@@ -29,7 +46,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 300;
+            Projectile.timeLeft = 600;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.extraUpdates = 0;
@@ -37,79 +54,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // Movimiento lento (el agujero negro flota)
-            Projectile.velocity *= 0.97f;
-            Projectile.rotation += 0.05f;
+            // === POP ELÁSTICO DE APARICIÓN (EasingCurves.Elastic.Out del pet de WoTG) ===
+            // scale = ElasticOut(0..120) * sqrt(InverseLerp(0..60)) — el agujero "rebota" al nacer.
+            Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 120f, VisualsTime, true)) *
+                               (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
+            VisualsTime += 1f;
 
-            // === PARTÍCULAS INFALLING EN ESPIRAL (patrón CircularSuction de WoTG) ===
+            // === COLAPSO FINAL: los últimos 40 ticks se encoge dramáticamente ===
+            if (Projectile.timeLeft < 40f)
+                Projectile.scale *= 0.93f;
+
+            // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
+            Projectile.velocity *= 0.97f;
+
+            // Rotación suave hacia velocity.X * 0.04 (igual que el pet de WoTG)
+            float targetRotation = Projectile.velocity.X * 0.04f;
+            Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
+
+            // === PARTÍCULAS (solo cliente) ===
             if (Main.netMode != NetmodeID.Server)
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    float angle = Projectile.rotation + i * (MathHelper.TwoPi / 3f);
-                    float dist = Main.rand.NextFloat(90f, 140f);
-                    Vector2 spawnPos = Projectile.Center + new Vector2(
-                        (float)Math.Cos(angle) * dist,
-                        (float)Math.Sin(angle) * dist);
-
-                    Vector2 toCenter = Projectile.Center - spawnPos;
-                    float speed = Main.rand.NextFloat(4f, 8f);
-                    if (toCenter.LengthSquared() > 0.01f)
-                    {
-                        toCenter.Normalize();
-                        Vector2 velocity = toCenter * speed;
-
-                        // RotateTowards: LA técnica que convierte infalling radial en espiral
-                        float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
-                        velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
-
-                        // Color: caliente cerca del centro, púrpura lejos
-                        Color color = dist < 60f ? new Color(255, 240, 180)
-                                   : dist < 100f ? new Color(255, 160, 60)
-                                   : new Color(160, 80, 255);
-
-                        Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
-                            velocity, 150, color, 1.3f);
-                        d.noGravity = true;
-                        d.fadeIn = 0f;
-                        d.scale = Main.rand.NextFloat(0.8f, 1.6f);
-                    }
-                }
-
-                // === DISCO DE ACRECIÓN (partículas GoldFlame orbitando) ===
-                if (Main.rand.NextBool(2))
-                {
-                    float diskAngle = Projectile.rotation * 4f;
-                    float diskRadius = Main.rand.NextFloat(10f, 40f);
-                    Vector2 diskPos = Projectile.Center + new Vector2(
-                        (float)Math.Cos(diskAngle) * diskRadius,
-                        (float)Math.Sin(diskAngle) * diskRadius * 0.25f);
-                    Vector2 tangent = new Vector2(
-                        -(float)Math.Sin(diskAngle),
-                        (float)Math.Cos(diskAngle) * 0.25f) * 3f;
-                    Dust d = Dust.NewDustPerfect(diskPos, DustID.GoldFlame,
-                        tangent, 220, new Color(255, 210, 100), 1.2f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-
-                // === POLVO Y HUMO ===
-                if (Main.rand.NextBool(5))
-                {
-                    float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                    float dist = Main.rand.NextFloat(120f, 180f);
-                    Vector2 spawnPos = Projectile.Center + new Vector2(
-                        (float)Math.Cos(angle) * dist,
-                        (float)Math.Sin(angle) * dist);
-                    Vector2 vel = (Projectile.Center - spawnPos) * 0.025f;
-                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
-                        vel, 80, new Color(80, 40, 100), 0.8f);
-                    d.noGravity = false;
-                    d.fadeIn = 0f;
-                }
+                SpawnSuctionParticles();
+                SpawnAccretionDiskParticles();
+                SpawnSmokeParticles();
+                SpawnCapturedEnergySparks();
+                AttractNearbyDust();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS ===
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (radio 350) ===
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.CanBeChasedBy()) continue;
@@ -124,139 +96,305 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === ILUMINACIÓN ===
-            float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GameUpdateCount * 0.08f);
-            Lighting.AddLight(Projectile.Center, new Vector3(0.95f * pulse, 0.45f * pulse, 0.1f * pulse));
+            // === ILUMINACIÓN PULSANTE (naranja del disco + toque púrpura) ===
+            float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
+            Lighting.AddLight(Projectile.Center, new Vector3(0.95f * pulse, 0.45f * pulse, 0.15f * pulse));
         }
+
+        // ------------------------------------------------------------------
+        //  PARTÍCULAS
+        // ------------------------------------------------------------------
+
+        /// <summary>Partículas que caen en espiral hacia el centro (CircularSuctionPattern de WoTG).</summary>
+        private void SpawnSuctionParticles()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 3f);
+                float dist = 90f + 50f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+
+                Vector2 toCenter = Projectile.Center - spawnPos;
+                // Más rápido cuanto más cerca del horizonte
+                float speed = 4f + 4f * (1f - dist / 140f);
+                if (toCenter.LengthSquared() > 0.01f)
+                {
+                    toCenter.Normalize();
+                    Vector2 velocity = toCenter * speed;
+
+                    // RotateTowards: LA técnica de WoTG que convierte infalling radial en espiral
+                    float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
+                    velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
+
+                    // Color: caliente cerca del centro, púrpura lejos
+                    Color color = dist < 60f ? new Color(255, 240, 180)
+                               : dist < 100f ? new Color(255, 160, 60)
+                               : new Color(160, 80, 255);
+
+                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
+                        velocity, 150, color, 1.3f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                    d.scale = Main.rand.NextFloat(0.8f, 1.6f);
+                }
+            }
+        }
+
+        /// <summary>Disco de acreción: GoldFlame orbitando en un plano aplanado.</summary>
+        private void SpawnAccretionDiskParticles()
+        {
+            if (Main.rand.NextBool(2))
+            {
+                float diskAngle = Projectile.rotation * 4f;
+                float diskRadius = Main.rand.NextFloat(10f, 40f);
+                Vector2 diskPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(diskAngle) * diskRadius,
+                    (float)Math.Sin(diskAngle) * diskRadius * 0.25f);
+                Vector2 tangent = new Vector2(
+                    -(float)Math.Sin(diskAngle),
+                    (float)Math.Cos(diskAngle) * 0.25f) * 3f;
+                Dust d = Dust.NewDustPerfect(diskPos, DustID.GoldFlame,
+                    tangent, 220, new Color(255, 210, 100), 1.2f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+        }
+
+        /// <summary>Humo púrpura siendo absorbido desde los alrededores.</summary>
+        private void SpawnSmokeParticles()
+        {
+            if (Main.rand.NextBool(5))
+            {
+                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
+                float dist = Main.rand.NextFloat(120f, 180f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+                Vector2 vel = (Projectile.Center - spawnPos) * 0.025f;
+                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Smoke,
+                    vel, 80, new Color(80, 40, 100), 0.8f);
+                d.noGravity = false;
+                d.fadeIn = 0f;
+            }
+        }
+
+        /// <summary>Chispas doradas encantadas capturadas por el campo gravitatorio.</summary>
+        private void SpawnCapturedEnergySparks()
+        {
+            if (Main.rand.NextBool(12))
+            {
+                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
+                float dist = Main.rand.NextFloat(140f, 220f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist,
+                    (float)Math.Sin(angle) * dist);
+                Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
+                Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Gold,
+                    vel, 255, new Color(255, 230, 150), 0.9f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Efecto gravitacional sobre el polvo del ambiente: los dusts cercanos
+        /// son atraídos hacia el horizonte de sucesos, como si el agujero devorase el entorno.
+        /// </summary>
+        private void AttractNearbyDust()
+        {
+            float radius = 190f;
+            for (int i = 0; i < Main.maxDust; i++)
+            {
+                Dust d = Main.dust[i];
+                if (!d.active || d.noGravity) continue;
+                Vector2 toCenter = Projectile.Center - d.position;
+                float dist = toCenter.Length();
+                if (dist > radius || dist < 4f) continue;
+                float strength = (1f - dist / radius) * 0.35f;
+                toCenter.Normalize();
+                // Componente tangencial sutil → espiral
+                Vector2 pull = toCenter * strength + new Vector2(-toCenter.Y, toCenter.X) * strength * 0.35f;
+                d.velocity += pull;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  RENDER
+        // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (_shader == null)
+            if (!_shaderFailed && _shader == null)
             {
-                try { _shader = new Ref<Effect>(ModContent.Request<Effect>("AethonMod/Content/Effects/Shaders/RealBlackHoleShader").Value); }
-                catch { }
+                try
+                {
+                    _shader = new Ref<Effect>(ModContent.Request<Effect>(
+                        "AethonMod/Content/Effects/Shaders/RealBlackHoleShader",
+                        AssetRequestMode.ImmediateLoad).Value);
+                }
+                catch
+                {
+                    _shaderFailed = true;
+                }
             }
 
             try
             {
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-                // === 1. HALO EXTERNO PÚRPURA ===
+                // === 1. HALO PÚRPURA EXTERIOR (aura cósmica de fondo) ===
                 Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                float haloPulse = 0.85f + 0.15f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3.5f);
                 Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(60, 20, 90, 50), 0f,
-                    new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
-                    3.0f, SpriteEffects.None, 0f);
+                    new Color(60, 20, 90, 40) * haloPulse * Projectile.scale, 0f,
+                    glowTex.Size() * 0.5f, 3.2f * Projectile.scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
-                // === 2. SHADER REALBLACKHOLE (exactamente como WoTG) ===
                 if (_shader != null && _shader.Value != null)
                 {
+                    // === 2. REALBLACKHOLESHADER — parámetros EXACTOS del PetBlackHoleRenderer de WoTG ===
                     Effect shader = _shader.Value;
 
-                    // Parámetros EXACTOS de WoTG BlackHole.DrawBlackHole()
+                    // El pet de WoTG renderiza a un target de 256x256: replicamos ese tamaño de canvas
+                    float targetSize = 256f;
+                    float resizingScale = Projectile.width / targetSize * Projectile.scale * 2f;
+
                     shader.Parameters["blackHoleRadius"].SetValue(0.3f);
                     shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
                     shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
                     shader.Parameters["accretionDiskColor"].SetValue(new Color(245, 105, 61).ToVector3());
                     shader.Parameters["cameraAngle"].SetValue(0.32f);
-                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(1f, 0f, Projectile.rotation));
+                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(Projectile.velocity.Y * -0.022f + 1f, 0f, Projectile.rotation));
                     shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, 0.33f, 1f));
-                    shader.Parameters["zoom"].SetValue(Vector2.One * 0.12f);
-                    shader.Parameters["accretionDiskRadius"].SetValue(0.33f);
-                    shader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
+                    shader.Parameters["zoom"].SetValue(Vector2.One * resizingScale);
+                    shader.Parameters["accretionDiskRadius"].SetValue(Projectile.scale * 0.4f);
+                    shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
 
-                    // FireNoiseB como textura de ruido del disco (exactamente como WoTG)
+                    // FireNoiseB como textura de ruido del disco de acreción (s1) — igual que WoTG
                     Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/FireNoiseB").Value;
                     Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
                     Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                    // InvisiblePixel como canvas (exactamente como WoTG)
-                    Texture2D invisiblePixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/InvisiblePixel").Value;
+                    // InvisiblePixel como canvas (s0) — igual que WoTG
+                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/WoTG/InvisiblePixel").Value;
 
-                    // Orden correcto: Begin(Immediate) → Apply → Draw → End → Begin(Deferred)
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
                     shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(invisiblePixel, drawPos, null, Color.Transparent, 0f,
-                        new Vector2(invisiblePixel.Width / 2f, invisiblePixel.Height / 2f),
-                        400f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
+                        pixel.Size() * 0.5f, targetSize, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+
+                    // === 3. REFUERZO DEL EVENT HORIZON ===
+                    // Sustituye al BlackOnlyShader de WoTG (que requiere render target):
+                    // radio del horizonte en píxeles = blackHoleRadius * zoom * (canvas / 2)
+                    float eventHorizonPx = 0.3f * resizingScale * targetSize * 0.5f;
+                    if (eventHorizonPx > 2f)
+                    {
+                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                            null, Main.GameViewMatrix.TransformationMatrix);
+                        float horizonScale = (eventHorizonPx * 2.15f) / glowTex.Width;
+                        Main.spriteBatch.Draw(glowTex, drawPos, null,
+                            new Color(0, 0, 0, 215), 0f, glowTex.Size() * 0.5f,
+                            horizonScale, SpriteEffects.None, 0f);
+                        Main.spriteBatch.End();
+                    }
                 }
                 else
                 {
-                    // === FALLBACK: si el shader no carga ===
+                    // === FALLBACK: dibujado manual si el shader no carga ===
                     DrawFallback(drawPos);
                 }
             }
             catch { }
+
+            RestoreSpriteBatch();
             return false;
         }
 
+        /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
+        private static void RestoreSpriteBatch()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.Transform);
+        }
+
+        /// <summary>Dibujado manual de respaldo (vórtice + anillo de fotones + aberración cromática).</summary>
         private void DrawFallback(Vector2 drawPos)
         {
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GameUpdateCount * 0.08f);
+            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
             Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             Texture2D vortexTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Vortex").Value;
             Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
+            float s = Projectile.scale;
 
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
 
             // Disco de acreción frontal (elíptico, naranja)
             Main.spriteBatch.Draw(vortexTex, drawPos, null,
                 new Color(255, 180, 80, 200), Projectile.rotation * 2f,
-                new Vector2(vortexTex.Width / 2f, vortexTex.Height / 2f),
-                new Vector2(1.5f, 0.5f), SpriteEffects.None, 0f);
+                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
 
-            // Disco trasero (Einstein ring)
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0, 4f), null,
+            // Disco trasero (anillo de Einstein)
+            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0f, 4f * s), null,
                 new Color(200, 50, 0, 100), -Projectile.rotation * 2f,
-                new Vector2(vortexTex.Width / 2f, vortexTex.Height / 2f),
-                new Vector2(1.5f, 0.5f), SpriteEffects.FlipVertically, 0f);
+                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.FlipVertically, 0f);
 
             // Beaming relativístico
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f, 0f), null,
+            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f * s, 0f), null,
                 new Color(255, 230, 150, 130), Projectile.rotation * 2f,
-                new Vector2(vortexTex.Width / 2f, vortexTex.Height / 2f),
-                new Vector2(1.5f, 0.5f), SpriteEffects.None, 0f);
+                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
             // Event horizon
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
             Main.spriteBatch.Draw(glowTex, drawPos, null,
-                Color.Black, 0f, new Vector2(glowTex.Width / 2f, glowTex.Height / 2f),
-                0.8f, SpriteEffects.None, 0f);
+                Color.Black, 0f, glowTex.Size() * 0.5f,
+                0.8f * s, SpriteEffects.None, 0f);
+            Main.spriteBatch.End();
 
-            // Photon ring + aberración cromática
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-            Main.spriteBatch.Draw(ringTex, drawPos - new Vector2(2f, 0f), null,
-                new Color(255, 0, 0, 80), 0f, new Vector2(ringTex.Width / 2f, ringTex.Height / 2f),
-                0.6f * pulse, SpriteEffects.None, 0f);
+            // Anillo de fotones + aberración cromática
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            Main.spriteBatch.Draw(ringTex, drawPos - new Vector2(2f * s, 0f), null,
+                new Color(255, 0, 0, 80), 0f, ringTex.Size() * 0.5f,
+                0.6f * pulse * s, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(0, 255, 0, 80), 0f, new Vector2(ringTex.Width / 2f, ringTex.Height / 2f),
-                0.6f * pulse, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos + new Vector2(2f, 0f), null,
-                new Color(0, 100, 255, 80), 0f, new Vector2(ringTex.Width / 2f, ringTex.Height / 2f),
-                0.6f * pulse, SpriteEffects.None, 0f);
+                new Color(0, 255, 0, 80), 0f, ringTex.Size() * 0.5f,
+                0.6f * pulse * s, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(ringTex, drawPos + new Vector2(2f * s, 0f), null,
+                new Color(0, 100, 255, 80), 0f, ringTex.Size() * 0.5f,
+                0.6f * pulse * s, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 240, 200, 220), 0f, new Vector2(ringTex.Width / 2f, ringTex.Height / 2f),
-                0.6f * pulse, SpriteEffects.None, 0f);
+                new Color(255, 240, 200, 220), 0f, ringTex.Size() * 0.5f,
+                0.6f * pulse * s, SpriteEffects.None, 0f);
             Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
         }
+
+        // ------------------------------------------------------------------
+        //  IMPACTO Y MUERTE
+        // ------------------------------------------------------------------
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // Implosión + explosión
+            // Implosión: 50 partículas convergiendo en espiral
             for (int i = 0; i < 50; i++)
             {
                 float angle = (MathHelper.TwoPi / 50) * i + Main.rand.NextFloat(-0.2f, 0.2f);
@@ -271,10 +409,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 vel = (toCenter * 7f + tangent * 4f);
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
                         vel, 200, new Color(200, 100, 255), 1.3f);
-                    d.noGravity = true; d.fadeIn = 0f;
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
                 }
             }
 
+            // Explosión: 40 GoldFlame radiales
             for (int i = 0; i < 40; i++)
             {
                 float angle = (MathHelper.TwoPi / 40) * i;
@@ -283,23 +423,91 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
                     dir, 220, new Color(255, 200, 100), 1.5f);
-                d.noGravity = true; d.fadeIn = 0f;
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
+            // Destellos encantados
             for (int i = 0; i < 15; i++)
             {
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Gold,
                     new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
                     255, Color.White, 1.0f);
-                d.noGravity = true; d.fadeIn = 0f;
+                d.noGravity = true;
+                d.fadeIn = 0f;
             }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
         }
+
+        public override void OnKill(int timeLeft)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+
+            // === COLAPSO FINAL: implosión + explosión ===
+            // Implosión: partículas convergiendo
+            for (int i = 0; i < 60; i++)
+            {
+                float angle = (MathHelper.TwoPi / 60) * i;
+                float dist = Main.rand.NextFloat(100f, 170f);
+                Vector2 spawnPos = Projectile.Center + new Vector2(
+                    (float)Math.Cos(angle) * dist, (float)Math.Sin(angle) * dist);
+                Vector2 toCenter = Projectile.Center - spawnPos;
+                if (toCenter.LengthSquared() > 0.01f)
+                {
+                    toCenter.Normalize();
+                    Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
+                    Dust d = Dust.NewDustPerfect(spawnPos, DustID.PurpleTorch,
+                        toCenter * 9f + tangent * 5f, 220, new Color(190, 90, 255), 1.4f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+            }
+
+            // Explosión: anillo expansivo de GoldFlame + Torch púrpura
+            for (int i = 0; i < 45; i++)
+            {
+                float angle = (MathHelper.TwoPi / 45) * i;
+                Vector2 dir = new Vector2(
+                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
+                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
+                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
+                    dir, 230, new Color(255, 200, 100), 1.6f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
+                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.PurpleTorch,
+                    new Vector2((float)Math.Cos(angle) * 3f, (float)Math.Sin(angle) * 3f),
+                    200, new Color(160, 80, 255), 1.2f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
+        }
+
+        // ------------------------------------------------------------------
+        //  HELPERS
+        // ------------------------------------------------------------------
+
+        /// <summary>Elastic ease-out (réplica de EasingCurves.Elastic.Evaluate(EasingType.Out) de WoTG).</summary>
+        private static float ElasticOut(float t)
+        {
+            if (t <= 0f) return 0f;
+            if (t >= 1f) return 1f;
+            float c = (2f * (float)Math.PI) / 3f;
+            return (float)(Math.Pow(2, -10 * t) * Math.Sin((t * 10 - 0.75) * c) + 1);
+        }
     }
 
+    /// <summary>Extensiones vectoriales para las partículas en espiral.</summary>
     public static class Vector2Extensions
     {
+        /// <summary>Rota el vector hacia el ángulo objetivo como máximo maxStep radianes, conservando la magnitud.</summary>
         public static Vector2 RotateTowards(this Vector2 current, float targetAngle, float maxStep)
         {
             float currentAngle = (float)Math.Atan2(current.Y, current.X);

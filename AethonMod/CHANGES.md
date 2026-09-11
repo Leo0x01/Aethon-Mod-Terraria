@@ -1,5 +1,98 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.83 — AGUJERO NEGRO + SOL idénticos a WoTG + FIX CRÍTICO de shaders
+
+Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi versión local se borran
+
+### A. FIX CRÍTICO: "Failed to load asset 'Content\Effects\Shaders\SunShader'"
+
+**Causa raíz descubierta analizando el código fuente de tModLoader v2026.07.3.0:**
+- tModLoader NO compila los archivos `.fx` durante el build (verificado en el código
+  fuente de tML y en el issue abierto #3326 de tModLoader).
+- Los mods DEBEN incluir los shaders **ya compilados como `.fxc`** — así lo hace
+  Wrath of the Gods (270 archivos .fxc commiteados en su repo).
+- Nuestros antiguos `.xnb` (generados con dxc en el sandbox) no eran XNB válidos de
+  MonoGame: el XnbReader de tML fallaba al parsearlos → "Asset could not be found".
+- Además tML no tiene reader para `.fx` (el FxReader vanilla es solo XNA, verificado
+  por reflection contra tModLoader.dll real), por lo que los `.fx` solos jamás se
+  registran como assets.
+
+**Solución aplicada:**
+- Borrados los 8 `.xnb` inválidos de `Content/Effects/Shaders/`.
+- Copiados los 5 `.fxc` compilados de WoTG (nuestros `.fx` son idénticos byte a byte):
+  `RealBlackHoleShader.fxc`, `SunShader.fxc`, `RadialShineShader.fxc`,
+  `BlackOnlyShader.fxc`, `BlackHoleDistortionShader.fxc`.
+- Los `.fx` se mantienen como fuente junto a los `.fxc` (sin conflicto: `.fx` no se
+  registra, `.fxc` sí). Los shaders propios `Bloom.fx`, `ChromaticAberration.fx` y
+  `Shockwave.fx` NO se usan desde C# y no tienen `.fxc` — si algún día se usan,
+  habrá que compilarlos con mgfxc/2MGFX primero.
+- Verificado por reflection contra `tModLoader.dll` v2026.07.3.0 (la versión exacta
+  del usuario): `Terraria.Testing.FxReader` NO existe (`.fx` sin reader) y
+  `Terraria.ModLoader.Assets.FxcReader` SÍ existe (`.fxc` se carga con
+  `new Effect(device, bytes)`).
+
+### B. BlackHoleProjectile — réplica EXACTA del BlackHolePet de WoTG
+
+Reescrito siguiendo `PetBlackHoleRenderer.UpdateUI()` de WoTG al pie de la letra:
+- **Zoom dinámico**: `width / 256 * scale * 2` (antes un 0.12 fijo — el error que
+  hacía que no se pareciera en nada al original).
+- **accretionDiskRadius**: `scale * 0.4` (antes 0.33 fijo).
+- **cameraRotationAxis**: `(velocity.Y * -0.022 + 1, 0, rotation)` — el eje se inclina
+  con el movimiento vertical, como el pet.
+- Canvas de InvisiblePixel de 256px (mismo tamaño del render target del pet).
+- `globalTime` ahora usa `Main.GlobalTimeWrappedHourly` (antes GameUpdateCount*0.0167).
+- Carga del shader con `AssetRequestMode.ImmediateLoad` + flag anti-reintento.
+
+Mejoras propias añadidas:
+- **Pop elástico de aparición** (ElasticOut — réplica de EasingCurves.Elastic de WoTG):
+  el agujero rebota al nacer, igual que el pet.
+- **Colapso final**: los últimos 40 ticks se encoge antes de explotar.
+- **Devora el polvo del entorno**: los dusts cercanos (radio 190) caen en espiral
+  hacia el horizonte de sucesos.
+- Succión espiral de partículas mejorada (más rápidas cuanto más cerca).
+- Disco de acreción con GoldFlame + chispas Enchanted_Gold capturadas + humo.
+- Refuerzo manual del event horizon (sustituye al BlackOnlyShader, que requiere
+  render targets): radio calculado desde los parámetros del shader.
+- Implosión + explosión + doble sonido al morir (OnKill).
+- Restauración correcta del SpriteBatch (`Main.Transform` +
+  `RasterizerState.CullCounterClockwise` — `Main.CullCurrentScissor` NO existe en
+  tML 2026, error CS0117 corregido).
+
+### C. SunProjectile — réplica EXACTA del StarPet de WoTG
+
+Reescrito siguiendo `StarPet.DrawSelf()` de WoTG al pie de la letra:
+- **Canvas correcto**: `DendriticNoiseZoomedOut.png` (¡la textura que usa WoTG y que
+  NOS FALTABA! antes usábamos WavyBlotchNoise como canvas — otra razón del parecido
+  nulo). Copiada a `Content/Effects/WoTG/` (10 texturas WoTG ahora).
+- Backglow doble con BloomCircleSmall (amarillo*0.7 @0.95 + rojo*0.45 @1.61).
+- RadialShine sobre WavyBlotchNoise con color (252,212,112)*0.24 y escala
+  `width*scale*2.72` (dibujado en Additive para que el brillo radial sume).
+- SunShader con parámetros exactos: corona=0.05, mainColor=blanco,
+  darkerColor=(204,92,25), accent=(181,0,0), sphereSpinTime=GlobalTimeWrappedHourly*0.9.
+- s1=WavyBlotchNoise, s2=PsychedelicWingTextureOffsetMap, sampler LinearWrap.
+
+Mejoras propias añadidas:
+- Pop elástico de aparición (ElasticOut).
+- **Hinchazón previa a la nova**: se expande los últimos 30 ticks antes de morir.
+- **Llamaradas solares periódicas** cada ~0.75s (burst radial de GoldFlame).
+- Chispas Torch orbitando + llamas GoldFlame + humo cálido + destellos Enchanted_Gold.
+- Iluminación `Vector3(1, 0.9, 0.5) * 3.2` con pulso sutil (como StarPet).
+- **Nova final**: 60 GoldFlame + 35 Torch + 20 destellos + 15 humos + doble sonido.
+
+### D. Otros cambios
+
+- `AethonMod.csproj`: eliminado el Import roto a `/tmp/tmodloader/tMLMod.targets`
+  (ruta del sandbox que no existe en la máquina del usuario); ahora usa el patrón
+  oficial `..\tModLoader.targets` con `Condition="Exists(...)"`.
+- `CosmicWeapons.cs`: tooltips actualizados describiendo los nuevos efectos.
+- `build.txt`: versión 5.81 → 5.83.
+- **Verificación de compilación**: el mod completo compila con **0 errores** contra
+  tModLoader v2026.07.3.0 real (descargado y compilado con .NET 10 SDK: 4 warnings
+  benignos preexistentes de `Kill()` obsoleto en archivos viejos; los proyectiles
+  cósmicos nuevos migrados a `OnKill()`).
+
+## Commit v5.82 — reescribir BlackHole + Sun con recursos exactos de WoTG
+
 ## Commit v5.29 — Bastones de prueba + efectos cósmicos + recreación Star Wrath
 
 Sistema completo de bastones de prueba para testear todos los efectos cósmicos

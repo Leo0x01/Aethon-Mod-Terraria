@@ -1,11 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="/tmp/tmodloader/tMLMod.targets" />
+
+  <!--
+    tModLoader genera automáticamente 'tModLoader.targets' en la carpeta ModSources
+    al abrir el juego. Este import es el patrón oficial de los mods de tML y permite
+    IntelliSense en el IDE. El Condition evita errores si el archivo no existe
+    (por ejemplo, al abrir el proyecto fuera de ModSources).
+
+    NOTA: el build real del mod NO usa este archivo. tModLoader compila los .cs con
+    Roslyn y empaqueta el .tmod a partir de build.txt (Develop Mods -> Build).
+    Los shaders .fx NO se compilan automáticamente: se empaquetan los .fxc
+    precompilados que están junto a cada .fx (igual que hace Wrath of the Gods).
+  -->
+  <Import Project="..\tModLoader.targets" Condition="Exists('..\tModLoader.targets')" />
 
   <PropertyGroup>
     <AssemblyName>AethonMod</AssemblyName>
     <RootNamespace>AethonMod</RootNamespace>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
