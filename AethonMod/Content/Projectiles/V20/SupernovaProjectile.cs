@@ -15,7 +15,7 @@ namespace AethonMod.Content.Projectiles.V20
     ///
     /// v5.95 — LA CARGA VA DETRÁS DEL SOL (petición del usuario: "sus efectos
     /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él"): la hija
-    /// del sol (ai[2]=1) va con hide=true (nadie más la dibuja — decompilado
+    /// del sol (ai[2]=1) va con hide=true (nadie más la dibuja
     /// tML: el bucle principal solo excluye a `hide`, así que antes la nova,
     /// con índice MAYOR que el sol, se pintaba ENCIMA de la estrella) y el
     /// SOL dibuja su halo de carga él mismo, antes de sus propias capas
@@ -360,7 +360,7 @@ namespace AethonMod.Content.Projectiles.V20
         {
             // v5.95 — HIJA DEL SOL: la carga la dibuja EL SOL, detrás de su
             // propio disco (DrawStarVisuals → DrawChargeSprites). Con
-            // hide=true tML jamás la pinta (decompilado: el bucle principal
+            // hide=true: el juego jamás la pinta (el bucle principal
             // solo excluye a `hide` — antes la nova, de índice MAYOR que el
             // sol, caía ENCIMA de la estrella).
             if (SunInvoked)

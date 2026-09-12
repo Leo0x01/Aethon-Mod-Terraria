@@ -43,7 +43,7 @@
 1. **Progresión infinita pero con curva suave** — nunca se siente como grind muerto.
 2. **Rejugabilidad** — cada personaje obtiene un árbol procedural distinto.
 3. **Integración con el mundo** — el mod afecta biomas, eventos y NPCs existentes.
-4. **Compatibilidad** — Funciona con Calamity, Thorium, Fargo's y otros mods grandes.
+4. **Compatibilidad** — Funciona junto a los mods grandes del ecosistema.
 5. **Accesibilidad** — Config options para desactivar eventos, ajustar XP, etc.
 
 ---
@@ -507,10 +507,8 @@ Ver §2 para las 5 fases. Detalles de combate:
 
 ## 17. Compatibilidad con mods
 
-- **Calamity Mod**: el códex incluye armas de Calamity si está cargado.
-- **Thorium**: lo mismo (incluye las clases Bard y Healer de Thorium como sub-ramas optativas).
-- **Fargo's Souls**: integración con el mod de Souls.
-- **Boss Checklist**: registro de jefes.
+- **Mods de contenido**: el códex puede absorber armas de otros mods si están cargados.
+- **Mods de utilidad**: registro de jefes y checklists cuando estén presentes.
 - **Recipe Browser**: recetas visibles.
 
 ---

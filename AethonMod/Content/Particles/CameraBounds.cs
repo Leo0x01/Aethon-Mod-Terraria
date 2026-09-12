@@ -6,7 +6,6 @@ namespace AethonMod.Content.Particles
     /// Rectángulo visible de la cámara en coordenadas del mundo.
     /// Se usa para frustum culling: no dibujar partículas fuera de pantalla.
     ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA", sección 16.1.
     /// </summary>
     public readonly struct CameraBounds
     {

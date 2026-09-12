@@ -128,8 +128,12 @@ Este esqueleto incluye:
 
 ---
 
-## 📚 Recursos
+## 🔧 Notas de los shaders
 
-- Documentación de tModLoader: <https://docs.tmodloader.net/docs/stable/>
-- Example Mod (referencia): incluido con tModLoader
-- Wiki de la comunidad: <https://github.com/tModLoader/tModLoader/wiki>
+- Los shaders viven en `Content/Effects/Shaders/`: cada `.fx` es la FUENTE
+  y cada `.fxc` es la versión compilada que el juego carga (tModLoader
+  registra el lector para `.fxc`; los `.fx` no se compilan solos).
+- Si se modifica un `.fx`, hay que recompilarlo al perfil `fx_2_0` para
+  regenerar el `.fxc` correspondiente antes de empaquetar el mod.
+- Las texturas de ruido/glow de `Content/Effects/Textures/` se regeneran
+  con `tools/gen_effects_textures.py` (ruido procedural determinista).

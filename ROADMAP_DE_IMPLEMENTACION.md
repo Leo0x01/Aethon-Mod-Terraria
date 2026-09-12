@@ -298,7 +298,7 @@ AethonMod/
 - [ ] Las Runas activas modifican el comportamiento del arma:
   - Ej: memorizar Last Prism → el grimorio dispara rayos convergentes además.
   - Implementar via flags en `ShardPlayer` que los proyectiles leen.
-- [ ] Soporte para mods cargados (escanear items de Calamity/Thorium si presentes).
+- [ ] Soporte para mods cargados (escanear items de otros mods si presentes).
 
 ### 🔴 Fase 10 — Eventos cósmicos (2–3 días)
 **Objetivo**: eventos por nivel del fragmento.
@@ -350,7 +350,7 @@ AethonMod/
 - [ ] Crear imágenes de preview (4–6 capturas).
 - [ ] Escribir wiki / guía en GitHub.
 - [ ] Publicar en Steam Workshop (`tModLoader -publish`).
-- [ ] Anunciar en Reddit (r/Terraria) y Discord de modding.
+- [ ] Anunciar en comunidades de modding.
 
 ---
 
@@ -492,7 +492,7 @@ Basado en el análisis de `docs.tmodloader.net/docs/stable/annotated.html`:
 | UI del árbol muy compleja | Alto | Reusar patrones del Example Mod; prototipar en web primero |
 | Performance con muchos proyectiles | Medio | Object pooling; limitar partículas |
 | Balance roto (arma muy OP) | Medio | Config options; playtest extenso |
-| Incompatibilidad con Calamity/Thorium | Bajo | Detectar mods via `ModLoader.TryGetMod()` |
+| Incompatibilidad con otros mods | Bajo | Detectar mods via `ModLoader.TryGetMod()` |
 | Sync multi-jugador roto | Alto | Testear en servidor dedicado desde Fase 12 |
 | Update de tModLoader rompe el mod | Medio | Pin a versión estable; seguir changelog |
 | Assets pixel-art requieren skill | Medio | Usar placeholders; contratar artista si presupuesto |

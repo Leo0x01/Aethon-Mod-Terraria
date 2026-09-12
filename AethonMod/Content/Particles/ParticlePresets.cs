@@ -5,10 +5,6 @@ namespace AethonMod.Content.Particles
 {
     /// <summary>
     /// Efectos pre-construidos sobre la librería de partículas.
-    ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA",
-    /// Apendice A (50.1 Spawn de explosion basica) y 2.3 (galería de efectos
-    /// pre-empaquetados como valor añadido para resultados rápidos).
     /// </summary>
     public static class ParticlePresets
     {

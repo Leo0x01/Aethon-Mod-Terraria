@@ -13,11 +13,10 @@ namespace AethonMod.Content.Particles
     /// Mantiene un buffer pre-asignado, actualiza todas las partículas cada frame,
     /// y las renderiza con batching por blend mode y frustum culling.
     ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA"
     /// Secciones 14 (orquestador), 16 (culling), 19.1 (ModSystem) y 12 (components).
     ///
     /// Los componentes se ejecutan inline con chequeos de bitmask en lugar del
-    /// patrón IParticleComponent + diccionario: es más rápido (sección 3.4 del libro)
+    /// patrón IParticleComponent + diccionario: es más rápido
     /// y evita las trampas de structs-copia (sección 11.2).
     ///
     /// Componentes implementados:
@@ -173,7 +172,7 @@ namespace AethonMod.Content.Particles
         }
 
         /// <summary>
-        /// API genérica de spawn por forma (sección 14 del libro): spawnea `count`
+        /// API genérica de spawn por forma: spawnea `count`
         /// copias del template posicionadas aleatoriamente según la shape, centradas
         /// en `center`.
         /// </summary>
@@ -210,7 +209,7 @@ namespace AethonMod.Content.Particles
                 if (p.HasComponent(ComponentFlag.Gravity))
                     p.Velocity.Y += p.UserData0 != 0 ? p.UserData0 : 0.2f;
 
-                // Component: Homing — persigue un NPC (sección 12.2 del libro)
+                // Component: Homing — persigue un NPC
                 if (p.HasComponent(ComponentFlag.Homing))
                 {
                     NPC target = FindHomingTarget(ref p);

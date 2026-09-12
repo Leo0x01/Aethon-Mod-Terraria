@@ -7,7 +7,6 @@ namespace AethonMod.Content.Weapons.Projectiles
 {
     /// <summary>
     /// Genesis Light — proyectil de luz autoguiado del Fragmento Génesis.
-    /// Inspirado en el Nightglow de la Emperatriz de la Luz.
     /// </summary>
     public class GenesisLight : ModProjectile
     {

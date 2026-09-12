@@ -1,4 +1,4 @@
-using Terraria;
+
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework.Input;

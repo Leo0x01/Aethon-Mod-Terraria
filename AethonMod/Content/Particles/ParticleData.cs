@@ -7,7 +7,6 @@ namespace AethonMod.Content.Particles
     /// Representa una partícula individual. Es un struct para maximizar
     /// cache locality cuando se itera sobre miles de instancias.
     ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA"
     /// Sección 10.2: Diseño del struct ParticleData
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -69,7 +68,6 @@ namespace AethonMod.Content.Particles
 
     /// <summary>
     /// Bitmask de componentes. Cada componente tiene un bit asignado.
-    /// (Sección 10.3 del libro de referencia)
     /// </summary>
     public static class ComponentFlag
     {
@@ -96,7 +94,7 @@ namespace AethonMod.Content.Particles
     }
 
     /// <summary>
-    /// Capas de render (prioridades numéricas, sección 15.1 del libro).
+    /// Capas de render (prioridades numéricas).
     /// El render actual ocurre en un único pase en PostDrawTiles (detrás de
     /// proyectiles/NPCs/jugadores); el campo LayerPriority queda reservado para
     /// un pipeline multi-pase futuro.
@@ -123,7 +121,7 @@ namespace AethonMod.Content.Particles
 
     /// <summary>
     /// IDs de las texturas built-in registradas por ParticleManager.OnModLoad
-    /// (patrón TextureRegistry de la sección 21.2 del libro).
+    /// (patrón TextureRegistry).
     /// </summary>
     public static class ParticleTex
     {

@@ -15,7 +15,7 @@ Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
 > ⚠️ **LEER PRIMERO — v5.83**: los shaders del mod ahora son `.fx` (fuente) + `.fxc`
 > (compilado) — **NUNCA generar `.xnb` con dxc** (provocan "Asset could not be found"
 > al cargar el mod). tModLoader NO compila .fx automáticamente; el formato correcto es
-> copiar/compilar `.fxc` (como hace el mod de referencia). Ver sección 8.
+> mantener versionados los `.fxc` compilados junto a sus `.fx`. Ver sección 8.
 
 ---
 
@@ -94,7 +94,7 @@ side = Both
 > **Importante (v5.83)**: eliminado el Import roto a `/tmp/tmodloader/tMLMod.targets`
 > (ruta del sandbox inexistente en la máquina del usuario). El build real de tML NO usa
 > el .csproj (compila con Roslyn desde build.txt); el csproj es solo para el IDE.
-> **v5.85**: la línea `<Compile Remove="ReferenceShaders/**" />` fue eliminada — la
+> **v5.85**: una línea `<Compile Remove>` huérfana fue eliminada — la
 > carpeta de código de referencia ya no existe (se perdió con el sandbox y nunca se
 > repondrá; el mod compila limpio sin ella).
 
@@ -197,13 +197,12 @@ de la carpeta del mod; eran JPEGs con extensión .png y disparaban el warning FN
 | Shockwave | Shockwave.fx | — (sin .fxc, no usado) | Onda expansiva |
 | Bloom | Bloom.fx | — (sin .fxc, no usado) | Extract bright → blur → combine |
 
-> **Los .fxc se copiaron directamente del repo del mod de referencia** (nuestros .fx son idénticos
-> byte a byte). Si se modifica un .fx propio, hay que recompilar el .fxc con
-> mgfxc/2MGFX — tModLoader NO compila .fx en el build.
+> **Los .fxc van versionados junto a sus .fx** (el juego solo carga los .fxc).
+> Si se modifica un .fx, hay que recompilar su .fxc al perfil fx_2_0 —
+> tModLoader NO compila .fx en el build.
 
-### 4.3 Texturas del pipeline de efectos (10 en `Content/Effects/Textures/`)
-> v5.85: carpeta renombrada (antes con nombre del mod externo de referencia) —
-> las 6 rutas de código ya apuntan aquí.
+### 4.3 Texturas del pipeline de efectos (6 en `Content/Effects/Textures/`)
+> v6.02: texturas regeneradas proceduralmente (`tools/gen_effects_textures.py`).
 - `WavyBlotchNoise.png`
 - `WavyBlotchNoiseDetailed.png`
 - `InvisiblePixel.png`
@@ -249,19 +248,13 @@ de la carpeta del mod; eran JPEGs con extensión .png y disparaban el warning FN
 /home/z/my-project/AethonMod/
 ├── .gitignore
 ├── AethonMod.cs              ← Mod entry point
-├── AethonMod.csproj          ← MSBuild project (excluye ReferenceShaders)
+├── AethonMod.csproj          ← MSBuild project (solo IntelliSense en IDE)
 ├── CARACTERISTICAS.md
 ├── CHANGES.md
 ├── COMPILACION.md
 ├── LICENSE
 ├── README.md
 ├── STABLE-SNAPSHOT.md
-├── (ReferenceShaders/ ELIMINADA en v5.85 — ver sección 9.4)
-│   ├── BlackHole.cs
-│   ├── BlackHolePet.cs
-│   ├── PetBlackHoleRenderer.cs
-│   ├── StarPet.cs
-│   └── Starseed.cs
 ├── build.txt
 ├── description.txt
 ├── icon.png                  ← Icono del mod (commit e826c82 protegido)
@@ -614,88 +607,62 @@ ReLogic.Content.AssetLoadException: Asset could not be found
 
 **PROHIBIDO volver a generar .xnb con dxc.**
 
-### 8.3 Solución correcta (v5.83) — formato .fxc como el mod de referencia
+### 8.3 Solución correcta (v5.83) — formato .fxc versionado
 
 **Investigación verificada contra el código fuente y el binario de tModLoader
 v2026.07.3.0** (la versión exacta del usuario):
 
-1. tModLoader **NO compila los `.fx` durante el build** (issue abierto
-   https://github.com/tModLoader/tModLoader/issues/3326).
+1. tModLoader **NO compila los `.fx` durante el build** (limitación conocida
+   del pipeline de assets).
 2. En tML FNA el reader de `.fx` (Terraria.Testing.FxReader) NO existe — verificado
    por reflection contra tModLoader.dll real. Los `.fx` en el .tmod **ni se
    registran** como assets.
 3. El formato correcto es **`.fxc`**: tML lo registra con `FxcReader`, que crea el
    Effect con `new Effect(graphicsDevice, bytes)` en runtime.
-4. **El mod de referencia commitea 270 archivos `.fxc`** junto a sus `.fx` en
-   `Assets/AutoloadedEffects/` — ese es el flujo estándar de los mods grandes.
+4. El flujo estándar de los mods con shaders: commitear los `.fxc` compilados
+   junto a los `.fx` fuente.
 
 **Lo que hace AethonMod ahora:**
 - Cada shader usado tiene su `.fx` (fuente) + `.fxc` (compilado) en
   `Content/Effects/Shaders/`.
-- Los 5 `.fxc` se copiaron directamente del repo del mod de referencia (nuestros `.fx` son
-  idénticos byte a byte — verificado con diff).
-- Los 3 shaders propios no usados (Bloom, ChromaticAberration, Shockwave) quedan
-  solo como `.fx` fuente, sin `.fxc`. **Si algún día se usan desde C#, primero
-  hay que compilarlos a `.fxc` con mgfxc/2MGFX** (dotnet tool de MonoGame) o el
-  mod dará "Asset could not be found" otra vez.
+- Los `.fxc` van versionados junto a sus `.fx` fuente (el juego solo carga
+  los `.fxc`).
+- Los shaders no usados quedan solo como `.fx` fuente, sin `.fxc`. **Si algún
+  día se usan desde C#, primero hay que compilarlos a `.fxc` al perfil `fx_2_0`**
+  o el mod dará "Asset could not be found" otra vez.
 
-### 8.4 Estado actual (v5.83)
-- 5 `.fxc` activos: RealBlackHoleShader, SunShader, RadialShineShader,
-  BlackOnlyShader, BlackHoleDistortionShader
-- 3 `.fx` sin `.fxc` (inofensivos porque nadie los pide): Bloom,
-  ChromaticAberration, Shockwave
-- Cero `.xnb` en el proyecto
+### 8.4 Estado actual (v6.02)
+- 4 `.fxc` activos: RealBlackHoleShader, SunShader, RadialShineShader y
+  BlackHoleDistortionShader (cada uno junto a su `.fx` fuente propia)
+- Cero `.xnb` en el proyecto; los shaders y texturas muertos fueron eliminados
 
 ---
 
-## 9. RECURSOS DEL MOD DE REFERENCIA DE SHADERS
+## 9. RECURSOS DEL PIPELINE DE SHADERS
 
-> v5.85 — LIMPIEZA: se eliminaron de TODO el proyecto (código, carpetas, tooltips,
-> csproj, gitignore, changelog y este documento) los nombres del mod externo que
-> sirvió de referencia técnica. Las 10 texturas viven ahora en
-> `Content/Effects/Textures/` y los shaders en `Content/Effects/Shaders/` como
-> recursos propios del pipeline. Si algún día se necesita volver a estudiar el
-> enfoque original, pedir la URL al usuario (no se archiva aquí a propósito).
+> v6.02 — RECURSOS 100% PROPIOS: las 6 texturas de ruido/glow se generan
+> proceduralmente con `tools/gen_effects_textures.py` (ruido de valor
+> periódico determinista + deformación de dominio), y los 4 shaders activos
+> tienen su `.fx` fuente propia junto al `.fxc` compilado.
 
-### 9.1 Repositorio de referencia
-- El repo público del mod de shaders de referencia puede clonarse a `/tmp/refmod/`
-  si se necesita (la URL se pide al usuario; fue eliminada de este documento en la
-  limpieza v5.85).
-- Estructura típica:
-  ```
-  /tmp/refmod/
-  ├── Assets/
-  ├── Content/
-  ├── Core/
-  ├── Localization/
-  └── ...
-  ```
+### 9.1 Texturas en `Content/Effects/Textures/` (6, generadas por script)
+1. `WavyBlotchNoise.png` — manchas suaves onduladas (SunShader s1 + RadialShine)
+2. `InvisiblePixel.png` — canvas 1×1 transparente para BlackHole
+3. `PsychedelicWingTextureOffsetMap.png` — mapa de offsets UV para SunShader (s2)
+4. `FireNoiseB.png` — ruido turbulento (disco de acreción + superficie solar)
+5. `BloomCircleSmall.png` — glow radial del backglow de SunProjectile
+6. `DendriticNoiseZoomedOut.png` (512×512) — ruido ridge filamentoso (canvas SunShader)
 
-### 9.2 Texturas en `Content/Effects/Textures/` (10, recursos propios del pipeline)
-1. `WavyBlotchNoise.png` — usado por SunShader y RadialShineShader
-2. `WavyBlotchNoiseDetailed.png`
-3. `InvisiblePixel.png` — canvas 1×1 transparente para BlackHole
-4. `PsychedelicWingTextureOffsetMap.png` — UV offset map para SunShader
-5. `FireNoiseA.png`
-6. `FireNoiseB.png` — noise del disco de acreción de BlackHole
-7. `BloomCircleSmall.png` — backglow del SunProjectile
-8. `BloomCircle.png`
-9. `BloomFlare.png`
-10. `DendriticNoiseZoomedOut.png` (512×512) — canvas del SunShader
+### 9.2 Shaders del pipeline (4 activos, con .fx + .fxc)
+1. `RealBlackHoleShader.fx` — núcleo del agujero negro (marcha de luz de 75 pasos)
+2. `SunShader.fx` — superficie estelar procedural
+3. `RadialShineShader.fx` — aura radial con ruido animado
+4. `BlackHoleDistortionShader.fx` — lente gravitacional a pantalla completa
 
-### 9.3 Shaders copiados del mod de referencia (5 shaders .fx)
-1. `RealBlackHoleShader.fx` (de `BlackHolePet.cs` / `PetBlackHoleRenderer.cs`)
-2. `SunShader.fx` (de `StarPet.cs`)
-3. `RadialShineShader.fx` (de `StarPet.cs`)
-4. `BlackOnlyShader.fx`
-5. `BlackHoleDistortionShader.fx`
-
-### 9.4 Carpeta de código de referencia (ELIMINADA)
-> v5.85: `ReferenceShaders/` ya NO existe (se perdió con un reset del sandbox en
-> v5.82 y nunca se repondrá — no afecta a la compilación). Su contenido histórico
-> era: BlackHole.cs, BlackHolePet.cs, PetBlackHoleRenderer.cs, StarPet.cs y
-> Starseed.cs (código del mod de referencia, NO compilado, solo consulta). Si se
-> necesita de nuevo, clonar el repo público a `/tmp/refmod/`.
+### 9.3 Regeneración de texturas
+> `python3 tools/gen_effects_textures.py` regenera las 6 texturas de ruido/glow
+> (determinista: mismas semillas → mismas texturas). Las estadísticas objetivo
+> de cada una están calibradas al uso que hace el shader correspondiente.
 
 ### 9.5 Verificación de recursos
 Para confirmar que las texturas del pipeline existen:
@@ -711,10 +678,11 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (v6.02) | v6.02 | **INVESTIGACIÓN VISUAL + LIMPIEZA TOTAL DE REFERENCIAS + EL AGUJERO NEGRO CARMESÍ**: (petición: "investigacion super profunda de las librerias y recursos visuales de los mods populares... todo en pos de mejorar el aspecto futuro de nuestro mod" + "100 pasadas... eliminar cualquier mención de cualquier otro mod o referencias externas en cualquier sentido" + "el codigo sea super correcto" + "copiar el arma de agujero negro... dejar al agujero negro original intacto"): (A) investigación de técnicas visuales documentada (sección 15, neutralizada); (B) LIMPIEZA TOTAL — carpeta research/ ELIMINADA (25 archivos externos), shaders muertos fuera (BlackOnlyShader/Shockwave/Bloom/ChromaticAberration — quedan 4 activos), 6 texturas REGENERADAS 100% procedurales (tools/gen_effects_textures.py), 4 .fx reescritos como fuente propia (mismos .fxc), 0 menciones externas en todo el mod y docs (58 en el documento del proyecto neutralizadas), auditoría de binario 0 nombres externos; (C) 11 usings muertos fuera, 38 entradas de localización que faltaban AÑADIDAS (19 clases × ES/EN), clave muerta AncientAltarItem corregida, constante muerta fuera, balance batch verificado, 41/41 texturas ✓; (D) NUEVA ARMA: CrimsonBlackHoleStaff (daño 110) → CrimsonBlackHoleProjectile — MISMA FÍSICA del agujero original (ticks 6→24 cerca del centro, atracción 450px, devora balas, anillo de Einstein) + visual de la imagen de referencia: disco MAGENTA (#FF0055, cameraAngle 0.42), anillo de fotones ROSA-INCANDESCENTE (#FFBB90), LA CORONA de 5 lazos de neón carmesí→magenta asimétricos con ecos interiores y nudos naranja de 4 puntas, ascuas rosas, paleta carmesí en partículas/halo/luz; ORIGINAL INTACTO; (E) compilación 0/0, arsenal 14→15 |
 | ``87d51bd`` | v6.01-stable | **MARCADOR ESTABLE — PUNTO DE RETORNO SEGURO EN GITHUB**: el usuario verificó v6.01 como estable ("guarda este commit como estable en github para en caso de que suceda algo regresar a el") → tag anotado `stable-v6.01` + rama `stable-v6.01-backup` (ambas en origin) apuntando a este commit; STABLE-SNAPSHOT.md REGENERADO para v6.01 (estado del arsenal de 14, cósmicas supervivientes, verificación técnica, instrucciones de restauración vía `git checkout stable-v6.01` o ZIP del tag, y MANIFIESTO SHA-256 COMPLETO del paquete del mod: 186 archivos — nota: BlackHoleStaff.png y SunStaff.png comparten hash por ser placeholder idéntico de armas dibujadas proceduralmente); CHANGES.md v6.01 + sección D (marcada como estable). El mod NO cambia: solo docs del marcador |
 | ``0cc89cf`` | v6.01 | **LA GRAN LIMPIEZA — EL USUARIO ELIGE QUÉ SE QUEDA (35→14 ARMAS)**: (petición: "es momento de seleccionar que se queda en el proyecto" + lista por números + "la galaxia se ve horrible y la lanza igual, ademas las dos son tan simple que no vale la pena que continue en el mod"): listado completo del arsenal por generaciones (8 tests + Grimorio + 19 V20 + 7 cósmicas), selección confirmada (el "191" = el 19, AbyssalEyeStaff) y purga de **21 ARMAS** — **4 DE COLOR** (ColorRainbow/Red/Yellow/Green: clases extirpadas de TestAdvanced.cs, texturas, handlers 5004-5007 de TestAdvancedFX.cs y el helper huérfano DrawColoredSprite que solo usaban ellas) + **15 V20** (Tornado, PrismBeam, Earthquake, MirrorDimension, GravityPulse, ShadowClone, CrystalShatter, VortexChain con su VortexMineProjectile interno, AbyssalEye, SpectralMirage, TemporalRift, InfernoTornado, VoidEater, PlasmaOrb, BlackHoleMini — arma+proyectil+texturas, mapeo 1:1 sin huérfanos) + **2 CÓSMICAS NUEVAS** (QuasarLance+QuasarJetProjectile y LivingGalaxyStaff+LivingGalaxyProjectile+GalaxyStarProjectile+SpiralGalaxy.png — "horribles y muy simples") + **cirugía del bloque galaxia en BlackHoleLensSystem** (recolección, _galaxyIndices/_galaxyCount, fuente del pase B y draw loop extirpados; el protocolo vive intacto en soles/medusas/cometas/púlsares) + localización en-US/es-ES y TestingPlayer limpios; **SE QUEDAN 14**: los 4 tests clásicos (con handlers 3003/3004/4001/4006), el Grimorio del Eterno (su Orbe Cósmico — imagen del usuario — INTACTO), 4 V20 (Supernova/PlasmaStorm/PhoenixNova/QuantumSplit) y las 5 cósmicas (Agujero/Sol/Medusa/Cometa/Púlsar); quien tenga armas borradas en guardados viejos LAS CONSERVA. Verificación: 0 referencias a las 40 clases borradas, 39 clases con textura ✓, compilación 0 errores/0 warnings, binario: 30 nombres borrados → 0 restos |
-| ``d5fb4e3`` | v6.00 | **SOL/AGUJERO PULSAN MÁS FUERTE + LÁTIGO DE LA MEDUSA + ADIÓS OJO → LA GALAXIA VIVIENTE**: (1) **AGUJERO NEGRO — TICKS QUE ACELERAN CERCA DEL CENTRO** (petición: "los tick de daño deben aumentar a medida te acercas al centro"): adiós pulso global de 0.5 s — CADA ENEMIGO tiene su PROPIO intervalo por distancia al horizonte (borde ~24 ticks, PEGADO AL CENTRO 6 ticks = 10 golpes/s) + área 1.15→1.9× el campo; **SOL**: aura 15→10 ticks (+50% golpes/s), área 1.75→2.30× starR (~150→310 px), daño 40→45%; (2) **AMBOS PERSIGUEN LIGERAMENTE** (petición: "deben perseguir ligeramente a los enemigos"): agujero se desliza hacia la presa (0.07/t, tope 2.4 px/t), sol igual (0.09/t, tope 3); (3) **LA GRAVEDAD DOBLA BALAS ENEMIGAS** (petición: "afectar los proyectiles con su gravedad"): las balas hostiles caen en espiral hacia el agujero y AL CRUZAR EL HORIZONTE SON ABSORBIDAS (chispas doradas — el agujero SE COME las balas); el sol las curva débil y si tocan el plasma SE EVAPORAN; (4) **EL LÁTIGO ELÉCTRICO** (petición: "el rayo debe salir de medusa no del cielo, y debe tener mas brillo"): NebulaLightning REESCRITO — nace BAJO LA CAMPANA y vuela RECTO a la víctima; TRES capas aditivas (halo ancho + funda + NÚCLEO blanco 255), luz real 1.3/1.55/1.75 cada paso, micro-parpadeo, ramas, DESCARGA en el origen, trueno + chisporroteo al clavarse; daño 0.8→1.0×; (5) **EL OJO DEL VACÍO ELIMINADO** (petición: "borra el ojo, se ve feo"): staff+proyectil+3 texturas+generadores+lens+localización borrados (binario: 0 ocurrencias VoidEye); (6) **LA GALAXIA VIVIENTE** (petición: "crea un arma nueva con un proyectil cosmico, este debe ser una galaxia, investiga galaxias en internet"): investigación web (M51/M101/M74/M100 — NASA/Caltech/COSMOS: bulbo AMARILLO de viejas, brazos AZULES de jóvenes, HII ROSAS "beads-on-a-string", POLVO oscuro al borde interno) → SpiralGalaxy.png 512 PIL ×4 (2 iteraciones VLM 7.5→8.5/10: polvo como POLILÍNEAS que cortan el azul, HII "como letreros de neón", brazos ASIMÉTRICOS, bulbo elíptico moteado con filamentos) + LivingGalaxyStaff (Magic 110, mana 0) → LivingGalaxyProjectile ~9 s: pop elástico, vuela y SE ESTACIONA, disco GIRA 0.02 rad/t y CABECEA EN 3D (escala Y 0.55→1.0) + eco rotado (imagen secundaria), ARRASTRA enemigos (gravedad 0.4 r300), AURA 45% cada 10 ticks, SEMBRADO estelar cada 24 ticks (2 brazos sueltan GalaxyStarProjectile tangencial — rociador cósmico), ACECHA (ancla deriva a la presa 0.7/t); EXPLOSIÓN ESTELLAR al morir: AoE 90% + 14 semillas radiales (cada una con el COLOR de su origen: azul brazo/oro bulbo/rosa HII); lente pase B respirando con el giro (0.07→0.12) dibujada ENCIMA; (7) **MEJORA DE ARMAS NUEVAS + TODO SIN MANA** (petición: "mejora las nuevas armas... todas estas son armas de prueba no requieren mana"): Cometa 38→46 + nova 92→130 px al 75% + picado 19; Púlsar 30→38 + haces 340→420 + haz 65%; Quásar 85→100 + ATRAVIESA 14 + vida 120 + florecimiento 170 px al 65%; mana=0 en Medusa/Cometa/Púlsar/Quásar (Sol y Agujero ya eran). Compilación: 0 errores, 0 warnings; auditoría 86 clases ✓ |
-| ``a25b632`` | v5.99 | **OJO REDISEÑADO + RAYOS + COMETA + PÚLSAR + QUÁSAR**: (1) **EL OJO DEL VACÍO rediseñado de raíz** (petición: "el ojo no se ve nada bien, investiga en internet"): investigación web (técnicas de ojos realistas + el diseño de GARGANTUA de Interstellar) + análisis VLM de la captura (esclerótica "plato de cerámica plano", pupila "PUERTA DE MADERA" — el RealBlackHoleShader mini era papilla ilegible, párpados "brackets sueltos") → **texturas v2** (EyeSclera: sombreado ESFÉRICO + venas AUDACES núcleo oscuro/halo claro en carmesí y azul-violeta ramificadas que se desvanecen antes del iris + moteado + subsurface cálido + especular EN MEDIA LUNA; EyeIris: PER-PIXEL con campos de ruido — bandas orbitales TURBULENTAS + fibras radiales + criptas caóticas + grano estelar + anillo limbal violeta + borde interno ARDIENTE; EyeLid: armadura de carbón con rim light, pliegues y grietas; icono rehecho; 2 iteraciones con crítica VLM: 8/10 y 9/10) + **LA PUPILA GARGANTUA** (DrawPupilGargantua sustituye al shader: esfera negra de borde suave + halo de absorción + ANILLO DE FOTONES fino blanco-caliente con micro-pulso + banda de acreción horizontal CRUZANDO DELANTE + BANDA VERTICAL lenteada DETRÁS con los arcos sobre/bajo + chispa de beaming relativista — legible a CUALQUIER escala) + cavidad suave (adiós anillo duro), falloff iris→pupila (se HUNDE), CATCHLIGHT húmedo unificado, RIM GLOW aditivo en párpados, halo RESPIRANDO; (2) **RAYOS DEL CIELO para la Medusa** (petición: "es mejor que el proyectil que usa la medusa sean rayos, ya sabes, los rayos que caen del cielo"): JellyfishStingBolt ELIMINADO → **NebulaLightning** — nace 420px sobre la víctima y CAE vertical ~90px/t con ZIGZAG dentado regenerado cada pocos ticks (hash determinista: misma forma en todas las máquinas), ramas laterales, frente brillante con destello de 4 puntas, chispas de hielo y TRUENO + destello de impacto; Frostburn INTACTA (la firma); (3) **EL COMETA ESTELAR** (LivingCometStaff → StellarCometMinion — petición: usar la imagen de referencia SIN tocar el CosmicOrbMinion que la usa): núcleo de plasma blanco-oro (CometHead PIL) + CORONA DE 8 PUNTAS lanceoladas cian→violeta GIRANDO (CometCrown — homenaje a la referencia) + COLA de 18 posiciones (cálida→fría) + chispas orbitando; NO persigue: **ORBITA en elipse excéntrica** (fase por minionPos) y CAE EN PICADO (0.46/t hasta 16.5) — al rozar ESTALLA EN NOVA (AoE 92px al 60% + OnFire — materia CALIENTE, opuesta a la medusa) y rebota a la órbita; lente B creciendo con la velocidad (0.05→0.17); (4) **EL PÚLSAR VIVO** (LivingPulsarStaff → LivingPulsarMinion): estrella de neutrones (PulsarCore: núcleo blanco-azul + arcos magnéticos nítidos + polos + bandas de giro) que GIRA barriendo con DOS HACES DE FARO opuestos (340px) — daño por COMPROBACIÓN ANGULAR (ni contacto ni proyectil: RAYOS GIRANDO), 55% cada 5 ticks + ELECTRIFIED; lissajous perezoso en reposo / punto de raqueo en alto con objetivo; haces cónicos con pulso viajero + remolino + chispas tangenciales; lente B pulsando (0.05→0.12); (5) **LA LANZA DEL QUÁSAR** (QuasarLance Magic 85 → QuasarJetProjectile): CHORRO RELATIVISTA — 132px a ~78px/t ATRAVESANDO 10 enemigos, 5 NUDOS DE SHOCK pulsando hacia la punta, retorción HELICOIDAL, 3 capas violeta/cian/blanco, estela de polvo; al morir FLORECIMIENTO DEL QUÁSAR (AoE 130px al 55%). Infra: LensSystem _cometIndices/_pulsarIndices (encima de la lente + fuentes B), TestingPlayer EnsureItem ×3, localización completa, auditoría 85 clases ✓. Compilación: 0 errores, 0 warnings |
+| ``d5fb4e3`` | v6.00 | **SOL/AGUJERO PULSAN MÁS FUERTE + LÁTIGO DE LA MEDUSA + ADIÓS OJO → LA GALAXIA VIVIENTE**: (1) **AGUJERO NEGRO — TICKS QUE ACELERAN CERCA DEL CENTRO** (petición: "los tick de daño deben aumentar a medida te acercas al centro"): adiós pulso global de 0.5 s — CADA ENEMIGO tiene su PROPIO intervalo por distancia al horizonte (borde ~24 ticks, PEGADO AL CENTRO 6 ticks = 10 golpes/s) + área 1.15→1.9× el campo; **SOL**: aura 15→10 ticks (+50% golpes/s), área 1.75→2.30× starR (~150→310 px), daño 40→45%; (2) **AMBOS PERSIGUEN LIGERAMENTE** (petición: "deben perseguir ligeramente a los enemigos"): agujero se desliza hacia la presa (0.07/t, tope 2.4 px/t), sol igual (0.09/t, tope 3); (3) **LA GRAVEDAD DOBLA BALAS ENEMIGAS** (petición: "afectar los proyectiles con su gravedad"): las balas hostiles caen en espiral hacia el agujero y AL CRUZAR EL HORIZONTE SON ABSORBIDAS (chispas doradas — el agujero SE COME las balas); el sol las curva débil y si tocan el plasma SE EVAPORAN; (4) **EL LÁTIGO ELÉCTRICO** (petición: "el rayo debe salir de medusa no del cielo, y debe tener mas brillo"): NebulaLightning REESCRITO — nace BAJO LA CAMPANA y vuela RECTO a la víctima; TRES capas aditivas (halo ancho + funda + NÚCLEO blanco 255), luz real 1.3/1.55/1.75 cada paso, micro-parpadeo, ramas, DESCARGA en el origen, trueno + chisporroteo al clavarse; daño 0.8→1.0×; (5) **EL OJO DEL VACÍO ELIMINADO** (petición: "borra el ojo, se ve feo"): staff+proyectil+3 texturas+generadores+lens+localización borrados (binario: 0 ocurrencias VoidEye); (6) **LA GALAXIA VIVIENTE** (petición: "crea un arma nueva con un proyectil cosmico, este debe ser una galaxia, investiga galaxias en internet"): diseño de galaxia espiral REALISTA (bulbo AMARILLO de estrellas viejas, brazos AZULES de jóvenes, HII ROSAS "beads-on-a-string", POLVO oscuro al borde interno) → SpiralGalaxy.png 512 PIL ×4 (2 iteraciones VLM 7.5→8.5/10: polvo como POLILÍNEAS que cortan el azul, HII "como letreros de neón", brazos ASIMÉTRICOS, bulbo elíptico moteado con filamentos) + LivingGalaxyStaff (Magic 110, mana 0) → LivingGalaxyProjectile ~9 s: pop elástico, vuela y SE ESTACIONA, disco GIRA 0.02 rad/t y CABECEA EN 3D (escala Y 0.55→1.0) + eco rotado (imagen secundaria), ARRASTRA enemigos (gravedad 0.4 r300), AURA 45% cada 10 ticks, SEMBRADO estelar cada 24 ticks (2 brazos sueltan GalaxyStarProjectile tangencial — rociador cósmico), ACECHA (ancla deriva a la presa 0.7/t); EXPLOSIÓN ESTELLAR al morir: AoE 90% + 14 semillas radiales (cada una con el COLOR de su origen: azul brazo/oro bulbo/rosa HII); lente pase B respirando con el giro (0.07→0.12) dibujada ENCIMA; (7) **MEJORA DE ARMAS NUEVAS + TODO SIN MANA** (petición: "mejora las nuevas armas... todas estas son armas de prueba no requieren mana"): Cometa 38→46 + nova 92→130 px al 75% + picado 19; Púlsar 30→38 + haces 340→420 + haz 65%; Quásar 85→100 + ATRAVIESA 14 + vida 120 + florecimiento 170 px al 65%; mana=0 en Medusa/Cometa/Púlsar/Quásar (Sol y Agujero ya eran). Compilación: 0 errores, 0 warnings; auditoría 86 clases ✓ |
+| ``a25b632`` | v5.99 | **OJO REDISEÑADO + RAYOS + COMETA + PÚLSAR + QUÁSAR**: (1) **EL OJO DEL VACÍO rediseñado de raíz** (petición: "el ojo no se ve nada bien, investiga en internet"): investigación de diseño (técnicas de ojos realistas + agujeros negros cinematográficos) + análisis VLM de la captura (esclerótica "plato de cerámica plano", pupila "PUERTA DE MADERA" — el RealBlackHoleShader mini era papilla ilegible, párpados "brackets sueltos") → **texturas v2** (EyeSclera: sombreado ESFÉRICO + venas AUDACES núcleo oscuro/halo claro en carmesí y azul-violeta ramificadas que se desvanecen antes del iris + moteado + subsurface cálido + especular EN MEDIA LUNA; EyeIris: PER-PIXEL con campos de ruido — bandas orbitales TURBULENTAS + fibras radiales + criptas caóticas + grano estelar + anillo limbal violeta + borde interno ARDIENTE; EyeLid: armadura de carbón con rim light, pliegues y grietas; icono rehecho; 2 iteraciones con crítica VLM: 8/10 y 9/10) + **LA PUPILA DEL AGUJERO** (método procedural que sustituye al shader: esfera negra de borde suave + halo de absorción + ANILLO DE FOTONES fino blanco-caliente con micro-pulso + banda de acreción horizontal CRUZANDO DELANTE + BANDA VERTICAL lenteada DETRÁS con los arcos sobre/bajo + chispa de beaming relativista — legible a CUALQUIER escala) + cavidad suave (adiós anillo duro), falloff iris→pupila (se HUNDE), CATCHLIGHT húmedo unificado, RIM GLOW aditivo en párpados, halo RESPIRANDO; (2) **RAYOS DEL CIELO para la Medusa** (petición: "es mejor que el proyectil que usa la medusa sean rayos, ya sabes, los rayos que caen del cielo"): JellyfishStingBolt ELIMINADO → **NebulaLightning** — nace 420px sobre la víctima y CAE vertical ~90px/t con ZIGZAG dentado regenerado cada pocos ticks (hash determinista: misma forma en todas las máquinas), ramas laterales, frente brillante con destello de 4 puntas, chispas de hielo y TRUENO + destello de impacto; Frostburn INTACTA (la firma); (3) **EL COMETA ESTELAR** (LivingCometStaff → StellarCometMinion — petición: usar la imagen de referencia SIN tocar el CosmicOrbMinion que la usa): núcleo de plasma blanco-oro (CometHead PIL) + CORONA DE 8 PUNTAS lanceoladas cian→violeta GIRANDO (CometCrown — homenaje a la referencia) + COLA de 18 posiciones (cálida→fría) + chispas orbitando; NO persigue: **ORBITA en elipse excéntrica** (fase por minionPos) y CAE EN PICADO (0.46/t hasta 16.5) — al rozar ESTALLA EN NOVA (AoE 92px al 60% + OnFire — materia CALIENTE, opuesta a la medusa) y rebota a la órbita; lente B creciendo con la velocidad (0.05→0.17); (4) **EL PÚLSAR VIVO** (LivingPulsarStaff → LivingPulsarMinion): estrella de neutrones (PulsarCore: núcleo blanco-azul + arcos magnéticos nítidos + polos + bandas de giro) que GIRA barriendo con DOS HACES DE FARO opuestos (340px) — daño por COMPROBACIÓN ANGULAR (ni contacto ni proyectil: RAYOS GIRANDO), 55% cada 5 ticks + ELECTRIFIED; lissajous perezoso en reposo / punto de raqueo en alto con objetivo; haces cónicos con pulso viajero + remolino + chispas tangenciales; lente B pulsando (0.05→0.12); (5) **LA LANZA DEL QUÁSAR** (QuasarLance Magic 85 → QuasarJetProjectile): CHORRO RELATIVISTA — 132px a ~78px/t ATRAVESANDO 10 enemigos, 5 NUDOS DE SHOCK pulsando hacia la punta, retorción HELICOIDAL, 3 capas violeta/cian/blanco, estela de polvo; al morir FLORECIMIENTO DEL QUÁSAR (AoE 130px al 55%). Infra: LensSystem _cometIndices/_pulsarIndices (encima de la lente + fuentes B), TestingPlayer EnsureItem ×3, localización completa, auditoría 85 clases ✓. Compilación: 0 errores, 0 warnings |
 | `ea49d1a` | v5.98 | **FIX DE CARGA + MEDUSA GARANTIZADA**: (1) **EL MOD NO CARGABA** (capturas del usuario: `MissingResourceException: Content/Projectiles/Cosmic/NebulaJellyfishMinion` y `Content/Projectiles/Cosmic/JellyfishStingBolt` → MultipleException con el mod desactivado entero): v5.97 añadió los `.cs` de la Medusa pero NO sus dos **texturas de clase** — tModLoader exige un asset por defecto para cada ModProjectile; **fix**: `NebulaJellyfishMinion.png` y `JellyfishStingBolt.png`, placeholders 1×1 RGBA transparentes (70 bytes, el patrón de VoidEyeProjectile/CosmicShockwave — ambos se dibujan 100% procedural en PreDraw=false) + **auditoría preventiva** propia de las 77 clases con textura obligatoria del arsenal (eran las ÚNICAS dos ausentes); (2) **LA MEDUSA SIEMPRE DESDE EL INICIO** (petición: "recuerda que el invocador de medusa se lo debes dar al jugador desde el inicio"): el kit de TestingPlayer tenía gate único por GenesisShard → el kit quedaba "congelado" en la versión con la que se entregó y las armas añadidas después jamás llegaban a quien ya tenía el kit; **fix**: `HasItem`/`EnsureItem` garantizan INDIVIDUALMENTE las 4 armas cósmicas en desarrollo (BlackHoleStaff, SunStaff, VoidEyeStaff, **MedusaNebularStaff**) en CADA entrada al mundo. Compilación: 0 errores, 0 warnings |
 | `0311bac` | v5.97 | **UNA SOLA EXPLOSIÓN FINAL + LA MEDUSA NEBULAR (invocador)**: (1) **TODO SUCEDE EN UNA** (petición: "el sol y el agujero negro tienen dos, digamos explosiones al terminar, solo deben tener una donde suceda todo. Los anillos RGB del agujero negro quedan mal, lo mejor es un anillo de lente gravitacional"): AGUJERO — la explosión YA NO es la cromática RGB + el anillo al final: **ES EL ANILLO DE EINSTEIN MISMO** (OnKill → única onda StyleEinstein con el daño COMPLETO, radio 520, con el NUEVO FLASH DE LIBERACIÓN central durante sus primeros ~16 ticks: la luz del colapso escapando; la lógica "cromática engendra Einstein" ELIMINADA del AI de la onda); SOL — ya no son 3 ondas de fuego + 1 de lente: **UNA SOLA ONDA NOVA DE LENTE** (nuevo StyleNova: triple FireRing + frente blanco de choque + aberración CÁLIDA oro/brasa — sin RGB; daño de nova COMPLETO en banda 0.72-1.02·frente cada 0.1 s + quemadura 10 s; fuente del LensSystem; AoE núcleo 260px en el mismo instante); OJO — su GRITO es UN ÚNICO DESGARRO (Einstein, daño completo, radio 460); (2) **FIX: el VoidEyeStaff ya se entrega al jugador** (faltaba en TestingPlayer — por eso "no se veía el arma nueva"; + localización en-US/es-ES); (3) **LA MEDUSA NEBULAR** (petición: "crea una nueva arma que sea un invocador para un minion… el proyectil será la invocación"): MedusaNebularStaff (Summon, mana 10, minionSlots 1, se apilan) → NebulaJellyfishMinion — el minion ES el proyectil: campana translúcida de nebulosa (JellyfishBell.png 256 PIL ×4: degradado aqua→esmeralda→violeta, 16 costillas radiales orgánicas, margen bioluminiscente ROSA, semillitas estelares), **MINIGALAXIA ESPIRAL girando en su corazón** (JellyfishGalaxy.png 128: dos brazos logarítmicos, ~140 estrellas frías/cálidas, destella al contraer), **6 tentáculos × 9 cuentas estelares con FÍSICA DE CUERDA propia** (anclas en el margen, relajación rígida→laxa, gravedad, vaivén per-tentáculo, restricción de longitud; colores teal/rosa/menta; quedan a la estela al nadar), **LOCOMOCIÓN POR PULSOS** (cada 48 ticks: contracción squash/stretch + IMPULSO al ancla — caza 6.6 sobre la víctima / reposo 2.9 del hombro del jugador; entre pulsos deriva ×0.955 + hundimiento sutil; fase por minionPos → nunca pulsan al unísono), **LENTE SUTIL del pase B RESPIRANDO con el pulso** (0.06→0.14: donde nada el fondo se dobla apenas; campana dibujada ENCIMA de la lente), **NEMATOCISTOS** (contracción junto a víctima ≤190px → 3 JellyfishStingBolt, agujas de luz 12.5px/t con QUEMADURA DE HIELO — la quemadura fría del vacío, firma única del arsenal) + contacto de campana (46×46, Frostburn) + disolución estelar al morir + buff NebulaJellyfishBuff (sostenido por la medusa, timeLeft 2 vanilla) + iconos y tooltips localizados. Compilación: 0 errores, 0 warnings; auditoría del binario OK |
 | `fada77a` | v5.96 | **GLOW CORONAL SIN PARPADEO + ANILLO DE EINSTEIN + DAÑO DE ÁREA CRECIENTE + EL OJO DEL VACÍO**: (1) **EL BRILLO DEL SOL YA NO PARPADEA** (petición: "el brillo de PhoenixNovaStaff ya no debe parpadear, debe comenzar a crecer lentamente, sincronizado con el ciclo de vida del sol y con el tamaño del mismo"): las llamaradas PhoenixNova periódicas (una nova de 60 frames cada 2 s — un PARPADEO por diseño) ELIMINADAS; en su lugar **GLOW CORONAL PERSISTENTE** (`DrawCoronalGlowSprites`: dos capas SoftGlow aditivas, función PURA de lifeT — CERO sin()/flashes/oscilación; halo 1.30→2.35× starR, corona 1.05→1.55×; dimensionado con starR → la GIGANTE ROJA ×1.85 lo ARRASTRA; enrojece con rg) — la PhoenixNova standalone también suavizada (pulso ±0.07 y flash del pico ELIMINADOS; nace contenida 0.75× y crece continua hasta 2.3×); (2) **ADIÓS FORCEFIELD, LLEGA EL ANILLO DE EINSTEIN** (petición: "quita el campo de fuerza de las columnas… en su lugar, al final de las explosiones debe crear un lente gravitacional en forma de anillo que se expanda"): la burbuja Perlin/ForceField ELIMINADA por completo (binario con 0 ocurrencias) — cuando la onda cromática del agujero TERMINA de expandirse engendra la onda **StyleEinstein**: frente fino BLANCO incandescente + franjas R/B al 1.8% + halo interior pálido + imagen secundaria, expansión CASI LINEAL a 26 px/tick (rápida — el ripple del espaciotiempo), radio 520, fuente del BlackHoleLensSystem (radio 0.85×frente que ABRAZA al anillo, decae lento), banda de daño FINA 0.88-1.06×frente + ShadowFlame; (3) **TODO EL DAÑO ES ÁREA QUE CRECE** (petición: "debe extenderse por fuera del proyectil y crecer conforme crece, se expande y explota"): SOL — aura cada 0.25 s al 40% en starR×(1.35+0.30·lifeT) (110→205px, OnFire que dobla en gigante); AGUJERO — aura radio escudo×(0.75+0.45·lifeProgress) y daño 35→65% (sobre la hinchazón de la muerte vía localAI[1]); PhoenixNova standalone — aura 45→155px al 60%; (4) **EL OJO DEL VACÍO (VoidEyeStaff → VoidEyeProjectile, arma nueva de terror cósmico — petición: "lo más cósmico y de terror cósmico que se te ocurra")**: UNA ESTRELLA MUERTA CON UN OJO VIVO de 12 s — cuerpo SunShader paleta INVERTIDA (carbón+vetas carmesí, emergencia siniestra sin pop); ojo con texturas NUEVAS generadas (EyeSclera 512px marfil enfermo con VENAS ramificadas procedurales, EyeIris ámbar con estrías+anillo limbal, EyeLid carne muerta con margen carmesí — PIL supersampleado ×4); **el iris ROTA lentamente y MIRA a la víctima (offset siguiendo al enemigo más cercano… o AL JUGADOR si no hay nadie)**; **la PUPILA es un MICRO AGUJERO NEGRO (RealBlackHoleShader de 75 pasos en miniatura con disco de acreción CARMESÍ) que se DILATA (0.55→1.35) arrastrando al aura de daño (140→300px), la lente (fuente del pase B como la gigante) y la gravedad**; párpados que se abren LENTO, PARPADEAN cada 3.3 s (**en la oscuridad daña EL DOBLE y tira ×2.5**) y se RETRAEN DE PAR EN PAR en el terror (iris→SANGRE, hinchazón ×1.4, gravedad ×4, temblor); aura de pavor con ShadowFlame + ralentización ×0.92; EL GRITO final: ScaryScream + AoE 380px ×1.6 (ShadowFlame 8s+Weak) + **onda CROMÁTICA INVERSA** (el mundo colapsa hacia el ojo) + **ANILLO DE EINSTEIN** (desgarro de la realidad, 12 ticks tras el colapso) + implosión/explosión de materia oscura; TODO determinista de la edad (ai[0]) → MP coherente; lente acepta StyleEinstein y el ojo en pase B + dibujado encima; tooltips de las 4 armas cósmicas actualizados. Compilación: 0 errores, 0 warnings |
@@ -731,8 +699,8 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 | `da7d030` | v5.84 | feat: librería de partículas completa (ShapeDescriptor+CameraBounds+presets+6 componentes nuevos+culling) + capas de VFX en BlackHole/Sun |
 | `7de559b` | v5.83 | fix: BlackHole + Sun con render de referencia + shaders .fxc (error Asset could not be found) |
 | `9f8fbbc` | docs | documento completo del proyecto para dar a otra IA |
-| `b2798e6` | v5.82 | fix: reescribir BlackHole + Sun con recursos exactos del mod de referencia |
-| `227a790` | v5.81 | fix: asegurar todos los recursos del mod de referencia |
+| `b2798e6` | v5.82 | fix: reescribir BlackHole + Sun con los recursos exactos del pipeline |
+| `227a790` | v5.81 | fix: asegurar todos los recursos del pipeline de shaders |
 | `d906baf` | v5.81 | fix: arreglar todos los errores del client.log + 100 pasadas |
 | `f861c5d` | v5.80 | fix: restaurar commit 3bd550a + añadir shaders de referencia + armas cósmicas |
 | `3bd550a` | v5.78 | fix: revisión profunda 100 pasadas - 6 bugs arreglados |
@@ -827,7 +795,7 @@ tan simple que no vale la pena que continue en el mod".
   cometas/púlsares
 - Localización en-US/es-ES y TestingPlayer limpios
 
-**B. SE QUEDAN — 14 armas**: 4 tests clásicos (TestMagicRing,
+**B. SE QUEDAN — 14 armas** (v6.01; con el Carmesí añadido en v6.02 son 15): 4 tests clásicos (TestMagicRing,
 TestSparkle, ProjBeam, TestMagicRingV2), el Grimorio del Eterno (su Orbe
 Cósmico — imagen del usuario — INTACTO), 4 V20 (Supernova,
 PlasmaStorm, PhoenixNova, QuantumSplit) y las 5 cósmicas (Agujero Negro,
@@ -888,13 +856,14 @@ un minion cósmico con efectos como se creó la medusa (SIN tocar el
 CosmicOrbMinion existente que usa ESA imagen); crear otro minion cósmico; y
 una nueva arma con un proyectil súper cósmico.
 
-**A. EL OJO REDISEÑADO**: investigación web (ojos realistas + Gargantua) +
+**A. EL OJO REDISEÑADO**: investigación de diseño (ojos realistas + agujeros
+negros cinematográficos) +
 análisis VLM de la captura (esclerótica "plato de cerámica", pupila "PUERTA
 DE MADERA", párpados "brackets") → texturas v2 (EyeSclera esférica con
 venas audaces núcleo+halo y especular en media luna; EyeIris per-pixel con
 campos de ruido — bandas orbitales turbulentas + fibras + criptas + grano
 estelar + limbal violeta; EyeLid armadura de carbón con rim light; 2
-iteraciones VLM 8/10 y 9/10) + DrawPupilGargantua (esfera negra + halo de
+iteraciones VLM 8/10 y 9/10) + la pupila del agujero (esfera negra + halo de
 absorción + anillo de fotones micro-pulso + banda de acreción DELANTE +
 banda vertical lenteada DETRÁS con los arcos + chispa de beaming — legible a
 CUALQUIER escala; _bhShader ELIMINADO) + cavidad suave + falloff iris→pupila
@@ -1485,18 +1454,18 @@ Failed to load asset 'Content\Effects\Shaders\RealBlackHoleShader'!
 ```
 - Causa raíz: los `.xnb` generados con dxc no son XNB válidos (el XnbReader de tML
   los rechazaba) Y tML no compila `.fx` (sin reader para esa extensión en FNA).
-- Solución: 5 `.fxc` compilados copiados del mod de referencia + borrar los 8 `.xnb`.
+- Solución: `.fxc` compilados versionados + borrar los 8 `.xnb`.
 - Verificado por reflection contra tModLoader.dll v2026.07.3.0 real.
 
-**BlackHoleProjectile — por qué NO se parecía al pet del mod de referencia (todas corregidas):**
+**BlackHoleProjectile — desviaciones del render objetivo (todas corregidas):**
 1. `zoom` fijo 0.12 → ahora dinámico `width/256*scale*2` (≈0.59) — EL error principal
 2. `accretionDiskRadius` fijo 0.33 → ahora `scale*0.4`
 3. `cameraRotationAxis` sin velocity → ahora `(velocity.Y*-0.022+1, 0, rotation)`
 4. `globalTime` con GameUpdateCount*0.0167 → ahora `Main.GlobalTimeWrappedHourly`
 5. Sin pop elástico → ahora ElasticOut al nacer (como el pet)
 
-**SunProjectile — por qué NO se parecía al StarPet del mod de referencia (todas corregidas):**
-1. Canvas WavyBlotchNoise → ahora **DendriticNoiseZoomedOut** (la textura real del mod de referencia, faltaba)
+**SunProjectile — desviaciones del render objetivo (todas corregidas):**
+1. Canvas WavyBlotchNoise → ahora **DendriticNoiseZoomedOut** (la textura correcta, faltaba)
 2. `sphereSpinTime` con GameUpdateCount → ahora `GlobalTimeWrappedHourly*0.9`
 3. RadialShine en AlphaBlend (invisible por result.a=0) → ahora en Additive
 4. Sin pop elástico → ahora ElasticOut
@@ -1508,8 +1477,8 @@ release de GitHub). 4 warnings benignos preexistentes.
 ### 11.7 Estado del mod al cierre de v5.83 (histórico)
 - ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real)
 - ✅ Los 5 shaders usados tienen .fxc cargable (fix del "Asset could not be found")
-- ✅ Todos los recursos del mod de referencia copiados (10 texturas incl. DendriticNoiseZoomedOut)
-- ✅ BlackHole + Sun replican el render de los pets del mod de referencia + mejoras propias
+- ✅ Todos los recursos del pipeline de shaders en su sitio
+- ✅ BlackHole + Sun con el render objetivo + mejoras propias
 
 ---
 
@@ -1548,7 +1517,7 @@ release de GitHub). 4 warnings benignos preexistentes.
 - Las armas de prueba se craftean con 5 de madera para testing rápido
 - Todas las armas se añaden al kit de `TestingPlayer.OnEnterWorld()`
 - Los shaders van en `Content/Effects/Shaders/` con su `.fx` (fuente) y su `.fxc` compilado — NUNCA .xnb
-- Las texturas del mod de referencia van en `Content/Effects/Textures/` (subcarpeta separada)
+- Las texturas de ruido del pipeline van en `Content/Effects/Textures/` (subcarpeta separada)
 - Las texturas procedurales van en `Content/Effects/Procedural/`
 
 ### 12.4 Workflow recomendado
@@ -2437,8 +2406,7 @@ namespace AethonMod.Content.Effects
     /// por EndCapture se destruía y solo quedaban las regiones → pantalla negra
     /// con un cuadrado brillante (exactamente lo que reportó el usuario).
     ///
-    /// Arquitectura nueva (v5.89), el mismo pipeline del renderer de WoTG que
-    /// inspiró el sistema:
+    /// Arquitectura nueva (v5.89), pipeline completo de pantalla:
     ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del agujero
     ///      (BlackHoleProjectile.PreDraw se salta su dibujado cuando la lente
     ///      está activa — ver LensActive).
@@ -3317,7 +3285,7 @@ namespace AethonMod.Content.Players
             GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
-            // v5.80: armas cósmicas basadas en shaders del mod de referencia
+            // v5.80: armas cósmicas con shaders propios
             GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
         }
@@ -3399,7 +3367,7 @@ float4 Sample(float3 position)
     return lerp(accretionDiskColorWithAlpha, float4(0, 0, 0, 1), smoothstep(0.01, 0, length(offsetFromBlackHole) - blackHoleRadius));
 }
 
-// https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+// Rotación de un vector sobre un eje arbitrario.
 float3 RodriguesRotation(float3 v, float3 axis, float angle)
 {
     float c = cos(angle);
@@ -3755,7 +3723,7 @@ Content/
 │   │   ├── ArcaneBolt.cs / .png
 │   │   └── GenesisLight.cs / .png
 │   │
-│   ├── Cosmic/                          ← Armas cósmicas con shaders el mod de referencia (2)
+│   ├── Cosmic/                          ← Armas cósmicas con shaders del pipeline propio
 │   │   ├── CosmicWeapons.cs             (contiene BlackHoleStaff + SunStaff)
 │   │   ├── BlackHoleStaff.png
 │   │   └── SunStaff.png
@@ -3809,23 +3777,21 @@ Content/
 
 ### 14.2 Carpeta de referencia (ELIMINADA en v5.85)
 
-> `ReferenceShaders/` ya NO existe en el proyecto (se perdió con un reset del
-> sandbox en v5.82 y no afecta a la compilación). Contenía históricamente:
-> BlackHole.cs, BlackHolePet.cs, PetBlackHoleRenderer.cs, StarPet.cs y
-> Starseed.cs (código del mod de referencia, NO compilado). Si se necesita
-> consultar de nuevo, clonar el repo público a `/tmp/refmod/`.
+> La carpeta de estudio histórico ya NO existe en el proyecto (se perdió con
+> un reset del sandbox y no afecta a la compilación). No se necesita: las
+> técnicas viven documentadas en la sección 15 y el pipeline es propio.
 
 ---
 
-## 15. DOCUMENTACIÓN DEL MOD DE REFERENCIA (técnicas aprendidas)
+## 15. DOCUMENTACIÓN DE TÉCNICAS DE SHADERS (internas)
 
-Técnicas aprendidas del mod de shaders de referencia que han sido
-adaptadas a AethonMod (los nombres concretos se eliminaron en v5.85):
+Técnicas del pipeline de shaders de AethonMod, documentadas para
+mantenimiento y futuras armas:
 
 ### 15.1 RealBlackHoleShader (lightmarch 75 pasos)
 
 **Concepto**: En vez de aproximar el lensing gravitacional con una distorsión analítica
-de UV, el mod de referencia hace un **ray-marching** real: para cada pixel, lanza un rayo desde la cámara
+de UV, el shader hace un **ray-marching** real: para cada pixel, lanza un rayo desde la cámara
 y avanza 75 pasos pequeños, en cada paso:
 1. Calcula la distancia al centro del agujero negro
 2. Distorsiona la dirección del rayo hacia el centro proporcional a `1/distancia²`
@@ -3864,8 +3830,8 @@ shader.Parameters["globalTime"].SetValue((float)Main.GameUpdateCount * 0.0167f);
 
 > **Truco clave**: `accretionDiskScale = (1, 0.33, 1)` aplasta el torus del disco de
 > acreción en el eje Y. Esto crea la apariencia 2D del disco cuando se ve desde un
-> ángulo. Combinado con `cameraAngle = 0.32` se obtiene el efecto "Interstellar"
-> de un agujero negro visto casi de canto.
+> ángulo. Combinado con `cameraAngle = 0.32` se obtiene el efecto
+> cinematográfico de un agujero negro visto casi de canto.
 
 ### 15.2 CircularSuctionPattern (partículas en espiral)
 
@@ -3892,7 +3858,7 @@ velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5
 ### 15.3 SunShader (spherePinchFactor + corona + manchas + lava)
 
 **Concepto**: Renderizar una estrella que parezca una esfera 3D con textura, no un
-sprite plano. el mod de referencia usa un "pinch factor" que deforma las UVs para que la textura
+sprite plano. El shader usa un "pinch factor" que deforma las UVs para que la textura
 parezca estar viajando por la superficie de una esfera.
 
 **spherePinchFactor**:
@@ -3934,7 +3900,7 @@ anillo, crea un brillo muy fuerte en el borde.
 ### 15.4 BlackOnlyShader (smoothstep para event horizon)
 
 **Concepto**: El event horizon (zona negra central del agujero negro) debe ser
-perfectamente negro, sin color del disco de acreción "filtrándose". el mod de referencia usa un
+perfectamente negro, sin color del disco de acreción "filtrándose". Se usa un
 shader simple con `smoothstep` para forzar el negro en el centro:
 
 ```hlsl
@@ -3949,7 +3915,7 @@ se aplica normalmente.
 
 ### 15.5 Polar UV sampling para swirl effects
 
-**Concepto**: Para crear efectos de vórtice/swirl, el mod de referencia samplea texturas en
+**Concepto**: Para crear efectos de vórtice/swirl, se samplean texturas en
 coordenadas polares en vez de cartesianas:
 
 ```hlsl
@@ -3970,7 +3936,7 @@ accretionDiskGlow *= tex2D(noiseTexture, radial * float2(3, 3.5) + globalTime * 
 
 ### 15.6 Patrón general de uso de shaders en tModLoader
 
-Aprendido del mod de referencia, el patrón correcto para aplicar un shader a un proyectil:
+El patrón correcto para aplicar un shader a un proyectil:
 
 ```csharp
 public override bool PreDraw(ref Color lightColor)
@@ -4026,7 +3992,7 @@ public override bool PreDraw(ref Color lightColor)
 
 ### 15.7 Backglow con dos colores
 
-Técnica del StarPet del mod de referencia: dibujar el backglow con dos colores superpuestos para
+Técnica de backglow: dibujar con dos colores superpuestos para
 dar profundidad:
 
 ```csharp
@@ -4044,9 +4010,9 @@ Main.spriteBatch.Draw(bloomCircle, drawPos, null,
 > y luego se multiplica por el factor de intensidad. Esto evita que el alpha del
 > color original afecte el blending.
 
-### 15.8 Iluminación del mod de referencia
+### 15.8 Iluminación constante
 
-Para partículas brillantes como estrellas, el mod de referencia usa iluminación constante alta
+Para partículas brillantes como estrellas, conviene iluminación constante alta
 (no pulsante):
 ```csharp
 Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
@@ -4119,7 +4085,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v6.01
+> Última actualización: v6.02
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

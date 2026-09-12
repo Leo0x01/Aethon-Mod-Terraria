@@ -44,7 +44,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// dibuja él mismo a sus hijos (carga de la Supernova) y su GLOW CORONAL
     /// ANTES de sus propias capas — detrás del disco SIEMPRE, sin
     /// depender del orden de índices de Main.projectile ni de DrawBehind
-    /// (decompilado tML: el bucle principal solo excluye `hide` — sin
+    /// (el bucle principal del juego solo excluye `hide` — sin
     /// hide=true la llamarada se dibujaba DOS VECES, una de ellas ENCIMA del
     /// sol: el "extraño parpadeo").
     ///
@@ -147,13 +147,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>Momento (ticks restantes) en el que nace la supernova: segundo 7.</summary>
         internal const int SupernovaSpawnAtRemaining = 180;
-
-        /// <summary>Cadencia de las llamaradas solares — v5.96: OBSOLETA.
-        /// Las llamaradas periódicas (una nova de 60 frames cada 2 s: cada una
-        /// un PARPADEO por diseño) se eliminaron; el sol lleva ahora un GLOW
-        /// CORONAL PERSISTENTE que crece con su ciclo de vida (petición del
-        /// usuario). La constante se conserva documentada para el histórico.</summary>
-        private const int FlareInterval = 120;
 
         /// <summary>
         /// v5.94 — Progreso de la fase GIGANTE ROJA: 0 durante la secuencia

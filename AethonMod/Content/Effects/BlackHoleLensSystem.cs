@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
-using Terraria.ID;
+
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Projectiles.Cosmic;
@@ -54,7 +54,7 @@ namespace AethonMod.Content.Effects
     /// su paso) y se dibuja encima de la lente junto a las cromáticas.
     ///
     /// v5.89 — FIX CRÍTICO de la "pantalla negra": FNA limpia el backbuffer al
-    /// re-bindearlo. La semántica de FNA (verificada decompilando FNA.dll) es
+    /// re-bindearlo. La semántica de FNA es
     /// que SetRenderTarget(null)/SetRenderTargets(...) ejecuta
     /// `Clear(Target|Depth|Stencil)` sobre el target recién bindeado cuando su
     /// RenderTargetUsage es DiscardContents — y el PresentationParameters del
@@ -67,8 +67,7 @@ namespace AethonMod.Content.Effects
     /// por EndCapture se destruía y solo quedaban las regiones → pantalla negra
     /// con un cuadrado brillante (exactamente lo que reportó el usuario).
     ///
-    /// Arquitectura nueva (v5.89), el mismo pipeline del renderer de WoTG que
-    /// inspiró el sistema:
+    /// Arquitectura nueva (v5.89), pipeline completo de pantalla:
     ///   1. El mundo se renderiza en Main.screenTarget SIN el núcleo del agujero
     ///      (BlackHoleProjectile.PreDraw se salta su dibujado cuando la lente
     ///      está activa — ver LensActive).
@@ -316,6 +315,7 @@ namespace AethonMod.Content.Effects
             //     anillo de Einstein + soles + MEDUSAS NEBULARES (v5.97) +
             //     COMETAS/PÚLSARES (v5.99) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
+            int crimsonHoleType = ModContent.ProjectileType<CrimsonBlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
@@ -342,7 +342,7 @@ namespace AethonMod.Content.Effects
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active) continue;
 
-                if (p.type == blackHoleType)
+                if (p.type == blackHoleType || p.type == crimsonHoleType)
                 {
                     if (count >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
@@ -714,11 +714,17 @@ namespace AethonMod.Content.Effects
 
             // === 8. ENCIMA DE LA LENTE: el núcleo del agujero negro ===
             // El shader del agujero nunca es deformado por su propia lente.
+            // (v6.02: también el AGUJERO NEGRO CARMESÍ — mismo registro, dibujo propio.)
             for (int i = 0; i < _blackHoleCount; i++)
             {
                 Projectile bh = Main.projectile[_blackHoleIndices[i]];
                 if (bh != null && bh.active)
-                    BlackHoleProjectile.DrawCoreVisuals(bh, false);
+                {
+                    if (bh.type == crimsonHoleType)
+                        CrimsonBlackHoleProjectile.DrawCoreVisuals(bh, false);
+                    else
+                        BlackHoleProjectile.DrawCoreVisuals(bh, false);
+                }
             }
 
             // === 9. ENCIMA DE LA LENTE: anillos de las ondas cromáticas/de lente ===

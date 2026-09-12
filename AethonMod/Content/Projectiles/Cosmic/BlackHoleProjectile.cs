@@ -53,9 +53,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// tick con la escala ya colapsada y el escudo “que mantiene su tamaño”
     /// decaía de 101px a 5px).
     ///
-    /// v5.94 — CAMPO DE FUERZA REAL DE LAS COLUMNAS LUNARES: investigado el
-    /// código de Terraria (Main.DrawNPCDirect_Inner) y usado su mecanismo
-    /// EXACTO — ruido Perlin ("Terraria/Images/Misc/Perlin", la textura del
+    /// v5.94 — CAMPO DE FUERZA REAL DE LAS COLUMNAS LUNARES: mecanismo del
+    /// juego base — ruido Perlin ("Terraria/Images/Misc/Perlin", la textura del
     /// juego) en un quad 600×600 con el shader GameShaders.Misc["ForceField"]
     /// VANILLA (v5.95: solo en la onda de la explosión). AURA DE DAÑO: los
     /// enemigos dentro del campo reciben daño cada 0.5 s (límites de daño en

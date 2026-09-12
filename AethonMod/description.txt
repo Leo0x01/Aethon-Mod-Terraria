@@ -10,7 +10,6 @@ Funciones principales:
 - Capstone de Absorción de Lore (memoriza armas del juego base + mods).
 - Bioma Sagrario Hueco con altar, mineral y mobs propios.
 - 6 jefes (mini-jefe, ecos, cósmicos, jefe final Aethon de 5 fases).
-- Eventos cósmicos por nivel (Lv 25, 50, 75, 100, 150).
 - Economía de Fragmentos de Resonancia.
 - NPC "El Testigo" que narra lore y vende runas.
 - Localización ES/EN.

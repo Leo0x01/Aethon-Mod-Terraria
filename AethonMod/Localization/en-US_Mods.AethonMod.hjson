@@ -4,7 +4,7 @@
         "Items.GenesisShard.DisplayName": "Genesis Shard",
         "Items.GenesisShard.Tooltip": "Light weapon that fires homing particles.\nMaterial to craft the Grimoire of the Eternal.\nDrops from King Slime and Eye of Cthulhu.",
 
-        "Items.Placeables.AncientAltarItem.DisplayName": "Ancient Altar",
+        "Items.AncientAltarItem.DisplayName": "Ancient Altar",
         "Items.ResonanceShard.DisplayName": "Resonance Shard",
         "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
@@ -55,6 +55,30 @@
         "NPCs.EchoBlade.DisplayName": "Echo of the First Wielder",
         "NPCs.EchoArcher.DisplayName": "Echo of the Star-Archer",
         "NPCs.RiftKeeper.DisplayName": "The Rift-Keeper",
+
+        "Items.TestMagicRing.DisplayName": "Test Magic Ring",
+        "Items.TestSparkle.DisplayName": "Test Sparkle",
+        "Items.ProjBeam.DisplayName": "Test Beam",
+        "Items.TestMagicRingV2.DisplayName": "Test Magic Ring V2",
+        "Items.SeerOrb.DisplayName": "Seer Orb",
+        "Items.BlackHoleStaff.DisplayName": "Black Hole",
+        "Items.SunStaff.DisplayName": "Sun",
+        "Items.SupernovaStaff.DisplayName": "Supernova",
+        "Items.PlasmaStormStaff.DisplayName": "Plasma Storm",
+        "Items.PhoenixNovaStaff.DisplayName": "Phoenix Nova",
+        "Items.QuantumSplitStaff.DisplayName": "Quantum Split",
+
+        "Items.CrimsonBlackHoleStaff.DisplayName": "Crimson Black Hole",
+        "Items.CrimsonBlackHoleStaff.Tooltip": "Summons THE CRIMSON BLACK HOLE.\nA queen's black hole: an electric-magenta accretion disk, a pink-hot photon ring\nand THE CROWN — five crimson neon arcs with orange knots arched over the horizon.\nSame physics as the Black Hole: eats bullets, ramps up its damage ticks, and dies in an Einstein Ring.",
+
+        "Projectiles.BlackHoleProjectile.DisplayName": "Black Hole",
+        "Projectiles.CrimsonBlackHoleProjectile.DisplayName": "Crimson Black Hole",
+        "Projectiles.SunProjectile.DisplayName": "Sun",
+        "Projectiles.CosmicShockwaveProjectile.DisplayName": "Cosmic Shockwave",
+        "Projectiles.SupernovaProjectile.DisplayName": "Supernova",
+        "Projectiles.PlasmaStormProjectile.DisplayName": "Plasma Storm",
+        "Projectiles.PhoenixNovaProjectile.DisplayName": "Phoenix Nova",
+        "Projectiles.QuantumSplitProjectile.DisplayName": "Quantum Split",
 
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",

@@ -6,7 +6,6 @@ namespace AethonMod.Content.Particles
 {
     /// <summary>
     /// Tipos de forma que puede generar un ShapeDescriptor.
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA", sección 13.3.
     /// </summary>
     public enum ShapeType
     {
@@ -24,7 +23,6 @@ namespace AethonMod.Content.Particles
     /// SpawnShape(shape, count, template) se encarga de posicionar las partículas
     /// según la forma. Añadir una forma nueva solo requiere un caso en el switch.
     ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA", sección 13.3.
     /// </summary>
     public readonly struct ShapeDescriptor
     {
@@ -67,7 +65,7 @@ namespace AethonMod.Content.Particles
         }
 
         // ------------------------------------------------------------------
-        //  GENERADORES POR FORMA (sección 5.4 del libro)
+        //  GENERADORES POR FORMA
         // ------------------------------------------------------------------
 
         /// <summary>Caja sólida o hueca (solo bordes).</summary>
@@ -134,7 +132,7 @@ namespace AethonMod.Content.Particles
             v.X * (float)Math.Sin(radians) + v.Y * (float)Math.Cos(radians));
 
         // ------------------------------------------------------------------
-        //  FACTORY METHODS (sección 3.6 del libro)
+        //  FACTORY METHODS
         // ------------------------------------------------------------------
 
         public static ShapeDescriptor Box(float w, float h) => new(ShapeType.Box, new Vector2(w, h), false, 0f);

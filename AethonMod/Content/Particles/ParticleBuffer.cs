@@ -1,4 +1,3 @@
-using System;
 
 namespace AethonMod.Content.Particles
 {
@@ -6,7 +5,6 @@ namespace AethonMod.Content.Particles
     /// Buffer pre-asignado de partículas con estrategia round-robin.
     /// Evita presión sobre el Garbage Collector al no asignar/liberar objetos.
     ///
-    /// Basado en: "Librería de Partículas para Terraria - Referencia para IA"
     /// Sección 11: Buffers Pre-asignados y Gestión de Memoria
     /// </summary>
     public class ParticleBuffer

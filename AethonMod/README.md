@@ -11,12 +11,12 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
 ## ✨ Funciones
 
 - **Fragmento Génesis** con niveles infinitos y 3 ramas principales.
-- **3 armas** (Lumina/Solbrand/Grimorio) con daño escalado por nivel.
+- **Grimorio del Eterno**: arma híbrida mágica/de invocación con niveles infinitos.
+- **Arsenal de pruebas cósmico** (14 armas: sol, agujero negro, medusa, cometa, púlsar...).
 - **Árboles de habilidades procedurales** (95 nodos totales: 30+30+35).
 - **Capstone de Absorción de Lore** — memoriza armas del juego base + mods.
 - **Bioma Sagrario Hueco** con altar, mineral y mobs propios.
 - **6 jefes** (mini-jefe, ecos, cósmicos, jefe final Aethon de 5 fases).
-- **Eventos cósmicos** por nivel (Lv 25, 50, 75, 100, 150).
 - **Economía de Fragmentos de Resonancia**.
 - **NPC "El Testigo"** que narra lore y vende runas.
 - **UI interactiva**: árbol de habilidades (tecla K) + códex de memoria (tecla J).

@@ -4,7 +4,7 @@
         "Items.GenesisShard.DisplayName": "Fragmento Génesis",
         "Items.GenesisShard.Tooltip": "Arma de luz que dispara partículas autoguiadas.\nMaterial para craftear el Grimorio del Eterno.\nDropea de King Slime y Eye of Cthulhu.",
 
-        "Items.Placeables.AncientAltarItem.DisplayName": "Altar Antiguo",
+        "Items.AncientAltarItem.DisplayName": "Altar Antiguo",
         "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
         "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
 
@@ -55,6 +55,30 @@
         "NPCs.EchoBlade.DisplayName": "Eco del Primer Portador",
         "NPCs.EchoArcher.DisplayName": "Eco de la Arquera Estelar",
         "NPCs.RiftKeeper.DisplayName": "El Guardián del Rift",
+
+        "Items.TestMagicRing.DisplayName": "Anillo Mágico de Prueba",
+        "Items.TestSparkle.DisplayName": "Destello de Prueba",
+        "Items.ProjBeam.DisplayName": "Rayo de Prueba",
+        "Items.TestMagicRingV2.DisplayName": "Anillo Mágico de Prueba V2",
+        "Items.SeerOrb.DisplayName": "Orbe del Vidente",
+        "Items.BlackHoleStaff.DisplayName": "Agujero Negro",
+        "Items.SunStaff.DisplayName": "Sol",
+        "Items.SupernovaStaff.DisplayName": "Supernova",
+        "Items.PlasmaStormStaff.DisplayName": "Tormenta de Plasma",
+        "Items.PhoenixNovaStaff.DisplayName": "Nova del Fénix",
+        "Items.QuantumSplitStaff.DisplayName": "División Cuántica",
+
+        "Items.CrimsonBlackHoleStaff.DisplayName": "Agujero Negro Carmesí",
+        "Items.CrimsonBlackHoleStaff.Tooltip": "Invoca EL AGUJERO NEGRO CARMESÍ.\nUn agujero negro de reina: disco de acreción magenta eléctrico, anillo de fotones rosa-incandescente\ny LA CORONA — cinco arcos de neón carmesí con nudos naranjas arqueados sobre el horizonte.\nMisma física que el Agujero Negro: devora balas, machaca con ticks acelerados y muere en un Anillo de Einstein.",
+
+        "Projectiles.BlackHoleProjectile.DisplayName": "Agujero Negro",
+        "Projectiles.CrimsonBlackHoleProjectile.DisplayName": "Agujero Negro Carmesí",
+        "Projectiles.SunProjectile.DisplayName": "Sol",
+        "Projectiles.CosmicShockwaveProjectile.DisplayName": "Onda de Choque Cósmica",
+        "Projectiles.SupernovaProjectile.DisplayName": "Supernova",
+        "Projectiles.PlasmaStormProjectile.DisplayName": "Tormenta de Plasma",
+        "Projectiles.PhoenixNovaProjectile.DisplayName": "Nova del Fénix",
+        "Projectiles.QuantumSplitProjectile.DisplayName": "División Cuántica",
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",

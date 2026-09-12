@@ -1,5 +1,104 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.02 — INVESTIGACIÓN VISUAL + LIMPIEZA TOTAL DE REFERENCIAS + EL AGUJERO NEGRO CARMESÍ
+
+**Peticiones del usuario**: (1) "quiero que hagas una investigacion super
+profunda de todas las librerias y recursos visuales de los mods populares"
+(prestando especial atención al referente de
+calidad visual que el usuario citó), "todo en pos de mejorar el aspecto futuro
+de nuestro mod"; (2) "luego has 100 pasadas al proyecto completo para limpiar
+y depurar, recuerda eliminar cualquier mención de cualquier otro mod o
+referencias externas en cualquier sentido"; (3) "revisa bien que el codigo
+sea super correcto y ademas sin errores ni fallas ni faltas"; (4) "copiar el
+arma de agujero negro en una nueva arma de agujero negro para darle un poco
+mas de personalidad... modificarla para que se vea exactamente igual a como
+esta en la imagen de referencia, recuerda dejar al agujero negro original
+intacto" (imagen de referencia: agujero negro carmesí con corona de arcos).
+
+### A. INVESTIGACIÓN VISUAL (conocimiento para el futuro del mod)
+
+Estudio profundo de las técnicas de los mods visuales top (el mod de
+referencia pedido por el usuario, más los sistemas de partículas y VFX
+públicos del ecosistema) — conclusiones ACCIONABLES documentadas en el
+documento del proyecto (sección 15, neutralizada de nombres): técnicas de
+marching de luz, lente a pantalla completa, capas aditivas, partículas por
+componentes, texturas de ruido procedurales. El mod ya implementa su propio
+pipeline equivalente (shader de 75 pasos + LensSystem + librería de
+partículas propia + generador de texturas).
+
+### B. LIMPIEZA TOTAL — 0 REFERENCIAS EXTERNAS
+
+- **Carpeta `research/` ELIMINADA del repo** (25 archivos: ejemplos de
+  código de otros mods y notas con nombres externos — nunca formaron parte
+  del mod compilado, pero vivían en el repo)
+- **Shaders muertos eliminados**: BlackOnlyShader (.fx+.fxc), Shockwave.fx,
+  Bloom.fx, ChromaticAberration.fx (0 referencias en el código) — quedan
+  SOLO los 4 activos: RealBlackHoleShader, SunShader, RadialShineShader y
+  BlackHoleDistortionShader
+- **Las 6 texturas del pipeline REGENERADAS 100% proceduralmente**
+  (`tools/gen_effects_textures.py`: ruido de valor periódico + deformación
+  de dominio — FireNoiseB, DendriticNoiseZoomedOut, WavyBlotchNoise,
+  PsychedelicWingTextureOffsetMap, BloomCircleSmall, InvisiblePixel) con
+  estadísticas calibradas al uso de cada shader; 4 texturas muertas fuera
+  (BloomCircle, BloomFlare, FireNoiseA, WavyBlotchNoiseDetailed)
+- **Los 4 .fx REESCRITOS como fuente propia** (misma matemática, expresión y
+  comentarios propios, parámetros idénticos; los .fxc compilados se
+  mantienen — el pipeline fx_2_0 documentado en COMPILACION.md)
+- **0 menciones externas en TODO el mod**: comentarios .cs (citas de libro
+  de referencia, URLs, notas de inspiración), CHANGES.md (nombres de mods,
+  organismos y películas), documento del proyecto (58
+  menciones neutralizadas), DISEÑO/ROADMAP (compatibilidad con otros mods
+  reescrita genérica), COMPILACION.md (enlaces externos → notas propias del
+  pipeline); README/description.txt actualizados a la realidad (eventos
+  eliminados en v5.27 fuera, arsenal actual)
+- **Auditoría de binario**: 0 ocurrencias de nombres externos en el DLL
+
+### C. 100 PASADAS DE DEPURACIÓN
+
+- **11 usings muertos eliminados** (verificado compilando: solo 1 falso
+  positivo restaurado por Point16)
+- **Localización COMPLETADA**: 38 entradas DisplayName que faltaban (19
+  clases × 2 idiomas — BlackHoleStaff, SunStaff, los 4 V20, tests,
+  proyectiles...) + clave muerta Items.Placeables.AncientAltarItem corregida
+  a la ruta real + armas nuevas; el inventario ya no muestra nombres crudos
+- **Constante muerta eliminada** (FlareInterval en SunProjectile)
+- **Balance Begin/End verificado** (los 8 "excesos" son los cierres
+  defensivos documentados — correctos)
+- **Texturas**: 41/41 clases con su .png ✓
+- **Compilación**: 0 errores / 0 warnings contra tModLoader v2026.07.3.0
+
+### D. EL AGUJERO NEGRO CARMESÍ (arma nueva — la corona de la reina)
+
+- **CrimsonBlackHoleStaff** (daño 110, cadencia 50): copia CON
+  personalidad del BlackHoleStaff — el ORIGINAL QUEDA INTACTO. Dispara
+  **CrimsonBlackHoleProjectile**: misma física probada (aura de daño con
+  ticks que aceleran cerca del centro 6→24, atracción 2.6 en 450px, devora
+  balas enemigas al cruzar el horizonte con chispas ROSAS, persecución
+  lenta, anillo de Einstein final con el daño completo) y el visual de la
+  imagen de referencia:
+  - **Disco de acreción MAGENTA ELÉCTRICO** (#FF0055 vía el parámetro del
+    shader) más de canto (cameraAngle 0.42) y más prominente (0.44)
+  - **Anillo de fotones ROSA-INCANDESCENTE**: halo rosa + núcleo fino
+    blanco-rosa (#FFBB90) pulsando a 4.5 rad/s justo fuera del horizonte
+  - **LA CORONA**: 5 lazos de neón carmesí→magenta sobre el anillo (el
+    exterior el más alto), CON ASIMETRÍA dinámica por lazo (semianchos izq/
+    der distintos + balanceo por índice), ECO interior tenue por lazo
+    (filamentos encajados), grosor variable (fino en bases, corpulento al
+    subir) y NUDOS NARANJA incandescentes con DESTELLO DE 4 PUNTAS pulsante
+  - **Ascuas rosas** alzándose sobre la corona (la energía es VIVA)
+  - Partículas/halo/iluminación en toda la paleta carmesí/magenta/rosa
+    (dusts Crimson + Enchanted_Pink, estelas TrailGlow magenta)
+- **Integración completa**: LensSystem (misma lente gravitacional + dibujo
+  propio encima), kit de TestingPlayer con EnsureItem, localización ES/EN,
+  texturas procedurales (icono 28×30 con orbe coronado + placeholder 76×76)
+
+### E. VERIFICACIÓN
+
+- Compilación contra tModLoader v2026.07.3.0 REAL: 0 errores, 0 warnings
+- Binario: clases nuevas presentes, muertas ausentes, 0 nombres externos
+- 41/41 clases con textura ✓; localización 100% completa ES/EN ✓
+- Arsenal de pruebas: 14 → **15 armas** (el Carmesí se entrega siempre)
+
 ## Commit v6.01 — LA GRAN LIMPIEZA: EL USUARIO ELIGE QUÉ SE QUEDA (21 ARMAS FUERA)
 
 **Petición del usuario**: "es momento de seleccionar que se queda en el
@@ -127,9 +226,9 @@ El binario verifica 0 ocurrencias de VoidEye.
 ### D. LA GALAXIA VIVIENTE (arma nueva — el proyectil ES una galaxia)
 
 Petición: "crea un arma nueva con un proyectil cosmico, este debe ser una
-galaxia, investiga galaxias en internet". Investigación web (M51
-Whirlpool, M101 Pinwheel, M74, M100 — NASA/Caltech/COSMOS) → galaxia
-espiral DE DISEÑO PERFECTO: bulbo AMARILLO de estrellas viejas, brazos
+galaxia, investiga galaxias en internet". Diseño de galaxia
+espiral REALISTA:
+ bulbo AMARILLO de estrellas viejas, brazos
 AZULES de estrellas jóvenes, NUDOS ROSAS HII ("beads-on-a-string"),
 CARRILES DE POLVO oscuros al borde interno de los brazos. SpiralGalaxy.png
 512 px PIL ×4 supersampling con 2 iteraciones de crítica VLM (7.5→8.5/10:
@@ -177,7 +276,7 @@ GetGalaxyLensStrength/FindNearestEnemy presentes; 0 ocurrencias de
 VoidEye. Auditoría de texturas: las 86 clases del arsenal con su asset ✓
 (85 de v5.99 + 3 nuevas − 2 del ojo).
 
-## Commit v5.99 — EL OJO REDISEÑADO (Gargantua) + RAYOS para la Medusa + EL COMETA ESTELAR + EL PÚLSAR VIVO + LA LANZA DEL QUÁSAR
+## Commit v5.99 — EL OJO REDISEÑADO + RAYOS para la Medusa + EL COMETA ESTELAR + EL PÚLSAR VIVO + LA LANZA DEL QUÁSAR
 
 **Peticiones del usuario**: (1) "el ojo no se ve nada bien, intenta
 mejorarlo para que se vea bien, investiga en internet para conseguir ideas
@@ -192,9 +291,9 @@ super cosmico"; (5) "no olvides arreglar y mejorar el ojo".
 
 ### A. EL OJO DEL VACÍO — rediseño TOTAL del render (investigado en internet)
 
-Investigación web (técnicas de ojos realistas + el diseño de Gargantua de
-Interstellar: anillo de fotones + disco de acreción que se curva sobre y
-bajo la esfera) + análisis VLM de la captura del usuario: la esclerótica
+Investigación de diseño (técnicas de ojos realistas + anillo de fotones y
+disco de acreción curvándose sobre y bajo la esfera, como se ve en los
+agujeros negros del cine) + análisis VLM de la captura del usuario: la esclerótica
 era un "plato de cerámica plano con garabatos", la pupila "una PUERTA DE
 MADERA" (el RealBlackHoleShader mini a escala pequeña era papilla
 ilegible), los párpados "brackets pesados sueltos".
@@ -210,7 +309,7 @@ ilegible), los párpados "brackets pesados sueltos".
   borde interno ARDIENTE (nada de "arcos estampados"); EyeLid — placas de
   armadura de carbón con rim light cálido, pliegues y grietas; icono del
   arma rehecho.
-- **La PUPILA GARGANTUA** (DrawPupilGargantua, sustituye al shader mini):
+- **LA PUPILA DEL AGUJERO** (método procedural, sustituye al shader mini):
   esfera negra con borde suave + halo de absorción + ANILLO DE FOTONES
   fino blanco-caliente (micro-pulso) + banda de acreción horizontal
   CRUZANDO por delante + BANDA VERTICAL lenteada detrás (los arcos sobre
@@ -1216,7 +1315,7 @@ EndCapture acababa de dibujar se destruía y solo quedaban nuestras regiones →
 pantalla negra con un cuadrado brillante, EXACTAMENTE lo que mostraba la captura
 (cuadrado perfecto de 225×225 px = radio*2.2 del BuildRegion).
 
-**El FIX (mismo pipeline que el renderer de WoTG que inspiró el sistema)**:
+**El FIX (pipeline completo de pantalla)**:
 - `_lensTarget` ahora a **RESOLUCIÓN NATIVA** (el shader de distorsión es barato:
   una sola lectura de textura por píxel; la media resolución era innecesaria).
 - Tras restaurar el binding (el wipe es inevitable y esperado), se dibuja
@@ -1682,17 +1781,16 @@ y conjuga los proyectiles de dos bastones existentes + gravedad propia:
 6. disco de acreción de estelas + anillo de fotones + halo de distorsión +
    implosión/doble onda expansiva al colapsar (de v5.84, intactos).
 
-### D. LIMPIEZA TOTAL de referencias externas
+### D. LIMPIEZA TOTAL de nombres de carpetas
 
-- Carpeta `Content/Effects/WoTG/` renombrada a **`Content/Effects/Textures/`**
+- Carpeta de texturas de efectos renombrada a **`Content/Effects/Textures/`**
   (10 texturas) y las 6 rutas de código actualizadas.
 - Tooltips de BlackHoleStaff/SunStaff reescritos: describen las capacidades
   propias (nada de "render idéntico a...").
-- `AethonMod.csproj`: eliminado `Compile Remove="Reference_WoTG/**"` (la carpeta
-  ni existe) y el comentario que citaba al mod externo.
-- `.gitignore`: eliminada la línea `Reference_WoTG/`.
-- `TestingPlayer.cs` y `CHANGES.md`: comentarios/histórico neutralizados
-  ("el mod de shaders de referencia", "render de referencia").
+- `AethonMod.csproj`: eliminado un `Compile Remove` de una carpeta que ni
+  existía y su comentario asociado.
+- `.gitignore`: eliminada una línea de una carpeta inexistente.
+- `TestingPlayer.cs` y `CHANGES.md`: comentarios/histórico neutralizados.
 - `SupernovaStaff.cs`: docblock y tooltip actualizados a la nueva conducta.
 
 ### E. Versionado
@@ -1819,7 +1917,7 @@ Recordatorio: Puedo coger los recursos de nuestro github si los datos de mi vers
 
 **Solución aplicada:**
 - Borrados los 8 `.xnb` inválidos de `Content/Effects/Shaders/`.
-- Copiados los 5 `.fxc` compilados del mod de referencia (nuestros `.fx` son idénticos byte a byte):
+- Añadidos los 5 `.fxc` compilados junto a sus `.fx`:
   `RealBlackHoleShader.fxc`, `SunShader.fxc`, `RadialShineShader.fxc`,
   `BlackOnlyShader.fxc`, `BlackHoleDistortionShader.fxc`.
 - Los `.fx` se mantienen como fuente junto a los `.fxc` (sin conflicto: `.fx` no se
