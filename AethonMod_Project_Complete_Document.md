@@ -793,10 +793,37 @@ Commits desde v5.28 hasta v5.97 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.97
-- **Mensaje**: "feat v5.97: UNA SOLA explosión final donde sucede TODO — el agujero estalla EN el anillo de lente gravitacional (adiós onda RGB: StyleEinstein con daño completo + flash de liberación central), el sol en una ONDA NOVA DE LENTE única (fuego + aberración cálida, StyleNova), el grito del ojo es UN solo desgarro + FIX: VoidEyeStaff ya se entrega al jugador + NUEVA ARMA INVOCADORA: LA MEDUSA NEBULAR (MedusaNebularStaff → NebulaJellyfishMinion — campana translúcida con minigalaxia girando, tentáculos de cuentas estelares con física de cuerda, locomoción por PULSOS, lente sutil respirando con el nado y nematocistos de quemadura de hielo)"
+- **Versión**: v5.98
+- **Mensaje**: "fix v5.98: el mod NO CARGABA — faltaban las texturas de clase de la Medusa (MissingResourceException: NebulaJellyfishMinion + JellyfishStingBolt → el mod se desactivaba entero; placeholders 1×1 transparentes al patrón de VoidEye/CosmicShockwave + auditoría de las 77 clases del arsenal) + la MEDUSA SIEMPRE en el inventario desde el inicio (kit 'congelado' reparado: las 4 armas cósmicas se garantizan individualmente en cada entrada al mundo, venga del guardado que venga)"
 
-### 11.2 Qué se hizo en v5.97 (una sola explosión + medusa nebular)
+### 11.2 Qué se hizo en v5.98 (fix de carga + medusa garantizada)
+
+**Peticiones del usuario**: "mira estos errores" (capturas del juego con
+`MissingResourceException: Content/Projectiles/Cosmic/NebulaJellyfishMinion`
+y `Content/Projectiles/Cosmic/JellyfishStingBolt` — el mod se desactivaba
+automáticamente al cargar) y "recuerda que el invocador de medusa se lo
+debes dar al jugador desde el inicio".
+
+**A. LA CAUSA — texturas de clase ausentes**: v5.97 añadió los `.cs` de la
+Medusa pero NO sus dos texturas de clase. tModLoader exige un asset para
+CADA `ModProjectile` en su ruta por defecto; al no existir, el cargador
+lanzaba `MissingResourceException` (dos inner exceptions) y desactivaba el
+mod ENTERO — el jugador no veía nada de v5.97. **Fix**:
+`NebulaJellyfishMinion.png` y `JellyfishStingBolt.png` (placeholders 1×1
+RGBA transparentes, 70 bytes — el mismo patrón de `VoidEyeProjectile.png` y
+`CosmicShockwaveProjectile.png`; ambos proyectiles se dibujan 100%
+proceduralmente así que la textura de clase jamás se muestra). Auditoría
+preventiva propia de las 77 clases con textura obligatoria del arsenal: las
+dos de la Medusa eran las ÚNICAS ausentes.
+
+**B. La Medusa SIEMPRE desde el inicio**: el kit de `TestingPlayer` tiene
+gate de una sola vez (GenesisShard) — quien entró al mundo con una versión
+anterior jamás recibía las armas añadidas después (kit "congelado"). **Fix**:
+`EnsureItem()` garantiza INDIVIDUALMENTE las 4 armas cósmicas en desarrollo
+(BlackHoleStaff, SunStaff, VoidEyeStaff, **MedusaNebularStaff**) en cada
+entrada al mundo: si falta una, vuelve al inventario.
+
+### 11.2.1 Qué se hizo en v5.97 (histórico — una sola explosión + medusa nebular)
 
 **Peticiones del usuario**: el sol y el agujero negro tienen dos, digamos
 explosiones al terminar — solo deben tener una donde suceda todo (los
@@ -3957,7 +3984,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.97
+> Última actualización: v5.98
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

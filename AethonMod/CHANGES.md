@@ -1,5 +1,59 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.98 — FIX: el mod NO CARGABA (texturas de la Medusa ausentes) + la Medusa SIEMPRE en el inventario
+
+**Peticiones del usuario**: (1) "mira estos errores" (capturas del juego:
+`MissingResourceException: Content/Projectiles/Cosmic/NebulaJellyfishMinion`
+y `Content/Projectiles/Cosmic/JellyfishStingBolt` — el mod se desactivaba
+automáticamente al cargar); (2) "recuerda que el invocador de medusa se lo
+debes dar al jugador desde el inicio".
+
+### A. LA CAUSA — texturas de clase ausentes
+
+v5.97 añadió los `.cs` de la Medusa pero **NO sus dos texturas de clase**.
+tModLoader exige un asset para CADA `ModProjectile` en su ruta por defecto
+(`Content/Projectiles/Cosmic/<Clase>`); al no existir, el cargador lanzaba
+`MissingResourceException` (dos inner exceptions en un `MultipleException`)
+y **desactivaba el mod entero** — por eso el jugador no veía NADA de v5.97
+(ni las explosiones únicas, ni el Ojo, ni la Medusa).
+
+**El fix**: `NebulaJellyfishMinion.png` y `JellyfishStingBolt.png` —
+placeholders 1×1 RGBA transparentes (70 bytes), el MISMO patrón que ya usan
+`VoidEyeProjectile.png` y `CosmicShockwaveProjectile.png`: ambos proyectiles
+se dibujan 100% proceduralmente (`PreDraw` devuelve `false`: campana +
+galaxia + cuentas del minion; destello de 4 puntas del nematocisto), así que
+la textura de clase JAMÁS se muestra — solo tiene que existir.
+
+**Auditoría preventiva**: script propio que escanea las 77 clases con
+textura obligatoria (`ModItem`/`ModProjectile`/`ModBuff`/`ModNPC`/…) del
+arsenal completo — las dos de la Medusa eran las ÚNICAS ausentes (sin más
+errores escondidos esperando al siguiente arranque).
+
+### B. La Medusa SIEMPRE desde el inicio (kit "congelado" reparado)
+
+El kit de `TestingPlayer` tiene gate de una sola vez (¿ya tienes el
+`GenesisShard`?) — quien entró al mundo con una versión ANTERIOR jamás
+recibía las armas añadidas después: el kit quedaba "congelado" en la
+versión con la que se entregó (el mismo hoyo del VoidEyeStaff en v5.97, y
+esta vez LA MEDUSA habría vuelto a quedarse fuera para quien ya tenía el
+kit).
+
+**El fix**: además del kit base (gate GenesisShard intacto), las cuatro
+armas cósmicas en desarrollo — `BlackHoleStaff`, `SunStaff`, `VoidEyeStaff`
+y **`MedusaNebularStaff`** — se garantizan INDIVIDUALMENTE en cada entrada
+al mundo (`EnsureItem`: si no está en el inventario, vuelve). El invocador
+de la Medusa SIEMPRE está ahí desde el inicio, venga del guardado que venga.
+
+### C. Prueba del usuario
+
+Develop Mods → Build → entrar al mundo: el mod CARGA sin errores (client.log
+limpio) y el inventario trae el kit completo CON el Báculo de la Medusa
+Nebular → invocarla: la medusa nada a pulsos colgando del hombro, galaxia
+girando en el corazón, tentáculos ondeando con física propia, nematocistos
+de quemadura fría al picar.
+
+---
+
 ## Commit v5.97 — UNA SOLA explosión final + LA MEDUSA NEBULAR (invocador de minion)
 
 **Peticiones del usuario**: (1) "el sol y el agujero negro tienen dos, digamos
