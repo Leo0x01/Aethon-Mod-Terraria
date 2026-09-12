@@ -23,9 +23,12 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// destello cruzado + anillo + AoE.
     ///
     /// Especificaciones:
-    ///   - damage = 85 (DamageClass.Magic, escala con daño mágico)
-    ///   - mana = 14, useTime = 22, knockBack 4, autoReuse
+    ///   - damage = 100 (DamageClass.Magic, escala con daño mágico)
+    ///   - mana = 0 (v6.00 — TODAS las armas cósmicas de prueba son SIN
+    ///     MANA, petición del usuario), useTime = 22, knockBack 4,
+    ///     autoReuse
     ///   - dispara QuasarJetProjectile a 26 px/t (×3 updates ≈ relativista)
+    ///     — v6.00: ATRAVIESA 14 enemigos (antes 10) y vive más (más alcance)
     /// </summary>
     public class QuasarLance : ModItem
     {
@@ -33,7 +36,7 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override void SetDefaults()
         {
-            Item.damage = 85;
+            Item.damage = 100;  // v6.00 — mejora (antes 85)
             Item.DamageType = DamageClass.Magic;
             Item.width = 30;
             Item.height = 30;
@@ -42,7 +45,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.useStyle = ItemUseStyleID.Swing;
             Item.autoReuse = true;
             Item.noMelee = true;
-            Item.mana = 14;
+            Item.mana = 0;      // v6.00 — arma de prueba: SIN MANA
             Item.knockBack = 4f;
             Item.value = Item.buyPrice(0, 6, 0, 0);
             Item.rare = ItemRarityID.Quest;
@@ -66,7 +69,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             tooltips.Add(new TooltipLine(Mod, "QL_Desc",
                 "[c/D9EAFF:Dispara un CHORRO RELATIVISTA — el objeto más brillante del universo, plasma a casi la velocidad de la luz]"));
             tooltips.Add(new TooltipLine(Mod, "QL_Desc2",
-                "[c/C8B8FF:La lanza de luz ATRAVIESA hasta 10 enemigos, con nudos de shock pulsando hacia la punta y retorción helicoidal]"));
+                "[c/C8B8FF:La lanza de luz ATRAVIESA hasta 14 enemigos, con nudos de shock pulsando hacia la punta y retorción helicoidal]"));
             tooltips.Add(new TooltipLine(Mod, "QL_Desc3",
                 "[c/9FD9FF:Al disiparse: EL FLORECIMIENTO DEL QUÁSAR — destello cruzado y estallido de plasma]"));
         }

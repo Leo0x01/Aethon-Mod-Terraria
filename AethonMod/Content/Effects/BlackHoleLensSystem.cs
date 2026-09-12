@@ -24,16 +24,16 @@ namespace AethonMod.Content.Effects
     /// ONDA NOVA DE LENTE (StyleNova — la explosión única del sol) como
     /// fuente del pase A.
     ///
-    /// v5.96 — EL ANILLO DE EINSTEIN Y EL OJO DEL VACÍO: (1) la onda
-    /// StyleEinstein (el lente gravitacional anular que nace al FINAL de la
+    /// v5.96 — EL ANILLO DE EINSTEIN (v6.00 — y el OJO DEL VACÍO fue
+    /// ELIMINADO por petición del usuario: "borra el ojo, se ve feo"): (1)
+    /// la onda StyleEinstein (el lente gravitacional anular que ES la
     /// explosión del agujero negro, petición del usuario) se registra como
     /// fuente del pase A con radio que ABRAZA al anillo (0.85× el frente) y
     /// fuerza que decae más lento — curva el fondo mientras se expande.
-    /// (v5.97: el anillo ya no nace "al final" — ES la explosión del
-    /// agujero, con el daño completo.) (2) EL OJO DEL VACÍO
-    /// (VoidEyeProjectile, arma nueva de terror cósmico) se dibuja ENCIMA de
-    /// la lente (igual que el sol) y actúa como fuente del pase B: su
-    /// distorsión crece con la DILATACIÓN de la pupila.
+    /// (2) v6.00 — LA GALAXIA VIVIENTE (LivingGalaxyProjectile, el arma
+    /// nueva que sustituye al ojo) se dibuja ENCIMA de la lente (igual que
+    /// el sol) y actúa como fuente del pase B: su distorsión respira con
+    /// el giro del disco (una masa de cientos de miles de soles).
     ///
     /// v5.95 — DOS PASES DE DISTORSIÓN + EL SOL COMO FUENTE SUTIL: el shader
     /// solo acepta UNA fuerza global (distortionStrength), así que la LENTE
@@ -160,10 +160,10 @@ namespace AethonMod.Content.Effects
         private int _sunCount;
         /// <summary>Número de soles que actúan como FUENTE (gigante roja).</summary>
         private int _sunSourceCount;
-        // v5.96 — OJOS DEL VACÍO a dibujar encima de la lente (su PreDraw se
-        // salta el pase del mundo igual que el sol y el agujero)
-        private readonly int[] _eyeIndices = new int[MaxSources];
-        private int _eyeCount;
+        // v6.00 — GALAXIAS VIVIENTES a dibujar encima de la lente (su PreDraw
+        // se salta el pase del mundo igual que el sol y el agujero)
+        private readonly int[] _galaxyIndices = new int[MaxSources];
+        private int _galaxyCount;
 
         /// <summary>v5.97 — medusas nebulares dibujadas encima de la lente.</summary>
         private readonly int[] _jellyIndices = new int[MaxSources];
@@ -322,7 +322,7 @@ namespace AethonMod.Content.Effects
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
-            int eyeType = ModContent.ProjectileType<VoidEyeProjectile>();
+            int galaxyType = ModContent.ProjectileType<LivingGalaxyProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
             int cometType = ModContent.ProjectileType<StellarCometMinion>();
             int pulsarType = ModContent.ProjectileType<LivingPulsarMinion>();
@@ -338,7 +338,7 @@ namespace AethonMod.Content.Effects
             _waveCount = 0;
             _sunCount = 0;           // v5.95 — soles a dibujar encima de la lente
             _sunSourceCount = 0;     // v5.95 — soles como FUENTE (gigante roja)
-            _eyeCount = 0;           // v5.96 — ojos del vacío encima de la lente
+            _galaxyCount = 0;      // v6.00 — galaxias vivientes encima de la lente
             _jellyCount = 0;         // v5.97 — medusas nebulares encima de la lente
             _cometCount = 0;         // v5.99 — cometas estelares encima de la lente
             _pulsarCount = 0;        // v5.99 — púlsares vivos encima de la lente
@@ -448,29 +448,28 @@ namespace AethonMod.Content.Effects
                         _sunSourceCount++;
                     }
                 }
-                else if (p.type == eyeType)
+                else if (p.type == galaxyType)
                 {
-                    // v5.96 — EL OJO DEL VACÍO: como el sol, SIEMPRE se recoge
-                    // para dibujarlo ENCIMA de la lente (su PreDraw se salta el
-                    // pase del mundo); como FUENTE del pase B, su distorsión
-                    // CRECE con la DILATACIÓN de la pupila (el terror curva el
-                    // espacio alrededor del ojo) y se dispara en la fase final.
-                    if (_eyeCount >= MaxSources) continue;
+                    // v6.00 — LA GALAXIA VIVIENTE (sustituye al OJO DEL VACÍO,
+                    // eliminado por petición del usuario): SIEMPRE se recoge
+                    // para dibujarla ENCIMA de la lente (el disco espiral jamás
+                    // es deformado); como FUENTE del pase B su distorsión
+                    // RESPIRA con el giro del disco — un bulbo de cientos de
+                    // miles de soles girando: donde flota, el fondo se dobla.
+                    if (_galaxyCount >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
                     Vector2 uv = screenPos / screenSize;
                     if (uv.X < -0.6f || uv.X > 1.6f || uv.Y < -0.6f || uv.Y > 1.6f)
                         continue;
-                    _eyeIndices[_eyeCount++] = i;
+                    _galaxyIndices[_galaxyCount++] = i;
 
-                    float dil = VoidEyeProjectile.GetDilation(p);
-                    if (dil > 0.6f && _sunSourceCount < MaxSources)
+                    if (_sunSourceCount < MaxSources)
                     {
-                        float radius = VoidEyeProjectile.GetEyeVisualRadius(p) / screenSize.X * 1.35f;
+                        float radius = LivingGalaxyProjectile.GetGalaxyVisualRadius(p) / screenSize.X * 1.3f;
                         _sunPositions[_sunSourceCount] = uv;
                         _sunRadii[_sunSourceCount] = Math.Max(radius, 0.0001f);
-                        // Fuerza sutil que crece con la dilatación (tope 0.45,
-                        // apenas por encima del sol: el ojo es MÁS perturbador).
-                        _sunStrengths[_sunSourceCount] = MathHelper.Clamp((dil - 0.6f) * 0.45f, 0f, 0.45f);
+                        // Fuerza sutil que pulsa con el giro (tope 0.35).
+                        _sunStrengths[_sunSourceCount] = LivingGalaxyProjectile.GetGalaxyLensStrength(p);
                         _sunSourceCount++;
                     }
                 }
@@ -549,9 +548,9 @@ namespace AethonMod.Content.Effects
             }
 
             bool hasA = count > 0;             // pase A: agujeros + ondas
-            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos + medusas + cometas + púlsares
+            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + galaxias + medusas + cometas + púlsares
             bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0 ||
-                                _eyeCount > 0 || _jellyCount > 0 || _cometCount > 0 || _pulsarCount > 0;
+                                _galaxyCount > 0 || _jellyCount > 0 || _cometCount > 0 || _pulsarCount > 0;
 
             if (!hasA && !hasB && !(wasActive && anyDrawables))
             {
@@ -708,12 +707,12 @@ namespace AethonMod.Content.Effects
                 Main.spriteBatch.End();
             }
 
-            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95), los OJOS (v5.96) y
-            //     las MEDUSAS (v5.97) ===
+            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95), las GALAXIAS
+            //     (v6.00) y las MEDUSAS (v5.97) ===
             // La estrella se saltó el pase del mundo (LensActive): el sistema
             // la pinta encima de la distorsión — con su glow coronal y creciendo
-            // como gigante roja. El ojo del vacío igual: la estrella muerta y
-            // su ojo vivo jamás son deformados por la lente. La medusa nebular
+            // como gigante roja. La galaxia viviente igual: su disco espiral
+            // jamás es deformado por la lente. La medusa nebular
             // igual: su campana translúcida solo curva lo que hay DETRÁS.
             for (int i = 0; i < _sunCount; i++)
             {
@@ -721,11 +720,11 @@ namespace AethonMod.Content.Effects
                 if (sun != null && sun.active)
                     SunProjectile.DrawStarVisuals(sun, false);
             }
-            for (int i = 0; i < _eyeCount; i++)
+            for (int i = 0; i < _galaxyCount; i++)
             {
-                Projectile eye = Main.projectile[_eyeIndices[i]];
-                if (eye != null && eye.active)
-                    VoidEyeProjectile.DrawEyeVisuals(eye, false);
+                Projectile galaxy = Main.projectile[_galaxyIndices[i]];
+                if (galaxy != null && galaxy.active)
+                    LivingGalaxyProjectile.DrawGalaxyVisuals(galaxy, false);
             }
             for (int i = 0; i < _jellyCount; i++)
             {

@@ -36,12 +36,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// del pase B del BlackHoleLensSystem, fuerza 0.06→0.14 RESPIRANDO con
     /// el pulso — es un trozo de nebulosa con masa).
     ///
-    /// ATAQUE — LOS RAYOS NEBULARES (v5.99): al contraer junto a una
-    /// víctima (≤190 px) la medusa DESCARGA UN RAYO QUE CAE DEL CIELO
-    /// sobre el objetivo (NebulaLightning) con QUEMADURA DE HIELO
-    /// (Frostburn — la quemadura fría del vacío, firma que ningún otro arma
-    /// cósmica usa) + daño de contacto de la campana. Al desvanecer se
-    /// disuelve en polvo de estrellas.
+    /// ATAQUE — EL LÁTIGO ELÉCTRICO (v6.00): al contraer junto a una
+    /// víctima (≤190 px) la medusa DESCARGA UN RAYO QUE SALE DE ELLA MISMA
+    /// (NebulaLightning — petición del usuario: "el rayo debe salir de
+    /// medusa no del cielo, y debe tener mas brillo") con QUEMADURA DE
+    /// HIELO (Frostburn — la quemadura fría del vacío, firma que ningún
+    /// otro arma cósmica usa) + daño de contacto de la campana. Al
+    /// desvanecer se disuelve en polvo de estrellas.
     ///
     /// Ciclo de vida del sirviente: patrón CosmicOrb (buff NebulaJellyfishBuff
     /// sostenido por la propia medusa; muere sin él).
@@ -182,9 +183,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.velocity += toAnchor * strength;
                 }
 
-                // LOS RAYOS: la campana se contrae junto a la víctima →
-                // cae un rayo del cielo sobre ella (solo la máquina dueña,
-                // patrón del resto del arsenal).
+                // EL LÁTIGO: la campana se contrae junto a la víctima →
+                // sale el rayo DE LA MEDUSA hacia ella (solo la máquina
+                // dueña, patrón del resto del arsenal).
                 if (target != null && Projectile.owner == Main.myPlayer &&
                     Vector2.Distance(target.Center, Projectile.Center) < StingRange)
                 {
@@ -321,24 +322,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ================================================================
-        //  LOS RAYOS NEBULARES — descargas del cielo
+        //  EL LÁTIGO ELÉCTRICO — el rayo SALE DE LA MEDUSA (v6.00)
         // ================================================================
 
         private void FireLightningStrike(NPC target)
         {
-            // EL RAYO: cae del cielo sobre la víctima (v5.99 — antes eran
-            // agujas de luz voladoras; petición del usuario: "es mejor que
-            // el proyectil que usa la medusa sean rayos, los rayos que caen
-            // del cielo"). Nace 420 px ENCIMA del objetivo y cae vertical.
-            int boltDamage = Math.Max(1, (int)(Projectile.damage * 0.8f));
-            Vector2 spawn = new Vector2(target.Center.X, target.Center.Y - 420f);
-            int idx = Projectile.NewProjectile(
-                Projectile.GetSource_FromThis(), spawn, Vector2.Zero,
+            // v6.00 — Petición del usuario: "el rayo debe salir de medusa no
+            // del cielo, y debe tener mas brillo". Nace BAJO LA CAMPANA (la
+            // "boca" de la medusa) y vuela RECTO hacia la víctima como un
+            // látigo de plasma frío — el trazo dentado vive entre la campana
+            // y el objetivo (más daño: el rayo es EL ataque de la medusa).
+            int boltDamage = Math.Max(1, (int)(Projectile.damage * 1.0f));
+            Vector2 origin = Projectile.Center + new Vector2(0f,
+                GetBellVisualRadius(Projectile) * 0.45f);
+            Vector2 toTarget = target.Center - origin;
+            float dist = toTarget.Length();
+            if (dist < 24f) return; // encima: el contacto de campana hace el resto
+            toTarget /= dist;
+            Projectile.NewProjectile(
+                Projectile.GetSource_FromThis(), origin, toTarget * 14f,
                 ModContent.ProjectileType<NebulaLightning>(),
                 boltDamage, 1.5f, Projectile.owner,
-                target.Center.Y + 24f,             // ai[0]: profundidad del impacto
+                dist,                              // ai[0]: distancia al objetivo
                 Main.rand.Next(1, 999999));        // ai[1]: semilla del zigzag
-            // el trazo del rayo nace donde nació (localAI lo captura él solo)
 
             if (Main.netMode != NetmodeID.Server)
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12,

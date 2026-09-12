@@ -29,7 +29,9 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// Especificaciones:
     ///   - damage = 38 (DamageClass.Summon)
-    ///   - mana = 10, useTime = 36, knockBack 3, minionSlots = 1 (apilable)
+    ///   - mana = 0, useTime = 36, knockBack 3, minionSlots = 1 (apilable)
+    ///     (v6.00 — TODAS las armas cósmicas de prueba son SIN MANA,
+    ///     petición del usuario; daño subido 38→46 — mejora de armas nuevas)
     /// </summary>
     public class LivingCometStaff : ModItem
     {
@@ -37,7 +39,7 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override void SetDefaults()
         {
-            Item.damage = 38;
+            Item.damage = 46;   // v6.00 — mejora (antes 38)
             Item.DamageType = DamageClass.Summon;
             Item.width = 30;
             Item.height = 30;
@@ -46,7 +48,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.useStyle = ItemUseStyleID.Swing;
             Item.autoReuse = true;
             Item.noMelee = true;
-            Item.mana = 10;
+            Item.mana = 0;      // v6.00 — arma de prueba: SIN MANA
             Item.knockBack = 3f;
             Item.value = Item.buyPrice(0, 5, 0, 0);
             Item.rare = ItemRarityID.Quest;

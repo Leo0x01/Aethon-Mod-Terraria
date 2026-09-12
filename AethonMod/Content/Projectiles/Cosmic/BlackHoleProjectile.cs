@@ -221,6 +221,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
 
+            // === v6.00 — PERSIGUE LIGERAMENTE A LOS ENEMIGOS ===
+            // Petición del usuario: "tanto el sol como el agujero negro deben
+            // perseguir ligeramente a los enemigos". El agujero SE DESLIZA
+            // hacia la presa más cercana con una aceleración mínima y un tope
+            // de velocidad bajito (2.4 px/t): deriva amenazante, no caza al
+            // sprint — pero si huyes despacio, te alcanza.
+            NPC prey = FindNearestEnemy(650f);
+            if (prey != null)
+            {
+                Vector2 toPrey = prey.Center - Projectile.Center;
+                if (toPrey.LengthSquared() > 120f)
+                {
+                    toPrey.Normalize();
+                    Projectile.velocity += toPrey * 0.07f;
+                }
+                float spd = Projectile.velocity.Length();
+                if (spd > 2.4f)
+                    Projectile.velocity *= 2.4f / spd;
+            }
+
             // Rotación suave hacia velocity.X * 0.04
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
@@ -268,28 +288,74 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === v5.96 — AURA DE DAÑO QUE CRECE CON EL AGUJERO ===
-            // Petición del usuario: "todo el daño de ambos proyectiles deben
-            // ser daño de área y este debe extenderse por fuera del proyectil
-            // y crecer conforme el proyectil crece, se expande y explota".
-            // El área nace CONTENIDA (~0.75× el radio del campo) y crece con
-            // el ciclo de vida completo: a medida que el agujero envejece
-            // (lifeProgress 0→1) el área y el daño suben; en la secuencia de
-            // muerte la hinchaZón (+60% de escala) arrastra al campo con ella
-            // (ShieldRadius usa la escala pre-colapso capturada en localAI[1]);
-            // y la explosión final (onda cromática + anillo de Einstein) es el
-            // clímax del área. Cada 0.5 s, SimpleStrikeNPC (sin iframes).
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                VisualsTime > 0f && VisualsTime % 30f == 0f)
+            // === v6.00 — LA GRAVEDAD TAMBIÉN DOBLA LOS PROYECTILES ENEMIGOS ===
+            // Petición del usuario: "deben ser capaces de afectar los
+            // proyectiles con su gravedad". Las balas hostiles (escupitajos,
+            // esferas, llamas de jefe) caen hacia el horizonte en espiral — y
+            // al TOCARLO son ABSORBIDAS: materia devorada en chispas doradas.
+            // Es defensa gravitacional pura: el agujero SE COME las balas.
+            if (Main.netMode != NetmodeID.Server)
+            {
+                float projGravityRadius = gravityRadius * 0.9f;
+                foreach (Projectile pr in Main.ActiveProjectiles)
+                {
+                    if (pr == null || !pr.active || !pr.hostile || pr.friendly) continue;
+                    Vector2 toHorizon = Projectile.Center - pr.Center;
+                    float d = toHorizon.Length();
+                    if (d > projGravityRadius || d < 4f) continue;
+
+                    // ¿Cruzó el horizonte? → ABSORBIDA (materia devorada).
+                    if (d < ShieldRadius * 0.6f)
+                    {
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            pr.Kill();
+                        for (int i = 0; i < 5; i++)
+                        {
+                            Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.GoldFlame,
+                                (pr.Center - Projectile.Center) * -0.02f +
+                                new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
+                                200, new Color(255, 210, 120), 0.7f);
+                            d2.noGravity = true;
+                            d2.fadeIn = 0f;
+                        }
+                        continue;
+                    }
+
+                    float ps = (1f - d / projGravityRadius) * gravityStrength * 0.35f;
+                    if (toHorizon.LengthSquared() > 0.01f)
+                    {
+                        toHorizon.Normalize();
+                        pr.velocity += toHorizon * ps;
+                    }
+                }
+            }
+
+            // === v6.00 — AURA MÁS GRANDE + TICKS QUE ACELERAN CERCA DEL CENTRO ===
+            // Petición del usuario: "aumentar los ticks de daño del agujero
+            // negro y su área de daño; los ticks de daño deben aumentar a
+            // medida te acercas al centro". DOS cambios: (1) el área creció
+            // (~+55% en todo el ciclo: 1.15→1.9× el campo); (2) ya NO hay un
+            // pulso global cada 0.5 s — CADA ENEMIGO tiene su PROPIO intervalo
+            // según lo cerca que esté del horizonte: en el borde del aura ~24
+            // ticks (0.4 s), pegado al centro 6 ticks (10 golpes/s). El campo
+            // te MACHACA cuanto más te hundes.
+            if (Main.netMode != NetmodeID.MultiplayerClient && VisualsTime > 0f)
             {
                 float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
-                float auraRadius = ShieldRadius * (0.75f + 0.45f * lifeProgress);
+                float auraRadius = ShieldRadius * (1.15f + 0.75f * lifeProgress);
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * (0.35f + 0.30f * lifeProgress)));
+                int t = (int)VisualsTime;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
+
+                    // INTERVALO POR ENEMIGO: cerca del centro → más ticks/s.
+                    float prox = MathHelper.Clamp(dist / auraRadius, 0f, 1f);
+                    int interval = 6 + (int)(prox * 18f); // 6 (centro) → 24 (borde)
+                    if ((t + npc.whoAmI) % interval != 0) continue;
+
                     // Empuje suave hacia el centro (el campo los exprime hacia
                     // el horizonte) + daño del aura.
                     Vector2 toCenter = Projectile.Center - npc.Center;
@@ -305,6 +371,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === ILUMINACIÓN PULSANTE (naranja incandescente del disco) ===
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
             Lighting.AddLight(Projectile.Center, new Vector3(0.95f * pulse, 0.45f * pulse, 0.15f * pulse));
+        }
+
+        /// <summary>
+        /// v6.00 — El enemigo chaseable más cercano dentro de maxDist (para la
+        /// persecución LIGERA del agujero — petición del usuario).
+        /// </summary>
+        private NPC FindNearestEnemy(float maxDist)
+        {
+            NPC best = null;
+            float bestDist = maxDist * maxDist;
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!npc.CanBeChasedBy()) continue;
+                float d2 = (npc.Center - Projectile.Center).LengthSquared();
+                if (d2 < bestDist)
+                {
+                    bestDist = d2;
+                    best = npc;
+                }
+            }
+            return best;
         }
 
         /// <summary>

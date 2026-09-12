@@ -48,8 +48,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.height = 18;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Magic;
-            Projectile.penetrate = 10;          // ATRAVIESA al enemigo
-            Projectile.timeLeft = 90;
+            Projectile.penetrate = 14;          // ATRAVIESA al enemigo (v6.00: 10→14)
+            Projectile.timeLeft = 120;           // v6.00 — más alcance (antes 90)
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.aiStyle = -1;
@@ -112,12 +112,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // AoE final: el chorro se disipa en plasma
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                int aoeDamage = Math.Max(1, (int)(Projectile.damage * 0.55f));
+                int aoeDamage = Math.Max(1, (int)(Projectile.damage * 0.65f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
-                    if (dist > 130f) continue;
+                    if (dist > 170f) continue;   // v6.00 — florecimiento MÁS GRANDE (antes 130)
                     npc.SimpleStrikeNPC(aoeDamage, npc.direction, false, 2f, DamageClass.Magic);
                 }
             }

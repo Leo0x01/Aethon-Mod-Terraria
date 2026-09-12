@@ -1,5 +1,113 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.00 — SOL Y AGUJERO PULSAN MÁS FUERTE + EL LÁTIGO DE LA MEDUSA + ADIÓS OJO, LLEGA LA GALAXIA VIVIENTE
+
+**Peticiones del usuario**: (1) "creo que deberías aumentar los tick de
+daños del sol y el agujero negro, tambien aumentar el area de daño del
+agujero negro y del sol; en el caso del agujero negro los tick de daño
+deben aumentar a medida te acercas al centro"; (2) "tanto el sol como el
+agujero negro deben perseguir ligeramente a los enemigos y tambien deben
+ser capas de afectar los proyectiles con su gravedad"; (3) "en cuanto a
+la medusa el rayo debe salir de medusa no del cielo, y debe tener mas
+brillo"; (4) "ademas mejora las nuevas armas que creaste y borra el ojo,
+se ve feo, mejor crea un arma nueva con un proyectil cosmico, este debe
+ser una galaxia, investiga galaxias en internet, recuerda todas estas son
+armas de prueba no requieren mana".
+
+### A. EL AGUJERO NEGRO Y EL SOL — MÁS TICKS, MÁS ÁREA, PERSIGUEN Y DOBLAN BALAS
+
+- **AGUJERO NEGRO — TICKS QUE ACELERAN CERCA DEL CENTRO** (petición
+  explícita): adiós al pulso global cada 0.5 s — ahora CADA ENEMIGO tiene
+  su PROPIO intervalo según su distancia al horizonte: en el borde del
+  aura ~24 ticks (0.4 s), PEGADO AL CENTRO 6 ticks (10 golpes/s): el campo
+  te MACHACA cuanto más te hundes. El área además creció: 1.15→1.9× el
+  campo (antes 0.75→1.2×)
+- **EL SOL**: pulso de aura 15→10 ticks (+50% de golpes/s) y área
+  1.75→2.30× el radio visual (la gigante roja la arrastra: ~150→310 px);
+  daño del aura 40→45%
+- **PERSIGUEN LIGERAMENTE A LOS ENEMIGOS** (ambos): el agujero SE DESLIZA
+  hacia la presa más cercana (accel 0.07/t, tope 2.4 px/t — deriva
+  amenazante) y el sol igual (0.09/t, tope 3 px/t)
+- **LA GRAVEDAD AHORA DOBLA PROYECTILES ENEMIGOS** (ambos): las balas
+  hostiles caen en espiral hacia el agujero y AL TOCAR EL HORIZONTE SON
+  ABSORBIDAS (chispas doradas — defensa gravitacional pura: el agujero SE
+  COME las balas); el sol las curva débilmente y si tocan el plasma SE
+  EVAPORAN en polvo de fuego
+
+### B. EL LÁTIGO ELÉCTRICO DE LA MEDUSA (v6.00)
+
+Petición: "el rayo debe salir de medusa no del cielo, y debe tener mas
+brillo". NebulaLightning REESCRITO: el rayo NACE BAJO LA CAMPANA (la
+"boca") y VUELA RECTO hacia la víctima — un LÁTIGO de plasma frío que se
+desenrosca de la medusa. MÁS BRILLO: TRES capas aditivas (halo aqua
+ancho + funda azul-blanco + NÚCLEO blanco puro a 255), luz real
+proyectada cada paso (1.3/1.55/1.75), micro-parpadeo vivo, ramas cortas
+laterales, frente de 4 puntas y DESCARGA en el origen (la campana
+chispea al soltarlo); al clavarse: trueno + estallado de hielo y el trazo
+LIGERA chisporroteando mientras se funde. Daño del rayo 0.8→1.0× (es EL
+ataque de la medusa).
+
+### C. EL OJO DEL VACÍO — ELIMINADO
+
+Petición: "borra el ojo, se ve feo". Borrado COMPLETO: VoidEyeStaff +
+VoidEyeProjectile (.cs y .png), las 3 texturas del ojo (EyeSclera/
+EyeIris/EyeLid), los generadores PIL, las referencias del LensSystem
+(_eyeIndices/pase B/dibujado encima), TestingPlayer y la localización.
+El binario verifica 0 ocurrencias de VoidEye.
+
+### D. LA GALAXIA VIVIENTE (arma nueva — el proyectil ES una galaxia)
+
+Petición: "crea un arma nueva con un proyectil cosmico, este debe ser una
+galaxia, investiga galaxias en internet". Investigación web (M51
+Whirlpool, M101 Pinwheel, M74, M100 — NASA/Caltech/COSMOS) → galaxia
+espiral DE DISEÑO PERFECTO: bulbo AMARILLO de estrellas viejas, brazos
+AZULES de estrellas jóvenes, NUDOS ROSAS HII ("beads-on-a-string"),
+CARRILES DE POLVO oscuros al borde interno de los brazos. SpiralGalaxy.png
+512 px PIL ×4 supersampling con 2 iteraciones de crítica VLM (7.5→8.5/10:
+polvo como polilíneas oscuras que CORTAN el azul, HII vívidos "como
+letreros de neón", brazos asimétricos, bulbo elíptico moteado con
+filamentos) + icono 30×30 de alto contraste (remolino en S grueso).
+
+- **LivingGalaxyStaff** (Magic, daño 110, mana 0, useTime 30) →
+  **LivingGalaxyProjectile** (~9 s): nace con pop elástico, VUELA y SE
+  ESTACIONA donde la lanzaste; el disco GIRA (0.02 rad/t) y CABECEA EN 3D
+  (escala Y 0.55→1.0 — la moneda espacial de canto a cara) + eco tenue
+  rotado (imagen secundaria); ARRASTRA enemigos (gravedad 0.4, radio
+  300), AURA estelar cada 10 ticks (45%), SEMBRADO estelar cada 24 ticks
+  (los 2 brazos sueltan GalaxyStarProjectile tangencialmente — rociador
+  cósmico), ACECHA (el ancla deriva hacia la presa 0.7 px/t)
+- **LA EXPLOSIÓN ESTELLAR** (OnKill): AoE 90% + 14 semillas estelares
+  radiales + destello + sonidos (nada de ondas: el sol tiene SU nova y el
+  agujero SU anillo — la galaxia estalla en SEMILLAS)
+- **GalaxyStarProjectile**: estrellas de 4 puntas girando con halo y eco,
+  cada una con el COLOR de su origen (azul de brazo / oro de bulbo /
+  rosa de HII)
+- **Lente**: pase B respirando con el giro (0.07→0.12 — masa de cien mil
+  millones de soles), dibujada ENCIMA de la lente (protocolo del arsenal)
+
+### E. MEJORA DE LAS ARMAS NUEVAS + TODAS SIN MANA
+
+Petición: "mejora las nuevas armas que creaste, recuerda todas estas son
+armas de prueba no requieren mana".
+
+- **Cometa Estelar**: daño 38→46, nova 92→130 px al 75% (antes 60%),
+  picado 16.5→19 px/t, cooldown 70→60
+- **Púlsar Vivo**: daño 30→38, haces 340→420 px, daño del haz 55→65%
+- **Lanza del Quásar**: daño 85→100, ATRAVIESA 10→14 enemigos, vida
+  90→120 (más alcance), florecimiento 130→170 px al 65%
+- **MANA = 0 en TODAS las armas de prueba cósmicas**: MedusaNebularStaff,
+  LivingCometStaff, LivingPulsarStaff, QuasarLance (SunStaff y
+  BlackHoleStaff ya lo eran) — y la nueva LivingGalaxyStaff nace sin mana
+
+### F. Verificación
+
+Compilación contra tModLoader real v2026.07.3.0 (/tmp/verify): 0 errores,
+0 warnings. Auditoría del binario: LivingGalaxyProjectile/
+GalaxyStarProjectile/LivingGalaxyStaff/DrawGalaxyVisuals/
+GetGalaxyLensStrength/FindNearestEnemy presentes; 0 ocurrencias de
+VoidEye. Auditoría de texturas: las 86 clases del arsenal con su asset ✓
+(85 de v5.99 + 3 nuevas − 2 del ojo).
+
 ## Commit v5.99 — EL OJO REDISEÑADO (Gargantua) + RAYOS para la Medusa + EL COMETA ESTELAR + EL PÚLSAR VIVO + LA LANZA DEL QUÁSAR
 
 **Peticiones del usuario**: (1) "el ojo no se ve nada bien, intenta

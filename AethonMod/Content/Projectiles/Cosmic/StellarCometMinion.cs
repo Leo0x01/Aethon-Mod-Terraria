@@ -49,12 +49,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private const float OrbitB = 54f;       // semi-eje menor (periapsis)
         private const float OrbitOmega = 0.016f; // velocidad angular (rad/t)
 
-        // === EL PICADO ===
-        private const float DiveAccel = 0.46f;
-        private const float DiveMaxSpeed = 16.5f;
+        // === EL PICADO (v6.00 — mejora de armas nuevas: picado MÁS VELOZ
+        // 16.5→19 y nova MÁS GRANDE 92→130 px y MÁS FUERTE 60→75%) ===
+        private const float DiveAccel = 0.55f;
+        private const float DiveMaxSpeed = 19f;
         private const float DiveTriggerRange = 520f;  // dispara si la víctima está a < esto
-        private const float NovaRadius = 92f;         // radio de la nova de impacto
-        private const int DiveCooldown = 70;
+        private const float NovaRadius = 130f;        // radio de la nova de impacto
+        private const int DiveCooldown = 60;
 
         // --- Estado visual local (solo cliente) ---
         private Vector2[] _trail;
@@ -230,7 +231,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // AoE: materia estelar caliente (SimpleStrikeNPC, patrón del sol)
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * 0.6f));
+                int novaDamage = Math.Max(1, (int)(Projectile.damage * 0.75f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;

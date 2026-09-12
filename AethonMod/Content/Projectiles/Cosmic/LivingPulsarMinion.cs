@@ -46,7 +46,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         internal const float SpinOmega = 0.015f;
 
         // === LOS HACES ===
-        private const float BeamLength = 340f;
+        private const float BeamLength = 420f;   // v6.00 — mejora: 340→420 px
         private const float BeamHalfWidth = 16f;   // grosor en la base
         private const int BeamHitCooldown = 20;
 
@@ -157,7 +157,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode != NetmodeID.MultiplayerClient &&
                 age % 5f < 1f)   // cada 5 ticks: 12 golpes/s girando
             {
-                int beamDamage = Math.Max(1, (int)(Projectile.damage * 0.55f));
+                int beamDamage = Math.Max(1, (int)(Projectile.damage * 0.65f));
                 float mainAngle = spin;
                 float antiAngle = spin + MathHelper.Pi;
                 foreach (NPC npc in Main.ActiveNPCs)

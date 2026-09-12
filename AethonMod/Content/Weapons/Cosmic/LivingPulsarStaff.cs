@@ -25,7 +25,9 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// Especificaciones:
     ///   - damage = 30 (DamageClass.Summon; los haces golpean al 55% a 12/s)
-    ///   - mana = 10, useTime = 36, minionSlots = 1 (apilable)
+    ///   - mana = 0, useTime = 36, minionSlots = 1 (apilable)
+    ///     (v6.00 — TODAS las armas cósmicas de prueba son SIN MANA,
+    ///     petición del usuario; daño subido 30→38 — mejora de armas nuevas)
     /// </summary>
     public class LivingPulsarStaff : ModItem
     {
@@ -33,7 +35,7 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override void SetDefaults()
         {
-            Item.damage = 30;
+            Item.damage = 38;   // v6.00 — mejora (antes 30)
             Item.DamageType = DamageClass.Summon;
             Item.width = 30;
             Item.height = 30;
@@ -42,7 +44,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.useStyle = ItemUseStyleID.Swing;
             Item.autoReuse = true;
             Item.noMelee = true;
-            Item.mana = 10;
+            Item.mana = 0;      // v6.00 — arma de prueba: SIN MANA
             Item.knockBack = 1.5f;
             Item.value = Item.buyPrice(0, 5, 0, 0);
             Item.rare = ItemRarityID.Quest;

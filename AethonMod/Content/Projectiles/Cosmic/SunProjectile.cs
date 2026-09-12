@@ -187,6 +187,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return p.width * p.scale * 0.75f;
         }
 
+        /// <summary>
+        /// v6.00 — El enemigo chaseable más cercano dentro de maxDist (para la
+        /// persecución LIGERA del sol — petición del usuario).
+        /// </summary>
+        private NPC FindNearestEnemy(float maxDist)
+        {
+            NPC best = null;
+            float bestDist = maxDist * maxDist;
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!npc.CanBeChasedBy()) continue;
+                float d2 = (npc.Center - Projectile.Center).LengthSquared();
+                if (d2 < bestDist)
+                {
+                    bestDist = d2;
+                    best = npc;
+                }
+            }
+            return best;
+        }
+
         /// <summary>v5.94 — Mezcla un color hacia el ROJO de la gigante (fase final).</summary>
         private Color ToRedGiant(Color c)
         {
@@ -268,22 +289,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.ai[2] = Projectile.damage;
             }
 
-            // === v5.96 — AURA DE DAÑO DE ÁREA CRECIENTE ===
-            // Petición del usuario: "todo el daño de ambos proyectiles deben
-            // ser daño de área y este debe extenderse por fuera del proyectil
-            // y crecer conforme el proyectil crece, se expande y explota".
-            // El sol quema a todo enemigo dentro de un aura que nace pegada al
-            // cuerpo (1.35× su radio visual) y crece con el CICLO DE VIDA
-            // (hasta 1.65×) — y como starR usa width×scale, la gigante roja
-            // (×1.85) ARRASTRA AL AURA con ella: 110px → 205px de radio. El
-            // daño del aura escala con el ramp ×1.75 de la gigante (ai[2]).
-            // Cada 0.25 s (15 ticks), SimpleStrikeNPC + quemadura OnFire.
+            // === v6.00 — AURA MÁS GRANDE + MÁS TICKS DE DAÑO ===
+            // Petición del usuario: "aumentar los tick de daños del sol y
+            // aumentar el área de daño del sol". El pulso pasa de 15 a 10
+            // ticks (+50% de golpes/s) y el área crece: 1.75→2.30× el radio
+            // visual (la gigante roja ×1.85 la ARRASTRA: ~150→310 px), daño
+            // del aura 45%.
             if (Main.netMode != NetmodeID.MultiplayerClient &&
-                VisualsTime > 30f && VisualsTime % 15f == 0f && Projectile.scale > 0.25f)
+                VisualsTime > 30f && VisualsTime % 10f == 0f && Projectile.scale > 0.25f)
             {
                 float lifeT = MathHelper.Clamp(VisualsTime / SunLifetime, 0f, 1f);
-                float auraRadius = GetStarVisualRadius(Projectile) * (1.35f + 0.30f * lifeT);
-                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.4f));
+                float auraRadius = GetStarVisualRadius(Projectile) * (1.75f + 0.55f * lifeT);
+                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
@@ -297,6 +314,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === MOVIMIENTO: deriva lenta y frenado ===
             Projectile.velocity *= 0.97f;
+
+            // === v6.00 — PERSIGUE LIGERAMENTE A LOS ENEMIGOS ===
+            // Petición del usuario: "tanto el sol como el agujero negro deben
+            // perseguir ligeramente a los enemigos". La estrella SE DESLIZA
+            // hacia la presa más cercana (tope 3 px/t): gravita hacia donde
+            // está la materia — sin perseguir al sprint.
+            NPC prey = FindNearestEnemy(560f);
+            if (prey != null)
+            {
+                Vector2 toPrey = prey.Center - Projectile.Center;
+                if (toPrey.LengthSquared() > 120f)
+                {
+                    toPrey.Normalize();
+                    Projectile.velocity += toPrey * 0.09f;
+                }
+                float spd = Projectile.velocity.Length();
+                if (spd > 3f)
+                    Projectile.velocity *= 3f / spd;
+            }
             Projectile.rotation += 0.01f;
 
             // === SUPERNOVA SINCRONIZADA (aparece en el segundo 7) ===
@@ -366,6 +402,47 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     toCenter.Normalize();
                     npc.velocity += toCenter * strength;
+                }
+            }
+
+            // === v6.00 — LA GRAVEDAD DEL SOL TAMBIÉN DOBLA PROYECTILES ENEMIGOS ===
+            // Petición del usuario: "deben ser capaces de afectar los
+            // proyectiles con su gravedad". La gravedad estelar es DÉBIL (el
+            // agujero es 10× más fuerte) pero las balas hostiles se curvan
+            // hacia la estrella — y si tocan el plasma, SE EVAPORAN en polvo
+            // de fuego (chispas naranjas).
+            if (Main.netMode != NetmodeID.Server)
+            {
+                float starR = GetStarVisualRadius(Projectile);
+                foreach (Projectile pr in Main.ActiveProjectiles)
+                {
+                    if (pr == null || !pr.active || !pr.hostile || pr.friendly) continue;
+                    Vector2 toStar = Projectile.Center - pr.Center;
+                    float d = toStar.Length();
+                    if (d > gravityRadius || d < 4f) continue;
+
+                    // ¿Tocó el plasma? → EVAPORADA (chispas de fuego).
+                    if (d < starR * 0.7f)
+                    {
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            pr.Kill();
+                        for (int i = 0; i < 5; i++)
+                        {
+                            Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.Torch,
+                                new Vector2(Main.rand.NextFloat(-1.8f, 1.8f), Main.rand.NextFloat(-2.4f, 0.6f)),
+                                200, new Color(255, 180, 80), 0.7f);
+                            d2.noGravity = true;
+                            d2.fadeIn = 0f;
+                        }
+                        continue;
+                    }
+
+                    float ps = (1f - d / gravityRadius) * sunGravity * 0.3f;
+                    if (toStar.LengthSquared() > 0.01f)
+                    {
+                        toStar.Normalize();
+                        pr.velocity += toStar * ps;
+                    }
                 }
             }
 

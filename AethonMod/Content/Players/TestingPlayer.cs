@@ -62,8 +62,6 @@ namespace AethonMod.Content.Players
                 // v5.80+: armas cósmicas basadas en shaders de lensing
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
-                // v5.96: EL OJO DEL VACÍO (arma de terror cósmico)
-                GiveItem(ModContent.ItemType<Weapons.Cosmic.VoidEyeStaff>(), 1);
                 // v5.97: LA MEDUSA NEBULAR (invocador de minion cósmico)
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>(), 1);
             }
@@ -71,9 +69,11 @@ namespace AethonMod.Content.Players
             // === GARANTÍA INDIVIDUAL (v5.98) — las armas cósmicas en
             // desarrollo SIEMPRE están en el inventario, venga de la
             // versión que venga el guardado del jugador ===
+            // (v6.00: EL OJO DEL VACÍO ELIMINADO — sustituido por LA GALAXIA
+            // VIVIENTE; quien aún tenga el ojo guardado lo conserva, pero ya
+            // no se garantiza — el arma nueva sí.)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.VoidEyeStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>());
             // v5.99: EL COMETA ESTELAR (invocador — inspirado en la imagen
             // de referencia del usuario), EL PÚLSAR VIVO (invocador con
@@ -81,6 +81,8 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.QuasarLance>());
+            // v6.00: LA GALAXIA VIVIENTE (el proyectil ES una galaxia espiral)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingGalaxyStaff>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

@@ -37,7 +37,9 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// Especificaciones:
     ///   - damage = 32 (DamageClass.Summon — escala con daño de invocación)
-    ///   - mana = 10, useTime = 36, knockBack 2, autoReuse, noMelee
+    ///   - mana = 0, useTime = 36, knockBack 2, autoReuse, noMelee
+    ///     (v6.00 — TODAS las armas cósmicas de prueba son SIN MANA,
+    ///     petición del usuario)
     ///   - minionSlots = 1 (invoca varias medusas con más espacio)
     /// </summary>
     public class MedusaNebularStaff : ModItem
@@ -55,7 +57,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.useStyle = ItemUseStyleID.Swing;
             Item.autoReuse = true;
             Item.noMelee = true;
-            Item.mana = 10;
+            Item.mana = 0;   // v6.00 — arma de prueba: SIN MANA
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(0, 5, 0, 0);
             Item.rare = ItemRarityID.Quest;
