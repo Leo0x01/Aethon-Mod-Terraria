@@ -28,13 +28,34 @@
         "Items.VoidEyeStaff.Tooltip": "La estrella muerta con un ojo vivo.\nSu pupila es un agujero negro. Cuando grita, la realidad se desgarra.",
 
         "Items.MedusaNebularStaff.DisplayName": "Báculo de la Medusa Nebular",
-        "Items.MedusaNebularStaff.Tooltip": "Invoca LA MEDUSA NEBULAR.\nUna campana translúcida con una galaxia espiral dentro, nadando a pulsos de gravedad.\nSus picaduras dejan la quemadura fría del vacío.",
+        "Items.MedusaNebularStaff.Tooltip": "Invoca LA MEDUSA NEBULAR.\nUna campana translúcida con una galaxia espiral dentro, nadando a pulsos de gravedad.\nSu campana invoca RAYOS QUE CAEN DEL CIELO, dejando la quemadura fría del vacío.",
 
         "Projectiles.NebulaJellyfishMinion.DisplayName": "Medusa Nebular",
-        "Projectiles.JellyfishStingBolt.DisplayName": "Nematocisto",
+        "Projectiles.NebulaLightning.DisplayName": "Rayo Nebular",
 
         "Buffs.NebulaJellyfishBuff.DisplayName": "Medusa Nebular",
         "Buffs.NebulaJellyfishBuff.Description": "Una medusa de nebulosa deriva a tu lado a pulsos de gravedad",
+
+        "Items.LivingCometStaff.DisplayName": "Báculo del Cometa Estelar",
+        "Items.LivingCometStaff.Tooltip": "Invoca EL COMETA ESTELAR.\nUn cometa vivo con corona de 8 puntas estelares, orbitándote en una elipse excéntrica.\nCAE EN PICADO sobre tus enemigos y estalla en una pequeña nova.",
+
+        "Projectiles.StellarCometMinion.DisplayName": "Cometa Estelar",
+
+        "Buffs.StellarCometBuff.DisplayName": "Cometa Estelar",
+        "Buffs.StellarCometBuff.Description": "Un cometa vivo orbita a tu lado y cae en picado sobre tus enemigos",
+
+        "Items.LivingPulsarStaff.DisplayName": "Báculo del Púlsar Vivo",
+        "Items.LivingPulsarStaff.Tooltip": "Invoca EL PÚLSAR VIVO.\nUna estrella de neutrones girando a tu lado, barriendo el campo con dos haces de faro de radiación.\nTodo lo que cruzan queda ELECTRIFICADO.",
+
+        "Projectiles.LivingPulsarMinion.DisplayName": "Púlsar Vivo",
+
+        "Buffs.LivingPulsarBuff.DisplayName": "Púlsar Vivo",
+        "Buffs.LivingPulsarBuff.Description": "Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos",
+
+        "Items.QuasarLance.DisplayName": "Lanza del Quásar",
+        "Items.QuasarLance.Tooltip": "Dispara un CHORRO RELATIVISTA — el objeto más brillante del universo.\nUna lanza de luz que atraviesa hasta 10 enemigos, con nudos de shock pulsando.\nTermina en el FLORECIMIENTO DEL QUÁSAR.",
+
+        "Projectiles.QuasarJetProjectile.DisplayName": "Chorro Relativista",
 
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",

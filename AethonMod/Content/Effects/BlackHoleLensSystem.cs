@@ -171,6 +171,18 @@ namespace AethonMod.Content.Effects
         /// <summary>Número de medusas recogidas este frame.</summary>
         private int _jellyCount;
 
+        /// <summary>v5.99 — COMETAS ESTELARES dibujados encima de la lente.</summary>
+        private readonly int[] _cometIndices = new int[MaxSources];
+
+        /// <summary>Número de cometas recogidos este frame.</summary>
+        private int _cometCount;
+
+        /// <summary>v5.99 — PÚLSARES VIVOS dibujados encima de la lente.</summary>
+        private readonly int[] _pulsarIndices = new int[MaxSources];
+
+        /// <summary>Número de púlsares recogidos este frame.</summary>
+        private int _pulsarCount;
+
         public override void Load()
         {
             // Hook MonoMod: punto 36 = tras EndCapture del mundo, antes de la UI.
@@ -306,12 +318,14 @@ namespace AethonMod.Content.Effects
 
             // === 1. Recopilar fuentes: agujeros + ondas cromáticas/de lente/
             //     anillo de Einstein + soles + OJOS DEL VACÍO (v5.96) + MEDUSAS
-            //     NEBULARES (v5.97) ===
+            //     NEBULARES (v5.97) + COMETAS/PÚLSARES (v5.99) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int eyeType = ModContent.ProjectileType<VoidEyeProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
+            int cometType = ModContent.ProjectileType<StellarCometMinion>();
+            int pulsarType = ModContent.ProjectileType<LivingPulsarMinion>();
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
             if (screenSize.X <= 0f || screenSize.Y <= 0f)
             {
@@ -326,6 +340,8 @@ namespace AethonMod.Content.Effects
             _sunSourceCount = 0;     // v5.95 — soles como FUENTE (gigante roja)
             _eyeCount = 0;           // v5.96 — ojos del vacío encima de la lente
             _jellyCount = 0;         // v5.97 — medusas nebulares encima de la lente
+            _cometCount = 0;         // v5.99 — cometas estelares encima de la lente
+            _pulsarCount = 0;        // v5.99 — púlsares vivos encima de la lente
 
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
@@ -483,12 +499,59 @@ namespace AethonMod.Content.Effects
                         _sunSourceCount++;
                     }
                 }
+                else if (p.type == cometType)
+                {
+                    // v5.99 — EL COMETA ESTELAR: siempre recogido para dibujarlo
+                    // ENCIMA de la lente (corona y núcleo jamás deformados); como
+                    // FUENTE del pase B su fuerza CRECE CON LA VELOCIDAD (0.05
+                    // en órbita → hasta 0.17 en pleno picado: velocidad =
+                    // momento = curvatura — donde cae el cometa, el fondo se
+                    // dobla un poco más).
+                    if (_cometCount >= MaxSources) continue;
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.35f || uv.X > 1.35f || uv.Y < -0.35f || uv.Y > 1.35f)
+                        continue;
+                    _cometIndices[_cometCount++] = i;
+
+                    if (_sunSourceCount < MaxSources)
+                    {
+                        float radius = StellarCometMinion.GetCometVisualRadius(p) / screenSize.X * 2.6f;
+                        _sunPositions[_sunSourceCount] = uv;
+                        _sunRadii[_sunSourceCount] = Math.Max(radius, 0.0001f);
+                        _sunStrengths[_sunSourceCount] = StellarCometMinion.GetCometLensStrength(p);
+                        _sunSourceCount++;
+                    }
+                }
+                else if (p.type == pulsarType)
+                {
+                    // v5.99 — EL PÚLSAR VIVO: siempre recogido para dibujarlo
+                    // ENCIMA de la lente (núcleo y haces jamás deformados); como
+                    // FUENTE del pase B PULSA con el giro (0.05→0.12): una masa
+                    // del tamaño de una ciudad girando a decenas de vueltas
+                    // por segundo — el fondo a su alrededor palpita curvado.
+                    if (_pulsarCount >= MaxSources) continue;
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.35f || uv.X > 1.35f || uv.Y < -0.35f || uv.Y > 1.35f)
+                        continue;
+                    _pulsarIndices[_pulsarCount++] = i;
+
+                    if (_sunSourceCount < MaxSources)
+                    {
+                        float radius = LivingPulsarMinion.GetPulsarVisualRadius(p) / screenSize.X * 2.2f;
+                        _sunPositions[_sunSourceCount] = uv;
+                        _sunRadii[_sunSourceCount] = Math.Max(radius, 0.0001f);
+                        _sunStrengths[_sunSourceCount] = LivingPulsarMinion.GetPulsarLensStrength(p);
+                        _sunSourceCount++;
+                    }
+                }
             }
 
             bool hasA = count > 0;             // pase A: agujeros + ondas
-            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos + medusas
+            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos + medusas + cometas + púlsares
             bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0 ||
-                                _eyeCount > 0 || _jellyCount > 0;
+                                _eyeCount > 0 || _jellyCount > 0 || _cometCount > 0 || _pulsarCount > 0;
 
             if (!hasA && !hasB && !(wasActive && anyDrawables))
             {
@@ -669,6 +732,18 @@ namespace AethonMod.Content.Effects
                 Projectile jelly = Main.projectile[_jellyIndices[i]];
                 if (jelly != null && jelly.active)
                     NebulaJellyfishMinion.DrawJellyfishVisuals(jelly, false);
+            }
+            for (int i = 0; i < _cometCount; i++)
+            {
+                Projectile comet = Main.projectile[_cometIndices[i]];
+                if (comet != null && comet.active)
+                    StellarCometMinion.DrawCometVisuals(comet, false);
+            }
+            for (int i = 0; i < _pulsarCount; i++)
+            {
+                Projectile pulsar = Main.projectile[_pulsarIndices[i]];
+                if (pulsar != null && pulsar.active)
+                    LivingPulsarMinion.DrawPulsarVisuals(pulsar, false);
             }
 
             // === 7. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===

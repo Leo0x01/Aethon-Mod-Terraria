@@ -36,8 +36,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// del pase B del BlackHoleLensSystem, fuerza 0.06→0.14 RESPIRANDO con
     /// el pulso — es un trozo de nebulosa con masa).
     ///
-    /// ATAQUE — LOS NEMATOCISTOS: al contraer junto a una víctima (≤190 px)
-    /// dispara 3 AGUJAS DE LUZ (JellyfishStingBolt) con QUEMADURA DE HIELO
+    /// ATAQUE — LOS RAYOS NEBULARES (v5.99): al contraer junto a una
+    /// víctima (≤190 px) la medusa DESCARGA UN RAYO QUE CAE DEL CIELO
+    /// sobre el objetivo (NebulaLightning) con QUEMADURA DE HIELO
     /// (Frostburn — la quemadura fría del vacío, firma que ningún otro arma
     /// cósmica usa) + daño de contacto de la campana. Al desvanecer se
     /// disuelve en polvo de estrellas.
@@ -181,13 +182,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.velocity += toAnchor * strength;
                 }
 
-                // NEMATOCISTOS: la campana se contrae junto a la víctima →
-                // dispara sus agujas de luz (solo la máquina dueña, patrón del
-                // resto del arsenal).
+                // LOS RAYOS: la campana se contrae junto a la víctima →
+                // cae un rayo del cielo sobre ella (solo la máquina dueña,
+                // patrón del resto del arsenal).
                 if (target != null && Projectile.owner == Main.myPlayer &&
                     Vector2.Distance(target.Center, Projectile.Center) < StingRange)
                 {
-                    FireNematocysts(target);
+                    FireLightningStrike(target);
                 }
             }
 
@@ -320,25 +321,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ================================================================
-        //  NEMATOCISTOS — las agujas de luz
+        //  LOS RAYOS NEBULARES — descargas del cielo
         // ================================================================
 
-        private void FireNematocysts(NPC target)
+        private void FireLightningStrike(NPC target)
         {
-            Vector2 baseDir = (target.Center - Projectile.Center).SafeNormalize(-Vector2.UnitY);
-            float bellR = GetBellVisualRadius(Projectile);
-            int boltDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
-            for (int i = -1; i <= 1; i++)
-            {
-                Vector2 dir = baseDir.RotatedBy(i * 0.16f);
-                Vector2 spawn = Projectile.Center + dir * bellR * 0.9f;
-                Projectile.NewProjectile(
-                    Projectile.GetSource_FromThis(), spawn, dir * 12.5f,
-                    ModContent.ProjectileType<JellyfishStingBolt>(),
-                    boltDamage, 1.5f, Projectile.owner);
-            }
+            // EL RAYO: cae del cielo sobre la víctima (v5.99 — antes eran
+            // agujas de luz voladoras; petición del usuario: "es mejor que
+            // el proyectil que usa la medusa sean rayos, los rayos que caen
+            // del cielo"). Nace 420 px ENCIMA del objetivo y cae vertical.
+            int boltDamage = Math.Max(1, (int)(Projectile.damage * 0.8f));
+            Vector2 spawn = new Vector2(target.Center.X, target.Center.Y - 420f);
+            int idx = Projectile.NewProjectile(
+                Projectile.GetSource_FromThis(), spawn, Vector2.Zero,
+                ModContent.ProjectileType<NebulaLightning>(),
+                boltDamage, 1.5f, Projectile.owner,
+                target.Center.Y + 24f,             // ai[0]: profundidad del impacto
+                Main.rand.Next(1, 999999));        // ai[1]: semilla del zigzag
+            // el trazo del rayo nace donde nació (localAI lo captura él solo)
+
             if (Main.netMode != NetmodeID.Server)
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12, Projectile.Center);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12,
+                    Projectile.Center);
         }
 
         // ================================================================

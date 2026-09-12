@@ -75,6 +75,12 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.VoidEyeStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>());
+            // v5.99: EL COMETA ESTELAR (invocador — inspirado en la imagen
+            // de referencia del usuario), EL PÚLSAR VIVO (invocador con
+            // haces de faro) y LA LANZA DEL QUÁSAR (chorro relativista)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.QuasarLance>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

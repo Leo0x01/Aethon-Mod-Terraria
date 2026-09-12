@@ -30,7 +30,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// BlackHoleLensSystem: donde nada, el fondo se dobla un poco).
     ///
     /// ATQUE — los NEMATOCISTOS: cuando la campana se contrae cerca de una
-    /// víctima, dispara 3 agujas de luz (JellyfishStingBolt) que aplican
+    /// víctima, DESCARGA UN RAYO QUE CAE DEL CIELO (NebulaLightning) con
     /// QUEMADURA DE HIELO (Frostburn — la quemadura fría del vacío) + el
     /// contacto de la campana daña. Al desvanecer: se disuelve en polvo de
     /// estrellas.
@@ -87,7 +87,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             tooltips.Add(new TooltipLine(Mod, "MN_Desc2",
                 "[c/C88BE8:Sus tentáculos de cuentas estelares ondean con vida propia, y donde nada el fondo se curva sutilmente a su paso]"));
             tooltips.Add(new TooltipLine(Mod, "MN_Desc3",
-                "[c/FF9AD4:Cuando su campana se contrae junto a una víctima, dispara NEMATOCISTOS — agujas de luz con QUEMADURA DE HIELO del vacío]"));
+                "[c/FF9AD4:Cuando su campana se contrae junto a una víctima, cae un RAYO NEBULAR DEL CIELO sobre ella — con QUEMADURA DE HIELO del vacío]"));
             tooltips.Add(new TooltipLine(Mod, "MN_Desc4",
                 "[c/17D6AA:Invoca varias medusas si tienes espacio de sirvientes]"));
         }

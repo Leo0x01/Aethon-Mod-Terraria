@@ -31,10 +31,31 @@
         "Items.MedusaNebularStaff.Tooltip": "Summons THE NEBULA JELLYFISH.\nA translucent bell holding a spiral galaxy, swimming on gravity pulses.\nIts stings leave the cold burn of the vacuum.",
 
         "Projectiles.NebulaJellyfishMinion.DisplayName": "Nebula Jellyfish",
-        "Projectiles.JellyfishStingBolt.DisplayName": "Nematocyst",
+        "Projectiles.NebulaLightning.DisplayName": "Nebular Lightning",
 
         "Buffs.NebulaJellyfishBuff.DisplayName": "Nebula Jellyfish",
         "Buffs.NebulaJellyfishBuff.Description": "A nebula jellyfish drifts at your side on gravity pulses",
+
+        "Items.LivingCometStaff.DisplayName": "Living Comet Staff",
+        "Items.LivingCometStaff.Tooltip": "Summons THE STELLAR COMET.\nA living comet with a crown of 8 star-points, orbiting you on an eccentric ellipse.\nIt DIVE-BOMBS enemies and bursts into a small nova.",
+
+        "Projectiles.StellarCometMinion.DisplayName": "Stellar Comet",
+
+        "Buffs.StellarCometBuff.DisplayName": "Stellar Comet",
+        "Buffs.StellarCometBuff.Description": "A living comet orbits you and dive-bombs your enemies",
+
+        "Items.LivingPulsarStaff.DisplayName": "Living Pulsar Staff",
+        "Items.LivingPulsarStaff.Tooltip": "Summons THE LIVING PULSAR.\nA neutron star spinning at your side, sweeping the battlefield with two lighthouse beams of radiation.\nEverything they cross is ELECTRIFIED.",
+
+        "Projectiles.LivingPulsarMinion.DisplayName": "Living Pulsar",
+
+        "Buffs.LivingPulsarBuff.DisplayName": "Living Pulsar",
+        "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",
+
+        "Items.QuasarLance.DisplayName": "Quasar Lance",
+        "Items.QuasarLance.Tooltip": "Fires a RELATIVISTIC JET — the brightest object in the universe.\nA lance of light piercing through up to 10 enemies, with pulsing shock knots.\nEnds in the QUASAR BLOOM.",
+
+        "Projectiles.QuasarJetProjectile.DisplayName": "Relativistic Jet",
 
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",

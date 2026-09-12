@@ -1,5 +1,120 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.99 — EL OJO REDISEÑADO (Gargantua) + RAYOS para la Medusa + EL COMETA ESTELAR + EL PÚLSAR VIVO + LA LANZA DEL QUÁSAR
+
+**Peticiones del usuario**: (1) "el ojo no se ve nada bien, intenta
+mejorarlo para que se vea bien, investiga en internet para conseguir ideas
+de assets o como hacerlo"; (2) "la medusa es interesante, pero sus
+proyectiles son aburridos, es mejor que el proyectil que usa la medusa sean
+rayos, ya sabes, los rayos que caen del cielo"; (3) "usando la segunda
+imagen como referencia, crea un minion cosmico con efectos, de la misma
+forma a como creaste la medusa, pero cuidado ya existe un minion con el
+nombre minion cosmico que usa exactamente la misma imagen, no lo toques";
+(4) "luego crea otro minion cosmico, y crea una nueva arma con un proyectil
+super cosmico"; (5) "no olvides arreglar y mejorar el ojo".
+
+### A. EL OJO DEL VACÍO — rediseño TOTAL del render (investigado en internet)
+
+Investigación web (técnicas de ojos realistas + el diseño de Gargantua de
+Interstellar: anillo de fotones + disco de acreción que se curva sobre y
+bajo la esfera) + análisis VLM de la captura del usuario: la esclerótica
+era un "plato de cerámica plano con garabatos", la pupila "una PUERTA DE
+MADERA" (el RealBlackHoleShader mini a escala pequeña era papilla
+ilegible), los párpados "brackets pesados sueltos".
+
+- **Texturas v2 (PIL ×4 supersampling, 2 iteraciones con crítica VLM
+  8/10 y 9/10)**: EyeSclera — sombreado ESFÉRICO (limbo oscuro + luz
+  arriba-izq), venas AUDACES con núcleo oscuro + halo (rojo carmesí y
+  azul-violeta, ramificación orgánica que se desvanecen antes del iris),
+  moteado biológico, subsurface cálido abajo, ESPECULAR EN MEDIA LUNA
+  (córnea); EyeIris — generación PER-PIXEL con campos de ruido
+  (turbulencia orgánica): bandas orbitales onduladas + fibras radiales
+  finas + criptas caóticas + grano estelar + anillo limbal violeta +
+  borde interno ARDIENTE (nada de "arcos estampados"); EyeLid — placas de
+  armadura de carbón con rim light cálido, pliegues y grietas; icono del
+  arma rehecho.
+- **La PUPILA GARGANTUA** (DrawPupilGargantua, sustituye al shader mini):
+  esfera negra con borde suave + halo de absorción + ANILLO DE FOTONES
+  fino blanco-caliente (micro-pulso) + banda de acreción horizontal
+  CRUZANDO por delante + BANDA VERTICAL lenteada detrás (los arcos sobre
+  y bajo la esfera — la imagen lenteada del disco) + chispa de beaming
+  relativista. Legible a CUALQUIER escala.
+- **El dibujado**: vignetta de cavidad suave (el ojo ASIENTA en la
+  estrella — adiós anillo duro suelto), FALLOFF iris→pupila (la pupila se
+  HUNDE), CATCHLIGHT unificado (media luna húmeda sobre iris+pupila),
+  RIM GLOW aditivo en los párpados (la luz del ojo baña la armadura) y
+  halo que RESPIRA lento. El _bhShader y su carga ELIMINADOS.
+
+### B. LA MEDUSA — RAYOS QUE CAEN DEL CIELO (adiós agujas aburridas)
+
+`JellyfishStingBolt` (agujas de luz) ELIMINADO → **`NebulaLightning`**:
+cuando la campana se contrae junto a una víctima, la medusa DESCARGA un
+rayo cósmico que CAE DEL CIELO sobre ella — nace 420 px arriba, cae
+vertical a ~90 px/t, con ZIGZAG dentado REGENERADO cada pocos ticks
+(vive), ramas laterales cortas, frente brillante con destello de 4 puntas,
+chispas de hielo al caer y TRUENO + destello de impacto al clavarse.
+QUEMADURA DE HIELO (Frostburn) intacta (la firma de la medusa). Zigzag
+determinista por hash (semilla, tick, segmento) → mismo rayo en todas las
+máquinas. Tooltips y localización actualizados (Rayo Nebular).
+
+### C. EL COMETA ESTELAR (LivingCometStaff → StellarCometMinion)
+
+Petición: crear un minion cósmico con la imagen de referencia (la
+criatura-estrella de 8 puntas) — SIN tocar el CosmicOrbMinion existente
+(que usa ESA imagen): esta es una criatura ORIGINAL hermana. Un cometa
+VIVO: núcleo de plasma blanco-oro con granulación (CometHead.png) +
+**CORONA DE 8 PUNTAS lanceoladas cian→violeta GIRANDO** (CometCrown.png —
+el homenaje a la referencia) + **COLA de polvo estelar** (historial de 18
+posiciones, cálida cerca → fría lejos) + **chispas orbitando** (el campo
+de partículas de la referencia). **NO persigue: ORBITA al jugador en una
+elipse excéntrica** (apoapsis/periapsis, fase por minionPos) y para
+atacar **CAE EN PICADO** (aceleración 0.46/t hasta 16.5) — al rozar a la
+víctima **ESTALLA EN UNA PEQUEÑA NOVA** (AoE 92 px al 60% + OnFire —
+materia estelar CALIENTE, la firma opuesta a la medusa) y rebota de
+vuelta a la órbita. Lente del pase B que CRECE CON LA VELOCIDAD
+(velocidad = momento = curvatura, 0.05→0.17). Buff StellarCometBuff
+(patrón del arsenal) + iconos PIL.
+
+### D. EL PÚLSAR VIVO (LivingPulsarStaff → LivingPulsarMinion)
+
+El segundo minion: una **estrella de neutrones VIVA** (PulsarCore.png:
+núcleo blanco-azul extremo + arcos magnéticos nítidos + polos brillantes
++ bandas de giro) que **GIRA barriendo el campo con DOS HACES DE FARO
+opuestos** (340 px, rotación vuelta cada ~6.9 s) — el ataque más raro del
+arsenal: el daño NO es contacto ni proyectil, son LOS RAYOS GIRANDO
+(comprobación angular por tick, tolerancia que se abre con la distancia,
+55% del daño cada 5 ticks + **ELECTRIFIED** — radiación de sincrotrón).
+Deriva en un lissajous perezoso sobre el hombro; con objetivo se coloca
+EN ALTO a media distancia jugador-víctima para RAÑARLA en cada giro.
+Haces dibujados como rayos cónicos blancos-cian con pulso viajero +
+rastro de remolino + chispas tangenciales. Lente del pase B PULSANDO con
+el giro (0.05→0.12). Buff LivingPulsarBuff + iconos PIL.
+
+### E. LA LANZA DEL QUÁSAR (QuasarLance → QuasarJetProjectile)
+
+El arma nueva con "un proyectil super cosmico": dispara un **CHORRO
+RELATIVISTA** — el objeto más brillante del universo (los chorros de los
+quásares superan el brillo de galaxias enteras). Una lanza de luz de 132
+px velocísima (26 px/t ×3 updates) que **ATRAVIESA hasta 10 enemigos**,
+con **5 NUDOS DE SHOCK** (los knots de Herbig-Haro) pulsando hacia la
+punta, retorción HELICOIDAL sutil, 3 capas (filo violeta → halo cian →
+núcleo blanco) y estela de polvo estelar. Al disiparse: **EL
+FLORECIMIENTO DEL QUÁSAR** — AoE 130 px al 55% + destello + temblor.
+DamageClass.Magic, damage 85, mana 14.
+
+### F. Infraestructura
+
+BlackHoleLensSystem: _cometIndices/_pulsarIndices recogidos SIEMPRE y
+dibujados ENCIMA de la lente (corona, núcleo y haces jamás deformados) +
+fuentes del pase B (cometa: velocidad; púlsar: pulso del giro).
+TestingPlayer: las 3 armas nuevas garantizadas individualmente
+(EnsureItem). Localización en-US/es-ES completa (armas, minions, buffs,
+proyectil del quásar). Auditoría de texturas: las 85 clases del arsenal
+con su asset ✓. Compilación contra tModLoader v2026.07.3.0 real:
+**0 errores, 0 warnings**.
+
+---
+
 ## Commit v5.98 — FIX: el mod NO CARGABA (texturas de la Medusa ausentes) + la Medusa SIEMPRE en el inventario
 
 **Peticiones del usuario**: (1) "mira estos errores" (capturas del juego:

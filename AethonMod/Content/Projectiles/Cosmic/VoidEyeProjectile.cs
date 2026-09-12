@@ -86,8 +86,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // Shaders estáticos (compartidos entre instancias, como el sol)
         private static Ref<Effect> _sunShader;
         private static bool _sunShaderFailed;
-        private static Ref<Effect> _bhShader;
-        private static bool _bhShaderFailed;
 
         private float Age => Projectile.ai[0];
 
@@ -589,20 +587,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// entre el pase del mundo (PreDraw, endActiveBatch=true) y el pase
         /// posterior a la lente (BlackHoleLensSystem, endActiveBatch=false).
         ///
+        /// v5.99 — REDISEÑO TOTAL del render (petición: "el ojo no se ve
+        /// nada bien, intenta mejorarlo"): texturas v2 (esclerótica esférica
+        /// con venas audaces + iris turbulento per-pixel + párpados-armadura)
+        /// y la PUPILA estilo GARGANTUA (Interstellar): esfera negra + anillo
+        /// de fotones fino + banda de acreción cruzando DELANTE + arcos
+        /// lenteados curvándose SOBRE y BAJO la esfera — nada de shader
+        /// mini (a esta escala era papilla ilegible, "puerta de madera").
+        ///
         /// CAPAS (de atrás a delante):
-        ///   0. backglow carmesí profundo (SoftGlow aditivo).
-        ///   1. anillo tenue del AURA de daño (marca el área del pavor).
-        ///   2. la ESTRELLA MUERTA: SunShader con paleta invertida (carbón
-        ///      + vetas carmesí) sobre DendriticNoiseZoomedOut.
-        ///   3. la ESCLERÓTICA (EyeSclera): marfil enfermo con venas.
-        ///   4. el IRIS (EyeIris): ámbar, ROTA lentamente, MIRA al objetivo
-        ///      (offset del iris hacia la víctima) y se tiñe de SANGRE en
-        ///      el terror.
-        ///   5. la PUPILA: RealBlackHoleShader (micro agujero negro con su
-        ///      disco de acreción carmesí) — se DILATA con el terror.
-        ///   6. el RECEPTÁCULO: anillo oscuro que asienta el ojo en la estrella.
-        ///   7. los PÁRPADOS (EyeLid superior + inferior en flip): carne
-        ///      muerta que se abre, parpadea y se retrae en el terror.
+        ///   0. backglow carmesí + aro del aura de daño (aditivo).
+        ///   1. la ESTRELLA MUERTA (SunShader invertido, carbón + vetas).
+        ///   2. VIGNETTA del receptáculo (asienta el ojo en la estrella —
+        ///      antes un anillo duro y "suelto"; ahora una cavidad suave).
+        ///   3. la ESCLERÓTICA v2 (esfera de marfil, venas, especular).
+        ///   4. el IRIS v2 (ámbar turbulento en órbita) rotando + MIRANDO.
+        ///   5. FALLOFF oscuro iris→pupila (la pupila se HUNDE en el iris).
+        ///   6. la PUPILA GARGANTUA (ver DrawPupilGargantua).
+        ///   7. CATCHLIGHT unificado (media luna húmeda sobre todo el ojo).
+        ///   8. los PÁRPADOS-armadura (se abren, parpadean, se retraen).
         /// </summary>
         internal static void DrawEyeVisuals(Projectile p, bool endActiveBatch)
         {
@@ -615,16 +618,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         AssetRequestMode.ImmediateLoad).Value);
                 }
                 catch { _sunShaderFailed = true; }
-            }
-            if (!_bhShaderFailed && _bhShader == null)
-            {
-                try
-                {
-                    _bhShader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/RealBlackHoleShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch { _bhShaderFailed = true; }
             }
 
             try
@@ -647,32 +640,36 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     "AethonMod/Content/Effects/Procedural/EyeLid").Value;
                 Texture2D ringTex = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/Ring").Value;
+                Texture2D fireRing = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Procedural/FireRing").Value;
 
-                // === 0+1. BACKGLOW CARMESÍ + ARO DEL AURA (aditivo) ===
+                // === 0. BACKGLOW CARMESÍ + ARO DEL AURA (aditivo) ===
                 if (endActiveBatch)
                     Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                float haloScale = eyeR * (2.4f + 0.9f * terror) / (softGlow.Width * 0.5f);
+                // el halo RESPIRA (lento, sutil — vida, no parpadeo)
+                float breathe = 0.5f + 0.5f * (float)Math.Sin(age * 0.021f);
+                float haloScale = eyeR * (2.2f + 0.9f * terror + 0.18f * breathe) /
+                    (softGlow.Width * 0.5f);
                 Main.spriteBatch.Draw(softGlow, drawPos, null,
-                    new Color(90, 10, 26, 46) * p.scale, 0f,
+                    new Color(96, 12, 28, 40 + (int)(14f * breathe)) * p.scale, 0f,
                     softGlow.Size() * 0.5f, haloScale, SpriteEffects.None, 0f);
 
                 if (age > AwakeEnd)
                 {
-                    // aro del aura de daño (muestra el ÁREA del pavor)
                     float dilNorm = MathHelper.Clamp((dil - 0.55f) / 0.8f, 0f, 1f);
                     float auraR = terror > 0f ? 380f : 140f + 160f * dilNorm;
                     float auraScale = auraR / (ringTex.Width * 0.5f * 0.92f);
                     Main.spriteBatch.Draw(ringTex, drawPos, null,
-                        new Color(130, 16, 34, 26), 0f,
+                        new Color(130, 16, 34, 22), 0f,
                         ringTex.Size() * 0.5f, auraScale, SpriteEffects.None, 0f);
                 }
                 Main.spriteBatch.End();
 
-                // === 2. LA ESTRELLA MUERTA (SunShader invertido) ===
+                // === 1. LA ESTRELLA MUERTA (SunShader invertido) ===
                 if (_sunShader != null && _sunShader.Value != null)
                 {
                     Texture2D dendritic = ModContent.Request<Texture2D>(
@@ -684,7 +681,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     Effect shader = _sunShader.Value;
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f + 0.07f * terror);
-                    // paleta INVERTIDA del sol: carbón oscuro + vetas carmesí
                     shader.Parameters["mainColor"].SetValue(
                         Color.Lerp(new Color(52, 34, 38), new Color(70, 26, 34), terror).ToVector3());
                     shader.Parameters["darkerColor"].SetValue(
@@ -708,50 +704,70 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.spriteBatch.End();
                 }
 
-                // === 3. LA ESCLERÓTICA (marfil enfermo con venas) ===
+                // === 2. VIGNETTA DEL RECEPTÁCULO (cavidad suave — el ojo
+                //     ASIENTA en la estrella, sin anillos duros sueltos) ===
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
+                float cavityScale = scleraR * 1.38f / (softGlow.Width * 0.5f);
+                Main.spriteBatch.Draw(softGlow, drawPos, null,
+                    new Color(16, 5, 8, 165), 0f, softGlow.Size() * 0.5f,
+                    cavityScale, SpriteEffects.None, 0f);
+
+                // === 3. LA ESCLERÓTICA v2 (esfera de marfil, venas audaces) ===
                 float scleraScale = scleraR / (scleraTex.Width * 0.5f);
-                // en el terror la esclerótica se INYECTA de sangre
-                Color scleraTint = Color.Lerp(Color.White, new Color(255, 150, 150), terror * 0.55f);
+                Color scleraTint = Color.Lerp(Color.White, new Color(255, 148, 148), terror * 0.5f);
                 Main.spriteBatch.Draw(scleraTex, drawPos, null, scleraTint, 0f,
                     scleraTex.Size() * 0.5f, scleraScale, SpriteEffects.None, 0f);
 
-                // === 4. EL IRIS (ámbar rotante, MIRA al objetivo) ===
-                float irisR = scleraR * 0.62f;
-                Vector2 gaze = GetGazeDirection(p); // hacia la víctima (o al jugador)
-                Vector2 irisOffset = gaze * scleraR * 0.16f;
-                // el iris ROTA lentamente (los iris no deberían rotar)
+                // === 4. EL IRIS v2 (ámbar turbulento, MIRA al objetivo) ===
+                float irisR = scleraR * 0.58f;
+                Vector2 gaze = GetGazeDirection(p);
+                Vector2 irisOffset = gaze * scleraR * 0.18f;
                 float irisRot = age * 0.008f;
-                // ámbar → SANGRE en el terror
                 Color irisTint = Color.Lerp(Color.White, new Color(255, 105, 95), terror);
                 float irisScale = irisR / (irisTex.Width * 0.5f);
                 Main.spriteBatch.Draw(irisTex, drawPos + irisOffset, null, irisTint, irisRot,
                     irisTex.Size() * 0.5f, irisScale, SpriteEffects.None, 0f);
+
+                // === 5. FALLOFF iris→pupila (la pupila se HUNDE: gradiente
+                //     oscuro entre el borde ardiente del iris y el vacío) ===
+                float pupilR = irisR * 0.5f * dil;
+                float fallScale = (pupilR * 2.05f) / (softGlow.Width * 0.5f);
+                Main.spriteBatch.Draw(softGlow, drawPos + irisOffset, null,
+                    new Color(20, 8, 14, 150), 0f, softGlow.Size() * 0.5f,
+                    fallScale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
 
-                // === 5. LA PUPILA (micro agujero negro con acreción carmesí) ===
-                float pupilR = irisR * 0.45f * dil;
-                DrawPupil(p, drawPos + irisOffset, pupilR, softGlow);
+                // === 6. LA PUPILA GARGANTUA (aditivo + alpha) ===
+                DrawPupilGargantua(drawPos + irisOffset, pupilR, softGlow, ringTex, fireRing,
+                    terror, age);
 
-                // === 6. RECEPTÁCULO + 7. PÁRPADOS ===
+                // === 7. CATCHLIGHT unificado + 8. PÁRPADOS ===
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                // media luna húmeda arriba-izquierda SOBRE iris+pupila (el
+                // brillo unificado del ojo mojado — coordina toda la luz)
+                float clOff = scleraR * 0.44f;
+                float clScale = scleraR * 0.66f / (softGlow.Width * 0.5f);
+                Main.spriteBatch.Draw(softGlow,
+                    drawPos + new Vector2(-clOff, -clOff) + irisOffset * 0.4f, null,
+                    new Color(255, 255, 248, 64), -0.6f,
+                    new Vector2(softGlow.Width * 0.5f, softGlow.Height * 0.72f),
+                    new Vector2(clScale, clScale * 0.42f), SpriteEffects.None, 0f);
+                Main.spriteBatch.End();
+
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // anillo oscuro que asienta el ojo en la superficie de la estrella
-                float socketScale = scleraR * 1.06f / (ringTex.Width * 0.5f * 0.92f);
-                Main.spriteBatch.Draw(ringTex, drawPos, null,
-                    new Color(22, 6, 9, 120), 0f,
-                    ringTex.Size() * 0.5f, socketScale, SpriteEffects.None, 0f);
-
-                // párpados: se deslizan con `open` (1.28×scleraR de recorrido)
+                // párpados-armadura: se deslizan con `open`
                 float lidSlide = scleraR * 1.28f * Math.Min(open, 1f);
                 float closeOverlap = scleraR * 0.35f * (1f - Math.Min(open, 1f));
-                // retraídos en el terror: open>1 tira MÁS arriba/abajo
                 float terrorPull = Math.Max(0f, open - 1f) * scleraR * 0.9f;
-                float lidScale = scleraR * 2.7f / lidTex.Width;
+                float lidScale = scleraR * 2.45f / lidTex.Width;
 
                 Vector2 upperPos = drawPos + new Vector2(0f, -lidSlide - terrorPull + closeOverlap);
                 Main.spriteBatch.Draw(lidTex, upperPos, null, Color.White, 0f,
@@ -759,12 +775,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 lowerPos = drawPos + new Vector2(0f, lidSlide + terrorPull - closeOverlap);
                 Main.spriteBatch.Draw(lidTex, lowerPos, null, Color.White, 0f,
                     lidTex.Size() * 0.5f, lidScale, SpriteEffects.FlipVertically, 0f);
+                Main.spriteBatch.End();
 
+                // === 8b. RIM GLOW de los párpados (aditivo): la luz del ojo
+                //     BAÑA el filo de la armadura — ya no son placas planas ===
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                byte lidGlowA = (byte)(int)(52 + 60 * terror);
+                Color lidGlow = new Color(255, 120, 70, lidGlowA);
+                Main.spriteBatch.Draw(lidTex, upperPos, null, lidGlow, 0f,
+                    lidTex.Size() * 0.5f, lidScale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(lidTex, lowerPos, null, lidGlow, 0f,
+                    lidTex.Size() * 0.5f, lidScale, SpriteEffects.FlipVertically, 0f);
                 Main.spriteBatch.End();
             }
             catch
             {
-                // cierre defensivo solo si una excepción cortó un Begin a medias
                 try { Main.spriteBatch.End(); } catch { }
             }
         }
@@ -801,60 +828,98 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// LA PUPILA: un micro agujero negro (RealBlackHoleShader — el mismo
-        /// lensing de 75 pasos del agujero negro del arsenal, en miniatura)
-        /// con su disco de acreción CARMESÍ. Se DILATA con el terror: la
-        /// pupila del horror no se encoge, se TRAGA la luz.
+        /// LA PUPILA GARGANTUA (v5.99): un agujero negro legible a CUALQUIER
+        /// escala — el look de Interstellar dibujado con sprites:
+        ///   1. BANDA VERTICAL lenteada DETRÁS: el disco de acreción curvado
+        ///      por la gravedad aparece como ARCOS sobre y bajo la esfera
+        ///      (la imagen lenteada del disco que hay detrás).
+        ///   2. ESFERA NEGRA: el horizonte de sucesos (disco negro puro con
+        ///      borde suave, no un cuadrado).
+        ///   3. ANILLO DE FOTONES: aro fino blanco-caliente ABRAZANDO la
+        ///      esfera (la luz atrapada orbitando) — con un micro-pulso.
+        ///   4. BANDA HORIZONTAL DELANTE: el disco de acreción CRUZANDO por
+        ///      delante de la esfera (oro-carmesí, aditivo).
+        /// En el terror TODO se aviva y enrojece. Se DILATA con el horror:
+        /// la pupila del terror no se encoge, se TRAGA la luz.
         /// Requiere el batch del mundo CERRADO (lo abre y cierra él mismo).
         /// </summary>
-        private static void DrawPupil(Projectile p, Vector2 pupilPos, float pupilR,
-            Texture2D softGlow)
+        private static void DrawPupilGargantua(Vector2 pupilPos, float pupilR,
+            Texture2D softGlow, Texture2D ringTex, Texture2D fireRing,
+            float terror, float age)
         {
-            if (_bhShader == null || _bhShader.Value == null || pupilR < 3f)
+            if (pupilR < 2.5f)
                 return;
             try
             {
-                Effect shader = _bhShader.Value;
-                // canvas con margen para el disco de acreción (como el agujero
-                // grande: zoom constante + canvas que escala con la pupila)
-                float canvasPx = pupilR * 3.4f;
-                float zoomBase = 1f / (0.15f * 3.4f); // horizonte = pupilR exacto
+                // tonos: oro-carmesí en calma → ARDIENTE en el terror
+                Color diskCol = Color.Lerp(new Color(232, 150, 70), new Color(255, 92, 60), terror);
+                Color photonCol = Color.Lerp(new Color(255, 244, 208), new Color(255, 214, 170), terror);
 
-                shader.Parameters["blackHoleRadius"].SetValue(0.3f);
-                shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
-                shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
-                shader.Parameters["accretionDiskColor"].SetValue(new Color(210, 60, 52).ToVector3());
-                shader.Parameters["cameraAngle"].SetValue(0.32f);
-                shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(1f, 0f, 0.1f));
-                shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, 0.33f, 1f));
-                shader.Parameters["zoom"].SetValue(Vector2.One * zoomBase);
-                shader.Parameters["accretionDiskRadius"].SetValue(0.25f);
-                shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly * 0.8f);
-
-                Texture2D fireNoise = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/FireNoiseB").Value;
-                Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
-                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-
-                Texture2D pixel = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/InvisiblePixel").Value;
-
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                    SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                // === 1. BANDA VERTICAL DETRÁS (los ARCOS lenteados) ===
+                // FireRing estirado VERTICALMENTE: lo que quede por encima
+                // y por debajo de la esfera negra son los arcos de Gargantua.
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
-                shader.CurrentTechnique.Passes[0].Apply();
-                Main.spriteBatch.Draw(pixel, pupilPos, null, Color.White, 0f,
-                    pixel.Size() * 0.5f, canvasPx, SpriteEffects.None, 0f);
+                Vector2 frOrigin = fireRing.Size() * 0.5f;
+                float arcW = pupilR * 2.1f / fireRing.Width;          // ancho ceñido
+                float arcH = (pupilR * 3.6f) / fireRing.Height;       // alto generoso
+                byte arcA = (byte)(int)(120 + 90 * terror);
+                Main.spriteBatch.Draw(fireRing, pupilPos, null,
+                    new Color(diskCol.R, diskCol.G, diskCol.B, arcA), MathHelper.PiOver2,
+                    frOrigin, new Vector2(arcW, arcH), SpriteEffects.None, 0f);
+
+                // === 4-primera-mitad. BANDA HORIZONTAL DELANTE (la mitad
+                //     trasera del disco, apagada, para densidad) ===
+                float bandW = (pupilR * 3.4f) / fireRing.Width;
+                float bandH = (pupilR * 1.15f) / fireRing.Height;
+                Main.spriteBatch.Draw(fireRing, pupilPos, null,
+                    new Color(diskCol.R, diskCol.G, diskCol.B, (byte)(int)(70 + 70 * terror)), 0f,
+                    frOrigin, new Vector2(bandW, bandH), SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
 
-                // refuerzo del horizonte de sucesos (disco negro, como el grande)
+                // === 2. LA ESFERA NEGRA (horizonte de sucesos) ===
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
-                float horizonScale = (pupilR * 2.15f) / softGlow.Width;
+                // núcleo duro + falloff del borde (esfera SUAVE, no recorte)
+                float coreScale = (pupilR * 2.02f) / softGlow.Width;
                 Main.spriteBatch.Draw(softGlow, pupilPos, null,
-                    new Color(0, 0, 0, 232), 0f, softGlow.Size() * 0.5f,
-                    horizonScale, SpriteEffects.None, 0f);
+                    new Color(4, 1, 3, 250), 0f, softGlow.Size() * 0.5f,
+                    coreScale, SpriteEffects.None, 0f);
+                // halo de absorción JUSTO fuera del horizonte (la luz se
+                // atenúa al caer — un anillo oscuro fino alrededor)
+                float absorbScale = (pupilR * 2.6f) / softGlow.Width;
+                Main.spriteBatch.Draw(softGlow, pupilPos, null,
+                    new Color(8, 2, 6, 120), 0f, softGlow.Size() * 0.5f,
+                    absorbScale, SpriteEffects.None, 0f);
+                Main.spriteBatch.End();
+
+                // === 3+4-final. ANILLO DE FOTONES + BANDA FRONTAL (aditivo) ===
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                // anillo de fotones: fino, blanco-caliente, MICRO-pulso lento
+                float phPulse = 0.92f + 0.08f * (float)Math.Sin(age * 0.13f);
+                float phScale = (pupilR * 1.16f * phPulse) / (ringTex.Width * 0.5f * 0.95f);
+                Main.spriteBatch.Draw(ringTex, pupilPos, null,
+                    new Color(photonCol.R, photonCol.G, photonCol.B, 235), 0f,
+                    ringTex.Size() * 0.5f, phScale, SpriteEffects.None, 0f);
+
+                // la banda FRONTAL del disco cruzando la esfera (encima del
+                // negro: el disco de acreción pasa POR DELANTE del horizonte)
+                Main.spriteBatch.Draw(fireRing, pupilPos, null,
+                    new Color(diskCol.R, diskCol.G, diskCol.B, (byte)(int)(150 + 80 * terror)), 0f,
+                    frOrigin, new Vector2(bandW, bandH * 0.72f), SpriteEffects.None, 0f);
+
+                // chispa del punto más caliente (donde el disco roza el
+                // anillo de fotones — el "beaming" relativista)
+                float sparkScale = (pupilR * 1.5f) / (softGlow.Width * 0.5f);
+                Main.spriteBatch.Draw(softGlow,
+                    pupilPos + new Vector2(pupilR * 0.55f, -pupilR * 0.28f), null,
+                    new Color(255, 236, 190, (byte)(int)(60 + 60 * terror)), 0f,
+                    softGlow.Size() * 0.5f, sparkScale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
             }
             catch

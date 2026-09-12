@@ -794,10 +794,62 @@ Commits desde v5.28 hasta v5.98 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.98
-- **Mensaje**: "fix v5.98: el mod NO CARGABA — faltaban las texturas de clase de la Medusa (MissingResourceException: NebulaJellyfishMinion + JellyfishStingBolt → el mod se desactivaba entero; placeholders 1×1 transparentes al patrón de VoidEye/CosmicShockwave + auditoría de las 77 clases del arsenal) + la MEDUSA SIEMPRE en el inventario desde el inicio (kit 'congelado' reparado: las 4 armas cósmicas se garantizan individualmente en cada entrada al mundo, venga del guardado que venga)"
+- **Versión**: v5.99
+- **Mensaje**: "feat v5.99: EL OJO REDISEÑADO de raíz (investigación web + VLM: esclerótica esférica con venas audaces, iris turbulento per-pixel y la PUPILA GARGANTUA de Interstellar — esfera negra + anillo de fotones + banda de acreción delante + arcos lenteados encima y debajo; adiós shader-mini 'puerta de madera') + la MEDUSA ahora dispara RAYOS QUE CAEN DEL CIELO (NebulaLightning: zigzag dentado regenerado, trueno e impacto con Frostburn) + EL COMETA ESTELAR (invocador: corona de 8 puntas girando, órbita elíptica excéntrica, CAE EN PICADO y estalla en nova + OnFire) + EL PÚLSAR VIVO (invocador: estrella de neutrones girando con DOS HACES DE FARO que barren el campo y ELECTRIFICAN) + LA LANZA DEL QUÁSAR (chorro relativista que atraviesa 10 enemigos con nudos de shock helicoidales) — 3 armas nuevas garantizadas en el inventario"
 
-### 11.2 Qué se hizo en v5.98 (fix de carga + medusa garantizada)
+### 11.2 Qué se hizo en v5.99 (ojo rediseñado + rayos + cometa + púlsar + quásar)
+
+**Peticiones del usuario**: el ojo no se ve nada bien (mejorarlo, investigando
+en internet ideas de assets); los proyectiles de la medusa son aburridos —
+mejor RAYOS que caen del cielo; con la segunda imagen como referencia, crear
+un minion cósmico con efectos como se creó la medusa (SIN tocar el
+CosmicOrbMinion existente que usa ESA imagen); crear otro minion cósmico; y
+una nueva arma con un proyectil súper cósmico.
+
+**A. EL OJO REDISEÑADO**: investigación web (ojos realistas + Gargantua) +
+análisis VLM de la captura (esclerótica "plato de cerámica", pupila "PUERTA
+DE MADERA", párpados "brackets") → texturas v2 (EyeSclera esférica con
+venas audaces núcleo+halo y especular en media luna; EyeIris per-pixel con
+campos de ruido — bandas orbitales turbulentas + fibras + criptas + grano
+estelar + limbal violeta; EyeLid armadura de carbón con rim light; 2
+iteraciones VLM 8/10 y 9/10) + DrawPupilGargantua (esfera negra + halo de
+absorción + anillo de fotones micro-pulso + banda de acreción DELANTE +
+banda vertical lenteada DETRÁS con los arcos + chispa de beaming — legible a
+CUALQUIER escala; _bhShader ELIMINADO) + cavidad suave + falloff iris→pupila
++ catchlight unificado + rim glow de párpados + halo respirando.
+
+**B. RAYOS PARA LA MEDUSA**: JellyfishStingBolt ELIMINADO → NebulaLightning
+(nace 420px sobre la víctima, cae vertical ~90px/t, zigzag dentado hash-
+determinista regenerado cada pocos ticks, ramas laterales, frente con
+Star-destello, trueno + destello de impacto, Frostburn intacta).
+
+**C. EL COMETA ESTELAR** (LivingCometStaff → StellarCometMinion, minionSlots
+1): núcleo de plasma (CometHead) + CORONA DE 8 PUNTAS girando (CometCrown —
+el homenaje a la imagen de referencia) + cola de 18 posiciones + chispas
+orbitando; NO persigue: ORBITA en elipse excéntrica (fase por minionPos) y
+CAE EN PICADO (0.46/t hasta 16.5) — al rozar estalla en NOVA (AoE 92px al
+60% + OnFire) y rebota a la órbita; lente B que crece con la velocidad
+(0.05→0.17); buff + iconos PIL.
+
+**D. EL PÚLSAR VIVO** (LivingPulsarStaff → LivingPulsarMinion): estrella de
+neutrones (PulsarCore con arcos magnéticos nítidos + polos + bandas de
+giro) que GIRA con DOS HACES DE FARO opuestos barriendo el campo (340px,
+daño por comprobación ANGULAR cada 5 ticks al 55% + ELECTRIFIED — ni
+contacto ni proyectil: RAYOS GIRANDO); lissajous perezoso en reposo, punto
+de raqueo en alto con objetivo; haces cónicos con pulso viajero + remolino
++ chispas tangenciales; lente B pulsando con el giro (0.05→0.12).
+
+**E. LA LANZA DEL QUÁSAR** (QuasarLance, Magic 85/mana 14 →
+QuasarJetProjectile): CHORRO RELATIVISTA — lanza de luz 132px a ~78px/t que
+ATRAVIESA 10 enemigos, 5 NUDOS DE SHOCK pulsando hacia la punta, retorción
+helical, 3 capas violeta/cian/blanco + estela; al morir: FLORECIMIENTO DEL
+QUÁSAR (AoE 130px al 55% + destello + temblor).
+
+**F. Infra**: LensSystem con _cometIndices/_pulsarIndices (encima de la
+lente + fuentes B); TestingPlayer EnsureItem ×3 armas; localización
+en-US/es-ES completa; auditoría 85 clases ✓; compilación 0 errores.
+
+### 11.2.1 Qué se hizo en v5.98 (histórico — fix de carga + medusa garantizada)
 
 **Peticiones del usuario**: "mira estos errores" (capturas del juego con
 `MissingResourceException: Content/Projectiles/Cosmic/NebulaJellyfishMinion`
@@ -3985,7 +4037,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.98
+> Última actualización: v5.99
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.
