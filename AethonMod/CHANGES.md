@@ -1,5 +1,66 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.05 — EL AGUJERO NEGRO CARMESÍ: COPIA EXACTA + PARÁMETROS
+
+**Petición del usuario**: "primero toma una copia exacta del agujero negro
+funcional que tenemos, y a partir de ahí modifica sus parámetros, disco de
+acreción mas grande y de otro color, el agujero un poco mas pequeño, mejorar
+la animación, etc. además te pido que investigues en internet como se crean
+matematicamente un agujero negro, investiga formulas e investiga la
+estructura de nuestro agujero negro funcional, luego replica el agujero
+negro de la referencia" (+ "haz lo mejor posible con todo lo aprendido y
+todos los recursos que puedas conseguir de cualquier lugar de Internet").
+
+### A. EL MÉTODO (radicalmente distinto al v6.04)
+
+El v6.04 (render Gargantua con texturas PNG pre-generadas) se veía horrible:
+SE ELIMINÓ COMPLETO (GargantuaRenderer.cs + GargantuaBack/Front/Shadow.png).
+El v6.05 es EXACTAMENTE lo que pidió el usuario: **el MISMO render del
+agujero funcional** (RealBlackHoleShader — marcha de luz de 75 pasos con
+lensing gravitacional real, dibujado sobre el lienzo InvisiblePixel, mismo
+halo, mismo refuerzo del horizonte, misma lente de pantalla) con los
+**PARÁMETROS recalibrados** — sin recompilar el .fxc (los parámetros del
+shader se establecen por nombre desde C# en cada frame).
+
+### B. INVESTIGACIÓN MATEMÁTICA (internet)
+
+Documentada en `research/blackhole/MATEMATICA_AGUJEROS_NEGROS.md`:
+r_s = 2GM/c² (Schwarzschild), esfera de fotones 1.5·r_s, sombra aparente
+(√27/2)·r_s ≈ 2.6·r_s, ISCO = 3·r_s (borde interno del disco), Kepler
+v = √(GM/r) → 0.41c en el ISCO, Doppler beaming δ = 1/(γ(1−β·cosθ)) con
+brillo ~δ³ (contraste ~13× entre lados), lente α = 4GM/(c²·b), Shakura–Sunyaev
+T(r) ∝ r^(−3/4) (núcleo caliente blanco → borde rojo), y el paper de
+Interstellar (James et al. 2015) para el Gargantua.
+
+### C. PARÁMETROS: FUNCIONAL → CARMESÍ
+
+| Parámetro | Funcional | Carmesí v6.05 | Por qué |
+|---|---|---|---|
+| `blackHoleRadius` | 0.30 | **0.25** | "el agujero un poco más pequeño" |
+| `accretionDiskRadius` (tubo del toro) | 0.40 | **0.48** | "disco más grande": borde ext. 3.8×→4.9× la sombra; borde interno ~0.27 queda pegado a la sombra (≈ISCO) |
+| `accretionDiskColor` | (245,105,61) | **(255,45,100)** | "otro color": paleta de la referencia (blanco-rosado→magenta→carmesí) |
+| `accretionDiskScale.y` | 0.33 | **0.28** | banda fina casi de canto (referencia ~15-20°) |
+| `cameraAngle` | 0.32 | **0.30** | inclinación ~17° como la referencia |
+| `globalTime` | t | **t×1.35** | "mejorar la animación": el plasma HIERVE más vivo |
+| `cameraRotationAxis` | fijo | **+ precesión ±0.05/±0.06 rad (2 frecuencias incommensurables)** | el plano del disco bambolea orgánico |
+| lienzo | 256·escala | **256·escala·1.10·(respiración ±1.8%)** | disco +10% en pantalla; el conjunto respira |
+| Doppler beaming | — | **velos aditivos: izq. blanco-rosado (δ³), der. carmesí tenue** | física real + la referencia (lado izquierdo brillante) |
+| Anillo de fotones | interno del shader | **+ refuerzo Ring rosa pálido pulsante a 1.7·r_h** | firma visual de la referencia |
+
+La FÍSICA DE JUEGO queda COPIA EXACTA del funcional (pop elástico,
+crecimiento→evaporación→anillo de Einstein, aura con ticks que aceleran
+cerca del centro, atracción 2.6 (10× el sol), devora balas enemigas,
+persecución lenta). El BlackHoleProjectile original queda INTACTO.
+
+### D. RESPUESTA AL USUARIO: ¿assets o código?
+
+El agujero funcional es **~100% código**: el visual es el shader
+RealBlackHoleShader.fxc (marcha de luz de 75 pasos) sobre un píxel
+transparente escalado (InvisiblePixel.png) + ruido FireNoiseB + dusts
+vanilla + la lente de pantalla (otro shader). No hay "assets" del agujero
+como tal — por eso el usuario no los encontraba. (Sección 6 del doc de
+investigación.)
+
 ## Commit v6.04 — EL AGUJERO NEGRO EXACTO: EL RENDER GARGANTUA
 
 **Petición del usuario**: "el agujero negro no se parece en nada... te
