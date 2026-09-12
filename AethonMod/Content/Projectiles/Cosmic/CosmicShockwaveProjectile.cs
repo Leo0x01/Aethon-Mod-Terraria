@@ -4,11 +4,21 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.DataStructures;
+using Terraria.Graphics.Shaders;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.94 — LA ONDA CROMÁTICA ES EL ESCUDO DESTRUIDO: además de las
+    /// franjas R/G/B de aberración, la onda dibuja la BURBUJA de ruido Perlin
+    /// con el shader ForceField VANILLA de Terraria (el mismo de las Columnas
+    /// Lunares) expandiéndose (2×) y desvaneciéndose con los parámetros
+    /// EXACTOS de la animación de destrucción del escudo del juego
+    /// (ai[3] = radio inicial de la burbuja, lo pasa el agujero negro).
+    /// Radios: ondas de fuego del sol 240/300/360, cromática 420.
+    ///
     /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
     ///
     /// v5.92 — FIX del error del sol: "Begin has been called before calling
@@ -423,25 +433,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float progress = MathHelper.Clamp(age / duration, 0f, 1f);
                 float alpha = WaveAlpha(age, duration);
 
-                // v5.93 — Texturas de ALTA CALIDAD (1024px): el Ring.png de
+                // v5.94 — Texturas de ALTA CALIDAD (1024px): el Ring.png de
                 // 64px se pixelaba al escalarlo al radio de la onda (hasta
                 // 620px) y su anillo fino teñido se veía BLANCO plano.
                 //   ring (fino)      — anillo blanco nítido (frentes de choque
                 //                      y franjas de aberración cromática)
-                //   ringShieldNebula — cuerpo de campo de fuerza CON COLOR
-                //                      horneado (interior rosa → magenta →
-                //                      borde cian, el escudo del Nebula Pillar)
                 //   fireRing         — llamas con COLOR propio (blanco-amarillo
                 //                      → naranja → rojo en las puntas)
+                //   perlin (vanilla) — el ruido Perlin del JUEGO: es la textura
+                //                      con la que Terraria dibuja el escudo de
+                //                      las Columnas Lunares (con el shader
+                //                      ForceField, ver la burbuja de abajo)
                 Texture2D ring = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/Ring").Value;
-                Texture2D nebulaBody = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Procedural/RingShieldNebula").Value;
                 Texture2D fireRing = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/FireRing").Value;
+                Texture2D perlin = ModContent.Request<Texture2D>(
+                    "Terraria/Images/Misc/Perlin").Value;
                 Vector2 drawPos = p.Center - Main.screenPosition;
                 float ringUnit = ring.Width / 2f;
-                float nebUnit = nebulaBody.Width / 2f;
                 float fireUnit = fireRing.Width / 2f;
                 // El núcleo del Ring fino vive a 0.92 del radio de su textura:
                 // factor de compensación para que un radio pedido R aparezca a R.
@@ -472,22 +482,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else
                 {
-                    // === CAMPO DE FUERZA CROMÁTICO (v5.93 — estilo Columna de Nebulosa) ===
-                    // La onda ES el campo de fuerza del agujero expandiéndose
-                    // al destruirse (petición del usuario). Look validado con
-                    // simulación: CUERPO translúcido magenta→cian (color horneado
-                    // en RingShieldNebula — 1 pasada, sin lavado a blanco) + TRES
-                    // AROS FINOS R/G/B con desfase radial = la aberración
-                    // cromática del escudo del Nebula Pillar, SEPARADA y VISIBLE.
-                    // La separación crece con la edad (dispersión real: el frente
-                    // al desvanecerse dispersa más) y se INVIERTE en la onda
-                    // convergente legada. Transparente: alphas moderados.
+                    // === ONDA CROMÁTICA — aberración R/G/B + DESTRUCCIÓN DEL CAMPO ===
+                    // v5.94 — LA onda ES el escudo del agujero destruyéndose:
+                    // la secuencia EXACTA de Terraria cuando cae el escudo de
+                    // una Columna Lunar (investigado en el código real del
+                    // juego, Main.DrawNPCDirect_Inner case 507): la burbuja de
+                    // ruido Perlin se dibuja con el shader ForceField VANILLA,
+                    // se EXPANDE (hasta 2×) y DESAPARECE — acompañada por las
+                    // tres franjas R/G/B de aberración cromática (la petición
+                    // original del usuario: "cuando es destruida esta se
+                    // expande y desaparece"). La separación crece con la edad
+                    // (dispersión real) y se INVIERTE en la convergente legada.
                     float fringe = front * (0.035f + 0.06f * progress) *
                                    (style == StyleChromaticInverse ? -1f : 1f);
 
-                    // Cuerpo del campo (tenue, se desvanece con la envolvente).
-                    DrawRing(nebulaBody, drawPos, front, nebUnit,
-                        new Color(255, 255, 255, (byte)(alpha * 145f)));
                     // Franja ROJA exterior.
                     DrawRing(ring, drawPos, (front + fringe) * thinComp, ringUnit,
                         new Color(255, 60, 70, (byte)(alpha * 175f)));
@@ -497,6 +505,38 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // Franja AZUL interior.
                     DrawRing(ring, drawPos, (front - fringe) * thinComp, ringUnit,
                         new Color(75, 155, 255, (byte)(alpha * 175f)));
+                }
+
+                // === v5.94 — BURBUJA DE DESTRUCCIÓN DEL ESCUDO (vanilla real) ===
+                // Shader ForceField del juego + Perlin vanilla, quad 600×600
+                // como en Main.cs: expansión (1+grow) hasta 2×, brillo ×2 y
+                // desvanecimiento 1-sqrt(grow) — los parámetros EXACTOS de la
+                // animación de destrucción del escudo de las Columnas.
+                // ai[3] = radio de la burbuja al morir (lo pasa el agujero);
+                // fallback proporcional si no llegó (p.ej. en MP).
+                if (style == StyleChromatic)
+                {
+                    Main.spriteBatch.End(); // cierra el pase aditivo de las franjas
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.PointWrap, DepthStencilState.Default, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+
+                    if (GameShaders.Misc.TryGetValue("ForceField", out MiscShaderData forceField))
+                    {
+                        float bubbleR = p.ai[3] > 4f ? p.ai[3] : front * 0.16f;
+                        // grow alcanza 1 en 15 ticks (vanilla: 30 de 120 — mismo 25%).
+                        float grow = Math.Min(age / 15f, 1f);
+                        float fade = 1f - (float)Math.Sqrt(grow);
+                        var dd = new DrawData(perlin, drawPos,
+                            new Rectangle(0, 0, 600, 600),
+                            new Color(fade, fade, fade, fade), 0f,
+                            new Vector2(300f, 300f),
+                            (bubbleR * 2f / 600f) * (1f + grow),
+                            SpriteEffects.None, 0f);
+                        forceField.UseColor(new Vector3(2f)); // el doble de brillo (vanilla)
+                        forceField.Apply(dd);
+                        dd.Draw(Main.spriteBatch);
+                    }
                 }
 
                 Main.spriteBatch.End();

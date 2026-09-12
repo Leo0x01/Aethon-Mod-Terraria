@@ -118,7 +118,9 @@ namespace AethonMod.Content.Projectiles.V20
 
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 float age = Projectile.ai[0];
-                float scale = MathHelper.Lerp(0f, 5f, age / 60f);
+                // v5.94 - fix 16x: Ring.png paso de 64px a 1024px (v5.93):
+                // el Lerp(0..5) dibujaba anillos de hasta 5120px.
+                float scale = MathHelper.Lerp(0f, 5f / 16f, age / 60f);
                 float pulse = 0.6f + 0.4f * (float)Math.Sin(age * 0.4f);
 
                 Vector2 ringOrigin = new Vector2(ring.Width / 2f, ring.Height / 2f);

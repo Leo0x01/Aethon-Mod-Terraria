@@ -166,9 +166,10 @@ namespace AethonMod.Content.Projectiles.V20
                 // === Photon ring (Ring white, additive) ===
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                // v5.94 - fix 16x: Ring.png paso de 64px a 1024px (v5.93).
                 Main.spriteBatch.Draw(ring, drawPos, null,
                     new Color(255, 240, 200, 220),
-                    0f, ringOrigin, 0.35f * pulse, SpriteEffects.None, 0f);
+                    0f, ringOrigin, (0.35f / 16f) * pulse, SpriteEffects.None, 0f);
                 // Bright core
                 Main.spriteBatch.Draw(glow, drawPos, null,
                     new Color(255, 200, 100, 150 * pulse),

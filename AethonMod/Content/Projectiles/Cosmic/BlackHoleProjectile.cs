@@ -5,12 +5,26 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.DataStructures;
+using Terraria.Graphics.Shaders;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.94 — CAMPO DE FUERZA REAL DE LAS COLUMNAS LUNARES: investigado el
+    /// código de Terraria (Main.DrawNPCDirect_Inner) y usado su mecanismo
+    /// EXACTO — ruido Perlin ("Terraria/Images/Misc/Perlin", la textura del
+    /// juego) en un quad 600×600 con el shader GameShaders.Misc["ForceField"]
+    /// VANILLA: alpha ligado a la "fuerza" (crece hacia la muerte), flash de
+    /// 30 ticks con pop +5% y brillo +50% al absorber un golpe, y al morir la
+    /// onda cromática dibuja la burbuja EXPANDIÉNDOSE (2×) y DESAPARECIENDO —
+    /// la secuencia del escudo de columna destruido. AURA DE DAÑO: los
+    /// enemigos dentro del campo reciben daño cada 0.5 s (límites de daño en
+    /// área mejorados). Anillos de fotones eliminados (los anillos solo
+    /// viven en la explosión final). Onda cromática: 620 → 420 px.
+    ///
     /// BlackHoleProjectile — agujero negro con lensing gravitacional real.
     ///
     /// RENDER: RealBlackHoleShader.fx (lightmarch de 75 pasos con lensing gravitacional
@@ -85,6 +99,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
 
+        /// <summary>
+        /// v5.94 — Multiplicador del radio del campo de fuerza sobre el horizonte
+        /// de sucesos (2.2×: envuelve el disco de acreción, que llega a ~1.4×).
+        /// </summary>
+        private const float ShieldRadiusMult = 2.2f;
+
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
@@ -131,6 +151,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             else if (Projectile.timeLeft <= 36f)
             {
+                // v5.94 — Radio del CAMPO DE FUERZA con la escala ANTES del
+                // colapso de la evaporación: el escudo MANTIENE su tamaño
+                // mientras el agujero interior se evapora (como el escudo de
+                // una Columna Lunar, que no encoge mientras la torre muere).
+                // El OnKill lo pasa a la onda cromática (ai[3]) para que la
+                // burbuja de destrucción arranque EXACTAMENTE de este radio.
+                Projectile.localAI[1] = 0.3f * Projectile.width *
+                                        Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
+
                 // FASE 2 — EVAPORACIÓN: colapso acelerado hacia la singularidad
                 // (la escala cae a 0 justo cuando llega la implosión final).
                 float collapse = Utils.GetLerpValue(36f, 0f, Projectile.timeLeft, true);
@@ -147,6 +176,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // (Con dos agujeros simultáneos escribe el más avanzado por frame —
             // el boost es visual y no acumulativo.)
             ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
+
+            // === v5.94 — TIMER DEL FLASH DEL ESCUDO (mecanismo de la torre) ===
+            // npc.ai[3] en vanilla: 1 al recibir el golpe, ++ hasta 120; el
+            // flash vive 30 ticks (1 - t/30). Aquí: el escudo "absorbe" al
+            // enemigo golpeado (OnHitNPC pone localAI[0]=1).
+            if (Projectile.localAI[0] > 0f)
+            {
+                Projectile.localAI[0] += 1f;
+                if (Projectile.localAI[0] > 30f)
+                    Projectile.localAI[0] = 0f;
+            }
 
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
@@ -169,9 +209,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // Partículas de la librería propia en la capa ENCIMA DE LA LENTE
                 // (capa AboveLens: el BlackHoleLensSystem las pinta tras compositar
                 // la distorsión → la lente queda DETRÁS de los efectos del agujero).
+                // v5.94: el ANILLO DE FOTONES pulsante se ELIMINÓ — los anillos
+                // ahora viven SOLO en la explosión final (onda cromática del
+                // OnKill), petición del usuario.
                 SpawnLibraryAbsorbedMatter();
                 SpawnLibraryAccretionDisk();
-                SpawnLibraryPhotonRing();
             }
 
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS ===
@@ -196,9 +238,53 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
+            // === v5.94 — AURA DE DAÑO DEL CAMPO DE FUERZA (límites mejorados) ===
+            // Petición del usuario: "debe mejorar los limites de su daño en
+            // area". Antes el daño solo existía en el hitbox de contacto (96px)
+            // y en la onda final; ahora el CAMPO DE FUERZA quema a todo enemigo
+            // atrapado dentro de su burbuja: cada 0.5 s, radio = escudo ×1.3
+            // (crece con la hinchaZón de la muerte, +60% en la fase final) —
+            // la gravedad los arrastra hacia dentro y el campo los desgasta.
+            if (Main.netMode != NetmodeID.MultiplayerClient &&
+                VisualsTime > 0f && VisualsTime % 30f == 0f)
+            {
+                float auraRadius = ShieldRadius * 1.3f;
+                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.CanBeChasedBy()) continue;
+                    float dist = (npc.Center - Projectile.Center).Length();
+                    if (dist > auraRadius) continue;
+                    // Empuje suave hacia el centro (el campo los exprime hacia
+                    // el horizonte) + daño del aura.
+                    Vector2 toCenter = Projectile.Center - npc.Center;
+                    if (toCenter.LengthSquared() > 0.01f)
+                    {
+                        toCenter.Normalize();
+                        npc.velocity += toCenter * 0.8f;
+                    }
+                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 0f, DamageClass.Magic);
+                }
+            }
+
             // === ILUMINACIÓN PULSANTE (naranja incandescente del disco) ===
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
             Lighting.AddLight(Projectile.Center, new Vector3(0.95f * pulse, 0.45f * pulse, 0.15f * pulse));
+        }
+
+        /// <summary>
+        /// v5.94 — Radio actual del campo de fuerza (px): 2.2× el horizonte,
+        /// con la escala PRE-colapso durante la evaporación (localAI[1]) para
+        /// que el escudo no encoja con el agujero mientras muere.
+        /// </summary>
+        private float ShieldRadius
+        {
+            get
+            {
+                if (Projectile.localAI[1] > 4f)
+                    return Projectile.localAI[1];
+                return 0.3f * Projectile.width * Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
+            }
         }
 
         // ------------------------------------------------------------------
@@ -433,33 +519,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Anillo de fotones pulsante: Ring con ScaleUp + FadeIn + FadeOut — un destello
-        /// circular en el horizonte de sucesos que se expande y desvanece.
+        /// v5.94 — ELIMINADO: el anillo de fotones pulsante (Ring con ScaleUp
+        /// cada 36 ticks) era un anillo visible DURANTE TODA la vida del
+        /// agujero; con la textura HD (1024px) además quedó 16× más grande
+        /// (1.15×1024 = 1178px de diámetro). Los anillos ahora solo existen
+        /// en la explosión final (ondas del OnKill) — petición del usuario:
+        /// "solo deben salir al final".
         /// </summary>
-        private void SpawnLibraryPhotonRing()
-        {
-            if (VisualsTime % 36f == 0f && VisualsTime > 20f && Projectile.scale > 0.3f)
-            {
-                var p = new ParticleData
-                {
-                    Position = Projectile.Center,
-                    Velocity = Vector2.Zero,
-                    Scale = Vector2.One,
-                    PackedColor = ParticleManager.PackColor(new Color(200, 220, 255, 170)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(200, 220, 255, 170)),
-                    TimeLeft = 30,
-                    Duration = 30,
-                    TextureId = ParticleTex.Ring,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.AboveLens,
-                };
-                p.UserData1 = 1.15f * Projectile.scale; // escala final X
-                p.UserData2 = 1.15f * Projectile.scale; // escala final Y
-                p.EnableComponent(ComponentFlag.ScaleUp);
-                p.EnableComponent(ComponentFlag.FadeOut);
-                ParticleManager.Spawn(p);
-            }
-        }
 
         // ------------------------------------------------------------------
         //  RENDER
@@ -588,17 +654,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawFallback(p, drawPos);
                 }
 
-                // === 4. CAMPO DE FUERZA (v5.93 — estilo Columna de Nebulosa) ===
-                // Petición del usuario: el agujero negro necesita el CAMPO DE
-                // FUERZA del Nebula Pillar — burbuja con ABERRACIÓN CROMÁTICA
-                // que al destruirse se EXPANDE y desaparece (esa expansión es
-                // la onda cromática del OnKill, que usa la MISMA RingShield).
-                // Look (referencia del juego): franja exterior CIAN-AZUL +
-                // cuerpo MAGENTA + interior ROSADO, borde suave y brillante,
-                // semitransparente — 3 pasadas de RingShield.png (1024px,
-                // banda ancha con arcos de energía) con desfases radiales
-                // vivos (la separación "respira"). Se dibuja en AMBOS pases
-                // (mundo y encima-de-la-lente) porque vive en DrawCoreVisuals.
+                // === 4. CAMPO DE FUERZA (v5.94 - EL EFECTO REAL DE LAS COLUMNAS) ===
+                // Peticion del usuario: el mecanismo EXACTO del escudo de las
+                // Columnas Lunares, investigado en el codigo real de Terraria
+                // (Main.DrawNPCDirect_Inner, torres 422/493/507/517): un quad
+                // de ruido PERLIN (la textura "Images/Misc/Perlin" del juego)
+                // dibujado con el shader GameShaders.Misc["ForceField"] - el
+                // MISMO shader que usa Terraria - en un batch Immediate +
+                // AlphaBlend + PointWrap + DepthStencil.Default con la MISMA
+                // geometria (fuente 600x600, origen 300,300). Alpha ligado a la
+                // "fuerza" del escudo (crece hacia la muerte), pop +5% y brillo
+                // +50% al absorber un golpe (flash de 30 ticks = npc.ai[3] de
+                // la torre). Al morir, el OnKill pasa este radio a la onda
+                // cromatica: la burbuja SE EXPANDE (2x) y DESAPARECE - la
+                // secuencia de destruccion del escudo de la Columna.
                 DrawForceField(p, drawPos);
             }
             catch
@@ -612,64 +681,78 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// v5.93 — Campo de fuerza del agujero negro (estilo Columna de
-        /// Nebulosa): burbuja translúcida con aberración cromática alrededor
-        /// del agujero. Look validado con simulación: CUERPO magenta→cian
-        /// (color horneado en RingShieldNebula.png, 1024px con arcos de
-        /// energía) + aros FINOS cian (exterior) y rosa (interior) cuya
-        /// separación "respira" — el borde del escudo del Nebula Pillar.
-        /// El radio sigue al horizonte (crece con la secuencia de
-        /// evaporación) y al morir el agujero la onda cromática del OnKill
-        /// continúa la historia: el campo "destruido" expandiéndose.
+        /// v5.94 - Campo de fuerza del agujero negro: EL EFECTO REAL del escudo
+        /// de las Columnas Lunares (codigo de Terraria decompilado): ruido
+        /// Perlin + shader ForceField VANILLA con la geometria y parametros
+        /// EXACTOS del juego:
+        ///   - Quad 600x600, sourceRect (0,0,600,600), origen (300,300)
+        ///   - Batch: Immediate + AlphaBlend + PointWrap + DepthStencil.Default
+        ///   - Alpha = fuerza*0.8 + 0.2 (vanilla lo liga a ShieldStrength)
+        ///   - Flash de 30 ticks al absorber un golpe: pop x(1+flash*0.05) y
+        ///     UseColor(1+flash*0.5) - identico al npc.ai[3] de la torre
+        /// La "fuerza" aqui es la carga hacia la muerte (0->1 en 10 s): el
+        /// campo se intensifica conforme el agujero acumula energia para la
+        /// explosion final.
         /// </summary>
         private static void DrawForceField(Projectile p, Vector2 drawPos)
         {
-            // Radio del horizonte en px (= 0.3·zoomBase·canvasPx·0.5, la misma
-            // fórmula de la sección 3) — el campo lo envuelve TODO (disco de
-            // acreción incluido: el toro llega a ~1.4× el horizonte).
-            float horizonPx = 0.3f * p.width * Math.Max(p.scale, 0.08f);
-            float shieldR = horizonPx * 1.9f;
-            if (shieldR < 14f) return;
+            // El shader del juego (registrado por DyeInitializer.LoadMisc como
+            // new MiscShaderData(Main.PixelShaderRef, "ForceField")).
+            if (!GameShaders.Misc.TryGetValue("ForceField", out MiscShaderData forceField))
+                return;
 
-            Texture2D body = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/RingShieldNebula").Value;
-            Texture2D thin = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/Ring").Value;
-            float bodyUnit = body.Width / 2f;
-            float thinUnit = thin.Width / 2f;
-            // El núcleo del Ring fino vive a 0.92 del radio de su textura.
-            float thinComp = 1f / 0.92f;
+            float shieldR = GetShieldRadius(p);
+            if (shieldR < 10f) return; // aun diminuto (pop de nacimiento)
 
-            float t = Main.GlobalTimeWrappedHourly;
-            // Pulso lento del campo + separación de aberración que "respira"
-            // (±5-6.5% del radio — proporcional, consistente a toda escala).
-            float pulse = 0.72f + 0.28f * (float)Math.Sin(t * 2.1f + p.whoAmI * 0.7f);
-            float aberr = shieldR * (0.05f + 0.015f * (float)Math.Sin(t * 1.4f + 1.9f));
+            // Perlin VANILLA del juego - la misma textura del escudo de las torres.
+            Texture2D perlin = ModContent.Request<Texture2D>(
+                "Terraria/Images/Misc/Perlin").Value;
 
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+            // Fuerza del escudo: crece con la vida consumida (el campo carga
+            // hacia la explosion). Vanilla: alpha = fuerza*0.8 + 0.2.
+            float strength = MathHelper.Clamp(1f - p.timeLeft / 600f, 0f, 1f);
+            float alpha = strength * 0.8f + 0.2f;
+
+            // Flash al absorber un golpe (OnHitNPC -> localAI[0] = 1..30):
+            // vanilla: flash = 1 - ai[3]/30 (decae en medio segundo).
+            float flash = 0f;
+            if (p.localAI[0] > 0f && p.localAI[0] <= 30f)
+                flash = 1f - p.localAI[0] / 30f;
+
+            // Batch EXACTO de vanilla (dibujado del escudo de torre en Main.cs).
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.PointWrap, DepthStencilState.Default, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
-            // Cuerpo del campo: magenta translúcido → borde cian (color horneado).
-            DrawRingTex(body, drawPos, shieldR, bodyUnit,
-                new Color(255, 255, 255, (byte)(215 * pulse)));
-            // Aro fino CIAN exterior (la aberración brillante del borde).
-            DrawRingTex(thin, drawPos, (shieldR + aberr) * thinComp, thinUnit,
-                new Color(120, 225, 255, (byte)(160 * pulse)));
-            // Aro fino ROSA interior.
-            DrawRingTex(thin, drawPos, (shieldR - aberr) * thinComp, thinUnit,
-                new Color(255, 125, 170, (byte)(130 * pulse)));
+
+            var dd = new DrawData(perlin, drawPos,
+                new Rectangle(0, 0, 600, 600),
+                Color.White * alpha,
+                0f,
+                new Vector2(300f, 300f),
+                // Diametro deseado = 2*shieldR sobre el quad de 600 -> escala
+                // = 2*shieldR/600 (vanilla: npc.scale*(1+flash*0.05)).
+                (shieldR * 2f / 600f) * (1f + flash * 0.05f),
+                SpriteEffects.None, 0f);
+            forceField.UseColor(new Vector3(1f + flash * 0.5f));
+            forceField.Apply(dd);
+            dd.Draw(Main.spriteBatch);
+
             Main.spriteBatch.End();
         }
 
-        /// <summary>Dibuja una textura de anillo centrada en drawPos con radio en píxeles (v5.93).</summary>
-        private static void DrawRingTex(Texture2D tex, Vector2 drawPos, float radiusPx,
-            float texUnit, Color color)
+        /// <summary>
+        /// v5.94 - Radio del campo de fuerza (px): 2.2x el horizonte, con la
+        /// escala PRE-colapso durante la evaporacion (localAI[1]) para que el
+        /// escudo no encoja mientras el agujero muere. Compartido por el
+        /// dibujado, el aura de dano y el OnKill (radio de la burbuja final).
+        /// </summary>
+        internal static float GetShieldRadius(Projectile p)
         {
-            if (radiusPx <= 0.5f || color.A == 0) return;
-            float scale = radiusPx / texUnit;
-            Main.spriteBatch.Draw(tex, drawPos, null, color, 0f,
-                tex.Size() * 0.5f, scale, SpriteEffects.None, 0f);
+            if (p.localAI[1] > 4f)
+                return p.localAI[1];
+            return 0.3f * p.width * Math.Max(p.scale, 0.08f) * ShieldRadiusMult;
         }
+
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
         private static void RestoreSpriteBatch()
@@ -726,21 +809,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Main.spriteBatch.End();
 
             // Anillo de fotones + aberración cromática
+            // v5.94 — escalas BASADAS EN RADIO (la textura Ring pasó de 64px a
+            // 1024px en v5.93: la escala fija 0.6 dibujaba un anillo de 614px
+            // en vez de los ~38px del horizonte). Radio visible = 1.3× el
+            // horizonte (compensado por el núcleo del Ring a 0.92).
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
+            float horizonPx = 0.3f * p.width * Math.Max(p.scale, 0.08f);
+            float photonR = horizonPx * 1.3f * pulse / 0.92f;
+            float photonScale = photonR / (ringTex.Width * 0.5f);
             Main.spriteBatch.Draw(ringTex, drawPos - new Vector2(2f * s, 0f), null,
                 new Color(255, 0, 0, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
+                photonScale, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(ringTex, drawPos, null,
                 new Color(0, 255, 0, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
+                photonScale, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(ringTex, drawPos + new Vector2(2f * s, 0f), null,
                 new Color(0, 100, 255, 80), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
+                photonScale, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(ringTex, drawPos, null,
                 new Color(255, 240, 200, 220), 0f, ringTex.Size() * 0.5f,
-                0.6f * pulse * s, SpriteEffects.None, 0f);
+                photonScale, SpriteEffects.None, 0f);
             Main.spriteBatch.End();
         }
 
@@ -751,6 +841,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             if (Main.netMode == NetmodeID.Server) return;
+
+            // v5.94 — FLASH DEL ESCUDO (mecanismo de la torre): el campo
+            // "absorbe" el impacto con su pop de +5% y su brillo +50%
+            // durante 30 ticks — como el escudo de una Columna Lunar al
+            // recibir un golpe de fuerza (npc.ai[3] = 1 en vanilla).
+            Projectile.localAI[0] = 1f;
 
             // v5.90: micro-colapso de la librería sobre el objetivo (paleta cálida)
             ParticlePresets.Implosion(target.Center, 70f, 16, new Color(255, 170, 80), 18);
@@ -818,14 +914,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // owner-client se sincroniza con el resto; patrón v5.86 del t-90).
             if (Projectile.owner == Main.myPlayer)
             {
-                Projectile.NewProjectile(
+                int waveIdx = Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
                     Projectile.damage, 0f, Projectile.owner,
                     0f,                                      // edad: sin retardo
                     CosmicShockwaveProjectile.StyleChromatic,
-                    620f);                                   // radio máximo
+                    420f);                                   // radio máximo (v5.94: 620 → 420)
+                // v5.94 — Radio de la burbuja de destrucción: la onda dibuja
+                // el escudo (Perlin + ForceField vanilla) expandiéndose desde
+                // ESTE radio — la secuencia del escudo de columna destruido.
+                if (waveIdx >= 0 && waveIdx < Main.maxProjectiles)
+                {
+                    float deathR = GetShieldRadius(Projectile);
+                    if (deathR < 10f) deathR = 63f; // escala 1 típica
+                    Main.projectile[waveIdx].ai[3] = deathR;
+                }
             }
 
             // v5.91 — reset del boost de succión: la materia absorbida ya no

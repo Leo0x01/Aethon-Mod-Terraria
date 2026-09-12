@@ -194,9 +194,10 @@ namespace AethonMod.Content.Projectiles.V20
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
 
                 // === Outer ring (dark purple, static) ===
+                // v5.94 - fix 16x: Ring.png paso de 64px a 1024px (v5.93).
                 Main.spriteBatch.Draw(ring, drawPos, null,
                     new Color(80, 30, 110, 230),
-                    0f, ringOrigin, 2.0f, SpriteEffects.None, 0f);
+                    0f, ringOrigin, 2.0f / 16f, SpriteEffects.None, 0f);
 
                 // Outer halo (subtle purple)
                 Main.spriteBatch.Draw(softGlow, drawPos, null,

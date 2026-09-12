@@ -146,11 +146,16 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
-                Texture2D ring = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
+                // v5.94 — EL ANILLO SE ELIMINÓ: los anillos son parte de la ONDA
+                // EXPANSIVA final (petición del usuario: "solo deben salir al
+                // final"). Además dibujaba Ring.png (1024px desde v5.93) con
+                // escalas fijas de hasta 4.6× → anillos de 4710px en cada
+                // llamarada. La llamarada queda como EXPLOSIÓN de brillo:
+                // halo pulsante + núcleo + flash blanco al pico.
                 Texture2D glowCircleWhite = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleWhite").Value;
                 Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
 
-                if (ring == null || glowCircleWhite == null || softGlow == null)
+                if (glowCircleWhite == null || softGlow == null)
                     return false;
 
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
@@ -158,7 +163,7 @@ namespace AethonMod.Content.Projectiles.V20
                 float progress = age / 60f; // 0..1
 
                 // v5.91 — Begin CON el transform del mundo (Main.GameViewMatrix):
-                // antes iba SIN matrix → los anillos se dibujaban en coords de
+                // antes iba SIN matrix → el dibujado quedaba en coords de
                 // pantalla puras (mal con zoom ≠ 1) y el restore final dejaba el
                 // batch corrupto para los proyectiles vanilla posteriores.
                 Main.spriteBatch.End();
@@ -166,39 +171,17 @@ namespace AethonMod.Content.Projectiles.V20
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // === Múltiples Ring.png a escalas crecientes ===
-                // Cada anillo más grande que el anterior, colores de naranja → rojo profundo
-                Vector2 ringOrigin = new Vector2(ring.Width / 2f, ring.Height / 2f);
-                for (int i = 0; i < 5; i++)
-                {
-                    // Cada anillo se expande con la edad, desfasado
-                    float ringProgress = MathHelper.Clamp(progress - i * 0.05f, 0f, 1f);
-                    float scale = 0.4f + ringProgress * (1.8f + i * 0.6f);
-                    float alpha = (1f - ringProgress) * 0.85f;
-                    if (alpha <= 0f) continue;
-
-                    // Color: del naranja brillante (i=0) al rojo profundo (i=4)
-                    int r = 255;
-                    int g = (int)(180 - i * 32);
-                    int b = (int)(60 - i * 12);
-                    g = Math.Max(g, 30);
-                    b = Math.Max(b, 10);
-
-                    Main.spriteBatch.Draw(ring, drawPos, null,
-                        new Color(r, g, b, (byte)(alpha * 255f)),
-                        0f, ringOrigin, scale, SpriteEffects.None, 0f);
-                }
-
-                // === Halo central SoftGlow naranja (pulsa con la edad) ===
+                // === Halo central SoftGlow naranja (pulsa y CRECE con la edad) ===
                 float pulse = 0.9f + (float)Math.Sin(age * 0.3f) * 0.15f;
+                float expand = 1f + progress * 1.2f; // la llamarada se extiende
                 Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
                 Main.spriteBatch.Draw(softGlow, drawPos, null,
                     new Color(255, 160, 60, 200),
-                    0f, glowOrigin, 1.5f * pulse, SpriteEffects.None, 0f);
+                    0f, glowOrigin, 1.5f * pulse * expand, SpriteEffects.None, 0f);
                 // Núcleo blanco-amarillo central
                 Main.spriteBatch.Draw(softGlow, drawPos, null,
                     new Color(255, 240, 180, 230),
-                    0f, glowOrigin, 0.8f * pulse, SpriteEffects.None, 0f);
+                    0f, glowOrigin, 0.8f * pulse * (1f + progress * 0.5f), SpriteEffects.None, 0f);
 
                 // === FLASH BLANCO en frame 30 (±5 frames) ===
                 if (age >= 25f && age <= 35f)

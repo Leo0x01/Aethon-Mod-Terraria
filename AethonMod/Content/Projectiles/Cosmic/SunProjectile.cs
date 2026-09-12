@@ -23,24 +23,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
     ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
-    /// CICLO DE VIDA (v5.85/v5.86) — el sol como cuerpo celeste completo:
+    /// CICLO DE VIDA (v5.85/v5.86/v5.94) - el sol como cuerpo celeste completo:
     ///   - t=0s    : nace con pop elástico (SIN llamarada: en t=0 aún está
     ///               sobre el jugador y la nova estallaría en su posición).
-    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s) —
+    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s) -
     ///               v5.91: la llamarada (PhoenixNova) se dibuja DETRÁS del
     ///               cuerpo del sol (DrawBehind → drawCacheProjsBehindProjectiles).
+    ///               v5.94: la llamarada YA NO dibuja anillos (los anillos son
+    ///               de la onda expansiva final: "solo deben salir al final").
     ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
     ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
     ///               y su luz se intensifica (materia convergiendo en espiral).
     ///               v5.91: nace con el flag ai[2]=1 ("invocada por el sol") para
-    ///               NO duplicar ondas al morir — las ondas de fuego las genera
+    ///               NO duplicar ondas al morir - las ondas de fuego las genera
     ///               EL SOL (autoridad absoluta de la sincronización).
-    ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE — nova masiva con
-    ///               3 ONDAS EXPANSIVAS DE FUEGO que BARRIAN dañando cada 0.1 s
-    ///               (v5.91) y aplicando QUEMADURA de 10 s, más el estallido de
-    ///               dusts y temblor de pantalla.
+    ///   - t=7-10s : v5.94 - GIGANTE ROJA: la estrella amarilla se HINCHA hasta
+    ///               x1.85 y ENROJECE (backglow, aura, SunShader, luz, dusts y
+    ///               partículas se tiñen) mientras su DAÑO DE ÁREA crece con
+    ///               ella: hitbox de contacto x1.85 y daño x1.75, quemadura
+    ///               de 10 s (petición del usuario: "una estrella amarilla que
+    ///               se convierte en gigante roja y luego explota, todo esto
+    ///               haciendo que su daño en area crezca junto con la estrella").
+    ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE - nova masiva con
+    ///               3 ONDAS EXPANSIVAS DE FUEGO (v5.94: radii 240/300/360 -
+    ///               antes 360/450/540, cubrían toda la pantalla) que BARRAN
+    ///               dañando cada 0.1 s (v5.91) y aplicando QUEMADURA de 10 s,
+    ///               más el estallido de dusts y temblor de pantalla.
     ///
-    /// v5.91 — LA EXPLOSIÓN FINAL ES LA SUPERNOVA (SupernovaStaff), SINCRONIZADA
+    ///     /// v5.91 — LA EXPLOSIÓN FINAL ES LA SUPERNOVA (SupernovaStaff), SINCRONIZADA
     /// POR CONSTRUCCIÓN: el OnKill del sol es ahora la AUTORIDAD de la explosión
     /// final — (1) mata la Supernova hija EN EL MISMO TICK (su flash + partículas
     /// estallan exactamente con el sol, sin depender de la sincronización por
@@ -85,6 +95,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Cadencia de las llamaradas solares: cada 2 segundos.</summary>
         private const int FlareInterval = 120;
 
+        /// <summary>
+        /// v5.94 — Progreso de la fase GIGANTE ROJA: 0 durante la secuencia
+        /// principal (estrella amarilla) y 0→1 en los últimos 3 s (la estrella
+        /// se hincha y enrojece antes de la supernova). Petición del usuario:
+        /// "es una estrella amarilla que se convierte en gigante roja y luego
+        /// explota, todo esto haciendo que su daño en area crezca junto con
+        /// la estrella".
+        /// </summary>
+        private float RedGiantProgress => Projectile.timeLeft <= SupernovaSpawnAtRemaining
+            ? 1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining
+            : 0f;
+
+        /// <summary>v5.94 — Mezcla un color hacia el ROJO de la gigante (fase final).</summary>
+        private Color ToRedGiant(Color c)
+        {
+            float p = RedGiantProgress;
+            if (p <= 0f) return c;
+            int g = Math.Max((int)(c.G * (1f - 0.7f * p)), 20);
+            int b = Math.Max((int)(c.B * (1f - 0.85f * p)), 8);
+            return new Color(c.R, g, b, c.A);
+        }
+
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
@@ -128,17 +160,39 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, VisualsTime, true));
             VisualsTime += 1f;
 
-            // === CARGA DE SUPERNOVA (últimos 3 s): el sol se comprime y brilla más ===
+            // === v5.94 — GIGANTE ROJA (últimos 3 s) ===
+            // La estrella amarilla de la secuencia principal SE HINCHA y
+            // ENROJECE (hasta ×1.85 de tamaño) mientras la supernova carga:
+            // compresión anterior (×1.0008) e hinchazón final de 30 ticks
+            // (×1.025) eliminadas — el crecimiento es ahora CONTINUO y el
+            // DAÑO DE ÁREA crece JUNTO con la estrella (hitbox + daño).
             bool supernovaCharging = Projectile.timeLeft <= SupernovaSpawnAtRemaining;
+            float redProgress = RedGiantProgress;
             if (supernovaCharging)
             {
-                // Compresión sutil: la materia se acumula antes del colapso.
-                Projectile.scale *= 1.0008f;
-            }
+                // Crecimiento suave de la gigante roja (smoothstep → ×1.85).
+                float growEase = redProgress * redProgress * (3f - 2f * redProgress);
+                Projectile.scale *= 1f + 0.85f * growEase;
 
-            // === NOVA FINAL: los últimos 30 ticks se hincha antes de explotar ===
-            if (Projectile.timeLeft < 30f)
-                Projectile.scale *= 1.025f;
+                // Daño de contacto creciendo con la estrella: ×1 → ×1.75.
+                // ai[2] guarda el daño base (registrado al nacer).
+                float baseDmg = Projectile.ai[2] > 0f ? Projectile.ai[2] : Projectile.damage;
+                Projectile.ai[2] = baseDmg;
+                int newDmg = Math.Max(1, (int)(baseDmg * (1f + 0.75f * redProgress)));
+                if (newDmg != Projectile.damage)
+                    Projectile.damage = newDmg;
+
+                // El hitbox de área CRECE con la estrella (Resize mantiene el
+                // centro: verificado en el código de Terraria).
+                int sz = Math.Max(16, (int)(92f * Projectile.scale));
+                if (sz != Projectile.width)
+                    Projectile.Resize(sz, sz);
+            }
+            else if (Projectile.ai[2] <= 0f)
+            {
+                // Daño base registrado al nacer (para el ramp de la gigante).
+                Projectile.ai[2] = Projectile.damage;
+            }
 
             // === MOVIMIENTO: deriva lenta y frenado ===
             Projectile.velocity *= 0.97f;
@@ -238,12 +292,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === ILUMINACIÓN INTENSA (con pulso sutil + crecimiento en la carga) ===
+            // v5.94 — la luz ENROJECE con la gigante: amarillo cálido → rojo.
             float pulse = 0.92f + 0.08f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
             float chargeLight = supernovaCharging
                 ? 1f + (1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining) * 0.8f
                 : 1f;
+            Vector3 lightColor = Vector3.Lerp(
+                new Vector3(1f, 0.9f, 0.5f),
+                new Vector3(1f, 0.25f, 0.1f),
+                redProgress);
             Lighting.AddLight(Projectile.Center,
-                new Vector3(1f, 0.9f, 0.5f) * 3.2f * pulse * chargeLight);
+                lightColor * 3.2f * pulse * chargeLight);
         }
 
         // ------------------------------------------------------------------
@@ -267,7 +326,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     vel *= Main.rand.NextFloat(1f, 3f);
                     vel += new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-1f, 1f));
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Torch,
-                        vel, 150, new Color(255, 150, 50), 1.0f);
+                        vel, 150, ToRedGiant(new Color(255, 150, 50)), 1.0f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -288,7 +347,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * 2f,
                     (float)Math.Sin(angle) * 2f);
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                    vel, 200, new Color(255, 200, 100), 1.2f);
+                    vel, 200, ToRedGiant(new Color(255, 200, 100)), 1.2f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -332,7 +391,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         (float)Math.Cos(angle) * Main.rand.NextFloat(3f, 6f),
                         (float)Math.Sin(angle) * Main.rand.NextFloat(3f, 6f));
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.GoldFlame,
-                        vel, 220, new Color(255, 180, 80), 1.4f);
+                        vel, 220, ToRedGiant(new Color(255, 180, 80)), 1.4f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -350,7 +409,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Gold,
-                    Vector2.Zero, 255, new Color(255, 240, 180), 0.7f);
+                    Vector2.Zero, 255, ToRedGiant(new Color(255, 240, 180)), 0.7f);
                 d.noGravity = true;
                 d.fadeIn = 0.3f;
             }
@@ -378,9 +437,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Position = spawnPos,
                     Velocity = Vector2.Zero,
                     Scale = Vector2.One * Main.rand.NextFloat(0.55f, 0.95f),
-                    PackedColor = ParticleManager.PackColor(new Color(255, 235, 140, 150)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 235, 140, 150)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(255, 110, 30, 30)),
+                    PackedColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 235, 140, 150))),
+                    PackedStartColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 235, 140, 150))),
+                    PackedEndColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 110, 30, 30))),
                     TimeLeft = 55,
                     Duration = 55,
                     TextureId = ParticleTex.SoftGlow,
@@ -416,9 +475,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Velocity = outward * Main.rand.NextFloat(1.2f, 2.2f),
                     Scale = new Vector2(1.5f, 0.4f),
                     Rotation = angle,
-                    PackedColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 245, 190, 160)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(255, 120, 40, 20)),
+                    PackedColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 245, 190, 160))),
+                    PackedStartColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 245, 190, 160))),
+                    PackedEndColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 120, 40, 20))),
                     TimeLeft = 32,
                     Duration = 32,
                     TextureId = ParticleTex.TrailGlow,
@@ -488,9 +547,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Scale = Vector2.One * Main.rand.NextFloat(0.4f, 0.8f),
                         Rotation = angle,
                         RotationSpeed = angVel * 2f,
-                        PackedColor = ParticleManager.PackColor(new Color(255, 210, 110, 210)),
-                        PackedStartColor = ParticleManager.PackColor(new Color(255, 230, 160, 210)),
-                        PackedEndColor = ParticleManager.PackColor(new Color(255, 90, 20, 30)),
+                        PackedColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 210, 110, 210))),
+                        PackedStartColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 230, 160, 210))),
+                        PackedEndColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 90, 20, 30))),
                         TimeLeft = 45,
                         Duration = 45,
                         TextureId = ParticleTex.Star,
@@ -539,9 +598,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Velocity = toCenter * speed + tangent * speed * 0.55f,
                     Scale = new Vector2(1.6f, 0.4f),
                     Rotation = (float)Math.Atan2(toCenter.Y, toCenter.X),
-                    PackedColor = ParticleManager.PackColor(new Color(255, 240, 170, 190)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 170, 190)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(255, 140, 40, 40)),
+                    PackedColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 240, 170, 190))),
+                    PackedStartColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 240, 170, 190))),
+                    PackedEndColor = ParticleManager.PackColor(ToRedGiant(new Color(255, 140, 40, 40))),
                     TimeLeft = 38,
                     Duration = 38,
                     TextureId = ParticleTex.TrailGlow,
@@ -592,6 +651,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 float scale = Projectile.scale;
+                // v5.94 — GIGANTE ROJA: mezcla de color según la fase (0 = amarilla).
+                float rg = RedGiantProgress;
 
                 // === 1. BACKGLOW ===
                 Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
@@ -599,14 +660,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
-                // Amarillo (pequeño e intenso)
+                // Amarillo → ROJO brillante (pequeño e intenso, crece con la gigante)
+                Color glowHot = Color.Lerp(new Color(255, 230, 100), new Color(255, 75, 25), rg);
+                glowHot.A = 0; // igual que el original (alpha 0)
                 Main.spriteBatch.Draw(bloomCircle, drawPos, null,
-                    (new Color(255, 230, 100) { A = 0 }) * 0.7f, 0f,
-                    bloomCircle.Size() * 0.5f, scale * 0.95f, SpriteEffects.None, 0f);
-                // Rojo (grande y tenue)
+                    glowHot * 0.7f, 0f,
+                    bloomCircle.Size() * 0.5f, scale * (0.95f + 0.35f * rg), SpriteEffects.None, 0f);
+                // Rojo profundo (grande y tenue — envuelve a la gigante)
+                Color glowRed = Color.Lerp(new Color(255, 50, 0), new Color(255, 30, 10), rg);
+                glowRed.A = 0; // igual que el original (alpha 0)
                 Main.spriteBatch.Draw(bloomCircle, drawPos, null,
-                    (new Color(255, 50, 0) { A = 0 }) * 0.45f, 0f,
-                    bloomCircle.Size() * 0.5f, scale * 1.61f, SpriteEffects.None, 0f);
+                    glowRed * 0.45f, 0f,
+                    bloomCircle.Size() * 0.5f, scale * (1.61f + 0.5f * rg), SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
 
                 // === 2. RADIAL SHINE (aura con ruido animado) ===
@@ -621,8 +686,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);
                     _shineShader.Value.CurrentTechnique.Passes[0].Apply();
+                    // v5.94 — el aura ENROJECE con la gigante.
+                    Color shineColor = Color.Lerp(new Color(252, 212, 112), new Color(255, 95, 45), rg);
                     Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
-                        new Color(252, 212, 112) * 0.24f, Projectile.rotation,
+                        shineColor * 0.24f, Projectile.rotation,
                         wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                 }
@@ -635,8 +702,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Texture2D dendritic = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
 
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
-                    shader.Parameters["mainColor"].SetValue(new Color(255, 255, 255).ToVector3());
-                    shader.Parameters["darkerColor"].SetValue(new Color(204, 92, 25).ToVector3());
+                    // v5.94 — GIGANTE ROJA: el cuerpo de la estrella enrojece.
+                    shader.Parameters["mainColor"].SetValue(
+                        Color.Lerp(new Color(255, 255, 255), new Color(255, 150, 120), rg).ToVector3());
+                    shader.Parameters["darkerColor"].SetValue(
+                        Color.Lerp(new Color(204, 92, 25), new Color(150, 28, 12), rg).ToVector3());
                     shader.Parameters["subtractiveAccentFactor"].SetValue(new Color(181, 0, 0).ToVector3());
                     shader.Parameters["sphereSpinTime"].SetValue(Main.GlobalTimeWrappedHourly * 0.9f);
                     shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
@@ -747,7 +817,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // QUEMADURA: el sol es una bola de plasma ardiente → inflama al enemigo.
-            target.AddBuff(BuffID.OnFire, 300);
+            // v5.94 - GIGANTE ROJA: la estrella hinchada quema el DOBLE (10 s).
+            target.AddBuff(BuffID.OnFire, RedGiantProgress > 0f ? 600 : 300);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, target.Center);
         }
 
@@ -778,7 +849,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
                 int waveDamage = Math.Max(1, (int)(novaDamage * 0.5f));
-                float[] radii = { 360f, 450f, 540f };
+                // v5.94 — ondas REDIMENSIONADAS (petición del usuario: eran
+                // demasiado grandes — cubrían toda la pantalla): 360/450/540 →
+                // 240/300/360. Sigue habiendo 3 frentes escalonados con daño
+                // cada 0.1 s y quemadura de 10 s — solo que a escala justa.
+                float[] radii = { 240f, 300f, 360f };
                 for (int i = 0; i < 3; i++)
                 {
                     Projectile.NewProjectile(
@@ -792,11 +867,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
 
                 // Daño AoE del núcleo de la nova (el epicentro de la explosión).
+                // v5.94: 340 → 260 (proporcional a las ondas nuevas).
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
-                    if (dist < 340f)
+                    if (dist < 260f)
                     {
                         npc.SimpleStrikeNPC(novaDamage, npc.direction,
                             false, Projectile.knockBack, DamageClass.Magic);
@@ -812,9 +888,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             ParticlePresets.Explosion(Projectile.Center, 170f, 40,
                 new Color(255, 245, 200), new Color(255, 90, 20), 50);
             // DOBLE ONDA EXPANSIVA (dorada rápida + roja retardada)
-            ParticlePresets.RingPulse(Projectile.Center, 280f,
+            // v5.94 — tamaños proporcionales a las ondas nuevas (la librería
+            // además ahora mide el radio REAL de la textura HD).
+            ParticlePresets.RingPulse(Projectile.Center, 200f,
                 new Color(255, 210, 100, 210), 34);
-            ParticlePresets.RingPulse(Projectile.Center, 380f,
+            ParticlePresets.RingPulse(Projectile.Center, 270f,
                 new Color(255, 80, 30, 150), 46);
             // Ráfaga de viento solar radial de la librería
             for (int i = 0; i < 22; i++)

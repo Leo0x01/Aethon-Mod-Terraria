@@ -338,8 +338,7 @@ namespace AethonMod.Content.Projectiles.V20
             try
             {
                 Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                Texture2D ring = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-                if (softGlow == null || ring == null) return false;
+                if (softGlow == null) return false;
 
                 float charge = MathHelper.Clamp(Age / ChargeDuration, 0f, 1f);
                 float chargeEased = charge * charge;
@@ -356,7 +355,11 @@ namespace AethonMod.Content.Projectiles.V20
 
                 Vector2 drawPos = Projectile.Center - Main.screenPosition + jitter;
                 Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
-                Vector2 ringOrigin = new Vector2(ring.Width / 2f, ring.Height / 2f);
+                // v5.94 — los ANILLOS DE CONTENCIÓN se eliminaron: los anillos
+                // son parte de la ONDA EXPANSIVA final ("solo deben salir al
+                // final", petición del usuario) y además la escala fija sobre
+                // la textura HD dibujaba anillos de hasta 2458px. La carga se
+                // expresa con el halo dorado condensándose + temblor creciente.
 
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
@@ -381,16 +384,6 @@ namespace AethonMod.Content.Projectiles.V20
                 float coreScale = 0.4f + chargeEased * 0.28f;
                 Color core = new Color(255, 250, 215, 240);
                 Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin, coreScale * pulse, SpriteEffects.None, 0f);
-
-                // === Anillos de contención pulsantes (la estrella luchando por no colapsar) ===
-                if (charge > 0.25f)
-                {
-                    float ringPhase = (Age % 24f) / 24f;
-                    float ringScale = (0.8f + ringPhase * 1.6f) * (0.6f + charge * 0.5f);
-                    byte ringAlpha = (byte)(160 * (1f - ringPhase) * charge);
-                    Main.spriteBatch.Draw(ring, drawPos, null,
-                        new Color(255, 220, 140, ringAlpha), 0f, ringOrigin, ringScale, SpriteEffects.None, 0f);
-                }
 
                 Main.spriteBatch.End();
             }

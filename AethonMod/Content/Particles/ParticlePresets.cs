@@ -69,8 +69,13 @@ namespace AethonMod.Content.Particles
                 BlendMode = 1,
                 LayerPriority = LayerPriorities.BeforeProjectiles,
             };
-            ring.UserData1 = radius / 64f;  // escala final X (Ring = 64px)
-            ring.UserData2 = radius / 64f;  // escala final Y
+            // v5.94 — Ring.png pasó de 64px a 1024px (textura HD de v5.93):
+            // la escala final se calculaba como radio/64 → anillos 16× más
+            // grandes de lo pedido. Ahora con el radio REAL de la textura
+            // (mitad de 1024 = 512): escala = radio/512 → el anillo visible
+            // queda a ~0.92·radio (núcleo del Ring a 0.92 de su radio).
+            ring.UserData1 = radius / 512f;  // escala final X (Ring HD = 1024px)
+            ring.UserData2 = radius / 512f;  // escala final Y
             ring.EnableComponent(ComponentFlag.ScaleUp);
             ring.EnableComponent(ComponentFlag.FadeOut);
             ParticleManager.Spawn(ring);
@@ -158,8 +163,9 @@ namespace AethonMod.Content.Particles
                 BlendMode = 1,
                 LayerPriority = LayerPriorities.BeforeProjectiles,
             };
-            ring.UserData1 = maxRadius / 64f;
-            ring.UserData2 = maxRadius / 64f;
+            // v5.94 — fix del 16× (Ring.png 64→1024px): radio REAL de la textura.
+            ring.UserData1 = maxRadius / 512f;
+            ring.UserData2 = maxRadius / 512f;
             ring.EnableComponent(ComponentFlag.ScaleUp);
             ring.EnableComponent(ComponentFlag.FadeOut);
             ParticleManager.Spawn(ring);

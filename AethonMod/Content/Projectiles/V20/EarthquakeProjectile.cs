@@ -127,7 +127,8 @@ namespace AethonMod.Content.Projectiles.V20
                     if (ringAge < 0f) continue;
                     if (ringAge > 30f) continue;
                     float progress = ringAge / 30f;
-                    float scale = 0.3f + progress * 2.4f;
+                    // v5.94 - fix 16x: Ring.png paso de 64px a 1024px (v5.93).
+                    float scale = (0.3f + progress * 2.4f) / 16f;
                     float alpha = (1f - progress) * 0.7f;
                     if (alpha <= 0f) continue;
                     Color col = new Color(255, 180, 80, (byte)(alpha * 255));

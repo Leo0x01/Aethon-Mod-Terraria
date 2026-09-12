@@ -707,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.93 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.94 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `PEND` | v5.94 | **EL CAMPO DE FUERZA REAL DE LAS COLUMNAS + GIGANTE ROJA + ANILLOS SOLO AL FINAL**: investigación profunda del código REAL de Terraria (entorno de decompilación reconstruido: .NET 8 + ilspycmd + tModLoader v2026.07.3.0 de GitHub; decompile de NPC 112k líneas, Main 85k, Projectile 93k + assembly completo) → **mecanismo EXACTO del escudo de las Columnas Lunares descifrado** (Main.DrawNPCDirect_Inner): la burbuja es **ruido Perlin ("Images/Misc/Perlin" del juego) en un quad 600×600 con el shader `GameShaders.Misc["ForceField"]` VANILLA** (Immediate+AlphaBlend+PointWrap+DepthStencil.Default), alpha=fuerza·0.8+0.2, flash de 30 ticks al golpe (pop +5%, brillo +50%, npc.ai[3]=1..120) y al destruirse **se expande 2×, brillo ×2 y desvanece 1-sqrt(grow)** → el agujero negro USA EL MISMO SHADER DEL JUEGO con las mismas llamadas (DrawForceField reescrito; fuerza= carga hacia la muerte; radio 2.2× horizonte que MANTIENE su tamaño durante la evaporación vía localAI[1] pre-colapso; flash al absorber golpes) y **la onda cromática dibuja la burbuja de destrucción** (ai[3]=radio final, parámetros exactos de la animación vanilla) + **AURA DE DAÑO del campo** (50% del daño cada 0.5 s dentro del escudo ×1.3, crece con la muerte — límites de daño en área mejorados) + **GIGANTE ROJA del sol** (t=7-10s: hincha ×1.85 smoothstep + ENROJECE todo — backglow/aura/SunShader/luz/dusts/partículas con ToRedGiant — y su daño de área crece: hitbox ×1.85 con Resize centro-fijo + daño ×1.75 con base en ai[2] + quemadura 10 s) + **ANILLOS SOLO AL FINAL** (causa raíz del "en todo momento": la textura HD de v5.93 dejó 16× más grandes todos los dibujos de escala fija — PhoenixNova 5 anillos por llamarada hasta 4710px y Supernova contención hasta 2458px ELIMINADOS; anillo de fotones del agujero 1178px ELIMINADO; campo v5.93 RingShieldNebula REEMPLAZADO por el ForceField real) + **REDIMENSIONADOS**: ondas sol 360/450/540→240/300/360, cromática 620→420, AoE núcleo 340→260, pulsos 280/380→200/270 + **fixes 16×**: ParticlePresets radius/64→radius/512, AbyssalEye 2.0→0.125, GravityPulse Lerp(0..5)→(0..0.3125), Earthquake ÷16, BlackHoleMini 0.35→0.0219, DrawFallback del agujero por radio. Compilación: 0 errores, 0 warnings |
 | `4d8681b` | v5.93 | **CAMPO DE FUERZA estilo Columna de Nebulosa + anillos de ALTA CALIDAD** (petición del usuario con referencia explícita al Nebula Pillar): el Ring.png era de **64px** (se pixelaba a 620px de radio) → **3 texturas nuevas de 1024px generadas proceduralmente** (Ring reemplazo directo 105KB con misma geometría — los 9 usos existentes ganan calidad; RingShieldNebula = cuerpo de campo con COLOR horneado rosa→magenta→cian + arcos de energía; FireRing = llamas con color propio blanco-amarillo→naranja→rojo y lengüetas fBm) + **DrawForceField** en el agujero negro: burbuja translúcida a 1.9× el horizonte (envuelve el disco) con cuerpo nebula + aros FINOS cian/rosa que "respiran" (±5-6.5% del radio) — vive en DrawCoreVisuals (mundo Y encima-de-lente) y crece con la evaporación → al morir, la onda cromática del OnKill ES el campo expandiéndose (continuidad visual perfecta) + **DrawWaveVisual reescrita**: cromática = cuerpo nebula tenue + 3 AROS FINOS R/G/B separados 3.5→9.5% del frente (aberración VISIBLE sin lavado a blanco — validado por simulación VLM + píxeles: el diseño de 3 pasadas de banda ancha se lavaba porque la base solapaba al 100%); fuego = FireRing ×2 + Ring fino de choque; compensación thinComp=1/0.92. Bugs de generación corregidos: clamp01 sobre canales 0-255 (→textura negra) y corte de borde (contenido ≤0.995 del canvas). RingShield blanca intermedia eliminada (sin usos). Compilación: 0 errores, 0 warnings |
 | `a260673` | v5.92 | **FIX del error del sol** ("el sol dio un error" — reporte del usuario con client.log): `InvalidOperationException: Begin has been called before calling End` en `CosmicShockwaveProjectile.PreDraw` (línea 367 de v5.91), 2 "Excepción silenciosa" por explosión del sol que ABORTABAN el dibujado de todos los proyectiles del frame. Causa raíz: las ondas de fuego del sol nacen con retardo escalonado (edades 0/-8/-16); en el tick EXACTO en que un retardo expira el frente mide 0 px → `DrawWaveVisual` devolvía SIN tocar el spriteBatch → el Begin de restauración INCONDICIONAL del PreDraw re-abría el batch del juego YA ABIERTO (la onda cromática del agujero nace sin retardo → jamás lo disparó, por eso SOLO el sol fallaba). Fix: `DrawWaveVisual` ahora devuelve **bool** (false = no tocó el batch / true = lo dejó CERRADO) y el PreDraw restaura SOLO cuando corresponde; auditoría de Begin/End de sol/nova/agujero/PhoenixNova/lente: ningún otro proyectil tiene el patrón. Compilación: 0 errores, 0 warnings |
 | `2f56660` | v5.91 | **El SOL AUTORITA su explosión final** (la Supernova del SupernovaStaff, verificada en el historial: el OnKill del sol mata la hija EN SU MISMO TICK con TryKillSupernova + genera ÉL las 3 ondas de fuego y el AoE del núcleo → sincronización POR CONSTRUCCIÓN, sin el punto único de fallo del índice ai[1]+clamp de la v5.88; flag ai[2]=1 SunInvoked → la hija no duplica ondas/AoE) + **partículas DEL COLOR DEL SOL** (halo dorado→blanco dorado, sin azul) + **ondas que dañan CADA 0.1 s A MEDIDA QUE AVANZAN** (_nextHitAt cooldowns por banda del frente, daño en área desde el centro; quemadura OnFire 10 s en fuego) + **aberración cromática TRANSPARENTE** (alphas 230→140/150→95) + **agujero negro: materia absorbida ORIENTADA AL CENTRO** (velocidad radial + Rotation=angle+π) con **ACELERACIÓN al explotar** (PullToGlobalBoost hasta ×6, reseteado en OnKill; polvo ×3) + **lente 1.4×** (mismo ángulo ~0.8 rad) + **PhoenixNova DETRÁS del sol** (DrawBehind→drawCacheProjsBehindProjectiles, firma verificada por reflexión; quirúrgico, sin el desastre v5.89) + **FIX del SpriteBatch del PhoenixNova** (restauraba SIN GameViewMatrix.TransformationMatrix → proyectiles vanilla "flotando/subiendo": la causa real de los círculos de v5.89) |
@@ -789,10 +790,51 @@ Commits desde v5.28 hasta v5.93 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.93
-- **Mensaje**: "feat v5.93: campo de fuerza estilo Columna de Nebulosa (magenta→cian, aberración en el borde que respira) + anillos 1024px (Ring HD / RingShieldNebula / FireRing con llamas) + onda cromática = el campo expandiéndose con franjas R/G/B separadas"
+- **Versión**: v5.94
+- **Mensaje**: "feat v5.94: el campo de fuerza REAL de las Columnas Lunares (shader ForceField VANILLA + Perlin del juego, investigado por decompilación) + gigante roja del sol con daño en área creciente + anillos SOLO en la explosión final + redimensionados + fixes 16× de la textura HD"
 
-### 11.2 Qué se hizo en v5.93 (campo de fuerza Nebula + calidad de anillos)
+### 11.2 Qué se hizo en v5.94 (escudo real de Columna + gigante roja + anillos al final)
+
+**Peticiones del usuario**: los anillos quedaron demasiado grandes (redimensionar
+sol y agujero); los anillos son parte de la onda expansiva — SOLO deben salir al
+final (salían en todo momento, con captura); el sol al explotar debe crecer en
+rojo (gigante roja) con su daño en área creciendo junto a la estrella; el agujero
+debe mejorar los límites de su daño en área; "no hiciste el efecto que tienen los
+escudos de las columnas en terraria — investiga profundamente el código de
+Terraria y de cualquier mod con escudos o campos de fuerza".
+
+**A. Investigación real (decompilación)**: el escudo de las Columnas = Perlin
+("Images/Misc/Perlin") en quad 600×600 + shader `GameShaders.Misc["ForceField"]`
+(DyeInitializer: `new MiscShaderData(Main.PixelShaderRef, "ForceField")`); vivo:
+alpha=fuerza·0.8+0.2; golpe: proyectil 629 baja fuerza y npc.ai[3]=1 → flash 30
+ticks (pop +5%, UseColor(1+flash·0.5)); destruido: expansión ×(1+grow) hasta 2×,
+UseColor(2), fade 1-sqrt(grow). El mod usa el MISMO shader con las MISMAS
+llamadas → look exacto del juego.
+
+**B. Agujero negro**: DrawForceField con el mecanismo vanilla (fuerza = carga
+hacia la muerte 0.2→1.0; flash al absorber golpes — OnHitNPC → localAI[0];
+radio 2.2× horizonte estable durante la evaporación — localAI[1] pre-colapso);
+al morir el OnKill pasa el radio a la onda (ai[3]) y la onda dibuja la burbuja
+EXPANDIÉNDOSE y DESAPARECIENDO con los parámetros exactos. AURA de daño: 50%
+cada 0.5 s dentro del campo ×1.3. Onda cromática 620→420.
+
+**C. Sol (gigante roja)**: t=7-10s — hincha ×1.85 (smoothstep) y enrojece
+(backglow/aura/SunShader/luz/dusts/partículas); hitbox ×1.85 (Resize centro
+fijo — verificado en el decompile) y daño ×1.75; quemadura 10 s. Ondas
+360/450/540→240/300/360; AoE del núcleo 340→260.
+
+**D. Anillos solo al final (causa raíz del bug)**: la textura HD de v5.93
+(64→1024px) dejó 16× más grandes los dibujos de escala fija. Eliminados:
+anillos de las llamaradas (PhoenixNova, hasta 4710px), de la carga (Supernova,
+hasta 2458px) y del anillo de fotones del agujero (1178px). Fixes: librería
+radius/64→radius/512; V20 (AbyssalEye/GravityPulse/Earthquake/BlackHoleMini)
+÷16; DrawFallback por radio.
+
+**E. Verificación**: compilación contra tModLoader real v2026.07.3.0 con 0
+errores y 0 warnings (entorno reconstruido: /tmp/verify + stub del hook
+MonoMod On_TimeLogger, generado en runtime por tML y ausente del DLL distribuido).
+
+### 11.2.1 Qué se hizo en v5.93 (histórico — campo Nebula inventado + anillos HD)
 
 **Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía muy
 baja calidad y era solo blanco; el agujero necesita el CAMPO DE FUERZA de la
@@ -3772,7 +3814,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.93
+> Última actualización: v5.94
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

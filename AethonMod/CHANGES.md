@@ -1,5 +1,103 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.94 — El campo de fuerza REAL de las Columnas + Gigante Roja + anillos a su tamaño
+
+**Peticiones del usuario**: (1) los anillos de alta calidad de v5.93 quedaron
+DEMASIADO GRANDES — redimensionar los del sol y el agujero; (2) los anillos
+son parte de la ONDA EXPANSIVA — solo deben salir AL FINAL (salían durante
+toda la vida de ambos proyectiles, con imagen de prueba incluida); (3) el sol
+al explotar debe CRECER EN ROJO — "una estrella amarilla que se convierte en
+gigante roja y luego explota, todo esto haciendo que su daño en area crezca
+junto con la estrella"; (4) el agujero negro debe mejorar los LÍMITES de su
+daño en área; (5) "no hiciste el efecto que tienen los escudos de las
+columnas en terraria... deberías comenzar a investigar profundamente el
+código de terraria y de cualquier mods que tengan escudos o campos de fuerza".
+
+### A. INVESTIGACIÓN PROFUNDA DEL CÓDIGO REAL DE TERRARIA (decompilación)
+
+Entorno reconstruido desde cero (.NET 8 + ilspycmd + tModLoader v2026.07.3.0
+descargado de GitHub). Decompile REAL de `Terraria.NPC` (112k líneas),
+`Terraria.Main` (85k), `Terraria.Projectile` (93k), `MiscShaderData`,
+`GameShaders` + grep global del assembly completo. **El mecanismo EXACTO del
+escudo de las Columnas Lunares** (Main.DrawNPCDirect_Inner, torres
+422/493/507/517):
+
+- El escudo NO es una textura de burbuja: es **ruido Perlin**
+  ("Images/Misc/Perlin", la textura del juego) en un **quad de 600×600**
+  (sourceRect 0,0,600,600, origen 300,300) dibujado con el shader
+  **`GameShaders.Misc["ForceField"]`** — registrado por DyeInitializer como
+  `new MiscShaderData(Main.PixelShaderRef, "ForceField")`, sin imágenes extra.
+- Batch EXACTO: Immediate + AlphaBlend + **PointWrap** + DepthStencil.Default
+  + CullNone + transform del mundo.
+- **Vivo**: alpha = fuerza·0.8 + 0.2; **flash al golpe** (el proyectil 629
+  baja la fuerza y pone npc.ai[3]=1; el AI lo incrementa hasta 120): pop de
+  escala +5% y UseColor(1+flash·0.5) durante 30 ticks.
+- **Destruido** (ai[3] > 0 con fuerza 0): la burbuja se **EXPANDE hasta 2×**
+  (escala·(1+grow), grow=min(t/30,1)), **brillo ×2** (UseColor(2)) y se
+  **DESVANECE** (color de la DrawData = 1-sqrt(grow)) — la secuencia que el
+  usuario pedía desde el principio.
+- tModLoader expone `GameShaders.Misc` públicamente → **el mod usa el MISMO
+  shader del juego con las MISMAS llamadas**: look idéntico garantizado.
+
+### B. EL CAMPO DE FUERZA DEL AGUJERO NEGRO (el efecto REAL de las Columnas)
+
+`BlackHoleProjectile.DrawForceField` REESCRITO con el mecanismo vanilla:
+Perlin del juego + shader ForceField + geometría/parámetros exactos
+(detalles en A). La "fuerza" del escudo = la carga hacia la muerte (alpha
+0.2→1.0 en los 10 s); **flash** al absorber un golpe (OnHitNPC →
+localAI[0]=1, timer de 30 ticks idéntico al npc.ai[3] de la torre); el radio
+(2.2× el horizonte) **mantiene su tamaño durante la evaporación** (escala
+pre-colapso en localAI[1]) como el escudo de una torre mientras muere; y al
+explotar, el OnKill pasa ese radio a la onda cromática (ai[3]): **la onda
+dibuja la burbuja del escudo EXPANDIÉNDOSE (2×) y DESAPARECIENDO** — la
+destrucción del escudo de la Columna, con las franjas R/G/B de aberración
+cromática encima. El inventado campo v5.93 (RingShieldNebula + aros finos)
+se ELIMINÓ (era "un anillo que sale en todo momento", justo lo que el
+usuario no quería).
+
+### C. AURA DE DAÑO DEL CAMPO (límites de daño en área mejorados)
+
+El agujero antes solo dañaba por contacto (hitbox 96 px) y en la onda final.
+Ahora el CAMPO DE FUERZA desgasta a todo enemigo atrapado dentro: **daño del
+50% cada 0.5 s** dentro del radio del escudo ×1.3 (crece con la hinchazón
+de la muerte, +60%), con empuje suave hacia el centro. La gravedad los
+arrastra, el campo los exprime y la onda final los barre.
+
+### D. GIGANTE ROJA (el sol antes de explotar)
+
+Últimos 3 s (t=7-10): la estrella amarilla se **HINCHA hasta ×1.85**
+(smoothstep continuo — sustituye a la compresión ×1.0008 y al hinchazón
+final ×1.025) y **ENROJECE TODO**: backglow, aura RadialShine, cuerpo
+SunShader (mainColor/darkerColor), luz, dusts y partículas de la librería
+(tinte `ToRedGiant`). **El daño de área crece con la estrella**: hitbox de
+contacto ×1.85 (Projectile.Resize, mantiene el centro — verificado en el
+código de Terraria) y daño ×1.75 (base en ai[2]), quemadura 10 s.
+
+### E. ANILLOS: SOLO EN LA EXPLOSIÓN FINAL + REDIMENSIONADOS
+
+Causa raíz de "demasiado grandes y en todo momento": v5.93 reemplazó
+Ring.png de 64→1024 px y TODOS los dibujados con escala fija quedaron 16×:
+
+- **Sol en vida** (los anillos naranjas gigantes de la captura):
+  PhoenixNova dibujaba 5 anillos por llamarada (hasta 4710 px) y la Supernova
+  sus anillos de contención (hasta 2458 px) → **ELIMINADOS** (la llamarada
+  queda como explosión de brillo: halo + núcleo + flash; la carga como halo
+  dorado condensándose + temblor).
+- **Agujero en vida** (el anillo cian gigante de la captura): anillo de
+  fotones pulsante cada 36 ticks (1178 px) → **ELIMINADO**; campo v5.93 →
+  reemplazado por el ForceField real (B).
+- **Ondas**: sol 360/450/540 → **240/300/360**; agujero 620 → **420**;
+  AoE del núcleo del sol 340 → 260; pulsos de la librería 280/380 → 200/270.
+- **Librería (ParticlePresets)**: `radius/64` asumía la textura de 64 px →
+  **`radius/512`** (radio real de la textura HD) en Explosion y RingPulse.
+- **V20**: AbyssalEye (2.0→0.125), GravityPulse (Lerp 0..5→0..0.3125),
+  Earthquake (÷16) y BlackHoleMini (0.35→0.0219) — restaurados a su tamaño.
+- **DrawFallback del agujero**: anillo de fotones ahora por radio (1.3× el
+  horizonte) en vez de escala fija 0.6.
+
+**Compilación verificada contra tModLoader real (v2026.07.3.0): 0 errores,
+0 warnings.**
+
 ## Commit v5.93 — El campo de fuerza de la Columna de Nebulosa + anillos de ALTA CALIDAD
 
 **Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía MUY
