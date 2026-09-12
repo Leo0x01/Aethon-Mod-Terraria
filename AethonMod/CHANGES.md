@@ -1,5 +1,128 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.96 — El brillo del sol crece sin parpadear + ANILLO DE EINSTEIN + daño de área creciente + EL OJO DEL VACÍO
+
+**Peticiones del usuario**: (1) "el PhoenixNovaStaff parpadea, creo que lo
+mejor es que el brillo de PhoenixNovaStaff ya no parpadee, este debe comenzar
+a crecer lentamente y que su crecimiento esté sincronizado con el ciclo de
+vida del sol y con el tamaño del mismo"; (2) "en cuanto al agujero negro,
+creo que es mejor que quites el campo de fuerza de las columnas, se ve mejor
+si eso. En su lugar, al final de las explosiones debe crear un lente
+gravitacional en forma de anillo que se expanda"; (3) "ahora todo el daño de
+ambos proyectiles deben ser daño de área y este debe extenderse por fuera del
+proyectil y crecer conforme el proyectil crece, se expande y explota"; (4)
+"crea otra arma nueva de prueba con la que has aprendido y esta nueva arma
+debe tener un proyectil lo más cósmico y de terror cósmico que se te ocurra,
+lo dejo a tu imaginación y capacidad de creación".
+
+### A. EL BRILLO DEL SOL YA NO PARPADEA — GLOW CORONAL PERSISTENTE
+
+Las llamaradas PhoenixNova periódicas (una nova de 60 frames cada 2 s — cada
+una nacía y moría: un PARPADEO por diseño) se **ELIMINARON por completo** del
+sol. En su lugar, `SunProjectile.DrawStarVisuals` dibuja un **GLOW CORONAL
+PERSISTENTE** (`DrawCoronalGlowSprites`): dos capas de SoftGlow aditivas que
+- **nacen tenues con la estrella** (halo a 1.30× su radio visual, alpha 70),
+- **crecen LENTO durante toda su vida** (función PURA de lifeT — CERO sin(),
+  CERO flashes, CERO oscilación: halo hasta 2.35×, corona 1.05→1.55×),
+- **se sincronizan con el TAMAÑO del sol**: todo se dimensiona con `starR`
+  (width×scale×0.75) → la GIGANTE ROJA (×1.85) ARRASTRA al glow consigo,
+- **enrojecen** con la gigante (Lerp naranja→rojo con rg).
+La carga de la Supernova hija se sigue dibujando detrás del disco. La
+PhoenixNovaStaff **standalone** también se suavizó: el pulso sinusoidal
+(0.93±0.07) y el flash del pico (frames 25-35) se eliminaron — la nova nace
+contenida (0.75×) y **crece de forma continua** hasta 2.3× con una
+envolvente lisa (encendido 12f → plena → desvanecido 8f).
+
+### B. ADIÓS CAMPO DE FUERZA — EL ANILLO DE EINSTEIN (agujero negro)
+
+La burbuja Perlin/ForceField vanilla (shader de las Columnas Lunares) que
+cabalgaba la onda cromática **se ELIMINÓ por completo** (textura, shader,
+bloque de dibujado y el `localAI[0]` del radio del escudo — el binario queda
+con 0 ocurrencias de ForceField/Perlin). **En su lugar**: cuando la onda
+cromática del agujero **TERMINA de expandirse** (el final de la explosión),
+engendra una onda **StyleEinstein** — el **LENTE GRAVITACIONAL ANULAR**:
+- **Frente fino BLANCO incandescente** (el anillo de Einstein puro: la luz
+  de todo lo que quedó detrás, doblada en un círculo perfecto, alpha 230).
+- **Franjas R/B MUY juntas** (separación 1.8% vs 3.5-9.5% de la cromática —
+  la imagen lensada se dispersa justo en el borde) + **halo interior pálido**
+  (la luz lensada esmealada por dentro) + **imagen secundaria tenue** fuera.
+- **Se expande MÁS RÁPIDO que la materia**: 26 px/tick con expansión CASI
+  LINEAL (vs 20 ease-out de las ondas de materia) — es el ripple del
+  espaciotiempo. Radio 520: SOBREPASA a la propia explosión.
+- **CURVA EL FONDO del juego**: fuente del BlackHoleLensSystem con radio que
+  ABRAZA al anillo (0.85× el frente) y fuerza que decae lento (0.9→0.4).
+- **Banda de daño FINA** (0.88-1.06× el frente, cada 0.1 s) + **ShadowFlame**
+  (la luz lensada quema el alma, no la carne).
+
+### C. TODO EL DAÑO ES DAÑO DE ÁREA QUE CRECE (sol + agujero)
+
+**SOL**: aura de daño cada 0.25 s (15 ticks) — radio = `starR×(1.35+0.30×
+lifeT)` (110→205px, **se extiende POR FUERA del cuerpo** y CRECE con el
+ciclo de vida), daño 40% (que ya rampa ×1.75 con la gigante), + OnFire que
+**DOBLA en gigante** (600 ticks). La explosión final ya era área (3 ondas de
+fuego con banda 0.72-1.02×frente cada 0.1 s + onda de lente + AoE del
+núcleo). **AGUJERO NEGRO**: el aura pasa de fija (50% cada 0.5 s en
+escudo×1.3) a **CRECIENTE**: radio = escudo×(0.75+0.45×lifeProgress)
+(sobre la hinchazón +60% de la muerte, vía localAI[1] pre-colapso) y daño
+35%→65% — y el clímax del área es la explosión (cromática + Einstein). La
+**PhoenixNova standalone** también: aura 45→155px (60% + OnFire cada
+0.166 s) creciendo con la expansión de la nova.
+
+### D. EL OJO DEL VACÍO — VoidEyeStaff (arma nueva de terror cósmico)
+
+**"Una estrella muerta con un ojo vivo"** — todo lo aprendido condensado en
+un solo horror de 12 segundos (`VoidEyeProjectile`, 720 ticks):
+- **CUERPO**: estrella MUERTA — el SunShader con **paleta invertida**
+  (carbón oscuro + vetas carmesí: el gemelo maligno del sol). Emergencia
+  SIN pop elástico (un peso siniestro: smoothstep lento).
+- **OJO** (texturas generadas: EyeSclera/EyeIris/EyeLid 512px, supersampled
+  ×4): esclerótica marfil enfermo con **VENAS ramificadas** e inyección de
+  sangre en el terror; **iris ÁMBAR que ROTA lentamente** (los iris no
+  deberían rotar) con estrías radiales y anillo limbal; **MIRA a la víctima**
+  — el offset del iris SIGUE al enemigo más cercano… **y si no hay nadie,
+  TE MIRA A TI** (al jugador).
+- **PUPILA**: un **MICRO AGUJERO NEGRO** — el RealBlackHoleShader (lensing
+  real de 75 pasos) en miniatura con su **disco de acreción CARMESÍ**. Se
+  **DILATA** con el terror (0.55→1.35) y con ella crecen TODOS:
+  el **aura de daño** (140→300px), la **lente gravitacional** (fuente del
+  pase B, como la gigante roja: el espacio se curva alrededor del ojo) y la
+  **gravedad del arrastre**.
+- **PÁRPADOS de carne muerta**: se abren LENTO (smoothstep 0.8-3 s),
+  **PARPADEAN** cada ~3.3 s — **en la oscuridad daña EL DOBLE** (es cuando
+  alimenta) y la gravedad tira ×2.5 — y en el terror se **RETRAEN DE PAR EN
+  PAR** (ojo desorbitado + iris ámbar→SANGRE).
+- **AURA DE TERROR** (daño de área creciente, filosofía v5.96): 0.2 s al
+  28-62% del daño + **ShadowFlame** + **ralentización por pavor** (×0.92/tick);
+  en el terror: cada 0.1 s al 75%, radio 380px.
+- **EL GRITO (muerte)**: chillido (ScaryScream) + AoE del núcleo (380px,
+  ×1.6, ShadowFlame 8 s + Weak) + **ONDA CROMÁTICA INVERSA** (el mundo
+  COLAPSA hacia el ojo muerto) + **ANILLO DE EINSTEIN** (el desgarro de la
+  realidad, 12 ticks tras el colapso) + implosión de materia oscura +
+  explosión de sangre + temblor fuerte.
+- **Sonidos del horror**: MoonLord (nacimiento y terror), ZombieMoan
+  (despertar, quejidos susurrados cada 2.8 s, parpadeos), ScaryScream (el
+  grito). Lágrimas de sangre (DustID.Blood) desde el párpado inferior,
+  zarcillos de materia oscura orbitando (librería: Orbit+ColorShift),
+  brasa corrupta, llama sombría (DustID.Shadowflame).
+- **MP coherente**: TODO (dilatación, apertura de párpados, terror) se
+  deriva DETERMINISTA de la edad (ai[0]) — el parpadeo y el daño en la
+  oscuridad coinciden en todas las máquinas sin sincronizar nada.
+
+### E. Tooltips actualizados
+
+SunStaff (glow coronal que crece + aura de área), BlackHoleStaff (aura
+creciente 35→65% + el anillo de Einstein al final de la explosión),
+PhoenixNovaStaff (crecimiento continuo + aura), VoidEyeStaff (nuevo).
+
+**Arte nuevo**: EyeSclera.png, EyeIris.png, EyeLid.png (512px, generados con
+PIL supersampled ×4 — venas ramificadas procedurales, estrías radiales del
+iris, carne muerta con margen carmesí), VoidEyeStaff.png (icono 28×30),
+VoidEyeProjectile.png (1×1 transparente — dibujado 100% manual).
+
+**Compilación**: verificada contra tModLoader v2026.07.3.0 real — 0 errores,
+0 warnings. Auditoría del binario: 0 ocurrencias de ForceField/Perlin
+(eliminación total confirmada), texturas del ojo presentes.
+
 ## Commit v5.95 — Efectos del sol DETRÁS de él + fix del error del agujero + el campo de fuerza COMO onda + lente del sol + ondas de lente
 
 **Peticiones del usuario**: (1) "sus efectos SupernovaStaff y PhoenixNovaStaff

@@ -14,17 +14,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
+    /// v5.96 — GLOW CORONAL PERSISTENTE + AURA DE ÁREA CRECIENTE (dos
+    /// peticiones del usuario): (1) "el brillo de PhoenixNovaStaff ya no debe
+    /// parpadear — debe comenzar a crecer lentamente, sincronizado con el
+    /// ciclo de vida del sol y con el tamaño del mismo": las llamaradas
+    /// PhoenixNova periódicas (una nova de 60 frames cada 2 s — cada una un
+    /// PARPADEO por diseño) se ELIMINARON; el sol lleva ahora un GLOW CORONAL
+    /// CONTINUO (DrawCoronalGlowSprites) que nace con la estrella, crece SIN
+    /// OSCILACIÓN (función pura del ciclo de vida) y se dimensiona con starR
+    /// → la gigante roja lo ARRASTRA. (2) "todo el daño de ambos proyectiles
+    /// deben ser daño de área que se extienda por fuera del proyectil y crezca
+    /// conforme crece, se expande y explota": aura de daño cada 0.25 s cuyo
+    /// radio (1.35→1.65× starR) crece con el ciclo de vida y con la gigante
+    /// (110→205px), con quemadura OnFire que dobla en la fase final.
+    ///
     /// v5.95 — SUS EFECTOS VAN DETRÁS DE ÉL (petición del usuario: "sus efectos
     /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él"): el SOL
-    /// dibuja él mismo a sus hijos (llamarada PhoenixNova + carga de la
-    /// Supernova) ANTES de sus propias capas — detrás del disco SIEMPRE, sin
+    /// dibuja él mismo a sus hijos (carga de la Supernova) y su GLOW CORONAL
+    /// ANTES de sus propias capas — detrás del disco SIEMPRE, sin
     /// depender del orden de índices de Main.projectile ni de DrawBehind
     /// (decompilado tML: el bucle principal solo excluye `hide` — sin
     /// hide=true la llamarada se dibujaba DOS VECES, una de ellas ENCIMA del
-    /// sol: el "extraño parpadeo"). Los hijos van con hide=true (nadie más
-    /// los dibuja) y la LLAMARADA IGUALA EL TAMAÑO DEL SOL (petición:
-    /// "aumentar el tamaño de PhoenixNovaStaff y que iguale el tamaño del sol"):
-    /// starR = radio visual real de la estrella (crece con la gigante roja).
+    /// sol: el "extraño parpadeo").
     ///
     /// v5.95 — LENTE GRAVITACIONAL EN LA GIGANTE ROJA (petición: "dale al sol
     /// un poco de lente gravitacional a medida que vaya creciendo como gigante
@@ -52,14 +63,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      s1 = WavyBlotchNoise, s2 = PsychedelicWingTextureOffsetMap,
     ///      escala = width * scale * 1.5 / tamaño de la textura.
     ///
-    /// CICLO DE VIDA (v5.85/v5.86/v5.94) - el sol como cuerpo celeste completo:
-    ///   - t=0s    : nace con pop elástico (SIN llamarada: en t=0 aún está
-    ///               sobre el jugador y la nova estallaría en su posición).
-    ///   - cada 2s : llamarada solar desde el centro (4 en total: 2, 4, 6, 8s) -
-    ///               v5.91: la llamarada (PhoenixNova) se dibuja DETRÁS del
-    ///               cuerpo del sol (DrawBehind → drawCacheProjsBehindProjectiles).
-    ///               v5.94: la llamarada YA NO dibuja anillos (los anillos son
-    ///               de la onda expansiva final: "solo deben salir al final").
+    /// CICLO DE VIDA (v5.85/v5.86/v5.94/v5.96) - el sol como cuerpo celeste completo:
+    ///   - t=0s    : nace con pop elástico + el GLOW CORONAL PERSISTENTE enciende
+    ///               tenue (v5.96: reemplaza las llamaradas periódicas — cada nova
+    ///               de 60 frames era un PARPADEO; el glow crece SIN OSCILACIÓN
+    ///               sincronizado con el ciclo de vida y con el tamaño de la
+    ///               estrella, y se dibuja DETRÁS del disco como backlight).
+    ///   - t=0-7s  : el glow corona crece LENTO (halo 1.30→2.0× starR) mientras
+    ///               el AURA DE ÁREA quema alrededor (1.35× starR, +OnFire).
     ///   - t=7s    : aparece SUPERNOVAPROJECTILE centrado y sincronizado (dura 3s);
     ///               carga energía mientras la gravedad del sol AUMENTA progresivamente
     ///               y su luz se intensifica (materia convergiendo en espiral).
@@ -69,10 +80,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   - t=7-10s : v5.94 - GIGANTE ROJA: la estrella amarilla se HINCHA hasta
     ///               x1.85 y ENROJECE (backglow, aura, SunShader, luz, dusts y
     ///               partículas se tiñen) mientras su DAÑO DE ÁREA crece con
-    ///               ella: hitbox de contacto x1.85 y daño x1.75, quemadura
+    ///               ella: hitbox de contacto x1.85, daño x1.75, AURA que sigue
+    ///               a la estrella (hasta 1.65× starR hinchada ≈ 205px), quemadura
     ///               de 10 s (petición del usuario: "una estrella amarilla que
     ///               se convierte en gigante roja y luego explota, todo esto
     ///               haciendo que su daño en area crezca junto con la estrella").
+    ///               El GLOW CORONAL crece con ella (se dimensiona con starR).
     ///   - t=10s   : ambos proyectiles explotan SIMULTÁNEAMENTE - nova masiva con
     ///               3 ONDAS EXPANSIVAS DE FUEGO (v5.94: radii 240/300/360 -
     ///               antes 360/450/540, cubrían toda la pantalla) que BARRAN
@@ -123,7 +136,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Momento (ticks restantes) en el que nace la supernova: segundo 7.</summary>
         internal const int SupernovaSpawnAtRemaining = 180;
 
-        /// <summary>Cadencia de las llamaradas solares: cada 2 segundos.</summary>
+        /// <summary>Cadencia de las llamaradas solares — v5.96: OBSOLETA.
+        /// Las llamaradas periódicas (una nova de 60 frames cada 2 s: cada una
+        /// un PARPADEO por diseño) se eliminaron; el sol lleva ahora un GLOW
+        /// CORONAL PERSISTENTE que crece con su ciclo de vida (petición del
+        /// usuario). La constante se conserva documentada para el histórico.</summary>
         private const int FlareInterval = 120;
 
         /// <summary>
@@ -149,9 +166,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// v5.95 — Radio visual de la estrella (px): la mitad del canvas del
-        /// SunShader (width×scale×1.5/2). Crece con la gigante roja — la
-        /// llamarada lo iguala y la lente lo abraza.
+        /// v5.96 — Radio visual de la estrella (px): la mitad del canvas del
+        /// SunShader (width×scale×1.5/2). Crece con la gigante roja — el glow
+        /// coronal persistente y la lente lo abrazan.
         /// </summary>
         internal static float GetStarVisualRadius(Projectile p)
         {
@@ -188,27 +205,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
-            // === LLAMARADAS SOLARES (PhoenixNova cada 2 s, DESDE t=2s) ===
-            // v5.86: la primera llamarada YA NO se lanza en t=0 — en ese instante
-            // el sol aún está sobre el jugador (nace en su posición y deriva con
-            // el disparo), así que la nova explotaba "en la posición del jugador".
-            // Ahora la primera espera al segundo 2, cuando el sol ya se ha alejado:
-            // llamaradas en t=2, 4, 6 y 8 s (4 en total).
-            if (VisualsTime > 0f && VisualsTime % FlareInterval == 0f && Projectile.owner == Main.myPlayer)
-            {
-                int flareDamage = (int)(Projectile.damage * 0.5f);
-                if (flareDamage < 1) flareDamage = 1;
-                Projectile.NewProjectile(
-                    Projectile.GetSource_FromThis(),
-                    Projectile.Center, Vector2.Zero,
-                    ModContent.ProjectileType<V20.PhoenixNovaProjectile>(),
-                    flareDamage, Projectile.knockBack * 0.5f,
-                    Projectile.owner,
-                    0f,   // ai[0]: edad de la llamarada
-                    0f,   // ai[1]: libre
-                    1f);  // ai[2]: SunInvoked (v5.95 — la llamarada se OCULTA y
-                          // la dibuja el SOL detrás de su propio disco)
-            }
+            // === v5.96 — GLOW CORONAL PERSISTENTE (REEMPLAZA A LAS LLAMARADAS) ===
+            // Petición del usuario: "el brillo de PhoenixNovaStaff ya no debe
+            // parpadear — debe comenzar a crecer lentamente y su crecimiento
+            // debe estar sincronizado con el ciclo de vida del sol y con el
+            // tamaño del mismo". Las llamaradas periódicas (una nova de 60
+            // frames cada 2 s que nacía y moría — cada una un PARPADEO por
+            // diseño) se ELIMINARON: en su lugar el sol lleva un GLOW CORONAL
+            // CONTINUO que nace con la estrella y crece SIN OSCILACIÓN durante
+            // toda su vida (lo dibuja DrawStarVisuals — ver
+            // DrawCoronalGlowSprites). Su daño pasó al AURA DE ÁREA creciente
+            // (abajo), que reemplaza el daño de contacto de las llamaradas.
 
             // === POP ELÁSTICO DE APARICIÓN ===
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, VisualsTime, true)) *
@@ -247,6 +254,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 // Daño base registrado al nacer (para el ramp de la gigante).
                 Projectile.ai[2] = Projectile.damage;
+            }
+
+            // === v5.96 — AURA DE DAÑO DE ÁREA CRECIENTE ===
+            // Petición del usuario: "todo el daño de ambos proyectiles deben
+            // ser daño de área y este debe extenderse por fuera del proyectil
+            // y crecer conforme el proyectil crece, se expande y explota".
+            // El sol quema a todo enemigo dentro de un aura que nace pegada al
+            // cuerpo (1.35× su radio visual) y crece con el CICLO DE VIDA
+            // (hasta 1.65×) — y como starR usa width×scale, la gigante roja
+            // (×1.85) ARRASTRA AL AURA con ella: 110px → 205px de radio. El
+            // daño del aura escala con el ramp ×1.75 de la gigante (ai[2]).
+            // Cada 0.25 s (15 ticks), SimpleStrikeNPC + quemadura OnFire.
+            if (Main.netMode != NetmodeID.MultiplayerClient &&
+                VisualsTime > 30f && VisualsTime % 15f == 0f && Projectile.scale > 0.25f)
+            {
+                float lifeT = MathHelper.Clamp(VisualsTime / SunLifetime, 0f, 1f);
+                float auraRadius = GetStarVisualRadius(Projectile) * (1.35f + 0.30f * lifeT);
+                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.4f));
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.CanBeChasedBy()) continue;
+                    float dist = (npc.Center - Projectile.Center).Length();
+                    if (dist > auraRadius) continue;
+                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
+                    // El plasma ardiente inflama: quemadura que DOBLA en gigante.
+                    npc.AddBuff(BuffID.OnFire, RedGiantProgress > 0f ? 600 : 300);
+                }
             }
 
             // === MOVIMIENTO: deriva lenta y frenado ===
@@ -742,34 +776,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float starR = GetStarVisualRadius(p);
 
                 // === 0. EFECTOS HIJOS DETRÁS DE LA ESTRELLA (v5.95) ===
-                // La llamarada y la carga de la nova se dibujan ANTES que el
-                // propio cuerpo del sol → quedan DETRÁS de él SIEMPRE. (v5.91
-                // usaba DrawBehind, pero decompilando tML se comprobó que el
-                // bucle principal SOLO excluye a `hide`: sin hide=true la
-                // llamarada se dibujaba DOS VECES por frame — una de ellas
-                // ENCIMA del sol, el "extraño parpadeo" — y la Supernova hija,
-                // con índice mayor que el sol, también caía encima.) Ahora los
-                // hijos van con hide=true (nadie más los dibuja) y el SOL los
-                // pinta él mismo, en el orden correcto e inmune al orden de
-                // índices de Main.projectile.
+                // v5.96 — GLOW CORONAL PERSISTENTE: reemplaza a las llamaradas
+                // PhoenixNova periódicas (cada nova de 60 frames era un
+                // PARPADEO por diseño — petición del usuario: "el brillo ya no
+                // debe parpadear, debe comenzar a crecer lentamente,
+                // sincronizado con el ciclo de vida del sol y con el tamaño del
+                // mismo"). Este glow nace con la estrella y crece SIN
+                // OSCILACIÓN durante toda su vida (función pura de lifeT), y
+                // como se dimensiona con starR, la GIGANTE ROJA (×1.85) lo
+                // arrastra con ella — el crecimiento sigue al TAMAÑO del sol.
+                // La carga de la Supernova hija sigue dibujándose detrás también.
                 if (endActiveBatch)
                     Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // Llamaradas del sol (PhoenixNova ocultas, nacidas en su centro).
-                int flareType = ModContent.ProjectileType<V20.PhoenixNovaProjectile>();
-                for (int i = 0; i < Main.maxProjectiles; i++)
-                {
-                    Projectile flare = Main.projectile[i];
-                    if (flare == null || !flare.active || flare.type != flareType) continue;
-                    if (flare.ai[2] != 1f) continue; // solo las llamaradas del sol
-                    // Nació en el centro del sol (la deriva posterior es mínima).
-                    if (Vector2.Distance(flare.Center, p.Center) > 48f) continue;
-                    PhoenixNovaProjectile.DrawFlareSprites(flare,
-                        flare.Center - Main.screenPosition, starR, rg, false);
-                }
+                float lifeT = MathHelper.Clamp(p.ai[0] / SunLifetime, 0f, 1f);
+                DrawCoronalGlowSprites(drawPos, starR, lifeT, rg);
 
                 // Carga de la Supernova hija (índice en ai[1], SINCRONIZADO en MP):
                 // el halo dorado condensándose DETRÁS del disco, escalando con la
@@ -876,6 +900,50 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // silenciosa" en el client.log.)
                 try { Main.spriteBatch.End(); } catch { }
             }
+        }
+
+        /// <summary>
+        /// v5.96 — GLOW CORONAL PERSISTENTE (reemplaza a las llamaradas
+        /// PhoenixNova periódicas — petición del usuario: "el brillo ya no
+        /// debe parpadear, debe comenzar a crecer lentamente y su crecimiento
+        /// debe estar sincronizado con el ciclo de vida del sol y con el
+        /// tamaño del mismo").
+        ///
+        /// DOS capas de SoftGlow aditivas, TODO función PURA de lifeT (0..1 del
+        /// ciclo de vida) — CERO oscilación: ningún sin(), ningún flash, ningún
+        /// parpadeo. El halo exterior nace a 1.30×starR y crece LENTO hasta
+        /// 2.35×; la corona interna abraza el disco (1.05×→1.55×). El brillo
+        /// sube con el ciclo (alpha 70→195 y 55→145). El tinte rojo de la
+        /// gigante (rg) tiñe ambas capas. Y como TODO se dimensiona con starR,
+        /// el crecimiento de la gigante roja (×1.85) ARRASTRA al glow con la
+        /// estrella: crecimiento SINCRONIZADO con el tamaño del sol.
+        /// Requiere el batch ADITIVO ya abierto — lo gestiona DrawStarVisuals.
+        /// </summary>
+        internal static void DrawCoronalGlowSprites(Vector2 drawPos, float starR,
+            float lifeT, float rg)
+        {
+            Texture2D softGlow = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            if (softGlow == null) return;
+            Vector2 glowOrigin = softGlow.Size() * 0.5f;
+
+            // === HALO EXTERIOR (backlight): 1.30× → 2.35× starR ===
+            float haloR = starR * (1.30f + 1.05f * lifeT);
+            byte haloA = (byte)(70f + 125f * lifeT);
+            Color haloCol = Color.Lerp(
+                new Color(255, 150, 55, 255), new Color(255, 60, 25, 255), rg) * ((float)haloA / 255f);
+            float haloScale = haloR / (softGlow.Width * 0.5f);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, haloCol, 0f,
+                glowOrigin, haloScale, SpriteEffects.None, 0f);
+
+            // === CORONA INTERNA (abraza el disco): 1.05× → 1.55× starR ===
+            float corR = starR * (1.05f + 0.50f * lifeT);
+            byte corA = (byte)(55f + 90f * lifeT);
+            Color corCol = Color.Lerp(
+                new Color(255, 235, 170, 255), new Color(255, 135, 90, 255), rg) * ((float)corA / 255f);
+            float corScale = corR / (softGlow.Width * 0.5f);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, corCol, 0f,
+                glowOrigin, corScale, SpriteEffects.None, 0f);
         }
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>

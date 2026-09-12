@@ -13,6 +13,15 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
+    /// v5.96 — EL ANILLO DE EINSTEIN Y EL OJO DEL VACÍO: (1) la onda
+    /// StyleEinstein (el lente gravitacional anular que nace al FINAL de la
+    /// explosión del agujero negro, petición del usuario) se registra como
+    /// fuente del pase A con radio que ABRAZA al anillo (0.85× el frente) y
+    /// fuerza que decae más lento — curva el fondo mientras se expande.
+    /// (2) EL OJO DEL VACÍO (VoidEyeProjectile, arma nueva de terror cósmico)
+    /// se dibuja ENCIMA de la lente (igual que el sol) y actúa como fuente
+    /// del pase B: su distorsión crece con la DILATACIÓN de la pupila.
+    ///
     /// v5.95 — DOS PASES DE DISTORSIÓN + EL SOL COMO FUENTE SUTIL: el shader
     /// solo acepta UNA fuerza global (distortionStrength), así que la LENTE
     /// DEL SOL EN GIGANTE ROJA va en su PROPIO pase débil (pase B: fuerza =
@@ -138,6 +147,10 @@ namespace AethonMod.Content.Effects
         private int _sunCount;
         /// <summary>Número de soles que actúan como FUENTE (gigante roja).</summary>
         private int _sunSourceCount;
+        // v5.96 — OJOS DEL VACÍO a dibujar encima de la lente (su PreDraw se
+        // salta el pase del mundo igual que el sol y el agujero)
+        private readonly int[] _eyeIndices = new int[MaxSources];
+        private int _eyeCount;
 
         public override void Load()
         {
@@ -272,10 +285,12 @@ namespace AethonMod.Content.Effects
             // un sol seguía en pantalla).
             bool wasActive = LensActive;
 
-            // === 1. Recopilar fuentes: agujeros + ondas cromáticas/de lente + soles ===
+            // === 1. Recopilar fuentes: agujeros + ondas cromáticas/de lente/
+            //     anillo de Einstein + soles + OJOS DEL VACÍO (v5.96) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
+            int eyeType = ModContent.ProjectileType<VoidEyeProjectile>();
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
             if (screenSize.X <= 0f || screenSize.Y <= 0f)
             {
@@ -288,6 +303,7 @@ namespace AethonMod.Content.Effects
             _waveCount = 0;
             _sunCount = 0;           // v5.95 — soles a dibujar encima de la lente
             _sunSourceCount = 0;     // v5.95 — soles como FUENTE (gigante roja)
+            _eyeCount = 0;           // v5.96 — ojos del vacío encima de la lente
 
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
@@ -325,10 +341,14 @@ namespace AethonMod.Content.Effects
                     if (count >= MaxSources) continue;
                     // v5.95 — también las ONDAS DE LENTE (estilo 3, la onda
                     // gravitacional de la explosión del sol) curvan el fondo.
+                    // v5.96 — y el ANILLO DE EINSTEIN (estilo 4, el lente
+                    // gravitacional anular del final de la explosión del
+                    // agujero negro) también es fuente.
                     float style = p.ai[1];
                     if (style != CosmicShockwaveProjectile.StyleChromatic &&
                         style != CosmicShockwaveProjectile.StyleChromaticInverse &&
-                        style != CosmicShockwaveProjectile.StyleLens)
+                        style != CosmicShockwaveProjectile.StyleLens &&
+                        style != CosmicShockwaveProjectile.StyleEinstein)
                         continue;
 
                     float front = CosmicShockwaveProjectile.GetFrontRadius(p);
@@ -340,9 +360,15 @@ namespace AethonMod.Content.Effects
                         continue;
 
                     // El frente de la onda curva el espacio que atraviesa.
-                    float radius = front / screenSize.X;
+                    // v5.96 — el ANILLO DE EINSTEIN arrastra su pozo COMPLETO:
+                    // el radio de distorsión abraza al anillo (0.85× el frente)
+                    // y decae MÁS LENTO (la lente es lo que ES, no un subproducto).
+                    bool isEinstein = style == CosmicShockwaveProjectile.StyleEinstein;
+                    float radius = front / screenSize.X * (isEinstein ? 0.85f : 1f);
                     float progress = CosmicShockwaveProjectile.GetProgress(p);
-                    float strength = MathHelper.Clamp(1f - progress * 0.75f, 0f, 1f);
+                    float strength = isEinstein
+                        ? MathHelper.Clamp(0.9f - progress * 0.5f, 0f, 1f)
+                        : MathHelper.Clamp(1f - progress * 0.75f, 0f, 1f);
 
                     _sourcePositions[count] = uv;
                     _sourceRadii[count] = Math.Max(radius, 0.0001f);
@@ -380,11 +406,37 @@ namespace AethonMod.Content.Effects
                         _sunSourceCount++;
                     }
                 }
+                else if (p.type == eyeType)
+                {
+                    // v5.96 — EL OJO DEL VACÍO: como el sol, SIEMPRE se recoge
+                    // para dibujarlo ENCIMA de la lente (su PreDraw se salta el
+                    // pase del mundo); como FUENTE del pase B, su distorsión
+                    // CRECE con la DILATACIÓN de la pupila (el terror curva el
+                    // espacio alrededor del ojo) y se dispara en la fase final.
+                    if (_eyeCount >= MaxSources) continue;
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.6f || uv.X > 1.6f || uv.Y < -0.6f || uv.Y > 1.6f)
+                        continue;
+                    _eyeIndices[_eyeCount++] = i;
+
+                    float dil = VoidEyeProjectile.GetDilation(p);
+                    if (dil > 0.6f && _sunSourceCount < MaxSources)
+                    {
+                        float radius = VoidEyeProjectile.GetEyeVisualRadius(p) / screenSize.X * 1.35f;
+                        _sunPositions[_sunSourceCount] = uv;
+                        _sunRadii[_sunSourceCount] = Math.Max(radius, 0.0001f);
+                        // Fuerza sutil que crece con la dilatación (tope 0.45,
+                        // apenas por encima del sol: el ojo es MÁS perturbador).
+                        _sunStrengths[_sunSourceCount] = MathHelper.Clamp((dil - 0.6f) * 0.45f, 0f, 0.45f);
+                        _sunSourceCount++;
+                    }
+                }
             }
 
             bool hasA = count > 0;             // pase A: agujeros + ondas
-            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja
-            bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0;
+            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos
+            bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0 || _eyeCount > 0;
 
             if (!hasA && !hasB && !(wasActive && anyDrawables))
             {
@@ -541,15 +593,22 @@ namespace AethonMod.Content.Effects
                 Main.spriteBatch.End();
             }
 
-            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95) ===
+            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95) y los OJOS (v5.96) ===
             // La estrella se saltó el pase del mundo (LensActive): el sistema
-            // la pinta encima de la distorsión — con sus hijos DETRÁS (la
-            // llamarada y la carga de la nova) y creciendo como gigante roja.
+            // la pinta encima de la distorsión — con su glow coronal y creciendo
+            // como gigante roja. El ojo del vacío igual: la estrella muerta y
+            // su ojo vivo jamás son deformados por la lente.
             for (int i = 0; i < _sunCount; i++)
             {
                 Projectile sun = Main.projectile[_sunIndices[i]];
                 if (sun != null && sun.active)
                     SunProjectile.DrawStarVisuals(sun, false);
+            }
+            for (int i = 0; i < _eyeCount; i++)
+            {
+                Projectile eye = Main.projectile[_eyeIndices[i]];
+                if (eye != null && eye.active)
+                    VoidEyeProjectile.DrawEyeVisuals(eye, false);
             }
 
             // === 7. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===

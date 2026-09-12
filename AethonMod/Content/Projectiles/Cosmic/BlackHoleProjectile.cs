@@ -13,6 +13,20 @@ using AethonMod.Content.Effects;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.96 — AURA DE DAÑO QUE CRECE CON EL AGUJERO + SIN CAMPO DE FUERZA.
+    /// Petición del usuario: "todo el daño de ambos proyectiles deben ser daño
+    /// de área y este debe extenderse por fuera del proyectil y crecer conforme
+    /// el proyectil crece, se expande y explota" y "quita el campo de fuerza de
+    /// las columnas, se ve mejor si eso. En su lugar, al final de las
+    /// explosiones debe crear un lente gravitacional en forma de anillo que se
+    /// expanda": (1) el aura de daño ahora CRECE con el ciclo de vida completo
+    /// (radio 0.75→1.2× el campo y daño 35→65%, sobre la hinchaZón de la muerte
+    /// que ya arrastra al campo vía la escala pre-colapso); (2) la burbuja
+    /// Perlin/ForceField de la explosión se ELIMINÓ — cuando la onda cromática
+    /// TERMINA de expandirse engendra el ANILLO DE EINSTEIN (lente
+    /// gravitacional anular expandiéndose — ver CosmicShockwaveProjectile,
+    /// estilo 4).
+    ///
     /// v5.95 — EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA (petición del usuario):
     /// el escudo Perlin/ForceField YA NO vive alrededor del agujero durante
     /// su vida — al explotar, la burbuja PARTE del radio que tenía el escudo
@@ -163,12 +177,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             else if (Projectile.timeLeft <= 36f)
             {
-                // v5.94/v5.95 — Radio del CAMPO DE FUERZA con la escala ANTES del
-                // colapso de la evaporación: se captura UNA SOLA VEZ (v5.95 fix —
-                // antes se recalculaba cada tick con la escala YA colapsada y el
-                // radio decaía de 101px a 5px en vez de mantenerse). El OnKill lo
-                // pasa a la onda cromática (localAI[0]) para que la burbuja que
-                // CABALGA la onda arranque EXACTAMENTE de este radio.
+                // v5.94/v5.96 — Radio del CAMPO con la escala ANTES del colapso
+                // de la evaporación: se captura UNA SOLA VEZ (v5.95 fix — antes
+                // se recalculaba cada tick con la escala YA colapsada y el radio
+                // decaía de 101px a 5px en vez de mantenerse). El AURA DE DAÑO
+                // creciente (v5.96) lo usa para mantener el área expandida
+                // durante la evaporación (la explosión es el clímax del área).
                 if (Projectile.localAI[1] <= 0f)
                     Projectile.localAI[1] = 0.3f * Projectile.width *
                                             Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
@@ -243,18 +257,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === v5.94 — AURA DE DAÑO DEL CAMPO DE FUERZA (límites mejorados) ===
-            // Petición del usuario: "debe mejorar los limites de su daño en
-            // area". Antes el daño solo existía en el hitbox de contacto (96px)
-            // y en la onda final; ahora el CAMPO DE FUERZA quema a todo enemigo
-            // atrapado dentro de su burbuja: cada 0.5 s, radio = escudo ×1.3
-            // (crece con la hinchaZón de la muerte, +60% en la fase final) —
-            // la gravedad los arrastra hacia dentro y el campo los desgasta.
+            // === v5.96 — AURA DE DAÑO QUE CRECE CON EL AGUJERO ===
+            // Petición del usuario: "todo el daño de ambos proyectiles deben
+            // ser daño de área y este debe extenderse por fuera del proyectil
+            // y crecer conforme el proyectil crece, se expande y explota".
+            // El área nace CONTENIDA (~0.75× el radio del campo) y crece con
+            // el ciclo de vida completo: a medida que el agujero envejece
+            // (lifeProgress 0→1) el área y el daño suben; en la secuencia de
+            // muerte la hinchaZón (+60% de escala) arrastra al campo con ella
+            // (ShieldRadius usa la escala pre-colapso capturada en localAI[1]);
+            // y la explosión final (onda cromática + anillo de Einstein) es el
+            // clímax del área. Cada 0.5 s, SimpleStrikeNPC (sin iframes).
             if (Main.netMode != NetmodeID.MultiplayerClient &&
                 VisualsTime > 0f && VisualsTime % 30f == 0f)
             {
-                float auraRadius = ShieldRadius * 1.3f;
-                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
+                float auraRadius = ShieldRadius * (0.75f + 0.45f * lifeProgress);
+                int auraDamage = Math.Max(1, (int)(Projectile.damage * (0.35f + 0.30f * lifeProgress)));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
@@ -659,12 +678,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawFallback(p, drawPos);
                 }
 
-                // v5.95 — SIN campo de fuerza en vida: el escudo Perlin/
-                // ForceField VANILLA ya no envuelve al agujero durante su
-                // existencia — ES la onda expansiva de la explosión (petición
-                // del usuario: "el campo de fuerza debe ser usado como onda
-                // expansiva"). Lo dibuja CosmicShockwaveProjectile.DrawWaveVisual
-                // al morir (burbuja que cabalga el frente expandiéndose).
+                // v5.95/v5.96 — SIN campo de fuerza en vida ni en la explosión:
+                // el escudo Perlin/ForceField vanilla se retiró por completo
+                // (petición del usuario: "quita el campo de fuerza de las
+                // columnas"). Al final de la explosión nace el ANILLO DE
+                // EINSTEIN — lo engendra la propia onda cromática al terminar
+                // (CosmicShockwaveProjectile.AI, estilo 4).
             }
             catch
             {
@@ -677,11 +696,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// v5.95 — ELIMINADO DrawForceField (escudo en vida): el campo de fuerza
-        /// ya NO se dibuja alrededor del agujero durante su vida — es la ONDA
-        /// EXPANSIVA de la explosión (petición del usuario). La burbuja Perlin/
-        /// ForceField la dibuja CosmicShockwaveProjectile.DrawWaveVisual al
-        /// morir el agujero: parte del radio del escudo y cabalga el frente.
+        /// v5.96 — ELIMINADA la burbuja de ForceField de la explosión (petición
+        /// del usuario: "quita el campo de fuerza de las columnas"). En su
+        /// lugar, cuando la onda cromática TERMINA de expandirse, engendra el
+        /// ANILLO DE EINSTEIN — el lente gravitacional anular que se expande
+        /// (estilo 4 de CosmicShockwaveProjectile).
         /// </summary>
 
         /// <summary>
@@ -852,7 +871,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // owner-client se sincroniza con el resto; patrón v5.86 del t-90).
             if (Projectile.owner == Main.myPlayer)
             {
-                int waveIdx = Projectile.NewProjectile(
+                // v5.96 — SIN burbuja de ForceField: la onda cromática ya no
+                // cabalga el escudo destruido (petición del usuario: "quita el
+                // campo de fuerza de las columnas"). Cuando la onda TERMINA de
+                // expandirse, ella misma engendra el ANILLO DE EINSTEIN
+                // (StyleEinstein, ver CosmicShockwaveProjectile.AI) — el lente
+                // gravitacional anular que se expande al final de la explosión.
+                Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
@@ -860,23 +885,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,                                      // edad: sin retardo
                     CosmicShockwaveProjectile.StyleChromatic,
                     420f);                                   // radio máximo (v5.94: 620 → 420)
-                // v5.95 — Radio de la burbuja del campo de fuerza: la onda ES el
-                // escudo destruido — la burbuja Perlin/ForceField parte de ESTE
-                // radio y cabalga el frente expandiéndose (petición del usuario:
-                // "el campo de fuerza debe ser usado como onda expansiva").
-                // v5.95 FIX CRÍTICO: v5.94 lo escribía en ai[3] — un índice que
-                // NO EXISTE (Projectile.ai solo tiene 3 ranuras en tModLoader)
-                // → IndexOutOfRangeException (el error del client.log del
-                // usuario: la burbuja jamás se dibujó y este OnKill abortaba
-                // antes de sonidos/dusts/temblor). Ahora viaja en localAI[0]
-                // (parámetro visual de cliente, lo fija el OnKill local) con
-                // fallback determinista (ai[2]×0.22) para clientes remotos.
-                if (waveIdx >= 0 && waveIdx < Main.maxProjectiles)
-                {
-                    float deathR = GetShieldRadius(Projectile);
-                    if (deathR < 10f) deathR = 63f; // escala 1 típica
-                    Main.projectile[waveIdx].localAI[0] = deathR;
-                }
             }
 
             // v5.91 — reset del boost de succión: la materia absorbida ya no

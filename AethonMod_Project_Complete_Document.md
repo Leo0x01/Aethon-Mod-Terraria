@@ -707,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.95 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.96 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `PENDIENTE` | v5.96 | **GLOW CORONAL SIN PARPADEO + ANILLO DE EINSTEIN + DAÑO DE ÁREA CRECIENTE + EL OJO DEL VACÍO**: (1) **EL BRILLO DEL SOL YA NO PARPADEA** (petición: "el brillo de PhoenixNovaStaff ya no debe parpadear, debe comenzar a crecer lentamente, sincronizado con el ciclo de vida del sol y con el tamaño del mismo"): las llamaradas PhoenixNova periódicas (una nova de 60 frames cada 2 s — un PARPADEO por diseño) ELIMINADAS; en su lugar **GLOW CORONAL PERSISTENTE** (`DrawCoronalGlowSprites`: dos capas SoftGlow aditivas, función PURA de lifeT — CERO sin()/flashes/oscilación; halo 1.30→2.35× starR, corona 1.05→1.55×; dimensionado con starR → la GIGANTE ROJA ×1.85 lo ARRASTRA; enrojece con rg) — la PhoenixNova standalone también suavizada (pulso ±0.07 y flash del pico ELIMINADOS; nace contenida 0.75× y crece continua hasta 2.3×); (2) **ADIÓS FORCEFIELD, LLEGA EL ANILLO DE EINSTEIN** (petición: "quita el campo de fuerza de las columnas… en su lugar, al final de las explosiones debe crear un lente gravitacional en forma de anillo que se expanda"): la burbuja Perlin/ForceField ELIMINADA por completo (binario con 0 ocurrencias) — cuando la onda cromática del agujero TERMINA de expandirse engendra la onda **StyleEinstein**: frente fino BLANCO incandescente + franjas R/B al 1.8% + halo interior pálido + imagen secundaria, expansión CASI LINEAL a 26 px/tick (rápida — el ripple del espaciotiempo), radio 520, fuente del BlackHoleLensSystem (radio 0.85×frente que ABRAZA al anillo, decae lento), banda de daño FINA 0.88-1.06×frente + ShadowFlame; (3) **TODO EL DAÑO ES ÁREA QUE CRECE** (petición: "debe extenderse por fuera del proyectil y crecer conforme crece, se expande y explota"): SOL — aura cada 0.25 s al 40% en starR×(1.35+0.30·lifeT) (110→205px, OnFire que dobla en gigante); AGUJERO — aura radio escudo×(0.75+0.45·lifeProgress) y daño 35→65% (sobre la hinchazón de la muerte vía localAI[1]); PhoenixNova standalone — aura 45→155px al 60%; (4) **EL OJO DEL VACÍO (VoidEyeStaff → VoidEyeProjectile, arma nueva de terror cósmico — petición: "lo más cósmico y de terror cósmico que se te ocurra")**: UNA ESTRELLA MUERTA CON UN OJO VIVO de 12 s — cuerpo SunShader paleta INVERTIDA (carbón+vetas carmesí, emergencia siniestra sin pop); ojo con texturas NUEVAS generadas (EyeSclera 512px marfil enfermo con VENAS ramificadas procedurales, EyeIris ámbar con estrías+anillo limbal, EyeLid carne muerta con margen carmesí — PIL supersampleado ×4); **el iris ROTA lentamente y MIRA a la víctima (offset siguiendo al enemigo más cercano… o AL JUGADOR si no hay nadie)**; **la PUPILA es un MICRO AGUJERO NEGRO (RealBlackHoleShader de 75 pasos en miniatura con disco de acreción CARMESÍ) que se DILATA (0.55→1.35) arrastrando al aura de daño (140→300px), la lente (fuente del pase B como la gigante) y la gravedad**; párpados que se abren LENTO, PARPADEAN cada 3.3 s (**en la oscuridad daña EL DOBLE y tira ×2.5**) y se RETRAEN DE PAR EN PAR en el terror (iris→SANGRE, hinchazón ×1.4, gravedad ×4, temblor); aura de pavor con ShadowFlame + ralentización ×0.92; EL GRITO final: ScaryScream + AoE 380px ×1.6 (ShadowFlame 8s+Weak) + **onda CROMÁTICA INVERSA** (el mundo colapsa hacia el ojo) + **ANILLO DE EINSTEIN** (desgarro de la realidad, 12 ticks tras el colapso) + implosión/explosión de materia oscura; TODO determinista de la edad (ai[0]) → MP coherente; lente acepta StyleEinstein y el ojo en pase B + dibujado encima; tooltips de las 4 armas cósmicas actualizados. Compilación: 0 errores, 0 warnings |
 | `f91c3a1` | v5.95 | **EFECTOS DEL SOL DETRÁS DE ÉL + FIX DEL ERROR DEL AGUJERO + EL CAMPO DE FUERZA COMO ONDA + LENTE DEL SOL + ONDAS DE LENTE**: (1) **CAUSA RAÍZ DEL PARPADEO** (decompilado `Main.DrawProjectiles` de tModLoader v2026.07.3.0): el bucle principal SOLO excluye a `hide` — la llamarada usaba `DrawBehind` SIN `hide=true` → se dibujaba **DOS VECES por frame, una ENCIMA del sol** con brillo aditivo duplicado (y la Supernova hija, de índice mayor, encima también) → **los hijos van con `hide=true` y EL SOL LOS DIBUJA ÉL MISMO** (`DrawStarVisuals` capa 0: llamarada + carga de la nova ANTES de sus capas — detrás del disco SIEMPRE, inmune al orden de índices y a Luminance; el disco alpha≈1 los oculta → backlight real por el limbo; standalone conservan su dibujado); (2) **LA LLAMARADA IGUALA EL TAMAÑO DEL SOL**: `DrawFlareSprites` dimensionada con starR (radio visual real width×scale×0.75 — crece con la gigante), núcleo = disco, halo backlight 2.6×, flash del pico = rim suave (alpha 120) en vez de pantalla blanca, paleta naranja→rojo gigante, pulso ±0.07; (3) **FIX DEL IndexOutOfRangeException del client.log**: v5.94 usaba `Projectile.ai[3]` — índice INEXISTENTE (array de 3) → ahora el radio de la burbuja viaja en `localAI[0]` con fallback determinista ai[2]×0.22 (+ fix localAI[1]: capturado UNA vez, antes decaía 101→5px); (4) **EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA**: escudo en vida ELIMINADO — al explotar la burbuja Perlin/ForceField parte del radio del escudo al morir y CABALGA el frente (radio=max(escudo, frente)) desvaneciéndose — destrucción de Columna CONVERTIDA en onda; (5) **LENTE DEL SOL EN GIGANTE ROJA**: BlackHoleLensSystem con DOS pases de distorsión (A fuerte: agujeros+ondas; B débil del sol: fuerza rg×0.4 — "un poco") + target propio + sol dibujado encima de la lente + MODO IDENTIDAD (sin frames de invisibilidad al morir la última fuente — backbuffer verificado en el decompile); (6) **ONDA DE LENTE (StyleLens) EN AMBAS EXPLOSIONES**: nuevo estilo 3 con RGB LIGERO (×0.65) + anillo blanco tenue, registrada como fuente de lente (curva el fondo), encima de la lente, daño 0.1 s — el sol la lanza sin retardo (radio 400, la gravitacional viaja delante de la materia) y el agujero ya la tenía (cromática+lente+ForceField); nova standalone redimensionada 240/300/360 + AoE 260. Compilación: 0 errores, 0 warnings |
 | `06fcf74` | v5.94 | **EL CAMPO DE FUERZA REAL DE LAS COLUMNAS + GIGANTE ROJA + ANILLOS SOLO AL FINAL**: investigación profunda del código REAL de Terraria (entorno de decompilación reconstruido: .NET 8 + ilspycmd + tModLoader v2026.07.3.0 de GitHub; decompile de NPC 112k líneas, Main 85k, Projectile 93k + assembly completo) → **mecanismo EXACTO del escudo de las Columnas Lunares descifrado** (Main.DrawNPCDirect_Inner): la burbuja es **ruido Perlin ("Images/Misc/Perlin" del juego) en un quad 600×600 con el shader `GameShaders.Misc["ForceField"]` VANILLA** (Immediate+AlphaBlend+PointWrap+DepthStencil.Default), alpha=fuerza·0.8+0.2, flash de 30 ticks al golpe (pop +5%, brillo +50%, npc.ai[3]=1..120) y al destruirse **se expande 2×, brillo ×2 y desvanece 1-sqrt(grow)** → el agujero negro USA EL MISMO SHADER DEL JUEGO con las mismas llamadas (DrawForceField reescrito; fuerza= carga hacia la muerte; radio 2.2× horizonte que MANTIENE su tamaño durante la evaporación vía localAI[1] pre-colapso; flash al absorber golpes) y **la onda cromática dibuja la burbuja de destrucción** (ai[3]=radio final, parámetros exactos de la animación vanilla) + **AURA DE DAÑO del campo** (50% del daño cada 0.5 s dentro del escudo ×1.3, crece con la muerte — límites de daño en área mejorados) + **GIGANTE ROJA del sol** (t=7-10s: hincha ×1.85 smoothstep + ENROJECE todo — backglow/aura/SunShader/luz/dusts/partículas con ToRedGiant — y su daño de área crece: hitbox ×1.85 con Resize centro-fijo + daño ×1.75 con base en ai[2] + quemadura 10 s) + **ANILLOS SOLO AL FINAL** (causa raíz del "en todo momento": la textura HD de v5.93 dejó 16× más grandes todos los dibujos de escala fija — PhoenixNova 5 anillos por llamarada hasta 4710px y Supernova contención hasta 2458px ELIMINADOS; anillo de fotones del agujero 1178px ELIMINADO; campo v5.93 RingShieldNebula REEMPLAZADO por el ForceField real) + **REDIMENSIONADOS**: ondas sol 360/450/540→240/300/360, cromática 620→420, AoE núcleo 340→260, pulsos 280/380→200/270 + **fixes 16×**: ParticlePresets radius/64→radius/512, AbyssalEye 2.0→0.125, GravityPulse Lerp(0..5)→(0..0.3125), Earthquake ÷16, BlackHoleMini 0.35→0.0219, DrawFallback del agujero por radio. Compilación: 0 errores, 0 warnings |
 | `4d8681b` | v5.93 | **CAMPO DE FUERZA estilo Columna de Nebulosa + anillos de ALTA CALIDAD** (petición del usuario con referencia explícita al Nebula Pillar): el Ring.png era de **64px** (se pixelaba a 620px de radio) → **3 texturas nuevas de 1024px generadas proceduralmente** (Ring reemplazo directo 105KB con misma geometría — los 9 usos existentes ganan calidad; RingShieldNebula = cuerpo de campo con COLOR horneado rosa→magenta→cian + arcos de energía; FireRing = llamas con color propio blanco-amarillo→naranja→rojo y lengüetas fBm) + **DrawForceField** en el agujero negro: burbuja translúcida a 1.9× el horizonte (envuelve el disco) con cuerpo nebula + aros FINOS cian/rosa que "respiran" (±5-6.5% del radio) — vive en DrawCoreVisuals (mundo Y encima-de-lente) y crece con la evaporación → al morir, la onda cromática del OnKill ES el campo expandiéndose (continuidad visual perfecta) + **DrawWaveVisual reescrita**: cromática = cuerpo nebula tenue + 3 AROS FINOS R/G/B separados 3.5→9.5% del frente (aberración VISIBLE sin lavado a blanco — validado por simulación VLM + píxeles: el diseño de 3 pasadas de banda ancha se lavaba porque la base solapaba al 100%); fuego = FireRing ×2 + Ring fino de choque; compensación thinComp=1/0.92. Bugs de generación corregidos: clamp01 sobre canales 0-255 (→textura negra) y corte de borde (contenido ≤0.995 del canvas). RingShield blanca intermedia eliminada (sin usos). Compilación: 0 errores, 0 warnings |
@@ -791,10 +792,72 @@ Commits desde v5.28 hasta v5.95 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.95
-- **Mensaje**: "feat v5.95: efectos del sol DETRÁS de él (el sol dibuja a sus hijos: fix del doble-draw del DrawBehind sin hide — el parpadeo) + fix del IndexOutOfRange del agujero (ai[3] no existe → localAI[0]) + el campo de fuerza COMO onda expansiva (burbuja que cabalga el frente) + lente sutil del sol en gigante roja (dos pases) + onda de lente con RGB ligero en ambas explosiones (StyleLens)"
+- **Versión**: v5.96
+- **Mensaje**: "feat v5.96: glow coronal persistente sin parpadeo (reemplaza las llamaradas periódicas: crece con el ciclo de vida y el tamaño del sol) + ADIÓS ForceField: al final de la explosión del agujero nace el ANILLO DE EINSTEIN (lente gravitacional anular expandiéndose, StyleEinstein) + todo el daño de ambos proyectiles es daño de área creciente (auras que se extienden por fuera y crecen con el proyectil) + EL OJO DEL VACÍO: VoidEyeStaff, una estrella muerta con un ojo vivo (iris que sigue a la víctima, pupila micro-agujero-negro que se dilata, párpados que parpadean — en la oscuridad daña el doble — y EL GRITO final)"
 
-### 11.2 Qué se hizo en v5.95 (efectos detrás del sol + fix del agujero + campo=onda + lentes)
+### 11.2 Qué se hizo en v5.96 (glow sin parpadeo + anillo de Einstein + daño de área + el ojo del vacío)
+
+**Peticiones del usuario**: el brillo de PhoenixNovaStaff ya no debe
+parpadear — debe comenzar a crecer lentamente, sincronizado con el ciclo de
+vida del sol y con el tamaño del mismo; quitar el campo de fuerza de las
+columnas del agujero negro (se ve mejor sin él) y en su lugar, al final de las
+explosiones, crear un lente gravitacional en forma de anillo que se expanda;
+todo el daño de ambos proyectiles debe ser daño de área que se extienda por
+fuera del proyectil y crezca conforme el proyectil crece, se expande y
+explota; crear otra arma nueva de prueba con lo aprendido, con el proyectil
+más cósmico y de terror cósmico posible (libre imaginación).
+
+**A. El brillo del sol ya no parpadea**: las llamaradas PhoenixNova
+periódicas (una nova de 60 frames cada 2 s — un PARPADEO por diseño)
+ELIMINADAS; en su lugar `DrawCoronalGlowSprites`: glow coronal persistente
+— dos capas SoftGlow aditivas, función PURA de lifeT (CERO sin/flashes),
+halo 1.30→2.35× starR, corona 1.05→1.55×, dimensionado con starR (la
+gigante roja ×1.85 lo arrastra), enrojece con rg. La PhoenixNova standalone
+también se suavizó (pulso y flash eliminados; crece continua 0.75→2.3×).
+
+**B. El anillo de Einstein**: burbuja Perlin/ForceField ELIMINADA por
+completo (binario: 0 ocurrencias de ForceField/Perlin). Cuando la onda
+cromática del agujero TERMINA de expandirse (el final de la explosión)
+engendra la onda StyleEinstein: frente fino blanco incandescente, franjas
+R/B al 1.8%, halo interior pálido + imagen secundaria, expansión casi
+lineal a 26 px/tick (radio 520), fuente del sistema de lente (radio
+0.85×frente abrazando al anillo), banda de daño fina 0.88-1.06×frente cada
+0.1 s + ShadowFlame.
+
+**C. Todo el daño es área creciente**: SOL — aura cada 0.25 s al 40% en
+starR×(1.35+0.30·lifeT) (110→205px, se extiende FUERA del cuerpo, crece con
+el ciclo y con la gigante; OnFire dobla en gigante). AGUJERO — aura radio
+escudo×(0.75+0.45·lifeProgress) y daño 35→65% (sobre la hinchazón +60% de
+la muerte vía localAI[1]); el clímax del área: cromática + Einstein.
+PhoenixNova standalone — aura 45→155px al 60% + OnFire cada 0.166 s.
+
+**D. El Ojo del Vacío (VoidEyeStaff → VoidEyeProjectile, 12 s)**: UNA
+ESTRELLA MUERTA CON UN OJO VIVO. Cuerpo: SunShader paleta invertida
+(carbón + vetas carmesí), emergencia siniestra sin pop elástico. Ojo:
+EyeSclera (marfil enfermo con venas ramificadas procedurales) + EyeIris
+(ámbar, estrías radiales, ROTA lentamente) + EyeLid (carne muerta, margen
+carmesí) — texturas 512px generadas con PIL supersampleado ×4. El iris
+MIRA a la víctima (offset siguiendo al enemigo más cercano… o AL JUGADOR
+si no hay nadie). La PUPILA es un micro agujero negro (RealBlackHoleShader
+75 pasos en miniatura, disco de acreción carmesí) que se DILATA (0.55→1.35)
+arrastrando al aura de daño (140→300px), la lente (pase B como la gigante)
+y la gravedad. Párpados: se abren LENTO (0.8-3 s), PARPADEAN cada 3.3 s
+(en la oscuridad daña EL DOBLE y la gravedad tira ×2.5), se retraen DE PAR
+EN PAR en el terror (iris→sangre, hinchazón ×1.4, gravedad ×4, temblor).
+Aura de pavor: ShadowFlame + ralentización ×0.92/tick. EL GRITO final:
+ScaryScream + AoE 380px ×1.6 (ShadowFlame 8 s + Weak) + onda cromática
+INVERSA (el mundo colapsa hacia el ojo) + ANILLO DE EINSTEIN (12 ticks
+tras el colapso) + implosión/explosión de materia oscura. Sonidos:
+MoonLord (nacimiento/terror), ZombieMoan (despertar/quejidos/parpadeos),
+ScaryScream (el grito). Lágrimas de sangre, zarcillos orbitando (librería
+Orbit+ColorShift), brasa corrupta, llama sombría. TODO determinista de la
+edad (ai[0]) → MP coherente sin sincronizar nada.
+
+**E. Sistema de lente**: acepta StyleEinstein como fuente (pase A) y el
+ojo como fuente sutil (pase B, fuerza (dil-0.6)×0.45 tope 0.45) + dibujado
+encima de la lente (paso 6). Tooltips de las 4 armas cósmicas actualizados.
+
+### 11.2.1 Qué se hizo en v5.95 (histórico — efectos detrás del sol + fix del agujero + campo=onda + lentes)
 
 **Peticiones del usuario**: los efectos SupernovaStaff y PhoenixNovaStaff deben
 estar DETRÁS del sol (había un extraño parpadeo — el PhoenixNova no estaba
@@ -836,7 +899,7 @@ fuente de lente (curva el fondo) + encima de la lente + daño 0.1 s; el sol la
 lanza sin retardo (radio 400); el agujero la tenía (cromática). Nova
 standalone: ondas 240/300/360 + AoE 260.
 
-### 11.2.1 Qué se hizo en v5.94 (histórico — escudo real de Columna + gigante roja)
+### 11.2.2 Qué se hizo en v5.94 (histórico — escudo real de Columna + gigante roja)
 
 **Peticiones del usuario**: los anillos quedaron demasiado grandes (redimensionar
 sol y agujero); los anillos son parte de la onda expansiva — SOLO deben salir al
@@ -877,7 +940,7 @@ radius/64→radius/512; V20 (AbyssalEye/GravityPulse/Earthquake/BlackHoleMini)
 errores y 0 warnings (entorno reconstruido: /tmp/verify + stub del hook
 MonoMod On_TimeLogger, generado en runtime por tML y ausente del DLL distribuido).
 
-### 11.2.2 Qué se hizo en v5.93 (histórico — campo Nebula inventado + anillos HD)
+### 11.2.3 Qué se hizo en v5.93 (histórico — campo Nebula inventado + anillos HD)
 
 **Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía muy
 baja calidad y era solo blanco; el agujero necesita el CAMPO DE FUERZA de la
@@ -3857,7 +3920,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.95
+> Última actualización: v5.96
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

@@ -61,7 +61,9 @@ namespace AethonMod.Content.Weapons.V20
             tooltips.Add(new TooltipLine(Mod, "PN_Title",
                 "[c/FF6400:═══ NOVA DE FÉNIX ═══]"));
             tooltips.Add(new TooltipLine(Mod, "PN_Desc",
-                "[c/B388FF:Explosión radial que envuelve al jugador en llamas]"));
+                "[c/B388FF:Explosión radial que envuelve al lanzador: nace contenida y CRECE LENTO durante toda su vida — sin parpadeos]"));
+            tooltips.Add(new TooltipLine(Mod, "PN_Desc2",
+                "[c/78788C:Su aura de daño se extiende por fuera de la nova y crece con la expansión (45→155px), inflamando con OnFire]"));
         }
 
         public override void AddRecipes()

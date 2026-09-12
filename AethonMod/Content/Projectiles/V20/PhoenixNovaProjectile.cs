@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -9,39 +8,28 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.V20
 {
     /// <summary>
-    /// PhoenixNovaProjectile — nova/llamarada solar centrada (llamarada cuando
-    /// la invoca el SunProjectile; explosión estática con PhoenixNovaStaff).
+    /// PhoenixNovaProjectile — nova/llamarada solar centrada.
     ///
-    /// v5.95 — DETRÁS DEL SOL, DE VERDAD (petición del usuario: "sus efectos
-    /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él… un extraño
-    /// parpadeo que supongo es PhoenixNovaStaff el cual no está detrás del
-    /// sol"). La v5.91 registraba la llamarada en drawCacheProjsBehindProjectiles
-    /// vía DrawBehind, PERO nunca ponía hide=true — y decompilando tML
-    /// (Main.DrawProjectiles) se comprobó que el bucle principal SOLO excluye a
-    /// los proyectiles con hide: la llamarada se dibujaba DOS VECES por frame,
-    /// una de ellas ENCIMA del sol con brillo aditivo duplicado → el "extraño
-    /// parpadeo". Ahora: (1) la llamarada invocada por el sol (ai[2]=1) va con
-    /// hide=true — ni tML ni ningún mod (Luminance incluida) la dibuja — y
-    /// (2) EL SOL la dibuja él mismo ANTES de sus propias capas
-    /// (SunProjectile.DrawStarVisuals → DrawFlareSprites): detrás del disco
-    /// SIEMPRE, en cualquier entorno. El disco del SunShader (alpha≈1) la
-    /// oculta en el centro y su brillo asoma por el limbo: una llamarada real
-    /// ERUPCIONANDO POR DETRÁS de la estrella.
+    /// v5.96 — SIN PARPADEO + AURA DE ÁREA CRECIENTE (dos peticiones del
+    /// usuario): (1) "el brillo de PhoenixNovaStaff ya no debe parpadear —
+    /// debe comenzar a crecer lentamente y su crecimiento debe estar
+    /// sincronizado con el ciclo de vida del sol y con el tamaño del mismo":
+    /// el PULSO sinusoidal (0.93±0.07, varias oscilaciones por segundo) y el
+    /// FLASH del pico (frames 25-35) se ELIMINARON — la nova ahora CRECE DE
+    /// FORMA CONTINUA: nace pequeña, se expande LENTO durante su vida y se
+    /// desvanece al final (envolvente suave, CERO oscilación). El SOL ya no
+    /// invoca llamaradas periódicas (SunProjectile lleva su GLOW CORONAL
+    /// PERSISTENTE — cada nova de 60 frames era un PARPADEO por diseño);
+    /// este proyectil queda como arma STANDALONE (PhoenixNovaStaff).
+    /// (2) "todo el daño deben ser daño de área que se extienda por fuera del
+    /// proyectil y crezca conforme crece, se expande y explota": aura de daño
+    /// cada 0.166 s (10 ticks) cuyo radio CRECE con la nova (45→155 px a lo
+    /// largo de su vida) con daño del 60% + OnFire — el daño ya no es solo el
+    /// hitbox de contacto de 80px.
     ///
-    /// v5.95 — TAMAÑO IGUAL AL DEL SOL (petición: "aumentar el tamaño de
-    /// PhoenixNovaStaff y que iguale el tamaño del sol"): los sprites se
-    /// dimensionan con starR, el RADIO VISUAL REAL de la estrella que la
-    /// invocó (crece con la gigante roja): el núcleo caliente mide lo mismo
-    /// que el disco solar y el halo lo envuelve como backlight. El FLASH del
-    /// pico pasó de "pantalla blanca completa" (el parpadeo) a un RIM de luz
-    /// suave alrededor del limbo (alpha ≤ 120 tras el sol).
-    ///
-    /// Visuales (60 frames total):
-    ///   - Halo SoftGlow aditivo pulsante SUAVE (0.93±0.07 — el pulso fuerte
-    ///     de la v5.91 contribuía al parpadeo) que se extiende con la edad.
-    ///   - Núcleo caliente del tamaño de la estrella (oculto tras el disco).
-    ///   - Frames 25-35: rim de luz (backlight del pico de la llamarada).
-    ///   - Spawn continuo de DustID.Torch en todas las direcciones.
+    /// v5.95 — histórico: nació como hija del sol (ai[2]=1, hide=true, el sol
+    /// la dibujaba detrás de su disco dimensionada con su radio visual real).
+    /// v5.96: el sol YA NO la invoca — ver SunProjectile (glow coronal).
     ///
     /// Físicas:
     ///   - Velocidad cero (estático). penetrate = -1. timeLeft = 60 (1 s).
@@ -78,9 +66,9 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
-                // v5.95 — HIJA DEL SOL: OCULTA. Nadie la dibuja salvo el propio
-                // sol (la pinta DETRÁS de su disco en DrawStarVisuals). hide
-                // solo afecta al RENDER: la llamarada sigue dañando igual.
+                // Legado v5.95: hija del sol (hide — nadie la dibuja salvo el
+                // propio sol). v5.96: el sol YA NO invoca llamaradas; la rama
+                // queda como defensa para clones antiguos si existieran.
                 if (Projectile.ai[2] == 1f)
                     Projectile.hide = true;
 
@@ -96,9 +84,36 @@ namespace AethonMod.Content.Projectiles.V20
                     }
                 }
 
-                // Iluminación cálida intensa (más intensa en el pico frame 30)
-                float intensity = age < 30f ? (age / 30f) : (1f - (age - 30f) / 30f);
-                intensity = MathHelper.Clamp(intensity, 0f, 1f);
+                // === v5.96 — AURA DE DAÑO DE ÁREA CRECIENTE ===
+                // Petición del usuario: "todo el daño deben ser daño de área y
+                // este debe extenderse por fuera del proyectil y crecer conforme
+                // el proyectil crece, se expande y explota". El radio del aura
+                // CRECE con la nova (45→155 px a lo largo de su vida — siempre
+                // POR FUERA del hitbox de 80px de diámetro): el daño acompaña a
+                // la expansión visual. Cada 10 ticks (0.166 s) + OnFire 5 s.
+                if (Main.netMode != NetmodeID.MultiplayerClient &&
+                    age > 4f && age % 10f == 0f)
+                {
+                    float progress = MathHelper.Clamp(age / 60f, 0f, 1f);
+                    float auraRadius = 45f + 110f * progress;
+                    int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.6f));
+                    foreach (NPC npc in Main.ActiveNPCs)
+                    {
+                        if (!npc.CanBeChasedBy()) continue;
+                        float dist = (npc.Center - Projectile.Center).Length();
+                        if (dist > auraRadius) continue;
+                        int dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
+                        npc.SimpleStrikeNPC(auraDamage, dir, false, 3f, DamageClass.Magic);
+                        npc.AddBuff(BuffID.OnFire, 300);
+                    }
+                }
+
+                // Iluminación cálida: SIGUE el crecimiento (sin pico).
+                // v5.96: la intensidad es función PURA de la edad — sube con la
+                // expansión y baja solo al desvanecerse final. Sin parpadeo.
+                float rise = Utils.GetLerpValue(0f, 18f, age, true);
+                float fall = 1f - Utils.GetLerpValue(46f, 60f, age, true);
+                float intensity = MathHelper.Clamp(rise * fall, 0f, 1f);
                 Lighting.AddLight(Projectile.Center,
                     new Vector3(1f * intensity, 0.55f * intensity, 0.15f * intensity));
             }
@@ -143,17 +158,11 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
-                // v5.95 — HIJA DEL SOL: el SOL la dibuja detrás de su disco
-                // (DrawStarVisuals); con hide=true tML jamás la pinta. Este
-                // PreDraw ni siquiera corre para ella (los proyectiles ocultos
-                // sin DrawBehind no pasan por el bucle de dibujado).
+                // Legado v5.95: hija del sol (hide=true — tML jamás la pinta).
                 if (Projectile.ai[2] == 1f)
                     return false;
 
                 // === STANDALONE (PhoenixNovaStaff): se dibuja a sí misma ===
-                // Tamaño equivalente a una estrella tipo sol (petición del
-                // usuario: "que iguale el tamaño del sol" — aquí no hay sol que
-                // la oculte, así que conserva su destello de pico completo).
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
                 Main.spriteBatch.End();
@@ -172,9 +181,7 @@ namespace AethonMod.Content.Projectiles.V20
                 try { Main.spriteBatch.End(); } catch { }
             }
 
-            // v5.95 — Restauración EXACTA del estado que tML espera tras
-            // PreDraw (FUERA del catch: el batch siempre vuelve a quedar
-            // ABIERTO, incluso en el path de error).
+            // Restauración EXACTA del estado que tML espera tras PreDraw.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -182,20 +189,19 @@ namespace AethonMod.Content.Projectiles.V20
         }
 
         // ================================================================
-        //  SPRITES DE LA LLAMARADA (v5.95)
+        //  SPRITES DE LA NOVA (v5.96 — crecimiento continuo, sin parpadeo)
         // ================================================================
 
         /// <summary>
-        /// v5.95 — Sprites de la llamarada: los dibuja EL SOL detrás de su
-        /// propio disco (DrawStarVisuals, capa 0) o el propio proyectil cuando
-        /// va suelto con PhoenixNovaStaff (PreDraw standalone). Requiere un
-        /// batch ADITIVO ya abierto — lo gestiona el llamador.
-        ///
-        /// El TAMAÑO IGUALA AL DEL SOL (petición del usuario): starR es el
-        /// radio visual REAL de la estrella invocadora — el núcleo caliente
-        /// mide lo mismo que el disco (queda oculto tras él y asoma por el
-        /// limbo) y el halo lo envuelve como backlight. redGiant tiñe la
-        /// llamarada de ROJO cuando la estrella se hincha (paleta unificada).
+        /// v5.96 — Sprites de la nova standalone: CRECIMIENTO CONTINUO Y LENTO
+        /// (petición del usuario: "el brillo ya no debe parpadear — debe
+        /// comenzar a crecer lentamente"). El halo nace CONTENIDO (0.75×starR,
+        /// apenas asoma del hitbox) y crece hasta 2.3×; el núcleo caliente
+        /// crece de 0.8× a 1.25×. La envolvente de brillo es función PURA de
+        /// la edad: sube en los primeros 12 frames (encendido), se mantiene
+        /// plena durante la expansión y solo baja en los últimos 8 frames
+        /// (desvanecimiento final) — CERO oscilación, CERO flashes.
+        /// Requiere un batch ADITIVO ya abierto — lo gestiona el llamador.
         /// </summary>
         internal static void DrawFlareSprites(Projectile p, Vector2 drawPos, float starR,
             float redGiant, bool standalone)
@@ -209,45 +215,39 @@ namespace AethonMod.Content.Projectiles.V20
             float age = p.ai[0];
             float progress = MathHelper.Clamp(age / 60f, 0f, 1f);
 
-            // Pulso SUAVE (v5.95: el pulso fuerte + el flash de pantalla de la
-            // v5.91 eran el "extraño parpadeo" que el usuario veía SOBRE el sol).
-            float pulse = 0.93f + 0.07f * (float)Math.Sin(age * 0.25f);
-            float expand = 1f + progress * 0.9f; // la llamarada se extiende
+            // v5.96 — Envolvente LISA: encendido (12f) → plena → desvanecido
+            // (últimos 8 frames). El pulso sinusoidal y el flash del pico de
+            // la v5.95 eran EL PARPADEO — eliminados por petición del usuario.
+            float rise = Utils.GetLerpValue(0f, 12f, age, true);
+            float fall = 1f - Utils.GetLerpValue(52f, 60f, age, true);
+            float vis = MathHelper.Clamp(rise * fall, 0f, 1f);
+
+            // Crecimiento LENTO y CONTINUO: el halo comienza CONTENIDO (0.75×)
+            // y llega a 2.3× — la nova se EXPANDE, no parpadea.
+            float expand = 0.75f + 1.55f * progress;
 
             // Paleta cálida: naranja solar → ROJO de la gigante.
             Color halo = Color.Lerp(new Color(255, 150, 55, 195), new Color(255, 65, 25, 195), redGiant);
             Color core = Color.Lerp(new Color(255, 235, 170, 225), new Color(255, 135, 90, 225), redGiant);
+            // v5.96: el brillo sigue a la envolvente suave (×vis).
+            halo *= vis;
+            core *= vis;
 
             Vector2 glowOrigin = softGlow.Size() * 0.5f;
 
-            // === HALO (backlight): envuelve a la estrella (≈2.6× su radio) ===
-            float haloScale = starR * 2.6f * expand / (softGlow.Width * 0.5f);
+            // === HALO: nace contenido y crece hasta 2.3× ===
+            float haloScale = starR * expand / (softGlow.Width * 0.5f);
             Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin,
-                haloScale * pulse, SpriteEffects.None, 0f);
+                haloScale, SpriteEffects.None, 0f);
 
-            // === NÚCLEO CALIENTE: IGUALA el tamaño del sol (oculto tras el
-            // disco; asoma por el limbo como corona en erupción) ===
-            float coreScale = starR * 1.05f * (1f + progress * 0.35f) / (softGlow.Width * 0.5f);
+            // === NÚCLEO CALIENTE: crece de 0.8× a 1.25× ===
+            float coreScale = starR * (0.8f + 0.45f * progress) / (softGlow.Width * 0.5f);
             Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin,
-                coreScale * pulse, SpriteEffects.None, 0f);
+                coreScale, SpriteEffects.None, 0f);
 
-            // === DESTELLO DEL PICO (frames 25-35) ===
-            // v5.95: ya NO es la "pantalla blanca" de la v5.91 (parpadeo):
-            // detrás del sol se lee como un RIM de luz que ABRAZA el limbo de
-            // la estrella (alpha 120); standalone (sin sol que la oculte)
-            // conserva el destello pleno (alpha 235).
-            if (age >= 25f && age <= 35f)
-            {
-                float flashStrength = 1f - Math.Abs(age - 30f) / 5f;
-                flashStrength = MathHelper.Clamp(flashStrength, 0f, 1f);
-                Vector2 whiteOrigin = glowCircleWhite.Size() * 0.5f;
-                float rimScale = starR * 1.45f * (1f + 0.08f * flashStrength) /
-                                 (glowCircleWhite.Width * 0.5f);
-                byte flashAlpha = (byte)(flashStrength * (standalone ? 235f : 120f));
-                Main.spriteBatch.Draw(glowCircleWhite, drawPos, null,
-                    new Color(255, 240, 210, flashAlpha),
-                    0f, whiteOrigin, rimScale, SpriteEffects.None, 0f);
-            }
+            // v5.95 — histórico: aquí vivía el FLASH del pico (frames 25-35,
+            // rim blanco sobre el limbo). v5.96: ELIMINADO — era el segundo
+            // componente del parpadeo. La nova simplemente CRECE y se apaga.
         }
     }
 }

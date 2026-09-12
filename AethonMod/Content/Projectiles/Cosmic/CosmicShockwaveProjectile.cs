@@ -4,13 +4,27 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.DataStructures;
-using Terraria.Graphics.Shaders;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.96 — ESTILO 4: EL ANILLO DE EINSTEIN + EL CAMPO DE FUERZA SE VA.
+    /// Petición del usuario: “creo que es mejor que quites el campo de fuerza
+    /// de las columnas, se ve mejor si eso. En su lugar, al final de las
+    /// explosiones debe crear un lente gravitacional en forma de anillo que se
+    /// expanda”. (1) La burbuja Perlin/ForceField vanilla que cabalgaba la onda
+    /// cromática se ELIMINÓ por completo (textura, shader, bloque de dibujado y
+    /// el localAI[0] que pasaba el radio del escudo). (2) En su lugar: cuando
+    /// la onda cromática del agujero TERMINA de expandirse (el final de la
+    /// explosión), engendra una onda StyleEinstein — un anillo de lente
+    /// gravitacional PURO: frente fino blanco incandescente, franjas R/B
+    /// juntas (1.8%), halo interior pálido, imagen secundaria tenue — que se
+    /// expande MÁS RÁPIDO que la materia (26 px/tick, expansión casi lineal)
+    /// y curva el FONDO del juego a su paso (fuente del BlackHoleLensSystem
+    /// con radio que abraza al anillo). Daña con banda fina (0.88-1.06·frente)
+    /// + ShadowFlame.
+    ///
     /// v5.95 — LLEGA EL ESTILO 3 (ONDA DE LENTE): onda expansiva creada CON
     /// LENTE gravitacional y una LIGERA distorsión cromática RGB (petición del
     /// usuario: "en ambas explosiones del sol y agujero negro también debe
@@ -27,6 +41,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// sonidos/dusts/temblor. Ahora el radio viaja en `localAI[0]` (visual de
     /// cliente: lo fija el OnKill del agujero en la misma máquina) con fallback
     /// DETERMINISTA derivado del radio máximo sincronizado (ai[2]×0.22).
+    /// (v5.96: todo este mecanismo quedó obsoleto — la burbuja ya no existe.)
     ///
     /// v5.95 — EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA: la burbuja Perlin/
     /// ForceField VANILLA ya no es un escudo estático en vida — ES el cuerpo de
@@ -38,8 +53,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// franjas R/G/B de aberración, la onda dibuja la BURBUJA de ruido Perlin
     /// con el shader ForceField VANILLA de Terraria (el mismo de las Columnas
     /// Lunares) con los parámetros EXACTOS de la animación de destrucción del
-    /// escudo del juego.
-    /// Radios: ondas de fuego del sol 240/300/360, cromática 420, lente 400.
+    /// escudo del juego. (v5.96: burbuja eliminada — ver arriba.)
+    /// Radios: ondas de fuego del sol 240/300/360, cromática 420, lente 400,
+    /// anillo de Einstein 520.
     ///
     /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
     ///
@@ -86,6 +102,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     mientras el frente barre al enemigo, y aplica QUEMADURA de 10 s
     ///     (OnFire, 600 ticks — antes 5 s) a cada golpe.
     ///
+    ///   ESTILO 3 — ONDA DE LENTE (nova final del sol, v5.95):
+    ///     Anillo blanco tenue + franjas R/G/B LIGERAS (×0.65); fuente del
+    ///     sistema de lente → curva el fondo a su paso.
+    ///
+    ///   ESTILO 4 — ANILLO DE EINSTEIN (v5.96, final de la explosión del
+    ///     agujero): nace cuando la cromática termina de expandirse. Frente
+    ///     fino blanco incandescente + franjas R/B al 1.8% + halo interior
+    ///     pálido + imagen secundaria. Banda de daño fina (0.88-1.06·frente)
+    ///     con ShadowFlame. Expansión casi lineal a 26 px/tick (radio 520).
+    ///
     /// Campos AI:
     ///   ai[0] = edad (negativa = retardo escalonado aún activo)
     ///   ai[1] = estilo (0 cromática / 1 cromática inversa / 2 fuego)
@@ -94,7 +120,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   (la API de NewProjectile solo acepta 3 slots de ai: la duración se
     ///   deriva de forma determinista para que todas las máquinas coincidan)
     ///
-    /// RENDER: los estilos 0/1 se dibujan ENCIMA de la lente gravitacional
+    /// RENDER: los estilos 0/1/3/4 se dibujan ENCIMA de la lente gravitacional
     /// (el BlackHoleLensSystem los pinta tras compositar la distorsión), de
     /// modo que la lente nunca deforma sus propios anillos. El estilo 2 se
     /// dibuja en el pase normal del mundo.
@@ -114,10 +140,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// v5.95 — Estilo: ONDA DE LENTE gravitacional (explosión del sol).
         /// Franjas R/G/B LIGERAS (separación ×0.65 de la cromática) + anillo
         /// blanco tenue en el frente; se registra como fuente del
-        /// BlackHoleLensSystem → el FONDO del juego se curva a su paso. Sin
-        /// burbuja de ForceField (esa es la onda del agujero negro).
+        /// BlackHoleLensSystem → el FONDO del juego se curva a su paso.
         /// </summary>
         public const float StyleLens = 3f;
+
+        /// <summary>
+        /// v5.96 — Estilo: ANILLO DE EINSTEIN. Petición del usuario: “en cuanto
+        /// al agujero negro… quita el campo de fuerza de las columnas… en su
+        /// lugar, al final de las explosiones debe crear un lente gravitacional
+        /// en forma de anillo que se expanda”. La onda cromática del agujero, AL
+        /// TERMINAR de expandirse (final de la explosión), engendra este anillo:
+        /// un frente FINO y brillante (la luz de todo lo que había detrás, doblada
+        /// en un círculo perfecto) con franjas R/G/B MUY juntas (la imagen
+        /// lensada se dispersa en su borde), registrado como fuente del
+        /// BlackHoleLensSystem → EL FONDO del juego se curva a su paso. El
+        /// ForceField vanilla (burbuja Perlin de las Columnas) se ELIMINÓ de la
+        /// onda cromática: el anillo de Einstein lo sustituye.
+        /// </summary>
+        public const float StyleEinstein = 4f;
 
         /// <summary>
         /// v5.91 — Intervalo de daño por tick: 6 ticks = 0.1 segundos EXACTOS
@@ -156,7 +196,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private float MaxRadius => Projectile.ai[2];
 
         /// <summary>Duración derivada del radio: frente de ~40 px/tick de pico.</summary>
-        private float Duration => Math.Max(MaxRadius / 20f, 10f);
+        private float Duration => DurationOf(MaxRadius, Style);
 
         public override void SetStaticDefaults()
         {
@@ -226,13 +266,39 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // v5.95 — onda de lente del sol: luz cálida blanquecina.
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(1f, 0.9f, 0.7f) * 1.1f * alpha);
+                else if (Style == StyleEinstein)
+                    // v5.96 — anillo de Einstein: luz pálida fría (la luz lensada).
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(0.9f, 0.92f, 1f) * 1.4f * alpha);
                 else
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(0.6f, 0.5f, 1f) * 0.9f * alpha);
 
                 // Frente completado → la onda se disipa.
                 if (age >= Duration)
+                {
+                    // v5.96 — AL FINAL DE LA EXPLOSIÓN NACE EL ANILLO DE
+                    // EINSTEIN (petición del usuario: “al final de las
+                    // explosiones debe crear un lente gravitacional en forma
+                    // de anillo que se expanda”): la onda cromática del
+                    // agujero terminó de expandirse — el espacio que dejó
+                    // curvado detrás libera su última vibración: un anillo de
+                    // lente puro que nace pequeño y se expande MÁS RÁPIDO que
+                    // la propia explosión (el ripple de espaciotiempo).
+                    if (Style == StyleChromatic && Projectile.owner == Main.myPlayer)
+                    {
+                        int einsteinDmg = Math.Max(1, (int)(Projectile.damage * 0.75f));
+                        Projectile.NewProjectile(
+                            Projectile.GetSource_FromThis(),
+                            Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                            ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                            einsteinDmg, 0f, Projectile.owner,
+                            0f,               // edad: nace YA (sin retardo)
+                            StyleEinstein,
+                            520f);            // radio máximo: sobrepasa a la explosión
+                    }
                     Projectile.Kill();
+                }
             }
             catch { }
         }
@@ -256,23 +322,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (p == null || !p.active) return -1f;
             float age = p.ai[0];
             if (age < 0f) return -1f;
-            return MathHelper.Clamp(age / DurationOf(p.ai[2]), 0f, 1f);
+            return MathHelper.Clamp(age / DurationOf(p.ai[2], p.ai[1]), 0f, 1f);
         }
 
-        /// <summary>Duración del frente derivada del radio máximo (determinista).</summary>
-        private static float DurationOf(float maxR)
+        /// <summary>Duración del frente derivada del radio máximo (determinista).
+        /// v5.96 — el ANILLO DE EINSTEIN viaja MÁS RÁPIDO que las ondas de
+        /// materia (26 px/tick de pico vs 20): es el ripple del espaciotiempo
+        /// mismo, no la materia eyectada.</summary>
+        private static float DurationOf(float maxR, float style = 0f)
         {
-            return Math.Max(maxR / 20f, 10f);
+            float speed = style == StyleEinstein ? 26f : 20f;
+            return Math.Max(maxR / speed, 10f);
         }
 
         private static float FrontRadius(float age, float style, float maxR)
         {
-            float duration = DurationOf(maxR);
+            float duration = DurationOf(maxR, style);
             float p = MathHelper.Clamp(age / duration, 0f, 1f);
             if (style == StyleChromaticInverse)
             {
                 // Convergencia acelerada: nace en maxR y colapsa hacia el centro.
                 return maxR * (1f - p * p);
+            }
+            if (style == StyleEinstein)
+            {
+                // v5.96 — ANILLO DE EINSTEIN: expansión CASI LINEAL (velocidad
+                // constante — un ripple luminoso no frena: se diluye). El
+                // leve ease inicial evita el salto brusco del primer frame.
+                return maxR * MathHelper.Clamp(p * (1f - 0.12f * p), 0f, 1f);
             }
             // Expansión ease-out: arranque veloz, frenado al final.
             return maxR * (1f - (1f - p) * (1f - p));
@@ -298,7 +375,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             // Banda de daño = grosor del anillo visible que avanza.
             float bandInner, bandOuter;
-            if (Style == StyleChromaticInverse)
+            if (Style == StyleEinstein)
+            {
+                // v5.96 — ANILLO DE EINSTEIN: banda FINA y pegada al frente —
+                // el anillo es delgado (la luz lensada se concentra en un
+                // círculo): solo daña lo que el borde del anillo TOCA.
+                bandInner = front * 0.88f;
+                bandOuter = front * 1.06f;
+            }
+            else if (Style == StyleChromaticInverse)
             {
                 // Convergente: el frente baja hacia el centro — la banda va
                 // POR DELANTE del frente (entre el frente y el radio exterior).
@@ -343,6 +428,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
 
                 npc.SimpleStrikeNPC(Projectile.damage, dir, false, knockBack, DamageClass.Magic);
+
+                // v5.96 — el anillo de Einstein aplica ShadowFlame (la luz
+                // lensada quema el alma, no la carne).
+                if (Style == StyleEinstein)
+                    npc.AddBuff(BuffID.ShadowFlame, 240);
 
                 // La onda de fuego aplica QUEMADURA de 10 s (v5.91: era 5 s).
                 if (Style == StyleFire)
@@ -398,11 +488,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // Retardo escalonado (ondas en secuencia): invisible e inofensiva.
             if (Age < 0f) return false;
 
-            // Las ondas cromáticas y de lente las pinta el sistema de lente
-            // ENCIMA de la distorsión (para que la lente no las deforme a
-            // ellas). Si la lente no está activa, caemos al dibujado normal
-            // del mundo.
-            if ((Style == StyleChromatic || Style == StyleChromaticInverse || Style == StyleLens) &&
+            // Las ondas cromáticas, de lente y el anillo de Einstein los pinta
+            // el sistema de lente ENCIMA de la distorsión (para que la lente no
+            // las deforme a ellas). Si la lente no está activa, caemos al
+            // dibujado normal del mundo.
+            if ((Style == StyleChromatic || Style == StyleChromaticInverse ||
+                 Style == StyleLens || Style == StyleEinstein) &&
                 BlackHoleLensSystem.LensActive)
                 return false;
 
@@ -455,7 +546,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 float age = p.ai[0];
                 float style = p.ai[1];
-                float duration = DurationOf(p.ai[2]);
+                float duration = DurationOf(p.ai[2], p.ai[1]);
                 float front = FrontRadius(age, style, p.ai[2]);
 
                 // v5.92 — Frente aún invisible (front <= 1 px): NO tocamos el
@@ -476,16 +567,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 //                      y franjas de aberración cromática)
                 //   fireRing         — llamas con COLOR propio (blanco-amarillo
                 //                      → naranja → rojo en las puntas)
-                //   perlin (vanilla) — el ruido Perlin del JUEGO: es la textura
-                //                      con la que Terraria dibuja el escudo de
-                //                      las Columnas Lunares (con el shader
-                //                      ForceField, ver la burbuja de abajo)
+                //   softGlow         — halo radial suave (el glow del anillo
+                //                      de Einstein, v5.96)
                 Texture2D ring = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/Ring").Value;
                 Texture2D fireRing = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/FireRing").Value;
-                Texture2D perlin = ModContent.Request<Texture2D>(
-                    "Terraria/Images/Misc/Perlin").Value;
                 Vector2 drawPos = p.Center - Main.screenPosition;
                 float ringUnit = ring.Width / 2f;
                 float fireUnit = fireRing.Width / 2f;
@@ -516,14 +603,48 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawRing(ring, drawPos, front * 0.97f * thinComp, ringUnit,
                         new Color(255, 250, 230, (byte)(alpha * 140f)));
                 }
+                else if (style == StyleEinstein)
+                {
+                    // === v5.96 — ANILLO DE EINSTEIN (lente gravitacional) ===
+                    // Petición del usuario: “al final de las explosiones debe
+                    // crear un lente gravitacional en forma de anillo que se
+                    // expanda”. La luz de todo lo que quedó detrás del colapso,
+                    // doblada en un círculo perfecto: frente FINO y BLANCO
+                    // incandescente (el anillo de Einstein puro), franjas R/B
+                    // MUY juntas (la imagen lensada se dispersa justo en su
+                    // borde — separación 1.8%, mucho más tight que la onda
+                    // cromática), un halo interior pálido (la luz lensada
+                    // esmealada por dentro) y una imagen secundaria tenue por
+                    // fuera. El FONDO del mundo lo curva el BlackHoleLensSystem
+                    // (está registrado como fuente con radio que ABRAZA al
+                    // anillo).
+                    float fr = front * 0.018f * (1f - progress * 0.45f);
+
+                    // Halo interior: la luz lensada acumulándose por dentro.
+                    DrawRing(ring, drawPos, front * 0.945f, ringUnit,
+                        new Color(255, 236, 190, (byte)(alpha * 60f)));
+                    // Imagen secundaria: eco tenue por fuera.
+                    DrawRing(ring, drawPos, front * 1.055f, ringUnit,
+                        new Color(210, 225, 255, (byte)(alpha * 45f)));
+                    // Franja AZUL interior (borde interno de la imagen).
+                    DrawRing(ring, drawPos, (front - fr) * thinComp, ringUnit,
+                        new Color(110, 180, 255, (byte)(alpha * 150f)));
+                    // Franja ROJA exterior (borde externo).
+                    DrawRing(ring, drawPos, (front + fr) * thinComp, ringUnit,
+                        new Color(255, 110, 110, (byte)(alpha * 150f)));
+                    // EL ANILLO: frente blanco incandescente.
+                    DrawRing(ring, drawPos, front * thinComp, ringUnit,
+                        new Color(255, 252, 244, (byte)(alpha * 230f)));
+                }
                 else
                 {
                     // === ONDA CROMÁTICA / ONDA DE LENTE — aberración R/G/B ===
-                    // v5.94 — LA onda cromática ES el escudo del agujero
-                    // destruyéndose (ver la burbuja de abajo). v5.95 — la onda
-                    // de LENTE (estilo 3) lleva la separación LIGERA (×0.65,
-                    // petición del usuario: "ligera distorsión cromática en
-                    // rgb") más un anillo blanco tenue marcando el frente.
+                    // v5.95 — la onda de LENTE (estilo 3) lleva la separación
+                    // LIGERA (×0.65, petición del usuario: "ligera distorsión
+                    // cromática en rgb") más un anillo blanco tenue marcando
+                    // el frente. (v5.96: la burbuja de ForceField que cabalgaba
+                    // la cromática se ELIMINÓ — petición del usuario; en su
+                    // lugar, al final de la explosión nace el ANILLO DE EINSTEIN.)
                     bool isLensWave = style == StyleLens;
                     float fringe = front * (0.035f + 0.06f * progress) *
                                    (isLensWave ? 0.65f : 1f) *
@@ -545,48 +666,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // Franja AZUL interior.
                     DrawRing(ring, drawPos, (front - fringe) * thinComp, ringUnit,
                         new Color(75, 155, 255, (byte)(alpha * 175f)));
-                }
-
-                // === v5.95 — EL CAMPO DE FUERZA ES LA ONDA (vanilla real) ===
-                // Shader ForceField del juego + Perlin vanilla, quad 600×600
-                // como en Main.cs. La burbuja PARTE del radio del escudo al
-                // morir (localAI[0], lo fija el OnKill del agujero — v5.94 lo
-                // ponía en ai[3], que NO EXISTE: el array ai de tModLoader
-                // tiene solo 3 ranuras → el IndexOutOfRangeException del
-                // client.log del usuario) y CABALGA el frente de la onda:
-                // radio = max(escudo, frente), expandiéndose con él mientras
-                // se desvanece — el escudo de una Columna Lunar destruida
-                // CONVERTIDO en onda expansiva (petición del usuario: "el
-                // campo de fuerza debe ser usado como onda expansiva").
-                // Fallback determinista desde el radio máximo sincronizado
-                // (ai[2]×0.22) para clientes remotos de MP.
-                if (style == StyleChromatic)
-                {
-                    Main.spriteBatch.End(); // cierra el pase aditivo de las franjas
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                        SamplerState.PointWrap, DepthStencilState.Default, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-
-                    if (GameShaders.Misc.TryGetValue("ForceField", out MiscShaderData forceField))
-                    {
-                        float deathR = p.localAI[0] > 4f ? p.localAI[0] : p.ai[2] * 0.22f;
-                        // La burbuja MANTIENE el tamaño del escudo al morir y
-                        // luego viaja CON el frente (mientras este lo supera).
-                        float bubbleR = Math.Max(deathR, front);
-                        // Desvanecimiento acompañando al frente (vanilla lo hace
-                        // rápido en la destrucción; aquí la burbuja ES la onda).
-                        float fade = MathHelper.Clamp(1f - progress * 0.9f, 0f, 1f);
-                        var dd = new DrawData(perlin, drawPos,
-                            new Rectangle(0, 0, 600, 600),
-                            new Color(fade, fade, fade, fade), 0f,
-                            new Vector2(300f, 300f),
-                            (bubbleR * 2f / 600f),
-                            SpriteEffects.None, 0f);
-                        // Brillo ×2 al nacer (vanilla destrucción) → ×1 al final.
-                        forceField.UseColor(new Vector3(2f - progress));
-                        forceField.Apply(dd);
-                        dd.Draw(Main.spriteBatch);
-                    }
                 }
 
                 Main.spriteBatch.End();
