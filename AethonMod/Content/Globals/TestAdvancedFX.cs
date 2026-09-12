@@ -9,21 +9,14 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Globals
 {
     /// <summary>
-    /// TestAdvancedFX v5.46
+    /// TestAdvancedFX v5.46 (v6.01 — los modos 5004-5007 de las armas de
+    /// COLOR fueron ELIMINADOS junto a ellas: limpieza del arsenal)
     ///
     /// Flags:
     /// 3003 = TestMagicRing
     /// 3004 = TestSparkle
     /// 4001 = ProjBeam
     /// 4006 = TestMagicRingV2
-    /// 5004 = ColorRainbow (REESCRITO: cambia el sprite + estela completos)
-    ///
-    /// TÉCNICA ColorRainbow:
-    /// PreDraw retorna FALSE → tModLoader NO dibuja el sprite original.
-    /// Nosotros dibujamos:
-    /// 1. El sprite del Nightglow con el color del hue (AlphaBlend)
-    /// 2. El GlowOrb con additive blending encima
-    /// 3. Dust de estela con el color del hue
     /// </summary>
     public class TestAdvancedFX : GlobalProjectile
     {
@@ -51,49 +44,6 @@ namespace AethonMod.Content.Globals
                 Vector2 pos = projectile.Center + new Vector2(
                     (float)System.Math.Cos(angle) * dist, (float)System.Math.Sin(angle) * dist);
                 Dust d = Dust.NewDustPerfect(pos, DustID.Enchanted_Gold, Vector2.Zero, 200, new Color(255, 255, 255), 0.5f);
-                d.noGravity = true; d.fadeIn = 0f;
-            }
-
-            // ColorRainbow (5004) — estela arcoíris densa (cubre la azul nativa)
-            if (projectile.ai[1] == 5004)
-            {
-                float hue = (Main.GameUpdateCount * 0.01f) % 1f;
-                Color c = Main.hslToRgb(hue, 1f, 0.5f);
-                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RainbowTorch,
-                    -projectile.velocity * 0.15f + new Vector2(
-                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
-                    0, c, 1.0f);
-                d.noGravity = true; d.fadeIn = 0f;
-            }
-
-            // ColorRed (5005) — estela roja Densa (cubre la azul nativa)
-            if (projectile.ai[1] == 5005)
-            {
-                // Dust denso cada frame para cubrir la estela nativa azul
-                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.RedTorch,
-                    -projectile.velocity * 0.15f + new Vector2(
-                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
-                    0, new Color(255, 50, 50), 1.0f);
-                d.noGravity = true; d.fadeIn = 0f;
-            }
-
-            // ColorYellow (5006) — estela amarilla densa
-            if (projectile.ai[1] == 5006)
-            {
-                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.YellowTorch,
-                    -projectile.velocity * 0.15f + new Vector2(
-                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
-                    0, new Color(255, 255, 50), 1.0f);
-                d.noGravity = true; d.fadeIn = 0f;
-            }
-
-            // ColorGreen (5007) — estela verde densa
-            if (projectile.ai[1] == 5007)
-            {
-                Dust d = Dust.NewDustPerfect(projectile.Center, DustID.GreenTorch,
-                    -projectile.velocity * 0.15f + new Vector2(
-                        Main.rand.NextFloat(-2, 2), Main.rand.NextFloat(-2, 2)),
-                    0, new Color(50, 255, 50), 1.0f);
                 d.noGravity = true; d.fadeIn = 0f;
             }
         }
@@ -151,63 +101,6 @@ namespace AethonMod.Content.Globals
                 return true;
             }
 
-            // === COLOR RAINBOW (5004) ===
-            if (projectile.ai[1] == 5004)
-            {
-                float hue = (t * 0.01f) % 1f;
-                Color c = Main.hslToRgb(hue, 1f, 0.5f);
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-
-                // GlowOrb blanco tintado con el color del hue (additive)
-                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(c.R, c.G, c.B, 180), 0f);
-                // Rayo de luz rotando con color del hue (additive)
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
-                // Dibujar sprite del Nightglow con color del hue (reemplaza el azul nativo)
-                DrawColoredSprite(projectile, c);
-                return false; // NO dibujar sprite azul nativo
-            }
-
-            // === COLOR ROJO (5005) ===
-            if (projectile.ai[1] == 5005)
-            {
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                Color c = new Color(255, 50, 50);
-                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(c.R, c.G, c.B, 180), 0f);
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
-                DrawColoredSprite(projectile, c);
-                return false;
-            }
-
-            // === COLOR AMARILLO (5006) ===
-            if (projectile.ai[1] == 5006)
-            {
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                Color c = new Color(255, 255, 50);
-                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(c.R, c.G, c.B, 180), 0f);
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
-                DrawColoredSprite(projectile, c);
-                return false;
-            }
-
-            // === COLOR VERDE (5007) ===
-            if (projectile.ai[1] == 5007)
-            {
-                float pulse = 0.8f + 0.2f * (float)System.Math.Sin(t * 0.1f);
-                Color c = new Color(50, 255, 50);
-                DrawTex("AethonMod/Content/Effects/GlowOrbWhite", projectile.Center, 0.5f * pulse,
-                    new Color(c.R, c.G, c.B, 180), 0f);
-                DrawTex("AethonMod/Content/Effects/GlowRay", projectile.Center, 0.4f * pulse,
-                    new Color(c.R, c.G, c.B, 80), t * 0.03f);
-                DrawColoredSprite(projectile, c);
-                return false;
-            }
-
             return true; // default: dibujar sprite original
         }
 
@@ -223,47 +116,6 @@ namespace AethonMod.Content.Globals
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
                 Main.spriteBatch.Draw(tex, drawPos, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// Dibuja el sprite del proyectil con un color de tinte + bloom.
-        /// 1. AlphaBlend + tinte: reemplaza el color azul del sprite
-        /// 2. Additive + tinte: agrega brillo/bloom (el "destello" que falta)
-        /// </summary>
-        private void DrawColoredSprite(Projectile projectile, Color tintColor)
-        {
-            try
-            {
-                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[projectile.type].Value;
-                if (tex == null) return;
-
-                // Calcular el frame correcto
-                int frameCount = Main.projFrames[projectile.type];
-                Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height / (frameCount > 0 ? frameCount : 1));
-                if (frameCount > 0)
-                {
-                    int frameY = projectile.frame % frameCount;
-                    frame.Y = frameY * (tex.Height / frameCount);
-                }
-
-                Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
-                Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-                // 1. Dibujar sprite con AlphaBlend + color del tinte (reemplaza el azul)
-                Main.EntitySpriteDraw(tex, drawPos, frame,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, 255),
-                    projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
-
-                // 2. Dibujar sprite OTRA VEZ con Additive + color del tinte (agrega bloom/destello)
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-                Main.spriteBatch.Draw(tex, drawPos, frame,
-                    new Color(tintColor.R, tintColor.G, tintColor.B, 128), // 50% alpha para no saturar
-                    projectile.rotation, origin, projectile.scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }

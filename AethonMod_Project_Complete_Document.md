@@ -796,10 +796,49 @@ Commits desde v5.28 hasta v5.99 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v6.00
-- **Mensaje**: "feat v6.00: sol y agujero negro con MÁS TICKS y MÁS ÁREA (el agujero golpea hasta 10 veces por segundo cerca del centro), AMBOS persiguen ligeramente a los enemigos y su gravedad DOBLA Y DEVORA las balas enemigas; la medusa dispara el rayo DESDE ELLA MISMA (látigo eléctrico mucho más brillante); EL OJO DEL VACÍO ELIMINADO y en su lugar LA GALAXIA VIVIENTE (investigación web de M51/M101: bulbo dorado, brazos azules, HII rosas y polvo — gira, cabecea en 3D, arrastra enemigos, siembra estrellas y estalla en 14 semillas); armas nuevas mejoradas y TODAS sin mana"
+- **Versión**: v6.01
+- **Mensaje**: "chore v6.01: LA GRAN LIMPIEZA — el usuario seleccionó qué se queda: 21 armas ELIMINADAS del arsenal de pruebas (4 de COLOR con sus handlers 5004-5007 y el helper huérfano DrawColoredSprite, 15 V20 con sus proyectiles, y las 2 cósmicas nuevas Quásar+Galaxia 'se ven horrible y son muy simples') + cirugía del bloque galaxia en BlackHoleLensSystem + localización y kit limpios; SE QUEDAN 14: los 4 tests clásicos, el Grimorio (Orbe Cósmico intacto), 4 V20 (Supernova/PlasmaStorm/PhoenixNova/QuantumSplit) y las 5 cósmicas (Agujero/Sol/Medusa/Cometa/Púlsar); verificación: 0 referencias, 39 clases con textura, 0 errores de compilación y 0 restos en binario"
 
-### 11.2 Qué se hizo en v6.00 (sol/agujero + látigo + galaxia viviente)
+### 11.2 Qué se hizo en v6.01 (la gran limpieza — el usuario elige qué se queda)
+
+**Petición del usuario**: "es momento de seleccionar que se queda en el
+proyecto" — listado completo del arsenal (35 armas agrupadas por
+generación), selección explícita por números, confirmación de dudas (el
+"191" era el 19 = AbyssalEyeStaff) y veredicto sobre las 2 cósmicas más
+nuevas: "la galaxia se ve horrible y la lanza igual, ademas las dos son
+tan simple que no vale la pena que continue en el mod".
+
+**A. FUERA — 21 armas**
+- 4 DE COLOR (ColorRainbow/Red/Yellow/Green): clases extirpadas de
+  TestAdvanced.cs, texturas .png borradas, handlers 5004-5007 eliminados
+  de TestAdvancedFX.cs + el helper DrawColoredSprite (solo lo usaban ellas)
+- 15 V20: Tornado, PrismBeam, Earthquake, MirrorDimension, GravityPulse,
+  ShadowClone, CrystalShatter, VortexChain (+VortexMineProjectile
+  interno), AbyssalEye, SpectralMirage, TemporalRift, InfernoTornado,
+  VoidEater, PlasmaOrb, BlackHoleMini — arma+proyectil+texturas (mapeo
+  1:1 auditado, sin huérfanos)
+- 2 CÓSMICAS NUEVAS: QuasarLance+QuasarJetProjectile y
+  LivingGalaxyStaff+LivingGalaxyProjectile+GalaxyStarProjectile+
+  SpiralGalaxy.png procedural
+- BlackHoleLensSystem: bloque galaxia extirpado (recolección, arrays,
+  fuente del pase B, draw loop) — el protocolo vive en soles/medusas/
+  cometas/púlsares
+- Localización en-US/es-ES y TestingPlayer limpios
+
+**B. SE QUEDAN — 14 armas**: 4 tests clásicos (TestMagicRing,
+TestSparkle, ProjBeam, TestMagicRingV2), el Grimorio del Eterno (su Orbe
+Cósmico — imagen del usuario — INTACTO), 4 V20 (Supernova,
+PlasmaStorm, PhoenixNova, QuantumSplit) y las 5 cósmicas (Agujero Negro,
+Sol, Medusa, Cometa Estelar, Púlsar Vivo — con EnsureItem garantizado).
+Quien tenga armas borradas en guardados viejos LAS CONSERVA (solo dejan
+de entregarse).
+
+**C. Verificación**: 0 referencias a las 40 clases borradas; 39 clases
+ModItem/ModProjectile/ModBuff TODAS con textura ✓; compilación contra
+tModLoader v2026.07.3.0 real 0 errores/0 warnings; binario auditado por
+bytes: 30 nombres borrados → 0 restos, 20 conservados → todos presentes.
+
+### 11.2.1 Qué se hizo en v6.00 (histórico — sol/agujero + látigo + galaxia viviente)
 
 **Peticiones del usuario**: aumentar los ticks de daño del sol y el agujero
 negro y su área (en el agujero los ticks aumentan cerca del centro); ambos
@@ -4078,7 +4117,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v6.00
+> Última actualización: v6.01
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

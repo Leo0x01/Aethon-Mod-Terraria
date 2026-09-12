@@ -1,5 +1,67 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.01 — LA GRAN LIMPIEZA: EL USUARIO ELIGE QUÉ SE QUEDA (21 ARMAS FUERA)
+
+**Petición del usuario**: "es momento de seleccionar que se queda en el
+proyecto" + lista explícita de borrado (números del inventario) + sobre el
+Quásar y la Galaxia Viviente: "la galaxia se ve horrible y la lanza igual,
+ademas las dos son tan simple que no vale la pena que continue en el mod".
+
+El arsenal de pruebas pasó de 35 a **14 armas**. Se listó el inventario
+completo agrupado por generación (8 tests originales + Grimorio + 19 V20 +
+7 cósmicas), el usuario seleccionó, se confirmaron las dudas (el "191"
+era el 19 = AbyssalEyeStaff; Quásar/Galaxia confirmadas fuera) y se
+ejecutó la purga con auditoría completa.
+
+### A. FUERA — 21 ARMAS ELIMINADAS
+
+- **4 ARMAS DE COLOR** (las más viejas, pruebas de sistema de partículas):
+  ColorRainbow, ColorRed, ColorYellow, ColorGreen — clases extirpadas de
+  TestAdvanced.cs, texturas borradas, y sus 4 handlers (modos 5004-5007)
+  limpiados de TestAdvancedFX.cs junto al helper huérfano
+  DrawColoredSprite (solo lo usaban ellas)
+- **15 ARMAS V20** (de las 20 de partículas): TornadoStaff,
+  PrismBeamStaff, EarthquakeStaff, MirrorDimensionStaff,
+  GravityPulseStaff, ShadowCloneStaff, CrystalShatterStaff,
+  VortexChainStaff (con su VortexMineProjectile interno), AbyssalEyeStaff,
+  SpectralMirageStaff, TemporalRiftStaff, InfernoTornadoStaff,
+  VoidEaterStaff, PlasmaOrbStaff, BlackHoleMiniStaff — arma + proyectil +
+  texturas, mapeo 1:1 verificado sin huérfanos
+- **2 CÓSMICAS NUEVAS** (v5.99/v6.00, "se ven horrible y son muy
+  simples"): LA LANZA DEL QUÁSAR (QuasarLance + QuasarJetProjectile) y LA
+  GALAXIA VIVIENTE (LivingGalaxyStaff + LivingGalaxyProjectile +
+  GalaxyStarProjectile + SpiralGalaxy.png procedural)
+- **BlackHoleLensSystem — cirugía del bloque galaxia**: recolección,
+  arrays _galaxyIndices/_galaxyCount, fuente del pase B y draw loop
+  extirpados; el protocolo de dibujado-encima-de-la-lente vive intacto en
+  soles, medusas, cometas y púlsares
+- **Localización en-US/es-ES**: entradas del Quásar y la Galaxia eliminadas
+- **TestingPlayer**: 21 líneas de entrega eliminadas del kit
+
+### B. SE QUEDAN — LOS 14 ELEGIDOS
+
+- **4 tests clásicos**: TestMagicRing, TestSparkle, ProjBeam,
+  TestMagicRingV2 (con sus handlers 3003/3004/4001/4006 intactos)
+- **El Grimorio del Eterno** (con su Orbe Cósmico — la imagen del
+  usuario, INTACTA)
+- **4 V20**: SupernovaStaff, PlasmaStormStaff, PhoenixNovaStaff,
+  QuantumSplitStaff
+- **5 cósmicas**: BlackHoleStaff, SunStaff, MedusaNebularStaff,
+  LivingCometStaff, LivingPulsarStaff (todas con su EnsureItem individual
+  garantizado)
+- Quien tenga armas borradas en un guardado viejo LAS CONSERVA (no se
+  eliminan del inventario existente — solo dejan de entregarse)
+
+### C. VERIFICACIÓN
+
+- Auditoría de referencias: 0 menciones a las 40 clases borradas en todo
+  el .cs del mod
+- Auditoría de texturas: 39 clases ModItem/ModProjectile/ModBuff, TODAS
+  con su .png en la ruta por defecto ✓
+- Compilación contra tModLoader v2026.07.3.0 REAL: 0 errores, 0 warnings
+- Auditoría de binario (búsqueda de bytes ASCII+UTF-16): 30 nombres
+  borrados → 0 restos; 20 conservados → todos presentes
+
 ## Commit v6.00 — SOL Y AGUJERO PULSAN MÁS FUERTE + EL LÁTIGO DE LA MEDUSA + ADIÓS OJO, LLEGA LA GALAXIA VIVIENTE
 
 **Peticiones del usuario**: (1) "creo que deberías aumentar los tick de

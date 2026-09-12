@@ -49,17 +49,6 @@
         "Buffs.LivingPulsarBuff.DisplayName": "Púlsar Vivo",
         "Buffs.LivingPulsarBuff.Description": "Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos",
 
-        "Items.QuasarLance.DisplayName": "Lanza del Quásar",
-        "Items.QuasarLance.Tooltip": "Dispara un CHORRO RELATIVISTA — el objeto más brillante del universo.\nUna lanza de luz que atraviesa hasta 14 enemigos, con nudos de shock pulsando.\nTermina en el FLORECIMIENTO DEL QUÁSAR.",
-
-        "Projectiles.QuasarJetProjectile.DisplayName": "Chorro Relativista",
-
-        "Items.LivingGalaxyStaff.DisplayName": "Báculo de la Galaxia Viviente",
-        "Items.LivingGalaxyStaff.Tooltip": "Invoca LA GALAXIA VIVIENTE — una espiral de diseño perfecto con cien mil millones de soles.\nSu disco arrastra a los enemigos con su gravedad y lanza estrellas desde sus brazos.\nTermina en la EXPLOSIÓN ESTELLAR.",
-
-        "Projectiles.LivingGalaxyProjectile.DisplayName": "Galaxia Viviente",
-        "Projectiles.GalaxyStarProjectile.DisplayName": "Estrella de Galaxia",
-
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
         "NPCs.TheWitness.DisplayName": "El Testigo",

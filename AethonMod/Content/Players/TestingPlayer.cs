@@ -7,14 +7,19 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// TestingPlayer — el kit de pruebas del arsenal.
     ///
-    /// v5.98 — FIX DEL KIT "CONGELADO": el kit completo solo se entrega UNA
-    /// vez (gate por GenesisShard), así que quien ya había entrado al mundo
-    /// con una versión anterior NUNCA recibía las armas añadidas después
-    /// (exactamente lo que pasó con la Medusa Nebular). Ahora el kit base
-    /// sigue siendo de una sola vez, pero las ARMAS CÓSMICAS EN DESARROLLO
-    /// se garantizan INDIVIDUALMENTE en cada entrada al mundo: si falta una
-    /// (se eliminó, se guardó con una versión vieja, lo que sea), vuelve al
-    /// inventario — la Medusa Nebular SIEMPRE está ahí desde el inicio.
+    /// v6.01 — LA GRAN LIMPIEZA: el usuario seleccionó qué se queda.
+    /// FUERA: las 4 armas de COLOR (Rainbow/Red/Yellow/Green), 15 de las
+    /// 20 V20 (Tornado, PrismBeam, Earthquake, MirrorDimension,
+    /// GravityPulse, ShadowClone, CrystalShatter, VortexChain, AbyssalEye,
+    /// SpectralMirage, TemporalRift, InfernoTornado, VoidEater, PlasmaOrb,
+    /// BlackHoleMini) y las 2 cósmicas nuevas (Quásar y Galaxia Viviente —
+    /// "se ven horrible y son muy simples"). SE QUEDAN 14: los 4 tests
+    /// clásicos, el Grimorio, 4 V20 (Supernova, PlasmaStorm, PhoenixNova,
+    /// QuantumSplit) y las 5 cósmicas (Agujero, Sol, Medusa, Cometa, Púlsar).
+    ///
+    /// v5.98 — FIX DEL KIT "CONGELADO": el kit base se entrega UNA sola vez
+    /// (gate por GenesisShard), pero las ARMAS CÓSMICAS EN DESARROLLO se
+    /// garantizan INDIVIDUALMENTE en cada entrada al mundo.
     /// </summary>
     public class TestingPlayer : ModPlayer
     {
@@ -35,30 +40,11 @@ namespace AethonMod.Content.Players
                 GiveItem(ModContent.ItemType<Weapons.TestSparkle>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.ProjBeam>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.TestMagicRingV2>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.ColorRainbow>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.ColorRed>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.ColorYellow>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.ColorGreen>(), 1);
-                // v5.77: 20 armas creativas (BlackHoleStaff movido a Cosmic)
-                GiveItem(ModContent.ItemType<Weapons.V20.BlackHoleMiniStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.TornadoStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.PrismBeamStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.EarthquakeStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.MirrorDimensionStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.GravityPulseStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.ShadowCloneStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.CrystalShatterStaff>(), 1);
+                // v5.77: arsenal creativo V20 — v6.01: solo los 4 ELEGIDOS
                 GiveItem(ModContent.ItemType<Weapons.V20.SupernovaStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.VortexChainStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.AbyssalEyeStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.SpectralMirageStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.TemporalRiftStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.V20.PlasmaStormStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.InfernoTornadoStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.VoidEaterStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
-                GiveItem(ModContent.ItemType<Weapons.V20.PlasmaOrbStaff>(), 1);
                 // v5.80+: armas cósmicas basadas en shaders de lensing
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
@@ -69,20 +55,16 @@ namespace AethonMod.Content.Players
             // === GARANTÍA INDIVIDUAL (v5.98) — las armas cósmicas en
             // desarrollo SIEMPRE están en el inventario, venga de la
             // versión que venga el guardado del jugador ===
-            // (v6.00: EL OJO DEL VACÍO ELIMINADO — sustituido por LA GALAXIA
-            // VIVIENTE; quien aún tenga el ojo guardado lo conserva, pero ya
-            // no se garantiza — el arma nueva sí.)
+            // (v6.01: QUÁSAR y GALAXIA VIVIENTE ELIMINADOS — "se ven
+            // horrible y son muy simples, no vale la pena que continúen";
+            // quien aún los tenga guardados los conserva, pero ya no se
+            // garantizan. El OJO DEL VACÍO corrió la misma suerte en v6.00.)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>());
-            // v5.99: EL COMETA ESTELAR (invocador — inspirado en la imagen
-            // de referencia del usuario), EL PÚLSAR VIVO (invocador con
-            // haces de faro) y LA LANZA DEL QUÁSAR (chorro relativista)
+            // v5.99: EL COMETA ESTELAR y EL PÚLSAR VIVO (invocadores)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.QuasarLance>());
-            // v6.00: LA GALAXIA VIVIENTE (el proyectil ES una galaxia espiral)
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingGalaxyStaff>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

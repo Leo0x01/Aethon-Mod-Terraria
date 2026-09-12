@@ -49,17 +49,6 @@
         "Buffs.LivingPulsarBuff.DisplayName": "Living Pulsar",
         "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",
 
-        "Items.QuasarLance.DisplayName": "Quasar Lance",
-        "Items.QuasarLance.Tooltip": "Fires a RELATIVISTIC JET — the brightest object in the universe.\nA lance of light piercing through up to 14 enemies, with pulsing shock knots.\nEnds in the QUASAR BLOOM.",
-
-        "Projectiles.QuasarJetProjectile.DisplayName": "Relativistic Jet",
-
-        "Items.LivingGalaxyStaff.DisplayName": "Living Galaxy Staff",
-        "Items.LivingGalaxyStaff.Tooltip": "Summons THE LIVING GALAXY — a grand-design spiral of a hundred billion suns.\nIts disk drags enemies with its gravity and flings stars from its arms.\nEnds in the STARBURST.",
-
-        "Projectiles.LivingGalaxyProjectile.DisplayName": "Living Galaxy",
-        "Projectiles.GalaxyStarProjectile.DisplayName": "Galaxy Star",
-
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
         "NPCs.TheWitness.DisplayName": "The Witness",
