@@ -9,6 +9,29 @@ using AethonMod.Content.Effects;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.97 — UNA SOLA EXPLOSIÓN FINAL (petición del usuario: “el sol y el
+    /// agujero negro tienen dos, digamos explosiones al terminar, solo deben
+    /// tener una donde suceda todo. Los anillos RGB del agujero negro quedan
+    /// mal, lo mejor es un anillo de lente gravitacional”):
+    ///   - AGUJERO NEGRO: la explosión YA NO es la onda cromática RGB + el
+    ///     anillo de Einstein al final — ES EL ANILLO DE EINSTEIN MISMO: una
+    ///     única onda StyleEinstein con el daño COMPLETO del agujero, con el
+    ///     FLASH DE LIBERACIÓN en el centro (la luz del colapso escapando,
+    ///     dibujado por la propia onda durante sus primeros ticks) y las
+    ///     franjas R/B sutiles del lente. Nada de RGB fuerte, nada de segunda
+    ///     explosión: TODO sucede dentro del anillo de lente gravitacional.
+    ///   - SOL: la explosión ya no son 3 ondas de fuego + 1 onda de lente —
+    ///     es UNA SOLA onda StyleNova: el frente de espaciotiempo QUE LLEVA
+    ///     EL FUEGO — triple anillo ardiente (FireRing) + frente fino blanco
+    ///     + aberración CÁLIDA (oro/exterior, brasa/interior — nada de RGB:
+    ///     la nova dispersa luz de FUEGO) — registrada como fuente del
+    ///     BlackHoleLensSystem → el fondo se curva a su paso. Daño de la nova
+    ///     COMPLETO en la banda + quemadura 10 s.
+    ///   - OJO DEL VACÍO: su GRITO también se unificó — el desgarro (anillo
+    ///     de Einstein carmesí) ES el grito: una sola onda con el daño del
+    ///     colapso COMPLETO (la vieja pareja cromática-inversa + anillo se
+    ///     eliminó).
+    ///
     /// v5.96 — ESTILO 4: EL ANILLO DE EINSTEIN + EL CAMPO DE FUERZA SE VA.
     /// Petición del usuario: “creo que es mejor que quites el campo de fuerza
     /// de las columnas, se ve mejor si eso. En su lugar, al final de las
@@ -23,7 +46,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// expande MÁS RÁPIDO que la materia (26 px/tick, expansión casi lineal)
     /// y curva el FONDO del juego a su paso (fuente del BlackHoleLensSystem
     /// con radio que abraza al anillo). Daña con banda fina (0.88-1.06·frente)
-    /// + ShadowFlame.
+    /// + ShadowFlame. (v5.97: ya no nace “al final” — ES la explosión.)
     ///
     /// v5.95 — LLEGA EL ESTILO 3 (ONDA DE LENTE): onda expansiva creada CON
     /// LENTE gravitacional y una LIGERA distorsión cromática RGB (petición del
@@ -102,15 +125,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     mientras el frente barre al enemigo, y aplica QUEMADURA de 10 s
     ///     (OnFire, 600 ticks — antes 5 s) a cada golpe.
     ///
-    ///   ESTILO 3 — ONDA DE LENTE (nova final del sol, v5.95):
-    ///     Anillo blanco tenue + franjas R/G/B LIGERAS (×0.65); fuente del
-    ///     sistema de lente → curva el fondo a su paso.
+    ///   ESTILO 3 — ONDA DE LENTE (LEGADO desde v5.97 — sustituida por la
+    ///     StyleNova del sol): anillo blanco tenue + franjas R/G/B LIGERAS
+    ///     (×0.65); fuente del sistema de lente → curva el fondo a su paso.
+    ///     Conservada como estilo disponible para armas futuras.
     ///
-    ///   ESTILO 4 — ANILLO DE EINSTEIN (v5.96, final de la explosión del
-    ///     agujero): nace cuando la cromática termina de expandirse. Frente
-    ///     fino blanco incandescente + franjas R/B al 1.8% + halo interior
-    ///     pálido + imagen secundaria. Banda de daño fina (0.88-1.06·frente)
-    ///     con ShadowFlame. Expansión casi lineal a 26 px/tick (radio 520).
+    ///   ESTILO 4 — ANILLO DE EINSTEIN (v5.96 → LA explosión del agujero en
+    ///     v5.97): frente fino blanco incandescente + franjas R/B al 1.8% +
+    ///     halo interior pálido + imagen secundaria + FLASH DE LIBERACIÓN en
+    ///     el centro durante los primeros ticks. Banda de daño fina
+    ///     (0.88-1.06·frente) con ShadowFlame. Expansión casi lineal a 26
+    ///     px/tick (radio 520). El OJO DEL VACÍO también muere con este anillo
+    ///     (su GRITO es el desgarro).
+    ///
+    ///   ESTILO 5 — ONDA NOVA DE LENTE (v5.97 — LA explosión del sol):
+    ///     la UNICA onda de la muerte del sol: el frente de espaciotiempo
+    ///     LLEVA EL FUEGO — triple anillo ardiente (FireRing) + frente fino
+    ///     blanco + aberración CÁLIDA (oro por fuera, brasa por dentro) +
+    ///     fuente del BlackHoleLensSystem (curva el fondo). Daño de la nova
+    ///     COMPLETO en la banda 0.72-1.02·frente cada 0.1 s + quemadura 10 s.
     ///
     /// Campos AI:
     ///   ai[0] = edad (negativa = retardo escalonado aún activo)
@@ -120,10 +153,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   (la API de NewProjectile solo acepta 3 slots de ai: la duración se
     ///   deriva de forma determinista para que todas las máquinas coincidan)
     ///
-    /// RENDER: los estilos 0/1/3/4 se dibujan ENCIMA de la lente gravitacional
+    /// RENDER: los estilos 0/1/3/4/5 se dibujan ENCIMA de la lente gravitacional
     /// (el BlackHoleLensSystem los pinta tras compositar la distorsión), de
     /// modo que la lente nunca deforma sus propios anillos. El estilo 2 se
-    /// dibuja en el pase normal del mundo.
+    /// dibuja en el pase normal del mundo (legado — desde v5.97 nada lo invoca).
     /// </summary>
     public class CosmicShockwaveProjectile : ModProjectile
     {
@@ -156,8 +189,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// BlackHoleLensSystem → EL FONDO del juego se curva a su paso. El
         /// ForceField vanilla (burbuja Perlin de las Columnas) se ELIMINÓ de la
         /// onda cromática: el anillo de Einstein lo sustituye.
+        /// v5.97 — YA NO NACE “AL FINAL”: ES LA EXPLOSIÓN MISMA (petición del
+        /// usuario: “solo deben tener una [explosión] donde suceda todo. Los
+        /// anillos RGB del agujero negro quedan mal, lo mejor es un anillo de
+        /// lente gravitacional”) — el OnKill del agujero lo invoca directamente
+        /// con el daño COMPLETO, y la propia onda dibuja además el FLASH DE
+        /// LIBERACIÓN central durante sus primeros ticks (la luz del colapso
+        /// escapando). El GRITO del Ojo del Vacío es también este anillo (el
+        /// desgarro de la realidad).
         /// </summary>
         public const float StyleEinstein = 4f;
+
+        /// <summary>
+        /// v5.97 — Estilo: ONDA NOVA DE LENTE (LA explosión del sol). Petición
+        /// del usuario: “el sol y el agujero negro tienen dos, digamos
+        /// explosiones al terminar, solo deben tener una donde suceda todo”.
+        /// La muerte del sol ya no suelta 3 ondas de fuego + 1 onda de lente:
+        /// suelta ESTA — un único frente de espaciotiempo que LLEVA EL FUEGO:
+        /// triple anillo ardiente (FireRing con su color propio) + frente fino
+        /// blanco de choque + aberración CÁLIDA (oro por fuera, brasa por
+        /// dentro — la nova dispersa LUZ DE FUEGO, no RGB). Fuente del
+        /// BlackHoleLensSystem → el fondo del juego se curva a su paso. Daño
+        /// de la nova COMPLETO en la banda + quemadura de 10 s.
+        /// </summary>
+        public const float StyleNova = 5f;
 
         /// <summary>
         /// v5.91 — Intervalo de daño por tick: 6 ticks = 0.1 segundos EXACTOS
@@ -251,7 +306,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // === SOPORTE VISUAL (solo cliente) ===
                 if (Main.netMode != NetmodeID.Server)
                 {
-                    if (Style == StyleFire)
+                    if (Style == StyleFire || Style == StyleNova)
                         SpawnFireFrontDusts(front, progress);
                     else
                         SpawnChromaticFrontSparks(front, progress);
@@ -259,7 +314,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // === LUZ ===
                 float alpha = WaveAlpha(age, Math.Max(Duration, 1f));
-                if (Style == StyleFire)
+                if (Style == StyleFire || Style == StyleNova)
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(1f, 0.55f, 0.2f) * 1.8f * alpha);
                 else if (Style == StyleLens)
@@ -277,26 +332,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // Frente completado → la onda se disipa.
                 if (age >= Duration)
                 {
-                    // v5.96 — AL FINAL DE LA EXPLOSIÓN NACE EL ANILLO DE
-                    // EINSTEIN (petición del usuario: “al final de las
-                    // explosiones debe crear un lente gravitacional en forma
-                    // de anillo que se expanda”): la onda cromática del
-                    // agujero terminó de expandirse — el espacio que dejó
-                    // curvado detrás libera su última vibración: un anillo de
-                    // lente puro que nace pequeño y se expande MÁS RÁPIDO que
-                    // la propia explosión (el ripple de espaciotiempo).
-                    if (Style == StyleChromatic && Projectile.owner == Main.myPlayer)
-                    {
-                        int einsteinDmg = Math.Max(1, (int)(Projectile.damage * 0.75f));
-                        Projectile.NewProjectile(
-                            Projectile.GetSource_FromThis(),
-                            Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
-                            ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                            einsteinDmg, 0f, Projectile.owner,
-                            0f,               // edad: nace YA (sin retardo)
-                            StyleEinstein,
-                            520f);            // radio máximo: sobrepasa a la explosión
-                    }
+                    // (v5.96: aquí la onda cromática engendraba el ANILLO DE
+                    // EINSTEIN al terminar de expandirse. v5.97 — ELIMINADO:
+                    // petición del usuario, “solo deben tener UNA explosión
+                    // donde suceda todo” — el anillo de Einstein YA ES la
+                    // explosión del agujero (lo invoca su OnKill directamente
+                    // con el daño completo); la onda cromática RGB dejó de
+                    // invocarse (“los anillos RGB del agujero negro quedan
+                    // mal, lo mejor es un anillo de lente gravitacional”).)
                     Projectile.Kill();
                 }
             }
@@ -383,6 +426,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 bandInner = front * 0.88f;
                 bandOuter = front * 1.06f;
             }
+            else if (Style == StyleNova)
+            {
+                // v5.97 — ONDA NOVA DE LENTE: banda ANCHA como la vieja onda
+                // de fuego (el cuerpo ardiente del frente, 0.72-1.02·frente) —
+                // la nova lleva el fuego y TODO sucede en esta única onda.
+                bandInner = front * 0.72f;
+                bandOuter = front * 1.02f;
+            }
             else if (Style == StyleChromaticInverse)
             {
                 // Convergente: el frente baja hacia el centro — la banda va
@@ -424,7 +475,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 else
                 {
                     dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
-                    knockBack = Style == StyleFire ? 5f : 6f;
+                    knockBack = (Style == StyleFire || Style == StyleNova) ? 5f : 6f;
                 }
 
                 npc.SimpleStrikeNPC(Projectile.damage, dir, false, knockBack, DamageClass.Magic);
@@ -435,7 +486,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     npc.AddBuff(BuffID.ShadowFlame, 240);
 
                 // La onda de fuego aplica QUEMADURA de 10 s (v5.91: era 5 s).
-                if (Style == StyleFire)
+                // v5.97 — la ONDA NOVA también (es la nova del sol: una sola
+                // explosión donde sucede TODO).
+                if (Style == StyleFire || Style == StyleNova)
                     npc.AddBuff(BuffID.OnFire, 600);
             }
         }
@@ -488,12 +541,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // Retardo escalonado (ondas en secuencia): invisible e inofensiva.
             if (Age < 0f) return false;
 
-            // Las ondas cromáticas, de lente y el anillo de Einstein los pinta
-            // el sistema de lente ENCIMA de la distorsión (para que la lente no
-            // las deforme a ellas). Si la lente no está activa, caemos al
-            // dibujado normal del mundo.
+            // Las ondas cromáticas, de lente, el anillo de Einstein y la nova
+            // de lente los pinta el sistema de lente ENCIMA de la distorsión
+            // (para que la lente no las deforme a ellas). Si la lente no está
+            // activa, caemos al dibujado normal del mundo.
             if ((Style == StyleChromatic || Style == StyleChromaticInverse ||
-                 Style == StyleLens || Style == StyleEinstein) &&
+                 Style == StyleLens || Style == StyleEinstein ||
+                 Style == StyleNova) &&
                 BlackHoleLensSystem.LensActive)
                 return false;
 
@@ -586,7 +640,36 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                if (style == StyleFire)
+                if (style == StyleNova)
+                {
+                    // === v5.97 — ONDA NOVA DE LENTE (LA explosión del sol) ===
+                    // Petición del usuario: “el sol y el agujero negro tienen
+                    // dos, digamos explosiones al terminar, solo deben tener UNA
+                    // donde suceda todo”. Un único frente de espaciotiempo QUE
+                    // LLEVA EL FUEGO: el triple anillo ardiente de la vieja nova
+                    // (FireRing con su color propio: núcleo blanco-amarillo →
+                    // naranja → rojo) + el frente fino blanco de choque + la
+                    // aberración CÁLIDA del lente (oro por fuera, brasa por
+                    // dentro — la nova dispersa LUZ DE FUEGO, no RGB). El FONDO
+                    // del mundo lo curva el BlackHoleLensSystem (fuente con
+                    // radio de frente completo).
+                    float fr = front * 0.03f * (1f - progress * 0.45f);
+
+                    // Cuerpo ardiente: doble pasada de FireRing (profundidad).
+                    DrawRing(fireRing, drawPos, front * 1.08f, fireUnit,
+                        new Color(255, 255, 255, (byte)(alpha * 215f)));
+                    DrawRing(fireRing, drawPos, front * 0.93f, fireUnit,
+                        new Color(255, 225, 170, (byte)(alpha * 195f)));
+                    // Frente fino blanco de choque caliente.
+                    DrawRing(ring, drawPos, front * 0.97f * thinComp, ringUnit,
+                        new Color(255, 250, 230, (byte)(alpha * 140f)));
+                    // Aberración CÁLIDA del lente: oro por fuera, brasa dentro.
+                    DrawRing(ring, drawPos, (front + fr) * thinComp, ringUnit,
+                        new Color(255, 200, 90, (byte)(alpha * 110f)));
+                    DrawRing(ring, drawPos, (front - fr) * thinComp, ringUnit,
+                        new Color(255, 90, 50, (byte)(alpha * 110f)));
+                }
+                else if (style == StyleFire)
                 {
                     // === ANILLO DE FUEGO (v5.93: FireRing.png con llamas reales) ===
                     // La textura trae el COLOR propio (núcleo blanco-amarillo
@@ -618,7 +701,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // fuera. El FONDO del mundo lo curva el BlackHoleLensSystem
                     // (está registrado como fuente con radio que ABRAZA al
                     // anillo).
+                    // v5.97 — YA ES LA EXPLOSIÓN COMPLETA (no “el final”):
+                    // durante sus primeros ticks dibuja además el FLASH DE
+                    // LIBERACIÓN — la luz del colapso escapando del punto
+                    // singular antes de que el anillo se la lleve (petición del
+                    // usuario: “solo deben tener una explosión donde suceda
+                    // TODO” — flash + anillo viven en la MISMA onda).
                     float fr = front * 0.018f * (1f - progress * 0.45f);
+
+                    // FLASH DE LIBERACIÓN central (primeros ~16 ticks):
+                    // brillo cálido que se apaga mientras el anillo despega.
+                    if (age < 16f)
+                    {
+                        Texture2D softGlow = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                        float flashT = MathHelper.Clamp(age / 16f, 0f, 1f);
+                        float flashAlpha = (1f - flashT) * (1f - flashT);
+                        float flashR = MathHelper.Lerp(120f, 46f, flashT);
+                        float flashScale = flashR / (softGlow.Width * 0.5f);
+                        Main.spriteBatch.Draw(softGlow, drawPos, null,
+                            new Color(255, 246, 225, (byte)(alpha * flashAlpha * 235f)),
+                            0f, new Vector2(softGlow.Width * 0.5f, softGlow.Height * 0.5f),
+                            flashScale, SpriteEffects.None, 0f);
+                    }
 
                     // Halo interior: la luz lensada acumulándose por dentro.
                     DrawRing(ring, drawPos, front * 0.945f, ringUnit,

@@ -59,6 +59,13 @@ namespace AethonMod.Content.Players
             // v5.80: armas cósmicas basadas en shaders de lensing gravitacional
             GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
             GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
+            // v5.96: EL OJO DEL VACÍO (arma de terror cósmico — petición del
+            // usuario; v5.97: FIX — faltaba dársela al jugador aquí)
+            GiveItem(ModContent.ItemType<Weapons.Cosmic.VoidEyeStaff>(), 1);
+            // v5.97: LA MEDUSA NEBULAR (invocador de minion cósmico — petición
+            // del usuario: "crea una nueva arma que sea un invocador para un
+            // minion… el proyectil será la invocación")
+            GiveItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>(), 1);
         }
 
         private void GiveItem(int itemType, int stack)

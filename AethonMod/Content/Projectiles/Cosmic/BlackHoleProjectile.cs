@@ -13,6 +13,16 @@ using AethonMod.Content.Effects;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.97 — LA EXPLOSIÓN ES EL ANILLO DE EINSTEIN (ÚNICA). Petición del
+    /// usuario: "el sol y el agujero negro tienen dos, digamos explosiones al
+    /// terminar, solo deben tener una donde suceda todo. Los anillos RGB del
+    /// agujero negro quedan mal, lo mejor es un anillo de lente gravitacional".
+    /// El agujero ya NO suelta la onda cromática RGB que engendraba el anillo
+    /// al final: suelta EL ANILLO DE EINSTEIN MISMO con el daño COMPLETO —
+    /// flash de liberación central + frente fino blanco + franjas R/B sutiles
+    /// + fondo curvándose: TODO en una única onda (ver OnKill y
+    /// CosmicShockwaveProjectile.StyleEinstein).
+    ///
     /// v5.96 — AURA DE DAÑO QUE CRECE CON EL AGUJERO + SIN CAMPO DE FUERZA.
     /// Petición del usuario: "todo el daño de ambos proyectiles deben ser daño
     /// de área y este debe extenderse por fuera del proyectil y crecer conforme
@@ -25,7 +35,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// Perlin/ForceField de la explosión se ELIMINÓ — cuando la onda cromática
     /// TERMINA de expandirse engendra el ANILLO DE EINSTEIN (lente
     /// gravitacional anular expandiéndose — ver CosmicShockwaveProjectile,
-    /// estilo 4).
+    /// estilo 4). (v5.97: la cromática RGB se eliminó del todo — el anillo ES
+    /// la explosión.)
     ///
     /// v5.95 — EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA (petición del usuario):
     /// el escudo Perlin/ForceField YA NO vive alrededor del agujero durante
@@ -858,33 +869,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnKill(int timeLeft)
         {
             // ================================================================
-            //  v5.90 — LA ÚNICA EXPLOSIÓN CROMÁTICA
+            //  v5.97 — LA EXPLOSIÓN ES EL ANILLO DE EINSTEIN (ÚNICA)
             // ================================================================
-            // El agujero terminó de evaporarse: toda la energía acumulada se
-            // libera en UNA SOLA onda expansiva cromática (estilo 0) con
-            // aberración cromática REAL — los canales R/G/B del anillo van
-            // separados radialmente — que además distorsiona el fondo a su
-            // paso (se registra como fuente del BlackHoleLensSystem) y HACE
-            // DAÑO a cada NPC cuando el frente lo alcanza. Las 4 ondas de la
-            // v5.86 (1 intermedia + 3 inversas escalonadas) se eliminaron.
+            // Petición del usuario: "el sol y el agujero negro tienen dos,
+            // digamos explosiones al terminar, solo deben tener una donde
+            // suceda todo. Los anillos RGB del agujero negro quedan mal, lo
+            // mejor es un anillo de lente gravitacional". El agujero ya NO
+            // suelta la onda cromática RGB que engendraba el anillo al final:
+            // suelta EL ANILLO DE EINSTEIN MISMO, con el daño COMPLETO del
+            // proyectil — un único frente de lente gravitacional que se
+            // expande casi lineal (26 px/tick), curva el FONDO del juego a su
+            // paso (fuente del BlackHoleLensSystem), dibuja el FLASH DE
+            // LIBERACIÓN central durante sus primeros ticks (la luz del
+            // colapso escapando — TODO sucede en esta única onda: flash +
+            // anillo + daño + ShadowFlame) y cuyas franjas R/B sutiles (1.8%)
+            // son la firma del lente, no una banda RGB.
             // La genera la máquina dueña del agujero (en MP el NewProjectile del
             // owner-client se sincroniza con el resto; patrón v5.86 del t-90).
             if (Projectile.owner == Main.myPlayer)
             {
-                // v5.96 — SIN burbuja de ForceField: la onda cromática ya no
-                // cabalga el escudo destruido (petición del usuario: "quita el
-                // campo de fuerza de las columnas"). Cuando la onda TERMINA de
-                // expandirse, ella misma engendra el ANILLO DE EINSTEIN
-                // (StyleEinstein, ver CosmicShockwaveProjectile.AI) — el lente
-                // gravitacional anular que se expande al final de la explosión.
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
                     Projectile.damage, 0f, Projectile.owner,
-                    0f,                                      // edad: sin retardo
-                    CosmicShockwaveProjectile.StyleChromatic,
-                    420f);                                   // radio máximo (v5.94: 620 → 420)
+                    0f,                                      // edad: sin retardo — TODO sucede YA
+                    CosmicShockwaveProjectile.StyleEinstein,
+                    520f);                                   // radio máximo (v5.96/97)
             }
 
             // v5.91 — reset del boost de succión: la materia absorbida ya no

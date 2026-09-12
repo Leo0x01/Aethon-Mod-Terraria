@@ -13,14 +13,27 @@ namespace AethonMod.Content.Effects
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
     ///
+    /// v5.97 — LA MEDUSA NEBULAR NADA EN EL ESPACIOTIEMPO: el minion
+    /// invocador (NebulaJellyfishMinion, petición del usuario: "crea una
+    /// nueva arma que sea un invocador para un minion… el proyectil será la
+    /// invocación") se recoge SIEMPRE para dibujarlo ENCIMA de la lente (su
+    /// campana translúcida jamás es deformada — solo curva lo que hay
+    /// DETRÁS) y actúa como la fuente MÁS SUTIL del pase B: fuerza
+    /// 0.06→0.14 RESPIRANDO con el pulso de nado (es un trozo de nebulosa
+    /// con masa — donde nada, el fondo se dobla apenas). También entra la
+    /// ONDA NOVA DE LENTE (StyleNova — la explosión única del sol) como
+    /// fuente del pase A.
+    ///
     /// v5.96 — EL ANILLO DE EINSTEIN Y EL OJO DEL VACÍO: (1) la onda
     /// StyleEinstein (el lente gravitacional anular que nace al FINAL de la
     /// explosión del agujero negro, petición del usuario) se registra como
     /// fuente del pase A con radio que ABRAZA al anillo (0.85× el frente) y
     /// fuerza que decae más lento — curva el fondo mientras se expande.
-    /// (2) EL OJO DEL VACÍO (VoidEyeProjectile, arma nueva de terror cósmico)
-    /// se dibuja ENCIMA de la lente (igual que el sol) y actúa como fuente
-    /// del pase B: su distorsión crece con la DILATACIÓN de la pupila.
+    /// (v5.97: el anillo ya no nace "al final" — ES la explosión del
+    /// agujero, con el daño completo.) (2) EL OJO DEL VACÍO
+    /// (VoidEyeProjectile, arma nueva de terror cósmico) se dibuja ENCIMA de
+    /// la lente (igual que el sol) y actúa como fuente del pase B: su
+    /// distorsión crece con la DILATACIÓN de la pupila.
     ///
     /// v5.95 — DOS PASES DE DISTORSIÓN + EL SOL COMO FUENTE SUTIL: el shader
     /// solo acepta UNA fuerza global (distortionStrength), así que la LENTE
@@ -151,6 +164,12 @@ namespace AethonMod.Content.Effects
         // salta el pase del mundo igual que el sol y el agujero)
         private readonly int[] _eyeIndices = new int[MaxSources];
         private int _eyeCount;
+
+        /// <summary>v5.97 — medusas nebulares dibujadas encima de la lente.</summary>
+        private readonly int[] _jellyIndices = new int[MaxSources];
+
+        /// <summary>Número de medusas recogidas este frame.</summary>
+        private int _jellyCount;
 
         public override void Load()
         {
@@ -286,11 +305,13 @@ namespace AethonMod.Content.Effects
             bool wasActive = LensActive;
 
             // === 1. Recopilar fuentes: agujeros + ondas cromáticas/de lente/
-            //     anillo de Einstein + soles + OJOS DEL VACÍO (v5.96) ===
+            //     anillo de Einstein + soles + OJOS DEL VACÍO (v5.96) + MEDUSAS
+            //     NEBULARES (v5.97) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int eyeType = ModContent.ProjectileType<VoidEyeProjectile>();
+            int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
             Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
             if (screenSize.X <= 0f || screenSize.Y <= 0f)
             {
@@ -304,6 +325,7 @@ namespace AethonMod.Content.Effects
             _sunCount = 0;           // v5.95 — soles a dibujar encima de la lente
             _sunSourceCount = 0;     // v5.95 — soles como FUENTE (gigante roja)
             _eyeCount = 0;           // v5.96 — ojos del vacío encima de la lente
+            _jellyCount = 0;         // v5.97 — medusas nebulares encima de la lente
 
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
@@ -344,11 +366,15 @@ namespace AethonMod.Content.Effects
                     // v5.96 — y el ANILLO DE EINSTEIN (estilo 4, el lente
                     // gravitacional anular del final de la explosión del
                     // agujero negro) también es fuente.
+                    // v5.97 — y la ONDA NOVA DE LENTE (estilo 5 — LA explosión
+                    // única del sol: el frente de espaciotiempo que lleva el
+                    // fuego) curva el fondo a su paso.
                     float style = p.ai[1];
                     if (style != CosmicShockwaveProjectile.StyleChromatic &&
                         style != CosmicShockwaveProjectile.StyleChromaticInverse &&
                         style != CosmicShockwaveProjectile.StyleLens &&
-                        style != CosmicShockwaveProjectile.StyleEinstein)
+                        style != CosmicShockwaveProjectile.StyleEinstein &&
+                        style != CosmicShockwaveProjectile.StyleNova)
                         continue;
 
                     float front = CosmicShockwaveProjectile.GetFrontRadius(p);
@@ -432,11 +458,37 @@ namespace AethonMod.Content.Effects
                         _sunSourceCount++;
                     }
                 }
+                else if (p.type == jellyType)
+                {
+                    // v5.97 — LA MEDUSA NEBULAR: siempre recogida para dibujarla
+                    // ENCIMA de la lente (su campana translúcida jamás es
+                    // deformada); como FUENTE del pase B es LO MÁS SUTIL del
+                    // arsenal (0.06→0.14 RESPIRANDO con el pulso de nado): es
+                    // un trozo de nebulosa con masa — donde nada, el fondo se
+                    // dobla apenas, y al contraer la campana, un poco más.
+                    if (_jellyCount >= MaxSources) continue;
+                    Vector2 screenPos = p.Center - Main.screenPosition;
+                    Vector2 uv = screenPos / screenSize;
+                    if (uv.X < -0.35f || uv.X > 1.35f || uv.Y < -0.35f || uv.Y > 1.35f)
+                        continue;
+                    _jellyIndices[_jellyCount++] = i;
+
+                    if (_sunSourceCount < MaxSources)
+                    {
+                        float contract = NebulaJellyfishMinion.GetPulseContract(p);
+                        float radius = NebulaJellyfishMinion.GetBellVisualRadius(p) / screenSize.X * 1.3f;
+                        _sunPositions[_sunSourceCount] = uv;
+                        _sunRadii[_sunSourceCount] = Math.Max(radius, 0.0001f);
+                        _sunStrengths[_sunSourceCount] = 0.06f + 0.08f * contract;
+                        _sunSourceCount++;
+                    }
+                }
             }
 
             bool hasA = count > 0;             // pase A: agujeros + ondas
-            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos
-            bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0 || _eyeCount > 0;
+            bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + ojos + medusas
+            bool anyDrawables = _blackHoleCount > 0 || _waveCount > 0 || _sunCount > 0 ||
+                                _eyeCount > 0 || _jellyCount > 0;
 
             if (!hasA && !hasB && !(wasActive && anyDrawables))
             {
@@ -593,11 +645,13 @@ namespace AethonMod.Content.Effects
                 Main.spriteBatch.End();
             }
 
-            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95) y los OJOS (v5.96) ===
+            // === 6. ENCIMA DE LA LENTE: los SOLES (v5.95), los OJOS (v5.96) y
+            //     las MEDUSAS (v5.97) ===
             // La estrella se saltó el pase del mundo (LensActive): el sistema
             // la pinta encima de la distorsión — con su glow coronal y creciendo
             // como gigante roja. El ojo del vacío igual: la estrella muerta y
-            // su ojo vivo jamás son deformados por la lente.
+            // su ojo vivo jamás son deformados por la lente. La medusa nebular
+            // igual: su campana translúcida solo curva lo que hay DETRÁS.
             for (int i = 0; i < _sunCount; i++)
             {
                 Projectile sun = Main.projectile[_sunIndices[i]];
@@ -609,6 +663,12 @@ namespace AethonMod.Content.Effects
                 Projectile eye = Main.projectile[_eyeIndices[i]];
                 if (eye != null && eye.active)
                     VoidEyeProjectile.DrawEyeVisuals(eye, false);
+            }
+            for (int i = 0; i < _jellyCount; i++)
+            {
+                Projectile jelly = Main.projectile[_jellyIndices[i]];
+                if (jelly != null && jelly.active)
+                    NebulaJellyfishMinion.DrawJellyfishVisuals(jelly, false);
             }
 
             // === 7. ENCIMA DE LA LENTE: efectos del agujero (capa AboveLens) ===

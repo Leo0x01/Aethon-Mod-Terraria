@@ -14,6 +14,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
+    /// v5.97 — UNA SOLA EXPLOSIÓN FINAL (petición del usuario: “el sol y el
+    /// agujero negro tienen dos, digamos explosiones al terminar, solo deben
+    /// tener una donde suceda todo”): el OnKill ya NO suelta 3 ondas de fuego
+    /// + 1 onda de lente — suelta UNA SOLA ONDA NOVA DE LENTE (StyleNova):
+    /// el frente de espaciotiempo QUE LLEVA EL FUEGO — triple anillo ardiente
+    /// (FireRing) + frente fino blanco + aberración CÁLIDA (oro/brasa — sin
+    /// RGB) — con el DAÑO DE LA NOVA COMPLETO (antes ×0.5 repartido en 4
+    /// ondas) + quemadura 10 s, registrada como fuente del BlackHoleLensSystem
+    /// → el fondo se curva a su paso. El AoE del núcleo (260px) golpea el
+    /// mismo instante: TODO sucede en UNA explosión.
+    ///
     /// v5.96 — GLOW CORONAL PERSISTENTE + AURA DE ÁREA CRECIENTE (dos
     /// peticiones del usuario): (1) "el brillo de PhoenixNovaStaff ya no debe
     /// parpadear — debe comenzar a crecer lentamente, sincronizado con el
@@ -48,7 +59,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// con lente gravitacional que tenga una ligera distorsión cromática en
     /// rgb"): además de las 3 ondas de fuego, el OnKill lanza una onda StyleLens
     /// SIN retardo (la onda gravitacional VIAJA DELANTE de la materia) con
-    /// franjas R/G/B LIGERAS que curvan el fondo a su paso.
+    /// franjas R/G/B LIGERAS que curvan el fondo a su paso. (v5.97: las 3 ondas
+    /// de fuego + esta onda se UNIFICARON en la StyleNova única — ver arriba.)
     ///
     /// RENDER (4 capas de profundidad):
     ///   0. EFECTOS HIJOS DETRÁS (v5.95): llamarada PhoenixNova (sprites
@@ -1047,44 +1059,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
-                int waveDamage = Math.Max(1, (int)(novaDamage * 0.5f));
-                // v5.94 — ondas REDIMENSIONADAS (petición del usuario: eran
-                // demasiado grandes — cubrían toda la pantalla): 360/450/540 →
-                // 240/300/360. Sigue habiendo 3 frentes escalonados con daño
-                // cada 0.1 s y quemadura de 10 s — solo que a escala justa.
-                float[] radii = { 240f, 300f, 360f };
-                for (int i = 0; i < 3; i++)
-                {
-                    Projectile.NewProjectile(
-                        Projectile.GetSource_FromThis(),
-                        Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
-                        ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                        waveDamage, 0f, Projectile.owner,
-                        -i * 8f,                                      // edad: retardo escalonado
-                        CosmicShockwaveProjectile.StyleFire,
-                        radii[i]);                                    // radio máximo
-                }
-
-                // v5.95 — ONDA DE LENTE GRAVITACIONAL (petición del usuario: "en
-                // ambas explosiones del sol y agujero negro también debe de haber
-                // una onda expansiva creada con lente gravitacional que tenga una
-                // ligera distorsión cromática en rgb"): el frente de espaciotiempo
-                // sale SIN retardo (la onda gravitacional viaja DELANTE de la
-                // materia que eyecta la nova) con franjas R/G/B LIGERAS + anillo
-                // blanco tenue, y se registra como fuente del BlackHoleLensSystem
-                // → CURVA EL FONDO del juego a su paso. Radio 400: envuelve a las
-                // tres ondas de fuego (240/300/360) como firma final del estallido.
+                // v5.97 — UNA SOLA EXPLOSIÓN DONDE SUCEDE TODO (petición del
+                // usuario: "el sol y el agujero negro tienen dos, digamos
+                // explosiones al terminar, solo deben tener una"): la muerte
+                // del sol ya no suelta 3 ondas de fuego + 1 onda de lente —
+                // suelta UNA SOLA ONDA NOVA DE LENTE (StyleNova): el frente de
+                // espaciotiempo QUE LLEVA EL FUEGO — triple anillo ardiente +
+                // frente blanco de choque + aberración CÁLIDA (oro/brasa, no
+                // RGB) — con el DAÑO DE LA NOVA COMPLETO (antes ×0.5 repartido
+                // entre 4 ondas) + quemadura 10 s en la banda, y registrada
+                // como fuente del BlackHoleLensSystem → el fondo se curva a su
+                // paso. Radio 380: el de la antigua onda mayor (360) + margen
+                // de lente.
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                    waveDamage, 0f, Projectile.owner,
-                    0f,                                          // edad: sin retardo — guía la explosión
-                    CosmicShockwaveProjectile.StyleLens,
-                    400f);                                       // radio máximo
+                    novaDamage, 0f, Projectile.owner,
+                    0f,                                          // edad: sin retardo — TODO sucede YA
+                    CosmicShockwaveProjectile.StyleNova,
+                    380f);                                       // radio máximo
 
-                // Daño AoE del núcleo de la nova (el epicentro de la explosión).
-                // v5.94: 340 → 260 (proporcional a las ondas nuevas).
+                // Daño AoE del núcleo de la nova (el epicentro de la MISMA
+                // explosión — la onda única barre desde el centro, el núcleo
+                // golpea el punto ciego inicial). v5.94: 340 → 260.
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;

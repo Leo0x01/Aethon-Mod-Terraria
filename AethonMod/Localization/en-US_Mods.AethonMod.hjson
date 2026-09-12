@@ -24,6 +24,18 @@
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
 
+        "Items.VoidEyeStaff.DisplayName": "Void Eye Staff",
+        "Items.VoidEyeStaff.Tooltip": "The dead star with a living eye.\nIts pupil is a black hole. When it screams, reality tears.",
+
+        "Items.MedusaNebularStaff.DisplayName": "Nebula Jellyfish Staff",
+        "Items.MedusaNebularStaff.Tooltip": "Summons THE NEBULA JELLYFISH.\nA translucent bell holding a spiral galaxy, swimming on gravity pulses.\nIts stings leave the cold burn of the vacuum.",
+
+        "Projectiles.NebulaJellyfishMinion.DisplayName": "Nebula Jellyfish",
+        "Projectiles.JellyfishStingBolt.DisplayName": "Nematocyst",
+
+        "Buffs.NebulaJellyfishBuff.DisplayName": "Nebula Jellyfish",
+        "Buffs.NebulaJellyfishBuff.Description": "A nebula jellyfish drifts at your side on gravity pulses",
+
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
         "NPCs.TheWitness.DisplayName": "The Witness",

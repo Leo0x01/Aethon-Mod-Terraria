@@ -24,6 +24,18 @@
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
 
+        "Items.VoidEyeStaff.DisplayName": "Báculo del Ojo del Vacío",
+        "Items.VoidEyeStaff.Tooltip": "La estrella muerta con un ojo vivo.\nSu pupila es un agujero negro. Cuando grita, la realidad se desgarra.",
+
+        "Items.MedusaNebularStaff.DisplayName": "Báculo de la Medusa Nebular",
+        "Items.MedusaNebularStaff.Tooltip": "Invoca LA MEDUSA NEBULAR.\nUna campana translúcida con una galaxia espiral dentro, nadando a pulsos de gravedad.\nSus picaduras dejan la quemadura fría del vacío.",
+
+        "Projectiles.NebulaJellyfishMinion.DisplayName": "Medusa Nebular",
+        "Projectiles.JellyfishStingBolt.DisplayName": "Nematocisto",
+
+        "Buffs.NebulaJellyfishBuff.DisplayName": "Medusa Nebular",
+        "Buffs.NebulaJellyfishBuff.Description": "Una medusa de nebulosa deriva a tu lado a pulsos de gravedad",
+
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
         "NPCs.TheWitness.DisplayName": "El Testigo",

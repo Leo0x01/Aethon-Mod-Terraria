@@ -1,5 +1,120 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.97 — UNA SOLA explosión final + LA MEDUSA NEBULAR (invocador de minion)
+
+**Peticiones del usuario**: (1) "el sol y el agujero negro tienen dos, digamos
+explosiones al terminar, solo deben tener una donde suceda todo, los anillos
+rgb del agujero negro quedan mal, lo mejor es un anillo de lente
+gravitacional"; (2) "no veo el arma nueva, te olvidaste de dársela al
+jugador"; (3) "crea una nueva arma que sea un invocador para un minion, este
+minion debe ser algo que hayas creado, crea un proyectil super creativo y
+cosmico, y este proyectil sera la invocacion".
+
+### A. UNA SOLA EXPLOSIÓN FINAL — el anillo de lente ES la explosión
+
+Las tres armas cósmicas mayores ya NO tienen "dos explosiones" al terminar
+(onda de materia + onda de lente después). Ahora **TODO sucede en UNA**:
+
+- **AGUJERO NEGRO**: la explosión YA NO es la onda cromática RGB que
+  engendraba el anillo de Einstein al final — **ES EL ANILLO DE EINSTEIN
+  MISMO** (`OnKill` → una única onda `StyleEinstein` con el daño COMPLETO del
+  proyectil). El anillo ganó el **FLASH DE LIBERACIÓN**: durante sus primeros
+  ~16 ticks dibuja en su centro un brillo cálido que se apaga mientras el
+  anillo despega (la luz del colapso escapando) — flash + anillo + daño +
+  ShadowFlame viven en la MISMA onda. La lógica "cromática engendra Einstein
+  al terminar" se ELIMINÓ del AI de la onda. Los estilos cromáticos quedan
+  como legado documentado (nada del arsenal actual los invoca).
+- **SOL**: el OnKill ya NO suelta 3 ondas de fuego + 1 onda de lente — suelta
+  **UNA SOLA ONDA NOVA DE LENTE** (nuevo `StyleNova`): el frente de
+  espaciotiempo QUE LLEVA EL FUEGO — triple anillo ardiente (FireRing con su
+  color propio) + frente fino blanco de choque + **aberración CÁLIDA**
+  (oro por fuera, brasa por dentro — la nova dispersa LUZ DE FUEGO, no RGB).
+  Daño de la nova COMPLETO en la banda 0.72-1.02·frente cada 0.1 s +
+  quemadura 10 s; fuente del `BlackHoleLensSystem` (el fondo se curva a su
+  paso). El AoE del núcleo (260 px) golpea en el mismo instante.
+- **OJO DEL VACÍO**: su GRITO también se unificó — ya no son la cromática
+  inversa del colapso + el anillo retardado: es **UN ÚNICO DESGARRO**
+  (anillo de Einstein con el daño del grito COMPLETO, radio 460). Los dusts
+  de implosión/sangre y el AoE del núcleo (380 px, ×1.6) ocurren en el MISMO
+  instante.
+
+### B. FIX — el Ojo del Vacío ya está en el inventario del jugador
+
+`TestingPlayer.OnEnterWorld` (el kit de prueba del SP) NO incluía el
+`VoidEyeStaff` de v5.96 — jamás llegó al inventario (por eso "no se veía el
+arma nueva"). Ahora se entrega junto al resto del arsenal. También se
+añadieron sus entradas de localización (en-US + es-ES: "Báculo del Ojo del
+Vacío") para que sea localizable por nombre.
+
+### C. LA MEDUSA NEBULAR — el invocador (el proyectil ES la invocación)
+
+Petición: "crea una nueva arma que sea un invocador para un minion… crea un
+proyectil super creativo y cosmico, y este proyectil sera la invocacion".
+
+**LA CRIATURA** (`MedusaNebularStaff` → `NebulaJellyfishMinion`,
+DamageClass.Summon, minionSlots 1, se apilan medusas):
+
+- **Cuerpo**: una medusa nacida en el corazón de una nebulosa. Campana
+  translúcida de gas interestelar **generada con PIL a 4× supersampling**
+  (`JellyfishBell.png` 256: degradado radial aqua→esmeralda→violeta, 16
+  costillas radiales con curvatura orgánica, anillos de crecimiento tenues,
+  margen bioluminiscente ROSA y semillitas estelares dentro).
+- **Corazón**: una **MINIGALAXIA ESPIRAL** (`JellyfishGalaxy.png` 128: dos
+  brazos logarítmicos sembrados de ~140 estrellas cálidas/frías + núcleo
+  blanco-dorado) que GIRA lentamente en el centro de la campana y DESTELLA
+  con cada contracción del nado.
+- **Tentáculos**: 6 tentáculos × 9 cuentas estelares (`JellyfishBead.png`:
+  cuentas blancas tintables con destello de 4 puntas) con **física de cuerda
+  propia**: anclas en el margen de la campana, relajación rígida cerca de la
+  campana y laxa hacia la punta, gravedad suave, vaivén per-tentáculo y
+  restricción de longitud — ondean con vida propia y quedan A LA ESTELA
+  cuando la medusa nada. Colores bioluminiscentes alternos teal/rosa/menta.
+- **Locomoción por PULSOS** (nadie más del arsenal se mueve así): cada 48
+  ticks la campana SE CONTRAE (squash/stretch visual: scaleY -20%, scaleX
+  +9%) y dispara un IMPULSO hacia su ancla; entre pulsos deriva con arrastre
+  acuático (×0.955/tick) y hundimiento sutil. En caza nada hacia un punto
+  SOBRE la víctima (impulso 6.6); en reposo cuelga del hombro del jugador
+  (impulso 2.9, apilada con sus hermanas por minionPos). Fase de pulso
+  desfaseada por minionPos → las medusas nunca pulsan al unísono.
+- **EL ESPACIOTIEMPO**: la medusa es una fuente del pase B del
+  `BlackHoleLensSystem` — la MÁS SUTIL del arsenal (fuerza 0.06→0.14
+  RESPIRANDO con el pulso): donde nada, el fondo se dobla apenas. Su
+  campana translúcida se dibuja ENCIMA de la lente (nunca deformada).
+- **ATAQUE — NEMATOCISTOS**: cuando la contracción ocurre junto a una
+  víctima (≤190 px) dispara 3 AGUJAS DE LUZ (`JellyfishStingBolt`: destello
+  de 4 puntas + estela estelar, 12.5 px/tick, daño 50% del minion) con
+  **QUEMADURA DE HIELO** (Frostburn — la quemadura fría del vacío, firma que
+  NINGÚN otro arma cósmica usa) + daño de contacto de la campana (hitbox
+  46×46, cooldown 18 ticks) con Frostburn al tocar.
+- **Muerte**: se disuelve en polvo de estrellas (26 dusts teal/rosa).
+- **Ciclo de sirviente**: patrón CosmicOrb — buff `NebulaJellyfishBuff`
+  (localizado en ambos idiomas, icono 32×32 generado) aplicado por el Shoot
+  del báculo y sostenido por la propia medusa (inmortal mientras el buff
+  viva: timeLeft 2, semántica vanilla de minion). Teletransporte de vuelta
+  si queda a >1100 px del dueño.
+- **Icono del arma**: `MedusaNebularStaff.png` 28×30 (vara carbón-teal con
+  la medusa encendida en la cima y estrellitas).
+
+### D. Verificación
+
+- Compilación contra tModLoader v2026.07.3.0 real (`/tmp/verify`): **0
+  errores, 0 warnings**. Auditoría del binario: símbolos nuevos presentes
+  (`NebulaJellyfishMinion`, `JellyfishStingBolt`, `MedusaNebularStaff`,
+  `NebulaJellyfishBuff`, `StyleNova`, `DrawJellyfishVisuals`) y las tres
+  rutas de textura del minion en el montón de user-strings.
+
+### E. Prueba del usuario
+
+Develop Mods → Build → kit de inicio (ahora con Báculo del Ojo del Vacío y
+Báculo de la Medusa Nebular) → **SunStaff**: estrella → gigante roja → UNA
+sola explosión: onda nova de lente (fuego + aberración cálida) curvando el
+fondo → **BlackHoleStaff**: agujero → al morir: flash de liberación + EL
+ANILLO DE EINSTEIN (nada de RGB) → **VoidEyeStaff**: el ojo se abre, te
+mira, parpadea → EL GRITO: un único desgarro → **MedusaNebularStaff**: la
+medusa emerge, su galaxia gira, NADA a pulsos colgando de tu hombro (con el
+fondo curvándose sutilmente), y al acercarse a un enemigo dispara sus
+nematocistos de hielo → client.log limpio.
+
 ## Commit v5.96 — El brillo del sol crece sin parpadear + ANILLO DE EINSTEIN + daño de área creciente + EL OJO DEL VACÍO
 
 **Peticiones del usuario**: (1) "el PhoenixNovaStaff parpadea, creo que lo

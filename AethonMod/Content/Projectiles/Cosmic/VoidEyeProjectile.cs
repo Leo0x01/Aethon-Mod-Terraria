@@ -16,6 +16,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// v5.96 — petición del usuario: "crea otra arma nueva de prueba con la
     /// que has aprendido y esta nueva arma debe tener un proyectil lo más
     /// cósmico y de terror cósmico que se te ocurra, lo dejo a tu imaginación").
+    /// (v5.97: el arma ya se le entrega al jugador en TestingPlayer — faltaba.)
     ///
     /// UNA ESTRELLA MUERTA CON UN OJO VIVO. Todo lo aprendido en el arsenal
     /// cósmico, condensado en un solo cuerpo celeste que te observa:
@@ -52,10 +53,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///                Aura cada 0.1 s al 75% del daño. Gemido creciente.
     ///   - t=12s      EL GRITO (OnKill): chillido (ScaryScream) + implosión de
     ///                materia oscura + AoE del núcleo (380 px, ×1.6, ShadowFlame
-    ///                8 s + Weak) + onda CROMÁTICA INVERSA (el mundo colapsa
-    ///                HACIA el ojo muerto) + ANILLO DE EINSTEIN (el desgarro
-    ///                de la realidad expandiéndose — el mismo lente del final
-    ///                de la explosión del agujero negro) + temblor fuerte.
+    ///                8 s + Weak) + UN ÚNICO ANILLO DE EINSTEIN — EL DESGARRO —
+    ///                con el daño del grito COMPLETO y su flash de liberación
+    ///                (v5.97: una sola explosión, como el sol y el agujero) +
+    ///                temblor fuerte.
     ///
     /// El daño ES daño de área (filosofía v5.96): el hitbox de contacto solo
     /// cubre el cuerpo de la estrella; el AURA que se extiende POR FUERA crece
@@ -486,35 +487,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 catch { }
             }
 
-            // === ONDAS (autoridad: el dueño del proyectil) ===
+            // === ONDA (autoridad: el dueño del proyectil) ===
             if (Projectile.owner == Main.myPlayer)
             {
-                // 1. ONDA CROMÁTICA INVERSA: el mundo COLAPSA hacia el ojo muerto
-                //    (la implosión del horror — lo contrario de la explosión).
-                int collapseDmg = Math.Max(1, (int)(Projectile.damage * 0.6f));
-                Projectile.NewProjectile(
-                    Projectile.GetSource_FromThis(),
-                    Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
-                    ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                    collapseDmg, 0f, Projectile.owner,
-                    0f,                                        // edad: sin retardo
-                    CosmicShockwaveProjectile.StyleChromaticInverse,
-                    300f);                                     // radio máximo
-
-                // 2. ANILLO DE EINSTEIN: el DESGARRO de la realidad expandiéndose
-                //    (el mismo lente del final de la explosión del agujero negro:
-                //    la muerte del ojo RASGA el espaciotiempo). Edad NEGATIVA =
-                //    retardo real (12 ticks tras el colapso — el desgarro llega
-                //    cuando el mundo YA está cayendo hacia el ojo).
-                int tearDmg = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                // v5.97 — EL GRITO ES UNA SOLA ONDA (petición del usuario:
+                // "solo deben tener una explosión donde suceda todo"): ya no
+                // son la cromática inversa del colapso + el anillo retardado —
+                // es EL DESGARRO: un único ANILLO DE EINSTEIN que rasga la
+                // realidad desde el punto donde el ojo murió, con el daño del
+                // grito COMPLETO (antes 0.6 + 0.5 repartidos). Su FLASH DE
+                // LIBERACIÓN inicial (la luz del ojo escapando) + la banda fina
+                // con ShadowFlame + el fondo curvándose a su paso: TODO en
+                // esta única onda. Los dusts de implosión/sangre del OnKill
+                // ocurren en el MISMO instante — una sola explosión.
+                int tearDmg = Math.Max(1, Projectile.damage);
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
                     tearDmg, 0f, Projectile.owner,
-                    -12f,                                      // retardo: tras el colapso
+                    0f,                                        // edad: sin retardo — TODO sucede YA
                     CosmicShockwaveProjectile.StyleEinstein,
-                    520f);                                     // radio máximo
+                    460f);                                     // radio máximo
             }
 
             // === AoE DEL NÚCLEO (la mirada final) ===
