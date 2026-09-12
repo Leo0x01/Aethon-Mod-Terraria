@@ -1,45 +1,58 @@
-# AethonMod — Estado SUPER ESTABLE (stable-v5.27)
+# AethonMod — Estado ESTABLE (stable-v6.01)
 
-**Fecha:** 2026-09-08
-**Commit:** e6cd894 (y subsiguientes hasta 401277a)
-**Tag:** `stable-v5.27`
-**Rama backup:** `stable-v5.27-backup`
+**Fecha:** 2026-09-12
+**Commit:** 0cc89cf (v6.01, LA GRAN LIMPIEZA) + 1d75a2c (docs) — este
+snapshot es el propio commit etiquetado `stable-v6.01`
+**Tag:** `stable-v6.01`
+**Rama backup:** `stable-v6.01-backup`
 
-## Estado verificado por el usuario: TODO FUNCIONA PERFECTAMENTE
+## Estado verificado por el usuario: ESTABLE
 
-### Grimorio del Eterno
-- ✅ 1 proyectil por click (no doble) — CAUSA RAÍZ ARREGLADA
-- ✅ 1 minion por click derecho (no doble)
-- ✅ autoReuse (mantener click para disparar continuo)
-- ✅ UseTimeMultiplier + UseAnimationMultiplier (velocidad escalada)
-- ✅ Tooltip con 2 ventanas (básica/completa) — click derecho alterna
-- ✅ Vista completa sin info vanilla ni modifiers
-- ✅ Sin debug spameando el chat
-- ✅ Sin cooldown artificial
+Versión confirmada como estable por el usuario tras probarla completa.
+Punto de retorno seguro: si algo se rompe en el futuro, volver aquí.
 
-### Minion (CosmicOrbMinion)
-- ✅ Órbita compacta (no círculo gigante)
-- ✅ Rotación sobre el centro (no sobre la parte superior)
-- ✅ Visible (no transparente)
+### Arsenal definitivo — 14 armas de prueba (LA GRAN LIMPIEZA, v6.01)
 
-### Proyectil Nightglow (#931)
-- ✅ Estela cósmica (dorado/cian/magenta/índigo)
-- ✅ Partículas de explosión con duración corta
+- **4 tests clásicos** (sin mana): TestMagicRing, TestSparkle, ProjBeam,
+  TestMagicRingV2 — handlers 3003/3004/4001/4006 intactos
+- **El Grimorio del Eterno**: sistema de niveles infinito; su Orbe Cósmico
+  usa la imagen del usuario (INTACTA, no tocar)
+- **4 V20**: SupernovaStaff, PlasmaStormStaff, PhoenixNovaStaff,
+  QuantumSplitStaff
+- **5 cósmicas**: BlackHoleStaff, SunStaff, MedusaNebularStaff,
+  LivingCometStaff, LivingPulsarStaff (todas con EnsureItem garantizado)
 
-### Eventos eliminados (por request del usuario)
-- ✅ LevelUpEventSystem eliminado (temblor, grano, time-skip, lore)
-- ✅ CosmicEventSystem eliminado (Hitos cósmicos, Lluvia de Luz, Rifts)
+### 21 armas eliminadas (recuperables desde el historial si algún día
+hiciesen falta)
 
-### Sprites
-- ✅ GrimoireEternal.png: 30×38 (sprite del usuario)
-- ✅ CosmicOrbMinion.png: 32×32 (sprite del usuario)
-- ✅ CosmicOrbBuff.png: 32×32
+- 4 de color (ColorRainbow/Red/Yellow/Green), 15 V20 (Tornado, PrismBeam,
+  Earthquake, MirrorDimension, GravityPulse, ShadowClone, CrystalShatter,
+  VortexChain, AbyssalEye, SpectralMirage, TemporalRift, InfernoTornado,
+  VoidEater, PlasmaOrb, BlackHoleMini), QuasarLance y LivingGalaxyStaff
+  ("se ven horrible y son muy simples") — lista completa y auditoría en
+  CHANGES.md v6.01. Quien las tenga en guardados viejos LAS CONSERVA.
 
-### Causa raíz del doble Shoot (RESUELTA)
-UseTimeMultiplier reducía useTime (22→21) pero NO useAnimation (22).
-Cuando useTime efectivo < useAnimation con autoReuse=true,
-tModLoader dispara Shoot 2 veces por ciclo.
-Fix: UseAnimationMultiplier aplica el mismo multiplier a useAnimation.
+### Cósmicas supervivientes (v5.99–v6.00, comportamiento verificado)
+
+- **Agujero Negro**: hasta 10 golpes/s cerca del centro, se desliza hacia
+  la presa más cercana, se COME las balas enemigas al cruzar el horizonte
+- **Sol**: quema cada 10 ticks con aura ~310 px, evapora balas enemigas
+- **Medusa**: el LÁTIGO ELÉCTRICO sale de su propia campana, brillante
+- **Cometa / Púlsar vivientes**: minions con buff propio, mejorados
+  (daño, nova, haces)
+
+### Verificación técnica de v6.01
+
+- Compilación contra tModLoader v2026.07.3.0 REAL: **0 errores,
+  0 warnings**
+- 39 clases ModItem/ModProjectile/ModBuff, TODAS con su textura ✓
+- Auditoría de binario: 0 restos de las 30 clases borradas
+- 0 referencias huérfanas a las 40 clases eliminadas
+
+### Recursos de usuario
+
+- Los recursos originales de `upload/` (imágenes del usuario, sprites)
+  siguen versionados en esta rama: backup vivo en GitHub.
 
 ## NO MODIFICAR NADA DE ESTE ESTADO SIN CONFIRMACIÓN DEL USUARIO
 
@@ -47,71 +60,205 @@ Fix: UseAnimationMultiplier aplica el mismo multiplier a useAnimation.
 ```bash
 git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git
 cd Aethon-Mod-Terraria
-git checkout stable-v5.27
+git checkout stable-v6.01
 ```
 
 O descargar ZIP:
-https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/tags/stable-v5.27.zip
+https://github.com/Leo0x01/Aethon-Mod-Terraria/archive/refs/tags/stable-v6.01.zip
 
-## Hashes SHA256 de archivos clave
+## Hashes SHA256 del paquete completo del mod (186 archivos)
 
+Todo lo que viaja dentro del .tmod (excluye *.md, *.csproj, obj/, bin/,
+*.bak, *.py según buildIgnore). Forma de verificar tras restaurar:
+```bash
+sha256sum AethonMod/description.txt   # comparar con la línea de abajo
+```
+(cualquier archivo de la lista puede verificarse igual, recalculando
+`sha256sum <archivo>` y comparando con la columna izquierda)
+
+0116be18c464c5587fc884ab421a583f953dca97cc1560b9cda9ff7db99f9d96  AethonMod/Content/Effects/Shaders/BlackHoleDistortionShader.fx
 048087e784a2fc3079f905289e72938125af6a87846e4547c42412b1c3c27268  AethonMod/description.txt
+0510cd2c3c86e5651d5a61254b4df0d44571c127056660247498e1b7f350446e  AethonMod/Content/Effects/BeamCyan.png
+05f5354e7b795ba110b8176e0bbc31f57a4da784a74de534de3681f4283d9695  AethonMod/Content/Effects/Shaders/ChromaticAberration.fx
 071fee4250aea9b500188e921c1f423512b7fe9b11618fe78d108d20ca6e0e64  AethonMod/Content/Items/BossSummonBag.cs
 0844393e699c80ce67a7e942ad4b744d155e175733c7e60b2e3cbcccef502d37  AethonMod/Content/Globals/TooltipToggleItem.cs
-0d31926c3ac4fcc45351fe11e45c8c26ee08e7eb1f628866721d36638f58001d  AethonMod/Content/Players/UIScrollBlockPlayer.cs
+090408c5c48495ae91da5261d6e2a31f345ace4e9e811b35d1cb274adc8ad1a5  AethonMod/Content/Weapons/GrimoireEternal.cs
+0b1fa567c87bcffe4b3e6e510457f9037db4ad33dfb6e5cc42ac42f39452c2b7  AethonMod/Content/Weapons/Cosmic/MedusaNebularStaff.png
+0b2bfc0e7d01d405e166e7af369cbfcb66e931d0c352f36851c5a2d4c2192529  AethonMod/Content/Players/TestingPlayer.cs
+0b80eb31d38925839ff125de4f0e8a43d21b24df82018eb8fbb3207676345a6d  AethonMod/Content/Effects/Shaders/RadialShineShader.fxc
+0e89e6373715c96597ea3c7523b8c11044e40b7ea58347491773b37ea437093b  AethonMod/Content/Weapons/V20/PhoenixNovaStaff.cs
+0f4c7ad01db6fc3e99140428509e1753d63ae69454a37dab7c0f2eed7a9f2547  AethonMod/Content/Effects/Shaders/Bloom.fx
 102055302ec839f00bb5abb829fccf46a83e4ae7b98df2ede3b6a8d92359e888  AethonMod/Content/Weapons/Projectiles/ArcaneBolt.png
+110406018c30bd9dbbd8ab1392c76cdbe4811bf904f87e7fcb5b232086f98bae  AethonMod/Content/Effects/Procedural/Ring.png
+12b682787d9979c51ff33ae332c3d20c42921a2b5c25be6975ecb62e3dea2b18  AethonMod/Content/Tiles/AncientAltar.cs
 13a81fd2cc4feca80323824e54f4137b3494b1a06c953de6cc9a5914bce99857  AethonMod/Content/NPCs/EchoBlade.cs
+13b57ea8afd54535f026229bf42163d9aaac7a299d8e570522aeeecca525c47e  AethonMod/Content/Effects/GlowCirclePurple.png
+1582afeb6a4bfb1e0b8e4ab43c7aeee7380c82c9922cb9c5b61703450a9f3ba8  AethonMod/Content/Globals/TestAdvancedFX.cs
 1a2292b336c59db6cd3dc565893f1624bb603e38b0f1316e595868aec33103b4  AethonMod/Content/Buffs/CosmicOrbBuff.cs
-1ecffb8041c8214c6c0ea62061c8303c3a3fc3881d866701034411d625f011b1  AethonMod/Content/Globals/CosmicProjectileFX.cs
+1b6004babb3a7c8e6173d118beb890065e049e1e04ade80860d92130b399d324  AethonMod/Content/Projectiles/Cosmic/StellarCometMinion.cs
+1bad4c2424bd4654a10470dc4a9d0aba61abb0fb1a701b2869be6e51e2eb6fec  AethonMod/Content/Effects/GlowOrbPurple.png
+1d4b0b096ba3c842bfe687e5dd855cce08346f4e8089498b9428c9b0b6089047  AethonMod/Content/Weapons/Cosmic/LivingCometStaff.cs
+1e77fea9b324443b58e28aae1c36b94695f144723d0f1605b1e1768f52bfd62b  AethonMod/LICENSE
+1e83dc4dd6a361e13ee9e9cd2b15ca3e6625be62fd2527e7a0358efe033b4a85  AethonMod/Content/Effects/Procedural/SoftGlow.png
+207fc44f4c3a077e70b2cc8d559e5f2935fe7c097bf7b5be5affa19aafbc8507  AethonMod/Content/Effects/Textures/BloomCircleSmall.png
 20e5a5304173882b66a6a52dd928c4d0e52d90aae5abe125b07359014ec6a1b3  AethonMod/Content/Tiles/AncientAltar.png
 220b016d3ac9d38b14595082bcd04f39b3cc4237637fedd33d39ddded9e53900  AethonMod/Content/Items/Placeables/AncientAltarItem.png
-284be76438b1937e68b877bd8bd20d4e25f29d0ebe35ee1b0e7bdeefce4181ae  AethonMod/Content/Projectiles/CosmicOrbMinion.cs
+237b59193b0906305ee0d21318c9ce192e1de6f0ff3d30ebbe86429c0cb4c623  AethonMod/Content/Effects/Shaders/BlackOnlyShader.fx
+271a23af0e27febc793c650c26cf93fa508857a24fe388e9df97b61e5dfe97ac  AethonMod/Content/Weapons/Projectiles/ArcaneBolt.cs
+27c76125de09cfc1797619c38514f6ddd92eccc4db3c58d40aa5e7c328dbff7e  AethonMod/Content/Effects/Shaders/RadialShineShader.fx
+2808130dd2e0f58cd8c9d1253f40a1039ea97b7dddafd08a8d061c3975389b01  AethonMod/Content/Weapons/V20/SupernovaStaff.cs
 28c1a296c654cdac99aaaadbfa582b0092c9ff9785e04b2cdeacdfe88a494a5c  AethonMod/Content/NPCs/EchoArcher.png
-2ae6d88d65443cf1a2507753f3adc3c440b3574ab2d668322306c2fb123e0568  AethonMod/build.txt
-2bc343151dc7cbc94cb4c6a500e4669192050eb3e307972b097cef228e8d985e  AethonMod/Content/Tiles/AncientAltar.cs
+29afee7c8c30e8192033d3c86f56c4be015bcf4e64eeba8382a987abc621345b  AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut.png
+2a2abe9501936bcc35250f032ddc461bad1b7c63a22561b343bad66f18b2fa15  AethonMod/Content/Buffs/LivingPulsarBuff.cs
+2c6758de60c2d39962c8cec3c8241a9dcf741e201c81ac52628db444fe12ba4b  AethonMod/Content/Effects/GlowOrbWhite.png
 2d353218737518b3ef1b0e4cfd7bba1393205d4322310940f97588f35d71e5d6  AethonMod/Content/NPCs/EchoBlade.png
 3029a3a6f964914c46b0c403110e4d5afecdc71590316d39cbf9c491e1739fdd  AethonMod/Content/Buffs/CosmicOrbBuff.png
 3029a3a6f964914c46b0c403110e4d5afecdc71590316d39cbf9c491e1739fdd  AethonMod/Content/Projectiles/CosmicOrbMinion.png
-306efbf9e997854f924c64d58f45b416060ad472a086b5c826a04a99c0fbe06c  AethonMod/Content/Systems/UISystem.cs
-322d7d089ebd3ac0e67d293b720bf339cc4be9379df8ec12ecf2026d0e099595  AethonMod/Content/NPCs/HollowTitan.cs
-39d510377cfe97563729d0fe43670c58f86607f3f97a4a1d524d0744d5d5196b  AethonMod/Content/UI/ShardXPBarUI.cs
+307d371806681bf63ec5e19db51cc62b712d306079a3f4b270dac92d9497eecf  AethonMod/Content/Effects/Procedural/CometCrown.png
+31a258516872ca93f238d38856eeff45f973d6bc5e67596ed3302810c0edcb40  AethonMod/Content/Effects/GlowCircleRed.png
+31c1087bbc0e07e4dde4f487f3f191c3f6333dc8c24d50ee01f69a0465e84bc0  AethonMod/Content/Effects/Textures/BloomFlare.png
+32b6eae02d1476a6c6339a33f865893c8934c550561ab377c11135ea1e78c692  AethonMod/Content/Effects/Shaders/RealBlackHoleShader.fxc
+36090e4b24239923e454cfd11c6d117f8fd2e7e7fbb47759211b8b2f3fa1d850  AethonMod/Content/Weapons/Cosmic/LivingCometStaff.png
+36995ca432e3e9c2691abea954d0daba451f09a7ee3f8f60bb11d3254338105c  AethonMod/Content/Effects/Procedural/JellyfishGalaxy.png
+38e515267028fd52a5d3c1466ba54429a30690eae748ef13811a902b8ac06865  AethonMod/Content/Effects/Textures/BloomCircle.png
 3a8fdd1512458f5f60ccff8b55b41a3c757e509dc5ed38d63c4efcfec0930a14  AethonMod/Content/NPCs/HollowTitan.png
 3ca970288aefb06e98be2023a17a66ca7684e162705dcd803a6db179dea43a26  AethonMod/Content/Items/SeerOrb.cs
+3dc5018986903598394f378600cacfe2bccb259ac756deba88405fc202db811c  AethonMod/Content/Effects/GlowOrbGreen.png
+3dce4cff5371571d3b9d365a1fca65ac7d217146dc312c491d0ba8a3e076dd8c  AethonMod/Content/Weapons/Cosmic/CosmicWeapons.cs
+3ea35367c1b7729f7ee39eaa3542456db75c22824860840fa5a63d9e4f8f2f9b  AethonMod/Content/Effects/Procedural/JellyfishBead.png
+3ea78d4960402d947d524040635968a2236984c24004f75d0bdd1f7066c71184  AethonMod/Content/Effects/Procedural/RingShieldNebula.png
+3ed9af52f17f07800f81158ee869783f3ca86a5dd9ef27b22afe88dee4958153  AethonMod/Content/Effects/Procedural/Noise.png
+4043e3dea4c3b15eb81a43a80f0c5e354f6ff56cda9013db8b8ffe1ce0cc8139  AethonMod/Content/Projectiles/Cosmic/NebulaLightning.cs
+4057fcf6498a4da837446b787e388f5e4180ca1fcd52f537ffa80bcf5aa22ee9  AethonMod/Content/NPCs/HollowTitan.cs
+40bec9da03938ad65513ddbf582faec13c1da8adcc69ec7643d29b1123fe6cd7  AethonMod/Content/Projectiles/V20/PhoenixNovaProjectile.png
+40bec9da03938ad65513ddbf582faec13c1da8adcc69ec7643d29b1123fe6cd7  AethonMod/Content/Projectiles/V20/PlasmaStormProjectile.png
+40bec9da03938ad65513ddbf582faec13c1da8adcc69ec7643d29b1123fe6cd7  AethonMod/Content/Projectiles/V20/QuantumSplitProjectile.png
+40bec9da03938ad65513ddbf582faec13c1da8adcc69ec7643d29b1123fe6cd7  AethonMod/Content/Projectiles/V20/SupernovaProjectile.png
+4306be8b2864ed57e23ad9374cff0f4320a620e643957d6cf7ff866582a52389  AethonMod/Content/Weapons/TestSparkle.png
 4329540a9a45394bb2448792351836806632ce0baadc230a868e6c986b6b379f  AethonMod/Content/NPCs/EchoArcher.cs
 43548d8c6e2a10092cc378a26bc845c1f5626125967440687acf95440b5fa3e4  AethonMod/Content/Items/BossSummonBag.png
-4cfcffae2cc7dbfc5cf5688b6ef3f4b48e458dad44e41c76cd3d7f7a728e06b1  AethonMod/Localization/es-ES_Mods.AethonMod.hjson
-4de3984a3d3d485d6a894bfa239c4228acca1d86bcd7ed1252a02172883ffaa4  AethonMod/Localization/en-US_Mods.AethonMod.hjson
+43b737a397c9c6a5c7ebe970e1f4a2d0847850839321e70d12df1b8909a7d065  AethonMod/Content/Particles/CameraBounds.cs
+44c63ec2299725f52f4a2e7da00d2a03eaf4ec4d5bb8cc96e380200075d8a934  AethonMod/Content/Effects/ShieldCyan.png
+462ff6492c86ac70f2bcb14644ee9e23c96528e69bc272aeb079bdc54c3ef443  AethonMod/Content/Effects/HexGold.png
+46ee0835745bbc0c6ecfde24280d3824e99c147fe92682eca9f3b6f5586e2103  AethonMod/Content/Effects/GlowCircleGold.png
+474adea2e301dd23b397821b1b361fa8a9fa1ce26e467677160ccd1189c01ebb  AethonMod/Content/NPCs/TheWitness.cs
+4af082b9d1fac94b73417ba1eee5b8b7742bd2e592397961324e4b0a41d7c143  AethonMod/Content/Effects/Shaders/SunShader.fx
+4bd7b8aa3576066f26adcf2a5d33883fecc4d77c25a3f8f62c22ca83db2bdaa7  AethonMod/Content/Effects/Shaders/BlackOnlyShader.fxc
 4deba471ec74ef38707e2039d7f9d538409ca73615729f08c77d3237003b4bb9  AethonMod/Content/Systems/AncientAltarWorldGen.cs
 4f245a55d102ad469c18f3e2409bb6592250d794e3cb514cb0e277b4af6e509c  AethonMod/Content/Players/BranchType.cs
+511e9820f389c011713d0eb741f145ec0eb4fa9476b9b8a5d8e1c04fe12f0e24  AethonMod/Content/Projectiles/Cosmic/SunProjectile.cs
+516534dfe2cbfb537da29ed3baff79fc8fd1b47002f99c188d8fc2a196ae1fed  AethonMod/Content/Effects/GlowCircleMagenta.png
+5186598f0ee45dc8def07e85ae21e655a2c715e61755d87802bfd96d489c3dfe  AethonMod/Content/Effects/Procedural/JellyfishBell.png
+51f63d8cab871dceefb661f523ea3775d50b65621a1f21c43e97d8fe4f23b928  AethonMod/Content/Effects/GlowRayCyan.png
+52d5c108afb93bed24ec2ee333e87ca67b720f0f6ce6fee85aa7bebfd7ef2dcc  AethonMod/Content/Projectiles/CosmicOrbBolt.cs
+54048e8f2e93ddca72df078fab863f7a6ffe6b0b791b0f27ba9f3d5b0a4561a6  AethonMod/Content/Weapons/Cosmic/MedusaNebularStaff.cs
+5581fd212d15ee141b077f5292fb245de4125ef565d5c08ffdd6c21e950f353d  AethonMod/Content/Projectiles/Cosmic/SunProjectile.png
+570e41b57b126f2f9ec5ce9600fdb0bbfae08abf73386bd3fba755e19526eff2  AethonMod/Content/Globals/GlobalNPCXP.cs
+57c41304b50bab041e78435270c4493d059e590c163a35a895552c7e27eda6fb  AethonMod/Content/Effects/GlowOrbCyan.png
 595242f9a05260ae0dd7f34cc3fc5d6d6d555e8244906612495e4a795d8db2fe  AethonMod/Content/Items/Placeables/AncientAltarItem.cs
 59f82f0ef93b6b0839ee75aac6adf6d0a34614750691dfa90d57f33e19fac101  AethonMod/Content/Systems/ShardSyncSystem.cs
+5acbaff8216441a29119f3050afb074acb682bd2e222f406c5436d068247aa9e  AethonMod/Content/Effects/GlowRayGold.png
+5b25b5c8b1edce30e07617d7005ee5f4956bab2b85d57b151495b09ad8f55e32  AethonMod/Content/Effects/Procedural/Star.png
 5b7dc67b03654dab01f7ac501c6978a1ecf29efbdd27f34e726c9d0abfc9366f  AethonMod/Content/Items/GenesisShard.cs
 5d50246d1c9b9c799e453a406ecc017348ff4c4ffdcdc8f34bd98b904f692610  AethonMod/Content/NPCs/AethonBoss.cs
+5dbe304bda502975698c5e03fb5fbeac571ff761d4e7874ae13cd3d5c48d68c9  AethonMod/Content/Effects/GlowOrb.png
+5f3d0ef57efec8edc50f88c09e9f04b6a665ae64d32ddb997dfaea5fb0835427  AethonMod/Content/Effects/HexCyan.png
+60fc74d9457025b53f2eb3722fce579f83be50f8a72f6b9b646942d13024d089  AethonMod/Content/Weapons/V20/PlasmaStormStaff.cs
+647d28d7114e505f9345ab720f44c5386ceaec55082958c3d64eaa069a3bd4ed  AethonMod/Content/Projectiles/Cosmic/BlackHoleProjectile.png
+66a3d89ad37078e378721d5a580da1ce9f6db5394f0e100b2c61276d2c818da5  AethonMod/Content/Effects/Shaders/BlackHoleDistortionShader.fxc
+6922be365283107468a747ba6e3e1c76f066fc5af8d85636a131ac50f6b35b72  AethonMod/Content/Effects/Textures/WavyBlotchNoise.png
+6b96a2ef820eddabd11b0176b6a0cb863ed3ae2e895d051a178ac2bde94a0f7c  AethonMod/Content/Effects/BeamGold.png
+6ca35354ee1a1a440f5bfae8f3b402ef0f1c1d5f0f5e7b145dc9058acac1b48b  AethonMod/Content/Weapons/Cosmic/LivingPulsarStaff.png
+6cf105c4d1e44592e7461ee27d4b7c4c0612789cbc76e47b0328bb991908d1ab  AethonMod/Content/Effects/GlowCircleGreen.png
+6d39df48bb9633a8b03cc5c53a049b55d450b7b2cc982c7b29d7b9dd61b4cd39  AethonMod/Content/Effects/GlowOrbGold.png
+6e44429c7743ef6905843d601cdb87398ee9b7e1e5db883338ef20aea7e22cdc  AethonMod/Content/Globals/CosmicProjectileFX.cs
+6f0be00bce9e885a5b57a5201a0a5df65922fdddc84cc9d7df2b5a38828896cb  AethonMod/Content/Buffs/NebulaJellyfishBuff.cs
+701acd580faf26ee9487e389fcaf3ac2bde944b4ca267ccf259c692fd45d132b  AethonMod/Content/Effects/Textures/FireNoiseA.png
 70596f5d0c4e2bd80ba8ff4094515c5c84f0ca5dd3a01043648446035522ad3e  AethonMod/Content/NPCs/AethonBoss.png
+706f74529fe8a3b0a9d3ba73a48e24e993e337109b4f926acd41d83522d6081b  AethonMod/Content/Particles/ShapeDescriptor.cs
+75e350afc0cc20225982ea18590b95ad0dc76e65e06a7158602c6acf2bb30fbc  AethonMod/Content/Effects/SparkleStar.png
+76e1b68fd0310a62f31537c1d415ac06ea1376f28bab373be32932bb7d3895d7  AethonMod/Content/Effects/TrailGlow.png
+7ba507840e436688c0af1d833bcdbffe1fded39f8fdf95bed405cef2696a08b7  AethonMod/Content/Buffs/NebulaJellyfishBuff.png
 7e1db631ec2f5aa33ca9c1cf356cd71aa070cbd4bd9874f7c9699ba4c4333a78  AethonMod/Content/Items/SeerOrb.png
-8135e26639cd4a6206a142848931c4cb07d4ec6d61e6e96b6d7dc9add60922e5  AethonMod/Content/Weapons/GrimoireEternal.cs
+80babf67bab60d1900192d988f6d7332161d06ac699843964e69e1a4ad6de6f5  AethonMod/Content/Effects/GlowCircle.png
+80babf67bab60d1900192d988f6d7332161d06ac699843964e69e1a4ad6de6f5  AethonMod/Content/Effects/GlowCircleWhite.png
+84e550bc8084214c99febc0774f8965262a537501a5197f902927573b7f6c536  AethonMod/update-changes.sh
 8507293b64eee4d071c2bf1749f6b1eef4ac153ef613c1dda55a4ed5c9595c0a  AethonMod/Content/Players/ShardPlayer.cs
 85a2e491feea9f4468245dca9cf5c7d345143360f548213bb9364f7f37ded86f  AethonMod/Content/Systems/ShardLevelSystem.cs
 85b52db6767cc0a14490dbcd77c3c36cec38797202e755d8eef1fa35a14b9d91  AethonMod/Content/Items/GenesisShard.png
 85b52db6767cc0a14490dbcd77c3c36cec38797202e755d8eef1fa35a14b9d91  AethonMod/Content/Weapons/Projectiles/GenesisLight.png
-8c3a5fc33615828acf73287c40f40c572140125344e56833d1eb29a6052ca4b0  AethonMod/Content/Systems/WeaponScaling.cs
-8da8f648f4d774e0cbffe752958b3554b9ae97717f980b065528fba7d623ee0e  AethonMod/Content/Projectiles/CosmicOrbBolt.cs
+869b9cbbe73177f72df30fe6b08039f4dc73f22649355c0010c407c8e387b00d  AethonMod/Content/Weapons/Cosmic/LivingPulsarStaff.cs
+89135344d713190113d8cd2dbc245edd02984397f7cf7cff6eb32f65b4f3cc30  AethonMod/Content/Projectiles/V20/PlasmaStormProjectile.cs
+8a4b10eab84c7882c751db8c5679372b377d56032fd702c36e783421571eeaf0  AethonMod/Content/Weapons/TestMagicRingV2.png
 8dbc18b98daaff22195466f1b8a348f777b82b2bebc5ffe603d1c15cf09a3f96  AethonMod/Content/Items/LevelUpTester.cs
-9565c3aac79bfdd0b9c94ba80badedc65db87e61c7d51052bd37c027f1ef0dd0  AethonMod/Content/Weapons/Projectiles/GenesisLight.cs
+8ea2c589cdc55c8183bcfa01ef8cc69f64e790187804fbdd30d29465b4c819d7  AethonMod/Content/Effects/GlowOrbMagenta.png
+95e0df10449d35d8515f6ed4861a537669b53d568aa26e3c1231480dfcc6dc15  AethonMod/.gitignore
+9792bebbc7fc96aead51c0e3e2d9d3b9cb33a90cc1af73e79e011a76b1890caf  AethonMod/Content/Weapons/V20/QuantumSplitStaff.cs
+9a54ad1e198e9ebd6a9003a063bd4e434157f85e6540eb96e4cdd6efd3eb943e  AethonMod/Content/Effects/GlowRay.png
+9ad8641b4c845ab22ed4d3148d12f2f6a0952b710f52f4fd9c363817c31cece6  AethonMod/Content/Projectiles/V20/PhoenixNovaProjectile.cs
+9d548b7f02b04b9135839672623671e432152874b9f9a5be0a7b108545853cdc  AethonMod/Content/Effects/Procedural/FireRing.png
+a083a3db2658ce06011ac9e8142c8b760f485b838d07b595a35209df50f7a16b  AethonMod/Content/Effects/Shaders/RealBlackHoleShader.fx
+a114847aceae90baeed11e4b647c7cb799720310f46b0ba0b607b261f0989db9  AethonMod/Content/Weapons/ProjBeam.png
+a4c97d804faf5b3aa0f2409525ca7187d66cefccd000e369ab00d9fa28ba036b  AethonMod/Content/Effects/Procedural/Trail.png
+a63c9b859b0d8866948827832f25ba4b4b168c935dac56f0ecf0c7ff81b241a3  AethonMod/Content/Effects/Shaders/SunShader.fxc
+a86fc74446af703e052087975fd40b3c027605667b4eacfde08161218de25588  AethonMod/Content/Projectiles/V20/QuantumSplitProjectile.cs
+a87b4a7ab6438807cb58858d573eb085eb062daa77b4b434aa78dcc9206d8a9e  AethonMod/Content/Weapons/TestMagicRing.png
+a87b4a7ab6438807cb58858d573eb085eb062daa77b4b434aa78dcc9206d8a9e  AethonMod/Content/Weapons/V20/PhoenixNovaStaff.png
+a87b4a7ab6438807cb58858d573eb085eb062daa77b4b434aa78dcc9206d8a9e  AethonMod/Content/Weapons/V20/PlasmaStormStaff.png
+a87b4a7ab6438807cb58858d573eb085eb062daa77b4b434aa78dcc9206d8a9e  AethonMod/Content/Weapons/V20/QuantumSplitStaff.png
+a87b4a7ab6438807cb58858d573eb085eb062daa77b4b434aa78dcc9206d8a9e  AethonMod/Content/Weapons/V20/SupernovaStaff.png
+a9b162d7ae32e7f88c36037867dd231499a10cef0ba303f0c2caea63d9f8c882  AethonMod/Content/Effects/BlackHoleLensSystem.cs
+a9e50da0631d6593cf964db0cc0fe5d97c0aab58c00d130544856acd839aca3d  AethonMod/Content/Effects/Textures/FireNoiseB.png
+abcce84b6216e0468d2726aaf47dcde85b0357e5719300445da2d8df5b7690a5  AethonMod/Content/Projectiles/Cosmic/CosmicShockwaveProjectile.cs
+ad859fd136b53712c45aa29d38fa7f8a6d3f04645a67c4374bbddca950275060  AethonMod/Content/Effects/Procedural/Slash.png
 b067a5be9e2ffb80b8bc2d5ba4c19818189fee0b09e64f7e1c5198fd7e9ecd58  AethonMod/Content/NPCs/RiftKeeper.cs
+b12a9f6f99431087fcc109ad9f92d96fd6e5bf9a557de17df559d7c186db8a01  AethonMod/Content/Effects/Shaders/Shockwave.fx
+b29b3d34b5d00c969604ff02703b414f8d46bbd3a8288c927d8ba3d3871769cd  AethonMod/Localization/es-ES_Mods.AethonMod.hjson
+b5f1f6754902046022b52704427456e78c4d797c544743092752fa4bb0cf10a0  AethonMod/Content/Effects/MagicRing.png
 b638c99b2af520058e0d8c3c5aba3f2d3f6d02b4f265b978dbb00bcc308a001d  AethonMod/Content/NPCs/TheWitness.png
-b84d3cf085d7fe8f7b0930af4687a3920c79b215b8e9151eeeb4db990b4a717c  AethonMod/Content/Globals/ShardLevelItem.cs
+b8de61e6d4c723670584d5e71c6aa056d144f3653a8d70e4905dc98e2ce08052  AethonMod/Content/Effects/MagicRingGold.png
+bb7f442242092f9b3df0b7b4a4cce004dc84d0660c84495ff17c09ca98f0b0aa  AethonMod/Content/Buffs/StellarCometBuff.cs
 bc248586be24ac2e9720a64dd4d26e3ae1da934b53ddd545fc287dd5db9ab420  AethonMod/icon.png
+bd38c6e389e3f3d3e7ec001cfc4a303e8d045dcc962cfe2a241b26de12b7ce53  AethonMod/Content/Effects/Textures/WavyBlotchNoiseDetailed.png
+bfb98fab5272b023d2e20f8f0100719471b574d548d7ad58e0f195995e0e8cb6  AethonMod/Content/Effects/Procedural/PulsarCore.png
+c0a777ac17270291b2dc040f8541c315dbba6b0f9cf94ed86d05b1f6978dab9d  AethonMod/Content/Effects/Textures/InvisiblePixel.png
+c0a777ac17270291b2dc040f8541c315dbba6b0f9cf94ed86d05b1f6978dab9d  AethonMod/Content/Projectiles/Cosmic/CosmicShockwaveProjectile.png
 c2b9429baa392efc9bed7f2882d45c87c8696a7a2451df1bde34b61f3071bc74  AethonMod/Content/Items/ResonanceShard.cs
+c434441bc141807dc032a0e5e77df62aea8c7286299ee6a3780692e2bda0d02f  AethonMod/Content/Projectiles/CosmicOrbMinion.cs
+c440516f324a0764195e608ba27e8e63b5baea41e2606faab3c793e6dbbfa093  AethonMod/Content/Particles/ParticlePresets.cs
+c4888ed689d714b9b190a5fd6c9ecbb92354366a9ef36530e8bec314a1060e47  AethonMod/Content/Projectiles/V20/SupernovaProjectile.cs
 c655729bc897ac7075fe9dd48c02e4e38510f643c99505b67b9e11e3af02ae29  AethonMod/Content/Biomes/HollowSanctumBiome.cs
-d370f38431595f191253332aa1221b449a653598c2bcc5af17f06f04af3a2968  AethonMod/Content/Players/TestingPlayer.cs
-d6feadef7209d8cdae7af55565bfd68ce9d84e3fc54c7ec6ee17aa478f1f4f80  AethonMod/Content/Globals/GlobalNPCXP.cs
+c78be00135021356b7c890605b1333aedd9ca8c523ef34f7cce79e7f71c3a731  AethonMod/Content/Weapons/Projectiles/GenesisLight.cs
+cb96b6b1928357f8b9526769d72583ade2b3d39f7c3bf25241018062658e40f7  AethonMod/Content/Effects/Procedural/Crescent.png
+cc1c27ad454775df13a8b1b1db212b498f3e2863bd5fee120da29bf463391bfb  AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap.png
+d102af8c0d605f48e7c4faf24c500d9bb85ed49c502e55dc6745e79f37f54fbe  AethonMod/Content/Buffs/LivingPulsarBuff.png
+d10a29433e867d9ebdf16420ed648443294e42369755e2824ff50484b2a6a42d  AethonMod/Content/Particles/ParticleBuffer.cs
+d23af30b1ab8a3fd73563f094a3a100b0fc23ffbacc9abf13a528711f2d081a2  AethonMod/Content/Effects/GlowCircleCyan.png
+da71dfa1613fdf2a22baf2975d4664d45b6b37f625ca6630d6ce80b3d0ab5c18  AethonMod/Content/Effects/ShieldGold.png
+db47f371035b1e1e656259726420e96cec5e101447c46dc82168377991a81da8  AethonMod/build.txt
 dc1344c77168a087a96829a30482f56bd2f6b60669e09adb5c8a79ffd9dd8144  AethonMod/Content/Projectiles/CosmicOrbBolt.png
+dc956115a2edc564b89bcbf054fc90b2e35fe80fa3cc146c311f924aaaa14a17  AethonMod/Content/Particles/ParticleData.cs
 dce398dcd510487cf8545878b01abee1e3ed56e564b5228827283eb04e29152c  AethonMod/Content/Items/ResonanceShard.png
-dd25d6477101525e13f4ea8de7572f45f430d00d80e9ebc021415f3a8cc136b3  AethonMod/Content/Weapons/Projectiles/ArcaneBolt.cs
+dd4228671126b38b3ca41c19c02eb91d3b472d1bee32b221ceee251bcca5033e  AethonMod/Content/Projectiles/Cosmic/LivingPulsarMinion.cs
+e0e57b385b8bc3ba849787fe99de6a1ab7feb361cb0790b56d0999a826678e11  AethonMod/Content/Particles/ParticleManager.cs
+e2164293eaf2a407129cf6d2d32dc9cf9038c98a74427c054975d31b0ddaf1f3  AethonMod/Content/Systems/WeaponScaling.cs
+e580ba9a34a6129195d28ab0053be015f7eabf8822d9068141c68e95666ae0d9  AethonMod/Content/Globals/ShardLevelItem.cs
 e5f3012681e5f58f2d771fee5feb27175cbbbbaaf434934bafbc4ae8befffd95  AethonMod/Content/Weapons/GrimoireEternal.png
 e7e6b702fba82c327bf992a0178aa8f6689e6d84f443a0bfb7e15ffac89eb903  AethonMod/AethonMod.cs
-e84b83df913ecb1e5f0cfe53a48e1165baff65ee5c4e0d6e82e9285d3e2ffe71  AethonMod/Content/NPCs/TheWitness.cs
+e7ed16ad3d10e124394fe9e9358f8be0f0687d4896a01429c96c05fd13b947ab  AethonMod/Content/Weapons/TestAdvanced.cs
+e925b8c8142fbe098eefb4787e1ed6feebf9b5aabf8be635ff1a40ae38fa455e  AethonMod/Content/Effects/Procedural/Vortex.png
+e9c553a959613bd34b5557cf46b7e95221a6b6e854a716894c63f4fe5f175977  AethonMod/Content/Projectiles/Cosmic/BlackHoleProjectile.cs
+eb3830fffb6b28ca5b5e38b27361141d228b87f732ad156b33acd135d45a4861  AethonMod/Content/Buffs/StellarCometBuff.png
+ee0a518186b42916c0895a3912b353d42774a79b08534ff05b6ca8e510764995  AethonMod/Content/Projectiles/Cosmic/NebulaJellyfishMinion.cs
+f1d546ff99b82fe38d3b1394383ee37cbafb8106b68a106c1a4e2da27cc0ecb1  AethonMod/icon_small.png
+f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317  AethonMod/Content/Projectiles/Cosmic/LivingPulsarMinion.png
+f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317  AethonMod/Content/Projectiles/Cosmic/NebulaJellyfishMinion.png
+f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317  AethonMod/Content/Projectiles/Cosmic/NebulaLightning.png
+f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317  AethonMod/Content/Projectiles/Cosmic/StellarCometMinion.png
 f541e4b650354a656b0dc5ccdc574d959340e982770b9c69ef972d3cc6beff61  AethonMod/Content/NPCs/RiftKeeper.png
 f6d63cc2f954f32a876cee83a6b25dd036653371eaa4051fbbe4f58a62bc0c1f  AethonMod/Content/Items/LevelUpTester.png
 f8e36528affff3610ddd96497111e04312b9f69b671dfef38d90cdc3a1e07d76  AethonMod/Content/AethonConfig.cs
+f93feda184de66ae43f94481ec59a59dcd15c3fdeadc89fb46ac18900c56978c  AethonMod/Content/Weapons/Cosmic/BlackHoleStaff.png
+f93feda184de66ae43f94481ec59a59dcd15c3fdeadc89fb46ac18900c56978c  AethonMod/Content/Weapons/Cosmic/SunStaff.png
+fb806199f4f75c5004e6a0f0eadcf5d3a5e9b025bf2b020450b2cdd6946438ff  AethonMod/Localization/en-US_Mods.AethonMod.hjson
+fc07131655a42c0031bc29b02566735e9ab82d1f7fb0bcc5583daa7780fbb3ad  AethonMod/Content/Effects/Procedural/CometHead.png

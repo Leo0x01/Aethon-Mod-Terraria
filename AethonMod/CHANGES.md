@@ -62,6 +62,13 @@ ejecutó la purga con auditoría completa.
 - Auditoría de binario (búsqueda de bytes ASCII+UTF-16): 30 nombres
   borrados → 0 restos; 20 conservados → todos presentes
 
+### D. MARCADA COMO ESTABLE
+
+- **2026-09-12**: el usuario verificó v6.01 como ESTABLE y pidió guardarla
+  como punto de retorno en GitHub. Tag `stable-v6.01` + rama
+  `stable-v6.01-backup` + STABLE-SNAPSHOT.md regenerado (manifiesto
+  SHA-256 completo del paquete: 186 archivos).
+
 ## Commit v6.00 — SOL Y AGUJERO PULSAN MÁS FUERTE + EL LÁTIGO DE LA MEDUSA + ADIÓS OJO, LLEGA LA GALAXIA VIVIENTE
 
 **Peticiones del usuario**: (1) "creo que deberías aumentar los tick de
