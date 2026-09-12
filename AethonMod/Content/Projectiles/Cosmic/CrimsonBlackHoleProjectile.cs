@@ -12,20 +12,19 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// CrimsonBlackHoleProjectile — v6.03 — EL AGUJERO NEGRO DE LA REFERENCIA.
+    /// CrimsonBlackHoleProjectile — v6.04 — EL AGUJERO NEGRO DE LA REFERENCIA.
     ///
     /// Copia con personalidad propia del BlackHoleProjectile (que queda
     /// INTACTO): misma física probada (aura de daño con ticks que aceleran
     /// cerca del centro, atracción 10× la del sol, devora balas enemigas al
     /// cruzar el horizonte, persecución lenta, anillo de Einstein final).
     ///
-    /// v6.03 — REDISEÑO VISUAL TOTAL según la referencia del usuario: el
-    /// render ESTILIZADO por capas de StylizedVoidRenderer (disco de
-    /// acreción elíptico INCLINADO de grumos fucsia con Doppler y
-    /// estriaciones vivas, anillos eco, núcleo negro, anillo de fotones,
-    /// catorce rayos superiores y relámpagos deterministas). LA CORONA
-    /// YA NO VIVE AQUÍ: fue retirada y convertida en el cosmético
-    /// VoidCrownItem (detrás de la cabeza del jugador).
+    /// v6.04 — RENDER GARGANTUA: las texturas procedurales calibradas con
+    /// las MEDIDAS PÍXEL-EXACTAS de la referencia del usuario (sombra 28%
+    /// del ancho, disco compacto ±3.55 r_sh, banda gruesa que CRUZA el
+    /// ecuador, arco de lente a 1.34 r_sh, Doppler cálido a la izquierda,
+    /// inclinación -12°, anillo de fotones naranja-blanco). LA CORONA
+    /// YA NO VIVE AQUÍ: es el cosmético VoidCrownItem (detrás de la cabeza).
     /// </summary>
     public class CrimsonBlackHoleProjectile : ModProjectile
     {
@@ -196,9 +195,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === ILUMINACIÓN PULSANTE (carmesí-magenta del disco) ===
+            // === ILUMINACIÓN PULSANTE (coral-carmesí del disco Gargantua) ===
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
-            Lighting.AddLight(Projectile.Center, new Vector3(1.0f * pulse, 0.16f * pulse, 0.34f * pulse));
+            Lighting.AddLight(Projectile.Center, new Vector3(1.0f * pulse, 0.34f * pulse, 0.22f * pulse));
         }
 
         /// <summary>El enemigo chaseable más cercano dentro de maxDist.</summary>
@@ -262,20 +261,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
                     velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
 
-                    // Materia fucsia de la referencia que se vuelve rosa
-                    // pálido al caer hacia el horizonte.
+                    // Materia del Gargantua: coral→dorado cayendo hacia el
+                    // horizonte, blanco-cálido al rozarlo (Doppler).
                     Color color;
                     if (dist < 60f)
                     {
-                        color = new Color(255, 240, 245); // blanco-rosa al borde
+                        color = new Color(255, 244, 220); // blanco cálido al borde
                     }
                     else
                     {
                         color = Main.rand.Next(3) switch
                         {
-                            0 => new Color(255, 0, 85),    // fucsia neón
-                            1 => new Color(255, 51, 119),  // rosa caliente
-                            _ => new Color(139, 10, 80),   // granate
+                            0 => new Color(252, 96, 84),    // coral naranja
+                            1 => new Color(255, 150, 110),  // naranja claro
+                            _ => new Color(238, 52, 76),    // carmesí cálido
                         };
                     }
 
@@ -345,8 +344,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
                                    tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
-                Color start = new Color(255, 40, 95, 190);
-                Color end = new Color(255, 215, 235, 235);
+                Color start = new Color(252, 96, 84, 190);
+                Color end = new Color(255, 244, 220, 235);
 
                 var p = new ParticleData
                 {
@@ -373,13 +372,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Disco de acreción: estelas TrailGlow magenta orbitando
-        /// con rotación sincronizada (materia carmesí arremolinada).</summary>
+        /// <summary>Disco de acreción: estelas TrailGlow cálidas orbitando
+        /// con rotación sincronizada — plasma coral/dorado del Gargantua,
+        /// en el radio del disco visible (1.4..3.2 R).</summary>
         private void SpawnLibraryAccretionDisk()
         {
             if (Main.rand.NextBool(4))
             {
-                float radius = Main.rand.NextFloat(26f, 46f) * MathHelper.Max(Projectile.scale, 0.4f);
+                float horizon = 0.3f * Projectile.width * Math.Max(Projectile.scale, 0.4f);
+                float radius = Main.rand.NextFloat(1.4f, 3.1f) * horizon;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 float angVel = 0.22f;
 
@@ -394,8 +395,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Scale = new Vector2(1.8f, 0.45f),
                     Rotation = angle + MathHelper.PiOver2,
                     RotationSpeed = angVel,
-                    PackedColor = ParticleManager.PackColor(new Color(255, 60, 130, 200)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 90, 160, 200)),
+                    PackedColor = ParticleManager.PackColor(new Color(255, 150, 110, 200)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 190, 140, 200)),
                     PackedEndColor = ParticleManager.PackColor(new Color(120, 0, 45, 40)),
                     TimeLeft = 48,
                     Duration = 48,
@@ -431,17 +432,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el agujero completo con el RENDER ESTILIZADO de la
-        /// referencia (StylizedVoidRenderer): halo profundo + ecos + disco
-        /// de acreción inclinado con Doppler + núcleo negro + anillo de
-        /// fotones + rayos + relámpagos — SIN corona (hoy es cosmético).
-        /// Compartido entre el pase del mundo y el pase posterior a la lente.
-        /// Contrato de batch idéntico al render viejo: al terminar queda
-        /// CERRADO (el llamador lo restaura).
+        /// Dibuja el agujero completo con el RENDER GARGANTUA (v6.04): las
+        /// texturas procedurales calibradas con las medidas píxel-exactas
+        /// de la referencia — lente trasera + anillo de fotones naranja-
+        /// blanco + SOMBRA negra de borde nítido + banda frontal que CRUZA
+        /// el ecuador — SIN corona (hoy es cosmético). Compartido entre el
+        /// pase del mundo y el pase posterior a la lente. Contrato de batch
+        /// idéntico al render viejo: al terminar queda CERRADO (el llamador
+        /// lo restaura).
         /// </summary>
         internal static void DrawCoreVisuals(Projectile p, bool endActiveBatch)
         {
-            StylizedVoidRenderer.Draw(p, endActiveBatch);
+            GargantuaRenderer.Draw(p, endActiveBatch);
         }
 
         /// <summary>Radio del campo (px), compartido con el aura y el OnKill.</summary>

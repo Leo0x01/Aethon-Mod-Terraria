@@ -1,5 +1,90 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.04 — EL AGUJERO NEGRO EXACTO: EL RENDER GARGANTUA
+
+**Petición del usuario**: "el agujero negro no se parece en nada... te
+mostraré el agujero negro de terraria que hiciste primera imagen y la
+referencia segunda imagen. usa todo el conocimiento que tienes, y todas las
+librerías disponibles para crear una copia exacta del agujero negro de la
+segunda imagen, no olvides que tenemos un agujero negro funcional puedes
+usar una copia como base para eso" (las coronas ya estaban perfectas).
+
+### A. ANÁLISIS MÉTRICO DE LA REFERENCIA (píxel-exacto)
+
+Análisis VLM doble (imagen completa + recortes) + medición píxel a píxel
+con Python (numpy) del recorte del agujero. La estructura REAL de la
+referencia (el brillo del lado derecho de la imagen es un PERSONAJE en
+primer plano, NO parte del agujero — no se replica):
+
+- SOMBRA negra central: Ø~95px sobre estructura de ~335px → 28% del ancho,
+  borde NÍTIDO, hueco redondeado.
+- DISCO de acreción COMPACTO: extensión total ~3.5× el diámetro de la
+  sombra (±3.55 r_sh), NO un anillo extendido.
+- Banda frontal GRUESA: ~40px de alto = ±0.43 r_sh, que CRUZA por delante
+  de la esfera en el ecuador (el clásico Gargantua de Interstellar).
+- ARCO DE LENTE superior (disco trasero lensado): cima a 1.34 r_sh sobre
+  el polo, BRILLANTE.
+- Tilt del sistema: ~-12° (extremo derecho hacia arriba).
+- DOPPLER: el lado que se acerca (izquierda) blanco-dorado CEGADOR; el
+  que se aleja (derecha) carmesí tenue.
+- Paleta medida: blanco #FFFFFF, dorado #FDCB7C, coral #FA7069, rosa
+  #FF5DAE, magenta #FF26B0, carmesí #F82960, granate #8B0000, halo
+  #1D0007.
+
+### B. EL GENERADOR PROCEDURAL (`tools/gen_gargantua.py`)
+
+Un mini "ray-tracer artístico" de lente gravitacional (la técnica de los
+shaders de Gargantua, sin geodésicas reales): 8 iteraciones de refinado
+con comparación visual iterativa + autodiagnóstico ASCII contra el mapa
+de brillo de la referencia. Técnicas:
+
+- **Proyección física**: disco edge-on elíptico con SKEW radial |Xr|^0.74
+  (puntas de aguja), grosor 3D del torus (más grueso al frente), banda
+  que cruza el ecuador por DEBAJO del centro de la sombra.
+- **Paleta DUAL por Doppler**: gradiente CÁLIDO (negro→granate→coral→
+  naranja→dorado→blanco) en el lado que se acerca, magenta en el que se
+  aleja — interpoladas por píxel.
+- **Turbulencia con DOMAIN WARPING** (plasma fluido, no estática digital)
+  + filamentos blancos finos + VETAS OSCURAS entre filamentos (el
+  contraste duro de la referencia).
+- **RIM INTERIOR ardiendo**: franja blanco-dorada en el borde interno del
+  disco (donde el gas orbita más rápido) + HOTSPOT cegador en el cruce.
+- **Anillo de fotones** naranja-blanco (la parte MÁS brillante) con picos
+  de relámpago deterministas.
+- **Tendrilas de gas** (wisps) y neblina roja atmosférica alrededor.
+
+Salida calibrada (2048×1024, sombra a R_SH=150px):
+- `GargantuaBack.png` — todo lo que vive DETRÁS de la esfera.
+- `GargantuaFront.png` — SOLO la banda que cruza por delante.
+- `GargantuaShadow.png` — círculo negro de borde NÍTIDO (caída de 6px).
+
+### C. EL RENDERER (`Content/VFX/GargantuaRenderer.cs`)
+
+Render por 3 pasos con el contrato de batch heredado (mundo + lente):
+
+1. **GARGANTUABACK** (aditivo): neblina + wisps + arcos de lente +
+   anillo de fotones + penumbra.
+2. **LA SOMBRA** (alpha): negro absoluto NÍTIDO — come el fondo del mundo
+   y el brillo trasero: el vacío.
+3. **GARGANTUAFRONT** (aditivo): la banda que CRUZA el ecuador con sus
+   filamentos y su hotspot blanco-dorado.
+
+El conjunto BAMBOLEA (±1.1°) y RESPIRA (0.97..1.03). La distorsión del
+fondo la sigue aportando BlackHoleLensSystem (abraza el disco completo:
+134px vs ±102px del disco) y las partículas orbitales viven ahora en el
+radio del disco visible (1.4..3.1 R) con la paleta cálida coral/dorado.
+
+### D. SIN CAMBIOS DE FÍSICA
+
+El CrimsonBlackHoleProjectile conserva TODA la física probada (aura de
+daño con ticks acelerados, atracción 10× el sol, devora balas enemigas,
+persecución lenta, anillo de Einstein final). Solo cambian: el render
+(StylizedVoidRenderer queda como miembro de la biblioteca para usos
+futuros), la paleta de las partículas de materia (coral→dorado→carmesí
+en vez de fucsia) y la iluminación (coral-cálida en vez de magenta).
+
+Compilado contra tModLoader real: 0 errores, 0 warnings.
+
 ## Commit v6.03 — LA BIBLIOTECA VISUAL AETHON + EL AGUJERO NEGRO DE LA REFERENCIA + LAS DOS CORONAS
 
 **Peticiones del usuario**: (1) "es momento de diseñar el nuevo sistema...

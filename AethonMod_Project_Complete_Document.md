@@ -678,6 +678,7 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (v6.04) | v6.04 | **EL AGUJERO NEGRO EXACTO — EL RENDER GARGANTUA**: (petición: "el agujero negro no se parece en nada... usa todo el conocimiento que tienes, y todas las librerías disponibles para crear una copia exacta del agujero negro de la segunda imagen, no olvides que tenemos un agujero negro funcional puedes usar una copia como base" — las coronas ya estaban perfectas): (A) **ANÁLISIS MÉTRICO PÍXEL-EXACTO** de la referencia (VLM doble + numpy): sombra Ø95px = 28% del ancho de la estructura, disco COMPACTO ±3.55 r_sh, banda GRUESA ±0.43 r_sh que CRUZA el ecuador (Gargantua de Interstellar), arco de lente a 1.34 r_sh, tilt -12°, Doppler blanco-dorado izquierda / carmesí derecha, paleta blanco/dorado #FDCB7C/coral #FA7069/rosa #FF5DAE/magenta #FF26B0/carmesí #F82960/granate #8B0007 — el brillo del lado derecho de la imagen es un PERSONAJE en primer plano y NO se replica; (B) **GENERADOR PROCEDURAL** `tools/gen_gargantua.py` — mini "ray-tracer artístico" de lente gravitacional con 8 iteraciones de refinado (VLM + autodiagnóstico ASCII contra el mapa de brillo de la referencia): proyección edge-on con skew de puntas de aguja |Xr|^0.74, grosor 3D del torus (grueso al frente), paleta DUAL por Doppler (cálida negro→granate→coral→naranja→dorado→blanco interpolada por píxel), turbulencia con DOMAIN WARPING (plasma fluido) + filamentos blancos + VETAS OSCURAS, rim interior ARDIENDO blanco-dorado, hotspot cegador en el cruce, anillo de fotones NARANJA-BLANCO con relámpagos deterministas, wisps de gas y neblina roja → GargantuaBack.png + GargantuaFront.png (2048×1024, calibradas con la sombra a R_SH=150px) + GargantuaShadow.png (círculo negro de borde NÍTIDO de 6px); (C) **GargantuaRenderer.cs** — render por 3 pasos con el contrato de batch heredado (mundo + lente): BACK aditivo (lente + fotones + neblina + wisps) → SOMBRA alpha (negro absoluto NÍTIDO que come el fondo del mundo) → FRONT aditivo (la banda que CRUZA el ecuador); bamboleo ±1.1° + respiración 0.97..1.03; la lente de BlackHoleLensSystem sigue distorsionando el fondo (abraza el disco: 134px vs ±102px); (D) **partículas e iluminación** en la paleta cálida (coral/dorado/carmesí en vez de fucsia; orbitan en el radio del disco visible 1.4..3.1 R); (E) **CERO cambios de física** (aura con ticks acelerados, atracción 10×, devora balas, anillo de Einstein — INTACTOS) y StylizedVoidRenderer queda como miembro de la biblioteca; compilación 0/0 contra tModLoader real |
 | (v6.03) | v6.03 | **LA BIBLIOTECA VISUAL AETHON + EL AGUJERO NEGRO DE LA REFERENCIA + LAS DOS CORONAS**: (petición: "es momento de diseñar el nuevo sistema... diseñar las nuevas librerias y assets" + "toma la corona actual del agujero negro y quítala... conviértela en un ítem cosmético que ubica la corona justo detrás de la cabeza del jugador" + "el agujero negro... tiene que ser exactamente igual pero sin la corona" + "recrea esa corona como un item extra... una nueva corona que no tiene nada que ver con la corona actual... nuevo cosmetico" — 2 imágenes de referencia nuevas): (A) **BIBLIOTECA VISUAL `Content/VFX/`** — VFXCore (efectos como LISTAS DE CUADROS DE LUZ GlowQuad volcadas a dibujo aditivo directo O a DrawData de capas de jugador — un MISMO renderizador sirve en proyectil y sobre la cabeza, cero GC), VFXPalettes (VoidQueen MEDIDA por píxel de la referencia + CrimsonCourt + RuneStars), ArcCrownRenderer (la corona de arcos promovida a librería), RuneCrownRenderer (8 glifos rúnicos diseñados desde cero), StylizedVoidRenderer y BoltRenderer (rayos deterministas); (B) **EL AGUJERO NEGRO EXACTO A LA REFERENCIA SIN CORONA**: geometría MEDIDA por píxel (lente plana ~2:1, oscuridad a ±0.23×semieje, aro BLANCO-CÁLIDO a 0.47×, banda fucsia SATURADA 0.7-1.0× — picos 255,0,255/248,0,73 — núcleo negro ~5% y media luna frontal 255,26,255): halo que respira → relleno SÓLIDO GlowOrb → GRADIENTE CONTINUO de 10 anillos Ring estirados y solapados → EL VACÍO de 4 elipses negras apiladas → cruce frontal + media luna → temblor de materia ANTIHORARIO con Doppler medido → 11 rayos superiores → 2 relámpagos; shader raymarchado FUERA del carmesí (el ORIGINAL lo conserva INTACTO); DrawCoronaCrown+SpawnCrownEmbers ELIMINADOS (0 en binario); 8 iteraciones de verificación con simulación PIL espejo + métricas de perfil normalizadas contra el recorte de la referencia; (C) **COSMÉTICO 1 — CORONA DE LA REINA DEL VACÍO (VoidCrownItem)**: la corona original del agujero, DETRÁS de la cabeza del jugador (VoidCrownDrawLayer antes de la capa Head: la cabeza tapa lo que cruza), accesorio puro sin estadísticas (funcionales O vanidad), con ascuas rosas y luz carmesí propia; (D) **COSMÉTICO 2 — CORONA RÚNICA ESTELAR (RuneCrownItem)**: 8 glifos (lanza/cáliz/puerta/estrella/rayo/arco/espiral/trono) flotando en arco ALTO sobre la cabeza con perlas blancas-rosadas, chispas ascendentes y luz rosa — NADA que ver con la de arcos; (E) CosmeticPlayer (escanea los 14 huecos de accesorio), kit con ambas coronas, localización ES/EN, íconos procedurales (3 iteraciones VLM), compilación 0/0 Debug+Release, auditoría binaria 11 clases nuevas + 21 símbolos presentes y shader del original INTACTO |
 | (v6.02) | v6.02 | **INVESTIGACIÓN VISUAL + LIMPIEZA TOTAL DE REFERENCIAS + EL AGUJERO NEGRO CARMESÍ**: (petición: "investigacion super profunda de las librerias y recursos visuales de los mods populares... todo en pos de mejorar el aspecto futuro de nuestro mod" + "100 pasadas... eliminar cualquier mención de cualquier otro mod o referencias externas en cualquier sentido" + "el codigo sea super correcto" + "copiar el arma de agujero negro... dejar al agujero negro original intacto"): (A) investigación de técnicas visuales documentada (sección 15, neutralizada); (B) LIMPIEZA TOTAL — carpeta research/ ELIMINADA (25 archivos externos), shaders muertos fuera (BlackOnlyShader/Shockwave/Bloom/ChromaticAberration — quedan 4 activos), 6 texturas REGENERADAS 100% procedurales (tools/gen_effects_textures.py), 4 .fx reescritos como fuente propia (mismos .fxc), 0 menciones externas en todo el mod y docs (58 en el documento del proyecto neutralizadas), auditoría de binario 0 nombres externos; (C) 11 usings muertos fuera, 38 entradas de localización que faltaban AÑADIDAS (19 clases × ES/EN), clave muerta AncientAltarItem corregida, constante muerta fuera, balance batch verificado, 41/41 texturas ✓; (D) NUEVA ARMA: CrimsonBlackHoleStaff (daño 110) → CrimsonBlackHoleProjectile — MISMA FÍSICA del agujero original (ticks 6→24 cerca del centro, atracción 450px, devora balas, anillo de Einstein) + visual de la imagen de referencia: disco MAGENTA (#FF0055, cameraAngle 0.42), anillo de fotones ROSA-INCANDESCENTE (#FFBB90), LA CORONA de 5 lazos de neón carmesí→magenta asimétricos con ecos interiores y nudos naranja de 4 puntas, ascuas rosas, paleta carmesí en partículas/halo/luz; ORIGINAL INTACTO; (E) compilación 0/0, arsenal 14→15 |
 | ``87d51bd`` | v6.01-stable | **MARCADOR ESTABLE — PUNTO DE RETORNO SEGURO EN GITHUB**: el usuario verificó v6.01 como estable ("guarda este commit como estable en github para en caso de que suceda algo regresar a el") → tag anotado `stable-v6.01` + rama `stable-v6.01-backup` (ambas en origin) apuntando a este commit; STABLE-SNAPSHOT.md REGENERADO para v6.01 (estado del arsenal de 14, cósmicas supervivientes, verificación técnica, instrucciones de restauración vía `git checkout stable-v6.01` o ZIP del tag, y MANIFIESTO SHA-256 COMPLETO del paquete del mod: 186 archivos — nota: BlackHoleStaff.png y SunStaff.png comparten hash por ser placeholder idéntico de armas dibujadas proceduralmente); CHANGES.md v6.01 + sección D (marcada como estable). El mod NO cambia: solo docs del marcador |
@@ -767,10 +768,42 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v6.03
-- **Mensaje**: "feat v6.03: LA BIBLIOTECA VISUAL AETHON (VFXCore + paletas + renderizadores de coronas/vacío/rayos) + el AGUJERO NEGRO EXACTO a la referencia SIN corona (geometría medida por píxel: lente plana saturada, aro blanco-cálido, núcleo negro, media luna frontal, rayos y relámpagos) + DOS COSMÉTICOS: la Corona de la Reina del Vacío (la original del agujero, DETRÁS de la cabeza) y la Corona Rúnica Estelar (8 glifos nuevos desde cero, halo sobre la cabeza)"
+- **Versión**: v6.04
+- **Mensaje**: "feat v6.04: EL AGUJERO NEGRO EXACTO — el RENDER GARGANTUA: texturas procedurales calibradas con las MEDIDAS PÍXEL-EXACTAS de la referencia (sombra 28% del ancho, disco compacto ±3.55 r_sh, banda GRUESA que CRUZA el ecuador, arco de lente a 1.34 r_sh, Doppler cálido izquierda, inclinación -12°) + anillo de fotones naranja-blanco + SOMBRA negra de borde nítido + generador tools/gen_gargantua.py (8 iteraciones de refinado)"
 
-### 11.2 Qué se hizo en v6.03 (biblioteca visual + agujero de la referencia + las dos coronas)
+### 11.2 Qué se hizo en v6.04 (el render Gargantua del agujero exacto)
+
+**Petición del usuario**: las coronas estaban perfectas, pero el agujero
+negro "no se parece en nada" a la referencia — crear una COPIA EXACTA del
+agujero de la segunda imagen usando todo el conocimiento y las librerías,
+sobre la base del agujero funcional existente.
+
+**A. ANÁLISIS MÉTRICO** — VLM doble (imagen completa + recortes) + medición
+numpy píxel a píxel: la sombra Ø95px = 28% del ancho de la estructura, el
+disco COMPACTO ±3.55 r_sh con banda GRUESA ±0.43 r_sh que CRUZA el ecuador,
+el arco de lente a 1.34 r_sh, tilt -12°, Doppler blanco-dorado a la
+izquierda, paleta blanco/dorado #FDCB7C/coral #FA7069/rosa/magenta/
+carmesí/granate. El brillo del lado derecho de la imagen es un PERSONAJE en
+primer plano — NO se replica (no es parte del agujero).
+
+**B. GENERADOR PROCEDURAL** (`tools/gen_gargantua.py`) — un mini
+"ray-tracer artístico" de lente gravitacional: proyección edge-on con skew
+de puntas de aguja, grosor 3D del torus, paleta DUAL por Doppler (cálida
+negro→coral→dorado→blanco / magenta), turbulencia con DOMAIN WARPING,
+filamentos + vetas oscuras, rim interior ardiendo, hotspot cegador en el
+cruce, anillo de fotones naranja-blanco con relámpagos, wisps de gas y
+neblina roja. Salida: GargantuaBack.png / GargantuaFront.png /
+GargantuaShadow.png (2048×1024, calibradas con la sombra a R_SH=150px).
+
+**C. GargantuaRenderer.cs** — render por 3 pasos: BACK aditivo (lente +
+fotones + neblina) → SOMBRA alpha (negro absoluto de borde NÍTIDO que come
+el fondo del mundo) → FRONT aditivo (la banda que cruza). Bamboleo ±1.1° y
+respiración 0.97..1.03; la lente de BlackHoleLensSystem sigue distorsionando
+el fondo (abraza el disco: 134px vs ±102px) y las partículas orbitales viven
+en el radio del disco (1.4..3.1 R) con paleta cálida. CERO cambios de
+física. Compilación 0/0 contra tModLoader real.
+
+### 11.2.0 Qué se hizo en v6.03 (histórico — biblioteca visual + coronas)
 
 **Petición del usuario**: diseñar las nuevas librerías y assets sobre la
 investigación de técnicas de los mods populares; quitar la corona actual
@@ -785,23 +818,15 @@ proyectiles y DrawData para capas de jugador — el camino oficial de tML),
 VFXPalettes (VoidQueen medida por píxel, CrimsonCourt, RuneStars),
 ArcCrownRenderer, RuneCrownRenderer, StylizedVoidRenderer y BoltRenderer.
 
-**B. EL AGUJERO NEGRO**: render estilizado por capas con la geometría
-MEDIDA en las dos referencias (ver fila v6.03 de la tabla del historial
-para el detalle completo de capas y mediciones). La corona fue retirada y
-el shader raymarchado ya no se usa en el carmesí — el ORIGINAL queda
-INTACTO con su shader.
+**B. EL AGUJERO NEGRO (v6.03, sustituido en v6.04 por el render Gargantua)**:
+render estilizado por capas con la geometría medida en las referencias de
+ESA iteración. La corona fue retirada y el shader raymarchado ya no se usa
+en el carmesí — el ORIGINAL queda INTACTO con su shader.
 
 **C/D. LOS DOS COSMÉTICOS**: VoidCrownItem (corona de arcos detrás de la
 cabeza) y RuneCrownItem (corona rúnica flotando arriba) — ambos
 accesorios puros que funcionan en huecos funcionales o de vanidad,
 detectados por CosmeticPlayer, con partículas vivas y luz propia.
-
-**E. Verificación**: compilación 0 errores/0 warnings (Debug y Release
-contra tModLoader v2026.07.3.0 real), auditoría de binario (11 clases
-nuevas y 21 símbolos presentes; DrawCoronaCrown/SpawnCrownEmbers = 0;
-shader del original intacto en UTF-16), simulaciones PIL espejo con
-métricas de perfil contra el recorte de la referencia y previews de
-jugador con ambas coronas.
 
 ### 11.2.1 Qué se hizo en v6.02 (histórico — investigación + limpieza + carmesí)
 
@@ -1388,7 +1413,20 @@ reiniciarse... AethonMod no se ha desactivado correctamente."
    (mismos 4 warnings benignos preexistentes, Kill obsoleto en archivos viejos).
 
 ### 11.3 Estado actual del mod
-- ✅ Mod compila correctamente (verificado contra tML 2026.07.3.0 real, 0 errores / 0 warnings)
+- ✅ Mod compila correctamente (verificado contra tModLoader real, 0 errores / 0 warnings)
+- ✅ **v6.04 — EL RENDER GARGANTUA**: el agujero carmesí con las texturas
+  procedurales calibradas con las MEDIDAS PÍXEL-EXACTAS de la referencia
+  (sombra negra de borde nítido 28% del ancho, disco compacto ±3.55 r_sh,
+  banda GRUESA que CRUZA el ecuador, arco de lente a 1.34 r_sh, anillo de
+  fotones naranja-blanco, Doppler blanco-dorado/carmesí) — física INTACTA
+- ✅ **v6.03 — LA BIBLIOTECA VISUAL AETHON** (`Content/VFX/`: VFXCore,
+  VFXPalettes, ArcCrownRenderer, RuneCrownRenderer, BoltRenderer) + LOS DOS
+  COSMÉTICOS DE CORONA (VoidCrownItem detrás de la cabeza y RuneCrownItem
+  flotando arriba — el usuario los verificó PERFECTOS)
+- ✅ **v6.02 — LIMPIEZA TOTAL** de referencias externas (research/ borrada,
+  texturas 100% procedurales, 0 menciones externas en binario y docs)
+- ✅ **v6.01 — LA GRAN LIMPIEZA**: arsenal de 14 armas + el Carmesí (15) y
+  los 2 cosméticos de corona; tag estable `stable-v6.01` en GitHub
 - ✅ **v5.93 — CAMPO DE FUERZA estilo Columna de Nebulosa** alrededor del
   agujero negro (magenta→cian con aberración viva en el borde) que la onda
   cromática "expande" al morir
@@ -4123,7 +4161,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v6.03
+> Última actualización: v6.04
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.
