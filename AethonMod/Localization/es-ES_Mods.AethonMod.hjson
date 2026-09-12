@@ -68,8 +68,14 @@
         "Items.PhoenixNovaStaff.DisplayName": "Nova del Fénix",
         "Items.QuantumSplitStaff.DisplayName": "División Cuántica",
 
-        "Items.CrimsonBlackHoleStaff.DisplayName": "Agujero Negro Carmesí",
-        "Items.CrimsonBlackHoleStaff.Tooltip": "Invoca EL AGUJERO NEGRO CARMESÍ.\nUn agujero negro de reina: disco de acreción magenta eléctrico, anillo de fotones rosa-incandescente\ny LA CORONA — cinco arcos de neón carmesí con nudos naranjas arqueados sobre el horizonte.\nMisma física que el Agujero Negro: devora balas, machaca con ticks acelerados y muere en un Anillo de Einstein.",
+        "Items.CrimsonBlackHoleStaff.DisplayName": "Agujero Negro del Vacío",
+        "Items.CrimsonBlackHoleStaff.Tooltip": "Invoca EL AGUJERO NEGRO DEL VACÍO — exactamente como la referencia.\nDisco de acreción fucsia inclinado de materia viva (brillo Doppler en el lado que se acerca),\nnúcleo negro, anillo de fotones rosa pálido, catorce rayos superiores y arcos de relámpago.\nMisma física que el Agujero Negro: devora balas, acelera sus ticks de daño y muere en un Anillo de Einstein.",
+
+        "Items.VoidCrownItem.DisplayName": "Corona de la Reina del Vacío",
+        "Items.VoidCrownItem.Tooltip": "La corona original del agujero negro carmesí, hoy cosmético portable.\nCinco arcos de neón carmesí con nudos naranjas arqueados JUSTO DETRÁS de tu cabeza.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
+
+        "Items.RuneCrownItem.DisplayName": "Corona Rúnica Estelar",
+        "Items.RuneCrownItem.Tooltip": "Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia\nflotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
 
         "Projectiles.BlackHoleProjectile.DisplayName": "Agujero Negro",
         "Projectiles.CrimsonBlackHoleProjectile.DisplayName": "Agujero Negro Carmesí",

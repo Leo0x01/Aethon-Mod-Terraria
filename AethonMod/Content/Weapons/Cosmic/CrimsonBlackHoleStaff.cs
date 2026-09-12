@@ -9,12 +9,13 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// CrimsonBlackHoleStaff — v6.02 — EL AGUJERO NEGRO CARMESÍ.
+    /// CrimsonBlackHoleStaff — v6.03 — EL AGUJERO NEGRO DEL VACÍO.
     ///
     /// Hermano del BlackHoleStaff (que queda INTACTO): misma física
-    /// gravitacional, personalidad de reina cósmica — disco de acreción
-    /// magenta eléctrico, anillo de fotones rosa-incandescente y una CORONA
-    /// de cinco arcos de neón con nudos naranjas arqueada sobre el horizonte.
+    /// gravitacional y el visual EXACTO de la referencia — disco de
+    /// acreción fucsia inclinado con Doppler, núcleo negro, anillo de
+    /// fotones rosa pálido, catorce rayos y relámpagos. La corona que
+    /// lucía (v6.02) se retiró y vive hoy como cosmético del jugador.
     /// </summary>
     public class CrimsonBlackHoleStaff : ModItem
     {
@@ -40,9 +41,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF0055:═══ AGUJERO NEGRO CARMESÍ ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:Lensing gravitacional real de 75 pasos + lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción MAGENTA ELÉCTRICO + anillo de fotones ROSA-INCANDESCENTE + LA CORONA: cinco arcos de neón carmesí con nudos naranjas arqueados sobre el horizonte]"));
+            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF0055:═══ AGUJERO NEGRO DEL VACÍO ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:EXACTAMENTE como la referencia: lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción FUCSIA INCLINADO de materia viva con Doppler + núcleo negro + anillo de fotones ROSA PÁLIDO + catorce rayos + relámpagos]"));
             tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px; su AURA DE DAÑO crece con él (35%→65% del daño) y machaca más rápido cuanto más cerca del centro]"));
             tooltips.Add(new TooltipLine(Mod, "D4", "[c/FF0055:Devora las balas enemigas al cruzar el horizonte — y al final nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
         }

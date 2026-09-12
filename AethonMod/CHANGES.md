@@ -1,5 +1,110 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.03 — LA BIBLIOTECA VISUAL AETHON + EL AGUJERO NEGRO DE LA REFERENCIA + LAS DOS CORONAS
+
+**Peticiones del usuario**: (1) "es momento de diseñar el nuevo sistema...
+es el momento de diseñar las nuevas librerias y assets" (sobre la
+investigación de técnicas de los mods populares); (2) "toma la corona actual
+del agujero negro y quítala, en cambio toma esa corona y conviértela en un
+ítem cosmético que ubica la corona justo detrás de la cabeza del jugador";
+(3) "con respecto al agujero negro este no se parece en nada a la referencia,
+tiene que ser exactamente igual pero sin la corona"; (4) "intenta recrear
+esa corona como un item extra, esta sera una nueva corona que no tiene nada
+que ver con la corona actual del agujero negro y esta sera un nuevo
+cosmetico" (dos imágenes de referencia nuevas: la entidad cósmica y el
+portal rosa).
+
+### A. LA BIBLIOTECA VISUAL AETHON (`Content/VFX/`)
+
+El nuevo sistema de librerías visuales propio — 6 módulos que ya usan (y
+usarán) todas las armas del mod:
+
+- **VFXCore** — el núcleo: los efectos se describen como listas de CUADROS
+  DE LUZ (GlowQuad: posición mundo/color/escala/rotación/textura) y se
+  vuelcan con UNA llamada al destino que haga falta: dibujo aditivo directo
+  (proyectiles, neón real) o emisión de DrawData para las capas de dibujado
+  del jugador (el camino oficial de tML, sin tocar el batch del renderer).
+  Un MISMO renderizador sirve en un proyectil y sobre la cabeza de un
+  jugador. Buffer estático reutilizable (cero GC por frame) + helpers de
+  respiración/balanceo/hash determinista/elipses.
+- **VFXPalettes** — paletas nombradas: VoidQueen (la del agujero de la
+  referencia, MEDIDA por píxel), CrimsonCourt (la corona de arcos) y
+  RuneStars (la corona rúnica nueva).
+- **ArcCrownRenderer** — la corona de arcos de neón (5 lazos con asimetría,
+  ecos interiores y nudos naranjas con destello de 4 puntas), promotida de
+  código de proyectil a MIEMBRO DE LA BIBLIOTECA reutilizable.
+- **RuneCrownRenderer** — la corona rúnica estelar: 8 glifos rúnicos
+  ANGULARES diseñados desde cero (la lanza, el cáliz, la puerta, la
+  estrella, el rayo, el arco, la espiral y el trono) flotando en arco sobre
+  la cabeza, con perlas rosa pálido en las puntas y halo tenue.
+- **StylizedVoidRenderer** — EL AGUJERO NEGRO DE LA REFERENCIA (ver B).
+- **BoltRenderer** — relámpagos deterministas reutilizables (zigzag por
+  hash puro: todas las máquinas ven el MISMO rayo; se regenera cada ~9
+  ticks — VIVE).
+
+### B. EL AGUJERO NEGRO — EXACTAMENTE LA REFERENCIA (SIN CORONA)
+
+Geometría MEDIDA por píxel en las dos imágenes de referencia (perfil
+horizontal/vertical del agujero del pecho de la entidad + elipse del
+portal): lente plana brillante de aspecto ~2:1, zona oscura interior hasta
+±0.23× el semieje, aro BLANCO-CÁLIDO a 0.47×, banda fucsia SATURADA de 0.7
+a 1.0× (picos medidos 255,0,255 y 248,0,73 — paleta fucsia intermedia
+exacta), núcleo negro PURO pequeño (~5% de la lente) y media luna inferior
+de destello frontal (pico medido 255,26,255).
+
+Render por capas: halo púrpura compacto que respira → relleno SÓLIDO
+(GlowOrb, lente saturada) → GRADIENTE CONTINUO de 10 anillos de Ring
+ESTIRADOS y solapados (blanco-cálido → caliente → fucsia; banda CONTINUA,
+nada de puntos) → EL VACÍO (4 elipses negras apiladas: negro absoluto y
+penumbra) → cruce frontal de los 3 anillos interiores + MEDIA LUNA →
+temblor de materia fluyendo (rotación ANTIHORARIA con leve Doppler
+izquierda-caliente, medido en la referencia) → ONCE rayos superiores
+sutiles (los del portal) → DOS relÁMPAGOS de los flancos. El shader
+raymarchado YA NO se usa en el carmesí (el original lo conserva intacto):
+el look de la referencia es luz por capas, no 3D realista. 8 iteraciones
+de verificación con simulación PIL espejo del algoritmo + crítica visual +
+medición de perfiles normalizados contra el recorte de la referencia.
+
+LA CORONA fue RETIRADA del proyectil (DrawCoronaCrown y SpawnCrownEmbers
+ELIMINADOS — 0 ocurrencias en el binario).
+
+### C. LA CORONA DE LA REINA DEL VACÍO (cosmético 1)
+
+La corona ORIGINAL del agujero negro (v6.02), retirada del proyectil y
+convertida en ÍTEM COSMÉTICO: **VoidCrownItem** — accesorio puro (cero
+estadísticas, huecos funcionales O de vanidad) que dibuja la corona de
+arcos JUSTO DETRÁS de la cabeza del jugador (capa VoidCrownDrawLayer,
+ANTES de la capa Head: la cabeza tapa lo que cruza — la corona ENVUELVE).
+Escala a la cabeza, respira, se balancea, suelta ASCUAS ROSAS sobre los
+ápices (la corona es energía viva) e ilumina la noche con su carmesí.
+Ícono procedural de 3 arcos + nudos (3 iteraciones de crítica visual).
+
+### D. LA CORONA RÚNICA ESTELAR (cosmético 2)
+
+Diseño NUEVO DESDE CERO sobre la referencia (no tiene nada que ver con la
+corona de arcos): **RuneCrownItem** — ocho glifos rúnicos de luz fucsia
+flotando en arco ALTO sobre la cabeza (capa RuneCrownDrawLayer, tras las
+capas de cara: es un halo), cada uno con su PERLA blanca-rosada en la
+punta. Los glifos flotan con oscilación desfasada, pulsan su brillo con
+fase propia y EMITEN CHISPAS ASCENDENTES desde las perlas. El arco flota
+alto para no competir con la corona de arcos si el jugador lleva AMBAS.
+Ícono procedural de arco fucsia + 5 glifos simples + perlas (3 iteraciones
+de crítica visual).
+
+### E. INFRAESTRUCTURA Y VERIFICACIÓN
+
+- **CosmeticPlayer** (ModPlayer): escanea los 14 huecos de accesorio
+  (funcionales 3..9 + vanidad 13..19) — un cosmético es un cosmético viva
+  dónde lo pongas; hace vivir las coronas (ascuas, chispas) y las ilumina.
+- **TestingPlayer**: el kit de pruebas entrega las DOS coronas además del
+  agujero carmesí.
+- **Localización** en-US/es-ES completa (2 ítems nuevos + agujero
+  actualizado); tooltips reescritos.
+- **Compilación contra tModLoader v2026.07.3.0 real**: 0 errores, 0
+  warnings (Debug y Release). **Auditoría de binario**: las 11 clases
+  nuevas + 21 símbolos presentes; DrawCoronaCrown/SpawnCrownEmbers = 0;
+  el shader del agujero ORIGINAL intacto (UTF-16 verificado).
+
 ## Commit v6.02 — INVESTIGACIÓN VISUAL + LIMPIEZA TOTAL DE REFERENCIAS + EL AGUJERO NEGRO CARMESÍ
 
 **Peticiones del usuario**: (1) "quiero que hagas una investigacion super

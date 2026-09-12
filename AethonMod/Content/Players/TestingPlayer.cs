@@ -65,8 +65,12 @@ namespace AethonMod.Content.Players
             // v5.99: EL COMETA ESTELAR y EL PÚLSAR VIVO (invocadores)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
-            // v6.02: EL AGUJERO NEGRO CARMESÍ (copia con corona de la reina)
+            // v6.02: EL AGUJERO NEGRO CARMESÍ (hoy con el visual de la referencia)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.CrimsonBlackHoleStaff>());
+            // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
+            // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
+            EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());
+            EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneCrownItem>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

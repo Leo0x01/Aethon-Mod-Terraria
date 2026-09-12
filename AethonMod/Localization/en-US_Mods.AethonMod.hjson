@@ -68,8 +68,14 @@
         "Items.PhoenixNovaStaff.DisplayName": "Phoenix Nova",
         "Items.QuantumSplitStaff.DisplayName": "Quantum Split",
 
-        "Items.CrimsonBlackHoleStaff.DisplayName": "Crimson Black Hole",
-        "Items.CrimsonBlackHoleStaff.Tooltip": "Summons THE CRIMSON BLACK HOLE.\nA queen's black hole: an electric-magenta accretion disk, a pink-hot photon ring\nand THE CROWN — five crimson neon arcs with orange knots arched over the horizon.\nSame physics as the Black Hole: eats bullets, ramps up its damage ticks, and dies in an Einstein Ring.",
+        "Items.CrimsonBlackHoleStaff.DisplayName": "Void Black Hole",
+        "Items.CrimsonBlackHoleStaff.Tooltip": "Summons THE VOID BLACK HOLE — exactly like the reference.\nA tilted fuchsia accretion disk of living matter (Doppler-bright on the approaching side),\na black core, a pale-pink photon ring, fourteen upper rays and lightning arcs.\nSame physics as the Black Hole: eats bullets, ramps up its damage ticks, and dies in an Einstein Ring.",
+
+        "Items.VoidCrownItem.DisplayName": "Crown of the Void Queen",
+        "Items.VoidCrownItem.Tooltip": "The original crown of the crimson black hole, now a wearable cosmetic.\nFive crimson neon arcs with orange knots arched JUST BEHIND your head.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
+
+        "Items.RuneCrownItem.DisplayName": "Astral Rune Crown",
+        "Items.RuneCrownItem.Tooltip": "A new crown designed from scratch: eight runic glyphs of fuchsia light\nfloating in an arc above your head, each tipped with a pale-pink pearl.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
 
         "Projectiles.BlackHoleProjectile.DisplayName": "Black Hole",
         "Projectiles.CrimsonBlackHoleProjectile.DisplayName": "Crimson Black Hole",

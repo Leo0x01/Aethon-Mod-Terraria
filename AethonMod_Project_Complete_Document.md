@@ -678,6 +678,7 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| (v6.03) | v6.03 | **LA BIBLIOTECA VISUAL AETHON + EL AGUJERO NEGRO DE LA REFERENCIA + LAS DOS CORONAS**: (petición: "es momento de diseñar el nuevo sistema... diseñar las nuevas librerias y assets" + "toma la corona actual del agujero negro y quítala... conviértela en un ítem cosmético que ubica la corona justo detrás de la cabeza del jugador" + "el agujero negro... tiene que ser exactamente igual pero sin la corona" + "recrea esa corona como un item extra... una nueva corona que no tiene nada que ver con la corona actual... nuevo cosmetico" — 2 imágenes de referencia nuevas): (A) **BIBLIOTECA VISUAL `Content/VFX/`** — VFXCore (efectos como LISTAS DE CUADROS DE LUZ GlowQuad volcadas a dibujo aditivo directo O a DrawData de capas de jugador — un MISMO renderizador sirve en proyectil y sobre la cabeza, cero GC), VFXPalettes (VoidQueen MEDIDA por píxel de la referencia + CrimsonCourt + RuneStars), ArcCrownRenderer (la corona de arcos promovida a librería), RuneCrownRenderer (8 glifos rúnicos diseñados desde cero), StylizedVoidRenderer y BoltRenderer (rayos deterministas); (B) **EL AGUJERO NEGRO EXACTO A LA REFERENCIA SIN CORONA**: geometría MEDIDA por píxel (lente plana ~2:1, oscuridad a ±0.23×semieje, aro BLANCO-CÁLIDO a 0.47×, banda fucsia SATURADA 0.7-1.0× — picos 255,0,255/248,0,73 — núcleo negro ~5% y media luna frontal 255,26,255): halo que respira → relleno SÓLIDO GlowOrb → GRADIENTE CONTINUO de 10 anillos Ring estirados y solapados → EL VACÍO de 4 elipses negras apiladas → cruce frontal + media luna → temblor de materia ANTIHORARIO con Doppler medido → 11 rayos superiores → 2 relámpagos; shader raymarchado FUERA del carmesí (el ORIGINAL lo conserva INTACTO); DrawCoronaCrown+SpawnCrownEmbers ELIMINADOS (0 en binario); 8 iteraciones de verificación con simulación PIL espejo + métricas de perfil normalizadas contra el recorte de la referencia; (C) **COSMÉTICO 1 — CORONA DE LA REINA DEL VACÍO (VoidCrownItem)**: la corona original del agujero, DETRÁS de la cabeza del jugador (VoidCrownDrawLayer antes de la capa Head: la cabeza tapa lo que cruza), accesorio puro sin estadísticas (funcionales O vanidad), con ascuas rosas y luz carmesí propia; (D) **COSMÉTICO 2 — CORONA RÚNICA ESTELAR (RuneCrownItem)**: 8 glifos (lanza/cáliz/puerta/estrella/rayo/arco/espiral/trono) flotando en arco ALTO sobre la cabeza con perlas blancas-rosadas, chispas ascendentes y luz rosa — NADA que ver con la de arcos; (E) CosmeticPlayer (escanea los 14 huecos de accesorio), kit con ambas coronas, localización ES/EN, íconos procedurales (3 iteraciones VLM), compilación 0/0 Debug+Release, auditoría binaria 11 clases nuevas + 21 símbolos presentes y shader del original INTACTO |
 | (v6.02) | v6.02 | **INVESTIGACIÓN VISUAL + LIMPIEZA TOTAL DE REFERENCIAS + EL AGUJERO NEGRO CARMESÍ**: (petición: "investigacion super profunda de las librerias y recursos visuales de los mods populares... todo en pos de mejorar el aspecto futuro de nuestro mod" + "100 pasadas... eliminar cualquier mención de cualquier otro mod o referencias externas en cualquier sentido" + "el codigo sea super correcto" + "copiar el arma de agujero negro... dejar al agujero negro original intacto"): (A) investigación de técnicas visuales documentada (sección 15, neutralizada); (B) LIMPIEZA TOTAL — carpeta research/ ELIMINADA (25 archivos externos), shaders muertos fuera (BlackOnlyShader/Shockwave/Bloom/ChromaticAberration — quedan 4 activos), 6 texturas REGENERADAS 100% procedurales (tools/gen_effects_textures.py), 4 .fx reescritos como fuente propia (mismos .fxc), 0 menciones externas en todo el mod y docs (58 en el documento del proyecto neutralizadas), auditoría de binario 0 nombres externos; (C) 11 usings muertos fuera, 38 entradas de localización que faltaban AÑADIDAS (19 clases × ES/EN), clave muerta AncientAltarItem corregida, constante muerta fuera, balance batch verificado, 41/41 texturas ✓; (D) NUEVA ARMA: CrimsonBlackHoleStaff (daño 110) → CrimsonBlackHoleProjectile — MISMA FÍSICA del agujero original (ticks 6→24 cerca del centro, atracción 450px, devora balas, anillo de Einstein) + visual de la imagen de referencia: disco MAGENTA (#FF0055, cameraAngle 0.42), anillo de fotones ROSA-INCANDESCENTE (#FFBB90), LA CORONA de 5 lazos de neón carmesí→magenta asimétricos con ecos interiores y nudos naranja de 4 puntas, ascuas rosas, paleta carmesí en partículas/halo/luz; ORIGINAL INTACTO; (E) compilación 0/0, arsenal 14→15 |
 | ``87d51bd`` | v6.01-stable | **MARCADOR ESTABLE — PUNTO DE RETORNO SEGURO EN GITHUB**: el usuario verificó v6.01 como estable ("guarda este commit como estable en github para en caso de que suceda algo regresar a el") → tag anotado `stable-v6.01` + rama `stable-v6.01-backup` (ambas en origin) apuntando a este commit; STABLE-SNAPSHOT.md REGENERADO para v6.01 (estado del arsenal de 14, cósmicas supervivientes, verificación técnica, instrucciones de restauración vía `git checkout stable-v6.01` o ZIP del tag, y MANIFIESTO SHA-256 COMPLETO del paquete del mod: 186 archivos — nota: BlackHoleStaff.png y SunStaff.png comparten hash por ser placeholder idéntico de armas dibujadas proceduralmente); CHANGES.md v6.01 + sección D (marcada como estable). El mod NO cambia: solo docs del marcador |
 | ``0cc89cf`` | v6.01 | **LA GRAN LIMPIEZA — EL USUARIO ELIGE QUÉ SE QUEDA (35→14 ARMAS)**: (petición: "es momento de seleccionar que se queda en el proyecto" + lista por números + "la galaxia se ve horrible y la lanza igual, ademas las dos son tan simple que no vale la pena que continue en el mod"): listado completo del arsenal por generaciones (8 tests + Grimorio + 19 V20 + 7 cósmicas), selección confirmada (el "191" = el 19, AbyssalEyeStaff) y purga de **21 ARMAS** — **4 DE COLOR** (ColorRainbow/Red/Yellow/Green: clases extirpadas de TestAdvanced.cs, texturas, handlers 5004-5007 de TestAdvancedFX.cs y el helper huérfano DrawColoredSprite que solo usaban ellas) + **15 V20** (Tornado, PrismBeam, Earthquake, MirrorDimension, GravityPulse, ShadowClone, CrystalShatter, VortexChain con su VortexMineProjectile interno, AbyssalEye, SpectralMirage, TemporalRift, InfernoTornado, VoidEater, PlasmaOrb, BlackHoleMini — arma+proyectil+texturas, mapeo 1:1 sin huérfanos) + **2 CÓSMICAS NUEVAS** (QuasarLance+QuasarJetProjectile y LivingGalaxyStaff+LivingGalaxyProjectile+GalaxyStarProjectile+SpiralGalaxy.png — "horribles y muy simples") + **cirugía del bloque galaxia en BlackHoleLensSystem** (recolección, _galaxyIndices/_galaxyCount, fuente del pase B y draw loop extirpados; el protocolo vive intacto en soles/medusas/cometas/púlsares) + localización en-US/es-ES y TestingPlayer limpios; **SE QUEDAN 14**: los 4 tests clásicos (con handlers 3003/3004/4001/4006), el Grimorio del Eterno (su Orbe Cósmico — imagen del usuario — INTACTO), 4 V20 (Supernova/PlasmaStorm/PhoenixNova/QuantumSplit) y las 5 cósmicas (Agujero/Sol/Medusa/Cometa/Púlsar); quien tenga armas borradas en guardados viejos LAS CONSERVA. Verificación: 0 referencias a las 40 clases borradas, 39 clases con textura ✓, compilación 0 errores/0 warnings, binario: 30 nombres borrados → 0 restos |
@@ -766,10 +767,47 @@ Commits desde v5.28 hasta v6.01 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v6.01
-- **Mensaje**: "chore v6.01: LA GRAN LIMPIEZA — el usuario seleccionó qué se queda: 21 armas ELIMINADAS del arsenal de pruebas (4 de COLOR con sus handlers 5004-5007 y el helper huérfano DrawColoredSprite, 15 V20 con sus proyectiles, y las 2 cósmicas nuevas Quásar+Galaxia 'se ven horrible y son muy simples') + cirugía del bloque galaxia en BlackHoleLensSystem + localización y kit limpios; SE QUEDAN 14: los 4 tests clásicos, el Grimorio (Orbe Cósmico intacto), 4 V20 (Supernova/PlasmaStorm/PhoenixNova/QuantumSplit) y las 5 cósmicas (Agujero/Sol/Medusa/Cometa/Púlsar); verificación: 0 referencias, 39 clases con textura, 0 errores de compilación y 0 restos en binario"
+- **Versión**: v6.03
+- **Mensaje**: "feat v6.03: LA BIBLIOTECA VISUAL AETHON (VFXCore + paletas + renderizadores de coronas/vacío/rayos) + el AGUJERO NEGRO EXACTO a la referencia SIN corona (geometría medida por píxel: lente plana saturada, aro blanco-cálido, núcleo negro, media luna frontal, rayos y relámpagos) + DOS COSMÉTICOS: la Corona de la Reina del Vacío (la original del agujero, DETRÁS de la cabeza) y la Corona Rúnica Estelar (8 glifos nuevos desde cero, halo sobre la cabeza)"
 
-### 11.2 Qué se hizo en v6.01 (la gran limpieza — el usuario elige qué se queda)
+### 11.2 Qué se hizo en v6.03 (biblioteca visual + agujero de la referencia + las dos coronas)
+
+**Petición del usuario**: diseñar las nuevas librerías y assets sobre la
+investigación de técnicas de los mods populares; quitar la corona actual
+del agujero negro y convertirla en cosmético detrás de la cabeza; el
+agujero EXACTAMENTE igual a la referencia (nuevas imágenes: la entidad
+cósmica y el portal rosa) pero sin corona; y una corona NUEVA desde cero
+como otro cosmético.
+
+**A. LA BIBLIOTECA VISUAL AETHON (`Content/VFX/`)** — 6 módulos:
+VFXCore (cuadros de luz GlowQuad con dos volcados: aditivo directo para
+proyectiles y DrawData para capas de jugador — el camino oficial de tML),
+VFXPalettes (VoidQueen medida por píxel, CrimsonCourt, RuneStars),
+ArcCrownRenderer, RuneCrownRenderer, StylizedVoidRenderer y BoltRenderer.
+
+**B. EL AGUJERO NEGRO**: render estilizado por capas con la geometría
+MEDIDA en las dos referencias (ver fila v6.03 de la tabla del historial
+para el detalle completo de capas y mediciones). La corona fue retirada y
+el shader raymarchado ya no se usa en el carmesí — el ORIGINAL queda
+INTACTO con su shader.
+
+**C/D. LOS DOS COSMÉTICOS**: VoidCrownItem (corona de arcos detrás de la
+cabeza) y RuneCrownItem (corona rúnica flotando arriba) — ambos
+accesorios puros que funcionan en huecos funcionales o de vanidad,
+detectados por CosmeticPlayer, con partículas vivas y luz propia.
+
+**E. Verificación**: compilación 0 errores/0 warnings (Debug y Release
+contra tModLoader v2026.07.3.0 real), auditoría de binario (11 clases
+nuevas y 21 símbolos presentes; DrawCoronaCrown/SpawnCrownEmbers = 0;
+shader del original intacto en UTF-16), simulaciones PIL espejo con
+métricas de perfil contra el recorte de la referencia y previews de
+jugador con ambas coronas.
+
+### 11.2.1 Qué se hizo en v6.02 (histórico — investigación + limpieza + carmesí)
+
+### 11.2.2 Versión anterior (v6.01 — la gran limpieza) LA GRAN LIMPIEZA — el usuario seleccionó qué se queda: 21 armas ELIMINADAS del arsenal de pruebas (4 de COLOR con sus handlers 5004-5007 y el helper huérfano DrawColoredSprite, 15 V20 con sus proyectiles, y las 2 cósmicas nuevas Quásar+Galaxia 'se ven horrible y son muy simples') + cirugía del bloque galaxia en BlackHoleLensSystem + localización y kit limpios; SE QUEDAN 14: los 4 tests clásicos, el Grimorio (Orbe Cósmico intacto), 4 V20 (Supernova/PlasmaStorm/PhoenixNova/QuantumSplit) y las 5 cósmicas (Agujero/Sol/Medusa/Cometa/Púlsar); verificación: 0 referencias, 39 clases con textura, 0 errores de compilación y 0 restos en binario"
+
+**v6.01 — la gran limpieza (el usuario elige qué se queda):**
 
 **Petición del usuario**: "es momento de seleccionar que se queda en el
 proyecto" — listado completo del arsenal (35 armas agrupadas por
@@ -795,7 +833,7 @@ tan simple que no vale la pena que continue en el mod".
   cometas/púlsares
 - Localización en-US/es-ES y TestingPlayer limpios
 
-**B. SE QUEDAN — 14 armas** (v6.01; con el Carmesí añadido en v6.02 son 15): 4 tests clásicos (TestMagicRing,
+**B. SE QUEDAN — 14 armas** (v6.01; con el Carmesí en v6.02 son 15; y en v6.03 se añaden 2 COSMÉTICOS de corona, no armas): 4 tests clásicos (TestMagicRing,
 TestSparkle, ProjBeam, TestMagicRingV2), el Grimorio del Eterno (su Orbe
 Cósmico — imagen del usuario — INTACTO), 4 V20 (Supernova,
 PlasmaStorm, PhoenixNova, QuantumSplit) y las 5 cósmicas (Agujero Negro,
@@ -808,7 +846,7 @@ ModItem/ModProjectile/ModBuff TODAS con textura ✓; compilación contra
 tModLoader v2026.07.3.0 real 0 errores/0 warnings; binario auditado por
 bytes: 30 nombres borrados → 0 restos, 20 conservados → todos presentes.
 
-### 11.2.1 Qué se hizo en v6.00 (histórico — sol/agujero + látigo + galaxia viviente)
+### 11.2.3 Qué se hizo en v6.00 (histórico — sol/agujero + látigo + galaxia viviente)
 
 **Peticiones del usuario**: aumentar los ticks de daño del sol y el agujero
 negro y su área (en el agujero los ticks aumentan cerca del centro); ambos
@@ -4085,7 +4123,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v6.02
+> Última actualización: v6.03
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

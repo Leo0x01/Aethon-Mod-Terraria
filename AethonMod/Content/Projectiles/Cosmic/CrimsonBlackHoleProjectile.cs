@@ -1,38 +1,34 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Effects;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// CrimsonBlackHoleProjectile — v6.02 — EL AGUJERO NEGRO CARMESÍ.
+    /// CrimsonBlackHoleProjectile — v6.03 — EL AGUJERO NEGRO DE LA REFERENCIA.
     ///
     /// Copia con personalidad propia del BlackHoleProjectile (que queda
     /// INTACTO): misma física probada (aura de daño con ticks que aceleran
     /// cerca del centro, atracción 10× la del sol, devora balas enemigas al
-    /// cruzar el horizonte, persecución lenta, anillo de Einstein final) con
-    /// un visual de reina cósmica:
-    ///   - Disco de acreción MAGENTA (el shader toma el color por parámetro).
-    ///   - Anillo de fotones ROSA-INCANDESCENTE fino sobre el horizonte.
-    ///   - CORONA DE ARCOs: 5 lazos de neón carmesí→magenta arqueados sobre
-    ///     el anillo de fotones, con nudos NARANJA incandescentes en los
-    ///     ápices (líneas de campo magnético solidificadas en luz).
-    ///   - Halo carmesí profundo y materia absorbida rosa/carmesí.
+    /// cruzar el horizonte, persecución lenta, anillo de Einstein final).
+    ///
+    /// v6.03 — REDISEÑO VISUAL TOTAL según la referencia del usuario: el
+    /// render ESTILIZADO por capas de StylizedVoidRenderer (disco de
+    /// acreción elíptico INCLINADO de grumos fucsia con Doppler y
+    /// estriaciones vivas, anillos eco, núcleo negro, anillo de fotones,
+    /// catorce rayos superiores y relámpagos deterministas). LA CORONA
+    /// YA NO VIVE AQUÍ: fue retirada y convertida en el cosmético
+    /// VoidCrownItem (detrás de la cabeza del jugador).
     /// </summary>
     public class CrimsonBlackHoleProjectile : ModProjectile
     {
-        /// <summary>Shader del núcleo (mismo asset que el agujero original:
-        /// el color del disco y los ángulos son parámetros).</summary>
-        private static Ref<Effect> _shader;
-        private static bool _shaderFailed;
-
         /// <summary>Tiempo visual de vida — pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
 
@@ -109,7 +105,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
-            // === PARTÍCULAS (solo cliente) — paleta carmesí/magenta ===
+            // === PARTÍCULAS (solo cliente) — paleta de la referencia ===
             if (Main.netMode != NetmodeID.Server)
             {
                 SpawnAbsorbedDusts();
@@ -117,7 +113,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 AttractNearbyDust();
                 SpawnLibraryAbsorbedMatter();
                 SpawnLibraryAccretionDisk();
-                SpawnCrownEmbers();
             }
 
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (10× la del sol) ===
@@ -267,19 +262,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
                     velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
 
-                    // Materia carmesí que se vuelve rosa-incandescente al caer.
+                    // Materia fucsia de la referencia que se vuelve rosa
+                    // pálido al caer hacia el horizonte.
                     Color color;
                     if (dist < 60f)
                     {
-                        color = new Color(255, 205, 225); // blanco-rosa al borde
+                        color = new Color(255, 240, 245); // blanco-rosa al borde
                     }
                     else
                     {
                         color = Main.rand.Next(3) switch
                         {
-                            0 => new Color(255, 30, 70),   // carmesí
-                            1 => new Color(255, 60, 150),  // magenta
-                            _ => new Color(220, 20, 110),  // granate
+                            0 => new Color(255, 0, 85),    // fucsia neón
+                            1 => new Color(255, 51, 119),  // rosa caliente
+                            _ => new Color(139, 10, 80),   // granate
                         };
                     }
 
@@ -305,28 +301,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Pink,
                     vel, 255, new Color(255, 130, 190), 0.9f);
-                d.noGravity = true;
-                d.fadeIn = 0f;
-            }
-        }
-
-        /// <summary>
-        /// ASCUAS DE LA CORONA: chispas rosas que se alzan sobre los ápices
-        /// de los arcos (la corona es energía VIVA, no un adorno estático).
-        /// </summary>
-        private void SpawnCrownEmbers()
-        {
-            if (Main.rand.NextBool(18))
-            {
-                // Horizonte aproximado en px (mismo cálculo del dibujado).
-                float horizonPx = 0.3f * Projectile.width * Math.Max(Projectile.scale, 0.08f);
-                // Punto sobre la corona (entre el anillo y el ápice exterior).
-                Vector2 emberPos = Projectile.Center + new Vector2(
-                    Main.rand.NextFloat(-1.3f, 1.3f) * horizonPx,
-                    -(horizonPx * (1.1f + Main.rand.NextFloat(0.8f, 2.2f))));
-                Dust d = Dust.NewDustPerfect(emberPos, DustID.Enchanted_Pink,
-                    new Vector2(Main.rand.NextFloat(-0.5f, 0.5f), -Main.rand.NextFloat(0.7f, 1.5f)),
-                    180, new Color(255, 175, 215), 0.8f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -457,233 +431,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el núcleo completo del agujero carmesí: halo profundo +
-        /// RealBlackHoleShader (disco magenta, cámara más de canto) +
-        /// horizonte negro + ANILLO DE FOTONES rosa + CORONA DE ARCOS.
+        /// Dibuja el agujero completo con el RENDER ESTILIZADO de la
+        /// referencia (StylizedVoidRenderer): halo profundo + ecos + disco
+        /// de acreción inclinado con Doppler + núcleo negro + anillo de
+        /// fotones + rayos + relámpagos — SIN corona (hoy es cosmético).
         /// Compartido entre el pase del mundo y el pase posterior a la lente.
+        /// Contrato de batch idéntico al render viejo: al terminar queda
+        /// CERRADO (el llamador lo restaura).
         /// </summary>
         internal static void DrawCoreVisuals(Projectile p, bool endActiveBatch)
         {
-            if (!_shaderFailed && _shader == null)
-            {
-                try
-                {
-                    _shader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/RealBlackHoleShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch
-                {
-                    _shaderFailed = true;
-                }
-            }
-
-            try
-            {
-                Vector2 drawPos = p.Center - Main.screenPosition;
-
-                // === 1. HALO CARMESÍ PROFUNDO (aura de fondo) ===
-                Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (endActiveBatch)
-                    Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                float haloPulse = 0.85f + 0.15f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3.5f);
-                Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(48, 0, 18, 44) * haloPulse * p.scale, 0f,
-                    glowTex.Size() * 0.5f, 3.2f * p.scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-
-                // Radio del horizonte en píxeles (mismo cálculo que el original).
-                float targetSize = 256f;
-                float zoomBase = p.width / targetSize * 2f;
-
-                if (_shader != null && _shader.Value != null)
-                {
-                    // === 2. REALBLACKHOLESHADER — disco MAGENTA, cámara más de canto ===
-                    Effect shader = _shader.Value;
-                    float canvasPx = targetSize * Math.Max(p.scale, 0.08f);
-
-                    shader.Parameters["blackHoleRadius"].SetValue(0.3f);
-                    shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
-                    shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
-                    // v6.02 — LA FIRMA CARMESÍ: disco de acreción magenta eléctrico.
-                    shader.Parameters["accretionDiskColor"].SetValue(new Color(255, 0, 85).ToVector3());
-                    // Cámara más inclinada: el disco casi de canto (más dramático).
-                    shader.Parameters["cameraAngle"].SetValue(0.42f);
-                    shader.Parameters["cameraRotationAxis"].SetValue(new Vector3(p.velocity.Y * -0.022f + 1f, 0f, p.rotation));
-                    // Toro algo más plano y algo más grueso: disco de reina prominente.
-                    shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, 0.30f, 1f));
-                    shader.Parameters["zoom"].SetValue(Vector2.One * zoomBase);
-                    shader.Parameters["accretionDiskRadius"].SetValue(Math.Min(p.scale, 1f) * 0.44f);
-                    shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
-
-                    Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/FireNoiseB").Value;
-                    Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
-                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/InvisiblePixel").Value;
-
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
-                        pixel.Size() * 0.5f, canvasPx, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-
-                    // === 3. REFUERZO DEL EVENT HORIZON (negro absoluto) ===
-                    float eventHorizonPx = 0.3f * zoomBase * canvasPx * 0.5f;
-                    if (eventHorizonPx > 2f)
-                    {
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        float horizonScale = (eventHorizonPx * 2.15f) / glowTex.Width;
-                        Main.spriteBatch.Draw(glowTex, drawPos, null,
-                            new Color(0, 0, 0, 215), 0f, glowTex.Size() * 0.5f,
-                            horizonScale, SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-
-                        // === 4. ANILLO DE FOTONES ROSA-INCANDESCENTE ===
-                        // Fino, CALIENTE (blanco-rosa #FFBB90 con halo #FF8A93):
-                        // el punto más brillante del agujero, justo fuera del borde.
-                        Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        float ringPulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4.5f);
-                        float photonR = eventHorizonPx * 1.12f;
-                        float photonScale = photonR / (ringTex.Width * 0.5f);
-                        // halo ancho rosa
-                        Main.spriteBatch.Draw(ringTex, drawPos, null,
-                            new Color(255, 105, 140, 110) * ringPulse, 0f, ringTex.Size() * 0.5f,
-                            photonScale * 1.06f, SpriteEffects.None, 0f);
-                        // núcleo fino blanco-rosa
-                        Main.spriteBatch.Draw(ringTex, drawPos, null,
-                            new Color(255, 200, 190, 235) * ringPulse, 0f, ringTex.Size() * 0.5f,
-                            photonScale * 0.98f, SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-
-                        // === 5. LA CORONA DE LA REINA — 5 ARCOS DE NEÓN ===
-                        DrawCoronaCrown(drawPos, eventHorizonPx);
-                    }
-                }
-                else
-                {
-                    // === FALLBACK sin shader ===
-                    DrawFallback(p, drawPos);
-                }
-            }
-            catch
-            {
-                // Cierre defensivo SOLO en el path de error.
-                try { Main.spriteBatch.End(); } catch { }
-            }
-        }
-
-        /// <summary>
-        /// LA CORONA: lazos de neón carmesí→magenta arqueados sobre el anillo
-        /// de fotones, con ASIMETRÍA por lazo (líneas de campo curvadas, no un
-        /// arcoíris), un ECO interior más tenue por lazo (filamentos
-        /// encajados) y NUDOS NARANJA con destello de 4 puntas en los ápices.
-        /// Respiran con el tiempo y se dibujan aditivamente.
-        /// </summary>
-        private static void DrawCoronaCrown(Vector2 drawPos, float horizonPx)
-        {
-            if (horizonPx < 3f) return;
-
-            Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            float time = Main.GlobalTimeWrappedHourly;
-
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            const int Loops = 5;
-            const int Segments = 18;
-
-            for (int l = 0; l < Loops; l++)
-            {
-                float t01 = l / (float)(Loops - 1);            // 0 exterior → 1 interior
-                float breathe = 1f + 0.06f * (float)Math.Sin(time * 2.2f + l * 1.7f);
-                // v6.02 — ASIMETRÍA por lazo (semianchos izquierdo/derecho
-                // distintos y balanceo determinista por índice): las líneas de
-                // campo se curvan, no forman un arcoíris simétrico.
-                float sway = 0.18f * (float)Math.Sin(time * 0.9f + l * 2.6f);
-                float halfWL = horizonPx * (1.55f - 0.30f * t01) * (1f - sway) * breathe;
-                float halfWR = horizonPx * (1.55f - 0.30f * t01) * (1f + sway) * breathe;
-                float apexH = horizonPx * (2.30f - 0.95f * t01) * breathe;
-                float baseY = drawPos.Y - horizonPx * 1.06f;
-
-                // El lazo completo: media elipse superior ASIMÉTRICA por puntos
-                // de glow con grosor variable (fino en las bases, corpulento al
-                // subir, afilado en el ápice — materia incandescente).
-                for (int s = 0; s <= Segments; s++)
-                {
-                    float ang = s / (float)Segments * MathHelper.Pi;   // 0..π
-                    float edge = (float)Math.Sin(ang);                 // 0 bases, 1 ápice
-                    float side = (float)Math.Cos(ang);                 // -1 izq → +1 der
-                    float halfW = side < 0f ? halfWL : halfWR;
-                    Vector2 pos = new Vector2(
-                        drawPos.X - (float)Math.Cos(ang) * halfW,
-                        baseY - edge * apexH);
-
-                    Color col = Color.Lerp(new Color(255, 23, 56), new Color(254, 25, 242), edge);
-                    // Grosor: crece hacia arriba, afila en el ápice (chispa final).
-                    float thickness = 0.16f + 0.13f * edge * (1f - 0.35f * edge);
-                    float intensity = 0.30f + 0.70f * edge;
-                    float pointPx = horizonPx * thickness;
-                    float scale = pointPx / glowTex.Width * 2f;
-
-                    Main.spriteBatch.Draw(glowTex, pos, null,
-                        col * intensity, 0f, glowTex.Size() * 0.5f,
-                        scale, SpriteEffects.None, 0f);
-                }
-
-                // ECO interior: un filamento más tenue y fino encajado dentro
-                // del lazo (los "sigilos de fuego" — filamentos encajados).
-                for (int s = 1; s < Segments; s++)
-                {
-                    float ang = s / (float)Segments * MathHelper.Pi;
-                    float edge = (float)Math.Sin(ang);
-                    float side = (float)Math.Cos(ang);
-                    float halfW = (side < 0f ? halfWL : halfWR) * 0.66f;
-                    Vector2 pos = new Vector2(
-                        drawPos.X - (float)Math.Cos(ang) * halfW,
-                        baseY - edge * apexH * 0.72f);
-                    Color col = Color.Lerp(new Color(255, 40, 80), new Color(255, 60, 190), edge);
-                    float scale = (horizonPx * 0.09f) / glowTex.Width * 2f;
-                    Main.spriteBatch.Draw(glowTex, pos, null,
-                        col * 0.55f, 0f, glowTex.Size() * 0.5f,
-                        scale, SpriteEffects.None, 0f);
-                }
-
-                // NUDO NARANJA en el ápice: englobado + DESTELLO DE 4 PUNTAS
-                // (dos glows estirados en cruz) + chispa blanca central.
-                float knotPulse = 0.85f + 0.30f * (float)Math.Sin(time * 3.1f + l * 2.3f);
-                Vector2 apex = new Vector2(drawPos.X, baseY - apexH);
-                Main.spriteBatch.Draw(glowTex, apex, null,
-                    new Color(255, 138, 60) * knotPulse, 0f, glowTex.Size() * 0.5f,
-                    (horizonPx * 0.34f) / glowTex.Width * 2f, SpriteEffects.None, 0f);
-                // destello de 4 puntas: dos elipses estiradas en cruz
-                float flareLen = horizonPx * 0.85f * knotPulse;
-                Main.spriteBatch.Draw(glowTex, apex, null,
-                    new Color(255, 170, 90) * knotPulse * 0.85f, 0f, glowTex.Size() * 0.5f,
-                    new Vector2(flareLen / glowTex.Width, (horizonPx * 0.10f) / glowTex.Width),
-                    SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(glowTex, apex, null,
-                    new Color(255, 170, 90) * knotPulse * 0.85f, 0f, glowTex.Size() * 0.5f,
-                    new Vector2((horizonPx * 0.10f) / glowTex.Width, flareLen / glowTex.Width),
-                    SpriteEffects.None, 0f);
-                // chispa blanca central
-                Main.spriteBatch.Draw(glowTex, apex, null,
-                    new Color(255, 240, 230) * knotPulse * 0.9f, 0f, glowTex.Size() * 0.5f,
-                    (horizonPx * 0.14f) / glowTex.Width * 2f, SpriteEffects.None, 0f);
-            }
-
-            Main.spriteBatch.End();
+            StylizedVoidRenderer.Draw(p, endActiveBatch);
         }
 
         /// <summary>Radio del campo (px), compartido con el aura y el OnKill.</summary>
@@ -700,65 +458,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);
-        }
-
-        /// <summary>Dibujado manual de respaldo (paleta carmesí).</summary>
-        private static void DrawFallback(Projectile p, Vector2 drawPos)
-        {
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-            Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            Texture2D vortexTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Vortex").Value;
-            Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-            float s = p.scale;
-
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            // Disco de acreción frontal (magenta)
-            Main.spriteBatch.Draw(vortexTex, drawPos, null,
-                new Color(255, 60, 140, 200), p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            // Disco trasero (anillo de Einstein)
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0f, 4f * s), null,
-                new Color(160, 0, 60, 100), -p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.FlipVertically, 0f);
-
-            // Beaming relativístico
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f * s, 0f), null,
-                new Color(255, 190, 220, 130), p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.End();
-
-            // Event horizon
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                Color.Black, 0f, glowTex.Size() * 0.5f,
-                0.8f * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-
-            // Anillo de fotones rosa
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            float horizonPx = 0.3f * p.width * Math.Max(p.scale, 0.08f);
-            float photonR = horizonPx * 1.3f * pulse / 0.92f;
-            float photonScale = photonR / (ringTex.Width * 0.5f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 60, 130, 200), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 200, 190, 220), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-
-            // Corona de arcos también en el fallback
-            if (horizonPx > 3f)
-                DrawCoronaCrown(drawPos, horizonPx);
         }
 
         // ------------------------------------------------------------------
