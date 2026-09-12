@@ -9,61 +9,49 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Projectiles.V20
 {
     /// <summary>
-    /// PhoenixNovaProjectile — nova/explosión centrada en el jugador (llamarada
-    /// solar cuando la invoca el SunProjectile).
+    /// PhoenixNovaProjectile — nova/llamarada solar centrada (llamarada cuando
+    /// la invoca el SunProjectile; explosión estática con PhoenixNovaStaff).
     ///
-    /// v5.91 — DETRÁS DEL SOL (DrawBehind): el Sol invoca esta nova cada 2 s como
-    /// LLAMARADA SOLAR. En DrawProjectiles tML dibuja los proyectiles en orden
-    /// ASCENDENTE de índice, así que la llamarada (invocada DESPUÉS del sol, índice
-    /// mayor) quedaba pintada ENCIMA del cuerpo de la estrella. Ahora el hook
-    /// DrawBehind la registra en drawCacheProjsBehindProjectiles: tML dibuja esa
-    /// cache ANTES de DrawProjectiles() → la llamarada queda DETRÁS del sol (y
-    /// por delante de los NPC): el disco de la estrella tapa el NÚCLEO de los
-    /// anillos y estos se abren alrededor de la silueta — una llamarada real
-    /// ERUPCIONANDO POR DETRÁS de la estrella (petición del usuario). El destello
-    /// blanco queda como un backlight dramático alrededor del disco.
+    /// v5.95 — DETRÁS DEL SOL, DE VERDAD (petición del usuario: "sus efectos
+    /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él… un extraño
+    /// parpadeo que supongo es PhoenixNovaStaff el cual no está detrás del
+    /// sol"). La v5.91 registraba la llamarada en drawCacheProjsBehindProjectiles
+    /// vía DrawBehind, PERO nunca ponía hide=true — y decompilando tML
+    /// (Main.DrawProjectiles) se comprobó que el bucle principal SOLO excluye a
+    /// los proyectiles con hide: la llamarada se dibujaba DOS VECES por frame,
+    /// una de ellas ENCIMA del sol con brillo aditivo duplicado → el "extraño
+    /// parpadeo". Ahora: (1) la llamarada invocada por el sol (ai[2]=1) va con
+    /// hide=true — ni tML ni ningún mod (Luminance incluida) la dibuja — y
+    /// (2) EL SOL la dibuja él mismo ANTES de sus propias capas
+    /// (SunProjectile.DrawStarVisuals → DrawFlareSprites): detrás del disco
+    /// SIEMPRE, en cualquier entorno. El disco del SunShader (alpha≈1) la
+    /// oculta en el centro y su brillo asoma por el limbo: una llamarada real
+    /// ERUPCIONANDO POR DETRÁS de la estrella.
     ///
-    /// v5.91 — FIX CRÍTICO DEL SPRITEBATCH (bug presente desde v5.88): este
-    /// PreDraw abría/cerraba el batch SIN Main.GameViewMatrix.TransformationMatrix
-    /// (y sin sampler/rasterizer) — sus anillos se dibujaban sin el transform del
-    /// mundo (mal posicionados con zoom ≠ 1) y el Begin(Deferred) final dejaba el
-    /// batch SIN TRANSFORMAR para TODOS los proyectiles vanilla posteriores del
-    /// frame: dibujados en coordenadas de mundo sin la vista → "círculos que
-    /// subían" flotando por la pantalla (el reporte del usuario en v5.89). Ahora
-    /// todos los Begin llevan el transform del mundo y el estado exacto que tML
-    /// espera (Deferred, AlphaBlend, DefaultSamplerState, CullCounterClockwise).
+    /// v5.95 — TAMAÑO IGUAL AL DEL SOL (petición: "aumentar el tamaño de
+    /// PhoenixNovaStaff y que iguale el tamaño del sol"): los sprites se
+    /// dimensionan con starR, el RADIO VISUAL REAL de la estrella que la
+    /// invocó (crece con la gigante roja): el núcleo caliente mide lo mismo
+    /// que el disco solar y el halo lo envuelve como backlight. El FLASH del
+    /// pico pasó de "pantalla blanca completa" (el parpadeo) a un RIM de luz
+    /// suave alrededor del limbo (alpha ≤ 120 tras el sol).
     ///
     /// Visuales (60 frames total):
-    ///   - Se dibuja múltiple Ring.png a escalas crecientes con colores
-    ///     naranja-rojo (de naranja brillante a rojo profundo).
-    ///   - En frame 30: flash blanco con GlowCircleWhite.
+    ///   - Halo SoftGlow aditivo pulsante SUAVE (0.93±0.07 — el pulso fuerte
+    ///     de la v5.91 contribuía al parpadeo) que se extiende con la edad.
+    ///   - Núcleo caliente del tamaño de la estrella (oculto tras el disco).
+    ///   - Frames 25-35: rim de luz (backlight del pico de la llamarada).
     ///   - Spawn continuo de DustID.Torch en todas las direcciones.
     ///
     /// Físicas:
-    ///   - Velocidad cero (estático).
-    ///   - penetrate = -1 (atraviesa todo en el área).
-    ///   - timeLeft = 60 (1 segundo).
-    ///   - tileCollide = false.
-    ///   - Aplica OnFire a los NPCs golpeados.
+    ///   - Velocidad cero (estático). penetrate = -1. timeLeft = 60 (1 s).
+    ///   - tileCollide = false. Aplica OnFire a los NPCs golpeados.
     /// </summary>
     public class PhoenixNovaProjectile : ModProjectile
     {
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
-        }
-
-        /// <summary>
-        /// v5.91 — LA LLAMARADA VA DETRÁS DEL SOL: registrarse en la cache
-        /// drawCacheProjsBehindProjectiles hace que tML dibuje este proyectil
-        /// ANTES del pase principal de proyectiles (verificado decompilando
-        /// Main.DrawCachedProjs: se llama justo antes de DrawProjectiles) →
-        /// queda detrás del cuerpo del sol y de cualquier proyectil posterior.
-        /// </summary>
-        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,
-            List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-        {
-            behindProjectiles.Add(index);
         }
 
         public override void SetDefaults()
@@ -90,6 +78,12 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
+                // v5.95 — HIJA DEL SOL: OCULTA. Nadie la dibuja salvo el propio
+                // sol (la pinta DETRÁS de su disco en DrawStarVisuals). hide
+                // solo afecta al RENDER: la llamarada sigue dañando igual.
+                if (Projectile.ai[2] == 1f)
+                    Projectile.hide = true;
+
                 float age = Projectile.ai[0];
                 Projectile.ai[0] += 1f;
 
@@ -142,79 +136,118 @@ namespace AethonMod.Content.Projectiles.V20
             catch { }
         }
 
+        // ================================================================
+        //  RENDER
+        // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
             try
             {
-                // v5.94 — EL ANILLO SE ELIMINÓ: los anillos son parte de la ONDA
-                // EXPANSIVA final (petición del usuario: "solo deben salir al
-                // final"). Además dibujaba Ring.png (1024px desde v5.93) con
-                // escalas fijas de hasta 4.6× → anillos de 4710px en cada
-                // llamarada. La llamarada queda como EXPLOSIÓN de brillo:
-                // halo pulsante + núcleo + flash blanco al pico.
-                Texture2D glowCircleWhite = ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowCircleWhite").Value;
-                Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-
-                if (glowCircleWhite == null || softGlow == null)
+                // v5.95 — HIJA DEL SOL: el SOL la dibuja detrás de su disco
+                // (DrawStarVisuals); con hide=true tML jamás la pinta. Este
+                // PreDraw ni siquiera corre para ella (los proyectiles ocultos
+                // sin DrawBehind no pasan por el bucle de dibujado).
+                if (Projectile.ai[2] == 1f)
                     return false;
 
+                // === STANDALONE (PhoenixNovaStaff): se dibuja a sí misma ===
+                // Tamaño equivalente a una estrella tipo sol (petición del
+                // usuario: "que iguale el tamaño del sol" — aquí no hay sol que
+                // la oculte, así que conserva su destello de pico completo).
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
-                float age = Projectile.ai[0];
-                float progress = age / 60f; // 0..1
 
-                // v5.91 — Begin CON el transform del mundo (Main.GameViewMatrix):
-                // antes iba SIN matrix → el dibujado quedaba en coords de
-                // pantalla puras (mal con zoom ≠ 1) y el restore final dejaba el
-                // batch corrupto para los proyectiles vanilla posteriores.
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // === Halo central SoftGlow naranja (pulsa y CRECE con la edad) ===
-                float pulse = 0.9f + (float)Math.Sin(age * 0.3f) * 0.15f;
-                float expand = 1f + progress * 1.2f; // la llamarada se extiende
-                Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
-                Main.spriteBatch.Draw(softGlow, drawPos, null,
-                    new Color(255, 160, 60, 200),
-                    0f, glowOrigin, 1.5f * pulse * expand, SpriteEffects.None, 0f);
-                // Núcleo blanco-amarillo central
-                Main.spriteBatch.Draw(softGlow, drawPos, null,
-                    new Color(255, 240, 180, 230),
-                    0f, glowOrigin, 0.8f * pulse * (1f + progress * 0.5f), SpriteEffects.None, 0f);
-
-                // === FLASH BLANCO en frame 30 (±5 frames) ===
-                if (age >= 25f && age <= 35f)
-                {
-                    // Intensidad máxima en frame 30, decrece simétricamente
-                    float flashStrength = 1f - Math.Abs(age - 30f) / 5f;
-                    flashStrength = MathHelper.Clamp(flashStrength, 0f, 1f);
-                    Vector2 whiteOrigin = new Vector2(glowCircleWhite.Width / 2f, glowCircleWhite.Height / 2f);
-                    // GlowCircleWhite pulsante
-                    float flashScale = 2.5f * flashStrength + 0.5f;
-                    Main.spriteBatch.Draw(glowCircleWhite, drawPos, null,
-                        new Color(255, 255, 255, (byte)(flashStrength * 255f)),
-                        0f, whiteOrigin, flashScale, SpriteEffects.None, 0f);
-                }
+                DrawFlareSprites(Projectile, drawPos, 56f, 0f, true);
 
                 Main.spriteBatch.End();
-                // v5.91 — Restauración EXACTA del estado que tML espera tras
-                // PreDraw (igual que el resto de proyectiles del mod): Deferred,
-                // AlphaBlend, DefaultSamplerState, CullCounterClockwise y el
-                // TRANSFORM DEL MUNDO. El Begin(Deferred, AlphaBlend) pelado de
-                // v5.88 corrompía el dibujado de todo proyectil posterior.
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                    null, Main.GameViewMatrix.TransformationMatrix);
             }
             catch
             {
-                // v5.90/v5.91 — cierre defensivo solo si una excepción cortó el Begin
-                // (path de error exclusivamente: el path normal deja el batch
-                // balanceado — sin excepciones first-chance por frame).
+                // Cierre defensivo solo si una excepción cortó un Begin a
+                // medias (el path normal deja las capas balanceadas).
                 try { Main.spriteBatch.End(); } catch { }
             }
+
+            // v5.95 — Restauración EXACTA del estado que tML espera tras
+            // PreDraw (FUERA del catch: el batch siempre vuelve a quedar
+            // ABIERTO, incluso en el path de error).
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.GameViewMatrix.TransformationMatrix);
             return false;
+        }
+
+        // ================================================================
+        //  SPRITES DE LA LLAMARADA (v5.95)
+        // ================================================================
+
+        /// <summary>
+        /// v5.95 — Sprites de la llamarada: los dibuja EL SOL detrás de su
+        /// propio disco (DrawStarVisuals, capa 0) o el propio proyectil cuando
+        /// va suelto con PhoenixNovaStaff (PreDraw standalone). Requiere un
+        /// batch ADITIVO ya abierto — lo gestiona el llamador.
+        ///
+        /// El TAMAÑO IGUALA AL DEL SOL (petición del usuario): starR es el
+        /// radio visual REAL de la estrella invocadora — el núcleo caliente
+        /// mide lo mismo que el disco (queda oculto tras él y asoma por el
+        /// limbo) y el halo lo envuelve como backlight. redGiant tiñe la
+        /// llamarada de ROJO cuando la estrella se hincha (paleta unificada).
+        /// </summary>
+        internal static void DrawFlareSprites(Projectile p, Vector2 drawPos, float starR,
+            float redGiant, bool standalone)
+        {
+            Texture2D softGlow = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            Texture2D glowCircleWhite = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/GlowCircleWhite").Value;
+            if (softGlow == null || glowCircleWhite == null) return;
+
+            float age = p.ai[0];
+            float progress = MathHelper.Clamp(age / 60f, 0f, 1f);
+
+            // Pulso SUAVE (v5.95: el pulso fuerte + el flash de pantalla de la
+            // v5.91 eran el "extraño parpadeo" que el usuario veía SOBRE el sol).
+            float pulse = 0.93f + 0.07f * (float)Math.Sin(age * 0.25f);
+            float expand = 1f + progress * 0.9f; // la llamarada se extiende
+
+            // Paleta cálida: naranja solar → ROJO de la gigante.
+            Color halo = Color.Lerp(new Color(255, 150, 55, 195), new Color(255, 65, 25, 195), redGiant);
+            Color core = Color.Lerp(new Color(255, 235, 170, 225), new Color(255, 135, 90, 225), redGiant);
+
+            Vector2 glowOrigin = softGlow.Size() * 0.5f;
+
+            // === HALO (backlight): envuelve a la estrella (≈2.6× su radio) ===
+            float haloScale = starR * 2.6f * expand / (softGlow.Width * 0.5f);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin,
+                haloScale * pulse, SpriteEffects.None, 0f);
+
+            // === NÚCLEO CALIENTE: IGUALA el tamaño del sol (oculto tras el
+            // disco; asoma por el limbo como corona en erupción) ===
+            float coreScale = starR * 1.05f * (1f + progress * 0.35f) / (softGlow.Width * 0.5f);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin,
+                coreScale * pulse, SpriteEffects.None, 0f);
+
+            // === DESTELLO DEL PICO (frames 25-35) ===
+            // v5.95: ya NO es la "pantalla blanca" de la v5.91 (parpadeo):
+            // detrás del sol se lee como un RIM de luz que ABRAZA el limbo de
+            // la estrella (alpha 120); standalone (sin sol que la oculte)
+            // conserva el destello pleno (alpha 235).
+            if (age >= 25f && age <= 35f)
+            {
+                float flashStrength = 1f - Math.Abs(age - 30f) / 5f;
+                flashStrength = MathHelper.Clamp(flashStrength, 0f, 1f);
+                Vector2 whiteOrigin = glowCircleWhite.Size() * 0.5f;
+                float rimScale = starR * 1.45f * (1f + 0.08f * flashStrength) /
+                                 (glowCircleWhite.Width * 0.5f);
+                byte flashAlpha = (byte)(flashStrength * (standalone ? 235f : 120f));
+                Main.spriteBatch.Draw(glowCircleWhite, drawPos, null,
+                    new Color(255, 240, 210, flashAlpha),
+                    0f, whiteOrigin, rimScale, SpriteEffects.None, 0f);
+            }
         }
     }
 }

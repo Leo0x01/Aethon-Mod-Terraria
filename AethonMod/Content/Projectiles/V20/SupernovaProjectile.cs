@@ -13,6 +13,20 @@ namespace AethonMod.Content.Projectiles.V20
     /// SupernovaProjectile — estrella que colapsa durante 3 segundos y luego
     /// estalla en una supernova masiva (v5.85, reescrito).
     ///
+    /// v5.95 — LA CARGA VA DETRÁS DEL SOL (petición del usuario: "sus efectos
+    /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él"): la hija
+    /// del sol (ai[2]=1) va con hide=true (nadie más la dibuja — decompilado
+    /// tML: el bucle principal solo excluye a `hide`, así que antes la nova,
+    /// con índice MAYOR que el sol, se pintaba ENCIMA de la estrella) y el
+    /// SOL dibuja su halo de carga él mismo, antes de sus propias capas
+    /// (SunProjectile.DrawStarVisuals → DrawChargeSprites), escalando con el
+    /// tamaño real de la estrella (crece con la gigante roja). Lanzada sola
+    /// (SupernovaStaff, ai[2]=0) se dibuja a sí misma normalmente.
+    ///
+    /// v5.95 — ONDAS STANDALONE REDIMENSIONADAS: 360/450/540 → 240/300/360 y
+    /// AoE 340 → 260 (mismo criterio que la v5.94 aplicó al sol — la nova
+    /// suelta quedó pendiente de aquel redimensionado).
+    ///
     /// v5.91 — LA EXPLOSIÓN FINAL DEL SOL (SupernovaStaff): el SunProjectile
     /// la invoca en su segundo 7 con el flag ai[2]=1 (SunInvoked) y la mata
     /// EN SU MISMO TICK de muerte → sincronización POR CONSTRUCCIÓN. Cuando
@@ -94,6 +108,12 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
+                // v5.95 — HIJA DEL SOL: OCULTA — su carga la dibuja el SOL
+                // detrás de su propio disco (hide solo afecta al render; el
+                // gameplay de la nova no cambia).
+                if (SunInvoked)
+                    Projectile.hide = true;
+
                 Age += 1f;
                 Projectile.velocity *= 0.92f;
 
@@ -188,8 +208,10 @@ namespace AethonMod.Content.Projectiles.V20
                 // amarillo y llamas a lo largo del frente. CADA UNA barre daño
                 // de área cada 0.1 s a medida que avanza y aplica QUEMADURA
                 // (OnFire, 10 s — v5.91: era 5 s).
+                // v5.95 — redimensionadas (criterio v5.94 del sol: 360/450/540
+                // → 240/300/360, a escala justa).
                 int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
-                float[] radii = { 360f, 450f, 540f };
+                float[] radii = { 240f, 300f, 360f };
                 for (int i = 0; i < 3; i++)
                 {
                     Projectile.NewProjectile(
@@ -204,11 +226,12 @@ namespace AethonMod.Content.Projectiles.V20
 
                 // Daño AoE del núcleo de la nova: solo en la autoridad
                 // (standalone — la hija del sol deja este golpe al OnKill del sol).
+                // v5.95: 340 → 260 (mismo criterio v5.94 del sol).
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
-                    if (dist < 340f)
+                    if (dist < 260f)
                     {
                         npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
                             false, Projectile.knockBack, DamageClass.Magic);
@@ -335,55 +358,24 @@ namespace AethonMod.Content.Projectiles.V20
         // ================================================================
         public override bool PreDraw(ref Color lightColor)
         {
+            // v5.95 — HIJA DEL SOL: la carga la dibuja EL SOL, detrás de su
+            // propio disco (DrawStarVisuals → DrawChargeSprites). Con
+            // hide=true tML jamás la pinta (decompilado: el bucle principal
+            // solo excluye a `hide` — antes la nova, de índice MAYOR que el
+            // sol, caía ENCIMA de la estrella).
+            if (SunInvoked)
+                return false;
+
             try
             {
-                Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (softGlow == null) return false;
-
-                float charge = MathHelper.Clamp(Age / ChargeDuration, 0f, 1f);
-                float chargeEased = charge * charge;
-
-                // Temblor de anticipación en el último tramo de la carga.
-                Vector2 jitter = Vector2.Zero;
-                if (charge > 0.6f)
-                {
-                    float shake = (charge - 0.6f) / 0.4f;
-                    jitter = new Vector2(
-                        Main.rand.NextFloat(-1f, 1f) * shake * 2.2f,
-                        Main.rand.NextFloat(-1f, 1f) * shake * 2.2f);
-                }
-
-                Vector2 drawPos = Projectile.Center - Main.screenPosition + jitter;
-                Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
-                // v5.94 — los ANILLOS DE CONTENCIÓN se eliminaron: los anillos
-                // son parte de la ONDA EXPANSIVA final ("solo deben salir al
-                // final", petición del usuario) y además la escala fija sobre
-                // la textura HD dibujaba anillos de hasta 2458px. La carga se
-                // expresa con el halo dorado condensándose + temblor creciente.
+                Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // === Halo contraído: de dorado (2.0) a BLANCO DORADO compacto (0.6) ===
-                // v5.91 — partículas del color del sol: el halo ya NO se
-                // desplaza al blanco-AZUL (255,255,245 de la v5.88) — se
-                // condensa en BLANCO DORADO (255, 235, 115), la paleta cálida
-                // de la corona del SunShader.
-                float scale = 2.0f - chargeEased * 1.4f;
-                int r = 255;
-                int g = (int)(200 + 35 * chargeEased);  // 200 → 235 (dorado → dorado claro)
-                int b = (int)(90 + 25 * chargeEased);   // 90 → 115 (sin azul)
-                Color halo = new Color(r, g, b, 220);
-                // Pulso creciente cerca del estallido.
-                float pulse = 1f + (float)Math.Sin(Age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
-                Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin, scale * pulse, SpriteEffects.None, 0f);
-
-                // Núcleo BLANCO-DORADO que crece en proporción (la masa se condensa).
-                float coreScale = 0.4f + chargeEased * 0.28f;
-                Color core = new Color(255, 250, 215, 240);
-                Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin, coreScale * pulse, SpriteEffects.None, 0f);
+                DrawChargeSprites(Projectile, drawPos, 1f);
 
                 Main.spriteBatch.End();
             }
@@ -399,6 +391,62 @@ namespace AethonMod.Content.Projectiles.V20
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);
             return false;
+        }
+
+        // ================================================================
+        //  SPRITES DE LA CARGA (v5.95)
+        // ================================================================
+
+        /// <summary>
+        /// v5.95 — Sprites de la CARGA de la supernova: los dibuja EL SOL
+        /// detrás de su propio disco (DrawStarVisuals, capa 0 — escalando con
+        /// el tamaño real de la estrella) o el propio proyectil cuando va
+        /// suelta con SupernovaStaff (PreDraw standalone, sizeMult=1).
+        /// Requiere un batch ADITIVO ya abierto — lo gestiona el llamador.
+        /// Halo dorado condensándose (2.0 → 0.6) + núcleo blanco-dorado que
+        /// crece con la masa + temblor de anticipación en el tramo final.
+        /// </summary>
+        internal static void DrawChargeSprites(Projectile p, Vector2 drawPos, float sizeMult)
+        {
+            Texture2D softGlow = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            if (softGlow == null) return;
+
+            float age = p.ai[0];
+            float charge = MathHelper.Clamp(age / ChargeDuration, 0f, 1f);
+            float chargeEased = charge * charge;
+
+            // Temblor de anticipación en el último tramo de la carga.
+            if (charge > 0.6f)
+            {
+                float shake = (charge - 0.6f) / 0.4f;
+                drawPos += new Vector2(
+                    Main.rand.NextFloat(-1f, 1f) * shake * 2.2f,
+                    Main.rand.NextFloat(-1f, 1f) * shake * 2.2f);
+            }
+
+            Vector2 glowOrigin = softGlow.Size() * 0.5f;
+
+            // === Halo contraído: de dorado (2.0) a BLANCO DORADO compacto (0.6) ===
+            // v5.91 — partículas del color del sol: el halo ya NO se
+            // desplaza al blanco-AZUL (255,255,245 de la v5.88) — se
+            // condensa en BLANCO DORADO (255, 235, 115), la paleta cálida
+            // de la corona del SunShader.
+            float scale = 2.0f - chargeEased * 1.4f;
+            int r = 255;
+            int g = (int)(200 + 35 * chargeEased);  // 200 → 235 (dorado → dorado claro)
+            int b = (int)(90 + 25 * chargeEased);   // 90 → 115 (sin azul)
+            Color halo = new Color(r, g, b, 220);
+            // Pulso creciente cerca del estallido.
+            float pulse = 1f + (float)Math.Sin(age * (0.25f + chargeEased * 0.5f)) * 0.06f * (1f + chargeEased * 2f);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, halo, 0f, glowOrigin,
+                scale * pulse * sizeMult, SpriteEffects.None, 0f);
+
+            // Núcleo BLANCO-DORADO que crece en proporción (la masa se condensa).
+            float coreScale = 0.4f + chargeEased * 0.28f;
+            Color core = new Color(255, 250, 215, 240);
+            Main.spriteBatch.Draw(softGlow, drawPos, null, core, 0f, glowOrigin,
+                coreScale * pulse * sizeMult, SpriteEffects.None, 0f);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)

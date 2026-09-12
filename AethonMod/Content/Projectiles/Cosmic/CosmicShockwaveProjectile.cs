@@ -11,13 +11,35 @@ using AethonMod.Content.Effects;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.95 — LLEGA EL ESTILO 3 (ONDA DE LENTE): onda expansiva creada CON
+    /// LENTE gravitacional y una LIGERA distorsión cromática RGB (petición del
+    /// usuario: "en ambas explosiones del sol y agujero negro también debe
+    /// haber una onda expansiva creada con lente gravitacional que tenga una
+    /// ligera distorsión cromática en rgb"). La lanza el sol al explotar (y la
+    /// cromática del agujero ya cumplía ese papel: lente + franjas R/G/B).
+    ///
+    /// v5.95 — FIX CRÍTICO DEL ERROR DEL AGUJERO NEGRO (IndexOutOfRange en el
+    /// client.log): v5.94 guardaba el radio de la burbuja de destrucción en
+    /// `Projectile.ai[3]`, pero el array `ai` de tModLoader SOLO TIENE 3
+    /// RANURAS (índices 0-2) → IndexOutOfRangeException en BlackHoleProjectile.
+    /// OnKill (escritura) y en DrawWaveVisual (lectura) — la burbuja del campo
+    /// de fuerza JAMÁS llegó a dibujarse y el OnKill abortó antes de los
+    /// sonidos/dusts/temblor. Ahora el radio viaja en `localAI[0]` (visual de
+    /// cliente: lo fija el OnKill del agujero en la misma máquina) con fallback
+    /// DETERMINISTA derivado del radio máximo sincronizado (ai[2]×0.22).
+    ///
+    /// v5.95 — EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA: la burbuja Perlin/
+    /// ForceField VANILLA ya no es un escudo estático en vida — ES el cuerpo de
+    /// la onda: parte del radio del escudo al morir y CABALGA el frente de la
+    /// onda expandiéndose con él mientras se desvanece (petición del usuario:
+    /// "el campo de fuerza debe ser usado como onda expansiva").
+    ///
     /// v5.94 — LA ONDA CROMÁTICA ES EL ESCUDO DESTRUIDO: además de las
     /// franjas R/G/B de aberración, la onda dibuja la BURBUJA de ruido Perlin
     /// con el shader ForceField VANILLA de Terraria (el mismo de las Columnas
-    /// Lunares) expandiéndose (2×) y desvaneciéndose con los parámetros
-    /// EXACTOS de la animación de destrucción del escudo del juego
-    /// (ai[3] = radio inicial de la burbuja, lo pasa el agujero negro).
-    /// Radios: ondas de fuego del sol 240/300/360, cromática 420.
+    /// Lunares) con los parámetros EXACTOS de la animación de destrucción del
+    /// escudo del juego.
+    /// Radios: ondas de fuego del sol 240/300/360, cromática 420, lente 400.
     ///
     /// CosmicShockwaveProjectile — onda expansiva con daño real por frente de onda.
     ///
@@ -87,6 +109,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>Estilo: onda de fuego (con quemadura).</summary>
         public const float StyleFire = 2f;
+
+        /// <summary>
+        /// v5.95 — Estilo: ONDA DE LENTE gravitacional (explosión del sol).
+        /// Franjas R/G/B LIGERAS (separación ×0.65 de la cromática) + anillo
+        /// blanco tenue en el frente; se registra como fuente del
+        /// BlackHoleLensSystem → el FONDO del juego se curva a su paso. Sin
+        /// burbuja de ForceField (esa es la onda del agujero negro).
+        /// </summary>
+        public const float StyleLens = 3f;
 
         /// <summary>
         /// v5.91 — Intervalo de daño por tick: 6 ticks = 0.1 segundos EXACTOS
@@ -191,6 +222,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Style == StyleFire)
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(1f, 0.55f, 0.2f) * 1.8f * alpha);
+                else if (Style == StyleLens)
+                    // v5.95 — onda de lente del sol: luz cálida blanquecina.
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(1f, 0.9f, 0.7f) * 1.1f * alpha);
                 else
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(0.6f, 0.5f, 1f) * 0.9f * alpha);
@@ -363,10 +398,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // Retardo escalonado (ondas en secuencia): invisible e inofensiva.
             if (Age < 0f) return false;
 
-            // Las ondas cromáticas las pinta el sistema de lente ENCIMA de la
-            // distorsión (para que la lente no las deforme a ellas). Si la
-            // lente no está activa, caemos al dibujado normal del mundo.
-            if ((Style == StyleChromatic || Style == StyleChromaticInverse) &&
+            // Las ondas cromáticas y de lente las pinta el sistema de lente
+            // ENCIMA de la distorsión (para que la lente no las deforme a
+            // ellas). Si la lente no está activa, caemos al dibujado normal
+            // del mundo.
+            if ((Style == StyleChromatic || Style == StyleChromaticInverse || Style == StyleLens) &&
                 BlackHoleLensSystem.LensActive)
                 return false;
 
@@ -482,19 +518,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else
                 {
-                    // === ONDA CROMÁTICA — aberración R/G/B + DESTRUCCIÓN DEL CAMPO ===
-                    // v5.94 — LA onda ES el escudo del agujero destruyéndose:
-                    // la secuencia EXACTA de Terraria cuando cae el escudo de
-                    // una Columna Lunar (investigado en el código real del
-                    // juego, Main.DrawNPCDirect_Inner case 507): la burbuja de
-                    // ruido Perlin se dibuja con el shader ForceField VANILLA,
-                    // se EXPANDE (hasta 2×) y DESAPARECE — acompañada por las
-                    // tres franjas R/G/B de aberración cromática (la petición
-                    // original del usuario: "cuando es destruida esta se
-                    // expande y desaparece"). La separación crece con la edad
-                    // (dispersión real) y se INVIERTE en la convergente legada.
+                    // === ONDA CROMÁTICA / ONDA DE LENTE — aberración R/G/B ===
+                    // v5.94 — LA onda cromática ES el escudo del agujero
+                    // destruyéndose (ver la burbuja de abajo). v5.95 — la onda
+                    // de LENTE (estilo 3) lleva la separación LIGERA (×0.65,
+                    // petición del usuario: "ligera distorsión cromática en
+                    // rgb") más un anillo blanco tenue marcando el frente.
+                    bool isLensWave = style == StyleLens;
                     float fringe = front * (0.035f + 0.06f * progress) *
+                                   (isLensWave ? 0.65f : 1f) *
                                    (style == StyleChromaticInverse ? -1f : 1f);
+
+                    if (isLensWave)
+                    {
+                        // Anillo blanco tenue del frente (onda de lente del sol).
+                        DrawRing(ring, drawPos, front * 1.02f * thinComp, ringUnit,
+                            new Color(255, 245, 225, (byte)(alpha * 110f)));
+                    }
 
                     // Franja ROJA exterior.
                     DrawRing(ring, drawPos, (front + fringe) * thinComp, ringUnit,
@@ -507,13 +547,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         new Color(75, 155, 255, (byte)(alpha * 175f)));
                 }
 
-                // === v5.94 — BURBUJA DE DESTRUCCIÓN DEL ESCUDO (vanilla real) ===
+                // === v5.95 — EL CAMPO DE FUERZA ES LA ONDA (vanilla real) ===
                 // Shader ForceField del juego + Perlin vanilla, quad 600×600
-                // como en Main.cs: expansión (1+grow) hasta 2×, brillo ×2 y
-                // desvanecimiento 1-sqrt(grow) — los parámetros EXACTOS de la
-                // animación de destrucción del escudo de las Columnas.
-                // ai[3] = radio de la burbuja al morir (lo pasa el agujero);
-                // fallback proporcional si no llegó (p.ej. en MP).
+                // como en Main.cs. La burbuja PARTE del radio del escudo al
+                // morir (localAI[0], lo fija el OnKill del agujero — v5.94 lo
+                // ponía en ai[3], que NO EXISTE: el array ai de tModLoader
+                // tiene solo 3 ranuras → el IndexOutOfRangeException del
+                // client.log del usuario) y CABALGA el frente de la onda:
+                // radio = max(escudo, frente), expandiéndose con él mientras
+                // se desvanece — el escudo de una Columna Lunar destruida
+                // CONVERTIDO en onda expansiva (petición del usuario: "el
+                // campo de fuerza debe ser usado como onda expansiva").
+                // Fallback determinista desde el radio máximo sincronizado
+                // (ai[2]×0.22) para clientes remotos de MP.
                 if (style == StyleChromatic)
                 {
                     Main.spriteBatch.End(); // cierra el pase aditivo de las franjas
@@ -523,17 +569,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     if (GameShaders.Misc.TryGetValue("ForceField", out MiscShaderData forceField))
                     {
-                        float bubbleR = p.ai[3] > 4f ? p.ai[3] : front * 0.16f;
-                        // grow alcanza 1 en 15 ticks (vanilla: 30 de 120 — mismo 25%).
-                        float grow = Math.Min(age / 15f, 1f);
-                        float fade = 1f - (float)Math.Sqrt(grow);
+                        float deathR = p.localAI[0] > 4f ? p.localAI[0] : p.ai[2] * 0.22f;
+                        // La burbuja MANTIENE el tamaño del escudo al morir y
+                        // luego viaja CON el frente (mientras este lo supera).
+                        float bubbleR = Math.Max(deathR, front);
+                        // Desvanecimiento acompañando al frente (vanilla lo hace
+                        // rápido en la destrucción; aquí la burbuja ES la onda).
+                        float fade = MathHelper.Clamp(1f - progress * 0.9f, 0f, 1f);
                         var dd = new DrawData(perlin, drawPos,
                             new Rectangle(0, 0, 600, 600),
                             new Color(fade, fade, fade, fade), 0f,
                             new Vector2(300f, 300f),
-                            (bubbleR * 2f / 600f) * (1f + grow),
+                            (bubbleR * 2f / 600f),
                             SpriteEffects.None, 0f);
-                        forceField.UseColor(new Vector3(2f)); // el doble de brillo (vanilla)
+                        // Brillo ×2 al nacer (vanilla destrucción) → ×1 al final.
+                        forceField.UseColor(new Vector3(2f - progress));
                         forceField.Apply(dd);
                         dd.Draw(Main.spriteBatch);
                     }

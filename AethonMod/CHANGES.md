@@ -1,5 +1,103 @@
 # AethonMod — Historial de Cambios
 
+## Commit v5.95 — Efectos del sol DETRÁS de él + fix del error del agujero + el campo de fuerza COMO onda + lente del sol + ondas de lente
+
+**Peticiones del usuario**: (1) "sus efectos SupernovaStaff y PhoenixNovaStaff
+deben estar detras de el, ademas parece que tiene un extraño parpadeo que
+supongo que es PhoenixNovaStaff el cual no esta detras del sol"; (2) "aumentar
+el tamaño de PhoenixNovaStaff y que iguale el tamaño del sol"; (3) "dale al
+sol un poco de lente gravitacional a medida que vaya creciendo como gigante
+roja"; (4) el agujero negro "tiene un error" (IndexOutOfRangeException en el
+client.log) "y el campo de fuerza debe ser usado como onda expansiva"; (5) "en
+ambas explosiones del sol y agujero negro tambien debe de haber una onda
+expansiva creada con lente gravitacional que tenga una ligera distorsion
+cromatica en rgb".
+
+### A. FIX DEL ERROR DEL AGUJERO NEGRO (IndexOutOfRangeException del client.log)
+
+v5.94 guardaba el radio de la burbuja del campo de fuerza en
+`Projectile.ai[3]` — **un índice que NO EXISTE**: el array `ai` de tModLoader
+tiene SOLO 3 ranuras (0-2). Tres stack traces lo confirmaban (OnKill al
+escribir + DrawWaveVisual al leer, desde PreDraw y desde la lente):
+la burbuja del escudo JAMÁS llegó a dibujarse y el OnKill abortaba antes de
+los sonidos/dusts/temblor. Ahora el radio viaja en `localAI[0]` (parámetro
+visual de cliente que fija el OnKill local) con **fallback determinista**
+derivado del radio máximo sincronizado (`ai[2]×0.22`) para clientes remotos
+de MP. FIX adicional: `localAI[1]` (radio pre-colapso del escudo) se
+**captura UNA SOLA VEZ** al empezar la evaporación — antes se recalculaba
+cada tick con la escala ya colapsada y el "escudo que mantiene su tamaño"
+decaía de 101px a 5px.
+
+### B. EL PARPADEO DEL SOL — CAUSA RAÍZ (decompilación de Main.DrawProjectiles)
+
+La llamarada (PhoenixNova) usaba `DrawBehind` → caché
+`drawCacheProjsBehindProjectiles`… **pero NUNCA ponía `hide = true`**, y el
+bucle principal de Terraria solo excluye a los proyectivos con `hide`:
+la llamarada se dibujaba **DOS VECES por frame — una de ellas ENCIMA del
+sol** con brillo aditivo duplicado = el "extraño parpadeo". Y la Supernova
+hija (spawned después → índice MAYOR que el sol) se pintaba directamente
+encima de la estrella. **Solución definitiva**: los hijos van con
+`hide = true` (ni tML ni ningún mod — Luminance incluida — los dibuja) y
+**EL SOL LOS DIBUJA ÉL MISMO** (`SunProjectile.DrawStarVisuals`, capa 0,
+ANTES de sus propias capas): detrás del disco SIEMPRE, inmune al orden de
+índices. El disco del SunShader (alpha≈1 en el cuerpo) los OCULTA en el
+centro → la llamarada se lee como un **backlight real asomando por el limbo**
+de la estrella. La SupernovaStaff standalone y la PhoenixNovaStaff
+standalone conservan su dibujado propio.
+
+### C. LA LLAMARADA IGUALA EL TAMAÑO DEL SOL
+
+`DrawFlareSprites` se dimensiona con `starR`, el **radio visual REAL** de la
+estrella invocadora (`width×scale×0.75` — crece con la gigante roja): el
+núcleo caliente mide lo mismo que el disco (queda oculto tras él) y el halo
+lo envuelve como backlight (≈2.6× su radio, extendiéndose con la edad). El
+destello del pico (frames 25-35) pasó de "pantalla blanca completa" (el
+parpadeo) a un **rim de luz suave** alrededor del limbo (alpha 120 tras el
+sol; 235 standalone). Paleta: naranja solar → ROJO gigante (Lerp con el
+progreso de la gigante). El pulso bajó a ±0.07.
+
+### D. EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA (agujero negro)
+
+El escudo Perlin/ForceField **ya NO vive alrededor del agujero durante su
+vida** (DrawForceField y su flash de golpe eliminados) — al explotar, la
+burbuja **PARTE del radio que tenía el escudo al morir** (localAI[0]) y
+**CABALGA el frente de la onda** expandiéndose con él
+(radio = max(escudo, frente)) mientras se desvanece
+(fade = 1-progress×0.9, brillo ×2→×1): la secuencia de destrucción del
+escudo de una Columna Lunar **CONVERTIDA en onda expansiva**, acompañada de
+las franjas R/G/B de aberración cromática. El aura de daño dentro del campo
+se conserva (daño cada 0.5 s, radio del escudo ×1.3).
+
+### E. LENTE GRAVITACIONAL DEL SOL EN LA GIGANTE ROJA (dos pases)
+
+El shader de distorsión solo acepta UNA fuerza global, así que el
+`BlackHoleLensSystem` ahora renderiza **DOS pases**: el pase A fuerte
+(agujeros + ondas cromáticas/de lente, fuerza 0.55×max) y el **pase B débil
+del sol** (fuerza 0.55×(progreso de la gigante×0.4) ≈ un cuarto del
+agujero — "un poco de lente") sobre el resultado del pase A, con su propio
+render target. El radio de la fuente = 1.4× el radio visual real de la
+estrella (crece mientras se hincha). El sol (con llamarada y carga de la
+nova) se dibuja **ENCIMA de la lente** (`DrawStarVisuals`) igual que el
+núcleo del agujero. **Modo identidad**: si las fuentes desaparecen mientras
+un sol sigue en pantalla, ese último frame los proyectiles que se saltaron
+el pase del mundo se dibujan encima SIN distorsión (verificado contra el
+decompile: el backbuffer contiene el mundo tras EndCapture) — sin él habría
+un frame de invisibilidad (parpadeo) al morir la última fuente.
+
+### F. ONDA DE LENTE GRAVITACIONAL EN AMBAS EXPLOSIONES (StyleLens)
+
+Nuevo estilo 3 del CosmicShockwaveProjectile: **onda expansiva creada CON
+lente gravitacional** con **ligera** distorsión cromática RGB (separación
+×0.65 de la cromática) + anillo blanco tenue en el frente; se registra como
+fuente del BlackHoleLensSystem → **curva el fondo del juego a su paso**; se
+dibuja encima de la lente (como las cromáticas) y barre daño cada 0.1 s.
+El sol la lanza en su OnKill SIN retardo (la onda gravitacional viaja
+DELANTE de la materia), radio 400 — envuelve a sus 3 ondas de fuego
+(240/300/360) como firma final del estallido. El agujero negro ya la tenía:
+su onda cromática ES lente + RGB (más la burbuja ForceField de la sección D).
+La SupernovaStaff standalone hereda el redimensionado que le faltaba:
+ondas 360/450/540 → 240/300/360 y AoE 340 → 260.
+
 ## Commit v5.94 — El campo de fuerza REAL de las Columnas + Gigante Roja + anillos a su tamaño
 
 **Peticiones del usuario**: (1) los anillos de alta calidad de v5.93 quedaron

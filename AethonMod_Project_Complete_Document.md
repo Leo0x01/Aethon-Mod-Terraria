@@ -707,10 +707,11 @@ ls /home/z/my-project/AethonMod/Content/Effects/Textures/   # debe listar 10 .pn
 
 ## 10. HISTORIAL DE VERSIONES
 
-Commits desde v5.28 hasta v5.94 (orden inverso, más reciente primero):
+Commits desde v5.28 hasta v5.95 (orden inverso, más reciente primero):
 
 | Commit | Versión | Descripción |
 |---|---|---|
+| `—` | v5.95 | **EFECTOS DEL SOL DETRÁS DE ÉL + FIX DEL ERROR DEL AGUJERO + EL CAMPO DE FUERZA COMO ONDA + LENTE DEL SOL + ONDAS DE LENTE**: (1) **CAUSA RAÍZ DEL PARPADEO** (decompilado `Main.DrawProjectiles` de tModLoader v2026.07.3.0): el bucle principal SOLO excluye a `hide` — la llamarada usaba `DrawBehind` SIN `hide=true` → se dibujaba **DOS VECES por frame, una ENCIMA del sol** con brillo aditivo duplicado (y la Supernova hija, de índice mayor, encima también) → **los hijos van con `hide=true` y EL SOL LOS DIBUJA ÉL MISMO** (`DrawStarVisuals` capa 0: llamarada + carga de la nova ANTES de sus capas — detrás del disco SIEMPRE, inmune al orden de índices y a Luminance; el disco alpha≈1 los oculta → backlight real por el limbo; standalone conservan su dibujado); (2) **LA LLAMARADA IGUALA EL TAMAÑO DEL SOL**: `DrawFlareSprites` dimensionada con starR (radio visual real width×scale×0.75 — crece con la gigante), núcleo = disco, halo backlight 2.6×, flash del pico = rim suave (alpha 120) en vez de pantalla blanca, paleta naranja→rojo gigante, pulso ±0.07; (3) **FIX DEL IndexOutOfRangeException del client.log**: v5.94 usaba `Projectile.ai[3]` — índice INEXISTENTE (array de 3) → ahora el radio de la burbuja viaja en `localAI[0]` con fallback determinista ai[2]×0.22 (+ fix localAI[1]: capturado UNA vez, antes decaía 101→5px); (4) **EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA**: escudo en vida ELIMINADO — al explotar la burbuja Perlin/ForceField parte del radio del escudo al morir y CABALGA el frente (radio=max(escudo, frente)) desvaneciéndose — destrucción de Columna CONVERTIDA en onda; (5) **LENTE DEL SOL EN GIGANTE ROJA**: BlackHoleLensSystem con DOS pases de distorsión (A fuerte: agujeros+ondas; B débil del sol: fuerza rg×0.4 — "un poco") + target propio + sol dibujado encima de la lente + MODO IDENTIDAD (sin frames de invisibilidad al morir la última fuente — backbuffer verificado en el decompile); (6) **ONDA DE LENTE (StyleLens) EN AMBAS EXPLOSIONES**: nuevo estilo 3 con RGB LIGERO (×0.65) + anillo blanco tenue, registrada como fuente de lente (curva el fondo), encima de la lente, daño 0.1 s — el sol la lanza sin retardo (radio 400, la gravitacional viaja delante de la materia) y el agujero ya la tenía (cromática+lente+ForceField); nova standalone redimensionada 240/300/360 + AoE 260. Compilación: 0 errores, 0 warnings |
 | `06fcf74` | v5.94 | **EL CAMPO DE FUERZA REAL DE LAS COLUMNAS + GIGANTE ROJA + ANILLOS SOLO AL FINAL**: investigación profunda del código REAL de Terraria (entorno de decompilación reconstruido: .NET 8 + ilspycmd + tModLoader v2026.07.3.0 de GitHub; decompile de NPC 112k líneas, Main 85k, Projectile 93k + assembly completo) → **mecanismo EXACTO del escudo de las Columnas Lunares descifrado** (Main.DrawNPCDirect_Inner): la burbuja es **ruido Perlin ("Images/Misc/Perlin" del juego) en un quad 600×600 con el shader `GameShaders.Misc["ForceField"]` VANILLA** (Immediate+AlphaBlend+PointWrap+DepthStencil.Default), alpha=fuerza·0.8+0.2, flash de 30 ticks al golpe (pop +5%, brillo +50%, npc.ai[3]=1..120) y al destruirse **se expande 2×, brillo ×2 y desvanece 1-sqrt(grow)** → el agujero negro USA EL MISMO SHADER DEL JUEGO con las mismas llamadas (DrawForceField reescrito; fuerza= carga hacia la muerte; radio 2.2× horizonte que MANTIENE su tamaño durante la evaporación vía localAI[1] pre-colapso; flash al absorber golpes) y **la onda cromática dibuja la burbuja de destrucción** (ai[3]=radio final, parámetros exactos de la animación vanilla) + **AURA DE DAÑO del campo** (50% del daño cada 0.5 s dentro del escudo ×1.3, crece con la muerte — límites de daño en área mejorados) + **GIGANTE ROJA del sol** (t=7-10s: hincha ×1.85 smoothstep + ENROJECE todo — backglow/aura/SunShader/luz/dusts/partículas con ToRedGiant — y su daño de área crece: hitbox ×1.85 con Resize centro-fijo + daño ×1.75 con base en ai[2] + quemadura 10 s) + **ANILLOS SOLO AL FINAL** (causa raíz del "en todo momento": la textura HD de v5.93 dejó 16× más grandes todos los dibujos de escala fija — PhoenixNova 5 anillos por llamarada hasta 4710px y Supernova contención hasta 2458px ELIMINADOS; anillo de fotones del agujero 1178px ELIMINADO; campo v5.93 RingShieldNebula REEMPLAZADO por el ForceField real) + **REDIMENSIONADOS**: ondas sol 360/450/540→240/300/360, cromática 620→420, AoE núcleo 340→260, pulsos 280/380→200/270 + **fixes 16×**: ParticlePresets radius/64→radius/512, AbyssalEye 2.0→0.125, GravityPulse Lerp(0..5)→(0..0.3125), Earthquake ÷16, BlackHoleMini 0.35→0.0219, DrawFallback del agujero por radio. Compilación: 0 errores, 0 warnings |
 | `4d8681b` | v5.93 | **CAMPO DE FUERZA estilo Columna de Nebulosa + anillos de ALTA CALIDAD** (petición del usuario con referencia explícita al Nebula Pillar): el Ring.png era de **64px** (se pixelaba a 620px de radio) → **3 texturas nuevas de 1024px generadas proceduralmente** (Ring reemplazo directo 105KB con misma geometría — los 9 usos existentes ganan calidad; RingShieldNebula = cuerpo de campo con COLOR horneado rosa→magenta→cian + arcos de energía; FireRing = llamas con color propio blanco-amarillo→naranja→rojo y lengüetas fBm) + **DrawForceField** en el agujero negro: burbuja translúcida a 1.9× el horizonte (envuelve el disco) con cuerpo nebula + aros FINOS cian/rosa que "respiran" (±5-6.5% del radio) — vive en DrawCoreVisuals (mundo Y encima-de-lente) y crece con la evaporación → al morir, la onda cromática del OnKill ES el campo expandiéndose (continuidad visual perfecta) + **DrawWaveVisual reescrita**: cromática = cuerpo nebula tenue + 3 AROS FINOS R/G/B separados 3.5→9.5% del frente (aberración VISIBLE sin lavado a blanco — validado por simulación VLM + píxeles: el diseño de 3 pasadas de banda ancha se lavaba porque la base solapaba al 100%); fuego = FireRing ×2 + Ring fino de choque; compensación thinComp=1/0.92. Bugs de generación corregidos: clamp01 sobre canales 0-255 (→textura negra) y corte de borde (contenido ≤0.995 del canvas). RingShield blanca intermedia eliminada (sin usos). Compilación: 0 errores, 0 warnings |
 | `a260673` | v5.92 | **FIX del error del sol** ("el sol dio un error" — reporte del usuario con client.log): `InvalidOperationException: Begin has been called before calling End` en `CosmicShockwaveProjectile.PreDraw` (línea 367 de v5.91), 2 "Excepción silenciosa" por explosión del sol que ABORTABAN el dibujado de todos los proyectiles del frame. Causa raíz: las ondas de fuego del sol nacen con retardo escalonado (edades 0/-8/-16); en el tick EXACTO en que un retardo expira el frente mide 0 px → `DrawWaveVisual` devolvía SIN tocar el spriteBatch → el Begin de restauración INCONDICIONAL del PreDraw re-abría el batch del juego YA ABIERTO (la onda cromática del agujero nace sin retardo → jamás lo disparó, por eso SOLO el sol fallaba). Fix: `DrawWaveVisual` ahora devuelve **bool** (false = no tocó el batch / true = lo dejó CERRADO) y el PreDraw restaura SOLO cuando corresponde; auditoría de Begin/End de sol/nova/agujero/PhoenixNova/lente: ningún otro proyectil tiene el patrón. Compilación: 0 errores, 0 warnings |
@@ -790,10 +791,52 @@ Commits desde v5.28 hasta v5.94 (orden inverso, más reciente primero):
 ## 11. ÚLTIMO ESTADO (donde nos quedamos)
 
 ### 11.1 Versión actual
-- **Versión**: v5.94
-- **Mensaje**: "feat v5.94: el campo de fuerza REAL de las Columnas Lunares (shader ForceField VANILLA + Perlin del juego, investigado por decompilación) + gigante roja del sol con daño en área creciente + anillos SOLO en la explosión final + redimensionados + fixes 16× de la textura HD"
+- **Versión**: v5.95
+- **Mensaje**: "feat v5.95: efectos del sol DETRÁS de él (el sol dibuja a sus hijos: fix del doble-draw del DrawBehind sin hide — el parpadeo) + fix del IndexOutOfRange del agujero (ai[3] no existe → localAI[0]) + el campo de fuerza COMO onda expansiva (burbuja que cabalga el frente) + lente sutil del sol en gigante roja (dos pases) + onda de lente con RGB ligero en ambas explosiones (StyleLens)"
 
-### 11.2 Qué se hizo en v5.94 (escudo real de Columna + gigante roja + anillos al final)
+### 11.2 Qué se hizo en v5.95 (efectos detrás del sol + fix del agujero + campo=onda + lentes)
+
+**Peticiones del usuario**: los efectos SupernovaStaff y PhoenixNovaStaff deben
+estar DETRÁS del sol (había un extraño parpadeo — el PhoenixNova no estaba
+detrás); aumentar el tamaño del PhoenixNovaStaff hasta igualar el del sol;
+un poco de lente gravitacional para el sol a medida que crezca como gigante
+roja; el agujero negro tiene un error y el campo de fuerza debe usarse COMO
+onda expansiva; en ambas explosiones debe haber una onda expansiva creada con
+lente gravitacional y ligera distorsión cromática RGB.
+
+**A. Fix del error (client.log)**: v5.94 escribía `Projectile.ai[3]` — el
+array `ai` de tModLoader SOLO tiene 3 ranuras → IndexOutOfRangeException en
+OnKill y DrawWaveVisual (la burbuja jamás se dibujó, el OnKill abortaba antes
+de sonidos/dusts). Ahora: `localAI[0]` + fallback determinista `ai[2]×0.22`.
+Fix extra: localAI[1] se captura UNA vez al iniciar la evaporación (antes
+decadía de 101px a 5px con la escala colapsada).
+
+**B. El parpadeo (decompilación de Main.DrawProjectiles)**: el bucle
+principal solo excluye `hide` → la llamarada (DrawBehind sin hide) se
+dibujaba DOS VECES, una ENCIMA del sol; la nova hija (índice mayor) encima.
+Solución: hijos con `hide=true` + EL SOL LOS DIBUJA (DrawStarVisuals capa 0,
+detrás del disco SIEMPRE — el disco alpha≈1 los oculta, backlight por el
+limbo). Standalones intactos.
+
+**C. Llamarada al tamaño del sol**: DrawFlareSprites con starR real (crece
+con la gigante): núcleo = disco, halo 2.6×, flash = rim suave (120/235),
+paleta naranja→rojo, pulso ±0.07.
+
+**D. Campo de fuerza = onda**: sin escudo en vida; la burbuja parte del
+radio del escudo al morir y CABALGA el frente (max(escudo, frente))
+desvaneciéndose (fade 1-p·0.9, brillo 2→1). Aura de daño conservada.
+
+**E. Lente del sol (dos pases)**: pase A fuerte (agujeros+ondas) + pase B
+débil del sol (fuerza rg×0.4, radio 1.4× starR) con target propio; el sol se
+dibuja encima de la lente (DrawStarVisuals); MODO IDENTIDAD al morir la
+última fuente (sin frame invisible — backbuffer verificado en decompile).
+
+**F. StyleLens (onda de lente)**: RGB ligero (×0.65) + anillo blanco tenue;
+fuente de lente (curva el fondo) + encima de la lente + daño 0.1 s; el sol la
+lanza sin retardo (radio 400); el agujero la tenía (cromática). Nova
+standalone: ondas 240/300/360 + AoE 260.
+
+### 11.2.1 Qué se hizo en v5.94 (histórico — escudo real de Columna + gigante roja)
 
 **Peticiones del usuario**: los anillos quedaron demasiado grandes (redimensionar
 sol y agujero); los anillos son parte de la onda expansiva — SOLO deben salir al
@@ -834,7 +877,7 @@ radius/64→radius/512; V20 (AbyssalEye/GravityPulse/Earthquake/BlackHoleMini)
 errores y 0 warnings (entorno reconstruido: /tmp/verify + stub del hook
 MonoMod On_TimeLogger, generado en runtime por tML y ausente del DLL distribuido).
 
-### 11.2.1 Qué se hizo en v5.93 (histórico — campo Nebula inventado + anillos HD)
+### 11.2.2 Qué se hizo en v5.93 (histórico — campo Nebula inventado + anillos HD)
 
 **Peticiones del usuario**: el anillo del agujero negro (Ring.png) tenía muy
 baja calidad y era solo blanco; el agujero necesita el CAMPO DE FUERZA de la
@@ -3814,7 +3857,7 @@ Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.9f, 0.5f) * 3.2f);
 
 **Fin del documento.**
 
-> Última actualización: v5.94
+> Última actualización: v5.95
 > Documento generado para asegurar continuidad del proyecto entre sesiones de IA.
 > Si eres una IA leyendo esto: SIEMPRE empieza por el Recordatorio al inicio de
 > cualquier commit o documento nuevo.

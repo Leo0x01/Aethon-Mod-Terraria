@@ -13,14 +13,26 @@ using AethonMod.Content.Effects;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
+    /// v5.95 — EL CAMPO DE FUERZA ES LA ONDA EXPANSIVA (petición del usuario):
+    /// el escudo Perlin/ForceField YA NO vive alrededor del agujero durante
+    /// su vida — al explotar, la burbuja PARTE del radio que tenía el escudo
+    /// al morir y CABALGA el frente de la onda cromática expandiéndose con él
+    /// mientras se desvanece (la secuencia de destrucción del escudo de una
+    /// Columna Lunar CONVERTIDA en onda). FIX CRÍTICO del error del usuario:
+    /// v5.94 guardaba el radio de la burbuja en `Projectile.ai[3]` — un índice
+    /// que NO EXISTE (el array ai de tModLoader tiene solo 3 ranuras) →
+    /// IndexOutOfRangeException en OnKill y DrawWaveVisual (client.log):
+    /// la burbuja jamás se dibujó y el OnKill abortó antes de sonidos/dusts.
+    /// Ahora viaja en localAI[0]. FIX del radio pre-colapso: localAI[1] se
+    /// captura UNA VEZ al empezar la evaporación (antes se recalculaba cada
+    /// tick con la escala ya colapsada y el escudo “que mantiene su tamaño”
+    /// decaía de 101px a 5px).
+    ///
     /// v5.94 — CAMPO DE FUERZA REAL DE LAS COLUMNAS LUNARES: investigado el
     /// código de Terraria (Main.DrawNPCDirect_Inner) y usado su mecanismo
     /// EXACTO — ruido Perlin ("Terraria/Images/Misc/Perlin", la textura del
     /// juego) en un quad 600×600 con el shader GameShaders.Misc["ForceField"]
-    /// VANILLA: alpha ligado a la "fuerza" (crece hacia la muerte), flash de
-    /// 30 ticks con pop +5% y brillo +50% al absorber un golpe, y al morir la
-    /// onda cromática dibuja la burbuja EXPANDIÉNDOSE (2×) y DESAPARECIENDO —
-    /// la secuencia del escudo de columna destruido. AURA DE DAÑO: los
+    /// VANILLA (v5.95: solo en la onda de la explosión). AURA DE DAÑO: los
     /// enemigos dentro del campo reciben daño cada 0.5 s (límites de daño en
     /// área mejorados). Anillos de fotones eliminados (los anillos solo
     /// viven en la explosión final). Onda cromática: 620 → 420 px.
@@ -151,14 +163,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             else if (Projectile.timeLeft <= 36f)
             {
-                // v5.94 — Radio del CAMPO DE FUERZA con la escala ANTES del
-                // colapso de la evaporación: el escudo MANTIENE su tamaño
-                // mientras el agujero interior se evapora (como el escudo de
-                // una Columna Lunar, que no encoge mientras la torre muere).
-                // El OnKill lo pasa a la onda cromática (ai[3]) para que la
-                // burbuja de destrucción arranque EXACTAMENTE de este radio.
-                Projectile.localAI[1] = 0.3f * Projectile.width *
-                                        Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
+                // v5.94/v5.95 — Radio del CAMPO DE FUERZA con la escala ANTES del
+                // colapso de la evaporación: se captura UNA SOLA VEZ (v5.95 fix —
+                // antes se recalculaba cada tick con la escala YA colapsada y el
+                // radio decaía de 101px a 5px en vez de mantenerse). El OnKill lo
+                // pasa a la onda cromática (localAI[0]) para que la burbuja que
+                // CABALGA la onda arranque EXACTAMENTE de este radio.
+                if (Projectile.localAI[1] <= 0f)
+                    Projectile.localAI[1] = 0.3f * Projectile.width *
+                                            Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
 
                 // FASE 2 — EVAPORACIÓN: colapso acelerado hacia la singularidad
                 // (la escala cae a 0 justo cuando llega la implosión final).
@@ -177,16 +190,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // el boost es visual y no acumulativo.)
             ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
 
-            // === v5.94 — TIMER DEL FLASH DEL ESCUDO (mecanismo de la torre) ===
-            // npc.ai[3] en vanilla: 1 al recibir el golpe, ++ hasta 120; el
-            // flash vive 30 ticks (1 - t/30). Aquí: el escudo "absorbe" al
-            // enemigo golpeado (OnHitNPC pone localAI[0]=1).
-            if (Projectile.localAI[0] > 0f)
-            {
-                Projectile.localAI[0] += 1f;
-                if (Projectile.localAI[0] > 30f)
-                    Projectile.localAI[0] = 0f;
-            }
+            // v5.94 — FLASH DEL ESCUDO eliminado en v5.95 (el campo de fuerza ya
+            // no vive en vida del agujero: es la onda expansiva de la explosión).
 
             // === MOVIMIENTO: deriva lenta y frenado (el agujero flota) ===
             Projectile.velocity *= 0.97f;
@@ -654,21 +659,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     DrawFallback(p, drawPos);
                 }
 
-                // === 4. CAMPO DE FUERZA (v5.94 - EL EFECTO REAL DE LAS COLUMNAS) ===
-                // Peticion del usuario: el mecanismo EXACTO del escudo de las
-                // Columnas Lunares, investigado en el codigo real de Terraria
-                // (Main.DrawNPCDirect_Inner, torres 422/493/507/517): un quad
-                // de ruido PERLIN (la textura "Images/Misc/Perlin" del juego)
-                // dibujado con el shader GameShaders.Misc["ForceField"] - el
-                // MISMO shader que usa Terraria - en un batch Immediate +
-                // AlphaBlend + PointWrap + DepthStencil.Default con la MISMA
-                // geometria (fuente 600x600, origen 300,300). Alpha ligado a la
-                // "fuerza" del escudo (crece hacia la muerte), pop +5% y brillo
-                // +50% al absorber un golpe (flash de 30 ticks = npc.ai[3] de
-                // la torre). Al morir, el OnKill pasa este radio a la onda
-                // cromatica: la burbuja SE EXPANDE (2x) y DESAPARECE - la
-                // secuencia de destruccion del escudo de la Columna.
-                DrawForceField(p, drawPos);
+                // v5.95 — SIN campo de fuerza en vida: el escudo Perlin/
+                // ForceField VANILLA ya no envuelve al agujero durante su
+                // existencia — ES la onda expansiva de la explosión (petición
+                // del usuario: "el campo de fuerza debe ser usado como onda
+                // expansiva"). Lo dibuja CosmicShockwaveProjectile.DrawWaveVisual
+                // al morir (burbuja que cabalga el frente expandiéndose).
             }
             catch
             {
@@ -681,64 +677,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// v5.94 - Campo de fuerza del agujero negro: EL EFECTO REAL del escudo
-        /// de las Columnas Lunares (codigo de Terraria decompilado): ruido
-        /// Perlin + shader ForceField VANILLA con la geometria y parametros
-        /// EXACTOS del juego:
-        ///   - Quad 600x600, sourceRect (0,0,600,600), origen (300,300)
-        ///   - Batch: Immediate + AlphaBlend + PointWrap + DepthStencil.Default
-        ///   - Alpha = fuerza*0.8 + 0.2 (vanilla lo liga a ShieldStrength)
-        ///   - Flash de 30 ticks al absorber un golpe: pop x(1+flash*0.05) y
-        ///     UseColor(1+flash*0.5) - identico al npc.ai[3] de la torre
-        /// La "fuerza" aqui es la carga hacia la muerte (0->1 en 10 s): el
-        /// campo se intensifica conforme el agujero acumula energia para la
-        /// explosion final.
+        /// v5.95 — ELIMINADO DrawForceField (escudo en vida): el campo de fuerza
+        /// ya NO se dibuja alrededor del agujero durante su vida — es la ONDA
+        /// EXPANSIVA de la explosión (petición del usuario). La burbuja Perlin/
+        /// ForceField la dibuja CosmicShockwaveProjectile.DrawWaveVisual al
+        /// morir el agujero: parte del radio del escudo y cabalga el frente.
         /// </summary>
-        private static void DrawForceField(Projectile p, Vector2 drawPos)
-        {
-            // El shader del juego (registrado por DyeInitializer.LoadMisc como
-            // new MiscShaderData(Main.PixelShaderRef, "ForceField")).
-            if (!GameShaders.Misc.TryGetValue("ForceField", out MiscShaderData forceField))
-                return;
-
-            float shieldR = GetShieldRadius(p);
-            if (shieldR < 10f) return; // aun diminuto (pop de nacimiento)
-
-            // Perlin VANILLA del juego - la misma textura del escudo de las torres.
-            Texture2D perlin = ModContent.Request<Texture2D>(
-                "Terraria/Images/Misc/Perlin").Value;
-
-            // Fuerza del escudo: crece con la vida consumida (el campo carga
-            // hacia la explosion). Vanilla: alpha = fuerza*0.8 + 0.2.
-            float strength = MathHelper.Clamp(1f - p.timeLeft / 600f, 0f, 1f);
-            float alpha = strength * 0.8f + 0.2f;
-
-            // Flash al absorber un golpe (OnHitNPC -> localAI[0] = 1..30):
-            // vanilla: flash = 1 - ai[3]/30 (decae en medio segundo).
-            float flash = 0f;
-            if (p.localAI[0] > 0f && p.localAI[0] <= 30f)
-                flash = 1f - p.localAI[0] / 30f;
-
-            // Batch EXACTO de vanilla (dibujado del escudo de torre en Main.cs).
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                SamplerState.PointWrap, DepthStencilState.Default, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            var dd = new DrawData(perlin, drawPos,
-                new Rectangle(0, 0, 600, 600),
-                Color.White * alpha,
-                0f,
-                new Vector2(300f, 300f),
-                // Diametro deseado = 2*shieldR sobre el quad de 600 -> escala
-                // = 2*shieldR/600 (vanilla: npc.scale*(1+flash*0.05)).
-                (shieldR * 2f / 600f) * (1f + flash * 0.05f),
-                SpriteEffects.None, 0f);
-            forceField.UseColor(new Vector3(1f + flash * 0.5f));
-            forceField.Apply(dd);
-            dd.Draw(Main.spriteBatch);
-
-            Main.spriteBatch.End();
-        }
 
         /// <summary>
         /// v5.94 - Radio del campo de fuerza (px): 2.2x el horizonte, con la
@@ -842,12 +786,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // v5.94 — FLASH DEL ESCUDO (mecanismo de la torre): el campo
-            // "absorbe" el impacto con su pop de +5% y su brillo +50%
-            // durante 30 ticks — como el escudo de una Columna Lunar al
-            // recibir un golpe de fuerza (npc.ai[3] = 1 en vanilla).
-            Projectile.localAI[0] = 1f;
-
             // v5.90: micro-colapso de la librería sobre el objetivo (paleta cálida)
             ParticlePresets.Implosion(target.Center, 70f, 16, new Color(255, 170, 80), 18);
             ParticlePresets.RingPulse(target.Center, 90f, new Color(255, 220, 160, 170), 22);
@@ -922,14 +860,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,                                      // edad: sin retardo
                     CosmicShockwaveProjectile.StyleChromatic,
                     420f);                                   // radio máximo (v5.94: 620 → 420)
-                // v5.94 — Radio de la burbuja de destrucción: la onda dibuja
-                // el escudo (Perlin + ForceField vanilla) expandiéndose desde
-                // ESTE radio — la secuencia del escudo de columna destruido.
+                // v5.95 — Radio de la burbuja del campo de fuerza: la onda ES el
+                // escudo destruido — la burbuja Perlin/ForceField parte de ESTE
+                // radio y cabalga el frente expandiéndose (petición del usuario:
+                // "el campo de fuerza debe ser usado como onda expansiva").
+                // v5.95 FIX CRÍTICO: v5.94 lo escribía en ai[3] — un índice que
+                // NO EXISTE (Projectile.ai solo tiene 3 ranuras en tModLoader)
+                // → IndexOutOfRangeException (el error del client.log del
+                // usuario: la burbuja jamás se dibujó y este OnKill abortaba
+                // antes de sonidos/dusts/temblor). Ahora viaja en localAI[0]
+                // (parámetro visual de cliente, lo fija el OnKill local) con
+                // fallback determinista (ai[2]×0.22) para clientes remotos.
                 if (waveIdx >= 0 && waveIdx < Main.maxProjectiles)
                 {
                     float deathR = GetShieldRadius(Projectile);
                     if (deathR < 10f) deathR = 63f; // escala 1 típica
-                    Main.projectile[waveIdx].ai[3] = deathR;
+                    Main.projectile[waveIdx].localAI[0] = deathR;
                 }
             }
 

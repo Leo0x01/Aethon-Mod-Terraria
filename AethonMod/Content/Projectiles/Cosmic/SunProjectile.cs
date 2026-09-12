@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
+using AethonMod.Content.Effects;
 using AethonMod.Content.Projectiles.V20;
 
 namespace AethonMod.Content.Projectiles.Cosmic
@@ -13,7 +14,35 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// SunProjectile — una estrella de plasma viva (10 segundos de vida).
     ///
-    /// RENDER (3 capas de profundidad):
+    /// v5.95 — SUS EFECTOS VAN DETRÁS DE ÉL (petición del usuario: "sus efectos
+    /// SupernovaStaff y PhoenixNovaStaff deben estar detrás de él"): el SOL
+    /// dibuja él mismo a sus hijos (llamarada PhoenixNova + carga de la
+    /// Supernova) ANTES de sus propias capas — detrás del disco SIEMPRE, sin
+    /// depender del orden de índices de Main.projectile ni de DrawBehind
+    /// (decompilado tML: el bucle principal solo excluye `hide` — sin
+    /// hide=true la llamarada se dibujaba DOS VECES, una de ellas ENCIMA del
+    /// sol: el "extraño parpadeo"). Los hijos van con hide=true (nadie más
+    /// los dibuja) y la LLAMARADA IGUALA EL TAMAÑO DEL SOL (petición:
+    /// "aumentar el tamaño de PhoenixNovaStaff y que iguale el tamaño del sol"):
+    /// starR = radio visual real de la estrella (crece con la gigante roja).
+    ///
+    /// v5.95 — LENTE GRAVITACIONAL EN LA GIGANTE ROJA (petición: "dale al sol
+    /// un poco de lente gravitacional a medida que vaya creciendo como gigante
+    /// roja"): el BlackHoleLensSystem recoge al sol como fuente de distorsión
+    /// SUTIL (fuerza = progreso×0.4, en su PROPIO pase débil para no heredar la
+    /// fuerza del agujero negro) y lo dibuja ENCIMA de la lente (DrawStarVisuals).
+    ///
+    /// v5.95 — ONDA DE LENTE EN LA EXPLOSIÓN (petición: "en ambas explosiones
+    /// del sol y agujero negro también debe de haber una onda expansiva creada
+    /// con lente gravitacional que tenga una ligera distorsión cromática en
+    /// rgb"): además de las 3 ondas de fuego, el OnKill lanza una onda StyleLens
+    /// SIN retardo (la onda gravitacional VIAJA DELANTE de la materia) con
+    /// franjas R/G/B LIGERAS que curvan el fondo a su paso.
+    ///
+    /// RENDER (4 capas de profundidad):
+    ///   0. EFECTOS HIJOS DETRÁS (v5.95): llamarada PhoenixNova (sprites
+    ///      aditivos) + carga de la Supernova — el disco los OCULTA (alpha≈1):
+    ///      se leen como backlight asomando por el limbo de la estrella.
     ///   1. Backglow con BloomCircleSmall: amarillo * 0.7 (escala 0.95) + rojo * 0.45 (escala 1.61).
     ///   2. RadialShineShader sobre WavyBlotchNoise: color (252, 212, 112) * 0.24,
     ///      escala = width * scale * 2.72 / tamaño de la textura.
@@ -75,10 +104,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class SunProjectile : ModProjectile
     {
-        private Ref<Effect> _sunShader;
-        private Ref<Effect> _shineShader;
-        private bool _sunShaderFailed;
-        private bool _shineShaderFailed;
+        /// <summary>Shader del cuerpo — estático (v5.95): compartido por todas
+        /// las instancias; lo cargan PreDraw y el BlackHoleLensSystem por igual.</summary>
+        private static Ref<Effect> _sunShader;
+        private static Ref<Effect> _shineShader;
+        private static bool _sunShaderFailed;
+        private static bool _shineShaderFailed;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico y el ritmo de llamaradas.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
@@ -87,10 +118,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public ref float SupernovaIndex => ref Projectile.ai[1];
 
         /// <summary>Duración total del sol: 10 segundos exactos.</summary>
-        private const int SunLifetime = 600;
+        internal const int SunLifetime = 600;
 
         /// <summary>Momento (ticks restantes) en el que nace la supernova: segundo 7.</summary>
-        private const int SupernovaSpawnAtRemaining = 180;
+        internal const int SupernovaSpawnAtRemaining = 180;
 
         /// <summary>Cadencia de las llamaradas solares: cada 2 segundos.</summary>
         private const int FlareInterval = 120;
@@ -103,9 +134,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// explota, todo esto haciendo que su daño en area crezca junto con
         /// la estrella".
         /// </summary>
-        private float RedGiantProgress => Projectile.timeLeft <= SupernovaSpawnAtRemaining
-            ? 1f - Projectile.timeLeft / (float)SupernovaSpawnAtRemaining
-            : 0f;
+        private float RedGiantProgress => GetRedGiantProgress(Projectile);
+
+        /// <summary>
+        /// v5.95 — Progreso de la gigante roja (0..1), ESTÁTICO: lo consultan
+        /// el BlackHoleLensSystem (lente sutil de la gigante) y los hijos que
+        /// el sol dibuja detrás (tinte rojo de la llamarada).
+        /// </summary>
+        internal static float GetRedGiantProgress(Projectile p)
+        {
+            return p.timeLeft <= SupernovaSpawnAtRemaining
+                ? 1f - p.timeLeft / (float)SupernovaSpawnAtRemaining
+                : 0f;
+        }
+
+        /// <summary>
+        /// v5.95 — Radio visual de la estrella (px): la mitad del canvas del
+        /// SunShader (width×scale×1.5/2). Crece con la gigante roja — la
+        /// llamarada lo iguala y la lente lo abraza.
+        /// </summary>
+        internal static float GetStarVisualRadius(Projectile p)
+        {
+            return p.width * p.scale * 0.75f;
+        }
 
         /// <summary>v5.94 — Mezcla un color hacia el ROJO de la gigante (fase final).</summary>
         private Color ToRedGiant(Color c)
@@ -152,7 +203,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, Vector2.Zero,
                     ModContent.ProjectileType<V20.PhoenixNovaProjectile>(),
                     flareDamage, Projectile.knockBack * 0.5f,
-                    Projectile.owner);
+                    Projectile.owner,
+                    0f,   // ai[0]: edad de la llamarada
+                    0f,   // ai[1]: libre
+                    1f);  // ai[2]: SunInvoked (v5.95 — la llamarada se OCULTA y
+                          // la dibuja el SOL detrás de su propio disco)
             }
 
             // === POP ELÁSTICO DE APARICIÓN ===
@@ -620,6 +675,36 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
+            // v5.95 — LA LENTE VA DETRÁS DEL SOL: con la lente activa (agujero
+            // negro, ondas cromáticas/de lente o la propia gigante roja en
+            // pantalla) el sol NO se dibuja en el pase del mundo (quedaría
+            // dentro de screenTarget y la distorsión lo deformaría): el
+            // BlackHoleLensSystem lo pinta ENCIMA de la lente llamando a
+            // DrawStarVisuals — igual que hace con el núcleo del agujero negro.
+            if (BlackHoleLensSystem.LensActive)
+                return false;
+
+            DrawStarVisuals(Projectile, true);
+
+            RestoreSpriteBatch();
+            return false;
+        }
+
+        /// <summary>
+        /// v5.95 — Dibuja el sol COMPLETO: primero sus EFECTOS HIJOS DETRÁS
+        /// (llamarada PhoenixNova + carga de la Supernova — petición del
+        /// usuario: "sus efectos SupernovaStaff y PhoenixNovaStaff deben estar
+        /// detrás de él"), luego las capas propias de la estrella (backglow →
+        /// aura → disco del SunShader). Compartido entre el pase del mundo
+        /// (PreDraw, endActiveBatch=true) y el pase posterior a la lente
+        /// (BlackHoleLensSystem, endActiveBatch=false: el batch llega cerrado).
+        /// El disco del SunShader emite alpha≈1 en su centro → OCULTA lo que
+        /// tiene detrás: la llamarada se lee como un backlight real asomando
+        /// por el limbo de la estrella (la llamarada IGUALA el tamaño del sol
+        /// — petición del usuario — porque se dimensiona con su radio real).
+        /// </summary>
+        internal static void DrawStarVisuals(Projectile p, bool endActiveBatch)
+        {
             if (!_sunShaderFailed && _sunShader == null)
             {
                 try
@@ -649,14 +734,63 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             try
             {
-                Vector2 drawPos = Projectile.Center - Main.screenPosition;
-                float scale = Projectile.scale;
+                Vector2 drawPos = p.Center - Main.screenPosition;
+                float scale = p.scale;
                 // v5.94 — GIGANTE ROJA: mezcla de color según la fase (0 = amarilla).
-                float rg = RedGiantProgress;
+                float rg = GetRedGiantProgress(p);
+                // v5.95 — Radio visual real de la estrella: la llamarada lo IGUALA.
+                float starR = GetStarVisualRadius(p);
+
+                // === 0. EFECTOS HIJOS DETRÁS DE LA ESTRELLA (v5.95) ===
+                // La llamarada y la carga de la nova se dibujan ANTES que el
+                // propio cuerpo del sol → quedan DETRÁS de él SIEMPRE. (v5.91
+                // usaba DrawBehind, pero decompilando tML se comprobó que el
+                // bucle principal SOLO excluye a `hide`: sin hide=true la
+                // llamarada se dibujaba DOS VECES por frame — una de ellas
+                // ENCIMA del sol, el "extraño parpadeo" — y la Supernova hija,
+                // con índice mayor que el sol, también caía encima.) Ahora los
+                // hijos van con hide=true (nadie más los dibuja) y el SOL los
+                // pinta él mismo, en el orden correcto e inmune al orden de
+                // índices de Main.projectile.
+                if (endActiveBatch)
+                    Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                // Llamaradas del sol (PhoenixNova ocultas, nacidas en su centro).
+                int flareType = ModContent.ProjectileType<V20.PhoenixNovaProjectile>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile flare = Main.projectile[i];
+                    if (flare == null || !flare.active || flare.type != flareType) continue;
+                    if (flare.ai[2] != 1f) continue; // solo las llamaradas del sol
+                    // Nació en el centro del sol (la deriva posterior es mínima).
+                    if (Vector2.Distance(flare.Center, p.Center) > 48f) continue;
+                    PhoenixNovaProjectile.DrawFlareSprites(flare,
+                        flare.Center - Main.screenPosition, starR, rg, false);
+                }
+
+                // Carga de la Supernova hija (índice en ai[1], SINCRONIZADO en MP):
+                // el halo dorado condensándose DETRÁS del disco, escalando con la
+                // estrella (1.35× su radio base para asomar por el limbo).
+                int novaIdx = (int)p.ai[1];
+                if (novaIdx >= 0 && novaIdx < Main.maxProjectiles)
+                {
+                    Projectile nova = Main.projectile[novaIdx];
+                    if (nova != null && nova.active &&
+                        nova.type == ModContent.ProjectileType<V20.SupernovaProjectile>() &&
+                        nova.ai[2] == 1f)
+                    {
+                        SupernovaProjectile.DrawChargeSprites(nova,
+                            nova.Center - Main.screenPosition,
+                            1.35f * starR / 69f);
+                    }
+                }
+                Main.spriteBatch.End();
 
                 // === 1. BACKGLOW ===
                 Texture2D bloomCircle = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
-                Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -680,7 +814,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     Effect shineShader = _shineShader.Value;
                     shineShader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
-                    Vector2 shineScale = Vector2.One * Projectile.width * scale * 2.72f / wavyBlotch.Size();
+                    Vector2 shineScale = Vector2.One * p.width * scale * 2.72f / wavyBlotch.Size();
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                         SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -689,7 +823,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // v5.94 — el aura ENROJECE con la gigante.
                     Color shineColor = Color.Lerp(new Color(252, 212, 112), new Color(255, 95, 45), rg);
                     Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
-                        shineColor * 0.24f, Projectile.rotation,
+                        shineColor * 0.24f, p.rotation,
                         wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                 }
@@ -717,20 +851,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Main.graphics.GraphicsDevice.Textures[2] = psychedelicWing;
                     Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
 
-                    Vector2 drawScale = Vector2.One * Projectile.width * scale * 1.5f / dendritic.Size();
+                    Vector2 drawScale = Vector2.One * p.width * scale * 1.5f / dendritic.Size();
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                         SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);
                     shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(dendritic, drawPos, null, Color.White, Projectile.rotation,
+                    Main.spriteBatch.Draw(dendritic, drawPos, null, Color.White, p.rotation,
                         dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                 }
                 else
                 {
                     // === FALLBACK: dibujado manual si el shader no carga ===
-                    DrawFallback(drawPos, scale);
+                    DrawFallback(p, drawPos, scale);
                 }
             }
             catch
@@ -742,9 +876,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // silenciosa" en el client.log.)
                 try { Main.spriteBatch.End(); } catch { }
             }
-
-            RestoreSpriteBatch();
-            return false;
         }
 
         /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw.</summary>
@@ -760,7 +891,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>Dibujado manual de respaldo (glow multicapa naranja).</summary>
-        private void DrawFallback(Vector2 drawPos, float scale)
+        private static void DrawFallback(Projectile p, Vector2 drawPos, float scale)
         {
             Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
             float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
@@ -865,6 +996,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         CosmicShockwaveProjectile.StyleFire,
                         radii[i]);                                    // radio máximo
                 }
+
+                // v5.95 — ONDA DE LENTE GRAVITACIONAL (petición del usuario: "en
+                // ambas explosiones del sol y agujero negro también debe de haber
+                // una onda expansiva creada con lente gravitacional que tenga una
+                // ligera distorsión cromática en rgb"): el frente de espaciotiempo
+                // sale SIN retardo (la onda gravitacional viaja DELANTE de la
+                // materia que eyecta la nova) con franjas R/G/B LIGERAS + anillo
+                // blanco tenue, y se registra como fuente del BlackHoleLensSystem
+                // → CURVA EL FONDO del juego a su paso. Radio 400: envuelve a las
+                // tres ondas de fuego (240/300/360) como firma final del estallido.
+                Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                    ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                    waveDamage, 0f, Projectile.owner,
+                    0f,                                          // edad: sin retardo — guía la explosión
+                    CosmicShockwaveProjectile.StyleLens,
+                    400f);                                       // radio máximo
 
                 // Daño AoE del núcleo de la nova (el epicentro de la explosión).
                 // v5.94: 340 → 260 (proporcional a las ondas nuevas).
