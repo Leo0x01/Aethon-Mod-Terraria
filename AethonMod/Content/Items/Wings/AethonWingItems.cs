@@ -7,24 +7,26 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items.Wings
 {
     /// <summary>
-    /// AethonWingsItem — v6.11 — LA BASE DE LAS 8 ALAS DEL MOD.
+    /// AethonWingsItem — v6.12 — LA BASE DE LAS 8 ALAS DE LUZ DEL MOD.
     ///
-    /// Las alas son ahora SPRITES de arte generado y refinado (IA →
-    /// simetría → contorno Terraria → animación de 4 frames) que usan el
-    /// sistema VANILLA de alas: [AutoloadEquip] reserva el slot de equipo,
-    /// el PNG {Nombre}_Wings.png es la tira de frames y tML la corta con
-    /// Height()/4 (frame 0 reposo, ciclo 0-1-2 al volar, frame 2 al
-    /// planear — así dibuja DrawPlayer_09_Wings para alas moddeadas).
+    /// Petición expresa del usuario: "haz las alas de la misma forma que
+    /// hiciste las coronas, usando la misma técnica". Las alas vuelven a
+    /// ser 100% LUZ PROCEDURAL:
     ///
-    /// FIX v6.11 (el reporte del usuario "mal animadas, fondo no
-    /// transparente"): v6.10 creyó que vanilla cortaba con Height()/7 —
-    /// ¡ese era el caso especial de las alas 22/43/44! El camino POR
-    /// DEFECTO usa num13=4 → las tiras de 7 frames se cortaban en cuartos
-    /// y las alas salían como TRES BANDAS rotas con huecos. Además el
-    /// origen real es (Width/2, Height/8) = CENTRO del frame → la raíz
-    /// del ala vive ahí, y el pipeline v6.11 (gen_ai_wings_v611.py)
-    /// elimina el fondo gris del arte IA por CONECTIVIDAD (flood-fill
-    /// desde los bordes) — el fondo queda 100% transparente.
+    ///   · [AutoloadEquip(EquipType.Wings)] reserva el slot de equipo y da
+    ///     las estadísticas de vuelo (ArmorIDs.Wing.Sets.Stats).
+    ///   · El PNG {Nombre}_Wings.png es un 8×8 TOTALMENTE TRANSPARENTE (el
+    ///     truco de Calamity): vanilla no dibuja NADA — ni sprite, ni caja,
+    ///     ni fondo. Cero animación vanilla que arreglar.
+    ///   · TODO el dibujado lo hace VFXWingsDrawLayer (después de la capa
+    ///     vanilla de alas, tras el cuerpo) a través de VFXCore quads — el
+    ///     MISMO camino de las coronas rúnica y del vacío que el usuario
+    ///     verificó perfectas.
+    ///   · La animación (muelles, golpe asimétrico, vibración de colibrí,
+    ///     sweep aerodinámico) la calcula WingAnimPlayer.
+    ///   · v6.12: alfas ALTAS (el pase de jugador compone con AlphaBlend,
+    ///     no aditivo — las alfas tenues del v6.08 eran invisibles) y
+    ///     VOLUMEN oscuro bajo la luz para siluetas legibles.
     ///
     /// Cada subclase conserva SUS estadísticas end-game y tooltips.
     /// </summary>

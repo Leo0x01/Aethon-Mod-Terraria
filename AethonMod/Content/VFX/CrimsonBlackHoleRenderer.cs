@@ -231,6 +231,18 @@ namespace AethonMod.Content.VFX
 
             try
             {
+                // ============ 0. ABRIR EL BATCH ADITIVO ============
+                // v6.12 — EL BUG DEL "SOLO UN AGUJERO": v6.11 dibujaba las
+                // secciones 1-4 SIN abrir el batch (el BeginAdditive se
+                // perdió en la reescritura) → el primer quad lanzaba
+                // InvalidOperationException ("Draw was called, but Begin has
+                // not yet been called"), el catch lo tragaba… y NI EL
+                // VÓRTICE NI LA ESFERA se dibujaban NUNCA. El usuario solo
+                // veía el hueco de la lente. El contrato de verdad: el batch
+                // llega CERRADO → AQUÍ se abre el aditivo → secciones 1-4 →
+                // End → alpha (esfera) → End → aditivo (6-8) → End CERRADO.
+                BeginAdditive();
+
                 // ============ 1. HALO AMBIENTE (cálido, inclinado) ============
                 Quad(center, new Vector2(5.6f * r, 3.7f * r * Squash), Tilt,
                     new Color(125, 18, 55), 0.13f);

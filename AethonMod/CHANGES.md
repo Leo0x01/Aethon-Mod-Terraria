@@ -1,5 +1,100 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.12 — EL AGUJERO NEGRO SIN ERROR + TODAS LAS ALAS CON LA TÉCNICA DE LAS CORONAS
+
+**Reporte del usuario** (con client.log): "el agujero negro dio error, y
+las alas se ven horribles, intenta hacer las alas de la misma forma que
+hiciste las coronas, usando la misma técnica".
+
+### A. EL ERROR DEL AGUJERO NEGRO — UN `BeginAdditive()` PERDIDO
+
+El client.log mostraba DOS `InvalidOperationException` silenciosas por
+frame con el agujero en pantalla:
+  · "Draw was called, but Begin has not yet been called" —
+    `CrimsonBlackHoleRenderer.Cap()` línea 198 ← `Draw()` línea 235 (¡el
+    primer quad del HALO!).
+  · "End was called, but Begin has not yet been called" — el `End()`
+    defensivo del catch.
+
+**Causa raíz**: la reescritura v6.11 del renderer PERDIÓ la llamada a
+`BeginAdditive()` al principio de `Draw()`. Las secciones 1-4 (halo, anillo
+interior, las dos hojas del vórtice, hotspot) dibujaban cuadros sobre un
+batch CERRADO → el primer `spriteBatch.Draw()` lanzaba, el catch lo tragaba
+…y **NI EL VÓRTICE NI LA ESFERA NEGRA SE DIBUJABAN NUNCA**. El usuario solo
+veía el hueco de la lente gravitacional ("es solo un agujero") Y los errores
+en el log. El arte Oblivion calibrado v6.10/v6.11 era correcto — jamás se
+mostró.
+
+**Fix**: `BeginAdditive()` como sección 0 del try. El contrato de batch
+queda: llega CERRADO → aditivo (1-4) → End → alpha (esfera negra) → End →
+aditivo (rayos, chispas, bloom) → End CERRADO. Ambos caminos (PreDraw del
+pase de mundo y RenderLens de la lente) funcionan; 0 excepciones.
+
+### B. LAS ALAS — DE VUELTA A LA LUZ PROCEDURAL (petición expresa)
+
+Los sprites de arte IA (v6.10/v6.11) no convencieron. El usuario pidió
+expresamente la técnica de las coronas (la verificada perfecta): accesorio +
+PlayerDrawLayer + renderizador VFX + textura de equipo en blanco. Se
+RESTAURA el sistema completo v6.08 con la LECCIÓN DE VISIBILIDAD aprendida:
+
+  · **WingVFX.cs** — WingDrawContext / WingMotionProfile / WingStyles /
+    VFXWingSlots (8 estilos, personalidades de vuelo intactas: mariposa
+    asimétrica 1.7, hada colibrí 0.52 con AlwaysFlutter, cometa sensible a
+    la velocidad, muelles por estilo).
+  · **WingAnimPlayer.cs** — máquina de estados (volar/planeo/caída/reposo)
+    con muelles, golpe asimétrico y cadencia de sonido/dust.
+  · **VFXWingsDrawLayer.cs** — UNA capa AfterParent(PlayerDrawLayers.Wings):
+    las alas quedan DETRÁS del cuerpo como alas de verdad. Anclaje en los
+    omóplatos (p.height·0.145, escala con el sprite).
+  · Los 8 renderizadores (BlackHole/Butterfly/Fairy/SolarCorona/Nebula/
+    Eclipse/Comet) con las 8 clases [AutoloadEquip] intactas (stats
+    end-game, tooltips, recetas, entrega por TestingPlayer).
+
+**LA LECCIÓN (por qué las v6.08 "no parecían alas")**: el pase de jugador
+compone los DrawData con **AlphaBlend** (NO aditivo). Las alfas tenues del
+v6.08 (0.085 en membranas, pensadas para aditivo) eran INVISIBLES — las alas
+se leían como manchas. Las coronas leen bien porque usan alfas casi totales
+(pulse·alpha ≈ 0.75-1.0). v6.12 aplica el estándar de corona a TODO:
+  · Membranas 0.085 → **0.45-0.55** + VOLUMEN oscuro debajo (la silueta
+    sólida que recorta la forma del ala contra el cielo — mariposa violeta
+    noche, hada ámbar, eclipse noche, nebulosa púrpura).
+  · Venas/filos/bordes 0.38 → **0.85-0.95**; núcleos a 1.0.
+  · Envergaduras ×1.2-1.35 (escala de alas vanilla).
+  · La luz del mundo ya NO apaga las alas: piso 0.88 (son fuentes de luz).
+
+**REDISEÑOS ESTRUCTURALES tras validación VLM (mock AlphaBlend exacto con
+las texturas reales, 24 escenas, cielo de día = peor caso)**:
+  · **Anillo de Fotones** (3/10 → **9/10**): antes "campo de energía con
+    forma de corazón". Ahora tiene FILO DE ATAQUE — una cinta dorada
+    continua del hombro a la punta — y las órbitas son PLUMAS BARRIDAS
+    alineadas al filo (3 elipses alargadas, cada una más lejos y más
+    grande) con los fotones corriendo por ellas.
+  · **Eclipse Total** (4/10 → **8/10**): antes "orbs sueltos junto a la
+    cabeza". Ahora: los discos van AFUERA (lóbulo superior apenas arriba,
+    lóbulo inferior abajo-afuera) + MEMBRANA de noche violeta que CONECTA
+    raíz→ambos lóbulos (el cuerpo del ala) + filo cromosférico pálido.
+  · **Nebulosa Viva**: los 6 blobs trazan el ARCO de un ala (exteriores
+    más altos), 3 filamentos (antes 2).
+  · **Corona Solar**: piso 0.52 en reposo — los lazos NUNCA colapsan a
+    mancha.
+  · Verificación final VLM: Mariposa 9 · Cometa 9 · Anillo de Fotones 9 ·
+    Eclipse 8 · Hada 8 · Horizonte 7 · Corona Solar 7 · Nebulosa 6 (estilo
+    nube, inherentemente etéreo).
+
+**Los PNG de equipo** (los 8 `{Nombre}_Wings.png`) son ahora 8×8
+TOTALMENTE transparentes (el truco de Calamity): vanilla no dibuja NADA —
+ni sprite, ni caja, ni fondo, ni animación que arreglar. Los 122 PNG del
+mod validados (ninguno corrupto — el "Image loading failed" del log viejo
+era de la v6.10).
+
+### C. VERIFICACIÓN
+
+  · Compilación contra tModLoader v2026.07.3.0 REAL: **0 errores /
+    0 warnings**.
+  · mock_wing_render_v612.py: simulación AlphaBlend exacta (quads rotados,
+    perfiles de SoftGlow/Ring/GlowOrb, lerp hacia el tinte) — 24 escenas
+    validadas por VLM.
+
 ## Commit v6.11 — EL VÓRTICE INVISIBLE ARREGLADO + LAS ALAS CON EL CORTE VANILLA CORRECTO (4 frames)
 
 **Reporte del usuario**: "el diseño de las alas se ve bien, pero están mal
