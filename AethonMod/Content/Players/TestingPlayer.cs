@@ -71,6 +71,18 @@ namespace AethonMod.Content.Players
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneCrownItem>());
+            // v6.06: LAS 10 ALAS DE PRUEBA end-game — 2 de luz procedural
+            // (técnica de las coronas) + 8 de spritesheet procedural
+            EnsureItem(ModContent.ItemType<Items.Wings.EventHorizonWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.PhotonRingWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.SolarNovaWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.QuantumPlasmaWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.EtherealVoidWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.GlacialEtherWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.GenesisFossilWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.NebulaPillarWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.EclipseWings>());
+            EnsureItem(ModContent.ItemType<Items.Wings.SupernovaWings>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

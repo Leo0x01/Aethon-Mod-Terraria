@@ -1,5 +1,98 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.06 — LAS 10 ALAS DE PRUEBA END-GAME (2 con técnica de las coronas + 8 con spritesheet procedural)
+
+**Petición del usuario**: "investiga como funcionan las alas en terraria,
+como es su animación y su reacción frente a las acciones del jugador, como
+volar, saltar, caer, o estar en reposo, investiga el código de su
+funcionamiento y crea 7 alas, quiero que para al menos 2 pares de alas uses
+la misma técnica que usaste para crear las coronas y estas alas deben ser
+con la temática del agujero negro nuevo" (+ "dame las 7 propuestas y crea
+otras que tu creas conveniente no te limites solo a las 7" + "De momento
+son todas de pruebas, así que sean alas de end-game" + "se las tienes que
+dar al jugador, pues son de pruebas").
+
+### A. INVESTIGACIÓN (código real de tModLoader en GitHub)
+
+- **`ExampleCustomDrawWings.cs`** del ExampleMod oficial: hook `WingUpdate`
+  (control total de frames/dusts/sonidos), `ModifyEquipTextureDraw`,
+  `VerticalWingSpeeds` (el planeo), `ArmorIDs.Wing.Sets.Stats[Item.wingSlot]
+  = new WingStats(tiempo, velocidad, aceleración)`.
+- **Patch de `Player.cs`** (lógica vanilla extraída): animación vanilla =
+  frame 0 en reposo · ciclo 1→2→3 cada 4 ticks al volar · frame 2 al caer ·
+  frame 1 al planear · frame 0 flotando en agua; sonido de aleteo
+  (SoundID.Item32) por ciclo; `ShouldDrawWingsThatAreAlwaysAnimated()`.
+- **Calamity `WingsofRebirth` + `WingsofRebirthLayer`**: EL PATRÓN para las
+  alas "técnica coronas" — textura de equipo EN BLANCO + `PlayerDrawLayer`
+  (`AfterParent(PlayerDrawLayers.Wings)`) + visibilidad por
+  `drawPlayer.wings == EquipLoader.GetEquipSlot(...)`.
+- **Formato del spritesheet** validado contra la imagen de referencia del
+  usuario (5 alas × 4 estados): tira vertical de 4 frames.
+
+### B. LAS 2 ALAS "TÉCNICA CORONAS" (temática agujero negro carmesí)
+
+PNG de equipo EN BLANCO (como Calamity) + TODO el dibujado por la
+biblioteca VFX + animación PROCEDURAL por MUELLES (sin frames):
+
+1. **Alas del Horizonte de Sucesos** (200 ticks · 9.5 · ×3): por lado, un
+   mini horizonte de sucesos negro con anillo de fotones + TRES ARCOS DE
+   ACRECIÓN anidados (paleta VoidQueen del agujero) + DOPPLER δ³ (el lado
+   que avanza arde más) + CUENTAS DE MATERIA orbitando al volar. Se pliegan
+   en reposo, se despliegan al caer, aleteo de onda continua al volar.
+2. **Alas del Anillo de Fotones** (200 · 9 · ×3.2): por lado, una
+   micro-singularidad + CINCO HOJAS DE LUZ curvadas que se comprimen en
+   reposo y abren en abanico al volar + PULSOS DE FOTONES viajando hacia
+   las puntas + mini-anillos de Einstein rotando en las puntas.
+
+Implementación: `WingAnimPlayer` (ModPlayer: muelle de apertura con
+overshoot orgánico, fase de aleteo, dusts y sonido solo si funcionales) +
+`EventHorizonWingRenderer` / `PhotonRingWingRenderer` (VFX) +
+`EventHorizonWingsDrawLayer` / `PhotonRingWingsDrawLayer`
+(`AfterParent(PlayerDrawLayers.Wings)` → `VFXCore.AppendToPlayerDraw`, el
+camino de las coronas) + iluminación del mundo muestreada (arden de noche,
+se integran de día) + gravedad invertida respetada.
+
+### C. LAS 8 ALAS CON SPRITESHEET PROCEDURAL (flujo vanilla 100%)
+
+`research/wings/gen_wings.py` — motor de arte con 7 ESTILOS (emplumadas /
+membrana / llama / cristal / nebulosa / eclipse / nova), supersampleado 4×,
+outline estilo Terraria, sombreado superior, simetría espejo TOTAL (misma
+semilla rng por lado) y AUTO-ENCAJE por recorte (imposible cortarse;
+alturas múltiplo de 4 por `texture.Frame(1,4)`). Dos rondas de validación
+VLM (8.8/8.4/8.0/7.0/7.0/8.0/7.4/8.4 → ajustes → **8/8 APROBADAS**):
+
+| Alas | Estilo | Vuelo |
+|---|---|---|
+| Nova Solar | lenguadas de plasma blanco→dorado→rojo | 190 · 9.5 |
+| Plasma Cuántico | shards cian facetados + destellos | 180 · **10** (récord) |
+| Vacío Etéreo | membrana púrpura + venas fucsia + estrellas | 180 · 9 |
+| Éter Glacial | plumas celestes + carámbanos (planeo lento) | 180 · 8.5 |
+| Fósiles del Génesis | hueso + vetas ámbar + sedimento | 180 · 9 |
+| Pilar de Nebulosa | cuerpo magenta translúcido + borde cian | 185 · 9 |
+| Eclipse | discos negros + rayos de corona oro | 190 · 9.2 |
+| Supernova | plumas de choque + anillos de onda | 185 · 9.4 |
+
+Clase base `AethonWings` (stats por `WingStats`, `VerticalWingSpeeds` con
+personalidad, dusts de vuelo por ala — todos DustIDs ya usados por el mod),
+subclases finas en `SheetWings.cs`, tooltips de color tipo coronas.
+
+### D. ENTREGA Y LOCALIZACIÓN
+
+- `TestingPlayer`: las 10 alas garantizadas en el inventario en cada
+  entrada al mundo (patrón `EnsureItem` de las armas cósmicas).
+- Recetas de madera (5) para recuperarlas si se pierden (como las coronas).
+- Localización es-ES + en-US (DisplayName + Tooltip de las 10).
+- build.txt → 6.06.
+
+### E. VERIFICACIÓN
+
+Compilado contra tModLoader **v2025.06.3.0 real** (.NET 8 SDK + dlls del
+release de GitHub en /tmp/verify; referencia `tModLoader.dll` +
+`TerrariaHooks.dll` + FNA + ReLogic): **Build succeeded · 0 errores ·
+0 warnings**. Nota de arquitectura descubierta: desde las versiones 2025
+la API de mods vive en `tModLoader.dll` (raíz del zip), NO en
+`TerrariaHooks.dll` (que solo es la vanilla con ganchos).
+
 ## Commit v6.05 — EL AGUJERO NEGRO CARMESÍ: COPIA EXACTA + PARÁMETROS
 
 **Petición del usuario**: "primero toma una copia exacta del agujero negro
