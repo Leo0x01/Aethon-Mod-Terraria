@@ -1,0 +1,65 @@
+[
+  {
+    "url": "https://www.semanticscholar.org",
+    "name": "[PDF] Smoke Simulation with Perlin Noise",
+    "snippet": "This work is studying real-time generation of smoke simulation based on a particle system and used texture mapping (Perlin noise ) and transparency ...",
+    "host_name": "www.semanticscholar.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://pages.cs.wisc.edu",
+    "name": "Cartoon Rendering of Smoke Animations - Computer Sciences",
+    "snippet": "by A Selle · Cited by 88 — We describe a technique for generating cartoon style animations of smoke . Particle systems are typically used to simulate and render smoke in real time ... 4 pages",
+    "host_name": "pages.cs.wisc.edu",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://thebookofshaders.com",
+    "name": "Fractal Brownian Motion",
+    "snippet": "It's essentially an fBm , but constructed from the absolute value of a signed noise to create sharp valleys in the function.",
+    "host_name": "thebookofshaders.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://garagefarm.net",
+    "name": "Perlin Noise: Implementation, Procedural Generation, and",
+    "snippet": "Nov 7, 2024 — Perlin Noise is a procedural noise algorithm designed to create smooth, natural looking randomness rather than the disconnected variation ...",
+    "host_name": "garagefarm.net",
+    "rank": 3,
+    "date": "Nov 7, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://andrewkchan.dev",
+    "name": "Simulating Fluids, Fire, and Smoke in Real-Time - Andrew Chan",
+    "snippet": "Dec 14, 2023 — It walks through the math behind fluid dynamics, parallel algorithms for modeling fluids, and the extra combustion bits that make fire special.",
+    "host_name": "andrewkchan.dev",
+    "rank": 4,
+    "date": "Dec 14, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.scratchapixel.com",
+    "name": "Value Noise and Procedural Patterns",
+    "snippet": "This technique with a 2D noise can produce patterns suitable to simulate fire, smoke , or clouds. ValueNoise noise ; float frequency = 0.02f; float ...",
+    "host_name": "www.scratchapixel.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://clas.iusb.edu",
+    "name": "Realistic Real-Time Rendering of Fire in a Production System",
+    "snippet": "by Y Vanzine · 2007 — The thesis presents an effort at developing a robust, interactive framework for rendering 3-D fire in real-time in a production environment. 18 pages",
+    "host_name": "clas.iusb.edu",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  }
+]

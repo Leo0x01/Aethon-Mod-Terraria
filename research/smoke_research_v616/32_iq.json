@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://iquilezles.org/articles/fbm",
+    "name": "fBM - Inigo Quilez",
+    "snippet": "A Fractional Brownian Motion is a similar process in which the increments are not completely independent from each other, but there's some sort of memory to the ...",
+    "host_name": "iquilezles.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://iquilezles.org/articles/warp",
+    "name": "Domain warping - Inigo Quilez",
+    "snippet": "So we are going to use some standard fBM (Fractional Brownian Motion) which is a simple sum of noise waves with increasing frequencies and decreasing amplitudes ...",
+    "host_name": "iquilezles.org",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://iquilezles.org/articles/morenoise",
+    "name": "value noise derivatives - 2008 - Inigo Quilez",
+    "snippet": "The fBM (Fractional Brownian Motion) is normally implemented as a fractal sum of Value Noise functions. with w=1/2 and s=2, or something close, normally. When s ...",
+    "host_name": "iquilezles.org",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://thebookofshaders.com/13",
+    "name": "Fractal Brownian Motion - The Book of Shaders",
+    "snippet": "This technique is called \"fractal Brownian Motion\" (fBM), or simply \"fractal noise\", This technique is commonly used to construct procedural landscapes. read ...",
+    "host_name": "thebookofshaders.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.shadertoy.com/view/WsV3zz",
+    "name": "FBM Scaling - Shadertoy",
+    "snippet": "Oct 1, 2019 · ... Fractional Brownian Motion with gain=0.5. More info: http://iquilezles.org/articles/fbm/fbm.htm. Common, Sound, Buffer A, Buffer B, Buffer C ...",
+    "host_name": "www.shadertoy.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

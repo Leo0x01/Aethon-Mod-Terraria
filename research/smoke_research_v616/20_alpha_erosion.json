@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://realtimevfx.com",
+    "name": "What is your Alpha/Opacity Mask/Clip/Erode Animation",
+    "snippet": "Feb 13, 2019 — Another trick I figured out is to use “equalized” noise textures for my alpha crawls. In Photoshop, go to Image > Adjustments > Equalize.",
+    "host_name": "realtimevfx.com",
+    "rank": 0,
+    "date": "Feb 13, 2019",
+    "favicon": ""
+  },
+  {
+    "url": "https://vfxdoc.readthedocs.io",
+    "name": "Alpha Erosion - VFXDoc",
+    "snippet": "Alpha erosion is a process of eroding opaque (or at least non-transparent) pixels based on different criteria. the shape dissolves itself into nothing.",
+    "host_name": "vfxdoc.readthedocs.io",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "http://www.mirzabeig.com",
+    "name": "Logo Dissolve with Particles - Mirza's Realm",
+    "snippet": "The alpha fades in completely 25% of the way, holds to 75%, and then fades out. A Scroll Speed of 1 causes the noise to animate during the lifetime of the  ...",
+    "host_name": "www.mirzabeig.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://torchinsky.me",
+    "name": "Stylized VFX in Unity. Part 1: Step, Smoothstep, Dissolve",
+    "snippet": "Nov 23, 2020 — In this article I am going to explain the basics of creation of the stylized visual effect for games.",
+    "host_name": "torchinsky.me",
+    "rank": 3,
+    "date": "Nov 23, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://realtimevfx.fandom.com",
+    "name": "Erosion - RealtimeVFX Wiki - Fandom",
+    "snippet": "Erosion, otherwise known known as Dissolving , is a technique used to \"fade out\" particles with intricate detail. This is commonly implemented by feeding a ... Read more",
+    "host_name": "realtimevfx.fandom.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

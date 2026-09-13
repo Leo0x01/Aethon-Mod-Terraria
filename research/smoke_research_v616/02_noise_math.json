@@ -1,0 +1,65 @@
+[
+  {
+    "url": "https://thebookofshaders.com",
+    "name": "Fractal Brownian Motion",
+    "snippet": "When you have more than 4 octaves , try changing the lacunarity value . Also with >4 octaves , change the gain value and see what happens. Note how with each ... Read more",
+    "host_name": "thebookofshaders.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://blog.demofox.org",
+    "name": "Perlin Noise Experiments - The blog at the bottom of the sea",
+    "snippet": "Apr 11, 2021 — Perlin noise is a specific version of lattice gradient noise , one way of generating the “base” noise images, each “ octave ” of this kind of sums, ... Read more",
+    "host_name": "blog.demofox.org",
+    "rank": 1,
+    "date": "Apr 11, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com",
+    "name": "ambient/R/noise-perlin.R at main",
+    "snippet": "Perlin noise generator #' #' This function generates either 2 or 3 dimensional perlin noise , with optional #' pertubation and fractality. Perlin noise is ... Read more",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://libnoise.sourceforge.net",
+    "name": "Glossary - libnoise",
+    "snippet": "A multiplier that determines how quickly the frequency increases for each successive octave in a Perlin - noise function. The frequency of each successive octave ... Read more",
+    "host_name": "libnoise.sourceforge.net",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.scratchapixel.com",
+    "name": "Value Noise and Procedural Patterns",
+    "snippet": "When Ken Perlin originally developed his noise function, he proposed a few simple algorithms to generate interesting solid textures using this function as a ... Read more",
+    "host_name": "www.scratchapixel.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://graphics.stanford.edu",
+    "name": "Using The Noise Functions",
+    "snippet": "This document gives a short introduction to Ken Perlin's (Technical Academy Award-winning) noise function. Perlin Noise is used ubiquitously in procedural ... Read more",
+    "host_name": "graphics.stanford.edu",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://leatherbee.org",
+    "name": "Perlin and Simplex Noise - LeatherBee Games",
+    "snippet": "Oct 24, 2018 — Lacunarity and gain measure how much the frequency and amplitude of each wave changes with each octave . For most applications, the lacunarity ... Read more",
+    "host_name": "leatherbee.org",
+    "rank": 6,
+    "date": "Oct 24, 2018",
+    "favicon": ""
+  }
+]

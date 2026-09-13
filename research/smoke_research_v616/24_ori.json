@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Making of Ori and the Will of the Wisps Teaser: Cinematic",
+    "snippet": "The video focuses on how our timeline integrates with all of our custom frameworks visual effects , camera, depth of field, camera shakes, ...",
+    "host_name": "discussions.unity.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://vfxlabs.net",
+    "name": "Fog of War – Technical Breakdown",
+    "snippet": "The view of the actual particles , showing some of the shader features that control the edges and fade softness. Excuse the jittery visuals, compression and ... Read more",
+    "host_name": "vfxlabs.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.pinterest.com",
+    "name": "Unity VFX - Faking Volumetric Fog (Particle System Tutorial)",
+    "snippet": "Learn how to create a very simple, but convincing and realistic volumetric fog effect using particles in Unity 5.5. This tutorial will show ...",
+    "host_name": "www.pinterest.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://realtimevfx.com",
+    "name": "Recreating Dig Trail Effect From Ori",
+    "snippet": "Nov 18, 2020 — Hey everyone, so I'm trying to recreate an effect as close as possible to the following trail from Ori and the Will of the Wisps and I find ...",
+    "host_name": "realtimevfx.com",
+    "rank": 3,
+    "date": "Nov 18, 2020",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://gamedev.stackexchange.com",
+    "name": "how to implement motion blur effect?",
+    "snippet": "Nov 19, 2012 — I wanted to know how one would implement this motion blur or fade effect behind the soccer ball .  Here is what I was thinking . You have the balls ...",
+    "host_name": "gamedev.stackexchange.com",
+    "rank": 0,
+    "date": "Nov 19, 2012",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Character sprite is blurred when moving",
+    "snippet": "Mar 20, 2014 — there is temporary ghosting from previous frames which creates a kind of motion-blur effect. You could get several of the previous video frames ...",
+    "host_name": "discussions.unity.com",
+    "rank": 1,
+    "date": "Mar 20, 2014",
+    "favicon": ""
+  },
+  {
+    "url": "https://canmom.art",
+    "name": "Motion blur & smears - canmom | bryn::writing",
+    "snippet": "Jul 19, 2020 — Animators love to use 'smear' frames to accentuate movements, add variation in a figure, and simulate motion blur .",
+    "host_name": "canmom.art",
+    "rank": 2,
+    "date": "Jul 19, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.traditionalanimation.com",
+    "name": "Smear, Speed & Motion Blur Effects in Animation",
+    "snippet": "Aug 22, 2017 — Motion blur is the smearing of rapidly moving objects in a still image or a sequence of images such as a movie or animation. Read more",
+    "host_name": "www.traditionalanimation.com",
+    "rank": 3,
+    "date": "Aug 22, 2017",
+    "favicon": ""
+  },
+  {
+    "url": "https://mynameismjp.wordpress.com",
+    "name": "Motion Blur Sample - The Danger Zone",
+    "snippet": "The effect is designed to simulate the blurring that occurs when a standard camera takes a photo of objects that are moving relative to the camera, due to the ... Read more",
+    "host_name": "mynameismjp.wordpress.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

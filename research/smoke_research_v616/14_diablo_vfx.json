@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://jangafx.com",
+    "name": "Exploring and Modernizing The VFX Methods of Diablo 3",
+    "snippet": "Mar 2, 2026 — To start with, we're going to create a very basic gradient without the artistic noise just to have a hard edged texture to test and visualize ... Read more",
+    "host_name": "jangafx.com",
+    "rank": 0,
+    "date": "Mar 2, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://realtimevfx.com",
+    "name": "Tutorial: How to recreate the smoke effect from Diablo 3 in",
+    "snippet": "Apr 18, 2020 — In the Assets folder in the Project tab, right click > Create > Shader > VFX Shader Graph. Call it whatever you like. Double click the shader to ... Read more",
+    "host_name": "realtimevfx.com",
+    "rank": 1,
+    "date": "Apr 18, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Tutorial: How to recreate the smoke effect from Diablo 3",
+    "snippet": "Apr 19, 2020 — Tutorial: How to recreate the smoke effect from Diablo 3 using Shader Graph and Visual Effect Graph ... New addition to VFX Graph samples: Smoke ... Read more",
+    "host_name": "discussions.unity.com",
+    "rank": 2,
+    "date": "Apr 19, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com",
+    "name": "JangaFX VFX Software & Tutorials",
+    "snippet": "We create real-time software for VFX Artists in games and film. We also make tutorials on how to create VFX for games! ...more Read more",
+    "host_name": "www.youtube.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

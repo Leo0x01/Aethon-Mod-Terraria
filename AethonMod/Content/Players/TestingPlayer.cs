@@ -71,6 +71,14 @@ namespace AethonMod.Content.Players
             // OLVIDO (100% creado por código, v6.15)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.FusionBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>());
+            // v6.16: EL AGUJERO CÓSMICO (nacido del script Unity del
+            // usuario) y EL AGUJERO DEL UMBRAL (el de la referencia, 100%
+            // código con Doppler, estrías pintadas y runas con huecos)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.CosmicBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.UmbralBlackHoleStaff>());
+            // v6.17: EL AGUJERO DE LA BRUMA — la demostración de la
+            // LIBRERÍA de humo/niebla/bruma procedural del proyecto
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.BrumaBlackHoleStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://discussions.unity.com",
+    "name": "HalfLambert + Color Ramp + Rim Mask - Shaders & Materials",
+    "snippet": "Aug 25, 2011 — Hi guys, I just started learning cg programming for shaders I'm trying to do a half lambert shader with a rim mask following the gdc2011 ...",
+    "host_name": "discussions.unity.com",
+    "rank": 0,
+    "date": "Aug 25, 2011",
+    "favicon": ""
+  },
+  {
+    "url": "http://gurneyjourney.blogspot.com",
+    "name": "Studio Lighting: Part III: Edge Lighting",
+    "snippet": "Nov 3, 2007 — Often called an edge light , it lights up the fringes of the form, separating it from the background. It's also called a “ rim ” or “kicker” in the ... Read more",
+    "host_name": "gurneyjourney.blogspot.com",
+    "rank": 1,
+    "date": "Nov 3, 2007",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.unrealengine.com",
+    "name": "Rim Lighting? - Rendering - Epic Developer Community Forums",
+    "snippet": "Aug 18, 2014 — The gradient aligns itself to the direction of the light source. Using a Colour Look-Up-style gradient texture lose flexibility of colours . it ...",
+    "host_name": "forums.unrealengine.com",
+    "rank": 2,
+    "date": "Aug 18, 2014",
+    "favicon": ""
+  },
+  {
+    "url": "https://documentation.chaos.com",
+    "name": "Render Smoke Color - Phoenix for 3ds Max",
+    "snippet": "Feb 9, 2026 — The Smoke Color can be a uniform color , a mixture of colors dragged by the simulation (RGB), a function of any physical channel, or sampled from ... Read more",
+    "host_name": "documentation.chaos.com",
+    "rank": 3,
+    "date": "Feb 9, 2026",
+    "favicon": ""
+  }
+]

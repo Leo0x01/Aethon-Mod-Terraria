@@ -1,0 +1,65 @@
+[
+  {
+    "url": "https://forum.revolutionarygamesstudio.com",
+    "name": "Fluid Dynamics - Curl Noise - Theory",
+    "snippet": "Aug 1, 2015 — Basically a grid is generated and at each point a noise value is obtained (just a scalar value). Then from this noise the fluid flow vector ... Read more",
+    "host_name": "forum.revolutionarygamesstudio.com",
+    "rank": 0,
+    "date": "Aug 1, 2015",
+    "favicon": ""
+  },
+  {
+    "url": "https://emildziewanowski.com",
+    "name": "Curl Noise",
+    "snippet": "Curl noise is one of the most important VFX building blocks. This formula, F(p) = ∇⨯(∇(SDF(p))*K(p )) a divergence-free curl is the better choice when creating ...",
+    "host_name": "emildziewanowski.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://gamedev.net",
+    "name": "Efficient curl noise for particles",
+    "snippet": "Nov 12, 2018 — Efficient curl noise for particles . Works great and produces a nice fluid, swirly effect. the \"snoise\" function a total of 18 times for each  ...",
+    "host_name": "gamedev.net",
+    "rank": 2,
+    "date": "Nov 12, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.researchgate.net",
+    "name": "Curl-noise for procedural fluid flow | Request PDF",
+    "snippet": "2D digital paintings is simulated with curl - noise . a tiling method for generating divergence - free velocity fields. curl of a scalar function … riving velocity ...",
+    "host_name": "www.researchgate.net",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://catlikecoding.com",
+    "name": "Surface Flow",
+    "snippet": "Dec 14, 2022 — Surface Flow. Velocity and Curl Noise . Create a particle system. Make particles stick to the surface. Flow particles downhill. Apply curl noise. Read more",
+    "host_name": "catlikecoding.com",
+    "rank": 4,
+    "date": "Dec 14, 2022",
+    "favicon": ""
+  },
+  {
+    "url": "https://daily.dev",
+    "name": "Curl noise for organic particle motion",
+    "snippet": "Sep 4, 2026 — Curl noise applies a curl operation to a scalar noise field to produce a divergence - free vector field, which gives particle motion an ...",
+    "host_name": "daily.dev",
+    "rank": 5,
+    "date": "Sep 4, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.unity3d.com",
+    "name": "Perlin Curl Noise | Visual Effect Graph | 10.2.2",
+    "snippet": "The Perlin Curl Noise Operator allows you to sample a noise value within a specified range in two or three dimensions based on provided coordinates. Perlin curl ... Read more",
+    "host_name": "docs.unity3d.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://unity.com",
+    "name": "Real-time Fluid Simulation in Ignitement",
+    "snippet": "Apr 23, 2026 — Solo developer Sørb explains how he uses real-time 2D fluid simulation to create dynamic, gameplay-driven fire VFX in Unity",
+    "host_name": "unity.com",
+    "rank": 0,
+    "date": "Apr 23, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://daily.dev",
+    "name": "Making fire feel alive: Real-time fluid simulation in Ignitement",
+    "snippet": "Apr 23, 2026 — Solo developer Sørb details the real-time 2D fluid simulation powering fire and lava VFX in the upcoming action roguelite Ignitement, ...",
+    "host_name": "daily.dev",
+    "rank": 1,
+    "date": "Apr 23, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://cs184-firesim.github.io",
+    "name": "Fire Simulation and Rendering",
+    "snippet": "In this project, we achieved real-time simulation and rendering of fire effects in both 2D and 3D . Our implementation utilized the Unity engine",
+    "host_name": "cs184-firesim.github.io",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.vfxapprentice.com",
+    "name": "Everything to Know About the Properties of Fire FX in Games",
+    "snippet": "Jun 1, 2023 — Convincing real - time simulations balance explicit alterations across five core axes: structural shape, heat-dictated color scales, random ...",
+    "host_name": "www.vfxapprentice.com",
+    "rank": 3,
+    "date": "Jun 1, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://80.lv",
+    "name": "Awesome Real-Time Liquid and Fire Simulation Made in",
+    "snippet": "Aug 1, 2023 — With it, you can make natural-looking VFX , including fire, water, smoke, dust, clouds, and more, create custom game mechanics based on realistic ... Read more",
+    "host_name": "80.lv",
+    "rank": 4,
+    "date": "Aug 1, 2023",
+    "favicon": ""
+  }
+]

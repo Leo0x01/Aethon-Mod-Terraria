@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tAPI - [Tutorial] Custom Dust | Page 2",
+    "snippet": "Jan 6, 2015 — This tutorial will teach you how to add custom dust to the game and completely control its behavior.",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Jan 6, 2015",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net",
+    "name": "Dust Class Reference",
+    "snippet": "Vanilla Dust are enumerated in the DustID class.New Dust can be implemented using the ModDust class.The Basic Dust Guideteaches the basics on using Dust . In ... Read more",
+    "host_name": "docs.tmodloader.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.fandom.com",
+    "name": "Dust IDs - Terraria Wiki - Fandom",
+    "snippet": "This page lists the IDs of dust particles in Terraria . Those particles that are not marked as \"safe\" will be replaced with dust cloud (ID 16) if the Blood ... Read more",
+    "host_name": "terraria.fandom.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.wiki.gg",
+    "name": "Dust IDs - Official Terraria Wiki",
+    "snippet": "This page lists the IDs of all dust particles in Terraria . Dust marked as not \"safe\" will be replaced with clouds ( dust 16) if Blood and Gore is disabled.  ...",
+    "host_name": "terraria.wiki.gg",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

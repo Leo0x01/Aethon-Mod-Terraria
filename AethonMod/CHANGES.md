@@ -1,5 +1,145 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.16 — TRES AGUJEROS NUEVOS + LA LIBRERÍA DE BRUMA (humo/niebla procedural)
+
+**Petición del usuario** (dos tareas en un mensaje):
+1. "es momento de crear otro, esta vez crea dos agujeros negros: en uno
+usa esto [script Unity CosmicBlackHole.cs + shader Custom/CosmicRing] y
+agrega lo que falta; y el otro hazlo usando la referencia como base...
+todo lo debes hacer por código. No olvides darle los 2 nuevos agujeros
+negros al jugador y todo en español."
+2. "crea una librería especializada en humo, niebla, bruma y todo eso
+de forma procedural y con calidad, que sea capaz de usarse en cualquier
+proporción ya sea grande o pequeño y en todo se vea bien; para esto
+investiga otros mods y busca recursos en internet... luego crea un 3er
+agujero con todo lo aprendido y librerías creadas en el proyecto, todo
+por código."
+
+**Los 4 agujeros existentes (base, vacío, fusión, olvido): INTACTOS.**
+El mod tiene ahora SIETE agujeros negros.
+
+### A. EL AGUJERO NEGRO CÓSMICO (#5) — nacido del script Unity del usuario
+
+`CosmicBlackHoleRenderer.cs` + `CosmicBlackHoleProjectile.cs` +
+`CosmicBlackHoleStaff.cs` (Bastón del Agujero Negro Cósmico). El script
+Unity traducido FIEL al sistema de pinceles del mod (100% código):
+
+  · **El shader, exacto**: `glow = sin(uv.x·20 + t·5)·0.5+0.5` → VEINTE
+    BANDAS de brillo recorriendo el anillo a 5 rad/s — la emisión
+    pulsa VIAJANDO, como el CosmicRing del usuario.
+  · **El color, exacto**: magenta (1.0, 0.2, 0.8) = (255,51,204).
+  · **Rotación 20°/s** (rotationSpeed del script), **distorsión
+    sinusoidal global** (sin(t)·0.3 — el SetGlobalFloat del shader),
+    **lightningParticles** (2 rayos violeta en el núcleo + 2 magenta
+    escapando del anillo), **runeParticles** (8 runas doradas de
+    CIRCUITO orbitando + perlas), **coreSphere** (BlackDisk absoluto).
+  · **Lo que faltaba, añadido**: aura oscura, nebulosas violeta/azul,
+    ecos del anillo (la resonancia del shader), corredores de fotones
+    con estela, destellos polares, ondas de distorsión, 9 partículas
+    radiales y aura final pulsante.
+
+### B. EL AGUJERO NEGRO DEL UMBRAL (#6) — el agujero de LA REFERENCIA
+
+`UmbralBlackHoleRenderer.cs` + proyectil + bastón. La referencia del
+usuario (imagen 1536×1024) medida PÍXEL A PÍXEL (perfiles radial y
+angular, distribución de tonos, localización de núcleos blancos y
+píxeles dorados) y reconstruida 100% por código:
+
+  · **La geometría medida — la topología "∞"**: esfera de vacío +
+    disco fino cruzando POR DEBAJO (línea delantera a ~1.4R) + **ARCO
+    DE LENTE DOBLE sobre la esfera** (el lado lejano doblado ARRIBA:
+    banda salmón a 1.45R + segundo anillo de fotones a 1.22R con línea
+    de filo fina e incandescente) + **ARCO INFERIOR magenta** (la
+    imagen lenseda de abajo, 1.28R) + **ALA BARRIDA** (banda circular
+    GORDA a 2.45R barriendo de abajo-derecha al extremo izquierdo —
+    "a broad, sweeping wing of light").
+  · **El Doppler medido**: máximo en el extremo IZQUIERDO (lum 185 vs
+    128 del derecho — cúbico), núcleos blanco-rosado (249,210,220)
+    concentrados en 120-180°, y la **CUÑA OSCURA** de 240-270°
+    (t≈4.45, el sector muerto medido).
+  · **La paleta medida** (¡rosa/magenta, NO naranja!): blanco-rosado
+    (250,210,220), rosa caliente (243,128,149), rosa (225,74,127),
+    carmesí-rosa (183,29,83), magenta profundo (153,14,76), vino
+    (110,17,51), ala magenta (240,41,168), arco salmón (248,110,95).
+  · **El círculo de runas**: dorado-ámbar MEDIDO (240,124,65), 12
+    glifos de SIGILO ANTIGUO (colmillos, coronas, garras) con HUECOS
+    por hash + glifos apagados donde la PÚA cruza el círculo; aro roto
+    en 30 segmentos.
+  · La PÚA de energía blanco-rosa (sup-derecha), el RAYO naranja-rojo
+    dentado ramificando abajo, 12 BRASAS con estelas de movimiento,
+    filamentos violeta cayendo al vacío y el vacío FINAL repintado
+    (el centro queda del NEGRO MÁS ABSOLUTO: lum 3.4 en el mock).
+
+### C. LA LIBRERÍA DE BRUMA — humo/niebla/bruma procedural (Content/Effects/Bruma)
+
+Investigación previa REAL (subagente de investigación web, 34 búsquedas
++ 12 fuentes leídas completas: JangaFX/Diablo 3 — reglas anti-fase y
+"Scale by Mids" de Julian Love —, The Book of Shaders, Inigo Quilez —
+fBm/warping/band-limiting —, VFXDoc — erosión de alfa —, vfxlabs —
+overdraw/paralaje —, vanilla Terraria DECOMPILADO — tinte por
+iluminación, smear 130-134, LOD por conteo —, Calamity — flipbooks y 3
+lotes de blending —, Starlight River — partículas por GPU —,
+ParticleLibrary). Informe completo: `research/smoke_research_v616/`.
+
+  · **`BrumaNoise.cs`** — hash determinista + value noise con QUINTIC
+    de Perlin + fBm con LACUNARIDAD 2 EXACTA (anti-fase Diablo 3) +
+    **domain warping** de IQ (el look "humo vivo") + **curl noise**
+    (remolinos sin divergencia) + **OctavesForRadius** (band-limiting:
+    el detalle fino mide SIEMPRE ~3px) + Erode (la erosión de alfa de
+    VFXDoc: el humo muere en GRUMOS, no se desvanece) + ByMids.
+  · **`BrumaBrushes.cs`** — 8 texturas de puff 128×128 NACIDAS DE
+    CÓDIGO EN RUNTIME (Texture2D+SetData, CERO PNGs): RGB blanco +
+    alfa = falloffRadial(blando) × ByMids(WarpedFbm) — la máscara
+    blandita y el ruido con detalle (regla Diablo 3). Disposición en
+    BrumaSystem.Unload (cero fugas de VRAM).
+  · **`BrumaFX.cs`** — LA API: `Puff` (núcleo texturizado + sub-blobs
+    ∝ PERÍMETRO con respiración DESFASADA y presupuesto de alfa de
+    COBERTURA CONSTANTE 1−(1−A)^(1/(n+1)) — la invariancia de escala
+    por construcción), `Cloud` (racimo con deriva por senos
+    INCONMENSURABLES 0.31/0.71 + curl), `Tendril` (voluta por ruta con
+    balanceo y erosión), `Column` (nace, crece al ascender, se erosiona
+    al morir) y `MistBand` (capas de niebla con paralaje y gradiente
+    vertical). Contrato: dibuja en el lote ABIERTO que el llamador
+    elija (aditivo = bruma LUMINOSA; alfa = bruma QUE OCLUYE).
+  · **`BrumaSystem.cs`** — el ciclo de vida (disposición al recargar).
+
+### D. EL AGUJERO NEGRO DE LA BRUMA (#7) — la demostración de la librería
+
+`BrumaBlackHoleRenderer.cs` + proyectil + bastón. Un vacío GELIDO
+envuelto en bruma nebular fría (teal/cian/violeta — identidad única
+entre los 7): HALO con `BrumaFX.Cloud`, ANILLO de fumarelitos con
+`BrumaFX.Puff` (densidad VIVA por fBm), VOLUTAS espiralando al núcleo
+con `BrumaFX.Tendril` (la materia devorada se disuelve en humo) y
+CHIMENEAS polares + anillo de fotones cian + escarcha flotante.
+
+### E. ENTREGA Y REGISTRO (el checklist completo de lecciones)
+
+  · `TestingPlayer.OnEnterWorld`: EnsureItem × 3 (Cósmico, Umbral,
+    Bruma) — el kit garantiza los TRES bastones en cada entrada al mundo.
+  · `BlackHoleLensSystem`: los 3 nuevos registrados (fuente de lente +
+    multiplicador + DrawCoreVisuals encima de la distorsión).
+  · PNGs de sombra 76×76 de los 3 proyectiles (patrón v6.09:
+    rim de identidad por agujero — magenta Unity / naranja Doppler /
+    teal gelido) + iconos 28×30 (generadores reproducibles
+    `tools/gen_cosmic_umbral_tex_v616.py` y `tools/gen_bruma_tex_v617.py`).
+  · Auditoría anti-recurrencia: 49/49 clases ModProjectile/ModItem con
+    su PNG (0 faltantes).
+  · Recetas: 5 madera (como los hermanos).
+
+### F. VALIDACIÓN
+
+  · **Compilación contra tModLoader 2026.07.3.0 REAL**: 0 errores,
+    0 warnings (7 iteraciones durante el desarrollo del Umbral).
+  · **Mock exacto** (`tools/mock_3agujeros_v616.py`, 1:1 con los
+    renderers sobre los pinceles reales + blending XNA modelado):
+    hoja comparativa de los 3 + Umbral vs referencia (7 rondas de
+    medición/iteración) + Bruma a 0.35× y 1.0× (la invariancia de
+    escala de la librería demostrada).
+  · VLM sobre la hoja: Cósmico 9/10, Umbral 10/10 como pieza, Bruma
+    7.5/10 (mock en `research/agujeros_v616/`).
+
+---
+
 ## Commit v6.15 — EL OLVIDO 100% CÓDIGO: LA REFERENCIA ROJA BORRADA, NUEVA REFERENCIA MÁGICA
 
 **Feedback del usuario**: "creaste OlvidoVortex.png y usaste la misma

@@ -318,6 +318,9 @@ namespace AethonMod.Content.Effects
             int crimsonHoleType = ModContent.ProjectileType<CrimsonBlackHoleProjectile>();
             int fusionHoleType = ModContent.ProjectileType<FusionBlackHoleProjectile>();
             int olvidoHoleType = ModContent.ProjectileType<OlvidoBlackHoleProjectile>();
+            int cosmicHoleType = ModContent.ProjectileType<CosmicBlackHoleProjectile>();
+            int umbralHoleType = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
+            int brumaHoleType = ModContent.ProjectileType<BrumaBlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
@@ -345,7 +348,9 @@ namespace AethonMod.Content.Effects
                 if (p == null || !p.active) continue;
 
                 if (p.type == blackHoleType || p.type == crimsonHoleType ||
-                    p.type == fusionHoleType || p.type == olvidoHoleType)
+                    p.type == fusionHoleType || p.type == olvidoHoleType ||
+                    p.type == cosmicHoleType || p.type == umbralHoleType ||
+                    p.type == brumaHoleType)
                 {
                     if (count >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
@@ -368,6 +373,12 @@ namespace AethonMod.Content.Effects
                         radiusMult = FusionBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == olvidoHoleType)
                         radiusMult = OlvidoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == cosmicHoleType)
+                        radiusMult = CosmicBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == umbralHoleType)
+                        radiusMult = UmbralBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == brumaHoleType)
+                        radiusMult = BrumaBlackHoleProjectile.LensRadiusMult;
                     float radius = p.width * p.scale / screenSize.X * radiusMult;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
@@ -740,6 +751,12 @@ namespace AethonMod.Content.Effects
                         FusionBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == olvidoHoleType)
                         OlvidoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == cosmicHoleType)
+                        CosmicBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == umbralHoleType)
+                        UmbralBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == brumaHoleType)
+                        BrumaBlackHoleProjectile.DrawCoreVisuals(bh);
                     else
                         BlackHoleProjectile.DrawCoreVisuals(bh, false);
                 }

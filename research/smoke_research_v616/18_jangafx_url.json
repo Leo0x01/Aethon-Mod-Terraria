@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://jangafx.com",
+    "name": "Exploring and Modernizing The VFX Methods of Diablo 3",
+    "snippet": "Mar 2, 2026 — Lets explore the famous Diablo 3 VFX talk by Julian Love. We'll investigate how to use D3 techniques in your visual effects today, ...",
+    "host_name": "jangafx.com",
+    "rank": 0,
+    "date": "Mar 2, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.gamedeveloper.com",
+    "name": "Video: How Blizzard created the visual effects of Diablo III",
+    "snippet": "In this GDC 2013 session, Blizzard Entertainment's Julian Love discusses the implementation of visual effects in Blizzard's Diablo franchise.",
+    "host_name": "www.gamedeveloper.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://garydave.artstation.com",
+    "name": "Diablo 3 VFX Shader",
+    "snippet": "Jan 14, 2021 — The infamous \"Blend-Add\" VFX shader from Diablo 3 , A shader that can be both additive and alpha blended at the same time, Uses Amplify Shader ...",
+    "host_name": "garydave.artstation.com",
+    "rank": 2,
+    "date": "Jan 14, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://realtimevfx.com",
+    "name": "I want to recreate the shader from Diablo 3 in Shaderforge",
+    "snippet": "Oct 19, 2016 — Use a color channel or the alpha channel if you aren't using it. Set shuriken to have a random initial color. Use the vertex color channel of ... Read more",
+    "host_name": "realtimevfx.com",
+    "rank": 3,
+    "date": "Oct 19, 2016",
+    "favicon": ""
+  }
+]

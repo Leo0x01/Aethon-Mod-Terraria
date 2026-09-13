@@ -7694,3 +7694,24 @@ Next:
 
 Stage Summary:
 - v6.15: el Olvido renace 100% por código según la nueva referencia mágica — 13 capas, ~380 quads/frame, runas doradas y tormenta eléctrica interiores, validado VLM 9/10 en mock exacto; la referencia roja purgada por completo (sprites + pipeline + menciones); los otros agujeros intactos
+
+---
+Task ID: 30-34
+Agent: Z.ai Code (agente principal)
+Task: v6.16 — TRES AGUJEROS NEGROS NUEVOS (Cósmico + Umbral + Bruma) + LA LIBRERÍA DE BRUMA procedural + entrega al jugador
+
+Work Log:
+- Investigación web de humo/niebla (subagente Task 29): Diablo 3/JangaFX (reglas anti-fase, Scale by Mids), Book of Shaders (fBm quintic), IQ (warping, band-limiting), VFXDoc (erosión de alfa), vfxlabs (overdraw), vanilla decompilado (tinte por iluminación, smear 130-134), Calamity (flipbooks, 3 lotes), Starlight River (GPU) → research/smoke_research_v616/
+- CÓSMICO (#5, del script Unity): CosmicBlackHoleRenderer — shader sin(uv·20+t·5) exacto (20 bandas viajando), magenta (255,51,204), rotación 20°/s, distorsión sin(t)·0.3, rayos violeta/magenta, 8 runas doradas de circuito, BlackDisk, + aura/nebulosas/ecos/fotones/destellos polares/ondas/motas
+- UMBRAL (#6, de la referencia medida): topología "∞" — disco fino (2.6R×1.4R) cruzando abajo + ARCO DE LENTE DOBLE sobre la esfera (1.45R salmón + 1.22R anillo de fotones con filo) + arco inferior magenta (1.28R) + ALA BARRIDA (banda 2.45R) + Doppler cúbico al IZQUIERDO + cuña oscura 240-270° + paleta rosa/magenta MEDIDA + runas ámbar (240,124,65) con huecos + púa + rayo naranja + brasas con estelas + filamentos violeta + vacío final repintado (centro lum 3.4)
+- LIBRERÍA DE BRUMA (Content/Effects/Bruma/): BrumaNoise + BrumaBrushes (8 puffs 128×128 horneados EN RUNTIME con SetData) + BrumaFX (Puff/Cloud/Tendril/Column/MistBand, invariancia de escala por construcción) + BrumaSystem
+- BRUMA (#7): vacío gelido teal/cian/violeta — halo Cloud + fumarelitos Puff + volutas Tendril espiralando al núcleo + chimeneas polares + fotones cian + escarcha
+- ENTREGA: EnsureItem ×3, registro en BlackHoleLensSystem, sombras+iconos ×3 (generadores reproducibles), recetas, auditoría 49/49
+- Validación: mock 1:1 (blending XNA + BrumaNoise en Python + puffs idénticos), hoja VLM (9/10/7.5), Umbral vs referencia 7 rondas (el VLM oscila 2-6; criterio final = medidas de píxel), Bruma a 0.35×/1.0× (invariancia demostrada)
+- build.txt 6.16, CHANGES.md v6.16 (A-F), compilación 0/0 contra tML 2026.07.3.0 real
+
+Test:
+- PENDIENTE (usuario): Build v6.16 → los TRES bastones nuevos se entregan al entrar al mundo
+
+Stage Summary:
+- v6.16: SIETE agujeros negros + la librería de bruma procedural, todo 100% código, entregado, 0/0

@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://www.gamedeveloper.com",
+    "name": "Art Design Deep Dive: Using a 3D pipeline for 2D",
+    "snippet": "Jan 24, 2018 — Dead Cells ' animations are designed, like 2D animations, on key frames. Once, the animation is convincing 't cure cancer, but may help a bit ...",
+    "host_name": "www.gamedeveloper.com",
+    "rank": 0,
+    "date": "Jan 24, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "The Visual Effects of Dead Cells - Unity Engine",
+    "snippet": "Jan 23, 2018 — How would you go on about creating the constant fog and particle-looking effects moving in the front of the camera.",
+    "host_name": "discussions.unity.com",
+    "rank": 1,
+    "date": "Jan 23, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://inlingogames.com",
+    "name": "What VFX in Games Are and Why We Need Them",
+    "snippet": "Oct 21, 2025 — It could be fog hiding danger, Environmental effects contribute to both aesthetics and gameplay mechanics—for example, the fog effect can be ...",
+    "host_name": "inlingogames.com",
+    "rank": 2,
+    "date": "Oct 21, 2025",
+    "favicon": ""
+  }
+]
