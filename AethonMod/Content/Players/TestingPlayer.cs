@@ -67,6 +67,10 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
             // v6.02: EL AGUJERO NEGRO CARMESÍ (hoy con el visual de la referencia)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.CrimsonBlackHoleStaff>());
+            // v6.14: LOS DOS AGUJEROS NUEVOS — la FUSIÓN (base+vacío) y el
+            // OLVIDO (100% exacto a la referencia Regicide)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.FusionBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());

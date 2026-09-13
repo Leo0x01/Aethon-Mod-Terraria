@@ -1,5 +1,36 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.14.2 — LOS BASTONES NUEVOS SE ENTREGAN AL JUGADOR (el kit de pruebas los olvidó)
+
+**Feedback del usuario**: "te olvidaste que debes darselo al jugador".
+
+**Causa**: el sistema de entrega del mod es `TestingPlayer.OnEnterWorld`
+— cada arma cósmica en desarrollo se GARANTIZA en el inventario en cada
+entrada al mundo (`EnsureItem`, v5.98: "venga de la versión que venga el
+guardado del jugador"). La v6.14 añadió los dos bastones nuevos con
+receta (5 de madera, como todos) pero jamás los registró en el kit → el
+jugador entraba al mundo y NO recibía ni el de FUSIÓN ni el del OLVIDO.
+
+**El fix** (2 líneas en `TestingPlayer.cs`):
+
+```csharp
+// v6.14: LOS DOS AGUJEROS NUEVOS — la FUSIÓN (base+vacío) y el
+// OLVIDO (100% exacto a la referencia Regicide)
+EnsureItem(ModContent.ItemType<Weapons.Cosmic.FusionBlackHoleStaff>());
+EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>());
+```
+
+Desde ahora, al entrar a cualquier mundo (single player), el jugador
+recibe ambos bastones si no los tiene — mismo protocolo que el carmesí
+desde v6.02. La receta de 5 de madera sigue como vía alternativa.
+
+**LECCIÓN anti-recurrencia**: cada arma nueva debe registrarse en DOS
+sitios — su archivo (defaults + receta) Y el kit de `TestingPlayer`
+(`EnsureItem`). Añadir al checklist de entrega.
+
+**Verificación**: compilación contra tModLoader v2026.07.3.0 REAL:
+**0 errores · 0 warnings**.
+
 ## Commit v6.14.1 — FIX DE CARGA: las 2 texturas de sombra olvidadas (el mod no cargaba)
 
 **Feedback del usuario**: "hay varios errores" + client.log — el mod se
