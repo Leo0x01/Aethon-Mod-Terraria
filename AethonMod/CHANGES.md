@@ -1,5 +1,87 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.10 — EL AGUJERO "OBLIVION" DE LA REFERENCIA REAL + TODAS LAS ALAS REHECHAS CON ARTE IA
+
+**Reporte del usuario**: "el agujero negro sigue sin ser exacto y además dio
+un error" (client.log con InvalidOperationException: Begin called before
+End en CrimsonBlackHoleProjectile.RestoreSpriteBatch) + la imagen ORIGINAL
+de la referencia (Reddit: Ancients Awakened — Regicide, Oblivion God of the
+Void) + "también cambia todas las alas, esas alas no parecen alas, se ven
+feas".
+
+### A. EL ERROR DEL CLIENT.LOG — CAUSA RAÍZ Y FIX
+
+El crash ocurría al final de la vida del agujero: la secuencia de
+evaporación componía `scale *= 1-collapse` hacia ~0 → `rSh < 2` → el
+renderer v6.09 hacía EARLY RETURN sin cerrar el batch → RestoreSpriteBatch
+hacía un `Begin()` DUPLICADO sobre un batch ya activo → FNA lanza
+InvalidOperationException y tML desactiva el dibujado del proyectil.
+
+**Fix a prueba de balas (PreDraw v6.10)**: cerramos el batch del pase de
+proyectiles nosotros (`try End catch` — si ya estaba cerrado por el hook de
+otro mod, lo respetamos), dibujamos con el renderer (que exige batch
+CERRADO y lo deja CERRADO pase lo que pase con try/catch defensivo) y
+restauramos con los parámetros EXACTOS de `Main.DrawProjectiles`
+(decompilado de tML 2026.07.3.0: Deferred, AlphaBlend, DefaultSamplerState,
+None, **Main.Rasterizer**, null, **Main.Transform**). Además la escala del
+colapso ahora tiene piso 0.06 (esfera mínima de 5.5px).
+
+### B. EL AGUJERO "OBLIVION" — LA REFERENCIA ORIGINAL POR FIN ENTENDIDA
+
+La imagen de Reddit NO es un Gargantua de disco delgado (lo que v6.09
+calibró): es un VÓRTICE DE PLASMA. Mediciones numpy píxel-exactas (esfera
+R=35px en (493,223), ajuste circular 84%):
+  · Esfera negra compacta + GAP oscuro 1.0–1.25R (el brillo NO la toca).
+  · Anillo interior 360° a ~1.5R con borde interno blanco-caliente
+    (hotspot medido: (255,246,137) a 355°, 3R).
+  · UNA HOJA GRUESA EN CRESCIENTE que barre POR ARRIBA (O→NO→N→NNE):
+    se mantiene a ~3R hasta 330° y SE DISPARA en aguja hasta 6.1R a 345°.
+  · Segundo cresiente BAJO (ESE→S→SSW) con borde exterior a 6.3R por el
+    sur (verificado: la masa lejana SE ES plasma rosa, no el cuello
+    plateado del jefe — este último se distinguió por color r≈g).
+  · TODO inclinado SW→NE (~24°) y fluyendo en sentido HORARIO.
+  · Rayos azul-violeta RAMIFICADOS dentro de la esfera (no cruzan el
+    centro), chispas blanco-amarillas, mechones hasta 6.5R.
+
+**CrimsonBlackHoleRenderer.cs v6.10**: reescrito completo — 8 capas (halo
+→ anillo+rim caliente → hoja superior → cresiente inferior → hotspot/nudo/
+aguja/mechones → ESFERA NEGRA opaca (garantiza el gap) → rayos ramificados
+→ chispas+bloom), todo en unidades de R=46px (GIGANTE autorizado:
+envergadura ~580px), girando en sentido horario a 0.16 rad/s, con
+turbulencia de pinceladas, filamentos calientes dentro de las hojas, colas
+de velocidad y jitter de borde. BlackHolePhysics.cs ELIMINADO (la nueva
+geometría es art-directed, no GR; queda en git history). Prototipo Python
+calibrado (tools/mock_oblivion_v610.py): perfil radial EMA 27/255 y
+extensión angular por cuadrantes emparejada (aguja NNE 6.0R vs 6.1R, sur
+5.7R vs 6.4R, oeste 3.2R vs 2.3R).
+
+### C. LAS 8 ALAS — ARTE IA REFINADO, SISTEMA VANILLA
+
+Las alas de luz procedural "no parecían alas". Ahora son SPRITES de verdad:
+  1. 8 diseños generados con IA (temas: horizonte de sucesos, anillo de
+     fotones, mariposa cósmica, hada estelar, corona solar, nebulosa viva,
+     eclipse total, cometa carmesí).
+  2. Pipeline tools/gen_ai_wings_v610.py: alfa desde fondo negro (umbral
+     suave + cierre morfológico para no agujerear plumas oscuras) →
+     SIMETRÍA PERFECTA por espejo (verificada numéricamente: diff=0.0000)
+     → contorno oscuro Terraria → limpieza de píxeles sueltos → supresión
+     del cuerpo central (mariposa/hada/eclipse/solar) → ANIMACIÓN de 7
+     frames (cada mitad rota sobre la RAÍZ: reposo plegado, planeo, apex
+     alzado, ciclo) → tira {Nombre}_Wings.png + icono.
+  3. **DESCUBRIMIENTO al decompilar DrawPlayer_09_Wings**: vanilla corta
+     las alas en **Height()/7 — ¡SIETE frames, no 4!** (origen (W/2,
+     H/14)). v6.06 usó 4 frames: por eso las alas salían "mal ubicadas".
+     El pipeline genera las 7 correctamente.
+  4. AethonWingItems.cs (antes VFXWingItems.cs): base estándar con
+     [AutoloadEquip(EquipType.Wings)] + WingStats (stats end-game
+     conservadas: 180-200 ticks, 9-10.5 velocidad, ×2.6-3.2, FLOTADO en
+     mariposa/hada). BORRADOS: WingVFX.cs, los 7 renderers VFX de alas,
+     VFXWingsDrawLayer.cs, WingAnimPlayer.cs, VFXWingItems.cs — el
+     sistema vanilla hace toda la animación (frame 0 reposo, 1 planeo,
+     2 apex, ciclo 0-2 al volar).
+  5. Validación VLM: 8/8 alas con silueta legible de alas reales,
+     animación reposo≠apex visible, simetría numérica perfecta.
+
 ## Commit v6.09 — EL AGUJERO NEGRO CARMESÍ "SUPER IGUAL": LA OTRA LIBRERÍA CON LAS FÍSICAS CORRECTAS
 
 **Reporte del usuario**: "todavía no se parece a la referencia, el disco de

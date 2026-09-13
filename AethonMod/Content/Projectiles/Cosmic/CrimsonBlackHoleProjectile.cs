@@ -12,8 +12,8 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// CrimsonBlackHoleProjectile — v6.09 — EL AGUJERO NEGRO CARMESÍ
-    /// "SUPER IGUAL" A LA REFERENCIA.
+    /// CrimsonBlackHoleProjectile — v6.10 — EL AGUJERO NEGRO CARMESÍ
+    /// "OBLIVION" (la referencia ORIGINAL: Ancients Awakened — Regicide).
     ///
     /// MÉTODO (petición del usuario): "investiga más sobre agujeros negros,
     /// investiga las matemáticas de cómo crear un agujero negro, crea otra
@@ -113,7 +113,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                             Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
 
                 float collapse = Utils.GetLerpValue(36f, 0f, Projectile.timeLeft, true);
-                Projectile.scale *= 1f - collapse;
+                // v6.10: piso de escala — el colapso ya no deja la escala en
+                // ~0 (provocaba el early-return del renderer viejo y el
+                // crash del doble Begin). Mínimo 0.06 → esfera de 5.5px.
+                Projectile.scale *= Math.Max(1f - collapse, 0.06f);
                 expansion = 1f;
             }
 
@@ -237,7 +240,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
             Vector3 light = new Vector3(1.15f * pulse, 0.30f * pulse, 0.48f * pulse);
             Lighting.AddLight(Projectile.Center, light);
-            float le = CrimsonBlackHoleRenderer.ShadowPx * Math.Max(Projectile.scale, 0.1f);
+            float le = CrimsonBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f), light * 0.75f);
         }
@@ -287,7 +290,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.timeLeft <= 90f)
                 deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
 
-            float shadow = CrimsonBlackHoleRenderer.ShadowPx * Math.Max(Projectile.scale, 0.1f);
+            float shadow = CrimsonBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
 
             for (int i = 0; i < 2; i++)
             {
@@ -384,7 +387,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 float dist = Main.rand.NextFloat(2.4f, 4.2f) *
-                             CrimsonBlackHoleRenderer.ShadowPx * MathHelper.Max(Projectile.scale, 0.4f);
+                             CrimsonBlackHoleRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -430,9 +433,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.rand.NextBool(4))
             {
-                // La sombra visual del carmesí v6.09: 38px × escala — las
-                // estelas orbitan en la MISMA banda que dibuja el renderer.
-                float shadow = CrimsonBlackHoleRenderer.ShadowPx *
+                // La esfera visual del carmesí v6.10: 46px × escala — las
+                // estelas orbitan en la banda del vórtice Oblivion.
+                float shadow = CrimsonBlackHoleRenderer.SpherePx *
                                MathHelper.Max(Projectile.scale, 0.4f);
                 float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
@@ -481,28 +484,47 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (BlackHoleLensSystem.LensActive)
                 return false;
 
-            DrawCoreVisuals(Projectile, true);
-            RestoreSpriteBatch();
+            // v6.10 — CONTRATO DE BATCH A PRUEBA DE BALAS:
+            // El crash del client.log (InvalidOperationException: Begin
+            // called before End) nacía del early-return del renderer v6.09
+            // cuando rSh < 2 (la escala del colapso final se componía hacia
+            // ~0): salía sin cerrar el batch y RestoreSpriteBatch hacía un
+            // Begin DUPLICADO. Ahora: cerramos el batch del pase de
+            // proyectiles nosotros, dibujamos con el renderer (que exige el
+            // batch CERRADO y lo deja CERRADO pase lo que pase) y lo
+            // restauramos con los parámetros EXACTOS de
+            // Main.DrawProjectiles (decompilado tML 2026.07.3.0).
+            bool wasActive = true;
+            try { Main.spriteBatch.End(); }
+            catch { wasActive = false; }   // ya estaba cerrado (hook de otro mod)
+
+            try
+            {
+                DrawCoreVisuals(Projectile);
+            }
+            catch { try { Main.spriteBatch.End(); } catch { } }
+
+            if (wasActive)
+                RestoreSpriteBatch();
             return false;
         }
 
         /// <summary>
-        /// Dibuja el agujero carmesí completo con la nueva librería por
-        /// capas (CrimsonBlackHoleRenderer): disco denso que RODEA la bola
-        /// negra, esfera de negro profundo, anillos de fotones como borde
-        /// de color, rayos cian de fondo y bloom. Compartido entre el pase
-        /// del mundo (PreDraw, endActiveBatch=true) y el pase posterior a
-        /// la lente (BlackHoleLensSystem, endActiveBatch=false: el batch
-        /// llega cerrado). Contrato de batch idéntico al original: al
-        /// terminar queda CERRADO (el llamador lo restaura).
+        /// Dibuja el agujero carmesí completo con la librería v6.10 (el
+        /// vórtice "Oblivion": esfera + gap + anillo + dos hojas en
+        /// cresciente inclinadas girando en sentido horario + rayos dentro
+        /// de la esfera). Compartido entre el pase del mundo (PreDraw, que
+        /// cierra/restaura el batch él mismo) y el pase posterior a la lente
+        /// (BlackHoleLensSystem, que llama con el batch ya cerrado).
+        /// CONTRATO: el SpriteBatch llega CERRADO y queda CERRADO.
         /// </summary>
-        internal static void DrawCoreVisuals(Projectile p, bool endActiveBatch)
+        internal static void DrawCoreVisuals(Projectile p)
         {
             Vector2 drawPos = p.Center - Main.screenPosition;
             float time = Main.GlobalTimeWrappedHourly;
             int seed = p.whoAmI * 7 + 3;
 
-            CrimsonBlackHoleRenderer.Draw(drawPos, p.scale, time, seed, endActiveBatch);
+            CrimsonBlackHoleRenderer.Draw(drawPos, p.scale, time, seed);
         }
 
         /// <summary>Radio del campo (px), compartido con el aura y el OnKill
@@ -514,13 +536,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return 0.3f * p.width * Math.Max(p.scale, 0.08f) * ShieldRadiusMult;
         }
 
-        /// <summary>Restaura el SpriteBatch al estado que tML espera tras PreDraw
-        /// (copia exacta).</summary>
+        /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
+        /// pase de proyectiles de vanilla — copia literal de
+        /// Main.DrawProjectiles (decompilado de tModLoader 2026.07.3.0):
+        /// spriteBatch.Begin(Deferred, AlphaBlend, DefaultSamplerState,
+        /// None, Rasterizer, null, Transform).</summary>
         private static void RestoreSpriteBatch()
         {
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.Transform);
         }
 
         // ------------------------------------------------------------------

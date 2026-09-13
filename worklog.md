@@ -7475,3 +7475,29 @@ Next:
 - El usuario prueba el agujero: bola negra profunda + anillo blanco denso + disco magenta que la rodea por completo (cruce frontal abajo, arco lejano arriba) + rayos cian + lente gigante
 - Siguen pendientes de verificación en juego del usuario: las 8 alas de la v6.08
 - Si el disco necesita ajuste fino (brillo/densidad/colores), los PARÁMETROS viven en CrimsonBlackHoleRenderer (calibrados con el prototipo: tools/mock_blackhole_v609.py)
+
+---
+Task ID: 21
+Agent: Z.ai Code (agente principal)
+Task: v6.10 — FIX del crash del client.log (SpriteBatch Begin/End) + EL AGUJERO NEGRO IDÉNTICO A LA REFERENCIA ORIGINAL de Reddit (AA Regicide "Oblivion") + TODAS LAS ALAS REHECHAS CON ARTE IA QUE SÍ PARECEN ALAS
+
+Work Log:
+- Análisis del client.log (415KB): el error 01:08 era el bug v6.06 ya fixeado (log viejo); el error REAL v6.09: InvalidOperationException "Begin has been called before calling End" en CrimsonBlackHoleProjectile.RestoreSpriteBatch línea 521 — durante la evaporación final scale se componía hacia ~0 → rSh<2 → early return del renderer sin cerrar batch → doble Begin
+- FIX a prueba de balas: PreDraw cierra el batch él mismo (try End catch — respeta hooks de otros mods como Luminance), el renderer nuevo exige batch CERRADO y lo deja CERRADO, restore con los parámetros EXACTOS de Main.DrawProjectiles (decompilado tML 2026.07.3.0: Main.Rasterizer + Main.Transform) + piso de escala 0.06 en el colapso
+- Decompilé FNA SpriteBatch: End() en batch inactivo LANZA (igual que Begin duplicado) — el try/catch es necesario
+- DESCARGUÉ la referencia original de Reddit (Ancients Awakened — Regicide, Oblivion God of the Void, 1080×795) y encontré el repo GitHub del mod viejo (AncientsAwakened-Superancients): el sprite 1.3 tenía agujero pequeño con 4 brazos; la imagen de Reddit es el rediseño GRANDE
+- MEDICIONES numpy definitivas (la clave que faltaba): esfera negra R=35px centro (493,223) por vacío encerrado + ajuste circular 84% · GAP 1.0-1.25R (¡el brillo NO toca la esfera!) · anillo interior 360° a 1.5R · hoja cresciente por ARRIBA con aguja a 6.1R@345° · masa lejana SE-S a 6.4R VERIFICADA como plasma (r>>g, no el cuello plateado r≈g del jefe) · inclinación global SW→NE ~24° · giro HORARIO
+- v6.09 estaba calibrado contra un Gargantua de disco delgado — ¡estructura equivocada! La referencia es un VÓRTICE de plasma art-directed
+- NUEVO CrimsonBlackHoleRenderer.cs (8 capas: halo → anillo+rim caliente → hoja superior 112 segmentos → cresiente inferior 72 → hotspot/nudo/aguja/mechones → esfera negra opaca → rayos violeta ramificados → chispas+bloom), R=46px GIGANTE, rotación horaria 0.16 rad/s, BlackHolePhysics.cs eliminado
+- Prototipo Python calibrado en 9 iteraciones (2 bugs propios encontrados: rm sin ×R y el centro de rotación de la mitad derecha): EMA 27/255, extensión angular emparejada (aguja NNE 6.0R vs 6.1R)
+- ALAS: generé 8 diseños con IA (image-generation) → pipeline gen_ai_wings_v610.py: alfa desde negro + cierre morfológico → SIMETRÍA por espejo (diff=0.0000 tras fix del centro de rotación) → contorno Terraria → limpieza de sueltos → supresión de cuerpo central → 7 FRAMES de animación (cada mitad rota sobre la raíz) → tira + icono
+- HALLAZGO al decompilar DrawPlayer_09_Wings: vanilla corta las alas con Height()/7 — ¡SIETE frames no 4! (origen (W/2, H/14)) — v6.06 usó 4: esa era la causa del "mal ubicadas"
+- AethonWingItems.cs (stats end-game y tooltips conservados); BORRADOS WingVFX.cs + 7 renderers + VFXWingsDrawLayer.cs + WingAnimPlayer.cs + VFXWingItems.cs — animación 100% vanilla
+- Validación VLM alas: 8/8 legibles como alas reales, animación reposo≠apex, simetría perfecta; mariposa/hada con plegado reforzado (+26°/×0.72)
+- Docs: build.txt 6.10, CHANGES.md (§A error, §B agujero, §C alas), MATEMATICA §v6.10; research/oblivion + research/wings_v610 al repo
+- Compilación final contra tML v2026.07.3.0 real: Build succeeded · 0 errores · 0 warnings
+
+Stage Summary:
+- v6.10 EN GitHub: el agujero carmesí es el VÓRTICE OBLIVION de la referencia real (esfera+gap+anillo+dos cresientes inclinados girando horario, gigante) SIN el crash (contrato de batch a prueba de balas); las 8 alas son sprites de arte IA con animación vanilla de 7 frames
+- Prueba del usuario: git pull → Develop Mods → Build → CrimsonBlackHoleStaff (sin crash al evaporarse, vórtice girando) → las 8 alas nuevas en el inventario (aleteo vanilla al volar)
+- El renderer viejo GR (BlackHolePhysics) vive en git history; las mediciones y el prototipo están en research/oblivion

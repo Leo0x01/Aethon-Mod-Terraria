@@ -46,7 +46,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FF0055:═══ AGUJERO NEGRO DEL VACÍO ═══]"));
             tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:EXACTAMENTE como la referencia — SUPER IGUAL: esfera de NEGRO PROFUNDO con borde de color, disco DENSO que la RODEA POR COMPLETO (cruza por delante abajo y se oculta detrás arriba)]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Render analítico por capas con la física real (BlackHolePhysics): anillo de fotones + eco lensado, disco kepleriano que HIERVE (ω∝r^-3/2), Doppler δ³ (izquierda cegadora) + rayos cian + lente que distorsiona el fondo]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Vórtice Oblivion: esfera negra + anillo interior + dos hojas de plasma en cresiente inclinadas girando en sentido horario con hotspot blanco-amarillo, rayos violeta dentro de la esfera + lente que distorsiona el fondo]"));
             tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:GIGANTE: 494px de envergadura. Atrae enemigos en un radio de 450px; su AURA abraza la mitad interior del disco y machaca más rápido cerca del centro]"));
             tooltips.Add(new TooltipLine(Mod, "D4", "[c/FF0055:Devora las balas enemigas al cruzar el horizonte — y al final nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
         }

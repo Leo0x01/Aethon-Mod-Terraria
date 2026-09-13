@@ -727,7 +727,7 @@ namespace AethonMod.Content.Effects
                 if (bh != null && bh.active)
                 {
                     if (bh.type == crimsonHoleType)
-                        CrimsonBlackHoleProjectile.DrawCoreVisuals(bh, false);
+                        CrimsonBlackHoleProjectile.DrawCoreVisuals(bh);
                     else
                         BlackHoleProjectile.DrawCoreVisuals(bh, false);
                 }

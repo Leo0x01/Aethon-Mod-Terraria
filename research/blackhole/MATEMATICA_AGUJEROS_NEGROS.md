@@ -190,3 +190,25 @@ Rampa cromática: `(255,214,240) → (255,42,122) → (255,66,168) → (255,88,2
   continua (la petición "disco más denso").
 - Escala gigante autorizada: R_sh = 38px (esfera 76px) → disco 494px de
   ancho total a escala 1 (≈53% del ancho de la referencia, igual que ella).
+
+
+## §v6.10 — EL VÓRTICE "OBLIVION" (la referencia original)
+
+La referencia REAL (Reddit: AA Regicide) resultó ser un vórtice de plasma,
+no un Gargantua. Geometría medida y usada por CrimsonBlackHoleRenderer v6.10
+(unidades de R = radio de la esfera):
+
+- Esfera negra R con gap 1.0–1.25R (nada de luz toca la esfera).
+- Anillo interior elíptico a 1.48R (squash 0.88) + rim blanco-caliente a 1.26R.
+- Hoja superior (creciente): θ 175°→352° (O→NO→N→NNE, horario), r_outer
+  2.3→3.3→3.0→3.3→3.2→4.2→5.9, grosor 1.0→0.07, hotspot blanco-amarillo a
+  t=0.72, nudo (255,246,137) a 355°/3R, aguja hasta 5.9R + mechones a 6.5R.
+- Cresiente inferior: θ 20°→205° (ESE→S→SSW), r_outer 1.95→3.2→6.3→6.0→4.8→2.6.
+- Inclinación global SW→NE de −0.42 rad; rotación horaria a 0.16 rad/s.
+- Rayos violeta (150,170,255) dentro de la esfera, en un semiplano, con
+  bifurcaciones; chispas blanco-amarillas titilantes.
+
+El perfil radial del prototipo alcanza EMA 27/255 contra la referencia y la
+extensión angular queda emparejada por cuadrantes (aguja NNE 6.0R vs 6.1R).
+La física GR de v6.09 (BlackHolePhysics.cs) fue retirada: la referencia es
+art-directed, y su "física" es la de un vórtice pictórico.

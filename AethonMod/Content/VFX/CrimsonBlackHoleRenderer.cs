@@ -8,160 +8,121 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// CrimsonBlackHoleRenderer — v6.09 — EL AGUJERO NEGRO CARMESÍ "SUPER
-    /// IGUAL" A LA REFERENCIA.
+    /// CrimsonBlackHoleRenderer — v6.10 — EL AGUJERO NEGRO "OBLIVION".
     ///
-    /// Petición del usuario: "el disco de acreción debe ser más denso y debe
-    /// rodear por completo a la bola negra, esta debe ser de un negro
-    /// profundo con bordes de color… que sea igual que la referencia, super
-    /// igual; si tiene que ser gigante que así sea". Este renderizador
-    /// sustituye al shader de marcha de rayos para el carmesí: es un render
-    /// ANALÍTICO POR CAPAS con la geometría de oclusión REAL de un disco
-    /// delgado inclinado (BlackHolePhysics), calibrado píxel a píxel contra
-    /// la referencia con el prototipo Python (tools/mock_blackhole_v609.py,
-    /// EMA 17/255 en el perfil radial — véase
-    /// research/blackhole/MATEMATICA_AGUJEROS_NEGROS.md §v6.09).
+    /// La referencia ORIGINAL del usuario (Reddit: Ancients Awakened —
+    /// Regicide, Oblivion God of the Void) NO es un Gargantua de disco
+    /// delgado: es un VÓRTICE DE PLASMA carmesí con:
+    ///   · Esfera negra compacta con un GAP oscuro (el brillo NO la toca).
+    ///   · Anillo interior 360° a ~1.5R con borde interno blanco-caliente.
+    ///   · UNA HOJA GRUESA EN CRESCIENTE que barre POR ARRIBA
+    ///     (O→NO→N→NNE) y se estira en una AGUJA LARGA hasta ~5.9R.
+    ///   · Un segundo cresiente BAJO (ESE→S→SSW) cuyo borde exterior
+    ///     llega a ~6.3R por el sur.
+    ///   · TODO el vórtice INCLINADO (SW→NE, ~24°) y girando HORARIO.
+    ///   · Hotspot blanco-amarillo en NNE, chispas, mechones lejanos,
+    ///     rayos azul-violeta RAMIFICADOS dentro de la esfera.
     ///
-    /// CAPAS (de atrás a delante — el orden ES la física):
-    ///  1. Fondo: halo ambiental carmesí + 18 rayos cian radiales.
-    ///  2. Lado LEJANO del disco (semiplano superior): elipse atenuada,
-    ///     comprimida; nace a 2.7·R_sh → el "foso" oscuro del eje mayor.
-    ///  3. Halo del anillo de fotones (la esfera lo recorta al dibujarse
-    ///     después: solo brilla FUERA de la silueta).
-    ///  4. ESFERA NEGRA: disco opaco #000000 puro (negro profundo pedido).
-    ///     Oculta el disco lejano y el halo → la bola "come" la luz.
-    ///  5. ANILLO DE FOTONES: banda sólida de anillos finos blancos
-    ///     (1.16–1.49·R_sh, con eco lensado 1.68–1.96·R_sh) — el "borde de
-    ///     color" de la bola + arco de eco sobre la esfera (Luminet 1979).
-    ///  6. Lado CERCANO del disco (semiplano inferior): cruza POR DELANTE de
-    ///     la cara inferior de la esfera desde +0.76·R_sh (medido en la
-    ///     referencia) con su borde interno BLANCO-CALIENTE (2.2·R_sh).
-    ///  7. Bloom: arco cercano + hotspot Doppler izquierdo + velo amplio.
+    /// Calibrado con el prototipo tools/mock_oblivion_v610.py contra
+    /// mediciones numpy de la referencia (perfil radial EMA 27/255 y
+    /// extensión angular por cuadrantes emparejada: aguja NNE 6.0R vs
+    /// 6.1R, sur 5.7R vs 6.4R, oeste 3.2R vs 2.3R).
     ///
-    /// El disco: 32 líneas de corriente keplerianas (ω ∝ r^(−3/2)) dibujadas
-    /// como cápsulas SoftGlow solapadas ×2.2 → banda CONTINUA y DENSA con
-    /// grano de plasma vivo. Brillo pico a 4.6·R_sh (magenta), carmesí en
-    /// los bordes, Doppler δ suavizado (izquierda que se acerca más
-    /// brillante), lado cercano aclarado a rosa-blanco en su núcleo.
-    ///
-    /// TODO a escala gigante autorizada: R_sh = 38px (esfera de 76px),
-    /// disco de 494px de envergadura a escala 1 — domina la pantalla como
-    /// la referencia domina su encuadre.
-    ///
-    /// Contrato de batch idéntico al anterior: si endActiveBatch es true
-    /// cierra el batch abierto; al terminar queda CERRADO (el llamador lo
-    /// restaura). Se usa con el pase del mundo (PreDraw) y con el pase
-    /// posterior a la lente (BlackHoleLensSystem, batch ya cerrado).
+    /// CONTRATO DE BATCH (v6.10, a prueba de balas): Draw() exige el
+    /// SpriteBatch CERRADO y lo deja CERRADO. Nunca llama End() sobre un
+    /// batch abierto — el llamador (PreDraw) cierra el suyo y lo restaura
+    /// con los parámetros EXACTOS de Main.DrawProjectiles.
     /// </summary>
     public static class CrimsonBlackHoleRenderer
     {
         // ==================================================================
-        //  PARÁMETROS CALIBRADOS (×R_sh — idénticos al prototipo validado)
+        //  PARÁMETROS CALIBRADOS (×R = radio de la esfera negra)
         // ==================================================================
 
-        /// <summary>Radio de la sombra en px a escala 1 — GIGANTE.</summary>
-        public const float ShadowPx = 38f;
+        /// <summary>Radio de la esfera negra en px a escala 1 — GIGANTE.</summary>
+        public const float SpherePx = 46f;
 
-        /// <summary>Achatado de la elipse del disco (b/a): ~70° desde face-on.</summary>
-        private const float MinorRatio = 0.345f;
+        /// <summary>Aplastado vertical del vórtice (perspectiva).</summary>
+        private const float Squash = 0.88f;
 
-        /// <summary>Borde interno CALIENTE (solo lado cercano) — cruza la esfera.</summary>
-        private const float RimRadius = 2.20f;
+        /// <summary>Inclinación global SW→NE del vórtice (radianes).</summary>
+        private const float Tilt = -0.42f;
 
-        /// <summary>Inicio del cuerpo del disco.</summary>
-        private const float BodyInner = 2.55f;
+        /// <summary>Velocidad de rotación del vórtice (rad/s, horario).</summary>
+        private const float SwirlSpeed = 0.16f;
 
-        /// <summary>Borde interno del lado LEJANO (el "foso" del eje mayor).</summary>
-        private const float FarInner = 2.70f;
+        // ---------------- HOJA SUPERIOR (por ARRIBA) ------------------------
+        private static readonly float[] BladeT = { 0.00f, 1.00f };
+        private static readonly float[] BladeTh = { 175f, 352f };      // grados: O→NO→N→NNE
+        private static readonly float[] BladeRo = { 2.30f, 3.30f, 3.00f, 3.30f, 3.20f, 4.20f, 5.90f };
+        private static readonly float[] BladeTk = { 1.00f, 0.80f, 0.55f, 0.32f, 0.07f };
+        private static readonly float[] BladeBri = { 0.60f, 0.80f, 1.00f, 0.78f, 0.52f };
+        private static readonly Color[] BladeCol =
+        {
+            new Color(255, 42, 122), new Color(255, 80, 160),
+            new Color(255, 150, 205), new Color(255, 250, 155),
+            new Color(255, 110, 200), new Color(222, 38, 98),
+            new Color(145, 18, 48)
+        };
 
-        /// <summary>Fade exterior del disco.</summary>
-        private const float OuterRadius = 6.50f;
-
-        /// <summary>Radio del brillo máximo (magenta).</summary>
-        private const float PeakRadius = 4.60f;
-
-        /// <summary>Líneas de corriente del disco (densidad).</summary>
-        private const int Streamlines = 32;
-
-        /// <summary>Grosor de cápsula (×R_sh).</summary>
-        private const float CapsuleWidth = 0.68f;
-
-        /// <summary>Paso angular objetivo (×R_sh de arco).</summary>
-        private const float SegmentArc = 0.68f;
-
-        /// <summary>Solape de cápsulas (banda continua y densa).</summary>
-        private const float CapsuleOverlap = 2.2f;
-
-        /// <summary>Contraste Doppler (izquierda que se acerca +, der −).</summary>
-        private const float Doppler = 0.30f;
-
-        /// <summary>Rayos cian del fondo.</summary>
-        private const int CyanRays = 18;
+        // ---------------- CRESCIENTE INFERIOR (por DEBAJO) ------------------
+        private static readonly float[] LowerT = { 0.00f, 1.00f };
+        private static readonly float[] LowerTh = { 20f, 205f };       // ESE→S→SSW
+        private static readonly float[] LowerRo = { 1.95f, 3.20f, 6.30f, 6.00f, 4.80f, 2.60f };
+        private static readonly float[] LowerTk = { 0.65f, 0.50f, 0.35f, 0.18f, 0.08f };
+        private static readonly float[] LowerBri = { 0.60f, 0.78f, 0.82f, 0.50f, 0.22f };
+        private static readonly Color[] LowerCol =
+        {
+            new Color(255, 60, 140), new Color(255, 82, 172),
+            new Color(250, 45, 125), new Color(222, 36, 100),
+            new Color(140, 18, 55)
+        };
 
         // ==================================================================
-        //  TEXTURAS (resolución diferida)
+        //  TEXTURAS
         // ==================================================================
 
         private static Asset<Texture2D> _softGlow;
-        private static Asset<Texture2D> _ring;
-        private static Asset<Texture2D> _ray;
         private static Asset<Texture2D> _blackDisk;
 
         private static Texture2D SoftGlow =>
             (_softGlow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        private static Texture2D Ring =>
-            (_ring ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring")).Value;
-
-        private static Texture2D Ray =>
-            (_ray ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowRay")).Value;
-
         private static Texture2D BlackDisk =>
             (_blackDisk ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
 
         // ==================================================================
-        //  HELPERS DE BATCH
+        //  HELPERS
         // ==================================================================
 
-        private static void BeginAdditive(bool endActiveBatch)
-        {
-            if (endActiveBatch)
-                Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-        }
-
-        private static void BeginAlpha(bool endActiveBatch)
-        {
-            if (endActiveBatch)
-                Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-        }
-
-        /// <summary>Cuadro estirado/rotado con blending aditivo.</summary>
-        private static void AddQuad(Texture2D tex, Vector2 center, Vector2 size,
-            float rotation, Color color)
-        {
-            Main.spriteBatch.Draw(tex, center, null, color, rotation,
-                tex.Size() * 0.5f, size / new Vector2(tex.Width, tex.Height),
-                SpriteEffects.None, 0f);
-        }
-
-        // ==================================================================
-        //  CURVAS CALIBRADAS (los mismos valores del prototipo)
-        // ==================================================================
-
-        /// <summary>smoothstep de Hermite clampeado.</summary>
+        /// <summary>smoothstep clampeado.</summary>
         private static float SmoothStep(float e0, float e1, float x)
         {
             float t = MathHelper.Clamp((x - e0) / (e1 - e0), 0f, 1f);
             return t * t * (3f - 2f * t);
         }
 
-        /// <summary>Hash determinista [0,1) — la MISMA secuencia en todas las máquinas.</summary>
+        /// <summary>Interpolación por segmentos suavizada: t en [0,1] sobre
+        /// una tabla de valores equiespaciados (calibradas del prototipo).</summary>
+        private static float KeyLerp(float[] keys, float t)
+        {
+            int n = keys.Length - 1;
+            float u = MathHelper.Clamp(t, 0f, 1f) * n;
+            int i = (int)u;
+            if (i >= n) return keys[n];
+            return MathHelper.Lerp(keys[i], keys[i + 1], SmoothStep(0f, 1f, u - i));
+        }
+
+        private static Color KeyColor(Color[] keys, float t)
+        {
+            int n = keys.Length - 1;
+            float u = MathHelper.Clamp(t, 0f, 1f) * n;
+            int i = (int)u;
+            if (i >= n) return keys[n];
+            return Color.Lerp(keys[i], keys[i + 1], MathHelper.Clamp(u - i, 0f, 1f));
+        }
+
+        /// <summary>Hash determinista [0,1).</summary>
         private static float Hash01(int seed, int a, int b)
         {
             int h = unchecked(seed * 374761393 + a * 668265263 + b * 1911520717);
@@ -171,302 +132,257 @@ namespace AethonMod.Content.VFX
             return (h & 0xFFFFFF) / 16777216f;
         }
 
-        /// <summary>
-        /// Perfil radial de brillo del disco (medido en la referencia,
-        /// normalizado al pico): carril oscuro → subida → PICO 4.6 → caída.
-        /// Tabla piecewise-lineal idéntica a la del prototipo validado.
-        /// </summary>
-        private static float DiskBrightness(float u)
+        /// <summary>Posición de un punto polar (rr en unidades de R) con
+        /// aplastado e inclinación globales — la MISMA del prototipo.</summary>
+        private static Vector2 Pol(float rr, float theta, float r, Vector2 center)
         {
-            if (u < RimRadius || u > OuterRadius)
-                return 0f;
-            if (u < BodyInner)
-                return 0.80f; // borde interno caliente
-            if (u <= 3.2f) return Lerp(0.30f, 0.55f, (u - BodyInner) / (3.2f - BodyInner));
-            if (u <= 3.8f) return Lerp(0.55f, 0.80f, (u - 3.2f) / (3.8f - 3.2f));
-            if (u <= PeakRadius) return Lerp(0.80f, 1.0f, (u - 3.8f) / (PeakRadius - 3.8f));
-            if (u <= 5.3f) return Lerp(1.0f, 0.82f, (u - PeakRadius) / (5.3f - PeakRadius));
-            if (u <= 5.5f) return Lerp(0.82f, 0.52f, (u - 5.3f) / (5.5f - 5.3f));
-            if (u <= 5.9f) return Lerp(0.52f, 0.22f, (u - 5.5f) / (5.9f - 5.5f));
-            return Lerp(0.22f, 0.08f, (u - 5.9f) / (OuterRadius - 5.9f));
+            float x = (float)Math.Cos(theta) * rr * r;
+            float y = (float)Math.Sin(theta) * rr * r * Squash;
+            float ca = (float)Math.Cos(Tilt), sa = (float)Math.Sin(Tilt);
+            return center + new Vector2(x * ca - y * sa, x * sa + y * ca);
         }
 
-        private static float Lerp(float a, float b, float t)
+        /// <summary>Cápsula elíptica aditiva.</summary>
+        private static void Cap(Vector2 pos, float len, float wid, float rot, Color c, float alpha)
         {
-            t = MathHelper.Clamp(t, 0f, 1f);
-            return a + (b - a) * t;
+            if (alpha <= 0.004f) return;
+            Texture2D tex = SoftGlow;
+            Vector2 texSize = new Vector2(tex.Width, tex.Height);
+            Main.spriteBatch.Draw(tex, pos, null, c * alpha, rot,
+                texSize * 0.5f, new Vector2(len, wid) / texSize,
+                SpriteEffects.None, 0f);
         }
 
-        /// <summary>
-        /// Rampa cromática radial NEÓN (medida): borde blanco-rosado →
-        /// carmesí vivo → fucsia → MAGENTA (pico) → fucsia → carmesí apagado.
-        /// </summary>
-        private static Color DiskColor(float u)
+        /// <summary>Cuadro suave estirado/rotado.</summary>
+        private static void Quad(Vector2 pos, Vector2 size, float rot, Color c, float alpha)
         {
-            // (radio, color) — la misma tabla del prototipo validado.
-            if (u < 2.55f) return LerpColor(new Color(255, 214, 240), new Color(255, 42, 122),
-                (u - RimRadius) / (2.55f - RimRadius));
-            if (u < 3.20f) return LerpColor(new Color(255, 42, 122), new Color(255, 66, 168),
-                (u - 2.55f) / (3.20f - 2.55f));
-            if (u < 3.80f) return LerpColor(new Color(255, 66, 168), new Color(255, 88, 232),
-                (u - 3.20f) / (3.80f - 3.20f));
-            if (u < PeakRadius) return LerpColor(new Color(255, 88, 232), new Color(255, 105, 255),
-                (u - 3.80f) / (PeakRadius - 3.80f));
-            if (u < 5.30f) return LerpColor(new Color(255, 105, 255), new Color(255, 78, 212),
-                (u - PeakRadius) / (5.30f - PeakRadius));
-            if (u < 5.90f) return LerpColor(new Color(255, 78, 212), new Color(224, 32, 84),
-                (u - 5.30f) / (5.90f - 5.30f));
-            return LerpColor(new Color(224, 32, 84), new Color(142, 22, 54),
-                (u - 5.90f) / (OuterRadius - 5.90f));
+            Texture2D tex = SoftGlow;
+            Main.spriteBatch.Draw(tex, pos, null, c * alpha, rot,
+                tex.Size() * 0.5f, size / tex.Size(),
+                SpriteEffects.None, 0f);
         }
 
-        private static Color LerpColor(Color a, Color b, float t)
+        private static void BeginAdditive()
         {
-            t = MathHelper.Clamp(t, 0f, 1f);
-            return new Color(
-                (int)(a.R + (b.R - a.R) * t),
-                (int)(a.G + (b.G - a.G) * t),
-                (int)(a.B + (b.B - a.B) * t));
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
-        /// <summary>
-        /// Atenuación del lado lejano: SOLO su región interna se apaga
-        /// (u &lt; 5); el PICO del arco lejano brilla SOBRE la esfera como
-        /// en la referencia; extremos horizontales y lado cercano a pleno
-        /// brillo.
-        /// </summary>
-        private static float SideFactor(float sinPhi, float u)
+        private static void BeginAlpha()
         {
-            if (sinPhi >= 0f)
-                return 1f;
-            float farDim = 0.55f + 0.45f * SmoothStep(FarInner, 5.0f, u);
-            float topness = SmoothStep(0.18f, 0.85f, -sinPhi);
-            return 1f - (1f - farDim) * topness;
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         // ==================================================================
-        //  EL RENDER COMPLETO
+        //  EL RENDER COMPLETO — contrato: batch CERRADO → CERRADO
         // ==================================================================
 
-        /// <summary>
-        /// Dibuja el agujero carmesí completo según la referencia.
-        /// </summary>
-        /// <param name="center">Centro en coords de PANTALLA.</param>
-        /// <param name="scale">Escala visual (pop elástico / colapso).</param>
-        /// <param name="time">Tiempo global animado.</param>
-        /// <param name="seed">Semilla determinista por proyectil.</param>
-        /// <param name="endActiveBatch">True si puede haber un batch abierto.</param>
-        public static void Draw(Vector2 center, float scale, float time, int seed,
-            bool endActiveBatch)
+        public static void Draw(Vector2 center, float scale, float time, int seed)
         {
+            float r = SpherePx * Math.Max(scale, 0.02f);
+            if (r < 2f) return;   // el batch queda INTACTO (cerrado)
+
+            float rot = time * SwirlSpeed;   // giro HORARIO del vórtice
+
             try
             {
-                float rSh = ShadowPx * Math.Max(scale, 0.02f);
-                if (rSh < 2f) return;
+                // ============ 1. HALO AMBIENTE (cálido, inclinado) ============
+                BeginAdditive();
+                Quad(center, new Vector2(5.6f * r, 3.7f * r * Squash), Tilt,
+                    new Color(125, 18, 55), 0.13f);
+                Quad(center, new Vector2(3.3f * r, 2.3f * r * Squash), Tilt,
+                    new Color(185, 36, 85), 0.12f);
 
-                // ============ 1. FONDO: halo ambiental + rayos cian ============
-                BeginAdditive(endActiveBatch);
-                AddQuad(SoftGlow, center, new Vector2(7.1f * rSh, 7.1f * rSh * MinorRatio * 1.6f),
-                    0f, new Color(110, 15, 48) * 0.16f);
-                AddQuad(SoftGlow, center, new Vector2(3.6f * rSh, 3.6f * rSh),
-                    0f, new Color(145, 28, 64) * 0.18f);
-                for (int i = 0; i < CyanRays; i++)
+                // ============ 2. ANILLO INTERIOR 360° + rim caliente ============
+                const int NRing = 48;
+                for (int i = 0; i < NRing; i++)
                 {
-                    float ang = Hash01(seed, i, 3) * MathHelper.TwoPi +
-                                0.10f * (float)Math.Sin(time * 0.31 + i * 2.1);
-                    float r0 = 2.1f * rSh;
-                    float r1 = (8.5f + 3.5f * Hash01(seed, i, 9)) * rSh;
-                    float mid = (r0 + r1) * 0.5f;
-                    AddQuad(Ray,
-                        center + new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * mid,
-                        new Vector2((r1 - r0) * 2f, 0.18f * rSh),
-                        ang, new Color(58, 170, 255) * 0.50f);
+                    float phi = i * MathHelper.TwoPi / NRing;
+                    Vector2 pos = Pol(1.48f, phi, r, center);
+                    float rotA = (float)Math.Atan2((float)Math.Cos(phi) * Squash, -(float)Math.Sin(phi)) + Tilt;
+                    float ang = phi * (180f / (float)Math.PI);
+                    float merge = 0.5f + 0.5f * (float)Math.Cos(MathHelper.ToRadians(ang - 95f + rot * (180f / (float)Math.PI)));
+                    float brillo = 0.46f + 0.40f * Math.Max(0f, merge);
+                    float flick = 0.86f + 0.14f * (float)Math.Sin(9f * phi + time * 6f + i * 2.3f);
+                    Color col = Math.Sin(phi) < 0 ? new Color(255, 66, 142) : new Color(255, 40, 108);
+                    Cap(pos, 0.52f * r, 0.26f * r, rotA, col, brillo * flick * 0.72f);
+                    // borde interno BLANCO-CALIENTE (abraza el gap)
+                    Vector2 hotPos = Pol(1.26f, phi, r, center);
+                    float hot = 0.38f + 0.50f * Math.Max(0f, merge);
+                    Cap(hotPos, 0.40f * r, 0.16f * r, rotA, new Color(255, 238, 198),
+                        hot * flick * 0.45f);
+                }
+
+                // ============ 3. LAS DOS HOJAS DEL VÓRTICE ============
+                DrawBlade(center, r, rot, time, seed,
+                    BladeT, BladeTh, BladeRo, BladeTk, BladeBri, BladeCol, 112, 1.0f, 0.30f);
+                DrawBlade(center, r, rot, time, seed,
+                    LowerT, LowerTh, LowerRo, LowerTk, LowerBri, LowerCol, 72, 0.65f, 0.22f);
+
+                // ============ 4. HOTSPOT + nudo NNE + aguja + mechones ============
+                Vector2 hx = BladePoint(BladeT, BladeTh, BladeRo, BladeTk, 0.72f, rot, r, center, out float hTh, out _, out _);
+                Cap(hx, 1.5f * r, 0.85f * r, hTh, new Color(255, 240, 168), 0.85f);
+                Cap(hx, 0.65f * r, 0.40f * r, hTh, new Color(255, 253, 232), 1.10f);
+                // nudo caliente NNE a 3R (medido: (255,246,137) a 355°, 3R)
+                Vector2 knot = Pol(3.0f, MathHelper.ToRadians(355f), r, center);
+                Cap(knot, 0.55f * r, 0.34f * r, MathHelper.ToRadians(355f), new Color(255, 246, 150), 0.55f);
+                // chispa de la aguja
+                Vector2 tip = BladePoint(BladeT, BladeTh, BladeRo, BladeTk, 0.97f, rot, r, center, out float tTh, out _, out _);
+                Cap(tip, 0.4f * r, 0.14f * r, tTh, new Color(255, 210, 170), 0.5f);
+                // mechones lejanos NNE (hasta 6.5R)
+                for (int wI = 0; wI < 3; wI++)
+                {
+                    float wTh = MathHelper.ToRadians(352f + wI * 9f) + rot;
+                    for (int s = 0; s < 3; s++)
+                    {
+                        float wr = 5.9f + s * 0.35f + 0.2f * Hash01(wI, s, 3);
+                        Vector2 wp = Pol(wr, wTh, r, center);
+                        Color wc = Color.Lerp(new Color(200, 45, 95), new Color(110, 18, 48), s / 2f);
+                        Cap(wp, 0.45f * r * (1f - s * 0.2f), 0.10f * r, wTh, wc, 0.50f - s * 0.12f);
+                    }
                 }
                 Main.spriteBatch.End();
 
-                // ============ 2. LADO LEJANO DEL DISCO (detrás de la esfera) ============
-                DrawDiskHalf(center, rSh, time, seed, nearSide: false);
-
-                // ============ 3. HALO DEL ANILLO DE FOTONES ============
-                // (la esfera que viene después lo RECORTA: solo brilla fuera
-                //  de la silueta — el "bloom pegado al borde" de la referencia)
-                BeginAdditive(false);
-                AddQuad(SoftGlow, center, new Vector2(4.2f * rSh, 4.2f * rSh), 0f,
-                    new Color(255, 196, 228) * 0.26f);
-                AddQuad(SoftGlow, center, new Vector2(3.3f * rSh, 3.3f * rSh), 0f,
-                    new Color(255, 214, 238) * 0.42f);
-                AddQuad(SoftGlow, center, new Vector2(2.7f * rSh, 2.7f * rSh), 0f,
-                    new Color(255, 224, 244) * 0.62f);
-                Main.spriteBatch.End();
-
-                // ============ 4. LA ESFERA NEGRA (negro profundo opaco) ============
-                // Con AlphaBlend y color (0,0,0): interior = dst·(1−1) = NEGRO
-                // PURO. Oculta el disco lejano y el halo: la bola COME la luz.
-                BeginAlpha(false);
+                // ============ 5. LA ESFERA NEGRA (come la luz) ============
+                // AlphaBlend + Color.Black = NEGRO PURO opaco: garantiza el GAP.
+                BeginAlpha();
                 Main.spriteBatch.Draw(BlackDisk, center, null, Color.Black, 0f,
                     BlackDisk.Size() * 0.5f,
-                    new Vector2(2f * rSh, 2f * rSh) / new Vector2(BlackDisk.Width, BlackDisk.Height),
+                    new Vector2(2f * r, 2f * r) / new Vector2(BlackDisk.Width, BlackDisk.Height),
                     SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
 
-                // ============ 5. ANILLOS DE FOTONES (el borde de color) ============
-                // Banda sólida 1.16–1.49·R_sh (rungs solapados) + eco lensado
-                // 1.68–1.96 + el arco de eco SOBRE la esfera (Luminet).
-                BeginAdditive(false);
-                float ringPulse = 0.90f + 0.10f * (float)Math.Sin(time * 2.3f);
-                DrawRingRung(center, rSh, 1.16f, 150, new Color(255, 248, 253), ringPulse);
-                DrawRingRung(center, rSh, 1.22f, 245, new Color(255, 250, 254), ringPulse);
-                DrawRingRung(center, rSh, 1.28f, 255, new Color(255, 253, 255), ringPulse);
-                DrawRingRung(center, rSh, 1.34f, 255, new Color(255, 253, 255), ringPulse);
-                DrawRingRung(center, rSh, 1.40f, 225, new Color(255, 247, 252), ringPulse);
-                DrawRingRung(center, rSh, 1.46f, 175, new Color(255, 240, 250), ringPulse);
-                DrawRingRung(center, rSh, 1.56f, 100, new Color(255, 236, 248), 1f);
-                DrawRingRung(center, rSh, 1.62f, 70, new Color(255, 234, 247), 1f);
-                DrawRingRung(center, rSh, 1.68f, 220, new Color(255, 238, 249), 1f);
-                DrawRingRung(center, rSh, 1.75f, 205, new Color(255, 236, 248), 1f);
-                DrawRingRung(center, rSh, 1.82f, 165, new Color(255, 232, 247), 1f);
-                DrawRingRung(center, rSh, 1.89f, 120, new Color(255, 228, 246), 1f);
-                DrawRingRung(center, rSh, 1.96f, 80, new Color(255, 226, 245), 1f);
-                // Arco de eco sobre la esfera (la imagen secundaria lensada).
-                AddQuad(SoftGlow, center - new Vector2(0f, 1.62f * rSh),
-                    new Vector2(3.6f * rSh, 1.5f * rSh), 0f,
-                    new Color(255, 235, 248) * 0.16f);
-                Main.spriteBatch.End();
+                // ============ 6. RAYOS AZUL-VIOLETA RAMIFICADOS DENTRO ============
+                BeginAdditive();
+                int frame = (int)(time * 7f);
+                for (int bi = 0; bi < 3; bi++)
+                {
+                    if ((frame + bi * 3) % 5 >= 2) continue;   // ráfagas
+                    float th0 = MathHelper.ToRadians(-60f + bi * 130f + (frame * 47) % 360);
+                    Vector2 p0 = center + new Vector2((float)Math.Cos(th0), (float)Math.Sin(th0)) * (r * 0.92f);
+                    Vector2 p1 = center + new Vector2((float)Math.Cos(th0 + 1.9f), (float)Math.Sin(th0 + 1.9f)) * (r * 0.45f);
+                    Vector2 prev = p0;
+                    for (int s = 1; s <= 5; s++)
+                    {
+                        float u = s / 5f;
+                        float jx = (Hash01(frame, bi * 10 + s, 11) - 0.5f) * r * 0.40f * (1f - u);
+                        float jy = (Hash01(frame, bi * 10 + s, 17) - 0.5f) * r * 0.40f * (1f - u);
+                        Vector2 nxt = Vector2.Lerp(p0, p1, u) + new Vector2(jx, jy);
+                        Vector2 mid = (prev + nxt) * 0.5f;
+                        float ra = (float)Math.Atan2(nxt.Y - prev.Y, nxt.X - prev.X);
+                        float ln = Vector2.Distance(prev, nxt) * 0.8f;
+                        Cap(mid, Math.Max(ln, 1.5f), 1.3f, ra, new Color(150, 170, 255), 0.30f);
+                        // bifurcación corta
+                        if ((s == 2 || s == 4) && Hash01(frame, bi * 7 + s, 23) > 0.4f)
+                        {
+                            float bra = ra + (Hash01(frame, s, 29) - 0.5f) * 1.6f;
+                            Vector2 bEnd = mid + new Vector2((float)Math.Cos(bra), (float)Math.Sin(bra)) * (r * 0.20f);
+                            Cap((mid + bEnd) * 0.5f, r * 0.12f, 1.1f, bra, new Color(170, 185, 255), 0.32f);
+                        }
+                        prev = nxt;
+                    }
+                }
 
-                // ============ 6. LADO CERCANO (cruza POR DELANTE de la esfera) ============
-                DrawDiskHalf(center, rSh, time, seed, nearSide: true);
+                // ============ 7. CHISPAS blanco-amarillas ============
+                float[] sparkT = { 0.72f, 0.55f, 0.82f, 0.30f, 0.62f, 0.90f, 0.12f };
+                float[] sparkR = { 3.6f, 2.7f, 4.6f, 2.3f, 3.4f, 5.2f, 2.0f };
+                for (int k = 0; k < sparkT.Length; k++)
+                {
+                    float tw = 0.5f + 0.5f * (float)Math.Sin(time * (5f + k * 1.7f) + k * 2.9f);
+                    if (tw < 0.55f) continue;
+                    float th = MathHelper.ToRadians(KeyLerp2(BladeT, BladeTh, sparkT[k])) + rot;
+                    Vector2 sp = Pol(sparkR[k], th, r, center);
+                    Cap(sp, 2.6f, 2.6f, 0f, new Color(255, 252, 222), 1.0f * tw);
+                    Cap(sp, 5.5f, 5.5f, 0f, new Color(255, 238, 165), 0.34f * tw);
+                }
 
-                // ============ 7. BLOOM ============
-                BeginAdditive(false);
-                // Arco cercano (el semiplano que nos sale al encuentro).
-                AddQuad(SoftGlow,
-                    center + new Vector2(0f, PeakRadius * rSh * MinorRatio * 0.72f),
-                    new Vector2(6.8f * rSh, 3.1f * rSh * MinorRatio * 1.9f), 0f,
-                    new Color(255, 150, 205) * 0.30f);
-                // Hotspot Doppler: el lado que se ACERCA (izquierda).
-                AddQuad(SoftGlow, center + new Vector2(-3.5f * rSh, 0.10f * rSh),
-                    new Vector2(3.3f * rSh, 1.5f * rSh), -0.05f,
-                    new Color(255, 130, 190) * 0.18f);
-                // Velo amplio de sangrado del disco al espacio.
-                AddQuad(SoftGlow, center,
-                    new Vector2(6.9f * rSh, 6.9f * rSh * MinorRatio * 1.55f), 0f,
-                    new Color(255, 90, 170) * 0.12f);
+                // ============ 8. BLOOM ============
+                Cap(hx, 2.8f * r, 1.8f * r, hTh, new Color(255, 195, 135), 0.20f);
+                Quad(center, new Vector2(3.5f * r, 2.6f * r * Squash), Tilt,
+                    new Color(255, 115, 185), 0.09f);
                 Main.spriteBatch.End();
             }
             catch
             {
-                // Cierre defensivo SOLO en el path de error.
+                // Cierre defensivo: dejar el batch CERRADO pase lo que pase.
                 try { Main.spriteBatch.End(); } catch { }
             }
         }
 
-        /// <summary>Un anillo fino de fotones a radio u·R_sh.</summary>
-        private static void DrawRingRung(Vector2 center, float rSh, float u, int alpha,
-            Color color, float pulse)
+        /// <summary>Interpola la tabla de ángulos (grados) de una hoja.</summary>
+        private static float KeyLerp2(float[] ts, float[] vals, float t)
         {
-            // Ring.png: el trazo gráfico vive a ~0.92 del semiancho → el
-            // tamaño final del sprite debe ser ~2.174× el radio visible.
-            float size = 2.174f * u * rSh;
-            AddQuad(Ring, center, new Vector2(size, size), 0f,
-                color * ((alpha / 255f) * pulse));
+            // tablas lineales de 2 puntos
+            float u = MathHelper.Clamp(t, 0f, 1f);
+            return MathHelper.Lerp(vals[0], vals[1], u);
         }
 
-        /// <summary>
-        /// Una mitad del disco de acreción (cápsulas SoftGlow solapadas por
-        /// línea de corriente kepleriana). El lado cercano se dibuja sobre
-        /// la esfera; el lejano queda detrás (la esfera lo oculta).
-        /// REQUIERE que no haya ningún batch abierto (el pase anterior
-        /// cerró el suyo).
-        /// </summary>
-        private static void DrawDiskHalf(Vector2 center, float rSh, float time, int seed,
-            bool nearSide)
+        /// <summary>Punto central de la sección t de una hoja.</summary>
+        private static Vector2 BladePoint(float[] ts, float[] ths, float[] ros, float[] tks,
+            float t, float rot, float r, Vector2 center, out float theta, out float rm, out float tk)
         {
-            float capW = CapsuleWidth * rSh;
+            float ro = KeyLerp(ros, t);
+            tk = KeyLerp(tks, t);
+            rm = ro - tk * 0.5f;
+            theta = MathHelper.ToRadians(KeyLerp2(ts, ths, t)) + rot;
+            return Pol(rm, theta, r, center);
+        }
 
-            BeginAdditive(false);
-            Texture2D glow = SoftGlow;
-            Vector2 glowSize = new Vector2(glow.Width, glow.Height);
-
-            for (int ri = 0; ri < Streamlines; ri++)
+        /// <summary>Una hoja del vórtice: cápsulas + filamentos + colas.</summary>
+        private static void DrawBlade(Vector2 center, float r, float rot, float time, int seed,
+            float[] ts, float[] ths, float[] ros, float[] tks, float[] bris, Color[] cols,
+            int nSeg, float filamentBoost, float jitter)
+        {
+            for (int i = 0; i < nSeg; i++)
             {
-                float u = RimRadius + (OuterRadius - RimRadius) * ri / (Streamlines - 1);
-                float r = u * rSh;
-                float b = DiskBrightness(u);
-                if (b <= 0.01f)
-                    continue;
+                float t = i / (float)(nSeg - 1);
+                float jr = (Hash01(seed, i * 7 + 1, 13) - 0.5f) * jitter;
+                Vector2 pos = BladePoint(ts, ths, ros, tks, t, rot, r, center, out float th, out float rm, out float tk);
+                rm += jr * 0.5f;
+                pos = Pol(rm, th, r, center);
+                // tangente numérica
+                float eps = 1.5f / nSeg;
+                Vector2 pos2 = BladePoint(ts, ths, ros, tks, Math.Min(t + eps, 1f), rot, r, center, out _, out _, out _);
+                float rotA = (float)Math.Atan2(pos2.Y - pos.Y, pos2.X - pos.X);
+                float segLen = Math.Max(Vector2.Distance(pos, pos2) * 1.55f, 3f);
+                Color col = KeyColor(cols, t);
+                float bri = KeyLerp(bris, t);
+                // trazos de pincel
+                float stroke = 0.70f + 0.30f * (float)Math.Sin(21f * t + time * 3.1f + Math.Sin(7.7f * t) * 2f);
+                stroke *= 0.90f + 0.10f * Hash01(seed, i * 31 + 5, 77);
+                float al = Math.Min(2.1f, bri * stroke * 1.3f);
+                Cap(pos, segLen, tk * r * 0.50f, rotA, col, al);
 
-                // El lado LEJANO nace más lejos: el "foso" oscuro sobre el
-                // eje mayor de la referencia (el borde caliente 2.2·R_sh
-                // SOLO existe en el semiplano que cruza por delante).
-                if (!nearSide && u < FarInner)
-                    continue;
-
-                Color baseCol = DiskColor(u);
-
-                // Kepler: ω ∝ r^(−3/2) — el interior hierve más rápido.
-                float omega = 1.5f * (float)Math.Pow(PeakRadius / u, 1.5f);
-
-                int nSeg = Math.Max(48, Math.Min(120,
-                    (int)(MathHelper.TwoPi * r / (SegmentArc * rSh))));
-                float step = MathHelper.TwoPi / nSeg;
-                // Desalineación de costuras entre anillos (banda uniforme).
-                float gridShift = Hash01(seed, ri, 77) * step;
-                float capLen = step * r * CapsuleOverlap;
-                float capWSide = capW * (nearSide ? 1f : 0.72f);
-
-                for (int si = 0; si < nSeg; si++)
+                // filamentos calientes DENTRO de la hoja (pinceladas)
+                for (int f = 0; f < 3; f++)
                 {
-                    float phi = si * step + gridShift;
-                    float sinPhi = (float)Math.Sin(phi);
-                    if (nearSide != (sinPhi > 0f))
-                        continue;
+                    float off = (f - 1) * 0.30f * tk;
+                    Vector2 fp = Pol(rm + off, th, r, center);
+                    Color fcol = Color.Lerp(col, new Color(255, 255, 235), f == 1 ? 0.60f : 0.35f);
+                    float fal = al * filamentBoost * (f == 1 ? 0.55f : 0.34f);
+                    Cap(fp, segLen * 0.92f, Math.Max(1.6f, tk * r * 0.14f), rotA, fcol, fal);
+                }
 
-                    // Proyección de pantalla del punto del disco.
-                    Vector2 offset = BlackHolePhysics.ProjectDiskPoint(r, phi, MinorRatio);
-                    Vector2 pos = center + offset;
-
-                    // Tangente proyectada (orientación de la cápsula).
-                    float rot = (float)Math.Atan2(MinorRatio * Math.Cos(phi), -Math.Sin(phi));
-
-                    // Grano fino del plasma (clumps keplerianos orbitando).
-                    float flick = 0.88f + 0.12f * (float)Math.Sin(
-                        7.0f * phi - omega * time * 1.8f +
-                        2.3f * Hash01(seed, ri, si));
-
-                    // Doppler: el lado que se ACERCA (izquierda) brilla más.
-                    float dop = 1f + Doppler * (-(float)Math.Cos(phi));
-
-                    float mult = b * flick * dop * SideFactor(sinPhi, u);
-                    if (!nearSide)
-                        mult *= 0.92f;
-
-                    // El borde interno caliente ARDE en el lado cercano.
-                    if (u < BodyInner)
-                        mult *= 0.35f + 0.65f * Math.Max(0f, sinPhi);
-
-                    float alpha = Math.Min(1f, 1.02f * mult);
-
-                    Color c = baseCol;
-                    if (nearSide && sinPhi > 0f)
+                // COLAS DE VELOCIDAD del borde exterior (tramo externo)
+                if (t > 0.5f && t < 0.95f && Hash01(seed, i * 13 + 3, 91) > 0.62f)
+                {
+                    float ro = KeyLerp(ros, t);
+                    float trailR = ro + 0.18f + 0.5f * Hash01(seed, i, 55);
+                    float trailTh = th + 0.10f;
+                    for (int s = 0; s < 3; s++)
                     {
-                        // Núcleo del arco cercano más CLARO (rosa-blanco medido).
-                        float w = 0.22f * sinPhi;
-                        c = LerpColor(c, new Color(255, 196, 255), w);
+                        float ur = trailR + s * 0.55f;
+                        float uth = trailTh + s * 0.16f;
+                        Vector2 up = Pol(ur, uth, r, center);
+                        Color ucol = Color.Lerp(col, new Color(140, 25, 70), 0.5f + 0.4f * s / 2f);
+                        Cap(up, 0.5f * r * (1f - s * 0.25f), 0.11f * r, uth + Tilt, ucol,
+                            0.45f * (1f - s * 0.3f) * bri);
                     }
-                    else if (!nearSide && u < 3.1f)
-                    {
-                        // Borde del arco lejano más BLANCO (medido arriba).
-                        float w = 0.45f * (3.1f - u) / (3.1f - FarInner);
-                        c = LerpColor(c, Color.White, w);
-                    }
-
-                    Main.spriteBatch.Draw(glow, pos, null, c * alpha, rot,
-                        glowSize * 0.5f,
-                        new Vector2(capLen, capWSide) / glowSize,
-                        SpriteEffects.None, 0f);
                 }
             }
-            Main.spriteBatch.End();
         }
     }
 }
