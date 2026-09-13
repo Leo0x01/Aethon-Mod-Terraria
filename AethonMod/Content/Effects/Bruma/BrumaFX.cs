@@ -311,7 +311,7 @@ namespace AethonMod.Content.Effects.Bruma
                           MathF.Sin(time * 0.31f + phase * 6.0f + i) * width * 0.22f +
                           MathF.Sin(time * 0.71f + phase * 11.0f + i * 2) * width * 0.09f;
 
-                // Densidad: nace densa, se EROSIONA al morir (VFXDoc — el
+                // Densidad: nace densa, se EROSIONA al morir (la regla de
                 // humo se disuelve en grumos, no se desvanece como fantasma).
                 float n = BrumaNoise.Fbm(x * 0.02f, y * 0.02f, seed + i, 3);
                 float life = MathF.Sin(phase * MathHelper.Pi);

@@ -8,70 +8,42 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// OlvidoBlackHoleRenderer — v6.15 — EL AGUJERO NEGRO DEL OLVIDO, 100% CÓDIGO.
+    /// OlvidoAscendidoBlackHoleRenderer — v6.18 — EL OLVIDO ASCENDIDO.
     ///
-    /// DIRECTRIZ DEL USUARIO: "el agujero negro no puede ser creado por
-    /// sprite, debe ser creado enteramente por código" — TODO el arte
-    /// extraído de la referencia roja anterior fue BORRADO del proyecto
-    /// (sprites y pipeline de extracción incluidos).
+    /// LA COPIA MEJORADA del Olvido definitivo (OlvidoBlackHoleRenderer
+    /// v6.15/v6.18 queda INTACTO — este archivo es un VÓRTICE NUEVO): el
+    /// mismo cuerpo (anillo de plasma con hotspot Doppler, brazos
+    /// espirales, runas doradas, ondas de distorsión, nebulosas y aura
+    /// mística) elevado con LA LIBRERÍA DE RAYOS LightningCore:
     ///
-    /// NUEVA REFERENCIA (imagen + prompt del usuario, 13/9/2026): agujero
-    /// negro cósmico-mágico con núcleo de vacío absoluto que absorbe la
-    /// luz, ANILLO ENERGÉTICO púrpura/rosa/magenta con textura de plasma
-    /// en movimiento e intensidad variable, RAYOS ELÉCTRICOS rosa/violeta,
-    /// PARTÍCULAS LUMINOSAS con movimiento radial, RUNAS DORADAS de estilo
-    /// antiguo flotando en círculo, DISTORSIÓN ESPACIAL (ondas que doblan
-    /// la luz), fondo oscuro con nebulosas púrpura/azul difusas y aura
-    /// mística arcana.
+    ///   1. ⚡ ARCOS DEL VACÍO — 3 LightningCore.Arc morado-azules
+    ///      abrazando el horizonte (radios 0.95× / 1.08× / 1.22×),
+    ///      re-generándose a ~9 Hz con chispas satélite por Flicker.
+    ///   2. ⚡ RAYOS ESPIRALES — 2 LightningCore.Bolt AZUL ELÉCTRICO que
+    ///      SIGUEN los brazos espirales: anclas SOBRE la espiral (del
+    ///      extremo exterior al anillo) + JitterPath + Catmull-Rom —
+    ///      rayos que ESPIRALAN HACIA EL NÚCLEO.
+    ///   3. BRAZOS ESPIRALES REFORZADOS — 3 brazos (antes 2) × 18 pasos
+    ///      (antes 14), fluyendo MÁS RÁPIDO (0.26 rad/s vs 0.18).
+    ///   4. NEBULOSA fBm MÁS RICA — 8 velos (antes 5) pintados DOBLE
+    ///      (halo grande tenue + núcleo pequeño intenso) y con PARPADEO
+    ///      POR HASH (cada velo respira a su propio ritmo).
+    ///   5. CORREDORES DE FOTONES COMO RAYOS FINOS — además de los 3
+    ///      destellos clásicos, 2 fotones-rayo dibujados como
+    ///      MICRO-BOLTS de LightningCore recorriendo el anillo.
     ///
-    /// TODO lo que se ve se COMPONE AQUÍ, CADA FRAME, por código: ~370
-    /// cuadros de luz (cápsulas, glows, anillos, zigzags) usando solo TRES
-    /// pinceles genéricos GENERADOS POR CÓDIGO por la biblioteca VFX del
-    /// mod (SoftGlow = degradé radial, Ring = anillo fino, BlackDisk =
-    /// disco negro de borde suave — los mismos pinceles de BoltRenderer,
-    /// las coronas y los demás agujeros). CERO sprites de arte. Cero
-    /// estado, cero red: todo determinista por hash puro.
+    /// Paleta MORADO-AZUL (la del recolor v6.18 del Olvido). TODO se
+    /// compone AQUÍ, CADA FRAME, por código con los pinceles
+    /// procedurales de la biblioteca VFX. Cero arte, cero estado, cero
+    /// red (determinismo por hash puro).
     ///
-    /// LAS CAPAS (en orden de pintado):
-    ///   0. AURA OSCURA MÍSTICA (alfa) — el bolsillo de vacío que oscurece
-    ///      el mundo alrededor (el agujero absorbe la luz circundante).
-    ///   1. NEBULOSAS púrpura/azul muy difusas girando lento + POLVO
-    ///      ambiental carmesí/magenta pulsando (la lejanía viva).
-    ///   2. ANILLO DE PLASMA (mitad TRASERA): 44 cápsulas sobre la elipse
-    ///      inclinada — hotspot Doppler (zona incandescente) + turbulencia
-    ///      por hash regenerada a 12 Hz + gradiente térmico blanco-amarillo
-    ///      → rosa → violeta según intensidad ("zonas más brillantes
-    ///      intercaladas con sombras").
-    ///   3. BRAZOS ESPIRALES del vórtice (2 brazos de cápsulas que se
-    ///      desenrocan del anillo hacia afuera, magenta→violeta).
-    ///   4. NÚCLEO — disco de NEGRO ABSOLUTO (el vacío) + filo violeta
-    ///      tenue en el horizonte (la última luz atrapada).
-    ///   5. ANILLO DE PLASMA (mitad DELANTERA, más brillante — el plasma
-    ///      CRUZA POR DELANTE de la esfera, como todo agujero que se
-    ///      respete).
-    ///   6. CORREDORES DE FOTONES — 3 destellos blanco-rosa orbitando.
-    ///   7. RAYOS ELÉCTRICOS — 2 VIOLETAS danzando DENTRO del núcleo +
-    ///      2 ROSAS emergiendo del anillo hacia afuera (zigzag determinista
-    ///      regenerado ~7 Hz: están VIVOS, no es una textura estática).
-    ///   8. DESTELLOS POLARES — agujas ahusadas blancas-rosas en los polos
-    ///      del vórtice (lens-flare del eje menor).
-    ///   9. RUNAS DORADAS — 10 glifos angulares originales orbitando en
-    ///      círculo perfecto (cuerpo dorado → punta pálida, latido y
-    ///      flotación propios) + anillo rúnico tenue que los une.
-    ///  10. ONDAS DE DISTORSIÓN — 2 anillos expandiéndose desde el
-    ///      horizonte (el espacio-tiempo LATE; la lente de pantalla la
-    ///      curva el BlackHoleLensSystem registrado aparte).
-    ///  11. PARTÍCULAS LUMINOSAS — 9 motas derivando RADIALMENTE HACIA
-    ///      AFUERA con tamaño/opacidad variables (rosa/violeta/dorada).
-    ///  12. AURA MÍSTICA final pulsante (el poder arcano emana).
-    ///
-    /// CONTRATO DE BATCH (v6.10, a prueba de balas): Draw() exige el
+    /// CONTRATO DE BATCH (idéntico al original v6.10): Draw() exige el
     /// SpriteBatch CERRADO y lo deja CERRADO.
     /// </summary>
-    public static class OlvidoBlackHoleRenderer
+    public static class OlvidoAscendidoBlackHoleRenderer
     {
         // ==================================================================
-        //  PARÁMETROS (calibrados contra la NUEVA referencia)
+        //  PARÁMETROS (el cuerpo del Olvido + las medidas ascendidas)
         // ==================================================================
 
         /// <summary>Radio de la esfera negra en px a escala 1 — GIGANTE.</summary>
@@ -94,6 +66,16 @@ namespace AethonMod.Content.VFX
         /// <summary>Regeneración de la turbulencia (Hz).</summary>
         private const float FlickHz = 12f;
 
+        // --- brazos espirales REFORZADOS (v6.18 ascendido: 3 × 18, rápido) ---
+        private const int ArmCount = 3;         // eran 2
+        private const int ArmSteps = 18;        // eran 14
+        private const float ArmFlow = 0.26f;    // era 0.18 — flujo más rápido
+        private const float ArmSweep = 1.35f;   // barrido angular del brazo
+        private const float ArmGrow = 0.95f;    // radio creciente del brazo
+
+        // --- NUEVO: la electricidad del vacío (arcos/rayos/fotones) ---
+        private const float VoidHz = 9f;        // ~9 Hz de re-generación
+
         // --- runas doradas ---
         private const int RuneCount = 10;
         private const float RuneRadius = 2.62f;  // ×R — el círculo rúnico
@@ -104,8 +86,7 @@ namespace AethonMod.Content.VFX
         private const int WaveCount = 2;
 
         // ==================================================================
-        //  PALETA (VLM sobre la nueva referencia: blanco-amarillo → rosa →
-        //  violeta; rayos violeta eléctrico; runas doradas)
+        //  PALETA — MORADO-AZUL (v6.18, la del recolor del Olvido)
         // ==================================================================
 
         private static readonly Color HotCore = new(235, 240, 255);   // blanco-frío incandescente
@@ -189,12 +170,7 @@ namespace AethonMod.Content.VFX
             return (h & 0xFFFFFF) / 16777216f;
         }
 
-        /// <summary>
-        /// Tinte de INTENSIDAD LINEAL (el patrón validado del Cometa
-        /// Estelar): rgb PLENO + alfa = factor. Con Color*f de XNA el
-        /// blending aditivo queda cuadrático (f²) y todo se apaga — con
-        /// este tinte el brillo es LINEAL en f.
-        /// </summary>
+        /// <summary>Tinte de INTENSIDAD LINEAL (el patrón validado).</summary>
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
@@ -223,24 +199,28 @@ namespace AethonMod.Content.VFX
                 float rr = r * breathe;
 
                 // ============ 0. AURA OSCURA MÍSTICA (alfa) ============
-                // El vacío ABSORBE la luz: un degradé oscuro violetáceo
+                // El vacío ABSORBE la luz: un degradé oscuro violáceo
                 // abraza el mundo alrededor del agujero (bolsillo de vacío).
                 BeginAlpha();
-                Quad(Glow, center, new Vector2(7.0f * rr, 7.0f * rr), 0f,
-                    new Color(6, 4, 22, 170));
+                Quad(Glow, center, new Vector2(7.4f * rr, 7.4f * rr), 0f,
+                    new Color(6, 4, 22, 175));
                 Main.spriteBatch.End();
 
-                // ============ 1..12: TODO LO BRILLANTE (aditivo) ============
+                // ============ 1..13: TODO LO BRILLANTE (aditivo) ============
                 BeginAdditive();
 
-                // --- 1. NEBULOSAS difusas + polvo ambiental ---
-                DrawNebulas(center, rr, time, seed);
+                // --- 1. NUEVO: NEBULOSA fBm MÁS RICA (8 velos dobles con
+                //        parpadeo por hash) + polvo ambiental denso ---
+                DrawNebulas(center, rr, time, seed, flick);
 
                 // --- 2. ANILLO DE PLASMA — mitad TRASERA ---
                 DrawPlasmaRing(center, rr, time, seed, flick, front: false);
 
-                // --- 3. BRAZOS ESPIRALES del vórtice ---
+                // --- 3. BRAZOS ESPIRALES REFORZADOS (3 × 18, flujo rápido) ---
                 DrawSpiralArms(center, rr, time, seed);
+
+                // --- 3.5 NUEVO: RAYOS ESPIRALES siguiendo los brazos ---
+                DrawSpiralBolts(center, rr, time, seed);
 
                 // --- 4. NÚCLEO + filo del horizonte ---
                 // El disco negro NO es aditivo: se pinta en alfa para
@@ -260,11 +240,14 @@ namespace AethonMod.Content.VFX
                 // --- 5. ANILLO DE PLASMA — mitad DELANTERA (más brillante) ---
                 DrawPlasmaRing(center, rr, time, seed, flick, front: true);
 
-                // --- 6. CORREDORES DE FOTONES orbitando ---
+                // --- 5.5 NUEVO: ARCOS DEL VACÍO (3 Arc a ~9 Hz) ---
+                DrawVoidArcs(center, r, time, seed);
+
+                // --- 6. CORREDORES DE FOTONES + NUEVO fotones-rayo ---
                 DrawPhotonRunners(center, rr, time, seed);
 
-                // --- 7. RAYOS ELÉCTRICOS (dentro del núcleo + del anillo) ---
-                DrawElectricBolts(center, r, time, seed, flick);
+                // --- 7. RAYOS EMERGIENDO DEL ANILLO (LightningCore.Bolt) ---
+                DrawElectricBolts(center, r, time, seed);
 
                 // --- 8. DESTELLOS POLARES ---
                 DrawPolarFlares(center, rr, time);
@@ -280,8 +263,8 @@ namespace AethonMod.Content.VFX
 
                 // --- 12. AURA MÍSTICA final pulsante ---
                 float aura = 0.85f + 0.15f * (float)Math.Sin(time * 2.0f);
-                Quad(Glow, center, new Vector2(5.6f * rr, 5.6f * rr), 0f,
-                    Tint(AuraViolet, 0.22f * aura));
+                Quad(Glow, center, new Vector2(6.0f * rr, 6.0f * rr), 0f,
+                    Tint(AuraViolet, 0.24f * aura));
 
                 Main.spriteBatch.End();
                 // El batch queda CERRADO (contrato).
@@ -294,32 +277,43 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  1. NEBULOSAS + POLVO AMBIENTAL
+        //  1. NUEVO — NEBULOSA fBm MÁS RICA + POLVO AMBIENTAL
         // ------------------------------------------------------------------
 
-        private static void DrawNebulas(Vector2 center, float rr, float time, int seed)
+        private static void DrawNebulas(Vector2 center, float rr, float time, int seed, int flick)
         {
-            // Cinco velos púrpura/azul ENORMES y tenues girando lento:
-            // "sutiles nebulosas púrpura y azul en la lejanía, muy difusas".
-            for (int i = 0; i < 5; i++)
+            // ============================================================
+            //  LA NEBULOSA fBm DEL ASCENDIDO: OCHO VELOS púrpura/azul
+            //  (antes 5), cada uno pintado DOBLE — halo grande tenue +
+            //  núcleo pequeño intenso, como dos octavas de ruido apiladas
+            //  — y con PARPADEO POR HASH: cada velo respira a su propio
+            //  ritmo (regenerado a 6 Hz), la lejanía VIVA.
+            // ============================================================
+            for (int i = 0; i < 8; i++)
             {
                 float h = Hash01(seed, 501 + i, 17);
                 float dir = i % 2 == 0 ? 1f : -1f;
                 float ang = h * MathHelper.TwoPi + time * 0.05f * dir;
-                float dist = (2.7f + 0.9f * Hash01(seed, 502 + i, 29)) * rr;
+                float dist = (2.5f + 1.0f * Hash01(seed, 502 + i, 29)) * rr;
                 Vector2 pos = center + new Vector2(
                     (float)Math.Cos(ang) * dist, (float)Math.Sin(ang) * dist * 0.8f);
-                float size = (2.0f + 1.1f * Hash01(seed, 503 + i, 41)) * rr;
+                float size = (1.8f + 1.2f * Hash01(seed, 503 + i, 41)) * rr;
                 Color c = i % 2 == 0 ? NebPurple : NebBlue;
-                float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 0.7f + i * 1.9f);
+
+                // EL PARPADEO POR HASH (cada velo tiene SU ritmo).
+                float fl = 0.70f + 0.30f * Hash01(seed, 505 + i, flick / 2);
+                float pulse = (0.75f + 0.25f * (float)Math.Sin(time * 0.7f + i * 1.9f)) * fl;
+
+                // DOBLE CAPA fBm: halo grande tenue + núcleo pequeño intenso.
                 Quad(Glow, pos, new Vector2(size, size), ang,
-                    Tint(c, (i % 2 == 0 ? 0.22f : 0.15f) * pulse));
+                    Tint(c, (i % 2 == 0 ? 0.20f : 0.14f) * pulse));
+                Quad(Glow, pos, new Vector2(size * 0.45f, size * 0.45f), ang,
+                    Tint(c, (i % 2 == 0 ? 0.16f : 0.11f) * pulse));
             }
 
-            // Polvo ambiental: 14 motas carmesí/magenta pulsando (la
-            // referencia tiene polvo rojizo con más densidad cerca del
-            // centro, desvaneciéndose hacia afuera).
-            for (int i = 0; i < 14; i++)
+            // Polvo ambiental: 18 motas morado-azul pulsando (antes 14 —
+            // la densidad del vacío ascendido).
+            for (int i = 0; i < 18; i++)
             {
                 float h = Hash01(seed, 600 + i, 13);
                 float ang = h * MathHelper.TwoPi + time * 0.03f * (i % 2 == 0 ? 1f : -1f);
@@ -334,13 +328,13 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  2/5. EL ANILLO DE PLASMA — 44 cápsulas por mitad
+        //  2/5. EL ANILLO DE PLASMA — 44 cápsulas por mitad (intacto)
         // ------------------------------------------------------------------
 
         private static void DrawPlasmaRing(Vector2 center, float rr, float time, int seed,
             int flick, bool front)
         {
-            // La mitad delantera (t ∈ 0..π) cruza POR DEBAJO-delante de la
+            // La mitad delantera (t ∈ 0..π) cruza POR DELANTE de la
             // esfera; la trasera (t ∈ π..2π) queda POR DETRÁS.
             float t0 = front ? 0f : MathHelper.Pi;
             float span = MathHelper.Pi;
@@ -362,9 +356,7 @@ namespace AethonMod.Content.VFX
                 if (segLen < 0.5f) continue;
                 float rot = (float)Math.Atan2(seg.Y, seg.X);
 
-                // INTENSIDAD: hotspot Doppler (una zona incandescente) ×
-                // turbulencia por hash (regenerada a 12 Hz — el plasma SE
-                // MUEVE, zonas brillantes intercaladas con sombras).
+                // INTENSIDAD: hotspot Doppler × turbulencia por hash (12 Hz).
                 float hot = 0.5f + 0.5f * (float)Math.Cos(t - hotspot);
                 hot = 0.35f + 0.65f * hot * hot;
                 float turb = 0.72f + 0.28f * Hash01(seed, 700 + s, flick);
@@ -381,8 +373,7 @@ namespace AethonMod.Content.VFX
                 Capsule(mid, segLen, 0.34f * rr * (0.7f + inten), rot, Tint(c, 0.40f * inten));
                 Capsule(mid, segLen, 0.11f * rr * inten, rot, Tint(c, 0.80f * inten));
 
-                // En la zona MÁS caliente, un punto blanco extra (el plasma
-                // casi se funde a blanco — "zonas más brillantes").
+                // En la zona MÁS caliente, un punto blanco extra.
                 if (inten > 0.88f)
                 {
                     Quad(Glow, mid, new Vector2(0.30f * rr, 0.30f * rr), rot,
@@ -392,27 +383,31 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  3. BRAZOS ESPIRALES — el vórtice se desenrosca
+        //  3. BRAZOS ESPIRALES REFORZADOS — el vórtice se desenrosca
         // ------------------------------------------------------------------
 
         private static void DrawSpiralArms(Vector2 center, float rr, float time, int seed)
         {
-            const int ArmSteps = 14;
-            float armPhase = time * 0.18f;
+            // ============================================================
+            //  REFORZADOS: 3 brazos (antes 2) × 18 pasos (antes 14) y
+            //  fluyendo a 0.26 rad/s (antes 0.18) — el vórtice del
+            //  Ascendido desenrosca MÁS MATERIA, MÁS RÁPIDO.
+            // ============================================================
+            float armPhase = time * ArmFlow;
 
-            for (int arm = 0; arm < 2; arm++)
+            for (int arm = 0; arm < ArmCount; arm++)
             {
-                float baseT = armPhase + arm * MathHelper.Pi;
+                float baseT = armPhase + arm * (MathHelper.TwoPi / ArmCount);
                 for (int k = 0; k < ArmSteps; k++)
                 {
                     float f = k / (float)(ArmSteps - 1);           // 0 en el anillo → 1 fuera
-                    float t = baseT + f * 1.35f;                   // barrido angular
-                    float grow = 1f + f * 0.95f;                   // radio creciente
+                    float t = baseT + f * ArmSweep;                // barrido angular
+                    float grow = 1f + f * ArmGrow;                 // radio creciente
                     Vector2 pos = VFXCore.Ellipse(center,
                         RingA * rr * grow, RingB * rr * grow, RingTilt, t);
                     Vector2 next = VFXCore.Ellipse(center,
                         RingA * rr * grow, RingB * rr * grow, RingTilt,
-                        t + 1.35f / ArmSteps);
+                        t + ArmSweep / ArmSteps);
                     Vector2 mid = (pos + next) * 0.5f;
                     Vector2 seg = next - pos;
                     float len = seg.Length();
@@ -428,41 +423,152 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  6. CORREDORES DE FOTONES — luz orbitando y acelerando
+        //  3.5 NUEVO — LOS RAYOS ESPIRALES (LightningCore sobre el brazo)
+        // ------------------------------------------------------------------
+
+        private static void DrawSpiralBolts(Vector2 center, float rr, float time, int seed)
+        {
+            // ============================================================
+            //  LOS RAYOS ESPIRALES — LA FIRMA DEL OLVIDO ASCENDIDO: dos
+            //  LightningCore.Bolt AZUL ELÉCTRICO que SIGUEN los brazos
+            //  espirales. Las ANCLAS se construyen con puntos SOBRE la
+            //  espiral (del extremo EXTERIOR al anillo — el rayo NACE
+            //  lejos y ESPIRALA HACIA EL NÚCLEO), el camino tiembla con
+            //  JitterPath (perpendicular de cuerda) y se suaviza con
+            //  Catmull-Rom para serpentear fluido sobre el brazo.
+            // ============================================================
+            int boltFlick = LightningCore.FlickTick(time, VoidHz);
+            float armPhase = time * ArmFlow;
+
+            for (int arm = 0; arm < 2; arm++)
+            {
+                if (!LightningCore.Flicker(seed + 431 + arm * 61, boltFlick, 0.80f))
+                    continue;
+
+                float baseT = armPhase + arm * (MathHelper.TwoPi / ArmCount);
+
+                // Anclas SOBRE la espiral: f=1 (exterior) → f=0 (anillo).
+                const int Anchors = 7;
+                Vector2[] anchors = new Vector2[Anchors + 1];
+                for (int k = 0; k <= Anchors; k++)
+                {
+                    float f = 1f - k / (float)Anchors;
+                    float t = baseT + f * ArmSweep;
+                    float grow = 1f + f * ArmGrow;
+                    anchors[k] = VFXCore.Ellipse(center,
+                        RingA * rr * grow, RingB * rr * grow, RingTilt, t);
+                }
+
+                // El rayo TIEMBLA sobre el camino espiral (extremos fijos)
+                // y se suaviza para serpentear siguiendo el brazo.
+                Vector2[] pts = LightningCore.JitterPath(anchors,
+                    seed + 500 + arm * 37, boltFlick, rr * 0.13f);
+                pts = LightningCore.Smooth(pts, 3);
+
+                // DOBLE TIRA azul eléctrico con RAMAS hacia fuera.
+                LightningCore.Bolt(Main.spriteBatch, pts,
+                    seed + 600 + arm * 43, boltFlick, rr * 0.085f,
+                    Tint(BoltViolet, 0.46f), Tint(BoltPink, 0.88f));
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  5.5 NUEVO — LOS ARCOS DEL VACÍO (LightningCore.Arc)
+        // ------------------------------------------------------------------
+
+        private static void DrawVoidArcs(Vector2 center, float r, float time, int seed)
+        {
+            // ============================================================
+            //  LOS ARCOS DEL VACÍO: tres LightningCore.Arc morado-azules
+            //  abrazando el horizonte — 0.95× (JUSTO dentro del filo),
+            //  1.08× y 1.22× del radio, cada uno derivando a su propia
+            //  velocidad. Se re-generan a ~9 Hz con parpadeo Flicker y
+            //  sueltan CHISPAS SATÉLITE — el vacío CHISPEA en círculos
+            //  alrededor de la esfera.
+            // ============================================================
+            int arcFlick = LightningCore.FlickTick(time, VoidHz);
+
+            for (int c = 0; c < 3; c++)
+            {
+                float radius = (0.95f + 0.13f * c) * r;
+                float drift = time * (0.90f - 0.55f * c) + c * 2.1f;
+
+                if (!LightningCore.Flicker(seed + 621 + c * 9, arcFlick, 0.85f))
+                    continue;
+
+                float span = 1.05f + 0.55f * Hash01(seed, 631 + c, arcFlick);
+                LightningCore.Arc(Main.spriteBatch, center, radius,
+                    drift, drift + span, seed + 210 + c * 29, arcFlick,
+                    r * 0.070f, Tint(BoltViolet, 0.40f), Tint(BoltPink, 0.82f), 1f, 11);
+
+                // CHISPA SATÉLITE del arco (el 35% de las regeneraciones).
+                if (LightningCore.Flicker(seed + 643 + c * 5, arcFlick, 0.35f))
+                {
+                    float satA = drift - span * 0.6f;
+                    LightningCore.Arc(Main.spriteBatch, center, radius * 1.04f,
+                        satA, satA + span * 0.30f, seed + 250 + c * 31, arcFlick,
+                        r * 0.040f, Tint(BoltViolet, 0.28f), Tint(HotCore, 0.65f), 1f, 6);
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  6. CORREDORES DE FOTONES + FOTONES-RAYO (micro-bolts)
         // ------------------------------------------------------------------
 
         private static void DrawPhotonRunners(Vector2 center, float rr, float time, int seed)
         {
+            // (los 3 corredores clásicos: halo violeta + núcleo blanco-frío)
             for (int i = 0; i < 3; i++)
             {
                 float t = time * (1.25f + 0.22f * i) + i * 2.1f;
                 Vector2 pos = Ellipse(center, rr, t);
                 float twinkle = 0.65f + 0.35f * (float)Math.Sin(time * 8f + i * 2.3f);
-                // halo magenta + núcleo blanco-rosa
                 Quad(Glow, pos, new Vector2(1.05f * rr, 1.05f * rr), 0f,
                     Tint(MidPink, 0.35f * twinkle));
                 Quad(Glow, pos, new Vector2(0.42f * rr, 0.42f * rr), 0f,
                     Tint(HotCore, 0.85f * twinkle));
             }
+
+            // ============================================================
+            //  NUEVO — FOTONES-RAYO: dos corredores extra dibujados como
+            //  MICRO-BOLTS de LightningCore (grosor mínimo) recorriendo
+            //  un arco corto del anillo — fotones "electrificados" del
+            //  vacío ascendido, con parpadeo vivo por Flicker.
+            // ============================================================
+            int boltFlick = LightningCore.FlickTick(time, VoidHz);
+            for (int i = 0; i < 2; i++)
+            {
+                if (!LightningCore.Flicker(seed + 521 + i * 11, boltFlick, 0.72f))
+                    continue;
+
+                float t = time * (1.55f + 0.30f * i) + i * 3.3f;
+                Vector2 p0 = Ellipse(center, rr, t - 0.32f);
+                Vector2 p1 = Ellipse(center, rr, t);
+                LightningCore.Bolt(Main.spriteBatch, p0, p1,
+                    seed + 530 + i * 7, boltFlick, rr * 0.045f,
+                    Tint(MidPink, 0.55f), Tint(HotCore, 0.92f), 1f, 5, rr * 0.05f);
+            }
         }
 
         // ------------------------------------------------------------------
-        //  7. RAYOS ELÉCTRICOS — zigzag determinista (regenerado ~7 Hz)
+        //  7. RAYOS EMERGIENDO DEL ANILLO (LightningCore.Bolt)
         // ------------------------------------------------------------------
 
-        private static void DrawElectricBolts(Vector2 center, float r, float time, int seed, int flick)
+        private static void DrawElectricBolts(Vector2 center, float r, float time, int seed)
         {
-            int boltFlick = flick / 2;   // ~6 Hz para los rayos (viven frenéticos)
+            // ============================================================
+            //  DOS RAYOS EMERGIENDO DEL ANILLO hacia afuera — ahora con
+            //  LightningCore.Bolt: doble tira cuerpo + núcleo, RAMAS
+            //  HEREDADAS y gorros de descarga (más ricos que el zigzag
+            //  simple del original), re-generados a ~9 Hz.
+            // ============================================================
+            int boltFlick = LightningCore.FlickTick(time, VoidHz);
 
-            // (v6.18: los RAYOS INTERIORES del núcleo fueron QUITADOS — el
-            //  vacío queda NEGRO ABSOLUTO y LIMPIO, como en el agujero de
-            //  la Bruma. Petición del usuario. Solo quedan los que ESCAPAN.)
-
-            // 7.2 — DOS RAYOS ROSA EMERGIENDO DEL ANILLO hacia afuera
-            //       ("rayos eléctricos que emergen del anillo").
             for (int i = 0; i < 2; i++)
             {
-                if (Hash01(seed, 850 + i, boltFlick) < 0.30f) continue;
+                if (!LightningCore.Flicker(seed + 858 + i * 13, boltFlick, 0.70f))
+                    continue;
 
                 float t = HotspotBase + time * PlasmaFlow + i * MathHelper.Pi +
                           0.6f * Hash01(seed, 851 + i, boltFlick / 3);
@@ -474,72 +580,15 @@ namespace AethonMod.Content.VFX
                 Vector2 tangent = new Vector2(-outward.Y, outward.X) * 0.35f;
                 Vector2 end = start + (outward + tangent) * (1.30f + 0.60f *
                     Hash01(seed, 852 + i, boltFlick)) * r;
-                DrawBolt(start, end, seed + 100 + i * 53, boltFlick, r * 0.09f,
-                    Tint(BoltViolet, 0.55f), Tint(BoltPink, 0.95f));
+
+                LightningCore.Bolt(Main.spriteBatch, start, end,
+                    seed + 100 + i * 53, boltFlick, r * 0.095f,
+                    Tint(BoltViolet, 0.52f), Tint(BoltPink, 0.92f), 1f, 7, r * 0.15f);
             }
-        }
-
-        /// <summary>
-        /// Un rayo en zigzag con RAMAS (la matemática de BoltRenderer
-        /// adaptada a coords de pantalla): funda de halo + núcleo fino por
-        /// segmento + ramas laterales cortas donde el hash lo pide.
-        /// </summary>
-        private static void DrawBolt(Vector2 start, Vector2 end, int seed, int flick,
-            float width, Color halo, Color core)
-        {
-            Vector2 delta = end - start;
-            float length = delta.Length();
-            if (length < 4f) return;
-
-            Vector2 dir = delta / length;
-            Vector2 normal = new Vector2(-dir.Y, dir.X);
-            float amp = Math.Min(length * 0.16f, 0.30f * width * 4f);
-
-            const int Segments = 6;
-            Vector2[] pts = new Vector2[Segments + 1];
-            for (int s = 0; s <= Segments; s++)
-            {
-                float f = s / (float)Segments;
-                float envelope = (float)Math.Sin(f * Math.PI);   // tenso en el medio
-                float jitter = (Hash01(seed, flick, s) - 0.5f) * 2f * amp * envelope;
-                pts[s] = start + dir * (length * f) + normal * jitter;
-            }
-
-            for (int s = 0; s < Segments; s++)
-            {
-                Vector2 a = pts[s];
-                Vector2 b = pts[s + 1];
-                Vector2 mid = (a + b) * 0.5f;
-                Vector2 seg = b - a;
-                float segLen = seg.Length();
-                if (segLen < 0.5f) continue;
-                float rot = (float)Math.Atan2(seg.Y, seg.X);
-
-                Capsule(mid, segLen, width * 2.0f, rot, halo);
-                Capsule(mid, segLen, width * 0.8f, rot, core);
-
-                // RAMA lateral corta donde el hash lo pide (fractura real).
-                if (s > 0 && s < Segments - 1 && Hash01(seed, flick, s + 91) > 0.62f)
-                {
-                    float side = Hash01(seed, flick, s + 37) > 0.5f ? 1f : -1f;
-                    float branchLen = (0.35f + 0.4f * Hash01(seed, flick, s + 53)) * length * 0.25f;
-                    Vector2 branchDir = (dir * 0.45f + normal * side).SafeNormalize(Vector2.UnitY);
-                    Vector2 bEnd = b + branchDir * branchLen;
-                    Vector2 bMid = (b + bEnd) * 0.5f;
-                    float bRot = (float)Math.Atan2(branchDir.Y, branchDir.X);
-                    Capsule(bMid, branchLen, width * 1.3f, bRot, halo * 0.6f);
-                    Capsule(bMid, branchLen, width * 0.5f, bRot, core * 0.6f);
-                }
-            }
-
-            // Extremos incandescentes.
-            Quad(Glow, start, new Vector2(width * 5f, width * 5f), 0f, halo);
-            Quad(Glow, start, new Vector2(width * 2.6f, width * 2.6f), 0f, core);
-            Quad(Glow, end, new Vector2(width * 4f, width * 4f), 0f, halo);
         }
 
         // ------------------------------------------------------------------
-        //  8. DESTELLOS POLARES — agujas ahusadas en el eje menor
+        //  8. DESTELLOS POLARES — agujas ahusadas en el eje menor (intacto)
         // ------------------------------------------------------------------
 
         private static void DrawPolarFlares(Vector2 center, float rr, float time)
@@ -578,7 +627,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  9. RUNAS DORADAS — 10 glifos originales orbitando en círculo
+        //  9. RUNAS DORADAS — 10 glifos originales orbitando (intacto)
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -668,7 +717,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  10. ONDAS DE DISTORSIÓN — el espacio-tiempo late
+        //  10. ONDAS DE DISTORSIÓN — el espacio-tiempo late (intacto)
         // ------------------------------------------------------------------
 
         private static void DrawDistortionWaves(Vector2 center, float r, float time, int seed)
@@ -689,7 +738,7 @@ namespace AethonMod.Content.VFX
 
         private static void DrawLuminousMotes(Vector2 center, float r, float time, int seed)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 12; i++)
             {
                 float h = Hash01(seed, 900 + i, 23);
                 float life = (time * 0.13f + h) % 1f;
@@ -704,7 +753,7 @@ namespace AethonMod.Content.VFX
                 float size = (0.14f + 0.13f * h) * r * 2f;
                 float alpha = (float)Math.Sin(life * Math.PI) * (0.55f + 0.45f * h);
 
-                // Rosa / violeta / dorada (rara) / blanca.
+                // Violeta / azul / dorada (rara) / blanca.
                 Color c = h < 0.40f ? MidPink
                         : h < 0.72f ? BoltViolet
                         : h < 0.90f ? RuneGold

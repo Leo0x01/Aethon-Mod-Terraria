@@ -9,35 +9,32 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// UmbralBlackHoleStaff — v6.16 — EL BASTÓN DEL AGUJERO NEGRO DEL UMBRAL.
+    /// OlvidoAscendidoBlackHoleStaff — v6.18 — EL BASTÓN DEL OLVIDO ASCENDIDO.
     ///
-    /// EL 6to agujero negro del mod, EL AGUJERO DE LA REFERENCIA
-    /// (petición expresa: "pon la referencia de fondo y comienza a
-    /// agregarle cosas hasta llegar al agujero negro de la referencia,
-    /// todo por código"): disco de acreción OBLICUO con asimetría
-    /// DOPPLER — el lado derecho BLANCO-incandescente y grueso, el
-    /// izquierdo rojo profundo y fino —, estrías pintadas largas y
-    /// curvas con gradiente blanco-amarillo → naranja → rojo neón →
-    /// magenta → púrpura, PÚA de energía blanco-rosa, rayo naranja
-    /// dentado, velos de materia vaporizada, filamentos violeta cayendo
-    /// al núcleo, CÍRCULO DE RUNAS doradas ENORME CON HUECOS y brasas
-    /// con estelas. 100% CÓDIGO.
+    /// La copia MEJORADA del bastón del Olvido (OlvidoBlackHoleStaff
+    /// queda INTACTO): lanza el agujero negro OLVIDO ASCENDIDO — el
+    /// Olvido elevado con la librería de rayos LightningCore: ARCOS DEL
+    /// VACÍO (3 coronas eléctricas morado-azules alrededor del
+    /// horizonte, ~9 Hz), RAYOS ESPIRALES que siguen los brazos y
+    /// espiralan hacia el núcleo (anclas sobre la espiral + JitterPath),
+    /// brazos espirales REFORZADOS (3×18, flujo rápido), nebulosa fBm
+    /// más rica y fotones-rayo recorriendo el anillo. Paleta
+    /// MORADO-AZUL eléctrico.
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión, Olvido y Cósmico —
-    /// todos quedan INTACTOS.
+    /// Daño 200 (el Olvido base es 150). Tooltip CORTO v6.18.
     /// </summary>
-    public class UmbralBlackHoleStaff : ModItem
+    public class OlvidoAscendidoBlackHoleStaff : ModItem
     {
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 150;
+            Item.damage = 200;
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 50; Item.useAnimation = 50;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
+            Item.shoot = ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>();
             Item.shootSpeed = 6f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
@@ -52,7 +49,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
             // texto (el nombre ahora vive en la localización, arriba).
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF9966:100% por código — el disco de la referencia con Doppler: lado cercano blanco, lado lejano rojo]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/A78BFF:El Olvido elevado — arcos del vacío y rayos espiralando hacia el núcleo morado-azul]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }

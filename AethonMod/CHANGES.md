@@ -1,5 +1,72 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.18 — LA GRAN CONSOLIDACIÓN: 9 AGUJEROS + LIBRERÍA DE RAYOS
+
+**Petición del usuario**: "revisa la ventana de información de todos los
+agujeros negros (demasiado larga, no se ve el nombre) · borra todas las
+alas · oculta el agujero base · quita el del vacío y la fusión · los 4
+definitivos (Umbral, Bruma, Cósmico, Olvido) se quedan sin partículas
+en el centro · Cósmico rojo-naranja, Olvido morado-azul · crea el
+AGUJERO NEGRO SUPREMO combinando los 4, mejorado y potenciado · crea
+librerías y actualiza las que hay · copia los 4 y mejora las copias
+dejando los originales intactos · limpia referencias externas — las
+técnicas son NUESTRAS".
+
+### A. LA LIMPIEZA
+  · **TOOLTIPS CORTOS**: todas las ventanas de info de los agujeros
+    reducidas a 2 líneas + nombres en español por localización (antes:
+    5 párrafos y el nombre auto-generado en inglés).
+  · **TODAS LAS ALAS BORRADAS**: 8 items + 9 VFX + draw layer + anim
+    player + localización ("todas están mal, no se ven nada bien").
+  · **Agujero BASE OCULTO** (no borrado — el código sigue en el mod).
+  · **Agujero del VACÍO y FUSIÓN ELIMINADOS** (archivos + refs + PNGs).
+
+### B. LOS 4 DEFINITIVOS — UMBRAL · BRUMA · CÓSMICO · OLVIDO
+  · Centro de la bola negra LIMPIO en Umbral/Cósmico/Olvido (fuera
+    filamentos interiores y rayos del núcleo — como el Bruma).
+  · **CÓSMICO RECOLOREADO a ROJO-NARANJA** (paleta, partículas, sombra,
+    icono — antes magenta del script Unity).
+  · **OLVIDO RECOLOREADO a MORADO-AZUL** (paleta, partículas, sombra,
+    icono — antes púrpura-rosa).
+
+### C. LIGHTNINGCORE — LA LIBRERÍA DE RAYOS (nueva, 100% propia)
+  `Content/VFX/LightningCore.cs`: rayos con jitter perpendicular de
+  cuerda, DOBLE TIRA cuerpo+núcleo, ramificación heredada con
+  decaimiento, arcos circulares eléctricos, suavizado Catmull-Rom,
+  parpadeo determinista (FlickTick/Flicker) — síntesis de toda la
+  investigación del ecosistema, re-implementada con código propio.
+
+### D. EL AGUJERO NEGRO SUPREMO (el 5to definitivo)
+  `SupremoBlackHoleRenderer.cs` (998 líneas, 15 capas): la combinación
+  de los 4 — disco Doppler (Umbral) + anillo de bandas sin(θ·20+t·5)
+  (Cósmico) + brazos espirales con flujo (Olvido) + halo/volutas de
+  humo (Bruma) + ⚡coronas de descarga LightningCore + doble círculo
+  rúnico contrarrotante + jets polares con rayos dentro. Esfera de 55px
+  (el más grande), atracción de 550px, TRES velocidades de tiempo.
+
+### E. LOS 4 ASCENDIDOS (copias mejoradas — originales INTACTOS)
+  · **Umbral Ascendido**: lluvia de 4 rayos ramificados + arco dorado
+    giratorio + Doppler a la 5ª potencia + doble anillo rúnico.
+  · **Bruma Ascendida**: 3 coronas de escarcha eléctrica + rayos
+    gelidos + 5 volutas con curl noise + cristales de hielo.
+  · **Cósmico Ascendido**: tormenta de 4-6 rayos PRO + doble anillo
+    de bandas + jets polares + doble círculo rúnico.
+  · **Olvido Ascendido**: 3 arcos del vacío + rayos ESPIRALES que
+    siguen los brazos + brazos reforzados + fotones-micro-rayo.
+  Todos con aura 15% más rápida y muerte más rica.
+
+### F. INTEGRACIÓN
+  · 5 nuevos registrados en BlackHoleLensSystem (lente gravitacional
+    propia para cada uno) + TestingPlayer (entrega) + localización
+    es-ES/en-US + sombras 76×76 + iconos 28×30 (generadores Python).
+  · **Limpieza de referencias externas**: todo comentario citando
+    otros mods/técnicas externas eliminado — las librerías (Bruma,
+    LightningCore, VFXCore) y sus técnicas son 100% NUESTRAS.
+  · Compilación 0 errores / 0 warnings.
+
+**ESTADO FINAL: 9 agujeros negros** — 4 definitivos + 4 ascendidos +
+el Supremo. La base oculta. Vacío y fusión eliminados.
+
 ## Commit v6.16 — TRES AGUJEROS NUEVOS + LA LIBRERÍA DE BRUMA (humo/niebla procedural)
 
 **Petición del usuario** (dos tareas en un mensaje):

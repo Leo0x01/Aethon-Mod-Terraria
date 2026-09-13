@@ -9,17 +9,16 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// OlvidoBlackHoleStaff — v6.15 — EL BASTÓN DEL AGUJERO NEGRO DEL OLVIDO.
+    /// OlvidoBlackHoleStaff — v6.18 — EL BASTÓN DEL AGUJERO NEGRO DEL OLVIDO.
     ///
-    /// El 4to agujero negro del mod, ahora 100% CREADO POR CÓDIGO
-    /// (directiva del usuario: "el agujero negro no puede ser creado por
-    /// sprite"): anillo de plasma púrpura/rosa con hotspot incandescente y
-    /// turbulencia viva, brazos espirales, rayos eléctricos violeta dentro
-    /// del vacío y rosa emergiendo del anillo, runas doradas orbitando en
-    /// círculo, ondas de distorsión, nebulosas difusas y aura mística.
+    /// El 4to agujero negro del mod, 100% CREADO POR CÓDIGO (directiva del
+    /// usuario): vórtice MORADO-AZUL (recoloreado en v6.18) con brazos
+    /// espirales, runas doradas orbitando, ondas de distorsión, nebulosas
+    /// difusas y aura mística. El núcleo queda NEGRO ABSOLUTO y LIMPIO
+    /// (las partículas interiores fueron quitadas en v6.18 — como en el
+    /// agujero de la Bruma).
     ///
-    /// Hermano del BlackHoleStaff (base) y del CrimsonBlackHoleStaff (el
-    /// agujero del vacío) — ambos quedan INTACTOS.
+    /// Uno de los 4 agujeros DEFINITIVOS: UMBRAL · BRUMA · CÓSMICO · OLVIDO.
     /// </summary>
     public class OlvidoBlackHoleStaff : ModItem
     {
@@ -45,11 +44,10 @@ namespace AethonMod.Content.Weapons.Cosmic
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/9C4DFF:═══ AGUJERO NEGRO DEL OLVIDO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/B870FF:100% creado por código — anillo de plasma púrpura/rosa con zonas incandescentes y sombras vivas, brazos espirales de vórtice y corredores de fotones orbitando]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:El vacío absoluto devora la luz mientras rayos eléctricos violeta danzan en su interior — y un círculo de RUNAS DORADAS gira lento a su alrededor, entre ondas de distorsión, nebulosas difusas y partículas emanando del poder arcano]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:GIGANTE: esfera de 52px, arte de ~7R. Atrae enemigos en un radio de 450px; su aura abraza el disco y machaca más rápido cerca del centro]"));
-            tooltips.Add(new TooltipLine(Mod, "D4", "[c/9C4DFF:Devora las balas enemigas al cruzar el horizonte — y al final nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
+            // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
+            // texto (el nombre ahora vive en la localización, arriba).
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/A78BFF:100% por código — vórtice morado-azul con brazos espirales y tormenta eléctrica]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

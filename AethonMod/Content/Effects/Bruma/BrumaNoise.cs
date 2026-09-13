@@ -7,9 +7,9 @@ namespace AethonMod.Content.Effects.Bruma
     /// BrumaNoise — v6.17 — LA MATEMÁTICA DE LA LIBRERÍA DE BRUMA.
     ///
     /// El aparato de ruido PROCEDURAL que alimenta toda la librería de
-    /// humo/niebla/bruma del mod (investigación: Book of Shaders cap. 11/13,
-    /// Inigo Quilez — fBm/warping/morenoise —, VFXDoc — erosión de alfa —,
-    /// y las reglas anti-fase de Diablo 3 de JangaFX):
+    /// humo/niebla/bruma del mod — síntesis PROPIA de las técnicas de
+    /// ruido fractal (fBm), domain-warping, erosión de alfa y las reglas
+    /// anti-fase de la bruma de calidad:
     ///
     ///   · Hash determinista [0,1) — mismo contrato que VFXCore.Hash01:
     ///     cero estado, cero red, misma secuencia SIEMPRE por semilla.
@@ -17,7 +17,7 @@ namespace AethonMod.Content.Effects.Bruma
     ///     (C2 continua — sin arrugas en el gradiente).
     ///   · fBm con LACUNARIDAD 2 EXACTA (potencia entera de 2: las
     ///     coordenadas de cada octava no entran nunca en fase con la
-    ///     anterior — regla nº1 de Diablo 3 contra el "phasing pulsante").
+    ///     anterior — la regla nº1 contra el "phasing pulsante").
     ///   · DOMAIN WARPING de IQ: f(p) = fbm(p + warp·fbm(p)) — EL look
     ///     "humo vivo" (nubes retorcidas, no mármol).
     ///   · CURL NOISE: v = (∂ψ/∂y, −∂ψ/∂x) — campo de velocidad SIN
@@ -153,7 +153,7 @@ namespace AethonMod.Content.Effects.Bruma
         }
 
         /// <summary>
-        /// EROSIÓN DE ALFA (VFXDoc): el ruido decide QUÉ muere primero —
+        /// EROSIÓN DE ALFA: el ruido decide QUÉ muere primero —
         /// el humo se disuelve en GRUMOS por donde el ruido manda, no se
         /// desvanece como fantasma. <paramref name="erosion"/> ∈ [0,1]:
         /// 0 = nada muere, 1 = todo muerto.
@@ -166,7 +166,7 @@ namespace AethonMod.Content.Effects.Bruma
         }
 
         /// <summary>
-        /// "SCALE BY MIDS" (Julian Love, Diablo 3): al multiplicar capas de
+        /// "SCALE BY MIDS": al multiplicar capas de
         /// ruido, re-centrar en 0.5 antes — "cuanto más multiplicas, más
         /// quieres constreñir el rango: si te queda mucho negro, se come
         /// toda la acción". Aquí: n' = 0.5 + (n−0.5)·k.

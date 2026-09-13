@@ -11,18 +11,15 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// <summary>
     /// BrumaBlackHoleStaff — v6.17 — EL BASTÓN DEL AGUJERO NEGRO DE LA BRUMA.
     ///
-    /// EL 7mo agujero negro del mod — nacido con la LIBRERÍA DE
-    /// HUMO/NIEBLA/BRUMA PROCEDURAL del proyecto (Content/Effects/Bruma,
-    /// creada por petición expresa investigando Diablo 3, Calamity,
-    /// Starlight River, Book of Shaders e Inigo Quilez): un vacío GELIDO
+    /// La DEMOSTRACIÓN de la LIBRERÍA DE HUMO/NIEBLA/BRUMA PROCEDURAL
+    /// 100% PROPIA del proyecto (Content/Effects/Bruma): un vacío GELIDO
     /// envuelto en bruma nebular fría teal/cian/violeta — el HALO son
     /// nubes (BrumaFX.Cloud), el anillo son FUMARELITOS (BrumaFX.Puff con
     /// texturas fBm horneadas 100% en runtime), las VOLUTAS espiralan al
     /// núcleo (BrumaFX.Tendril) y por los polos escapan CHIMENEAS de
     /// bruma (BrumaFX.Column). Todo por código, a CUALQUIER escala.
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión, Olvido, Cósmico y
-    /// Umbral — todos quedan INTACTOS.
+    /// Uno de los 4 agujeros DEFINITIVOS: UMBRAL · BRUMA · CÓSMICO · OLVIDO.
     /// </summary>
     public class BrumaBlackHoleStaff : ModItem
     {
@@ -48,11 +45,10 @@ namespace AethonMod.Content.Weapons.Cosmic
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/5AD0E6:═══ AGUJERO NEGRO DE LA BRUMA ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/8FDCEF:100% creado por código con la LIBRERÍA DE BRUMA del proyecto — humo, niebla y bruma procedural con calidad a cualquier escala: texturas fBm nacidas en runtime, curl noise y senos inconmensurables]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Un vacío GELIDO envuelto en bruma nebular fría — el HALO son nubes de humo teal girando lento, el anillo son FUMARELITOS orbitando y las VOLUTAS espiralan hacia el núcleo donde la materia se disuelve en bruma]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Por los polos escapan chimeneas de niebla entre corredores de fotones cian, escarcha flotante y ondas de distorsión — la muerte llega EROSIONADA en grumos, como el humo de verdad]"));
-            tooltips.Add(new TooltipLine(Mod, "D4", "[c/5AD0E6:GIGANTE: esfera de 48px, arte de ~7R. Atrae enemigos en 450px; al morir nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
+            // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
+            // texto (el nombre ahora vive en la localización, arriba).
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/8FDCEF:100% por código con la librería de bruma — humo y niebla procedural a cualquier escala]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }

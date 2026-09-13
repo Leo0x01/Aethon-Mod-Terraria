@@ -315,12 +315,16 @@ namespace AethonMod.Content.Effects
             //     anillo de Einstein + soles + MEDUSAS NEBULARES (v5.97) +
             //     COMETAS/PÚLSARES (v5.99) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
-            int crimsonHoleType = ModContent.ProjectileType<CrimsonBlackHoleProjectile>();
-            int fusionHoleType = ModContent.ProjectileType<FusionBlackHoleProjectile>();
             int olvidoHoleType = ModContent.ProjectileType<OlvidoBlackHoleProjectile>();
             int cosmicHoleType = ModContent.ProjectileType<CosmicBlackHoleProjectile>();
             int umbralHoleType = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
             int brumaHoleType = ModContent.ProjectileType<BrumaBlackHoleProjectile>();
+            // v6.18: los CINCO nuevos — el SUPREMO + los 4 ASCENDIDOS
+            int supremoHoleType = ModContent.ProjectileType<SupremoBlackHoleProjectile>();
+            int umbralAscType = ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>();
+            int brumaAscType = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
+            int cosmicAscType = ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>();
+            int olvidoAscType = ModContent.ProjectileType<OlvidoAscendidoBlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
@@ -347,10 +351,12 @@ namespace AethonMod.Content.Effects
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active) continue;
 
-                if (p.type == blackHoleType || p.type == crimsonHoleType ||
-                    p.type == fusionHoleType || p.type == olvidoHoleType ||
+                if (p.type == blackHoleType || p.type == olvidoHoleType ||
                     p.type == cosmicHoleType || p.type == umbralHoleType ||
-                    p.type == brumaHoleType)
+                    p.type == brumaHoleType ||
+                    p.type == supremoHoleType || p.type == umbralAscType ||
+                    p.type == brumaAscType || p.type == cosmicAscType ||
+                    p.type == olvidoAscType)
                 {
                     if (count >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
@@ -363,15 +369,10 @@ namespace AethonMod.Content.Effects
                     // Con el ángulo pico reducido a ~0.8 rad el anillo de
                     // distorsión sigue siendo DELGADO (no mueve toda la pantalla):
                     // solo abraza el disco de acreción completo y muere a ~3 radios.
-                    // v6.09 — el AGUJERO CARMESÍ es GIGANTE (disco analítico de
-                    // 6.5·38px): su lente usa su propio multiplicador (2.9×) para
-                    // ABRAZAR el disco completo (véase CrimsonBlackHoleProjectile).
+                    // v6.09 — cada agujero GIGANTE usa su propio multiplicador
+                    // para ABRAZAR el disco completo (véase cada proyectil).
                     float radiusMult = 1.4f;
-                    if (p.type == crimsonHoleType)
-                        radiusMult = CrimsonBlackHoleProjectile.LensRadiusMult;
-                    else if (p.type == fusionHoleType)
-                        radiusMult = FusionBlackHoleProjectile.LensRadiusMult;
-                    else if (p.type == olvidoHoleType)
+                    if (p.type == olvidoHoleType)
                         radiusMult = OlvidoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == cosmicHoleType)
                         radiusMult = CosmicBlackHoleProjectile.LensRadiusMult;
@@ -379,6 +380,16 @@ namespace AethonMod.Content.Effects
                         radiusMult = UmbralBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == brumaHoleType)
                         radiusMult = BrumaBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == supremoHoleType)
+                        radiusMult = SupremoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == umbralAscType)
+                        radiusMult = UmbralAscendidoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == brumaAscType)
+                        radiusMult = BrumaAscendidoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == cosmicAscType)
+                        radiusMult = CosmicAscendidoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == olvidoAscType)
+                        radiusMult = OlvidoAscendidoBlackHoleProjectile.LensRadiusMult;
                     float radius = p.width * p.scale / screenSize.X * radiusMult;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
@@ -738,18 +749,14 @@ namespace AethonMod.Content.Effects
 
             // === 8. ENCIMA DE LA LENTE: el núcleo del agujero negro ===
             // El shader del agujero nunca es deformado por su propia lente.
-            // (v6.02: también el AGUJERO NEGRO CARMESÍ — mismo registro, dibujo propio.)
-            // (v6.14: también FUSIÓN y OLVIDO — mismo registro, dibujo propio.)
+            // (v6.14: OLVIDO/CÓSMICO/UMBRAL/BRUMA — mismo registro, dibujo propio.)
+            // (v6.18: el VACÍO y la FUSIÓN fueron ELIMINADOS del mod.)
             for (int i = 0; i < _blackHoleCount; i++)
             {
                 Projectile bh = Main.projectile[_blackHoleIndices[i]];
                 if (bh != null && bh.active)
                 {
-                    if (bh.type == crimsonHoleType)
-                        CrimsonBlackHoleProjectile.DrawCoreVisuals(bh);
-                    else if (bh.type == fusionHoleType)
-                        FusionBlackHoleProjectile.DrawCoreVisuals(bh);
-                    else if (bh.type == olvidoHoleType)
+                    if (bh.type == olvidoHoleType)
                         OlvidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == cosmicHoleType)
                         CosmicBlackHoleProjectile.DrawCoreVisuals(bh);
@@ -757,6 +764,16 @@ namespace AethonMod.Content.Effects
                         UmbralBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == brumaHoleType)
                         BrumaBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == supremoHoleType)
+                        SupremoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == umbralAscType)
+                        UmbralAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == brumaAscType)
+                        BrumaAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == cosmicAscType)
+                        CosmicAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == olvidoAscType)
+                        OlvidoAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else
                         BlackHoleProjectile.DrawCoreVisuals(bh, false);
                 }

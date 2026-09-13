@@ -17,12 +17,12 @@ namespace AethonMod.Content.Effects.Bruma
     ///     RGB       = BLANCO PURO (255,255,255)
     ///
     /// ...que es la receta canónica del humo procedural (investigación:
-    /// Diablo 3 / Book of Shaders / IQ):
+    /// las reglas clásicas del VFX de bruma de calidad):
     ///   · La MÁSCARA (falloff radial) es BLANDA y sin detalle — una
     ///     máscara con detalle se ve ESTÁTICA al mover el ruido (regla D3).
     ///   · El RUIDO (fBm con domain warping) lleva TODO el detalle —
     ///     grumos, filamentos, volutas.
-    ///   · "Scale by Mids" antes de multiplicar (Julian Love: "si te
+    ///   · "Scale by Mids" antes de multiplicar (regla de oro: "si te
     ///     queda mucho negro, se come toda la acción").
     ///   · RGB BLANCO + alfa en canal aparte = tinte LINEAL (lección
     ///     v6.15 del propio mod): sirve IGUAL en lote aditivo (humo
@@ -82,7 +82,7 @@ namespace AethonMod.Content.Effects.Bruma
                     float d = Vector2.Distance(p, c) / (Size * 0.5f);   // 0 centro → 1 borde
 
                     // --- LA MÁSCARA: plató interior + caída suave (smoothstep
-                    //     0.55→1.0). BLANDA a propósito (regla Diablo 3).
+                    //     0.55→1.0). BLANDA a propósito (regla anti-fase).
                     float falloff = 1f - BrumaNoise.Smoothstep(0.55f, 1.0f, d);
 
                     // --- EL RUIDO: 4 celdas base, fBm TORSIONADO (domain
@@ -91,7 +91,7 @@ namespace AethonMod.Content.Effects.Bruma
                     float v = j * 4f / Size;
                     float n = BrumaNoise.WarpedFbm(u, v, 977 + seed * 131, warp: 3f);
 
-                    // --- SCALE BY MIDS (Julian Love) y multiplicación:
+                    // --- SCALE BY MIDS  y multiplicación:
                     //     ×2 SOLO al ruido, JAMÁS a la máscara.
                     n = BrumaNoise.ByMids(n, 1.6f);
                     float a = Math.Clamp(falloff * n * 1.35f, 0f, 1f);

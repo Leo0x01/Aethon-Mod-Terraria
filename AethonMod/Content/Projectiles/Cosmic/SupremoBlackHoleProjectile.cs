@@ -12,31 +12,37 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// CosmicBlackHoleProjectile — v6.16 — EL AGUJERO NEGRO CÓSMICO.
+    /// SupremoBlackHoleProjectile — v6.18 — EL AGUJERO NEGRO SUPREMO.
     ///
-    /// NACIDO DEL SCRIPT UNITY DEL USUARIO (CosmicBlackHole.cs): anillo
-    /// energético MAGENTA (1.0, 0.2, 0.8) con las 20 BANDAS del shader
-    /// sin(uv·20 + t·5) recorriéndolo a 5 rad/s, rotación de 20°/s,
-    /// rayos eléctricos (lightningParticles), runas doradas flotando
-    /// (runeParticles), distorsión sinusoidal global (0.3) y núcleo
-    /// negro absoluto — más TODO lo que faltaba (aura oscura, nebulosas,
-    /// ecos del anillo, corredores de fotones, destellos polares, ondas
-    /// de distorsión y partículas radiales). 100% CÓDIGO, cero sprites.
+    /// EL 5to AGUJERO DEFINITIVO — LA COMBINACIÓN DE LOS 4 (petición del
+    /// usuario: "el agujero negro supremo, la combinación de los 4
+    /// agujeros, mejorado, potenciado y mejor animado. El agujero más
+    /// espectacular del mod"): el DISCO DOPPLER del Umbral, el ANILLO DE
+    /// BANDAS del Cósmico, los BRAZOS ESPIRALES del Olvido, el HUMO de la
+    /// Bruma — y la CORONA DE RAYOS de LightningCore (3 arcos en el
+    /// horizonte + 3 rayos fugitivos, 2 carmesí y 1 dorado), jets
+    /// polares oro/violeta, doble círculo de runas y volutas cayendo.
     ///
-    /// La FÍSICA de juego es la MISMA copia probada del agujero del
-    /// olvido (pop elástico, atracción, aura con ticks acelerados,
+    /// La FÍSICA de juego es la MISMA copia probada del agujero de la
+    /// bruma (pop elástico, atracción, aura con ticks acelerados,
     /// devora balas, persecución lenta, evaporación y anillo de Einstein
-    /// final). Los demás agujeros quedan INTACTOS.
+    /// final) — con la ESCALA SUPREMA: esfera de 55px (la más grande del
+    /// mod) y atracción en 550px. Los demás agujeros quedan INTACTOS.
     ///
-    /// ESCALA: esfera de 50px de radio, arte de ~7R de envergadura.
+    /// PALETA SUPREMA de partículas: ORO (255,190,80) / CARMESÍ
+    /// (255,90,40) / VIOLETA (150,80,255) — el oro/carmesí domina y el
+    /// violeta acentúa.
     /// </summary>
-    public class CosmicBlackHoleProjectile : ModProjectile
+    public class SupremoBlackHoleProjectile : ModProjectile
     {
-        /// <summary>Multiplicador del aura sobre la esfera visual.</summary>
-        private const float ShieldRadiusMult = 4.6f;
+        /// <summary>Multiplicador del aura sobre la esfera visual (supremo).</summary>
+        private const float ShieldRadiusMult = 4.8f;
 
         /// <summary>Multiplicador del radio de la lente gravitacional de pantalla.</summary>
-        internal const float LensRadiusMult = 3.4f;
+        internal const float LensRadiusMult = 3.6f;
+
+        /// <summary>Radio de atracción gravitacional (px) — EL MÁS GRANDE.</summary>
+        private const float GravityRadius = 550f;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
@@ -48,9 +54,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            // Mismo hitbox que los agujeros hermanos (la VISUAL gigante es
-            // independiente del hitbox: la escala del renderer no depende
-            // de width).
+            // Mismo hitbox que los agujeros hermanos.
             Projectile.width = 96;
             Projectile.height = 96;
             Projectile.friendly = true;
@@ -85,8 +89,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                             Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
 
                 float collapse = Utils.GetLerpValue(36f, 0f, Projectile.timeLeft, true);
-                // Piso de escala (lección v6.10: el colapso jamás deja la
-                // escala en ~0 — evita el crash del doble Begin).
+                // Piso de escala (lección v6.10).
                 Projectile.scale *= Math.Max(1f - collapse, 0.06f);
                 expansion = 1f;
             }
@@ -98,7 +101,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.velocity *= 0.97f;
 
             // === PERSIGUE LIGERAMENTE A LOS ENEMIGOS (copia exacta) ===
-            NPC prey = FindNearestEnemy(650f);
+            NPC prey = FindNearestEnemy(750f);
             if (prey != null)
             {
                 Vector2 toPrey = prey.Center - Projectile.Center;
@@ -108,15 +111,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.velocity += toPrey * 0.07f;
                 }
                 float spd = Projectile.velocity.Length();
-                if (spd > 2.4f)
-                    Projectile.velocity *= 2.4f / spd;
+                if (spd > 2.6f)
+                    Projectile.velocity *= 2.6f / spd;
             }
 
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
-            // === PARTÍCULAS (solo cliente) — paleta del cósmico (magenta
-            //     eléctrico + violeta + blanco-rosa + destellos dorados) ===
+            // === PARTÍCULAS (solo cliente) — PALETA SUPREMA: oro / carmesí /
+            //     violeta (el oro/carmesí domina, el violeta acentúa) ===
             if (Main.netMode != NetmodeID.Server)
             {
                 SpawnAbsorbedDusts();
@@ -126,8 +129,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 SpawnLibraryAccretionDisk();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (copia exacta) ===
-            float gravityRadius = 450f * (1f + expansion * 0.6f);
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (550px — supremo) ===
+            float gravityRadius = GravityRadius * (1f + expansion * 0.6f);
             const float gravityStrength = 2.6f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -163,7 +166,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.PinkCrystalShard,
                                 (pr.Center - Projectile.Center) * -0.02f +
                                 new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
-                                200, new Color(255, 170, 120), 0.7f);
+                                200, new Color(255, 200, 120), 0.7f);
                             d2.noGravity = true;
                             d2.fadeIn = 0f;
                         }
@@ -207,13 +210,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === ILUMINACIÓN PULSANTE — TRES puntos para el vórtice ===
-            // Magenta eléctrico con un toque violeta (la estirpe cósmica).
+            // ORO regio con un pulso vivo (la estirpe suprem: el disco
+            // de bandas arde dorado, los rayos parpadean carmesí).
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
-            Vector3 light = new Vector3(1.00f * pulse, 0.24f * pulse, 0.82f * pulse);
+            Vector3 light = new Vector3(0.95f * pulse, 0.72f * pulse, 0.38f * pulse);
             Lighting.AddLight(Projectile.Center, light);
-            float le = CosmicBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
+            float le = SupremoBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
-            Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f), light * 0.75f);
+            Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f),
+                new Vector3(0.45f * pulse, 0.30f * pulse, 0.85f * pulse) * 0.75f);
         }
 
         /// <summary>El enemigo chaseable más cercano dentro de maxDist (copia exacta).</summary>
@@ -246,18 +251,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS — paleta del cósmico: magenta eléctrico / violeta /
-        //  blanco-rosa + destellos dorados.
+        //  PARTÍCULAS — PALETA SUPREMA: oro / carmesí / violeta
         // ------------------------------------------------------------------
 
-        /// <summary>Materia absorbida (dusts) cayendo en espiral desde el anillo.</summary>
+        /// <summary>Materia devorada (dusts) cayendo en espiral desde el anillo.</summary>
         private void SpawnAbsorbedDusts()
         {
             float deathSpeedBoost = 1f;
             if (Projectile.timeLeft <= 90f)
                 deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
 
-            float shadow = CosmicBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
+            float shadow = SupremoBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
 
             for (int i = 0; i < 2; i++)
             {
@@ -281,15 +285,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Color color;
                     if (dist < 1.6f * shadow)
                     {
-                        color = new Color(255, 242, 225); // blanco cálido al borde
+                        color = new Color(255, 244, 220); // blanco-oro al borde
                     }
                     else
                     {
                         color = Main.rand.Next(3) switch
                         {
-                            0 => new Color(255, 68, 26),    // rojo-naranja del anillo
-                            1 => new Color(255, 110, 40),   // naranja eléctrico
-                            _ => new Color(180, 30, 15),    // rojo profundo
+                            0 => new Color(255, 190, 80),   // ORO
+                            1 => new Color(255, 90, 40),    // CARMESÍ
+                            _ => new Color(150, 80, 255),   // VIOLETA
                         };
                     }
 
@@ -302,19 +306,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Chispas rosas encantadas capturadas por el campo.</summary>
+        /// <summary>Chispas doradas/violetas capturadas por el campo.</summary>
         private void SpawnCapturedEnergySparks()
         {
             if (Main.rand.NextBool(12))
             {
                 float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(260f, 380f) * MathHelper.Max(Projectile.scale, 0.5f);
+                float dist = Main.rand.NextFloat(300f, 440f) * MathHelper.Max(Projectile.scale, 0.5f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
                 Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Pink,
-                    vel, 255, new Color(255, 180, 130), 0.9f);
+                    vel, 255, new Color(255, 200, 110), 0.9f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -323,7 +327,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Devora el polvo del ambiente en espiral.</summary>
         private void AttractNearbyDust()
         {
-            float radius = 420f;
+            float radius = 500f;
             for (int i = 0; i < Main.maxDust; i++)
             {
                 Dust d = Main.dust[i];
@@ -342,14 +346,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  PARTÍCULAS DE LA LIBRERÍA PROPIA (capa AboveLens)
         // ------------------------------------------------------------------
 
-        /// <summary>Materia absorbida: estelas TrailGlow cayendo en espiral.</summary>
+        /// <summary>Materia devorada: estelas TrailGlow cayendo en espiral.</summary>
         private void SpawnLibraryAbsorbedMatter()
         {
             for (int i = 0; i < 2; i++)
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 float dist = Main.rand.NextFloat(2.4f, 4.2f) *
-                             CosmicBlackHoleRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
+                             SupremoBlackHoleRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -359,8 +363,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
                                    tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
-                Color start = new Color(255, 90, 40, 190);
-                Color end = new Color(255, 245, 230, 235);
+                Color start = new Color(255, 170, 70, 190);   // oro fundido
+                Color end = new Color(255, 246, 225, 235);    // blanco-incandescente
 
                 var p = new ParticleData
                 {
@@ -387,22 +391,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Estelas orbitando en la banda del anillo energético
-        /// (2.3..5.8× la esfera, elipse del vórtice 1.18).</summary>
+        /// <summary>Estelas orbitando en la banda del anillo de bandas
+        /// (2.3..5.8× la esfera, elipse 1.24 del anillo suprem).</summary>
         private void SpawnLibraryAccretionDisk()
         {
             if (Main.rand.NextBool(4))
             {
-                float shadow = CosmicBlackHoleRenderer.SpherePx *
+                float shadow = SupremoBlackHoleRenderer.SpherePx *
                                MathHelper.Max(Projectile.scale, 0.4f);
                 float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 // Kepler: ω ∝ r^(−3/2) — el interior gira más rápido.
-                float angVel = 0.16f * (float)Math.Pow(4.6f * shadow / radius, 1.5f);
+                float angVel = 0.16f * (float)Math.Pow(4.8f * shadow / radius, 1.5f);
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
-                    (float)Math.Sin(angle) * radius * 1.18f); // elipse del anillo
+                    (float)Math.Sin(angle) * radius * 1.24f); // elipse del anillo
+
+                // El color nace del lado DOPPLER: mitad ORO (acerca),
+                // mitad CARMESÍ (aleja) — la herencia del Umbral.
+                bool hotSide = Math.Cos(angle) < 0f;
+                Color c = hotSide ? new Color(255, 190, 80, 200) : new Color(235, 90, 45, 200);
 
                 var p = new ParticleData
                 {
@@ -411,9 +420,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Scale = new Vector2(2.2f, 0.55f),
                     Rotation = angle + MathHelper.PiOver2,
                     RotationSpeed = angVel,
-                    PackedColor = ParticleManager.PackColor(new Color(255, 68, 26, 200)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 130, 80, 200)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(120, 15, 5, 40)),
+                    PackedColor = ParticleManager.PackColor(c),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 240, 210, 200)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(120, 60, 30, 40)),
                     TimeLeft = 48,
                     Duration = 48,
                     TextureId = ParticleTex.TrailGlow,
@@ -432,7 +441,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  RENDER — 100% CÓDIGO (CosmicBlackHoleRenderer v6.16)
+        //  RENDER — 100% CÓDIGO (SupremoBlackHoleRenderer v6.18)
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
@@ -459,7 +468,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el Agujero Negro Cósmico completo. Compartido entre el
+        /// Dibuja el Agujero Negro Supremo completo. Compartido entre el
         /// pase del mundo (PreDraw) y el pase posterior a la lente.
         /// CONTRATO: el SpriteBatch llega CERRADO y queda CERRADO.
         /// </summary>
@@ -467,9 +476,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Vector2 drawPos = p.Center - Main.screenPosition;
             float time = Main.GlobalTimeWrappedHourly;
-            int seed = p.whoAmI * 13 + 7;
+            int seed = p.whoAmI * 17 + 5;
 
-            CosmicBlackHoleRenderer.Draw(drawPos, p.scale, time, seed);
+            SupremoBlackHoleRenderer.Draw(drawPos, p.scale, time, seed);
         }
 
         /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
@@ -482,7 +491,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  IMPACTO Y MUERTE (física exacta, paleta magenta/violeta/dorada)
+        //  IMPACTO Y MUERTE (física exacta, PALETA SUPREMA oro/carmesí/violeta)
         // ------------------------------------------------------------------
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -490,8 +499,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.Server) return;
 
             // Micro-colapso sobre el objetivo
-            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(255, 68, 26), 18);
-            ParticlePresets.RingPulse(target.Center, 90f, new Color(255, 180, 130, 170), 22);
+            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(255, 180, 70), 18);
+            ParticlePresets.RingPulse(target.Center, 90f, new Color(255, 220, 150, 170), 22);
 
             // Implosión: 50 partículas convergiendo en espiral
             for (int i = 0; i < 50; i++)
@@ -507,7 +516,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.5f;
                     Vector2 vel = (toCenter * 7f + tangent * 4f);
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        vel, 200, new Color(255, 80, 40), 1.3f);
+                        vel, 200, new Color(255, 190, 80), 1.3f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -521,17 +530,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 11f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 220, new Color(255, 120, 50), 1.5f);
+                    dir, 220, new Color(255, 90, 40), 1.5f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // Destellos encantados magenta y dorados
+            // Destellos de la corona: oro y violeta
             for (int i = 0; i < 15; i++)
             {
                 Color c = Main.rand.NextBool(3)
-                    ? new Color(255, 200, 110)   // destello dorado arcano (encaja con rojo-naranja)
-                    : new Color(255, 230, 200);  // ámbar pálido
+                    ? new Color(255, 246, 225)   // blanco-incandescente
+                    : new Color(255, 200, 110);  // oro claro
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
                     new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
                     255, c, 1.0f);
@@ -565,16 +574,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
                     Projectile.Center, new Vector2(1f, 0f), 7f, 10, 20, 0.45f,
-                    "AethonCosmicBlackHoleFinalBlast"));
+                    "AethonSupremoBlackHoleFinalBlast"));
             }
             catch { }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
-            // Presets — colapso gravitatorio cósmico (magenta + blanco)
+            // Presets — el COLAPSO SUPREMO (oro + violeta + blanco)
             ParticlePresets.Implosion(Projectile.Center, 185f, 52,
-                new Color(255, 68, 26), 28);
+                new Color(255, 180, 70), 28);
             ParticlePresets.Explosion(Projectile.Center, 145f, 30,
-                new Color(255, 245, 230), new Color(200, 50, 25), 44);
+                new Color(255, 246, 225), new Color(150, 80, 255), 44);
 
             // Implosión: partículas convergiendo
             for (int i = 0; i < 60; i++)
@@ -589,21 +598,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     toCenter.Normalize();
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        toCenter * 9f + tangent * 5f, 220, new Color(255, 80, 40), 1.4f);
+                        toCenter * 9f + tangent * 5f, 220, new Color(255, 190, 80), 1.4f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
             }
 
-            // Explosión: anillo expansivo
+            // Explosión: anillo expansivo (oro + carmesí + violeta)
             for (int i = 0; i < 45; i++)
             {
                 float angle = (MathHelper.TwoPi / 45) * i;
                 Vector2 dir = new Vector2(
                     (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
+                Color c = i % 3 == 0 ? new Color(255, 190, 80)
+                        : i % 3 == 1 ? new Color(255, 90, 40)
+                        : new Color(150, 80, 255);
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 230, new Color(255, 130, 60), 1.6f);
+                    dir, 230, c, 1.6f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

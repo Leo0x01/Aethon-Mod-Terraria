@@ -7,15 +7,18 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// TestingPlayer — el kit de pruebas del arsenal.
     ///
+    /// v6.18 — LA SEGUNDA GRAN LIMPIEZA (petición del usuario):
+    /// · TODAS LAS ALAS BORRADAS (8 items + VFX + draw layer + anim player).
+    /// · El AGUJERO NEGRO BASE queda OCULTO (no borrado): ya no se entrega
+    ///   ni se garantiza — el código sigue en el mod por si acaso.
+    /// · AGUJERO DEL VACÍO (Crimson) y FUSIÓN (base+vacío) ELIMINADOS.
+    /// · SE QUEDAN los 4 agujeros definitivos: UMBRAL, BRUMA, CÓSMICO y
+    ///   OLVIDO — más los nuevos de la tanda v6.18 (Supremo + Ascendidos).
+    ///
     /// v6.01 — LA GRAN LIMPIEZA: el usuario seleccionó qué se queda.
-    /// FUERA: las 4 armas de COLOR (Rainbow/Red/Yellow/Green), 15 de las
-    /// 20 V20 (Tornado, PrismBeam, Earthquake, MirrorDimension,
-    /// GravityPulse, ShadowClone, CrystalShatter, VortexChain, AbyssalEye,
-    /// SpectralMirage, TemporalRift, InfernoTornado, VoidEater, PlasmaOrb,
-    /// BlackHoleMini) y las 2 cósmicas nuevas (Quásar y Galaxia Viviente —
-    /// "se ven horrible y son muy simples"). SE QUEDAN 14: los 4 tests
-    /// clásicos, el Grimorio, 4 V20 (Supernova, PlasmaStorm, PhoenixNova,
-    /// QuantumSplit) y las 5 cósmicas (Agujero, Sol, Medusa, Cometa, Púlsar).
+    /// FUERA: las 4 armas de COLOR, 15 de las 20 V20 y las 2 cósmicas
+    /// nuevas (Quásar y Galaxia Viviente). SE QUEDAN 14: los 4 tests
+    /// clásicos, el Grimorio, 4 V20 y las 5 cósmicas.
     ///
     /// v5.98 — FIX DEL KIT "CONGELADO": el kit base se entrega UNA sola vez
     /// (gate por GenesisShard), pero las ARMAS CÓSMICAS EN DESARROLLO se
@@ -46,7 +49,8 @@ namespace AethonMod.Content.Players
                 GiveItem(ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1);
                 GiveItem(ModContent.ItemType<Weapons.V20.QuantumSplitStaff>(), 1);
                 // v5.80+: armas cósmicas basadas en shaders de lensing
-                GiveItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1);
+                // (v6.18: el AGUJERO NEGRO BASE ya NO se entrega — OCULTO,
+                // no borrado, petición del usuario)
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>(), 1);
                 // v5.97: LA MEDUSA NEBULAR (invocador de minion cósmico)
                 GiveItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>(), 1);
@@ -59,42 +63,36 @@ namespace AethonMod.Content.Players
             // horrible y son muy simples, no vale la pena que continúen";
             // quien aún los tenga guardados los conserva, pero ya no se
             // garantizan. El OJO DEL VACÍO corrió la misma suerte en v6.00.)
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>());
+            // (v6.18: el AGUJERO NEGRO BASE está OCULTO — no se entrega.)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SunStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.MedusaNebularStaff>());
             // v5.99: EL COMETA ESTELAR y EL PÚLSAR VIVO (invocadores)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingCometStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LivingPulsarStaff>());
-            // v6.02: EL AGUJERO NEGRO CARMESÍ (hoy con el visual de la referencia)
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.CrimsonBlackHoleStaff>());
-            // v6.14: LOS DOS AGUJEROS NUEVOS — la FUSIÓN (base+vacío) y el
-            // OLVIDO (100% creado por código, v6.15)
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.FusionBlackHoleStaff>());
+            // (v6.18: el AGUJERO DEL VACÍO y la FUSIÓN fueron ELIMINADOS —
+            // petición del usuario; quien los tenga guardados los conserva.)
+            // v6.14: EL OLVIDO (100% creado por código, v6.15)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>());
-            // v6.16: EL AGUJERO CÓSMICO (nacido del script Unity del
-            // usuario) y EL AGUJERO DEL UMBRAL (el de la referencia, 100%
-            // código con Doppler, estrías pintadas y runas con huecos)
+            // v6.16: EL AGUJERO CÓSMICO y EL AGUJERO DEL UMBRAL
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.CosmicBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.UmbralBlackHoleStaff>());
             // v6.17: EL AGUJERO DE LA BRUMA — la demostración de la
             // LIBRERÍA de humo/niebla/bruma procedural del proyecto
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.BrumaBlackHoleStaff>());
+            // v6.18: LOS CINCO NUEVOS — el SUPREMO (la fusión de los 4,
+            // mejorado y potenciado) + los 4 ASCENDIDOS (copias mejoradas
+            // de Umbral/Bruma/Cósmico/Olvido con la librería de rayos)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SupremoBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.UmbralAscendidoBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.BrumaAscendidoBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.CosmicAscendidoBlackHoleStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoAscendidoBlackHoleStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneCrownItem>());
-            // v6.08: LAS 8 ALAS DE LUZ — TODO el sistema es ahora técnica
-            // coronas (las 8 de spritesheet fueron BORRADAS a petición del
-            // usuario; quien las tenga guardadas las conserva pero ya no
-            // se garantizan). Mariposa y Hada NUEVAS + las 6 restantes.
-            EnsureItem(ModContent.ItemType<Items.Wings.EventHorizonWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.PhotonRingWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.CosmicButterflyWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.StardustFairyWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.SolarCoronaWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.LivingNebulaWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.TotalEclipseWings>());
-            EnsureItem(ModContent.ItemType<Items.Wings.CrimsonCometWings>());
+            // (v6.18: TODAS LAS ALAS FUERON BORRADAS del mod — petición del
+            // usuario: "todas están mal, no se ven nada bien".)
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

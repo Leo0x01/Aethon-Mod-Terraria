@@ -166,7 +166,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.PinkCrystalShard,
                                 (pr.Center - Projectile.Center) * -0.02f +
                                 new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
-                                200, new Color(230, 150, 255), 0.7f);
+                                200, new Color(150, 170, 255), 0.7f);
                             d2.noGravity = true;
                             d2.fadeIn = 0f;
                         }
@@ -284,15 +284,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Color color;
                     if (dist < 1.6f * shadow)
                     {
-                        color = new Color(245, 235, 255); // blanco-lila al borde
+                        color = new Color(235, 240, 255); // blanco-azulado al borde
                     }
                     else
                     {
                         color = Main.rand.Next(3) switch
                         {
-                            0 => new Color(215, 70, 255),   // violeta eléctrico
-                            1 => new Color(255, 70, 190),   // fucsia
-                            _ => new Color(110, 25, 175),    // olvido profundo
+                            0 => new Color(120, 140, 255),   // azul eléctrico
+                            1 => new Color(100, 190, 255),   // cian-azul
+                            _ => new Color(45, 60, 180),     // olvido azul profundo
                         };
                     }
 
@@ -317,7 +317,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Sin(angle) * dist);
                 Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Pink,
-                    vel, 255, new Color(216, 140, 255), 0.9f);
+                    vel, 255, new Color(140, 170, 255), 0.9f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -362,8 +362,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
                                    tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
-                Color start = new Color(210, 80, 255, 190);
-                Color end = new Color(255, 244, 245, 235);
+                Color start = new Color(90, 120, 255, 190);
+                Color end = new Color(240, 244, 255, 235);
 
                 var p = new ParticleData
                 {
@@ -414,9 +414,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Scale = new Vector2(2.2f, 0.55f),
                     Rotation = angle + MathHelper.PiOver2,
                     RotationSpeed = angVel,
-                    PackedColor = ParticleManager.PackColor(new Color(230, 70, 220, 200)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 140, 235, 200)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(70, 0, 110, 40)),
+                    PackedColor = ParticleManager.PackColor(new Color(100, 110, 255, 200)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(160, 190, 255, 200)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(10, 15, 90, 40)),
                     TimeLeft = 48,
                     Duration = 48,
                     TextureId = ParticleTex.TrailGlow,
@@ -497,8 +497,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.Server) return;
 
             // Micro-colapso sobre el objetivo
-            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(200, 50, 255), 18);
-            ParticlePresets.RingPulse(target.Center, 90f, new Color(230, 160, 255, 170), 22);
+            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(90, 130, 255), 18);
+            ParticlePresets.RingPulse(target.Center, 90f, new Color(150, 180, 255, 170), 22);
 
             // Implosión: 50 partículas convergiendo en espiral
             for (int i = 0; i < 50; i++)
@@ -514,7 +514,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.5f;
                     Vector2 vel = (toCenter * 7f + tangent * 4f);
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        vel, 200, new Color(230, 80, 220), 1.3f);
+                        vel, 200, new Color(110, 150, 255), 1.3f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -528,7 +528,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 11f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 220, new Color(190, 60, 240), 1.5f);
+                    dir, 220, new Color(70, 180, 255), 1.5f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -537,8 +537,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             for (int i = 0; i < 15; i++)
             {
                 Color c = Main.rand.NextBool(3)
-                    ? new Color(255, 210, 120)   // destello dorado arcano
-                    : new Color(240, 200, 255);  // violeta pálido
+                    ? new Color(255, 210, 120)   // destello dorado arcano (contraste cálido)
+                    : new Color(200, 215, 255);  // azul pálido
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
                     new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
                     255, c, 1.0f);
@@ -579,9 +579,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // Presets — colapso gravitatorio del olvido (violeta + blanco)
             ParticlePresets.Implosion(Projectile.Center, 185f, 52,
-                new Color(200, 55, 255), 28);
+                new Color(90, 130, 255), 28);
             ParticlePresets.Explosion(Projectile.Center, 145f, 30,
-                new Color(245, 230, 255), new Color(170, 30, 220), 44);
+                new Color(230, 238, 255), new Color(50, 60, 200), 44);
 
             // Implosión: partículas convergiendo
             for (int i = 0; i < 60; i++)
@@ -596,7 +596,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     toCenter.Normalize();
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        toCenter * 9f + tangent * 5f, 220, new Color(225, 85, 235), 1.4f);
+                        toCenter * 9f + tangent * 5f, 220, new Color(105, 160, 255), 1.4f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -610,7 +610,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 230, new Color(195, 55, 245), 1.6f);
+                    dir, 230, new Color(80, 185, 255), 1.6f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

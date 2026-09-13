@@ -9,35 +9,31 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// UmbralBlackHoleStaff — v6.16 — EL BASTÓN DEL AGUJERO NEGRO DEL UMBRAL.
+    /// BrumaAscendidoBlackHoleStaff — v6.18 — EL BASTÓN DE LA BRUMA ASCENDIDA.
     ///
-    /// EL 6to agujero negro del mod, EL AGUJERO DE LA REFERENCIA
-    /// (petición expresa: "pon la referencia de fondo y comienza a
-    /// agregarle cosas hasta llegar al agujero negro de la referencia,
-    /// todo por código"): disco de acreción OBLICUO con asimetría
-    /// DOPPLER — el lado derecho BLANCO-incandescente y grueso, el
-    /// izquierdo rojo profundo y fino —, estrías pintadas largas y
-    /// curvas con gradiente blanco-amarillo → naranja → rojo neón →
-    /// magenta → púrpura, PÚA de energía blanco-rosa, rayo naranja
-    /// dentado, velos de materia vaporizada, filamentos violeta cayendo
-    /// al núcleo, CÍRCULO DE RUNAS doradas ENORME CON HUECOS y brasas
-    /// con estelas. 100% CÓDIGO.
+    /// LA COPIA MEJORADA del bastón de la Bruma (que queda INTACTO): el
+    /// vacío gelido, ELEVADO — CORONAS DE ESCARCHA ELÉCTRICA parpadeando
+    /// alrededor del horizonte (LightningCore.Arc cian a ~10 Hz, la firma
+    /// visual), RAYOS GELIDOS ramificados escapando del anillo de humo,
+    /// CINCO volutas serpenteando con curl reforzado, CRISTALES de hielo
+    /// flotando y chimeneas polares más altas. 100% CÓDIGO con las
+    /// librerías del proyecto (BrumaFX + LightningCore).
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión, Olvido y Cósmico —
-    /// todos quedan INTACTOS.
+    /// Física idéntica a la de la Bruma (aura un 15% más rápida, muerte
+    /// más rica). Hermano de todos los agujeros del mod — intactos.
     /// </summary>
-    public class UmbralBlackHoleStaff : ModItem
+    public class BrumaAscendidoBlackHoleStaff : ModItem
     {
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 150;
+            Item.damage = 200;
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 50; Item.useAnimation = 50;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
+            Item.shoot = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
             Item.shootSpeed = 6f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
@@ -52,7 +48,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
             // texto (el nombre ahora vive en la localización, arriba).
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF9966:100% por código — el disco de la referencia con Doppler: lado cercano blanco, lado lejano rojo]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/8FDCEF:La Bruma elevada — coronas de escarcha eléctrica y cinco volutas disolviéndose en el núcleo]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }

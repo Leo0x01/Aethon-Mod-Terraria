@@ -9,35 +9,31 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// UmbralBlackHoleStaff — v6.16 — EL BASTÓN DEL AGUJERO NEGRO DEL UMBRAL.
+    /// UmbralAscendidoBlackHoleStaff — v6.18 — EL BASTÓN DEL UMBRAL ASCENDIDO.
     ///
-    /// EL 6to agujero negro del mod, EL AGUJERO DE LA REFERENCIA
-    /// (petición expresa: "pon la referencia de fondo y comienza a
-    /// agregarle cosas hasta llegar al agujero negro de la referencia,
-    /// todo por código"): disco de acreción OBLICUO con asimetría
-    /// DOPPLER — el lado derecho BLANCO-incandescente y grueso, el
-    /// izquierdo rojo profundo y fino —, estrías pintadas largas y
-    /// curvas con gradiente blanco-amarillo → naranja → rojo neón →
-    /// magenta → púrpura, PÚA de energía blanco-rosa, rayo naranja
-    /// dentado, velos de materia vaporizada, filamentos violeta cayendo
-    /// al núcleo, CÍRCULO DE RUNAS doradas ENORME CON HUECOS y brasas
-    /// con estelas. 100% CÓDIGO.
+    /// LA COPIA MEJORADA del bastón del Umbral (que queda INTACTO): el
+    /// agujero de la referencia, ELEVADO — Doppler extremo (el lado que se
+    /// acerca ARDE a blanco incandescente y grueso; el lejano se hunde en
+    /// rojo profundo y fino), LLUVIA DE RAYOS naranjas ramificados cayendo
+    /// del círculo de runas (LightningCore), ARCO DORADO eléctrico girando
+    /// alrededor del horizonte, DOBLE anillo rúnico contrarrotante y brasas
+    /// de estelas largas. 100% CÓDIGO.
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión, Olvido y Cósmico —
-    /// todos quedan INTACTOS.
+    /// Física idéntica a la del Umbral (aura un 15% más rápida, muerte más
+    /// rica). Hermano de todos los agujeros del mod — intactos.
     /// </summary>
-    public class UmbralBlackHoleStaff : ModItem
+    public class UmbralAscendidoBlackHoleStaff : ModItem
     {
         public override void SetStaticDefaults() { }
         public override void SetDefaults()
         {
-            Item.damage = 150;
+            Item.damage = 200;
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 50; Item.useAnimation = 50;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<UmbralBlackHoleProjectile>();
+            Item.shoot = ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>();
             Item.shootSpeed = 6f;
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
@@ -52,7 +48,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
             // texto (el nombre ahora vive en la localización, arriba).
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF9966:100% por código — el disco de la referencia con Doppler: lado cercano blanco, lado lejano rojo]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF9966:El Umbral elevado — Doppler extremo, lluvia de rayos ramificados y doble anillo rúnico]"));
             tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }

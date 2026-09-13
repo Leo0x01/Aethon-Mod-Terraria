@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "1) Yes, there are 4 visible jagged lightning bolts with branches falling around the black sphere.\n2) No, there is no golden/yellow electric arc partially circling the black sphere.\n3) No, the bolts do not anchor on an outer faint ring; they appear to float or originate from points in the surrounding space.\n4) The bolts are visible and well-placed, though they are relatively dim against the dark background.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789338295,
+  "id": "20260914062451b4ac2d782b734765",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260914062451b4ac2d782b734765",
+  "usage": {
+    "completion_tokens": 90,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 352,
+    "prompt_tokens_details": {
+      "cached_tokens": 4
+    },
+    "total_tokens": 442
+  }
+}

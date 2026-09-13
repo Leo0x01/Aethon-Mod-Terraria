@@ -9,21 +9,17 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// CosmicBlackHoleStaff — v6.16 — EL BASTÓN DEL AGUJERO NEGRO CÓSMICO.
+    /// CosmicBlackHoleStaff — v6.18 — EL BASTÓN DEL AGUJERO NEGRO CÓSMICO.
     ///
-    /// EL 5to agujero negro del mod, NACIDO DEL SCRIPT UNITY del usuario
-    /// (CosmicBlackHole.cs + shader "Custom/CosmicRing"): anillo
-    /// energético MAGENTA (1.0, 0.2, 0.8) donde VEINTE BANDAS DE BRILLO
+    /// Nacido del script Unity del usuario (CosmicBlackHole.cs + shader
+    /// "Custom/CosmicRing"): anillo energético (hoy ROJO-NARANJA — recolor
+    /// v6.18 para diferenciarlo del Olvido) donde VEINTE BANDAS DE BRILLO
     /// recorren el vórtice a la velocidad exacta del shader
-    /// (sin(uv·20 + t·5)), rotación de 20°/s, rayos eléctricos
-    /// (lightningParticles), runas doradas flotando (runeParticles),
-    /// distorsión sinusoidal global y núcleo de negro absoluto
-    /// (coreSphere) — más todo lo que faltaba: aura oscura, nebulosas,
-    /// ecos del anillo, corredores de fotones, destellos polares, ondas
-    /// de distorsión y partículas radiales. 100% CÓDIGO.
+    /// (sin(uv·20 + t·5)), rotación de 20°/s, rayos eléctricos escapando
+    /// del anillo, runas doradas flotando, distorsión sinusoidal global y
+    /// núcleo de negro absoluto LIMPIO (v6.18: sin partículas en el centro).
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión y Olvido — todos
-    /// quedan INTACTOS.
+    /// Uno de los 4 agujeros DEFINITIVOS: UMBRAL · BRUMA · CÓSMICO · OLVIDO.
     /// </summary>
     public class CosmicBlackHoleStaff : ModItem
     {
@@ -49,11 +45,10 @@ namespace AethonMod.Content.Weapons.Cosmic
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "T", "[c/FF33CC:═══ AGUJERO NEGRO CÓSMICO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66D9:100% creado por código — nacido del script Unity: anillo energético MAGENTA con las VEINTE BANDAS del shader sin(uv·20 + t·5) recorriéndolo, rotando a 20°/s]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:El núcleo es negro absoluto mientras RAYOS ELÉCTRICOS violeta danzan dentro y magenta escapan del anillo — y RUNAS DORADAS de circuito flotan orbitando, entre ecos de resonancia, corredores de fotones, destellos polares y ondas de distorsión sinusoidal]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:GIGANTE: esfera de 50px, arte de ~7R. Atrae enemigos en un radio de 450px; su aura abraza el anillo y machaca más rápido cerca del centro]"));
-            tooltips.Add(new TooltipLine(Mod, "D4", "[c/FF33CC:Devora las balas enemigas al cruzar el horizonte — y al final nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
+            // v6.18: TOOLTIP CORTO — la ventana de info ya no es un muro de
+            // texto (el nombre ahora vive en la localización, arriba).
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF7A55:100% por código — anillo rojo-naranja de bandas vivas, runas doradas y tormenta eléctrica]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Atrae enemigos en 450px · devora balas · muere en un Anillo de Einstein]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }
     }
