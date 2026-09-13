@@ -1,5 +1,109 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.13 — EL AGUJERO NEGRO CON PERSONALIDAD + LAS 8 ALAS RE DISEÑADAS DE CERO CON LA TÉCNICA DE LAS CORONAS
+
+**Feedback del usuario**: "el agujero negro no se parece en nada a la
+referencia, veo que te cuesta mucho crear el agujero negro, solo debes
+tomar el agujero funcional que tenemos como base y adaptarlo, darle más
+personalidad, más efectos y todo eso. Y las alas se siguen viendo muy
+feas, crea nuevos diseños de alas con la técnica de la corona".
+
+### A. EL AGUJERO NEGRO — SIETE CAPAS NUEVAS DE IDENTIDAD (base intacta)
+
+Nueva estrategia (directiva del usuario): YA NO perseguir la réplica
+píxel-exacta de la referencia — tomar el agujero FUNCIONAL v6.12 (que ya
+dibuja esfera + anillo + vórtice sin errores) y darle PERSONALIDAD. La
+física, la lente gravitacional, las partículas y el contrato de batch
+(cerrado→cerrado) quedan INTACTOS. Siete capas nuevas, todas deterministas
+(cero estado, cero red):
+
+  · **0.5 ONDAS DE ESPACIO-TIEMPO** — anillos finos (textura Ring real,
+    aplastada e inclinada como el vórtice) que nacen pegados al horizonte
+    y se expanden hasta 7R: el vacío "late". Ciclo de 2.8s, dos ondas
+    desfasadas. Color magenta saturado (visible en cielo diurno y noche).
+  · **2.5 PULSOS DE FOTONES** — dos destellos blanco-candente que CORREN
+    por el anillo interior a 2.4× la velocidad del vórtice, con estela
+    corta rosa: luz orbitando y acelerando.
+  · **3.5 CHORROS RELATIVISTAS** — dos haces polares (dirección = normal
+    del plano del disco, como M87): núcleo blanco-rosa + manto violeta,
+    afinándose hacia la punta, con TRES bolas de plasma viajando hacia
+    fuera por haz. Se dibujan ANTES de la esfera → sus bases quedan
+    TRAGADAS por el horizonte.
+  · **3.6 CORRIENTES DE MATERIA** — cinco riachuelos de plasma que caen
+    en espiral desde 5.4R (aceleración gravitatoria: ease u^1.45) hasta
+    1.44R y DESAPARECEN TRAS EL HORIZONTE; se vuelven blanco-rosa al
+    rozarlo (Doppler).
+  · **3.7 LLAMARADAS DEL DISCO** — prominencias periódicas (ciclo 3.4s):
+    arcos de cápsulas que se alzan del borde de la hoja superior NORMAL
+    al plano y se pliegan de vuelta, naranja→pálido en la cresta.
+  · **3.8 ARCOS DE EINSTEIN** — filamentos pálidos arqueados por encima
+    y por debajo a 1.8R: la lente gravitacional insinuada sin shaders.
+  · **6.5 RIM VIOLETA** — el borde del horizonte RESPIRA: 18 cápsulas
+    violetas a 1.045R latiendo a 1.7 rad/s (la última luz atrapada).
+
+Validación: mock Python exacto (tools/mock_blackhole_v613.py, texturas
+reales + modelo aditivo del juego) → VLM: chorros ✓, corrientes ✓, ondas
+✓, aro violeta ✓, 8/10 "vivo y con personalidad" (primera ronda de alfas
+subidas para jets/corrientes tras feedback VLM). En cielo diurno: núcleo
+y vórtice perfectamente visibles; ondas recalibradas a magenta saturado.
+
+### B. LAS ALAS — OCHO DISEÑOS NUEVOS, EL VOCABULARIO DE LAS CORONAS
+
+Diagnóstico: las alas v6.12 usaban blobs radiales apilados sobre curvas
+polares → "manchas difusas", no alas. ¿Qué hace que las CORONAS se vean
+bien? Cuatro primitivas con identidad: EL TRAZO (cápsula estirada con
+gradiente), LA PERLA (núcleo casi blanco + halo), EL DESTELLO DE 4 PUNTAS
+(dos glows en cruz) y EL VOLUMEN OSCURO (silueta). **WingStrokes.cs**
+(nuevo) las empaqueta + LA PLUMA (Bézier con volumen, trazo, nervio y
+perla en la punta). Los 8 renderers REESCRITOS de cero:
+
+  · **Horizonte de Sucesos** — 7 PLUMAS violeta→magenta→rosa naciendo de
+    un MINI-HORIZONTE en el hombro (disco negro + anillo de fotones
+    blanco), puntas dobladas al vacío, perlas de fotón + polvo.
+  · **Anillo de Fotones** — DOS HUESOS gruesos con MEMBRANA violeta entre
+    ellos (la superficie alar) + dos anillos elípticos con filo de ataque
+    grueso (Doppler: el frente arde) y 4 fotones orbitando con estela.
+  · **Mariposa Cósmica** — VITRAL: contorno dorado en cadena de trazos,
+    venas como glifos, celdas de cristal violeta, ojo de ala con anillo.
+  · **Hada de Polvo Estelar** — 4 PÉTALOS con contorno de dos trazos,
+    3 venas internas, relleno ámbar translúcido y perlas titilantes.
+  · **Corona Solar** — TRES LAZOS de prominencia (ArcCrown como alas):
+    gradiente de temperatura rojo→oro, filamento eco, NUDO con DESTELLO
+    DE 4 PUNTAS en cada ápice, brasas flotando.
+  · **Nebulosa Viva** — ESQUELETO de 6 plumas maestras púrpura (la
+    silueta) + nube de blobs en deriva + 5 ESTRELLAS con perla y CRUZ DE
+    DIFRACCIÓN (Hubble) + filamentos fucsia serpentean.
+  · **Eclipse Total** — plumas NEGRAS azul-noche casi opacas con puntas
+    CROMOSFÉRICAS blanco-caliente (perlas + micro destellos), rayos de
+    corona pálidos por detrás y mini disco de eclipse en el hombro.
+  · **Cometa Carmesí** — TRES VELAS gordas de plasma (7.5px base) con
+    MEMBRANA de sustentación entre ellas, onda de brillo viajando,
+    CABEZAS con perla + destello 4 puntas, cola sensible a la velocidad.
+
+Validación iterativa (tools/mock_wing_render_v613.py, AlphaBlend del pase
+de jugador + cielo de día + silueta): RONDA 1: 6/10, 5/10 y 4/10 en
+Horizonte/Nebulosa/Eclipse (trazos finos, "humo", "globos") → plumas más
+corpulentas + esqueleto de plumas maestras + rediseño total de Eclipse.
+RONDA 2: Anillo 6/10 y Cometa 5/10 ("halo", "jets") → huesos + filio de
+ataque, velas + membrana. RONDA 3 FINAL: **8/8 APROBADAS** (Anillo 8,
+Mariposa 10, Eclipse 9.5, Horizonte 9, Nebulosa 8.5, Hada 8, Corona 7.5,
+Cometa pasa claro). Tooltips de 4 alas actualizados a los nuevos diseños.
+
+### C. DOCUMENTACIÓN Y VERIFICACIÓN
+
+  · build.txt 6.13; este CHANGES.md; research/wings_v613 + research/
+    blackhole (mocks + validaciones VLM) al repo.
+  · Compilación contra tModLoader 2026.07.3.0 REAL: **Build succeeded ·
+    0 errores · 0 warnings**.
+
+**Prueba del usuario**: git pull → Develop Mods → Build → (1) CrimsonBlackHoleStaff:
+vórtice + esfera + chorros + corrientes cayendo + ondas + llamaradas +
+aro violeta respirando; (2) las 8 alas nuevas en el inventario (plumas,
+anillos con huesos, vitral, pétalos, prominencias, nebulosa con estrellas,
+eclipse con puntas blancas, velas de cometa).
+
+---
+
 ## Commit v6.12 — EL AGUJERO NEGRO SIN ERROR + TODAS LAS ALAS CON LA TÉCNICA DE LAS CORONAS
 
 **Reporte del usuario** (con client.log): "el agujero negro dio error, y

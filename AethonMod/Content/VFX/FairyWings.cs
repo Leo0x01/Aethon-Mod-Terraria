@@ -5,58 +5,36 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// FairyWings — v6.12 — LAS ALAS DE HADA DE POLVO ESTELAR.
+    /// FairyWings — v6.13 — EL HADA DE POLVO ESTELAR "PÉTALOS".
     ///
-    /// Cuatro lóbulos alargados y PUNTIAGUDOS por lado (la silueta de las
-    /// hadas clásicas): dos superiores largos y dos inferiores cortos, todos
-    /// de membrana DORADA translúcida con el borde ardiendo en ámbar.
+    /// Rediseño con la técnica de las coronas: cada uno de los CUATRO
+    /// pétalos por lado es una HOJA DE LUZ construida como las runas —
+    /// contorno de dos trazos simétricos que se encuentran en la punta
+    /// (gradiente ámbar), TRES venas interiores pálidas que nacen de la
+    /// base, relleno translúcido con volumen oscuro debajo, y una PERLA
+    /// de polvo estelar en la punta. Micro-perlas titilantes festonean el
+    /// borde exterior — el "polvo" que deja el hada al pasar.
     ///
-    /// v6.12 — LA LECCIÓN DE VISIBILIDAD (AlphaBlend, no aditivo): cada
-    /// lóbulo lleva ahora VOLUMEN (ámbar profundo sólido al 55%) debajo de
-    /// la membrana luminosa y el borde arde a 0.9 — se lee como ala desde
-    /// cualquier fondo, como las coronas.
-    ///
-    /// Su firma son los DESTELLOS: 7 chispas de polvo estelar repartidas por
-    /// las alas que titilan con fases deterministas (cada una parpadea a su
-    /// ritmo — el polvo estelar de un hada NUNCA está quieto) y una llovizna
-    /// sutil de motas doradas que cae de los bordes.
-    ///
-    /// El aleteo es el de un COLIBRÍ: vibración RÁPIDA y superficial
-    /// (FlapSpeedFlying 0.52 — casi 10 ciclos por segundo visible) que
-    /// NUNCA cesa del todo (AlwaysFlutter: el hada vibra incluso parada).
-    ///
-    /// Paleta: dorado miel + blanco cálido con toques rosa pálido.
+    /// La vibración de colibrí se conserva (rápida y superficial, siempre
+    /// latiendo) con retardo por pétalo: una ONDA continua punta→raíz.
     /// </summary>
     public static class FairyWings
     {
-        /// <summary>Destellos de polvo estelar por lado.</summary>
-        private const int Sparkles = 7;
-
-        /// <summary>Segmentos del borde de cada lóbulo.</summary>
-        private const int RimSegs = 9;
-
-        /// <summary>Pinta las alas de hada en el buffer de VFXCore.</summary>
         public static void Render(ref WingDrawContext ctx)
         {
             if (ctx.Alpha <= 0f) return;
-            float open = MathHelper.Clamp(ctx.Open, 0f, 1.15f);
+            float open = MathHelper.Clamp(ctx.Open, 0f, 1.1f);
 
-            // Vibración de colibrí: alta frecuencia, poca amplitud — y SIEMPRE
-            // latiendo (el hada no para del todo ni en reposo).
+            // vibración de colibrí: alta frecuencia, poca amplitud, SIEMPRE
             float flutter = (float)Math.Sin(ctx.FlapPhase) * (ctx.FlapAmp * 0.75f + 0.25f);
-            float o = open * VFXCore.Breathe(ctx.Time, 2.6f, 0f, 0.04f);
 
             for (int side = -1; side <= 1; side += 2)
             {
                 Vector2 root = ctx.Back + new Vector2(side * 4f, -3f * ctx.GravDir);
 
-                // ============================================================
-                //  LOS 4 LÓBULOS (silueta de hada clásica)
-                // ============================================================
                 for (int lobe = 0; lobe < 4; lobe++)
                 {
-                    // Configuración por lóbulo: (ángulo base, longitud, ancho).
-                    // 0/1 = superiores (largos, arriba y afuera); 2/3 = inferiores.
+                    // configuración por pétalo: (ángulo base, longitud, ancho)
                     float baseAng = lobe switch
                     {
                         0 => -1.28f,   // superior alto
@@ -64,132 +42,104 @@ namespace AethonMod.Content.VFX
                         2 => -0.30f,   // inferior exterior
                         _ => 0.10f,    // inferior bajo
                     };
-                    // v6.12: envergadura de hada vanilla (~30px por lóbulo mayor).
-                    float len = lobe switch { 0 => 26f, 1 => 31f, 2 => 21f, _ => 16f };
-                    float wid = lobe switch { 0 => 9f, 1 => 10.5f, 2 => 8.5f, _ => 6.5f };
+                    float len = lobe switch { 0 => 27f, 1 => 32f, 2 => 22f, _ => 17f };
+                    float wid = lobe switch { 0 => 10f, 1 => 11.5f, 2 => 9f, _ => 7f };
 
-                    // El lóbulo RETRASA su vibración con la distancia (onda
-                    // continua a lo largo del ala: puntas siguiendo a la raíz).
+                    // la ONDA: cada pétalo retrasa su vibración (punta→raíz)
                     float lag = lobe * 0.55f;
                     float ang = baseAng + flutter * (0.30f + 0.06f * lobe)
                                 * (float)Math.Sin(ctx.FlapPhase - lag) * 1.6f;
 
-                    // Apertura: en reposo los lóbulos se PLEGAN hacia el cuerpo
-                    // (ángulos comprimidos hacia abajo).
-                    float fold = MathHelper.Lerp(0.45f, 1f, o);
+                    // en reposo los pétalos se PLEGAN hacia el cuerpo
+                    float fold = MathHelper.Lerp(0.48f, 1f, open);
                     ang = -MathHelper.Lerp(-0.35f, -ang, fold);
 
                     float dirX = (float)Math.Cos(ang) * side;
                     float dirY = (float)Math.Sin(ang) * ctx.GravDir;
 
-                    // --- VOLUMEN ÁMBAR (el cuerpo sólido del lóbulo) ---
-                    // v6.12: media celda más ancha y alfa 0.55 — el lóbulo se
-                    // lee como pétalo sólido translúcido, no como niebla.
-                    for (int c = 0; c < 6; c++)
-                    {
-                        float t = (c + 0.5f) / 6f;
-                        // Ancho del lóbulo: hinchado en el primer tercio, PUNTIAGUDO
-                        // al final (perfil de hoja).
-                        float profile = (float)Math.Sin(t * MathHelper.Pi) * (1f - t * 0.35f);
-                        float w = wid * (0.55f + profile) * (0.5f + 0.5f * o);
-
-                        Vector2 pos = root + new Vector2(dirX, dirY) * (len * t * fold)
-                            + new Vector2(0f, flutter * 1.2f * t);
-                        Vector2 memScale = new Vector2(w * 2.3f, len / 6f * 1.6f);
-                        float memRot = (float)Math.Atan2(dirY, dirX);
-                        Color vol = Color.Lerp(new Color(196, 112, 28),
-                            new Color(232, 150, 60), t);
-                        VFXCore.Quad(pos, vol * (0.55f * ctx.Alpha * (0.55f + 0.45f * o)),
-                            memScale, memRot, VFXCore.SoftGlow);
-                    }
-
-                    // --- MEMBRANA LUMINOSA dorada (el brillo encima) ---
-                    for (int c = 0; c < 6; c++)
-                    {
-                        float t = (c + 0.5f) / 6f;
-                        float jitterW = (VFXCore.Hash01(side * 5 + lobe, c, 1) - 0.5f) * 0.4f;
-                        float profile = (float)Math.Sin(t * MathHelper.Pi) * (1f - t * 0.35f);
-                        float w = wid * (0.40f + profile * 0.6f + jitterW * 0.3f) * (0.5f + 0.5f * o);
-
-                        Vector2 pos = root + new Vector2(dirX, dirY) * (len * t * fold)
-                            + new Vector2(0f, flutter * 1.2f * t);
-                        Vector2 memScale = new Vector2(w * 1.7f, len / 6f * 1.3f);
-                        float memRot = (float)Math.Atan2(dirY, dirX);
-                        Color mem = Color.Lerp(new Color(255, 218, 140),
-                            new Color(255, 190, 120), t);
-                        VFXCore.Quad(pos, mem * (0.45f * ctx.Alpha * (0.5f + 0.5f * o)),
-                            memScale, memRot, VFXCore.SoftGlow);
-                    }
-
-                    // --- BORDE ámbar ARDIENDO (0.9: silueta nítida) ---
-                    for (int s = 0; s <= RimSegs; s++)
-                    {
-                        float t = s / (float)RimSegs;
-                        float profile = (float)Math.Sin(t * MathHelper.Pi);
-                        float w = wid * (0.55f + profile) * (0.5f + 0.5f * o);
-                        // Los DOS bordes del lóbulo (arriba y abajo del eje).
-                        Vector2 axis = new Vector2(dirX, dirY);
-                        Vector2 perp = new Vector2(-axis.Y, axis.X);
-                        for (int b = -1; b <= 1; b += 2)
-                        {
-                            Vector2 pos = root + axis * (len * t * fold)
-                                + perp * (w * b)
-                                + new Vector2(0f, flutter * 1.2f * t);
-                            Color rim = Color.Lerp(new Color(255, 240, 180),
-                                new Color(255, 175, 80), t * 0.7f);
-                            float tw = 0.8f + 0.2f * VFXCore.Hash01(side + lobe, s, b);
-                            VFXCore.Quad(pos, rim * (0.90f * tw * ctx.Alpha * (0.55f + 0.45f * o)),
-                                new Vector2(3.4f, 3.4f));
-                        }
-                    }
-
-                    // La PUNTA: destello cálido.
+                    Vector2 base0 = root;
                     Vector2 tip = root + new Vector2(dirX, dirY) * (len * fold)
-                        + new Vector2(0f, flutter * 1.2f);
-                    VFXCore.Quad(tip, new Color(255, 244, 200) * (0.85f * ctx.Alpha),
-                        new Vector2(4.6f, 4.6f));
-                }
+                                  + new Vector2(0f, flutter * 1.4f);
 
-                // ============================================================
-                //  EL POLVO ESTELAR: 7 chispas titilando SOBRE las alas
-                // ============================================================
-                for (int k = 0; k < Sparkles; k++)
-                {
-                    // Cada chispa tiene su sitio fijo (determinista) cerca de un
-                    // lóbulo y su PROPIO ritmo de titileo (hash de fase).
-                    float u = VFXCore.Hash01(side, k, 11);
-                    float v = VFXCore.Hash01(side, k, 12);
-                    int lobeK = k % 4;
-                    float baseAng = lobeK switch { 0 => -1.28f, 1 => -0.88f, 2 => -0.30f, _ => 0.10f };
-                    float lenK = lobeK switch { 0 => 26f, 1 => 31f, 2 => 21f, _ => 16f };
-                    float fold = MathHelper.Lerp(0.45f, 1f, o);
-                    Vector2 axis = new Vector2((float)Math.Cos(baseAng) * side,
-                        (float)Math.Sin(baseAng) * ctx.GravDir);
-                    Vector2 perp = new Vector2(-axis.Y, axis.X);
-                    Vector2 pos = root + axis * (lenK * u * fold) + perp * ((v - 0.5f) * 16f);
+                    // vectores perpendiculares (el "ancho" del pétalo)
+                    Vector2 perp = new Vector2(-dirY * ctx.GravDir, dirX * side * ctx.GravDir);
+                    Vector2 mid = (base0 + tip) * 0.5f;
+                    float wMid = wid * fold;
 
-                    // Titileo: pulso agudo con pausa (como una estrella).
-                    float phase = ctx.Time * (2.2f + 2.8f * v) + u * 37f;
-                    float tw = (float)Math.Pow(0.5f + 0.5f * (float)Math.Sin(phase), 3.0);
-                    // Solo visible ~70% del tiempo (parpadeo con pausas).
-                    if (tw > 0.05f)
+                    // ---- RELLENO translúcido (3 celdas a lo largo) ----
+                    for (int c = 0; c < 3; c++)
                     {
-                        Color spark = v > 0.5f
-                            ? new Color(255, 248, 220)
-                            : new Color(255, 205, 240);
-                        VFXCore.Quad(pos, spark * (tw * 0.95f * ctx.Alpha),
-                            new Vector2(3.6f, 3.6f));
-                        VFXCore.Quad(pos, spark * (tw * 0.35f * ctx.Alpha),
-                            new Vector2(8.0f, 8.0f));
+                        float t = (c + 0.5f) / 3f;
+                        Vector2 cpos = root + new Vector2(dirX, dirY) * (len * fold * t)
+                            + new Vector2(0f, flutter * 1.4f * t);
+                        // perfil de hoja: hinchado al inicio, puntiagudo al final
+                        float profile = (float)Math.Sin(t * MathHelper.Pi) * (1f - t * 0.30f);
+                        Vector2 csize = new Vector2(wMid * (0.8f + profile) * 1.9f, len * fold / 3f * 1.5f);
+                        float crot = (float)Math.Atan2(dirY, dirX);
+
+                        // volumen ámbar oscuro + tinte dorado (translúcido)
+                        VFXCore.Quad(cpos, new Color(124, 68, 16) * (0.46f * ctx.Alpha * fold), csize, crot);
+                        VFXCore.Quad(cpos, new Color(212, 128, 34) * (0.30f * ctx.Alpha * fold), csize * 0.8f, crot);
+                    }
+
+                    // ---- EL CONTORNO: dos trazos simétricos base→punta ----
+                    Vector2 edgeA0 = base0 + perp * (wMid * 0.30f);
+                    Vector2 edgeB0 = base0 - perp * (wMid * 0.30f);
+                    Vector2 edgeA = mid + perp * (wMid * 0.85f);
+                    Vector2 edgeB = mid - perp * (wMid * 0.85f);
+
+                    // gradiente ámbar: base cobre → punta dorada pálida
+                    Color cBase = new Color(214, 118, 30);
+                    Color cMid = new Color(255, 178, 70);
+                    Color cTip = new Color(255, 232, 168);
+
+                    // lado A (dos segmentos con curva)
+                    Vector2 bendA = mid + perp * (wMid * 0.72f) + new Vector2(0f, -1.2f * ctx.GravDir);
+                    WingStrokes.Stroke(edgeA0, edgeA, 2.1f, cBase, cMid, 0.88f * ctx.Alpha);
+                    WingStrokes.Stroke(edgeA, tip, 1.6f, cMid, cTip, 0.88f * ctx.Alpha);
+                    // lado B
+                    WingStrokes.Stroke(edgeB0, edgeB, 2.1f, cBase, cMid, 0.88f * ctx.Alpha);
+                    WingStrokes.Stroke(edgeB, tip, 1.6f, cMid, cTip, 0.88f * ctx.Alpha);
+
+                    // ---- LAS VENAS (trazos de runa dentro del pétalo) ----
+                    for (int v = 0; v < 3; v++)
+                    {
+                        float spread = (v - 1) * 0.34f;   // abanico de la base a la punta
+                        Vector2 vdir = new Vector2(
+                            (float)Math.Cos(ang + spread) * side,
+                            (float)Math.Sin(ang + spread) * ctx.GravDir);
+                        Vector2 vtip = base0 + vdir * (len * fold * 0.82f);
+                        Vector2 vmid = base0 + vdir * (len * fold * 0.45f) + perp * (wMid * 0.18f * (v - 1));
+
+                        Color v0 = new Color(255, 196, 110);
+                        Color v1 = new Color(255, 244, 214);
+                        WingStrokes.Stroke(base0, vmid, 1.4f, v0, v0, 0.72f * ctx.Alpha);
+                        WingStrokes.Stroke(vmid, vtip, 1.1f, v0, v1, 0.72f * ctx.Alpha);
+                    }
+
+                    // ---- LA PERLA DE POLVO ESTELAR en la punta ----
+                    float tw = 0.75f + 0.25f * (float)Math.Sin(ctx.Time * 6.5f + lobe * 1.9f + side);
+                    WingStrokes.Pearl(tip, 8.0f,
+                        new Color(255, 196, 100), new Color(255, 253, 244), 0.95f * tw * ctx.Alpha);
+
+                    // ---- MICRO-PERLAS titilantes en el borde exterior ----
+                    for (int k = 0; k < 2; k++)
+                    {
+                        float h = VFXCore.Hash01(side * 9 + lobe, k * 4 + 1, 3);
+                        float mtw = 0.5f + 0.5f * (float)Math.Sin(ctx.Time * (4f + h * 4f) + h * 11f);
+                        if (mtw < 0.62f) continue;
+                        float t = 0.35f + h * 0.5f;
+                        Vector2 ppos = root + new Vector2(dirX, dirY) * (len * fold * t)
+                            + perp * (wMid * (0.55f + 0.3f * k));
+                        WingStrokes.Pearl(ppos, 4.6f,
+                            new Color(255, 214, 130), new Color(255, 255, 250),
+                            0.85f * mtw * ctx.Alpha);
                     }
                 }
 
-                // El CORAZÓN del hada: punto de luz rosa-dorado en la raíz.
-                float heart = 0.7f + 0.3f * (float)Math.Sin(ctx.Time * 5.5f + side);
-                VFXCore.Quad(root, new Color(255, 214, 150) * (0.65f * heart * ctx.Alpha),
-                    new Vector2(10f, 10f));
-                VFXCore.Quad(root, Color.White * (0.7f * heart * ctx.Alpha),
-                    new Vector2(4.2f, 4.2f));
+                // núcleo de anclaje en la espalda
+                WingStrokes.Pearl(root, 7.5f, new Color(255, 178, 80),
+                    new Color(255, 250, 235), 0.9f * ctx.Alpha);
             }
         }
     }

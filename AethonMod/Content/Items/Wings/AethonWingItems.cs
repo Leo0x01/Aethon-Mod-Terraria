@@ -104,8 +104,8 @@ namespace AethonMod.Content.Items.Wings
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "W1", "[c/FF1738:═══ ALAS DEL HORIZONTE DE SUCESOS ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FF66AA:Alas de energía violeta-negra con remolinos de acreción\nmagenta cruzando la membrana y anillos de fotones blancos\nardiendo en las puntas]"));
-            tooltips.Add(new TooltipLine(Mod, "W3", "[c/FC0096:Cada pluma de plasma gira alrededor de su propio mini horizonte\n— la luz se dobla al pasar cerca de ti]"));
+            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FF66AA:Siete plumas de luz violeta→magenta→rosa naciendo de un mini\nhorizonte de sucesos en tu espalda: disco negro + anillo de fotones\nblanco — las puntas se doblan hacia el vacío]"));
+            tooltips.Add(new TooltipLine(Mod, "W3", "[c/FC0096:Cada pluma termina en una perla de fotón y un polvo de luz\nescapa del ala al aletear — la luz se dobla cerca de ti]"));
             tooltips.Add(new TooltipLine(Mod, "W5", "[c/FFD700:Vuelo end-game: 200 ticks · velocidad 9.5 · aceleración ×3]"));
         }
     }
@@ -124,7 +124,7 @@ namespace AethonMod.Content.Items.Wings
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "W1", "[c/FFC0CB:═══ ALAS DEL ANILLO DE FOTONES ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FFD9EC:La luz que escapó del horizonte: alas doradas de aros de órbita\nconcéntricos con fotones corriendo por ellos y sus estelas]"));
+            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FFD9EC:La luz que escapó del horizonte: dos anillos de órbita por lado con\nfotones corriendo por ellos y sus estelas — el filo\ndelantero ARDE más (Doppler de verdad)]"));
             tooltips.Add(new TooltipLine(Mod, "W3", "[c/FF9AD5:Cada aleteo acelera los fotones del aro mayor — de dentro\nhacia afuera, como un destello de sincrotón]"));
             tooltips.Add(new TooltipLine(Mod, "W5", "[c/FFD700:Vuelo end-game: 200 ticks · velocidad 9 · aceleración ×3.2 (récord)]"));
         }
@@ -148,7 +148,7 @@ namespace AethonMod.Content.Items.Wings
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "W1", "[c/FF7BAC:═══ ALAS DE MARIPOSA CÓSMICA ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FF9AC8:Membrana de nebulosa púrpura-azul tachonada de campos de\nestrellas, venas de luz turquesa y borde festoneado con ojo\nde ala de ninfa junto a la punta]"));
+            tooltips.Add(new TooltipLine(Mod, "W2", "[c/FF9AC8:Un vitral estelar: contorno dorado, venas de luz como glifos y\nceldas de cristal violeta translúcido — con ojos de ala y perlas\nfestoneando el borde]"));
             tooltips.Add(new TooltipLine(Mod, "W3", "[c/FFC06A:El golpe de vuelo de una mariposa REAL: bajada rápida y potente,\nsubida lenta — las alas casi se aplauden sobre tu espalda]"));
             tooltips.Add(new TooltipLine(Mod, "W5", "[c/FFD700:Vuelo end-game: 190 ticks · velocidad 9.5 · FLOTADO de mariposa]"));
         }
@@ -235,7 +235,7 @@ namespace AethonMod.Content.Items.Wings
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "W1", "[c/E8E0F0:═══ ALAS DE ECLIPSE TOTAL ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "W2", "[c/C8BCDD:Plumas negras sólidas con el anillo cromosférico blanco-dorado\nexactamente en el borde: la luna negra tapando el sol]"));
+            tooltips.Add(new TooltipLine(Mod, "W2", "[c/C8BCDD:Dos discos de luna nueva por lado: casi opacos, rodeados de su aro\ncromosférico blanco-caliente y rayos de corona ondeando detrás]"));
             tooltips.Add(new TooltipLine(Mod, "W3", "[c/FFF0F5:Un halo de corona te sigue allá donde vueles — la penumbra\nde un eclipse total en movimiento]"));
             tooltips.Add(new TooltipLine(Mod, "W5", "[c/FFD700:Vuelo end-game: 200 ticks · velocidad 9 · aceleración ×2.9]"));
         }

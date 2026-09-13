@@ -8,7 +8,32 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// CrimsonBlackHoleRenderer — v6.11 — EL AGUJERO NEGRO "OBLIVION".
+    /// CrimsonBlackHoleRenderer — v6.13 — EL AGUJERO NEGRO "OBLIVION" +
+    /// PERSONALIDAD.
+    ///
+    /// v6.13 — NUEVA DIRECTRIZ DEL USUARIO: "toma el agujero funcional que
+    /// tenemos como base y adáptalo, dale más personalidad, más efectos y
+    /// todo eso". La base v6.12 (halo + anillo 360° + dos hojas en
+    /// cresciente + esfera negra + rayos + chispas + bloom, contrato de
+    /// batch cerrado→cerrado) queda INTACTA y se le suman SIETE capas
+    /// nuevas de identidad:
+    ///
+    ///   · 0.5 ONDAS DE ESPACIO-TIEMPO — anillos finos que nacen del
+    ///     horizonte y se expanden (el vacío "late").
+    ///   · 2.5 PULSOS DE FOTONES — dos destellos que CORREN por el anillo
+    ///     interior más rápido que el vórtice (luz orbitando).
+    ///   · 3.5 CHORROS RELATIVISTAS — dos haces polares perpendicular al
+    ///     disco, con bolas de plasma VIAJANDO hacia fuera.
+    ///   · 3.6 CORRIENTES DE MATERIA — cinco riachuelos de plasma que caen
+    ///     en espiral desde 5.4R y DESAPARECEN TRAS EL HORIZONTE.
+    ///   · 3.7 LLAMARADAS DEL DISCO — prominencias que se alzan del borde
+    ///     exterior y se pliegan de vuelta (como las del Sol).
+    ///   · 3.8 ARCOS DE EINSTEIN — filamentos pálidos arqueados arriba y
+    ///     abajo (lente gravitacional insinuada).
+    ///   · 6.5 RIM VIOLETA — el borde del horizonte RESPIRA luz violeta.
+    ///
+    /// La esfera sigue comiéndose TODO lo que cae tras ella (las corrientes
+    /// y los chorros se dibujan ANTES del pase alfa del disco negro).
     ///
     /// La referencia ORIGINAL del usuario (Reddit: Ancients Awakened —
     /// Regicide, Oblivion God of the Void): VÓRTICE DE PLASMA carmesí con
@@ -107,6 +132,7 @@ namespace AethonMod.Content.VFX
 
         private static Asset<Texture2D> _blob;
         private static Asset<Texture2D> _blackDisk;
+        private static Asset<Texture2D> _ring;
 
         /// <summary>El blob gaussiano del prototipo (perfil en RGB, alfa 255).</summary>
         private static Texture2D Blob =>
@@ -114,6 +140,10 @@ namespace AethonMod.Content.VFX
 
         private static Texture2D BlackDisk =>
             (_blackDisk ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
+
+        /// <summary>v6.13 — Anillo fino procedural (ondas de espacio-tiempo).</summary>
+        private static Texture2D Ring =>
+            (_ring ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring")).Value;
 
         // ==================================================================
         //  HELPERS
@@ -204,6 +234,40 @@ namespace AethonMod.Content.VFX
         private static void Quad(Vector2 pos, Vector2 sigma, float rot, Color c, float alpha)
             => Cap(pos, sigma.X, sigma.Y, rot, c, alpha);
 
+        /// <summary>
+        /// v6.13 — Anillo fino con la textura Ring, aplastado e inclinado
+        /// como el resto del vórtice (para las ondas de espacio-tiempo):
+        /// dibuja en el batch ADITIVO ACTIVO.
+        /// </summary>
+        private static void RingQuad(Vector2 pos, float radius, Color c, float alpha)
+        {
+            if (alpha <= 0.004f) return;
+            Texture2D tex = Ring;
+            float s = radius * 2.174f;               // círculo visible ≈ radius
+            float m = alpha * 1.4f;
+            var tint = new Color(
+                (byte)Math.Min(255f, c.R * m),
+                (byte)Math.Min(255f, c.G * m),
+                (byte)Math.Min(255f, c.B * m), 255);
+            Main.spriteBatch.Draw(tex, pos, null, tint, Tilt,
+                new Vector2(tex.Width, tex.Height) * 0.5f,
+                new Vector2(s, s * Squash) / new Vector2(tex.Width, tex.Height),
+                SpriteEffects.None, 0f);
+        }
+
+        /// <summary>v6.13 — Tangente de la elipse del vórtice en (rr, θ).</summary>
+        private static float PolTangent(float rr, float theta, float r)
+        {
+            const float eps = 0.02f;
+            Vector2 a = Pol(rr, theta - eps, r, Vector2.Zero);
+            Vector2 b = Pol(rr, theta + eps, r, Vector2.Zero);
+            return (float)Math.Atan2(b.Y - a.Y, b.X - a.X);
+        }
+
+        /// <summary>v6.13 — Dirección del polo NORTE del disco (normal al plano).</summary>
+        private static Vector2 JetDir =>
+            new Vector2(-(float)Math.Sin(Tilt), (float)Math.Cos(Tilt));
+
         private static void BeginAdditive()
         {
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
@@ -243,6 +307,20 @@ namespace AethonMod.Content.VFX
                 // End → alpha (esfera) → End → aditivo (6-8) → End CERRADO.
                 BeginAdditive();
 
+                // ============ 0.5 ONDAS DE ESPACIO-TIEMPO (v6.13) ============
+                // El vacío LATÉ: anillos finos que nacen pegados al
+                // horizonte y se expanden hasta 7R desvaneciéndose. Van
+                // PRIMERO (detrás de todo el vórtice) — son el "suelo" del
+                // espacio curvándose, no plasma.
+                const float RippleCycle = 2.8f;
+                for (int wv = 0; wv < 2; wv++)
+                {
+                    float age = (time / RippleCycle + wv * 0.5f) % 1f;
+                    float rr = r * (1.9f + age * 5.3f);
+                    float a = 0.26f * (1f - age) * Math.Min(age * 7f, 1f);
+                    RingQuad(center, rr, new Color(255, 95, 185), a);
+                }
+
                 // ============ 1. HALO AMBIENTE (cálido, inclinado) ============
                 Quad(center, new Vector2(5.6f * r, 3.7f * r * Squash), Tilt,
                     new Color(125, 18, 55), 0.13f);
@@ -269,6 +347,26 @@ namespace AethonMod.Content.VFX
                         hot * flick * 0.45f);
                 }
 
+                // ============ 2.5 PULSOS DE FOTONES (v6.13) ============
+                // Dos destellos que CORREN por el anillo interior a 2.4× la
+                // velocidad del vórtice — luz orbitando el horizonte,
+                // acelerando al acercarse (la materia cae, la luz corre).
+                for (int pp = 0; pp < 2; pp++)
+                {
+                    float pTh = rot * 2.4f + pp * MathHelper.Pi;
+                    Vector2 ppos = Pol(1.46f, pTh, r, center);
+                    float tang = PolTangent(1.46f, pTh, r);
+                    float pPulse = 0.75f + 0.25f * (float)Math.Sin(time * 9f + pp * 2.0f);
+                    Cap(ppos, 0.52f * r, 0.15f * r, tang,
+                        new Color(255, 246, 238), 0.80f * pPulse);
+                    Cap(ppos, 0.17f * r, 0.075f * r, tang,
+                        new Color(255, 255, 252), 1.05f * pPulse);
+                    // estela corta detrás del pulso (contra el avance)
+                    Vector2 trail = Pol(1.46f, pTh - 0.14f, r, center);
+                    Cap(trail, 0.34f * r, 0.085f * r, tang,
+                        new Color(255, 190, 215), 0.45f * pPulse);
+                }
+
                 // ============ 3. LAS DOS HOJAS DEL VÓRTICE ============
                 DrawBlade(center, r, rot, time, seed,
                     BladeT, BladeTh, BladeRoT, BladeRo, BladeTkT, BladeTk,
@@ -276,6 +374,136 @@ namespace AethonMod.Content.VFX
                 DrawBlade(center, r, rot, time, seed,
                     LowerT, LowerTh, LowerRoT, LowerRo, LowerTkT, LowerTk,
                     LowerBriT, LowerBri, LowerColT, LowerCol, 72, 0.65f, 0.22f);
+
+                // ============ 3.5 CHORROS RELATIVISTAS (v6.13) ============
+                // Dos haces de plasma perpendicular al plano del disco
+                // (como M87): núcleo blanco-rosa + borde violeta, afinándose
+                // hacia la punta, con TRES bolas de plasma viajando hacia
+                // fuera por cada haz. Se dibujan ANTES de la esfera → sus
+                // bases quedan TRAGADAS por el horizonte: parecen nacer de
+                // dentro del vacío.
+                Vector2 jdir = JetDir;
+                float jetLen = 4.4f;
+                for (int j = 0; j < 2; j++)
+                {
+                    float dir = j == 0 ? 1f : -1f;
+                    for (int s = 0; s < 11; s++)
+                    {
+                        float u = (s + 0.5f) / 11f;               // 0 base → 1 punta
+                        Vector2 pos = center + jdir * (dir * (0.30f + u * jetLen) * r);
+                        float wOut = 0.30f * (1f - u * 0.82f);    // afina hacia la punta
+                        float fade = (1f - u) * (0.16f + 0.84f * Math.Min(u * 4f, 1f));
+                        // núcleo blanco-rosa + manto violeta (v6.13b: alfas al alza —
+                        // en la validación del mock casi no se veían)
+                        Cap(pos, 0.34f * r, wOut * r, Tilt - MathHelper.PiOver2,
+                            new Color(255, 205, 235), 0.72f * fade);
+                        Cap(pos, 0.42f * r, wOut * 1.7f * r, Tilt - MathHelper.PiOver2,
+                            new Color(168, 110, 255), 0.34f * fade);
+                    }
+                    // bolas de plasma VIAJANDO por el haz (deterministas)
+                    for (int k = 0; k < 3; k++)
+                    {
+                        float bu = 0.45f + ((time * 0.42f + k / 3f + j * 0.5f) % 1f) * 3.6f;
+                        Vector2 bpos = center + jdir * (dir * bu * r);
+                        float bp = 0.65f + 0.35f * (float)Math.Sin(time * 7f + k * 2.1f + j * 1.3f);
+                        Cap(bpos, 0.17f * r, 0.17f * r, 0f, new Color(255, 248, 252), 1.0f * bp);
+                        Cap(bpos, 0.40f * r, 0.40f * r, 0f, new Color(200, 130, 255), 0.40f * bp);
+                    }
+                }
+
+                // ============ 3.6 CORRIENTES DE MATERIA (v6.13) ============
+                // Cinco riachuelos de plasma que caen en espiral desde 5.4R
+                // hasta el anillo y DESAPARECEN TRAS EL HORIZONTE (se
+                // dibujan antes del pase alfa → la esfera los devora).
+                // Cada uno con su fase/velocidad determinista; aceleran al
+                // acercarse (caída gravitatoria) y se vuelven blanco-rosa
+                // al rozar el horizonte (Doppler).
+                const int Streams = 5;
+                for (int st = 0; st < Streams; st++)
+                {
+                    float h1 = Hash01(seed, st, 3);
+                    float h2 = Hash01(seed, st, 7);
+                    float cyc = 2.6f + h1 * 1.7f;                  // s por caída
+                    float ph = (time / cyc + h2) % 1f;             // 0 fuera → 1 devorado
+                    float baseAng = h1 * MathHelper.TwoPi;
+
+                    for (int k = 0; k < 8; k++)                    // la cabeza + 7 de estela
+                    {
+                        float u = ph - k * 0.028f;
+                        if (u < 0f) continue;
+                        // caída acelerada: rápido al principio visual lento al inicio real
+                        float ease = (float)Math.Pow(u, 1.45f);
+                        float rr = MathHelper.Lerp(5.4f, 1.44f, ease);
+                        float th = baseAng + u * 4.6f + rot * 0.6f; // espiral hacia dentro
+                        Vector2 pos = Pol(rr, th, r, center);
+                        float tang = PolTangent(rr, th, r);
+                        float mix = 1f - (rr - 1.44f) / 3.96f;      // 0 lejos → 1 horizonte
+                        Color col = Color.Lerp(new Color(255, 70, 130), new Color(255, 244, 250), mix);
+                        float fadeIn = Math.Min(u * 9f, 1f);
+                        float fadeOut = u > 0.90f ? (1f - u) / 0.10f : 1f;
+                        float al = 0.85f * fadeIn * fadeOut * (1f - k * 0.09f);
+                        Cap(pos, 0.34f * r * (1f - 0.45f * mix), 0.10f * r, tang, col, al);
+                    }
+                }
+
+                // ============ 3.7 LLAMARADAS DEL DISCO (v6.13) ============
+                // Prominencias: cada ~3.4s una de TRES llamaradas se alza
+                // del borde de la hoja superior, se arquea hacia el polo y
+                // se pliega de vuelta (como las prominencias solares).
+                Vector2 jn = JetDir;
+                const float FlareCycle = 3.4f;
+                for (int fl = 0; fl < 3; fl++)
+                {
+                    float ft = (time + fl * 1.13f) % FlareCycle;
+                    if (ft > 2.1f) continue;                         // ventana activa 0..2.1s
+                    float life = ft / 2.1f;                          // 0..1
+                    float env = (float)Math.Sin(life * MathHelper.Pi); // crece → decrece
+
+                    // ancla en la hoja superior (t = 0.28..0.60 según la llamarada)
+                    float at = 0.28f + fl * 0.16f;
+                    Vector2 fpos = BladePoint(BladeT, BladeTh, BladeRoT, BladeRo,
+                        BladeTkT, BladeTk, at, rot, r, center, out float fTh);
+                    float fRo = KeyLerp(BladeRoT, BladeRo, at);
+
+                    Vector2[] pts = new Vector2[8];
+                    for (int s = 0; s < 8; s++)
+                    {
+                        float u = s / 7f;
+                        // se alza NORMAL al plano y deriva radialmente afuera
+                        float h = (float)Math.Sin(u * MathHelper.Pi) * 1.15f * env;
+                        float rr = fRo + u * 1.30f;
+                        float th = fTh + u * 0.26f;
+                        pts[s] = Pol(rr, th, r, center) + jn * (h * r);
+                    }
+                    for (int s = 0; s < 7; s++)
+                    {
+                        Vector2 a = pts[s], b = pts[s + 1];
+                        Vector2 mid = (a + b) * 0.5f;
+                        float ra = (float)Math.Atan2(b.Y - a.Y, b.X - a.X);
+                        float ln = Math.Max(Vector2.Distance(a, b) * 0.85f, 2.5f);
+                        float u = (s + 1) / 7f;
+                        Color fc = Color.Lerp(new Color(255, 120, 80), new Color(255, 235, 190),
+                            (float)Math.Sin(u * MathHelper.Pi));
+                        Cap(mid, ln, 0.11f * r * (1f - u * 0.35f), ra, fc, 0.55f * env);
+                    }
+                }
+
+                // ============ 3.8 ARCOS DE EINSTEIN (v6.13) ============
+                // Filamentos pálidos arqueados por encima y por debajo de
+                // la esfera a 1.8R — la luz de fondo doblándose alrededor
+                // del vacío (insinuación de lente, sin coste de shader).
+                for (int arc = 0; arc < 2; arc++)
+                {
+                    float a0 = arc == 0 ? -0.42f : MathHelper.Pi - 0.42f;
+                    for (int s = 0; s < 11; s++)
+                    {
+                        float th = a0 + s / 10f * 1.55f;
+                        Vector2 pos = Pol(1.80f, th, r, center);
+                        float tang = PolTangent(1.80f, th, r);
+                        float ab = 0.15f * (float)Math.Sin(s / 10f * MathHelper.Pi);
+                        Cap(pos, 0.22f * r, 0.040f * r, tang, new Color(255, 205, 230), ab);
+                    }
+                }
 
                 // ============ 4. HOTSPOT + nudo NNE + aguja + mechones ============
                 Vector2 hx = BladePoint(BladeT, BladeTh, BladeRoT, BladeRo, BladeTkT, BladeTk,
@@ -340,6 +568,23 @@ namespace AethonMod.Content.VFX
                             Cap((mid + bEnd) * 0.5f, r * 0.12f, 1.1f, bra, new Color(170, 185, 255), 0.32f);
                         }
                         prev = nxt;
+                    }
+                }
+
+                // ============ 6.5 RIM VIOLETA QUE RESPIRA (v6.13) ============
+                // El borde del horizonte RESPIRA: un aro violeta fino justo
+                // fuera de la esfera negra, latiendo lento — la última luz
+                // atrapada antes de cruzar el horizonte de sucesos.
+                {
+                    float rimPulse = 0.55f + 0.45f * (float)Math.Sin(time * 1.7f);
+                    for (int s = 0; s < 18; s++)
+                    {
+                        float th = s * MathHelper.TwoPi / 18f + rot * 0.22f;
+                        Vector2 pos = Pol(1.045f, th, r, center);
+                        float tang = PolTangent(1.045f, th, r);
+                        float flick = 0.8f + 0.2f * (float)Math.Sin(6f * th + time * 3.5f);
+                        Cap(pos, 0.21f * r, 0.045f * r, tang,
+                            new Color(196, 138, 255), 0.34f * rimPulse * flick);
                     }
                 }
 

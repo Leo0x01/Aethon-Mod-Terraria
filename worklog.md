@@ -7549,3 +7549,32 @@ Next:
 - El usuario prueba: (1) CrimsonBlackHoleStaff — el vórtice Oblivion POR FIN VISIBLE (esfera negra + gap + anillo + dos hojas de plasma carmesí girando horario) SIN errores en el log; (2) las 8 alas de luz: equipar cada una (reposo plegadas, vuelo con aleteo propio, planeo, sweep al correr; mariposa/hada con flotado)
 - Si alguna ala necesita ajuste fino (tamaño/brillo/color de un estilo concreto), los parámetros viven en su renderizador (Content/VFX/*Wings.cs) y las personalidades de vuelo en WingVFX.cs
 - La técnica de las coronas está ahora documentada como el estándar del mod para cosméticos del jugador
+
+---
+Task ID: 24
+Agent: Z.ai Code (agente principal)
+Task: v6.13 — EL AGUJERO NEGRO CON PERSONALIDAD (base funcional + 7 capas nuevas) + LAS 8 ALAS REDISEÑADAS DE CERO CON LA TÉCNICA DE LAS CORONAS (nuevos diseños)
+
+Work Log:
+- Feedback del usuario: el agujero "no se parece en nada a la referencia, veo que te cuesta mucho" → NUEVA DIRECTIVA: tomar el agujero FUNCIONAL como base y darle MÁS PERSONALIDAD Y EFECTOS (adiós a la réplica píxel-exacta); las alas "se siguen viendo muy feas" → crear NUEVOS DISEÑOS con la técnica de la corona
+- Análisis VLM de la captura del usuario: bola negra plana + anillo magenta + brazo espiral "tipo tiza" + rayos cian — funciona pero sin vida
+- AGUJERO NEGRO (CrimsonBlackHoleRenderer.cs, base intacta + 7 capas): 0.5 ondas de espacio-tiempo (textura Ring real, expanden hasta 7R, magenta saturado); 2.5 pulsos de fotones corriendo el anillo a 2.4× el vórtice; 3.5 chorros relativistas polares (normal del plano, como M87) con 3 bolas viajando por haz, bases TRAGADAS por la esfera; 3.6 cinco corrientes de materia cayendo en espiral (ease^1.45) que DESAPARECEN tras el horizonte; 3.7 llamaradas-prominencias del disco cada 3.4s; 3.8 arcos de Einstein pálidos; 6.5 rim violeta respirando en el borde. Helpers nuevos: RingQuad/PolTangent/JetDir
+- Mock exacto (tools/mock_blackhole_v613.py, texturas reales + aditivo del juego) + VLM: primera ronda jets/corrientes casi invisibles → alfas 0.34→0.72/0.60→0.85; ondas se fundían con cielo azul → magenta saturado. FINAL: chorros ✓ corrientes ✓ ondas ✓ aro ✓ 8/10 "vivo y con personalidad"; núcleo+vórtice perfectos en cielo diurno
+- ALAS: diagnóstico de fondo — v6.12 usaba blobs radiales apilados (manchas), las coronas funcionan por CUATRO primitivas: TRAZO (cápsula estirada con gradiente), PERLA (núcleo blanco + halo), DESTELLO 4 PUNTAS (cruz), VOLUMEN OSCURO (silueta) → WingStrokes.cs NUEVO las empaqueta + LA PLUMA (Bézier: volumen + trazo + nervio + perla en punta, con volAlpha/pearlScale)
+- LOS 8 RENDERERS REESCRITOS DE CERO: Horizonte (7 plumas + mini-horizonte en el hombro: disco negro + anillo de fotones), Anillo de Fotones (2 HUESOS + MEMBRANA violeta + anillos con filo de ataque Doppler + 4 fotones orbitando con estela), Mariposa VITRAL (contorno dorado en trazos + venas glifo + celdas de cristal + ojo con anillo), Hada (4 pétalos con 3 venas + perlas titilantes), Corona Solar (ArcCrown como alas: 3 lazos con gradiente de temperatura + nudos con destello 4 puntas + brasas), Nebulosa (ESQUELETO de 6 plumas maestras + nube + 5 estrellas con CRUZ DE DIFRACCIÓN + filamentos), Eclipse REDISEÑO TOTAL (plumas NEGRAS azul-noche con puntas cromosféricas blancas + rayos de corona + mini disco en el hombro — el de discos "globos de jabón" se descartó), Cometa (3 VELAS gordas con MEMBRANA de sustentación + cabezas con perla/destello + cola sensible a velocidad)
+- Validación iterativa (tools/mock_wing_render_v613.py, AlphaBlend del pase de jugador + cielo día + silueta, 4 estados × 8 alas): RONDA 1: Horizonte 6, Nebulosa 5 ("humo"), Eclipse 4 ("globos") → plumas corpulentas (wRoot 6.8, volAlpha 0.68, pearlScale 3.3) + esqueleto de plumas maestras en Nebulosa + rediseño Eclipse; RONDA 2: Anillo 6 ("halo sin estructura"), Cometa 5 ("jets de propulsión") → huesos+membrana+filo de ataque en Anillo, velas 7.5px+membrana en Cometa; RONDA 3: **8/8 APROBADAS** — Mariposa 10, Eclipse 9.5, Horizonte 9, Nebulosa 8.5, Anillo 8, Hada 8, Corona 7.5, Cometa pasa claro
+- Tooltips de 4 alas actualizados a los nuevos diseños (Horizonte, Anillo, Mariposa, Eclipse); fix de saltos de línea literales en strings C# introducidos por edición
+- Errores de compilación encontrados y fixeados: switch sin paréntesis en NebulaWings (b%3), cierre sobre parámetro ref en ButterflyWings (L2W → función con parámetros explícitos), typo ctx.Background→GetBack
+- Docs: build.txt 6.13, CHANGES.md (entrada v6.13 secciones A-C), research/wings_v613 + research/blackhole con mocks y validaciones al repo
+- Compilación final contra tModLoader 2026.07.3.0 REAL: Build succeeded · 0 errores · 0 warnings
+
+Test:
+- Sandbox: mock Python del agujero validado VLM (8/10, todos los efectos nuevos visibles en negro y cielo) + mock de alas 8/8 aprobadas tras 3 rondas + compilación limpia
+- PENDIENTE (el usuario prueba en su máquina): Develop Mods → Build → CrimsonBlackHoleStaff (chorros + corrientes + ondas + llamaradas + rim violeta SIN errores en client.log) y las 8 alas nuevas (plumas/huesos/vitral/pétalos/prominencias/estrellas/eclipse/velas)
+
+Next:
+- Si el usuario reporta más ajustes visuales: las perlas/tamaños ya son parámetros por renderer (rápidos de afinar)
+- Los iconos de ítems (PNG 30×24) siguen siendo los genéricos de v6.12 — regenerarlos a imagen de los nuevos diseños si el usuario lo pide
+
+Stage Summary:
+- v6.13 EN GitHub: el agujero negro funcional ahora tiene SIETE capas de personalidad (ondas, pulsos, chorros, corrientes, llamaradas, arcos de Einstein, rim respirando) sin tocar física/lente/contrato de batch; las 8 alas son diseños NUEVOS construidos con el vocabulario exacto de las coronas (trazos, perlas, destellos, volúmenes) validados 8/8 por VLM en 3 rondas iterativas

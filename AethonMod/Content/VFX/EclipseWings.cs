@@ -5,164 +5,153 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// EclipseWings — v6.12 — LAS ALAS DE ECLIPSE TOTAL.
+    /// EclipseWings — v6.13 — LAS ALAS DE ECLIPSE TOTAL (ronda 2).
     ///
-    /// El momento más hermoso del cielo: la luna negra tapando el sol con
-    /// la corona brillando a su alrededor. Cada ala es un ECLIPSE en miniatura:
+    /// La ronda 1 (discos opacos) NO pasó la validación VLM: "se ven como
+    /// globos de jabón, no como alas". REDISEÑO con la técnica de las
+    /// coronas y la primitiva que SÍ lee como ala: la PLUMA.
     ///
-    ///   · El DISCO NEGRO (GlowOrb alpha 1.0): la luna, SÓLIDA, con la
-    ///     silueta recortada en escalón (dos discos por lado: uno grande
-    ///     arriba y uno menor debajo — la forma del ala).
-    ///   · El ANILLO CROMOSFÉRICO: un aro fino blanco-rosado EXACTAMENTE en
-    ///     el borde del disco (la cromosfera solar asomando) — NÍTIDO (0.9).
-    ///   · LOS RAYOS DE LA CORONA: 5-6 penachos blancos de LONGITUDES
-    ///     DESIGUALES radiando de detrás del disco, ONDEANDO cada uno con su
-    ///     propia fase (alfas 0.72/0.55 — se leen a distancia).
-    ///   · El PROMINENTE: una pequeña llamarada rosa asomando por el limbo.
+    /// El look "eclipse total de un ángel caído": SEIS plumas NEGRAS por
+    /// lado (volúmenes azul-noche casi opacos — la luna nueva) cuyas
+    /// PUNTAS arden en blanco-caliente (el anillo cromosférico de la
+    /// totalidad: perlas blancas + filo pálido al final de cada pluma), un
+    /// abanico de RAYOS DE CORONA pálidos radiando por DETRÁS (donde estaría
+    /// el sol tapado) y un pequeño DISCO DE ECLIPSE en el hombro — negro
+    /// con su aro fino blanco — de donde nace todo.
     ///
-    /// v6.12: discos MÁS GRANDES y todo el conjunto al alfa de corona.
-    ///
-    /// Vuelo MAJESTUOSO y lento (0.17 rad/tick): un eclipse no tiene prisa.
+    /// Majestad lenta: las plumas se mecen con fases desfasadas y en reposo
+    /// se pliegan verticalmente tras la espalda.
     /// </summary>
     public static class EclipseWings
     {
-        /// <summary>Rayos de corona por disco.</summary>
-        private const int Rays = 6;
+        /// <summary>Plumas negras por lado.</summary>
+        private const int Feathers = 6;
 
-        /// <summary>Pinta las alas de eclipse en el buffer de VFXCore.</summary>
+        /// <summary>Rayos de corona por lado.</summary>
+        private const int CoronaRays = 5;
+
+        /// <summary>Segmentos del aro del disco del hombro.</summary>
+        private const int ShoulderRimSegs = 12;
+
         public static void Render(ref WingDrawContext ctx)
         {
             if (ctx.Alpha <= 0f) return;
-            float open = MathHelper.Clamp(ctx.Open, 0f, 1.15f);
+            float open = MathHelper.Clamp(ctx.Open, 0f, 1.1f);
 
             float flap = (float)Math.Sin(ctx.FlapPhase) * ctx.FlapAmp;
-            float o = open * VFXCore.Breathe(ctx.Time, 1.2f, 0f, 0.025f);
-            float sweep = MathHelper.Clamp(Math.Abs(ctx.SpeedX) / 9f, 0f, 1f) * 0.40f;
 
             for (int side = -1; side <= 1; side += 2)
             {
-                Vector2 root = ctx.Back + new Vector2(side * 6f, 0f);
+                Vector2 root = ctx.Back + new Vector2(side * 4f, -2f * ctx.GravDir);
 
-                // ============================================================
-                //  LA MEMBRANA DEL ECLIPSE (v6.12 — FIX VLM: "orbs sueltos")
-                // ============================================================
-                // El CUERPO del ala: una cuña de noche violeta que CONECTA la
-                // raíz con los dos lóbulos (mayor arriba-afuera, menor
-                // abajo-afuera). Sin ella los discos leen como orbs flotantes;
-                // con ella, el conjunto lee como ALA NEGRA cuyas puntas son
-                // eclipses. Relleno baricéntrico con quads que se afilan hacia
-                // los extremos.
-                Vector2 tipUp = root + new Vector2(
-                    side * (9f + 13f * o), -(2f + 9f * o) * ctx.GravDir);
-                Vector2 tipDn = root + new Vector2(
-                    side * (20f + 17f * o), (10f + 9f * o) * ctx.GravDir);
-                tipUp.Y += flap * 1.8f * ctx.GravDir;
-                tipDn.Y += flap * 1.8f * ctx.GravDir;
-                for (int m = 0; m < 30; m++)
+                // ============ LOS RAYOS DE CORONA (DETRÁS de las plumas) ============
+                // Trazos pálidos radiando desde el "sol tapado" de la espalda —
+                // se dibujan PRIMERO: nacen por detrás del abanico negro.
+                for (int ray = 0; ray < CoronaRays; ray++)
                 {
-                    float mt = VFXCore.Hash01(side, m, 51);        // a lo largo del ala
-                    float ms = VFXCore.Hash01(side, m, 52);        // entre los dos lóbulos
-                    // Punto interior (más denso hacia la raíz, hueco hacia las puntas).
-                    Vector2 a = Vector2.Lerp(root, tipUp, mt);
-                    Vector2 b = Vector2.Lerp(root, tipDn, mt);
-                    Vector2 p = Vector2.Lerp(a, b, 0.15f + 0.70f * ms);
-                    float taper = 1f - mt * 0.45f;                 // afila hacia las puntas
-                    Color vol = Color.Lerp(new Color(30, 16, 44), new Color(48, 26, 66),
-                        VFXCore.Hash01(side, m, 53));
-                    VFXCore.Quad(p, vol * (0.52f * taper * ctx.Alpha * (0.5f + 0.5f * o)),
-                        new Vector2(13f * taper + 3f, 11f * taper + 3f));
-                }
-                // El FILO SUPERIOR de la membrana: cromosfera pálida de la
-                // raíz al lóbulo mayor (la línea que grita "ala").
-                Vector2 prevL = root;
-                for (int e = 0; e <= 8; e++)
-                {
-                    float t = e / 8f;
-                    Vector2 p = Vector2.Lerp(root, tipUp, t)
-                        + new Vector2(0f, -4.5f * (1f - t * 0.4f) * ctx.GravDir);
-                    Vector2 d = p - prevL;
-                    float rot = d.LengthSquared() > 0.0001f ? (float)Math.Atan2(d.Y, d.X) : 0f;
-                    Color ec = Color.Lerp(new Color(255, 230, 240), new Color(210, 190, 235), t);
-                    VFXCore.Quad(p, ec * (0.85f * ctx.Alpha * (0.5f + 0.5f * o)),
-                        new Vector2(7.5f, 3.4f), rot, VFXCore.SoftGlow);
-                    prevL = p;
+                    float h = VFXCore.Hash01(side * 7, ray * 5 + 1, 3);
+                    // repartidos en el semiplano superior, sesgados afuera
+                    float th = -MathHelper.Pi * 0.88f + ray / (float)(CoronaRays - 1) * MathHelper.Pi * 1.05f +
+                               (h - 0.5f) * 0.38f;
+                    // ondean (viento de la corona)
+                    th += 0.10f * (float)Math.Sin(ctx.Time * 2.1f + ray * 1.9f + h * 6f);
+
+                    float rayLen = MathHelper.Lerp(16f, 34f, h) * (0.45f + 0.55f * open) *
+                                   (0.85f + 0.15f * (float)Math.Sin(ctx.Time * 1.6f + ray * 2.4f));
+
+                    Vector2 dir = new Vector2((float)Math.Cos(th) * side, (float)Math.Sin(th) * ctx.GravDir);
+                    if (dir.LengthSquared() < 0.001f) continue;
+                    dir.Normalize();
+
+                    Vector2 a = root + dir * (9f + 5f * open);
+                    Vector2 b = root + dir * (9f + 5f * open + rayLen);
+                    Vector2 bend = root + dir * (9f + 5f * open + rayLen * 0.5f) +
+                        new Vector2(0f, -2.5f * ctx.GravDir);
+
+                    Vector2 m1 = WingStrokes.Bezier(a, bend, b, 0.35f);
+                    Vector2 m2 = WingStrokes.Bezier(a, bend, b, 0.7f);
+                    Color rc0 = new Color(255, 250, 235);
+                    Color rc1 = new Color(196, 210, 255);
+                    WingStrokes.Stroke(a, m1, 1.8f, rc0, rc0, 0.50f * ctx.Alpha);
+                    WingStrokes.Stroke(m1, m2, 1.5f, rc0, rc1, 0.45f * ctx.Alpha);
+                    WingStrokes.Stroke(m2, b, 1.2f, rc1, rc1, 0.36f * ctx.Alpha);
                 }
 
-                // ============================================================
-                //  LOS DOS DISCOS DEL ECLIPSE (la silueta escalonada del ala)
-                // ============================================================
-                for (int disc = 0; disc < 2; disc++)
+                // ============ EL DISCO DE ECLIPSE EN EL HOMBRO ============
+                // La "luna nueva" de la que nacen las plumas: disco negro
+                // opaco + aro fino blanco (la totalidad en miniatura).
+                float voidR = 6.0f + 1.5f * open;
+                VFXCore.Quad(root, new Color(14, 12, 32) * (0.94f * ctx.Alpha),
+                    new Vector2(voidR * 2.3f, voidR * 2.3f), VFXCore.GlowOrb);
+                for (int s = 0; s < ShoulderRimSegs; s++)
                 {
-                    bool major = disc == 0;
-                    float R = (major ? 19f : 12.5f) * (0.42f + 0.58f * o);
-                    // v6.12 — FIX DE GEOMETRÍA (VLM: "los discos flotan junto
-                    // a la cabeza"): el disco mayor va AFUERA y apenas arriba
-                    // (lóbulo superior de un ala de verdad, no un halo) y el
-                    // menor claramente abajo-afuera (lóbulo inferior).
-                    Vector2 center = root + (major
-                        ? new Vector2(side * (9f + 13f * o) * (1f + sweep * 0.3f),
-                                      -(2f + 9f * o) * ctx.GravDir)
-                        : new Vector2(side * (20f + 17f * o) * (1f + sweep * 0.3f),
-                                      (10f + 9f * o) * ctx.GravDir));
-                    center.Y += flap * 1.8f * ctx.GravDir;
-
-                    // --- LOS RAYOS DE LA CORONA (detrás del disco) ---
-                    // Irregulares como la corona real: longitudes desiguales
-                    // deterministas y ángulos abriéndose en abanico.
-                    for (int r = 0; r < Rays; r++)
-                    {
-                        // Ángulo: abanico abierto hacia fuera y arriba.
-                        float ang = MathHelper.Lerp(0.15f, MathHelper.Pi - 0.15f, r / (float)(Rays - 1));
-                        // En pantalla: 0 = derecha del disco... giramos al espacio del ala.
-                        float dirX = (float)Math.Cos(ang) * side;
-                        float dirY = -(float)Math.Sin(ang) * ctx.GravDir;
-
-                        // Longitud DESIGUAL (los streamers de la corona real).
-                        float baseLen = (R * 1.05f + R * 0.95f * VFXCore.Hash01(side + disc, r, 31))
-                                        * (0.5f + 0.5f * o);
-                        // ONDEO: cada rayo ondea con su propia fase (viento solar).
-                        float wave = VFXCore.Sway(ctx.Time, 1.0f + 0.35f * (r % 3), r * 1.9f + disc * 3.1f);
-                        float len = baseLen * (1f + 0.10f * wave * ctx.GravDir);
-
-                        // El rayo: cinta estrecha alargada desde el borde del disco.
-                        Vector2 rayPos = center + new Vector2(dirX, dirY) * (R + len * 0.5f);
-                        float rayRot = (float)Math.Atan2(dirY, dirX);
-                        float thick = 3.2f * (1f - 0.35f * (r % 2)) * (0.6f + 0.4f * o);
-                        Color rayCol = Color.Lerp(new Color(235, 240, 255), new Color(255, 225, 235),
-                            VFXCore.Hash01(side + disc, r, 32));
-                        VFXCore.Quad(rayPos, rayCol * (0.72f * ctx.Alpha * (0.5f + 0.5f * o)),
-                            new Vector2(len, thick), rayRot, VFXCore.SoftGlow);
-                        // Núcleo del rayo: línea fina más brillante.
-                        VFXCore.Quad(rayPos, new Color(255, 250, 255) * (0.55f * ctx.Alpha * (0.5f + 0.5f * o)),
-                            new Vector2(len * 0.85f, thick * 0.4f), rayRot, VFXCore.SoftGlow);
-                    }
-
-                    // --- EL ANILLO CROMOSFÉRICO (aro fino en el borde) ---
-                    VFXCore.Quad(center, new Color(255, 214, 226) * (0.90f * ctx.Alpha * (0.5f + 0.5f * o)),
-                        VFXCore.RingQuadSize(R * 1.03f), VFXCore.Ring);
-
-                    // --- EL DISCO NEGRO (la luna: encima de todo lo demás) ---
-                    VFXCore.Quad(center, Color.Black * (1.00f * ctx.Alpha),
-                        new Vector2(R * 2f, R * 2f), VFXCore.GlowOrb);
-
-                    // --- EL PROMINENTE (llamarada rosa en el limbo) ---
-                    if (major)
-                    {
-                        float promPhase = ctx.Time * 0.9f;
-                        float prom = 0.5f + 0.5f * (float)Math.Sin(promPhase);
-                        Vector2 promPos = center + new Vector2(
-                            side * R * 0.62f, -R * 0.78f * ctx.GravDir);
-                        VFXCore.Quad(promPos, new Color(255, 140, 170) * (0.75f * prom * ctx.Alpha),
-                            new Vector2(5.5f + 2.5f * prom, 4.0f + 1.8f * prom));
-                    }
+                    float th = s * MathHelper.TwoPi / ShoulderRimSegs;
+                    float th2 = (s + 1) * MathHelper.TwoPi / ShoulderRimSegs;
+                    Vector2 a = root + new Vector2((float)Math.Cos(th), (float)Math.Sin(th) * ctx.GravDir) * (voidR * 1.22f);
+                    Vector2 b = root + new Vector2((float)Math.Cos(th2), (float)Math.Sin(th2) * ctx.GravDir) * (voidR * 1.22f);
+                    float height = 0.5f + 0.5f * (float)Math.Sin(th + MathHelper.PiOver2);
+                    Color rc = Color.Lerp(new Color(205, 216, 255), new Color(255, 253, 248), height);
+                    WingStrokes.Stroke(a, b, MathHelper.Lerp(1.2f, 1.9f, height), rc, rc,
+                        (0.4f + 0.5f * height) * ctx.Alpha);
                 }
 
-                // La NOCHE que llevas encima: un halo de penumbra violácea MUY
-                // sutil alrededor de todo el ala (la luz se apaga cerca de un
-                // eclipse — pintado aditivo oscuro púrpura).
-                Vector2 dusk = root + new Vector2(side * 16f * o, -5f * ctx.GravDir * o);
-                VFXCore.Quad(dusk, new Color(38, 20, 60) * (0.45f * ctx.Alpha * o),
-                    new Vector2(68f * (0.6f + 0.4f * o), 50f * (0.6f + 0.4f * o)));
+                // ============ LAS PLUMAS NEGRAS (la silueta del ala) ============
+                // Seis plumas azul-noche casi opacas; las PUNTAS arden en
+                // blanco (la cromosfera asomando tras la luna negra).
+                for (int f = 0; f < Feathers; f++)
+                {
+                    float u = f / (float)(Feathers - 1);              // 0 arriba → 1 abajo
+                    float baseAng = MathHelper.Lerp(-0.60f, 0.55f, u);
+                    float lag = f * 0.45f;
+                    float flapAng = (float)Math.Sin(ctx.FlapPhase - lag) * ctx.FlapAmp * 0.34f;
+
+                    // reposo: el abanico se pliega casi vertical tras la espalda
+                    float fold = MathHelper.Lerp(0.42f, 1f, open);
+                    float ang = (baseAng + flapAng) * fold;
+
+                    // longitud: la central domina (silueta de ala de verdad)
+                    float L = MathHelper.Lerp(30f, 50f, (float)Math.Sin(u * MathHelper.Pi)) *
+                              (0.50f + 0.50f * open);
+
+                    float sweep = MathHelper.Clamp(ctx.SpeedX * ctx.Direction * 0.04f, -0.45f, 0.45f);
+
+                    Vector2 dir = new Vector2((float)Math.Cos(ang) * side, (float)Math.Sin(ang) * ctx.GravDir);
+                    Vector2 tip = root + dir * L;
+                    float bendAmt = (0.34f + sweep * 0.7f) * fold;
+                    Vector2 bend = root + dir * (L * 0.52f) +
+                        new Vector2(-side * (float)Math.Cos(ang) * L * bendAmt * 0.45f, 0f);
+
+                    // plumas de la luna nueva: raíz negro-azul → punta gris-perla
+                    // (el graduado hace que la pluma se lea aunque sea oscura)
+                    Color cRoot = new Color(26, 22, 54);
+                    Color cMid = new Color(52, 46, 96);
+                    Color cTip = new Color(122, 118, 168);
+                    Color dark = new Color(10, 9, 26);
+
+                    float wRoot = 6.4f + 2.4f * (1f - Math.Abs(u - 0.45f));
+                    WingStrokes.Feather(root, tip, bend, wRoot, 2.0f, cRoot, cMid, cTip, dark,
+                        ctx.Alpha * (0.80f + 0.20f * open), true, 0.80f, 3.0f);
+
+                    // la PUNTA CROMOSFÉRICA: perla blanco-caliente + micro destello
+                    // (el anillo de la totalidad vive en las puntas de las plumas)
+                    float rimTw = 0.75f + 0.25f * (float)Math.Sin(ctx.Time * 2.8f + f * 1.7f + side);
+                    WingStrokes.Pearl(tip, 8.5f, new Color(216, 226, 255),
+                        new Color(255, 253, 250), 0.95f * rimTw * ctx.Alpha);
+                    if (f % 2 == 0)
+                        WingStrokes.Flare4(tip, 9f, 1.8f, new Color(228, 236, 255),
+                            0.5f * rimTw * ctx.Alpha);
+                }
+
+                // ============ EL DESTELLO DE TOTALIDAD sobre el abanico ============
+                // (solo visible al volar: el momento exacto del eclipse)
+                if (open > 0.65f)
+                {
+                    float tPulse = 0.7f + 0.3f * (float)Math.Sin(ctx.Time * 2.4f);
+                    float vis = (open - 0.65f) / 0.35f;
+                    Vector2 crown = root + new Vector2(0f, -26f * ctx.GravDir * open);
+                    WingStrokes.Flare4(crown, 16f, 2.2f, new Color(235, 240, 255),
+                        0.55f * tPulse * vis * ctx.Alpha);
+                }
             }
         }
     }
