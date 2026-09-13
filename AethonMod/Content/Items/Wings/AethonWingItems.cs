@@ -7,19 +7,24 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items.Wings
 {
     /// <summary>
-    /// AethonWingsItem — v6.10 — LA BASE DE LAS 8 ALAS DEL MOD.
+    /// AethonWingsItem — v6.11 — LA BASE DE LAS 8 ALAS DEL MOD.
     ///
     /// Las alas son ahora SPRITES de arte generado y refinado (IA →
-    /// simetría perfecta → contorno Terraria → animación de 7 frames)
-    /// que usan el sistema VANILLA de alas: [AutoloadEquip] reserva el
-    /// slot de equipo, el PNG {Nombre}_Wings.png es la tira de frames y
-    /// tML la corta con Height()/7 (frame 0 reposo, 1 planeo, 2 apex,
-    /// ciclo 0-2-0 al volar — así dibuja DrawPlayer_09_Wings).
+    /// simetría → contorno Terraria → animación de 4 frames) que usan el
+    /// sistema VANILLA de alas: [AutoloadEquip] reserva el slot de equipo,
+    /// el PNG {Nombre}_Wings.png es la tira de frames y tML la corta con
+    /// Height()/4 (frame 0 reposo, ciclo 0-1-2 al volar, frame 2 al
+    /// planear — así dibuja DrawPlayer_09_Wings para alas moddeadas).
     ///
-    /// DESCUBRIMIENTO v6.10 (decompilando DrawPlayer_09_Wings): vanilla
-    /// corta las alas en SIETE frames, no cuatro — v6.06 usó 4 frames y
-    /// por eso las alas salían "mal ubicadas". El pipeline
-    /// tools/gen_ai_wings_v610.py genera las 7.
+    /// FIX v6.11 (el reporte del usuario "mal animadas, fondo no
+    /// transparente"): v6.10 creyó que vanilla cortaba con Height()/7 —
+    /// ¡ese era el caso especial de las alas 22/43/44! El camino POR
+    /// DEFECTO usa num13=4 → las tiras de 7 frames se cortaban en cuartos
+    /// y las alas salían como TRES BANDAS rotas con huecos. Además el
+    /// origen real es (Width/2, Height/8) = CENTRO del frame → la raíz
+    /// del ala vive ahí, y el pipeline v6.11 (gen_ai_wings_v611.py)
+    /// elimina el fondo gris del arte IA por CONECTIVIDAD (flood-fill
+    /// desde los bordes) — el fondo queda 100% transparente.
     ///
     /// Cada subclase conserva SUS estadísticas end-game y tooltips.
     /// </summary>
@@ -79,7 +84,7 @@ namespace AethonMod.Content.Items.Wings
     }
 
     // =====================================================================
-    //  LAS 8 ALAS — arte IA refinado, animación vanilla de 7 frames
+    //  LAS 8 ALAS — arte IA refinado, animación vanilla de 4 frames
     // =====================================================================
 
     /// <summary>

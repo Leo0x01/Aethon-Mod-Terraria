@@ -7501,3 +7501,24 @@ Stage Summary:
 - v6.10 EN GitHub: el agujero carmesí es el VÓRTICE OBLIVION de la referencia real (esfera+gap+anillo+dos cresientes inclinados girando horario, gigante) SIN el crash (contrato de batch a prueba de balas); las 8 alas son sprites de arte IA con animación vanilla de 7 frames
 - Prueba del usuario: git pull → Develop Mods → Build → CrimsonBlackHoleStaff (sin crash al evaporarse, vórtice girando) → las 8 alas nuevas en el inventario (aleteo vanilla al volar)
 - El renderer viejo GR (BlackHolePhysics) vive en git history; las mediciones y el prototipo están en research/oblivion
+
+---
+Task ID: 22
+Agent: Z.ai Code (agente principal)
+Task: v6.11 — FIX de los DOS reportes del usuario con capturas: (1) alas "mal animadas y programadas" + "fondo no transparente", (2) agujero negro "es solo un agujero, no se parece en nada a la referencia"
+
+Work Log:
+- Análisis VLM + numpy de las 2 capturas: las alas doradas aparecían como 3 BANDAS horizontales con huecos y fondos oscuros; el agujero mostraba solo un círculo negro con halo tenue y partículas — el vórtice carmesí entero medía 14 píxeles magenta en la imagen
+- DIAGNÓSTICO ALAS #1 (decompilando DrawPlayer_09_Wings de tModLoader 2026.07.3.0 REAL): v6.10 confundió el caso especial (alas 22: Height()/7) con el camino por defecto — las alas MODDEADAS se cortan con num13=4 → Height()/4, origen (Width/2, Height/8) = CENTRO del frame. Las tiras de 7 frames cortadas en cuartos = fragmentos con huecos = las 3 bandas de la captura. Animación real (Player.cs decompilado): reposo f0, vuelo ciclo 0→1→2 cada 5 ticks, planeo f2 fijo, f3 NUNCA se usa
+- DIAGNÓSTICO ALAS #2: el pipeline v6.10 extraía alfa por umbral de LUMINANCIA (7→42) — los artes IA con fondo GRIS (photonring (25,24,29), fairy, eclipse, comet) quedaban por encima → CAJA RECTANGULAR semitransparente cubriendo el frame (PhotonRingWings 79% opaco). ESE era el "fondo no transparente"
+- FIX ALAS (gen_ai_wings_v611.py): tiras de 4 frames con la RAÍZ en el centro del frame; fondo eliminado por CONECTIVIDAD (flood-fill desde los bordes con distancia de color — mata viñetas) + alfa dura; aleteo sin clipping por ALCANCE REAL por píxel (bug propio encontrado y fixeado: faltaba abs() en sin(ang) para poses negativas); rotación sobre la raíz de verdad (pivote rootY·sq — v6.10 rotaba desplazado); fusión ponderada en la costura; iconos de par completo transparentes
+- DIAGNÓSTICO AGUJERO: TRES bugs en Cap(): (a) dibujaba SoftGlow con (len,wid) como tamaño TOTAL cuando eran las SIGMAS gaussianas del prototipo y SoftGlow concentra el brillo en un núcleo diminuto → cada cápsula brillaba en 2-3px = vórtice microscópico; (b) blending aditivo con premultiply aplicaba el alfa dos veces (rgb·a²); (c) KeyLerp equiespaciado ≠ t-claves explícitas del prototipo calibrado
+- FIX AGUJERO: OblivionBlob.png NUEVO (128×128, perfil gaussiano EXACTO del prototipo horneado en RGB con alfa 255 → premultiply no lo toca y el aditivo queda LINEAL) + CrimsonBlackHoleRenderer.cs reescrito (Cap a tamaño total 2·sigma, tinte m=alfa·1.4 clampeado en RGB, KeyLerp/KeyColor con t-claves explícitas idénticas al prototipo)
+- VERIFICACIÓN: mock_renderer_v611.py = simulación Python EXACTA del C# (muestrea la textura real, quads rotados, tinte clampeado, aditivo) → VLM valida en fondo NEGRO (esfera+anillo+2 crescientes+aguja presentes, EMA radial 32/255 vs 27/255 del prototipo) y en CIELO AZUL (vórtice brillante visible, esfera negra pura); simulación del render vanilla de las alas (frame centrado en el torso) → VLM 8/8 APROBADAS (anclaje, forma, transparencia, aleteo)
+- Física de juego, lente, partículas y contrato de batch (fix del crash v6.10) INTACTOS; compilación contra tModLoader v2026.07.3.0 REAL: Build succeeded · 0 errores · 0 warnings
+- Docs: build.txt 6.11, CHANGES.md (entrada v6.11 secciones A-B), research/renderer_v611 al repo
+
+Stage Summary:
+- v6.11: LAS ALAS usan el corte vanilla correcto (4 frames, raíz en el centro, fondo 100% transparente, aleteo sin clipping) y EL AGUJERO NEGRO por fin dibuja el vórtice Oblivion completo (esfera + gap + anillo + dos crescientes gigantes girando) — el mismo arte calibrado contra la referencia que estaba siendo dibujado microscópico
+- Prueba del usuario: git pull → Develop Mods → Build → (1) equipar cada ala: reposo plegadas, vuelo con aleteo vanilla 0-1-2, planeo con f2 abierta, SIN cajas de fondo; (2) CrimsonBlackHoleStaff: bola negra + anillo + hojas de plasma carmesí rodeándola girando en sentido horario, GIGANTE
+- Los PNGs de las alas miden ahora 138-146 × 416-512 (4 frames de 104-128)

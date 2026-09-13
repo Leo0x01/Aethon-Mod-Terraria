@@ -1,5 +1,95 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.11 — EL VÓRTICE INVISIBLE ARREGLADO + LAS ALAS CON EL CORTE VANILLA CORRECTO (4 frames)
+
+**Reporte del usuario**: "el diseño de las alas se ve bien, pero están mal
+animadas y programadas… además debes crearlas con fondo transparente. En
+cuanto al agujero negro, es solo un agujero, no se parece en nada a la
+imagen de referencia" (con dos capturas: las alas como 3 bandas con fondos
+oscuros, y el agujero como un simple círculo negro con rayos).
+
+### A. LAS ALAS — DOS BUGS REALES (ambos visibles en la captura)
+
+**Bug A1 — el troceado**: v6.10 creyó (decompilando) que vanilla corta las
+alas con `Height()/7`. ¡Era el caso especial de las alas 22/43/44! El
+camino POR DEFECTO de `DrawPlayer_09_Wings` usa `num13 = 4` → las alas
+moddeadas se cortan con **Height()/4** y origen **(Width/2, Height/8)** =
+centro del frame. Las tiras de 7 frames cortadas en cuartos mostraban
+FRAGMENTOS de 2-3 alas con huecos (exactamente las "3 bandas" de la
+captura). La animación real (Player.cs decompilado): reposo = frame 0,
+vuelo = ciclo 0→1→2 cada 5 ticks, planeo = frame 2 fijo; el frame 3 nunca
+se usa en alas normales.
+
+**Bug A2 — el fondo no transparente**: el pipeline v6.10 extraía el alfa
+con un umbral de LUMINANCIA (7→42), pero los artes IA con fondo GRIS
+oscuro (photonring (25,24,29), fairy (22,14,13), eclipse (14,15,20),
+comet (21,6,9)) quedaban por encima → una CAJA RECTANGULAR semitransparente
+cubría todo el frame (PhotonRingWings tenía el 79% del sprite opaco).
+
+**Fix (tools/gen_ai_wings_v611.py)**:
+  · **4 frames** (f0 plegada · f1 media · f2 apertura total · f3 copia de
+    la f1) con la RAÍZ en el CENTRO del frame — el origen exacto de
+    vanilla. Tiras 138-146 × 416-512.
+  · **Fondo eliminado por CONECTIVIDAD**: color de fondo = mediana del
+    borde; región de fondo = flood-fill desde los 4 bordes a través de
+    píxeles con distancia de color < 58 (mata viñetas y gradientes);
+    fuera de esa región alfa = smoothstep(dist, 22, 58) + cierre
+    morfológico + relleno de huecos. Fondo 100% transparente (alfa dura:
+    <0.03 → 0). PhotonRing baja del 79% al 55% de opacidad (solo alas).
+  · **Aleteo sin clipping**: el margen se calcula con el ALCANCE REAL por
+    píxel (reach = |dy|·sq·cos(ang) + |dx|·|sin(ang)|; ojo al abs() — el
+    v6.11 inicial sin él subestimaba las poses de ángulo negativo) y el
+    arte se escala hasta caber — las alas quedan GRANDES y las puntas
+    nunca tocan el borde del frame (verificado 8/8).
+  · **Rotación sobre la raíz de verdad**: el squash se aplica al
+    contenido y el pivote vive en rootY·sq (el v6.10 rotaba alrededor de
+    rootY sin squash — desplazaba el pivote). Mitades compuestas con
+    máscara dura en la costura + fusión ponderada → la unión de la raíz
+    es perfecta y las puntas divergen = el aleteo.
+  · Iconos regenerados como PAR COMPLETO (~30×22, transparentes).
+  · Simulación del render vanilla (frame centrado en el torso del
+    jugador) validada con visión AI: 8/8 APROBADAS — anclaje, forma de
+    ala, transparencia y progresión del aleteo.
+
+### B. EL AGUJERO — EL VÓRTICE ERA INVISIBLE (14 píxeles magenta)
+
+La captura del usuario mostraba SOLO la esfera negra + el halo tenue + el
+lens + partículas: **el vórtice carmesí entero medía 14 píxeles magenta**
+en la imagen. Tres bugs del renderer v6.10, todos en `Cap()`:
+
+  · **TAMAÑO**: dibujaba SoftGlow con (len, wid) como TAMAÑO TOTAL del
+    quad, pero esos números son las SIGMAS gaussianas del prototipo
+    (add_blob es visible hasta ~1.5×sigma) y SoftGlow concentra su brillo
+    en un núcleo diminuto (alfa 134 a r=6/32) → cada cápsula brillaba en
+    2-3px. El disco negro sí se veía porque usa 2r explícito.
+  · **ALFA²**: con texturas premultiplicadas + Additive(SourceAlpha, One)
+    el color `c*alpha` aplicaba el alfa DOS veces (rgb·a·a) → aún más
+    tenue.
+  · **KeyLerp equiespaciado**: las tablas calibradas del prototipo usan
+    t-claves explícitas (0.25, 0.45, 0.65…) — el v6.10 las leía como
+    equiespaciadas y distorsionaba la geometría de las hojas.
+
+**Fix (CrimsonBlackHoleRenderer.cs v6.11 + OblivionBlob.png nuevo)**:
+  · Textura **OblivionBlob.png** (128×128): el perfil gaussiano EXACTO del
+    prototipo horneado en el RGB (g = (exp(-3.6d²)+0.4·exp(-1.2d²))·
+    (1-d²)²/1.4), alfa 255 en toda la textura → el premultiply de tML no
+    la toca y el aditivo queda LINEAL.
+  · `Cap()` dibuja el quad con TAMAÑO TOTAL = (2·sigma, 2·sigma): d =
+    distancia/sigma reproduce add_blob píxel a píxel; el color lleva el
+    brillo m=alfa·1.4 en el RGB con alfa 255 (el mismo clip del
+    acumulador del prototipo).
+  · `KeyLerp`/`KeyColor` con T-CLAVES explícitas — geometría idéntica al
+    prototipo calibrado contra la referencia.
+  · Simulación Python EXACTA del código C# (mock_renderer_v611.py:
+    muestreo de la textura real, quads rotados, tinte clampeado,
+    composición aditiva): validada con visión AI sobre fondo NEGRO
+    (esfera + anillo + dos crescientes + aguja — EMA radial 32/255 vs
+    27/255 del prototipo) y sobre CIELO AZUL (el vórtice brilla, la
+    esfera sigue siendo negra pura, sin partes invisibles).
+  · La física de juego, la lente gravitacional, las partículas y el
+    contrato de batch (cerrado→cerrado, el fix del crash v6.10) quedan
+    INTACTOS.
+
 ## Commit v6.10 — EL AGUJERO "OBLIVION" DE LA REFERENCIA REAL + TODAS LAS ALAS REHECHAS CON ARTE IA
 
 **Reporte del usuario**: "el agujero negro sigue sin ser exacto y además dio

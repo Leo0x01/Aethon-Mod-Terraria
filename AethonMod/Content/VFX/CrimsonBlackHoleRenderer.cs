@@ -8,25 +8,39 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// CrimsonBlackHoleRenderer — v6.10 — EL AGUJERO NEGRO "OBLIVION".
+    /// CrimsonBlackHoleRenderer — v6.11 — EL AGUJERO NEGRO "OBLIVION".
     ///
     /// La referencia ORIGINAL del usuario (Reddit: Ancients Awakened —
-    /// Regicide, Oblivion God of the Void) NO es un Gargantua de disco
-    /// delgado: es un VÓRTICE DE PLASMA carmesí con:
-    ///   · Esfera negra compacta con un GAP oscuro (el brillo NO la toca).
-    ///   · Anillo interior 360° a ~1.5R con borde interno blanco-caliente.
-    ///   · UNA HOJA GRUESA EN CRESCIENTE que barre POR ARRIBA
-    ///     (O→NO→N→NNE) y se estira en una AGUJA LARGA hasta ~5.9R.
-    ///   · Un segundo cresiente BAJO (ESE→S→SSW) cuyo borde exterior
-    ///     llega a ~6.3R por el sur.
-    ///   · TODO el vórtice INCLINADO (SW→NE, ~24°) y girando HORARIO.
-    ///   · Hotspot blanco-amarillo en NNE, chispas, mechones lejanos,
-    ///     rayos azul-violeta RAMIFICADOS dentro de la esfera.
+    /// Regicide, Oblivion God of the Void): VÓRTICE DE PLASMA carmesí con
+    /// esfera negra compacta + GAP, anillo interior 360° a ~1.5R, UNA HOJA
+    /// GRUESA EN CRESCIENTE que barre por ARRIBA (O→NO→N→NNE) con aguja
+    /// hasta ~5.9R, un cresiente BAJO (ESE→S→SSW) hasta ~6.3R, todo
+    /// INCLINADO (SW→NE ~24°) girando HORARIO, hotspot blanco-amarillo,
+    /// chispas y rayos azul-violeta ramificados dentro de la esfera.
     ///
-    /// Calibrado con el prototipo tools/mock_oblivion_v610.py contra
-    /// mediciones numpy de la referencia (perfil radial EMA 27/255 y
-    /// extensión angular por cuadrantes emparejada: aguja NNE 6.0R vs
-    /// 6.1R, sur 5.7R vs 6.4R, oeste 3.2R vs 2.3R).
+    /// v6.11 — FIX DEL VÓRTICE INVISIBLE (el reporte del usuario: "es solo
+    /// un agujero, no se parece en nada a la referencia"): el v6.10 dibujaba
+    /// SoftGlow con (len, wid) como TAMAÑO TOTAL del quad, pero esos números
+    /// son las SIGMAS gaussianas del prototipo (add_blob: visible hasta
+    /// ~1.5×sigma) y SoftGlow concentra su brillo en un núcleo diminuto →
+    /// cada cápsula brillaba en 2-3px y el vórtice entero era microscópico.
+    /// Además el blending aditivo (SourceAlpha, One) multiplicaba el alfa
+    /// DOS veces (color premultiplicado × alfa del color) → alfa² → aún más
+    /// tenue; y KeyLerp asumía tablas equiespaciadas cuando el prototipo
+    /// calibrado usa t-claves explícitas (0.25, 0.45, 0.65…).
+    ///
+    /// EL MÉTODO NUEVO (calibrado 1:1 contra el prototipo validado con la
+    /// referencia, EMA 27/255):
+    ///   · Textura OblivionBlob.png: perfil gaussiano EXACTO del prototipo
+    ///     horneado en el RGB (g = (exp(-3.6d²)+0.4·exp(-1.2d²))·ventana),
+    ///     alpha=255 en toda la textura → el premultiply de tML no la toca
+    ///     y el aditivo queda LINEAL en el perfil.
+    ///   · Cap/Quad dibujan el quad con TAMAÑO TOTAL = (2·sigma, 2·sigma):
+    ///     d = distancia/sigma reproduce add_blob píxel a píxel.
+    ///   · Color con alfa 255 y brillo m=alfa·1.4 en el RGB (clampeado a
+    ///     255 — el mismo clip del acumulador del prototipo).
+    ///   · KeyLerp con T-CLAVES explícitas (idéntico al smooth() del
+    ///     prototipo) y KeyColor lineal entre claves (idéntico color_ramp).
     ///
     /// CONTRATO DE BATCH (v6.10, a prueba de balas): Draw() exige el
     /// SpriteBatch CERRADO y lo deja CERRADO. Nunca llama End() sobre un
@@ -52,11 +66,16 @@ namespace AethonMod.Content.VFX
         private const float SwirlSpeed = 0.16f;
 
         // ---------------- HOJA SUPERIOR (por ARRIBA) ------------------------
+        // Tablas con T-CLAVES explícitas — IGUAL que el prototipo.
         private static readonly float[] BladeT = { 0.00f, 1.00f };
         private static readonly float[] BladeTh = { 175f, 352f };      // grados: O→NO→N→NNE
+        private static readonly float[] BladeRoT = { 0.00f, 0.25f, 0.45f, 0.65f, 0.80f, 0.90f, 1.00f };
         private static readonly float[] BladeRo = { 2.30f, 3.30f, 3.00f, 3.30f, 3.20f, 4.20f, 5.90f };
+        private static readonly float[] BladeTkT = { 0.00f, 0.30f, 0.55f, 0.80f, 1.00f };
         private static readonly float[] BladeTk = { 1.00f, 0.80f, 0.55f, 0.32f, 0.07f };
+        private static readonly float[] BladeBriT = { 0.00f, 0.30f, 0.72f, 0.86f, 1.00f };
         private static readonly float[] BladeBri = { 0.60f, 0.80f, 1.00f, 0.78f, 0.52f };
+        private static readonly float[] BladeColT = { 0.00f, 0.30f, 0.55f, 0.72f, 0.84f, 0.93f, 1.00f };
         private static readonly Color[] BladeCol =
         {
             new Color(255, 42, 122), new Color(255, 80, 160),
@@ -68,9 +87,13 @@ namespace AethonMod.Content.VFX
         // ---------------- CRESCIENTE INFERIOR (por DEBAJO) ------------------
         private static readonly float[] LowerT = { 0.00f, 1.00f };
         private static readonly float[] LowerTh = { 20f, 205f };       // ESE→S→SSW
+        private static readonly float[] LowerRoT = { 0.00f, 0.25f, 0.50f, 0.65f, 0.80f, 1.00f };
         private static readonly float[] LowerRo = { 1.95f, 3.20f, 6.30f, 6.00f, 4.80f, 2.60f };
+        private static readonly float[] LowerTkT = { 0.00f, 0.35f, 0.60f, 0.85f, 1.00f };
         private static readonly float[] LowerTk = { 0.65f, 0.50f, 0.35f, 0.18f, 0.08f };
+        private static readonly float[] LowerBriT = { 0.00f, 0.30f, 0.50f, 0.75f, 1.00f };
         private static readonly float[] LowerBri = { 0.60f, 0.78f, 0.82f, 0.50f, 0.22f };
+        private static readonly float[] LowerColT = { 0.00f, 0.30f, 0.50f, 0.75f, 1.00f };
         private static readonly Color[] LowerCol =
         {
             new Color(255, 60, 140), new Color(255, 82, 172),
@@ -82,11 +105,12 @@ namespace AethonMod.Content.VFX
         //  TEXTURAS
         // ==================================================================
 
-        private static Asset<Texture2D> _softGlow;
+        private static Asset<Texture2D> _blob;
         private static Asset<Texture2D> _blackDisk;
 
-        private static Texture2D SoftGlow =>
-            (_softGlow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
+        /// <summary>El blob gaussiano del prototipo (perfil en RGB, alfa 255).</summary>
+        private static Texture2D Blob =>
+            (_blob ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/OblivionBlob")).Value;
 
         private static Texture2D BlackDisk =>
             (_blackDisk ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
@@ -102,24 +126,36 @@ namespace AethonMod.Content.VFX
             return t * t * (3f - 2f * t);
         }
 
-        /// <summary>Interpolación por segmentos suavizada: t en [0,1] sobre
-        /// una tabla de valores equiespaciados (calibradas del prototipo).</summary>
-        private static float KeyLerp(float[] keys, float t)
+        /// <summary>Interpolación por claveframes con T-CLAVES explícitas y
+        /// smoothstep entre tramos — IGUAL al smooth() del prototipo.</summary>
+        private static float KeyLerp(float[] ts, float[] vs, float t)
         {
-            int n = keys.Length - 1;
-            float u = MathHelper.Clamp(t, 0f, 1f) * n;
-            int i = (int)u;
-            if (i >= n) return keys[n];
-            return MathHelper.Lerp(keys[i], keys[i + 1], SmoothStep(0f, 1f, u - i));
+            int n = ts.Length;
+            if (t <= ts[0]) return vs[0];
+            if (t >= ts[n - 1]) return vs[n - 1];
+            for (int i = 0; i < n - 1; i++)
+            {
+                if (t >= ts[i] && t <= ts[i + 1])
+                    return MathHelper.Lerp(vs[i], vs[i + 1],
+                        SmoothStep(ts[i], ts[i + 1], t));
+            }
+            return vs[n - 1];
         }
 
-        private static Color KeyColor(Color[] keys, float t)
+        /// <summary>Interpolación de COLOR lineal entre claveframes con
+        /// t-claves explícitas — IGUAL al color_ramp() del prototipo.</summary>
+        private static Color KeyColor(float[] ts, Color[] vs, float t)
         {
-            int n = keys.Length - 1;
-            float u = MathHelper.Clamp(t, 0f, 1f) * n;
-            int i = (int)u;
-            if (i >= n) return keys[n];
-            return Color.Lerp(keys[i], keys[i + 1], MathHelper.Clamp(u - i, 0f, 1f));
+            int n = ts.Length;
+            if (t <= ts[0]) return vs[0];
+            if (t >= ts[n - 1]) return vs[n - 1];
+            for (int i = 0; i < n - 1; i++)
+            {
+                if (t >= ts[i] && t <= ts[i + 1])
+                    return Color.Lerp(vs[i], vs[i + 1],
+                        MathHelper.Clamp((t - ts[i]) / (ts[i + 1] - ts[i]), 0f, 1f));
+            }
+            return vs[n - 1];
         }
 
         /// <summary>Hash determinista [0,1).</summary>
@@ -142,25 +178,31 @@ namespace AethonMod.Content.VFX
             return center + new Vector2(x * ca - y * sa, x * sa + y * ca);
         }
 
-        /// <summary>Cápsula elíptica aditiva.</summary>
+        /// <summary>
+        /// Cápsula elíptica aditiva — v6.11: (len, wid) son las SIGMAS
+        /// gaussianas del prototipo → el quad se dibuja con TAMAÑO TOTAL
+        /// (2·len, 2·wid) para que el perfil del blob reproduzca add_blob.
+        /// El color lleva el brillo m=alfa·1.4 en el RGB (con alfa 255):
+        /// blending aditivo LINEAL, sin el alfa² del v6.10.
+        /// </summary>
         private static void Cap(Vector2 pos, float len, float wid, float rot, Color c, float alpha)
         {
             if (alpha <= 0.004f) return;
-            Texture2D tex = SoftGlow;
+            Texture2D tex = Blob;
             Vector2 texSize = new Vector2(tex.Width, tex.Height);
-            Main.spriteBatch.Draw(tex, pos, null, c * alpha, rot,
-                texSize * 0.5f, new Vector2(len, wid) / texSize,
+            float m = alpha * 1.4f;
+            var tint = new Color(
+                (byte)Math.Min(255f, c.R * m),
+                (byte)Math.Min(255f, c.G * m),
+                (byte)Math.Min(255f, c.B * m), 255);
+            Main.spriteBatch.Draw(tex, pos, null, tint, rot,
+                texSize * 0.5f, new Vector2(len * 2f, wid * 2f) / texSize,
                 SpriteEffects.None, 0f);
         }
 
-        /// <summary>Cuadro suave estirado/rotado.</summary>
-        private static void Quad(Vector2 pos, Vector2 size, float rot, Color c, float alpha)
-        {
-            Texture2D tex = SoftGlow;
-            Main.spriteBatch.Draw(tex, pos, null, c * alpha, rot,
-                tex.Size() * 0.5f, size / tex.Size(),
-                SpriteEffects.None, 0f);
-        }
+        /// <summary>Cuadro suave estirado/rotado (sigmas como Cap).</summary>
+        private static void Quad(Vector2 pos, Vector2 sigma, float rot, Color c, float alpha)
+            => Cap(pos, sigma.X, sigma.Y, rot, c, alpha);
 
         private static void BeginAdditive()
         {
@@ -190,7 +232,6 @@ namespace AethonMod.Content.VFX
             try
             {
                 // ============ 1. HALO AMBIENTE (cálido, inclinado) ============
-                BeginAdditive();
                 Quad(center, new Vector2(5.6f * r, 3.7f * r * Squash), Tilt,
                     new Color(125, 18, 55), 0.13f);
                 Quad(center, new Vector2(3.3f * r, 2.3f * r * Squash), Tilt,
@@ -218,19 +259,23 @@ namespace AethonMod.Content.VFX
 
                 // ============ 3. LAS DOS HOJAS DEL VÓRTICE ============
                 DrawBlade(center, r, rot, time, seed,
-                    BladeT, BladeTh, BladeRo, BladeTk, BladeBri, BladeCol, 112, 1.0f, 0.30f);
+                    BladeT, BladeTh, BladeRoT, BladeRo, BladeTkT, BladeTk,
+                    BladeBriT, BladeBri, BladeColT, BladeCol, 112, 1.0f, 0.30f);
                 DrawBlade(center, r, rot, time, seed,
-                    LowerT, LowerTh, LowerRo, LowerTk, LowerBri, LowerCol, 72, 0.65f, 0.22f);
+                    LowerT, LowerTh, LowerRoT, LowerRo, LowerTkT, LowerTk,
+                    LowerBriT, LowerBri, LowerColT, LowerCol, 72, 0.65f, 0.22f);
 
                 // ============ 4. HOTSPOT + nudo NNE + aguja + mechones ============
-                Vector2 hx = BladePoint(BladeT, BladeTh, BladeRo, BladeTk, 0.72f, rot, r, center, out float hTh, out _, out _);
+                Vector2 hx = BladePoint(BladeT, BladeTh, BladeRoT, BladeRo, BladeTkT, BladeTk,
+                    0.72f, rot, r, center, out float hTh);
                 Cap(hx, 1.5f * r, 0.85f * r, hTh, new Color(255, 240, 168), 0.85f);
                 Cap(hx, 0.65f * r, 0.40f * r, hTh, new Color(255, 253, 232), 1.10f);
                 // nudo caliente NNE a 3R (medido: (255,246,137) a 355°, 3R)
                 Vector2 knot = Pol(3.0f, MathHelper.ToRadians(355f), r, center);
                 Cap(knot, 0.55f * r, 0.34f * r, MathHelper.ToRadians(355f), new Color(255, 246, 150), 0.55f);
                 // chispa de la aguja
-                Vector2 tip = BladePoint(BladeT, BladeTh, BladeRo, BladeTk, 0.97f, rot, r, center, out float tTh, out _, out _);
+                Vector2 tip = BladePoint(BladeT, BladeTh, BladeRoT, BladeRo, BladeTkT, BladeTk,
+                    0.97f, rot, r, center, out float tTh);
                 Cap(tip, 0.4f * r, 0.14f * r, tTh, new Color(255, 210, 170), 0.5f);
                 // mechones lejanos NNE (hasta 6.5R)
                 for (int wI = 0; wI < 3; wI++)
@@ -293,7 +338,7 @@ namespace AethonMod.Content.VFX
                 {
                     float tw = 0.5f + 0.5f * (float)Math.Sin(time * (5f + k * 1.7f) + k * 2.9f);
                     if (tw < 0.55f) continue;
-                    float th = MathHelper.ToRadians(KeyLerp2(BladeT, BladeTh, sparkT[k])) + rot;
+                    float th = MathHelper.ToRadians(KeyLerp(BladeT, BladeTh, sparkT[k])) + rot;
                     Vector2 sp = Pol(sparkR[k], th, r, center);
                     Cap(sp, 2.6f, 2.6f, 0f, new Color(255, 252, 222), 1.0f * tw);
                     Cap(sp, 5.5f, 5.5f, 0f, new Color(255, 238, 165), 0.34f * tw);
@@ -312,44 +357,39 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        /// <summary>Interpola la tabla de ángulos (grados) de una hoja.</summary>
-        private static float KeyLerp2(float[] ts, float[] vals, float t)
-        {
-            // tablas lineales de 2 puntos
-            float u = MathHelper.Clamp(t, 0f, 1f);
-            return MathHelper.Lerp(vals[0], vals[1], u);
-        }
-
         /// <summary>Punto central de la sección t de una hoja.</summary>
-        private static Vector2 BladePoint(float[] ts, float[] ths, float[] ros, float[] tks,
-            float t, float rot, float r, Vector2 center, out float theta, out float rm, out float tk)
+        private static Vector2 BladePoint(float[] ts, float[] ths, float[] roT, float[] ros,
+            float[] tkT, float[] tks, float t, float rot, float r, Vector2 center, out float theta)
         {
-            float ro = KeyLerp(ros, t);
-            tk = KeyLerp(tks, t);
-            rm = ro - tk * 0.5f;
-            theta = MathHelper.ToRadians(KeyLerp2(ts, ths, t)) + rot;
+            float ro = KeyLerp(roT, ros, t);
+            float tk = KeyLerp(tkT, tks, t);
+            float rm = ro - tk * 0.5f;
+            theta = MathHelper.ToRadians(KeyLerp(ts, ths, t)) + rot;
             return Pol(rm, theta, r, center);
         }
 
         /// <summary>Una hoja del vórtice: cápsulas + filamentos + colas.</summary>
         private static void DrawBlade(Vector2 center, float r, float rot, float time, int seed,
-            float[] ts, float[] ths, float[] ros, float[] tks, float[] bris, Color[] cols,
+            float[] ts, float[] ths, float[] roT, float[] ros, float[] tkT, float[] tks,
+            float[] briT, float[] bris, float[] colT, Color[] cols,
             int nSeg, float filamentBoost, float jitter)
         {
             for (int i = 0; i < nSeg; i++)
             {
                 float t = i / (float)(nSeg - 1);
                 float jr = (Hash01(seed, i * 7 + 1, 13) - 0.5f) * jitter;
-                Vector2 pos = BladePoint(ts, ths, ros, tks, t, rot, r, center, out float th, out float rm, out float tk);
-                rm += jr * 0.5f;
+                Vector2 pos = BladePoint(ts, ths, roT, ros, tkT, tks, t, rot, r, center, out float th);
+                float ro = KeyLerp(roT, ros, t);
+                float tk = KeyLerp(tkT, tks, t);
+                float rm = ro - tk * 0.5f + jr * 0.5f;
                 pos = Pol(rm, th, r, center);
                 // tangente numérica
                 float eps = 1.5f / nSeg;
-                Vector2 pos2 = BladePoint(ts, ths, ros, tks, Math.Min(t + eps, 1f), rot, r, center, out _, out _, out _);
+                Vector2 pos2 = BladePoint(ts, ths, roT, ros, tkT, tks, Math.Min(t + eps, 1f), rot, r, center, out _);
                 float rotA = (float)Math.Atan2(pos2.Y - pos.Y, pos2.X - pos.X);
                 float segLen = Math.Max(Vector2.Distance(pos, pos2) * 1.55f, 3f);
-                Color col = KeyColor(cols, t);
-                float bri = KeyLerp(bris, t);
+                Color col = KeyColor(colT, cols, t);
+                float bri = KeyLerp(briT, bris, t);
                 // trazos de pincel
                 float stroke = 0.70f + 0.30f * (float)Math.Sin(21f * t + time * 3.1f + Math.Sin(7.7f * t) * 2f);
                 stroke *= 0.90f + 0.10f * Hash01(seed, i * 31 + 5, 77);
@@ -369,7 +409,6 @@ namespace AethonMod.Content.VFX
                 // COLAS DE VELOCIDAD del borde exterior (tramo externo)
                 if (t > 0.5f && t < 0.95f && Hash01(seed, i * 13 + 3, 91) > 0.62f)
                 {
-                    float ro = KeyLerp(ros, t);
                     float trailR = ro + 0.18f + 0.5f * Hash01(seed, i, 55);
                     float trailTh = th + 0.10f;
                     for (int s = 0; s < 3; s++)
