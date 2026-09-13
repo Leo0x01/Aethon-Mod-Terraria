@@ -7448,3 +7448,30 @@ Work Log:
 Stage Summary:
 - v6.08 EN GitHub (main): el agujero carmesí tiene el núcleo compacto + anillo pegado + RASTRO alargado diagonal de las referencias (mismo tamaño total, física intacta); las 8 alas son 100% luz procedural con personalidades de vuelo distintas (mariposa asimétrica, hada vibrante, cometa sensible a la velocidad...)
 - Prueba del usuario: Develop Mods → Build → CrimsonBlackHoleStaff (núcleo pequeño + rastro largo fino) → entrar al mundo → las 8 alas nuevas en el inventario → probar cada una (vuelo, reposo, planeo, caída + flotado en mariposa/hada)
+
+---
+Task ID: 20
+Agent: Z.ai Code (agente principal)
+Task: v6.09 — EL AGUJERO NEGRO CARMESÍ "SUPER IGUAL" A LA REFERENCIA (feedback: "todavía no se parece; el disco debe ser más denso y rodear por completo a la bola negra; esta de un negro profundo con bordes de color; investiga más, investiga las matemáticas, crea otra librería con las físicas correctas; si tiene que ser gigante que así sea")
+
+Work Log:
+- Feedback del usuario analizado + VLM sobre la nueva referencia (pasted_image_1789282941428.png): esfera negra pura #000000, anillo de fotones INTENSO abrazando la silueta, disco magenta/neón que RODEA la bola (cruce frontal abajo + arco visible arriba), pico de brillo a radio medio, rayos cian radiales, gigante
+- INVESTIGACIÓN web adicional: James et al. 2015 (DNGR/Interstellar, arXiv:1502.03808 — disco como anillo plano inclinado + imagen secundaria), Luminet 1979 (imagen directa + secundaria), sombra (√27/2)·r_s confirmada (UNLV). CLAVE HALLADA: el shader de marcha de rayos produce un TORO genérico; la referencia es un DISCO DELGADO INCLINADO con OCLUSIÓN geométrica (lado cercano delante, lejano detrás) — por eso "todavía no se parecía"
+- Mediciones numpy píxel-exactas de la referencia (R_sh≈14px): banda de fotones sólida 1.16–1.49·R_sh (blanco 255 con doble pico), eco lensado 1.68–1.96, foso 2.1–2.9, borde interno caliente 2.2 SOLO lado cercano (cruza la esfera a +0.76·R_sh), pico 4.6 (magenta 255,105,255), fade 6.5, elipse b/a=0.345, Doppler izq +, 18 rayos cian; perfiles alfa de SoftGlow/Ring/GlowRay medidos para el port fiel
+- PROTOTIPO Python (tools/mock_blackhole_v609.py) con las TEXTURAS REALES del mod + muestreo bilinear + supersampling 2× (simula el LinearClamp de la GPU): 8 rondas de calibración (VLM + numérica) → error medio absoluto 17/255 en el perfil radial de 23 puntos (pico mock 212 vs ref 207); fixes clave: lado lejano nace a 2.7 (el "foso" de la referencia), cápsulas solapadas ×2.2 desalineadas por anillo (sin rayos de sol), banda de fotones como rungs solapados, BlackDisk.png NUEVO (núcleo opaco negro + borde 4px), rayos cian desplazados fuera de la esfera (el centro de GlowRay queda oculto tras la bola)
+- LA OTRA LIBRERÍA (petición textual): Content/VFX/BlackHolePhysics.cs (matemática GR pura: r_s, esfera de fotones 1.5 r_s, sombra (√27/2) r_s, ISCO 3 r_s, Kepler v=√(GM/r) y ω∝r^-3/2, Doppler δ y δ³, Shakura–Sunyaev T∝r^-3/4 e I∝r^-3, redshift g=√(1-r_s/r), proyección del disco inclinado + test cercano/lejano + test de oclusión por la sombra) + Content/VFX/CrimsonBlackHoleRenderer.cs (el render analítico por 7 capas calibrado 1:1 con el prototipo)
+- CrimsonBlackHoleProjectile REESCRITO: DrawCoreVisuals → CrimsonBlackHoleRenderer.Draw (sin shader: es 100% sprites, imposible que falle); física de juego INTACTA (copia exacta); partículas re-escaladas a la banda del disco nuevo (2.3–5.8·R_sh con ω kepleriano y la MISMA elipse 0.345); iluminación en 3 puntos; aura 2.2×→4.6× (abraza la mitad interior del disco gigante); lente con multiplicador propio 2.9× (BlackHoleLensSystem parcheado); tooltips del staff actualizados
+- ESCALA GIGANTE (autorizada): sombra 38px de radio (esfera 76px), disco 494px de envergadura a escala 1
+- Verificación crítica del pipeline: decompilado ReLogic PngReader del tML real → PreMultiplyAlpha confirmado (las texturas se cargan premultiplicadas) → el blending aditivo del renderer replica EXACTAMENTE el modelo del prototipo (contribución = alfa·color); bugs de Begin/End dobles corregidos (contrato: solo el primer pase cierra el batch del llamador)
+- Compilación contra tModLoader v2026.07.3.0 REAL: Build succeeded · 0 errores · 0 warnings
+- Docs: build.txt 6.09, CHANGES.md (entrada v6.09 secciones A-D), research/blackhole/MATEMATICA_AGUJEROS_NEGROS.md §v6.09 (geometría de oclusión + mediciones + fuentes)
+
+Test:
+- Compilación: 0 errores / 0 warnings contra tML v2026.07.3.0 real (proyecto /home/z/.verify)
+- Prototipo validado numéricamente: EMA 17/255 vs referencia; animación viva (delta entre frames > 0)
+- PENDIENTE (como siempre): la verificación en juego la hace el usuario (Develop Mods → Build → CrimsonBlackHoleStaff)
+
+Next:
+- El usuario prueba el agujero: bola negra profunda + anillo blanco denso + disco magenta que la rodea por completo (cruce frontal abajo, arco lejano arriba) + rayos cian + lente gigante
+- Siguen pendientes de verificación en juego del usuario: las 8 alas de la v6.08
+- Si el disco necesita ajuste fino (brillo/densidad/colores), los PARÁMETROS viven en CrimsonBlackHoleRenderer (calibrados con el prototipo: tools/mock_blackhole_v609.py)

@@ -45,9 +45,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "T", "[c/FF0055:═══ AGUJERO NEGRO DEL VACÍO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:EXACTAMENTE como la referencia: lente que distorsiona el propio fondo del juego alrededor del horizonte de sucesos]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Disco de acreción CARMESÍ-FUCSIA de materia viva con DOPPLER BEAMING (el lado que se acerca brilla ~δ³ más) + anillo de fotones ROSA PÁLIDO + lente que distorsiona el fondo alrededor del horizonte]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Atrae enemigos en un radio de 450px; su AURA DE DAÑO crece con él (35%→65% del daño) y machaca más rápido cuanto más cerca del centro]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:EXACTAMENTE como la referencia — SUPER IGUAL: esfera de NEGRO PROFUNDO con borde de color, disco DENSO que la RODEA POR COMPLETO (cruza por delante abajo y se oculta detrás arriba)]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:Render analítico por capas con la física real (BlackHolePhysics): anillo de fotones + eco lensado, disco kepleriano que HIERVE (ω∝r^-3/2), Doppler δ³ (izquierda cegadora) + rayos cian + lente que distorsiona el fondo]"));
+            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:GIGANTE: 494px de envergadura. Atrae enemigos en un radio de 450px; su AURA abraza la mitad interior del disco y machaca más rápido cerca del centro]"));
             tooltips.Add(new TooltipLine(Mod, "D4", "[c/FF0055:Devora las balas enemigas al cruzar el horizonte — y al final nace el ANILLO DE EINSTEIN que curva el fondo del juego]"));
         }
         public override void AddRecipes() { CreateRecipe().AddIngredient(ItemID.Wood, 5).Register(); }

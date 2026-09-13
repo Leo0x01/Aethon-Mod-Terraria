@@ -1,5 +1,90 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.09 — EL AGUJERO NEGRO CARMESÍ "SUPER IGUAL": LA OTRA LIBRERÍA CON LAS FÍSICAS CORRECTAS
+
+**Reporte del usuario**: "todavía no se parece a la referencia, el disco de
+acreción debe ser más denso y debe rodear por completo a la bola negra, esta
+debe ser de un negro profundo con bordes de color. Investiga más sobre
+agujeros negros, investiga las matemáticas de cómo crear un agujero negro,
+crea otra librería de ser necesario con las físicas correctas, que el agujero
+negro sea igual a la referencia — y cuando digo igual es que sea igual SUPER
+IGUAL; asegúrate de que sea igual que la referencia, si tiene que ser
+gigante para eso que así sea".
+
+### A. LA INVESTIGACIÓN (lo que faltaba entender)
+
+El shader de marcha de rayos produce un TORO lensado genérico — por eso
+"todavía no se parecía": la referencia no es un toro, es un DISCO DELGADO
+INCLINADO visto a ~70° con la geometría de oclusión clásica (Luminet 1979;
+James et al. 2015, el paper de DNGR/Interstellar): el lado CERCANO cruza por
+delante de la cara inferior de la esfera, el lado LEJANO se oculta detrás,
+y el anillo de fotones + su eco lensado abrazan la silueta. ESO es "rodear
+por completo a la bola negra".
+
+Mediciones píxel-exactas de la referencia (347×173, R_sh≈14px): banda de
+fotones sólida 1.16–1.49·R_sh (blanco 255), eco lensado 1.68–1.96, foso
+oscuro 2.1–2.9 (el lado lejano nace a 2.7), borde interno CALIENTE a 2.2
+que cruza la esfera a +0.76·R_sh bajo el centro, pico del disco a 4.6
+(magenta saturado), fade exterior 6.5, elipse b/a=0.345, Doppler izquierdo
++30%, 18 rayos cian de fondo.
+
+### B. LA OTRA LIBRERÍA (2 archivos nuevos)
+
+- **`Content/VFX/BlackHolePhysics.cs`** — la matemática GR pura en unidades
+  r_s=1: horizonte, esfera de fotones (1.5 r_s), sombra (√27/2 ≈ 2.598 r_s),
+  ISCO (3 r_s), velocidad kepleriana v=√(GM/r), ω∝r^(−3/2), Doppler δ y
+  δ³, Shakura–Sunyaev T∝r^(−3/4) e I∝r^(−3), redshift g=√(1−r_s/r), y la
+  proyección del disco inclinado con el test cercano/lejano (la clave).
+- **`Content/VFX/CrimsonBlackHoleRenderer.cs`** — el render ANALÍTICO POR
+  CAPAS con esa geometría: (1) halo ambiental + 18 rayos cian radiales,
+  (2) lado LEJANO del disco (comprimido, nace a 2.7·R_sh), (3) halo de
+  fotones, (4) **ESFERA NEGRA OPURA** (BlackDisk.png nuevo: negro profundo
+  #000000 que COME la luz — oculta el disco lejano dentro de su silueta),
+  (5) **ANILLOS DE FOTONES** = el borde de color (13 rungs solapados
+  1.16–1.96·R_sh + arco de eco sobre la esfera), (6) **LADO CERCANO que
+  CRUZA POR DELANTE** de la cara inferior de la esfera con su borde blanco
+  caliente a 2.2·R_sh, (7) bloom (arco cercano + hotspot Doppler izquierdo).
+- **`Content/Effects/Procedural/BlackDisk.png`** — textura nueva (256px,
+  núcleo opaco + borde de 4px).
+
+### C. EL DISCO DENSO QUE RODEA (la petición textual)
+
+32 líneas de corriente keplerianas dibujadas como CÁPSULAS SoftGlow
+solapadas ×2.2 (tangente a la elipse) → banda CONTINUA y DENSA, no un
+donut: brillo pico a 4.6·R_sh (magenta 255,105,255), carmesí en los bordes,
+grano de plasma orbitando con ω∝r^(−3/2) (el interior hierve más rápido),
+Doppler δ suavizado (izquierda cegadora), lado cercano aclarado a
+rosa-blanco en su núcleo, lado lejano comprimido al 72% con su borde
+blanqueado. La calibración es 1:1 con el prototipo Python
+(`tools/mock_blackhole_v609.py`) que usa las texturas REALES del mod y fue
+validado numéricamente contra la referencia (error medio 17/255 en el
+perfil radial de 23 puntos — el pico del mock 212 vs ref 207).
+
+### D. ESCALA GIGANTE + INTEGRACIÓN
+
+- **GIGANTE autorizado**: sombra de 38px de radio (esfera de 76px), disco
+  de 494px de envergadura a escala 1 — domina la pantalla como la
+  referencia domina su encuadre. El aura de daño sube 2.2× → 4.6× sobre la
+  sombra para abrazar la mitad interior del disco (mult. del escudo).
+- **Lente de pantalla**: su radio de distorsión ahora usa el multiplicador
+  propio del carmesí (2.9× en vez de 1.4×) para ABRAZAR el disco completo.
+- Partículas (dusts + librería) re-escaladas a la banda del disco nuevo
+  (2.3–5.8·R_sh, elipse 0.345, ω kepleriano); iluminación en 3 puntos;
+  tooltips del staff actualizados.
+- **Física de juego INTACTA** (copia exacta): atracción 10× el sol, aura de
+  ticks acelerados, devora balas, persecución lenta, anillo de Einstein
+  final. El BlackHoleProjectile ORIGINAL queda INTACTO con su shader.
+- Verificación compilada contra tModLoader v2026.07.3.0 REAL: **0 errores,
+  0 warnings**. Confirmado decompilando que tML premultiplica las texturas
+  (ReLogic PngReader → PreMultiplyAlpha): el blending aditivo del renderer
+  replica exactamente el modelo del prototipo validado.
+
+**Prueba del usuario**: Develop Mods → Build → CrimsonBlackHoleStaff →
+disparar: la bola negra profunda con su anillo blanco, el disco magenta
+denso rodeándola por completo (cruce frontal abajo), los rayos cian y la
+lente curvando el fondo. (Las 8 alas de la v6.08 siguen pendientes de
+prueba en juego.)
+
 ## Commit v6.08 — TODAS LAS ALAS SON AHORA DE LUZ (8, técnica coronas) + EL AGUJERO NEGRO CON EL HORIENTE PEQUEÑO Y EL DISCO ALARGADO
 
 **Reporte del usuario**: "el agujero negro se ve bastante bien, pero es igual

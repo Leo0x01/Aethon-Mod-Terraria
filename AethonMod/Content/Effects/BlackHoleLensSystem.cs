@@ -355,7 +355,13 @@ namespace AethonMod.Content.Effects
                     // Con el ángulo pico reducido a ~0.8 rad el anillo de
                     // distorsión sigue siendo DELGADO (no mueve toda la pantalla):
                     // solo abraza el disco de acreción completo y muere a ~3 radios.
-                    float radius = p.width * p.scale / screenSize.X * 1.4f;
+                    // v6.09 — el AGUJERO CARMESÍ es GIGANTE (disco analítico de
+                    // 6.5·38px): su lente usa su propio multiplicador (2.9×) para
+                    // ABRAZAR el disco completo (véase CrimsonBlackHoleProjectile).
+                    float radiusMult = p.type == crimsonHoleType
+                        ? CrimsonBlackHoleProjectile.LensRadiusMult
+                        : 1.4f;
+                    float radius = p.width * p.scale / screenSize.X * radiusMult;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
                     // (nace con el pop elástico, crece con la expansión final del

@@ -1,129 +1,73 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Effects;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// CrimsonBlackHoleProjectile — v6.05 — EL AGUJERO NEGRO CARMESÍ DE LA REFERENCIA.
+    /// CrimsonBlackHoleProjectile — v6.09 — EL AGUJERO NEGRO CARMESÍ
+    /// "SUPER IGUAL" A LA REFERENCIA.
     ///
-    /// MÉTODO (petición del usuario): "primero toma una copia exacta del
-    /// agujero negro funcional que tenemos, y a partir de ahí modifica sus
-    /// parámetros: disco de acreción más grande y de otro color, el agujero
-    /// un poco más pequeño, mejorar la animación". ESTO ES EXACTAMENTE ESO:
-    /// el MISMO RealBlackHoleShader (marcha de luz de 75 pasos con lensing
-    /// gravitacional real — el render del agujero funcional que ya nos
-    /// gustaba) con los PARÁMETROS recalibrados según la referencia y las
-    /// fórmulas de la física real:
+    /// MÉTODO (petición del usuario): "investiga más sobre agujeros negros,
+    /// investiga las matemáticas de cómo crear un agujero negro, crea otra
+    /// librería de ser necesario con las físicas correctas, que el agujero
+    /// negro sea igual a la referencia — y cuando digo igual es que sea
+    /// igual SUPER IGUAL; si tiene que ser gigante para eso que así sea".
     ///
-    ///   · DISCO MÁS ALARGADO — v6.08 según la referencia (mediciones
-    ///     píxel-exactas de la imagen del usuario): el toro se ESTIRA en
-    ///     horizontal (accretionDiskScale.x 1 → 1.15) y se aplasta aún más
-    ///     en vertical (0.28 → 0.17): banda fina de canto cuyo rastro llega
-    ///     a ~5× la sombra, como la diagonal de la referencia. El tubo baja
-    ///     de 0.48 → 0.36: annulus [0.39, 1.11] en unidades offset → borde
-    ///     exterior en pantalla (0.75+0.36)×1.15 = 1.28 ≈ IGUAL que antes
-    ///     (1.23): el agujero MANTIENE su tamaño total.
-    ///   · OTRO COLOR        — naranja (245,105,61) → carmesí-fucsia
-    ///     (255,45,100): la paleta de la referencia (núcleo blanco-rosado →
-    ///     magenta neón → carmesí profundo).
-    ///   · AGUJERO MÁS PEQUEÑO — v6.08: blackHoleRadius 0.25 → 0.17 y el
-    ///     refuerzo negro del C# baja de 2.15× a 1.45× el horizonte: la
-    ///     sombra pasa de ~2.15 a ~1.45 unidades relativas — un núcleo
-    ///     compacto (≈20% del rastro, como la referencia: 42px de sombra
-    ///     en un rastro de 210px) con su anillo de fotones ABRAZÁNDOLO.
-    ///   · ANIMACIÓN MEJORADA — (1) el tiempo del shader corre ×1.35: el
-    ///     plasma del disco HIERVE más vivo; (2) la cámara PRECESIONA con dos
-    ///     frecuencias incommensurables (bamboleo orgánico del plano del
-    ///     disco, ±0.06 rad); (3) el conjunto RESPIRA (±1.8%); (4) el halo
-    ///     late a dos frecuencias; (5) DOPPLER BEAMING real: δ = 1/(γ(1−β·cosθ))
-    ///     → el lado que se acerca (izquierda, como la referencia) brilla
-    ///     ~δ³ ≈ 3-4× más; (6) ANILLO DE FOTONES rosa pálido pulsante
-    ///     (r_fotón = 1.7·r_horizonte en el espacio del shader).
+    /// RESPUESTA: dos archivos NUEVOS de librería:
+    ///   · BlackHolePhysics.cs      — la matemática GR pura (r_s, esfera de
+    ///     fotones 1.5 r_s, sombra (√27/2) r_s, ISCO 3 r_s, Kepler ω∝r^(−3/2),
+    ///     Doppler δ³, Shakura–Sunyaev T∝r^(−3/4), redshift g=√(1−r_s/r),
+    ///     proyección del disco inclinado con test cercano/lejano).
+    ///   · CrimsonBlackHoleRenderer.cs — el render ANALÍTICO POR CAPAS con la
+    ///     geometría de oclusión REAL: disco lejano → ESFERA NEGRA opaca
+    ///     (negro profundo) → anillos de fotones (borde de color) → disco
+    ///     cercano que CRUZA POR DELANTE de la bola. 32 líneas de corriente
+    ///     keplerianas de cápsulas solapadas → banda CONTINUA y DENSA que
+    ///     RODEA POR COMPLETO a la esfera (Gargantua).
     ///
-    /// FÍSICA (formulas investigadas — ver research/blackhole/):
-    ///   · Radio de Schwarzschild: r_s = 2GM/c²  (el "blackHoleRadius").
-    ///   · Esfera de fotones: r_ph = 1.5·r_s  (fotones orbitando).
-    ///   · Sombra aparente: R_sh = (√27/2)·r_s ≈ 2.6·r_s.
-    ///   · ISCO: r_isco = 3·r_s — el borde INTERNO del disco de acreción
-    ///     (con tubo 0.48 y horizonte 0.25 el borde interno visible nace
-    ///     pegado al horizonte, como en la referencia).
-    ///   · Kepler: v(r) = √(GM/r); en el ISCO v ≈ 0.41c → beaming δ³.
-    ///   · Lente: α = 4GM/(c²·b) — la desviación que la marcha de 75 pasos
-    ///     integra paso a paso con curvatura ~1/r² (la misma del agujero
-    ///     funcional, INTACTA).
+    /// Calibración: prototipo Python con las texturas reales del mod
+    /// (tools/mock_blackhole_v609.py) validado contra la referencia con
+    /// error medio 17/255 en el perfil radial — véase
+    /// research/blackhole/MATEMATICA_AGUJEROS_NEGROS.md §v6.09.
     ///
-    /// La física de juego (aura con ticks que aceleran cerca del centro,
-    /// atracción 10× la del sol, devora balas al cruzar el horizonte,
-    /// persecución lenta, anillo de Einstein final) es la MISMA copia exacta
-    /// del BlackHoleProjectile — que queda INTACTO. La lente de pantalla
-    /// (BlackHoleLensSystem) sigue curvando el fondo alrededor del
-    /// horizonte y pinta este render ENCIMA (DrawCoreVisuals).
+    /// ESCALA GIGANTE (autorizada): sombra de 38px de radio (esfera de 76),
+    /// disco de 494px de envergadura a escala 1.
+    ///
+    /// La física de JUEGO queda intacta (aura con ticks que aceleran cerca
+    /// del centro, atracción 10× la del sol, devora balas al cruzar el
+    /// horizonte, persecución lenta, anillo de Einstein final): es la MISMA
+    /// copia del BlackHoleProjectile — que queda INTACTO. La lente de
+    /// pantalla (BlackHoleLensSystem) sigue curvando el fondo alrededor y
+    /// pinta este render ENCIMA (DrawCoreVisuals).
     /// </summary>
     public class CrimsonBlackHoleProjectile : ModProjectile
     {
-        /// <summary>Shader del núcleo — estático: compartido por todas las
-        /// instancias (el MISMO RealBlackHoleShader del agujero funcional:
-        /// copia exacta, solo cambian los parámetros que se le pasan).</summary>
-        private static Ref<Effect> _shader;
-        private static bool _shaderFailed;
+        /// <summary>
+        /// Multiplicador del radio del aura sobre la sombra visual. v6.09:
+        /// 2.2 → 4.6 — el campo de daño ahora abraza la mitad interior del
+        /// disco GIGANTE (la zona donde la materia orbita en llamas), no solo
+        /// un pompón alrededor de la antigua sombra diminuta.
+        /// </summary>
+        private const float ShieldRadiusMult = 4.6f;
+
+        /// <summary>
+        /// Multiplicador del radio de la lente gravitacional de pantalla
+        /// (BlackHoleLensSystem) para ESTE agujero: la distorsión debe
+        /// ABRAZAR el disco completo (borde exterior a 6.5·38 = 247px,
+        /// elipse incluida) → 96·2.9 ≈ 278px de radio de influencia.
+        /// </summary>
+        internal const float LensRadiusMult = 2.9f;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
-
-        /// <summary>
-        /// Multiplicador del radio del campo de fuerza sobre el horizonte
-        /// de sucesos (2.2×: envuelve el disco de acreción).
-        /// </summary>
-        private const float ShieldRadiusMult = 2.2f;
-
-        // ==================================================================
-        //  PARÁMETROS VISUALES DEL AGUJERO CARMESÍ (los que se pidieron)
-        // ==================================================================
-
-        /// <summary>Radio del horizonte en unidades shader — v6.08: núcleo
-        /// COMPACTO (0.25 → 0.17): con el refuerzo a 1.45× la sombra visible
-        /// queda en ~20% del rastro del disco, como en la referencia.</summary>
-        private const float HoleRadius = 0.17f;
-
-        /// <summary>Grosor del tubo del toro del disco — v6.08: tubo FINO
-        /// (0.48 → 0.36): annulus [0.39, 1.11] en unidades offset — el rastro
-        /// nace LEJOS del horizonte (2.3×), como la diagonal de la referencia.</summary>
-        private const float DiskTubeRadius = 0.36f;
-
-        /// <summary>Color base del disco — la paleta de la referencia:
-        /// carmesí-fucsia (núcleo blanco-rosado → magenta → carmesí).</summary>
-        private static readonly Color DiskColor = new Color(255, 45, 100);
-
-        /// <summary>Achatado vertical del toro — v6.08: banda MUCHO más fina
-        /// (0.28 → 0.17): elipse de canto ~6:1, el rastro fino y alargado de
-        /// la referencia (el disco real mide grosor ≈ 0.45× la sombra).</summary>
-        private const float DiskFlattenY = 0.17f;
-
-        /// <summary>v6.08 NUEVO — elongación HORIZONTAL del toro
-        /// (accretionDiskScale.x): estira el disco en el eje de pantalla
-        /// para el look "rastro alargado" de la referencia sin tocar el
-        /// radio mayor fijo (0.75) del shader (que NO se puede recompilar).</summary>
-        private const float DiskStretchX = 1.15f;
-
-        /// <summary>Inclinación de la cámara (rad) — ~17°: el plano del
-        /// disco se ve casi de canto con su arco de lente arriba (Gargantua).</summary>
-        private const float CameraTilt = 0.30f;
-
-        /// <summary>Impulso del lienzo: el disco gana tamaño en pantalla
-        /// (+10%) sin tocar la cobertura del shader (zoom constante).</summary>
-        private const float CanvasBoost = 1.10f;
-
-        /// <summary>Velocidad del tiempo del shader — el disco HIERVE más
-        /// rápido (×1.35) y el remolino de la lente gira más vivo.</summary>
-        private const float TimeScale = 1.35f;
 
         public override void SetStaticDefaults()
         {
@@ -132,8 +76,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            // Copia exacta del agujero funcional: mismo hitbox (el canvas del
-            // shader y el aura escalan con width).
+            // Mismo hitbox que el agujero funcional (la VISUAL gigante es
+            // independiente del hitbox: la escala CrimsonBlackHoleRenderer
+            // no depende de width).
             Projectile.width = 96;
             Projectile.height = 96;
             Projectile.friendly = true;
@@ -196,7 +141,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
-            // === PARTÍCULAS (solo cliente) — paleta carmesí/fucsia de la referencia ===
+            // === PARTÍCULAS (solo cliente) — paleta carmesí/fucsia, a la
+            //     escala del disco GIGANTE nuevo ===
             if (Main.netMode != NetmodeID.Server)
             {
                 SpawnAbsorbedDusts();
@@ -286,9 +232,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === ILUMINACIÓN PULSANTE (carmesí-fucsia del disco) ===
+            // === ILUMINACIÓN PULSANTE — TRES puntos para el disco GIGANTE ===
+            // (el carmesí-fucsia del disco baña el mundo alrededor de la bola)
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
-            Lighting.AddLight(Projectile.Center, new Vector3(1.0f * pulse, 0.28f * pulse, 0.42f * pulse));
+            Vector3 light = new Vector3(1.15f * pulse, 0.30f * pulse, 0.48f * pulse);
+            Lighting.AddLight(Projectile.Center, light);
+            float le = CrimsonBlackHoleRenderer.ShadowPx * Math.Max(Projectile.scale, 0.1f);
+            Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
+            Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f), light * 0.75f);
         }
 
         /// <summary>El enemigo chaseable más cercano dentro de maxDist (copia exacta).</summary>
@@ -309,8 +260,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return best;
         }
 
-        /// <summary>Radio actual del campo (px): 2.2× el horizonte, con la
-        /// escala pre-colapso durante la evaporación (copia exacta).</summary>
+        /// <summary>Radio actual del campo (px): abraza la mitad interior del
+        /// disco gigante (mult 4.6), con la escala pre-colapso durante la
+        /// evaporación (misma fórmula que el funcional).</summary>
         private float ShieldRadius
         {
             get
@@ -322,28 +274,32 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS — paleta carmesí / fucsia / blanco-rosado (referencia)
+        //  PARTÍCULAS — paleta carmesí / fucsia / blanco-rosado, a la escala
+        //  del disco GIGANTE (R_sh visual = 38px × escala)
         // ------------------------------------------------------------------
 
         /// <summary>Materia absorbida (dusts): polvo carmesí/fucsia cayendo
-        /// en espiral, blanco-rosado al rozar el horizonte.</summary>
+        /// en espiral desde el cuerpo del disco, blanco-rosado al rozar el
+        /// horizonte.</summary>
         private void SpawnAbsorbedDusts()
         {
             float deathSpeedBoost = 1f;
             if (Projectile.timeLeft <= 90f)
                 deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
 
+            float shadow = CrimsonBlackHoleRenderer.ShadowPx * Math.Max(Projectile.scale, 0.1f);
+
             for (int i = 0; i < 2; i++)
             {
                 float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 2f) +
                               Main.rand.NextFloat(-0.25f, 0.25f);
-                float dist = 100f + 55f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
+                float dist = 2.6f * shadow + 1.4f * shadow * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
 
                 Vector2 toCenter = Projectile.Center - spawnPos;
-                float speed = (4f + 4f * (1f - dist / 155f)) * deathSpeedBoost;
+                float speed = (6f + 6f * (1f - dist / (4f * shadow))) * deathSpeedBoost;
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
@@ -355,7 +311,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // Materia carmesí: fucsia→carmesí cayendo hacia el
                     // horizonte, blanco-rosado al rozarlo (Doppler).
                     Color color;
-                    if (dist < 60f)
+                    if (dist < 1.6f * shadow)
                     {
                         color = new Color(255, 240, 250); // blanco-rosado al borde
                     }
@@ -378,13 +334,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Chispas rosas encantadas capturadas por el campo.</summary>
+        /// <summary>Chispas rosas encantadas capturadas por el campo
+        /// (a la distancia del borde exterior del disco gigante).</summary>
         private void SpawnCapturedEnergySparks()
         {
             if (Main.rand.NextBool(12))
             {
                 float angle = Main.rand.NextFloat(0, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(140f, 220f);
+                float dist = Main.rand.NextFloat(260f, 380f) * MathHelper.Max(Projectile.scale, 0.5f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -396,10 +353,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Devora el polvo del ambiente en espiral (copia exacta).</summary>
+        /// <summary>Devora el polvo del ambiente en espiral (radio a la
+        /// escala del disco nuevo).</summary>
         private void AttractNearbyDust()
         {
-            float radius = 260f;
+            float radius = 420f;
             for (int i = 0; i < Main.maxDust; i++)
             {
                 Dust d = Main.dust[i];
@@ -425,7 +383,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             for (int i = 0; i < 2; i++)
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(95f, 165f) * MathHelper.Max(Projectile.scale, 0.4f);
+                float dist = Main.rand.NextFloat(2.4f, 4.2f) *
+                             CrimsonBlackHoleRenderer.ShadowPx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -442,7 +401,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     Position = spawnPos,
                     Velocity = velocity,
-                    Scale = new Vector2(1.35f, 0.42f),
+                    Scale = new Vector2(1.6f, 0.5f),
                     Rotation = angle + MathHelper.Pi,
                     PackedColor = ParticleManager.PackColor(start),
                     PackedStartColor = ParticleManager.PackColor(start),
@@ -465,29 +424,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>Disco de acreción: estelas TrailGlow fucsia orbitando con
         /// rotación sincronizada — plasma carmesí/fucsia EN la banda del
-        /// disco visible (2.3..5.5× el horizonte compacto, barriendo el
-        /// rastro ALARGADO hasta su borde exterior).</summary>
+        /// disco gigante (2.3..5.8× la sombra, barriendo desde el borde
+        /// caliente hasta el fade exterior, con velocidad kepleriana).</summary>
         private void SpawnLibraryAccretionDisk()
         {
             if (Main.rand.NextBool(4))
             {
-                // Horizonte VISUAL del carmesí v6.08: 0.17 unidades shader
-                // (más compacto) — el rastro orbita en 2.3..5.5× para barrer
-                // la banda ALARGADA del disco ((0.39..1.28) unidades × 96 px).
-                float horizon = 0.17f * Projectile.width * MathHelper.Max(Projectile.scale, 0.4f) * 1.1f;
-                float radius = Main.rand.NextFloat(2.3f, 5.5f) * horizon;
+                // La sombra visual del carmesí v6.09: 38px × escala — las
+                // estelas orbitan en la MISMA banda que dibuja el renderer.
+                float shadow = CrimsonBlackHoleRenderer.ShadowPx *
+                               MathHelper.Max(Projectile.scale, 0.4f);
+                float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float angVel = 0.25f; // el disco carmesí gira un poco más vivo
+                // Kepler: ω ∝ r^(−3/2) — el interior gira más rápido.
+                float angVel = 0.16f * (float)Math.Pow(4.6f * shadow / radius, 1.5f);
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
-                    (float)Math.Sin(angle) * radius);
+                    (float)Math.Sin(angle) * radius * 0.345f); // la MISMA elipse del renderer
 
                 var p = new ParticleData
                 {
                     Position = spawnPos,
                     Velocity = Vector2.Zero,
-                    Scale = new Vector2(1.8f, 0.45f),
+                    Scale = new Vector2(2.2f, 0.55f),
                     Rotation = angle + MathHelper.PiOver2,
                     RotationSpeed = angVel,
                     PackedColor = ParticleManager.PackColor(new Color(255, 70, 140, 200)),
@@ -511,7 +471,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  RENDER — COPIA EXACTA DEL AGUJERO FUNCIONAL + PARÁMETROS NUEVOS
+        //  RENDER — LA NUEVA LIBRERÍA ANALÍTICA (v6.09)
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
@@ -527,207 +487,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el agujero carmesí completo: halo + RealBlackHoleShader
-        /// (¡el MISMO raymarching de 75 pasos del agujero funcional! copia
-        /// exacta, solo cambian los parámetros) + refuerzo del horizonte +
-        /// DOPPLER BEAMING + anillo de fotones pulsante. Compartido entre el
-        /// pase del mundo (PreDraw, endActiveBatch=true) y el pase posterior
-        /// a la lente (BlackHoleLensSystem, endActiveBatch=false: el batch
+        /// Dibuja el agujero carmesí completo con la nueva librería por
+        /// capas (CrimsonBlackHoleRenderer): disco denso que RODEA la bola
+        /// negra, esfera de negro profundo, anillos de fotones como borde
+        /// de color, rayos cian de fondo y bloom. Compartido entre el pase
+        /// del mundo (PreDraw, endActiveBatch=true) y el pase posterior a
+        /// la lente (BlackHoleLensSystem, endActiveBatch=false: el batch
         /// llega cerrado). Contrato de batch idéntico al original: al
         /// terminar queda CERRADO (el llamador lo restaura).
         /// </summary>
         internal static void DrawCoreVisuals(Projectile p, bool endActiveBatch)
         {
-            if (!_shaderFailed && _shader == null)
-            {
-                try
-                {
-                    _shader = new Ref<Effect>(ModContent.Request<Effect>(
-                        "AethonMod/Content/Effects/Shaders/RealBlackHoleShader",
-                        AssetRequestMode.ImmediateLoad).Value);
-                }
-                catch
-                {
-                    _shaderFailed = true;
-                }
-            }
+            Vector2 drawPos = p.Center - Main.screenPosition;
+            float time = Main.GlobalTimeWrappedHourly;
+            int seed = p.whoAmI * 7 + 3;
 
-            try
-            {
-                Vector2 drawPos = p.Center - Main.screenPosition;
-                float time = Main.GlobalTimeWrappedHourly;
-
-                // === 1. HALO CARMESÍ EXTERIOR (aura de brasa fucsia de fondo) ===
-                // Copia del halo del funcional, recolor: carmesí profundo.
-                Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (endActiveBatch)
-                    Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                // Latido a DOS frecuencias (animación mejorada: batimiento vivo).
-                float haloPulse = 0.85f + 0.11f * (float)Math.Sin(time * 3.1f) +
-                                  0.04f * (float)Math.Sin(time * 0.9f + 1.7f);
-                Main.spriteBatch.Draw(glowTex, drawPos, null,
-                    new Color(70, 6, 28, 46) * haloPulse * p.scale, 0f,
-                    glowTex.Size() * 0.5f, 3.4f * p.scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-
-                if (_shader != null && _shader.Value != null)
-                {
-                    // ============================================================
-                    //  2. REALBLACKHOLESHADER — LA COPIA EXACTA CON PARÁMETROS
-                    //     CARMESÍ (marcha de luz de 75 pasos + lensing real)
-                    // ============================================================
-                    Effect shader = _shader.Value;
-
-                    // Lienzo que crece con la escala (fix v5.90 del original)
-                    // + impulso del 10% (disco más grande en pantalla) +
-                    // RESPIRACIÓN sutil (animación mejorada).
-                    float targetSize = 256f;
-                    float breathe = 1f + 0.018f * (float)Math.Sin(time * 1.27f + p.whoAmI * 0.9f);
-                    float canvasPx = targetSize * Math.Max(p.scale, 0.08f) * CanvasBoost * breathe;
-                    float zoomBase = p.width / targetSize * 2f;
-
-                    // --- PARÁMETROS v6.08 (mediciones de la referencia) ---
-                    // Núcleo compacto: 0.25 → 0.17.
-                    shader.Parameters["blackHoleRadius"].SetValue(HoleRadius);
-                    shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
-                    shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
-                    // Otro color: naranja → carmesí-fucsia de la referencia.
-                    shader.Parameters["accretionDiskColor"].SetValue(DiskColor.ToVector3());
-                    // Inclinación ~17°: banda casi de canto (referencia).
-                    shader.Parameters["cameraAngle"].SetValue(CameraTilt);
-                    // ANIMACIÓN MEJORADA: la cámara PRECESIONA — el eje de
-                    // rotación oscila con dos frecuencias incommensurables
-                    // (±0.05/±0.06 rad): el plano del disco bambolea orgánico
-                    // sobre la inclinación base que ya tenía el funcional.
-                    float swayX = 1f + 0.05f * (float)Math.Sin(time * 0.63f + p.whoAmI * 0.7f);
-                    float swayZ = p.rotation + 0.06f * (float)Math.Sin(time * 0.41f);
-                    shader.Parameters["cameraRotationAxis"].SetValue(
-                        new Vector3(p.velocity.Y * -0.022f + swayX, 0f, swayZ));
-                    // Banda FINA y ALARGADA — v6.08: squash vertical 0.28 → 0.17
-                    // + estirón horizontal ×1.15 (el rastro de la referencia).
-                    shader.Parameters["accretionDiskScale"].SetValue(
-                        new Vector3(DiskStretchX, DiskFlattenY, 1f));
-                    shader.Parameters["zoom"].SetValue(Vector2.One * zoomBase);
-                    // DISCO ALARGADO: tubo 0.48 → 0.36 (rastro que nace lejos).
-                    shader.Parameters["accretionDiskRadius"].SetValue(Math.Min(p.scale, 1f) * DiskTubeRadius);
-                    // ANIMACIÓN MEJORADA: el tiempo corre ×1.35 — el plasma
-                    // del disco HIERVE más rápido y la lente remolina más viva.
-                    shader.Parameters["globalTime"].SetValue(time * TimeScale);
-
-                    // FireNoiseB como textura de ruido del disco de acreción (s1)
-                    Texture2D fireNoise = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/FireNoiseB").Value;
-                    Main.graphics.GraphicsDevice.Textures[1] = fireNoise;
-                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-
-                    // InvisiblePixel como canvas (s0)
-                    Texture2D pixel = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Textures/InvisiblePixel").Value;
-
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(pixel, drawPos, null, Color.White, 0f,
-                        pixel.Size() * 0.5f, canvasPx, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-
-                    // === 3. REFUERZO DEL EVENT HORIZON (v6.08: 1.45×, compacto) ===
-                    // radio del horizonte en píxeles = blackHoleRadius * zoom * (canvas / 2)
-                    float pxPerUnit = zoomBase * canvasPx * 0.5f;
-                    float eventHorizonPx = HoleRadius * pxPerUnit;
-                    if (eventHorizonPx > 2f)
-                    {
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        // v6.08: 2.15× → 1.45× — antes el refuerzo INFLABA la sombra
-                        // al doble; ahora es el núcleo compacto de la referencia,
-                        // bien sólido (alpha 235) y ABIERTO por el rastro del disco.
-                        float horizonScale = (eventHorizonPx * 1.45f) / glowTex.Width;
-                        Main.spriteBatch.Draw(glowTex, drawPos, null,
-                            new Color(0, 0, 0, 235), 0f, glowTex.Size() * 0.5f,
-                            horizonScale, SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-                    }
-
-                    // ============================================================
-                    //  4. DOPPLER BEAMING — el lado que se ACERCA brilla más
-                    // ============================================================
-                    // Física real: δ = 1/(γ(1−β·cosθ)); el brillo observado
-                    // escala ~δ³. Con v_kepler ≈ 0.4c en el borde interno el
-                    // lado que se acerca (la IZQUIERDA, como en la referencia)
-                    // brilla 3-4× más y el que se aleja se apaga hacia el
-                    // carmesí profundo. Dos velos aditivos sobre el render:
-                    // (v6.08: posiciones DIAGONALES — el lado que se acerca arde
-                    // abajo-izquierda y el que se aleja se apaga arriba-derecha,
-                    // como la diagonal de la referencia; el borde exterior usa el
-                    // estirón horizontal nuevo: (0.75+tubo)×1.15.)
-                    float diskOuterPx = (0.75f + DiskTubeRadius) * DiskStretchX * pxPerUnit;
-                    float doppler = 0.85f + 0.15f * (float)Math.Sin(time * 1.7f);
-                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-
-                    // Lado que se ACERCA (abajo-izquierda): blanco-rosado cegador,
-                    // un velo ALARGADO siguiendo la diagonal del rastro.
-                    Main.spriteBatch.Draw(glowTex,
-                        drawPos + new Vector2(-0.46f * diskOuterPx, 0.07f * diskOuterPx),
-                        null, new Color(255, 235, 248, 115) * doppler, -0.18f,
-                        glowTex.Size() * 0.5f,
-                        new Vector2((1.15f * diskOuterPx) / glowTex.Width,
-                                    (0.62f * diskOuterPx) / glowTex.Height), SpriteEffects.None, 0f);
-
-                    // Lado que se ALEJA (arriba-derecha): brasa carmesí tenue,
-                    // también estirada a favor de la diagonal.
-                    Main.spriteBatch.Draw(glowTex,
-                        drawPos + new Vector2(0.44f * diskOuterPx, -0.06f * diskOuterPx),
-                        null, new Color(140, 12, 48, 55), -0.18f,
-                        glowTex.Size() * 0.5f,
-                        new Vector2((1.30f * diskOuterPx) / glowTex.Width,
-                                    (0.55f * diskOuterPx) / glowTex.Height), SpriteEffects.None, 0f);
-
-                    Main.spriteBatch.End();
-
-                    // ============================================================
-                    //  5. ANILLO DE FOTONES ROSA PÁLIDO (pulsante)
-                    // ============================================================
-                    // En el shader el anillo brilla a 1.7·r_horizonte del
-                    // centro (distGlow): aquí lo REFUERZO con la textura Ring
-                    // en ese mismo radio, blanco-rosado, latiendo — la firma
-                    // "anillo de fotones rosa pálido" de la referencia.
-                    float ringPx = HoleRadius * 1.7f * pxPerUnit;
-                    if (ringPx > 3f)
-                    {
-                        Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-                        float ringPulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.3f + p.whoAmI);
-                        // Radio visible de Ring ≈ 0.92× su mitad (calibración v5.93).
-                        float ringScale = ringPx / (ringTex.Width * 0.5f * 0.92f);
-                        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
-                        Main.spriteBatch.Draw(ringTex, drawPos, null,
-                            new Color(255, 205, 228, 130) * ringPulse, 0f,
-                            ringTex.Size() * 0.5f, ringScale, SpriteEffects.None, 0f);
-                        Main.spriteBatch.End();
-                    }
-                }
-                else
-                {
-                    // === FALLBACK: dibujado manual si el shader no carga ===
-                    DrawFallback(p, drawPos);
-                }
-            }
-            catch
-            {
-                // Cierre defensivo SOLO en el path de error.
-                try { Main.spriteBatch.End(); } catch { }
-            }
+            CrimsonBlackHoleRenderer.Draw(drawPos, p.scale, time, seed, endActiveBatch);
         }
 
         /// <summary>Radio del campo (px), compartido con el aura y el OnKill
-        /// (copia exacta de la física del funcional).</summary>
+        /// (misma fórmula que el funcional, con el mult 4.6 nuevo).</summary>
         internal static float GetShieldRadius(Projectile p)
         {
             if (p.localAI[1] > 4f)
@@ -742,71 +521,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
                 null, Main.GameViewMatrix.TransformationMatrix);
-        }
-
-        /// <summary>Dibujado manual de respaldo (copia del fallback del
-        /// funcional, recolor carmesí: vórtice + anillo de fotones +
-        /// aberración cromática sutil).</summary>
-        private static void DrawFallback(Projectile p, Vector2 drawPos)
-        {
-            float pulse = 0.9f + 0.1f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 4f);
-            Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-            Texture2D vortexTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Vortex").Value;
-            Texture2D ringTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring").Value;
-            float s = p.scale;
-
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            // Disco de acreción frontal (elíptico, carmesí-fucsia)
-            Main.spriteBatch.Draw(vortexTex, drawPos, null,
-                new Color(255, 80, 145, 200), p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            // Disco trasero (anillo de Einstein)
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(0f, 4f * s), null,
-                new Color(170, 0, 65, 100), -p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.FlipVertically, 0f);
-
-            // Beaming relativístico (lado que se acerca, blanco-rosado)
-            Main.spriteBatch.Draw(vortexTex, drawPos - new Vector2(3f * s, 0f), null,
-                new Color(255, 210, 235, 130), p.rotation * 2f,
-                vortexTex.Size() * 0.5f, new Vector2(1.5f, 0.5f) * s, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.End();
-
-            // Event horizon
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.Draw(glowTex, drawPos, null,
-                Color.Black, 0f, glowTex.Size() * 0.5f,
-                0.8f * s, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
-
-            // Anillo de fotones + aberración cromática (recolor carmesí)
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            // Horizonte visual del carmesí (0.25 unidades shader × el impulso
-            // del lienzo — véase pxPerUnit del pase del shader).
-            float horizonPx = HoleRadius * CanvasBoost * p.width * Math.Max(p.scale, 0.08f);
-            float photonR = horizonPx * 1.3f * pulse / 0.92f;
-            float photonScale = photonR / (ringTex.Width * 0.5f);
-            Main.spriteBatch.Draw(ringTex, drawPos - new Vector2(2f * s, 0f), null,
-                new Color(255, 0, 80, 80), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 120, 200, 80), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos + new Vector2(2f * s, 0f), null,
-                new Color(120, 0, 60, 80), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ringTex, drawPos, null,
-                new Color(255, 240, 250, 220), 0f, ringTex.Size() * 0.5f,
-                photonScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.End();
         }
 
         // ------------------------------------------------------------------
