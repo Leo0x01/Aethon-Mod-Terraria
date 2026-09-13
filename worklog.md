@@ -7522,3 +7522,30 @@ Stage Summary:
 - v6.11: LAS ALAS usan el corte vanilla correcto (4 frames, raíz en el centro, fondo 100% transparente, aleteo sin clipping) y EL AGUJERO NEGRO por fin dibuja el vórtice Oblivion completo (esfera + gap + anillo + dos crescientes gigantes girando) — el mismo arte calibrado contra la referencia que estaba siendo dibujado microscópico
 - Prueba del usuario: git pull → Develop Mods → Build → (1) equipar cada ala: reposo plegadas, vuelo con aleteo vanilla 0-1-2, planeo con f2 abierta, SIN cajas de fondo; (2) CrimsonBlackHoleStaff: bola negra + anillo + hojas de plasma carmesí rodeándola girando en sentido horario, GIGANTE
 - Los PNGs de las alas miden ahora 138-146 × 416-512 (4 frames de 104-128)
+
+---
+Task ID: 23
+Agent: Z.ai Code (agente principal)
+Task: v6.12 — FIX del error del agujero negro (client.log) + TODAS LAS ALAS REHECHAS CON LA TÉCNICA DE LAS CORONAS (petición expresa del usuario)
+
+Work Log:
+- Analicé el client.log subido (4786 líneas, sesiones v6.10 y v6.11): DOS InvalidOperationException silenciosas con el agujero en pantalla — "Draw was called, but Begin has not yet been called" en CrimsonBlackHoleRenderer.Cap() línea 198 ← Draw() línea 235 (el primer quad del HALO), y "End was called, but Begin has not yet been called" del End defensivo; ambas con la pila completa a través de DrawCoreVisuals → BlackHoleLensSystem.RenderLens() línea 730
+- CAUSA RAÍZ: la reescritura v6.11 del renderer PERDIÓ el BeginAdditive() del principio de Draw() — las secciones 1-4 (halo, anillo, las dos hojas del vórtice, hotspot) dibujaban sobre un batch CERRADO → el primer Draw lanzaba, el catch lo tragaba… y NI EL VÓRTICE NI LA ESFERA se dibujaban NUNCA (por eso el usuario solo veía "un agujero": la lente sin el arte encima). FIX: BeginAdditive() como sección 0 del try — el contrato queda cerrado→aditivo(1-4)→End→alpha(esfera)→End→aditivo(6-8)→End cerrado, válido en AMBOS caminos (PreDraw del mundo y RenderLens de la lente)
+- EL PEDIDO DE LAS ALAS: "hazlas de la misma forma que hiciste las coronas, usando la misma técnica". Restauré el sistema completo de alas de luz v6.08 desde el commit 9fbd878: WingVFX.cs (contexto+perfiles de vuelo+registro de 8 estilos), WingAnimPlayer.cs (muelles, golpe asimétrico de mariposa, vibración de colibrí del hada, sweep aerodinámico), VFXWingsDrawLayer.cs (UNA capa AfterParent(PlayerDrawLayers.Wings) — detrás del cuerpo, anclada a los omóplatos, escala con el sprite) y los 7 archivos de renderizadores
+- LA LECCIÓN DE VISIBILIDAD (por qué las v6.08 "no parecían alas"): el pase de jugador compone DrawData con AlphaBlend (NO aditivo) — las alfas tenues del v6.08 (0.085 en membranas) eran INVISIBLES. Las coronas leen perfecto porque usan pulse·alpha ≈ 0.75-1.0. Apliqué el estándar de corona a TODO: membranas 0.45-0.55 + VOLUMEN oscuro debajo (mariposa violeta noche, hada ámbar, eclipse noche, nebulosa púrpura — la silueta sólida que recorta el ala contra el cielo), venas/filos 0.85-0.95, núcleos 1.0, envergaduras ×1.2-1.35, luz del mundo con piso 0.88 (las alas son fuentes de luz, nunca se apagan en cuevas)
+- Los 8 PNG {Nombre}_Wings.png regenerados como 8×8 TOTALMENTE transparentes (truco Calamity): vanilla no dibuja nada — cero sprite, cero caja, cero animación vanilla que arreglar; los ítems, stats end-game, tooltips, recetas y la entrega por TestingPlayer intactas; los 122 PNG del mod validados (ninguno corrupto)
+- MOCK AlphaBlend EXACTO (tools/mock_wing_render_v612.py): quads rotados con los perfiles reales de SoftGlow/Ring/GlowOrb, lerp hacia el tinte (el modelo del pase de jugador), 24 escenas (8 estilos × reposo/aleteo/planeo) sobre cielo de día (el peor caso) con silueta del jugador ENCIMA (las alas van detrás)
+- Validación VLM ronda 1: Mariposa 9, Cometa 9, Hada 8, Horizonte 7, CoronaSolar 7 — pero Anillo de Fotones 3 ("campo de energía con forma de corazón, no un ala"), Eclipse 4 ("orbs sueltos junto a la cabeza"), Nebulosa 6 (amorfa)
+- REDISEÑOS ESTRUCTURALES: Anillo de Fotones ahora tiene FILO DE ATAQUE (cinta dorada continua hombro→punta) y las órbitas son PLUMAS BARRIDAS alineadas al filo; Eclipse tiene los discos AFUERA (lóbulo superior apenas arriba, inferior abajo-afuera) + MEMBRANA de noche violeta conectando raíz→ambos lóbulos + filo cromosférico; Nebulosa con arco de ala (blobs exteriores más altos) y 3 filamentos; Corona Solar con piso 0.52 en reposo
+- Validación VLM ronda 2 (tras el rediseño): Anillo de Fotones 9/9/8/8 ✓ y Eclipse 8/8/7/7 ✓ — TODAS las alas leen como alas
+- Docs: build.txt 6.12, CHANGES.md (entrada v6.12 secciones A-C), research/wings_v612 al repo; compilación contra tModLoader v2026.07.3.0 REAL: Build succeeded · 0 errores · 0 warnings; commit 304fb4f pusheado a origin/main
+
+Test:
+- Compilación: 0 errores / 0 warnings contra tML v2026.07.3.0 real (proyecto /home/z/.verify, build --no-incremental, tipos nuevos verificados en el DLL)
+- Mock VLM: 24 escenas — Mariposa 9, Cometa 9, AnilloFotones 9, Eclipse 8, Hada 8, Horizonte 7, CoronaSolar 7, Nebulosa 6
+- PENDIENTE (como siempre): la verificación en juego la hace el usuario (Develop Mods → Build → client.log sin InvalidOperationException)
+
+Next:
+- El usuario prueba: (1) CrimsonBlackHoleStaff — el vórtice Oblivion POR FIN VISIBLE (esfera negra + gap + anillo + dos hojas de plasma carmesí girando horario) SIN errores en el log; (2) las 8 alas de luz: equipar cada una (reposo plegadas, vuelo con aleteo propio, planeo, sweep al correr; mariposa/hada con flotado)
+- Si alguna ala necesita ajuste fino (tamaño/brillo/color de un estilo concreto), los parámetros viven en su renderizador (Content/VFX/*Wings.cs) y las personalidades de vuelo en WingVFX.cs
+- La técnica de las coronas está ahora documentada como el estándar del mod para cosméticos del jugador
