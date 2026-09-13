@@ -7609,3 +7609,35 @@ Test:
 Next:
 - Si el usuario ajusta el Olvido: las ganancias (halo/vortex/anillo/backplate) ya son texturas horneadas — regenerar con build_assets_olvido.py tarda segundos; el coverage 7.8R y SpherePx=52 son constantes del renderer
 - La técnica de extracción-directa (píxeles de la referencia → capas animables) queda documentada como EL método para réplicas exactas en el futuro
+
+Stage Summary:
+- v6.14 EN GitHub (commit 1087123): los DOS agujeros nuevos completos — FUSIÓN (Gargantua base detrás + vórtice del vacío delante ×0.68) y OLVIDO (arte extraído de los píxeles de la referencia, 12 rondas VLM + 130 de optimización, EMA 16.4/255) — el agujero del vacío INTACTO, compilación 0/0; faltaban solo los 2 PNGs de sombra por defecto (fix en v6.14.1/Task 26)
+
+---
+Task ID: 26
+Agent: Z.ai Code (agente principal)
+Task: v6.14.1 — FIX DEL client.log DEL USUARIO ("hay varios errores"): el mod no cargaba por 2 texturas de sombra olvidadas
+
+Work Log:
+- Leí /home/z/my-project/upload/client.log (241 KB): el mod compilaba y empaquetaba bien pero al CARGAR moría con MultipleException → 2 MissingResourceException idénticas en dos intentos: "Recurso esperado no encontrado: Content/Projectiles/Cosmic/FusionBlackHoleProjectile" y ".../OlvidoBlackHoleProjectile" → el mod entero se desactivaba ("Los mods se han desactivado automáticamente")
+- CAUSA RAÍZ: tModLoader auto-requesta la textura por defecto de TODO ModProjectile (namespace + nombre de clase) durante Mod.TransferAllAssets(), aunque PreDraw devuelva false y jamás se dibuje. El commit v6.14 entregó los 2 agujeros nuevos con todo su arte VFX (5 texturas del Olvido + 2 iconos de bastón) pero olvidó los 2 PNGs de sombra por defecto
+- Auditoría completa anti-recurrencia: script ad-hoc que resuelve la textura esperada de las 55 clases de contenido por namespace+clase (regla REAL de tModLoader, no por archivo) y verifica existencia del PNG → exactamente 2 faltantes (los del log); AethonWingsItem es class abstract → tModLoader no la registra (falso positivo descartado); 0 overrides de Texture apuntando a archivos inexistentes
+- Analicé el patrón del CrimsonBlackHoleProjectile.png píxel a píxel (perfil radial): disco negro sólido r≤14 alpha 255 → rim (255,30,100) pico r≈18-22 alpha ~70 → desvanecido (200,0,70)→(120,0,40) hasta r=37 → 4181 px visibles
+- tools/gen_fusion_olvido_projectile_tex.py NUEVO (reproducible): genera ambas sombras con ese patrón exacto (4184 px visibles cada una) + invariantes verificadas (centro negro sólido, esquinas transparentes) + pase ámbar extra en la FUSIÓN
+- FusionBlackHoleProjectile.png (76×76 RGBA): identidad FUSIÓN — rim DOBLE ámbar del Gargantua (255,175,80) por dentro + carmesí del vacío (200,20,90) por fuera
+- OlvidoBlackHoleProjectile.png (76×76 RGBA): identidad OLVIDO — rim magenta profundo de la referencia Regicide (255,45,110) desvaneciendo a rojo oscurísimo (110,0,45)
+- Validación VLM de las 3 sombras lado a lado (4×, fondo oscuro y claro): las tres limpias sin artefactos; #2 lee ámbar+rosa, #3 lee magenta ✓
+- Verificación de empaquetado: buildIgnore NO excluye PNGs → ambas texturas entrarán al .tmod; git check-ignore limpio
+- Docs: build.txt 6.14 → 6.14.1, CHANGES.md (entrada v6.14.1 con causa raíz + lección anti-recurrencia)
+- Compilación contra tModLoader 2026.07.3.0 REAL (/tmp/verify + /tmp/tml, dotnet 8.0.425 en ~/.dotnet): Build succeeded · 0 errores · 0 warnings
+
+Test:
+- Sandbox: auditoría de assets 0 faltantes + invariantes numéricas de los PNGs + VLM 3 sombras limpias + compilación limpia
+- PENDIENTE (el usuario prueba en su máquina): Develop Mods → Build (version 6.14.1) → el mod debe CARGAR sin desactivarse → client.log SIN MissingResourceException → los TRES bastones de agujero (base/fusión/olvido) funcionan con sus visuales completos
+
+Next:
+- Si carga bien: el usuario valida visualmente el Olvido (rémula exacta de la referencia) y la Fusión (anillo naranja + vórtice carmesí)
+- LECCIÓN REGISTRADA EN CHANGES.md: cada ModProjectile/ModItem nuevo SIEMPRE necesita su PNG de sombra por defecto, aunque nunca se dibuje (auditar antes de commit)
+
+Stage Summary:
+- v6.14.1: el mod vuelve a cargar — los 2 únicos errores del client.log eran las 2 texturas de sombra por defecto olvidadas en v6.14; fix de 2 PNGs de 76×76 con las identidades de cada agujero, 0 líneas de código tocadas, auditoría completa de los 55 content-types limpia, compilación 0/0

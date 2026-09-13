@@ -1,5 +1,53 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.14.1 — FIX DE CARGA: las 2 texturas de sombra olvidadas (el mod no cargaba)
+
+**Feedback del usuario**: "hay varios errores" + client.log — el mod se
+desactivaba automáticamente al cargar la v6.14 con
+`MissingResourceException` × 2:
+
+```
+ReLogic.AssetLoadException: Asset could not be found:
+    "Content\Projectiles\Cosmic\FusionBlackHoleProjectile"
+    "Content\Projectiles\Cosmic\OlvidoBlackHoleProjectile"
+```
+
+**Causa raíz**: tModLoader AUTO-REQUESTA la textura por defecto de todo
+`ModProjectile` (ruta = namespace + nombre de clase) durante
+`TransferAllAssets()`, aunque su `PreDraw` devuelva `false` y jamás se
+dibuje. El commit v6.14 entregó los dos agujeros nuevos con todo su arte
+procedural/VFX (5 texturas del Olvido + 2 iconos de bastón) pero olvidó
+los DOS PNGs de sombra visual por defecto → ambos errores se agregaban
+en un `MultipleException` → el mod entero quedaba deshabilitado.
+
+**El fix** (sin tocar NI UNA línea de los agujeros):
+
+  · **FusionBlackHoleProjectile.png** (76×76 RGBA) — sombra con la
+    identidad de la FUSIÓN: disco negro sólido (r≤14) + rim DOBLE, ámbar
+    del Gargantua base (255,175,80) por dentro + carmesí del vacío
+    (200,20,90) por fuera.
+  · **OlvidoBlackHoleProjectile.png** (76×76 RGBA) — sombra con la
+    identidad del OLVIDO: rim magenta profundo de la referencia Regicide
+    (255,45,110) desvaneciendo a rojo oscurísimo (110,0,45).
+
+Ambas calcan el patrón EXACTO del CrimsonBlackHoleProjectile.png medido
+píxel a píxel (disco negro r≤14 alpha 255 · rim pico r≈18-22 alpha ~70 ·
+desvanecido hasta r=37 · 4184 px visibles vs 4181 del carmesí) —
+generadas por `tools/gen_fusion_olvido_projectile_tex.py` (reproducible)
+y validadas por VLM como sombras limpias sin artefactos.
+
+**Auditoría completa anti-recurrencia**: script que resuelve la textura
+esperada de las 55 clases de contenido por namespace+clase y verifica la
+existencia del PNG → 0 faltantes tras el fix (AethonWingsItem es
+abstract → tModLoader no la registra). La lección queda registrada:
+**cada ModProjectile/ModItem nuevo SIEMPRE necesita su PNG de sombra,
+aunque nunca se dibuje.**
+
+**Verificación**: compilación contra tModLoader v2026.07.3.0 REAL
+(DLLs del release): **0 errores · 0 warnings**. Pendiente: el usuario
+reconstruye en Develop Mods → Build → el mod debe cargar limpio y los
+TRES bastones (base/fusión/olvido) funcionar.
+
 ## Commit v6.14 — LOS DOS AGUJEROS NEGROS NUEVOS: LA FUSIÓN (base+vacío) Y EL OLVIDO (100% EXACTO a la referencia)
 
 **Feedback del usuario**: "para que el agujero negro sea exacto, has 100
