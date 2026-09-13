@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "1) Yes, violet electric storm with branching lightning inside the black core.\n2) Yes, purple/pink plasma ring with a visible hotspot.\n3) Yes, golden angular runes orbiting the outer ring.\n4) Yes, pink bolts escaping/branching from the ring.\n5) Yes, spiral arms are present within the inner structure.\n6) 9/10 (Highly matches the description: void core, internal lightning, energy ring, rays, particles, runes, distortion).\n7) No visual defects detected; image is clean and high quality.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789325706,
+  "id": "20260914025501faf947f67a924da8",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260914025501faf947f67a924da8",
+  "usage": {
+    "completion_tokens": 114,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1705,
+    "prompt_tokens_details": {
+      "cached_tokens": 2
+    },
+    "total_tokens": 1819
+  }
+}

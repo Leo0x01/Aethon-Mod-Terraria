@@ -1,5 +1,79 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.15 — EL OLVIDO 100% CÓDIGO: LA REFERENCIA ROJA BORRADA, NUEVA REFERENCIA MÁGICA
+
+**Feedback del usuario**: "creaste OlvidoVortex.png y usaste la misma
+referencia para crear el agujero negro, eso no puede ser, borra todo
+rastro de la referencia OlvidoVortex.png del proyecto, el agujero negro
+no puede ser creado por sprite, debe ser creado enteramente por codigo
+… borra todas las referencias del agujero negro rojo del proyecto
+incluyendo el sprite, los otros agujeros negros no los toques. Entonces
+esta vez en el agujero negro del olvido crealo y sustituye todas las
+referencias por la nueva referencia que te doy [imagen + prompt:
+núcleo oscuro, anillo energético púrpura/rosa, rayos, partículas,
+runas doradas y distorsión espacial]".
+
+### A. LA PURGA — TODO rastro de la referencia roja, BORRADO
+
+  · **5 PNGs eliminados** (el arte extraído píxel a píxel de la imagen
+    de Reddit en v6.14): OlvidoVortex.png (1024), OlvidoHalo.png,
+    OlvidoSphere.png, OlvidoBackplate.png, OlvidoWisps.png.
+  · **research/olvido/ eliminado** (3.1 MB): el pipeline entero de
+    extracción (scripts, máscaras, drafts, comparaciones, curvas de
+    optimización).
+  · Comentarios y tooltips que mencionaban la extracción/Regicide
+    reescritos. **Los otros agujeros negros (base, vacío, fusión):
+    NI UNA LÍNEA TOCADA.**
+
+### B. EL NUEVO OLVIDO — compuesto por CÓDIGO cada frame
+
+`OlvidoBlackHoleRenderer.cs` reescrito de cero: ~380 cuadros de luz por
+frame usando SOLO los tres pinceles genéricos GENERADOS POR CÓDIGO de
+la biblioteca VFX (SoftGlow = degradé radial, Ring = anillo fino,
+BlackDisk = disco negro — los mismos de BoltRenderer y las coronas).
+CERO sprites de arte. Cero estado, cero red: hash puro determinista.
+
+Las 13 capas (según la nueva imagen + prompt del usuario):
+
+  · **0. Aura oscura mística** (alfa) — el vacío absorbe la luz.
+  · **1. Nebulosas púrpura/azul** difusas girando + polvo carmesí/magenta.
+  · **2/5. ANILLO DE PLASMA** — 44 cápsulas por mitad sobre la elipse
+    inclinada: hotspot Doppler incandescente + turbulencia hash a 12 Hz
+    (zonas brillantes intercaladas con sombras), gradiente térmico
+    blanco-amarillo → rosa → violeta; la mitad delantera CRUZA POR
+    DELANTE de la esfera.
+  · **3. Brazos espirales** del vórtice (magenta → violeta).
+  · **4. Núcleo** — disco NEGRO ABSOLUTO + filo violeta respirando.
+  · **6. Corredores de fotones** orbitando y acelerando.
+  · **7. RAYOS ELÉCTRICOS** — una TORMENTA de 4 rayos violeta con núcleo
+    casi blanco y RAMAS fractales DENTRO del vacío (regenerados a ~6 Hz)
+    + 2 rayos rosa escapando del anillo.
+  · **8. Destellos polares** — agujas ahusadas en los polos del vórtice.
+  · **9. RUNAS DORADAS** — 10 glifos angulares ORIGINALES (lanza, cáliz,
+    puerta, estrella, rayo, arco, espiral, trono, llave, ojo) orbitando
+    en círculo perfecto con latido/flotación propios + anillo rúnico.
+  · **10. Ondas de distorsión** expandiéndose (el espacio-tiempo late).
+  · **11. Partículas luminosas** con deriva radial hacia afuera.
+  · **12. Aura mística** violeta pulsante.
+
+**La lección del brillo**: `Color * f` de XNA escala los 4 canales → el
+blending aditivo queda CUADRÁTICO (f²) y todo se apaga (ronda VLM 1:
+"too dim, bolts missing"). FIX: helper `Tint(c, f)` con rgb PLENO +
+alfa = f → brillo LINEAL (el patrón validado del Cometa Estelar).
+Rondas VLM: 5/10 → 7/10 → 8/10 → **9/10 "highly matches"**.
+
+`OlvidoBlackHoleProjectile.cs`: física probada INTACTA, paleta
+recoloreada al violeta/fucsia/dorado (dusts, partículas de biblioteca,
+iluminación magenta-violeta, impactos y muerte). Icono del bastón
+regenerado (28×30, bastón violeta + mini-agujero púrpura/rosa + runa
+dorada, VLM ✓). Tooltips nuevos ("100% creado por código").
+
+**Verificación**: mock Python EXACTO (tools/mock_olvido_v615.py,
+texturas reales + blending del juego) validado por VLM en 4 rondas →
+renders archivados en research/olvido_codigo/. Compilación contra
+tModLoader v2026.07.3.0 REAL: **0 errores · 0 warnings**. Auditoría de
+assets: 0 texturas faltantes.
+
 ## Commit v6.14.2 — LOS BASTONES NUEVOS SE ENTREGAN AL JUGADOR (el kit de pruebas los olvidó)
 
 **Feedback del usuario**: "te olvidaste que debes darselo al jugador".

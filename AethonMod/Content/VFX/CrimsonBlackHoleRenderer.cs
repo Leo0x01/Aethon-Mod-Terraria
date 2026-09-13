@@ -35,8 +35,8 @@ namespace AethonMod.Content.VFX
     /// La esfera sigue comiéndose TODO lo que cae tras ella (las corrientes
     /// y los chorros se dibujan ANTES del pase alfa del disco negro).
     ///
-    /// La referencia ORIGINAL del usuario (Reddit: Ancients Awakened —
-    /// Regicide, Oblivion God of the Void): VÓRTICE DE PLASMA carmesí con
+    /// La referencia ORIGINAL del usuario (imagen externa hoy retirada del
+    /// proyecto): VÓRTICE DE PLASMA carmesí con
     /// esfera negra compacta + GAP, anillo interior 360° a ~1.5R, UNA HOJA
     /// GRUESA EN CRESCIENTE que barre por ARRIBA (O→NO→N→NNE) con aguja
     /// hasta ~5.9R, un cresiente BAJO (ESE→S→SSW) hasta ~6.3R, todo

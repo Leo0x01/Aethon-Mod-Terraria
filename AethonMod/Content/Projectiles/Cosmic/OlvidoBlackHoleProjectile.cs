@@ -12,27 +12,25 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// OlvidoBlackHoleProjectile — v6.14 — EL AGUJERO NEGRO DEL OLVIDO.
+    /// OlvidoBlackHoleProjectile — v6.15 — EL AGUJERO NEGRO DEL OLVIDO.
     ///
-    /// PETICIÓN DEL USUARIO: "crea un 4to agujero negro que sea 100% exacto
-    /// a la referencia, este se debe llamar agujero negro del olvido… usa
-    /// todas las técnicas que sean necesarias".
+    /// DIRECTRIZ DEL USUARIO: "el agujero negro no puede ser creado por
+    /// sprite, debe ser creado enteramente por código" — el visual es
+    /// 100% CÓDIGO (OlvidoBlackHoleRenderer v6.15: anillo de plasma por
+    /// cápsulas con hotspot + turbulencia, brazos espirales, rayos
+    /// eléctricos deterministas, runas doradas orbitando, ondas de
+    /// distorsión, nebulosas y aura mística — CERO sprites de arte).
     ///
-    /// LA RESPUESTA: en vez de recrear el vórtice proceduralmente (los
-    /// intentos anteriores), el ARTE SE EXTRAE DE LOS PÍXELES DE LA PROPIA
-    /// REFERENCIA (Ancients Awakened — Regicide, Oblivion God of the Void)
-    /// y se anima como capas: backplate del vacío, halo con bloom, vortex
-    /// exacto (anillo + disco + brazos + aguja), esfera con su estrella
-    /// rosa y rayo púrpora interiores, y velos exteriores en rotación lenta
-    /// — más pulsos de fotones, llamaradas del hotspot y chispas cayendo.
+    /// NUEVA REFERENCIA (imagen + prompt): núcleo de vacío absoluto,
+    /// anillo energético púrpura/rosa/magenta, rayos eléctricos,
+    /// partículas luminosas, runas doradas y distorsión espacial.
     ///
     /// La FÍSICA de juego es la MISMA copia probada del agujero carmesí
     /// (pop elástico, atracción 10× el sol, aura con ticks acelerados,
     /// devora balas, persecución lenta, evaporación y anillo de Einstein
-    /// final). El agujero del vacío (CrimsonBlackHoleProjectile) queda
-    /// INTACTO — este es su hermano gemelo EXACTO a la referencia.
+    /// final). Los demás agujeros quedan INTACTOS.
     ///
-    /// ESCALA: esfera de 52px de radio, arte de 811px de envergadura.
+    /// ESCALA: esfera de 52px de radio, arte de ~7R de envergadura.
     /// </summary>
     public class OlvidoBlackHoleProjectile : ModProjectile
     {
@@ -119,8 +117,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
-            // === PARTÍCULAS (solo cliente) — paleta del olvido (carmesí
-            //     profundo + blanco-rosado), a la escala del arte extraído ===
+            // === PARTÍCULAS (solo cliente) — paleta del olvido (violeta
+            //     eléctrico + fucsia + blanco-lilac + destellos dorados),
+            //     a la escala del vórtice de código ===
             if (Main.netMode != NetmodeID.Server)
             {
                 SpawnAbsorbedDusts();
@@ -167,7 +166,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             Dust d2 = Dust.NewDustPerfect(pr.Center, DustID.PinkCrystalShard,
                                 (pr.Center - Projectile.Center) * -0.02f +
                                 new Vector2(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-1.5f, 1.5f)),
-                                200, new Color(255, 130, 200), 0.7f);
+                                200, new Color(230, 150, 255), 0.7f);
                             d2.noGravity = true;
                             d2.fadeIn = 0f;
                         }
@@ -210,9 +209,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === ILUMINACIÓN PULSANTE — TRES puntos para el disco GIGANTE ===
+            // === ILUMINACIÓN PULSANTE — TRES puntos para el vórtice ===
+            // Violeta-magenta con un toque cálido (la estirpe arcana).
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
-            Vector3 light = new Vector3(1.15f * pulse, 0.28f * pulse, 0.42f * pulse);
+            Vector3 light = new Vector3(0.95f * pulse, 0.32f * pulse, 0.90f * pulse);
             Lighting.AddLight(Projectile.Center, light);
             float le = OlvidoBlackHoleRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
@@ -249,8 +249,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS — paleta del olvido: carmesí profundo / fucsia /
-        //  blanco-rosado (la del arte exacto), a la escala del disco (52px).
+        //  PARTÍCULAS — paleta del olvido: violeta eléctrico / fucsia /
+        //  blanco-lilac + destellos dorados (la del vórtice de código).
         // ------------------------------------------------------------------
 
         /// <summary>Materia absorbida (dusts) cayendo en espiral desde los brazos.</summary>
@@ -284,15 +284,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Color color;
                     if (dist < 1.6f * shadow)
                     {
-                        color = new Color(255, 240, 250); // blanco-rosado al borde
+                        color = new Color(245, 235, 255); // blanco-lila al borde
                     }
                     else
                     {
                         color = Main.rand.Next(3) switch
                         {
-                            0 => new Color(238, 40, 90),   // carmesí vivo
-                            1 => new Color(255, 70, 150),   // fucsia
-                            _ => new Color(180, 15, 70),    // olvido profundo
+                            0 => new Color(215, 70, 255),   // violeta eléctrico
+                            1 => new Color(255, 70, 190),   // fucsia
+                            _ => new Color(110, 25, 175),    // olvido profundo
                         };
                     }
 
@@ -317,7 +317,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Sin(angle) * dist);
                 Vector2 vel = (Projectile.Center - spawnPos) * 0.03f;
                 Dust d = Dust.NewDustPerfect(spawnPos, DustID.Enchanted_Pink,
-                    vel, 255, new Color(255, 130, 190), 0.9f);
+                    vel, 255, new Color(216, 140, 255), 0.9f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -362,8 +362,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
                                    tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
-                Color start = new Color(255, 60, 130, 190);
-                Color end = new Color(255, 244, 235, 235);
+                Color start = new Color(210, 80, 255, 190);
+                Color end = new Color(255, 244, 245, 235);
 
                 var p = new ParticleData
                 {
@@ -390,8 +390,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Estelas orbitando en la banda del vórtice exacto
-        /// (2.3..5.8× la esfera, elipse casi circular 0.96 del arte).</summary>
+        /// <summary>Estelas orbitando en la banda del vórtice de código
+        /// (2.3..5.8× la esfera, elipse del plasma 0.96).</summary>
         private void SpawnLibraryAccretionDisk()
         {
             if (Main.rand.NextBool(4))
@@ -405,7 +405,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
-                    (float)Math.Sin(angle) * radius * 0.96f); // elipse del arte
+                    (float)Math.Sin(angle) * radius * 0.96f); // elipse del plasma
 
                 var p = new ParticleData
                 {
@@ -414,9 +414,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Scale = new Vector2(2.2f, 0.55f),
                     Rotation = angle + MathHelper.PiOver2,
                     RotationSpeed = angVel,
-                    PackedColor = ParticleManager.PackColor(new Color(255, 70, 140, 200)),
-                    PackedStartColor = ParticleManager.PackColor(new Color(255, 120, 180, 200)),
-                    PackedEndColor = ParticleManager.PackColor(new Color(90, 0, 45, 40)),
+                    PackedColor = ParticleManager.PackColor(new Color(230, 70, 220, 200)),
+                    PackedStartColor = ParticleManager.PackColor(new Color(255, 140, 235, 200)),
+                    PackedEndColor = ParticleManager.PackColor(new Color(70, 0, 110, 40)),
                     TimeLeft = 48,
                     Duration = 48,
                     TextureId = ParticleTex.TrailGlow,
@@ -435,7 +435,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  RENDER — EL ARTE EXACTO EXTRAÍDO DE LA REFERENCIA
+        //  RENDER — 100% CÓDIGO (OlvidoBlackHoleRenderer v6.15)
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
@@ -465,8 +465,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el Agujero Negro del Olvido completo (el arte EXACTO de la
-        /// referencia como capas animadas). Compartido entre el pase del
+        /// Dibuja el Agujero Negro del Olvido completo (el vórtice 100%
+        /// por código del OlvidoBlackHoleRenderer). Compartido entre el pase del
         /// mundo (PreDraw) y el pase posterior a la lente.
         /// CONTRATO: el SpriteBatch llega CERRADO y queda CERRADO.
         /// </summary>
@@ -489,7 +489,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  IMPACTO Y MUERTE (física exacta, paleta del olvido)
+        //  IMPACTO Y MUERTE (física exacta, paleta violeta/dorada del olvido)
         // ------------------------------------------------------------------
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -497,8 +497,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.Server) return;
 
             // Micro-colapso sobre el objetivo
-            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(255, 40, 100), 18);
-            ParticlePresets.RingPulse(target.Center, 90f, new Color(255, 150, 190, 170), 22);
+            ParticlePresets.Implosion(target.Center, 70f, 16, new Color(200, 50, 255), 18);
+            ParticlePresets.RingPulse(target.Center, 90f, new Color(230, 160, 255, 170), 22);
 
             // Implosión: 50 partículas convergiendo en espiral
             for (int i = 0; i < 50; i++)
@@ -514,7 +514,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.5f;
                     Vector2 vel = (toCenter * 7f + tangent * 4f);
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        vel, 200, new Color(255, 70, 130), 1.3f);
+                        vel, 200, new Color(230, 80, 220), 1.3f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -528,17 +528,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * Main.rand.NextFloat(5f, 11f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(5f, 11f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 220, new Color(255, 60, 120), 1.5f);
+                    dir, 220, new Color(190, 60, 240), 1.5f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // Destellos encantados rosas
+            // Destellos encantados violeta y dorados
             for (int i = 0; i < 15; i++)
             {
+                Color c = Main.rand.NextBool(3)
+                    ? new Color(255, 210, 120)   // destello dorado arcano
+                    : new Color(240, 200, 255);  // violeta pálido
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink,
                     new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-4f, 4f)),
-                    255, Color.White, 1.0f);
+                    255, c, 1.0f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
@@ -574,11 +577,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             catch { }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
-            // Presets — colapso gravitatorio del olvido
+            // Presets — colapso gravitatorio del olvido (violeta + blanco)
             ParticlePresets.Implosion(Projectile.Center, 185f, 52,
-                new Color(255, 60, 110), 28);
+                new Color(200, 55, 255), 28);
             ParticlePresets.Explosion(Projectile.Center, 145f, 30,
-                new Color(255, 225, 240), new Color(255, 20, 90), 44);
+                new Color(245, 230, 255), new Color(170, 30, 220), 44);
 
             // Implosión: partículas convergiendo
             for (int i = 0; i < 60; i++)
@@ -593,7 +596,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     toCenter.Normalize();
                     Vector2 tangent = new Vector2(-toCenter.Y, toCenter.X) * 0.7f;
                     Dust d = Dust.NewDustPerfect(spawnPos, DustID.Crimson,
-                        toCenter * 9f + tangent * 5f, 220, new Color(255, 80, 140), 1.4f);
+                        toCenter * 9f + tangent * 5f, 220, new Color(225, 85, 235), 1.4f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
@@ -607,7 +610,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 13f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 13f));
                 Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Crimson,
-                    dir, 230, new Color(255, 50, 110), 1.6f);
+                    dir, 230, new Color(195, 55, 245), 1.6f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

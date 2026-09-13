@@ -13,7 +13,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
     /// CrimsonBlackHoleProjectile — v6.10 — EL AGUJERO NEGRO CARMESÍ
-    /// "OBLIVION" (la referencia ORIGINAL: Ancients Awakened — Regicide).
+    /// "OBLIVION" (la referencia ORIGINAL: imagen externa hoy retirada del proyecto).
     ///
     /// MÉTODO (petición del usuario): "investiga más sobre agujeros negros,
     /// investiga las matemáticas de cómo crear un agujero negro, crea otra

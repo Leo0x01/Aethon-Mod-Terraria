@@ -7641,3 +7641,56 @@ Next:
 
 Stage Summary:
 - v6.14.1: el mod vuelve a cargar — los 2 únicos errores del client.log eran las 2 texturas de sombra por defecto olvidadas en v6.14; fix de 2 PNGs de 76×76 con las identidades de cada agujero, 0 líneas de código tocadas, auditoría completa de los 55 content-types limpia, compilación 0/0
+
+---
+Task ID: 27
+Agent: Z.ai Code (agente principal)
+Task: v6.14.2 — "te olvidaste que debes darselo al jugador": los bastones nuevos no se entregaban
+
+Work Log:
+- El usuario reportó que olvidé entregar los agujeros nuevos al jugador
+- Localicé el sistema de entrega del mod: TestingPlayer.OnEnterWorld (kit de pruebas) — EnsureItem garantiza cada arma cósmica en el inventario en CADA entrada al mundo (v5.98), independiente del guardado
+- Diagnóstico: los dos staves nuevos SÍ tenían receta (5 madera, como todos) pero NUNCA se registraron en el kit → el jugador entraba al mundo y no recibía nada
+- Fix: 2 líneas en TestingPlayer.cs — EnsureItem(FusionBlackHoleStaff) + EnsureItem(OlvidoBlackHoleStaff), junto al carmesí (v6.02), con comentario v6.14
+- Docs: build.txt 6.14.2, CHANGES.md v6.14.2 (causa + lección anti-recurrencia: cada arma nueva se registra en DOS sitios — su archivo Y el kit)
+- Compilación contra tModLoader 2026.07.3.0 REAL: 0 errores 0 warnings
+- Commit edf0049 + push a GitHub main ✓
+
+Test:
+- Sandbox: compilación limpia 0/0
+- PENDIENTE (usuario prueba): Develop Mods → Build (v6.14.2) → entrar a cualquier mundo → el jugador recibe FusionBlackHoleStaff y OlvidoBlackHoleStaff automáticamente (si no los tiene)
+
+Next:
+- Validación visual de los dos agujeros nuevos por el usuario
+- Checklist de entrega para futuras armas: archivo + receta + PNG de sombra + EnsureItem en TestingPlayer
+
+Stage Summary:
+- v6.14.2 EN GitHub (edf0049): los dos bastones nuevos ahora se entregan al jugador al entrar al mundo (mismo protocolo EnsureItem que todas las armas cósmicas) — 0 errores 0 warnings
+
+---
+Task ID: 28
+Agent: Z.ai Code (agente principal)
+Task: v6.15 — PURGA de la referencia roja + EL OLVIDO rehecho 100% POR CÓDIGO con la nueva referencia mágica
+
+Work Log:
+- Directiva del usuario: el agujero no puede ser creado por sprite → BORRAR todo rastro de la referencia roja (OlvidoVortex.png y derivados, research/olvido incluido), NO tocar los otros agujeros, y recrear el Olvido con la NUEVA referencia (imagen + prompt: núcleo de vacío, anillo púrpura/rosa, rayos, partículas, runas doradas, distorsión)
+- Análisis VLM de la nueva imagen de referencia: núcleo negro con rayos violeta interiores, anillo elíptico blanco-rosa→magenta, runas doradas en círculo, destellos polares, polvo carmesí, valores RGB extraídos
+- LA PURGA: git rm de los 5 PNGs extraídos (OlvidoVortex/Halo/Sphere/Backplate/Wisps) + research/olvido completo (3.1 MB de pipeline de extracción); comentarios/tooltips que citaban Regicide/Ancients Awakened neutralizados (ediciones SOLO de comentarios en los archivos del carmesí — cero líneas de código de los otros agujeros)
+- OlvidoBlackHoleRenderer.cs REESCRITO DE CERO (700 líneas): 13 capas compuestas por código cada frame (~380 quads) usando solo los 3 pinceles genéricos generados por código (SoftGlow/Ring/BlackDisk): aura oscura alfa → nebulosas+polvo → anillo de plasma 44 cápsulas/mitad (hotspot Doppler + turbulencia hash 12 Hz + gradiente térmico) → brazos espirales → núcleo negro absoluto+filo violeta → mitad delantera del anillo → corredores de fotones → rayos eléctricos (4 violetas con ramas DENTRO del vacío + 2 rosa escapando del anillo, regenerados ~6 Hz) → destellos polares → 10 runas doradas orbitando (tabla de glifos originales por trazos, técnica de la corona rúnica) → ondas de distorsión → partículas radiales → aura mística
+- LECCIÓN CLAVE DE BRILLO: Color*f de XNA escala los 4 canales → blending aditivo cuadrático (f²) → todo tenue (VLM ronda 1: "too dim, bolts missing"). FIX: helper Tint(c,f) con rgb pleno + alfa=f → LINEAL (patrón validado del Cometa Estelar)
+- Mock Python exacto (tools/mock_olvido_v615.py, texturas reales + blending del juego): 4 rondas VLM → 5/10 → 7/10 (runas como puntos, rayos ausentes) → 8/10 (rayos con ramas, runas legibles ×1.35) → 9/10 "highly matches" tras subir la tormenta interior (4 rayos, umbral 0.08, grosor 0.13R)
+- OlvidoBlackHoleProjectile.cs: física intacta, paleta recolor violeta/fucsia/dorado (dusts, partículas biblioteca, luz magenta-violeta, impacto/muerte)
+- Icono del bastón regenerado (tools/gen_olvido_staff_icon_v615.py): bastón violeta + mini-agujero púrpura/rosa + runa dorada + destello arcano, VLM ✓
+- Tooltips reescritos ("100% creado por código"); auditoría de assets 54 clases: 0 faltantes; compilación 0 errores 0 warnings
+- Docs: build.txt 6.15, CHANGES.md v6.15, research/olvido_codigo (4 renders validados)
+
+Test:
+- Sandbox: 4 rondas VLM sobre mock exacto (9/10 final, sin defectos) + compilación 0/0 + código sin ninguna referencia a la referencia roja
+- PENDIENTE (usuario prueba): Build v6.15 → OlvidoBlackHoleStaff → el vórtice mágico 100% código (anillo púrpura/rosa con hotspot, tormenta violeta dentro del vacío, rayos rosa, runas doradas orbitando, ondas, nebulosas) SIN errores en client.log; los otros 3 agujeros IDÉNTICOS
+
+Next:
+- Si el usuario ajusta: todos los parámetros son constantes del renderer (densidad de cápsulas, umbrales de rayos, escala de runas)
+- La LECCIÓN DEL BRILDO LINEAL (Tint vs Color*f) aplica a TODO el mod de ahora en adelante
+
+Stage Summary:
+- v6.15: el Olvido renace 100% por código según la nueva referencia mágica — 13 capas, ~380 quads/frame, runas doradas y tormenta eléctrica interiores, validado VLM 9/10 en mock exacto; la referencia roja purgada por completo (sprites + pipeline + menciones); los otros agujeros intactos
