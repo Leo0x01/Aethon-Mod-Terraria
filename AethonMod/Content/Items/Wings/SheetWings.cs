@@ -13,6 +13,7 @@ namespace AethonMod.Content.Items.Wings
     /// naranja → rojo profundo (la paleta de las ondas de fuego del
     /// SunStaff). Spritesheet vanilla de 4 frames.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class SolarNovaWings : AethonWings
     {
         public override int FlyTime => 190;
@@ -36,6 +37,7 @@ namespace AethonMod.Content.Items.Wings
     /// Shards angulares cian facetados con destellos internos y bordes
     /// de brillo aditivo: tecnología alienígena hecha gema.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class QuantumPlasmaWings : AethonWings
     {
         public override int FlyTime => 180;
@@ -61,6 +63,7 @@ namespace AethonMod.Content.Items.Wings
     /// VENAS FUCSIA vivas (la sangre del vacío de la Reina) y estrellas
     /// internas.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class EtherealVoidWings : AethonWings
     {
         public override int FlyTime => 180;
@@ -84,6 +87,7 @@ namespace AethonMod.Content.Items.Wings
     /// Plumas etéreas celestes con puntas de carámbano y brillo interior
     /// frío; las plumas altas casi se desvanecen en el aire.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class GlacialEtherWings : AethonWings
     {
         public override int FlyTime => 180;
@@ -120,6 +124,7 @@ namespace AethonMod.Content.Items.Wings
     /// shard cristalizado en el hombro: las alas de algo que voló cuando
     /// el mundo era nuevo.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class GenesisFossilWings : AethonWings
     {
         public override int FlyTime => 180;
@@ -145,6 +150,7 @@ namespace AethonMod.Content.Items.Wings
     /// redondeados: el look exacto del campo de fuerza del agujero negro
     /// (la burbuja estilo Nebula Pillar que el usuario validó en v5.93).
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class NebulaPillarWings : AethonWings
     {
         public override int FlyTime => 185;
@@ -170,6 +176,7 @@ namespace AethonMod.Content.Items.Wings
     /// de corona blanco-oro en abanico que forman la silueta del ala, con
     /// su arco de limbo abrazando el conjunto.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class EclipseWings : AethonWings
     {
         public override int FlyTime => 190;
@@ -194,6 +201,7 @@ namespace AethonMod.Content.Items.Wings
     /// Plumas de choque blancas-rosadas-violeta con ANILLOS DE ONDA
     /// expansiva cruzando cada ala: una supernova atada a tu espalda.
     /// </summary>
+    [AutoloadEquip(EquipType.Wings)]
     public class SupernovaWings : AethonWings
     {
         public override int FlyTime => 185;

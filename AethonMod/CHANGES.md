@@ -1,5 +1,72 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.07 — FIX: el mod no cargaba (IndexOutOfRangeException en las 8 alas de spritesheet)
+
+**Reporte del usuario**: "estaba comenzando las pruebas y está lleno de
+errores" (client.log de tModLoader 2026.07.3.0).
+
+### A. EL ERROR (del log real)
+
+```
+System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at AethonMod.Content.Items.Wings.AethonWings.SetStaticDefaults() in AethonWings.cs:line 45
+   at Terraria.ModLoader.ModItem.SetupContent()
+```
+
+El error se repetía **8 veces** (una por cada ala de spritesheet: Nova Solar,
+Plasma Cuántico, Vacío Etéreo, Éter Glacial, Fósiles del Génesis, Pilar de
+Nebulosa, Eclipse y Supernova) y desactivaba el mod al cargar. Las 2 alas
+"técnica coronas" (Horizonte de Sucesos y Anillo de Fotones) SÍ pasaban.
+
+### B. LA CAUSA RAÍZ
+
+Las 8 clases de `SheetWings.cs` **no llevaban el atributo
+`[AutoloadEquip(EquipType.Wings)]`**. Sin ese atributo, tModLoader nunca
+reserva el slot de equipo de alas → `Item.wingSlot` queda en `-1` → la línea
+`ArmorIDs.Wing.Sets.Stats[Item.wingSlot]` indexa fuera del array y revienta
+el SetupContent de TODO el mod. Las 2 alas de coronas sí lo tenían (por eso
+pasaban): la diferencia entre los dos grupos lo confirmó al 100%.
+
+**Por qué no se detectó antes**: la compilación C# pasa perfecto — el
+atributo es metadata de autoload, no código. Solo revienta en runtime, en la
+fase "Configurando contenido" del arranque del juego.
+
+### C. EL FIX
+
+- `[AutoloadEquip(EquipType.Wings)]` añadido a las 8 clases de
+  `SheetWings.cs`. Con el atributo, tML reserva el slot leyendo la textura
+  `Nombre_Wings.png` (las 8 existen y son válidas: RGBA, altura múltiplo de
+  4 para la tira de 4 frames) y `Item.wingSlot` llega con valor real a
+  `SetStaticDefaults`.
+- Nada más tocado: stats, dusts, tooltips, recetas, localización, entrega al
+  jugador y las 2 alas procedurales quedaron igual (ya eran correctas).
+
+### D. VERIFICACIÓN
+
+- **Compilación completa del mod contra tModLoader.dll REAL v2026.07.3.0**
+  (el mismo release que usa el usuario, descargado de GitHub releases):
+  **0 errores, 0 warnings** (entorno de verificación del sandbox reconstruido
+  desde cero: .NET 8 SDK + tModLoader.zip 2026.07.3.0 + referencias
+  tModLoader/FNA/ReLogic/TerrariaHooks/Steamworks.NET).
+- Validación PIL de las 10 texturas de equipo `_Wings.png`: todas PNG RGBA
+  válidas, alturas múltiplo de 4 (tira de 4 frames ✓), y las 2 de coronas
+  totalmente transparentes (8×8, el truco Calamity para que el dibujo vanilla
+  no pinte nada) ✓.
+- Diagnóstico diferencial del log: 8 fallos = exactamente las 8 clases sin
+  atributo; las 2 con atributo pasaron su `SetStaticDefaults` — evidencia
+  concluyente de la causa.
+
+### E. NOTA SOBRE EL AVISO DEL ICONO
+
+El log del usuario contiene un aviso NO fatal durante el empaquetado:
+`[FNA]: Image loading failed: unknown image type` (aparece en la fase
+"Empaquetando: AethonMod"). El `icon.png` (80×80 RGBA) y `icon_small.png`
+(30×30 RGBA) del repo son válidos; si vuelve a aparecer, restaurarlos con
+`git checkout -- icon.png icon_small.png`. El empaquetado terminó bien y no
+afecta al juego.
+
+---
+
 ## Commit v6.06 — LAS 10 ALAS DE PRUEBA END-GAME (2 con técnica de las coronas + 8 con spritesheet procedural)
 
 **Petición del usuario**: "investiga como funcionan las alas en terraria,
