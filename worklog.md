@@ -7425,3 +7425,26 @@ Test:
 
 Next:
 - Esperar la verificación en juego del usuario (v6.05 agujero carmesí + 10 alas v6.07); si llegan errores de client.log → diagnóstico como siempre
+
+
+---
+Task ID: 19
+Agent: Z.ai Code (agente principal)
+Task: v6.08 — EL AGUJERO NEGRO SEGÚN LAS REFERENCIAS (horizonte más pequeño + disco más alargado) + EL SISTEMA DE ALAS COMPLETAMENTE REHECHO (todas técnica coronas, mariposa y hada nuevas, animaciones mejoradas)
+
+Work Log:
+- Feedback del usuario: el agujero "se ve bastante bien pero es igual al original solo con otro color" → horizonte MÁS PEQUEÑO, disco MÁS ALARGADO, tamaño total igual; las alas "todas se ven mal", las 8 de sprite "mal ubicadas" (imagen 3: anclaje 8-12px bajo los omóplatos) → BORRAR las de sprite, crear MARIPOSA + HADA, rediseñar TODO con técnica coronas, mejorar animaciones, crear más alas como las 2 especiales
+- Análisis VLM + numpy de las 2 referencias del agujero: sombra compacta 84×64px (~20% del rastro), anillo de fotones ABRAZÁNDOLO (1.1-1.3×), banda como RASTRO largo fino (~5× sombra) en DIAGONAL (acercándose abajo-izq cegador / alejándose arriba-der brasa)
+- Agujero carmesí recalibrado: blackHoleRadius 0.25→0.17, refuerzo negro 2.15×→1.45× (la bola negra ya no se inflaba al doble), accretionDiskScale (1,0.28,1)→(1.15,0.17,1) NUEVO estirón horizontal (rastro alargado sin tocar el radio mayor 0.75 fijo del shader NO recompilable), tubo 0.48→0.36 (annulus nace a 2.3×), borde exterior 1.28≈1.23 anterior (TAMAÑO TOTAL PRESERVADO), Doppler diagonal, partículas 2.3..5.5×; lente de pantalla intacta (se dimensiona por hitbox)
+- SISTEMA DE ALAS NUEVO: WingVFX.cs (WingDrawContext con velocidades para sweep aerodinámico + WingMotionProfile personalidad de vuelo + WingStyles registro de 8 estilos + VFXWingSlots mapeador slot→estilo); VFXCore.Quad rotado+textura (cintas por tangente); VFXWingsDrawLayer UNA capa para las 8 (anclada a omóplatos -6px); WingAnimPlayer REESCRITO (golpe asimétrico StrokeAsymmetry, AlwaysFlutter, muelles por estilo, sonido cada 2 ciclos para el hada)
+- LAS 8 ALAS: Horizonte de Sucesos (rediseñada: rastro de acreción cinta+Doppler+eco Einstein), Anillo de Fotones (rediseñada: 3 aros elípticos con fotones orbitando con estelas + pulso de aleteo), Mariposa Cósmica (NUEVA: 2 lóbulos con fase independiente, membrana retícula, venas, borde dorado festoneado, ojo de ala, golpe real de mariposa), Hada de Polvo Estelar (NUEVA: 4 lóbulos dorados, 7 chispas titilantes deterministas, vibración colibrí), Corona Solar (lazos de prominencia con gradiente de temperatura y llamaradas), Nebulosa Viva (6 blobs en deriva turbulenta + filamentos + estrellas con cruces de difracción, RESPIRA), Eclipse Total (discos negros + anillo cromosférico + rayos desiguales ondeando), Cometa Carmesí (núcleo + cola iónica con onda viajera, se BARRRE al correr)
+- BORRADAS: SheetWings.cs, AethonWings.cs, 2 renderers viejos, 2 DrawLayers viejas, 16 PNGs de sprite, entradas de localización de las 8
+- Ítems: VFXWingItems.cs (base + 8 clases [AutoloadEquip]), stats end-game 180-200/9-10.5/×2.6-3.2, FLOTADO en mariposa y hada, tooltips de color, recetas madera, TestingPlayer actualizado, localización es/EN
+- Iconos procedurales 30×24 (gen_vfx_wing_icons.py, supersampling ×4) validados VLM (7-10/10, nebulosa reforzada tras feedback); SIMULACIÓN Python de 5 renderizadores (mock_wing_render.py, 11 escenas) validada VLM: anclaje/formas/simetría ✓
+- Errores de compilación encontrados y fixeados: DustID.GoldFlare→GoldFlame, DustID.BlackTorch→Shadowflame (verificado decompilando el DustID real), typo PhotonsPerHoophi, Math.Lerp→MathHelper.Lerp, resto de sintaxis limpio
+- Compilación final: Build succeeded · 0 errores · 0 warnings contra tModLoader v2026.07.3.0 REAL
+- Docs: build.txt 6.08, CHANGES.md (entrada v6.08 secciones A-D); commit 9fbd878 pusheado a origin/main
+
+Stage Summary:
+- v6.08 EN GitHub (main): el agujero carmesí tiene el núcleo compacto + anillo pegado + RASTRO alargado diagonal de las referencias (mismo tamaño total, física intacta); las 8 alas son 100% luz procedural con personalidades de vuelo distintas (mariposa asimétrica, hada vibrante, cometa sensible a la velocidad...)
+- Prueba del usuario: Develop Mods → Build → CrimsonBlackHoleStaff (núcleo pequeño + rastro largo fino) → entrar al mundo → las 8 alas nuevas en el inventario → probar cada una (vuelo, reposo, planeo, caída + flotado en mariposa/hada)
