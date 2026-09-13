@@ -3,87 +3,108 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// WingAnimPlayer — v6.06 — LA ANIMACIÓN PROCEDURAL DE LAS ALAS DE LUZ.
+    /// WingAnimPlayer — v6.08 — LA ANIMACIÓN PROCEDURAL DE LAS 8 ALAS DE LUZ.
     ///
-    /// Las dos alas "técnica coronas" (Horizonte de Sucesos y Anillo de
-    /// Fotones) NO tienen spritesheet: su textura de equipo es un PNG en
-    /// blanco y TODO su dibujado lo hace la biblioteca VFX desde sus capas
-    /// de dibujado. Este ModPlayer es el CORAZÓN de su animación: un estado
-    /// por ala (apertura + fase de aleteo) que reacciona con MUELLES suaves
-    /// a cada acción del jugador:
+    /// TODO el sistema de alas es ahora de luz (técnica de las coronas) y su
+    /// textura de equipo es un PNG en blanco: TODO el dibujado lo hace la
+    /// biblioteca VFX. Este ModPlayer es el CORAZÓN de la animación y ha
+    /// sido reescrito con las MEJORAS pedidas:
     ///
-    ///   - VOLANDO (salto presionado + tiempo de vuelo) → apertura 1.0 y
-    ///     ciclo de aleteo continuo (fase avanza; el aleteo es una onda
-    ///     continua, no frames — suavidad infinita).
-    ///   - PLANEANDO (cayendo + salto presionado, sin tiempo) → apertura
-    ///     0.85, aleteo lento y suave.
-    ///   - CAYENDO → apertura 0.95, alas extendidas sin aletear.
-    ///   - REPOSO → apertura 0.2: las alas se PLEGAN contra la espalda.
+    ///   1. PERSONALIDAD POR ESTILO (WingMotionProfile): cada ala tiene sus
+    ///      frecuencias, aperturas objetivo y muelle propios — la mariposa
+    ///      aletea LENTO y PROFUNDO, el hada VIBRA rápido y nunca para, el
+    ///      eclipse es majestuoso...
+    ///   2. GOLPE ASIMÉTRICO (StrokeAsymmetry): la mariposa baja el ala
+    ///      RÁPIDO (el golpe que da empuje) y la sube LENTO — como el vuelo
+    ///      real de una mariposa, no una onda sine simétrica.
+    ///   3. ALWAYSFLUTTER: las alas de hada y nebulosa NUNCA dejan de
+    ///      latir del todo (vibración sutil en reposo).
+    ///   4. MUELLES por estilo: rigidez/amortiguación distintas (el cometa
+    ///      responde nervioso, la nebulosa deriva perezosa).
+    ///   5. Cadencia de sonido/dust por estilo (el hada suena cada 2 ciclos
+    ///      porque su aleteo es casi 10×/segundo).
     ///
-    /// El muelle (velocidad + rigidez + amortiguación) da el "overshoot"
-    /// orgánico al abrir/cerrar. Los dusts y el sonido de aleteo se emiten
-    /// SOLO cuando el ala es FUNCIONAL (no en vanidad pura).
+    /// Estados del jugador (detección intacta de v6.06): VOLANDO → apertura
+    /// FlyOpen + ciclo continuo · PLANEANDO → GlideOpen + aleteo lento ·
+    /// CAYENDO → FallOpen extendida · REPOSO → FoldOpen plegada.
     /// </summary>
     public class WingAnimPlayer : ModPlayer
     {
-        // === ALAS DEL HORIZONTE DE SUCESOS ===
-        /// <summary>Apertura 0..1 (0 plegada, 1 extendida).</summary>
-        public float EhOpen;
+        /// <summary>El estado de animación de UN ala.</summary>
+        public struct WingAnimState
+        {
+            /// <summary>Apertura 0..1+ (0 plegada, 1 extendida).</summary>
+            public float Open;
 
-        /// <summary>Velocidad del muelle de apertura.</summary>
-        public float EhOpenVel;
+            /// <summary>Velocidad del muelle de apertura.</summary>
+            public float OpenVel;
 
-        /// <summary>Fase del ciclo de aleteo (rad, avanza al volar).</summary>
-        public float EhFlapPhase;
+            /// <summary>Fase del ciclo de aleteo (rad).</summary>
+            public float FlapPhase;
 
-        /// <summary>Amplitud del aleteo (0 reposo .. 1 volando).</summary>
-        public float EhFlapAmp;
+            /// <summary>Amplitud del aleteo (0 reposo .. 1 volando).</summary>
+            public float FlapAmp;
 
-        // === ALAS DEL ANILLO DE FOTONES ===
-        public float PrOpen;
-        public float PrOpenVel;
-        public float PrFlapPhase;
-        public float PrFlapAmp;
+            /// <summary>Ciclos completados (cadencia de sonido del hada).</summary>
+            public int CycleCount;
+        }
 
-        // Slots de equipo cacheados (perezoso).
-        private int _ehSlot = -1;
-        private int _prSlot = -1;
+        /// <summary>Un estado por estilo de ala (índice = WingStyles).</summary>
+        private WingAnimState[] _states = new WingAnimState[WingStyles.Count];
+
+        /// <summary>Acceso del renderizador al estado de un estilo.</summary>
+        public ref WingAnimState State(int style) => ref _states[style];
+
+        /// <summary>Slots de equipo cacheados por estilo (-1 sin resolver).</summary>
+        private int[] _slots = new int[WingStyles.Count];
+
+        private bool _slotsReady;
+
+        private void ResolveSlots()
+        {
+            if (_slotsReady) return;
+            for (int i = 0; i < WingStyles.Count; i++)
+                _slots[i] = EquipLoader.GetEquipSlot(Mod, VFXWingSlots.ItemNames[i], EquipType.Wings);
+            _slotsReady = true;
+        }
+
+        public override void Initialize()
+        {
+            // Reset al entrar a un mundo nuevo (tML reutiliza instancias).
+            _states = new WingAnimState[WingStyles.Count];
+            _slotsReady = false;
+        }
 
         public override void PostUpdate()
         {
             if (Main.netMode == NetmodeID.Server) return;
+            ResolveSlots();
 
-            if (_ehSlot < 0)
-                _ehSlot = EquipLoader.GetEquipSlot(Mod, "EventHorizonWings", EquipType.Wings);
-            if (_prSlot < 0)
-                _prSlot = EquipLoader.GetEquipSlot(Mod, "PhotonRingWings", EquipType.Wings);
+            for (int style = 0; style < WingStyles.Count; style++)
+            {
+                if (Player.wings != _slots[style]) continue;
 
-            // Visible = el slot de alas VISUALES del jugador (funcional o vanidad).
-            bool ehVisible = Player.wings == _ehSlot;
-            bool prVisible = Player.wings == _prSlot;
-            // Funcional = además da vuelo (wingsLogic apunta al mismo slot).
-            bool ehFunc = ehVisible && Player.wingsLogic == _ehSlot;
-            bool prFunc = prVisible && Player.wingsLogic == _prSlot;
-
-            if (ehVisible)
-                UpdateWing(ref EhOpen, ref EhOpenVel, ref EhFlapPhase, ref EhFlapAmp,
-                    ehFunc, dustId: DustID.PinkTorch, dustColor: new Color(255, 60, 190));
-            if (prVisible)
-                UpdateWing(ref PrOpen, ref PrOpenVel, ref PrFlapPhase, ref PrFlapAmp,
-                    prFunc, dustId: DustID.PinkCrystalShard, dustColor: new Color(255, 170, 215));
+                // Visible = slot VISUAL equipado (funcional o vanidad).
+                // Funcional = además da vuelo (wingsLogic apunta al mismo slot).
+                bool functional = Player.wingsLogic == _slots[style];
+                UpdateWing(style, functional);
+            }
         }
 
         /// <summary>
-        /// La máquina de estados de un ala de luz: muelle de apertura +
-        /// fase de aleteo + sonido en cada ciclo + ascuas al volar.
+        /// La máquina de estados de un ala de luz — ahora con la
+        /// PERSONALIDAD de su estilo (WingMotionProfile).
         /// </summary>
-        private void UpdateWing(ref float open, ref float vel, ref float phase, ref float amp,
-            bool functional, int dustId, Color dustColor)
+        private void UpdateWing(int style, bool functional)
         {
+            WingMotionProfile profile = WingStyles.Motion(style);
+            ref WingAnimState st = ref _states[style];
+
             // --- estado objetivo según la acción del jugador ---
             bool flying = functional && Player.controlJump && Player.wingTime > 0f
                           && Player.jump == 0 && Player.velocity.Y != 0f;
@@ -91,28 +112,57 @@ namespace AethonMod.Content.Players
                            && Player.velocity.Y > 0f;
             bool falling = Player.velocity.Y != 0f;
 
-            float target = flying ? 1f : gliding ? 0.85f : falling ? 0.95f : 0.2f;
+            float target = flying ? profile.FlyOpen
+                          : gliding ? profile.GlideOpen
+                          : falling ? profile.FallOpen
+                          : profile.FoldOpen;
 
-            // --- muelle: rigidez + amortiguación (overshoot orgánico) ---
-            vel += (target - open) * 0.02f;
-            vel *= 0.88f;
-            open += vel;
-            if (open < -0.05f) open = -0.05f;
-            if (open > 1.15f) open = 1.15f;
+            // --- MUELLE por estilo (overshoot orgánico calibrado) ---
+            st.OpenVel += (target - st.Open) * profile.SpringStiffness;
+            st.OpenVel *= profile.SpringDamping;
+            st.Open += st.OpenVel;
+            if (st.Open < -0.05f) st.Open = -0.05f;
+            if (st.Open > 1.15f) st.Open = 1.15f;
 
-            // --- aleteo: amplitud easing + avance de fase ---
-            float targetAmp = flying ? 1f : gliding ? 0.3f : 0f;
-            amp += (targetAmp - amp) * 0.06f;
+            // --- amplitud del aleteo: easing hacia el objetivo ---
+            // ALWAYSFLUTTER: nunca baja del todo (vibración sutil en reposo).
+            float flutterFloor = profile.AlwaysFlutter ? 0.22f : 0f;
+            float targetAmp = flying ? 1f : gliding ? 0.30f : flutterFloor;
+            st.FlapAmp += (targetAmp - st.FlapAmp) * 0.06f;
 
-            if (flying || gliding)
+            // --- avance de fase: GOLPE ASIMÉTRICO por estilo ---
+            // La mariposa baja el ala RÁPIDO (empuje) y sube LENTO: el avance
+            // de fase no es constante, escala con la posición del golpe.
+            if (flying || gliding || profile.AlwaysFlutter)
             {
-                float speed = flying ? 0.24f : 0.045f;
-                phase += speed;
-                if (phase >= MathHelper.TwoPi)
+                float baseSpeed = flying ? profile.FlapSpeedFlying
+                                : gliding ? profile.FlapSpeedGliding
+                                : 0.085f;   // vibración de reposo (hada/nebulosa)
+
+                float advance;
+                if (profile.StrokeAsymmetry > 1f)
                 {
-                    phase -= MathHelper.TwoPi;
-                    // Un flap completo → sonido de aleteo (solo funcional).
-                    if (flying && functional)
+                    // Mitad "abajo" (sin>0): rápida ×(1+a·0.35); mitad "arriba": lenta.
+                    float s = (float)System.Math.Sin(st.FlapPhase);
+                    float k = s > 0f ? (1f + (profile.StrokeAsymmetry - 1f) * 0.55f)
+                                     : (1f - (profile.StrokeAsymmetry - 1f) * 0.30f);
+                    advance = baseSpeed * k;
+                }
+                else
+                {
+                    advance = baseSpeed;
+                }
+
+                st.FlapPhase += advance;
+                if (st.FlapPhase >= MathHelper.TwoPi)
+                {
+                    st.FlapPhase -= MathHelper.TwoPi;
+                    st.CycleCount++;
+
+                    // Sonido de aleteo: cada ciclo (o cada 2 para el hada, que
+                    // aletea casi 10 veces por segundo — sonaría ametralladora).
+                    bool soundNow = profile.SoundEveryCycle || (st.CycleCount & 1) == 0;
+                    if (flying && functional && soundNow)
                         SoundEngine.PlaySound(SoundID.Item32, Player.position);
                 }
             }
@@ -125,7 +175,8 @@ namespace AethonMod.Content.Players
                     Player.position + new Vector2(
                         Player.width * 0.5f + side * Main.rand.NextFloat(6f, 34f),
                         Player.height * 0.5f - 12f),
-                    8, 8, dustId, 0f, 0f, 120, dustColor, Main.rand.NextFloat(0.8f, 1.4f));
+                    8, 8, profile.DustId, 0f, 0f, 120, profile.DustColor,
+                    Main.rand.NextFloat(0.8f, 1.4f));
                 d.noGravity = true;
                 d.noLight = false;
                 d.velocity *= 0.3f;

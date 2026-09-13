@@ -1,5 +1,133 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.08 — TODAS LAS ALAS SON AHORA DE LUZ (8, técnica coronas) + EL AGUJERO NEGRO CON EL HORIENTE PEQUEÑO Y EL DISCO ALARGADO
+
+**Reporte del usuario**: "el agujero negro se ve bastante bien, pero es igual
+al original solo con otro color... el horizonte de eventos debe ser mas
+pequeño, y el disco de acreción mas alargado" + "todas las alas se ven mal y
+las 8 alas con sprite estan mal ubicadas... crea alas de mariposa y alas de
+hadas, y a partir de ahora que todas las alas sean con el mismo estilo que
+las coronas; el resto de alas con sprite borralas; rediseña todas y mejora
+sus animaciones, tomate tu tiempo, crea mas alas como las 2 especiales".
+
+### A. EL AGUJERO NEGRO CARMESÍ (recalibrado con mediciones píxel-exactas)
+
+Análisis de las 2 referencias del usuario (numpy + relleno de huecos): la
+sombra es un núcleo COMPACTO (84×64 px, ~20% del rastro total) con el anillo
+de fotones ABRAZÁNDOLO (1.1-1.3× la sombra) y el disco como un RASTRO LARGO
+Y FINO que llega a ~5× la sombra y cruza en DIAGONAL (lado que se acerca
+abajo-izquierda, el que se aleja arriba-derecha). El render anterior fallaba
+en las proporciones: el refuerzo negro del C# inflaba la sombra a 2.15× el
+horizonte y el toro era un donut gordo pegado al horizonte.
+
+- **Horizonte más pequeño**: `blackHoleRadius` 0.25 → **0.17** + refuerzo
+  negro 2.15× → **1.45×** (alpha 235, núcleo compacto sólido ≈20% del
+  rastro, como la referencia). El anillo de fotones overlay queda a 1.18×
+  del núcleo visible — abrazándolo, como en la referencia.
+- **Disco más alargado**: `accretionDiskScale` = (1, 0.28, 1) →
+  **(1.15, 0.17, 1)**: estirón horizontal ×1.15 (el rastro de la diagonal)
+  + achatado vertical 0.17 (banda de canto ~6:1). El tubo baja 0.48 → 0.36:
+  el annulus nace a 2.3× el horizonte (lejos, como el rastro) y el borde
+  exterior queda en (0.75+0.36)×1.15 = 1.28 unidades ≈ IGUAL que antes —
+  **el agujero MANTIENE su tamaño total** (petición explícita).
+- **Doppler diagonal**: los velos se inclinan a favor de la diagonal
+  (acercándose abajo-izquierda cegador / alejándose arriba-derecha brasa) y
+  se estiran siguiendo el rastro.
+- Partículas del disco recalibradas al annulus nuevo (2.3..5.5× el
+  horizonte compacto). La lente de pantalla (BlackHoleLensSystem) no
+  cambia: se dimensiona por el hitbox (p.width), no por el shader — sigue
+  abrazando el borde del disco. Física 100% intacta.
+
+### B. LAS ALAS: DE 10 MIXTAS A 8 DE LUZ (sistema unificado)
+
+**BORRADO**: las 8 alas de spritesheet (clases SheetWings.cs + AethonWings.cs
++ las 16 PNG de ítems y tiras de frames + sus entradas de localización + la
+garantía de entrega). El usuario las vio "mal ubicadas" (el anclaje vanilla
+de la tira quedaba 8-12 px por debajo de los omóplatos — medido en su
+captura) y pidió eliminarlas.
+
+**SISTEMA NUEVO (todo técnica coronas — PNG en blanco + render VFX):**
+
+- `WingVFX.cs` — el núcleo: `WingDrawContext` (anclaje, apertura, aleteo,
+  dirección, gravedad, luz, VELOCIDADES para el sweep aerodinámico y el
+  diedro), `WingMotionProfile` (la personalidad de vuelo de cada estilo) y
+  `WingStyles` (registro estilo→renderizador, 8 estilos).
+- `VFXCore.Quad` con rotación + textura (NUEVO): cintas de luz orientadas
+  por la tangente — la base de los rastros, colas y lazos.
+- `VFXWingsDrawLayer` — UNA capa para las 8 (antes había 2), después de la
+  capa vanilla de alas, anclada a la ESPALDA ALTA (omóplatos, -6px).
+- `WingAnimPlayer` REESCRITO: muelles por estilo, **golpe asimétrico**
+  (la mariposa baja el ala rápido y sube lento — vuelo real),
+  **AlwaysFlutter** (el hada y la nebulosa nunca dejan de latir), cadencia
+  de sonido por estilo (el hada suena cada 2 ciclos porque aletea ~10×/s).
+
+**LAS 8 ALAS** (todas end-game ≥ Solar Wings, mariposa y hada con FLOTADO):
+
+1. **Horizonte de Sucesos** (rediseñada) — rastro de acreción ALARGADO por
+   lado (cinta por tangente con Doppler δ³ y vetas de plasma), mini
+   horizonte con anillo de fotones a 1.18×, cuentas de materia orbitando y
+   eco de anillo de Einstein en la punta.
+2. **Anillo de Fotones** (rediseñada) — 3 aros de órbita elípticos en
+   abanico con FOTONES corriendo por ellos (con estelas) y un pulso que
+   recorre el aro mayor con cada golpe de aleteo.
+3. **Mariposa Cósmica** (NUEVA) — lobo superior grande con ojo de ala +
+   lobo inferior caído (fase de aleteo independiente), membrana translúcida
+   de retícula, 5 venas curvas, borde dorado festoneado, golpe asimétrico
+   real y las alas casi aplaudiendo sobre la espalda al subir.
+4. **Hada de Polvo Estelar** (NUEVA) — 4 lóbulos puntiagudos de membrana
+   dorada con borde ámbar, 7 chispas de polvo estelar titilando con fases
+   deterministas y vibración de colibrí que NUNCA cesa.
+5. **Corona Solar** (NUEVA) — 4 lazos de prominencia por lado con gradiente
+   de temperatura (blanco → dorado → naranja → braza), puntas en
+   llamaradas, mancha solar en la raíz y estirón al empujar.
+6. **Nebulosa Viva** (NUEVA) — 6 blobs de gas en deriva turbulenta
+   individual, filamentos serpenteantes y estrellas con cruces de
+   difracción; la nube RESPIRA en lugar de aletear.
+7. **Eclipse Total** (NUEVA) — discos negros sólidos con anillo
+   cromosférico exacto en el borde, 6 rayos de corona DESIGUALES ondeando
+   con fases propias y llamarada rosa en el limbo.
+8. **Cometa Carmesí** (NUEVA) — núcleo blanco-dorado + cola iónica cónica
+   con onda viajera, gradiente blanco→dorado→carmesí→braza, vetas de plasma
+   y motas de polvo; la cola se BARRRE al correr (máxima respuesta a la
+   velocidad).
+
+**Ítems**: `VFXWingItems.cs` (base + las 8 clases con [AutoloadEquip]),
+stats 180-200 ticks / velocidad 9-10.5 / aceleración ×2.6-3.2, flotado en
+mariposa y hada, tooltips de color estilo coronas, recetas de madera,
+entrega garantizada en TestingPlayer, localización es-ES + en-US.
+
+**Iconos**: 8 iconos procedurales de 30×24 (supersampling ×4, composición
+aditiva sobre transparente) con la silueta de cada estilo — generados por
+`research/wings/gen_vfx_wing_icons.py` y validados por VLM (7-10/10; el de
+nebulosa reforzado tras el feedback: núcleo denso + estrellas ancla).
+
+### C. VERIFICACIÓN
+
+- **Compilación completa contra tModLoader.dll REAL v2026.07.3.0:
+  0 errores, 0 warnings.**
+- **Simulación Python de los renderizadores** (`research/wings/
+  mock_wing_render.py`): réplica exacta de la matemática de mariposa, hada,
+  anillo de fotones, horizonte y cometa en 11 escenas (volando/reposo/golpe)
+  validada por VLM — anclaje al hombro ✓, extensión arriba/afuera ✓, formas
+  reconocibles ✓, simetría ✓.
+- Validación PIL de las 16 PNGs nuevas: 8 iconos 30×24 RGBA + 8 texturas de
+  equipo 8×8 RGBA totalmente transparentes (truco Calamity, el mismo de las
+  coronas que ya funcionaba).
+- Firma de `EquipLoader.GetEquipSlot(Mod, string, EquipType)` verificada
+  decompilando el tML real (la usan el animador, la capa y el mapeador de
+  slots).
+
+### D. PRUEBA DEL USUARIO
+
+Develop Mods → Build → disparar CrimsonBlackHoleStaff (núcleo negro
+compacto + anillo pegado + RASTRO largo fino en diagonal + partículas
+barriendo el annulus) → entrar al mundo → las 8 alas en el inventario →
+equipar cada una: mariposa (golpe lento profundo + flotado), hada
+(vibración rápida + flotado), cometa (la cola barre al correr), eclipse
+(majestuosa), etc. — y las de agujero negro con el rastro y los fotones.
+
+---
+
 ## Commit v6.07 — FIX: el mod no cargaba (IndexOutOfRangeException en las 8 alas de spritesheet)
 
 **Reporte del usuario**: "estaba comenzando las pruebas y está lleno de

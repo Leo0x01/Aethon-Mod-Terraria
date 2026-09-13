@@ -73,6 +73,14 @@ namespace AethonMod.Content.VFX
             _quads.Add(new GlowQuad { Position = position, Color = color, Scale = scale, Rotation = 0f, Texture = texture });
         }
 
+        /// <summary>v6.08 — Cuadro con TEXTURA propia Y ROTACIÓN: cintas de
+        /// luz orientadas por la tangente (alas de mariposa, colas de
+        /// cometa, rastros de acreción...).</summary>
+        public static void Quad(Vector2 position, Color color, Vector2 scale, float rotation, Texture2D texture)
+        {
+            _quads.Add(new GlowQuad { Position = position, Color = color, Scale = scale, Rotation = rotation, Texture = texture });
+        }
+
         /// <summary>Añade un cuadro circular (atajo: escala uniforme).</summary>
         public static void Quad(Vector2 position, Color color, float scale)
         {

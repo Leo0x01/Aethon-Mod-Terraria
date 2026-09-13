@@ -23,14 +23,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// gustaba) con los PARÁMETROS recalibrados según la referencia y las
     /// fórmulas de la física real:
     ///
-    ///   · DISCO MÁS GRANDE  — accretionDiskRadius 0.40 → 0.48 (tubo del
-    ///     toro): el disco abraza el horizonte y su borde exterior pasa de
-    ///     3.8× a ~4.9× el radio de la sombra (la referencia mide ~3.5-4×).
+    ///   · DISCO MÁS ALARGADO — v6.08 según la referencia (mediciones
+    ///     píxel-exactas de la imagen del usuario): el toro se ESTIRA en
+    ///     horizontal (accretionDiskScale.x 1 → 1.15) y se aplasta aún más
+    ///     en vertical (0.28 → 0.17): banda fina de canto cuyo rastro llega
+    ///     a ~5× la sombra, como la diagonal de la referencia. El tubo baja
+    ///     de 0.48 → 0.36: annulus [0.39, 1.11] en unidades offset → borde
+    ///     exterior en pantalla (0.75+0.36)×1.15 = 1.28 ≈ IGUAL que antes
+    ///     (1.23): el agujero MANTIENE su tamaño total.
     ///   · OTRO COLOR        — naranja (245,105,61) → carmesí-fucsia
     ///     (255,45,100): la paleta de la referencia (núcleo blanco-rosado →
     ///     magenta neón → carmesí profundo).
-    ///   · AGUJERO MÁS PEQUEÑO — blackHoleRadius 0.30 → 0.25 (-17%): sombra
-    ///     más contenida, disco relativamente más dominante.
+    ///   · AGUJERO MÁS PEQUEÑO — v6.08: blackHoleRadius 0.25 → 0.17 y el
+    ///     refuerzo negro del C# baja de 2.15× a 1.45× el horizonte: la
+    ///     sombra pasa de ~2.15 a ~1.45 unidades relativas — un núcleo
+    ///     compacto (≈20% del rastro, como la referencia: 42px de sombra
+    ///     en un rastro de 210px) con su anillo de fotones ABRAZÁNDOLO.
     ///   · ANIMACIÓN MEJORADA — (1) el tiempo del shader corre ×1.35: el
     ///     plasma del disco HIERVE más vivo; (2) la cámara PRECESIONA con dos
     ///     frecuencias incommensurables (bamboleo orgánico del plano del
@@ -80,23 +88,30 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  PARÁMETROS VISUALES DEL AGUJERO CARMESÍ (los que se pidieron)
         // ==================================================================
 
-        /// <summary>Radio del horizonte en unidades shader — el agujero un
-        /// poco MÁS PEQUEÑO que el funcional (0.30 → 0.25: -17% en píxeles).</summary>
-        private const float HoleRadius = 0.25f;
+        /// <summary>Radio del horizonte en unidades shader — v6.08: núcleo
+        /// COMPACTO (0.25 → 0.17): con el refuerzo a 1.45× la sombra visible
+        /// queda en ~20% del rastro del disco, como en la referencia.</summary>
+        private const float HoleRadius = 0.17f;
 
-        /// <summary>Grosor del tubo del toro del disco — el disco MÁS
-        /// GRANDE que el funcional (0.40 → 0.48: borde exterior ~4.9× la
-        /// sombra, como la banda amplia de la referencia).</summary>
-        private const float DiskTubeRadius = 0.48f;
+        /// <summary>Grosor del tubo del toro del disco — v6.08: tubo FINO
+        /// (0.48 → 0.36): annulus [0.39, 1.11] en unidades offset — el rastro
+        /// nace LEJOS del horizonte (2.3×), como la diagonal de la referencia.</summary>
+        private const float DiskTubeRadius = 0.36f;
 
         /// <summary>Color base del disco — la paleta de la referencia:
         /// carmesí-fucsia (núcleo blanco-rosado → magenta → carmesí).</summary>
         private static readonly Color DiskColor = new Color(255, 45, 100);
 
-        /// <summary>Achatado vertical del toro — banda un poco MÁS FINA que
-        /// la del funcional (0.33 → 0.28): anillo elíptico casi de canto,
-        /// como el de la referencia (inclinación ~17°).</summary>
-        private const float DiskFlattenY = 0.28f;
+        /// <summary>Achatado vertical del toro — v6.08: banda MUCHO más fina
+        /// (0.28 → 0.17): elipse de canto ~6:1, el rastro fino y alargado de
+        /// la referencia (el disco real mide grosor ≈ 0.45× la sombra).</summary>
+        private const float DiskFlattenY = 0.17f;
+
+        /// <summary>v6.08 NUEVO — elongación HORIZONTAL del toro
+        /// (accretionDiskScale.x): estira el disco en el eje de pantalla
+        /// para el look "rastro alargado" de la referencia sin tocar el
+        /// radio mayor fijo (0.75) del shader (que NO se puede recompilar).</summary>
+        private const float DiskStretchX = 1.15f;
 
         /// <summary>Inclinación de la cámara (rad) — ~17°: el plano del
         /// disco se ve casi de canto con su arco de lente arriba (Gargantua).</summary>
@@ -450,16 +465,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>Disco de acreción: estelas TrailGlow fucsia orbitando con
         /// rotación sincronizada — plasma carmesí/fucsia EN la banda del
-        /// disco visible (1.5..3.4× el horizonte visual, que ahora es más
-        /// pequeño y el disco más grande).</summary>
+        /// disco visible (2.3..5.5× el horizonte compacto, barriendo el
+        /// rastro ALARGADO hasta su borde exterior).</summary>
         private void SpawnLibraryAccretionDisk()
         {
             if (Main.rand.NextBool(4))
             {
-                // Horizonte VISUAL del carmesí: 0.25 unidades shader
-                // (×96 px/unidad ×1.1 de impulso del lienzo).
-                float horizon = 0.275f * Projectile.width * MathHelper.Max(Projectile.scale, 0.4f);
-                float radius = Main.rand.NextFloat(1.5f, 3.4f) * horizon;
+                // Horizonte VISUAL del carmesí v6.08: 0.17 unidades shader
+                // (más compacto) — el rastro orbita en 2.3..5.5× para barrer
+                // la banda ALARGADA del disco ((0.39..1.28) unidades × 96 px).
+                float horizon = 0.17f * Projectile.width * MathHelper.Max(Projectile.scale, 0.4f) * 1.1f;
+                float radius = Main.rand.NextFloat(2.3f, 5.5f) * horizon;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 float angVel = 0.25f; // el disco carmesí gira un poco más vivo
 
@@ -573,8 +589,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float canvasPx = targetSize * Math.Max(p.scale, 0.08f) * CanvasBoost * breathe;
                     float zoomBase = p.width / targetSize * 2f;
 
-                    // --- PARÁMETROS MODIFICADOS (el corazón del cambio) ---
-                    // Agujero un poco más pequeño: 0.30 → 0.25.
+                    // --- PARÁMETROS v6.08 (mediciones de la referencia) ---
+                    // Núcleo compacto: 0.25 → 0.17.
                     shader.Parameters["blackHoleRadius"].SetValue(HoleRadius);
                     shader.Parameters["blackHoleCenter"].SetValue(Vector3.Zero);
                     shader.Parameters["aspectRatioCorrectionFactor"].SetValue(1f);
@@ -590,10 +606,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float swayZ = p.rotation + 0.06f * (float)Math.Sin(time * 0.41f);
                     shader.Parameters["cameraRotationAxis"].SetValue(
                         new Vector3(p.velocity.Y * -0.022f + swayX, 0f, swayZ));
-                    // Banda un poco más fina: 0.33 → 0.28 (elipse de canto).
-                    shader.Parameters["accretionDiskScale"].SetValue(new Vector3(1f, DiskFlattenY, 1f));
+                    // Banda FINA y ALARGADA — v6.08: squash vertical 0.28 → 0.17
+                    // + estirón horizontal ×1.15 (el rastro de la referencia).
+                    shader.Parameters["accretionDiskScale"].SetValue(
+                        new Vector3(DiskStretchX, DiskFlattenY, 1f));
                     shader.Parameters["zoom"].SetValue(Vector2.One * zoomBase);
-                    // DISCO MÁS GRANDE: tubo 0.40 → 0.48 (borde ~4.9× sombra).
+                    // DISCO ALARGADO: tubo 0.48 → 0.36 (rastro que nace lejos).
                     shader.Parameters["accretionDiskRadius"].SetValue(Math.Min(p.scale, 1f) * DiskTubeRadius);
                     // ANIMACIÓN MEJORADA: el tiempo corre ×1.35 — el plasma
                     // del disco HIERVE más rápido y la lente remolina más viva.
@@ -615,7 +633,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         pixel.Size() * 0.5f, canvasPx, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
 
-                    // === 3. REFUERZO DEL EVENT HORIZON (copia exacta, radio nuevo) ===
+                    // === 3. REFUERZO DEL EVENT HORIZON (v6.08: 1.45×, compacto) ===
                     // radio del horizonte en píxeles = blackHoleRadius * zoom * (canvas / 2)
                     float pxPerUnit = zoomBase * canvasPx * 0.5f;
                     float eventHorizonPx = HoleRadius * pxPerUnit;
@@ -624,9 +642,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                             SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                             null, Main.GameViewMatrix.TransformationMatrix);
-                        float horizonScale = (eventHorizonPx * 2.15f) / glowTex.Width;
+                        // v6.08: 2.15× → 1.45× — antes el refuerzo INFLABA la sombra
+                        // al doble; ahora es el núcleo compacto de la referencia,
+                        // bien sólido (alpha 235) y ABIERTO por el rastro del disco.
+                        float horizonScale = (eventHorizonPx * 1.45f) / glowTex.Width;
                         Main.spriteBatch.Draw(glowTex, drawPos, null,
-                            new Color(0, 0, 0, 215), 0f, glowTex.Size() * 0.5f,
+                            new Color(0, 0, 0, 235), 0f, glowTex.Size() * 0.5f,
                             horizonScale, SpriteEffects.None, 0f);
                         Main.spriteBatch.End();
                     }
@@ -639,25 +660,33 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // lado que se acerca (la IZQUIERDA, como en la referencia)
                     // brilla 3-4× más y el que se aleja se apaga hacia el
                     // carmesí profundo. Dos velos aditivos sobre el render:
-                    float diskOuterPx = (0.75f + DiskTubeRadius) * pxPerUnit;
+                    // (v6.08: posiciones DIAGONALES — el lado que se acerca arde
+                    // abajo-izquierda y el que se aleja se apaga arriba-derecha,
+                    // como la diagonal de la referencia; el borde exterior usa el
+                    // estirón horizontal nuevo: (0.75+tubo)×1.15.)
+                    float diskOuterPx = (0.75f + DiskTubeRadius) * DiskStretchX * pxPerUnit;
                     float doppler = 0.85f + 0.15f * (float)Math.Sin(time * 1.7f);
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                         SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);
 
-                    // Lado que se ACERCA (izquierda): blanco-rosado cegador.
+                    // Lado que se ACERCA (abajo-izquierda): blanco-rosado cegador,
+                    // un velo ALARGADO siguiendo la diagonal del rastro.
                     Main.spriteBatch.Draw(glowTex,
-                        drawPos + new Vector2(-0.42f * diskOuterPx, -0.05f * diskOuterPx),
-                        null, new Color(255, 235, 248, 115) * doppler, 0f,
+                        drawPos + new Vector2(-0.46f * diskOuterPx, 0.07f * diskOuterPx),
+                        null, new Color(255, 235, 248, 115) * doppler, -0.18f,
                         glowTex.Size() * 0.5f,
-                        (0.85f * diskOuterPx) / glowTex.Width, SpriteEffects.None, 0f);
+                        new Vector2((1.15f * diskOuterPx) / glowTex.Width,
+                                    (0.62f * diskOuterPx) / glowTex.Height), SpriteEffects.None, 0f);
 
-                    // Lado que se ALEJA (derecha): brasa carmesí tenue.
+                    // Lado que se ALEJA (arriba-derecha): brasa carmesí tenue,
+                    // también estirada a favor de la diagonal.
                     Main.spriteBatch.Draw(glowTex,
-                        drawPos + new Vector2(0.45f * diskOuterPx, 0.05f * diskOuterPx),
-                        null, new Color(140, 12, 48, 55), 0f,
+                        drawPos + new Vector2(0.44f * diskOuterPx, -0.06f * diskOuterPx),
+                        null, new Color(140, 12, 48, 55), -0.18f,
                         glowTex.Size() * 0.5f,
-                        (1.05f * diskOuterPx) / glowTex.Width, SpriteEffects.None, 0f);
+                        new Vector2((1.30f * diskOuterPx) / glowTex.Width,
+                                    (0.55f * diskOuterPx) / glowTex.Height), SpriteEffects.None, 0f);
 
                     Main.spriteBatch.End();
 
