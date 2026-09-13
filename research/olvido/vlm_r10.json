@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "1) 8/10\n2) 9/10\n3) 7/10\n4) 7/10\n5) 8/10\n6) Yes, because the core visual elements (red accretion disk, crown-like top structure, and lightning effects) are clearly recognizable as the same entity.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789317803,
+  "id": "202609140043213b76ddcbd6f14bf3",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "202609140043213b76ddcbd6f14bf3",
+  "usage": {
+    "completion_tokens": 69,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 903,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 972
+  }
+}

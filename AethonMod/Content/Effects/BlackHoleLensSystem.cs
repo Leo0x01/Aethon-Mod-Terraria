@@ -316,6 +316,8 @@ namespace AethonMod.Content.Effects
             //     COMETAS/PÚLSARES (v5.99) ===
             int blackHoleType = ModContent.ProjectileType<BlackHoleProjectile>();
             int crimsonHoleType = ModContent.ProjectileType<CrimsonBlackHoleProjectile>();
+            int fusionHoleType = ModContent.ProjectileType<FusionBlackHoleProjectile>();
+            int olvidoHoleType = ModContent.ProjectileType<OlvidoBlackHoleProjectile>();
             int waveType = ModContent.ProjectileType<CosmicShockwaveProjectile>();
             int sunType = ModContent.ProjectileType<SunProjectile>();
             int jellyType = ModContent.ProjectileType<NebulaJellyfishMinion>();
@@ -342,7 +344,8 @@ namespace AethonMod.Content.Effects
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active) continue;
 
-                if (p.type == blackHoleType || p.type == crimsonHoleType)
+                if (p.type == blackHoleType || p.type == crimsonHoleType ||
+                    p.type == fusionHoleType || p.type == olvidoHoleType)
                 {
                     if (count >= MaxSources) continue;
                     Vector2 screenPos = p.Center - Main.screenPosition;
@@ -358,9 +361,13 @@ namespace AethonMod.Content.Effects
                     // v6.09 — el AGUJERO CARMESÍ es GIGANTE (disco analítico de
                     // 6.5·38px): su lente usa su propio multiplicador (2.9×) para
                     // ABRAZAR el disco completo (véase CrimsonBlackHoleProjectile).
-                    float radiusMult = p.type == crimsonHoleType
-                        ? CrimsonBlackHoleProjectile.LensRadiusMult
-                        : 1.4f;
+                    float radiusMult = 1.4f;
+                    if (p.type == crimsonHoleType)
+                        radiusMult = CrimsonBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == fusionHoleType)
+                        radiusMult = FusionBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == olvidoHoleType)
+                        radiusMult = OlvidoBlackHoleProjectile.LensRadiusMult;
                     float radius = p.width * p.scale / screenSize.X * radiusMult;
 
                     // La lente es "pequeña": intensidad ligada a la escala del agujero
@@ -721,6 +728,7 @@ namespace AethonMod.Content.Effects
             // === 8. ENCIMA DE LA LENTE: el núcleo del agujero negro ===
             // El shader del agujero nunca es deformado por su propia lente.
             // (v6.02: también el AGUJERO NEGRO CARMESÍ — mismo registro, dibujo propio.)
+            // (v6.14: también FUSIÓN y OLVIDO — mismo registro, dibujo propio.)
             for (int i = 0; i < _blackHoleCount; i++)
             {
                 Projectile bh = Main.projectile[_blackHoleIndices[i]];
@@ -728,6 +736,10 @@ namespace AethonMod.Content.Effects
                 {
                     if (bh.type == crimsonHoleType)
                         CrimsonBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == fusionHoleType)
+                        FusionBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == olvidoHoleType)
+                        OlvidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else
                         BlackHoleProjectile.DrawCoreVisuals(bh, false);
                 }

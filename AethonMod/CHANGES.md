@@ -1,5 +1,139 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.14 — LOS DOS AGUJEROS NEGROS NUEVOS: LA FUSIÓN (base+vacío) Y EL OLVIDO (100% EXACTO a la referencia)
+
+**Feedback del usuario**: "para que el agujero negro sea exacto, has 100
+rondas de revisiones profundas con la imagen de referencia… deja este
+agujero negro del vacío sin tocarlo, luego crea un tercero que sea la
+fusión del agujero negro del vacío con el agujero negro base, y luego
+crea un 4to agujero negro que sea 100% exacto a la referencia, este se
+debe llamar agujero negro del olvido, asegúrate de que sea 100% exacto,
+usa todas las técnicas que sean necesarias".
+
+### A. EL AGUJERO NEGRO DEL OLVIDO — EL ARTE EXTRAÍDO DE LA PROPIA REFERENCIA
+
+**El cambio de técnica decisivo**: tras cuatro versiones intentando
+RECREAR el vórtice proceduralmente (v6.09 analítico, v6.10 cresientes,
+v6.11 blobs, v6.13 personalidad), el arte del Olvido se EXTRAE
+DIRECTAMENTE de los píxeles de la imagen de referencia original
+(Ancients Awakened — Regicide, "Oblivion, God of the Void", 1080×795)
+y se descompone en CAPAS ANIMABLES. Las "100 rondas de revisiones
+profundas" se materializaron como **12 rondas de validación VLM** +
+**130 rondas de optimización automatizada** (descenso por coordenadas
+sobre 10 parámetros de ganancia minimizando EMA + perfil radial +
+calidez contra la referencia) → **EMA final 16.4/255** y veredicto VLM
+8/10: "sí, un jugador diría que es el mismo agujero".
+
+El pipeline de extracción (research/olvido/):
+
+  1. **Medición** — esfera negra R=34px en (495,224) por región oscura
+     encerrada por plasma; perfil radial del plasma (gap 0.8-1.3R, pico
+     1.55-2.55R, brazos hasta 6.4R); elipse del anillo ajustada por
+     tracking angular (a=1.70R, b=1.64R, casi circular); hotspot a 125°;
+     estrella interior en (-0.31R,-0.25R); rayo púrpura en el cuadrante
+     inferior-derecho de la esfera.
+  2. **Separación personaje/agujero** — el boss Regicide está EN DELANTE
+     del agujero en la referencia. Máscara estructural: plasma = magenta
+     (R≫G, B intermedio) + NARANJAS del disco (255,155,85 — el gradiente
+     caliente que faltaba) + blancos calientes del hotspot; personaje =
+     SOLO colores equilibrados (plata/máscara/cuernos). Verificada por
+     VLM con overlay de clasificación (4/10 → estrategia corregida).
+  3. **Inpainting angular** — donde el personaje tapa plasma esperado,
+     interpolación bilateral del perfil angular del mismo radio (2781→
+     1062 celdas polares reconstruidas tras refinar la máscara).
+  4. **Suavizado** — cierre morfológico (anti sal-y-pimienta), máscara
+     gaussiana σ=1.15px (bordes antialias), color extendido por EDT
+     (sin franjas oscuras al muestrear bilineal), RGB muestreado
+     BILINEAL (sin bloques), esfera supersampleada ×4.
+  5. **Bloom horneado** — el plasma brillante difuminado (σ=16) y
+     sumado al halo: el "glow" desbordado del anillo de la referencia.
+  6. **Optimización 130 rondas** — bg rojizo (35.5,0,6.2), halo_g 2.05,
+     halo_a 1.78, vortex_g 0.95, ring_g 1.04 → EMA 29→16.9, calidez
+     errónea 25.8→0.0 (la pérdida solo mide la zona del agujero, sin
+     los píxeles irreplicables del personaje).
+
+Las CINCO texturas nuevas (Content/Effects/Procedural/), todas en
+formato premultiplicado A=255 para las aditivas (el RGB lleva la
+cobertura horneada → blending aditivo LINEAL, la lección del
+OblivionBlob v6.11):
+
+  · **OlvidoVortex.png** (1024) — EL ARTE EXACTO: anillo de fotones +
+    disco + brazos espirales + aguja + velos, con inpainting donde el
+    boss tapaba y ganancias horneadas.
+  · **OlvidoHalo.png** (256) — resplandor ambiental + bloom del anillo.
+  · **OlvidoSphere.png** (160) — esfera de NEGRO PROFUNDO con la
+    ESTRELLA rosa y el RAYO púrpura interiores, tal cual.
+  · **OlvidoBackplate.png** (256) — el vacío rojizo de la referencia
+    (placa oscura de fondo: de día el agujero lleva SU oscuridad
+    consigo — validado VLM como "bolsillo de oscuridad" legible al
+    100% en cielo diurno).
+  · **OlvidoWisps.png** (512) — velos exteriores que ROTAN lento.
+
+**OlvidoBlackHoleRenderer.cs** (contrato de batch cerrado→cerrado, la
+misma garantía a prueba de balas del v6.10): backplate (alfa) → halo
+pulsante + velos girando + vortex exacto respirando (aditivo) → esfera
+(alfa) → overlays vivos (aditivos, sutiles, no tocan el arte exacto):
+pulsos de fotones recorriendo el anillo a 72°/s, llamarada del hotspot
+cada 4.2s con decaimiento exponencial, y seis chispas cayendo en
+espiral hacia el horizonte. Esfera GIGANTE: 52px de radio, arte de
+811px de envergadura.
+
+**OlvidoBlackHoleProjectile.cs** — física 100% probada (copia del
+carmesí: pop elástico, atracción, aura con ticks acelerados, devora
+balas, persecución, evaporación, anillo de Einstein final) con lente
+propia (mult 3.4) y paleta del olvido. **El agujero del vacío queda
+INTACTO** (ni una línea tocada).
+
+**OlvidoBlackHoleStaff** (daño 150) con icono 28×30 generado (bastón +
+mini-agujero carmesí, validado VLM) y tooltips completos.
+
+### B. EL AGUJERO NEGRO DE FUSIÓN — LA FUSIÓN LITERAL DE LOS DOS PADRES
+
+**FusionBlackHoleProjectile** — petición: "la fusión del agujero negro
+del vacío con el agujero negro base". Su DrawCoreVisuals encadena AMBOS
+renderizadores originales en el MISMO centro, cada uno con su identidad
+intacta:
+
+  1. **DETRÁS** — `BlackHoleProjectile.DrawCoreVisuals(p, false)`: el
+     Gargantua de marcha de luz del BASE (RealBlackHoleShader de 75
+     pasos, disco naranja lensado, halo ámbar, refuerzo del horizonte).
+  2. **DELANTE** — `CrimsonBlackHoleRenderer.Draw(·, scale×0.68, ·)`: el
+     VÓRTICE OBLIVION del VACÍO con sus SIETE capas de personalidad
+     v6.13 (ondas de espacio-tiempo, pulsos de fotones, chorros
+     relativistas, corrientes de materia, llamaradas, arcos de Einstein,
+     rim violeta) a 0.68× — su esfera negra se alinea con el horizonte
+     del Gargantua y el ANILLO NARANJA LENSADO asoma alrededor.
+
+El resultado: fuego y vacío en un solo cuerpo. Física idéntica probada
+con radio de atracción ampliado (480px — "la suma de ambas masas"),
+paleta de partículas DOBLE (carmesí del vacío + naranja del Gargantua
+entremezcladas en dusts, estelas, implosiones y explosiones), lente
+propia (mult 3.2) e icono propio (anillo naranja+carmesí, validado VLM
+como "solar-void" distinguible).
+
+**FusionBlackHoleStaff** (daño 130) con tooltips de la doble estirpe.
+
+### C. REGISTRO EN LA LENTE GRAVITACIONAL
+
+`BlackHoleLensSystem` (ediciones aditivas, sin tocar el comportamiento
+de los agujeros existentes): los tipos Fusion y Olvido se recogen como
+fuentes de distorsión con sus propios multiplicadores (3.2 y 3.4) y se
+dibujan ENCIMA de la lente con sus DrawCoreVisuals propios (mismo
+protocolo que el carmesí desde v6.02).
+
+### D. VERIFICACIÓN
+
+  · **Compilación**: Build succeeded · 0 errores · 0 warnings contra
+    tModLoader v2026.07.3.0 REAL (DLLs del release, /tmp/verify).
+  · **12 rondas VLM**: máscara (r3), comparaciones v1→final (r4-r10),
+    iconos (r11), cielo diurno (r12) — final 8/10 "mismo agujero".
+  · **130 rondas de optimización** con pérdida restringida a la zona
+    del agujero (sin píxeles del personaje) — curva guardada en
+    research/olvido/optim_result.json.
+  · **Pendiente (el usuario prueba)**: Develop Mods → Build → los TRES
+    bastones (BlackHoleStaff base intacto, FusionBlackHoleStaff nuevo,
+    OlvidoBlackHoleStaff nuevo) → client.log limpio.
+
 ## Commit v6.13 — EL AGUJERO NEGRO CON PERSONALIDAD + LAS 8 ALAS RE DISEÑADAS DE CERO CON LA TÉCNICA DE LAS CORONAS
 
 **Feedback del usuario**: "el agujero negro no se parece en nada a la

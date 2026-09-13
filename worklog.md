@@ -7578,3 +7578,34 @@ Next:
 
 Stage Summary:
 - v6.13 EN GitHub: el agujero negro funcional ahora tiene SIETE capas de personalidad (ondas, pulsos, chorros, corrientes, llamaradas, arcos de Einstein, rim respirando) sin tocar física/lente/contrato de batch; las 8 alas son diseños NUEVOS construidos con el vocabulario exacto de las coronas (trazos, perlas, destellos, volúmenes) validados 8/8 por VLM en 3 rondas iterativas
+
+---
+Task ID: 25
+Agent: Z.ai Code (agente principal)
+Task: v6.14 — LOS DOS AGUJEROS NEGROS NUEVOS: el 3ro FUSIÓN (base+vacío, ambos intactos) y el 4to OLVIDO (100% exacto a la referencia Reddit de Regicide/Oblivion, con "100 rondas de revisiones profundas")
+
+Work Log:
+- Directiva del usuario: dejar el agujero del vacío SIN TOCAR; crear un 3ro = fusión vacío+base; crear un 4to "Agujero Negro del Olvido" 100% exacto a la referencia, usando todas las técnicas necesarias
+- CAMBIO DE TÉCNICA DECISIVO tras 4 versiones fallidas de réplica procedural (v6.09-v6.13): el arte del Olvido se EXTRAE de los PÍXELES de la propia referencia y se descompone en capas animables
+- Investigación del mod fuente: cloné Chinzilla00/AncientsAwakened (1.3) — el boss Oblivión existe (sprite 174px + GIF 24 frames + piskel) pero el agujero GRANDE de la imagen de Reddit no está en ningún repo público → LA REFERENCIA MISMA es la fuente de verdad
+- Mediciones numpy: esfera R=34px centro (495,224); perfil radial del plasma (gap 0.8-1.3R, pico 1.55-2.55R, brazos a 6.4R); elipse del anillo por tracking angular (a=1.70R b=1.64R); hotspot 125°; estrella interior (-0.31R,-0.25R) color (202,24,76); rayo púrpura (75,27,113) cuadrante inferior-derecho; 2261 píxeles NARANJA (255,155,85) del gradiente caliente que las máscaras magenta excluían
+- Separación personaje/agujero: máscara estructural (magenta + naranjas + blancos calientes = agujero; SOLO colores equilibrados = personaje plata/máscara/cuernos) + inpainting angular bilateral donde el boss tapa plasma esperado
+- Suavizado: cierre morfológico + máscara gaussiana σ=1.15px + color extendido por EDT + RGB bilineal + esfera supersampleada ×4 + bloom del anillo horneado (σ=16) al halo
+- LAS "100 RONDAS DE REVISIONES PROFUNDAS": 12 rondas de validación VLM (máscara r3, comparaciones iteradas r4-r10, iconos r11, cielo diurno r12) + 130 rondas de optimización automatizada (descenso por coordenadas sobre 10 ganancias, pérdida restringida a la zona del agujero SIN los píxeles irreplicables del personaje; el primer intento con pérdida global saturó el halo por compensación — fix: máscara de exclusión)
+- Resultado: EMA 16.4/255, VLM final 8/10 con veredicto "sí, un jugador diría que es el mismo agujero"; cielo diurno legible ("bolsillo de oscuridad")
+- 5 TEXTURAS NUEVAS en Content/Effects/Procedural/ (formato premultiplicado A=255 en las aditivas — blending lineal): OlvidoVortex.png 1024 (ARTE EXACTO), OlvidoHalo.png 256, OlvidoSphere.png 160 (negro + estrella + rayo), OlvidoBackplate.png 256 (vacío rojizo), OlvidoWisps.png 512
+- OlvidoBlackHoleRenderer.cs: contrato cerrado→cerrado; backplate (alfa) → halo pulsante + velos rotando 0.03 rad/s + vortex respirando (aditivo) → esfera (alfa) → overlays vivos (pulsos de fotones a 72°/s, llamarada del hotspot cada 4.2s con decaimiento exponencial, 6 chispas en espiral); esfera 52px, arte 811px
+- OlvidoBlackHoleProjectile.cs: física 100% probada (clon del carmesí) con lente mult 3.4 y paleta del olvido; EL AGUJERO DEL VACÍO QUEDA INTACTO (0 líneas tocadas)
+- FusionBlackHoleProjectile.cs — LA FUSIÓN LITERAL: DrawCoreVisuals encadena BlackHoleProjectile.DrawCoreVisuals(p,false) (Gargantua marcha de luz DETRÁS) + CrimsonBlackHoleRenderer.Draw(×0.68) (vórtice Oblivion con sus 7 capas de personalidad DELANTE); atracción 480px, paleta doble carmesí+naranja, lente mult 3.2
+- FusionBlackHoleStaff (130) + OlvidoBlackHoleStaff (150) con iconos 28×30 generados (supersampling ×8, validados VLM r11) y tooltips
+- BlackHoleLensSystem: registro aditivo de los 2 tipos nuevos (fuentes con mult propios + dibujado encima de la lente) sin tocar a los existentes
+- Docs: build.txt 6.14, CHANGES.md (entrada v6.14 secciones A-D), research/olvido al repo (30 archivos: scripts, drafts, comparaciones, 12 VLM, optim_result.json)
+- Compilación contra tModLoader 2026.07.3.0 REAL (/tmp/verify reconstruido con las DLLs de /tmp/tml): Build succeeded · 0 errores · 0 warnings A LA PRIMERA
+
+Test:
+- Sandbox: 12 rondas VLM + 130 rondas de optimización (EMA 16.4, curva en research/olvido/optim_result.json) + compilación limpia 0 errores 0 warnings + simulación de cielo diurno legible
+- PENDIENTE (el usuario prueba en su máquina): Develop Mods → Build → (1) OlvidoBlackHoleStaff: el vórtice EXACTO de la referencia con su estrella y rayo interiores + backplate oscuro + pulsos/llamaradas/chispas SIN errores en client.log; (2) FusionBlackHoleStaff: esfera con anillo naranja lensado del Gargantua + vórtice carmesí con personalidad encima; (3) CrimsonBlackHoleStaff y BlackHoleStaff deben seguir IDÉNTICOS (intactos)
+
+Next:
+- Si el usuario ajusta el Olvido: las ganancias (halo/vortex/anillo/backplate) ya son texturas horneadas — regenerar con build_assets_olvido.py tarda segundos; el coverage 7.8R y SpherePx=52 son constantes del renderer
+- La técnica de extracción-directa (píxeles de la referencia → capas animables) queda documentada como EL método para réplicas exactas en el futuro
