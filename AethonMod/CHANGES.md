@@ -1,5 +1,75 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.19 — LOS SOLES RÚNICOS + EL CETRO DEL TRUENO
+
+**Petición del usuario**: "ahora hagamos que el sol sea más mágico: al
+igual que los agujeros negros tienen anillos con runas, crea varias
+copias del sol y ponles anillos con runas — la primera un solo anillo,
+la segunda 2 (uno rodea el sol y el otro en OTRA dirección), la tercera
+3 y así hasta 10 copias, cada una mejorada un poquito más hasta la
+copia 10 con muchas mejoras y animaciones · el SOL ORIGINAL NO SE TOCA
+· crea un arma que use rayos con NUESTRA librería, con varios efectos
+en los rayos".
+
+### A. LA FAMILIA DE LOS SOLES RÚNICOS (10 copias — el Sol original INTACTO)
+  · **RuneSunRenderer.cs** (VFX): UNA sola clase parametrizada por
+    copia (tier 1..10) — el cuerpo solar hereda la TÉCNICA del sol
+    (backglow BloomCircle + aura RadialShineShader + disco de plasma
+    SunShader con granulación dendrítica, re-implementada — cero
+    dependencia del SunProjectile) + el SISTEMA RÚNICO:
+  · **N ANILLOS = el número de la copia**: cada anillo vive en SU
+    PROPIO plano orbital (semiejes, achatado e inclinación distintos)
+    con **GIRO ALTERNO** — el par gira horario, el impar antihorario
+    ("el otro rodea el sol en otra dirección").
+  · Cada anillo: aro elíptico de cápsulas con PROFUNDIDAD (el frente
+    más brillante) + glifos de la **ESCRITURA SOLAR** (8 diseños
+    nuevos: el Astro, la Llama, la Rueda, la Espiga, la Puerta del
+    Día, la Corona, el Cometa y el Sigilo) cabalgando la órbita
+    ROTADOS A LA TANGENTE, con perlas y latidos propios.
+  · **MEJORAS PROGRESIVAS** (una capa por copia): 2·chispas orbitales
+    3·destellos de 4 puntas · 4·prominencias de plasma del limbo ·
+    5·viento solar · 6·rayos fugitivos entre anillos (LightningCore) ·
+    7·precesión de los planos + acentos azul-estelar cada 3er anillo ·
+    8·núcleo pulsante + ondas de eco · 9·corona de pétalos de plasma ·
+    10·ERUPCIÓN RÚNICA (runas desprendiéndose y volando) + JETS
+    POLARES con rayo interno — el sistema completo.
+  · **RuneSunProjectile.cs**: UN proyectil parametrizado (ai[0] =
+    copia): vida 10 s + 0.2 s por copia, pop elástico, persecución
+    suave de enemigos, aura ardiente cada 10 ticks, GIGANTE FINAL
+    (hinchazón ×1.5 + daño ×1.5 en los últimos 1.5 s) y UNA SOLA NOVA
+    RÚNICA al morir (onda nova + AoE + ráfaga de runas de eco — la
+    lección v5.97 de "una sola explosión").
+  · **RuneSunStaves.cs**: 10 bastones (Bastón del Sol Rúnico I..X),
+    daño 80→296, tooltips cortos de 2 líneas, localización es/EN.
+  · Iconos 28×30 procedurales: bastón dorado + cabeza solar + N
+    anillos elípticos de inclinaciones alternas (tools/
+    gen_rune_suns_v619.py).
+
+### B. EL CETRO DEL TRUENO RÚNICO (el arma de rayos — LightningCore)
+  · **RunicLightning.cs** — un LINE-STRIKE: el rayo nace en la punta
+    del jugador y golpea AL INSTANTE el punto del cursor (el proyectil
+    NUNCA se mueve). EFECTOS APLICADOS AL RAYO:
+    1. Rayo principal zigzag vivo ~14 Hz con DOBLE TIRA cuerpo-oro +
+       núcleo-blanco, ramas y gorros (LightningCore.Bolt).
+    2. DAÑO EN LÍNEA: Collision.CheckAABBvLineCollision barre todo lo
+       que cruza la descarga.
+    3. CADENA ELÉCTRICA: hasta 3 saltos a enemigos cercanos (60% del
+       daño, rayos secundarios azul-estelar).
+    4. ARCOS DE IMPACTO: dos coronas eléctricas vibrando (Arc CW+CCW).
+    5. ELECTRIFICADO (240 ticks) a todo lo tocado.
+    6. ONDA DE CHOQUE expandiéndose + luz a lo largo de toda la línea.
+  · **StormRuneStaff.cs**: Cetro del Trueno Rúnico — daño 95, mana 12,
+    alcance 560 px, icono procedural con núcleo eléctrico y rayo
+    dentado.
+  · Sombras PNG 76×76 de ambos proyectiles nuevos (la lección v6.14.1:
+    tModLoader auto-requesta la textura de TODO ModProjectile).
+
+### C. ENTREGA
+  · TestingPlayer: los 10 bastones + el cetro con EnsureItem.
+  · Localización es-ES + en-US (nombres y proyectiles).
+  · Compilación 0 errores / 0 warnings contra tModLoader
+    v2026.07.3.0 real.
+
 ## Commit v6.18 — LA GRAN CONSOLIDACIÓN: 9 AGUJEROS + LIBRERÍA DE RAYOS
 
 **Petición del usuario**: "revisa la ventana de información de todos los

@@ -87,6 +87,22 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.BrumaAscendidoBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.CosmicAscendidoBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.OlvidoAscendidoBlackHoleStaff>());
+            // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
+            // (el Sol original queda INTACTO), N anillos rúnicos por copia
+            // con giros alternos y mejoras progresivas (la X las tiene todas)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico1Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico2Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico3Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico4Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico5Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico6Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico7Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico8Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico9Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico10Staff>());
+            // v6.19: EL CETRO DEL TRUENO — el arma de rayos de la librería
+            // LightningCore (daño en línea, cadena, arcos, electrificación)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());

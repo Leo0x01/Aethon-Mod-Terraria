@@ -939,3 +939,34 @@ Next:
 
 Stage Summary:
 - v6.18 completa: 9 AGUJEROS NEGROS (4 definitivos + 4 ascendidos + Supremo), librería de rayos LightningCore propia, alas borradas, vacío/fusión eliminados, base oculto, tooltips cortos, recolors Cósmico/Olvido, referencias externas purgadas — todo compilando 0/0
+
+---
+Task ID: 35
+Agent: Z.ai Code (agente principal)
+Task: v6.19 — LOS SOLES RÚNICOS + EL CETRO DEL TRUENO (petición: copias del sol con anillos de runas 1..10 con giros alternos y mejoras progresivas — el sol original INTACTO — + un arma de rayos con la librería propia y varios efectos)
+
+Work Log:
+- Sandbox reseteado de nuevo: resincronicé con origin/main (4c39556 = v6.18) y reconstruí el entorno de compilación desde cero (.NET 8.0.425 en ~/.dotnet + tModLoader v2026.07.3.0 en /tmp/tml + /tmp/verify con referencias a tModLoader.dll/FNA/ReLogic/TerrariaHooks) — v6.18 verificada 0/0 antes de empezar
+- Estudié los patrones vigentes: LightningCore (Bolt/Arc/FlickTick/Flicker), VFXCore (Quad/SoftGlow/Ring/RingQuadSize/Hash01), el doble círculo de runas del Supremo (CW + CCW), el render del sol (backglow BloomCircle + RadialShineShader + SunShader + glow coronal), el OnKill del sol (una sola nova StyleNova — lección v5.97), el kit de EnsureItem y la localización hjson
+- RuneSunRenderer.cs (~800 líneas, Content/VFX): UNA clase parametrizada por tier 1..10 — cuerpo solar con la TÉCNICA del sol re-implementada (SunShader sobre DendriticNoise con drawScale R×3 igual al original, aura R×5.44, backglow, corona 2 capas función pura de lifeT) + N ANILLOS RÚNICOS: cada anillo en su PROPIO plano orbital (RingA 1.62+0.44k, achatado 0.34+0.07(k%3), tilt -0.55+0.20k) con GIRO ALTERNO (±(0.26+0.045k) rad/s — "el otro rodea el sol en otra dirección"), aro elíptico de 30 cápsulas con PROFUNDIDAD (frente más brillante), runas de la ESCRITURA SOLAR (8 glifos nuevos: Astro/Llama/Rueda/Espiga/Puerta/Corona/Cometa/Sigilo) rotadas a la TANGENTE con perlas
+- MEJORAS PROGRESIVAS por copia: 2·chispas orbitales · 3·destellos 4 puntas · 4·prominencias (Bolt del limbo con Smooth+JitterPath) · 5·viento solar · 6·rayos fugitivos entre anillos (Bolt k→k+2) · 7·precesión de planos + acentos azul-estelar cada 3er anillo · 8·núcleo pulsante + ondas de eco · 9·corona de pétalos de plasma · 10·erupción rúnica (runas desprendiéndose) + jets polares con rayo interno
+- RuneSunProjectile.cs: UN proyectil (ai[0]=tier, ai[1]=seed, ai[2]=daño base): OnSpawn fija vida 600+12(tier-1), pop elástico, persecución suave (patrón del sol), aura 45% cada 10 ticks (radio crece +6%/tier), GIGANTE FINAL ×1.5 con daño ×1.5 en los últimos 90 ticks, OnKill = UNA nova rúnica (CosmicShockwave StyleNova radio 380+14(tier-1) + AoE 260+12(tier-1) + runas de eco 12+2·tier dusts Enchanted_Gold + explosión de partículas + PunchCamera + sonidos)
+- RuneSunStaves.cs: clase base + 10 subclases (SolRunico1..10Staff), daño 80→296, tooltips de 2 líneas (regla v6.18), receta de madera
+- RunicLightning.cs + StormRuneStaff.cs: EL ARMA DE RAYOS — line-strike instantáneo al cursor (velocity anclada → 0 en el primer tick, alcance 560 px): daño en LÍNEA con Collision.CheckAABBvLineCollision (margen 14 px), CADENA a 3 enemigos (60% daño), ARCOS CW+CCW en el impacto, ELECTRIFIED 240 ticks, onda de choque Ring expandiéndose, luz en 3 puntos de la línea, rayo principal doble tira oro/blanco ~14 Hz
+- tools/gen_rune_suns_v619.py: 13 PNGs — 2 sombras 76×76 (sol cálido + anillo; chispa eléctrica con zigzag) + 11 iconos 28×30 SS8 (bastón dorado + cabeza solar + N anillos elípticos de inclinaciones alternas; cetro con núcleo eléctrico)
+- Localización es-ES + en-US: 10 bastones + cetro + 2 proyectiles
+- TestingPlayer: 11 EnsureItem nuevos
+- Balance tras revisión: daño del rayo 2 aplicaciones (ticks 2 y 8, no cada 3); disco R×3 y aura R×5.44 para igualar al sol original; guard de _anchored en PreDraw
+- Compilación final contra tML v2026.07.3.0 real: 0 errores, 0 warnings (3 iteraciones de fixes: using Graphics, MathHelper.Clamp int→System.Math.Clamp, renombrado GlowTexture→GlowTex por CS0108)
+
+Test:
+- Build succeeded 0 errores / 0 warnings contra tModLoader v2026.07.3.0 real (/tmp/verify)
+- 13/13 PNGs generados y verificados (invariantes del patrón v6.14.1: esquinas transparentes, masa visible en rango)
+- PENDIENTE (usuario): Build v6.19 → probar los 10 soles rúnicos (I..X) y el Cetro del Trueno
+
+Next:
+- Iterar visuales según feedback del usuario (tamaños de anillo, velocidad de giro, densidad de runas — todo son constantes del RuneSunRenderer)
+- La familia queda lista para futuras variantes (tier es un parámetro: un eventual Sol Supremo = tier alto con paleta propia)
+
+Stage Summary:
+- v6.19 EN GitHub: 10 COPIAS DEL SOL con anillos rúnicos en planos orbitales de GIRO ALTERNO (1 anillo la primera, 10 anillos la décima con erupción rúnica + jets polares) + mejoras progresivas por copia — EL SOL ORIGINAL 100% INTACTO — y el CETRO DEL TRUENO RÚNICO, el arma de rayos con LightningCore (daño en línea, cadena, arcos, electrificación, onda de choque)

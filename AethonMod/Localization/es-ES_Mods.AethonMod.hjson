@@ -86,6 +86,22 @@
         "Items.RuneCrownItem.DisplayName": "Corona Rúnica Estelar",
         "Items.RuneCrownItem.Tooltip": "Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia\nflotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
 
+        // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
+        // (el Sol original queda INTACTO) con N anillos rúnicos en planos
+        // orbitales de giros alternos, mejoras progresivas por copia.
+        "Items.SolRunico1Staff.DisplayName": "Bastón del Sol Rúnico I",
+        "Items.SolRunico2Staff.DisplayName": "Bastón del Sol Rúnico II",
+        "Items.SolRunico3Staff.DisplayName": "Bastón del Sol Rúnico III",
+        "Items.SolRunico4Staff.DisplayName": "Bastón del Sol Rúnico IV",
+        "Items.SolRunico5Staff.DisplayName": "Bastón del Sol Rúnico V",
+        "Items.SolRunico6Staff.DisplayName": "Bastón del Sol Rúnico VI",
+        "Items.SolRunico7Staff.DisplayName": "Bastón del Sol Rúnico VII",
+        "Items.SolRunico8Staff.DisplayName": "Bastón del Sol Rúnico VIII",
+        "Items.SolRunico9Staff.DisplayName": "Bastón del Sol Rúnico IX",
+        "Items.SolRunico10Staff.DisplayName": "Bastón del Sol Rúnico X",
+        // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)
+        "Items.StormRuneStaff.DisplayName": "Cetro del Trueno Rúnico",
+
         // v6.18: LAS ALAS FUERON BORRADAS DEL MOD (petición del usuario).
 
         "Projectiles.BlackHoleProjectile.DisplayName": "Agujero Negro",
@@ -104,6 +120,10 @@
         "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Bruma Ascendida",
         "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Cósmico Ascendido",
         "Projectiles.OlvidoAscendidoBlackHoleProjectile.DisplayName": "Olvido Ascendido",
+
+        // v6.19: los proyectiles de los soles rúnicos y del rayo del cetro
+        "Projectiles.RuneSunProjectile.DisplayName": "Sol Rúnico",
+        "Projectiles.RunicLightning.DisplayName": "Trueno Rúnico",
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
