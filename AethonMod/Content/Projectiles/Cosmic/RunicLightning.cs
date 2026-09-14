@@ -171,13 +171,37 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // Guard: hasta anclarse no hay descarga que dibujar.
             if (!_anchored) return false;
 
-            // La descarga completa (contrato: batch cerrado → cerrado).
-            DrawBolt();
+            // ============================================================
+            //  CONTRATO DE BATCH A PRUEBA DE BALAS (v6.10 — la lección de
+            //  los agujeros): durante PreDraw el batch de tML está ABIERTO;
+            //  hay que CERRARLO antes de que DrawBolt() llame a Begin()
+            //  aditivo. Sin esto: InvalidOperationException "Begin has been
+            //  called before calling End" → el rayo NUNCA se pinta (arma
+            //  invisible + error en client.log) — bug v6.19 corregido.
+            // ============================================================
+            bool wasActive = true;
+            try { Main.spriteBatch.End(); }
+            catch { wasActive = false; }
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            try
+            {
+                DrawBolt();
+            }
+            catch { try { Main.spriteBatch.End(); } catch { } }
+
+            if (wasActive)
+                RestoreSpriteBatch();
             return false;
+        }
+
+        /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
+        /// pase de proyectiles de vanilla (Main.DrawProjectiles) — el mismo
+        /// contrato validado de la familia de agujeros negros.</summary>
+        private static void RestoreSpriteBatch()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.Transform);
         }
 
         private void DrawBolt()

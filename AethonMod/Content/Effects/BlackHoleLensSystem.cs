@@ -321,6 +321,9 @@ namespace AethonMod.Content.Effects
             int brumaHoleType = ModContent.ProjectileType<BrumaBlackHoleProjectile>();
             // v6.18: los CINCO nuevos — el SUPREMO + los 4 ASCENDIDOS
             int supremoHoleType = ModContent.ProjectileType<SupremoBlackHoleProjectile>();
+            // v6.20: el SUPREMO AURORA — el gradiente negro→morado→azul→dorado
+            // (el original queda intacto; este es el hermano del alba polar)
+            int supremoAuroraType = ModContent.ProjectileType<SupremoAuroraBlackHoleProjectile>();
             int umbralAscType = ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>();
             int brumaAscType = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
             int cosmicAscType = ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>();
@@ -354,7 +357,8 @@ namespace AethonMod.Content.Effects
                 if (p.type == blackHoleType || p.type == olvidoHoleType ||
                     p.type == cosmicHoleType || p.type == umbralHoleType ||
                     p.type == brumaHoleType ||
-                    p.type == supremoHoleType || p.type == umbralAscType ||
+                    p.type == supremoHoleType || p.type == supremoAuroraType ||
+                    p.type == umbralAscType ||
                     p.type == brumaAscType || p.type == cosmicAscType ||
                     p.type == olvidoAscType)
                 {
@@ -382,6 +386,8 @@ namespace AethonMod.Content.Effects
                         radiusMult = BrumaBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == supremoHoleType)
                         radiusMult = SupremoBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == supremoAuroraType)
+                        radiusMult = SupremoAuroraBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == umbralAscType)
                         radiusMult = UmbralAscendidoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == brumaAscType)
@@ -766,6 +772,8 @@ namespace AethonMod.Content.Effects
                         BrumaBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == supremoHoleType)
                         SupremoBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == supremoAuroraType)
+                        SupremoAuroraBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == umbralAscType)
                         UmbralAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == brumaAscType)

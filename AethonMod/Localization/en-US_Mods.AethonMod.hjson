@@ -74,6 +74,8 @@
         "Items.OlvidoBlackHoleStaff.DisplayName": "Olvido Black Hole Staff",
         // v6.18: the FIVE new ones
         "Items.SupremoBlackHoleStaff.DisplayName": "Supreme Black Hole Staff",
+        // v6.20: the AURORA sibling of the Supreme (black→purple→blue→gold gradient)
+        "Items.SupremoAuroraBlackHoleStaff.DisplayName": "Aurora Supreme Black Hole Staff",
         "Items.UmbralAscendidoBlackHoleStaff.DisplayName": "Ascended Umbral Staff",
         "Items.BrumaAscendidoBlackHoleStaff.DisplayName": "Ascended Bruma Staff",
         "Items.CosmicAscendidoBlackHoleStaff.DisplayName": "Ascended Cosmic Staff",
@@ -128,6 +130,7 @@
         "Projectiles.BrumaBlackHoleProjectile.DisplayName": "Bruma Black Hole",
         "Projectiles.OlvidoBlackHoleProjectile.DisplayName": "Olvido Black Hole",
         "Projectiles.SupremoBlackHoleProjectile.DisplayName": "Supreme Black Hole",
+        "Projectiles.SupremoAuroraBlackHoleProjectile.DisplayName": "Aurora Supreme Black Hole",
         "Projectiles.UmbralAscendidoBlackHoleProjectile.DisplayName": "Ascended Umbral",
         "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Ascended Bruma",
         "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Ascended Cosmic",

@@ -83,6 +83,9 @@ namespace AethonMod.Content.Players
             // mejorado y potenciado) + los 4 ASCENDIDOS (copias mejoradas
             // de Umbral/Bruma/Cósmico/Olvido con la librería de rayos)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SupremoBlackHoleStaff>());
+            // v6.20: el SUPREMO AURORA — el gradiente negro→morado→azul→dorado
+            // (el Supremo original dorado queda INTACTO)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SupremoAuroraBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.UmbralAscendidoBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.BrumaAscendidoBlackHoleStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.CosmicAscendidoBlackHoleStaff>());

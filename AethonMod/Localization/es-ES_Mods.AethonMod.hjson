@@ -76,6 +76,8 @@
         "Items.OlvidoBlackHoleStaff.DisplayName": "Bastón del Agujero del Olvido",
         // v6.18: LOS CINCO NUEVOS — el Supremo y los 4 Ascendidos
         "Items.SupremoBlackHoleStaff.DisplayName": "Bastón del Agujero Negro Supremo",
+        // v6.20: el hermano AURORA del Supremo (gradiente negro→morado→azul→dorado)
+        "Items.SupremoAuroraBlackHoleStaff.DisplayName": "Bastón del Agujero Supremo Aurora",
         "Items.UmbralAscendidoBlackHoleStaff.DisplayName": "Bastón del Umbral Ascendido",
         "Items.BrumaAscendidoBlackHoleStaff.DisplayName": "Bastón de la Bruma Ascendida",
         "Items.CosmicAscendidoBlackHoleStaff.DisplayName": "Bastón del Cósmico Ascendido",
@@ -116,6 +118,7 @@
         "Projectiles.BrumaBlackHoleProjectile.DisplayName": "Agujero de la Bruma",
         "Projectiles.OlvidoBlackHoleProjectile.DisplayName": "Agujero del Olvido",
         "Projectiles.SupremoBlackHoleProjectile.DisplayName": "Agujero Negro Supremo",
+        "Projectiles.SupremoAuroraBlackHoleProjectile.DisplayName": "Agujero Negro Supremo Aurora",
         "Projectiles.UmbralAscendidoBlackHoleProjectile.DisplayName": "Umbral Ascendido",
         "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Bruma Ascendida",
         "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Cósmico Ascendido",

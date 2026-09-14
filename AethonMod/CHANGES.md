@@ -1,5 +1,65 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.20 — FIX DE LOS SOLES RÚNICOS + EL CETRO DEL TRUENO + EL AGUJERO NEGRO SUPREMO AURORA
+
+**Petición del usuario**: "que raro, no veo los soles, los bastones sí
+invocan al sol, pero el sol no se ve, o sea el proyectil es invisible,
+lo mismo con el bastón de rayo, no se ve nada y además dio error · el
+sol original sí se ve, pero los nuevos soles no se ven ni el bastón de
+rayos · en el agujero negro supremo, cambiar el color: centro negro y
+que vaya cambiando de color — a morado cerca del centro, azul y dorado
+en los bordes; guardar una copia del original y crear uno nuevo con
+estos cambios".
+
+### A. EL BUG DE LOS PROYECTILES INVISIBLES (v6.19 corregido)
+  · **CAUSA RAÍZ** (del client.log): `InvalidOperationException: Begin
+    has been called before calling End` — `RuneSunProjectile.PreDraw`
+    y `RunicLightning.PreDraw` llamaban a sus renderers CON EL
+    SpriteBatch de tML todavía ABIERTO; el primer `BeginAdditive()`
+    interno re-abría un batch ya abierto → excepción CADA FRAME → el
+    dibujo abortaba → proyectil INVISIBLE (los bastones sí invocaban).
+  · **EL FIX**: el CONTRATO DE BATCH A PRUEBA DE BALAS (v6.10, el mismo
+    de la familia de agujeros negros) aplicado a los dos PreDraw:
+    `End()` defensivo → renderer (cerrado→cerrado) → `RestoreSpriteBatch()`
+    con los parámetros EXACTOS del pase de proyectiles de vanilla
+    (`Main.Rasterizer` + `Main.Transform`).
+  · Los 10 Bastones del Sol Rúnico I..X y el Cetro del Trueno Rúnico
+    ahora pintan su sistema completo (anillos, runas, rayos, efectos).
+
+### B. EL AGUJERO NEGRO SUPREMO AURORA (el original queda INTACTO)
+  · **SupremoAuroraBlackHoleRenderer.cs** (VFX): la copia NUEVA del
+    Supremo con EL GRADIENTE DEL USUARIO como FUNCIÓN —
+    `AuroraGrad(t)`: MORADO (185,105,255) en t=0 → AZUL (92,150,255) →
+    DORADO (255,195,90) en t=1 — aplicado a CADA CAPA por su distancia
+    radial al núcleo:
+    · EL NÚCLEO → NEGRO ABSOLUTO (BlackDisk, repintado final intacto).
+    · JUNTO AL NÚCLEO → MORADO: el rim del horizonte, el anillo de
+      fotones, los arcos LightningCore, el interior del disco Doppler
+      (blanco frío el lado que acerca, morado profundo el que aleja) y
+      la nube interna de Bruma.
+    · EL MEDIO → AZUL: los brazos espirales (gradiente A LO LARGO del
+      brazo), el círculo interior de runas, el contrarroto del aura y
+      el lado que acerca del disco de acreción.
+    · LOS BORDES → DORADO: el anillo de bandas (cada SEGMENTO coloreado
+      por su distancia radial real 1.24..1.95R — la petición hecha
+      geometría), las puntas de los brazos y de los JETS POLARES
+      (morado→azul→dorado a lo largo del haz), el círculo exterior de
+      runas, la nube externa y el aura final.
+    · LAS ONDAS DE DISTORSIÓN NACEN MORADAS y MUEREN DORADAS (el
+      gradiente expandiéndose por el espacio-tiempo), y los rayos
+      fugitivos son 2 AZULES + 1 DORADO.
+  · **SupremoAuroraBlackHoleProjectile.cs**: la MISMA física suprema
+    (esfera 55px, atracción 550px, devora balas, anillo de Einstein)
+    con la paleta aurora en luz (centro morado, polo azul, base
+    dorada), partículas, disco de acreción e impactos.
+  · **SupremoAuroraBlackHoleStaff.cs**: "Bastón del Agujero Supremo
+    Aurora" — 300 de daño, tooltips cortos, localización es/EN.
+  · Registro completo: BlackHoleLensSystem (lente gravitacional:
+    fuente + radio + núcleo encima de la lente), EnsureItem al entrar
+    al mundo, sombra 76×76 (rim morado→azul, peak 78) e icono 28×30
+    (bastón morado + mini-agujero con el gradiente pintado por píxel +
+    runa dorada + destellos fríos) — tools/gen_supremo_aurora_tex_v620.py.
+
 ## Commit v6.19 — LOS SOLES RÚNICOS + EL CETRO DEL TRUENO
 
 **Petición del usuario**: "ahora hagamos que el sol sea más mágico: al

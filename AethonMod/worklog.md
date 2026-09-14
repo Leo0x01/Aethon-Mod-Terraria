@@ -970,3 +970,33 @@ Next:
 
 Stage Summary:
 - v6.19 EN GitHub: 10 COPIAS DEL SOL con anillos rúnicos en planos orbitales de GIRO ALTERNO (1 anillo la primera, 10 anillos la décima con erupción rúnica + jets polares) + mejoras progresivas por copia — EL SOL ORIGINAL 100% INTACTO — y el CETRO DEL TRUENO RÚNICO, el arma de rayos con LightningCore (daño en línea, cadena, arcos, electrificación, onda de choque)
+
+---
+Task ID: 36
+Agent: Z.ai Code (agente principal)
+Task: v6.20 — FIX de los proyectiles invisibles de v6.19 (soles rúnicos + cetro del trueno) + EL AGUJERO NEGRO SUPREMO AURORA (recolor con gradiente, el original preservado)
+
+Work Log:
+- Análisis del client.log del usuario: DOS InvalidOperationException "Begin has been called before calling End" — en RuneSunRenderer.BeginAdditive (vía RuneSunProjectile.PreDraw:186) y en RunicLightning.DrawBolt (vía PreDraw:175)
+- CAUSA RAÍZ: ambos PreDraw llamaban a sus renderers con el SpriteBatch de tML todavía ABIERTO (los renderers exigen batch CERRADO→CERRADO); la excepción abortaba el dibujo CADA FRAME → proyectiles invisibles (los bastones sí invocaban)
+- FIX 1 — RuneSunProjectile.PreDraw: contrato de batch a prueba de balas v6.10 (End defensivo → renderer → RestoreSpriteBatch con Main.Rasterizer+Main.Transform, los parámetros EXACTOS del pase de proyectiles de vanilla)
+- FIX 2 — RunicLightning.PreDraw: mismo contrato
+- EL SUPREMO AURORA (petición: "centro negro, morado cerca del centro, azul y dorado en los bordes; guardar una copia del original y crear uno nuevo"):
+  · SupremoAuroraBlackHoleRenderer.cs — copia NUEVA del Supremo (999 líneas, el original SIN tocar) con AuroraGrad(t) como FUNCIÓN del gradiente morado(185,105,255)→azul(92,150,255)→dorado(255,195,90), aplicada por DISTANCIA RADIAL: rim/fotones/arcos/interior-Doppler/nube-interna MORADOS; brazos/círculo-interior-de-runas/contrarroto AZULES; exterior-del-anillo-de-bandas (por segmento, radial real 1.24..1.95R)/puntas-de-jets-y-brazos/círculo-exterior-de-runas/nube-externa/aura-final DORADOS; ondas de distorsión nacen moradas y mueren doradas; rayos fugitivos 2 azules + 1 dorado
+  · SupremoAuroraBlackHoleProjectile.cs — misma física suprema, paleta aurora en luz (centro morado, polo azul, base dorada), dusts, partículas de librería e impactos
+  · SupremoAuroraBlackHoleStaff.cs — 300 daño, tooltips cortos es
+  · Registro: BlackHoleLensSystem (fuente + LensRadiusMult 3.6 + DrawCoreVisuals encima de la lente), EnsureItem en TestingPlayer, localización es/EN
+  · tools/gen_supremo_aurora_tex_v620.py: sombra 76×76 (rim morado→azul profundo, peak 78) + icono 28×30 (bastón morado + mini-agujero con el gradiente pintado POR PÍXEL por distancia radial + runa dorada + destellos fríos)
+- build.txt → 6.20; CHANGES.md v6.20 (secciones A y B)
+- Sandbox: compilación forzada --no-incremental 0 errores 0 warnings contra tModLoader v2026.07.3.0 real
+
+Test:
+- Sandbox 0/0 (rebuild forzado verificado)
+- PENDIENTE (usuario): Build v6.20 → (1) los 10 soles rúnicos y el Cetro del Trueno ahora DEBEN verse (sin excepciones en client.log); (2) el Bastón del Agujero Supremo Aurora se entrega al entrar al mundo — núcleo negro, rim morado, brazos azules, bordes dorados; el Supremo original dorado SIGUE intacto y entregado
+
+Next:
+- Si el usuario quiere afinar el gradiente: todos los stops viven en AuroraGrad() y las constantes de paleta del SupremoAuroraBlackHoleRenderer
+- LECCIÓN v6.20: TODO PreDraw que llame a un renderer propio DEBE cerrar el batch antes (el contrato v6.10 no es opcional — revisar en futuras armas)
+
+Stage Summary:
+- v6.20: los soles rúnicos y el cetro del trueno VUELVEN VISIBLES (bug de SpriteBatch corregido con el contrato probado de los agujeros) + el AGUJERO NEGRO SUPREMO AURORA con el gradiente negro→morado→azul→dorado del usuario aplicado capa a capa por distancia radial, el original 100% preservado — 0/0 contra tML real

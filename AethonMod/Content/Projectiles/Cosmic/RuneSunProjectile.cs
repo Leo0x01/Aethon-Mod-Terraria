@@ -182,14 +182,37 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // El sistema rúnico completo (contrato: batch cerrado → cerrado).
-            RuneSunRenderer.Draw(Projectile, Tier, LifeT, RedGiant, Seed);
+            // ============================================================
+            //  CONTRATO DE BATCH A PRUEBA DE BALAS (v6.10 — la lección de
+            //  los agujeros): durante PreDraw el batch de tML está ABIERTO;
+            //  hay que CERRARLO antes de que el renderer llame a Begin()
+            //  con sus propios estados. Sin esto: InvalidOperationException
+            //  "Begin has been called before calling End" → el sol NUNCA
+            //  se pinta (proyectil invisible) — bug v6.19 corregido.
+            // ============================================================
+            bool wasActive = true;
+            try { Main.spriteBatch.End(); }
+            catch { wasActive = false; }
 
-            // Restaura el batch al estado que tML espera tras PreDraw.
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            try
+            {
+                RuneSunRenderer.Draw(Projectile, Tier, LifeT, RedGiant, Seed);
+            }
+            catch { try { Main.spriteBatch.End(); } catch { } }
+
+            if (wasActive)
+                RestoreSpriteBatch();
             return false;
+        }
+
+        /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
+        /// pase de proyectiles de vanilla (Main.DrawProjectiles) — el mismo
+        /// contrato validado de la familia de agujeros negros.</summary>
+        private static void RestoreSpriteBatch()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.Transform);
         }
 
         public override void OnKill(int timeLeft)
