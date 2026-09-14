@@ -223,16 +223,22 @@ namespace AethonMod.Content.Effects.Bruma
         /// <summary>
         /// Disposición de TODAS las texturas horneadas (llamado desde
         /// BrumaSystem.Unload) — cero fugas de VRAM entre recargas.
+        /// v6.27 FIX: ModContent.UnloadModContent corre en un hilo del POOL
+        /// y FNA exige que Texture.Dispose ocurra en el hilo PRINCIPAL
+        /// (ThreadStateException en el log del usuario). Las referencias se
+        /// cortan AHORA y la disposición real se ENCOLA al hilo principal.
         /// </summary>
         public static void Unload()
         {
+            // Recolectar primero (el cierre solo captura locales — las
+            // estáticas ya quedan en null para la próxima carga).
+            List<Texture2D> moribundas = new();
             for (int v = 0; v < Variantes; v++)
             {
                 if (_puffs[v] == null) continue;
                 for (int t = 0; t < _puffs[v].Length; t++)
                 {
-                    try { _puffs[v][t]?.Dispose(); }
-                    catch { }
+                    if (_puffs[v][t] != null) moribundas.Add(_puffs[v][t]);
                     _puffs[v][t] = null;
                 }
                 _puffs[v] = null;
@@ -242,12 +248,24 @@ namespace AethonMod.Content.Effects.Bruma
                 if (_vapors[v] == null) continue;
                 for (int t = 0; t < _vapors[v].Length; t++)
                 {
-                    try { _vapors[v][t]?.Dispose(); }
-                    catch { }
+                    if (_vapors[v][t] != null) moribundas.Add(_vapors[v][t]);
                     _vapors[v][t] = null;
                 }
                 _vapors[v] = null;
             }
+
+            if (moribundas.Count == 0) return;
+
+            // FNA: las funciones de audio/gráficos deben correr en el hilo
+            // principal — Main.QueueMainThreadAction es el canal oficial.
+            Main.QueueMainThreadAction(() =>
+            {
+                foreach (Texture2D tex in moribundas)
+                {
+                    try { tex.Dispose(); }
+                    catch { }
+                }
+            });
         }
     }
 }

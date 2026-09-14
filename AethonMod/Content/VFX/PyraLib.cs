@@ -58,13 +58,18 @@ namespace AethonMod.Content.VFX
             (32, new Color(215, 255, 215)),
             (36, new Color(245, 255, 245)));
 
-        /// <summary>Muestreo de la tabla por temperatura 0..1 (interpolación LINEAL).</summary>
+        /// <summary>Muestreo de la tabla por temperatura 0..1 (interpolación LINEAL).
+        /// v6.27 FIX: a prueba de NaN/Inf (el clamp de MathHelper NO corta NaN
+        /// y `(int)NaN` = int.MinValue en x64 → IndexOutOfRangeException real
+        /// en el log del usuario) y de tablas de 1 solo color.</summary>
         public static Color Sample(Color[] ramp, float temperature)
         {
             if (ramp == null || ramp.Length == 0) return Color.White;
+            if (ramp.Length == 1) return ramp[0];
+            if (!float.IsFinite(temperature)) temperature = 0f;   // NaN/±Inf → frío
             temperature = MathHelper.Clamp(temperature, 0f, 1f);
             float t = temperature * (ramp.Length - 1);
-            int i = Math.Min((int)t, ramp.Length - 2);
+            int i = Math.Clamp((int)t, 0, ramp.Length - 2);
             return Color.Lerp(ramp[i], ramp[i + 1], t - i);
         }
 

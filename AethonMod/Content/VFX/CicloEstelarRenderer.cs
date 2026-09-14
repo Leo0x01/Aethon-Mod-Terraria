@@ -547,6 +547,13 @@ namespace AethonMod.Content.VFX
         /// 0.2 Hz sobre la rampa SolarFire ENROJECIDA.</summary>
         private static void DrawConveccion(Vector2 pos, float R, float a3, float time, int seed)
         {
+            // v6.27 FIX: venimos de DrawSunBody con el batch CERRADO (la
+            // sección 4 cierra tras FlushAdditive) — Tongue espera el lote
+            // ABIERTO del llamador (contrato de PyraLib/StormLib). Sin este
+            // Begin el primer batch.Draw lanza InvalidOperationException
+            // ("Draw was called, but Begin has not yet been called").
+            BeginAdditive();
+
             Color[] ramp = RampaEnrojecida(a3);
 
             // EL LATIDO LENTO: 0.2 Hz — el corazón cansado del coloso.
@@ -568,6 +575,8 @@ namespace AethonMod.Content.VFX
                     seed + 900 + k * 61, time, intensity: 0.60f * (0.35f + 0.65f * a3),
                     wind: 0f, gravDir: 1f, rot: ang + MathHelper.PiOver2);
             }
+
+            Main.spriteBatch.End();
         }
 
         /// <summary>La RAMPA SolarFire lerp hacia rojos (cacheada por

@@ -49,6 +49,20 @@
         "Buffs.LivingPulsarBuff.DisplayName": "Púlsar Vivo",
         "Buffs.LivingPulsarBuff.Description": "Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos",
 
+        "Buffs.OcasoActivoBuff.DisplayName": "El Ocaso",
+        "Buffs.OcasoActivoBuff.Description": "El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución",
+        "Buffs.SobrecalentadoBuff.DisplayName": "Sobrecalentada",
+        "Buffs.SobrecalentadoBuff.Description": "El bastón humea y calla: no dispara mientras se enfría",
+
+        "Items.ArsenalBag.DisplayName": "Bolsa del Arsenal Primordial",
+        "Items.ArsenalBag.Tooltip": "TODO el arsenal del mod en una sola ranura.\nClic derecho para desplegarlo.\nSolo entrega lo que te falte.\nLa bolsa es permanente: reábrela cuando pierdas un arma.",
+
+        "Items.OcasoAethonStaff.DisplayName": "Bastón del Ocaso de Aethon",
+        "Items.OcasoAethonStaff.Tooltip": "El arma suprema del medidor: carga → estallido → bloqueo.\nCada impacto de un fragmento carga el aro de tu cabeza.\nAro lleno: CLIC DERECHO enciende EL OCASO (8 s de muertes de estrella ×3).\nBajo el 50% de vida del objetivo, la muerte EJECUTA.\nDespués: 2 s de sobrecalentada. Sin maná.",
+
+        "Projectiles.OcasoShardProjectile.DisplayName": "Fragmento del Ocaso",
+        "Projectiles.OcasoBurstProjectile.DisplayName": "Muerte de Estrella",
+
         "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
         "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
         "NPCs.TheWitness.DisplayName": "El Testigo",

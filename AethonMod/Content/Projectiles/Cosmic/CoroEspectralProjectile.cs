@@ -88,8 +88,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Semilla determinista (ai[2]).</summary>
         private int Seed => Math.Max(1, (int)Projectile.ai[2]) + Projectile.identity;
 
-        /// <summary>El daño base del arma.</summary>
-        private float BaseDamage => Projectile.ai[3] > 0f ? Projectile.ai[3] : Projectile.damage;
+        /// <summary>El daño base del arma. v6.27 FIX: el array `ai`
+        /// de tModLoader SOLO tiene 3 ranuras — el espejo vive en `localAI[2]`
+        /// (no sincronizada, pero `Projectile.damage` —que SÍ viaja— es el
+        /// fallback, y el daño manual corre en servidor/SP).</summary>
+        private float BaseDamage => Projectile.localAI[2] > 0f ? Projectile.localAI[2] : Projectile.damage;
 
         // === LOS COLORES DE LA ESCALA (dorada → ceniza) ===
         private static readonly Color[] Escala = new Color[]
@@ -132,7 +135,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.ai[1] = Projectile.Center.Y;
             if (Projectile.ai[2] <= 0f)
                 Projectile.ai[2] = (Projectile.identity % 9973 + 1) * 1f;
-            Projectile.ai[3] = Projectile.damage;
+            // v6.27 FIX: `ai[3]` NO EXISTE (IndexOutOfRangeException en el
+            // log del usuario) — el espejo del daño va a localAI[2].
+            Projectile.localAI[2] = Projectile.damage;
             _age = 0f;
             Projectile.netUpdate = true;
 

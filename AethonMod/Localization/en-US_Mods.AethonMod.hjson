@@ -49,6 +49,20 @@
         "Buffs.LivingPulsarBuff.DisplayName": "Living Pulsar",
         "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",
 
+        "Buffs.OcasoActivoBuff.DisplayName": "The Ocaso",
+        "Buffs.OcasoActivoBuff.Description": "The ocaso burns: 8 seconds of star-deaths at ×3 damage with execute",
+        "Buffs.SobrecalentadoBuff.DisplayName": "Overheated",
+        "Buffs.SobrecalentadoBuff.Description": "The staff smokes and stays silent: it won't fire while it cools",
+
+        "Items.ArsenalBag.DisplayName": "Primordial Arsenal Bag",
+        "Items.ArsenalBag.Tooltip": "The mod's ENTIRE arsenal in a single slot.\nRight-click to deploy it.\nOnly delivers what you're missing.\nThe bag is permanent: reopen it whenever you lose a weapon.",
+
+        "Items.OcasoAethonStaff.DisplayName": "Ocaso of Aethon Staff",
+        "Items.OcasoAethonStaff.Tooltip": "The supreme gauge weapon: charge → burst → lockout.\nEvery fragment hit charges the halo over your head.\nFull halo: RIGHT-CLICK ignites THE OCASO (8 s of ×3 star-deaths).\nBelow 50% target health, death EXECUTES.\nAfterwards: 2 s overheat lockout. No mana.",
+
+        "Projectiles.OcasoShardProjectile.DisplayName": "Ocaso Shard",
+        "Projectiles.OcasoBurstProjectile.DisplayName": "Star-Death",
+
         "NPCs.HollowTitan.DisplayName": "The Hollow Titan",
         "NPCs.AethonBoss.DisplayName": "Aethon, the Primordial Light",
         "NPCs.TheWitness.DisplayName": "The Witness",

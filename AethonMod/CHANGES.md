@@ -2,6 +2,113 @@
 
 # AethonMod — Historial de Cambios
 
+## Commit v6.27 — LA BOLSA DEL ARSENAL + EL OCASO DE AETHON + LOS 6 BUGS DE RUNTIME MUERTOS
+
+**Petición del usuario**: "hay demasiados errores, además todo lo que le
+vas a dar al jugador ponlo en una bolsa o cofre y dale solo la bolsa con
+todos los objetos dentro · dime que piensas de los biomas · crea una
+nueva arma para aplicar el patrón gauge del Cosmic Destroyer a un arma
+suprema · dime cuales son las librerías actuales del proyecto y si con
+esta ultima investigación creaste o no librerías o mejoraste alguna ·
+revisa los .md en el proyecto y actualízalos según corresponda · dime
+que mas se puede agregar al mod según lo que investigaste".
+
+### A. LOS 6 BUGS DE RUNTIME DEL client.log — MUERTOS POR LA RAÍZ
+  Análisis del client.log subido (v6.26 en juego): 5 clases de excepción
+  real + 1 warn sistémico. TODAS arregladas:
+  1. **`Projectile.ai[3]` NO EXISTE** — el array `ai` de tModLoader
+     SOLO tiene 3 ranuras (0..2). El Coro Espectral y el Péndulo del
+     Juicio guardaban el espejo del daño en `ai[3]` →
+     `IndexOutOfRangeException` en OnSpawn Y en cada tick de AI (las dos
+     armas directamente rotas en juego). FIX: el espejo vive en
+     `localAI[2]` (ranura libre, con `Projectile.damage` —que SÍ
+     viaja— como fallback).
+  2. **`PyraPalettes.Sample` NO cortaba NaN** — `MathHelper.Clamp` deja
+     pasar NaN (las comparaciones con NaN son falsas) y `(int)NaN` =
+     `int.MinValue` en x64 → índice negativo → excepción. FIX: guard
+     `float.IsFinite` + tablas de 1 color + `Math.Clamp` final. A prueba
+     de balas para TODA la librería PyraLib.
+  3. **`CicloEstelarRenderer.DrawConveccion` dibujaba con el lote
+     CERRADO** — venía de `DrawSunBody` (cierra tras FlushAdditive) y
+     llamaba a `PyraLib.Tongue` que espera el lote ABIERTO del llamador
+     → "Draw was called, but Begin has not yet been called" +
+     "End was called..." (las 2 excepciones del log de las 18:08). FIX:
+     `BeginAdditive()` + `End()` envolviendo las lenguas (el mismo
+     contrato del resto del renderer).
+  4. **`BrumaBrushes.Unload` disponía texturas en hilo del POOL** —
+     ModContent.UnloadModContent corre fuera del hilo principal y FNA
+     exige Texture.Dispose en el hilo principal → ThreadStateException
+     en cada recarga. FIX: las referencias se cortan YA y la disposición
+     real se encola con `Main.QueueMainThreadAction` (el canal oficial).
+  5. (El mismo fix del punto 1 cubría las 4 trazas del log: OnSpawn +
+     BaseDamage × 2 armas.)
+  6. El warn "Image loading failed: unknown image type" del empaquetado
+     existe desde v6.21 y NO es de nuestros PNGs (auditoría PIL: los 200+
+     PNGs del mod son RGBA estándar, esquinas transparentes verificadas)
+     — documentado, sin acción.
+
+### B. LA BOLSA DEL ARSENAL PRIMORDIAL — el kit en UNA ranura
+  Petición literal: todo lo que se le da al jugador, DENTRO de una bolsa;
+  al jugador SOLO la bolsa. `ArsenalBag` (ítem permanente, rango rojo,
+  PNG 30×30 procedural): `TestingPlayer.OnEnterWorld` pasó de 40+
+  `EnsureItem` individuales a **UNA sola entrega garantizada** — la bolsa.
+  Clic derecho la abre: despliega el arsenal COMPLETO (kit base + las 47
+  armas + cosméticos) con semántica de garantía (solo lo que falte —
+  reabrirla repone armas perdidas sin duplicar). Apertura con 30 chispas
+  oro/violeta + texto de casa. `ArsenalBag.Contenido()` es ahora EL
+  punto único de la verdad del arsenal (dar de alta un arma nueva = 1
+  línea ahí). El inventario del jugador deja de inundarse en cada
+  entrada al mundo.
+
+### C. EL OCASO DE AETHON — el patrón gauge del Cosmic Destroyer, aplicado
+  El arma suprema de la investigación v6.26 (INFORME_EXOELECTRIC_NAMELESS,
+  lección 10): LA TRINIDAD carga → burst → lockout, con los NÚMEROS del
+  informe (gauge 100, +3 por impacto, 480 ticks de modo, ×3 de daño,
+  execute <50% HP, lockout de castigo):
+  · **CARGA**: el bastón dispara Fragmentos del Ocaso (150, búsqueda
+    suave, estela ribbon + cruz de destello). CADA IMPACTO llena el aro.
+  · **BURST**: aro lleno → CLIC DERECHO (AltFunctionUse) igniciona EL
+    OCASO: 8 s donde cada disparo es una MUERTE DE ESTRELLA — mini-eclipse
+    de 90 px con anillos rúnicos del EMISOR COMPARTIDO (tier 3, el mismo
+    trazo de los soles), corona SolarFire (PyraPalettes), arcos de
+    StormLib, anillo de OndaLib y cadena violeta a 2 vecinos (50%) —
+    daño ×3 (450) con EJECUCIÓN (+50%) bajo el 50% de vida del objetivo
+    (`ModifyHitNPC` + `FinalDamage` — sin dados). Al morir abre un
+    DESGARRO en la realidad (RiftLib.Tear vía OcasoBurstFX, 40 ticks).
+  · **LOCKOUT**: 2 s de Sobrecalentada — el bastón no dispara, humea.
+  · **LA UI DEL GAUGE, 100% CÓDIGO** (`OcasoSystem.PostDrawInterface`,
+    lote de interfaz TAL CUAL — el patrón aprobado de OndaSystem): aro
+    de 20 segmentos tipo aureola sobre la cabeza; violeta→dorado al
+    cargar; LISTO = pulso + 3 puntas orbitando + rótulo; ACTIVO = drenaje
+    oro→rojo con chispas StormLib; LOCKOUT = rojo apagándose + vapor.
+    Fade-out −0.05/tick (la lección de UI del TSA).
+  · 2 buffs indicadores con PNGs 32×32 procedurales (OcasoActivo /
+    Sobrecalentado, con cuenta atrás). `OcasoPlayer` es la máquina de
+    estados; cadencia normal 14 ticks, ocaso 20. Sin maná (el costo ES
+    el gauge).
+  · 6 PNGs nuevos (2 iconos + 2 buffs + 2 sombras 76×76 de proyectil)
+    por `tools/gen_v627_assets.py`.
+
+### D. DOCUMENTACIÓN — los .md al día con la investigación
+  · CARACTERISTICAS.md: nueva sección **LIBRERÍAS VFX** (el inventario
+    completo de las 12 librerías + los 2 sistemas de soporte) + arsenal
+    y sistemas al día (bolsa, gauge, contadores reales).
+  · README.md: funciones/cómo-jugar actualizados (la bolsa, el arsenal
+    de 47, el Ocaso).
+  · Este CHANGES.md v6.27.
+  · worklog.md (sandbox): Task 45 completo.
+  · La opinión de biomas + el backlog priorizado de la investigación
+    top-100 quedan en research/estrategia_v626/ (INFORME_BIOMAS.md con
+    5 conceptos con plan de fases; INFORME_TOP100.md con 15 lecciones y
+    tablas de ideas priorizadas A/B/C).
+
+### E. ESTADO TÉCNICO
+  · Compilación contra tModLoader 2026.07.3.0 real: **0 errores,
+    0 warnings** (tras los fixes + el arma nueva + la bolsa).
+  · build.txt → 6.27. hjson es/EN con las 8 claves nuevas (bolsa,
+    arma, 2 proyectiles, 2 buffs). Sin referencias externas (auditoría
+    v6.26 se mantiene: modReferences vacío).
+
 ## Commit v6.26 — EL SOL DE LOS 20 ANILLOS + RIFTLIB + 14 ARMAS NUEVAS + LAS CORONAS DE VERDAD
 
 **Petición del usuario**: "el baston del eclipse primordial cámbialo,

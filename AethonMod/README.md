@@ -12,10 +12,20 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
 
 - **Fragmento Génesis** con niveles infinitos y 3 ramas principales.
 - **Grimorio del Eterno**: arma híbrida mágica/de invocación con niveles infinitos.
-- **Arsenal de pruebas cósmico** (14 armas: sol, agujero negro, medusa, cometa, púlsar...).
+- **Arsenal de pruebas cósmico — 47 armas** (soles rúnicos, 10 agujeros
+  negros, 6 estrellas reales, desgarro de realidad, tormentas, ciclo
+  estelar, enjambres, péndulos, coros…).
+- **BOLSA DEL ARSENAL PRIMORDIAL**: al entrar al mundo recibes SOLO la
+  bolsa (1 ranura); clic derecho despliega todo el arsenal — solo entrega
+  lo que te falte y es permanente (v6.27).
+- **EL OCASO DE AETHON**: el arma suprema del medidor gauge
+  (carga → estallido ×3 → bloqueo) con aro medidor 100% por código (v6.27).
+- **12 librerías VFX propias** (humo, fuego, rayos, estelas, ondas, luz,
+  desgarros de realidad…) — render 100% procedural, 0 sprites de arte.
 - **Árboles de habilidades procedurales** (95 nodos totales: 30+30+35).
 - **Capstone de Absorción de Lore** — memoriza armas del juego base + mods.
-- **Bioma Sagrario Hueco** con altar, mineral y mobs propios.
+- **Bioma Sagrario Hueco** (stub lógico; 5 conceptos de bioma diseñados en
+  `research/estrategia_v626/INFORME_BIOMAS.md`).
 - **6 jefes** (mini-jefe, ecos, cósmicos, jefe final Aethon de 5 fases).
 - **Economía de Fragmentos de Resonancia**.
 - **NPC "El Testigo"** que narra lore y vende runas.
@@ -27,11 +37,17 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
 
 1. Compila el mod (ver `COMPILACION.md`).
 2. Actívalo en tModLoader.
-3. Craftea el **Fragmento Génesis** (1 Wood, receta de debug) o encuentra el **Altar Antiguo** bajo tierra.
-4. Mata enemigos con daño Ranged/Melee/Magic → el fragmento se "imprprime" con esa rama.
-5. Sigue matando → sube de nivel infinitamente.
+3. Entra a un mundo (un jugador): recibes **LA BOLSA DEL ARSENAL
+   PRIMORDIAL** — el kit de pruebas completo en una sola ranura.
+4. Clic derecho sobre la bolsa: se despliega TODO el arsenal (solo lo que
+   te falte; reábrela cuando pierdas un arma).
+5. Mata enemigos con daño Ranged/Melee/Magic → el fragmento se "imprime"
+   con esa rama.
 6. Pulsa **K** para abrir el árbol de habilidades.
 7. Pulsa **J** para abrir el códex de memoria (nivel 50+).
+8. Con el **BASTÓN DEL OCASO DE AETHON**: cada impacto de un fragmento
+   carga el aro sobre tu cabeza; aro lleno → **CLIC DERECHO** y llueven
+   8 segundos de muertes de estrella a daño ×3.
 
 ## 📦 Estructura
 
