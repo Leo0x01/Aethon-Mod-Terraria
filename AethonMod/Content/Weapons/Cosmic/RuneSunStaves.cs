@@ -31,7 +31,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void SetDefaults()
         {
             int tier = Tier;
-            Item.damage = 80 + 24 * (tier - 1);          // 80 → 536
+            // v6.26 — LA MEJORA MAYOR DE LA VEINTE: el sello supremo de la
+            // familia sube de grado (536 → 820 de daño, 15,3 s de vida).
+            Item.damage = tier >= 20 ? 820 : 80 + 24 * (tier - 1);   // 80 → 536 · 820 la XX
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 50; Item.useAnimation = 50;
@@ -42,7 +44,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item8;
-            Item.value = 1000 * tier;
+            Item.value = 1000 * tier + (tier >= 20 ? 20000 : 0);
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
@@ -71,6 +73,9 @@ namespace AethonMod.Content.Weapons.Cosmic
                 $"[c/FFD080:Copia {tier} del Sol — {anillos} en planos orbitales con giros alternos]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
                 $"[c/78788C:{mejora}]"));
+            if (tier >= 20)
+                tooltips.Add(new TooltipLine(Mod, "D3",
+                    "[c/FFEC9E:LA MEJORA MAYOR — sistema ×1.30 · vida 15 s · aura ardiente al 55% · la Nova del Sellado ×1.6]"));
         }
 
         public override void AddRecipes()

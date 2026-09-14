@@ -9,30 +9,31 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// EclipsePrimordialStaff — v6.22 — EL BASTÓN DEL ECLIPSE PRIMORDIAL.
+    /// EclipsePrimordialStaff — v6.26 — EL SOL DE LOS 20 ANILLOS.
     ///
-    /// PETICIÓN DEL USUARIO: "crea un bastón nuevo que fusione el sol de
-    /// 20 anillos rúnicos, más todos los agujeros negros; a esto dale
-    /// efectos de luz, bruma, humo, rayos y otros efectos que creas
-    /// convenientes".
+    /// v6.26 — LA ORDEN DEL USUARIO: "el bastón del eclipse primordial
+    /// cámbialo, esta nueva versión será el sol de 20 anillos, y la
+    /// mezcla de todos los agujeros negros rúnicos".
     ///
-    /// LA FUSIÓN TOTAL: un agujero negro supremo (la física más grande
-    /// del mod: 600px de atracción) con el SISTEMA SOLAR RÚNICO COMPLETO
-    /// orbitando el horizonte — los 20 anillos de la copia XX, el gran
-    /// sellado maestro y su cometa. TODAS las herencias fundidas:
-    ///   · del UMBRAL  → el disco Doppler oblicuo (ahora gradiente aurora).
-    ///   · del CÓSMICO → el anillo de bandas (20 zonas de brillo viajando).
-    ///   · del OLVIDO  → los brazos espirales con flujo hacia adentro.
-    ///   · de la BRUMA → el halo de nubes, el humo que respira y las
-    ///                   volutas cayendo al núcleo.
-    ///   · del SUPREMO → el núcleo negro devorador + rim dorado + jets.
-    ///   · del AURORA  → el gradiente negro→morado→azul→dorado.
-    ///   · del SOL XX  → los 20 anillos rúnicos + el GRAN SELLADO.
-    ///   · de STORMLIB → la corona de rayos de 2ª generación.
-    ///   · de LUMENLIB → los rayos prismáticos + el destello del corazón.
+    /// EL SOL DE LOS 20 ANILLOS — LA MEZCLA DE TODOS LOS AGUJEROS NEGROS
+    /// RÚNICOS: el núcleo ya no es una luna negra — es el Sol XX ENTERO
+    /// (cuerpo solar + 20 anillos + gran sellado + cometa, ×1.30) con
+    /// TODAS las firmas orbitando por fuera:
+    ///   · del SUPREMO   → los TRES círculos rúnicos concéntricos de pie
+    ///                      con perlas (blanco/dorado/violeta) entrelazados
+    ///                      con el anillo 20 del sol.
+    ///   · del CÓSMICO   → el anillo de bandas (20 zonas de brillo viajando).
+    ///   · del OLVIDO    → los brazos espirales con flujo hacia adentro,
+    ///                      ahora ALIMENTANDO al sol.
+    ///   · de la BRUMA   → el halo de nubes + el aliento + las volutas
+    ///                      cayendo al cuerpo solar (acreción invertida).
+    ///   · del UMBRAL    → el anillo de fotones + corredores.
+    ///   · del AURORA    → el gradiente morado→azul→dorado exterior.
+    ///   · de STORMLIB   → la corona de descarga + rayos fugitivos.
+    ///   · de LUMENLIB   → la luz prismática radiando.
     ///
     /// La muerte es LA NOVA DEL ECLIPSE: el anillo de Einstein + la nova
-    /// rúnica del sol fundido — la explosión más grande del mod.
+    /// rúnica del sol ×1.6 + la nova visual con TODAS las librerías.
     /// </summary>
     public class EclipsePrimordialStaff : ModItem
     {
@@ -40,7 +41,7 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override void SetDefaults()
         {
-            Item.damage = 640;
+            Item.damage = 700;
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 55; Item.useAnimation = 55;
@@ -64,11 +65,11 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/B46CFF:EL ECLIPSE — el Sol de los 20 Anillos fundido con TODOS los agujeros negros]"));
+                "[c/FFD080:EL SOL DE LOS 20 ANILLOS — la fusión del Sol XX con TODOS los agujeros negros rúnicos]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Gradiente aurora · 20 anillos rúnicos + gran sellado · bruma y humo · corona de rayos · luz prismática]"));
+                "[c/78788C:Tres círculos rúnicos entrelazados · anillo de bandas · brazos que alimentan al sol · halo de bruma · gradiente aurora · corona de descarga · luz prismática]"));
             tooltips.Add(new TooltipLine(Mod, "D3",
-                "[c/78788C:La atracción más grande del mod (600px) · muere en el Anillo de Einstein + la Nova Rúnica]"));
+                "[c/78788C:Atracción gravitacional de 600px · muere en LA NOVA DEL ECLIPSE (Anillo de Einstein + nova rúnica ×1.6)]"));
         }
 
         public override void AddRecipes()

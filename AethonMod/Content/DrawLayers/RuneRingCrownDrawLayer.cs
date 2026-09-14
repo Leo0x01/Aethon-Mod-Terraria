@@ -8,15 +8,16 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RuneRingCrownDrawLayer — v6.25 — LA AUREOLA DEL SOL I SOBRE LA CABEZA.
+    /// RuneRingCrownDrawLayer — v6.26 — LA AUREOLA DEL SOL I SOBRE LA CABEZA.
     ///
     /// Capa de dibujado del jugador que pinta LA CORONA DE ANILLOS
-    /// RÚNICOS: el ANILLO DEL SOL RÚNICO I ringiendo la CABEZA como una
-    /// AUREOLA (v6.25 — la corrección del destinatario: esta corona, no
-    /// la Estelar, es la que vive sobre la cabeza). Se dibuja tras las
-    /// capas de cabeza/cara: la aureola vive ALREDEDOR de la cabeza.
-    /// Los quads salen de RuneRingCrownRenderer a través de la
-    /// biblioteca (AppendToPlayerDraw — el camino oficial de tML).
+    /// RÚNICOS: el ANILLO DEL SOL RÚNICO I — LITERAL, por el EMISOR
+    /// COMPARTIDO de RuneSunRenderer (EmitRingSystem tier 1: el mismo
+    /// código que dibuja al sol en el mundo) — ringendo la CABEZA como
+    /// una AUREOLA. Se dibuja tras las capas de cabeza/cara: la aureola
+    /// vive ALREDEDOR de la cabeza. Los quads salen de
+    /// RuneRingCrownRenderer a través de la biblioteca
+    /// (AppendToPlayerDraw — el camino oficial de tML).
     /// </summary>
     public class RuneRingCrownDrawLayer : PlayerDrawLayer
     {

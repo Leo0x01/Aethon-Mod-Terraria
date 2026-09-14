@@ -71,7 +71,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnSpawn(Terraria.DataStructures.IEntitySource source)
         {
             int tier = Tier;
-            _lifetime = BaseLifetime + 12 * (tier - 1);
+            // v6.26 — LA MEJORA MAYOR DE LA VEINTE: +90 ticks de vida (15,3 s
+            // totales) para que el GRAN SELLADO tenga tiempo de sonar entero.
+            _lifetime = BaseLifetime + 12 * (tier - 1) + (tier >= 20 ? 90 : 0);
             Projectile.timeLeft = (int)_lifetime;
             // ai[1] = semilla determinista del disparo (visual).
             if (Projectile.ai[1] <= 0f)
@@ -103,8 +105,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             _age += 1f;
 
             // === POP ELÁSTICO DE APARICIÓN ===
+            // (v6.26 — LA VEINTE nace GRANDE: sistema ×1.30 — el GRAN
+            // SELLADO merece un cielo entero para él solo.)
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, _age, true)) *
-                               (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true));
+                               (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true)) *
+                               (Tier >= 20 ? 1.30f : 1f);
 
             // === LA GIGANTE FINAL: se hincha ×1.5 y el daño sube ×1.5
             // (v6.22: la copia 20 — EL GRAN SELLADO — se hincha ×1.75) ===
@@ -130,7 +135,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 BaseDamage = Projectile.damage;
             }
 
-            // === EL AURA DE DAÑO (cada 10 ticks — 45% del daño) ===
+            // === EL AURA DE DAÑO (cada 10 ticks — 45% del daño;
+            //     LA VEINTE ARDE MÁS: 55% — la Mejora Mayor) ===
             if (Main.netMode != NetmodeID.MultiplayerClient &&
                 _age > 30f && _age % 10f == 0f && Projectile.scale > 0.25f)
             {
@@ -139,7 +145,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // Las copias altas tienen anillos más anchos: el aura crece
                 // con la copia (la 10 abraza su 3er anillo).
                 auraRadius *= 1f + 0.06f * (Tier - 1);
-                int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
+                int auraDamage = Math.Max(1, (int)(Projectile.damage * (Tier >= 20 ? 0.55f : 0.45f)));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
@@ -228,8 +234,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // ============================================================
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
-                float novaRadius = 380f + 14f * (tier - 1);
+                // v6.26 — LA NOVA DEL SELLADO: la VEINTE revienta ×1.6 con
+                // el radio más grande del arma alguna (766 px).
+                bool supremo = tier >= 20;
+                int novaDamage = Math.Max(1, (int)(Projectile.damage * (supremo ? 1.6f : 1.25f)));
+                float novaRadius = 380f + 14f * (tier - 1) + (supremo ? 120f : 0f);
 
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
@@ -241,7 +250,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     novaRadius);                         // radio escalado por copia
 
                 // AoE del núcleo (el epicentro de la MISMA explosión).
-                float coreR = 260f + 12f * (tier - 1);
+                float coreR = 260f + 12f * (tier - 1) + (supremo ? 90f : 0f);
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.CanBeChasedBy()) continue;
@@ -303,11 +312,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.fadeIn = 0f;
             }
 
-            // === Screenshake coordinado ===
+            // === Screenshake coordinado (LA VEINTE sacude más: 12) ===
             try
             {
                 Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
-                    Projectile.Center, new Vector2(1f, 0f), 8f, 12, 18, 0.45f,
+                    Projectile.Center, new Vector2(1f, 0f), tier >= 20 ? 12f : 8f, 12, 18, 0.45f,
                     "AethonRuneSunNova"));
             }
             catch { }

@@ -12,39 +12,54 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// EclipsePrimordialProjectile — v6.22 — EL ECLIPSE PRIMORDIAL.
+    /// EclipsePrimordialProjectile — v6.26 — EL SOL DE LOS 20 ANILLOS +
+    /// LA MEZCLA DE TODOS LOS AGUJEROS NEGROS RÚNICOS.
     ///
-    /// LA FUSIÓN TOTAL (petición del usuario): "un bastón nuevo que
-    /// fusione el sol de 20 anillos rúnicos, más todos los agujeros
-    /// negros, con efectos de luz, bruma, humo, rayos y otros efectos".
+    /// v6.26 — LA ORDEN DEL USUARIO: "el bastón del eclipse primordial
+    /// cámbialo, esta nueva versión será el sol de 20 anillos, y la mezcla
+    /// de todos los agujeros negros rúnicos". EL NÚCLEO YA NO ES UN
+    /// AGUJERO NEGRO: el centro es EL SOL DE LOS 20 ANILLOS (el cuerpo
+    /// solar completo de RuneSunRenderer a tier 20, escalado ×1.30), y a
+    /// su alrededor orbita LA MEZCLA: las firmas de TODOS los agujeros
+    /// negros rúnicos (EclipsePrimordialRenderer): los tres círculos
+    /// rúnicos del Supremo entrelazados con el anillo 20, el anillo de
+    /// bandas del Cósmico, los brazos del Olvido ALIMENTANDO al sol, el
+    /// halo de bruma, el anillo de fotones del Umbral, el gradiente
+    /// aurora, la corona de descarga de StormLib y la luz prismática.
     ///
-    /// Un agujero negro supremo con EL SISTEMA SOLAR RÚNICO COMPLETO (20
-    /// anillos + gran sellado + cometa) orbitando el horizonte — y TODAS
-    /// las herencias fundidas: el disco Doppler del Umbral (gradiente
-    /// aurora), el anillo de bandas del Cósmico, los brazos espirales del
-    /// Olvido, el humo de la Bruma, los rayos de StormLib y LA LUZ
-    /// prismática de LumenLib (el render completo en
-    /// EclipsePrimordialRenderer).
+    /// LA FÍSICA hereda de los agujeros (la atracción de 600px — ahora
+    /// ATRAE hacia el sol) + el AURA DE DAÑO del sol: los enemigos caen
+    /// al coloso y arden en su corona. Vida ~14 s.
     ///
-    /// La FÍSICA de juego es la MISMA copia probada del Supremo (pop
-    /// elástico, atracción en 600px — ahora la más grande del mod, aura
-    /// con ticks acelerados, devora balas, persecución lenta, evaporación
-    /// y anillo de Einstein final). Los demás agujeros quedan INTACTOS.
+    /// LA MUERTE es LA NOVA DEL ECLIPSE: el anillo de Einstein + la nova
+    /// rúnica del sol ×1.6 (las dos explosiones en un instante — la
+    /// lección v5.97) + la nova visual con TODAS las librerías
+    /// (OndaLib.Shock + StormLib.MultiBolt radiales + BrumaFX.Cloud
+    /// expansivo + LumenLib.Aurora + ImpactFlash CONCENTRADO — prohibido
+    /// el Flash de pantalla completa, lección v6.26).
     ///
-    /// PALETA ECLIPSE de partículas: el GRADIENTE AURORA — MORADO
-    /// (185,105,255) cerca del centro / AZUL (92,150,255) al medio /
-    /// DORADO (255,195,90) en los bordes + blanco frío en los picos.
+    /// PALETA de partículas: el ORO SOLAR cerca del cuerpo + el GRADIENTE
+    /// AURORA (morado/azul/dorado) en la mezcla exterior.
     /// </summary>
     public class EclipsePrimordialProjectile : ModProjectile
     {
-        /// <summary>Multiplicador del aura sobre la esfera visual (eclipse).</summary>
+        /// <summary>Vida total en ticks (~14 s — el coloso dura).</summary>
+        private const int LifeTicks = 840;
+
+        /// <summary>Multiplicador del aura sobre el cuerpo del sol.</summary>
         private const float ShieldRadiusMult = 4.8f;
 
         /// <summary>Multiplicador del radio de la lente gravitacional de pantalla.</summary>
         internal const float LensRadiusMult = 4.2f;
 
-        /// <summary>Radio de atracción gravitacional (px) — EL MÁS GRANDE.</summary>
+        /// <summary>Radio de atracción gravitacional (px) — la herencia de los agujeros.</summary>
         private const float GravityRadius = 600f;
+
+        /// <summary>Ticks de la fase de colapso final (LA NOVA DEL ECLIPSE).</summary>
+        private const int NovaTicks = 36;
+
+        /// <summary>Ticks de la fase de crecimiento (la gigante roja final).</summary>
+        private const int GrowTicks = 90;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
@@ -62,7 +77,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 600;
+            Projectile.timeLeft = LifeTicks;
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
             Projectile.extraUpdates = 0;
@@ -75,25 +90,29 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
             VisualsTime += 1f;
 
-            // === SECUENCIA DE MUERTE (copia exacta: crecimiento → evaporación) ===
+            // === SECUENCIA DE MUERTE: crecimiento (gigante roja) → NOVA ===
             float expansion = 0f;
-            if (Projectile.timeLeft > 36f && Projectile.timeLeft <= 90f)
+            if (Projectile.timeLeft > NovaTicks && Projectile.timeLeft <= GrowTicks)
             {
-                expansion = 1f - (Projectile.timeLeft - 36f) / 54f;
+                expansion = 1f - (Projectile.timeLeft - NovaTicks) / 54f;
                 Projectile.scale *= 1f + expansion * 0.6f;
             }
-            else if (Projectile.timeLeft <= 36f)
+            else if (Projectile.timeLeft <= NovaTicks)
             {
                 if (Projectile.localAI[1] <= 0f)
                     Projectile.localAI[1] = 0.3f * Projectile.width *
                                             Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
 
-                float collapse = Utils.GetLerpValue(36f, 0f, Projectile.timeLeft, true);
+                float collapse = Utils.GetLerpValue(NovaTicks, 0f, Projectile.timeLeft, true);
                 Projectile.scale *= Math.Max(1f - collapse, 0.06f);
                 expansion = 1f;
             }
 
             ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
+
+            // === LA NOVA DEL ECLIPSE: se dispara al empezar el colapso ===
+            if (Projectile.timeLeft <= NovaTicks)
+                TriggerNovaDelEclipse();
 
             // === MOVIMIENTO: deriva lenta y frenado (copia exacta) ===
             Projectile.velocity *= 0.97f;
@@ -116,17 +135,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float targetRotation = Projectile.velocity.X * 0.04f;
             Projectile.rotation += MathHelper.WrapAngle(targetRotation - Projectile.rotation) * 0.3f;
 
-            // === PARTÍCULAS (solo cliente) — PALETA ECLIPSE AURORA ===
+            // === PARTÍCULAS (solo cliente) — el oro del sol + la aurora ===
             if (Main.netMode != NetmodeID.Server)
             {
-                SpawnAbsorbedDusts();
+                SpawnFallingMatter();
                 SpawnCapturedEnergySparks();
                 AttractNearbyDust();
-                SpawnLibraryAbsorbedMatter();
-                SpawnLibraryAccretionDisk();
+                SpawnLibraryFallingMatter();
+                SpawnLibraryAccretionBand();
             }
 
-            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (600px — eclipse) ===
+            // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (600px — hacia el sol) ===
             float gravityRadius = GravityRadius * (1f + expansion * 0.6f);
             const float gravityStrength = 2.6f;
             foreach (NPC npc in Main.ActiveNPCs)
@@ -179,10 +198,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === AURA DE DAÑO: TICKS QUE ACELERAN CERCA DEL CENTRO ===
+            // === AURA DE DAÑO DEL SOL: TICKS QUE ACELERAN CERCA DEL CENTRO ===
             if (Main.netMode != NetmodeID.MultiplayerClient && VisualsTime > 0f)
             {
-                float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
+                float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / (float)LifeTicks, 0f, 1f);
                 float auraRadius = ShieldRadius * (1.15f + 0.75f * lifeProgress);
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * (0.35f + 0.30f * lifeProgress)));
                 int t = (int)VisualsTime;
@@ -206,14 +225,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
 
-            // === ILUMINACIÓN PULSANTE — TRES puntos (paleta aurora) ===
+            // === ILUMINACIÓN PULSANTE — TRES puntos (oro solar + violeta) ===
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
-            Vector3 light = new Vector3(0.80f * pulse, 0.62f * pulse, 0.95f * pulse);
-            Lighting.AddLight(Projectile.Center, light);
-            float le = EclipsePrimordialRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
-            Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), light * 0.55f);
+            Vector3 sunLight = new Vector3(1.00f * pulse, 0.82f * pulse, 0.55f * pulse);
+            Lighting.AddLight(Projectile.Center, sunLight);
+            float le = EclipsePrimordialRenderer.SunBodyPx * Math.Max(Projectile.scale, 0.1f);
+            Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), sunLight * 0.55f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f),
-                new Vector3(0.35f * pulse, 0.20f * pulse, 0.60f * pulse) * 0.75f);
+                new Vector3(0.45f * pulse, 0.25f * pulse, 0.75f * pulse) * 0.75f);
         }
 
         /// <summary>El enemigo chaseable más cercano dentro de maxDist (copia exacta).</summary>
@@ -234,7 +253,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return best;
         }
 
-        /// <summary>Radio actual del campo (px) — abraza la mitad interior del anillo.</summary>
+        /// <summary>Radio actual del campo (px) — abraza el cuerpo del sol.</summary>
         private float ShieldRadius
         {
             get
@@ -246,29 +265,31 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  PARTÍCULAS — PALETA ECLIPSE AURORA (morado/azul/dorado)
+        //  PARTÍCULAS — el ORO DEL SOL + el GRADIENTE AURORA
         // ------------------------------------------------------------------
 
-        /// <summary>Materia devorada (dusts) cayendo en espiral desde el anillo.</summary>
-        private void SpawnAbsorbedDusts()
+        /// <summary>Materia cayendo al sol (dusts) desde el borde de los anillos.</summary>
+        private void SpawnFallingMatter()
         {
             float deathSpeedBoost = 1f;
-            if (Projectile.timeLeft <= 90f)
-                deathSpeedBoost = 1f + (90f - Projectile.timeLeft) / 90f * 2f;
+            if (Projectile.timeLeft <= GrowTicks)
+                deathSpeedBoost = 1f + (GrowTicks - Projectile.timeLeft) / GrowTicks * 2f;
 
-            float shadow = EclipsePrimordialRenderer.SpherePx * Math.Max(Projectile.scale, 0.1f);
+            // El ancla: el CUERPO del sol (×1.30 — el coloso de la mezcla).
+            float core = EclipsePrimordialRenderer.SunBodyPx * Math.Max(Projectile.scale, 0.1f);
 
             for (int i = 0; i < 2; i++)
             {
                 float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 2f) +
                               Main.rand.NextFloat(-0.25f, 0.25f);
-                float dist = 2.6f * shadow + 1.4f * shadow * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i);
+                // Nace en el BORDE del sistema de anillos (~8.6× el cuerpo).
+                float dist = (7.2f + 1.4f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i)) * core;
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
 
                 Vector2 toCenter = Projectile.Center - spawnPos;
-                float speed = (6f + 6f * (1f - dist / (4f * shadow))) * deathSpeedBoost;
+                float speed = (6f + 6f * (1f - dist / (16f * core))) * deathSpeedBoost;
                 if (toCenter.LengthSquared() > 0.01f)
                 {
                     toCenter.Normalize();
@@ -277,16 +298,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float angleToCenter = (float)Math.Atan2(toCenter.Y, toCenter.X);
                     velocity = velocity.RotateTowards(angleToCenter + MathHelper.PiOver2 * 0.3f, 0.5f);
 
-                    // LA PALETA AURORA por distancia: cerca MORADO, medio AZUL,
-                    // borde DORADO — con blanco frío al borde del horizonte.
+                    // LA PALETA: MORADO frío al nacer en el borde → AZUL al
+                    // caer → DORADO/blanco al arder junto al sol.
                     Color color;
-                    if (dist < 1.6f * shadow)
+                    if (dist < 2.6f * core)
                     {
                         color = new Color(238, 242, 255); // blanco frío
                     }
                     else
                     {
-                        float t = MathHelper.Clamp((dist - 1.6f * shadow) / (2.4f * shadow), 0f, 1f);
+                        float t = MathHelper.Clamp((dist - 2.6f * core) / (6.0f * core), 0f, 1f);
                         color = t < 0.45f
                             ? Color.Lerp(new Color(185, 105, 255), new Color(92, 150, 255), t / 0.45f)
                             : Color.Lerp(new Color(92, 150, 255), new Color(255, 195, 90), (t - 0.45f) / 0.55f);
@@ -307,7 +328,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.rand.NextBool(12))
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(300f, 440f) * MathHelper.Max(Projectile.scale, 0.5f);
+                float dist = Main.rand.NextFloat(380f, 560f) * MathHelper.Max(Projectile.scale, 0.5f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -341,14 +362,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  PARTÍCULAS DE LA LIBRERÍA PROPIA (capa AboveLens)
         // ------------------------------------------------------------------
 
-        /// <summary>Materia devorada: estelas TrailGlow cayendo en espiral.</summary>
-        private void SpawnLibraryAbsorbedMatter()
+        /// <summary>Materia cayendo al sol: estelas TrailGlow espiralando.</summary>
+        private void SpawnLibraryFallingMatter()
         {
             for (int i = 0; i < 2; i++)
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(2.4f, 4.2f) *
-                             EclipsePrimordialRenderer.SpherePx * MathHelper.Max(Projectile.scale, 0.4f);
+                // Nace MÁS AFUERA del sistema (la acreción de la mezcla).
+                float dist = Main.rand.NextFloat(8.0f, 11.5f) *
+                             EclipsePrimordialRenderer.SunBodyPx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -358,8 +380,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 velocity = inward * Main.rand.NextFloat(1.8f, 2.8f) +
                                    tangent * Main.rand.NextFloat(0.25f, 0.5f);
 
-                Color start = new Color(185, 105, 255, 190);   // morado aurora
-                Color end = new Color(238, 242, 255, 235);     // blanco frío
+                Color start = new Color(185, 105, 255, 190);   // morado aurora (frío, lejos)
+                Color end = new Color(255, 225, 150, 235);     // oro solar (ardiendo)
 
                 var p = new ParticleData
                 {
@@ -376,6 +398,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     BlendMode = 1,
                     LayerPriority = LayerPriorities.AboveLens,
                 };
+
                 p.UserData0 = Projectile.Center.X;
                 p.UserData1 = Projectile.Center.Y;
                 p.UserData3 = 0.09f;
@@ -386,23 +409,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Estelas orbitando en la banda del anillo (elipse aurora).</summary>
-        private void SpawnLibraryAccretionDisk()
+        /// <summary>Estelas orbitando en la banda del borde (elipse aurora).</summary>
+        private void SpawnLibraryAccretionBand()
         {
             if (Main.rand.NextBool(4))
             {
-                float shadow = EclipsePrimordialRenderer.SpherePx *
+                // La banda vive EN el borde de los anillos del sol.
+                float core = EclipsePrimordialRenderer.SunBodyPx *
                                MathHelper.Max(Projectile.scale, 0.4f);
-                float radius = Main.rand.NextFloat(2.3f, 5.8f) * shadow;
+                float radius = Main.rand.NextFloat(8.2f, 11.8f) * core;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float angVel = 0.16f * (float)Math.Pow(4.8f * shadow / radius, 1.5f);
+                float angVel = 0.16f * (float)Math.Pow(11.0f * core / radius, 1.5f);
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
                     (float)Math.Sin(angle) * radius * 1.24f);
 
                 // EL COLOR por DOPPLER: el lado que se ACERCA arde DORADO,
-                // el que se ALEJA se enfría al MORADO (el eclipse vive).
+                // el que se ALEJA se enfría al MORADO (la mezcla vive).
                 bool hotSide = Math.Cos(angle) < 0f;
                 Color c = hotSide ? new Color(255, 195, 90, 200) : new Color(185, 105, 255, 200);
 
@@ -434,17 +458,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  RENDER — 100% CÓDIGO (EclipsePrimordialRenderer v6.22)
+        //  RENDER — EL SOL + LA MEZCLA (100% código, v6.26)
         // ------------------------------------------------------------------
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // La lente va DETRÁS: el BlackHoleLensSystem pinta el núcleo
-            // ENCIMA de la distorsión llamando a DrawCoreVisuals.
+            // La lente va DETRÁS: el BlackHoleLensSystem pinta el sol y la
+            // mezcla ENCIMA de la distorsión llamando a DrawCoreVisuals.
             if (BlackHoleLensSystem.LensActive)
                 return false;
 
-            // CONTRATO DE BATCH A PRUEBA DE BALAS (v6.10).
+            // CONTRATO DE BATCH A PRUEBA DE BALAS (v6.10): durante PreDraw
+            // el batch de tML está ABIERTO; hay que CERRARLO antes de que
+            // los renderers llamen a Begin() con sus propios estados.
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
             catch { wasActive = false; }
@@ -461,8 +487,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja el Eclipse Primordial completo. Compartido entre el pase
-        /// del mundo (PreDraw) y el pase posterior a la lente.
+        /// Dibuja EL SOL DE LOS 20 ANILLOS + LA MEZCLA DE TODOS LOS AGUJEROS
+        /// NEGROS RÚNICOS. Compartido entre el pase del mundo (PreDraw) y el
+        /// pase posterior a la lente.
         /// CONTRATO: el SpriteBatch llega CERRADO y queda CERRADO.
         /// </summary>
         internal static void DrawCoreVisuals(Projectile p)
@@ -471,7 +498,42 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float time = Main.GlobalTimeWrappedHourly;
             int seed = p.whoAmI * 17 + 5;
 
-            EclipsePrimordialRenderer.Draw(drawPos, p.scale, time, seed);
+            // lifeT: el ciclo de vida del sol (la corona crece con él).
+            float lifeT = MathHelper.Clamp(1f - p.timeLeft / (float)LifeTicks, 0f, 1f);
+            // rg: la GIGANTE ROJA final (los últimos 90 ticks hincha y tiñe).
+            float rg = 0f;
+            if (p.timeLeft > NovaTicks && p.timeLeft <= GrowTicks)
+                rg = 1f - (p.timeLeft - NovaTicks) / 54f;
+            else if (p.timeLeft <= NovaTicks)
+                rg = 1f;
+            // novaT: el avance de LA NOVA DEL ECLIPSE (el colapso final).
+            float novaT = 0f;
+            if (p.timeLeft <= NovaTicks)
+                novaT = MathHelper.Clamp(1f - p.timeLeft / (float)NovaTicks, 0f, 1f);
+
+            // === 1. EL SOL DE LOS 20 ANILLOS (LA HERENCIA DEL SOL, ×1.30) ===
+            // RuneSunRenderer.Draw lee p.scale: se escala EN VIVO ×1.30
+            // (visual puro — el valor se restaura en el mismo frame) para
+            // que el Sol XX pinte a cuerpo de coloso.
+            float baseScale = Math.Max(p.scale, 0.02f);
+            p.scale = baseScale * EclipsePrimordialRenderer.SunScale;
+            try
+            {
+                RuneSunRenderer.Draw(p, 20, lifeT, rg, seed);
+            }
+            finally
+            {
+                p.scale = baseScale;
+            }
+
+            // === 2. LA MEZCLA DE TODOS LOS AGUJEROS NEGROS RÚNICOS ===
+            // (Desvanece mientras la nova se la come.)
+            float sunR = RuneSunRenderer.BodyPx * baseScale * EclipsePrimordialRenderer.SunScale;
+            EclipsePrimordialRenderer.Draw(drawPos, sunR, time, seed, 1f - novaT);
+
+            // === 3. LA NOVA DEL ECLIPSE (visual — solo los ticks finales) ===
+            if (novaT > 0f)
+                EclipsePrimordialRenderer.DrawNova(drawPos, novaT, time, seed);
         }
 
         /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del
@@ -484,7 +546,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ------------------------------------------------------------------
-        //  IMPACTO Y MUERTE (física exacta, PALETA ECLIPSE aurora)
+        //  IMPACTO Y MUERTE (física exacta, paleta oro solar + aurora)
         // ------------------------------------------------------------------
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -547,14 +609,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
         }
 
-        public override void OnKill(int timeLeft)
+        // ------------------------------------------------------------------
+        //  LA NOVA DEL ECLIPSE — la explosión final del arma
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// v6.26 — LA NOVA DEL ECLIPSE (UNA sola vez, guardada en
+        /// localAI[2]): el ANILLO DE EINSTEIN (daño completo) + LA NOVA
+        /// RÚNICA del sol fundido ×1.6 (daño y radio del Sol XX) — las dos
+        /// explosiones en un solo instante — más el sacudón, los sonidos y
+        /// las ráfagas de partículas. MP-seguro: los proyectiles de onda
+        /// solo los spawnea el dueño; lo visual solo el cliente.
+        /// </summary>
+        private void TriggerNovaDelEclipse()
         {
-            // ============================================================
-            //  LA NOVA DEL ECLIPSE — LA EXPLOSIÓN MÁS GRANDE DEL MOD:
-            //  el ANILLO DE EINSTEIN (daño completo) + LA NOVA RÚNICA del
-            //  sol fundido (daño 55%) — las dos explosiones en UN solo
-            //  instante (la lección v5.97).
-            // ============================================================
+            if (Projectile.localAI[2] != 0f) return;
+            Projectile.localAI[2] = 1f;
+
+            // === EL DAÑO: Einstein + nova rúnica ×1.6 (una sola vez) ===
             if (Projectile.owner == Main.myPlayer)
             {
                 Projectile.NewProjectile(
@@ -565,36 +637,46 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,
                     CosmicShockwaveProjectile.StyleEinstein,
                     620f);
+
+                // LA NOVA RÚNICA DEL SOL XX: daño ×1.6 y el radio récord
+                // de la familia (380 + 14·19 + 120 = 766 px).
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
                     ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                    Math.Max(1, (int)(Projectile.damage * 0.55f)), 0f, Projectile.owner,
+                    Math.Max(1, (int)(Projectile.damage * 1.6f)), 0f, Projectile.owner,
                     0f,
                     CosmicShockwaveProjectile.StyleNova,
-                    520f);
+                    766f);
             }
 
             ParticleManager.PullToGlobalBoost = 1f;
 
             if (Main.netMode == NetmodeID.Server) return;
 
+            // === EL SACUDÓN Y LOS SONIDOS (la veinte sacude: 12) ===
             try
             {
                 Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
-                    Projectile.Center, new Vector2(1f, 0f), 9f, 12, 22, 0.5f,
-                    "AethonEclipseFinalBlast"));
+                    Projectile.Center, new Vector2(1f, 0f), 12f, 12, 22, 0.5f,
+                    "AethonEclipseNova"));
             }
             catch { }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45, Projectile.Center);
 
-            // Presets — el COLAPSO DEL ECLIPSE (aurora + oro + blanco).
+            // === LOS PRESETS — el colapso dorado y aurora ===
             ParticlePresets.Implosion(Projectile.Center, 210f, 60,
                 new Color(185, 105, 255), 32);
             ParticlePresets.Explosion(Projectile.Center, 165f, 36,
                 new Color(238, 242, 255), new Color(255, 195, 90), 50);
+            ParticlePresets.RingPulse(Projectile.Center, 260f,
+                new Color(255, 210, 100, 210), 34);
+            ParticlePresets.RingPulse(Projectile.Center, 330f,
+                new Color(255, 80, 30, 150), 46);
 
-            // Implosión: partículas convergiendo.
+            // Implosión: 70 partículas convergiendo al punto de la nova.
             for (int i = 0; i < 70; i++)
             {
                 float angle = (MathHelper.TwoPi / 70) * i;
@@ -643,7 +725,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.fadeIn = 0f;
             }
 
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
+            // EL FUEGO DE LA NOVA (dusts del patrón del sol).
+            for (int i = 0; i < 60; i++)
+            {
+                float angle = (MathHelper.TwoPi / 60) * i;
+                Vector2 dir = new Vector2(
+                    (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 14f),
+                    (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 14f)) *
+                    Math.Max(Projectile.scale, 0.4f);
+                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
+                    dir, 240, new Color(255, 200, 100), 1.7f);
+                d.noGravity = true;
+                d.fadeIn = 0f;
+            }
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            // Si la nova NO fue disparada por el reloj (muerte prematura),
+            // se dispara AQUÍ — nunca se pierde la explosión final.
+            TriggerNovaDelEclipse();
         }
 
         // ------------------------------------------------------------------

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Spirit Classic - Steam Workshop",
+    "snippet": "May 29, 2023 — Introducing a variety of bosses, biomes, weapons, events, and mechanics, Spirit is one of Terraria's largest content mods . Spirit has been ... Read more",
+    "host_name": "steamcommunity.com",
+    "rank": 0,
+    "date": "May 29, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Spirit Reforged - tModLoader",
+    "snippet": "Oct 8, 2025 — Reforged is a sequel and remaster of The Spirit Mod. Spirit Reforged is a general content mod . Download the mod on the tModLoader Mod Browser ...",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Oct 8, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://spiritmod.wiki.gg",
+    "name": "Spirit Reforged - Spirit Mod Wiki",
+    "snippet": "The Mod Spirit Reforged is a general content mod which aims to create a fleshed out, high-quality experience for players at all points of progression.",
+    "host_name": "spiritmod.wiki.gg",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://spiritmod.fandom.com",
+    "name": "Spirit Mod Wiki",
+    "snippet": "The Spirit Mod is one of the largest mods for Terraria: with more than 1300 items, 8 bosses, and hundreds of enemies , as well as 3 new events and 3 brand ... Read more",
+    "host_name": "spiritmod.fandom.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

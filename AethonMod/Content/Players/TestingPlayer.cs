@@ -93,28 +93,15 @@ namespace AethonMod.Content.Players
             // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
             // (el Sol original queda INTACTO), N anillos rúnicos por copia
             // con giros alternos y mejoras progresivas (la X las tiene todas)
+            // (v6.26: las copias 6..19 quedan OCULTAS — petición del usuario:
+            // ya no se entregan ni se garantizan; el código sigue en el mod.
+            // La VEINTE recibe LA MEJORA MAYOR y la corona de la familia.)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico1Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico2Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico3Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico4Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico5Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico6Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico7Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico8Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico9Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico10Staff>());
-            // v6.22: LA SEGUNDA DÉCADA — soles 11..20 (cometa, lluvia rúnica,
-            // aurora polar, estrella compañera, cinturón de asteroides,
-            // tormenta total, corona prismática, lanzas, nova, gran sellado)
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico11Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico12Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico13Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico14Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico15Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico16Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico17Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico18Staff>());
-            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico19Staff>());
+            // (v6.26: SolRunico6..SolRunico19 OCULTOS — no se entregan.)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico20Staff>());
             // v6.22: EL ECLIPSE PRIMORDIAL — el Sol de los 20 Anillos fundido
             // con TODOS los agujeros negros (luz + bruma + humo + rayos)
@@ -140,6 +127,30 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SinfoniaPrimordialStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.TormentaNebularStaff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.LanzaAlbaStaff>());
+            // v6.26: EL DESGARRO EN LA REALIDAD — RiftLib (la librería nueva
+            // de las grietas espacio-temporales) + el proyectil que ATRAVIESA
+            // paredes con su línea de daño
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.DesgarroRealityStaff>());
+            // v6.26: LAS SEIS ESTRELLAS REALES — estrellas de neutrones,
+            // púlsar, enana blanca, estrella muerta, supergigante roja y
+            // magnetar (astrofísica estilizada de la casa)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.NeutronStarStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.PulsarStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.WhiteDwarfStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.DeadStarStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.RedSupergiantStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.MagnetarStaff>());
+            // v6.26: EL CICLO ESTELAR — la estrella que VIVE: nebulosa →
+            // secuencia principal → gigante roja → supernova → remanente
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.CicloEstelarStaff>());
+            // v6.26: LOS CINCO BASTONES CREATIVOS — el reloj de arena cósmico,
+            // la marea gravitatoria, el enjambre prismático, el péndulo del
+            // juicio y el coro espectral
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.RelojArenaStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.MareaGravitatoriaStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.EnjambrePrismaticoStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.PenduloJuicioStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.CoroEspectralStaff>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "The maximum size of a single upload mod? (Use steam's",
+    "snippet": "Jan 24, 2023 — The maximum size of a single upload mod ? upper limit to 50MB, otherwise only 5MB. Now tmodloader can be downloaded from steam and steam  ...",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Jan 24, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Steam Workshop::Improved Item Info",
+    "snippet": "Improved Item Info (III ) is mod that displays more comprehensive stats about weapons. It essentially shows how the weapon is affected by modifiers and ... Read more",
+    "host_name": "steamcommunity.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com",
+    "name": "Increase requirements for Workshop publishing · Issue #3643",
+    "snippet": "Jul 20, 2023 — tModLoader / tModLoader . Publish button only shows up for mods that are loaded. least ~20 characters. be loaded and running before publishing. ...",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "Jul 20, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.wiki.gg",
+    "name": "tModLoader - Official Terraria Wiki",
+    "snippet": "Aug 15, 2026 — tModLoader facilitates the sharing and distribution of mods via its Steam Workshop page and its built-in mod browser.",
+    "host_name": "terraria.wiki.gg",
+    "rank": 3,
+    "date": "Aug 15, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.fandom.com",
+    "name": "tModLoader - Terraria Wiki - Fandom",
+    "snippet": "tModLoader (tML) is a free program which allows playing Terraria with mods. It can be used to download mods from their database, called the Mod Browser, ...",
+    "host_name": "terraria.fandom.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://store.steampowered.com",
+    "name": "tModLoader Mod Upload Rules",
+    "snippet": "Mods which are very clearly joke mods may be permitted on a case-by-case basis. Rule 2: Do not access or modify files outside of the tModLoader user data ... Read more",
+    "host_name": "store.steampowered.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -27,7 +27,7 @@ namespace AethonMod.Content.VFX
     ///
     /// Nació del análisis de huecos de v6.25 (research/humo_v625/
     /// ANALISIS_HUECOS.md): TODOS los mods premium del ecosistema
-    /// (Calamity, WoTE, SOTS, MEAC, la propia Emperatriz vanilla) tienen
+    /// (todos los grandes arsenales del ecosistema) tienen
     /// RIBBONS de grosor variable siguiendo el camino real del
     /// proyectil — nosotros solo teníamos fantasmas rectos. Esta
     /// librería cubre el hueco con la técnica de la casa:
@@ -36,14 +36,14 @@ namespace AethonMod.Content.VFX
     ///     (acepta la polilínea que el proyectil ya tiene — oldPos — o
     ///     el ring-buffer propio EstelaTrack).
     ///   · SANITIZE → SMOOTH → RESAMPLE: el camino de tML es una escalera
-    ///     de ticks (lección LunarVeil: cortar teleports &gt; 1000 px; el
+    ///     de ticks (lección élite: cortar teleports &gt; 1000 px; el
     ///     suavizado 0.25/0.5/0.25 ×2 disimula los peldaños).
     ///   · EL RIBBON: remuestreo por longitud de arco cada ~14 px y TRES
     ///     capas por tramo (velo ×1.6 alpha 0.30 · cuerpo alpha 0.60 ·
     ///     NÚCLEO blanco ×0.30 alpha 0.90 — la doble pasada de la casa
     ///     en versión triple), anchura por PERFIL (Head/Center/Comet/
     ///     Alive), rotación por TANGENTE.
-    ///   · LOS FANTASMAS con SQUASH (lección MEAC): N copias del sprite
+    ///   · LOS FANTASMAS con SQUASH (lección élite): N copias del sprite
     ///     del llamador con alpha decreciente y Y ×0.55 — leen
     ///     "rasguño de luz", no "cola de sprites".
     ///   · LA ESTELA DE POLVO: paquete determinista listo para el
@@ -122,7 +122,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// SANITIZADO: corta la polilínea en NaN/ceros/teleports &gt; 1000 px
-        /// (lección LunarVeil — oldPos sucios al nacer y al teletransportar).
+        /// (lección élite — oldPos sucios al nacer y al teletransportar).
         /// Devuelve el tramo LIMPIO que termina en el ÚLTIMO punto.
         /// </summary>
         public static Vector2[] Sanitize(Vector2[] pts)
@@ -341,13 +341,13 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  LOS FANTASMAS — afterimages con squash (lección MEAC)
+        //  LOS FANTASMAS — afterimages con squash (lección élite)
         // ==================================================================
 
         /// <summary>
         /// FANTASMAS: N transformaciones a lo largo del camino (desde la
         /// cabeza hacia atrás) para que el llamador dibuje su sprite con
-        /// ellas: alpha decreciente (0.6 − i/15 — MEAC), escala X creciendo
+        /// ellas: alpha decreciente (0.6 − i/15 — élite), escala X creciendo
         /// ×1.0→×1.4 hacia atrás (Emperatriz vanilla) y SQUASH vertical
         /// Y ×0.55 — leen "rasguño de luz", no "cola de sprites".
         /// La librería NO conoce el sprite: devuelve la transform.
@@ -377,7 +377,7 @@ namespace AethonMod.Content.VFX
                 float f = MathHelper.Clamp(1f - g * 0.11f, 0f, 1f);
                 positions[g] = PuntoEnCamino(pts, f * total);
 
-                // Alpha MEAC: 0.6 − i/15 (nunca negativo).
+                // Alpha élite: 0.6 − i/15 (nunca negativo).
                 alphas[g] = MathF.Max(0.6f - g / 15f, 0f);
                 // Escala X creciente hacia atrás (la Emperatriz: ×1.4).
                 scales[g] = 1f + 0.4f * g / MathF.Max(ghosts - 1f, 1f);

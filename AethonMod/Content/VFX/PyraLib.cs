@@ -15,7 +15,7 @@ namespace AethonMod.Content.VFX
     /// PyraPalettes — v6.25 — LAS TABLAS DE FUEGO DE LA CASA (37 niveles).
     ///
     /// El color del fuego es una TEMPERATURA muestreada en una RAMPA 1D
-    /// (lección Everglow: una rampa por material; aquí las tablas son
+    /// (lección de la investigación interna: una rampa por material; aquí las tablas son
     /// CÓDIGO, no PNG — el equivalente numérico de las LUT de textura
     /// 1×N con filtro LINEAR del ecosistema, con interpolación LINEAL
     /// entre niveles). Tres materiales:
@@ -25,7 +25,7 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class PyraPalettes
     {
-        /// <summary>Niveles de temperatura de las tablas (0..36 — formato Doom Fire).</summary>
+        /// <summary>Niveles de temperatura de las tablas (0..36 — formato fuego de difusión).</summary>
         public const int Niveles = 37;
 
         /// <summary>Fuego noble: negro→granate→naranja→oro→blanco (37 colores).</summary>
@@ -91,7 +91,7 @@ namespace AethonMod.Content.VFX
     /// PyraLib — v6.25 — LA LIBRERÍA DEL FUEGO.
     ///
     /// Nació del análisis de huecos de v6.25 (research/humo_v625/
-    /// ANALISIS_HUECOS.md): la técnica Doom Fire de la envoltura v6.22 se
+    /// ANALISIS_HUECOS.md): la técnica fuego de difusión de la envoltura v6.22 se
     /// PERDIÓ en la purga — el fuego era deuda de librería. Tres motores,
     /// un contrato:
     ///
@@ -102,7 +102,7 @@ namespace AethonMod.Content.VFX
     ///     inconmensurables con reversión), parpadeo de altura 0.85..1.15
     ///     (7.1/17.3 rad/s — jamais en fase), erosión de ruido (la llama
     ///     se DESGARRA como el humo — BrumaNoise.Erode) y viento opcional.
-    ///   · CAMPO: la rejilla de brasas con PROPAGACIÓN (técnica Doom Fire
+    ///   · CAMPO: la rejilla de brasas con PROPAGACIÓN (técnica fuego de difusión
     ///     validada en v6.22: cada celda enfría 1 nivel al subir y vaga
     ///     ±1 columna por hash determinista) — para zonas de fuego
     ///     persistente; simulación a 30 Hz, celdas con temp ≤ 3 mueren,
@@ -282,7 +282,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL CAMPO DE BRASAS — la propagación Doom Fire (determinista)
+        //  EL CAMPO DE BRASAS — la propagación fuego de difusión (determinista)
         // ==================================================================
 
         // El estado por semilla: [y·w + x] = temperatura 0..36.
@@ -399,7 +399,7 @@ namespace AethonMod.Content.VFX
             campo[y * dims[0] + x] = (sbyte)Math.Clamp(temperature, 0, 36);
         }
 
-        /// <summary>EL PASO DE PROPAGACIÓN (Doom Fire determinista por hash).</summary>
+        /// <summary>EL PASO DE PROPAGACIÓN (fuego de difusión determinista por hash).</summary>
         private static void Simular(sbyte[] campo, int w, int h, int seed)
         {
             // De ABAJO hacia ARRIBA: cada celda hereda del vecino inferior

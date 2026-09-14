@@ -25,7 +25,7 @@ namespace AethonMod.Content.VFX
     ///
     /// Nació del análisis de huecos de v6.25 (research/humo_v625/
     /// ANALISIS_HUECOS.md): el ecosistema premium pone una onda expansiva
-    /// en TODO golpe importante (Calamity en cada hit de boss, WoTE con
+    /// en TODO golpe importante (los grandes mods en cada hit de boss;
     /// su ShockwaveShader de borde roto, SOTS con anillos por estilos) —
     /// nosotros solo teníamos el proyectil pesado de las muertes
     /// cósmicas. Esta librería es "la onda de trabajo" reutilizable.

@@ -202,10 +202,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
 
                 // v6.25 — EL PAQUETE DE IMPACTO CENTRALIZADO (OndaLib):
-                // la sacudida de cámara del acumulador ÚNICO del frame +
-                // el destello de pantalla del velo radial.
+                // la sacudida de cámara del acumulador ÚNICO del frame.
+                // (v6.26 — SIN FLASH DE PANTALLA: el destello de la
+                // sinfonía vive CONCENTRADO en el proyectil — petición
+                // del usuario: "debería estar concentrado en el proyectil
+                // y no iluminar toda la pantalla". El golpe de cámara
+                // se queda — sacudida, no luz.)
                 OndaLib.Kick(9f, 16);
-                OndaLib.Flash(new Color(255, 240, 210), 0.16f, 8);
             }
 
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
@@ -456,18 +459,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     MathHelper.Clamp(0.85f * fade + 0.15f, 0f, 1f), seed, 10f,
                     OndaFalloff.Quadratic, chromatic: true);
 
-                float flashI = MathHelper.Clamp(1f - _dyingAge / 8f, 0f, 1f);
+                // v6.26 — EL DESTELLO CONCENTRADO EN EL PROYECTIL: el
+                // estallido local sube de potencia (110 px, cruz larga)
+                // para leerse a distancia SIN tocar la pantalla entera.
+                // El destello vive AQUÍ, en el corazón de la detonación.
+                float flashI = MathHelper.Clamp(1f - _dyingAge / 10f, 0f, 1f);
                 if (flashI > 0f)
                 {
                     StormLib.ImpactFlash(Main.spriteBatch, center,
-                        70f * (0.6f + 0.4f * flashI), prism, flashI, time * 0.9f);
+                        110f * (0.6f + 0.4f * flashI), prism, flashI, time * 0.9f);
                     if (_dyingAge < 3f)
-                        StormLib.ImpactFlash(Main.spriteBatch, center, 48f,
+                        StormLib.ImpactFlash(Main.spriteBatch, center, 72f,
                             GoldWarm, flashI * 0.7f, -time * 1.2f);
                 }
                 LumenLib.Flare(Main.spriteBatch, center,
-                    (60f + 80f * phase) * (0.5f + 0.5f * fade), prism,
-                    0.55f * fade + 0.25f * flashI, time * 0.4f);
+                    (70f + 90f * phase) * (0.5f + 0.5f * fade), prism,
+                    0.60f * fade + 0.30f * flashI, time * 0.4f);
 
                 // EL AURORA COMPLETA (la sinfonía cromática de despedida).
                 LumenLib.Aurora(Main.spriteBatch, center,

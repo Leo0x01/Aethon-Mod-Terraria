@@ -232,9 +232,19 @@ namespace AethonMod.Content.VFX
                     Main.spriteBatch.End();
                 }
 
-                // === 4. EL SISTEMA RÚNICO (aditivo — todo lo mágico) ===
+                // === 4. EL SISTEMA RÚNICO (v6.26 — EL EMISOR COMPARTIDO) ===
+                // Los anillos se EMITEN al buffer de VFXCore en coords de
+                // MUNDO y se vuelcan en su PROPIA tanda aditiva. ESTE MISMO
+                // emisor viste a los soles del mundo Y a las coronas cósmicas
+                // de los jugadores (RuneRingCrownRenderer / RunicHaloRenderer)
+                // — la copia de los anillos dejó de ser "parecida": ES el
+                // mismo trazo, el mismo latido y los mismos alphas.
+                VFXCore.Begin();
+                EmitRingSystem(p.Center, R, time, seed, tier, rg, lifeT);
+                VFXCore.FlushAdditive(null, false);   // el batch ya está CERRADO
+
+                // === 5. LAS DEMÁS CAPAS (aditivo — todo lo mágico) ===
                 BeginAdditive();
-                DrawRingSystem(drawPos, R, time, seed, tier, rg, boltFlick, lifeT);
                 if (tier >= 2) DrawOrbitSparks(drawPos, R, time, seed, tier);
                 if (tier >= 3) DrawTwinkles(drawPos, R, time, seed, tier);
                 if (tier >= 4) DrawProminences(drawPos, R, time, seed, boltFlick, tier);
@@ -326,9 +336,20 @@ namespace AethonMod.Content.VFX
         private static float RingSpin(int k) =>
             (k % 2 == 0 ? 1f : -1f) * (RingSpin0 + RingSpinStep * k);
 
-        private static void DrawRingSystem(Vector2 center, float R, float time, int seed,
-            int tier, float rg, int boltFlick, float lifeT)
+        /// <summary>
+        /// v6.26 — EL EMISOR COMPARTIDO DE LOS ANILLOS: emite el sistema
+        /// rúnico completo de la copia `tier` (1..20) al buffer de VFXCore,
+        /// en COORDENADAS DE MUNDO. ESTE MISMO código viste a los soles del
+        /// mundo (RuneSunProjectile) y a las coronas cósmicas de los
+        /// jugadores (RuneRingCrownRenderer / RunicHaloRenderer): copiar
+        /// los anillos de los soles dejó de ser "parecerse" — ES el mismo
+        /// trazo, el mismo latido y los mismos alphas, a cualquier escala.
+        /// `alpha` multiplica la intensidad (luz del mundo / energía).
+        /// </summary>
+        public static void EmitRingSystem(Vector2 center, float R, float time, int seed,
+            int tier, float rg, float lifeT, float alpha = 1f)
         {
+            if (R < 1f || alpha <= 0.02f) return;
             int n = Math.Min(tier, MaxTier);
             float glyphScale = Math.Max(R / 52f, 0.25f) * 1.45f;
 
@@ -340,7 +361,7 @@ namespace AethonMod.Content.VFX
                 float spin = time * RingSpin(k);
                 // v6.22: del 10º anillo en arriba las runas crecen +1 (no +2)
                 // — 20 anillos × 44 runas sería 880 glifos: demasiado.
-                int runeCount = Runes0 + RuneStep * Math.Min(k, 9) + RuneStep2 * Math.Max(0, k - 9);
+                int runeCount = RunesOfRing(k);
 
                 // El color del anillo: ORO / BLANCO-ESTELAR alternando, y
                 // cada 3º AZUL-ESTELAR desde tier 7 (el sello frío).
@@ -369,8 +390,8 @@ namespace AethonMod.Content.VFX
                             (float)Math.Sin(t + MathHelper.PiOver2) * (float)Math.Cos(tilt);
                         // Latido del aro (la energía recorre el anillo).
                         float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 1.8f + k * 1.3f + s * 0.35f);
-                        float fade = (1f - lifeT * 0.55f);
-                        Capsule(mid, len, Math.Max(2.2f, 0.052f * R) * (1f + 0.35f * depth),
+                        float fade = (1f - lifeT * 0.55f) * alpha;
+                        EmitCapsule(mid, len, Math.Max(2.2f, 0.052f * R) * (1f + 0.35f * depth),
                             rot, Tint(body, (0.30f + 0.30f * depth) * pulse * fade));
                     }
                     prev = pt;
@@ -381,16 +402,36 @@ namespace AethonMod.Content.VFX
                 for (int g = 0; g < runeCount; g++)
                 {
                     float ang = g / (float)runeCount * MathHelper.TwoPi + spin;
-                    DrawRuneOnOrbit(center, a, b, tilt, ang, time, seed, k, g,
-                        body, tip, glyphScale, rg, lifeT, tier);
+                    EmitRuneOnOrbit(center, a, b, tilt, ang, time, seed, k, g,
+                        body, tip, glyphScale, rg, lifeT, alpha);
                 }
             }
         }
 
-        /// <summary>Un glifo rúnico sobre SU órbita elíptica.</summary>
-        private static void DrawRuneOnOrbit(Vector2 center, float a, float b, float tilt,
+        /// <summary>Glifos del anillo k (la cuenta LITERAL de la familia).</summary>
+        public static int RunesOfRing(int k) =>
+            Runes0 + RuneStep * Math.Min(k, 9) + RuneStep2 * Math.Max(0, k - 9);
+
+        /// <summary>
+        /// Posición MUNDIAL del glifo g del anillo k (las chispas de las
+        /// coronas) — la MISMA matemática de la emisión, jams una copia.
+        /// </summary>
+        public static Vector2 RingGlyphWorld(Vector2 center, float R, float time,
+            int tier, int k, int g)
+        {
+            float a = RingA(k) * R;
+            float b = a * RingFlat(k);
+            float tilt = RingTilt(k, time, tier);
+            float spin = time * RingSpin(k);
+            float ang = g / (float)RunesOfRing(k) * MathHelper.TwoPi + spin;
+            float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
+            return EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
+        }
+
+        /// <summary>Un glifo rúnico sobre SU órbita elíptica (al buffer).</summary>
+        private static void EmitRuneOnOrbit(Vector2 center, float a, float b, float tilt,
             float ang, float time, int seed, int k, int g,
-            Color body, Color tip, float glyphScale, float rg, float lifeT, int tier)
+            Color body, Color tip, float glyphScale, float rg, float lifeT, float alpha)
         {
             // Flotación viva: el radio respira por glifo.
             float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
@@ -402,11 +443,11 @@ namespace AethonMod.Content.VFX
 
             // Latido de brillo propio.
             float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f + k * 0.8f);
-            float fade = 1f - lifeT * 0.55f;
+            float fade = (1f - lifeT * 0.55f) * alpha;
 
             // Resplandor suave DETRÁS (el grabado ardiendo).
-            Quad(Glow, glyphPos, new Vector2(34f * glyphScale, 34f * glyphScale), 0f,
-                Tint(body, 0.20f * pulse * fade));
+            VFXCore.Quad(glyphPos, Tint(body, 0.20f * pulse * fade),
+                new Vector2(34f * glyphScale, 34f * glyphScale), 0f, Glow);
 
             // Los TRAZOS del glifo (rotados con la órbita).
             Vector2[] strokes = _runes[(g + k) % _runes.Length];
@@ -427,15 +468,22 @@ namespace AethonMod.Content.VFX
                 float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
                 Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
 
-                Capsule(mid, len, 3.3f * glyphScale, rot, Tint(col, 0.85f * pulse * fade));
+                EmitCapsule(mid, len, 3.3f * glyphScale, rot, Tint(col, 0.85f * pulse * fade));
             }
 
             // PERLA sobre el glifo (la gema del sello).
             Vector2 pearlPos = glyphPos + new Vector2(0f, -11.5f * glyphScale).RotatedBy(glyphRot);
-            Quad(Glow, pearlPos, new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f,
-                Tint(body, 0.60f * pulse * fade));
-            Quad(Glow, pearlPos, new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f,
-                Tint(tip, 0.9f * pulse * fade));
+            VFXCore.Quad(pearlPos, Tint(body, 0.60f * pulse * fade),
+                new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f, Glow);
+            VFXCore.Quad(pearlPos, Tint(tip, 0.9f * pulse * fade),
+                new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f, Glow);
+        }
+
+        /// <summary>Cápsula al buffer compartido (coords de mundo).</summary>
+        private static void EmitCapsule(Vector2 mid, float len, float width, float rot, Color tint)
+        {
+            if (tint.A == 0) return;
+            VFXCore.Quad(mid, tint, new Vector2(len + width, width * 1.9f), rot);
         }
 
         // ==================================================================
@@ -801,20 +849,28 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// Dibuja el SISTEMA ORBITAL de la copia `tier` (anillos + runas +
         /// chispas + destellos + erupción + lluvia + sellado) alrededor de
-        /// `center` con radio base `R` — SIN el cuerpo solar (el llamador
-        /// pone debajo lo que quiera: un sol, un agujero negro...).
+        /// `center` (coords de PANTALLA, como el resto de la casa) con radio
+        /// base `R` — SIN el cuerpo solar (el llamador pone debajo lo que
+        /// quiera: un sol, un agujero negro...).
         /// CONTRATO: batch ABIERTO en modo aditivo (queda ABIERTO).
         /// </summary>
         public static void DrawOrbitalSystem(Vector2 center, float R, float time,
             int seed, int tier, float alphaMul)
         {
             if (alphaMul <= 0.02f) return;
-            int boltFlick = StormLib.FlickTick(time, BoltHz);
 
-            // rg = 0 y lifeT = 0: sin gigante final, sin desvanecimiento —
-            // el sistema arde a PLENA intensidad alrededor del llamador.
-            // alphaMul decide si las capas secundarias se dibujan también.
-            DrawRingSystem(center, R, time, seed, tier, 0f, boltFlick, 0f);
+            // v6.26 — LOS ANILLOS VAN POR EL EMISOR COMPARTIDO (coords de
+            // MUNDO — el MISMO código que viste a los soles y a las coronas):
+            // cerrar el batch del llamador, volcar la tanda propia y REABRIR
+            // el aditivo para las capas restantes (salida: ABIERTO).
+            try { Main.spriteBatch.End(); } catch { }
+            VFXCore.Begin();
+            EmitRingSystem(center + Main.screenPosition, R, time, seed,
+                tier, 0f, 0f, alphaMul);
+            VFXCore.FlushAdditive(null, false);
+
+            // Las capas secundarias (coords de pantalla, batch ABIERTO).
+            BeginAdditive();
             if (alphaMul > 0.55f)
             {
                 if (tier >= 2) DrawOrbitSparks(center, R, time, seed, tier);

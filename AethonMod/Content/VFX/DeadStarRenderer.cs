@@ -1,0 +1,256 @@
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using Terraria;
+using Terraria.ModLoader;
+using AethonMod.Content.Effects.Bruma;
+
+namespace AethonMod.Content.VFX
+{
+    /// <summary>
+    /// DeadStarRenderer — v6.26 — LA ESTRELLA MUERTA (LA ENANA NEGRA).
+    ///
+    /// Un sol que agotó hasta su último fotón. La firma visual (la
+    /// INVERSA de toda la familia: MASA OSCURA PRIMERO, luz tenue
+    /// después — el contrato de lote de la casa para lo que OCLUYE):
+    ///
+    ///   · EL NÚCLEO OSCURO — BlackDisk (la textura de los agujeros):
+    ///     un cuerpo negro que no emite, solo OCULTA.
+    ///   · EL AURA OSCURA — quads negros en AlphaBlend alrededor: la
+    ///     estrella APAGA la luz del mundo ( Lighting.AddLight negativo
+    ///     no existe: el oscurecimiento visual lo hace esta masa).
+    ///   · BRASAS FRÍAS CAYENDO — PyraLib.Tongue con la rampa ColdFire
+    ///     y alfas bajos, apuntando HACIA ABAJO (brasas que CAEN de un
+    ///     cuerpo sin fuego).
+    ///   · EL HUMO DE ENTROPÍA — BrumaFX.Puff oscuro que SUBE del cuerpo
+    ///     (puffs deterministas en ciclo vertical, sin estado).
+    ///   · LOS ECOS FANTASMALES — las runas de su vida pasada titilando
+    ///     a 0.2 Hz: RuneSunRenderer.EmitRingSystem (el emisor compartido
+    ///     de la casa) con tier 2 y alfa estrangulado al parpadeo.
+    ///   · EL RESCOLDO — un rim naranja MUY tenue (la última vez que fue
+    ///     un sol) + luz de mundo naranja casi nada.
+    ///
+    /// CONTRATO DE BATCH: Draw() exige el SpriteBatch CERRADO y lo deja
+    /// CERRADO (el llamador restaura el batch de tML — contrato v6.10).
+    /// </summary>
+    public static class DeadStarRenderer
+    {
+        /// <summary>Radio del cuerpo en px a escala 1 (el cadáver compacto).</summary>
+        public const float BodyPx = 16f;
+
+        // --- PALETA: oscuridad + rescoldo ambar ---
+        private static readonly Color VoidBlack = new(12, 9, 16);
+        private static readonly Color EntropySmoke = new(26, 22, 30);
+        private static readonly Color EmberAmber = new(200, 110, 50);
+        private static readonly Color EmberDim = new(120, 70, 45);
+
+        // --- PINCELES ---
+        private static Asset<Texture2D> _glow;
+        private static Asset<Texture2D> _disk;
+        private static Asset<Texture2D> _ring;
+
+        private static Texture2D Glow =>
+            (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
+
+        /// <summary>EL NÚCLEO NEGRO (la textura de los agujeros de la casa).</summary>
+        private static Texture2D Disk =>
+            (_disk ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
+
+        private static Texture2D Ring =>
+            (_ring ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring")).Value;
+
+        // ==================================================================
+        //  EL RENDER PRINCIPAL — batch CERRADO → CERRADO
+        // ==================================================================
+
+        /// <summary>
+        /// Dibuja la estrella muerta: masa oscura PRIMERO (núcleo BlackDisk
+        /// + aura que apaga) y la poca vida que le queda después (brasas
+        /// frías, humo de entropía, ecos rúnicos a 0.2 Hz).
+        /// `lifeT` = 0..1, `seed` = semilla del disparo.
+        /// </summary>
+        public static void Draw(Projectile p, float lifeT, int seed)
+        {
+            try
+            {
+                Vector2 drawPos = p.Center - Main.screenPosition;
+                float scale = Math.Max(p.scale, 0.05f);
+                float R = BodyPx * scale;
+                float time = Main.GlobalTimeWrappedHourly;
+
+                // === 1. LA MASA OSCURA (AlphaBlend — PRIMERO, el contrato
+                //     de la casa: lo que OCLUYE se pinta debajo) ===
+                DrawDarkMass(drawPos, R, time, seed);
+
+                // === 2. EL HUMO DE ENTROPÍA (BrumaFX — sube del cuerpo) ===
+                DrawEntropySmoke(drawPos, R, time, seed);
+
+                // === 3. EL RESCOLDO (lo poco que le queda de ser un sol) ===
+                BeginAdditive();
+                DrawEmbers(drawPos, R, time, seed, lifeT);
+                DrawDimRim(drawPos, R, time, lifeT, seed);
+                Main.spriteBatch.End();
+
+                // === 4. LOS ECOS FANTASMALES (las runas de su vida pasada
+                //     titilando a 0.2 Hz — el emisor compartido de la casa) ===
+                float blink = 0.5f + 0.5f * MathF.Sin(time * 0.2f * MathHelper.TwoPi);
+                VFXCore.Begin();
+                RuneSunRenderer.EmitRingSystem(p.Center, R, time, seed, 2,
+                    0f, lifeT, alpha: 0.16f * blink);
+                VFXCore.FlushAdditive(null, false);   // el batch ya está CERRADO
+            }
+            catch
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
+        }
+
+        // ==================================================================
+        //  CAPA 1 — LA MASA OSCURA (AlphaBlend: oculta y oscurece)
+        // ==================================================================
+
+        private static void DrawDarkMass(Vector2 pos, float R, float time, int seed)
+        {
+            BeginAlpha();
+
+            // EL AURA OSCURA: dos quads negros (SoftGlow con color casi
+            // negro) — la estrella se lleva la luz del mundo alrededor.
+            for (int i = 0; i < 2; i++)
+            {
+                float mul = i == 0 ? 3.1f : 1.9f;
+                // El aura RESPIRA hacia adentro (mundo muriendo: 0.3 Hz).
+                float breathe = 0.90f + 0.10f * MathF.Sin(time * 1.9f + i * 2.6f);
+                float a = (i == 0 ? 0.32f : 0.46f) * breathe;
+                Main.spriteBatch.Draw(Glow, pos, null,
+                    Tint(VoidBlack, a), 0f,
+                    Glow.Size() * 0.5f, ScaleOf(R * mul * breathe), SpriteEffects.None, 0f);
+            }
+
+            // EL NÚCLEO NEGRO: BlackDisk (sólido hasta ~0.88 del semiancho
+            // → el tamaño final ~2.17× el radio visible, la lección de los
+            // agujeros de la casa).
+            Vector2 diskScale = new Vector2(R * 2.17f, R * 2.17f) / Disk.Size();
+            Main.spriteBatch.Draw(Disk, pos, null,
+                new Color(255, 255, 255, 235), 0f,
+                Disk.Size() * 0.5f, diskScale, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.End();
+        }
+
+        // ==================================================================
+        //  CAPA 2 — EL HUMO DE ENTROPÍA (BrumaFX, SUBE del cuerpo)
+        // ==================================================================
+
+        private static void DrawEntropySmoke(Vector2 pos, float R, float time, int seed)
+        {
+            // BrumaFX dibuja en el lote ABIERTO que tenga Main.spriteBatch:
+            // usamos SU lote de masa (AlphaBlend + LinearClamp — la casa).
+            BrumaFX.BeginMass();
+
+            const int Puffs = 3;
+            for (int i = 0; i < Puffs; i++)
+            {
+                // Ciclo vertical SIN estado: cada puff sube del cuerpo y
+                // renace abajo ((t·0.14 + i/N) mod 1).
+                float phase = (time * 0.14f + i / (float)Puffs) % 1f;
+                float rise = phase * R * 2.6f;
+                // El zig horizontal del ascenso (determinista por fase).
+                float sway = MathF.Sin(phase * 5.2f + i * 2.4f) * R * 0.42f;
+                Vector2 pPos = pos + new Vector2(sway, -R * 0.4f - rise);
+                // El puff CRECE y MUERE al subir (la entropía se dispersa).
+                float size = R * (0.55f + 0.85f * phase);
+                float a = 0.30f * (1f - phase) * (0.6f + 0.4f * phase);
+                BrumaFX.Puff(pPos, size, EntropySmoke, seed + 977 + i * 61,
+                    time + i * 3f, alpha: a, quality: 0.5f);
+            }
+
+            Main.spriteBatch.End();
+        }
+
+        // ==================================================================
+        //  CAPA 3 — LAS BRASAS FRÍAS Y EL RESCOLDO (aditivo tenue)
+        // ==================================================================
+
+        private static void DrawEmbers(Vector2 pos, float R, float time, int seed, float lifeT)
+        {
+            // LAS BRASAS FRÍAS CAYENDO: PyraLib.Tongue con la rampa
+            // ColdFire, alfas bajos y rot = π (la lengua apunta ABAJO —
+            // brasas que CAEN de un cuerpo sin fuego).
+            const int Embers = 3;
+            for (int k = 0; k < Embers; k++)
+            {
+                float ang = VFXCore.Hash01(seed, 211 + k, 3) * MathHelper.TwoPi + time * 0.10f;
+                float rr = R * (0.55f + 0.55f * VFXCore.Hash01(seed, 223 + k, 7));
+                Vector2 basePos = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
+                // Cada brasa late a su ritmo apagado (0.5 Hz — frío).
+                float dim = 0.30f + 0.25f * MathF.Sin(time * 3.1f + k * 2.1f);
+                PyraLib.Tongue(Main.spriteBatch, basePos,
+                    R * (0.8f + 0.5f * VFXCore.Hash01(seed, 227 + k, 11)),   // altura
+                    R * 0.22f,                                                // ancho
+                    PyraPalettes.ColdFire,
+                    0.30f + 0.12f * VFXCore.Hash01(seed, 229 + k, 13),       // temperatura
+                    seed + 331 + k * 37, time,
+                    intensity: dim, wind: 0f, gravDir: 1f,
+                    rot: MathHelper.Pi);   // CAE, no sube
+            }
+        }
+
+        private static void DrawDimRim(Vector2 pos, float R, float time, float lifeT, int seed)
+        {
+            // EL RESCOLDO: el rim naranja MUY tenue del limbo (el recuerdo
+            // de cuando fue un sol) — casi nada, respirando a 0.2 Hz.
+            float ember = 0.5f + 0.5f * MathF.Sin(time * 0.2f * MathHelper.TwoPi);
+            Vector2 size = VFXCore.RingQuadSize(R * 1.12f);
+            Main.spriteBatch.Draw(Ring, pos, null,
+                Tint(EmberAmber, 0.14f + 0.10f * ember), time * 0.05f,
+                Ring.Size() * 0.5f, size / Ring.Size(), SpriteEffects.None, 0f);
+
+            // Los PUNTOS DE RESCOLDO: 4 ascuas ambar fijas en el limbo,
+            // encendiéndose a 0.2 Hz (la vida que le queda, contada).
+            int flick02 = StormLib.FlickTick(time, 0.2f);
+            for (int k = 0; k < 4; k++)
+            {
+                if (!StormLib.IsLit(seed + 233 + k, flick02, 0.45f)) continue;
+                float ang = k * MathHelper.PiOver2 + 0.6f;
+                Vector2 ashen = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (R * 0.95f);
+                Main.spriteBatch.Draw(Glow, ashen, null,
+                    Tint(EmberDim, 0.40f * ember), 0f,
+                    Glow.Size() * 0.5f, ScaleOf(R * 0.20f), SpriteEffects.None, 0f);
+            }
+        }
+
+        // ==================================================================
+        //  HELPERS
+        // ==================================================================
+
+        /// <summary>Escala uniforme del pincel Glow para un diámetro dado.</summary>
+        private static Vector2 ScaleOf(float diameter) =>
+            new Vector2(diameter, diameter) / Glow.Size();
+
+        /// <summary>Abre el lote ADITIVO de la casa (brillos).</summary>
+        private static void BeginAdditive()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>Abre el lote ALFA de la casa (masa que OCLUYE).</summary>
+        private static void BeginAlpha()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>Tinte premultiplicado de la casa (v6.25).</summary>
+        private static Color Tint(Color c, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f);
+            return new Color(
+                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
+                (byte)(int)(255f * f));
+        }
+    }
+}

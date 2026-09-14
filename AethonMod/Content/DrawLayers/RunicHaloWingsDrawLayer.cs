@@ -8,14 +8,16 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RunicHaloWingsDrawLayer — v6.24 — LOS CÍRCULOS DE LOS AGUJEROS EN LA ESPALDA.
+    /// RunicHaloWingsDrawLayer — v6.26 — LOS ANILLOS DE LOS SOLES EN LA ESPALDA.
     ///
-    /// La capa de las alas-anillo: pinta LOS TRES CÍRCULOS RÚNICOS (la
-    /// forma LITERAL de los agujeros negros — v6.24) tras la espalda del
-    /// jugador (mismo pase que las alas: el sistema queda DETRÁS del
-    /// cuerpo). La INTENSIDAD la aporta RunicHaloPlayer (la energía de
-    /// vuelo): quieta es el sello elegante de un agujero; VOLANDO los
-    /// círculos se avivan.
+    /// La capa de las alas-anillo: pinta EL ANILLO RÚNICO ESTELAR — los
+    /// anillos del SOL III, LITERALES, por el EMISOR COMPARTIDO de
+    /// RuneSunRenderer (EmitRingSystem tier 3: el mismo código que
+    /// dibuja al sol en el mundo) — tras la espalda del jugador (mismo
+    /// pase que las alas: el sistema queda DETRÁS del cuerpo). La
+    /// INTENSIDAD la aporta RunicHaloPlayer (la energía de vuelo):
+    /// quieta es el sello elegante de un sol; VOLANDO los anillos se
+    /// avivan (×0.80..1.20 — contenido, sin bloom).
     ///
     /// Los quads salen de RunicHaloRenderer por VFXCore
     /// (AppendToPlayerDraw — el camino oficial de las coronas).

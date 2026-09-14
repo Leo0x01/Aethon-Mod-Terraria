@@ -18,7 +18,7 @@ namespace AethonMod.Content.Effects.Bruma
     ///
     /// v6.25 — LA RECONSTRUCCIÓN tras la investigación de 23 fuentes
     /// (research/humo_v625/INFORME_MODS_HUMO.md — vanilla decompilada,
-    /// Everglow, Calamity, Coralite, Starlight River, Spirit/Stellamod…):
+    /// los mejores renderizadores del ecosistema):
     ///
     ///   1. TINTE PREMULTIPLICADO (RGB×f): el fix del bug de los
     ///      rectángulos — el pincel horneado es premultiplicado y el
@@ -27,7 +27,7 @@ namespace AethonMod.Content.Effects.Bruma
     ///   2. FLIPBOOK de ruido evolucionado: los puffs ciclan frames en
     ///      ping-pong lento (ambiente) o por VIDA (AnimatedPuff/Vapor) —
     ///      el humo SE DESGARRA, no solo rota (anti-patrón nº3).
-    ///   3. ESCALERA de texturas 64/128/160 por radio (lección Calamity).
+    ///   3. ESCALERA de texturas 64/128/160 por radio (lección de la investigación interna).
     ///   4. LUZ DEL MUNDO con piso: WorldTint(pos) — el humo VIVE en
     ///      cuevas (factor 0.25..1 por canal, tintado por la luz local).
     ///   5. VIENTO del mundo: Main.windSpeedCurrent empuja Column/Tendril/
@@ -181,7 +181,7 @@ namespace AethonMod.Content.Effects.Bruma
         private static float H01(int seed, int a, int b) => BrumaNoise.Hash(a, b, seed);
 
         // ==================================================================
-        //  LA LUZ DEL MUNDO — el humo vive en cuevas (lección Everglow)
+        //  LA LUZ DEL MUNDO — el humo vive en cuevas (lección de la investigación interna)
         // ==================================================================
 
         /// <summary>
@@ -342,8 +342,8 @@ namespace AethonMod.Content.Effects.Bruma
         // ==================================================================
 
         /// <summary>
-        /// DIBUJA UN PUFF con su CICLO DE VIDA completo (lecciones Calamity/
-        /// Everglow/Spirit): flipbook avanzando POR VIDA (el humo se
+        /// DIBUJA UN PUFF con su CICLO DE VIDA completo (lecciones la investigación interna/
+        /// élite/Spirit): flipbook avanzando POR VIDA (el humo se
         /// DESGARRA de verdad), envolvente nacimiento-rápido/muerte-lenta,
         /// crecimiento ×1.5, Rampa de enfriamiento opcional (color →
         /// endColor — la historia térmica de la bocanada) y BRASA que
@@ -361,7 +361,7 @@ namespace AethonMod.Content.Effects.Bruma
             life01 = MathHelper.Clamp(life01, 0f, 1f);
             if (worldLit) color = WorldTint(center, color);
 
-            // --- La Rampa de ENFRIAMIENTO (familia Spirit/Stellamod): el
+            // --- La Rampa de ENFRIAMIENTO (familia Spirit/élite): el
             //     color cuenta la historia térmica al morir. ---
             if (endColor.HasValue)
                 color = Color.Lerp(color, endColor.Value,
@@ -399,7 +399,7 @@ namespace AethonMod.Content.Effects.Bruma
         // ==================================================================
 
         /// <summary>
-        /// DIBUJA UN VAPOR (estilo Everglow "Vapor"): pincel de LUT DURA
+        /// DIBUJA UN VAPOR (estilo el vapor de élite): pincel de LUT DURA
         /// (núcleo denso, borde que muere en bruma gruesa), LUZ DEL MUNDO
         /// por defecto (el vapor físico se apaga en las sombras), muerte
         /// rápida (fade-out desde el 45%) y viento del mundo en el drift

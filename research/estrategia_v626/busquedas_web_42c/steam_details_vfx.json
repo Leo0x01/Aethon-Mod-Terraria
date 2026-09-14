@@ -1,0 +1,437 @@
+{
+ "response": {
+  "result": 1,
+  "resultcount": 10,
+  "publishedfiledetails": [
+   {
+    "publishedfileid": "3628420060",
+    "result": 1,
+    "creator": "76561198272033122",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "133667468",
+    "file_url": "",
+    "hcontent_file": "8432587023793309532",
+    "preview_url": "https://images.steamusercontent.com/ugc/10110830189423072922/3247FB57CC3AC6BDC47736EB47CA5DEB3A2C854D/",
+    "hcontent_preview": "10110830189423072922",
+    "title": "VFX+",
+    "description": "VFX+ is a mod that aims to remake much of Terraria\u2019s visual effects from the ground up without impacting functionality.\r\n\r\nThe mod currently reworks the VFX (and often SFX too) of nearly every single Mage weapon, with other classes and changes coming in the future.\r\n\r\nEvery individual weapon change can be turned on or off via the config.\r\n\r\nVFX+ should be compatible with most mods (Yes, including Calamity), just don\u2019t expect it to play nice with anything that heavily reworks vanilla weapons.\r\n\r\nMultiplayer is untested at this point but should be mostly fine, although ALL players will need the mod enabled. \r\n[quote=tModLoader VFXPlus]\nDeveloped By Linty[/quote]",
+    "time_created": 1766344100,
+    "time_updated": 1777944292,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 308524,
+    "favorited": 7047,
+    "lifetime_subscriptions": 356200,
+    "lifetime_favorited": 7443,
+    "views": 375933,
+    "tags": [
+     {
+      "tag": "Audio Tweaks"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3677096576",
+    "result": 1,
+    "creator": "76561198161257906",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "4217134",
+    "file_url": "",
+    "hcontent_file": "2525242031272794299",
+    "preview_url": "https://images.steamusercontent.com/ugc/18037759893634511193/02222E43B39871773115C51AAF8FE2D6DAFFEE7A/",
+    "hcontent_preview": "18037759893634511193",
+    "title": "Calamity VFX+",
+    "description": "[h1]For personal reasons, I plan to slowly resume development on all my mods after (probably) December 23rd. Please do not expect updates until then (some compatibility patches may be updated).[/h1]\r\n\r\nCalamity VFX+ applies [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3628420060&searchtext=vfx%2B]VFX+[/url][/b] style effects to weapons in [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072&searchtext=calamity+mod]Calamity Mod[/url][/b].\r\n\r\nWhile some shaders have been modified, the foundation is entirely based on the work of [b]Linty (@linty9075)[/b], who developed [b]VFX+[/b]. Thank you for the awesome mod!\r\n\r\nThis mod shouldn't affect weapon behavior, but it's not a perfect implementation, so there may be slight differences.\r\n\r\n[h3]Tested only on Calamity 2.1, Multiplayer has not been tested! (It should work though) [/h3]\r\n\r\n==============\r\n\r\n[h3]BEFORE[/h3]\r\n[img]https://raw.githubusercontent.com/Piggy3590/CalamitySyncFix/refs/heads/main/YharimBefore.gif[/img]\r\n\r\n[h3]AFTER[/h3]\r\n[img]https://raw.githubusercontent.com/Piggy3590/CalamitySyncFix/refs/heads/main/YharimAfter.gif[/img]\r\n\r\n==============\r\n\r\n\ud83d\udfe9 Complete, Confirmed to be included in the next update.\r\n\ud83d\udfe8 In progress, Development is in progress and will switch to \"Completed\" once completed.\r\n\ud83d\udfe5 Planned, Not implemented.\r\n\r\nCurrently Applies to:\r\n[List]\r\n    [*]Prism-type weapons (Dark Spark, Yharim's Crystal)\r\n    [*]Phantasmal Fury\r\n    [*]Vivid Clarity (little WIP)\r\n    [*]Magnetic Meltdown\r\n    [*] Shadecrystal Barrage\r\n    [*] Aquamarine Staff\r\n    [*] Fate's Reveal\r\n    [*] Event Horizon\r\n[/List]\r\n\r\nPlanned:\r\n[List]\r\n    [*] Configuration (\ud83d\udfe8)\r\n    [*](I'm not sure what else to implement yet cuz I'm melee only. sry please recommend weapons in the comments)\r\n[/List]\r\n\r\n===============\r\n\r\nCredit: Linty (@linty9075) - Developer of VFX+.\r\nBug report: [url=https://docs.google.com/forms/d/e/1FAIpQLSeVGon1VdxkmJCEMzA-VXmlgUppui3jV2IKMLfRV-g0OpUIkg/viewform?usp=header]Forms[/url][quote=tModLoader CalamityVFXPlus]\r\nDeveloped By Piggy[/quote]",
+    "time_created": 1772451152,
+    "time_updated": 1780258266,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 40130,
+    "favorited": 1159,
+    "lifetime_subscriptions": 48790,
+    "lifetime_favorited": 1219,
+    "views": 59999,
+    "tags": [
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Client"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3701189953",
+    "result": 1,
+    "creator": "76561198286446694",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "895184",
+    "file_url": "",
+    "hcontent_file": "2680391552901580965",
+    "preview_url": "https://images.steamusercontent.com/ugc/10424305544873848242/6E97AB6A440AEA4F0228E601BA476B03EF8C1B17/",
+    "hcontent_preview": "10424305544873848242",
+    "title": "VFX+ Boss Addon",
+    "description": "VFX+ Boss Addon is an addon for GreatFriend129's VFXPlus. This mod overhauls boss visuals without impacting functionality.\r\n\r\nThis mod is in Alpha, and as such is still a work in progress. More content will be added in the future, and some of the existing content may be changed or removed.\r\n\r\n[hr][/hr]\r\n\r\nThe mod [i] completely reworks [/i] the VFX and SFX of the Lunatic Cultist and the Wall Of Flesh. I'm aiming to add more bosses in the future, but for now these are the only two.\r\n\r\nEach individual boss overhaul can be turned on or off via the config.\r\n\r\nLike the original, this mod should be compatible with most other mods including Calamity, [u] However, some mods may use their own projectiles mimicking vanilla ones, which [b] will not be changed. [/b] [/u]\r\n\r\nMultiplayer is untested but should be alright, although ALL players will need the mod enabled. \r\n\r\n[hr][/hr]\r\n\r\nVFX+ Boss Addon is released under the GNU General Public License v3.0.\r\nYou should have received a copy of the license along with this code.\r\n\r\n[b] DISCLAIMER: While all efforts have been made to keep the changes purely visual, some attacks may have slight differences in angles or damage. [/b][quote=tModLoader VFXPlusBoss]\nDeveloped By Bluebasher5[/quote]",
+    "time_created": 1775483295,
+    "time_updated": 1785597348,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 34671,
+    "favorited": 1038,
+    "lifetime_subscriptions": 40445,
+    "lifetime_favorited": 1101,
+    "views": 58629,
+    "tags": [
+     {
+      "tag": "Audio Tweaks"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3793786981",
+    "result": 1,
+    "creator": "76561199356651986",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "93084",
+    "file_url": "",
+    "hcontent_file": "4011813683243481553",
+    "preview_url": "https://images.steamusercontent.com/ugc/12074636431505987017/543F52E72F410AA37D4BFA411D32AD28B3D39172/",
+    "hcontent_preview": "12074636431505987017",
+    "title": "Vanilla Slash VFX",
+    "description": "[h1][b]Vanilla Slash VFX[/b][/h1]\r\n\r\n[h2]This mod adds vanilla [b]Excalibur[/b]-like slash effects to most sword-type weapons(usestyle = swing), including [b]modded weapons[/b].[/h2]\r\n\r\nThe effect's color is sampled from the [b]weapon's texture[/b].\r\n\r\nIt's purely a texture-based effect with [b]no[/b] additional shader overhead.",
+    "time_created": 1788235336,
+    "time_updated": 1788758322,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 4917,
+    "favorited": 178,
+    "lifetime_subscriptions": 5628,
+    "lifetime_favorited": 187,
+    "views": 9581,
+    "tags": [
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Russian"
+     },
+     {
+      "tag": "Chinese"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3627911768",
+    "result": 1,
+    "creator": "76561198242225670",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "1163939",
+    "file_url": "",
+    "hcontent_file": "9162859091595304570",
+    "preview_url": "https://images.steamusercontent.com/ugc/16894770258228566691/4F1948B6CC14B1F3DBC2A61A294A6B337B3F4A20/",
+    "hcontent_preview": "16894770258228566691",
+    "title": "Crit VFX",
+    "description": "Crit VFX is a lightweight, client-side visual enhancement mod that makes critical hits feel powerful and satisfying without affecting gameplay balance.\r\n\r\nThis mod focuses entirely on presentation, adding impactful particles, screen shake, and custom audio feedback whenever a critical hit occurs.\r\n\r\nFEATURES\r\n\u2022 Custom crit particle effects with multiple visual styles\r\n\u2022 Adjustable particle size and intensity\r\n\u2022 Screen shake on crits (configurable strength)\r\n\u2022 Custom crit sound effects\r\n\u2022 Multiple sound slots with optional random selection\r\n\u2022 Adjustable crit sound volume\r\n\u2022 Optional enhanced crit combat text\r\n\u2022 Fully client-side (safe for multiplayer)\r\n\u2022 Compatible with Terraria 1.4.4+ and modpacks\r\n\r\nAll features can be configured in the Mod Configuration menu and changed at any time.\r\n\r\nCrit VFX is designed to work alongside balance mods, weapon mods, and overhauls without conflict.[quote=tModLoader CritVFX]\nDeveloped By 2xClean[/quote]",
+    "time_created": 1766291755,
+    "time_updated": 1766436549,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 3981,
+    "favorited": 99,
+    "lifetime_subscriptions": 5127,
+    "lifetime_favorited": 108,
+    "views": 6421,
+    "tags": [
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     },
+     {
+      "tag": "English"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "2947903565",
+    "result": 1,
+    "creator": "76561198050977969",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "264041",
+    "file_url": "",
+    "hcontent_file": "3674723181069530859",
+    "preview_url": "https://images.steamusercontent.com/ugc/2044110590409673063/8C80508F110F2B6BA81223A8B40008443AE14222/",
+    "hcontent_preview": "2044110590409673063",
+    "title": "Calamity VFX Addon",
+    "description": "Calamity VFX Addon is an addon desiring to redesign some of the more dated visuals of Calamity.\r\n\r\nChanges Supreme Witch, Calamitas' Brimstone Monsters, as well Omega Blue's Tentacles.\r\n\r\nHas config options to reduce or disable intensity of effects.",
+    "time_created": 1679014265,
+    "time_updated": 1679067111,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 7435,
+    "favorited": 310,
+    "lifetime_subscriptions": 16314,
+    "lifetime_favorited": 363,
+    "views": 30303,
+    "tags": [
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "Both"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3687584716",
+    "result": 1,
+    "creator": "76561198372423139",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "10294929",
+    "file_url": "",
+    "hcontent_file": "5242306090608368740",
+    "preview_url": "https://images.steamusercontent.com/ugc/15969995246606626801/B50F3101C2B381F209A447B53342C52CE14E610D/",
+    "hcontent_preview": "15969995246606626801",
+    "title": "Hellkite SFX + VFX (Llow - The End)",
+    "description": "[img]https://images.steamusercontent.com/ugc/15585824561185954338/CD7E161BBE31FBF9145A04997D441B5061C7686C/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]\r\n\r\n[i]An expansion mod for the Hellkite sword from Calamity Mod.[/i]\r\n[i]Adds a deep charge mechanic, Divine Fury system, and reactive audio-visual effects.[/i]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u2694 Charge System[/h2]\r\n\r\nHold [b]Right Click[/b] to charge the blade. The longer you hold, the more powerful the strike \u2014 scaling from base damage up to a full critical hit at maximum charge.\r\n\r\n[list]\r\n[*]Releasing early still grants a partial damage bonus\r\n[*]Charge power is reflected in damage scaling and lightning intensity\r\n[*]Background music gradually fades during charge, putting full focus on the strike\r\n[*]Missing a swing or releasing too early [b]resets[/b] the Divine Fury counter\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]Divine Fury[/h2]\r\n\r\nLanding [b]fully charged strikes[/b] builds the Divine Fury counter.\r\n\r\n[b]Fury Mode:[/b]\r\n[list]\r\n[*]Blade is permanently fully charged\r\n[*]Every strike always critically hits and deals maximum damage\r\n[*]Enhanced lightning effects trigger on every hit\r\n[/list]\r\n\r\n[b]Counter resets on:[/b]\r\n[list]\r\n[*]Swinging with LMB\r\n[*]Releasing RMB before full charge\r\n[*]Missing a fully charged swing\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]Lightning Modes[/h2]\r\n\r\nEvery charged strike releases scorching lightning. Three modes are available \u2014 choose your preferred style in the mod config.\r\n\r\n[h3]Fan \u2014 bolts spread toward the cursor[/h3]\r\n[img]https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHcyaXFrbzlxc3l1bjd3bjNhYWlqY2Q4d3Q0OWcyc2FyM3ZzYTRhMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IZtisoctTmFcY6u0pl/giphy.gif[/img]\r\n\r\n[h3]All Sides \u2014 bolts converge from all directions[/h3]\r\n[img]https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGs2Y3BsNTJiN2VheGVkZmV5ZTh4aW1neXJmbjd3MXd4MHVsenkzeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/OMn16ueTaXLmvWtlVz/giphy.gif[/img]\r\n\r\n[h3]From Above \u2014 bolts fall from the sky[/h3]\r\n[img]https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2ZnZmNsNHpyNmtxZ3VyOHFqb25obDJxZmFrcXNhZGl4d3JidmdrMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Fd9k7UKOUOf9Qb6haW/giphy.gif[/img]\r\n\r\nLightning also deals damage over time to enemies near the bolts \u2014 [i]10% of the strike damage per second[/i].\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u2699 Config Options[/h2]\r\n\r\n[list]\r\n[*][b]Hit Sound Volume[/b] \u2014 adjust the volume of impact sounds\r\n[*][b]Lightning Visual Mode[/b] \u2014 Fan / All Sides / From Above\r\n[*][b]Visual Only Mode[/b] \u2014 disables all damage scaling and lightning damage, keeping effects purely cosmetic\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]Requirements[/h2]\r\n\r\n[list]\r\n[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688266]Calamity Mod[/url] \u2014 required\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]Localization[/h2]\r\n\r\n[list]\r\n[*][b]English[/b] \u2713\r\n[*][b]\u0420\u0443\u0441\u0441\u043a\u0438\u0439[/b] \u2713\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]Roadmap[/h2]\r\n\r\nThis mod is actively in development. Planned features and improvements are on the way \u2014 stay tuned for updates.\r\n\r\n[hr][/hr]\r\n\r\n[h2]Credits[/h2]\r\n\r\n[list]\r\n[*]Sound samples sourced from: [url=https://youtu.be/LusgCAwXCVw]https://youtu.be/LusgCAwXCVw[/url]\r\n[*]Built on top of [b]Calamity Mod[/b] by MountainDrew/Fabsol\r\n  [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688266]Steam Workshop[/url] \u2014 [url=https://github.com/CalamityTeam/CalamityModPublic]GitHub[/url]\r\n[/list]\r\n\r\n[quote=Hellkite: The End]'Feel the strength of a blade forged through passion'[/quote]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u0420\u0443\u0441\u0441\u043a\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u044f[/h2]\r\n\r\n[hr][/hr]\r\n\r\n[img]https://images.steamusercontent.com/ugc/15585824561185954338/CD7E161BBE31FBF9145A04997D441B5061C7686C/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]\r\n\r\n[i]\u041c\u043e\u0434-\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u0438\u0435 \u0434\u043b\u044f \u043c\u0435\u0447\u0430 Hellkite \u0438\u0437 Calamity Mod.[/i]\r\n[i]\u0414\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 \u043c\u0435\u0445\u0430\u043d\u0438\u043a\u0443 \u0437\u0430\u0440\u044f\u0434\u043a\u0438, \u0441\u0438\u0441\u0442\u0435\u043c\u0443 \u0411\u043e\u0436\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u042f\u0440\u043e\u0441\u0442\u0438 \u0438 \u0440\u0435\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u0430\u0443\u0434\u0438\u043e\u0432\u0438\u0437\u0443\u0430\u043b\u044c\u043d\u044b\u0435 \u044d\u0444\u0444\u0435\u043a\u0442\u044b.[/i]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u2694 \u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u0437\u0430\u0440\u044f\u0434\u043a\u0438[/h2]\r\n\r\n\u0417\u0430\u0436\u043c\u0438\u0442\u0435 [b]\u041f\u041a\u041c[/b] \u0434\u043b\u044f \u0437\u0430\u0440\u044f\u0434\u043a\u0438 \u043a\u043b\u0438\u043d\u043a\u0430. \u0427\u0435\u043c \u0434\u043e\u043b\u044c\u0448\u0435 \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0435 \u2014 \u0442\u0435\u043c \u043c\u043e\u0449\u043d\u0435\u0435 \u0443\u0434\u0430\u0440: \u043e\u0442 \u0431\u0430\u0437\u043e\u0432\u043e\u0433\u043e \u0443\u0440\u043e\u043d\u0430 \u0434\u043e \u043f\u043e\u043b\u043d\u043e\u0433\u043e \u043a\u0440\u0438\u0442\u0430 \u043f\u0440\u0438 \u043c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u043e\u043c \u0437\u0430\u0440\u044f\u0434\u0435.\r\n\r\n[list]\r\n[*]\u0420\u0430\u043d\u043d\u0438\u0439 \u0432\u044b\u043f\u0430\u0434 \u0432\u0441\u0451 \u0440\u0430\u0432\u043d\u043e \u0434\u0430\u0451\u0442 \u0447\u0430\u0441\u0442\u0438\u0447\u043d\u044b\u0439 \u0431\u043e\u043d\u0443\u0441 \u043a \u0443\u0440\u043e\u043d\u0443\r\n[*]\u0421\u0438\u043b\u0430 \u0437\u0430\u0440\u044f\u0434\u0430 \u043e\u0442\u0440\u0430\u0436\u0430\u0435\u0442\u0441\u044f \u0432 \u0441\u043a\u0430\u043b\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0438 \u0443\u0440\u043e\u043d\u0430 \u0438 \u0438\u043d\u0442\u0435\u043d\u0441\u0438\u0432\u043d\u043e\u0441\u0442\u0438 \u043c\u043e\u043b\u043d\u0438\u0439\r\n[*]\u0424\u043e\u043d\u043e\u0432\u0430\u044f \u043c\u0443\u0437\u044b\u043a\u0430 \u043f\u043e\u0441\u0442\u0435\u043f\u0435\u043d\u043d\u043e \u0437\u0430\u0442\u0438\u0445\u0430\u0435\u0442 \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u0437\u0430\u0440\u044f\u0434\u043a\u0438\r\n[*]\u041f\u0440\u043e\u043c\u0430\u0445 \u0438\u043b\u0438 \u043f\u0440\u0435\u0436\u0434\u0435\u0432\u0440\u0435\u043c\u0435\u043d\u043d\u044b\u0439 \u0432\u044b\u043f\u0430\u0434 [b]\u0441\u0431\u0440\u0430\u0441\u044b\u0432\u0430\u044e\u0442[/b] \u0441\u0447\u0451\u0442\u0447\u0438\u043a \u042f\u0440\u043e\u0441\u0442\u0438\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u0411\u043e\u0436\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u0430\u044f \u042f\u0440\u043e\u0441\u0442\u044c[/h2]\r\n\r\n\u041f\u043e\u043f\u0430\u0434\u0430\u043d\u0438\u044f [b]\u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u0437\u0430\u0440\u044f\u0436\u0435\u043d\u043d\u044b\u043c\u0438 \u0443\u0434\u0430\u0440\u0430\u043c\u0438[/b] \u043d\u0430\u043a\u0430\u043f\u043b\u0438\u0432\u0430\u044e\u0442 \u0441\u0447\u0451\u0442\u0447\u0438\u043a \u0411\u043e\u0436\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u042f\u0440\u043e\u0441\u0442\u0438.\r\n\r\n[b]\u0420\u0435\u0436\u0438\u043c \u042f\u0440\u043e\u0441\u0442\u0438:[/b]\r\n[list]\r\n[*]\u041a\u043b\u0438\u043d\u043e\u043a \u043f\u043e\u0441\u0442\u043e\u044f\u043d\u043d\u043e \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u0437\u0430\u0440\u044f\u0436\u0435\u043d\r\n[*]\u041a\u0430\u0436\u0434\u044b\u0439 \u0443\u0434\u0430\u0440 \u0432\u0441\u0435\u0433\u0434\u0430 \u043a\u0440\u0438\u0442\u0443\u0435\u0442 \u0438 \u043d\u0430\u043d\u043e\u0441\u0438\u0442 \u043c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u044b\u0439 \u0443\u0440\u043e\u043d\r\n[*]\u0423\u0441\u0438\u043b\u0435\u043d\u043d\u044b\u0435 \u043c\u043e\u043b\u043d\u0438\u0438 \u043f\u0440\u0438 \u043a\u0430\u0436\u0434\u043e\u043c \u043f\u043e\u043f\u0430\u0434\u0430\u043d\u0438\u0438\r\n[/list]\r\n\r\n[b]\u0421\u0447\u0451\u0442\u0447\u0438\u043a \u0441\u0431\u0440\u0430\u0441\u044b\u0432\u0430\u0435\u0442\u0441\u044f \u043f\u0440\u0438:[/b]\r\n[list]\r\n[*]\u0423\u0434\u0430\u0440\u0435 \u041b\u041a\u041c\r\n[*]\u041e\u0442\u043f\u0443\u0441\u043a\u0430\u043d\u0438\u0438 \u041f\u041a\u041c \u0434\u043e \u043f\u043e\u043b\u043d\u043e\u0433\u043e \u0437\u0430\u0440\u044f\u0434\u0430\r\n[*]\u041f\u0440\u043e\u043c\u0430\u0445\u0435 \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u0437\u0430\u0440\u044f\u0436\u0435\u043d\u043d\u044b\u043c \u0443\u0434\u0430\u0440\u043e\u043c\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u0412\u0438\u0434\u044b \u043c\u043e\u043b\u043d\u0438\u0439[/h2]\r\n\r\n\u041a\u0430\u0436\u0434\u044b\u0439 \u0437\u0430\u0440\u044f\u0436\u0435\u043d\u043d\u044b\u0439 \u0443\u0434\u0430\u0440 \u0432\u044b\u043f\u0443\u0441\u043a\u0430\u0435\u0442 \u043e\u0431\u0436\u0438\u0433\u0430\u044e\u0449\u0438\u0435 \u043c\u043e\u043b\u043d\u0438\u0438. \u0414\u043e\u0441\u0442\u0443\u043f\u043d\u044b \u0442\u0440\u0438 \u0440\u0435\u0436\u0438\u043c\u0430 \u2014 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043f\u0440\u0435\u0434\u043f\u043e\u0447\u0438\u0442\u0430\u0435\u043c\u044b\u0439 \u0432 \u043a\u043e\u043d\u0444\u0438\u0433\u0435 \u043c\u043e\u0434\u0430.\r\n\r\n[i]\u0421\u043c\u043e\u0442\u0440\u0438\u0442\u0435 \u0433\u0438\u0444\u043a\u0438 \u0432\u044b\u0448\u0435[/i]\r\n\r\n\u041c\u043e\u043b\u043d\u0438\u0438 \u0442\u0430\u043a\u0436\u0435 \u043d\u0430\u043d\u043e\u0441\u044f\u0442 \u0443\u0440\u043e\u043d \u0441\u043e \u0432\u0440\u0435\u043c\u0435\u043d\u0435\u043c \u0432\u0440\u0430\u0433\u0430\u043c \u0440\u044f\u0434\u043e\u043c \u0441 \u0431\u043e\u043b\u0442\u0430\u043c\u0438 \u2014 [i]10% \u043e\u0442 \u0443\u0440\u043e\u043d\u0430 \u0443\u0434\u0430\u0440\u0430 \u0432 \u0441\u0435\u043a\u0443\u043d\u0434\u0443[/i].\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u2699 \u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438[/h2]\r\n\r\n[list]\r\n[*][b]\u0413\u0440\u043e\u043c\u043a\u043e\u0441\u0442\u044c \u0437\u0432\u0443\u043a\u043e\u0432 \u0443\u0434\u0430\u0440\u043e\u0432[/b] \u2014 \u0440\u0435\u0433\u0443\u043b\u0438\u0440\u043e\u0432\u043a\u0430 \u0433\u0440\u043e\u043c\u043a\u043e\u0441\u0442\u0438 \u0437\u0432\u0443\u043a\u043e\u0432 \u043f\u043e\u043f\u0430\u0434\u0430\u043d\u0438\u044f\r\n[*][b]\u0420\u0435\u0436\u0438\u043c \u043e\u0442\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044f \u043c\u043e\u043b\u043d\u0438\u0439[/b] \u2014 \u0412\u0435\u0435\u0440 / \u0421\u043e \u0432\u0441\u0435\u0445 \u0441\u0442\u043e\u0440\u043e\u043d / \u0421 \u043d\u0435\u0431\u0430\r\n[*][b]\u0422\u043e\u043b\u044c\u043a\u043e \u0432\u0438\u0437\u0443\u0430\u043b\u044c\u043d\u044b\u0435 \u044d\u0444\u0444\u0435\u043a\u0442\u044b[/b] \u2014 \u043e\u0442\u043a\u043b\u044e\u0447\u0430\u0435\u0442 \u0432\u0441\u0451 \u0441\u043a\u0430\u043b\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0443\u0440\u043e\u043d\u0430 \u0438 \u0443\u0440\u043e\u043d \u043e\u0442 \u043c\u043e\u043b\u043d\u0438\u0439, \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044f \u044d\u0444\u0444\u0435\u043a\u0442\u044b \u0447\u0438\u0441\u0442\u043e \u043a\u043e\u0441\u043c\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u043c\u0438\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u0417\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u0438[/h2]\r\n\r\n[list]\r\n[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688266]Calamity Mod[/url] \u2014 \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u0435\u043d\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u041b\u043e\u043a\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f[/h2]\r\n\r\n[list]\r\n[*][b]English[/b] \u2713\r\n[*][b]\u0420\u0443\u0441\u0441\u043a\u0438\u0439[/b] \u2713\r\n[/list]\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u041f\u043b\u0430\u043d\u044b \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u044f[/h2]\r\n\r\n\u041c\u043e\u0434 \u0430\u043a\u0442\u0438\u0432\u043d\u043e \u0440\u0430\u0437\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u0435\u0442\u0441\u044f. \u041d\u043e\u0432\u044b\u0435 \u0444\u0443\u043d\u043a\u0446\u0438\u0438 \u0438 \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u044f \u0443\u0436\u0435 \u0432 \u043f\u043b\u0430\u043d\u0430\u0445 \u2014 \u0441\u043b\u0435\u0434\u0438\u0442\u0435 \u0437\u0430 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f\u043c\u0438.\r\n\r\n[hr][/hr]\r\n\r\n[h2]\u0410\u0432\u0442\u043e\u0440\u0441\u0442\u0432\u043e[/h2]\r\n\r\n[list]\r\n[*]\u0421\u0435\u043c\u043f\u043b\u044b \u0437\u0432\u0443\u043a\u043e\u0432 \u0432\u0437\u044f\u0442\u044b \u043e\u0442\u0441\u044e\u0434\u0430: [url=https://youtu.be/LusgCAwXCVw]https://youtu.be/LusgCAwXCVw[/url]\r\n[*]\u041c\u043e\u0434 \u043e\u0441\u043d\u043e\u0432\u0430\u043d \u043d\u0430 [b]Calamity Mod[/b] \u043e\u0442 MountainDrew/Fabsol\r\n  [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688266]Steam Workshop[/url] \u2014 [url=https://github.com/CalamityTeam/CalamityModPublic]GitHub[/url]\r\n[/list]\r\n\r\n[quote=Hellkite: The End]'\u041f\u043e\u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0439 \u0441\u0438\u043b\u0443 \u043a\u043b\u0438\u043d\u043a\u0430, \u0432\u044b\u043a\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e \u0447\u0435\u0440\u0435\u0437 \u0441\u0442\u0440\u0430\u0441\u0442\u044c'[/quote][quote=tModLoader HellkiteTheEnd]\r\nDeveloped By sltx[/quote]",
+    "time_created": 1773882956,
+    "time_updated": 1773909224,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 2883,
+    "favorited": 92,
+    "lifetime_subscriptions": 3624,
+    "lifetime_favorited": 100,
+    "views": 4987,
+    "tags": [
+     {
+      "tag": "new content"
+     },
+     {
+      "tag": "Gameplay Tweaks"
+     },
+     {
+      "tag": "Audio Tweaks"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Russian"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3797271251",
+    "result": 1,
+    "creator": "76561199206924751",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "127152",
+    "file_url": "",
+    "hcontent_file": "8407723052483470094",
+    "preview_url": "https://images.steamusercontent.com/ugc/16217711911186434504/8F83290620DA24680B71FE21F9B5347EAA766FFA/",
+    "hcontent_preview": "16217711911186434504",
+    "title": "Every weapon deserves to feel distinct",
+    "description": "This mod is a complete overhaul of Terraria\u2019s spear playstyle.\r\n\r\nAs its initial release, the mod reworks every existing spear in the game. Going forward, I plan to update it as often as possible\u2014ideally every day\u2014and gradually rework other weapons that I personally love but rarely get a real chance to use in actual gameplay.\r\n\r\nHere are a few examples of what has been implemented so far:\r\n\r\n\u2460 VFX have been added to spear-type weapons, greatly improving their visual feedback and overall feel when used.\r\n\r\n\u2461 Spear-type weapons now have a 1-in-3 chance to perform two consecutive thrusts.\r\nSome spears even have special mechanics that are triggered by this extra attack. \ud83d\ude0e\r\n\r\nThere are also differences between individual weapons. For example, the Trident has a 1-in-5 chance to perform three consecutive thrusts instead.\r\n\r\n\u2462 The Spear is now craftable.\r\nSeveral new spear-related accessories have also been added.\r\n\r\n\u2463 Hardmode ore spears now have their own unique abilities.\r\nWeapons such as the Cobalt Naginata and Mythril Halberd, which normally see very little use, have received much more distinctive reworks while still keeping the overall feel and atmosphere of vanilla Terraria.\r\n\r\n---completion---\r\nTo avoid conflicts with other mods in the future, I also plan to make each rework individually toggleable through the mod's configuration settings.\r\n------\r\n\r\nFor now, the project is being released primarily as a spear rework mod, but the long-term plan is to gradually expand it into a mod that reworks weapons across the entire game.\r\n\r\nPlease share your own Terraria weapon rework ideas in the comments!\r\n\r\nI strongly believe this mod will become much better by rebuilding weapons around the different playstyles, perspectives, and ideas of the Terraria community.[quote=tModLoader Everyweapondeservestofeeldistinct]\nDeveloped By ojo[/quote]",
+    "time_created": 1788755902,
+    "time_updated": 1789085964,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 550,
+    "favorited": 56,
+    "lifetime_subscriptions": 606,
+    "lifetime_favorited": 59,
+    "views": 2313,
+    "tags": [
+     {
+      "tag": "Gameplay Tweaks"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Both"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3800221790",
+    "result": 1,
+    "creator": "76561199162797422",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "290444",
+    "file_url": "",
+    "hcontent_file": "1082189081370371744",
+    "preview_url": "https://images.steamusercontent.com/ugc/13154350605428608917/35D97A1A8C70BAA99EA800EF3C17F463ACCE5F56/",
+    "hcontent_preview": "13154350605428608917",
+    "title": "Game Feel: Combat Feedback",
+    "description": "[h1]\u6e38\u620f\u624b\u611f\uff1a\u6253\u51fb\u611f\u53cd\u9988 / Game Feel: Combat Feedback[/h1]\r\n\r\n\u4e3a\u6218\u6597\u6ce8\u5165\u8857\u673a\u7ea7\u6253\u51fb\u611f\u7684\u7eaf\u5ba2\u6237\u7aef\u624b\u611f\u6a21\u7ec4\u3002/ A pure client-side mod that injects arcade-style combat feedback into Terraria.\r\n\r\n[h2]\u7279\u6027 / Features[/h2]\r\n\r\n[list]\r\n[*][b]\u547d\u4e2d\u987f\u5e27 Hit-Stop[/b] \u2014 \u6309\u8f7b/\u4e2d/\u91cd/\u66b4\u51fb\u5206\u7ea7\u51bb\u7ed3\u76ee\u6807\u52a8\u4f5c\uff0cBoss \u72ec\u7acb\u65f6\u957f\u4e0a\u9650 / Tiered frame freeze on hit, separate cap for bosses\r\n[*][b]\u65b9\u5411\u6027\u9707\u5c4f Directional Screenshake[/b] \u2014 Trauma \u6a21\u578b\uff0c\u968f\u8ddd\u79bb\u8870\u51cf\uff0c\u6bcf\u8fde\u51fb +10%\uff0c\u504f\u5411\u51fb\u9000\u65b9\u5411 / Trauma-based shake with distance falloff, +10% per combo, biased toward knockback\r\n[*][b]\u53d7\u51fb\u95ea\u767d Hit Flash[/b] \u2014 \u8d1d\u585e\u5c14\u66f2\u7ebf\u5e73\u6ed1\u6de1\u51fa\uff0c\u53ef\u9009\u5143\u7d20\u53cd\u5e94\u914d\u8272 / Smooth bezier fade with optional elemental reaction colors\r\n[*][b]\u66b4\u51fb\u5706\u5f62\u5149\u6655 Crit Glow[/b] \u2014 \u5168\u5c4f\u5f84\u5411\u5149\u6655\uff0cS \u5f62\u6de1\u5165\u6de1\u51fa\uff08\u5148\u6162\u540e\u5feb\u518d\u6162\uff09\uff0c\u5cf0\u503c\u4f4d\u7f6e\u4e0e\u6574\u4f53\u900f\u660e\u5ea6\u53ef\u8c03\uff0c\u9ed8\u8ba4\u5173\u95ed / Full-screen radial glow with a slow-fast-slow S-curve envelope; peak position and overall opacity tunable, off by default\r\n[*][b]\u547d\u4e2d\u7c92\u5b50\u4e0e\u5f39\u7247 Particles & Shrapnel[/b] \u2014 \u66f2\u7ebf\u51cf\u901f\u706b\u82b1\u3001\u5e26\u91cd\u529b\u629b\u7269\u7ebf\u7684\u673a\u68b0\u788e\u7247 / Curve-eased sparks and ballistic debris\r\n[*][b]\u547d\u4e2d\u52a8\u6001\u5149\u6548 Dynamic Hit Lighting[/b] \u2014 \u771f\u5b9e\u4f5c\u7528\u4e8e\u6e38\u620f\u5149\u7167\u7cfb\u7edf / Feeds the actual game lighting system\r\n[*][b]\u8fde\u51fb\u7cfb\u7edf Combo System[/b] \u2014 \u8fde\u51fb HUD \u663e\u793a\u8fde\u51fb\u6570\u4e0e\u7d2f\u8ba1\u4f24\u5bb3\uff1b[b]\u8d85\u8fc7 50 \u8fde\u51fb\u8fdb\u5165\u72c2\u70ed\u6001[/b]\uff1a\u8fde\u51fb\u6570\u5f69\u8272\u6e10\u53d8 + \u5f69\u8679\u91cd\u5f71\u62d6\u5c3e\uff0c\u7c92\u5b50\u6570\u91cf\u63d0\u5347 50%\uff1b[b]\u8fbe\u5230 100 \u8fde\u51fb\u89e6\u53d1\u72c2\u70ed\u7206\u53d1[/b]\uff1a\u5927\u91cf\u5f69\u8679\u7c92\u5b50\u8ff8\u53d1\u3001\u70ab\u5f69\u62d6\u5c3e\u4e0e\u7206\u53d1\u97f3\u6548 / Combo HUD with total damage; [b]beyond 50 combo, fever mode kicks in[/b]: the counter turns rainbow with a ghost trail and particles ramp up by 50%; [b]at 100 combo a fever burst fires[/b] \u2014 a rainbow particle explosion, colorful trail and a burst sound\r\n[*][b]\u53d7\u51fb\u955c\u5934\u51b2\u51fb Hurt Camera Kick[/b] \u2014 \u53d7\u4f24\u77ac\u95f4\u955c\u5934\u5411\u53d7\u4f24\u65b9\u5411\u540e\u5750 / Camera recoil toward the hurt direction\r\n[*][b]\u6b66\u5668\u6325\u52a8\u6b8b\u5f71 Weapon Afterimages[/b] \u2014 \u6325\u780d\u62d6\u5c3e / Swing trails\r\n[*][b]\u5206\u5c42\u547d\u4e2d\u97f3\u6548 Layered Hit Sounds[/b] \u2014 \u949d\u54cd/\u9aa8\u611f/\u91d1\u5c5e\u8106\u54cd\u968f\u6863\u4f4d\u53d8\u5316\uff0c\u66b4\u51fb\u63d0\u97f3\uff0c\u9010\u76ee\u6807\u51b7\u5374 + \u6bcf\u5e27\u4e0a\u9650\u9632\u97f3\u7206 / Thud/snap/metallic crack by tier with pitched crit accent, per-target cooldown and per-frame cap\r\n[*][b]\u51fb\u6740\u51b2\u51fb\u6ce2 Kill Shockwave[/b] \u2014 \u51fb\u6740\u6269\u6563\u5149\u73af\u4e0e\u5f84\u5411\u7c92\u5b50\uff0cBoss \u7ffb\u500d\u5e76\u4f34\u968f\u7206\u54cd / Expanding ring and radial particles on kill, doubled scale and boom on bosses\r\n[*][b]\u547d\u4e2d\u6807\u8bb0 Hit Markers[/b] \u2014 \u767d\u8272\u5341\u5b57\u3001\u66b4\u51fb\u91d1\u8272\u53c9\uff0c\u65cb\u8f6c\u6de1\u51fa / White cross markers, golden spinning X on crits\r\n[*][b]\u6218\u6597\u8bc4\u7ea7 Style Rank[/b] \u2014 D\u2192SSS \u5b9e\u65f6\u8bc4\u4ef7\u9a71\u52a8\u53cd\u9988\u5f3a\u5ea6\uff0cSSS \u91d1\u8272\u6697\u89d2\u4e0e\u97f3\u6548\uff0c\u53d7\u4f24\u6389\u7ea7 / Live D\u2192SSS rank boosts feedback; SSS golden vignette and sound, taking damage drops the rank\r\n[*][b]\u73a9\u5bb6\u53cd\u9988 Player Feedback[/b] \u2014 \u53d7\u51fb\u67d3\u95ea\u3001\u6fd2\u6b7b\u5fc3\u8df3\u6697\u89d2\u3001\u53d7\u4f24\u65b9\u5411\u5f27\u3001\u843d\u5730/\u51b2\u523a\u5c18\u571f\u3001\u6325\u780d\u5f27\u5149 / Hurt white flash, low-health heartbeat vignette, damage-direction arc, landing/dash dust, slash arcs\r\n[*][b]\u7c7b\u578b\u500d\u7387\u4e0e\u9ed1\u540d\u5355 Class Muls & Blacklist[/b] \u2014 \u8fd1\u6218/\u8fdc\u7a0b/\u9b54\u6cd5/\u53ec\u5524/\u5176\u4ed6\u72ec\u7acb\u500d\u7387\uff0c\u53ef\u6309 NPC \u5c4f\u853d\u53cd\u9988 / Separate melee/ranged/magic/summon/other multipliers and per-NPC suppression\r\n[*][b]\u9884\u89c8\u4e0e\u5206\u4eab Preview & Share[/b] \u2014 \u6309 P \u539f\u5730\u9884\u89c8\u5168\u90e8\u6548\u679c\uff0c/gffeed export/import \u5206\u4eab\u914d\u7f6e\u7801\uff0cBoss \u51fb\u6740/\u72c2\u70ed/SSS \u81ea\u52a8\u622a\u56fe / Press P to preview all effects, /gffeed export/import share codes, auto screenshots on highlights\r\n[/list]\r\n\r\n[h2]\u914d\u7f6e / Configuration[/h2]\r\n\r\n[list]\r\n[*]\u514b\u5236 / \u6807\u51c6 / \u5f3a\u70c8 \u4e09\u6863\u9884\u8bbe\u4e00\u952e\u5207\u6362\uff0c\u5168\u90e8\u53c2\u6570\u53ef\u81ea\u7531\u5fae\u8c03 / Three presets (Subtle / Standard / Intense), every parameter tunable\r\n[*]\u5185\u7f6e\u8d1d\u585e\u5c14\u66f2\u7ebf\u7f16\u8f91\u5668\uff08\u6309 [b]G[/b]\uff09\uff0c\u81ea\u5b9a\u4e49\u6bcf\u6761\u52a8\u753b\u66f2\u7ebf / Built-in bezier curve editor (press [b]G[/b]) for every animation curve\r\n[*]\u72c2\u70ed\u7206\u53d1\u53ef\u914d\u7f6e\uff1a\u5f00\u5173\u3001\u7206\u53d1\u7c92\u5b50\u91cf\u3001\u62d6\u5c3e\u65f6\u957f / Fever burst is configurable: toggle, particle count, trail duration\r\n[*]\u652f\u6301 ElementalReactions \u5143\u7d20\u914d\u8272\uff08\u5f31\u4f9d\u8d56\uff0c\u672a\u5b89\u88c5\u4e0d\u5f71\u54cd\u4f7f\u7528\uff09 / Optional ElementalReactions color integration (weak reference, works fine without it)\r\n[/list]\r\n\r\n[h2]\u66f4\u65b0\u516c\u544a / Changelog[/h2]\r\n\r\n[b]v1.0.0 \u2014 \u9996\u6b21\u6b63\u5f0f\u53d1\u5e03 / First Stable Release[/b]\r\n[list]\r\n[*]\u5b8c\u6574\u7684\u8857\u673a\u7ea7\u6218\u6597\u624b\u611f\u53cd\u9988\u7ba1\u7ebf\uff1a\u547d\u4e2d\u987f\u5e27\u3001\u65b9\u5411\u6027\u9707\u5c4f\u3001\u53d7\u51fb\u95ea\u767d\u3001\u66b4\u51fb\u5706\u5f62\u5149\u6655\u3001\u547d\u4e2d\u7c92\u5b50\u4e0e\u5f39\u7247\u3001\u52a8\u6001\u5149\u6548\u3001\u51fb\u6740\u51b2\u51fb\u6ce2\u3001\u547d\u4e2d\u6807\u8bb0 / Full arcade-style combat feedback pipeline: hit-stop, directional shake, hit flash, crit glow, particles & shrapnel, impact light, kill shockwave, hit markers\r\n[*]\u8fde\u51fb\u7cfb\u7edf\uff0850 \u8fde\u51fb\u72c2\u70ed\u6001 / 100 \u8fde\u51fb\u72c2\u70ed\u7206\u53d1\uff09\u3001D\u2192SSS \u6218\u6597\u8bc4\u7ea7\u3001\u5206\u5c42\u547d\u4e2d\u97f3\u6548 / Combo system (fever at 50, burst at 100), D\u2192SSS style rank, layered hit sounds\r\n[*]\u955c\u5934\u53cd\u9988\uff1a\u53d7\u4f24\u955c\u5934\u51b2\u51fb\u3001\u91cd\u51fb\u955c\u5934\u62bd\u8fd1\u3001\u6b66\u5668\u6b8b\u5f71\u3001\u6325\u780d\u5f27\u5149 / Camera feedback: hurt kick, zoom punch, weapon afterimages, slash arcs\r\n[*]\u73a9\u5bb6\u53cd\u9988\uff1a\u53d7\u51fb\u67d3\u95ea\u3001\u6fd2\u6b7b\u5fc3\u8df3\u6697\u89d2\u3001\u53d7\u4f24\u65b9\u5411\u5f27\u3001\u843d\u5730/\u51b2\u523a\u5c18\u571f\u3001\u5760\u843d\u53cd\u9988 / Player feedback: hurt flash, low-health heartbeat vignette, damage direction arc, landing & dash dust, fall feedback\r\n[*]\u6218\u6597\u673a\u5236\u91cd\u5199\uff08\u53ef\u9009\uff09\uff1a\u56db\u6863\u4f24\u5bb3\u6982\u7387\u4e0e\u7cfb\u6570\u3001\u8bc4\u7ea7\u5347\u6863\u3001\u65a9\u6740\u7cfb\u7edf / Optional combat rewrite: four-tier damage weights & multipliers, rank promotion, execution system\r\n[*]\u67aa\u68b0\u53cd\u9988\uff1a\u67aa\u53e3\u70df\u96fe/\u67aa\u53e3\u7130/\u540e\u5750\u529b\uff0c\u5b50\u5f39\u547d\u4e2d\u706b\u82b1\uff08\u6309\u6750\u8d28\uff09 / Gun feedback: muzzle smoke & flash & recoil, material-based bullet sparks\r\n[*]\u5b9e\u9a8c\u6027\u955c\u5934\u7cfb\u7edf\uff1a\u79fb\u52a8\u68c0\u6d4b\u3001\u81ea\u7531\u843d\u4f53\u3001\u91cd\u751f\u3001Boss \u53d6\u666f\u4e0e\u9501\u5b9a / Experimental camera system: motion detection, free fall, respawn, boss framing & lock\r\n[*]\u5185\u7f6e\u8d1d\u585e\u5c14\u66f2\u7ebf\u7f16\u8f91\u5668\u3001\u914d\u7f6e\u5206\u4eab\u7801\u3001\u9ad8\u5149\u65f6\u523b\u81ea\u52a8\u622a\u56fe / Built-in bezier curve editor, config share codes, highlight auto screenshots\r\n[*]\u5168\u94fe\u8def\u5bf9\u8c61\u6c60\u5316 + \u5408\u6279\u6e32\u67d3\uff0c\u9ad8\u8fde\u51fb\u6218\u6597\u6d41\u7545 / Fully pooled with batched rendering for smooth high-combo fights\r\n[/list]\r\n\r\n[h2]\u8bf4\u660e / Notes[/h2]\r\n\r\n\u7eaf\u5ba2\u6237\u7aef\u6a21\u7ec4\uff1a\u4e0d\u6dfb\u52a0\u4efb\u4f55\u5185\u5bb9\u7269\u54c1\uff0c\u5355\u4eba\u8054\u673a\u5747\u53ef\u4f7f\u7528\uff0c\u670d\u52a1\u5668\u4e0e\u5176\u4ed6\u73a9\u5bb6\u65e0\u9700\u5b89\u88c5\u3002\u6240\u6709\u6548\u679c\u9ed8\u8ba4\u5747\u8861\uff0c\u6655 3D \u6216\u504f\u597d\u539f\u7248\u624b\u611f\u7684\u73a9\u5bb6\u53ef\u5207\u6362\"\u514b\u5236\"\u9884\u8bbe\u6216\u9010\u9879\u5173\u95ed\u3002\r\n\r\nPure client-side: adds no content items, works in single player and multiplayer \u2014 the server and other players do not need it installed. Defaults are balanced; switch to the Subtle preset or toggle effects off individually if you prefer a vanilla feel.\r\n[quote=tModLoader GameFeel]\r\nDeveloped By CEAT[/quote]",
+    "time_created": 1789218912,
+    "time_updated": 1789352958,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 43,
+    "favorited": 6,
+    "lifetime_subscriptions": 51,
+    "lifetime_favorited": 6,
+    "views": 81,
+    "tags": [
+     {
+      "tag": "Utilities"
+     },
+     {
+      "tag": "quality of life"
+     },
+     {
+      "tag": "Gameplay Tweaks"
+     },
+     {
+      "tag": "Audio Tweaks"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "Chinese"
+     },
+     {
+      "tag": "NoSync"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   },
+   {
+    "publishedfileid": "3455924006",
+    "result": 1,
+    "creator": "76561197998663380",
+    "creator_app_id": 1281930,
+    "consumer_app_id": 1281930,
+    "filename": "",
+    "file_size": "678078",
+    "file_url": "",
+    "hcontent_file": "1848721376263745643",
+    "preview_url": "https://images.steamusercontent.com/ugc/12629766647728847756/E7F6302EEADD0D29BFE3704E4FE5F5686FA5E866/",
+    "hcontent_preview": "12629766647728847756",
+    "title": "WeaponOut Lite: An Item Holding Mod",
+    "description": "[quote=Flashkirby (for multiplayer)]This is a \"NoSync\" mod, if you want players to see held items then both they and the server must have the mod installed (otherwise it will be clientside only)[/quote]\r\n\r\n[h1]Summary[/h1]\r\n[list]\r\n[*] Displays items you are holding\r\n[*] Customise poses available via the Mod Configuration menu\r\n[/list]\r\n\r\n[h1]Details[/h1]\r\nWeaponOut Lite is based on the original feature in WeaponOut before it become a content mod, focussing entirely on displaying held items. This version is just for the vanity effects.\r\n\r\n[h1]Credits[/h1]\r\nDeveloper: Flashkirby\r\nBeta Testers: Karob, RunicPixels, W1K\r\n\r\nJoin the discord? https://discord.gg/4Sj4T344bE\r\nWhere's the sauce? https://github.com/Flashkirby/WeaponOutLite\r\n\r\n[h1]Mod Compatibility[/h1]\r\nMods shown in gifs\r\nhttps://steamcommunity.com/sharedfiles/filedetails/?id=3299878724\r\nhttps://steamcommunity.com/sharedfiles/filedetails/?id=2811803870\r\n\r\nCheck the Steam Workshop thread for a full list of compatibilities and fixes: https://steamcommunity.com/workshop/filedetails/discussion/3455924006/595145468747528229/\r\n\r\n[quote=Flashkirby]\"fine then i'll do it myself\"\r\n\r\nHey folks this is the original author of WeaponOut. A huge thank you to all the porters over the years who have managed to get these mods running in 1.4! This ISN'T WeaponOut with the content like the fist weapon subclass and all that wonderful stuff, but it IS WeaponOutLite rewritten from the ground up to make use of all of the wonderful features that 1.4 gave us. This includes arm animations, config menus and so on. And yes this is multiplayer compatible.\r\n\r\nI don't have any major updates intended for this mod (it kinda does exactly what it needs to and nothing more), but I will be listening out for mod compatibilities - be sure to let me know (either here or in discussions) when you come across oddities, or just have suggestions. I'll be sure to read them eventually,\r\n\r\nThank you for your patience.\r\n\r\nFlashkirby[/quote]",
+    "time_created": 1743467282,
+    "time_updated": 1759714181,
+    "visibility": 0,
+    "banned": 0,
+    "ban_reason": "",
+    "subscriptions": 465673,
+    "favorited": 10750,
+    "lifetime_subscriptions": 598057,
+    "lifetime_favorited": 11644,
+    "views": 315278,
+    "tags": [
+     {
+      "tag": "library"
+     },
+     {
+      "tag": "Visual Tweaks"
+     },
+     {
+      "tag": "English"
+     },
+     {
+      "tag": "NoSync"
+     },
+     {
+      "tag": "1.4.4"
+     }
+    ]
+   }
+  ]
+ }
+}

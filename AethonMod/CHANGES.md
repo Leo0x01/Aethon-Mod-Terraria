@@ -1,5 +1,145 @@
 # AethonMod — Historial de Cambios
 
+# AethonMod — Historial de Cambios
+
+## Commit v6.26 — EL SOL DE LOS 20 ANILLOS + RIFTLIB + 14 ARMAS NUEVAS + LAS CORONAS DE VERDAD
+
+**Petición del usuario**: "el baston del eclipse primordial cámbialo,
+esta nueva versión sera el sol de 20 anillos, y la mescla de todos los
+agujeros negros rúnicos · oculta los soles de 6 a 19, y el sol 20 dale
+una mejora mayor · crea nueva variantes de soles basado en estrellas
+reales (estrellas de neutrones, pulsares, enanas blancas, estrellas
+muertas...) · crea un baston que simule el ciclo de vida completo de una
+estrella que se convierte en super nova · el baston sinfonia primordial
+hace un destello en toda la pantalla, pero esto deberia estar
+concentrado en el proyectil · luego crea mas bastones con nuevos tipos
+de proyectiles creativos, al menos 5 · un baston que su proyectil sea un
+desgarro en la realidad (investiga mods populares) · el anillo runico
+estelar y corona de anillos runicos... tienen que ser creados por
+codigos y tienen que copiar los anillos de los soles, pero no lo hacen ·
+investiga el ExoElectric Disentegrator y el Nameless Destroyer · ideas
+para un bioma nuevo + investigación de biomas · investiga los 100 mods
+mas populares · limpia las referencias externas de las librerías".
+
+### A. EL EMISOR COMPARTIDO DE LOS ANILLOS — LAS CORONAS DE VERDAD
+  El problema de fondo de las coronas: eran COPIAS A MANO (constantes
+  trasladadas) que se "parecían" a los anillos de los soles. v6.26 crea
+  el EMISOR COMPARTIDO: `RuneSunRenderer.EmitRingSystem(center, R, time,
+  seed, tier, rg, lifeT, alpha)` emite el sistema rúnico EXACTO al
+  buffer de VFXCore (coords de mundo). Los soles del mundo, la CORONA DE
+  ANILLOS RÚNICOS (aureola = Sol I literal sobre la cabeza) y el ANILLO
+  RÚNICO ESTELAR (alas = Sol III literal en la espalda, 3 anillos con
+  giros alternos) dibujan con EL MISMO CÓDIGO — si el sol cambia, las
+  coronas cambian con él. GetGlyphPosition también usa la matemática
+  compartida (RingGlyphWorld). DrawOrbitalSystem re-traduce a pantalla.
+
+### B. EL ECLIPSE PRIMORDIAL — AHORA ES EL SOL DE LOS 20 ANILLOS
+  El bastón cambia de dueño: ya no es un agujero negro con anillos — ES
+  EL SOL DE LOS 20 ANILLOS (RuneSunRenderer tier 20, sistema ×1.30) con
+  LA MEZCLA DE TODOS LOS AGUJEROS NEGROS RÚNICOS orbitando por fuera:
+  los 3 círculos del Supremo (blanco/dorado/violeta contrarrotantes
+  entrelazados con el anillo 20), el anillo de bandas del Cósmico, los
+  brazos espirales del Olvido ALIMENTANDO al sol, el halo de bruma y las
+  volutas de acreción de la Bruma, el anillo de fotones del Umbral, el
+  gradiente aurora completo, la corona de descarga de StormLib, la luz
+  prismática de LumenLib y los jets polares dobles. Muere en LA NOVA DEL
+  ECLIPSE (anillo de Einstein + nova ×1.6 + 766 px — todo concentrado en
+  el proyectil, sin flash de pantalla). Daño 700.
+
+### C. LA FAMILIA DE LOS SOLES — OCULTAS Y MEJORADAS
+  · Soles 6..19 OCULTOS (no se entregan ni garantizan; el código sigue).
+  · EL SOL 20 RECIBE LA MEJORA MAYOR: daño 536 → 820, sistema ×1.30,
+    vida 15,3 s (+90 ticks), aura ardiente al 55%, LA NOVA DEL SELLADO
+    ×1.6 con radio récord 766 px y sacudida 12.
+
+### D. LA SINFONÍA PRIMORDIAL — EL DESTELLO CONCENTRADO
+  Fuera el flash de pantalla completa (OndaLib.Flash): el destello vive
+  AHORA en el proyectil — ImpactFlash local de 110 px con cruz larga,
+  Flare ampliado y 10 ticks de caída. La sacudida de cámara se queda.
+
+### E. RIFTLIB + EL BASTÓN DEL DESGARRO EN LA REALIDAD (nueva librería)
+  RiftLib (~1000 L, según el contrato del informe de investigación):
+  Tear (grieta lineal con labios ×3 capas velo/cuerpo/núcleo +
+  aberración cromática R/B ±2 px + vacío OCLUSIVO), Interior con
+  Estrellas (16-28 con scroll y paralaje), Grieta persistente (fractal
+  Lichtenberg que respira), Shards, ChispasAnomalia, EcoGlitch y
+  Oscurecer (el mundo se oscurece herido, máx 0.35, RiftMundoSystem).
+  EL BASTÓN DEL DESGARRO EN LA REALIDAD (250): el proyectil ES el
+  desgarro — telégrafo → apertura → sostenido → cierre; la LÍNEA de
+  daño atraviesa PAREDES (Collision.CheckAABBvLineCollision) con DoT;
+  al cerrarse deja una GRIETA PERSISTENTE que drena ~8 s.
+
+### F. LAS SEIS ESTRELLAS REALES (astrofísica estilizada de la casa)
+  · ESTRELLA DE NEUTRONES (240): núcleo de 12 px ultradenso, aura 60 px
+    con daño TRIPLE, starquakes periódicos (Kick + onda + aberración).
+  · PÚLSAR (280): el FARO — dos haces polares barriendo a 1 rev/s; cada
+    barrido que toca un enemigo golpea ×1.5 (cooldown 30 t por NPC).
+  · ENANA BLANCA (180): rescoldo cristalino de 7 facetas, anillo de
+    acreción que ROBA brillo a los enemigos.
+  · ESTRELLA MUERTA (200): la enana negra — masa oscura que devora luz,
+    entropía 8/s, brasas frías PyraLib.ColdFire, runas a 0,2 Hz.
+  · SUPERGIGANTE ROJA (260): coloso de 90 px con celdas de convección;
+    al morir se COLAPSA (implosión 20 t) y revienta en NOVA ×1.8.
+  · MAGNETAR (320): campo violeta con líneas RETORCIDAS (r=L·sen²θ con
+    torsión), cadenas de rayo automáticas cada 20 t, ARRITMIA
+    determinista (seno de seno).
+
+### G. EL BASTÓN DEL CICLO ESTELAR — UNA VIDA COMPLETA EN 18 s
+  Máquina de 5 actos: NEBULOSA (contracción + Wisps, aura fría) →
+  SECUENCIA PRINCIPAL (ignición con flash + cuerpo SunShader + 3 anillos
+  tenues) → GIGANTE ROJA (hincha ×2.2, 9 celdas de convección, nebulosa
+  planetaria desprendiéndose) → COLAPSO + SUPERNOVA (implosión ×0.3 y
+  nova ×2 en 650 px con TODAS las librerías) → EL REMANENTE (estrella de
+  neutrones enana pulsando que se apaga). La ESTELA cuenta la historia
+  en 5 colores.
+
+### H. LOS CINCO BASTONES CREATIVOS
+  · RELOJ DE ARENA CÓSMICO: el reloj VIVO — motas de luz cayendo por el
+    cuello, el montículo creciendo, y CUANDO LA CÁMARA SE VACÍA EL
+    TIEMPO SE INVIERTA (gira 180°): 720 ticks, varios ciclos.
+  · MAREA GRAVITARIA: ola de luz que CABALGA el terreno (sube y baja
+    colinas), arrastra enemigos, y al golpear pared se rompe en 3 olas
+    menores (MareaChicaProjectile).
+  · ENJAMBRE PRISMÁTICO: 12 avispas de luz con boids simple (cohesión/
+    separación/migración de presa), cada una con su color del prisma y
+    picaduras con cooldown.
+  · PÉNDULO DEL JUICIO: péndulo con física REAL (θ'' = -g/L·sen θ), el
+    arco SE AMPLÍA con cada vaivén (+8% hasta ±150°) y a los 8 s el hilo
+    SE CORTA: la maza vuela balística y estalla.
+  · CORO ESPECTRAL: 6 notas de luz cantando en órbita; cada una emite su
+    anillo de onda (OndaLib.Pulse) a su turno con tono de campana; el
+    coro se despide apagándose de a una.
+
+### I. LA INVESTIGACIÓN (4 informes en research/estrategia_v626/)
+  · INFORME_EXOELECTRIC_NAMELESS (42-a): el Exo Disintegrator (IER, con
+    el patrón Mars/WoTG: rayo de 5600 px con telegraph 40 f + carga
+    150 f, núcleo oscuro + bordes brillantes) y el Nameless/Cosmic
+    Destroyer (The Stars Above: gauge carga→burst→lockout ×3). 14
+    lecciones aplicadas al diseño del arsenal.
+  · INFORME_DESGARRO_REALIDAD (42-b): técnicas de desgarro de 16 fuentes
+    + el CONTRATO de RiftLib (implementado en E).
+  · INFORME_TOP100 (42-c): los ~150 mods más populares del Workshop con
+    suscriptores reales, análisis por categoría y 15 lecciones
+    estratégicas (nicho VFX-first, GIF de arma como canal #1...).
+  · INFORME_BIOMAS (42-d): estado del Sagrario Hueco (stub), checklist
+    técnico completo de biomas tML y 5 conceptos diseñados para
+    AethonMod (Sagrario realizado, Campo Estelar, Veta Rúnica, Cenizas
+    del Eclipse, Falla del Vacío — pendientes de implementar).
+
+### J. LIMPIEZA DE REFERENCIAS EXTERNAS
+  Auditoría completa: CERO dependencias de código (modReferences vacío,
+  sin TryGetMod ni imports de terceros) y las menciones a otros mods en
+  COMENTARIOS neutralizadas — las librerías son 100% propias y las
+  técnicas están parafraseadas (nada de código GPL).
+
+### K. ENTREGA
+  · EnsureItem: +14 armas nuevas (Desgarro, 6 estrellas reales, Ciclo
+    Estelar, 5 creativos) y soles 6-19 fuera del kit.
+  · Localización es-ES/en-US completa de las 14 armas y sus proyectiles.
+  · 28 PNGs nuevos (14 iconos 30×30 + 14 sombras 76×76, PIL+numpy
+    determinista) + scripts reproducibles en tools/.
+  · Compilación contra tML real: 0 errores / 0 warnings.
+
 ## Commit v6.25 — EL HUMO DE VERDAD: EL FIX PREMULTIPLICADO + LA INVESTIGACIÓN DE 23 FUENTES + TRES LIBRERÍAS NUEVAS
 
 **Petición del usuario**: "¿qué es este error? se ve mal, se supone que es

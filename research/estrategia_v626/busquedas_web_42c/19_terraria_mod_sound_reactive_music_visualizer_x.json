@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://discussions.unity.com",
+    "name": "[Audio Reactive] Music visualizer - Community Showcases",
+    "snippet": "Jul 31, 2019 — Music Beat-Audio Visualizer has just been updated too and is pretty simple and effective. Both are good for the visuals and for getting synch. ...",
+    "host_name": "discussions.unity.com",
+    "rank": 0,
+    "date": "Jul 31, 2019",
+    "favicon": ""
+  },
+  {
+    "url": "https://play.google.com/store/apps/details?id=com.h6ah4i.android.music_visualizer2&hl=en_US",
+    "name": "Music Visualizer - Apps on Google Play",
+    "snippet": "\" Music Visualizer \" brings your music to life with mesmerizing visual effects while delivering a powerful audio player experience. Read more",
+    "host_name": "play.google.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://tympanus.net",
+    "name": "Coding a 3D Audio Visualizer with Three.js, GSAP & Web",
+    "snippet": "Jun 18, 2025 — A music -driven visualizer where a glowing 3D orb pulses and spikes to the beat while GSAP-draggable panels drift around it with smooth, inertia ...",
+    "host_name": "tympanus.net",
+    "rank": 2,
+    "date": "Jun 18, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://chromewebstore.google.com/detail/audiovisualizer/bojhikphaecldnbdekplmadjkflgbkfh?hl=en",
+    "name": "audiovisualizer - Chrome Web Store",
+    "snippet": "Visualizes music in a cool way . * Works on any website. * Choose among several scenes. * It's Open Source * Play around with scene settings to fundamentally ... Read more",
+    "host_name": "chromewebstore.google.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

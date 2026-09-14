@@ -23,17 +23,17 @@ namespace AethonMod.Content.Effects.Bruma
     ///      (premultiplicado de verdad) — bordes suaves en AMBOS lotes.
     ///      "Premultiplicar o morir" (lección 1 de la investigación).
     ///
-    ///   2. ESCALERA DE TAMAÑOS por TEXTURA (lección Calamity — 22/24/32/
+    ///   2. ESCALERA DE TAMAÑOS por TEXTURA (lección de la investigación interna — 22/24/32/
     ///      80/256 px): 64 / 128 / 160 px por radio del puff — el detalle
     ///      fino del ruido mide siempre ~3 px de MUNDO, no de textura.
     ///
-    ///   3. FLIPBOOK de ruido EVOLUCIONADO (lección Calamity/D3): cada
+    ///   3. FLIPBOOK de ruido EVOLUCIONADO (lección de la investigación interna): cada
     ///      variante es una TIRA VERTICAL de 4-6 frames del MISMO campo
     ///      fBm con el dominio desplazándose y el contraste creciendo —
     ///      el humo SE DESGARRA de verdad (la rotación sola delata el
     ///      truco en puffs grandes — anti-patrón nº3 de la investigación).
     ///
-    ///   4. VAPOR: la variante de LUT DURA (lección Everglow): núcleo
+    ///   4. VAPOR: la variante de LUT DURA (lección de la investigación interna): núcleo
     ///      denso con caída más brusca y contraste mayor — para el humo
     ///      ALFA de una capa que "ocupa" (el look de juego moderno).
     ///
@@ -188,7 +188,7 @@ namespace AethonMod.Content.Effects.Bruma
                         // --- LA MÁSCARA: plató interior + caída suave.
                         //     BLANDA a propósito (regla anti-fase); el
                         //     VAPOR usa la caída DURA (0.62→0.86: LUT
-                        //     255→0 en ~74% de densidad — Everglow). ---
+                        //     255→0 en ~74% de densidad — investigación interna). ---
                         float falloff = hard
                             ? 1f - BrumaNoise.Smoothstep(mesa, 0.86f, d)
                             : 1f - BrumaNoise.Smoothstep(mesa, 1.0f, d);

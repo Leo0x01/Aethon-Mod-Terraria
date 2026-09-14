@@ -117,7 +117,7 @@ namespace AethonMod.Content.Players
             {
                 if (Main.rand.NextBool(30))
                 {
-                    int g = Main.rand.Next(RuneRingCrownRenderer.GlyphCount);
+                    int g = Main.rand.Next(RuneRingCrownRenderer.Glyphs);
                     Vector2 glyph = RuneRingCrownRenderer.GetGlyphPosition(
                         head, scale, Main.GlobalTimeWrappedHourly, g);
                     Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,

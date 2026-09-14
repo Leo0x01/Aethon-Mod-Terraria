@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://github.com",
+    "name": "tModLoader/tModLoader: A mod to make and play Terraria",
+    "snippet": "tModLoader (TML) is an open-source, community-driven, modification and expansion of the Terraria game that makes it possible to make and play mods.",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "How to create a symlink between your github repository",
+    "snippet": "Oct 5, 2016 — Hello fellow Terrarians, Today I'm going to show you how to ''sync'' your mod folder directly with your github repository folder. it's synced.",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Oct 5, 2016",
+    "favicon": ""
+  },
+  {
+    "url": "https://steamcommunity.com",
+    "name": "THE STARS ABOVE - Workshop",
+    "snippet": "Nov 6, 2023 — tModLoader . An API for modders to easily add dimensions (referred to as subworlds) to their mods, making all the necessary code injections, ...",
+    "host_name": "steamcommunity.com",
+    "rank": 2,
+    "date": "Nov 6, 2023",
+    "favicon": ""
+  }
+]
