@@ -5,202 +5,244 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// RunicHaloRenderer — v6.22 — EL ANILLO RÚNICO DE LA ESPALDA.
+    /// RunicHaloRenderer — v6.23 — LOS ANILLOS DE VUELO DEL SOL IV.
     ///
-    /// Petición del usuario: "un anillo rúnico en la espalda del jugador
-    /// que funcione como ALAS y HALO en la espalda — cuando el jugador
-    /// va a volar, este anillo rúnico BRILLA CON INTENSIDAD".
+    /// Petición original v6.22: "un anillo rúnico en la espalda que
+    /// funcione como alas y halo; cuando el jugador va a volar, este
+    /// anillo brilla con intensidad".
     ///
-    /// UN GRAN ANILLO RÚNICO vertical tras la espalda (el halo) con su
-    /// contraro interior + glifos cabalgando la órbita + el corazón de
-    /// luz. LA INTENSIDAD VIVE: `flight` (0..1) es la energía de vuelo
-    /// acumulada — al VOLAR el anillo SE ENCIENDE:
-    ///   · el bloom del corazón crece ×2.2,
-    ///   · nace la CRUZ DE LUZ (el destello de 4 puntas),
-    ///   · los RAYOS radiales del halo se encienden (8 rayos),
-    ///   · el aro exterior gana su DOBLE ancho caliente,
-    ///   · y las runas arden al blanco.
-    /// Quieto es un sello elegante; volando es un SOL en tu espalda.
+    /// v6.23 — LA ORDEN DEL USUARIO: "que los anillos de vuelos sean LOS
+    /// ANILLOS DEL SOL NÚMERO 4, además el anillo es muy brillante —
+    /// reduce el brillo a como se ve en los soles".
+    ///
+    /// EL SISTEMA ORBITAL DEL SOL RÚNICO IV, LITERAL: los CUATRO anillos
+    /// del Sol Rúnico IV (la MISMA geometría de RuneSunRenderer, tier 4)
+    /// orbitando la ESPALDA del jugador:
+    ///   · cada anillo en SU PROPIO PLANO (semiejes 1.62+0.44k ×R,
+    ///     achatado 0.34..0.48, inclinación −0.55+0.20k),
+    ///   · GIRO ALTERNO (par horario, impar antihorario),
+    ///   · 6/8/10/12 glifos cabalgando la órbita rotados a la TANGENTE,
+    ///     con perlas y latidos — LA MISMA TÉCNICA, al brillo EXACTO de
+    ///     los soles (los alphas del DrawRingSystem del sol, sin el
+    ///     bloom gigante de v6.22).
+    ///
+    /// LA INTENSIDAD VIVE (acotada al nivel solar): `flight` (0..1) es
+    /// la energía de vuelo — al VOLAR el sistema SE AVIVA: los anillos
+    /// giran más rápido, las runas arden hacia el blanco y el corazón
+    /// crece — pero NUNCA por encima del lenguaje de los soles: un
+    /// multiplicador 0.85..1.20, cero bloom cegador.
     /// </summary>
     public static class RunicHaloRenderer
     {
-        // --- LA TABLA DE GLIFOS (la firma angular de la casa) ---
+        // --- LA GEOMETRÍA DEL SOL IV (los valores LITERALES del sol) ---
+        private const float RingA0 = 1.62f;      // semieje mayor del 1er anillo (×R)
+        private const float RingAStep = 0.44f;   // separación entre anillos (×R)
+        private const float RingSpin0 = 0.26f;   // giro base (rad/s)
+        private const float RingSpinStep = 0.045f;
+        private const int Runes0 = 6;            // glifos del 1er anillo
+        private const int RuneStep = 2;          // +2 glifos por anillo
+
+        /// <summary>Los CUATRO anillos del Sol Rúnico IV.</summary>
+        public const int RingCount = 4;
+
+        /// <summary>La base del sistema (px) — el anillo interior abraza
+        /// la espalda y el IV (2.94×R) es el gran halo.</summary>
+        private const float BaseR = 13f;
+
+        // --- LA PALETA (los oros del sol — concordancia total) ---
+        private static readonly Color RuneGold = new(255, 190, 80);    // cuerpo de runa dorada
+        private static readonly Color RuneGoldTip = new(255, 240, 185);// punta pálida
+        private static readonly Color WhiteIncan = new(255, 250, 235); // blanco-incandescente
+
+        // --- LA TABLA DE GLIFOS (la escritura solar de RuneSunRenderer) ---
         private static readonly Vector2[][] _runes = new Vector2[][]
         {
+            // R0 — EL ASTRO (el punto de luz con rayos)
             new Vector2[] { new(0f, -4.5f), new(0f, 4.5f), new(-4.5f, 0f), new(4.5f, 0f), new(-3f, -3f), new(-1.2f, -1.2f), new(3f, -3f), new(1.2f, -1.2f), new(-3f, 3f), new(-1.2f, 1.2f), new(3f, 3f), new(1.2f, 1.2f) },
+            // R1 — LA LLAMA VIVA
+            new Vector2[] { new(0f, 6.5f), new(0f, 1f), new(0f, 1f), new(-3f, -2f), new(-3f, -2f), new(0f, -5f), new(0f, -5f), new(3f, -2f), new(3f, -2f), new(0f, 1f), new(-1.5f, -6.5f), new(1.5f, -6.5f) },
+            // R2 — LA RUEDA SOLAR
             new Vector2[] { new(0f, -5f), new(0f, 5f), new(-5f, 0f), new(5f, 0f), new(-3.5f, -3.5f), new(3.5f, 3.5f), new(3.5f, -3.5f), new(-3.5f, 3.5f), new(-2.2f, 0f), new(2.2f, 0f), new(0f, -2.2f), new(0f, 2.2f) },
-            new Vector2[] { new(0f, -6.5f), new(-4f, 0f), new(-4f, 0f), new(0f, 6.5f), new(0f, 6.5f), new(4f, 0f), new(4f, 0f), new(0f, -6.5f), new(-2.2f, 0f), new(2.2f, 0f), new(0f, -4f), new(0f, 4f) },
+            // R3 — LA ESPIGA DE LUZ
             new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.2f, -3.5f), new(0f, -0.5f), new(3.2f, -3.5f), new(0f, -0.5f), new(-3.2f, 3.5f), new(0f, 0.5f), new(3.2f, 3.5f), new(0f, 0.5f) },
+            // R4 — LA PUERTA DEL DÍA
+            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(0f, -7f), new(0f, -7f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, 7f), new(3.5f, 7f), new(0f, -4f), new(0f, 7f) },
+            // R5 — LA CORONA BAJA
+            new Vector2[] { new(-4f, 5f), new(-4f, -2f), new(-4f, -2f), new(-1.5f, -5.5f), new(-1.5f, -5.5f), new(0f, -1.5f), new(0f, -1.5f), new(1.5f, -5.5f), new(1.5f, -5.5f), new(4f, -2f), new(4f, -2f), new(4f, 5f), new(-4f, 5f), new(4f, 5f) },
+            // R6 — EL TRAZO DEL COMETA
             new Vector2[] { new(-4f, 6.5f), new(3f, -1f), new(3f, -1f), new(0f, -6.5f), new(0f, -6.5f), new(4f, -3f), new(1.5f, 2f), new(4.5f, 1.5f), new(-1.5f, 1f), new(1.5f, 4f) },
-            new Vector2[] { new(-3f, 7f), new(-3f, -2f), new(-3f, -2f), new(3f, -6f), new(3f, -6f), new(3f, 2f), new(3f, 2f), new(-2f, 6f) },
+            // R7 — EL SIGILO SOLAR (el sello maestro)
+            new Vector2[] { new(0f, -6.5f), new(-4f, 0f), new(-4f, 0f), new(0f, 6.5f), new(0f, 6.5f), new(4f, 0f), new(4f, 0f), new(0f, -6.5f), new(-2.2f, 0f), new(2.2f, 0f), new(0f, -4f), new(0f, 4f) },
         };
 
-        /// <summary>Glifos del aro principal.</summary>
-        private const int RuneCount = 10;
+        /// <summary>Semieje mayor del anillo k (×R) — LITERAL del sol.</summary>
+        private static float RingA(int k) => RingA0 + RingAStep * k;
 
-        // --- LA PALETA (oro regio + blanco) ---
-        private static readonly Color GoldBody = new(255, 190, 80);
-        private static readonly Color GoldTip = new(255, 240, 185);
-        private static readonly Color WhiteIncan = new(255, 250, 235);
+        /// <summary>Achatado del anillo k (plano distinto por anillo).</summary>
+        private static float RingFlat(int k) => 0.34f + 0.07f * (k % 3);
+
+        /// <summary>Inclinación del plano del anillo k (LITERAL del sol).</summary>
+        private static float RingTilt(int k) => -0.55f + 0.20f * k;
 
         /// <summary>
-        /// Calcula el ANILLO-HALO como cuadros de luz en el buffer de
-        /// VFXCore (coordenadas de MUNDO).
+        /// El GIRO del anillo k: ALTERNO (par horario, impar antihorario)
+        /// — la firma del sol. Al volar TODO el sistema se aviva (×1..1.5).
+        /// </summary>
+        private static float RingSpin(int k, float flight)
+            => (k % 2 == 0 ? 1f : -1f) * (RingSpin0 + RingSpinStep * k) * (1f + 0.5f * flight);
+
+        /// <summary>Las runas del anillo k — LITERAL del sol (6/8/10/12).</summary>
+        public static int RunesOf(int k) => Runes0 + RuneStep * k;
+
+        // ==================================================================
+        //  EL RENDER — el sistema orbital al buffer de VFXCore
+        // ==================================================================
+
+        /// <summary>
+        /// Calcula LOS CUATRO ANILLOS DEL SOL IV como cuadros de luz en el
+        /// buffer de VFXCore (coordenadas de MUNDO).
         /// </summary>
         /// <param name="back">Ancla: la ESPALDA ALTA del jugador (omóplatos).</param>
         /// <param name="scale">Escala (humano ≈ 1).</param>
         /// <param name="time">Tiempo animado.</param>
-        /// <param name="flight">LA ENERGÍA DE VUELO (0..1) — el brillo.</param>
+        /// <param name="flight">LA ENERGÍA DE VUELO (0..1) — el avivo.</param>
         /// <param name="alpha">Multiplicador global (luz del mundo).</param>
         public static void ComputeQuads(Vector2 back, float scale, float time,
             float flight, float alpha = 1f)
         {
             if (scale <= 0.05f || alpha <= 0.02f) return;
 
-            // LA INTENSIDAD: quieta = sello elegante; volando = SOL.
-            float glow = 0.55f + 1.45f * flight;
-            float breathe = 1f + (0.02f + 0.035f * flight) * (float)Math.Sin(time * (1.6f + 2.2f * flight));
+            // LA INTENSIDAD ACOTADA AL LENGUAJE SOLAR: quieto un pelo por
+            // debajo del sol; volando un pelo por encima — NUNCA el bloom
+            // cegador de v6.22 (el usuario: "reduce el brillo a como se
+            // ve en los soles").
+            float glow = 0.85f + 0.35f * flight;
 
-            // --- EL CORAZÓN: el bloom central (el motor del halo) ---
-            float coreSize = 30f * scale * breathe * (1f + 1.2f * flight);
-            VFXCore.Quad(back, GoldBody * (0.14f * glow * alpha), new Vector2(coreSize * 2.1f, coreSize * 2.1f));
-            VFXCore.Quad(back, WhiteIncan * (0.22f * glow * alpha), new Vector2(coreSize, coreSize));
+            float R = BaseR * scale;
+            float glyphScale = Math.Max(R / 52f, 0.25f) * 1.45f;
 
-            // --- LA CRUZ DE LUZ (solo volando: el destello de 4 puntas) ---
-            if (flight > 0.12f)
+            // === EL CORAZÓN: un avivo pequeño y contenido (nada del bloom
+            //     ×2.1 de v6.22 — un latido solar discreto en la espalda) ===
+            float heart = (0.10f + 0.22f * flight) * alpha * glow;
+            VFXCore.Quad(back, Tint(RuneGold, heart), new Vector2(22f * scale, 22f * scale));
+
+            // === LOS CUATRO ANILLOS (la geometría LITERAL del Sol IV) ===
+            for (int k = 0; k < RingCount; k++)
             {
-                float arm = 66f * scale * (0.7f + 0.5f * flight) * breathe;
-                float crossA = 0.16f + 0.30f * flight;
-                VFXCore.Quad(back, GoldBody * (crossA * alpha), new Vector2(arm, 3.2f * scale));
-                VFXCore.Quad(back, GoldBody * (crossA * alpha), new Vector2(3.2f * scale, arm));
-                VFXCore.Quad(back, WhiteIncan * (crossA * 0.8f * alpha), new Vector2(arm * 0.7f, 2.1f * scale));
-                VFXCore.Quad(back, WhiteIncan * (crossA * 0.8f * alpha), new Vector2(2.1f * scale, arm * 0.7f));
-            }
+                float a = RingA(k) * R;
+                float b = a * RingFlat(k);
+                float tilt = RingTilt(k);
+                float spin = time * RingSpin(k, flight);
+                int runeCount = RunesOf(k);
 
-            // --- LOS RAYOS RADIALES del halo (8, encendiéndose al volar) ---
-            if (flight > 0.05f)
-            {
-                for (int i = 0; i < 8; i++)
+                // --- 1. EL ARO ELÍPTICO: polilínea de cápsulas con
+                //     PROFUNDIDAD (el frente más brillante) — el alpha
+                //     EXACTO del sol: (0.30+0.30·depth)·pulse ---
+                const int Segments = 30;
+                Vector2 prev = EllipsePoint(back, a, b, tilt, spin);
+                for (int s = 1; s <= Segments; s++)
                 {
-                    float ang = i / 8f * MathHelper.TwoPi + time * 0.20f;
-                    Vector2 dir = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
-                    float len = (20f + 26f * flight) * scale * (0.8f + 0.2f * (float)Math.Sin(time * 2.6f + i * 1.7f));
-                    Vector2 mid = back + dir * (34f * scale + len * 0.5f);
-                    // púa de luz radial (cápsula).
-                    VFXCore.Quad(mid, Color.Lerp(GoldBody, WhiteIncan, 0.4f) *
-                        ((0.20f + 0.26f * flight) * alpha),
-                        new Vector2(len, Math.Max(2.2f, 3.4f * scale)), ang);
-                }
-            }
-
-            // --- EL ARO PRINCIPAL: el gran anillo vertical (el halo) ---
-            float a = 36f * scale * breathe;
-            float b = 36f * scale * breathe;
-            float tilt = 0.06f * (float)Math.Sin(time * 0.7f);   // el aro SE MECE vivo
-            float spin = time * (0.42f + 0.30f * flight);        // gira más rápido al volar
-
-            const int Segments = 34;
-            Vector2 prev = EllipsePoint(back, a, b, tilt, spin);
-            for (int s = 1; s <= Segments; s++)
-            {
-                float t = spin + s / (float)Segments * MathHelper.TwoPi;
-                Vector2 pt = EllipsePoint(back, a, b, tilt, t);
-                Vector2 mid = (prev + pt) * 0.5f;
-                Vector2 delta = pt - prev;
-                float len = delta.Length();
-                if (len > 0.5f)
-                {
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-                    float depth = 0.55f + 0.45f * (float)Math.Sin(t + MathHelper.PiOver2);
-                    float pulse = 0.74f + 0.26f * (float)Math.Sin(time * 2.1f + s * 0.37f);
-                    // El DOBLE ancho caliente al volar.
-                    float w = Math.Max(2.4f, 5.6f * scale) * (1f + 0.30f * depth + 0.55f * flight);
-                    Capsule(mid, len, w, rot,
-                        Tint(GoldBody, (0.30f + 0.28f * depth) * pulse * glow * 0.6f * alpha));
-                    // la vena caliente interior.
-                    Capsule(mid, len, w * 0.38f, rot,
-                        Tint(GoldTip, (0.40f + 0.34f * depth) * pulse * (0.5f + 0.5f * flight) * alpha));
-                }
-                prev = pt;
-            }
-
-            // --- EL CONTRARO interior: fino, blanco-azulado, CCW ---
-            float a2 = 28.5f * scale * breathe;
-            float b2 = 28.5f * scale * breathe;
-            float spin2 = -time * (0.30f + 0.22f * flight);
-            const int Segs2 = 26;
-            Vector2 prev2 = EllipsePoint(back, a2, b2, tilt, spin2);
-            for (int s = 1; s <= Segs2; s++)
-            {
-                float t = spin2 + s / (float)Segs2 * MathHelper.TwoPi;
-                Vector2 pt = EllipsePoint(back, a2, b2, tilt, t);
-                Vector2 mid = (prev2 + pt) * 0.5f;
-                Vector2 delta = pt - prev2;
-                float len = delta.Length();
-                if (len > 0.5f)
-                {
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-                    Capsule(mid, len, Math.Max(1.7f, 3.2f * scale), rot,
-                        Tint(new Color(215, 230, 255), (0.26f + 0.22f * flight) * alpha));
-                }
-                prev2 = pt;
-            }
-
-            // --- LOS GLIFOS cabalgando el aro principal ---
-            float glyphScale = Math.Max(scale * 0.88f, 0.28f);
-            for (int g = 0; g < RuneCount; g++)
-            {
-                float ang = g / (float)RuneCount * MathHelper.TwoPi + spin;
-                float floatR = 1f + 0.04f * (float)Math.Sin(time * 1.35f + g * 0.9f);
-                Vector2 glyphPos = EllipsePoint(back, a * floatR, b * floatR, tilt, ang);
-                float tanAng = TangentialAngle(a * floatR, b * floatR, tilt, ang);
-                float glyphRot = tanAng + MathHelper.PiOver2;
-                float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.6f + g * 1.3f);
-
-                // Resplandor del glifo (más grande al volar).
-                VFXCore.Quad(glyphPos, GoldBody * ((0.16f + 0.20f * flight) * pulse * alpha),
-                    new Vector2(24f * glyphScale, 24f * glyphScale));
-
-                // Los TRAZOS (al volar arden al BLANCO).
-                Vector2[] strokes = _runes[g % _runes.Length];
-                Color col = Color.Lerp(GoldTip, WhiteIncan, flight * 0.6f);
-                for (int s = 0; s < strokes.Length; s += 2)
-                {
-                    Vector2 rotA = strokes[s] * glyphScale;
-                    Vector2 rotB = strokes[s + 1] * glyphScale;
-                    rotA = rotA.RotatedBy(glyphRot) + glyphPos;
-                    rotB = rotB.RotatedBy(glyphRot) + glyphPos;
-                    Vector2 mid = (rotA + rotB) * 0.5f;
-                    Vector2 delta = rotB - rotA;
+                    float t = spin + s / (float)Segments * MathHelper.TwoPi;
+                    Vector2 pt = EllipsePoint(back, a, b, tilt, t);
+                    Vector2 mid = (prev + pt) * 0.5f;
+                    Vector2 delta = pt - prev;
                     float len = delta.Length();
-                    if (len < 0.01f) continue;
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-                    Capsule(mid, len, 2.5f * glyphScale, rot, Tint(col, 0.85f * pulse * alpha));
+                    if (len > 0.5f)
+                    {
+                        float rot = (float)Math.Atan2(delta.Y, delta.X);
+                        // Profundidad: sin(t)·cos(tilt) > 0 → frente de la órbita.
+                        float depth = 0.55f + 0.45f *
+                            (float)Math.Sin(t + MathHelper.PiOver2) * (float)Math.Cos(tilt);
+                        // Latido del aro (la energía recorre el anillo).
+                        float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 1.8f + k * 1.3f + s * 0.35f);
+                        Capsule(mid, len, Math.Max(2.2f, 0.052f * R) * (1f + 0.35f * depth),
+                            rot, Tint(RuneGold, (0.30f + 0.30f * depth) * pulse * glow * alpha));
+                    }
+                    prev = pt;
                 }
 
-                // LA PERLA.
-                Vector2 pearlPos = glyphPos + new Vector2(0f, -8.0f * glyphScale).RotatedBy(glyphRot);
-                VFXCore.Quad(pearlPos, GoldBody * (0.5f * pulse * alpha),
-                    new Vector2(5.2f * glyphScale, 5.2f * glyphScale));
-                VFXCore.Quad(pearlPos, col * (0.9f * pulse * alpha),
-                    new Vector2(2.4f * glyphScale, 2.4f * glyphScale));
+                // --- 2. LAS RUNAS: glifos cabalgando la órbita, rotados a
+                //     la TANGENTE, con perlas y latidos (el alpha solar) ---
+                for (int g = 0; g < runeCount; g++)
+                {
+                    float ang = g / (float)runeCount * MathHelper.TwoPi + spin;
+                    float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
+                    Vector2 glyphPos = EllipsePoint(back, a * breathe, b * breathe, tilt, ang);
+
+                    float tanAng = TangentialAngle(a * breathe, b * breathe, tilt, ang);
+                    float glyphRot = tanAng + MathHelper.PiOver2; // la runa "de pie" sobre el aro
+
+                    float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f + k * 0.8f);
+
+                    // Resplandor suave DETRÁS (el grabado ardiendo — 0.20 solar).
+                    VFXCore.Quad(glyphPos, Tint(RuneGold, 0.20f * pulse * glow * alpha),
+                        new Vector2(34f * glyphScale, 34f * glyphScale));
+
+                    // Los TRAZOS del glifo (al volar arden al BLANCO — sutil).
+                    Vector2[] strokes = _runes[(g + k) % _runes.Length];
+                    Color col = Color.Lerp(RuneGoldTip, WhiteIncan, flight * 0.45f);
+                    for (int s = 0; s < strokes.Length; s += 2)
+                    {
+                        Vector2 rotA = strokes[s] * glyphScale;
+                        Vector2 rotB = strokes[s + 1] * glyphScale;
+                        rotA = rotA.RotatedBy(glyphRot) + glyphPos;
+                        rotB = rotB.RotatedBy(glyphRot) + glyphPos;
+                        Vector2 mid = (rotA + rotB) * 0.5f;
+                        Vector2 delta = rotB - rotA;
+                        float len = delta.Length();
+                        if (len < 0.01f) continue;
+                        float rot = (float)Math.Atan2(delta.Y, delta.X);
+
+                        // Gradiente vertical local: abajo cuerpo, arriba punta pálida.
+                        float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
+                        Color strokeCol = Color.Lerp(col, RuneGold, 1f - localY * 0.25f);
+
+                        Capsule(mid, len, 3.3f * glyphScale, rot,
+                            Tint(strokeCol, 0.85f * pulse * glow * alpha));
+                    }
+
+                    // PERLA sobre el glifo (la gema del sello — alphas solares).
+                    Vector2 pearlPos = glyphPos + new Vector2(0f, -11.5f * glyphScale).RotatedBy(glyphRot);
+                    VFXCore.Quad(pearlPos, Tint(RuneGold, 0.60f * pulse * glow * alpha),
+                        new Vector2(7.0f * glyphScale, 7.0f * glyphScale));
+                    VFXCore.Quad(pearlPos, Tint(RuneGoldTip, 0.9f * pulse * glow * alpha),
+                        new Vector2(3.2f * glyphScale, 3.2f * glyphScale));
+                }
             }
         }
 
-        /// <summary>Posición mundial del glifo g (para las chispas de vuelo).</summary>
+        /// <summary>Posición mundial del glifo g del sistema (las chispas).</summary>
         public static Vector2 GetGlyphPosition(Vector2 back, float scale, float time, int g)
         {
-            float breathe = 1f + 0.03f * (float)Math.Sin(time * 1.6f);
-            float a = 36f * scale * breathe;
-            float tilt = 0.06f * (float)Math.Sin(time * 0.7f);
-            float spin = time * 0.42f;
-            float ang = g / (float)RuneCount * MathHelper.TwoPi + spin;
-            float floatR = 1f + 0.04f * (float)Math.Sin(time * 1.35f + g * 0.9f);
-            return EllipsePoint(back, a * floatR, a * floatR, tilt, ang);
+            // Mapa acumulativo: anillo 0 (6) · 1 (8) · 2 (10) · 3 (12).
+            int k = 0, idx = g;
+            for (int i = 0; i < RingCount && idx >= RunesOf(i); i++)
+            {
+                idx -= RunesOf(i);
+                k++;
+            }
+            k %= RingCount;
+
+            float R = BaseR * scale;
+            float a = RingA(k) * R;
+            float b = a * RingFlat(k);
+            float tilt = RingTilt(k);
+            float spin = time * RingSpin(k, 0f);
+            float ang = idx / (float)RunesOf(k) * MathHelper.TwoPi + spin;
+            float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + idx * 0.9f + k * 0.5f);
+            return EllipsePoint(back, a * breathe, b * breathe, tilt, ang);
         }
 
-        /// <summary>Cuenta de glifos (chispas).</summary>
-        public static int Glyphs => RuneCount;
+        /// <summary>Glifos totales del sistema (las chispas de vuelo).</summary>
+        public static int Glyphs
+        {
+            get
+            {
+                int total = 0;
+                for (int k = 0; k < RingCount; k++) total += RunesOf(k);
+                return total;
+            }
+        }
 
         // ------------------------------------------------------------------
         //  HELPERS (patrón validado del proyecto)

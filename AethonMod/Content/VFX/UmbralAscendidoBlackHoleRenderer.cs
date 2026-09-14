@@ -8,8 +8,13 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// UmbralAscendidoBlackHoleRenderer — v6.18 — LA COPIA MEJORADA DEL
+    /// UmbralAscendidoBlackHoleRenderer — v6.23 — LA COPIA MEJORADA DEL
     /// UMBRAL: "EL ASCENDIDO".
+    ///
+    /// v6.23 — EL SEGUNDO ANILLO RÚNICO BIEN VISIBLE (petición del
+    /// usuario): radio 1.66→1.95·R y glifos del 62%→80% del tamaño — la
+    /// firma contrarrotante del Ascendido ahora se lee CLARA junto al
+    /// círculo dorado principal.
     ///
     /// El Umbral original (UmbralBlackHoleRenderer) queda INTACTO; este es
     /// un archivo NUEVO nacido de él — misma geometría medida, misma
@@ -32,8 +37,9 @@ namespace AethonMod.Content.VFX
     ///      PROFUNDO y fino.
     ///
     ///   4. DOBLE CÍRCULO DE RUNAS — el anillo dorado original + un SEGUNDO
-    ///      anillo de runas MÁS PEQUEÑO CONTRARROTANDO (más rápido, al
-    ///      revés): la firma del sello elevado.
+    ///      anillo de runas CONTRARROTANDO (más rápido, al revés): la firma
+    ///      del sello elevado. v6.23: el segundo anillo AHORA BIEN VISIBLE
+    ///      (radio 1.66→1.95·R, glifos al 80% del tamaño).
     ///
     ///   5. BRASAS AMPLIFICADAS — más partículas (12→20) con ESTELAS MÁS
     ///      LARGAS y brasas doradas rúnicas en la mezcla.
@@ -101,9 +107,10 @@ namespace AethonMod.Content.VFX
         private const float RuneOrbit = 0.06f;    // rad/s — gira MUY lento
         private const int CircleSegments = 30;    // segmentos del aro (rotos)
 
-        // --- ASCENDIDO: el SEGUNDO anillo de runas, pequeño y CONTRARROTANDO ---
+        // --- ASCENDIDO: el SEGUNDO anillo de runas, CONTRARROTANDO ---
+        //     (v6.23: radio 1.66→1.95·R y glifos al 80% — BIEN VISIBLE) ---
         private const int RuneCount2 = 8;         // menos glifos: anillo íntimo
-        private const float RuneRadius2 = 1.66f;  // ×R — entre horizonte y ala
+        private const float RuneRadius2 = 1.95f;  // ×R — sube: se lee CLARO (v6.23)
         private const float RuneOrbit2 = -0.21f;  // rad/s — CONTRARROTACIÓN
 
         // --- ASCENDIDO: LA LLUVIA DE RAYOS (StormLib) ---
@@ -820,10 +827,11 @@ namespace AethonMod.Content.VFX
             DrawRuneRing(center, r, time, seed, RuneRadius, RuneCount,
                 time * RuneOrbit, glyphMul: 1f, hashOff: 0, spikeWindow: 0.45f);
 
-            // EL SEGUNDO ANILLO — MÁS PEQUEÑO, CONTRARROTANDO: la firma del
-            // Ascendido (gira al revés y 3.5× más rápido que el exterior).
+            // EL SEGUNDO ANILLO — CONTRARROTANDO: la firma del Ascendido
+            // (gira al revés y 3.5× más rápido que el exterior). v6.23:
+            // glifos al 80% (era 62%) — la firma se lee CLARA, no susurrada.
             DrawRuneRing(center, r, time, seed + 5000, RuneRadius2, RuneCount2,
-                time * RuneOrbit2, glyphMul: 0.62f, hashOff: 500, spikeWindow: 0.30f);
+                time * RuneOrbit2, glyphMul: 0.80f, hashOff: 500, spikeWindow: 0.30f);
         }
 
         /// <summary>Un anillo completo de runas (aro roto + glifos + perlas).</summary>

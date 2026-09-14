@@ -9,7 +9,14 @@ using AethonMod.Content.Effects.Bruma;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// EclipsePrimordialRenderer — v6.22 — LA FUSIÓN TOTAL, 100% CÓDIGO.
+    /// EclipsePrimordialRenderer — v6.23 — LA FUSIÓN TOTAL, 100% CÓDIGO.
+    ///
+    /// v6.23 — LA ORDEN DEL USUARIO: "el bastón del eclipse primordial
+    /// debe ser NEGRO en su centro, el sol debe verse ligeramente": el
+    /// aura final ya NO lava el corazón (se pinta ANTES del repintado
+    /// negro — el vacío la devora en el centro) y EL SOL ASOMA: la
+    /// CORONA DEL ECLIPSE, un aro fino de luz blanco-cálida al borde
+    /// del disco negro + un jade dorado más afuera — un eclipse REAL.
     ///
     /// EL ARMA FINAL DEL PROYECTO (petición del usuario): "un bastón nuevo
     /// que fusione el sol de 20 anillos rúnicos, más todos los agujeros
@@ -234,6 +241,16 @@ namespace AethonMod.Content.VFX
                 // --- 15. ✨ LUMENLIB — LA LUZ PRISMÁTICA radiando ---
                 DrawPrismaticLight(center, r, rr, time, seed);
 
+                // --- 15b. EL AURA FINAL GRANDE pulsante (aurora completa) —
+                //     v6.23: AHORA ANTES del repintado: el vacío negro la
+                //     DEVORA en el centro y el aura queda como halo ALREDEDOR
+                //     del disco negro (antes lavaba de dorado el corazón) ---
+                float aura = 0.85f + 0.15f * (float)Math.Sin(tFast * 1.4f);
+                Quad(Glow, center, new Vector2(6.6f * rr, 6.6f * rr), 0f,
+                    Tint(AurGold, 0.18f * aura));
+                RingQuad(center, 3.1f * rr, -tMid * 0.08f,
+                    Tint(AurPurple, 0.10f * aura));
+
                 // --- 16. EL VACÍO VUELVE A DEVORAR: repintado del núcleo ---
                 Main.spriteBatch.End();
                 BeginAlpha();
@@ -243,12 +260,15 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 1.02f * r, tMid * 0.13f,
                     Tint(SupGold, 0.30f + 0.10f * (float)Math.Sin(tMid * 1.6f)));
 
-                // --- 17. AURA FINAL GRANDE pulsante (aurora completa) ---
-                float aura = 0.85f + 0.15f * (float)Math.Sin(tFast * 1.4f);
-                Quad(Glow, center, new Vector2(6.6f * rr, 6.6f * rr), 0f,
-                    Tint(AurGold, 0.18f * aura));
-                RingQuad(center, 3.1f * rr, -tMid * 0.08f,
-                    Tint(AurPurple, 0.10f * aura));
+                // --- 16b. EL SOL ASOMA (v6.23 — petición del usuario: "negro
+                //     en su centro, el sol debe verse ligeramente"): la
+                //     CORONA DEL ECLIPSE — un aro fino de luz blanco-cálida
+                //     JUSTO al borde del disco negro y un jade dorado más
+                //     afuera: el sol vivo asomando tras la luna negra. ---
+                RingQuad(center, 1.055f * r, -tMid * 0.10f,
+                    Tint(WarmWhite, 0.20f + 0.07f * (float)Math.Sin(tMid * 2.3f)));
+                RingQuad(center, 1.13f * r, tMid * 0.07f,
+                    Tint(AurGold, 0.11f + 0.04f * (float)Math.Sin(tMid * 1.7f + 1.1f)));
 
                 Main.spriteBatch.End();
             }

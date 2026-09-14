@@ -120,6 +120,8 @@
         "Items.EclipsePrimordialStaff.DisplayName": "Bastón del Eclipse Primordial",
         // v6.22: LOS TRES COSMÉTICOS NUEVOS
         "Items.FireVeilItem.DisplayName": "Envoltura de Fuego Primordial",
+        // v6.23: la envoltura de rayos (StormLib sobre la silueta)
+        "Items.StormVeilItem.DisplayName": "Envoltura de Rayos Primordial",
         "Items.RuneRingCrownItem.DisplayName": "Corona de Anillos Rúnicos",
         "Items.RunicHaloWings.DisplayName": "Anillo Rúnico Estelar",
         // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)

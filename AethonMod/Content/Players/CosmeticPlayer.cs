@@ -109,8 +109,8 @@ namespace AethonMod.Content.Players
                     new Vector3(0.22f, 0.04f, 0.14f));
             }
 
-            // === v6.22 — LA CORONA DE ANILLOS VIVE: chispas doradas/azules
-            // escapando de los glifos de los aros + luz cálida-fría mixta.
+            // === v6.23 — LA CORONA DEL SOL I VIVE: chispas doradas
+            // escapando de los glifos del ANILLO + luz cálida tenue. ===
             if (RuneRingCrown)
             {
                 Vector2 body = Player.Center - new Vector2(0f, Player.height * 0.05f * Player.gravDir);
@@ -129,10 +129,8 @@ namespace AethonMod.Content.Players
                     d.fadeIn = 0f;
                 }
 
-                // La LUZ mezclada de los tres aros (oro + azul).
+                // La LUZ cálida del anillo del Sol I (oro tenue).
                 Lighting.AddLight(body, new Vector3(0.16f, 0.13f, 0.07f));
-                Lighting.AddLight(body + new Vector2(0f, 14f * Player.gravDir),
-                    new Vector3(0.07f, 0.09f, 0.16f));
             }
         }
     }

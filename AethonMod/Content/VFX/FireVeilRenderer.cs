@@ -6,7 +6,14 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// FireVeilRenderer — v6.22 — EL FUEGO QUE ENVUELVE (100% CÓDIGO).
+    /// FireVeilRenderer — v6.23 — EL FUEGO QUE ENVUELVE (100% CÓDIGO).
+    ///
+    /// v6.23 — EL ABRAZO JUSTO: a petición del usuario el fuego ya NO es
+    /// una columna gigante — el campo vive PEGADO A LA SILUETA (11×11
+    /// celdas ≈ el cuerpo + un licking de 3-4 px por encima de la cabeza):
+    /// la envoltura es un AURA LLAMEANTE que abraza al personaje, no una
+    /// pira. La base arde sobre los pies cubriendo el ancho del cuerpo y
+    /// las puntas apenas LAMEN la coronilla.
     ///
     /// EL ALGORITMO DE PROPAGACIÓN DE INTENSIDADES: un campo de W×H celdas
     /// guarda un nivel de intensidad 0..36 por celda; la BASE está siempre
@@ -40,13 +47,19 @@ namespace AethonMod.Content.VFX
         //  EL CAMPO — geometría del fuego
         // ==================================================================
 
-        /// <summary>Ancho del campo en celdas.</summary>
-        public const int W = 26;
+        /// <summary>
+        /// Ancho del campo en celdas (v6.23: 11 — pegado al cuerpo, la
+        /// silueta envuelta con un margen corto de llama a cada lado).
+        /// </summary>
+        public const int W = 11;
 
-        /// <summary>Alto del campo en celdas.</summary>
-        public const int H = 38;
+        /// <summary>
+        /// Alto del campo en celdas (v6.23: 11 — cuerpo de 42 px + el
+        /// licking de 3-4 px por ENCIMA de la cabeza, nada más).
+        /// </summary>
+        public const int H = 11;
 
-        /// <summary>Tamaño de la celda en px (el pincel solapa ~×1.4).</summary>
+        /// <summary>Tamaño de la celda en px (el pincel solapa ~×1.3).</summary>
         public const float Cell = 4.4f;
 
         /// <summary>La PALETA: 37 niveles de brasa a blanco cegador.</summary>
@@ -123,12 +136,12 @@ namespace AethonMod.Content.VFX
 
             float speed = vel.Length();
             float fanning = MathHelper.Clamp(speed / 7f, 0f, 1f);      // el avivo del aire
-            int wind = (int)MathHelper.Clamp(-vel.X * 0.55f, -2.5f, 2.5f); // el viento en celdas
+            int wind = (int)MathHelper.Clamp(-vel.X * 0.30f, -1.2f, 1.2f); // el viento en celdas (campo corto)
 
             // === 1. LA SIEMBRA — la base SIEMPRE encendida sobre la silueta ===
             // (las 3 filas inferiores; la intensidad baja con la distancia
             // al cuerpo y VIVE con el avivo del movimiento).
-            float halfBody = Math.Max(bodyW * 0.55f, 8f) / Cell;   // medio ancho del cuerpo en celdas
+            float halfBody = Math.Max(bodyW * 0.70f, 10f) / Cell;  // medio ancho del cuerpo en celdas (cubre la silueta)
             int center = W / 2;
             for (int y = H - 3; y < H; y++)
             {
@@ -149,9 +162,9 @@ namespace AethonMod.Content.VFX
             }
 
             // === 2. LA PROPAGACIÓN — el fuego camina hacia arriba ===
-            // (los PASES: 1 normal · +1 cayendo · +2 volando — las llamas
-            // alcanzan más alto cuando el viento relativo las estira).
-            int passes = 1 + (falling ? 1 : 0) + (flying ? 2 : 0);
+            // (los PASES: 1 normal · +1 cayendo · +1 volando — el abrazo
+            // se ESTIRA apenas con el viento relativo, sin columna).
+            int passes = 1 + (falling ? 1 : 0) + (flying ? 1 : 0);
             for (int p = 0; p < passes; p++)
             {
                 for (int y = 1; y < H; y++)
@@ -165,9 +178,11 @@ namespace AethonMod.Content.VFX
 
                         // EL DECAIMIENTO ALEATORIO (el consumo del combustible):
                         // sesgo cúbico — muchos pasos finos, algún salto grande.
+                        // v6.23: decay más rápido — en un campo de 11 filas el
+                        // fuego debe MORIR justo al pasar la coronilla.
                         float h = Main.rand.NextFloat();
                         int decay = (int)Math.Clamp(
-                            Math.Sign(h - 0.5f) * Math.Pow(Math.Abs(h - 0.5f) * 2f, 1.6f) * 3.2f + 1.2f, 1, 5);
+                            Math.Sign(h - 0.5f) * Math.Pow(Math.Abs(h - 0.5f) * 2f, 1.6f) * 4.0f + 1.4f, 1, 6);
 
                         // LA DERIVA LATERAL + EL VIENTO (la interacción).
                         int drift = Main.rand.Next(-1, 2);
@@ -202,9 +217,9 @@ namespace AethonMod.Content.VFX
 
             // LA INERCIA VERTICAL del campo: al subir se retrasa por debajo
             // (aplastado contra el cuerpo); al caer se estira hacia arriba.
-            float inertia = MathHelper.Clamp(-vel.Y * 1.15f, -9f, 15f);
+            float inertia = MathHelper.Clamp(-vel.Y * 0.80f, -5f, 7f);
             // LA INCLINACIÓN total de las llamas (el viento visible).
-            float lean = MathHelper.Clamp(-vel.X * 0.35f, -10f, 10f);
+            float lean = MathHelper.Clamp(-vel.X * 0.28f, -6f, 6f);
 
             Vector2 origin = new Vector2(feet.X - W * Cell * 0.5f, feet.Y - H * Cell + inertia);
 
@@ -221,11 +236,11 @@ namespace AethonMod.Content.VFX
                     float t = v / 36f;
                     Color c = Pal[v];
 
-                    // LA CELDA: pincel solapado (×1.42) para la coherencia
-                    // de la llama — las celdas ALTAS se estiran un poco más
-                    // (las puntas de fuego se alargan).
-                    float sy = Cell * 1.42f * (1f + 0.45f * (y / (float)H) * t);
-                    float sx = Cell * 1.42f * (1f - 0.18f * (y / (float)H));
+                    // LA CELDA: pincel solapado (×1.30) para la coherencia
+                    // de la llama — las puntas altas apenas se alargan
+                    // (el licking corto sobre la coronilla).
+                    float sy = Cell * 1.18f * (1f + 0.12f * (y / (float)H) * t);
+                    float sx = Cell * 1.30f * (1f - 0.15f * (y / (float)H));
 
                     Vector2 pos = origin + new Vector2(
                         (x + 0.5f) * Cell + lean * leanF,
@@ -233,7 +248,7 @@ namespace AethonMod.Content.VFX
 
                     // EL ALPHA: la masa arde SÓLIDA abajo y se desvanece arriba
                     // (la punta de la llama es humeante).
-                    float a = (0.52f + 0.48f * t) * (1f - 0.35f * (y / (float)H)) * alpha;
+                    float a = (0.55f + 0.45f * t) * (1f - 0.30f * (y / (float)H)) * alpha;
                     if (a <= 0.03f) continue;
 
                     VFXCore.Quad(pos, new Color(c.R, c.G, c.B, (byte)(int)(255f * a)),

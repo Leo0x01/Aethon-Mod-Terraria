@@ -1,5 +1,98 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.23 — EL AJUSTE FINO: el abrazo del fuego + la ENVOLTURA DE RAYOS + los anillos de los soles + el eclipse de verdad + los círculos rúnicos completos
+
+**Petición del usuario**: "el fuego es muy grande, debe estar limitado a solo
+unos 3 o 4 píxeles por encima del personaje · de la misma forma que haces con
+el fuego, crea un item cosmético que sea una envoltura de rayos, usa nuestras
+librerías para darle el toque especial · que los anillos de vuelo sean los
+anillos del sol número 4, además el anillo es muy brillante, reduce el brillo
+a como se ve en los soles · que la corona de anillos rúnicos sea la del sol
+número 1 · el bastón del eclipse primordial debe ser negro en su centro, el
+sol debe verse ligeramente · los dos bastones de agujeros negros supremos
+deben tener sus agujeros 3 anillos rúnicos (tienen dos) · todos los agujeros
+avanzados deben tener 2 anillos rúnicos de tipo agujero (solo uno de los
+bastones tiene 2, el resto solo 1)".
+
+### A. EL FUEGO — EL ABRAZO JUSTO (fix de tamaño)
+  El campo de propagación de intensidades pasa de 26×38 celdas (una COLUMNA
+  de 167 px — 4× la altura del jugador) a **11×11 celdas** (48 px): la
+  envoltura vive PEGADA A LA SILUETA — la base arde sobre los pies cubriendo
+  el ancho del cuerpo y las puntas LAMEN la coronilla 3-4 px por encima,
+  nada más. Re-calibrado completo: decay más rápido (muere al pasar la
+  cabeza), viento ±1.2 celdas, inercia vertical ±5..7 px, pincel ×1.18/×1.30,
+  1 pase extra al volar (antes 2), el humo nace justo sobre la coronilla
+  y las chispas a lo largo del cuerpo. TODAS las interacciones vivas:
+  viento en contra al correr, avivo, aplastado del salto, estirada en caída.
+
+### B. LA ENVOLTURA DE RAYOS PRIMORDIAL (cosmético nuevo — StormLib)
+  `StormVeilRenderer/Player/Item/DrawLayer` — la HERMANA ELÉCTRICA del fuego:
+  la SILUETA del jugador (una elipse del tamaño exacto del cuerpo) es el
+  CARRIL de una tormenta construida con STORMLIB (nuestra librería):
+  · **LOS CHISPAZOS** — rayos de verdad entre dos anclas del contorno:
+    ZigPath + REFINO FRACTAL multi-escala (la MISMA matemática del rayo del
+    cielo aprobado), oro solar y azul-estelar alternando.
+  · **LOS ARCOS** — descargas abrazando el contorno con jitter radial hash
+    (el patrón ArcRing): media silueta arriba, media abajo.
+  · **LOS PELOS** — filamentos caóticos finísimos hacia afuera (el "hair"
+    de las descargas reales).
+  · **EL RENDER** — cada segmento = TRES CAPAS por VFXCore (halo + cuerpo +
+    núcleo blanco razor) con las texturas BoltHalo/BoltCore procedurales;
+    gorros de descarga en los extremos.
+  · **INTERACTIVA**: la velocidad acumula ENERGÍA (quieto = brisa eléctrica,
+    corriendo = tormenta encendida con estela a contra de la marcha); al
+    saltar los arcos caen a los pies, al caer suben a la cabeza. Chispas
+    DustID.Electric + luz fría-oro con stutter de descarga.
+  Icono 30×30 procedural (tools/gen_storm_veil_icon_v623.py), localización
+  es/EN, EnsureItem al entrar al mundo.
+
+### C. LOS ANILLOS DE VUELO = LOS ANILLOS DEL SOL IV (brillo de soles)
+  `RunicHaloRenderer` REESCRITO: el halo de la espalda ya NO es un anillo
+  gigante con bloom cegador — es **EL SISTEMA ORBITAL DEL SOL RÚNICO IV,
+  LITERAL**: los CUATRO anillos del sol nº4 (semiejes 1.62+0.44k ×R, achatado
+  0.34..0.48, inclinaciones −0.55..+0.05, giro alterno CW/CCW, 6/8/10/12
+  glifos con perlas y latidos) orbitando la espalda, a los **ALPHAS EXACTOS
+  del sol** (aro (0.30+0.30·depth)·pulse, glifos 0.85·pulse, perlas
+  0.60/0.90). El corazón pasa de bloom ×2.1 a un latido discreto de 22 px.
+  La ENERGÍA DE VUELO sigue viva pero ACOTADA: multiplicador 0.85..1.20,
+  giro ×1..1.5, runas ardiendo al blanco al volar. La luz del mundo y las
+  chispas también se contienen al nivel solar.
+
+### D. LA CORONA = EL ANILLO DEL SOL I (brillo de soles)
+  `RuneRingCrownRenderer` REESCRITO: de tres aros propios con corazón
+  brillante a **EL ANILLO DEL SOL RÚNICO I, LITERAL** — un solo aro
+  (1.62R × 0.34, inclinación −0.55, CW 0.26 rad/s) con sus 6 glifos,
+  perlas y latidos al BRILLO EXACTO del sol. Icono regenerado (un anillo
+  inclinado con 6 perlas). CosmeticPlayer actualizado (chispas doradas +
+  luz cálida única).
+
+### E. EL ECLIPSE PRIMORDIAL — EL SOL ASOMA
+  El corazón ya NO se lava de dorado: el AURA FINAL (SoftGlow 6.6×rr) se
+  pinta AHORA **ANTES** del repintado negro — el vacío la DEVORA en el
+  centro y queda como halo alrededor del disco. Y nace **LA CORONA DEL
+  ECLIPSE**: un aro fino de luz blanco-cálida JUSTO al borde del disco
+  negro (1.055R, 0.20±0.07) + un jade dorado más afuera (1.13R, 0.11±0.04)
+  — el sol vivo asomando tras la luna negra: un eclipse REAL.
+
+### F. LOS CÍRCULOS RÚNICOS DE LOS AGUJEROS NEGROS
+  · **Los DOS SUPREMOS → 3 anillos**: el Supremo añade el CÍRCULO BLANCO
+    íntimo (6 runas @2.02R, CW 0.16 — entre el anillo de fotones y el
+    dorado); el Supremo Aurora añade el CÍRCULO MORADO íntimo (6 runas
+    @2.02R — el color que faltaba del gradiente negro→morado→azul→dorado).
+    REFACTOR: DrawRune ya no hardcodea el viejo if de dos círculos —
+    count/orbit son parámetros (el bug que habría roto el tercer anillo).
+  · **Los ASCENDIDOS → 2 anillos CLAROS cada uno**: el Cósmico ya los
+    tenía (intacto); el Umbral SUBE su anillo íntimo (radio 1.66R→1.95R,
+    glifos ×0.62→×0.80 — ahora se LEE); la Bruma Ascendida recibe SU
+    SISTEMA RÚNICO desde cero (8 teal CW @2.55R + 6 hielo-blanca CCW
+    @3.15R, paleta RimTeal/FrostMote/PhotonWhite); el Olvido añade el
+    círculo VIOLETA contrarrotante (6 runas @3.20R, −0.12 rad/s).
+
+### G. ENTREGA
+  Compilación **0 errores / 0 warnings** contra tModLoader v2026.07.3.0
+  real. build.txt 6.23. Localización es/EN de la Envoltura de Rayos.
+  EnsureItem de la Envoltura al entrar al mundo.
+
 ## Commit v6.22 — LA LUZ Y EL FUEGO: LumenLib + el Eclipse Primordial + los soles 11-20 + 3 cosméticos interactivos
 
 **Petición del usuario**: "crea un item cosmético que envuelva al personaje

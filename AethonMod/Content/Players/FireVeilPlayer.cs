@@ -9,10 +9,11 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// FireVeilPlayer — v6.22 — EL PORTADOR DE LA ENVOLTURA DE FUEGO.
+    /// FireVeilPlayer — v6.23 — EL PORTADOR DE LA ENVOLTURA DE FUEGO.
     ///
-    /// Mantiene el CAMPO DE INTENSIDADES del fuego (26×38 celdas) y lo
-    /// hace VIVIR con las acciones del jugador:
+    /// Mantiene el CAMPO DE INTENSIDADES del fuego (11×11 celdas — el
+    /// abrazo pegado a la silueta, v6.23) y lo hace VIVIR con las
+    /// acciones del jugador:
     ///   - Escanea los huecos de accesorio (funcionales + vanidad) buscando
     ///     la Envoltura de Fuego Primordial — un cosmético es un cosmético
     ///     viva donde lo pongas.
@@ -112,12 +113,13 @@ namespace AethonMod.Content.Players
                 d.fadeIn = 0f;
             }
 
-            // === EL HUMO de las puntas más altas (la llama respira hacia arriba) ===
+            // === EL HUMO de las puntas (v6.23: justo sobre la coronilla —
+            // el licking de 3-4 px respira humo, nada más arriba) ===
             if (Main.rand.NextBool(40))
             {
                 Vector2 tip = Player.Center - new Vector2(
                     Main.rand.NextFloat(-8f, 8f),
-                    Player.height * (0.9f + Main.rand.NextFloat(0f, 0.5f)) * Player.gravDir);
+                    Player.height * (0.92f + Main.rand.NextFloat(0f, 0.12f)) * Player.gravDir);
                 Dust d = Dust.NewDustPerfect(tip, DustID.Smoke,
                     new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
                                 -Main.rand.NextFloat(0.5f, 1.1f) * Player.gravDir),

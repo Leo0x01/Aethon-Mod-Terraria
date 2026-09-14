@@ -131,6 +131,9 @@ namespace AethonMod.Content.Players
             // ANILLOS RÚNICOS que rodea el cuerpo y el ANILLO RÚNICO
             // ESTELAR (alas + halo de la espalda que arde al volar)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.FireVeilItem>());
+            // v6.23: LA ENVOLTURA DE RAYOS — la tormenta de StormLib sobre
+            // la silueta (interactiva con el movimiento, como el fuego)
+            EnsureItem(ModContent.ItemType<Items.Cosmetics.StormVeilItem>());
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneRingCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Wings.RunicHaloWings>());
             // (v6.18: las 8 alas viejas FUERON BORRADAS — petición del

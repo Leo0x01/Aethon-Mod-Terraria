@@ -9,14 +9,19 @@ using AethonMod.Content.Effects.Bruma;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// BrumaAscendidoBlackHoleRenderer — v6.18 — LA COPIA MEJORADA DE LA
+    /// BrumaAscendidoBlackHoleRenderer — v6.23 — LA COPIA MEJORADA DE LA
     /// BRUMA: "LA ASCENDIDA".
+    ///
+    /// v6.23 — EL DOBLE CÍRCULO DE RUNAS (petición del usuario): 8 runas
+    /// TEAL CW @2.55·R + 6 runas BLANCAS DE HIELO CCW @3.15·R, MÁS
+    /// AFUERA — los DOS anillos rúnicos de tipo agujero que faltaban,
+    /// dibujados con los glifos de la casa en tema ESCARCHA.
     ///
     /// La Bruma original (BrumaBlackHoleRenderer) queda INTACTA; este es
     /// un archivo NUEVO nacido de ella — misma identidad GELIDA (teal /
     /// cian / violeta), misma librería de bruma (BrumaFX), mismo contrato
-    /// de batch — con CINCO MEJORAS SUSTANCIALES sobre la LIBRERÍA DE
-    /// RAYOS StormLib:
+    /// de batch — con SEIS MEJORAS SUSTANCIALES (cinco de ellas sobre la
+    /// LIBRERÍA DE RAYOS StormLib, más el doble círculo rúnico v6.23):
     ///
     ///   1. ⚡ CORONAS DE ESCARCHA ELÉCTRICA — 3 StormLib.Arc cian
     ///      alrededor del horizonte a radios ligeramente distintos,
@@ -35,6 +40,10 @@ namespace AethonMod.Content.VFX
     ///   5. CHIMENEAS POLARES REFORZADAS — Column más ALTAS (2.2·R, era
     ///      1.6·R, 7 pasos, era 5) con motas de escarcha subiendo por el
     ///      eje del vórtice.
+    ///
+    ///   6. DOBLE CÍRCULO DE RUNAS (v6.23) — 8 runas TEAL CW @2.55·R +
+    ///      6 BLANCAS DE HIELO CCW @3.15·R, MÁS AFUERA: la firma rúnica
+    ///      de los agujeros negros, en versión hielo-estelar.
     ///
     /// CONTRATO DE BATCH (v6.10, IDÉNTICO al original): Draw() exige el
     /// SpriteBatch CERRADO y lo deja CERRADO. El humo se dibuja en el lote
@@ -79,6 +88,14 @@ namespace AethonMod.Content.VFX
         // --- ASCENDIDO: los cristales de hielo flotando ---
         private const int IceCrystalCount = 6;
 
+        // --- v6.23: EL DOBLE CÍRCULO DE RUNAS (hielo-estelar) ---
+        private const int RuneCount = 8;         // teal, CW
+        private const float RuneRadius = 2.55f;  // ×R — círculo rúnico
+        private const float RuneOrbit = 0.10f;   // rad/s
+        private const int RuneCount2 = 6;        // blancas, CCW
+        private const float RuneRadius2 = 3.15f; // ×R — MÁS AFUERA
+        private const float RuneOrbit2 = -0.14f; // rad/s — CONTRARROTO
+
         // --- ASCENDIDO: chimeneas polares reforzadas ---
         private const int ChimneySteps = 7;         // (el original usaba 5)
         private const float ChimneyHeight = 2.2f;   // ×R (el original: 1.6)
@@ -99,6 +116,8 @@ namespace AethonMod.Content.VFX
         private static readonly Color PhotonWhite = new(225, 250, 255); // cian-blanco caliente
         private static readonly Color RimTeal = new(60, 200, 220);      // horizonte congelado
         private static readonly Color FrostMote = new(185, 235, 250);   // escarcha
+        private static readonly Color RuneTeal = new(60, 200, 220);     // cuerpo de runa teal
+        private static readonly Color RuneTealTip = new(225, 250, 255); // punta hielo-blanca
 
         // ==================================================================
         //  PINCELES (los genéricos + los de la LIBRERÍA DE BRUMA)
@@ -255,6 +274,11 @@ namespace AethonMod.Content.VFX
                 // --- 8b. LOS CRISTALES DE HIELO — destellos angulares
                 //      flotando alrededor (nuevos del Ascendido). ---
                 DrawIceCrystals(center, r, time, seed);
+
+                // --- 8c. EL DOBLE CÍRCULO DE RUNAS — 8 teal CW + 6 blancas
+                //      de hielo CCW MÁS AFUERA (v6.23: la firma rúnica,
+                //      versión hielo-estelar de la Ascendida). ---
+                DrawRuneCircle(center, r, time, seed);
 
                 // --- 9. ONDAS DE DISTORSIÓN ---
                 DrawDistortionWaves(center, r, time, seed);
@@ -624,6 +648,129 @@ namespace AethonMod.Content.VFX
                 Quad(Glow, pos, new Vector2(size * 0.9f, size * 0.9f), 0f,
                     Tint(PhotonWhite, 0.75f * glint));
             }
+        }
+
+        // ------------------------------------------------------------------
+        //  8c. EL DOBLE CÍRCULO DE RUNAS — 8 TEAL CW + 6 BLANCAS CCW
+        //      (v6.23 — NUEVO: la firma rúnica de los agujeros negros,
+        //       versión HIELO-ESTELAR de la Ascendida)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Tabla de glifos: cada runa es una lista de TRAZOS (pares de
+        /// puntos en espacio local ~11×15). Ocho diseños angulares del
+        /// lenguaje de glifos de la casa, rebautizados a tema ESCARCHA
+        /// (cristales, carámbanos y ventiscas — la escritura del frío),
+        /// dibujados como cápsulas.
+        /// </summary>
+        private static readonly Vector2[][] _runes = new Vector2[][]
+        {
+            // H0 — EL CRISTAL ROTO
+            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.5f, -3f), new(0f, -6.5f), new(3.5f, -3f), new(0f, -6.5f), new(-3.5f, 3.5f), new(3.5f, 3.5f), new(-2f, 5.5f), new(2f, 5.5f) },
+            // H1 — EL CARÁMBANO
+            new Vector2[] { new(0f, 7f), new(0f, -4f), new(0f, -4f), new(-3f, -7f), new(0f, -4f), new(3f, -7f), new(-2.5f, 0f), new(2.5f, 0f), new(-2.5f, 3f), new(2.5f, 3f) },
+            // H2 — EL TRONO GELIDO
+            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, -5f), new(0f, -7f), new(-1.5f, 1.5f), new(1.5f, 1.5f) },
+            // H3 — LA ESTRELLA DOBLE
+            new Vector2[] { new(0f, 7f), new(0f, -7f), new(-4f, 0f), new(4f, 0f), new(-2.5f, -4.5f), new(2.5f, 4.5f), new(2.5f, -4.5f), new(-2.5f, 4.5f) },
+            // H4 — EL CIRCUITO GLACIAL
+            new Vector2[] { new(-3.5f, 6f), new(-3.5f, -4f), new(-3.5f, -4f), new(3.5f, -4f), new(3.5f, -4f), new(3.5f, 6f), new(-3.5f, 6f), new(3.5f, 6f), new(-3.5f, -6.5f), new(3.5f, -6.5f), new(0f, -4f), new(0f, -6.5f) },
+            // H5 — LA VENTISCA
+            new Vector2[] { new(-3f, 6f), new(-3f, -2f), new(-3f, -2f), new(3f, -6f), new(3f, -6f), new(3f, 2f), new(3f, 2f), new(-2.5f, 6f), new(-1.5f, -6.5f), new(1.5f, -6.5f) },
+            // H6 — EL OJO CONGELADO
+            new Vector2[] { new(-4f, 0f), new(0f, -4f), new(0f, -4f), new(4f, 0f), new(4f, 0f), new(0f, 4f), new(0f, 4f), new(-4f, 0f), new(-1.5f, 0f), new(1.5f, 0f), new(0f, -7f), new(0f, -4.5f), new(0f, 4.5f), new(0f, 7f) },
+            // H7 — LA CORONA POLAR
+            new Vector2[] { new(-4f, 5.5f), new(-4f, -5.5f), new(-4f, -5.5f), new(-2f, -1f), new(-2f, -1f), new(0f, -6.5f), new(0f, -6.5f), new(2f, -1f), new(2f, -1f), new(4f, -5.5f), new(4f, -5.5f), new(4f, 5.5f), new(-4f, 5.5f), new(4f, 5.5f) },
+        };
+
+        /// <summary>
+        /// EL DOBLE CÍRCULO DE RUNAS (v6.23): aro + 8 glifos TEAL CW
+        /// adentro + 6 glifos BLANCOS DE HIELO CCW MÁS AFUERA — dos
+        /// coronas de conjuro girando en sentidos opuestos (la firma
+        /// rúnica de los agujeros negros, versión de la Ascendida).
+        /// </summary>
+        private static void DrawRuneCircle(Vector2 center, float r, float time, int seed)
+        {
+            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.35f;
+
+            // ============================================================
+            //  EL CÍRCULO TEAL — 8 runas girando CW (el conjuro interior)
+            // ============================================================
+            RingQuad(center, RuneRadius * r, time * RuneOrbit,
+                Tint(RuneTeal, 0.22f));
+            for (int g = 0; g < RuneCount; g++)
+            {
+                DrawRune(center, r, time, g, RuneRadius,
+                    RuneTeal, RuneTealTip, glyphScale,
+                    count: RuneCount, orbit: RuneOrbit, offset: 0);
+            }
+
+            // ============================================================
+            //  EL CÍRCULO BLANCO DE HIELO — 6 runas MÁS AFUERA girando
+            //  CCW (el contrarroto de escarcha: la nieve gira al revés;
+            //  cuerpo FrostMote → punta PhotonWhite, ambas de la paleta)
+            // ============================================================
+            RingQuad(center, RuneRadius2 * r, time * RuneOrbit2,
+                Tint(FrostMote, 0.18f));
+            for (int g = 0; g < RuneCount2; g++)
+            {
+                DrawRune(center, r, time, g, RuneRadius2,
+                    FrostMote, PhotonWhite, glyphScale * 0.85f,
+                    count: RuneCount2, orbit: RuneOrbit2, offset: 3);
+            }
+        }
+
+        /// <summary>
+        /// Una runa del círculo (glifo + resplandor + perla) — el modelo
+        /// de la casa: cada llamada trae SU `count` y SU `orbit`.
+        /// </summary>
+        private static void DrawRune(Vector2 center, float r, float time, int g,
+            float radius, Color body, Color tip, float glyphScale,
+            int count, float orbit, int offset)
+        {
+            float ang = g / (float)count * MathHelper.TwoPi + time * orbit;
+
+            // Flotación viva: el radio respira por glifo y el glifo se mece.
+            float floatR = radius * r +
+                           2.4f * glyphScale * (float)Math.Sin(time * 1.35f + g * 0.9f);
+            float bobY = 2.0f * glyphScale * (float)Math.Sin(time * 0.85f + g * 1.7f);
+            Vector2 glyphPos = center + new Vector2(
+                (float)Math.Cos(ang) * floatR,
+                (float)Math.Sin(ang) * floatR + bobY);
+
+            // Latido de brillo propio por glifo.
+            float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f);
+
+            // Resplandor suave DETRÁS de cada runa.
+            Quad(Glow, glyphPos, new Vector2(36f * glyphScale, 36f * glyphScale), 0f,
+                Tint(body, 0.20f * pulse));
+
+            // Trazos: cápsulas, cuerpo → punta pálida.
+            Vector2[] strokes = _runes[(g + offset) % _runes.Length];
+            for (int s = 0; s < strokes.Length; s += 2)
+            {
+                Vector2 a = glyphPos + strokes[s] * glyphScale;
+                Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
+                Vector2 mid = (a + b) * 0.5f;
+                Vector2 delta = b - a;
+                float len = delta.Length();
+                if (len < 0.01f) continue;
+                float rot = (float)Math.Atan2(delta.Y, delta.X);
+
+                // Gradiente vertical: abajo cuerpo, arriba punta pálida.
+                float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
+                Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
+
+                Capsule(mid, len, 3.4f * glyphScale, rot, Tint(col, 0.85f * pulse));
+            }
+
+            // PERLA sobre el glifo (la gema de escarcha).
+            Vector2 pearlPos = glyphPos - new Vector2(0f, 11.5f * glyphScale);
+            float pearlPulse = 0.8f + 0.2f * (float)Math.Sin(time * 3.0f + g * 2.0f);
+            Quad(Glow, pearlPos, new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f,
+                Tint(body, 0.62f * pulse));
+            Quad(Glow, pearlPos, new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f,
+                Tint(tip, 0.9f * pearlPulse));
         }
 
         // ------------------------------------------------------------------

@@ -7,17 +7,17 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Players
 {
     /// <summary>
-    /// RunicHaloPlayer — v6.22 — LA ENERGÍA DE VUELO DEL ANILLO RÚNICO.
+    /// RunicHaloPlayer — v6.23 — LA ENERGÍA DE VUELO DE LOS ANILLOS DEL SOL IV.
     ///
-    /// Petición del usuario: "cuando el jugador VA A VOLAR, este anillo
-    /// rúnico BRILLA CON INTENSIDAD". Este ModPlayer acumula la ENERGÍA
-    /// DE VUELO (0..1): sube rápido mientras el jugador VUELA de verdad
-    /// (salto mantenido + tiempo de alas + movimiento vertical) y decae
-    /// suave al soltar — el anillo se enciende y se apaga como un motor.
+    /// Petición original: "cuando el jugador VA A VOLAR, estos anillos
+    /// BRILLAN CON INTENSIDAD". Este ModPlayer acumula la ENERGÍA DE
+    /// VUELO (0..1): sube rápido mientras el jugador VUELA de verdad y
+    /// decae suave al soltar — el sistema orbital se aviva y se aquieta
+    /// como un motor.
     ///
-    /// También hace vivir al halo en el mundo: chispas doradas escapando
-    /// de los glifos (a borbotones al volar) y la LUZ del anillo creciendo
-    /// con la energía.
+    /// v6.23: el brillo vive ACOTADO al lenguaje de los soles (petición
+    /// del usuario) — la luz del mundo y las chispas también se
+    /// contienen al nivel solar.
     /// </summary>
     public class RunicHaloPlayer : ModPlayer
     {
@@ -45,8 +45,9 @@ namespace AethonMod.Content.Players
             Vector2 back = Player.Center + new Vector2(0f, -Player.height * 0.145f * Player.gravDir);
             float scale = Player.height / 42f;
 
-            // === LAS CHISPAS del anillo (a borbotones al volar) ===
-            int rate = flying ? 6 : 34;
+            // === LAS CHISPAS del sistema (a borbotones al volar — menos
+            //     spam que v6.22: el sistema es ELEGANTE como el sol) ===
+            int rate = flying ? 10 : 40;
             if (Main.rand.NextBool(rate))
             {
                 int g = Main.rand.Next(RunicHaloRenderer.Glyphs);
@@ -56,15 +57,16 @@ namespace AethonMod.Content.Players
                 Vector2 tang = (glyph - back).RotatedBy(MathHelper.PiOver2);
                 tang.Normalize();
                 Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
-                    tang * Main.rand.NextFloat(0.8f, 2.2f) * (0.4f + 1.2f * FlightEnergy) -
+                    tang * Main.rand.NextFloat(0.8f, 2.0f) * (0.4f + 1.0f * FlightEnergy) -
                     new Vector2(0f, 0.5f),
                     180, new Color(255, 225, 150), 0.7f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // === LA LUZ del anillo (el motor encendido) ===
-            float li = 0.5f + 1.1f * FlightEnergy;
+            // === LA LUZ del sistema (el motor encendido — contenido al
+            //     nivel solar, nada del faro cegador de v6.22) ===
+            float li = 0.35f + 0.75f * FlightEnergy;
             Lighting.AddLight(back, 0.75f * li, 0.60f * li, 0.28f * li);
         }
     }

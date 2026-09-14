@@ -1128,3 +1128,45 @@ Next:
 
 Stage Summary:
 - v6.21 EN GitHub: INVESTIGACIÓN de 4 mods grandes sintetizada en INFORME.md + STORMLIB (librería de rayos 2ª generación: filamentos de verdad con Refine fractal, multi-bolt, pelos, ramas auto-corregidas, impactos de cruz de luz) + EL RAYO DEL CIELO reconstruido (telegraph → columna → cadena → muerte violenta) + FIX del sol cuadrado (Immediate vs Deferred) + MANA 0 en todos los bastones — 4 texturas nuevas, mock VLM 8/10, compilación 0/0.
+
+---
+Task ID: 38
+Agent: Z.ai Code (agente principal — sesión AethonMod)
+Task: v6.22 — LA LUZ Y EL FUEGO (commit 477ccbb; registro de recuperación — esta sección faltaba en el worklog del repo)
+
+Work Log:
+- Respondida la pregunta del usuario: StormLib ERA solo de rayos → creada LUMENLIB (la luz) con la investigación superprofunda de 3 frentes: WoTE (31 archivos + 12 shaders HLSL), la Emperatriz de la Luz VANILLA decompilada del binario real de tModLoader (ilspycmd), y MEAC adquirido por 10 rangos paralelos + parser .tmod propio + ILSpy (3 informes en research/luz_v622).
+- Migración TOTAL LightningCore→StormLib en TODOS los usuarios (7 renderers) y la librería vieja ELIMINADA — una sola librería de rayos en todo el mod.
+- RuneSunRenderer extendido a MaxTier 20 (10 capas nuevas: cometa, lluvia de runas, aurora polar, estrella compañera, cinturón kepleriano, tormenta total, lanzas prismáticas, núcleo de nova, GRAN SELLADO) + 10 bastones nuevos (SolRunico11..20).
+- EL ECLIPSE PRIMORDIAL: la fusión del Sol de 20 Anillos + TODOS los agujeros negros (luz LumenLib + bruma BrumaFX + humo + rayos StormLib + gradiente aurora) con lente gravitacional ×4.2.
+- TRES COSMÉTICOS: FireVeil (fuego procedural interactivo con el movimiento), RuneRingCrown (3 anillos orbitando el cuerpo), RunicHaloWings (alas + halo que arde al volar).
+- 15 PNGs procedurales (2 rondas VLM), localización es/EN, EnsureItem, build.txt 6.22, CHANGES.md, compilación 0/0.
+
+Stage Summary:
+- v6.22 en GitHub: 20 soles, el Eclipse Primordial, 3 cosméticos vivos, LumenLib y una sola librería de rayos (StormLib) en todo el mod.
+
+---
+Task ID: 39
+Agent: Z.ai Code (agente principal — sesión AethonMod) + subagente 39-a (anillos de agujeros negros)
+Task: v6.23 — EL AJUSTE FINO: el abrazo del fuego + la ENVOLTURA DE RAYOS + los anillos de los soles + el eclipse de verdad + los círculos rúnicos completos
+
+Work Log:
+- EL FUEGO — EL ABRAZO JUSTO (fix de tamaño): el campo pasa de 26×38 celdas (columna de 167 px, 4× el jugador) a 11×11 (48 px) — pegado a la silueta con las puntas LAMIENDO 3-4 px sobre la coronilla. Decay recalibrado (muere al pasar la cabeza), viento ±1.2 celdas, inercia ±5..7, pincel ×1.18/×1.30, 1 pase extra al volar, humo sobre la coronilla.
+- LA ENVOLTURA DE RAYOS PRIMORDIAL (cosmético NUEVO con StormLib): StormVeilRenderer/Player/Item/DrawLayer — la silueta como carril de una tormenta: CHISPAZOS ZigPath+Refine fractal entre anclas, ARCOS abrazando el contorno (patrón ArcRing con jitter hash), PELOS caóticos hacia afuera; render de 3 capas por VFXCore (halo+cuerpo+núcleo razor) con BoltHalo/BoltCore; INTERACTIVA (energía por velocidad, estela a contra de la marcha, arcos a los pies al saltar / a la cabeza al caer). Icono 30×30 procedural + localización es/EN + EnsureItem.
+- LOS ANILLOS DE VUELO = LOS DEL SOL IV: RunicHaloRenderer reescrito — los CUATRO anillos LITERALES del Sol Rúnico IV (1.62+0.44k ×R, flat 0.34..0.48, tilt −0.55..+0.05, giro alterno, 6/8/10/12 glifos) sobre la espalda a los ALPHAS EXACTOS del sol; corazón de bloom ×2.1 → latido 22 px; energía de vuelo ACOTADA (0.85..1.20); luz y chispas contenidas.
+- LA CORONA = LA DEL SOL I: RuneRingCrownRenderer reescrito — UN solo aro LITERAL del Sol I (1.62R × 0.34, tilt −0.55, CW 0.26) con 6 glifos/perlas al brillo EXACTO; icono regenerado; CosmeticPlayer ajustado.
+- EL ECLIPSE — EL SOL ASOMA: el aura final se pinta ANTES del repintado negro (el vacío la devora en el centro — antes lavaba el corazón de dorado) + LA CORONA DEL ECLIPSE (aro blanco-cálido 1.055R + jade dorado 1.13R): negro de verdad con el sol asomando al borde.
+- SUBAGENTE 39-a — LOS CÍRCULOS RÚNICOS: Supremo y Supremo Aurora 2→3 anillos (blanco íntimo @2.02R / morado íntimo @2.02R — refactor del DrawRune que hardcodeaba dos círculos); Bruma Ascendida 0→2 (sistema desde cero: teal 8 @2.55R + hielo 6 @3.15R); Olvido Ascendido 1→2 (violeta 6 @3.20R CCW); Umbral Ascendido anillo íntimo 1.66R→1.95R ×0.62→×0.80 (se LEE); Cósmico Ascendido intacto (ya tenía 2).
+- Sandbox: compilación 0 errores / 0 warnings contra tModLoader v2026.07.3.0 real (fix de un paréntesis perdido en un tooltip durante la integración).
+
+Test:
+- Sandbox 0/0 verificado tras TODAS las ediciones (mi trabajo + el del subagente juntos).
+- Iconos VLM-verificados: la Envoltura de Rayos lee "anillo eléctrico irregular con núcleo azul" y la Corona lee "una sola elipse dorada con 6 perlas".
+- PENDIENTE (usuario): Build v6.23 → (1) el fuego abraza con puntas 3-4 px sobre la cabeza; (2) la Envoltura de Rayos entregada al entrar al mundo; (3) las alas/corona con los anillos LITERALES de los soles al brillo solar; (4) el Eclipse con centro negro y corona asomando; (5) supremos con 3 círculos y ascendidos con 2.
+
+Next:
+- La jerarquía rúnica queda: básico (sin runas) → avanzado/ascendido (2 círculos) → supremo (3 círculos).
+- StormVeilRenderer abre la familia de cosméticos ELÉCTRICOS (anillos de tormenta en armas sería el paso natural).
+
+Stage Summary:
+- v6.23: el ajuste fino completo del usuario — 6 peticiones cerradas (tamaño del fuego, envoltura de rayos nueva, anillos de vuelo = Sol IV, corona = Sol I, eclipse negro con sol asomando, círculos rúnicos 3/2) con compilación 0/0.

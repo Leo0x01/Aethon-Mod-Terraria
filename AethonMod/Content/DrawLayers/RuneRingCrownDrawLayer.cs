@@ -8,13 +8,13 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RuneRingCrownDrawLayer — v6.22 — LOS ANILLOS QUE TE RODEAN.
+    /// RuneRingCrownDrawLayer — v6.23 — EL ANILLO DEL SOL I QUE TE RODEA.
     ///
-    /// Capa de dibujado que pinta la CORONA DE ANILLOS RÚNICOS: los tres
-    /// aros orbitando el CUERPO del jugador (se dibujan en el pase
-    /// delantero sobre los accesorios de cara: los anillos son ENERGÍA y
-    /// cruzan por delante del cuerpo — el ecuatorial abraza la cintura).
-    /// Los quads salen de RuneRingCrownRenderer por VFXCore
+    /// Capa de dibujado que pinta LA CORONA: EL anillo del Sol Rúnico I
+    /// orbitando el CUERPO del jugador (se dibuja en el pase delantero
+    /// sobre los accesorios de cara: el aro es ENERGÍA y cruza por
+    /// delante del cuerpo — el anillo inclinado te abraza). Los quads
+    /// salen de RuneRingCrownRenderer por VFXCore
     /// (AppendToPlayerDraw — el camino oficial de las coronas).
     /// </summary>
     public class RuneRingCrownDrawLayer : PlayerDrawLayer

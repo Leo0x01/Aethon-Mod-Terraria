@@ -8,13 +8,17 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// OlvidoAscendidoBlackHoleRenderer — v6.18 — EL OLVIDO ASCENDIDO.
+    /// OlvidoAscendidoBlackHoleRenderer — v6.23 — EL OLVIDO ASCENDIDO.
+    ///
+    /// v6.23 — EL SEGUNDO CÍRCULO RÚNICO (petición del usuario): 6 runas
+    /// VIOLETAS @3.20·R CONTRARROTANDO alrededor del círculo dorado — el
+    /// DOBLE anillo rúnico de tipo agujero que le faltaba.
     ///
     /// LA COPIA MEJORADA del Olvido definitivo (OlvidoBlackHoleRenderer
     /// v6.15/v6.18 queda INTACTO — este archivo es un VÓRTICE NUEVO): el
     /// mismo cuerpo (anillo de plasma con hotspot Doppler, brazos
-    /// espirales, runas doradas, ondas de distorsión, nebulosas y aura
-    /// mística) elevado con LA LIBRERÍA DE RAYOS StormLib:
+    /// espirales, doble círculo de runas, ondas de distorsión, nebulosas
+    /// y aura mística) elevado con LA LIBRERÍA DE RAYOS StormLib:
     ///
     ///   1. ⚡ ARCOS DEL VACÍO — 3 StormLib.Arc morado-azules
     ///      abrazando el horizonte (radios 0.95× / 1.08× / 1.22×),
@@ -76,10 +80,16 @@ namespace AethonMod.Content.VFX
         // --- NUEVO: la electricidad del vacío (arcos/rayos/fotones) ---
         private const float VoidHz = 9f;        // ~9 Hz de re-generación
 
-        // --- runas doradas ---
+        // --- runas doradas (círculo interior) ---
         private const int RuneCount = 10;
         private const float RuneRadius = 2.62f;  // ×R — el círculo rúnico
         private const float RuneOrbit = 0.10f;   // rad/s de rotación del círculo
+
+        // --- v6.23: EL SEGUNDO CÍRCULO RÚNICO — violeta pálido,
+        //     CONTRARROTANDO MÁS AFUERA que el dorado ---
+        private const int VioletCount = 6;         // 6 glifos violetas
+        private const float VioletRadius = 3.20f;  // ×R — MÁS AFUERA que el dorado
+        private const float VioletOrbit = -0.12f;  // rad/s — CONTRARROTANDO
 
         // --- ondas de distorsión ---
         private const float WaveCycle = 2.6f;    // s
@@ -96,6 +106,8 @@ namespace AethonMod.Content.VFX
         private static readonly Color BoltPink = new(90, 190, 255);   // rayo exterior azul eléctrico
         private static readonly Color RuneGold = new(255, 150, 40);   // cuerpo de runa
         private static readonly Color RuneTip = new(255, 225, 150);   // punta de runa
+        private static readonly Color RuneViolet = new(200, 140, 255);   // runa violeta (círculo exterior v6.23)
+        private static readonly Color RuneVioletTip = new(240, 225, 255); // punta violeta pálida
         private static readonly Color NebPurple = new(70, 40, 200);   // nebulosa morada
         private static readonly Color NebBlue = new(40, 100, 230);    // nebulosa azul
         private static readonly Color AuraViolet = new(70, 80, 220);  // aura mística azulada
@@ -254,6 +266,10 @@ namespace AethonMod.Content.VFX
 
                 // --- 9. RUNAS DORADAS orbitando + anillo rúnico ---
                 DrawGoldenRunes(center, r, time, seed);
+
+                // --- 9b. EL CÍRCULO VIOLETA CONTRARROTANTE (v6.23): el
+                //      doble círculo rúnico del Olvido. ---
+                DrawVioletRunes(center, r, time, seed);
 
                 // --- 10. ONDAS DE DISTORSIÓN expandiéndose ---
                 DrawDistortionWaves(center, r, time, seed);
@@ -628,6 +644,8 @@ namespace AethonMod.Content.VFX
 
         // ------------------------------------------------------------------
         //  9. RUNAS DORADAS — 10 glifos originales orbitando (intacto)
+        //     + 9b: EL CÍRCULO VIOLETA CONTRARROTANTE (v6.23 — doble
+        //      círculo rúnico de tipo agujero)
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -713,6 +731,74 @@ namespace AethonMod.Content.VFX
                     Tint(RuneGold, 0.62f * pulse));
                 Quad(Glow, pearlPos, new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f,
                     Tint(new Color(220, 235, 255), 0.9f * pearlPulse));
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  9b. NUEVO (v6.23) — EL CÍRCULO VIOLETA CONTRARROTANTE: el doble
+        //      círculo rúnico de tipo agujero (espejo del círculo ámbar
+        //      del Cósmico Ascendido)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// EL SEGUNDO CÍRCULO RÚNICO (v6.23): 6 glifos VIOLETAS a radio
+        /// MAYOR (3.20·R) CONTRARROTANDO respecto a las runas doradas —
+        /// dos coronas de conjuro girando en sentidos opuestos, la firma
+        /// rúnica completa del Olvido Ascendido.
+        /// </summary>
+        private static void DrawVioletRunes(Vector2 center, float r, float time, int seed)
+        {
+            // Glifos al 85% de las doradas (0.85 × 1.35 de la casa).
+            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.35f * 0.85f;
+
+            // Aro violeta tenue que UNE los glifos exteriores.
+            RingQuad(center, VioletRadius * r, time * VioletOrbit,
+                Tint(RuneViolet, 0.18f));
+
+            for (int g = 0; g < VioletCount; g++)
+            {
+                float ang = g / (float)VioletCount * MathHelper.TwoPi + time * VioletOrbit;
+
+                // Flotación viva (desfasada de las doradas).
+                float floatR = VioletRadius * r +
+                               2.2f * glyphScale * (float)Math.Sin(time * 1.1f + g * 1.4f);
+                float bobY = 1.8f * glyphScale * (float)Math.Sin(time * 0.95f + g * 2.1f);
+                Vector2 glyphPos = center + new Vector2(
+                    (float)Math.Cos(ang) * floatR,
+                    (float)Math.Sin(ang) * floatR + bobY);
+
+                // Latido propio, más nervioso que el dorado.
+                float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 2.8f + g * 1.7f);
+
+                // Resplandor suave DETRÁS (violeta).
+                Quad(Glow, glyphPos, new Vector2(30f * glyphScale, 30f * glyphScale), 0f,
+                    Tint(RuneViolet, 0.18f * pulse));
+
+                // Trazos: cápsulas violetas (glifos desfasados de la tabla).
+                Vector2[] strokes = _runes[(g * 3 + 2) % _runes.Length];
+                for (int s = 0; s < strokes.Length; s += 2)
+                {
+                    Vector2 a = glyphPos + strokes[s] * glyphScale;
+                    Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
+                    Vector2 mid = (a + b) * 0.5f;
+                    Vector2 delta = b - a;
+                    float len = delta.Length();
+                    if (len < 0.01f) continue;
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+
+                    // Gradiente vertical: abajo cuerpo, arriba punta pálida.
+                    float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
+                    Color col = Color.Lerp(RuneVioletTip, RuneViolet, 1f - localY * 0.25f);
+
+                    Capsule(mid, len, 3.2f * glyphScale, rot, Tint(col, 0.80f * pulse));
+                }
+
+                // PERLA violeta sobre el glifo.
+                Vector2 pearlPos = glyphPos - new Vector2(0f, 10.5f * glyphScale);
+                Quad(Glow, pearlPos, new Vector2(6.2f * glyphScale, 6.2f * glyphScale), 0f,
+                    Tint(RuneViolet, 0.55f * pulse));
+                Quad(Glow, pearlPos, new Vector2(2.9f * glyphScale, 2.9f * glyphScale), 0f,
+                    Tint(RuneVioletTip, 0.9f * pulse));
             }
         }
 

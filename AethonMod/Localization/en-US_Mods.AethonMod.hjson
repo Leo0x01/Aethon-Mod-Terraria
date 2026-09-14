@@ -119,6 +119,8 @@
         "Items.EclipsePrimordialStaff.DisplayName": "Staff of the Primordial Eclipse",
         // v6.22: THE THREE NEW COSMETICS
         "Items.FireVeilItem.DisplayName": "Primordial Fire Veil",
+        // v6.23: the lightning shroud (StormLib over the silhouette)
+        "Items.StormVeilItem.DisplayName": "Primordial Storm Veil",
         "Items.RuneRingCrownItem.DisplayName": "Rune Ring Crown",
         "Items.RunicHaloWings.DisplayName": "Astral Rune Ring",
         // v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)

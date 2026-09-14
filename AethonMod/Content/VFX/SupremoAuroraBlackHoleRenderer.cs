@@ -9,8 +9,14 @@ using AethonMod.Content.Effects.Bruma;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// SupremoAuroraBlackHoleRenderer — v6.20 — EL AGUJERO NEGRO SUPREMO
+    /// SupremoAuroraBlackHoleRenderer — v6.23 — EL AGUJERO NEGRO SUPREMO
     /// AURORA, 100% CÓDIGO.
+    ///
+    /// v6.23 — EL TRIPLE CÍRCULO DE RUNAS (petición del usuario): junto
+    /// a los dos anillos rúnicos clásicos nace el TERCERO — el círculo
+    /// MORADO íntimo (6 runas @2.02·R, CW rápido) entre el anillo de
+    /// fotones y el azul: EL COLOR QUE FALTABA del gradiente. `DrawRune`
+    /// ahora recibe SU `count` y SU `orbit` por llamada.
     ///
     /// PETICIÓN DEL USUARIO (v6.20): "en el agujero negro supremo, cambiar
     /// el color: centro NEGRO y que vaya cambiando de color — a MORADO
@@ -24,7 +30,8 @@ namespace AethonMod.Content.VFX
     ///   · EL NÚCLEO        → NEGRO ABSOLUTO (el horizonte siempre gana).
     ///   · JUNTO AL NÚCLEO  → MORADO (185,105,255): el rim del horizonte,
     ///     el anillo de fotones, los arcos eléctricos, el interior del
-    ///     disco Doppler y la nube interna de humo.
+    ///     disco Doppler, la nube interna de humo y el círculo íntimo de
+    ///     runas moradas (v6.23).
     ///   · EL MEDIO         → AZUL (92,150,255): los brazos espirales al
     ///     desenroscarse, el círculo interior de runas, el contrarroto.
     ///   · LOS BORDES       → DORADO (255,195,90): el exterior del anillo
@@ -100,6 +107,11 @@ namespace AethonMod.Content.VFX
         private const int OuterRuneCount = 6;      // doradas, CCW
         private const float OuterRuneRadius = 3.30f; // ×R — MÁS AFUERA (borde)
         private const float OuterRuneOrbit = -0.075f; // rad/s — CONTRARROTO
+        // --- v6.23: EL TERCER CÍRCULO — morado, el MÁS ÍNTIMO (el color
+        //     que FALTABA del gradiente, junto al núcleo) girando rápido ---
+        private const int PurpleRuneCount = 6;      // moradas, CW rápido
+        private const float PurpleRuneRadius = 2.02f;  // ×R — MÁS ADENTRO
+        private const float PurpleRuneOrbit = 0.16f;   // rad/s — el círculo vivo
 
         // --- LOS RAYOS (LA ESTRELLA — StormLib) ---
         private const float BoltHz = 10f;        // ~10 Hz de parpadeo vivo
@@ -128,6 +140,8 @@ namespace AethonMod.Content.VFX
         private static readonly Color RuneBlueTip = new(222, 234, 255);
         private static readonly Color RuneGold = new(255, 185, 75);    // runa dorada (círculo del borde)
         private static readonly Color RuneGoldTip = new(255, 240, 190);
+        private static readonly Color RunePurple = new(185, 130, 255);  // runa morada (círculo íntimo)
+        private static readonly Color RunePurpleTip = new(235, 215, 255); // punta morada pálida
         private static readonly Color NebPurple = new(98, 62, 188);    // nebulosa morada
         private static readonly Color NebGold = new(182, 132, 52);     // nebulosa dorada
         private static readonly Color WarmWhite = new(240, 245, 255);  // blanco aurora
@@ -319,7 +333,7 @@ namespace AethonMod.Content.VFX
                 DrawHorizonArcs(center, r, time, seed, boltFlick);
                 DrawEscapingBolts(center, rr, tFast, seed, boltFlick);
 
-                // --- 10. DOBLE CÍRCULO DE RUNAS (CW + CCW) ---
+                // --- 10. TRIPLE CÍRCULO DE RUNAS (CW + CCW + CW íntimo) ---
                 DrawRuneCircles(center, r, tSlow, seed);
 
                 // --- 11. JETS POLARES (oro arriba, violeta abajo) ---
@@ -757,9 +771,9 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  10. EL DOBLE CÍRCULO DE RUNAS — 8 AZULES CW + 6 DORADAS CCW
-        //      (el círculo interior = el MEDIO del gradiente; el exterior
-        //       = el BORDE — morado→azul→dorado de dentro afuera)
+        //  10. EL TRIPLE CÍRCULO DE RUNAS — 8 AZULES CW + 6 DORADAS CCW
+        //      + 6 MORADAS íntimas CW rápido (v6.23: el TERCER anillo —
+        //      morado→azul→dorado de dentro afuera YA completo)
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -801,7 +815,8 @@ namespace AethonMod.Content.VFX
             for (int g = 0; g < InnerRuneCount; g++)
             {
                 DrawRune(center, r, time, g, InnerRuneRadius,
-                    RuneBlue, RuneBlueTip, glyphScale, offset: 0);
+                    RuneBlue, RuneBlueTip, glyphScale,
+                    count: InnerRuneCount, orbit: InnerRuneOrbit, offset: 0);
             }
 
             // ============================================================
@@ -813,17 +828,35 @@ namespace AethonMod.Content.VFX
             for (int g = 0; g < OuterRuneCount; g++)
             {
                 DrawRune(center, r, time, g, OuterRuneRadius,
-                    RuneGold, RuneGoldTip, glyphScale * 0.85f, offset: 3);
+                    RuneGold, RuneGoldTip, glyphScale * 0.85f,
+                    count: OuterRuneCount, orbit: OuterRuneOrbit, offset: 3);
+            }
+
+            // ============================================================
+            //  EL CÍRCULO MORADO — 6 runas MÁS ADENTRO, rápido e íntimo
+            //  (v6.23: EL COLOR QUE FALTABA del gradiente — junto al
+            //  núcleo, entre el anillo de fotones y el azul)
+            // ============================================================
+            RingQuad(center, PurpleRuneRadius * r, time * PurpleRuneOrbit,
+                Tint(RunePurple, 0.20f));
+            for (int g = 0; g < PurpleRuneCount; g++)
+            {
+                DrawRune(center, r, time, g, PurpleRuneRadius,
+                    RunePurple, RunePurpleTip, glyphScale * 0.92f,
+                    count: PurpleRuneCount, orbit: PurpleRuneOrbit, offset: 6);
             }
         }
 
-        /// <summary>Una runa del círculo (glifo + resplandor + perla).</summary>
+        /// <summary>
+        /// Una runa del círculo (glifo + resplandor + perla). v6.23: cada
+        /// llamada trae SU `count` y SU `orbit` — el círculo ya NO se
+        /// deduce del `offset` (hay TRES coronas, no dos).
+        /// </summary>
         private static void DrawRune(Vector2 center, float r, float time, int g,
-            float radius, Color body, Color tip, float glyphScale, int offset)
+            float radius, Color body, Color tip, float glyphScale,
+            int count, float orbit, int offset)
         {
-            float ang = g / (float)(offset == 0 ? InnerRuneCount : OuterRuneCount)
-                        * MathHelper.TwoPi +
-                        time * (offset == 0 ? InnerRuneOrbit : OuterRuneOrbit);
+            float ang = g / (float)count * MathHelper.TwoPi + time * orbit;
 
             // Flotación viva: el radio respira por glifo y el glifo se mece.
             float floatR = radius * r +
