@@ -106,6 +106,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === EL VUELO: la chispa se abre paso, decelerando suave ===
             Projectile.velocity *= 0.988f;
 
+            // === v6.25 — LA ESTELA DE LA SINFONÍA: el track del camino
+            //     (EstelaLib — el ring-buffer por identidad) ===
+            EstelaLib.Track(Projectile.whoAmI, 24).Push(Projectile.Center);
+            if (_age % 120f == 0f) EstelaLib.PurgeTracks();
+
             // === LAS CADENAS: cada 9 ticks, un rayo al enemigo cercano ===
             if (_age % 9f == 0f && Main.netMode != NetmodeID.MultiplayerClient)
             {
@@ -196,15 +201,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     d.fadeIn = 0f;
                 }
 
-                // EL PUÑETAZO DE CÁMARA radial.
-                try
-                {
-                    Main.instance.CameraModifiers.Add(
-                        new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
-                            Projectile.Center, new Vector2(0.6f, 0.8f), 6f, 8, 14, 0.35f,
-                            "AethonSinfonia"));
-                }
-                catch { }
+                // v6.25 — EL PAQUETE DE IMPACTO CENTRALIZADO (OndaLib):
+                // la sacudida de cámara del acumulador ÚNICO del frame +
+                // el destello de pantalla del velo radial.
+                OndaLib.Kick(9f, 16);
+                OndaLib.Flash(new Color(255, 240, 210), 0.16f, 8);
             }
 
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
@@ -297,6 +298,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         14f + 5f * i, i % 2 == 0 ? BrumaDorada : BrumaVioleta,
                         seed + 300 + i * 37, time - 0.12f * i,
                         alpha: 0.22f - 0.05f * i, quality: 0.5f);
+                }
+
+                // === 1b. LA ESTELA DE RIBBON (v6.25 — EstelaLib: el CAMINO
+                //     REAL de la chispa, ribbon de grosor variable Comet con
+                //     triple capa velo/cuerpo/núcleo + cabeza integrada) ===
+                Vector2[] camino = EstelaLib.Track(Projectile.whoAmI, 24).Points();
+                if (camino.Length > 2)
+                {
+                    for (int i = 0; i < camino.Length; i++)
+                        camino[i] -= Main.screenPosition;
+                    EstelaLib.Ribbon(Main.spriteBatch, camino, 15f,
+                        EstelaProfile.Comet, prism, 0.55f, seed + 7, time);
                 }
 
                 // === 2. EL CORAZÓN DE LUZ (LumenLib — bloom prismático + destello) ===
@@ -437,6 +450,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     null, Main.GameViewMatrix.TransformationMatrix);
 
                 // === 2. EL ESTALLIDO DE LUZ (LumenLib — flash + aurora completa) ===
+                // === 2b. LA ONDA EXPANSIVA (v6.25 — OndaLib: el frente ROTO ===
+                // ===     con aberración cromática + retaguardia) ===
+                OndaLib.Shock(Main.spriteBatch, center, phase, 215f, prism,
+                    MathHelper.Clamp(0.85f * fade + 0.15f, 0f, 1f), seed, 10f,
+                    OndaFalloff.Quadratic, chromatic: true);
+
                 float flashI = MathHelper.Clamp(1f - _dyingAge / 8f, 0f, 1f);
                 if (flashI > 0f)
                 {

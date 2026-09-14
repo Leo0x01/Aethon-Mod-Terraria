@@ -240,16 +240,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // La MASA principal de la tormenta (respirando).
+                // La MASA principal de la tormenta (respirando) — v6.25:
+                // VIVE por la LUZ DEL MUNDO (la nube física se apaga en
+                // las sombras, con piso — nunca invisible del todo).
                 float breathe = 1f + 0.05f * (float)Math.Sin(time * 0.7f);
                 BrumaFX.Cloud(Projectile.Center - Main.screenPosition,
                     92f * breathe, StormViolet, seed + 11, time,
-                    puffs: 6, alpha: 0.34f * lifeFade);
+                    puffs: 6, alpha: 0.34f * lifeFade, worldLit: true);
 
                 // La CAPA ALTA tenue (la profundidad del cielo).
                 BrumaFX.Cloud(Projectile.Center - Main.screenPosition - new Vector2(0f, 30f),
                     120f * breathe, StormCyan, seed + 47, time * 0.8f,
-                    puffs: 5, alpha: 0.20f * lifeFade);
+                    puffs: 5, alpha: 0.20f * lifeFade, worldLit: true);
 
                 // DOS PUFFS GIANTES girando lento (la deriva de la tormenta).
                 for (int i = 0; i < 2; i++)
@@ -259,7 +261,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         (float)Math.Cos(ang) * 30f, (float)Math.Sin(ang) * 12f - 8f);
                     BrumaFX.Puff(pos, 52f, i == 0 ? StormViolet : StormCyan,
                         seed + 83 + i * 37, time,
-                        alpha: 0.22f * lifeFade, quality: 0.6f);
+                        alpha: 0.22f * lifeFade, quality: 0.6f, worldLit: true);
                 }
 
                 // ============ 2..6: LO BRILLANTE (pase aditivo) ============

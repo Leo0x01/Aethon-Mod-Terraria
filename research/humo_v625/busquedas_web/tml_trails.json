@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://forums.terraria.org/index.php?threads/particle-trail.50021",
+    "name": "tModLoader - Particle Trail - Terraria Community Forums",
+    "snippet": "Oct 4, 2016 · Hi, Does anyone know how to add a trail to a particle like the Terra beam? I've been trying for ages and no luck! Thanks, Jimbo. tModLoader - Projectile trail drawing incorrectly [Tutorial] TModLoader: Projectile Help | Terraria Community Forums More results from forums.terraria.org",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=OT9eZ7mSKtY",
+    "name": "Terraria Modding Tutorial || - Global Projectile (1.4) - YouTube",
+    "snippet": "Nov 17, 2022 · Support my game development on Patreon for cool stuff! https://www.patreon.com/RipStudios?fan_landing=true My Project Files: ...",
+    "host_name": "www.youtube.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=UKF05U0HGtw",
+    "name": "MAGIC WEAPON AND PROJECTILE - HOW TO MAKE A MOD",
+    "snippet": "May 28, 2022 · Video Information Welcome to How to Make a Mod for Terraria 1.4. This series will cover a range of items from basic weapons to advanced AI ...",
+    "host_name": "www.youtube.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net/docs/1.4-preview/class_terraria_1_1_projectile.html",
+    "name": "Terraria.Projectile Class Reference - tModLoader",
+    "snippet": "Holds the value of Projectile.spriteDirection from previous updates from newest to oldest. Use for drawing trails. Must be used with ProjectileID.Sets.",
+    "host_name": "docs.tmodloader.net",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=bJ03_Z6ANCc",
+    "name": "Tmodloader 1.4 Mod Tutorial (Bow effects) - YouTube",
+    "snippet": "Jul 17, 2022 · This tutorial will teach you how to make a bow shoot multiple projectiles, make your projectile inflict a debuff and add dust to your ...",
+    "host_name": "www.youtube.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=9q6EI93mT98",
+    "name": "OUTDATED! - Terraria Mod Development Tutorial - tModLoader 0.9",
+    "snippet": "Mar 7, 2017 · Video Information Javelin Fix: On the line: projectile.velocity.Y = projectile.velocity.Y * velYmult; Change to: projectile.velocity.",
+    "host_name": "www.youtube.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=Ov7JUsWt2xE",
+    "name": "Projectiles - Terraria Modding Tutorial (1.4) - YouTube",
+    "snippet": "Feb 13, 2023 · Hi everyone! Today we talk about projectiles and how you can make your own custom behaviors and get a greater understanding of what's going ...",
+    "host_name": "www.youtube.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=li6Gz6vIsPE",
+    "name": "Tmodloader 1.4 Mod Tutorial (Creating a custom projectile) - YouTube",
+    "snippet": "Jun 25, 2022 · This video will show you how to make a custom projectile for your bow Resources: https://visualstudio.microsoft.com/do... Tags: Mod Tutorial ...",
+    "host_name": "www.youtube.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

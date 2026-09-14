@@ -5,26 +5,32 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// RuneRingCrownRenderer — v6.23 — LA CORONA: EL ANILLO DEL SOL I.
+    /// RuneRingCrownRenderer — v6.25 — LA CORONA DE ANILLOS RÚNICOS:
+    /// LA AUREOLA DEL SOL I SOBRE LA CABEZA.
     ///
-    /// Petición original v6.22: "un cosmético que sea una corona de
-    /// anillos rúnicos que rodee al jugador" (eran TRES aros propios).
+    /// v6.22: "una corona de anillos rúnicos que rodee al jugador" (tres
+    /// aros propios orbitando el CUERPO).
+    /// v6.23: "que SEA la del sol número 1" (el anillo LITERAL del Sol I,
+    /// todavía alrededor del torso).
+    /// v6.25 — LA ORDEN DEL USUARIO (la corrección del destinatario): "la
+    /// que tenías que cambiar era la CORONA DE ANILLOS RÚNICOS — debe
+    /// estar en la CABEZA del jugador como una AUREOLA, igual al anillo
+    /// del sol rúnico 1, sin brillar de más".
     ///
-    /// v6.23 — LA ORDEN DEL USUARIO: "que la corona de anillos rúnicos
-    /// SEA LA DEL SOL NÚMERO 1, además el anillo es muy brillante —
-    /// reduce el brillo a como se ve en los soles".
-    ///
-    /// EL ANILLO DEL SOL RÚNICO I, LITERAL: EL primer anillo del sistema
-    /// solar (la MISMA geometría de RuneSunRenderer, tier 1) orbitando el
-    /// CUERPO del jugador:
+    /// EL ANILLO DEL SOL RÚNICO I, LITERAL, RINGIENDO LA CABEZA: el mismo
+    /// sistema de RuneSunRenderer tier 1, anclado a la CABEZA como una
+    /// aureola de verdad:
     ///   · el aro elíptico de cápsulas con PROFUNDIDAD (semiejes
     ///     1.62×R / 0.34×R, inclinación −0.55 — el plano del Sol I),
     ///   · giro CW 0.26 rad/s (el paso del sol),
-    ///   · 6 glifos cabalgando la órbita rotados a la TANGENTE, con
-    ///     perlas y latidos — LOS ALPHAS EXACTOS del sol: aro
-    ///     (0.30+0.30·depth)·pulse, glifos 0.85·pulse, perlas
-    ///     0.60/0.90·pulse. Cero bloom añadido: el anillo se lee AL
-    ///     MISMO BRILLO que en los soles.
+    ///   · 6 glifos solares cabalgando la órbita rotados a la TANGENTE,
+    ///     con perlas y latidos — LOS ALPHAS EXACTOS del sol: aro
+    ///     (0.30+0.30·depth)·pulse, resplandor 0.20·pulse, trazos
+    ///     0.85·pulse, perlas 0.60/0.90·pulse. Cero bloom añadido: se
+    ///     lee AL MISMO BRILLO que en los soles.
+    ///
+    /// Uso (biblioteca): VFXCore.Begin() → ComputeQuads(...) →
+    /// VFXCore.AppendToPlayerDraw(...) o VFXCore.FlushAdditive(...).
     /// </summary>
     public static class RuneRingCrownRenderer
     {
@@ -34,14 +40,20 @@ namespace AethonMod.Content.VFX
         private const float RingTilt0 = -0.55f;  // inclinación (el plano del Sol I)
         private const float RingSpin0 = 0.26f;   // giro CW (rad/s — el paso del sol)
 
-        /// <summary>LA CORONA ES UN SOLO ANILLO: el del Sol I.</summary>
+        /// <summary>La corona ES un solo anillo: el del Sol I.</summary>
         public const int RingCount = 1;
+
+        /// <summary>Los glifos del anillo (LITERAL del Sol I: 6).</summary>
+        public const int GlyphCount = 6;
 
         /// <summary>Las runas del anillo (LITERAL del Sol I: 6 glifos).</summary>
         public static int RunesOf(int k) => 6;
 
-        /// <summary>La base del anillo (px) — abraza el torso del cuerpo.</summary>
-        private const float BaseR = 16f;
+        /// <summary>
+        /// La base del anillo (px): el radio de la CABEZA — la aureola
+        /// ringea la cabeza (el semieje mayor queda a 1.62×12 ≈ 19 px).
+        /// </summary>
+        private const float BaseR = 12f;
 
         // --- LA PALETA (los oros del sol — concordancia total) ---
         private static readonly Color RuneGold = new(255, 190, 80);    // cuerpo de runa dorada
@@ -65,40 +77,40 @@ namespace AethonMod.Content.VFX
         };
 
         // ==================================================================
-        //  EL RENDER — el anillo del Sol I al buffer de VFXCore
+        //  EL RENDER — el anillo del Sol I ringiendo la CABEZA
         // ==================================================================
 
         /// <summary>
-        /// Calcula EL ANILLO DEL SOL I como cuadros de luz en el buffer de
-        /// VFXCore (coordenadas de MUNDO).
+        /// Calcula LA AUREOLA (el anillo del Sol I) como cuadros de luz en
+        /// el buffer de VFXCore (coordenadas de MUNDO).
         /// </summary>
-        /// <param name="center">Centro del cuerpo del jugador (mundo).</param>
+        /// <param name="head">Centro de la cabeza que ringea la aureola.</param>
         /// <param name="scale">Escala del conjunto (humano ≈ 1).</param>
-        /// <param name="time">Tiempo animado (GlobalTimeWrappedHourly).</param>
-        /// <param name="alpha">Multiplicador global (0..1).</param>
-        public static void ComputeQuads(Vector2 center, float scale, float time, float alpha = 1f)
+        /// <param name="time">Tiempo animado (Main.GlobalTimeWrappedHourly).</param>
+        /// <param name="alpha">Multiplicador global de intensidad (0..1).</param>
+        public static void ComputeQuads(Vector2 head, float scale, float time, float alpha = 1f)
         {
             if (scale <= 0.05f || alpha <= 0.02f) return;
 
             float R = BaseR * scale;
             float glyphScale = Math.Max(R / 52f, 0.25f) * 1.45f;
 
-            // === EL ÚNICO ARO: el plano LITERAL del Sol I (1.62R × 0.34,
-            //     inclinado −0.55, girando CW al paso del sol) ===
+            // === EL ARO: el plano LITERAL del Sol I (1.62R × 0.34, inclinado
+            //     −0.55, girando CW al paso del sol) ringiendo la cabeza ===
             float a = RingA0 * R;
             float b = a * RingFlat0;
             float tilt = RingTilt0;
             float spin = time * RingSpin0;
-            int runeCount = RunesOf(0);
+            int runeCount = GlyphCount;
 
             // --- 1. EL ARO ELÍPTICO: polilínea de cápsulas con PROFUNDIDAD
             //     (el alpha EXACTO del sol: (0.30+0.30·depth)·pulse) ---
             const int Segments = 30;
-            Vector2 prev = EllipsePoint(center, a, b, tilt, spin);
+            Vector2 prev = EllipsePoint(head, a, b, tilt, spin);
             for (int s = 1; s <= Segments; s++)
             {
                 float t = spin + s / (float)Segments * MathHelper.TwoPi;
-                Vector2 pt = EllipsePoint(center, a, b, tilt, t);
+                Vector2 pt = EllipsePoint(head, a, b, tilt, t);
                 Vector2 mid = (prev + pt) * 0.5f;
                 Vector2 delta = pt - prev;
                 float len = delta.Length();
@@ -122,7 +134,7 @@ namespace AethonMod.Content.VFX
             {
                 float ang = g / (float)runeCount * MathHelper.TwoPi + spin;
                 float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f);
-                Vector2 glyphPos = EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
+                Vector2 glyphPos = EllipsePoint(head, a * breathe, b * breathe, tilt, ang);
 
                 float tanAng = TangentialAngle(a * breathe, b * breathe, tilt, ang);
                 float glyphRot = tanAng + MathHelper.PiOver2; // la runa "de pie" sobre el aro
@@ -164,15 +176,15 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>Posición mundial del glifo g del anillo (las chispas).</summary>
-        public static Vector2 GetGlyphPosition(Vector2 center, float scale, float time, int k, int g)
+        public static Vector2 GetGlyphPosition(Vector2 head, float scale, float time, int g)
         {
             float R = BaseR * scale;
             float a = RingA0 * R;
             float b = a * RingFlat0;
             float spin = time * RingSpin0;
-            float ang = g / (float)RunesOf(0) * MathHelper.TwoPi + spin;
+            float ang = g / (float)GlyphCount * MathHelper.TwoPi + spin;
             float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f);
-            return EllipsePoint(center, a * breathe, b * breathe, RingTilt0, ang);
+            return EllipsePoint(head, a * breathe, b * breathe, RingTilt0, ang);
         }
 
         // ------------------------------------------------------------------

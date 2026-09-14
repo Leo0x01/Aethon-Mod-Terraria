@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Thorium Helheim - Steam Workshop",
+    "snippet": "Disable flashy effects in the mod config! Reworks all of Thorium's boss fights , all can be toggled on or off respectively. Also adds some minor Calamity and ...",
+    "host_name": "steamcommunity.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://thoriummod.fandom.com",
+    "name": "Thorium Mod Wiki",
+    "snippet": "Thorium Mod , is one of the most expansive mods for Terraria. With over 2000 new items, 11 challenging new boss fights, hordes of new enemies, an entirely new ...",
+    "host_name": "thoriummod.fandom.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tModLoader - The Thorium Mod | Page 313",
+    "snippet": "Feb 21, 2016 — Something to keep in mind when designing boss fights is that the mechanics should be challenging. Especially for Expert mode.",
+    "host_name": "forums.terraria.org",
+    "rank": 2,
+    "date": "Feb 21, 2016",
+    "favicon": ""
+  }
+]

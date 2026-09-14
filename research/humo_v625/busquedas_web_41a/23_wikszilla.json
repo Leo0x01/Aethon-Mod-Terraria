@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Terraria Mod Collection - Steam Workshop",
+    "snippet": "Nov 20, 2023 — Steam Workshop: tModLoader . A collection of tModLoader workshop mods put together for a new and fresh Terraria experience.",
+    "host_name": "steamcommunity.com",
+    "rank": 0,
+    "date": "Nov 20, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "PC - nothing from workshop is working",
+    "snippet": "Feb 11, 2023 — If Steam Workshop simply WILL NOT work for you, you actually have a location in your Terraria files, to manually install \"Packs\" in .zip and . Read more",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Feb 11, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://store.steampowered.com",
+    "name": "tModLoader on Steam",
+    "snippet": "tModLoader (TML ) is an open-source, community-driven modification and expansion of the Terraria game that makes it possible to make and play mods.",
+    "host_name": "store.steampowered.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.rockpapershotgun.com",
+    "name": "Terraria has added Steam Workshop support for easier",
+    "snippet": "Mar 30, 2021 — You can now browse and install many Terraria mods easily through your browser, thanks to the new Steam Workshop added in update 1.4.2 on ...",
+    "host_name": "www.rockpapershotgun.com",
+    "rank": 3,
+    "date": "Mar 30, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.wiki.gg",
+    "name": "tModLoader - Official Terraria Wiki",
+    "snippet": "Aug 15, 2026 — tModLoader (TML ) is a standalone program which allows playing Terraria with mods. It is available on Steam as free Terraria DLC, ...",
+    "host_name": "terraria.wiki.gg",
+    "rank": 4,
+    "date": "Aug 15, 2026",
+    "favicon": ""
+  }
+]

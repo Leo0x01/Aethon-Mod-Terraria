@@ -1,5 +1,126 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.25 — EL HUMO DE VERDAD: EL FIX PREMULTIPLICADO + LA INVESTIGACIÓN DE 23 FUENTES + TRES LIBRERÍAS NUEVAS
+
+**Petición del usuario**: "¿qué es este error? se ve mal, se supone que es
+humo o bruma... acaso es un sprite, deberías hacer humo o bruma mayormente
+por código y de ser sprite estos deben ser transparentes con fondo
+invisible, ¿acaso la librería está mal o los sprites? de ser así,
+investiga a fondo y con profundidad todos los mods populares, al menos 20
+mods y crea librerías que creas que nos falten y mejora la librería para
+humo, bruma, niebla · si te fijas todo lo que lleva esto de humo o bruma
+tiene el mismo error · la corona rúnica estelar del commit anterior estaba
+bien no la cambies, la que tenías que cambiar era corona de anillos
+rúnicos, regresa la corona rúnica estelar a como estaba en el commit
+anterior".
+
+### A. EL BUG DE LOS RECTÁNGULOS — LA CAUSA RAÍZ (y NO eran los PNGs)
+  Los PNGs del mod (SoftGlow/Ring/BlackDisk) están BIEN: fondos
+  transparentes, verificados píxel a píxel. El error estaba en las
+  TEXTURAS HORNEADAS EN RUNTIME de la librería de bruma:
+  · BrumaBrushes escribía `new Color(255, 255, 255, alfa)` — RGB LLENO en
+    TODOS los píxeles (incluso donde alfa ≈ 0), SIN premultiplicar. En el
+    pipeline FNA/tModLoader (que espera alfa premultiplicada): en lotes
+    ADITIVOS (Blend One/One) el canal alfa se IGNORA por completo → TODO
+    el quad se pintaba como RECTÁNGULO SÓLIDO de color; en lotes alfa los
+    bordes quedaban duros (el RGB no muere con el alfa). ESO eran las
+    "sábanas rectangulares" de las capturas — TODO lo que usaba BrumaFX
+    tenía el mismo error porque TODOS comparten los mismos pinceles.
+  · EL FIX: horneado PREMULTIPLICADO (`RGB = blanco × alfa`) + el Tinte
+    de BrumaFX ahora premultiplicado (RGB × f además del alfa × f) — la
+    INTENSIDAD manda también en lotes aditivos y los bordes son suaves en
+    CUALQUIER lote. El humo de TODO el mod se ve suave de verdad.
+
+### B. LA INVESTIGACIÓN — 23 FUENTES (informes en research/humo_v625/)
+  · INFORME_MODS_HUMO.md (Task 41-a): vanilla 1.4.4.9 decompilada (Dust
+    completo), Everglow/Coralite/LunarVeil/WoTE/MEAC locales + 7 repos
+    públicos clonados (Calamity, StarlightRiver, Spirit, SOTS, Fargo's,
+    Overhaul, ParticleLibrary) + web (Thorium, Redemption, AA, Orchid,
+    Avalon...). 24 lecciones con números y 8 anti-patrones.
+  · ANALISIS_HUECOS.md (Task 41-b): gap analysis de 17 capacidades contra
+    26 fuentes — qué tienen los mods premium que nos faltaba.
+
+### C. BRUMAFX v2 — LA SEGUNDA GENERACIÓN DE LA LIBRERÍA DE HUMO
+  · FLIPBOOK de ruido evolucionado: cada pincel es una TIRA VERTICAL de
+    4-6 frames del MISMO campo fBm (dominio desplazándose +0.3 celdas y
+    contraste creciendo por frame) — el humo SE DESGARRA, no solo rota
+    (anti-patrón nº3 de la investigación). Puff cicla en ping-pong lento;
+    AnimatedPuff avanza POR VIDA (Calamity).
+  · ESCALERA de texturas 64/128/160 px por radio (lección Calamity).
+  · VAPOR: el pincel de LUT DURA (núcleo denso, caída 255→0 al 74% —
+    Everglow) + luz del mundo por defecto + muerte rápida.
+  · LUZ DEL MUNDO con piso: WorldTint(pos) — factor 0.25..0.85 por canal
+    (en pleno día sin cambio; en cueva tenue pero visible; bajo antorcha
+    el humo se TINTA cálido). Activada en la Tormenta Nebular.
+  · VIENTO del mundo (Main.windSpeedCurrent) en Column/Tendril/MistBand/
+    Vapor — humo de un mundo con clima.
+  · SMEAR vanilla (dusts 130-134): hasta 6 copias del NÚCLEO cayendo
+    atrás por la velocidad.
+  · AnimatedPuff: envolvente nacimiento-rápido/muerte-lenta + crecimiento
+    ×1.5 + RAMPA DE ENFRIAMIENTO (color→gris — la historia térmica) +
+    brasa que EMITE luz mientras arde.
+  · PRESUPUESTO de 500 quads/frame con LOD automático (menos sub-blobs).
+  · Wisps: voluta + motas de brasa (lección nº24). API VIEJA 100%
+    compatible (Puff/Cloud/Tendril/Column/MistBand sin cambios de firma).
+
+### D. TRES LIBRERÍAS NUEVAS (los huecos del análisis 41-b)
+  · ESTELALIB (Content/VFX/EstelaLib.cs): los RIBBONS de grosor variable
+    que TODOS los mods premium tienen — Sanitize→Smooth→Resample del
+    camino (oldPos sucios, teleports, escalera de ticks) + Ribbon de
+    triple capa (velo/cuerpo/núcleo) con perfiles Head/Center/Comet/Alive
+    + fantasmas con squash (MEAC) + EstelaTrack (ring-buffer por
+    identidad que se AUTO-PODRE a los 2 ticks).
+  · ONDALIB (OndaLib.cs + OndaSystem.cs): las ONDAS EXPANSIVAS de
+    impacto — frente ROTO en 12-16 segmentos con radio vivo + doble anillo
+    (frente + retaguardia ×0.5) + grosor que engorda mientras muere +
+    expansión fast-out + aberración cromática ±1.8% + EL PAQUETE DE
+    IMPACTO: Kick (sacudida de cámara centralizada en el hook oficial
+    ModifyScreenPosition, cap 14px, máx 2 impulsos) y Flash (velo radial
+    en PostDrawInterface, máx 1 activo + cooldown).
+  · PYRALIB (PyraLib.cs): EL FUEGO — recuperada la técnica Doom Fire
+    perdida en la purga de v6.24. PyraPalettes (3 tablas de 37 niveles:
+    SolarFire/ColdFire/VoidFire con los colores de la casa) + Tongue (la
+    lengua: parpadeo inconmensurable 7.1/17.3, punta vaga con reversión,
+    erosión de ruido, triple capa, ROTABLE) + Flame (racimo) + EmberField
+    (campo de brasas con propagación determinista a 30 Hz, cap 600 celdas)
+    + Sparks (ascuas físicas → ParticleManager) + Light.
+
+### E. EL ECLIPSE — EL HUMO DEL VACÍO DE VERDAD
+  Con el fix premultiplicado la bruma interior ya es SUAVE; y ahora con
+  VOLUMEN COMPLETO: 8 volátiles orbitando (eran 6, más grandes) + las dos
+  espirales con BRASAS (Wisps) + 4 JETS DE VAPOR del limbo (LUT dura,
+  naciendo en el borde y CAYENDO al centro con aceleración gravitacional
+  — la masa del vacío se come el gas). El centro del eclipse respira.
+
+### F. LAS CORONAS — LA CORRECCIÓN DEL DESTINATARIO
+  · LA CORONA RÚNICA ESTELAR (RuneCrownItem): REVERTIDA a v6.23 exacta —
+    el arco de ocho glifos fucsia con perlas y chispas rosas que estaba
+    BIEN (renderer + capa + ítem + icono + tooltips + chispas y luz del
+    CosmeticPlayer, todo al estado del commit anterior).
+  · LA CORONA DE ANILLOS RÚNICOS (RuneRingCrownItem): la que DEBÍA subir
+    a la cabeza — ahora ES la aureola: EL ANILLO DEL SOL RÚNICO I LITERAL
+    ringiendo la CABEZA (plano 1.62R×0.34, inclinación −0.55, giro CW
+    0.26, radio base de cabeza 12px) con sus 6 glifos y perlas al brillo
+    EXACTO de los soles; la capa ancla al CENTRO DE LA CABEZA.
+
+### G. LAS LIBRERÍAS CABLEADAS EN LAS ARMAS (v6.24 → vivas)
+  · LA SINFONÍA PRIMORDIAL: la estela de vuelo ahora es un RIBBON de
+    EstelaLib (perfil Comet, prismático) sobre el camino REAL del track +
+    la detonación lleva LA ONDA EXPANSIVA de OndaLib (frente roto con
+    aberración cromática) + el paquete de impacto centralizado (Kick 9px +
+    Flash del velo radial — sustituye al PunchCameraModifier ad-hoc).
+  · LA LANZA DEL ALBA: la punta ARDE — PyraLib.Tongue con la tabla
+    SolarFire (la llama ancla en la punta y crece contra la marcha) + el
+    PULSO de OndaLib en cada golpe + las ASCUAS de PyraLib.Sparks
+    (ParticleManager) + Kick suave de 3px.
+  · LA TORMENTA NEBULAR: la nube física VIVE por la luz del mundo.
+
+### H. CICLO DE VIDA
+  BrumaSystem descarga ahora también los campos de brasas de PyraLib y
+  los tracks de EstelaLib — cero fugas entre recargas.
+
+— Compilación contra tModLoader 2026.07.3.0 real: 0 errores, 0 warnings.
+
 ## Commit v6.24 — EL SOL DEL ECLIPSE + EL HUMO DEL VACÍO + LA AUREOLA DEL SOL I + LOS CÍRCULOS DE LOS AGUJEROS + LAS TRES ARMAS DE LAS LIBRERÍAS
 
 **Petición del usuario**: "al agujero negro eclipse no se le ve el sol ·

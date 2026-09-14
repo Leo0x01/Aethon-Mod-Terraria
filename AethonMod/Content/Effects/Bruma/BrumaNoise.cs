@@ -124,6 +124,19 @@ namespace AethonMod.Content.Effects.Bruma
             return Fbm(x + warp * qx, y + warp * qy, seed + 7);
         }
 
+        /// <summary>
+        /// v6.25 — WarpedFbm con OCTAVAS explícitas: el horneado del
+        /// flipbook de BrumaBrushes usa 4 (velocidad de panadería) en
+        /// pines pequeños y 5 en los grandes (detalle extra donde el ojo
+        /// lo va a ver). Misma matemática, LOD a la carta.
+        /// </summary>
+        public static float WarpedFbm(float x, float y, int seed, float warp, int octaves)
+        {
+            float qx = Fbm(x, y, seed, octaves);
+            float qy = Fbm(x + 5.2f, y + 1.3f, seed, octaves);
+            return Fbm(x + warp * qx, y + warp * qy, seed + 7, octaves);
+        }
+
         // ==================================================================
         //  CURL NOISE — remolinos sin divergencia
         // ==================================================================

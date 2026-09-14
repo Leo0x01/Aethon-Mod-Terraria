@@ -6,19 +6,19 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items.Cosmetics
 {
     /// <summary>
-    /// RuneRingCrownItem — v6.23 — LA CORONA: EL ANILLO DEL SOL I.
+    /// RuneRingCrownItem — v6.25 — LA CORONA DE ANILLOS RÚNICOS:
+    /// LA AUREOLA DEL SOL I SOBRE LA CABEZA.
     ///
-    /// Petición original v6.22: "crea un cosmético que sea una corona
-    /// de anillos rúnicos que RODEE al jugador" (eran tres aros).
-    ///
-    /// v6.23 — LA ORDEN DEL USUARIO: "que la corona de anillos rúnicos
-    /// SEA LA DEL SOL NÚMERO 1, además el anillo es muy brillante —
-    /// reduce el brillo a como se ve en los soles".
-    ///
-    /// EL ANILLO DEL SOL RÚNICO I, LITERAL: el primer aro del sistema
-    /// solar orbitando tu CUERPO — el mismo plano (1.62R × 0.34,
-    /// inclinación −0.55), el mismo paso CW y los mismos 6 glifos con
-    /// perlas y latidos, al BRILLO EXACTO de los soles.
+    /// Petición original v6.22: "un cosmético que sea una corona de
+    /// anillos rúnicos" (tres aros orbitando el cuerpo).
+    /// v6.23: "que SEA la del sol número 1" (el anillo LITERAL del Sol I,
+    /// alrededor del torso).
+    /// v6.25 — LA CORRECCIÓN DEL DESTINATARIO: esta es la corona que
+    /// debía subirse a la CABEZA como una AUREOLA — EL ANILLO DEL SOL
+    /// RÚNICO I, LITERAL, ringiendo la cabeza: el aro elíptico de
+    /// cápsulas del sol (plano 1.62R × 0.34, inclinación −0.55, giro CW
+    /// 0.26) con sus 6 glifos solares cabalgando la órbita, al brillo
+    /// EXACTO de los soles.
     ///
     /// Puro adorno: cualquier hueco de accesorio, cero estadísticas.
     /// </summary>
@@ -50,11 +50,11 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FFC86B:═══ CORONA DE ANILLOS RÚNICOS ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "C", "[c/FFC864:═══ CORONA DE ANILLOS RÚNICOS — LA AUREOLA DEL SOL I ═══]"));
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/FFE8A8:EL anillo del Sol Rúnico I orbitando tu cuerpo: el mismo plano,\nel mismo paso y los mismos 6 glifos con perlas — al brillo EXACTO\nde los soles]"));
+                "[c/FFE8B0:El ANILLO DEL SOL RÚNICO I ringiendo tu CABEZA como una aureola:\nel mismo aro del sol con sus seis glifos cabalgando la órbita]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:El aro inclinado −0.55 abraza el torso girando en horario, sus\nglifos cabalgando la órbita a la tangente. Puro cosmético:\ncero estadísticas, vale en cualquier hueco de accesorio o vanidad]"));
+                "[c/78788C:La geometría, el giro y el brillo LITERALES del sol — al mismo nivel\nde luz que ves en los soles rúnicos, nada más]"));
         }
 
         public override void AddRecipes()

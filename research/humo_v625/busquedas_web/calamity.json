@@ -1,0 +1,65 @@
+[
+  {
+    "url": "https://calamitymod.wiki.gg",
+    "name": "Configuration options - Official Calamity Mod Wiki",
+    "snippet": "Aug 9, 2026 — Sets the maximum of particle effects that can exist at once. Particles are separate from dust and gores. Turn down to improve performance . Read more",
+    "host_name": "calamitymod.wiki.gg",
+    "rank": 0,
+    "date": "Aug 9, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Particle System Rendering Differently in Play Mode, But",
+    "snippet": "Sep 14, 2021 — Particle count seems stable in both play and edit mode; Performance isn't an issue ; Particles have a speed (apparently important); Same thing ... Read more",
+    "host_name": "discussions.unity.com",
+    "rank": 1,
+    "date": "Sep 14, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://gamedev.stackexchange.com",
+    "name": "Performance issue when particle system occupies most",
+    "snippet": "Jun 3, 2021 — I'm using particle systems to create stars in my space sim project. The star is made off 2 particle systems: star surface (max particles: 500) and corona ...",
+    "host_name": "gamedev.stackexchange.com",
+    "rank": 2,
+    "date": "Jun 3, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://developer.nvidia.com",
+    "name": "Chapter 23. High-Speed, Off-Screen Particles",
+    "snippet": "The results show that our low-resolution, off-screen rendering can produce significant performance gains. It helps to make the cost of particles more scalable, ... Read more",
+    "host_name": "developer.nvidia.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Particle Library :: Comments - tModLoader",
+    "snippet": "it won't help if calamity is the issue, it doesn't make use of this library. i understand how calamity could cause fps drops, though. if you would still like to ... Read more",
+    "host_name": "steamcommunity.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.unity3d.com",
+    "name": "Renderer module reference",
+    "snippet": "Renderer module reference. The Renderer module's settings determine how a particle's image or Mesh is transformed, shaded and overdrawn by other particles . Read more",
+    "host_name": "docs.unity3d.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://killertee.wordpress.com",
+    "name": "[UNITY] Particle System Rendering Optimization Tricks. - Tee",
+    "snippet": "Dec 20, 2021 — Each Particle Effect usually contains multiply Particle System which increase set-pass call and draw calls. More set-pass calls mean Game Engine ... Read more",
+    "host_name": "killertee.wordpress.com",
+    "rank": 6,
+    "date": "Dec 20, 2021",
+    "favicon": ""
+  }
+]

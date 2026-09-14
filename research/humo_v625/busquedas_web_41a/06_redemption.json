@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://github.com",
+    "name": "SnowyStarfall/ParticleLibrary: A Particle system for Terraria",
+    "snippet": "A library that provides an API to allow modders to create performant, customizable particles - serving as an alternative to Terraria's dust and particles . Read more",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Particle Library - Steam Workshop",
+    "snippet": "A library that provides an API to allow modders to create performant, customizable particles - serving as an alternative to Terraria's dust and particles . Read more",
+    "host_name": "steamcommunity.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "How to create a symlink between your github repository",
+    "snippet": "Oct 5, 2016 — Hello fellow Terrarians, Today I'm going to show you how to ''sync'' your mod folder directly with your github repository folder. The first ...",
+    "host_name": "forums.terraria.org",
+    "rank": 2,
+    "date": "Oct 5, 2016",
+    "favicon": ""
+  },
+  {
+    "url": "https://discourse.threejs.org",
+    "name": "Document or tutorial on Photons 2 - Questions",
+    "snippet": "May 26, 2024 — I'm new to threejs, and i need to write fire with particle system . I came across this Photons 2 library. This is exactly the fire effect i want ... Read more",
+    "host_name": "discourse.threejs.org",
+    "rank": 3,
+    "date": "May 26, 2024",
+    "favicon": ""
+  }
+]

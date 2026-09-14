@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://fabiensanglard.net",
+    "name": "How DOOM fire was done",
+    "snippet": "Dec 28, 2018 — At its core, the fire effect relies on a simple array. The idea is to model the fire particle's temperature as it elevates … the heat can be ...",
+    "host_name": "fabiensanglard.net",
+    "rank": 0,
+    "date": "Dec 28, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://nhess.copernicus.org",
+    "name": "Using cellular automata to simulate wildfire propagation",
+    "snippet": "by JG Freire · 2019 · Cited by 141 — Cellular automata have been successfully applied to simulate the propagation of wildfires with the aim of assisting fire managers in defining  ...",
+    "host_name": "nhess.copernicus.org",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://research.fs.usda.gov",
+    "name": "A cellular automaton model of wildfire propagation and",
+    "snippet": "by KC Clarke · 1994 · Cited by 313 — We propose a new model to predict the spatial and temporal behavior of wildfires. Fire spread and intensity were simulated using a cellular automaton model. Read more",
+    "host_name": "research.fs.usda.gov",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://matzjb.se",
+    "name": "Realistic Fire Simulation using Cellular Automata | MatzJB",
+    "snippet": "May 13, 2014 — In this post I will explain how you can create an interesting fire effect using simple “game of life”-like rules and some post processing",
+    "host_name": "matzjb.se",
+    "rank": 3,
+    "date": "May 13, 2014",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.researchgate.net",
+    "name": "A Cellular Automata Model for Fire Spreading Prediction",
+    "snippet": "The method used for simulating forest fires is the Cellular Automata to simulate the movement of fire during a fire.",
+    "host_name": "www.researchgate.net",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

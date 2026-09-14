@@ -1199,3 +1199,34 @@ Next:
 
 Stage Summary:
 - v6.24: el eclipse tiene SOL (corona anular + streamers + limbo + anillo de diamante) y HUMO vivo en el centro (9+ puffs de bruma orbitando/espiralando); la corona rúnica ES la aureola del sol 1; el anillo estelar usa la forma de los agujeros; TRES armas nuevas usan todas las librerías; las envolturas de fuego y rayo purgadas — 0 errores 0 warnings
+
+---
+Task ID: 41
+Agent: Z.ai Code (agente principal)
+Task: v6.25 — EL HUMO DE VERDAD: el fix premultiplicado + la investigación de 23 fuentes + BrumaFX v2 + tres librerías nuevas + la corrección de las coronas
+
+Petición del usuario: "¿qué es este error [el humo se ve como rectángulos]? ... deberías hacer humo o bruma mayormente por código y de ser sprite estos deben ser transparentes con fondo invisible... investiga a fondo y con profundidad todos los mods populares, al menos 20 mods y crea librerías que creas que nos falten y mejora la librería para humo, bruma, niebla · todo lo que lleva humo o bruma tiene el mismo error · la corona rúnica estelar del commit anterior estaba bien no la cambies, la que tenías que cambiar era corona de anillos rúnicos, regresa la estelar a como estaba".
+
+Work Log:
+- DIAGNÓSTICO (VLM de las 3 capturas): "sábanas rectangulares superpuestas con bordes duros y esquinas vivas" en TODO lo que usa bruma. Verificados los PNGs del mod (SoftGlow/Ring/BlackDisk): fondos transparentes CORRECTOS — el error NO eran los sprites.
+- LA CAUSA RAÍZ ENCONTRADA: BrumaBrushes.HornearPuff escribía `new Color(255,255,255, alfa)` — RGB LLENO en todos los píxeles, SIN premultiplicar. En FNA/tML (pipeline premultiplicado): lote ADITIVO (Blend One/One) IGNORA el canal alfa → TODO el quad = rectángulo sólido; lote alfa = bordes duros (el RGB no muere con el alfa). Por eso TODO lo que usa BrumaFX tenía el mismo error: comparten los pinceles.
+- INVESTIGACIÓN (2 subagentes paralelos, Task 41-a y 41-b): 23+ fuentes analizadas (vanilla 1.4.4.9 decompilada completa del Dust system, Everglow, Calamity público, StarlightRiver, Coralite, LunarVeil, Spirit, SOTS, Fargo's, Overhaul, ParticleLibrary, MEAC, WoTE + web: Thorium, Redemption, AA, Orchid, Avalon...) → research/humo_v625/INFORME_MODS_HUMO.md (24 lecciones con números + 8 anti-patrones) + ANALISIS_HUECOS.md (gap analysis de 17 capacidades, contratos de diseño completos).
+- EL FIX (BrumaBrushes v2): horneado PREMULTIPLICADO (RGB = blanco × alfa) + ESCALERA de texturas 64/128/160 por radio + FLIPBOOK de ruido evolucionado (tiras verticales de 4-6 frames, drift 0.3 celdas/frame + contraste creciente — el humo SE DESGARRA) + pincel VAPOR de LUT dura (mesa 0.62→0.86, contraste 1.9).
+- BrumaFX v2: Tinte PREMULTIPLICADO (RGB×f — la intensidad manda también en aditivo) + WorldTint (luz del mundo con piso 0.25 — lección Everglow) + viento del mundo en Column/Tendril/MistBand/Vapor + smear vanilla (6 copias del núcleo) + AnimatedPuff (flipbook por vida + envolvente + rampa de enfriamiento + brasa que emite luz) + Vapor + Wisps (voluta con motas) + presupuesto 500 quads/frame con LOD + BeginMass/BeginGlow. API vieja 100% compatible.
+- TRES LIBRERÍAS NUEVAS: ESTELALIB (ribbons de grosor variable: Sanitize/Smooth/Resample + triple capa + perfiles Head/Center/Comet/Alive + fantasmas con squash + EstelaTrack con auto-pudrición), ONDALIB+OndaSystem (ondas de impacto: frente roto 12-16 segmentos + doble anillo + fast-out + aberración cromática + Kick centralizado en ModifyScreenPosition + Flash en PostDrawInterface), PYRALIB (fuego: PyraPalettes 3×37 niveles + Tongue rotable + Flame + EmberField Doom Fire determinista 30Hz + Sparks→ParticleManager + Light).
+- CABLEADO: Sinfonía (Ribbon Comet prismático en vuelo + Shock con aberración + Kick 9px + Flash — sustituye el PunchCameraModifier ad-hoc), Lanza del Alba (PyraLib.Tongue SolarFire en la punta ardiendo contra la marcha + OndaLib.Pulse por golpe + Sparks + Kick 3px), Tormenta (nube física worldLit), Eclipse (DrawVoidSmoke con 8 volátiles + espirales con Wisps + 4 jets de Vapor cayendo del limbo).
+- CORRECCIÓN DE LAS CORONAS (la corrección del destinatario): RuneCrownItem (CORONA RÚNICA ESTELAR) REVERTIDO a v6.23 exacta (git checkout: renderer + capa + ítem + icono + tooltips + chispas rosas del CosmeticPlayer); RuneRingCrownItem (CORONA DE ANILLOS RÚNICOS) es ahora LA AUREOLA DEL SOL I sobre la CABEZA (BaseR=12, anclaje al centro de la cabeza en la capa, GetGlyphPosition nueva firma).
+- VERIFICACIÓN VISUAL DEL FIX: tools/mock_bruma_v625.py (réplica 1:1 del pipeline: horneado fBm + lotes aditivo/alfa, viejo vs nuevo) → VLM: VIEJO aditivo 2/10 ("video game glitch" — idéntico a las capturas del usuario), NUEVO 9/10 ("high-end fluid simulations"), VIEJO alfa 1/10, NUEVO alfa 9/10.
+- Docs: build.txt 6.25, CHANGES.md v6.25 (secciones A-H), localización es/EN (tooltips de las coronas).
+- Compilación contra tModLoader 2026.07.3.0 REAL (/tmp/verify + /tmp/tml, dotnet 8.0.425): Build succeeded · 0 errores · 0 warnings.
+
+Test:
+- Sandbox: compilación 0/0 + mock del fix VLM-validado (nuevo 9/10 vs viejo 2/10)
+- PENDIENTE (el usuario prueba en su máquina): Develop Mods → Build (v6.25) → (1) TODO el humo/bruma del mod (Eclipse, Bruma, Tormenta, Sinfonía, Lanza) ahora SUAVE sin rectángulos; (2) la Corona Rúnica Estelar VOLVIÓ al arco fucsia de 8 glifos; (3) la Corona de Anillos Rúnicos es la aureola del sol 1 sobre la cabeza; (4) la Sinfonía deja ribbon + onda con aberración + sacudida/destello al detonar; (5) la Lanza arde en la punta y pulsa al golpear.
+
+Next:
+- Si el humo queda demasiado tenue en algún sitio: los alphas viven en los call-sites (DrawVoidSmoke 0.24-0.34, Tormenta 0.20-0.34); el premultiplicado ahora RESPETA la intensidad de verdad (antes "brillaba" por el bug)
+- PyraLib.EmberField queda listo para futuros cosméticos de fuego persistente (la envoltura perdida se re-crea en 1 tarde sobre él)
+
+Stage Summary:
+- v6.25: el bug de los rectángulos muerto por la raíz (premultiplicado), la librería de humo reconstruida con las 24 lecciones de 23 fuentes (flipbook evolucionado, escalera, luz del mundo, viento, smear, presupuesto), TRES librerías nuevas (EstelaLib/OndaLib/PyraLib — los huecos del ecosistema premium), las coronas con el destinatario corregido — 0 errores 0 warnings

@@ -8,21 +8,21 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RuneRingCrownDrawLayer — v6.23 — EL ANILLO DEL SOL I QUE TE RODEA.
+    /// RuneRingCrownDrawLayer — v6.25 — LA AUREOLA DEL SOL I SOBRE LA CABEZA.
     ///
-    /// Capa de dibujado que pinta LA CORONA: EL anillo del Sol Rúnico I
-    /// orbitando el CUERPO del jugador (se dibuja en el pase delantero
-    /// sobre los accesorios de cara: el aro es ENERGÍA y cruza por
-    /// delante del cuerpo — el anillo inclinado te abraza). Los quads
-    /// salen de RuneRingCrownRenderer por VFXCore
-    /// (AppendToPlayerDraw — el camino oficial de las coronas).
+    /// Capa de dibujado del jugador que pinta LA CORONA DE ANILLOS
+    /// RÚNICOS: el ANILLO DEL SOL RÚNICO I ringiendo la CABEZA como una
+    /// AUREOLA (v6.25 — la corrección del destinatario: esta corona, no
+    /// la Estelar, es la que vive sobre la cabeza). Se dibuja tras las
+    /// capas de cabeza/cara: la aureola vive ALREDEDOR de la cabeza.
+    /// Los quads salen de RuneRingCrownRenderer a través de la
+    /// biblioteca (AppendToPlayerDraw — el camino oficial de tML).
     /// </summary>
     public class RuneRingCrownDrawLayer : PlayerDrawLayer
     {
         public override Position GetDefaultPosition()
         {
-            // Por delante de la cara/accesorios: los aros RODEAN al cuerpo
-            // y cruzan por delante — es una envoltura, no un halo alto.
+            // Tras la cara/accesorios de cabeza: la aureola RODEA la cabeza.
             return new AfterParent(PlayerDrawLayers.FaceAcc);
         }
 
@@ -38,14 +38,14 @@ namespace AethonMod.Content.DrawLayers
             Player p = drawInfo.drawPlayer;
             if (p == null || p.dead) return;
 
-            // Ancla: el CENTRO del cuerpo (los anillos RODEAN el torso).
-            Vector2 body = p.Center - new Vector2(0f, p.height * 0.05f * p.gravDir);
+            // Ancla: el CENTRO de la CABEZA (la aureola la ringea).
+            Vector2 head = p.Center - new Vector2(0f, p.height * 0.22f * p.gravDir);
 
             // La corona escala con el tamaño del sprite (humano = 1).
             float scale = p.height / 42f;
 
             VFXCore.Begin();
-            RuneRingCrownRenderer.ComputeQuads(body, scale, Main.GlobalTimeWrappedHourly, 1f);
+            RuneRingCrownRenderer.ComputeQuads(head, scale, Main.GlobalTimeWrappedHourly, 1f);
             VFXCore.AppendToPlayerDraw(ref drawInfo);
         }
     }

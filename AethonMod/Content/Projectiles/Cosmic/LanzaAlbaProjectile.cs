@@ -7,6 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Effects.Bruma;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -47,6 +48,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private readonly Vector2[] _chainTo = new Vector2[2];
         private readonly float[] _chainLife = new float[2];
 
+        // === v6.25 — EL PULSO DE IMPACTO (OndaLib.Pulse en el golpe) ===
+        private float _hitPulse;
+
         private float _age;
 
         public override void SetStaticDefaults()
@@ -73,6 +77,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void AI()
         {
             _age += 1f;
+
+            // v6.25 — el pulso de impacto envejece (se dibuja en PreDraw).
+            if (_hitPulse > 0f) _hitPulse -= 1f;
 
             // === LA ESTELA: historial en ring buffer ===
             if (!_trailInit)
@@ -104,6 +111,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // === v6.25 — EL PULSO DE IMPACTO (OndaLib: la onda se dibuja
+            //     en PreDraw; la SACUDIDA suave ya) + LAS ASCUAS de la
+            //     tabla SolarFire (PyraLib.Sparks → ParticleManager) ===
+            _hitPulse = 10f;
+            if (Main.netMode != NetmodeID.Server)
+            {
+                OndaLib.Kick(3f, 8);
+                PyraLib.Sparks(Projectile.Center, Vector2.Zero, 6,
+                    PyraPalettes.SolarFire, Seed + 500, out ParticleData[] ascuas);
+                if (ascuas != null)
+                    for (int s = 0; s < ascuas.Length; s++)
+                        ParticleManager.Spawn(ascuas[s]);
+            }
+
             // === LAS CHISPAS del golpe ===
             if (Main.netMode != NetmodeID.Server)
             {
@@ -243,6 +264,28 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // === 3. LA HOJA (LumenLib.Lance — la doble pasada de la hoja) ===
                 LumenLib.Lance(Main.spriteBatch, center, dir, 50f, 11f,
                     DawnGold, 0.85f * lifeFade);
+
+                // === 3b. v6.25 — EL FUEGO DEL ALBA (PyraLib.Tongue con la
+                //     tabla SolarFire): la punta de la lanza ARDE — la
+                //     llama ancla en la punta y crece CONTRA la marcha
+                //     (rot = marcha − 90°), con su parpadeo inconmensurable,
+                //     su punta vaga y su núcleo blanco en la base ===
+                {
+                    Vector2 punta = center + dir * 22f;
+                    float rotMarcha = dir.ToRotation() - MathHelper.PiOver2;
+                    PyraLib.Tongue(Main.spriteBatch, punta, 20f, 7.5f,
+                        PyraPalettes.SolarFire, 0.82f, seed + 91, time,
+                        0.75f * lifeFade, 0f, 1f, rotMarcha);
+                }
+
+                // === 3c. v6.25 — EL PULSO DE IMPACTO (OndaLib.Pulse: el
+                //     eco de cada golpe — anillo doble que nace y muere) ===
+                if (_hitPulse > 0f)
+                {
+                    float prog = 1f - _hitPulse / 10f;
+                    OndaLib.Pulse(Main.spriteBatch, center, prog, 95f,
+                        DawnGold, _hitPulse / 10f, seed + 3);
+                }
 
                 // === 4. EL CORAZÓN: destello + la RUNA ardiente ===
                 LumenLib.Flare(Main.spriteBatch, center, 20f, DawnWhite,

@@ -6,14 +6,16 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items.Cosmetics
 {
     /// <summary>
-    /// RuneCrownItem — v6.24 — LA CORONA RÚNICA: LA AUREOLA DEL SOL I.
+    /// RuneCrownItem — v6.03 — LA CORONA RÚNICA ESTELAR.
     ///
-    /// v6.24 — LA ORDEN DEL USUARIO: "debe estar en la cabeza del
-    /// jugador como una AUREOLA, tiene que ser una aureola IGUAL al
-    /// anillo del sol rúnico 1" — EL ANILLO DEL SOL RÚNICO I, LITERAL,
-    /// ringiendo la cabeza: el aro elíptico de cápsulas del sol (plano
-    /// 1.62R × 0.34, inclinación −0.55, giro CW 0.26) con sus 6 glifos
-    /// solares cabalgando la órbita, al brillo EXACTO de los soles.
+    /// Diseño NUEVO DESDE CERO sobre la referencia del usuario: un arco de
+    /// OCHO GLIFOS RÚNICOS que flota sobre la cabeza — la lanza, el cáliz,
+    /// la puerta, la estrella, el rayo, el arco, la espiral y el trono —
+    /// cada uno con su perla rosa pálido en la punta. Los glifos flotan,
+    /// pulsan su brillo con fase propia y emiten chispas ascendentes.
+    ///
+    /// No tiene nada que ver con la corona de arcos del agujero negro:
+    /// esta es ESCRITURA MÁGICA, no líneas de campo.
     ///
     /// Puro adorno: cualquier hueco de accesorio, cero estadísticas.
     /// </summary>
@@ -46,9 +48,9 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FFC864:═══ CORONA RÚNICA — LA AUREOLA DEL SOL I ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FFE8B0:El ANILLO DEL SOL RÚNICO I ringiendo tu cabeza como una aureola:\nel mismo aro del sol con sus seis glifos cabalgando la órbita]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:La geometría, el giro y el brillo LITERALES del sol — al mismo nivel\nde luz que ves en los soles rúnicos, nada más]"));
+            tooltips.Add(new TooltipLine(Mod, "C", "[c/FF0055:═══ CORONA RÚNICA ESTELAR ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:Ocho glifos rúnicos de luz fucsia flotando en arco sobre tu cabeza,\ncada uno con su perla rosa pálido en la punta]"));
+            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:La lanza, el cáliz, la puerta, la estrella, el rayo, el arco, la espiral\ny el trono — escritura mágica que respira y suelta chispas ascendentes]"));
             tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]"));
         }
 

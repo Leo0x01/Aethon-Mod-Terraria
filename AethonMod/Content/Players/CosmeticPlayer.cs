@@ -87,14 +87,38 @@ namespace AethonMod.Content.Players
                 Lighting.AddLight(head, new Vector3(0.30f, 0.06f, 0.12f));
             }
 
-            // === LA CORONA RÚNICA (v6.24 — LA AUREOLA DEL SOL I) respira
-            // luz: chispas doradas escapando de los glifos del anillo. ===
+            // === LA CORONA RÚNICA ESTELAR (revertida a v6.23 — la que
+            //     estaba bien) respira luz: chispas ascendentes desde
+            //     las perlas de los glifos.
             if (RuneCrown)
+            {
+                if (Main.rand.NextBool(28))
+                {
+                    int g = Main.rand.Next(RuneCrownRenderer.GlyphCount);
+                    Vector2 pearl = RuneCrownRenderer.GetPearlPosition(
+                        head, scale, Main.GlobalTimeWrappedHourly, g);
+                    Dust d = Dust.NewDustPerfect(pearl, DustID.Enchanted_Pink,
+                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
+                                    -Main.rand.NextFloat(0.5f, 1.1f) * Player.gravDir),
+                        160, new Color(255, 200, 220), 0.7f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+
+                // Luz rosa tenue del arco rúnico.
+                Lighting.AddLight(head - new Vector2(0f, 18f * Player.gravDir),
+                    new Vector3(0.22f, 0.04f, 0.14f));
+            }
+
+            // === v6.25 — LA CORONA DE ANILLOS RÚNICOS ES LA AUREOLA:
+            //     chispas doradas escapando de los glifos del ANILLO DEL
+            //     SOL I ringiendo la CABEZA + luz cálida tenue. ===
+            if (RuneRingCrown)
             {
                 if (Main.rand.NextBool(30))
                 {
-                    int g = Main.rand.Next(RuneCrownRenderer.GlyphCount);
-                    Vector2 glyph = RuneCrownRenderer.GetGlyphPosition(
+                    int g = Main.rand.Next(RuneRingCrownRenderer.GlyphCount);
+                    Vector2 glyph = RuneRingCrownRenderer.GetGlyphPosition(
                         head, scale, Main.GlobalTimeWrappedHourly, g);
                     Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
                         new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
@@ -107,30 +131,6 @@ namespace AethonMod.Content.Players
                 // Luz cálida tenue de la aureola (el oro del sol I).
                 Lighting.AddLight(head,
                     new Vector3(0.18f, 0.14f, 0.06f));
-            }
-
-            // === v6.23 — LA CORONA DEL SOL I VIVE: chispas doradas
-            // escapando de los glifos del ANILLO + luz cálida tenue. ===
-            if (RuneRingCrown)
-            {
-                Vector2 body = Player.Center - new Vector2(0f, Player.height * 0.05f * Player.gravDir);
-                if (Main.rand.NextBool(22))
-                {
-                    int k = Main.rand.Next(RuneRingCrownRenderer.RingCount);
-                    int g = Main.rand.Next(RuneRingCrownRenderer.RunesOf(k));
-                    Vector2 glyph = RuneRingCrownRenderer.GetGlyphPosition(
-                        body, scale, Main.GlobalTimeWrappedHourly, k, g);
-                    bool gold = k != 2;
-                    Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
-                        new Vector2(Main.rand.NextFloat(-0.35f, 0.35f),
-                                    -Main.rand.NextFloat(0.4f, 1.0f) * Player.gravDir),
-                        170, gold ? new Color(255, 220, 150) : new Color(190, 210, 255), 0.7f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-
-                // La LUZ cálida del anillo del Sol I (oro tenue).
-                Lighting.AddLight(body, new Vector3(0.16f, 0.13f, 0.07f));
             }
         }
     }

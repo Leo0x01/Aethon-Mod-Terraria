@@ -808,39 +808,43 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// EL HUMO DEL VACÍO: MUCHA bruma girando DENTRO del disco negro
-        /// (blending ALFA — masa de verdad sobre el negro absoluto):
-        /// la masa central que respira + 6 volátiles orbitando CW/CCW +
-        /// 2 volutas espiralando hacia el centro. El centro del eclipse
-        /// NUNCA es un punto muerto.
+        /// (blending ALFA — masa de verdad sobre el negro absoluto).
+        /// v6.25 — LA LIBRERÍA DE BRUMA YA PREMULTIPLICADA (el bug de los
+        /// rectángulos muerto): ahora el humo es SUAVE de verdad, y con
+        /// volumen COMPLETO: la masa central respirando + 8 volátiles
+        /// orbitando CW/CCW + 2 espirales con BRASAS (Wisps) + los JETS
+        /// DE VAPOR del limbo (el gas del borde CAE al centro — la
+        /// gravitación del vacío, con la LUT dura de BrumaFX.Vapor).
+        /// El centro del eclipse NUNCA es un punto muerto.
         /// </summary>
         private static void DrawVoidSmoke(Vector2 center, float r, float time, int seed)
         {
             // === 1. LA MASA CENTRAL: el corazón del vacío respirando ===
-            BrumaFX.Puff(center, 0.40f * r, SmokeViolet, seed + 201, time,
-                alpha: 0.32f + 0.10f * (float)Math.Sin(time * 0.8f), quality: 0.8f);
+            BrumaFX.Puff(center, 0.42f * r, SmokeViolet, seed + 201, time,
+                alpha: 0.34f + 0.10f * (float)Math.Sin(time * 0.8f), quality: 0.85f);
 
-            // === 2. LOS VOLÁTILES ORBITANDO: seis puffs girando DENTRO ===
-            // ===     del disco (CW/CCW alternos — dirección propia)   ===
-            for (int i = 0; i < 6; i++)
+            // === 2. LOS VOLÁTILES ORBITANDO: OCHO puffs girando DENTRO ===
+            // ===     del disco (CW/CCW alternos — dirección propia)    ===
+            for (int i = 0; i < 8; i++)
             {
                 float dir = i % 2 == 0 ? 1f : -1f;
-                float ang = i / 6f * MathHelper.TwoPi + time * 0.16f * dir;
-                float dist = (0.30f + 0.30f * Hash01(seed, 2400 + i, 31)) * r;
+                float ang = i / 8f * MathHelper.TwoPi + time * 0.16f * dir;
+                float dist = (0.28f + 0.34f * Hash01(seed, 2400 + i, 31)) * r;
                 Vector2 pos = center + new Vector2(
                     (float)Math.Cos(ang) * dist,
                     (float)Math.Sin(ang) * dist * 0.88f);
 
-                float puffR = (0.22f + 0.12f * Hash01(seed, 2410 + i, 37)) * r;
+                float puffR = (0.20f + 0.15f * Hash01(seed, 2410 + i, 37)) * r;
                 Color c = i % 3 == 0 ? SmokeEmber
                         : i % 3 == 1 ? SmokeViolet : SmokePurple;
                 float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 1.1f + i * 1.7f);
 
                 BrumaFX.Puff(pos, puffR, c, seed + 2500 + i * 37, time + i * 3f,
-                    alpha: 0.30f * pulse, quality: 0.7f);
+                    alpha: 0.32f * pulse, quality: 0.75f);
             }
 
-            // === 3. LAS ESPIRALES: dos volutas serpenteando AL CENTRO ===
-            // ===     (la materia del vacío caendo espiral adentro)    ===
+            // === 3. LAS ESPIRALES CON BRASAS: dos volutas serpenteando ===
+            // ===     AL CENTRO con motas de brasa (BrumaFX.Wisps)     ===
             for (int s = 0; s < 2; s++)
             {
                 Vector2[] path = new Vector2[5];
@@ -853,9 +857,34 @@ namespace AethonMod.Content.VFX
                         (float)Math.Cos(ang) * dist,
                         (float)Math.Sin(ang) * dist);
                 }
-                BrumaFX.Tendril(path, Math.Max(10f, 0.26f * r),
-                    s == 0 ? SmokePurple : SmokeViolet, seed + 2700 + s * 53, time,
-                    alpha: 0.22f, fade: 0.85f);
+                BrumaFX.Wisps(path, Math.Max(10f, 0.26f * r),
+                    s == 0 ? SmokePurple : SmokeViolet, SmokeEmber,
+                    seed + 2700 + s * 53, time,
+                    alpha: 0.24f, fade: 0.85f, motes: 3);
+            }
+
+            // === 4. LOS JETS DEL LIMBO: vapor de LUT DURA naciendo en el ===
+            // ===     borde y CAYENDO al centro (la gravitación del      ===
+            // ===     vacío se come el gas — vida cíclica determinista)   ===
+            for (int v = 0; v < 4; v++)
+            {
+                float fase = (time * 0.22f + v / 4f) % 1f;
+                float ang = v / 4f * MathHelper.TwoPi + time * 0.10f * (v % 2 == 0 ? 1f : -1f);
+
+                // Nace EN el limbo (0.98r) y cae espiralando al corazón.
+                Vector2 nace = center + new Vector2(
+                    (float)Math.Cos(ang) * 0.98f * r,
+                    (float)Math.Sin(ang) * 0.98f * r);
+                Vector2 muere = center + new Vector2(
+                    (float)Math.Cos(ang + 1.1f) * 0.34f * r,
+                    (float)Math.Sin(ang + 1.1f) * 0.34f * r);
+                float ease = fase * fase;   // acelera al caer (gravitación)
+                Vector2 pos = Vector2.Lerp(nace, muere, ease);
+
+                float jetR = (0.10f + 0.06f * Hash01(seed, 2800 + v, 43)) * r;
+                BrumaFX.Vapor(pos, jetR, v % 2 == 0 ? SmokePurple : SmokeViolet,
+                    seed + 2900 + v * 71, fase, time,
+                    alpha: 0.30f, velocity: new Vector2(0.3f, 0.35f));
             }
         }
 

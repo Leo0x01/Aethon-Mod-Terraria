@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Is there any way to create a \"heat distortion\" effect in an",
+    "snippet": "Dec 28, 2023 — The original video is creating a heat haze effect by creating a distortion vector value, and then masking it using a gradient that's also ... Read more",
+    "host_name": "discussions.unity.com",
+    "rank": 0,
+    "date": "Dec 28, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://blenderartists.org",
+    "name": "Fake Simulated Heat Distortion in Blender",
+    "snippet": "Feb 1, 2021 — Short tutorial: Create a smoke+fire simulation . Disable the adaptive domain feature. Set your cache type to OpenVDB and Bake the simulation. ...",
+    "host_name": "blenderartists.org",
+    "rank": 1,
+    "date": "Feb 1, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://lindenreidblog.com",
+    "name": "Heat Distortion Shader Tutorial",
+    "snippet": "Mar 5, 2018 — Basically, this heat distortion shader was achieved by creating a flat plane mesh and applying a material with a shader that does the following:. Read more",
+    "host_name": "lindenreidblog.com",
+    "rank": 2,
+    "date": "Mar 5, 2018",
+    "favicon": ""
+  }
+]
