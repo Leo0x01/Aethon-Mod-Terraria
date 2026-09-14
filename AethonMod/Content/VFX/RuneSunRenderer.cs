@@ -755,15 +755,21 @@ namespace AethonMod.Content.VFX
 
         private static void BeginAdditive()
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+            // v6.21 — LA LECCIÓN DEL CUADRO DE RUIDO: los pases de SHADER
+            // exigen SpriteSortMode.Immediate. Con Deferred el batch enlaza
+            // su PROPIO efecto al hacer flush y el Passes[0].Apply() se
+            // IGNORA → el DendriticNoise se pintaba CRUDO ("un cuadrado con
+            // textura, sin animación" — el reporte del usuario). El sol
+            // original usa Immediate en TODOS sus pases; ahora igual.
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         private static void BeginAlpha()
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 

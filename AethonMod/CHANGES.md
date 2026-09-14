@@ -1,5 +1,86 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.21 — LA TORMENTA: rayos de verdad + el fix de los soles + sin maná
+
+**Petición del usuario**: "la imagen muestra cómo se ve el sol, solo se ve su
+textura, no tiene animación, solo un cuadrado con textura · en cuanto al
+bastón de rayos, eso no son rayos de verdad, no se parecen en nada a rayos,
+es momento de investigar y mejorar · todos los bastones que crees son de
+prueba, por lo tanto no necesitan usar mana · investiga Coralite, Everglow,
+Wrath of the Empress y Lunar Veil — sus librerías y técnicas — y crea tus
+propias librerías con todo lo aprendido de la investigación profunda y
+metódica".
+
+### A. LA INVESTIGACIÓN PROFUNDA (4 repos clonados y estudiados a fondo)
+  · **Coralite** (360 MB, 78 archivos de rayos) — el jefe eléctrico y su
+    librería de descargas: jitter perpendicular con extremos anclados,
+    parpadeo con APAGADO del ~50% a 15 Hz, MULTI-FILAMENTO superpuesto
+    (2 colores), muerte violenta (el jitter REVIENTA al disolverse),
+    gorros a 2 escalas, daño en la LÍNEA RECTA (el jitter es cosmético).
+  · **Everglow** (658 MB) — árbol de rayos RECURSIVO con AUTO-CORRECCIÓN
+    de curvatura (rot −= totalRot·0.3), el "hervir" de todos los puntos,
+    el FLASH MULTI-DRAW (redibujar la misma geometría N veces), ancho
+    empaquetado en las coords de textura, la capa negra bajo las estelas.
+  · **Wrath of the Empress** (16 MB) — la CRUZ DE LUZ de 4 draws en los
+    impactos (2 orientaciones × 2 escalas con pulso), el TELEGRAPH como
+    contrato (línea de aviso + daño/movimiento gateados), paletas por datos.
+  · **Lunar Veil** (27 MB, linaje Stellamod) — el sándwich de batch
+    Immediate (valida nuestro contrato v6.10), endcaps redondeados,
+    `extraUpdates` para densidad, screen-shake con atenuación por distancia.
+  · Los 4 informes completos (Task IDs 37-a…37-d) viven en el worklog;
+    la síntesis operativa en `research/storm_v621/INFORME.md`.
+
+### B. STORMLIB — LA SEGUNDA GENERACIÓN DE RAYOS (librería nueva, 100% propia)
+  · **4 texturas procedurales nuevas** (RGB blanco + perfil en alfa):
+    `BoltHalo` (banda gaussiana suave), `BoltCore` (EL FILAMENTO: núcleo
+    blanco que serpentea dentro de la textura con GRIETAS de alta
+    frecuencia y nodos brillantes — el análisis VLM de las texturas reales
+    del ecosistema medido y replicado), `BoltChain` (eslabones) y
+    `BoltImpact` (estallido radial de 7 rayos desiguales).
+  · **`Content/VFX/StormLib.cs`** (LightningCore queda INTACTA para los
+    agujeros negros): ZigPath (perpendicular + dispersión + envolvente,
+    extremos EXACTOS), **Refine** (subdivisión de punto medio con sesgo
+    cúbico — la rugosidad MULTI-ESCALA que rompe el zigzag geométrico),
+    Boil, ForkTree (ramas con auto-corrección, ×0.40 de ancho),
+    **MultiBolt** (tronco + 2 acompañantes + 2 PELOS caóticos + ramas),
+    Strand (TRIPLE CAPA: halo contenido ×2.0 / cuerpo / NÚCLEO BLANCO
+    razor ×0.26 — la nitidez vive en la TEXTURA), ChainBolt, ArcRing,
+    **ImpactFlash** (cruz de luz 4-draw + destello apilado), EndCap,
+    AddLightAlong (luz estrangulada), IsLit (apagado intermitente) y
+    DeathGrow (la muerte violenta).
+  · Verificación visual (patrón de la casa): `tools/mock_storm_v621.py`
+    traduce StormLib 1:1 a Python sobre las texturas reales → mock VLM
+    **8/10 "reads as real lightning, release-quality, excellent in
+    motion"** (v1 6.5 → v2 8 tras afinar: núcleo fino, fractal, pelos).
+
+### C. EL CETRO DEL TRUENO RECONSTRUIDO — EL RAYO DEL CIELO
+  · `RunicLightning` v6.21: ya no dispara una línea horizontal borrosa —
+    **INVOCA UN RAYO QUE CAE DEL CIELO** sobre el cursor: TELEGRAPH de 10
+    ticks (línea fina de aviso + anillo objetivo pulsante + carga a
+    ráfagas) → el GOLPE (daño en la COLUMNA cielo→suelo por línea recta +
+    estallido radial de 110 px + CADENA a 3 enemigos al 60% + Electrified
+    240) → LA DESCARGA (MultiBolt de 3 filamentos + pelos + ramas,
+    regenerado a 15 Hz con apagado intermitente, muerte violenta con
+    DeathGrow) → EL IMPACTO (cruz de luz + destello apilado + onda de
+    choque + arcos crispados + 40 chispas + puñetazo de cámara VERTICAL +
+    trueno grave por capa de zaps con pitch −0.45).
+  · `StormRuneStaff`: **MANA 0** (regla del usuario: todos los bastones
+    son de prueba — el resto de la familia ya estaba en 0), disparo al
+    cursor clampeado a 560 px, tooltip actualizado, sonido de uso grave.
+
+### D. EL FIX DEL SOL RÚNICO (el cuadrado con textura)
+  · **CAUSA RAÍZ**: `RuneSunRenderer.BeginAdditive/BeginAlpha` usaban
+    `SpriteSortMode.Deferred` → el pase `Passes[0].Apply()` se IGNORA
+    (con Deferred el SpriteBatch enlaza su PROPIO efecto al hacer flush)
+    → el `DendriticNoise` se pintaba CRUDO como un cuadrado estático sin
+    animación (exacto el reporte del usuario); el RadialShine del aura
+    también se perdía.
+  · **EL FIX**: ambos helpers pasan a `SpriteSortMode.Immediate` con
+    `LinearWrap` — IDÉNTICOS al sol original que sí se ve bien → el disco
+    de plasma vuelve a ser la esfera animada con SunShader y el aura
+    vuelve a ser el resplandor de ruido vivo. (LECCIÓN v6.21: cualquier
+    pase de shader exige Immediate — el contrato del batch no es opcional.)
+
 ## Commit v6.20 — FIX DE LOS SOLES RÚNICOS + EL CETRO DEL TRUENO + EL AGUJERO NEGRO SUPREMO AURORA
 
 **Petición del usuario**: "que raro, no veo los soles, los bastones sí

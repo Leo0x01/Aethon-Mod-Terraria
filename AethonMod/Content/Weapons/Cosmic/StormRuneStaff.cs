@@ -9,23 +9,23 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// StormRuneStaff — v6.19 — EL CETRO DEL TRUENO RÚNICO.
+    /// StormRuneStaff — v6.21 — EL CETRO DEL TRUENO RÚNICO.
     ///
-    /// El ARMA DE RAYOS del proyecto (petición del usuario: "crea un arma
-    /// que use rayos usando nuestra librería, aplica varios efectos a
-    /// estos rayos"). Dispara UNA DESCARGA INSTANTÁNEA al punto del
-    /// cursor: rayo zigzag vivo de la librería LightningCore (doble tira
-    /// cuerpo + núcleo, re-generado ~14 Hz) con:
+    /// RECONSTRUIDO con StormLib (la librería de la investigación v6.21):
+    /// el cetro INVOCA RAYOS DEL CIELO sobre el cursor — telegraph de
+    /// aviso + descarga multi-filamento (tronco dorado + acompañantes
+    /// azul-estelar + ramas) que CAE de ~700-980 px encima del objetivo,
+    /// golpea en COLUMNA, estalla en radial, SALTA a 3 enemigos y
+    /// ELECTRIFICA. Alcance 560 px.
     ///
-    ///   · Daño EN LÍNEA (todo lo que cruza la descarga).
-    ///   · CADENA eléctrica a 3 enemigos cercanos (60% del daño).
-    ///   · ARCOS de impacto + ONDA DE CHOQUE expandiéndose.
-    ///   · ELECTRIFICADO (240 ticks) + luz a lo largo del rayo.
-    ///
-    /// Alcance 560 px. Mana 12.
+    /// v6.21 — SIN MANA (regla del usuario: todos los bastones del mod
+    /// son de prueba).
     /// </summary>
     public class StormRuneStaff : ModItem
     {
+        /// <summary>Alcance máximo del rayo desde el jugador (px).</summary>
+        private const float MaxRange = 560f;
+
         public override void SetStaticDefaults() { }
 
         public override void SetDefaults()
@@ -33,32 +33,34 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.damage = 95;
             Item.DamageType = DamageClass.Magic;
             Item.width = 28; Item.height = 30;
-            Item.useTime = 24; Item.useAnimation = 24;
+            Item.useTime = 26; Item.useAnimation = 26;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<RunicLightning>();
             Item.shootSpeed = 14f;
-            Item.mana = 12; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
-            Item.UseSound = SoundID.Item12;
+            Item.UseSound = SoundID.Item12.WithPitchOffset(-0.2f);
             Item.value = 12000;
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // EL VECTOR COMPLETO al cursor (clampeado a 560 px): el rayo es
-            // INSTANTÁNEO — el proyectil lo ancla y NO viaja.
+            // EL RAYO CAE DEL CIELO sobre el cursor (clampeado a 560 px del
+            // jugador): el proyectil NACE en el punto de impacto y ancla
+            // su descarga desde arriba.
             Vector2 muzzle = position + Vector2.Normalize(velocity) * 18f;
-            Vector2 toCursor = Main.MouseWorld - muzzle;
-            float len = toCursor.Length();
+            Vector2 target = Main.MouseWorld;
+            Vector2 toTarget = target - muzzle;
+            float len = toTarget.Length();
             if (len < 24f)
-                toCursor = Vector2.Normalize(velocity == Vector2.Zero ? Vector2.UnitX : velocity) * 24f;
-            else if (len > 560f)
-                toCursor *= 560f / len;
+                toTarget = Vector2.Normalize(velocity == Vector2.Zero ? Vector2.UnitX : velocity) * 24f;
+            else if (len > MaxRange)
+                toTarget *= MaxRange / len;
 
-            Projectile.NewProjectile(source, muzzle, toCursor, type, damage, knockback,
-                player.whoAmI);
+            Projectile.NewProjectile(source, muzzle + toTarget, Vector2.Zero,
+                type, damage, knockback, player.whoAmI);
             return false;
         }
 
@@ -66,9 +68,9 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             // v6.18: TOOLTIP CORTO — dos líneas, el nombre vive arriba.
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/BFE8FF:Descarga instantánea de rayo rúnico al cursor (560 px)]"));
+                "[c/BFE8FF:Invoca rayos del cielo sobre el cursor (560 px)]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Daña en línea · salta a 3 enemigos · arcos y onda de choque · electrifica]"));
+                "[c/78788C:Golpea en columna · salta a 3 enemigos · electrifica · sin maná]"));
         }
 
         public override void AddRecipes()
