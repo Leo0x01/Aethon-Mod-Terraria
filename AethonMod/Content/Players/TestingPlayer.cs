@@ -123,21 +123,23 @@ namespace AethonMod.Content.Players
             // StormLib (daño en línea, cadena, arcos, electrificación)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
-            // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
+            // detrás de la cabeza, y la rúnica nueva — v6.24: LA AUREOLA
+            // DEL SOL I ringiendo la cabeza)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneCrownItem>());
-            // v6.22: LOS TRES COSMÉTICOS NUEVOS — la ENVOLTURA DE FUEGO
-            // procedural (interactiva con el movimiento), la CORONA DE
-            // ANILLOS RÚNICOS que rodea el cuerpo y el ANILLO RÚNICO
-            // ESTELAR (alas + halo de la espalda que arde al volar)
-            EnsureItem(ModContent.ItemType<Items.Cosmetics.FireVeilItem>());
-            // v6.23: LA ENVOLTURA DE RAYOS — la tormenta de StormLib sobre
-            // la silueta (interactiva con el movimiento, como el fuego)
-            EnsureItem(ModContent.ItemType<Items.Cosmetics.StormVeilItem>());
+            // (v6.24: la ENVOLTURA DE FUEGO y la ENVOLTURA DE RAYOS fueron
+            // BORRADAS — petición del usuario. La CORONA DE ANILLOS RÚNICOS
+            // (el anillo del Sol I sobre el cuerpo) y el ANILLO RÚNICO
+            // ESTELAR (los círculos de los agujeros en la espalda) quedan.)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneRingCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Wings.RunicHaloWings>());
             // (v6.18: las 8 alas viejas FUERON BORRADAS — petición del
             // usuario. v6.22 vuelve UNA sola, LA BUENA: el anillo rúnico.)
+            // v6.24: LAS TRES ARMAS DE LAS LIBRERÍAS — cada una usa TODAS
+            // (StormLib rayos + BrumaFX humo + LumenLib luz + runas)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SinfoniaPrimordialStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.TormentaNebularStaff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.LanzaAlbaStaff>());
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

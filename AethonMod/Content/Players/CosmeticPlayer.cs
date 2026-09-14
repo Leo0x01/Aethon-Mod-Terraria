@@ -87,26 +87,26 @@ namespace AethonMod.Content.Players
                 Lighting.AddLight(head, new Vector3(0.30f, 0.06f, 0.12f));
             }
 
-            // === LA CORONA RÚNICA RESPIRA LUZ: chispas ascendentes desde
-            // las perlas de los glifos.
+            // === LA CORONA RÚNICA (v6.24 — LA AUREOLA DEL SOL I) respira
+            // luz: chispas doradas escapando de los glifos del anillo. ===
             if (RuneCrown)
             {
-                if (Main.rand.NextBool(28))
+                if (Main.rand.NextBool(30))
                 {
                     int g = Main.rand.Next(RuneCrownRenderer.GlyphCount);
-                    Vector2 pearl = RuneCrownRenderer.GetPearlPosition(
+                    Vector2 glyph = RuneCrownRenderer.GetGlyphPosition(
                         head, scale, Main.GlobalTimeWrappedHourly, g);
-                    Dust d = Dust.NewDustPerfect(pearl, DustID.Enchanted_Pink,
+                    Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
                         new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
-                                    -Main.rand.NextFloat(0.5f, 1.1f) * Player.gravDir),
-                        160, new Color(255, 200, 220), 0.7f);
+                                    -Main.rand.NextFloat(0.4f, 0.9f) * Player.gravDir),
+                        165, new Color(255, 225, 150), 0.6f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
 
-                // Luz rosa tenue del arco rúnico.
-                Lighting.AddLight(head - new Vector2(0f, 18f * Player.gravDir),
-                    new Vector3(0.22f, 0.04f, 0.14f));
+                // Luz cálida tenue de la aureola (el oro del sol I).
+                Lighting.AddLight(head,
+                    new Vector3(0.18f, 0.14f, 0.06f));
             }
 
             // === v6.23 — LA CORONA DEL SOL I VIVE: chispas doradas

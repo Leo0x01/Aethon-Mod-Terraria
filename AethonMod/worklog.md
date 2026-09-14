@@ -1170,3 +1170,32 @@ Next:
 
 Stage Summary:
 - v6.23: el ajuste fino completo del usuario — 6 peticiones cerradas (tamaño del fuego, envoltura de rayos nueva, anillos de vuelo = Sol IV, corona = Sol I, eclipse negro con sol asomando, círculos rúnicos 3/2) con compilación 0/0.
+---
+Task ID: 40
+Agent: Z.ai Code (agente principal)
+Task: v6.24 — EL SOL DEL ECLIPSE + EL HUMO DEL VACÍO + LA AUREOLA DEL SOL I + LOS CÍRCULOS DE LOS AGUJEROS + LAS TRES ARMAS DE LAS LIBRERÍAS + LA PURGA DE LAS ENVOLTURAS
+
+Work Log:
+- Directiva del usuario (7 peticiones): el sol del eclipse no se ve · un arma con todas las librerías (creativo) · la corona rúnica = AUREOLA del sol 1 en la cabeza (brilla mucho, no se parece al aro del sol) · el anillo rúnico estelar = mismos problemas + la FORMA de los agujeros negros · el centro del eclipse con mucho humo/bruma (animación) · VARIAS armas con todas las librerías · BORRAR la envoltura de fuego y la de rayo
+- ANÁLISIS VLM de la captura del usuario (pasted_image_1789402596726.png): orbes dorados orbitando el cuerpo = los anillos actuales en forma de sol; corona fucsia por encima
+- ECLIPSE — EL SOL (A): v6.23 dejaba el sol como 2 aros finos (0.20/0.11) → DrawSolarCorona NUEVO pintado ANTES del repintado negro: halo caliente 3.4r (0.44) + núcleo 2.5r + LumenLib.Bloom (2 capas) + 9 STREAMERS LumenLib.Ray del limbo → el repintado se come el centro y queda EL RESPLANDOR ANULAR de un eclipse total; limbo 0.20→0.55; anillo de diamante (Flare 4 puntas, sutil)
+- ECLIPSE — EL HUMO (B): DrawVoidSmoke NUEVO en pase ALFA (masa de verdad sobre el negro): masa central que respira (Puff 0.40r) + 6 volátiles orbitando CW/CCW (violeta/púrpura/brasa) + 2 Tendril espiralando al centro + brasa violeta latiendo bajo el humo; mock 1:1 (tools/mock_eclipse_v624.py) → VLM: humo 8/10, centro vivo 7/10, sol 6/10 → REFORZADO (halo 0.44, bloom 0.40, streamers 0.36+0.34·pulse, limbo 0.55)
+- CORONA (C): RuneCrownRenderer REESCRITO — el arco fucsia de 8 glifos BORRADO; LA AUREOLA = EL ANILLO DEL SOL I LITERAL ringiendo la cabeza (1.62R×0.34, tilt −0.55, CW 0.26, 6 glifos solares tangenciales, alphas EXACTOS del sol); CosmeticPlayer actualizado (chispas doradas + luz cálida); icono regenerado (aureola dorada inclinada); tooltips es/EN + ModifyTooltips reescritos
+- ANILLO ESTELAR (D): RunicHaloRenderer REESCRITO — los 4 anillos elípticos del sol IV BORRADOS; LOS CÍRCULOS DE LOS AGUJEROS LITERALES: 3 RingQuad planos (blanco 2.02R CW rápido 6, dorado 2.62R CW lento 8, violeta 3.30R CCW 6) con runas S0..S7 flotando DE PIE (radio respirando + mecido + perlas), alphas EXACTOS de los agujeros (aros 0.24/0.20/0.18, trazos 0.85, perlas 0.62/0.90); energía de vuelo acotada 0.85..1.20; icono regenerado (3 aros concéntricos)
+- ARMAS (E): TRES armas nuevas, cada una usa TODAS las librerías (StormLib + BrumaFX + LumenLib + runas): SINFONÍA PRIMORDIAL (chispa prismática con cadenas al vuelo → detonación con 6 MultiBolt radiales + nube de bruma + aurora + runas volando, 120 dmg), TORMENTA NEBULAR (tormenta persistente 5s: nube ALFA + 3 descargas con telegraph→MultiBolt→daño 85px, 80 dmg/golpe), LANZA DEL ALBA (hoja Lance + LanceTrail + Rayo precedente + Tendril sobre estela real en ring buffer + ChainBolt por golpe, 90 dmg perforante ×4)
+- PURGA (F): git rm de 10 archivos (FireVeilItem/StormVeil ×.cs+.png, FireVeilPlayer, StormVeilPlayer, FireVeilDrawLayer, StormVeilDrawLayer, FireVeilRenderer, StormVeilRenderer) + FlameBrush.png (solo lo usaba el fuego) + entradas hjson ×2 idiomas + EnsureItem ×2 → grep final: 0 referencias
+- ASSETS: tools/gen_v624_assets.py (reproducible) → 3 iconos de arma 30×30 + 3 sombras 76×76 (patrón del estilo de la casa; fix de unidades del radio) + 2 iconos de cosmético regenerados; hoja de contacto VLM: 8/8 legibles y limpios
+- AUDITORÍA anti-recurrencia (lección v6.14.1): 70 clases ModProjectile/ModItem → 0 PNGs faltantes
+- Docs: build.txt 6.24, CHANGES.md v6.24 (secciones A-G), localización es/EN (3 armas nuevas + corona reescrita)
+- Compilación contra tModLoader 2026.07.3.0 REAL (/tmp/verify + /tmp/tml, dotnet 8.0.425): Build succeeded · 0 errores · 0 warnings
+
+Test:
+- Sandbox: compilación 0/0 + auditoría de assets limpia + mock del eclipse VLM-validado (humo 8/10) + hoja de 8 PNGs VLM-verificada
+- PENDIENTE (el usuario prueba en su máquina): Develop Mods → Build (v6.24) → (1) EclipsePrimordialStaff: la CORONA SOLAR brillando alrededor de la luna negra + EL HUMO girando dentro del disco; (2) las 3 armas nuevas se entregan al entrar al mundo; (3) Corona Rúnica Estelar = la aureola dorada del sol 1 ringiendo la cabeza; (4) Anillo Rúnico Estelar = los 3 círculos de los agujeros en la espalda; (5) las envolturas de fuego/rayo DESAPARECIDAS (del inventario las conserva quien las tenía, pero ya no se entregan ni existen)
+
+Next:
+- Si el usuario ajusta el brillo del sol del eclipse: las constantes viven en DrawSolarCorona (halo 0.44, bloom 0.40, streamers 0.36+0.34) y DrawVoidSmoke (alphas 0.30-0.34)
+- Las 3 armas son la PLANTILLA de futuras armas de librerías: cada una demuestra un patrón distinto (proyectil+detonación / campo persistente / proyectil perforante)
+
+Stage Summary:
+- v6.24: el eclipse tiene SOL (corona anular + streamers + limbo + anillo de diamante) y HUMO vivo en el centro (9+ puffs de bruma orbitando/espiralando); la corona rúnica ES la aureola del sol 1; el anillo estelar usa la forma de los agujeros; TRES armas nuevas usan todas las librerías; las envolturas de fuego y rayo purgadas — 0 errores 0 warnings

@@ -86,7 +86,7 @@
         "Items.VoidCrownItem.Tooltip": "La corona original del agujero negro carmesí, hoy cosmético portable.\nCinco arcos de neón carmesí con nudos naranjas arqueados JUSTO DETRÁS de tu cabeza.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
 
         "Items.RuneCrownItem.DisplayName": "Corona Rúnica Estelar",
-        "Items.RuneCrownItem.Tooltip": "Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia\nflotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
+        "Items.RuneCrownItem.Tooltip": "La AUREOLA del Sol Rúnico I ringiendo tu cabeza: el mismo anillo del sol\n(el aro inclinado con sus seis glifos cabalgando la órbita) al brillo exacto de los soles.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
 
         // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
         // (el Sol original queda INTACTO) con N anillos rúnicos en planos
@@ -118,12 +118,15 @@
         // v6.22: EL ECLIPSE PRIMORDIAL — el Sol de los 20 Anillos fundido
         // con TODOS los agujeros negros (luz + bruma + humo + rayos)
         "Items.EclipsePrimordialStaff.DisplayName": "Bastón del Eclipse Primordial",
-        // v6.22: LOS TRES COSMÉTICOS NUEVOS
-        "Items.FireVeilItem.DisplayName": "Envoltura de Fuego Primordial",
-        // v6.23: la envoltura de rayos (StormLib sobre la silueta)
-        "Items.StormVeilItem.DisplayName": "Envoltura de Rayos Primordial",
+        // (v6.24: la ENVOLTURA DE FUEGO y la ENVOLTURA DE RAYOS fueron
+        // BORRADAS — petición del usuario.)
         "Items.RuneRingCrownItem.DisplayName": "Corona de Anillos Rúnicos",
         "Items.RunicHaloWings.DisplayName": "Anillo Rúnico Estelar",
+        // v6.24: LAS TRES ARMAS DE LAS LIBRERÍAS — cada una usa TODAS
+        // (StormLib rayos + BrumaFX humo + LumenLib luz + runas)
+        "Items.SinfoniaPrimordialStaff.DisplayName": "Bastón de la Sinfonía Primordial",
+        "Items.TormentaNebularStaff.DisplayName": "Cetro de la Tormenta Nebular",
+        "Items.LanzaAlbaStaff.DisplayName": "Lanza del Alba Rúnica",
         // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Cetro del Trueno Rúnico",
 

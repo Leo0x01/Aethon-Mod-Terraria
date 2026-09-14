@@ -1,5 +1,123 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.24 — EL SOL DEL ECLIPSE + EL HUMO DEL VACÍO + LA AUREOLA DEL SOL I + LOS CÍRCULOS DE LOS AGUJEROS + LAS TRES ARMAS DE LAS LIBRERÍAS
+
+**Petición del usuario**: "al agujero negro eclipse no se le ve el sol ·
+ahora crea un arma que use todas nuestras librerías, sé creativo con eso ·
+el accesorio de la corona rúnica debe estar en la cabeza del jugador como
+una aureola, además brilla mucho y no se parece en nada al aro que usa el
+sol 1, tiene que ser una aureola igual al anillo del sol rúnico 1 · el
+otro ítem cosmético anillo rúnico estelar tiene los mismos problemas,
+además estos aros no deben estar en esa forma, la forma correcta es la
+misma forma que la de los agujeros negros · el agujero negro eclipse no
+debe ser completamente oscuro en el centro, debe tener alguna animación o
+mejor, que tenga mucho humo o bruma · no olvides crear varias armas nuevas
+que usen todas nuestras librerías · borra la envoltura de fuego y rayo".
+
+### A. EL ECLIPSE — EL SOL SE VE (la corona solar del eclipse)
+  v6.23 dejó "el sol asomando" como DOS AROS FINOS (alpha 0.20/0.11) — el
+  usuario: "NO SE LE VE EL SOL". Ahora es UN ECLIPSE TOTAL DE VERDAD:
+  · LA CORONA SOLAR (DrawSolarCorona, pintada ANTES del repintado negro):
+    halo caliente 3.4r (alpha 0.44) + núcleo interno 2.5r + EL BLOOM del
+    sol (LumenLib, 2 capas) + 9 STREAMERS de luz radiando del limbo
+    (LumenLib.Ray con grosor animado y pulso por streamer). El repintado
+    negro se come el centro y el SOL queda como el resplandor anular
+    cegador alrededor de la luna negra.
+  · EL LIMBO: el filo blanco-cálido al borde del disco SUBE a alpha 0.55
+    (antes 0.20) + el jade dorado a 0.16.
+  · EL ANILLO DE DIAMANTE: LumenLib.Flare de 4 puntas latiendo SOBRE la
+    luna negra (sutil: 0.14..0.24 — el centro sigue siendo la luna).
+
+### B. EL ECLIPSE — EL HUMO DEL VACÍO (el centro ya no está muerto)
+  "No debe ser completamente oscuro en el centro, que tenga mucho humo o
+  bruma": LA BRUMA DE LA LIBRERÍA VIVE DENTRO DEL DISCO (pase ALFA =
+  masa de verdad sobre el negro absoluto — DrawVoidSmoke):
+  · LA MASA CENTRAL que respira (Puff 0.40r, alpha 0.32 ± latido).
+  · SEIS VOLÁTILES orbitando CW/CCW alternos (radios 0.30..0.60r,
+    violeta/púrpura/brasa, cada uno con su semilla y pulso).
+  · DOS VÓLUTAS espiralando hacia el centro (Tendril sobre camino
+    espiral 0.92r→0.18r).
+  · LA BRASA VIOLETA: glow tenue bajo el humo (0.09..0.14) — el centro
+    NUNCA es un punto muerto del todo.
+  Validado en mock 1:1 (tools/mock_eclipse_v624.py): VLM 8/10 humo
+  visible, 7/10 "centro negro-pero-vivo", sol reforzado tras la ronda.
+
+### C. LA CORONA RÚNICA = LA AUREOLA DEL SOL I (RuneCrownRenderer)
+  "Debe estar en la CABEZA como una AUREOLA, igual al anillo del sol
+  rúnico 1": el arco fucsia de 8 glifos de v6.03 QUEDA BORRADO — la
+  corona es ahora EL ANILLO DEL SOL RÚNICO I LITERAL ringiendo la cabeza
+  (la MISMA geometría de RuneSunRenderer tier 1): el aro elíptico de
+  cápsulas con profundidad (semiejes 1.62×R / 0.34×R, inclinación −0.55,
+  giro CW 0.26 rad/s) con SUS 6 glifos solares cabalgando la órbita
+  rotados a la tangente, perlas y latidos — LOS ALPHAS EXACTOS del sol
+  (aro (0.30+0.30·depth)·pulse, resplandor 0.20, trazos 0.85, perlas
+  0.60/0.90). Chispas doradas + luz cálida tenue en CosmeticPlayer. Icono
+  regenerado (la aureola dorada inclinada). El brillo ES el del sol —
+  nada del bloom fucsia cegador.
+
+### D. EL ANILLO RÚNICO ESTELAR = LA FORMA DE LOS AGUJEROS (RunicHaloRenderer)
+  "Estos aros no deben estar en esa forma, la forma correcta es LA MISMA
+  FORMA QUE LA DE LOS AGUJEROS NEGROS": los 4 anillos elípticos del sol
+  IV QUEDAN BORRADOS — el ítem de alas es ahora LOS CÍRCULOS RÚNICOS DE
+  LOS AGUJEROS, LITERALES (la técnica de SupremoBlackHoleRenderer):
+  · TRES círculos PLANOS (RingQuad — el aro fino): BLANCO íntimo 2.02R
+    CW rápido (6), DORADO 2.62R CW lento (8), VIOLETA 3.30R CCW (6 — el
+    contrarroto arcano).
+  · Las runas flotando ALREDEDOR de cada círculo (radio respirando por
+    glifo + mecido — la runa del agujero vive DE PIE, no tangencial),
+    con la tabla de glifos S0..S7 del supremo y perlas.
+  · LOS ALPHAS EXACTOS de los agujeros: aros 0.24/0.20/0.18, trazos
+    0.85·pulse, perlas 0.62/0.90.
+  · La energía de vuelo VIVE acotada (0.85..1.20, giro ×1..1.5, runas
+    ardiendo al blanco). Icono regenerado (los 3 aros concéntricos).
+
+### E. LAS TRES ARMAS DE LAS LIBRERÍAS (la petición doble: "un arma" + "varias armas")
+  CADA ARMA USA TODAS LAS LIBRERÍAS DEL PROYECTO — StormLib (rayos) +
+  BrumaFX (humo) + LumenLib (luz) + las runas — cada una con su
+  personalidad de juego:
+  · EL BASTÓN DE LA SINFONÍA PRIMORDIAL (120 dmg, SinfoniaPrimordial
+    Staff/Projectile): LA CHISPA DE LA CREACIÓN — corazón prismático de
+    drift (BloomPulse + Flare + Aurora + 5 Ray de sol) + estela de
+    BrumaFX + arcos de corona StormLib + cadenas a enemigos al vuelo
+    (55% dmg, Electrified) + 6 runas orbitando (forma de agujero). AL
+    MORIR — LA SINFONÍA: daño en área 140px + ImpactFlash + Aurora
+    completa de 15 bandas + SEIS MultiBolt radiales reventando + la
+    NUBE de bruma de la detonación creciendo + las runas VOLANDO +
+    doble onda de choque + cámara.
+  · EL CETRO DE LA TORMENTA NEBULAR (80 dmg/golpe, TormentaNebular
+    Staff/Projectile): LA TORMENTA PERSISTENTE (5 s sobre el cursor,
+    560px) — nube viva de BrumaFX (2 Cloud + 2 Puffs, pase ALFA = masa
+    que ocluye) + aurora LumenLib latiendo dentro + runas orbitando el
+    borde (8 oro CW + 6 violeta CCW) + arcos ambientales + HASTA TRES
+    DESCARGAS simultáneas con ciclo propio: telegraph
+    (LumenLib.Telegraph 10 ticks) → MultiBolt de la panza de la nube →
+    daño 85px + Electrified + trueno + ImpactFlash + onda.
+  · LA LANZA DEL ALBA RÚNICA (90 dmg, LanzaAlba Staff/Projectile): el
+    FILO del amanecer — la hoja de luz (LumenLib.Lance + LanceTrail de
+    8 fantasmas) + el Rayo de sol que la precede + Flare en la punta +
+    la runa estrella girando en el corazón + la VÓLUTA de bruma sobre
+    su estela real (Tendril, ring buffer de 8 posiciones) + EndCap
+    eléctrico. Perfora 4 enemigos; CADA GOLPE encadena ChainBolt a 2
+    cercanos (60% dmg + Electrified).
+  Entrega completa: EnsureItem ×3, recetas 5 madera, iconos 30×30
+  procedurales + sombras 76×76 (patrón del estilo de la casa), hjson
+  es/EN, tools/gen_v624_assets.py reproducible, hoja de contacto VLM
+  verificada (8/8 legibles).
+
+### F. LA PURGA — LA ENVOLTURA DE FUEGO Y LA DE RAYOS BORRADAS
+  "Borra la envoltura de fuego y rayo": git rm de FireVeilItem/
+  Player/DrawLayer/Renderer + StormVeilItem/Player/DrawLayer/Renderer +
+  FlameBrush.png (solo la usaba el fuego) + entradas hjson es/EN +
+  EnsureItem. Auditoría post-purga: 0 referencias .cs restantes.
+
+### G. CALIDAD
+  · Auditoría de assets: 70 clases ModProjectile/ModItem → 0 PNGs de
+    sombra faltantes (la lección v6.14.1).
+  · Compilación contra tModLoader 2026.07.3.0 REAL (/tmp/verify +
+    /tmp/tml, dotnet 8.0.425): Build succeeded · 0 errores · 0 warnings.
+  · Mock del eclipse (tools/mock_eclipse_v624.py) con VLM: humo 8/10,
+    centro vivo 7/10, sol reforzado tras la ronda de feedback.
+
 ## Commit v6.23 — EL AJUSTE FINO: el abrazo del fuego + la ENVOLTURA DE RAYOS + los anillos de los soles + el eclipse de verdad + los círculos rúnicos completos
 
 **Petición del usuario**: "el fuego es muy grande, debe estar limitado a solo

@@ -8,13 +8,14 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RunicHaloWingsDrawLayer — v6.22 — EL ANILLO RÚNICO EN LA ESPALDA.
+    /// RunicHaloWingsDrawLayer — v6.24 — LOS CÍRCULOS DE LOS AGUJEROS EN LA ESPALDA.
     ///
-    /// La capa de las alas-anillo: pinta el GRAN HALO RÚNICO tras la
-    /// espalda del jugador (mismo pase que las alas — el pase de ESPALDA:
-    /// el anillo queda DETRÁS del cuerpo como un halo de verdad). La
-    /// INTENSIDAD la aporta RunicHaloPlayer (la energía de vuelo): quieta
-    /// es un sello elegante; VOLANDO es un sol en tu espalda.
+    /// La capa de las alas-anillo: pinta LOS TRES CÍRCULOS RÚNICOS (la
+    /// forma LITERAL de los agujeros negros — v6.24) tras la espalda del
+    /// jugador (mismo pase que las alas: el sistema queda DETRÁS del
+    /// cuerpo). La INTENSIDAD la aporta RunicHaloPlayer (la energía de
+    /// vuelo): quieta es el sello elegante de un agujero; VOLANDO los
+    /// círculos se avivan.
     ///
     /// Los quads salen de RunicHaloRenderer por VFXCore
     /// (AppendToPlayerDraw — el camino oficial de las coronas).

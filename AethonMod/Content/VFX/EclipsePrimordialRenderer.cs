@@ -9,14 +9,25 @@ using AethonMod.Content.Effects.Bruma;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// EclipsePrimordialRenderer — v6.23 — LA FUSIÓN TOTAL, 100% CÓDIGO.
+    /// EclipsePrimordialRenderer — v6.24 — LA FUSIÓN TOTAL, 100% CÓDIGO.
     ///
-    /// v6.23 — LA ORDEN DEL USUARIO: "el bastón del eclipse primordial
-    /// debe ser NEGRO en su centro, el sol debe verse ligeramente": el
-    /// aura final ya NO lava el corazón (se pinta ANTES del repintado
-    /// negro — el vacío la devora en el centro) y EL SOL ASOMA: la
-    /// CORONA DEL ECLIPSE, un aro fino de luz blanco-cálida al borde
-    /// del disco negro + un jade dorado más afuera — un eclipse REAL.
+    /// v6.24 — LA ORDEN DEL USUARIO: "al agujero negro eclipse no se le
+    /// ve el sol" + "no debe ser completamente oscuro en el centro, debe
+    /// tener alguna animación o mejor, que tenga mucho humo o bruma":
+    ///   · LA CORONA SOLAR DEL ECLIPSE — el SOL DE VERDAD detrás de la
+    ///     luna negra: halo caliente + bloom LumenLib + 9 STREAMERS de
+    ///     luz radiando del limbo (el repintado negro se come el centro
+    ///     y el sol queda como el resplandor TOTAL de un eclipse real).
+    ///   · EL LIMBO BLANCO-CÁLIDO al borde del disco (el filo del sol
+    ///     asomando) + el destello de 4 puntas (el anillo de diamante).
+    ///   · EL HUMO DEL VACÍO — la luna negra NO es un punto muerto:
+    ///     MUCHA bruma viva (masa central que respira + 6 volátiles
+    ///     orbitando CW/CCW + 2 volutas espiralando al centro) girando
+    ///     DENTRO del disco, con una brasa violeta latiendo debajo.
+    ///
+    /// v6.23 — "negro en su centro, el sol debe verse ligeramente": el
+    /// aura final se pinta ANTES del repintado negro y el sol asoma al
+    /// borde del disco.
     ///
     /// EL ARMA FINAL DEL PROYECTO (petición del usuario): "un bastón nuevo
     /// que fusione el sol de 20 anillos rúnicos, más todos los agujeros
@@ -116,6 +127,12 @@ namespace AethonMod.Content.VFX
         private static readonly Color NebGold = new(190, 130, 40);
         private static readonly Color NebViolet = new(80, 50, 170);
         private static readonly Color WarmWhite = new(255, 225, 175);
+
+        // EL HUMO DEL VACÍO (v6.24): la bruma que vive DENTRO de la luna negra.
+        private static readonly Color SmokeViolet = new(108, 72, 160);
+        private static readonly Color SmokePurple = new(140, 96, 186);
+        private static readonly Color SmokeEmber = new(158, 110, 62);
+        private static readonly Color EmberGlow = new(150, 95, 205);
 
         // EL GRADIENTE AURORA (herencia del Supremo Aurora):
         private static readonly Color AurPurple = new(185, 105, 255);
@@ -251,6 +268,14 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 3.1f * rr, -tMid * 0.08f,
                     Tint(AurPurple, 0.10f * aura));
 
+                // --- 15c. EL SOL DE VERDAD (v6.24 — petición del usuario:
+                //     "no se le ve el sol"): LA CORONA SOLAR DEL ECLIPSE —
+                //     el halo caliente del sol vivo + sus STREAMERS
+                //     radiando del limbo, pintados ANTES del repintado para
+                //     que el vacío se coma el centro y el SOL quede como el
+                //     resplandor anular de un eclipse TOTAL de verdad ---
+                DrawSolarCorona(center, r, tMid, seed);
+
                 // --- 16. EL VACÍO VUELVE A DEVORAR: repintado del núcleo ---
                 Main.spriteBatch.End();
                 BeginAlpha();
@@ -260,15 +285,36 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 1.02f * r, tMid * 0.13f,
                     Tint(SupGold, 0.30f + 0.10f * (float)Math.Sin(tMid * 1.6f)));
 
-                // --- 16b. EL SOL ASOMA (v6.23 — petición del usuario: "negro
-                //     en su centro, el sol debe verse ligeramente"): la
-                //     CORONA DEL ECLIPSE — un aro fino de luz blanco-cálida
-                //     JUSTO al borde del disco negro y un jade dorado más
-                //     afuera: el sol vivo asomando tras la luna negra. ---
-                RingQuad(center, 1.055f * r, -tMid * 0.10f,
-                    Tint(WarmWhite, 0.20f + 0.07f * (float)Math.Sin(tMid * 2.3f)));
+                // --- 16b. EL LIMBO DEL ECLIPSE (v6.24): el filo BLANCO-CÁLIDO
+                //     del sol asomando al borde de la luna negra (ahora con
+                //     la fuerza de un limbo solar de verdad) + el jade dorado ---
+                RingQuad(center, 1.035f * r, -tMid * 0.10f,
+                    Tint(WarmWhite, 0.55f + 0.18f * (float)Math.Sin(tMid * 2.3f)));
                 RingQuad(center, 1.13f * r, tMid * 0.07f,
-                    Tint(AurGold, 0.11f + 0.04f * (float)Math.Sin(tMid * 1.7f + 1.1f)));
+                    Tint(AurGold, 0.16f + 0.06f * (float)Math.Sin(tMid * 1.7f + 1.1f)));
+
+                // --- 16c. EL ANILLO DE DIAMANTE: el destello de 4 puntas
+                //     sobre la luna negra (sutil — el centro sigue siendo
+                //     la luna; solo el LATIDO de la gema) ---
+                float beat = (float)Math.Pow(0.5f + 0.5f * (float)Math.Sin(tMid * 3.1f), 2.0f);
+                LumenLib.Flare(Main.spriteBatch, center, r * (1.05f + 0.16f * beat),
+                    WarmWhite, 0.14f + 0.10f * beat, tMid * 0.22f);
+
+                // --- 16d. EL HUMO DEL VACÍO (v6.24 — petición del usuario:
+                //     "mucho humo o bruma" en el centro): la luna negra
+                //     NO es un punto muerto — MUCHA bruma viva girando
+                //     DENTRO del disco, pintada con blending ALFA para que
+                //     sea MASA de verdad sobre el negro absoluto ---
+                Main.spriteBatch.End();
+                BeginAlpha();
+                DrawVoidSmoke(center, r, tSlow, seed);
+                Main.spriteBatch.End();
+                BeginAdditive();
+
+                // LA BRASA VIOLETA: el latido de luz bajo el humo (el
+                // centro respira — nunca un punto muerto del todo).
+                Quad(Glow, center, new Vector2(0.95f * r, 0.95f * r), 0f,
+                    Tint(EmberGlow, 0.09f + 0.05f * (float)Math.Sin(tSlow * 1.7f)));
 
                 Main.spriteBatch.End();
             }
@@ -712,6 +758,105 @@ namespace AethonMod.Content.VFX
             // LA AURORA DE BANDAS prismáticas girando lejos (el velo).
             LumenLib.Aurora(Main.spriteBatch, center, 2.6f * rr, time,
                 LumenLib.Drift(time, seed, 0.10f), 0.30f, 12);
+        }
+
+        // ------------------------------------------------------------------
+        //  15c. EL SOL DE VERDAD — LA CORONA SOLAR DEL ECLIPSE (v6.24)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// LA CORONA SOLAR: el sol vivo DETRÁS de la luna negra. Se pinta
+        /// ANTES del repintado negro: el vacío se come el centro y el sol
+        /// queda como el RESPLANDOR ANULAR de un eclipse total — halo
+        /// caliente + bloom LumenLib + 9 STREAMERS radiando del limbo.
+        /// </summary>
+        private static void DrawSolarCorona(Vector2 center, float r, float time, int seed)
+        {
+            // === 1. EL HALO CALIENTE: el resplandor del sol llenendo el ===
+            // ===     borde del disco (respira como la corona solar)     ===
+            float breath = 0.92f + 0.08f * (float)Math.Sin(time * 1.3f);
+            Quad(Glow, center, new Vector2(3.4f * r * breath, 3.4f * r * breath), 0f,
+                Tint(WarmWhite, 0.44f + 0.12f * (float)Math.Sin(time * 1.9f)));
+            Quad(Glow, center, new Vector2(2.5f * r, 2.5f * r), 0f,
+                Tint(WhiteIncan, 0.38f + 0.10f * (float)Math.Sin(time * 2.1f)));
+
+            // EL BLOOM DEL SOL (LumenLib: capas apiladas invertidas).
+            LumenLib.Bloom(Main.spriteBatch, center, 2.1f * r, WarmWhite,
+                0.40f + 0.12f * (float)Math.Sin(time * 1.7f), 2);
+
+            // === 2. LOS STREAMERS: rayos de sol radiando del limbo ===
+            // ===     (la firma de LumenLib.Ray — cada uno con su pulso) ===
+            const int Streamers = 9;
+            for (int i = 0; i < Streamers; i++)
+            {
+                float ang = i / (float)Streamers * MathHelper.TwoPi + time * 0.05f;
+                Vector2 dir = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
+                Vector2 origin = center + dir * (r * 1.02f);
+
+                float len = (0.75f + 0.85f * Hash01(seed, 2300 + i, 23)) * r;
+                float pulse = 0.45f + 0.55f * (float)Math.Sin(time * 1.7f + i * 1.9f);
+                Color col = Color.Lerp(WarmWhite, SupGold, 0.40f);
+
+                LumenLib.Ray(Main.spriteBatch, origin, dir, len,
+                    Math.Max(7f, 0.18f * r), col, 0.36f + 0.34f * pulse, pulse);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        //  16d. EL HUMO DEL VACÍO — la luna negra VIVA (v6.24)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// EL HUMO DEL VACÍO: MUCHA bruma girando DENTRO del disco negro
+        /// (blending ALFA — masa de verdad sobre el negro absoluto):
+        /// la masa central que respira + 6 volátiles orbitando CW/CCW +
+        /// 2 volutas espiralando hacia el centro. El centro del eclipse
+        /// NUNCA es un punto muerto.
+        /// </summary>
+        private static void DrawVoidSmoke(Vector2 center, float r, float time, int seed)
+        {
+            // === 1. LA MASA CENTRAL: el corazón del vacío respirando ===
+            BrumaFX.Puff(center, 0.40f * r, SmokeViolet, seed + 201, time,
+                alpha: 0.32f + 0.10f * (float)Math.Sin(time * 0.8f), quality: 0.8f);
+
+            // === 2. LOS VOLÁTILES ORBITANDO: seis puffs girando DENTRO ===
+            // ===     del disco (CW/CCW alternos — dirección propia)   ===
+            for (int i = 0; i < 6; i++)
+            {
+                float dir = i % 2 == 0 ? 1f : -1f;
+                float ang = i / 6f * MathHelper.TwoPi + time * 0.16f * dir;
+                float dist = (0.30f + 0.30f * Hash01(seed, 2400 + i, 31)) * r;
+                Vector2 pos = center + new Vector2(
+                    (float)Math.Cos(ang) * dist,
+                    (float)Math.Sin(ang) * dist * 0.88f);
+
+                float puffR = (0.22f + 0.12f * Hash01(seed, 2410 + i, 37)) * r;
+                Color c = i % 3 == 0 ? SmokeEmber
+                        : i % 3 == 1 ? SmokeViolet : SmokePurple;
+                float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 1.1f + i * 1.7f);
+
+                BrumaFX.Puff(pos, puffR, c, seed + 2500 + i * 37, time + i * 3f,
+                    alpha: 0.30f * pulse, quality: 0.7f);
+            }
+
+            // === 3. LAS ESPIRALES: dos volutas serpenteando AL CENTRO ===
+            // ===     (la materia del vacío caendo espiral adentro)    ===
+            for (int s = 0; s < 2; s++)
+            {
+                Vector2[] path = new Vector2[5];
+                for (int k = 0; k < 5; k++)
+                {
+                    float f = k / 4f;
+                    float ang = time * (0.20f + 0.10f * s) + s * MathHelper.Pi + f * 3.6f;
+                    float dist = MathHelper.Lerp(0.92f, 0.18f, f) * r;
+                    path[k] = center + new Vector2(
+                        (float)Math.Cos(ang) * dist,
+                        (float)Math.Sin(ang) * dist);
+                }
+                BrumaFX.Tendril(path, Math.Max(10f, 0.26f * r),
+                    s == 0 ? SmokePurple : SmokeViolet, seed + 2700 + s * 53, time,
+                    alpha: 0.22f, fade: 0.85f);
+            }
         }
 
         // ==================================================================

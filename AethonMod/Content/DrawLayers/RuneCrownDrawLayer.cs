@@ -8,13 +8,15 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.DrawLayers
 {
     /// <summary>
-    /// RuneCrownDrawLayer — v6.03 — EL HALO RÚNICO SOBRE LA CABEZA.
+    /// RuneCrownDrawLayer — v6.24 — LA AUREOLA DEL SOL I SOBRE LA CABEZA.
     ///
-    /// Capa de dibujado del jugador que pinta la CORONA RÚNICA ESTELAR:
-    /// el arco de ocho glifos FLOTANDO por encima de la cabeza (se dibuja
-    /// tras las capas de cabeza/cara: es un halo, vive por encima y no
-    /// tapa nada). Los quads salen de RuneCrownRenderer a través de la
-    /// biblioteca (AppendToPlayerDraw: DrawData oficial de tML).
+    /// Capa de dibujado del jugador que pinta LA CORONA RÚNICA: el
+    /// ANILLO DEL SOL RÚNICO I ringiendo la cabeza como una AUREOLA
+    /// (v6.24 — petición del usuario: "debe estar en la cabeza como una
+    /// aureola, igual al anillo del sol rúnico 1"). Se dibuja tras las
+    /// capas de cabeza/cara: la aureola vive ALREDEDOR de la cabeza.
+    /// Los quads salen de RuneCrownRenderer a través de la biblioteca
+    /// (AppendToPlayerDraw: DrawData oficial de tML).
     /// </summary>
     public class RuneCrownDrawLayer : PlayerDrawLayer
     {

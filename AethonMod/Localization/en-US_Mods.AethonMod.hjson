@@ -85,7 +85,7 @@
         "Items.VoidCrownItem.Tooltip": "The original crown of the crimson black hole, now a wearable cosmetic.\nFive crimson neon arcs with orange knots arched JUST BEHIND your head.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
 
         "Items.RuneCrownItem.DisplayName": "Astral Rune Crown",
-        "Items.RuneCrownItem.Tooltip": "A new crown designed from scratch: eight runic glyphs of fuchsia light\nfloating in an arc above your head, each tipped with a pale-pink pearl.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
+        "Items.RuneCrownItem.Tooltip": "The HALO of Runic Sun I ringing your head: the sun's very own ring\n(the tilted hoop with its six glyphs riding the orbit) at the exact brightness of the suns.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
 
         // v6.19: THE RUNIC SUN FAMILY — 10 copies of the Sun (the original
         // Sun stays untouched) with N rune rings on orbital planes with
@@ -117,12 +117,14 @@
         // v6.22: THE PRIMORDIAL ECLIPSE — the Sun of the 20 Rings fused
         // with ALL the black holes (light + mist + smoke + lightning)
         "Items.EclipsePrimordialStaff.DisplayName": "Staff of the Primordial Eclipse",
-        // v6.22: THE THREE NEW COSMETICS
-        "Items.FireVeilItem.DisplayName": "Primordial Fire Veil",
-        // v6.23: the lightning shroud (StormLib over the silhouette)
-        "Items.StormVeilItem.DisplayName": "Primordial Storm Veil",
+        // (v6.24: the FIRE VEIL and the STORM VEIL were removed — user request.)
         "Items.RuneRingCrownItem.DisplayName": "Rune Ring Crown",
         "Items.RunicHaloWings.DisplayName": "Astral Rune Ring",
+        // v6.24: THE THREE LIBRARY WEAPONS — each one uses ALL of them
+        // (StormLib lightning + BrumaFX smoke + LumenLib light + runes)
+        "Items.SinfoniaPrimordialStaff.DisplayName": "Staff of the Primordial Symphony",
+        "Items.TormentaNebularStaff.DisplayName": "Scepter of the Nebular Storm",
+        "Items.LanzaAlbaStaff.DisplayName": "Lance of the Runic Dawn",
         // v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Runic Thunder Scepter",
         // v6.18: wings were removed from the mod (user request).
