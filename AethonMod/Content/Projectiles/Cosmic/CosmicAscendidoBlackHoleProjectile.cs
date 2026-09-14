@@ -21,7 +21,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// elevado así:
     ///
     ///   · VISUAL — el CosmicAscendidoBlackHoleRenderer: tormenta de
-    ///     rayos ramificados (4-6 LightningCore.Bolt), coronas de
+    ///     rayos ramificados (4-6 StormLib.Bolt), coronas de
     ///     descarga, DOBLE anillo de bandas (eco interior
     ///     contrarrotante), doble círculo de runas (8 doradas + 5 ámbar)
     ///     y jets polares con rayo interior.

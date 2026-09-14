@@ -1,5 +1,149 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.22 — LA LUZ Y EL FUEGO: LumenLib + el Eclipse Primordial + los soles 11-20 + 3 cosméticos interactivos
+
+**Petición del usuario**: "crea un item cosmético que envuelva al personaje
+con fuego creado por código, el fuego debe interactuar con las acciones del
+personaje cuando se mueva · el bastón de rayos está perfecto, ahora añade
+ese rayo a todo lo que usaba la librería de rayos anterior, mantén la
+concordancia, la consistencia y los tamaños correctos · crea 10 bastones
+más de sol con anillos rúnicos, del 11 hasta el 20 · crea un bastón nuevo
+que fusione el sol de 20 anillos rúnicos más todos los agujeros negros,
+dale efectos de luz, bruma, humo, rayos y otros efectos · crea un cosmético
+que sea una corona de anillos rúnicos que rodee al jugador · crea un
+cosmético de un anillo rúnico en la espalda que funcione como alas y halo;
+cuando el jugador vaya a volar este anillo brilla con intensidad ·
+pregunta: StormLib ¿sirve para haces de luz y otros efectos o solo rayos?
+en cuyo caso crea más librerías con el conocimiento de los mods estudiados
+· investiga super profundo Wrath of the Empress y MEAC (empress of light)
+y crea una librería para manejar la luz como ellos".
+
+### A. LA INVESTIGACIÓN DE LUZ SUPERPROFUNDA (3 informes nuevos)
+  · **WoTE** (`research/luz_v622/INFORME_WOTE_LUZ.md`) — 31 archivos
+    leídos + 12 shaders HLSL .fx incluidos en el repo: el BLOOM APILADO
+    INVERTIDO (textura radial 200×200 en 2-4 capas: escalas 4.1/2.85/1.5/0.8
+    con alfas 0.25/0.67/0.7/1.0), paletas cíclicas MulticolorLerp con wrap,
+    hue drift 0.2-0.6/s + semilla por identidad, estela sinusoidal
+    perpendicular, LightLance con telegraph de 2100px + 30 fantasmas,
+    deathray con pulso 8.6 Hz. Casi CERO Lighting.AddLight: todo es render
+    emisivo.
+  · **La Emperatriz VANILLA extraída del binario real** (INFORME_EOL_
+    VANILLA.md — tModLoader.dll decompilado): el color = hslToRgb(hue%1,
+    S=1, L por capa: 0.5 cuerpo/0.85 luz/1.0 núcleos), la DOBLE PASADA
+    universal (color A÷2 ×1.1-1.4 SOBRE blanca A÷2 ×1.0), afterimages que
+    CRECEN hacia atrás (×1.4, 39-79 fantasmas), la telegrafía de lanza de
+    3600px, SunDance = sprite estirado 4 capas con grosor animado
+    0.25→0.7 + LUZ MUESTREADA cada 800/12 px, el aurora de muerte de 15
+    bandas espejadas π·i, el enrage dorado (255,231,69).
+  · **MEAC (el rework chino de la Emperatriz)** (INFORME_MEAC_LUZ.md —
+    .tmod descargado por 10 rangos paralelos + parser propio del formato
+    + ILSpy + VLM): el LUT arcoíris 1×256 (HSL S=1 L=0.5 — valida nuestra
+    matemática EXACTA), hue en ai[0] EN GRADOS con voleas desfasadas,
+    lanza = sprite + triángulo de 2500px + 8 afterimages con SQUASH Y,
+    doble dibujado con A=0, fuego = LUT de 40 niveles, tiras 1×N de
+    perfil DURO tintadas en runtime, warp de pantalla con RT.
+  · CERO código copiado de ninguno: las TÉCNICAS re-implementadas 100%.
+
+### B. LUMENLIB — LA LIBRERÍA DE LA LUZ (la respuesta a la pregunta del usuario)
+  StormLib ERA solo de rayos (filamentos eléctricos). Ahora el proyecto
+  tiene el TRÍO completo: **StormLib** (rayos) + **BrumaFX** (humo/niebla)
+  + **LumenLib** (la luz que EMANA). `Content/VFX/LumenLib.cs`:
+  · **Motor de color**: Hue (HSL propio con las L firmadas por capa),
+    Drift (el hue que camina 0.2-0.6/s con semilla por identidad), Cycle
+    (paletas cíclicas con wrap) + LumenPalettes (PrismRose/PrismDay/
+    SolarGold/VoidCold/EclipseFire).
+  · **Bloom** — el apilado invertido de 2-4 capas con los NÚMEROS medidos
+    del ecosistema (4.1/2.85/1.5/0.8 · 0.25/0.67/0.7/1.0) + BloomPulse.
+  · **DoublePass** — la doble pasada universal (color ×1.15 A÷2 sobre
+    blanca A÷2).
+  · **Flare** — el destello de 4 puntas (cruz + diagonal ×0.62 + punto
+    caliente).
+  · **Ray** — el rayo de sol: bloom ESTIRADO en 3 capas (velo ×1.6 /
+    cuerpo / núcleo ×0.3) con GROSOR ANIMADO y la boca cegadora.
+  · **Lance + LanceTrail + Telegraph** — la lanza de luz con hoja
+    (LumenBlade), N fantasmas que crecen ×1.4 con alpha (1-i/N)^1.6 y la
+    línea de aviso con anillo objetivo.
+  · **Aurora** — las 15 bandas espejadas π·i con dos vueltas de hue y dos
+    frecuencias.
+  · **LightAlong** — la luz del mundo MUESTREADA cada N px (la lección
+    del muestreo de la Emperatriz).
+  · **4 texturas procedurales nuevas**: LumenBloom (200×200), LumenBlade
+    (64×256 con taper y vetas), LumenFlare (128×128) y FlameBrush (24×36).
+
+### C. LA MIGRACIÓN COMPLETA: STORMLIB EN TODAS PARTES
+  TODO lo que usaba la librería vieja de rayos ahora usa la 2ª generación
+  (misma concordancia, mismos tamaños): los 4 Ascendidos + el Supremo +
+  el Supremo Aurora + el sol rúnico (prominencias, rayos fugitivos, jets)
+  — Bolt→Bolt, Arc→ArcRing, Flicker→IsLit, y los caminos suavizados
+  (Smooth+JitterPath) ahora son BÉZIER + REFINO FRACTAL (la rugosidad
+  multi-escala). **LightningCore.cs ELIMINADA** del mod: una sola librería
+  de rayos, la buena.
+
+### D. LOS SOLES RÚNICOS 11-20 (la segunda década, una capa nueva por tier)
+  11 · COMETA ORBITAL (cabeza + cola cruzando los anillos) · 12 · LLUVIA
+  DE RUNAS cayendo al sol · 13 · AURORA POLAR (cortinas LumenLib.Ray con
+  drift de hue) · 14 · ESTRELLA COMPAÑERA azul + PUENTE DE LUZ · 15 ·
+  CINTURÓN DE ASTEROIDES kepleriano con brecha · 16 · TORMENTA TOTAL
+  (multi-boltos + arco corona) · 17 · CORONA PRISMÁTICA (rayos de luz de
+  colores) · 18 · LANZAS PRISMÁTICAS orbitando con estelas · 19 · NÚCLEO
+  DE NUEVA (latido a estallido + destellos de limbo) · 20 · EL GRAN
+  SELLADO (los 8 glifos maestros en un aro ecuatorial + contrasello
+  violeta retrógrado). Packing más tighto del 10º anillo arriba, runas
+  +1/anillo (435 glifos en la XX), gigante final ×1.75 en la XX, daño
+  80→536.
+
+### E. EL ECLIPSE PRIMORDIAL — LA FUSIÓN TOTAL
+  `Bastón del Eclipse Primordial`: un agujero negro SUPREMO (esfera 55px,
+  atracción 600px — la mayor del mod) con EL SISTEMA SOLAR RÚNICO XX
+  COMPLETO orbitando el horizonte (RuneSunRenderer.DrawOrbitalSystem con
+  tier 20: los 20 anillos + gran sellado + cometa) + TODAS las herencias:
+  disco Doppler con GRADIENTE AURORA, anillo de bandas sin(θ·20+t·5),
+  brazos espirales, halo de BRUMA (Cloud×2 + Puff de HUMO que respira),
+  volutas Tendril cayendo, corona de RAYOS StormLib (arcos + multi-boltos),
+  jets polares, doble círculo de runas, RAYOS PRISMÁTICOS LumenLib + el
+  destello del corazón + el velo aurora. Muerte = ANILLO DE EINSTEIN +
+  NOVA RÚNICA (las dos explosiones juntas) + 34 runas de eco. Lente
+  gravitacional ×4.2 registrada en BlackHoleLensSystem.
+
+### F. LA ENVOLTURA DE FUEGO PRIMORDIAL (cosmético interactivo)
+  `FireVeilItem` + `FireVeilPlayer` + `FireVeilRenderer` +
+  `FireVeilDrawLayer`: un CAMPO DE 26×38 celdas de intensidades 0..36 vive
+  sobre el jugador — el algoritmo clásico de PROPAGACIÓN DE FUEGO (base
+  siempre encendida, decaimiento aleatorio, deriva lateral) con TABLA DE
+  37 COLORES propia (brasa→carmesí→naranja→ámbar→oro→blanco). EL FUEGO
+  INTERACTÚA: al CORRER el viento inclina las llamas EN CONTRA de la
+  marcha y las AVIVA (más intensidad + brasas sueltas) · al SALTAR se
+  APLASTAN y se retrasan por debajo (la inercia) · al CAER se ESTIRAN
+  hacia arriba (pases extra de propagación) · al VOLAR se vuelven COLUMNA
+  (pases dobles) · quieto: la lumbre calma. Chispas + humo + luz cálida
+  respirando. 100% código: cero sprites de fuego.
+
+### G. LA CORONA DE ANILLOS RÚNICOS (cosmético)
+  `RuneRingCrownItem`: TRES anillos rúnicos orbitando el CUERPO (el aro
+  dorado casi vertical del pecho, el blanco-estelar inclinado en
+  contrarroto y el ecuatorial azul de la cintura) — la técnica de los
+  anillos del Sol puesta sobre el jugador, con glifos a la tangente,
+  perlas y latidos. Chispas doradas/azules + luz mixta.
+
+### H. EL ANILLO RÚNICO ESTELAR (alas + halo)
+  `RunicHaloWings` (vuelan de verdad: 180 ticks, velocidad 9, ×2.5 — el
+  patrón AutoloadEquip + PNG 8×8 en blanco de v6.12): un GRAN ANILLO
+  RÚNICO vertical tras la espalda con contraro, glifos y corazón de luz.
+  AL VOLAR SE ENCIENDE (la ENERGÍA DE VUELO de RunicHaloPlayer: +0.09/tick
+  volando): el bloom ×2.2, la CRUZ DE LUZ, los 8 rayos radiales, el doble
+  ancho del aro y las runas ardiendo al blanco. Chispas tangenciales a
+  borbotones + luz del motor.
+
+### I. ENTREGA
+  · 15 nuevos PNGs procedurales (LumenBloom/LumenBlade/LumenFlare/
+    FlameBrush + iconos XI-XX + Eclipse + 3 cosméticos + sombra del
+    proyectil + _Wings 8×8) — validados VLM en 2 rondas ("LISTOS PARA
+    INTEGRACIÓN").
+  · Localización es-ES + en-US completa (15 DisplayName nuevos).
+  · EnsureItem ×2 sitios para TODO lo nuevo (10 bastones + Eclipse + 3
+    cosméticos).
+  · build.txt 6.22 · compilación 0 errores / 0 warnings contra tML real.
+
 ## Commit v6.21 — LA TORMENTA: rayos de verdad + el fix de los soles + sin maná
 
 **Petición del usuario**: "la imagen muestra cómo se ve el sol, solo se ve su

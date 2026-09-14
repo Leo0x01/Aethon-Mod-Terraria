@@ -25,10 +25,15 @@ namespace AethonMod.Content.Players
         /// <summary>¿Lleva la Corona Rúnica Estelar (glifos flotantes)?</summary>
         public bool RuneCrown;
 
+        /// <summary>¿Lleva la Corona de Anillos Rúnicos (v6.22 — los tres
+        /// aros orbitando el cuerpo)?</summary>
+        public bool RuneRingCrown;
+
         public override void ResetEffects()
         {
             VoidCrown = false;
             RuneCrown = false;
+            RuneRingCrown = false;
         }
 
         public override void PostUpdate()
@@ -37,6 +42,7 @@ namespace AethonMod.Content.Players
             // vanidad (13..19) — en cualquier lado cuenta.
             int voidType = ModContent.ItemType<Items.Cosmetics.VoidCrownItem>();
             int runeType = ModContent.ItemType<Items.Cosmetics.RuneCrownItem>();
+            int ringType = ModContent.ItemType<Items.Cosmetics.RuneRingCrownItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -49,6 +55,7 @@ namespace AethonMod.Content.Players
                 if (item == null || item.IsAir) continue;
                 if (item.type == voidType) VoidCrown = true;
                 else if (item.type == runeType) RuneCrown = true;
+                else if (item.type == ringType) RuneRingCrown = true;
             }
 
             if (Main.netMode == NetmodeID.Server) return;
@@ -100,6 +107,32 @@ namespace AethonMod.Content.Players
                 // Luz rosa tenue del arco rúnico.
                 Lighting.AddLight(head - new Vector2(0f, 18f * Player.gravDir),
                     new Vector3(0.22f, 0.04f, 0.14f));
+            }
+
+            // === v6.22 — LA CORONA DE ANILLOS VIVE: chispas doradas/azules
+            // escapando de los glifos de los aros + luz cálida-fría mixta.
+            if (RuneRingCrown)
+            {
+                Vector2 body = Player.Center - new Vector2(0f, Player.height * 0.05f * Player.gravDir);
+                if (Main.rand.NextBool(22))
+                {
+                    int k = Main.rand.Next(RuneRingCrownRenderer.RingCount);
+                    int g = Main.rand.Next(RuneRingCrownRenderer.RunesOf(k));
+                    Vector2 glyph = RuneRingCrownRenderer.GetGlyphPosition(
+                        body, scale, Main.GlobalTimeWrappedHourly, k, g);
+                    bool gold = k != 2;
+                    Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
+                        new Vector2(Main.rand.NextFloat(-0.35f, 0.35f),
+                                    -Main.rand.NextFloat(0.4f, 1.0f) * Player.gravDir),
+                        170, gold ? new Color(255, 220, 150) : new Color(190, 210, 255), 0.7f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+
+                // La LUZ mezclada de los tres aros (oro + azul).
+                Lighting.AddLight(body, new Vector3(0.16f, 0.13f, 0.07f));
+                Lighting.AddLight(body + new Vector2(0f, 14f * Player.gravDir),
+                    new Vector3(0.07f, 0.09f, 0.16f));
             }
         }
     }

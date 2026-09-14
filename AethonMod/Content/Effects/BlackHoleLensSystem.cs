@@ -324,6 +324,9 @@ namespace AethonMod.Content.Effects
             // v6.20: el SUPREMO AURORA — el gradiente negro→morado→azul→dorado
             // (el original queda intacto; este es el hermano del alba polar)
             int supremoAuroraType = ModContent.ProjectileType<SupremoAuroraBlackHoleProjectile>();
+            // v6.22: EL ECLIPSE PRIMORDIAL — la fusión del Sol de los 20
+            // Anillos + TODOS los agujeros negros (la lente más grande)
+            int eclipseType = ModContent.ProjectileType<EclipsePrimordialProjectile>();
             int umbralAscType = ModContent.ProjectileType<UmbralAscendidoBlackHoleProjectile>();
             int brumaAscType = ModContent.ProjectileType<BrumaAscendidoBlackHoleProjectile>();
             int cosmicAscType = ModContent.ProjectileType<CosmicAscendidoBlackHoleProjectile>();
@@ -358,6 +361,7 @@ namespace AethonMod.Content.Effects
                     p.type == cosmicHoleType || p.type == umbralHoleType ||
                     p.type == brumaHoleType ||
                     p.type == supremoHoleType || p.type == supremoAuroraType ||
+                    p.type == eclipseType ||
                     p.type == umbralAscType ||
                     p.type == brumaAscType || p.type == cosmicAscType ||
                     p.type == olvidoAscType)
@@ -388,6 +392,8 @@ namespace AethonMod.Content.Effects
                         radiusMult = SupremoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == supremoAuroraType)
                         radiusMult = SupremoAuroraBlackHoleProjectile.LensRadiusMult;
+                    else if (p.type == eclipseType)
+                        radiusMult = EclipsePrimordialProjectile.LensRadiusMult;
                     else if (p.type == umbralAscType)
                         radiusMult = UmbralAscendidoBlackHoleProjectile.LensRadiusMult;
                     else if (p.type == brumaAscType)
@@ -774,6 +780,8 @@ namespace AethonMod.Content.Effects
                         SupremoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == supremoAuroraType)
                         SupremoAuroraBlackHoleProjectile.DrawCoreVisuals(bh);
+                    else if (bh.type == eclipseType)
+                        EclipsePrimordialProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == umbralAscType)
                         UmbralAscendidoBlackHoleProjectile.DrawCoreVisuals(bh);
                     else if (bh.type == brumaAscType)

@@ -12,7 +12,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// RuneSunProjectile — v6.19 — LA FAMILIA DE LOS SOLES RÚNICOS.
     ///
-    /// UN solo proyectil parametrizado: `ai[0]` = copia (1..10). La copia
+    /// UN solo proyectil parametrizado: `ai[0]` = copia (1..20). La copia
     /// N lleva N ANILLOS RÚNICOS en planos orbitales distintos con GIROS
     /// ALTERNOS, y cada nivel añade una mejora más (ver RuneSunRenderer).
     ///
@@ -79,7 +79,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             BaseDamage = Projectile.damage;
         }
 
-        /// <summary>La copia (1..10), clampeada.</summary>
+        /// <summary>La copia (1..20), clampeada.</summary>
         private int Tier => System.Math.Clamp((int)Projectile.ai[0], 1, RuneSunRenderer.MaxTier);
 
         /// <summary>Semilla determinista del disparo.</summary>
@@ -106,16 +106,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.scale = ElasticOut(Utils.GetLerpValue(0f, 90f, _age, true)) *
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 45f, _age, true));
 
-            // === LA GIGANTE FINAL: se hincha ×1.5 y el daño sube ×1.5 ===
+            // === LA GIGANTE FINAL: se hincha ×1.5 y el daño sube ×1.5
+            // (v6.22: la copia 20 — EL GRAN SELLADO — se hincha ×1.75) ===
             float rg = RedGiant;
             if (rg > 0f)
             {
                 float ease = rg * rg * (3f - 2f * rg);
-                Projectile.scale *= 1f + 0.50f * ease;
+                float swell = Tier >= 20 ? 0.75f : 0.50f;
+                Projectile.scale *= 1f + swell * ease;
 
                 float baseDmg = BaseDamage > 0f ? BaseDamage : Projectile.damage;
                 BaseDamage = baseDmg;
-                int newDmg = Math.Max(1, (int)(baseDmg * (1f + 0.50f * rg)));
+                int newDmg = Math.Max(1, (int)(baseDmg * (1f + swell * rg)));
                 if (newDmg != Projectile.damage)
                     Projectile.damage = newDmg;
 

@@ -16,13 +16,13 @@ namespace AethonMod.Content.VFX
     /// un archivo NUEVO nacido de ella — misma identidad GELIDA (teal /
     /// cian / violeta), misma librería de bruma (BrumaFX), mismo contrato
     /// de batch — con CINCO MEJORAS SUSTANCIALES sobre la LIBRERÍA DE
-    /// RAYOS LightningCore:
+    /// RAYOS StormLib:
     ///
-    ///   1. ⚡ CORONAS DE ESCARCHA ELÉCTRICA — 3 LightningCore.Arc cian
+    ///   1. ⚡ CORONAS DE ESCARCHA ELÉCTRICA — 3 StormLib.Arc cian
     ///      alrededor del horizonte a radios ligeramente distintos,
     ///      parpadeando a ~10 Hz — LA FIRMA VISUAL de la Ascendida.
     ///
-    ///   2. ⚡ RAYOS GELIDOS — 2 LightningCore.Bolt cian-blancos ESCAPANDO
+    ///   2. ⚡ RAYOS GELIDOS — 2 StormLib.Bolt cian-blancos ESCAPANDO
     ///      del anillo de humo (doble tira + ramas heredadas).
     ///
     ///   3. VOLUTAS REFORZADAS — las Tendril pasan de 3 a 5, con MÁS
@@ -236,11 +236,11 @@ namespace AethonMod.Content.VFX
                 DrawPhotonRunners(center, rr, time, seed);
 
                 // --- 6b. ⚡ LAS CORONAS DE ESCARCHA ELÉCTRICA — LA FIRMA
-                //      de la Ascendida: 3 arcos LightningCore cian alrededor
+                //      de la Ascendida: 3 arcos StormLib cian alrededor
                 //      del horizonte, a radios ligeramente distintos. ---
                 DrawFrostCrowns(center, r, time, seed);
 
-                // --- 6c. ⚡ LOS RAYOS GELIDOS — 2 LightningCore.Bolt
+                // --- 6c. ⚡ LOS RAYOS GELIDOS — 2 StormLib.Bolt
                 //      cian-blancos ESCAPANDO del anillo de humo. ---
                 DrawGelidBolts(center, rr, time, seed);
 
@@ -366,21 +366,21 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  6b. ⚡ LAS CORONAS DE ESCARCHA ELÉCTRICA — LightningCore.Arc ×3
+        //  6b. ⚡ LAS CORONAS DE ESCARCHA ELÉCTRICA — StormLib.Arc ×3
         //      alrededor del horizonte, a radios ligeramente distintos,
         //      parpadeando a ~10 Hz — LA FIRMA VISUAL del Ascendido.
         // ------------------------------------------------------------------
 
         private static void DrawFrostCrowns(Vector2 center, float r, float time, int seed)
         {
-            int cflick = LightningCore.FlickTick(time, FrostCrownHz);
+            int cflick = StormLib.FlickTick(time, FrostCrownHz);
             float spin = time * 0.55f;
 
             for (int k = 0; k < FrostCrownCount; k++)
             {
                 int cseed = seed + 8100 + k * 131;
                 // El parpadeo nervioso: cada corona se APAGA a veces.
-                if (!LightningCore.Flicker(cseed, cflick, 0.88f)) continue;
+                if (!StormLib.IsLit(cseed, cflick, 0.88f)) continue;
 
                 // Radios ligeramente distintos (coronas concéntricas) y
                 // contrarrotación alternada: el horizonte CHISPEA.
@@ -390,7 +390,7 @@ namespace AethonMod.Content.VFX
                 // (v2 del calibrado: 0.080·R — calibrado con el mock VLM.)
                 float w = Math.Max(r * (0.080f - 0.010f * k), 2.2f);
 
-                LightningCore.Arc(Main.spriteBatch, center, radius, a0, a0 + span,
+                StormLib.ArcRing(Main.spriteBatch, center, radius, a0, a0 + span,
                     cseed, cflick, w,
                     Tint(SmokeCyan, 0.50f), Tint(PhotonWhite, 0.95f),
                     alpha: 1f, count: 9);
@@ -398,19 +398,19 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  6c. ⚡ LOS RAYOS GELIDOS — LightningCore.Bolt ×2 cian-blancos
+        //  6c. ⚡ LOS RAYOS GELIDOS — StormLib.Bolt ×2 cian-blancos
         //      ESCAPANDO del anillo de humo (doble tira + ramas + gorros).
         // ------------------------------------------------------------------
 
         private static void DrawGelidBolts(Vector2 center, float rr, float time, int seed)
         {
-            int bflick = LightningCore.FlickTick(time, GelidBoltHz);
+            int bflick = StormLib.FlickTick(time, GelidBoltHz);
 
             for (int i = 0; i < GelidBoltCount; i++)
             {
                 int bseed = seed + 9200 + i * 173;
                 // El parpadeo nervioso: el rayo se APAGA a veces.
-                if (!LightningCore.Flicker(bseed, bflick, 0.78f)) continue;
+                if (!StormLib.IsLit(bseed, bflick, 0.78f)) continue;
 
                 // El ancla VIVE sobre el anillo de humo (deriva lenta) y el
                 // rayo ESCAPA hacia afuera, ligeramente hacia arriba.
@@ -426,9 +426,9 @@ namespace AethonMod.Content.VFX
                 float len = GelidBoltLen * rr * (0.85f + 0.40f * Hash01(seed, 9210 + i, 3));
                 Vector2 end = start + dir * len;
 
-                // LA DOBLE TIRA DE LightningCore (funda + núcleo + ramas).
+                // LA DOBLE TIRA DE StormLib (funda + núcleo + ramas).
                 float w = Math.Max(rr * 0.075f, 2.2f);
-                LightningCore.Bolt(Main.spriteBatch, start, end, bseed, bflick,
+                StormLib.Bolt(Main.spriteBatch, start, end, bseed, bflick,
                     w, Tint(SmokeCyan, 0.55f), Tint(PhotonWhite, 0.95f),
                     alpha: 1f, segments: 7, amp: rr * 0.15f);
 

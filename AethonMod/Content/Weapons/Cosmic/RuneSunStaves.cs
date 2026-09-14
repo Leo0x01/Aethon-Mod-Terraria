@@ -31,7 +31,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override void SetDefaults()
         {
             int tier = Tier;
-            Item.damage = 80 + 24 * (tier - 1);          // 80 → 296
+            Item.damage = 80 + 24 * (tier - 1);          // 80 → 536
             Item.DamageType = DamageClass.Generic;
             Item.width = 28; Item.height = 30;
             Item.useTime = 50; Item.useAnimation = 50;
@@ -58,11 +58,19 @@ namespace AethonMod.Content.Weapons.Cosmic
         {
             // v6.18: TOOLTIP CORTO — dos líneas, el nombre vive arriba.
             int tier = Tier;
-            string anillos = tier == 1 ? "1 anillo rúnico" : $"{tier} anillos rúnicos";
+            string anillos = $"{tier} anillos rúnicos";
+            string mejora = tier switch
+            {
+                >= 20 => "cometa + lluvia rúnica + aurora polar + compañera azul + cinturón de asteroides + tormenta total + corona y lanzas prismáticas + corazón de nova + EL GRAN SELLADO",
+                >= 17 => "cometa + lluvia rúnica + aurora polar + compañera azul + cinturón de asteroides + tormenta total + corona prismática",
+                >= 14 => "cometa + lluvia rúnica + aurora polar + estrella compañera",
+                >= 11 => "cometa + lluvia rúnica + aurora polar",
+                _ => "aura ardiente · persigue enemigos · gigante final · una sola nova",
+            };
             tooltips.Add(new TooltipLine(Mod, "D",
                 $"[c/FFD080:Copia {tier} del Sol — {anillos} en planos orbitales con giros alternos]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/78788C:Aura ardiente · persigue enemigos · gigante final · una sola nova]"));
+                $"[c/78788C:{mejora}]"));
         }
 
         public override void AddRecipes()
@@ -105,4 +113,39 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// <summary>Copia 10 — DIEZ anillos: el SISTEMA COMPLETO (erupción
     /// rúnica + jets polares + todas las mejoras a máxima potencia).</summary>
     public class SolRunico10Staff : RuneSunStaffBase { protected override int Tier => 10; }
+
+    // =====================================================================
+    //  v6.22 — LA SEGUNDA DÉCADA (11..20)
+    // =====================================================================
+
+    /// <summary>Copia 11 — ONCE anillos + COMETA ORBITAL con cola.</summary>
+    public class SolRunico11Staff : RuneSunStaffBase { protected override int Tier => 11; }
+
+    /// <summary>Copia 12 — DOCE anillos + LLUVIA DE RUNAS cayendo al sol.</summary>
+    public class SolRunico12Staff : RuneSunStaffBase { protected override int Tier => 12; }
+
+    /// <summary>Copia 13 — TRECE anillos + AURORA POLAR prismática.</summary>
+    public class SolRunico13Staff : RuneSunStaffBase { protected override int Tier => 13; }
+
+    /// <summary>Copia 14 — CATORCE anillos + ESTRELLA COMPAÑERA azul con puente de luz.</summary>
+    public class SolRunico14Staff : RuneSunStaffBase { protected override int Tier => 14; }
+
+    /// <summary>Copia 15 — QUINCE anillos + CINTURÓN DE ASTEROIDES con brecha.</summary>
+    public class SolRunico15Staff : RuneSunStaffBase { protected override int Tier => 15; }
+
+    /// <summary>Copia 16 — DIECISÉIS anillos + TORMENTA TOTAL: multi-boltos + arco corona.</summary>
+    public class SolRunico16Staff : RuneSunStaffBase { protected override int Tier => 16; }
+
+    /// <summary>Copia 17 — DIECISIETE anillos + CORONA PRISMÁTICA de rayos de luz.</summary>
+    public class SolRunico17Staff : RuneSunStaffBase { protected override int Tier => 17; }
+
+    /// <summary>Copia 18 — DIECIOCHO anillos + LANZAS PRISMÁTICAS orbitando.</summary>
+    public class SolRunico18Staff : RuneSunStaffBase { protected override int Tier => 18; }
+
+    /// <summary>Copia 19 — DIECINUEVE anillos + NÚCLEO DE NUEVA latiendo a estallido.</summary>
+    public class SolRunico19Staff : RuneSunStaffBase { protected override int Tier => 19; }
+
+    /// <summary>Copia 20 — VEINTE anillos: EL SISTEMA SUPREMO con el GRAN
+    /// SELLADO (los 8 glifos maestros + contrasello retrógrado).</summary>
+    public class SolRunico20Staff : RuneSunStaffBase { protected override int Tier => 20; }
 }

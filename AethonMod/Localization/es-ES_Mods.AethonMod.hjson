@@ -101,6 +101,27 @@
         "Items.SolRunico8Staff.DisplayName": "Bastón del Sol Rúnico VIII",
         "Items.SolRunico9Staff.DisplayName": "Bastón del Sol Rúnico IX",
         "Items.SolRunico10Staff.DisplayName": "Bastón del Sol Rúnico X",
+        // v6.22: LA SEGUNDA DÉCADA — soles 11..20 (el cometa, la lluvia
+        // rúnica, la aurora polar, la estrella compañera, el cinturón de
+        // asteroides, la tormenta total, la corona y las lanzas prismáticas,
+        // el corazón de nova y EL GRAN SELLADO de la copia XX)
+        "Items.SolRunico11Staff.DisplayName": "Bastón del Sol Rúnico XI",
+        "Items.SolRunico12Staff.DisplayName": "Bastón del Sol Rúnico XII",
+        "Items.SolRunico13Staff.DisplayName": "Bastón del Sol Rúnico XIII",
+        "Items.SolRunico14Staff.DisplayName": "Bastón del Sol Rúnico XIV",
+        "Items.SolRunico15Staff.DisplayName": "Bastón del Sol Rúnico XV",
+        "Items.SolRunico16Staff.DisplayName": "Bastón del Sol Rúnico XVI",
+        "Items.SolRunico17Staff.DisplayName": "Bastón del Sol Rúnico XVII",
+        "Items.SolRunico18Staff.DisplayName": "Bastón del Sol Rúnico XVIII",
+        "Items.SolRunico19Staff.DisplayName": "Bastón del Sol Rúnico XIX",
+        "Items.SolRunico20Staff.DisplayName": "Bastón del Sol Rúnico XX",
+        // v6.22: EL ECLIPSE PRIMORDIAL — el Sol de los 20 Anillos fundido
+        // con TODOS los agujeros negros (luz + bruma + humo + rayos)
+        "Items.EclipsePrimordialStaff.DisplayName": "Bastón del Eclipse Primordial",
+        // v6.22: LOS TRES COSMÉTICOS NUEVOS
+        "Items.FireVeilItem.DisplayName": "Envoltura de Fuego Primordial",
+        "Items.RuneRingCrownItem.DisplayName": "Corona de Anillos Rúnicos",
+        "Items.RunicHaloWings.DisplayName": "Anillo Rúnico Estelar",
         // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Cetro del Trueno Rúnico",
 
@@ -123,6 +144,8 @@
         "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Bruma Ascendida",
         "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Cósmico Ascendido",
         "Projectiles.OlvidoAscendidoBlackHoleProjectile.DisplayName": "Olvido Ascendido",
+        // v6.22: EL ECLIPSE PRIMORDIAL
+        "Projectiles.EclipsePrimordialProjectile.DisplayName": "Eclipse Primordial",
 
         // v6.19: los proyectiles de los soles rúnicos y del rayo del cetro
         "Projectiles.RuneSunProjectile.DisplayName": "Sol Rúnico",

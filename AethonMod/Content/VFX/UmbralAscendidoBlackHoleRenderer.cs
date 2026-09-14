@@ -14,15 +14,15 @@ namespace AethonMod.Content.VFX
     /// El Umbral original (UmbralBlackHoleRenderer) queda INTACTO; este es
     /// un archivo NUEVO nacido de él — misma geometría medida, misma
     /// paleta carmesí/naranja DOPPLER, mismo contrato de batch — con CINCO
-    /// MEJORAS SUSTANCIALES sobre la LIBRERÍA DE RAYOS LightningCore:
+    /// MEJORAS SUSTANCIALES sobre la LIBRERÍA DE RAYOS StormLib:
     ///
-    ///   1. ⚡ LLUVIA DE RAYOS NARANJAS — 4 rayos LightningCore.Bolt CAYENDO
+    ///   1. ⚡ LLUVIA DE RAYOS NARANJAS — 4 rayos StormLib.Bolt CAYENDO
     ///      alrededor del agujero, naciendo en el círculo de runas y
     ///      cayendo hacia afuera-abajo, con parpadeo vivo a ~8 Hz. La doble
     ///      tira funda+núcleo con RAMAS heredadas sustituye al rayo simple
     ///      del original.
     ///
-    ///   2. ⚡ ARCO DORADO — un LightningCore.Arc eléctrico parcial (~90°)
+    ///   2. ⚡ ARCO DORADO — un StormLib.Arc eléctrico parcial (~90°)
     ///      alrededor del horizonte, dorado, GIRANDO con el tiempo, con un
     ///      segundo filo más fino desfasado.
     ///
@@ -106,12 +106,12 @@ namespace AethonMod.Content.VFX
         private const float RuneRadius2 = 1.66f;  // ×R — entre horizonte y ala
         private const float RuneOrbit2 = -0.21f;  // rad/s — CONTRARROTACIÓN
 
-        // --- ASCENDIDO: LA LLUVIA DE RAYOS (LightningCore) ---
+        // --- ASCENDIDO: LA LLUVIA DE RAYOS (StormLib) ---
         private const int BoltRainCount = 4;      // rayos cayendo alrededor
         private const float BoltRainHz = 8f;      // regeneración nerviosa (~8 Hz)
         private const float BoltRainLen = 1.60f;  // ×R — largo de cada rayo
 
-        // --- ASCENDIDO: EL ARCO DORADO giratorio (LightningCore.Arc) ---
+        // --- ASCENDIDO: EL ARCO DORADO giratorio (StormLib.Arc) ---
         private const float GoldArcHz = 9f;       // regeneración del arco
         private const float GoldArcRadius = 1.38f; // ×R — abraza el horizonte
         private const float GoldArcSpin = 0.85f;  // rad/s — gira con el tiempo
@@ -331,7 +331,7 @@ namespace AethonMod.Content.VFX
                 //      LLUVIA DE RAYOS nazca ENCIMA de ellas. ---
                 DrawRuneCircle(center, r, time, seed);
 
-                // --- 8. ⚡ LA LLUVIA DE RAYOS NARANJAS (LightningCore:
+                // --- 8. ⚡ LA LLUVIA DE RAYOS NARANJAS (StormLib:
                 //      doble tira + RAMAS, anclada al círculo de runas) ---
                 DrawLightningRain(center, r, time, seed);
 
@@ -357,7 +357,7 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 1.02f * r, time * 0.12f,
                     Tint(MagentaViolet, 0.26f + 0.08f * (float)Math.Sin(time * 1.5f)));
 
-                // --- 13. ⚡ EL ARCO DORADO GIRATORIO (LightningCore.Arc) —
+                // --- 13. ⚡ EL ARCO DORADO GIRATORIO (StormLib.Arc) —
                 //      la CAPA FINAL: nada vuelve a devorarlo. Abraza el
                 //      horizonte a 1.38·R girando con el tiempo. ---
                 DrawGoldenArc(center, r, time, seed);
@@ -698,7 +698,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  7. ⚡ LA LLUVIA DE RAYOS NARANJAS — LightningCore.Bolt ×4
+        //  7. ⚡ LA LLUVIA DE RAYOS NARANJAS — StormLib.Bolt ×4
         //      (doble tira cuerpo+núcleo, RAMAS heredadas, gorros de
         //      descarga) naciendo en el CÍRCULO DE RUNAS y CAYENDO hacia
         //      afuera-abajo. SUSTITUYE al rayo simple del original.
@@ -706,13 +706,13 @@ namespace AethonMod.Content.VFX
 
         private static void DrawLightningRain(Vector2 center, float r, float time, int seed)
         {
-            int lflick = LightningCore.FlickTick(time, BoltRainHz);
+            int lflick = StormLib.FlickTick(time, BoltRainHz);
 
             for (int i = 0; i < BoltRainCount; i++)
             {
                 int bseed = seed + 310 + i * 97;
                 // El parpadeo nervioso: cada rayo se APAGA a veces.
-                if (!LightningCore.Flicker(bseed, lflick, 0.80f)) continue;
+                if (!StormLib.IsLit(bseed, lflick, 0.80f)) continue;
 
                 // El ancla VIVE sobre el círculo de runas (gira despacio,
                 // distinto por rayo) y el rayo CAE hacia afuera-abajo.
@@ -731,9 +731,9 @@ namespace AethonMod.Content.VFX
                 float len = BoltRainLen * r * (0.80f + 0.55f * Hash01(seed, 340 + i, lflick));
                 Vector2 end = start + dir * len;
 
-                // LA DOBLE TIRA DE LightningCore (funda + núcleo + ramas).
+                // LA DOBLE TIRA DE StormLib (funda + núcleo + ramas).
                 float w = Math.Max(r * 0.085f, 2.2f);
-                LightningCore.Bolt(Main.spriteBatch, start, end, bseed, lflick,
+                StormLib.Bolt(Main.spriteBatch, start, end, bseed, lflick,
                     w, Tint(BoltRainHalo, 0.55f), Tint(BoltRainCore, 0.95f),
                     alpha: 1f, segments: 7, amp: r * 0.16f);
 
@@ -744,14 +744,14 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  8. ⚡ EL ARCO DORADO GIRATORIO — LightningCore.Arc de ~90°
+        //  8. ⚡ EL ARCO DORADO GIRATORIO — StormLib.Arc de ~90°
         //      alrededor del horizonte, con un segundo filo desfasado.
         // ------------------------------------------------------------------
 
         private static void DrawGoldenArc(Vector2 center, float r, float time, int seed)
         {
-            int gflick = LightningCore.FlickTick(time, GoldArcHz);
-            if (!LightningCore.Flicker(seed + 777, gflick, 0.90f)) return;
+            int gflick = StormLib.FlickTick(time, GoldArcHz);
+            if (!StormLib.IsLit(seed + 777, gflick, 0.90f)) return;
 
             // El arco recorre ~90° del horizonte y GIRA con el tiempo.
             // (v2 del calibrado: ancho 0.10·R y halo 0.62 — calibrado con
@@ -759,15 +759,15 @@ namespace AethonMod.Content.VFX
             float a0 = time * GoldArcSpin;
             float w = Math.Max(r * 0.10f, 2.6f);
 
-            LightningCore.Arc(Main.spriteBatch, center, GoldArcRadius * r,
+            StormLib.ArcRing(Main.spriteBatch, center, GoldArcRadius * r,
                 a0, a0 + MathHelper.PiOver2, seed + 777, gflick, w,
                 Tint(GoldArcHalo, 0.62f), Tint(GoldArcCore, 0.95f),
                 alpha: 1f, count: 9);
 
             // EL SEGUNDO FILO: más fino, más afuera, desfasado (corona doble).
-            if (LightningCore.Flicker(seed + 778, gflick, 0.70f))
+            if (StormLib.IsLit(seed + 778, gflick, 0.70f))
             {
-                LightningCore.Arc(Main.spriteBatch, center, GoldArcRadius * 1.12f * r,
+                StormLib.ArcRing(Main.spriteBatch, center, GoldArcRadius * 1.12f * r,
                     a0 + 0.35f, a0 + 0.35f + MathHelper.PiOver2 * 0.8f,
                     seed + 778, gflick, w * 0.62f,
                     Tint(GoldArcHalo, 0.42f), Tint(GoldArcCore, 0.80f),

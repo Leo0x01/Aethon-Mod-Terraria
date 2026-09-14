@@ -26,7 +26,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// El RENDER es el UmbralAscendidoBlackHoleRenderer: Doppler extremo
     /// (lado cercano BLANCO-incandescente y grueso, lejano rojo profundo y
-    /// fino), LLUVIA DE RAYOS LightningCore anclada al círculo de runas,
+    /// fino), LLUVIA DE RAYOS StormLib anclada al círculo de runas,
     /// ARCO DORADO giratorio, DOBLE anillo rúnico contrarrotante y brasas
     /// de estelas largas. 100% CÓDIGO.
     ///

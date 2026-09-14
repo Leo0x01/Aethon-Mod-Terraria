@@ -103,15 +103,38 @@ namespace AethonMod.Content.Players
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico8Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico9Staff>());
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico10Staff>());
+            // v6.22: LA SEGUNDA DÉCADA — soles 11..20 (cometa, lluvia rúnica,
+            // aurora polar, estrella compañera, cinturón de asteroides,
+            // tormenta total, corona prismática, lanzas, nova, gran sellado)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico11Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico12Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico13Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico14Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico15Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico16Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico17Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico18Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico19Staff>());
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.SolRunico20Staff>());
+            // v6.22: EL ECLIPSE PRIMORDIAL — el Sol de los 20 Anillos fundido
+            // con TODOS los agujeros negros (luz + bruma + humo + rayos)
+            EnsureItem(ModContent.ItemType<Weapons.Cosmic.EclipsePrimordialStaff>());
             // v6.19: EL CETRO DEL TRUENO — el arma de rayos de la librería
-            // LightningCore (daño en línea, cadena, arcos, electrificación)
+            // StormLib (daño en línea, cadena, arcos, electrificación)
             EnsureItem(ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>());
             // v6.03: LOS COSMÉTICOS DE LAS DOS CORONAS (la del agujero,
             // detrás de la cabeza, y la rúnica nueva, flotando sobre ella)
             EnsureItem(ModContent.ItemType<Items.Cosmetics.VoidCrownItem>());
             EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneCrownItem>());
-            // (v6.18: TODAS LAS ALAS FUERON BORRADAS del mod — petición del
-            // usuario: "todas están mal, no se ven nada bien".)
+            // v6.22: LOS TRES COSMÉTICOS NUEVOS — la ENVOLTURA DE FUEGO
+            // procedural (interactiva con el movimiento), la CORONA DE
+            // ANILLOS RÚNICOS que rodea el cuerpo y el ANILLO RÚNICO
+            // ESTELAR (alas + halo de la espalda que arde al volar)
+            EnsureItem(ModContent.ItemType<Items.Cosmetics.FireVeilItem>());
+            EnsureItem(ModContent.ItemType<Items.Cosmetics.RuneRingCrownItem>());
+            EnsureItem(ModContent.ItemType<Items.Wings.RunicHaloWings>());
+            // (v6.18: las 8 alas viejas FUERON BORRADAS — petición del
+            // usuario. v6.22 vuelve UNA sola, LA BUENA: el anillo rúnico.)
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

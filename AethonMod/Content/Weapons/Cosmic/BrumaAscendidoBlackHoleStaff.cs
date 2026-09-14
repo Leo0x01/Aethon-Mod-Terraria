@@ -13,11 +13,11 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// LA COPIA MEJORADA del bastón de la Bruma (que queda INTACTO): el
     /// vacío gelido, ELEVADO — CORONAS DE ESCARCHA ELÉCTRICA parpadeando
-    /// alrededor del horizonte (LightningCore.Arc cian a ~10 Hz, la firma
+    /// alrededor del horizonte (StormLib.Arc cian a ~10 Hz, la firma
     /// visual), RAYOS GELIDOS ramificados escapando del anillo de humo,
     /// CINCO volutas serpenteando con curl reforzado, CRISTALES de hielo
     /// flotando y chimeneas polares más altas. 100% CÓDIGO con las
-    /// librerías del proyecto (BrumaFX + LightningCore).
+    /// librerías del proyecto (BrumaFX + StormLib).
     ///
     /// Física idéntica a la de la Bruma (aura un 15% más rápida, muerte
     /// más rica). Hermano de todos los agujeros del mod — intactos.

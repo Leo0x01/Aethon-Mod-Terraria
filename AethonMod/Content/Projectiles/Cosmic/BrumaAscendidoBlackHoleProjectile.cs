@@ -25,7 +25,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     y polvo violeta — la paleta teal/cian/violeta elevada.
     ///
     /// El RENDER es el BrumaAscendidoBlackHoleRenderer: CORONAS DE
-    /// ESCARCHA ELÉCTRICA (3 LightningCore.Arc cian a ~10 Hz — la firma),
+    /// ESCARCHA ELÉCTRICA (3 StormLib.Arc cian a ~10 Hz — la firma),
     /// RAYOS GELIDOS escapando del anillo de humo, CINCO volutas con curl
     /// reforzado, CRISTALES de hielo flotando y chimeneas polares más
     /// altas con motas de escarcha. 100% CÓDIGO.

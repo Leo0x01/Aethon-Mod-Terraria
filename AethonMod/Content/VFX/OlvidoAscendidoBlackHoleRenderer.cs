@@ -14,12 +14,12 @@ namespace AethonMod.Content.VFX
     /// v6.15/v6.18 queda INTACTO — este archivo es un VÓRTICE NUEVO): el
     /// mismo cuerpo (anillo de plasma con hotspot Doppler, brazos
     /// espirales, runas doradas, ondas de distorsión, nebulosas y aura
-    /// mística) elevado con LA LIBRERÍA DE RAYOS LightningCore:
+    /// mística) elevado con LA LIBRERÍA DE RAYOS StormLib:
     ///
-    ///   1. ⚡ ARCOS DEL VACÍO — 3 LightningCore.Arc morado-azules
+    ///   1. ⚡ ARCOS DEL VACÍO — 3 StormLib.Arc morado-azules
     ///      abrazando el horizonte (radios 0.95× / 1.08× / 1.22×),
     ///      re-generándose a ~9 Hz con chispas satélite por Flicker.
-    ///   2. ⚡ RAYOS ESPIRALES — 2 LightningCore.Bolt AZUL ELÉCTRICO que
+    ///   2. ⚡ RAYOS ESPIRALES — 2 StormLib.Bolt AZUL ELÉCTRICO que
     ///      SIGUEN los brazos espirales: anclas SOBRE la espiral (del
     ///      extremo exterior al anillo) + JitterPath + Catmull-Rom —
     ///      rayos que ESPIRALAN HACIA EL NÚCLEO.
@@ -30,7 +30,7 @@ namespace AethonMod.Content.VFX
     ///      POR HASH (cada velo respira a su propio ritmo).
     ///   5. CORREDORES DE FOTONES COMO RAYOS FINOS — además de los 3
     ///      destellos clásicos, 2 fotones-rayo dibujados como
-    ///      MICRO-BOLTS de LightningCore recorriendo el anillo.
+    ///      MICRO-BOLTS de StormLib recorriendo el anillo.
     ///
     /// Paleta MORADO-AZUL (la del recolor v6.18 del Olvido). TODO se
     /// compone AQUÍ, CADA FRAME, por código con los pinceles
@@ -246,7 +246,7 @@ namespace AethonMod.Content.VFX
                 // --- 6. CORREDORES DE FOTONES + NUEVO fotones-rayo ---
                 DrawPhotonRunners(center, rr, time, seed);
 
-                // --- 7. RAYOS EMERGIENDO DEL ANILLO (LightningCore.Bolt) ---
+                // --- 7. RAYOS EMERGIENDO DEL ANILLO (StormLib.Bolt) ---
                 DrawElectricBolts(center, r, time, seed);
 
                 // --- 8. DESTELLOS POLARES ---
@@ -423,26 +423,26 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  3.5 NUEVO — LOS RAYOS ESPIRALES (LightningCore sobre el brazo)
+        //  3.5 NUEVO — LOS RAYOS ESPIRALES (StormLib sobre el brazo)
         // ------------------------------------------------------------------
 
         private static void DrawSpiralBolts(Vector2 center, float rr, float time, int seed)
         {
             // ============================================================
             //  LOS RAYOS ESPIRALES — LA FIRMA DEL OLVIDO ASCENDIDO: dos
-            //  LightningCore.Bolt AZUL ELÉCTRICO que SIGUEN los brazos
+            //  StormLib.Bolt AZUL ELÉCTRICO que SIGUEN los brazos
             //  espirales. Las ANCLAS se construyen con puntos SOBRE la
             //  espiral (del extremo EXTERIOR al anillo — el rayo NACE
             //  lejos y ESPIRALA HACIA EL NÚCLEO), el camino tiembla con
             //  JitterPath (perpendicular de cuerda) y se suaviza con
             //  Catmull-Rom para serpentear fluido sobre el brazo.
             // ============================================================
-            int boltFlick = LightningCore.FlickTick(time, VoidHz);
+            int boltFlick = StormLib.FlickTick(time, VoidHz);
             float armPhase = time * ArmFlow;
 
             for (int arm = 0; arm < 2; arm++)
             {
-                if (!LightningCore.Flicker(seed + 431 + arm * 61, boltFlick, 0.80f))
+                if (!StormLib.IsLit(seed + 431 + arm * 61, boltFlick, 0.80f))
                     continue;
 
                 float baseT = armPhase + arm * (MathHelper.TwoPi / ArmCount);
@@ -459,53 +459,53 @@ namespace AethonMod.Content.VFX
                         RingA * rr * grow, RingB * rr * grow, RingTilt, t);
                 }
 
-                // El rayo TIEMBLA sobre el camino espiral (extremos fijos)
-                // y se suaviza para serpentear siguiendo el brazo.
-                Vector2[] pts = LightningCore.JitterPath(anchors,
-                    seed + 500 + arm * 37, boltFlick, rr * 0.13f);
-                pts = LightningCore.Smooth(pts, 3);
+                // El rayo GANA la rugosidad MULTI-ESCALA del refino fractal
+                // de StormLib (los extremos quedan ANCLADOS: el jitter vive
+                // solo en los midpoints interiores).
+                Vector2[] pts = StormLib.Refine(anchors,
+                    seed + 500 + arm * 37, boltFlick, 0.9f);
 
-                // DOBLE TIRA azul eléctrico con RAMAS hacia fuera.
-                LightningCore.Bolt(Main.spriteBatch, pts,
+                // EL FILAMENTO azul eléctrico con ramas hacia fuera.
+                StormLib.Strand(Main.spriteBatch, pts,
                     seed + 600 + arm * 43, boltFlick, rr * 0.085f,
                     Tint(BoltViolet, 0.46f), Tint(BoltPink, 0.88f));
             }
         }
 
         // ------------------------------------------------------------------
-        //  5.5 NUEVO — LOS ARCOS DEL VACÍO (LightningCore.Arc)
+        //  5.5 NUEVO — LOS ARCOS DEL VACÍO (StormLib.Arc)
         // ------------------------------------------------------------------
 
         private static void DrawVoidArcs(Vector2 center, float r, float time, int seed)
         {
             // ============================================================
-            //  LOS ARCOS DEL VACÍO: tres LightningCore.Arc morado-azules
+            //  LOS ARCOS DEL VACÍO: tres StormLib.Arc morado-azules
             //  abrazando el horizonte — 0.95× (JUSTO dentro del filo),
             //  1.08× y 1.22× del radio, cada uno derivando a su propia
             //  velocidad. Se re-generan a ~9 Hz con parpadeo Flicker y
             //  sueltan CHISPAS SATÉLITE — el vacío CHISPEA en círculos
             //  alrededor de la esfera.
             // ============================================================
-            int arcFlick = LightningCore.FlickTick(time, VoidHz);
+            int arcFlick = StormLib.FlickTick(time, VoidHz);
 
             for (int c = 0; c < 3; c++)
             {
                 float radius = (0.95f + 0.13f * c) * r;
                 float drift = time * (0.90f - 0.55f * c) + c * 2.1f;
 
-                if (!LightningCore.Flicker(seed + 621 + c * 9, arcFlick, 0.85f))
+                if (!StormLib.IsLit(seed + 621 + c * 9, arcFlick, 0.85f))
                     continue;
 
                 float span = 1.05f + 0.55f * Hash01(seed, 631 + c, arcFlick);
-                LightningCore.Arc(Main.spriteBatch, center, radius,
+                StormLib.ArcRing(Main.spriteBatch, center, radius,
                     drift, drift + span, seed + 210 + c * 29, arcFlick,
                     r * 0.070f, Tint(BoltViolet, 0.40f), Tint(BoltPink, 0.82f), 1f, 11);
 
                 // CHISPA SATÉLITE del arco (el 35% de las regeneraciones).
-                if (LightningCore.Flicker(seed + 643 + c * 5, arcFlick, 0.35f))
+                if (StormLib.IsLit(seed + 643 + c * 5, arcFlick, 0.35f))
                 {
                     float satA = drift - span * 0.6f;
-                    LightningCore.Arc(Main.spriteBatch, center, radius * 1.04f,
+                    StormLib.ArcRing(Main.spriteBatch, center, radius * 1.04f,
                         satA, satA + span * 0.30f, seed + 250 + c * 31, arcFlick,
                         r * 0.040f, Tint(BoltViolet, 0.28f), Tint(HotCore, 0.65f), 1f, 6);
                 }
@@ -532,42 +532,42 @@ namespace AethonMod.Content.VFX
 
             // ============================================================
             //  NUEVO — FOTONES-RAYO: dos corredores extra dibujados como
-            //  MICRO-BOLTS de LightningCore (grosor mínimo) recorriendo
+            //  MICRO-BOLTS de StormLib (grosor mínimo) recorriendo
             //  un arco corto del anillo — fotones "electrificados" del
             //  vacío ascendido, con parpadeo vivo por Flicker.
             // ============================================================
-            int boltFlick = LightningCore.FlickTick(time, VoidHz);
+            int boltFlick = StormLib.FlickTick(time, VoidHz);
             for (int i = 0; i < 2; i++)
             {
-                if (!LightningCore.Flicker(seed + 521 + i * 11, boltFlick, 0.72f))
+                if (!StormLib.IsLit(seed + 521 + i * 11, boltFlick, 0.72f))
                     continue;
 
                 float t = time * (1.55f + 0.30f * i) + i * 3.3f;
                 Vector2 p0 = Ellipse(center, rr, t - 0.32f);
                 Vector2 p1 = Ellipse(center, rr, t);
-                LightningCore.Bolt(Main.spriteBatch, p0, p1,
+                StormLib.Bolt(Main.spriteBatch, p0, p1,
                     seed + 530 + i * 7, boltFlick, rr * 0.045f,
                     Tint(MidPink, 0.55f), Tint(HotCore, 0.92f), 1f, 5, rr * 0.05f);
             }
         }
 
         // ------------------------------------------------------------------
-        //  7. RAYOS EMERGIENDO DEL ANILLO (LightningCore.Bolt)
+        //  7. RAYOS EMERGIENDO DEL ANILLO (StormLib.Bolt)
         // ------------------------------------------------------------------
 
         private static void DrawElectricBolts(Vector2 center, float r, float time, int seed)
         {
             // ============================================================
             //  DOS RAYOS EMERGIENDO DEL ANILLO hacia afuera — ahora con
-            //  LightningCore.Bolt: doble tira cuerpo + núcleo, RAMAS
+            //  StormLib.Bolt: doble tira cuerpo + núcleo, RAMAS
             //  HEREDADAS y gorros de descarga (más ricos que el zigzag
             //  simple del original), re-generados a ~9 Hz.
             // ============================================================
-            int boltFlick = LightningCore.FlickTick(time, VoidHz);
+            int boltFlick = StormLib.FlickTick(time, VoidHz);
 
             for (int i = 0; i < 2; i++)
             {
-                if (!LightningCore.Flicker(seed + 858 + i * 13, boltFlick, 0.70f))
+                if (!StormLib.IsLit(seed + 858 + i * 13, boltFlick, 0.70f))
                     continue;
 
                 float t = HotspotBase + time * PlasmaFlow + i * MathHelper.Pi +
@@ -581,7 +581,7 @@ namespace AethonMod.Content.VFX
                 Vector2 end = start + (outward + tangent) * (1.30f + 0.60f *
                     Hash01(seed, 852 + i, boltFlick)) * r;
 
-                LightningCore.Bolt(Main.spriteBatch, start, end,
+                StormLib.Bolt(Main.spriteBatch, start, end,
                     seed + 100 + i * 53, boltFlick, r * 0.095f,
                     Tint(BoltViolet, 0.52f), Tint(BoltPink, 0.92f), 1f, 7, r * 0.15f);
             }

@@ -39,12 +39,33 @@ namespace AethonMod.Content.VFX
     ///       3 · DESTELLOS de 4 puntas alrededor del sistema.
     ///       4 · PROMINENCIAS — arcos de plasma saltando del limbo.
     ///       5 · VIENTO SOLAR — partículas de luz subiendo radialmente.
-    ///       6 · RAYOS FUGITIVOS entre anillos (LightningCore.Bolt).
+    ///       6 · RAYOS FUGITIVOS entre anillos (StormLib.Bolt).
     ///       7 · PRECESIÓN — los planos orbitales BAMBOLEAN vivos.
     ///       8 · NÚCLEO PULSANTE + ONDAS DE ECO expandiéndose.
     ///       9 · CORONA DE PÉTALOS de plasma orbitando el cuerpo.
     ///      10 · ERUPCIÓN RÚNICA (runas que se desprenden y vuelan) +
     ///           JETS POLARES con rayo interno — el sistema completo.
+    ///      11 · COMETA ORBITAL — cabeza brillante y cola larga cruzando
+    ///           los planos de los anillos en órbita propia (v6.22).
+    ///      12 · LLUVIA DE RUNAS — glifos cayendo del exterior HACIA el
+    ///           sol (la recarga inversa de la erupción).
+    ///      13 · AURORA POLAR — cortinas prismáticas sobre los polos
+    ///           (LumenLib.Ray con drift de hue).
+    ///      14 · ESTRELLA COMPAÑERA — enana azul orbitando lejos, unida
+    ///           al sol por un PUENTE DE LUZ.
+    ///      15 · CINTURÓN DE ASTEROIDES — banda densa de rocas de luz
+    ///           con una brecha (kepleriano: el interior corre más).
+    ///      16 · TORMENTA TOTAL — MULTI-BOLTOS entre anillos y arco
+    ///           eléctrico corona el sistema entero.
+    ///      17 · CORONA PRISMÁTICA — rayos de luz de colores radiando
+    ///           del cuerpo (la firma de LumenLib).
+    ///      18 · LANZAS PRISMÁTICAS — hojas de luz orbitando y apuntando
+    ///           afuera, con estelas de fantasmas.
+    ///      19 · NÚCLEO DE NUEVA — el corazón late a estallido: destellos
+    ///           de 4 puntas en el limbo y ecos dobles.
+    ///      20 · EL GRAN SELLADO — el círculo maestro: los 8 glifos en
+    ///           secuencia cabalgando un aro casi ecuatorial gigante +
+    ///           contrasello violeta retrógrado — el sello del sistema.
     ///
     /// PALETA SOLAR REGIA (diferente de los agujeros): blanco-
     /// incandescente (255,250,235) → oro (255,195,85) → ámbar (255,140,40)
@@ -64,18 +85,20 @@ namespace AethonMod.Content.VFX
         /// <summary>Radio del disco de plasma en px a escala 1.</summary>
         public const float BodyPx = 46f;
 
-        /// <summary>Tier máximo de la familia (10 copias).</summary>
-        public const int MaxTier = 10;
+        /// <summary>Tier máximo de la familia (20 copias — v6.22).</summary>
+        public const int MaxTier = 20;
 
         // --- LA GEOMETRÍA ORBITAL (por anillo k = 0..N-1) ---
         private const float RingA0 = 1.62f;      // semieje mayor del 1er anillo (×R)
         private const float RingAStep = 0.44f;   // separación entre anillos (×R)
+        private const float RingAStep2 = 0.30f;  // v6.22: packing más tighto del 10º arriba
         private const float RingSpin0 = 0.26f;   // giro base (rad/s)
         private const float RingSpinStep = 0.045f;
 
         // --- LAS RUNAS ---
         private const int Runes0 = 6;            // glifos del 1er anillo
-        private const int RuneStep = 2;          // +2 glifos por anillo
+        private const int RuneStep = 2;          // +2 glifos por anillo (hasta el 9º)
+        private const int RuneStep2 = 1;         // v6.22: +1 por anillo del 10º arriba
 
         // --- LA VIDA EXTRA ---
         private const float BoltHz = 14f;        // regeneración de los rayos (~14 Hz)
@@ -135,7 +158,7 @@ namespace AethonMod.Content.VFX
                 float scale = Math.Max(p.scale, 0.05f);
                 float R = BodyPx * scale;
                 float time = Main.GlobalTimeWrappedHourly;
-                int boltFlick = LightningCore.FlickTick(time, BoltHz);
+                int boltFlick = StormLib.FlickTick(time, BoltHz);
 
                 // === 0. GLOW CORONAL + VIENTO SOLAR (aditivo, DETRÁS) ===
                 BeginAdditive();
@@ -220,6 +243,17 @@ namespace AethonMod.Content.VFX
                 if (tier >= 9) DrawPlasmaPetals(drawPos, R, time, seed, tier);
                 if (tier >= 10) DrawRunicEruption(drawPos, R, time, seed, boltFlick);
                 if (tier >= 10) DrawPolarJets(drawPos, R, time, seed, boltFlick);
+                // v6.22 — LA SEGUNDA DÉCADA (11..20)
+                if (tier >= 11) DrawOrbitComet(drawPos, R, time, seed);
+                if (tier >= 12) DrawRuneRain(drawPos, R, time, seed);
+                if (tier >= 13) DrawPolarAurora(drawPos, R, time, seed, tier);
+                if (tier >= 14) DrawCompanionStar(drawPos, R, time, seed, tier);
+                if (tier >= 15) DrawAsteroidBelt(drawPos, R, time, seed);
+                if (tier >= 16) DrawStormCrown(drawPos, R, time, seed, boltFlick, tier);
+                if (tier >= 17) DrawPrismaticRays(drawPos, R, time, seed, tier);
+                if (tier >= 18) DrawPrismaticLances(drawPos, R, time, seed, tier);
+                if (tier >= 19) DrawNovaHeart(drawPos, R, time, seed, tier);
+                if (tier >= 20) DrawGrandSeal(drawPos, R, time, seed);
                 Main.spriteBatch.End();
             }
             catch
@@ -258,9 +292,16 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Semieje mayor del anillo k (×R).
+        /// Semieje mayor del anillo k (×R). v6.22: del 10º en arriba el
+        /// packing se TIGHTA (0.30×R por anillo) para que 20 anillos
+        /// quepan en un sistema espectacular pero no ridículo.
         /// </summary>
-        private static float RingA(int k) => RingA0 + RingAStep * k;
+        private static float RingA(int k)
+        {
+            int k1 = Math.Min(k, 9);
+            int k2 = Math.Max(0, k - 9);
+            return RingA0 + RingAStep * k1 + RingAStep2 * k2;
+        }
 
         /// <summary>Achatado del anillo k (plano distinto por anillo).</summary>
         private static float RingFlat(int k) => 0.34f + 0.07f * (k % 3);
@@ -297,7 +338,9 @@ namespace AethonMod.Content.VFX
                 float b = a * RingFlat(k);
                 float tilt = RingTilt(k, time, tier);
                 float spin = time * RingSpin(k);
-                int runeCount = Runes0 + RuneStep * k;
+                // v6.22: del 10º anillo en arriba las runas crecen +1 (no +2)
+                // — 20 anillos × 44 runas sería 880 glifos: demasiado.
+                int runeCount = Runes0 + RuneStep * Math.Min(k, 9) + RuneStep2 * Math.Max(0, k - 9);
 
                 // El color del anillo: ORO / BLANCO-ESTELAR alternando, y
                 // cada 3º AZUL-ESTELAR desde tier 7 (el sello frío).
@@ -497,7 +540,7 @@ namespace AethonMod.Content.VFX
             int count = Math.Min(2 + tier / 3, 5);
             for (int i = 0; i < count; i++)
             {
-                if (!LightningCore.Flicker(seed + 500 + i * 23, boltFlick, 0.72f)) continue;
+                if (!StormLib.IsLit(seed + 500 + i * 23, boltFlick, 0.72f)) continue;
 
                 // El arco nace del limbo y CAE de vuelta (un bucle solar).
                 float baseAng = time * (0.30f + 0.08f * i) + i * 2.7f +
@@ -513,14 +556,14 @@ namespace AethonMod.Content.VFX
                     (float)Math.Cos(baseAng + 0.65f) * R * 1.02f,
                     (float)Math.Sin(baseAng + 0.65f) * R * 1.02f * 0.92f);
 
-                // El bucle serpenteante: ancla → cima → ancla, suavizado.
-                var path = new Vector2[] { start, mid, end };
-                Vector2[] smooth = LightningCore.Smooth(path, 5);
-                Vector2[] jitter = LightningCore.JitterPath(smooth, seed + 530 + i, boltFlick,
-                    Math.Max(5f, 0.10f * R));
-                LightningCore.Bolt(Main.spriteBatch, jitter, seed + 540 + i, boltFlick,
+                // El bucle serpenteante: ancla → cima → ancla, muestreado como
+                // BÉZIER cuadrática y roto por el REFINO FRACTAL de StormLib
+                // (la rugosidad multi-escala de los arcos de plasma de verdad).
+                Vector2[] loop = QuadBezier(start, mid, end, 9);
+                Vector2[] jagged = StormLib.Refine(loop, seed + 530 + i, boltFlick, 0.85f);
+                StormLib.Strand(Main.spriteBatch, jagged, seed + 540 + i, boltFlick,
                     Math.Max(2.8f, 0.055f * R),
-                    Tint(SunAmber, 0.55f), Tint(WhiteIncan, 0.92f), 1f, 0.32f);
+                    Tint(SunAmber, 0.55f), Tint(WhiteIncan, 0.92f), 1f);
             }
         }
 
@@ -550,7 +593,7 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        /// <summary>Tier 6 — RAYOS FUGITIVOS entre anillos (LightningCore).</summary>
+        /// <summary>Tier 6 — RAYOS FUGITIVOS entre anillos (StormLib).</summary>
         private static void DrawInterRingBolts(Vector2 center, float R, float time, int seed,
             int boltFlick, int tier)
         {
@@ -558,7 +601,7 @@ namespace AethonMod.Content.VFX
             int count = Math.Min(1 + tier / 3, 4);
             for (int i = 0; i < count; i++)
             {
-                if (!LightningCore.Flicker(seed + 700 + i * 31, boltFlick, 0.80f)) continue;
+                if (!StormLib.IsLit(seed + 700 + i * 31, boltFlick, 0.80f)) continue;
 
                 // Del anillo k al anillo k+2 (saltando uno — el chispazo cruzado).
                 int k = (i * 2 + (boltFlick / 2)) % Math.Max(1, n - 2);
@@ -580,7 +623,7 @@ namespace AethonMod.Content.VFX
                 bool blue = tier >= 7 && k2 % 3 == 2;
                 Color halo = blue ? Tint(StarBlue, 0.58f) : Tint(SunGold, 0.58f);
 
-                LightningCore.Bolt(Main.spriteBatch, start, end,
+                StormLib.Bolt(Main.spriteBatch, start, end,
                     seed + 730 + i * 53, boltFlick,
                     Math.Max(2.6f, 0.05f * R),
                     halo, Tint(WhiteIncan, 0.95f),
@@ -732,10 +775,10 @@ namespace AethonMod.Content.VFX
                 }
 
                 // ⚡ EL RAYO dentro del chorro (la espina eléctrica del jet).
-                if (LightningCore.Flicker(seed + 950 + side * 13, boltFlick, 0.80f))
+                if (StormLib.IsLit(seed + 950 + side * 13, boltFlick, 0.80f))
                 {
                     Vector2 tip = center + dir * (R * 0.85f + 1.35f * R);
-                    LightningCore.Bolt(Main.spriteBatch, basePos, tip,
+                    StormLib.Bolt(Main.spriteBatch, basePos, tip,
                         seed + 960 + side * 29, boltFlick,
                         Math.Max(2.4f, 0.045f * R),
                         Tint(SunGold, 0.50f), Tint(WhiteIncan, 0.90f),
@@ -746,6 +789,423 @@ namespace AethonMod.Content.VFX
                 Vector2 jetTip = center + dir * (R * 0.85f + 1.45f * R);
                 Quad(Glow, jetTip, new Vector2(0.50f * R, 0.50f * R), 0f,
                     Tint(WhiteIncan, 0.42f * pulse));
+            }
+        }
+
+        // ==================================================================
+        //  v6.22 — LA PUERTA PÚBLICA: el sistema orbital SIN el cuerpo solar
+        //  (para el ECLIPSE PRIMORDIAL: los 20 anillos rúnicos orbitando un
+        //  agujero negro). El batch debe llegar ABIERTO en modo aditivo.
+        // ==================================================================
+
+        /// <summary>
+        /// Dibuja el SISTEMA ORBITAL de la copia `tier` (anillos + runas +
+        /// chispas + destellos + erupción + lluvia + sellado) alrededor de
+        /// `center` con radio base `R` — SIN el cuerpo solar (el llamador
+        /// pone debajo lo que quiera: un sol, un agujero negro...).
+        /// CONTRATO: batch ABIERTO en modo aditivo (queda ABIERTO).
+        /// </summary>
+        public static void DrawOrbitalSystem(Vector2 center, float R, float time,
+            int seed, int tier, float alphaMul)
+        {
+            if (alphaMul <= 0.02f) return;
+            int boltFlick = StormLib.FlickTick(time, BoltHz);
+
+            // rg = 0 y lifeT = 0: sin gigante final, sin desvanecimiento —
+            // el sistema arde a PLENA intensidad alrededor del llamador.
+            // alphaMul decide si las capas secundarias se dibujan también.
+            DrawRingSystem(center, R, time, seed, tier, 0f, boltFlick, 0f);
+            if (alphaMul > 0.55f)
+            {
+                if (tier >= 2) DrawOrbitSparks(center, R, time, seed, tier);
+                if (tier >= 3) DrawTwinkles(center, R, time, seed, tier);
+                if (tier >= 12) DrawRuneRain(center, R, time, seed);
+                if (tier >= 11) DrawOrbitComet(center, R, time, seed);
+                if (tier >= 20) DrawGrandSeal(center, R, time, seed);
+            }
+        }
+
+        // ==================================================================
+        //  v6.22 — LA SEGUNDA DÉCADA (tiers 11..20)
+        // ==================================================================
+
+        /// <summary>Tier 11 — COMETA ORBITAL: cabeza brillante + cola larga
+        /// cruzando los planos de los anillos en órbita propia inclinada.</summary>
+        private static void DrawOrbitComet(Vector2 center, float R, float time, int seed)
+        {
+            float a = 6.4f * R, b = 2.6f * R;
+            float tilt = -0.30f + 0.06f * (float)Math.Sin(time * 0.20f);
+            float t = time * 0.52f + Hash01(seed, 1200, 3) * MathHelper.TwoPi;
+
+            Vector2 head = EllipsePoint(center, a, b, tilt, t);
+            Vector2 ahead = EllipsePoint(center, a, b, tilt, t - 0.055f);
+            Vector2 dir = (head - ahead).SafeNormalize(-Vector2.UnitX);
+            float rot = (float)Math.Atan2(dir.Y, dir.X);
+            float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 5.1f);
+
+            // LA COLA: 11 segmentos tras la cabeza, decayendo.
+            const int Tail = 11;
+            for (int i = 0; i < Tail; i++)
+            {
+                float f = i / (float)Tail;
+                Vector2 pos = head - dir * (f * 1.85f * R);
+                float w = (0.30f - 0.24f * f) * R;
+                float al = (1f - f) * (1f - f) * 0.55f;
+                Color c = Color.Lerp(WhiteIncan, SunGold, 0.35f + 0.5f * f);
+                Capsule(pos - dir * (0.09f * R), 0.16f * R, w, rot, Tint(c, al * pulse));
+            }
+
+            // LA CABEZA: bloom doble + núcleo.
+            Quad(Glow, head, new Vector2(0.62f * R, 0.62f * R), 0f, Tint(SunGold, 0.40f * pulse));
+            Quad(Glow, head, new Vector2(0.30f * R, 0.30f * R), 0f, Tint(WhiteIncan, 0.90f * pulse));
+        }
+
+        /// <summary>Tier 12 — LLUVIA DE RUNAS: glifos cayendo del exterior
+        /// HACIA el sol (la recarga inversa de la erupción).</summary>
+        private static void DrawRuneRain(Vector2 center, float R, float time, int seed)
+        {
+            const float Cycle = 1.35f;
+            for (int i = 0; i < 3; i++)
+            {
+                float phase = ((time / Cycle) + i * 0.33f) % 1f;
+                float bright = (float)Math.Sin(phase * Math.PI);
+                if (bright < 0.06f) continue;
+
+                int cycle = (int)(time / Cycle) + i;
+                int glyph = (int)(Hash01(seed, 1300 + cycle, 3) * _runes.Length) % _runes.Length;
+                float ang = Hash01(seed, 1310 + cycle, 5) * MathHelper.TwoPi + time * 0.11f;
+                float startR = 4.4f * R, endR = 1.02f * R;
+                float dist = MathHelper.Lerp(startR, endR, phase);
+                Vector2 pos = center + new Vector2(
+                    (float)Math.Cos(ang) * dist, (float)Math.Sin(ang) * dist * 0.80f);
+
+                float glyphScale = Math.Max(R / 52f, 0.25f) * 1.30f;
+                float glyphRot = ang + MathHelper.PiOver2 + phase * 1.8f;
+
+                Quad(Glow, pos, new Vector2(36f * glyphScale, 36f * glyphScale), 0f,
+                    Tint(RuneGoldTip, 0.24f * bright));
+                Vector2[] strokes = _runes[glyph];
+                for (int s = 0; s < strokes.Length; s += 2)
+                {
+                    Vector2 rotA = strokes[s] * glyphScale * (1.1f - 0.35f * phase);
+                    Vector2 rotB = strokes[s + 1] * glyphScale * (1.1f - 0.35f * phase);
+                    rotA = rotA.RotatedBy(glyphRot) + pos;
+                    rotB = rotB.RotatedBy(glyphRot) + pos;
+                    Vector2 mid = (rotA + rotB) * 0.5f;
+                    Vector2 delta = rotB - rotA;
+                    float len = delta.Length();
+                    if (len < 0.01f) continue;
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+                    Capsule(mid, len, 3.0f * glyphScale, rot, Tint(RuneGold, 0.80f * bright));
+                }
+            }
+        }
+
+        /// <summary>Tier 13 — AURORA POLAR: cortinas prismáticas sobre los
+        /// polos (LumenLib.Ray con drift de hue — la luz de verdad).</summary>
+        private static void DrawPolarAurora(Vector2 center, float R, float time, int seed, int tier)
+        {
+            for (int side = 0; side < 2; side++)
+            {
+                Vector2 up = side == 0 ? -Vector2.UnitY : Vector2.UnitY;
+                Vector2 basePos = center + up * (R * 1.55f);
+
+                const int Curtains = 4;
+                for (int c = 0; c < Curtains; c++)
+                {
+                    float drift = LumenLib.Drift(time, seed + c + side * 7, 0.22f);
+                    Color col = LumenLib.Hue(drift, 0.55f, 1f);
+                    // la cortina se abre en ABANICO desde el polo.
+                    float spread = (c - (Curtains - 1) * 0.5f) * 0.55f;
+                    Vector2 dir = (up + new Vector2((float)Math.Sin(spread), 0f).RotatedBy(side * MathHelper.Pi))
+                        .SafeNormalize(up);
+                    float len = (1.05f + 0.45f * (float)Math.Sin(time * 1.3f + c * 1.9f)) * R;
+                    float pulse = 0.5f + 0.5f * (float)Math.Sin(time * 2.3f + c * 2.4f + side * 1.7f);
+                    LumenLib.Ray(Main.spriteBatch, basePos, dir, len,
+                        Math.Max(6f, 0.14f * R), col, 0.55f + 0.25f * pulse, pulse);
+                }
+            }
+        }
+
+        /// <summary>Tier 14 — ESTRELLA COMPAÑERA: enana azul orbitando lejos,
+        /// unida al sol por un PUENTE DE LUZ vivo.</summary>
+        private static void DrawCompanionStar(Vector2 center, float R, float time, int seed, int tier)
+        {
+            float a = 5.9f * R, b = 2.1f * R;
+            float tilt = 0.42f;
+            float t = -time * 0.31f + Hash01(seed, 1400, 9) * MathHelper.TwoPi;
+            Vector2 star = EllipsePoint(center, a, b, tilt, t);
+            float pulse = 0.8f + 0.2f * (float)Math.Sin(time * 3.2f);
+
+            // EL PUENTE DE LUZ: el haz que une sol y compañera.
+            Vector2 delta = star - center;
+            float len = delta.Length();
+            if (len > R * 0.6f)
+            {
+                Vector2 dir = delta / len;
+                Color bridge = Color.Lerp(StarBlue, WhiteIncan, 0.35f);
+                LumenLib.Ray(Main.spriteBatch, center + dir * (R * 0.9f), dir, len - R * 0.9f,
+                    Math.Max(4f, 0.07f * R), bridge, 0.30f + 0.18f * pulse,
+                    0.5f + 0.5f * (float)Math.Sin(time * 2.2f));
+            }
+
+            // LA ENANA AZUL: bloom + destello de 4 puntas.
+            LumenLib.Bloom(Main.spriteBatch, star, 0.52f * R * pulse, StarBlue, 0.8f, 3);
+            LumenLib.Flare(Main.spriteBatch, star, 1.05f * R * pulse, StarBlue, 0.55f,
+                time * 0.5f);
+        }
+
+        /// <summary>Tier 15 — CINTURÓN DE ASTEROIDES: banda densa de rocas de
+        /// luz con una BRECHA (kepleriano: el interior corre más).</summary>
+        private static void DrawAsteroidBelt(Vector2 center, float R, float time, int seed)
+        {
+            const int Rocks = 42;
+            float beltA = 3.85f * R, beltB = 1.30f * R;
+            float tilt = -0.18f;
+            for (int i = 0; i < Rocks; i++)
+            {
+                float h = Hash01(seed, 1500 + i, 13);
+                float h2 = Hash01(seed, 1550 + i, 17);
+                // velocidad kepleriana: las de dentro corren MÁS.
+                float rMul = 0.90f + 0.22f * h2;
+                float speed = 0.34f / (rMul * rMul);
+                float ang = h * MathHelper.TwoPi + time * speed;
+
+                // LA BRECHA: sin rocas en un arco que también gira.
+                float gap = ang % MathHelper.TwoPi;
+                float gapCenter = time * 0.10f;
+                float dGap = Math.Abs(((gap - gapCenter + MathHelper.Pi) % MathHelper.TwoPi
+                    + MathHelper.TwoPi) % MathHelper.TwoPi - MathHelper.Pi);
+                if (dGap < 0.55f) continue;
+
+                Vector2 pos = EllipsePoint(center, beltA * rMul, beltB * rMul, tilt, ang);
+                float size = (0.045f + 0.075f * h2) * R;
+                float tw = 0.55f + 0.45f * (float)Math.Sin(time * 3.1f + i * 1.95f);
+                Color c = h2 > 0.75f ? WhiteIncan : SunGold;
+                Quad(Glow, pos, new Vector2(size, size), 0f, Tint(c, 0.55f * tw));
+                // chispa de rigor en las grandes.
+                if (h2 > 0.88f)
+                    Quad(Glow, pos, new Vector2(size * 0.42f, size * 0.42f), 0f,
+                        Tint(WhiteIncan, 0.85f * tw));
+            }
+        }
+
+        /// <summary>Tier 16 — TORMENTA TOTAL: MULTI-BOLTOS ricos entre
+        /// anillos + el arco eléctrico que CORONA el sistema entero.</summary>
+        private static void DrawStormCrown(Vector2 center, float R, float time, int seed,
+            int boltFlick, int tier)
+        {
+            int n = Math.Min(tier, MaxTier);
+            // 2 MULTI-BOLTOS cruzando el sistema (filamentos de verdad).
+            int extra = 2;
+            for (int i = 0; i < extra; i++)
+            {
+                if (!StormLib.IsLit(seed + 1600 + i * 97, boltFlick, 0.62f)) continue;
+                int k1 = (int)(Hash01(seed, 1610 + i, boltFlick) * n);
+                int k2 = Math.Min(k1 + 3, n - 1);
+                float a1 = RingA(k1) * R, b1 = a1 * RingFlat(k1);
+                float t1 = RingTilt(k1, time, tier);
+                float s1 = time * RingSpin(k1);
+                float a2 = RingA(k2) * R, b2 = a2 * RingFlat(k2);
+                float t2 = RingTilt(k2, time, tier);
+                float s2 = time * RingSpin(k2);
+                Vector2 start = EllipsePoint(center, a1, b1, t1,
+                    Hash01(seed, 1620 + i, boltFlick) * MathHelper.TwoPi + s1);
+                Vector2 end = EllipsePoint(center, a2, b2, t2,
+                    Hash01(seed, 1630 + i, boltFlick) * MathHelper.TwoPi + s2);
+                StormLib.MultiBolt(Main.spriteBatch, start, end,
+                    seed + 1640 + i * 53, boltFlick,
+                    Math.Max(2.2f, 0.042f * R),
+                    Tint(SunGold, 0.50f), Tint(StarBlue, 0.50f), Tint(WhiteIncan, 0.92f),
+                    0.9f, Math.Max(11f, 0.18f * R), 8);
+            }
+
+            // EL ARCO CORONA: abrazando el sistema por fuera, girando.
+            float crownR = RingA(n - 1) * R * 1.04f;
+            if (StormLib.IsLit(seed + 1690, boltFlick, 0.80f))
+            {
+                float drift = time * 0.9f;
+                StormLib.ArcRing(Main.spriteBatch, center, crownR,
+                    drift, drift + 1.55f, seed + 1691, boltFlick,
+                    Math.Max(2.4f, 0.04f * R),
+                    Tint(SunGold, 0.42f), Tint(WhiteIncan, 0.88f), 1f, 12);
+                StormLib.ArcRing(Main.spriteBatch, center, crownR * 1.05f,
+                    -drift + 2.6f, -drift + 4.0f, seed + 1692, boltFlick,
+                    Math.Max(1.9f, 0.032f * R),
+                    Tint(StarBlue, 0.36f), Tint(WhiteIncan, 0.82f), 1f, 10);
+            }
+        }
+
+        /// <summary>Tier 17 — CORONA PRISMÁTICA: rayos de luz de colores
+        /// radiando del cuerpo (la firma de LumenLib).</summary>
+        private static void DrawPrismaticRays(Vector2 center, float R, float time, int seed, int tier)
+        {
+            const int Rays = 7;
+            for (int i = 0; i < Rays; i++)
+            {
+                float drift = LumenLib.Drift(time, seed + i * 11, 0.28f);
+                Color col = LumenLib.Hue(drift, 0.55f, 1f);
+                float ang = i / (float)Rays * MathHelper.TwoPi + time * 0.14f;
+                Vector2 dir = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
+                Vector2 origin = center + dir * (R * 0.95f);
+
+                float len = (1.35f + 0.85f * Hash01(seed, 1700 + i, 19)) * R;
+                float pulse = 0.5f + 0.5f * (float)Math.Sin(time * 2.5f + i * 2.1f);
+                LumenLib.Ray(Main.spriteBatch, origin, dir, len,
+                    Math.Max(5f, 0.10f * R), col, 0.42f + 0.30f * pulse, pulse);
+            }
+        }
+
+        /// <summary>Tier 18 — LANZAS PRISMÁTICAS: hojas de luz orbitando y
+        /// apuntando AFUERA, con estelas de fantasmas que crecen.</summary>
+        private static void DrawPrismaticLances(Vector2 center, float R, float time, int seed, int tier)
+        {
+            const int Lances = 3;
+            float a = 4.9f * R, b = 1.9f * R;
+            float tilt = 0.66f;
+            for (int i = 0; i < Lances; i++)
+            {
+                float t = time * 0.55f + i / (float)Lances * MathHelper.TwoPi;
+                Vector2 pos = EllipsePoint(center, a, b, tilt, t);
+                Vector2 ahead = EllipsePoint(center, a, b, tilt, t - 0.10f);
+                Vector2 dir = (pos - ahead).SafeNormalize(Vector2.UnitX);
+                float drift = LumenLib.Drift(time, seed + 60 + i * 31, 0.30f);
+                Color col = LumenLib.Hue(drift, 0.55f, 1f);
+
+                float len = 1.35f * R;
+                float width = Math.Max(4.5f, 0.115f * R);
+                // el apuntado se mezcla radial+velocidad (la noria de hojas).
+                Vector2 radial = (pos - center).SafeNormalize(dir);
+                Vector2 aim = (dir * 0.55f + radial * 0.45f).SafeNormalize(dir);
+
+                LumenLib.LanceTrail(Main.spriteBatch, pos, aim, len * 0.85f, width * 0.8f,
+                    col, 0.5f, 4, 0.16f * R);
+                LumenLib.Lance(Main.spriteBatch, pos, aim, len, width, col, 0.85f);
+                // broche: perla en la base de la lanza.
+                Quad(Glow, pos, new Vector2(0.24f * R, 0.24f * R), 0f, Tint(WhiteIncan, 0.75f));
+            }
+        }
+
+        /// <summary>Tier 19 — NÚCLEO DE NUEVA: el corazón late a estallido —
+        /// destellos de 4 puntas en el limbo y ecos dobles acelerados.</summary>
+        private static void DrawNovaHeart(Vector2 center, float R, float time, int seed, int tier)
+        {
+            // el latido a estallido del corazón.
+            float beat = (float)Math.Pow(0.5f + 0.5f * (float)Math.Sin(time * 3.4f), 3.0f);
+            LumenLib.Flare(Main.spriteBatch, center, R * (1.05f + 0.35f * beat),
+                Color.Lerp(SunGold, WhiteIncan, 0.4f), 0.30f + 0.45f * beat, time * 0.35f);
+            LumenLib.Bloom(Main.spriteBatch, center, R * (0.80f + 0.30f * beat),
+                new Color(255, 245, 210), 0.55f + 0.35f * beat, 3);
+
+            // DESTELLOS DE LIMBO: uno nuevo cada ~1.1 s en un punto del borde.
+            const float Cycle = 1.1f;
+            float phase = (time / Cycle) % 1f;
+            int cycle = (int)(time / Cycle);
+            float bright = (float)Math.Sin(phase * Math.PI);
+            if (bright > 0.08f)
+            {
+                float ang = Hash01(seed, 1900 + cycle, 21) * MathHelper.TwoPi + time * 0.3f;
+                Vector2 pos = center + new Vector2(
+                    (float)Math.Cos(ang) * R * 1.04f,
+                    (float)Math.Sin(ang) * R * 0.94f);
+                float drift = LumenLib.Drift(time, cycle, 0.4f);
+                LumenLib.Flare(Main.spriteBatch, pos, (0.55f + 0.4f * phase) * R,
+                    LumenLib.Hue(drift, 0.6f), 0.6f * bright, phase * 2.2f);
+            }
+
+            // los ECOs ahora son DOBLES y más rápidos (la nueva respira urgente).
+            for (int w = 0; w < 2; w++)
+            {
+                float ph = ((time / 1.5f) + w * 0.5f) % 1f;
+                float radius = (1.08f + ph * 1.10f) * R;
+                float fade = (1f - ph) * (1f - ph);
+                RingQuad(center, radius, ph * 4.2f + w * 1.3f,
+                    Tint(w % 2 == 0 ? WhiteIncan : SunGold, 0.30f * fade));
+            }
+        }
+
+        /// <summary>Tier 20 — EL GRAN SELLADO: los 8 glifos en secuencia
+        /// cabalgando un aro casi ecuatorial GIGANTE + el contrasello
+        /// violeta retrógrado — el sello maestro del sistema.</summary>
+        private static void DrawGrandSeal(Vector2 center, float R, float time, int seed)
+        {
+            float glyphScale = Math.Max(R / 52f, 0.25f) * 1.85f;
+
+            // EL ARO MAESTRO: casi ecuatorial (plano casi horizontal visto
+            // de canto), girando LENTO y majestuoso.
+            float a = 4.35f * R, b = a * 0.30f;
+            float tilt = -0.10f + 0.05f * (float)Math.Sin(time * 0.24f);
+            float spin = time * 0.085f;
+
+            const int Segments = 40;
+            Vector2 prev = EllipsePoint(center, a, b, tilt, spin);
+            for (int s = 1; s <= Segments; s++)
+            {
+                float t = spin + s / (float)Segments * MathHelper.TwoPi;
+                Vector2 pt = EllipsePoint(center, a, b, tilt, t);
+                Vector2 mid = (prev + pt) * 0.5f;
+                Vector2 delta = pt - prev;
+                float len = delta.Length();
+                if (len > 0.5f)
+                {
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+                    float depth = 0.55f + 0.45f *
+                        (float)Math.Sin(t + MathHelper.PiOver2) * (float)Math.Cos(tilt);
+                    float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 1.15f + s * 0.28f);
+                    Capsule(mid, len, Math.Max(2.6f, 0.056f * R) * (1f + 0.30f * depth),
+                        rot, Tint(WhiteIncan, (0.26f + 0.28f * depth) * pulse));
+                }
+                prev = pt;
+            }
+
+            // LOS 8 GLIFOS MAESTROS en secuencia sobre el aro.
+            for (int g = 0; g < _runes.Length; g++)
+            {
+                float ang = g / (float)_runes.Length * MathHelper.TwoPi + spin;
+                Vector2 glyphPos = EllipsePoint(center, a * 1.03f, b * 1.03f, tilt, ang);
+                float tanAng = tangentialAngle(a, b, tilt, ang);
+                float glyphRot = tanAng + MathHelper.PiOver2;
+                float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 1.9f + g * 0.8f);
+
+                Quad(Glow, glyphPos, new Vector2(42f * glyphScale, 42f * glyphScale), 0f,
+                    Tint(WhiteIncan, 0.22f * pulse));
+                Vector2[] strokes = _runes[g];
+                for (int s = 0; s < strokes.Length; s += 2)
+                {
+                    Vector2 rotA = strokes[s] * glyphScale;
+                    Vector2 rotB = strokes[s + 1] * glyphScale;
+                    rotA = rotA.RotatedBy(glyphRot) + glyphPos;
+                    rotB = rotB.RotatedBy(glyphRot) + glyphPos;
+                    Vector2 mid = (rotA + rotB) * 0.5f;
+                    Vector2 delta = rotB - rotA;
+                    float len = delta.Length();
+                    if (len < 0.01f) continue;
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+                    Capsule(mid, len, 3.6f * glyphScale, rot,
+                        Tint(RuneGoldTip, 0.88f * pulse));
+                }
+            }
+
+            // EL CONTRASELLO: aro violeta fino RETRÓGRADO casi vertical.
+            float a2 = 4.75f * R, b2 = a2 * 0.26f;
+            float tilt2 = 1.38f + 0.04f * (float)Math.Sin(time * 0.19f + 2f);
+            float spin2 = -time * 0.13f;
+            const int Segs2 = 30;
+            Vector2 prev2 = EllipsePoint(center, a2, b2, tilt2, spin2);
+            for (int s = 1; s <= Segs2; s++)
+            {
+                float t = spin2 + s / (float)Segs2 * MathHelper.TwoPi;
+                Vector2 pt = EllipsePoint(center, a2, b2, tilt2, t);
+                Vector2 mid = (prev2 + pt) * 0.5f;
+                Vector2 delta = pt - prev2;
+                float len = delta.Length();
+                if (len > 0.5f)
+                {
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+                    Capsule(mid, len, Math.Max(1.9f, 0.038f * R), rot,
+                        Tint(RuneBlue, 0.40f + 0.18f * (float)Math.Sin(time * 1.4f + s * 0.4f)));
+                }
+                prev2 = pt;
             }
         }
 
@@ -801,6 +1261,24 @@ namespace AethonMod.Content.VFX
             Vector2 local = new Vector2(a * ct, b * st);
             float cR = (float)Math.Cos(tilt), sR = (float)Math.Sin(tilt);
             return center + new Vector2(local.X * cR - local.Y * sR, local.X * sR + local.Y * cR);
+        }
+
+        /// <summary>
+        /// BÉZIER cuadrática muestreada (ancla → control → ancla): el arco
+        /// de las prominencias — la curva suave que luego el refino fractal
+        /// de StormLib rompe en rugosidad multi-escala.
+        /// </summary>
+        private static Vector2[] QuadBezier(Vector2 a, Vector2 c, Vector2 b, int samples)
+        {
+            if (samples < 1) samples = 1;
+            Vector2[] pts = new Vector2[samples + 1];
+            for (int i = 0; i <= samples; i++)
+            {
+                float t = i / (float)samples;
+                float u = 1f - t;
+                pts[i] = u * u * a + 2f * u * t * c + t * t * b;
+            }
+            return pts;
         }
 
         /// <summary>

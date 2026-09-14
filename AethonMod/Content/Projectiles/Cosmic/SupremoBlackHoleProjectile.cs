@@ -19,7 +19,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// agujeros, mejorado, potenciado y mejor animado. El agujero más
     /// espectacular del mod"): el DISCO DOPPLER del Umbral, el ANILLO DE
     /// BANDAS del Cósmico, los BRAZOS ESPIRALES del Olvido, el HUMO de la
-    /// Bruma — y la CORONA DE RAYOS de LightningCore (3 arcos en el
+    /// Bruma — y la CORONA DE RAYOS de StormLib (3 arcos en el
     /// horizonte + 3 rayos fugitivos, 2 carmesí y 1 dorado), jets
     /// polares oro/violeta, doble círculo de runas y volutas cayendo.
     ///

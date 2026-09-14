@@ -100,6 +100,27 @@
         "Items.SolRunico8Staff.DisplayName": "Runic Sun Staff VIII",
         "Items.SolRunico9Staff.DisplayName": "Runic Sun Staff IX",
         "Items.SolRunico10Staff.DisplayName": "Runic Sun Staff X",
+        // v6.22: THE SECOND DECADE — suns 11..20 (the comet, the rune rain,
+        // the polar aurora, the companion star, the asteroid belt, the full
+        // storm, the prismatic crown and lances, the nova heart and THE
+        // GRAND SEAL of copy XX)
+        "Items.SolRunico11Staff.DisplayName": "Runic Sun Staff XI",
+        "Items.SolRunico12Staff.DisplayName": "Runic Sun Staff XII",
+        "Items.SolRunico13Staff.DisplayName": "Runic Sun Staff XIII",
+        "Items.SolRunico14Staff.DisplayName": "Runic Sun Staff XIV",
+        "Items.SolRunico15Staff.DisplayName": "Runic Sun Staff XV",
+        "Items.SolRunico16Staff.DisplayName": "Runic Sun Staff XVI",
+        "Items.SolRunico17Staff.DisplayName": "Runic Sun Staff XVII",
+        "Items.SolRunico18Staff.DisplayName": "Runic Sun Staff XVIII",
+        "Items.SolRunico19Staff.DisplayName": "Runic Sun Staff XIX",
+        "Items.SolRunico20Staff.DisplayName": "Runic Sun Staff XX",
+        // v6.22: THE PRIMORDIAL ECLIPSE — the Sun of the 20 Rings fused
+        // with ALL the black holes (light + mist + smoke + lightning)
+        "Items.EclipsePrimordialStaff.DisplayName": "Staff of the Primordial Eclipse",
+        // v6.22: THE THREE NEW COSMETICS
+        "Items.FireVeilItem.DisplayName": "Primordial Fire Veil",
+        "Items.RuneRingCrownItem.DisplayName": "Rune Ring Crown",
+        "Items.RunicHaloWings.DisplayName": "Astral Rune Ring",
         // v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Runic Thunder Scepter",
         // v6.18: wings were removed from the mod (user request).
@@ -135,6 +156,8 @@
         "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Ascended Bruma",
         "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Ascended Cosmic",
         "Projectiles.OlvidoAscendidoBlackHoleProjectile.DisplayName": "Ascended Olvido",
+        // v6.22: THE PRIMORDIAL ECLIPSE
+        "Projectiles.EclipsePrimordialProjectile.DisplayName": "Primordial Eclipse",
 
         // v6.19: the runic suns and the scepter's lightning bolt
         "Projectiles.RuneSunProjectile.DisplayName": "Runic Sun",

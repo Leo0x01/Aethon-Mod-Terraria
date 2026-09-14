@@ -21,7 +21,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// elevado así:
     ///
     ///   · VISUAL — el OlvidoAscendidoBlackHoleRenderer: arcos del vacío
-    ///     (3 LightningCore.Arc), rayos ESPIRALANDO hacia el núcleo sobre
+    ///     (3 StormLib.Arc), rayos ESPIRALANDO hacia el núcleo sobre
     ///     los brazos reforzados (3×18), nebulosa fBm más rica y
     ///     fotones-rayo recorriendo el anillo.
     ///   · AURA — ticks un 15% MÁS RÁPIDOS (el vacío castiga más de

@@ -39,7 +39,7 @@ namespace AethonMod.Content.VFX
     ///
     /// La ESTRUCTURA es la MISMA del Supremo original (la fusión de los
     /// 4: disco Doppler del Umbral, anillo de bandas del Cósmico, brazos
-    /// del Olvido, humo de la Bruma, corona de rayos de LightningCore) —
+    /// del Olvido, humo de la Bruma, corona de rayos de StormLib) —
     /// SOLO cambia el COLOR: el negro→morado→azul→dorado del alba polar.
     ///
     /// CONTRATO DE BATCH (v6.10, a prueba de balas): Draw() exige el
@@ -101,7 +101,7 @@ namespace AethonMod.Content.VFX
         private const float OuterRuneRadius = 3.30f; // ×R — MÁS AFUERA (borde)
         private const float OuterRuneOrbit = -0.075f; // rad/s — CONTRARROTO
 
-        // --- LOS RAYOS (LA ESTRELLA — LightningCore) ---
+        // --- LOS RAYOS (LA ESTRELLA — StormLib) ---
         private const float BoltHz = 10f;        // ~10 Hz de parpadeo vivo
 
         // --- las volutas que caen al núcleo (herencia BRUMA) ---
@@ -263,7 +263,7 @@ namespace AethonMod.Content.VFX
                 float tFast = time * 1.55f;
 
                 int flick = (int)(tMid * FlickHz);
-                int boltFlick = LightningCore.FlickTick(time, BoltHz);   // ~10 Hz
+                int boltFlick = StormLib.FlickTick(time, BoltHz);   // ~10 Hz
 
                 float breathe = 1f + 0.012f * (float)Math.Sin(tMid * 1.15f);
                 float rr = r * breathe;
@@ -691,7 +691,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  9a. ⚡ LOS ARCOS DEL HORIZONTE — LightningCore.Arc, ~10 Hz
+        //  9a. ⚡ LOS ARCOS DEL HORIZONTE — StormLib.Arc, ~10 Hz
         // ------------------------------------------------------------------
 
         private static void DrawHorizonArcs(Vector2 center, float r, float time, int seed,
@@ -702,7 +702,7 @@ namespace AethonMod.Content.VFX
             // girando a velocidades distintas — PARPADEANDO a ~10 Hz.
             for (int i = 0; i < 3; i++)
             {
-                if (!LightningCore.Flicker(seed + 40 + i * 17, boltFlick, 0.82f))
+                if (!StormLib.IsLit(seed + 40 + i * 17, boltFlick, 0.82f))
                     continue;
 
                 float span = 1.15f + 0.55f * Hash01(seed, 920 + i, boltFlick / 4);
@@ -710,7 +710,7 @@ namespace AethonMod.Content.VFX
                               + i * 2.1f;
                 float radius = r * (1.05f + 0.08f * i);
 
-                LightningCore.Arc(Main.spriteBatch, center, radius,
+                StormLib.ArcRing(Main.spriteBatch, center, radius,
                     baseA, baseA + span,
                     seed + 40 + i * 17, boltFlick,
                     Math.Max(2.6f, 0.052f * r),
@@ -721,7 +721,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  9b. ⚡ LOS RAYOS FUGITIVOS — LightningCore.Bolt (2 azules + 1 dorado)
+        //  9b. ⚡ LOS RAYOS FUGITIVOS — StormLib.Bolt (2 azules + 1 dorado)
         // ------------------------------------------------------------------
 
         private static void DrawEscapingBolts(Vector2 center, float rr, float time, int seed,
@@ -731,7 +731,7 @@ namespace AethonMod.Content.VFX
             // cuerpo/núcleo con ramas — la librería nueva del proyecto).
             for (int i = 0; i < 3; i++)
             {
-                if (!LightningCore.Flicker(seed + 61 + i, boltFlick, 0.85f))
+                if (!StormLib.IsLit(seed + 61 + i, boltFlick, 0.85f))
                     continue;
 
                 // Emergen donde la banda del shader está EN SU PICO.
@@ -748,7 +748,7 @@ namespace AethonMod.Content.VFX
 
                 // 2 AZULES + 1 DORADO (el reparto del gradiente exterior).
                 Color haloC = i < 2 ? AurBlue : AurGold;
-                LightningCore.Bolt(Main.spriteBatch, start, end,
+                StormLib.Bolt(Main.spriteBatch, start, end,
                     seed + 130 + i * 53, boltFlick,
                     Math.Max(3f, 0.085f * rr),
                     Tint(haloC, 0.58f), Tint(WhiteIncan, 0.95f),
@@ -871,7 +871,7 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
         //  11. JETS POLARES — el gradiente aurora A LO LARGO del haz:
         //      MORADO en la base (junto al núcleo) → AZUL al medio →
-        //      DORADO en la punta, con un RAYO LightningCore DENTRO
+        //      DORADO en la punta, con un RAYO StormLib DENTRO
         // ------------------------------------------------------------------
 
         private static void DrawPolarJets(Vector2 center, float rr, float time,
@@ -932,12 +932,12 @@ namespace AethonMod.Content.VFX
                         Tint(cHot, a * 1.6f));
                 }
 
-                // --- ⚡ EL RAYO DENTRO DEL JET: un LightningCore.Bolt
+                // --- ⚡ EL RAYO DENTRO DEL JET: un StormLib.Bolt
                 //     recorriendo el corazón del chorro. ---
-                if (LightningCore.Flicker(seed + 90 + side * 13, boltFlick, 0.80f))
+                if (StormLib.IsLit(seed + 90 + side * 13, boltFlick, 0.80f))
                 {
                     Vector2 tip = center + dir * (baseOff + 1.85f * rr);
-                    LightningCore.Bolt(Main.spriteBatch, basePos, tip,
+                    StormLib.Bolt(Main.spriteBatch, basePos, tip,
                         seed + 210 + side * 29, boltFlick,
                         Math.Max(2.6f, 0.045f * rr),
                         Tint(cBody, 0.50f), Tint(cHot, 0.90f),

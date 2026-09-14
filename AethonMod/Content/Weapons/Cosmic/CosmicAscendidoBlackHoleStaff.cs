@@ -13,7 +13,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// La copia MEJORADA del bastón del Cósmico (CosmicBlackHoleStaff
     /// queda INTACTO): lanza el agujero negro COSMICO ASCENDIDO — el
-    /// Cósmico elevado con la librería de rayos LightningCore: TORMENTA
+    /// Cósmico elevado con la librería de rayos StormLib: TORMENTA
     /// de 4-6 rayos ramificados escapando del anillo (doble tira
     /// cuerpo rojo-naranja + núcleo ámbar), CORONAS DE DESCARGA
     /// abrazando el horizonte (~11 Hz), DOBLE ANILLO DE BANDAS (el eco

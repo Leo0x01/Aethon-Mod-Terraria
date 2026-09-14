@@ -43,8 +43,8 @@ namespace AethonMod.Content.VFX
     /// impactos) y se re-implementa 100% con código PROPIO sobre la pila de
     /// la casa: SpriteBatch + texturas procedurales + hash determinista.
     ///
-    /// LA DIFERENCIA con LightningCore (v6.18, que queda intacta para los
-    /// agujeros negros): LightningCore dibuja cápsulas de GLOW suave — es
+    /// LA DIFERENCIA con la primera generación (v6.18, ya retirada del
+    /// proyecto): aquella dibujaba cápsulas de GLOW suave — era
     /// una tira de energía difusa. StormLib dibuja FILAMENTOS de verdad:
     ///
     ///   1. TEXTURAS DE FILAMENTO — BoltHalo (banda suave) y BoltCore (el
@@ -75,9 +75,10 @@ namespace AethonMod.Content.VFX
     ///   8. IMPACTO = CRUZ DE LUZ + DESTELLO — 4 draws del glow en 2
     ///      orientaciones × 2 escalas + el estallido radial girando.
     ///
-    /// CONTRATO (idéntico al de LightningCore): los métodos de DIBUJO
-    /// reciben el batch ABIERTO en modo aditivo y no lo tocan — se pueden
-    /// aninar dentro de un renderer mayor. Coordenadas tal cual lleguen.
+    /// CONTRATO (el de siempre, heredado de la primera generación): los
+    /// métodos de DIBUJO reciben el batch ABIERTO en modo aditivo y no lo
+    /// tocan — se pueden aninar dentro de un renderer mayor. Coordenadas
+    /// tal cual lleguen.
     /// </summary>
     public static class StormLib
     {
@@ -424,7 +425,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// ARCO ELÉCTRICO alrededor de un centro (las coronas de impacto):
-        /// el arco de LightningCore re-implementado con las texturas de
+        /// el arco clásico re-implementado con las texturas de
         /// filamento — mucho más crispado.
         /// </summary>
         public static void ArcRing(SpriteBatch batch, Vector2 center, float radius,

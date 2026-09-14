@@ -16,7 +16,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// anillo de BANDAS del CÓSMICO (20 zonas de brillo viajando a
     /// 5 rad/s), los BRAZOS ESPIRALES del OLVIDO con flujo hacia
     /// adentro, el HUMO de la BRUMA (halo de nubes + volutas cayendo) —
-    /// y la CORONA DE RAYOS de LightningCore: 3 arcos eléctricos vibrando
+    /// y la CORONA DE RAYOS de StormLib: 3 arcos eléctricos vibrando
     /// en el horizonte a ~10 Hz y 3 rayos fugitivos (2 carmesí + 1
     /// dorado), con jets polares oro/violeta y doble círculo de runas.
     ///

@@ -7715,3 +7715,23 @@ Test:
 
 Stage Summary:
 - v6.16: SIETE agujeros negros + la librería de bruma procedural, todo 100% código, entregado, 0/0
+
+---
+Task ID: 38
+Agent: Z.ai Code (agente principal — sesión AethonMod)
+Task: v6.22 — LA LUZ Y EL FUEGO: LumenLib + migración StormLib total + soles 11-20 + Eclipse Primordial + 3 cosméticos interactivos
+
+Work Log:
+- Investigación de luz superprofunda en 3 frentes: WoTE (31 archivos + 12 shaders .fx), la Emperatriz VANILLA decompilada del tModLoader.dll real (ILSpy — FairyQueenLance/SunDance/LastingRainbow/RainbowStreak/DeathAurora con números exactos) y MEAC (el rework chino: .tmod descargado por 10 rangos paralelos + parser del formato binario propio + ILSpy + VLM de texturas). 3 informes en research/luz_v622/.
+- LumenLib.cs — LA LIBRERÍA DE LA LUZ (la respuesta a la pregunta del usuario: StormLib era solo de rayos): Hue/Drift/Cycle + Bloom apilado invertido (4.1/2.85/1.5/0.8) + DoublePass + Flare + Ray (grosor animado) + Lance/LanceTrail/Telegraph + Aurora (15 bandas espejadas) + LightAlong muestreada + 4 texturas procedurales (LumenBloom/LumenBlade/LumenFlare/FlameBrush).
+- MIGRACIÓN TOTAL: LightningCore eliminada; los 4 Ascendidos + Supremo + SupremoAurora + el sol rúnico usan StormLib (Bolt→Bolt, Arc→ArcRing, Flicker→IsLit; Smooth+JitterPath → Bézier + Refine fractal). Mismos tamaños, nueva nitidez.
+- SOLES 11-20: una capa nueva por tier (cometa, lluvia de runas, aurora polar, estrella compañera con puente de luz, cinturón de asteroides kepleriano, tormenta total, corona prismática, lanzas prismáticas, núcleo de nova, GRAN SELLADO) + packing tighto + 435 runas en la XX + gigante ×1.75.
+- EL ECLIPSE PRIMORDIAL: física suprema (atracción 600px) + DrawOrbitalSystem(tier 20) orbitando el horizonte + todas las herencias (Doppler aurora, bandas, espirales, BrumaFX Cloud/Puff/Tendril, corona StormLib, jets, runas dobles, rayos prismáticos LumenLib + aurora veil) + muerte = Einstein + Nova Rúnica + lente ×4.2 en BlackHoleLensSystem.
+- LA ENVOLTURA DE FUEGO: campo 26×38 de propagación de intensidades 0..36 con tabla de 37 colores propia — INTERACTIVA (viento en contra al correr, avivo, aplastado/salto, estirada/caída, columna/vuelo) + chispas + humo + luz. 100% código.
+- LA CORONA DE ANILLOS: 3 aros rúnicos orbitando el cuerpo (oro vertical + blanco contrarroto + azul ecuatorial).
+- EL ANILLO RÚNICO ESTELAR: alas funcionales (patrón v6.12: AutoloadEquip + PNG 8×8 en blanco) + el gran anillo-halo tras la espalda que SE ENCIENDE al volar (energía de vuelo: bloom ×2.2 + cruz de luz + 8 rayos + runas al blanco).
+- Entrega: 15 PNGs procedurales validados VLM (2 rondas — "LISTOS PARA INTEGRACIÓN"), localización es/EN (15 nombres), EnsureItem ×2 sitios, build.txt 6.22, CHANGES.md, compilación 0/0 contra tML 2026.07.3.0 real.
+
+Stage Summary:
+- v6.22: el proyecto tiene el TRÍO de librerías propio (StormLib rayos + BrumaFX humo + LumenLib luz), el arma final (Eclipse Primordial), 20 soles rúnicos, y 3 cosméticos vivos (fuego interactivo, anillos, alas-halo). Todo 100% código, cero referencias externas.
+- Prueba del usuario: Build → entrar al mundo → el kit entrega los 10 bastones nuevos + el Eclipse + los 3 cosméticos.

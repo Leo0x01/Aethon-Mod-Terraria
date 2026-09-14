@@ -13,7 +13,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// La copia MEJORADA del bastón del Olvido (OlvidoBlackHoleStaff
     /// queda INTACTO): lanza el agujero negro OLVIDO ASCENDIDO — el
-    /// Olvido elevado con la librería de rayos LightningCore: ARCOS DEL
+    /// Olvido elevado con la librería de rayos StormLib: ARCOS DEL
     /// VACÍO (3 coronas eléctricas morado-azules alrededor del
     /// horizonte, ~9 Hz), RAYOS ESPIRALES que siguen los brazos y
     /// espiralan hacia el núcleo (anclas sobre la espiral + JitterPath),

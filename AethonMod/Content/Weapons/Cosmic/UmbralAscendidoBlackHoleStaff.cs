@@ -15,7 +15,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// agujero de la referencia, ELEVADO — Doppler extremo (el lado que se
     /// acerca ARDE a blanco incandescente y grueso; el lejano se hunde en
     /// rojo profundo y fino), LLUVIA DE RAYOS naranjas ramificados cayendo
-    /// del círculo de runas (LightningCore), ARCO DORADO eléctrico girando
+    /// del círculo de runas (StormLib), ARCO DORADO eléctrico girando
     /// alrededor del horizonte, DOBLE anillo rúnico contrarrotante y brasas
     /// de estelas largas. 100% CÓDIGO.
     ///

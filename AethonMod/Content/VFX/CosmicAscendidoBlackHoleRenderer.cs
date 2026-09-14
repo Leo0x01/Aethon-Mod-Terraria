@@ -14,14 +14,14 @@ namespace AethonMod.Content.VFX
     /// v6.16/v6.18 queda INTACTO — este archivo es un VÓRTICE NUEVO): el
     /// mismo cuerpo (núcleo de negro absoluto, anillo de VEINTE BANDAS
     /// sin(uv·20 + t·5), runas doradas, ecos, fotones, motas) elevado con
-    /// LA LIBRERÍA DE RAYOS LightningCore:
+    /// LA LIBRERÍA DE RAYOS StormLib:
     ///
-    ///   1. ⚡ TORMENTA DE RAYOS PRO — 4-6 LightningCore.Bolt escapando
+    ///   1. ⚡ TORMENTA DE RAYOS PRO — 4-6 StormLib.Bolt escapando
     ///      del anillo donde la banda del shader está EN SU PICO: doble
     ///      tira CUERPO (rojo-naranja) + NÚCLEO (ámbar casi blanco) con
     ///      RAMAS HEREDADAS y gorros de descarga. Mucho más rico que los
     ///      2 zigzags simples del original.
-    ///   2. ⚡ CORONAS DE DESCARGA — 2 LightningCore.Arc naranja
+    ///   2. ⚡ CORONAS DE DESCARGA — 2 StormLib.Arc naranja
     ///      eléctrico abrazando el horizonte a radios 1.0× y 1.15×,
     ///      re-generándose a ~11 Hz con chispas satélite por Flicker.
     ///   3. DOBLE ANILLO DE BANDAS — el anillo principal + un ANILLO ECO
@@ -31,7 +31,7 @@ namespace AethonMod.Content.VFX
     ///      círculo de 5 ÁMBAR contrarrotando a radio mayor.
     ///   5. JETS POLARES — chorros naranjas arriba/abajo (cápsulas
     ///      alargadas ANIMADAS con glow pulsante en la base) y un
-    ///      LightningCore.Bolt vibrando DENTRO de cada jet.
+    ///      StormLib.Bolt vibrando DENTRO de cada jet.
     ///
     /// Paleta ROJO-NARANJA incandescente (la del recolor v6.18 del
     /// Cósmico). TODO se compone AQUÍ, CADA FRAME, por código con los
@@ -497,25 +497,25 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  7. NUEVO — LA TORMENTA DE RAYOS PRO (LightningCore.Bolt)
+        //  7. NUEVO — LA TORMENTA DE RAYOS PRO (StormLib.Bolt)
         // ------------------------------------------------------------------
 
         private static void DrawLightningStorm(Vector2 center, float r, float time, int seed)
         {
             // ============================================================
             //  LA TORMENTA DE RAYOS PRO — el corazón del Ascendido:
-            //  4-6 LightningCore.Bolt de DOBLE TIRA (cuerpo rojo-naranja +
+            //  4-6 StormLib.Bolt de DOBLE TIRA (cuerpo rojo-naranja +
             //  núcleo ámbar casi blanco) con RAMAS HEREDADAS y gorros de
             //  descarga, ESCAPANDO del anillo donde la banda del shader
             //  está EN SU PICO. Cada rayo se re-genera a ~11 Hz y
             //  parpadea con Flicker propio (todo determinista por hash).
             // ============================================================
-            int stormFlick = LightningCore.FlickTick(time, StormHz);
+            int stormFlick = StormLib.FlickTick(time, StormHz);
             int count = 4 + (Hash01(seed, 404, stormFlick / 3) > 0.5f ? 2 : 0); // 4..6
 
             for (int i = 0; i < count; i++)
             {
-                if (!LightningCore.Flicker(seed + 300 + i * 97, stormFlick, 0.82f))
+                if (!StormLib.IsLit(seed + 300 + i * 97, stormFlick, 0.82f))
                     continue;
 
                 // Emergen donde la banda del shader está EN SU PICO (como
@@ -533,28 +533,28 @@ namespace AethonMod.Content.VFX
                 Vector2 end = start + (outward + tangent) *
                               (1.10f + 0.80f * Hash01(seed, 852 + i, stormFlick)) * r;
 
-                // LA DOBLE TIRA CUERPO + NÚCLEO CON RAMAS de LightningCore.
-                LightningCore.Bolt(Main.spriteBatch, start, end,
+                // LA DOBLE TIRA CUERPO + NÚCLEO CON RAMAS de StormLib.
+                StormLib.Bolt(Main.spriteBatch, start, end,
                     seed + 100 + i * 53, stormFlick, r * 0.105f,
                     Tint(BoltViolet, 0.52f), Tint(BoltPink, 0.92f), 1f, 7, r * 0.16f);
             }
         }
 
         // ------------------------------------------------------------------
-        //  7.5 NUEVO — LAS CORONAS DE DESCARGA (LightningCore.Arc)
+        //  7.5 NUEVO — LAS CORONAS DE DESCARGA (StormLib.Arc)
         // ------------------------------------------------------------------
 
         private static void DrawDischargeCrowns(Vector2 center, float r, float time, int seed)
         {
             // ============================================================
             //  LAS CORONAS DE DESCARGA: dos ARCOS ELÉCTRICOS de
-            //  LightningCore abrazando el horizonte — uno a 1.0× y otro
+            //  StormLib abrazando el horizonte — uno a 1.0× y otro
             //  a 1.15× del radio, girando en SENTIDOS OPUESTOS. Se
             //  re-generan a ~11 Hz (parpadeo nervioso) y cada tanto
             //  sueltan una CHISPA SATÉLITE que persigue al arco
             //  principal. La tensión del vórtice hecha chispas circulares.
             // ============================================================
-            int crownFlick = LightningCore.FlickTick(time, StormHz);
+            int crownFlick = StormLib.FlickTick(time, StormHz);
 
             for (int c = 0; c < 2; c++)
             {
@@ -562,20 +562,20 @@ namespace AethonMod.Content.VFX
                 float drift = time * (c == 0 ? 1.15f : -0.85f) + c * 2.4f;
                 float span = 1.30f + 0.50f * Hash01(seed, 942 + c, crownFlick);
 
-                if (!LightningCore.Flicker(seed + 941 + c * 7, crownFlick, 0.86f))
+                if (!StormLib.IsLit(seed + 941 + c * 7, crownFlick, 0.86f))
                     continue;
 
                 // EL ARCO PRINCIPAL de la corona (~1/4 de vuelta).
-                LightningCore.Arc(Main.spriteBatch, center, radius,
+                StormLib.ArcRing(Main.spriteBatch, center, radius,
                     drift, drift + span, seed + 500 + c * 13, crownFlick,
                     r * 0.075f, Tint(CrownOrange, 0.42f), Tint(HotWhite, 0.88f), 1f, 12);
 
                 // CHISPA SATÉLITE (el 40% de las regeneraciones): mini-arco
                 // que persigue al principal por el radio intermedio.
-                if (LightningCore.Flicker(seed + 963 + c * 3, crownFlick, 0.40f))
+                if (StormLib.IsLit(seed + 963 + c * 3, crownFlick, 0.40f))
                 {
                     float satA = drift - span * 0.55f;
-                    LightningCore.Arc(Main.spriteBatch, center, radius * 1.055f,
+                    StormLib.ArcRing(Main.spriteBatch, center, radius * 1.055f,
                         satA, satA + span * 0.35f, seed + 540 + c * 19, crownFlick,
                         r * 0.045f, Tint(CrownOrange, 0.30f), Tint(BoltPink, 0.70f), 1f, 7);
                 }
@@ -592,10 +592,10 @@ namespace AethonMod.Content.VFX
             //  LOS JETS POLARES ASCENDIDOS: chorros naranjas arriba y
             //  abajo del vórtice (4 cápsulas alargadas Ahusadas cuya
             //  LONGITUD late con el tiempo), un GLOW PULSANTE en la base
-            //  (el "motor" del jet) y un LightningCore.Bolt vibrando
+            //  (el "motor" del jet) y un StormLib.Bolt vibrando
             //  DENTRO de cada chorro — el núcleo eléctrico del escape.
             // ============================================================
-            int jetFlick = LightningCore.FlickTick(time, StormHz);
+            int jetFlick = StormLib.FlickTick(time, StormHz);
             Vector2 pole = new Vector2(
                 -(float)Math.Sin(RingTilt + MathHelper.PiOver2),
                 (float)Math.Cos(RingTilt + MathHelper.PiOver2));
@@ -627,8 +627,8 @@ namespace AethonMod.Content.VFX
                 // EL RAYO INTERIOR del jet (el núcleo eléctrico vibrando).
                 Vector2 start = center + dir * (baseOff * 0.9f);
                 Vector2 end = center + dir * (baseOff + jetLen * 1.05f);
-                if (LightningCore.Flicker(seed + 701 + side * 37, jetFlick, 0.90f))
-                    LightningCore.Bolt(Main.spriteBatch, start, end,
+                if (StormLib.IsLit(seed + 701 + side * 37, jetFlick, 0.90f))
+                    StormLib.Bolt(Main.spriteBatch, start, end,
                         seed + 810 + side * 41, jetFlick, rr * 0.085f,
                         Tint(BoltViolet, 0.45f), Tint(BoltPink, 0.88f), 1f, 6, rr * 0.09f);
 
