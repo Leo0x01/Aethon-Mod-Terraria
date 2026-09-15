@@ -33,7 +33,7 @@ namespace AethonMod.Content.VFX
     public static class MagnetarRenderer
     {
         /// <summary>Radio del núcleo en px a escala 1 (compacto, toda la energía es el CAMPO).</summary>
-        public const float BodyPx = 14f;
+        public const float BodyPx = 26f;
 
         /// <summary>Alcance de las CADENAS DE RAYO automáticas (px).</summary>
         public const float ChainRange = 240f;

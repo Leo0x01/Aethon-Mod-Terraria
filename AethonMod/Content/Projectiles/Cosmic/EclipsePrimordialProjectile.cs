@@ -12,34 +12,28 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// EclipsePrimordialProjectile — v6.26 — EL SOL DE LOS 20 ANILLOS +
-    /// LA MEZCLA DE TODOS LOS AGUJEROS NEGROS RÚNICOS.
+    /// EclipsePrimordialProjectile — v6.28 — EL ECLIPSE TOTAL (el rediseño).
     ///
-    /// v6.26 — LA ORDEN DEL USUARIO: "el bastón del eclipse primordial
-    /// cámbialo, esta nueva versión será el sol de 20 anillos, y la mezcla
-    /// de todos los agujeros negros rúnicos". EL NÚCLEO YA NO ES UN
-    /// AGUJERO NEGRO: el centro es EL SOL DE LOS 20 ANILLOS (el cuerpo
-    /// solar completo de RuneSunRenderer a tier 20, escalado ×1.30), y a
-    /// su alrededor orbita LA MEZCLA: las firmas de TODOS los agujeros
-    /// negros rúnicos (EclipsePrimordialRenderer): los tres círculos
-    /// rúnicos del Supremo entrelazados con el anillo 20, el anillo de
-    /// bandas del Cósmico, los brazos del Olvido ALIMENTANDO al sol, el
-    /// halo de bruma, el anillo de fotones del Umbral, el gradiente
-    /// aurora, la corona de descarga de StormLib y la luz prismática.
+    /// v6.28 — LA ORDEN DEL USUARIO: "rediseña el bastón de eclipse
+    /// primordial". La versión v6.26 (el Sol de los 20 Anillos + la mezcla
+    /// de TODOS los agujeros) se retira. EL NUEVO CONCEPTO es el nombre del
+    /// arma: UN ECLIPSE SOLAR TOTAL — el disco de la noche se DESLIZA sobre
+    /// el sol primordial (EL CRECIENTE menguante), el día MUERE (el mundo
+    /// se apaga con RiftLib.Oscurecer — el sesgo violeta de la casa), la
+    /// CORONA blanca streamerea desde detrás, la CROMOSFERA roja arde al
+    /// limbo con sus perlas de Baily, LAS PROMINENCIAS lamen desde la cara
+    /// oculta y EL ANILLO DE DIAMANTE viaja por el borde — acelerando en
+    /// LA ÚLTIMA LUZ. LOS TRES CÍRCULOS RÚNICOS (blanco/dorado/violeta)
+    /// contienen la noche: la firma de la casa.
     ///
-    /// LA FÍSICA hereda de los agujeros (la atracción de 600px — ahora
-    /// ATRAE hacia el sol) + el AURA DE DAÑO del sol: los enemigos caen
-    /// al coloso y arden en su corona. Vida ~14 s.
+    /// LA FÍSICA se conserva (la good): atracción gravitacional de 600px
+    /// + devorar proyectiles enemigos + el aura de quemadura de la corona
+    /// (los enemigos caen al eclipse y arden). Vida ~14 s.
     ///
-    /// LA MUERTE es LA NOVA DEL ECLIPSE: el anillo de Einstein + la nova
-    /// rúnica del sol ×1.6 (las dos explosiones en un instante — la
-    /// lección v5.97) + la nova visual con TODAS las librerías
-    /// (OndaLib.Shock + StormLib.MultiBolt radiales + BrumaFX.Cloud
-    /// expansivo + LumenLib.Aurora + ImpactFlash CONCENTRADO — prohibido
-    /// el Flash de pantalla completa, lección v6.26).
-    ///
-    /// PALETA de partículas: el ORO SOLAR cerca del cuerpo + el GRADIENTE
-    /// AURORA (morado/azul/dorado) en la mezcla exterior.
+    /// LA MUERTE es EL RETORNO DE LA LUZ: el disco IMPLODE (la noche se
+    /// traga a sí misma), la corona EXPLOTA soplada, el núcleo queda
+    /// CEGADOR — y el Anillo de Einstein + la nova ×1.6 estallan mientras
+    /// EL DÍA VUELVE (la oscuridad se suelta).
     /// </summary>
     public class EclipsePrimordialProjectile : ModProjectile
     {
@@ -50,16 +44,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private const float ShieldRadiusMult = 4.8f;
 
         /// <summary>Multiplicador del radio de la lente gravitacional de pantalla.</summary>
-        internal const float LensRadiusMult = 4.2f;
+        internal const float LensRadiusMult = 2.6f;
 
         /// <summary>Radio de atracción gravitacional (px) — la herencia de los agujeros.</summary>
         private const float GravityRadius = 600f;
 
-        /// <summary>Ticks de la fase de colapso final (LA NOVA DEL ECLIPSE).</summary>
+        /// <summary>Ticks de LA ÚLTIMA LUZ + EL RETORNO (el colapso final).</summary>
         private const int NovaTicks = 36;
 
-        /// <summary>Ticks de la fase de crecimiento (la gigante roja final).</summary>
-        private const int GrowTicks = 90;
+        /// <summary>Ticks del DESLIZAMIENTO del disco (la fase del creciente).</summary>
+        private const int FormTicks = 45;
 
         /// <summary>Tiempo visual de vida — usada para el pop elástico de aparición.</summary>
         public ref float VisualsTime => ref Projectile.ai[0];
@@ -90,29 +84,44 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                (float)Math.Sqrt(Utils.GetLerpValue(0f, 60f, VisualsTime, true));
             VisualsTime += 1f;
 
-            // === SECUENCIA DE MUERTE: crecimiento (gigante roja) → NOVA ===
-            float expansion = 0f;
-            if (Projectile.timeLeft > NovaTicks && Projectile.timeLeft <= GrowTicks)
-            {
-                expansion = 1f - (Projectile.timeLeft - NovaTicks) / 54f;
-                Projectile.scale *= 1f + expansion * 0.6f;
-            }
-            else if (Projectile.timeLeft <= NovaTicks)
+            // === LA SECUENCIA DE MUERTE: SOLO EL COLAPSO (la noche se
+            //     traga a sí misma — el renderer pinta el resto) ===
+            float novaT = 0f;
+            if (Projectile.timeLeft <= NovaTicks)
             {
                 if (Projectile.localAI[1] <= 0f)
                     Projectile.localAI[1] = 0.3f * Projectile.width *
                                             Math.Max(Projectile.scale, 0.08f) * ShieldRadiusMult;
 
-                float collapse = Utils.GetLerpValue(NovaTicks, 0f, Projectile.timeLeft, true);
-                Projectile.scale *= Math.Max(1f - collapse, 0.06f);
-                expansion = 1f;
+                novaT = Utils.GetLerpValue(NovaTicks, 0f, Projectile.timeLeft, true);
+                Projectile.scale *= Math.Max(1f - novaT * 0.7f, 0.10f);
             }
 
+            float expansion = novaT;
             ParticleManager.PullToGlobalBoost = 1f + expansion * 5f;
 
-            // === LA NOVA DEL ECLIPSE: se dispara al empezar el colapso ===
+            // === LA NOVA / EL RETORNO DE LA LUZ: se dispara al empezar el colapso ===
             if (Projectile.timeLeft <= NovaTicks)
                 TriggerNovaDelEclipse();
+
+            // === EL DÍA MUERE CON EL ECLIPSE (v6.28 — el mundo se apaga
+            //     mientras el disco cubre al sol; VUELVE con la nova) ===
+            if (Main.netMode != NetmodeID.Server)
+            {
+                float formT = MathHelper.Clamp(VisualsTime / FormTicks, 0f, 1f);
+                if (novaT > 0f)
+                {
+                    // EL RETORNO: la oscuridad se suelta con la nova.
+                    RiftLib.Oscurecer(0.32f * (1f - novaT));
+                }
+                else
+                {
+                    // EL TRÁNSITO apaga el mundo gradualmente (el creciente
+                    // mengua → el total → la ÚLTIMA LUZ al máximo).
+                    float ultima = LifeTicks - Projectile.timeLeft > LifeTicks * 0.88f ? 0.06f : 0f;
+                    RiftLib.Oscurecer(0.26f * formT + ultima);
+                }
+            }
 
             // === MOVIMIENTO: deriva lenta y frenado (copia exacta) ===
             Projectile.velocity *= 0.97f;
@@ -229,7 +238,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float pulse = 0.8f + 0.2f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 5f);
             Vector3 sunLight = new Vector3(1.00f * pulse, 0.82f * pulse, 0.55f * pulse);
             Lighting.AddLight(Projectile.Center, sunLight);
-            float le = EclipsePrimordialRenderer.SunBodyPx * Math.Max(Projectile.scale, 0.1f);
+            float le = EclipsePrimordialRenderer.SunPx * Math.Max(Projectile.scale, 0.1f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, -le * 1.5f), sunLight * 0.55f);
             Lighting.AddLight(Projectile.Center + new Vector2(0f, le * 1.7f),
                 new Vector3(0.45f * pulse, 0.25f * pulse, 0.75f * pulse) * 0.75f);
@@ -272,18 +281,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private void SpawnFallingMatter()
         {
             float deathSpeedBoost = 1f;
-            if (Projectile.timeLeft <= GrowTicks)
-                deathSpeedBoost = 1f + (GrowTicks - Projectile.timeLeft) / GrowTicks * 2f;
+            if (Projectile.timeLeft <= NovaTicks)
+                deathSpeedBoost = 1f + (NovaTicks - Projectile.timeLeft) / (float)NovaTicks * 2f;
 
             // El ancla: el CUERPO del sol (×1.30 — el coloso de la mezcla).
-            float core = EclipsePrimordialRenderer.SunBodyPx * Math.Max(Projectile.scale, 0.1f);
+            float core = EclipsePrimordialRenderer.SunPx * Math.Max(Projectile.scale, 0.1f);
 
             for (int i = 0; i < 2; i++)
             {
                 float angle = Projectile.rotation * 1.5f + i * (MathHelper.TwoPi / 2f) +
                               Main.rand.NextFloat(-0.25f, 0.25f);
                 // Nace en el BORDE del sistema de anillos (~8.6× el cuerpo).
-                float dist = (7.2f + 1.4f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i)) * core;
+                float dist = (3.8f + 0.7f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + i)) * core;
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -369,8 +378,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                 // Nace MÁS AFUERA del sistema (la acreción de la mezcla).
-                float dist = Main.rand.NextFloat(8.0f, 11.5f) *
-                             EclipsePrimordialRenderer.SunBodyPx * MathHelper.Max(Projectile.scale, 0.4f);
+                float dist = Main.rand.NextFloat(4.2f, 5.8f) *
+                             EclipsePrimordialRenderer.SunPx * MathHelper.Max(Projectile.scale, 0.4f);
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * dist,
                     (float)Math.Sin(angle) * dist);
@@ -415,11 +424,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.rand.NextBool(4))
             {
                 // La banda vive EN el borde de los anillos del sol.
-                float core = EclipsePrimordialRenderer.SunBodyPx *
+                float core = EclipsePrimordialRenderer.SunPx *
                                MathHelper.Max(Projectile.scale, 0.4f);
-                float radius = Main.rand.NextFloat(8.2f, 11.8f) * core;
+                float radius = Main.rand.NextFloat(4.3f, 6.2f) * core;
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float angVel = 0.16f * (float)Math.Pow(11.0f * core / radius, 1.5f);
+                float angVel = 0.16f * (float)Math.Pow(5.8f * core / radius, 1.5f);
 
                 Vector2 spawnPos = Projectile.Center + new Vector2(
                     (float)Math.Cos(angle) * radius,
@@ -487,9 +496,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// Dibuja EL SOL DE LOS 20 ANILLOS + LA MEZCLA DE TODOS LOS AGUJEROS
-        /// NEGROS RÚNICOS. Compartido entre el pase del mundo (PreDraw) y el
-        /// pase posterior a la lente.
+        /// Dibuja EL ECLIPSE TOTAL (el sol + el disco de la noche + la
+        /// corona + la cromosfera + las prominencias + el anillo de
+        /// diamante + los círculos rúnicos). Compartido entre el pase del
+        /// mundo (PreDraw) y el pase posterior a la lente.
         /// CONTRATO: el SpriteBatch llega CERRADO y queda CERRADO.
         /// </summary>
         internal static void DrawCoreVisuals(Projectile p)
@@ -498,42 +508,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float time = Main.GlobalTimeWrappedHourly;
             int seed = p.whoAmI * 17 + 5;
 
-            // lifeT: el ciclo de vida del sol (la corona crece con él).
-            float lifeT = MathHelper.Clamp(1f - p.timeLeft / (float)LifeTicks, 0f, 1f);
-            // rg: la GIGANTE ROJA final (los últimos 90 ticks hincha y tiñe).
-            float rg = 0f;
-            if (p.timeLeft > NovaTicks && p.timeLeft <= GrowTicks)
-                rg = 1f - (p.timeLeft - NovaTicks) / 54f;
-            else if (p.timeLeft <= NovaTicks)
-                rg = 1f;
-            // novaT: el avance de LA NOVA DEL ECLIPSE (el colapso final).
+            // LA EDAD (para el deslizamiento del disco + la última luz).
+            float age = p.ai[0];
+
+            // novaT: el avance de EL RETORNO DE LA LUZ (el colapso final).
             float novaT = 0f;
             if (p.timeLeft <= NovaTicks)
                 novaT = MathHelper.Clamp(1f - p.timeLeft / (float)NovaTicks, 0f, 1f);
 
-            // === 1. EL SOL DE LOS 20 ANILLOS (LA HERENCIA DEL SOL, ×1.30) ===
-            // RuneSunRenderer.Draw lee p.scale: se escala EN VIVO ×1.30
-            // (visual puro — el valor se restaura en el mismo frame) para
-            // que el Sol XX pinte a cuerpo de coloso.
-            float baseScale = Math.Max(p.scale, 0.02f);
-            p.scale = baseScale * EclipsePrimordialRenderer.SunScale;
-            try
-            {
-                RuneSunRenderer.Draw(p, 20, lifeT, rg, seed);
-            }
-            finally
-            {
-                p.scale = baseScale;
-            }
+            // === EL SOL PRIMORDIAL (el coloso de 74 px × escala) ===
+            float sunR = EclipsePrimordialRenderer.SunPx * Math.Max(p.scale, 0.02f);
 
-            // === 2. LA MEZCLA DE TODOS LOS AGUJEROS NEGROS RÚNICOS ===
-            // (Desvanece mientras la nova se la come.)
-            float sunR = RuneSunRenderer.BodyPx * baseScale * EclipsePrimordialRenderer.SunScale;
-            EclipsePrimordialRenderer.Draw(drawPos, sunR, time, seed, 1f - novaT);
-
-            // === 3. LA NOVA DEL ECLIPSE (visual — solo los ticks finales) ===
+            // === EL ECLIPSE (o SU RETORNO en los ticks finales) ===
             if (novaT > 0f)
-                EclipsePrimordialRenderer.DrawNova(drawPos, novaT, time, seed);
+                EclipsePrimordialRenderer.DrawRetorno(drawPos, sunR, novaT, time, seed);
+            else
+                EclipsePrimordialRenderer.Draw(drawPos, sunR, time, seed, age, LifeTicks);
         }
 
         /// <summary>Restaura el SpriteBatch con los parámetros EXACTOS del

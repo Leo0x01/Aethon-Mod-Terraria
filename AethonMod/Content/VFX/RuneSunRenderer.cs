@@ -236,7 +236,7 @@ namespace AethonMod.Content.VFX
                 // Los anillos se EMITEN al buffer de VFXCore en coords de
                 // MUNDO y se vuelcan en su PROPIA tanda aditiva. ESTE MISMO
                 // emisor viste a los soles del mundo Y a las coronas cósmicas
-                // de los jugadores (RuneRingCrownRenderer / RunicHaloRenderer)
+                // (v6.28: los cosméticos que las usaban fueron borrados)
                 // — la copia de los anillos dejó de ser "parecida": ES el
                 // mismo trazo, el mismo latido y los mismos alphas.
                 VFXCore.Begin();
@@ -341,7 +341,7 @@ namespace AethonMod.Content.VFX
         /// rúnico completo de la copia `tier` (1..20) al buffer de VFXCore,
         /// en COORDENADAS DE MUNDO. ESTE MISMO código viste a los soles del
         /// mundo (RuneSunProjectile) y a las coronas cósmicas de los
-        /// jugadores (RuneRingCrownRenderer / RunicHaloRenderer): copiar
+        /// (v6.28: los cosméticos que las usaban fueron borrados): copiar
         /// los anillos de los soles dejó de ser "parecerse" — ES el mismo
         /// trazo, el mismo latido y los mismos alphas, a cualquier escala.
         /// `alpha` multiplica la intensidad (luz del mundo / energía).

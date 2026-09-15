@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Is it possible to fire a laser beam weapon as a new projectile?",
+    "snippet": "Aug 30, 2018 — I want to make a weapon that can fire a laser , shotgun and meteors at the same time. Using a shoot hook with Projectile .",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Aug 30, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net",
+    "name": "ModProjectile Class Reference",
+    "snippet": "Useful for things like diagonal lasers , projectiles. Allows you to draw things behind this projectile , or to modify the way it is drawn . Useful for things like ...",
+    "host_name": "docs.tmodloader.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.fandom.com",
+    "name": "Projectile IDs - Terraria Wiki - Fandom",
+    "snippet": "This page is a list of all of the projectiles in Terraria . In the game, the number of projectiles existing at the same time is capped at 1000. Projectile ... Read more",
+    "host_name": "terraria.fandom.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  }
+]

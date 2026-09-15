@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using AethonMod.Content.Weapons;
 using AethonMod.Content.Weapons.V20;
 using AethonMod.Content.Items.Cosmetics;
-using AethonMod.Content.Items.Wings;
 
 namespace AethonMod.Content.Items
 {
@@ -166,8 +165,6 @@ namespace AethonMod.Content.Items
             // --- LOS COSMÉTICOS ---
             l.Add((ModContent.ItemType<Cosmetics.VoidCrownItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.RuneCrownItem>(), 1));
-            l.Add((ModContent.ItemType<Cosmetics.RuneRingCrownItem>(), 1));
-            l.Add((ModContent.ItemType<Wings.RunicHaloWings>(), 1));
 
             // --- LAS ARMAS DE LAS LIBRERÍAS (v6.24) ---
             l.Add((ModContent.ItemType<Weapons.Cosmic.SinfoniaPrimordialStaff>(), 1));

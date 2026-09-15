@@ -32,7 +32,7 @@ namespace AethonMod.Content.VFX
     public static class NeutronStarRenderer
     {
         /// <summary>Radio del núcleo en px a escala 1 (MINÚSCULO y ultradenso).</summary>
-        public const float BodyPx = 12f;
+        public const float BodyPx = 22f;
 
         /// <summary>Rotación visible: 1.5 rev/s (el campo co-rota con la estrella).</summary>
         public const float SpinRate = MathHelper.TwoPi * 1.5f;

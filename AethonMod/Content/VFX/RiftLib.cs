@@ -18,7 +18,11 @@ namespace AethonMod.Content.VFX
         Apertura,
         /// <summary>Sostenido: el desgarro está abierto y DAÑA (la línea viva).</summary>
         Sostenido,
-        /// <summary>Cierre: los labios se cierran a −0.05·vida; el daño cesó 8 ticks antes.</summary>
+        /// <summary>La vibración previa a la fractura: onda estacionaria creciendo.</summary>
+        Vibracion,
+        /// <summary>LA FRACTURA: la línea recta se QUIEBRA en el camino Lichtenberg (daño ×2+).</summary>
+        Fractura,
+        /// <summary>Cierre: los labios se cierran; el daño cesó 8 ticks antes.</summary>
         Cierre,
     }
 
@@ -40,43 +44,61 @@ namespace AethonMod.Content.VFX
         /// <summary>La ENTROPÍA (violeta-cian eléctrico de los planos rotos).</summary>
         public static readonly Color[] Entropia =
         {
-            new(147, 24, 204), new(0, 221, 250), new(255, 255, 255),
+            new(120, 40, 200), new(190, 60, 255), new(140, 240, 255), new(255, 255, 255),
         };
     }
 
     /// <summary>
-    /// RiftLib — v6.26 — LA LIBRERÍA DE LOS DESGARROS DE REALIDAD.
+    /// RiftLib — v6.28 — LA LIBRERÍA DE LOS DESGARROS DE REALIDAD, SEGUNDA
+    /// GENERACIÓN: EL DESGARRO CONTINUO.
     ///
-    /// Nace de la investigación del ecosistema (INFORME_DESGARRO_REALIDAD.md,
-    /// Task 42-b: los patrones de desgarro de la investigación interna +
-    /// élite RainbowRiftArrow + Wrath of the Gods "Reality Shatter") re-implementada
-    /// 100% con código PROPIO sobre la pila de la casa: SpriteBatch + texturas
-    /// procedurales + hash determinista. Cero dependencias externas, cero código ajeno.
+    /// LA LECCIÓN RAÍZ de v6.28 (INFORME_RIFTLIB_V2.md — medido con PIL sobre
+    /// las texturas de la casa): la TrailGlow.png de v1 TENÍA EL DEFECTO — su
+    /// alfa rampa 3→204 A LO LARGO del eje de longitud y su color era CIAN
+    /// PURO (0,255,255). Cada junta entre los 8-24 segmentos del desgarro era
+    /// una franja casi transparente y CIAN — las "interrupciones azules" que
+    /// el usuario vio. El contrato del ecosistema (verificado sobre las
+    /// texturas de línea de Calamity: BloomLineThick/LineThick): UNIFORME a lo
+    /// largo del eje, gradiente SOLO a lo ancho, SIN color horneado.
     ///
-    /// EL VOCABULARIO (qué es un desgarro de verdad):
-    ///   · EL DESGARRO ES UNA LÍNEA con LABIOS DE LUZ (3 capas por segmento —
-    ///     velo/cuerpo/núcleo, la triple pasada de la casa) y ABERRACIÓN R/B en el
-    ///     borde (3 draws con tinte de canal puro y offset perpendicular ±2 px —
-    ///     la lección DrawChromaticAberration, sin shader).
-    ///   · EL INTERIOR ES VACÍO PROFUNDO: banda que OCLUYE (negro de verdad,
-    ///     lote NO-premultiplicado del llamador, grosor 0.62·w) con ESTRELLAS que
-    ///     fluyen a lo largo del eje (scroll élite, −2 px/tick) y paralaje X≠Y
-    ///     (lección DoG: las profundas se mueven a distinta velocidad).
-    ///   · LA APERTURA ES UN GOLPE: 3-4 ticks de apertura (élite 0.333/tick), Kick
-    ///     de cámara perpendicular, Flash, y la ESTRELLA DE 4 PUNTAS del punto de
-    ///     ruptura (DoG: vertical ×8 + horizontal ×5, todo ·3.25·charge).
-    ///   · EL CIERRE ES JUSTO: el daño cesa 8 ticks ANTES de que el visual muera
-    ///     (lección élite SCCut + élite PrismaticBurst).
-    ///   · LA GRIETA PERSISTE: el camino Lichtenberg (curvatura ACUMULADA,
-    ///     micro-fallas 1/9, taper→0) queda como HERIDA que respira (±8%) y NO
-    ///     scrollea — el desgarro fluye, la cicatriz permanece.
+    /// LA RESPUESTA (v2 — 6 texturas nuevas 100% procedurales, gen_rift_v628.py):
+    ///   · EL DESGARRO RECTO ES UN SOLO QUAD: las RiftTaper* (512×64) llevan
+    ///     el PERFIL DE LONGITUD horneado (lens sin^0.6 · respiración nebulosa
+    ///     ±15% a 4 ciclos) y la SECCIÓN COMPLETA (par de labios a ±0.31·W
+    ///     cabalgando el borde del vacío, núcleo razor sobre cada labio).
+    ///     CERO juntas porque CERO segmentos — la lección HyperdeathRiftScepterBeam
+    ///     de Calamity: su rayo de 3000 px es UN solo quad estirado.
+    ///   · EL CAMINO FRACTURADO ES UNA CADENA SIN HUECOS: RiftLip/RiftCore
+    ///     (64×16, columnas IDÉNTICAS — desviación medida 0.0000) + anchura
+    ///     evaluada en los VÉRTICES compartidos (la lección WidthFunction de
+    ///     Calamity) + solape len+w·0.9 + PERLA en cada vértice (el round-join
+    ///     estándar) → la herida Lichtenberg continua aunque gire.
+    ///   · SIN ABERRACIÓN R/B en los labios: los re-dibujos de canal puro
+    ///     (soloB = azul) eran el segundo culpable de las interrupciones
+    ///     azules — el vocabulario queda LIMPIO: labios de color + núcleo
+    ///     blanco + vacío negro. El eco glitch (EcoGlitch) sigue disponible
+    ///     para quien lo quiera, pero el desgarro del arma YA NO LO USA.
+    ///
+    /// EL VOCABULARIO (lo que no cambió de v1):
+    ///   · EL DESGARRO ES UNA LÍNEA con LABIOS DE LUZ y el INTERIOR ES VACÍO
+    ///     PROFUNDO (banda que OCLUYE, lote NO-premultiplicado) con ESTRELLAS
+    ///     que fluyen a lo largo del eje (scroll élite, −2 px/tick) y paralaje.
+    ///   · LA APERTURA ES UN GOLPE (3-4 ticks, Kick perpendicular, Flash) y la
+    ///     ESTRELLA DE 4 PUNTAS del punto de ruptura (DoG: vertical ×8 +
+    ///     horizontal ×5, todo ·3.25·charge).
+    ///   · LA FRACTURA ES EL CLÍMAX (lección v6.28: el vidrio se propaga a
+    ///     1458-1500 m/s — en juego la fractura es un evento de 1-2 frames):
+    ///     tras la VIBRACIÓN (onda estacionaria 0→3.5 px a ~10 Hz creciendo
+    ///     16 ticks — la tensión visible), la línea se QUIEBRA al camino
+    ///     Lichtenberg y EL DAÑO PEGA ×2+ en ese instante exacto.
+    ///   · EL CIERRE ES JUSTO: el daño cesa 8 ticks ANTES de que el visual muera.
     ///
     /// CONTRATO DE LOTE (idéntico al de StormLib/EstelaLib/OndaLib): los métodos
     /// de DIBUJO pintan en el SpriteBatch que el LLAMADOR les pase y NUNCA lo
     /// abren/cierran. DOS lotes hacen falta para un desgarro completo:
-    ///   1. EL VACÍO (TearVacio/GrietaVacio/Interior): lote NO-premultiplicado
+    ///   1. EL VACÍO (TearVacio/GrietaVacio): lote NO-premultiplicado
     ///      (BlendState.NonPremultiplied) — dibujar PRIMERO (occlude antes de iluminar).
-    ///   2. LA LUZ (Tear/Star/Grieta): lote ADITIVO — después.
+    ///   2. LA LUZ (Tear/Grieta/Star): lote ADITIVO — después.
     /// Todo determinista por semilla (misma secuencia SIEMPRE, cero Main.rand);
     /// cero estado de desgarros (progress/fase los lleva el llamador); cero GC
     /// por frame (buffers estáticos reutilizados).
@@ -87,9 +109,11 @@ namespace AethonMod.Content.VFX
         //  TEXTURAS COMPARTIDAS (resolución diferida)
         // ==================================================================
 
-        private static Asset<Texture2D> _black, _star, _glow, _ring, _orb, _trail;
+        private static Asset<Texture2D> _black, _star, _glow, _ring, _orb;
+        private static Asset<Texture2D> _taperVelo, _taperCuerpo, _taperNucleo, _taperVoid;
+        private static Asset<Texture2D> _lip, _core;
 
-        /// <summary>El disco negro 256² (el VACÍO que ocluye — negro aunque sea mediodía).</summary>
+        /// <summary>El disco negro 256² (el VACÍO del camino fracturado — negro aunque sea mediodía).</summary>
         private static Texture2D BlackTex =>
             (_black ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
@@ -114,10 +138,37 @@ namespace AethonMod.Content.VFX
             (_orb ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/GlowOrb")).Value;
 
-        /// <summary>La estela degradada 32×8 (el cuerpo de los labios).</summary>
-        private static Texture2D TrailTex =>
-            (_trail ??= ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/TrailGlow")).Value;
+        // --- LAS TEXTURAS v6.28 (el desgarro continuo — gen_rift_v628.py) ---
+
+        /// <summary>EL VELO del desgarro recto: UN quad con el perfil de longitud horneado.</summary>
+        private static Texture2D TaperVeloTex =>
+            (_taperVelo ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftTaperVelo")).Value;
+
+        /// <summary>EL CUERPO del desgarro recto: el par de labios a ±0.31·W.</summary>
+        private static Texture2D TaperCuerpoTex =>
+            (_taperCuerpo ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftTaperCuerpo")).Value;
+
+        /// <summary>EL NÚCLEO RAZOR del desgarro recto (sobre cada labio).</summary>
+        private static Texture2D TaperNucleoTex =>
+            (_taperNucleo ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftTaperNucleo")).Value;
+
+        /// <summary>EL VACÍO del desgarro recto (pase NO-premultiplicado): negro oclusivo.</summary>
+        private static Texture2D TaperVoidTex =>
+            (_taperVoid ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftTaperVoid")).Value;
+
+        /// <summary>EL LABIO UNIFORME del camino fracturado (columnas idénticas — sin juntas).</summary>
+        private static Texture2D LipTex =>
+            (_lip ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftLip")).Value;
+
+        /// <summary>EL NÚCLEO UNIFORME del camino fracturado (banda dura 30%).</summary>
+        private static Texture2D CoreTex =>
+            (_core ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Procedural/RiftCore")).Value;
 
         // ==================================================================
         //  LAS CURVAS (públicas: el contrato numérico del desgarro)
@@ -170,72 +221,60 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL DESGARRO — la línea que se abre (escuela A de daño)
+        //  EL DESGARRO RECTO — LA LÍNEA EN UN SOLO QUAD (v6.28)
         // ==================================================================
 
+        /// <summary>La altura del quad del desgarro recto (el contrato de las RiftTaper*): 1.60·maxWidth.</summary>
+        public const float QuadAlto = 1.60f;
+
         /// <summary>
-        /// EL VACÍO DEL DESGARRO: la banda negra que OCLUYE, grosor 0.62·w vivo
-        /// (curva "lens" sin(p·π)^0.6 — gorda al centro, aguja en las puntas),
-        /// respirando ±6%. Se dibuja en el LOTE NO-PREMULTIPLICADO del llamador
-        /// (dibujar ANTES de la luz: el vacío tapa, los labios iluminan).
+        /// EL VACÍO DEL DESGARRO RECTO: UN SOLO QUAD RiftTaperVoid (512×64) —
+        /// la banda negra que OCLUYE con el perfil de longitud horneado (gorda
+        /// al centro, aguja en las puntas, ±6% de respiración). Se dibuja en el
+        /// LOTE NO-PREMULTIPLICADO del llamador (dibujar ANTES de la luz).
+        /// CERO juntas: el desgarro entero es una sola pieza.
         /// </summary>
         /// <param name="batch">Batch ABIERTO (BlendState.NonPremultiplied recomendado).</param>
         /// <param name="progress">0..1 vida del desgarro (0-0.08 apertura, 0.85-1 cierre).</param>
-        /// <param name="maxWidth">Ancho MÁXIMO del desgarro abierto (8..16 px recomendado).</param>
+        /// <param name="maxWidth">Ancho MÁXIMO del desgarro abierto (8..24 px recomendado).</param>
         public static void TearVacio(SpriteBatch batch, Vector2 origin, Vector2 dir,
             float length, float progress, float maxWidth, int seed, float time)
         {
             if (batch == null || length < 8f) return;
 
-            float w = maxWidth * Apertura(progress);
-            if (w < 0.5f) return;
+            float h = QuadAlto * maxWidth * Apertura(progress);
+            if (h < 0.8f) return;
 
-            dir = Vector2.Normalize(dir);
             float breathe = VFXCore.Breathe(time, 2.2f, seed, 0.06f);
-            int segs = Math.Clamp((int)(length / 48f), 8, 24);
+            float rot = MathF.Atan2(dir.Y, dir.X);
+            Vector2 center = origin + dir * (length * 0.5f);
 
-            for (int i = 0; i < segs; i++)
-            {
-                float f = (i + 0.5f) / segs;
-                float lens = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.6f);
-                float wseg = w * lens * breathe;
-                if (wseg < 0.6f) continue;
-
-                Vector2 a = origin + dir * (length * i / segs);
-                Vector2 b = origin + dir * (length * (i + 1) / segs);
-                Vector2 mid = (a + b) * 0.5f;
-                Vector2 delta = b - a;
-                float len = delta.Length();
-                if (len < 0.1f) continue;
-                float rot = MathF.Atan2(delta.Y, delta.X);
-
-                // EL VACÍO: negro premultiplicado — el interior del desgarro es
-                // un agujero en la escena, no una franja oscura encima de ella.
-                Quad(batch, BlackTex, mid,
-                    new Vector2(len + wseg * 0.35f, wseg * 0.62f), rot,
-                    Tint(Color.Black, 0.94f));
-            }
+            batch.Draw(TaperVoidTex, center, null,
+                Tint(Color.White, 0.96f * breathe), rot,
+                new Vector2(TaperVoidTex.Width, TaperVoidTex.Height) * 0.5f,
+                new Vector2(length, h * breathe) / new Vector2(TaperVoidTex.Width, TaperVoidTex.Height),
+                SpriteEffects.None, 0f);
         }
 
         /// <summary>
-        /// DIBUJA EL DESGARRO (el pase de LUZ): la línea de <paramref name="origin"/>
-        /// a origin+dir·<paramref name="length"/> con anchura viva
-        /// Apertura(progress)·maxWidth. ANATOMÍA por segmento (~cada 48 px):
-        ///   1. LOS LABIOS ×2 (arriba/abajo, a ±0.5·(0.62·w) del eje — justo en el
-        ///      borde del vacío): velo ×1.6 α0.30 · cuerpo α0.60 · NÚCLEO blanco ×0.3 α0.90.
-        ///   2. LA ABERRACIÓN: el cuerpo re-dibujado a ±2 px perpendiculares con
-        ///      tinte de canal PURO (soloR/soloB), grosor ×0.55 y alpha ×0.45 —
-        ///      solo en el sostenido (LOD: nunca en apertura/cierre) y con
-        ///      intensity &gt; 0.5.
-        ///   3. LAS ESTRELLAS del interior (16-28, scroll + paralaje + parpadeo).
-        ///   4. EL VELO DEL BORDE: SoftGlow ×1.6 en cada labio (α 0.18) — el
-        ///      "bloom de la herida" que integra el negro con el mundo.
+        /// DIBUJA EL DESGARRO RECTO (el pase de LUZ) — v6.28: TRES QUADS, CERO
+        /// JUNTAS. La línea de <paramref name="origin"/> a
+        /// origin+dir·<paramref name="length"/> con anchura viva
+        /// Apertura(progress)·maxWidth·QuadAlto, toda la anatomía (par de labios
+        /// a ±0.31·W + núcleo razor sobre cada labio + perfil de longitud con
+        /// respiración nebulosa ±15% a 4 ciclos) HORNEADA en las RiftTaper*:
+        ///   1. EL VELO (RiftTaperVelo, tinte de paleta[0], α 0.30·intensity).
+        ///   2. EL CUERPO (RiftTaperCuerpo, tinte de paleta[1], α 0.60·intensity).
+        ///   3. EL NÚCLEO (RiftTaperNucleo, tinte BLANCO de paleta[última], α 0.90·intensity).
+        ///   4. LAS ESTRELLAS del interior (16-28, scroll + paralaje + parpadeo).
+        /// SIN aberración R/B (v6.28: los re-dibujos de canal azul eran las
+        /// "interrupciones azules" — el vocabulario queda limpio).
         /// </summary>
         /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
         /// <param name="progress">0..1 vida del desgarro (0-0.08 apertura, 0.85-1 cierre).</param>
-        /// <param name="maxWidth">Ancho MÁXIMO del desgarro abierto (8..16 px recomendado).</param>
-        /// <param name="ecoOffset">Offset del eco glitch (re-dibujo RGB desplazado).</param>
-        /// <param name="ecoTint">Tinte de canal puro del eco (null = sin eco).</param>
+        /// <param name="maxWidth">Ancho MÁXIMO del desgarro abierto (8..24 px recomendado).</param>
+        /// <param name="ecoOffset">Offset del eco glitch (re-dibujo desplazado).</param>
+        /// <param name="ecoTint">Tinte del eco (null = sin eco).</param>
         public static void Tear(SpriteBatch batch, Vector2 origin, Vector2 dir,
             float length, float progress, float maxWidth, Color[] paleta,
             float intensity, int seed, float time,
@@ -243,86 +282,39 @@ namespace AethonMod.Content.VFX
         {
             if (batch == null || paleta == null || paleta.Length == 0 || length < 8f) return;
 
-            float w = maxWidth * Apertura(progress);
-            if (w < 0.5f) return;
+            float h = QuadAlto * maxWidth * Apertura(progress);
+            if (h < 0.8f) return;
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
             if (intensity <= 0.02f) return;
 
-            dir = Vector2.Normalize(dir);
-            Vector2 perp = new(-dir.Y, dir.X);
-
-            Color velo = Pal(paleta, 0);
-            Color cuerpo = Pal(paleta, 1);
-            Color nucleo = Pal(paleta, paleta.Length - 1);
-
-            // LOS TINTES DE CANAL PURO (la aberración R/B sin shader).
-            Color soloR = new((byte)(int)(cuerpo.R * 1.15f), (byte)(int)(cuerpo.G * 0.25f), (byte)(int)(cuerpo.B * 0.25f));
-            Color soloB = new((byte)(int)(cuerpo.R * 0.25f), (byte)(int)(cuerpo.G * 0.25f), (byte)(int)(cuerpo.B * 1.15f));
-
-            int segs = Math.Clamp((int)(length / 48f), 8, 24);
-            // LOD de capas por anchura (la librería se degrada sola — lección EstelaLib).
-            int capas = w >= 6f ? 3 : w >= 3f ? 2 : 1;
-            // La aberración SOLO en el sostenido y con intensidad (mitigación del contrato).
-            bool aberrar = progress > 0.08f && progress < 0.85f && intensity > 0.5f;
+            float breathe = VFXCore.Breathe(time, 2.2f, seed, 0.06f);
             float beat = 0.90f + 0.10f * MathF.Sin(time * 7.3f + seed);
+            float rot = MathF.Atan2(dir.Y, dir.X);
+            Vector2 center = origin + dir * (length * 0.5f) + ecoOffset;
 
-            for (int i = 0; i < segs; i++)
-            {
-                float f = (i + 0.5f) / segs;
-                float lens = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.6f);
-                float wseg = w * lens;
-                if (wseg < 0.4f) continue;
+            Color velo = Eco(Tint(Pal(paleta, 0), 0.30f * intensity * beat), ecoTint);
+            Color cuerpo = Eco(Tint(Pal(paleta, 1), 0.60f * intensity), ecoTint);
+            Color nucleo = Eco(Tint(Pal(paleta, paleta.Length - 1), 0.90f * intensity), ecoTint);
 
-                Vector2 a = origin + dir * (length * i / segs);
-                Vector2 b = origin + dir * (length * (i + 1) / segs);
-                Vector2 mid = (a + b) * 0.5f;
-                Vector2 delta = b - a;
-                float len = delta.Length();
-                if (len < 0.1f) continue;
-                float rot = MathF.Atan2(delta.Y, delta.X);
+            var texSize = new Vector2(TaperVeloTex.Width, TaperVeloTex.Height);
+            var scale = new Vector2(length, h * breathe) / texSize;
+            var originPx = texSize * 0.5f;
 
-                // El borde del vacío: ±0.5·(0.62·w) del eje — ahí viven los labios.
-                float edge = 0.31f * wseg;
+            // === 1+2+3: LOS TRES QUADS (velo → cuerpo → núcleo) ===
+            batch.Draw(TaperVeloTex, center, null, velo, rot, originPx, scale, SpriteEffects.None, 0f);
+            batch.Draw(TaperCuerpoTex, center, null, cuerpo, rot, originPx, scale, SpriteEffects.None, 0f);
+            batch.Draw(TaperNucleoTex, center, null, nucleo, rot, originPx, scale, SpriteEffects.None, 0f);
 
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    Vector2 lipPos = mid + perp * (edge * lado);
-
-                    // --- CAPA 1: EL VELO (×1.6 de ancho, alpha 0.30) ---
-                    if (capas >= 3)
-                        LipQuad(batch, lipPos, ecoOffset, len + wseg * 0.9f, wseg * 0.55f, rot,
-                            Eco(Tint(velo, 0.30f * intensity * beat), ecoTint));
-
-                    // --- CAPA 2: EL CUERPO (el labio de color) ---
-                    if (capas >= 2)
-                        LipQuad(batch, lipPos, ecoOffset, len + wseg * 0.5f, wseg * 0.34f, rot,
-                            Eco(Tint(cuerpo, 0.60f * intensity), ecoTint));
-
-                    // --- LA ABERRACIÓN CROMÁTICA: ±2 px perpendiculares, canal puro ---
-                    if (aberrar)
-                    {
-                        LipQuad(batch, lipPos + perp * 2f, ecoOffset, len + wseg * 0.5f, wseg * 0.19f, rot,
-                            Eco(Tint(soloR, 0.27f * intensity), ecoTint));
-                        LipQuad(batch, lipPos - perp * 2f, ecoOffset, len + wseg * 0.5f, wseg * 0.19f, rot,
-                            Eco(Tint(soloB, 0.27f * intensity), ecoTint));
-                    }
-
-                    // --- CAPA 3: EL NÚCLEO (razor blanco, alpha 0.90) ---
-                    LipQuad(batch, lipPos, ecoOffset, len + wseg * 0.3f, MathF.Max(wseg * 0.10f, 0.8f), rot,
-                        Eco(Tint(nucleo, 0.90f * intensity), ecoTint));
-
-                    // --- EL VELO DEL BORDE (el bloom que integra el negro) ---
-                    if (capas >= 3 && ecoTint == null)
-                        Quad(batch, GlowTex, lipPos, new Vector2(len + wseg * 1.1f, wseg * 1.6f), rot,
-                            Tint(velo, 0.18f * intensity));
-                }
-            }
-
-            // LAS ESTRELLAS DEL INTERIOR: el vacío fluye (scroll élite).
+            // === 4: LAS ESTRELLAS del interior (el vacío fluye — scroll élite) ===
             // (En los re-dibujos de ECO no: el glitch es de los LABIOS.)
             if (ecoTint == null)
-                Estrellas(batch, origin, dir, length, w, paleta, intensity, seed, time, 2f, 16 + seed % 13);
+                Estrellas(batch, origin, dir, length, maxWidth * Apertura(progress),
+                    paleta, intensity, seed, time, 2f, 16 + seed % 13);
         }
+
+        // ==================================================================
+        //  LA ESTRELLA DE RUPTURA + EL PAQUETE DE IMPACTO
+        // ==================================================================
 
         /// <summary>
         /// LA ESTRELLA DE 4 PUNTAS del punto de ruptura (lección DoG): la espiga
@@ -384,43 +376,47 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL PAQUETE DE IMPACTO del desgarro (la apertura ES un golpe): Kick de
-        /// cámara PERPENDICULAR a la línea (7 px, 12 ticks), Flash de pantalla
-        /// (tinte de paleta, 0.22, 8 ticks), el sonido grave de la ruptura (pitch
-        /// −0.65 — la lección DoG del pitch −0.75) y la RÁFAGA de chispas de
-        /// anomalía (12 motas vía ParticleManager, cliente). Se llama UNA VEZ,
-        /// al abrir. Registro puro: NADA de dibujo aquí (el visual lo pinta
-        /// PreDraw con la fase Apertura).
+        /// EL PAQUETE DE IMPACTO del desgarro (la apertura/fractura ES un golpe):
+        /// Kick de cámara PERPENDICULAR a la línea, Flash de pantalla (tinte de
+        /// paleta), el sonido grave de la ruptura (pitch grave) y la RÁFAGA de
+        /// chispas de anomalía vía ParticleManager (cliente). Se llama UNA VEZ.
+        /// Registro puro: NADA de dibujo aquí.
         /// </summary>
+        /// <param name="fuerza">Escala del golpe (1 = apertura; 1.3 = fractura).</param>
         public static void TearImpacto(Vector2 origin, Vector2 dir, float length,
-            Color[] paleta, int seed)
+            Color[] paleta, int seed, float fuerza = 1f)
         {
             if (paleta == null || paleta.Length == 0) return;
+            fuerza = MathHelper.Clamp(fuerza, 0.5f, 2f);
 
             // El KICK perpendicular al corte: la cámara se desplaza AL LADO,
             // como si la realidad hubiera TRONADO (no hacia adelante).
             if (dir.X != 0f || dir.Y != 0f)
             {
                 Vector2 p = Vector2.Normalize(new(-dir.Y, dir.X));
-                OndaLib.Kick(7f, 12, MathF.Atan2(p.Y, p.X));
+                OndaLib.Kick(7f * fuerza, 12, MathF.Atan2(p.Y, p.X));
             }
             else
-                OndaLib.Kick(7f, 12, -1f);
+                OndaLib.Kick(7f * fuerza, 12, -1f);
 
-            OndaLib.Flash(Pal(paleta, 1), 0.22f, 8);
+            OndaLib.Flash(Pal(paleta, 1), MathHelper.Clamp(0.22f * fuerza, 0.15f, 0.34f), 8);
 
             // El sonido de la ruptura: hondo, con el mundo "asentándose" después
-            // (pitch −0.65 — la lección DoG del pitch −0.75 al abrir el rift).
+            // (pitch −0.65 apertura / −0.75 fractura — la lección DoG).
             if (Main.netMode != NetmodeID.Server)
             {
-                try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8.WithPitchOffset(-0.65f), origin); }
+                try
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item8.WithPitchOffset(fuerza > 1.1f ? -0.75f : -0.65f), origin);
+                }
                 catch { }
             }
 
-            // LA RÁFAGA de chispas de anomalía (12 motas, solo cliente).
+            // LA RÁFAGA de chispas de anomalía (solo cliente).
             if (Main.netMode != NetmodeID.Server)
             {
-                ChispasAnomalia(origin, 12, paleta, seed, out ParticleData[] motas);
+                ChispasAnomalia(origin, (int)(12 * fuerza), paleta, seed, out ParticleData[] motas);
                 if (motas != null)
                     for (int i = 0; i < motas.Length; i++)
                         ParticleManager.Spawn(motas[i]);
@@ -428,7 +424,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  LA GRIETA — la herida persistente (escuela B de daño)
+        //  EL CAMINO — la herida FRACTURADA (la cadena sin huecos)
         // ==================================================================
 
         /// <summary>
@@ -442,11 +438,13 @@ namespace AethonMod.Content.VFX
         /// <param name="points">4..32 puntos (24 recomendado → ~700-900 px).</param>
         /// <param name="pasoMin/pasoMax">25..50 px por punto (0.5× en el último).</param>
         /// <param name="curvatura">5° = vidrio; 9° = caos.</param>
+        /// <param name="fallas">Probabilidad de micro-falla por paso (1/9 normal, 1/4 = furia).</param>
         public static Vector2[] CaminoGrieta(Vector2 origin, Vector2 dir,
             int seed, int points = 24, float pasoMin = 25f, float pasoMax = 50f,
-            float curvatura = 5f)
+            float curvatura = 5f, float fallas = 9f)
         {
-            points = Math.Clamp(points, 4, 32);
+            points = Math.Clamp(points, 4, 40);
+            fallas = MathHelper.Clamp(fallas, 3f, 12f);
             var pts = new Vector2[points];
             pts[0] = origin;
 
@@ -464,8 +462,8 @@ namespace AethonMod.Content.VFX
                 drift = MathHelper.Clamp(drift + g, -0.9f, 0.9f);   // nunca media vuelta
                 bearing = bearing0 + drift;
 
-                // MICRO-FALLA (1/9): el quiebre brusco — la firma Lichtenberg.
-                if (H01(seed, i, 211) < 1f / 9f)
+                // MICRO-FALLA: el quiebre brusco — la firma Lichtenberg.
+                if (H01(seed, i, 211) < 1f / fallas)
                 {
                     float kink = (H01(seed, i, 307) - 0.5f) * 2f * 0.6f;
                     drift = MathHelper.Clamp(drift + kink, -0.9f, 0.9f);
@@ -481,9 +479,38 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL VACÍO DE LA GRIETA persistente (pase no-premultiplicado): bandas
-        /// negras a lo largo del camino con el taper raíz→punta y la respiración
-        /// ±8% de la herida. Dibujar ANTES de <see cref="Grieta"/>.
+        /// EL CAMINO DE LA VIBRACIÓN (v6.28): la línea RECTA con la ONDA
+        /// ESTACIONARIA creciendo — la tensión visible antes de la fractura
+        /// (lección v6.28: amplitud 0→máx, ~10 Hz, 2 nodos). Determinista.
+        /// </summary>
+        /// <param name="amplitud">0..máx px del vaivén lateral.</param>
+        public static Vector2[] CaminoVibracion(Vector2 origin, Vector2 dir, float length,
+            float amplitud, float time, int nodos = 2)
+        {
+            int points = Math.Clamp((int)(length / 40f), 10, 20);
+            var pts = new Vector2[points];
+            dir = dir.LengthSquared() > 0.0001f ? Vector2.Normalize(dir) : Vector2.One;
+            Vector2 perp = new(-dir.Y, dir.X);
+
+            for (int i = 0; i < points; i++)
+            {
+                float f = i / (float)(points - 1);
+                // LA ONDA ESTACIONARIA: nodos en los extremos (la herida está
+                // CLAVADA en ambos extremos mientras vibra) — sin(f·π·nodos).
+                float onda = MathF.Sin(f * MathHelper.Pi * nodos) *
+                             MathF.Sin(time * MathHelper.TwoPi * 10f);   // ~10 Hz
+                pts[i] = origin + dir * (length * f) + perp * (onda * amplitud);
+            }
+            return pts;
+        }
+
+        /// <summary>
+        /// EL VACÍO DE LA HERIDA FRACTURADA (pase no-premultiplicado): bandas
+        /// negras BlackDisk a lo largo del camino con la anchura evaluada EN LOS
+        /// VÉRTICES (lección Calamity WidthFunction — sin escalones), solape
+        /// len+w y el taper raíz→punta con la respiración ±8%. Dibujar ANTES de
+        /// <see cref="Grieta"/>. Los extremos REDONDEADOS del BlackDisk hacen de
+        /// junta natural (el round-join del estándar).
         /// </summary>
         public static void GrietaVacio(SpriteBatch batch, Vector2[] camino, float progress,
             float maxWidth, int seed, float time)
@@ -492,23 +519,17 @@ namespace AethonMod.Content.VFX
 
             float vida = MathF.Pow(1f - MathHelper.Clamp(progress, 0f, 1f), 0.8f);
             float respira = 1f + 0.08f * MathF.Sin(time * 2.2f + seed * 0.13f);
-            float total = 0f;
-            for (int i = 1; i < camino.Length; i++)
-                total += Vector2.Distance(camino[i - 1], camino[i]);
-            if (total < 8f) return;
+            if (LongitudCamino(camino) < 8f) return;
+            float[] ws = AnchosCamino(camino, maxWidth);
 
-            float arc = 0f;
             for (int i = 0; i < camino.Length - 1; i++)
             {
                 Vector2 a = camino[i];
                 Vector2 b = camino[i + 1];
                 float len = Vector2.Distance(a, b);
-                if (len < 0.35f) { arc += len; continue; }
-                float tMid = (arc + len * 0.5f) / total;
-                arc += len;
+                if (len < 0.35f) continue;
 
-                // TAPER: gorda en la raíz (donde nació el desgarro), aguja en la punta.
-                float wseg = maxWidth * MathF.Pow(1f - tMid, 0.9f) * respira;
+                float wseg = (ws[i] + ws[i + 1]) * 0.5f * respira;
                 if (wseg < 0.5f) continue;
 
                 float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
@@ -519,16 +540,20 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// DIBUJA LA GRIETA PERSISTENTE (el pase de LUZ) sobre el camino: labios
-        /// de 3 capas con taper raíz→punta y aberración R/B, ESTRELLAS FIJAS (la
-        /// grieta NO scrollea: es una HERIDA, no una boca tragando) y CHISPAS de
-        /// anomalía dibujadas (máx 1 cada 3 ticks, determinista). El alpha muere
-        /// con falloff Slow (física mágica: se resiste a sanar).
+        /// DIBUJA LA HERIDA FRACTURADA (el pase de LUZ) sobre el camino — v6.28:
+        /// LA CADENA SIN HUECOS. Por SEGMENTO: RiftLip (textura UNIFORME a lo
+        /// largo — la desviación medida 0.0000) en DOS capas (velo ×1.6 alto +
+        /// cuerpo) con la anchura evaluada EN LOS VÉRTICES compartidos, solape
+        /// len+w·0.9 (cubre giros ≤~53°) y RiftCore como núcleo razor; por
+        /// VÉRTICE interior: LA PERLA (un RiftLip cuadrado de diámetro w — el
+        /// round-join estándar que mata los huecos en las esquinas). ESTRELLAS
+        /// FIJAS (la grieta NO scrollea: es una herida) y CHISPAS de anomalía
+        /// deterministas. SIN aberración R/B (v6.28).
         /// </summary>
-        /// <param name="progress">0..1 de la vida de la grieta (480 ticks ≈ 8 s recomendado).</param>
+        /// <param name="progress">0..1 de la vida de la herida.</param>
         /// <param name="chispas">True = dibuja las chispas de anomalía (1 cada 3 ticks).</param>
-        /// <param name="ecoOffset">Offset del eco glitch (re-dibujo RGB desplazado).</param>
-        /// <param name="ecoTint">Tinte de canal puro del eco (null = sin eco).</param>
+        /// <param name="ecoOffset">Offset del eco glitch.</param>
+        /// <param name="ecoTint">Tinte del eco (null = sin eco).</param>
         public static void Grieta(SpriteBatch batch, Vector2[] camino, float progress,
             float maxWidth, Color[] paleta, float intensity, int seed, float time,
             bool chispas = true, Vector2 ecoOffset = default, Color? ecoTint = null)
@@ -540,66 +565,55 @@ namespace AethonMod.Content.VFX
             float vida = MathF.Pow(1f - MathHelper.Clamp(progress, 0f, 1f), 0.8f);
             float respira = 1f + 0.08f * MathF.Sin(time * 2.2f + seed * 0.13f);
 
-            float total = 0f;
-            for (int i = 1; i < camino.Length; i++)
-                total += Vector2.Distance(camino[i - 1], camino[i]);
-            if (total < 8f) return;
+            if (LongitudCamino(camino) < 8f) return;
+            float[] ws = AnchosCamino(camino, maxWidth);
 
             Color velo = Pal(paleta, 0);
             Color cuerpo = Pal(paleta, 1);
             Color nucleo = Pal(paleta, paleta.Length - 1);
-            Color soloR = new((byte)(int)(cuerpo.R * 1.15f), (byte)(int)(cuerpo.G * 0.25f), (byte)(int)(cuerpo.B * 0.25f));
-            Color soloB = new((byte)(int)(cuerpo.R * 0.25f), (byte)(int)(cuerpo.G * 0.25f), (byte)(int)(cuerpo.B * 1.15f));
-            bool aberrar = vida > 0.25f && intensity > 0.5f;
 
-            float arc = 0f;
             int k = 0;
             for (int i = 0; i < camino.Length - 1; i++)
             {
                 Vector2 a = camino[i];
                 Vector2 b = camino[i + 1];
                 float len = Vector2.Distance(a, b);
-                if (len < 0.35f) { arc += len; continue; }
-                float tMid = (arc + len * 0.5f) / total;
-                arc += len;
+                if (len < 0.35f) continue;
 
-                float wseg = maxWidth * MathF.Pow(1f - tMid, 0.9f) * respira;
+                // LA ANCHURA EN EL VÉRTICE COMPARTIDO (la lección WidthFunction):
+                // promedio de los dos vértices del segmento — sin escalones.
+                float wa = ws[i] * respira;
+                float wb = ws[i + 1] * respira;
+                float wseg = (wa + wb) * 0.5f;
                 if (wseg < 0.4f) continue;
 
                 Vector2 mid = (a + b) * 0.5f;
                 Vector2 delta = b - a;
                 float rot = MathF.Atan2(delta.Y, delta.X);
-                Vector2 perp = new(-delta.Y / len, delta.X / len);
-                float edge = 0.31f * wseg;
                 // El latido de la herida (vive, no es un dibujo muerto).
                 float beat = 0.88f + 0.12f * MathF.Sin(time * 6.1f + k * 1.7f + seed);
 
-                for (int lado = -1; lado <= 1; lado += 2)
+                // === EL VELO (×1.6 de alto, α 0.30 — el halo que integra) ===
+                LipQuad(batch, mid + ecoOffset, len + wseg * 0.9f, wseg * 1.6f, rot,
+                    Eco(Tint(velo, 0.30f * intensity * vida * beat), ecoTint));
+
+                // === EL CUERPO (el labio de color, α 0.60) ===
+                LipQuad(batch, mid + ecoOffset, len + wseg * 0.9f, wseg, rot,
+                    Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
+
+                // === EL NÚCLEO RAZOR (banda dura 30% de RiftCore, α 0.90) ===
+                LipQuadCore(batch, mid + ecoOffset, len + wseg * 0.9f, wseg * 0.8f, rot,
+                    Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
+
+                // === LA PERLA del vértice compartido (el round-join: CERO
+                //     huecos en las esquinas — el estándar regl-gpu-lines) ===
+                if (i > 0)
                 {
-                    Vector2 lipPos = mid + perp * (edge * lado);
-
-                    // VELO ×1.6 α0.30
-                    Quad(batch, GlowTex, lipPos + ecoOffset,
-                        new Vector2(len + wseg * 0.9f, wseg * 0.55f), rot,
+                    LipQuad(batch, a + ecoOffset, wseg * 1.15f, wseg * 1.6f, rot,
                         Eco(Tint(velo, 0.30f * intensity * vida * beat), ecoTint));
-
-                    // CUERPO α0.60 + LA ABERRACIÓN R/B (±2 px, canal puro)
-                    Quad(batch, TrailTex, lipPos + ecoOffset,
-                        new Vector2(len + wseg * 0.5f, wseg * 0.34f), rot,
+                    LipQuad(batch, a + ecoOffset, wseg * 1.15f, wseg, rot,
                         Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
-                    if (aberrar)
-                    {
-                        Quad(batch, TrailTex, lipPos + perp * 2f + ecoOffset,
-                            new Vector2(len + wseg * 0.5f, wseg * 0.19f), rot,
-                            Eco(Tint(soloR, 0.27f * intensity * vida), ecoTint));
-                        Quad(batch, TrailTex, lipPos - perp * 2f + ecoOffset,
-                            new Vector2(len + wseg * 0.5f, wseg * 0.19f), rot,
-                            Eco(Tint(soloB, 0.27f * intensity * vida), ecoTint));
-                    }
-
-                    // NÚCLEO razor α0.90
-                    Quad(batch, TrailTex, lipPos + ecoOffset,
-                        new Vector2(len + wseg * 0.3f, MathF.Max(wseg * 0.10f, 0.8f)), rot,
+                    LipQuadCore(batch, a + ecoOffset, wseg * 1.15f, wseg * 0.8f, rot,
                         Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
                 }
                 k++;
@@ -609,7 +623,7 @@ namespace AethonMod.Content.VFX
             EstrellasCamino(batch, camino, maxWidth * respira, paleta, intensity * vida, seed, time, 14 + seed % 7);
 
             // === LAS CHISPAS DE ANOMALÍA (máx 1 cada 3 ticks, deterministas) ===
-            if (chispas && vida > 0.15f)
+            if (chispas && ecoTint == null && vida > 0.15f)
             {
                 int tick = (int)(time * 60f);
                 int slot = tick / 3;
@@ -627,57 +641,290 @@ namespace AethonMod.Content.VFX
                     // Los dos rayitos de la mota (la anomalía "chasquea").
                     float ang = H01(seed, slot, 531) * MathHelper.TwoPi;
                     Vector2 d = new(MathF.Cos(ang), MathF.Sin(ang));
-                    Quad(batch, TrailTex, p + new Vector2(jx, jy) + d * 4f,
+                    Quad(batch, CoreTex, p + new Vector2(jx, jy) + d * 4f,
                         new Vector2(7f, 1.4f), ang, Tint(nucleo, 0.7f * vida));
-                    Quad(batch, TrailTex, p + new Vector2(jx, jy) - d * 4f,
+                    Quad(batch, CoreTex, p + new Vector2(jx, jy) - d * 4f,
                         new Vector2(7f, 1.4f), ang, Tint(nucleo, 0.7f * vida));
                 }
             }
         }
 
+        /// <summary>La longitud total de un camino (px).</summary>
+        public static float LongitudCamino(Vector2[] camino)
+        {
+            if (camino == null || camino.Length < 2) return 0f;
+            float total = 0f;
+            for (int i = 1; i < camino.Length; i++)
+                total += Vector2.Distance(camino[i - 1], camino[i]);
+            return total;
+        }
+
+        /// <summary>
+        /// LOS ANCHOS DEL CAMINO (una pasada): la anchura en cada VÉRTICE con el
+        /// taper raíz→punta (1.0 en la raíz, aguja en la punta) — la lección
+        /// Calamity WidthFunction: la anchura vive en los VÉRTICES compartidos,
+        /// nunca en los centros de segmento (sin escalones en las juntas).
+        /// </summary>
+        public static float[] AnchosCamino(Vector2[] camino, float maxWidth)
+        {
+            if (camino == null || camino.Length < 2) return Array.Empty<float>();
+            var ws = new float[camino.Length];
+            float total = LongitudCamino(camino);
+            if (total < 1f)
+            {
+                for (int i = 0; i < ws.Length; i++) ws[i] = maxWidth;
+                return ws;
+            }
+            float arc = 0f;
+            ws[0] = maxWidth;
+            for (int i = 1; i < camino.Length; i++)
+            {
+                arc += Vector2.Distance(camino[i - 1], camino[i]);
+                float t = arc / total;
+                // TAPER: gorda en la raíz (donde nació el desgarro), aguja en la punta.
+                ws[i] = maxWidth * MathF.Pow(1f - t, 0.9f);
+            }
+            return ws;
+        }
+
+        /// <summary>
+        /// ¿El hitbox toca la CÁPSULA del camino? (taper local + franja de gracia) —
+        /// la colisión de la herida fracturada, lista para el daño de la FRACTURA.
+        /// </summary>
+        public static bool CaminoToca(Vector2[] camino, float maxWidth, Rectangle hitbox, float gracia = 8f)
+        {
+            if (camino == null || camino.Length < 2) return false;
+            float[] ws = AnchosCamino(camino, maxWidth);
+            for (int i = 0; i < camino.Length - 1; i++)
+            {
+                Vector2 a = camino[i];
+                Vector2 b = camino[i + 1];
+                Vector2 d = b - a;
+                float len = d.Length();
+                if (len < 0.35f) continue;
+                if (LineaToca(a, d / len, len, MathF.Max(ws[i], ws[i + 1]) + gracia, hitbox))
+                    return true;
+            }
+            return false;
+        }
+
         // ==================================================================
-        //  EL INTERIOR — el vacío que se ve dentro (re-utilizable solo)
+        //  LAS PIEZAS SUELTAS (los quiere todo el mundo)
         // ==================================================================
 
         /// <summary>
-        /// EL VACÍO INTERIOR re-utilizable: la banda que OCLUYE (en el lote del
-        /// llamador — NO-premultiplicado) + N estrellas deterministas con PARALAJE
-        /// (las profundas se mueven y parpadean distinto) y SCROLL px/tick a lo
-        /// largo del eje (el desgarro fluye: 2 px/tick; la grieta no: 0).
-        /// El grosor efectivo es width·Apertura(progress).
+        /// SHARDS DE CRISTAL: 6-10 esquirlas + 1 GRANDE: nacen a lo largo de la
+        /// línea, salen con velocidad perpendicular ± jitter, rotan, CAEN
+        /// (gravedad de vidrio 0.11) y mueren desvaneciéndose. Devuelve el
+        /// paquete para el ParticleManager (la librería NO spawnea).
         /// </summary>
-        /// <param name="batch">Batch ABIERTO NO-premultiplicado (EL VACÍO).</param>
-        /// <param name="batchEstrellas">Batch ADITIVO del llamador para las estrellas (null = el mismo batch).</param>
-        public static void Interior(SpriteBatch batch, Vector2 origin, Vector2 dir, float length,
-            float width, float progress, Color[] paleta, int seed, float time,
-            float scroll = 2f, int estrellas = 22, SpriteBatch batchEstrellas = null)
+        /// <param name="length">Largo de la línea donde nacen (0 = solo en el origen).</param>
+        public static void Shards(Vector2 origin, Vector2 dir, Color[] paleta,
+            int seed, out ParticleData[] outParticles, float length = 0f)
         {
-            if (batch == null || length < 8f) return;
-            float w = width * Apertura(progress);
-            if (w < 0.5f) return;
+            int count = 6 + seed % 5;                 // 6..10 esquirlas
+            outParticles = new ParticleData[count + 1];   // +1: LA GRANDE
 
-            dir = Vector2.Normalize(dir);
-            int segs = Math.Clamp((int)(length / 48f), 8, 24);
-            float breathe = VFXCore.Breathe(time, 2.2f, seed, 0.06f);
+            float baseAng = (dir.X == 0f && dir.Y == 0f) ? -MathHelper.PiOver2 : MathF.Atan2(dir.Y, dir.X);
 
-            for (int i = 0; i < segs; i++)
+            for (int k = 0; k <= count; k++)
             {
-                float f = (i + 0.5f) / segs;
-                float lens = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.6f);
-                float wseg = w * lens * breathe;
-                if (wseg < 0.6f) continue;
+                bool grande = k == count;
+                float h1 = H01(seed, k, 701);
+                float h2 = H01(seed, k, 709);
+                float h3 = H01(seed, k, 719);
+                float h4 = H01(seed, k, 727);
 
-                Vector2 a = origin + dir * (length * i / segs);
-                Vector2 b = origin + dir * (length * (i + 1) / segs);
-                float len = Vector2.Distance(a, b);
-                if (len < 0.1f) continue;
-                Quad(batch, BlackTex, (a + b) * 0.5f,
-                    new Vector2(len + wseg * 0.35f, wseg * 0.62f),
-                    MathF.Atan2(b.Y - a.Y, b.X - a.X), Tint(Color.Black, 0.94f));
+                // Nace sobre la línea (la esquirla SALE del desgarro).
+                Vector2 pos = origin + dir * (h1 * length);
+                // Sale con velocidad perpendicular ± jitter (hacia fuera del corte).
+                float ang = baseAng + MathHelper.PiOver2 * (h2 > 0.5f ? 1f : -1f) + (h3 - 0.5f) * 1.2f;
+                float speed = (1.5f + 2.5f * h4) * (grande ? 0.7f : 1f);
+
+                // El color del vidrio: paleta con borde blanco (lección DoG).
+                Color c = Color.Lerp(Pal(paleta, (int)(h4 * paleta.Length) % paleta.Length), Color.White, 0.5f);
+
+                var p = new ParticleData
+                {
+                    Position = pos,
+                    Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * speed,
+                    Scale = Vector2.One * (grande ? 0.62f : 0.34f + 0.22f * h2),
+                    PackedColor = ParticleManager.PackColor(c),
+                    PackedStartColor = ParticleManager.PackColor(c),
+                    PackedEndColor = ParticleManager.PackColor(Color.Transparent),
+                    Rotation = ang + (h1 - 0.5f) * 0.8f,
+                    RotationSpeed = (h2 - 0.5f) * 0.22f,
+                    TimeLeft = grande ? 80 : 40 + (int)(30f * h3),
+                    Duration = grande ? 80 : 40 + (int)(30f * h3),
+                    TextureId = ParticleTex.Slash,       // el glifo de vidrio de la casa
+                    BlendMode = 1,                        // aditivo: vidrio que BRILLA
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.Rotation);
+                p.EnableComponent(ComponentFlag.Gravity);
+                p.UserData0 = 0.11f;                     // gravedad de vidrio (cayendo)
+                outParticles[k] = p;
             }
-
-            Estrellas(batchEstrellas ?? batch, origin, dir, length, w, paleta, 1f, seed, time, scroll, estrellas);
         }
+
+        /// <summary>
+        /// CHISPAS DE ANOMALÍA: paquete determinista de motas radiales (los
+        /// números DoG — vel 8-14 radial adaptados al ParticleManager), color
+        /// Lerp(paleta, Blanco, 0.65), vida 30-45, mota 2-4 px.
+        /// La librería NO spawnea: devuelve el paquete.
+        /// </summary>
+        public static void ChispasAnomalia(Vector2 center, int count, Color[] paleta,
+            int seed, out ParticleData[] outParticles)
+        {
+            count = Math.Clamp(count, 1, 40);
+            outParticles = new ParticleData[count];
+
+            for (int k = 0; k < count; k++)
+            {
+                float h1 = H01(seed, k, 801);
+                float h2 = H01(seed, k, 811);
+                float h3 = H01(seed, k, 821);
+                float h4 = H01(seed, k, 831);
+
+                float ang = h1 * MathHelper.TwoPi;
+                float speed = (8f + 6f * h2) / 5.5f;    // 8-14 DoG ÷ drag-equivalente casa
+                Color c = Color.Lerp(Pal(paleta, (int)(h3 * paleta.Length) % paleta.Length), Color.White, 0.65f);
+                int vida = 30 + (int)(15f * h4);
+
+                var p = new ParticleData
+                {
+                    Position = center,
+                    Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * speed,
+                    Scale = Vector2.One * (0.035f + 0.045f * h3),   // mota 2-4 px
+                    PackedColor = ParticleManager.PackColor(c),
+                    PackedStartColor = ParticleManager.PackColor(c),
+                    PackedEndColor = ParticleManager.PackColor(Color.Transparent),
+                    TimeLeft = vida,
+                    Duration = vida,
+                    TextureId = ParticleTex.SoftGlow,
+                    BlendMode = 1,
+                    LayerPriority = LayerPriorities.BeforeProjectiles,
+                };
+                p.EnableComponent(ComponentFlag.FadeOut);
+                p.EnableComponent(ComponentFlag.ScaleDown);
+                outParticles[k] = p;
+            }
+        }
+
+        /// <summary>
+        /// EL ECO GLITCH (lección élite glur, SIN render targets): 3 offsets
+        /// horizontales alternos ±(2..3) px con tintes de canal y alpha
+        /// decreciente. El llamador re-dibuja su desgarro/grieta con estos
+        /// offsets. Los arrays son buffers estáticos (cero GC).
+        /// (v6.28: el desgarro del arma YA NO lo usa — el usuario lo leyó como
+        /// "interrupciones"; queda disponible para otros llamadores.)
+        /// </summary>
+        public static void EcoGlitch(int seed, float time, out Vector2[] offsets,
+            out Color[] tintes)
+        {
+            int tick = (int)(time * 60f);
+            for (int i = 0; i < 3; i++)
+            {
+                // Offset horizontal alterno ±(2..3) px, por eco y por tick.
+                float mag = 2f + H01(seed, tick, 901 + i) * 1f;
+                float sign = (i % 2 == 0 ? -1f : 1f) * (H01(seed, tick, 911 + i) > 0.5f ? 1f : -1f);
+                _ecoOff[i] = new Vector2(mag * sign, 0f);
+
+                // Tinte de canal (R para un lado, B para el otro) con alpha decreciente.
+                float a = 0.30f * (1f - i / 3f);
+                _ecoTint[i] = i % 2 == 0
+                    ? new Color(255, 0, 0, (byte)(int)(255f * a))
+                    : new Color(0, 90, 255, (byte)(int)(255f * a));
+            }
+            offsets = _ecoOff;
+            tintes = _ecoTint;
+        }
+
+        // ==================================================================
+        //  EL MUNDO — el oscurecer de la realidad herida
+        // ==================================================================
+
+        /// <summary>
+        /// PIDE el oscurecimiento del mundo mientras la realidad está desgarrada
+        /// (máx 0.35 — la mitad del FillProgress de DoG, arma no jefe). RiftMundoSystem
+        /// lo aplica en ModifySunLightColor y lo deja decaer solo (~0.5 s).
+        /// Solo afecta al CLIENTE (los servidores no ven pantallas).
+        /// </summary>
+        public static void Oscurecer(float objetivo)
+            => RiftMundoSystem.Pedir(MathHelper.Clamp(objetivo, 0f, 0.35f));
+
+        // ==================================================================
+        //  PRIMITIVAS INTERNAS
+        // ==================================================================
+
+        private static readonly Vector2[] _ecoOff = new Vector2[3];
+        private static readonly Color[] _ecoTint = new Color[3];
+
+        /// <summary>Color de la paleta con índice seguro (las paletas tienen 3 o 4 entradas).</summary>
+        private static Color Pal(Color[] paleta, int i)
+            => paleta[Math.Clamp(i, 0, paleta.Length - 1)];
+
+        /// <summary>Hash determinista [0,1) (VFXCore, sin estado).</summary>
+        private static float H01(int seed, int a, int b) => VFXCore.Hash01(seed, a, b);
+
+        /// <summary>Tinte de INTENSIDAD LINEAL premultiplicado (el de la casa v6.25).</summary>
+        private static Color Tint(Color c, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f);
+            return new Color(
+                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
+                (byte)(int)(255f * f));
+        }
+
+        /// <summary>Aplica el tinte de canal del eco (null = tal cual).</summary>
+        private static Color Eco(Color c, Color? eco)
+        {
+            if (!eco.HasValue) return c;
+            Color e = eco.Value;
+            return new Color(
+                (byte)(int)(c.R * e.R / 255f),
+                (byte)(int)(c.G * e.G / 255f),
+                (byte)(int)(c.B * e.B / 255f),
+                (byte)(int)(c.A * e.A / 255f));
+        }
+
+        /// <summary>Quad centrado con rotación (tamaño total = size px, sobre el lote ABIERTO).</summary>
+        private static void Quad(SpriteBatch batch, Texture2D tex, Vector2 pos,
+            Vector2 size, float rot, Color tint)
+        {
+            if (tex == null || tint.A == 0 || size.X < 0.1f || size.Y < 0.1f) return;
+            batch.Draw(tex, pos, null, tint, rot,
+                new Vector2(tex.Width, tex.Height) * 0.5f,
+                size / new Vector2(tex.Width, tex.Height),
+                SpriteEffects.None, 0f);
+        }
+
+        /// <summary>El quad del LABIO del camino (RiftLip — textura uniforme, sin juntas).</summary>
+        private static void LipQuad(SpriteBatch batch, Vector2 pos,
+            float len, float w, float rot, Color tint)
+            => Quad(batch, LipTex, pos, new Vector2(len, w), rot, tint);
+
+        /// <summary>El quad del NÚCLEO del camino (RiftCore — banda dura uniforme).</summary>
+        private static void LipQuadCore(SpriteBatch batch, Vector2 pos,
+            float len, float w, float rot, Color tint)
+            => Quad(batch, CoreTex, pos, new Vector2(len, w), rot, tint);
+
+        /// <summary>La espiga de la estrella de 4 puntas (textura degradada orientada).</summary>
+        private static void StarQuad(SpriteBatch batch, Vector2 center, float rot,
+            float largo, float ancho, Color tint)
+        {
+            if (tint.A == 0 || largo < 1f) return;
+            // rot gira el eje del degradado: π/2 = espiga VERTICAL.
+            batch.Draw(StarTex, center, null, tint, rot,
+                new Vector2(StarTex.Width, StarTex.Height) * 0.5f,
+                new Vector2(largo, ancho) / new Vector2(StarTex.Width, StarTex.Height),
+                SpriteEffects.None, 0f);
+        }
+
+        // ==================================================================
+        //  EL INTERIOR — el campo de estrellas del vacío
+        // ==================================================================
 
         /// <summary>
         /// EL CAMPO DE ESTRELLAS del interior (16-28): posiciones deterministas
@@ -769,222 +1016,6 @@ namespace AethonMod.Content.VFX
                     Tint(baseC, MathHelper.Clamp(tw * intensity, 0f, 1f)));
             }
         }
-
-        // ==================================================================
-        //  LAS PIEZAS SUELTAS (los quiere todo el mundo)
-        // ==================================================================
-
-        /// <summary>
-        /// SHARDS DE CRISTAL: 6-10 esquirlas + 1 GRANDE (números de la investigación interna
-        /// RealityRuptureStealth): nacen a lo largo de la línea, salen con
-        /// velocidad perpendicular ± jitter, rotan, CAEN (gravedad de vidrio
-        /// 0.11) y mueren desvaneciéndose. Pop-in por ScaleUp (la adaptación
-        /// casa del PolyOut(4)). Devuelve el paquete para el ParticleManager
-        /// (la librería NO spawnea).
-        /// </summary>
-        /// <param name="length">Largo de la línea donde nacen (0 = solo en el origen).</param>
-        public static void Shards(Vector2 origin, Vector2 dir, Color[] paleta,
-            int seed, out ParticleData[] outParticles, float length = 0f)
-        {
-            int count = 6 + seed % 5;                 // 6..10 esquirlas
-            outParticles = new ParticleData[count + 1];   // +1: LA GRANDE
-
-            float baseAng = (dir.X == 0f && dir.Y == 0f) ? -MathHelper.PiOver2 : MathF.Atan2(dir.Y, dir.X);
-
-            for (int k = 0; k <= count; k++)
-            {
-                bool grande = k == count;
-                float h1 = H01(seed, k, 701);
-                float h2 = H01(seed, k, 709);
-                float h3 = H01(seed, k, 719);
-                float h4 = H01(seed, k, 727);
-
-                // Nace sobre la línea (la esquirla SALE del desgarro).
-                Vector2 pos = origin + dir * (h1 * length);
-                // Sale con velocidad perpendicular ± jitter (hacia fuera del corte).
-                float ang = baseAng + MathHelper.PiOver2 * (h2 > 0.5f ? 1f : -1f) + (h3 - 0.5f) * 1.2f;
-                float speed = (1.5f + 2.5f * h4) * (grande ? 0.7f : 1f);
-
-                // El color del vidrio: paleta con borde blanco (lección DoG).
-                Color c = Color.Lerp(Pal(paleta, (int)(h4 * paleta.Length) % paleta.Length), Color.White, 0.5f);
-
-                var p = new ParticleData
-                {
-                    Position = pos,
-                    Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * speed,
-                    Scale = Vector2.One * (grande ? 0.62f : 0.34f + 0.22f * h2),
-                    PackedColor = ParticleManager.PackColor(c),
-                    PackedStartColor = ParticleManager.PackColor(c),
-                    PackedEndColor = ParticleManager.PackColor(Color.Transparent),
-                    Rotation = ang + (h1 - 0.5f) * 0.8f,
-                    RotationSpeed = (h2 - 0.5f) * 0.22f,
-                    TimeLeft = grande ? 80 : 40 + (int)(30f * h3),
-                    Duration = grande ? 80 : 40 + (int)(30f * h3),
-                    TextureId = ParticleTex.Slash,       // el glifo de vidrio de la casa
-                    BlendMode = 1,                        // aditivo: vidrio que BRILLA
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
-                };
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.Rotation);
-                p.EnableComponent(ComponentFlag.Gravity);
-                p.UserData0 = 0.11f;                     // gravedad de vidrio (cayendo)
-                outParticles[k] = p;
-            }
-        }
-
-        /// <summary>
-        /// CHISPAS DE ANOMALÍA: paquete determinista de motas radiales (los
-        /// números DoG — vel 8-14 radial con drag — adaptados al ParticleManager
-        /// sin drag: velocidad efectiva equivalente), color
-        /// Lerp(paleta[hash], Blanco, 0.65), vida 30-45, mota 2-4 px.
-        /// La librería NO spawnea: devuelve el paquete.
-        /// </summary>
-        public static void ChispasAnomalia(Vector2 center, int count, Color[] paleta,
-            int seed, out ParticleData[] outParticles)
-        {
-            count = Math.Clamp(count, 1, 40);
-            outParticles = new ParticleData[count];
-
-            for (int k = 0; k < count; k++)
-            {
-                float h1 = H01(seed, k, 801);
-                float h2 = H01(seed, k, 811);
-                float h3 = H01(seed, k, 821);
-                float h4 = H01(seed, k, 831);
-
-                float ang = h1 * MathHelper.TwoPi;
-                float speed = (8f + 6f * h2) / 5.5f;    // 8-14 DoG ÷ drag-equivalente casa
-                Color c = Color.Lerp(Pal(paleta, (int)(h3 * paleta.Length) % paleta.Length), Color.White, 0.65f);
-                int vida = 30 + (int)(15f * h4);
-
-                var p = new ParticleData
-                {
-                    Position = center,
-                    Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * speed,
-                    Scale = Vector2.One * (0.035f + 0.045f * h3),   // mota 2-4 px
-                    PackedColor = ParticleManager.PackColor(c),
-                    PackedStartColor = ParticleManager.PackColor(c),
-                    PackedEndColor = ParticleManager.PackColor(Color.Transparent),
-                    TimeLeft = vida,
-                    Duration = vida,
-                    TextureId = ParticleTex.SoftGlow,
-                    BlendMode = 1,
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
-                };
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.ScaleDown);
-                outParticles[k] = p;
-            }
-        }
-
-        /// <summary>
-        /// EL ECO GLITCH (lección élite glur, SIN render targets): 3 offsets
-        /// horizontales alternos ±(2..3) px con tintes de CANAL PURO (R/B) y
-        /// alpha 0.30·(1−i/3). El llamador re-dibuja su desgarro/grieta con
-        /// estos offsets (los parámetros ecoOffset/ecoTint de Tear/Grieta)
-        /// — el pulso de brillo glitch SIN tocar la lente.
-        /// Los arrays son buffers estáticos (cero GC).
-        /// </summary>
-        public static void EcoGlitch(int seed, float time, out Vector2[] offsets,
-            out Color[] tintes)
-        {
-            int tick = (int)(time * 60f);
-            for (int i = 0; i < 3; i++)
-            {
-                // Offset horizontal alterno ±(2..3) px, por eco y por tick.
-                float mag = 2f + H01(seed, tick, 901 + i) * 1f;
-                float sign = (i % 2 == 0 ? -1f : 1f) * (H01(seed, tick, 911 + i) > 0.5f ? 1f : -1f);
-                _ecoOff[i] = new Vector2(mag * sign, 0f);
-
-                // Tinte de canal puro (R para un lado, B para el otro) con alpha 0.30·(1−i/3).
-                float a = 0.30f * (1f - i / 3f);
-                _ecoTint[i] = i % 2 == 0
-                    ? new Color(255, 0, 0, (byte)(int)(255f * a))
-                    : new Color(0, 90, 255, (byte)(int)(255f * a));
-            }
-            offsets = _ecoOff;
-            tintes = _ecoTint;
-        }
-
-        // ==================================================================
-        //  EL MUNDO — el oscurecer de la realidad herida (T11 del contrato)
-        // ==================================================================
-
-        /// <summary>
-        /// PIDE el oscurecimiento del mundo mientras la realidad está desgarrada
-        /// (máx 0.35 — la mitad del FillProgress de DoG, arma no jefe). RiftMundoSystem
-        /// lo aplica en ModifySunLightColor y lo deja decaer solo (~0.5 s).
-        /// Solo afecta al CLIENTE (los servidores no ven pantallas).
-        /// </summary>
-        public static void Oscurecer(float objetivo)
-            => RiftMundoSystem.Pedir(MathHelper.Clamp(objetivo, 0f, 0.35f));
-
-        // ==================================================================
-        //  PRIMITIVAS INTERNAS
-        // ==================================================================
-
-        private static readonly Vector2[] _ecoOff = new Vector2[3];
-        private static readonly Color[] _ecoTint = new Color[3];
-
-        /// <summary>Color de la paleta con índice seguro (las paletas tienen 3 o 4 entradas).</summary>
-        private static Color Pal(Color[] paleta, int i)
-            => paleta[Math.Clamp(i, 0, paleta.Length - 1)];
-
-        /// <summary>Hash determinista [0,1) (VFXCore, sin estado).</summary>
-        private static float H01(int seed, int a, int b) => VFXCore.Hash01(seed, a, b);
-
-        /// <summary>Tinte de INTENSIDAD LINEAL premultiplicado (el de la casa v6.25).</summary>
-        private static Color Tint(Color c, float f)
-        {
-            f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
-        }
-
-        /// <summary>Aplica el tinte de canal del eco (null = tal cual).</summary>
-        private static Color Eco(Color c, Color? eco)
-        {
-            if (!eco.HasValue) return c;
-            Color e = eco.Value;
-            return new Color(
-                (byte)(int)(c.R * e.R / 255f),
-                (byte)(int)(c.G * e.G / 255f),
-                (byte)(int)(c.B * e.B / 255f),
-                (byte)(int)(c.A * e.A / 255f));
-        }
-
-        /// <summary>Quad centrado con rotación (tamaño total = size px, sobre el lote ABIERTO).</summary>
-        private static void Quad(SpriteBatch batch, Texture2D tex, Vector2 pos,
-            Vector2 size, float rot, Color tint)
-        {
-            if (tex == null || tint.A == 0 || size.X < 0.1f || size.Y < 0.1f) return;
-            batch.Draw(tex, pos, null, tint, rot,
-                new Vector2(tex.Width, tex.Height) * 0.5f,
-                size / new Vector2(tex.Width, tex.Height),
-                SpriteEffects.None, 0f);
-        }
-
-        /// <summary>El quad de un labio (desplazado por el offset del eco glitch).</summary>
-        private static void LipQuad(SpriteBatch batch, Vector2 pos, Vector2 ecoOffset,
-            float len, float w, float rot, Color tint)
-        {
-            // El eco desplaza en ESPACIO DE PANTALLA (horizontal ±2..3 px — el
-            // glitch VHS de élite), no en el espacio del labio: por eso se suma tal cual.
-            Quad(batch, TrailTex, pos + ecoOffset, new Vector2(len, w), rot, tint);
-        }
-
-        /// <summary>La espiga de la estrella de 4 puntas (textura degradada orientada).</summary>
-        private static void StarQuad(SpriteBatch batch, Vector2 center, float rot,
-            float largo, float ancho, Color tint)
-        {
-            if (tint.A == 0 || largo < 1f) return;
-            // rot gira el eje del degradado: π/2 = espiga VERTICAL.
-            batch.Draw(StarTex, center, null, tint, rot,
-                new Vector2(StarTex.Width, StarTex.Height) * 0.5f,
-                new Vector2(largo, ancho) / new Vector2(StarTex.Width, StarTex.Height),
-                SpriteEffects.None, 0f);
-        }
     }
 
     /// <summary>
@@ -995,8 +1026,11 @@ namespace AethonMod.Content.VFX
     /// Un acumulador estático: los desgarros activos piden su oscuridad
     /// (<see cref="RiftLib.Oscurecer"/>) y el sistema la aplica SOLO en
     /// ModifySunLightColor (el hook oficial de tML), con sesgo violeta-azulado
-    /// y decaimiento suave (~0.5 s al dejar de pedir) para no pelear con otros
-    /// mods más de lo necesario. Cliente-only.
+    /// y decaimiento suave (~0.5 s al dejar de pedir). Cliente-only.
+    ///
+    /// v6.28: también lo usa EL ECLIPSE PRIMORDIAL rediseñado (el día se
+    /// apaga durante el eclipse y VUELVE en la nova) — el sistema es la
+    /// "oscuridad prestada" de la casa.
     /// </summary>
     public class RiftMundoSystem : ModSystem
     {

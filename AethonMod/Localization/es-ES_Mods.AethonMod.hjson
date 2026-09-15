@@ -134,8 +134,6 @@
         "Items.EclipsePrimordialStaff.DisplayName": "Bastón del Eclipse Primordial",
         // (v6.24: la ENVOLTURA DE FUEGO y la ENVOLTURA DE RAYOS fueron
         // BORRADAS — petición del usuario.)
-        "Items.RuneRingCrownItem.DisplayName": "Corona de Anillos Rúnicos",
-        "Items.RunicHaloWings.DisplayName": "Anillo Rúnico Estelar",
         // v6.24: LAS TRES ARMAS DE LAS LIBRERÍAS — cada una usa TODAS
         // (StormLib rayos + BrumaFX humo + LumenLib luz + runas)
         "Items.SinfoniaPrimordialStaff.DisplayName": "Bastón de la Sinfonía Primordial",

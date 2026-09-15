@@ -16,6 +16,9 @@ namespace AethonMod.Content.Players
     ///   - La CORONA DE ARCOS suelta ascuas rosas sobre sus ápices.
     ///   - La CORONA RÚNICA emite chispas ascendentes desde las perlas.
     ///   - Ambas iluminan suavemente la noche con su color.
+    ///
+    /// (v6.28: la CORONA DE ANILLOS RÚNICOS y el ANILLO RÚNICO ESTELAR
+    /// fueron BORRADOS por petición del usuario — quedan las dos coronas.)
     /// </summary>
     public class CosmeticPlayer : ModPlayer
     {
@@ -25,15 +28,10 @@ namespace AethonMod.Content.Players
         /// <summary>¿Lleva la Corona Rúnica Estelar (glifos flotantes)?</summary>
         public bool RuneCrown;
 
-        /// <summary>¿Lleva la Corona de Anillos Rúnicos (v6.22 — los tres
-        /// aros orbitando el cuerpo)?</summary>
-        public bool RuneRingCrown;
-
         public override void ResetEffects()
         {
             VoidCrown = false;
             RuneCrown = false;
-            RuneRingCrown = false;
         }
 
         public override void PostUpdate()
@@ -42,7 +40,6 @@ namespace AethonMod.Content.Players
             // vanidad (13..19) — en cualquier lado cuenta.
             int voidType = ModContent.ItemType<Items.Cosmetics.VoidCrownItem>();
             int runeType = ModContent.ItemType<Items.Cosmetics.RuneCrownItem>();
-            int ringType = ModContent.ItemType<Items.Cosmetics.RuneRingCrownItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -55,7 +52,6 @@ namespace AethonMod.Content.Players
                 if (item == null || item.IsAir) continue;
                 if (item.type == voidType) VoidCrown = true;
                 else if (item.type == runeType) RuneCrown = true;
-                else if (item.type == ringType) RuneRingCrown = true;
             }
 
             if (Main.netMode == NetmodeID.Server) return;
@@ -108,29 +104,6 @@ namespace AethonMod.Content.Players
                 // Luz rosa tenue del arco rúnico.
                 Lighting.AddLight(head - new Vector2(0f, 18f * Player.gravDir),
                     new Vector3(0.22f, 0.04f, 0.14f));
-            }
-
-            // === v6.25 — LA CORONA DE ANILLOS RÚNICOS ES LA AUREOLA:
-            //     chispas doradas escapando de los glifos del ANILLO DEL
-            //     SOL I ringiendo la CABEZA + luz cálida tenue. ===
-            if (RuneRingCrown)
-            {
-                if (Main.rand.NextBool(30))
-                {
-                    int g = Main.rand.Next(RuneRingCrownRenderer.Glyphs);
-                    Vector2 glyph = RuneRingCrownRenderer.GetGlyphPosition(
-                        head, scale, Main.GlobalTimeWrappedHourly, g);
-                    Dust d = Dust.NewDustPerfect(glyph, DustID.Enchanted_Gold,
-                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f),
-                                    -Main.rand.NextFloat(0.4f, 0.9f) * Player.gravDir),
-                        165, new Color(255, 225, 150), 0.6f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-
-                // Luz cálida tenue de la aureola (el oro del sol I).
-                Lighting.AddLight(head,
-                    new Vector3(0.18f, 0.14f, 0.06f));
             }
         }
     }

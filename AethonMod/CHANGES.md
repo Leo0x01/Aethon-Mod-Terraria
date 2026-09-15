@@ -1,6 +1,116 @@
 # AethonMod — Historial de Cambios
 
-# AethonMod — Historial de Cambios
+## Commit v6.28 — EL DESGARRO CONTINUO + EL ECLIPSE TOTAL + LA PURGA DE COSMÉTICOS
+
+**Petición del usuario**: "el desgarro tiene interrupciones azules, en vez de
+ser una línea continua, además el desgarro no tiene que soltar más
+proyectiles, solo debe hacer daño el desgarro en sí, y hacer aún más daño
+cuando pasa de una línea recta a fracturarse · borrar corona de anillos
+rúnicos y anillo rúnico estelar · el bastón de supergigante roja no lanza la
+supergigante roja · todas las demás variantes de estrellas son bastante
+pequeñas, hazlas un poquito más grandes · rediseña el bastón de eclipse
+primordial · investiga mods que tengan desgarros de realidad y mejora la
+librería de desgarros · actualiza los .md".
+
+### A. LA RAÍZ DE LAS "INTERRUPCIONES AZULES" — MEDIDA, NO ADIVINADA
+  La investigación (research/desgarro_v628/INFORME_RIFTLIB_V2.md, texturas
+  medidas con PIL + 25 búsquedas web + Calamity decompilada) encontró el
+  culpable EXACTO: **la TrailGlow.png tenía el defecto** — su alfa rampa
+  3→204 A LO LARGO del eje de longitud y su color es CIAN PURO (0,255,255).
+  Cada junta entre los 8-24 segmentos del desgarro era una franja casi
+  transparente y CIAN = exactamente las "interrupciones azules". El segundo
+  culpable: la aberración cromática R/B de los labios (re-dibujo de canal
+  AZUL puro). EL CONTRATO del ecosistema (verificado en las texturas de
+  línea de Calamity): UNIFORME a lo largo del eje, gradiente SOLO a lo
+  ancho, SIN color horneado.
+
+### B. RIFTLIB v2 — EL DESGARRO CONTINUO (6 texturas nuevas, 100% código)
+  `tools/gen_rift_v628.py` (auto-verificado — mide sus propias texturas):
+  · **RiftTaperVelo/Cuerpo/Nucleo/Void** (512×64): EL DESGARRO RECTO EN
+    **UN SOLO QUAD** — el perfil de longitud horneado (lens sin^0.6 ·
+    respiración nebulosa ±15% a 4 ciclos, la lección Dimension-Tearing
+    Disk) + la sección completa (par de labios a ±0.31·W cabalgando el
+    borde del vacío + núcleo razor). CERO juntas porque CERO segmentos
+    (la lección HyperdeathRiftScepterBeam: su rayo de 3000 px es UN quad).
+  · **RiftLip/RiftCore** (64×16): el camino FRACTURADO con columnas
+    IDÉNTICAS (desviación medida 0.0000) + anchura evaluada EN LOS
+    VÉRTICES compartidos (lección WidthFunction de Calamity) + solape
+    len+w·0.9 + **PERLA en cada vértice** (el round-join estándar) → la
+    herida Lichtenberg continua aunque gire.
+  · SIN aberración R/B en los labios: el vocabulario queda LIMPIO (labios
+    de color + núcleo blanco + vacío negro). El EcoGlitch sigue como API
+    pero el arma YA NO lo usa.
+  · Mock 1:1 del pipeline (PNGs premultiplicados como tML, aditivo
+    dst += tex·tint, occlusión no-premult) — VEREDICTO NUMÉRICO: v1
+    65px de huecos reales; v2 UN QUAD 0px; el camino fracturado y la
+    vibración con brillo sobre camino min 232-246/255 en TODO el arco
+    (solo la aguja final legítimamente se apaga). VLM: v1 "cyan dashed
+    segments 3/10" vs v2 "single unbroken line, white-hot core 9/10".
+
+### C. EL BASTÓN DEL DESGARRO v2 — LA LÍNEA QUE SE FRACTURA
+  El nuevo guion (la física del vidrio: las grietas se propagan a
+  1458-1500 m/s — la FRACTURA es un evento de 1-2 frames con tensión
+  visible antes):
+  · TELÉGRAFO (12 ticks) → APERTURA (3): el PRIMER GOLPE ×1.0 a toda la
+    línea recta → RECTO (52): la línea viva con DoT ×0.07/3 ticks →
+    **VIBRACIÓN (16)**: onda estacionaria 0→3.5 px a ~10 Hz + shimmer
+    nervioso + retumbo (la línea está a punto de FALLAR) → **FRACTURA
+    (2)**: EL CLÍMAX — la línea se QUIEBRA al camino Lichtenberg con
+    FURIA (curvatura 8, micro-fallas 1/4) y pega **×2.2** a lo largo de
+    la herida fracturada + shards de vidrio + kick ×1.3 + flash 0.30 →
+    GRIETA VIVA (98): DoT ×0.10/3 ticks → CIERRE (10): el daño cesó 8
+    ticks antes del final visual.
+  · **NADA de proyectiles extra**: RealityTearZoneProjectile BORRADO (la
+    petición literal) — el desgarro daña ÉL MISMO por línea/camino
+    (SimpleStrikeNPC, escuela A). Sin eco glitch, sin aberración.
+
+### D. LOS DOS COSMÉTICOS BORRADOS (petición literal)
+  Corona de Anillos Rúnicos (RuneRingCrownItem) y Anillo Rúnico Estelar
+  (RunicHaloWings): 10 archivos eliminados (ítems+PNGs+renderers+capas+
+  RunicHaloPlayer) + referencias limpias (ArsenalBag, CosmeticPlayer,
+  hjson es/EN). Quedan la Corona de la Reina del Vacío y la Corona Rúnica
+  Estelar.
+
+### E. LA SUPERGIGANTE ROJA + LAS ESTRELLAS AGRANDADAS
+  · El crash del client.log (PyraPalettes.Sample por NaN vía rr/R) ya
+    tenía el guard v6.27 — ahora ADEMÁS la división de las celdas de
+    convección lleva clampeo total (R>0.05 + Clamp 0..1): la división
+    JAMÁS puede envenenar la temperatura. El coloso Vuelve a verse.
+  · "Un poquito más grande" (petición): estrella de neutrones 12→22 px,
+    púlsar 16→28, enana blanca 20→34, enana muerta 16→28, magnetar
+    14→26 (+ hitboxes proporcionales). La supergigante (90 px) intacta.
+
+### F. EL ECLIPSE PRIMORDIAL — REDISEÑO TOTAL: "EL ECLIPSE TOTAL"
+  La v6.26 (Sol de 20 anillos + mezcla de todos los agujeros) se retira.
+  El NUEVO concepto es el nombre del arma: UN ECLIPSE SOLAR TOTAL:
+  · EL SOL PRIMORDIAL desnudo (blanco-oro, granulado vivo).
+  · **EL DISCO DE LA NOCHE** (ocultador no-premultiplicado) que SE
+    DESLIZA sobre el sol: EL CRECIENTE mengua (smoothstep — la lección
+    del mock: el ease-out cuártico enterraba el creciente).
+  · **EL DÍA MUERE**: el mundo se apaga con RiftLib.Oscurecer (el sesgo
+    violeta de la casa) mientras dura el eclipse — y VUELVE con la nova.
+  · **LA CORONA**: 12 streamers asimétricos (ecuatoriales largos, polares
+    plumosos — la corona REAL) curvados como líneas de campo, cada uno
+    respirando y con flujo interior. Velo ANULAR (no centrado — lección
+    del mock: el glow centrado LAVABA el disco negro).
+  · LA CROMOSFERA (aro rojo 1.02R + perlas de Baily) · LAS PROMINENCIAS
+    (5 lazos rojo-oros con parpadeo PyraLib) · **EL ANILLO DE DIAMANTE**
+    (floriturna de 4 puntas VIAJANDO por el limbo, ×6 más rápido en LA
+    ÚLTIMA LUZ) · LOS TRES CÍRCULOS RÚNICOS (2.4/3.2/4.0R — la firma).
+  · LA MUERTE = **EL RETORNO DE LA LUZ**: el disco IMPLODE (pow 1.6 — el
+    encogimiento SE LEE), la corona EXPLOTA soplada, el núcleo queda
+    CEGADOR (cruz ×2 pares) y el Einstein + nova ×1.6 estallan mientras
+    la oscuridad se suelta. Mock VLM: creciente 9/10, total 8/10, última
+    luz 9/10, retorno 9/10.
+  · La física se conserva: atracción 600 px + devora proyectiles enemigos
+    + aura de quemadura. Lente gravitacional ×2.6.
+
+### G. LOS .md DEL PROYECTO — ACTUALIZADOS (la petición que faltó en v6.27)
+  ROADMAP_DE_IMPLEMENTACION.md (estado de fases v6.28), DISEÑO_DEL_MOD.md
+  (la pila de 8 librerías VFX + sección identidad), AethonMod_Project_
+  Complete_Document.md (banner de la era v6.x + tabla de estado),
+  CHANGES.md, worklog consolidado (el del repo — históric 433 KB — y el
+  de sesión sincronizados).
 
 ## Commit v6.27 — LA BOLSA DEL ARSENAL + EL OCASO DE AETHON + LOS 6 BUGS DE RUNTIME MUERTOS
 

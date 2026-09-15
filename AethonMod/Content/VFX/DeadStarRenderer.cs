@@ -37,7 +37,7 @@ namespace AethonMod.Content.VFX
     public static class DeadStarRenderer
     {
         /// <summary>Radio del cuerpo en px a escala 1 (el cadáver compacto).</summary>
-        public const float BodyPx = 16f;
+        public const float BodyPx = 28f;
 
         // --- PALETA: oscuridad + rescoldo ambar ---
         private static readonly Color VoidBlack = new(12, 9, 16);

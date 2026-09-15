@@ -29,7 +29,7 @@ namespace AethonMod.Content.VFX
     public static class WhiteDwarfRenderer
     {
         /// <summary>Radio del cuerpo en px a escala 1 (pequeña y densa).</summary>
-        public const float BodyPx = 20f;
+        public const float BodyPx = 34f;
 
         /// <summary>Radio de detección del anillo de acreción (px).</summary>
         public const float AccretionRange = 150f;

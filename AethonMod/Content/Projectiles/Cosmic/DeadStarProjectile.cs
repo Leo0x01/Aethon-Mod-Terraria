@@ -47,8 +47,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            Projectile.width = 26;
-            Projectile.height = 26;
+            Projectile.width = 42;
+            Projectile.height = 42;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;

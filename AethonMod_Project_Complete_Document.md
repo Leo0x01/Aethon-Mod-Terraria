@@ -12,8 +12,17 @@ Repositorio: https://github.com/Leo0x01/Aethon-Mod-Terraria
 > Cualquier IA o desarrollador que trabaje en este proyecto DEBE leer este documento completo
 > antes de tocar cualquier archivo.
 
-> ⚠️ **LEER PRIMERO — v5.83**: los shaders del mod ahora son `.fx` (fuente) + `.fxc`
-> (compilado) — **NUNCA generar `.xnb` con dxc** (provocan "Asset could not be found"
+> ⚠️ **LEER PRIMERO — v6.28**: la ERA DE LAS LIBRERÍAS VFX (v6.16→v6.28) transformó
+> el proyecto: el mod es hoy **100% código renderizado** (todas las armas se dibujan
+> con SpriteBatch + texturas procedurales propias — CERO sprites dibujados a mano en
+> las armas nuevas) y tiene **OCHO librerías VFX propias**: StormLib (rayos),
+> BrumaFX (humo/niebla), LumenLib (luz), PyraLib (fuego), EstelaLib (ribbons),
+> OndaLib (ondas de impacto), RiftLib v2 (desgarros de realidad) y VFXCore (el núcleo).
+> El arsenal se entrega en LA BOLSA DEL ARSENAL (un solo ítem). Detalles abajo en la
+> sección "ACTUALIZACIÓN v6.x — LA ERA DE LAS LIBRERÍAS".
+>
+> ⚠️ **v5.83 (sigue vigente)**: los shaders del mod son `.fx` (fuente) + `.fxc`
+> (compilado) — **NUECA generar `.xnb` con dxc** (provocan "Asset could not be found"
 > al cargar el mod). tModLoader NO compila .fx automáticamente; el formato correcto es
 > mantener versionados los `.fxc` compilados junto a sus `.fx`. Ver sección 8.
 
@@ -49,12 +58,12 @@ git log --oneline -5
 |---|---|
 | **Mod name (interno)** | AethonMod |
 | **Display name** | Aethon, la Luz Primordial |
-| **Versión (build.txt)** | 5.90 |
+| **Versión (build.txt)** | 6.28 |
 | **Author** | AethonModTeam |
 | **Framework** | tModLoader 1.4.4 |
 | **Runtime** | .NET 8, C# |
 | **Side** | Both (Client + Server) |
-| **Commit actual** | v5.90 — Revert del sol a v5.88 (8781aa4) tras arruinar sus efectos en v5.89 + agujero negro rehecho: sin partículas moradas, partículas ABSORBIDAS (nuevo componente PullTo), UNA sola explosión cromática final con daño, lente DELGADA (ángulo pico 14.9→0.8 rad) y fix del corte del disco al crecer (canvas que escala) |
+| **Commit actual** | v6.28 — EL DESGARRO CONTINUO (RiftLib v2: el desgarro recto ES UN QUAD — cero juntas, cero interrupciones azules; la TrailGlow tenía alfa rampando A LO LARGO + color cian puro) + EL ECLIPSE TOTAL (rediseño: disco de la noche + corona de streamers + anillo de diamante + el mundo se apaga) + estrellas reales agrandadas + purga de cosméticos |
 | **Commit estable del remote** | e826c82 (referencia de sprites protegidos) |
 | **Homepage** | https://github.com/Leo0x01/Aethon-Mod-Terraria |
 
@@ -126,6 +135,41 @@ namespace AethonMod
     }
 }
 ```
+
+---
+
+## 2-bis. ACTUALIZACIÓN v6.x — LA ERA DE LAS LIBRERÍAS (v6.16 → v6.28)
+
+> El proyecto vive hoy su tercera era. Este es el estado REAL (v6.28);
+
+### La pila de OCHO librerías VFX propias (Content/VFX/)
+| Librería | Qué dibuja | Nació |
+|---|---|---|
+| **VFXCore** | El núcleo: quads, tintes premultiplicados, hash determinista, ring-quad | v6.03 |
+| **EstelaLib** | Ribbons de grosor variable (estelas de proyectiles) | v6.25 |
+| **OndaLib** + OndaSystem | Ondas de impacto: frente roto, aberración, Kick de cámara, Flash | v6.25 |
+| **PyraLib** | El fuego: 3 tablas de 37 niveles, Tongue, EmberField Doom Fire, Sparks | v6.25 |
+| **StormLib** | Rayos 2ª gen: Bézier + Refine fractal, MultiBolt, núcleo razor | v6.21 |
+| **BrumaFX** (Content/Effects/Bruma/) | Humo/niebla: flipbook de ruido, puffs horneados en runtime, luz del mundo, viento | v6.16/v6.25 |
+| **LumenLib** | La luz: bloom apilado invertido, flare, rayos, lanzas, aurora | v6.22 |
+| **RiftLib v2** | Desgarros de realidad: el desgarro recto ES UN QUAD continuo; caminos Lichtenberg con perlas; oscurecer del mundo | v6.26/v6.28 |
+
+### El arsenal (v6.28)
+- **9 AGUJEROS NEGROS RÚNICOS** (4 base + 3 v6.16 + 2 ascendidos... más los 5 "ascendidos") con lente gravitacional de pantalla (BlackHoleLensSystem).
+- **20 SOLES RÚNICOS** (RuneSunRenderer parametrizado, 1..20 anillos).
+- **6 ESTRELLAS REALES** (neutrones 22 px, púlsar 28, enana blanca 34, enana muerta 28, magnetar 26, supergigante roja 90 — v6.28 las agrandó).
+- **EL ECLIPSE PRIMORDIAL v6.28** — rediseñado como EL ECLIPSE TOTAL: disco de la noche que se desliza (EL CRECIENTE), corona de 12 streamers asimétricos, cromosfera + perlas de Baily, prominencias, EL ANILLO DE DIAMANTE viajero, los 3 círculos rúnicos, y el mundo SE APAGA (RiftLib.Oscurecer) mientras dura — la muerte es EL RETORNO DE LA LUZ.
+- **EL DESGARRO EN LA REALIDAD v6.28** — la línea CONTINUA (un quad) que VIBRA y se FRACTURA (daño ×2.2 en la fractura).
+- **EL OCASO DE AETHON** (v6.27) — el arma del patrón gauge del Cosmic Destroyer.
+- + las armas de las librerías (Sinfonía, Tormenta Nebular, Lanza del Alba), el Grimoire, los minions cósmicos, etc.
+- **TODO se entrega en LA BOLSA DEL ARSENAL** (ArsenalBag — un ítem, clic derecho despliega todo; Contenido() es el punto único de la verdad).
+
+### Las reglas de la casa que NO cambian
+1. **100% código**: cada ModProjectile lleva su PNG de sombra 76×76 (autoload lo exige) y su icono — generados por scripts reproducibles en `tools/gen_*.py`.
+2. **El contrato de batch v6.10**: en PreDraw el batch de tML está ABIERTO — cerrarlo antes del pase propio y restaurarlo después EXACTO.
+3. **Tinte premultiplicado (v6.25)**: `Tint(c, f) = (RGB·f, 255·f)` — la intensidad manda también en aditivo; los PNG los premultiplica tML al cargar (los SetData runtime NO — horneado manual).
+4. **Determinismo MP**: semillas por `Projectile.identity`, daño solo server/sp con SimpleStrikeNPC, visual solo cliente.
+5. **CHANGES.md + worklog + build.txt + 0 errores 0 warnings** en cada entrega.
 
 ---
 

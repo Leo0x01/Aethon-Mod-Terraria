@@ -132,8 +132,6 @@
         // with ALL the black holes (light + mist + smoke + lightning)
         "Items.EclipsePrimordialStaff.DisplayName": "Staff of the Primordial Eclipse",
         // (v6.24: the FIRE VEIL and the STORM VEIL were removed — user request.)
-        "Items.RuneRingCrownItem.DisplayName": "Rune Ring Crown",
-        "Items.RunicHaloWings.DisplayName": "Astral Rune Ring",
         // v6.24: THE THREE LIBRARY WEAPONS — each one uses ALL of them
         // (StormLib lightning + BrumaFX smoke + LumenLib light + runes)
         "Items.SinfoniaPrimordialStaff.DisplayName": "Staff of the Primordial Symphony",

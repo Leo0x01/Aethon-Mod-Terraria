@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://realtimevfx.com",
+    "name": "VFX Breakdowns",
+    "snippet": "Jul 22, 2019 — I was looking through the demo reel for Beyond-FX, and this breakdown from Uncharted 4 caught my eye: Beyond-FX- Breakdown . Read more",
+    "host_name": "realtimevfx.com",
+    "rank": 0,
+    "date": "Jul 22, 2019",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.vfxapprentice.com",
+    "name": "How to master good timing in VFX and animation?",
+    "snippet": "Aug 20, 2025 — Resolve your timing early in the pipeline using grey geometric \"block-ins\" before adding complex textures, shaders, or rendering technicalities.",
+    "host_name": "www.vfxapprentice.com",
+    "rank": 1,
+    "date": "Aug 20, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.adobe.com",
+    "name": "shatter effect shatters instantly",
+    "snippet": "Feb 11, 2025 — im trying to do an effect where i made 3 masks of a car and have them shatter but some reason on the first frame they just instantly become a bunch of ...",
+    "host_name": "community.adobe.com",
+    "rank": 2,
+    "date": "Feb 11, 2025",
+    "favicon": ""
+  }
+]

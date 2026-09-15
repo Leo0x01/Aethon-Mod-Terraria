@@ -515,12 +515,34 @@ Ver §2 para las 5 fases. Detalles de combate:
 
 ## 18. Identidad visual y audio
 
-### Paleta de colores
+### La identidad visual REAL v6.28 — 100% CÓDIGO RENDERIZADO
+La identidad visual del mod ya NO es una dirección de arte de sprites: es
+**una pila de OCHO librerías VFX propias** que dibujan TODO con SpriteBatch
++ texturas procedurales (cero sprites ajenos, cero edits de Photoshop):
+
+| Librería | El idioma que aporta | Armas insignia |
+|---|---|---|
+| **VFXCore** | quads, tintes premultiplicados, hash determinista | (el núcleo de todo) |
+| **StormLib** | rayos de filamento fractal (Bézier + Refine) | Cetro del Trueno, Sinfonía |
+| **BrumaFX** | humo/niebla con flipbook de ruido + luz del mundo | agujero de la Bruma, Tormenta Nebular |
+| **LumenLib** | luz: bloom apilado, flares, lanzas, auroras | Lanza del Alba, soles rúnicos |
+| **PyraLib** | fuego: 37 niveles, lenguas, brasas Doom Fire | supergigante roja, Eclipse (prominencias) |
+| **EstelaLib** | ribbons de grosor variable | estelas de los minion cósmicos |
+| **OndaLib** | ondas de impacto + Kick + Flash | detonaciones de la Sinfonía |
+| **RiftLib v2** | desgarros CONTINUOS de realidad (un quad recto; caminos Lichtenberg con perlas; el mundo se apaga) | El Desgarro de la Realidad, el Eclipse (la noche) |
+
+La firma de la casa: **labios de luz de 3 capas + vacío oclusivo + runas
+dorado/violeta/blanco + el mundo reacciona** (se oscurece, tiembla, se
+ilumina). Cada arma es un pequeño "boss visual" con física propia.
+
+### Paleta de colores (la original — sigue mandando)
 - **Fondo**: espacio profundo (azul-negro `oklch(0.13 0.025 280)`).
 - **Primario (starlight gold)**: `#f5c451` — para acentos de Distancia y UI.
 - **Acento (violeta arcano)**: `#b388ff` — para Artes Mágicas.
 - **Solar (cuerpo a cuerpo)**: `#ff9a3c`.
 - **Vacío teal**: `#3dd6c4`.
+- (v6.28 añadidos de facto: carmesí del desgarro `#ff3c82`, violeta de la
+  noche `#8c5aeb`, blanco incandescente `#fffaf0` del Eclipse Total.)
 
 ### Tipografía
 - UI del juego: fuente pixel-art consistente con Terraria.
@@ -534,6 +556,15 @@ Ver §2 para las 5 fases. Detalles de combate:
 ---
 
 ## 📌 Resumen de cambios vs. versión anterior
+
+> **v6.28**: RiftLib v2 (el desgarro CONTINUO — la TrailGlow tenía el
+> defecto: alfa rampando a lo largo + cian puro en las juntas = las
+> "interrupciones azules"; ahora el desgarro recto ES UN QUAD y la
+> fractura pega ×2.2) · EL ECLIPSE PRIMORDIAL rediseñado como EL ECLIPSE
+> TOTAL (disco de la noche + creciente + corona + anillo de diamante +
+> el día muere) · estrellas reales agrandadas (×1.75) · supergigante con
+> guardas NaN totales · BORRADOS la Corona de Anillos Rúnicos y el Anillo
+> Rúnico Estelar · este .md actualizado (la deuda de v6.27).
 
 | Aspecto | Antes (v1) | Ahora (v2) |
 |---------|-----------|-----------|

@@ -20,11 +20,14 @@ entregadas por LA BOLSA DEL ARSENAL PRIMORDIAL:
 - **10 agujeros negros**: Olvido, Cósmico, Umbral, Bruma, Supremo,
   Supremo Aurora + 4 Ascendidos (Umbral/Bruma/Cósmico/Olvido)
 - **6 soles rúnicos**: Sol 1..5 + EL SOL 20 (la corona de la familia)
-- **Eclipse Primordial** (el Sol de los 20 Anillos + la mezcla de TODOS
-  los agujeros) y **Cetro del Trueno** (StormLib)
+- **Eclipse Primordial — EL ECLIPSE TOTAL** (rediseño v6.28: el disco de
+  la noche se desliza sobre el sol primordial —EL CRECIENTE—, el día SE
+  APAGA, la corona de streamers + cromosfera + anillo de diamante; la
+  muerte es EL RETORNO DE LA LUZ) y **Cetro del Trueno** (StormLib)
 - **3 armas de las librerías** (v6.24): Sinfonía Primordial, Tormenta
   Nebular, Lanza del Alba
-- **El Desgarro en la Realidad** (RiftLib, atraviesa paredes)
+- **El Desgarro en la Realidad v2** (RiftLib v2: línea CONTINUA que VIBRA
+  y se FRACTURA con daño ×2.2 — atraviesa paredes, sin proyectiles extra)
 - **6 estrellas reales** (v6.26): Estrella de Neutrones, Púlsar, Enana
   Blanca, Estrella Muerta, Supergigante Roja, Magnetar
 - **El Ciclo Estelar** (nebulosa → gigante → supernova → remanente)

@@ -34,7 +34,7 @@ namespace AethonMod.Content.VFX
     public static class PulsarRenderer
     {
         /// <summary>Radio del núcleo en px a escala 1 (compacto como toda estrella de neutrones).</summary>
-        public const float BodyPx = 16f;
+        public const float BodyPx = 28f;
 
         /// <summary>Longitud del haz polar en px (el faro de 400 px).</summary>
         public const float BeamLength = 400f;

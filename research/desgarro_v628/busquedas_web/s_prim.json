@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://github.com",
+    "name": "tModLoader/tModLoader: A mod to make and play Terraria",
+    "snippet": "tModLoader (TML) is an open-source, community-driven, modification and expansion of the Terraria game that makes it possible to make and play mods. Read more",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tModLoader - Particle Trail",
+    "snippet": "Oct 4, 2016 — Hi, Does anyone know how to add a trail to a particle like the Terra beam? I've been trying for ages and no luck! Thanks, Jimbo.",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Oct 4, 2016",
+    "favicon": ""
+  },
+  {
+    "url": "https://discourse.threejs.org",
+    "name": "Trail Renderer / Particle system - Questions",
+    "snippet": "Oct 9, 2019 — It provides a good conceptual overview about particle systems and their building blocks (emitter, particle, lifespan etc.) along with some code . Read more",
+    "host_name": "discourse.threejs.org",
+    "rank": 2,
+    "date": "Oct 9, 2019",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.unity3d.com",
+    "name": "Scripting API: TrailRenderer",
+    "snippet": "The following code sample demonstrates how to attach a Trail Renderer to a moving GameObject and configure some of its basic properties.",
+    "host_name": "docs.unity3d.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://gist.github.com",
+    "name": "Unity Trail Renderer",
+    "snippet": "1. create an empty game object · 2. attach this script and a MeshRenderer · 3. Then assign a particle material to the mesh renderer. Read more",
+    "host_name": "gist.github.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

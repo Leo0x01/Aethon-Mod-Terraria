@@ -184,7 +184,11 @@ namespace AethonMod.Content.VFX
 
                 // La celda SUBE: más caliente (más cerca del amarillo en
                 // la rampa SolarFire); BAJA: más fría (rojo profundo).
-                float temp = MathHelper.Clamp(0.42f + 0.20f * conv + 0.12f * (1f - rr / R) - collapse * 0.25f, 0f, 1f);
+                // (v6.28: rr/R con guardas — R>0.05 garantizado por Draw, y
+                // el cociente clampeado: la división JAMÁS puede dar NaN/±Inf
+                // que envenene la temperatura — el crash del log del usuario.)
+                float rel = R > 0.05f ? MathHelper.Clamp(rr / R, 0f, 1f) : 0.5f;
+                float temp = MathHelper.Clamp(0.42f + 0.20f * conv + 0.12f * (1f - rel) - collapse * 0.25f, 0f, 1f);
                 Color cell = PyraPalettes.Sample(PyraPalettes.SolarFire, temp);
 
                 // El TAMAÑO de la celda (voraz: respira con su ciclo).

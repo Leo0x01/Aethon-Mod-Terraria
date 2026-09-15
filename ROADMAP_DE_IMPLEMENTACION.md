@@ -5,6 +5,33 @@
 
 ---
 
+## 🚦 ESTADO REAL DEL PROYECTO — v6.28 (leer antes del roadmap original)
+
+> El roadmap de abajo es el PLAN ORIGINAL (rama Ranged/Melee/Magic con
+> árboles procedurales). La ejecución real tomó otro camino igual de
+> ambicioso: LA ERA DE LAS LIBRERÍAS VFX. Estado:
+
+| Frente del roadmap original | Estado real v6.28 |
+|---|---|
+| Arquitectura / esqueleto | ✅ HECHO (y muy crecido: 1979 archivos en git) |
+| Rama Magic (+ invocador) | ✅ DESBORDADA: **~50 bastones** cósmicos (9 agujeros negros rúnicos con lente gravitacional, 20 soles rúnicos, 6 estrellas reales agrandadas v6.28, el Eclipse Primordial REDISEÑADO como EL ECLIPSE TOTAL, el Desgarro de la Realidad v2 CONTINUO que se FRACTURA ×2.2, el Ocaso gauge, las armas de las librerías, minions cósmicos, Grimoire) |
+| Rama Ranged / Melee | ⏳ PENDIENTE (el arsenal actual es 100% Magic) |
+| Sistema de niveles / árboles | 🔶 PARCIAL (LevelUpTester + GenesisShard existen; los árboles procedurales no) |
+| Jefe final Aethon | ⏳ PENDIENTE |
+| **NO ESTABA EN EL PLAN → LA PILA DE 8 LIBRERÍAS VFX** | ✅ **LA JOYA DEL PROYECTO**: VFXCore · EstelaLib (ribbons) · OndaLib (ondas+Kick+Flash) · PyraLib (fuego) · StormLib (rayos) · BrumaFX (humo) · LumenLib (luz) · **RiftLib v2 (desgarros continuos — v6.28)**. Todo 100% código, mock-verified y VLM-verified |
+| **NO ESTABA EN EL PLAN → EL ARSENAL EN UNA BOLSA** | ✅ ArsenalBag (v6.27): UNA entrega, clic derecho despliega todo |
+| **NO ESTABA EN EL PLAN → cosméticos vivos** | 🔶 2 de 4 (Corona del Vacío + Corona Rúnica Estelar; v6.28 BORRÓ la Corona de Anillos y el Anillo Rúnico Estelar por petición) |
+| Entrega / compilación | ✅ 0 errores 0 warnings contra tML 2026.07.3.0 real, en cada versión |
+
+> **Para la siguiente IA**: el flujo de trabajo de la casa está en
+> `AethonMod/CHANGES.md` (última entrada) y en el worklog. Las reglas
+> duras: contrato de batch v6.10, tinte premultiplicado v6.25,
+> determinismo MP, PNGs de sombra 76×76 por proyectil, scripts
+> `tools/gen_*.py` reproducibles, bump de build.txt + CHANGES + worklog
+> en cada entrega.
+
+---
+
 ## 📑 Índice
 
 1. [Requisitos previos y entorno](#1-requisitos-previos-y-entorno)

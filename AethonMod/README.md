@@ -13,7 +13,8 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
 - **Fragmento Génesis** con niveles infinitos y 3 ramas principales.
 - **Grimorio del Eterno**: arma híbrida mágica/de invocación con niveles infinitos.
 - **Arsenal de pruebas cósmico — 47 armas** (soles rúnicos, 10 agujeros
-  negros, 6 estrellas reales, desgarro de realidad, tormentas, ciclo
+  negros, 6 estrellas reales (agrandadas v6.28), el desgarro de realidad
+  CONTINUO que se fractura, EL ECLIPSE TOTAL rediseñado, tormentas, ciclo
   estelar, enjambres, péndulos, coros…).
 - **BOLSA DEL ARSENAL PRIMORDIAL**: al entrar al mundo recibes SOLO la
   bolsa (1 ranura); clic derecho despliega todo el arsenal — solo entrega
