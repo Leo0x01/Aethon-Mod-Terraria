@@ -1,5 +1,102 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.29 — LOS DOS EXHUMADOS + LAS DIEZ BOLSAS POR CATEGORÍA
+
+**Petición del usuario**: "investiga esto Terraria Calamity mod Supreme
+Calamitas Enchanted Exhumed... investiga el arma Rancor, investiga bien su
+funcionamiento completo, qué librerías y assets usa y crea un arma basada en
+eso, también de esos mods investiga el funcionamiento completo de Gruesome
+Eminence, qué librerías y assets usa y también crea un arma basada en eso ·
+luego crea varias bolsas para todas las armas que me tienes que dar no solo
+una y separalas por categorías, una categoría por bolsa · al jugador también
+dale 99 Dummy para probar las armas".
+
+### A. LA INVESTIGACIÓN (research/rancor_v629/INFORME_EXHUMADOS.md)
+  Wiki oficial + Fandom + 6 búsquedas web. LO QUE ES "Enchanted Exhumed": el
+  sistema de la Brimstone Witch — el encantamiento único **Exhume** que
+  **transforma un ítem en otro totalmente nuevo** (Burning Sea→**Rancor**,
+  Ghastly Visage→**Gruesome Eminence**). RANCOR: círculo mágico a distancia
+  fija (basado en el círculo de transmutación humana de Fullmetal
+  Alchemist) → **3 segundos de carga** → un haz láser GRANDE que **perfora
+  infinito** ("The Angy Beam") → al tocar tiles sólidos brotan **BRAZOS
+  ESQUELÉTICOS (66.67% del daño)** + **cinders grandes (33.33%)** + fog y
+  lava visuales → los enemigos del haz **se desintegran en cenizas**.
+  GRUESOME EMINENCE: invoca una **congregación de espíritus gaseosa** cerca
+  del cursor que sigue loose y **se mueve salvajemente por su cuenta**,
+  libera **espíritus menores visuales** que son TIRADOS DE VUELTA, y tras
+  **14 segundos** se acumulan en **UNA SOLA ABOMINACIÓN totalmente
+  controlable** con el daño rampando **del 100% al 185%**; consume maná
+  CONSTANTE mientras se canaliza; el interior tiene siluetas de **Giygas**.
+
+### B. EL RENCOR PRIMORDIAL (el arma nacida del Rancor)
+  `RencorPrimordialStaff` + `RencorPrimordialProjectile`: EL CÍRCULO DE
+  TRANSMUTACIÓN rúnico de la casa (10 runas doradas CW + 6 violetas CCW
+  encendiéndose UNA A UNA + **LA ESTRELLA de 5 puntas dibujada con
+  cápsulas** — el homenaje FMA) a 380 px → **180 ticks de carga exactos**
+  (bruma espiralando HACIA dentro + ascuas orbitando + Telegraph carmesí +
+  latidos subiendo + Oscurecer) → **EL HAZ CONTINUO**: RiftLib.Tear con
+  paleta carmesí-ámbar nueva (UN SOLO QUAD, 880 px × 44, cero juntas — la
+  tecnología v6.28) + Ray ígneo + ImpactFlash en la boca + kick/flash del
+  paquete TearImpacto → **AL TOCAR TILE: LOS BRAZOS ESPECTRALES** (4 brazos
+  de cápsulas hueso-con-halo-carmesí que brotan escalonados de la
+  superficie, crecen con smoothstep, golpes ×0.66) + **LAS ASCUAS**
+  (PyraLib.Sparks rampa SolarFire + daño de área ×0.33 cada 8 ticks) + LA
+  FOG (BrumaFX) + **LA LAVA** (PyraLib.Flame lamiendo el tile + luz ámbar)
+  → **LOS ENEMIGOS DEL HAZ MUEREN EN CENIZA** (la muerte con firma) → el
+  cierre: la estrella implota y el círculo exhala. Daño manual por línea
+  (escuela A): apertura ×1.0 + DoT ×0.30/5t. Sin maná, rareza Purple.
+
+### C. LA EMINENCIA ATROZ (el arma nacida del Gruesome Eminence)
+  `EminenciaAtrozStaff` + `EminenciaAtrozProjectile`: **LA CONGREGACIÓN**
+  (BrumaFX.Cloud doble: pálida de hueso + interior violeta oscuro) nace
+  cerca del cursor clampeado a pantalla+rango → sigue CON spring flojo y
+  **SE LARGA con dardos salvajes** (hash-gated) → **LOS ESPÍRITUS MENORES**
+  paramétricos (3..12): cada uno con su ciclo se-libera→flota→**TIRADO DE
+  VUELTA**, con estelitas EstelaLib → **LOS OJOS** (2+6·x) asomando con
+  zócalos NEGROS + escleróticas blancas + pupilas negras **DE VERDAD** (el
+  pase ALFA — lección v6.29: el negro del DiscoNegro es INVISIBLE en el
+  lote aditivo) + destellos carmesí AL LADO (nunca encima) → **LA CARA**
+  (el interior Giygas: ojo inmenso + boca negra en ventanas caóticas desde
+  crecimiento 0.55) → **LA ACUMULACIÓN**: 840 ticks de canal (14 s EXACTOS
+  de Calamity) → **LA ABOMINACIÓN**: la nube SE APRIETA ×0.85, spring ×2.4
+  (control total), EL OJO MAYOR con la pupila siguiendo el vuelo + anillo
+  carmesí + corona de ojos + estela Comet de EstelaLib + rugido propio →
+  daño de área cada 6 ticks con **mult = 1 + 0.85·x (100%→185% EXACTO)** →
+  sin canal la masa SUBE, decae y se disipa (los espíritus escapan).
+
+### D. LAS DIEZ BOLSAS POR CATEGORÍA + LAS 99 DUMMIES
+  LA BOLSA ÚNICA (v6.27) SE RETIRA — ArsenalBag.cs/.png BORRADOS. En su
+  lugar `BolsaCategoria` (la base: permanente, clic derecho, semántica de
+  garantía "solo lo que falte") + **DIEZ BOLSAS** (Content/Items/Bolsas/):
+  1. Bolsa del Probador (kit+test) · 2. Bastones Fundacionales (los 4 V20)
+  · 3. Clásicos Cósmicos (sol+criaturas) · 4. Agujeros Negros (los 10)
+  · 5. Soles Rúnicos (los 20) · 6. Estrellas Reales (las 7) · 7. Armas de
+  las Librerías (las 6) · 8. Bastones Creativos (los 6) · 9. **EXHUMADOS**
+  (El Rencor + La Eminencia) · 10. Cosméticos (las coronas). TestingPlayer
+  entrega las 10 garantizadas + **99 TARGET DUMMY** (ItemID 3202 — el campo
+  de entrenamiento directo en el inventario).
+
+### E. LOS ASSETS (tools/gen_v629_assets.py — 14 PNGs 100% procedurales)
+  10 iconos de bolsa (30×30, un emblema por categoría: llave/nova/galaxia/
+  agujero/sol/constelación/rayo/reloj/sello-exhumado/corona) + EL TOMO del
+  Rencor (28×30, cuero carmesí + círculo dorado-carmesí con pentagrama) +
+  EL FANTASMA de la Eminencia (30×30, pixel-art DURO: cúpula+falda
+  ondulada, contorno violeta-negro, 2 ojos con pupilas carmesí, boca
+  abierta) + las 2 sombras 76×76. VLM 3 rondas: constelación 5→7/10,
+  Eminencia 4→7/10 (el fix fue BORDE DURO + contraste), Rencor 6→
+  brillado. MOCKS 1:1 (tools/mock_exhumados_v629.py): Rencor 8/10
+  (círculo+haz+brazos OK) · Eminencia: ojos 8/10, composición 9/10,
+  sobreexposición 9/10 — TRAS el fix del pase alfa (la primera pasada del
+  mock REVELÓ el bug real: las pupilas negras en aditivo son invisibles).
+
+### F. WORKLOG: LA CONSOLIDACIÓN DEFINITIVA
+  El worklog raíz del repo (557 KB, congelado desde v6.23 y confundiendo
+  con el activo) BORRADO del repo — el histórico vive en git y EL WORKLOG
+  ACTIVO ES `AethonMod/worklog.md` (Tasks 1-47, versionado). Los headers
+  de sandbox y del worklog apuntan ahora al correcto.
+
+— 0 errores · 0 warnings contra tML 2026.07.3.0 real (/tmp/verify)
+
 ## Commit v6.28 — EL DESGARRO CONTINUO + EL ECLIPSE TOTAL + LA PURGA DE COSMÉTICOS
 
 **Petición del usuario**: "el desgarro tiene interrupciones azules, en vez de

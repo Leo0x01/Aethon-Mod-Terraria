@@ -1,6 +1,11 @@
-# Worklog — Proyecto AethonMod (sandbox actual)
+# Worklog — Proyecto AethonMod — EL WORKLOG DEL REPO (el activo)
 
-> Histórico completo de sesiones anteriores (433 KB): `/home/z/my-project/AethonMod/worklog.md` (dentro del clone del repo)
+> **ESTE es EL worklog del proyecto** (versionado en git, publicado en
+> GitHub, Tasks 1-47). Desde v6.29 el antiguo worklog raíz del repo
+> (557 KB, congelado en v6.23) fue BORRADO — su histórico completo vive
+> en git history. El worklog del SANDBOX (`/home/z/my-project/worklog.md`)
+> es solo el registro de la sesión actual de la máquina y se sincroniza
+> aquí al final de cada entrega.
 
 ---
 Task ID: 1
@@ -1498,3 +1503,36 @@ Next:
 
 Stage Summary:
 - v6.28: el desgarro de la realidad por fin ES una línea continua (la raíz era una textura con alfa rampando a lo largo + cian puro — medido, no adivinado), se FRACTURA con daño ×2.2, y no suelta nada; el Eclipse Primordial renace como EL ECLIPSE TOTAL (creciente → día muerto → corona → anillo de diamante → retorno de la luz); las estrellas reales ×1.75; la supergigante a prueba de NaN; dos cosméticos purgados; los TRES .md de proyecto al día; el worklog consolidado — 0 errores 0 warnings.
+
+---
+Task ID: 47
+Agent: Z.ai Code (agente principal — sesión AethonMod v6.29)
+Task: v6.29 — LOS DOS EXHUMADOS (Rancor + Gruesome Eminence de Calamity) + LAS DIEZ BOLSAS POR CATEGORÍA + LAS 99 DUMMIES
+
+Work Log:
+- INVESTIGACIÓN (petición: "investiga esto Terraria Calamity mod Supreme Calamitas Enchanted Exhumed... investiga el arma Rancor... investiga Gruesome Eminence"): 6 búsquedas web + 4 lecturas de wiki (wiki.gg oficial Rancor/Gruesome Eminence/Enchantment + Fandom) → research/rancor_v629/INFORME_EXHUMADOS.md. "Enchanted Exhumed" = el encantamiento EXHUME de la Brimstone Witch (transforma ítems en otros nuevos: Burning Sea→Rancor, Ghastly Visage→Gruesome Eminence).
+- RANCOR (ficha completa): magic tome 333 dmg · círculo mágico a distancia fija (FMA transmutation circle) → 3 s de carga → "The Angy Beam" (haz que perfora infinito) → brazos esqueléticos al tocar tiles (66.67%) + cinders (33.33%) + fog/lava visual → enemigos mueren en ceniza.
+- GRUESOME EMINENCE (ficha completa): magic 666 dmg · congregación gaseosa de espíritus cerca del cursor (loose + wild) · espíritus menores tirados de vuelta · 14 s de acumulación → LA ABOMINACIÓN controlable · daño 100%→185% · maná constante · interior Giygas · clamp a pantalla.
+- EL RENCOR PRIMORDIAL (RencorPrimordialStaff + RencorPrimordialProjectile): círculo de transmutación rúnico (10 runas oro CW + 6 violetas CCW encendiéndose UNA A UNA + LA ESTRELLA de 5 puntas con cápsulas — homenaje FMA) a 380 px → 180 ticks de carga (bruma espiralando hacia dentro + PyraLib sparks orbitando + LumenLib.Telegraph carmesí + BloomPulse creciendo + latidos Item4 con pitch subiendo + RiftLib.Oscurecer 0.04→0.16) → EL HAZ: RiftLib.Tear paleta carmesí-ámbar nueva (120,8,30)/(220,36,80)/(255,140,60)/(255,244,214) — UN SOLO QUAD 880×44 + LumenLib.Ray ígneo ×1.6 + ImpactFlash en la boca + TearImpacto (kick perpendicular + flash + chispas) → AL TOCAR TILE (marcha de 16 px con WorldGen.SolidTile clampeado a los bordes del mundo): 4 BRAZOS ESPECTRALES escalonados (cápsulas hueso 255,243,228 + halo carmesí; GeomBrazo determinista — el daño y el dibujo ven EL MISMO brazo; golpes ×0.66 a las edades 12 y 38) + ASCUAS ×0.33 cada 8 ticks en área 62 px + PyraLib.Sparks SolarFire + BrumaFX.Puff (la fog) + PyraLib.Flame lamiendo el tile (LA LAVA) + luz ámbar → MUERTE EN CENIZA (npc.life<=0 post-golpe → ráfaga DustID.Ash/Crimson) → cierre 14 ticks (la estrella implota + suspiro + exhalación de humo). Daño manual escuela A (friendly=false): apertura ×1.0 + DoT ×0.30 cada 5 ticks. Dos fixes de revisión: RiftLib.Tear TOMA COORDENADAS DE PANTALLA (el contrato de RealityTear) y los brazos SOLO nacen si _tileHallado (sin pared no hay brazos — la regla de Calamity).
+- LA EMINENCIA ATROZ (EminenciaAtrozStaff + EminenciaAtrozProjectile): la congregación nace cerca del cursor (clamp 560 px) · UNA SOLA por jugador (Shoot escanea Main.projectiles) · el CANAL: CanalActivo = owner.channel + HeldItem==staff (crecimiento SOLO mientras se sostiene; sin maná por la regla de la casa) · movimiento: spring k=0.018+0.045·x (florece a control total ×2.4) + DARDOS SALVAJES hash-gated cada 46 ticks (fuerza 3.5+5.5·(1−x)) + damping 0.92 + tope 10+8·x + clamp de pantalla (el 1920×1080 de Calamity) · growth 1/840 por tick de canal (14 s EXACTOS) con gracia de 240 ticks y decaimiento 1/180 · daño de área cada 6 ticks radio 42+30·x con mult=1+0.85·x (100%→185% EXACTO) + MuerteEspiritual (polvo Ghost asciende) · la masa: BrumaFX.Cloud doble (pálida 208,222,226 + interior 84,64,104) · LOS ESPÍRITUS MENORES: 3..12 paramétricos deterministas (ciclo se-libera→flota→TIRADO-DE-VUELTA pow 1.6; estelitas EstelaLib.Head de 5 puntos reconstruidas) · LOS OJOS 2+6·x con parpadeo hash · LA CARA Giygas desde 0.55 (ventanas caóticas h<0.30) · LA ABOMINACIÓN: nube ×0.85 + OJO MAYOR (pupila siguiendo la dirección del vuelo) + anillo carmesí + corona + estela Comet de EstelaLib (ring buffer de 10 posiciones) + rugido Item12+Item117 + latigazo de polvo Ghost · disipación final (los espíritus escapan).
+- **EL BUG REAL QUE ENCONTRÓ EL MOCK**: la primera pasada dibujaba las pupilas/bocas negras con DiscoNegro en el LOTE ADITIVO — el negro aditivo es INVISIBLE (no suma nada): los ojos habrían salido como manchas blancas sin pupila. FIX: reestructuración en DOS pases — EL PASE ALFA lleva la masa + LOS RASGOS (zócalo negro → esclerótica blanca GlowOrb → PUPILA NEGRA DiscoNegro → boca negra) y EL PASE ADITIVO solo la luz (bloom, aurora, espíritus, destellos carmesí AL LADO de las pupilas — nunca encima). LECCIÓN v6.29 registrada.
+- LAS DIEZ BOLSAS POR CATEGORÍA (petición: "crea varias bolsas... separalas por categorías, una categoría por bolsa"): ArsenalBag.cs/.png BORRADOS → Content/Items/Bolsas/ con BolsaCategoria (base abstracta: permanente, CanRightClick, semántica de garantía Tiene/Dar, FX de apertura con el color de cada categoría) + BolsasCategorias.cs con las 10: Probador(9 kit) / Fundacionales(4 V20) / Clásicos Cósmicos(4) / Agujeros Negros(10) / Soles Rúnicos(20) / Estrellas Reales(7) / Armas de las Librerías(6) / Bastones Creativos(6) / EXHUMADOS(2 — el Rencor + la Eminencia) / Cosméticos(2).
+- LAS 99 DUMMIES (petición: "al jugador también dale 99 Dummy"): ItemID.TargetDummy=3202 VERIFICADO POR REFLEXIÓN contra tModLoader.dll (TileID.TargetDummy=378) → TestingPlayer entrega las 10 bolsas garantizadas + 99 dummies (si no las tiene) con mensajes de bienvenida.
+- ASSETS (tools/gen_v629_assets.py, 14 PNGs): 10 bolsas 30×30 (silueta de saco + interior por categoría + 10 emblemas: llave/nova/galaxia/agujero-con-disco-negro/sol-8-rayos/constelación/rayo-prisma/reloj-de-arena/sello-exhumado-con-pentagrama/corona) + TOMO del Rencor 28×30 (cuero carmesí + lomo + borde de páginas dorado + círculo con anillos + pentagrama + 6 runas + broche) + FANTASMA de la Eminencia 30×30 (REDISEÑO pixel-art DURO tras el 4/10 del VLM: cúpula+falda ondulada senoidal, contorno violeta-negro 2 px, relleno sólido, 2 ojos con zócalos/escleróticas/pupilas carmesí, boca abierta con lengua, 3 brasas) + 2 sombras 76×76 (el patrón de la casa, comparadas con MareaChica: mean_rgb 21.5/56.5 vs 27.6 del precedente).
+- VERIFICACIÓN VLM (3 rondas): constelación 5/10 → 7/10 (núcleo mayor + estrellas más grandes); Eminencia 4/10 "ink splatter" → 7/10 (pixel-art duro); Rencor 6/10 → brillado (anillos ×1.4, estrella 0.8→grosor, portada +brillo). MOCKS 1:1 (tools/mock_exhumados_v629.py): Rencor 8/10 (círculo de carga + haz+brazos OK) · Eminencia tras el fix del pase alfa: ojos 8/10, composición 9/10, sobreexposición 9/10 (la primera pasada del mock estaba sobreexpuesta y REVELÓ el bug del aditivo+negro).
+- LOCALIZACIÓN: ArsenalBag fuera; las 10 bolsas + las 2 armas + los 2 proyectiles dentro (es-ES + en-US, tooltips completos con las mecánicas).
+- COMPILACIÓN: 4 fixes durante el ciclo (using Terraria.DataStructures para IEntitySource; ColorHex(Titulo)→ColorHex(ColorFiesta); Asset<Texture2D> en ReLogic.Content; prefijo Bolsas. en TestingPlayer) → **0 errores 0 warnings** contra tML 2026.07.3.0 real (/tmp/verify).
+- WORKLOG: el worklog raíz del repo (557 KB, congelado desde v6.23) BORRADO del repo — el histórico vive en git; el ACTIVO es ESTE (Tasks 1-47); headers corregidos.
+- CHANGES.md v6.29 (A-F) + build.txt 6.29.
+
+Test:
+- Sandbox: compilación 0/0 (verificada 4 veces) + 2 mocks VLM-verificados + 14 PNGs VLM-verificados en 3 rondas
+- PENDIENTE (usuario prueba): Build v6.29 → (1) LAS 10 BOLSAS llegan al entrar al mundo + 99 dummies; clic derecho en cada bolsa despliega SU categoría (solo lo que falta); (2) EL RENCOR: cast → círculo rúnico cargando 3 s (runas encendiéndose, telegraph) → EL HAZ carmesí-ámbar continuo que atraviesa TODO → contra una pared: 4 brazos de hueso + ascuas + llama + fog; los enemigos mueren en ceniza; (3) LA EMINENCIA: sostener el clic → la masa pálida sigue el cursor floja y se larga sola → los espíritus salen y son tirados de vuelta → a los 14 s: LA ABOMINACIÓN con el ojo mayor obedeciendo al cursor; soltar: la masa decae y se disipa.
+
+Next:
+- Si la cara Giygas no se lee: subir el umbral de ventana (h<0.30 → 0.45) o el alpha de la esclerótica.
+- Si el haz del Rencor tapa demasiado: bajar HazAncho (44) o el alpha del Ray ígneo (0.28).
+- La Eminencia en MP: el canal solo crece en SP (owner.channel no se sincroniza) — documentado; SP es el contexto de pruebas.
+
+Stage Summary:
+- v6.29: los DOS EXHUMADOS de Calamity investigados a fondo (Rancor: círculo→3s→haz perforante con brazos 66%/ascuas 33%/muerte en ceniza · Gruesome Eminence: congregación wild→14s→abominación controlable al 185%) y recreados 100% con nuestras librerías; LA LECCIÓN del pase alfa para los negros; las 10 bolsas por categoría + 99 dummies; el worklog consolidado definitivamente — 0/0.

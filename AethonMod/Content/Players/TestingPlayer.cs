@@ -1,23 +1,36 @@
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
-using AethonMod.Content.Items;
+using AethonMod.Content.Items.Bolsas;
 
 namespace AethonMod.Content.Players
 {
     /// <summary>
     /// TestingPlayer — el kit de pruebas del arsenal.
     ///
-    /// v6.27 — LA BOLSA: petición del usuario ("todo lo que le vas a dar
-    /// al jugador ponlo en una bolsa o cofre y dale solo la bolsa con
-    /// todos los objetos dentro"). OnEnterWorld ya NO inunda el
-    /// inventario con 40+ ítems: entrega SOLO LA BOLSA DEL ARSENAL
-    /// PRIMORDIAL (1 ranura) y el jugador la abre con clic derecho
-    /// cuando quiera — el contenido completo (kit base + arsenal) vive
-    /// ahora en ArsenalBag.Contenido(), el punto único de la verdad.
+    /// v6.29 — LAS BOLSAS POR CATEGORÍA + LAS DUMMIES: petición del usuario
+    /// ("crea varias bolsas para todas las armas que me tienes que dar no
+    /// solo una y separalas por categorías, una categoría por bolsa · al
+    /// jugador también dale 99 Dummy para probar las armas"). OnEnterWorld
+    /// entrega:
     ///
-    /// Histórico: v5.98 kit congelado + garantía individual por arma
-    /// (40+ EnsureItem); v6.01/v6.18/v6.26 altas y bajas de la gran
-    /// limpieza — todo eso ahora es UNA línea.
+    ///   · LAS DIEZ BOLSAS (una por categoría del arsenal — cada una se
+    ///     abre con clic derecho y solo entrega lo que falte):
+    ///       1. La Bolsa del Probador          (herramientas de prueba)
+    ///       2. La Bolsa de los Fundacionales  (los 4 del alba)
+    ///       3. La Bolsa de los Clásicos       (el sol y sus criaturas)
+    ///       4. La Bolsa de los Agujeros Negros (los 10)
+    ///       5. La Bolsa de los Soles Rúnicos  (los 20)
+    ///       6. La Bolsa de las Estrellas Reales (las 7)
+    ///       7. La Bolsa de las Librerías      (las 6 VFX)
+    ///       8. La Bolsa de los Creativos      (los 6 experimentos)
+    ///       9. La Bolsa de los Exhumados      (el rencor + la eminencia)
+    ///      10. La Bolsa de los Cosméticos    (las coronas)
+    ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
+    ///     entrenamiento directo en el inventario).
+    ///
+    /// Histórico: v5.98 kit congelado + 40+ EnsureItem; v6.27 UNA bolsa
+    /// (ArsenalBag); v6.29 la bolsa única RETIRADA — una por categoría.
     /// </summary>
     public class TestingPlayer : ModPlayer
     {
@@ -26,20 +39,45 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === EL KIT COMPLETO EN UNA RANULA: LA BOLSA (v6.27) ===
-            // Garantizada en cada entrada (si la borraste, vuelve); su
-            // contenido se despliega con clic derecho y semántica de
-            // "solo lo que falte" — reabrirla repone armas perdidas.
-            if (!HasItem(ModContent.ItemType<ArsenalBag>()))
+            // === LAS DIEZ BOLSAS (garantizadas en cada entrada) ===
+            int bolsas = 0;
+            bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
+            bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
+            bolsas += Entregar(ModContent.ItemType<BolsaClasicosCosmicos>());
+            bolsas += Entregar(ModContent.ItemType<BolsaAgujerosNegros>());
+            bolsas += Entregar(ModContent.ItemType<BolsaSolesRunicos>());
+            bolsas += Entregar(ModContent.ItemType<BolsaEstrellasReales>());
+            bolsas += Entregar(ModContent.ItemType<BolsaArmasLibrerias>());
+            bolsas += Entregar(ModContent.ItemType<BolsaBastonesCreativos>());
+            bolsas += Entregar(ModContent.ItemType<BolsaExhumados>());
+            bolsas += Entregar(ModContent.ItemType<BolsaCosmeticos>());
+
+            // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
+            int dummies = 0;
+            if (!HasItem(ItemID.TargetDummy))
             {
-                GiveItem(ModContent.ItemType<ArsenalBag>(), 1);
-                if (Player.whoAmI == Main.myPlayer)
-                {
-                    Terraria.Main.NewText(
-                        "La Bolsa del Arsenal Primordial llega contigo: clic derecho para desplegar todo el arsenal.",
-                        new Microsoft.Xna.Framework.Color(230, 196, 255));
-                }
+                GiveItem(ItemID.TargetDummy, 99);
+                dummies = 99;
             }
+
+            if (bolsas > 0 && Player.whoAmI == Main.myPlayer)
+            {
+                Terraria.Main.NewText(
+                    "Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.",
+                    new Microsoft.Xna.Framework.Color(230, 196, 255));
+                if (dummies > 0)
+                    Terraria.Main.NewText(
+                        $"Además: {dummies} dummies de prueba para el campo de entrenamiento.",
+                        new Microsoft.Xna.Framework.Color(255, 216, 107));
+            }
+        }
+
+        /// <summary>Entrega el ítem si no se tiene; devuelve 1 si se entregó.</summary>
+        private int Entregar(int itemType)
+        {
+            if (HasItem(itemType)) return 0;
+            GiveItem(itemType, 1);
+            return 1;
         }
 
         /// <summary>¿El jugador tiene este ítem en el inventario (58 slots)?</summary>

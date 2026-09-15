@@ -5,16 +5,16 @@
 
 ---
 
-## 🚦 ESTADO REAL DEL PROYECTO — v6.28 (leer antes del roadmap original)
+## 🚦 ESTADO REAL DEL PROYECTO — v6.29 (leer antes del roadmap original)
 
 > El roadmap de abajo es el PLAN ORIGINAL (rama Ranged/Melee/Magic con
 > árboles procedurales). La ejecución real tomó otro camino igual de
 > ambicioso: LA ERA DE LAS LIBRERÍAS VFX. Estado:
 
-| Frente del roadmap original | Estado real v6.28 |
+| Frente del roadmap original | Estado real v6.29 |
 |---|---|
 | Arquitectura / esqueleto | ✅ HECHO (y muy crecido: 1979 archivos en git) |
-| Rama Magic (+ invocador) | ✅ DESBORDADA: **~50 bastones** cósmicos (9 agujeros negros rúnicos con lente gravitacional, 20 soles rúnicos, 6 estrellas reales agrandadas v6.28, el Eclipse Primordial REDISEÑADO como EL ECLIPSE TOTAL, el Desgarro de la Realidad v2 CONTINUO que se FRACTURA ×2.2, el Ocaso gauge, las armas de las librerías, minions cósmicos, Grimoire) |
+| Rama Magic (+ invocador) | ✅ DESBORDADA: **~52 armas** cósmicas (9 agujeros negros rúnicos con lente gravitacional, 20 soles rúnicos, 7 estrellas reales agrandadas v6.28, el Eclipse Primordial REDISEÑADO como EL ECLIPSE TOTAL, el Desgarro de la Realidad v2 CONTINUO que se FRACTURA ×2.2, el Ocaso gauge, las armas de las librerías, minions cósmicos, Grimoire + **v6.29: LOS DOS EXHUMADOS** — El Rencor Primordial (círculo→haz perforante con brazos/ascuas/muerte en ceniza) y La Eminencia Atroz (congregación de espíritus→14 s→LA ABOMINACIÓN al 185%), nacidos de la investigación de Calamity) |
 | Rama Ranged / Melee | ⏳ PENDIENTE (el arsenal actual es 100% Magic) |
 | Sistema de niveles / árboles | 🔶 PARCIAL (LevelUpTester + GenesisShard existen; los árboles procedurales no) |
 | Jefe final Aethon | ⏳ PENDIENTE |
