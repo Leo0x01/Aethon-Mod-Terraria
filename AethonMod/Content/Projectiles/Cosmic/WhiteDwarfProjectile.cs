@@ -103,9 +103,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * mult));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
                     npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 1f, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
                 }
             }
 
@@ -139,7 +140,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
@@ -188,9 +189,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int burst = Math.Max(1, (int)(Projectile.damage * 0.8f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 110f) continue;
                     npc.SimpleStrikeNPC(burst, npc.direction, false, 1.5f, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
                 }
             }
 

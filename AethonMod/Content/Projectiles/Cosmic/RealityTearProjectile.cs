@@ -10,20 +10,23 @@ using AethonMod.Content.Particles;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// RealityTearProjectile — v6.28 — EL DESGARRO EN LA REALIDAD, SEGUNDA
-    /// GENERACIÓN: LA LÍNEA QUE SE FRACTURA.
+    /// RealityTearProjectile — v6.30 — EL DESGARRO EN LA REALIDAD, TERCERA
+    /// GENERACIÓN: LA LÍNEA QUE PARTE EL ESPEJO.
     ///
-    /// v6.28 — las órdenes del usuario: (1) el desgarro debe ser UNA LÍNEA
-    /// CONTINUA (las "interrupciones azules" eran la TrailGlow: alfa rampando
-    /// A LO LARGO + color cian puro en las juntas — RiftLib v2 lo mata con las
-    /// texturas RiftTaper*: el desgarro recto ES UN SOLO QUAD, CERO juntas);
-    /// (2) el desgarro NO SUELTA MÁS PROYECTILES — solo daña EL DESGARRO EN
-    /// SÍ (la grieta persistente RealityTearZoneProjectile está BORRADA);
-    /// (3) hace AÚN MÁS DAÑO cuando pasa de línea recta a FRACTURARSE.
+    /// v6.30 — las órdenes del usuario: (1) la segunda fase SIGUE sin ser
+    /// continua (tenía cortes) — RiftLib v3 endurece la cadena: el VACÍO
+    /// solapa IGUAL que la luz (len+w — cubre giros ≤~126°), LA PERLA vive
+    /// en TODOS los vértices (raíz incluida) con diámetro max(w), el taper
+    /// es SUAVE (exp 0.45 + suelo 25% — el vidrio real mantiene el 40-70%
+    /// de su anchura) y NINGÚN segmento se omite jamás; (2) el proyectil
+    /// que CAÍA (los shards) BORRADO — la realidad se parte COMO UN ESPEJO
+    /// ROTO: el canal madre + RAMIFICACIONES COMO UN RAYO (la figura de
+    /// Lichtenberg: ramas a 25°-55° alternando lados, ×0.6 de ancho, con
+    /// sub-ramas) + los ARCOS TELARAÑA concéntricos del impacto — TODO ES
+    /// LA GRIETA, nada se suelta; (3) el daño de la fractura pega TODO el
+    /// patrón: ×2.2 el canal madre, ×1.6 las ramas/arcos.
     ///
-    /// LA LÍNEA DE TIEMPO (el guion de física del vidrio — la lección v6.28:
-    /// las grietas se propagan a 1458-1500 m/s; en juego, LA FRACTURA ES UN
-    /// EVENTO DE 1-2 FRAMES precedido de tensión visible):
+    /// LA LÍNEA DE TIEMPO (el guion de física del vidrio):
     ///   · TELEGRAFO (12 ticks): la estrella de ruptura crece, el anillo
     ///     implosiona, el mundo se apaga (0→0.22). CERO daño.
     ///   · APERTURA (3 ticks): EL PRIMER GOLPE — la línea recta (620 px, UN
@@ -33,17 +36,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     fluyendo dentro del vacío oclusivo, respiración nebulosa. DoT
     ///     ×0.07 cada 3 ticks (EL DESGARRO EN SÍ — nada de proyectiles).
     ///   · VIBRACIÓN (16 ticks): LA TENSIÓN — onda estacionaria creciendo
-    ///     0→3.5 px a ~10 Hz (RiftLib.CaminoVibracion dibujado con la cadena
-    ///     SIN huecos), shimmer rápido, un retumbo grave. La línea está a
-    ///     punto de FALLAR.
-    ///   · FRACTURA (2 ticks): EL CLÍMAX — la línea se QUIEBRA al camino
-    ///     Lichtenberg (curvatura 8, micro-fallas 1/4 — LA FURIA): daño
-    ///     ×2.2 a lo largo de la herida fracturada + shards de vidrio +
-    ///     kick ×1.3 + flash 0.30 + el mundo al MÁXIMO de oscuridad.
-    ///   · GRIETA VIVA (98 ticks): la herida jagged persiste respirando
-    ///     (±8%) con estrellas fijas y chispas. DoT ×0.10 cada 3 ticks.
+    ///     0→3.5 px a ~10 Hz (RiftLib.CaminoVibracion con la cadena v6.30),
+    ///     shimmer rápido, un retumbo grave. La línea está a punto de FALLAR.
+    ///   · FRACTURA (2 ticks): EL CLÍMAX — EL ESPEJO SE PARTE: el canal
+    ///     Lichtenberg moderado + LAS RAMAS tipo rayo + los arcos telaraña
+    ///     (CaminoEspejoRoto): daño ×2.2 canal / ×1.6 ramas + kick ×1.3 +
+    ///     flash 0.30 + el mundo al MÁXIMO de oscuridad. SIN shards.
+    ///   · ESPEJO VIVO (98 ticks): la herida RAMIFICADA persiste respirando
+    ///     (±8%) con estrellas fijas y chispas. DoT ×0.10 canal / ×0.07
+    ///     ramas cada 3 ticks. La vida NUNCA baja de ~0.52 (se LEE continua).
     ///   · CIERRE (10 ticks): el daño CESÓ 8 ticks antes del final visual;
-    ///     los labios se cierran y la realidad sana.
+    ///     TODAS las grietas se cierran juntas y la realidad sana.
     ///
     /// Determinismo MP: la dirección se toma de la velocity SINCRONIZADA al
     /// nacer; la semilla es Projectile.identity (la misma en todas las
@@ -72,6 +75,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>El multiplicador de daño de LA FRACTURA (la petición v6.28: "aún más daño cuando se fractura").</summary>
         private const float DañoFractura = 2.2f;
 
+        /// <summary>El multiplicador de daño de LAS RAMAS y arcos del espejo roto (v6.30).</summary>
+        private const float DañoRamas = 1.6f;
+
         // === LA PALETA DEL ARMA: labios violeta/carmesí (realidad herida) ===
         private static readonly Color[] Paleta =
         {
@@ -88,8 +94,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private bool _golpeApertura;  // el daño ×1.0 de la apertura
         private bool _fracturaHecha;  // EL CLÍMAX (daño ×2.2 + paquete)
         private bool _suspiroHecho;   // el sonido final del cierre
-        private Vector2[] _caminoMundo;     // la herida fracturada (coordenadas de MUNDO — el daño)
-        private Vector2[] _caminoPantalla;  // la herida fracturada (coordenadas de PANTALLA — el dibujo)
+        private Vector2[] _caminoMundo;     // el canal del espejo en coords de MUNDO (alias del Principal — luz/chispas)
+        private RiftLib.RiftRamillete _espejoMundo;     // EL ESPEJO ROTO (mundo — el daño de TODAS las grietas)
+        private RiftLib.RiftRamillete _espejoPantalla;  // EL ESPEJO ROTO (pantalla — el dibujo)
 
         public override void SetStaticDefaults()
         {
@@ -267,44 +274,40 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 case RiftFase.Fractura:
                 {
                     float preFrac = TelegrafoTicks + AperturaTicks + RectoTicks + VibracionTicks;
-                    float ageF = EdadFase(preFrac);
                     bool enGrieta = _age > preFrac + FracturaTicks;   // la GRIETA VIVA
 
-                    // === EL CLÍMAX (1-2 ticks): LA FRACTURA ===
+                    // === EL CLÍMAX (1-2 ticks): EL ESPEJO SE PARTE ===
                     if (!_fracturaHecha)
                     {
                         _fracturaHecha = true;
 
-                        // LA HERIDA FRACTURADA: el camino Lichtenberg con FURIA
-                        // (curvatura 8 = caos, micro-fallas 1/4 — se QUIEBRA de verdad).
-                        _caminoMundo = RiftLib.CaminoGrieta(_origin, _dir, seed,
-                            26, 22f, 46f, 8f, 4f);
+                        // LA REALIDAD SE PARTE COMO UN ESPEJO ROTO: el canal
+                        // Lichtenberg + LAS RAMIFICACIONES tipo rayo + los arcos
+                        // telaraña del impacto (v6.30 — la petición del usuario:
+                        // ramificaciones como un rayo para simular el espejo).
+                        _espejoMundo = RiftLib.CaminoEspejoRoto(_origin, _dir, seed, TearLength);
+                        _caminoMundo = _espejoMundo.Principal;
 
-                        // EL GOLPE DE LA FRACTURA: daño ×2.2 por TODO el camino
-                        // (la petición del usuario: más daño al fracturarse).
-                        GolpearCamino(DañoFractura, 0.6f);
+                        // EL GOLPE DEL ESPEJO: daño ×2.2 por el CANAL MADRE y
+                        // ×1.6 por RAMAS/ARCOS (la fractura pega TODO el patrón).
+                        GolpearRamillete(DañoFractura, DañoRamas, 0.6f);
 
-                        // EL PAQUETE DEL CLÍMAX: kick ×1.3, flash 0.30, shards.
+                        // EL PAQUETE DEL CLÍMAX: kick ×1.3, flash 0.30 — SIN
+                        // shards que caen (v6.30: nada suelto; TODO ES LA GRIETA).
                         RiftLib.TearImpacto(_origin, _dir, TearLength, Paleta, seed, 1.3f);
-                        if (Main.netMode != NetmodeID.Server)
-                        {
-                            RiftLib.Shards(_origin, _dir, Paleta, seed + 31, out ParticleData[] shards, TearLength);
-                            if (shards != null)
-                                for (int i = 0; i < shards.Length; i++)
-                                    ParticleManager.Spawn(shards[i]);
-                        }
                     }
 
                     if (enGrieta)
                     {
                         float ageG = _age - (preFrac + FracturaTicks);
 
-                        // EL DoT DE LA GRIETA VIVA: cada 3 ticks, ×0.10 (la herida
-                        // fracturada duele MÁS que la línea — tiene más filo).
+                        // EL DoT DEL ESPEJO VIVO: cada 3 ticks, ×0.10 el canal
+                        // y ×0.07 ramas/arcos (la herida rota duele en TODOS sus
+                        // filos — tiene más bordes que una línea).
                         if (ageG > 0f && ageG % 3f == 1f)
-                            GolpearCamino(0.10f, 0.30f);
+                            GolpearRamillete(0.10f, 0.07f, 0.30f);
 
-                        // LA LUZ de la herida (muestreada a lo largo del camino).
+                        // LA LUZ de la herida (muestreada a lo largo del canal madre).
                         if (_age % 3f == 0f && _caminoMundo != null)
                             StormLib.AddLightAlong(_caminoMundo, 0.40f, 0.18f, 0.55f, 0.7f, 56f);
 
@@ -370,7 +373,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int dmg = Math.Max(1, (int)(Projectile.damage * factor));
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.active || !npc.CanBeChasedBy()) continue;
+                if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                 if (!RiftLib.LineaToca(_origin, _dir, TearLength, MaxWidth + 8f, npc.Hitbox)) continue;
 
                 npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
@@ -380,21 +383,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// EL DAÑO DEL CAMINO FRACTURADO (la herida jagged): cápsula por
-        /// segmento con el taper local — LA FRACTURA PEGA ×2.2 AQUÍ.
+        /// EL DAÑO DEL ESPEJO ROTO (escuela A): el canal madre a
+        /// <paramref name="factorPrincipal"/> y las ramas/arcos a
+        /// <paramref name="factorRamas"/> — LA FRACTURA PEGA TODO EL PATRÓN.
+        /// Determinismo MP: SOLO server/singleplayer (SimpleStrikeNPC).
         /// </summary>
-        private void GolpearCamino(float factor, float knockback)
+        private void GolpearRamillete(float factorPrincipal, float factorRamas, float knockback)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient || _caminoMundo == null) return;
+            if (Main.netMode == NetmodeID.MultiplayerClient || _espejoMundo == null) return;
 
-            int dmg = Math.Max(1, (int)(Projectile.damage * factor));
+            int dmgP = Math.Max(1, (int)(Projectile.damage * factorPrincipal));
+            int dmgR = Math.Max(1, (int)(Projectile.damage * factorRamas));
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.active || !npc.CanBeChasedBy()) continue;
-                if (!RiftLib.CaminoToca(_caminoMundo, MaxWidth, npc.Hitbox, 8f)) continue;
+                if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                // El canal madre (el golpe mayor).
+                if (RiftLib.CaminoToca(_espejoMundo.Principal, MaxWidth, npc.Hitbox, 8f))
+                {
+                    npc.SimpleStrikeNPC(dmgP, npc.direction, false, knockback, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                    continue;
+                }
+                // Las ramas y los arcos (los filos secundarios del espejo).
+                if (RiftLib.RamilleteToca(_espejoMundo, MaxWidth, npc.Hitbox, 8f))
+                {
+                    npc.SimpleStrikeNPC(dmgR, npc.direction, false, knockback, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                }
             }
         }
 
@@ -491,24 +507,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 if (_age <= preFrac + FracturaTicks)
                 {
-                    // EL FRAME DE LA FRACTURA: la herida NACE al MÁXIMO (el
-                    // flash de la rotura — vida plena en el contrato Grieta)
-                    // y la intensidad EXPLOTA.
+                    // EL FRAME DEL ESPEJO PARTIÉNDOSE: la herida NACE al
+                    // MÁXIMO (el flash de la rotura — vida plena) y la
+                    // intensidad EXPLOTA.
                     progress = 0.05f;
                     intensity = 1.25f;
                 }
                 else
                 {
-                    // LA GRIETA VIVA: progreso 0→1 de su propia vida.
+                    // EL ESPEJO VIVO: progreso 0→0.55 de su propia vida
+                    // (v6.30: la vida JAMÁS baja de 0.45^0.8≈0.52 — la
+                    // grieta se LEA continua hasta que cierra de verdad).
                     float ageG = _age - preGrieta;
-                    progress = 0.10f + 0.75f * MathHelper.Clamp(ageG / GrietaTicks, 0f, 1f);
+                    progress = 0.10f + 0.45f * MathHelper.Clamp(ageG / GrietaTicks, 0f, 1f);
                     intensity = 0.90f + 0.10f * MathF.Sin(time * 4.4f + seed);
                 }
             }
             else
             {
+                // EL CIERRE DEL ESPEJO: 0.55→1.0 — el patrón entero sana.
                 float ageC = _age - preGrieta - GrietaTicks;
-                progress = 0.85f + 0.15f * MathHelper.Clamp(ageC / CierreTicks, 0f, 1f);
+                progress = 0.55f + 0.45f * MathHelper.Clamp(ageC / CierreTicks, 0f, 1f);
                 intensity = 0.92f * (1f - MathHelper.Clamp(ageC / CierreTicks, 0f, 1f) * 0.5f);
             }
 
@@ -550,16 +569,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
             }
             // ============================================================
-            //  FASE 2 — LA HERIDA FRACTURADA (Fractura/Grieta/Cierre):
-            //  la cadena Lichtenberg SIN huecos (perlas en cada vértice).
+            //  FASE 2 — EL ESPEJO ROTO (Fractura/Grieta/Cierre): el canal
+            //  madre + LAS RAMIFICACIONES tipo rayo + los arcos telaraña,
+            //  TODO con la cadena continua v6.30 (sin cortes — el usuario).
             // ============================================================
             else
             {
-                // El camino se regenera en CLIENTE también (determinista: la
+                // El espejo se regenera en CLIENTE también (determinista: la
                 // MISMA semilla → la MISMA herida en todas las máquinas).
-                if (_caminoPantalla == null)
-                    _caminoPantalla = RiftLib.CaminoGrieta(origin, dir, seed, 26, 22f, 46f, 8f, 4f);
-                DibujarCamino(_caminoPantalla, progress, intensity, seed, time);
+                if (_espejoPantalla == null)
+                    _espejoPantalla = RiftLib.CaminoEspejoRoto(origin, dir, seed, TearLength);
+                DibujarRamillete(_espejoPantalla, progress, intensity, seed, time);
             }
 
             // ============================================================
@@ -585,7 +605,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Main.spriteBatch.End();
         }
 
-        /// <summary>Dibuja una herida CAMINO (vibrante o fracturada) con los dos lotes del contrato.</summary>
+        /// <summary>Dibuja una herida CAMINO (vibrante) con los dos lotes del contrato.</summary>
         private void DibujarCamino(Vector2[] camino, float progress, float intensity, int seed, float time)
         {
             // PASO 1 — EL VACÍO OCLUSIVO (lote NO-premultiplicado).
@@ -600,6 +620,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
             RiftLib.Grieta(Main.spriteBatch, camino, progress, MaxWidth, Paleta,
+                intensity, seed, time);
+        }
+
+        /// <summary>Dibuja EL ESPEJO ROTO completo (canal + ramas + arcos) con
+        /// los dos lotes del contrato (v6.30).</summary>
+        private void DibujarRamillete(RiftLib.RiftRamillete espejo, float progress,
+            float intensity, int seed, float time)
+        {
+            // PASO 1 — EL VACÍO OCLUSIVO de TODAS las grietas (juntas).
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            RiftLib.RamilleteVacio(Main.spriteBatch, espejo, progress, MaxWidth, seed, time);
+            Main.spriteBatch.End();
+
+            // PASO 2 — LA LUZ de TODAS las grietas (juntas).
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            RiftLib.Ramillete(Main.spriteBatch, espejo, progress, MaxWidth, Paleta,
                 intensity, seed, time);
         }
     }

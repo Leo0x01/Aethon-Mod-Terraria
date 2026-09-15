@@ -5,6 +5,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Effects;
 using AethonMod.Content.Projectiles.V20;
@@ -190,7 +191,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxDist * maxDist;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float d2 = (npc.Center - Projectile.Center).LengthSquared();
                 if (d2 < bestDist)
                 {
@@ -296,7 +297,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
                     npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
@@ -386,7 +387,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 Vector2 toCenter = Projectile.Center - npc.Center;
                 float dist = toCenter.Length();
                 if (dist > gravityRadius || dist < 5f) continue;
@@ -1155,7 +1156,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // golpea el punto ciego inicial). v5.94: 340 → 260.
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < 260f)
                     {

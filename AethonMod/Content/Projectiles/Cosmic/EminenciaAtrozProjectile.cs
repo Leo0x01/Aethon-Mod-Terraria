@@ -12,13 +12,16 @@ using AethonMod.Content.Weapons.Cosmic;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// EminenciaAtrozProjectile — v6.29 — LA CONGREGACIÓN DE ESPÍRITUS.
+    /// EminenciaAtrozProjectile — v6.30 — LA CONGREGACIÓN DE ESPÍRITUS.
     ///
-    /// El proyectil único de LA EMINENCIA ATROZ (research/rancor_v629 — la
-    /// traducción completa del Gruesome Eminence de Calamity):
+    /// El proyectil único de LA EMINENCIA ATROZ (research/v630 — MEDIDO del
+    /// sprite Spirit_Congregation real de Calamity: 45.8% NEGRO + 26.4%
+    /// violeta oscuro + 10.4% rojo oscuro con las CARAS ardiendo
+    /// ROJO-NARANJA (253,74,60) DENTRO de la masa — v6.29 la hizo PÁLIDA y
+    /// no se parecía en nada; v6.30 la corrige con los colores medidos):
     ///
-    ///   · LA MASA: BrumaFX.Cloud DOBLE — pálida de hueso fuera, violeta
-    ///     oscura dentro (la conglomeración gaseosa que OCLUYE), respirando.
+    ///   · LA MASA NEGRA: BrumaFX.Cloud DOBLE — negra-violeta fuera, corazón
+    ///     NEGRO dentro (la silueta se lee sobre cualquier fondo).
     ///   · EL MOVIMIENTO SALVAJE: sigue el cursor CON spring flojo... y de
     ///     cuando en cuando SE LARGA con un impulso de dardo (la
     ///     "moves around wildly" de Calamity). Al madurar obedece (spring
@@ -34,6 +37,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     (100% → 185% — EXACTO a Calamity).
     ///   · LA CARA (el interior Giygas): desde crecimiento 0.55, un ojo
     ///     grande y una boca asoman en VENTANAS CAÓTICAS dentro de la masa.
+    ///   · v6.30 — EL SISTEMA DE TRES PASES: alfa1 (masa negra + zócalos +
+    ///     brasas base) → aditivo (los OJOS ROJO-NARANJA ardiendo + estelas)
+    ///     → alfa2 (LAS PUPILAS Y LA BOCA NEGRAS ENCIMA del brillo — la
+    ///     mirada corta el propio fuego).
     ///
     /// El canal: mientras el dueño SOSTIENE el arma, la congregación vive
     /// y crece; si la suelta, la masa decae y se disipa (el "mana drain"
@@ -156,7 +163,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
                         Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Ghost,
                             new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 4.5f,
-                            160, new Color(220, 230, 235), 0.9f);
+                            160, i % 3 == 0 ? new Color(253, 74, 60) : new Color(36, 14, 48), 0.9f);
                         d.noGravity = true;
                     }
                 }
@@ -262,7 +269,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Ghost,
                             new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang) * 1.4f) *
                                 Main.rand.NextFloat(2f, 5f),
-                            170, new Color(230, 238, 240), 1.1f);
+                            170, i % 3 == 0 ? new Color(253, 74, 60) : new Color(40, 16, 52), 1.1f);
                         d.noGravity = true;
                     }
                 }
@@ -281,7 +288,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > radio + npc.width * 0.5f)
                     continue;
                 int dmg = (int)(Projectile.damage * mult);
@@ -302,7 +309,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Main.rand.NextFloat(-npc.height * 0.5f, npc.height * 0.5f)),
                     DustID.Ghost,
                     new Vector2(Main.rand.NextFloat(-0.6f, 0.6f), Main.rand.NextFloat(-2.4f, -1.0f)),
-                    150, new Color(225, 235, 238), 1.0f);
+                    150, i % 3 == 0 ? new Color(253, 74, 60) : new Color(40, 16, 52), 1.0f);
                 d.noGravity = true;
                 d.fadeIn = 0.5f;
             }
@@ -336,13 +343,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 null, Main.Transform);
         }
 
-        // --- LA PALETA: espectral blanco-hueso + acentos carmesí (brimstone) ---
-        private static readonly Color MasaPalida = new(208, 222, 226);
-        private static readonly Color MasaInterna = new(84, 64, 104);
-        private static readonly Color EspirituPalido = new(225, 240, 238);
-        private static readonly Color Carmin = new(255, 70, 90);
-        private static readonly Color OjoBlanco = new(245, 250, 250);
-        private static readonly Color NegroRasgo = new(10, 5, 16);
+        // --- LA PALETA (v6.30 — MEDIDA del sprite Spirit_Congregation de
+        //     Calamity: 45.8% NEGRO + 26.4% violeta oscuro (32,0,32) + 10.4%
+        //     rojo oscuro; las CARAS arden ROJO-NARANJA (253,74,60) DENTRO
+        //     de la masa negra; acento pálido (192,224,224) 0.6%) ---
+        private static readonly Color MasaNegra = new(24, 8, 34);        // el cuerpo de la congregación
+        private static readonly Color MasaNucleo = new(10, 3, 16);       // el corazón negro de la masa
+        private static readonly Color EspirituOscuro = new(40, 16, 52);  // los espíritus menores
+        private static readonly Color RojoCara = new(253, 74, 60);       // las caras que ARDEN (medido)
+        private static readonly Color NaranjaCara = new(255, 130, 70);   // las brasas calientes
+        private static readonly Color BrasaBase = new(122, 28, 18);      // la base del ojo (alfa)
+        private static readonly Color PálidoRasgo = new(192, 224, 224);  // el acento pálido (0.6%)
+        private static readonly Color NegroRasgo = new(5, 2, 9);
 
         private void DrawCongregacion()
         {
@@ -362,60 +374,72 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 center = Projectile.Center - Main.screenPosition;
 
                 // ============================================================
-                //  1. EL PASE ALFA — LA MASA + LOS RASGOS DE VERDAD
-                //  (los NEGROS — pupilas, bocas, zócalos — SOLO funcionan en
-                //  alfa: el lote aditivo IGNORA el negro. Lección v6.29.)
+                //  1. EL PASE ALFA — LA MASA NEGRA DE VERDAD (v6.30: la
+                //  congregación medida de Calamity es NEGRA/VIOLETA OSCURA —
+                //  NO pálida) + los zócalos + las brasas base de los ojos
                 // ============================================================
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                BrumaFX.Cloud(center, radio, MasaPalida, seed + 5, time,
-                    puffs: 6 + (int)(3 * growth), alpha: 0.30f * fade, worldLit: true);
+                // LA MASA NEGRA (el cuerpo de la congregación — silueta que
+                // se lee sobre CUALQUIER fondo: worldLit false, se autodefine).
+                BrumaFX.Cloud(center, radio, MasaNegra, seed + 5, time,
+                    puffs: 6 + (int)(3 * growth), alpha: 0.52f * fade, worldLit: false);
 
-                // EL INTERIOR OSCURO (la profundidad de la conglomeración).
-                BrumaFX.Cloud(center - new Vector2(0f, 6f), radio * 0.62f, MasaInterna,
+                // EL CORAZÓN NEGRO (la profundidad del vacío — más denso al centro).
+                BrumaFX.Cloud(center - new Vector2(0f, 6f), radio * 0.62f, MasaNucleo,
                     seed + 41, time * 1.2f,
-                    puffs: 4 + (int)(2 * growth), alpha: 0.34f * fade, worldLit: false);
+                    puffs: 4 + (int)(2 * growth), alpha: 0.58f * fade, worldLit: false);
 
-                // LOS RASGOS: ojos con pupilas NEGRAS de verdad + LA CARA.
-                DibujarRasgos(center, radio, time, seed, growth, fade, abominacion);
+                // LOS ZÓCALOS + LAS BRASAS BASE (los huecos donde arden los ojos).
+                DibujarZocalos(center, radio, time, seed, growth, fade, abominacion);
 
                 Main.spriteBatch.End();
 
                 // ============================================================
-                //  2. LO BRILLANTE (pase aditivo) — la luz SOLO
+                //  2. LO QUE ARDE (pase aditivo) — las CARAS ROJO-NARANJA
+                //     brillando DENTRO de la masa negra (el 5.2% (253,74,60)
+                //     del sprite real) + las estelas
                 // ============================================================
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                // --- EL CORAZÓN DE LA MASA (bloom pálido que late) ---
+                // --- EL RESPLANDOR DE LA MASA (rojo profundo que late — la
+                //     congregación vista desde fuera ARDE por dentro) ---
                 LumenLib.BloomPulse(Main.spriteBatch, center, radio * 0.8f,
-                    EspirituPalido, (0.16f + 0.14f * growth) * fade, time, 0.9f, 2);
+                    RojoCara, (0.07f + 0.08f * growth) * fade, time, 0.9f, 2);
 
-                // --- LA AURORA INTERNA (la firma de LumenLib — tenue) ---
-                if (growth > 0.25f)
-                    LumenLib.Aurora(Main.spriteBatch, center, radio * 0.9f, time,
-                        LumenLib.Drift(time, seed, 0.10f),
-                        0.16f * growth * fade, 8);
-
-                // --- LOS ESPÍRITUS MENORES (se liberan → son tirados de vuelta) ---
+                // --- LOS ESPÍRITUS MENORES (sus OJOS rojos + estelas mientras
+                //     se liberan y son tirados de vuelta) ---
                 DibujarEspiritus(center, radio, time, seed, growth, fade);
 
-                // --- LOS BRILLOS DE LOS OJOS (los destellos carmesí/hueso AL
-                //     LADO de las pupilas — nunca ENCIMA: el aditivo no oscurece) ---
-                DibujarBrillosOjos(center, radio, time, seed, growth, fade, abominacion);
+                // --- LOS OJOS QUE ARDEN (el rojo-naranja medido) ---
+                DibujarOjosBrillantes(center, radio, time, seed, growth, fade, abominacion);
 
-                // --- LA ESTELA DE LA ABOMINACIÓN (el rastro del monstruo) ---
+                // --- LA ESTELA DE LA ABOMINACIÓN (el rastro carmesí del monstruo) ---
                 if (abominacion)
                 {
                     var camino = new Vector2[_estela.Length];
                     for (int i = 0; i < _estela.Length; i++)
                         camino[i] = _estela[i] - Main.screenPosition;
                     EstelaLib.Ribbon(Main.spriteBatch, camino, 26f,
-                        EstelaProfile.Comet, EspirituPalido, 0.55f * fade, seed + 3, time);
+                        EstelaProfile.Comet, RojoCara, 0.45f * fade, seed + 3, time);
                 }
+
+                Main.spriteBatch.End();
+
+                // ============================================================
+                //  3. EL SEGUNDO PASE ALFA — LAS PUPILAS Y LA BOCA NEGRAS
+                //     ENCIMA del brillo (la mirada de la abominación corta
+                //     el propio fuego que la enciende)
+                // ============================================================
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                DibujarPupilas(center, radio, time, seed, growth, fade, abominacion);
 
                 Main.spriteBatch.End();
             }
@@ -428,7 +452,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// LOS ESPÍRITUS MENORES — paramétricos y deterministas: cada uno
         /// tiene su ciclo (se LIBERA de la masa a +62 px, flota, y es TIRADO
-        /// DE VUELTA con aceleración — el ciclo exacto de Calamity).
+        /// DE VUELTA con aceleración — el ciclo exacto de Calamity). v6.30:
+        /// sus OJOS arden rojo-naranja (el espíritu del sprite real es oscuro
+        /// con brillos rojos — no un fantasma pálido).
         /// </summary>
         private void DibujarEspiritus(Vector2 center, float radio, float time,
             int seed, float growth, float fade)
@@ -459,12 +485,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // La respiración del espíritu.
                 float pulso = 0.7f + 0.3f * (float)Math.Sin(time * 2.2f + i * 2.0f);
 
-                Quad(VFXCore.GlowOrb, pos, new Vector2(16f, 16f) * pulso, 0f,
-                    Tint(EspirituPalido, 0.34f * pulso * fade));
-                Quad(VFXCore.SoftGlow, pos, new Vector2(5.4f, 5.4f), 0f,
-                    Tint(OjoBlanco, 0.85f * pulso * fade));
+                // EL CUERPO OSCURO del espíritu (masa negra pequeña — pase alfa).
+                Quad(DiscoNegro, pos, new Vector2(15f, 15f) * pulso, 0f,
+                    Tint(EspirituOscuro, 0.55f * pulso * fade));
 
-                // LA ESTELITA del espíritu (los primeros 6: ribbon corto).
+                // EL OJO QUE ARDE (rojo-naranja — el espíritu TE MIRA).
+                Quad(VFXCore.GlowOrb, pos, new Vector2(5.6f, 5.6f) * pulso, 0f,
+                    Tint(RojoCara, 0.85f * pulso * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(2.6f, 2.6f) * pulso, 0f,
+                    Tint(NaranjaCara, 0.95f * pulso * fade));
+
+                // LA ESTELITA del espíritu (los primeros 6: ribbon carmesí corto).
                 if (i < 6 && fuera > 0.25f)
                 {
                     var pts = new Vector2[5];
@@ -481,22 +512,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             (float)Math.Cos(a2) * r2, (float)Math.Sin(a2) * r2 * 0.82f - 8f);
                     }
                     EstelaLib.Ribbon(Main.spriteBatch, pts, 6f,
-                        EstelaProfile.Head, EspirituPalido, 0.40f * fade, seed + 60 + i, time);
+                        EstelaProfile.Head, RojoCara, 0.35f * fade, seed + 60 + i, time);
                 }
             }
         }
 
         // ==================================================================
-        //  LOS RASGOS (EL PASE ALFA) — los negros de verdad
+        //  LOS OJOS — el sistema de TRES pases (v6.30, la lección v6.29+)
         // ==================================================================
 
-        /// <summary>
-        /// LOS RASGOS DEL CUERPO: ojos con zócalo negro + esclerótica blanca
-        /// + PUPILA NEGRA (el DiscoNegro SOLO oscurece en el pase alfa — en
-        /// el aditivo el negro es invisible), LA CARA Giygas y EL OJO MAYOR
-        /// de la abominación con su pupila siguiendo el vuelo.
-        /// </summary>
-        private void DibujarRasgos(Vector2 center, float radio, float time,
+        /// <summary>LOS ZÓCALOS + BRASAS BASE (pase alfa 1): los huecos negros
+        /// donde arden los ojos + la base de brasa rojo-oscuro.</summary>
+        private void DibujarZocalos(Vector2 center, float radio, float time,
             int seed, float growth, float fade, bool abominacion)
         {
             // === LOS OJOS MENORES (asoman con la acumulación: 2 + 6·x) ===
@@ -519,103 +546,54 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 float tam = (6f + 4f * h2) * (abominacion ? 1.15f : 1f);
 
-                // EL ZÓCALO NEGRO (el hueco donde vive el ojo).
-                Quad(DiscoNegro, pos, new Vector2(tam * 2.5f, tam * 2.5f), 0f,
-                    Tint(NegroRasgo, 0.55f * fade));
-                // LA ESCLERÓTICA (el blanco — GlowOrb casi opaco en alfa).
-                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.7f, tam * 1.7f), 0f,
-                    Tint(OjoBlanco, 0.80f * fade));
-                // LA PUPILA NEGRA (desplazada — cada ojo mira a su sitio).
-                Vector2 mira = new Vector2(0.4f - 0.8f * h1, 0.3f - 0.6f * h2);
-                Quad(DiscoNegro, pos + mira * tam * 0.5f,
-                    new Vector2(tam * 0.72f, tam * 0.72f), 0f,
-                    Tint(NegroRasgo, 0.92f * fade));
+                // EL ZÓCALO NEGRO (el hueco donde vive el ojo — más oscuro
+                // que la masa: el contraste mide la mirada).
+                Quad(DiscoNegro, pos, new Vector2(tam * 2.6f, tam * 2.6f), 0f,
+                    Tint(NegroRasgo, 0.85f * fade));
+                // LA BRASA BASE (rojo-oscuro — el rescoldo bajo el brillo).
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.55f, tam * 1.55f), 0f,
+                    Tint(BrasaBase, 0.85f * fade));
             }
 
-            // === LA CARA (el interior Giygas — ventanas caóticas) ===
+            // === LA CARA (el interior Giygas — zócalos de la cara grande) ===
             if (growth > 0.55f && !abominacion)
-                DibujarLaCara(center, radio, time, seed, fade);
+                DibujarZocaloCara(center, radio, time, seed, fade);
 
-            // === EL OJO MAYOR DE LA ABOMINACIÓN (siguiendo el vuelo) ===
+            // === EL ZÓCALO DEL OJO MAYOR de la abominación ===
             if (abominacion)
             {
-                Vector2 dirV = Projectile.velocity.LengthSquared() > 0.01f
-                    ? Vector2.Normalize(Projectile.velocity) : Vector2.UnitX;
                 Vector2 pos = center - new Vector2(0f, 6f);
                 float tam = 30f * (1f + 0.06f * (float)Math.Sin(time * 3.1f));
-
-                // EL ZÓCALO (el hueco grande).
-                Quad(DiscoNegro, pos, new Vector2(tam * 2.6f, tam * 2.6f), 0f,
-                    Tint(NegroRasgo, 0.60f * fade));
-                // LA ESCLERÓTICA.
-                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.9f, tam * 1.9f), 0f,
-                    Tint(OjoBlanco, 0.85f * fade));
-                // LA PUPILA que MIRA hacia donde vuela el monstruo.
-                Vector2 pupila = pos + dirV * tam * 0.42f;
-                Quad(DiscoNegro, pupila, new Vector2(tam * 0.95f, tam * 0.95f), 0f,
-                    Tint(NegroRasgo, 0.95f * fade));
+                Quad(DiscoNegro, pos, new Vector2(tam * 2.8f, tam * 2.8f), 0f,
+                    Tint(NegroRasgo, 0.90f * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.8f, tam * 1.8f), 0f,
+                    Tint(BrasaBase, 0.90f * fade));
             }
         }
 
-        /// <summary>
-        /// LA CARA — el interior Giygas de Calamity: un ojo inmenso y una
-        /// boca que asoman en VENTANAS CAÓTICAS dentro de la masa madura.
-        /// (Todo en el pase ALFA: la boca ES negra de verdad.)
-        /// </summary>
-        private void DibujarLaCara(Vector2 center, float radio, float time, int seed, float fade)
+        /// <summary>EL ZÓCALO DE LA CARA Giygas (la ventana caótica).</summary>
+        private void DibujarZocaloCara(Vector2 center, float radio, float time, int seed, float fade)
         {
-            // LA VENTANA: caótica — abre ~30% del tiempo, se disuelve al cerrar.
+            // LA VENTANA: caótica — abre ~30% del tiempo.
             int ventana = (int)(time * 0.5f);
             float h = VFXCore.Hash01(seed, 900, ventana);
             if (h > 0.30f) return;
-            // El fade de la ventana (los últimos 20% se disuelve).
             float dentro = 0.30f - h;
             float alphaVentana = MathHelper.Clamp(dentro / 0.06f, 0f, 1f) * fade;
 
             // EL OJO INMENSO (desplazado, mirando sin mirar).
             Vector2 posOjo = center + new Vector2(radio * 0.12f, -radio * 0.10f);
             float tam = radio * 0.55f;
-            // EL ZÓCALO + LA ESCLERÓTICA + LA PUPILA (todos alfa).
-            Quad(DiscoNegro, posOjo, new Vector2(tam * 2.4f, tam * 2.4f), 0f,
-                Tint(NegroRasgo, 0.55f * alphaVentana));
-            Quad(VFXCore.GlowOrb, posOjo, new Vector2(tam * 1.6f, tam * 1.6f), 0f,
-                Tint(OjoBlanco, 0.75f * alphaVentana));
-            Vector2 pupila = posOjo + new Vector2(
-                0.10f * (float)Math.Sin(time * 1.7f), 0.07f * (float)Math.Cos(time * 1.3f)) * tam;
-            Quad(DiscoNegro, pupila, new Vector2(tam * 0.85f, tam * 0.85f), 0f,
-                Tint(NegroRasgo, 0.88f * alphaVentana));
-
-            // LA BOCA (la voluta abierta — el grito negro).
-            Vector2 posBoca = center + new Vector2(-radio * 0.06f, radio * 0.42f);
-            float anchoBoca = radio * (0.55f + 0.10f * (float)Math.Sin(time * 2.3f));
-            var boca = new Vector2[5];
-            for (int k = 0; k < boca.Length; k++)
-            {
-                float t = k / (float)(boca.Length - 1);
-                boca[k] = posBoca + new Vector2(
-                    (t - 0.5f) * anchoBoca,
-                    4f * (float)Math.Sin(t * MathHelper.Pi));
-            }
-            for (int k = 0; k < boca.Length - 1; k++)
-            {
-                Vector2 a = boca[k], b = boca[k + 1];
-                Vector2 mid = (a + b) * 0.5f;
-                float len = (b - a).Length();
-                float rot = (float)Math.Atan2(b.Y - a.Y, b.X - a.X);
-                Quad(DiscoNegro, mid, new Vector2(len + 9f, 15f), rot,
-                    Tint(NegroRasgo, 0.80f * alphaVentana));
-            }
+            Quad(DiscoNegro, posOjo, new Vector2(tam * 2.5f, tam * 2.5f), 0f,
+                Tint(NegroRasgo, 0.80f * alphaVentana));
+            Quad(VFXCore.GlowOrb, posOjo, new Vector2(tam * 1.5f, tam * 1.5f), 0f,
+                Tint(BrasaBase, 0.85f * alphaVentana));
         }
 
-        // ==================================================================
-        //  LOS BRILLOS (EL PASE ADITIVO) — la luz al lado de los negros
-        // ==================================================================
-
-        /// <summary>
-        /// LOS BRILLOS DE LOS OJOS: destellos carmesí AL LADO de las pupilas
-        /// (nunca encima — el aditivo NO puede oscurecer) + las chispas.
-        /// </summary>
-        private void DibujarBrillosOjos(Vector2 center, float radio, float time,
+        /// <summary>LOS OJOS QUE ARDEN (pase aditivo): el ROJO-NARANJA medido
+        /// (253,74,60) brillando en los zócalos — el 5.2% del sprite real que
+        /// define TODA la personalidad de la congregación.</summary>
+        private void DibujarOjosBrillantes(Vector2 center, float radio, float time,
             int seed, float growth, float fade, bool abominacion)
         {
             int n = 2 + (int)(6f * growth);
@@ -632,38 +610,135 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (float)Math.Cos(ang) * dist, (float)Math.Sin(ang) * dist * 0.8f);
                 float tam = (6f + 4f * h2) * (abominacion ? 1.15f : 1f);
 
-                // EL DESTELLO CARMESÍ (la herencia brimstone — al lado de la
-                // pupila negra, donde la esclerótica aún se ve).
-                Vector2 mira = new Vector2(0.4f - 0.8f * h1, 0.3f - 0.6f * h2);
-                Quad(VFXCore.SoftGlow, pos - mira * tam * 0.85f,
-                    new Vector2(tam * 0.55f, tam * 0.55f), 0f,
-                    Tint(Carmin, 0.75f * fade));
-                // La chispa del ojo.
-                Quad(VFXCore.SoftGlow, pos + new Vector2(-tam * 0.45f, -tam * 0.45f),
-                    new Vector2(tam * 0.30f, tam * 0.30f), 0f,
-                    Tint(OjoBlanco, 0.85f * fade));
+                // EL OJO QUE ARDE (rojo-naranja — el fuego de la mirada).
+                float lat = 0.75f + 0.25f * (float)Math.Sin(time * 5.1f + i * 2.2f);
+                Quad(VFXCore.SoftGlow, pos, new Vector2(tam * 2.1f, tam * 2.1f), 0f,
+                    Tint(RojoCara, 0.38f * lat * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.05f, tam * 1.05f), 0f,
+                    Tint(RojoCara, 0.80f * lat * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 0.5f, tam * 0.5f), 0f,
+                    Tint(NaranjaCara, 0.95f * lat * fade));
             }
 
-            // === EL BRILLO DEL OJO MAYOR ===
+            // === LA CARA QUE ARDE (la ventana Giygas) ===
+            if (growth > 0.55f && !abominacion)
+                DibujarCaraBrillante(center, radio, time, seed, fade);
+
+            // === EL OJO MAYOR DE LA ABOMINACIÓN (el dominante) ===
+            if (abominacion)
+            {
+                Vector2 pos = center - new Vector2(0f, 6f);
+                float tam = 30f;
+                float lat = 0.8f + 0.2f * (float)Math.Sin(time * 3.1f);
+
+                // EL ARO CARMESÍ del zócalo.
+                Quad(VFXCore.Ring, pos, new Vector2(tam * 3.6f, tam * 3.6f), 0f,
+                    Tint(RojoCara, 0.22f * fade));
+                // EL OJO QUE ARDE.
+                Quad(VFXCore.SoftGlow, pos, new Vector2(tam * 2.4f, tam * 2.4f), 0f,
+                    Tint(RojoCara, 0.40f * lat * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 1.55f, tam * 1.55f), 0f,
+                    Tint(RojoCara, 0.85f * lat * fade));
+                Quad(VFXCore.GlowOrb, pos, new Vector2(tam * 0.8f, tam * 0.8f), 0f,
+                    Tint(NaranjaCara, 0.95f * lat * fade));
+                // EL DESTELLO PÁLIDO (el acento 0.6% del sprite real — la
+                // chispa fría arriba-izquierda del ojo: la vida que le queda).
+                Quad(VFXCore.SoftGlow, pos - new Vector2(tam * 0.55f, tam * 0.55f),
+                    new Vector2(tam * 0.30f, tam * 0.30f), 0f,
+                    Tint(PálidoRasgo, 0.75f * lat * fade));
+            }
+        }
+
+        /// <summary>LA CARA QUE ARDE (aditivo — la ventana Giygas).</summary>
+        private void DibujarCaraBrillante(Vector2 center, float radio, float time, int seed, float fade)
+        {
+            int ventana = (int)(time * 0.5f);
+            float h = VFXCore.Hash01(seed, 900, ventana);
+            if (h > 0.30f) return;
+            float dentro = 0.30f - h;
+            float alphaVentana = MathHelper.Clamp(dentro / 0.06f, 0f, 1f) * fade;
+
+            // EL OJO INMENSO ardiendo.
+            Vector2 posOjo = center + new Vector2(radio * 0.12f, -radio * 0.10f);
+            float tam = radio * 0.55f;
+            Quad(VFXCore.SoftGlow, posOjo, new Vector2(tam * 2.0f, tam * 2.0f), 0f,
+                Tint(RojoCara, 0.35f * alphaVentana));
+            Quad(VFXCore.GlowOrb, posOjo, new Vector2(tam * 1.25f, tam * 1.25f), 0f,
+                Tint(RojoCara, 0.75f * alphaVentana));
+            Quad(VFXCore.GlowOrb, posOjo, new Vector2(tam * 0.6f, tam * 0.6f), 0f,
+                Tint(NaranjaCara, 0.90f * alphaVentana));
+
+            // LAS BRASAS DE LA BOCA (la voluta abierta — el grito ardiendo).
+            Vector2 posBoca = center + new Vector2(-radio * 0.06f, radio * 0.42f);
+            float anchoBoca = radio * (0.55f + 0.10f * (float)Math.Sin(time * 2.3f));
+            for (int k = 0; k < 5; k++)
+            {
+                float t = k / 4f;
+                Vector2 p = posBoca + new Vector2(
+                    (t - 0.5f) * anchoBoca,
+                    4f * (float)Math.Sin(t * MathHelper.Pi));
+                Quad(VFXCore.GlowOrb, p, new Vector2(9f, 7f), 0f,
+                    Tint(RojoCara, 0.45f * alphaVentana));
+            }
+        }
+
+        /// <summary>LAS PUPILAS Y LA BOCA NEGRAS (pase alfa 2 — ENCIMA del
+        /// brillo): la mirada corta el fuego. Solo los ojos GRANDES llevan
+        /// pupila (los menores son pura brasa — como el sprite real).</summary>
+        private void DibujarPupilas(Vector2 center, float radio, float time,
+            int seed, float growth, float fade, bool abominacion)
+        {
+            // === LA PUPILA DE LA CARA (la ventana Giygas) ===
+            if (growth > 0.55f && !abominacion)
+            {
+                int ventana = (int)(time * 0.5f);
+                float h = VFXCore.Hash01(seed, 900, ventana);
+                if (h <= 0.30f)
+                {
+                    float dentro = 0.30f - h;
+                    float alphaVentana = MathHelper.Clamp(dentro / 0.06f, 0f, 1f) * fade;
+                    Vector2 posOjo = center + new Vector2(radio * 0.12f, -radio * 0.10f);
+                    float tam = radio * 0.55f;
+                    Vector2 pupila = posOjo + new Vector2(
+                        0.10f * (float)Math.Sin(time * 1.7f),
+                        0.07f * (float)Math.Cos(time * 1.3f)) * tam;
+                    Quad(DiscoNegro, pupila, new Vector2(tam * 0.72f, tam * 0.72f), 0f,
+                        Tint(NegroRasgo, 0.90f * alphaVentana));
+
+                    // LA BOCA NEGRA (el grito de verdad — sobre las brasas).
+                    Vector2 posBoca = center + new Vector2(-radio * 0.06f, radio * 0.42f);
+                    float anchoBoca = radio * (0.55f + 0.10f * (float)Math.Sin(time * 2.3f));
+                    var boca = new Vector2[5];
+                    for (int k = 0; k < boca.Length; k++)
+                    {
+                        float t = k / (float)(boca.Length - 1);
+                        boca[k] = posBoca + new Vector2(
+                            (t - 0.5f) * anchoBoca,
+                            4f * (float)Math.Sin(t * MathHelper.Pi));
+                    }
+                    for (int k = 0; k < boca.Length - 1; k++)
+                    {
+                        Vector2 a = boca[k], b = boca[k + 1];
+                        Vector2 mid = (a + b) * 0.5f;
+                        float len = (b - a).Length();
+                        float rot = (float)Math.Atan2(b.Y - a.Y, b.X - a.X);
+                        Quad(DiscoNegro, mid, new Vector2(len + 9f, 15f), rot,
+                            Tint(NegroRasgo, 0.85f * alphaVentana));
+                    }
+                }
+            }
+
+            // === LA PUPILA DEL OJO MAYOR (siguiendo el vuelo — la abominación
+            //     TE MIRA a donde va a ir) ===
             if (abominacion)
             {
                 Vector2 dirV = Projectile.velocity.LengthSquared() > 0.01f
                     ? Vector2.Normalize(Projectile.velocity) : Vector2.UnitX;
                 Vector2 pos = center - new Vector2(0f, 6f);
                 float tam = 30f;
-
-                // EL DESTELLO CARMESÍ en el borde que MIRA (la pupila negra
-                // queda intacta — el carmesí brilla DETRÁS de ella).
-                Quad(VFXCore.SoftGlow, pos + dirV * tam * 0.95f,
-                    new Vector2(tam * 0.55f, tam * 0.55f), 0f,
-                    Tint(Carmin, 0.85f * fade));
-                // EL ANILLO CARMESÍ del zócalo (el aura del ojo).
-                Quad(VFXCore.Ring, pos, new Vector2(tam * 3.4f, tam * 3.4f), 0f,
-                    Tint(Carmin, 0.20f * fade));
-                // LA CHISPA del ojo (arriba-izquierda).
-                Quad(VFXCore.SoftGlow, pos - new Vector2(tam * 0.62f, tam * 0.62f),
-                    new Vector2(tam * 0.34f, tam * 0.34f), 0f,
-                    Tint(OjoBlanco, 0.95f * fade));
+                Vector2 pupila = pos + dirV * tam * 0.40f;
+                Quad(DiscoNegro, pupila, new Vector2(tam * 0.88f, tam * 0.88f), 0f,
+                    Tint(NegroRasgo, 0.95f * fade));
             }
         }
 

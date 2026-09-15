@@ -222,7 +222,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > 34f) continue;
 
                 // El cooldown por NPC (el barrido no es metralleta).
@@ -275,7 +275,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int dmg = Math.Max(1, (int)(BaseDamage * 1.5f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 300f) continue;
                     npc.SimpleStrikeNPC(dmg, npc.direction, false, 8f, DamageClass.Magic);
                 }

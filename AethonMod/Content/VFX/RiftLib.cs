@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -507,10 +508,12 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// EL VACÍO DE LA HERIDA FRACTURADA (pase no-premultiplicado): bandas
         /// negras BlackDisk a lo largo del camino con la anchura evaluada EN LOS
-        /// VÉRTICES (lección Calamity WidthFunction — sin escalones), solape
-        /// len+w y el taper raíz→punta con la respiración ±8%. Dibujar ANTES de
-        /// <see cref="Grieta"/>. Los extremos REDONDEADOS del BlackDisk hacen de
-        /// junta natural (el round-join del estándar).
+        /// VÉRTICES (lección Calamity WidthFunction — sin escalones).
+        /// v6.30 — LA REGLA DE ORO DE LA CONTINUIDAD: el vacío SOLAPA IGUAL O
+        /// MÁS que la luz (len+w completo — cubre giros ≤~126°) y lleva SU
+        /// PERLA NEGRA en CADA vértice: un hueco en el negro se lee como CORTE
+        /// de la grieta (la raíz medida de los "cortes" de v6.29).
+        /// Dibujar ANTES de <see cref="Grieta"/>.
         /// </summary>
         public static void GrietaVacio(SpriteBatch batch, Vector2[] camino, float progress,
             float maxWidth, int seed, float time)
@@ -527,36 +530,60 @@ namespace AethonMod.Content.VFX
                 Vector2 a = camino[i];
                 Vector2 b = camino[i + 1];
                 float len = Vector2.Distance(a, b);
-                if (len < 0.35f) continue;
+                if (len < 0.30f) continue;
 
-                float wseg = (ws[i] + ws[i + 1]) * 0.5f * respira;
-                if (wseg < 0.5f) continue;
+                float wa = MathF.Max(ws[i] * respira, 0.6f);
+                float wb = MathF.Max(ws[i + 1] * respira, 0.6f);
+                float wseg = (wa + wb) * 0.5f;
+                float wmax = MathF.Max(wa, wb);
 
                 float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
+
+                // EL SEGMENTO negro (solape COMPLETO len+w — nunca menos que la luz).
                 Quad(batch, BlackTex, (a + b) * 0.5f,
-                    new Vector2(len + wseg * 0.35f, wseg * 0.62f * vida + 0.8f), rot,
+                    new Vector2(len + wmax, wseg * 0.62f * vida + 0.8f), rot,
+                    Tint(Color.Black, 0.94f * vida));
+
+                // LA PERLA NEGRA del vértice (el round-join del vacío).
+                Quad(batch, BlackTex, a,
+                    new Vector2(wmax * 1.15f, wseg * 0.66f * vida + 0.8f), rot,
+                    Tint(Color.Black, 0.94f * vida));
+            }
+
+            // LA PERLA DE LA PUNTA (cierra el extremo distal del canal).
+            int fin = camino.Length - 1;
+            if (fin > 0)
+            {
+                Vector2 a = camino[fin - 1];
+                Vector2 b = camino[fin];
+                float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
+                float wfin = MathF.Max(ws[fin] * respira, 0.6f);
+                Quad(batch, BlackTex, b,
+                    new Vector2(wfin * 1.15f, wfin * 0.66f * vida + 0.8f), rot,
                     Tint(Color.Black, 0.94f * vida));
             }
         }
 
         /// <summary>
-        /// DIBUJA LA HERIDA FRACTURADA (el pase de LUZ) sobre el camino — v6.28:
-        /// LA CADENA SIN HUECOS. Por SEGMENTO: RiftLip (textura UNIFORME a lo
-        /// largo — la desviación medida 0.0000) en DOS capas (velo ×1.6 alto +
-        /// cuerpo) con la anchura evaluada EN LOS VÉRTICES compartidos, solape
-        /// len+w·0.9 (cubre giros ≤~53°) y RiftCore como núcleo razor; por
-        /// VÉRTICE interior: LA PERLA (un RiftLip cuadrado de diámetro w — el
-        /// round-join estándar que mata los huecos en las esquinas). ESTRELLAS
-        /// FIJAS (la grieta NO scrollea: es una herida) y CHISPAS de anomalía
-        /// deterministas. SIN aberración R/B (v6.28).
+        /// DIBUJA LA HERIDA FRACTURADA (el pase de LUZ) sobre el camino — v6.30:
+        /// LA CADENA A PRUEBA DE GIRONES. Por SEGMENTO: RiftLip (textura UNIFORME
+        /// a lo largo) en DOS capas (velo ×1.6 alto + cuerpo) con la anchura
+        /// evaluada EN LOS VÉRTICES compartidos y SOLAPE COMPLETO len+wmax
+        /// (cubre giros ≤~126° — regl-gpu-lines) + RiftCore como núcleo razor;
+        /// por VÉRTICE (TODOS, incluida la raíz): LA PERLA de diámetro max(w) —
+        /// el round-join que mata el cuño exterior en los giros fuertes; y LA
+        /// PERLA DE LA PUNTA tras el bucle (el canal cierra, no se corta).
+        /// NADA se omite (suelo 0.6px). SIN aberración R/B.
         /// </summary>
         /// <param name="progress">0..1 de la vida de la herida.</param>
-        /// <param name="chispas">True = dibuja las chispas de anomalía (1 cada 3 ticks).</param>
+        /// <param name="chispas">True = dibuja las chispas de anomalía.</param>
         /// <param name="ecoOffset">Offset del eco glitch.</param>
         /// <param name="ecoTint">Tinte del eco (null = sin eco).</param>
+        /// <param name="estrellas">True = dibuja las estrellas fijas del interior.</param>
         public static void Grieta(SpriteBatch batch, Vector2[] camino, float progress,
             float maxWidth, Color[] paleta, float intensity, int seed, float time,
-            bool chispas = true, Vector2 ecoOffset = default, Color? ecoTint = null)
+            bool chispas = true, Vector2 ecoOffset = default, Color? ecoTint = null,
+            bool estrellas = true)
         {
             if (batch == null || camino == null || camino.Length < 2 || paleta == null || paleta.Length == 0) return;
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
@@ -578,14 +605,15 @@ namespace AethonMod.Content.VFX
                 Vector2 a = camino[i];
                 Vector2 b = camino[i + 1];
                 float len = Vector2.Distance(a, b);
-                if (len < 0.35f) continue;
+                if (len < 0.30f) continue;
 
-                // LA ANCHURA EN EL VÉRTICE COMPARTIDO (la lección WidthFunction):
-                // promedio de los dos vértices del segmento — sin escalones.
-                float wa = ws[i] * respira;
-                float wb = ws[i + 1] * respira;
+                // LA ANCHURA EN LOS VÉRTICES COMPARTIDOS — con SUELO: ningún
+                // segmento se omite jamás (v6.30: los `continue` por anchura
+                // eran huecos REALES en la cola fina del taper).
+                float wa = MathF.Max(ws[i] * respira, 0.6f);
+                float wb = MathF.Max(ws[i + 1] * respira, 0.6f);
                 float wseg = (wa + wb) * 0.5f;
-                if (wseg < 0.4f) continue;
+                float wmax = MathF.Max(wa, wb);
 
                 Vector2 mid = (a + b) * 0.5f;
                 Vector2 delta = b - a;
@@ -594,33 +622,47 @@ namespace AethonMod.Content.VFX
                 float beat = 0.88f + 0.12f * MathF.Sin(time * 6.1f + k * 1.7f + seed);
 
                 // === EL VELO (×1.6 de alto, α 0.30 — el halo que integra) ===
-                LipQuad(batch, mid + ecoOffset, len + wseg * 0.9f, wseg * 1.6f, rot,
+                LipQuad(batch, mid + ecoOffset, len + wmax, wseg * 1.6f, rot,
                     Eco(Tint(velo, 0.30f * intensity * vida * beat), ecoTint));
 
                 // === EL CUERPO (el labio de color, α 0.60) ===
-                LipQuad(batch, mid + ecoOffset, len + wseg * 0.9f, wseg, rot,
+                LipQuad(batch, mid + ecoOffset, len + wmax, wseg, rot,
                     Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
 
                 // === EL NÚCLEO RAZOR (banda dura 30% de RiftCore, α 0.90) ===
-                LipQuadCore(batch, mid + ecoOffset, len + wseg * 0.9f, wseg * 0.8f, rot,
+                LipQuadCore(batch, mid + ecoOffset, len + wmax, wseg * 0.8f, rot,
                     Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
 
-                // === LA PERLA del vértice compartido (el round-join: CERO
-                //     huecos en las esquinas — el estándar regl-gpu-lines) ===
-                if (i > 0)
-                {
-                    LipQuad(batch, a + ecoOffset, wseg * 1.15f, wseg * 1.6f, rot,
-                        Eco(Tint(velo, 0.30f * intensity * vida * beat), ecoTint));
-                    LipQuad(batch, a + ecoOffset, wseg * 1.15f, wseg, rot,
-                        Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
-                    LipQuadCore(batch, a + ecoOffset, wseg * 1.15f, wseg * 0.8f, rot,
-                        Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
-                }
+                // === LA PERLA DEL VÉRTICE (TODOS los vértices, diámetro max(w):
+                //     el round-join estándar — CERO huecos en las esquinas) ===
+                LipQuad(batch, a + ecoOffset, wmax * 1.25f, wseg * 1.6f, rot,
+                    Eco(Tint(velo, 0.30f * intensity * vida * beat), ecoTint));
+                LipQuad(batch, a + ecoOffset, wmax * 1.25f, wseg, rot,
+                    Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
+                LipQuadCore(batch, a + ecoOffset, wmax * 1.25f, wseg * 0.8f, rot,
+                    Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
                 k++;
             }
 
+            // === LA PERLA DE LA PUNTA (el canal distal CIERRA — nunca se corta) ===
+            int fin = camino.Length - 1;
+            if (fin > 0)
+            {
+                Vector2 a = camino[fin - 1];
+                Vector2 b = camino[fin];
+                float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
+                float wfin = MathF.Max(ws[fin] * respira, 0.6f);
+                LipQuad(batch, b + ecoOffset, wfin * 1.25f, wfin * 1.6f, rot,
+                    Eco(Tint(velo, 0.30f * intensity * vida), ecoTint));
+                LipQuad(batch, b + ecoOffset, wfin * 1.25f, wfin, rot,
+                    Eco(Tint(cuerpo, 0.60f * intensity * vida), ecoTint));
+                LipQuadCore(batch, b + ecoOffset, wfin * 1.25f, wfin * 0.8f, rot,
+                    Eco(Tint(nucleo, 0.90f * intensity * vida), ecoTint));
+            }
+
             // === LAS ESTRELLAS FIJAS de la herida (sin scroll, con paralaje) ===
-            EstrellasCamino(batch, camino, maxWidth * respira, paleta, intensity * vida, seed, time, 14 + seed % 7);
+            if (estrellas)
+                EstrellasCamino(batch, camino, maxWidth * respira, paleta, intensity * vida, seed, time, 14 + seed % 7);
 
             // === LAS CHISPAS DE ANOMALÍA (máx 1 cada 3 ticks, deterministas) ===
             if (chispas && ecoTint == null && vida > 0.15f)
@@ -661,14 +703,18 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// LOS ANCHOS DEL CAMINO (una pasada): la anchura en cada VÉRTICE con el
-        /// taper raíz→punta (1.0 en la raíz, aguja en la punta) — la lección
-        /// Calamity WidthFunction: la anchura vive en los VÉRTICES compartidos,
-        /// nunca en los centros de segmento (sin escalones en las juntas).
+        /// taper raíz→punta — la lección Calamity WidthFunction: la anchura vive
+        /// en los VÉRTICES compartidos, nunca en los centros de segmento.
+        /// v6.30 — EL TAPER SUAVE DEL VIDRIO: exponente 0.45 (NO 0.9 — el vidrio
+        /// real mantiene el 40-70% de su anchura hasta cerca de la punta) y
+        /// SUELO del 25% (la punta del canal NUNCA muere: sin agujas invisibles
+        /// que rompen la cadena en trazos sueltos).
         /// </summary>
         public static float[] AnchosCamino(Vector2[] camino, float maxWidth)
         {
             if (camino == null || camino.Length < 2) return Array.Empty<float>();
             var ws = new float[camino.Length];
+            float suelo = maxWidth * 0.25f;
             float total = LongitudCamino(camino);
             if (total < 1f)
             {
@@ -681,8 +727,8 @@ namespace AethonMod.Content.VFX
             {
                 arc += Vector2.Distance(camino[i - 1], camino[i]);
                 float t = arc / total;
-                // TAPER: gorda en la raíz (donde nació el desgarro), aguja en la punta.
-                ws[i] = maxWidth * MathF.Pow(1f - t, 0.9f);
+                // TAPER SUAVE: gorda en la raíz, punta viva al 25% (v6.30).
+                ws[i] = MathF.Max(maxWidth * MathF.Pow(1f - t, 0.45f), suelo);
             }
             return ws;
         }
@@ -709,64 +755,199 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  LAS PIEZAS SUELTAS (los quiere todo el mundo)
+        //  v6.30 — EL ESPEJO ROTO: el ramillete de grietas
         // ==================================================================
 
         /// <summary>
-        /// SHARDS DE CRISTAL: 6-10 esquirlas + 1 GRANDE: nacen a lo largo de la
-        /// línea, salen con velocidad perpendicular ± jitter, rotan, CAEN
-        /// (gravedad de vidrio 0.11) y mueren desvaneciéndose. Devuelve el
-        /// paquete para el ParticleManager (la librería NO spawnea).
+        /// EL RAMILLETE DEL ESPEJO ROTO: el canal principal + sus
+        /// RAMIFICACIONES (como un rayo — la figura de Lichtenberg) + los ARCOS
+        /// TELARAÑA concéntricos alrededor del punto de ruptura. LA HERIDA
+        /// COMPLETA cuando la realidad se parte como un espejo — sin sueltas:
+        /// nada cae, TODO ES LA GRIETA.
         /// </summary>
-        /// <param name="length">Largo de la línea donde nacen (0 = solo en el origen).</param>
-        public static void Shards(Vector2 origin, Vector2 dir, Color[] paleta,
-            int seed, out ParticleData[] outParticles, float length = 0f)
+        public class RiftRamillete
         {
-            int count = 6 + seed % 5;                 // 6..10 esquirlas
-            outParticles = new ParticleData[count + 1];   // +1: LA GRANDE
+            /// <summary>EL CANAL MADRE (la grieta principal — anchura completa).</summary>
+            public Vector2[] Principal = Array.Empty<Vector2>();
 
-            float baseAng = (dir.X == 0f && dir.Y == 0f) ? -MathHelper.PiOver2 : MathF.Atan2(dir.Y, dir.X);
+            /// <summary>LAS RAMAS (los rayos que parten del canal).</summary>
+            public Vector2[][] Ramas = Array.Empty<Vector2[]>();
 
-            for (int k = 0; k <= count; k++)
-            {
-                bool grande = k == count;
-                float h1 = H01(seed, k, 701);
-                float h2 = H01(seed, k, 709);
-                float h3 = H01(seed, k, 719);
-                float h4 = H01(seed, k, 727);
+            /// <summary>La escala de anchura de cada rama (0.45..0.70).</summary>
+            public float[] RamasAncho = Array.Empty<float>();
 
-                // Nace sobre la línea (la esquirla SALE del desgarro).
-                Vector2 pos = origin + dir * (h1 * length);
-                // Sale con velocidad perpendicular ± jitter (hacia fuera del corte).
-                float ang = baseAng + MathHelper.PiOver2 * (h2 > 0.5f ? 1f : -1f) + (h3 - 0.5f) * 1.2f;
-                float speed = (1.5f + 2.5f * h4) * (grande ? 0.7f : 1f);
+            /// <summary>LOS ARCOS TELARAÑA (las grietas concéntricas del impacto).</summary>
+            public Vector2[][] Arcos = Array.Empty<Vector2[]>();
 
-                // El color del vidrio: paleta con borde blanco (lección DoG).
-                Color c = Color.Lerp(Pal(paleta, (int)(h4 * paleta.Length) % paleta.Length), Color.White, 0.5f);
-
-                var p = new ParticleData
-                {
-                    Position = pos,
-                    Velocity = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * speed,
-                    Scale = Vector2.One * (grande ? 0.62f : 0.34f + 0.22f * h2),
-                    PackedColor = ParticleManager.PackColor(c),
-                    PackedStartColor = ParticleManager.PackColor(c),
-                    PackedEndColor = ParticleManager.PackColor(Color.Transparent),
-                    Rotation = ang + (h1 - 0.5f) * 0.8f,
-                    RotationSpeed = (h2 - 0.5f) * 0.22f,
-                    TimeLeft = grande ? 80 : 40 + (int)(30f * h3),
-                    Duration = grande ? 80 : 40 + (int)(30f * h3),
-                    TextureId = ParticleTex.Slash,       // el glifo de vidrio de la casa
-                    BlendMode = 1,                        // aditivo: vidrio que BRILLA
-                    LayerPriority = LayerPriorities.BeforeProjectiles,
-                };
-                p.EnableComponent(ComponentFlag.FadeOut);
-                p.EnableComponent(ComponentFlag.Rotation);
-                p.EnableComponent(ComponentFlag.Gravity);
-                p.UserData0 = 0.11f;                     // gravedad de vidrio (cayendo)
-                outParticles[k] = p;
-            }
+            /// <summary>La escala de anchura de los arcos (~0.40).</summary>
+            public float[] ArcosAncho = Array.Empty<float>();
         }
+
+        /// <summary>
+        /// GENERA EL ESPEJO ROTO (determinista — la misma semilla da la MISMA
+        /// herida en todas las máquinas). Las reglas medidas (research/v630 §D):
+        /// · Canal madre: Lichtenberg MODERADO (curvatura 4.5, kinks ±0.35 —
+        ///   giros ≤~50° que la cadena v6.30 cubre de sobra; el CAOS vive en
+        ///   las RAMAS, no en el canal).
+        /// · Ramas: una cada 2-3 vértices, alternando lados, a 25°-55° del
+        ///   canal, largo 0.22-0.42·L, anchura ×0.6 — y SUB-RAMAS ×0.45 en las
+        ///   ramas más largas (la recursión Lichtenberg).
+        /// · Arcos: 2 anillos concéntricos (0.22·L y 0.42·L) partidos en
+        ///   segmentos con huecos — la telaraña del impacto del vidrio real.
+        /// </summary>
+        /// <param name="length">Largo del canal madre (px).</param>
+        public static RiftRamillete CaminoEspejoRoto(Vector2 origin, Vector2 dir,
+            int seed, float length = 620f)
+        {
+            var r = new RiftRamillete();
+            dir = dir.LengthSquared() > 0.0001f ? Vector2.Normalize(dir) : new Vector2(1f, 0f);
+
+            // === 1. EL CANAL MADRE (Lichtenberg moderado) ===
+            int pts = Math.Clamp((int)(length / 30f), 14, 26);
+            r.Principal = CaminoGrieta(origin, dir, seed, pts, 24f, 42f, 4.5f, 6f);
+
+            var ramas = new List<Vector2[]>();
+            var anchosR = new List<float>();
+            int n = r.Principal.Length;
+
+            // === 2. LAS RAMAS (como un rayo — alternando lados) ===
+            int lado = seed % 2 == 0 ? 1 : -1;
+            for (int i = 2; i < n - 2; i += 2 + seed % 2)
+            {
+                if (H01(seed, i, 1201) < 0.35f) continue;   // no en todos los vértices
+
+                Vector2 a = r.Principal[i - 1];
+                Vector2 b = r.Principal[i];
+                Vector2 tan = b - a;
+                if (tan.LengthSquared() < 0.01f) continue;
+                tan = Vector2.Normalize(tan);
+
+                // El largo de la rama: más larga cerca del origen (donde el
+                // golpe fue fuerte), más corta hacia la punta.
+                float restante = 1f - (float)i / MathF.Max(n - 1, 1);
+                float largoRama = length * (0.22f + 0.20f * H01(seed, i, 1211)) * (0.45f + 0.55f * restante);
+                if (largoRama < 55f) continue;
+
+                // El ángulo de salida: 25°-55° del canal, alternando lados.
+                float ang = (25f + 30f * H01(seed, i, 1221)) * MathHelper.Pi / 180f * lado;
+                float cos = MathF.Cos(ang), sin = MathF.Sin(ang);
+                var dirR = new Vector2(tan.X * cos - tan.Y * sin, tan.X * sin + tan.Y * cos);
+
+                int ptsR = Math.Clamp((int)(largoRama / 26f), 4, 9);
+                var rama = CaminoGrieta(b, dirR, seed + i * 17, ptsR, 13f, 24f, 5f, 7f);
+                ramas.Add(rama);
+                anchosR.Add(0.60f);
+                lado = -lado;                                // alterna el lado
+            }
+
+            // === 3. LAS SUB-RAMAS (la recursión — solo en las 3 ramas largas) ===
+            var ordenadas = new List<int>();
+            for (int i = 0; i < ramas.Count; i++) ordenadas.Add(i);
+            ordenadas.Sort((x, y) => LongitudCamino(ramas[y]).CompareTo(LongitudCamino(ramas[x])));
+            int subTotal = Math.Min(3, ordenadas.Count);
+            for (int s = 0; s < subTotal; s++)
+            {
+                int idx = ordenadas[s];
+                var madre = ramas[idx];
+                int m = madre.Length;
+                for (int j = 2; j < m - 1; j += 3)
+                {
+                    if (H01(seed, 3301 + idx, j) < 0.55f) continue;
+                    Vector2 a = madre[j - 1];
+                    Vector2 b = madre[j];
+                    Vector2 tan = b - a;
+                    if (tan.LengthSquared() < 0.01f) continue;
+                    tan = Vector2.Normalize(tan);
+                    float largoSub = LongitudCamino(madre) * 0.45f * (0.6f + 0.4f * H01(seed, 3311 + idx, j));
+                    if (largoSub < 40f) continue;
+                    float angS = (30f + 25f * H01(seed, 3321 + idx, j)) * MathHelper.Pi / 180f *
+                                 (H01(seed, 3331 + idx, j) > 0.5f ? 1f : -1f);
+                    float cos = MathF.Cos(angS), sin = MathF.Sin(angS);
+                    var dirS = new Vector2(tan.X * cos - tan.Y * sin, tan.X * sin + tan.Y * cos);
+                    int ptsS = Math.Clamp((int)(largoSub / 22f), 3, 6);
+                    ramas.Add(CaminoGrieta(b, dirS, seed + 3401 + idx * 13 + j, ptsS, 11f, 20f, 5f, 7f));
+                    anchosR.Add(0.45f);
+                }
+            }
+
+            r.Ramas = ramas.ToArray();
+            r.RamasAncho = anchosR.ToArray();
+
+            // === 4. LOS ARCOS TELARAÑA (grietas concéntricas del impacto) ===
+            var arcos = new List<Vector2[]>();
+            var anchosA = new List<float>();
+            for (int anillo = 0; anillo < 2; anillo++)
+            {
+                float radio = length * (0.22f + 0.20f * anillo);
+                int segs = 3 + seed % 3;
+                float hueco = 0.12f + 0.06f * H01(seed, anillo, 1301);
+                for (int s = 0; s < segs; s++)
+                {
+                    float a0 = s / (float)segs * MathHelper.TwoPi + H01(seed, anillo * 31 + s, 1311) * 0.6f;
+                    float a1 = (s + 1 - hueco) / (float)segs * MathHelper.TwoPi;
+                    var arco = new Vector2[7];
+                    for (int p = 0; p < 7; p++)
+                    {
+                        float t = p / 6f;
+                        float ang = a0 + (a1 - a0) * t;
+                        float rr = radio * (0.92f + 0.16f * H01(seed, anillo * 7 + s, 1321 + p));
+                        arco[p] = origin + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
+                    }
+                    arcos.Add(arco);
+                    anchosA.Add(0.40f);
+                }
+            }
+            r.Arcos = arcos.ToArray();
+            r.ArcosAncho = anchosA.ToArray();
+
+            return r;
+        }
+
+        /// <summary>EL VACÍO DEL ESPEJO ROTO (pase no-premultiplicado): todos los
+        /// caminos del ramillete con la cadena continua v6.30.</summary>
+        public static void RamilleteVacio(SpriteBatch batch, RiftRamillete r, float progress,
+            float maxWidth, int seed, float time)
+        {
+            if (batch == null || r == null) return;
+            GrietaVacio(batch, r.Principal, progress, maxWidth, seed, time);
+            for (int i = 0; i < r.Ramas.Length; i++)
+                GrietaVacio(batch, r.Ramas[i], progress, maxWidth * r.RamasAncho[i], seed + 51 + i, time);
+            for (int i = 0; i < r.Arcos.Length; i++)
+                GrietaVacio(batch, r.Arcos[i], progress, maxWidth * r.ArcosAncho[i], seed + 97 + i, time);
+        }
+
+        /// <summary>LA LUZ DEL ESPEJO ROTO (pase aditivo): el canal madre con
+        /// estrellas y chispas, las ramas y arcos con la cadena continua (sin
+        /// estrellas — la densidad la pone el patrón, no el ruido).</summary>
+        public static void Ramillete(SpriteBatch batch, RiftRamillete r, float progress,
+            float maxWidth, Color[] paleta, float intensity, int seed, float time)
+        {
+            if (batch == null || r == null || paleta == null || paleta.Length == 0) return;
+            Grieta(batch, r.Principal, progress, maxWidth, paleta, intensity, seed, time);
+            for (int i = 0; i < r.Ramas.Length; i++)
+                Grieta(batch, r.Ramas[i], progress, maxWidth * r.RamasAncho[i], paleta,
+                    intensity * 0.88f, seed + 51 + i, time, chispas: false, estrellas: false);
+            for (int i = 0; i < r.Arcos.Length; i++)
+                Grieta(batch, r.Arcos[i], progress, maxWidth * r.ArcosAncho[i], paleta,
+                    intensity * 0.75f, seed + 97 + i, time, chispas: false, estrellas: false);
+        }
+
+        /// <summary>¿El hitbox toca ALGUNA grieta del espejo roto? (la colisión de
+        /// la herida completa — canal + ramas + arcos).</summary>
+        public static bool RamilleteToca(RiftRamillete r, float maxWidth, Rectangle hitbox, float gracia = 8f)
+        {
+            if (r == null) return false;
+            if (CaminoToca(r.Principal, maxWidth, hitbox, gracia)) return true;
+            for (int i = 0; i < r.Ramas.Length; i++)
+                if (CaminoToca(r.Ramas[i], maxWidth * r.RamasAncho[i], hitbox, gracia)) return true;
+            for (int i = 0; i < r.Arcos.Length; i++)
+                if (CaminoToca(r.Arcos[i], maxWidth * r.ArcosAncho[i], hitbox, gracia)) return true;
+            return false;
+        }
+
+        // ==================================================================
+        //  LAS PIEZAS SUELTAS (los quiere todo el mundo)
+        // ==================================================================
 
         /// <summary>
         /// CHISPAS DE ANOMALÍA: paquete determinista de motas radiales (los

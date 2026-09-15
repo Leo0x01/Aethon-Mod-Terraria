@@ -59,10 +59,13 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Dibuja la supergigante: cuerpo enorme + celdas de convección +
-        /// atmósfera 3× + el pulso de vida 0.2 Hz — y si `collapse` &gt; 0,
-        /// la IMPLOSIÓN (todo encoge, se enciende y distorsiona).
+        /// Dibuja la supergigante: CUERPO SÓLIDO (pase ALFA — v6.30, la lección
+        /// v6.29: lo oscuro vive en el pase ALFA y la luz sola en el aditivo:
+        /// un cuerpo TODO-aditivo con alfas 0.16-0.55 sobre un fondo claro es
+        /// INVISIBLE) + atmósfera 3× + celdas de convección + anillo de fuego
+        /// — y si `collapse` &gt; 0, la IMPLOSIÓN.
         /// `lifeT` = 0..1, `collapse` = 0..1 de los últimos 20 ticks.
+        /// CONTRATO DE BATCH: cerrado → cerrado.
         /// </summary>
         public static void Draw(Projectile p, float lifeT, float collapse, int seed)
         {
@@ -87,34 +90,105 @@ namespace AethonMod.Content.VFX
                 Color bodyTint = Color.Lerp(GiantOrange, CollapseWhite, collapse);
                 Color glowTint = Color.Lerp(GiantRed, CollapseWhite, collapse * 0.8f);
 
+                // === PASO 1 — EL CUERPO SÓLIDO (pase ALFA): la gigante ES un
+                //     DISCO de verdad — visible a plena luz del día ===
+                BeginAlpha();
+                DrawCuerpoSolido(drawPos, R, bodyTint, fade, collapse);
+                DrawCelulasFrias(drawPos, R, time, seed, fade);
+                Main.spriteBatch.End();
+
+                // === PASO 2 — LA LUZ (pase aditivo) ===
                 BeginAdditive();
-
-                // === 1. LA ATMÓSFERA EXTENSA (corona roja 3×) ===
                 DrawAtmosphere(drawPos, R, glowTint, time, seed, fade, collapse);
-
-                // === 2. EL CUERPO (el disco enorme y frío) ===
-                DrawBody(drawPos, R, bodyTint, glowTint, fade);
-
-                // === 3. LAS CELDAS DE CONVECCIÓN (los blobs voraces) ===
                 DrawConvectionCells(drawPos, R, time, seed, fade, collapse);
-
-                // === 4. EL ANILLO DE FUEGO (la atmósfera girando) ===
                 DrawFireRingHalo(drawPos, R, glowTint, time, fade);
-
-                // === 5. LA DISTORSIÓN DEL COLAPSO (el anillo que contrae) ===
                 if (collapse > 0f)
                     DrawCollapseDistortion(drawPos, R, collapse, time, seed);
-
                 Main.spriteBatch.End();
             }
-            catch
+            catch (Exception ex)
             {
                 try { Main.spriteBatch.End(); } catch { }
+                try { Terraria.ModLoader.Logging.PublicLogger.Error("[AethonMod] RedSupergiantRenderer.Draw falló: " + ex.Message, ex); } catch { }
             }
         }
 
         // ==================================================================
-        //  CAPA 1 — LA ATMÓSFERA EXTENSA (3× el cuerpo)
+        //  CAPA 1 — EL CUERPO SÓLIDO (pase ALFA — v6.30: el disco de VERDAD)
+        // ==================================================================
+
+        /// <summary>
+        /// EL DISCO SÓLIDO de la gigante en el pase ALFA (el oscurecimiento
+        /// del limbo al revés: brillante al centro, rojo profundo al borde):
+        /// SOBRE CUALQUIER FONDO se lee como el COLOSO que es. Cuatro capas
+        /// de disco (panza profunda → masa → interior caliente → limbo
+        /// brillante) — la estructura de una foto de gigante roja real.
+        /// </summary>
+        private static void DrawCuerpoSolido(Vector2 pos, float R, Color bodyTint,
+            float fade, float collapse)
+        {
+            // LA PANZA PROFUNDA (el disco exterior — rojo sangre oscuro sólido).
+            Main.spriteBatch.Draw(Glow, pos, null,
+                TinteAlfa(Color.Lerp(GiantDeep, CollapseWhite, collapse * 0.6f), 0.96f * fade), 0f,
+                Glow.Size() * 0.5f, ScaleOf(R * 1.04f), SpriteEffects.None, 0f);
+
+            // LA MASA MEDIA (el cuerpo rojo-naranja sólido).
+            Color masa = Color.Lerp(Color.Lerp(GiantDeep, GiantOrange, 0.62f), bodyTint, 0.5f);
+            Main.spriteBatch.Draw(Glow, pos, null,
+                TinteAlfa(masa, 0.92f * fade), 0f,
+                Glow.Size() * 0.5f, ScaleOf(R * 0.82f), SpriteEffects.None, 0f);
+
+            // EL INTERIOR CALIENTE (donde el plasma sube — naranja vivo).
+            Main.spriteBatch.Draw(Glow, pos, null,
+                TinteAlfa(bodyTint, 0.88f * fade), 0f,
+                Glow.Size() * 0.5f, ScaleOf(R * 0.52f), SpriteEffects.None, 0f);
+
+            // EL LIMBO BRILLANTE (el corazón del horno — casi blanco).
+            Color limbo = Color.Lerp(Color.Lerp(GiantOrange, new Color(255, 220, 140), 0.6f),
+                CollapseWhite, collapse);
+            Main.spriteBatch.Draw(Glow, pos, null,
+                TinteAlfa(limbo, 0.85f * fade), 0f,
+                Glow.Size() * 0.5f, ScaleOf(R * 0.26f), SpriteEffects.None, 0f);
+        }
+
+        /// <summary>
+        /// LAS CÉLULAS FRÍAS (pase ALFA): la granulación LENTA como manchas
+        /// SEMITRANSPARENTES MÁS OSCURAS sobre el disco sólido — el plasma
+        /// que BAJA se ve (sin estas, la gigante sería una bola lisa).
+        /// </summary>
+        private static void DrawCelulasFrias(Vector2 pos, float R, float time,
+            int seed, float fade)
+        {
+            const int Cells = 9;
+            for (int k = 0; k < Cells; k++)
+            {
+                float h1 = VFXCore.Hash01(seed, 401 + k, 3);
+                float h2 = VFXCore.Hash01(seed, 409 + k, 7);
+                float h3 = VFXCore.Hash01(seed, 419 + k, 11);
+
+                float orbitDir = k % 2 == 0 ? 1f : -1f;
+                float ang = h1 * MathHelper.TwoPi + time * (0.045f + 0.03f * h2) * orbitDir;
+
+                // EL CICLO DE CONVECCIÓN (0.1 Hz — lenta y ENORME).
+                float convHz = 0.08f + 0.05f * h3;
+                float conv = MathF.Sin(time * convHz * MathHelper.TwoPi + h2 * MathHelper.TwoPi);
+                float rr = R * (0.20f + 0.48f * h2) * (1f + 0.16f * conv);
+                Vector2 cPos = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
+
+                // La celda que BAJA se ve OSCURA (el plasma frío hundiéndose).
+                float oscuridad = MathHelper.Clamp(0.5f - 0.5f * conv, 0f, 1f);
+                if (oscuridad < 0.20f) continue;
+
+                float size = R * (0.20f + 0.16f * h3) * (1f + 0.30f * conv);
+                Main.spriteBatch.Draw(Glow, cPos, null,
+                    TinteAlfa(GiantDeep, 0.30f * oscuridad * fade),
+                    ang + time * 0.15f * orbitDir,
+                    Glow.Size() * 0.5f, ScaleOf(size), SpriteEffects.None, 0f);
+            }
+        }
+
+        // ==================================================================
+        //  CAPA 2 — LA ATMÓSFERA EXTENSA (3× el cuerpo, aditivo)
         // ==================================================================
 
         private static void DrawAtmosphere(Vector2 pos, float R, Color glowTint,
@@ -136,30 +210,14 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 2 — EL CUERPO
+        //  CAPA 3 — LAS CELDAS CALIENTES (aditivo — el plasma que SUBE)
         // ==================================================================
 
-        private static void DrawBody(Vector2 pos, float R, Color bodyTint,
-            Color glowTint, float fade)
-        {
-            // El disco: la panza profunda de la gigante.
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(GiantDeep, 0.55f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 1.02f), SpriteEffects.None, 0f);
-            // La masa media (el cuerpo rojo-naranja).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(bodyTint, 0.55f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.78f), SpriteEffects.None, 0f);
-            // El limbo caliente (el borde interno más brillante).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(Color.Lerp(bodyTint, new Color(255, 220, 140), 0.4f), 0.45f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.45f), SpriteEffects.None, 0f);
-        }
-
-        // ==================================================================
-        //  CAPA 3 — LAS CELDAS DE CONVECCIÓN (la granulación LENTA)
-        // ==================================================================
-
+        /// <summary>
+        /// LAS CÉLDAS CALIENTES de la convección (aditivo): solo cuando el
+        /// ciclo SUBE (conv > 0) — los ojos calientes del plasma subiendo,
+        /// muestreados de la rampa SolarFire (la temperatura cuenta el cuento).
+        /// </summary>
         private static void DrawConvectionCells(Vector2 pos, float R, float time,
             int seed, float fade, float collapse)
         {
@@ -179,14 +237,11 @@ namespace AethonMod.Content.VFX
                 // lenta y ENORME, la granulación del coloso).
                 float convHz = 0.08f + 0.05f * h3;
                 float conv = MathF.Sin(time * convHz * MathHelper.TwoPi + h2 * MathHelper.TwoPi);
+                if (conv <= 0.15f) continue;                 // solo las que SUBEN brillan
+
                 float rr = R * (0.20f + 0.48f * h2) * (1f + 0.16f * conv);
                 Vector2 cPos = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
 
-                // La celda SUBE: más caliente (más cerca del amarillo en
-                // la rampa SolarFire); BAJA: más fría (rojo profundo).
-                // (v6.28: rr/R con guardas — R>0.05 garantizado por Draw, y
-                // el cociente clampeado: la división JAMÁS puede dar NaN/±Inf
-                // que envenene la temperatura — el crash del log del usuario.)
                 float rel = R > 0.05f ? MathHelper.Clamp(rr / R, 0f, 1f) : 0.5f;
                 float temp = MathHelper.Clamp(0.42f + 0.20f * conv + 0.12f * (1f - rel) - collapse * 0.25f, 0f, 1f);
                 Color cell = PyraPalettes.Sample(PyraPalettes.SolarFire, temp);
@@ -194,16 +249,9 @@ namespace AethonMod.Content.VFX
                 // El TAMAÑO de la celda (voraz: respira con su ciclo).
                 float size = R * (0.20f + 0.16f * h3) * (1f + 0.30f * conv);
                 Main.spriteBatch.Draw(Glow, cPos, null,
-                    Tint(cell, 0.38f * fade * (1f + 0.25f * conv)),
+                    Tint(cell, 0.42f * fade * conv),
                     ang + time * 0.15f * orbitDir,
                     Glow.Size() * 0.5f, ScaleOf(size), SpriteEffects.None, 0f);
-
-                // EL OJO de la celda (el punto caliente del plasma subiendo).
-                if (conv > 0.35f)
-                    Main.spriteBatch.Draw(Glow, cPos, null,
-                        Tint(PyraPalettes.Sample(PyraPalettes.SolarFire, temp + 0.25f),
-                            0.45f * fade * conv), 0f,
-                        Glow.Size() * 0.5f, ScaleOf(size * 0.35f), SpriteEffects.None, 0f);
             }
         }
 
@@ -281,6 +329,21 @@ namespace AethonMod.Content.VFX
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>Abre el lote ALFA de la casa (los CUERPOS sólidos — v6.30).</summary>
+        private static void BeginAlpha()
+        {
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>Tinte NO-premultiplicado (para el lote ALFA: RGB intacto, alfa f).</summary>
+        private static Color TinteAlfa(Color c, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f);
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
 
         /// <summary>Tinte premultiplicado de la casa (v6.25).</summary>

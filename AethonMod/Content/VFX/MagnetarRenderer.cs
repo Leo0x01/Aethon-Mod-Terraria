@@ -289,7 +289,7 @@ namespace AethonMod.Content.VFX
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (found >= 3) break;
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - p.Center).Length();
                 if (dist > ChainRange || dist < R * 2f) continue;
 

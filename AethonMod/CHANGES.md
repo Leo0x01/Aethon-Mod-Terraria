@@ -1,5 +1,124 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.30 — EL ESPEJO ROTO + LA QUEMADURA CÓSMICA + LAS ARMAS QUE APRUEBAN CONTRA DUMMY
+
+**Petición del usuario**: "el arma de desgarro... en la segunda [fase] sigue el mismo problema de que no es continuo, tiene cortes, además que genere un proyectil que cae no es bueno, ese proyectil que cae debes quitarlo, lo que debe hacer el arma de desgarro es lo siguiente, en el momento en el que se desgarra se debe partir la realidad como un espejo roto, no dejar caer fragmentos, usa la librería de desgarro pero dale ramificaciones como si fuera un rayo, entiendes, para simular un espejo roto · además haz que todas las armas puedan dañar a los Dummy · la supergigante roja del bastón supergigante roja no se ve · todos los soles deben ser capaces de quemar · las armas eléctricas deben dar un debuff correspondiente · y con los agujeros negros debes crear un nuevo debuff, para eso toma la forma del debuff de quemadura y luego tiñe de negro y el debuff nuevo se llama, quemadura cósmica · creo que debes mejorar mucho a Los dos Exhumados, mejoralos tanto como puedas y no se parecen en nada a los originales · investiga más y si necesitas crear más librerías o mejorar la que ya tenemos entonces investiga aún más · y lo de los desgarros de realidad es sumamente importante, investiga mucho cómo hacer que se vea genial y sin errores... luego haz varios repasos del código".
+
+### A. LA INVESTIGACIÓN (research/v630/INFORME_VISUAL_EXHUMADOS.md — MEDIDO, no adivinado)
+  Descarga y medición NUMÉRICA (PIL/numpy) de los sprites y GIFs oficiales del
+  wiki de Calamity: **Rancor**: "The Angy Beam" = NÚCLEO BLANCO PURO
+  (255,255,255) + bordes ROSA-MAGENTA media (204,77,112); el círculo mágico =
+  ESCALA DE GRISES blanca-plata; los brazos = SILUETAS NEGRAS (31% negro +
+  22% (32,0,0) + 17% (64,32,32)); cinders ámbar. **Gruesome Eminence**: la
+  Spirit_Congregation (134×142, 18 frames) = 45.8% NEGRO + 26.4% violeta
+  oscuro + 10.4% rojo oscuro con las CARAS ardiendo ROJO-NARANJA (253,74,60);
+  el icono = cabeza rojo-oscura con detalles TAN (la Cabeza de Dismas).
+  **Lichtenberg/espejo roto**: reglas de ramificación medidas (ramas a
+  25°-55° alternando lados, ×0.6 ancho, sub-ramas ×0.45, arcos concéntricos
+  0.22L/0.42L) + las reglas de continuidad de quads (solape len+w cubre
+  giros ≤126°; el hueco del vacío se lee como CORTE). Y el tML NPC.cs.patch:
+  **el Target Dummy es `immortal`** — recibe golpes y muestra números de
+  daño pero `CanBeChasedBy()` LO EXCLUYE (la raíz de que nuestras armas
+  manuales no le pegaban).
+
+### B. RIFTLIB v3 — EL ESPEJO ROTO (la petición más importante)
+  · **LA RAÍZ DE LOS CORTES (medida con el mock 1:1)**: (1) el VACÍO
+    solapaba len+w·0.35 (cubre giros ≤53°) mientras la luz usaba w·0.9 — los
+    huecos del NEGRO se leían como cortes; (2) el taper (1-t)^0.9 mataba la
+    cola (a t=0.75 el ancho era 3.8px) y los segmentos con w<0.4 se OMITÍAN
+    — huecos REALES en cadena; (3) la vida (1-progress)^0.8 llegaba a 0.22 —
+    la cola fina+tenue se percibía discontinua.
+  · **LA CADENA A PRUEBA DE CORTES v6.30**: el vacío solapa IGUAL que la luz
+    (len+wmax completo), LA PERLA vive en TODOS los vértices (raíz incluida)
+    con diámetro max(w), LA PERLA DE LA PUNTA cierra el canal distal, el
+    taper es SUAVE (exp 0.45 + suelo 25% — el vidrio real mantiene 40-70%
+    de su anchura), NINGÚN segmento se omite (suelo 0.6px).
+  · **EL RAMILLETE (RiftRamillete + CaminoEspejoRoto)**: al fracturarse, la
+    realidad se parte COMO UN ESPEJO: el canal madre Lichtenberg MODERADO
+    (curvatura 4.5 — el caos vive en las ramas, no en el canal) + LAS RAMAS
+    tipo rayo (25°-55° alternando lados, largo 0.22-0.42·L, ancho ×0.6) +
+    SUB-RAMAS ×0.45 en las 3 más largas + LOS ARCOS TELARAÑA concéntricos
+    (2 anillos 0.22L/0.42L partidos con huecos). RamilleteVacio/Ramillete/
+    RamilleteToca dibujan y golpean TODO el patrón.
+  · **SIN NADA QUE CAIGA**: RiftLib.Shards BORRADO — el proyectil que caía
+    era su paquete de partículas con gravedad; la fractura es TODO GRIETA.
+  · **EL DAÑO DEL ESPEJO**: ×2.2 el canal madre, ×1.6 las ramas/arcos; el
+    DoT del espejo vivo ×0.10 canal / ×0.07 ramas cada 3 ticks.
+  · **EL MOCK 1:1 (tools/mock_espejo_v630.py, muestreo bilineal + PNGs
+    premultiplicados como tML)**: v6.29 = 19 cortes NEGROS a mitad del
+    canal; v6.30 = **0 cortes** en el canal madre y TODAS las ramas (5
+    semillas); lo único tenue que queda es la PUNTA-AGUJA final de los arcos
+    (t>0.85, el crack muriéndose — como el vidrio real). (El mock reveló y
+    corrigió además un bug de AABB del propio mock — el juego con SpriteBatch
+    no lo tiene.)
+
+### C. TODAS LAS ARMAS DAÑAN A LOS DUMMY — VFXCore.EsObjetivo
+  `CanBeChasedBy()` excluye al Target Dummy (es immortal — el NPC.cs.patch
+  de tML medido). NUEVO filtro de la casa `VFXCore.EsObjetivo(npc)` =
+  CanBeChasedBy || TargetDummy: los 111 filtros de daño/búsqueda de TODO el
+  mod pasan por él — las Dummy reciben números de daño de TODAS las armas
+  manuales (y los homing las persiguen: se puede probar de verdad).
+
+### D. LA SUPERGIGANTE ROJA SE VE (la lección del pase alfa, otra vez)
+  El cuerpo era TODO-ADITIVO con alfas 0.16-0.55 y colores oscuros — sobre
+  un fondo claro es INVISIBLE. AHORA: **PASO ALFA** con EL DISCO SÓLIDO de
+  4 capas (panza profunda → masa → interior caliente → limbo brillante — la
+  estructura de una foto de gigante real) + LAS CÉLULAS FRÍAS (las manchas
+  oscuras del plasma que baja, en alfa) → **PASO ADITIVO** (atmósfera 3× +
+  solo las celdas CALIENTES que suben + anillo de fuego + la distorsión del
+  colapso). Y el catch ahora LOGUEA al client.log (PublicLogger — la próxima
+  vez sabremos POR QUÉ).
+
+### E. LOS DEBUFFS POR FAMILIA (la petición textual)
+  · **TODOS LOS SOLES QUEMAN**: RuneSunProjectile.OnHitNPC nuevo (contacto
+    OnFire 10 s — las 20 variantes + el gigante); NeutronStar y WhiteDwarf
+    +OnFire 240 en todos sus golpes; SunProjectile ya quemaba (aura/contacto/
+    nova). DeadStar → QUEMADURA CÓSMICA (el fuego de una estrella muerta es
+    NEGRO).
+  · **LAS ELÉCTRICAS ELECTRIFICAN**: Magnetar aura +OnFire... no: +Electrified
+    150 (el campo magnético), Pulsar burst final +Electrified, OcasoBurst
+    cadena +Electrified 150, LanzaAlba contacto +Electrified 180 (la cadena
+    ya lo tenía). Ya estaban: RunicLightning (3/3), Sinfonía, Tormenta
+    Nebular, LivingPulsar.
+  · **QUEMADURA CÓSMICA (el debuff nuevo)**: la FORMA de la llama de
+    quemadura TIÑIDA DE NEGRO (icono 32×32 procedural: llama pixel-art con
+    corazón negro-cósmico, gradiente violeta y MOTAS DE ESTRELLAS dentro —
+    "el fuego que arde hacia dentro"). DoT lifeRegen 32 + brasas
+    violeta-negras que ASPIRAN hacia el centro. Lo aplican LOS 12 AGUJEROS
+    (9 + 3 ascendidos + supremo aurora) y EL ECLIPSE: 4 s los básicos,
+    6 s ascendidos, 8 s los supremos, 5 s el eclipse. Localización es/EN.
+
+### F. LOS DOS EXHUMADOS — LOS COLORES MEDIDOS (v6.29 los hizo irreconocibles)
+  · **EL RENCOR**: el haz pasa de carmesí-ámbar a **NÚCLEO BLANCO + FILO
+    ROSA (204,77,112)** (RiftLib.Tear con la paleta medida) + el Ray ígneo
+    rosa; el círculo de transmutación pasa de oro/violeta a **PLATA**
+    (blanco-gris medido: 224/192/160); LOS BRAZOS pasan de cápsulas de
+    hueso blanco a **SILUETAS NEGRAS con borde rojo oscuro EN EL PASE ALFA**
+    (el negro aditivo es invisible — la lección v6.29) con LA AURA DEL BROTE
+    roja en aditivo (la única luz de las sombras) y el brote emergiendo del
+    muro en 8 ticks.
+  · **LA EMINENCIA**: de nube pálida a **LA MASA NEGRA** (doble BrumaFX
+    negra-violeta + corazón negro) con **LAS CARAS ARDIENDO ROJO-NARANJA
+    (253,74,60) DENTRO** — EL SISTEMA DE TRES PASES: alfa1 (masa + zócalos +
+    brasas base) → aditivo (los ojos que arden + estelas carmesí) → alfa2
+    (LAS PUPILAS Y LA BOCA NEGRAS ENCIMA del brillo — la mirada corta el
+    propio fuego). Los espíritus menores: cuerpos OSCUROS con ojos rojos
+    ardiendo (no fantasmas pálidos). El icono regenerado: la CABEZA OSCURA
+    cosida con ojos rojos (la Cabeza de Dismas medida — tan + rojo oscuro).
+    Los polvos de muerte/latigazo/dsipación: oscuros + brasas rojas.
+
+### G. LOS REPASOS DE CÓDIGO (la petición: "varios repasos")
+  1. Auditoría global de golpes/debuffs (41 archivos con SimpleStrikeNPC:
+     cada familia con su debuff correspondiente — tabla completa en el
+     worklog).
+  2. Contratos de batch verificados en los 3 archivos intervenidos
+     (Eminencia 3 pases, Rencor 2, supergigante 2) — Begin/End balanceados
+     con catch de seguridad.
+  3. Limpieza: ageF muerto, Shards borrado, PálidoRasgo ahora usado (el
+     destello frío del ojo mayor), comentarios/tooltips al día con los
+     colores nuevos.
+  4. El mock numérico como estándar (5 semillas × todos los caminos).
+
 ## Commit v6.29 — LOS DOS EXHUMADOS + LAS DIEZ BOLSAS POR CATEGORÍA
 
 **Petición del usuario**: "investiga esto Terraria Calamity mod Supreme

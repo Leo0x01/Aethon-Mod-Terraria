@@ -87,7 +87,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }

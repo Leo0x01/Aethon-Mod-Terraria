@@ -49,6 +49,8 @@
         "Buffs.LivingPulsarBuff.DisplayName": "Púlsar Vivo",
         "Buffs.LivingPulsarBuff.Description": "Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos",
 
+        "Buffs.QuemaduraCosmica.DisplayName": "Quemadura cósmica",
+        "Buffs.QuemaduraCosmica.Description": "El horizonte de eventos te lame: el fuego que arde hacia dentro",
         "Buffs.OcasoActivoBuff.DisplayName": "El Ocaso",
         "Buffs.OcasoActivoBuff.Description": "El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución",
         "Buffs.SobrecalentadoBuff.DisplayName": "Sobrecalentada",

@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://www.youtube.com/watch?v=26TkO3bLec8",
+    "name": "How to Generate Fractal Trees - YouTube",
+    "snippet": "Apr 9, 2023 · How to create the classic fractal tree, complete with leaves and fruit. Creating trees is one on my favorite projects.",
+    "host_name": "www.youtube.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=gwv7yqwxN1g",
+    "name": "Generate Endless Fractal Trees with this function! Easy JavaScript",
+    "snippet": "Nov 15, 2023 · This JavaScript function generates a fractal tree using recursive principles. It dynamically draws branches, starting with the trunk, and ...",
+    "host_name": "www.youtube.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.cs.swarthmore.edu/courses/CS21Labs/s17/challenge_lab10.php",
+    "name": "S17 CS21: Fractal Challenge",
+    "snippet": "A recursive function to draw a tree requires some trigonometry and keeping track of the current location and size branch you are drawing, and at what angle and ...",
+    "host_name": "www.cs.swarthmore.edu",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/processing/comments/12i89ib/video_on_how_to_create_simple_classic_fractal",
+    "name": "Video on how to create simple, classic fractal trees. Includes  - Reddit",
+    "snippet": "Apr 11, 2023 · Start with a small value for t. What you 'should' see is a tree with only a few branches, because the len < 3 in the branches() loop stops the ...",
+    "host_name": "www.reddit.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.chegg.com/homework-help/questions-and-answers/fig-813-fractal-tree-different-branch-thicknesses-83-make-bush-curves-trees-appear-natural-q96581732",
+    "name": "Solved Fig. 8.13 A fractal tree with different branch | Chegg.com",
+    "snippet": "Apr 22, 2022 · algorithm recursively creates a tree with thinner branches. Recursively draws the fractal tree with variable thickness and randomized angles.  ...",
+    "host_name": "www.chegg.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://natureofcode.com/fractals",
+    "name": "Chapter 8: Fractals - Nature of Code",
+    "snippet": "While a fascinating mathematical discussion, this escape-time algorithm is a less practical method for generating fractals than the recursive techniques we'll ...",
+    "host_name": "natureofcode.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.instagram.com/reel/CpaHCnPJ3rt/?hl=en",
+    "name": "The Sierpinski triangle is a fractal pattern that is  - Instagram",
+    "snippet": "Mar 5, 2023 · We can continue this process of creating smaller branches at 60-degree angles to the previous branches, each time reducing the length of the ...",
+    "host_name": "www.instagram.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://homo-deus.com/lab/mathematics/fractal-tree",
+    "name": "Fractal Tree Generator — Interactive Recursive Branching",
+    "snippet": "Mar 19, 2026 · A fractal tree is a recursive structure where each branch splits into two smaller branches at a fixed angle. The process repeats at every level ...",
+    "host_name": "homo-deus.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

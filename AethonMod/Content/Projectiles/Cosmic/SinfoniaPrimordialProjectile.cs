@@ -118,7 +118,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float bestDist = 260f;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < bestDist) { bestDist = dist; best = npc; }
                 }
@@ -154,7 +154,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() >
                         26f + Math.Max(npc.width, npc.height) * 0.35f) continue;
                     Detonate();
@@ -217,7 +217,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             const float BurstR = 140f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > BurstR) continue;
                 npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
                     3.5f, DamageClass.Magic);

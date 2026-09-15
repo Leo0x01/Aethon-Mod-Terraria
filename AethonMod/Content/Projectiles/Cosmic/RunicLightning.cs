@@ -177,7 +177,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             const float Margin = 16f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 Vector2 c1 = npc.position - new Vector2(Margin, Margin);
                 Vector2 c2 = npc.Size + new Vector2(Margin * 2f, Margin * 2f);
                 if (!Collision.CheckAABBvLineCollision(c1, c2, _sky, _strike)) continue;
@@ -192,7 +192,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             const float BurstR = 110f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy() || hit.Contains(npc)) continue;
+                if (!VFXCore.EsObjetivo(npc) || hit.Contains(npc)) continue;
                 if ((npc.Center - _strike).Length() > BurstR) continue;
 
                 npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
@@ -210,7 +210,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float bestDist = 320f;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy() || hit.Contains(npc)) continue;
+                    if (!VFXCore.EsObjetivo(npc) || hit.Contains(npc)) continue;
                     float dist = (npc.Center - origin).Length();
                     if (dist < bestDist)
                     {

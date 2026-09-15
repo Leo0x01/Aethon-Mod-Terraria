@@ -214,7 +214,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     int dmg = Math.Max(1, (int)(BaseDamage * 0.12f));
                     foreach (NPC npc in Main.ActiveNPCs)
                     {
-                        if (!npc.CanBeChasedBy()) continue;
+                        if (!VFXCore.EsObjetivo(npc)) continue;
                         if (anillo.Golpeados.Contains(npc.whoAmI)) continue;
                         float dist = (npc.Center - anillo.Origen).Length();
                         if (MathF.Abs(dist - r) > 14f) continue;

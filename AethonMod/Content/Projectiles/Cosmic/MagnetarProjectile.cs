@@ -99,9 +99,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
                     npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 1f, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: el campo magnético ELECTRIFICA
                 }
             }
 
@@ -149,7 +150,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
@@ -163,7 +164,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             var dists = new List<float>();
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist > maxRange) continue;
                 // inserción ordenada (N pequeño: burbuja fina, cero GC).
@@ -214,7 +215,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int burst = Math.Max(1, (int)(Projectile.damage * 1.0f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 180f) continue;
                     npc.SimpleStrikeNPC(burst, npc.direction, false, 3f, DamageClass.Magic);
                     try { npc.AddBuff(BuffID.Electrified, 180); } catch { }

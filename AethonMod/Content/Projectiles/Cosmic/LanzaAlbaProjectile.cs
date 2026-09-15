@@ -111,6 +111,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // v6.30 — LAS ARMAS ELÉCTRICAS ELECTRIFICAN (petición del
+            // usuario): la hoja que desata cadenas de rayo prende al contacto.
+            try { target.AddBuff(BuffID.Electrified, 180); } catch { }
+
             // === v6.25 — EL PULSO DE IMPACTO (OndaLib: la onda se dibuja
             //     en PreDraw; la SACUDIDA suave ya) + LAS ASCUAS de la
             //     tabla SolarFire (PyraLib.Sparks → ParticleManager) ===
@@ -155,7 +159,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float bestDist = 300f;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy() || hitList.Contains(npc)) continue;
+                    if (!VFXCore.EsObjetivo(npc) || hitList.Contains(npc)) continue;
                     float dist = (npc.Center - origin).Length();
                     if (dist < bestDist) { bestDist = dist; best = npc; }
                 }

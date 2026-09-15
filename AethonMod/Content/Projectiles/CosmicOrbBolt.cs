@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles
 {
@@ -48,7 +49,7 @@ namespace AethonMod.Content.Projectiles
                 if (npc.aiStyle == 7) continue;
                 if (npc.catchItem > 0) continue;
                 if (npc.immortal) continue;
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
 
                 float dist = Vector2.Distance(npc.Center, Projectile.Center);
                 if (dist < closestDist)

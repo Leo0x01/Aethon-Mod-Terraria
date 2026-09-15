@@ -5,6 +5,8 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
+using AethonMod.Content.Buffs;
 using Terraria.DataStructures;
 using Terraria.Graphics.Shaders;
 using AethonMod.Content.Particles;
@@ -275,7 +277,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             const float gravityStrength = 2.6f; // sol: 0.26 (10 veces menos)
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 Vector2 toCenter = Projectile.Center - npc.Center;
                 float dist = toCenter.Length();
                 if (dist > gravityRadius || dist < 5f) continue;
@@ -346,7 +348,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int t = (int)VisualsTime;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
 
@@ -364,6 +366,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         npc.velocity += toCenter * 0.8f;
                     }
                     npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 0f, DamageClass.Magic);
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
                 }
             }
 
@@ -382,7 +385,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxDist * maxDist;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float d2 = (npc.Center - Projectile.Center).LengthSquared();
                 if (d2 < bestDist)
                 {

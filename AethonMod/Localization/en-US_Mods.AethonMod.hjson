@@ -47,7 +47,9 @@
         "Projectiles.LivingPulsarMinion.DisplayName": "Living Pulsar",
 
         "Buffs.LivingPulsarBuff.DisplayName": "Living Pulsar",
-        "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",
+        "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",        "Buffs.QuemaduraCosmica.DisplayName": "Cosmic Burn",
+        "Buffs.QuemaduraCosmica.Description": "The event horizon licks you: fire that burns inward",
+
 
         "Buffs.OcasoActivoBuff.DisplayName": "The Ocaso",
         "Buffs.OcasoActivoBuff.Description": "The ocaso burns: 8 seconds of star-deaths at ×3 damage with execute",
@@ -76,7 +78,7 @@
         "Items.BolsaCosmeticos.Tooltip": "The crowns that sit upon your character.\nRight-click to deploy them.\nOnly delivers what you're missing.",
 
         "Items.RencorPrimordialStaff.DisplayName": "The Primordial Rancor",
-        "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form (research: Calamity's RANCOR).\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS crimson-amber beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
+        "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form (research: Calamity's RANCOR).\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS white-core, pink-edged beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
 
         "Items.EminenciaAtrozStaff.DisplayName": "The Gruesome Eminence",
         "Items.EminenciaAtrozStaff.Tooltip": "The arsenal's exhumed form (research: Calamity's GRUESOME EMINENCE).\nHold to channel: the spirit congregation hovers near your cursor.\n14 s of accumulation → THE ABOMINATION, full control.\nDamage climbs from 100% to 185% as it accumulates.\nRelease the channel and the mass decays and dissipates. No mana.",

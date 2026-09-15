@@ -11,9 +11,13 @@ using AethonMod.Content.Particles;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// RencorPrimordialProjectile — v6.29 — EL RENCOR PRIMORDIAL.
+    /// RencorPrimordialProjectile — v6.30 — EL RENCOR PRIMORDIAL.
     ///
-    /// El ritual completo del exhumado de Calamity (research/rancor_v629):
+    /// El ritual completo del exhumado de Calamity — con los colores MEDIDOS
+    /// de los sprites reales (research/v630): el haz = NÚCLEO BLANCO PURO +
+    /// bordes ROSA-MAGENTA (204,77,112); el círculo = PLATA/BLANCO-gris; los
+    /// brazos = SILUETAS NEGRAS con borde rojo oscuro (pase alfa — v6.29 los
+    /// hizo de hueso blanco y no se parecían en nada):
     ///
     ///   FASE CARGA (180 ticks — los 3 s EXACTOS de Calamity):
     ///     EL CÍRCULO DE TRANSMUTACIÓN — 10 runas doradas CW + 6 violetas
@@ -65,10 +69,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private bool _tileHallado;
         private Vector2 _puntoTile;    // dónde toca el haz la superficie
 
-        // === LA PALETA DEL RENCOR (carne → brasa → incandescente) ===
+        // === LA PALETA DEL RENCOR (v6.30 — MEDIDA del sprite real: "The Angy
+        //     Beam" = NÚCLEO BLANCO PURO + bordes ROSA-MAGENTA (204,77,112)) ===
         private static readonly Color[] PaletaRencor =
         {
-            new(120, 8, 30), new(220, 36, 80), new(255, 140, 60), new(255, 244, 214),
+            new(140, 20, 60), new(204, 77, 112), new(255, 180, 200), new(255, 255, 255),
         };
 
         public override void SetStaticDefaults()
@@ -367,7 +372,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if (!RiftLib.LineaToca(_origin, _dir, HazLongitud, HazAncho * 1.5f, npc.Hitbox))
                     continue;
                 int dmg = (int)(Projectile.damage * mult);
@@ -382,7 +387,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - centro).Length() > radio + npc.width * 0.5f) continue;
                 int dmg = (int)(Projectile.damage * mult);
                 npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
@@ -442,11 +447,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 null, Main.Transform);
         }
 
-        // --- LA PALETA DEL DIBUJO ---
-        private static readonly Color OroHalo = new(255, 190, 90);
-        private static readonly Color OroVivo = new(255, 226, 140);
-        private static readonly Color RunaVioleta = new(150, 110, 255);
-        private static readonly Color CarneHueso = new(255, 243, 228);
+        // --- LA PALETA DEL DIBUJO (v6.30 — MEDIDA de los sprites de Calamity:
+        //     el círculo es ESCALA DE GRISES blanca-plata (Rancor_Magic_Circle:
+        //     40% (224) + 33% (192) + 12% (160)); los brazos son SILUETAS
+        //     NEGRAS con borde rojo oscuro (Rancor_Arms: 31% negro + 22%
+        //     (32,0,0) + 17% (64,32,32)) — NO hueso blanco) ---
+        private static readonly Color PlataHalo = new(208, 214, 224);
+        private static readonly Color PlataViva = new(242, 245, 250);
+        private static readonly Color PlataTenue = new(168, 174, 186);
+        private static readonly Color SombraBrazo = new(10, 4, 8);      // el CUERPO negro del brazo
+        private static readonly Color RojoBrazo = new(96, 16, 24);      // el BORDE rojo oscuro
         private static readonly Color BrumaVioleta = new(96, 60, 110);
 
         private void DrawRencor()
@@ -488,6 +498,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         alpha: 0.16f * vida, quality: 0.5f, worldLit: true);
                 }
 
+                // v6.30 — LOS BRAZOS ESPECTRALES EN EL PASE ALFA: son SILUETAS
+                // NEGRAS (medido: 31% negro + rojo oscuro en el borde — el
+                // NEGRO aditivo es INVISIBLE, la lección v6.29 del pase alfa).
+                if (enHaz && _tileHallado)
+                    DibujarBrazos(time, vida);
+
                 // ============ 2..7: LO BRILLANTE (pase aditivo) ============
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
@@ -513,9 +529,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     RiftLib.Tear(Main.spriteBatch, _origin - Main.screenPosition, _dir,
                         HazLongitud, progreso, HazAncho, PaletaRencor, 1f * vida, seed, time);
 
-                    // EL AURA ÍGNEA del haz (el "searing" de Calamity).
+                    // --- 5. EL AURA ÍGNEA del haz (el "searing" de Calamity —
+                    //     v6.30: ROSA como el borde medido del haz).
                     LumenLib.Ray(Main.spriteBatch, center, _dir, HazLongitud, HazAncho * 1.6f,
-                        OroHalo, 0.28f * vida, 0.5f + 0.5f * (float)Math.Sin(time * 9f));
+                        new Color(232, 120, 160), 0.28f * vida, 0.5f + 0.5f * (float)Math.Sin(time * 9f));
 
                     // LA BOCA DEL HAZ cegadora (los primeros ticks).
                     float boca = MathHelper.Clamp(1f - hazAge / 10f, 0f, 1f);
@@ -523,15 +540,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         StormLib.ImpactFlash(Main.spriteBatch, center,
                             58f * (0.6f + 0.4f * boca), PaletaRencor[1], boca * vida, time);
 
-                    // --- 5. LOS BRAZOS ESPECTRALES sobre el tile ---
-                    if (_tileHallado) DibujarBrazos(time, vida);
-
                     // --- 6. LA LAVA (PyraLib.Flame lamiendo la superficie) ---
                     if (_tileHallado)
                     {
                         PyraLib.Flame(Main.spriteBatch, _puntoTile - Main.screenPosition,
                             20f, PyraPalettes.SolarFire, seed + 5, time,
                             (0.65f + 0.35f * (float)Math.Sin(time * 7f)) * vida);
+
+                        // v6.30 — EL RESPLANDOR DEL BROTE de los brazos (aditivo:
+                        // la ÚNICA luz de las sombras — la herida del muro ARDE).
+                        DibujarAurasBrote(time, vida);
                     }
                 }
 
@@ -581,26 +599,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Vector2[][] glifos = GlifosRencor;
 
-            // === EL ANILLO EXTERIOR dorado (10 runas CW) ===
+            // === EL ANILLO EXTERIOR de plata (10 runas CW — el blanco-gris
+            //     MEDIDO del Rancor_Magic_Circle: 224/192/160) ===
             float spin = enCarga ? time * 0.12f : time * 0.45f;
             int litOro = enCarga
                 ? (int)Math.Ceiling(10f * charge) : 10;
             for (int g = 0; g < 10; g++)
                 DibujarRuna(center, 96f, spin, g, 10, glifos[(g + 2) % glifos.Length],
-                    OroVivo, 0.80f, vida, litOro > g ? 1f : 0.15f);
+                    PlataViva, 0.80f, vida, litOro > g ? 1f : 0.15f);
 
-            // === EL ANILLO INTERIOR violeta (6 runas CCW) ===
+            // === EL ANILLO INTERIOR de plata tenue (6 runas CCW) ===
             int litVioleta = enCarga
                 ? (int)Math.Ceiling(6f * charge) : 6;
             for (int g = 0; g < 6; g++)
                 DibujarRuna(center, 64f, -time * 0.10f, g, 6, glifos[g % glifos.Length],
-                    RunaVioleta, 0.72f, vida, litVioleta > g ? 1f : 0.15f);
+                    PlataTenue, 0.72f, vida, litVioleta > g ? 1f : 0.15f);
 
-            // === LOS DOS ANILLOS (el cuerpo del círculo) ===
+            // === LOS DOS ANILLOS (el cuerpo del círculo — plata) ===
             Quad(VFXCore.Ring, center, VFXCore.RingQuadSize(190f), time * 0.05f,
-                Tint(OroHalo, 0.30f * vida));
+                Tint(PlataHalo, 0.30f * vida));
             Quad(VFXCore.Ring, center, VFXCore.RingQuadSize(128f), -time * 0.04f,
-                Tint(RunaVioleta, 0.26f * vida));
+                Tint(PlataTenue, 0.26f * vida));
 
             // === LA ESTRELLA DE 5 PUNTAS (el homenaje Fullmetal Alchemist) ===
             if (charge > 0.35f || !enCarga)
@@ -626,7 +645,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     float len = d.Length();
                     if (len < 0.01f) continue;
                     Capsule(mid, len, 3.4f, (float)Math.Atan2(d.Y, d.X),
-                        Tint(CarneHueso, 0.55f * starAlpha * vida));
+                        Tint(PlataViva, 0.55f * starAlpha * vida));
                     Capsule(mid, len, 7f, (float)Math.Atan2(d.Y, d.X),
                         Tint(PaletaRencor[1], 0.20f * starAlpha * vida));
                 }
@@ -670,7 +689,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>LOS BRAZOS ESPECTRALES — cápsulas de hueso con borde carmesí.</summary>
+        /// <summary>LOS BRAZOS ESPECTRALES (v6.30 — PASE ALFA): SILUETAS
+        /// NEGRAS con borde rojo oscuro — MEDIDO del sprite Rancor_Arms de
+        /// Calamity (31% negro puro + 22% (32,0,0) + 17% (64,32,32)): manos-
+        /// garra de SOMBRAS que brotan del muro herido, NO huesos blancos.</summary>
         private void DibujarBrazos(float time, float vida)
         {
             for (int b = 0; b < Brazos; b++)
@@ -686,31 +708,52 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 codo -= Main.screenPosition;
                 mano -= Main.screenPosition;
 
-                // EL SEGMENTO SUPERIOR (con halo carmesí debajo — la aura del hueso).
-                DibujarSegmentoBrazo(basePos, codo, 9f, pulsar * vida * retract);
-                // EL ANTEBRAZO.
-                DibujarSegmentoBrazo(codo, mano, 7f, pulsar * vida * retract);
+                // EL BRAZO AL NACER: emerge del muro en 8 ticks (el brote).
+                float brote = MathHelper.Clamp(edad / 8f, 0f, 1f);
 
-                // LA MANO: la mota de la muñeca + los 4 DEDOS abanicados.
-                Quad(VFXCore.SoftGlow, mano, new Vector2(12f, 12f), 0f,
-                    Tint(CarneHueso, 0.65f * vida * retract));
+                // EL SEGMENTO SUPERIOR (sombra negra + borde rojo oscuro).
+                DibujarSegmentoBrazo(basePos, Vector2.Lerp(basePos, codo, brote), 9f, pulsar * vida * retract);
+                // EL ANTEBRAZO.
+                DibujarSegmentoBrazo(codo, Vector2.Lerp(codo, mano, brote), 7f, pulsar * vida * retract);
+
+                // LA MANO-GARRA: la masa negra de la muñeca + los 4 DEDOS.
+                Quad(VFXCore.SoftGlow, mano, new Vector2(13f, 13f), 0f,
+                    Tint(RojoBrazo, 0.60f * vida * retract));
+                Quad(VFXCore.SoftGlow, mano, new Vector2(9f, 9f), 0f,
+                    Tint(SombraBrazo, 0.88f * vida * retract));
                 float angMano = MathF.Atan2(mano.Y - codo.Y, mano.X - codo.X);
                 for (int f = 0; f < 4; f++)
                 {
                     float fa = angMano + (f - 1.5f) * 0.38f +
                         0.10f * MathF.Sin(time * 5f + f * 2.0f + b);
-                    float flargo = (13f + 4f * (f % 2)) * retract;
+                    float flargo = (13f + 4f * (f % 2)) * retract * brote;
                     Vector2 punta = mano + new Vector2((float)Math.Cos(fa), (float)Math.Sin(fa)) * flargo;
-                    DibujarSegmentoBrazo(mano, punta, 3.2f, 0.8f * pulsar * vida * retract);
+                    DibujarSegmentoBrazo(mano, punta, 3.2f, 0.9f * pulsar * vida * retract);
                 }
-
-                // LA AURA del punto de brote (donde el muro está HERIDO).
-                Quad(VFXCore.SoftGlow, basePos, new Vector2(36f, 36f), 0f,
-                    Tint(PaletaRencor[1], 0.22f * vida * retract));
             }
         }
 
-        /// <summary>Un segmento de hueso: halo carmesí + cuerpo blanco-hueso.</summary>
+        /// <summary>EL RESPLANDOR DEL BROTE (aditivo — v6.30): la herida roja
+        /// del muro donde nace cada brazo (LA ÚNICA luz de los brazos: el
+        /// cuerpo es sombra, el brote ARDE).</summary>
+        private void DibujarAurasBrote(float time, float vida)
+        {
+            for (int b = 0; b < Brazos; b++)
+            {
+                if (!_brazoNacido[b]) continue;
+                float retract = MathHelper.Clamp((TotalTicks - _age) / 12f, 0f, 1f);
+                GeomBrazo(b, out Vector2 basePos, out _, out _);
+                basePos -= Main.screenPosition;
+                float pulso = 0.7f + 0.3f * (float)Math.Sin(time * 7f + b * 2.1f);
+                Quad(VFXCore.SoftGlow, basePos, new Vector2(38f, 38f), 0f,
+                    Tint(PaletaRencor[1], (0.20f + 0.10f * pulso) * vida * retract));
+                Quad(VFXCore.SoftGlow, basePos, new Vector2(14f, 14f), 0f,
+                    Tint(new Color(255, 120, 140), 0.30f * vida * retract * pulso));
+            }
+        }
+
+        /// <summary>Un segmento del brazo: borde ROJO OSCURO ancho + cuerpo
+        /// NEGRO (la silueta medida — dibujado en el PASE ALFA).</summary>
         private void DibujarSegmentoBrazo(Vector2 a, Vector2 b, float ancho, float alpha)
         {
             if (alpha <= 0.02f) return;
@@ -719,10 +762,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float len = d.Length();
             if (len < 0.5f) return;
             float rot = (float)Math.Atan2(d.Y, d.X);
-            // El halo carmesí (más ancho, tenue — la aura espectral).
-            Capsule(mid, len, ancho * 2.1f, rot, Tint(PaletaRencor[1], 0.28f * alpha));
-            // El hueso.
-            Capsule(mid, len, ancho, rot, Tint(CarneHueso, 0.78f * alpha));
+            // El borde rojo oscuro (más ancho, tenue — el rim de la sombra).
+            Capsule(mid, len, ancho * 2.0f, rot, Tint(RojoBrazo, 0.50f * alpha));
+            // EL CUERPO NEGRO (la silueta espectral de Calamity).
+            Capsule(mid, len, ancho, rot, Tint(SombraBrazo, 0.88f * alpha));
         }
 
         /// <summary>Los glifos del círculo del rencor.</summary>

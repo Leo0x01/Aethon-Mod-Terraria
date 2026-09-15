@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Buffs;
 using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.Projectiles.Cosmic
@@ -102,9 +103,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int dot = Math.Max(2, (int)(Projectile.damage * 0.01f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > EntropyRadius) continue;
                     npc.SimpleStrikeNPC(dot, 0, false, 0f, DamageClass.Magic);
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
                 }
             }
 
@@ -168,9 +170,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int burst = Math.Max(1, (int)(Projectile.damage * 0.5f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 100f) continue;
                     npc.SimpleStrikeNPC(burst, npc.direction, false, 0.5f, DamageClass.Magic);
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
                 }
             }
 

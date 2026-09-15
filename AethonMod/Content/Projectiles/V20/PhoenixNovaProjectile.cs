@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.V20
 {
@@ -99,7 +100,7 @@ namespace AethonMod.Content.Projectiles.V20
                     int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.6f));
                     foreach (NPC npc in Main.ActiveNPCs)
                     {
-                        if (!npc.CanBeChasedBy()) continue;
+                        if (!VFXCore.EsObjetivo(npc)) continue;
                         float dist = (npc.Center - Projectile.Center).Length();
                         if (dist > auraRadius) continue;
                         int dir = npc.Center.X < Projectile.Center.X ? -1 : 1;

@@ -202,7 +202,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int dmg = Math.Max(1, (int)(BaseDamage * mult));
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > 160f) continue;
 
                 npc.SimpleStrikeNPC(dmg, npc.direction, false, 1f, DamageClass.Magic);

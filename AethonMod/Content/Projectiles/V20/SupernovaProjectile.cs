@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Projectiles.Cosmic;
 
@@ -127,7 +128,7 @@ namespace AethonMod.Content.Projectiles.V20
                 float pullStrength = 0.5f + chargeEased * 1.7f; // 0.5 → 2.2
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     Vector2 toCenter = Projectile.Center - npc.Center;
                     float dist = toCenter.Length();
                     if (dist > pullRadius || dist < 5f) continue;
@@ -229,7 +230,7 @@ namespace AethonMod.Content.Projectiles.V20
                 // v5.95: 340 → 260 (mismo criterio v5.94 del sol).
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < 260f)
                     {

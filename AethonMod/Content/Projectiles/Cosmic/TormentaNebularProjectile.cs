@@ -170,7 +170,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === EL DAÑO EN ÁREA del punto de impacto ===
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - point).Length() > StrikeR) continue;
                 npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
                     2.5f, DamageClass.Magic);

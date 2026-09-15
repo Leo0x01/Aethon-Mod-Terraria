@@ -104,7 +104,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
@@ -133,7 +133,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (cadenas >= 2) break;
-                if (npc.whoAmI == target.whoAmI || !npc.CanBeChasedBy()) continue;
+                if (npc.whoAmI == target.whoAmI || !VFXCore.EsObjetivo(npc)) continue;
                 if (npc.immortal) continue;
                 float dist = (npc.Center - target.Center).Length();
                 if (dist > 220f) continue;
@@ -141,6 +141,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 npc.SimpleStrikeNPC(
                     (int)(Projectile.damage * 0.5f), npc.direction, false,
                     2.5f, DamageClass.Magic);
+                try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: la cadena ELECTRIFICA
                 cadenas++;
             }
 

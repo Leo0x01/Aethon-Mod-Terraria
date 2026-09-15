@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.VFX
@@ -268,5 +269,21 @@ namespace AethonMod.Content.VFX
             float sR = (float)Math.Sin(tilt);
             return center + new Vector2(local.X * cR - local.Y * sR, local.X * sR + local.Y * cR);
         }
+
+        // ==================================================================
+        //  v6.30 — EL FILTRO DE OBJETIVOS DE LA CASA (las Dummy incluidas)
+        // ==================================================================
+
+        /// <summary>
+        /// ¿Es este NPC un objetivo VÁLIDO para el daño manual de la casa
+        /// (escuela A)? CanBeChasedBy() EXCLUYE al Target Dummy (es
+        /// <c>immortal</c>: recibe golpes y muestra números, pero su vida
+        /// jamás baja — medido contra el NPC.cs.patch de tML 1.4.4). El
+        /// usuario prueba las armas contra Dummy: TODO nuestro daño manual
+        /// pasa por aquí, y las Dummy CUENTAN.
+        /// </summary>
+        public static bool EsObjetivo(NPC npc)
+            => npc != null && npc.active &&
+               (npc.CanBeChasedBy() || npc.type == NPCID.TargetDummy);
     }
 }

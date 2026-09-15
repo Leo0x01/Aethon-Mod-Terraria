@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Particles
@@ -379,7 +380,7 @@ namespace AethonMod.Content.Particles
             float bestDist = 400f * 400f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = Vector2.DistanceSquared(npc.Center, p.Position);
                 if (dist < bestDist)
                 {

@@ -148,7 +148,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * (Tier >= 20 ? 0.55f : 0.45f)));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
                     npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
@@ -181,11 +181,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
             return best;
+        }
+
+        /// <summary>v6.30 — TODO SOL QUEMA (petición del usuario): el golpe de
+        /// CONTACTO del sol también prende — OnFire 10 s en el cuerpo del sol.</summary>
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            // MP-seguro: AddBuff corre en quien tenga autoridad sobre el NPC.
+            try { target.AddBuff(BuffID.OnFire, 600); } catch { }
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -253,7 +261,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float coreR = 260f + 12f * (tier - 1) + (supremo ? 90f : 0f);
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < coreR)
                     {

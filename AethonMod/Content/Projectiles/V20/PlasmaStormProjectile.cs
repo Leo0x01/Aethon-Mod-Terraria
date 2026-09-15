@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.V20
 {
@@ -58,7 +59,7 @@ namespace AethonMod.Content.Projectiles.V20
                 float minDist = 350f;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float d = (npc.Center - Projectile.Center).Length();
                     if (d < minDist) { minDist = d; target = npc; }
                 }

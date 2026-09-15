@@ -1536,3 +1536,38 @@ Next:
 
 Stage Summary:
 - v6.29: los DOS EXHUMADOS de Calamity investigados a fondo (Rancor: círculo→3s→haz perforante con brazos 66%/ascuas 33%/muerte en ceniza · Gruesome Eminence: congregación wild→14s→abominación controlable al 185%) y recreados 100% con nuestras librerías; LA LECCIÓN del pase alfa para los negros; las 10 bolsas por categoría + 99 dummies; el worklog consolidado definitivamente — 0/0.
+
+---
+Task ID: 48
+Agent: Z.ai Code (agente principal — sesión AethonMod v6.30)
+Task: v6.30 — EL ESPEJO ROTO (RiftLib v3) + TODAS LAS ARMAS VS DUMMY + SUPERGIGANTE VISIBLE + DEBUFFS POR FAMILIA (QUEMADURA CÓSMICA) + LOS DOS EXHUMADOS CON LOS COLORES MEDIDOS
+
+Petición del usuario: "el arma de desgarro... en la segunda sigue el mismo problema de que no es continuo, tiene cortes, además que genere un proyectil que cae no es bueno, ese proyectil que cae debes quitarlo... se debe partir la realidad como un espejo roto, no dejar caer fragmentos, usa la librería de desgarro pero dale ramificaciones como si fuera un rayo... · todas las armas puedan dañar a los dummy · la supergigante roja no se ve · todos los soles deben quemar · las armas eléctricas deben dar un debuff correspondiente · con los agujeros negros crea un debuff nuevo: toma la forma del de quemadura, tiñe de negro, se llama quemadura cósmica · mejora mucho a Los dos Exhumados, no se parecen en nada a los originales · investiga más y mejora las librerías · varios repasos del código".
+
+Work Log:
+- INVESTIGACIÓN MEDIDA (research/v630/INFORME_VISUAL_EXHUMADOS.md + ref/): sprites y GIFs oficiales del wiki de Calamity descargados y medidos con PIL/numpy. RANCOR: el Angy Beam = blanco puro + rosa (204,77,112); círculo = grises-plata; brazos = siluetas NEGRAS (31% negro); cinders ámbar. GRUESOME EMINENCE: la congregación = 45.8% NEGRO + violeta oscuro + caras ROJO-NARANJA (253,74,60) ardiendo dentro; icono = cabeza rojo-oscura con tan (Dismas' Head). Reglas Lichtenberg/espejo (ramas 25°-55° alternas ×0.6, sub-ramas ×0.45, arcos 0.22L/0.42L) + continuidad de quads (solape len+w = giros ≤126°). tML NPC.cs.patch: el Target Dummy es immortal — recibe golpes pero CanBeChasedBy LO EXCLUYE.
+- LA RAÍZ DE LOS CORTES (medida con mock 1:1): (1) el VACÍO solapaba w·0.35 (<53° de giro) — sus huecos se leían como cortes; (2) taper (1-t)^0.9 + skip de w<0.4 = huecos REALES en la cola; (3) vida 0.22 al final = percepción discontinua.
+- RIFTLIB v3: AnchosCamino taper 0.45 + suelo 25%; GrietaVacio solape len+wmax + PERLA NEGRA en cada vértice + perla de punta; Grieta solape len+wmax + PERLA en TODOS los vértices + perla de punta + suelo 0.6px (nada se omite) + param estrellas; RiftRamillete + CaminoEspejoRoto (canal moderado + ramas alternas 25-55° ×0.6 + sub-ramas ×0.45 + 2 anillos de arcos con huecos) + RamilleteVacio/Ramillete/RamilleteToca; Shards BORRADO.
+- REALITYTEAR v3: la fractura = CaminoEspejoRoto; GolpearRamillete (×2.2 canal / ×1.6 ramas; DoT ×0.10/×0.07); SIN shards que caen; progresos 0.10→0.55 vivo / 0.55→1.0 cierre (la vida nunca baja de ~0.52); header v6.30.
+- VFXCORE.EsObjetivo(npc) = CanBeChasedBy || TargetDummy — reemplazados los 111 filtros (99 exactos + variantes) en ~50 archivos: TODAS las armas de daño manual pegan a las Dummy (y los homing las persiguen).
+- SUPERGIGANTE: RedSupergiantRenderer reestructurado en DOS pases — PASO ALFA con el DISCO SÓLIDO de 4 capas + células frías (granulación oscura) y PASO ADITIVO (atmósfera + celdas calientes que suben + anillo + colapso); el catch ahora loguea al client.log (Logging.PublicLogger + referencia log4net al verify).
+- DEBUFFS: RuneSunProjectile.OnHitNPC (OnFire 600 — los 20 soles + gigante); NeutronStar/WhiteDwarf +OnFire 240 en todos los golpes; DeadStar → QuemaduraCósmica 300; Magnetar aura +Electrified 150; Pulsar burst +Electrified 120; OcasoBurst cadena +Electrified 150; LanzaAlba contacto +Electrified 180. QUEMADURA CÓSMICA (Content/Buffs/QuemaduraCosmica.cs): debuff lifeRegen −32 + brasas violeta-negras que aspiran; icono 32×32 procedural (llama pixel-art con corazón negro-cósmico + motas de estrellas, esquinas transparentes); aplicada por LOS 12 AGUJEROS (4/6/8 s) + el eclipse (5 s); hjson es/EN.
+- EXHUMADOS: RENCOR — paleta del haz blanco+rosa (140,20,60)/(204,77,112)/(255,180,200)/(255,255,255), Ray rosa, círculo PLATA (PlataHalo/Viva/Tenue), brazos = siluetas NEGRAS (SombraBrazo + RojoBrazo) EN EL PASE ALFA con brote en 8 ticks + DibujarAurasBrote (la única luz, aditiva); tooltips y comentarios al día. EMINENCIA — MASA NEGRA (doble BrumaFX negra, worldLit false) + SISTEMA DE TRES PASES: alfa1 (zócalos + brasas base) → aditivo (ojos rojo-naranja ardiendo + estelas + bloom rojo) → alfa2 (pupilas y boca NEGRAS encima del brillo); espíritus menores oscuros con ojos rojos; icono regenerado (cabeza oscura cosida con ojos rojos — 30×30, esquinas OK); polvos de muerte/latigazo/disipación oscuros + brasas.
+- MOCK 1:1 (tools/mock_espejo_v630.py — bilineal + premultiplicado como tML): v6.29 = 19 cortes NEGROS a mitad del canal; v6.30 = 0 cortes en canal + todas las ramas (5 semillas 7331/1234/555/88/20250915); lo tenue restante son las puntas-aguja de los arcos (t>0.85 — el crack muriéndose). El mock también reveló (y se corrigió) un bug de AABB del propio mock — el juego con SpriteBatch no lo tiene.
+- ASSETS (tools/gen_v630_assets.py): QuemaduraCosmica.png (32×32) + EminenciaAtrozStaff.png regenerado (30×30) — ambos con esquinas transparentes verificadas.
+- REPASOS DE CÓDIGO: (1) auditoría de golpes/debuffs de los 41 archivos con strikes — tabla por familia; (2) contratos de batch de los 3 archivos intervenidos; (3) limpieza (ageF muerto, Shards, PálidoRasgo ahora usado como destello frío del ojo mayor); (4) verificación de texturas/hjson/PNGs; (5) compilación limpia de obj 0/0.
+- CHANGES.md v6.30 (A-G) + build.txt 6.30.
+
+Test:
+- Sandbox: compilación 0 errores 0 warnings contra tML 2026.07.3.0 real (/tmp/verify, limpia de obj, verificada 8 veces durante el ciclo).
+- Mock numérico: la continuidad del espejo roto PROBADA con números (0 cortes reales en 5 semillas).
+- VLM: el servicio quedó con rate-limit 429 durante toda la sesión — los mocks numéricos + las mediciones PIL de los sprites originales son la verificación (las verificaciones VLM pendientes: captura del usuario + iconos).
+- PENDIENTE (usuario prueba): (1) el Bastón del Desgarro: línea recta → vibración → EL ESPEJO SE PARTE (canal + ramificaciones tipo rayo + telaraña de arcos, TODO continuo, SIN nada que caiga) pega ×2.2/×1.6 y la herida ramificada vive; (2) TODAS las armas contra las 99 Dummy (números de daño); (3) la supergigante roja VISIBLE (disco sólido rojo con granulación); (4) los soles queman (OnFire), las eléctricas electrifican, los agujeros negros aplican QUEMADURA CÓSMICA (llama negra); (5) EL RENCOR: haz blanco-rosa + círculo plata + brazos de sombra negra; LA EMINENCIA: masa negra con caras rojas ardiendo + el icono de la cabeza oscura.
+
+Next:
+- Si el espejo se lee denso: bajar RamasAncho 0.6→0.5 o el número de arcos (constantes de CaminoEspejoRoto).
+- Si el DoT de la quemadura cósmica suple demasiado: lifeRegen 32→24 (QuemaduraCosmica.Update).
+- La cara Giygas de la Eminencia: subir el umbral de ventana (h<0.30 → 0.45) si no aparece.
+
+Stage Summary:
+- v6.30: el desgarro por fin ES un espejo roto CONTINUO (ramificado como un rayo, sin nada que cae, PROBADO numéricamente), todas las armas aprueban contra las Dummy, la supergigante tiene cuerpo sólido, cada familia de armas deja su debuff (con la nueva QUEMADURA CÓSMICA negra), y los Dos Exhumados llevan los colores MEDIDOS de los sprites reales de Calamity — 0/0.

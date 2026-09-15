@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://mattdesl.svbtle.com",
+    "name": "Drawing Lines is Hard - Matt DesLauriers - Svbtle",
+    "snippet": "Mar 9, 2015 — Triangulated Lines #. A common alternative is to break a line into triangles or triangle strips , and then render them as regular geometry. Read more",
+    "host_name": "mattdesl.svbtle.com",
+    "rank": 0,
+    "date": "Mar 9, 2015",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.khronos.org",
+    "name": "ANY way to do proper fuzzy translucent overlapping lines",
+    "snippet": "Oct 10, 2017 — One solution is to modify how you're generating the vertices of this strip of triangles such that the triangles don't overlap . First, compute ...",
+    "host_name": "community.khronos.org",
+    "rank": 1,
+    "date": "Oct 10, 2017",
+    "favicon": ""
+  },
+  {
+    "url": "https://levelup.gitconnected.com",
+    "name": "Rendering Thick Lines in WebGL: A Practical Approach from a",
+    "snippet": "Apr 25, 2026 — Instead of relying purely on intersection ( miter join ), I introduce additional triangles that effectively “cut” the corner when the angle ... Read more",
+    "host_name": "levelup.gitconnected.com",
+    "rank": 2,
+    "date": "Apr 25, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.kitware.com",
+    "name": "Drawing Lines in GeoJS",
+    "snippet": "Jan 17, 2017 — Both SVG and the 2D canvas element render lines by generating a path that outlines the lines with the appropriate bevels, joins, and end caps. Read more",
+    "host_name": "www.kitware.com",
+    "rank": 3,
+    "date": "Jan 17, 2017",
+    "favicon": ""
+  },
+  {
+    "url": "https://computergraphics.stackexchange.com",
+    "name": "Rounding the edges in a mitered line segment inside of a",
+    "snippet": "Nov 1, 2017 — To be precise you render your line as three quad -sections (i.e. 6 triangles in a single strip ). The middle section between the ednpoints as ... Read more",
+    "host_name": "computergraphics.stackexchange.com",
+    "rank": 4,
+    "date": "Nov 1, 2017",
+    "favicon": ""
+  },
+  {
+    "url": "https://gamedev.net",
+    "name": "degenerate triangles",
+    "snippet": "May 22, 2015 — I am making a webgl 2d renderer to render quads (sprites). To make the renderer more effective i minimize draw calls by having all vertex data ... Read more",
+    "host_name": "gamedev.net",
+    "rank": 5,
+    "date": "May 22, 2015",
+    "favicon": ""
+  }
+]

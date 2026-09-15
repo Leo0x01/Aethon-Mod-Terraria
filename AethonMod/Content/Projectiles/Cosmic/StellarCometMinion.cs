@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
@@ -234,7 +235,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int novaDamage = Math.Max(1, (int)(Projectile.damage * 0.75f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - at).Length();
                     if (dist > NovaRadius) continue;
                     npc.SimpleStrikeNPC(novaDamage, npc.direction, false, 3f, DamageClass.Summon);
@@ -288,7 +289,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (owner.HasMinionAttackTargetNPC)
             {
                 NPC marked = Main.npc[owner.MinionAttackTargetNPC];
-                if (marked != null && marked.active && marked.CanBeChasedBy())
+                if (marked != null && VFXCore.EsObjetivo(marked))
                     return marked;
             }
             NPC closest = null;
@@ -297,7 +298,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 if (npc.friendly || npc.townNPC) continue;
                 if (npc.dontTakeDamage || npc.immortal) continue;
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = Vector2.Distance(npc.Center, Projectile.Center);
                 if (dist < closestDist) { closestDist = dist; closest = npc; }
             }

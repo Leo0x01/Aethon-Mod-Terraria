@@ -143,7 +143,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === EL OBJETIVO (con MIGRACIÓN al morir) ===
             NPC presa = Main.npc[Math.Clamp(_target, 0, Main.maxNPCs)];
-            if (presa == null || !presa.active || !presa.CanBeChasedBy() ||
+            if (presa == null || !VFXCore.EsObjetivo(presa) ||
                 (presa.Center - Projectile.Center).Length() > 900f)
             {
                 presa = BuscarPresa();
@@ -231,7 +231,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int dmg = Math.Max(1, (int)(BaseDamage * 0.26f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 170f) continue;
                     npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
                 }
@@ -286,7 +286,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = 800f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }

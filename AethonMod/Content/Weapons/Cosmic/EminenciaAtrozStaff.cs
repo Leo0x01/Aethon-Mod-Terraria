@@ -15,7 +15,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// del GRUESOME EMINENCE de Calamity (research/rancor_v629/):
     ///
     ///   · LA CONGREGACIÓN: invoca una conglomeración GASEOSA de espíritus
-    ///     cerca del cursor (BrumaFX — la masa pálida de hueso que OCLUYE).
+    ///     cerca del cursor (BrumaFX — la masa NEGRA de espíritus con caras ROJO-NARANJA ardiendo — v6.30 medido).
     ///   · EL COMPORTAMIENTO SALVAJE: sigue el cursor FLOJAMENTE y SE LARGA
     ///     por su cuenta de cuando en cuando (la "wildly" de Calamity).
     ///   · LOS ESPÍRITUS MENORES: la congregación libera espíritus pequeños

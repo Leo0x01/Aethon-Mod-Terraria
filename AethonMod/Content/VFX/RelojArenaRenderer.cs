@@ -329,7 +329,7 @@ namespace AethonMod.Content.VFX
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - p.Center).Length() > 160f) continue;
 
                     var tex = Terraria.GameContent.TextureAssets.Npc[npc.type].Value;

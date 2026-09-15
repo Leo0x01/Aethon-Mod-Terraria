@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Globals
@@ -117,7 +118,7 @@ namespace AethonMod.Content.Globals
                             {
                                 if (!npc.active || npc.whoAmI == target.whoAmI) continue;
                                 if (npc.friendly || npc.townNPC) continue;
-                                if (!npc.CanBeChasedBy()) continue;
+                                if (!VFXCore.EsObjetivo(npc)) continue;
                                 // v5.30: Check de inmunidad para no dañar NPCs ya golpeados
                                 if (npc.immune[projectile.owner] > 0) continue;
                                 float dist = Vector2.Distance(npc.Center, target.Center);

@@ -21,7 +21,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///   · 3 SEGUNDOS DE CARGA (180 ticks — el número exacto de Calamity):
     ///     las runas se encienden UNA A UNA, la bruma espirala HACIA el
     ///     círculo, las ascuas orbitan y el Telegraph del haz avisa.
-    ///   · EL HAZ: "The Angy Beam" — un desgarro CONTINUO carmesí-ámbar
+    ///   · EL HAZ: "The Angy Beam" — un desgarro CONTINUO de núcleo BLANCO y filo ROSA (v6.30: medido del sprite real)
     ///     (RiftLib.Tear: UN SOLO QUAD, cero juntas) de 880 px que perfora
     ///     INFINITO (atraviesa paredes y todo lo que viva).
     ///   · AL TOCAR TILE: LOS BRAZOS ESPECTRALES (×0.66 — 4 brazos de
@@ -80,7 +80,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             tooltips.Add(new TooltipLine(Mod, "D2",
                 "[c/C9B8FF:Clava un círculo de transmutación rúnico a 380 px]"));
             tooltips.Add(new TooltipLine(Mod, "D3",
-                "[c/C9B8FF:3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO]"));
+                "[c/FFC0D8:3 s de carga → EL HAZ CONTINUO de núcleo blanco y filo rosa que perfora TODO]"));
             tooltips.Add(new TooltipLine(Mod, "D4",
                 "[c/FFD66B:Al tocar pared: brazos espectrales (×0.66) y ascuas (×0.33)]"));
             tooltips.Add(new TooltipLine(Mod, "D5",

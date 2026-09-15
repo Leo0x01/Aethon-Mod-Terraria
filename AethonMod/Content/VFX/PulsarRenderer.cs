@@ -226,7 +226,7 @@ namespace AethonMod.Content.VFX
 
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.active || !npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if (DistToSegment(npc.Center, a, b) > R * 1.6f) continue;
 
                     Vector2 hit = npc.Center - Main.screenPosition;

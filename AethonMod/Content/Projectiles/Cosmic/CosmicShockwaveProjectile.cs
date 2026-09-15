@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 using AethonMod.Content.Effects;
 
 namespace AethonMod.Content.Projectiles.Cosmic
@@ -457,7 +458,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // Cooldown de 0.1 s por NPC: "daño por cada 0.1 segundo".
                 if (ageNow < _nextHitAt[i]) continue;
                 NPC npc = Main.npc[i];
-                if (npc == null || !npc.active || !npc.CanBeChasedBy()) continue;
+                if (npc == null || !VFXCore.EsObjetivo(npc)) continue;
 
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bandInner || dist > bandOuter) continue;

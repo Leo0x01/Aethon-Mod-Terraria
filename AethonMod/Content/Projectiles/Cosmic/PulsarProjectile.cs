@@ -74,7 +74,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float best = 900f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float d = (npc.Center - Projectile.Center).Length();
                 if (d < best) { best = d; prey = npc; }
             }
@@ -133,7 +133,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     foreach (NPC npc in Main.ActiveNPCs)
                     {
-                        if (!npc.CanBeChasedBy()) continue;
+                        if (!VFXCore.EsObjetivo(npc)) continue;
                         if (DistToSegment(npc.Center, a, b) > BeamHitWidth) continue;
 
                         // EL COOLDOWN POR NPC (el Dictionary de la misión).
@@ -178,7 +178,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
@@ -237,9 +237,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int burst = Math.Max(1, (int)(Projectile.damage * 0.9f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 160f) continue;
                     npc.SimpleStrikeNPC(burst, npc.direction, false, 2f, DamageClass.Magic);
+                    try { npc.AddBuff(BuffID.Electrified, 120); } catch { }   // v6.30: el pulso final ELECTRIFICA
                 }
             }
 

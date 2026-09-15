@@ -314,7 +314,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float bestDist = maxRange;
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist < bestDist) { bestDist = dist; best = npc; }
             }
@@ -332,7 +332,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int dmg = Math.Max(1, (int)(BaseDamage * mult));
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!npc.CanBeChasedBy()) continue;
+                if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > radio) continue;
                 npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
                 if (fuegoTicks > 0)
@@ -352,7 +352,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 int novaDmg = Math.Max(1, (int)(BaseDamage * 2f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    if (!npc.CanBeChasedBy()) continue;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 650f) continue;
                     npc.SimpleStrikeNPC(novaDmg, npc.direction, false, 8f, DamageClass.Magic);
                     npc.AddBuff(BuffID.OnFire, 600);
