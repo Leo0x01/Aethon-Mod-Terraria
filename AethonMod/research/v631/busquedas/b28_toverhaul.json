@@ -1,0 +1,54 @@
+{
+ "query": "Terraria Overhaul mod melee slash arc swing visual Mirsario",
+ "engine": "ddg-html",
+ "results": [
+  {
+   "url": "https://steamcommunity.com/workshop/filedetails/?id=2811803870",
+   "name": "Steam Workshop::Terraria Overhaul (Configuration Update!)",
+   "snippet": "A large mod for Terraria that focuses on increasing overall enjoyment of the game, via improving aspects such as: combat looks, feel, & mechanics, movement, camera, ambience, and even the entire soundtrack. The Work-in-Progress 5.0 version for Terraria 1.4 is a complete reimplementation of the mod , which boasts: - A vastly superior & open sourced codebase; - Reimagined and more vanilla ...",
+   "host_name": "steamcommunity.com"
+  },
+  {
+   "url": "https://mirsar.io/Projects/TerrariaOverhaul",
+   "name": "Terraria Overhaul - mirsar.io",
+   "snippet": "A large mod for Terraria that focuses on increasing overall enjoyment of the game, via improving aspects such as: combat looks, feel, &amp; mechanics, movement, camera, ambience, and even the entire soundtrack.",
+   "host_name": "mirsar.io"
+  },
+  {
+   "url": "https://github.com/Mirsario/TerrariaOverhaul/issues/287",
+   "name": "Disabling some melee reworks does not revert projectile/slash ... - GitHub",
+   "snippet": "Disabling Improved Melee Animations, Attack aiming, improved collision, slash visualization does not revert the projectile/ swing sprite back to vanilla defaults. Vanilla ( Overhaul mod disabled): ht...",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://github.com/Mirsario/TerrariaOverhaul/issues/262",
+   "name": "1.4.4's slash effect with vanilla melee animation #262 - GitHub",
+   "snippet": "Since I prefer the slash effect + the vanilla swing (at least on those weapons that make no sense right now such as axes or the scimitar and so on, 'cause otherwise I love how Overhaul's animation looks), I tried disabling all the enhanced melee effects... but 1.4.4's new slash effect is applied both above and below the player! Is there a way to make so that the slash only renders above the ...",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://steamcommunity.com/workshop/filedetails/discussion/2811803870/4353365966426629252/",
+   "name": "Terraria Overhaul (Configuration Update!) - Steam Community",
+   "snippet": "Please add in configuration fine-tuning of values for melee velocity damage multiplier and heavy attack damage multiplier. When paired with Thorium sheathes, one can reach 5k damage with a 15 base damage weapon with just a dash and a well-timed right click.",
+   "host_name": "steamcommunity.com"
+  },
+  {
+   "url": "https://terrariamods.fandom.com/wiki/Terraria_Overhaul",
+   "name": "Terraria Overhaul - Official Terraria Mods Wiki",
+   "snippet": "Terraria Overhaul is a colossal mod for Terraria , which, instead of focusing on adding new content to the game, focuses on adding new gameplay mechanics and completely remaking existing ones.",
+   "host_name": "terrariamods.fandom.com"
+  },
+  {
+   "url": "https://www.nexusmods.com/terraria/mods/21",
+   "name": "Terraria Overhaul - Gameplay enhancements and much more",
+   "snippet": "﻿ (NOTE: This NexusMods page tends to be outdated. The version shown above is the current one on Mod Browser.) TCF Forum Page Overhaul's Discord Mirsario's Patreon This is a huge mod , which, instead of adding new content to the game, focuses on adding new gameplay mechanics and completely remaking existing ones. It remakes melee , ranged and magic combat, adds seasons, dodgerolls, block ...",
+   "host_name": "www.nexusmods.com"
+  },
+  {
+   "url": "https://www.mirsar.io/Posts/TerrariaOverhaul-v5.0-beta-13",
+   "name": "Terraria Overhaul v5.0 BETA 13(C): the overhauling - mirsar.io",
+   "snippet": "HELLO! TModLoader for Terr*ria 1.4.4 is out now, and so is this Overhaul update that introduces support for it, and which also brings: Feature decoupling, which makes Overhaul affect 9000.1% more items; Initial archery overhaul - shoot arrows, charge arrows, fly around thanks to arrows; Tree falling animations 2.0 - Dear god; Reworked enemy &quot;stun&quot; mechanics; Brand new muzzleflashes ...",
+   "host_name": "www.mirsar.io"
+  }
+ ]
+}

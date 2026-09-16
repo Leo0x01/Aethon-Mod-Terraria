@@ -15,7 +15,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// EminenciaAtrozProjectile — v6.30 — LA CONGREGACIÓN DE ESPÍRITUS.
     ///
     /// El proyectil único de LA EMINENCIA ATROZ (research/v630 — MEDIDO del
-    /// sprite Spirit_Congregation real de Calamity: 45.8% NEGRO + 26.4%
+    /// sprite de congregación de referencia: 45.8% NEGRO + 26.4%
     /// violeta oscuro + 10.4% rojo oscuro con las CARAS ardiendo
     /// ROJO-NARANJA (253,74,60) DENTRO de la masa — v6.29 la hizo PÁLIDA y
     /// no se parecía en nada; v6.30 la corrige con los colores medidos):
@@ -24,18 +24,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     NEGRO dentro (la silueta se lee sobre cualquier fondo).
     ///   · EL MOVIMIENTO SALVAJE: sigue el cursor CON spring flojo... y de
     ///     cuando en cuando SE LARGA con un impulso de dardo (la
-    ///     "moves around wildly" de Calamity). Al madurar obedece (spring
+    ///     "se mueve salvajemente" de la referencia). Al madurar obedece (spring
     ///     ×2.4 — la abominación es "fully controllable").
     ///   · LOS ESPÍRITUS MENORES: 3..12 espíritus paramétricos que SE
     ///     LIBERAN de la masa, flotan... y SON TIRADOS DE VUELTA (el ciclo
-    ///     exacto de Calamity — puramente visuales, deterministas).
+    ///     exacto de la referencia — puramente visuales, deterministas).
     ///   · LA ACUMULACIÓN: 840 ticks de canal (14 s EXACTOS) → crecimiento
     ///     0→1 → LA ABOMINACIÓN: la nube SE APRIETA, EL OJO MAYOR domina
     ///     con su pupila carmesí SIGUIENDO la dirección del vuelo, corona
     ///     de ojos menores, estela Comet de EstelaLib y rugido propio.
     ///   · LA RAMPA DE DAÑO: cada 6 ticks, área — con mult = 1 + 0.85·x
-    ///     (100% → 185% — EXACTO a Calamity).
-    ///   · LA CARA (el interior Giygas): desde crecimiento 0.55, un ojo
+    ///     (100% → 185% — el número exacto).
+    ///   · LA CARA (el interior caótico): desde crecimiento 0.55, un ojo
     ///     grande y una boca asoman en VENTANAS CAÓTICAS dentro de la masa.
     ///   · v6.30 — EL SISTEMA DE TRES PASES: alfa1 (masa negra + zócalos +
     ///     brasas base) → aditivo (los OJOS ROJO-NARANJA ardiendo + estelas)
@@ -44,11 +44,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// El canal: mientras el dueño SOSTIENE el arma, la congregación vive
     /// y crece; si la suelta, la masa decae y se disipa (el "mana drain"
-    /// de Calamity traducido a nuestra regla de maná 0).
+    /// de la referencia traducido a nuestra regla de maná 0).
     /// </summary>
     public class EminenciaAtrozProjectile : ModProjectile
     {
-        /// <summary>Los 14 segundos de acumulación de Calamity.</summary>
+        /// <summary>Los 14 segundos EXACTOS de acumulación.</summary>
         private const int CanalTotal = 840;
 
         /// <summary>Grace de canal roto antes de que el crecimiento decaiga.</summary>
@@ -123,7 +123,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (canal)
             {
                 _sinCanalTicks = 0f;
-                // LA ACUMULACIÓN: 14 s EXACTOS de Calamity.
+                // LA ACUMULACIÓN: 14 s EXACTOS del ritual.
                 if (_crecimiento < 1f)
                     _crecimiento = Math.Min(1f, _crecimiento + 1f / CanalTotal);
                 // El canal la mantiene viva (6 s de aire si se suelta).
@@ -140,7 +140,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float growth = _crecimiento;
 
             // ============================================================
-            //  EL RUGIDO DE LA ABOMINACIÓN (el "Full Size" de Calamity)
+            //  EL RUGIDO DE LA ABOMINACIÓN (el tamaño completo)
             // ============================================================
             if (growth >= 1f && !_rugidoHecho)
             {
@@ -176,7 +176,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.owner == Main.myPlayer)
             {
                 // EL OBJETIVO: el cursor, clampeado (rango de la casa + la
-                // pantalla de Calamity con 100 px de gracia).
+                // pantalla medida con 100 px de gracia).
                 Vector2 objetivo = Main.MouseWorld;
                 var pantalla = new Rectangle(
                     (int)Main.screenPosition.X - 100, (int)Main.screenPosition.Y - 100,
@@ -220,7 +220,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // ============================================================
-            //  EL DAÑO DEL CUERPO (cada 6 ticks — con la rampa de Calamity)
+            //  EL DAÑO DEL CUERPO (cada 6 ticks — con la rampa medida)
             // ============================================================
             if (_age % GolpeCada == 0f)
                 GolpearCuerpo(growth);
@@ -277,7 +277,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// EL GOLPE DEL CUERPO: daño de área con LA RAMPA EXACTA de Calamity
+        /// EL GOLPE DEL CUERPO: daño de área con LA RAMPA EXACTA medida
         /// (100% → 185%). Los enemigos que mueren aquí sueltan espíritu.
         /// </summary>
         private void GolpearCuerpo(float growth)
@@ -344,7 +344,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // --- LA PALETA (v6.30 — MEDIDA del sprite Spirit_Congregation de
-        //     Calamity: 45.8% NEGRO + 26.4% violeta oscuro (32,0,32) + 10.4%
+        //     la referencia: 45.8% NEGRO + 26.4% violeta oscuro (32,0,32) + 10.4%
         //     rojo oscuro; las CARAS arden ROJO-NARANJA (253,74,60) DENTRO
         //     de la masa negra; acento pálido (192,224,224) 0.6%) ---
         private static readonly Color MasaNegra = new(24, 8, 34);        // el cuerpo de la congregación
@@ -375,7 +375,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // ============================================================
                 //  1. EL PASE ALFA — LA MASA NEGRA DE VERDAD (v6.30: la
-                //  congregación medida de Calamity es NEGRA/VIOLETA OSCURA —
+                //  congregación medida es NEGRA/VIOLETA OSCURA —
                 //  NO pálida) + los zócalos + las brasas base de los ojos
                 // ============================================================
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -452,7 +452,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// LOS ESPÍRITUS MENORES — paramétricos y deterministas: cada uno
         /// tiene su ciclo (se LIBERA de la masa a +62 px, flota, y es TIRADO
-        /// DE VUELTA con aceleración — el ciclo exacto de Calamity). v6.30:
+        /// DE VUELTA con aceleración — el ciclo exacto). v6.30:
         /// sus OJOS arden rojo-naranja (el espíritu del sprite real es oscuro
         /// con brillos rojos — no un fantasma pálido).
         /// </summary>
@@ -555,7 +555,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Tint(BrasaBase, 0.85f * fade));
             }
 
-            // === LA CARA (el interior Giygas — zócalos de la cara grande) ===
+            // === LA CARA (el interior caótico — zócalos de la cara grande) ===
             if (growth > 0.55f && !abominacion)
                 DibujarZocaloCara(center, radio, time, seed, fade);
 
@@ -571,7 +571,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>EL ZÓCALO DE LA CARA Giygas (la ventana caótica).</summary>
+        /// <summary>EL ZÓCALO DE LA CARA (la ventana caótica).</summary>
         private void DibujarZocaloCara(Vector2 center, float radio, float time, int seed, float fade)
         {
             // LA VENTANA: caótica — abre ~30% del tiempo.
@@ -620,7 +620,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Tint(NaranjaCara, 0.95f * lat * fade));
             }
 
-            // === LA CARA QUE ARDE (la ventana Giygas) ===
+            // === LA CARA QUE ARDE (la ventana caótica) ===
             if (growth > 0.55f && !abominacion)
                 DibujarCaraBrillante(center, radio, time, seed, fade);
 
@@ -649,7 +649,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>LA CARA QUE ARDE (aditivo — la ventana Giygas).</summary>
+        /// <summary>LA CARA QUE ARDE (aditivo — la ventana caótica).</summary>
         private void DibujarCaraBrillante(Vector2 center, float radio, float time, int seed, float fade)
         {
             int ventana = (int)(time * 0.5f);
@@ -688,7 +688,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private void DibujarPupilas(Vector2 center, float radio, float time,
             int seed, float growth, float fade, bool abominacion)
         {
-            // === LA PUPILA DE LA CARA (la ventana Giygas) ===
+            // === LA PUPILA DE LA CARA (la ventana caótica) ===
             if (growth > 0.55f && !abominacion)
             {
                 int ventana = (int)(time * 0.5f);

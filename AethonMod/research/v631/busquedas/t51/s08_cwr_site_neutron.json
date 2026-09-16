@@ -1,0 +1,54 @@
+{
+ "query": "site:calamity-overhaul.cc neutron",
+ "engine": "bing",
+ "results": [
+  {
+   "url": "https://www.bbc.com/weather/2643743",
+   "name": "London - BBC Weather",
+   "snippet": "14-day weather forecast for London.",
+   "host_name": "www.bbc.com"
+  },
+  {
+   "url": "https://weather.metoffice.gov.uk/forecast/gcpvj0v07",
+   "name": "London (Greater London ) weather - Met Office",
+   "snippet": "London 7 day weather forecast including weather warnings, temperature, rain, wind, visibility, humidity and UV",
+   "host_name": "weather.metoffice.gov.uk"
+  },
+  {
+   "url": "https://www.accuweather.com/en/gb/london/ec4a-2/hourly-weather-forecast/328328",
+   "name": "London, London, United Kingdom Hourly Weather | AccuWeather",
+   "snippet": "Hourly Weather Forecast for London AccuWeather's hourly forecast for London provides hour-by-hour temperatures, RealFeel® …",
+   "host_name": "www.accuweather.com"
+  },
+  {
+   "url": "https://www.yourweather.co.uk/weather_London-Europe-United+Kingdom-London--1-34032.html",
+   "name": "Weather London . 14 day Forecast - Meteored UK",
+   "snippet": "15 小时之前 · London Weather Forecast. Access detailed hourly and 14 day forecasts, current conditions, maps, warnings, …",
+   "host_name": "www.yourweather.co.uk"
+  },
+  {
+   "url": "https://www.bbc.co.uk/weather",
+   "name": "BBC Weather - Home",
+   "snippet": "Latest weather conditions and forecasts for the UK and the world. Includes up to 14-days of hourly forecast information, warnings, …",
+   "host_name": "www.bbc.co.uk"
+  },
+  {
+   "url": "https://london-weather.co.uk/",
+   "name": "London Weather : Forecast, Real-Time Updates & 14-Day Outlook",
+   "snippet": "Get accurate London weather forecasts with hourly updates, 14-day outlook, and AI-powered clothing recommendations. Real-time …",
+   "host_name": "london-weather.co.uk"
+  },
+  {
+   "url": "https://weather.com/gb/england/greater-london/city/london/today",
+   "name": "Weather Forecast and Conditions for London , England, United …",
+   "snippet": "Today’s and tonight’s London, England, United Kingdom weather forecast, weather conditions and Doppler radar from The Weather …",
+   "host_name": "weather.com"
+  },
+  {
+   "url": "https://www.weatherengland.com/england/london-city-of/london/forecast",
+   "name": "London Weather : 14-Day Forecast | WeatherEngland",
+   "snippet": "London weather forecast for the next 14 days. Daily highs and lows, rain probability, wind, UV index and trend charts, updated …",
+   "host_name": "www.weatherengland.com"
+  }
+ ]
+}

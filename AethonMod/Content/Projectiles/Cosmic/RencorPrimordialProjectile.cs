@@ -13,13 +13,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// <summary>
     /// RencorPrimordialProjectile — v6.30 — EL RENCOR PRIMORDIAL.
     ///
-    /// El ritual completo del exhumado de Calamity — con los colores MEDIDOS
+    /// El ritual completo del exhumado — con los colores MEDIDOS
     /// de los sprites reales (research/v630): el haz = NÚCLEO BLANCO PURO +
     /// bordes ROSA-MAGENTA (204,77,112); el círculo = PLATA/BLANCO-gris; los
     /// brazos = SILUETAS NEGRAS con borde rojo oscuro (pase alfa — v6.29 los
     /// hizo de hueso blanco y no se parecían en nada):
     ///
-    ///   FASE CARGA (180 ticks — los 3 s EXACTOS de Calamity):
+    ///   FASE CARGA (180 ticks — los 3 s EXACTOS del ritual):
     ///     EL CÍRCULO DE TRANSMUTACIÓN — 10 runas doradas CW + 6 violetas
     ///     CCW encendiéndose UNA A UNA + LA ESTRELLA de 5 puntas (el
     ///     homenaje FMA) + la bruma espiralando HACIA dentro + las ascuas
@@ -40,7 +40,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class RencorPrimordialProjectile : ModProjectile
     {
-        // === LOS TIEMPOS DEL RITUAL (Calamity: 3 s de carga exactos) ===
+        // === LOS TIEMPOS DEL RITUAL (el ritual: 3 s de carga exactos) ===
         private const int CargaTicks = 180;
         private const int HazTicks = 90;
         private const int CierreTicks = 14;
@@ -50,7 +50,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private const float HazLongitud = 880f;
         private const float HazAncho = 44f;
 
-        // === LOS DAÑOS PORCENTUALES DE CALAMITY ===
+        // === LOS DAÑOS PORCENTUALES DEL RITUAL ===
         private const float DañoBrazo = 0.66f;    // 66.67% — los brazos espectrales
         private const float DañoAscuas = 0.33f;   // 33.33% — las ascuas
 
@@ -130,7 +130,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 float charge = MathHelper.Clamp(_age / CargaTicks, 0f, 1f);
 
-                // EL LATIDO del ritual (subiendo de tono — la carga de Calamity).
+                // EL LATIDO del ritual (subiendo de tono — la carga del ritual).
                 if (Main.netMode != NetmodeID.Server && _age % 30f == 0f)
                 {
                     try
@@ -174,7 +174,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // EL PAQUETE DE IMPACTO (kick perpendicular + flash + chispas).
                     RiftLib.TearImpacto(_origin, _dir, HazLongitud, PaletaRencor, seed, 1.0f);
 
-                    // EL TRUENO DEL HAZ (el disparo del láser de Calamity).
+                    // EL TRUENO DEL HAZ (el disparo del láser).
                     if (Main.netMode != NetmodeID.Server)
                     {
                         try
@@ -202,7 +202,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (hazAge > 0f && hazAge % 5f == 1f)
                     GolpearLinea(0.30f);
 
-                // === EL LOOP DEL LÁSER (el "Laser Loop" de Calamity) ===
+                // === EL LOOP DEL LÁSER (el lazo del láser) ===
                 if (Main.netMode != NetmodeID.Server && hazAge % 15f == 0f)
                 {
                     try
@@ -217,7 +217,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 for (int b = 0; b < Brazos; b++)
                 {
                     // SOLO si el haz halló un tile (sin pared no hay brazos —
-                    // la regla de Calamity: nacen DE la superficie).
+                    // la regla del ritual: nacen DE la superficie).
                     if (!_tileHallado) break;
                     if (!_brazoNacido[b] && hazAge >= 6f + b * 14f)
                     {
@@ -397,7 +397,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// LA MUERTE CON FIRMA: los enemigos del rencor NO caen — SE
-        /// DESINTEGRAN EN CENIZA (la ráfaga cenicienta-carmesí de Calamity).
+        /// DESINTEGRAN EN CENIZA (la ráfaga cenicienta-carmesí del exhumado).
         /// </summary>
         private static void MuerteCeniza(NPC npc)
         {
@@ -447,7 +447,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 null, Main.Transform);
         }
 
-        // --- LA PALETA DEL DIBUJO (v6.30 — MEDIDA de los sprites de Calamity:
+        // --- LA PALETA DEL DIBUJO (v6.30 — MEDIDA de los sprites de referencia:
         //     el círculo es ESCALA DE GRISES blanca-plata (Rancor_Magic_Circle:
         //     40% (224) + 33% (192) + 12% (160)); los brazos son SILUETAS
         //     NEGRAS con borde rojo oscuro (Rancor_Arms: 31% negro + 22%
@@ -489,7 +489,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else if (enHaz && _tileHallado)
                 {
-                    // LA FOG DEL IMPACTO (el "Rancor Fog" de Calamity).
+                    // LA FOG DEL IMPACTO (la niebla del rencor).
                     BrumaFX.Puff(_puntoTile - Main.screenPosition, 58f, BrumaVioleta,
                         seed + (int)(hazAge * 0.25f), time,
                         alpha: 0.22f * vida, quality: 0.6f, worldLit: true);
@@ -529,7 +529,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     RiftLib.Tear(Main.spriteBatch, _origin - Main.screenPosition, _dir,
                         HazLongitud, progreso, HazAncho, PaletaRencor, 1f * vida, seed, time);
 
-                    // --- 5. EL AURA ÍGNEA del haz (el "searing" de Calamity —
+                    // --- 5. EL AURA ÍGNEA del haz (el ardor ígneo del haz —
                     //     v6.30: ROSA como el borde medido del haz).
                     LumenLib.Ray(Main.spriteBatch, center, _dir, HazLongitud, HazAncho * 1.6f,
                         new Color(232, 120, 160), 0.28f * vida, 0.5f + 0.5f * (float)Math.Sin(time * 9f));
@@ -621,7 +621,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Quad(VFXCore.Ring, center, VFXCore.RingQuadSize(128f), -time * 0.04f,
                 Tint(PlataTenue, 0.26f * vida));
 
-            // === LA ESTRELLA DE 5 PUNTAS (el homenaje Fullmetal Alchemist) ===
+            // === LA ESTRELLA DE 5 PUNTAS (el sello de la transmutación) ===
             if (charge > 0.35f || !enCarga)
             {
                 float starAlpha = enCarga
@@ -691,7 +691,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>LOS BRAZOS ESPECTRALES (v6.30 — PASE ALFA): SILUETAS
         /// NEGRAS con borde rojo oscuro — MEDIDO del sprite Rancor_Arms de
-        /// Calamity (31% negro puro + 22% (32,0,0) + 17% (64,32,32)): manos-
+        /// la referencia (31% negro puro + 22% (32,0,0) + 17% (64,32,32)): manos-
         /// garra de SOMBRAS que brotan del muro herido, NO huesos blancos.</summary>
         private void DibujarBrazos(float time, float vida)
         {
@@ -764,7 +764,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float rot = (float)Math.Atan2(d.Y, d.X);
             // El borde rojo oscuro (más ancho, tenue — el rim de la sombra).
             Capsule(mid, len, ancho * 2.0f, rot, Tint(RojoBrazo, 0.50f * alpha));
-            // EL CUERPO NEGRO (la silueta espectral de Calamity).
+            // EL CUERPO NEGRO (la silueta espectral medida).
             Capsule(mid, len, ancho, rot, Tint(SombraBrazo, 0.88f * alpha));
         }
 

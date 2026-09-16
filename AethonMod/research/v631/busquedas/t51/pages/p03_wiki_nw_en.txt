@@ -1,0 +1,60 @@
+URL: https://calamity-overhaul.cc/en/items/neutronwand/
+=====
+
+
+Overview
+Section titled “Overview”
+Light of the Star Tomb is the magic branch of the neutron weapon line. Left click hurls a pulsar at the cursor. Hold right click to magnetically brake the ones already out, then release to crack them open. The stars are the sustain; the starquake is the harvest.
+“The psychic meant to crush stars into black holes, but only ever made remnants frozen in degenerate matter. Nomads call that stretch of sky the Star Tomb.”
+Base Stats
+Section titled “Base Stats”
+Field
+Value
+Base damage
+355
+Use time
+26
+Knockback
+0
+Crit
++6%
+Mana cost
+16
+Damage type
+Magic
+Rarity
+Red
+Best modifier
+Celestial
+Combat Behavior
+Section titled “Combat Behavior”
+Left Click
+Section titled “Left Click”
+Throws a pulsar toward the cursor. It brakes on its own, settles near the aim point, then spins up. Once it anchors, two magnetic beams sweep with the spin. Non-boss fodder gets a weak pull toward the star.
+Three may stand at once. Seeding a fourth forces the oldest into a weaker starquake, so the cast still counts. Hits apply
+20 s
+of Void Erosion and carry
+80
+armor penetration. A star lasts about
+11 s
+. Left click spends mana.
+Right Click
+Section titled “Right Click”
+Charge only builds if a star on the field can still be braked. Holding packs spin into the crust; a full charge takes about
+1 s
+. Releasing triggers a starquake: the crust splits, a shock ring expands, and hostile projectiles inside it die. A fuller charge makes a larger, harder quake.
+Quake hits apply
+30 s
+of Void Erosion and
+100
+armor penetration. Stars that survive the quake overclock for a while. Right click itself costs no mana.
+How to Obtain
+Section titled “How to Obtain”
+Craft
+11
+Neutron Star Ingot
+at
+Draedon’s Forge
+. Without Calamity, the station is the
+Ancient Manipulator
+.

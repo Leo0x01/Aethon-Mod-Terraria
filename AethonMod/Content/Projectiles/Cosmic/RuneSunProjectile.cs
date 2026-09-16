@@ -57,8 +57,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void SetDefaults()
         {
-            Projectile.width = 92;
-            Projectile.height = 92;
+            Projectile.width = 104;
+            Projectile.height = 104;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Generic;
             Projectile.penetrate = -1;
@@ -126,7 +126,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (newDmg != Projectile.damage)
                     Projectile.damage = newDmg;
 
-                int sz = Math.Max(16, (int)(92f * Projectile.scale));
+                int sz = Math.Max(16, (int)(104f * Projectile.scale));   // v6.31: 92→104 (BodyPx 46→52)
                 if (sz != Projectile.width)
                     Projectile.Resize(sz, sz);
             }

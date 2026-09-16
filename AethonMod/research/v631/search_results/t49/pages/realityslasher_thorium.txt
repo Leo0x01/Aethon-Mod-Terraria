@@ -1,0 +1,51 @@
+URL: https://thoriummod.wiki.gg/wiki/Reality_Slasher
+=====
+
+
+{{item infobox	
+| type = Weapon
+| type2 = Healer
+| damage = 170
+| damagetype = radiant
+| critical = 10%
+| auto = yes
+| knockback = 6.5
+| stack = 1
+| rare = 12
+| use = 22
+| hardmode = yes
+| buff = Soul Essence
+| bufftip = Upon reaching 5 stacks of soul essence, you recover (<[[Additional healing|Bonus Healing]]>) health and (<3 × Bonus Healing>) mana
+| debuff = Light Curse
+| debuffduration = 5 seconds
+| debufftip = Pure darkness is melting this enemy
+| tooltip = 'Leave your mark upon the world...'
+Grants 3 soul essence on direct hit
+Rapidly spins a reality slicing scythe all around you
+Nearby enemies are rapidly torn from reality
+| sell = {{value|0|20}}
+}}
+
+The '''Reality Slasher''' is a craftable post-[[Moon Lord]] [[radiant weapon]]. When swung, it will produce a double-edged scythe that spins in a full circle around the player, damaging [[enemies]] and inflicting the [[Light Curse]] [[debuff]]. With each use of the scythe, the nearest unobstructed enemy will be slashed either horizontally or vertically by straight purple "cuts" 3 times, dealing additional damage.
+
+Upon directly striking an enemy, the user will gain 3 stacks of [[Soul Essence]]. The purple cuts will not grant any soul essence.
+
+{{modifier|meleealt}}
+
+== Crafting ==
+=== Recipe ===
+{{recipes|result={{PAGENAME}}}}
+
+== History ==
+{{history|1.7.0.0|Decreased damage from 200 to 170, and the scythe and slash attacks no longer impede i-frames.}}
+{{history|1.6.0.0|Increased damage from 96 to 200 and critical chance from 8% to 10%.}}
+{{history|1.5.1.1|Added Soul Essence mechanic.}}
+{{history|1.4.3.2|Sprite updated.}}
+{{history|1.4.3.0|Knockback increased from 6 to 6.5.}}
+{{history|1.3.1.0|Introduced}}
+
+{{Primordial Essences}}
+{{Master Template Weapons
+| show-main = yes
+| show-radiant = yes
+}}

@@ -1,0 +1,103 @@
+{
+ "LogSpiral's Library": {
+  "id": "3019394991",
+  "github": [],
+  "discord": []
+ },
+ "Impact Library": {
+  "id": "2776422822",
+  "github": [],
+  "discord": []
+ },
+ "Luminance": {
+  "id": "3222493606",
+  "github": [],
+  "discord": []
+ },
+ "Lights And Shadows": {
+  "id": "2670628346",
+  "github": [],
+  "discord": []
+ },
+ "Particle Library": {
+  "id": "2760520795",
+  "github": [
+   "github.com/SnowyStarfall/ParticleLibrary",
+   "github.com/SnowyStarfall/ParticleLibrary/tree/main",
+   "github.com/SnowyStarfall/ParticleLibrary/tree/main/Examples"
+  ],
+  "discord": [
+   "discord.gg/bhCuppRdVF"
+  ]
+ },
+ "VFX+": {
+  "id": "3628420060",
+  "github": [],
+  "discord": []
+ },
+ "Fancy Lighting": {
+  "id": "2822950837",
+  "github": [],
+  "discord": []
+ },
+ "Realistic Sky": {
+  "id": "3172916251",
+  "github": [
+   "github.com/LucilleKarma/Realistic-Sky"
+  ],
+  "discord": []
+ },
+ "CoolerItemVisualEffect": {
+  "id": "2829306780",
+  "github": [],
+  "discord": []
+ },
+ "MeleeEffects(近战特效修改)": {
+  "id": "2851052437",
+  "github": [],
+  "discord": []
+ },
+ "Split": {
+  "id": "3703340292",
+  "github": [],
+  "discord": [
+   "discord.gg/5eutHVCYMg"
+  ]
+ },
+ "Deimos, the Starborn Princess": {
+  "id": "3003980015",
+  "github": [
+   "github.com/JesterRomut/EverquartzAdventure"
+  ],
+  "discord": [
+   "discord.gg/6Bh7Stt6d3"
+  ]
+ },
+ "Polarities": {
+  "id": "2855691488",
+  "github": [],
+  "discord": []
+ },
+ "Mod of Redemption [BETA]": {
+  "id": "2893332653",
+  "github": [],
+  "discord": [
+   "discord.gg/VNneR3U"
+  ]
+ },
+ "Secrets Of The Shadows": {
+  "id": "2843112914",
+  "github": [],
+  "discord": []
+ },
+ "Catalyst Mod": {
+  "id": "2838015851",
+  "github": [],
+  "discord": []
+ },
+ "Calamity: Wrath of the Gods": {
+  "id": "2995193002",
+  "github": [],
+  "discord": []
+ }
+}

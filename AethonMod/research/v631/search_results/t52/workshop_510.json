@@ -1,0 +1,3062 @@
+[
+ {
+  "rank": 1,
+  "id": "2824688072",
+  "title": "Calamity Mod",
+  "author": "Ozzatron"
+ },
+ {
+  "rank": 2,
+  "id": "2824688266",
+  "title": "Calamity Mod Music",
+  "author": "Ozzatron"
+ },
+ {
+  "rank": 3,
+  "id": "2619954303",
+  "title": "Recipe Browser",
+  "author": "javidpack"
+ },
+ {
+  "rank": 4,
+  "id": "2669644269",
+  "title": "Boss Checklist",
+  "author": "javidpack"
+ },
+ {
+  "rank": 5,
+  "id": "2563309347",
+  "title": "Magic Storage",
+  "author": "absoluteAquarian"
+ },
+ {
+  "rank": 6,
+  "id": "2908170107",
+  "title": "absoluteAquarian Utilities (SerousCommonLib)",
+  "author": "absoluteAquarian"
+ },
+ {
+  "rank": 7,
+  "id": "2599842771",
+  "title": "AlchemistNPC Lite",
+  "author": "Gregg"
+ },
+ {
+  "rank": 8,
+  "id": "2565639705",
+  "title": "Ore Excavator (1.4.3/1.4.4 Veinminer)",
+  "author": "CrazyContraption"
+ },
+ {
+  "rank": 9,
+  "id": "2785100219",
+  "title": "Subworld Library",
+  "author": "John Snail"
+ },
+ {
+  "rank": 10,
+  "id": "3222493606",
+  "title": "Luminance",
+  "author": "Lucille"
+ },
+ {
+  "rank": 11,
+  "id": "2570931073",
+  "title": "Fargo's Mutant Mod",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 12,
+  "id": "2797518634",
+  "title": "Quality of Terraria",
+  "author": "太阳照常升起"
+ },
+ {
+  "rank": 13,
+  "id": "2816694149",
+  "title": "Boss Cursor",
+  "author": "kgoyo"
+ },
+ {
+  "rank": 14,
+  "id": "2824688804",
+  "title": "Calamity's Vanities",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 15,
+  "id": "2597324266",
+  "title": "Wing Slot Extra",
+  "author": "Dissary"
+ },
+ {
+  "rank": 16,
+  "id": "2670628346",
+  "title": "Lights And Shadows",
+  "author": "yiyang233"
+ },
+ {
+  "rank": 17,
+  "id": "2838015851",
+  "title": "Catalyst Mod",
+  "author": "apotofkoolaid"
+ },
+ {
+  "rank": 18,
+  "id": "2825151264",
+  "title": "◆ Calamity Chinese Translation Patch ◆ 灾厄汉化补丁 ◆",
+  "author": "Kcovin"
+ },
+ {
+  "rank": 19,
+  "id": "2687866031",
+  "title": "Census - Town NPC Checklist",
+  "author": "javidpack"
+ },
+ {
+  "rank": 20,
+  "id": "2909886416",
+  "title": "Thorium Mod",
+  "author": "DivermanSam"
+ },
+ {
+  "rank": 21,
+  "id": "2815540735",
+  "title": "Fargo's Souls Mod",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 22,
+  "id": "2995193002",
+  "title": "Calamity: Wrath of the Gods",
+  "author": "Lucille"
+ },
+ {
+  "rank": 23,
+  "id": "2563784437",
+  "title": "Cheat Sheet",
+  "author": "javidpack"
+ },
+ {
+  "rank": 24,
+  "id": "2564645933",
+  "title": "HERO's Mod",
+  "author": "javidpack"
+ },
+ {
+  "rank": 25,
+  "id": "2831752947",
+  "title": "LuiAFK Reborn",
+  "author": "miningcrack"
+ },
+ {
+  "rank": 26,
+  "id": "2565540604",
+  "title": "Auto Trash",
+  "author": "javidpack"
+ },
+ {
+  "rank": 27,
+  "id": "2790924965",
+  "title": "Structure Helper",
+  "author": "ScalarVector1"
+ },
+ {
+  "rank": 28,
+  "id": "3478363753",
+  "title": "DAYBREAK",
+  "author": "tomat"
+ },
+ {
+  "rank": 29,
+  "id": "3403460014",
+  "title": "SilkyUI",
+  "author": "太阳照常升起"
+ },
+ {
+  "rank": 30,
+  "id": "3459129920",
+  "title": "Calamity Mod Infernum Mode",
+  "author": "Jav"
+ },
+ {
+  "rank": 31,
+  "id": "3338554501",
+  "title": "InnoVault",
+  "author": "HoCha113"
+ },
+ {
+  "rank": 32,
+  "id": "2707400823",
+  "title": "Auto Reforge",
+  "author": "Sad Onion"
+ },
+ {
+  "rank": 33,
+  "id": "2816188633",
+  "title": "Vanilla Calamity Mod Music",
+  "author": "apotofkoolaid"
+ },
+ {
+  "rank": 34,
+  "id": "2838188064",
+  "title": "Basic Automated (Vein) Mining",
+  "author": "Dissary"
+ },
+ {
+  "rank": 35,
+  "id": "2836588773",
+  "title": "Colored Calamity Relics",
+  "author": "Altixal"
+ },
+ {
+  "rank": 36,
+  "id": "3018447913",
+  "title": "Better Boss Health Bar for 1.4.4+",
+  "author": "Setnour6"
+ },
+ {
+  "rank": 37,
+  "id": "3119712528",
+  "title": "High FPS Support",
+  "author": "Stellar"
+ },
+ {
+  "rank": 38,
+  "id": "2763158325",
+  "title": "ArmamentDisplay",
+  "author": "Genesis"
+ },
+ {
+  "rank": 39,
+  "id": "2562997415",
+  "title": "Shorter Respawn Time",
+  "author": "javidpack"
+ },
+ {
+  "rank": 40,
+  "id": "3161388997",
+  "title": "Calamity Overhaul",
+  "author": "HoCha113"
+ },
+ {
+  "rank": 41,
+  "id": "2563851005",
+  "title": "Which Mod Is This From? (WMITF)",
+  "author": "HilariousWalnut34"
+ },
+ {
+  "rank": 42,
+  "id": "2562915378",
+  "title": "Max Stack Plus Extra",
+  "author": "RighteousRyan"
+ },
+ {
+  "rank": 43,
+  "id": "3241967932",
+  "title": "Calamity: Hunt of the Old God",
+  "author": "mgsts"
+ },
+ {
+  "rank": 44,
+  "id": "2562953970",
+  "title": "Better Zoom",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 45,
+  "id": "2839001756",
+  "title": "Unofficial Calamity Whips",
+  "author": "Poroboros"
+ },
+ {
+  "rank": 46,
+  "id": "2563862309",
+  "title": "The Stars Above",
+  "author": "Pepperlog"
+ },
+ {
+  "rank": 47,
+  "id": "2825583251",
+  "title": "More Accessory Slots (More Accessories)",
+  "author": "Aeryn"
+ },
+ {
+  "rank": 48,
+  "id": "2811803870",
+  "title": "Terraria Overhaul (Configuration Update!)",
+  "author": "Mirsario"
+ },
+ {
+  "rank": 49,
+  "id": "2621687273",
+  "title": "Autofish",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 50,
+  "id": "2782337219",
+  "title": "Fargo's Music Mod",
+  "author": "The Terry"
+ },
+ {
+  "rank": 51,
+  "id": "3044249615",
+  "title": "Calamity - Fargo's Souls DLC",
+  "author": "Jav"
+ },
+ {
+  "rank": 52,
+  "id": "2563815443",
+  "title": "Dialogue Panel Rework",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 53,
+  "id": "2860270524",
+  "title": "Calamity Ranger Expansion",
+  "author": "承影"
+ },
+ {
+  "rank": 54,
+  "id": "2760520795",
+  "title": "Particle Library",
+  "author": "✿snowy✿nibblz✿"
+ },
+ {
+  "rank": 55,
+  "id": "2847872897",
+  "title": "Loot Beams",
+  "author": "ChemAtDark"
+ },
+ {
+  "rank": 56,
+  "id": "2828370879",
+  "title": "Shop Expander",
+  "author": "Exterminator"
+ },
+ {
+  "rank": 57,
+  "id": "2816557864",
+  "title": "Improved Movement Visuals",
+  "author": "Orion"
+ },
+ {
+  "rank": 58,
+  "id": "2853619836",
+  "title": "Heart Crystal & Life Fruit Glow",
+  "author": "Chev"
+ },
+ {
+  "rank": 59,
+  "id": "2564503881",
+  "title": "HP Awareness",
+  "author": "Core"
+ },
+ {
+  "rank": 60,
+  "id": "2835214226",
+  "title": "Calamity Mod Extra Music",
+  "author": "The Pale Fixer"
+ },
+ {
+  "rank": 61,
+  "id": "2669670918",
+  "title": "Begone, Evil! (Disable Evil Biome Spread)",
+  "author": "javidpack"
+ },
+ {
+  "rank": 62,
+  "id": "2816941454",
+  "title": "Better Blending",
+  "author": "Orion"
+ },
+ {
+  "rank": 63,
+  "id": "2563082541",
+  "title": "Angler Shop",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 64,
+  "id": "3025497808",
+  "title": "[1.4.4] Magic Storage魔法存储拼音搜索",
+  "author": "AnkhSpirit"
+ },
+ {
+  "rank": 65,
+  "id": "2793971101",
+  "title": "Gravitation Don't Flip the Screen",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 66,
+  "id": "3024322683",
+  "title": "Magic Builder",
+  "author": "GabsGoncs"
+ },
+ {
+  "rank": 67,
+  "id": "2992680615",
+  "title": "Biome Titles",
+  "author": "Dice"
+ },
+ {
+  "rank": 68,
+  "id": "2829306780",
+  "title": "CoolerItemVisualEffect",
+  "author": "错数螺线LogSpiral"
+ },
+ {
+  "rank": 69,
+  "id": "3458992153",
+  "title": "Infernum Mode Music",
+  "author": "Jav"
+ },
+ {
+  "rank": 70,
+  "id": "2614857307",
+  "title": "OmniSwing",
+  "author": "Pop000100"
+ },
+ {
+  "rank": 71,
+  "id": "2847120725",
+  "title": "Chinese Patch for Fargo's Mutant Mod & Fargo's Souls Mod",
+  "author": "StelleZetex"
+ },
+ {
+  "rank": 72,
+  "id": "2877850919",
+  "title": "Smarter Cursor",
+  "author": "Quandratic"
+ },
+ {
+  "rank": 73,
+  "id": "2564872136",
+  "title": "Antisocial",
+  "author": "javidpack"
+ },
+ {
+  "rank": 74,
+  "id": "2689434541",
+  "title": "Bosses As NPCs",
+  "author": "Rijam"
+ },
+ {
+  "rank": 75,
+  "id": "3019394991",
+  "title": "LogSpiral's Library",
+  "author": "错数螺线LogSpiral"
+ },
+ {
+  "rank": 76,
+  "id": "2877696929",
+  "title": "Wombat's General Improvements",
+  "author": "lazywombat"
+ },
+ {
+  "rank": 77,
+  "id": "3001692619",
+  "title": "Concise Mods List",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 78,
+  "id": "2817496179",
+  "title": "Atmospheric Torches",
+  "author": "Orion"
+ },
+ {
+  "rank": 79,
+  "id": "2864843929",
+  "title": "Consolaria",
+  "author": "has2r"
+ },
+ {
+  "rank": 80,
+  "id": "2827446882",
+  "title": "zzp198's WeaponOut Lite",
+  "author": "zzp198"
+ },
+ {
+  "rank": 81,
+  "id": "3040436287",
+  "title": "zh-Hans localization for Calamity's Vanity",
+  "author": "uisdfja"
+ },
+ {
+  "rank": 82,
+  "id": "2831360228",
+  "title": "Project tRU",
+  "author": "Yum"
+ },
+ {
+  "rank": 83,
+  "id": "2822950837",
+  "title": "Fancy Lighting",
+  "author": "Rex"
+ },
+ {
+  "rank": 84,
+  "id": "2811905172",
+  "title": "Terraria Ambience",
+  "author": "RighteousRyan"
+ },
+ {
+  "rank": 85,
+  "id": "2982372319",
+  "title": "Spirit Classic",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 86,
+  "id": "3449156562",
+  "title": "Calamity Fables",
+  "author": "IbanPlay"
+ },
+ {
+  "rank": 87,
+  "id": "2826615136",
+  "title": "Terraria Ambience API",
+  "author": "RighteousRyan"
+ },
+ {
+  "rank": 88,
+  "id": "3316697363",
+  "title": "Call of Void",
+  "author": "_Polaris_"
+ },
+ {
+  "rank": 89,
+  "id": "2979448082",
+  "title": "Summoner UI (Latest Stable Release)",
+  "author": "Tetriscat66"
+ },
+ {
+  "rank": 90,
+  "id": "2815010161",
+  "title": "Shared World Map",
+  "author": "Jake"
+ },
+ {
+  "rank": 91,
+  "id": "3269610671",
+  "title": "Syla's Resource Pack Library",
+  "author": "Tetriscat66"
+ },
+ {
+  "rank": 92,
+  "id": "2827999994",
+  "title": "DPSExtreme",
+  "author": "javidpack"
+ },
+ {
+  "rank": 93,
+  "id": "2984622072",
+  "title": "Starlight River",
+  "author": "ScalarVector1"
+ },
+ {
+  "rank": 94,
+  "id": "2800050107",
+  "title": "tML Language Pack Fix",
+  "author": "太阳照常升起"
+ },
+ {
+  "rank": 95,
+  "id": "2843258712",
+  "title": "WorldGen Previewer",
+  "author": "javidpack"
+ },
+ {
+  "rank": 96,
+  "id": "2729987636",
+  "title": "Friendly NPCs Don't Die",
+  "author": "Slayer6409"
+ },
+ {
+  "rank": 97,
+  "id": "2603400287",
+  "title": "Armor Modifiers & Reforging",
+  "author": "Dissary"
+ },
+ {
+  "rank": 98,
+  "id": "2776422822",
+  "title": "Impact Library",
+  "author": "Seraph"
+ },
+ {
+  "rank": 99,
+  "id": "2817545194",
+  "title": "Helpful NPCs",
+  "author": "⑨9 The Strongest 9⑨"
+ },
+ {
+  "rank": 100,
+  "id": "2802867430",
+  "title": "Fargo's Best of Both Worlds",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 101,
+  "id": "2793782057",
+  "title": "Colored Damage Types",
+  "author": "Fudgepants"
+ },
+ {
+  "rank": 102,
+  "id": "2858396998",
+  "title": "MEAC - 原版内容重置 demo",
+  "author": "yiyang233"
+ },
+ {
+  "rank": 103,
+  "id": "2906451681",
+  "title": "Fargo's Soul Mod Extras",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 104,
+  "id": "3172916251",
+  "title": "Realistic Sky",
+  "author": "Lucille"
+ },
+ {
+  "rank": 105,
+  "id": "2816999612",
+  "title": "Recipe Browser && Magic Storage",
+  "author": "Kinoler"
+ },
+ {
+  "rank": 106,
+  "id": "2893332653",
+  "title": "Mod of Redemption [BETA]",
+  "author": "Halmska"
+ },
+ {
+  "rank": 107,
+  "id": "2812377597",
+  "title": "No Pylon Restrictions",
+  "author": "Jake"
+ },
+ {
+  "rank": 108,
+  "id": "2906406399",
+  "title": "Infernum Master and Legendary Modes Patch",
+  "author": "rawJIo"
+ },
+ {
+  "rank": 109,
+  "id": "3244873353",
+  "title": "Rainbow Master: Colored Relics",
+  "author": "huanchen53"
+ },
+ {
+  "rank": 110,
+  "id": "2843112914",
+  "title": "Secrets Of The Shadows",
+  "author": "VortexOfRainbows"
+ },
+ {
+  "rank": 111,
+  "id": "3158254975",
+  "title": "Better Caves",
+  "author": "Verveine"
+ },
+ {
+  "rank": 112,
+  "id": "2875039408",
+  "title": "BossHealthBar(Boss血条)",
+  "author": "Devil_Slime"
+ },
+ {
+  "rank": 113,
+  "id": "2835407664",
+  "title": "No More Tombs",
+  "author": "STS15"
+ },
+ {
+  "rank": 114,
+  "id": "3039823461",
+  "title": "[1.4.4]OreExcavator汉化",
+  "author": "xxx"
+ },
+ {
+  "rank": 115,
+  "id": "3017904100",
+  "title": "LuiAFKReborn汉化1.4.4",
+  "author": "Setsuna"
+ },
+ {
+  "rank": 116,
+  "id": "2789237440",
+  "title": "Teleport All NPC Home",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 117,
+  "id": "2891420130",
+  "title": "Craftable Calamity Items",
+  "author": "Aqurtex"
+ },
+ {
+  "rank": 118,
+  "id": "2576847291",
+  "title": "Compare Item Stats",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 119,
+  "id": "3003323203",
+  "title": "Boss Intros",
+  "author": "Dice"
+ },
+ {
+  "rank": 120,
+  "id": "2825033995",
+  "title": "Calamity Flamethrowers",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 121,
+  "id": "3408499520",
+  "title": "Ability To Read",
+  "author": "S̷a̷n̶h̸o̷s̷ [SG:R]"
+ },
+ {
+  "rank": 122,
+  "id": "2992213994",
+  "title": "Instant Platform Fallthrough",
+  "author": "diniamo"
+ },
+ {
+  "rank": 123,
+  "id": "3486967746",
+  "title": "Calamity: Wrath of the Machines",
+  "author": "Lucille"
+ },
+ {
+  "rank": 124,
+  "id": "2832487441",
+  "title": "Wikithis",
+  "author": "BasicallyIAmFox"
+ },
+ {
+  "rank": 125,
+  "id": "2917091521",
+  "title": "Shoe Slot",
+  "author": "stormytuna"
+ },
+ {
+  "rank": 126,
+  "id": "3455924006",
+  "title": "WeaponOut Lite: An Item Holding Mod",
+  "author": "FK99"
+ },
+ {
+  "rank": 127,
+  "id": "2820025575",
+  "title": "Pylons Prevent Evils",
+  "author": "Dissary"
+ },
+ {
+  "rank": 128,
+  "id": "2565770836",
+  "title": "The Amulet Of Many Minions: Combat Pets!",
+  "author": "Billybobmcbo"
+ },
+ {
+  "rank": 129,
+  "id": "2925134686",
+  "title": "Expanded Inventory",
+  "author": "Kumquat Karl"
+ },
+ {
+  "rank": 130,
+  "id": "2828041071",
+  "title": "imkSushi's Mod",
+  "author": "imkSushi"
+ },
+ {
+  "rank": 131,
+  "id": "2563277843",
+  "title": "The Clicker Class",
+  "author": "DivermanSam"
+ },
+ {
+  "rank": 132,
+  "id": "2988092558",
+  "title": "[VSC Framework] Dialect",
+  "author": "ThomasThePencil"
+ },
+ {
+  "rank": 133,
+  "id": "3301165007",
+  "title": "Calamity Ore NPC",
+  "author": "Finnblade"
+ },
+ {
+  "rank": 134,
+  "id": "2561619075",
+  "title": "Summoners' Association",
+  "author": "javidpack"
+ },
+ {
+  "rank": 135,
+  "id": "3055383223",
+  "title": "Chinese Translation Patch for Thorium & Thorium Addons",
+  "author": "Flandre Scarlet"
+ },
+ {
+  "rank": 136,
+  "id": "2857930354",
+  "title": "Better Treasure Bag Loot",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 137,
+  "id": "3142064272",
+  "title": "Unofficial Calamity Bard & Healer",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 138,
+  "id": "2853817477",
+  "title": "Calamity Rarities",
+  "author": "The Golden Knight"
+ },
+ {
+  "rank": 139,
+  "id": "2914771557",
+  "title": "Better Boss Health Bar",
+  "author": "你思贺大跌"
+ },
+ {
+  "rank": 140,
+  "id": "2563098343",
+  "title": "Team Spectate",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 141,
+  "id": "3625429529",
+  "title": "属性面板PropertyPanel",
+  "author": "错数螺线LogSpiral"
+ },
+ {
+  "rank": 142,
+  "id": "2837407674",
+  "title": "Lan's Unlimited Buff Slots",
+  "author": "Lanboost"
+ },
+ {
+  "rank": 143,
+  "id": "3070717963",
+  "title": "Thorium Helheim",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 144,
+  "id": "3021285778",
+  "title": "androLib",
+  "author": "andro951"
+ },
+ {
+  "rank": 145,
+  "id": "2815701209",
+  "title": "JoJoStands",
+  "author": "AnotherGuy"
+ },
+ {
+  "rank": 146,
+  "id": "2942702352",
+  "title": "Wing Slot",
+  "author": "Wumbology"
+ },
+ {
+  "rank": 147,
+  "id": "2569059803",
+  "title": "Teleport to pylons from anywhere!",
+  "author": "eddywm"
+ },
+ {
+  "rank": 148,
+  "id": "3028584450",
+  "title": "Cataclysm Mod",
+  "author": "WitherTaco"
+ },
+ {
+  "rank": 149,
+  "id": "3161277410",
+  "title": "Clamity Music Mod",
+  "author": "WitherTaco"
+ },
+ {
+  "rank": 150,
+  "id": "2831179995",
+  "title": "Aimbot",
+  "author": "Roxy The Proxy"
+ },
+ {
+  "rank": 151,
+  "id": "2962495092",
+  "title": "AlchemistNPCLite汉化",
+  "author": "xxx"
+ },
+ {
+  "rank": 152,
+  "id": "3022671410",
+  "title": "Vacuum Ore Bag",
+  "author": "andro951"
+ },
+ {
+  "rank": 153,
+  "id": "2851830850",
+  "title": "MrPlague's Authentic Races",
+  "author": "MrPlague"
+ },
+ {
+  "rank": 154,
+  "id": "2812108605",
+  "title": "Point Shop",
+  "author": "太阳照常升起"
+ },
+ {
+  "rank": 155,
+  "id": "2828604929",
+  "title": "Dragon Ball Terraria Legacy",
+  "author": "FullNovaAlchemist"
+ },
+ {
+  "rank": 156,
+  "id": "3355517847",
+  "title": "Fargo系列的汉化合集（无突变与魂石）",
+  "author": "虞悖"
+ },
+ {
+  "rank": 157,
+  "id": "2827634634",
+  "title": "Where's My Items",
+  "author": "javidpack"
+ },
+ {
+  "rank": 158,
+  "id": "2982195397",
+  "title": "Pets Overhaul",
+  "author": "Pearlie"
+ },
+ {
+  "rank": 159,
+  "id": "2807309918",
+  "title": "Start with base",
+  "author": "Unftf"
+ },
+ {
+  "rank": 160,
+  "id": "2930931197",
+  "title": "Homeward Journey",
+  "author": "7"
+ },
+ {
+  "rank": 161,
+  "id": "2818107739",
+  "title": "Anime Vanity & Pets",
+  "author": "Pork"
+ },
+ {
+  "rank": 162,
+  "id": "3151123166",
+  "title": "High FPS Support CN",
+  "author": "yf"
+ },
+ {
+  "rank": 163,
+  "id": "2824717058",
+  "title": "Calamity Loot Swap",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 164,
+  "id": "2994789105",
+  "title": "非灾厄官方灾厄鞭子汉化补丁",
+  "author": "Flandre Scarlet"
+ },
+ {
+  "rank": 165,
+  "id": "3201195744",
+  "title": "Better Tooltips",
+  "author": "i have stupid chud internet"
+ },
+ {
+  "rank": 166,
+  "id": "3013189983",
+  "title": "Hypnos in Calamity Mod",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 167,
+  "id": "2568847048",
+  "title": "Vitality Mod",
+  "author": "bartuscus"
+ },
+ {
+  "rank": 168,
+  "id": "3233084552",
+  "title": "Colored Fargo Relics",
+  "author": "Yukimu"
+ },
+ {
+  "rank": 169,
+  "id": "2815777479",
+  "title": "DawnMod: RisingDays",
+  "author": "Devil_Slime"
+ },
+ {
+  "rank": 170,
+  "id": "2864849706",
+  "title": "Camping",
+  "author": "FK99"
+ },
+ {
+  "rank": 171,
+  "id": "3281576339",
+  "title": "Magic Storage Starter Bag",
+  "author": "Oskarien"
+ },
+ {
+  "rank": 172,
+  "id": "2856742618",
+  "title": "No More Items Stuck in Blocks",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 173,
+  "id": "2621278406",
+  "title": "More Zenith Items",
+  "author": "No."
+ },
+ {
+  "rank": 174,
+  "id": "3114886209",
+  "title": "Ragnarok Mod",
+  "author": "CrafterDaemon"
+ },
+ {
+  "rank": 175,
+  "id": "3310041861",
+  "title": "Munchies - Consumables Checklist",
+  "author": "jboss"
+ },
+ {
+  "rank": 176,
+  "id": "2852444211",
+  "title": "Replace String",
+  "author": "夜谷紫幽"
+ },
+ {
+  "rank": 177,
+  "id": "2562968836",
+  "title": "Advanced World Generation",
+  "author": "Ishigh"
+ },
+ {
+  "rank": 178,
+  "id": "3001536716",
+  "title": "In-game Translate (Supports both v1.4.4 and v1.4.3)",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 179,
+  "id": "2851052437",
+  "title": "MeleeEffects(近战特效修改)",
+  "author": "Wind_Mind"
+ },
+ {
+  "rank": 180,
+  "id": "3378168037",
+  "title": "Compatibility Checker (Beta)",
+  "author": "JamzOJamz"
+ },
+ {
+  "rank": 181,
+  "id": "2939093580",
+  "title": "Orchid Mineshaft",
+  "author": "Verveine"
+ },
+ {
+  "rank": 182,
+  "id": "3019925104",
+  "title": "Lunar Veil Legacy",
+  "author": "Lunziestella"
+ },
+ {
+  "rank": 183,
+  "id": "2938711389",
+  "title": "Pinyin Search Support for Recipe Browser",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 184,
+  "id": "3234262967",
+  "title": "Potion Slots",
+  "author": "Dice"
+ },
+ {
+  "rank": 185,
+  "id": "2795036823",
+  "title": "Multiple Lures",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 186,
+  "id": "2973922820",
+  "title": "Touhou Little Friend ~ Adventure with cute partners",
+  "author": "中学生"
+ },
+ {
+  "rank": 187,
+  "id": "2845512631",
+  "title": "Koko Net Lib",
+  "author": "Roxy The Proxy"
+ },
+ {
+  "rank": 188,
+  "id": "2773928114",
+  "title": "Better Extractinator",
+  "author": "B34tingH34rt"
+ },
+ {
+  "rank": 189,
+  "id": "2890863160",
+  "title": "Faster UI",
+  "author": "Autumn Leaf Cookie"
+ },
+ {
+  "rank": 190,
+  "id": "3162500097",
+  "title": "ConsolariaCN",
+  "author": "薯条虫到处觅食"
+ },
+ {
+  "rank": 191,
+  "id": "2903207756",
+  "title": "One Piece Mod",
+  "author": "Minion_2187"
+ },
+ {
+  "rank": 192,
+  "id": "3628420060",
+  "title": "VFX+",
+  "author": "Its a seeya"
+ },
+ {
+  "rank": 193,
+  "id": "2809886101",
+  "title": "Weapon Enchantments",
+  "author": "andro951"
+ },
+ {
+  "rank": 194,
+  "id": "2923689066",
+  "title": "无限加点系统 Infinite Add Point System",
+  "author": "纪年空"
+ },
+ {
+  "rank": 195,
+  "id": "2974503494",
+  "title": "More Pylons",
+  "author": "承影"
+ },
+ {
+  "rank": 196,
+  "id": "2956897719",
+  "title": "Useful NPCs",
+  "author": "Gortart"
+ },
+ {
+  "rank": 197,
+  "id": "2565505925",
+  "title": "Max Luck",
+  "author": "SteptimusHeap"
+ },
+ {
+  "rank": 198,
+  "id": "2833137928",
+  "title": "Calamity Alternate Exo Mechs Theme",
+  "author": "apotofkoolaid"
+ },
+ {
+  "rank": 199,
+  "id": "2816205775",
+  "title": "Mount and Journey",
+  "author": "Qz"
+ },
+ {
+  "rank": 200,
+  "id": "2850199955",
+  "title": "Elaina: Wandering Witch",
+  "author": "Korate"
+ },
+ {
+  "rank": 201,
+  "id": "2927542027",
+  "title": "Achievement Mod",
+  "author": "metalkingpig"
+ },
+ {
+  "rank": 202,
+  "id": "3481943642",
+  "title": "1/10000 Chance for Withered Foxy Jumpscare Every Second",
+  "author": "yonmaruyon"
+ },
+ {
+  "rank": 203,
+  "id": "2910253435",
+  "title": "New Beginnings",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 204,
+  "id": "2886049116",
+  "title": "Calamity Craftable Shrine Items",
+  "author": "小水母暮雾儿"
+ },
+ {
+  "rank": 205,
+  "id": "2566353646",
+  "title": "More Endless Ammo",
+  "author": "HilariousWalnut34"
+ },
+ {
+  "rank": 206,
+  "id": "3449149200",
+  "title": "Spirit Music Mod",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 207,
+  "id": "3070430423",
+  "title": "Fancy Whips",
+  "author": "starblock"
+ },
+ {
+  "rank": 208,
+  "id": "3141716573",
+  "title": "Generated Housing",
+  "author": "CornHusker"
+ },
+ {
+  "rank": 209,
+  "id": "2634682993",
+  "title": "Better Multiplayer",
+  "author": "kittenchilly"
+ },
+ {
+  "rank": 210,
+  "id": "2947735494",
+  "title": "Starter Bags - 1.4.4",
+  "author": "Right Hand Man"
+ },
+ {
+  "rank": 211,
+  "id": "2817869311",
+  "title": "Plentiful Ores",
+  "author": "Valkyrienyanko"
+ },
+ {
+  "rank": 212,
+  "id": "2904348574",
+  "title": "Vyklade's DBT Transformation Lib",
+  "author": "Vyklade"
+ },
+ {
+  "rank": 213,
+  "id": "3449158983",
+  "title": "Spirit Reforged",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 214,
+  "id": "2977808495",
+  "title": "MooMoo's Ultimate Yoyo Revamp",
+  "author": "Moo Moo"
+ },
+ {
+  "rank": 215,
+  "id": "3106201538",
+  "title": "Thorium + Calamity Convergence Mod REDUX",
+  "author": "zriverazrty"
+ },
+ {
+  "rank": 216,
+  "id": "2802069787",
+  "title": "Reduced Grinding",
+  "author": "Dragon3025"
+ },
+ {
+  "rank": 217,
+  "id": "2829862017",
+  "title": "Bags",
+  "author": "WHOni"
+ },
+ {
+  "rank": 218,
+  "id": "3069154070",
+  "title": "MooMoo's Yoyo Lib",
+  "author": "Moo Moo"
+ },
+ {
+  "rank": 219,
+  "id": "2984386500",
+  "title": "Extra Accessory Slot",
+  "author": "队友的压力怪"
+ },
+ {
+  "rank": 220,
+  "id": "2815701751",
+  "title": "JoJoStands: Sounds",
+  "author": "AnotherGuy"
+ },
+ {
+  "rank": 221,
+  "id": "3008407784",
+  "title": "Can I Shimmer This? [CIST]",
+  "author": "Terry"
+ },
+ {
+  "rank": 222,
+  "id": "3128243548",
+  "title": "More Accessories CN",
+  "author": "yf"
+ },
+ {
+  "rank": 223,
+  "id": "2826246821",
+  "title": "Lan's House Builder",
+  "author": "Lanboost"
+ },
+ {
+  "rank": 224,
+  "id": "2567580488",
+  "title": "Fargo's Enemy Modifiers",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 225,
+  "id": "3030483105",
+  "title": "Enchanted Moons",
+  "author": "Dice"
+ },
+ {
+  "rank": 226,
+  "id": "2852943694",
+  "title": "MeleeEffectsWithCalamity(近战特效修改灾厄适配)",
+  "author": "寰宇最终合成站"
+ },
+ {
+  "rank": 227,
+  "id": "2869271636",
+  "title": "Dragon Ball Terraria: Calamity Addon",
+  "author": "Chaoticley"
+ },
+ {
+  "rank": 228,
+  "id": "3024992349",
+  "title": "Better Zenith in Calamity Mod",
+  "author": "ZE-star"
+ },
+ {
+  "rank": 229,
+  "id": "2817789946",
+  "title": "Platform Helper",
+  "author": "Valkyrienyanko"
+ },
+ {
+  "rank": 230,
+  "id": "3535746309",
+  "title": "Thrower Unification",
+  "author": "StarlightCat"
+ },
+ {
+  "rank": 231,
+  "id": "2823524728",
+  "title": "Show the body of bosses in minimap",
+  "author": "雅莎_Yasa"
+ },
+ {
+  "rank": 232,
+  "id": "3363192023",
+  "title": "Infernum Chinese Font Addon",
+  "author": "Tigerzzz"
+ },
+ {
+  "rank": 233,
+  "id": "3352461632",
+  "title": "Pets Overhaul: Calamity Addon",
+  "author": "Pearlie"
+ },
+ {
+  "rank": 234,
+  "id": "3282694994",
+  "title": "TerRoguelike",
+  "author": "AquaSG"
+ },
+ {
+  "rank": 235,
+  "id": "3427152309",
+  "title": "Revengeance+",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 236,
+  "id": "3453353275",
+  "title": "Recipe Browser include Magic Storage",
+  "author": "Arth"
+ },
+ {
+  "rank": 237,
+  "id": "2563528791",
+  "title": "Directional Melee - Aim your swings",
+  "author": "Liburia"
+ },
+ {
+  "rank": 238,
+  "id": "3173371762",
+  "title": "Pokemod V1.4 (The Bigger and Better Update)",
+  "author": "Eevster"
+ },
+ {
+  "rank": 239,
+  "id": "2564806684",
+  "title": "Taller Trees",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 240,
+  "id": "2962209906",
+  "title": "OreExcavator汉化",
+  "author": "xxx"
+ },
+ {
+  "rank": 241,
+  "id": "3165492818",
+  "title": "Auto Fisher",
+  "author": "Silencersn"
+ },
+ {
+  "rank": 242,
+  "id": "2792903559",
+  "title": "Free Block Placing - Place block on air!",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 243,
+  "id": "2572367426",
+  "title": "The Shop Market",
+  "author": "Jake"
+ },
+ {
+  "rank": 244,
+  "id": "2824879484",
+  "title": "The Story of Red Cloud",
+  "author": "tsorcrevamp"
+ },
+ {
+  "rank": 245,
+  "id": "3018345579",
+  "title": "LuiAFK Reborn DLC",
+  "author": "thyreo"
+ },
+ {
+  "rank": 246,
+  "id": "2873974388",
+  "title": "Calamity Enraged Providence Theme",
+  "author": "apotofkoolaid"
+ },
+ {
+  "rank": 247,
+  "id": "2939737748",
+  "title": "DragonLens",
+  "author": "ScalarVector1"
+ },
+ {
+  "rank": 248,
+  "id": "2796081796",
+  "title": "Boss Bag Glows in Inventory",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 249,
+  "id": "2590065264",
+  "title": "Fargo's Banner Boost",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 250,
+  "id": "2924671735",
+  "title": "Not Consumable Boss Summon Items + New vanilla Boss Summons",
+  "author": "Futhorka🏳️‍🌈"
+ },
+ {
+  "rank": 251,
+  "id": "2580273153",
+  "title": "Unlimited Buff Slots",
+  "author": "Lord Of Otakus"
+ },
+ {
+  "rank": 252,
+  "id": "2906178094",
+  "title": "Everglow | 流光无际 [Demonstration]",
+  "author": "万象元素"
+ },
+ {
+  "rank": 253,
+  "id": "2868553455",
+  "title": "Hook Stats and Wing Stats",
+  "author": "stormytuna"
+ },
+ {
+  "rank": 254,
+  "id": "2816898097",
+  "title": "[DEPRECATED] Calamity Interludes In-Game",
+  "author": "Purple Crayon Muncher"
+ },
+ {
+  "rank": 255,
+  "id": "2830666695",
+  "title": "tModLoader en Español - Traducción Calamity, Infernum, Thorium, WotG, Fargo, Stars Above, SOTS, Spirit",
+  "author": "Doremy"
+ },
+ {
+  "rank": 256,
+  "id": "3021379176",
+  "title": "Steam Achievement Fix",
+  "author": "The Pale Fixer"
+ },
+ {
+  "rank": 257,
+  "id": "3521910543",
+  "title": "Infernum Multiplayer Patch Remastered",
+  "author": "phrepapates"
+ },
+ {
+  "rank": 258,
+  "id": "2571804182",
+  "title": "Qwerty's Bosses and Items 2",
+  "author": "qwerty 3.14"
+ },
+ {
+  "rank": 259,
+  "id": "2799559538",
+  "title": "Terrarchitect",
+  "author": "g freddy"
+ },
+ {
+  "rank": 260,
+  "id": "2568214360",
+  "title": "Better Friendly NPCs",
+  "author": "Dissary"
+ },
+ {
+  "rank": 261,
+  "id": "3168580963",
+  "title": "You",
+  "author": "Lucille"
+ },
+ {
+  "rank": 262,
+  "id": "2956324268",
+  "title": "Calamity: Community Remix",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 263,
+  "id": "3446119263",
+  "title": "tPackBuilder",
+  "author": "Purple Crayon Muncher"
+ },
+ {
+  "rank": 264,
+  "id": "2818817085",
+  "title": "Better Respawn",
+  "author": "Tlotro"
+ },
+ {
+  "rank": 265,
+  "id": "3426033427",
+  "title": "CalamityOreNPC汉化",
+  "author": "秋海棠叶"
+ },
+ {
+  "rank": 266,
+  "id": "2817254924",
+  "title": "Gensokyo",
+  "author": "Eidolon"
+ },
+ {
+  "rank": 267,
+  "id": "2877369235",
+  "title": "Starter Classes (Mod Support & Custom Bags)",
+  "author": "wesleycody"
+ },
+ {
+  "rank": 268,
+  "id": "3024607349",
+  "title": "Calamity Demutation",
+  "author": "Setsuna"
+ },
+ {
+  "rank": 269,
+  "id": "3058372966",
+  "title": "Aether's Blessing: Shimmer QoL",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 270,
+  "id": "2893486731",
+  "title": "70酱吖皮肤包",
+  "author": "我好弱"
+ },
+ {
+  "rank": 271,
+  "id": "3556808030",
+  "title": "Infernum SOTS Sanctuary WorldGen Adjuster",
+  "author": "Akira"
+ },
+ {
+  "rank": 272,
+  "id": "3456517686",
+  "title": "Infernal Eclipse of Ragnarok",
+  "author": "Akira"
+ },
+ {
+  "rank": 273,
+  "id": "3153589462",
+  "title": "Improved Movement Visuals CN",
+  "author": "yf"
+ },
+ {
+  "rank": 274,
+  "id": "2871665851",
+  "title": "Verdant",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 275,
+  "id": "2822937879",
+  "title": "Multiplayer Boss-Fight Stats",
+  "author": "Seedonator"
+ },
+ {
+  "rank": 276,
+  "id": "2829795471",
+  "title": "Calamity mod Traducción Español/Calamity Mod spanish translation",
+  "author": "Inventor of sex"
+ },
+ {
+  "rank": 277,
+  "id": "2816211642",
+  "title": "Hairstyles Unlock",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 278,
+  "id": "3351534238",
+  "title": "Calamity Crossmod Vulnerabilities",
+  "author": "Jacie_krece"
+ },
+ {
+  "rank": 279,
+  "id": "3539368598",
+  "title": "ModLiquid Library",
+  "author": "Lion8cake"
+ },
+ {
+  "rank": 280,
+  "id": "3597301090",
+  "title": "DawnMusicMod(黎明:乐曲)",
+  "author": "Devil_Slime"
+ },
+ {
+  "rank": 281,
+  "id": "3312725122",
+  "title": "Munchies - Calamity Addon",
+  "author": "jboss"
+ },
+ {
+  "rank": 282,
+  "id": "2564381975",
+  "title": "Cheat Extensions for Hero's/Cheat Sheet",
+  "author": "Jake"
+ },
+ {
+  "rank": 283,
+  "id": "2940755468",
+  "title": "Terraria Random Loot",
+  "author": "ShadoW"
+ },
+ {
+  "rank": 284,
+  "id": "2866111868",
+  "title": "Item Checklist",
+  "author": "javidpack"
+ },
+ {
+  "rank": 285,
+  "id": "2952627559",
+  "title": "1.4.4.9 tModLoader Korean Translation",
+  "author": "strike"
+ },
+ {
+  "rank": 286,
+  "id": "2565804857",
+  "title": "Infinite Boss Summons",
+  "author": "秧鶏"
+ },
+ {
+  "rank": 287,
+  "id": "2563537904",
+  "title": "NPC Control",
+  "author": "Saschahi"
+ },
+ {
+  "rank": 288,
+  "id": "3485175010",
+  "title": "Infernal Arsenal Mod",
+  "author": "Akira"
+ },
+ {
+  "rank": 289,
+  "id": "2981525206",
+  "title": "Rain Overhaul",
+  "author": "supchyan"
+ },
+ {
+  "rank": 290,
+  "id": "2996637748",
+  "title": "Atmospheric Lava [1.4.4]",
+  "author": "4keeY"
+ },
+ {
+  "rank": 291,
+  "id": "3429647408",
+  "title": "旧神之猎完全汉化mod",
+  "author": "Deepest seeker"
+ },
+ {
+  "rank": 292,
+  "id": "2840594640",
+  "title": "Lag Remover",
+  "author": "Xetaxheb"
+ },
+ {
+  "rank": 293,
+  "id": "3673284500",
+  "title": "Calamity Multiplayer Patch",
+  "author": "Piggy"
+ },
+ {
+  "rank": 294,
+  "id": "3013337643",
+  "title": "Shop Expand",
+  "author": "泠潇丶苏ゆき"
+ },
+ {
+  "rank": 295,
+  "id": "2833852432",
+  "title": "Spooky Mod",
+  "author": "Dylan_Doe"
+ },
+ {
+  "rank": 296,
+  "id": "2816609331",
+  "title": "Loot Bags",
+  "author": "⑨9 The Strongest 9⑨"
+ },
+ {
+  "rank": 297,
+  "id": "3452171528",
+  "title": "WHummus' Calamity/Thorium Balancing",
+  "author": "Wardrobe Hummus"
+ },
+ {
+  "rank": 298,
+  "id": "2981752535",
+  "title": "Fish Guns+",
+  "author": "Gnose"
+ },
+ {
+  "rank": 299,
+  "id": "2600460955",
+  "title": "Level+",
+  "author": "PoctorDepper"
+ },
+ {
+  "rank": 300,
+  "id": "2963222095",
+  "title": "Magic Storage魔法存储拼音搜索",
+  "author": "xxx"
+ },
+ {
+  "rank": 301,
+  "id": "3696148536",
+  "title": "Remnants",
+  "author": "lazywombat"
+ },
+ {
+  "rank": 302,
+  "id": "2841418880",
+  "title": "300x Spawns",
+  "author": "末泠"
+ },
+ {
+  "rank": 303,
+  "id": "3184307602",
+  "title": "Calamity Clickers",
+  "author": "WitherTaco"
+ },
+ {
+  "rank": 304,
+  "id": "3069195391",
+  "title": "Lures Display Bait",
+  "author": "IAmTheOneWhoStoleYourClock:)"
+ },
+ {
+  "rank": 305,
+  "id": "2747380524",
+  "title": "Storm's Additions Mod",
+  "author": "TheStorm"
+ },
+ {
+  "rank": 306,
+  "id": "2570921824",
+  "title": "JBMiner (Vein Miner)",
+  "author": "奖艇"
+ },
+ {
+  "rank": 307,
+  "id": "3703340292",
+  "title": "Split",
+  "author": "instrex"
+ },
+ {
+  "rank": 308,
+  "id": "2825058895",
+  "title": "Sloome (calamity Expansion)",
+  "author": "Bloop"
+ },
+ {
+  "rank": 309,
+  "id": "2645058109",
+  "title": "Helpful Hotkeys",
+  "author": "javidpack"
+ },
+ {
+  "rank": 310,
+  "id": "2563345152",
+  "title": "Happiness Removal",
+  "author": "tomat"
+ },
+ {
+  "rank": 311,
+  "id": "2928398913",
+  "title": "Quality of Life Compendium",
+  "author": "Jabon"
+ },
+ {
+  "rank": 312,
+  "id": "3436582116",
+  "title": "Thorium Chest Loot Tweaks",
+  "author": "Verveine"
+ },
+ {
+  "rank": 313,
+  "id": "3017370769",
+  "title": "Better Fishing",
+  "author": "Shipmans AGLA"
+ },
+ {
+  "rank": 314,
+  "id": "2929641040",
+  "title": "Instant Housing",
+  "author": "Faceless"
+ },
+ {
+  "rank": 315,
+  "id": "3018208290",
+  "title": "Block's Leveling Mod",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 316,
+  "id": "3395336633",
+  "title": "Clicker Extra API",
+  "author": "WitherTaco"
+ },
+ {
+  "rank": 317,
+  "id": "2984967727",
+  "title": "Summoner UI (Latest Beta Release)",
+  "author": "Tetriscat66"
+ },
+ {
+  "rank": 318,
+  "id": "2793436136",
+  "title": "Atherius Mod",
+  "author": "Merfinator"
+ },
+ {
+  "rank": 319,
+  "id": "3047462801",
+  "title": "ARSENAL - Weapons expansion mod",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 320,
+  "id": "2562919284",
+  "title": "ItemMagnetPlus",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 321,
+  "id": "2958674071",
+  "title": "Heartbeataria",
+  "author": "KondiU"
+ },
+ {
+  "rank": 322,
+  "id": "3199815681",
+  "title": "Persistent Summons",
+  "author": "beanie"
+ },
+ {
+  "rank": 323,
+  "id": "3349758108",
+  "title": "环境瓶",
+  "author": "水星"
+ },
+ {
+  "rank": 324,
+  "id": "2829442749",
+  "title": "Signature Equipment",
+  "author": "Kenflesh"
+ },
+ {
+  "rank": 325,
+  "id": "3148310222",
+  "title": "InfraSonic",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 326,
+  "id": "2563410612",
+  "title": "Better Chests",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 327,
+  "id": "3211527715",
+  "title": "FlameThrowers+",
+  "author": "Lil Chief"
+ },
+ {
+  "rank": 328,
+  "id": "2985966860",
+  "title": "Music Display",
+  "author": "GabeHasWon"
+ },
+ {
+  "rank": 329,
+  "id": "2566083800",
+  "title": "Chat Source",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 330,
+  "id": "2824636665",
+  "title": "Bumblebirb Pet",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 331,
+  "id": "2821690764",
+  "title": "Infinite Minions",
+  "author": "7-Volt"
+ },
+ {
+  "rank": 332,
+  "id": "2829105343",
+  "title": "Archery Overhaul",
+  "author": "Riptide"
+ },
+ {
+  "rank": 333,
+  "id": "3288950444",
+  "title": "No Useless Pickups",
+  "author": "Lunaros"
+ },
+ {
+  "rank": 334,
+  "id": "2805399398",
+  "title": "Equipment Modifiers & Reforging",
+  "author": "Dissary"
+ },
+ {
+  "rank": 335,
+  "id": "2803697863",
+  "title": "Fargo's Loot Bonus",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 336,
+  "id": "2623400922",
+  "title": "**DEPRECATED** Extra Accessory Slots",
+  "author": "Aubrey"
+ },
+ {
+  "rank": 337,
+  "id": "2954039007",
+  "title": "Clientside Lag Prevention",
+  "author": "welcome to the jam"
+ },
+ {
+  "rank": 338,
+  "id": "2817795758",
+  "title": "Lighting Essentials",
+  "author": "Valkyrienyanko"
+ },
+ {
+  "rank": 339,
+  "id": "2745251188",
+  "title": "Better Expert Rarity",
+  "author": "S-Pladison"
+ },
+ {
+  "rank": 340,
+  "id": "2822742451",
+  "title": "FullHPWhenRespawn",
+  "author": "Volcanic"
+ },
+ {
+  "rank": 341,
+  "id": "3404410551",
+  "title": "Unofficial SOTS Bard, Thrower and Healer",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 342,
+  "id": "3003980015",
+  "title": "Deimos, the Starborn Princess",
+  "author": "Kernschmelze"
+ },
+ {
+  "rank": 343,
+  "id": "2891778120",
+  "title": "Enchanted! Glint Effect",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 344,
+  "id": "2976739190",
+  "title": "Catalyst Anti-Tier Lock",
+  "author": "Snek"
+ },
+ {
+  "rank": 345,
+  "id": "2863092349",
+  "title": "Enhanced Buff Display",
+  "author": "absoluteAquarian"
+ },
+ {
+  "rank": 346,
+  "id": "3112814055",
+  "title": "Nitrate",
+  "author": "tomat"
+ },
+ {
+  "rank": 347,
+  "id": "2756689032",
+  "title": "Another RPG Mod",
+  "author": "Plexus"
+ },
+ {
+  "rank": 348,
+  "id": "3251592253",
+  "title": "Inventory Drag",
+  "author": "The Golden Knight"
+ },
+ {
+  "rank": 349,
+  "id": "2829235662",
+  "title": "Zenith Progression",
+  "author": "Kenflesh"
+ },
+ {
+  "rank": 350,
+  "id": "2830791815",
+  "title": "KevinYDTGaster的无限召唤",
+  "author": "KevinYDTGaster"
+ },
+ {
+  "rank": 351,
+  "id": "2829748212",
+  "title": "LuiAFK Utilities",
+  "author": "SparK"
+ },
+ {
+  "rank": 352,
+  "id": "3732711988",
+  "title": "Magic Storage - Mod List Tweaks",
+  "author": "enliguin"
+ },
+ {
+  "rank": 353,
+  "id": "3258675288",
+  "title": "Jujutsu Terraria",
+  "author": "Phamility"
+ },
+ {
+  "rank": 354,
+  "id": "2620863596",
+  "title": "More Terra Weapons",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 355,
+  "id": "3063000134",
+  "title": "[Alpha 2] T Date Mod",
+  "author": "Sp0kyBoi (not spoky)"
+ },
+ {
+  "rank": 356,
+  "id": "2797773802",
+  "title": "Extra Pylons",
+  "author": "B34tingH34rt"
+ },
+ {
+  "rank": 357,
+  "id": "3168223097",
+  "title": "Roommates",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 358,
+  "id": "3174001921",
+  "title": "Calamity Decorative Potions",
+  "author": "WitherTaco"
+ },
+ {
+  "rank": 359,
+  "id": "2836679312",
+  "title": "Orchid Mod",
+  "author": "Verveine"
+ },
+ {
+  "rank": 360,
+  "id": "3630305943",
+  "title": "Calamity Simple Whip Addon",
+  "author": "ikahurula"
+ },
+ {
+  "rank": 361,
+  "id": "3521246622",
+  "title": "Shape of Light 光之形",
+  "author": "star·kz"
+ },
+ {
+  "rank": 362,
+  "id": "2828997816",
+  "title": "UnNerfs Calamity",
+  "author": "Roxy The Proxy"
+ },
+ {
+  "rank": 363,
+  "id": "2563663281",
+  "title": "[1.4 Alpha] Any Accessory In Social Accessory Slots",
+  "author": "frankfires360"
+ },
+ {
+  "rank": 364,
+  "id": "3010989007",
+  "title": "Bank Buttons",
+  "author": "patman"
+ },
+ {
+  "rank": 365,
+  "id": "2796592442",
+  "title": "TWAILA",
+  "author": "The Golden Knight"
+ },
+ {
+  "rank": 366,
+  "id": "2828097300",
+  "title": "Calamity Mod PT-BR Translation",
+  "author": "Pixelnando"
+ },
+ {
+  "rank": 367,
+  "id": "2562922612",
+  "title": "Consistent Reforging",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 368,
+  "id": "3435381419",
+  "title": "Terramon Mod (Beta)",
+  "author": "JamzOJamz"
+ },
+ {
+  "rank": 369,
+  "id": "3400340796",
+  "title": "Rare Drop Notification",
+  "author": "Pearlie"
+ },
+ {
+  "rank": 370,
+  "id": "3097202223",
+  "title": "至尊巨蛤汉化",
+  "author": "虚空大队友"
+ },
+ {
+  "rank": 371,
+  "id": "3410746873",
+  "title": "Calamity Inheritance",
+  "author": "Demon Lilies"
+ },
+ {
+  "rank": 372,
+  "id": "2829211497",
+  "title": "MagicStorage Void Bag",
+  "author": "simply graggle"
+ },
+ {
+  "rank": 373,
+  "id": "2861550387",
+  "title": "More Critters",
+  "author": "Veloxii"
+ },
+ {
+  "rank": 374,
+  "id": "2929635479",
+  "title": "Quick Arena",
+  "author": "Faceless"
+ },
+ {
+  "rank": 375,
+  "id": "3157893946",
+  "title": "救赎Mod-汉化补丁",
+  "author": "马达"
+ },
+ {
+  "rank": 376,
+  "id": "3037513045",
+  "title": "AlchemistNPC Lite Traducción al Español",
+  "author": "Auraz"
+ },
+ {
+  "rank": 377,
+  "id": "2904526508",
+  "title": "Optimized Cursor",
+  "author": "Metacinnabar"
+ },
+ {
+  "rank": 378,
+  "id": "3014421997",
+  "title": "True Tooltips",
+  "author": "Martipops"
+ },
+ {
+  "rank": 379,
+  "id": "3547911126",
+  "title": "MagicStorage汉化补完（魔法存储）",
+  "author": "Eric-WuW"
+ },
+ {
+  "rank": 380,
+  "id": "2710494433",
+  "title": "Too Many Accessories",
+  "author": "JPAN_v2"
+ },
+ {
+  "rank": 381,
+  "id": "3244769813",
+  "title": "Calamity Waifu Pack",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 382,
+  "id": "2566694256",
+  "title": "Better Autosave",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 383,
+  "id": "3546999760",
+  "title": "Large Herbs",
+  "author": "Guida"
+ },
+ {
+  "rank": 384,
+  "id": "3265571217",
+  "title": "More Accessories Slots",
+  "author": "末泠"
+ },
+ {
+  "rank": 385,
+  "id": "2822925665",
+  "title": "Multiplayer Boss Spectator",
+  "author": "Seedonator"
+ },
+ {
+  "rank": 386,
+  "id": "2855738893",
+  "title": "Travelling Merchant Sells More Items",
+  "author": "Jenek"
+ },
+ {
+  "rank": 387,
+  "id": "3016919117",
+  "title": "Secrets Of The Shadows  - Chinese Translation Patch 『1.4.4』",
+  "author": "Yee苍棱"
+ },
+ {
+  "rank": 388,
+  "id": "2817113655",
+  "title": "Accessories+",
+  "author": "Destructor_Ben"
+ },
+ {
+  "rank": 389,
+  "id": "3299543098",
+  "title": "Chinese-translation Mod for Lunar Veil",
+  "author": "虞悖"
+ },
+ {
+  "rank": 390,
+  "id": "2854563169",
+  "title": "Tianic's Custom Races",
+  "author": "Tianic"
+ },
+ {
+  "rank": 391,
+  "id": "3006139970",
+  "title": "Wing Time UI",
+  "author": "Knocker"
+ },
+ {
+  "rank": 392,
+  "id": "3654792532",
+  "title": "Celeste Hair",
+  "author": "PumpkiNot"
+ },
+ {
+  "rank": 393,
+  "id": "2563001341",
+  "title": "Creative tools",
+  "author": "NotLe0n"
+ },
+ {
+  "rank": 394,
+  "id": "2797072909",
+  "title": "Lobotomy Corporation",
+  "author": "Kerubii"
+ },
+ {
+  "rank": 395,
+  "id": "2902135659",
+  "title": "Final Fantasy - Distant Memories (Alpha)",
+  "author": "Michaelsoftman"
+ },
+ {
+  "rank": 396,
+  "id": "2937971205",
+  "title": "Terraria3D",
+  "author": "Matt"
+ },
+ {
+  "rank": 397,
+  "id": "2801796077",
+  "title": "Combinations",
+  "author": "Keiler"
+ },
+ {
+  "rank": 398,
+  "id": "3596210599",
+  "title": "Lilac Arcane Pack",
+  "author": "Demon Lilies"
+ },
+ {
+  "rank": 399,
+  "id": "2882060244",
+  "title": "Calamity Post-ML Boots 灾厄月后鞋子",
+  "author": "plantare"
+ },
+ {
+  "rank": 400,
+  "id": "2627948485",
+  "title": "Radiance",
+  "author": "Stellar"
+ },
+ {
+  "rank": 401,
+  "id": "3443694510",
+  "title": "Auto Reforge Plus",
+  "author": "泠"
+ },
+ {
+  "rank": 402,
+  "id": "2582705339",
+  "title": "Overhauled Item Animations",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 403,
+  "id": "3104068174",
+  "title": "Anime Vanity & Pets的自用汉化",
+  "author": "凸^ V ^凸"
+ },
+ {
+  "rank": 404,
+  "id": "3014683484",
+  "title": "Calamity KR / 칼라미티 모드 한글패치",
+  "author": "lH"
+ },
+ {
+  "rank": 405,
+  "id": "2897429198",
+  "title": "Vanquish Mod (Calamity Addon)",
+  "author": "mars"
+ },
+ {
+  "rank": 406,
+  "id": "2865861210",
+  "title": "星海苍穹民间汉化",
+  "author": "Xian"
+ },
+ {
+  "rank": 407,
+  "id": "3429100300",
+  "title": "森罗万象：森林之息",
+  "author": "诡异妖刀"
+ },
+ {
+  "rank": 408,
+  "id": "3018274567",
+  "title": "Artificer's Accessories",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 409,
+  "id": "2829242966",
+  "title": "Better Russian Font (Улучшенный русский шрифт)",
+  "author": "EnotikSergo"
+ },
+ {
+  "rank": 410,
+  "id": "2658783282",
+  "title": "Apacchii's Classes: Reborn",
+  "author": "Apacchii"
+ },
+ {
+  "rank": 411,
+  "id": "2803799129",
+  "title": "Pings",
+  "author": "Vlidmir Putan"
+ },
+ {
+  "rank": 412,
+  "id": "2824854732",
+  "title": "Discordya - Discord Rich Presence",
+  "author": "Doremy"
+ },
+ {
+  "rank": 413,
+  "id": "3015724275",
+  "title": "Every Weapon is Craftable",
+  "author": "Kimit The Frg (777)"
+ },
+ {
+  "rank": 414,
+  "id": "3429640606",
+  "title": "BetterChatBox",
+  "author": "Veik"
+ },
+ {
+  "rank": 415,
+  "id": "2984645790",
+  "title": "星光之河汉化补丁",
+  "author": "Lacewing"
+ },
+ {
+  "rank": 416,
+  "id": "3018279603",
+  "title": "Minion ModifyWeaponDamage Patch",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 417,
+  "id": "2813360630",
+  "title": "No Lake Size Penalty",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 418,
+  "id": "3013399263",
+  "title": "Display Luck Count",
+  "author": "sexual_lobster"
+ },
+ {
+  "rank": 419,
+  "id": "2823297069",
+  "title": "Reduced Mining",
+  "author": "Volcanic"
+ },
+ {
+  "rank": 420,
+  "id": "3033802020",
+  "title": "Foldering - A Terraria Sorting Mod",
+  "author": "catNull"
+ },
+ {
+  "rank": 421,
+  "id": "2868319578",
+  "title": "Lost Girl/Nymph Town NPC Mod",
+  "author": "patczuch"
+ },
+ {
+  "rank": 422,
+  "id": "2798318299",
+  "title": "FasterWeapons(更快的攻速)",
+  "author": "Vrong"
+ },
+ {
+  "rank": 423,
+  "id": "3371695690",
+  "title": "Sorcery Fight (A Jujutsu Kaisen Mod)",
+  "author": "ehannnnn"
+ },
+ {
+  "rank": 424,
+  "id": "3320052348",
+  "title": "The Ultimate Infinite Star",
+  "author": "锯角Serrat Antler"
+ },
+ {
+  "rank": 425,
+  "id": "2877063812",
+  "title": "Ammo Tool",
+  "author": "QuestionMark"
+ },
+ {
+  "rank": 426,
+  "id": "2599410891",
+  "title": "Sleeping Passes Time",
+  "author": "RighteousRyan"
+ },
+ {
+  "rank": 427,
+  "id": "2562701154",
+  "title": "GaMeTerraria",
+  "author": "John Snail"
+ },
+ {
+  "rank": 428,
+  "id": "2855691488",
+  "title": "Polarities",
+  "author": "turingcomplete30"
+ },
+ {
+  "rank": 429,
+  "id": "2853164729",
+  "title": "Faster Weapons (outdated)",
+  "author": "Valkyrienyanko"
+ },
+ {
+  "rank": 430,
+  "id": "2819498996",
+  "title": "Nycro's Nohit Efficiency Mod",
+  "author": "Purple Crayon Muncher"
+ },
+ {
+  "rank": 431,
+  "id": "3014137690",
+  "title": "Change Sleep Time",
+  "author": "Martipops"
+ },
+ {
+  "rank": 432,
+  "id": "2567016793",
+  "title": "Fargo's OmniWield",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 433,
+  "id": "2956585819",
+  "title": "Better fishing",
+  "author": ": )"
+ },
+ {
+  "rank": 434,
+  "id": "2601112501",
+  "title": "Echoes of the Ancients",
+  "author": "z19th"
+ },
+ {
+  "rank": 435,
+  "id": "3359357778",
+  "title": "Platform Torches",
+  "author": "Potat369"
+ },
+ {
+  "rank": 436,
+  "id": "2821806183",
+  "title": "Shields Of Cthulhu",
+  "author": "Jay"
+ },
+ {
+  "rank": 437,
+  "id": "3159258290",
+  "title": "Decorative Potions",
+  "author": "stormytuna"
+ },
+ {
+  "rank": 438,
+  "id": "3357778735",
+  "title": "Macrocosm [BETA]",
+  "author": "134340 Pluto"
+ },
+ {
+  "rank": 439,
+  "id": "3543514645",
+  "title": "Munchies Crossmod Addon",
+  "author": "Pudd1ng"
+ },
+ {
+  "rank": 440,
+  "id": "2565611547",
+  "title": "NPC Name Display",
+  "author": "bartuscus"
+ },
+ {
+  "rank": 441,
+  "id": "3086919933",
+  "title": "Vanilla+ QoL",
+  "author": "Pannoniæ"
+ },
+ {
+  "rank": 442,
+  "id": "2789445751",
+  "title": "Tokens",
+  "author": "blahblahbal"
+ },
+ {
+  "rank": 443,
+  "id": "2868793314",
+  "title": "AFK's PETS and more(Alpha)",
+  "author": "Sir AFK"
+ },
+ {
+  "rank": 444,
+  "id": "2926204876",
+  "title": "Better Taxes",
+  "author": "adolescent"
+ },
+ {
+  "rank": 445,
+  "id": "3164029586",
+  "title": "MCA: More calamity ammunitions",
+  "author": "mediamalleolus"
+ },
+ {
+  "rank": 446,
+  "id": "2985635894",
+  "title": "Noitaria",
+  "author": "Genesis"
+ },
+ {
+  "rank": 447,
+  "id": "2791578194",
+  "title": "Better Beds",
+  "author": "Cyrilly"
+ },
+ {
+  "rank": 448,
+  "id": "2567018576",
+  "title": "Fargo's Equipable Inventory",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 449,
+  "id": "2663387058",
+  "title": "tMusicPlayer",
+  "author": "Sheepish Shepherd"
+ },
+ {
+  "rank": 450,
+  "id": "2770211555",
+  "title": "Living World Mod [INDEV]",
+  "author": "Terry"
+ },
+ {
+  "rank": 451,
+  "id": "2965168591",
+  "title": "Journey's Trend: The Community Vanity Mod",
+  "author": "PeanutSte"
+ },
+ {
+  "rank": 452,
+  "id": "2838173304",
+  "title": "DawnMOD:Weapon Rework(黎明:武器重做)",
+  "author": "Devil_Slime"
+ },
+ {
+  "rank": 453,
+  "id": "3578165070",
+  "title": "Luminous Water Reflection 潮之韵(Demo)",
+  "author": "star·kz"
+ },
+ {
+  "rank": 454,
+  "id": "2838049771",
+  "title": "Lan's UI Lib (Library only)",
+  "author": "Lanboost"
+ },
+ {
+  "rank": 455,
+  "id": "2847081688",
+  "title": "Bombus Apis",
+  "author": "SkippZz"
+ },
+ {
+  "rank": 456,
+  "id": "2565527050",
+  "title": "United Collection (Whips and more!)",
+  "author": "Dpoopoop"
+ },
+ {
+  "rank": 457,
+  "id": "2986383249",
+  "title": "External Localizer",
+  "author": "eva828"
+ },
+ {
+  "rank": 458,
+  "id": "3439924021",
+  "title": "Pokemod 汉化",
+  "author": "尘世之缘"
+ },
+ {
+  "rank": 459,
+  "id": "3635922668",
+  "title": "Extra World Sizes",
+  "author": "Remurin"
+ },
+ {
+  "rank": 460,
+  "id": "3124369320",
+  "title": "More Trophies and Relics [Modded Support]",
+  "author": "Kid Justice Gaming"
+ },
+ {
+  "rank": 461,
+  "id": "2567903865",
+  "title": "Advanced Ammunition, A Ranger Expansion",
+  "author": "Poroboros"
+ },
+ {
+  "rank": 462,
+  "id": "3352276218",
+  "title": "Pegasus Lib",
+  "author": "Moonlight Glint"
+ },
+ {
+  "rank": 463,
+  "id": "2859770277",
+  "title": "Better Classes",
+  "author": "Battle_Guy_648"
+ },
+ {
+  "rank": 464,
+  "id": "2906446375",
+  "title": "Magic storage starter kit",
+  "author": "Jake"
+ },
+ {
+  "rank": 465,
+  "id": "2903065706",
+  "title": "Better Game UI",
+  "author": "Unknown Devices"
+ },
+ {
+  "rank": 466,
+  "id": "3623354274",
+  "title": "Running Skeleton Jumpscare (1/5000 Chance)",
+  "author": "mrpejo"
+ },
+ {
+  "rank": 467,
+  "id": "3411241014",
+  "title": "Jese&Beta's Damage Calc Jese和Beta的伤害计算",
+  "author": "Jese__Ki"
+ },
+ {
+  "rank": 468,
+  "id": "3268339229",
+  "title": "Prisma's Juicebox",
+  "author": "prisma"
+ },
+ {
+  "rank": 469,
+  "id": "3280663174",
+  "title": "CaIamity Mod",
+  "author": "<i><u>"
+ },
+ {
+  "rank": 470,
+  "id": "3135791602",
+  "title": "Buyable Strange Dyes",
+  "author": "spoon"
+ },
+ {
+  "rank": 471,
+  "id": "3678702962",
+  "title": "Immersive Inventory (Better HUD Visuals)",
+  "author": "󠀡󠀡"
+ },
+ {
+  "rank": 472,
+  "id": "2737642173",
+  "title": "Mech Bosses Rework",
+  "author": "N0t_UNowen"
+ },
+ {
+  "rank": 473,
+  "id": "2567152289",
+  "title": "Fargo's Fallen Stars",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 474,
+  "id": "2855690226",
+  "title": "Multihitbox NPC Library",
+  "author": "turingcomplete30"
+ },
+ {
+  "rank": 475,
+  "id": "2822931031",
+  "title": "Multiplayer Boss-Fight Halo Announcer",
+  "author": "Seedonator"
+ },
+ {
+  "rank": 476,
+  "id": "2731717335",
+  "title": "Item Randomizer",
+  "author": "Ishigh"
+ },
+ {
+  "rank": 477,
+  "id": "2859219043",
+  "title": "Universe of Swords Reborn",
+  "author": "Jumping Jesus"
+ },
+ {
+  "rank": 478,
+  "id": "2816178948",
+  "title": "[OBSOLETE] Better Crafting Interface",
+  "author": "Jake"
+ },
+ {
+  "rank": 479,
+  "id": "3441211221",
+  "title": "Map World View",
+  "author": "Drovyn"
+ },
+ {
+  "rank": 480,
+  "id": "2595202551",
+  "title": "Minecraft Bed Mechanics",
+  "author": "Dissary"
+ },
+ {
+  "rank": 481,
+  "id": "2910102582",
+  "title": "Calamitous Journeys (A Calamity Expansion)",
+  "author": "ScuttleBaka"
+ },
+ {
+  "rank": 482,
+  "id": "3490645435",
+  "title": "Stackable Pet, Mount, Vanity and Hook Items",
+  "author": "Guida"
+ },
+ {
+  "rank": 483,
+  "id": "3139798632",
+  "title": "TJujutsu",
+  "author": "RiceSword"
+ },
+ {
+  "rank": 484,
+  "id": "3536551483",
+  "title": "Fancy Hooks/Flails",
+  "author": "Guida"
+ },
+ {
+  "rank": 485,
+  "id": "2590054406",
+  "title": "Fargo's Crafting Tree Generator",
+  "author": "Fargowilta"
+ },
+ {
+  "rank": 486,
+  "id": "2975775201",
+  "title": "Alchemist NPC Reborn PRERELEASE",
+  "author": "Secretik"
+ },
+ {
+  "rank": 487,
+  "id": "2566387467",
+  "title": "Ultimate Potions Mod",
+  "author": "Magman"
+ },
+ {
+  "rank": 488,
+  "id": "3046264015",
+  "title": "UltraSonic",
+  "author": "The Pale Fixer"
+ },
+ {
+  "rank": 489,
+  "id": "3135388514",
+  "title": "The Story of Red Cloud Music",
+  "author": "Vibrent"
+ },
+ {
+  "rank": 490,
+  "id": "2568873583",
+  "title": "[1.4 Alpha] Terry's Unlimited Buffs Mod",
+  "author": "The Terry"
+ },
+ {
+  "rank": 491,
+  "id": "2850116059",
+  "title": "Randomly give items",
+  "author": "末泠"
+ },
+ {
+  "rank": 492,
+  "id": "3040406362",
+  "title": "Calamity Treads",
+  "author": "sir plurbius"
+ },
+ {
+  "rank": 493,
+  "id": "3436253565",
+  "title": "Not Quite Nitrate (Performance and Bug Fixes)",
+  "author": "tomat"
+ },
+ {
+  "rank": 494,
+  "id": "2626764822",
+  "title": "Banner Bonanza",
+  "author": "javidpack"
+ },
+ {
+  "rank": 495,
+  "id": "3110065875",
+  "title": "灾厄兑换币汉化",
+  "author": "虚空大队友"
+ },
+ {
+  "rank": 496,
+  "id": "2825090034",
+  "title": "Calamity Rogue Stealth Strikes Only",
+  "author": "GinYuH"
+ },
+ {
+  "rank": 497,
+  "id": "3723637703",
+  "title": "Calamity Fancy UI",
+  "author": "next"
+ },
+ {
+  "rank": 498,
+  "id": "3339387093",
+  "title": "UpgradableZenith",
+  "author": "错数螺线LogSpiral"
+ },
+ {
+  "rank": 499,
+  "id": "2974201361",
+  "title": "WebCom",
+  "author": "Webmilio"
+ },
+ {
+  "rank": 500,
+  "id": "3301088570",
+  "title": "Calamity Infernum Nothing Patch Fix",
+  "author": "11111111234"
+ },
+ {
+  "rank": 501,
+  "id": "3131402417",
+  "title": "Miscellanaria",
+  "author": "KondiU"
+ },
+ {
+  "rank": 502,
+  "id": "3103181172",
+  "title": "Peaceful Aether",
+  "author": "Ricoshet"
+ },
+ {
+  "rank": 503,
+  "id": "2737468715",
+  "title": "[1.4 Alpha] BloodSoul",
+  "author": "雪沫"
+ },
+ {
+  "rank": 504,
+  "id": "2578668501",
+  "title": "Unlimited Arena Buffs",
+  "author": "Lord Of Otakus"
+ },
+ {
+  "rank": 505,
+  "id": "2564474517",
+  "title": "Ethereal Boots",
+  "author": "Splitface"
+ },
+ {
+  "rank": 506,
+  "id": "3453705595",
+  "title": "Mod Manager",
+  "author": "Drovyn"
+ },
+ {
+  "rank": 507,
+  "id": "3026604494",
+  "title": "Block's Info Accessories",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 508,
+  "id": "2666868291",
+  "title": "Rothur Mod",
+  "author": "Yoda_Yoda"
+ },
+ {
+  "rank": 509,
+  "id": "3018268810",
+  "title": "Weapon Augments",
+  "author": "BlockCrusader"
+ },
+ {
+  "rank": 510,
+  "id": "2961904216",
+  "title": "Dragon Ball Terraria: Blue Evolution Addon",
+  "author": "GoldFix1"
+ }
+]

@@ -8,31 +8,33 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// RedSupergiantRenderer — v6.26 — LA SUPERGIGANTE ROJA.
+    /// RedSupergiantRenderer — v6.31 — LA SUPERGIGANTE ROJA, CON EL CUERPO DEL
+    /// SOL ORIGINAL (la petición del usuario: "copia el código del sol original
+    /// para usar en todos los demás soles o estrellas — y hazlos un poco más
+    /// grandes": v6.30 dibujaba el cuerpo con 4 blobs SoftGlow y seguía
+    /// INVISIBLE; v6.31 usa RuneSunRenderer.DrawSunBody — EL DISCO DE PLASMA
+    /// SunShader de verdad, sólido, con granulación dendrítica — en ROJO).
     ///
-    /// EL COLOSO: un cuerpo ENORME (~90 px) rojo y frío. La firma visual:
-    ///
-    ///   · CELDAS DE CONVECCIÓN — los blobs voraces de la granulación
-    ///     solar pero LENTA y ENORME: 9 celdas deterministas sobre el
-    ///     disco, cada una orbitando a su paso, SUBIENDO y BAJANDO (el
-    ///     ciclo de convección en fase por celda) y coloreada por la
-    ///     rampa PyraPalettes.SolarFire según su temperatura local.
-    ///   · LA ATMÓSFERA EXTENSA — la corona roja 3× (tres velos SoftGlow
-    ///     + el anillo FireRing de la casa girando lento).
-    ///   · EL PULSO DE VIDA LENTO — todo el cuerpo late a 0.2 Hz
-    ///     hinchándose 5% (un gigante RESPIRA en segundos, no en ticks).
-    ///   · EL COLAPSO — los últimos 20 ticks: TODO se encoge (1−c)²
-    ///     mientras el color huye del rojo al BLANCO-AZUL (el núcleo se
-    ///     enciende al comprimirse) y un anillo de DISTORSIÓN contrae —
-    ///     la nova saldrá DE AQUÍ.
+    /// EL COLOSO (más grande que nunca: 90 → 105 px):
+    ///   · EL CUERPO — LA TÉCNICA EXACTA DEL SOL: backglow + aura + disco de
+    ///     plasma SunShader con la paleta ROJA FRÍA (main 255,130,95 · darker
+    ///     148,32,16 · acento sustractivo 120,0,0) y giro LENTO (0.35 — un
+    ///     coloso convecta a pasos de semanas).
+    ///   · CELDAS DE CONVECCIÓN — las manchas oscuras (pase alfa SOBRE el
+    ///     disco) y los ojos calientes (aditivo) de la granulación LENTA.
+    ///   · LA ATMÓSFERA EXTENSA — tres velos + el anillo FireRing girando.
+    ///   · EL PULSO DE VIDA LENTO — 0.2 Hz hinchándose 5%.
+    ///   · EL COLAPSO — los últimos 20 ticks: encoge (1−c)², el color huye
+    ///     al BLANCO-AZUL, el anillo de DISTORSIÓN contrae — la nova sale
+    ///     DE AQUÍ.
     ///
     /// CONTRATO DE BATCH: Draw() exige el SpriteBatch CERRADO y lo deja
     /// CERRADO (el llamador restaura el batch de tML — contrato v6.10).
     /// </summary>
     public static class RedSupergiantRenderer
     {
-        /// <summary>Radio del cuerpo en px a escala 1 (ENORME).</summary>
-        public const float BodyPx = 90f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 90→105 — MÁS GRANDE).</summary>
+        public const float BodyPx = 105f;
 
         /// <summary>La frecuencia del pulso de vida (0.2 Hz — lento).</summary>
         public const float PulseHz = 0.2f;
@@ -59,11 +61,11 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Dibuja la supergigante: CUERPO SÓLIDO (pase ALFA — v6.30, la lección
-        /// v6.29: lo oscuro vive en el pase ALFA y la luz sola en el aditivo:
-        /// un cuerpo TODO-aditivo con alfas 0.16-0.55 sobre un fondo claro es
-        /// INVISIBLE) + atmósfera 3× + celdas de convección + anillo de fuego
-        /// — y si `collapse` &gt; 0, la IMPLOSIÓN.
+        /// Dibuja la supergigante: EL CUERPO DEL SOL ORIGINAL (RuneSunRenderer.
+        /// DrawSunBody con la paleta roja — v6.31: el disco de plasma SunShader
+        /// SÓLIDO que v6.30 no tenía y por eso era INVISIBLE) + celdas de
+        /// convección oscuras sobre el disco + atmósfera 3× + celdas calientes
+        /// + anillo de fuego — y si `collapse` &gt; 0, la IMPLOSIÓN.
         /// `lifeT` = 0..1, `collapse` = 0..1 de los últimos 20 ticks.
         /// CONTRATO DE BATCH: cerrado → cerrado.
         /// </summary>
@@ -87,17 +89,27 @@ namespace AethonMod.Content.VFX
 
                 // El COLOR DEL COLAPSO: el rojo frío huye al blanco-azul
                 // (el núcleo comprimido se enciende antes de la nova).
-                Color bodyTint = Color.Lerp(GiantOrange, CollapseWhite, collapse);
                 Color glowTint = Color.Lerp(GiantRed, CollapseWhite, collapse * 0.8f);
 
-                // === PASO 1 — EL CUERPO SÓLIDO (pase ALFA): la gigante ES un
-                //     DISCO de verdad — visible a plena luz del día ===
+                // === PASO 1 — EL CUERPO: LA TÉCNICA EXACTA DEL SOL ORIGINAL
+                //     (backglow + aura + disco de plasma SunShader) con la
+                //     paleta roja fría — el giro LENTO del coloso (0.35). ===
+                RuneSunRenderer.DrawSunBody(drawPos, R, p.rotation, time,
+                    Color.Lerp(new Color(255, 130, 95), CollapseWhite, collapse * 0.7f),
+                    Color.Lerp(new Color(148, 32, 16), new Color(120, 130, 160), collapse * 0.6f),
+                    new Color(120, 0, 0),
+                    Color.Lerp(GiantRed, CollapseWhite, collapse * 0.5f),
+                    Color.Lerp(new Color(255, 40, 15), new Color(200, 220, 255), collapse * 0.6f),
+                    Color.Lerp(new Color(255, 110, 60), CollapseWhite, collapse * 0.6f),
+                    0.35f, fade);
+
+                // === PASO 2 — LAS CÉLULAS FRÍAS (pase ALFA sobre el disco: la
+                //     granulación oscura — el plasma que BAJA se ve) ===
                 BeginAlpha();
-                DrawCuerpoSolido(drawPos, R, bodyTint, fade, collapse);
                 DrawCelulasFrias(drawPos, R, time, seed, fade);
                 Main.spriteBatch.End();
 
-                // === PASO 2 — LA LUZ (pase aditivo) ===
+                // === PASO 3 — LA LUZ (pase aditivo) ===
                 BeginAdditive();
                 DrawAtmosphere(drawPos, R, glowTint, time, seed, fade, collapse);
                 DrawConvectionCells(drawPos, R, time, seed, fade, collapse);
@@ -114,42 +126,11 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 1 — EL CUERPO SÓLIDO (pase ALFA — v6.30: el disco de VERDAD)
+        //  CAPA 1 — EL CUERPO (v6.31: LA TÉCNICA DEL SOL ORIGINAL vive en
+        //  RuneSunRenderer.DrawSunBody — el disco de plasma SunShader con la
+        //  paleta roja; DrawCuerpoSolido de v6.30 con 4 blobs SoftGlow BORRADO:
+        //  era la raíz de la supergigante invisible)
         // ==================================================================
-
-        /// <summary>
-        /// EL DISCO SÓLIDO de la gigante en el pase ALFA (el oscurecimiento
-        /// del limbo al revés: brillante al centro, rojo profundo al borde):
-        /// SOBRE CUALQUIER FONDO se lee como el COLOSO que es. Cuatro capas
-        /// de disco (panza profunda → masa → interior caliente → limbo
-        /// brillante) — la estructura de una foto de gigante roja real.
-        /// </summary>
-        private static void DrawCuerpoSolido(Vector2 pos, float R, Color bodyTint,
-            float fade, float collapse)
-        {
-            // LA PANZA PROFUNDA (el disco exterior — rojo sangre oscuro sólido).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                TinteAlfa(Color.Lerp(GiantDeep, CollapseWhite, collapse * 0.6f), 0.96f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 1.04f), SpriteEffects.None, 0f);
-
-            // LA MASA MEDIA (el cuerpo rojo-naranja sólido).
-            Color masa = Color.Lerp(Color.Lerp(GiantDeep, GiantOrange, 0.62f), bodyTint, 0.5f);
-            Main.spriteBatch.Draw(Glow, pos, null,
-                TinteAlfa(masa, 0.92f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.82f), SpriteEffects.None, 0f);
-
-            // EL INTERIOR CALIENTE (donde el plasma sube — naranja vivo).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                TinteAlfa(bodyTint, 0.88f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.52f), SpriteEffects.None, 0f);
-
-            // EL LIMBO BRILLANTE (el corazón del horno — casi blanco).
-            Color limbo = Color.Lerp(Color.Lerp(GiantOrange, new Color(255, 220, 140), 0.6f),
-                CollapseWhite, collapse);
-            Main.spriteBatch.Draw(Glow, pos, null,
-                TinteAlfa(limbo, 0.85f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.26f), SpriteEffects.None, 0f);
-        }
 
         /// <summary>
         /// LAS CÉLULAS FRÍAS (pase ALFA): la granulación LENTA como manchas

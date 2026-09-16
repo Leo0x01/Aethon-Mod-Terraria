@@ -1,0 +1,54 @@
+{
+ "query": "tModLoader melee slash projectile tutorial code DrawOffset rotation",
+ "engine": "ddg-html",
+ "results": [
+  {
+   "url": "https://docs.tmodloader.net/docs/stable/class_mod_projectile.html",
+   "name": "ModProjectile Class Reference - tModLoader",
+   "snippet": "Allows you to determine whether this projectile can hit the given NPC. Return true to allow hitting the target, return false to block this projectile from hitting the target, and return null to use the vanilla code for whether the target can be hit. Returns null by default. Can be called on the local client or server, depending on who owns the projectile . Parameters",
+   "host_name": "docs.tmodloader.net"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/tutorial-tmodloader-projectile-help.68337/",
+   "name": "tModLoader - [Tutorial] TModLoader: Projectile Help | Terraria ...",
+   "snippet": "You can use the code \"Having a projectile shoot at something\" in the next post after the opening post and replace all the \" projectile \" to \"npc\" and the \"npc\" to \"player\".",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://docs.tmodloader.net/docs/1.3/class_terraria_1_1_mod_loader_1_1_mod_projectile.html",
+   "name": "tModLoader: Terraria.ModLoader.ModProjectile Class Reference",
+   "snippet": "This class serves as a place for you to place all your properties and hooks for each projectile . Create instances of ModProjectile (preferably overriding this class) to pass as parameters to Mod.AddProjectile. Definition at line 13 of file ModProjectile.cs.",
+   "host_name": "docs.tmodloader.net"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/custom-slash-on-melee-weapon.104252/",
+   "name": "Custom slash on melee weapon... | Terraria Community Forums",
+   "snippet": "How to make a projectile similar to Arcalis' projectile for melee weapon? - Arcalis projectile ... Please explain the projectile code . It is very necessary, because there is already art.",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://deepwiki.com/tModLoader/tModLoader/3.5-custom-projectiles",
+   "name": "Custom Projectiles | tModLoader/tModLoader | DeepWiki",
+   "snippet": "Custom projectiles allow mods to create new projectile entities with unique behaviors, visuals, and interactions. This system enables everything from simple bullets and arrows to complex guided missil",
+   "host_name": "deepwiki.com"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/tutorial-projectile-guide-and-implementation-tmodloader-edition.40062/",
+   "name": "tModLoader - [Tutorial] Projectile Guide and Implementation: tModLoader ...",
+   "snippet": "[ Tutorial ] Projectile Guide and Implementation tModLoader Edition by: Sin Costan Introduction: Hello TCF community, by a request, I have imported the original tAPI guide to tModLoader , with a few changes of course. This page looks pretty empty boss, where's the tutorial ? By the power of...",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=dq5aN_s0kVI",
+   "name": "[tModLoader] The Modder's Blueprint - #03: Held Projectile & Custom ...",
+   "snippet": "[ tModLoader ] The Modder's Blueprint - #03: Held Projectile & Custom Dust Collin_cs 1.43K subscribers 98",
+   "host_name": "www.youtube.com"
+  },
+  {
+   "url": "https://tconfig.fandom.com/wiki/Item_%26_Projectile_Tutorial",
+   "name": "Item & Projectile Tutorial - Surfpup's tConfig Mod Wiki",
+   "snippet": "I'm still working with some of the code to figure out how it applies additonal functions to projectiles . Here I will state the things I have not figured out how to modify yet, or effects that still need to rely on stock item values until an alternative is figured out. Projectile issues still existing for now Boomerangs: - Throw limit is enforced through the CanUse() Item method. - Chakram ...",
+   "host_name": "tconfig.fandom.com"
+  }
+ ]
+}

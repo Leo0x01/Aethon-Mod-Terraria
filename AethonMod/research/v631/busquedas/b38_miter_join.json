@@ -1,0 +1,54 @@
+{
+ "query": "thick line rendering miter join quads 2D game algorithm",
+ "engine": "ddg-lite",
+ "results": [
+  {
+   "url": "https://github.com/mhalber/Lines",
+   "name": "GitHub - mhalber/Lines: 6 different implementations of doing wide line ...",
+   "snippet": "",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://stackoverflow.com/questions/60440682/drawing-a-line-in-modern-opengl",
+   "name": "c++ - Drawing a line in modern OpenGL - Stack Overflow",
+   "snippet": "",
+   "host_name": "stackoverflow.com"
+  },
+  {
+   "url": "https://github.com/Rabbid76/graphics-snippets/blob/master/documentation/thick_line_shader.md",
+   "name": "graphics-snippets/documentation/thick_line_shader.md at master ... - GitHub",
+   "snippet": "",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://stackoverflow.com/questions/687173/how-do-i-render-thick-2d-lines-as-polygons",
+   "name": "How do I render thick 2D lines as polygons? - Stack Overflow",
+   "snippet": "",
+   "host_name": "stackoverflow.com"
+  },
+  {
+   "url": "https://www.xjavascript.com/blog/algorithm-for-drawing-line-with-thickness-width/",
+   "name": "Fast Line Drawing Algorithm with Thickness for JavaScript Games: Worm ...",
+   "snippet": "",
+   "host_name": "www.xjavascript.com"
+  },
+  {
+   "url": "https://mattdesl.svbtle.com/drawing-lines-is-hard",
+   "name": "Drawing Lines is Hard - Matt DesLauriers on Svbtle",
+   "snippet": "",
+   "host_name": "mattdesl.svbtle.com"
+  },
+  {
+   "url": "https://shtille.github.io/blog/polyline-rendering",
+   "name": "Polyline rendering | Shtille's blog",
+   "snippet": "",
+   "host_name": "shtille.github.io"
+  },
+  {
+   "url": "https://shtille.github.io/blog/polyline-rendering-4",
+   "name": "Polyline rendering. Part 4 | Shtille's blog",
+   "snippet": "",
+   "host_name": "shtille.github.io"
+  }
+ ]
+}

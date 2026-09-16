@@ -163,6 +163,18 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.RedSupergiantStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.MagnetarStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.CicloEstelarStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.SembradorCementeralStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.ColapsoMagnetarStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.LagrimasSolMoribundoStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.DecretoEclipseStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.CometaErranteStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.NovaEncadenadaStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.VozCuasarStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.TelarConstelacionesStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.LluviaMeteorosStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.AbrazoNebulosaStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.FiloHorizonteStaff>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Cosmic.RayoGammaStaff>(), 1));
             return l;
         }
     }
@@ -209,7 +221,7 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>9 — LOS EXHUMADOS: las formas nuevas de v6.29 (Calamity research).</summary>
+    /// <summary>9 — LOS EXHUMADOS: las formas nuevas de v6.29.</summary>
     public class BolsaExhumados : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Exhumados";

@@ -9,26 +9,29 @@ using AethonMod.Content.Projectiles.Cosmic;
 namespace AethonMod.Content.Weapons.Cosmic
 {
     /// <summary>
-    /// DesgarroRealityStaff — v6.28 — EL BASTÓN DEL DESGARRO EN LA REALIDAD.
+    /// DesgarroRealityStaff — v6.31 — EL BASTÓN DEL DESGARRO EN LA REALIDAD.
     ///
     /// Petición del usuario: "un bastón que su proyectil sea un desgarro en la
     /// realidad... y dañar con eso". EL PROYECTIL NO ES UN OBJETO: ES LA HERIDA.
-    /// Al soltar el casteo, la realidad se ABRE en una línea CONTINUA de 620 px
-    /// que atraviesa paredes (un desgarro del ESPACIO no conoce la geometría):
+    /// Al soltar el casteo, la realidad se ABRE en una línea CONTINUA y PAREJA
+    /// de 620 px que atraviesa paredes (un desgarro del ESPACIO no conoce la
+    /// geometría):
     ///
     ///   · TELÉGRAFO (12 ticks): la estrella de ruptura crece y el anillo
     ///     implosiona — el mundo se oscurece.
-    ///   · APERTURA (3 ticks): EL PRIMER GOLPE — la línea recta (UN SOLO
-    ///     QUAD continuo — cero juntas, cero interrupciones) se abre de golpe.
+    ///   · APERTURA (3 ticks): EL PRIMER GOLPE — la línea nace YA completa (UN
+    ///     SOLO QUAD continuo — cero juntas, cero interrupciones).
     ///   · LA LÍNEA VIVA (~52 ticks): daño de apertura + mordidas suaves.
     ///   · VIBRACIÓN (16 ticks): LA TENSIÓN — onda estacionaria creciendo
     ///     0→3.5 px a ~10 Hz: la línea está a punto de FALLAR.
-    ///   · LA FRACTURA (2 ticks): EL CLÍMAX — la línea se QUIEBRA en la
-    ///     herida Lichtenberg y pega ×2.2. Después la grieta vive ~1.6 s
-    ///     doliendo y la realidad sana. NADA de proyectiles extra.
+    ///   · EL CLÍMAX (2 ticks): la herida se PROFUNDIZA — flash + ancho ×1.35
+    ///     + daño ×2.2. La línea SIGUE RECTA: nada se rompe en pedazos.
+    ///   · EL CORTE VIVO (~1.6 s): la MISMA línea, más intensa, doliendo.
+    ///     El cierre se COME el corte desde los extremos. NADA de proyectiles
+    ///     extra — TODO ES LA LÍNEA.
     ///
-    /// Todo el visual lo pinta RiftLib v2 (texturas RiftTaper*/RiftLip — el
-    /// desgarro continuo); el daño es la escuela A (línea/camino). v6.28 —
+    /// Todo el visual lo pinta RiftLib v3 (las RiftTaper* de MESETA — el
+    /// desgarro continuo y parejo); el daño es la escuela A (línea). v6.28 —
     /// sin maná (regla del usuario: todos los bastones del mod son de prueba).
     /// </summary>
     public class DesgarroRealityStaff : ModItem
@@ -59,7 +62,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             tooltips.Add(new TooltipLine(Mod, "D2",
                 "[c/E6B0FF:Abre una grieta CONTINUA de 620 px que ATRAVIESA PAREDES y corta a todo el que la toque]"));
             tooltips.Add(new TooltipLine(Mod, "D3",
-                "[c/FF9EC4:Golpe de apertura · la línea VIBRA... y al FRACTURARSE pega ×2.2 · la grieta viva sigue doliendo]"));
+                "[c/FF9EC4:Golpe de apertura · la línea VIBRA... y al PROFUNDIZARSE pega ×2.2 · el corte vivo sigue doliendo]"));
             tooltips.Add(new TooltipLine(Mod, "D4",
                 "[c/78788C:El interior es un vacío con estrellas · labios violeta/carmesí · el mundo se apaga · sin maná]"));
         }

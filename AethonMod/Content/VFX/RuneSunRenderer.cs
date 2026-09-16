@@ -82,8 +82,9 @@ namespace AethonMod.Content.VFX
         //  PARÁMETROS
         // ==================================================================
 
-        /// <summary>Radio del disco de plasma en px a escala 1.</summary>
-        public const float BodyPx = 46f;
+        /// <summary>Radio del disco de plasma en px a escala 1 (v6.31: 46→52 —
+        /// "hazlos un poco más grandes": la familia entera crece ~13%).</summary>
+        public const float BodyPx = 52f;
 
         /// <summary>Tier máximo de la familia (20 copias — v6.22).</summary>
         public const int MaxTier = 20;
@@ -167,70 +168,16 @@ namespace AethonMod.Content.VFX
                 if (tier >= 8) DrawCorePulse(drawPos, R, time, tier);
                 Main.spriteBatch.End();
 
-                // === 1. BACKGLOW (alpha — el resplandor profundo) ===
-                BeginAlpha();
-                Texture2D bloom = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
-                Color glowHot = Color.Lerp(new Color(255, 230, 100), new Color(255, 75, 25), rg);
-                glowHot.A = 0;
-                Main.spriteBatch.Draw(bloom, drawPos, null, glowHot * 0.7f, 0f,
-                    bloom.Size() * 0.5f, scale * 0.95f, SpriteEffects.None, 0f);
-                Color glowRed = Color.Lerp(new Color(255, 50, 0), new Color(255, 30, 10), rg);
-                glowRed.A = 0;
-                Main.spriteBatch.Draw(bloom, drawPos, null, glowRed * 0.45f, 0f,
-                    bloom.Size() * 0.5f, scale * 1.61f, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-
-                // === 2. AURA (RadialShineShader — ruido de energía) ===
-                Texture2D wavyBlotch = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
-                if (_shineShader != null && _shineShader.Value != null)
-                {
-                    Effect shine = _shineShader.Value;
-                    shine.Parameters["globalTime"].SetValue(time);
-                    // Misma proporción del sol: 2.72 × el ANCHO (2R) del cuerpo.
-                    Vector2 shineScale = Vector2.One * R * 5.44f / wavyBlotch.Size();
-
-                    BeginAdditive();
-                    shine.CurrentTechnique.Passes[0].Apply();
-                    Color shineColor = Color.Lerp(new Color(252, 212, 112), new Color(255, 95, 45), rg);
-                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
-                        shineColor * 0.24f, p.rotation,
-                        wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                }
-
-                // === 3. EL DISCO DE PLASMA (SunShader — la piel del sol) ===
-                if (_sunShader != null && _sunShader.Value != null)
-                {
-                    Effect shader = _sunShader.Value;
-                    Texture2D psychedelic = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
-                    Texture2D dendritic = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
-
-                    shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
-                    shader.Parameters["mainColor"].SetValue(
-                        Color.Lerp(new Color(255, 255, 255), new Color(255, 150, 120), rg).ToVector3());
-                    shader.Parameters["darkerColor"].SetValue(
-                        Color.Lerp(new Color(204, 92, 25), new Color(150, 28, 12), rg).ToVector3());
-                    shader.Parameters["subtractiveAccentFactor"].SetValue(new Color(181, 0, 0).ToVector3());
-                    shader.Parameters["sphereSpinTime"].SetValue(time * 0.9f);
-                    shader.Parameters["globalTime"].SetValue(time);
-
-                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
-                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-                    Main.graphics.GraphicsDevice.Textures[2] = psychedelic;
-                    Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
-
-                    Vector2 drawScale = Vector2.One * R * 3.0f / dendritic.Size();
-
-                    BeginAlpha();
-                    shader.CurrentTechnique.Passes[0].Apply();
-                    Main.spriteBatch.Draw(dendritic, drawPos, null, Color.White, p.rotation,
-                        dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
-                }
+                // === 1-3. EL CUERPO SOLAR (v6.31: LA TÉCNICA EXACTA DEL SOL
+                //     vive en DrawSunBody — el MISMO código que ahora viste a
+                //     TODAS las estrellas del mod; la gigante tiñe la paleta) ===
+                DrawSunBody(drawPos, R, p.rotation, time,
+                    Color.Lerp(new Color(255, 255, 255), new Color(255, 150, 120), rg),
+                    Color.Lerp(new Color(204, 92, 25), new Color(150, 28, 12), rg),
+                    new Color(181, 0, 0),
+                    Color.Lerp(new Color(255, 230, 100), new Color(255, 75, 25), rg),
+                    Color.Lerp(new Color(255, 50, 0), new Color(255, 30, 10), rg),
+                    Color.Lerp(new Color(252, 212, 112), new Color(255, 95, 45), rg));
 
                 // === 4. EL SISTEMA RÚNICO (v6.26 — EL EMISOR COMPARTIDO) ===
                 // Los anillos se EMITEN al buffer de VFXCore en coords de
@@ -1391,6 +1338,115 @@ namespace AethonMod.Content.VFX
                         AssetRequestMode.ImmediateLoad).Value);
                 }
                 catch { _shineShaderFailed = true; }
+            }
+        }
+
+        // ==================================================================
+        //  v6.31 — EL CUERPO DEL SOL ORIGINAL, COMPARTIDO POR TODAS LAS ESTRELLAS
+        // ==================================================================
+
+        /// <summary>
+        /// v6.31 — EL CUERPO DEL SOL ORIGINAL (la petición literal del usuario:
+        /// "copia el código del sol original para usar en todos los demás soles
+        /// o estrellas"): LA TÉCNICA EXACTA del sol — backglow BloomCircle en
+        /// pase ALFA (el resplandor profundo) + aura RadialShineShader (el ruido
+        /// de energía) + EL DISCO DE PLASMA SunShader con granulación dendrítica
+        /// (la PIEL del sol) — parametrizada SOLO por radio y paleta. Todas las
+        /// estrellas reales del mod (supergigante, neutrón, enana blanca, magnetar,
+        /// estrella muerta) dibujan su cuerpo con ESTE código: visible a plena
+        /// luz del día, sólido, con la textura de plasma del sol de verdad.
+        /// CONTRATO DE BATCH: cerrado → cerrado.
+        /// </summary>
+        /// <param name="drawPos">Centro en PANTALLA (ya restado screenPosition).</param>
+        /// <param name="R">Radio del cuerpo en px (BodyPx·scale del llamador).</param>
+        /// <param name="rotation">Rotación del disco (p.rotation del proyectil).</param>
+        /// <param name="time">Main.GlobalTimeWrappedHourly.</param>
+        /// <param name="mainColor">El color del plasma brillante (la "piel").</param>
+        /// <param name="darkerColor">El color del plasma frío (las celdas que bajan).</param>
+        /// <param name="accentColor">El acento sustractivo (las manchas profundas).</param>
+        /// <param name="backHot">El resplandor profundo interior (BloomCircle 1).</param>
+        /// <param name="backRed">El resplandor extendido exterior (BloomCircle 2).</param>
+        /// <param name="shineColor">El tinte del aura de energía.</param>
+        /// <param name="spinMul">Velocidad de giro de la esfera (0.9 = sol; 0.35 = gigante lenta).</param>
+        /// <param name="alphaMul">Multiplicador global de intensidad (fundidos).</param>
+        public static void DrawSunBody(Vector2 drawPos, float R, float rotation, float time,
+            Color mainColor, Color darkerColor, Color accentColor,
+            Color backHot, Color backRed, Color shineColor,
+            float spinMul = 0.9f, float alphaMul = 1f)
+        {
+            if (R < 1f || alphaMul <= 0.02f) return;
+            LoadShaders();
+
+            try
+            {
+                // === 1. BACKGLOW (pase ALFA — el resplandor profundo): las
+                //     proporciones EXACTAS del sol (0.95 y 1.61 × R/BodyPx). ===
+                BeginAlpha();
+                Texture2D bloom = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+                float bScale = R / BodyPx;
+                Color glowHot = backHot; glowHot.A = 0;
+                Main.spriteBatch.Draw(bloom, drawPos, null, glowHot * (0.7f * alphaMul), 0f,
+                    bloom.Size() * 0.5f, bScale * 0.95f, SpriteEffects.None, 0f);
+                Color glowRed = backRed; glowRed.A = 0;
+                Main.spriteBatch.Draw(bloom, drawPos, null, glowRed * (0.45f * alphaMul), 0f,
+                    bloom.Size() * 0.5f, bScale * 1.61f, SpriteEffects.None, 0f);
+                Main.spriteBatch.End();
+
+                // === 2. AURA (RadialShineShader — el ruido de energía):
+                //     la proporción del sol, 2.72 × el ANCHO (2R) del cuerpo. ===
+                Texture2D wavyBlotch = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+                if (_shineShader != null && _shineShader.Value != null)
+                {
+                    Effect shine = _shineShader.Value;
+                    shine.Parameters["globalTime"].SetValue(time);
+                    Vector2 shineScale = Vector2.One * R * 5.44f / wavyBlotch.Size();
+
+                    BeginAdditive();
+                    shine.CurrentTechnique.Passes[0].Apply();
+                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
+                        shineColor * (0.24f * alphaMul), rotation,
+                        wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+
+                // === 3. EL DISCO DE PLASMA (SunShader — LA PIEL del sol):
+                //     la granulación dendrítica que gira, el limbo y las manchas
+                //     sustractivas — EL CUERPO de verdad, sólido en pase ALFA. ===
+                if (_sunShader != null && _sunShader.Value != null)
+                {
+                    Effect shader = _sunShader.Value;
+                    Texture2D psychedelic = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
+                    Texture2D dendritic = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+
+                    shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
+                    shader.Parameters["mainColor"].SetValue(mainColor.ToVector3());
+                    shader.Parameters["darkerColor"].SetValue(darkerColor.ToVector3());
+                    shader.Parameters["subtractiveAccentFactor"].SetValue(accentColor.ToVector3());
+                    shader.Parameters["sphereSpinTime"].SetValue(time * spinMul);
+                    shader.Parameters["globalTime"].SetValue(time);
+
+                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
+                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+                    Main.graphics.GraphicsDevice.Textures[2] = psychedelic;
+                    Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
+
+                    Vector2 drawScale = Vector2.One * R * 3.0f / dendritic.Size();
+
+                    BeginAlpha();
+                    shader.CurrentTechnique.Passes[0].Apply();
+                    Main.spriteBatch.Draw(dendritic, drawPos, null,
+                        Color.White * alphaMul, rotation,
+                        dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+            }
+            catch
+            {
+                try { Main.spriteBatch.End(); } catch { }
             }
         }
     }

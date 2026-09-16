@@ -12,12 +12,12 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// EminenciaAtrozStaff — v6.29 — LA EMINENCIA ATROZ.
     ///
     /// LA SEGUNDA DE LOS DOS EXHUMADOS — el arma nacida de la investigación
-    /// del GRUESOME EMINENCE de Calamity (research/rancor_v629/):
+    /// (research/rancor_v629/):
     ///
     ///   · LA CONGREGACIÓN: invoca una conglomeración GASEOSA de espíritus
     ///     cerca del cursor (BrumaFX — la masa NEGRA de espíritus con caras ROJO-NARANJA ardiendo — v6.30 medido).
     ///   · EL COMPORTAMIENTO SALVAJE: sigue el cursor FLOJAMENTE y SE LARGA
-    ///     por su cuenta de cuando en cuando (la "wildly" de Calamity).
+    ///     por su cuenta de cuando en cuando (el vaivén salvaje medido).
     ///   · LOS ESPÍRITUS MENORES: la congregación libera espíritus pequeños
     ///     que flotan, lingüean... y SON TIRADOS DE VUELTA (puramente
     ///     visuales, deterministas).
@@ -25,11 +25,11 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///     espíritus se acumulan hasta crear LA ABOMINACIÓN: un monstruo
     ///     único TOTALMENTE CONTROLABLE (el spring se aprieta ×2.4).
     ///   · LA RAMPA: el daño crece del 100% al 185% del base (1 + 0.85·x —
-    ///     EXACTO a Calamity).
-    ///   · LA CARA: el interior Giygas — un ojo y una boca que asoman en
+    ///     EXACTO medido).
+    ///   · LA CARA: el interior vivo — un ojo y una boca que asoman en
     ///     ventanas caóticas cuando la masa está madura.
     ///
-    /// El precio del canal (Calamity drena maná constante; nosotros por la
+    /// El precio del canal (la referencia drena maná constante; nosotros por la
     /// regla de la casa NO — pero SIN canal NO hay crecimiento, y sin
     /// crecimiento la congregación DECAE y se disipa).
     /// </summary>

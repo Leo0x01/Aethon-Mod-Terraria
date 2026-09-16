@@ -189,6 +189,7 @@ namespace AethonMod.Content.VFX
             }
 
             Main.spriteBatch.End();
+            ContarQuads(_quads.Count);
             _quads.Clear();
         }
 
@@ -271,19 +272,196 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  v6.30 — EL FILTRO DE OBJETIVOS DE LA CASA (las Dummy incluidas)
+        //  v6.31 — EL FILTRO DE OBJETIVOS: EL MISMO DE TERRARIA BASE
         // ==================================================================
 
         /// <summary>
         /// ¿Es este NPC un objetivo VÁLIDO para el daño manual de la casa
-        /// (escuela A)? CanBeChasedBy() EXCLUYE al Target Dummy (es
-        /// <c>immortal</c>: recibe golpes y muestra números, pero su vida
-        /// jamás baja — medido contra el NPC.cs.patch de tML 1.4.4). El
-        /// usuario prueba las armas contra Dummy: TODO nuestro daño manual
-        /// pasa por aquí, y las Dummy CUENTAN.
+        /// (escuela A)? v6.31 — LA PETICIÓN LITERAL DEL USUARIO: "que el
+        /// filtro sea el mismo que usan las armas de Terraria base y otros
+        /// mods". ES EL PREDICADO EXACTO de la puerta de daño de vanilla
+        /// (Projectile.cs, la puerta principal proyectil→NPC, medida sobre
+        /// el decompile real):
+        /// <code>
+        ///   npc.active &amp;&amp; !npc.dontTakeDamage &amp;&amp; !npc.friendly
+        /// </code>
+        /// Consecuencias medibles (todas = comportamiento vanilla):
+        ///   · EL TARGET DUMMY CUENTA (muestra números; immortal, su vida
+        ///     jamás baja — exactamente como con las armas base).
+        ///   · Los NPC AMISTOSOS (pueblos, atados) NO reciben daño — igual
+        ///     que una espada base los atraviesa sin herirlos.
+        ///   · Los NPC con dontTakeDamage (escenas/inmunes de evento) se
+        ///     respetan.
+        /// (La vacuna del Guía [type 22 + killGuide] y el gate de i-frames
+        /// por jugador viven en el motor de vanilla; nuestro daño manual
+        /// lleva SU PROPIA cadencia por diseño — los cooldowns de la casa.)
         /// </summary>
         public static bool EsObjetivo(NPC npc)
-            => npc != null && npc.active &&
-               (npc.CanBeChasedBy() || npc.type == NPCID.TargetDummy);
+            => npc != null && npc.active && !npc.dontTakeDamage && !npc.friendly;
+
+        // ==================================================================
+        //  v6.31 — EL MOTOR v2: capas de oclusión + janitor + calidad + presupuesto
+        //  (la guía de ingeniería de la super investigación: lo que los mods
+        //  top hacen y nuestro motor no tenía)
+        // ==================================================================
+
+        /// <summary>
+        /// LAS CAPAS DE DIBUJO del motor (v6.31): los efectos que OCULLEN (el
+        /// vacío de un desgarro, el horizonte de un agujero negro) necesitan
+        /// dibujarse DEBAJO de los NPCs — que el cuerpo del enemigo TAPE el
+        /// horizonte de sucesos vende la profundidad que el aditivo no puede.
+        /// </summary>
+        public enum VFXLayer
+        {
+            /// <summary>Debajo de todo (detrás de tiles y NPCs).</summary>
+            DetrasDeTodo = 0,
+            /// <summary>Sobre los tiles, DEBAJO de los NPCs (la capa de la oclusión).</summary>
+            DetrasDeNPCs = 1,
+            /// <summary>Sobre los NPCs (el brillo final).</summary>
+            SobreNPCs = 2,
+        }
+
+        // (delegados por capa: el llamador registra su dibujo del frame)
+        private static readonly List<Action<SpriteBatch>>[] _capas =
+        {
+            new List<Action<SpriteBatch>>(32),
+            new List<Action<SpriteBatch>>(32),
+            new List<Action<SpriteBatch>>(32),
+        };
+
+        /// <summary>
+        /// REGISTRA un dibujo con CAPA para este frame (v6.31): el delegado se
+        /// ejecuta en <see cref="FlushOcclusion"/> en orden de capa. El dibujo
+        /// debe abrir/cerrar SUS lotes (el batch que recibe ya está preparado
+        /// en NonPremultiplied). Para la luz normal sigue habiendo
+        /// <see cref="FlushAdditive"/> — esto es SOLO para lo que OCULLE.
+        /// </summary>
+        public static void RegisterLayer(Action<SpriteBatch> draw, VFXLayer layer)
+        {
+            if (draw == null || Main.netMode == NetmodeID.Server) return;
+            _capas[(int)layer].Add(draw);
+            if (_capas[(int)layer].Count > 64)       // techo de seguridad
+                _capas[(int)layer].RemoveAt(0);
+        }
+
+        /// <summary>
+        /// VUELCA las capas registradas (v6.31): los dibujos oclusivos en su
+        /// orden (detrás de todo → detrás de NPCs). El llamador decide DÓNDE
+        /// del pipeline lo invoca (p. ej. un ModSystem.PostDrawTiles para que
+        /// los NPCs tapen la oclusión). Limpia los registros del frame.
+        /// </summary>
+        public static void FlushOcclusion()
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            for (int c = 0; c < _capas.Length; c++)
+            {
+                if (_capas[c].Count == 0) continue;
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                for (int i = 0; i < _capas[c].Count; i++)
+                {
+                    try { _capas[c][i](Main.spriteBatch); }
+                    catch { }
+                }
+                Main.spriteBatch.End();
+                _capas[c].Clear();
+            }
+            Janitor();
+        }
+
+        /// <summary>
+        /// EL CONSERJE DE ESTADO (v6.31 — la lección de higiene de pipeline de
+        /// la super investigación): los shaders que registran texturas en los
+        /// SLOTS 1..3 del dispositivo los dejan PEGADOS si el frame termina a
+        /// mitad de pase (pausa, teleport, excepción) — y el siguiente dibujo
+        /// que use esos slots sale CORROMPIDO. Este barrido los anula al
+        /// terminar el volcado de capas: un solo lugar, cero víctimas.
+        /// </summary>
+        private static void Janitor()
+        {
+            try
+            {
+                var device = Main.graphics?.GraphicsDevice;
+                if (device == null) return;
+                device.Textures[1] = null;
+                device.Textures[2] = null;
+                device.Textures[3] = null;
+            }
+            catch { }
+        }
+
+        // --- LA PUERTA DE CALIDAD ---
+
+        /// <summary>Las familias de efectos que PUEDEN no dibujarse según la
+        /// configuración del jugador (v6.31 — el quality-gate de la casa).</summary>
+        public enum CalidadFX
+        {
+            /// <summary>Post-proceso de pantalla (bloom propio, aberración fuerte).</summary>
+            PostProceso,
+            /// <summary>Warp/distorsión de pantalla (lentes, calor).</summary>
+            WarpPantalla,
+            /// <summary>Brillos HDR apilados.</summary>
+            Bloom,
+            /// <summary>Lluvias de partículas cosméticas densas.</summary>
+            ParticulasAltas,
+        }
+
+        private static bool _renderEspecial;
+        private static uint _frameDeCalidad;
+
+        /// <summary>
+        /// ¿Está PERMITIDA esta familia de efectos? (v6.31): la puerta que
+        /// hay que consultar ANTES de cualquier post-proceso — en el menú o
+        /// sin dispositivo el post-proceso rompe (la lección de seguridad de
+        /// render de la investigación; la detección de iluminación Retro/
+        /// Trippy no es API pública en tML 2026.07: el gate es conservador
+        /// con lo disponible, listo para ensancharse).
+        /// </summary>
+        public static bool CalidadPermitida(CalidadFX f)
+        {
+            uint frame = Main.GameUpdateCount;
+            if (frame != _frameDeCalidad)
+            {
+                _frameDeCalidad = frame;
+                try { _renderEspecial = Main.gameMenu || Main.graphics?.GraphicsDevice == null; }
+                catch { _renderEspecial = true; }
+            }
+            return !_renderEspecial;
+        }
+
+        // --- EL PRESUPUESTO DE CUADROS ---
+
+        private static int _quadsDelFrame;
+        private static uint _frameDelPresupuesto;
+
+        /// <summary>
+        /// EL PRESUPUESTO (v6.31 — anti-"abrumador"): cuenta los cuadros
+        /// vuelcados este frame; los llamadores COSMÉTICOS consultan esto
+        /// antes de emitir (si hay 3 jefes con bruma a la vez, las lluvias de
+        /// partículas decorativas se saltan solas). Techo ~24000 quads/frame.
+        /// </summary>
+        public static bool Presupuesto(int quadsQueQuieroEmitir)
+        {
+            uint frame = Main.GameUpdateCount;
+            if (frame != _frameDelPresupuesto)
+            {
+                _frameDelPresupuesto = frame;
+                _quadsDelFrame = 0;
+            }
+            return _quadsDelFrame + quadsQueQuieroEmitir <= 24000;
+        }
+
+        /// <summary>Registra consumo del presupuesto (lo llama FlushAdditive).</summary>
+        private static void ContarQuads(int n)
+        {
+            uint frame = Main.GameUpdateCount;
+            if (frame != _frameDelPresupuesto)
+            {
+                _frameDelPresupuesto = frame;
+                _quadsDelFrame = 0;
+            }
+            _quadsDelFrame += n;
+        }
     }
 }

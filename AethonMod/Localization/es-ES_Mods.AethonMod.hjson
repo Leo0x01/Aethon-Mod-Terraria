@@ -73,15 +73,15 @@
         "Items.BolsaBastonesCreativos.DisplayName": "Bolsa de los Bastones Creativos",
         "Items.BolsaBastonesCreativos.Tooltip": "El gauge, el péndulo, el coro y demás rarezas (los 6).\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
         "Items.BolsaExhumados.DisplayName": "Bolsa de los Exhumados",
-        "Items.BolsaExhumados.Tooltip": "Las formas exhumadas: el rencor y la eminencia.\nNacidas de la investigación de los exhumados de Calamity.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+        "Items.BolsaExhumados.Tooltip": "Las formas exhumadas: el rencor y la eminencia.\nLas formas exhumadas originales del arsenal.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
         "Items.BolsaCosmeticos.DisplayName": "Bolsa de los Cosméticos",
         "Items.BolsaCosmeticos.Tooltip": "Las coronas que se ciñen a tu personaje.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
 
         "Items.RencorPrimordialStaff.DisplayName": "El Rencor Primordial",
-        "Items.RencorPrimordialStaff.Tooltip": "La forma exhumada del arsenal (investigación: RANCOR de Calamity).\nClava un círculo de transmutación rúnico a 380 px.\n3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.\nAl tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).\nLos enemigos del haz se desintegran en ceniza. Sin maná.",
+        "Items.RencorPrimordialStaff.Tooltip": "La forma exhumada del arsenal: EL RENCOR PRIMORDIAL.\nClava un círculo de transmutación rúnico a 380 px.\n3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.\nAl tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).\nLos enemigos del haz se desintegran en ceniza. Sin maná.",
 
         "Items.EminenciaAtrozStaff.DisplayName": "La Eminencia Atroz",
-        "Items.EminenciaAtrozStaff.Tooltip": "La forma exhumada del arsenal (investigación: GRUESOME EMINENCE de Calamity).\nSostén el uso: la congregación de espíritus canaliza cerca del cursor.\n14 s de acumulación → LA ABOMINACIÓN, control total.\nEl daño crece del 100% al 185% mientras se acumula.\nSi sueltas el canal, la masa decae y se disipa. Sin maná.",
+        "Items.EminenciaAtrozStaff.Tooltip": "La forma exhumada del arsenal: LA EMINENCIA ATROZ.\nSostén el uso: la congregación de espíritus canaliza cerca del cursor.\n14 s de acumulación → LA ABOMINACIÓN, control total.\nEl daño crece del 100% al 185% mientras se acumula.\nSi sueltas el canal, la masa decae y se disipa. Sin maná.",
 
         "Projectiles.RencorPrimordialProjectile.DisplayName": "Círculo del Rencor",
         "Projectiles.EminenciaAtrozProjectile.DisplayName": "Congregación de Espíritus",
@@ -203,6 +203,42 @@
         "Items.DesgarroRealityStaff.DisplayName": "Bastón del Desgarro en la Realidad",
         "Items.DesgarroRealityStaff.Tooltip": "Dispara un DESGARRO en la realidad.\nLa grieta atraviesa paredes y daña con su línea.\nAl cerrarse deja una grieta persistente que drena.\nMientras vive, el mundo se oscurece herido.",
 
+        // v6.31 — EL SEMBRADOR: el púlsar ancla del cementerio estelar
+        "Items.SembradorCementeralStaff.DisplayName": "Sembrador del Cementerio Estelar",
+        "Items.SembradorCementeralStaff.Tooltip": "Siembra PÚLSARES que frenan en seco y se anclan donde apuntas.\nCada púlsar gira acelerando y barre con dos haces-faro opuestos.\nGolpe de anclaje a plena potencia; los haces pican sin descanso.\nMáximo 3 púlsares: la nueva siembra se come a la más vieja.",
+
+        // v6.31 — EL COLAPSO: la estrella que frena, tiembla y estalla
+        "Items.ColapsoMagnetarStaff.DisplayName": "El Colapso del Magnetar",
+        "Items.ColapsoMagnetarStaff.Tooltip": "Dispara una estrella magnetar que frena hasta casi detenerse.\nCuanto más aprieta el freno, más devasta el STARQUAKE.\nEl anillo solo golpea con su FRENTE y perfora armaduras.\nLa superviviente entra en overclock y muere en un destello.",
+
+        // v6.31 — LAS LÁGRIMAS: la escopeta de lágrimas orbitales del sol moribundo
+        "Items.LagrimasSolMoribundoStaff.DisplayName": "Las Lágrimas del Sol Moribundo",
+        "Items.LagrimasSolMoribundoStaff.Tooltip": "Derrama TRES LÁGRIMAS de un sol moribundo.\nCada lágrima orbita 2,5 s encendiéndose de chamuscado a oro.\nLuego caza sin descanso: hasta 18 mordiscos con quemadura cósmica.\nAl desvanecerse estalla en metal fundido.",
+
+        // v6.31 — EL DECRETO: el círculo del eclipse que crece y ejecuta
+        "Items.DecretoEclipseStaff.DisplayName": "El Decreto del Eclipse",
+        "Items.DecretoEclipseStaff.Tooltip": "Clava un CÍRCULO DE ECLIPSE en el punto del cursor.\nCrece hasta 660 px mientras vive y ejecuta cada 15 ticks:\nla onda viaja al borde y TODO lo de dentro recibe el corte.\nEl más cercano al centro paga ×4,8 · el ojo se contrae antes del tajo.",
+
+        // v6.32 — W2-a: CUATRO ARMAS CÓSMICAS NUEVAS (cometa, nova, cuásar, telar)
+        "Items.CometaErranteStaff.DisplayName": "El Cometa Errante",
+        "Items.CometaErranteStaff.Tooltip": "Captura un cometa en ÓRBITA ELÍPTICA a tu alrededor durante 6 vueltas.\nEl núcleo de hielo-fuego golpea a plena potencia; la cola de polvo pica a ×0.4.\nLa cola apunta SIEMPRE hacia afuera de la órbita, como los cometas reales.\nTras 420 ticks se lanza en cacería y estalla en hielo-fuego.",
+        "Items.NovaEncadenadaStaff.DisplayName": "La Nova Encadenada",
+        "Items.NovaEncadenadaStaff.Tooltip": "Una esfera de nova lenta que estalla al tocar enemigo o suelo.\nCada nova encadena 3 hijas ×0.65 y 2 nietas ×0.42 — hasta 3 generaciones.\nEl frente del anillo es lo que golpea · cero azar: presas por distancia.",
+        "Items.VozCuasarStaff.DisplayName": "La Voz del Cuásar",
+        "Items.VozCuasarStaff.Tooltip": "Invoca un cuásar que carga 40 ticks y suelta un HAZ CONTINUO de 460 px.\nEl haz PERFORA TODO · DOPPLER: el borde delantero azul, la cola roja.\nRebota una vez en las paredes · muere con un destello.",
+        "Items.TelarConstelacionesStaff.DisplayName": "El Telar de Constelaciones",
+        "Items.TelarConstelacionesStaff.Tooltip": "Cada uso clava una ESTRELLITA donde estaba tu cursor.\nSe conectan solas con hilos de luz: la constelación se dibuja sola.\nCon 4 o más, cada 30 ticks la FIGURA SE ENCIENDE:\ntodo enemigo dentro del polígono recibe ×2.2 por estrella.",
+
+        // v6.33 — W2-b: CUATRO ARMAS CÓSMICAS MÁS (lluvia, nebulosa, horizonte, rayo gamma)
+        "Items.LluviaMeteorosStaff.DisplayName": "La Lluvia de Meteoros",
+        "Items.LluviaMeteorosStaff.Tooltip": "Marca la zona del cursor con un telégrafo ámbar de 30 ticks.\nLuego caen 8 meteoros escalonados, uno cada 4 ticks, en diagonal con estela de fuego.\nCada impacto estalla ×1.0 en radio 70 y quema con la quemadura cósmica 3 s.",
+        "Items.AbrazoNebulosaStaff.DisplayName": "El Abrazo de la Nebulosa",
+        "Items.AbrazoNebulosaStaff.Tooltip": "Instala una nebulosa en el cursor: nube magenta-cian-violeta de 300 ticks.\nLos de dentro reciben ×0.06 cada 3 ticks y quedan lentos.\nEn su seno nacen estrellitas que revientan en mini-pops ×0.8.\nAl morir se disipa en polvo de estrellas.",
+        "Items.FiloHorizonteStaff.DisplayName": "El Filo del Horizonte",
+        "Items.FiloHorizonteStaff.Tooltip": "Lanza un disco negro — un horizonte de sucesos — con línea de fotón en el ecuador.\nAtraviesa a los enemigos perdiendo velocidad y vuelve como bumerán.\nCada golpe deja una marca que implosiona 30 ticks después: ×0.7 + arrastre.",
+        "Items.RayoGammaStaff.DisplayName": "El Rayo Gamma",
+        "Items.RayoGammaStaff.Tooltip": "Un haz fino de 700 px cruza TODO al instante... pero aún no hace daño.\nCada enemigo tocado queda marcado con un contorno brillante.\nTras 30 ticks, todas las marcas liquidan a la vez:\nclang, destello, daño ×1.0 y quemadura cósmica 5 s.",
+
         "Items.NeutronStarStaff.DisplayName": "Bastón de la Estrella de Neutrones",
         "Items.NeutronStarStaff.Tooltip": "Un núcleo de 12 px ultradenso.\nAura de 60 px con daño triplicado.\nStarquakes periódicos que sacuden el suelo.\nGravita hacia sus presas.",
         "Items.PulsarStaff.DisplayName": "Bastón del Púlsar",
@@ -231,6 +267,19 @@
         "Items.CoroEspectralStaff.Tooltip": "Seis notas de luz cantando en órbita lenta.\nCada nota emite su anillo de onda a su turno.\nEl coro se despide apagándose de a una.",
 
         "Projectiles.DesgarroRealityProjectile.DisplayName": "Desgarro en la Realidad",
+        "Projectiles.SembradorPulsarProjectile.DisplayName": "Púlsar del Cementerio",
+        "Projectiles.LagrimaSolarProjectile.DisplayName": "Lágrima Solar",
+        "Projectiles.ColapsoMagnetarProjectile.DisplayName": "Magnetar del Colapso",
+        "Projectiles.DecretoEclipseProjectile.DisplayName": "Círculo del Eclipse",
+        "Projectiles.CometaErranteProjectile.DisplayName": "Cometa Errante",
+        "Projectiles.NovaEncadenadaProjectile.DisplayName": "Nova Encadenada",
+        "Projectiles.VozCuasarProjectile.DisplayName": "Voz del Cuásar",
+        "Projectiles.TelarEstrellaProjectile.DisplayName": "Estrella del Telar",
+        "Projectiles.LluviaMeteorosProjectile.DisplayName": "Lluvia de Meteoros",
+        "Projectiles.MeteoroProjectile.DisplayName": "Meteoro",
+        "Projectiles.AbrazoNebulosaProjectile.DisplayName": "Abrazo de la Nebulosa",
+        "Projectiles.FiloHorizonteProjectile.DisplayName": "Filo del Horizonte",
+        "Projectiles.RayoGammaProjectile.DisplayName": "Rayo Gamma",
         "Projectiles.NeutronStarProjectile.DisplayName": "Estrella de Neutrones",
         "Projectiles.PulsarProjectile.DisplayName": "Púlsar",
         "Projectiles.WhiteDwarfProjectile.DisplayName": "Enana Blanca",

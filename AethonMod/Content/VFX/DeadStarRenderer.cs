@@ -15,8 +15,9 @@ namespace AethonMod.Content.VFX
     /// INVERSA de toda la familia: MASA OSCURA PRIMERO, luz tenue
     /// después — el contrato de lote de la casa para lo que OCLUYE):
     ///
-    ///   · EL NÚCLEO OSCURO — BlackDisk (la textura de los agujeros):
-    ///     un cuerpo negro que no emite, solo OCULTA.
+    ///   · EL CUERPO — LA TÉCNICA DEL SOL ORIGINAL (v6.31) con la paleta
+    ///     de ASCUAS APAGADAS: granulación tenue rojiza de un cadáver que
+    ///     aún guarda la forma de ser un sol.
     ///   · EL AURA OSCURA — quads negros en AlphaBlend alrededor: la
     ///     estrella APAGA la luz del mundo ( Lighting.AddLight negativo
     ///     no existe: el oscurecimiento visual lo hace esta masa).
@@ -36,8 +37,8 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class DeadStarRenderer
     {
-        /// <summary>Radio del cuerpo en px a escala 1 (el cadáver compacto).</summary>
-        public const float BodyPx = 28f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 28→33 — más grande).</summary>
+        public const float BodyPx = 33f;
 
         // --- PALETA: oscuridad + rescoldo ambar ---
         private static readonly Color VoidBlack = new(12, 9, 16);
@@ -47,15 +48,11 @@ namespace AethonMod.Content.VFX
 
         // --- PINCELES ---
         private static Asset<Texture2D> _glow;
-        private static Asset<Texture2D> _disk;
         private static Asset<Texture2D> _ring;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        /// <summary>EL NÚCLEO NEGRO (la textura de los agujeros de la casa).</summary>
-        private static Texture2D Disk =>
-            (_disk ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
 
         private static Texture2D Ring =>
             (_ring ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring")).Value;
@@ -65,9 +62,11 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Dibuja la estrella muerta: masa oscura PRIMERO (núcleo BlackDisk
-        /// + aura que apaga) y la poca vida que le queda después (brasas
-        /// frías, humo de entropía, ecos rúnicos a 0.2 Hz).
+        /// Dibuja la estrella muerta: EL CUERPO con LA TÉCNICA DEL SOL ORIGINAL
+        /// (v6.31 — DrawSunBody con la paleta de ASCUAS APAGADAS: un cadáver
+        /// estelar de granulación tenue rojiza, visible y sólido — el disco
+        /// negro plano de v6.30 BORRADO) + el aura que apaga ALREDEDOR + el
+        /// humo de entropía + las brasas frías + los ecos rúnicos a 0.2 Hz.
         /// `lifeT` = 0..1, `seed` = semilla del disparo.
         /// </summary>
         public static void Draw(Projectile p, float lifeT, int seed)
@@ -79,20 +78,32 @@ namespace AethonMod.Content.VFX
                 float R = BodyPx * scale;
                 float time = Main.GlobalTimeWrappedHourly;
 
-                // === 1. LA MASA OSCURA (AlphaBlend — PRIMERO, el contrato
-                //     de la casa: lo que OCLUYE se pinta debajo) ===
-                DrawDarkMass(drawPos, R, time, seed);
+                // === 1. EL AURA QUE APAGA (AlphaBlend — PRIMERO, DETRÁS del
+                //     cuerpo: oscurece el MUNDO alrededor, no al cadáver) ===
+                DrawDarkAura(drawPos, R, time);
 
-                // === 2. EL HUMO DE ENTROPÍA (BrumaFX — sube del cuerpo) ===
+                // === 2. EL CUERPO — LA TÉCNICA DEL SOL ORIGINAL con la paleta
+                //     de ascuas (main 150,72,50 · darker 58,28,22 · acento
+                //     28,10,8 · giro casi parado 0.22 — un muerto reciente) ===
+                RuneSunRenderer.DrawSunBody(drawPos, R, p.rotation, time,
+                    new Color(150, 72, 50),
+                    new Color(58, 28, 22),
+                    new Color(28, 10, 8),
+                    new Color(122, 52, 30),
+                    new Color(64, 26, 16),
+                    new Color(142, 72, 46),
+                    0.22f, 1f - lifeT * 0.25f);
+
+                // === 3. EL HUMO DE ENTROPÍA (BrumaFX — sube del cuerpo) ===
                 DrawEntropySmoke(drawPos, R, time, seed);
 
-                // === 3. EL RESCOLDO (lo poco que le queda de ser un sol) ===
+                // === 4. EL RESCOLDO (lo poco que le queda de ser un sol) ===
                 BeginAdditive();
                 DrawEmbers(drawPos, R, time, seed, lifeT);
                 DrawDimRim(drawPos, R, time, lifeT, seed);
                 Main.spriteBatch.End();
 
-                // === 4. LOS ECOS FANTASMALES (las runas de su vida pasada
+                // === 5. LOS ECOS FANTASMALES (las runas de su vida pasada
                 //     titilando a 0.2 Hz — el emisor compartido de la casa) ===
                 float blink = 0.5f + 0.5f * MathF.Sin(time * 0.2f * MathHelper.TwoPi);
                 VFXCore.Begin();
@@ -107,10 +118,11 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 1 — LA MASA OSCURA (AlphaBlend: oculta y oscurece)
+        //  CAPA 1 — EL AURA QUE APAGA (AlphaBlend: oscurece el MUNDO
+        //  alrededor; el cuerpo del cadáver es la técnica del sol)
         // ==================================================================
 
-        private static void DrawDarkMass(Vector2 pos, float R, float time, int seed)
+        private static void DrawDarkAura(Vector2 pos, float R, float time)
         {
             BeginAlpha();
 
@@ -126,14 +138,6 @@ namespace AethonMod.Content.VFX
                     Tint(VoidBlack, a), 0f,
                     Glow.Size() * 0.5f, ScaleOf(R * mul * breathe), SpriteEffects.None, 0f);
             }
-
-            // EL NÚCLEO NEGRO: BlackDisk (sólido hasta ~0.88 del semiancho
-            // → el tamaño final ~2.17× el radio visible, la lección de los
-            // agujeros de la casa).
-            Vector2 diskScale = new Vector2(R * 2.17f, R * 2.17f) / Disk.Size();
-            Main.spriteBatch.Draw(Disk, pos, null,
-                new Color(255, 255, 255, 235), 0f,
-                Disk.Size() * 0.5f, diskScale, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
         }

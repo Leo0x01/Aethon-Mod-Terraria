@@ -28,8 +28,8 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class WhiteDwarfRenderer
     {
-        /// <summary>Radio del cuerpo en px a escala 1 (pequeña y densa).</summary>
-        public const float BodyPx = 34f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 34→39 — más grande).</summary>
+        public const float BodyPx = 39f;
 
         /// <summary>Radio de detección del anillo de acreción (px).</summary>
         public const float AccretionRange = 150f;
@@ -41,15 +41,14 @@ namespace AethonMod.Content.VFX
 
         // --- PINCELES ---
         private static Asset<Texture2D> _glow;
-        private static Asset<Texture2D> _orb;
         private static Asset<Texture2D> _hex;
         private static Asset<Texture2D> _ring;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        private static Texture2D Orb =>
-            (_orb ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowOrb")).Value;
+        // (v6.31: el orbe del núcleo BORRADO — el cuerpo es LA TÉCNICA DEL SOL
+        // ORIGINAL vía RuneSunRenderer.DrawSunBody; el pincel Orb ya no se usa)
 
         /// <summary>La FACETA hexagonal cristalina (la red de la enana).</summary>
         private static Texture2D Hex =>
@@ -78,13 +77,15 @@ namespace AethonMod.Content.VFX
                 float fade = 1f - lifeT * 0.40f;
                 bool accreting = preyCenter.HasValue;
 
+                // === 1. EL CUERPO DENSO — LA TÉCNICA DEL SOL ORIGINAL (v6.31:
+                //     DrawSunBody gestiona SUS PROPIOS lotes → se dibuja ANTES
+                //     de abrir el aditivo; el disco blanco-azulado sólido) ===
+                DrawBody(drawPos, R, fade);
+
                 BeginAdditive();
 
-                // === 1. EL FULGOR FRÍO ESTABLE (casi sin latido) ===
+                // === 2. EL FULGOR FRÍO ESTABLE (casi sin latido) ===
                 DrawColdGlow(drawPos, R, time, fade);
-
-                // === 2. EL CUERPO DENSO (orbe de núcleo sólido) ===
-                DrawBody(drawPos, R, fade);
 
                 // === 3. LAS FACETAS CRISTALINAS (hexágonos fijos, lento) ===
                 DrawFacets(drawPos, R, time, seed, fade);
@@ -127,14 +128,17 @@ namespace AethonMod.Content.VFX
 
         private static void DrawBody(Vector2 pos, float R, float fade)
         {
-            // El orbe: núcleo sólido + borde suave (la densidad de la enana).
-            Main.spriteBatch.Draw(Orb, pos, null,
-                Tint(CrystalWhite, 0.80f * fade), 0f,
-                Orb.Size() * 0.5f, ScaleOf(R * 1.05f), SpriteEffects.None, 0f);
-            // El corazón cegador frío.
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(CrystalWhite, 0.90f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.50f), SpriteEffects.None, 0f);
+            // v6.31 — LA TÉCNICA DEL SOL ORIGINAL (RuneSunRenderer.DrawSunBody):
+            // el disco de plasma SunShader BLANCO-AZULADO cristalino — la enana
+            // de verdad, sólida y visible (el orbe+blob de v6.30 BORRADO).
+            RuneSunRenderer.DrawSunBody(pos, R, 0f, Main.GlobalTimeWrappedHourly,
+                new Color(242, 246, 255),
+                new Color(150, 170, 210),
+                new Color(70, 90, 170),
+                new Color(200, 220, 255),
+                new Color(120, 150, 255),
+                new Color(215, 230, 255),
+                0.55f, fade);
         }
 
         // ==================================================================

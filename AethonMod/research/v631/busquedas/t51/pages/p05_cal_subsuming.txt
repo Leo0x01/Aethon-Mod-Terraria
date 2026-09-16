@@ -1,0 +1,62 @@
+URL: https://calamitymod.wiki.gg/wiki/Subsuming_Vortex
+=====
+
+
+{{item infobox
+| type = Weapon
+| damagetype = magic
+| damage = 460
+| knockback = 5
+| mana = 28
+| use = 20
+| velocity = 7
+| auto = yes
+| tooltip = Press {{key|use}} to release a barrage of vortices that race towards enemies
+Press {{key|open}} to cast a gigantic vortex in front of you with a bias towards the mouse
+When enemies are near the vortex, it sends multiple fast-moving smaller vortices towards them
+Releasing {{key|open}} fires the vortex towards the mouse if enough time has passed
+Damage scales based on how long the vortex was held out
+Struck enemies are completely consumed by {{cbuff|Miracle Blight}}
+| debuff = Miracle Blight
+| debuffchance = 100%
+| debuffduration = 5 seconds (Small Vortex)
+| rare = 18
+| sell = {{value|0|48}}
+| stack = 1
+| research = 1
+| hardmode = yes
+| postml = yes
+| sound = Item 84.wav
+| soundtext = Use
+| sound2 = SubsumingVortexExplosion.ogg
+| sound2text = Explosion
+}}
+[[File:Subsuming Vortex (demo).gif|thumb|500x500px|right|The Subsuming Vortex's primary and secondary fire.]]
+The '''Subsuming Vortex''' is a craftable post-[[Moon Lord]] [[spell tome]].
+
+When used with its primary fire ({{key|use}}), it rapidly fires a spread of 3 homing vortices, each dealing 30% of the weapon's damage and piercing infinitely.
+
+When used with its secondary fire ({{key|open}}), it charges up a large vortex that appears on the spell tome, dealing damage on hit. The vortex periodically consumes mana to fire smaller, faster vortices. After about 1 second of charging, it can be launched towards the cursor by releasing the fire button. After 4 seconds, the vortex becomes fully charged and stops firing small vortices. The launched large vortex causes a massive explosion on hit, which rapidly deals damage. The damage of the explosion scales with how long the vortex has been charged, up to 465% of the weapon's damage.
+
+All of its attacks inflict the [[Miracle Blight]] [[debuff]].
+
+{{Modifier|magic}}
+
+== Crafting ==
+=== Recipe ===
+{{recipes|view=infobox|result=Subsuming Vortex}}
+
+== Notes ==
+*[[Soul Seekers (Supreme)|Supreme Soul Seekers]] take only 60% damage from Subsuming Vortex.
+
+== Trivia ==
+*Its primary fire is based on its original function, where it fired 3 rebounding discs similarly to the [[Razorblade Typhoon]].
+
+{{vh}}
+{{Miracle Matter}}
+{{Master Template Weapons
+| show-main = yes
+| show-magic = yes
+}}
+[[Category:Spell tomes]]
+{{language info|en=Subsuming Vortex}}

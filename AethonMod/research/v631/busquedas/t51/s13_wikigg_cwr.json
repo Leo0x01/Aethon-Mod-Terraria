@@ -1,0 +1,54 @@
+{
+ "query": "terrariamods wiki.gg Calamity Overhaul weapons",
+ "engine": "bing",
+ "results": [
+  {
+   "url": "https://idp.jpv.ac.in/Admin/forgotPassword",
+   "name": "Forgot Password",
+   "snippet": "The One Nation One Subscription (ONOS) initiative is aimed at providing access to scholarly research content to all individuals in the …",
+   "host_name": "idp.jpv.ac.in"
+  },
+  {
+   "url": "https://idp.jpv.ac.in/Admin/reset-password",
+   "name": "Application - idp. jpv .ac.in",
+   "snippet": "Your reset password link has been expired. Please visit the following link.",
+   "host_name": "idp.jpv.ac.in"
+  },
+  {
+   "url": "https://jpv.bihar-ums.com/login",
+   "name": "Home [ jpv .bihar-ums.com]",
+   "snippet": "Forgot User Name? Click Here. Forgot Password? Click Here.",
+   "host_name": "jpv.bihar-ums.com"
+  },
+  {
+   "url": "https://www.jpv.ac.in/",
+   "name": "Jai Prakash University | JPU Official Website",
+   "snippet": "This is Official Website of Jai Prakash University, Chapra. Jai Prakash VishwavUniversity) was established on 22.11.1990 by the …",
+   "host_name": "www.jpv.ac.in"
+  },
+  {
+   "url": "https://jpv.bihar-ums.com/index/collegeforgotpassword",
+   "name": "Jai Prakash Vishwavidyalaya - jpv .bihar-ums.com",
+   "snippet": "Username Reset Login",
+   "host_name": "jpv.bihar-ums.com"
+  },
+  {
+   "url": "https://idp.jpv.ac.in/",
+   "name": "Shibboleth Identity Provider",
+   "snippet": "Login Credentials have already been shared with the Authorized Users for Accessing the above E-Resources. Users who have not …",
+   "host_name": "idp.jpv.ac.in"
+  },
+  {
+   "url": "https://jpv.samarth.ac.in/index.php/site/login",
+   "name": "Login - Samarth eGov Suite",
+   "snippet": "Forgot Password ? First Time Login ?",
+   "host_name": "jpv.samarth.ac.in"
+  },
+  {
+   "url": "https://jpvadm.samarth.edu.in/index.php/site/login",
+   "name": "Login - JAI PRAKASH UNIVERSITY",
+   "snippet": "Forgot Password? Click to Reset your Password.",
+   "host_name": "jpvadm.samarth.edu.in"
+  }
+ ]
+}

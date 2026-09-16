@@ -14,7 +14,7 @@ namespace AethonMod.Content.VFX
     /// La estrella de neutrones GIRANDO con sus DOS HACES POLARES de
     /// luz barriendo el mundo como un faro (~1 rev/s). La firma visual:
     ///
-    ///   · EL NÚCLEO — la textura PROCEDURAL PulsarCore.png de la casa
+    ///   · EL CUERPO — LA TÉCNICA DEL SOL ORIGINAL (v6.31, DrawSunBody)
     ///     (Effects/Procedural/), girando SOLIDARIO con el haz: la
     ///     estrella y su luz son UN solo cuerpo en rotación.
     ///   · LOS DOS HACES OPUESTOS — LumenLib.Ray de 400 px a lo largo
@@ -33,8 +33,8 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class PulsarRenderer
     {
-        /// <summary>Radio del núcleo en px a escala 1 (compacto como toda estrella de neutrones).</summary>
-        public const float BodyPx = 28f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 28→33 — más grande).</summary>
+        public const float BodyPx = 33f;
 
         /// <summary>Longitud del haz polar en px (el faro de 400 px).</summary>
         public const float BeamLength = 400f;
@@ -49,15 +49,11 @@ namespace AethonMod.Content.VFX
 
         // --- PINCELES ---
         private static Asset<Texture2D> _glow;
-        private static Asset<Texture2D> _core;
         private static Asset<Texture2D> _ring;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        /// <summary>EL NÚCLEO DEL PÚLSAR — la textura procedural de la casa.</summary>
-        private static Texture2D Core =>
-            (_core ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/PulsarCore")).Value;
 
         private static Texture2D Ring =>
             (_ring ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/Ring")).Value;
@@ -67,7 +63,7 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// Dibuja el púlsar: núcleo PulsarCore girando + los DOS haces
+        /// Dibuja el púlsar: EL CUERPO DEL SOL girando + los DOS haces
         /// polares opuestos + los conos del faro + el anillo de emisión.
         /// `beamAngle` = ángulo ACTUAL del haz principal (rad, determinista:
         /// se calcula igual en servidor y clientes), `lifeT` = 0..1 del
@@ -104,14 +100,24 @@ namespace AethonMod.Content.VFX
                     DrawBeam(drawPos, dir, R, pulse, fade, seed + side * 17);
                 }
 
-                // === 4. EL NÚCLEO (PulsarCore girando solidario al haz) ===
-                DrawCore(drawPos, R, beamAngle, pulse, fade);
-
-                // === 5. LOS IMPACTOS DEL BARRIDO (visual determinista en el
+                // === 4. LOS IMPACTOS DEL BARRIDO (visual determinista en el
                 //     cliente: si un enemigo está EN el haz, chispea) ===
                 DrawSweepFlashes(p, drawPos, beamAngle, R, time, seed);
 
                 Main.spriteBatch.End();
+
+                // === 5. EL CUERPO — LA TÉCNICA DEL SOL ORIGINAL (v6.31:
+                //     DrawSunBody gestiona SUS lotes → DESPUÉS del aditivo;
+                //     el disco azul-blanco gira SOLDADO AL HAZ — la estrella
+                //     ES el giro; el PulsarCore de textura plana BORRADO) ===
+                RuneSunRenderer.DrawSunBody(drawPos, R, beamAngle, time,
+                    new Color(240, 248, 255),
+                    new Color(126, 160, 235),
+                    new Color(50, 80, 215),
+                    new Color(150, 200, 255),
+                    new Color(90, 120, 255),
+                    new Color(198, 222, 255),
+                    0.5f, fade * (0.80f + 0.20f * pulse));
             }
             catch
             {
@@ -182,29 +188,10 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 4 — EL NÚCLEO (PulsarCore girando solidario)
+        //  CAPA 4 — EL CUERPO (v6.31: LA TÉCNICA DEL SOL ORIGINAL vive en
+        //  RuneSunRenderer.DrawSunBody, girando solidario al haz; el
+        //  DrawCore de textura plana BORRADO)
         // ==================================================================
-
-        private static void DrawCore(Vector2 pos, float R, float beamAngle,
-            float pulse, float fade)
-        {
-            // El núcleo procedural gira CON el haz (la estrella ES el giro).
-            Vector2 coreScale = new Vector2(R * 2.1f, R * 2.1f) / Core.Size();
-            Main.spriteBatch.Draw(Core, pos, null,
-                Tint(WhiteHot, (0.85f + 0.15f * pulse) * fade), beamAngle,
-                Core.Size() * 0.5f, coreScale,
-                SpriteEffects.None, 0f);
-
-            // El velo azul encima (el núcleo respira en azul).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(BeamBlue, 0.40f * fade), beamAngle,
-                Glow.Size() * 0.5f, ScaleOf(R * 1.35f), SpriteEffects.None, 0f);
-
-            // El punto cegador (el polo activo).
-            Main.spriteBatch.Draw(Glow, pos, null,
-                Tint(WhiteHot, 0.95f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.50f), SpriteEffects.None, 0f);
-        }
 
         // ==================================================================
         //  CAPA 5 — LOS IMPACTOS DEL BARRIDO (determinista, visual)

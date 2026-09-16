@@ -1,0 +1,54 @@
+{
+ "query": "tModLoader primitive trail WidthFunction code example",
+ "engine": "ddg-html",
+ "results": [
+  {
+   "url": "https://github.com/ThatDamnPineapple/TrailLib",
+   "name": "GitHub - ThatDamnPineapple/TrailLib: A Library mod for TModloader that ...",
+   "snippet": "A Library mod for TModloader that allows for easy trail creation and rendering.",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://github.com/RowieK/tModLoader-Example-mod",
+   "name": "GitHub - RowieK/tModLoader-Example-mod: A mod to make and play Terraria ...",
+   "snippet": "tModLoader (TML) is an open-source, community-driven, modification and expansion of the Terraria game that makes it possible to make and play mods. TML expands your Terraria adventures with new content to explore created by the Terraria community! TML allows players to create and play Terraria mods and is designed in such a way so that you can play alone or together with friends, with one mod ...",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://deepwiki.com/tModLoader/tModLoader/7-example-mod",
+   "name": "Example Mod | tModLoader/tModLoader | DeepWiki",
+   "snippet": "ExampleMod is included with tModLoader installations and provides both source code examples and in-game demonstrations of modding concepts. For detailed information about the project structure and build configuration, see Example Mod Structure. For specific content implementation examples , see Example Content Implementation.",
+   "host_name": "deepwiki.com"
+  },
+  {
+   "url": "https://deepwiki.com/tModLoader/tModLoader/7.2-example-content-implementation",
+   "name": "Example Content Implementation | tModLoader/tModLoader | DeepWiki",
+   "snippet": "ExampleMod organizes its example implementations into logical categories that mirror the tModLoader content system architecture. The mod demonstrates hundreds of different content examples across all major content types.",
+   "host_name": "deepwiki.com"
+  },
+  {
+   "url": "https://steamcommunity.com/app/1281930/discussions/0/3111403360718746620/",
+   "name": "How do I add a \"trail\" effect (similar to the EoC's dashes) to an ...",
+   "snippet": "I've been trying to add a \" trail \" effect where it would show where the boss was, similar to the Shield of Cthulhu dash or the Eye of Cthulhu's phase 2 dashes. Unfortunately, all attempts have ended in failure.",
+   "host_name": "steamcommunity.com"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/spawning-a-projectile-dust-trail-a-set-distance-behind-the-projectile.82863/",
+   "name": "tModLoader - Spawning a projectile dust trail a set distance behind the ...",
+   "snippet": "The code is working fine, and the trail is working fine. However, I am attempting to edit the dust trail so that the trail starts to spawn at a set distance behind the projectile, and not on the projectile itself.",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://docs.tmodloader.net/docs/stable/functions_func.html",
+   "name": "tModLoader: Class Members - Functions",
+   "snippet": "- a - AcceptClientChanges () : ModConfig Action () : HelpCommand, ModCommand Active () : BuilderToggle, CompassInfoDisplay, DepthMeterInfoDisplay, DPSMeterInfoDisplay ...",
+   "host_name": "docs.tmodloader.net"
+  },
+  {
+   "url": "https://docs.tmodloader.net/docs/stable/",
+   "name": "tModLoader: Main Page",
+   "snippet": "A mod to make and play Terraria mods Main Page Related Pages Packages Classes",
+   "host_name": "docs.tmodloader.net"
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+URL: https://calamitymod.wiki.gg/wiki/Dragonfire
+=====
+
+
+{{buff infobox
+| type = Debuff
+| playereffects = -25 health per second and natural life regen is disabled (if player)
+-480 health per second (if enemy)
+}}
+
+'''Dragonfire''' is a [[Debuffs#Debuff Resistances and Vulnerabilities|Heat]]-type [[debuff]] inflicted by [[Yharon, Dragon of Rebirth]], [[The Torch God]] in [[Death Mode]], [[Lava Chicken Broth]] and equipment dropped by Yharon. It causes the player to lose 25 health per second, disables natural life regeneration and causes [[enemies]] to lose 480 health per second.
+
+If the target is inflicted with [[Oiled]], they will lose 505 health per second instead of 480.
+
+== Resistances ==
+The player can become immune to Dragonfire by equipping the following items:
+{{item immunities|1}}
+
+*If the player has the [[Dynamo Stem Cells]] [[accessory]] equipped, they lose 12.5 health per second instead of 25.
+
+== Causes ==
+=== From the player ===
+{{item debuffs}}
+
+=== From NPCs ===
+{{npc debuffs}}
+
+== Immune NPCs ==
+{{immune npcs|collapse=yes}}
+
+== Notes ==
+*If the player is named "JFL" or "MrJFL", Dragonfire will deal 100 damage per second instead of 25.
+
+== Trivia ==
+*Before being reworked in [[1.5.1.001]], it was known as '''Lethal Lava Burn''' and was able to be inflicted onto the player upon contact with [[lava]], depending on if its respective [[configuration option]] was enabled.
+*One of the death messages caused by Dragonfire, "This was a fight
+could not win.", is a reference to one of the quotes sang in the [https://www.youtube.com/watch?v=5GcPA3C0QeI Roar of the Jungle Dragon] [[music]] track.
+
+{{vh}}
+{{Master Template Buffs
+| show-main = yes
+| show-debuffs = yes
+}}
+{{language info|en=Dragonfire}}

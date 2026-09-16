@@ -1,0 +1,36 @@
+URL: https://calamity-overhaul.cc/en/items/dragonsword/
+=====
+
+
+Overview
+Section titled “Overview”
+Dragon’s Word is an endgame magic tome. Left click fires three “dragon tears” that spin, then home and apply Dragonfire; right click opens a Dragon Command circle at the cursor, repeatedly “ordering death” on enemies inside. Only one command circle at a time.
+Fires dragon tears that spin for a while before homing in on enemies.
+Right-click to cast Dragon Command Magic at the cursor, issuing a death command to enemies within the area.
+”A dragon can shed tears only once in its lifetime.”
+Combat Behavior
+Section titled “Combat Behavior”
+Each cast costs 80 mana. Left click fires 3 dragon tears that spin, then home and apply Dragonfire.
+Right click opens a Dragon Command circle at the cursor. Only one circle can exist; while it is up, you cannot fire tears or start another command. Hold right click with enough remaining mana to pay the cast cost and the radius grows, up to about 41 tiles, while draining about 60 extra mana per second. Release or run short of that cost and the circle shrinks until it vanishes. Enemies inside are slashed about every 0.25 seconds.
+Base Stats
+Section titled “Base Stats”
+Field
+Value
+Type
+Magic weapon
+Rarity
+Red
+Mana
+80
+How to Obtain
+Section titled “How to Obtain”
+Requires Calamity.
+Craft at
+Draedon’s Forge
+with
+Subsuming Vortex
+, 39
+Yharon Soul Fragment
+, and
+Rock
+.

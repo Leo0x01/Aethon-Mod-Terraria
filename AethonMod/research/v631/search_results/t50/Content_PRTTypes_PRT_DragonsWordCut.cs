@@ -1,0 +1,55 @@
+﻿using InnoVault.PRT;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using Terraria;
+
+namespace CalamityOverhaul.Content.PRTTypes
+{
+    internal class PRT_DragonsWordCut : BasePRT
+    {
+        public Color InitialColor;
+        public bool AffectedByGravity;
+        public float Ylength = 1f;
+        public float Xlength = 0.6f;
+        public override string Texture => CWRConstant.Masking + "StarTexture_White";
+        public override bool CanPool => true;
+        public PRT_DragonsWordCut Configure(bool affectedByGravity, int lifetime) {
+            AffectedByGravity = affectedByGravity;
+            Lifetime = lifetime;
+            InitialColor = Color;
+            return this;
+        }
+        public override void Reset() {
+            base.Reset();
+            InitialColor = default;
+            AffectedByGravity = false;
+            Ylength = 1f;
+            Xlength = 0.6f;
+        }
+
+        public override void SetProperty() => PRTDrawMode = PRTDrawModeEnum.NonPremultiplied;
+
+        public override void AI() {
+            Scale *= 0.9f;
+            Color = Color.Lerp(InitialColor, Color.Transparent, (float)Math.Pow(LifetimeCompletion, 3D));
+            Velocity *= 0.95f;
+            Ylength *= 1.25f;
+            Xlength *= 0.7f;
+            if (Velocity.Length() < 12f && AffectedByGravity) {
+                Velocity.X *= 0.94f;
+                Velocity.Y += 0.25f;
+            }
+            Rotation = Velocity.ToRotation() + MathHelper.PiOver2;
+        }
+
+        public override bool PreDraw(SpriteBatch spriteBatch) {
+            Vector2 scale = new Vector2(Xlength, Ylength) * Scale * 6;
+            Texture2D texture = PRTLoader.PRT_IDToTexture[ID];
+            spriteBatch.Draw(texture, Position - Main.screenPosition, null
+                , Color.Gold, Rotation, texture.Size() * 0.5f, scale * new Vector2(0.85f, 1f), 0, 0f);
+            spriteBatch.Draw(texture, Position - Main.screenPosition
+                , null, Color, Rotation, texture.Size() * 0.5f, scale, 0, 0f);
+            return false;
+        }
+    }
+}

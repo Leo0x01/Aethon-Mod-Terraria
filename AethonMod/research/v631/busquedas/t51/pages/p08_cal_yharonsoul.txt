@@ -1,0 +1,33 @@
+URL: https://calamitymod.wiki.gg/wiki/Yharon_Soul_Fragment
+=====
+
+
+{{infobox wrapper
+|{{item infobox
+| type = Crafting material
+| stack = 9999
+| tooltip = A shard of a draconic Auric Soul
+| rare = 15
+| sell = {{value|0|5}}
+| research = 25
+| hardmode = yes
+| postml = yes
+}}
+|{{item drops infobox
+| [[Yharon, Dragon of Rebirth]] | 35-40 | 100%
+| [[Treasure Bag (Yharon)]] | 40-50 | {{expert|100%}}
+}}
+}}
+
+'''Yharon Soul Fragments''' are a post-[[Moon Lord]] [[crafting material]] that are dropped by [[Yharon, Dragon of Rebirth]]. They are used to make highly powerful endgame equipment, including [[Auric Bar]]s.
+
+== Crafting ==
+=== Used in ===
+{{recipes|ingredient=Yharon Soul Fragment}}
+
+{{vh}}
+{{Master Template Consumables
+| show-main = yes
+| show-drop = yes
+}}
+{{language info|en=Yharon Soul Fragment}}

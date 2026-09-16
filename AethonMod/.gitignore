@@ -22,3 +22,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Los volúmenes de investigación crudos no suben a GitHub:
+*.tar.gz
+research/**/repos/

@@ -32,8 +32,8 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class MagnetarRenderer
     {
-        /// <summary>Radio del núcleo en px a escala 1 (compacto, toda la energía es el CAMPO).</summary>
-        public const float BodyPx = 26f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 26→31 — más grande).</summary>
+        public const float BodyPx = 31f;
 
         /// <summary>Alcance de las CADENAS DE RAYO automáticas (px).</summary>
         public const float ChainRange = 240f;
@@ -63,13 +63,10 @@ namespace AethonMod.Content.VFX
 
         // --- PINCELES ---
         private static Asset<Texture2D> _glow;
-        private static Asset<Texture2D> _orb;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        private static Texture2D Orb =>
-            (_orb ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowOrb")).Value;
 
         // ==================================================================
         //  EL RENDER PRINCIPAL — batch CERRADO → CERRADO
@@ -118,20 +115,24 @@ namespace AethonMod.Content.VFX
                 // === 4. LAS CHISPAS DE RECONEXIÓN (puntos blancos estallando) ===
                 DrawReconnectionSparks(drawPos, R, spin, seed, flick, time, fade);
 
-                // === 5. EL NÚCLEO (violeta-blanco, latiendo en arritmia) ===
-                Main.spriteBatch.Draw(Orb, drawPos, null,
-                    Tint(VioletCore, 0.85f * fade), 0f,
-                    Orb.Size() * 0.5f, ScaleOf(R * 1.05f), SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(Glow, drawPos, null,
-                    Tint(VioletWhite, (0.55f + 0.40f * pulse) * fade), 0f,
-                    Glow.Size() * 0.5f, ScaleOf(R * (0.45f + 0.25f * pulse)), SpriteEffects.None, 0f);
-
-                // === 6. LAS CADENAS A LOS ENEMIGOS (la tormenta que DAÑA:
+                // === 5. LAS CADENAS A LOS ENEMIGOS (la tormenta que DAÑA:
                 //     el mismo test que hace el servidor, releído aquí en
                 //     visual determinista — las cadenas se VEN donde pegan) ===
                 DrawChainStrikes(p, drawPos, R, seed, flick, time, fade);
 
                 Main.spriteBatch.End();
+
+                // === 6. EL NÚCLEO (violeta-blanco) — v6.31: LA TÉCNICA DEL SOL
+                //     ORIGINAL (DrawSunBody gestiona SUS PROPIOS lotes → va
+                //     DESPUÉS de cerrar el aditivo; el orbe+blob BORRADOS) ===
+                RuneSunRenderer.DrawSunBody(drawPos, R, p.rotation, time,
+                    new Color(238, 224, 255),
+                    new Color(128, 96, 190),
+                    new Color(70, 25, 130),
+                    new Color(168, 120, 255),
+                    new Color(108, 70, 220),
+                    new Color(205, 175, 255),
+                    1.1f, fade * (0.75f + 0.25f * pulse));
             }
             catch
             {

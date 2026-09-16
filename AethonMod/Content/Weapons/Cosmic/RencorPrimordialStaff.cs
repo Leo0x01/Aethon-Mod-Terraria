@@ -12,13 +12,13 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// RencorPrimordialStaff — v6.29 — EL RENCOR PRIMORDIAL.
     ///
     /// LA PRIMERA DE LOS DOS EXHUMADOS — el arma nacida de la investigación
-    /// del RANCOR de Calamity (research/rancor_v629/INFORME_EXHUMADOS.md):
+    /// (research/rancor_v629/INFORME_EXHUMADOS.md):
     ///
     ///   · EL CÍRCULO DE TRANSMUTACIÓN rúnico a distancia del jugador (el
-    ///     homenaje declarado de Calamity al círculo de Fullmetal Alchemist,
+    ///     homenaje declarado al círculo de la transmutación clásica,
     ///     aquí con las runas de la casa: 10 doradas CW + 6 violetas CCW +
     ///     LA ESTRELLA de 5 puntas dibujada con cápsulas).
-    ///   · 3 SEGUNDOS DE CARGA (180 ticks — el número exacto de Calamity):
+    ///   · 3 SEGUNDOS DE CARGA (180 ticks — el número exacto del ritual):
     ///     las runas se encienden UNA A UNA, la bruma espirala HACIA el
     ///     círculo, las ascuas orbitan y el Telegraph del haz avisa.
     ///   · EL HAZ: "The Angy Beam" — un desgarro CONTINUO de núcleo BLANCO y filo ROSA (v6.30: medido del sprite real)
@@ -27,7 +27,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///   · AL TOCAR TILE: LOS BRAZOS ESPECTRALES (×0.66 — 4 brazos de
     ///     cápsulas que brotan de la superficie) + LAS ASCUAS (×0.33 —
     ///     PyraLib.Sparks de rampa SolarFire + daño de área) + la fog y el
-    ///     resplandor de lava de Calamity (BrumaFX + luz ámbar).
+    ///     resplandor de lava del ritual (BrumaFX + luz ámbar).
     ///   · LOS ENEMIGOS DEL HAZ MUEREN EN CENIZA (la muerte con firma).
     ///
     /// Sin maná (regla de la casa). Rareza Purple — la jerarquía especial
@@ -59,7 +59,7 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // === EL CÍRCULO NACE A DISTANCIA DEL JUGADOR (la regla de Calamity) ===
+            // === EL CÍRCULO NACE A DISTANCIA DEL JUGADOR (la regla del ritual) ===
             // Clampeado a MaxRange en la dirección del cursor; el haz disparará
             // EN LA MISMA DIRECCIÓN jugador→círculo (continúa a través del punto).
             Vector2 aim = Vector2.Normalize(

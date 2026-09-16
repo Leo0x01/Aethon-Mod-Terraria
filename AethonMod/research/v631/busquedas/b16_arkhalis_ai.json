@@ -1,0 +1,54 @@
+{
+ "query": "Terraria source code Arkhalis aiStyle 190 projectile swing arc github",
+ "engine": "ddg-lite",
+ "results": [
+  {
+   "url": "https://github.com/TheVamp/Terraria-Source-Code/blob/master/Terraria/Projectile.cs",
+   "name": "Terraria-Source-Code/Terraria/Projectile.cs at master - GitHub",
+   "snippet": "",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://github.com/TheVamp/Terraria-Source-Code/tree/master/Terraria",
+   "name": "Terraria-Source-Code/Terraria at master · TheVamp/Terraria ... - GitHub",
+   "snippet": "",
+   "host_name": "github.com"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/need-help-with-making-a-weapon-similar-to-arkhalis.101964/",
+   "name": "tModLoader - Need help with making a weapon similar to arkhalis.",
+   "snippet": "",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://forums.terraria.org/index.php?threads/projectile-ai-styles.10064/",
+   "name": "tAPI - Projectile AI Styles | Terraria Community Forums",
+   "snippet": "",
+   "host_name": "forums.terraria.org"
+  },
+  {
+   "url": "https://raw.githubusercontent.com/tModLoader/tModLoader/refs/heads/1.4.4/ExampleMod/Content/Projectiles/ExampleSwingingEnergySwordProjectile.cs",
+   "name": "raw.githubusercontent.com",
+   "snippet": "",
+   "host_name": "raw.githubusercontent.com"
+  },
+  {
+   "url": "https://tconfig.fandom.com/wiki/Projectile_Class",
+   "name": "Projectile Class | Surfpup's tConfig Mod Wiki | Fandom",
+   "snippet": "",
+   "host_name": "tconfig.fandom.com"
+  },
+  {
+   "url": "https://tconfig.fandom.com/wiki/List_of_Projectile_AI_Styles",
+   "name": "List of Projectile AI Styles - Surfpup's tConfig Mod Wiki",
+   "snippet": "",
+   "host_name": "tconfig.fandom.com"
+  },
+  {
+   "url": "https://terraria.wiki.gg/wiki/Category:Terraria_source_files",
+   "name": "Category:Terraria source files - Official Terraria Wiki",
+   "snippet": "",
+   "host_name": "terraria.wiki.gg"
+  }
+ ]
+}

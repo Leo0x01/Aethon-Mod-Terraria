@@ -31,8 +31,8 @@ namespace AethonMod.Content.VFX
     /// </summary>
     public static class NeutronStarRenderer
     {
-        /// <summary>Radio del núcleo en px a escala 1 (MINÚSCULO y ultradenso).</summary>
-        public const float BodyPx = 22f;
+        /// <summary>Radio del cuerpo en px a escala 1 (v6.31: 22→26 — más grande).</summary>
+        public const float BodyPx = 26f;
 
         /// <summary>Rotación visible: 1.5 rev/s (el campo co-rota con la estrella).</summary>
         public const float SpinRate = MathHelper.TwoPi * 1.5f;
@@ -58,13 +58,9 @@ namespace AethonMod.Content.VFX
 
         // --- PINCELES ---
         private static Asset<Texture2D> _glow;
-        private static Asset<Texture2D> _orb;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
-
-        private static Texture2D Orb =>
-            (_orb ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/GlowOrb")).Value;
 
         // ==================================================================
         //  EL RENDER PRINCIPAL — batch CERRADO → CERRADO
@@ -93,7 +89,7 @@ namespace AethonMod.Content.VFX
                 // === 1. EL RESPLANDOR PROFUNDO (el halo del ultradenso) ===
                 DrawGlow(drawPos, R, time, fade);
 
-                // === 2. EL CAMPO DIPOALR (los bucles r = L·sen²θ, aurora) ===
+                // === 2. EL CAMPO DIPOLAR (los bucles r = L·sen²θ, aurora) ===
                 for (int k = 0; k < Field.Length; k++)
                     DrawDipoleLoop(drawPos, R, spin, seed, k, time, fade);
 
@@ -101,17 +97,30 @@ namespace AethonMod.Content.VFX
                 //     rotación se VE, no se explica) ===
                 DrawEquatorStreaks(drawPos, R, spin, time, fade);
 
-                // === 4. EL NÚCLEO MINÚSCULO Y CEGADOR ===
-                DrawCore(drawPos, R, time, quakeT, fade);
-
-                // === 5. LA SUPERFICIE CHISPEANTE (4 puntas a 20 Hz) ===
+                // === 4. LA SUPERFICIE CHISPEANTE (4 puntas a 20 Hz) ===
                 DrawSurfaceSparkles(drawPos, R, spin, seed, flick20, fade);
 
-                // === 6. EL STARQUAKE (onda + aberración del núcleo) ===
+                // === 5. EL STARQUAKE (onda + aberración del núcleo) ===
                 if (quakeT > 0f)
                     DrawStarquake(drawPos, R, quakeT, time, seed);
 
                 Main.spriteBatch.End();
+
+                // === 6. EL CUERPO — LA TÉCNICA DEL SOL ORIGINAL (v6.31: el disco
+                //     de plasma SunShader azul-blanco con granulación dendrítica,
+                //     girando RÁPIDO — la superficie DURA de verdad, no un orbe;
+                //     el jitter del starquake lo hace TIEMBLAR) ===
+                Vector2 jitter = quakeT > 0f
+                    ? new Vector2(MathF.Sin(time * 63f), MathF.Cos(time * 71f)) * R * 0.06f * quakeT
+                    : Vector2.Zero;
+                RuneSunRenderer.DrawSunBody(drawPos + jitter, R, p.rotation, time,
+                    new Color(235, 242, 255),
+                    new Color(118, 148, 222),
+                    new Color(45, 75, 205),
+                    new Color(150, 190, 255),
+                    new Color(82, 112, 255),
+                    new Color(192, 216, 255),
+                    2.5f, fade);
             }
             catch
             {
@@ -137,7 +146,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 2 — EL CAMPO DIPOALR (r = L·sen²θ, curvándose polo a polo)
+        //  CAPA 2 — EL CAMPO DIPOLAR (r = L·sen²θ, curvándose polo a polo)
         // ==================================================================
 
         private static void DrawDipoleLoop(Vector2 pos, float R, float spin,
@@ -224,25 +233,10 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  CAPA 4 — EL NÚCLEO MINÚSCULO Y CEGADOR
+        //  CAPA 4 — EL CUERPO (v6.31: LA TÉCNICA DEL SOL ORIGINAL vive en
+        //  RuneSunRenderer.DrawSunBody — el disco de plasma SunShader
+        //  azul-blanco; el DrawCore de orbe+blob BORRADO)
         // ==================================================================
-
-        private static void DrawCore(Vector2 pos, float R, float time, float quakeT, float fade)
-        {
-            // El jitter del starquake: el núcleo TIEMBLA (±6% de R).
-            Vector2 jitter = Vector2.Zero;
-            if (quakeT > 0f)
-                jitter = new Vector2(MathF.Sin(time * 63f), MathF.Cos(time * 71f)) * R * 0.06f * quakeT;
-
-            // Cuerpo: orbe de NÚCLEO SÓLIDO (la superficie DURA de la estrella).
-            Main.spriteBatch.Draw(Orb, pos + jitter, null,
-                Tint(CoreBlue, 0.85f * fade), 0f,
-                Orb.Size() * 0.5f, ScaleOf(R * 1.05f), SpriteEffects.None, 0f);
-            // El punto caliente: blanco puro al centro.
-            Main.spriteBatch.Draw(Glow, pos + jitter, null,
-                Tint(WhiteBlinding, 0.95f * fade), 0f,
-                Glow.Size() * 0.5f, ScaleOf(R * 0.55f), SpriteEffects.None, 0f);
-        }
 
         // ==================================================================
         //  CAPA 5 — LA SUPERFICIE CHISPEANTE (4 puntas a 20 Hz)

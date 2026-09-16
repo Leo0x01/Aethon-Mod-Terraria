@@ -1,0 +1,54 @@
+{
+ "query": "龙魂碎片 灾厄 犽戎 泰拉瑞亚",
+ "engine": "bing",
+ "results": [
+  {
+   "url": "https://discussions.apple.com/thread/3939178",
+   "name": "what is ipsw? - Apple Community",
+   "snippet": "May 9, 2012 · iTunes uses \"ipsw\" files to restore your iPod or iPhone. If those files are unusable, then try deleting them, renaming …",
+   "host_name": "discussions.apple.com"
+  },
+  {
+   "url": "https://www.zhihu.com/question/21364959?sort=created",
+   "name": "在 Mac 下应该如何解包 iOS IPSW 固件？",
+   "snippet": "ipsw, ipa 什么的实际上都是zip 用BetterZip什么的打开并解压 或者是直接修改扩展名双击打开 具体每个文件是干什么用的 …",
+   "host_name": "www.zhihu.com"
+  },
+  {
+   "url": "https://www.zhihu.com/question/37027908",
+   "name": "Apple 是怎么做到彻底禁止 iOS 降级刷机的？ - 知乎",
+   "snippet": "1.2009年第49周之前生产的iPhone 3GS及更早版本机器中是没有验证固件和签名固件的机制的，也就是可以直接下载ipsw格式的固件 …",
+   "host_name": "www.zhihu.com"
+  },
+  {
+   "url": "https://discussions.apple.com/thread/5376130",
+   "name": "when itunes downloads ipsw where does it … - Apple Community",
+   "snippet": "Sep 26, 2013 · Rename, move, or delete the iOS software file (.ipsw) iTunes uses IPSW files to restore your device. If those files are …",
+   "host_name": "discussions.apple.com"
+  },
+  {
+   "url": "https://jingyan.baidu.com/article/f3e34a12a2e0c8f5eb6535f3.html",
+   "name": "【iPhone升级】找出iTunes下载好的.ipsw固件-百度经验",
+   "snippet": "Jul 15, 2015 · 【iPhone升级】找出iTunes下载好的.ipsw固件,进行DUF模式，或者恢复模式升级的时候，发现找不到.iw固件，或者有 …",
+   "host_name": "jingyan.baidu.com"
+  },
+  {
+   "url": "https://jingyan.baidu.com/article/6079ad0e3a5d2568fe86db31.html",
+   "name": "iOS固件下载后怎么安装 - 百度经验",
+   "snippet": "Sep 30, 2019 · 方法/步骤 1 首先，查看下载的固件文件格式，后缀名是否是“ipsw”的文件，iTunes只认ipsw的固态文件 2 然后将iOS设 …",
+   "host_name": "jingyan.baidu.com"
+  },
+  {
+   "url": "https://www.zhihu.com/question/40584042",
+   "name": "用于iPhone4S降级的fistmedaddy.ipsw固件和原版固件有什么区别？",
+   "snippet": "很多人用Odysseus工具包将iPhone4S降级至iOS 6.1.3，使用到的自制固件fistmedaddy.ipsw的文件大小官方固…",
+   "host_name": "www.zhihu.com"
+  },
+  {
+   "url": "https://discussions.apple.com/thread/253627357",
+   "name": "Where to download 12.5.4 *.ipsw file - Apple Community",
+   "snippet": "Feb 1, 2022 · Hi, I have an iPhone 6 (model A1586 MG482ZP/A) with iOS 8.3. When I check for updates it says there is a new …",
+   "host_name": "discussions.apple.com"
+  }
+ ]
+}

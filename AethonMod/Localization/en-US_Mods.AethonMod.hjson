@@ -73,15 +73,15 @@
         "Items.BolsaBastonesCreativos.DisplayName": "Creative Staves Bag",
         "Items.BolsaBastonesCreativos.Tooltip": "The gauge, the pendulum, the choir and other oddities (all 6).\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaExhumados.DisplayName": "Exhumed Bag",
-        "Items.BolsaExhumados.Tooltip": "The exhumed forms: the rancor and the eminence.\nBorn from the research into Calamity's exhumed weapons.\nRight-click to deploy them.\nOnly delivers what you're missing.",
+        "Items.BolsaExhumados.Tooltip": "The exhumed forms: the rancor and the eminence.\nThe arsenal's original exhumed forms.\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaCosmeticos.DisplayName": "Cosmetics Bag",
         "Items.BolsaCosmeticos.Tooltip": "The crowns that sit upon your character.\nRight-click to deploy them.\nOnly delivers what you're missing.",
 
         "Items.RencorPrimordialStaff.DisplayName": "The Primordial Rancor",
-        "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form (research: Calamity's RANCOR).\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS white-core, pink-edged beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
+        "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form: THE PRIMORDIAL RANCOR.\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS white-core, pink-edged beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
 
         "Items.EminenciaAtrozStaff.DisplayName": "The Gruesome Eminence",
-        "Items.EminenciaAtrozStaff.Tooltip": "The arsenal's exhumed form (research: Calamity's GRUESOME EMINENCE).\nHold to channel: the spirit congregation hovers near your cursor.\n14 s of accumulation → THE ABOMINATION, full control.\nDamage climbs from 100% to 185% as it accumulates.\nRelease the channel and the mass decays and dissipates. No mana.",
+        "Items.EminenciaAtrozStaff.Tooltip": "The arsenal's exhumed form: THE GRUESOME EMINENCE.\nHold to channel: the spirit congregation hovers near your cursor.\n14 s of accumulation → THE ABOMINATION, full control.\nDamage climbs from 100% to 185% as it accumulates.\nRelease the channel and the mass decays and dissipates. No mana.",
 
         "Projectiles.RencorPrimordialProjectile.DisplayName": "Circle of Rancor",
         "Projectiles.EminenciaAtrozProjectile.DisplayName": "Spirit Congregation",
@@ -214,6 +214,42 @@
         "Items.DesgarroRealityStaff.DisplayName": "Reality Tear Staff",
         "Items.DesgarroRealityStaff.Tooltip": "Fires a TEAR in reality.\nThe rift pierces walls and damages along its line.\nWhen it closes it leaves a lingering rift that drains.\nWhile it lives, the wounded world darkens.",
 
+        // v6.31 — THE SOWER: the anchoring pulsar of the stellar graveyard
+        "Items.SembradorCementeralStaff.DisplayName": "Stellar Graveyard Sower",
+        "Items.SembradorCementeralStaff.Tooltip": "Sows PULSARS that brake hard and anchor where you aim.\nEach pulsar spins up and sweeps with two opposite lighthouse beams.\nFull-power anchor strike; the beams bite without rest.\nMax 3 pulsars: the newest sowing eats the oldest.",
+
+        // v6.31 — THE COLLAPSE: the star that brakes, trembles and bursts
+        "Items.ColapsoMagnetarStaff.DisplayName": "Magnetar Collapse",
+        "Items.ColapsoMagnetarStaff.Tooltip": "Fires a magnetar star that brakes until it nearly stops.\nThe harder the brake holds, the deadlier the STARQUAKE.\nThe ring only strikes with its FRONT and pierces armor.\nThe survivor enters overclock and dies in a final flash.",
+
+        // v6.31 — THE TEARS: the orbital tear shotgun of the dying sun
+        "Items.LagrimasSolMoribundoStaff.DisplayName": "Tears of the Dying Sun",
+        "Items.LagrimasSolMoribundoStaff.Tooltip": "Sheds THREE TEARS from a dying sun.\nEach tear orbits for 2.5 s, kindling from charred to gold.\nThen it hunts without rest: up to 18 bites with cosmic burn.\nIt bursts into molten metal as it fades.",
+
+        // v6.31 — THE DECREE: the eclipse circle that grows and executes
+        "Items.DecretoEclipseStaff.DisplayName": "The Eclipse Decree",
+        "Items.DecretoEclipseStaff.Tooltip": "Nails an ECLIPSE CIRCLE at the cursor.\nIt grows up to 660 px while alive and executes every 15 ticks:\nthe wave rides to the border and EVERYTHING inside is cut.\nClosest to the center pays ×4.8 · the eye contracts before the slash.",
+
+        // v6.32 — W2-a: FOUR NEW COSMIC WEAPONS (comet, nova, quasar, loom)
+        "Items.CometaErranteStaff.DisplayName": "The Wandering Comet",
+        "Items.CometaErranteStaff.Tooltip": "Captures a comet in an ELLIPTICAL ORBIT around you for 6 laps.\nThe ice-fire core strikes at full power; the dust tail nips at ×0.4.\nThe tail ALWAYS points away from the orbit, like real comets.\nAfter 420 ticks it launches into the hunt and bursts into ice-fire.",
+        "Items.NovaEncadenadaStaff.DisplayName": "The Chained Nova",
+        "Items.NovaEncadenadaStaff.Tooltip": "A slow nova sphere that bursts on touching foe or ground.\nEach nova chains 3 daughters ×0.65 and 2 granddaughters ×0.42 — up to 3 generations.\nThe ring's FRONT is what strikes · zero chance: prey by distance.",
+        "Items.VozCuasarStaff.DisplayName": "The Voice of the Quasar",
+        "Items.VozCuasarStaff.Tooltip": "Summons a quasar that charges 40 ticks then unleashes a 460 px CONTINUOUS BEAM.\nThe beam PIERCES EVERYTHING · DOPPLER: leading edge blue, tail red.\nIt bounces once off walls · it dies with a flash.",
+        "Items.TelarConstelacionesStaff.DisplayName": "The Constellation Loom",
+        "Items.TelarConstelacionesStaff.Tooltip": "Each use nails a LITTLE STAR where your cursor was.\nThey connect themselves with threads of light: the constellation draws itself.\nWith 4 or more, every 30 ticks the FIGURE IGNITES:\nevery enemy inside the polygon takes ×2.2 per star.",
+
+        // v6.33 — W2-b: FOUR MORE COSMIC WEAPONS (meteor shower, nebula, horizon, gamma ray)
+        "Items.LluviaMeteorosStaff.DisplayName": "The Meteor Shower",
+        "Items.LluviaMeteorosStaff.Tooltip": "Marks the cursor zone with a 30-tick amber telegraph.\nThen 8 meteors fall in staggered waves, one every 4 ticks, diagonal with fire trails.\nEach impact bursts ×1.0 in a 70 px radius and burns with cosmic burn for 3 s.",
+        "Items.AbrazoNebulosaStaff.DisplayName": "The Nebula's Embrace",
+        "Items.AbrazoNebulosaStaff.Tooltip": "Installs a nebula at the cursor: a magenta-cyan-violet cloud lasting 300 ticks.\nThose inside take ×0.06 every 3 ticks and are left SLOWED.\nBaby stars are born in its bosom and burst into ×0.8 mini-pops.\nOn death it dissipates into stardust.",
+        "Items.FiloHorizonteStaff.DisplayName": "The Horizon's Edge",
+        "Items.FiloHorizonteStaff.Tooltip": "Throws a black disc — an event horizon — with a photon line at its equator.\nIt pierces through enemies losing speed and returns like a boomerang.\nEvery hit leaves a mark that implodes 30 ticks later: ×0.7 + a pull.",
+        "Items.RayoGammaStaff.DisplayName": "The Gamma Ray",
+        "Items.RayoGammaStaff.Tooltip": "A thin 700 px beam crosses EVERYTHING instantly... but deals no damage yet.\nEvery enemy touched is marked with a glowing outline.\nAfter 30 ticks, ALL marks settle at once:\nclang, flash, ×1.0 damage and cosmic burn for 5 s.",
+
         "Items.NeutronStarStaff.DisplayName": "Neutron Star Staff",
         "Items.NeutronStarStaff.Tooltip": "A 12 px ultradense core.\n60 px aura with tripled damage.\nPeriodic starquakes shake the ground.\nGravity pulls it toward its prey.",
         "Items.PulsarStaff.DisplayName": "Pulsar Staff",
@@ -242,6 +278,19 @@
         "Items.CoroEspectralStaff.Tooltip": "Six notes of light singing in slow orbit.\nEach note emits its wave ring in turn.\nThe choir bids farewell going dark one by one.",
 
         "Projectiles.DesgarroRealityProjectile.DisplayName": "Reality Tear",
+        "Projectiles.SembradorPulsarProjectile.DisplayName": "Graveyard Pulsar",
+        "Projectiles.LagrimaSolarProjectile.DisplayName": "Solar Tear",
+        "Projectiles.ColapsoMagnetarProjectile.DisplayName": "Collapsing Magnetar",
+        "Projectiles.DecretoEclipseProjectile.DisplayName": "Eclipse Circle",
+        "Projectiles.CometaErranteProjectile.DisplayName": "Wandering Comet",
+        "Projectiles.NovaEncadenadaProjectile.DisplayName": "Chained Nova",
+        "Projectiles.VozCuasarProjectile.DisplayName": "Voice of the Quasar",
+        "Projectiles.TelarEstrellaProjectile.DisplayName": "Loom Star",
+        "Projectiles.LluviaMeteorosProjectile.DisplayName": "Meteor Shower",
+        "Projectiles.MeteoroProjectile.DisplayName": "Meteor",
+        "Projectiles.AbrazoNebulosaProjectile.DisplayName": "Nebula's Embrace",
+        "Projectiles.FiloHorizonteProjectile.DisplayName": "Horizon's Edge",
+        "Projectiles.RayoGammaProjectile.DisplayName": "Gamma Ray",
         "Projectiles.NeutronStarProjectile.DisplayName": "Neutron Star",
         "Projectiles.PulsarProjectile.DisplayName": "Pulsar",
         "Projectiles.WhiteDwarfProjectile.DisplayName": "White Dwarf",
