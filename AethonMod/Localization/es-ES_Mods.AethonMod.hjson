@@ -293,6 +293,10 @@
         "Projectiles.EnjambrePrismaticoProjectile.DisplayName": "Enjambre Prismático",
         "Projectiles.PenduloJuicioProjectile.DisplayName": "Péndulo del Juicio",
         "Projectiles.CoroEspectralProjectile.DisplayName": "Coro Espectral",
+        "Projectiles.LanzaAlbaProjectile.DisplayName": "Lanza del Alba",
+        "Projectiles.RealityTearProjectile.DisplayName": "Desgarro de Realidad",
+        "Projectiles.SinfoniaPrimordialProjectile.DisplayName": "Sinfonía Primordial",
+        "Projectiles.TormentaNebularProjectile.DisplayName": "Tormenta Nebular",
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",

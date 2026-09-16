@@ -1792,3 +1792,26 @@ Work Log:
 
 Stage Summary:
 - v6.31 COMPLETA: F1 desgarro parejo (mock 0 cortes) · F2 el sol en todas las estrellas (+grandes) · F3 filtro vanilla (reflexión) · W1 4 armas de las dos formas · W2 8 armas creativas (12 nuevas) · L1 motor v2 + PulsoLib + TelaLib · L2 limpieza total · L3 auditoría · 4 investigaciones (R1-R4) · 0 errores 0 warnings.
+
+---
+Task ID: 53
+Agent: Orquestador principal (Z.ai Code)
+Task: Recuperar el proyecto tras la pérdida de sesión (GitHub = fuente de la verdad), reconstruir el entorno de compilación borrado y ejecutar la auditoría exhaustiva de "código faltante o cortado" sobre v6.31, cerrando v6.32.
+
+Work Log:
+- Verificado el estado: local en v6.30 con 692 archivos sin commitear; GitHub (origin/main) en v6.31 COMPLETA. Respaldado el estado local (rama backup-local-v630-unsigned + stash) y hecho reset --hard origin/main según la política del usuario.
+- Entorno de compilación RECONSTRUIDO desde cero: dotnet SDK 8.0.425 (dotnet-install.sh), tModLoader v2026.07.3.0 estable (release oficial de GitHub, extraído en /tmp/tml/tml), /home/z/sandbox/verify.csproj con 8 referencias (tModLoader.dll, FNA, ReLogic, Steamworks.NET, Newtonsoft.Json, Hjson, log4net, TerrariaHooks — el hook On_TimeLogger de BlackHoleLensSystem vive en TerrariaHooks) y compile.sh.
+- HALLAZGO GRAVE: research/v631 (93 .cs de investigación con fragmentos ajenos y sintaxis incompleta) estaba DENTRO de la carpeta del mod → tML los compilaría al construir EN EL JUEGO (9 errores CS1002 en la primera compilación). MOVIDA a la raíz del repo: fuera del .tmod y de la compilación. También era una violación de la limpieza de menciones (archivos murasama_proj.cs, exoblade_holdout.cs...).
+- Auditoría estructural completa: 238 PNGs válidos (PIL verify) · 135 clases sprite-autoload CON sprite (regla tML verificada: namespace-sin-mod + NombreDeClase.png) · 141 assets Request<> existentes (prefijo mod-qualified resuelto) · 4 .fx con .fxc · hjson es/en sintaxis válida · grep 0 de menciones a otros mods en Content/ y Localization/.
+- Añadidas 8 claves hjson (4 proyectiles × es+en: Lanza del Alba, Desgarro de Realidad, Sinfonía Primordial, Tormenta Nebular) — QuemaduraCosmica EN ya existía (línea con dos claves juntas).
+- BlackHoleStaff (original de CosmicWeapons.cs) estaba huérfano sin bolsa → añadido a BolsaAgujerosNegros (nota → "Once formas de devorar la luz").
+- Verificación visual F1 (desgarro): mock numérico re-ejecutado (0 cortes ±0.0%, 5 semillas; cadena 0 cortes) + VLM sobre RENDER_DESGARRO_v631.png → "continua, grosor constante, libre de espejo roto/Lichtenberg/telaraña — 9/10".
+- Verificación visual F2 (supergigante): NUEVO tools/mock_sol_v632.py — traducción 1:1 del SunShader.fx a numpy (pellizco esférico, doble muestreo, manchas, ríos de lava, corona) + las 7 capas del RedSupergiantRenderer sobre cielo CLARO → disco sólido 100% visible (radio 79px), VLM 9/10; verificada la cadena: 13 clases usan DrawSunBody y cada proyectil llama a su renderer.
+- Verificadas las 12 armas de v6.31 (4 formas + 8 creativas): cs+png+proyectil+hjson+bolsa — completas.
+- Recompilación final: 0 errores · 0 warnings. build.txt → 6.32, CHANGES.md con la entrada v6.32, este worklog, commit y push a GitHub.
+
+Stage Summary:
+- El mod v6.32 compila limpio CONTRA tML real Y dentro del juego (el bug de research/ dentro del mod está muerto).
+- Las dos quejas visuales del usuario (desgarro discontinuo/espejo roto y supergigante invisible) están verificadas con mocks 1:1 + VLM 9/10.
+- La política de recuperación queda documentada: SIEMPRE reset --hard a origin/main (GitHub es la buena); el estado local intermedio se respalda antes.
+- Entorno de build reproducible: dotnet 8 + tML 2026.07.3.0 + /home/z/sandbox/compile.sh.

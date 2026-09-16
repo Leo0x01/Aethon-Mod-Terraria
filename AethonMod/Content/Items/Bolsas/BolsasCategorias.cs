@@ -91,11 +91,12 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "La Bolsa de los Agujeros Negros";
         protected override string NombreCorto => "Bolsa de los Agujeros Negros";
         protected override Color ColorFiesta => new(170, 90, 255);
-        protected override string Nota => "Diez formas de devorar la luz";
+        protected override string Nota => "Once formas de devorar la luz";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Weapons.Cosmic.BlackHoleStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.OlvidoBlackHoleStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.CosmicBlackHoleStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.UmbralBlackHoleStaff>(), 1));

@@ -304,6 +304,10 @@
         "Projectiles.EnjambrePrismaticoProjectile.DisplayName": "Prismatic Swarm",
         "Projectiles.PenduloJuicioProjectile.DisplayName": "Pendulum of Judgment",
         "Projectiles.CoroEspectralProjectile.DisplayName": "Spectral Choir",
+        "Projectiles.LanzaAlbaProjectile.DisplayName": "Dawn Lance",
+        "Projectiles.RealityTearProjectile.DisplayName": "Reality Tear",
+        "Projectiles.SinfoniaPrimordialProjectile.DisplayName": "Primordial Symphony",
+        "Projectiles.TormentaNebularProjectile.DisplayName": "Nebular Storm",
 
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
