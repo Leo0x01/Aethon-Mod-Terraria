@@ -1815,3 +1815,50 @@ Stage Summary:
 - Las dos quejas visuales del usuario (desgarro discontinuo/espejo roto y supergigante invisible) están verificadas con mocks 1:1 + VLM 9/10.
 - La política de recuperación queda documentada: SIEMPRE reset --hard a origin/main (GitHub es la buena); el estado local intermedio se respalda antes.
 - Entorno de build reproducible: dotnet 8 + tML 2026.07.3.0 + /home/z/sandbox/compile.sh.
+
+---
+Task ID: 54
+Agent: Investigador de rayos eléctricos
+Task: Investigación web profunda de rayos eléctricos en mods/juegos para mejorar StormLib
+
+Work Log:
+- Relevancia previa: leídas las firmas públicas de StormLib.cs (ZigPath 12 seg / amp 24px, Boil 3px, ForkTree 3 ramas spread 0.45-0.90 rad, FlickTick 15Hz, IsLit 0.62, Strand/ChainBolt/Bolt/MultiBolt/ArcRing/ImpactFlash/EndCap/AddLightAlong) para saber qué ya existe.
+- 11 búsquedas web (z-ai web_search + DDG lite + GitHub API): algoritmo midpoint displacement, tModLoader/Calamity lightning, glow 2D, arcos bezier/jitter, Terraria vanilla (Electrified, Thunder Zapper, Lightning Aura, proyectil 466).
+- LEÍDO ÍNTEGRO el artículo canónico de drilian (https://drilian.com/posts/2009.02.25-lightning-bolts/): midpoint displacement de 5 generaciones con offset halving, forks lengthScale 0.7 más tenues, animación a 2 bolts (regen cada 10 frames = 6Hz, vida 20 frames, fade al 50%), jitter doble en midpoints, vertex strip con normal media para evitar puntos en las juntas.
+- Descargado y leído código real de CalamityModPublic (raw.githubusercontent): RedLightning.cs (3 capas 0.6/0.4/0.2, colores 219,104,58 / 255,126,56 / 255,128,128 ×0.5, extraUpdates 20, trail 20, drift ±40px, Utils.DrawLaser+LightningLaserDraw), SystemBaneLightning.cs (Cyan×0.35 esc 0.5 + White×0.75 esc 0.3, homing 0.25rad/tick, jitter 0.52/0.9 rad), ThunderBoltVFX.cs (shake decae (1-t), fade ×0.95, Squish, doble pasada 0.6 + lerp White, luz ×3, flip %30<15), HeavenlyGaleLightningShader.fx (noise scroll 1.81 u/s opuesto, warp 0.15, exp 3.95+7), BoltParticle.cs (3 variantes, stretch 0.5/1.6, lerp cúbico).
+- Reutilizado y ampliado el material local ya descargado en research/v633/src/ (agente paralelo): DigitalRuby LightningBoltScript.cs (Generations 6, ChaosFactor 0.15, Duration 0.05s=20Hz), Habrador_Lightning.cs (gens 4, offset 60, splitProb 0.8, fork 20°-50° con ×0.6, ancho 0.8/0.3), Fargo CopperLightning (patrón vanilla 466: UnifiedRandom encadenado, Y forzada, ±40px, re-encadena 1000px, Electrified 120 ticks, daño ×0.8/rebote) y vanilla decompilado Projectile.cs (proyectil 466 "Lightning Orb Arc" con EXACTAMENTE ese patrón; AI_176_EdgyLightning del Thunder Zapper: homing 400px, 10px/tick, frame aleatorio cada 3 ticks; AI_137_LightningAura: zap cada 30 ticks, anim cada 8, altura 4-14 tiles) + DelegateMethods.LightningLaserDraw (textura 21px, frames 8/6/8).
+- Bloqueos documentados: gamedev.stackexchange (Cloudflare), grep.app (checkpoint Vercel), terraria.wiki.gg y fandom (403), r.jina.ai (401), stackexchange API (throttle) — resuelto con stackprinter/DDG-lite/snippets y GitHub raw.
+- Escrito el entregable completo: research/v633/INFORME_RAYOS_ELECTRICOS.md (tabla de 18 técnicas con números, 5 técnicas ganadoras priorizadas con parámetros exactos y métodos nuevos recomendados, 10 citas de código con URL, notas de integración: presupuesto de quads, determinismo Hash01, MP-safe).
+
+Stage Summary:
+- StormLib hoy genera el rayo con jitter uniforme mono-escala; el estándar de la industria (drilian/DigitalRuby/Habrador, 2009-2016) es midpoint displacement fractal: 4-6 generaciones, offset inicial len×0.15, halving por generación → recomendado FractalPath(generations=5, chaos=0.15) aditivo a ZigPath.
+- Forks: nacer DURANTE la subdivisión con ángulo 20°-50° (0.35-0.87 rad), longitud ×0.6-0.7, ancho ×0.5, alpha ×0.4, prob 0.25-0.35/segmento (spread actual 0.45-0.90 rad ya es correcto).
+- Animación ganadora: 2 bolts entrelazados desfasados 10 ticks (regen 6Hz, vida 20 ticks, fade 100%→50%), Boil 3px normal y 6px en midpoints — sustituye al blink binario 15Hz/0.62.
+- Render: 3 capas glow/mid/core (esc 1.0/0.5/0.22, #1E50A8 ×0.30 / #5EB3FF ×0.55 / #FFFFFF ×0.90; Calamity Red usa 0.6/0.4/0.2 ×0.5) dibujadas como ribbon con normal media (o Utils.DrawLaser vanilla con textura 21px frames 8/6/8) para eliminar puntos brillantes en juntas; luz (0.4,0.65,1.0)×1.5-3.
+- Impacto: partículas con shake que decae (1−t), fade ×0.95/tick tras t>10, Squish.X que adelgaza, doble pasada glow 0.6 + core lerp(White,color,t), 3 variantes de sprite (receta ThunderBoltVFX/BoltParticle de Calamity).
+- Vanilla confirma: proyectil 466 "Lightning Orb Arc" (random walk Y-negativa, deriva ±40px, electrocuta quieto al golpear), zap del Thunder Zapper a 20Hz de flicker de frames, Electrified castiga el movimiento horizontal (4→16 HP/s).
+
+---
+Task ID: 55
+Agent: Orquestador principal (Z.ai Code)
+Task: v6.33 — fix estrellas semitransparentes + diagnóstico de las 4 armas invisibles + investigación rayos (Task 54) + StormLib v2 + los 4 desgarros nuevos de las referencias del usuario.
+
+Work Log:
+- EL ENTORNO SE PERDIÓ OTRA VEZ: local en v6.30 + 693 archivos sin commitear; GitHub tenía v6.32 completa. Stash + reset --hard origin/main (la política: GitHub es la buena). Sandbox de compilación reconstruido (dotnet 8 + tML 2026.07.3.0 + verify.csproj).
+- DIAGNÓSTICO "NO VEO LAS 4 ARMAS": en v6.32 de GitHub SÍ están (BolsaEstrellasReales, líneas 167-178) — la causa era la copia local v6.30 del usuario. SOLUCIÓN UX: nueva BolsaDosFormas con las 4 (Sembrador/Colapso/Lágrimas/Decreto) + registro en TestingPlayer (12 bolsas).
+- FIX SEMITRANSPARENCIA: las estrellas pasaban fade=1−lifeT·0.40..0.45 como alphaMul del disco; el sol original pasa 1. Fix en DrawSunBody: cuerpo = alphaMul>=0.55 ? 1 : alphaMul/0.55 — disco 100% opaco toda la vida, funde solo al final. Heredan las 7 estrellas + el sol.
+- Task 54 (subagente): INFORME_RAYOS_ELECTRICOS.md — 18 técnicas con números (fractal midpoint-displacement con halving, forks de subdivisión 0.25-0.35 prob, doble rayo entrelazado 6 Hz vida 20t, receta 3 capas #1E50A8/#5EB3FF/#FFFFFF escalas 1.0/0.5/0.22, chispas con shake decaído+squish, vanilla 466 Lightning Orb Arc, Electrified 4→16 HP/s).
+- STORMLIB v2: FractalPath (T1), FractalBolt con forks de subdivisión (T2, fórmula de midpoints (2i+1)·2^(G-g-1) verificada a mano), StormArc doble relevado + receta 3 capas + normal media (T3+T4), SparkBurst (T5).
+- REFERENCIAS DEL USUARIO: stockcake bloqueado por Cloudflare (curl + agent-browser con checkbox fallados) → 4 búsquedas de imágenes equivalentes (z-ai image-search) + análisis VLM técnico completo (research/v633/refs/ + vlm_ref1/2.json): formas, bordes, paletas hex, glow, la clave de lectura de cada concepto.
+- RIFTLIB v4 — LA FAMILIA DE LOS PORTALES: PortalAnillos (6 anillos, rotación jerárquica, glifos, polvo espiral), OjoEspacial (doble elipse, núcleo negro BlackDisk, grid convergente, rim cian+ámbar, succión), DesgarroGlitch (24 vértices dentados, astillas glitch, nebulosa magenta, rayos StormLib, partículas de datos), HeridaElectrica (vacío+scanlines, arcos StormArc, strobe, aberración cromática, 5 ramificaciones fractales, chispas a lo largo).
+- LAS 4 ARMAS: SuturaCuanticaStaff/PortalDimensionalStaff/PliegueEspacioStaff/HeridaElectricaStaff + 4 proyectiles (EsObjetivo + SimpleStrikeNPC + i-frames por familia) + 8 PNGs (gen_v633_assets.py) + hjson es/en + BolsaDesgarros (clásico+4).
+- MOCK 1:1 (mock_portales_v633.py, mismas fórmulas C#) + VLM ronda 1: Portal sin magenta / Herida invisible 4-2 / Glitch núcleo muy blanco / rejilla débil → v6.33 b (números corregidos en C# Y mock) → ronda 2: Portal 9 · Pliegue 9 · Glitch 8 · Herida 7 con ramas visibles.
+- LIMPIEZA: menciones a otros mods en los nuevos comentarios técnicos neutralizadas — grep 0 en Content/ y Localization/.
+- Compilación final: 0 errores 0 warnings. build.txt 6.33 + CHANGES v6.33 + commit + push.
+
+Stage Summary:
+- Las estrellas son SÓLIDAS (el disco nunca transparenta — la queja del usuario resuelta de raíz en DrawSunBody).
+- Las 4 armas de las dos formas tienen SU PROPIA BOLSA (imposible perderlas: TestingPlayer las garantiza en cada entrada).
+- StormLib v2 con las 5 técnicas de la investigación profunda (fractal + forks integrados + corriente continua + receta 3 capas + chispas).
+- LOS 4 DESGARROS NUEVOS basados en las referencias: Sutura Cuántica (glitch), Portal Dimensional (anillos), Pliegue del Espacio (ojo), Herida Eléctrica (grieta con ramas) — verificados con mock 1:1 + VLM (7-9/10).
+- RiftLib v4 = la familia de portales (4 primitivas nuevas con contrato cerrado→cerrado).

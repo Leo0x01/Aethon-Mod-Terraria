@@ -1,0 +1,56 @@
+[
+  {
+    "url": "http://research.nvidia.com",
+    "name": "Publications | NVIDIA Real-Time Graphics Research",
+    "snippet": "Procedural Data Enhancement. Understanding and modeling lighting effects are fundamental tasks in computer vision and graphics. This paper describes the ...",
+    "host_name": "research.nvidia.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://advances.realtimerendering.com",
+    "name": "SIGGRAPH 2022 Advances in Real",
+    "snippet": "This encompasses a wide range of topics including antialiasing, level-of-detail, analytic models for both materials and lighting , and GPU /parallel programming. Read more",
+    "host_name": "advances.realtimerendering.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://arxiv.org",
+    "name": "arXiv:2504.01358v1 [cs.GR] 2 Apr 2025",
+    "snippet": "by Z Wu · 2025 · Cited by 3 — We present a novel approach that enables efficient global illumination for 3D Gaussians Splatting through screen- space ray tracing.",
+    "host_name": "arxiv.org",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.nvidia.com",
+    "name": "Higher Education and Research",
+    "snippet": "NVIDIA provides a full-stack, open source platform empowering researchers, developers, and students to design, simulate, and validate AI-native 6G networks",
+    "host_name": "www.nvidia.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.janwalter.org",
+    "name": "fmx_2012_slides.pdf - Jan Walter",
+    "snippet": "Change Lights Point (with radius) and area lights vs. light emitting geometry 27 pages",
+    "host_name": "www.janwalter.org",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://research.nvidia.com",
+    "name": "Real-Time Neural Appearance Models",
+    "snippet": "We do not currently support effects that affect surface geometry, such as displacement mapping. We implemented the neural displacement approach",
+    "host_name": "research.nvidia.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  }
+]

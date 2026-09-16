@@ -1436,10 +1436,21 @@ namespace AethonMod.Content.VFX
 
                     Vector2 drawScale = Vector2.One * R * 3.0f / dendritic.Size();
 
+                    // v6.33 — EL CUERPO ESTELAR ES SIEMPRE SÓLIDO (la queja del
+                    // usuario: "todas las estrellas son semitransparentes, eso
+                    // no debería ser"): el alphaMul solo apaga backglow y aura;
+                    // el DISCO mantiene alfa 1 durante su vida y solo funde en
+                    // el último aliento (alphaMul < 0.55) para que la muerte no
+                    // sea un corte seco. El sol original pasa alphaMul=1 y no
+                    // cambia en nada.
+                    float cuerpo = alphaMul >= 0.55f
+                        ? 1f
+                        : MathHelper.Clamp(alphaMul / 0.55f, 0f, 1f);
+
                     BeginAlpha();
                     shader.CurrentTechnique.Passes[0].Apply();
                     Main.spriteBatch.Draw(dendritic, drawPos, null,
-                        Color.White * alphaMul, rotation,
+                        Color.White * cuerpo, rotation,
                         dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
                     Main.spriteBatch.End();
                 }

@@ -1,5 +1,46 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.33 — LAS ESTRELLAS SÓLIDAS + LOS CUATRO DESGARROS + STORMLIB v2 + LAS DOS BOLSAS NUEVAS
+
+**Petición del usuario**: "no veo las 4 armas nuevas de las dos formas de uso · todas las estrellas son semitransparentes, eso no debería ser · investigación profunda en todos los mods para mejorar la librería de rayos eléctricos · el Desgarro no está bien ejecutado: crea varios bastones de desgarro de realidad basados en las imágenes de referencia (4 links de stockcake), mejorando librerías si hace falta".
+
+### A. EL DIAGNÓSTICO DE LAS 4 ARMAS INVISIBLES
+  · LA CAUSA RAÍZ: el entorno local se había PERDIDO otra vez (quedó en v6.30 con 693 archivos sin commitear) y el usuario compilaba desde ahí — en GitHub v6.32 las 12 armas SÍ estaban. Aplicada la política de la casa: reset --hard origin/main (GitHub = la verdad).
+  · PARA QUE SEA IMPOSIBLE PERDERLAS: nueva **Bolsa de las Dos Formas** (las 4 de las dos formas: Sembrador, Colapso, Lágrimas, Decreto) — entregada por TestingPlayer junto a las demás, con la semántica de garantía (reabrir repone).
+
+### B. EL FIX DE LAS ESTRELLAS SEMITRANSPARENTES (la causa medida)
+  · LA RAÍZ: las estrellas pasaban `fade = 1−lifeT·0.40..0.45` como alphaMul del DISCO — el cuerpo estelar transparentaba el fondo con la edad, cuando el sol original pasa alphaMul=1 (opaco SIEMPRE).
+  · EL FIX en RuneSunRenderer.DrawSunBody: `cuerpo = alphaMul >= 0.55 ? 1 : alphaMul/0.55` — el disco mantiene alfa 1 durante TODA la vida (el alphaMul solo apaga backglow y aura) y funde solo en el último aliento para que la muerte no sea un corte seco. Las 7 estrellas + el sol heredan el fix automáticamente.
+
+### C. LA INVESTIGACIÓN DE RAYOS ELÉCTRICOS (Task 54 — research/v633/INFORME_RAYOS_ELECTRICOS.md)
+  · 18 técnicas con NÚMEROS de los clásicos de generación fractal + los grandes mods de VFX + la vanilla decompilada (el proyectil 466 "Lightning Orb Arc" con su random walk de UnifiedRandom, el zap 20 Hz, el Electrified que castiga el movimiento 4→16 HP/s).
+  · LAS 5 TÉCNICAS GANADORAS implementadas en **STORMLIB v2**:
+    1. `FractalPath` — midpoint displacement con offset = len·0.15 y HALVING por generación (5 gens → 32 tramos multi-escala).
+    2. `FractalBolt` — ramas que nacen AL PARTIR los segmentos (prob 0.28, 20°-50°, ×0.65 longitud, ×0.5 ancho, ×0.4 alpha — solo el tronco a brillo completo).
+    3. `StormArc` — EL ARCO DE CORRIENTE CONTINUA: dos rayos entrelazados que se RELEVAN a 6 Hz (vida 20 ticks, fade 100→50%) — nunca hay blink binario; BOIL doble en los midpoints.
+    4. La RECETA ELÉCTRICA de 3 capas (glow #1E50A8 ×0.30 esc ×1.0 · mid #5EB3FF ×0.55 ×0.5 · core #FFFFFF ×0.90 ×0.22) con NORMAL MEDIA por vértice (mata los puntos de las juntas).
+    5. `SparkBurst` — chispas con shake DECAÍDO a 0, squish que adelgaza, doble pasada glow+core, 3 variantes de forma.
+
+### D. LOS CUATRO DESGARROS NUEVOS (las 4 referencias del usuario)
+  · Las imágenes de stockcake (bloqueadas por Cloudflare) se sustituyeron por equivalentes buscadas y analizadas con VLM (research/v633/refs/ + vlm_ref1/2.json — análisis técnico completo: forma, borde, interior, paleta hex, glow, partículas, la clave de lectura).
+  · **RIFTLIB v4 — LA FAMILIA DE LOS PORTALES** (contrato cerrado→cerrado):
+    · `PortalAnillos` — el portal de 6 anillos concéntricos con rotación jerárquica alternada, gradiente cian→magenta, glifos rúnicos, núcleo blanco respirando a 0.3 Hz, polvo espiral y sparkles orbitando.
+    · `OjoEspacial` — la doble elipse diagonal (el ojo) con NÚCLEO NEGRO sólido, rim cian + horizonte ámbar, LA REJILLA QUE CONVERGE (grid warping con líneas de fuga curvándose) y succión de partículas.
+    · `DesgarroGlitch` — el círculo irregular fragmentado con ASTILLAS GLITCH rectangulares cian/violeta (flicker 0.1-0.3 s), nebulosa magenta con vetas fucsia, rayos que irradian y partículas de datos.
+    · `HeridaElectrica` — la grieta lineal con interior de ESTÁTICA (scanlines 10-30 Hz), arcos voltaicos internos (StormArc), strobe, ABERRACIÓN CROMÁTICA (rojo/cian partidos), RAMIFICACIONES fractales (5 grietas secundarias 55°-75°) y chispas a lo largo.
+  · **LAS 4 ARMAS** (items + proyectiles + PNGs procedurales + hjson es/en):
+    · **La Sutura Cuántica** — desgarro glitch en el cursor: corrompe el círculo (i-frames 20) + rayos cuánticos a los 3 más cercanos cada 45 ticks (×0.6).
+    · **El Portal Dimensional** — succión suave 300 px + trituración del núcleo blanco cada 18 ticks.
+    · **El Pliegue del Espacio** — curvatura FUERTE 350 px + compresión del núcleo negro (×1.3, knockback 0); el ojo SIGUE al enemigo más cercano.
+    · **La Herida Eléctrica** — línea 620 px desde el jugador: pica ×0.35 cada 10 ticks + ELECTRIFICADO 120 ticks.
+  · **Bolsa de los Desgarros** nueva (el clásico + los 4) y registrada en TestingPlayer.
+  · MOCK 1:1 (mock_portales_v633.py con las mismas fórmulas C#) + 2 rondas VLM: ronda 1 detectó 4 fallos (portal sin magenta, herida invisible/fina, núcleo glitch muy blanco, rejilla débil) → v6.33 b con los números corregidos → Portal 9 · Pliegue 9 · Glitch 8 · Herida 4→7 con ramificaciones visibles.
+
+### E. LIMPIEZA
+  · Las menciones a otros mods introducidas en los comentarios técnicos de las nuevas librerías NEUTRALIZADAS (grep 0 en Content/ y Localization/).
+
+**Resultados: build.txt 6.33 · 0 errores 0 warnings contra tML 2026.07.3.0 real · las estrellas 100% opacas · StormLib con las 5 técnicas de la investigación · 4 desgarros nuevos verificados con mock 1:1 + VLM.**
+
 ## Commit v6.32 — LA RECUPERACIÓN DE GITHUB + LA AUDITORÍA EXHAUSTIVA + EL MOCK DEL SOL
 
 **Petición del usuario**: "has perdido el progreso varias veces — si el local se borra, SIEMPRE copia la versión de GitHub que es la buena · analiza todo el código porque con las pausas continuas seguro hay código faltante o cortado que rompería la compilación".

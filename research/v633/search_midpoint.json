@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://stevelosh.com/blog/2016/02/midpoint-displacement",
+    "name": "Terrain Generation with Midpoint Displacement - Steve Losh",
+    "snippet": "Feb 19, 2016 · Today we're just going to look at a single algorithm for generating realistic-looking terrain called \"Midpoint Displacement\". It's relatively ...",
+    "host_name": "stevelosh.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/proceduralgeneration/comments/ncrahu/procedurally_generated_realistic_lightning_pattern",
+    "name": "Procedurally Generated Realistic Lightning Pattern",
+    "snippet": "May 15, 2021 · Maximize downward slope of a path then turn it into a nice shape with your lightning gen. midpoint displacement :D. The angle, length and  ... #wip Procedural Lightning generation in blender using animation ... Creating one dimensional Midpoint displacement : r/processing More results from www.reddit.com",
+    "host_name": "www.reddit.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=qNoSliX_6Gc",
+    "name": "Midpoint Displacement // Terrain Rendering episode #3 - YouTube",
+    "snippet": "Jan 23, 2023 · This is the third episode in a series where we follow along \"Focus on 3D Terrain Programming\" by Trent Polack. In this video we study the ...",
+    "host_name": "www.youtube.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://gamedev.stackexchange.com/questions/71397/how-can-i-generate-a-lightning-bolt-effect",
+    "name": "algorithm - How can I generate a lightning bolt effect?",
+    "snippet": "Mar 5, 2014 · Choose a point on that line (approximately or exactly in the middle), called S and split the segment into two line segments ( O->S and S->E ). Does anyone know what terrain generation algorithm is used here? Midpoint displacement generating unsatisfactory terrain More results from gamedev.stackexchange.com",
+    "host_name": "gamedev.stackexchange.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://medium.com/@math-and-pixels-magic/procedural-terrain-generation-ii-the-diamond-square-algorithm-b12673adc378",
+    "name": "Procedural Terrain Generation II: The Diamond-Square Algorithm",
+    "snippet": "Nov 20, 2025 · The Midpoint displacement algorithm starts with two points, p1 and p2. It calculates the point p3 halfway between p1 and p2, displaces p2.y by ...",
+    "host_name": "medium.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://bitesofcode.wordpress.com/2016/12/23/landscape-generation-using-midpoint-displacement",
+    "name": "Landscape generation using midpoint displacement - Bites of code",
+    "snippet": "Dec 23, 2016 · Today I will present how to implement in Python a simple yet effective algorithm for proceduraly generating 2D landscapes.",
+    "host_name": "bitesofcode.wordpress.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://talk.codea.io/t/1-5d-procedural-generation-using-midpoint-displacement/8363",
+    "name": "1.5d Procedural Generation using Midpoint Displacement - Examples",
+    "snippet": "Jan 8, 2014 · On Codea Community, I just uploaded a midpoint displacement algorithm for anyone that is interested. It could be used, for example, ...",
+    "host_name": "talk.codea.io",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://craftofcoding.wordpress.com/2021/09/13/recursive-patterns-lightning-bolts",
+    "name": "Recursive patterns – lightning bolts - The Craft of Coding",
+    "snippet": "Sep 13, 2021 · The pathway of the lightning bolt is a jagged fractal in 3D space, but can be simulated in 2D using the midpoint displacement method.",
+    "host_name": "craftofcoding.wordpress.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

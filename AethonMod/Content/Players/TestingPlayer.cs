@@ -39,7 +39,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS DIEZ BOLSAS (garantizadas en cada entrada) ===
+            // === LAS DOCE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -51,6 +51,8 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaBastonesCreativos>());
             bolsas += Entregar(ModContent.ItemType<BolsaExhumados>());
             bolsas += Entregar(ModContent.ItemType<BolsaCosmeticos>());
+            bolsas += Entregar(ModContent.ItemType<BolsaDosFormas>());      // v6.33: LAS 4 DE LAS DOS FORMAS
+            bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33: LOS 5 DESGARROS
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

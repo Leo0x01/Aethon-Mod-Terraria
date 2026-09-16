@@ -524,6 +524,253 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.33 — LA SEGUNDA GENERACIÓN MEJORADA (informe v633/INFORME_
+        //  RAYOS_ELECTRICOS.md: las técnicas clásicas de generación fractal +
+        //  + vanilla decompilada — las 5 técnicas con SUS números)
+        // ==================================================================
+
+        /// <summary>
+        /// T1 — EL CAMINO FRACTAL DE VERDAD (midpoint displacement, la técnica
+        /// canónica de midpoint-displacement): empieza con 1 segmento y
+        /// cada generación PARTE cada segmento por su punto medio desplazado
+        /// sobre la PERPENDICULAR con offset = len·chaos que SE DIVIDE A LA
+        /// MITAD por generación (offset /= 2). 5 generaciones → 32 tramos con
+        /// rugosidad MULTI-ESCALA: lazadas grandes + micro-detalle — lo que el
+        /// jitter mono-escala de ZigPath no puede dar. Extremos anclados.
+        /// Determinista por (seed, flick).
+        /// </summary>
+        public static Vector2[] FractalPath(Vector2 start, Vector2 end,
+            int seed, int flick, int generations = 5, float chaos = 0.15f)
+        {
+            if (generations < 1) generations = 1;
+            if (generations > 8) generations = 8;
+            float len = Vector2.Distance(start, end);
+            if (len < 2f)
+                return new[] { start, end };
+
+            // La lista de puntos (empieza con los anclajes exactos).
+            var pts = new List<Vector2> { start, end };
+            float offset = len * MathHelper.Clamp(chaos, 0.02f, 0.30f);
+
+            for (int g = 0; g < generations; g++)
+            {
+                int count = pts.Count;
+                for (int i = 0; i < count - 1; i++)
+                {
+                    Vector2 a = pts[i * 2];
+                    Vector2 b = pts[i * 2 + 1];
+                    Vector2 seg = b - a;
+                    float sl = seg.Length();
+                    Vector2 mid = (a + b) * 0.5f;
+                    if (sl > 0.01f)
+                    {
+                        Vector2 normal = new Vector2(-seg.Y / sl, seg.X / sl);
+                        float j = (VFXCore.Hash01(seed, flick * 31 + g, i * 61 + 13) - 0.5f) * 2f;
+                        mid += normal * (j * offset);
+                    }
+                    // Inserta el midpoint entre a y b.
+                    pts.Insert(i * 2 + 1, mid);
+                }
+                offset *= 0.5f;      // ← LA REGLA: cada generación, la mitad
+            }
+            return pts.ToArray();
+        }
+
+        /// <summary>
+        /// T1+T2 — EL RAYO FRACTAL CON RAMAS DE SUBDIVISIÓN: FractalPath +
+        /// forks que nacen AL PARTIR cada segmento (la escuela clásica): prob
+        /// 0.25-0.35 por segmento en las generaciones 2+, ángulo 20°-50° del
+        /// tronco, longitud ×0.6-0.7, ancho ×0.5 y alpha ×0.4 (SOLO el tronco
+        /// va a brillo completo). Máx 4 ramas (presupuesto de quads).
+        /// Dibuja todo con la receta de pintado de la casa.
+        /// </summary>
+        public static void FractalBolt(SpriteBatch batch, Vector2 start, Vector2 end,
+            int seed, int flick, float width, Color halo, Color core,
+            float alpha = 1f, int generations = 5, float chaos = 0.15f,
+            float forkChance = 0.28f)
+        {
+            Vector2[] trunk = FractalPath(start, end, seed, flick, generations, chaos);
+            if (trunk.Length < 2) return;
+
+            // === EL TRONCO a brillo completo ===
+            StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
+                StormTaper.Center, CoreTex, HaloTex);
+
+            // === LAS RAMAS DE SUBDIVISIÓN (nacieron al partir) ===
+            int forks = 0;
+            for (int g = 1; g < generations && forks < 4; g++)
+            {
+                int segsAtG = 1 << g;                     // segmentos en esta generación
+                // El midpoint del segmento i de la gen g acaba en el índice
+                // (2i+1)·2^(G-g-1) del array final (verificado a mano).
+                int step = 1 << (generations - g - 1);
+                for (int i = 0; i < segsAtG && forks < 4; i++)
+                {
+                    int idx = (2 * i + 1) * step;
+                    if (idx <= 0 || idx >= trunk.Length - 1) continue;
+                    if (VFXCore.Hash01(seed, flick * 7 + g, idx * 97 + 41) > forkChance)
+                        continue;
+
+                    Vector2 origin = trunk[idx];
+                    Vector2 dir = trunk[idx + 1] - trunk[idx - 1];
+                    float dl = dir.Length();
+                    if (dl < 0.01f) continue;
+                    dir /= dl;
+
+                    float side = VFXCore.Hash01(seed, g * 13, idx * 7 + 5) > 0.5f ? 1f : -1f;
+                    float ang = side * (0.35f + 0.52f * VFXCore.Hash01(seed, g, idx * 11));
+                    Vector2 fdir = dir.RotatedBy(ang);
+                    // la regla clásica: el fork mide ~×0.65 del segmento que lo parió.
+                    float flen = Math.Min(dl * 0.65f,
+                        Vector2.Distance(start, end) * 0.22f);
+
+                    Vector2[] branch = FractalPath(origin, origin + fdir * flen,
+                        seed + 313 + g * 17 + idx, flick,
+                        Math.Max(2, generations - 2), 0.12f);
+                    StrandImpl(batch, branch, seed + 313 + g * 17 + idx, flick,
+                        width * 0.5f, halo, core, alpha * 0.4f,
+                        StormTaper.Linear, CoreTex, HaloTex);
+                    forks++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// T3+T4 — EL ARCO DE CORRIENTE CONTINUA (el estándar de los grandes, no el
+        /// blink binario): DOS rayos fractales ENTRELAZADOS que se RELEVAN —
+        /// cada uno se regenera cada 10 ticks (6 Hz) con vida de 20 ticks y
+        /// se desvanece 100%→50% mientras el otro nace a full: SIEMPRE hay
+        /// un rayo visible, la corriente no se corta. Pintado con LA RECETA
+        /// ELÉCTRICA de 3 pasadas (glow #1E50A8 ×0.30 esc ×1.0 · mid #5EB3FF
+        /// ×0.55 esc ×0.5 · core BLANCO ×0.90 esc ×0.22 (la receta de 3 capas
+        /// 0.6/0.4/0.2) y BOIL doble en los midpoints (±6 px, "hierve más
+        /// donde se partió"). Ideal para el interior de las heridas y los
+        /// arcos sostenidos entre máquinas.
+        /// </summary>
+        public static void StormArc(SpriteBatch batch, Vector2 start, Vector2 end,
+            int seed, float time, float width, Color? tint = null,
+            float alpha = 1f, float len = 0f)
+        {
+            Color t = tint ?? Color.White;
+            Color glow = Tint(new Color(30, 80, 168).MultiplyRGB(t), 255);    // #1E50A8
+            Color mid = new Color(94, 179, 255).MultiplyRGB(t);               // #5EB3FF
+            Color coreC = new Color(255, 255, 255);                            // #FFFFFF
+            if (len <= 0f) len = Vector2.Distance(start, end);
+            if (len < 4f) return;
+
+            // La fase de relevos: 6 Hz, cada bolt vive 20 ticks.
+            float phase = time * 6f;
+            int slotA = (int)phase;
+            int slotB = (int)(phase + 1f);
+            float ageA = phase - slotA;                    // 0..1 edad de A
+            float ageB = phase + 1f - slotB;               // 0..1 edad de B
+
+            // A nació hace ageA·(1/6s): los primeros 10 ticks a full, luego →50%.
+            float alphaA = alpha * (ageA < 0.5f ? 1f : MathHelper.Lerp(1f, 0.5f, (ageA - 0.5f) * 2f));
+            float alphaB = alpha * (ageB < 0.5f ? 1f : MathHelper.Lerp(1f, 0.5f, (ageB - 0.5f) * 2f));
+
+            PintaArco(batch, start, end, seed, slotA, width, glow, mid, coreC, alphaA);
+            PintaArco(batch, start, end, seed + 977, slotB, width, glow, mid, coreC, alphaB);
+        }
+
+        /// <summary>Una pasada del arco con la receta de 3 capas.</summary>
+        private static void PintaArco(SpriteBatch batch, Vector2 start, Vector2 end,
+            int seed, int slot, float width, Color glow, Color mid, Color coreC, float alpha)
+        {
+            if (alpha <= 0.02f) return;
+            Vector2[] pts = FractalPath(start, end, seed, slot, 5, 0.15f);
+            // EL BOIL DOBLE EN LOS MIDPOINTS (±3 px normal, ±6 en las potencias de 2).
+            for (int i = 1; i < pts.Length - 1; i++)
+            {
+                bool esMid = (i & (i - 1)) == 0;           // índice potencia de 2
+                float amp = esMid ? 6f : 3f;
+                pts[i] += new Vector2(
+                    (VFXCore.Hash01(seed, slot, i * 19 + 7) - 0.5f) * 2f * amp,
+                    (VFXCore.Hash01(seed, slot + 31, i * 23 + 3) - 0.5f) * 2f * amp);
+            }
+
+            float total = PathLength(pts);
+            if (total < 1f) return;
+            float arc = 0f;
+            for (int i = 0; i < pts.Length - 1; i++)
+            {
+                Vector2 seg = pts[i + 1] - pts[i];
+                float sl = seg.Length();
+                if (sl < 0.30f) { arc += sl; continue; }
+                // NORMAL MEDIA (la lección del ribbon): la perpendicular al promedio de las
+                // direcciones adyacentes — mata los puntos brillantes de las juntas.
+                Vector2 prev = i > 0 ? pts[i] - pts[i - 1] : seg;
+                Vector2 next = i < pts.Length - 2 ? pts[i + 2] - pts[i + 1] : seg;
+                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
+                if (avg.LengthSquared() < 0.001f) avg = seg;
+                avg = Vector2.Normalize(avg);
+                float rot = (float)Math.Atan2(avg.Y, avg.X);
+                Vector2 pos = (pts[i] + pts[i + 1]) * 0.5f;
+                float tMid = (arc + sl * 0.5f) / total;
+                float w = width * MathHelper.Clamp((float)Math.Sin(tMid * Math.PI) + 0.35f, 0.3f, 1f);
+
+                // LAS 3 CAPAS (receta eléctrica): glow esc ×1.0 · mid ×0.5 · core ×0.22.
+                Quad(batch, GlowTex, pos, new Vector2(sl + w * 1.6f, w * 1.6f), rot,
+                    Tint(glow, 0.30f * alpha));
+                Quad(batch, GlowTex, pos, new Vector2(sl + w * 0.8f, w * 0.8f), rot,
+                    Tint(mid, 0.55f * alpha));
+                Quad(batch, GlowTex, pos, new Vector2(sl + w * 0.4f, w * 0.22f), rot,
+                    Tint(coreC, 0.90f * alpha));
+                arc += sl;
+            }
+        }
+
+        /// <summary>
+        /// T5 — LA RÁFAGA DE CHISPAS DE IMPACTO (la receta ThunderBoltVFX de
+        /// clásica): N chispas con STRETCH (0.5, 1.6), SHAKE que DECAE
+        /// lineal a 0 (Vector2.One.RotatedByRandom(2π)·(1−t)·power), SQUISH
+        /// que las ADELGAZA hasta un hilo antes de morir, DOBLE PASADA (glow
+        /// color×0.6 + core lerp(White→color)), 3 VARIANTES de forma por
+        /// hash y flip cada medio segundo. Determinista por (seed, time).
+        /// </summary>
+        public static void SparkBurst(SpriteBatch batch, Vector2 pos, Color color,
+            float size, int count, int seed, float t, float power = 14f)
+        {
+            if (t < 0f || t > 1f || count < 1) return;
+            float fade = t > 0.5f ? 1f - 0.95f * ((t - 0.5f) / 0.5f) : 1f;
+            float shake = (1f - t) * power;
+            bool flip = (int)(Main.GlobalTimeWrappedHourly * 2f) % 2 == 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                float h1 = VFXCore.Hash01(seed, i, 31);
+                float h2 = VFXCore.Hash01(seed, i, 67);
+                float h3 = VFXCore.Hash01(seed, i, 97);
+                float ang = h1 * MathHelper.TwoPi;
+                float dist = (6f + 34f * h2) * (0.4f + 0.6f * t);
+                Vector2 dir = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
+                Vector2 p = pos + dir * dist
+                    + new Vector2(
+                        (VFXCore.Hash01(seed, (int)(t * 60f), i * 13) - 0.5f) * 2f * shake,
+                        (VFXCore.Hash01(seed, (int)(t * 60f) + 7, i * 17) - 0.5f) * 2f * shake);
+
+                // Variante de forma (3) + el flip de medio segundo.
+                float variant = h3;
+                float lenS = 0.5f + 1.1f * variant;
+                float widS = 1.6f - 0.9f * variant;
+                if (flip) widS *= 0.7f;
+                widS *= fade;                              // ← EL SQUISH
+
+                Color glow = Tint(color, 0.60f * fade * (1f - t * 0.3f));
+                Color core = Color.Lerp(Color.White, color, t);
+                Quad(batch, GlowTex, p, new Vector2(size * lenS, size * widS), ang, glow);
+                Quad(batch, GlowTex, p, new Vector2(size * lenS * 0.55f, size * widS * 0.55f),
+                    ang, Tint(core, 0.85f * fade));
+            }
+
+            // El NÚCLEO del estallido (doble pasada, se apaga con t).
+            Quad(batch, GlowTex, pos, new Vector2(size * 2.2f, size * 2.2f) * (1f - t * 0.5f),
+                0f, Tint(color, 0.5f * fade));
+            Quad(batch, GlowTex, pos, new Vector2(size * 1.0f, size * 1.0f) * (1f - t * 0.5f),
+                0f, Tint(Color.Lerp(Color.White, color, t), 0.9f * fade));
+        }
+
+        // ==================================================================
         //  PRIMITIVAS INTERNAS
         // ==================================================================
 

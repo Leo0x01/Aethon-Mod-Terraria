@@ -309,6 +309,20 @@
         "Projectiles.SinfoniaPrimordialProjectile.DisplayName": "Primordial Symphony",
         "Projectiles.TormentaNebularProjectile.DisplayName": "Nebular Storm",
 
+        "Items.SuturaCuanticaStaff.DisplayName": "The Quantum Suture",
+        "Items.SuturaCuanticaStaff.Tooltip": "Opens a GLITCH TEAR where you aim.\nCorrupts every enemy inside the circle.\nEvery 45 ticks fires quantum bolts at the 3 nearest.",
+        "Items.PortalDimensionalStaff.DisplayName": "The Dimensional Portal",
+        "Items.PortalDimensionalStaff.Tooltip": "Opens the ring gate where you aim.\nGentle pull within 300 px: whoever crosses the white core is shredded.\nThe portal breathes for 6 seconds.",
+        "Items.PliegueEspacioStaff.DisplayName": "The Fold of Space",
+        "Items.PliegueEspacioStaff.Tooltip": "Opens the EYE where you aim: the double ellipse with the black core.\nFolds space within 350 px and drags enemies in.\nWhoever touches the core is compressed.",
+        "Items.HeridaElectricaStaff.DisplayName": "The Electric Wound",
+        "Items.HeridaElectricaStaff.Tooltip": "Opens THE CRACK toward where you aim.\nStings in a line and applies ELECTRIFIED.\nThe current never cuts out.",
+
+        "Projectiles.DesgarroCuanticoProjectile.DisplayName": "Quantum Suture",
+        "Projectiles.PortalDimensionalProjectile.DisplayName": "Dimensional Portal",
+        "Projectiles.PliegueEspacioProjectile.DisplayName": "Fold of Space",
+        "Projectiles.HeridaElectricaProjectile.DisplayName": "Electric Wound",
+
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
 }

@@ -298,6 +298,20 @@
         "Projectiles.SinfoniaPrimordialProjectile.DisplayName": "Sinfonía Primordial",
         "Projectiles.TormentaNebularProjectile.DisplayName": "Tormenta Nebular",
 
+        "Items.SuturaCuanticaStaff.DisplayName": "La Sutura Cuántica",
+        "Items.SuturaCuanticaStaff.Tooltip": "Abre un DESGARRO GLITCH donde apuntas.\nCorrompe a todo enemigo dentro del círculo.\nCada 45 ticks dispara rayos cuánticos a los 3 más cercanos.",
+        "Items.PortalDimensionalStaff.DisplayName": "El Portal Dimensional",
+        "Items.PortalDimensionalStaff.Tooltip": "Abre la puerta de anillos donde apuntas.\nSucción suave en 300 px: el que cruza el núcleo blanco es triturado.\nEl portal respira 6 segundos.",
+        "Items.PliegueEspacioStaff.DisplayName": "El Pliegue del Espacio",
+        "Items.PliegueEspacioStaff.Tooltip": "Abre el OJO donde apuntas: la doble elipse con el núcleo negro.\nDobla el espacio en 350 px y arrastra a los enemigos.\nEl que toca el núcleo es comprimido.",
+        "Items.HeridaElectricaStaff.DisplayName": "La Herida Eléctrica",
+        "Items.HeridaElectricaStaff.Tooltip": "Abre LA GRIETA hacia donde apuntas.\nPica en línea y aplica ELECTRIFICADO.\nLa corriente nunca se corta.",
+
+        "Projectiles.DesgarroCuanticoProjectile.DisplayName": "Sutura Cuántica",
+        "Projectiles.PortalDimensionalProjectile.DisplayName": "Portal Dimensional",
+        "Projectiles.PliegueEspacioProjectile.DisplayName": "Pliegue del Espacio",
+        "Projectiles.HeridaElectricaProjectile.DisplayName": "Herida Eléctrica",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }

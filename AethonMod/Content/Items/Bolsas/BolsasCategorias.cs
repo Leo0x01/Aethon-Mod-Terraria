@@ -255,4 +255,48 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>11 — LAS DOS FORMAS (v6.33): LAS 4 ARMAS QUE NACIERON DE LAS
+    /// DOS FORMAS DE USO de las armas investigadas — su propia bolsa para que
+    /// sean IMPOSIBLES de perder de vista (la queja del usuario: "no veo las
+    /// 4 armas nuevas de las dos formas").</summary>
+    public class BolsaDosFormas : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Dos Formas";
+        protected override string NombreCorto => "Bolsa de las Dos Formas";
+        protected override Color ColorFiesta => new(120, 230, 180);
+        protected override string Nota => "Cada arma nació de una forma de uso distinta";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<SembradorCementeralStaff>(), 1));
+            l.Add((ModContent.ItemType<ColapsoMagnetarStaff>(), 1));
+            l.Add((ModContent.ItemType<LagrimasSolMoribundoStaff>(), 1));
+            l.Add((ModContent.ItemType<DecretoEclipseStaff>(), 1));
+            return l;
+        }
+    }
+
+    /// <summary>12 — LOS DESGARROS (v6.33): el clásico + LOS 4 NUEVOS nacidos
+    /// de las referencias del usuario (el cuántico, el portal, el pliegue y
+    /// la herida eléctrica).</summary>
+    public class BolsaDesgarros : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de los Desgarros de Realidad";
+        protected override string NombreCorto => "Bolsa de los Desgarros";
+        protected override Color ColorFiesta => new(0, 229, 255);
+        protected override string Nota => "Cinco formas de romper el tejido del mundo";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<DesgarroRealityStaff>(), 1));
+            l.Add((ModContent.ItemType<SuturaCuanticaStaff>(), 1));
+            l.Add((ModContent.ItemType<PortalDimensionalStaff>(), 1));
+            l.Add((ModContent.ItemType<PliegueEspacioStaff>(), 1));
+            l.Add((ModContent.ItemType<HeridaElectricaStaff>(), 1));
+            return l;
+        }
+    }
 }

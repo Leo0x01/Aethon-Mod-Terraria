@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://gamedev.stackexchange.com",
+    "name": "algorithm - How can I generate a lightning bolt effect?",
+    "snippet": "Mar 5, 2014 — Is there an algorithm to generate a lightning bolt? I would like an algorithm that generates a list of segment or point objects specifying where the bolt ...",
+    "host_name": "gamedev.stackexchange.com",
+    "rank": 0,
+    "date": "Mar 5, 2014",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.controlbooth.com",
+    "name": "Creating 3D Lightning Bolt Effect",
+    "snippet": "May 25, 2013 — design a lightning effect in After Effects and project it onto the tree. It might make the lightning look less static and give some movement to ...",
+    "host_name": "www.controlbooth.com",
+    "rank": 1,
+    "date": "May 25, 2013",
+    "favicon": ""
+  },
+  {
+    "url": "https://discourse.threejs.org",
+    "name": "Lightning bolt effect - Questions",
+    "snippet": "Oct 2, 2017 — Hy room, i want to create a lightning bolt effect without having to use shader, i was thinking about using dynamic geometry, any idea?",
+    "host_name": "discourse.threejs.org",
+    "rank": 2,
+    "date": "Oct 2, 2017",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.noaa.gov",
+    "name": "How Lightning is Created",
+    "snippet": "Apr 5, 2023 — After the initial lightning stroke, if enough charge is leftover, additional lightning strokes will use the same channel, giving the bolt its ...",
+    "host_name": "www.noaa.gov",
+    "rank": 3,
+    "date": "Apr 5, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.psu.edu",
+    "name": "A bolt is born! Atmospheric events underpinning lightning",
+    "snippet": "Jul 28, 2025 — A bolt is born! Atmospheric events underpinning lightning strikes explained. Purple thunderclouds and a spy plane are seen from below. In ... Read more",
+    "host_name": "www.psu.edu",
+    "rank": 4,
+    "date": "Jul 28, 2025",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tModLoader - Particle Trail",
+    "snippet": "Oct 4, 2016 — When you fire the Terra Blade, the projectile is followed by a trail of green dust. This 'effect' is simply dust spawned by the AI of the  ...",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Oct 4, 2016",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net",
+    "name": "Terraria.Projectile Class Reference",
+    "snippet": "Spawns a projectile into the game world with the given type . The spawn position is given in world coordinates by the X and Y parameters. SpeedX and SpeedY ... Read more",
+    "host_name": "docs.tmodloader.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.fandom.com",
+    "name": "Projectile IDs - Terraria Wiki - Fandom",
+    "snippet": "This page is a list of all of the projectiles in Terraria. In the game, the number of projectiles existing at the same time is capped at 1000. Bolt ( projectile ...",
+    "host_name": "terraria.fandom.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.wiki.gg",
+    "name": "Projectile IDs - Official Terraria Wiki",
+    "snippet": "This page contains a sortable list of projectile IDs that are used internally in Terraria's game code to reference projectiles.",
+    "host_name": "terraria.wiki.gg",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  }
+]

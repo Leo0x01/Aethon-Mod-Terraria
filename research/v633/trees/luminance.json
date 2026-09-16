@@ -1,0 +1,1504 @@
+{
+  "sha": "b2468dfd2f299597602dc6826af781d436c29a57",
+  "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/b2468dfd2f299597602dc6826af781d436c29a57",
+  "tree": [
+    {
+      "path": ".editorconfig",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44232a2869764ad411e25016297bd5229b633064",
+      "size": 8704,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/44232a2869764ad411e25016297bd5229b633064"
+    },
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dfe0770424b2a19faf507a501ebfc23be8f54e7b",
+      "size": 66,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/dfe0770424b2a19faf507a501ebfc23be8f54e7b"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9af87e948d29b1205034c2e5e9e3693e70143234",
+      "size": 39,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9af87e948d29b1205034c2e5e9e3693e70143234"
+    },
+    {
+      "path": "Assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "845e2f711e1b46e440ed60d518f0c433f451219e",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/845e2f711e1b46e440ed60d518f0c433f451219e"
+    },
+    {
+      "path": "Assets/AutoloadedEffects",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e24d2de365edffc12b84caa0b8b5400434fa0248",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/e24d2de365edffc12b84caa0b8b5400434fa0248"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Compiler",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4426404ab6047cc82a671e393ee3fcf9452e78e4",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/4426404ab6047cc82a671e393ee3fcf9452e78e4"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Compiler/d3dcompiler_47.dll",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0439b1c68f00dcb637027ebed177b5876a43567e",
+      "size": 4127184,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0439b1c68f00dcb637027ebed177b5876a43567e"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Compiler/fxc.exe",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b71eaaa87c1047ea1bd561917ee2450aaabee276",
+      "size": 138720,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b71eaaa87c1047ea1bd561917ee2450aaabee276"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "56999592066ca9feaf963b355b0cad22a86a771e",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/56999592066ca9feaf963b355b0cad22a86a771e"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Examples",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4285e1985593a71f8a28d71700f270c44599849e",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/4285e1985593a71f8a28d71700f270c44599849e"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Examples/ExamplePrimShader.fx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf52f1e8015ef38fe10c90ac4bf2d3ecc0679b9d",
+      "size": 1979,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/cf52f1e8015ef38fe10c90ac4bf2d3ecc0679b9d"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Examples/ExamplePrimShader.xnb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd3e0a18f2ed1277ff57dbf14c049e11e56fcbb1",
+      "size": 1276,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/fd3e0a18f2ed1277ff57dbf14c049e11e56fcbb1"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/OverlayModifiers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "71216bee5d5a80b0434dd49b14f052a2716feadf",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/71216bee5d5a80b0434dd49b14f052a2716feadf"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/OverlayModifiers/MetaballEdgeShader.fx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "365e8dcb6c577f740266757fbe06dd927c67af55",
+      "size": 2763,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/365e8dcb6c577f740266757fbe06dd927c67af55"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/OverlayModifiers/MetaballEdgeShader.xnb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3eab12324002325df02fd269cb1323c938b989ac",
+      "size": 2296,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3eab12324002325df02fd269cb1323c938b989ac"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/OverlayModifiers/PixelationShader.fx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ff634900720621d450a92b09621f41dcc43cb4f",
+      "size": 455,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0ff634900720621d450a92b09621f41dcc43cb4f"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/OverlayModifiers/PixelationShader.xnb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f1066428677c190be5b59711de287c42bd16bfc",
+      "size": 1200,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9f1066428677c190be5b59711de287c42bd16bfc"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Primitives",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "03efd494d2932a8b1f02dbe0efd0730a17554c07",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/03efd494d2932a8b1f02dbe0efd0730a17554c07"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Primitives/QuadRenderer.fx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c167ec75ab0c90a4a7ea65c72a432235fbec3f8",
+      "size": 1086,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/6c167ec75ab0c90a4a7ea65c72a432235fbec3f8"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Primitives/QuadRenderer.xnb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "734cdcdf603638084880bfdaa8258360ec7cc426",
+      "size": 1264,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/734cdcdf603638084880bfdaa8258360ec7cc426"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Primitives/StandardPrimitiveShader.fx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9efad005646644d888359085d6f884393a164231",
+      "size": 1066,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9efad005646644d888359085d6f884393a164231"
+    },
+    {
+      "path": "Assets/AutoloadedEffects/Shaders/Primitives/StandardPrimitiveShader.xnb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d83b935486cd3251ae2550abe39f0c85839acc48",
+      "size": 1140,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d83b935486cd3251ae2550abe39f0c85839acc48"
+    },
+    {
+      "path": "Assets/GreyscaleTextures",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "54b8b64c4b798bd91d5191d4f0acde0bb4bb3574",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/54b8b64c4b798bd91d5191d4f0acde0bb4bb3574"
+    },
+    {
+      "path": "Assets/GreyscaleTextures/BloomCircleSmall.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1c0bd7510d6bdcd3090202a9af1fe4b96f1a815",
+      "size": 7607,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/a1c0bd7510d6bdcd3090202a9af1fe4b96f1a815"
+    },
+    {
+      "path": "Assets/GreyscaleTextures/BloomFlare.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c92cf061d2363052c3803c64d8b4d534ebae4053",
+      "size": 134051,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c92cf061d2363052c3803c64d8b4d534ebae4053"
+    },
+    {
+      "path": "Assets/GreyscaleTextures/BloomLine.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c9928084ae91e461a74c296664152fae1af33ad",
+      "size": 1775,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/8c9928084ae91e461a74c296664152fae1af33ad"
+    },
+    {
+      "path": "Assets/GreyscaleTextures/ChromaticBurst.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8813b35100c34270de5ecab7df9ff0c380f27675",
+      "size": 449243,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/8813b35100c34270de5ecab7df9ff0c380f27675"
+    },
+    {
+      "path": "Assets/GreyscaleTextures/ShineFlare.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e8c572de26604dbfded6a31d0501fcda5b7811a",
+      "size": 54435,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/5e8c572de26604dbfded6a31d0501fcda5b7811a"
+    },
+    {
+      "path": "Assets/InvisiblePixel.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b50df6ee71c93f8012eb53be3e9340c7f69a4ea",
+      "size": 120,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/5b50df6ee71c93f8012eb53be3e9340c7f69a4ea"
+    },
+    {
+      "path": "Assets/LazyAsset.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2cf7a204ce0c30d4759ef687da24301c57669c1",
+      "size": 1359,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/f2cf7a204ce0c30d4759ef687da24301c57669c1"
+    },
+    {
+      "path": "Assets/MiscTexturesRegistry.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa222f074d821a374f69ee0f35e6d57397e2c0a8",
+      "size": 2876,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/aa222f074d821a374f69ee0f35e6d57397e2c0a8"
+    },
+    {
+      "path": "Assets/Noise",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8a6f039d033c07c00ecd8d543017fcf538a9dba8",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/8a6f039d033c07c00ecd8d543017fcf538a9dba8"
+    },
+    {
+      "path": "Assets/Noise/DendriticNoise.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2e8ec7a6cd247c48bfefd40fa499d8102e34e7d",
+      "size": 597356,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b2e8ec7a6cd247c48bfefd40fa499d8102e34e7d"
+    },
+    {
+      "path": "Assets/Noise/DendriticNoiseZoomedOut.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41d5fd5d44a63735f357c319dee807b1fa049d2e",
+      "size": 117168,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/41d5fd5d44a63735f357c319dee807b1fa049d2e"
+    },
+    {
+      "path": "Assets/Noise/TurbulentNoise.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56453cf3becf33265d3d7b0c9a7ad197a3be9f7d",
+      "size": 254495,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/56453cf3becf33265d3d7b0c9a7ad197a3be9f7d"
+    },
+    {
+      "path": "Assets/Noise/WavyBlotchNoise.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71df21c2eff82130ca496321c255674230ab886f",
+      "size": 126621,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/71df21c2eff82130ca496321c255674230ab886f"
+    },
+    {
+      "path": "Assets/Pixel.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3ba2f73621d9f95f881979b7e6018e820fe78d5",
+      "size": 119,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e3ba2f73621d9f95f881979b7e6018e820fe78d5"
+    },
+    {
+      "path": "CHANGELOGS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04eab9ebe83f3eafdf2e437631ece845108bbb7e",
+      "size": 2496,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/04eab9ebe83f3eafdf2e437631ece845108bbb7e"
+    },
+    {
+      "path": "Common",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3582e21159e7b2fe8c1c786bd3e46601a7ecc8fe",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/3582e21159e7b2fe8c1c786bd3e46601a7ecc8fe"
+    },
+    {
+      "path": "Common/DataStructures",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "adb7668f1eb83ec7ea7a025b43dfc8680948fcd8",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/adb7668f1eb83ec7ea7a025b43dfc8680948fcd8"
+    },
+    {
+      "path": "Common/DataStructures/IProjOwnedByBoss.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a78466f05b713466b84aba0581e66399c9a178a",
+      "size": 616,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3a78466f05b713466b84aba0581e66399c9a178a"
+    },
+    {
+      "path": "Common/Easings",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4b4fa9daac5c19488257cc20e2dccf159b554c82",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/4b4fa9daac5c19488257cc20e2dccf159b554c82"
+    },
+    {
+      "path": "Common/Easings/EasingCurve.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3907d5569f2693a189574392b185b71414503aa",
+      "size": 5336,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c3907d5569f2693a189574392b185b71414503aa"
+    },
+    {
+      "path": "Common/Easings/EasingType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f07ac52947deb80fe019b57744df6723b5360077",
+      "size": 591,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/f07ac52947deb80fe019b57744df6723b5360077"
+    },
+    {
+      "path": "Common/Easings/PiecewiseCurve.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8bf95995d0e08dac6191c8dfae406cab0f602be",
+      "size": 3248,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d8bf95995d0e08dac6191c8dfae406cab0f602be"
+    },
+    {
+      "path": "Common/Easings/PiecewiseRotation.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ed0ecce1aee9105822bb746116426e46f0d6f96",
+      "size": 4626,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/4ed0ecce1aee9105822bb746116426e46f0d6f96"
+    },
+    {
+      "path": "Common/StateMachines",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5ab1bbed8ab4f7c772feddc35ae44e7da15c85e3",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/5ab1bbed8ab4f7c772feddc35ae44e7da15c85e3"
+    },
+    {
+      "path": "Common/StateMachines/AutoloadAsBehavior.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3b061d0a90c9a9676d0e353b113cacfc192c859",
+      "size": 1984,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d3b061d0a90c9a9676d0e353b113cacfc192c859"
+    },
+    {
+      "path": "Common/StateMachines/AutomatedMethodInvokeAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdc7be1eea041214604349c10d1c2a67b49c81b9",
+      "size": 1362,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/bdc7be1eea041214604349c10d1c2a67b49c81b9"
+    },
+    {
+      "path": "Common/StateMachines/EntityAIState.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6dfdc151f300db757c49cd05eca5a971b399042",
+      "size": 919,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d6dfdc151f300db757c49cd05eca5a971b399042"
+    },
+    {
+      "path": "Common/StateMachines/IState.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16aa497be38ec430e66178533c2fbb691e5f4d3d",
+      "size": 877,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/16aa497be38ec430e66178533c2fbb691e5f4d3d"
+    },
+    {
+      "path": "Common/StateMachines/PushdownAutomata.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f410b3157485e5a0a7a0095e282505da38f9655",
+      "size": 8423,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/6f410b3157485e5a0a7a0095e282505da38f9655"
+    },
+    {
+      "path": "Common/StateMachines/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ebfdc925c4bf303b48f91d5f42dda881d293b02",
+      "size": 2431,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3ebfdc925c4bf303b48f91d5f42dda881d293b02"
+    },
+    {
+      "path": "Common/Utilities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f0cc1012d49bb40ae6a4479dbea13b37a0c10a24",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/f0cc1012d49bb40ae6a4479dbea13b37a0c10a24"
+    },
+    {
+      "path": "Common/Utilities/CollisionUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77bf0253e59f9b6da453d2fde5b6aea2f4314e93",
+      "size": 2261,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/77bf0253e59f9b6da453d2fde5b6aea2f4314e93"
+    },
+    {
+      "path": "Common/Utilities/Drawcode",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f26342eb26fdd0e531dff445f1202999ad727381",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/f26342eb26fdd0e531dff445f1202999ad727381"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/DrawingUtilities.DrawActions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0cf5d2f6cb940847e69d79164b9f88039691f2c0",
+      "size": 9462,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0cf5d2f6cb940847e69d79164b9f88039691f2c0"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/DrawingUtilities.HelperMethods.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e25232a2cf6b996d9d626b4f4f3a3b9bab8eb449",
+      "size": 5495,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e25232a2cf6b996d9d626b4f4f3a3b9bab8eb449"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/DrawingUtilities.PerspectiveTransformations.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a4718a354d23c71f07540fcca8a641b4879da0e",
+      "size": 3667,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9a4718a354d23c71f07540fcca8a641b4879da0e"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/DrawingUtilities.RenderTargets.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f72c907382c723a4ea7a74080d5ec3f30a27e503",
+      "size": 1583,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/f72c907382c723a4ea7a74080d5ec3f30a27e503"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/DrawingUtilities.Spritebatch.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "536bf62414b1637ab13de97bcc62a4940e26bf2c",
+      "size": 8974,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/536bf62414b1637ab13de97bcc62a4940e26bf2c"
+    },
+    {
+      "path": "Common/Utilities/Drawcode/TooltipUtilitites.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bda2316f45b7f4e2915f9923593929f0bdc48851",
+      "size": 1440,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/bda2316f45b7f4e2915f9923593929f0bdc48851"
+    },
+    {
+      "path": "Common/Utilities/Entities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "087f5ead77387f4834ba0e4fd0ebfe04c1bf099e",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/087f5ead77387f4834ba0e4fd0ebfe04c1bf099e"
+    },
+    {
+      "path": "Common/Utilities/Entities/EntityUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e70c97791a18e7f43c758955c82cd47b08a0131",
+      "size": 978,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/7e70c97791a18e7f43c758955c82cd47b08a0131"
+    },
+    {
+      "path": "Common/Utilities/Entities/MotionUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b3706eb4ae75918571cddf00c652dd17e733589",
+      "size": 3881,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/4b3706eb4ae75918571cddf00c652dd17e733589"
+    },
+    {
+      "path": "Common/Utilities/Entities/NPCUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39113c396ac63d9b2b4ed595c9e07d17c263b4a3",
+      "size": 3494,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/39113c396ac63d9b2b4ed595c9e07d17c263b4a3"
+    },
+    {
+      "path": "Common/Utilities/Entities/PlayerUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef3390b01686dd6163ddf194918d349602003aed",
+      "size": 972,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/ef3390b01686dd6163ddf194918d349602003aed"
+    },
+    {
+      "path": "Common/Utilities/Entities/ProjectileUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c45151595a9937a8604659a1eca9ee8fe7f724a",
+      "size": 8756,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0c45151595a9937a8604659a1eca9ee8fe7f724a"
+    },
+    {
+      "path": "Common/Utilities/Entities/TileUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b03ac309228b0370656c7597ab2d3dc152c548b2",
+      "size": 2096,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b03ac309228b0370656c7597ab2d3dc152c548b2"
+    },
+    {
+      "path": "Common/Utilities/Mathematics",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f17da2e2ddb039af4f4711e06614d0aabffc3a7d",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/f17da2e2ddb039af4f4711e06614d0aabffc3a7d"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/CollisionUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2403ea29632a885b2510f016b85976c7a522c5b7",
+      "size": 4806,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/2403ea29632a885b2510f016b85976c7a522c5b7"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/MathematicalUtilities.AngleCalculations.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee1e99f7164c77d24bd0367b98be554e98e90db0",
+      "size": 2738,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/ee1e99f7164c77d24bd0367b98be554e98e90db0"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/MathematicalUtilities.NeatShorthands.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27d81f1766c05e704b1423d79f33b26ee8292f80",
+      "size": 6291,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/27d81f1766c05e704b1423d79f33b26ee8292f80"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/MathematicalUtilities.Pseudorandomness.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b2c2c88f1973a216e79cbdb08740948b5199d5c",
+      "size": 6676,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/7b2c2c88f1973a216e79cbdb08740948b5199d5c"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/MathematicalUtilities.VectorCalculations.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5e9ffce613d104aa02855d5b2ce1bc7a0bbb518",
+      "size": 3995,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c5e9ffce613d104aa02855d5b2ce1bc7a0bbb518"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/MathematicalUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ac236e7212b9208088a17af1fca795f69f6ee14",
+      "size": 3108,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3ac236e7212b9208088a17af1fca795f69f6ee14"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/RNG",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a4b3a6c6b6568f0821adbf62e36d8e821b651e05",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/a4b3a6c6b6568f0821adbf62e36d8e821b651e05"
+    },
+    {
+      "path": "Common/Utilities/Mathematics/RNG/RandomUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d60fe16df98d6e5b6bff1d5122a74c7227c4977",
+      "size": 611,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/5d60fe16df98d6e5b6bff1d5122a74c7227c4977"
+    },
+    {
+      "path": "Common/Utilities/Reflection",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0b66f3f0e46567a618ad8c179b235138bc75eb29",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/0b66f3f0e46567a618ad8c179b235138bc75eb29"
+    },
+    {
+      "path": "Common/Utilities/Reflection/ReflectionUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f24725812bc378fe5d416d71c10d19b64a52e173",
+      "size": 2539,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/f24725812bc378fe5d416d71c10d19b64a52e173"
+    },
+    {
+      "path": "Common/Utilities/TextUtilities.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c75c3b6b0e9abf2ac8f0630ae68d1fc3d52352c9",
+      "size": 3397,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c75c3b6b0e9abf2ac8f0630ae68d1fc3d52352c9"
+    },
+    {
+      "path": "Common/VerletIntergration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0d8c39f6633fd608a5d8b29419a05836002a6695",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/0d8c39f6633fd608a5d8b29419a05836002a6695"
+    },
+    {
+      "path": "Common/VerletIntergration/VerletSegment.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9e02c0a6ef482f1efec054b3bfe32bd5db9e781",
+      "size": 734,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d9e02c0a6ef482f1efec054b3bfe32bd5db9e781"
+    },
+    {
+      "path": "Common/VerletIntergration/VerletSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b857bbb7df1248b2cca405471c5860ad1f2517ef",
+      "size": 956,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b857bbb7df1248b2cca405471c5860ad1f2517ef"
+    },
+    {
+      "path": "Common/VerletIntergration/VerletSimulations.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0420de0cfda1f8bda1853ba38a5f4c6517f58eb3",
+      "size": 5084,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0420de0cfda1f8bda1853ba38a5f4c6517f58eb3"
+    },
+    {
+      "path": "Core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f9dce30abb2168dc84f4407fefb4e1e949a5451b",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/f9dce30abb2168dc84f4407fefb4e1e949a5451b"
+    },
+    {
+      "path": "Core/Balancing",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "afc37253cc0d694206a018b4f38d5c54b56fd86d",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/afc37253cc0d694206a018b4f38d5c54b56fd86d"
+    },
+    {
+      "path": "Core/Balancing/BalancePriority.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9ea0bda7662939a22e4864a7b0fe9364f449680",
+      "size": 1203,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e9ea0bda7662939a22e4864a7b0fe9364f449680"
+    },
+    {
+      "path": "Core/Balancing/BalancingManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b15181943e01dac9fec70f60d6abeb43b5e7216",
+      "size": 1464,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9b15181943e01dac9fec70f60d6abeb43b5e7216"
+    },
+    {
+      "path": "Core/Balancing/DefaultNPCBalancingRules.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7a4ea4463e733121830f5cb6f0667b73aff8880",
+      "size": 2672,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b7a4ea4463e733121830f5cb6f0667b73aff8880"
+    },
+    {
+      "path": "Core/Balancing/INPCHitBalancingRule.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e46e1b6adad2e114f1f7397a0343e32ca9e5699d",
+      "size": 1175,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e46e1b6adad2e114f1f7397a0343e32ca9e5699d"
+    },
+    {
+      "path": "Core/Balancing/InternalBalancingManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "898a7f09530ae0c891f05775265212b6dd906caf",
+      "size": 5486,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/898a7f09530ae0c891f05775265212b6dd906caf"
+    },
+    {
+      "path": "Core/Balancing/ItemBalancingChange.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eec75727b9f84cc574223858b5b18f4960617c3a",
+      "size": 275,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/eec75727b9f84cc574223858b5b18f4960617c3a"
+    },
+    {
+      "path": "Core/Balancing/NPCHPBalancingChange.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d490d26508392129f804a16db3cf98cbfd33ffa0",
+      "size": 236,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d490d26508392129f804a16db3cf98cbfd33ffa0"
+    },
+    {
+      "path": "Core/Balancing/NPCHitBalancingChange.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dad7a1a7d755767a0ec4b61890eb7ddfe3301216",
+      "size": 225,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/dad7a1a7d755767a0ec4b61890eb7ddfe3301216"
+    },
+    {
+      "path": "Core/Balancing/NPCHitContext.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "17adcad4cb32197e69a33827702b31fe78db088d",
+      "size": 448,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/17adcad4cb32197e69a33827702b31fe78db088d"
+    },
+    {
+      "path": "Core/Config.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b721ac6d0e99b51a4cd52590d78254242ec6f6f",
+      "size": 468,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/2b721ac6d0e99b51a4cd52590d78254242ec6f6f"
+    },
+    {
+      "path": "Core/Cutscenes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6fa6849205273ae384cf30758eca96985a60d9e6",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/6fa6849205273ae384cf30758eca96985a60d9e6"
+    },
+    {
+      "path": "Core/Cutscenes/Cutscene.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "851070d65c8ed59a9f68228062e5619ea6960d9a",
+      "size": 3135,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/851070d65c8ed59a9f68228062e5619ea6960d9a"
+    },
+    {
+      "path": "Core/Cutscenes/CutsceneManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20cec065c21bfc8ca8f795f183b259d03e6d67a8",
+      "size": 3629,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/20cec065c21bfc8ca8f795f183b259d03e6d67a8"
+    },
+    {
+      "path": "Core/Globals",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "24d50c39de7a836f91a047eec52d4f1225c3b491",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/24d50c39de7a836f91a047eec52d4f1225c3b491"
+    },
+    {
+      "path": "Core/Globals/LuminanceGlobalItem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a1f40e267dc81b26b5350186beedb47412207c4",
+      "size": 282,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3a1f40e267dc81b26b5350186beedb47412207c4"
+    },
+    {
+      "path": "Core/Globals/LuminanceGlobalNPC.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4d3ae4c3bfd9e5c02c63dfd912ea7d3a6266249",
+      "size": 430,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d4d3ae4c3bfd9e5c02c63dfd912ea7d3a6266249"
+    },
+    {
+      "path": "Core/Graphics",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a24cab55fcc712cb0515050de166423fb838af07",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/a24cab55fcc712cb0515050de166423fb838af07"
+    },
+    {
+      "path": "Core/Graphics/Atlases",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "211be2676ca088614851f6a3de87c9eb7a5a5318",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/211be2676ca088614851f6a3de87c9eb7a5a5318"
+    },
+    {
+      "path": "Core/Graphics/Atlases/Atlas.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88dd2d3d7f8e1755eac09959dd5461f2634e6df6",
+      "size": 4794,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/88dd2d3d7f8e1755eac09959dd5461f2634e6df6"
+    },
+    {
+      "path": "Core/Graphics/Atlases/AtlasManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28d3ad26ea67c1fae6ef34700228dc7a2026b0a1",
+      "size": 6201,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/28d3ad26ea67c1fae6ef34700228dc7a2026b0a1"
+    },
+    {
+      "path": "Core/Graphics/Atlases/AtlasTexture.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6aa7dbfbbd056606082a55d9a00c4e66da418b1b",
+      "size": 615,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/6aa7dbfbbd056606082a55d9a00c4e66da418b1b"
+    },
+    {
+      "path": "Core/Graphics/Atlases/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55d6553edf7b75f3eb47650ae6e075e7a50daac2",
+      "size": 5366,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/55d6553edf7b75f3eb47650ae6e075e7a50daac2"
+    },
+    {
+      "path": "Core/Graphics/Automators",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e84910b77a6421d37f6cf362469278a819cd1895",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/e84910b77a6421d37f6cf362469278a819cd1895"
+    },
+    {
+      "path": "Core/Graphics/Automators/ManagedRenderTarget.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c057daae196e1cda56259c5230fc7655dcf6df22",
+      "size": 6874,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c057daae196e1cda56259c5230fc7655dcf6df22"
+    },
+    {
+      "path": "Core/Graphics/Automators/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6917a8136bd1f1a512108c0dec8c49fb4bfed508",
+      "size": 680,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/6917a8136bd1f1a512108c0dec8c49fb4bfed508"
+    },
+    {
+      "path": "Core/Graphics/Automators/RenderTargetManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c78d5ce226e68fda1f3e7e0487e04521cd54e657",
+      "size": 5100,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c78d5ce226e68fda1f3e7e0487e04521cd54e657"
+    },
+    {
+      "path": "Core/Graphics/Particles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5a89a9266c933da523474eb552372860ee477995",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/5a89a9266c933da523474eb552372860ee477995"
+    },
+    {
+      "path": "Core/Graphics/Particles/ManualParticleRenderer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d0418fda454d8f63100c9b3974ca41ede059ec4",
+      "size": 1929,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0d0418fda454d8f63100c9b3974ca41ede059ec4"
+    },
+    {
+      "path": "Core/Graphics/Particles/Metaballs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "170b976b4a37e8a377c14eb97426b9fc7f6c179a",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/170b976b4a37e8a377c14eb97426b9fc7f6c179a"
+    },
+    {
+      "path": "Core/Graphics/Particles/Metaballs/MetaballInstance.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93fc00f6da2e3e86a6cdef27d3af9c5d0c4e94b8",
+      "size": 1218,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/93fc00f6da2e3e86a6cdef27d3af9c5d0c4e94b8"
+    },
+    {
+      "path": "Core/Graphics/Particles/Metaballs/MetaballManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18b579cae8dfae879f73a88b13445abb3bed025a",
+      "size": 2424,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/18b579cae8dfae879f73a88b13445abb3bed025a"
+    },
+    {
+      "path": "Core/Graphics/Particles/Metaballs/MetaballType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1dfe66ae74144eda91abd0ac22eea563a259b8f6",
+      "size": 8910,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/1dfe66ae74144eda91abd0ac22eea563a259b8f6"
+    },
+    {
+      "path": "Core/Graphics/Particles/Particle.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba0a6121cc8b379d5eb262208642e3487f96ab5e",
+      "size": 4319,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/ba0a6121cc8b379d5eb262208642e3487f96ab5e"
+    },
+    {
+      "path": "Core/Graphics/Particles/ParticleManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb961442efd17b1fec1506379c7cdd7e9f3a1d53",
+      "size": 4766,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/eb961442efd17b1fec1506379c7cdd7e9f3a1d53"
+    },
+    {
+      "path": "Core/Graphics/Particles/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94d7ca666dc493531cf14a1b10e7566bda4a093d",
+      "size": 2762,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/94d7ca666dc493531cf14a1b10e7566bda4a093d"
+    },
+    {
+      "path": "Core/Graphics/Primitives",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bceed6e1101704294448a0ae2660a95aa950fee7",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/bceed6e1101704294448a0ae2660a95aa950fee7"
+    },
+    {
+      "path": "Core/Graphics/Primitives/IPixelatedPrimitiveRenderer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46942843c8f362e5eb4b93cf550f27aa085fcc52",
+      "size": 630,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/46942843c8f362e5eb4b93cf550f27aa085fcc52"
+    },
+    {
+      "path": "Core/Graphics/Primitives/IPrimitiveSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "067e647b9f895511053d9543f8ca60009be4be9f",
+      "size": 323,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/067e647b9f895511053d9543f8ca60009be4be9f"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PixelationPrimitiveLayer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2a584a39e3fbccb5be04b8f6724f77c916596b5",
+      "size": 334,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d2a584a39e3fbccb5be04b8f6724f77c916596b5"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PrimitivePixelationSystem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81542ecbe9bcd41010ac6043a73187981f5390d9",
+      "size": 7902,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/81542ecbe9bcd41010ac6043a73187981f5390d9"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PrimitiveRenderer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "916492e718057185cccf0f001ef91fde7eecf3a6",
+      "size": 25633,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/916492e718057185cccf0f001ef91fde7eecf3a6"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PrimitiveSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec6577579272879623b2127d35dbdec5ba07625c",
+      "size": 2965,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/ec6577579272879623b2127d35dbdec5ba07625c"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PrimitiveSettingsCircle.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8cb9b5ae952d5f32fb4649c15108011c974d5919",
+      "size": 1307,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/8cb9b5ae952d5f32fb4649c15108011c974d5919"
+    },
+    {
+      "path": "Core/Graphics/Primitives/PrimitiveSettingsCircleEdge.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4922e2edd1443ba9ade8bf7b7a1afa2be1cec549",
+      "size": 1459,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/4922e2edd1443ba9ade8bf7b7a1afa2be1cec549"
+    },
+    {
+      "path": "Core/Graphics/Primitives/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62e41bcba277e1838d8422535a888e79c9b31244",
+      "size": 4632,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/62e41bcba277e1838d8422535a888e79c9b31244"
+    },
+    {
+      "path": "Core/Graphics/Primitives/VertexColor2DColorTexture.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e110db1290e0bc93174568de0770073ab0f02225",
+      "size": 1828,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e110db1290e0bc93174568de0770073ab0f02225"
+    },
+    {
+      "path": "Core/Graphics/Shaders",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c6ee6462b24487b9ec430982a89d00aced002568",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/c6ee6462b24487b9ec430982a89d00aced002568"
+    },
+    {
+      "path": "Core/Graphics/Shaders/DyeShaderMappings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0c2b439aeea0667751b303c26200a6786b823fd",
+      "size": 3896,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c0c2b439aeea0667751b303c26200a6786b823fd"
+    },
+    {
+      "path": "Core/Graphics/Shaders/ManagedScreenFilter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b7e447c79e917cd525376f3b6440b4431025b1f",
+      "size": 13018,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/4b7e447c79e917cd525376f3b6440b4431025b1f"
+    },
+    {
+      "path": "Core/Graphics/Shaders/ManagedShader.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f3096fb4e44dff2fe7d912d73e5c40f571f5c9c",
+      "size": 12036,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9f3096fb4e44dff2fe7d912d73e5c40f571f5c9c"
+    },
+    {
+      "path": "Core/Graphics/Shaders/ScreenShaderFixer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe7af89a3fadf24a6779524930a4398a71052ca6",
+      "size": 1705,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/fe7af89a3fadf24a6779524930a4398a71052ca6"
+    },
+    {
+      "path": "Core/Graphics/Shaders/ShaderManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bbdf62e768650d067cf056b6c8885017b8aebfbb",
+      "size": 11367,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/bbdf62e768650d067cf056b6c8885017b8aebfbb"
+    },
+    {
+      "path": "Core/Graphics/Shaders/ShaderRecompilationMonitor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d216310fbc5e187af41392ac9aaac9e95e4dee18",
+      "size": 17024,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d216310fbc5e187af41392ac9aaac9e95e4dee18"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d2afc81ebc099142fe7e97a0b8368ba482270f6c",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/d2afc81ebc099142fe7e97a0b8368ba482270f6c"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers/BlockerSystem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "988688e2c91aa76f5cec3c0aa36569f3bf63fe6b",
+      "size": 4747,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/988688e2c91aa76f5cec3c0aa36569f3bf63fe6b"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers/CameraPanSystem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "097a6d8a91d2d858812acb547addc93ae5b52fd4",
+      "size": 3681,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/097a6d8a91d2d858812acb547addc93ae5b52fd4"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "516daadef0d60bfed53dd2eb8b275a6066cf4acc",
+      "size": 2611,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/516daadef0d60bfed53dd2eb8b275a6066cf4acc"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers/ScreenModifierManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1bdf8aaa4b1894fea7dba5d60e5d7374935c229",
+      "size": 2471,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d1bdf8aaa4b1894fea7dba5d60e5d7374935c229"
+    },
+    {
+      "path": "Core/Graphics/SpecificEffectManagers/ScreenShakeSystem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9762967c2cb57eb63d5550bd376ff81ddc5c4fb8",
+      "size": 7893,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/9762967c2cb57eb63d5550bd376ff81ddc5c4fb8"
+    },
+    {
+      "path": "Core/Hooking",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4b25c9c13e987ff77da2fc663ba6e9838d2d53da",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/4b25c9c13e987ff77da2fc663ba6e9838d2d53da"
+    },
+    {
+      "path": "Core/Hooking/HookHelper.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "387654b21e12ca9e8d806d9c9bc0cc608d52e8e2",
+      "size": 3966,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/387654b21e12ca9e8d806d9c9bc0cc608d52e8e2"
+    },
+    {
+      "path": "Core/Hooking/ICustomDetourProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3be7857b0126594bd3c77a8c3fa3f9a12f537536",
+      "size": 608,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3be7857b0126594bd3c77a8c3fa3f9a12f537536"
+    },
+    {
+      "path": "Core/Hooking/IExistingDetourProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42879e421accd357c43aabfdefe1f27f785fa9bb",
+      "size": 632,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/42879e421accd357c43aabfdefe1f27f785fa9bb"
+    },
+    {
+      "path": "Core/Hooking/ILEditProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc12bb7b5f3bf945d23aa420599b2c8528a69022",
+      "size": 1622,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/cc12bb7b5f3bf945d23aa420599b2c8528a69022"
+    },
+    {
+      "path": "Core/Hooking/ManagedILEdit.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "446782253ed78c5e9469839e4eb8cb4fd0cb0a67",
+      "size": 3550,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/446782253ed78c5e9469839e4eb8cb4fd0cb0a67"
+    },
+    {
+      "path": "Core/LuminanceSystem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4784053776008d44fbdf6ff71fa94a25c9c62f3",
+      "size": 345,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c4784053776008d44fbdf6ff71fa94a25c9c62f3"
+    },
+    {
+      "path": "Core/MenuInfoUI",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c114d1fbe5bec20783807abbbc404d5fa8a84b3c",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/c114d1fbe5bec20783807abbbc404d5fa8a84b3c"
+    },
+    {
+      "path": "Core/MenuInfoUI/IInfoIcon.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6336fa08051f922b85d771246f5619cfda04777f",
+      "size": 212,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/6336fa08051f922b85d771246f5619cfda04777f"
+    },
+    {
+      "path": "Core/MenuInfoUI/InfoUIManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "153162a0c21dbcf8eb7e41f258d7c28f2778d7e4",
+      "size": 1130,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/153162a0c21dbcf8eb7e41f258d7c28f2778d7e4"
+    },
+    {
+      "path": "Core/MenuInfoUI/InternalInfoUIManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e5dfb67455e2b6608bf9e7ce2838a5b4b270749",
+      "size": 13903,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/4e5dfb67455e2b6608bf9e7ce2838a5b4b270749"
+    },
+    {
+      "path": "Core/MenuInfoUI/PlayerInfoIcon.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e04706ec4189d55249f21e8831c5b389e13d65e7",
+      "size": 869,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e04706ec4189d55249f21e8831c5b389e13d65e7"
+    },
+    {
+      "path": "Core/MenuInfoUI/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3fc7e720efe40774f49d343f5d3579867a4cfb7",
+      "size": 1695,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b3fc7e720efe40774f49d343f5d3579867a4cfb7"
+    },
+    {
+      "path": "Core/MenuInfoUI/WorldInfoIcon.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3455a9d08aa8961f50aa9c73e6ca479f0b1f5ca",
+      "size": 929,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/b3455a9d08aa8961f50aa9c73e6ca479f0b1f5ca"
+    },
+    {
+      "path": "Core/ModCalls",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b1cf110c412db1e4ea32dc3a573337593db607a4",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/b1cf110c412db1e4ea32dc3a573337593db607a4"
+    },
+    {
+      "path": "Core/ModCalls/LuminanceCalls",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5946580fb277127ec227e35c4e7d86dc75e93abd",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/5946580fb277127ec227e35c4e7d86dc75e93abd"
+    },
+    {
+      "path": "Core/ModCalls/LuminanceCalls/RegisterWorldInfoIconCall.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3593c1ab9896c7db60cec20e5bb2925e24c7a820",
+      "size": 1571,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3593c1ab9896c7db60cec20e5bb2925e24c7a820"
+    },
+    {
+      "path": "Core/ModCalls/ModCall.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "335f5b828e264285b496454cc3eeb19a1c72bc60",
+      "size": 3263,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/335f5b828e264285b496454cc3eeb19a1c72bc60"
+    },
+    {
+      "path": "Core/ModCalls/ModCallManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0884527eca8346698031119da782a1d70394423",
+      "size": 1686,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c0884527eca8346698031119da782a1d70394423"
+    },
+    {
+      "path": "Core/ModCalls/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aef2dc6a8a8db959137e7d19a5c61c836d03d2e3",
+      "size": 1535,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/aef2dc6a8a8db959137e7d19a5c61c836d03d2e3"
+    },
+    {
+      "path": "Core/Sounds",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bbc04f192aa726f16a7dab4c9d10cc08842d85c0",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/bbc04f192aa726f16a7dab4c9d10cc08842d85c0"
+    },
+    {
+      "path": "Core/Sounds/LoopedSoundInstance.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "805990b7288e2493dc601447aa1ffc15a3bb5105",
+      "size": 5190,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/805990b7288e2493dc601447aa1ffc15a3bb5105"
+    },
+    {
+      "path": "Core/Sounds/LoopedSoundManager.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e426609ab8e4396cba92696e48b0a2cb1cf3301",
+      "size": 2288,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/2e426609ab8e4396cba92696e48b0a2cb1cf3301"
+    },
+    {
+      "path": "Core/VersionAwareModJitAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94dfb79b89d23d6c68d9740bd6039873160f6ca3",
+      "size": 695,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/94dfb79b89d23d6c68d9740bd6039873160f6ca3"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df5c5c614af6abd2235d529b5a8b765e096ca503",
+      "size": 1064,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/df5c5c614af6abd2235d529b5a8b765e096ca503"
+    },
+    {
+      "path": "Localization",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "483dae2b47f47fce12fdddb9ab2c1db63fc46704",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/483dae2b47f47fce12fdddb9ab2c1db63fc46704"
+    },
+    {
+      "path": "Localization/de-DE_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "377d382b3a01ff453483ece854b38e48011c5efe",
+      "size": 362,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/377d382b3a01ff453483ece854b38e48011c5efe"
+    },
+    {
+      "path": "Localization/en-US_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2699d4a317ff667eb4a104b3883593ffafdf228b",
+      "size": 333,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/2699d4a317ff667eb4a104b3883593ffafdf228b"
+    },
+    {
+      "path": "Localization/es-ES_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75b3bd66b3602a9060c4884bc28015efd2f201c3",
+      "size": 395,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/75b3bd66b3602a9060c4884bc28015efd2f201c3"
+    },
+    {
+      "path": "Localization/fr-FR_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c23f6e7001960d6070ec5ad3d70fc4f1e2c34d2f",
+      "size": 396,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c23f6e7001960d6070ec5ad3d70fc4f1e2c34d2f"
+    },
+    {
+      "path": "Localization/it-IT_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25334840782364dda6ae09ecc6f26c8756ebefbe",
+      "size": 348,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/25334840782364dda6ae09ecc6f26c8756ebefbe"
+    },
+    {
+      "path": "Localization/ru-RU_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4a274a62f1633cea54da733654e4e2e86089010",
+      "size": 540,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c4a274a62f1633cea54da733654e4e2e86089010"
+    },
+    {
+      "path": "Localization/zh-Hans_Mods.Luminance.hjson",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2fb9d6ff577a8a3c759a5d2a90c57bfa6e7c98c",
+      "size": 301,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e2fb9d6ff577a8a3c759a5d2a90c57bfa6e7c98c"
+    },
+    {
+      "path": "Luminance.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c34172bf163f9944a5e17207fbc64a174732b3b",
+      "size": 1650,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0c34172bf163f9944a5e17207fbc64a174732b3b"
+    },
+    {
+      "path": "Luminance.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "740c6b418638b5b3bf5062b43b7590dadfe708ab",
+      "size": 660,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/740c6b418638b5b3bf5062b43b7590dadfe708ab"
+    },
+    {
+      "path": "Luminance.sln",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e334083e949aa081f37084ca8c590df9eff74343",
+      "size": 1098,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/e334083e949aa081f37084ca8c590df9eff74343"
+    },
+    {
+      "path": "Luminance.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f86dadd86a727e48055624dd8b2cbd943ec0eb0",
+      "size": 185802,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/7f86dadd86a727e48055624dd8b2cbd943ec0eb0"
+    },
+    {
+      "path": "Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3c0627c1dcdcd94e6024cac57598258211ebd624",
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/trees/3c0627c1dcdcd94e6024cac57598258211ebd624"
+    },
+    {
+      "path": "Properties/launchSettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10114472bb5e57aa8e55f75fb6c34df7362380e5",
+      "size": 402,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/10114472bb5e57aa8e55f75fb6c34df7362380e5"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6c96b1c130371c57fb4b85a7d5a52c0d71c5a1b",
+      "size": 3665,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d6c96b1c130371c57fb4b85a7d5a52c0d71c5a1b"
+    },
+    {
+      "path": "TODO.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0467ed3fd72e0e3b330262b19b6063fe70fbbc96",
+      "size": 792,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0467ed3fd72e0e3b330262b19b6063fe70fbbc96"
+    },
+    {
+      "path": "build.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3bdefc4d7e6bde917f4985838b3d9ea1d7ee5f53",
+      "size": 344,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/3bdefc4d7e6bde917f4985838b3d9ea1d7ee5f53"
+    },
+    {
+      "path": "description.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0af22b38382327d4bfb5a037ad180b83d94775a7",
+      "size": 117,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/0af22b38382327d4bfb5a037ad180b83d94775a7"
+    },
+    {
+      "path": "description_workshop.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8afc236155a74865de0dcb588e0cc5e508f765b",
+      "size": 172,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d8afc236155a74865de0dcb588e0cc5e508f765b"
+    },
+    {
+      "path": "icon.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c86e3776d9c9ad4943ebbd3ca8d5bc1c1c8c74bd",
+      "size": 3335,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/c86e3776d9c9ad4943ebbd3ca8d5bc1c1c8c74bd"
+    },
+    {
+      "path": "icon_workshop.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d19a3180fc27c63391916848f6449cbdcb1839fc",
+      "size": 14102,
+      "url": "https://api.github.com/repos/LucilleKarma/Luminance/git/blobs/d19a3180fc27c63391916848f6449cbdcb1839fc"
+    }
+  ],
+  "truncated": false
+}

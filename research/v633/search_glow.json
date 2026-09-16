@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://www.youtube.com/watch?v=WiDVoj5VQ4c",
+    "name": "How to make 2D GLOW in Unity! - YouTube",
+    "snippet": "Mar 22, 2020 · In this video we create an awesome Glow effect for extra flare! ▻ Check out Popcore! https://popcore.com/career ○ Download the project: ...",
+    "host_name": "www.youtube.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=bkPe1hxOmbI",
+    "name": "How to make Unity GLOW! (Post Processing Bloom Unity Tutorial)",
+    "snippet": "Sep 4, 2021 · Shader with Emission (intensity above 0) · Post Processing Bloom · Render Pipeline Asset, Enable HDR · Camera, Enable Post Processing.",
+    "host_name": "www.youtube.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://catlikecoding.com/unity/tutorials/advanced-rendering/bloom",
+    "name": "Bloom - Catlike Coding",
+    "snippet": "Jan 31, 2018 · This tutorial covers how to add support for a bloom effect to a camera. It assumes you're familiar with the material covered in the Rendering ...",
+    "host_name": "catlikecoding.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=Tm0rRX8GnFk",
+    "name": "Unity 2D Glow Tutorial - YouTube",
+    "snippet": "Aug 9, 2022 · Share your videos with friends, family, and the world.",
+    "host_name": "www.youtube.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://code.tutsplus.com/how-to-generate-shockingly-good-2d-lightning-effects--gamedev-2681t",
+    "name": "How to Generate Shockingly Good 2D Lightning Effects | Envato Tuts+",
+    "snippet": "Jan 8, 2013 · In this tutorial, I'll explain how to programmatically generate awesome 2D lightning effects: bolts, branches, and even text. Scroll to top.",
+    "host_name": "code.tutsplus.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developer.nvidia.com/gpugems/gpugems/part-iv-image-processing/chapter-21-real-time-glow",
+    "name": "Chapter 21. Real-Time Glow - NVIDIA Developer",
+    "snippet": "The first step in rendering glows is to specify which objects or parts of objects are the sources of glow. The color and brightness of these glow sources",
+    "host_name": "developer.nvidia.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.gamedeveloper.com/design/how-to-create-2d-glow-effects-in-unity",
+    "name": "How To Create 2D Glow Effects in Unity - Game Developer",
+    "snippet": "click the Add Override button and select Post-processing > Bloom. Under the bloom effect, enable the threshold and intensity and set their value to 1 and 0.5.",
+    "host_name": "www.gamedeveloper.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://learnopengl.com/Advanced-Lighting/Bloom",
+    "name": "Bloom - LearnOpenGL",
+    "snippet": "+ OpenGL tutorials with clear examples. 2D Game Breakout Setting up. Bloom gives all brightly lit regions of a scene a glow-like effect. Advanced-Lighting/bloom · Extracting Bright Color · Gaussian Blur",
+    "host_name": "learnopengl.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]
