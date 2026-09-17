@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "(1) **Sí.** Se percibe claramente el movimiento orbital: las estelas de luz blanca (fotones) y las bandas rojas-naranjas muestran una dirección de desplazamiento antihorario definida.\n\n(2) **Sí.** El centro del vórtice es un negro absoluto, sin fuga de luz, creando la profundidad necesaria.\n\n(3) **Notas:**\n*   **Izquierda (Vórtice): 8/10.** Excelente lectura del movimiento orbital y contraste del núrtico, aunque podría beneficiarse de mayor definición en los \"ecos\" o ondas periféricas para aumentar la sensación de gravedad extrema.\n*   **Derecha (Corona): 6/10.** La estructura de arcos carmesí es reconocible y los nudos de neón están presentes, pero la falta de nitidez (difuminado excesivo) resta impacto técnico y define menos la geometría de los 5 arcos individuales.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789622183,
+  "id": "2026091713161460274e1f762f42dd",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "2026091713161460274e1f762f42dd",
+  "usage": {
+    "completion_tokens": 234,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 417,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 651
+  }
+}

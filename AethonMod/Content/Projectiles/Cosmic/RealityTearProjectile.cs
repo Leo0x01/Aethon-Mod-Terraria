@@ -42,8 +42,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     herida abierta: α 0.90±10% a 4.4 Hz). DoT ×0.10 cada 3 ticks
     ///     (cesa 8 ticks antes del final visual).
     ///   · CIERRE (10 ticks): LA REALIDAD SANA COMIÉNDOSE EL CORTE DESDE LOS
-    ///     EXTREMOS (ErodeT direccional CWR): la línea se ACORTA hacia el
-    ///     centro SIN menguar el ancho — nunca un fundido plano.
+    ///     EXTREMOS (la erosión direccional de la casa): la línea se ACORTA
+    ///     hacia el centro SIN menguar el ancho — nunca un fundido plano.
     ///
     /// Determinismo MP: la dirección se toma de la velocity SINCRONIZADA al
     /// nacer; la semilla es Projectile.identity (la misma en todas las
@@ -480,7 +480,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 // EL CIERRE: LA REALIDAD SANA COMIÉNDOSE EL CORTE DESDE LOS
                 // EXTREMOS — la línea se ACORTA hacia el centro, el ancho
-                // NO mengua (ErodeT direccional CWR, nunca un fundido plano).
+                // NO mengua (la erosión direccional de la casa, nunca un fundido plano).
                 float ageC = _age - preGrieta - CorteVivoTicks;
                 float t = MathHelper.Clamp(ageC / CierreTicks, 0f, 1f);
                 progress = 0.85f;

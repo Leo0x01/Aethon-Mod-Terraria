@@ -1862,3 +1862,126 @@ Stage Summary:
 - StormLib v2 con las 5 técnicas de la investigación profunda (fractal + forks integrados + corriente continua + receta 3 capas + chispas).
 - LOS 4 DESGARROS NUEVOS basados en las referencias: Sutura Cuántica (glitch), Portal Dimensional (anillos), Pliegue del Espacio (ojo), Herida Eléctrica (grieta con ramas) — verificados con mock 1:1 + VLM (7-9/10).
 - RiftLib v4 = la familia de portales (4 primitivas nuevas con contrato cerrado→cerrado).
+
+---
+Task ID: 56
+Agent: Orquestador principal (Z.ai Code)
+Task: v6.34 — LAS DOS LIBRERÍAS DE SIGNOS MÁGICOS (SigiloLib + OrbitaLib, la petición central del usuario) + refactors 1:1 + mock/VLM.
+
+Work Log:
+- ENTORNO PERDIDO OTRA VEZ (tercera vez): /tmp + sandbox + dotnet borrados. RECONSTRUIDO: dotnet 8.0.425 + tModLoader v2026.07.3.0 oficial (61 MB, GitHub release) + /home/z/sandbox/{verify.csproj,compile.sh} con las 8 referencias (tModLoader, FNA, ReLogic, TerrariaHooks, Steamworks.NET, Newtonsoft.Json, Hjson, log4net).
+- HALLAZGO (otra vez): AethonMod/research/ (untracked, 7 MB) DENTRO de la carpeta del mod → tML la compilaría EN EL JUEGO (9 errores CS1002). Era SUBCONJUNTO de research/ de la raíz → respaldada en /tmp y sacada.
+- ESTUDIO de las dos técnicas: RuneCrownRenderer (arco de 8 glifos del portador) + RuneSunRenderer.EmitRingSystem (las LEYES: RingA packing, RingFlat por plano, RingTilt con precesión tier≥7, RingSpin ALTERNO, runas cabalgando la TANGENTE con gradiente y perla) y CosmicBlackHoleRenderer (la fórmula del shader sin(τ·20−t·5), 20 bandas, gradiente térmico 3 colores, mitades frente/espalda, turbulencia 12 Hz) + ArcCrownRenderer (5 lazos asimétricos).
+- SIGILOLIB creada (~800 líneas): leyes públicas + 2 alfabetos públicos + primitivas Runa/AroEliptico/RunaOrbitando/AnilloRunico/NodoCardinal/PolvoRunico + compuestos SistemaAnillos/ArcoGloria (1:1) + NUEVO SelloSolar + PerlaArcoWorld/RunaSelloWorld.
+- ORBITALIB creada (~600 líneas): AnilloEnergia/EcosAnillo/Fotones/OndasDistorsion/AnilloFino/Distorsion/CoronaArcos (1:1) + NUEVO SelloVacio + helpers AbrirAdditive/AbrirAlpha/CerrarBatch.
+- REFACTORS 1:1: RuneSunRenderer delega (constantes como alias const→const, métodos como lambdas de 1 línea, _runes→SigiloLib.RunasSolares en 6 usos, tangentialAngle→delegación); RuneCrownRenderer y ArcCrownRenderer = facades finas (~50 líneas); CosmicBlackHoleRenderer borra DrawEnergyRing/DrawRingEchoes/DrawPhotonRunners y llama OrbitaLib (constantes aliasadas).
+- MOCK 1:1 (tools/mock_sigilos_v634.py, fórmulas exactas) + VLM 6 RONDAS: (1) bloom del tonemap lavaba → recalibrado; (2) núcleo del vórtide no era negro absoluto (mi máscara 0.94) → 1.0; (3) las 12 runas del sello EMPASTABAN (glow 34·gs vs separación 2πr/12 — DEFECTO REAL DE DISEÑO) → 8 runas con proporción de la casa; (4) gamma 1/2.2 del tonemap ELEVABA los halos (0.076→0.32, contraste trazo/halo 4:1→1.7:1) → aditivo puro lineal (LA LECCIÓN: fiel al SpriteBatch del juego); (5) aro interior 0.80r se fundía → 0.66r + glifo central ×1.55 difuso → ×2.3 + destello propio; (6) VEREDICTO FINAL: sol+anillos 8.5/10 · SelloSolar 9/10 · vórtice 8/10 (núcleo negro absoluto ✓, movimiento orbital con exposición honesta de 3 sub-frames) · corona 6/10 (look histórico 1:1 preservado).
+- Compilación 0/0 en cada paso. Fixes de la propia librería: using Terraria.ModLoader faltante en OrbitaLib.
+
+Stage Summary:
+- LAS DOS LIBRERÍAS DE SIGNOS MÁGICOS EXISTEN y están verificadas: SigiloLib (sol) y OrbitaLib (vacío) — con los compuestos invocables SelloSolar y SelloVacio para embellecer lo que venga.
+- El look de los soles/agujeros negros NO cambió ni un número (delegación pura) — lo nuevo es que AHORA se puede invocar desde cualquier lado.
+- Lección técnica documentada: mocks con gamma = empaste; aditivo lineal = la verdad del juego.
+
+---
+Task ID: 57-a
+Agent: Subagente mejoras mecánicas (EstelaLib/PulsoLib/StormLib/VFXCore)
+Task: 4 mejoras mecánicas de las librerías VFX para v6.34 — taper del ribbon de EstelaLib, sistema de trauma de cámara en PulsoLib, arco perseguidor SeekArc en StormLib y presupuesto adaptativo por FPS en VFXCore.
+
+Work Log:
+- Leído el contexto: últimas 3 secciones del worklog (Task 53/54/55 — recuperación del entorno, informe de rayos, StormLib v2 + RiftLib v4) y LOS 4 ARCHIVOS ÍNTEGROS (EstelaLib 456 líneas, PulsoLib 394, StormLib 875, VFXCore 467).
+- TAREA 1 (EstelaLib): parámetro opcional `float taper = 0f` AÑADIDO AL FINAL de la firma de Ribbon (después de `head` — ningún call-site posicional/nombrado se rompe). En el bucle de segmentos: `t01 = 1 − f` (0 = cabeza/origen → 1 = cola, al revés que f) y `w *= MathF.Max(1f − taper·t01, 0.15f)` — clamp al 15% del grosor; con taper = 0 el factor es 1 en todo el camino → salida idéntica a la de siempre. La cabeza (bloom) no se toca (t01 = 0 allí → factor 1). Documentado en el `<param name="taper">` con la historia v6.34.
+- TAREA 2 (PulsoLib): campo `private static float _trauma` + `public static void Trauma(float)` que ACUMULA con `MathHelper.Clamp(_trauma + cantidad, 0, 1)`. El latido vive en `ActualizarPantalla()` (el único update por frame del sistema — se le añadió UNA línea `LatidoTrauma()` al inicio, con guard propio de un-latido-por-frame): shake = `trauma² × FuerzaTraumaMax` (constante nueva 8f) EMITIDO POR `GolpearCamara` (la MISMA puerta PunchCameraModifier — un solo sistema de cámara, nunca dos shakes desacoplados; dirección por VFXCore.Hash01, jamás Main.rand) y desangrado `_trauma = Math.Max(0, _trauma − 0.02)` por tick. Trauma al cuadrado documentado: golpe pequeño ≈ imperceptible, golpe grande sacude. GolpearCamara y los métodos de shake directo quedaron INTACTOS.
+- TAREA 3 (StormLib): `public static void SeekArc(Vector2 from, Vector2 to, Vector2 target, float fuerza, Color cBase, Color cMedia, Color cNucleo, float alpha, int seed = 0, float time = 0f, float width = 3.5f)`. Receta: 1) FractalPath(from→to, 5 gens, chaos 0.15 — la misma generación de StormArc, regenera a 15 Hz por FlickTick); 2) SESGO — cada punto interior `pts[i] = Vector2.Lerp(pts[i], target, sin(t01·π)·fuerza)` (0 en anclajes EXACTOS, máx en el vientre; fuerza ≈ 0.25 recomendada); 3) pintado de 3 CAPAS con normal media y taper de StormArc (glow ×1.0 · mid ×0.5 · core ×0.22; colores de la receta #1E50A8/#5EB3FF/#FFF) EMITIDO AL BUFFER DE VFXCore (Quad con rotación → FlushAdditive pinta con la misma SoftGlow) — no abre ni cierra ningún batch.
+- TAREA 4 (VFXCore): `public static void ReportarFps(float fps)` con media móvil exponencial `_fpsSuave = 0.9·prev + 0.1·fps` (nace en 60) y factor que RESPIRA: `< 45 FPS → −0.05/reporte (suelo 0.5)`; `> 55 FPS → +0.02/reporte (techo 1)`. Propiedad `public static float FactorCalidad => _factorCalidad` y el techo de `Presupuesto` ahora es `(int)(24000f × _factorCalidad)` — factor 1 = 24000 exactos = comportamiento IDÉNTICO. Guard anti-NaN/infinito (un NaN envenenaría la media para siempre). NO se creó ningún ModSystem (API para el futuro, documentado).
+- Compilación intermedia por tarea (compile.sh): 0/0 tras tareas 1 y 2. Durante la 3 aparecieron 10 errores de RiftLib.Glitch/RiftLib.Portales/RiftLib (CS0260/CS0111/CS0102) — interferencia de UN AGENTE PARALELO partiendo RiftLib en parciales (ninguno de mis archivos). Verifiqué mi trabajo con compilación AISLADA de mis 4 archivos + BrumaNoise (csproj propio en /tmp): 0 Warning(s) 0 Error(s). Esperé al hermano y la compilación completa volvió a verde.
+- Verificación final de call-sites (grep EstelaLib.Ribbon / PulsoLib.GolpearCamara / StormLib.StormArc sobre Content): los 12+ call-sites de Ribbon (OcasoShard, Eminencia×2, OcasoBurst, Sinfonia, LagrimaSolar, CicloEstelar, Enjambre, MareaGravitatoria, PenduloJuicio…) y los de StormArc (RiftLib + RiftLib.Portales) SIGUEN INTACTOS; GolpearCamara conserva sus llamadas internas (Liquidar/Retroceder) sin tocar — PulsoLib hoy es 100% API futura (cero referencias `PulsoLib.` externas, como estaba).
+- Compilación FINAL contra tModLoader 2026.07.3.0: "Build succeeded. 0 Warning(s) 0 Error(s)."
+
+Stage Summary:
+- EstelaLib.Ribbon ahora tiene TAPER DE COLA opcional (0 = idéntico; la estela nace gruesa y muere fina, suelo 15%) sin romper un solo call-site.
+- PulsoLib tiene SISTEMA DE TRAUMA acumulativo (0..1, −0.02/tick, shake = trauma²×8 px por la MISMA puerta de cámara) — los golpes pequeños casi no se sienten, los grandes sacuden.
+- StormLib tiene SeekArc: el arco fractal A→B cuyo camino se ABOMBA hacia un objetivo (peso senoidal, anclajes exactos) pintado con la receta de 3 capas y emitido al buffer de VFXCore.
+- VFXCore tiene PRESUPUESTO ADAPTATIVO: ReportarFps + FactorCalidad (0.5..1) multiplica el techo de Presupuesto — la calidad respira sola con los FPS, factor 1 = comportamiento clásico exacto.
+- Los 4 archivos modificados compilan 0 errores / 0 warnings contra tML real; cero cambios de comportamiento existente fuera de lo pedido; ningún otro archivo tocado.
+
+---
+Task ID: 57-b
+Agent: Subagente RiftLib split + LumenLib v2
+Task: Split PURAMENTE mecánico de RiftLib.cs (1640 líneas) en 3 archivos partial class (núcleo + familia glitch + familia portales) sin cambiar una sola línea de código funcional, y LumenLib v2 con el método nuevo BloomTriple (bloom multi-escala SIN RenderTarget).
+
+Work Log:
+- Contexto: leídas las últimas 3 secciones del worklog (Task 53/54/55): v6.33 añadió a RiftLib la familia de portales (PortalAnillos, OjoEspacial, DesgarroGlitch, HeridaElectrica) y es lo que motivó el split.
+- Backups de seguridad en /tmp (RiftLib_57b_backup.cs, LumenLib_57b_backup.cs) antes de tocar nada.
+- Mapa de dependencias de helpers privados por familia: PortalAdditive/PortalAlpha los usan las DOS familias nuevas (glitch Y portales) -> se quedan en el núcleo (regla de higiene v6.34); DiskTex solo OjoEspacial -> Portales; _ecoOff/_ecoTint solo EcoGlitch -> Glitch; Quad/Tint/H01/Pal/StarQuad/TaperQuad/Eco/texturas Taper compartidas -> núcleo.
+- Conteos ANTES: grep -c "static" RiftLib.cs = 57; definiciones de métodos (líneas static+paréntesis) = 34; call-sites "RiftLib." en Content = 78.
+- CREADOS RiftLib.Glitch.cs (200 líneas; summary propio "v6.33 — la familia glitch"; _ecoOff/_ecoTint + EcoGlitch + DesgarroGlitch) y RiftLib.Portales.cs (447 líneas; summary propio "v6.33 — la familia de portales"; _disk/DiskTex + PortalAnillos + OjoEspacial + HeridaElectrica). Los cuerpos se extrajeron con sed de rangos EXACTOS del original (garantía byte a byte).
+- Verificación byte a byte de los 7 bloques movidos (diff contra el backup): EcoGlitch OK, _ecoOff/_ecoTint OK, DesgarroGlitch OK (135 líneas), _disk/DiskTex OK (6), PortalAnillos OK (132), OjoEspacial OK (116), HeridaElectrica OK (154) — todos IDÉNTICOS.
+- Borrado del original por rangos (sed, orden descendente): 789-816 (EcoGlitch), 835-836 (buffers del eco), 1012-1026 (banner v6.33 + _disk/DiskTex), 1044-1583 (las 4 primitivas v6.33). RiftLib.cs 1640 -> 1055 líneas.
+- Ediciones SOLO de documentación/organización (cero código): summary maestro reescrito con "LA ORGANIZACIÓN v6.34: la librería vive en TRES ARCHIVOS PARCIALES"; "public static class RiftLib" -> "public static partial class RiftLib"; sección "PRIMITIVAS INTERNAS — compartidas por el núcleo y por los parciales"; sección nueva "v6.33 — LOS LOTES DE LAS FAMILIAS NUEVAS (glitch + portales)" para PortalAdditive/PortalAlpha (compartidos); nota de mudanza del eco glitch; banners renumerados en los parciales (HeridaElectrica 4->3 en Portales.cs; DesgarroGlitch sin número en Glitch.cs).
+- LUMENLIB v2: añadido BloomTriple justo tras BloomPulse siguiendo el patrón EXACTO de la casa (Quad privado + GlowTex=SoftGlow + Tint; batch ABIERTO en aditivo, sin tocarlo): tres bandas SoftGlow a 1.0x, 1.9x y 3.4x del radio con alfas 0.55·i, 0.28·i y 0.13·i; núcleo con el color puro, media lerp hacia blanco 30%, amplia 55% (blanco cálido 255,250,240 de la casa). Doc-comment documenta POR QUÉ multi-escala y no RenderTarget (RT global = riesgo de pantalla negra y no verificable fuera del juego; el multi-escala es mockeable y a prueba de fallos por capa). Diff mínimo: 1 método nuevo, 0 métodos existentes tocados. NO se añadió FlareMejorado.
+- Compilación final: 0 errores, 0 warnings.
+
+Stage Summary:
+- RiftLib.cs 1084 líneas (núcleo: RiftFase, RiftPaletas, 26 métodos del núcleo con las 9 texturas compartidas y las primitivas internas, PortalAdditive/PortalAlpha compartidos, RiftMundoSystem); RiftLib.Glitch.cs 200 (EcoGlitch + DesgarroGlitch + buffers); RiftLib.Portales.cs 447 (PortalAnillos + OjoEspacial + HeridaElectrica + disco negro). LumenLib.cs 544 (493 + 51 de BloomTriple).
+- ANTI-ROTURA: definiciones de métodos (static+paréntesis) 34 ANTES = 29(núcleo)+2(glitch)+3(portales) DESPUÉS, exacto. Líneas "static" 57 -> 59 (delta +2 = las dos declaraciones "public static partial class" de los archivos nuevos; cero métodos nuevos en el split). Call-sites "RiftLib." en Content: 78 = 78 (intactos, ninguno tocado).
+- Prueba reina de conservación: diff de código puro (sin comentarios ni líneas vacías) original vs unión de los 3 archivos = SOLO las cabeceras using/namespace/{}/cierre de los 2 archivos nuevos (22 líneas estructurales). 966 líneas de código funcional conservadas al 100%: 0 perdidas, 0 modificadas.
+- Compilación: Build succeeded · 0 Warning(s) · 0 Error(s).
+
+---
+Task ID: 58-a
+Agent: Subagente GravLens + NebulaLib
+Task: Crear Content/VFX/GravLens.cs (la distorsión unificada que generaliza la lente del agujero negro para cualquier efecto) y Content/VFX/NebulaLib.cs (nebulosas volumétricas con curl noise y advección), con el desacople MÍNIMO en BlackHoleLensSystem.cs.
+
+Work Log:
+- Contexto estudiado: últimas 3 secciones del worklog (Task 53/54/55 — v6.31→v6.33, sandbox reproducible, StormLib v2, RiftLib v4), BlackHoleLensSystem.cs ÍNTEGRO (hook MonoMod On_TimeLogger punto 36, pases A/B, arrays de 5 fuentes UV, fallback defensivo, modo identidad) y el patrón Shaders/ (Ref<Effect> + ModContent.Request con bandera de fallo).
+- Patrones de la casa absorbidos: VFXCore (Quad/Begin/FlushAdditive, Hash01, Presupuesto, dedup por Main.GameUpdateCount), BoltRenderer (contrato VFXCore.Begin→ComputeQuads→FlushAdditive), BrumaFX (Column/Tendril/Cloud, Tint premultiplicado, ventanas de vida) y PyraLib (Tint/H01 propios, senos inconmensurables).
+- Baseline verificada ANTES de tocar nada: compile.sh 0 errores / 0 warnings.
+- CREADO Content/VFX/GravLens.cs: struct Lente {Centro, Radio, Fuerza, Vida01, Orden, Decaimiento}; Registrar(centro, radio, fuerza, vida) con cap de 8 (expulsa al ticket MÁS VIEJO, no al de menos vida), no-op en servidor y guard NaN (lección v6.27 de PyraPalettes — un NaN envenenaría la fuerza GLOBAL del pase); Actualizar() decae vidas a 60 Hz con dedup por Main.GameUpdateCount (idempotente: pausa = congelado, como todo el juego); PoblarParaRender(...) interno convierte mundo→UV, culla con margen de onda ±0.35 y aplica ventana nacimiento-rápido(15%)/muerte-lenta(30%) a la fuerza.
+- DECISIÓN DE INTEGRACIÓN (documentada en código): los agujeros negros NO pasan por Registrar — su recolección está trenzada con _blackHoleIndices (dibujado AboveLens) y los LensRadiusMult por tipo; reestructurarla era un diff grande con riesgo real de romper la regla de oro. En su lugar las lentes externas se FUNDEN en las MISMAS arrays del pase A en el punto de render: mismo hook, mismo shader, cero duplicación, camino de los agujeros INTACTO.
+- DIFF en BlackHoleLensSystem.cs: +31 líneas, 0 tocadas/0 borradas — (1) using AethonMod.Content.VFX; (2) bloque v6.34 en la cabecera con la decisión; (3) GravLens.Actualizar() al inicio del try del hook (el sistema no tiene punto de update: su único tick es el hook de render); (4) punto "1b" en RenderLens: count += GravLens.PoblarParaRender(_sourcePositions, _sourceRadii, _strengths, count, MaxSources) justo antes de calcular hasA.
+- CREADO Content/VFX/NebulaLib.cs: Nube(centro, radio, time, seed, colorA, colorB, alpha, volutas=14) — volutas de SoftGlow orbitando lento (velocidades distintas, CW/CCW mixto), ADVECTADAS por curl noise (Curl2D = (∂n/∂y, −∂n/∂x) por diferencias centrales de un ValueNoise2D a mano: hash de esquina + smoothstep + bilineal, ~30 líneas sin dependencias), respiración ±20% con fases propias, mezcla colorA→colorB por distancia al corazón, alpha clampeada 0.05-0.14 (VELOS, no fuegos) y LOD por VFXCore.Presupuesto. Columna(base_, altura, ancho, time, seed, colorA, colorB, alpha) — 10-16 volutas apiladas ascendiendo en bucle (y=(y0+time·vel)%altura, vel invariante de escala, ciclo ~2.9 s), ensanchando hacia arriba (×0.55→×1.35), desvaneciendo en el techo (último 28%) y naciendo suave en el pie (el wrap jamás se ve). TODO determinista por (time, seed), cero estado, cero shaders nuevos, cero GC por frame.
+- CONCURRENCIA con 58-b (split de RiftLib a partials): a mitad de mi verificación aparecieron RiftLib.Glitch.cs/RiftLib.Portales.cs en vuelo (10 errores CS0102/CS0111/CS0260 AJENOS a mis archivos). Verifiqué mi código con un csproj aislado que excluía sus archivos (0/0), SIN tocar su árbol; al terminar 58-b su split, la compilación COMPLETA compartida pasó sola.
+- Compilación final (árbol completo, con el split de 58-b incluido): Build succeeded — 0 Warnings, 0 Errors. Sandbox limpio (verify temporal y /tmp/obj_58a eliminados).
+
+Stage Summary:
+- GravLens operativa: cualquier efecto del mod curva el fondo con UNA llamada (Registrar), fundida al pipeline existente sin duplicar hook ni shader — los agujeros negros siguen distorsionando EXACTAMENTE igual (diff puro de inserciones).
+- NebulaLib operativa: nebulosas y columnas de gas volumétricas por capas con curl noise real (flujo sin divergencia), listas para géiseres/portales/minions.
+- 0 errores / 0 warnings en el árbol completo; la coexistencia con el agente paralelo 58-b quedó verificada (sus partials + mis librerías compilan juntos).
+
+---
+Task ID: 58-c
+Agent: Subagente AudioLib
+Task: Crear Content/VFX/AudioLib.cs — la identidad sonora de la casa: perfiles sonoros por familia (Solar/Vacia/Electrica/Runico/Cosmica/Desgarro × apertura/impacto/carga/zona/muerte) sobre sonidos VANILLA ya usados por el mod, con anti-spam por (familia, momento) y jitter de pitch vivo. Un solo archivo nuevo, nada más tocado.
+
+Work Log:
+- Contexto leído: últimas 3 secciones del worklog (Task 53/54/55 — v6.31→v6.33: RiftLib v4 con la familia de portales, StormLib v2, entorno reproducible dotnet8 + tML 2026.07.3.0 + /home/z/sandbox/compile.sh).
+- Patrón de sonido de la casa estudiado: grep de SoundEngine.PlaySound/SoundStyle (150+ usos) + lectura de RunicLightning (el trueno en 3 capas 12/93/122), EnjambrePrismatico (zumbido periódico de zona Item93 cada 90t a 0.35), BlackHole* (Item14+Item88), PulsoLib (el precedente directo: sonido por Material con pitch de combo + try/catch + guard de servidor) y ColapsoMagnetar (Item77 como carga que sube lerp −0.35→+0.30, Item94 como clímax).
+- Inventario completo de SoundIDs usados por el mod (rg -o + uniq): 28 IDs (Item1-167, NPCHit/Death, DD2_*, Roar). Verificación semántica extra contra el vanilla decompilado de research/v633/src/vanilla/Projectile.cs (p.ej. Item118 = spawn del proyectil 522, Item89 = tipos 424-426) para descartar IDs ambiguos.
+- MAPA 6×5 decidido SOLO con IDs que la casa ya usa (30/30 celdas con pedigrí documentado en una línea de porqué cada una; 2 reutilizaciones deliberadas: Item12 en Elec.impacto+Runico.apertura y Item93 en Elec.apertura+zona — el pitch/volumen de la familia los separa).
+- AudioLib.cs creado (~250 líneas): enum Familia anidado; Sonar(familia, momento, pos, volumen=1, pitch=0) con switch de momento (desconocido→impacto); pitch base por familia (Solar +0.10, Vacia −0.30, Electrica +0.40, Runico 0, Cosmica −0.10, Desgarro −0.20) + jitter Main.rand ±0.08 salvo "carga" (estable); volumen base por momento (apertura 0.90, impacto/muerte 1.00, carga 0.60, zona 0.45) escalado por el llamador; anti-spam Dictionary<int,int> _ultimoTick con clave compuesta a mano ((int)familia*8 + momento) — NADA de GetHashCode de strings (aleatorio por proceso en .NET); enfriamiento 12 ticks para apertura/impacto/muerte y 30 para zona/carga; limpieza perezosa >64 entradas → Clear; PuedeSonar privado que registra el tick al conceder; SilenciarZona() público que reinicia la memoria (cambio de arma); guard Main.netMode==Server + try/catch a prueba de balas (estilo PulsoLib); Elegir() como switch expression (familia,momento)→SoundStyle con el catálogo comentado.
+- COMPILACIÓN: compile.sh compartido da 10 errores — TODOS en RiftLib.cs/RiftLib.Glitch.cs/RiftLib.Portales.cs (otro agente en plena refactorización a partials: CS0260/CS0111/CS0102, sin el modificador partial todavía); 0 de AudioLib. Verificación privada con copia del verify.csproj excluyendo SOLO esos 2 archivos en vuelo del otro agente: Build succeeded. 0 Warning(s). 0 Error(s). (dos reintentos del shared espaciados, mismo estado).
+
+Stage Summary:
+- AudioLib.cs existe y es la única capa sonora del mod con VOZ POR FAMILIA: 6 familias × 5 momentos, 100% sonidos vanilla ya usados por la casa (cero archivos de audio, cero rutas frágiles), cada elección documentada con su pedigrí.
+- El anti-spam mata el "coro de impactos": el mismo (familia, momento) suena 1 vez cada 12 ticks (30 zona/carga); clave int compuesta a mano, limpieza perezosa a 64, SilenciarZona() para reiniciar al cambiar de arma.
+- 0 errores 0 warnings en AudioLib (verificado aislado contra tML 2026.07.3.0 real; el shared compile queda bloqueado SOLO por los RiftLib.* de otro agente en curso, ninguno mío).
+- Nadie más toca este archivo; sin migración de call-sites (tarea de otros): AudioLib queda listo para adoptar.
+
+---
+Task ID: 59
+Agent: Orquestador principal (Z.ai Code)
+Task: v6.34 cierre — auditoría multi-pasada (subagente 59-a), fixes críticos, versión, CHANGES, commit y push.
+
+Work Log:
+- AUDITORÍA (subagente 59-a, solo lectura, 6 pasadas): PASADA 1 grep otros mods → 3 hits "CWR" en comentarios; PASADA 2 hjson → 2 DisplayNames faltantes (las bolsas v6.33), 1 clave huérfana (DesgarroRealityProjectile), 1 línea fusionada en-US:50; PASADA 3 assets → 2 PNGs FALTANTES (BolsaDosFormas.png, BolsaDesgarros.png — CRÍTICO: tML habría fallado la carga del mod); PASADA 4 código → 2 TODOs reales (roadmap legítimo), 1 método muerto (tangentialAngle); PASADA 5 librerías nuevas → sanas (guards NaN, Begin/End equilibrados, pases A/B intactos), doc "DOCE RUNAS" obsoleta, ReportarFps INERTE, guard ciclo; PASADA 6 → 246/246 PNGs válidos.
+- FIXES CRÍTICOS: tools/gen_v634_assets.py genera las 2 bolsas con el patrón exacto de la casa (interior DUAL oro→violeta con yin cósmico / saco negro con grieta glitch magenta) — VLM 7/10 y 8/10; +DisplayName+Tooltip es/en de ambas; los 3 CWR neutralizados ("la erosión direccional de la casa") — grep 0 de 15 patrones.
+- FIXES MENORES: clave huérfana borrada (es+en); línea fusionada separada; tangentialAngle muerto borrado; doc SelloSolar actualizada (OCHO RUNAS); guard ciclo≤0.01 en OndasDistorsion.
+- CALIDADFpSSystem.cs NUEVO (Content/Systems/): el alimentador del presupuesto adaptativo (PostUpdateEverything → VFXCore.ReportarFps(Main.frameRate), guard dedicated server) — la mejora v6.34 de VFXCore quedó VIVA en vez de dormida.
+- build.txt 6.33→6.34, CHANGES.md v6.34 (secciones A-E con lo no verificable documentado), este worklog.
+- Compilación final: 0 errores 0 warnings contra tML 2026.07.3.0 real. Commit + push a GitHub (main).
+
+Stage Summary:
+- La auditoría cazó que v6.33 salió a medias en sus 2 bolsas (sin sprite ni nombre = mod que no carga): ARREGLADO de raíz.
+- v6.34 = +2 librerías de signos mágicos (petición central) +6 mejoras +3 librerías nuevas +1 auditoría completa con limpieza total de referencias.
+- La pila de la casa queda en 15 librerías VFX + BrumaFX + la técnica del sol: TODO lo que brilla pasa por una librería.

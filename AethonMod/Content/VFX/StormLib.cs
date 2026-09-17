@@ -720,6 +720,91 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        // ==================================================================
+        //  v6.34 — EL ARCO PERSEGUIDOR (SeekArc): el camino se CURVA al objetivo
+        // ==================================================================
+
+        /// <summary>
+        /// v6.34 — EL ARCO PERSEGUIDOR: un arco eléctrico de
+        /// <paramref name="from"/> a <paramref name="to"/> cuyo CAMINO ENTERO
+        /// se CURVA hacia <paramref name="target"/> — el rayo que "busca" a su
+        /// víctima sin desanclarse de sus extremos. La receta, en tres pasos:
+        /// 1) el CAMINO FRACTAL normal de A a B (FractalPath, la misma
+        /// generación de StormArc); 2) EL SESGO — cada punto interior se
+        /// desplaza hacia el objetivo con peso senoidal
+        /// (sin(t01·π)·fuerza: 0 en los anclajes, MÁXIMO en el medio — el
+        /// vientre del arco se abomba hacia target, los extremos quedan
+        /// EXACTOS); 3) el PINTADO DE 3 CAPAS de la casa (glow ×1.0 · mid
+        /// ×0.5 · core ×0.22 — ver StormArc) con NORMAL MEDIA por tramo.
+        /// A diferencia del resto de StormLib (que dibuja al batch abierto),
+        /// este EMITE AL BUFFER DE VFXCORE (Quad con rotación → el llamador
+        /// vuelca con FlushAdditive, que pinta con la MISMA textura SoftGlow
+        /// de las 3 capas): encaja con los efectos que ya componen cuadros
+        /// de luz y no abre ni cierra NINGÚN batch.
+        /// </summary>
+        /// <param name="from">Anclaje A (coords de mundo).</param>
+        /// <param name="to">Anclaje B (coords de mundo).</param>
+        /// <param name="target">El objetivo al que el camino se curva (el arco se abomba hacia él; NUNCA lo alcanza).</param>
+        /// <param name="fuerza">Cuánto se abomba el camino (≈0.25 recomendado: en el vientre, cada punto recorre esa fracción de su distancia al objetivo).</param>
+        /// <param name="cBase">Color de la capa glow (la receta: #1E50A8).</param>
+        /// <param name="cMedia">Color de la capa media (la receta: #5EB3FF).</param>
+        /// <param name="cNucleo">Color del núcleo (la receta: #FFFFFF).</param>
+        /// <param name="alpha">Multiplicador global de intensidad.</param>
+        /// <param name="seed">Semilla determinista del fractal.</param>
+        /// <param name="time">Tiempo animado (regenera la forma a 15 Hz con FlickTick).</param>
+        /// <param name="width">Ancho del cuerpo del arco en px (3.5 ≈ el de los arcos internos de la casa).</param>
+        public static void SeekArc(Vector2 from, Vector2 to, Vector2 target, float fuerza,
+            Color cBase, Color cMedia, Color cNucleo, float alpha,
+            int seed = 0, float time = 0f, float width = 3.5f)
+        {
+            float len = Vector2.Distance(from, to);
+            if (len < 4f) return;
+
+            // === 1. EL CAMINO FRACTAL NORMAL (la misma receta de StormArc) ===
+            int flick = FlickTick(time);
+            Vector2[] pts = FractalPath(from, to, seed, flick, 5, 0.15f);
+
+            // === 2. EL SESGO HACIA EL OBJETIVO: peso senoidal — 0 en los
+            // anclajes (quedan EXACTOS), máximo al medio (el vientre busca).
+            // Lerp(punto→target, peso): con fuerza 0.25, el vientre recorre
+            // el 25% de su distancia al objetivo. ===
+            for (int i = 1; i < pts.Length - 1; i++)
+            {
+                float t01 = i / (float)(pts.Length - 1);
+                float peso = (float)Math.Sin(t01 * Math.PI) * fuerza;
+                pts[i] = Vector2.Lerp(pts[i], target, peso);
+            }
+
+            // === 3. EL PINTADO DE 3 CAPAS — el mismo motor de PintaArco
+            // (normal media + taper), pero EMITIDO al buffer de VFXCore. ===
+            float total = PathLength(pts);
+            if (total < 1f) return;
+            float arc = 0f;
+            for (int i = 0; i < pts.Length - 1; i++)
+            {
+                Vector2 seg = pts[i + 1] - pts[i];
+                float sl = seg.Length();
+                if (sl < 0.30f) { arc += sl; continue; }
+                // NORMAL MEDIA (la lección del ribbon): mata los puntos
+                // brillantes de las juntas.
+                Vector2 prev = i > 0 ? pts[i] - pts[i - 1] : seg;
+                Vector2 next = i < pts.Length - 2 ? pts[i + 2] - pts[i + 1] : seg;
+                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
+                if (avg.LengthSquared() < 0.001f) avg = seg;
+                avg = Vector2.Normalize(avg);
+                float rot = (float)Math.Atan2(avg.Y, avg.X);
+                Vector2 pos = (pts[i] + pts[i + 1]) * 0.5f;
+                float tMid = (arc + sl * 0.5f) / total;
+                float w = width * MathHelper.Clamp((float)Math.Sin(tMid * Math.PI) + 0.35f, 0.3f, 1f);
+
+                // LAS 3 CAPAS (receta eléctrica): glow esc ×1.0 · mid ×0.5 · core ×0.22.
+                VFXCore.Quad(pos, Tint(cBase, 0.30f * alpha), new Vector2(sl + w * 1.6f, w * 1.6f), rot);
+                VFXCore.Quad(pos, Tint(cMedia, 0.55f * alpha), new Vector2(sl + w * 0.8f, w * 0.8f), rot);
+                VFXCore.Quad(pos, Tint(cNucleo, 0.90f * alpha), new Vector2(sl + w * 0.4f, w * 0.22f), rot);
+                arc += sl;
+            }
+        }
+
         /// <summary>
         /// T5 — LA RÁFAGA DE CHISPAS DE IMPACTO (la receta ThunderBoltVFX de
         /// clásica): N chispas con STRETCH (0.5, 1.6), SHAKE que DECAE

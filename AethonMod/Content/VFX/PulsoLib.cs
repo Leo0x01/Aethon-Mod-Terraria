@@ -28,6 +28,9 @@ namespace AethonMod.Content.VFX
     ///     lleva la semilla whoAmI (determinismo MP gratis).
     ///   · LA CÁMARA: un solo punto de acceso al PunchCameraModifier real,
     ///     con try/catch a prueba de balas.
+    ///   · v6.34 — EL TRAUMA: el shake ACUMULATIVO con decaimiento — el castigo
+    ///     sostenido SANGRA la cámara a razón de trauma² (los golpes pequeños
+    ///     casi no se sienten, los grandes sacuden) y se disipa solo.
     ///   · EL SONIDO POR MATERIAL: máx 2/frame (presupuesto) y pitch por
     ///     combo — el contador de racha regala el pitch ascendente.
     ///   · LA PANTALLA: un estado push/decay con apilamiento limitado —
@@ -290,6 +293,66 @@ namespace AethonMod.Content.VFX
             catch { }
         }
 
+        // ------------------------------------------------------------------
+        //  v6.34 — EL TRAUMA (el shake que se ACUMULA y se disipa solo)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// La fuerza del shake con el trauma AL 100% (px) — el techo del temblor.
+        /// </summary>
+        private const float FuerzaTraumaMax = 8f;
+
+        /// <summary>El castigo acumulado (0..1): se suma con <see cref="Trauma"/>.</summary>
+        private static float _trauma;
+
+        private static uint _frameTrauma;
+
+        /// <summary>
+        /// v6.34 — ACUMULA TRAUMA DE CÁMARA (0..1, clampeado): a diferencia del
+        /// shake directo (GolpearCamara: un golpe, un tirón, se acabó), el
+        /// trauma SE SUMA y el sistema lo va sangrando solo (−0.02/tick en
+        /// <see cref="ActualizarPantalla"/>). EL TRAUMA AL CUADRADO es el
+        /// concepto: un golpe pequeño (trauma 0.1 → shake 0.08 px) es casi
+        /// IMPERCEPTIBLE; uno grande (trauma 0.8 → shake ×0.64 de la fuerza
+        /// máxima) SACUDE de verdad — la curva no lineal es lo que separa el
+        /// "golpecito" del "porrazo". El shake sale por la MISMA puerta que
+        /// GolpearCamara (el PunchCameraModifier de la casa): UN solo sistema
+        /// de cámara, nunca dos shakes desacoplados.
+        /// </summary>
+        /// <param name="cantidad">Cuánto trauma se suma (0..1 recomendado;
+        /// típico 0.10-0.35 por golpe).</param>
+        public static void Trauma(float cantidad)
+            => _trauma = MathHelper.Clamp(_trauma + cantidad, 0f, 1f);
+
+        /// <summary>
+        /// EL LATIDO DEL TRAUMA (v6.34, una vez por frame desde
+        /// <see cref="ActualizarPantalla"/>): calcula el shake como
+        /// trauma² × <see cref="FuerzaTraumaMax"/> y lo empuja por la puerta de
+        /// cámara de la casa — dirección por Hash01 (el "random" determinista
+        /// de la casa; JAMÁS Main.rand) — y desangra el trauma a 0.02/tick
+        /// (50 ticks de vida desde el tope, ~1 s a 60 fps).
+        /// </summary>
+        private static void LatidoTrauma()
+        {
+            if (_trauma <= 0f) return;
+            uint frame = Main.GameUpdateCount;
+            if (frame == _frameTrauma) return;   // un latido por frame
+            _frameTrauma = frame;
+
+            // EL SHAKE AL CUADRADO: los golpes pequeños casi no se sienten,
+            // los grandes sacuden (ver Trauma).
+            float shake = _trauma * _trauma * FuerzaTraumaMax;
+            if (shake > 0.05f)
+            {
+                float ang = VFXCore.Hash01((int)frame, 17, 977) * MathHelper.TwoPi;
+                GolpearCamara(new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)),
+                    shake, 6);
+            }
+
+            // EL DESANGRADO: −0.02 por tick, jamás negativo.
+            _trauma = Math.Max(0f, _trauma - 0.02f);
+        }
+
         // ==================================================================
         //  4 — EL SONIDO POR MATERIAL (presupuesto 2/frame + pitch por combo)
         // ==================================================================
@@ -378,6 +441,7 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static void ActualizarPantalla()
         {
+            LatidoTrauma();   // v6.34 — el trauma también late aquí (el latido único por frame)
             if (_ticksPantalla <= 0) { _fuerzaPantalla = 0f; return; }
             uint frame = Main.GameUpdateCount;
             if (frame == _framePantalla) return;   // un decay por frame

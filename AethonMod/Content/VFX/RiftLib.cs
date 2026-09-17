@@ -51,8 +51,27 @@ namespace AethonMod.Content.VFX
     }
 
     /// <summary>
-    /// RiftLib — v6.31 — LA LIBRERÍA DE LOS DESGARROS DE REALIDAD, TERCERA
+    /// RiftLib — v6.34 — LA LIBRERÍA DE LOS DESGARROS DE REALIDAD, TERCERA
     /// GENERACIÓN: LA LÍNEA CONTINUA Y PAREJA.
+    ///
+    /// LA ORGANIZACIÓN v6.34: la librería vive en TRES ARCHIVOS PARCIALES —
+    /// la MISMA clase, el MISMO namespace y el MISMO contrato, solo cambia
+    /// el cajón (el split fue PURAMENTE mecánico: mismos métodos, mismos
+    /// cuerpos, cero call-sites tocados):
+    ///   · ESTE ARCHIVO (el maestro): la documentación maestra, RiftPaletas,
+    ///     el NÚCLEO del desgarro clásico (Tear/TearVacio/TearImpacto,
+    ///     Grieta/GrietaVacio, Star, el camino de la vibración con sus
+    ///     curvas y su colisión, el campo de estrellas, las chispas de
+    ///     anomalía, el oscurecer del mundo) + las PRIMITIVAS INTERNAS de
+    ///     quad/textura compartidas + los lotes alfa/aditivo de las
+    ///     familias nuevas (regla de higiene: lo que usan dos familias se
+    ///     queda en el núcleo).
+    ///   · El parcial GLITCH (v6.33): EcoGlitch + DesgarroGlitch con sus
+    ///     buffers privados del eco.
+    ///   · El parcial de PORTALES (v6.33): PortalAnillos + OjoEspacial +
+    ///     HeridaElectrica con su disco negro.
+    /// Los parciales comparten los miembros privados del maestro; la fase
+    /// (RiftFase), las paletas y RiftMundoSystem viven aquí, con el núcleo.
     ///
     /// LA LECCIÓN RAÍZ de v6.31 (research/v631/INFORME_TAJOS_CORTE_REALIDAD.md,
     /// 54 búsquedas + las fuentes de referencia leídas línea a línea):
@@ -96,9 +115,9 @@ namespace AethonMod.Content.VFX
     ///   · LA FRACTURA ES EL CLÍMAX ÓPTICO: tras la VIBRACIÓN (onda estacionaria
     ///     0→3.5 px a ~10 Hz creciendo 16 ticks), flash 0.30 + ancho ×1.35 +
     ///     el daño ×2.2 — y la línea SIGUE RECTA (más intensa: la herida abierta).
-    ///   · EL CIERRE SE COME EL CORTE DESDE LOS EXTREMOS (ErodeT direccional
-    ///     CWR): la línea se acorta hacia el centro SIN menguar el ancho —
-    ///     "la realidad sana comiéndose el corte".
+    ///   · EL CIERRE SE COME EL CORTE DESDE LOS EXTREMOS (la erosión
+    ///     direccional de la casa): la línea se acorta hacia el centro SIN
+    ///     menguar el ancho — "la realidad sana comiéndose el corte".
     ///   · EL CIERRE ES JUSTO: el daño cesa 8 ticks ANTES de que el visual muera.
     ///
     /// CONTRATO DE LOTE (idéntico al de StormLib/EstelaLib/OndaLib): los métodos
@@ -111,7 +130,7 @@ namespace AethonMod.Content.VFX
     /// cero estado de desgarros (progress/fase los lleva el llamador); cero GC
     /// por frame (buffers estáticos reutilizados).
     /// </summary>
-    public static class RiftLib
+    public static partial class RiftLib
     {
         // ==================================================================
         //  TEXTURAS COMPARTIDAS (resolución diferida)
@@ -786,34 +805,8 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        /// <summary>
-        /// EL ECO GLITCH (lección élite glur, SIN render targets): 3 offsets
-        /// horizontales alternos ±(2..3) px con tintes de canal y alpha
-        /// decreciente. El llamador re-dibuja su desgarro/grieta con estos
-        /// offsets. Los arrays son buffers estáticos (cero GC).
-        /// (v6.28: el desgarro del arma YA NO lo usa — el usuario lo leyó como
-        /// "interrupciones"; queda disponible para otros llamadores.)
-        /// </summary>
-        public static void EcoGlitch(int seed, float time, out Vector2[] offsets,
-            out Color[] tintes)
-        {
-            int tick = (int)(time * 60f);
-            for (int i = 0; i < 3; i++)
-            {
-                // Offset horizontal alterno ±(2..3) px, por eco y por tick.
-                float mag = 2f + H01(seed, tick, 901 + i) * 1f;
-                float sign = (i % 2 == 0 ? -1f : 1f) * (H01(seed, tick, 911 + i) > 0.5f ? 1f : -1f);
-                _ecoOff[i] = new Vector2(mag * sign, 0f);
-
-                // Tinte de canal (R para un lado, B para el otro) con alpha decreciente.
-                float a = 0.30f * (1f - i / 3f);
-                _ecoTint[i] = i % 2 == 0
-                    ? new Color(255, 0, 0, (byte)(int)(255f * a))
-                    : new Color(0, 90, 255, (byte)(int)(255f * a));
-            }
-            offsets = _ecoOff;
-            tintes = _ecoTint;
-        }
+        // (EL ECO GLITCH se mudó en v6.34 al parcial glitch, junto a
+        //  DesgarroGlitch — mismos cuerpos, mismo namespace.)
 
         // ==================================================================
         //  EL MUNDO — el oscurecer de la realidad herida
@@ -829,11 +822,10 @@ namespace AethonMod.Content.VFX
             => RiftMundoSystem.Pedir(MathHelper.Clamp(objetivo, 0f, 0.35f));
 
         // ==================================================================
-        //  PRIMITIVAS INTERNAS
+        //  PRIMITIVAS INTERNAS — compartidas por el núcleo y por los
+        //  parciales de las familias nuevas (los parciales ven los
+        //  privados del maestro: mismos quads, mismos tintes)
         // ==================================================================
-
-        private static readonly Vector2[] _ecoOff = new Vector2[3];
-        private static readonly Color[] _ecoTint = new Color[3];
 
         /// <summary>Color de la paleta con índice seguro (las paletas tienen 3 o 4 entradas).</summary>
         private static Color Pal(Color[] paleta, int i)
@@ -1010,20 +1002,12 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  v6.33 — LA FAMILIA DE LOS PORTALES (los 4 desgarros nuevos nacen
-        //  de las referencias del usuario analizadas con VLM: research/v633/
-        //  refs + vlm_ref1/2.json). CONTRATO: reciben el sprite batch CERRADO
-        //  y lo dejan CERRADO (contrato v6.10) — gestionan sus lotes alfa y
-        //  aditivo internamente. Coordenadas de PANTALLA (resta screenPosition
-        //  antes de llamar).
+        //  v6.33 — LOS LOTES DE LAS FAMILIAS NUEVAS (glitch + portales).
+        //  Abren/cierran el sprite batch del juego con el estado de la casa;
+        //  los usan las tres primitivas del parcial de portales y la del
+        //  parcial glitch — por eso viven AQUÍ, en el núcleo compartido
+        //  (regla v6.34: lo que usan dos familias no se mueve de sitio).
         // ==================================================================
-
-        private static Asset<Texture2D> _disk;
-
-        /// <summary>El disco negro sólido (el núcleo del pliegue).</summary>
-        private static Texture2D DiskTex =>
-            (_disk ??= ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Procedural/BlackDisk")).Value;
 
         /// <summary>Abre/cierra el lote ADITIVO de la casa.</summary>
         private static void PortalAdditive()
@@ -1041,546 +1025,6 @@ namespace AethonMod.Content.VFX
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 
-        // ------------------------------------------------------------------
-        //  1 — EL PORTAL DIMENSIONAL (la referencia: anillos concéntricos
-        //  perfectos en túnel, gradiente cian→magenta, glifos, núcleo blanco
-        //  que respira, sparkles orbitando, polvo en espiral)
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// EL PORTAL DE ANILLOS — "Se abre portal dimensional": 6 anillos
-        /// concéntricos con ROTACIÓN JERÁRQUICA (cada uno gira a su velocidad,
-        /// sentidos alternos — el parallax del túnel), gradiente cian→magenta
-        /// de fuera a dentro, GLIFOS (marcas runicas) a lo largo de cada
-        /// anillo, el NÚCLEO BLANCO que respira a 0.3 Hz, sparkles de 4
-        /// puntas orbitando y polvo fluyendo en ESPIRAL hacia dentro.
-        /// `progress` 0→1 = la apertura (los anillos nacen del centro).
-        /// </summary>
-        public static void PortalAnillos(Vector2 center, float radius, float progress,
-            float time, int seed, float alpha = 1f)
-        {
-            if (radius < 4f || alpha <= 0.02f) return;
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-            try
-            {
-                Color cian = new(0, 176, 255);        // #00B0FF
-                Color magenta = new(213, 0, 249);     // #D500F9
-                Color blanco = new(255, 255, 255);
-
-                // El breathing del conjunto (0.3 Hz — el portal "late").
-                float breathe = 1f + 0.05f * MathF.Sin(time * 0.3f * MathHelper.TwoPi + seed);
-                float open = (float)Math.Pow(progress, 0.7f);   // ease-out de apertura
-
-                PortalAdditive();
-                var batch = Main.spriteBatch;
-
-                // === 1. LOS 6 ANILLOS CONCÉNTRICOS (el túnel) ===
-                const int Anillos = 6;
-                for (int k = 0; k < Anillos; k++)
-                {
-                    float fk = k / (float)(Anillos - 1);         // 0=interior … 1=exterior
-                    // Los anillos exteriores nacen PRIMERO (la apertura
-                    // empuja hacia afuera) — cada uno abre con su retraso.
-                    float anilloOpen = MathHelper.Clamp(progress * (1.6f + k * 0.35f) - k * 0.35f, 0f, 1f);
-                    float r = radius * (0.22f + 0.78f * fk) * anilloOpen * breathe;
-                    if (r < 2f) continue;
-
-                    // El gradiente del túnel: cian fuera, magenta dentro
-                    // (v6.33 b: el magenta interior MÁS PRESENTE — la lección
-                    // del mock: a 0.28 se perdía contra el cielo claro).
-                    Color anillo = Color.Lerp(magenta, cian, fk);
-                    // Los interiores son MÁS definidos (el fondo del túnel).
-                    float grosor = MathHelper.Lerp(3.2f, 6.5f, 1f - fk);
-                    float alfa = (0.40f + 0.50f * (1f - fk)) * alpha * anilloOpen;
-
-                    // LA ROTACIÓN JERÁRQUICA: sentidos alternos, el interior
-                    // gira más rápido (la entrada gira con el otro lado).
-                    float spin = time * (0.35f + 0.55f * (1f - fk)) * (k % 2 == 0 ? 1f : -1f);
-                    float rot = spin + seed;
-
-                    // El anillo (dibujado como arco completo con la textura Ring).
-                    Quad(batch, RingTex, center, new Vector2(r * 2.15f, r * 2.15f), rot,
-                        Tint(anillo, alfa * 0.8f));
-                    Quad(batch, RingTex, center, new Vector2(r * 2.0f, r * 2.0f), rot,
-                        Tint(anillo, alfa));
-
-                    // === LOS GLIFOS (las marcas del círculo — 10-14 por anillo) ===
-                    int glifos = 8 + k * 2;
-                    for (int g = 0; g < glifos; g++)
-                    {
-                        float h = H01(seed, k * 31 + g, 71);
-                        if (h < 0.45f) continue;             // no todos los sitios
-                        float ang = spin * (1f + 0.15f * fk) + g * MathHelper.TwoPi / glifos;
-                        Vector2 gp = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r;
-                        float gs = grosor * (1.2f + 1.4f * H01(seed, k * 17 + g, 73));
-                        // El glifo: una marca alargada RADIAL (como runa del círculo).
-                        Quad(batch, GlowTex, gp, new Vector2(gs * 0.5f, gs * 2.4f),
-                            ang + MathHelper.PiOver2,
-                            Tint(Color.Lerp(anillo, blanco, 0.35f), alfa * 0.85f));
-                    }
-                }
-
-                // === 2. EL POLVO EN ESPIRAL (fluye hacia dentro) ===
-                const int Polvo = 14;
-                for (int d = 0; d < Polvo; d++)
-                {
-                    float h1 = H01(seed, d, 79);
-                    float h2 = H01(seed, d, 83);
-                    // Cada partícula espiralea hacia el centro (la succión del túnel).
-                    float t = (time * (0.25f + 0.3f * h2) + h1) % 1f;      // 1=borde, 0=centro
-                    float rr = radius * 1.05f * t * open;
-                    float ang = h2 * MathHelper.TwoPi + time * (1.8f + h1 * 1.2f) * (h1 > 0.5f ? 1f : -1f);
-                    Vector2 pp = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
-                    float s = 3f + 5f * h2;
-                    float a = 0.55f * alpha * open * (0.3f + 0.7f * MathF.Sin(t * MathF.PI));
-                    Quad(batch, OrbTex, pp, new Vector2(s, s), 0f,
-                        Tint(Color.Lerp(magenta, cian, h1), a));
-                }
-
-                // === 3. LOS SPARKLES ORBITANDO (estrellas de 4 puntas) ===
-                const int Sparkles = 7;
-                for (int s = 0; s < Sparkles; s++)
-                {
-                    float h1 = H01(seed, s, 89);
-                    float h2 = H01(seed, s, 97);
-                    float rr = radius * (0.55f + 0.5f * h1) * open;
-                    float ang = time * (0.6f + 0.5f * h2) * (s % 2 == 0 ? 1f : -1f)
-                                + h2 * MathHelper.TwoPi;
-                    Vector2 sp = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
-                    float tw = 0.4f + 0.6f * MathF.Abs(MathF.Sin(time * 3f + s * 2.1f));
-                    float ss = (5f + 7f * h1) * tw;
-                    StarQuad(batch, sp, ang, ss, ss * 0.30f,
-                        Tint(blanco, 0.65f * alpha * open * tw));
-                }
-
-                // === 4. EL NÚCLEO BLANCO (la otra dimensión — respira) ===
-                float heart = 0.5f + 0.5f * MathF.Sin(time * 0.3f * MathHelper.TwoPi + 1.7f);
-                float nr = radius * 0.20f * open * (1f + 0.10f * heart);
-                // v6.33 b: el VELO MAGENTA del fondo del túnel (la profundidad
-                // que el mock mostró faltante — el interior arde en magenta).
-                Quad(batch, GlowTex, center, new Vector2(radius * 1.05f, radius * 1.05f), 0f,
-                    Tint(magenta, 0.16f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(nr * 3.4f, nr * 3.4f), 0f,
-                    Tint(cian, 0.35f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(nr * 2.0f, nr * 2.0f), 0f,
-                    Tint(magenta, 0.50f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(nr * 1.15f, nr * 1.15f), 0f,
-                    Tint(blanco, (0.75f + 0.25f * heart) * alpha * open));
-                Main.spriteBatch.End();
-            }
-            catch
-            {
-                try { Main.spriteBatch.End(); } catch { }
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  2 — EL PLIEGUE DEL ESPACIO (la referencia: doble elipse diagonal
-        //  tipo ojo, rim cian + interior ámbar, NÚCLEO NEGRO, rejilla que
-        //  converge, succión de partículas)
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// EL OJO ESPACIAL — "Apertura de portal dimensional": la doble
-        /// elipse diagonal (el ojo del pliegue) con el borde RIM cian fino y
-        /// el resplandor interior ÁMBAR, el NÚCLEO NEGRO absoluto (pase alfa
-        /// sólido — el vacío del otro lado) y LA REJILLA QUE CONVERGE (grid
-        //  warping: líneas de fuga que se curvan hacia el centro — la señal
-        //  visual #1 de "espacio-tiempo doblado"), con partículas succionadas
-        /// hacia dentro. `progress` 0→1 = la apertura del ojo.
-        /// </summary>
-        public static void OjoEspacial(Vector2 center, float radius, float progress,
-            float time, int seed, float alpha = 1f, float tilt = -0.55f)
-        {
-            if (radius < 4f || alpha <= 0.02f) return;
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-            try
-            {
-                Color cian = new(0, 212, 255);        // #00D4FF
-                Color ambar = new(255, 184, 0);       // #FFB800
-                Color blanco = new(255, 250, 205);
-
-                float open = (float)Math.Pow(progress, 0.6f);
-                float breathe = 1f + 0.04f * MathF.Sin(time * 0.8f * MathHelper.TwoPi + seed);
-                float R = radius * open * breathe;
-                if (R < 2f) return;
-
-                // === PASO 1 — EL NÚCLEO NEGRO (pase ALFA: el vacío sólido) ===
-                PortalAlpha();
-                var batch = Main.spriteBatch;
-                // La doble elipse: dos discos solapados en diagonal (el ojo).
-                Vector2 e1 = center + new Vector2(MathF.Cos(tilt), MathF.Sin(tilt)) * R * 0.34f;
-                Vector2 e2 = center - new Vector2(MathF.Cos(tilt), MathF.Sin(tilt)) * R * 0.34f;
-                float diskR = R * 0.78f;
-                Quad(batch, DiskTex, e1, new Vector2(diskR * 2f, diskR * 1.15f), tilt + MathHelper.PiOver2,
-                    new Color(8, 8, 14, (byte)(int)(235 * alpha * open)));
-                Quad(batch, DiskTex, e2, new Vector2(diskR * 2f, diskR * 1.15f), tilt + MathHelper.PiOver2,
-                    new Color(8, 8, 14, (byte)(int)(235 * alpha * open)));
-                Main.spriteBatch.End();
-
-                // === PASO 2 — LA REJILLA QUE CONVERGE (aditivo, dentro) ===
-                PortalAdditive();
-                batch = Main.spriteBatch;
-                const int Rayos = 9;
-                for (int g = 0; g < Rayos; g++)
-                {
-                    float ang = g * MathHelper.TwoPi / Rayos + tilt * 0.5f;
-                    // La línea de fuga: del borde hacia el centro, curvándose
-                    // (el warp: el punto medio se desvía TANGENCIALMENTE).
-                    Vector2 borde = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * R * 0.95f;
-                    Vector2 tang = new Vector2(-MathF.Sin(ang), MathF.Cos(ang));
-                    float warp = 0.35f * MathF.Sin(time * 0.9f + g * 1.3f) * R;
-                    Vector2 mid = Vector2.Lerp(borde, center, 0.5f) + tang * warp;
-                    float len1 = Vector2.Distance(borde, mid);
-                    if (len1 > 3f)
-                        Quad(batch, GlowTex, Vector2.Lerp(borde, mid, 0.5f),
-                            new Vector2(len1, 2.2f), (float)Math.Atan2(mid.Y - borde.Y, mid.X - borde.X),
-                            Tint(cian, 0.45f * alpha * open));
-                    float len2 = Vector2.Distance(mid, center);
-                    if (len2 > 3f)
-                        Quad(batch, GlowTex, Vector2.Lerp(mid, center, 0.5f),
-                            new Vector2(len2, 1.6f), (float)Math.Atan2(center.Y - mid.Y, center.X - mid.X),
-                            Tint(ambar, 0.35f * alpha * open));
-                }
-                // Los anillos de la rejilla (concéntricos, deformados).
-                for (int c = 0; c < 3; c++)
-                {
-                    float rr = R * (0.30f + 0.28f * c);
-                    float squish = 0.62f + 0.06f * MathF.Sin(time * 0.7f + c);
-                    Quad(batch, RingTex, center, new Vector2(rr * 2.1f, rr * 2.1f * squish),
-                        tilt + MathHelper.PiOver2, Tint(cian, 0.20f * alpha * open));
-                }
-
-                // === PASO 3 — EL RIM DEL BORDE (cian fino ×2 elipses + ámbar) ===
-                for (int e = 0; e < 2; e++)
-                {
-                    Vector2 ec = e == 0 ? e1 : e2;
-                    // El halo ámbar interior (el horizonte caliente).
-                    Quad(batch, GlowTex, ec, new Vector2(diskR * 2.30f, diskR * 1.32f),
-                        tilt + MathHelper.PiOver2, Tint(ambar, 0.16f * alpha * open));
-                    // El rim cian: la línea fina y nítida del borde (Ring estirado).
-                    Quad(batch, RingTex, ec, new Vector2(diskR * 2.24f, diskR * 1.26f),
-                        tilt + MathHelper.PiOver2, Tint(cian, 0.55f * alpha * open));
-                    Quad(batch, RingTex, ec, new Vector2(diskR * 2.10f, diskR * 1.18f),
-                        tilt + MathHelper.PiOver2, Tint(cian, 0.35f * alpha * open));
-                }
-                // El CUELLO del ojo: el punto más brillante (donde se tocan).
-                Quad(batch, GlowTex, center, new Vector2(R * 0.55f, R * 0.55f), 0f,
-                    Tint(blanco, 0.50f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(R * 0.22f, R * 0.22f), 0f,
-                    Tint(blanco, 0.85f * alpha * open));
-
-                // === PASO 4 — LA SUCCIÓN (partículas cayendo al vacío) ===
-                const int Suck = 10;
-                for (int d = 0; d < Suck; d++)
-                {
-                    float h1 = H01(seed, d, 101);
-                    float h2 = H01(seed, d, 103);
-                    float t = 1f - ((time * (0.30f + 0.35f * h2) + h1) % 1f);   // 1=fuera→0=centro
-                    float ang = h2 * MathHelper.TwoPi + time * 0.8f * (h1 - 0.5f) * 2f;
-                    Vector2 pp = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * R * 1.1f * t;
-                    float s = 2.5f + 3.5f * h2;
-                    Quad(batch, OrbTex, pp, new Vector2(s, s * (1f + t * 0.8f)), ang,
-                        Tint(Color.Lerp(ambar, cian, t), 0.50f * alpha * open * t));
-                }
-                Main.spriteBatch.End();
-            }
-            catch
-            {
-                try { Main.spriteBatch.End(); } catch { }
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  3 — EL DESGARRO CUÁNTICO (la referencia: círculo fragmentado con
-        //  borde GLITCH de bloques, núcleo magenta nebuloso, rayos que
-        //  irradian, flicker rápido, partículas de datos)
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// EL DESGARRO GLITCH — "Desgarro de realidad cuántica": el círculo
-        /// IRREGULAR fragmentado (24 vértices con radios hash — la silueta
-        /// rasgada) con el borde de BLOQUES GLITCH (astillas rectangulares
-        /// cian/violeta proyectadas hacia afuera, cada una con su flicker
-        /// rápido 0.1-0.3 s), el NÚCLEO MAGENTA nebuloso con vetas fucsia,
-        /// RAYOS que irradian desde el borde (StormLib) y partículas de
-        /// datos (cuadraditos que se desprenden rotando). `progress` 0→1.
-        /// </summary>
-        public static void DesgarroGlitch(Vector2 center, float radius, float progress,
-            float time, int seed, float alpha = 1f)
-        {
-            if (radius < 4f || alpha <= 0.02f) return;
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-            try
-            {
-                Color cian = new(0, 229, 255);        // #00E5FF
-                Color violeta = new(124, 77, 255);    // #7C4DFF
-                Color magenta = new(213, 0, 249);     // #D500F9
-                Color fucsia = new(255, 64, 129);     // #FF4081
-                Color blanco = new(255, 255, 255);
-
-                float open = (float)Math.Pow(progress, 0.55f);
-                float R = radius * open;
-                const int Verts = 24;
-                float tick = time * 60f;
-
-                // === PASO 1 — EL NÚCLEO (pase alfa: la nebulosa SÓLIDA) ===
-                PortalAlpha();
-                var batch = Main.spriteBatch;
-                // La silueta irregular: el polígono rasgado (8 rebanadas de pastel).
-                for (int s = 0; s < 8; s++)
-                {
-                    float a0 = s * MathHelper.PiOver4 + 0.09f * MathF.Sin(time * 1.1f + s);
-                    float a1 = (s + 1) * MathHelper.PiOver4 - 0.09f * MathF.Sin(time * 0.9f + s * 2f);
-                    float r0 = R * (0.62f + 0.30f * H01(seed, s, 107));
-                    float r1 = R * (0.62f + 0.30f * H01(seed, s + 1, 109));
-                    // El quad de la rebanada (del centro al arco).
-                    Vector2 p0 = center + new Vector2(MathF.Cos(a0), MathF.Sin(a0)) * r0;
-                    Vector2 p1 = center + new Vector2(MathF.Cos(a1), MathF.Sin(a1)) * r1;
-                    Vector2 pm = center + new Vector2(MathF.Cos((a0 + a1) * 0.5f), MathF.Sin((a0 + a1) * 0.5f)) * Math.Max(r0, r1);
-                    float wSeg = Vector2.Distance(p0, p1) + 6f;
-                    float hSeg = Math.Max(r0, r1);
-                    Quad(batch, GlowTex, (p0 + p1) * 0.5f + (pm - center) * 0.25f,
-                        new Vector2(wSeg, hSeg), (a0 + a1) * 0.5f + MathHelper.PiOver2,
-                        new Color(magenta.R, magenta.G, magenta.B, (byte)(int)(120 * alpha * open)));
-                }
-                Main.spriteBatch.End();
-
-                // === PASO 2 — EL BORDE GLITCH + LA LUZ (aditivo) ===
-                PortalAdditive();
-                batch = Main.spriteBatch;
-                for (int v = 0; v < Verts; v++)
-                {
-                    float h1 = H01(seed, v, 113);
-                    float h2 = H01(seed, v, 127);
-                    float h3 = H01(seed, v, 131);
-                    float ang = v * MathHelper.TwoPi / Verts;
-                    float rv = R * (0.70f + 0.34f * h1);             // el borde dentado
-
-                    // El FLICKER rápido (0.1-0.3 s por astilla — inestable).
-                    float flickHz = 6f + 14f * h2;
-                    float lit = MathF.Sin(tick * flickHz * 0.1047f + h3 * 6.28f) * 0.5f + 0.5f;
-                    if (lit < 0.25f) continue;
-
-                    Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang));
-                    Vector2 bord = center + dir * rv;
-
-                    // LA ASTILLA GLITCH: un bloque rectangular proyectado hacia
-                    // afuera (los artefactos de compresión de la realidad rota).
-                    float bw = 3f + 11f * h2;
-                    float bh = 2f + 5f * h3;
-                    float bo = rv + (6f + 16f * h3) * lit;
-                    Color astC = h1 > 0.5f ? cian : violeta;
-                    Quad(batch, GlowTex, center + dir * bo,
-                        new Vector2(bw, bh), ang,
-                        Tint(astC, (0.45f + 0.55f * lit) * alpha * open));
-
-                    // LA LÍNEA DEL BORDE (el contorno irregular que sangra luz).
-                    Quad(batch, GlowTex, bord, new Vector2(R * 0.30f, 2.2f + 2.5f * lit),
-                        ang + MathHelper.PiOver2, Tint(astC, 0.60f * alpha * open * lit));
-
-                    // LA VETA FUCSIA (el relámpago interno de la nebulosa).
-                    if (v % 3 == 0)
-                        Quad(batch, GlowTex, center + dir * (rv * 0.55f),
-                            new Vector2(rv * 0.62f, 1.8f), ang,
-                            Tint(fucsia, 0.42f * alpha * open * lit));
-
-                    // EL RAYO QUE IRRADIA (el código escapando — StormLib).
-                    if (v % 4 == 0 && lit > 0.7f)
-                    {
-                        Vector2 ext = center + dir * (rv + 26f + 34f * h2);
-                        StormLib.Bolt(batch, bord, ext, seed + v * 7, (int)(tick * 0.35f),
-                            4.5f, astC, blanco, 0.55f * alpha * open * lit, 4, 9f);
-                    }
-                }
-
-                // EL NÚCLEO CEGADOR (el corazón de la corrupción) — v6.33 b:
-                // el corazón MAGENTA pesa más (la lección del mock: el blanco
-                // puro se comía la lectura cuántica).
-                float heart = 0.5f + 0.5f * MathF.Sin(time * 9f + seed);
-                Quad(batch, GlowTex, center, new Vector2(R * 0.95f, R * 0.95f), 0f,
-                    Tint(magenta, 0.34f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(R * 0.52f, R * 0.52f), 0f,
-                    Tint(violeta, 0.42f * alpha * open));
-                Quad(batch, GlowTex, center, new Vector2(R * 0.30f, R * 0.30f) * (1f + 0.12f * heart),
-                    0f, Tint(blanco, (0.50f + 0.30f * heart) * alpha * open));
-
-                // LAS PARTÍCULAS DE DATOS (cuadraditos que se desprenden).
-                for (int d = 0; d < 9; d++)
-                {
-                    float h1 = H01(seed, d, 137);
-                    float h2 = H01(seed, d, 139);
-                    float ang = h1 * MathHelper.TwoPi + time * (0.4f + 0.3f * h2);
-                    float t = ((time * (0.22f + 0.2f * h2) + h2) % 1f);
-                    float rr = R * (0.75f + 0.7f * t);
-                    Vector2 pp = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rr;
-                    float s = 2f + 4f * h2;
-                    Quad(batch, GlowTex, pp, new Vector2(s, s * (0.4f + 0.6f * h1)),
-                        ang + time * 1.7f * (h1 - 0.5f) * 2f,
-                        Tint(h1 > 0.5f ? cian : fucsia, 0.55f * alpha * open * (1f - t)));
-                }
-                Main.spriteBatch.End();
-            }
-            catch
-            {
-                try { Main.spriteBatch.End(); } catch { }
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  4 — LA HERIDA ELÉCTRICA (la referencia: grieta lineal dentada con
-        //  borde blanco→cian→violeta, interior de estática con scanlines,
-        //  arcos voltaicos internos, strobe 10-30 Hz, chispas zig-zag)
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// LA HERIDA ELÉCTRICA — "Desgarro de realidad eléctrica": LA GRIETA
-        /// (quad del desgarro de la casa con paleta eléctrica) cuyo interior
-        /// lleva ESTÁTICA (scanlines horizontales parpadeando dentro del
-        /// vacío) y ARCOS VOLTAICOS (StormLib.StormArc — la corriente que
-        /// corre POR DENTRO de la herida), con STROBE nervioso, chispas en
-        /// los extremos y ABERRACIÓN CROMÁTICA sutil (el filo rojo/cian
-        /// partido). `progress` 0→1 = la herida abriéndose.
-        /// </summary>
-        public static void HeridaElectrica(Vector2 origin, Vector2 dir,
-            float length, float maxWidth, float progress, float time, int seed,
-            float alpha = 1f)
-        {
-            if (length < 8f || maxWidth < 1f || alpha <= 0.02f) return;
-            dir = Vector2.Normalize(dir);
-            progress = MathHelper.Clamp(progress, 0f, 1f);
-            float tick = time * 60f;
-
-            Color cian = new(0, 255, 255);          // #00FFFF
-            Color violeta = new(138, 43, 226);      // #8A2BE2
-            Color blancoHielo = new(224, 255, 255); // #E0FFFF
-            Color rojoCA = new(255, 40, 40);        // aberración
-
-            float open = (float)Math.Pow(progress, 0.6f);
-            float len = length * open;
-            float w = maxWidth * open;
-
-            // === 1. EL VACÍO DE LA HERIDA (pase alfa — el negro con ESTÁTICA) ===
-            PortalAlpha();
-            var b = Main.spriteBatch;
-            // El cuerpo negro (la banda del vacío — 0.62 del quad como el desgarro).
-            Quad(b, TaperVoidTex, origin + dir * (len * 0.5f),
-                new Vector2(len, w * 1.30f), (float)Math.Atan2(dir.Y, dir.X),
-                new Color(5, 5, 16, (byte)(int)(240 * alpha * open)));
-            // LAS SCANLINES (la estática interior — el buffer detrás de la realidad).
-            int lineas = Math.Max(3, (int)(len / 22f));
-            for (int l = 0; l < lineas; l++)
-            {
-                float h = H01(seed, l, 149);
-                float h2 = H01(seed, l, 151);
-                float lx = len * (0.08f + 0.84f * h);
-                // Cada scanline parpadea a su frecuencia (10-30 Hz — el strobe).
-                float st = MathF.Sin(tick * (0.17f + 0.34f * h2) + h * 6.28f) * 0.5f + 0.5f;
-                if (st < 0.35f) continue;
-                Quad(b, GlowTex, origin + dir * lx,
-                    new Vector2(len * (0.10f + 0.16f * h2), 1.3f + 1.5f * st),
-                    (float)Math.Atan2(dir.Y, dir.X) + MathHelper.PiOver2 * 0f,
-                    Tint(blancoHielo, 0.10f * st * alpha * open));
-            }
-            Main.spriteBatch.End();
-
-            // === 2. LA LUZ (aditivo — batch del llamador reabierto) ===
-            PortalAdditive();
-            b = Main.spriteBatch;
-            float rot = (float)Math.Atan2(dir.Y, dir.X);
-            Vector2 mid = origin + dir * (len * 0.5f);
-
-            // LA ABERRACIÓN CROMÁTICA: el filo dibujado DOS VECES desplazado
-            // en perpendicular (rojo a un lado, cian al otro — la fractura óptica).
-            Vector2 perp = new(-dir.Y, dir.X);
-            Vector2 abOff = perp * (1.6f + 1.2f * MathF.Sin(time * 13f));
-            Quad(b, TaperVeloTex, mid + abOff, new Vector2(len, w * 1.15f), rot,
-                Tint(rojoCA, 0.16f * alpha * open));
-            Quad(b, TaperVeloTex, mid - abOff, new Vector2(len, w * 1.15f), rot,
-                Tint(cian, 0.16f * alpha * open));
-
-            // EL VELO violeta + EL CUERPO cian + EL NÚCLEO blanco (la herida) —
-            // v6.33 b: MÁS GRUESA Y MÁS BRILLANTE (la lección del mock: una
-            // banda fina oscura era INVISIBLE contra el cielo claro).
-            Quad(b, TaperVeloTex, mid, new Vector2(len, w * 1.85f), rot,
-                Tint(violeta, 0.55f * alpha * open));
-            Quad(b, TaperVeloTex, mid, new Vector2(len, w * 1.45f), rot,
-                Tint(cian, 0.30f * alpha * open));
-            Quad(b, TaperCuerpoTex, mid, new Vector2(len, w * 1.00f), rot,
-                Tint(cian, 0.85f * alpha * open));
-            Quad(b, TaperNucleoTex, mid, new Vector2(len, w * 0.38f), rot,
-                Tint(blancoHielo, 1f * alpha * open));
-
-            // EL STROBE (10-30 Hz — el arco que falla): todo el cuerpo pica.
-            float strobe = MathF.Sin(tick * 0.38f + seed) * 0.5f + 0.5f;
-            if (strobe > 0.62f)
-            {
-                Quad(b, TaperVeloTex, mid, new Vector2(len, w * 2.3f), rot,
-                    Tint(cian, 0.22f * alpha * open * strobe));
-                Quad(b, TaperNucleoTex, mid, new Vector2(len, w * 0.55f), rot,
-                    Tint(blancoHielo, 0.55f * alpha * open * strobe));
-            }
-
-            // === 3. LOS ARCOS VOLTAICOS INTERNOS (StormLib.StormArc ×3) ===
-            int arcs = 3;
-            for (int a = 0; a < arcs; a++)
-            {
-                float h = H01(seed, a, 157);
-                float t0 = 0.12f + 0.24f * h + a * 0.22f;
-                Vector2 a0 = origin + dir * (len * t0) + perp * (w * 0.22f * (h - 0.5f) * 2f);
-                Vector2 a1 = origin + dir * (len * Math.Min(1f, t0 + 0.30f + 0.2f * h))
-                             - perp * (w * 0.22f * (H01(seed, a, 163) - 0.5f) * 2f);
-                StormLib.StormArc(b, a0, a1, seed + a * 31, time,
-                    3.5f, cian, 0.65f * alpha * open);
-            }
-
-            // === 3b. v6.33 b — LAS RAMIFICACIONES (la lección del mock: la
-            // herida recta leía "cuchillo"; la referencia manda: "grieta con
-            // ramificaciones que se bifurcan como raíces o rayos"). 5 grietas
-            // secundarias deterministas saliendo del cuerpo en diagonal. ===
-            const int Ramas = 5;
-            for (int r = 0; r < Ramas; r++)
-            {
-                float h1 = H01(seed, r, 173);
-                float h2 = H01(seed, r, 179);
-                float h3 = H01(seed, r, 181);
-                if (h1 < 0.30f) continue;                    // no todas nacen
-                float t0 = 0.12f + 0.76f * h2;
-                Vector2 nace = origin + dir * (len * t0);
-                float lado = h3 > 0.5f ? 1f : -1f;
-                // La rama: 55°-75° del cuerpo (los rayos que brotan).
-                float angRama = rot + lado * (0.96f + 0.35f * h1);
-                float largoR = len * (0.10f + 0.13f * h2);
-                Vector2 fin = nace + new Vector2(MathF.Cos(angRama), MathF.Sin(angRama)) * largoR;
-                // LA GRIETA SECUNDARIA: fractal cian/violeta (StormLib con
-                // semilla propia — el zig-zag de las ramas de un rayo).
-                StormLib.Bolt(b, nace, fin, seed + 601 + r * 43, (int)(tick * 0.4f),
-                    5.5f, violeta, blancoHielo, 0.75f * alpha * open, 5, largoR * 0.18f);
-                StormLib.Bolt(b, nace, fin, seed + 601 + r * 43, (int)(tick * 0.4f),
-                    2.5f, cian, blancoHielo, 0.85f * alpha * open, 5, largoR * 0.18f);
-            }
-
-            // === 3c. v6.33 b — CHISPAS A LO LARGO (no solo los extremos). ===
-            int tramos = Math.Max(2, (int)(len / 110f));
-            for (int s = 0; s <= tramos; s++)
-            {
-                float h = H01(seed, s, 191);
-                if (h < 0.45f) continue;
-                Vector2 sp = origin + dir * (len * s / (float)tramos)
-                             + perp * (w * 0.4f * (H01(seed, s, 193) - 0.5f) * 2f);
-                float st = ((tick + s * 9f) % 30f) / 30f;
-                StormLib.SparkBurst(b, sp, cian, w * 0.75f, 3, seed + 21 + s,
-                    st, w * 0.8f);
-            }
-
-            // === 4. LAS CHISPAS ZIG-ZAG en los extremos (StormLib.SparkBurst) ===
-            float sparkT = (tick % 26f) / 26f;
-            StormLib.SparkBurst(b, origin, cian, w * 1.3f, 5, seed + 5,
-                sparkT, w * 1.2f);
-            StormLib.SparkBurst(b, origin + dir * len, cian, w * 1.3f, 5, seed + 9,
-                sparkT, w * 1.2f);
-            Main.spriteBatch.End();
-        }
     }
 
     /// <summary>

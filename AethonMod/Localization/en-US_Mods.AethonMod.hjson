@@ -47,7 +47,8 @@
         "Projectiles.LivingPulsarMinion.DisplayName": "Living Pulsar",
 
         "Buffs.LivingPulsarBuff.DisplayName": "Living Pulsar",
-        "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",        "Buffs.QuemaduraCosmica.DisplayName": "Cosmic Burn",
+        "Buffs.LivingPulsarBuff.Description": "A neutron star spins at your side, its beams raking your enemies",
+        "Buffs.QuemaduraCosmica.DisplayName": "Cosmic Burn",
         "Buffs.QuemaduraCosmica.Description": "The event horizon licks you: fire that burns inward",
 
 
@@ -76,6 +77,10 @@
         "Items.BolsaExhumados.Tooltip": "The exhumed forms: the rancor and the eminence.\nThe arsenal's original exhumed forms.\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaCosmeticos.DisplayName": "Cosmetics Bag",
         "Items.BolsaCosmeticos.Tooltip": "The crowns that sit upon your character.\nRight-click to deploy them.\nOnly delivers what you're missing.",
+        "Items.BolsaDosFormas.DisplayName": "Two Forms Bag",
+        "Items.BolsaDosFormas.Tooltip": "The two-usage-form weapons: each one deploys its alternative form.\nThe four that learned to say two things at once.\nRight-click to deploy them.\nOnly delivers what you're missing.",
+        "Items.BolsaDesgarros.DisplayName": "Tears Bag",
+        "Items.BolsaDesgarros.Tooltip": "The staves that rip reality: suture, portal, fold and wound.\nEach tear opens differently.\nRight-click to deploy them.\nOnly delivers what you're missing.",
 
         "Items.RencorPrimordialStaff.DisplayName": "The Primordial Rancor",
         "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form: THE PRIMORDIAL RANCOR.\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS white-core, pink-edged beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
@@ -277,7 +282,6 @@
         "Items.CoroEspectralStaff.DisplayName": "Spectral Choir Staff",
         "Items.CoroEspectralStaff.Tooltip": "Six notes of light singing in slow orbit.\nEach note emits its wave ring in turn.\nThe choir bids farewell going dark one by one.",
 
-        "Projectiles.DesgarroRealityProjectile.DisplayName": "Reality Tear",
         "Projectiles.SembradorPulsarProjectile.DisplayName": "Graveyard Pulsar",
         "Projectiles.LagrimaSolarProjectile.DisplayName": "Solar Tear",
         "Projectiles.ColapsoMagnetarProjectile.DisplayName": "Collapsing Magnetar",

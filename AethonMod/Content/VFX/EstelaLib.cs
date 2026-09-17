@@ -243,9 +243,16 @@ namespace AethonMod.Content.VFX
         /// <param name="seed">Semilla determinista.</param>
         /// <param name="time">Tiempo animado (GlobalTimeWrappedHourly).</param>
         /// <param name="head">True = dibuja cabeza brillante en el último punto.</param>
+        /// <param name="taper">v6.34 — EL TAPER DE COLA (0..1): 0 = grosor de
+        /// siempre (comportamiento IDÉNTICO, los call-sites actuales no cambian);
+        /// &gt;0 = la estela NACE GRUESA en la cabeza y MUERE FINA hacia la cola —
+        /// el grosor de cada segmento se multiplica por (1 − taper·t01), donde
+        /// t01 es la posición normalizada a lo largo de la estela (0 = cabeza /
+        /// origen, 1 = cola). CLAMPEADO: el grosor jamás baja del 15% del
+        /// original (nunca un hilo invisible).</param>
         public static void Ribbon(SpriteBatch batch, Vector2[] pts, float width,
             EstelaProfile profile, Color color, float intensity, int seed,
-            float time, bool head = true)
+            float time, bool head = true, float taper = 0f)
         {
             if (batch == null || pts == null || pts.Length < 2 || width < 1f) return;
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
@@ -285,6 +292,15 @@ namespace AethonMod.Content.VFX
                 float w = AnchoDe(profile, f, width, seed, time);
                 float beat = 0.85f + 0.15f * MathF.Sin(time * 7.1f + f * 9f + seed);
                 w *= beat;
+
+                // v6.34 — EL TAPER DE COLA: t01 corre DESDE LA CABEZA (0, el
+                // origen de la estela) HACIA LA COLA (1) — ojo, al revés que f.
+                // El multiplicador (1 − taper·t01) deja la cabeza INTACTA y
+                // adelgaza hacia la cola, con SUELO en el 15% (clamp): con
+                // taper = 0 el factor es 1 en todo el camino → salida bit a bit
+                // idéntica a la de siempre.
+                float t01 = 1f - f;
+                w *= MathF.Max(1f - taper * t01, 0.15f);
 
                 // La densidad muere hacia la cola (la estela se DISUELVE).
                 float aFade = 0.20f + 0.80f * MathF.Pow(f, 0.7f);

@@ -7,11 +7,25 @@ using Terraria;
 using Terraria.ModLoader;
 using AethonMod.Content.Particles;
 using AethonMod.Content.Projectiles.Cosmic;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Effects
 {
     /// <summary>
     /// BlackHoleLensSystem — lente gravitacional de pantalla completa.
+    ///
+    /// v6.34 — GRAVLENS, LA PUERTA ABIERTA: cualquier efecto del mod
+    /// (ondas de choque, portales, impactos...) ya puede curvar el fondo
+    /// con GravLens.Registrar(...) — la librería unificada de
+    /// Content/VFX. DECISIÓN DE INTEGRACIÓN: los agujeros negros NO se
+    /// recogen vía Registrar (su recolección está trenzada con los
+    /// índices de dibujado "encima de la lente" y con los
+    /// LensRadiusMult por tipo); las lentes externas se FUNDEN en las
+    /// mismas arrays del pase A justo antes de renderizar (punto 1b de
+    /// RenderLens) — mismo hook, mismo shader, cero duplicación, y el
+    /// camino de los agujeros queda INTACTO (pixel-perfect con v6.33).
+    /// El reloj de vida de esas lentes (GravLens.Actualizar) late en el
+    /// hook: este sistema no tiene punto de update propio.
     ///
     /// v5.97 — LA MEDUSA NEBULAR NADA EN EL ESPACIOTIEMPO: el minion
     /// invocador (NebulaJellyfishMinion, petición del usuario: "crea una
@@ -257,6 +271,13 @@ namespace AethonMod.Content.Effects
         {
             try
             {
+                // v6.34 — GRAVLENS: el reloj de vida de las lentes
+                // registradas late AQUÍ (este sistema no tiene punto de
+                // update propio: su único tick es el hook de render;
+                // Actualizar es idempotente por Main.GameUpdateCount,
+                // el mismo dedup de VFXCore.Presupuesto).
+                GravLens.Actualizar();
+
                 if (detailedDrawType == 36)
                 {
                     if (CanRender())
@@ -562,6 +583,16 @@ namespace AethonMod.Content.Effects
                     }
                 }
             }
+
+            // === 1b. v6.34 — GRAVLENS: LAS LENTES EXTERNAS SE FUNDEN AQUÍ ===
+            // Cualquier efecto del mod que haya llamado a
+            // GravLens.Registrar(...) (ondas de choque, portales,
+            // impactos...) vierte sus masas en LAS MISMAS arrays del
+            // pase A: mismo hook, mismo shader, CERO duplicación. El
+            // camino de los agujeros negros (punto 1) queda INTACTO —
+            // la decisión completa, documentada en GravLens.cs.
+            count += GravLens.PoblarParaRender(_sourcePositions, _sourceRadii,
+                _strengths, count, MaxSources);
 
             bool hasA = count > 0;             // pase A: agujeros + ondas
             bool hasB = _sunSourceCount > 0;   // pase B: soles en gigante roja + medusas + cometas + púlsares

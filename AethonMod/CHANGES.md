@@ -1,5 +1,36 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.34 — LAS DOS LIBRERÍAS DE SIGNOS MÁGICOS + LAS MEJORAS + LAS TRES LIBRERÍAS NUEVAS + LA AUDITORÍA
+
+**Petición del usuario**: "debemos crear una librería sobre los anillos de los soles rúnicos y los agujeros negros — que los anillos de los soles rúnicos tengan una librería y los anillos de los agujeros negros tengan otra, serán las librerías de signos mágicos, la usaremos para embellecer algunas cosas más adelante. Luego comienza con la mejora de las librerías y luego con la creación de las nuevas librerías. Por último da unas cuantas pasadas al código para detectar errores e inconsistencias, además de quitar referencias a otros mods".
+
+### A. LAS DOS LIBRERÍAS DE SIGNOS MÁGICOS (la petición central)
+  · **SIGILOLIB — LA ESCRITURA MÁGICA DEL SOL** (Content/VFX/SigiloLib.cs): todo lo que vestía a las estrellas rúnicas promovido a PRIMITIVAS INVOCABLES — las LEYES de la familia como contrato público (RingA/RingFlat/RingTilt con precesión/RingSpin alterno/packing del 10º, constantes exactas), los DOS ALFABETOS públicos (RunasSolares ×8 + RunasCorona ×8), y las primitivas: `Runa` (la letra suelta), `AroEliptico` (profundidad frente/espalda + latido), `RunaOrbitando` (cabalgando la tangente), `AnilloRunico`, `NodoCardinal` (perla + destello 4 puntas), `PolvoRunico`, los compuestos `SistemaAnillos` (la corona del sol 1:1) y `ArcoGloria` (la corona del portador 1:1), y EL NUEVO **`SelloSolar`** — EL SIGNO MÁGICO INVOCABLE: aro doble contrarrotando + las 8 runas del alfabeto + 4 nodos cardinales + el glifo maestro central ×2.3 con su destello + polvo orbital. Calibración v6.34b/c medida con VLM: 8 runas con la proporción de la casa (12 con escala lineal EMPASTABAN los glows 2×), aro interior a 0.66r (a 0.80r se fundía), glifo central ×2.3 (a ×1.55 era elipse difusa).
+  · **ORBITALIB — LA ESCRITURA MÁGICA DEL VACÍO** (Content/VFX/OrbitaLib.cs): los anillos de los agujeros negros como primitivas — `AnilloEnergia` (LA FÓRMULA FIEL del shader: sin(τ·20−t·5), 20 bandas viajando, turbulencia hash 12 Hz, gradiente térmico de 3 colores, cápsula HALO+NÚCLEO, mitades frente/espalda), `EcosAnillo`, `Fotones` (corredores con estela), `OndasDistorsion`, `AnilloFino` (el aro del horizonte), `Distorsion` (el vaivén ±3%), `CoronaArcos` (los 5 lazos de neón, al buffer de VFXCore) y EL NUEVO **`SelloVacio`** — el par oscuro del SelloSolar (batch cerrado→cerrado, cierre defensivo).
+  · REFACTORS 1:1 (ni un número cambiado): RuneSunRenderer delega en SigiloLib, RuneCrownRenderer y ArcCrownRenderer son facades finas, CosmicBlackHoleRenderer delega sus 3 técnicas (DrawEnergyRing/DrawRingEchoes/DrawPhotonRunners BORRADOS).
+  · VERIFICACIÓN: mock 1:1 (tools/mock_sigilos_v634.py) + VLM iterativo: sol+anillos 8.5/10 · SelloSolar 9/10 · vórtice 8/10 (núcleo NEGRO ABSOLUTO ✓) · corona 6/10 (look histórico preservado). LA LECCIÓN DEL MOCK: la gamma 1/2.2 EMPASTABA (halos 0.08→0.32, contraste 4:1→1.7:1) — el aditivo puro lineal es el fiel al juego.
+
+### B. LAS MEJORAS DE LAS LIBRERÍAS EXISTENTES
+  · **EstelaLib** — `Ribbon(..., taper)`: perfil de anchura por longitud (suelo 15%; taper=0 = idéntico; 9 call-sites intactos).
+  · **PulsoLib** — SISTEMA DE TRAUMA: `Trauma(c)` acumula [0,1], shake por `trauma²·8` por la MISMA puerta PunchCameraModifier, desangre 0.02/tick.
+  · **StormLib** — `SeekArc`: el arco que se CURVA hacia un objetivo (sesgo Lerp con peso sin(t01·π)·fuerza, 0 en anclas exactas), 3 capas al buffer.
+  · **VFXCore** — PRESUPUESTO ADAPTATIVO: `ReportarFps`/`FactorCalidad` (media móvil 0.9/0.1; <45 FPS adelgaza a suelo 0.5, >55 recupera a techo 1). ALIMENTADO por el nuevo CalidadFpsSystem (PostUpdateEverything → Main.frameRate): VIVO, no dormido.
+  · **RiftLib PARTIDA EN 3 PARCIALES** (núcleo + Glitch + Portales): split mecánico verificado byte a byte (34 métodos antes = 34 después; 78 call-sites intactos; 966 líneas funcionales exactas).
+  · **LumenLib v2** — `BloomTriple`: bloom de TRES BANDAS (1.0×/1.9×/3.4×, alfas 0.55/0.28/0.13, blanco progresivo) — decisión de la casa: un RenderTarget global puede dejar pantalla NEGRA y no es verificable fuera del juego.
+
+### C. LAS TRES LIBRERÍAS NUEVAS
+  · **GRAVLENS**: la distorsión UNIFICADA — `Registrar(centro, radio, fuerza, vida)` (cap 8). Integración por FUSIÓN en el pase A del BlackHoleLensSystem (+31 líneas, 0 modificadas): mismo hook, mismo shader, pases A/B preservados.
+  · **NEBULALIB**: nebulosas volumétricas con CURL NOISE REAL (Curl2D de un ValueNoise2D a mano): `Nube` (volutas CW/CCW, respiración ±20%, alfas 0.05-0.14) y `Columna` (géiser vertical). Determinista, guards NaN, cero shaders.
+  · **AUDIOLIB**: LA IDENTIDAD SONORA — `Sonar(Familia, momento, pos)`: 6 familias × 5 momentos con sonidos vanilla que el mod ya usaba (30 celdas con su porqué), pitch por familia, jitter ±0.08, ANTI-SPAM 12/30 ticks, `SilenciarZona()`.
+
+### D. LA AUDITORÍA (Task 59-a)
+  · **EL HALLAZGO CRÍTICO**: las 2 bolsas de v6.33 salieron a medias — SIN PNG (tML habría FALLADO LA CARGA) y SIN hjson. FIX: gen_v634_assets.py (interior DUAL oro→violeta + yin cósmico / saco negro + grieta glitch — VLM 7 y 8/10) + DisplayName+Tooltip es/en.
+  · Limpieza: 3 "CWR" neutralizados — grep 0 de 15 patrones de otros mods; clave huérfana borrada; línea fusionada en-US:50 separada; tangentialAngle muerto borrado; doc actualizada; guard ciclo≤0.
+  · Verificado: 180/180 sprites · 16/16 assets · 246/246 PNGs (PIL) · hjson 180/180 ambos idiomas · partials correctos · Begin/End equilibrados · pases A/B intactos.
+  · Los 2 TODOs restantes (drop del jefe, sync de resonancia) son ROADMAP del modo historia, no bugs.
+
+Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. build.txt 6.34.
+
 ## Commit v6.33 — LAS ESTRELLAS SÓLIDAS + LOS CUATRO DESGARROS + STORMLIB v2 + LAS DOS BOLSAS NUEVAS
 
 **Petición del usuario**: "no veo las 4 armas nuevas de las dos formas de uso · todas las estrellas son semitransparentes, eso no debería ser · investigación profunda en todos los mods para mejorar la librería de rayos eléctricos · el Desgarro no está bien ejecutado: crea varios bastones de desgarro de realidad basados en las imágenes de referencia (4 links de stockcake), mejorando librerías si hace falta".

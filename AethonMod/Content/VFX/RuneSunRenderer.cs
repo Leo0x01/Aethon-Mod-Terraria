@@ -89,17 +89,18 @@ namespace AethonMod.Content.VFX
         /// <summary>Tier máximo de la familia (20 copias — v6.22).</summary>
         public const int MaxTier = 20;
 
-        // --- LA GEOMETRÍA ORBITAL (por anillo k = 0..N-1) ---
-        private const float RingA0 = 1.62f;      // semieje mayor del 1er anillo (×R)
-        private const float RingAStep = 0.44f;   // separación entre anillos (×R)
-        private const float RingAStep2 = 0.30f;  // v6.22: packing más tighto del 10º arriba
-        private const float RingSpin0 = 0.26f;   // giro base (rad/s)
-        private const float RingSpinStep = 0.045f;
+        // --- LA GEOMETRÍA ORBITAL (por anillo k = 0..N-1) — LA LEY VIVE EN
+        //     SIGILOLIB (la librería de signos mágicos del sol) ---
+        private const float RingA0 = SigiloLib.RingA0;        // semieje mayor del 1er anillo (×R)
+        private const float RingAStep = SigiloLib.RingAStep;   // separación entre anillos (×R)
+        private const float RingAStep2 = SigiloLib.RingAStep2; // packing ajustado del 10º arriba
+        private const float RingSpin0 = SigiloLib.RingSpin0;   // giro base (rad/s)
+        private const float RingSpinStep = SigiloLib.RingSpinStep;
 
-        // --- LAS RUNAS ---
-        private const int Runes0 = 6;            // glifos del 1er anillo
-        private const int RuneStep = 2;          // +2 glifos por anillo (hasta el 9º)
-        private const int RuneStep2 = 1;         // v6.22: +1 por anillo del 10º arriba
+        // --- LAS RUNAS (la cuenta vive en SigiloLib) ---
+        private const int Runes0 = SigiloLib.Runes0;            // glifos del 1er anillo
+        private const int RuneStep = SigiloLib.RuneStep;        // +2 glifos por anillo (hasta el 9º)
+        private const int RuneStep2 = SigiloLib.RuneStep2;      // +1 por anillo del 10º arriba
 
         // --- LA VIDA EXTRA ---
         private const float BoltHz = 14f;        // regeneración de los rayos (~14 Hz)
@@ -245,119 +246,38 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL SISTEMA DE ANILLOS — N anillos, cada uno en SU plano
+        //  EL SISTEMA DE ANILLOS — la LEY vive en SIGILOLIB (la librería de
+        //  signos mágicos del sol); este renderer la DELEGA 1:1
         // ==================================================================
 
-        /// <summary>
-        /// Semieje mayor del anillo k (×R). v6.22: del 10º en arriba el
-        /// packing se TIGHTA (0.30×R por anillo) para que 20 anillos
-        /// quepan en un sistema espectacular pero no ridículo.
-        /// </summary>
-        private static float RingA(int k)
-        {
-            int k1 = Math.Min(k, 9);
-            int k2 = Math.Max(0, k - 9);
-            return RingA0 + RingAStep * k1 + RingAStep2 * k2;
-        }
+        /// <summary>Semieje mayor del anillo k (×R) — la ley de SigiloLib.</summary>
+        private static float RingA(int k) => SigiloLib.RingA(k);
 
         /// <summary>Achatado del anillo k (plano distinto por anillo).</summary>
-        private static float RingFlat(int k) => 0.34f + 0.07f * (k % 3);
+        private static float RingFlat(int k) => SigiloLib.RingFlat(k);
+
+        /// <summary>Inclinación del plano del anillo k (con precesión en tier alto).</summary>
+        private static float RingTilt(int k, float time, int tier) =>
+            SigiloLib.RingTilt(k, time, tier >= SigiloLib.TierPrecesion);
+
+        /// <summary>El GIRO del anillo k: ALTERNO (par CW, impar CCW).</summary>
+        private static float RingSpin(int k) => SigiloLib.RingSpin(k);
 
         /// <summary>
-        /// Inclinación del plano del anillo k — y con PRECESIÓN (tier ≥ 7):
-        /// el plano BAMBOLEA vivo alrededor de su valor base.
-        /// </summary>
-        private static float RingTilt(int k, float time, int tier)
-        {
-            float baseTilt = -0.55f + 0.20f * k;
-            if (tier >= 7)
-                baseTilt += 0.10f * (float)Math.Sin(time * (0.35f + 0.06f * k) + k * 1.9f);
-            return baseTilt;
-        }
-
-        /// <summary>
-        /// El GIRO del anillo k: ALTERNO (par horario, impar antihorario —
-        /// "el otro debe rodear el sol en otra dirección"), con velocidad
-        /// creciente por anillo.
-        /// </summary>
-        private static float RingSpin(int k) =>
-            (k % 2 == 0 ? 1f : -1f) * (RingSpin0 + RingSpinStep * k);
-
-        /// <summary>
-        /// v6.26 — EL EMISOR COMPARTIDO DE LOS ANILLOS: emite el sistema
-        /// rúnico completo de la copia `tier` (1..20) al buffer de VFXCore,
-        /// en COORDENADAS DE MUNDO. ESTE MISMO código viste a los soles del
-        /// mundo (RuneSunProjectile) y a las coronas cósmicas de los
-        /// (v6.28: los cosméticos que las usaban fueron borrados): copiar
-        /// los anillos de los soles dejó de ser "parecerse" — ES el mismo
-        /// trazo, el mismo latido y los mismos alphas, a cualquier escala.
-        /// `alpha` multiplica la intensidad (luz del mundo / energía).
+        /// v6.26 → v6.34 — EL EMISOR COMPARTIDO DE LOS ANILLOS: delega en
+        /// SIGILOLIB.SistemaAnillos (la librería de signos mágicos del sol,
+        /// con las leyes EXACTAS de la familia — el mismo trazo, el mismo
+        /// latido y los mismos alphas, a cualquier escala). `alpha`
+        /// multiplica la intensidad (luz del mundo / energía).
         /// </summary>
         public static void EmitRingSystem(Vector2 center, float R, float time, int seed,
             int tier, float rg, float lifeT, float alpha = 1f)
         {
-            if (R < 1f || alpha <= 0.02f) return;
-            int n = Math.Min(tier, MaxTier);
-            float glyphScale = Math.Max(R / 52f, 0.25f) * 1.45f;
-
-            for (int k = 0; k < n; k++)
-            {
-                float a = RingA(k) * R;
-                float b = a * RingFlat(k);
-                float tilt = RingTilt(k, time, tier);
-                float spin = time * RingSpin(k);
-                // v6.22: del 10º anillo en arriba las runas crecen +1 (no +2)
-                // — 20 anillos × 44 runas sería 880 glifos: demasiado.
-                int runeCount = RunesOfRing(k);
-
-                // El color del anillo: ORO / BLANCO-ESTELAR alternando, y
-                // cada 3º AZUL-ESTELAR desde tier 7 (el sello frío).
-                bool blue = tier >= 7 && k % 3 == 2;
-                Color body = blue ? RuneBlue : RuneGold;
-                Color tip = blue ? RuneBlueTip : RuneGoldTip;
-                // La gigante final tiñe todo hacia el carmesí.
-                if (rg > 0f) body = Color.Lerp(body, SunCrimson, rg * 0.45f);
-
-                // --- 1. EL ARO ELÍPTICO: polilínea de cápsulas con PROFUNDIDAD
-                //     (el frente de la órbita más brillante que la espalda) ---
-                const int Segments = 30;
-                Vector2 prev = EllipsePoint(center, a, b, tilt, spin);
-                for (int s = 1; s <= Segments; s++)
-                {
-                    float t = spin + s / (float)Segments * MathHelper.TwoPi;
-                    Vector2 pt = EllipsePoint(center, a, b, tilt, t);
-                    Vector2 mid = (prev + pt) * 0.5f;
-                    Vector2 delta = pt - prev;
-                    float len = delta.Length();
-                    if (len > 0.5f)
-                    {
-                        float rot = (float)Math.Atan2(delta.Y, delta.X);
-                        // Profundidad: sin(t)·cos(tilt) > 0 → frente de la órbita.
-                        float depth = 0.55f + 0.45f *
-                            (float)Math.Sin(t + MathHelper.PiOver2) * (float)Math.Cos(tilt);
-                        // Latido del aro (la energía recorre el anillo).
-                        float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 1.8f + k * 1.3f + s * 0.35f);
-                        float fade = (1f - lifeT * 0.55f) * alpha;
-                        EmitCapsule(mid, len, Math.Max(2.2f, 0.052f * R) * (1f + 0.35f * depth),
-                            rot, Tint(body, (0.30f + 0.30f * depth) * pulse * fade));
-                    }
-                    prev = pt;
-                }
-
-                // --- 2. LAS RUNAS: glifos cabalgando la órbita, rotados a
-                //     la TANGENTE (los glifos "andan" por el anillo) ---
-                for (int g = 0; g < runeCount; g++)
-                {
-                    float ang = g / (float)runeCount * MathHelper.TwoPi + spin;
-                    EmitRuneOnOrbit(center, a, b, tilt, ang, time, seed, k, g,
-                        body, tip, glyphScale, rg, lifeT, alpha);
-                }
-            }
+            SigiloLib.SistemaAnillos(center, R, time, seed, tier, rg, lifeT, alpha);
         }
 
         /// <summary>Glifos del anillo k (la cuenta LITERAL de la familia).</summary>
-        public static int RunesOfRing(int k) =>
-            Runes0 + RuneStep * Math.Min(k, 9) + RuneStep2 * Math.Max(0, k - 9);
+        public static int RunesOfRing(int k) => SigiloLib.RunesOfRing(k);
 
         /// <summary>
         /// Posición MUNDIAL del glifo g del anillo k (las chispas de las
@@ -366,102 +286,14 @@ namespace AethonMod.Content.VFX
         public static Vector2 RingGlyphWorld(Vector2 center, float R, float time,
             int tier, int k, int g)
         {
-            float a = RingA(k) * R;
-            float b = a * RingFlat(k);
-            float tilt = RingTilt(k, time, tier);
-            float spin = time * RingSpin(k);
-            float ang = g / (float)RunesOfRing(k) * MathHelper.TwoPi + spin;
+            float a = SigiloLib.RingA(k) * R;
+            float b = a * SigiloLib.RingFlat(k);
+            float tilt = SigiloLib.RingTilt(k, time, tier >= SigiloLib.TierPrecesion);
+            float spin = time * SigiloLib.RingSpin(k);
+            float ang = g / (float)SigiloLib.RunesOfRing(k) * MathHelper.TwoPi + spin;
             float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
-            return EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
+            return SigiloLib.EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
         }
-
-        /// <summary>Un glifo rúnico sobre SU órbita elíptica (al buffer).</summary>
-        private static void EmitRuneOnOrbit(Vector2 center, float a, float b, float tilt,
-            float ang, float time, int seed, int k, int g,
-            Color body, Color tip, float glyphScale, float rg, float lifeT, float alpha)
-        {
-            // Flotación viva: el radio respira por glifo.
-            float breathe = 1f + 0.045f * (float)Math.Sin(time * 1.35f + g * 0.9f + k * 0.5f);
-            Vector2 glyphPos = EllipsePoint(center, a * breathe, b * breathe, tilt, ang);
-
-            // La TANGENTE de la órbita en este punto: la runa cabalga de pie.
-            float tanAng = tangentialAngle(a * breathe, b * breathe, tilt, ang);
-            float glyphRot = tanAng + MathHelper.PiOver2; // la runa "de pie" sobre el aro
-
-            // Latido de brillo propio.
-            float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f + k * 0.8f);
-            float fade = (1f - lifeT * 0.55f) * alpha;
-
-            // Resplandor suave DETRÁS (el grabado ardiendo).
-            VFXCore.Quad(glyphPos, Tint(body, 0.20f * pulse * fade),
-                new Vector2(34f * glyphScale, 34f * glyphScale), 0f, Glow);
-
-            // Los TRAZOS del glifo (rotados con la órbita).
-            Vector2[] strokes = _runes[(g + k) % _runes.Length];
-            for (int s = 0; s < strokes.Length; s += 2)
-            {
-                Vector2 localA = strokes[s] * glyphScale;
-                Vector2 localB = strokes[s + 1] * glyphScale;
-                // Rota el trazo al marco de la runa (sobre la tangente).
-                Vector2 rotA = localA.RotatedBy(glyphRot) + glyphPos;
-                Vector2 rotB = localB.RotatedBy(glyphRot) + glyphPos;
-                Vector2 mid = (rotA + rotB) * 0.5f;
-                Vector2 delta = rotB - rotA;
-                float len = delta.Length();
-                if (len < 0.01f) continue;
-                float rot = (float)Math.Atan2(delta.Y, delta.X);
-
-                // Gradiente vertical local: abajo cuerpo, arriba punta pálida.
-                float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
-                Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
-
-                EmitCapsule(mid, len, 3.3f * glyphScale, rot, Tint(col, 0.85f * pulse * fade));
-            }
-
-            // PERLA sobre el glifo (la gema del sello).
-            Vector2 pearlPos = glyphPos + new Vector2(0f, -11.5f * glyphScale).RotatedBy(glyphRot);
-            VFXCore.Quad(pearlPos, Tint(body, 0.60f * pulse * fade),
-                new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f, Glow);
-            VFXCore.Quad(pearlPos, Tint(tip, 0.9f * pulse * fade),
-                new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f, Glow);
-        }
-
-        /// <summary>Cápsula al buffer compartido (coords de mundo).</summary>
-        private static void EmitCapsule(Vector2 mid, float len, float width, float rot, Color tint)
-        {
-            if (tint.A == 0) return;
-            VFXCore.Quad(mid, tint, new Vector2(len + width, width * 1.9f), rot);
-        }
-
-        // ==================================================================
-        //  TABLA DE GLIFOS — la ESCRITURA SOLAR (8 diseños originales)
-        // ==================================================================
-
-        /// <summary>
-        /// Cada runa es una lista de TRAZOS (pares de puntos en espacio
-        /// local ~11×15). Ocho diseños angulares de estilo ASTRO RÚNICO:
-        /// soles, llamas, ruedas y puertas — la escritura del sello que
-        /// viste a las copias del sol.
-        /// </summary>
-        private static readonly Vector2[][] _runes = new Vector2[][]
-        {
-            // R0 — EL ASTRO (el punto de luz con rayos)
-            new Vector2[] { new(0f, -4.5f), new(0f, 4.5f), new(-4.5f, 0f), new(4.5f, 0f), new(-3f, -3f), new(-1.2f, -1.2f), new(3f, -3f), new(1.2f, -1.2f), new(-3f, 3f), new(-1.2f, 1.2f), new(3f, 3f), new(1.2f, 1.2f) },
-            // R1 — LA LLAMA VIVA
-            new Vector2[] { new(0f, 6.5f), new(0f, 1f), new(0f, 1f), new(-3f, -2f), new(-3f, -2f), new(0f, -5f), new(0f, -5f), new(3f, -2f), new(3f, -2f), new(0f, 1f), new(-1.5f, -6.5f), new(1.5f, -6.5f) },
-            // R2 — LA RUEDA SOLAR
-            new Vector2[] { new(0f, -5f), new(0f, 5f), new(-5f, 0f), new(5f, 0f), new(-3.5f, -3.5f), new(3.5f, 3.5f), new(3.5f, -3.5f), new(-3.5f, 3.5f), new(-2.2f, 0f), new(2.2f, 0f), new(0f, -2.2f), new(0f, 2.2f) },
-            // R3 — LA ESPIGA DE LUZ
-            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.2f, -3.5f), new(0f, -0.5f), new(3.2f, -3.5f), new(0f, -0.5f), new(-3.2f, 3.5f), new(0f, 0.5f), new(3.2f, 3.5f), new(0f, 0.5f) },
-            // R4 — LA PUERTA DEL DÍA
-            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(0f, -7f), new(0f, -7f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, 7f), new(3.5f, 7f), new(0f, -4f), new(0f, 7f) },
-            // R5 — LA CORONA BAJA
-            new Vector2[] { new(-4f, 5f), new(-4f, -2f), new(-4f, -2f), new(-1.5f, -5.5f), new(-1.5f, -5.5f), new(0f, -1.5f), new(0f, -1.5f), new(1.5f, -5.5f), new(1.5f, -5.5f), new(4f, -2f), new(4f, -2f), new(4f, 5f), new(-4f, 5f), new(4f, 5f) },
-            // R6 — EL TRAZO DEL COMETA
-            new Vector2[] { new(-4f, 6.5f), new(3f, -1f), new(3f, -1f), new(0f, -6.5f), new(0f, -6.5f), new(4f, -3f), new(1.5f, 2f), new(4.5f, 1.5f), new(-1.5f, 1f), new(1.5f, 4f) },
-            // R7 — EL SIGILO SOLAR (el sello maestro)
-            new Vector2[] { new(0f, -6.5f), new(-4f, 0f), new(-4f, 0f), new(0f, 6.5f), new(0f, 6.5f), new(4f, 0f), new(4f, 0f), new(0f, -6.5f), new(-2.2f, 0f), new(2.2f, 0f), new(0f, -4f), new(0f, 4f) },
-        };
 
         // ==================================================================
         //  LAS MEJORAS PROGRESIVAS (una capa nueva por tier)
@@ -689,7 +521,7 @@ namespace AethonMod.Content.VFX
 
                 // Qué glifo y de qué anillo (determinista por ciclo).
                 int cycle = (int)(time / Cycle) + i;
-                int glyph = (int)(Hash01(seed, 900 + cycle, 3) * _runes.Length) % _runes.Length;
+                int glyph = (int)(Hash01(seed, 900 + cycle, 3) * SigiloLib.RunasSolares.Length) % SigiloLib.RunasSolares.Length;
                 int ring = Math.Max(0, Math.Min(MaxTier - 1,
                     (int)(Hash01(seed, 910 + cycle, 5) * 4)));
                 int idx = (int)(Hash01(seed, 920 + cycle, 7) * (Runes0 + RuneStep * ring));
@@ -712,7 +544,7 @@ namespace AethonMod.Content.VFX
                 // Resplandor + trazos del glifo fugitivo.
                 Quad(Glow, pos, new Vector2(40f * glyphScale, 40f * glyphScale), 0f,
                     Tint(RuneGold, 0.28f * bright));
-                Vector2[] strokes = _runes[glyph];
+                Vector2[] strokes = SigiloLib.RunasSolares[glyph];
                 for (int s = 0; s < strokes.Length; s += 2)
                 {
                     Vector2 rotA = strokes[s] * glyphScale * (0.8f + 0.4f * phase);
@@ -875,7 +707,7 @@ namespace AethonMod.Content.VFX
                 if (bright < 0.06f) continue;
 
                 int cycle = (int)(time / Cycle) + i;
-                int glyph = (int)(Hash01(seed, 1300 + cycle, 3) * _runes.Length) % _runes.Length;
+                int glyph = (int)(Hash01(seed, 1300 + cycle, 3) * SigiloLib.RunasSolares.Length) % SigiloLib.RunasSolares.Length;
                 float ang = Hash01(seed, 1310 + cycle, 5) * MathHelper.TwoPi + time * 0.11f;
                 float startR = 4.4f * R, endR = 1.02f * R;
                 float dist = MathHelper.Lerp(startR, endR, phase);
@@ -887,7 +719,7 @@ namespace AethonMod.Content.VFX
 
                 Quad(Glow, pos, new Vector2(36f * glyphScale, 36f * glyphScale), 0f,
                     Tint(RuneGoldTip, 0.24f * bright));
-                Vector2[] strokes = _runes[glyph];
+                Vector2[] strokes = SigiloLib.RunasSolares[glyph];
                 for (int s = 0; s < strokes.Length; s += 2)
                 {
                     Vector2 rotA = strokes[s] * glyphScale * (1.1f - 0.35f * phase);
@@ -1162,17 +994,17 @@ namespace AethonMod.Content.VFX
             }
 
             // LOS 8 GLIFOS MAESTROS en secuencia sobre el aro.
-            for (int g = 0; g < _runes.Length; g++)
+            for (int g = 0; g < SigiloLib.RunasSolares.Length; g++)
             {
-                float ang = g / (float)_runes.Length * MathHelper.TwoPi + spin;
+                float ang = g / (float)SigiloLib.RunasSolares.Length * MathHelper.TwoPi + spin;
                 Vector2 glyphPos = EllipsePoint(center, a * 1.03f, b * 1.03f, tilt, ang);
-                float tanAng = tangentialAngle(a, b, tilt, ang);
+                float tanAng = SigiloLib.TangenteElipse(a, b, tilt, ang);
                 float glyphRot = tanAng + MathHelper.PiOver2;
                 float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 1.9f + g * 0.8f);
 
                 Quad(Glow, glyphPos, new Vector2(42f * glyphScale, 42f * glyphScale), 0f,
                     Tint(WhiteIncan, 0.22f * pulse));
-                Vector2[] strokes = _runes[g];
+                Vector2[] strokes = SigiloLib.RunasSolares[g];
                 for (int s = 0; s < strokes.Length; s += 2)
                 {
                     Vector2 rotA = strokes[s] * glyphScale;
@@ -1282,18 +1114,6 @@ namespace AethonMod.Content.VFX
                 pts[i] = u * u * a + 2f * u * t * c + t * t * b;
             }
             return pts;
-        }
-
-        /// <summary>
-        /// Ángulo de la TANGENTE de la elipse (para rotar las runas que la
-        /// cabalgan): derivada del punto respecto de t, proyectada al plano.
-        /// </summary>
-        private static float tangentialAngle(float a, float b, float tilt, float t)
-        {
-            Vector2 dLocal = new Vector2(-a * (float)Math.Sin(t), b * (float)Math.Cos(t));
-            float cR = (float)Math.Cos(tilt), sR = (float)Math.Sin(tilt);
-            Vector2 d = new Vector2(dLocal.X * cR - dLocal.Y * sR, dLocal.X * sR + dLocal.Y * cR);
-            return (float)Math.Atan2(d.Y, d.X);
         }
 
         /// <summary>Hash determinista [0,1).</summary>

@@ -65,30 +65,24 @@ namespace AethonMod.Content.VFX
         /// <summary>Radio de la esfera negra en px a escala 1 — GIGANTE.</summary>
         public const float SpherePx = 50f;
 
-        /// <summary>Elipse del anillo energético (oblicua como un vórtice).</summary>
-        private const float RingA = 1.90f;      // semieje mayor (×R)
-        private const float RingB = 1.18f;      // semieje menor (×R)
-        private const float RingTilt = -0.38f;  // rad — inclinación
+        /// <summary>Elipse del anillo energético (oblicua como un vórtice) —
+        /// LA LEY VIVE EN ORBITALIB (la librería de signos mágicos del vacío).</summary>
+        private const float RingA = OrbitaLib.RingA;      // semieje mayor (×R)
+        private const float RingB = OrbitaLib.RingB;      // semieje menor (×R)
+        private const float RingTilt = OrbitaLib.RingTilt; // rad — inclinación
 
-        /// <summary>Rotación del anillo: 20°/s del script Unity.</summary>
-        private const float RingSpin = 0.349f;  // rad/s (= 20°/s)
+        /// <summary>Rotación del anillo: 20°/s de la casa (OrbitaLib).</summary>
+        private const float RingSpin = OrbitaLib.RingSpin;  // rad/s (= 20°/s)
 
-        /// <summary>
-        /// LA FÓRMULA DEL SHADER: glow = sin(uv.x·20 + t·5)·0.5+0.5.
-        /// 20 bandas viajando a 5 rad/s en espacio paramétrico.
-        /// </summary>
-        private const float BandFreq = 20f;
-        private const float BandSpeed = 5f;
+        /// <summary>LA FÓRMULA DEL SHADER (OrbitaLib): 20 bandas a 5 rad/s.</summary>
+        private const float BandFreq = OrbitaLib.BandFreq;
+        private const float BandSpeed = OrbitaLib.BandSpeed;
 
-        /// <summary>
-        /// Distorsión sinusoidal global del script (0.3): el radio del
-        /// anillo VIBRA con sin(t)·0.3 — aquí, acotado al 3% del radio
-        /// para que sea un temblor vivo sin romper la elipse.
-        /// </summary>
-        private const float DistortionStrength = 0.3f;
+        /// <summary>Distorsión sinusoidal global (OrbitaLib.DistorsionFuerza).</summary>
+        private const float DistortionStrength = OrbitaLib.DistorsionFuerza;
 
-        /// <summary>Segmentos de cada mitad del anillo.</summary>
-        private const int RingSegments = 44;
+        /// <summary>Segmentos de cada mitad del anillo (OrbitaLib).</summary>
+        private const int RingSegments = OrbitaLib.RingSegments;
 
         /// <summary>Regeneración de la turbulencia (Hz).</summary>
         private const float FlickHz = 12f;
@@ -233,11 +227,13 @@ namespace AethonMod.Content.VFX
                 // --- 1. NEBULOSAS difusas + polvo ambiental ---
                 DrawNebulas(center, rr, time, seed);
 
-                // --- 2. ECOS DEL ANILLO (la resonancia del shader) ---
-                DrawRingEchoes(center, rr, time, distortion);
+                // --- 2. ECOS DEL ANILLO (la resonancia del shader) —
+                //     ORBITALIB.EcosAnillo (la técnica promovida a librería)
+                OrbitaLib.EcosAnillo(center, rr, time, distortion);
 
-                // --- 3. ANILLO ENERGÉTICO — mitad TRASERA ---
-                DrawEnergyRing(center, rr, time, seed, flick, front: false);
+                // --- 3. ANILLO ENERGÉTICO — mitad TRASERA —
+                //     ORBITALIB.AnilloEnergia (la fórmula fiel del shader)
+                OrbitaLib.AnilloEnergia(center, rr, time, seed, flick, front: false);
 
                 // --- 4. NÚCLEO + rim del horizonte ---
                 Main.spriteBatch.End();
@@ -248,11 +244,12 @@ namespace AethonMod.Content.VFX
                 RingQuad(center, 1.02f * r, time * 0.15f,
                     Tint(RingMagenta, 0.40f + 0.12f * (float)Math.Sin(time * 1.7f)));
 
-                // --- 5. ANILLO ENERGÉTICO — mitad DELANTERA (más brillante) ---
-                DrawEnergyRing(center, rr, time, seed, flick, front: true);
+                // --- 5. ANILLO ENERGÉTICO — mitad DELANTERA (más brillante) —
+                //     ORBITALIB.AnilloEnergia
+                OrbitaLib.AnilloEnergia(center, rr, time, seed, flick, front: true);
 
-                // --- 6. CORREDORES DE FOTONES orbitando ---
-                DrawPhotonRunners(center, rr, time, seed);
+                // --- 6. CORREDORES DE FOTONES orbitando — ORBITALIB.Fotones
+                OrbitaLib.Fotones(center, rr, time);
 
                 // --- 7. RAYOS ELÉCTRICOS (en el núcleo + del anillo) ---
                 DrawElectricBolts(center, r, time, seed, flick);
@@ -322,123 +319,10 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
-        //  2. ECOS DEL ANILLO — la resonancia del shader CosmicRing
+        //  2/3/5/6. EL ANILLO ENERGÉTICO, LOS ECOS Y LOS FOTONES — viven en
+        //  ORBITALIB (AnilloEnergia / EcosAnillo / Fotones): la librería de
+        //  signos mágicos del vacío. Este renderer los DELEGA 1:1.
         // ------------------------------------------------------------------
-
-        private static void DrawRingEchoes(Vector2 center, float rr, float time, float distortion)
-        {
-            // Dos anillos fantasma a ±1 banda de fase del shader: la emisión
-            // del anillo "rebota" en el espacio curvado. Respiran con la
-            // distorsión sinusoidal global del script.
-            float phase = time * BandSpeed * 0.20f;
-
-            float echo1 = 0.55f + 0.45f * (float)Math.Sin(phase);
-            RingQuad(center, 1.42f * rr, time * RingSpin,
-                Tint(RingMagenta, 0.16f * echo1));
-
-            float echo2 = 0.55f + 0.45f * (float)Math.Sin(phase + MathHelper.Pi);
-            RingQuad(center, 0.80f * rr, -time * RingSpin * 0.7f,
-                Tint(DeepViolet, 0.14f * echo2));
-
-            // Un velo tenue de emisión alrededor del anillo entero (el
-            // resplandor de la emisión ×5 envolviendo el vórtice).
-            Quad(Glow, center, new Vector2(4.4f * rr, 3.6f * rr), RingTilt,
-                Tint(RingMagenta, 0.10f + 0.05f * distortion));
-        }
-
-        // ------------------------------------------------------------------
-        //  3/5. EL ANILLO ENERGÉTICO — EL SHADER COSMICRING FIEL
-        // ------------------------------------------------------------------
-
-        private static void DrawEnergyRing(Vector2 center, float rr, float time, int seed,
-            int flick, bool front)
-        {
-            // La mitad delantera (t ∈ 0..π) cruza POR DELANTE de la esfera.
-            float t0 = front ? 0f : MathHelper.Pi;
-            float span = MathHelper.Pi;
-            float bright = front ? 1.30f : 0.90f;
-
-            // El anillo ROTA (rotationSpeed 20°/s del script Unity).
-            float spin = time * RingSpin;
-
-            for (int s = 0; s < RingSegments; s++)
-            {
-                float t = t0 + span * (s + 0.5f) / RingSegments;
-                float tSpin = t + spin;   // el patrón de bandas gira con el anillo
-
-                // Posición + tangente de la cápsula.
-                Vector2 a = Ellipse(center, rr, t - span / (RingSegments * 2f));
-                Vector2 b = Ellipse(center, rr, t + span / (RingSegments * 2f));
-                Vector2 mid = (a + b) * 0.5f;
-                Vector2 seg = b - a;
-                float segLen = seg.Length();
-                if (segLen < 0.5f) continue;
-                float rot = (float)Math.Atan2(seg.Y, seg.X);
-
-                // ============================================================
-                //  LA FÓRMULA EXACTA DEL SHADER:
-                //  glow = sin(uv.x · 20 + _Time.y · 5) · 0.5 + 0.5
-                //  → VEINTE BANDAS de emisión recorriendo el anillo.
-                // ============================================================
-                float glow = 0.5f + 0.5f * (float)Math.Sin(tSpin * BandFreq - time * BandSpeed);
-
-                // Turbulencia viva por hash (regenerada a 12 Hz).
-                float turb = 0.74f + 0.26f * Hash01(seed, 700 + s, flick);
-                float inten = glow * turb * bright;
-
-                // Gradiente térmico: banda al máximo = blanco-rosa
-                // incandescente; media = magenta puro; valle = violeta.
-                Color c;
-                if (inten > 0.82f) c = HotWhite;
-                else if (inten > 0.45f) c = RingMagenta;
-                else c = DeepViolet;
-
-                // Cápsula HALO (gruesa, tenue) + cápsula NÚCLEO (fina, viva).
-                Capsule(mid, segLen, 0.36f * rr * (0.7f + inten), rot, Tint(c, 0.40f * inten));
-                Capsule(mid, segLen, 0.12f * rr * inten, rot, Tint(c, 0.85f * inten));
-
-                // En el PICO de cada banda, un punto blanco extra (la
-                // emisión ×5 del material casi fundiéndose a blanco).
-                if (inten > 0.86f)
-                {
-                    Quad(Glow, mid, new Vector2(0.32f * rr, 0.32f * rr), rot,
-                        Tint(HotWhite, 0.70f * (inten - 0.86f) / 0.14f));
-                }
-            }
-        }
-
-        // ------------------------------------------------------------------
-        //  6. CORREDORES DE FOTONES — luz orbitando el vórtice
-        // ------------------------------------------------------------------
-
-        private static void DrawPhotonRunners(Vector2 center, float rr, float time, int seed)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                // Orbitan con la rotación del anillo (20°/s) más su propia
-                // velocidad angular — fotones "corriendo" el vórtice.
-                float t = time * (RingSpin + 0.55f + 0.20f * i) + i * 2.1f;
-                Vector2 pos = Ellipse(center, rr, t);
-                float twinkle = 0.65f + 0.35f * (float)Math.Sin(time * 8f + i * 2.3f);
-
-                // Estela corta detrás del fotón (cápsula sobre la tangente).
-                Vector2 behind = Ellipse(center, rr, t - 0.22f);
-                Vector2 seg = pos - behind;
-                float len = seg.Length();
-                if (len > 0.5f)
-                {
-                    float rot = (float)Math.Atan2(seg.Y, seg.X);
-                    Vector2 mid = (pos + behind) * 0.5f;
-                    Capsule(mid, len, 0.14f * rr, rot, Tint(RingMagenta, 0.40f * twinkle));
-                }
-
-                // halo magenta + núcleo blanco-rosa
-                Quad(Glow, pos, new Vector2(1.05f * rr, 1.05f * rr), 0f,
-                    Tint(RingMagenta, 0.35f * twinkle));
-                Quad(Glow, pos, new Vector2(0.42f * rr, 0.42f * rr), 0f,
-                    Tint(HotWhite, 0.85f * twinkle));
-            }
-        }
 
         // ------------------------------------------------------------------
         //  7. RAYOS ELÉCTRICOS — el lightningParticles del script

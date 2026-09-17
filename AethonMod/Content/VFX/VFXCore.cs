@@ -439,7 +439,9 @@ namespace AethonMod.Content.VFX
         /// EL PRESUPUESTO (v6.31 — anti-"abrumador"): cuenta los cuadros
         /// vuelcados este frame; los llamadores COSMÉTICOS consultan esto
         /// antes de emitir (si hay 3 jefes con bruma a la vez, las lluvias de
-        /// partículas decorativas se saltan solas). Techo ~24000 quads/frame.
+        /// partículas decorativas se saltan solas). Techo ~24000 quads/frame
+        /// — que desde v6.34 RESPIRA: se multiplica por <see cref="FactorCalidad"/>
+        /// (con factor 1 el techo es el de siempre, idéntico).
         /// </summary>
         public static bool Presupuesto(int quadsQueQuieroEmitir)
         {
@@ -449,7 +451,10 @@ namespace AethonMod.Content.VFX
                 _frameDelPresupuesto = frame;
                 _quadsDelFrame = 0;
             }
-            return _quadsDelFrame + quadsQueQuieroEmitir <= 24000;
+            // v6.34 — EL TECHO RESPIRA: el factor adaptativo multiplica el
+            // límite efectivo (factor 1 → 24000 exactos, comportamiento
+            // IDÉNTICO al clásico; factor 0.5 → la mitad de techo).
+            return _quadsDelFrame + quadsQueQuieroEmitir <= (int)(24000f * _factorCalidad);
         }
 
         /// <summary>Registra consumo del presupuesto (lo llama FlushAdditive).</summary>
@@ -462,6 +467,56 @@ namespace AethonMod.Content.VFX
                 _quadsDelFrame = 0;
             }
             _quadsDelFrame += n;
+        }
+
+        // --- v6.34 — EL PRESUPUESTO ADAPTATIVO (la calidad que respira) ---
+
+        /// <summary>
+        /// La media móvil EXPONENCIAL de los FPS (0.9·prev + 0.1·último):
+        /// nace en 60 — un hijack de un frame (carga, pausa) NO tira la
+        /// calidad; solo el hundimiento sostenido cuenta.
+        /// </summary>
+        private static float _fpsSuave = 60f;
+
+        /// <summary>
+        /// El factor de calidad ACTUAL (0.5..1): multiplica el techo de
+        /// <see cref="Presupuesto"/>. Arranca en 1 (sin recortes).
+        /// </summary>
+        private static float _factorCalidad = 1f;
+
+        /// <summary>
+        /// El factor de calidad ACTUAL (0.5..1) — público para que los
+        /// renderizadores que quieran acompañen la respiración (escalar sus
+        /// propias lluvias de partículas, etc.). 1 = el comportamiento de
+        /// siempre.
+        /// </summary>
+        public static float FactorCalidad => _factorCalidad;
+
+        /// <summary>
+        /// v6.34 — REPORTA los FPS reales del juego (API para el futuro: la
+        /// llama un sistema externo — p. ej. un medidor que lea el frame
+        /// time — y NADIE la llama aún; no se crea ningún sistema nuevo aquí).
+        /// Lógica: media móvil EXPONENCIAL (0.9·prev + 0.1·fps) y el factor
+        /// de calidad RESPIRA con ella — si el promedio cae por debajo de
+        /// 45 FPS, el factor BAJA 0.05 por reporte (suelo 0.5: ni a la mitad
+        /// del techo se recorta más); si supera los 55, SUBE 0.02 por reporte
+        /// (techo 1: recuperación LENTA a propósito — se pierde calidad en un
+        /// pico y se recupera con calma, sin ver el yo-yó). El factor
+        /// multiplica el límite efectivo del presupuesto: LA CALIDAD SE
+        /// ADAPTA SOLA — si los FPS caen, el mod adelgaza sus efectos; nadie
+        /// tiene que configurar nada.
+        /// </summary>
+        public static void ReportarFps(float fps)
+        {
+            // Robustez: un NaN/infinito envenenaría la media PARA SIEMPRE
+            // (0.9·NaN = NaN) y dejaría el factor congelado.
+            if (float.IsNaN(fps) || float.IsInfinity(fps)) return;
+
+            _fpsSuave = _fpsSuave * 0.9f + fps * 0.1f;
+            if (_fpsSuave < 45f)
+                _factorCalidad = Math.Max(_factorCalidad - 0.05f, 0.5f);
+            else if (_fpsSuave > 55f)
+                _factorCalidad = Math.Min(_factorCalidad + 0.02f, 1f);
         }
     }
 }

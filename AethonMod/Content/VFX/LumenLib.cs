@@ -236,6 +236,57 @@ namespace AethonMod.Content.VFX
             Bloom(batch, pos, size * pulse, color, intensity * pulse, layers);
         }
 
+        /// <summary>
+        /// v6.34 — EL BLOOM MULTI-ESCALA: tres bandas de frecuencia de glow
+        /// (núcleo + medio + amplio) con alfas calibrados — el look "bloom de
+        /// verdad" SIN tocar el pipeline global del juego: la textura radial
+        /// suave (SoftGlow) apilada a 1.0×, 1.9× y 3.4× del
+        /// <paramref name="radio"/>, con alfas 0.55·i, 0.28·i y 0.13·i
+        /// (i = <paramref name="intensidad"/>) y el color CALENTÁNDOSE hacia
+        /// blanco al alejarse del centro (la media a un 30%, la amplia a un
+        /// 55% — como el corazón de un bloom real, que "quema" la periferia).
+        /// La suma de las tres bandas lee como UN SOLO resplandor con cuerpo
+        /// y caída suave, no como tres aros concéntricos.
+        ///
+        /// POR QUÉ MULTI-ESCALA Y NO RenderTarget (decisión de la casa): un
+        /// RT global — agarrar la escena, difuminarla y re-proyectarla —
+        /// puede dejar la PANTALLA NEGRA si algo falla (un begin/end
+        /// desbalanceado, un cambio de resolución a mitad de frame, una
+        /// excepción dentro del hook de render) y NO se puede probar fuera
+        /// del juego: el fallo solo se ve dentro, cuando ya es tarde. El
+        /// multi-escala es VERIFICABLE (la suma de alfas por banda se
+        /// puede mockear numéricamente igual que el desgarro) y SEGURO: si
+        /// una capa falla, las demás siguen pintadas. Mismo contrato que
+        /// <see cref="Bloom"/>: el batch ABIERTO en aditivo, sin tocarlo.
+        /// </summary>
+        /// <param name="batch">Batch ABIERTO en modo aditivo.</param>
+        /// <param name="pos">Centro (coords tal cual lleguen).</param>
+        /// <param name="radio">Radio del glow NÚCLEO en px (las bandas crecen desde él).</param>
+        /// <param name="color">El color de la LUZ (las bandas externas viran a blanco).</param>
+        /// <param name="intensidad">Multiplicador global 0..1 (por defecto 1).</param>
+        public static void BloomTriple(SpriteBatch batch, Vector2 pos, float radio,
+            Color color, float intensidad = 1f)
+        {
+            if (intensidad <= 0.02f || radio < 2f) return;
+
+            // El blanco cálido de la casa (el mismo corazón de Bloom/Flare/Ray).
+            Color blanco = new Color(255, 250, 240);
+
+            // De FUERA hacia DENTRO (el orden del bloom apilado de la casa):
+            // 1) la BANDA AMPLIA — 3.4× el radio, casi un susurro (α 0.13·i):
+            //    la atmósfera que "se derrama" muy lejos del centro.
+            Quad(batch, GlowTex, pos, new Vector2(radio * 6.8f, radio * 6.8f), 0f,
+                Tint(Color.Lerp(color, blanco, 0.55f), 0.13f * intensidad));
+            // 2) la BANDA MEDIA — 1.9× el radio, el cuerpo del resplandor
+            //    (α 0.28·i), ya recalentada un 30% hacia blanco.
+            Quad(batch, GlowTex, pos, new Vector2(radio * 3.8f, radio * 3.8f), 0f,
+                Tint(Color.Lerp(color, blanco, 0.30f), 0.28f * intensidad));
+            // 3) la BANDA NÚCLEO — 1.0× el radio, la que lleva el COLOR puro
+            //    (α 0.55·i): la identidad cromática vive en el centro.
+            Quad(batch, GlowTex, pos, new Vector2(radio * 2f, radio * 2f), 0f,
+                Tint(color, 0.55f * intensidad));
+        }
+
         // ==================================================================
         //  2. LA DOBLE PASADA — el contrato de la luz que EMANA
         // ==================================================================

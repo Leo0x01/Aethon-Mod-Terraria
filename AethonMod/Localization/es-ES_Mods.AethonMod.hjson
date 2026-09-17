@@ -76,6 +76,10 @@
         "Items.BolsaExhumados.Tooltip": "Las formas exhumadas: el rencor y la eminencia.\nLas formas exhumadas originales del arsenal.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
         "Items.BolsaCosmeticos.DisplayName": "Bolsa de los Cosméticos",
         "Items.BolsaCosmeticos.Tooltip": "Las coronas que se ciñen a tu personaje.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+        "Items.BolsaDosFormas.DisplayName": "Bolsa de las Dos Formas",
+        "Items.BolsaDosFormas.Tooltip": "Las armas de las dos formas de uso: cada una despliega su forma alternativa.\nLas cuatro que aprendieron a decir dos cosas a la vez.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+        "Items.BolsaDesgarros.DisplayName": "Bolsa de los Desgarros",
+        "Items.BolsaDesgarros.Tooltip": "Los bastones que rajan la realidad: sutura, portal, pliegue y herida.\nCada desgarro se abre distinto.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
 
         "Items.RencorPrimordialStaff.DisplayName": "El Rencor Primordial",
         "Items.RencorPrimordialStaff.Tooltip": "La forma exhumada del arsenal: EL RENCOR PRIMORDIAL.\nClava un círculo de transmutación rúnico a 380 px.\n3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.\nAl tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).\nLos enemigos del haz se desintegran en ceniza. Sin maná.",
@@ -266,7 +270,6 @@
         "Items.CoroEspectralStaff.DisplayName": "Bastón del Coro Espectral",
         "Items.CoroEspectralStaff.Tooltip": "Seis notas de luz cantando en órbita lenta.\nCada nota emite su anillo de onda a su turno.\nEl coro se despide apagándose de a una.",
 
-        "Projectiles.DesgarroRealityProjectile.DisplayName": "Desgarro en la Realidad",
         "Projectiles.SembradorPulsarProjectile.DisplayName": "Púlsar del Cementerio",
         "Projectiles.LagrimaSolarProjectile.DisplayName": "Lágrima Solar",
         "Projectiles.ColapsoMagnetarProjectile.DisplayName": "Magnetar del Colapso",
