@@ -36,7 +36,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<PliegueEspacioProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 26; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;   // v6.35: SIN MANÁ (petición: los bastones nuevos no lo requieren)
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item122.WithPitchOffset(0.15f);
             Item.value = 24000;
@@ -105,7 +105,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<HeridaElectricaProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 15; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;   // v6.35: SIN MANÁ (petición: los bastones nuevos no lo requieren)
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item122.WithPitchOffset(0.55f);
             Item.value = 24000;

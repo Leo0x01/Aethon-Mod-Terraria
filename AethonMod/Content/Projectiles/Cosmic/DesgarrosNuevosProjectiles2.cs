@@ -57,7 +57,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
-            Projectile.hide = true;
+            // v6.35: SIN hide — mismo fix que los desgarros de la primera
+            // tanda: tML no dibuja los proyectivos ocultos y PreDraw nunca
+            // corría. Sin hide el VFX de RiftLib vive.
         }
 
         public override void AI()
@@ -192,7 +194,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
-            Projectile.hide = true;
+            // v6.35: SIN hide — mismo fix que los desgarros de la primera
+            // tanda: tML no dibuja los proyectivos ocultos y PreDraw nunca
+            // corría. Sin hide el VFX de RiftLib vive.
         }
 
         public override void AI()

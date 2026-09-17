@@ -239,19 +239,24 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>10 — LOS COSMÉTICOS: las coronas de la casa.</summary>
+    /// <summary>10 — LOS COSMÉTICOS: las coronas de la casa + LOS TRES
+    /// ACCESORIOS DE LAS LIBRERÍAS DE SIGNOS MÁGICOS (v6.35: los sellos y
+    /// anillos que rodean al jugador).</summary>
     public class BolsaCosmeticos : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Cosméticos";
         protected override string NombreCorto => "Bolsa de los Cosméticos";
         protected override Color ColorFiesta => new(255, 140, 220);
-        protected override string Nota => "Las coronas que se ciñen a tu personaje";
+        protected override string Nota => "Coronas, sellos y anillos que se ciñen a tu personaje";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
             l.Add((ModContent.ItemType<Cosmetics.VoidCrownItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.RuneCrownItem>(), 1));
+            l.Add((ModContent.ItemType<Accessories.SelloGenesisItem>(), 1));
+            l.Add((ModContent.ItemType<Accessories.AnillosSolRunicoItem>(), 1));
+            l.Add((ModContent.ItemType<Accessories.AnillosHorizonteItem>(), 1));
             return l;
         }
     }
@@ -278,15 +283,15 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>12 — LOS DESGARROS (v6.33): el clásico + LOS 4 NUEVOS nacidos
-    /// de las referencias del usuario (el cuántico, el portal, el pliegue y
-    /// la herida eléctrica).</summary>
+    /// <summary>12 — LOS DESGARROS (v6.33 + v6.35): el clásico + LOS 4
+    /// de la primera tanda + LOS 4 NUEVOS de la segunda (el corazón, la
+    /// garganta, el umbral y el leviatán).</summary>
     public class BolsaDesgarros : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Desgarros de Realidad";
         protected override string NombreCorto => "Bolsa de los Desgarros";
         protected override Color ColorFiesta => new(0, 229, 255);
-        protected override string Nota => "Cinco formas de romper el tejido del mundo";
+        protected override string Nota => "Nueve formas de romper el tejido del mundo";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
@@ -296,6 +301,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<PortalDimensionalStaff>(), 1));
             l.Add((ModContent.ItemType<PliegueEspacioStaff>(), 1));
             l.Add((ModContent.ItemType<HeridaElectricaStaff>(), 1));
+            l.Add((ModContent.ItemType<CorazonColapsoStaff>(), 1));
+            l.Add((ModContent.ItemType<GargantaVacioStaff>(), 1));
+            l.Add((ModContent.ItemType<UmbralRotoStaff>(), 1));
+            l.Add((ModContent.ItemType<LeviatanEspectralStaff>(), 1));
             return l;
         }
     }

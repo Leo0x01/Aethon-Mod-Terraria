@@ -53,7 +53,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
-            Projectile.hide = true;
+            // v6.35: SIN hide — el bucle DrawProjectiles de tML SALTA los
+            // proyectivos ocultos ("!projectile[i].hide" en Main.cs) y PreDraw
+            // jamás se llamaba: EL DESGARRO ERA INVISIBLE. Sin hide entra al
+            // pase normal y PreDraw (que retorna false) pinta todo el VFX.
         }
 
         public override void AI()
@@ -226,7 +229,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
-            Projectile.hide = true;
+            // v6.35: SIN hide — el bucle DrawProjectiles de tML SALTA los
+            // proyectivos ocultos ("!projectile[i].hide" en Main.cs) y PreDraw
+            // jamás se llamaba: EL DESGARRO ERA INVISIBLE. Sin hide entra al
+            // pase normal y PreDraw (que retorna false) pinta todo el VFX.
         }
 
         public override void AI()

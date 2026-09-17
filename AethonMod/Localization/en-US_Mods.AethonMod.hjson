@@ -20,6 +20,7 @@
         "Projectiles.GenesisLight.DisplayName": "Genesis Light",
         "Projectiles.CosmicOrbMinion.DisplayName": "Cosmic Orb",
         "Projectiles.CosmicOrbBolt.DisplayName": "Cosmic Bolt",
+        "Projectiles.AnillosSingularesHalo.DisplayName": "Horizon Rings",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Cosmic Orb",
         "Buffs.CosmicOrbBuff.Description": "A cosmic orb of light follows you and shoots at your enemies",
@@ -76,11 +77,11 @@
         "Items.BolsaExhumados.DisplayName": "Exhumed Bag",
         "Items.BolsaExhumados.Tooltip": "The exhumed forms: the rancor and the eminence.\nThe arsenal's original exhumed forms.\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaCosmeticos.DisplayName": "Cosmetics Bag",
-        "Items.BolsaCosmeticos.Tooltip": "The crowns that sit upon your character.\nRight-click to deploy them.\nOnly delivers what you're missing.",
+        "Items.BolsaCosmeticos.Tooltip": "Crowns, seals and rings that sit upon your character.\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaDosFormas.DisplayName": "Two Forms Bag",
         "Items.BolsaDosFormas.Tooltip": "The two-usage-form weapons: each one deploys its alternative form.\nThe four that learned to say two things at once.\nRight-click to deploy them.\nOnly delivers what you're missing.",
         "Items.BolsaDesgarros.DisplayName": "Tears Bag",
-        "Items.BolsaDesgarros.Tooltip": "The staves that rip reality: suture, portal, fold and wound.\nEach tear opens differently.\nRight-click to deploy them.\nOnly delivers what you're missing.",
+        "Items.BolsaDesgarros.Tooltip": "The staves that rip reality: suture, portal, fold, wound,\nheart, throat, threshold and leviathan. Each tear opens differently.\nRight-click to deploy them.\nOnly delivers what you're missing.",
 
         "Items.RencorPrimordialStaff.DisplayName": "The Primordial Rancor",
         "Items.RencorPrimordialStaff.Tooltip": "The arsenal's exhumed form: THE PRIMORDIAL RANCOR.\nPins a runic transmutation circle 380 px away.\n3 s of charge → THE CONTINUOUS white-core, pink-edged beam that pierces EVERYTHING.\nOn wall contact: spectral arms (x0.66) and cinders (x0.33).\nEnemies caught by the beam disintegrate into ash. No mana.",
@@ -134,6 +135,17 @@
 
         "Items.RuneCrownItem.DisplayName": "Astral Rune Crown",
         "Items.RuneCrownItem.Tooltip": "A new crown designed from scratch: eight runic glyphs of fuchsia light\nfloating in an arc above your head, each tipped with a pale-pink pearl.\nPure cosmetic: no stats. Works in accessory or vanity slots.",
+
+        // v6.35: THE THREE ACCESSORIES OF THE MAGIC-SIGN LIBRARIES —
+        // seals and rings that SURROUND THE PLAYER (SigiloLib + OrbitaLib).
+        "Items.SelloGenesisItem.DisplayName": "The Seal of Genesis",
+        "Items.SelloGenesisItem.Tooltip": "The sun's magic signs surround you: the double ring with its eight runes spinning,\nand inside, the star-blue seal counter-rotating with the glyph of the Astro.\n+40 max mana, +8% magic damage and +4% magic crit.\nWorks in accessory or vanity slots.",
+
+        "Items.AnillosSolRunicoItem.DisplayName": "The Rune Sun's Rings",
+        "Items.AnillosSolRunicoItem.Tooltip": "Seven rune rings orbit your body on alternating planes:\neven clockwise, odd counter-clockwise, precessing alive with runes riding each one.\n+2 life regeneration, +8% melee damage, +3% melee crit and +3 defense.\nWorks in accessory or vanity slots.",
+
+        "Items.AnillosHorizonteItem.DisplayName": "The Event Horizon Rings",
+        "Items.AnillosHorizonteItem.Tooltip": "The accretion disk orbits you: twenty incandescent bands traveling,\nphotons running the vortex and the horizon's fine ring.\nTHE LENS: the background bends around you. THE PULL: nearby enemies drift toward you.\n+10% speed and +5% universal damage. Works in accessory or vanity slots.",
 
         // v6.19: THE RUNIC SUN FAMILY — 10 copies of the Sun (the original
         // Sun stays untouched) with N rune rings on orbital planes with
@@ -322,10 +334,27 @@
         "Items.HeridaElectricaStaff.DisplayName": "The Electric Wound",
         "Items.HeridaElectricaStaff.Tooltip": "Opens THE CRACK toward where you aim.\nStings in a line and applies ELECTRIFIED.\nThe current never cuts out.",
 
+        // v6.35: THE FOUR NEW TEARS (second batch of references).
+        "Items.CorazonColapsoStaff.DisplayName": "The Heart of the Collapse",
+        "Items.CorazonColapsoStaff.Tooltip": "Ignites the FOUR-POINTED STAR of stellar fire.\nBurns every enemy inside the heart.\nEvery 30 ticks the filaments flare at the 2 closest.",
+
+        "Items.GargantaVacioStaff.DisplayName": "The Throat of the Void",
+        "Items.GargantaVacioStaff.Tooltip": "Opens the devouring vortex: absolute black core and magenta ring.\nThe lens bends the background and the pull drags within 320 px.\nWhoever touches the black core is devoured.",
+
+        "Items.UmbralRotoStaff.DisplayName": "The Broken Threshold",
+        "Items.UmbralRotoStaff.Tooltip": "Splits reality with a perfect horizontal cut.\nAbove, the void with the spectral skeleton; below, the world.\nStings in a line and every 60 ticks the other reality bites.",
+
+        "Items.LeviatanEspectralStaff.DisplayName": "The Spectral Leviathan",
+        "Items.LeviatanEspectralStaff.Tooltip": "Launches the ethereal bone creature: fourteen vertebrae swimming in S.\nPierces everything it touches and turns toward the nearest enemy.\n4 seconds of spectral swimming.",
+
         "Projectiles.DesgarroCuanticoProjectile.DisplayName": "Quantum Suture",
         "Projectiles.PortalDimensionalProjectile.DisplayName": "Dimensional Portal",
         "Projectiles.PliegueEspacioProjectile.DisplayName": "Fold of Space",
         "Projectiles.HeridaElectricaProjectile.DisplayName": "Electric Wound",
+        "Projectiles.CorazonColapsoProjectile.DisplayName": "Heart of the Collapse",
+        "Projectiles.GargantaVacioProjectile.DisplayName": "Throat of the Void",
+        "Projectiles.UmbralRotoProjectile.DisplayName": "Broken Threshold",
+        "Projectiles.LeviatanEspectralProjectile.DisplayName": "Spectral Leviathan",
 
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",

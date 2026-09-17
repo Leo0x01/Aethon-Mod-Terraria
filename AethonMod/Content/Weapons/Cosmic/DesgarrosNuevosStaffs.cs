@@ -37,7 +37,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<DesgarroCuanticoProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 18; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;   // v6.35: SIN MANÁ (petición: los bastones nuevos no lo requieren)
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item122.WithPitchOffset(0.35f);
             Item.value = 24000;
@@ -92,7 +92,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<PortalDimensionalProjectile>();
             Item.shootSpeed = 1f;
-            Item.mana = 22; Item.noMelee = true;
+            Item.mana = 0; Item.noMelee = true;   // v6.35: SIN MANÁ (petición: los bastones nuevos no lo requieren)
             Item.rare = ItemRarityID.Quest;
             Item.UseSound = SoundID.Item122.WithPitchOffset(-0.30f);
             Item.value = 24000;

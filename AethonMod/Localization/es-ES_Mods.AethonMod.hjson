@@ -20,6 +20,7 @@
         "Projectiles.GenesisLight.DisplayName": "Luz del Génesis",
         "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
         "Projectiles.CosmicOrbBolt.DisplayName": "Bolt Cósmico",
+        "Projectiles.AnillosSingularesHalo.DisplayName": "Anillos del Horizonte",
 
         "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
         "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
@@ -75,11 +76,11 @@
         "Items.BolsaExhumados.DisplayName": "Bolsa de los Exhumados",
         "Items.BolsaExhumados.Tooltip": "Las formas exhumadas: el rencor y la eminencia.\nLas formas exhumadas originales del arsenal.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
         "Items.BolsaCosmeticos.DisplayName": "Bolsa de los Cosméticos",
-        "Items.BolsaCosmeticos.Tooltip": "Las coronas que se ciñen a tu personaje.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+        "Items.BolsaCosmeticos.Tooltip": "Coronas, sellos y anillos que se ciñen a tu personaje.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
         "Items.BolsaDosFormas.DisplayName": "Bolsa de las Dos Formas",
         "Items.BolsaDosFormas.Tooltip": "Las armas de las dos formas de uso: cada una despliega su forma alternativa.\nLas cuatro que aprendieron a decir dos cosas a la vez.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
         "Items.BolsaDesgarros.DisplayName": "Bolsa de los Desgarros",
-        "Items.BolsaDesgarros.Tooltip": "Los bastones que rajan la realidad: sutura, portal, pliegue y herida.\nCada desgarro se abre distinto.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+        "Items.BolsaDesgarros.Tooltip": "Los bastones que rajan la realidad: sutura, portal, pliegue, herida,\ncorazón, garganta, umbral y leviatán. Cada desgarro se abre distinto.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
 
         "Items.RencorPrimordialStaff.DisplayName": "El Rencor Primordial",
         "Items.RencorPrimordialStaff.Tooltip": "La forma exhumada del arsenal: EL RENCOR PRIMORDIAL.\nClava un círculo de transmutación rúnico a 380 px.\n3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.\nAl tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).\nLos enemigos del haz se desintegran en ceniza. Sin maná.",
@@ -134,6 +135,17 @@
 
         "Items.RuneCrownItem.DisplayName": "Corona Rúnica Estelar",
         "Items.RuneCrownItem.Tooltip": "Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia\nflotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
+
+        // v6.35: LOS TRES ACCESORIOS DE LAS LIBRERÍAS DE SIGNOS MÁGICOS —
+        // los sellos y anillos que RODEAN AL JUGADOR (SigiloLib + OrbitaLib).
+        "Items.SelloGenesisItem.DisplayName": "El Sello del Génesis",
+        "Items.SelloGenesisItem.Tooltip": "Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,\ny dentro el sello azul-estelar contrarrotando con el glifo del astro.\n+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico.\nVale en huecos de accesorio o de vanidad.",
+
+        "Items.AnillosSolRunicoItem.DisplayName": "Los Anillos del Sol Rúnico",
+        "Items.AnillosSolRunicoItem.Tooltip": "Siete aros rúnicos orbitan tu cuerpo en planos alternos:\npar horario, impar antihorario, precesando vivos con sus runas a lomos.\n+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa.\nVale en huecos de accesorio o de vanidad.",
+
+        "Items.AnillosHorizonteItem.DisplayName": "Los Anillos del Horizonte de Sucesos",
+        "Items.AnillosHorizonteItem.Tooltip": "El disco de acreción te orbita: veinte bandas incandescentes viajando,\nlos fotones corriendo el vórtice y el aro fino del horizonte.\nLA LENTE: el fondo se curva a tu alrededor. LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti.\n+10% de velocidad y +5% de daño universal. Vale en huecos de accesorio o de vanidad.",
 
         // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
         // (el Sol original queda INTACTO) con N anillos rúnicos en planos
@@ -310,10 +322,27 @@
         "Items.HeridaElectricaStaff.DisplayName": "La Herida Eléctrica",
         "Items.HeridaElectricaStaff.Tooltip": "Abre LA GRIETA hacia donde apuntas.\nPica en línea y aplica ELECTRIFICADO.\nLa corriente nunca se corta.",
 
+        // v6.35: LOS CUATRO DESGARROS NUEVOS (segunda tanda de referencias).
+        "Items.CorazonColapsoStaff.DisplayName": "El Corazón del Colapso",
+        "Items.CorazonColapsoStaff.Tooltip": "Enciende la ESTRELLA DE CUATRO PUNTAS de fuego estelar.\nQuema a todo enemigo dentro del corazón.\nCada 30 ticks los filamentos lanzan llamaradas a los 2 más cercanos.",
+
+        "Items.GargantaVacioStaff.DisplayName": "La Garganta del Vacío",
+        "Items.GargantaVacioStaff.Tooltip": "Abre el vórtice devorador: núcleo negro absoluto y anillo magenta.\nLa lente curva el fondo y la succión arrastra en 320 px.\nEl que toca el núcleo negro es devorado.",
+
+        "Items.UmbralRotoStaff.DisplayName": "El Umbral Roto",
+        "Items.UmbralRotoStaff.Tooltip": "Raja la realidad con un corte horizontal perfecto.\nArriba el vacío con el esqueleto espectral; abajo, el mundo.\nPica en línea y cada 60 ticks la otra realidad muerde.",
+
+        "Items.LeviatanEspectralStaff.DisplayName": "El Leviatán Espectral",
+        "Items.LeviatanEspectralStaff.Tooltip": "Lanza a la criatura de hueso etéreo: catorce vértebras nadando en S.\nAtraviesa todo lo que toca y gira hacia el enemigo más cercano.\n4 segundos de nado espectral.",
+
         "Projectiles.DesgarroCuanticoProjectile.DisplayName": "Sutura Cuántica",
         "Projectiles.PortalDimensionalProjectile.DisplayName": "Portal Dimensional",
         "Projectiles.PliegueEspacioProjectile.DisplayName": "Pliegue del Espacio",
         "Projectiles.HeridaElectricaProjectile.DisplayName": "Herida Eléctrica",
+        "Projectiles.CorazonColapsoProjectile.DisplayName": "Corazón del Colapso",
+        "Projectiles.GargantaVacioProjectile.DisplayName": "Garganta del Vacío",
+        "Projectiles.UmbralRotoProjectile.DisplayName": "Umbral Roto",
+        "Projectiles.LeviatanEspectralProjectile.DisplayName": "Leviatán Espectral",
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",

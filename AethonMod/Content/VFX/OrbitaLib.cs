@@ -216,7 +216,7 @@ namespace AethonMod.Content.VFX
         /// MITADES (trasera/delantera) para que el anillo PUEDA pasar por
         /// delante del núcleo del consumidor.
         /// </summary>
-        /// <param name="center">Centro del vórtice (mundo).</param>
+        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition — el batch abre con GameViewMatrix).</param>
         /// <param name="rr">Radio respirado del vórtice (px — ya con Distorsion aplicado).</param>
         /// <param name="time">Tiempo animado.</param>
         /// <param name="seed">Semilla determinista del disparo.</param>
@@ -300,7 +300,7 @@ namespace AethonMod.Content.VFX
         /// la emisión del anillo "rebota" en el espacio curvado. Respiran
         /// con la distorsión sinusoidal global.
         /// </summary>
-        /// <param name="center">Centro del vórtice (mundo).</param>
+        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition — el batch abre con GameViewMatrix).</param>
         /// <param name="rr">Radio respirado (px).</param>
         /// <param name="time">Tiempo animado.</param>
         /// <param name="distortion">La distorsión cruda (sin(time)·0.3).</param>
@@ -334,7 +334,7 @@ namespace AethonMod.Content.VFX
         /// vórtice con estela sobre la tangente — luz "corriendo" en
         /// círculos alrededor de lo que no la deja escapar.
         /// </summary>
-        /// <param name="center">Centro del vórtice (mundo).</param>
+        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition — el batch abre con GameViewMatrix).</param>
         /// <param name="rr">Radio respirado (px).</param>
         /// <param name="time">Tiempo animado.</param>
         /// <param name="count">Número de fotones (la casa: 3).</param>
@@ -381,7 +381,7 @@ namespace AethonMod.Content.VFX
         /// el vórtice en ciclo continuo (nace en el horizonte, se dilata,
         /// se disuelve — y vuelve a nacer). El pulso gravitatorio.
         /// </summary>
-        /// <param name="center">Centro del vórtice (mundo).</param>
+        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition — el batch abre con GameViewMatrix).</param>
         /// <param name="r">Radio base del vórtice (px).</param>
         /// <param name="time">Tiempo animado.</param>
         /// <param name="seed">Semilla determinista.</param>
@@ -529,7 +529,7 @@ namespace AethonMod.Content.VFX
         /// SpriteBatch del llamador debe estar CERRADO al llamar (y queda
         /// CERRADO al salir), igual que el render completo del vórtice.
         /// </summary>
-        /// <param name="center">Centro del sello (mundo).</param>
+        /// <param name="center">Centro en coords de PANTALLA (mundo − Main.screenPosition).</param>
         /// <param name="radius">Radio del vórtice (px — el anillo llega a ~1.9×).</param>
         /// <param name="time">Tiempo animado (GlobalTimeWrappedHourly).</param>
         /// <param name="seed">Semilla determinista.</param>
