@@ -241,7 +241,8 @@ namespace AethonMod.Content.Items.Bolsas
 
     /// <summary>10 — LOS COSMÉTICOS: las coronas de la casa + LOS TRES
     /// ACCESORIOS DE LAS LIBRERÍAS DE SIGNOS MÁGICOS (v6.35: los sellos y
-    /// anillos que rodean al jugador).</summary>
+    /// anillos que rodean al jugador) + EL ANILLO RÚNICO DORSAL (v6.36:
+    /// la firma del vacío en la espalda).</summary>
     public class BolsaCosmeticos : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Cosméticos";
@@ -257,6 +258,7 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Accessories.SelloGenesisItem>(), 1));
             l.Add((ModContent.ItemType<Accessories.AnillosSolRunicoItem>(), 1));
             l.Add((ModContent.ItemType<Accessories.AnillosHorizonteItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.AnilloRunicoDorsalItem>(), 1));
             return l;
         }
     }
@@ -305,6 +307,30 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<GargantaVacioStaff>(), 1));
             l.Add((ModContent.ItemType<UmbralRotoStaff>(), 1));
             l.Add((ModContent.ItemType<LeviatanEspectralStaff>(), 1));
+            return l;
+        }
+    }
+
+    /// <summary>13 — LOS CÓDIGOS VIVOS (v6.36): LAS 4 ARMAS QUE NACIERON
+    /// DE LOS CÓDIGOS DE LAS IMÁGENES DEL USUARIO — cada una es la
+    /// traducción C# de una demo web hecha arma (la cadena follow, el
+    /// agujero negro con lente, el sol que late y la sierpe de 16
+    /// segmentos). Su propia bolsa: códigos ajenos que aprendieron a
+    /// vivir aquí.</summary>
+    public class BolsaCodigosVivos : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de los Códigos Vivos";
+        protected override string NombreCorto => "Bolsa de los Códigos Vivos";
+        protected override Color ColorFiesta => new(120, 255, 190);
+        protected override string Nota => "Cuatro códigos ajenos que aprendieron a vivir aquí";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<DanzaOrbesStaff>(), 1));
+            l.Add((ModContent.ItemType<LenteAbismoStaff>(), 1));
+            l.Add((ModContent.ItemType<SolVivoStaff>(), 1));
+            l.Add((ModContent.ItemType<SierpeEstelarStaff>(), 1));
             return l;
         }
     }

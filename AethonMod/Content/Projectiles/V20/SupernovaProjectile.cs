@@ -421,9 +421,16 @@ namespace AethonMod.Content.Projectiles.V20
             if (charge > 0.6f)
             {
                 float shake = (charge - 0.6f) / 0.4f;
+                // v6.36 — LA REGLA DE LA CASA (cero Main.rand en el render):
+                // el temblor pasa a ser DETERMINISTA — dos senos
+                // inconmensurables por eje (se lee igual de nervioso pero
+                // todas las máquinas dibujan el MISMO temblor).
+                float t = Main.GlobalTimeWrappedHourly;
                 drawPos += new Vector2(
-                    Main.rand.NextFloat(-1f, 1f) * shake * 2.2f,
-                    Main.rand.NextFloat(-1f, 1f) * shake * 2.2f);
+                    (float)Math.Sin(t * 31.7f) * shake * 1.6f +
+                    (float)Math.Sin(t * 47.3f) * shake * 0.6f,
+                    (float)Math.Cos(t * 37.9f) * shake * 1.6f +
+                    (float)Math.Sin(t * 41.1f) * shake * 0.6f);
             }
 
             Vector2 glowOrigin = softGlow.Size() * 0.5f;

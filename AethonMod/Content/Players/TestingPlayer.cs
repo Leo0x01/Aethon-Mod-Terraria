@@ -26,6 +26,9 @@ namespace AethonMod.Content.Players
     ///       8. La Bolsa de los Creativos      (los 6 experimentos)
     ///       9. La Bolsa de los Exhumados      (el rencor + la eminencia)
     ///      10. La Bolsa de los Cosméticos    (las coronas)
+    ///      11. La Bolsa de las Dos Formas    (v6.33)
+    ///      12. La Bolsa de los Desgarros     (v6.33 + v6.35)
+    ///      13. La Bolsa de los Códigos Vivos (v6.36 — los 4 de las imágenes)
     ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
     ///     entrenamiento directo en el inventario).
     ///
@@ -39,7 +42,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS DOCE BOLSAS (garantizadas en cada entrada) ===
+            // === LAS TRECE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -52,7 +55,8 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaExhumados>());
             bolsas += Entregar(ModContent.ItemType<BolsaCosmeticos>());
             bolsas += Entregar(ModContent.ItemType<BolsaDosFormas>());      // v6.33: LAS 4 DE LAS DOS FORMAS
-            bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33: LOS 5 DESGARROS
+            bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33+v6.35: LOS 9 DESGARROS
+            bolsas += Entregar(ModContent.ItemType<BolsaCodigosVivos>());   // v6.36: LOS 4 CÓDIGOS VIVOS
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

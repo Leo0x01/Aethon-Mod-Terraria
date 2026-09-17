@@ -344,6 +344,31 @@
         "Projectiles.UmbralRotoProjectile.DisplayName": "Umbral Roto",
         "Projectiles.LeviatanEspectralProjectile.DisplayName": "Leviatán Espectral",
 
+        // v6.36: LOS CUATRO CÓDIGOS VIVOS (los códigos de las imágenes
+        // del usuario traducidos a armas) + EL ANILLO RÚNICO DORSAL.
+        "Items.DanzaOrbesStaff.DisplayName": "La Danza de los Orbes",
+        "Items.DanzaOrbesStaff.Tooltip": "Invoca el código vivo de la cadena: un minisistema solar orbitándote.\nTodo orbe quema al que toca: sol ×1.0, planetas ×0.7, lunas ×0.5.\n12 segundos de danza · un sistema a la vez · sin coste de maná.",
+
+        "Items.LenteAbismoStaff.DisplayName": "La Lente del Abismo",
+        "Items.LenteAbismoStaff.Tooltip": "Planta el código vivo del agujero negro: disco de veinte bandas,\nhorizonte negro y estrellas dobladas cayendo en espiral.\nLa lente curva el fondo · succión en 300 px · devora ×1.2 · enfoca y muerde ×0.6.",
+
+        "Items.SolVivoStaff.DisplayName": "El Sol Vivo",
+        "Items.SolVivoStaff.Tooltip": "Enciende el código vivo del sol: latiendo con el pulso exacto del original.\nEl aura quema ×0.55 · cada pico del pulso LATE ×0.7 · las prominencias azotan ×0.85.\n5 segundos de sol · un sol a la vez · sin coste de maná.",
+
+        "Items.SierpeEstelarStaff.DisplayName": "La Sierpe Estelar",
+        "Items.SierpeEstelarStaff.Tooltip": "Libera el código vivo de la criatura: dieciséis segmentos — cabeza,\naletas gemelas y espina — nadando en vueltas alrededor de tu cursor.\nLa cabeza atraviesa todo · la espina quema ×0.4 · una sierpe a la vez.",
+
+        "Items.AnilloRunicoDorsalItem.DisplayName": "El Anillo Rúnico Dorsal",
+        "Items.AnilloRunicoDorsalItem.Tooltip": "La firma mágica del vacío cuelga de tu espalda.\nLos anillos rúnicos de los agujeros negros — no su disco de acreción.\nPuro cosmético: cero estadísticas.",
+
+        "Items.BolsaCodigosVivos.DisplayName": "Bolsa de los Códigos Vivos",
+        "Items.BolsaCodigosVivos.Tooltip": "Los códigos de las imágenes hechos armas: la danza de los orbes,\nla lente del abismo, el sol vivo y la sierpe estelar.\nCada código aprendió a vivir aquí. Clic derecho para desplegarlas.\nSolo entrega lo que te falte.",
+
+        "Projectiles.DanzaOrbesProjectile.DisplayName": "Danza de los Orbes",
+        "Projectiles.LenteAbismoProjectile.DisplayName": "Lente del Abismo",
+        "Projectiles.SolVivoProjectile.DisplayName": "Sol Vivo",
+        "Projectiles.SierpeEstelarProjectile.DisplayName": "Sierpe Estelar",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }

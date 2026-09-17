@@ -356,6 +356,31 @@
         "Projectiles.UmbralRotoProjectile.DisplayName": "Broken Threshold",
         "Projectiles.LeviatanEspectralProjectile.DisplayName": "Spectral Leviathan",
 
+        // v6.36: THE FOUR LIVING CODES (the image codes turned into
+        // weapons) + THE RUNIC BACK RING.
+        "Items.DanzaOrbesStaff.DisplayName": "The Dance of the Orbs",
+        "Items.DanzaOrbesStaff.Tooltip": "Summons the living code of the chain: a miniature solar system orbiting you.\nEvery orb burns what it touches: sun x1.0, planets x0.7, moons x0.5.\n12 seconds of dance · one system at a time · no mana cost.",
+
+        "Items.LenteAbismoStaff.DisplayName": "The Lens of the Abyss",
+        "Items.LenteAbismoStaff.Tooltip": "Plants the living code of the black hole: a twenty-band disk,\na black horizon and bent stars falling in a spiral.\nThe lens bends the background · pull in 300 px · devours x1.2 · focuses and bites x0.6.",
+
+        "Items.SolVivoStaff.DisplayName": "The Living Sun",
+        "Items.SolVivoStaff.Tooltip": "Lights the living code of the sun: beating with the original's exact pulse.\nThe aura burns x0.55 · every pulse peak THUMPS x0.7 · prominences lash x0.85.\n5 seconds of sun · one sun at a time · no mana cost.",
+
+        "Items.SierpeEstelarStaff.DisplayName": "The Star Serpent",
+        "Items.SierpeEstelarStaff.Tooltip": "Releases the living code of the creature: sixteen segments — head,\ntwin fins and spine — swimming laps around your cursor.\nThe head pierces everything · the spine burns x0.4 · one serpent at a time.",
+
+        "Items.AnilloRunicoDorsalItem.DisplayName": "The Runic Back Ring",
+        "Items.AnilloRunicoDorsalItem.Tooltip": "The void's magical signature hangs from your back.\nThe runic rings of black holes — not their accretion disk.\nPurely cosmetic: zero stats.",
+
+        "Items.BolsaCodigosVivos.DisplayName": "Bag of Living Codes",
+        "Items.BolsaCodigosVivos.Tooltip": "The image codes turned into weapons: the dance of the orbs,\nthe lens of the abyss, the living sun and the star serpent.\nEvery code learned to live here. Right-click to unfold them.\nOnly delivers what you are missing.",
+
+        "Projectiles.DanzaOrbesProjectile.DisplayName": "Dance of the Orbs",
+        "Projectiles.LenteAbismoProjectile.DisplayName": "Lens of the Abyss",
+        "Projectiles.SolVivoProjectile.DisplayName": "Living Sun",
+        "Projectiles.SierpeEstelarProjectile.DisplayName": "Star Serpent",
+
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
 }

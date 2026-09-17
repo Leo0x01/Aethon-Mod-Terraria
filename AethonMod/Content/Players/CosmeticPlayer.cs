@@ -15,7 +15,9 @@ namespace AethonMod.Content.Players
     /// que vivan en el mundo:
     ///   - La CORONA DE ARCOS suelta ascuas rosas sobre sus ápices.
     ///   - La CORONA RÚNICA emite chispas ascendentes desde las perlas.
-    ///   - Ambas iluminan suavemente la noche con su color.
+    ///   - EL ANILLO RÚNICO DORSAL (v6.36) suelta chispas desde sus runas
+    ///     y tiñe el aire de magenta (la firma del vacío en tu espalda).
+    ///   - Ambas coronas iluminan suavemente la noche con su color.
     ///
     /// (v6.28: la CORONA DE ANILLOS RÚNICOS y el ANILLO RÚNICO ESTELAR
     /// fueron BORRADOS por petición del usuario — quedan las dos coronas.)
@@ -28,10 +30,15 @@ namespace AethonMod.Content.Players
         /// <summary>¿Lleva la Corona Rúnica Estelar (glifos flotantes)?</summary>
         public bool RuneCrown;
 
+        /// <summary>¿Lleva EL ANILLO RÚNICO DORSAL (v6.36 — la firma del
+        /// vacío colgada de la espalda)?</summary>
+        public bool AnilloDorsal;
+
         public override void ResetEffects()
         {
             VoidCrown = false;
             RuneCrown = false;
+            AnilloDorsal = false;
         }
 
         public override void PostUpdate()
@@ -40,6 +47,7 @@ namespace AethonMod.Content.Players
             // vanidad (13..19) — en cualquier lado cuenta.
             int voidType = ModContent.ItemType<Items.Cosmetics.VoidCrownItem>();
             int runeType = ModContent.ItemType<Items.Cosmetics.RuneCrownItem>();
+            int anilloType = ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -52,6 +60,7 @@ namespace AethonMod.Content.Players
                 if (item == null || item.IsAir) continue;
                 if (item.type == voidType) VoidCrown = true;
                 else if (item.type == runeType) RuneCrown = true;
+                else if (item.type == anilloType) AnilloDorsal = true;
             }
 
             if (Main.netMode == NetmodeID.Server) return;
@@ -104,6 +113,32 @@ namespace AethonMod.Content.Players
                 // Luz rosa tenue del arco rúnico.
                 Lighting.AddLight(head - new Vector2(0f, 18f * Player.gravDir),
                     new Vector3(0.22f, 0.04f, 0.14f));
+            }
+
+            // === EL ANILLO RÚNICO DORSAL (v6.36): la firma del vacío
+            //     respira — chispas que escapan de las runas EXACTAS del
+            //     anillo de la espalda y luz magenta suave.
+            if (AnilloDorsal)
+            {
+                if (Main.rand.NextBool(36))
+                {
+                    // El centro de la espalda (la MISMA ancla de la capa).
+                    Vector2 espalda = Player.Center -
+                        new Vector2(0f, Player.height * 0.04f * Player.gravDir);
+                    int g = Main.rand.Next(AnilloDorsalRenderer.RunasCuenta);
+                    Vector2 runa = AnilloDorsalRenderer.RunaWorld(espalda,
+                        Player.height, Main.GlobalTimeWrappedHourly, g);
+                    Dust d = Dust.NewDustPerfect(runa, DustID.Enchanted_Pink,
+                        new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
+                                    -Main.rand.NextFloat(0.4f, 1.0f) * Player.gravDir),
+                        160, new Color(255, 140, 200), 0.7f);
+                    d.noGravity = true;
+                    d.fadeIn = 0f;
+                }
+
+                // Luz magenta tenue del anillo.
+                Lighting.AddLight(Player.Center,
+                    new Vector3(0.16f, 0.05f, 0.11f));
             }
         }
     }
