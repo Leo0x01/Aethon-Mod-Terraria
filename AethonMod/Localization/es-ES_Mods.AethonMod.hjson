@@ -422,6 +422,11 @@
         "Buffs.CriaEstelarBuff.DisplayName": "Cría Estelar",
         "Buffs.CriaEstelarBuff.Description": "Una cría de sierpe estelar nada a tu lado y caza a tus enemigos",
 
+        "Items.TajosAstralesStaff.DisplayName": "El Bastón de los Tajos Astrales",
+        "Items.TajosAstralesStaff.Tooltip": "Marca el punto donde apuntas — y diez ticks después EL CORTE FLORECE:\nsiete medias lunas blancas en todas direcciones, creciendo de punta a punta.\nLa herida llega cuando el tajo aparece (causalidad retrasada).\nCada arco corta una vez su banda curva · sin coste de maná.",
+
+        "Projectiles.TajoAstralProjectile.DisplayName": "Tajo Astral",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://support.google.com/webmasters/answer/7489871?hl=en",
+    "name": "https://github.com/tModLoader/tModLoader/tree/1.4.",
+    "snippet": "No information is available for this page. Learn why",
+    "host_name": "support.google.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://forum.godotengine.org",
+    "name": "Slash-Animation with Trails",
+    "snippet": "Mar 19, 2024 — There have been several issues opened for this in github , Add a Trail3D node to draw smooth lines for VFX ・ rendering also tends to badly ...",
+    "host_name": "forum.godotengine.org",
+    "rank": 1,
+    "date": "Mar 19, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com",
+    "name": "[Reject] PR #5286 Introduces Breaking Rendering",
+    "snippet": "Aug 4, 2026 — Their solution was to enable Legacy lighting mode while playing and ensure that their mods remained performant under that mode. However, if this ... Read more",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "Aug 4, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tModLoader - Particle Trail",
+    "snippet": "Oct 4, 2016 — This ' effect ' is simply dust spawned by the AI of the projectile . Projectile trail drawing incorrectly",
+    "host_name": "forums.terraria.org",
+    "rank": 3,
+    "date": "Oct 4, 2016",
+    "favicon": ""
+  }
+]

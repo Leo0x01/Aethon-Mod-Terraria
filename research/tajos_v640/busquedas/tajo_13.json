@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Particle on sword swing",
+    "snippet": "Jun 23, 2023 — I need help with particle on sword swing , I want it to have the particles of a fiery greatsword when is swings , but i cant find the proper ...",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Jun 23, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.construct.net",
+    "name": "How do I make a sword swing like terraria?",
+    "snippet": "Sep 1, 2013 — Sword swing , you say. It's pretty obvious it rotates, yeah. So either use the stupid rotate behavior for noobs or make them rotate in code . Read more",
+    "host_name": "www.construct.net",
+    "rank": 1,
+    "date": "Sep 1, 2013",
+    "favicon": ""
+  },
+  {
+    "url": "https://forum.gdevelop.io",
+    "name": "Sword and other melee weapon swinging - How do I?",
+    "snippet": "Feb 16, 2026 — How do I create a swing animation for swords (or axes, anything of that sort) similar to that in games like Terraria?",
+    "host_name": "forum.gdevelop.io",
+    "rank": 2,
+    "date": "Feb 16, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://forum.gamemaker.io",
+    "name": "Creating sword trails via code",
+    "snippet": "Jun 14, 2018 — First you need to known the position of the base of the sword and the tip of the sword with its current orientation. Then make a ds_list which ... Read more",
+    "host_name": "forum.gamemaker.io",
+    "rank": 3,
+    "date": "Jun 14, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Swinging a sword through code - Questions & Answers",
+    "snippet": "Aug 5, 2012 — If you are familiar with transforms and it's properties, you just need to create a transform variable on your script and assign the sword there. Read more",
+    "host_name": "discussions.unity.com",
+    "rank": 4,
+    "date": "Aug 5, 2012",
+    "favicon": ""
+  }
+]

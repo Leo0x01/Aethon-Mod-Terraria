@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://terraria.wiki.gg",
+    "name": "Use time - Official Terraria Wiki",
+    "snippet": "Aug 28, 2026 — For items that are swung overhead (melee weapons, pickaxes, etc.), the length of their swinging animation is related to useAnimation . A single ... Read more",
+    "host_name": "terraria.wiki.gg",
+    "rank": 0,
+    "date": "Aug 28, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Particle on sword swing",
+    "snippet": "Jun 23, 2023 — I need help with particle on sword swing , I want it to have the particles of a fiery greatsword when is swings, but i cant find the proper ...",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Jun 23, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://terraria.fandom.com",
+    "name": "Use Style IDs - Terraria Wiki - Fandom",
+    "snippet": "This page lists the IDs of all item use styles and hold styles in Terraria . Both are internal variables that determine how an item is held by the player ... Read more",
+    "host_name": "terraria.fandom.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -16,6 +16,17 @@ namespace AethonMod.Content.Players
     /// las coronas) y respeta el OJITO de ocultar accesorio: las
     /// estadísticas viven en UpdateAccessory, la escritura vive aquí.
     ///
+    /// v6.40 — LA ESCRITURA CAMBIÓ DE PUERTA: el Sello del Génesis y los
+    /// Anillos del Sol Rúnico YA NO salen por las capas de jugador (el
+    /// pase del jugador mezcla con la fórmula PREmultiplicada de
+    /// AlphaBlend y los tintes de la casa con RGB intacto se dibujaban
+    /// como COLOR PLANO — el reporte del usuario): ahora invocan sus
+    /// HALOS proyectiles (SelloGenesisHalo / AnillosSolaresHalo), que
+    /// vuelcan por SU lote aditivo — el MISMO camino por el que salen
+    /// los anillos de los soles rúnicos reales. La succión, las ascuas
+    /// y la lente de los Anillos del Horizonte siguen aquí (su halo ya
+    /// iba por el camino aditivo desde v6.35).
+    ///
     /// Lo que hace VIVO cada accesorio:
     ///   · EL SELLO DEL GÉNESIS — chispas doradas que escapan de las
     ///     runas del aro mayor (en su posición EXACTA del mundo) y luz
@@ -93,6 +104,17 @@ namespace AethonMod.Content.Players
 
                 // Luz de oro suave (la escritura ilumina).
                 Lighting.AddLight(Player.Center, new Vector3(0.26f, 0.20f, 0.07f));
+
+                // v6.40 — EL HALO ADITIVO (el sello dejó de salir por la
+                // capa de jugador: ahí se veía COLOR PLANO — el pase es
+                // premultiplicado y los tintes de la casa no).
+                if (Player.whoAmI == Main.myPlayer && !EspiarHaloSello())
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("SelloGenesis"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<SelloGenesisHalo>(),
+                        0, 0f, Player.whoAmI);
+                }
             }
 
             // ==============================================================
@@ -118,6 +140,16 @@ namespace AethonMod.Content.Players
 
                 // Luz cálida de estrella viva.
                 Lighting.AddLight(Player.Center, new Vector3(0.30f, 0.22f, 0.05f));
+
+                // v6.40 — EL HALO ADITIVO (la constelación dejó de salir
+                // por la capa de jugador por el mismo COLOR PLANO).
+                if (Player.whoAmI == Main.myPlayer && !EspiarHaloSol())
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("AnillosSolRunico"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AnillosSolaresHalo>(),
+                        0, 0f, Player.whoAmI);
+                }
             }
 
             // ==============================================================
@@ -188,6 +220,32 @@ namespace AethonMod.Content.Players
         private bool EspiarHalo()
         {
             int tipo = ModContent.ProjectileType<AnillosSingularesHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>¿Ya vive mi halo del sello del génesis?</summary>
+        private bool EspiarHaloSello()
+        {
+            int tipo = ModContent.ProjectileType<SelloGenesisHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>¿Ya vive mi halo de los anillos del sol?</summary>
+        private bool EspiarHaloSol()
+        {
+            int tipo = ModContent.ProjectileType<AnillosSolaresHalo>();
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile p = Main.projectile[i];

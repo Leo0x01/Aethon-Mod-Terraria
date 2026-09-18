@@ -434,6 +434,11 @@
         "Buffs.CriaEstelarBuff.DisplayName": "Star Hatchling",
         "Buffs.CriaEstelarBuff.Description": "A star serpent hatchling swims by your side and hunts your enemies",
 
+        "Items.TajosAstralesStaff.DisplayName": "Staff of the Astral Cuts",
+        "Items.TajosAstralesStaff.Tooltip": "Marks where you aim — ten ticks later THE CUT BLOOMS:\nseven white crescents in every direction, growing tip to tip.\nThe wound arrives when the slash appears (delayed causality).\nEach arc cuts its curved band once · no mana cost.",
+
+        "Projectiles.TajoAstralProjectile.DisplayName": "Astral Slash",
+
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
 }

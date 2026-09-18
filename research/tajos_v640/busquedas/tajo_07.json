@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Custom slash on melee weapon",
+    "snippet": "Mar 24, 2021 — How to make a projectile similar to Arcalis' projectile for melee weapon? - Arcalis projectile ... Please explain the projectile code .",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Mar 24, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net",
+    "name": "ModProjectile Class Reference",
+    "snippet": "The Basic Projectile Guideteaches the basics of writing a custom AI, such as timers, gravity, rotation, etc. Called on local, server, and remote clients. Read more",
+    "host_name": "docs.tmodloader.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  }
+]

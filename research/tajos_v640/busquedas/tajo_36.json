@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://github.com",
+    "name": "'projectile' does not exist in the current context · Issue #2675",
+    "snippet": "Jul 3, 2022 — This bug affects Mod capability as a Modder. This bug affects Mod capability as a Modder ・ define the projectile's properties won't compile ...",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "Jul 3, 2022",
+    "favicon": ""
+  },
+  {
+    "url": "https://forums.terraria.org",
+    "name": "tModLoader - Modding Tutorial 2: Basic Item & Sword",
+    "snippet": "Jul 13, 2023 — This tutorial will be about creating a simple item (material) and a sword . projectile github .com. A mod to make and play Terraria mods . ...",
+    "host_name": "forums.terraria.org",
+    "rank": 1,
+    "date": "Jul 13, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://steamcommunity.com",
+    "name": "Steam Workshop::Katana ZERO Weapons",
+    "snippet": "Jul 29, 2025 — The Katana ZERO Mod adds the seven katanas from the game Katana ZERO to Terraria . These weapons have unique slashing animations, can deflect ... Read more",
+    "host_name": "steamcommunity.com",
+    "rank": 2,
+    "date": "Jul 29, 2025",
+    "favicon": ""
+  }
+]

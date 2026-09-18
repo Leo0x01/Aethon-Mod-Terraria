@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://forums.terraria.org",
+    "name": "Here's the thing How can I make a sword shoot two",
+    "snippet": "Feb 19, 2024 — I decided to make a mod with spinning swords (from Example mod , this is the sword I use - ExampleCustomSwingSword ) But I just ran into the ... Read more",
+    "host_name": "forums.terraria.org",
+    "rank": 0,
+    "date": "Feb 19, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com",
+    "name": "Allow modded swords to have the cool swing projectiles",
+    "snippet": "Apr 12, 2023 — This proposal allows the use of the 1.4.4 cool sword swing effects to appear for modded swords if chosen. Remember the teaser for the reworked ... Read more",
+    "host_name": "github.com",
+    "rank": 1,
+    "date": "Apr 12, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tmodloader.net",
+    "name": "Projectile Class Reference",
+    "snippet": "Vanilla projectile AI styles are enumerated in the ProjAIStyleID class. Modders can use vanilla aiStyle and optionally ModProjectile.AIType to mimic AI code ...",
+    "host_name": "docs.tmodloader.net",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  }
+]
