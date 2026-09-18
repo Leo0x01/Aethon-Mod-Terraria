@@ -296,13 +296,25 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// LA HERIDA ELÉCTRICA — "Desgarro de realidad eléctrica": LA GRIETA
-        /// (quad del desgarro de la casa con paleta eléctrica) cuyo interior
-        /// lleva ESTÁTICA (scanlines horizontales parpadeando dentro del
-        /// vacío) y ARCOS VOLTAICOS (StormLib.StormArc — la corriente que
-        /// corre POR DENTRO de la herida), con STROBE nervioso, chispas en
-        /// los extremos y ABERRACIÓN CROMÁTICA sutil (el filo rojo/cian
-        /// partido). `progress` 0→1 = la herida abriéndose.
+        /// LA HERIDA ELÉCTRICA — v6.39: EL DESGARRO RASGADO DE PUNTA A PUNTA.
+        /// Antes era UN QUAD RECTO + arcos dentro ("si la realidad se
+        /// desgarra no sería una fea línea recta" — el usuario tiene
+        /// razón). Ahora:
+        ///   · EL BORDE RASGADO — CaminoDesgarro (los dientes congelados de
+        ///     la casa, deriva lenta, anclajes exactos).
+        ///   · EL VACÍO por camino (RiftTaperVoid recortada a la meseta por
+        ///     segmento, solape adaptativo + perlas — la geometría de la
+        ///     cadena gemela) con la ESTÁTICA (scanlines) siguiendo la
+        ///     tangente local del rasgado.
+        ///   · LOS LABIOS de luz por camino (velo/cuerpo/núcleo + LA
+        ///     ABERRACIÓN CROMÁTICA desplazada en perpendicular + el strobe).
+        ///   · LOS ARCOS VOLTAICOS corriendo POR DENTRO del rasgado
+        ///     (StormArc entre PUNTOS DEL CAMINO — la corriente sigue la
+        ///     herida; v6.39 los arcos ya no se cortan por secciones: la
+        ///     reparación de StormLib).
+        ///   · LAS RAMIFICACIONES y LAS CHISPAS como siempre, pero naciendo
+        ///     de los puntos del camino.
+        /// `progress` 0→1 = la herida abriéndose.
         /// </summary>
         public static void HeridaElectrica(Vector2 origin, Vector2 dir,
             float length, float maxWidth, float progress, float time, int seed,
@@ -322,84 +334,132 @@ namespace AethonMod.Content.VFX
             float len = length * open;
             float w = maxWidth * open;
 
+            // v6.39 — EL CAMINO RASGADO (la herida con dientes).
+            Vector2[] camino = CaminoDesgarro(origin, dir, len, seed, time, Rasgado(maxWidth));
+            float h = w * 1.30f;
+
             // === 1. EL VACÍO DE LA HERIDA (pase alfa — el negro con ESTÁTICA) ===
             PortalAlpha();
             var b = Main.spriteBatch;
-            // El cuerpo negro (la banda del vacío — 0.62 del quad como el desgarro).
-            Quad(b, TaperVoidTex, origin + dir * (len * 0.5f),
-                new Vector2(len, w * 1.30f), (float)Math.Atan2(dir.Y, dir.X),
-                new Color(5, 5, 16, (byte)(int)(240 * alpha * open)));
-            // LAS SCANLINES (la estática interior — el buffer detrás de la realidad).
+            // El cuerpo negro POR EL CAMINO (la banda del vacío — por
+            // segmento con el solape adaptativo y las perlas: el negro
+            // apilado es idempotente — cobertura garantizada).
+            for (int i = 0; i < camino.Length - 1; i++)
+            {
+                Vector2 a = camino[i];
+                Vector2 c = camino[i + 1];
+                float segLen = Vector2.Distance(a, c);
+                if (segLen < 0.30f) continue;
+                float rot = (float)Math.Atan2(c.Y - a.Y, c.X - a.X);
+                float giroA = i > 0 ? GiroEn(camino, i) : 0f;
+                float giroB = i < camino.Length - 2 ? GiroEn(camino, i + 1) : 0f;
+                float largo = segLen + ExtensionSolape(h * 0.5f, giroA) + ExtensionSolape(h * 0.5f, giroB);
+                bool extremo = i == 0 || i == camino.Length - 2;
+
+                TaperQuad(b, TaperVoidTex, (a + c) * 0.5f, largo, h, rot,
+                    new Color(5, 5, 16, (byte)(int)(240 * alpha * open)), extremo);
+                if (i > 0)
+                    TaperQuad(b, TaperVoidTex, a, h * 0.75f, h, rot,
+                        new Color(5, 5, 16, (byte)(int)(240 * alpha * open)));
+            }
+
+            // LAS SCANLINES (la estática interior — el buffer detrás de la
+            // realidad), cada una sobre su punto del camino con la TANGENTE
+            // local del rasgado (v6.39: antes todas sobre la recta).
             int lineas = Math.Max(3, (int)(len / 22f));
             for (int l = 0; l < lineas; l++)
             {
-                float h = H01(seed, l, 149);
-                float h2 = H01(seed, l, 151);
-                float lx = len * (0.08f + 0.84f * h);
+                float hh = H01(seed, l, 149);
+                float hh2 = H01(seed, l, 151);
+                // El punto del camino a esa fracción (aproximación por índice).
+                float idxF = (0.08f + 0.84f * hh) * (camino.Length - 1);
+                int i0 = Math.Clamp((int)idxF, 0, camino.Length - 2);
+                float tt = idxF - i0;
+                Vector2 p = Vector2.Lerp(camino[i0], camino[i0 + 1], tt);
+                Vector2 segl = camino[i0 + 1] - camino[i0];
+                float rotl = segl.LengthSquared() > 0.01f
+                    ? (float)Math.Atan2(segl.Y, segl.X) : (float)Math.Atan2(dir.Y, dir.X);
                 // Cada scanline parpadea a su frecuencia (10-30 Hz — el strobe).
-                float st = MathF.Sin(tick * (0.17f + 0.34f * h2) + h * 6.28f) * 0.5f + 0.5f;
+                float st = MathF.Sin(tick * (0.17f + 0.34f * hh2) + hh * 6.28f) * 0.5f + 0.5f;
                 if (st < 0.35f) continue;
-                Quad(b, GlowTex, origin + dir * lx,
-                    new Vector2(len * (0.10f + 0.16f * h2), 1.3f + 1.5f * st),
-                    (float)Math.Atan2(dir.Y, dir.X) + MathHelper.PiOver2 * 0f,
-                    Tint(blancoHielo, 0.10f * st * alpha * open));
+                Quad(b, GlowTex, p, new Vector2(len * (0.10f + 0.16f * hh2), 1.3f + 1.5f * st),
+                    rotl, Tint(blancoHielo, 0.10f * st * alpha * open));
             }
             Main.spriteBatch.End();
 
             // === 2. LA LUZ (aditivo — batch del llamador reabierto) ===
             PortalAdditive();
             b = Main.spriteBatch;
-            float rot = (float)Math.Atan2(dir.Y, dir.X);
-            Vector2 mid = origin + dir * (len * 0.5f);
 
-            // LA ABERRACIÓN CROMÁTICA: el filo dibujado DOS VECES desplazado
-            // en perpendicular (rojo a un lado, cian al otro — la fractura óptica).
+            // LA ABERRACIÓN CROMÁTICA por camino: el filo dibujado DOS VECES
+            // desplazado en perpendicular (rojo a un lado, cian al otro —
+            // la fractura óptica del rasgado).
             Vector2 perp = new(-dir.Y, dir.X);
             Vector2 abOff = perp * (1.6f + 1.2f * MathF.Sin(time * 13f));
-            Quad(b, TaperVeloTex, mid + abOff, new Vector2(len, w * 1.15f), rot,
-                Tint(rojoCA, 0.16f * alpha * open));
-            Quad(b, TaperVeloTex, mid - abOff, new Vector2(len, w * 1.15f), rot,
-                Tint(cian, 0.16f * alpha * open));
+            for (int i = 0; i < camino.Length - 1; i++)
+            {
+                Vector2 a = camino[i];
+                Vector2 c = camino[i + 1];
+                float segLen = Vector2.Distance(a, c);
+                if (segLen < 0.30f) continue;
+                float rot = (float)Math.Atan2(c.Y - a.Y, c.X - a.X);
+                float giroA = i > 0 ? GiroEn(camino, i) : 0f;
+                float giroB = i < camino.Length - 2 ? GiroEn(camino, i + 1) : 0f;
+                float largo = segLen + ExtensionSolape(h * 0.5f, giroA, 0f) + ExtensionSolape(h * 0.5f, giroB, 0f);
+                bool extremo = i == 0 || i == camino.Length - 2;
 
-            // EL VELO violeta + EL CUERPO cian + EL NÚCLEO blanco (la herida) —
-            // v6.33 b: MÁS GRUESA Y MÁS BRILLANTE (la lección del mock: una
-            // banda fina oscura era INVISIBLE contra el cielo claro).
-            Quad(b, TaperVeloTex, mid, new Vector2(len, w * 1.85f), rot,
-                Tint(violeta, 0.55f * alpha * open));
-            Quad(b, TaperVeloTex, mid, new Vector2(len, w * 1.45f), rot,
-                Tint(cian, 0.30f * alpha * open));
-            Quad(b, TaperCuerpoTex, mid, new Vector2(len, w * 1.00f), rot,
-                Tint(cian, 0.85f * alpha * open));
-            Quad(b, TaperNucleoTex, mid, new Vector2(len, w * 0.38f), rot,
-                Tint(blancoHielo, 1f * alpha * open));
+                // LA ABERRACIÓN (dos velos finos a cada lado).
+                TaperQuad(b, TaperVeloTex, (a + c) * 0.5f + abOff, largo, h * 0.88f, rot,
+                    Tint(rojoCA, 0.16f * alpha * open), extremo);
+                TaperQuad(b, TaperVeloTex, (a + c) * 0.5f - abOff, largo, h * 0.88f, rot,
+                    Tint(cian, 0.16f * alpha * open), extremo);
 
-            // EL STROBE (10-30 Hz — el arco que falla): todo el cuerpo pica.
+                // EL VELO violeta + EL CUERPO cian + EL NÚCLEO blanco (la herida).
+                TaperQuad(b, TaperVeloTex, (a + c) * 0.5f, largo, h * 1.42f, rot,
+                    Tint(violeta, 0.55f * alpha * open), extremo);
+                TaperQuad(b, TaperVeloTex, (a + c) * 0.5f, largo, h * 1.12f, rot,
+                    Tint(cian, 0.30f * alpha * open), extremo);
+                TaperQuad(b, TaperCuerpoTex, (a + c) * 0.5f, largo, h * 0.77f, rot,
+                    Tint(cian, 0.85f * alpha * open), extremo);
+                TaperQuad(b, TaperNucleoTex, (a + c) * 0.5f, largo, h * 0.29f, rot,
+                    Tint(blancoHielo, 1f * alpha * open), extremo);
+            }
+
+            // EL STROBE (10-30 Hz — el arco que falla): todo el cuerpo pica
+            // (los segmentos pares del camino — el pico viaja).
             float strobe = MathF.Sin(tick * 0.38f + seed) * 0.5f + 0.5f;
             if (strobe > 0.62f)
             {
-                Quad(b, TaperVeloTex, mid, new Vector2(len, w * 2.3f), rot,
-                    Tint(cian, 0.22f * alpha * open * strobe));
-                Quad(b, TaperNucleoTex, mid, new Vector2(len, w * 0.55f), rot,
-                    Tint(blancoHielo, 0.55f * alpha * open * strobe));
+                for (int i = 0; i < camino.Length - 1; i += 2)
+                {
+                    Vector2 a = camino[i];
+                    Vector2 c = camino[i + 1];
+                    float segLen = Vector2.Distance(a, c);
+                    if (segLen < 0.30f) continue;
+                    float rot = (float)Math.Atan2(c.Y - a.Y, c.X - a.X);
+                    TaperQuad(b, TaperVeloTex, (a + c) * 0.5f, segLen + 2f, h * 1.77f, rot,
+                        Tint(cian, 0.22f * alpha * open * strobe));
+                    TaperQuad(b, TaperNucleoTex, (a + c) * 0.5f, segLen + 2f, h * 0.42f, rot,
+                        Tint(blancoHielo, 0.55f * alpha * open * strobe));
+                }
             }
 
-            // === 3. LOS ARCOS VOLTAICOS INTERNOS (StormLib.StormArc ×3) ===
-            int arcs = 3;
-            for (int a = 0; a < arcs; a++)
+            // === 3. LOS ARCOS VOLTAICOS INTERNOS — CORRIENDO POR DENTRO del
+            //     rasgado (v6.39: entre PUNTOS DEL CAMINO — la corriente
+            //     SIGUE la herida; antes colgaban de la recta) ===
+            int tramosArco = Math.Min(3, Math.Max(1, camino.Length / 6));
+            for (int t = 0; t < tramosArco; t++)
             {
-                float h = H01(seed, a, 157);
-                float t0 = 0.12f + 0.24f * h + a * 0.22f;
-                Vector2 a0 = origin + dir * (len * t0) + perp * (w * 0.22f * (h - 0.5f) * 2f);
-                Vector2 a1 = origin + dir * (len * Math.Min(1f, t0 + 0.30f + 0.2f * h))
-                             - perp * (w * 0.22f * (H01(seed, a, 163) - 0.5f) * 2f);
-                StormLib.StormArc(b, a0, a1, seed + a * 31, time,
+                int i0 = Math.Clamp(2 + t * 5 + (seed % 3), 1, camino.Length - 3);
+                int i1 = Math.Min(i0 + 4, camino.Length - 1);
+                Vector2 a0 = camino[i0] + perp * (w * 0.10f * (H01(seed, t, 157) - 0.5f) * 2f);
+                Vector2 a1 = camino[i1] - perp * (w * 0.10f * (H01(seed, t, 163) - 0.5f) * 2f);
+                StormLib.StormArc(b, a0, a1, seed + t * 31, time,
                     3.5f, cian, 0.65f * alpha * open);
             }
 
-            // === 3b. v6.33 b — LAS RAMIFICACIONES (la lección del mock: la
-            // herida recta leía "cuchillo"; la referencia manda: "grieta con
-            // ramificaciones que se bifurcan como raíces o rayos"). 5 grietas
-            // secundarias deterministas saliendo del cuerpo en diagonal. ===
+            // === 3b. LAS RAMIFICACIONES (la herida con ramas que se
+            //     bifurcan como raíces o rayos — naciendo DEL CAMINO) ===
             const int Ramas = 5;
             for (int r = 0; r < Ramas; r++)
             {
@@ -407,11 +467,17 @@ namespace AethonMod.Content.VFX
                 float h2 = H01(seed, r, 179);
                 float h3 = H01(seed, r, 181);
                 if (h1 < 0.30f) continue;                    // no todas nacen
-                float t0 = 0.12f + 0.76f * h2;
-                Vector2 nace = origin + dir * (len * t0);
+                // La rama nace de un punto del camino (no de la recta).
+                float idxF = (0.12f + 0.76f * h2) * (camino.Length - 1);
+                int i0 = Math.Clamp((int)idxF, 1, camino.Length - 2);
+                Vector2 nace = camino[i0];
+                // La dirección local del rasgado en ese punto.
+                Vector2 segl = camino[Math.Min(i0 + 1, camino.Length - 1)] - camino[i0];
+                float rotLocal = segl.LengthSquared() > 0.01f
+                    ? (float)Math.Atan2(segl.Y, segl.X) : (float)Math.Atan2(dir.Y, dir.X);
                 float lado = h3 > 0.5f ? 1f : -1f;
                 // La rama: 55°-75° del cuerpo (los rayos que brotan).
-                float angRama = rot + lado * (0.96f + 0.35f * h1);
+                float angRama = rotLocal + lado * (0.96f + 0.35f * h1);
                 float largoR = len * (0.10f + 0.13f * h2);
                 Vector2 fin = nace + new Vector2(MathF.Cos(angRama), MathF.Sin(angRama)) * largoR;
                 // LA GRIETA SECUNDARIA: fractal cian/violeta (StormLib con
@@ -422,13 +488,15 @@ namespace AethonMod.Content.VFX
                     2.5f, cian, blancoHielo, 0.85f * alpha * open, 5, largoR * 0.18f);
             }
 
-            // === 3c. v6.33 b — CHISPAS A LO LARGO (no solo los extremos). ===
+            // === 3c. CHISPAS A LO LARGO del camino (no de la recta) ===
             int tramos = Math.Max(2, (int)(len / 110f));
             for (int s = 0; s <= tramos; s++)
             {
-                float h = H01(seed, s, 191);
-                if (h < 0.45f) continue;
-                Vector2 sp = origin + dir * (len * s / (float)tramos)
+                float hs = H01(seed, s, 191);
+                if (hs < 0.45f) continue;
+                float idxF = (s / (float)tramos) * (camino.Length - 1);
+                int i0 = Math.Clamp((int)idxF, 0, camino.Length - 2);
+                Vector2 sp = Vector2.Lerp(camino[i0], camino[i0 + 1], idxF - i0)
                              + perp * (w * 0.4f * (H01(seed, s, 193) - 0.5f) * 2f);
                 float st = ((tick + s * 9f) % 30f) / 30f;
                 StormLib.SparkBurst(b, sp, cian, w * 0.75f, 3, seed + 21 + s,
@@ -437,9 +505,9 @@ namespace AethonMod.Content.VFX
 
             // === 4. LAS CHISPAS ZIG-ZAG en los extremos (StormLib.SparkBurst) ===
             float sparkT = (tick % 26f) / 26f;
-            StormLib.SparkBurst(b, origin, cian, w * 1.3f, 5, seed + 5,
+            StormLib.SparkBurst(b, camino[0], cian, w * 1.3f, 5, seed + 5,
                 sparkT, w * 1.2f);
-            StormLib.SparkBurst(b, origin + dir * len, cian, w * 1.3f, 5, seed + 9,
+            StormLib.SparkBurst(b, camino[camino.Length - 1], cian, w * 1.3f, 5, seed + 9,
                 sparkT, w * 1.2f);
             Main.spriteBatch.End();
         }

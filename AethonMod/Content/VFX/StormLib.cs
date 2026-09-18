@@ -35,7 +35,33 @@ namespace AethonMod.Content.VFX
     }
 
     /// <summary>
-    /// StormLib — v6.21 — LA SEGUNDA GENERACIÓN DE RAYOS.
+    /// StormLib — v6.39 — LA TERCERA GENERACIÓN: LA REPARACIÓN DEL ADITIVO.
+    ///
+    /// v6.39 — el informe research/v637 encontró DOS raíces medidas en la
+    /// v6.21 que juntas producían el artefacto reportado por el usuario
+    /// ("líneas intermitentes de un color más oscuro o claro, brillo y
+    /// desenfoque CORTADO POR SECCIONES"):
+    ///
+    ///   RAÍZ 1 — EL ALFA ES INVISIBLE EN EL LOTE ADITIVO. BlendState.Additive
+    ///   de XNA/FNA es (Src=One, Dst=One): aporte.rgb = textura.rgb ×
+    ///   tinte.rgb — el canal alfa de AMBOS no entra NUNCA en la ecuación.
+    ///   Las texturas Bolt* v6.21 llevaban el filamento SOLO en el alfa
+    ///   (RGB=blanco) y StormLib.Tint ponía la intensidad SOLO en el alfa
+    ///   del tinte → en el juego los rayos dibujaban RECTÁNGULOS SÓLIDOS a
+    ///   brillo máximo (la convención correcta — perfil horneado en RGB —
+    ///   existe en la casa desde v5.x: SoftGlow, GlowOrb…). v6.39 regenera
+    ///   las texturas premultiplicadas y hace Tint premultiplicado.
+    ///
+    ///   RAÍZ 2 — EL RIBBON SE CORTABA. Cada sub-segmento solapaba al vecino
+    ///   `subLen + w*2` → el aditivo APILABA el brillo en cada junta (las
+    ///   "cuentas" claras) y el crackle aleatorio POR SUB-SEGMENTO lo
+    ///   entrecortaba (las oscuras). v6.39 pinta el filamento como un ribbon
+    ///   DE VERDAD: quads BORDE A BORDE con la NORMAL MEDIA en las juntas y
+    ///   el LARGO EXACTO proyectado (la geometría del round-join de RiftLib
+    ///   v6.31: extensión adaptativa w/2·tan(δ/2) SOLO donde el camino gira
+    ///   de verdad), con la BANDA UNIFORME a lo largo (el brillo continuo de
+    ///   punta a punta) y el crackle POR PUNTO interpolado (la variación de
+    ///   brillo respira a lo largo del rayo, nunca a saltos de 42 px).
     ///
     /// Nace de la investigación profunda y metódica del ecosistema (los
     /// sistemas de rayos de los grandes mods de VFX, estudiados a fondo:
@@ -47,13 +73,18 @@ namespace AethonMod.Content.VFX
     /// proyecto): aquella dibujaba cápsulas de GLOW suave — era
     /// una tira de energía difusa. StormLib dibuja FILAMENTOS de verdad:
     ///
-    ///   1. TEXTURAS DE FILAMENTO — BoltHalo (banda suave) y BoltCore (el
-    ///      núcleo blanco que serpentea DENTRO de la textura, con grietas
-    ///      de alta frecuencia y nodos brillantes). La nitidez de un rayo
-    ///      vive en la TEXTURA, no en la geometría.
+    ///   1. TEXTURAS DE FILAMENTO — v6.39: BoltHalo y BoltCore son BANDAS
+    ///      UNIFORMES a lo largo (solo 3 px de fundido antialias en los
+    ///      extremos) con el perfil PREMULTIPLICADO en RGB (la convención
+    ///      SoftGlow de la casa — el lote aditivo PASA del alfa). La
+    ///      nitidez de un rayo vive en la GEOMETRÍA multi-escala y en el
+    ///      crackle por punto, NUNCA en ruido horneado a lo largo de la
+    ///      textura (eso era el "cortado por secciones").
     ///
-    ///   2. TRIPLE CAPA por sub-segmento — halo ancho de color + cuerpo
-    ///      del color + NÚCLEO BLANCO a ~⅓ del ancho (la vena caliente).
+    ///   2. TRIPLE CAPA por segmento — halo ancho de color + cuerpo
+    ///      del color + NÚCLEO BLANCO a ~¼ del ancho (la vena caliente),
+    ///      quads BORDE A BORDE (largo exacto proyectado + extensión
+    ///      adaptativa de giro — cero apilamiento aditivo en juntas rectas).
     ///
     ///   3. PARPADEO CON APAGADO — el rayo se re-genera a ~15 Hz y además
     ///      tiene probabilidad de apagarse un frame entero (el factor #1
@@ -78,7 +109,8 @@ namespace AethonMod.Content.VFX
     /// CONTRATO (el de siempre, heredado de la primera generación): los
     /// métodos de DIBUJO reciben el batch ABIERTO en modo aditivo y no lo
     /// tocan — se pueden aninar dentro de un renderer mayor. Coordenadas
-    /// tal cual lleguen.
+    /// tal cual lleguen. (Por eso el Tint premultiplicado: TODO lo que
+    /// dibuja esta librería vive en el lote aditivo.)
     /// </summary>
     public static class StormLib
     {
@@ -111,6 +143,17 @@ namespace AethonMod.Content.VFX
         private static Texture2D GlowTex =>
             (_glowTex ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
+
+        /// <summary>v6.39 — LA BANDA UNIFORME del halo, pública: para quien
+        /// emite cuadros de luz al buffer de VFXCore (SeekArc, BoltRenderer)
+        /// y necesita la banda premultiplicada que el lote aditivo respeta —
+        /// SoftGlow es RADIAL (funde a lo largo) y estirado produce las
+        /// franjas por junta.</summary>
+        public static Texture2D BandaTex => HaloTex;
+
+        /// <summary>v6.39 — LA VENA (el filamento núcleo), pública por la
+        /// misma razón que <see cref="BandaTex"/>.</summary>
+        public static Texture2D VenaTex => CoreTex;
 
         // ==================================================================
         //  EL RELOJ Y EL PARPADEO (deterministas)
@@ -306,20 +349,26 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL RENDER — triple capa por sub-segmento (batch ABIERTO aditivo)
+        //  EL RENDER — triple capa borde a borde (batch ABIERTO aditivo)
         // ==================================================================
 
-        /// <summary>Máxima longitud de un sub-segmento dibujable (px).</summary>
-        private const float SubMax = 42f;
-
         /// <summary>
-        /// Dibuja UN filamento por su lista de puntos: halo + cuerpo +
-        /// NÚCLEO BLANCO por sub-segmento (~42 px), brillo de grieta por
-        /// sub-segmento, taper a lo largo y gorros en los extremos.
+        /// Dibuja UN filamento por su lista de puntos — v6.39, EL RIBBON DE
+        /// VERDAD: cada segmento es UN quad tocando a sus vecinos BORDE A
+        /// BORDE (la NORMAL MEDIA orienta la junta — el quad de ayer y el de
+        /// mañana comparten el corte; el LARGO es la distancia PROYECTADA
+        /// sobre esa dirección media + la EXTENSIÓN ADAPTATIVA DE GIRO de
+        /// RiftLib v6.31: w/2·tan(δ/2) SOLO donde el camino gira de verdad).
+        /// Tres capas de ancho (halo ×2 / cuerpo ×1 / vena ×¼), BANDAS
+        /// UNIFORMES a lo largo (brillo CONTINUO — el v6.21 solapaba
+        /// subLen+w*2 y el aditivo APILABA cada junta: las "cuentas
+        /// brillantes") y EL CRACKLE POR PUNTO (el brillo respira entre
+        /// VÉRTICES interpolado, nunca por sub-sección dura: el
+        /// "cortado por secciones"). Taper a lo largo y gorros en extremos.
         /// </summary>
         /// <param name="batch">Batch ABIERTO en modo aditivo.</param>
         /// <param name="pts">La polilínea (ZigPath/Boil/ramas).</param>
-        /// <param name="width">Ancho del CUERPO en px (el halo va ×2.5, el núcleo ×⅓).</param>
+        /// <param name="width">Ancho del CUERPO en px (el halo va ×2, la vena ×¼).</param>
         /// <param name="halo">Color del halo/cuerpo.</param>
         /// <param name="core">Color del núcleo (casi blanco de verdad).</param>
         public static void Strand(SpriteBatch batch, Vector2[] pts, int seed, int flick,
@@ -673,7 +722,12 @@ namespace AethonMod.Content.VFX
             PintaArco(batch, start, end, seed + 977, slotB, width, glow, mid, coreC, alphaB);
         }
 
-        /// <summary>Una pasada del arco con la receta de 3 capas.</summary>
+        /// <summary>Una pasada del arco — v6.39: LAS 3 CAPAS CON LA BANDA
+        /// UNIFORME (BoltHalo halo/cuerpo + BoltCore vena) y el LARGO EXACTO
+        /// proyectado + la extensión de giro. El v6.33 estiraba SOFTGLOW
+        /// (RADIAL: funde a 0 en los dos extremos de cada quad) y compensaba
+        /// con solapes sl+w·1.6/0.8/0.4 → franjas oscuras + apiles claros =
+        /// EL "brillo cortado por secciones" del reporte. Muerto.</summary>
         private static void PintaArco(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int slot, float width, Color glow, Color mid, Color coreC, float alpha)
         {
@@ -709,12 +763,19 @@ namespace AethonMod.Content.VFX
                 float tMid = (arc + sl * 0.5f) / total;
                 float w = width * MathHelper.Clamp((float)Math.Sin(tMid * Math.PI) + 0.35f, 0.3f, 1f);
 
-                // LAS 3 CAPAS (receta eléctrica): glow esc ×1.0 · mid ×0.5 · core ×0.22.
-                Quad(batch, GlowTex, pos, new Vector2(sl + w * 1.6f, w * 1.6f), rot,
+                // v6.39 — EL LARGO EXACTO + LA EXTENSIÓN DE GIRO (borde a
+                // borde — nada de solapes que el aditivo apila).
+                float largo = Vector2.Dot(seg, avg);
+                if (largo < 0.30f) { arc += sl; continue; }
+                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
+                       + ExtensionJunta(w, AnguloEntre(seg, next));
+
+                // LAS 3 CAPAS (receta eléctrica): halo ×1.6 · cuerpo ×0.8 · vena ×0.30.
+                Quad(batch, HaloTex, pos, new Vector2(largo, w * 1.6f), rot,
                     Tint(glow, 0.30f * alpha));
-                Quad(batch, GlowTex, pos, new Vector2(sl + w * 0.8f, w * 0.8f), rot,
+                Quad(batch, HaloTex, pos, new Vector2(largo, w * 0.8f), rot,
                     Tint(mid, 0.55f * alpha));
-                Quad(batch, GlowTex, pos, new Vector2(sl + w * 0.4f, w * 0.22f), rot,
+                Quad(batch, CoreTex, pos, new Vector2(largo, w * 0.30f), rot,
                     Tint(coreC, 0.90f * alpha));
                 arc += sl;
             }
@@ -776,7 +837,12 @@ namespace AethonMod.Content.VFX
             }
 
             // === 3. EL PINTADO DE 3 CAPAS — el mismo motor de PintaArco
-            // (normal media + taper), pero EMITIDO al buffer de VFXCore. ===
+            // (normal media + largo exacto + extensión de giro), pero
+            // EMITIDO al buffer de VFXCore. v6.39: los quads llevan la
+            // TEXTURA DE BANDA propia (BoltHalo/BoltCore — la banda
+            // premultiplicada que el aditivo respeta): antes se volcaban
+            // SIN textura y FlushAdditive los pintaba con SoftGlow (RADIAL:
+            // funde a lo largo) → el brillo se cortaba por secciones. ===
             float total = PathLength(pts);
             if (total < 1f) return;
             float arc = 0f;
@@ -797,10 +863,17 @@ namespace AethonMod.Content.VFX
                 float tMid = (arc + sl * 0.5f) / total;
                 float w = width * MathHelper.Clamp((float)Math.Sin(tMid * Math.PI) + 0.35f, 0.3f, 1f);
 
-                // LAS 3 CAPAS (receta eléctrica): glow esc ×1.0 · mid ×0.5 · core ×0.22.
-                VFXCore.Quad(pos, Tint(cBase, 0.30f * alpha), new Vector2(sl + w * 1.6f, w * 1.6f), rot);
-                VFXCore.Quad(pos, Tint(cMedia, 0.55f * alpha), new Vector2(sl + w * 0.8f, w * 0.8f), rot);
-                VFXCore.Quad(pos, Tint(cNucleo, 0.90f * alpha), new Vector2(sl + w * 0.4f, w * 0.22f), rot);
+                // v6.39 — EL LARGO EXACTO + LA EXTENSIÓN DE GIRO.
+                float largo = Vector2.Dot(seg, avg);
+                if (largo < 0.30f) { arc += sl; continue; }
+                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
+                       + ExtensionJunta(w, AnguloEntre(seg, next));
+
+                // LAS 3 CAPAS (receta eléctrica): halo ×1.6 · cuerpo ×0.8 · vena ×0.30
+                // — con TEXTURA de banda propia (la sobrecarga v6.08 de Quad).
+                VFXCore.Quad(pos, Tint(cBase, 0.30f * alpha), new Vector2(largo, w * 1.6f), rot, HaloTex);
+                VFXCore.Quad(pos, Tint(cMedia, 0.55f * alpha), new Vector2(largo, w * 0.8f), rot, HaloTex);
+                VFXCore.Quad(pos, Tint(cNucleo, 0.90f * alpha), new Vector2(largo, w * 0.30f), rot, CoreTex);
                 arc += sl;
             }
         }
@@ -860,9 +933,27 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// EL MOTOR DEL FILAMENTO: recorre la polilínea en sub-segmentos de
-        /// ~42 px y pinta las TRES capas (halo ancho + cuerpo + núcleo
-        /// blanco) con brillo de grieta por sub-segmento y taper.
+        /// EL MOTOR DEL FILAMENTO (v6.39 — EL RIBBON DE VERDAD): recorre la
+        /// polilínea SEGMENTO A SEGMENTO pintando las TRES capas con quads
+        /// que se tocan BORDE A BORDE:
+        ///
+        ///   · LA NORMAL MEDIA: la dirección del quad es el promedio de las
+        ///     direcciones ADYACENTES — los dos quads que comparten un
+        ///     vértice cortan la junta con la MISMA orientación (mata las
+        ///     lentes de doble brillo de las rotaciones dispares).
+        ///   · EL LARGO EXACTO: la distancia proyectada sobre la dirección
+        ///     media + LA EXTENSIÓN ADAPTATIVA DE GIRO (w/2·tan(δ/2) — la
+        ///     geometría del round-join de RiftLib v6.31: cero en los
+        ///     tramos rectos, solo lo geométricamente necesario en las
+        ///     esquinas) + 1.2 px de margen antialias que la textura cubre
+        ///     con su fundido de 3 px (las rampas complementarias suman ~1:
+        ///     la junta es INVISIBLE, no apila).
+        ///   · EL CRACKLE POR PUNTO: el brillo se sorteaba en los VÉRTICES
+        ///     (baja frecuencia) y se INTERPOLA entre ellos — el rayo
+        ///     respira a lo largo sin UNA sola sección dura (el v6.21 lo
+        ///     sorteaba por sub-segmento de 42 px: el brillo se cortaba en
+        ///     escalones — el reporte del usuario). La VENA no lleva crackle
+        ///     (el núcleo caliente arde SIEMPRE — es el ancla visual).
         /// </summary>
         private static void StrandImpl(SpriteBatch batch, Vector2[] pts, int seed, int flick,
             float width, Color halo, Color core, float alpha, StormTaper taper,
@@ -873,8 +964,15 @@ namespace AethonMod.Content.VFX
             float total = PathLength(pts);
             if (total < 1f) return;
 
+            // EL CRACKLE INTERPOLADO POR CONSTRUCCIÓN (v6.39): el brillo de
+            // un segmento es la media de los brillos de SUS DOS VÉRTICES
+            // (cada uno 0.66..1.0 por hash de baja frecuencia) — continuo de
+            // punta a punta, cero secciones duras, cero búfer.
+            // La VENA no lleva crackle (el núcleo caliente arde SIEMPRE).
+            float Brillo(int i)
+                => 0.66f + 0.34f * VFXCore.Hash01(seed, flick, i * 41 + 17);
+
             float arc = 0f;
-            int k = 0;
             for (int i = 0; i < pts.Length - 1; i++)
             {
                 Vector2 a = pts[i];
@@ -883,46 +981,64 @@ namespace AethonMod.Content.VFX
                 float len = seg.Length();
                 if (len < 0.35f) { arc += len; continue; }
 
-                // Sub-segmentación: las grietas viven a escala fina.
-                int m = Math.Max(1, (int)Math.Ceiling(len / SubMax));
-                for (int s = 0; s < m; s++)
-                {
-                    Vector2 p0 = a + seg * (s / (float)m);
-                    Vector2 p1 = a + seg * ((s + 1) / (float)m);
-                    Vector2 sub = p1 - p0;
-                    float subLen = sub.Length();
-                    if (subLen < 0.30f) { arc += subLen; continue; }
-                    float rot = (float)Math.Atan2(sub.Y, sub.X);
-                    Vector2 mid = (p0 + p1) * 0.5f;
-                    float tMid = (arc + subLen * 0.5f) / total;
+                // === LA NORMAL MEDIA (la lección del ribbon) ===
+                Vector2 prev = i > 0 ? a - pts[i - 1] : seg;
+                Vector2 next = i < pts.Length - 2 ? pts[i + 2] - b : seg;
+                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
+                if (avg.LengthSquared() < 0.001f) avg = seg;
+                avg = Vector2.Normalize(avg);
 
-                    // El TAPER y la GRIETA de este sub-segmento.
-                    float w = width * TaperFactor(taper, tMid);
-                    float crackle = 0.62f + 0.38f * VFXCore.Hash01(seed, flick, k * 41 + 17);
+                float rot = (float)Math.Atan2(avg.Y, avg.X);
+                Vector2 mid = (a + b) * 0.5f;
+                float tMid = (arc + len * 0.5f) / total;
 
-                    // 1) EL HALO — banda suave, ancho, del color (contenido:
-                    //                    el halo NO debe engullir al filamento).
-                    Quad(batch, haloTex, mid,
-                        new Vector2(subLen + w * 2.0f, w * 2.0f), rot,
-                        Tint(halo, 0.30f * alpha * crackle));
-                    // 2) EL CUERPO — el filamento de color con sus grietas.
-                    Quad(batch, bodyTex, mid,
-                        new Vector2(subLen + w * 1.0f, w * 1.0f), rot,
-                        Tint(halo, 0.85f * alpha * crackle));
-                    // 3) EL NÚCLEO — la vena BLANCA razor-fina a ¼ del ancho.
-                    Quad(batch, bodyTex, mid,
-                        new Vector2(subLen + w * 0.45f, w * 0.26f), rot,
-                        Tint(core, 1f * alpha));
+                // El TAPER y el CRACKLE (interpolado entre los vértices).
+                float w = width * TaperFactor(taper, tMid);
+                float crackle = (Brillo(i) + Brillo(i + 1)) * 0.5f;
 
-                    arc += subLen;
-                    k++;
-                }
+                // === LA EXTENSIÓN ADAPTATIVA DE GIRO (el round-join) ===
+                float largo = Vector2.Dot(seg, avg);
+                if (largo < 0.35f) { arc += len; continue; }
+                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
+                       + ExtensionJunta(w, AnguloEntre(seg, next));
+
+                // 1) EL HALO — banda suave ancha, del color (el contenido:
+                //    el halo NO debe engullir al filamento).
+                Quad(batch, haloTex, mid, new Vector2(largo, w * 2.0f), rot,
+                    Tint(halo, 0.30f * alpha * crackle));
+                // 2) EL CUERPO — el filamento de color.
+                Quad(batch, bodyTex, mid, new Vector2(largo, w * 1.0f), rot,
+                    Tint(halo, 0.85f * alpha * crackle));
+                // 3) LA VENA — la línea BLANCA razor-fina a ¼ del ancho
+                //    (sin crackle: el núcleo arde SIEMPRE).
+                Quad(batch, bodyTex, mid, new Vector2(largo, w * 0.26f), rot,
+                    Tint(core, 1f * alpha));
+
+                arc += len;
             }
 
             // Los GORROS de descarga en ambos extremos.
             EndCap(batch, pts[0], width, halo, core, alpha);
             EndCap(batch, pts[pts.Length - 1], width, halo, core, alpha);
         }
+
+        /// <summary>El ángulo (0..π) entre dos direcciones (el GIRO de la junta).</summary>
+        private static float AnguloEntre(Vector2 d0, Vector2 d1)
+        {
+            if (d0.LengthSquared() < 0.0001f || d1.LengthSquared() < 0.0001f) return 0f;
+            float dot = MathHelper.Clamp(Vector2.Dot(Vector2.Normalize(d0), Vector2.Normalize(d1)), -1f, 1f);
+            return MathF.Acos(dot);
+        }
+
+        /// <summary>
+        /// LA EXTENSIÓN DE JUNTA (la geometría del round-join, medida de
+        /// RiftLib v6.31): dos bandas de ancho w que giran δ necesitan
+        /// e = w/2·tan(δ/2) para que sus esquinas se crucen. Suelo 1.2 px
+        /// (el margen antialias que el fundido de 3 px de la textura hace
+        /// invisible), techo w/2 (en los giros de 90°+ el solape clásico).
+        /// </summary>
+        private static float ExtensionJunta(float w, float giro)
+            => MathHelper.Clamp(w * 0.5f * MathF.Tan(giro * 0.5f) + 1.2f, 1.2f, w * 0.5f + 1.2f);
 
         /// <summary>La curva de anchura (el contrato del taper).</summary>
         private static float TaperFactor(StormTaper taper, float t)
@@ -950,11 +1066,19 @@ namespace AethonMod.Content.VFX
                 SpriteEffects.None, 0f);
         }
 
-        /// <summary>Tinte de INTENSIDAD LINEAL (patrón validado del proyecto).</summary>
+        /// <summary>Tinte de INTENSIDAD PREMULTIPLICADO (v6.39 — el patrón
+        /// validado del proyecto, el mismo Tint v6.25 de RiftLib): el lote
+        /// aditivo (One/One) PASA del canal alfa — una intensidad que viva
+        /// solo ahí es INVISIBLE (el bug raíz nº 1 del informe v6.39: las 3
+        /// capas salían a brillo MÁXIMO). Escala el RGB (lo que el aditivo
+        /// suma de verdad) y deja el alfa para los lotes alfa (compatibilidad
+        /// gratis).</summary>
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
+            return new Color(
+                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
+                (byte)(int)(255f * f));
         }
     }
 }

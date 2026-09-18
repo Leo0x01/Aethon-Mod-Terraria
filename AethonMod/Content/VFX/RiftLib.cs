@@ -245,13 +245,18 @@ namespace AethonMod.Content.VFX
         public const float QuadAlto = 1.60f;
 
         /// <summary>
-        /// EL VACÍO DEL DESGARRO RECTO: UN SOLO QUAD RiftTaperVoid (512×64) —
-        /// la banda negra que OCLUYE con el PERFIL DE MESETA horneado (ancho
-        /// 100% en el 80% central + tapas redondas — v6.31: el huso era la
-        /// raíz de lo "discontinuo"). Se dibuja en el LOTE NO-PREMULTIPLICADO
-        /// del llamador (dibujar ANTES de la luz).
-        /// CERO juntas: el desgarro entero es una sola pieza; el ancho NO
-        /// respira (la vida la pone la alpha del tinte).
+        /// EL VACÍO DEL DESGARRO — v6.39: LA LÍNEA RASGADA (un solo quad ya
+        /// NO: "si la realidad se desgarra no sería una fea línea recta").
+        /// El camino <see cref="CaminoDesgarro"/> dibujado con la MISMA
+        /// textura RiftTaperVoid RECORTADA a la meseta por segmento — la
+        /// geometría de la cadena gemela de <see cref="GrietaVacio"/>
+        /// (solape adaptativo al giro real + PERLA de vacío en cada vértice:
+        /// el negro apilado es idempotente — cobertura garantizada) y los
+        /// segmentos EXTREMOS con la textura de estadio COMPLETO (la tapa
+        /// redonda del arranque y la punta). El ANCHO es PLANO de punta a
+        /// punta (la meseta del contrato v6.31: la anchura NUNCA respira —
+        /// la vida la pone la alpha) y la altura sigue siendo
+        /// Apertura(progress)·maxWidth·anchoMul·QuadAlto.
         /// </summary>
         /// <param name="batch">Batch ABIERTO (BlendState.NonPremultiplied recomendado).</param>
         /// <param name="progress">0..1 vida del desgarro (0-0.08 apertura, 0.85-1 cierre).</param>
@@ -267,30 +272,54 @@ namespace AethonMod.Content.VFX
             if (h < 0.8f) return;
 
             float breathe = VFXCore.Breathe(time, 2.2f, seed, 0.06f);
-            float rot = MathF.Atan2(dir.Y, dir.X);
-            Vector2 center = origin + dir * (length * 0.5f);
 
-            // v6.31: EL ANCHO ES CONSTANTE — la respiración vive en la ALPHA.
-            batch.Draw(TaperVoidTex, center, null,
-                Tint(Color.White, 0.96f * breathe), rot,
-                new Vector2(TaperVoidTex.Width, TaperVoidTex.Height) * 0.5f,
-                new Vector2(length, h) / new Vector2(TaperVoidTex.Width, TaperVoidTex.Height),
-                SpriteEffects.None, 0f);
+            // v6.39 — EL BORDE RASGADO: la realidad no se corta con regla.
+            Vector2[] camino = CaminoDesgarro(origin, dir, length, seed, time, Rasgado(maxWidth));
+
+            for (int i = 0; i < camino.Length - 1; i++)
+            {
+                Vector2 a = camino[i];
+                Vector2 b = camino[i + 1];
+                float len = Vector2.Distance(a, b);
+                if (len < 0.30f) continue;
+
+                float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
+                float giroA = i > 0 ? GiroEn(camino, i) : 0f;
+                float giroB = i < camino.Length - 2 ? GiroEn(camino, i + 1) : 0f;
+                float largo = len + ExtensionSolape(h * 0.5f, giroA) + ExtensionSolape(h * 0.5f, giroB);
+
+                // LOS SEGMENTOS EXTREMOS llevan la textura ESTADIO COMPLETA:
+                // su tapa redonda ES el arranque/la punta de la herida.
+                bool extremo = i == 0 || i == camino.Length - 2;
+
+                TaperQuad(batch, TaperVoidTex, (a + b) * 0.5f, largo, h, rot,
+                    Tint(Color.White, 0.96f * breathe), extremo);
+
+                // LA PERLA del vértice (el round-join del vacío — el negro
+                // apilado sobre negro es idempotente: cobertura gratis).
+                if (i > 0)
+                    TaperQuad(batch, TaperVoidTex, a, h * 0.75f, h, rot,
+                        Tint(Color.White, 0.96f * breathe));
+            }
         }
 
         /// <summary>
-        /// DIBUJA EL DESGARRO RECTO (el pase de LUZ) — v6.31: TRES QUADS, CERO
-        /// JUNTAS, PERFIL DE MESETA. La línea de <paramref name="origin"/> a
-        /// origin+dir·<paramref name="length"/> con anchura viva
-        /// Apertura(progress)·maxWidth·anchoMul·QuadAlto, toda la anatomía
-        /// (banda de vacío 62.5% + LOS DOS LABIOS en su borde + filos razor +
-        /// EL CENTRO CEGADOR — lección Last Prism) HORNEADA en las RiftTaper*:
+        /// DIBUJA EL DESGARRO (el pase de LUZ) — v6.39: LA LÍNEA RASGADA.
+        /// El camino <see cref="CaminoDesgarro"/> por segmento con la MISMA
+        /// anatomía y los MISMOS factores α de siempre, la geometría de la
+        /// cadena gemela de <see cref="Grieta"/> (solape adaptativo al GIRO
+        /// REAL — cero apiles en tramos rectos — y la PERLA DE LUZ solo donde
+        /// hay giro de verdad δ > 8°), y LAS ESTRELLAS por camino:
         ///   1. EL VELO (RiftTaperVelo, tinte de paleta[0], α 0.30·intensity).
         ///   2. EL CUERPO (RiftTaperCuerpo, tinte de paleta[1], α 0.60·intensity).
         ///   3. EL NÚCLEO (RiftTaperNucleo, tinte BLANCO de paleta[última], α 0.90·intensity).
-        ///   4. LAS ESTRELLAS del interior (16-28, scroll + paralaje + parpadeo).
+        ///   4. LAS ESTRELLAS del interior (16-28, paralaje + parpadeo — por
+        ///      el camino rasgado, no por la recta).
         /// EL ANCHO NO RESPIRA (v6.31 — un ancho que late se lee "no parejo");
         /// la vida la pone el latido de la ALPHA del velo. SIN aberración R/B.
+        /// v6.39 b: las RiftTaper* de LUZ llegan PREMULTIPLICADAS de fábrica
+        /// (gen_bolts_v637.py — RGB=perfil): sus labios y su filo vuelven a
+        /// verse en el lote aditivo (el alfa solo no existía para él).
         /// </summary>
         /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
         /// <param name="progress">0..1 vida del desgarro (0-0.08 apertura, 0.85-1 cierre).</param>
@@ -311,28 +340,56 @@ namespace AethonMod.Content.VFX
             if (intensity <= 0.02f) return;
 
             float beat = 0.90f + 0.10f * MathF.Sin(time * 7.3f + seed);
-            float rot = MathF.Atan2(dir.Y, dir.X);
-            Vector2 center = origin + dir * (length * 0.5f) + ecoOffset;
 
             Color velo = Eco(Tint(Pal(paleta, 0), 0.30f * intensity * beat), ecoTint);
             Color cuerpo = Eco(Tint(Pal(paleta, 1), 0.60f * intensity), ecoTint);
             Color nucleo = Eco(Tint(Pal(paleta, paleta.Length - 1), 0.90f * intensity), ecoTint);
 
-            var texSize = new Vector2(TaperVeloTex.Width, TaperVeloTex.Height);
-            // v6.31: EL ANCHO ES CONSTANTE — cero respiración de escala.
-            var scale = new Vector2(length, h) / texSize;
-            var originPx = texSize * 0.5f;
+            // v6.39 — EL BORDE RASGADO (mismo camino que el vacío: diente a diente).
+            Vector2[] camino = CaminoDesgarro(origin, dir, length, seed, time, Rasgado(maxWidth));
 
-            // === 1+2+3: LOS TRES QUADS (velo → cuerpo → núcleo) ===
-            batch.Draw(TaperVeloTex, center, null, velo, rot, originPx, scale, SpriteEffects.None, 0f);
-            batch.Draw(TaperCuerpoTex, center, null, cuerpo, rot, originPx, scale, SpriteEffects.None, 0f);
-            batch.Draw(TaperNucleoTex, center, null, nucleo, rot, originPx, scale, SpriteEffects.None, 0f);
+            for (int i = 0; i < camino.Length - 1; i++)
+            {
+                Vector2 a = camino[i];
+                Vector2 b = camino[i + 1];
+                float len = Vector2.Distance(a, b);
+                if (len < 0.30f) continue;
 
-            // === 4: LAS ESTRELLAS del interior (el vacío fluye — scroll élite) ===
-            // (En los re-dibujos de ECO no: el glitch es de los LABIOS.)
+                Vector2 mid = (a + b) * 0.5f + ecoOffset;
+                float rot = MathF.Atan2(b.Y - a.Y, b.X - a.X);
+
+                // EL SOLAPE ADAPTATIVO: la luz aditiva se APILA — su solape
+                // es EXACTAMENTE el geométricamente necesario (suelo 0).
+                float giroA = i > 0 ? GiroEn(camino, i) : 0f;
+                float giroB = i < camino.Length - 2 ? GiroEn(camino, i + 1) : 0f;
+                float largo = len + ExtensionSolape(h * 0.5f, giroA, 0f) + ExtensionSolape(h * 0.5f, giroB, 0f);
+
+                bool extremo = i == 0 || i == camino.Length - 2;
+
+                // === EL VELO (α 0.30 — el halo que integra) ===
+                TaperQuad(batch, TaperVeloTex, mid, largo, h, rot, velo, extremo);
+                // === EL CUERPO (los labios en el borde del vacío, α 0.60) ===
+                TaperQuad(batch, TaperCuerpoTex, mid, largo, h, rot, cuerpo, extremo);
+                // === EL NÚCLEO RAZOR (los filos + el centro cegador, α 0.90) ===
+                TaperQuad(batch, TaperNucleoTex, mid, largo, h, rot, nucleo, extremo);
+
+                // === LA PERLA DE LUZ solo donde HAY GIRO REAL (δ > 8°): en
+                //     los tramos casi rectos la perla aditiva era una cuenta
+                //     brillante; en los giros de verdad es el round-join que
+                //     cierra la esquina del labio. ===
+                if (giroA > 0.14f)
+                {
+                    TaperQuad(batch, TaperVeloTex, a + ecoOffset, h * 0.75f, h, rot, velo);
+                    TaperQuad(batch, TaperCuerpoTex, a + ecoOffset, h * 0.75f, h, rot, cuerpo);
+                    TaperQuad(batch, TaperNucleoTex, a + ecoOffset, h * 0.75f, h, rot, nucleo);
+                }
+            }
+
+            // === LAS ESTRELLAS del interior (por el CAMINO rasgado — en los
+            //     re-dibujos de ECO no: el glitch es de los LABIOS) ===
             if (ecoTint == null)
-                Estrellas(batch, origin, dir, length, maxWidth * Apertura(progress),
-                    paleta, intensity, seed, time, 2f, 16 + seed % 13);
+                EstrellasCamino(batch, camino, maxWidth * Apertura(progress),
+                    paleta, intensity, seed, time, 16 + seed % 13);
         }
 
         // ==================================================================
@@ -447,6 +504,74 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.39 — EL BORDE RASGADO ("si la realidad se desgarra no sería
+        //  una fea línea recta"): el generador del camino dentado.
+        // ==================================================================
+
+        /// <summary>La amplitud del rasgado (v6.39): dientes proporcionales
+        /// a la herida (~0.32·maxWidth, suelo 2.5 px, techo 8 px — una
+        /// herida rasgada no es un gusano serpenteante).</summary>
+        public static float Rasgado(float maxWidth)
+            => MathF.Min(8f, MathF.Max(2.5f, maxWidth * 0.32f));
+
+        /// <summary>
+        /// EL CAMINO DEL DESGARRO (v6.39): la línea RECTA de siempre con el
+        /// BORDE RASGADO — la realidad no se corta con regla. TRES OCTAVAS
+        /// de dientes CONGELADOS por semilla (grandes ~26 px + medianas +
+        /// micro) con envolvente senoidal (los ANCLAJES quedan EXACTOS, el
+        /// rasgado vive al medio) y una DERIVA LENTA (±15% a ~0.3 Hz — la
+        /// herida abierta no se re-teje: v6.28 enseñó que regenerar la
+        /// forma por frame se lee como "interrupciones").
+        /// Los índices de hash se CUANTIZAN por distancia absoluta al
+        /// ancestro (f·length/26): dos desgarros contiguos de la misma
+        /// línea (cola + frente) coinciden diente a diente en la costura.
+        /// Determinista: la MISMA herida en todas las máquinas.
+        /// </summary>
+        /// <param name="jagAmp">La amplitud base del rasgado (ver
+        /// <see cref="Rasgado"/> — la desviación máxima es ~1.67·jagAmp).</param>
+        public static Vector2[] CaminoDesgarro(Vector2 origin, Vector2 dir, float length,
+            int seed, float time, float jagAmp)
+        {
+            if (length < 8f) return new[] { origin, origin + dir * length };
+            int points = Math.Clamp((int)(length / 26f) + 1, 10, 26);
+            var pts = new Vector2[points];
+            dir = dir.LengthSquared() > 0.0001f ? Vector2.Normalize(dir) : Vector2.One;
+            Vector2 perp = new(-dir.Y, dir.X);
+
+            // LA DERIVA LENTA (la única vida del borde: ±15%).
+            float drift = DriftDesgarro(seed, time);
+
+            for (int i = 0; i < points; i++)
+            {
+                float f = i / (float)(points - 1);
+                float env = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.7f);
+                // El índice CUANTIZADO por distancia absoluta (la costura
+                // de sub-desgarros coincide diente a diente).
+                int k = (int)MathF.Round(f * length / 26f);
+                pts[i] = origin + dir * (length * f)
+                       + perp * (JagDesgarro(seed, k, jagAmp) * env * drift);
+            }
+            pts[0] = origin;
+            pts[points - 1] = origin + dir * length;      // anclajes EXACTOS
+            return pts;
+        }
+
+        /// <summary>
+        /// EL JAG COMPARTIDO (v6.39): las TRES OCTAVAS congeladas del borde
+        /// rasgado en el punto de índice cuantizado k — LA MISMA fórmula
+        /// para el desgarro y su vibración (los dientes NO saltan al
+        /// cambiar de fase: la herida vibra CON sus dientes, no los cambia).
+        /// </summary>
+        private static float JagDesgarro(int seed, int k, float jagAmp)
+            => (H01(seed, k, 301) - 0.5f) * 2f * jagAmp
+             + (H01(seed, k, 307) - 0.5f) * 2f * jagAmp * 0.45f
+             + (H01(seed, k, 311) - 0.5f) * 2f * jagAmp * 0.22f;
+
+        /// <summary>La deriva lenta del borde (±15% a ~0.3 Hz).</summary>
+        private static float DriftDesgarro(int seed, float time)
+            => 1f + 0.15f * MathF.Sin(time * 1.9f + seed * 0.7f);
+
+        // ==================================================================
         //  EL CAMINO DE LA VIBRACIÓN — la tensión visible antes del golpe
         // ==================================================================
 
@@ -456,15 +581,21 @@ namespace AethonMod.Content.VFX
         /// (lección v6.28: amplitud 0→máx, ~10 Hz, 2 nodos). Determinista.
         /// v6.31: es EL ÚNICO camino del desgarro (sin ramas, sin Lichtenberg —
         /// la única curvatura permitida es esta onda de amplitud ≤3.5 px).
+        /// v6.39: la onda cabalga SOBRE EL BORDE RASGADO con LA MISMA
+        /// fórmula de dientes (<see cref="JagDesgarro"/> — el borde NO
+        /// cambia al entrar en vibración: la herida vibra CON sus
+        /// dientes; sin esto la línea se "enderezaba" de golpe).
         /// </summary>
         /// <param name="amplitud">0..máx px del vaivén lateral.</param>
+        /// <param name="seed">La semilla del desgarro (los dientes congelados).</param>
         public static Vector2[] CaminoVibracion(Vector2 origin, Vector2 dir, float length,
-            float amplitud, float time, int nodos = 2)
+            float amplitud, float time, int nodos = 2, int seed = 0, float jagAmp = 5.12f)
         {
             int points = Math.Clamp((int)(length / 40f), 10, 20);
             var pts = new Vector2[points];
             dir = dir.LengthSquared() > 0.0001f ? Vector2.Normalize(dir) : Vector2.One;
             Vector2 perp = new(-dir.Y, dir.X);
+            float drift = DriftDesgarro(seed, time);
 
             for (int i = 0; i < points; i++)
             {
@@ -473,7 +604,10 @@ namespace AethonMod.Content.VFX
                 // CLAVADA en ambos extremos mientras vibra) — sin(f·π·nodos).
                 float onda = MathF.Sin(f * MathHelper.Pi * nodos) *
                              MathF.Sin(time * MathHelper.TwoPi * 10f);   // ~10 Hz
-                pts[i] = origin + dir * (length * f) + perp * (onda * amplitud);
+                float env = MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.7f);
+                int k = (int)MathF.Round(f * length / 26f);
+                pts[i] = origin + dir * (length * f)
+                       + perp * (onda * amplitud + JagDesgarro(seed, k, jagAmp) * env * drift);
             }
             return pts;
         }

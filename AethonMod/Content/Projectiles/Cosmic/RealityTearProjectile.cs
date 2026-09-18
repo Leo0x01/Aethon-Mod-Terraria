@@ -489,9 +489,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // ============================================================
-            //  LA LÍNEA (todas las fases restantes): UN SOLO QUAD CONTINUO —
+            //  LA LÍNEA (todas las fases restantes): LA LÍNEA RASGADA de
+            //  v6.39 (Tear/TearVacio ya dibujan POR EL CAMINO dentado —
+            //  "si la realidad se desgarra no sería una fea línea recta") —
             //  excepto la VIBRACIÓN, que la dobla con la ONDA ESTACIONARIA
-            //  (la cadena GEMELA del quad: mismas texturas, ancho plano).
+            //  SOBRE LOS MISMOS DIENTES (misma semilla, mismo jag: la
+            //  herida vibra CON sus dientes, no los cambia).
             // ============================================================
             float ageV = MathF.Max(0f, _age - preVib);
             float amplitud = fase == RiftFase.Vibracion
@@ -501,12 +504,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (amplitud > 0.6f)
             {
                 // === LA LÍNEA VIBRANDO (la cadena gemela, sin huecos) ===
-                Vector2[] camino = RiftLib.CaminoVibracion(origin, dir, TearLength, amplitud, time);
+                Vector2[] camino = RiftLib.CaminoVibracion(origin, dir, TearLength, amplitud, time,
+                    2, seed, RiftLib.Rasgado(MaxWidth));
                 DibujarCamino(camino, intensity, seed, time);
             }
             else
             {
-                // === LA LÍNEA RECTA PURA: UN SOLO QUAD (con la EROSIÓN del
+                // === LA LÍNEA RASGADA (con la EROSIÓN del
                 //     cierre acortándola desde los dos extremos) ===
                 Vector2 subOrigin = origin + dir * (TearLength * erosion * 0.5f);
                 float subLen = TearLength * (1f - erosion);
