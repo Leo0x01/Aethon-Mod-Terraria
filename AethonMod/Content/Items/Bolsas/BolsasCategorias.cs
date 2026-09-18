@@ -47,17 +47,21 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>2 — LOS BASTONES FUNDACIONALES: los cuatro del alba del mod.</summary>
+    /// <summary>2 — LOS BASTONES FUNDACIONALES: los que empezaron todo
+    /// (v6.41: EL GRIMORIO ETERNO entra en la bolsa — el arma raíz del
+    /// mod no estaba en NINGUNA y no había forma de probarla sin
+    /// fabricarla; ahora los cinco del alba). </summary>
     public class BolsaFundacionales : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Bastones Fundacionales";
         protected override string NombreCorto => "Bolsa de los Fundacionales";
         protected override Color ColorFiesta => new(90, 220, 255);
-        protected override string Nota => "Los cuatro bastones que empezaron todo";
+        protected override string Nota => "El grimorio raíz y los cuatro bastones del alba";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Weapons.GrimoireEternal>(), 1));
             l.Add((ModContent.ItemType<Weapons.V20.SupernovaStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.V20.PlasmaStormStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.V20.PhoenixNovaStaff>(), 1));
@@ -363,6 +367,29 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<CintaAuroraStaff>(), 1));          // la que ondea
             l.Add((ModContent.ItemType<ManadaAstralStaff>(), 1));         // la manada elástica
             l.Add((ModContent.ItemType<CriaEstelarStaff>(), 1));          // LA CRÍA (minion)
+            return l;
+        }
+    }
+
+    /// <summary>15 — LOS HUÉSPEDES (v6.41): LAS ARMAS DE PRUEBAS NACIDAS
+    /// DE RÉPLICAS — el tentáculo del vacío (el tomo de la apatía nula)
+    /// y el fragmento de supernova (la singularidad alada hecha minion),
+    /// más el bastón de los tajos astrales (v6.40, que se quedó sin
+    /// bolsa). Su propia bolsa: son armas de PRUEBAS fieles a su fuente
+    /// de estudio — visitantes en el arsenal.</summary>
+    public class BolsaHuespedes : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de los Huéspedes";
+        protected override string NombreCorto => "Bolsa de los Huéspedes";
+        protected override Color ColorFiesta => new(140, 255, 160);
+        protected override string Nota => "Réplicas de prueba: el tentáculo, el fragmento y los tajos astrales";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<TomoApatiaNula>(), 1));            // el tentáculo del vacío
+            l.Add((ModContent.ItemType<FragmentoSupernovaStaff>(), 1));   // la singularidad alada (minion)
+            l.Add((ModContent.ItemType<TajosAstralesStaff>(), 1));        // v6.40: los tajos del anime
             return l;
         }
     }

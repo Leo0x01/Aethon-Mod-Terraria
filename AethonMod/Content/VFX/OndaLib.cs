@@ -236,6 +236,69 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.41 — EL TELEGRAPH (el aviso que precede al golpe)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.41 — EL TELEGRAPH: la LÍNEA DE AVISO que precede a un ataque
+        /// alineado (el rayo que va a caer, el beam que va a disparar). LA
+        /// regla de legibilidad del ecosistema premium: TODO golpe duro
+        /// avisa ~30-60 ticks antes con una línea fina que CRECE en brillo
+        /// — el jugador la ve, la entiende, la esquiva.
+        ///
+        /// El paquete (3 piezas, la gramática del aviso):
+        ///   · LA BANDA ANCHA: un corredor tenue (×0.18 alfa, ancho ×4)
+        ///     que marca el TERRENO del golpe — está ahí desde el tick 0.
+        ///   · EL NÚCLEO FINO: la línea central que GANA brillo con el
+        ///     progress (0.15 → 0.85) — el cuchillo que se afila.
+        ///   · EL ANILLO DE ORIGEN: un aro en el punto de disparo que se
+        ///     CONTRAE al ritmo del aviso (radio ×(1.6−progress) → 0.6) —
+        ///     el "cargando" del disparo.
+        ///
+        /// EL PARPADEO DEL ÚLTIMO SEGUNDO: en el tramo final (progress
+        /// &gt; 0.75) el núcleo late a 18 Hz — el aviso "chilla" justo
+        /// antes del golpe (determinista: seno del reloj, nada de random).
+        /// </summary>
+        /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
+        /// <param name="origen">Punto de disparo (espacio del lote del llamador).</param>
+        /// <param name="fin">Punto de llegada del golpe.</param>
+        /// <param name="progress">0..1 del aviso (1 = el golpe dispara YA).</param>
+        /// <param name="color">El color del ataque que viene.</param>
+        /// <param name="anchoCore">Grosor del núcleo en px (2-4 recomendado).</param>
+        public static void Telegrafo(SpriteBatch batch, Vector2 origen, Vector2 fin,
+            float progress, Color color, float anchoCore = 3f)
+        {
+            if (batch == null) return;
+            progress = MathHelper.Clamp(progress, 0f, 1f);
+
+            float flick = 1f;
+            if (progress > 0.75f)
+            {
+                // EL CHILLIDO: el aviso late rápido justo antes del golpe.
+                float t = (progress - 0.75f) / 0.25f;
+                flick = 0.6f + 0.4f * MathF.Sin(Main.GlobalTimeWrappedHourly * 18f * MathF.PI) * t + 0.4f * t;
+            }
+
+            float aCore = (0.15f + 0.7f * progress) * flick;
+            float aBanda = 0.18f * (0.6f + 0.4f * progress);
+
+            // 1. LA BANDA ANCHA: el corredor del golpe.
+            Seg(batch, origen, fin, anchoCore * 4f, Tint(color, aBanda));
+
+            // 2. EL NÚCLEO FINO: la línea que se afila.
+            Seg(batch, origen, fin, anchoCore, Tint(color, aCore));
+
+            // 3. EL ANILLO DE ORIGEN: se contrae con la carga.
+            float r = (1.6f - progress) * anchoCore * 7f + 6f;
+            float s = MathF.Max(r, 4f) * 2.174f;
+            batch.Draw(RingTex, origen, null, Tint(color, aCore),
+                (fin - origen).ToRotation(),
+                new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
+                new Vector2(s, s) / new Vector2(RingTex.Width, RingTex.Height),
+                SpriteEffects.None, 0f);
+        }
+
+        // ==================================================================
         //  LA ONDA DE SUELO — medio-anillo pegado al piso + polvo
         // ==================================================================
 

@@ -29,6 +29,8 @@ namespace AethonMod.Content.Players
     ///      11. La Bolsa de las Dos Formas    (v6.33)
     ///      12. La Bolsa de los Desgarros     (v6.33 + v6.35)
     ///      13. La Bolsa de los Códigos Vivos (v6.36 — los 4 de las imágenes)
+    ///      14. La Bolsa de las Sierpes     (v6.38 — la familia)
+    ///      15. La Bolsa de los Huéspedes   (v6.41 — las réplicas de prueba)
     ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
     ///     entrenamiento directo en el inventario).
     ///
@@ -42,7 +44,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS TRECE BOLSAS (garantizadas en cada entrada) ===
+            // === LAS QUINCE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -58,6 +60,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33+v6.35: LOS 9 DESGARROS
             bolsas += Entregar(ModContent.ItemType<BolsaCodigosVivos>());   // v6.36: LOS 4 CÓDIGOS VIVOS
             bolsas += Entregar(ModContent.ItemType<BolsaSierpes>());        // v6.38: LA FAMILIA DE LAS SIERPES
+            bolsas += Entregar(ModContent.ItemType<BolsaHuespedes>());      // v6.41: LAS RÉPLICAS DE PRUEBA
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

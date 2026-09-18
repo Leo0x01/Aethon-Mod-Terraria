@@ -287,6 +287,82 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.41 — EL ESTALLIDO (la flor de fuego radial)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.41 — EL ESTALLIDO: la FLOR DE FUEGO radial — el estallido
+        /// clásico de las singularidades: SEIS RAYOS de lengüetas a 60°
+        /// (con el giro maestro de −0.2π que rompe la simetría perfecta)
+        /// naciendo del centro hacia FUERA, cada uno con la envolvente de
+        /// vida en SIN(π·progress) — nacen finos, ENGORdan al mediar la
+        /// vida y mueren finos (la lengüeta), el radio crece fast-out y
+        /// el corazón central es un FLASH BLANCO que se apaga antes que
+        /// los rayos.
+        ///
+        /// La diferencia con <see cref="Flame"/> (la hoguera): Flame es
+        /// DIRECCIONAL (gravedad, viento, un solo "arriba"); Estallido es
+        /// RADIAL — el fuego explota hacia TODOS lados a la vez.
+        /// </summary>
+        /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
+        /// <param name="center">El centro de la explosión (espacio del lote).</param>
+        /// <param name="radius">El radio FINAL de la flor (px).</param>
+        /// <param name="progress">0..1 de la vida de la explosión.</param>
+        /// <param name="ramp">La tabla de temperatura (SolarFire recomendado).</param>
+        /// <param name="seed">Semilla determinista.</param>
+        /// <param name="time">El reloj (GlobalTimeWrappedHourly + edad propia).</param>
+        public static void Estallido(SpriteBatch batch, Vector2 center, float radius,
+            float progress, Color[] ramp, int seed, float time, float intensity = 1f)
+        {
+            if (batch == null || radius < 4f || ramp == null) return;
+            progress = MathHelper.Clamp(progress, 0f, 1f);
+            intensity = MathHelper.Clamp(intensity, 0f, 1f);
+            if (intensity <= 0.02f) return;
+
+            // EL RADIO crece fast-out (sale como una explosión y frena).
+            float r = radius * OndaLib.Expansion(progress);
+
+            // LA ENVOLVENTE DE LA LENGÜETA: fina → gorda → fina.
+            float env = MathF.Sin(progress * MathHelper.Pi);
+
+            // === LOS SEIS RAYOS (60° entre sí, el giro maestro los desalinea) ===
+            const int Rayos = 6;
+            float offset = -0.2f * MathHelper.Pi;
+
+            for (int k = 0; k < Rayos; k++)
+            {
+                float ang = offset - MathHelper.PiOver2 + k * MathHelper.Pi / 3f;
+
+                // La altura del rayo: 85..115% del radio (hash por rayo).
+                float h1 = H01(seed, 900 + k, 47);
+                float h = r * (0.85f + 0.30f * h1);
+
+                // La anchura: la envolvente de lengüeta sobre el 12% del radio.
+                float w = MathF.Max(radius * 0.12f * env, 2.5f);
+
+                // La temperatura: casi blanco al centro de la vida.
+                float temp = 0.80f + 0.15f * env;
+
+                Tongue(batch, center, h, w, ramp, temp,
+                    seed + k * 71, time, intensity * (0.55f + 0.45f * env),
+                    wind: 0f, gravDir: 1f, rot: ang + MathHelper.PiOver2);
+            }
+
+            // === EL CORAZÓN: el flash blanco que se apaga primero. ===
+            float core = MathF.Pow(1f - progress, 2.2f);
+            if (core > 0.02f)
+            {
+                Texture2D tex = GlowTex;
+                Color nucleo = PyraPalettes.Sample(ramp, 1f);
+                float s = radius * 0.55f * (1f - progress * 0.6f);
+                batch.Draw(tex, center, null, Tint(nucleo, core * 0.85f * intensity), 0f,
+                    new Vector2(tex.Width, tex.Height) * 0.5f,
+                    new Vector2(s, s) / new Vector2(tex.Width, tex.Height),
+                    SpriteEffects.None, 0f);
+            }
+        }
+
+        // ==================================================================
         //  EL CAMPO DE BRASAS — la propagación fuego de difusión (determinista)
         // ==================================================================
 

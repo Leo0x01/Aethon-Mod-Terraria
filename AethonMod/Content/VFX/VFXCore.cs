@@ -88,6 +88,30 @@ namespace AethonMod.Content.VFX
             _quads.Add(new GlowQuad { Position = position, Color = color, Scale = new Vector2(scale, scale), Rotation = 0f, Texture = null });
         }
 
+        /// <summary>
+        /// v6.41 — EL CUADRO ESTIRADO DE A A B (la línea de la casa): un
+        /// quad de <paramref name="grosor"/> px de ancho cubriendo TODO el
+        /// segmento A→B (posición = punto medio, rotación = ángulo del
+        /// segmento, escala X = longitud). EL primitivo de los rayos, las
+        /// líneas de telegraph y los beams — antes cada arma lo recomponía
+        /// a mano con senos y cosenos.
+        /// </summary>
+        public static void Line(Vector2 a, Vector2 b, Color color, float grosor)
+        {
+            Vector2 delta = b - a;
+            float len = delta.Length();
+            if (len < 0.5f || grosor <= 0f || color.A == 0) return;
+
+            _quads.Add(new GlowQuad
+            {
+                Position = a + delta * 0.5f,
+                Color = color,
+                Scale = new Vector2(len, grosor),
+                Rotation = delta.ToRotation(),
+                Texture = null,
+            });
+        }
+
         /// <summary>Cuántos cuadros lleva el buffer (diagnóstico).</summary>
         public static int QuadCount => _quads.Count;
 
@@ -172,25 +196,37 @@ namespace AethonMod.Content.VFX
             if (endActiveBatch)
                 Main.spriteBatch.End();
 
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            Vector2 screen = Main.screenPosition;
-            for (int i = 0; i < _quads.Count; i++)
+            // v6.41 — EL VOLCADO BLINDADO (try/finally): si UN Draw lanza
+            // (dispositivo perdido, textura nula por descarga caliente), el
+            // lote ANTERIOR quedaba ABIERTO para siempre → TODO el render
+            // del juego se corrompía hasta relogear, y el búfer nunca se
+            // limpiaba (los cuadros muertos se re-volcaban cada frame).
+            // Ahora: el End y la limpieza se garantizan pase lo que pase.
+            try
             {
-                GlowQuad q = _quads[i];
-                if (q.Color.A == 0) continue;
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
 
-                Texture2D tex = q.Texture ?? defaultTex;
-                Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
-                Main.spriteBatch.Draw(tex, q.Position - screen, null,
-                    q.Color, q.Rotation, tex.Size() * 0.5f, q.Scale * invTex, SpriteEffects.None, 0f);
+                Vector2 screen = Main.screenPosition;
+                for (int i = 0; i < _quads.Count; i++)
+                {
+                    GlowQuad q = _quads[i];
+                    if (q.Color.A == 0) continue;
+
+                    Texture2D tex = q.Texture ?? defaultTex;
+                    Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
+                    Main.spriteBatch.Draw(tex, q.Position - screen, null,
+                        q.Color, q.Rotation, tex.Size() * 0.5f, q.Scale * invTex, SpriteEffects.None, 0f);
+                }
             }
-
-            Main.spriteBatch.End();
-            ContarQuads(_quads.Count);
-            _quads.Clear();
+            finally
+            {
+                try { Main.spriteBatch.End(); }
+                catch { /* el End del lote de rescate nunca puede tirar */ }
+                ContarQuads(_quads.Count);
+                _quads.Clear();
+            }
         }
 
         /// <summary>

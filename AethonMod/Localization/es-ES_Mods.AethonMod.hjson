@@ -427,6 +427,27 @@
 
         "Projectiles.TajoAstralProjectile.DisplayName": "Tajo Astral",
 
+        "Projectiles.AnillosSolaresHalo.DisplayName": "Anillos Solares",
+        "Projectiles.SelloGenesisHalo.DisplayName": "Sello del Génesis",
+        "Projectiles.AnilloRunicoDorsalHalo.DisplayName": "Anillo Rúnico Dorsal",
+
+        "Items.TomoApatiaNula.DisplayName": "El Tomo de la Apatía Nula",
+        "Items.TomoApatiaNula.Tooltip": "El tomo que ya no siente nada escupe tentáculos de vacío:\ngestan 2 segundos sin dañar (pulsos que imploden) y luego azotan\nen tres curvas hacia tu mira, teletransportándose entre curva y curva.\nGolpea todo lo que toca (90×90) · cada impacto sucesivo pesa menos.\nARMA DE PRUEBAS (réplica exacta de su fuente de estudio).",
+
+        "Projectiles.TentaculoCosmicoProjectile.DisplayName": "Tentáculo del Vacío",
+
+        "Items.FragmentoSupernovaStaff.DisplayName": "El Fragmento de Supernova",
+        "Items.FragmentoSupernovaStaff.Tooltip": "La singularidad alada hecha sirviente: el ojo alado con sus\nafterimages orbitando y respirando a su alrededor (la firma).\nVOLEA de 5 ráfagas nova en abanico · BEAM telegrafiado de 900px (×2.5)\n· flor de fuego al morir cada ráfaga · sin coste de maná.\nMINION: ocupa 1 espacio de sirviente · nunca expira.\nARMA DE PRUEBAS (réplica del jefe de la singularidad alada).",
+
+        "Projectiles.FragmentoSupernovaMinion.DisplayName": "Fragmento de Supernova",
+        "Projectiles.RafagaNovaProjectile.DisplayName": "Ráfaga Nova",
+
+        "Buffs.FragmentoSupernovaBuff.DisplayName": "Fragmento de Supernova",
+        "Buffs.FragmentoSupernovaBuff.Description": "Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos",
+
+        "Items.BolsaHuespedes.DisplayName": "Bolsa de los Huéspedes",
+        "Items.BolsaHuespedes.Tooltip": "Las réplicas de prueba: el tentáculo del vacío, el fragmento\nde supernova y los tajos astrales. Clic derecho.\nSolo entrega lo que te falte.",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }
