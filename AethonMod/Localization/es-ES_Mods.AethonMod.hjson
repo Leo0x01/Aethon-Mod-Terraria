@@ -448,6 +448,40 @@
         "Items.BolsaHuespedes.DisplayName": "Bolsa de los Huéspedes",
         "Items.BolsaHuespedes.Tooltip": "Las réplicas de prueba: el tentáculo del vacío, el fragmento\nde supernova y los tajos astrales. Clic derecho.\nSolo entrega lo que te falte.",
 
+        "Items.MetronomoPulsar.DisplayName": "El Metrónomo de Púlsar",
+        "Items.MetronomoPulsar.Tooltip": "El arma que dispara AL COMPÁS: el púlsar sobre tu cabeza late cada 0,5 s.\nPERFECT (±0,05 s): crítico garantizado + abanico doble.\nGOOD (±0,1 s): crítico garantizado. Fuera de compás: el combo se pierde.\n8 aciertos seguidos: EL FARO — 3 s de haz giratorio de 900 px.\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.MetronomoPulsarHalo.DisplayName": "Metrónomo de Púlsar",
+        "Projectiles.PulsoPulsarProjectile.DisplayName": "Pulso de Púlsar",
+
+        "Items.VelaSolar.DisplayName": "La Vela Solar",
+        "Items.VelaSolar.Tooltip": "Mantén pulsado: la vela de fotones se despliega y la cadencia sube\nde 12 a 30 disparos/s con el calor (daño ×1 → ×1,6).\nAl calor pleno: LA FUSIÓN — 1,5 s de plasma ×2 y luego la vela se funde (3 s).\nSoltar a tiempo conserva ~70% del calor.\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.VelaSolarProjectile.DisplayName": "Vela Solar",
+        "Projectiles.RafagaSolarProjectile.DisplayName": "Ráfaga Solar",
+
+        "Items.GuadanaDesgarro.DisplayName": "La Guadaña del Desgarro",
+        "Items.GuadanaDesgarro.Tooltip": "El tajo vuela 220 px y donde muere abre UNA FISURA VERTICAL de realidad (2 s):\ntodo lo que la cruza sangra, y los proyectiles enemigos que la tocan\nDESAPARECEN — los traga y su daño se suma AL PRÓXIMO Tajo (EL HAMBRE).\nClic der: la fisura se abre directamente en tu mira (≤480 px).\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.TajoGuadanaProjectile.DisplayName": "Tajo de la Guadaña",
+        "Projectiles.FisuraDesgarroProjectile.DisplayName": "Fisura de Realidad",
+
+        "Items.EgidaNova.DisplayName": "La Égida de Nova",
+        "Items.EgidaNova.Tooltip": "Clic izq: EL EMBESTÓN — golpe de escudo con empujón 9.\nClic der: ALZAR LA GUARDIA (0,3 s): un golpe en la ventana perfecta\nNO EXISTE — detona LA NOVA (3× + quemadura + 1 s invulnerable).\nLa guardia que expira sin parar te aturde 0,5 s. Enfriamiento 8 s (anillo visible).\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.GuardiaNovaProjectile.DisplayName": "Guardia de Nova",
+        "Projectiles.AnilloEnfriamientoProjectile.DisplayName": "Anillo de Enfriamiento",
+        "Projectiles.NovaParryProjectile.DisplayName": "Nova del Parry",
+        "Projectiles.EmbestidaNovaProjectile.DisplayName": "Embestida de Nova",
+
+        "Items.EcoCuantico.DisplayName": "El Eco Cuántico",
+        "Items.EcoCuantico.Tooltip": "Cada pulso vuela y decohiere en una semilla que se re-emite como ECO\ncontra el enemigo más cercano (60% · 36% · 21,6%: 2,17× por cadena completa).\nClic der: LA RESONANCIA — todas las semillas disparan A LA VEZ (5 s de recarga).\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.PulsoEcoProjectile.DisplayName": "Pulso Cuántico",
+
+        "Items.VerboPrimordialStaff.DisplayName": "El Verbo Primordial",
+        "Items.VerboPrimordialStaff.Tooltip": "La palabra que pronunció la primera luz — SIETE MOVIMIENTOS:\nI EL PULSO · II EL SELLO · III LA CORONA · IV LA TORMENTA\nV EL FUEGO · VI EL DESGARRO · VII LA SINFONÍA\nCada movimiento habla con las bibliotecas de la casa; el daño crece ×1,0 → ×1,4\ny al séptimo segundo: LA DETONACIÓN (2,5× + quemadura).\nARMA DE PRUEBAS — sin coste de maná.",
+        "Projectiles.VerboPrimordialProjectile.DisplayName": "El Verbo Primordial",
+        "Projectiles.VerboDetonacionProjectile.DisplayName": "Detonación del Verbo",
+
+        "Items.BolsaApuestas.DisplayName": "Bolsa de las Apuestas",
+        "Items.BolsaApuestas.Tooltip": "Las cinco apuestas de la casa (el ritmo, la cadencia, la zona,\nel parry y el eco) y EL VERBO PRIMORDIAL que las une. Clic derecho.\nSolo entrega lo que te falte.",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }

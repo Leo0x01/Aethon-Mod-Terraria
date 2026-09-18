@@ -14,7 +14,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// El ARMA SUPREMA del patrón gauge (petición del usuario: "aplica el
     /// patrón gauge del Cosmic Destroyer a un arma suprema"). La trinidad
-    /// del informe de investigación v6.26 (INFORME_EXOELECTRIC_NAMELESS,
+    /// del informe de investigación v6.26 (el informe de investigación v6.26,
     /// lección 10), traducida al lenguaje del arsenal:
     ///
     ///   · CARGA (El Fragmento): disparo rápido de fragmentos del ocaso

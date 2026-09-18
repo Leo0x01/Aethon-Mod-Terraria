@@ -1,58 +1,71 @@
-# === Sitio web (Next.js) ===
-# dependencies
-node_modules/
-.pnp
-.pnp.js
+# ==================================================================
+#  AethonMod — .gitignore del repositorio (v6.42)
+#
+#  EL REPO ES SOLO EL MOD: AethonMod/ + su documentación. Todo lo
+#  demás que viva en el directorio de trabajo es material del
+#  entorno de desarrollo y NO se publica.
+# ==================================================================
 
-# next.js
+# === El entorno web del sandbox (no forma parte del proyecto) ===
+node_modules/
 .next/
 out/
 build/
 next-env.d.ts
-
-# production
 dist/
-
-# misc
-.DS_Store
-*.pem
-.vscode/
-.idea/
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
+package.json
+package-lock.json
+bun.lock
+yarn.lock
+pnpm-lock.yaml
+src/
+public/
+prisma/
+db/
+tests/
+download/
+examples/
+mini-services/
+skills/
+tool-results/
+tools/
+Caddyfile
+components.json
+eslint.config.mjs
+next.config.ts
+postcss.config.mjs
+tailwind.config.ts
+tsconfig.json
 .env
-
-# vercel
-.vercel
-
-# typescript
+.env*.local
+.zscripts/
 *.tsbuildinfo
+upload/
 
-# === Mod C# (tModLoader) ===
+# === Secretos JAMÁS en el repo ===
+*.pem
+*.key
+
+# === Material de trabajo local (nunca se publica) ===
+research/
+*_BACKUP.md
+dev.log
+*.log
+
+# === Artefactos de compilación del mod ===
 bin/
 obj/
 *.dll
 *.pdb
 *.exe
+*.tmod
 
-
-
-# === Zips / downloads ===
-download/*.zip
-
-# === Logs / temp ===
-*.log
-dev.log
-server.log
-/tmp/
-.zscripts/
-
-# === Temp work files (improvements phase) ===
-tmp_scripts/
-tool-results/
+# === IDE / SO ===
+.vs/
+.vscode/
+.idea/
+*.user
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -63,7 +63,7 @@ namespace AethonMod.Content.Weapons
             Item.autoReuse = true; // v5.1: permite mantener click para disparar continuo
             Item.shoot = 931; // Nightglow (fix 48688dd) — proyectil vanilla con homing
             Item.shootSpeed = 12f;
-            Item.mana = 3;
+            Item.mana = 0;    // v6.42: SIN MANÁ (la regla de la casa — todas son armas de pruebas)
             Item.noMelee = true;
             Item.reuseDelay = 10; // v5.16: cooldown forzado (migrado del TestStaff que funciona)
         }
@@ -114,9 +114,12 @@ namespace AethonMod.Content.Weapons
 
         public override void ModifyManaCost(Player player, ref float reduce, ref float mult)
         {
-            var sl = GetShard(Item);
-            if (sl == null) return;
-            Item.mana = WeaponScaling.ManaCost(sl.Level);
+            // v6.42: SIN MANÁ (la regla de la casa — todas son armas de
+            // pruebas): el coste escalado se retira; el nivel sigue
+            // escalando daño/velocidad, ya no el maná.
+            Item.mana = 0;
+            reduce = 1f;
+            mult = 0f;
         }
 
         public override float UseTimeMultiplier(Player player)

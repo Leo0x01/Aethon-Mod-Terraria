@@ -460,6 +460,40 @@
         "Items.BolsaHuespedes.DisplayName": "Bag of Guests",
         "Items.BolsaHuespedes.Tooltip": "The test replicas: the void tentacle, the supernova\nfragment and the astral cuts. Right click.\nOnly delivers what you're missing.",
 
+        "Items.MetronomoPulsar.DisplayName": "The Pulsar Metronome",
+        "Items.MetronomoPulsar.Tooltip": "The weapon that fires ON BEAT: the pulsar above your head ticks every 0.5s.\nPERFECT (±0.05s): guaranteed crit + double fan.\nGOOD (±0.1s): guaranteed crit. Off beat: the combo resets.\n8 hits in a row: THE LIGHTHOUSE — 3s of sweeping 900px beam.\nTEST WEAPON — no mana cost.",
+        "Projectiles.MetronomoPulsarHalo.DisplayName": "Pulsar Metronome",
+        "Projectiles.PulsoPulsarProjectile.DisplayName": "Pulsar Pulse",
+
+        "Items.VelaSolar.DisplayName": "The Solar Sail",
+        "Items.VelaSolar.Tooltip": "Hold: the photon sail unfurls and fire rate climbs\nfrom 12 to 30 shots/s with heat (damage ×1 → ×1.6).\nAt full heat: FUSION — 1.5s of ×2 plasma, then the sail melts (3s).\nReleasing in time keeps ~70% of the heat.\nTEST WEAPON — no mana cost.",
+        "Projectiles.VelaSolarProjectile.DisplayName": "Solar Sail",
+        "Projectiles.RafagaSolarProjectile.DisplayName": "Solar Burst",
+
+        "Items.GuadanaDesgarro.DisplayName": "The Rend Reaper",
+        "Items.GuadanaDesgarro.Tooltip": "The slash flies 220px and where it dies it opens A VERTICAL REALITY FISSURE (2s):\neverything crossing it bleeds, and enemy projectiles that touch it\nVANISH — it devours them and their damage joins YOUR NEXT SLASH.\nRight click: the fissure opens right at your cursor (≤480px).\nTEST WEAPON — no mana cost.",
+        "Projectiles.TajoGuadanaProjectile.DisplayName": "Reaper Slash",
+        "Projectiles.FisuraDesgarroProjectile.DisplayName": "Reality Fissure",
+
+        "Items.EgidaNova.DisplayName": "The Nova Aegis",
+        "Items.EgidaNova.Tooltip": "Left click: THE BASH — shield strike with knockback 9.\nRight click: RAISE GUARD (0.3s): a hit inside the perfect window\nDOES NOT EXIST — it detonates THE NOVA (3× + burn + 1s invulnerable).\nA guard that expires without a parry stuns you 0.5s. 8s cooldown (visible ring).\nTEST WEAPON — no mana cost.",
+        "Projectiles.GuardiaNovaProjectile.DisplayName": "Nova Guard",
+        "Projectiles.AnilloEnfriamientoProjectile.DisplayName": "Cooldown Ring",
+        "Projectiles.NovaParryProjectile.DisplayName": "Parry Nova",
+        "Projectiles.EmbestidaNovaProjectile.DisplayName": "Nova Bash",
+
+        "Items.EcoCuantico.DisplayName": "The Quantum Echo",
+        "Items.EcoCuantico.Tooltip": "Each pulse flies and decoheres into a seed that re-emits as an ECHO\nagainst the nearest enemy (60% · 36% · 21.6%: 2.17× per full chain).\nRight click: THE RESONANCE — all live seeds fire AT ONCE (5s cooldown).\nTEST WEAPON — no mana cost.",
+        "Projectiles.PulsoEcoProjectile.DisplayName": "Quantum Pulse",
+
+        "Items.VerboPrimordialStaff.DisplayName": "The Primordial Word",
+        "Items.VerboPrimordialStaff.Tooltip": "The word that spoke the first light — SEVEN MOVEMENTS:\nI THE PULSE · II THE SEAL · III THE CROWN · IV THE STORM\nV THE FIRE · VI THE REND · VII THE SYMPHONY\nEach movement speaks with the libraries of the house; damage climbs ×1.0 → ×1.4\nand at the seventh second: THE DETONATION (2.5× + burn).\nTEST WEAPON — no mana cost.",
+        "Projectiles.VerboPrimordialProjectile.DisplayName": "The Primordial Word",
+        "Projectiles.VerboDetonacionProjectile.DisplayName": "Word Detonation",
+
+        "Items.BolsaApuestas.DisplayName": "Bag of Bets",
+        "Items.BolsaApuestas.Tooltip": "The five bets of the house (rhythm, cadence, zone,\nparry and echo) and THE PRIMORDIAL WORD that binds them. Right click.\nOnly delivers what you are missing.",
+
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
 }

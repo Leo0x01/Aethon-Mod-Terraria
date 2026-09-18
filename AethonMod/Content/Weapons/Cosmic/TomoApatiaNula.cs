@@ -36,7 +36,7 @@ namespace AethonMod.Content.Weapons.Cosmic
             Item.damage = 63;
             Item.DamageType = DamageClass.Magic;
             Item.crit = 12;
-            Item.mana = 26;
+            Item.mana = 0;    // v6.42: SIN MANÁ (la regla de la casa — todas son armas de pruebas)
             Item.useTime = 8;
             Item.useAnimation = 20;
             Item.reuseDelay = 8;

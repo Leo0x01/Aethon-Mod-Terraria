@@ -393,4 +393,30 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>16 — LAS APUESTAS (v6.42): LAS CINCO ARMAS EN LAS QUE LA
+    /// CASA APOSTÓ — cinco mecánicas distintas de juego (el ritmo, la
+    /// cadencia creciente, la zona melee, el parry defensivo y el eco
+    /// encadenado) más EL VERBO PRIMORDIAL: la palabra que las une a
+    /// todas, el arma que habla con TODAS las bibliotecas de la casa
+    /// en sus siete movimientos.</summary>
+    public class BolsaApuestas : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Apuestas";
+        protected override string NombreCorto => "Bolsa de las Apuestas";
+        protected override Color ColorFiesta => new(255, 230, 140);
+        protected override string Nota => "Cinco apuestas de la casa y la palabra que las une";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<MetronomoPulsar>(), 1));       // APUESTA 1: el ritmo
+            l.Add((ModContent.ItemType<VelaSolar>(), 1));             // APUESTA 2: la cadencia
+            l.Add((ModContent.ItemType<GuadanaDesgarro>(), 1));       // APUESTA 3: la zona melee
+            l.Add((ModContent.ItemType<EgidaNova>(), 1));             // APUESTA 4: el parry
+            l.Add((ModContent.ItemType<EcoCuantico>(), 1));           // APUESTA 5: el eco
+            l.Add((ModContent.ItemType<VerboPrimordialStaff>(), 1));  // EL VERBO (todas las librerías)
+            return l;
+        }
+    }
 }

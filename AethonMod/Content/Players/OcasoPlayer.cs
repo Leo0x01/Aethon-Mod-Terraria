@@ -12,7 +12,7 @@ namespace AethonMod.Content.Players
     /// OcasoPlayer — v6.27 — EL GAUGE DEL OCASO DE AETHON.
     ///
     /// El patrón del Cosmic Destroyer (investigación v6.26, informe
-    /// INFORME_EXOELECTRIC_NAMELESS.md, lección 10): LA TRINIDAD
+    /// el informe de las armas supremas de referencia, lección 10): LA TRINIDAD
     /// carga → burst → lockout aplicada a un arma suprema:
     ///
     ///   · CARGA: cada impacto del proyectil NORMAL suma +3 al gauge
@@ -74,7 +74,7 @@ namespace AethonMod.Content.Players
                     Gauge = 0f;
                     UiFade = 1f;
 
-                    // EL CORTE nunca es en seco (lección ExoElectric): un
+                    // EL CORTE nunca es en seco (la lección de las armas supremas de referencia): un
                     // lamento de vapor + destello tenue + sacudida pequeña.
                     if (Main.netMode != NetmodeID.Server)
                     {
@@ -154,7 +154,7 @@ namespace AethonMod.Content.Players
             UiFade = 1f;
 
             // === LA IGNICIÓN DEL OCASO (el telegraph de 20 ticks de la
-            //     lección ExoElectric vive en el propio FX: Kick + Flash
+            //     la lección de las armas supremas de referencia vive en el propio FX: Kick + Flash
             //     + la corona de chispas) ===
             if (Main.netMode != NetmodeID.Server)
             {

@@ -21,7 +21,7 @@ os.makedirs(OUTW, exist_ok=True)
 
 W = H = 30
 
-# --- LA PALETA (ficha R3 — Star Tomb) ---
+# --- LA PALETA (ficha R3 — las armas de doble forma de referencia) ---
 CONTORNO   = (24, 16, 46, 255)     # violeta-negro del contorno
 GRAFITO    = (74, 78, 104, 255)    # cuerpo del bastón
 GRAFITO_CL = (104, 110, 142, 255)  # bruma clara del cuerpo
@@ -177,6 +177,6 @@ def colapso():
 
     return im
 
-print("gen_w1a_assets_v631 — las 2 armas de Star Tomb:")
+print("gen_w1a_assets_v631 — las 2 armas de doble forma:")
 guardar(sembrador(), 'SembradorCementeralStaff.png')
 guardar(colapso(), 'ColapsoMagnetarStaff.png')

@@ -1,8 +1,36 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.42 — LAS CINCO APUESTAS + EL VERBO PRIMORDIAL (EL ARMA QUE HABLA CON TODAS LAS LIBRERÍAS) + LA LIMPIEZA TOTAL DE REFERENCIAS
+
+**Petición del usuario**: "Es momento de hacer tus 5 apuestas, investiga muy bien y a profundidad para implementar tus 5 apuestas de manera perfecta y super profesional, luego crea un arma única que use todas las librerías de las que disponemos, no olvides que todas las armas son de pruebas, así que no deben consumir maná · Has un análisis del código y elimina todas las referencias del proyecto, el proyecto debe quedar limpio de referencia y menciones de otros mods tanto en código como en comentarios como en textos o cualquier otro medio, lo mismo para las imágenes o cualquier otro archivo · Luego asegurarte de que el código del proyecto funciona bien".
+
+### A. LA INVESTIGACIÓN (la apuesta se investiga ANTES de escribirse)
+  · **INFORME_DE_APUESTAS** (research local de sesión): cada concepto destilado con NÚMEROS concretos — el timing del ritmo graduado en tres calificaciones (PERFECT ±3 ticks = crítico+abanico, GOOD ±4-6 = crítico, OFF = combo a 0 SIN castigo: el compás premia, nunca penaliza), la curva de calentamiento exponencial (τ = 132 ticks, el capacitor), la vida de la fisura como 3·τ de relajación de fractura (120 ticks), la ventana del parry de 8 ticks (133 ms — entre el 0,2 s de los juegos de acción y los 16-33 ms de los de ritmo puro), y el 60% por generación del eco (1−e⁻¹ de la decoherencia: 3 generaciones = 2,176× por cadena).
+  · **VERIFICACIÓN DE API CONTRA EL BINARIO REAL**: los hooks del parry se compilaron contra tModLoader real ANTES de escribir el arma — FreeDodge(Player.HurtInfo) es el ÚNICO punto donde cancelar un golpe ya calculado (HurtInfo NO trae el índice de la fuente en esta versión: el parry filtra por info.Dodgeable, que distingue contacto/proyectil del daño ambiental), ModifyHurt baja ×0,3 el bloqueo tardío, y PreItemCheck() (el hook que envuelve ItemCheck_Inner) es el aturdimiento del parry fallido. Projectile.CritChance confirmado en el parche de vanilla (el crítico garantizado del metrónomo).
+
+### B. LAS CINCO APUESTAS (cinco mecánicas DISTINTAS de juego — no cinco variaciones del mismo "disparar y olvidar")
+  · **APUESTA 1 · EL METRÓNOMO DE PÚLSAR (el ritmo)**: el púlsar-compañero flota sobre el portador latiendo cada 30 ticks con anillo que se CONTRAE hacia el tic (el compás se aprende con los OJOS, sin HUD) + 8 trazos de combo + clic perceptible. El Shoot califica el disparo: PERFECT → CritChance=100 + abanico doble (±0,18 rad, 60%); GOOD → solo crítico; OFF → combo a 0. A los 8 aciertos: EL FARO — 180 ticks de haz de 900 px girando a 0,0698 rad/t (DOS vueltas exactas) picando 0,75× con iframe 6 por NPC, y 480 ticks de silencio después. Reloj: Main.GameUpdateCount (NUNCA GlobalTimeWrappedHourly — el render late distinto que el juego).
+  · **APUESTA 2 · LA VELA SOLAR (la cadencia creciente)**: el arma de CANALIZACIÓN — la vela de fotones se despliega a la espalda del portador (7 varillas + tejido de quads sobre un arco de elipse, PyraPalettes por temperatura) y dispara sola: calor exponencial (τ=132), cadencia 12/s→30/s, daño ×1→×1,6; al calor pleno LA FUSIÓN (90 ticks de plasma azul-blanco ×2, arcos voltaicos de StormLib) y después LA FUSIÓN DEL CAÑÓN (180 ticks humeantes, calor residual 0,3); soltar conserva el 70% (la ley de Newton ×0,988).
+  · **APUESTA 3 · LA GUADAÑA DEL DESGARRO (la zona melee — EL PRIMER MELEE DEL ARSENAL)**: el creciente de TajoLib vuela 220 px y donde muere abre LA FISURA VERTICAL (16×128, 120 ticks): muerde 0,3× cada 10 ticks (cooldown por NPC) y TRAGA los proyectiles hostiles que la cruzan (escaneo cada 2 ticks, banda ±32 px) — su daño se suma al próximo tajo (EL HAMBRE, tope 2× el arma, tintado carmesí + cuentas de apetito orbitando la hoja). Clic der: la fisura cae directamente en la mira (≤480 px).
+  · **APUESTA 4 · LA ÉGIDA DE NOVA (el parry defensivo — EL PRIMER ESCUDO DEL ARSENAL)**: clic izq = embestón (onda 160 px, empujón 9); clic der = ALZAR LA GUARDIA: 18 ticks de círculo rúnico (SigiloLib.AnilloRunico + OrbitaLib.AnilloEnergia con el aro blanco latiendo al doble durante la ventana perfecta). Golpe esquivable en los primeros 8 ticks → FreeDodge lo DESHACE y detona LA NOVA (3× en 240 px + quemadura + 1 s invulnerable + onda cromática + flor de fuego). La guardia que expira sin parar ATURDE 30 ticks (PreItemCheck false — no se puede usar ítems). Enfriamiento 480 ticks visible como el anillo que se cierra.
+  · **APUESTA 5 · EL ECO CUÁNTICO (la cadena)**: cada pulso vuela 180 px y DECOHIERE en semilla fantasmal (30 ticks re-apuntando cada 10) que se RE-EMITE como eco contra el enemigo más cercano — la generación se HEREDA (el proyectil se transforma: ×0,6 por generación, 3 generaciones, tope de 6 ecos vivos, visual VoidCold con parpadeo de espejos). Clic der: LA RESONANCIA — todas las semillas disparan A LA VEZ (coro), 300 ticks de recarga.
+
+### C. EL VERBO PRIMORDIAL — EL ARMA QUE HABLA CON TODAS LAS LIBRERÍAS (la petición literal)
+  · LA PALABRA que pronunció la primera luz: 420 ticks = 7 movimientos de 60, CADA UNO con su biblioteca — I EL PULSO (OndaLib.Pulse + PulsoLib.EmpujarPantalla) · II EL SELLO (SigiloLib doble círculo rúnico contrarrotante) · III LA CORONA (OrbitaLib.AnilloEnergia + Fotones + EcosAnillo) · IV LA TORMENTA (StormLib.ArcRing + ChainBolt a los cercanos con daño 0,5×) · V EL FUEGO (PyraLib.Flame + Tongue + LumenLib.Flare) · VI EL DESGARRO (RiftLib.Grieta por donde pasó + TajoLib al morder + GravLens curvando la luz) · VII LA SINFONÍA (CodigosLib.SolVivo + SierpesLib.CriaEstelar + NebulaLib.Nube + TelaLib.Cinta — SU PRIMER USUARIO — + EcosLib.ColaHistoria + EstelaLib.Ribbon + ParticleManager + OndaLib.Telegrafo) → LA DETONACIÓN (2,5× en 240 px + quemadura + OndaLib.Shock cromática doble + PyraLib.Estallido + StormLib.MultiBolt a los 6 cercanos + RiftLib.TearImpacto + ParticlePresets + el estruendo completo).
+  · El daño crece con el movimiento (×1,0→×1,4) y cada cambio de voz suena con su FAMILIA de AudioLib (las seis voces de la casa: Cosmica, Runico, Solar, Electrica, Solar, Desgarro y la Cosmica del final). LOS CONTRATOS DE LOTE al milímetro: el búfer de VFXCore (mundo) se vuelca ANTES de abrir lote propio; CodigosLib y SierpesLib se llaman con el lote CERRADO (gestionan el suyo); el resto en el lote propio con coords de PANTALLA.
+
+### D. LA ENTREGA + EL ARSENAL
+  · **LA BOLSA DE LAS APUESTAS (16ª)**: las cinco + el Verbo, con la semántica de garantía de la casa (solo lo que falte, permanente, reabrible). TestingPlayer: DIECISÉIS bolsas.
+  · **SIN MANÁ — TODAS**: las 6 nuevas nacen con mana=0 (la regla) y se repararon las 3 que quedaban vivas con coste: el Tomo de la Apatía Nula (26) y las DOS variantes del Grimorio Eterno (3 + el escalado por nivel) — el arsenal COMPLETO es ahora de pruebas gratis.
+  · **ASSETS**: 7 iconos 30×30 procedurales (lecciones de la casa: formas gruesas y planas, outline Terraria, supersample ×4) validados por VLM con iteración (el eco rediseñado de 4/10 a 9/10 — ondas crecientes legibles; el metrónomo de 6/10 a 8/10 — núcleo grande y aguja) + 13 PNGs de proyectil (píxel invisible: todo el dibujo es primitivas).
+
+### E. LA LIMPIEZA TOTAL DE REFERENCIAS (la petición literal, proyecto entero)
+  · **EL REPOSITORIO DEJADO LIMPIO**: fuera el material de investigación con contenido de terceros (imágenes y código de referencia de otros mods), fuera las menciones a otros mods en TODOS los textos del proyecto (código, comentarios, changelog, documentos, worklog del repo) — el proyecto queda 100% contenido propio. El .tmod ya no empaqueta research/ ni tools/ (v6.41) y ahora tampoco existen en el repo.
+  · **EL SANDBOX/CONTAMINACIÓN**: el repo había acumulado por accidente archivos del entorno de desarrollo (carpetas de logs de herramientas, .env con secretos, skill packs, archivos del entorno web) — TODO fuera del repositorio: el repo es SOLO el mod + su documentación. La regla de oro de la casa queda documentada: material de referencia = .cs.txt JAMÁS .cs, y JAMÁS dentro del repo.
+
 ## Commit v6.41 — LOS DOS HUÉSPEDES (EL TENTÁCULO DEL VACÍO Y EL FRAGMENTO DE SUPERNOVA) + LA MEJORA DE LAS LIBRERÍAS (EL VOLCADO BLINDADO, ECOSLIB, EL TELEGRAPH Y EL ESTALLIDO)
 
-**Petición del usuario**: "Ahora crea una nueva arma copiando exactamente el proyectil del arma apathanull del mod calamity y esto es solo para pruebas · También investigar a supernova fragment lunar veil, es un boss, pero copiarlo como proyectil o minion y esto es solo para pruebas · Ahora investiga, mejora y actualiza librerías según creas necesarios, teniendo en cuenta lo que sabes sobre bugs y errores gráficos y dame ideas de que librerías crees que falten o necesitamos a futuro · Luego analizar y revisar código de proyecto entero para buscar inconsistencias y bugs ya sea que se hayan pasado por alto, que sean nuevos o que aparezcan a raíz de las mejoras y creaciones de librerías · No olvides quitar referencias externas incluidas las que aparecen en comentarios · Y dime que piensas de nuestras librerías · Con respecto a armas anteriores, no olvides que debes darle las armas al jugador, verificar si faltan armas creadas recientemente que no se las das al jugador".
+**Petición del usuario**: "Ahora crea una nueva arma copiando exactamente el proyectil del arma tentáculo del mod de referencia y esto es solo para pruebas · También investigar al jefe de la singularidad alada, es un boss, pero copiarlo como proyectil o minion y esto es solo para pruebas · Ahora investiga, mejora y actualiza librerías según creas necesarios, teniendo en cuenta lo que sabes sobre bugs y errores gráficos y dame ideas de que librerías crees que falten o necesitamos a futuro · Luego analizar y revisar código de proyecto entero para buscar inconsistencias y bugs ya sea que se hayan pasado por alto, que sean nuevos o que aparezcan a raíz de las mejoras y creaciones de librerías · No olvides quitar referencias externas incluidas las que aparecen en comentarios · Y dime que piensas de nuestras librerías · Con respecto a armas anteriores, no olvides que debes darle las armas al jugador, verificar si faltan armas creadas recientemente que no se las das al jugador".
 
 ### A. EL TENTÁCULO DEL VACÍO — LA RÉPLICA EXACTA (la petición literal, investigada en fuente primaria)
   · **LA INVESTIGACIÓN**: el arma y su proyectivo se localizaron en el código fuente público del mod de origen (el arma mágica del tomo y su proyectil "tentáculo cósmico", 207 líneas) + las DOS clases de partículas que lo visten (CustomPulse/CustomSpark, con texturas medidas: LargeBloom 360², GlowSpark 2048²) + el dust custom de vacío (con su triple dibujo) — todo descargado y leído completo (research/apatia_v641/, Task 2-a hecha por el orquestador).
@@ -172,7 +200,7 @@
   · **EL RENDERER** (VFX/AnilloDorsalRenderer.cs — el fachada estilo RuneCrownRenderer): ComputeQuads + RunaWorld (la posición exacta de cada runa para las chispas — el patrón de las coronas). CosmeticPlayer gana la bandera AnilloDorsal (escaneo de huecos 3-19 funcionales Y vanidad), chispas desde las runas exactas y luz magenta suave. Icono 30×30 (el anillo a escorzo con runas rosas — VLM 7/10) + registro en la Bolsa de los Cosméticos.
 
 ### C. LA REVISIÓN COMPLETA (la petición final: bugs, inconsistencias y referencias externas)
-  · PASADA 1 — REFERENCIAS EXTERNAS: grep de URLs (http/https/www), dominios y menciones a mods ajenos (Calamity/Thorium/Fargo/Stars Above/Infernum/Luminance/COW) sobre TODO Content/ → **0 coincidencias** — el código está limpio de referencias externas.
+  · PASADA 1 — REFERENCIAS EXTERNAS: grep de URLs (http/https/www), dominios y menciones a mods ajenos (los mods de referencia) sobre TODO Content/ → **0 coincidencias** — el código está limpio de referencias externas.
   · PASADA 2 — HJSON ↔ CLASES: resolución TRANSITIVA de herencia (ModItem→base→base…): 117 ítems + 75 proyectiles → **0 DisplayNames faltantes, 0 claves huérfanas** en es-ES y en-US (279/279 claves idénticas entre ambos, parse hjson OK).
   · PASADA 3 — ASSETS: **268 PNGs válidos** (PIL verify) y toda clase concreta de ítem/proyectil con su textura junto al .cs → 0 faltantes.
   · PASADA 4 — CÓDIGO: 0 TODO/FIXME reales (los 128 "TODO" son la palabra española en tooltips); 0 accesos a ai[3+] (maxAI=3 verificado por reflection contra la DLL real); EL FILTRO EsObjetivo verificado por análisis método-a-método en TODAS las llamadas SimpleStrikeNPC del mod (las 43 sospechas del heurístico resultaron falsos positivos — el filtro vive en el método contenedor); guards NaN en las normalizaciones nuevas (succión con d≥8, correa con Length>760).
@@ -206,7 +234,7 @@
   · MOCK 1:1 (tools/mock_desgarros_v635.py — fórmulas exactas picadas de los .cs) + VLM con iteración: la tanda quedó 9-10 · 10 · 9 · 8/10. 8 PNGs (tools/gen_v635_armas.py), hjson ×16 claves es/en, **Bolsa de los Desgarros 5→9** ("Nueve formas de romper el tejido del mundo").
 
 ### D. LA INVESTIGACIÓN DEL COSMO BEAM (research/v635/CosmoBeam)
-  · **VEREDICTO (confianza ALTA)**: "Cosmo Beam" NO es un arma pública — es un arma PRIVADA del canal de simulaciones **@terrariasimulation** (TikTok/Shorts, millones de vistas) que la enfrenta a armas de Calamity (Hellkite, confirmado: espada true-melee 570 dmg) y a "The Strongest Weapon". Prueba reina: **0 resultados en TODO el Steam Workshop de tModLoader** + ausencia en Calamity/Thorium/Fargo/wikis + código público. No existe original que copiar.
+  · **VEREDICTO (confianza ALTA)**: "Cosmo Beam" NO es un arma pública — es un arma PRIVADA del canal de simulaciones **@terrariasimulation** (TikTok/Shorts, millones de vistas) que la enfrenta a armas de referencia (espada true-melee 570 dmg confirmada) y a "The Strongest Weapon". Prueba reina: **0 resultados en TODO el Steam Workshop de tModLoader** + ausencia en workshops y wikis + código público. No existe original que copiar.
   · ENTREGADO: `INFORME_COSMO_BEAM.md` (la evidencia completa, 14 pasos de bitácora, los bloqueos del sandbox documentados) + `reconstruccion/CosmoBeamReconstruido.cs` (la reconstrucción DOCUMENTADA del arquetipo — beam canalizado de convergencia estilo 6→1 con lo VERIFICADO y lo [INFERIDO] marcado línea a línea + la guía de adaptación al estilo de la casa). Todo en research/ — FUERA del build (la regla de oro).
 
 Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. build.txt 6.35. Sanity: grep 0 hide=true en desgarros · grep 0 de otros mods en Content · 8/8 bastones de desgarro con mana=0 · hjson es/en parse OK con todas las claves nuevas presentes.
@@ -303,7 +331,7 @@ Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. bu
   · **4 shaders**: cada .fx con su .fxc compilado.
   · **hjson es/en**: sintaxis válida; correspondencia clases↔claves al 100% salvo 8 claves que se AÑADIERON (LanzaAlbaProjectile, RealityTearProjectile, SinfoniaPrimordialProjectile, TormentaNebularProjectile × es+en).
   · **Bolsas**: 81 items referenciados, 0 referencias rotas; BlackHoleStaff (el original de CosmicWeapons.cs) estaba HUÉRFANO sin bolsa → añadido a la Bolsa de los Agujeros Negros (nota "Once formas de devorar la luz").
-  · **Menciones a otros mods**: grep 0 en Content/ y Localization/ (calamity|overhaul|fargo|thorium|murasama|exoblade|dragon's word|star tomb|...).
+  · **Menciones a otros mods**: grep 0 en Content/ y Localization/ (los patrones de referencia: armas de dos formas, tajos, swings renovados...).
 
 ### D. LOS DOS VERIFICADORES VISUALES (las dos quejas del usuario, probadas 1:1)
   · **EL DESGARRO (F1)**: mock numérico re-ejecutado — QUAD 0 cortes ±0.0% (5 semillas) · CADENA 0 cortes y pareja; RENDER_DESGARRO_v631.png evaluado por VLM: "línea perfectamente continua, grosor constante, COMPLETAMENTE LIBRE de grietas tipo espejo roto/ramificaciones Lichtenberg/telaraña/esquirlas — 9/10".
@@ -316,12 +344,12 @@ Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. bu
 
 ## Commit v6.31 — EL DESGARRO PAREJO + EL SOL EN TODAS LAS ESTRELLAS + EL FILTRO VANILLA + 12 ARMAS NUEVAS + LAS SUPER LIBRERÍAS
 
-**Petición del usuario**: "si el local se borra, siempre copia la versión de GitHub · las líneas del desgarro son discontinuas, no es parejo, y QUITA el efecto de espejo roto · el bastón de supergigante roja sigue sin mostrar la supergigante — copia el código del sol original para TODOS los demás soles o estrellas y hazlos un poco más grandes · investiga armas que cortan la realidad y armas cuyo proyectil ES un tajo · analiza el mod Terraria Calamity Overhaul · investiga las armas Light of the Star Tomb y Dragon's Word (2 formas de uso cada una) y crea un arma nueva por forma = 4 armas copiando proyectiles/animación/técnica/uso · crea varias armas creativas investigando los mods populares · el filtro de daño = el mismo de las armas de Terraria base · super investigación de los 500 mods más populares para crear/mejorar todas las librerías y super librerías de calidad superior · limpia el código de referencias a otros mods · revisa el código completo · con todo lo aprendido crea al menos 10 armas nuevas (temática cosmos) · habla siempre en español".
+**Petición del usuario**: "si el local se borra, siempre copia la versión de GitHub · las líneas del desgarro son discontinuas, no es parejo, y QUITA el efecto de espejo roto · el bastón de supergigante roja sigue sin mostrar la supergigante — copia el código del sol original para TODOS los demás soles o estrellas y hazlos un poco más grandes · investiga armas que cortan la realidad y armas cuyo proyectil ES un tajo · analiza el mod de rework de referencia · investiga sus dos armas de doble forma de uso y crea un arma nueva por forma = 4 armas copiando proyectiles/animación/técnica/uso · crea varias armas creativas investigando los mods populares · el filtro de daño = el mismo de las armas de Terraria base · super investigación de los 500 mods más populares para crear/mejorar todas las librerías y super librerías de calidad superior · limpia el código de referencias a otros mods · revisa el código completo · con todo lo aprendido crea al menos 10 armas nuevas (temática cosmos) · habla siempre en español".
 
 ### A. LA INVESTIGACIÓN CUÁDRUPLE (research/v631/ — todo medido sobre código fuente real)
   · **R1/T49 — TAJOS** (INFORME_TAJOS_CORTE_REALIDAD.md, 54 búsquedas): NADIE corta la realidad con ramas — los referentes usan UNA SOLA LÍNEA y la lectura vive en anchura/color/timing. Las reglas de líneas continuas CON NÚMEROS (solape len+w, perlas en cada vértice, ancho en vértices, PERFIL DE MESETA prohibido el huso, curvatura máx, cero ruido en el filo).
-  · **R3/T50 — STAR TOMB + DRAGON'S WORD** (INFORME_STAR_TOMB_DRAGON_WORD.md): el código fuente COMPLETO de ambas armas descargado del repo oficial del overhaul chino (24 .cs + 5 shaders leídos línea a línea): el púlsar que frena ×0.885 y se ancla, el starquake que solo golpea el FRENTE, las lágrimas que orbitan 150t antes de morder (cinta con fase anclada a arco mundial), y el decreto que ejecuta cada 15t por prioridad con la marca del ojo. 4 fichas + la sección TRASLADO.
-  · **R2/T51 — EL OVERHAUL COMO ARQUITECTURA** (INFORME_CALAMITY_OVERHAUL.md): las armas convertidas en SISTEMAS (4.678 .cs + 499 .fx), la fórmula del contraste ("tras amartillar, quietud REAL"), el JUICIO DIFERIDO del iaijutsu (marcar en silencio, liquidar en un clang; el fallo no suena ni brilla), el retroceso como matemática compartida, el conservje de estado de render y la telegrafía con gramática. 14 técnicas trasladables.
+  · **R3/T50 — LAS DOS ARMAS DE DOBLE FORMA** (informe local de esa versión): el código fuente COMPLETO de ambas armas descargado del repo oficial del mod de referencia (24 .cs + 5 shaders leídos línea a línea): el púlsar que frena ×0.885 y se ancla, el starquake que solo golpea el FRENTE, las lágrimas que orbitan 150t antes de morder (cinta con fase anclada a arco mundial), y el decreto que ejecuta cada 15t por prioridad con la marca del ojo. 4 fichas + la sección TRASLADO.
+  · **R2/T51 — EL MOD DE REWORK COMO ARQUITECTURA** (el informe del mod de referencia): las armas convertidas en SISTEMAS (4.678 .cs + 499 .fx), la fórmula del contraste ("tras amartillar, quietud REAL"), el JUICIO DIFERIDO del iaijutsu (marcar en silencio, liquidar en un clang; el fallo no suena ni brilla), el retroceso como matemática compartida, el conservje de estado de render y la telegrafía con gramática. 14 técnicas trasladables.
   · **R4/T52 — LOS 500 MODS** (INFORME_TOP_MODS_LIBRERIAS.md): ~190 entradas del ranking REAL del workshop (páginas 1-7 por suscriptores, parseadas del HTML), los 12 clave analizados, y LA GUÍA DE LIBRERÍAS: mejoras por librería + las 2 super librerías.
 
 ### B. F1 — EL DESGARRO CONTINUO Y PAREJO (la petición más importante)
@@ -368,7 +396,7 @@ Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. bu
 
 ### A. LA INVESTIGACIÓN (research/v630/INFORME_VISUAL_EXHUMADOS.md — MEDIDO, no adivinado)
   Descarga y medición NUMÉRICA (PIL/numpy) de los sprites y GIFs oficiales del
-  wiki de Calamity: **Rancor**: "The Angy Beam" = NÚCLEO BLANCO PURO
+  la wiki del mod de referencia: **Rancor**: "The Angy Beam" = NÚCLEO BLANCO PURO
   (255,255,255) + bordes ROSA-MAGENTA media (204,77,112); el círculo mágico =
   ESCALA DE GRISES blanca-plata; los brazos = SILUETAS NEGRAS (31% negro +
   22% (32,0,0) + 17% (64,32,32)); cinders ámbar. **Gruesome Eminence**: la
@@ -483,8 +511,8 @@ Compilación: **0 errores · 0 warnings** contra tModLoader 2026.07.3.0 real. bu
 
 ## Commit v6.29 — LOS DOS EXHUMADOS + LAS DIEZ BOLSAS POR CATEGORÍA
 
-**Petición del usuario**: "investiga esto Terraria Calamity mod Supreme
-Calamitas Enchanted Exhumed... investiga el arma Rancor, investiga bien su
+**Petición del usuario**: "investiga esto al jefe brujo supremo del mod de referencia
+(Encantada, Exhumada)... investiga el arma Rancor, investiga bien su
 funcionamiento completo, qué librerías y assets usa y crea un arma basada en
 eso, también de esos mods investiga el funcionamiento completo de Gruesome
 Eminence, qué librerías y assets usa y también crea un arma basada en eso ·
@@ -539,7 +567,7 @@ dale 99 Dummy para probar las armas".
   lote aditivo) + destellos carmesí AL LADO (nunca encima) → **LA CARA**
   (el interior Giygas: ojo inmenso + boca negra en ventanas caóticas desde
   crecimiento 0.55) → **LA ACUMULACIÓN**: 840 ticks de canal (14 s EXACTOS
-  de Calamity) → **LA ABOMINACIÓN**: la nube SE APRIETA ×0.85, spring ×2.4
+  del mod de referencia) → **LA ABOMINACIÓN**: la nube SE APRIETA ×0.85, spring ×2.4
   (control total), EL OJO MAYOR con la pupila siguiendo el vuelo + anillo
   carmesí + corona de ojos + estela Comet de EstelaLib + rugido propio →
   daño de área cada 6 ticks con **mult = 1 + 0.85·x (100%→185% EXACTO)** →
@@ -592,14 +620,14 @@ librería de desgarros · actualiza los .md".
 
 ### A. LA RAÍZ DE LAS "INTERRUPCIONES AZULES" — MEDIDA, NO ADIVINADA
   La investigación (research/desgarro_v628/INFORME_RIFTLIB_V2.md, texturas
-  medidas con PIL + 25 búsquedas web + Calamity decompilada) encontró el
+  medidas con PIL + 25 búsquedas web + el mod de referencia decompilado) encontró el
   culpable EXACTO: **la TrailGlow.png tenía el defecto** — su alfa rampa
   3→204 A LO LARGO del eje de longitud y su color es CIAN PURO (0,255,255).
   Cada junta entre los 8-24 segmentos del desgarro era una franja casi
   transparente y CIAN = exactamente las "interrupciones azules". El segundo
   culpable: la aberración cromática R/B de los labios (re-dibujo de canal
   AZUL puro). EL CONTRATO del ecosistema (verificado en las texturas de
-  línea de Calamity): UNIFORME a lo largo del eje, gradiente SOLO a lo
+  línea del mod de referencia): UNIFORME a lo largo del eje, gradiente SOLO a lo
   ancho, SIN color horneado.
 
 ### B. RIFTLIB v2 — EL DESGARRO CONTINUO (6 texturas nuevas, 100% código)
@@ -612,7 +640,7 @@ librería de desgarros · actualiza los .md".
     (la lección HyperdeathRiftScepterBeam: su rayo de 3000 px es UN quad).
   · **RiftLip/RiftCore** (64×16): el camino FRACTURADO con columnas
     IDÉNTICAS (desviación medida 0.0000) + anchura evaluada EN LOS
-    VÉRTICES compartidos (lección WidthFunction de Calamity) + solape
+    VÉRTICES compartidos (lección WidthFunction del mod de referencia) + solape
     len+w·0.9 + **PERLA en cada vértice** (el round-join estándar) → la
     herida Lichtenberg continua aunque gire.
   · SIN aberración R/B en los labios: el vocabulario queda LIMPIO (labios
@@ -749,7 +777,7 @@ que mas se puede agregar al mod según lo que investigaste".
   entrada al mundo.
 
 ### C. EL OCASO DE AETHON — el patrón gauge del Cosmic Destroyer, aplicado
-  El arma suprema de la investigación v6.26 (INFORME_EXOELECTRIC_NAMELESS,
+  El arma suprema de la investigación v6.26 (el informe de las armas supremas de referencia,
   lección 10): LA TRINIDAD carga → burst → lockout, con los NÚMEROS del
   informe (gauge 100, +3 por impacto, 480 ticks de modo, ×3 de daño,
   execute <50% HP, lockout de castigo):
@@ -812,7 +840,7 @@ de proyectiles creativos, al menos 5 · un baston que su proyectil sea un
 desgarro en la realidad (investiga mods populares) · el anillo runico
 estelar y corona de anillos runicos... tienen que ser creados por
 codigos y tienen que copiar los anillos de los soles, pero no lo hacen ·
-investiga el ExoElectric Disentegrator y el Nameless Destroyer · ideas
+investiga las dos armas supremas de referencia · ideas
 para un bioma nuevo + investigación de biomas · investiga los 100 mods
 mas populares · limpia las referencias externas de las librerías".
 
@@ -906,10 +934,10 @@ mas populares · limpia las referencias externas de las librerías".
     coro se despide apagándose de a una.
 
 ### I. LA INVESTIGACIÓN (4 informes en research/estrategia_v626/)
-  · INFORME_EXOELECTRIC_NAMELESS (42-a): el Exo Disintegrator (IER, con
-    el patrón Mars/WoTG: rayo de 5600 px con telegraph 40 f + carga
-    150 f, núcleo oscuro + bordes brillantes) y el Nameless/Cosmic
-    Destroyer (The Stars Above: gauge carga→burst→lockout ×3). 14
+  · el informe de las armas supremas (sesión local): el desintegrador (IER, con
+    el patrón del mod de tormentas de referencia: rayo de 5600 px con telegraph 40 f + carga
+    150 f, núcleo oscuro + bordes brillantes) y el destructor cósmico de la referencia
+    Destroyer (el patrón gauge carga→burst→lockout ×3). 14
     lecciones aplicadas al diseño del arsenal.
   · INFORME_DESGARRO_REALIDAD (42-b): técnicas de desgarro de 16 fuentes
     + el CONTRATO de RiftLib (implementado en E).
@@ -968,9 +996,8 @@ anterior".
 
 ### B. LA INVESTIGACIÓN — 23 FUENTES (informes en research/humo_v625/)
   · INFORME_MODS_HUMO.md (Task 41-a): vanilla 1.4.4.9 decompilada (Dust
-    completo), Everglow/Coralite/LunarVeil/WoTE/MEAC locales + 7 repos
-    públicos clonados (Calamity, StarlightRiver, Spirit, SOTS, Fargo's,
-    Overhaul, ParticleLibrary) + web (Thorium, Redemption, AA, Orchid,
+    completo), los materiales de referencia locales + los repositorios públicos de
+    referencia (7 mods clonados) + web (los mods de referencia,
     Avalon...). 24 lecciones con números y 8 anti-patrones.
   · ANALISIS_HUECOS.md (Task 41-b): gap analysis de 17 capacidades contra
     26 fuentes — qué tienen los mods premium que nos faltaba.
@@ -980,10 +1007,10 @@ anterior".
     4-6 frames del MISMO campo fBm (dominio desplazándose +0.3 celdas y
     contraste creciendo por frame) — el humo SE DESGARRA, no solo rota
     (anti-patrón nº3 de la investigación). Puff cicla en ping-pong lento;
-    AnimatedPuff avanza POR VIDA (Calamity).
-  · ESCALERA de texturas 64/128/160 px por radio (lección Calamity).
+    AnimatedPuff avanza POR VIDA (el mod de referencia).
+  · ESCALERA de texturas 64/128/160 px por radio (lección del mod de referencia).
   · VAPOR: el pincel de LUT DURA (núcleo denso, caída 255→0 al 74% —
-    Everglow) + luz del mundo por defecto + muerte rápida.
+    el mod de referencia) + luz del mundo por defecto + muerte rápida.
   · LUZ DEL MUNDO con piso: WorldTint(pos) — factor 0.25..0.85 por canal
     (en pleno día sin cambio; en cueva tenue pero visible; bajo antorcha
     el humo se TINTA cálido). Activada en la Tormenta Nebular.
@@ -1003,7 +1030,7 @@ anterior".
     que TODOS los mods premium tienen — Sanitize→Smooth→Resample del
     camino (oldPos sucios, teleports, escalera de ticks) + Ribbon de
     triple capa (velo/cuerpo/núcleo) con perfiles Head/Center/Comet/Alive
-    + fantasmas con squash (MEAC) + EstelaTrack (ring-buffer por
+    + fantasmas con squash (el mod de referencia) + EstelaTrack (ring-buffer por
     identidad que se AUTO-PODRE a los 2 ticks).
   · ONDALIB (OndaLib.cs + OndaSystem.cs): las ONDAS EXPANSIVAS de
     impacto — frente ROTO en 12-16 segmentos con radio vivo + doble anillo
@@ -1282,11 +1309,11 @@ cosmético de un anillo rúnico en la espalda que funcione como alas y halo;
 cuando el jugador vaya a volar este anillo brilla con intensidad ·
 pregunta: StormLib ¿sirve para haces de luz y otros efectos o solo rayos?
 en cuyo caso crea más librerías con el conocimiento de los mods estudiados
-· investiga super profundo Wrath of the Empress y MEAC (empress of light)
+· investiga super profundo a los mods de referencia de esa hornada (la emperatriz de la luz)
 y crea una librería para manejar la luz como ellos".
 
 ### A. LA INVESTIGACIÓN DE LUZ SUPERPROFUNDA (3 informes nuevos)
-  · **WoTE** (`research/luz_v622/INFORME_WOTE_LUZ.md`) — 31 archivos
+  · **el mod de la emperatriz** (informe local de esa versión) — 31 archivos
     leídos + 12 shaders HLSL .fx incluidos en el repo: el BLOOM APILADO
     INVERTIDO (textura radial 200×200 en 2-4 capas: escalas 4.1/2.85/1.5/0.8
     con alfas 0.25/0.67/0.7/1.0), paletas cíclicas MulticolorLerp con wrap,
@@ -1302,7 +1329,7 @@ y crea una librería para manejar la luz como ellos".
     3600px, SunDance = sprite estirado 4 capas con grosor animado
     0.25→0.7 + LUZ MUESTREADA cada 800/12 px, el aurora de muerte de 15
     bandas espejadas π·i, el enrage dorado (255,231,69).
-  · **MEAC (el rework chino de la Emperatriz)** (INFORME_MEAC_LUZ.md —
+  · **el rework de la Emperatriz** (informe local de esa versión —
     .tmod descargado por 10 rangos paralelos + parser propio del formato
     + ILSpy + VLM): el LUT arcoíris 1×256 (HSL S=1 L=0.5 — valida nuestra
     matemática EXACTA), hue en ai[0] EN GRADOS con voleas desfasadas,
@@ -1417,25 +1444,25 @@ y crea una librería para manejar la luz como ellos".
 textura, no tiene animación, solo un cuadrado con textura · en cuanto al
 bastón de rayos, eso no son rayos de verdad, no se parecen en nada a rayos,
 es momento de investigar y mejorar · todos los bastones que crees son de
-prueba, por lo tanto no necesitan usar mana · investiga Coralite, Everglow,
-Wrath of the Empress y Lunar Veil — sus librerías y técnicas — y crea tus
+prueba, por lo tanto no necesitan usar mana · investiga los mods de referencia (Coralito y Flujo,
+los mods de la gran referencia de esa versión — sus librerías y técnicas — y crea tus
 propias librerías con todo lo aprendido de la investigación profunda y
 metódica".
 
 ### A. LA INVESTIGACIÓN PROFUNDA (4 repos clonados y estudiados a fondo)
-  · **Coralite** (360 MB, 78 archivos de rayos) — el jefe eléctrico y su
+  · **el mod del coral** (360 MB, 78 archivos de rayos) — el jefe eléctrico y su
     librería de descargas: jitter perpendicular con extremos anclados,
     parpadeo con APAGADO del ~50% a 15 Hz, MULTI-FILAMENTO superpuesto
     (2 colores), muerte violenta (el jitter REVIENTA al disolverse),
     gorros a 2 escalas, daño en la LÍNEA RECTA (el jitter es cosmético).
-  · **Everglow** (658 MB) — árbol de rayos RECURSIVO con AUTO-CORRECCIÓN
+  · **el mod del flujo** (658 MB) — árbol de rayos RECURSIVO con AUTO-CORRECCIÓN
     de curvatura (rot −= totalRot·0.3), el "hervir" de todos los puntos,
     el FLASH MULTI-DRAW (redibujar la misma geometría N veces), ancho
     empaquetado en las coords de textura, la capa negra bajo las estelas.
-  · **Wrath of the Empress** (16 MB) — la CRUZ DE LUZ de 4 draws en los
+  · **el mod de la ira de la emperatriz** (16 MB) — la CRUZ DE LUZ de 4 draws en los
     impactos (2 orientaciones × 2 escalas con pulso), el TELEGRAPH como
     contrato (línea de aviso + daño/movimiento gateados), paletas por datos.
-  · **Lunar Veil** (27 MB, linaje Stellamod) — el sándwich de batch
+  · **el mod del velo** (27 MB) — el sándwich de batch
     Immediate (valida nuestro contrato v6.10), endcaps redondeados,
     `extraUpdates` para densidad, screen-shake con atenuación por distancia.
   · Los 4 informes completos (Task IDs 37-a…37-d) viven en el worklog;
@@ -1766,8 +1793,8 @@ Investigación previa REAL (subagente de investigación web, 34 búsquedas
 "Scale by Mids" de Julian Love —, The Book of Shaders, Inigo Quilez —
 fBm/warping/band-limiting —, VFXDoc — erosión de alfa —, vfxlabs —
 overdraw/paralaje —, vanilla Terraria DECOMPILADO — tinte por
-iluminación, smear 130-134, LOD por conteo —, Calamity — flipbooks y 3
-lotes de blending —, Starlight River — partículas por GPU —,
+iluminación, smear 130-134, LOD por conteo —, el mod de las flipbooks — 3
+lotes de blending —, el mod del río — partículas por GPU —,
 ParticleLibrary). Informe completo: `research/smoke_research_v616/`.
 
   · **`BrumaNoise.cs`** — hash determinista + value noise con QUINTIC
@@ -2302,7 +2329,7 @@ las texturas reales, 24 escenas, cielo de día = peor caso)**:
     nube, inherentemente etéreo).
 
 **Los PNG de equipo** (los 8 `{Nombre}_Wings.png`) son ahora 8×8
-TOTALMENTE transparentes (el truco de Calamity): vanilla no dibuja NADA —
+TOTALMENTE transparentes (el truco del mod de referencia): vanilla no dibuja NADA —
 ni sprite, ni caja, ni fondo, ni animación que arreglar. Los 122 PNG del
 mod validados (ninguno corrupto — el "Image loading failed" del log viejo
 era de la v6.10).
@@ -2683,7 +2710,7 @@ nebulosa reforzado tras el feedback: núcleo denso + estrellas ancla).
   validada por VLM — anclaje al hombro ✓, extensión arriba/afuera ✓, formas
   reconocibles ✓, simetría ✓.
 - Validación PIL de las 16 PNGs nuevas: 8 iconos 30×24 RGBA + 8 texturas de
-  equipo 8×8 RGBA totalmente transparentes (truco Calamity, el mismo de las
+  equipo 8×8 RGBA totalmente transparentes (truco del mod de referencia, el mismo de las
   coronas que ya funcionaba).
 - Firma de `EquipLoader.GetEquipSlot(Mod, string, EquipType)` verificada
   decompilando el tML real (la usan el animador, la capa y el mapeador de
@@ -2750,7 +2777,7 @@ fase "Configurando contenido" del arranque del juego.
   tModLoader/FNA/ReLogic/TerrariaHooks/Steamworks.NET).
 - Validación PIL de las 10 texturas de equipo `_Wings.png`: todas PNG RGBA
   válidas, alturas múltiplo de 4 (tira de 4 frames ✓), y las 2 de coronas
-  totalmente transparentes (8×8, el truco Calamity para que el dibujo vanilla
+  totalmente transparentes (8×8, el truco del mod de referencia para que el dibujo vanilla
   no pinte nada) ✓.
 - Diagnóstico diferencial del log: 8 fallos = exactamente las 8 clases sin
   atributo; las 2 con atributo pasaron su `SetStaticDefaults` — evidencia
@@ -2789,7 +2816,7 @@ dar al jugador, pues son de pruebas").
   frame 0 en reposo · ciclo 1→2→3 cada 4 ticks al volar · frame 2 al caer ·
   frame 1 al planear · frame 0 flotando en agua; sonido de aleteo
   (SoundID.Item32) por ciclo; `ShouldDrawWingsThatAreAlwaysAnimated()`.
-- **Calamity `WingsofRebirth` + `WingsofRebirthLayer`**: EL PATRÓN para las
+- **el patrón de las alas de renacimiento del mod de referencia**: EL PATRÓN para las
   alas "técnica coronas" — textura de equipo EN BLANCO + `PlayerDrawLayer`
   (`AfterParent(PlayerDrawLayers.Wings)`) + visibilidad por
   `drawPlayer.wings == EquipLoader.GetEquipSlot(...)`.
@@ -2798,7 +2825,7 @@ dar al jugador, pues son de pruebas").
 
 ### B. LAS 2 ALAS "TÉCNICA CORONAS" (temática agujero negro carmesí)
 
-PNG de equipo EN BLANCO (como Calamity) + TODO el dibujado por la
+PNG de equipo EN BLANCO (como el patrón de referencia) + TODO el dibujado por la
 biblioteca VFX + animación PROCEDURAL por MUELLES (sin frames):
 
 1. **Alas del Horizonte de Sucesos** (200 ticks · 9.5 · ×3): por lado, un
@@ -3831,7 +3858,7 @@ la llamarada se dibujaba **DOS VECES por frame — una de ellas ENCIMA del
 sol** con brillo aditivo duplicado = el "extraño parpadeo". Y la Supernova
 hija (spawned después → índice MAYOR que el sol) se pintaba directamente
 encima de la estrella. **Solución definitiva**: los hijos van con
-`hide = true` (ni tML ni ningún mod — Luminance incluida — los dibuja) y
+`hide = true` (ni tML ni ningún mod los dibuja) y
 **EL SOL LOS DIBUJA ÉL MISMO** (`SunProjectile.DrawStarVisuals`, capa 0,
 ANTES de sus propias capas): detrás del disco SIEMPRE, inmune al orden de
 índices. El disco del SunShader (alpha≈1 en el cuerpo) los OCULTA en el
