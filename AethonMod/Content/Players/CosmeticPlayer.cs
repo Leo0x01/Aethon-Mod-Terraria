@@ -15,8 +15,11 @@ namespace AethonMod.Content.Players
     /// que vivan en el mundo:
     ///   - La CORONA DE ARCOS suelta ascuas rosas sobre sus ápices.
     ///   - La CORONA RÚNICA emite chispas ascendentes desde las perlas.
-    ///   - EL ANILLO RÚNICO DORSAL (v6.36) suelta chispas desde sus runas
-    ///     y tiñe el aire de magenta (la firma del vacío en tu espalda).
+    ///   - EL ANILLO RÚNICO DORSAL (v6.37): invoca su halo proyectil (la
+    ///     TRIPLE CORONA DE CONJURO de los agujeros negros, dibujada por
+    ///     AnilloDorsalRenderer con OrbitaLib — runas de pie y perlas
+    ///     detrás del cuerpo) y suelta chispas DORADAS desde las runas
+    ///     exactas del círculo de oro.
     ///   - Ambas coronas iluminan suavemente la noche con su color.
     ///
     /// (v6.28: la CORONA DE ANILLOS RÚNICOS y el ANILLO RÚNICO ESTELAR
@@ -30,8 +33,8 @@ namespace AethonMod.Content.Players
         /// <summary>¿Lleva la Corona Rúnica Estelar (glifos flotantes)?</summary>
         public bool RuneCrown;
 
-        /// <summary>¿Lleva EL ANILLO RÚNICO DORSAL (v6.36 — la firma del
-        /// vacío colgada de la espalda)?</summary>
+        /// <summary>¿Lleva EL ANILLO RÚNICO DORSAL (v6.37 — la triple
+        /// corona de conjuro del vacío colgada de la espalda)?</summary>
         public bool AnilloDorsal;
 
         public override void ResetEffects()
@@ -115,31 +118,52 @@ namespace AethonMod.Content.Players
                     new Vector3(0.22f, 0.04f, 0.14f));
             }
 
-            // === EL ANILLO RÚNICO DORSAL (v6.36): la firma del vacío
-            //     respira — chispas que escapan de las runas EXACTAS del
-            //     anillo de la espalda y luz magenta suave.
+            // === EL ANILLO RÚNICO DORSAL (v6.37): LA CORONA DE CONJURO
+            //     de los agujeros negros DETRÁS del cuerpo — el halo
+            //     proyectil la dibuja (el dueño local lo invoca; tML lo
+            //     sincroniza) y la escritura DORADA respira: chispas que
+            //     escapan de las runas EXACTAS del círculo de oro.
             if (AnilloDorsal)
             {
+                // EL HALO (la triple corona + el anillo de fotones).
+                if (Player.whoAmI == Main.myPlayer && !EspiarHaloDorsal())
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("AnilloRunicoDorsal"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AnilloRunicoDorsalHalo>(),
+                        0, 0f, Player.whoAmI);
+                }
+
+                // Chispas doradas desde las runas del círculo de oro (la
+                // misma ancla y la misma geometría del halo).
                 if (Main.rand.NextBool(36))
                 {
-                    // El centro de la espalda (la MISMA ancla de la capa).
                     Vector2 espalda = Player.Center -
                         new Vector2(0f, Player.height * 0.04f * Player.gravDir);
-                    int g = Main.rand.Next(AnilloDorsalRenderer.RunasCuenta);
+                    int g = Main.rand.Next(OrbitaLib.RunasMedias);
                     Vector2 runa = AnilloDorsalRenderer.RunaWorld(espalda,
                         Player.height, Main.GlobalTimeWrappedHourly, g);
                     Dust d = Dust.NewDustPerfect(runa, DustID.Enchanted_Pink,
                         new Vector2(Main.rand.NextFloat(-0.4f, 0.4f),
                                     -Main.rand.NextFloat(0.4f, 1.0f) * Player.gravDir),
-                        160, new Color(255, 140, 200), 0.7f);
+                        160, new Color(255, 214, 140), 0.7f);
                     d.noGravity = true;
                     d.fadeIn = 0f;
                 }
-
-                // Luz magenta tenue del anillo.
-                Lighting.AddLight(Player.Center,
-                    new Vector3(0.16f, 0.05f, 0.11f));
             }
+        }
+
+        /// <summary>¿Ya vive mi halo de la corona rúnica dorsal?</summary>
+        private bool EspiarHaloDorsal()
+        {
+            int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.AnilloRunicoDorsalHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
+                    return true;
+            }
+            return false;
         }
     }
 }

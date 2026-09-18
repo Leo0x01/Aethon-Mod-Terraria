@@ -8,19 +8,44 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// OrbitaLib — v6.34 — LA ESCRITURA MÁGICA DEL VACÍO.
+    /// OrbitaLib — v6.34 — LA ESCRITURA MÁGICA DEL VACÍO. · v6.37 — LA
+    /// CORRECCIÓN: LOS ANILLOS RÚNICOS.
     ///
-    /// LA LIBRERÍA DE SIGNOS MÁGICOS DE LOS AGUJEROS NEGROS: todo lo que
-    /// hoy viste a los vórtices — el anillo energético con sus VEINTE
-    /// BANDAS de emisión viajando (la fórmula fiel del shader:
-    /// glow = sin(uv.x·20 + t·5)·0.5+0.5), los ecos en resonancia, los
-    /// fotones corriendo el vórtice, el temblor de la distorsión y la
-    /// corona de lazos de neón — promovido a PRIMITIVAS INVOCABLES para
-    /// embellecer cualquier cosa: portales oscuros, invocaciones de vacío,
-    /// maldiciones, jefes, armas.
+    /// LA LIBRERÍA DE SIGNOS MÁGICOS DE LOS AGUJEROS NEGROS. La
+    /// aclaración del usuario (v6.37): "cuando te pedí una librería para
+    /// LOS ANILLOS DE LOS AGUJEROS, me refería a los ANILLOS RÚNICOS" —
+    /// los círculos de runas DE PIE con sus perlas que rodean a los
+    /// vórtices (la firma de conjuro), NO el lado energético del disco.
+    /// Esta librería contiene AHORA las DOS escrituras del vacío:
     ///
-    /// LAS LEYES DE LA FAMILIA (heredadas 1:1 del agujero negro cósmico —
+    ///   · LOS ANILLOS RÚNICOS (v6.37 — la petición original, completada):
+    ///     el CÍRCULO DE CONJURO (el aro fino de pauta + las runas DE PIE
+    ///     cabalgándolo — el radio respira por glifo, el glifo se mece,
+    ///     cada runa arde con su resplandor y su PERLA, y el latido late
+    ///     por glifo) — la técnica exacta del agujero SUPREMO, promovida
+    ///     a primitiva 1:1. Dos alfabetos públicos (RunasVacio del
+    ///     Supremo + RunasAbismo del Umbral) y DOS humores de vida: el
+    ///     sereno (la casa) y el NERVIOSO (los círculos contrarrotantes
+    ///     de los Ascendidos). EL SIGILO EROSIONADO: la variante del
+    ///     Umbral — el aro ROTO con huecos por hash, glifos perdidos y
+    ///     la púa que apaga lo que cruza. Y LA CORONA DE CONJURO: la
+    ///     triple corona del Supremo (blanca íntima + dorada + violeta
+    ///     contrarrotante) invocable en una llamada.
+    ///   · EL LADO ENERGÉTICO (v6.34): el anillo de VEINTE BANDAS de
+    ///     emisión (la fórmula fiel del shader: glow = sin(uv.x·20+t·5)
+    ///     ·0.5+0.5), los ecos en resonancia, los fotones corriendo el
+    ///     vórtice, el temblor de la distorsión y la corona de lazos de
+    ///     neón — el disco de acreción y su familia.
+    ///
+    /// LAS LEYES DE LA FAMILIA (heredadas 1:1 de los agujeros negros —
     /// ni un número cambiado, el look de los vórtices queda INTACTO):
+    ///   · EL CÍRCULO DE CONJURO: aro fino de pauta girando con el
+    ///     conjunto + runas DE PIE flotando a radio·R (respirando 2.4·gs
+    ///     a 1.35 Hz por glifo, meciéndose 2.0·gs a 0.85 Hz), latido de
+    ///     brillo 0.75+0.25, resplandor 36·gs al 20%, trazos de cápsula
+    ///     3.4·gs al 85% con gradiente cuerpo→punta pálida y PERLA
+    ///     (7.0·gs al 62% + 3.2·gs al 90% del latido propio 0.8+0.2 a
+    ///     3 Hz) a 11.5·gs sobre el glifo.
     ///   · EL ANILLO ENERGÉTICO: elipse oblicua (vórtice), MITAD TRASERA
     ///     y MITAD DELANTERA por separado (el anillo PASA por delante del
     ///     núcleo — el frente más brillante), veinte bandas de brillo
@@ -38,7 +63,13 @@ namespace AethonMod.Content.VFX
     ///     (líneas de campo curvadas), eco interior y NUDOS con destello
     ///     de 4 puntas en los ápices.
     ///
-    /// LO NUEVO (el motivo de la librería — el arsenal de embellecimiento):
+    /// LO NUEVO (el arsenal de embellecimiento):
+    ///   · CirculoRunico(...) / RunaVacia(...) — el círculo de conjuro
+    ///     y su runa de pie (v6.37, la petición completada).
+    ///   · SigiloErosionado(...) — el sigilo del Umbral: aro roto y
+    ///     glifos con huecos (v6.37).
+    ///   · CoronaConjuro(...) — la triple corona del Supremo en una
+    ///     llamada (v6.37).
     ///   · AnilloFotones(...) — el aro fino del horizonte (el anillo de
     ///     fotones puro).
     ///   · OndasDistorsion(...) — anillos de choque expandiéndose desde el
@@ -52,7 +83,10 @@ namespace AethonMod.Content.VFX
     ///     anillo dibujan al SPRITEBATCH ACTUAL — el llamador abre el
     ///     batch aditivo con los helpers AbrirAdditive()/CerrarBatch()
     ///     (o el suyo propio con Main.GameViewMatrix). CONTRATO: batch
-    ///     ABIERTO en aditivo → batch ABIERTO.
+    ///     ABIERTO en aditivo → batch ABIERTO. Los ANILLOS RÚNICOS
+    ///     (CirculoRunico/RunaVacia/SigiloErosionado/CoronaConjuro)
+    ///     siguen ESTE contrato: son hijos directos del pase aditivo de
+    ///     los vórtices.
     ///   · SECCIÓN B (el patrón de la corona): CoronaArcos emite al BUFFER
     ///     de VFXCore (pase aditivo, coords de mundo) — Begin/Flush del
     ///     llamador, igual que el resto de librerías de la casa.
@@ -509,6 +543,471 @@ namespace AethonMod.Content.VFX
                 VFXCore.Quad(apex, VFXPalettes.CrimsonCourt.KnotSpark * (knotPulse * 0.9f * alpha),
                     new Vector2(sparkPx * 2f, sparkPx * 2f));
             }
+        }
+
+        // ==================================================================
+        //  LOS ANILLOS RÚNICOS DEL VACÍO (v6.37 — LA CORRECCIÓN DE LA
+        //  LIBRERÍA): los círculos de conjuro de los agujeros negros
+        //  promovidos a primitivas 1:1. La aclaración del usuario: los
+        //  anillos de los agujeros SON los rúnicos.
+        // ==================================================================
+
+        // --- EL ALFABETO DEL SUPREMO (público — la escritura del vacío) ---
+
+        /// <summary>
+        /// EL ALFABETO DEL VACÍO — los OCHO glifos DE PIE del Supremo:
+        /// cada runa es una lista de TRAZOS (pares de puntos en espacio
+        /// local ~11×15). Diseños angulares de CORONA SUPREMA (el sol
+        /// roto, el cetro, el trono...) — la escritura que rodea al
+        /// vórtice con sus perlas.
+        /// </summary>
+        public static readonly Vector2[][] RunasVacio = new Vector2[][]
+        {
+            // S0 — EL SOL ROTO
+            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.5f, -3f), new(0f, -6.5f), new(3.5f, -3f), new(0f, -6.5f), new(-3.5f, 3.5f), new(3.5f, 3.5f), new(-2f, 5.5f), new(2f, 5.5f) },
+            // S1 — EL CETRO
+            new Vector2[] { new(0f, 7f), new(0f, -4f), new(0f, -4f), new(-3f, -7f), new(0f, -4f), new(3f, -7f), new(-2.5f, 0f), new(2.5f, 0f), new(-2.5f, 3f), new(2.5f, 3f) },
+            // S2 — EL TRONO
+            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, -5f), new(0f, -7f), new(-1.5f, 1.5f), new(1.5f, 1.5f) },
+            // S3 — LA ESTRELLA DOBLE
+            new Vector2[] { new(0f, 7f), new(0f, -7f), new(-4f, 0f), new(4f, 0f), new(-2.5f, -4.5f), new(2.5f, 4.5f), new(2.5f, -4.5f), new(-2.5f, 4.5f) },
+            // S4 — EL CIRCUITO REAL
+            new Vector2[] { new(-3.5f, 6f), new(-3.5f, -4f), new(-3.5f, -4f), new(3.5f, -4f), new(3.5f, -4f), new(3.5f, 6f), new(-3.5f, 6f), new(3.5f, 6f), new(-3.5f, -6.5f), new(3.5f, -6.5f), new(0f, -4f), new(0f, -6.5f) },
+            // S5 — LA VUELTA SUPREMA
+            new Vector2[] { new(-3f, 6f), new(-3f, -2f), new(-3f, -2f), new(3f, -6f), new(3f, -6f), new(3f, 2f), new(3f, 2f), new(-2.5f, 6f), new(-1.5f, -6.5f), new(1.5f, -6.5f) },
+            // S6 — EL OJO DEL VACÍO
+            new Vector2[] { new(-4f, 0f), new(0f, -4f), new(0f, -4f), new(4f, 0f), new(4f, 0f), new(0f, 4f), new(0f, 4f), new(-4f, 0f), new(-1.5f, 0f), new(1.5f, 0f), new(0f, -7f), new(0f, -4.5f), new(0f, 4.5f), new(0f, 7f) },
+            // S7 — LA CORONA ESTELAR
+            new Vector2[] { new(-4f, 5.5f), new(-4f, -5.5f), new(-4f, -5.5f), new(-2f, -1f), new(-2f, -1f), new(0f, -6.5f), new(0f, -6.5f), new(2f, -1f), new(2f, -1f), new(4f, -5.5f), new(4f, -5.5f), new(4f, 5.5f), new(-4f, 5.5f), new(4f, 5.5f) },
+        };
+
+        /// <summary>
+        /// EL ALFABETO DEL ABISMO — los DOCE glifos del Umbral (la
+        /// escritura EROSIONADA: la corona, el colmillo, la cadena, el
+        /// ojo cerrado...), la firma del sigilo roto.
+        /// </summary>
+        public static readonly Vector2[][] RunasAbismo = new Vector2[][]
+        {
+            // U0 — LA CORONA
+            new Vector2[] { new(-4f, 5.5f), new(-4f, -5.5f), new(-4f, -5.5f), new(-2.5f, -1f), new(-2.5f, -1f), new(-1f, -6.5f), new(-1f, -6.5f), new(1f, -1f), new(1f, -1f), new(2.5f, -6.5f), new(2.5f, -6.5f), new(4f, -1f), new(4f, -1f), new(4f, 5.5f), new(-4f, 5.5f), new(4f, 5.5f) },
+            // U1 — EL COLMILLO
+            new Vector2[] { new(-3f, -6.5f), new(-3f, 4f), new(-3f, 4f), new(0f, 7f), new(0f, 7f), new(3f, 4f), new(3f, 4f), new(3f, -6.5f), new(-3f, -6.5f), new(3f, -6.5f) },
+            // U2 — LA CADENA
+            new Vector2[] { new(-3.5f, -3.5f), new(3.5f, -3.5f), new(3.5f, -3.5f), new(3.5f, 1.5f), new(3.5f, 1.5f), new(-3.5f, 1.5f), new(-3.5f, 1.5f), new(-3.5f, -3.5f), new(-3.5f, 1.5f), new(3.5f, 6.5f) },
+            // U3 — EL OJO CERRADO
+            new Vector2[] { new(-4f, 0f), new(0f, -3f), new(0f, -3f), new(4f, 0f), new(4f, 0f), new(0f, 3f), new(0f, 3f), new(-4f, 0f), new(-2f, -1.2f), new(2f, -1.2f) },
+            // U4 — LA MEDIA LUNA
+            new Vector2[] { new(2f, -6.5f), new(-2f, -6.5f), new(-2f, -6.5f), new(-3.5f, 0f), new(-3.5f, 0f), new(-2f, 6.5f), new(-2f, 6.5f), new(2f, 6.5f), new(2f, 6.5f), new(0.5f, 0f), new(0.5f, 0f), new(2f, -6.5f) },
+            // U5 — EL ABISMO
+            new Vector2[] { new(-3.5f, -6f), new(3.5f, -6f), new(3.5f, -6f), new(0f, 6.5f), new(-1.5f, 0f), new(1.5f, 0f) },
+            // U6 — LA ESTACA
+            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3f, -2f), new(0f, -5f), new(3f, -2f), new(0f, -5f), new(-2f, 4.5f), new(2f, 4.5f) },
+            // U7 — EL TRÉBOL ANGULAR
+            new Vector2[] { new(0f, -6.5f), new(0f, 0f), new(0f, 0f), new(-3.5f, -2.5f), new(0f, 0f), new(3.5f, -2.5f), new(0f, 0f), new(0f, 6.5f), new(-2.5f, 3.5f), new(2.5f, 3.5f) },
+            // U8 — LA GARRA
+            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -2f), new(-3.5f, -2f), new(-1.5f, -6.5f), new(-1.5f, -6.5f), new(0f, -1f), new(0f, -1f), new(1.5f, -6.5f), new(1.5f, -6.5f), new(3.5f, -2f), new(3.5f, -2f), new(3.5f, 7f) },
+            // U9 — EL SIGILO
+            new Vector2[] { new(0f, -6.5f), new(-4f, 3.5f), new(-4f, 3.5f), new(4f, 3.5f), new(4f, 3.5f), new(0f, -6.5f), new(-2.5f, 6.5f), new(2.5f, 6.5f) },
+            // U10 — EL PORTÓN
+            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -7f), new(-3.5f, -7f), new(3.5f, -7f), new(3.5f, -7f), new(3.5f, 7f), new(-3.5f, 7f), new(3.5f, 7f), new(-3.5f, -3f), new(3.5f, -3f) },
+            // U11 — LA VELA
+            new Vector2[] { new(-2.5f, 7f), new(-2.5f, -3f), new(-2.5f, -3f), new(0f, -6.5f), new(0f, -6.5f), new(2.5f, -3f), new(2.5f, -3f), new(2.5f, 7f), new(-2.5f, 7f), new(2.5f, 7f), new(-1.2f, 1f), new(1.2f, 1f) },
+        };
+
+        // --- LAS CONSTANTES DE LA TRIPLE CORONA (del Supremo, públicas) ---
+
+        /// <summary>Radio del aro ÍNTIMO de la triple corona (×R — la corona blanca).</summary>
+        public const float AroIntimo = 2.02f;
+
+        /// <summary>Runas del aro íntimo (giran rápido: el círculo vivo).</summary>
+        public const int RunasIntimas = 6;
+
+        /// <summary>Giro del aro íntimo (rad/s — rápido e íntimo, CW).</summary>
+        public const float GiroIntimo = 0.16f;
+
+        /// <summary>Radio del aro MEDIO de la triple corona (×R — la corona dorada).</summary>
+        public const float AroMedio = 2.62f;
+
+        /// <summary>Runas del aro medio (giran con el conjunto).</summary>
+        public const int RunasMedias = 8;
+
+        /// <summary>Giro del aro medio (rad/s — CW lento).</summary>
+        public const float GiroMedio = 0.10f;
+
+        /// <summary>Radio del aro EXTERNO de la triple corona (×R — la corona violeta).</summary>
+        public const float AroExterno = 3.30f;
+
+        /// <summary>Runas del aro externo (el contrarroto arcano).</summary>
+        public const int RunasExternas = 6;
+
+        /// <summary>Giro del aro externo (rad/s — CONTRARROTO, CCW).</summary>
+        public const float GiroExterno = -0.075f;
+
+        /// <summary>Calibre del glifo: r de referencia de la escala (la casa: 52).</summary>
+        public const float GlifoCalibre = 52f;
+
+        /// <summary>Multiplicador de escala del glifo del Supremo (la casa: 1.40).</summary>
+        public const float GlifoMul = 1.40f;
+
+        /// <summary>Segmentos del aro del sigilo erosionado (la casa: 30).</summary>
+        public const int ErosionSegmentos = 30;
+
+        // --- LA PALETA RÚNICA DEL VACÍO (los pares cuerpo/punta) ---
+
+        /// <summary>Cuerpo de runa BLANCA íntima (la corona viva del Supremo).</summary>
+        public static readonly Color RunaBlanca = new(255, 245, 220);
+
+        /// <summary>Punta de runa blanca (incandescente).</summary>
+        public static readonly Color RunaBlancaTip = new(255, 252, 240);
+
+        /// <summary>Cuerpo de runa DORADA (el conjuro del Supremo).</summary>
+        public static readonly Color RunaDorada = new(255, 180, 70);
+
+        /// <summary>Punta de runa dorada (pálida cálida).</summary>
+        public static readonly Color RunaDoradaTip = new(255, 235, 175);
+
+        /// <summary>Cuerpo de runa VIOLETA (la envoltura contrarrotante).</summary>
+        public static readonly Color RunaVioleta = new(110, 130, 255);
+
+        /// <summary>Punta de runa violeta (fría pálida).</summary>
+        public static readonly Color RunaVioletaTip = new(205, 220, 255);
+
+        // ==================================================================
+        //  PRIMITIVA RÚNICA 1 — LA RUNA DE PIE (la unidad atómica)
+        // ==================================================================
+
+        /// <summary>
+        /// UNA RUNA DE PIE del círculo de conjuro — la unidad atómica de
+        /// los anillos rúnicos de los agujeros negros (la técnica exacta
+        /// del Supremo): el resplandor suave DETRÁS del glifo, los TRAZOS
+        /// de cápsula con gradiente vertical (abajo cuerpo, arriba punta
+        /// pálida — la runa queda DE PIE, sin rotar con la órbita) y la
+        /// PERLA de la corona latiendo sobre el glifo.
+        ///
+        /// CONTRATO (Sección A): batch ABIERTO en aditivo → ABIERTO.
+        /// </summary>
+        /// <param name="glyphPos">Centro del glifo (coords de PANTALLA).</param>
+        /// <param name="time">Tiempo animado.</param>
+        /// <param name="g">Índice del glifo (desfasa latidos y perlas).</param>
+        /// <param name="strokes">Los trazos de la runa (alfabeto).</param>
+        /// <param name="body">Color del cuerpo de la runa.</param>
+        /// <param name="tip">Color de la punta pálida (y de la perla).</param>
+        /// <param name="glyphScale">Escala final del glifo.</param>
+        /// <param name="alphaMul">Multiplicador global (fade de vida).</param>
+        /// <param name="nervioso">TRUE = el humor de los círculos contrarrotantes de los Ascendidos (glow 30 al 18%, latido 0.70+0.30 a 2.8 Hz, perlas 6.2/2.9 al 55/90%).</param>
+        /// <param name="strokeW">Grosor del trazo en unidades de gs (−1 = el del humor: 3.4 sereno / 3.2 nervioso).</param>
+        /// <param name="strokeAlpha">Alfa del trazo (−1 = el del humor: 0.85 / 0.80).</param>
+        /// <param name="pearlTip">Color de la punta de la PERLA (null = tip — el modelo de la casa).</param>
+        public static void RunaVacia(Vector2 glyphPos, float time, int g,
+            Vector2[] strokes, Color body, Color tip, float glyphScale,
+            float alphaMul = 1f, bool nervioso = false,
+            float strokeW = -1f, float strokeAlpha = -1f, Color? pearlTip = null)
+        {
+            if (strokes == null || strokes.Length < 2 || glyphScale <= 0.01f) return;
+
+            // Latido de brillo propio por glifo.
+            float pulse = nervioso
+                ? 0.70f + 0.30f * (float)Math.Sin(time * 2.8f + g * 1.7f)
+                : 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f);
+
+            // Resplandor suave DETRÁS de cada runa (el "glow arcano").
+            float glowSize = nervioso ? 30f : 36f;
+            float glowAlpha = nervioso ? 0.18f : 0.20f;
+            Quad(Glow, glyphPos, new Vector2(glowSize * glyphScale, glowSize * glyphScale), 0f,
+                Tint(body, glowAlpha * pulse * alphaMul));
+
+            // Trazos: cápsulas, cuerpo → punta pálida (runa DE PIE).
+            float w = strokeW >= 0f ? strokeW : (nervioso ? 3.2f : 3.4f);
+            float a = strokeAlpha >= 0f ? strokeAlpha : (nervioso ? 0.80f : 0.85f);
+            for (int s = 0; s < strokes.Length; s += 2)
+            {
+                Vector2 pa = glyphPos + strokes[s] * glyphScale;
+                Vector2 pb = glyphPos + strokes[s + 1] * glyphScale;
+                Vector2 mid = (pa + pb) * 0.5f;
+                Vector2 delta = pb - pa;
+                float len = delta.Length();
+                if (len < 0.01f) continue;
+                float rot = (float)Math.Atan2(delta.Y, delta.X);
+
+                // Gradiente vertical: abajo cuerpo, arriba punta pálida.
+                float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
+                Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
+
+                Capsule(mid, len, w * glyphScale, rot, Tint(col, a * pulse * alphaMul));
+            }
+
+            // PERLA sobre el glifo (la gema de la corona).
+            float pearlOff = nervioso ? 10.5f : 11.5f;
+            float pearlA = nervioso ? 6.2f : 7.0f;
+            float pearlB = nervioso ? 2.9f : 3.2f;
+            Vector2 pearlPos = glyphPos - new Vector2(0f, pearlOff * glyphScale);
+            // El nervioso funde la perla con el latido del glifo; el
+            // sereno le da su PROPIO latido (0.8+0.2 a 3 Hz).
+            float pearlPulse = nervioso
+                ? pulse
+                : 0.8f + 0.2f * (float)Math.Sin(time * 3.0f + g * 2.0f);
+            Color cTip = pearlTip ?? tip;
+            Quad(Glow, pearlPos, new Vector2(pearlA * glyphScale, pearlA * glyphScale), 0f,
+                Tint(body, (nervioso ? 0.55f : 0.62f) * pulse * alphaMul));
+            Quad(Glow, pearlPos, new Vector2(pearlB * glyphScale, pearlB * glyphScale), 0f,
+                Tint(cTip, 0.9f * pearlPulse * alphaMul));
+        }
+
+        // ==================================================================
+        //  PRIMITIVA RÚNICA 2 — EL CÍRCULO DE CONJURO (el anillo completo)
+        // ==================================================================
+
+        /// <summary>
+        /// EL CÍRCULO DE CONJURO — EL ANILLO RÚNICO DEL AGUJERO NEGRO, la
+        /// firma de los vórtices (la petición completada v6.37): el ARO
+        /// FINO de pauta girando con el conjunto y las runas DE PIE
+        /// cabalgándolo — el radio RESPIRA por glifo (2.4·gs a 1.35 Hz),
+        /// el glifo se MECE (2.0·gs a 0.85 Hz), cada runa arde con su
+        /// resplandor y su PERLA. La técnica exacta del Supremo 1:1.
+        ///
+        /// CONTRATO (Sección A): batch ABIERTO en aditivo → ABIERTO.
+        /// </summary>
+        /// <param name="center">Centro (coords de PANTALLA).</param>
+        /// <param name="r">Radio del vórtice (px — el aro vive a radius·r).</param>
+        /// <param name="time">Tiempo animado.</param>
+        /// <param name="radius">Radio del aro (×r — la casa: 2.02/2.62/3.30).</param>
+        /// <param name="count">Runas del círculo (la casa: 6/8/12).</param>
+        /// <param name="orbit">Velocidad angular del conjunto (rad/s — negativa = contrarroto).</param>
+        /// <param name="body">Color del cuerpo de runa (y del aro).</param>
+        /// <param name="tip">Color de la punta pálida.</param>
+        /// <param name="glyphScale">Escala FINAL de los glifos (la casa: Max(r/52, 0.25)·1.40).</param>
+        /// <param name="alphabet">Alfabeto de runas (null = RunasVacio, el del Supremo).</param>
+        /// <param name="offset">Desfase del alfabeto (los círculos del conjunto empiezan en runas distintas).</param>
+        /// <param name="stride">Paso del alfabeto (1 = seguido; 3 = los glifos desfasados de los nerviosos).</param>
+        /// <param name="alphaMul">Multiplicador global de intensidad.</param>
+        /// <param name="ringAlpha">Alfa del aro de pauta (la casa: 0.24/0.20/0.18).</param>
+        /// <param name="nervioso">El humor contrarrotante de los Ascendidos (respiración y latido propios).</param>
+        /// <param name="strokeW">Grosor del trazo ×gs (−1 = el del humor).</param>
+        /// <param name="strokeAlpha">Alfa del trazo (−1 = el del humor).</param>
+        /// <param name="pearlTip">Color de la perla (null = tip).</param>
+        public static void CirculoRunico(Vector2 center, float r, float time,
+            float radius, int count, float orbit, Color body, Color tip,
+            float glyphScale, Vector2[][] alphabet = null, int offset = 0,
+            int stride = 1, float alphaMul = 1f, float ringAlpha = 0.24f,
+            bool nervioso = false, float strokeW = -1f, float strokeAlpha = -1f,
+            Color? pearlTip = null)
+        {
+            if (count <= 0 || r < 2f || alphaMul <= 0.02f) return;
+
+            // El aro fino de pauta (gira con el conjunto — Ring.png).
+            AnilloFino(center, radius * r, time * orbit, Tint(body, ringAlpha * alphaMul));
+
+            // Flotación viva: los humores respiran distinto.
+            float breatheAmp = nervioso ? 2.2f : 2.4f;
+            float breatheHz = nervioso ? 1.1f : 1.35f;
+            float breathePh = nervioso ? 1.4f : 0.9f;
+            float bobAmp = nervioso ? 1.8f : 2.0f;
+            float bobHz = nervioso ? 0.95f : 0.85f;
+            float bobPh = nervioso ? 2.1f : 1.7f;
+
+            // El alfabeto (defensa de librería pública: nada de tablas vacías).
+            Vector2[][] tabla = alphabet ?? RunasVacio;
+            if (tabla.Length == 0) return;
+
+            for (int g = 0; g < count; g++)
+            {
+                float ang = g / (float)count * MathHelper.TwoPi + time * orbit;
+
+                // El radio respira por glifo y el glifo se mece.
+                float floatR = radius * r +
+                               breatheAmp * glyphScale * (float)Math.Sin(time * breatheHz + g * breathePh);
+                float bobY = bobAmp * glyphScale * (float)Math.Sin(time * bobHz + g * bobPh);
+                Vector2 glyphPos = center + new Vector2(
+                    (float)Math.Cos(ang) * floatR,
+                    (float)Math.Sin(ang) * floatR + bobY);
+
+                // La runa de la posición g (stride/offset: los conjuntos
+                // empiezan en glifos distintos y los nerviosos los saltan).
+                Vector2[] strokes = tabla[(g * stride + offset) % tabla.Length];
+
+                RunaVacia(glyphPos, time, g, strokes, body, tip, glyphScale,
+                    alphaMul, nervioso, strokeW, strokeAlpha, pearlTip);
+            }
+        }
+
+        // ==================================================================
+        //  PRIMITIVA RÚNICA 3 — EL SIGILO EROSIONADO (la variante del Umbral)
+        // ==================================================================
+
+        /// <summary>
+        /// EL SIGILO EROSIONADO — el círculo rúnico ROTO del Umbral: el
+        /// aro deshecho en segmentos de cápsula con HUECOS por hash (el
+        /// sigilo devorado), los glifos PERDIDOS al azar determinista, la
+        /// PÚA que APAGA las runas que cruza y las brasas latiendo por
+        /// tramo. La escritura del abismo, 1:1 del Umbral.
+        ///
+        /// CONTRATO (Sección A): batch ABIERTO en aditivo → ABIERTO.
+        /// </summary>
+        /// <param name="center">Centro (coords de PANTALLA).</param>
+        /// <param name="r">Radio del vórtice (px).</param>
+        /// <param name="time">Tiempo animado.</param>
+        /// <param name="seed">Semilla determinista (los huecos).</param>
+        /// <param name="radius">Radio del aro (×r — la casa: 2.55/1.95).</param>
+        /// <param name="count">Runas del círculo (la casa: 12/8).</param>
+        /// <param name="orbit">Velocidad angular (rad/s — lento: 0.06).</param>
+        /// <param name="glyphScale">Escala FINAL (la casa: Max(r/52, 0.25)·1.75).</param>
+        /// <param name="body">Color del cuerpo (la casa: dorado).</param>
+        /// <param name="tip">Color de la punta pálida.</param>
+        /// <param name="alphabet">Alfabeto (null = RunasAbismo, el del Umbral).</param>
+        /// <param name="offset">Desfase del alfabeto (el segundo anillo: 500).</param>
+        /// <param name="hashOff">Desfase del hash (el segundo anillo hueca DISTINTO: 500).</param>
+        /// <param name="spikeAngle">Ángulo de la púa (rad — lo que cruza, se apaga; pasa SpikeAngle+RingTilt).</param>
+        /// <param name="spikeWindow">Ventana de la púa (rad — la casa: 0.45/0.30).</param>
+        public static void SigiloErosionado(Vector2 center, float r, float time, int seed,
+            float radius, int count, float orbit, float glyphScale,
+            Color body, Color tip, Vector2[][] alphabet = null, int offset = 0,
+            int hashOff = 0, float spikeAngle = -0.55f, float spikeWindow = 0.45f)
+        {
+            if (count <= 0 || r < 2f) return;
+            float circleR = radius * r;
+            float giro = time * orbit;
+
+            // El alfabeto (defensa de librería pública: nada de tablas vacías).
+            Vector2[][] tabla = alphabet ?? RunasAbismo;
+            if (tabla.Length == 0) return;
+
+            // --- EL ARO ROTO: segmentos de cápsula con HUECOS por hash ---
+            for (int s = 0; s < ErosionSegmentos; s++)
+            {
+                float h = VFXCore.Hash01(seed, 940 + s, 3 + hashOff);
+                if (h < 0.30f) continue;   // HUECO: el tramo no existe
+
+                float ta = s / (float)ErosionSegmentos * MathHelper.TwoPi + giro;
+                float tb = (s + 1) / (float)ErosionSegmentos * MathHelper.TwoPi + giro;
+                Vector2 pa = center + new Vector2(
+                    (float)Math.Cos(ta) * circleR, (float)Math.Sin(ta) * circleR);
+                Vector2 pb = center + new Vector2(
+                    (float)Math.Cos(tb) * circleR, (float)Math.Sin(tb) * circleR);
+                Vector2 mid = (pa + pb) * 0.5f;
+                Vector2 d = pb - pa;
+                float len = d.Length();
+                if (len < 0.5f) continue;
+                float rot = (float)Math.Atan2(d.Y, d.X);
+
+                // Brasa viva: cada tramo late con su propia fase.
+                float pulse = 0.55f + 0.45f * (float)Math.Sin(time * 1.6f + s * 1.1f);
+                float fade = 0.35f + 0.65f * h;
+                Capsule(mid, len, 1.7f * glyphScale, rot,
+                    Tint(body, 0.42f * pulse * fade));
+            }
+
+            // --- LOS GLIFOS: dorados, finos, CON HUECOS ---
+            for (int g = 0; g < count; g++)
+            {
+                float ang = g / (float)count * MathHelper.TwoPi + giro;
+
+                // Flotación viva: el radio respira por glifo.
+                float floatR = circleR +
+                               2.2f * glyphScale * (float)Math.Sin(time * 1.2f + g * 0.9f);
+                float bobY = 1.8f * glyphScale * (float)Math.Sin(time * 0.8f + g * 1.7f);
+                Vector2 glyphPos = center + new Vector2(
+                    (float)Math.Cos(ang) * floatR,
+                    (float)Math.Sin(ang) * floatR + bobY);
+
+                // LOS HUECOS DE LA REFERENCIA: glifos PERDIDOS por hash
+                // (sigilo erosionado) y glifos APAGADOS donde la PÚA cruza.
+                float gapRoll = VFXCore.Hash01(seed, 960 + g, 5 + hashOff);
+                bool nearSpike = Math.Abs(MathHelper.WrapAngle(
+                    ang - spikeAngle)) < spikeWindow;
+
+                float presence = gapRoll < 0.18f ? 0f            // hueco total
+                              : nearSpike ? 0.25f                 // atravesado por la púa
+                              : 1f;
+                if (presence <= 0f) continue;
+
+                // Latido de brillo propio por glifo.
+                float pulse = (0.70f + 0.30f * (float)Math.Sin(time * 2.2f + g * 1.3f))
+                              * presence;
+
+                // Resplandor suave DETRÁS (el "grabado a láser" ardiendo).
+                Quad(Glow, glyphPos, new Vector2(30f * glyphScale, 30f * glyphScale), 0f,
+                    Tint(body, 0.18f * pulse));
+
+                // Trazos FINOS: cápsulas finísimas de grabado.
+                Vector2[] strokes = tabla[(g + offset) % tabla.Length];
+                for (int s = 0; s < strokes.Length; s += 2)
+                {
+                    Vector2 pa = glyphPos + strokes[s] * glyphScale;
+                    Vector2 pb = glyphPos + strokes[s + 1] * glyphScale;
+                    Vector2 mid = (pa + pb) * 0.5f;
+                    Vector2 delta = pb - pa;
+                    float len = delta.Length();
+                    if (len < 0.01f) continue;
+                    float rot = (float)Math.Atan2(delta.Y, delta.X);
+
+                    // Gradiente vertical: abajo cuerpo, arriba punta pálida.
+                    float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
+                    Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
+
+                    Capsule(mid, len, 3.2f * glyphScale, rot, Tint(col, 0.95f * pulse));
+                }
+
+                // PERLA dorada sobre el glifo (la gema erosionada — el
+                // blanco cálido de la casa del abismo).
+                Vector2 pearlPos = glyphPos - new Vector2(0f, 11.0f * glyphScale);
+                Quad(Glow, pearlPos, new Vector2(5.6f * glyphScale, 5.6f * glyphScale), 0f,
+                    Tint(body, 0.50f * pulse));
+                Quad(Glow, pearlPos, new Vector2(2.6f * glyphScale, 2.6f * glyphScale), 0f,
+                    Tint(new Color(255, 235, 195), 0.85f * pulse));
+            }
+        }
+
+        // ==================================================================
+        //  EL COMPUESTO RÚNICO — LA CORONA DE CONJURO (la triple corona)
+        // ==================================================================
+
+        /// <summary>
+        /// LA CORONA DE CONJURO — la TRIPLE CORONA del agujero SUPREMO
+        /// invocable en una llamada (la firma rúnica de los vórtices, la
+        /// petición completada v6.37): el círculo DORADO de 8 runas
+        /// girando CW con el conjunto, el círculo VIOLETA de 6 runas MÁS
+        /// AFUERA contrarrotando (el contrarroto arcano) y el círculo
+        /// BLANCO de 6 runas íntimas rápido (entre el anillo de fotones y
+        /// el dorado — la corona viva). Escala de glifo del Supremo.
+        ///
+        /// CONTRATO (Sección A): batch ABIERTO en aditivo → ABIERTO.
+        /// </summary>
+        /// <param name="center">Centro (coords de PANTALLA).</param>
+        /// <param name="r">Radio del vórtice (px — el aro externo llega a 3.30×).</param>
+        /// <param name="time">Tiempo animado.</param>
+        /// <param name="alphaMul">Multiplicador global de intensidad.</param>
+        /// <param name="glyphMul">Multiplicador de la escala de glifo (1 = el calibre del Supremo; la espalda del jugador usa ~2.6 para que las runas SE LEAN).</param>
+        /// <param name="alphabet">Alfabeto (null = RunasVacio).</param>
+        /// <param name="blanco">Par cuerpo del círculo íntimo (null = RunaBlanca).</param>
+        /// <param name="dorado">Par cuerpo del círculo medio (null = RunaDorada).</param>
+        /// <param name="violeta">Par cuerpo del círculo externo (null = RunaVioleta).</param>
+        public static void CoronaConjuro(Vector2 center, float r, float time,
+            float alphaMul = 1f, float glyphMul = 1f, Vector2[][] alphabet = null,
+            Color? blanco = null, Color? dorado = null, Color? violeta = null)
+        {
+            if (r < 2f || alphaMul <= 0.02f) return;
+
+            float glyphScale = Math.Max(r / GlifoCalibre, 0.25f) * GlifoMul * glyphMul;
+            Color cBlanco = blanco ?? RunaBlanca;
+            Color cDorado = dorado ?? RunaDorada;
+            Color cVioleta = violeta ?? RunaVioleta;
+
+            // EL CÍRCULO DORADO — 8 runas girando CW (con el conjunto).
+            CirculoRunico(center, r, time, AroMedio, RunasMedias, GiroMedio,
+                cDorado, RunaDoradaTip, glyphScale, alphabet, offset: 0,
+                alphaMul: alphaMul, ringAlpha: 0.24f);
+
+            // EL CÍRCULO VIOLETA — 6 runas MÁS AFUERA girando CCW
+            // (el contrarroto arcano de la fusión).
+            CirculoRunico(center, r, time, AroExterno, RunasExternas, GiroExterno,
+                cVioleta, RunaVioletaTip, glyphScale * 0.85f, alphabet, offset: 3,
+                alphaMul: alphaMul, ringAlpha: 0.18f);
+
+            // EL CÍRCULO BLANCO — 6 runas MÁS ADENTRO, rápido e íntimo
+            // (entre el anillo de fotones y el dorado).
+            CirculoRunico(center, r, time, AroIntimo, RunasIntimas, GiroIntimo,
+                cBlanco, RunaBlancaTip, glyphScale * 0.92f, alphabet, offset: 6,
+                alphaMul: alphaMul, ringAlpha: 0.20f);
         }
 
         // ==================================================================

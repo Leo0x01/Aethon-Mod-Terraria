@@ -105,7 +105,6 @@ namespace AethonMod.Content.VFX
         private const int RuneCount = 12;
         private const float RuneRadius = 2.55f;   // ×R — a la altura del anillo
         private const float RuneOrbit = 0.06f;    // rad/s — gira MUY lento
-        private const int CircleSegments = 30;    // segmentos del aro (rotos)
 
         // --- ASCENDIDO: el SEGUNDO anillo de runas, CONTRARROTANDO ---
         //     (v6.23: radio 1.66→1.95·R y glifos al 80% — BIEN VISIBLE) ---
@@ -785,149 +784,41 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
         //  9. EL DOBLE CÍRCULO DE RUNAS — doradas, ENORMES y CON HUECOS
         //     (el original) + el anillo íntimo CONTRARROTANTE (Ascendido)
+        //     v6.37 — delega en OrbitaLib (la librería de los anillos
+        //     rúnicos): ni un número cambiado. El alfabeto U vive AHORA
+        //     en OrbitaLib.RunasAbismo (el default de la librería).
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// Tabla de glifos: cada runa es una lista de TRAZOS (pares de
-        /// puntos en espacio local ~11×15). Doce diseños angulares
-        /// ORIGINALES de estilo SIGILO ANTIGUO (colmillos, coronas y
-        /// garras — la estirpe del sello), trazos FINOS y elegantes.
+        /// v6.37 — delega en OrbitaLib (la librería de los anillos
+        /// rúnicos): ni un número cambiado. Cada anillo es UNA llamada a
+        /// `OrbitaLib.SigiloErosionado` con SUS constantes de siempre:
+        /// el aro ROTO con huecos por hash, los glifos PERDIDOS y
+        /// APAGADOS por la PÚA, la brasa por tramo y las perlas
+        /// erosionadas viven AHORA en la primitiva. El alfabeto U (la
+        /// tabla `_runes` de siempre, idéntica byte a byte) es el
+        /// default de la librería: OrbitaLib.RunasAbismo.
         /// </summary>
-        private static readonly Vector2[][] _runes = new Vector2[][]
-        {
-            // U0 — LA CORONA
-            new Vector2[] { new(-4f, 5.5f), new(-4f, -5.5f), new(-4f, -5.5f), new(-2.5f, -1f), new(-2.5f, -1f), new(-1f, -6.5f), new(-1f, -6.5f), new(1f, -1f), new(1f, -1f), new(2.5f, -6.5f), new(2.5f, -6.5f), new(4f, -1f), new(4f, -1f), new(4f, 5.5f), new(-4f, 5.5f), new(4f, 5.5f) },
-            // U1 — EL COLMILLO
-            new Vector2[] { new(-3f, -6.5f), new(-3f, 4f), new(-3f, 4f), new(0f, 7f), new(0f, 7f), new(3f, 4f), new(3f, 4f), new(3f, -6.5f), new(-3f, -6.5f), new(3f, -6.5f) },
-            // U2 — LA CADENA
-            new Vector2[] { new(-3.5f, -3.5f), new(3.5f, -3.5f), new(3.5f, -3.5f), new(3.5f, 1.5f), new(3.5f, 1.5f), new(-3.5f, 1.5f), new(-3.5f, 1.5f), new(-3.5f, -3.5f), new(-3.5f, 1.5f), new(3.5f, 6.5f) },
-            // U3 — EL OJO CERRADO
-            new Vector2[] { new(-4f, 0f), new(0f, -3f), new(0f, -3f), new(4f, 0f), new(4f, 0f), new(0f, 3f), new(0f, 3f), new(-4f, 0f), new(-2f, -1.2f), new(2f, -1.2f) },
-            // U4 — LA MEDIA LUNA
-            new Vector2[] { new(2f, -6.5f), new(-2f, -6.5f), new(-2f, -6.5f), new(-3.5f, 0f), new(-3.5f, 0f), new(-2f, 6.5f), new(-2f, 6.5f), new(2f, 6.5f), new(2f, 6.5f), new(0.5f, 0f), new(0.5f, 0f), new(2f, -6.5f) },
-            // U5 — EL ABISMO
-            new Vector2[] { new(-3.5f, -6f), new(3.5f, -6f), new(3.5f, -6f), new(0f, 6.5f), new(-1.5f, 0f), new(1.5f, 0f) },
-            // U6 — LA ESTACA
-            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3f, -2f), new(0f, -5f), new(3f, -2f), new(0f, -5f), new(-2f, 4.5f), new(2f, 4.5f) },
-            // U7 — EL TRÉBOL ANGULAR
-            new Vector2[] { new(0f, -6.5f), new(0f, 0f), new(0f, 0f), new(-3.5f, -2.5f), new(0f, 0f), new(3.5f, -2.5f), new(0f, 0f), new(0f, 6.5f), new(-2.5f, 3.5f), new(2.5f, 3.5f) },
-            // U8 — LA GARRA
-            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -2f), new(-3.5f, -2f), new(-1.5f, -6.5f), new(-1.5f, -6.5f), new(0f, -1f), new(0f, -1f), new(1.5f, -6.5f), new(1.5f, -6.5f), new(3.5f, -2f), new(3.5f, -2f), new(3.5f, 7f) },
-            // U9 — EL SIGILO
-            new Vector2[] { new(0f, -6.5f), new(-4f, 3.5f), new(-4f, 3.5f), new(4f, 3.5f), new(4f, 3.5f), new(0f, -6.5f), new(-2.5f, 6.5f), new(2.5f, 6.5f) },
-            // U10 — EL PORTÓN
-            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -7f), new(-3.5f, -7f), new(3.5f, -7f), new(3.5f, -7f), new(3.5f, 7f), new(-3.5f, 7f), new(3.5f, 7f), new(-3.5f, -3f), new(3.5f, -3f) },
-            // U11 — LA VELA
-            new Vector2[] { new(-2.5f, 7f), new(-2.5f, -3f), new(-2.5f, -3f), new(0f, -6.5f), new(0f, -6.5f), new(2.5f, -3f), new(2.5f, -3f), new(2.5f, 7f), new(-2.5f, 7f), new(2.5f, 7f), new(-1.2f, 1f), new(1.2f, 1f) },
-        };
-
         private static void DrawRuneCircle(Vector2 center, float r, float time, int seed)
         {
+            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.75f;
+
             // EL ANILLO EXTERIOR — el círculo de runas original, intacto.
-            DrawRuneRing(center, r, time, seed, RuneRadius, RuneCount,
-                time * RuneOrbit, glyphMul: 1f, hashOff: 0, spikeWindow: 0.45f);
+            OrbitaLib.SigiloErosionado(center, r, time, seed,
+                RuneRadius, RuneCount, RuneOrbit, glyphScale * 1f,
+                RuneGold, RuneTip,
+                offset: 0, hashOff: 0,
+                spikeAngle: SpikeAngle + RingTilt, spikeWindow: 0.45f);
 
             // EL SEGUNDO ANILLO — CONTRARROTANDO: la firma del Ascendido
-            // (gira al revés y 3.5× más rápido que el exterior). v6.23:
+            // (gira al revés y 3.5× más rápido que el exterior; seed+5000
+            // y hashOff/offset 500 para que hueque y lea DISTINTO). v6.23:
             // glifos al 80% (era 62%) — la firma se lee CLARA, no susurrada.
-            DrawRuneRing(center, r, time, seed + 5000, RuneRadius2, RuneCount2,
-                time * RuneOrbit2, glyphMul: 0.80f, hashOff: 500, spikeWindow: 0.30f);
-        }
-
-        /// <summary>Un anillo completo de runas (aro roto + glifos + perlas).</summary>
-        private static void DrawRuneRing(Vector2 center, float r, float time, int seed,
-            float ringRadius, int runeCount, float orbit, float glyphMul,
-            int hashOff, float spikeWindow)
-        {
-            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.75f * glyphMul;
-            float circleR = ringRadius * r;
-
-            // --- EL ARO ROTO: segmentos de cápsula con HUECOS por hash ---
-            for (int s = 0; s < CircleSegments; s++)
-            {
-                float h = Hash01(seed, 940 + s, 3 + hashOff);
-                if (h < 0.30f) continue;   // HUECO: el tramo no existe
-
-                float ta = s / (float)CircleSegments * MathHelper.TwoPi + orbit;
-                float tb = (s + 1) / (float)CircleSegments * MathHelper.TwoPi + orbit;
-                Vector2 pa = center + new Vector2(
-                    (float)Math.Cos(ta) * circleR, (float)Math.Sin(ta) * circleR);
-                Vector2 pb = center + new Vector2(
-                    (float)Math.Cos(tb) * circleR, (float)Math.Sin(tb) * circleR);
-                Vector2 mid = (pa + pb) * 0.5f;
-                Vector2 d = pb - pa;
-                float len = d.Length();
-                if (len < 0.5f) continue;
-                float rot = (float)Math.Atan2(d.Y, d.X);
-
-                // Brasa viva: cada tramo late con su propia fase.
-                float pulse = 0.55f + 0.45f * (float)Math.Sin(time * 1.6f + s * 1.1f);
-                float fade = 0.35f + 0.65f * h;
-                Capsule(mid, len, 1.7f * glyphScale, rot,
-                    Tint(RuneGold, 0.42f * pulse * fade));
-            }
-
-            // --- LOS GLIFOS: dorados, finos, CON HUECOS ---
-            for (int g = 0; g < runeCount; g++)
-            {
-                float ang = g / (float)runeCount * MathHelper.TwoPi + orbit;
-
-                // Flotación viva: el radio respira por glifo.
-                float floatR = circleR +
-                               2.2f * glyphScale * (float)Math.Sin(time * 1.2f + g * 0.9f);
-                float bobY = 1.8f * glyphScale * (float)Math.Sin(time * 0.8f + g * 1.7f);
-                Vector2 glyphPos = center + new Vector2(
-                    (float)Math.Cos(ang) * floatR,
-                    (float)Math.Sin(ang) * floatR + bobY);
-
-                // ============================================================
-                //  LOS HUECOS DE LA REFERENCIA:
-                //  · glifos PERDIDOS por hash (sigilo erosionado);
-                //  · glifos APAGADOS donde la PÚA cruza el círculo.
-                // ============================================================
-                float gapRoll = Hash01(seed, 960 + g, 5 + hashOff);
-                bool nearSpike = Math.Abs(MathHelper.WrapAngle(
-                    ang - (SpikeAngle + RingTilt))) < spikeWindow;
-
-                float presence = gapRoll < 0.18f ? 0f            // hueco total
-                              : nearSpike ? 0.25f                 // atravesado por la púa
-                              : 1f;
-                if (presence <= 0f) continue;
-
-                // Latido de brillo propio por glifo.
-                float pulse = (0.70f + 0.30f * (float)Math.Sin(time * 2.2f + g * 1.3f))
-                              * presence;
-
-                // Resplandor suave DETRÁS (el "grabado a láser" ardiendo).
-                Quad(Glow, glyphPos, new Vector2(30f * glyphScale, 30f * glyphScale), 0f,
-                    Tint(RuneGold, 0.18f * pulse));
-
-                // Trazos FINOS: cápsulas finísimas de grabado.
-                Vector2[] strokes = _runes[(g + hashOff) % _runes.Length];
-                for (int s = 0; s < strokes.Length; s += 2)
-                {
-                    Vector2 a = glyphPos + strokes[s] * glyphScale;
-                    Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
-                    Vector2 mid = (a + b) * 0.5f;
-                    Vector2 delta = b - a;
-                    float len = delta.Length();
-                    if (len < 0.01f) continue;
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-
-                    // Gradiente vertical: abajo cuerpo dorado, arriba punta pálida.
-                    float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
-                    Color col = Color.Lerp(RuneTip, RuneGold, 1f - localY * 0.25f);
-
-                    Capsule(mid, len, 3.2f * glyphScale, rot, Tint(col, 0.95f * pulse));
-                }
-
-                // PERLA dorada sobre el glifo.
-                Vector2 pearlPos = glyphPos - new Vector2(0f, 11.0f * glyphScale);
-                Quad(Glow, pearlPos, new Vector2(5.6f * glyphScale, 5.6f * glyphScale), 0f,
-                    Tint(RuneGold, 0.50f * pulse));
-                Quad(Glow, pearlPos, new Vector2(2.6f * glyphScale, 2.6f * glyphScale), 0f,
-                    Tint(new Color(255, 235, 195), 0.85f * pulse));
-            }
+            OrbitaLib.SigiloErosionado(center, r, time, seed + 5000,
+                RuneRadius2, RuneCount2, RuneOrbit2, glyphScale * 0.80f,
+                RuneGold, RuneTip,
+                offset: 500, hashOff: 500,
+                spikeAngle: SpikeAngle + RingTilt, spikeWindow: 0.30f);
         }
 
         // ------------------------------------------------------------------

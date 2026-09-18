@@ -606,6 +606,9 @@ namespace AethonMod.Content.VFX
         /// LOS TRES CÍRCULOS: blanco 2.4R CW rápido + dorado 3.2R CW lento
         /// + violeta 4.0R CCW — la escritura que CONTIENE al eclipse (la
         /// técnica exacta del Supremo: RingQuad + glifos DE PIE + perlas).
+        /// v6.37: NO delega en OrbitaLib.CirculoRunico — su geometría de
+        /// cápsula es propia (len+0.35·w, w) y el refactor rompería el
+        /// look 1:1.
         /// </summary>
         private static void DrawRuneCircles(Vector2 center, float rr, float time, int seed,
             float aMul)

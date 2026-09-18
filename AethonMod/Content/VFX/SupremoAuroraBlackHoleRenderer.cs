@@ -774,35 +774,21 @@ namespace AethonMod.Content.VFX
         //  10. EL TRIPLE CÍRCULO DE RUNAS — 8 AZULES CW + 6 DORADAS CCW
         //      + 6 MORADAS íntimas CW rápido (v6.23: el TERCER anillo —
         //      morado→azul→dorado de dentro afuera YA completo)
+        //      v6.37 — delega en OrbitaLib (la librería de los anillos
+        //      rúnicos): ni un número cambiado. El alfabeto S vive AHORA
+        //      en OrbitaLib.RunasVacio (el default de la librería).
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// Tabla de glifos: cada runa es una lista de TRAZOS (pares de
-        /// puntos en espacio local ~11×15). Ocho diseños angulares
-        /// ORIGINALES de estilo CORONA SUPREMA (soles, cetros y tronos —
-        /// la escritura del agujero que une a los cuatro), dibujados como
-        /// cápsulas.
+        /// v6.37 — delega en OrbitaLib (la librería de los anillos
+        /// rúnicos): ni un número cambiado. Cada corona del gradiente
+        /// aurora es UNA llamada a `OrbitaLib.CirculoRunico` con SUS
+        /// constantes de siempre — el aro fino de pauta, las runas DE
+        /// PIE (resplandor, trazos de cápsula con gradiente, perla
+        /// latiendo) y la flotación viva viven AHORA en la primitiva.
+        /// El alfabeto S (la tabla `_runes` de siempre, idéntica byte a
+        /// byte) es el default de la librería: OrbitaLib.RunasVacio.
         /// </summary>
-        private static readonly Vector2[][] _runes = new Vector2[][]
-        {
-            // S0 — EL SOL ROTO
-            new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.5f, -3f), new(0f, -6.5f), new(3.5f, -3f), new(0f, -6.5f), new(-3.5f, 3.5f), new(3.5f, 3.5f), new(-2f, 5.5f), new(2f, 5.5f) },
-            // S1 — EL CETRO
-            new Vector2[] { new(0f, 7f), new(0f, -4f), new(0f, -4f), new(-3f, -7f), new(0f, -4f), new(3f, -7f), new(-2.5f, 0f), new(2.5f, 0f), new(-2.5f, 3f), new(2.5f, 3f) },
-            // S2 — EL TRONO
-            new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, -5f), new(0f, -7f), new(-1.5f, 1.5f), new(1.5f, 1.5f) },
-            // S3 — LA ESTRELLA DOBLE
-            new Vector2[] { new(0f, 7f), new(0f, -7f), new(-4f, 0f), new(4f, 0f), new(-2.5f, -4.5f), new(2.5f, 4.5f), new(2.5f, -4.5f), new(-2.5f, 4.5f) },
-            // S4 — EL CIRCUITO REAL
-            new Vector2[] { new(-3.5f, 6f), new(-3.5f, -4f), new(-3.5f, -4f), new(3.5f, -4f), new(3.5f, -4f), new(3.5f, 6f), new(-3.5f, 6f), new(3.5f, 6f), new(-3.5f, -6.5f), new(3.5f, -6.5f), new(0f, -4f), new(0f, -6.5f) },
-            // S5 — LA VUELTA SUPREMA
-            new Vector2[] { new(-3f, 6f), new(-3f, -2f), new(-3f, -2f), new(3f, -6f), new(3f, -6f), new(3f, 2f), new(3f, 2f), new(-2.5f, 6f), new(-1.5f, -6.5f), new(1.5f, -6.5f) },
-            // S6 — EL OJO DEL VACÍO
-            new Vector2[] { new(-4f, 0f), new(0f, -4f), new(0f, -4f), new(4f, 0f), new(4f, 0f), new(0f, 4f), new(0f, 4f), new(-4f, 0f), new(-1.5f, 0f), new(1.5f, 0f), new(0f, -7f), new(0f, -4.5f), new(0f, 4.5f), new(0f, 7f) },
-            // S7 — LA CORONA ESTELAR
-            new Vector2[] { new(-4f, 5.5f), new(-4f, -5.5f), new(-4f, -5.5f), new(-2f, -1f), new(-2f, -1f), new(0f, -6.5f), new(0f, -6.5f), new(2f, -1f), new(2f, -1f), new(4f, -5.5f), new(4f, -5.5f), new(4f, 5.5f), new(-4f, 5.5f), new(4f, 5.5f) },
-        };
-
         private static void DrawRuneCircles(Vector2 center, float r, float time, int seed)
         {
             float glyphScale = Math.Max(r / 52f, 0.25f) * 1.40f;
@@ -810,95 +796,26 @@ namespace AethonMod.Content.VFX
             // ============================================================
             //  EL CÍRCULO AZUL — 8 runas girando CW (el MEDIO del gradiente)
             // ============================================================
-            RingQuad(center, InnerRuneRadius * r, time * InnerRuneOrbit,
-                Tint(RuneBlue, 0.24f));
-            for (int g = 0; g < InnerRuneCount; g++)
-            {
-                DrawRune(center, r, time, g, InnerRuneRadius,
-                    RuneBlue, RuneBlueTip, glyphScale,
-                    count: InnerRuneCount, orbit: InnerRuneOrbit, offset: 0);
-            }
+            OrbitaLib.CirculoRunico(center, r, time, InnerRuneRadius, InnerRuneCount,
+                InnerRuneOrbit, RuneBlue, RuneBlueTip, glyphScale,
+                offset: 0, ringAlpha: 0.24f);
 
             // ============================================================
             //  EL CÍRCULO DORADO — 6 runas MÁS AFUERA girando CCW (el BORDE
             //  del gradiente — el contrarroto del alba polar)
             // ============================================================
-            RingQuad(center, OuterRuneRadius * r, time * OuterRuneOrbit,
-                Tint(RuneGold, 0.18f));
-            for (int g = 0; g < OuterRuneCount; g++)
-            {
-                DrawRune(center, r, time, g, OuterRuneRadius,
-                    RuneGold, RuneGoldTip, glyphScale * 0.85f,
-                    count: OuterRuneCount, orbit: OuterRuneOrbit, offset: 3);
-            }
+            OrbitaLib.CirculoRunico(center, r, time, OuterRuneRadius, OuterRuneCount,
+                OuterRuneOrbit, RuneGold, RuneGoldTip, glyphScale * 0.85f,
+                offset: 3, ringAlpha: 0.18f);
 
             // ============================================================
             //  EL CÍRCULO MORADO — 6 runas MÁS ADENTRO, rápido e íntimo
             //  (v6.23: EL COLOR QUE FALTABA del gradiente — junto al
             //  núcleo, entre el anillo de fotones y el azul)
             // ============================================================
-            RingQuad(center, PurpleRuneRadius * r, time * PurpleRuneOrbit,
-                Tint(RunePurple, 0.20f));
-            for (int g = 0; g < PurpleRuneCount; g++)
-            {
-                DrawRune(center, r, time, g, PurpleRuneRadius,
-                    RunePurple, RunePurpleTip, glyphScale * 0.92f,
-                    count: PurpleRuneCount, orbit: PurpleRuneOrbit, offset: 6);
-            }
-        }
-
-        /// <summary>
-        /// Una runa del círculo (glifo + resplandor + perla). v6.23: cada
-        /// llamada trae SU `count` y SU `orbit` — el círculo ya NO se
-        /// deduce del `offset` (hay TRES coronas, no dos).
-        /// </summary>
-        private static void DrawRune(Vector2 center, float r, float time, int g,
-            float radius, Color body, Color tip, float glyphScale,
-            int count, float orbit, int offset)
-        {
-            float ang = g / (float)count * MathHelper.TwoPi + time * orbit;
-
-            // Flotación viva: el radio respira por glifo y el glifo se mece.
-            float floatR = radius * r +
-                           2.4f * glyphScale * (float)Math.Sin(time * 1.35f + g * 0.9f);
-            float bobY = 2.0f * glyphScale * (float)Math.Sin(time * 0.85f + g * 1.7f);
-            Vector2 glyphPos = center + new Vector2(
-                (float)Math.Cos(ang) * floatR,
-                (float)Math.Sin(ang) * floatR + bobY);
-
-            // Latido de brillo propio por glifo.
-            float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f);
-
-            // Resplandor suave DETRÁS de cada runa.
-            Quad(Glow, glyphPos, new Vector2(36f * glyphScale, 36f * glyphScale), 0f,
-                Tint(body, 0.20f * pulse));
-
-            // Trazos: cápsulas, cuerpo → punta pálida.
-            Vector2[] strokes = _runes[(g + offset) % _runes.Length];
-            for (int s = 0; s < strokes.Length; s += 2)
-            {
-                Vector2 a = glyphPos + strokes[s] * glyphScale;
-                Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
-                Vector2 mid = (a + b) * 0.5f;
-                Vector2 delta = b - a;
-                float len = delta.Length();
-                if (len < 0.01f) continue;
-                float rot = (float)Math.Atan2(delta.Y, delta.X);
-
-                // Gradiente vertical: abajo cuerpo, arriba punta pálida.
-                float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
-                Color col = Color.Lerp(tip, body, 1f - localY * 0.25f);
-
-                Capsule(mid, len, 3.4f * glyphScale, rot, Tint(col, 0.85f * pulse));
-            }
-
-            // PERLA sobre el glifo (la gema de la corona).
-            Vector2 pearlPos = glyphPos - new Vector2(0f, 11.5f * glyphScale);
-            float pearlPulse = 0.8f + 0.2f * (float)Math.Sin(time * 3.0f + g * 2.0f);
-            Quad(Glow, pearlPos, new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f,
-                Tint(body, 0.62f * pulse));
-            Quad(Glow, pearlPos, new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f,
-                Tint(tip, 0.9f * pearlPulse));
+            OrbitaLib.CirculoRunico(center, r, time, PurpleRuneRadius, PurpleRuneCount,
+                PurpleRuneOrbit, RunePurple, RunePurpleTip, glyphScale * 0.92f,
+                offset: 6, ringAlpha: 0.20f);
         }
 
         // ------------------------------------------------------------------

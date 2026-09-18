@@ -648,6 +648,9 @@ namespace AethonMod.Content.VFX
 
         // ------------------------------------------------------------------
         //  9a. RUNAS DORADAS — el runeParticles del script (intacto)
+        //      v6.37 — delega en OrbitaLib (la librería de los anillos
+        //      rúnicos): ni un número cambiado. La tabla C (8 runas de
+        //      CIRCUITO ENERGÉTICO) es PROPIA → se pasa como `alphabet`.
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -676,67 +679,40 @@ namespace AethonMod.Content.VFX
             new Vector2[] { new(0f, 6.5f), new(3.5f, 0f), new(3.5f, 0f), new(0f, -6.5f), new(0f, -6.5f), new(-3.5f, 0f), new(-3.5f, 0f), new(0f, 6.5f), new(-1.2f, -1f), new(1.2f, 1f) },
         };
 
+        /// <summary>
+        /// v6.37 — delega en OrbitaLib (la librería de los anillos
+        /// rúnicos): ni un número cambiado. El aro de pauta, las runas
+        /// DE PIE y las perlas viven AHORA en la primitiva
+        /// `OrbitaLib.CirculoRunico`. La tabla C (8 runas propias de
+        /// CIRCUITO ENERGÉTICO) se pasa como `alphabet`; el trazo GRUESO
+        /// de la casa (3.8) como `strokeW` y la PERLA CÁLIDA
+        /// (255,240,200) — que aquí era hardcoded — como `pearlTip`.
+        /// </summary>
         private static void DrawGoldenRunes(Vector2 center, float r, float time, int seed)
         {
-            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.35f;
-
-            // Aro rúnico tenue que UNE los glifos (el círculo del conjuro).
-            RingQuad(center, RuneRadius * r, time * RuneOrbit,
-                Tint(RuneGold, 0.22f));
-
-            for (int g = 0; g < RuneCount; g++)
-            {
-                float ang = g / (float)RuneCount * MathHelper.TwoPi + time * RuneOrbit;
-
-                // Flotación viva: el radio respira por glifo y el glifo se
-                // mece verticalmente (el runeParticles flotando).
-                float floatR = RuneRadius * r +
-                               2.4f * glyphScale * (float)Math.Sin(time * 1.35f + g * 0.9f);
-                float bobY = 2.0f * glyphScale * (float)Math.Sin(time * 0.85f + g * 1.7f);
-                Vector2 glyphPos = center + new Vector2(
-                    (float)Math.Cos(ang) * floatR,
-                    (float)Math.Sin(ang) * floatR + bobY);
-
-                // Latido de brillo propio por glifo.
-                float pulse = 0.75f + 0.25f * (float)Math.Sin(time * 2.4f + g * 1.3f);
-
-                // Resplandor suave DETRÁS de cada runa.
-                Quad(Glow, glyphPos, new Vector2(36f * glyphScale, 36f * glyphScale), 0f,
-                    Tint(RuneGold, 0.20f * pulse));
-
-                // Trazos: cápsulas doradas, cuerpo → punta pálida.
-                Vector2[] strokes = _runes[g % _runes.Length];
-                for (int s = 0; s < strokes.Length; s += 2)
-                {
-                    Vector2 a = glyphPos + strokes[s] * glyphScale;
-                    Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
-                    Vector2 mid = (a + b) * 0.5f;
-                    Vector2 delta = b - a;
-                    float len = delta.Length();
-                    if (len < 0.01f) continue;
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-
-                    // Gradiente vertical: abajo cuerpo dorado, arriba punta pálida.
-                    float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
-                    Color col = Color.Lerp(RuneTip, RuneGold, 1f - localY * 0.25f);
-
-                    Capsule(mid, len, 3.8f * glyphScale, rot, Tint(col, 0.85f * pulse));
-                }
-
-                // PERLA dorada sobre el glifo (la gema del circuito).
-                Vector2 pearlPos = glyphPos - new Vector2(0f, 11.5f * glyphScale);
-                float pearlPulse = 0.8f + 0.2f * (float)Math.Sin(time * 3.0f + g * 2.0f);
-                Quad(Glow, pearlPos, new Vector2(7.0f * glyphScale, 7.0f * glyphScale), 0f,
-                    Tint(RuneGold, 0.62f * pulse));
-                Quad(Glow, pearlPos, new Vector2(3.2f * glyphScale, 3.2f * glyphScale), 0f,
-                    Tint(new Color(255, 240, 200), 0.9f * pearlPulse));
-            }
+            OrbitaLib.CirculoRunico(center, r, time, RuneRadius, RuneCount, RuneOrbit,
+                RuneGold, RuneTip, Math.Max(r / 52f, 0.25f) * 1.35f,
+                alphabet: _runes, offset: 0, ringAlpha: 0.22f,
+                strokeW: 3.8f, pearlTip: new Color(255, 240, 200));
         }
 
         // ------------------------------------------------------------------
         //  9b. NUEVO — EL CÍRCULO ÁMBAR CONTRARROTANTE (doble círculo rúnico)
+        //      v6.37 — delega en OrbitaLib (la librería de los anillos
+        //      rúnicos) con el humor NERVIOSO: ni un número cambiado.
         // ------------------------------------------------------------------
 
+        /// <summary>
+        /// v6.37 — delega en OrbitaLib (la librería de los anillos
+        /// rúnicos): ni un número cambiado. El humor NERVIOSO de la
+        /// librería ES el de aquí (respiración 2.2·sin(1.1t+1.4g), vaivén
+        /// 1.8·sin(0.95t+2.1g), latido 0.70+0.30·sin(2.8t+1.7g), glow 30
+        /// @0.18, trazos 3.2 @0.80, perlas 6.2/2.9 @0.55/0.90 a 10.5·gs
+        /// fundidas al latido del glifo); los glifos desfasados de la
+        /// tabla (`_runes[(g*3+2) % len]`) como `stride: 3, offset: 2`;
+        /// la PERLA ÁMBAR cálida (255,245,220) — que aquí era hardcoded —
+        /// como `pearlTip`.
+        /// </summary>
         private static void DrawAmberRunes(Vector2 center, float r, float time, int seed)
         {
             // ============================================================
@@ -745,56 +721,11 @@ namespace AethonMod.Content.VFX
             //  dos coronas de conjuro girando en sentidos opuestos, la
             //  firma rúnica del Cósmico Ascendido.
             // ============================================================
-            float glyphScale = Math.Max(r / 52f, 0.25f) * 1.10f;
-
-            // Aro ámbar tenue que UNE los glifos exteriores.
-            RingQuad(center, AmberRadius * r, time * AmberOrbit,
-                Tint(RuneAmber, 0.18f));
-
-            for (int g = 0; g < AmberCount; g++)
-            {
-                float ang = g / (float)AmberCount * MathHelper.TwoPi + time * AmberOrbit;
-
-                // Flotación viva (desfasada de las doradas).
-                float floatR = AmberRadius * r +
-                               2.2f * glyphScale * (float)Math.Sin(time * 1.1f + g * 1.4f);
-                float bobY = 1.8f * glyphScale * (float)Math.Sin(time * 0.95f + g * 2.1f);
-                Vector2 glyphPos = center + new Vector2(
-                    (float)Math.Cos(ang) * floatR,
-                    (float)Math.Sin(ang) * floatR + bobY);
-
-                // Latido propio, más nervioso que el dorado.
-                float pulse = 0.70f + 0.30f * (float)Math.Sin(time * 2.8f + g * 1.7f);
-
-                // Resplandor suave DETRÁS (ámbar).
-                Quad(Glow, glyphPos, new Vector2(30f * glyphScale, 30f * glyphScale), 0f,
-                    Tint(RuneAmber, 0.18f * pulse));
-
-                // Trazos: cápsulas ámbar (glifos desfasados de la tabla).
-                Vector2[] strokes = _runes[(g * 3 + 2) % _runes.Length];
-                for (int s = 0; s < strokes.Length; s += 2)
-                {
-                    Vector2 a = glyphPos + strokes[s] * glyphScale;
-                    Vector2 b = glyphPos + strokes[s + 1] * glyphScale;
-                    Vector2 mid = (a + b) * 0.5f;
-                    Vector2 delta = b - a;
-                    float len = delta.Length();
-                    if (len < 0.01f) continue;
-                    float rot = (float)Math.Atan2(delta.Y, delta.X);
-
-                    float localY = ((strokes[s].Y + strokes[s + 1].Y) * 0.5f + 7f) / 14f;
-                    Color col = Color.Lerp(AmberTip, RuneAmber, 1f - localY * 0.25f);
-
-                    Capsule(mid, len, 3.2f * glyphScale, rot, Tint(col, 0.80f * pulse));
-                }
-
-                // PERLA ámbar sobre el glifo.
-                Vector2 pearlPos = glyphPos - new Vector2(0f, 10.5f * glyphScale);
-                Quad(Glow, pearlPos, new Vector2(6.2f * glyphScale, 6.2f * glyphScale), 0f,
-                    Tint(RuneAmber, 0.55f * pulse));
-                Quad(Glow, pearlPos, new Vector2(2.9f * glyphScale, 2.9f * glyphScale), 0f,
-                    Tint(new Color(255, 245, 220), 0.9f * pulse));
-            }
+            OrbitaLib.CirculoRunico(center, r, time, AmberRadius, AmberCount, AmberOrbit,
+                RuneAmber, AmberTip, Math.Max(r / 52f, 0.25f) * 1.10f,
+                alphabet: _runes, stride: 3, offset: 2,
+                ringAlpha: 0.18f, nervioso: true,
+                pearlTip: new Color(255, 245, 220));
         }
 
         // ------------------------------------------------------------------

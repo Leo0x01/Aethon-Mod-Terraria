@@ -6,21 +6,26 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Items.Cosmetics
 {
     /// <summary>
-    /// AnilloRunicoDorsalItem — v6.36 — EL ANILLO RÚNICO DORSAL.
+    /// AnilloRunicoDorsalItem — v6.37 — EL ANILLO RÚNICO DORSAL (la
+    /// triple corona de conjuro del vacío).
     ///
-    /// EL ACCESORIO COSMÉTICO DEL VACÍO: la gran firma mágica colgada
-    /// de tu ESPALDA — un anillo rúnico de pie detrás del cuerpo (a
-    /// escorzo, como las alas de un círculo mágico) con las OCHO RUNAS
-    /// cabalgando su tangente, el ANILLO DE FOTONES interior
-    /// contrarrotando (LOS ANILLOS RÚNICOS de los agujeros negros de
-    /// la casa — no su disco de acreción), las cuatro perlas cardinales
-    /// y el polvo rúnico orbitando. La precesión del plano lo mantiene
-    /// vivo: el anillo respira mientras caminas.
+    /// EL ACCESORIO COSMÉTICO DEL VACÍO: el CÍRCULO DE CONJURO LITERAL
+    /// de los agujeros negros colgado de tu ESPALDA — la TRIPLE CORONA
+    /// DEL SUPREMO a escala del jugador (de la librería corregida):
+    /// el círculo DORADO de ocho runas girando con el conjunto, el
+    /// círculo VIOLETA de seis runas contrarrotando más afuera (el
+    /// contrarroto arcano), el círculo BLANCO íNTIMO de seis latiendo
+    /// rápido junto al ANILLO DE FOTONES del horizonte. Las runas DE
+    /// PIE — el radio respira, el glifo se mece — cada una con su
+    /// resplandor y su PERLA latiendo encima: la escritura exacta de
+    /// los vórtices, respirando detrás de tu cuerpo.
     ///
     /// Puro adorno: cualquier hueco de accesorio, cero estadísticas —
     /// la misma regla de las coronas. La detección la hace
-    /// CosmeticPlayer (la bandera AnilloDorsal), el dibujado la capa
-    /// AnilloRunicoDorsalDrawLayer y la geometría AnilloDorsalRenderer.
+    /// CosmeticPlayer (la bandera AnilloDorsal), que invoca el halo
+    /// proyectil AnilloRunicoDorsalHalo (la corona se dibuja con
+    /// AnilloDorsalRenderer → OrbitaLib.CoronaConjuro, detrás del
+    /// cuerpo: LA ESPALDA).
     /// </summary>
     public class AnilloRunicoDorsalItem : ModItem
     {
@@ -51,11 +56,11 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FF5CA0:═══ EL ANILLO RÚNICO DORSAL ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "C", "[c/FFC36B:═══ EL ANILLO RÚNICO DORSAL ═══]"));
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/FF9ECB:La firma mágica del vacío cuelga de tu espalda: el anillo rúnico a escorzo,\ncon sus ocho runas cabalgando la tangente y el anillo de fotones contrarrotando]"));
+                "[c/FFE7B0:El círculo de conjuro del agujero negro cuelga de tu espalda: la triple\ncorona rúnica LITERAL de los vórtices — ocho runas doradas girando con el conjunto]"));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/E6B8FF:Los anillos rúnicos de los agujeros negros — no su disco de acreción:\nescritura que respira, perlas cardinales y polvo rúnico orbitándote]"));
+                "[c/CDA8FF:seis runas violetas contrarrotando más afuera y el círculo blanco íntimo latiendo\njunto al anillo de fotones — runas de pie, respirando, con sus perlas]"));
             tooltips.Add(new TooltipLine(Mod, "D3",
                 "[c/78788C:Puro cosmético: cero estadísticas. Equípalo en cualquier hueco\nde accesorio, funcional o de vanidad]"));
         }
