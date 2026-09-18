@@ -1,0 +1,201 @@
+TITLE: Mice problem
+URL: https://en.wikipedia.org/wiki/Mice_problem
+
+Mice problem - Wikipedia
+Jump to content
+Main menu
+ Main menu
+ move to sidebar
+ hide
+ Navigation
+ Main page
+Contents
+Current events
+Random article
+About Wikipedia
+Contact us
+ Contribute
+ Help
+Learn to edit
+Community portal
+Recent changes
+Upload file
+Special pages
+Search
+ Search
+Appearance
+ Donate
+Create account
+Log in
+Personal tools
+Donate
+Create account
+Log in
+ Contents
+ move to sidebar
+ hide
+ (Top)
+ 1
+ Path of the mice
+ 2
+ In media
+ 3
+ Whirl
+ 4
+ References
+ 5
+ External links
+Toggle the table of contents
+ Mice problem
+6 languages
+ Français
+Italiano
+Nederlands
+Português
+Русский
+Українська
+ Edit links
+ Article
+Talk
+ English
+ Read
+Edit
+View history
+Tools
+ Tools
+ move to sidebar
+ hide
+ Actions
+Read
+Edit
+View history
+ General
+ What links here
+Related changes
+Upload file
+Permanent link
+Page information
+Cite this page
+Get shortened URL
+Switch to legacy parser
+ Edit interlanguage links
+ Print/export
+ Download as PDF
+Printable version
+ In other projects
+ Wikimedia Commons
+Wikidata item
+ Appearance
+ move to sidebar
+ hide
+Text
+Small
+Standard
+Large
+This page always uses small font size
+Width
+Standard
+Wide
+The content is as wide as possible for your browser window.
+Color 
+Automatic
+Light
+Dark
+This page is always in light mode.
+ From Wikipedia, the free encyclopedia
+ Mathematical problem
+For the Monty Python sketch, see The Mouse Problem.
+Four mice
+Three mice
+Six mice
+In mathematics, the mice problem is a continuous pursuit–evasion problem in which a number of mice (or insects, dogs, missiles, etc.) are considered to be placed at the corners of a regular polygon. In the classic setup, each then begins to move towards its immediate neighbour (clockwise or anticlockwise). The goal is often to find out at what time the mice meet.
+The most common version has the mice starting at the corners of a unit square, moving at unit speed. In this case they meet after a time of one unit, because the distance between two neighboring mice always decreases at a speed of one unit. More generally, for a regular polygon of 
+ n
+ {\displaystyle n}
+ unit-length sides, the distance between neighboring mice decreases at a speed of 
+ 1
+ −
+ cos
+ ⁡
+ (
+ 2
+ π
+ /
+ n
+ )
+ {\displaystyle 1-\cos(2\pi /n)}
+, so they meet after a time of 
+ 1
+ /
+ (
+ 1
+ −
+ cos
+ ⁡
+ (
+ 2
+ π
+ /
+ n
+ )
+ )
+ {\displaystyle 1/{\bigl (}1-\cos(2\pi /n){\bigr )}}
+.[1][2]
+Path of the mice
+[edit]
+For all regular polygons, each mouse traces out a pursuit curve in the shape of a logarithmic spiral. These curves meet in the center of the polygon.[3]
+In media
+[edit]
+In Dara Ó Briain: School of Hard Sums, the mice problem is discussed. Instead of 4 mice, 4 ballroom dancers are used.[4]
+Whirl
+[edit]
+A whirl with alternating black and white squares
+Connecting the locations of the mice at different intervals forms a whirl: a figure consisting of a sequence of nested polygons, each smaller and rotated relative to the previous.[5][6][7][8][9][10]
+References
+[edit]
+↑ Gamow, George; Stern, Marvin (1958). Puzzle Math. Viking Press. pp. 112–114.
+↑ Lucas, Édouard (1877). "Problem of the Three Dogs". Nouv. Corresp. Math. 3: 175–176.
+↑ Bernhart, Arthur (1959). "Polygons of pursuit". Scripta Mathematica. 24: 23–50. MR 0104178.
+↑ Ó Briain, Dara; du Sautoy, Marcus; Watson, Mark; Brigstocke, Marcus (March 2014). "Downton Abacus: The Maths of Wealth". Dara Ó Briain: School of Hard Sums. Season 3. Episode 4. 24 minutes in. Dave.
+↑ Weisstein, Eric W., Whirl, Wolfram Mathworld
+↑ Freund, J. E. Introduction to Probability. New York: Dover, 1993.
+↑ Kabai, S. Mathematical Graphics I: Lessons in Computer Graphics Using Mathematica. Püspökladány, Hungary: Uniconstant, p. 75, 2002.
+↑ Lauwerier, H. Fractals: Endlessly Repeated Geometric Figures. Princeton, NJ: Princeton University Press, p. 66, 1991.
+↑ Pappas, T. "Spider & Spirals." The Joy of Mathematics. San Carlos, CA: Wide World Publ./Tetra, p. 228, 1989.
+↑ Wells, D. The Penguin Dictionary of Curious and Interesting Geometry. London: Penguin, pp. 201-202, 1991.
+External links
+[edit]
+Weisstein, Eric W. "Mice Problem". MathWorld.
+Zeno's Mice (Ants) Problem and the Logarithmic Spirals - YouTube lecture with equation derivation
+This geometry-related article is a stub. You can help Wikipedia by adding missing information.
+v
+t
+e
+Retrieved from "https://en.wikipedia.org/w/index.php?title=Mice_problem&oldid=1316562080"
+ Categories: Recreational mathematics
+Pursuit–evasion
+Geometry stubs
+Hidden categories: Articles with short description
+Short description matches Wikidata
+All stub articles
+ This page was last edited on 13 October 2025, at 05:02 (UTC).
+ Page was rendered with Parsoid.
+ Text is available under the Creative Commons Attribution-ShareAlike 4.0 License;
+additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy. Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc., a non-profit organization.
+ Privacy policy
+ About Wikipedia
+ Disclaimers
+ Contact Wikipedia
+ Legal & safety contacts
+ Code of Conduct
+ Developers
+ Statistics
+ Cookie statement
+ Mobile view
+Edit preview settings
+Search
+ Search
+Toggle the table of contents
+ Mice problem
+6 languages
+Add topic

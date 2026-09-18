@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://www.math.ucsd.edu",
+    "name": "Project #2 – Shader-based sine-wave water surface",
+    "snippet": "Fix values for (a) wavelength (lambda), frequency ( freq ), and amplitude (amp). wave height is given by height = amp * cos( 2*pi*( d / lambda – freq *t ) ). The ...",
+    "host_name": "www.math.ucsd.edu",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://learn.unity.com",
+    "name": "Creating a Vertex Displacement Shader",
+    "snippet": "1. Create a new Material and name it Wave_Mat. · 2. Set the shader on the Material to Custom/ Waves and add your normal map to the Normal Map property. · 3. Press ...",
+    "host_name": "learn.unity.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://offscreencanvas.com",
+    "name": "Vertex Shader Displacement - Offscreen Canvas",
+    "snippet": "With a sin wave , you can get away with a simple wave distortion. Offset the wave by the UVs, slap time into it, and you got a wave like in this demo",
+    "host_name": "offscreencanvas.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://catlikecoding.com",
+    "name": "Sine Waves - Procedural GPU Patterns",
+    "snippet": "A written tutorial that introduces you to procedural GPU patterns, using sine waves .",
+    "host_name": "catlikecoding.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://godotshaders.com",
+    "name": "Rotation Displacement Vertex Shader",
+    "snippet": "Feb 1, 2025 — float wave = sin ( TIME * frequency - angle); // Use the wave value to scale the vertex's distance from the center. pos *= 1.0 + amplitude ...",
+    "host_name": "godotshaders.com",
+    "rank": 4,
+    "date": "Feb 1, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://hub.jmonkeyengine.org",
+    "name": "Water rendering using Sine waves and GLSL shaders",
+    "snippet": "Jul 5, 2024 — I used f(x,t)=asin(xw+t*p ) where x is the coordinate, w is frequency a is amplitude, t is time and p is phase shift, I then took 3 of these and ...",
+    "host_name": "hub.jmonkeyengine.org",
+    "rank": 5,
+    "date": "Jul 5, 2024",
+    "favicon": ""
+  }
+]

@@ -57,6 +57,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaDosFormas>());      // v6.33: LAS 4 DE LAS DOS FORMAS
             bolsas += Entregar(ModContent.ItemType<BolsaDesgarros>());      // v6.33+v6.35: LOS 9 DESGARROS
             bolsas += Entregar(ModContent.ItemType<BolsaCodigosVivos>());   // v6.36: LOS 4 CÓDIGOS VIVOS
+            bolsas += Entregar(ModContent.ItemType<BolsaSierpes>());        // v6.38: LA FAMILIA DE LAS SIERPES
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

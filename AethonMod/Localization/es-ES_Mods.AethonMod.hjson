@@ -369,6 +369,59 @@
         "Projectiles.SolVivoProjectile.DisplayName": "Sol Vivo",
         "Projectiles.SierpeEstelarProjectile.DisplayName": "Sierpe Estelar",
 
+        // v6.38: LA CAMADA DE LAS SIERPES (10 formas nuevas de mover la
+        // misma cadena + la cría, el minion — la original INTACTA).
+        "Items.OuroborosAstralStaff.DisplayName": "El Ouroboros Astral",
+        "Items.OuroborosAstralStaff.Tooltip": "Doce cuentas se persiguen en círculo apuntando adelante — nadie manda.\nCada cuenta barre ×0.55; al expirar la espiral se cierra y DETONA ×2.0.\n10 segundos de anillo · sin coste de maná.",
+
+        "Items.CaravanaEspectralStaff.DisplayName": "La Caravana Espectral",
+        "Items.CaravanaEspectralStaff.Tooltip": "El cuerpo repite la trayectoria EXACTA del faro: el camino-memoria.\nEl rastro limpia el pasillo ×0.35 — con giros dibujas muros en S.\n9 segundos de caravana · sin coste de maná.",
+
+        "Items.AnguilaSolarStaff.DisplayName": "La Anguila Solar",
+        "Items.AnguilaSolarStaff.Tooltip": "El cuerpo ES una fórmula: la onda viajera de la anguila, λ ≈ el cuerpo.\nLas CRESTAS muerden ×1.0, los valles solo ×0.30 — roza con la cresta.\n8 segundos de nado en S · sin coste de maná.",
+
+        "Items.CienpiesRunicoStaff.DisplayName": "El Ciempiés Rúnico",
+        "Items.CienpiesRunicoStaff.Tooltip": "Doce placas pegadas al suelo con una pata desfasada Δφ=45° cada una.\nLas patas plantadas dejan su RUNA: la runa pica ×0.40.\nLa marcha sube de frecuencia lejos de la presa · sin coste de maná.",
+
+        "Items.FlageloEstelarStaff.DisplayName": "El Flagelo Estelar",
+        "Items.FlageloEstelarStaff.Tooltip": "El látigo de Verlet con constraint por masa: la energía corre a la punta.\nLa punta golpea ∝ su velocidad (×0.5 → ×1.5); sobre 26 px/tick,\nEL CHASQUIDO: ×2.2 + sacudida. 8 segundos · sin coste de maná.",
+
+        "Items.ViboraGenesiacaStaff.DisplayName": "La Víbora Genesíaca",
+        "Items.ViboraGenesiacaStaff.Tooltip": "Un esqueleto, dos cuerpos: la espina de la sierpe y DOS HEBRAS trenzadas.\nLas perlas queman ×0.45; al enroscar el rumbo la hélice se comprime ×1.6.\n9 segundos de víbora · sin coste de maná.",
+
+        "Items.BoaEclipseStaff.DisplayName": "La Boa del Eclipse",
+        "Items.BoaEclipseStaff.Tooltip": "La cabeza hace la servo-espiral sobre la presa y el cuerpo la envuelve.\nCada vuelta completa es un stack de APRIETE: ×0.5 → ×4.0.\nLa presa cae y busca la siguiente. 10 segundos · sin coste de maná.",
+
+        "Items.FarolGuardianStaff.DisplayName": "El Farol Guardián",
+        "Items.FarolGuardianStaff.Tooltip": "La base es un farol colgante y la PUNTA persigue a la presa (FABRIK).\nLa mano muerde ×1.0 y la cadena quema ×0.40 — el cuerpo se TENSA.\n12 segundos de guardián · sin coste de maná.",
+
+        "Items.CintaAuroraStaff.DisplayName": "La Cinta Aurora",
+        "Items.CintaAuroraStaff.Tooltip": "El estandarte vivo: la espina anclada a tu espalda y dos senos inconmensurables.\nLa cinta corta ×0.5; la amplitud es TU VELOCIDAD — corre y se vuelve látigo.\n12 segundos de estandarte · sin coste de maná.",
+
+        "Items.ManadaAstralStaff.DisplayName": "La Manada Astral",
+        "Items.ManadaAstralStaff.Tooltip": "Seis cazadores con distancia ELÁSTICA y liderazgo que SALTA.\nCada cazador golpea con SU PROPIA velocidad: ×0.55 → ×1.4.\n10 segundos de cacería · sin coste de maná.",
+
+        "Items.CriaEstelarStaff.DisplayName": "La Cría Estelar",
+        "Items.CriaEstelarStaff.Tooltip": "La hijita de la sierpe estelar: el MISMO ADN, pero cachorra y despierta.\nEn reposo nada a tu alrededor; en caza embiste (mordida de minion).\nOcupa 1 espacio de sirviente · nunca expira · sin coste de maná.",
+
+        "Items.BolsaSierpes.DisplayName": "Bolsa de las Sierpes",
+        "Items.BolsaSierpes.Tooltip": "La sierpe estelar y sus once descendientes: cada una nada distinto.\nEl anillo, la caravana, la anguila, el ciempiés, el látigo, la víbora,\nla boa, el farol, la cinta, la manada y la cría. Clic derecho.\nSolo entrega lo que te falte.",
+
+        "Projectiles.OuroborosAstralProjectile.DisplayName": "Ouroboros Astral",
+        "Projectiles.CaravanaEspectralProjectile.DisplayName": "Caravana Espectral",
+        "Projectiles.AnguilaSolarProjectile.DisplayName": "Anguila Solar",
+        "Projectiles.CienpiesRunicoProjectile.DisplayName": "Ciempiés Rúnico",
+        "Projectiles.FlageloEstelarProjectile.DisplayName": "Flagelo Estelar",
+        "Projectiles.ViboraGenesiacaProjectile.DisplayName": "Víbora Genesíaca",
+        "Projectiles.BoaEclipseProjectile.DisplayName": "Boa del Eclipse",
+        "Projectiles.FarolGuardianProjectile.DisplayName": "Farol Guardián",
+        "Projectiles.CintaAuroraProjectile.DisplayName": "Cinta Aurora",
+        "Projectiles.ManadaAstralProjectile.DisplayName": "Manada Astral",
+        "Projectiles.CriaEstelarMinion.DisplayName": "Cría Estelar",
+
+        "Buffs.CriaEstelarBuff.DisplayName": "Cría Estelar",
+        "Buffs.CriaEstelarBuff.Description": "Una cría de sierpe estelar nada a tu lado y caza a tus enemigos",
+
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
 }

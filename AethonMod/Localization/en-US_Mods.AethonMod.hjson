@@ -381,6 +381,59 @@
         "Projectiles.SolVivoProjectile.DisplayName": "Living Sun",
         "Projectiles.SierpeEstelarProjectile.DisplayName": "Star Serpent",
 
+        // v6.38: THE SERPENT BROOD (10 new ways to move the same chain
+        // + the hatchling minion — the original UNTOUCHED).
+        "Items.OuroborosAstralStaff.DisplayName": "The Astral Ouroboros",
+        "Items.OuroborosAstralStaff.Tooltip": "Twelve beads chase each other in a circle aiming ahead — nobody leads.\nEach bead sweeps x0.55; at expiry the spiral closes and DETONATES x2.0.\n10 seconds of ring · no mana cost.",
+
+        "Items.CaravanaEspectralStaff.DisplayName": "The Spectral Caravan",
+        "Items.CaravanaEspectralStaff.Tooltip": "The body repeats the lantern's EXACT trajectory: the path-memory.\nThe trail cleans the corridor x0.35 — with turns you draw S walls.\n9 seconds of caravan · no mana cost.",
+
+        "Items.AnguilaSolarStaff.DisplayName": "The Solar Eel",
+        "Items.AnguilaSolarStaff.Tooltip": "The body IS a formula: the eel's traveling wave, lambda ~= body length.\nCRESTS bite x1.0, troughs only x0.30 — graze with the crest.\n8 seconds of S-swimming · no mana cost.",
+
+        "Items.CienpiesRunicoStaff.DisplayName": "The Runic Centipede",
+        "Items.CienpiesRunicoStaff.Tooltip": "Twelve plates hugging the ground with a leg phase-shifted 45° each.\nPlanted legs leave their RUNE: the rune stings x0.40.\nThe gait raises its frequency far from prey · no mana cost.",
+
+        "Items.FlageloEstelarStaff.DisplayName": "The Stellar Flagellum",
+        "Items.FlageloEstelarStaff.Tooltip": "The Verlet whip with mass-weighted constraint: energy runs to the tip.\nThe tip strikes proportional to its speed (x0.5 -> x1.5); past 26 px/tick,\nTHE CRACK: x2.2 + screenshake. 8 seconds · no mana cost.",
+
+        "Items.ViboraGenesiacaStaff.DisplayName": "The Genesis Viper",
+        "Items.ViboraGenesiacaStaff.Tooltip": "One skeleton, two bodies: the serpent's spine and TWO braided strands.\nThe pearls burn x0.45; when the heading coils the helix compresses x1.6.\n9 seconds of viper · no mana cost.",
+
+        "Items.BoaEclipseStaff.DisplayName": "The Eclipse Boa",
+        "Items.BoaEclipseStaff.Tooltip": "The head draws the servo-spiral over the prey and the body wraps it.\nEach complete turn is a SQUEEZE stack: x0.5 -> x4.0.\nThe prey falls and it seeks the next. 10 seconds · no mana cost.",
+
+        "Items.FarolGuardianStaff.DisplayName": "The Guardian Lantern",
+        "Items.FarolGuardianStaff.Tooltip": "The base is a hanging lantern and the TIP chases the prey (FABRIK).\nThe hand bites x1.0 and the chain burns x0.40 — the body TENSES.\n12 seconds of guardian · no mana cost.",
+
+        "Items.CintaAuroraStaff.DisplayName": "The Aurora Ribbon",
+        "Items.CintaAuroraStaff.Tooltip": "The living banner: a spine anchored to your back and two incommensurable sines.\nThe ribbon cuts x0.5; the amplitude is YOUR SPEED — run and it whips.\n12 seconds of banner · no mana cost.",
+
+        "Items.ManadaAstralStaff.DisplayName": "The Astral Pack",
+        "Items.ManadaAstralStaff.Tooltip": "Six hunters with ELASTIC spacing and leadership that JUMPS.\nEach hunter strikes with ITS OWN speed: x0.55 -> x1.4.\n10 seconds of hunt · no mana cost.",
+
+        "Items.CriaEstelarStaff.DisplayName": "The Star Hatchling",
+        "Items.CriaEstelarStaff.Tooltip": "The star serpent's baby daughter: the SAME DNA, small and awake.\nAt rest she swims around you; on the hunt she charges (minion bite).\nTakes 1 minion slot · never expires · no mana cost.",
+
+        "Items.BolsaSierpes.DisplayName": "Bag of Serpents",
+        "Items.BolsaSierpes.Tooltip": "The star serpent and her eleven descendants: each swims differently.\nThe ring, the caravan, the eel, the centipede, the whip, the viper,\nthe boa, the lantern, the ribbon, the pack and the hatchling.\nOnly delivers what you are missing.",
+
+        "Projectiles.OuroborosAstralProjectile.DisplayName": "Astral Ouroboros",
+        "Projectiles.CaravanaEspectralProjectile.DisplayName": "Spectral Caravan",
+        "Projectiles.AnguilaSolarProjectile.DisplayName": "Solar Eel",
+        "Projectiles.CienpiesRunicoProjectile.DisplayName": "Runic Centipede",
+        "Projectiles.FlageloEstelarProjectile.DisplayName": "Stellar Flagellum",
+        "Projectiles.ViboraGenesiacaProjectile.DisplayName": "Genesis Viper",
+        "Projectiles.BoaEclipseProjectile.DisplayName": "Eclipse Boa",
+        "Projectiles.FarolGuardianProjectile.DisplayName": "Guardian Lantern",
+        "Projectiles.CintaAuroraProjectile.DisplayName": "Aurora Ribbon",
+        "Projectiles.ManadaAstralProjectile.DisplayName": "Astral Pack",
+        "Projectiles.CriaEstelarMinion.DisplayName": "Star Hatchling",
+
+        "Buffs.CriaEstelarBuff.DisplayName": "Star Hatchling",
+        "Buffs.CriaEstelarBuff.Description": "A star serpent hatchling swims by your side and hunts your enemies",
+
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
 }

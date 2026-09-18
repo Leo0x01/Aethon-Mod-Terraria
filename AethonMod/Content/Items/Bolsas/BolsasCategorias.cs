@@ -334,4 +334,36 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>14 — LAS SIERPES (v6.38): LA FAMILIA COMPLETA — la sierpe
+    /// estelar original (INTACTA) y sus once descendientes: diez formas
+    /// nuevas de mover la misma cadena (el anillo, la caravana, la
+    /// anguila, el ciempiés, el látigo, la víbora, la boa, el farol, la
+    /// cinta y la manada — cada una nacida de un patrón distinto del
+    /// informe de locomoción) y LA CRÍA: la sierpe hecha minion.</summary>
+    public class BolsaSierpes : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Sierpes";
+        protected override string NombreCorto => "Bolsa de las Sierpes";
+        protected override Color ColorFiesta => new(170, 240, 255);
+        protected override string Nota => "La sierpe estelar y sus once descendientes: cada una nada distinto";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<SierpeEstelarStaff>(), 1));       // LA MADRE (intacta)
+            l.Add((ModContent.ItemType<OuroborosAstralStaff>(), 1));      // el anillo que se persigue
+            l.Add((ModContent.ItemType<CaravanaEspectralStaff>(), 1));    // el tren del camino-memoria
+            l.Add((ModContent.ItemType<AnguilaSolarStaff>(), 1));         // la fórmula ondulante
+            l.Add((ModContent.ItemType<CienpiesRunicoStaff>(), 1));       // la marcha metacronal
+            l.Add((ModContent.ItemType<FlageloEstelarStaff>(), 1));       // el látigo que chasquea
+            l.Add((ModContent.ItemType<ViboraGenesiacaStaff>(), 1));      // la doble hélice
+            l.Add((ModContent.ItemType<BoaEclipseStaff>(), 1));           // la que abraza
+            l.Add((ModContent.ItemType<FarolGuardianStaff>(), 1));        // la que alcanza
+            l.Add((ModContent.ItemType<CintaAuroraStaff>(), 1));          // la que ondea
+            l.Add((ModContent.ItemType<ManadaAstralStaff>(), 1));         // la manada elástica
+            l.Add((ModContent.ItemType<CriaEstelarStaff>(), 1));          // LA CRÍA (minion)
+            return l;
+        }
+    }
 }

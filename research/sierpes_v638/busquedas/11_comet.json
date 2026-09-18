@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://en.wikipedia.org",
+    "name": "Comet tail",
+    "snippet": "A comet tail is a projection of material from a comet that often becomes visible when illuminated by the Sun, while the comet passes through the inner Solar ...",
+    "host_name": "en.wikipedia.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://space.stackexchange.com",
+    "name": "Would the trajectory of a comet be altered by attaching",
+    "snippet": "May 12, 2020 — The parachute interacting with the comet's tail should slow down the velocity of the comet over a period of time and this should alter its ...",
+    "host_name": "space.stackexchange.com",
+    "rank": 1,
+    "date": "May 12, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.chegg.com",
+    "name": "Solved A comet's tail always trails behind its direction of",
+    "snippet": "Jun 27, 2024 — A comet's tail always trails behind its direction of motion throughout its journey through the solar system.TrueFalse",
+    "host_name": "www.chegg.com",
+    "rank": 2,
+    "date": "Jun 27, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "What is a better approach to doing projectile trail colliders?",
+    "snippet": "Apr 30, 2021 — I am working on a 2D game where the player and enemies can cast projectiles . Some of these projectiles have a particle system attached to ...",
+    "host_name": "discussions.unity.com",
+    "rank": 3,
+    "date": "Apr 30, 2021",
+    "favicon": ""
+  }
+]

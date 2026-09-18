@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://elonuniversity.contentdm.oclc.org",
+    "name": "Numerical Simulation· of Jellyfish Swimming",
+    "snippet": "The contraction of a jellyfish's bell generates a vortex ring as it swims, we will simplify into two dimensions using two point vortices.",
+    "host_name": "elonuniversity.contentdm.oclc.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.researchgate.net",
+    "name": "(PDF) Numerical Simulation of Jellyfish Swimming",
+    "snippet": "The contraction of a jellyfish's bell generates a vortex ring as it swims, The main goal of the project is to model the swimming motion of jellyfish using a ...",
+    "host_name": "www.researchgate.net",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.mdpi.com",
+    "name": "Exploring How Tentacles and Oral Arms Impact Locomotion",
+    "snippet": "by JG Miles · 2019 · Cited by 34 — A snapshot of a jellyfish simulation with 8 tentacles /oral arms swimming at R e = 150 during its 5th contraction cycle, illustrating some of the simulation ... Read more",
+    "host_name": "www.mdpi.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://journals.calstate.edu",
+    "name": "View of Numerical Simulation of Jellyfish Swimming",
+    "snippet": "by J Thomas · 2025 — The contractionof a jellyfish's bell generates a vortex ring as it swims, will simplify into two dimensions using two point vortices. position their tentacles ...",
+    "host_name": "journals.calstate.edu",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.academia.edu",
+    "name": "Simulation of swimming oblate jellyfish with a paddling-",
+    "snippet": "A three-dimensional computational model was established for an oblate jellyfish to analyse how the vortex structures present in the wake affect the swimming ... Read more",
+    "host_name": "www.academia.edu",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.sciencedirect.com",
+    "name": "Design and optimization of a bionic jellyfish robot for",
+    "snippet": "by K Luo · 2025 · Cited by 7 — This study presents the design of a biomimetic jellyfish robot based on a linkage-rod structural system. The drive system and linkage mechanism were optimized, ... Read more",
+    "host_name": "www.sciencedirect.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.katexagoraris.com",
+    "name": "Jellyfish Physics, Facts and Simulations",
+    "snippet": "The Lion's Mane jellyfish can have tentacles as long as 15 meters, and a bell as big as 1.8 meters. While Stygiomedusa gigantea is one of the most endangered ... Read more",
+    "host_name": "www.katexagoraris.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.mysimulator.uk",
+    "name": "Jellyfish Simulator (2D)",
+    "snippet": "A 2D jet-propulsion jellyfish simulator: bell contraction drives forward thrust , tentacles sway on a Verlet chain, and bioluminescence flashes with every pulse. Read more",
+    "host_name": "www.mysimulator.uk",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

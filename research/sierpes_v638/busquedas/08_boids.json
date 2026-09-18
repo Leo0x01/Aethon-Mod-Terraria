@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://www.red3d.com",
+    "name": "Boids (Flocks, Herds, and Schools - red3d.com",
+    "snippet": "The basic flocking model consists of three simple steering behaviors which describe how an individual boid maneuvers based on the positions and velocities its ...",
+    "host_name": "www.red3d.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.doc.ic.ac.uk",
+    "name": "On emergent behaviour, visualising the Boids Algorithm",
+    "snippet": "Oct 4, 2025 — The Boids algorithm, developed by Craig Reynolds in 1986, simulates the flocking behavior of birds and other animals . Read more",
+    "host_name": "www.doc.ic.ac.uk",
+    "rank": 1,
+    "date": "Oct 4, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://en.wikipedia.org",
+    "name": "Boids",
+    "snippet": "Boids is an artificial life algorithm, developed by Craig Reynolds in 1986, which simulates the flocking behaviour of birds, and related group motion.",
+    "host_name": "en.wikipedia.org",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.cs.toronto.edu",
+    "name": "Flocks, Herds, and Schools: A Distributed Behavioral Model",
+    "snippet": "by CW Reynolds · 1987 · Cited by 16468 — Flock centering causes the boid to fly in a direction that moves it closer to the centroid of the nearby boids . if a boid is deep inside a flock , the population ... Read more",
+    "host_name": "www.cs.toronto.edu",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://vanhunteradams.com",
+    "name": "Boids-algorithm",
+    "snippet": "Boids is an artificial life program that produces startlingly realistic simulations of flocking behavior. The Boids algorithm was developed by Craig Reynolds ...",
+    "host_name": "vanhunteradams.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.tandfonline.com",
+    "name": "The computational beauty of flocking: boids revisited",
+    "snippet": "by IL Bajec · 2007 · Cited by 44 — It is a mathematical approximation of the flock centring steering behaviour ( table 1 ). The main idea is that every boid wants to be evenly surrounded by its ... Read more",
+    "host_name": "www.tandfonline.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  }
+]

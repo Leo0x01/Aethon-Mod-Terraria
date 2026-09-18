@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://gamedev.net",
+    "name": "Implementing snake (Slither.io) like movement",
+    "snippet": "Dec 11, 2021 — The most naive approach was to move the head of the snake toward the mouse , then for all subsequent points just set it to be the value of the ... Read more",
+    "host_name": "gamedev.net",
+    "rank": 0,
+    "date": "Dec 11, 2021",
+    "favicon": ""
+  },
+  {
+    "url": "https://gamedev.stackexchange.com",
+    "name": "Smooth out movement of the snake in a 2d Snake game",
+    "snippet": "Oct 17, 2020 — If I want to move the snake , I simply remove one part from the back ( .pop_back() ) and then add a new part in the front accrding to the ... Read more",
+    "host_name": "gamedev.stackexchange.com",
+    "rank": 1,
+    "date": "Oct 17, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.monogame.net",
+    "name": "Chapter 22: Snake Game Mechanics",
+    "snippet": "By inserting a new head segment at the front of the chain and removing the last segment , this creates the illusion of the entire chain moving forward as one, ... Read more",
+    "host_name": "docs.monogame.net",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Moving a snake the ECS way.",
+    "snippet": "Nov 24, 2019 — I was thinking on having a snake entity with components that hold references to its spawned head , body parts and tail entities. The body parts ... Read more",
+    "host_name": "discussions.unity.com",
+    "rank": 3,
+    "date": "Nov 24, 2019",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.articulate.com",
+    "name": "Snake - created entirely in Storyline 360",
+    "snippet": "Feb 27, 2024 — Play the game here\n\nOverview\nVideo games have always been a part of my life. Starting from my early days playing Super Mario on the Gameboy Advance, ...",
+    "host_name": "community.articulate.com",
+    "rank": 4,
+    "date": "Feb 27, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://forum.gdevelop.io",
+    "name": "How can i make a snake following my player without any",
+    "snippet": "Aug 13, 2025 — The classic snake movement is easy. You check if the space it's moving to is empty you then add a tile there. You then delete the last or oldest ... Read more",
+    "host_name": "forum.gdevelop.io",
+    "rank": 5,
+    "date": "Aug 13, 2025",
+    "favicon": ""
+  }
+]

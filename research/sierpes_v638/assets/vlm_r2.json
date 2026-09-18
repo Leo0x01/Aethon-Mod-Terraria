@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Aquí tienes la revisión de legibilidad de los iconos:\n\n**1: 8/10 — Anillo de cuentas dorado con una serpiente (ouroboros) y detalle turquesa.**\n**2: 7/10 — Bastón con farol de luz ámbar y un rastro de cuentas verdes.**\n**3: 9/10 — Cabeza de anguila o serpiente amarilla en forma de S.**\n**4: 6/10 — Ciempiés segmentado de color ámbar con patas azules.**\n**5: 7/10 — Látigo o cola carmesí enrollada con punta blanca.**\n**6: 8/10 — Doble hélice o espiral de cuentas doradas y violetas.**\n**7: 5/10 — Mancha blanca difusa con un punto central, difícil de distinguir como espiral.**\n**8: 6/10 — Farol colgante con cadena y una estructura metálica en la base.**\n**9: 7/10 — Cinta o lazo verde y violeta con un broche dorado.**\n**10: 8/10 — Tres estrellas azules dispuestas en triángulo con una corona.**\n**11: 8/10 — Pequeña criatura blanca (sierpe) con ojos cyan grandes y corona.**\n**12: 9/10 — Saco o bolsa oscura con una sierpe azul en forma de S.**\n\n---\n\n**Iconos por debajo de 6/10:**\n*   **7** (5/10)",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789707810,
+  "id": "20260918130323cdfc31b3a9364c21",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260918130323cdfc31b3a9364c21",
+  "usage": {
+    "completion_tokens": 355,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 597,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 952
+  }
+}

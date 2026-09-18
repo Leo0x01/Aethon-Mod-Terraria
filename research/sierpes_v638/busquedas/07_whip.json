@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://www.lexaloffle.com",
+    "name": "Procedural Animation With Verlet Physics (Part 1)",
+    "snippet": "Feb 7, 2026 — In Verlet , we primarily use acceleration to simulate external forces (like gravity or wind). The beauty of Verlet comes from the simplicity of ... Read more",
+    "host_name": "www.lexaloffle.com",
+    "rank": 0,
+    "date": "Feb 7, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://pikuma.com",
+    "name": "Verlet Integration and Cloth Physics Simulation",
+    "snippet": "May 10, 2022 — Physics simulation in games is a super vast and interesting topic! This article explores how Verlet integration can be used to simulate 2D ...",
+    "host_name": "pikuma.com",
+    "rank": 1,
+    "date": "May 10, 2022",
+    "favicon": ""
+  },
+  {
+    "url": "https://toqoz.fyi",
+    "name": "Verlet Rope in Games",
+    "snippet": "Aug 26, 2020 — Write Your Own Physics . Don't make the mistake of seeing “hinge joint”, “angle joint”, or some other variation in your game/ physics engine ... Read more",
+    "host_name": "toqoz.fyi",
+    "rank": 2,
+    "date": "Aug 26, 2020",
+    "favicon": ""
+  },
+  {
+    "url": "https://pybullet.org",
+    "name": "Constraint-Based Verlet Physics Engine - Real-Time",
+    "snippet": "Mar 4, 2008 — hello everyone, I'm currently trying to implement a 2D physics engine, using the verlet integration method. For collision detection, i have ... Read more",
+    "host_name": "pybullet.org",
+    "rank": 3,
+    "date": "Mar 4, 2008",
+    "favicon": ""
+  },
+  {
+    "url": "http://datagenetics.com",
+    "name": "Verlet Simulations",
+    "snippet": "In this article we're going to look at some simple physics simulations using a technique called Verlet Integration. We'll start with some basic concepts, ... Read more",
+    "host_name": "datagenetics.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.gdcvault.com",
+    "name": "Using Verlet Integration and Constraints in a Six Degree of",
+    "snippet": "The simulation could integrate stiff systems at the time steps used in games without the need to compute expensive Jacobian matrices and had very simple. Read more",
+    "host_name": "www.gdcvault.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  }
+]

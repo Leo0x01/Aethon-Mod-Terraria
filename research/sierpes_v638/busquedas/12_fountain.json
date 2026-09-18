@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://discussions.unity.com",
+    "name": "Ballistic Trajectory - Unity Engine",
+    "snippet": "May 28, 2018 — Hey all, i'm working on a 3D first person shooter-tower defense game and i'm trying to make a mortar/howitzer tower. the problem is this, ...",
+    "host_name": "discussions.unity.com",
+    "rank": 0,
+    "date": "May 28, 2018",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.vaia.com",
+    "name": "Ballistic Trajectory: Physics & Formulas | Vaia",
+    "snippet": "Sep 5, 2024 — Consider a water fountain pushing water into the air. The water stream follows a ballistic trajectory , Kinematic equations calculating ...",
+    "host_name": "www.vaia.com",
+    "rank": 1,
+    "date": "Sep 5, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://en.wikipedia.org",
+    "name": "Projectile motion",
+    "snippet": "In physics , projectile motion describes the motion of an object that is launched into the air and moves under the influence of gravity alone, ... Read more",
+    "host_name": "en.wikipedia.org",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://allphysicsfundamentals.com",
+    "name": "Projectile Motion: The Physics of Every Throw, Launch, and",
+    "snippet": "Learn projectile motion in physics with key equations, horizontal & vertical components, real-world examples, and interactive visuals.",
+    "host_name": "allphysicsfundamentals.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "http://web.cs.wpi.edu",
+    "name": "3.5 PREDICTING PHYSICS",
+    "snippet": "A moving projectile under gravity will follow a curved trajectory. The projectile moves according to the formula Ept = Ep0 + Eusmt + Egt2 2 [3.1] game envi- ... 7 pages",
+    "host_name": "web.cs.wpi.edu",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://dev.to",
+    "name": "The Math Behind the Arc: Understanding Projectile Motion",
+    "snippet": "Sep 28, 2024 — Just as we can calculate the path of a thrown object , quantum mechanics allows us to calculate the probability of a particle's position, ... Read more",
+    "host_name": "dev.to",
+    "rank": 5,
+    "date": "Sep 28, 2024",
+    "favicon": ""
+  }
+]

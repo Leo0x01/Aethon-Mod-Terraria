@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://www.youtube.com/watch?v=W-ou_sVlTWk",
+    "name": "5.21: Matter.js: Mouse Constraints - The Nature of Code - YouTube",
+    "snippet": "Mar 9, 2017 · In this video, I demonstrate how to use mouse constraints with matter.js to add mouse interaction to a p5.js physics simulation sketch.",
+    "host_name": "www.youtube.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://natureofcode.com/physics-libraries",
+    "name": "Chapter 6: Physics Libraries - Nature of Code",
+    "snippet": "A distance constraint is a connection of fixed length between two bodies ... Replace your friend with your mouse, and that's what a mouse constraint is.",
+    "host_name": "natureofcode.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://zalo.github.io/blog/constraints",
+    "name": "Constraints - Sublucid Geometry",
+    "snippet": "Feb 6, 2019 · If the distance constraints are first solved in one direction, and then the other, it creates a form of Inverse Kinematics called “FABRIK”, or “ ...",
+    "host_name": "zalo.github.io",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://pikuma.com/blog/verlet-integration-2d-cloth-physics-simulation",
+    "name": "Verlet Integration and Cloth Physics Simulation - Pikuma",
+    "snippet": "May 10, 2022 · Then we compare this distance with cursor size squared. If it's smaller, it means the point overlap with the mouse cursor and thus is selected.",
+    "host_name": "pikuma.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/playlist?list=PLRqwX-V7Uu6akvoNKE4GAxf6ZeBYoJ4uh",
+    "name": "5: Physics Libraries - The Nature of Code - YouTube",
+    "snippet": "These video lessons accompany Chapter 5 (Physics Libraries) from The Nature of Code book. Both Box2D and toxiclibs are covered. Hope you enjoy them! ...more",
+    "host_name": "www.youtube.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://anshuman-kumar.gitbook.io/nez-doc/verlet-physics",
+    "name": "Verlet physics | Nez framework documentation - GitBook",
+    "snippet": "Sep 26, 2019 · Constraints are just mathematic rules that are solved and adjust the Particle positions. At the very simplest we have a DistanceConstraint . As ...",
+    "host_name": "anshuman-kumar.gitbook.io",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.lexaloffle.com/bbs/?tid=154658",
+    "name": "Procedural Animation With Verlet Physics (Part 1) - Lexaloffle Games",
+    "snippet": "Feb 7, 2026 · The beauty of Verlet comes from the simplicity of handling internal constraints like keeping a specific distance between a spider's hip and its ...",
+    "host_name": "www.lexaloffle.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://toqoz.fyi/game-rope.html",
+    "name": "Verlet Rope in Games",
+    "snippet": "Aug 26, 2020 · A good example of this behavior being useful might be to imagine an object which is programmed to follow the mouse cursor. ... distance constraint ...",
+    "host_name": "toqoz.fyi",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]
