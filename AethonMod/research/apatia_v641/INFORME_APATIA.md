@@ -75,6 +75,6 @@ luz `clamp(scale·0.8)·color`.
 - Los sonidos .ogg del original no se copian (calco vanilla Item12/Item14 con el mismo perfil de pitch).
 
 ## 5) FUENTES (en esta carpeta)
-`Apathanull.cs` · `CosmicTentacle.cs` · `CustomPulse.cs` · `CustomSpark.cs` · `VoidDustInverted.cs`
+`Apathanull.cs.txt` · `CosmicTentacle.cs.txt` · `CustomPulse.cs.txt` · `CustomSpark.cs.txt` · `VoidDustInverted.cs.txt` (extensión .cs.txt: material de referencia, NO fuente — tML compila todo .cs del directorio)
 (repo público del mod de origen, rama 1.4.4, vía API de GitHub autenticada; texturas medidas por PIL:
 LargeBloom 360², GlowSpark 2048², BasicCircle 64², BloomCircle 200², SmallBloom 400²).
