@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -162,19 +161,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
     }
 
     /// <summary>
-    /// FisuraDesgarroProjectile — v6.42 — LA FISURA VERTICAL DE REALIDAD.
+    /// FisuraDesgarroProjectile — v6.42/v6.43 — LA FISURA VERTICAL DE REALIDAD.
     ///
     /// LA HERIDA que el tajo deja en el mundo: una grieta carmesí de
     /// 16×128 px que vive 120 ticks (3·τ de la relajación de fractura
     /// — el "2 segundos" del diseño son la física hablando) y hace DOS
     /// cosas:
     ///
-    ///   · MUERDE: todo lo que cruza su banda (±32 px de la línea)
-    ///     recibe 0,3× cada 10 ticks (la zona de daño persistente).
-    ///   · TRAGA: los proyectiles ENEMIGOS que la cruzan desaparecen
-    ///     — la fisura se los come y su daño SE SUMA al próximo tajo
-    ///     del portador (EL HAMBRE, con tope de 2× el daño del arma:
-    ///     devorar spam no puede trivializar a los jefes).
+    ///   · MUERDE: todo lo que cruza LA GRIETA DE VERDAD recibe 0,3×
+    ///     cada 10 ticks — desde v6.43 la detección es
+    ///     FormaLib.NPCEnSegmento sobre el eje vertical de la herida con
+    ///     el grosor REAL de 16 px (la sección eficaz de la FISURA, no
+    ///     un rectángulo generoso: el AABB del NPC contra la franja de
+    ///     la grieta, por el chequeo de línea del motor).
+    ///   · TRAGA: los proyectiles ENEMIGOS que cruzan su banda (±32 px,
+    ///     MISMO radio de siempre — ahora FormaLib.ProyectilHostilEnBanda)
+    ///     desaparecen — la fisura se los come y su daño SE SUMA al
+    ///     próximo tajo del portador (EL HAMBRE, con tope de 2× el
+    ///     daño del arma: devorar spam no puede trivializar a los jefes).
     ///
     /// El borde rasgado con dientes congelados (CaminoDesgarro — la
     /// costura coincide diente a diente) y las chispas de anomalía.
@@ -185,8 +189,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public const float LargoFisura = 128f;
         public const float Banda = 32f;
 
-        /// <summary>Cooldowns de mordida por NPC (una por 10 ticks).</summary>
-        private readonly Dictionary<int, int> _mordidas = new();
+        /// <summary>
+        /// v6.43 — El ANCHO REAL de la herida (16 px, el ancho del sprite
+        /// de la fisura): el grosor de la cápsula con la que MUERDE vía
+        /// <see cref="FormaLib.NPCEnSegmento"/> — la sección eficaz real
+        /// de la grieta. No confundir con <see cref="Banda"/>: esa es la
+        /// calle ANCHA de devorar proyectiles (±32 px), que sigue igual.
+        /// </summary>
+        public const float GrosorMordida = 16f;
 
         private int _edad;
 
@@ -221,27 +231,38 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Vector2 abajo = Projectile.Center + Vector2.UnitY * (LargoFisura * 0.5f);
 
             // === LA MORDIDA (autoridad + EsObjetivo, 0,3× cada 10 ticks). ===
+            // v6.43 — LA SECCIÓN EFICAZ REAL: antes "centro del NPC a menos
+            // de 32+ancho·0.35 px" (un círculo generoso que sobre-mordía);
+            // ahora el AABB del NPC contra LA GRIETA de verdad — el eje
+            // vertical de la herida con su grosor real de 16 px, por el
+            // chequeo de línea del motor (broad-phase + AABB girado).
+            // MISMO daño, MISMA cadencia: solo cambió la geometría.
             if (Main.myPlayer == Projectile.owner && _edad % 10 == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * 0.3f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                    if (DistanciaASegmento(npc.Center, arriba, abajo) < Banda + npc.width * 0.35f)
-                        npc.SimpleStrikeNPC(dmg, npc.Center.X < Projectile.Center.X ? -1 : 1,
-                            false, 1.5f, DamageClass.Melee);
+                    if (!FormaLib.NPCEnSegmento(npc, arriba, abajo, GrosorMordida)) continue;
+                    npc.SimpleStrikeNPC(dmg, npc.Center.X < Projectile.Center.X ? -1 : 1,
+                        false, 1.5f, DamageClass.Melee);
                 }
             }
 
             // === LA TRAGA: devorar proyectiles hostiles que crucen. ===
+            // v6.43 — la banda de ±32 px ahora vive en la librería:
+            // FormaLib.ProyectilHostilEnBanda (ancho total 64 = Banda·2 →
+            // MISMO radio; el filtro hostil && daño > 0 — los telegraphs
+            // damage=0 quedan fuera por diseño — también vive allí; la
+            // guardia friendly de la doble bandera se mantiene aquí).
             if ((Main.myPlayer == Projectile.owner || Main.netMode == NetmodeID.SinglePlayer) &&
                 _edad % 2 == 0)
             {
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile p = Main.projectile[i];
-                    if (p == null || !p.active || !p.hostile || p.friendly || p.damage <= 0) continue;
-                    if (DistanciaASegmento(p.Center, arriba, abajo) > Banda) continue;
+                    if (p == null || !p.active || p.friendly) continue;
+                    if (!FormaLib.ProyectilHostilEnBanda(p, arriba, abajo, Banda * 2f)) continue;
 
                     // EL HAMBRE crece (tope 2× el daño del arma — el diseño).
                     ApuestasPlayer ap = Main.player[Projectile.owner].GetModPlayer<ApuestasPlayer>();
@@ -276,18 +297,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>Distancia punto-segmento (la matemática de la casa).</summary>
-        private static float DistanciaASegmento(Vector2 punto, Vector2 a, Vector2 b)
-        {
-            Vector2 ab = b - a;
-            float t = Vector2.Dot(punto - a, ab) / Math.Max(1f, ab.LengthSquared());
-            t = MathHelper.Clamp(t, 0f, 1f);
-            return Vector2.Distance(punto, a + ab * t);
-        }
-
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
+
+            // v6.43 — LA LUZ DE LAS FORMAS (solo con FormaLib.Depuracion):
+            // la mordida REAL (la grieta de 16 px) en cian y la banda de la
+            // traga (±32 px) en carmesí — para VER la sección eficaz de
+            // verdad, no la que uno imagina.
+            Vector2 punta = Vector2.UnitY * (LargoFisura * 0.5f);
+            FormaLib.DepurarDibujar(Projectile.Center - punta, Projectile.Center + punta,
+                GrosorMordida);
+            FormaLib.DepurarDibujar(Projectile.Center - punta, Projectile.Center + punta,
+                Banda * 2f, new Color(255, 60, 60, 140));
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }

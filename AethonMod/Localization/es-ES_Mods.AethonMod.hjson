@@ -484,4 +484,7 @@
 
         "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
         "Common.Milestone": "Hito alcanzado: {0}",
+
+        "Items.PrismaDePaisajesItem.DisplayName": "El Prisma de Paisajes",
+        "Items.PrismaDePaisajesItem.Tooltip": "El probador de la librería del cielo: cada uso despliega UN PAISAJE\nentero sobre el fondo del mundo — capas con su parallax, su deriva,\nsu profundidad y sus tintes de cielo, luz y brillo.\nCiclo: Eclipse Umbral → Lluvia Estelar → Amanecer Primordial → cielo limpio.\nARMA DE PRUEBAS — sin coste de maná.",
 }

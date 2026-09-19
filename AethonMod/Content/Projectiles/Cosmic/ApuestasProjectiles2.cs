@@ -43,6 +43,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public const float EnfriamientoNewton = 0.988f;
         public const int FusionTicks = 90;
         public const int CanionMuertoTicks = 180;
+        public const int Varillas = 7;              // las costillas del arco de la vela
 
         // === LA PALETA ===
         private static readonly Color MembranaBase = new(255, 196, 110);
@@ -209,6 +210,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private int _edadContador;
         private int _edadPar() => _edadContador++;
 
+        // === LA GEOMETRÍA DE LA VELA (v6.43): el arco se calcula UNA vez
+        // por frame y ambos pases leen del MISMO array — cero GC, y el
+        // volumétrico y la estructura no pueden divergir. ===
+        private readonly Vector2[] _puntas = new Vector2[Varillas + 1];
+        private Vector2 _baseP;
+        private Vector2 _bordeP;
+        private Color _rampa;
+        private float _semiA;
+        private float _semiB;
+        private float _inclinacion;
+        private float _caida;
+        private int _lado;
+        private float _time;
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
@@ -217,13 +232,47 @@ namespace AethonMod.Content.Projectiles.Cosmic
             try { Main.spriteBatch.End(); }
             catch { wasActive = false; }
 
+            CalcularVela();
+
+            // === EL PASE DE MEDIA RESOLUCIÓN (v6.43 — MediaResLib): el
+            // VOLUMÉTRICO DIFUSO de la vela — el tejido de la membrana,
+            // el borde llameante y las alas de fusión — corre a media
+            // resolución y se compone ×2: fill-rate ÷4. Son manchas de
+            // luz, no trazos definidos: con el sampler lineal el
+            // resultado es indistinguible. ===
+            MediaResLib.Empezar(pixelado: false);
+            if (MediaResLib.EnPase)
+            {
+                try { DrawVolumetrico(Main.spriteBatch); }
+                finally { MediaResLib.Terminar(); }
+            }
+            else
+            {
+                // Respaldo nativo (RT indisponible): el mismo dibujado sin pase.
+                try
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    DrawVolumetrico(Main.spriteBatch);
+                    Main.spriteBatch.End();
+                }
+                catch
+                {
+                    try { Main.spriteBatch.End(); } catch { }
+                }
+            }
+
+            // === LA ESTRUCTURA FINA (resolución NATIVA): las costillas y el
+            // corazón son trazos DEFINIDOS del arte — la media resolución
+            // se los comería. ===
             try
             {
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                DrawVela(Main.spriteBatch);
+                DrawEstructura(Main.spriteBatch);
                 Main.spriteBatch.End();
             }
             catch
@@ -239,90 +288,114 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// LA MEMBRANA — el arte de la vela: 7 varillas sobre un arco de
-        /// cuarto de elipse; entre varilla y varilla, el tejido (quads
-        /// estirados a lo largo de la cuerda). El calor despliega el
-        /// arco (más área = más presión de radiación capturada) y pinta
-        /// el tejido con la rampa del fuego solar; la fusión la vuelve
-        /// azul-blanca y le añade EL BORDE LLAMEANTE (PyraLib.Tongue);
-        /// el cañón muerto la deja CAÍDA (rotación vencida) y gris.
+        /// LA GEOMETRÍA — el arco de la vela resuelto una sola vez: 7
+        /// varillas sobre un cuarto de elipse. El calor despliega el arco
+        /// (más área = más presión de radiación capturada); el cañón
+        /// muerto la deja CAÍDA (rotación vencida); la rampa del color
+        /// pinta el tejido según el estado (fuego solar → plasma frío →
+        /// gris vencido).
         /// </summary>
-        private void DrawVela(SpriteBatch batch)
+        private void CalcularVela()
         {
-            Vector2 base_ = Projectile.Center - Main.screenPosition;
-            int lado = Main.player[Projectile.owner].direction > 0 ? 1 : -1;
-            float time = Main.GlobalTimeWrappedHourly;
+            _baseP = Projectile.Center - Main.screenPosition;
+            _lado = Main.player[Projectile.owner].direction > 0 ? 1 : -1;
+            _time = Main.GlobalTimeWrappedHourly;
 
             // La caída del cañón muerto: la vela se rinde.
-            float caida = Estado == 2f
+            _caida = Estado == 2f
                 ? MathHelper.Lerp(0f, 0.9f, 1f - _canionRestante / (float)CanionMuertoTicks)
                 : 0f;
 
             // El despliegue: 55% del arco frío → 100% al calor pleno.
             float despliegue = 0.55f + 0.45f * Calor;
-            float semiA = 66f * despliegue;
-            float semiB = 54f * despliegue;
-            float inclinacion = -0.35f * lado + caida * 1.1f;
+            _semiA = 66f * despliegue;
+            _semiB = 54f * despliegue;
+            _inclinacion = -0.35f * _lado + _caida * 1.1f;
 
-            Color rampa = Estado == 1f
+            _rampa = Estado == 1f
                 ? PyraPalettes.Sample(PyraPalettes.ColdFire, 0.8f)
                 : Estado == 2f
                     ? new Color(120, 110, 100) * 0.5f
                     : PyraPalettes.Sample(PyraPalettes.SolarFire, 0.25f + 0.6f * Calor);
 
-            Texture2D glow = VFXCore.SoftGlow;
-            const int Varillas = 7;
-            Vector2 prev = default;
             for (int i = 0; i <= Varillas; i++)
             {
                 float t = i / (float)Varillas;           // 0..1 a lo largo del arco
                 float ang = MathHelper.PiOver2 - t * MathHelper.PiOver2;   // vertical → horizontal
                 // El arco de la vela (elipse en cuartos, espejada por lado).
-                Vector2 local = new Vector2(-MathF.Cos(ang) * semiA * lado, -MathF.Sin(ang) * semiB)
-                    .RotatedBy(inclinacion * (0.4f + 0.6f * t));
-                Vector2 punta = base_ + local + new Vector2(0f, MathF.Sin(time * 1.8f + t * 3f) * 2.5f);
-
-                if (i > 0)
-                {
-                    // EL TEJIDO: el quad estirado entre varillas.
-                    Vector2 delta = punta - prev;
-                    float len = delta.Length();
-                    if (len > 0.5f)
-                    {
-                        float opacidad = (0.16f + 0.3f * Calor) * (1f - caida * 0.6f);
-                        Color tejido = rampa * opacidad;
-                        batch.Draw(glow, prev + delta * 0.5f, null, tejido,
-                            delta.ToRotation(), glow.Size() * 0.5f,
-                            new Vector2(len * 1.05f, 10f + 8f * Calor) / glow.Size(),
-                            SpriteEffects.None, 0f);
-                    }
-                }
-                prev = punta;
-
-                // LA VARILLA: la costilla luminosa del tejido.
-                batch.Draw(glow, punta, null, rampa * (0.5f + 0.25f * Calor),
-                    ang + inclinacion, glow.Size() * 0.5f,
-                    new Vector2(6f, 26f) / glow.Size(), SpriteEffects.None, 0f);
+                Vector2 local = new Vector2(-MathF.Cos(ang) * _semiA * _lado, -MathF.Sin(ang) * _semiB)
+                    .RotatedBy(_inclinacion * (0.4f + 0.6f * t));
+                _puntas[i] = _baseP + local + new Vector2(0f, MathF.Sin(_time * 1.8f + t * 3f) * 2.5f);
             }
 
-            // EL CORAZÓN de la vela (el mástil).
-            batch.Draw(glow, base_, null, Estado == 1f ? NucleoFusion * 0.8f : rampa * 0.55f,
-                0f, glow.Size() * 0.5f, new Vector2(14f, 20f) / glow.Size(),
-                SpriteEffects.None, 0f);
+            // El extremo libre del arco: donde vive el borde llameante.
+            _bordeP = _baseP + new Vector2(-_semiA * _lado, -_semiB).RotatedBy(_inclinacion * 0.4f);
+        }
 
-            // EL BORDE LLAMEANTE (solo con calor — PyraLib: las lenguas del mástil).
+        /// <summary>
+        /// EL VOLUMÉTRICO (va al pase de MEDIA RESOLUCIÓN): el tejido
+        /// entre varillas, el borde llameante (las lenguas del mástil) y
+        /// las alas de fusión — las manchas de luz DIFUSAS, las que no
+        /// necesitan resolución nativa. El batch que recibe es el del
+        /// pase (matriz escalada ×0,5): las posiciones son las de siempre.
+        /// </summary>
+        private void DrawVolumetrico(SpriteBatch batch)
+        {
+            Texture2D glow = VFXCore.SoftGlow;
+
+            // EL TEJIDO: el quad estirado entre varillas.
+            for (int i = 1; i <= Varillas; i++)
+            {
+                Vector2 delta = _puntas[i] - _puntas[i - 1];
+                float len = delta.Length();
+                if (len > 0.5f)
+                {
+                    float opacidad = (0.16f + 0.3f * Calor) * (1f - _caida * 0.6f);
+                    Color tejido = _rampa * opacidad;
+                    batch.Draw(glow, _puntas[i - 1] + delta * 0.5f, null, tejido,
+                        delta.ToRotation(), glow.Size() * 0.5f,
+                        new Vector2(len * 1.05f, 10f + 8f * Calor) / glow.Size(),
+                        SpriteEffects.None, 0f);
+                }
+            }
+
+            // EL BORDE LLAMEANTE (solo con calor — las lenguas del mástil).
             if (Calor > 0.15f && Estado != 2f)
             {
-                Vector2 borde = base_ + new Vector2(-semiA * lado, -semiB).RotatedBy(inclinacion * 0.4f);
-                PyraLib.Tongue(batch, borde, 26f + 30f * Calor, 12f + 10f * Calor,
+                PyraLib.Tongue(batch, _bordeP, 26f + 30f * Calor, 12f + 10f * Calor,
                     Estado == 1f ? PyraPalettes.ColdFire : PyraPalettes.SolarFire,
-                    Calor, Seed, time, 0.9f * Calor);
+                    Calor, Seed, _time, 0.9f * Calor);
             }
 
             // EL ALAS DE FUSIÓN: la estrella despierta — arco voltaico.
             if (Estado == 1f)
-                StormLib.ArcRing(batch, base_, 40f, -MathHelper.Pi, 0f, Seed,
-                    StormLib.FlickTick(time, 15f), 3f, MembranaFusion * 0.7f, NucleoFusion, 0.8f, 6);
+                StormLib.ArcRing(batch, _baseP, 40f, -MathHelper.Pi, 0f, Seed,
+                    StormLib.FlickTick(_time, 15f), 3f, MembranaFusion * 0.7f, NucleoFusion, 0.8f, 6);
+        }
+
+        /// <summary>
+        /// LA ESTRUCTURA (resolución NATIVA): las costillas luminosas del
+        /// tejido y el corazón de la vela — los trazos DEFINIDOS del arte.
+        /// </summary>
+        private void DrawEstructura(SpriteBatch batch)
+        {
+            Texture2D glow = VFXCore.SoftGlow;
+
+            for (int i = 0; i <= Varillas; i++)
+            {
+                float t = i / (float)Varillas;
+                float ang = MathHelper.PiOver2 - t * MathHelper.PiOver2;
+
+                // LA VARILLA: la costilla luminosa del tejido.
+                batch.Draw(glow, _puntas[i], null, _rampa * (0.5f + 0.25f * Calor),
+                    ang + _inclinacion, glow.Size() * 0.5f,
+                    new Vector2(6f, 26f) / glow.Size(), SpriteEffects.None, 0f);
+            }
+
+            // EL CORAZÓN de la vela (el mástil).
+            batch.Draw(glow, _baseP, null, Estado == 1f ? NucleoFusion * 0.8f : _rampa * 0.55f,
+                0f, glow.Size() * 0.5f, new Vector2(14f, 20f) / glow.Size(),
+                SpriteEffects.None, 0f);
         }
     }
 

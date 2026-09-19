@@ -12,12 +12,13 @@ using AethonMod.Content.Players;
 namespace AethonMod.Content.Projectiles.Cosmic
 {
     /// <summary>
-    /// MetronomoPulsarHalo — v6.42 — APUESTA 1: EL METRÓNOMO DE PÚLSAR.
+    /// MetronomoPulsarHalo — v6.43 — APUESTA 1: EL METRÓNOMO DE PÚLSAR.
     ///
     /// El COMPÁS vivo: un púlsar en miniatura que flota sobre la cabeza
     /// del portador mientras sostiene el arma. Late cada 30 ticks
-    /// (0,5 s exactos — el periodo del arma) con un anillo que se
-    /// contrae hacia el tic, un destello y un clic perceptible.
+    /// (0,5 s exactos — el periodo del arma) con un anillo que NACE en
+    /// el tic y se expande apagándose hasta el siguiente, un destello y
+    /// un clic perceptible.
     ///
     /// LA LECTURA DEL RITMO (tres calificaciones):
     ///   · PERFECT (±3 ticks del tic, ±50 ms): crítico garantizado +
@@ -37,6 +38,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// GlobalTimeWrappedHourly — el render late distinto que el juego),
     /// cero Main.rand en el render, lote cerrado→cerrado, daño del faro
     /// solo en autoridad con EsObjetivo.
+    ///
+    /// v6.43 — LA COREOGRAFÍA DECLARATIVA (CompasLib): el latido de 30 t
+    /// y el faro de 180 t ya no se programan con switches a mano — se
+    /// DECLARAN como compases (static readonly, cero estado, cero GC) y
+    /// la AI/render consultan el instante activo. El reloj sigue siendo
+    /// el de siempre (GameUpdateCount para el latido, _faroTicks para el
+    /// faro): el compás interpreta, no cuenta. F7 dibuja los compases en
+    /// pantalla (CompasLib.Depuracion).
     /// </summary>
     public class MetronomoPulsarHalo : ModProjectile
     {
@@ -49,6 +58,43 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public const int FaroEnfriamiento = 480;
         public const float FaroLargo = 900f;
         public const float FaroOmega = 0.0698f;   // rad/t — dos vueltas exactas
+        /// <summary>La mitad del faro: 90 t = UNA rotación exacta del haz (ω·90 ≈ 2π).</summary>
+        public const int FaroMedio = FaroTicks / 2;
+
+        // ==================================================================
+        //  v6.43 — LOS COMPASES DECLARADOS (CompasLib): la coreografía como
+        //  DATO, construida UNA vez (static readonly — cero estado, cero GC
+        //  por frame, multi-instanciable gratis). El reloj sigue siendo el
+        //  de siempre; esto solo declara QUÉ pasa en cada ventana.
+        // ==================================================================
+
+        /// <summary>
+        /// EL COMPÁS DEL LATIDO (ciclo de 30 t): la ventana "Tic" dura UN
+        /// tick y SOLAPA a propósito sobre la "Onda" — en el tick 0 gana el
+        /// Tic (prioridad 2: el evento — clic + destello de luz); del 1 al
+        /// 29 reina la Onda (el anillo que nació en el tic se expande y se
+        /// apaga hasta el siguiente). El viejo `FaseCompas == 0` era este
+        /// switch escrito a mano.
+        /// </summary>
+        private static readonly Compas CompasLatido = Compas.Nuevo(Periodo)
+            .Con(Movimiento.Nuevo("Tic", 0f, 1f).ConPrioridad(2))
+            .Con(Movimiento.Nuevo("Onda", 0f, Periodo));
+
+        /// <summary>Índice del "Tic" en <see cref="CompasLatido"/> (lo fija el orden de .Con — comparar por int, sin strings).</summary>
+        private const int IdxTic = 0;
+
+        /// <summary>
+        /// EL COMPÁS DEL FARO (ciclo de 180 t): DOS barridos de 90 — cada
+        /// uno es UNA rotación exacta del haz (ω·90 ≈ 2π; juntos, las dos
+        /// vueltas del premio). Lleva la ENVOLVENTE del haz (la fracción
+        /// del ciclo = el desvanecimiento) y declara la estructura; el
+        /// ciclo de VIDA (encendido, conteo, enfriamiento de 480 t) es el
+        /// reloj del proyectil (_faroTicks/_faroCd) — el reloj manda, el
+        /// compás interpreta.
+        /// </summary>
+        private static readonly Compas CompasFaro = Compas.Nuevo(FaroTicks)
+            .Con(Movimiento.Nuevo("Barrido1", 0f, FaroMedio))
+            .Con(Movimiento.Nuevo("Barrido2", FaroMedio, FaroMedio));
 
         /// <summary>El combo actual de aciertos al compás.</summary>
         private int _combo;
@@ -56,8 +102,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Ticks restantes del FARO (0 = apagado).</summary>
         private int _faroTicks;
 
-        /// <summary>Ángulo actual del haz del faro.</summary>
-        private float _angFaro;
+        /// <summary>
+        /// v6.43 — CERO GC: la lista de claves para envejecer los iframes
+        /// del picotazo se REUTILIZA (el viejo `new List<>(Keys)` alocaba
+        /// una lista en CADA tick del faro). Estática y despejada por uso —
+        /// la AI corre de una en una.
+        /// </summary>
+        private static readonly List<int> _clavesPicotazo = new List<int>(16);
 
         /// <summary>Enfriamiento del faro (para no re-dispararlo al instante).</summary>
         private int _faroCd;
@@ -103,6 +154,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void AI()
         {
+            // v6.43 — LA LLAVE DE LA DEPURACIÓN: F7 dibuja los compases en
+            // pantalla (líneas de tiempo desde el PostDraw). Off por defecto.
+            CompasLib.AtenderTecla();
+
             Player duenio = Main.player[Projectile.owner];
             if (duenio == null || !duenio.active || duenio.dead ||
                 duenio.HeldItem == null ||
@@ -122,8 +177,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.Center = Vector2.Lerp(Projectile.Center, ancla, 0.18f);
             Projectile.velocity = Vector2.Zero;
 
-            // === EL TIC: el destello y el clic del compás. ===
-            if (FaseCompas == 0)
+            // === EL TIC: el destello y el clic del compás (v6.43 — la
+            //     ventana "Tic" [0..1) del compás declarado: en el tick 0
+            //     su prioridad le gana a la Onda y el evento dispara — el
+            //     viejo `FaseCompas == 0` era este switch a mano). ===
+            Instante latido = CompasLatido.En(FaseCompas);
+            if (latido.En(IdxTic))
             {
                 Lighting.AddLight(Projectile.Center, GlowFrio.ToVector3() * 1.2f);
                 if (Main.netMode != NetmodeID.Server)
@@ -135,17 +194,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (_faroCd > 0) _faroCd--;
 
-            // === EL FARO: el premio del combo — dos vueltas de haz. ===
+            // === EL FARO: el premio del combo — dos vueltas de haz
+            //     (v6.43: el compás declarado lleva la ESTRUCTURA; el
+            //     reloj sigue siendo _faroTicks, solo que leído hacia
+            //     ADELANTE: reloj = FaroTicks − _faroTicks). ===
             if (_faroTicks > 0)
             {
                 _faroTicks--;
-                _angFaro += FaroOmega;
 
-                // El haz pica a todo lo que cruza (solo autoridad).
+                // El reloj del faro hacia adelante: 1..180.
+                float relojFaro = FaroTicks - _faroTicks;
+
+                // El haz pica a todo lo que cruza (solo autoridad). La
+                // dirección sale del reloj SIN envolver: el faro dura
+                // EXACTAMENTE un ciclo del compás y en su tick final
+                // (reloj 180) la envoltura lo torcería a 0 — el viejo
+                // _angFaro tampoco envolvía (nacía en −π/2 y sumaba ω·N).
                 if (Main.myPlayer == Projectile.owner)
                 {
+                    float angFaro = -MathHelper.PiOver2 + FaroOmega * relojFaro;
                     Vector2 a = Projectile.Center;
-                    Vector2 b = a + new Vector2(MathF.Cos(_angFaro), MathF.Sin(_angFaro)) * FaroLargo;
+                    Vector2 b = a + new Vector2(MathF.Cos(angFaro), MathF.Sin(angFaro)) * FaroLargo;
                     int dmg = Math.Max(1, (int)(Projectile.damage * 0.75f));
                     foreach (NPC npc in Main.ActiveNPCs)
                     {
@@ -164,11 +233,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         }
                     }
                 }
-                // Los iframe del picotazo envejecen.
-                foreach (int k in new List<int>(_picotazos.Keys))
+                // Los iframe del picotazo envejecen (v6.43 — cero GC: la
+                // lista de claves es reutilizable; el viejo new List<>
+                // alocaba una por tick del faro).
+                _clavesPicotazo.Clear();
+                _clavesPicotazo.AddRange(_picotazos.Keys);
+                for (int i = 0; i < _clavesPicotazo.Count; i++)
                 {
-                    _picotazos[k]--;
-                    if (_picotazos[k] <= 0) _picotazos.Remove(k);
+                    int k = _clavesPicotazo[i];
+                    int restante = _picotazos[k] - 1;
+                    if (restante <= 0) _picotazos.Remove(k);
+                    else _picotazos[k] = restante;
                 }
 
                 if (_faroTicks == 0)
@@ -207,8 +282,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (_combo >= ComboParaFaro && _faroCd <= 0)
             {
                 _combo = 0;
+                // El reloj del faro nace en 0: el ángulo ya se DERIVA del
+                // reloj (−π/2 + ω·reloj — nace apuntando al cielo).
                 _faroTicks = FaroTicks;
-                _angFaro = -MathHelper.PiOver2;   // nace apuntando al cielo
                 _picotazos.Clear();
 
                 if (Main.netMode != NetmodeID.Server)
@@ -232,12 +308,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 Vector2 pos = Projectile.Center - Main.screenPosition;
                 float time = Main.GlobalTimeWrappedHourly;
-                int fase = FaseCompas;
-                float hastaTic = fase / (float)Periodo;   // 0 (acaba de tic) → 1 (a punto de tic)
+
+                // v6.43 — EL INSTANTE DEL COMPÁS: la fase del latido ya no
+                // se calcula a mano — la FRACCIÓN del ciclo del compás es
+                // bit a bit el viejo fase/Periodo.
+                Instante latido = CompasLatido.En(FaseCompas);
+                float hastaTic = latido.FraccionCiclo;   // 0 (acaba de tic) → 1 (a punto de tic)
 
                 // === EL ANILLO DEL COMPÁS (búfer de VFXCore — coords de MUNDO):
-                //     se CONTRAE hacia el tic (la cuenta atrás visible — el
-                //     jugador aprende el compás con los ojos). ===
+                //     la ONDA del tic — nace pequeña y brillante en el tick 0
+                //     y se expande apagándose hasta el siguiente (la cuenta
+                //     atrás visible: el jugador aprende el compás con los
+                //     ojos). ===
                 float anillo = 14f + 40f * hastaTic;
                 float aAnillo = 0.35f + 0.5f * (1f - hastaTic);
                 VFXCore.Quad(Projectile.Center, AnilloTic * aAnillo,
@@ -278,11 +360,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         SpriteEffects.None, 0f);
                 }
 
-                // === EL FARO: el haz que barre el campo. ===
+                // === EL FARO: el haz que barre el campo (v6.43: la
+                //     ENVOLVENTE sale del compás — la fracción restante del
+                //     ciclo es el desvanecimiento; la dirección, del reloj
+                //     sin envolver, como siempre). ===
                 if (_faroTicks > 0)
                 {
-                    float resto = _faroTicks / (float)FaroTicks;
-                    Vector2 dir = new Vector2(MathF.Cos(_angFaro), MathF.Sin(_angFaro));
+                    float relojFaro = FaroTicks - _faroTicks;
+                    Instante faro = CompasFaro.En(relojFaro);
+                    float resto = 1f - faro.FraccionCiclo;
+                    float angFaro = -MathHelper.PiOver2 + FaroOmega * relojFaro;
+                    Vector2 dir = new Vector2(MathF.Cos(angFaro), MathF.Sin(angFaro));
                     LumenLib.Ray(Main.spriteBatch, pos, dir, FaroLargo, 46f,
                         GlowFrio, 0.9f * resto, 0.5f + 0.5f * MathF.Sin(time * 7f));
                     LumenLib.Ray(Main.spriteBatch, pos, dir, FaroLargo, 16f,
@@ -301,6 +389,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
             return false;
+        }
+
+        // ==================================================================
+        //  v6.43 — LA DEPURACIÓN DEL COMPÁS: F7 (atendido en la AI) enciende
+        //  las líneas de tiempo declarativas — el jugador VEE la
+        //  coreografía: un rectángulo por movimiento, el cursor del reloj
+        //  y el activo iluminado. PostDraw se llama aunque PreDraw
+        //  devuelva false (verificado contra el binario real: el salto del
+        //  hook cae JUSTO en la llamada a PostDraw — incondicional), y el
+        //  dibujado se apaga solo: Depuracion es false por defecto.
+        // ==================================================================
+        public override void PostDraw(Color lightColor)
+        {
+            if (Main.netMode == NetmodeID.Server || !CompasLib.Depuracion) return;
+
+            Vector2 centro = new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
+            CompasLib.DepurarDibujar(CompasLatido, FaseCompas, centro);
+            if (_faroTicks > 0)
+                CompasLib.DepurarDibujar(CompasFaro, FaroTicks - _faroTicks,
+                    centro + new Vector2(0f, 48f));
         }
     }
 

@@ -994,14 +994,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.Server) return;
 
             // Estruendo de la liberación final (todas las máquinas)
-            try
-            {
-                Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
-                    Projectile.Center, new Vector2(1f, 0f), 6f, 9, 18, 0.4f,
-                    "AethonBlackHoleFinalBlast"));
-            }
-            catch { }
+            // v6.43 — PantallaLib: el PunchCameraModifier pasa a la
+            // SACUDIDA TRAUMA de la casa (misma magnitud 6; el id conserva
+            // la semántica de identidad del original — repetir REFRESCA
+            // el trauma, no lo apila).
+            Pantalla.Sacudir(6f, 0.4f, "AethonBlackHoleFinalBlast");
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
+
+            // v6.43 — PantallaLib: el flash violeta + la viñeta de la
+            // implosión final (la singularidad se libera y el túnel se
+            // CIERRA sobre el jugador — el color del colapso).
+            Pantalla.Flash(new Color(190, 120, 255), 0.3f, 0.6f);
+            Pantalla.Vineta(0.65f, 1.5f);
 
             // === PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===
             // (v5.90: paleta cálida — antes los presets eran violeta)

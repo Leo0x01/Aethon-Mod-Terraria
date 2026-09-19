@@ -496,4 +496,7 @@
 
         "Common.LevelUp": "Your weapon has reached level {0}!",
         "Common.Milestone": "Milestone reached: {0}",
+
+        "Items.PrismaDePaisajesItem.DisplayName": "The Landscape Prism",
+        "Items.PrismaDePaisajesItem.Tooltip": "The sky library tester: each use unfurls AN ENTIRE LANDSCAPE\nover the world's background — layers with their own parallax, drift,\ndepth and their sky, light and brightness tints.\nCycle: Umbral Eclipse → Starfall Rain → Primordial Dawn → clear sky.\nTEST WEAPON — no mana cost.",
 }

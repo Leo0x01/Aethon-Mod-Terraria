@@ -290,14 +290,15 @@ namespace AethonMod.Content.Projectiles.V20
                 ParticleManager.Spawn(p);
             }
 
-            // === TEMBLOR DE CÁMARA FUERTE ===
-            try
-            {
-                Main.instance.CameraModifiers.Add(new Terraria.Graphics.CameraModifiers.PunchCameraModifier(
-                    Projectile.Center, new Vector2(1f, 0f), 10f, 14, 22, 0.5f,
-                    "AethonSupernovaBlast"));
-            }
-            catch { }
+            // === v6.43 — PANTALLALIB: EL GOLPE DE PANTALLA COMPLETO ===
+            // (sustituye al PunchCameraModifier "AethonSupernovaBlast":
+            // misma magnitud 10 en la nueva sacudida de modelo trauma +
+            // flash blanco + viñeta + onda expansiva de la librería de
+            // pantalla de la casa — el estallido cinematográfico entero).
+            Pantalla.Flash(Color.White, 0.35f, 0.75f);
+            Pantalla.Vineta(0.5f, 1.2f);
+            Pantalla.OndaExpansiva(Projectile.Center, 460f, 0.5f, new Color(255, 180, 80), 60f);
+            Pantalla.Sacudir(10f, 0.5f);
 
             // === DUSTS FRONTALES: 70 lenguas de fuego ===
             for (int i = 0; i < 70; i++)

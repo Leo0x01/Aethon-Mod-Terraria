@@ -43,6 +43,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.TestSparkle>(), 1));
             l.Add((ModContent.ItemType<Weapons.ProjBeam>(), 1));
             l.Add((ModContent.ItemType<Weapons.TestMagicRingV2>(), 1));
+            // v6.43 — CieloLib: el prisma que despliega los paisajes de la
+            // librería del cielo (el tester del fondo del juego).
+            l.Add((ModContent.ItemType<Cosmetics.PrismaDePaisajesItem>(), 1));
             return l;
         }
     }

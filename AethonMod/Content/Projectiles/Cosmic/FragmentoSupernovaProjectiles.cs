@@ -25,7 +25,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · EL OJO ALADO: cuerpo crema-oro (110×40) + DOS ALAS naranjas
     ///     inclinadas con puntas rojo oscuro + LA PUPILA oscura (pase
     ///     alpha — el vacío del ojo) — se INCLINA con la velocidad
-    ///     (banking ×0.03, el número del original).
+    ///     (banking ×0.03, el número del original). v6.43: el cuerpo
+    ///     compuesto YA ES UN MOLDE (MoldeLib.OjoAlado — EL PRIMER MOLDE
+    ///     de la casa): este archivo solo ANCLA (centro+rotación+escala)
+    ///     y PROYECTA; los números exactos viven en la librería.
     ///   · LAS AFTERIMAGES ORBITALES — LA FIRMA: 4 clones crema (alfa 50)
     ///     orbitando a 8px + 3 clones naranjas (alfa 77) a 16px, girando
     ///     y RESPIRANDO con el pulso triangular de 4 segundos (el bucle
@@ -59,10 +62,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private const int BeamTicks = 15;          // la ráfaga del beam
         private const float VelHover = 9f;
 
-        // === LA PALETA (las medidas EXACTAS del sprite original). ===
-        private static readonly Color CuerpoOro = new(255, 220, 150);    // crema-oro
-        private static readonly Color AlaNaranja = new(240, 120, 72);    // las alas
-        private static readonly Color PuntaRoja = new(168, 48, 48);      // las puntas
+        // === LA PALETA de los ECOS (las medidas EXACTAS del sprite
+        //     original; la del cuerpo vivo vive en MoldeLib.CrearOjoAlado). ===
         private static readonly Color EcoCrema = new(255, 233, 197, 50); // anillo interior
         private static readonly Color EcoNaranja = new(244, 142, 72, 77);// anillo exterior
 
@@ -259,6 +260,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             catch
             {
                 try { Main.spriteBatch.End(); } catch { }
+                // v6.43: si el molde dejó quads a medio emitir, FUERA — el
+                // búfer de VFXCore es de UN efecto por Begin/Flush. Lo mismo
+                // la cola del pase alpha (auditoría v6.43/T4): la pupila
+                // caducada no espera al flush del frame siguiente.
+                VFXCore.Begin();
+                MoldeLib.Molde.OjoAlado.DescartarPaseAlpha();
             }
 
             if (wasActive)
@@ -284,21 +291,39 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // (el orden importa: la PUPILA se dibuja AL FINAL en pase alpha —
             //  el vacío del ojo debe OSCURECER el brillo del cuerpo propio,
             //  no quedar enterrado debajo: la lección del mock v6.41.)
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
 
-            // LAS AFTERIMAGES ORBITALES (LA FIRMA — el bucle del original:
-            // 4 clones crema a 8px + 3 clones naranja a 16px, respirando).
+            // v6.43 — EL OJO ALADO ES UN MOLDE: el cuerpo compuesto
+            //  (cuerpo+alas+puntas+pupila) está DECLARADO una sola vez en
+            //  MoldeLib con los números EXACTOS de la réplica; aquí solo se
+            //  ANCLA y se PROYECTA — los quads caen al búfer de VFXCore en
+            //  coords de MUNDO y FlushAdditive los vuelca (false: el lote
+            //  del PreDraw ya se cerró). Las afterimages son el MODO
+            //  FANTASMA del MISMO molde (silueta en un color sólido).
+            MoldeLib.Molde molde = MoldeLib.Molde.OjoAlado;
+            VFXCore.Begin();
             for (int i = 0; i < _ecos.Length; i++)
             {
                 bool interior = i < 4;
                 Color tinte = (interior ? EcoCrema : EcoNaranja) * 0.8f;
-                ComponerOjo(_ecos[i], rot, interior ? 0.55f : 0.5f, tinte, teñir: true);
+                // EL FANTASMA: la carne encoge (0.55/0.5) pero la
+                //  ENVERGADURA se queda (anclaje 1) y SIN pupila — el
+                //  bucle EXACTO de la réplica, calcado al molde.
+                molde.ProyectarFantasma(_ecos[i], rot, 0f,
+                    interior ? 0.55f : 0.5f, tiempo, tinte);
             }
+            // EL CUERPO VIVO (tinte blanco = sus colores propios). banking 0:
+            //  el banco del original (velocidad.X×0.03) ya vive HORNEADO en
+            //  Projectile.rotation — pasarlo aquí además lo doblaría.
+            molde.Proyectar(centro, rot, 0f, 1f, tiempo, Color.White, 1f);
+            VFXCore.FlushAdditive(null, false);
 
-            // EL CUERPO VIVO (con sus colores propios).
-            ComponerOjo(centro, rot, 1f, Color.White, teñir: false);
+            // EL GLOW, EL HALO, EL TELEGRAPH y EL RAYO se quedan en su pase
+            //  aditivo propio de siempre: NO son piezas de cuerpo (son el
+            //  aura radial y el ataque) y el aditivo CONMUTA — el orden
+            //  contra el molde no cambia un píxel.
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
 
             // EL GLOW GOLDENROD PULSANTE (periodo 1.4 s — el número exacto).
             float latido = (float)Math.Cos(tiempo % 1.4f / 1.4f * MathHelper.TwoPi) * 0.5f + 0.5f;
@@ -346,12 +371,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Main.spriteBatch.End();
 
             // --- PASO 2 (alpha): LA PUPILA — el vacío del ojo ENCIMA de
-            //     todo el brillo (oscurece el cuerpo vivo y sus ecos). ---
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            ComponerPupila(centro, rot, 0.6f);
-            Main.spriteBatch.End();
+            //     todo el brillo (oscurece el cuerpo vivo y sus ecos).
+            //     La vuelca el MOLDE: quedó en su cola PendientesAlpha
+            //     durante la proyección y este flush abre el lote
+            //     AlphaBlend propio de la casa y lo cierra limpio. ---
+            molde.FlushPaseAlpha();
         }
 
         /// <summary>Llena el búfer de las 7 posiciones de los ecos orbitales.</summary>
@@ -361,51 +385,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 _ecos[i] = EcosLib.EcoOrbital(centro, tempo, i * 0.25f, 8f * (0.6f + 0.4f * pulso));
             for (int i = 0; i < 3; i++)
                 _ecos[4 + i] = EcosLib.EcoOrbital(centro, tempo, i * 0.34f, 16f * (0.6f + 0.4f * pulso));
-        }
-
-        /// <summary>
-        /// Compone EL OJO ALADO en una posición. Con <paramref name="teñir"/>
-        /// TODO el ojo se dibuja del color del eco (el fantasma); si no,
-        /// con sus colores propios (el cuerpo vivo).
-        /// </summary>
-        private void ComponerOjo(Vector2 pos, float rot, float escala, Color tinte, bool teñir)
-        {
-            Texture2D glow = VFXCore.SoftGlow;
-            Vector2 pantalla = pos - Main.screenPosition;
-            Vector2 tam = glow.Size();
-
-            Color cuerpo = teñir ? tinte : CuerpoOro * 0.85f;
-            Color ala = teñir ? tinte : AlaNaranja * 0.8f;
-            Color punta = teñir ? tinte : PuntaRoja * 0.85f;
-
-            // EL CUERPO: crema-oro horizontal (110×40).
-            Main.spriteBatch.Draw(glow, pantalla, null, cuerpo, rot, tam * 0.5f,
-                new Vector2(110f, 40f) * escala / tam, SpriteEffects.None, 0f);
-
-            // LAS ALAS: naranjas, inclinadas ±25°, a los costados.
-            for (int lado = -1; lado <= 1; lado += 2)
-            {
-                Vector2 offset = new Vector2(38f * lado, -4f).RotatedBy(rot);
-                Main.spriteBatch.Draw(glow, pantalla + offset, null, ala,
-                    rot + lado * -0.44f, tam * 0.5f,
-                    new Vector2(52f, 16f) * escala / tam, SpriteEffects.None, 0f);
-
-                // LAS PUNTAS: rojo oscuro al final de cada ala.
-                Vector2 puntaOffset = new Vector2(62f * lado, -12f).RotatedBy(rot);
-                Main.spriteBatch.Draw(glow, pantalla + puntaOffset, null, punta,
-                    rot + lado * -0.6f, tam * 0.5f,
-                    new Vector2(22f, 10f) * escala / tam, SpriteEffects.None, 0f);
-            }
-        }
-
-        /// <summary>LA PUPILA: el vacío horizontal del ojo (pase ALPHA — oscurece).</summary>
-        private void ComponerPupila(Vector2 pos, float rot, float escala)
-        {
-            Texture2D glow = VFXCore.SoftGlow;
-            Vector2 pantalla = pos - Main.screenPosition;
-            Main.spriteBatch.Draw(glow, pantalla, null, Color.Black * 0.55f, rot,
-                glow.Size() * 0.5f,
-                new Vector2(34f, 12f) * escala / glow.Size(), SpriteEffects.None, 0f);
         }
 
         /// <summary>Un quad estirado de A a B sobre el lote abierto (el rayo).</summary>
