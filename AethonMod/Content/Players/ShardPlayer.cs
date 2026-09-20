@@ -1,8 +1,10 @@
+using System;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using AethonMod.Content.Systems;
 using AethonMod.Content.Globals;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Players
 {
@@ -10,6 +12,33 @@ namespace AethonMod.Content.Players
     {
         public int ResonanceShards = 0;
         public bool FirstLevelUpTriggered = false;
+
+        // ================================================================
+        //  v6.47 — LA VOZ DEL HAMBRE
+        // ================================================================
+        //
+        // Con el libro a nivel alto, cada rato sin matar es un MOMENTO
+        // DE HAMBRE: EcoLib susurra y la barra dorada paladece. Al cuarto
+        // momento (~5 minutos), el libro pierde la paciencia y GRIMORIO
+        // FURIOSO llama a su comida (GrimorioFuriaSistema — las oleadas).
+        //
+        // La hambre solo cuenta con el libro VISIBLE (barra rápida):
+        // guardado, el libro DUERME (la hambre se congela, no se olvida).
+        // Una kill del portador lo alimenta: hambre a cero.
+
+        /// <summary>Ticks desde la última kill del portador (con libro visible).</summary>
+        public int TicksSinMatar = 0;
+        /// <summary>Momentos de hambre acumulados (0..10).</summary>
+        public int MomentosHambre = 0;
+
+        /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
+        public const int SegundosPorMomento = 75;
+        /// <summary>Momentos que tarden la furia (~5 minutos sin comer).</summary>
+        public const int MomentosParaFuria = 4;
+        /// <summary>El libro hambriento habla "a nivel alto" (25 = el segundo peldaño del Testigo).</summary>
+        public const int NivelMinimoHambre = 25;
+        /// <summary>Tope de momentos de hambre (= tope de oleadas).</summary>
+        public const int MomentosMax = 10;
 
         // ================================================================
         //  v6.46 — LOS TRES ESTADOS DEL LIBRO
@@ -185,6 +214,103 @@ namespace AethonMod.Content.Players
         }
 
         public override void OnHurt(Player.HurtInfo info) { }
+
+        /// <summary>
+        /// v6.47: EL CORAZÓN DE LA VOZ DEL HAMBRE. Corre cada tick: cuenta
+        /// el tiempo sin matar (solo con libro visible y nivel alto),
+        /// susurra cada momento de hambre y cruza el umbral de la furia.
+        /// </summary>
+        public override void PostUpdate()
+        {
+            try
+            {
+                bool local = Player.whoAmI == Main.myPlayer && Main.netMode != Terraria.ID.NetmodeID.Server;
+                int nivel = NivelLibro(false);
+
+                if (nivel >= NivelMinimoHambre)
+                {
+                    TicksSinMatar++;
+                    int momentos = Math.Min(TicksSinMatar / (60 * SegundosPorMomento), MomentosMax);
+
+                    if (momentos > MomentosHambre)
+                    {
+                        MomentosHambre = momentos;
+
+                        // EL SUSURRO: la voz del libro en modo hambre — sin
+                        // rugido, escala menuda, gris pálido. Solo la oye el
+                        // portador (SP-first).
+                        if (local)
+                        {
+                            string clave = "Mods.AethonMod.Eco.Hambre.Susurro" +
+                                           Math.Min(MomentosHambre, 4);
+                            EcoLib.Hablar(
+                                Terraria.Localization.Language.GetTextValue(clave),
+                                new Microsoft.Xna.Framework.Color(176, 172, 168),
+                                rugido: false, escala: 0.52f);
+                        }
+
+                        // LA FURIA: al cuarto momento, el evento (si la config
+                        // lo permite y el mundo está libre — un jefe o una
+                        // invasión lo BLOQUEA y la hambre sigue subiendo hasta
+                        // 10: por eso existen las 10 oleadas naturales).
+                        if (MomentosHambre >= MomentosParaFuria &&
+                            Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
+                        {
+                            var config = ModContent.GetInstance<Content.AethonConfig>();
+                            bool evento = config == null || config.EventoHambreGrimorio;
+                            if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
+                                GrimorioFuriaSistema.Provocar(Player, MomentosHambre);
+                        }
+                    }
+                }
+                // guardado el libro: DUERME — la hambre se congela.
+
+                // EL AURA DEL HAMBRE: la ceniza del libro sobre su portador
+                // (AuraLib por las capas de jugador — solo el local la viste).
+                if (local && MomentosHambre > 0 && !Player.dead)
+                    AuraLib.ActualizarJugador(Player, AuraHambre());
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// El portador mató algo (lo llama GlobalNPCXP cuando el libro de
+        /// su barra rápida ha comido): la hambre se perdona — la barra
+        /// dorada recupera su color y los susurros callan.
+        /// </summary>
+        public void RegistrarKill()
+        {
+            TicksSinMatar = 0;
+            MomentosHambre = 0;
+        }
+
+        // === EL PERFIL DEL AURA DE HAMBRE (cacheado: cero GC por frame) ===
+        private static AuraPerfil _auraHambre;
+        private static int _auraHambreIntensidad = -1;
+
+        /// <summary>El perfil del hambre a la intensidad actual (creado SOLO cuando cambia).</summary>
+        private AuraPerfil AuraHambre()
+        {
+            if (_auraHambre == null || _auraHambreIntensidad != MomentosHambre)
+            {
+                _auraHambre = AuraPerfil.HambreDelGrimorio(MomentosHambre);
+                _auraHambreIntensidad = MomentosHambre;
+            }
+            return _auraHambre;
+        }
+
+        /// <summary>El perfil cacheado del aura de hambre (las capas de jugador lo dibujan).</summary>
+        public AuraPerfil AuraHambrePublica() => AuraHambre();
+
+        /// <summary>
+        /// El festín terminó y el libro está saciado: la hambre del
+        /// portador se perdona por completo (GrimorioFuriaSistema.Fin).
+        /// </summary>
+        public void PerdonarHambre()
+        {
+            TicksSinMatar = 0;
+            MomentosHambre = 0;
+        }
 
         public override void SaveData(TagCompound tag)
         {

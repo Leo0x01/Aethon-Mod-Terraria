@@ -1,6 +1,7 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.NPCs
 {
@@ -42,6 +43,45 @@ namespace AethonMod.Content.NPCs
             NPC.velocity.Y *= 0.8f;
             // Brillo violeta.
             Lighting.AddLight(NPC.Center, new Microsoft.Xna.Framework.Vector3(0.4f, 0.2f, 0.6f));
+
+            // ================================================================
+            //  v6.47 — LAS BURBUJAS DRAMÁTICAS DEL TESTIGO (EcoLib).
+            //  La biblioteca de diálogos con cola es genérica: el Testigo
+            //  la usa como segundo usuario (después del grimorio) para
+            //  hablar POR BURBUJA DRAMÁTICA cuando te acercas — susurros
+            //  violetas sin rugido, en vez de chat plano. Solo cliente.
+            // ================================================================
+            if (Main.netMode != Terraria.ID.NetmodeID.Server)
+            {
+                bool alguienCerca = false;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player pl = Main.player[i];
+                    if (pl != null && pl.active && !pl.dead &&
+                        pl.Distance(NPC.Center) < 300f)
+                    {
+                        alguienCerca = true;
+                        break;
+                    }
+                }
+
+                NPC.localAI[0]++;
+                if (alguienCerca && NPC.localAI[0] >= 840f) // ~14 s entre burbujas
+                {
+                    NPC.localAI[0] = 0f;
+                    NPC.localAI[1]++; // la línea rota deterministamente
+                    int idx = 1 + ((int)NPC.localAI[1]) % 3;
+                    EcoLib.Hablar(
+                        Terraria.Localization.Language.GetTextValue(
+                            "Mods.AethonMod.Testigo.Ambiente" + idx),
+                        new Microsoft.Xna.Framework.Color(196, 150, 255),
+                        rugido: false, escala: 0.5f);
+                }
+                else if (!alguienCerca && NPC.localAI[0] < 700f)
+                {
+                    NPC.localAI[0] = 700f; // pre-calentado: habla pronto al acercarse
+                }
+            }
         }
 
         public override string GetChat()

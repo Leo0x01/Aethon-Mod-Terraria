@@ -16,6 +16,24 @@
         "Items.LevelUpTester.DisplayName": "Level Slayer",
         "Items.LevelUpTester.Tooltip": "Grants +10 levels to the Grimoire of the Eternal.\nSearches the whole inventory.\nTesting item — remove before release.",
 
+        "Items.CarnadaDelGrimorio.DisplayName": "Grimoire Bait",
+        "Items.CarnadaDelGrimorio.Tooltip": "Triggers the WAVES OF HUNGER without waiting.\nLeft click: unleash the fury (prepared waves).\nRight click: cycle 1..10 waves.\nEverything dying in wave k pays XP ×(k+1).\nTesting item — remove before release.",
+
+        "Items.CristalDelTitanHueco.DisplayName": "Hollow Titan Crystal",
+        "Items.CristalDelTitanHueco.Tooltip": "A shard of the crystal colossus of the Sanctum.\nSummons the HOLLOW TITAN.\nONLY WORKS BY DAY — the night belongs to the dead.",
+
+        "Items.SelloDelRift.DisplayName": "Rift Seal",
+        "Items.SelloDelRift.Tooltip": "The key of the one half here, half between worlds.\nSummons the RIFT KEEPER.\nONLY WORKS BY DAY.",
+
+        "Items.PlumaDeLaArquera.DisplayName": "Archer's Feather",
+        "Items.PlumaDeLaArquera.Tooltip": "It fell from the sky when she tried to shoot Aethon down.\nSummons the ECHO OF THE STAR ARCHER.\nONLY WORKS BY DAY.",
+
+        "Items.SombraDelPortador.DisplayName": "Bearer's Shadow",
+        "Items.SombraDelPortador.Tooltip": "The silhouette of the first soul ever bound to a shard.\nSummons the ECHO OF THE FIRST BEARER.\nONLY WORKS BY DAY.",
+
+        "Items.NombreDeAethon.DisplayName": "The Name of Aethon",
+        "Items.NombreDeAethon.Tooltip": "'Go to the Hollow Sanctum and call its name.'\nSummons AETHON, THE PRIMORDIAL LIGHT.\nONLY WORKS BY DAY.\nFive phases await — the final acknowledgment.",
+
         "Projectiles.ArcaneBolt.DisplayName": "Arcane Bolt",
         "Projectiles.GenesisLight.DisplayName": "Genesis Light",
         "Projectiles.CosmicOrbMinion.DisplayName": "Cosmic Orb",
@@ -519,4 +537,36 @@
         "Eco.VozJefe.LunaticCultist": "The cult falls voiceless. The grimoire dons his ritual mask and rehearses, in whispers, the summoning of the end.",
         "Eco.VozJefe.MoonLord": "The Lord of the Moon exhales his last light. The grimoire stays silent, for once… then writes: 'thanks for the food.'",
         "Eco.VozJefe.Desconocido": "A greater power has fallen. The grimoire devours its essence without asking for a name.",
+
+        "Eco.VozJefe.Aethon": "The Primordial Light dims by its own will. The grimoire keeps a blank page — for once, it eats in silence.",
+        "Eco.VozJefe.HollowTitan": "The crystal colossus collapses in chimes. The grimoire slurps its hollow echo: the resonance of a guardian with nothing left to guard.",
+        "Eco.VozJefe.RiftKeeper": "The keeper folds into its own rift and vanishes. The grimoire learns the trick and files it between chapters.",
+        "Eco.VozJefe.LosEcos": "The previous bearers return to the stardust they always were. The grimoire closes their files — and leafs through YOURS.",
+
+        "Eco.VozCincoEstrellas": "The rarest thing it has ever eaten. The grimoire keeps the recipe — in case luck strikes twice.",
+
+        "Eco.Hambre.Susurro1": "The grimoire is hungry…",
+        "Eco.Hambre.Susurro2": "The grimoire is hungry… the pages lick themselves…",
+        "Eco.Hambre.Susurro3": "The grimoire is HUNGRY… the clasps are creaking…",
+        "Eco.Hambre.Susurro4": "…hungry… HUNGRY… HUNGRY…",
+
+        "Eco.Furia.Ira": "The grimoire is FURIOUS for going so long without eating…",
+        "Eco.Furia.Llamada": "The grimoire calls its food…",
+        "Eco.Furia.Saciado": "The grimoire is sated… for now.",
+
+        "Furia.Oleada": "Wave {0} of {1} — the grimoire spits out its food. XP ×{2} this wave.",
+        "Furia.OleadaFinal": "FINAL WAVE {0} of {1} — the book is black with rage. The aura rots: black-gray, red edges.",
+        "Furia.Jefe": "The hunger summons a guardian: {0} (XP ×{1})",
+        "Furia.JefeHuido": "{0} sinks away, unsatisfied…",
+
+        "Llamado.SoloDia": "The call only answers BY DAY — the night belongs to eyes and the dead.",
+        "Llamado.YaVive": "One already lives. The call does not double.",
+
+        "Carnada.Preparadas": "The bait will serve {0} waves. (Right click to change)",
+        "Carnada.YaActivo": "The fury is ALREADY unleashed — feed it or survive.",
+        "Carnada.Ocupado": "The world is busy (a boss or an invasion). The bait waits its turn.",
+
+        "Testigo.Ambiente1": "I watched you before you had a name.",
+        "Testigo.Ambiente2": "The book you carry… I saw the first one being born.",
+        "Testigo.Ambiente3": "Every bearer ends up as a page. Yours is still being written.",
 }

@@ -52,6 +52,17 @@ namespace AethonMod.Content.Items.Bolsas
             // y el flujo del Fragmento Génesis debe poder probarse en el
             // mundo de pruebas que ya tengas.
             l.Add((ModContent.ItemType<Items.Placeables.AncientAltarItem>(), 5));
+            // v6.47 — LA CARNADA DEL GRIMORIO: el probador del evento de las
+            // oleadas del hambre (clic der prepara 1..10 oleadas, clic izq
+            // desata la furia). Sin esperas: el festín a la carta.
+            l.Add((ModContent.ItemType<Items.CarnadaDelGrimorio>(), 1));
+            // v6.47 — LOS LLAMADOS: los cinco invocadores de los jefes del
+            // mod (de día) — el Testigo ya aparece solo; los jefes, a llamar.
+            l.Add((ModContent.ItemType<Items.Llamados.CristalDelTitanHueco>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.SelloDelRift>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.PlumaDeLaArquera>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.SombraDelPortador>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
             return l;
         }
     }

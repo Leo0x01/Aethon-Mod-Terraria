@@ -32,6 +32,13 @@ namespace AethonMod.Content.Globals
         public bool ShowExtendedTooltip = false;
 
         /// <summary>
+        /// v6.47: ¿ya se comió este libro su primera criatura 5★? La
+        /// primera merece su línea en EcoLib ("Lo más raro que ha
+        /// comido jamás") — una sola vez en la vida del libro.
+        /// </summary>
+        public bool PrimeraCincoEstrellas = false;
+
+        /// <summary>
         /// Solo aplica a las 2 armas Aethon (Grimorio + Fragmento Génesis).
         /// DEFENSIVO: envuelto en try/catch porque se llama durante la carga del mod
         /// y ModContent.ItemType puede fallar si los items aún no están registrados.
@@ -160,6 +167,8 @@ namespace AethonMod.Content.Globals
                 tag["aethonLevel"] = Level;
                 tag["aethonXP"] = XP;
             }
+            if (PrimeraCincoEstrellas)
+                tag["aethonPrimera5"] = true;
         }
 
         public override void LoadData(Item item, TagCompound tag)
@@ -169,11 +178,13 @@ namespace AethonMod.Content.Globals
                 Level = tag.GetInt("aethonLevel");
                 if (Level < 1) Level = 1;
                 XP = tag.GetInt("aethonXP");
+                PrimeraCincoEstrellas = tag.GetBool("aethonPrimera5");
             }
             catch
             {
                 Level = 1;
                 XP = 0;
+                PrimeraCincoEstrellas = false;
             }
         }
     }

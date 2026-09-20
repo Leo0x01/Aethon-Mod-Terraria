@@ -16,6 +16,24 @@
         "Items.LevelUpTester.DisplayName": "Verdugo de Niveles",
         "Items.LevelUpTester.Tooltip": "Da +10 niveles al Grimorio del Eterno.\nBusca en todo el inventario.\nItem de testing — eliminar antes de release.",
 
+        "Items.CarnadaDelGrimorio.DisplayName": "La Carnada del Grimorio",
+        "Items.CarnadaDelGrimorio.Tooltip": "Provoca LAS OLEADAS DEL HAMBRE sin esperar.\nClic izq: desata la furia (las oleadas preparadas).\nClic der: prepara 1..10 oleadas.\nTodo lo que muera en la oleada k paga XP ×(k+1).\nItem de testing — eliminar antes de release.",
+
+        "Items.CristalDelTitanHueco.DisplayName": "Cristal del Titán Hueco",
+        "Items.CristalDelTitanHueco.Tooltip": "Fragmento del coloso cristalino del Sagrario.\nConvoca al TITÁN HUECO.\nSOLO FUNCIONA DE DÍA — la noche es de los muertos.",
+
+        "Items.SelloDelRift.DisplayName": "Sello del Rift",
+        "Items.SelloDelRift.Tooltip": "La llave del que existe mitad aquí, mitad entre mundos.\nConvoca al GUARDIÁN DEL RIFT.\nSOLO FUNCIONA DE DÍA.",
+
+        "Items.PlumaDeLaArquera.DisplayName": "Pluma de la Arquera",
+        "Items.PlumaDeLaArquera.Tooltip": "Cayó del cielo la vez que ella intentó derribar a Aethon.\nConvoca al ECO DE LA ARQUERA ESTELAR.\nSOLO FUNCIONA DE DÍA.",
+
+        "Items.SombraDelPortador.DisplayName": "Sombra del Portador",
+        "Items.SombraDelPortador.Tooltip": "La silueta del primer alma que se ató a un fragmento.\nConvoca al ECO DEL PRIMER PORTADOR.\nSOLO FUNCIONA DE DÍA.",
+
+        "Items.NombreDeAethon.DisplayName": "El Nombre de Aethon",
+        "Items.NombreDeAethon.Tooltip": "«Ve al Sagrario Hueco y llama su nombre.»\nConvoca a AETHON, LA LUZ PRIMORDIAL.\nSOLO FUNCIONA DE DÍA.\nLas cinco fases esperan — el reconocimiento final.",
+
         "Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
         "Projectiles.GenesisLight.DisplayName": "Luz del Génesis",
         "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
@@ -507,4 +525,36 @@
         "Eco.VozJefe.LunaticCultist": "El culto queda sin voz. El grimorio se pone su máscara ritual y ensaya, en susurros, la invocación del fin.",
         "Eco.VozJefe.MoonLord": "El Señor de la Luna exhala su última luz. El grimorio guarda silencio, por una vez… y luego escribe: «gracias por la comida».",
         "Eco.VozJefe.Desconocido": "Un poder mayor ha caído. El grimorio devora su esencia sin preguntar el nombre.",
+
+        "Eco.VozJefe.Aethon": "La Luz Primordial se apaga por su propia voluntad. El grimorio guarda la página en blanco — por primera vez, come en silencio.",
+        "Eco.VozJefe.HollowTitan": "El coloso de cristal se derrumba en campanadas. El grimorio sorbe su eco hueco: resonancia de un guardián que ya no guarda nada.",
+        "Eco.VozJefe.RiftKeeper": "El guardián se pliega sobre su propio rift y desaparece. El grimorio aprende el truco y lo guarda entre los capítulos.",
+        "Eco.VozJefe.LosEcos": "Los portadores anteriores vuelven al polvo de estrellas que ya fueron. El grimorio cierra sus expedientes — y hojea el TUYO.",
+
+        "Eco.VozCincoEstrellas": "Lo más raro que ha comido jamás. El grimorio guarda la receta — por si vuelve a tener suerte.",
+
+        "Eco.Hambre.Susurro1": "El grimorio tiene hambre…",
+        "Eco.Hambre.Susurro2": "El grimorio tiene hambre… las páginas se lamen…",
+        "Eco.Hambre.Susurro3": "El grimorio TIENE HAMBRE… los cierres crujen…",
+        "Eco.Hambre.Susurro4": "…hambre… HAMBRE… HAMBRE…",
+
+        "Eco.Furia.Ira": "El grimorio está FURIOSO por pasar demasiado tiempo sin comer…",
+        "Eco.Furia.Llamada": "El grimorio llama a su comida…",
+        "Eco.Furia.Saciado": "El grimorio está saciado… por ahora.",
+
+        "Furia.Oleada": "Oleada {0} de {1} — el grimorio escupe a su comida. XP ×{2} en esta oleada.",
+        "Furia.OleadaFinal": "OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.",
+        "Furia.Jefe": "El hambre convoca un guardián: {0} (XP ×{1})",
+        "Furia.JefeHuido": "{0} se hunde, insatisfecho…",
+
+        "Llamado.SoloDia": "El llamado solo responde DE DÍA — la noche es de los ojos y los muertos.",
+        "Llamado.YaVive": "Ya vive uno. El llamado no se dobla.",
+
+        "Carnada.Preparadas": "La carnada repartirá {0} oleadas. (Clic derecho para cambiar)",
+        "Carnada.YaActivo": "La furia YA está desatada — aliméntala o sobrevive.",
+        "Carnada.Ocupado": "El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.",
+
+        "Testigo.Ambiente1": "Te he observado antes de que tuvieras nombre.",
+        "Testigo.Ambiente2": "El libro que llevas… yo vi nacer al primero.",
+        "Testigo.Ambiente3": "Todo portador termina en una página. Tú aún estás escribiendo la tuya.",
 }

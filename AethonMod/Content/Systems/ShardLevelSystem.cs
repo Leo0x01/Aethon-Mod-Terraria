@@ -195,7 +195,11 @@ namespace AethonMod.Content.Systems
         /// servidor dedicado sin bestiario), la MISMA fórmula vanilla
         /// recalculada sobre el NPC vivo. Las variantes visuales (netID
         /// negativo) comparten las estrellas de su tipo base.
+        /// v6.47: público como EstrellasDe — la PRIMERA 5★ del libro
+        /// (GlobalNPCXP) consulta lo mismo que la dieta.
         /// </summary>
+        public static int EstrellasDe(NPC npc) => EstrellasBestiario(npc);
+
         private static int EstrellasBestiario(NPC npc)
         {
             try

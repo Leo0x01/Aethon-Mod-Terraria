@@ -57,5 +57,20 @@ namespace AethonMod.Content
         /// </summary>
         [DefaultValue(true)]
         public bool ManaGratisEnPruebas = true;
+
+        // ------------------------------------------------------------------
+        //  v6.47 — LA VOZ DEL HAMBRE Y LA FURIA
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// ¿El grimorio hambriento convoca sus OLEADAS cuando pasa
+        /// demasiado tiempo sin comer? ON por defecto (el evento ES
+        /// contenido del mod de pruebas). Apágalo para dejar SOLO los
+        /// susurros y la barra palidecida (puro sabor, cero castigo).
+        /// La Carnada del Grimorio (el ítem de prueba) funciona SIEMPRE,
+        /// con la bandera apagada o no.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool EventoHambreGrimorio = true;
     }
 }

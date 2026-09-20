@@ -24,6 +24,11 @@ namespace AethonMod.Content.VFX
     ///   propios).
     /// - Reiniciar(): OnWorldUnload/Unload — cero estática huérfana.
     ///
+    /// v6.47 — LOS SUSURROS: Hablar acepta ESCALA (0.52 = la voz menuda
+    /// del hambre del grimorio — el mismo tipo dramático, tamaño de
+    /// secreto) y rugido opcional ya existía: la Voz del Hambre entra por
+    /// aquí SIN rugir, susurrando de verdad.
+    ///
     /// REGLAS DE LA CASA:
     /// - Render 100% DETERMINISTA: cero Main.rand — la animación es pura
     ///   función de la edad del eco (tipeo, pop, deriva y fundido).
@@ -59,15 +64,22 @@ namespace AethonMod.Content.VFX
         /// Encola una voz. El texto llega YA LOCALIZADO (hjson). Las
         /// líneas largas se parten aquí (una vez, fuera del render) en
         /// trozos de ~44 caracteres cortados en espacio.
+        /// v6.47: escala opcional (los SUSURROS usan ~0.52).
         /// </summary>
-        public static void Hablar(string texto, Color tinte, bool rugido = true)
+        public static void Hablar(string texto, Color tinte, bool rugido = true, float escala = 0.62f)
         {
             try
             {
                 if (string.IsNullOrEmpty(texto)) return;
                 if (_cola.Count >= ColaMax) return; // desbordamiento: se descarta, sin crecer
 
-                var eco = new Eco { Texto = PartirEnLineas(texto, 44), Tinte = tinte, Rugido = rugido };
+                var eco = new Eco
+                {
+                    Texto = PartirEnLineas(texto, 44),
+                    Tinte = tinte,
+                    Rugido = rugido,
+                    Escala = MathHelper.Clamp(escala, 0.3f, 1.2f),
+                };
                 _cola.Enqueue(eco);
             }
             catch { }

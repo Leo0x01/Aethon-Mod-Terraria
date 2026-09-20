@@ -128,6 +128,16 @@ namespace AethonMod.Content.Globals
                 {
                     int baseXP = ShardLevelSystem.XPForNPC(npc, nivelGrimorio);
                     int xp = ShardLevelSystem.ApplyXPMultiplier(baseXP);
+
+                    // v6.47 — LA XP DE LAS OLEADAS: todo lo que muere
+                    // convocado por la furia del grimorio paga ×(oleada+1)
+                    // — la oleada 1 paga ×2 … la 10 paga ×11 (también los
+                    // JEFES de las oleadas: son las "versiones especiales"
+                    // que prometen más XP).
+                    var sello = npc.GetGlobalNPC<OleadaNPC>();
+                    if (sello != null && sello.EsDeOleada)
+                        xp *= sello.Oleada + 1;
+
                     bool cobro = false;
                     if (xp > 0)
                     {
@@ -145,9 +155,43 @@ namespace AethonMod.Content.Globals
                         }
                     }
 
+                    // v6.47 — LA VOZ DEL HAMBRE: la kill ALIMENTA el libro —
+                    // la hambre se perdona (susurros y barra palidecida
+                    // vuelven a su sitio).
+                    if (cobro || xp > 0)
+                        player.GetModPlayer<Players.ShardPlayer>()?.RegistrarKill();
+
                     // La barra dorada late en la pantalla del dueño del libro.
                     if (cobro && player.whoAmI == Main.myPlayer)
                         ShardHUDSystem.MarcarGanancia(xp);
+
+                    // v6.47 — LA PRIMERA 5★ CON VOZ PROPIA: la primera
+                    // criatura 5 estrellas que el libro se come merece su
+                    // línea ("Lo más raro que ha comido jamás") — una sola
+                    // vez por libro, en la primera copia visible.
+                    if (player.whoAmI == Main.myPlayer && !Main.dedServ && !npc.boss && cobro)
+                    {
+                        try
+                        {
+                            var slPrimero = player.inventory[0];
+                            for (int i = 0; i < 10; i++)
+                            {
+                                Item inv = player.inventory[i];
+                                if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                                    continue;
+                                slPrimero = inv;
+                                break;
+                            }
+                            var sl5 = slPrimero.GetGlobalItem<ShardLevelItem>();
+                            if (sl5 != null && !sl5.PrimeraCincoEstrellas &&
+                                ShardLevelSystem.EstrellasDe(npc) >= 5)
+                            {
+                                sl5.PrimeraCincoEstrellas = true;
+                                EcoSistema.SusurrarCincoEstrellas();
+                            }
+                        }
+                        catch { }
+                    }
 
                     // LA VOZ DEL GRIMORIO: la derrota de un jefe, contada
                     // por el propio libro (EcoLib + hjson). Solo el

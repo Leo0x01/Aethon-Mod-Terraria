@@ -119,6 +119,15 @@ namespace AethonMod.Content.Systems
                 float x = XBarra;
                 float y = YBarra;
 
+                // === v6.47 — LA PALIDEZ DEL HAMBRE ===
+                // La Voz del Hambre: cada momento sin comer apaga el dorado
+                // (gris pálido creciente); al matar, el color VUELVE (la
+                // kill alimenta el libro — RegistrarKill pone la hambre a
+                // cero y el próximo frame ya reluce).
+                var spHambre = p.GetModPlayer<Players.ShardPlayer>();
+                int hambre = spHambre != null ? spHambre.MomentosHambre : 0;
+                float palidez = MathHelper.Clamp(hambre / 10f, 0f, 1f) * 0.72f;
+
                 // === EL LATIDO: brillo senoidal mientras vive el pulso ===
                 float fase = (TicksPulso - _pulso) * 0.22f;
                 float latido = _pulso > 0
@@ -140,6 +149,12 @@ namespace AethonMod.Content.Systems
                 {
                     Color cuerpo = new Color(245, 196, 81);
                     Color brillo = new Color(255, 235, 150);
+                    if (palidez > 0f)
+                    {
+                        // EL DORADO PALIDECE: hacia el gris ceniza del hambre
+                        cuerpo = Color.Lerp(cuerpo, new Color(139, 136, 128), palidez);
+                        brillo = Color.Lerp(brillo, new Color(168, 165, 158), palidez);
+                    }
                     if (latido > 0f)
                     {
                         // el pulso empuja el dorado hacia el blanco-oro
@@ -152,8 +167,16 @@ namespace AethonMod.Content.Systems
 
                 // === TEXTO: nivel a la izquierda, XP a la derecha ===
                 string txtNivel = $"Grimorio · Nv {sl.Level}";
+                Color tinteNivel = new Color(245, 196, 81) * 0.95f;
+                if (hambre > 0)
+                {
+                    // el nombre también palidece… y con 8+ hambres, susurra
+                    tinteNivel = Color.Lerp(tinteNivel, new Color(150, 148, 142) * 0.95f, palidez);
+                    if (hambre >= 8)
+                        txtNivel += "  (hambre…)";
+                }
                 sb.DrawString(font, txtNivel, new Vector2(x + 2f, YTexto),
-                    new Color(245, 196, 81) * 0.95f, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
+                    tinteNivel, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
 
                 string txtXP = $"{sl.XP} / {xpNecesaria} XP";
                 if (Main.hardMode) txtXP += "   HM ×2";

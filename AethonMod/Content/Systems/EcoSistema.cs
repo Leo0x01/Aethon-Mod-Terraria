@@ -74,6 +74,9 @@ namespace AethonMod.Content.Systems
         /// <summary>
         /// Anuncia la derrota de un jefe con la voz del Grimorio. Llamado
         /// desde GlobalNPCXP.OnKill cuando el killer es el jugador local.
+        /// v6.47: también los JEFES DEL MOD tienen su voz (Aethon, el
+        /// Titán Hueco, el Guardián del Rift y Los Ecos — que hablan al
+        /// caer el ÚLTIMO, como Los Gemelos).
         /// </summary>
         public static void AnunciarJefeMuerto(NPC npc)
         {
@@ -91,6 +94,22 @@ namespace AethonMod.Content.Systems
                         if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
                             (otro.type == NPCID.Retinazer || otro.type == NPCID.Spazmatism))
                             return; // aún vive un gemelo: la derrota no es completa
+                    }
+                }
+                // v6.47 — LOS ECOS DEL MOD son lo mismo: la Arquera y el
+                // Primer Portador son DOS cuerpos de la MISMA historia
+                // (los portadores anteriores); la voz suena al caer el
+                // último de los dos.
+                else if (npc.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                         npc.type == ModContent.NPCType<Content.NPCs.EchoBlade>())
+                {
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC otro = Main.npc[i];
+                        if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
+                            (otro.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                             otro.type == ModContent.NPCType<Content.NPCs.EchoBlade>()))
+                            return; // aún vive un eco: la derrota no es completa
                     }
                 }
                 // Partes en cascada (segmentos, ojos, manos, cabezas): no hablan.
@@ -139,7 +158,17 @@ namespace AethonMod.Content.Systems
             if (type == NPCID.HallowBoss) return "EmpressOfLight";
             if (type == NPCID.CultistBoss) return "LunaticCultist";
             if (type == NPCID.MoonLordCore) return "MoonLord";
-            return "Desconocido"; // jefes del mod y desconocidos: la voz genérica
+            // v6.47 — LOS JEFES DEL MOD, ahora que se pueden convocar:
+            try
+            {
+                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>()) return "Aethon";
+                if (type == ModContent.NPCType<Content.NPCs.HollowTitan>()) return "HollowTitan";
+                if (type == ModContent.NPCType<Content.NPCs.RiftKeeper>()) return "RiftKeeper";
+                if (type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                    type == ModContent.NPCType<Content.NPCs.EchoBlade>()) return "LosEcos";
+            }
+            catch { }
+            return "Desconocido"; // jefes del mod desconocidos: la voz genérica
         }
 
         /// <summary>
@@ -168,7 +197,38 @@ namespace AethonMod.Content.Systems
             if (type == NPCID.HallowBoss) return new Color(255, 230, 120);    // destello prisma
             if (type == NPCID.CultistBoss) return new Color(100, 240, 255);   // teletransporte
             if (type == NPCID.MoonLordCore) return new Color(200, 140, 255);  // luz lunar
+            // v6.47 — los colores de los jefes del mod
+            try
+            {
+                if (type == ModContent.NPCType<Content.NPCs.AethonBoss>())
+                    return new Color(196, 150, 255);   // la luz primordial
+                if (type == ModContent.NPCType<Content.NPCs.HollowTitan>())
+                    return new Color(168, 232, 255);   // cristal del Sagrario
+                if (type == ModContent.NPCType<Content.NPCs.RiftKeeper>())
+                    return new Color(96, 224, 220);    // teal del entre-mundos
+                if (type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                    type == ModContent.NPCType<Content.NPCs.EchoBlade>())
+                    return new Color(255, 178, 96);    // ámbar de los portadores
+            }
+            catch { }
             return new Color(245, 196, 81);                                   // el dorado del grimorio
+        }
+
+        /// <summary>
+        /// v6.47 — LA PRIMERA 5★: la primera criatura 5 estrellas que el
+        /// libro se come merece su LÍNEA propia. La llama GlobalNPCXP al
+        /// detectarla (una vez por libro).
+        /// </summary>
+        public static void SusurrarCincoEstrellas()
+        {
+            try
+            {
+                EcoLib.Hablar(
+                    Language.GetTextValue("Mods.AethonMod.Eco.VozCincoEstrellas"),
+                    new Color(255, 122, 218),  // magenta raro
+                    rugido: false, escala: 0.62f);
+            }
+            catch { }
         }
     }
 }
