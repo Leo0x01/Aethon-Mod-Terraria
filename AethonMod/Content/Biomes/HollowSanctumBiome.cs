@@ -37,8 +37,19 @@ namespace AethonMod.Content.Biomes
         public override bool IsBiomeActive(Player player)
         {
             // Activo cuando el jugador esta bajo tierra y tiene al menos 400 HP max.
+            // v6.44 — MODO PRUEBAS (la petición del usuario: "todo es de
+            // pruebas"): la puerta de los 400 PV se abre con la bandera de
+            // config (SagrarioAccesibleEnPruebas, ON por defecto) para que
+            // el paisaje del Sagrario se pueda VER en cualquier jugador de
+            // pruebas sin comerse primero 7 corazones de vida. La puerta
+            // real (400 PV) se restaura apagando la bandera — la lógica
+            // original queda intacta debajo.
+            bool puertaDeVida = player.statLifeMax >= 400;
+            var config = ModContent.GetInstance<AethonConfig>();
+            if (config != null && config.SagrarioAccesibleEnPruebas)
+                puertaDeVida = true;
             return (player.ZoneDirtLayerHeight || player.ZoneRockLayerHeight) &&
-                   player.statLifeMax >= 400;
+                   puertaDeVida;
         }
     }
 }

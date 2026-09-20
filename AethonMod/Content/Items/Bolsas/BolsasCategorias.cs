@@ -46,6 +46,12 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.43 — CieloLib: el prisma que despliega los paisajes de la
             // librería del cielo (el tester del fondo del juego).
             l.Add((ModContent.ItemType<Cosmetics.PrismaDePaisajesItem>(), 1));
+            // v6.44 — EL LUGAR, COLÓCALO DONDE QUIERAS: el Altar Antiguo
+            // colocable (5) para montar un Sagrario de pruebas en cualquier
+            // mundo — los altares naturales solo generan en mundos NUEVOS,
+            // y el flujo del Fragmento Génesis debe poder probarse en el
+            // mundo de pruebas que ya tengas.
+            l.Add((ModContent.ItemType<Items.Placeables.AncientAltarItem>(), 5));
             return l;
         }
     }

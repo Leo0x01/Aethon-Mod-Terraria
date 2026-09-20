@@ -16,10 +16,12 @@ namespace AethonMod.Content.Items.Cosmetics
     /// del mundo — capas con parallax propio, deriva y profundidad, el
     /// cielo teñido, la luz de fondo matizada y el brillo respirando.
     ///
-    /// EL CICLO: cielo limpio → Eclipse Umbral → Lluvia Estelar →
-    /// Amanecer Primordial → cielo limpio. Cada cambio entra con su
-    /// fundido cruzado (la escena vieja se desvanece mientras la nueva
-    /// sube).
+    /// EL CICLO (v6.44 — cuatro escenas): cielo limpio → Eclipse Umbral →
+    /// Lluvia Estelar → Amanecer Primordial → Sagrario Violeta → cielo
+    /// limpio. Cada cambio entra con su fundido cruzado (la escena vieja
+    /// se desvanece mientras la nueva sube). El Sagrario Violeta (v6.44)
+    /// despliega EL PAISAJE DEL LUGAR — las mismas capas del fondo del
+    /// bioma — donde estés: el lugar hecho accesible con un clic.
     ///
     /// Arma de PRUEBAS de la casa: sin maná, sin daño — solo paisaje.
     /// </summary>
@@ -48,13 +50,15 @@ namespace AethonMod.Content.Items.Cosmetics
             // en los demás clientes (y el servidor) el prisma solo "se usa".
             if (Main.myPlayer != player.whoAmI) return null;
 
-            // === EL CICLO DEL PRISMA ===
+            // === EL CICLO DEL PRISMA (v6.44: cuatro escenas — el
+            // Sagrario Violeta cierra el ciclo con EL LUGAR) ===
             string actual = CieloLib.NombreEscenaActiva;
             string siguiente;
             if (actual == null)                        siguiente = CieloEscenas.NombreEclipse;
             else if (actual == CieloEscenas.NombreEclipse)    siguiente = CieloEscenas.NombreEstelar;
             else if (actual == CieloEscenas.NombreEstelar)    siguiente = CieloEscenas.NombreAlba;
-            else if (actual == CieloEscenas.NombreAlba)       siguiente = null;
+            else if (actual == CieloEscenas.NombreAlba)       siguiente = CieloEscenas.NombreSagrario;
+            else if (actual == CieloEscenas.NombreSagrario)   siguiente = null;
             else                                        siguiente = CieloEscenas.NombreEclipse;
 
             if (siguiente == null)
@@ -67,6 +71,7 @@ namespace AethonMod.Content.Items.Cosmetics
             {
                 EscenaDeCielo escena = siguiente == CieloEscenas.NombreEclipse ? CieloEscenas.EclipseUmbral
                     : siguiente == CieloEscenas.NombreEstelar ? CieloEscenas.LluviaEstelar
+                    : siguiente == CieloEscenas.NombreSagrario ? CieloEscenas.SagrarioVioleta
                     : CieloEscenas.AmanecerPrimordial;
                 CieloLib.Activar(escena);
                 Main.NewText($"El prisma despliega: {siguiente}.",
@@ -81,6 +86,7 @@ namespace AethonMod.Content.Items.Cosmetics
                     CieloEscenas.NombreEclipse => new Color(200, 60, 160),
                     CieloEscenas.NombreEstelar => new Color(110, 180, 255),
                     CieloEscenas.NombreAlba => new Color(255, 190, 90),
+                    CieloEscenas.NombreSagrario => new Color(200, 130, 255),
                     _ => new Color(170, 170, 190),
                 };
                 for (int i = 0; i < 14; i++)
@@ -101,7 +107,7 @@ namespace AethonMod.Content.Items.Cosmetics
             tooltips.Add(new TooltipLine(Mod, "C",
                 "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]"));
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/78788C:El probador de la librería del cielo: despliega paisajes enteros\nsobre el fondo del mundo — capas con parallax, deriva y tintes]"));
+                "[c/78788C:El probador de la librería del cielo: despliega paisajes enteros\nsobre el fondo del mundo — capas con parallax, deriva y tintes\n(v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]"));
         }
     }
 }

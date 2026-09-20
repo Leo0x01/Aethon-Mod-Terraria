@@ -43,9 +43,15 @@ namespace AethonMod.Content.Players
         }
 
         /// <summary>
-        /// PostUpdate: regeneración de mana y vida + reducción de daño.
+        /// PostUpdateBuffs: regeneración de mana y vida.
+        /// v6.44 (auditoría R44): EL HOOK CORRECTO. En el binario real,
+        /// Player.Update consume lifeRegen/manaRegen en UpdateLifeRegen y
+        /// UpdateManaRegen, que corren ANTES de PostUpdate — las escritas
+        /// del hook viejo eran letra muerta (ResetEffects las borra al
+        /// tick siguiente sin que nadie las lea). PostUpdateBuffs corre
+        /// entre ResetEffects y el consumo: aquí sí cuentan.
         /// </summary>
-        public override void PostUpdate()
+        public override void PostUpdateBuffs()
         {
             int level = 0;
             for (int i = 0; i < 58; i++)
@@ -62,12 +68,17 @@ namespace AethonMod.Content.Players
             }
             if (level == 0) return;
 
-            // Regeneración de mana (por segundo, 60 frames)
+            // Regeneración de mana (por segundo)
+            // v6.44 (auditoría R44): Player.manaRegen lo REESCRIBE
+            // UpdateManaRegen desde cero cada tick — el campo que
+            // ACUMULA aportes externos es manaRegenBonus. Unidades del
+            // motor: 120 cuentas = 1 maná → para R maná/seg hay que
+            // aportar 2·R cuentas por tick (el viejo `* 60 / 60` era un
+            // no-op además de letra muerta).
             int manaRegen = WeaponScaling.ManaRegen(level);
             if (manaRegen > 0 && Player.statMana < Player.statManaMax2)
             {
-                // Distribuir el regen a lo largo de 60 frames
-                Player.manaRegen += manaRegen * 60 / 60;
+                Player.manaRegenBonus += manaRegen * 2;
             }
 
             // Regeneración de vida (por segundo)

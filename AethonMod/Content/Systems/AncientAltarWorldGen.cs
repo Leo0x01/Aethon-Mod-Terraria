@@ -51,10 +51,16 @@ namespace AethonMod.Content.Systems
                 if (minY >= maxY) continue;
                 int y = WorldGen.genRand.Next(minY, maxY);
 
-                // Buscar un punto con suelo sólido debajo y aire arriba
+                // Buscar un punto con suelo sólido debajo y aire arriba.
+                // v6.44 (auditoría R44): el suelo bajo el altar es y+1, no
+                // y+2 — verificado en el IL del TileObject.CanPlace real:
+                // PlaceObject(x, y) ancla el ORIGIN (1,1) en (x, y), así
+                // que la caja 3×2 ocupa las filas y-1..y y el suelo está
+                // en y+1 (con y+2 el altar flotaba y los puntos buenos
+                // con aire bajo el suelo se rechazaban).
                 Tile tile = Main.tile[x, y];
                 if (tile == null) continue;
-                Tile below = Main.tile[x, y + 2];
+                Tile below = Main.tile[x, y + 1];
                 if (below == null) continue;
                 bool belowSolid = below.HasTile && Main.tileSolid[below.TileType] &&
                                   below.TileType != TileID.MagicalIceBlock;
@@ -78,7 +84,9 @@ namespace AethonMod.Content.Systems
                     bool found = false;
                     for (int tx = 50; tx < Main.maxTilesX - 50; tx += 3)
                     {
-                        Tile below = Main.tile[tx, ty + 2];
+                        // v6.44 (auditoría R44): suelo en ty+1 (ídem bucle
+                        // aleatorio — la caja del altar acaba en la fila ty).
+                        Tile below = Main.tile[tx, ty + 1];
                         Tile here = Main.tile[tx, ty];
                         if (below != null && here != null &&
                             below.HasTile && Main.tileSolid[below.TileType] &&

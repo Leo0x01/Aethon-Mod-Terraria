@@ -27,10 +27,15 @@ namespace AethonMod.Content.VFX
         /// <summary>La tercera escena: el primer amanecer del mundo.</summary>
         public const string NombreAlba = "Amanecer Primordial";
 
+        /// <summary>La cuarta escena (v6.44): el paisaje del Sagrario Hueco
+        /// — la que hace EL LUGAR visible en cualquier parte del mundo.</summary>
+        public const string NombreSagrario = "Sagrario Violeta";
+
         // --- LAS ESCENAS (lazy) ---
         private static EscenaDeCielo _eclipse;
         private static EscenaDeCielo _estelar;
         private static EscenaDeCielo _alba;
+        private static EscenaDeCielo _sagrario;
 
         /// <summary>EL ECLIPSE UMBRAL: la nebulosa carmesí detrás, las
         /// montañas violetas al medio y las siluetas oscuras de primer
@@ -153,6 +158,57 @@ namespace AethonMod.Content.VFX
             Brillo = 1.10f,
             FadeInSeg = 1.8f,
             FadeOutSeg = 1.4f,
+        };
+
+        /// <summary>EL SAGRARIO VIOLETA (v6.44 — EL LUGAR HECHO ESCENA):
+        /// las MISMAS tres texturas que el bioma cuelga de su fondo de
+        /// superficie (SanctumBackgroundStyle) reenganchadas como capas
+        /// LIBRES del prisma — la nebulosa violeta resplandeciendo atrás,
+        /// las montañas rúnico-violeta en la media y las columnas de luz
+        /// dispersas de primer plano. El cielo se tiñe de violeta profundo
+        /// y la luz baja apenas: el paisaje del Sagrario Hueco se puede
+        /// DESPLEGAR donde quieras (¡también en la superficie!) para
+        /// verlo sin descender — y sin costura: las texturas son las
+        /// 1024×256 del generador de la casa (Δ de costura ≤ 0,09).</summary>
+        public static EscenaDeCielo SagrarioVioleta => _sagrario ??= new EscenaDeCielo(NombreSagrario)
+        {
+            Capas =
+            {
+                // La nebulosa del Sagrario — BRILLANTE (violeta 188,86,241
+                // medido en la textura): el telón resplandeciente del bioma.
+                new Capa
+                {
+                    RutaTextura = "Content/Effects/Cielo/SanctumFar",
+                    Parallax = 0.08f, OffsetY = 60f, Escala = 0.95f, Alpha = 0.55f,
+                    Tinte = new Color(255, 255, 255, 255),
+                    ScrollX = 5f, Profundidad = 0.12f, Brillante = true,
+                },
+                // Las montañas rúnico-violeta — la cordillera del Sagrario
+                // (violeta oscuro 91,36,149 medido).
+                new Capa
+                {
+                    RutaTextura = "Content/Effects/Cielo/SanctumMiddle",
+                    Parallax = 0.30f, OffsetY = 40f, Escala = 0.68f, Alpha = 1f,
+                    Tinte = new Color(255, 255, 255, 255),
+                    ScrollX = 0f, Profundidad = 0.50f, Brillante = false,
+                },
+                // Las columnas verticales brillantes — dispersas (alfa medio
+                // 24: las columnas son ESCASAS por diseño), primer plano.
+                new Capa
+                {
+                    RutaTextura = "Content/Effects/Cielo/SanctumClose",
+                    Parallax = 0.58f, OffsetY = 12f, Escala = 0.55f, Alpha = 1f,
+                    Tinte = new Color(235, 215, 255, 255),
+                    ScrollX = 0f, Profundidad = 0.88f, Brillante = false,
+                },
+            },
+            // LOS EFECTOS: el cielo violeta profundo, la luz de fondo
+            // violeta-media y la penumbra suave del interior del bioma.
+            TinteDelCielo = new Color(30, 8, 48),
+            TinteDelFondo = new Color(84, 34, 132),
+            Brillo = 0.92f,
+            FadeInSeg = 1.6f,
+            FadeOutSeg = 1.2f,
         };
     }
 }

@@ -29,5 +29,19 @@ namespace AethonMod.Content
 
         [DefaultValue(false)]
         public bool ShowDebugInfo = false;
+
+        // ------------------------------------------------------------------
+        //  v6.44 — EL MODO PRUEBAS DE LOS LUGARES
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// ¿El Sagrario Hueco baja su puerta de 400 PV al máximo? ON por
+        /// defecto: todo el mod es de PRUEBAS y el paisaje del Sagrario
+        /// (los fondos de CieloLib) debe poder verse descendiendo al
+        /// subsuelo con cualquier jugador de pruebas. Apágalo para
+        /// restaurar la puerta real de los 400 PV.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool SagrarioAccesibleEnPruebas = true;
     }
 }

@@ -48,7 +48,12 @@ namespace AethonMod.Content.NPCs
                 target = Main.player[NPC.target];
                 if (!target.active || target.dead)
                 {
+                    // v6.44 (auditoría R44): solo life=0 NO dispara checkDead
+                    // — dejaba un jefe ZOMBI de 0 PV matable de un golpe con
+                    // botín y recompensa. active=false = despawn limpio
+                    // (patrón HollowTitan v5.59).
                     NPC.life = 0;
+                    NPC.active = false;
                     return;
                 }
             }
