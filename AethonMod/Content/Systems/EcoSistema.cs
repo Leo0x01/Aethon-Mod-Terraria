@@ -137,8 +137,41 @@ namespace AethonMod.Content.Systems
             catch { }
         }
 
-        /// <summary>La clave hjson de la voz de cada derrota.</summary>
-        private static string ClaveDeVoz(int type)
+        /// <summary>
+        /// v6.48 — EL SABOR DEL BIOMA: la primer línea del hambre sabe a
+        /// DÓNDE está el libro — cada bioma tiene SUS propias muestras de
+        /// "carne de jungla", "sal del infierno"… (3 por bioma, repartidas
+        /// por ElegirVariante sin repetir). La llama ShardPlayer en el
+        /// primer momento de hambre; el color y la escala los pone el
+        /// llamador. Devuelve "" si algo falla (el llamador calla).
+        /// </summary>
+        public static string SusurroDelBioma(Player p)
+        {
+            try
+            {
+                if (p == null || !p.active) return "";
+                string pool;
+                if (p.ZoneUnderworldHeight) pool = "Infierno";
+                else if (p.ZoneDungeon) pool = "Mazmorra";
+                else if (p.ZoneCorrupt) pool = "Corrupcion";
+                else if (p.ZoneCrimson) pool = "Carmesi";
+                else if (p.ZoneSnow) pool = "Nieve";
+                else if (p.ZoneJungle) pool = "Jungla";
+                else if (p.ZoneDesert) pool = "Desierto";
+                else if (p.ZoneBeach) pool = "Playa";
+                else if (p.ZoneHallow) pool = "Sagrado";
+                else if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight) pool = "Subsuelo";
+                else if (p.ZoneSkyHeight) pool = "Cielo";
+                else pool = "Superficie";
+                return EcoLib.ElegirVariante("Mods.AethonMod.Eco.Bioma." + pool, 3);
+            }
+            catch { return ""; }
+        }
+
+        /// <summary>La clave hjson de la voz de cada derrota (pública: el
+        /// Testigo cronista reutiliza la MISMA tabla para su versión
+        /// humana de la misma derrota — dos narradores, un hecho).</summary>
+        public static string ClaveDeVoz(int type)
         {
             if (type == NPCID.KingSlime) return "KingSlime";
             if (type == NPCID.EyeofCthulhu) return "EyeofCthulhu";

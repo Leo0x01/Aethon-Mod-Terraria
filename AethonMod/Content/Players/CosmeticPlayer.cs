@@ -37,11 +37,21 @@ namespace AethonMod.Content.Players
         /// corona de conjuro del vacío colgada de la espalda)?</summary>
         public bool AnilloDorsal;
 
+        /// <summary>¿Lleva LA CORONA RÚNICA DE AURA (v6.48 — el pentágono
+        /// Polígono(5) violeta-oro de AuraLib, por el portador aditivo)?</summary>
+        public bool CoronaRunicaAura;
+
+        /// <summary>¿Lleva LA FORMA ASCENDIDA (v6.48 — el aura de la Luz
+        /// Primordial, el drop cumplido de Aethon)?</summary>
+        public bool FormaAscendida;
+
         public override void ResetEffects()
         {
             VoidCrown = false;
             RuneCrown = false;
             AnilloDorsal = false;
+            CoronaRunicaAura = false;
+            FormaAscendida = false;
         }
 
         public override void PostUpdate()
@@ -51,6 +61,8 @@ namespace AethonMod.Content.Players
             int voidType = ModContent.ItemType<Items.Cosmetics.VoidCrownItem>();
             int runeType = ModContent.ItemType<Items.Cosmetics.RuneCrownItem>();
             int anilloType = ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>();
+            int coronaAuraType = ModContent.ItemType<Items.Cosmetics.CoronaRunicoAuraItem>();
+            int ascendidaType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -64,6 +76,8 @@ namespace AethonMod.Content.Players
                 if (item.type == voidType) VoidCrown = true;
                 else if (item.type == runeType) RuneCrown = true;
                 else if (item.type == anilloType) AnilloDorsal = true;
+                else if (item.type == coronaAuraType) CoronaRunicaAura = true;
+                else if (item.type == ascendidaType) FormaAscendida = true;
             }
 
             if (Main.netMode == NetmodeID.Server) return;
@@ -151,6 +165,46 @@ namespace AethonMod.Content.Players
                     d.fadeIn = 0f;
                 }
             }
+            // === LA CORONA RÚNICA DE AURA (v6.48) y LA FORMA ASCENDIDA:
+            //     ambas viven por el PORTADOR (AuraPortadorHalo) — el
+            //     camino aditivo del halo-proyectil. El dueño local lo
+            //     invoca; tML lo sincroniza.
+            if (Player.whoAmI == Main.myPlayer)
+            {
+                if (CoronaRunicaAura && !EspiarPortador(1))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("CoronaRunicaAura"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 1f);
+                }
+                if (FormaAscendida && !EspiarPortador(2))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendida"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 2f);
+                }
+            }
+
+            // LA LUZ de la forma ascendida (la luz primordial tibia).
+            if (FormaAscendida)
+                Lighting.AddLight(Player.Center - new Vector2(0f, 10f),
+                    new Vector3(0.22f, 0.17f, 0.08f));
+        }
+
+        /// <summary>¿Ya vive mi portador de aura con este modo?</summary>
+        private bool EspiarPortador(int modo)
+        {
+            int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo &&
+                    (int)p.ai[0] == modo)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>¿Ya vive mi halo de la corona rúnica dorsal?</summary>

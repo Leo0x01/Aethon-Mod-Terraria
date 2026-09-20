@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -5,6 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Items.Esencias;
 
 namespace AethonMod.Content.Globals
 {
@@ -12,24 +14,37 @@ namespace AethonMod.Content.Globals
     /// OleadaNPC — EL SELLO DE LAS OLEADAS DEL GRIMORIO. Todo monstruo o
     /// jefe que el libro hambriento CONVOCA lleva esta marca:
     ///
-    /// - STATS ENFURECIDAS: vida, daño y defensa escalados por el número
-    ///   de oleada (los jefes son VERSIONES ESPECIALES — su propio
-    ///   multiplicador, más duro que el de la chusma).
-    /// - AGRESIÓN REAL: re-objetivo constante y empuje hacia la presa
-    ///   (los jefes y los gusanos se saltan el empuje — su AI ya manda).
+    /// - STATS ENFURECIDAS (v6.48, LA LETRA DEL USUARIO): la oleada k
+    ///   multiplica la vida Y el ataque por ×(k+1) — la 1 golpea ×2 y la
+    ///   10 ×11, monstruos Y jefes; LA OLEADA ESPECIAL (11) los viste a
+    ///   ×15. La defensa sigue escalando aparte (chusma +2k, jefes +6k).
+    /// - AGRESIÓN REAL (v6.48, CRECIENTE): la chusma re-objetiva y
+    ///   empuja hacia la presa MÁS FUERTE con cada oleada (empuje
+    ///   0.16+0.02k, techo 10+0.5k); los JEFES ya no son sagrados:
+    ///   re-objetivo cada 20 ticks, los que surcan tiles HOMING hacia la
+    ///   presa y los embistes (el lunge de la furia), y TODOS disparan
+    ///   sus DIENTES (AtaqueOleadaProjectile — los ataques nuevos de
+    ///   librería) con cadencia que crece con la oleada.
     /// - EL AURA (AuraLib, la octava librería): capa trasera ANTES del
     ///   cuerpo (PreDraw) y el VELO frontal al 6% DESPUÉS (PostDraw) —
-    ///   gris-blanca, y en la oleada 10 gris-negra con bordes rojo
-    ///   oscuro. Las partículas corren por Actualizar (AI, no render).
+    ///   gris-blanca, en la 10 gris-negra con bordes rojo oscuro y en la
+    ///   ESPECIAL el JUICIO (negra, rojo intenso, chispas carmesí).
+    ///   Las partículas corren por Actualizar (AI, no render).
     /// - LA XP DE LA OLEADA: GlobalNPCXP multiplica el cobro por
-    ///   (oleada + 1) — la oleada 1 paga ×2 … la 10 paga ×11.
+    ///   MultiplicadorXP() — oleada k paga ×(k+1), la ESPECIAL ×15.
+    /// - EL PAGO EN METALES (v6.48): cada monstruo muerto suelta k
+    ///   MONEDAS DE ORO y cada jefe de oleada k MONEDAS DE PLATINO (la
+    ///   especial: 15) — la furia del libro paga lo que come. Los jefes
+    ///   además dejan caer SU ESENCIA (EsenciaDeJefeItem — un nivel
+    ///   completo para el libro).
     ///
     /// PROPAGACIÓN: los segmentos que los jefes-gusano y sus sirvientes
     /// engendran a su lado HEREDAN el sello al nacer (OnSpawn) — el
     /// Devorador entero y los Creepers del Cerebro visten el aura y la
-    /// furia de su convocador. (Consecuencia querida: la marca también
-    /// salta a los spawns NATURALES que caigan cerca de una oleada —
-    /// el hambre del libro es contagiosa.)
+    /// furia de su convocador. (Consecuencia querida y documentada: la
+    /// marca también salta a los spawns NATURALES que caigan cerca de
+    /// una oleada — el hambre del libro es contagiosa, y paga más XP Y
+    /// más peligro: el sello es el sello.)
     ///
     /// LOTES (el contrato de la casa en PreDraw/PostDraw): AuraLib vuelca
     /// su lote aditivo cerrando el activo; aquí se REABRE el lote del
@@ -42,45 +57,53 @@ namespace AethonMod.Content.Globals
 
         /// <summary>¿Este NPC fue convocado por la furia del grimorio?</summary>
         public bool EsDeOleada = false;
-        /// <summary>El número de oleada que lo convocó (1..10).</summary>
+        /// <summary>El número de oleada que lo convocó (1..11).</summary>
         public int Oleada = 0;
         /// <summary>¿Es la VERSIÓN ESPECIAL del jefe de la oleada?</summary>
         public bool EsJefeDeOleada = false;
+        /// <summary>
+        /// v6.48 — ¿Es de LA OLEADA ESPECIAL (11 — El Juicio)? Todos los
+        /// jefes juntos a ×15: stats, XP y aura del JUICIO.
+        /// </summary>
+        public bool EsEspecial = false;
         /// <summary>El perfil del aura que viste (null = sin aura).</summary>
         public AuraPerfil Aura = null;
 
         private int _tickAggro = 0;
+        private int _tickAtaque = 0;   // el tempo de los dientes
+        private int _tickLunge = 0;    // el tempo de los embites
 
         // ==================================================================
         //  EL SELLADO
         // ==================================================================
 
         /// <summary>
-        /// Marca este NPC como criatura de la oleada k y aplica TODAS las
-        /// consecuencias: stats enfurecidos, aura y knockback resistido.
-        /// Llamado por GrimorioFuriaSistema JUSTO DESPUÉS de NPC.NewNPC
-        /// (OnSpawn corre DENTRO de NewNPC — todavía no existía la marca).
+        /// Marca este NPC como criatura de la oleada k (especial=true →
+        /// la 11, EL JUICIO) y aplica TODAS las consecuencias: stats
+        /// enfurecidos, aura y knockback resistido. Llamado por
+        /// GrimorioFuriaSistema JUSTO DESPUÉS de NPC.NewNPC (OnSpawn
+        /// corre DENTRO de NewNPC — todavía no existía la marca).
         /// </summary>
-        public void Marcar(NPC npc, int oleada, bool jefe)
+        public void Marcar(NPC npc, int oleada, bool jefe, bool especial = false)
         {
             try
             {
                 EsDeOleada = true;
-                Oleada = oleada < 1 ? 1 : (oleada > 10 ? 10 : oleada);
+                EsEspecial = especial;
+                Oleada = especial ? 11 : (oleada < 1 ? 1 : (oleada > 10 ? 10 : oleada));
                 EsJefeDeOleada = jefe;
 
-                // === STATS: chusma y jefes escalan distinto ===
-                // Chusma: vida ×(1+0.6(k-1)) → ×6.4 en la 10; daño ×(1+0.15(k-1)).
-                // Jefes: vida ×(2.5+0.5(k-1)) → ×7 en la 10; daño ×(1.5+0.1(k-1)).
-                float multVida = jefe ? 2.5f + 0.5f * (Oleada - 1) : 1f + 0.6f * (Oleada - 1);
-                float multDanio = jefe ? 1.5f + 0.1f * (Oleada - 1) : 1f + 0.15f * (Oleada - 1);
+                // === STATS: LA LETRA DEL USUARIO (v6.48) ===
+                // La oleada k: vida Y daño ×(k+1) — la 1 ×2, la 10 ×11,
+                // para chusma Y jefes. LA ESPECIAL: ×15.
+                float mult = MultiplicadorStats;
 
-                int nuevaVida = (int)(npc.lifeMax * multVida);
+                int nuevaVida = (int)(npc.lifeMax * mult);
                 if (nuevaVida < 1) nuevaVida = 1;
                 npc.lifeMax = nuevaVida;
                 npc.life = nuevaVida;
                 if (npc.damage > 0)
-                    npc.damage = (int)(npc.damage * multDanio);
+                    npc.damage = (int)(npc.damage * mult);
                 npc.defense += jefe ? 6 * Oleada : 2 * Oleada;
                 npc.knockBackResist *= 0.35f; // la furia no se interrumpe
 
@@ -92,6 +115,18 @@ namespace AethonMod.Content.Globals
             }
             catch { EsDeOleada = false; }
         }
+
+        /// <summary>
+        /// EL MULTIPLICADOR DE STATS: ×(oleada+1) — la 1 ×2 … la 10 ×11;
+        /// la OLEADA ESPECIAL ×15 (la letra del usuario).
+        /// </summary>
+        public float MultiplicadorStats => EsEspecial ? 15f : Oleada + 1f;
+
+        /// <summary>
+        /// EL MULTIPLICADOR DE XP (lo lee GlobalNPCXP): ×(oleada+1) — la
+        /// 1 paga ×2 … la 10 ×11; la ESPECIAL ×15.
+        /// </summary>
+        public int MultiplicadorXP => EsEspecial ? 15 : Oleada + 1;
 
         /// <summary>El radio del aura según el tamaño del bicho (los jefes visten más grande).</summary>
         private static float RadioSegun(NPC npc, bool jefe)
@@ -123,7 +158,7 @@ namespace AethonMod.Content.Globals
                     if (Vector2.DistanceSquared(otro.Center, npc.Center) > 800f * 800f) continue;
 
                     // hereda la oleada del vecino (como chusma, no como jefe)
-                    Marcar(npc, sello.Oleada, false);
+                    Marcar(npc, sello.Oleada, false, sello.EsEspecial);
                     break;
                 }
             }
@@ -131,7 +166,7 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
-        //  LA AGRESIÓN
+        //  LA AGRESIÓN (chusma Y jefes — la furia crece con la oleada)
         // ==================================================================
 
         /// <summary>
@@ -153,12 +188,20 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// PostAI (después de la AI de vanilla, que ya escribió su
-        /// velocidad): EL EMPUJE de la furia hacia la presa — chusma solo,
-        /// nunca jefes (su AI es sagrada) ni gusanos (aiStyle 6: la física
-        /// de segmentos se rompe). Techo de velocidad: la furia no es
-        /// teletransporte. Las PARTÍCULAS del aura corren aquí para todos
-        /// (chusma Y jefes — en AI, no en render).
+        /// PostAI (después de la AI de vanilla): LA AGRESIÓN v6.48 —
+        ///
+        /// · La CHUSMA: empuje hacia la presa más fuerte con cada oleada
+        ///   (0.16+0.02k, techo 10+0.5k). Gusanos (aiStyle 6) exentos
+        ///   (la física de segmentos se rompe).
+        /// · Los JEFES (ya no sagrados): re-objetivo cada 20 ticks; los
+        ///   que surcan tiles HOMING suave (la furia los pega a la
+        ///   presa) + EL EMBITE (lunge periódico que crece con la
+        ///   oleada); y TODOS escupen SUS DIENTES — los ataques nuevos
+        ///   de librería (AtaqueOleadaProjectile) con cadencia
+        ///   300−18k (tope 60; especial 50).
+        ///
+        /// Las PARTÍCULAS del aura corren aquí para todos (chusma Y
+        /// jefes — en AI, no en render).
         /// </summary>
         public override void PostAI(NPC npc)
         {
@@ -169,19 +212,250 @@ namespace AethonMod.Content.Globals
                 if (Aura != null)
                     AuraLib.Actualizar(npc, Aura);
 
-                if (!EsDeOleada || npc.boss || npc.aiStyle == 6) return;
+                if (!EsDeOleada) return;
 
-                Player t = Main.player[npc.target];
-                if (t == null || !t.active || t.dead) return;
+                Player presa = Main.player[npc.target];
+                bool presaValida = presa != null && presa.active && !presa.dead;
 
-                Vector2 dir = t.Center - npc.Center;
-                float d = dir.Length();
-                if (d > 1500f || d < 1f) return;
+                // === LA CHUSMA: el empuje creciente ===
+                if (!npc.boss)
+                {
+                    if (npc.aiStyle == 6) return; // gusanos: física sagrada
+                    if (!presaValida) return;
+                    Vector2 dir = presa.Center - npc.Center;
+                    float d = dir.Length();
+                    if (d > 1500f || d < 1f) return;
+                    npc.velocity += dir / d * (0.16f + 0.02f * Oleada);
+                    float techo = 10f + 0.5f * Oleada;
+                    float vel = npc.velocity.Length();
+                    if (vel > techo)
+                        npc.velocity = npc.velocity * (techo / vel);
+                    return;
+                }
 
-                npc.velocity += dir / d * 0.16f;
-                float vel = npc.velocity.Length();
-                if (vel > 10f)
-                    npc.velocity = npc.velocity * (10f / vel);
+                // === LOS JEFES: la furia de verdad ===
+                if (!EsJefeDeOleada) return; // solo los convocados por el libro
+
+                // EL RE-OBJETIVO (cada 20 ticks — nunca se distraen).
+                _tickAggro++;
+                if (_tickAggro >= 20)
+                {
+                    _tickAggro = 0;
+                    npc.TargetClosest(false);
+                    presa = Main.player[npc.target];
+                    presaValida = presa != null && presa.active && !presa.dead;
+                }
+
+                // EL HOMING + EL EMBITE: solo los que surcan tiles (los
+                // demás ya persiguen por su cuenta — su AI usa el suelo).
+                if (presaValida && npc.noTileCollide)
+                {
+                    Vector2 dir = presa.Center - npc.Center;
+                    float d = dir.Length();
+                    if (d > 60f && d < 2200f)
+                        npc.velocity += dir / d * (0.05f + 0.008f * Oleada);
+
+                    _tickLunge++;
+                    int cadenciaLunge = EsEspecial ? 90 : Math.Max(120, 300 - 18 * Oleada);
+                    if (_tickLunge >= cadenciaLunge)
+                    {
+                        _tickLunge = 0;
+                        Vector2 embite = (presa.Center - npc.Center).SafeNormalize(Vector2.Zero);
+                        npc.velocity += embite * (2f + 0.35f * Oleada);
+                    }
+                }
+
+                // LOS DIENTES: los ataques nuevos de librería, con cadencia
+                // que crece con la oleada (la 10 y la especial, sin pausa).
+                if (presaValida)
+                {
+                    _tickAtaque++;
+                    int cadencia = EsEspecial ? 50 : Math.Max(60, 300 - 18 * Oleada);
+                    if (_tickAtaque >= cadencia)
+                    {
+                        _tickAtaque = 0;
+                        EscupirDientes(npc, presa);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // ==================================================================
+        //  LOS DIENTES — el ataque nuevo de cada guardián (librerías)
+        // ==================================================================
+
+        /// <summary>El estilo de diente que corresponde a cada guardián.</summary>
+        private static int EstiloDe(NPC npc)
+        {
+            if (npc.type == NPCID.KingSlime) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloReyGelatina;
+            if (npc.type == NPCID.EyeofCthulhu) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloOjo;
+            if (npc.type == NPCID.Deerclops) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDeerclops;
+            if (npc.type == NPCID.QueenBee) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloAbeja;
+            if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.EaterofWorldsBody ||
+                npc.type == NPCID.EaterofWorldsTail)
+                return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDevorador;
+            if (npc.type == NPCID.BrainofCthulhu) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro;
+            if (npc.type == NPCID.SkeletronHead)
+                return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloSkeletron;
+            // guardián sin diente propio (no debería pasar): el estallido
+            return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro;
+        }
+
+        /// <summary>
+        /// Escupe UN RACIÓN de dientes del estilo del guardián (los patrones
+        /// completos de AtaqueOleadaProjectile — cada grupo es el "ataque").
+        /// </summary>
+        private void EscupirDientes(NPC npc, Player presa)
+        {
+            try
+            {
+                int estilo = EstiloDe(npc);
+                int danio = (int)(16f * MultiplicadorStats);
+                var src = npc.GetSource_FromAI();
+
+                switch (estilo)
+                {
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloReyGelatina:
+                    {
+                        // EL SELLO DEL TRONO: ocho cuentas de la corona.
+                        for (int i = 0; i < 8; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 8f;
+                            Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 70f;
+                            Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, ang, i * 31 + Oleada);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloOjo:
+                    {
+                        // LOS TAJOS DEL VIGÍA: dos marcas sobre la presa.
+                        for (int i = 0; i < 2; i++)
+                        {
+                            Vector2 pos = presa.Center + (i == 0 ? Vector2.Zero : new Vector2(90f, -40f));
+                            float dir = Main.rand.NextFloat(MathHelper.TwoPi);
+                            Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, dir, Oleada * 7 + i);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDeerclops:
+                    {
+                        // LOS LÁTIGOS DE ESCARCHA: tres espinas del cielo.
+                        for (int i = 0; i < 3; i++)
+                        {
+                            Vector2 pos = presa.Center + new Vector2(
+                                (i - 1) * 130f + Main.rand.NextFloat(-40f, 40f), -420f);
+                            Projectile.NewProjectile(src, pos, new Vector2(0f, 4f),
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 11 + i);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloAbeja:
+                    {
+                        // EL ABANICO DE AGUIJONES: cinco con corrección.
+                        Vector2 baseDir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY);
+                        for (int i = -2; i <= 2; i++)
+                        {
+                            Vector2 vel = baseDir.RotatedBy(i * 0.16f) * 11f;
+                            Projectile.NewProjectile(src, npc.Center, vel,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 13 + i);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDevorador:
+                    {
+                        // LAS FAUCES CORRUPTAS: tres bocas que curvan.
+                        Vector2 baseDir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+                        for (int i = -1; i <= 1; i++)
+                        {
+                            Vector2 vel = baseDir.RotatedBy(i * 0.35f) * 8f;
+                            Projectile.NewProjectile(src, npc.Center, vel,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 17 + i);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro:
+                    {
+                        // EL ESTALLIDO CARMESÍ: ocho reflejos radiales.
+                        for (int i = 0; i < 8; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 8f;
+                            Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 9f;
+                            Projectile.NewProjectile(src, npc.Center, vel,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 19 + i);
+                        }
+                        break;
+                    }
+
+                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloSkeletron:
+                    {
+                        // LAS CALAVERAS EN ÓRBITA: tres cráneos que se lanzan.
+                        for (int i = 0; i < 3; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 3f;
+                            Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 92f;
+                            Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                danio, 2f, Main.myPlayer, estilo, ang, Oleada * 23 + i);
+                        }
+                        break;
+                    }
+                }
+
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, npc.Center);
+            }
+            catch { }
+        }
+
+        // ==================================================================
+        //  LA MUERTE PAGA — monedas y esencias
+        // ==================================================================
+
+        /// <summary>
+        /// v6.48 — EL PAGO EN METALES Y ESENCIAS: cada monstruo de la
+        /// oleada k suelta k MONEDAS DE ORO; cada JEFE de la oleada k
+        /// MONEDAS DE PLATINO + SU ESENCIA (la especial: 15). El festín
+        /// del libro paga en los dos metales.
+        /// </summary>
+        public override void OnKill(NPC npc)
+        {
+            if (!EsDeOleada) return;
+            try
+            {
+                int monedas = EsEspecial ? 15 : Oleada;
+                var src = npc.GetSource_Loot();
+
+                if (EsJefeDeOleada)
+                {
+                    // EL PLATINO DEL GUARDIÁN (k monedas — la 10: 10).
+                    if (monedas > 0)
+                        Item.NewItem(src, npc.Center, ItemID.PlatinumCoin, monedas);
+
+                    // SU ESENCIA (un alma por guardián — el ítem que sube
+                    // un nivel COMPLETO al libro).
+                    int esencia = EsenciaDeJefeItem.DeNPC(npc.type);
+                    if (esencia > 0)
+                        Item.NewItem(src, npc.Center, esencia, 1);
+                }
+                else
+                {
+                    // EL ORO DE LA CHUSMA (k monedas — la 10: 10).
+                    if (monedas > 0)
+                        Item.NewItem(src, npc.Center, ItemID.GoldCoin, monedas);
+                }
             }
             catch { }
         }

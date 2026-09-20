@@ -1,19 +1,52 @@
+using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
+using AethonMod.Content.Projectiles.Jefes;
 
 namespace AethonMod.Content.NPCs
 {
     /// <summary>
-    /// El Guardián del Rift — jefe cósmico de nivel 75.
-    /// Existe mitad en Terraria, mitad en el vacío entre mundos.
-    /// Teleporta a través de rifts, dispara virotes de vacío, y a 30% HP sella los rifts.
+    /// El Guardián del Rift — el centinela entre mundos, rehecho de cero
+    /// en v6.48.
+    ///
+    /// LO QUE ERA (v5): teleports secos con polvo morado y tres
+    /// DeathLaser de vanilla. LO QUE ES: EL CENTINELA DE LA CASA —
+    /// · ARTE 100% CÓDIGO: la figura encapuchada de luz tenue (capas de
+    ///   cápsulas), la rendija de ojos turquesa, el halo del sello y las
+    ///   LLAVES orbitando (los fragmentos del umbral).
+    /// · EL TELETRANSPORTE DE VERDAD: NO es un pop — SE DESGARRA: abre
+    ///   un desgarro vertical donde estaba (RiftLib.TearVacio), el
+    ///   cuerpo se DISUELVE en la grieta, nace al otro lado y la grieta
+    ///   SE CIERRA detrás. Con estela de ecos mientras cruza.
+    /// · LOS VIROTES DE VACÍO: lanzas que PARPAJEAN entre fases (medio
+    ///   dentro del desgarro) con abanico de 3 (5 en el sello).
+    /// · EL SELLO (&lt;30% vida): la arena se CIERRA — cuatro PAREDES DE
+    ///   DESGARRO (CorteRealidad) avanzando desde los puntos cardinales,
+    ///   el teleport redoblado y el anuncio de la casa.
+    ///
+    /// 95.000 PV, se convoca con el Sello del Rift (de día).
     /// </summary>
     public class RiftKeeper : ModNPC
     {
-        private int AttackTimer = 0;
-        private int TeleportTimer = 0;
+        // === EL ESTADO DEL CENTINELA ===
+        private int _tickTele = 0;        // el ciclo del desgarro
+        private int _tickAtaque = 0;      // la cadencia de los virotes
+        private int _tickSello = 0;       // el frío del sello
+        private float _anguloOrbita = 0f; // el rumbo de la guardia
+        private Vector2 _posSalida = Vector2.Zero; // dónde se desgarró
+
+        // 0 = sólido · 1 = disolviéndose en la grieta · 2 = naciendo al otro lado
+        private int _faseCruce = 0;
+
+        // === LA PALETA DEL ENTRE-MUNDOS ===
+        private static readonly Color TealUmbral = new(96, 224, 220);
+        private static readonly Color VioletaVacio = new(140, 60, 220);
+        private static readonly Color VeloTenue = new(70, 130, 150);
 
         public override void SetStaticDefaults()
         {
@@ -48,81 +81,292 @@ namespace AethonMod.Content.NPCs
                 target = Main.player[NPC.target];
                 if (!target.active || target.dead)
                 {
-                    // v6.44 (auditoría R44): solo life=0 NO dispara checkDead
-                    // — dejaba un jefe ZOMBI de 0 PV matable de un golpe con
-                    // botín y recompensa. active=false = despawn limpio
-                    // (patrón HollowTitan v5.59).
+                    // v6.44 (R44): active=false = el despawn limpio de la casa.
                     NPC.life = 0;
                     NPC.active = false;
                     return;
                 }
             }
 
-            // Fase 2 a 30% HP: sella los rifts (arena cerrada).
-            bool phase2 = (float)NPC.life / NPC.lifeMax < 0.30f;
+            bool sello = (float)NPC.life / NPC.lifeMax < 0.30f;
 
-            // Movimiento: teleport cada 180 ticks (o 120 en fase 2).
-            TeleportTimer++;
-            int teleportInterval = phase2 ? 120 : 180;
-            if (TeleportTimer >= teleportInterval)
+            // === EL ANUNCIO DEL SELLO (una vez) ===
+            if (sello && NPC.localAI[0] < 1f)
             {
-                TeleportTimer = 0;
-                TeleportNear(target);
+                NPC.localAI[0] = 1f;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Rift.Sello"), TealUmbral);
+                NPC.netUpdate = true;
             }
 
-            // Entre teleports: flotar y perseguir suavemente.
-            Vector2 toTarget = target.Center - NPC.Center;
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.Zero) * 4f, 0.05f);
-
-            // Ataque: virotes de vacío cada 75 ticks.
-            AttackTimer++;
-            if (AttackTimer >= 75)
+            // === EL CICLO DEL DESGARRO (el teleport de verdad) ===
+            int cadenciaTele = sello ? 160 : 240;
+            _tickTele++;
+            if (_faseCruce == 0 && _tickTele >= cadenciaTele)
             {
-                AttackTimer = 0;
-                FireVoidLances(target);
+                // SE DESGARRA: la grieta se abre donde está.
+                _faseCruce = 1;
+                _tickTele = 0;
+                _posSalida = NPC.Center;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, NPC.Center);
+                OndaLib.Kick(4f, 8);
+            }
+            else if (_faseCruce == 1 && _tickTele >= 26)
+            {
+                // EL CRUCE: nace al otro lado (el ángulo opuesto de la
+                // guardia — el centinela SIEMPRE te flanquea).
+                _faseCruce = 2;
+                _tickTele = 0;
+                _anguloOrbita += MathHelper.Pi + Main.rand.NextFloat(-0.6f, 0.6f);
+                Vector2 posNueva = target.Center + new Vector2(
+                    MathF.Cos(_anguloOrbita), MathF.Sin(_anguloOrbita)) * 340f;
+                NPC.Center = posNueva;
+                NPC.velocity = Vector2.Zero;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, NPC.Center);
+                NPC.netUpdate = true;
+            }
+            else if (_faseCruce == 2 && _tickTele >= 22)
+            {
+                _faseCruce = 0; // sólido otra vez
+                _tickTele = 0;
             }
 
-            Lighting.AddLight(NPC.Center, new Vector3(0.2f, 0.4f, 0.5f));
+            // === LA GUARDIA: orbita a la presa (solo sólido o naciendo) ===
+            if (_faseCruce != 1)
+            {
+                _anguloOrbita += (sello ? 0.014f : 0.009f);
+                Vector2 punto = target.Center + new Vector2(
+                    MathF.Cos(_anguloOrbita), MathF.Sin(_anguloOrbita) * 0.7f) * 340f;
+                Vector2 deseada = (punto - NPC.Center) * 0.04f;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.10f);
+                if (_faseCruce == 1) NPC.velocity = Vector2.Zero;
+            }
+            else
+            {
+                // DISOLVIÉNDOSE: la grieta lo chupa (se hunde hacia el tear).
+                NPC.velocity = Vector2.Zero;
+            }
+
+            // === LOS VIROTES DE VACÍO (75 t; 48 con el sello) ===
+            if (_faseCruce == 0)
+            {
+                _tickAtaque++;
+                int cadencia = sello ? 48 : 75;
+                if (_tickAtaque >= cadencia)
+                {
+                    _tickAtaque = 0;
+                    LanzarVirotes(target, sello);
+                }
+            }
+
+            // === EL SELLO: las cuatro paredes (cada 360 t mientras dure) ===
+            if (sello)
+            {
+                _tickSello++;
+                if (_tickSello >= 360)
+                {
+                    _tickSello = 0;
+                    SellarLaArena(target);
+                }
+            }
         }
 
-        private void TeleportNear(Player target)
+        // ==================================================================
+        //  LOS DIENTES DEL CENTINELA
+        // ==================================================================
+
+        /// <summary>LOS VIROTES: abanico de 3 (5 con el sello), con lead.</summary>
+        private void LanzarVirotes(Player target, bool sello)
         {
-            // Teleporta a un punto aleatorio cerca del jugador.
-            Vector2 offset = new Vector2(
-                Main.rand.NextFloat(-300f, 300f),
-                Main.rand.NextFloat(-200f, 200f));
-            NPC.Center = target.Center + offset;
-            NPC.velocity = Vector2.Zero;
-            // Efecto visual de rift.
-            for (int i = 0; i < 30; i++)
+            // EL LEAD: apunta a dónde ESTARÁS (el centinela conoce tu rumbo).
+            Vector2 pred = target.Center + target.velocity * 18f;
+            Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitX);
+            int n = sello ? 5 : 3;
+            for (int i = -(n / 2); i <= n / 2; i++)
             {
-                Dust.NewDust(NPC.Center, 30, 30, DustID.PurpleTorch, 0, 0, 100, default, 1.5f);
+                Vector2 vel = dir.RotatedBy(i * 0.14f) * 10.5f;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, vel,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.72f), 2f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloViroteVacio, 0f, NPC.whoAmI * 17 + i);
             }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12, NPC.Center);
         }
 
-        private void FireVoidLances(Player target)
+        /// <summary>
+        /// EL SELLO: cuatro PAREDES DE DESGARRO avanzando desde los
+        /// cardinales — la arena se cierra alrededor de la presa.
+        /// </summary>
+        private void SellarLaArena(Player target)
         {
-            Vector2 vel = (target.Center - NPC.Center).SafeNormalize(Vector2.Zero) * 10f;
-            for (int i = -1; i <= 1; i++)
+            for (int i = 0; i < 4; i++)
             {
-                Projectile.NewProjectile(
-                    NPC.GetSource_FromAI(),
-                    NPC.Center,
-                    vel.RotatedBy(i * 0.15),
-                    ProjectileID.DeathLaser,
-                    40,
-                    2f,
-                    Main.myPlayer);
+                float cardinal = i * MathHelper.PiOver2;
+                // Cada pared nace a 480 px del centro de la presa y AVANZA
+                // hacia ella (obliga a moverse: el sello estrecha).
+                Vector2 pos = target.Center + new Vector2(
+                    MathF.Cos(cardinal), MathF.Sin(cardinal)) * 480f;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.6f), 3f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloCorteRealidad,
+                    cardinal + MathHelper.Pi, NPC.whoAmI * 23 + i);
             }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item103, NPC.Center);
+            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Rift.Paredes"),
+                VioletaVacio);
         }
 
+        // ==================================================================
+        //  EL ARTE DEL CENTINELA — 100% CÓDIGO
+        // ==================================================================
+        public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
+        {
+            if (Main.netMode == NetmodeID.Server) return false;
+
+            bool wasActive = true;
+            try { Main.spriteBatch.End(); }
+            catch { wasActive = false; }
+
+            try
+            {
+                float t = Main.GlobalTimeWrappedHourly;
+                bool sello = (float)NPC.life / NPC.lifeMax < 0.30f;
+                Vector2 c = NPC.Center;
+
+                // LA DISOLUCIÓN: el cuerpo se apaga mientras la grieta lo chupa.
+                float alphaCuerpo = _faseCruce == 0 ? 1f :
+                    (_faseCruce == 1 ? MathHelper.Clamp(1f - _tickTele / 26f, 0f, 1f)
+                                    : MathHelper.Clamp(_tickTele / 22f, 0f, 1f));
+
+                // === FASE 1 — EL CUERPO (búfer de quads, coords de MUNDO) ===
+
+                // EL VELO: la capa del centinela — cápsulas apiladas.
+                VFXCore.Quad(c + new Vector2(0f, 8f), VeloTenue * (0.45f * alphaCuerpo),
+                    new Vector2(30f, 30f));
+                VFXCore.Quad(c + new Vector2(0f, -4f), VeloTenue * (0.60f * alphaCuerpo),
+                    new Vector2(26f, 34f));
+
+                // LA CAPA EXTERIOR (la falda que se deshace abajo).
+                for (int i = 0; i < 3; i++)
+                {
+                    float franja = 0.30f * (1f - i * 0.30f);
+                    VFXCore.Quad(c + new Vector2(0f, 14f + i * 10f),
+                        TealUmbral * (franja * alphaCuerpo), new Vector2(28f - i * 6f, 14f));
+                }
+
+                // LA CAPUCHA (el hueco de la cabeza).
+                VFXCore.Quad(c + new Vector2(0f, -22f), VeloTenue * (0.80f * alphaCuerpo),
+                    new Vector2(22f, 20f));
+                VFXCore.Quad(c + new Vector2(0f, -27f), VeloTenue * (0.65f * alphaCuerpo),
+                    new Vector2(14f, 12f));
+
+                // LA RENDIJA DE OJOS (tres ojos del umbral — el del centro más largo).
+                float parpadeo = 0.85f + 0.15f * MathF.Sin(t * 2.6f);
+                VFXCore.Quad(c + new Vector2(0f, -24f), TealUmbral * (0.95f * alphaCuerpo * parpadeo),
+                    new Vector2(12f, 3.5f));
+                VFXCore.Quad(c + new Vector2(-7f, -25f), TealUmbral * (0.80f * alphaCuerpo * parpadeo),
+                    new Vector2(5f, 3f));
+                VFXCore.Quad(c + new Vector2(7f, -25f), TealUmbral * (0.80f * alphaCuerpo * parpadeo),
+                    new Vector2(5f, 3f));
+
+                // LOS HOMBROS DEL SELLO (los picos de la armadura del umbral).
+                VFXCore.Quad(c + new Vector2(-17f, -14f), TealUmbral * (0.55f * alphaCuerpo),
+                    new Vector2(10f, 18f), -0.5f);
+                VFXCore.Quad(c + new Vector2(17f, -14f), TealUmbral * (0.55f * alphaCuerpo),
+                    new Vector2(10f, 18f), 0.5f);
+
+                // LAS LLAVES ORBITANDO (los fragmentos del sello — 4 picos).
+                for (int i = 0; i < 4; i++)
+                {
+                    float ang = t * 1.1f + i * MathHelper.PiOver2;
+                    Vector2 off = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * 52f;
+                    VFXCore.Quad(c + off + new Vector2(0f, -8f),
+                        TealUmbral * (0.70f * alphaCuerpo), new Vector2(7f, 14f), ang);
+                }
+                VFXCore.FlushAdditive(null, false);
+
+                // === FASE 2 — LOS ADITIVOS (lote de pantalla) ===
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                Vector2 pos = c - Main.screenPosition;
+
+                // EL HALO DEL SELLO (la corona giratoria del guardián).
+                OrbitaLib.AnilloFino(pos + new Vector2(0f, -40f), 26f, t * 0.9f,
+                    OrbitaLib.Tint(TealUmbral, 0.40f * alphaCuerpo));
+                if (sello)
+                    OrbitaLib.AnilloFino(pos + new Vector2(0f, -40f), 34f, -t * 1.4f,
+                        OrbitaLib.Tint(VioletaVacio, 0.35f * alphaCuerpo));
+
+                // EL CORAZÓN DEL UMBRAL (el pecho respira).
+                LumenLib.BloomPulse(Main.spriteBatch, pos, 22f, TealUmbral,
+                    (sello ? 0.75f : 0.5f) * alphaCuerpo, t, 2.4f);
+
+                // === LA GRIETA DE SALIDA (donde se desgarró) ===
+                if (_faseCruce == 1)
+                {
+                    Vector2 grieta = _posSalida - Main.screenPosition;
+                    float abre = MathHelper.Clamp(_tickTele / 26f, 0f, 1f);
+                    RiftLib.TearVacio(Main.spriteBatch, grieta, -Vector2.UnitY, 130f,
+                        abre, 40f, NPC.whoAmI * 7, t);
+                    // EL SIFÓN: chispas cayendo a la grieta.
+                    for (int i = 0; i < 3; i++)
+                    {
+                        float h = VFXCore.Hash01(NPC.whoAmI, i, (int)(_edadGlobal / 12f));
+                        Vector2 chispa = grieta + new Vector2(
+                            (h - 0.5f) * 90f, -30f - h * 60f + _tickTele * 1.5f);
+                        LumenLib.Bloom(Main.spriteBatch, chispa, 7f, TealUmbral, 0.5f, 2);
+                    }
+                }
+                // === LA GRIETA DE LLEGADA (cerrándose tras el cruce) ===
+                else if (_faseCruce == 2)
+                {
+                    float cierra = 1f - MathHelper.Clamp(_tickTele / 22f, 0f, 1f);
+                    RiftLib.TearVacio(Main.spriteBatch, pos, -Vector2.UnitY, 130f,
+                        cierra, 40f, NPC.whoAmI * 7 + 1, t);
+                }
+
+                Main.spriteBatch.End();
+            }
+            catch
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
+            finally
+            {
+                if (wasActive)
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+            }
+            return false; // el centinela LO dibuja la grieta (cero sprite)
+        }
+
+        /// <summary>La edad global determinista para las chispas del render.</summary>
+        private static float _edadGlobal => Main.GlobalTimeWrappedHourly * 60f % 997f;
+
+        // ==================================================================
+        //  LA MUERTE DEL CENTINELA
+        // ==================================================================
         public override void OnKill()
         {
-            // Otorgar resonancia al jugador que mato al NPC (no a LocalPlayer — bug en MP).
+            // EL COLAPSO DEL UMBRAL: el desgarro final se lo traga.
+            for (int d = 0; d < 36; d++)
+            {
+                int idx = Dust.NewDust(NPC.Center, 40, 50, DustID.PurpleTorch,
+                    Main.rand.NextFloat(-6f, 6f), Main.rand.NextFloat(-8f, 2f));
+                Main.dust[idx].noGravity = true;
+            }
+            OndaLib.Kick(9f, 18);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath6, NPC.Center);
+
+            // Otorgar resonancia al jugador que mató al NPC (no a LocalPlayer — bug en MP).
             int killerWho = NPC.lastInteraction;
             if (killerWho < 0 || killerWho >= Main.player.Length)
             {
-                // Fallback: buscar primer jugador que interactuo.
                 for (int i = 0; i < Main.player.Length; i++)
                 {
                     if (Main.player[i] != null && Main.player[i].active && NPC.playerInteraction[i])
@@ -140,7 +384,8 @@ namespace AethonMod.Content.NPCs
             if (sp != null)
             {
                 sp.ResonanceShards += 45;
-                Main.NewText($"Has absorbido 45 fragmentos de resonancia de {NPC.FullName}!", new Color(245, 196, 81));
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Resonancia",
+                    NPC.FullName, 45), new Color(245, 196, 81));
             }
         }
     }

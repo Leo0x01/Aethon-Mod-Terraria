@@ -266,7 +266,10 @@ namespace AethonMod.Content.Items.Bolsas
     /// <summary>10 — LOS COSMÉTICOS: las coronas de la casa + LOS TRES
     /// ACCESORIOS DE LAS LIBRERÍAS DE SIGNOS MÁGICOS (v6.35: los sellos y
     /// anillos que rodean al jugador) + EL ANILLO RÚNICO DORSAL (v6.36:
-    /// la firma del vacío en la espalda).</summary>
+    /// la firma del vacío en la espalda) + LA CORONA RÚNICA DE AURA y LA
+    /// FORMA ASCENDIDA (v6.48: las DOS auras de AURALIB por el PORTADOR
+    /// aditivo — el pentágono violeta-oro y la luz primordial de Aethon).
+    /// </summary>
     public class BolsaCosmeticos : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Cosméticos";
@@ -283,6 +286,8 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Accessories.AnillosSolRunicoItem>(), 1));
             l.Add((ModContent.ItemType<Accessories.AnillosHorizonteItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.AnilloRunicoDorsalItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.CoronaRunicoAuraItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
             return l;
         }
     }

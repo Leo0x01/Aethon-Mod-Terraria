@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 
 namespace AethonMod.Content.VFX
 {
@@ -28,6 +29,18 @@ namespace AethonMod.Content.VFX
     /// del hambre del grimorio — el mismo tipo dramático, tamaño de
     /// secreto) y rugido opcional ya existía: la Voz del Hambre entra por
     /// aquí SIN rugir, susurrando de verdad.
+    ///
+    /// v6.48 — LA COLA CON PRIORIDAD Y LAS VARIANTES:
+    /// - Hablar(..., prioridad: true): LA VOZ DEL LIBRO SIEMPRE VA
+    ///   PRIMERO — se cuela al FRENTE de la cola (la voz activa termina
+    ///   su línea y la siguiente en nacer es la del libro; las demás
+    ///   esperan detrás: "la otra voz aparece después de la primera",
+    ///   exactamente como pidió el usuario). Así la Furia nunca compite
+    ///   con las voces de los jefes del propio evento.
+    /// - ElegirVariante(clave, n): el REPARTO sin repetición — cada
+    ///   situación tiene VARIAS muestras y esta elige una distinta de la
+    ///   última dicha para esa clave (matar al Rey Gelatina veinte veces
+    ///   no puede escuchar siempre la misma línea).
     ///
     /// REGLAS DE LA CASA:
     /// - Render 100% DETERMINISTA: cero Main.rand — la animación es pura
@@ -57,6 +70,9 @@ namespace AethonMod.Content.VFX
         private static readonly Queue<Eco> _cola = new Queue<Eco>();
         private static Eco _activo = null;
 
+        /// <summary>La memoria del reparto: la última variante dicha por clave.</summary>
+        private static readonly Dictionary<string, int> _ultimaVariante = new Dictionary<string, int>();
+
         /// <summary>Tope de la cola pendiente (la activa no cuenta).</summary>
         public const int ColaMax = 8;
 
@@ -65,8 +81,12 @@ namespace AethonMod.Content.VFX
         /// líneas largas se parten aquí (una vez, fuera del render) en
         /// trozos de ~44 caracteres cortados en espacio.
         /// v6.47: escala opcional (los SUSURROS usan ~0.52).
+        /// v6.48: prioridad opcional — la voz del LIBRO se cuela AL FRENTE
+        /// de la cola (no corta la voz activa: la línea en curso termina
+        /// y la del libro nace justo después; las demás esperan detrás).
         /// </summary>
-        public static void Hablar(string texto, Color tinte, bool rugido = true, float escala = 0.62f)
+        public static void Hablar(string texto, Color tinte, bool rugido = true,
+            float escala = 0.62f, bool prioridad = false)
         {
             try
             {
@@ -80,9 +100,52 @@ namespace AethonMod.Content.VFX
                     Rugido = rugido,
                     Escala = MathHelper.Clamp(escala, 0.3f, 1.2f),
                 };
-                _cola.Enqueue(eco);
+                if (prioridad && _cola.Count > 0)
+                {
+                    // EL CULÓN DE LA COLA: la voz prioritaria pasa delante de
+                    // TODAS las pendientes (las prioritarias múltiples se
+                    // mantienen en su orden de llegada entre ellas).
+                    var pendientes = _cola.ToArray();
+                    _cola.Clear();
+                    _cola.Enqueue(eco);
+                    for (int i = 0; i < pendientes.Length; i++)
+                        _cola.Enqueue(pendientes[i]);
+                }
+                else
+                {
+                    _cola.Enqueue(eco);
+                }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.48 — EL REPARTO SIN REPETICIÓN: elige una de las variantes
+        /// "clave1..claveN" DISTINTA de la última dicha para esa situación
+        /// (aleatorio lógico — corre en la lógica del juego, nunca en el
+        /// render). Devuelve el TEXTO YA LOCALIZADO (y "" si la clave no
+        /// existe — el llamador decide si callar).
+        /// </summary>
+        public static string ElegirVariante(string clave, int variantes)
+        {
+            try
+            {
+                if (variantes <= 1) return Language.GetTextValue(clave + "1");
+                int ultima = -1;
+                _ultimaVariante.TryGetValue(clave, out ultima);
+
+                int idx;
+                if (variantes == 2) idx = ultima == 1 ? 2 : 1;
+                else
+                {
+                    // Sorteo con rechazo de la repetida (n>2: 1..n menos la última)
+                    do { idx = 1 + Main.rand.Next(variantes); }
+                    while (idx == ultima);
+                }
+                _ultimaVariante[clave] = idx;
+                return Language.GetTextValue(clave + idx);
+            }
+            catch { return ""; }
         }
 
         /// <summary>
@@ -207,6 +270,7 @@ namespace AethonMod.Content.VFX
         {
             _cola.Clear();
             _activo = null;
+            _ultimaVariante.Clear();
         }
     }
 }

@@ -231,6 +231,9 @@ namespace AethonMod.Content.VFX
         /// oleada 10 el aura se pudre — cuerpo gris-negro con BORDES ROJOS
         /// oscuros (lo que pide la letra: la comida del libro harta de
         /// esperar). Jefes y monstruos de las oleadas visten ESTA.
+        /// v6.48 — LA OLEADA ESPECIAL (11): EL JUICIO — el aura más
+        /// vistosa de la casa: negra, bordes rojo INTENSO con coronas de
+        /// chispas carmesí y ORO (el festín final paga en dos metales).
         /// </summary>
         public static AuraPerfil OleadaGrimorio(int oleada)
         {
@@ -252,7 +255,30 @@ namespace AethonMod.Content.VFX
                 VeloFrontal = true,
             };
 
-            if (oleada >= 10)
+            if (oleada >= 11)
+            {
+                // LA OLEADA ESPECIAL — EL JUICIO: negra con bordes rojo
+                // intenso y chispas DOBLES (carmesí + oro), el doble de
+                // vivas. Todos los jefes juntos visten ESTA.
+                p.ConTrasera(new Color(20, 16, 20), new Color(44, 38, 44), new Color(196, 22, 32));
+                p.ConFrontal(new Color(22, 18, 22), new Color(46, 40, 46), new Color(170, 18, 28));
+                p.ConParticulas(new ParticulasAura
+                {
+                    Cantidad = 14,
+                    Forma = FormaParticula.Chispa,
+                    Color = new Color(210, 30, 42),
+                    Alfa = 0.65f,
+                    Solidas = false,
+                    Tasa = 1.4f,
+                    Velocidad = 42f,
+                    Ascenso = 52f,
+                    Tamano = 12f,
+                    Vida = 0.8f,
+                });
+                p.Glow = 1.9f;
+                p.Distorsion = 1.35f;
+            }
+            else if (oleada >= 10)
             {
                 // LA OLEADA FINAL: gris-negra con bordes rojo oscuro.
                 p.ConTrasera(new Color(28, 24, 28), new Color(48, 44, 50), new Color(142, 16, 24));
@@ -291,6 +317,97 @@ namespace AethonMod.Content.VFX
                     Vida = 1.1f,
                 });
             }
+            return p;
+        }
+
+        /// <summary>
+        /// v6.48 — LA CORONA RÚNICA DE AURA: el patrón POLÍGONO con
+        /// ConLados(5) y los tintes de la casa (violeta del Sagrario +
+        /// oro del grimorio) hecho COSMÉTICO — un pentágono de runas
+        /// girando alrededor del jugador con chispas doradas. Cuesta UN
+        /// PRESET (no un arma): la Bolsa de Cosméticos la reparte.
+        /// </summary>
+        public static AuraPerfil CoronaRunica()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 54f,
+                Anillos = 2,
+                Gajos = 10,
+                Patron = PatronAura.Poligono,
+                Lados = 5,
+                Giro = 0.35f,
+                Fluir = 0.5f,
+                Deriva = 0.10f,
+                Ascenso = 8f,
+                Distorsion = 0.55f,
+                Blur = 0.6f,
+                Glow = 1.5f,
+                Semilla = 5150, // "5150": pentágono rúnico
+                AlfaTrasera = 0.30f,
+                AlfaFrontal = 0.05f,
+                VeloFrontal = true,
+            };
+            // LOS TINTES DEL MOD: violeta del Sagrario al centro, el oro
+            // del grimorio en el BORDE (las aristas de la jaula dorada).
+            p.ConTrasera(new Color(122, 66, 200), new Color(158, 96, 232), new Color(255, 214, 130));
+            p.ConFrontal(new Color(126, 70, 204), new Color(162, 100, 236), new Color(255, 226, 150));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 8,
+                Forma = FormaParticula.Chispa,
+                Color = new Color(255, 214, 130),
+                Alfa = 0.55f,
+                Solidas = false,
+                Tasa = 0.8f,
+                Velocidad = 20f,
+                Ascenso = 26f,
+                Tamano = 9f,
+                Vida = 1.2f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.48 — LA FORMA ASCENDIDA: el aura de la Luz Primordial que
+        /// Aethon deja caer al reconocerte como un par (su drop prometido
+        /// desde v5, cumplido). Luz dorada-violeta respirando alrededor
+        /// del portador — la corona del que ya no necesita invocarla.
+        /// </summary>
+        public static AuraPerfil FormaAscendida()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 60f,
+                Anillos = 3,
+                Gajos = 14,
+                Patron = PatronAura.Perlin,
+                Fluir = 0.6f,
+                Deriva = 0.12f,
+                Ascenso = 10f,
+                Distorsion = 0.7f,
+                Blur = 1f,
+                Glow = 1.8f,
+                Semilla = 150,
+                AlfaTrasera = 0.28f,
+                AlfaFrontal = 0.06f,
+                VeloFrontal = true,
+            };
+            p.ConTrasera(new Color(255, 236, 170), new Color(196, 150, 255), new Color(255, 251, 230));
+            p.ConFrontal(new Color(255, 240, 180), new Color(200, 156, 255), new Color(255, 253, 240));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 10,
+                Forma = FormaParticula.Orbe,
+                Color = new Color(255, 240, 190),
+                Alfa = 0.5f,
+                Solidas = false,
+                Tasa = 1.0f,
+                Velocidad = 18f,
+                Ascenso = 30f,
+                Tamano = 9f,
+                Vida = 1.3f,
+            });
             return p;
         }
 
@@ -654,6 +771,41 @@ namespace AethonMod.Content.VFX
                 VFXCore.AppendToPlayerDraw(ref drawInfo);
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.48 — EL CAMINO ADITIVO DEL JUGADOR (la mejora pedida: el
+        /// camino del halo-proyectil). Los NPCs dibujan su aura ADITIVA
+        /// (neón); el jugador iba por DrawData (AlphaBlend) y las auras
+        /// de color vivos salían planas (la lección v6.40 de las manchas
+        /// planas). ESTE método emite el aura del jugador al búfer y lo
+        /// VUELCA ADITIVO — lo llama el PORTADOR (AuraPortadorHalo), un
+        /// proyectil cosmético pegado al jugador: su PreDraw tiene el
+        /// lote BAJO NUESTRO CONTROL y vanilla dibuja los proyectiles
+        /// ANTES que los jugadores → la capa queda DETRÁS del cuerpo.
+        /// El VELO FRONTAL sigue por DrawData (al 6% no necesita neón).
+        /// DEVUELVE true si el lote del llamador fue CERRADO (reabrir
+        /// con ReabrirLoteVanilla) — el contrato de la casa.
+        /// </summary>
+        public static bool DibujarJugadorAditivo(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+            try
+            {
+                Emitir(pl.Center, p.Radio, p, frontal: false, 511);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
         }
 
         /// <summary>Escala del aura según el tamaño del NPC (los jefes visten más grande).</summary>

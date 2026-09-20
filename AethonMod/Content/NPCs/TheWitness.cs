@@ -1,14 +1,35 @@
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
+using AethonMod.Content.Systems;
 using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.NPCs
 {
     /// <summary>
-    /// El Testigo — NPC cósmico errante.
-    /// No hostil: narra lore según el nivel del fragmento del jugador,
-    /// y vende Fragmentos de Resonancia.
+    /// El Testigo — NPC cósmico errante. No hostil.
+    ///
+    /// v6.48 — EL CRONISTA Y EL MERCADER DE ALMAS:
+    /// · LA CRÓNICA: cada jefe que EL LIBRO devora con su portador queda
+    ///   apuntado (ShardPlayer.CronicaJefes, lo marca GlobalNPCXP). El
+    ///   Testigo cuenta SU versión HUMANA de esa misma derrota — dos
+    ///   narradores, un mismo hecho: el libro dice "comí" y el Testigo
+    ///   dice "yo lo vi caer". Cada charla nueva revela LA SIGUIENTE
+    ///   página del cuento (el cursor CronicaNarrada persiste).
+    /// · LA TIENDA DE ESENCIAS: vende las almas de los SIETE guardianes
+    ///   de las oleadas (EsenciaDeJefeItem — un nivel completo por alma,
+    ///   10 monedas de platino cada una)… a quien SOBREVIVIÓ a la
+    ///   oleada 10 de la furia (DerrotaOleada10). El botón siempre está
+    ///   a la vista (el probador lo quiere a mano); el Testigo solo
+    ///   abre el cajón al que aguantó el festín completo.
+    ///
+    /// v6.47 — LAS BURBUJAS: habla por EcoLib al acercarte (violeta,
+    /// sin rugido). El chat clásico (GetChat) cuenta la crónica y el
+    /// nivel del grimorio — TODO localizado en hjson (la casa no
+    /// hardcodea diálogos).
     /// </summary>
     public class TheWitness : ModNPC
     {
@@ -36,13 +57,35 @@ namespace AethonMod.Content.NPCs
             NPC.immortal = true;
         }
 
+        // ==================================================================
+        //  LA TIENDA DE ESENCIAS (el cajón de las almas)
+        // ==================================================================
+
+        /// <summary>
+        /// EL CAJÓN DE LAS ALMAS: las SIETE esencias de los guardianes de
+        /// las oleadas — cada una sube UN NIVEL COMPLETO al Grimorio
+        /// (EsenciaDeJefeItem, precio 10 de platino en su SetDefaults).
+        /// La CONDICIÓN de la casa: solo las compra quien derrotó la
+        /// oleada 10 de la furia (ShardPlayer.DerrotaOleada10).
+        /// </summary>
+        public override void AddShops()
+        {
+            var tienda = new NPCShop(Type, "Esencias");
+            var desbloqueada = new Condition("Mods.AethonMod.Conditions.TiendaEsencias",
+                () => Main.LocalPlayer != null && Main.LocalPlayer.active &&
+                      Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>()?.DerrotaOleada10 == true);
+            foreach (int esencia in Items.Esencias.EsenciaDeJefeItem.Todas())
+                tienda.Add(esencia, desbloqueada);
+            tienda.Register();
+        }
+
         public override void AI()
         {
             // Flota suavemente sin moverse.
             NPC.velocity.X *= 0.8f;
             NPC.velocity.Y *= 0.8f;
             // Brillo violeta.
-            Lighting.AddLight(NPC.Center, new Microsoft.Xna.Framework.Vector3(0.4f, 0.2f, 0.6f));
+            Lighting.AddLight(NPC.Center, new Vector3(0.4f, 0.2f, 0.6f));
 
             // ================================================================
             //  v6.47 — LAS BURBUJAS DRAMÁTICAS DEL TESTIGO (EcoLib).
@@ -51,7 +94,7 @@ namespace AethonMod.Content.NPCs
             //  hablar POR BURBUJA DRAMÁTICA cuando te acercas — susurros
             //  violetas sin rugido, en vez de chat plano. Solo cliente.
             // ================================================================
-            if (Main.netMode != Terraria.ID.NetmodeID.Server)
+            if (Main.netMode != NetmodeID.Server)
             {
                 bool alguienCerca = false;
                 for (int i = 0; i < Main.maxPlayers; i++)
@@ -72,9 +115,8 @@ namespace AethonMod.Content.NPCs
                     NPC.localAI[1]++; // la línea rota deterministamente
                     int idx = 1 + ((int)NPC.localAI[1]) % 3;
                     EcoLib.Hablar(
-                        Terraria.Localization.Language.GetTextValue(
-                            "Mods.AethonMod.Testigo.Ambiente" + idx),
-                        new Microsoft.Xna.Framework.Color(196, 150, 255),
+                        Language.GetTextValue("Mods.AethonMod.Testigo.Ambiente" + idx),
+                        new Color(196, 150, 255),
                         rugido: false, escala: 0.5f);
                 }
                 else if (!alguienCerca && NPC.localAI[0] < 700f)
@@ -84,9 +126,16 @@ namespace AethonMod.Content.NPCs
             }
         }
 
-        public override string GetChat()
+        // ==================================================================
+        //  EL CHAT — la crónica primero, el nivel después
+        // ==================================================================
+
+        /// <summary>
+        /// EL NIVEL DEL GRIMORIO del jugador local (la misma lectura de
+        /// siempre: el libro SOSTENIDO).
+        /// </summary>
+        private static int NivelDelGrimorio()
         {
-            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             int level = 0;
             Item held = Main.LocalPlayer.HeldItem;
             if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
@@ -94,60 +143,88 @@ namespace AethonMod.Content.NPCs
                 try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
                 catch { }
             }
-            return level switch
+            return level;
+        }
+
+        public override string GetChat()
+        {
+            // ==============================================================
+            //  v6.48 — LA CRÓNICA: si hay páginas sin contar, ESTA charla
+            //  es la página siguiente (el libro devoró un jefe; el Testigo
+            //  lo vio caer con ojos de humano). Se consume de una en una.
+            // ==============================================================
+            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
+            if (sp != null && sp.CronicaJefes != null && sp.CronicaNarrada < sp.CronicaJefes.Count)
             {
-                0 => "Te he observado. Aun no has reclamado el Fragmento Genesis. Busca el Sagrario Hueco bajo tierra.",
-                < 25 => $"Tu fragmento brilla con nivel {level}. Aun es debil. Sigue combatiendo.",
-                < 50 => $"Nivel {level}... El fragmento empieza a recordar su origen. La Lluvia de Luz Estelar se acerca.",
-                < 75 => $"Nivel {level}. El Sagrario Hueco responde a tu poder. Rifts dimensionales acechan.",
-                < 100 => $"Nivel {level}. Aethon se agita en suenos. Los Ecos de portadores anteriores vendran por ti.",
-                < 150 => $"Nivel {level}. Aethon esta a punto de despertar. Preparate para el reconocimiento.",
-                _ => $"Nivel {level}. Aethon te espera. Ve al Sagrario Hueco y llama su nombre.",
-            };
+                int jefe = sp.CronicaJefes[sp.CronicaNarrada];
+                string clave = EcoSistema.ClaveDeVoz(jefe);
+                string linea = Language.GetTextValue("Mods.AethonMod.Testigo.Cronica." + clave);
+                if (string.IsNullOrEmpty(linea) || linea.StartsWith("Mods.AethonMod"))
+                    linea = Language.GetTextValue("Mods.AethonMod.Testigo.Cronica.Desconocido");
+                sp.CronicaNarrada++;
+                return linea;
+            }
+
+            // El escalado del grimorio, como siempre (ahora localizado).
+            int level = NivelDelGrimorio();
+            if (level <= 0)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.SinLibro");
+            if (level < 25)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Debil", level);
+            if (level < 50)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Recuerda", level);
+            if (level < 75)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Sagrario", level);
+            if (level < 100)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Ecos", level);
+            if (level < 150)
+                return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Despierta", level);
+            return Language.GetTextValue("Mods.AethonMod.Testigo.Chat.Espera", level);
         }
 
         public override void SetChatButtons(ref string button, ref string button2)
         {
-            var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
-            int level = 0;
-            Item held = Main.LocalPlayer.HeldItem;
-            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
-            {
-                try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
-                catch { }
-            }
-            if (level >= 50)
-                button = "Comprar Resonancia (10 monedas)";
-            else
-                button = "Hablar";
+            button = Language.GetTextValue("Mods.AethonMod.Testigo.BotonResonancia");
+
+            // v6.48 — EL CAJÓN DE LAS ESENCIAS: siempre a la vista (el
+            // probador lo quiere a mano); el Testigo decide al abrirlo.
+            button2 = Language.GetTextValue("Mods.AethonMod.Testigo.BotonEsencias");
         }
 
         public override void OnChatButtonClicked(bool firstButton, ref string shopName)
         {
-            if (!firstButton) return;
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
             if (sp == null) return;
 
-            // Calcular nivel del Grimorio sostenido (igual que en GetChat/SetChatButtons).
-            int level = 0;
-            Item held = Main.LocalPlayer.HeldItem;
-            if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+            // === BOTÓN 2 — LA TIENDA DE ESENCIAS (el cajón de las almas) ===
+            if (!firstButton)
             {
-                try { var sl = held.GetGlobalItem<Globals.ShardLevelItem>(); if (sl != null) level = sl.Level; }
-                catch { }
+                if (!sp.DerrotaOleada10)
+                {
+                    // El Testigo NO abre el cajón: el festín no está pagado.
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Testigo.EsenciasBloqueadas"),
+                        new Color(150, 150, 180));
+                    return;
+                }
+                shopName = "Esencias";
+                return;
             }
 
+            // === BOTÓN 1 — LA RESONANCIA DE SIEMPRE (nivel 50+) ===
+            int level = NivelDelGrimorio();
             if (level >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
             {
                 Item.NewItem(
                     Main.LocalPlayer.GetSource_GiftOrReward(),
                     Main.LocalPlayer.Center,
                     ModContent.ItemType<Items.ResonanceShard>());
-                Main.NewText("El Testigo te da un Fragmento de Resonancia.", new Microsoft.Xna.Framework.Color(245, 196, 81));
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Testigo.ResonanciaEntregada"),
+                    new Color(245, 196, 81));
             }
             else if (level < 50)
             {
-                Main.NewText("El Testigo solo comparte resonancia con portadores de nivel 50+.", new Microsoft.Xna.Framework.Color(150, 150, 180));
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Testigo.ResonanciaBloqueada"),
+                    new Color(150, 150, 180));
             }
         }
     }

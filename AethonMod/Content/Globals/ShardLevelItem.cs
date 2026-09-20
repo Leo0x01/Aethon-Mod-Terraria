@@ -160,6 +160,31 @@ namespace AethonMod.Content.Globals
 
         // === Persistencia ===
 
+        /// <summary>
+        /// v6.48 — LA ESENCIA DEL GUARDIÁN: sube UN nivel COMPLETO al libro
+        /// (la vía directa de las esencias de los jefes de oleada — no
+        /// pasa por la XP: el alma ES el nivel). Anuncia como una subida
+        /// normal (condensada, con hitos y config respetadas).
+        /// </summary>
+        public void SubirNivelDirecto(Item item, int niveles = 1)
+        {
+            try
+            {
+                if (niveles <= 0) return;
+                if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
+                Level += niveles;
+                bool cruzoHito = false;
+                int nivelHito = 0;
+                int limite = Level;
+                for (int l = Level - niveles + 1; l <= limite; l++)
+                {
+                    if (l % 50 == 0) { cruzoHito = true; nivelHito = l; }
+                }
+                OnLevelUp(item, niveles, cruzoHito, nivelHito);
+            }
+            catch { }
+        }
+
         public override void SaveData(Item item, TagCompound tag)
         {
             if (Level > 1 || XP > 0)

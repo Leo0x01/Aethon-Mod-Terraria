@@ -16,55 +16,58 @@ namespace AethonMod.Content.Systems
     /// EL CUENTO ENTERO:
     /// 1. LA VOZ DEL HAMBRE (ShardPlayer): con el libro a nivel alto
     ///    (25+), cada 75 segundos sin matar es un MOMENTO DE HAMBRE —
-    ///    EcoLib susurra ("El grimorio tiene hambre…") y la barra dorada
-    ///    palidece un poco más. Pure flavor, cero mecánica… hasta que no.
+    ///    EcoLib susurra (con EL SAJOR DEL BIOMA en la primera línea)
+    ///    y la barra dorada palidece un poco más. Pure flavor… hasta
+    ///    que no.
     /// 2. LA FURIA: al cuarto momento (~5 minutos sin comer), el libro
     ///    pierde la paciencia: "El grimorio está furioso…" y luego
     ///    "El grimorio llama a su comida…".
     /// 3. EL EVENTO (5 minutos de oleadas): UNA OLEADA POR CADA MOMENTO
-    ///    DE HAMBRE acumulado, hasta 10 (hambriento durante una pelea de
-    ///    jefes = más hambres acumuladas = más oleadas). Cada oleada:
-    ///    - La CHUSMA: monstruos del bioma Y de la hora (noche = ojos y
-    ///      zombis, día = babosas…) con stats enfurecidas (vida, daño,
-    ///      defensa, sin knockback) y empuje hacia la presa (OleadaNPC).
-    ///    - AL FINAL DE CADA OLEADA: UN JEFE PRE-HARDMODE del bioma y la
-    ///      hora — superficie día: Rey Gelatina · noche: Ojo de Cthulhu ·
-    ///      nieve: Deerclops · jungla: Abeja Reina · corrupción:
-    ///      Devorador de Mundos · carmesí: Cerebro · mazmorra: Skeletron
-    ///      (noche) · infierno: el Ojo los caza. Versión ESPECIAL: vida,
-    ///      daño y defensa potenciados por la oleada (OleadaNPC.Marcar
-    ///      con jefe=true).
-    ///    - LA XP: TODO lo que muera en la oleada k paga ×(k+1) — la
-    ///      oleada 1 paga ×2, la 10 paga ×11 (GlobalNPCXP).
-    ///    - EL AURA: cada criatura y jefe viste el humo gris-blanco de
-    ///      AuraLib (capa trasera + velo frontal al 94%); en la OLEADA 10
-    ///      el aura se pudre: gris-negra con bordes rojo oscuro.
-    /// 4. EL SITIO: el reloj de las oleadas dura 5 MINUTOS repartidos
-    ///    entre las N oleadas (18000/N ticks cada fase de chusma); los
-    ///    jefes paran el reloj (la oleada k+1 empieza cuando cae el
-    ///    jefe k). Al final: "El grimorio está saciado… por ahora." y la
-    ///    hambre del portador se perdona.
+    ///    DE HAMBRE acumulado, hasta 10. Cada oleada: LA CHUSMA del
+    ///    bioma con stats ×(k+1) (la 1 ×2, la 10 ×11 — la letra del
+    ///    usuario), y AL FINAL UN JEFE PRE-HARDMODE del bioma — v6.48
+    ///    SIN importar la hora (los guardianes de la furia no duermen:
+    ///    cada zona tiene SU guardián fijo y la superficie alterna Rey
+    ///    Gelatina/Ojo por paridad de oleada, para que no se repita).
+    ///    El pago: k monedas de oro por monstruo, k de platino + SU
+    ///    ESENCIA por jefe, y TODO paga XP ×(k+1).
+    /// 4. LA OLEADA ESPECIAL — EL JUICIO (v6.48): tras la oleada 10 (o
+    ///    directa con la Carnada preparada en 11), TODOS los guardianes
+    ///    a la vez: siete jefes ×15 en vida, daño y XP, con el aura del
+    ///    JUICIO y sin pausa en los dientes. Empiezan DOS EN PANTALLA y
+    ///    el resto se van sumando cada 15 s — el festín final. Cuando
+    ///    cae el último: "El grimorio está saciado… por ahora." y el
+    ///    perdón de la hambre.
+    /// 5. LA MUERTE DEL PORTADOR (v6.48): si el jugador cae durante el
+    ///    festín, EL EVENTO TERMINA y el libro TOMA VENGANZA — varias
+    ///    líneas (la voz del libro SIEMPRE con prioridad: se cuela al
+    ///    frente de la cola de EcoLib y las demás voces esperan detrás).
     ///
     /// SP-FIRST: la máquina corre en el servidor del mundo (en SP es el
     /// mismo proceso — las voces de EcoLib y los chat funcionan); en MP
     /// dedicado las voces son TODO pendiente como el resto del sync de
     /// la casa. La Carnada del Grimorio (ítem de prueba) dispara esto
-    /// SIEMPRE, aunque la config tenga el hambre automática apagada.
+    /// SIEMPRE, aunque la config tenga el hambre automática apagada (y
+    /// cicla 1..10 y LA ESPECIAL).
     /// </summary>
     public class GrimorioFuriaSistema : ModSystem
     {
         // === LAS FASES DEL EVENTO ===
-        private enum Fase { Inactivo, Llamada, Monstruos, Jefe, Interludio, Fin }
+        private enum Fase { Inactivo, Llamada, Monstruos, Jefe, Interludio, Especial, Fin }
 
         // === EL ESTADO (servidor del mundo; SP = el mismo proceso) ===
         private static Fase _fase = Fase.Inactivo;
         private static int _ticksFase = 0;
-        private static int _oleadasTotales = 0;    // N (1..10)
+        private static int _oleadasTotales = 0;    // N (1..10, 11 = solo especial)
         private static int _oleadaActual = 0;      // k (1..N)
         private static int _ticksOleada = 0;       // reloj de la fase de chusma
         private static int _pulsoSpawn = 0;        // tempo entre escupitajos
         private static int _bossIdx = -1;          // whoAmI del jefe de la oleada
         private static int _jugador = -1;          // whoAmI del hambriento
+
+        // === EL ESTADO DE LA OLEADA ESPECIAL ===
+        private static int _spawneados = 0;         // cuántos guardián ya nacieron (la cuenta la valida el escaneo de sellos)
+        private static int _ticksSuma = 0;          // tempo de las sumas
 
         // === LAS CONSTANTES DE LA CASA ===
         /// <summary>El evento completo dura 5 MINUTOS de oleadas (300 s).</summary>
@@ -77,11 +80,15 @@ namespace AethonMod.Content.Systems
         private const int TicksInterludio = 90;
         /// <summary>Tope de chusma viva por oleada: 8 + 2k.</summary>
         private const int VivosBase = 8;
+        /// <summary>Cada cuánto se suma un guardián más en LA ESPECIAL.</summary>
+        private const int TicksSumaEspecial = 900; // 15 s
 
         /// <summary>¿El evento de las oleadas está corriendo ahora?</summary>
         public static bool Activo => _fase != Fase.Inactivo && _fase != Fase.Fin;
-        /// <summary>La oleada actual (0 si no hay evento).</summary>
+        /// <summary>La oleada actual (0 si no hay evento; 11 = la ESPECIAL).</summary>
         public static int OleadaActual => Activo ? _oleadaActual : 0;
+        /// <summary>¿Está corriendo LA OLEADA ESPECIAL (El Juicio)?</summary>
+        public static bool EspecialActiva => Activo && _fase == Fase.Especial;
 
         // ==================================================================
         //  EL DISPARO
@@ -106,8 +113,9 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// LA FURIA: arranca el evento con N oleadas (el número de
-        /// momentos de hambre, 1..10). La llama ShardPlayer cuando el
-        /// libro cruza el umbral — y la Carnada del Grimorio para las
+        /// momentos de hambre, 1..10; 11 = LA OLEADA ESPECIAL directa —
+        /// la vía de prueba de la Carnada). La llama ShardPlayer cuando
+        /// el libro cruza el umbral — y la Carnada del Grimorio para las
         /// pruebas (salta la config: el cebo es la herramienta de test).
         /// Corre en el servidor del mundo (SP = el mismo proceso).
         /// </summary>
@@ -117,20 +125,20 @@ namespace AethonMod.Content.Systems
             if (Activo) return;                                      // un festín a la vez
             if (jugador == null || !jugador.active) return;
 
-            _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 10);
+            _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 11);
             _oleadaActual = 0;
             _jugador = jugador.whoAmI;
             _fase = Fase.Llamada;
             _ticksFase = 0;
 
-            // LAS DOS VOCES: primero la ira, después la llamada. Solo en
-            // el proceso que TIENE pantalla (SP: aquí mismo).
+            // LAS DOS VOCES: primero la ira, después la llamada — LA VOZ
+            // DEL LIBRO VA PRIMERO (prioridad: se cuela al frente).
             if (Main.netMode != NetmodeID.Server && jugador.whoAmI == Main.myPlayer)
             {
                 EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Ira"),
-                    new Color(168, 96, 60), rugido: true);
+                    new Color(168, 96, 60), rugido: true, prioridad: true);
                 EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Llamada"),
-                    new Color(226, 64, 64), rugido: true);
+                    new Color(226, 64, 64), rugido: true, prioridad: true);
             }
         }
 
@@ -156,10 +164,25 @@ namespace AethonMod.Content.Systems
                 return;
             }
 
+            // v6.48 — LA MUERTE DEL PORTADOR: el festín se CANCELA y el
+            // libro TOMA VENGANZA (varias líneas — la voz del libro
+            // siempre con prioridad). Castigo puro de voz: el evento
+            // muere, la venganza es la despedida.
+            if (hambriento.dead)
+            {
+                VenganzaPorMuerte(hambriento);
+                Terminar();
+                return;
+            }
+
             switch (_fase)
             {
                 case Fase.Llamada:
-                    if (_ticksFase >= TicksLlamada) SiguienteOleada(hambriento);
+                    if (_ticksFase >= TicksLlamada)
+                    {
+                        if (_oleadasTotales >= 11) ArrancarEspecial(hambriento);
+                        else SiguienteOleada(hambriento);
+                    }
                     break;
 
                 case Fase.Monstruos:
@@ -174,27 +197,39 @@ namespace AethonMod.Content.Systems
                     if (_ticksFase >= TicksInterludio) SiguienteOleada(hambriento);
                     break;
 
+                case Fase.Especial:
+                    FaseEspecial(hambriento);
+                    break;
+
                 case Fase.Fin:
                     if (_ticksFase >= 90) Terminar();
                     break;
             }
         }
 
-                // ==============================================================
-                //  LAS OLEADAS
-                // ==============================================================
+        // ==================================================================
+        //  LAS OLEADAS
+        // ==================================================================
 
         private static void SiguienteOleada(Player hambriento)
         {
             _oleadaActual++;
             if (_oleadaActual > _oleadasTotales)
             {
+                // ¿LA OLEADA ESPECIAL? Solo tras un 10x10 COMPLETO (10
+                // oleadas pedidas y las 10 servidas).
+                if (_oleadasTotales == 10 && _oleadaActual == 11)
+                {
+                    ArrancarEspecial(hambriento);
+                    return;
+                }
+
                 // EL FINAL: saciedad y perdón
                 _fase = Fase.Fin;
                 _ticksFase = 0;
                 if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
                     EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Saciado"),
-                        new Color(245, 196, 81), rugido: false);
+                        new Color(245, 196, 81), rugido: false, prioridad: true);
                 // la hambre del portador se perdona: el festín contó
                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                 sp?.PerdonarHambre();
@@ -222,7 +257,7 @@ namespace AethonMod.Content.Systems
 
         private static void FaseMonstruos(Player hambriento)
         {
-            int duracion = Math.Max(600, TicksEvento / _oleadasTotales); // ≥ 10 s por oleada
+            int duracion = Math.Max(600, TicksEvento / Math.Max(1, _oleadasTotales)); // ≥ 10 s por oleada
             _ticksOleada++;
 
             // === LOS ESCUPITAJOS DE CHUSMA ===
@@ -262,6 +297,20 @@ namespace AethonMod.Content.Systems
             // EL JEFE CALLÓ → la oleada se completa
             if (jefe == null || !jefe.active || jefe.life <= 0)
             {
+                // v6.48 — LA OLEADA 10 VENCIDA: el portador gana el
+                // DERECHO A LAS ESENCIAS del Testigo (la tienda de 10
+                // de platino se abre) — y la ESPECIAL viene después.
+                if (_oleadaActual >= 10 && _oleadasTotales >= 10)
+                {
+                    var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
+                    if (sp != null && !sp.DerrotaOleada10)
+                    {
+                        sp.DerrotaOleada10 = true;
+                        if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
+                            Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.DerechoEsencias"),
+                                new Color(196, 150, 255));
+                    }
+                }
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
                 return;
@@ -281,6 +330,160 @@ namespace AethonMod.Content.Systems
             }
         }
 
+        // ==================================================================
+        //  LA OLEADA ESPECIAL — EL JUICIO (todos los guardianes a ×15)
+        // ==================================================================
+
+        /// <summary>
+        /// LOS SIETE GUARDIANES de las oleadas (el reparto completo de
+        /// zonas) — TODOS juntos en la ESPECIAL, cada uno vestido de
+        /// ×15 y con el aura del JUICIO.
+        /// </summary>
+        private static int[] LosSiete()
+        {
+            return new int[]
+            {
+                NPCID.KingSlime,
+                NPCID.EyeofCthulhu,
+                NPCID.Deerclops,
+                NPCID.QueenBee,
+                NPCID.EaterofWorldsHead,
+                NPCID.BrainofCthulhu,
+                NPCID.SkeletronHead,
+            };
+        }
+
+        /// <summary>
+        /// ARRANCA EL JUICIO: la voz del libro anuncia el festín final y
+        /// los guardianes empiezan a nacer — DOS EN PANTALLA desde el
+        /// primer segundo (la letra del usuario) y el resto se suma cada
+        /// 15 s hasta los siete.
+        /// </summary>
+        private static void ArrancarEspecial(Player hambriento)
+        {
+            _fase = Fase.Especial;
+            _ticksFase = 0;
+            _oleadaActual = 11;
+            _ticksSuma = 0;
+            _spawneados = 0;
+
+            // LA VOZ DEL JUICIO (prioridad: el libro manda).
+            if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
+            {
+                EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Juicio"),
+                    new Color(178, 26, 38), rugido: true, prioridad: true);
+            }
+            if (Main.netMode != NetmodeID.Server)
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.OleadaEspecial"),
+                    new Color(178, 26, 38));
+
+            // LOS DOS PRIMEROS: en pantalla YA.
+            for (int i = 0; i < 2; i++) NacerGuardian(hambriento);
+        }
+
+        /// <summary>Nace UN guardián de la ESPECIAL en su anillo alrededor del portador.</summary>
+        private static void NacerGuardian(Player hambriento)
+        {
+            try
+            {
+                if (_spawneados >= 7) return;
+                int tipo = LosSiete()[_spawneados];
+                float ang = _spawneados * (MathHelper.TwoPi / 7f) + 0.7f;
+                Vector2 pos = hambriento.Center + new Vector2(
+                    MathF.Cos(ang), MathF.Sin(ang)) * 520f - new Vector2(0f, 180f);
+
+                int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo);
+                NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
+                if (jefe == null || !jefe.active) return;
+
+                // EL SELLO DEL JUICIO: ×15 en TODO, aura del JUICIO.
+                jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, 11, jefe: true, especial: true);
+                jefe.netUpdate = true;
+
+                _spawneados++;
+
+                if (Main.netMode != NetmodeID.Server)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.Jefe", jefe.FullName, 15),
+                        new Color(226, 64, 64));
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// EL JUICIO EN MARCHA: cada 15 s nace OTRO guardián hasta los
+        /// siete (siempre ≥ 2 en pantalla mientras vivan). El festín
+        /// termina cuando cae el ÚLTIMO — entonces la saciedad especial
+        /// y el perdón de la hambre.
+        /// </summary>
+        private static void FaseEspecial(Player hambriento)
+        {
+            // LA SUMA: otro guardián cada 15 s (hasta 7).
+            if (_spawneados < 7)
+            {
+                _ticksSuma++;
+                if (_ticksSuma >= TicksSumaEspecial)
+                {
+                    _ticksSuma = 0;
+                    NacerGuardian(hambriento);
+                }
+            }
+
+            // ¿VIVE ALGUNO? (los índices pueden reciclarse: valida tipo+marca)
+            int vivos = 0;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || !n.boss) continue;
+                var sello = n.GetGlobalNPC<OleadaNPC>();
+                if (sello != null && sello.EsDeOleada && sello.EsEspecial && sello.EsJefeDeOleada)
+                    vivos++;
+            }
+
+            if (_spawneados >= 7 && vivos == 0)
+            {
+                // EL FINAL DEL JUICIO: la saciedad especial.
+                _fase = Fase.Fin;
+                _ticksFase = 0;
+                if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
+                {
+                    string linea = EcoLib.ElegirVariante("Mods.AethonMod.Eco.Furia.JuicioFin", 3);
+                    if (!string.IsNullOrEmpty(linea))
+                        EcoLib.Hablar(linea, new Color(245, 196, 81), rugido: false, prioridad: true);
+                }
+                var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
+                sp?.PerdonarHambre();
+            }
+        }
+
+        // ==================================================================
+        //  LA VENGANZA POR MUERTE (el castigo de voz del libro)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.48 — EL PORTADOR MURIÓ durante el festín: el evento SE
+        /// TERMINA y el libro toma venganza — no de daño: de PALABRA
+        /// (4 muestras para no repetir). La voz del libro con PRIORIDAD:
+        /// las voces de jefes que esperaban en la cola salen DESPUÉS.
+        /// </summary>
+        private static void VenganzaPorMuerte(Player hambriento)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
+                {
+                    string linea = EcoLib.ElegirVariante("Mods.AethonMod.Eco.Furia.Venganza", 4);
+                    if (!string.IsNullOrEmpty(linea))
+                        EcoLib.Hablar(linea, new Color(178, 26, 38),
+                            rugido: true, escala: 0.62f, prioridad: true);
+                }
+                if (Main.netMode != NetmodeID.Server)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.MuertePortador"),
+                        new Color(150, 140, 148));
+            }
+            catch { }
+        }
+
         /// <summary>Cuánta chusma de ESTA oleada sigue viva.</summary>
         private static int ContarChusma()
         {
@@ -296,22 +499,18 @@ namespace AethonMod.Content.Systems
         }
 
         // ==================================================================
-        //  LOS POOLS — el bioma y la hora deciden la comida
+        //  LOS POOLS — el bioma decide la comida (la hora ya no manda)
         // ==================================================================
 
         /// <summary>
-        /// Los monstruos que el bioma y la hora del portador ofrecen. IDs
-        /// verificados contra el Terraria real (sondeo de reflexión).
+        /// Los monstruos que el bioma del portador ofrece. IDs verificados
+        /// contra el Terraria real (sondeo de reflexión).
         /// </summary>
         private static int[] PoolMonstruos(Player p)
         {
-            bool noche = !Main.dayTime;
-
             // === INFIERNO ===
             if (p.ZoneUnderworldHeight)
-                return noche
-                    ? new int[] { NPCID.Demon, NPCID.FireImp, NPCID.LavaSlime }
-                    : new int[] { NPCID.FireImp, NPCID.LavaSlime, NPCID.Demon };
+                return new int[] { NPCID.Demon, NPCID.FireImp, NPCID.LavaSlime };
 
             // === MAZMORRA ===
             if (p.ZoneDungeon)
@@ -339,9 +538,7 @@ namespace AethonMod.Content.Systems
 
             // === DESIERTO ===
             if (p.ZoneDesert)
-                return noche
-                    ? new int[] { NPCID.SandSlime, NPCID.Antlion, NPCID.Zombie, NPCID.DemonEye }
-                    : new int[] { NPCID.SandSlime, NPCID.Antlion, NPCID.Antlion };
+                return new int[] { NPCID.SandSlime, NPCID.Antlion, NPCID.Antlion };
 
             // === PLAYA ===
             if (p.ZoneBeach)
@@ -355,37 +552,51 @@ namespace AethonMod.Content.Systems
             if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight)
                 return new int[] { NPCID.CaveBat, NPCID.Skeleton, NPCID.BlueSlime };
 
-            // === SUPERFICIE: el día escupe babosas, la noche ojos y zombis ===
-            if (noche)
-                return new int[] { NPCID.Zombie, NPCID.DemonEye, NPCID.BaldZombie, NPCID.CataractEye };
-            return new int[] { NPCID.GreenSlime, NPCID.BlueSlime, NPCID.Zombie, NPCID.PurpleSlime };
+            // === SUPERFICIE ===
+            return new int[] { NPCID.Zombie, NPCID.DemonEye, NPCID.GreenSlime, NPCID.BlueSlime };
         }
 
         /// <summary>
-        /// El jefe PRE-HARDMODE que cierra la oleada según el bioma y la
-        /// hora. La superficie de día es del Rey Gelatina y la noche del
-        /// Ojo de Cthulhu (lo que pide la letra); el resto de biomas
-        /// aportan SU guardián. El Muro de Carne NO está en la lista a
-        /// propósito: es la puerta del hardmode y una furia involuntaria
-        /// no puede abrir mundos.
+        /// El JEFE PRE-HARDMODE que cierra la oleada según el bioma.
+        ///
+        /// v6.48 — LA REGLA NUEVA DEL USUARIO: los jefes de oleada NO se
+        /// ven afectados por la HORA — cada ZONA tiene su guardián fijo
+        /// (aparecen en su zona predeterminada), y las zonas que no
+        /// tenían guardián YA TIENEN UNO:
+        ///   · superficie → alterna Rey Gelatina / Ojo por PARIDAD de
+        ///     oleada (variedad sin hora: la 1 Rey, la 2 Ojo, la 3 Rey…)
+        ///   · desierto → REY GELATINA (la corona de la arena)
+        ///   · playa y cielo → OJO DE CTHULHU (el vigía que vuela)
+        ///   · granito/mármol/subsuelo → el MAL DEL MUNDO (Devorador o
+        ///     Cerebro según el mundo)
+        ///   · nieve → Deerclops · jungla → Abeja Reina · corrupción →
+        ///     Devorador · carmesí → Cerebro · mazmorra → Skeletron ·
+        ///     infierno → el Ojo los caza.
+        /// El Muro de Carne sigue EXCLUIDO a propósito (una furia
+        /// involuntaria no abre el hardmode).
         /// </summary>
         private static int JefeDelLugar(Player p)
         {
-            bool noche = !Main.dayTime;
-
             if (p.ZoneUnderworldHeight) return NPCID.EyeofCthulhu; // el ojo los caza en el infierno
-            if (p.ZoneDungeon) return noche ? NPCID.SkeletronHead : NPCID.EyeofCthulhu;
+            if (p.ZoneDungeon) return NPCID.SkeletronHead;          // v6.48: SIN hora — el guardián no duerme
             if (p.ZoneSnow) return NPCID.Deerclops;
             if (p.ZoneJungle) return NPCID.QueenBee;
             if (p.ZoneCorrupt) return NPCID.EaterofWorldsHead;
             if (p.ZoneCrimson) return NPCID.BrainofCthulhu;
 
+            // DESIERTO (v6.48 — zona SIN guardián, ahora con el Rey).
+            if (p.ZoneDesert) return NPCID.KingSlime;
+
+            // PLAYA y CIELO (v6.48 — zonas sin guardián, ahora con el Ojo).
+            if (p.ZoneBeach) return NPCID.EyeofCthulhu;
+            if (p.ZoneSkyHeight) return NPCID.EyeofCthulhu;
+
             // SUBSUELO sin bioma: el mal del mundo (o el Rey, en mundos limpios)
             if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight)
                 return WorldGen.crimson ? NPCID.BrainofCthulhu : NPCID.EaterofWorldsHead;
 
-            // SUPERFICIE (y desierto, playa, cielo, cualquier techo al aire)
-            return noche ? NPCID.EyeofCthulhu : NPCID.KingSlime;
+            // SUPERFICIE: por PARIDAD de oleada (sin hora — la 1 Rey, la 2 Ojo…)
+            return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.EyeofCthulhu;
         }
 
         // ==================================================================
@@ -423,7 +634,7 @@ namespace AethonMod.Content.Systems
             catch { }
         }
 
-        /// <summary>Convoca al JEFE (versión especial de la oleada) del bioma/hora.</summary>
+        /// <summary>Convoca al JEFE (versión especial de la oleada) del bioma.</summary>
         private static void SpawnJefeOleada(Player hambriento)
         {
             try
@@ -481,6 +692,8 @@ namespace AethonMod.Content.Systems
             _oleadaActual = 0;
             _bossIdx = -1;
             _jugador = -1;
+            _spawneados = 0;
+            _ticksSuma = 0;
         }
 
         public override void OnWorldUnload()

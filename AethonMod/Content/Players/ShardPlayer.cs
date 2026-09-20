@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -30,6 +31,43 @@ namespace AethonMod.Content.Players
         public int TicksSinMatar = 0;
         /// <summary>Momentos de hambre acumulados (0..10).</summary>
         public int MomentosHambre = 0;
+
+        // ================================================================
+        //  v6.48 — EL LIBRO CELOSO · LA CRÓNICA · EL JUICIO
+        // ================================================================
+
+        /// <summary>
+        /// EL LIBRO CELOSO: el tipo del último ítem sostenido — si el
+        /// portador EMPIÑA OTRA ARMA mientras el libro tiene hambre, el
+        /// susurro celoso (“¿Eso también mata?”) según la CLASE del arma
+        /// (melé, magia, invocación, arrojadiza, arco o bala). Pura voz:
+        /// cero código de gameplay.
+        /// </summary>
+        private int _ultimaArmaSostenida = -1;
+        /// <summary>El frío entre susurros de celos (no repite a cada swap).</summary>
+        private int _ticksCelos = 0;
+
+        /// <summary>
+        /// LA CRÓNICA DEL TESTIGO: los jefes que EL LIBRO ha devorado con
+        /// ESTE portador (los mata GlobalNPCXP al cobrar la kill). El
+        /// Testigo lee esta lista para contar SU versión humana de cada
+        /// derrota — dos narradores, un mismo hecho.
+        /// </summary>
+        public System.Collections.Generic.List<int> CronicaJefes = new System.Collections.Generic.List<int>();
+
+        /// <summary>
+        /// v6.48 — EL CURSOR DE LA CRÓNICA: cuántas derrotas ya CONTÓ el
+        /// Testigo en su versión humana (GetChat consume de una en una:
+        /// cada charla nueva revela la siguiente página del cuento).
+        /// </summary>
+        public int CronicaNarrada = 0;
+
+        /// <summary>
+        /// ¿El portador ya derrotó LA OLEADA 10 de la furia? El Testigo
+        /// solo vende las ESENCIAS de los jefes (10 de platino) a quien
+        /// ha sobrevivido al festín completo.
+        /// </summary>
+        public bool DerrotaOleada10 = false;
 
         /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
         public const int SegundosPorMomento = 75;
@@ -239,14 +277,30 @@ namespace AethonMod.Content.Players
                         // EL SUSURRO: la voz del libro en modo hambre — sin
                         // rugido, escala menuda, gris pálido. Solo la oye el
                         // portador (SP-first).
+                        // v6.48 — EL SAJOR DEL BIOMA: la primer línea de cada
+                        // momento cambia con el bioma ("carne de jungla",
+                        // "sal del infierno"…): el libro sabe DÓNDE está
+                        // hambriento. El resto del escalado sigue siendo el
+                        // de la casa (1→4).
                         if (local)
                         {
-                            string clave = "Mods.AethonMod.Eco.Hambre.Susurro" +
-                                           Math.Min(MomentosHambre, 4);
-                            EcoLib.Hablar(
-                                Terraria.Localization.Language.GetTextValue(clave),
-                                new Microsoft.Xna.Framework.Color(176, 172, 168),
-                                rugido: false, escala: 0.52f);
+                            if (MomentosHambre == 1)
+                            {
+                                string sabor = EcoSistema.SusurroDelBioma(Player);
+                                if (!string.IsNullOrEmpty(sabor))
+                                    EcoLib.Hablar(sabor,
+                                        new Microsoft.Xna.Framework.Color(176, 172, 168),
+                                        rugido: false, escala: 0.52f);
+                            }
+                            else
+                            {
+                                string clave = "Mods.AethonMod.Eco.Hambre.Susurro" +
+                                               Math.Min(MomentosHambre, 4);
+                                EcoLib.Hablar(
+                                    Terraria.Localization.Language.GetTextValue(clave),
+                                    new Microsoft.Xna.Framework.Color(176, 172, 168),
+                                    rugido: false, escala: 0.52f);
+                            }
                         }
 
                         // LA FURIA: al cuarto momento, el evento (si la config
@@ -265,12 +319,97 @@ namespace AethonMod.Content.Players
                 }
                 // guardado el libro: DUERME — la hambre se congela.
 
+                if (local) ElLibroCeloso(nivel);
+
                 // EL AURA DEL HAMBRE: la ceniza del libro sobre su portador
-                // (AuraLib por las capas de jugador — solo el local la viste).
+                // — v6.48 por el PORTADOR (AuraPortadorHalo, el camino
+                // aditivo del halo-proyectil: el neón de verdad detrás del
+                // cuerpo). Las partículas corren en la AI del portador.
                 if (local && MomentosHambre > 0 && !Player.dead)
-                    AuraLib.ActualizarJugador(Player, AuraHambre());
+                {
+                    if (!EspiarPortador(0))
+                    {
+                        Projectile.NewProjectile(Player.GetSource_Misc("AuraHambre"),
+                            Player.Center, Vector2.Zero,
+                            ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                            0, 0f, Player.whoAmI, 0f);
+                    }
+                }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.48 — EL LIBRO CELOSO: si el portador cambia a OTRA ARMA
+        /// mientras el libro está hambriento, el libro susurra su celos —
+        /// una muestra DISTINTA según la CLASE del arma sostenida (melé,
+        /// magia, invocación, arrojadiza, y la distancia repartida entre
+        /// ARCO y BALA, como pidió el usuario). PURA VOZ: cero mecánica,
+        /// cero números — el libro solo opina. Frío de 8 s para no cantar
+        /// a cada swap de hotbar.
+        /// </summary>
+        private void ElLibroCeloso(int nivelLibro)
+        {
+            if (_ticksCelos > 0) _ticksCelos--;
+
+            Item sostenido = Player.HeldItem;
+            int tipo = sostenido != null ? sostenido.type : -1;
+            if (tipo == _ultimaArmaSostenida) return; // mismo ítem: nada nuevo
+            _ultimaArmaSostenida = tipo;
+
+            // solo con hambre de verdad (la primer boca cuenta) y solo
+            // con ARMAS (daño > 0, no el propio libro, no herramientas).
+            if (MomentosHambre <= 0 || nivelLibro <= 0) return;
+            if (sostenido == null || sostenido.IsAir || sostenido.damage <= 0) return;
+            if (tipo == ModContent.ItemType<Weapons.GrimoireEternal>()) return;
+            if (_ticksCelos > 0) return;
+
+            // LA CLASE DEL ARMA CELADA (con arco y bala separados).
+            string pool;
+            var dt = sostenido.DamageType;
+            if (dt == DamageClass.Melee || dt == DamageClass.MeleeNoSpeed) pool = "Melee";
+            else if (dt == DamageClass.Magic || dt == DamageClass.MagicSummonHybrid) pool = "Magia";
+            else if (dt == DamageClass.Summon || dt == DamageClass.SummonMeleeSpeed) pool = "Invocacion";
+            else if (dt == DamageClass.Throwing) pool = "Arrojadiza";
+            else if (dt == DamageClass.Ranged)
+            {
+                if (sostenido.useAmmo == Terraria.ID.AmmoID.Arrow) pool = "Arco";
+                else if (sostenido.useAmmo == Terraria.ID.AmmoID.Bullet) pool = "Bala";
+                else pool = "Arco"; // cerbatanas/dardos: el arco cubre
+            }
+            else return; // sin clase clara: el libro calla
+
+            _ticksCelos = 480; // 8 s de frío
+            string texto = EcoLib.ElegirVariante("Mods.AethonMod.Eco.Celos." + pool, 3);
+            if (!string.IsNullOrEmpty(texto))
+                EcoLib.Hablar(texto,
+                    new Microsoft.Xna.Framework.Color(196, 116, 108),
+                    rugido: false, escala: 0.52f);
+        }
+
+        /// <summary>¿Ya vive mi portador de aura con este modo?</summary>
+        private bool EspiarPortador(int modo)
+        {
+            int tipo = ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p.active && p.owner == Player.whoAmI && p.type == tipo &&
+                    (int)p.ai[0] == modo)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// v6.48 — LA CRÓNICA: apunta que EL LIBRO devoró a este jefe con
+        /// este portador (lo llama GlobalNPCXP al cobrar la kill — antes
+        /// de la voz). El Testigo contará su versión humana.
+        /// </summary>
+        public void CronicaMarcar(int npcType)
+        {
+            if (npcType <= 0) return;
+            if (!CronicaJefes.Contains(npcType)) CronicaJefes.Add(npcType);
         }
 
         /// <summary>
@@ -316,6 +455,10 @@ namespace AethonMod.Content.Players
         {
             tag["resonanceShards"] = ResonanceShards;
             tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
+            // v6.48 — la crónica del Testigo y el derecho a las esencias.
+            tag["cronicaJefes"] = CronicaJefes;
+            tag["cronicaNarrada"] = CronicaNarrada;
+            tag["derrotaOleada10"] = DerrotaOleada10;
         }
 
         public override void LoadData(TagCompound tag)
@@ -324,6 +467,9 @@ namespace AethonMod.Content.Players
             {
                 ResonanceShards = tag.GetInt("resonanceShards");
                 FirstLevelUpTriggered = tag.GetBool("firstLevelUpTriggered");
+                CronicaJefes = new System.Collections.Generic.List<int>(tag.GetList<int>("cronicaJefes"));
+                CronicaNarrada = tag.GetInt("cronicaNarrada");
+                DerrotaOleada10 = tag.GetBool("derrotaOleada10");
             }
             catch { }
         }

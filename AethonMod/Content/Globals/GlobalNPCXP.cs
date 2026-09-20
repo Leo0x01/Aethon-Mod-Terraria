@@ -129,14 +129,20 @@ namespace AethonMod.Content.Globals
                     int baseXP = ShardLevelSystem.XPForNPC(npc, nivelGrimorio);
                     int xp = ShardLevelSystem.ApplyXPMultiplier(baseXP);
 
-                    // v6.47 — LA XP DE LAS OLEADAS: todo lo que muere
+                    // v6.47/v6.48 — LA XP DE LAS OLEADAS: todo lo que muere
                     // convocado por la furia del grimorio paga ×(oleada+1)
-                    // — la oleada 1 paga ×2 … la 10 paga ×11 (también los
-                    // JEFES de las oleadas: son las "versiones especiales"
-                    // que prometen más XP).
+                    // — la oleada 1 paga ×2 … la 10 paga ×11, LA ESPECIAL
+                    // paga ×15 (jefes incluidos: son las "versiones
+                    // especiales" que prometen más XP).
                     var sello = npc.GetGlobalNPC<OleadaNPC>();
                     if (sello != null && sello.EsDeOleada)
-                        xp *= sello.Oleada + 1;
+                        xp *= sello.MultiplicadorXP;
+
+                    // v6.48 — LA CRÓNICA DEL TESTIGO: el libro devoró a ESTE
+                    // jefe con este portador — el Testigo ganará su línea
+                    // humana de la misma derrota (dos narradores, un hecho).
+                    if (npc.boss && player.whoAmI == Main.myPlayer)
+                        player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type);
 
                     bool cobro = false;
                     if (xp > 0)
