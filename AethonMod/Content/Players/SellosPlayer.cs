@@ -79,6 +79,29 @@ namespace AethonMod.Content.Players
                 else if (item.type == vacio) AnillosVacio = true;
             }
 
+            // v6.50 — LA SUCCIÓN ANTES DEL MURO (hallazgo auditoría MP nº3):
+            // los cosméticos son del cliente, pero la FÍSICA (npc.velocity
+            // hacia el portador) es de la AUTORIDAD — el viejo `return` del
+            // server se la tragaba y el gate del bloque (≠ client) la
+            // bloqueaba en el cliente: en MP NADIE la corría (muerta).
+            // Ahora: server en MP, y el proceso local en SP — como toda
+            // física honesta del juego.
+            if (AnillosVacio && Main.netMode != NetmodeID.MultiplayerClient && !Player.dead)
+            {
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                    if (npc.boss) continue;
+
+                    Vector2 hacia = Player.Center - npc.Center;
+                    float dist = hacia.Length();
+                    if (dist > 140f || dist < 12f) continue;
+
+                    npc.velocity += Vector2.Normalize(hacia) *
+                        0.05f * (1f - dist / 140f + 0.35f);
+                }
+            }
+
             if (Main.netMode == NetmodeID.Server) return;
             if (Player.dead) return;
 
@@ -182,26 +205,6 @@ namespace AethonMod.Content.Players
 
                 // --- LA LUZ del disco (rojo-naranja tenue). ---
                 Lighting.AddLight(Player.Center, new Vector3(0.22f, 0.07f, 0.02f));
-
-                // --- LA SUCCIÓN REAL (física, no cosmética): los
-                //     EsObjetivo en 140 px se deslizan hacia el portador
-                //     — suavecita, apenas un tirón gravitatorio (los
-                //     jefes no se dejan arrastrar). ---
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    foreach (NPC npc in Main.ActiveNPCs)
-                    {
-                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                        if (npc.boss) continue;
-
-                        Vector2 hacia = Player.Center - npc.Center;
-                        float dist = hacia.Length();
-                        if (dist > 140f || dist < 12f) continue;
-
-                        npc.velocity += Vector2.Normalize(hacia) *
-                            0.05f * (1f - dist / 140f + 0.35f);
-                    }
-                }
 
                 // --- EL HALO: el proyectil cosmético que dibuja los
                 //     anillos (SelloVacio en su propio batch) lo invoca

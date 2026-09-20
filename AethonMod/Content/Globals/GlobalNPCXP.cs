@@ -144,8 +144,15 @@ namespace AethonMod.Content.Globals
                     // v6.49: sin filtro de jugador local — en MP la
                     // autoridad es el SERVIDOR (la crónica se guarda en su
                     // réplica del jugador y viaja al reconectar).
+                    // v6.50: la réplica del server YA NO basta — el Testigo
+                    // lee la crónica en el CLIENTE; EcoRed.MsgCronica lleva
+                    // la marca al portador YA (tienda de esencias y páginas
+                    // del cronista funcionan en MP desde ahora).
                     if (npc.boss)
+                    {
                         player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type);
+                        EcoRed.SincronizarCronica(player);
+                    }
 
                     bool cobro = false;
                     if (xp > 0)
@@ -183,6 +190,11 @@ namespace AethonMod.Content.Globals
                             EcoRed.LatidoDeXp(player, xp);     // MP: al portador
                     }
 
+                    // v6.50 — LOS LIBROS CAMINAN: el server acaba de subir
+                    // SU copia; EcoRed.MsgLibro lleva el nivel nuevo al
+                    // portador (tooltips/daño/HUD viven en SU cliente).
+                    EcoRed.SincronizarLibros(player);
+
                     // v6.47 — LA PRIMERA 5★ CON VOZ PROPIA: la primera
                     // criatura 5 estrellas que el libro se come merece su
                     // línea ("Lo más raro que ha comido jamás") — una sola
@@ -211,13 +223,18 @@ namespace AethonMod.Content.Globals
                         catch { }
                     }
 
-                    // LA VOZ DEL GRIMORIO: la derrota de un jefe, contada
-                    // por el propio libro (EcoLib + hjson). v6.49 — LA VOZ
-                    // CAMINA EN RED: EcoRed la lleva a la pantalla del
-                    // portador que cobró (en SP habla directo).
-                    if (npc.boss)
-                        EcoSistema.AnunciarJefeMuerto(npc, player);
                 }
+
+                // v6.50 — LA VOZ DEL GRIMORIO ES DEL MUNDO: la derrota de
+                // un jefe dispara el mensaje para TODOS los portadores con
+                // libro visible (aunque el que mató no cargue ninguno — el
+                // diseño MP del usuario: "uno mata al Rey Gelatina, el
+                // mensaje se activa para todos"). Cada portador oye SOLO
+                // la línea de SU propio grimorio (EcoRed + variantes
+                // repartidas por la autoridad). La XP, arriba, sigue siendo
+                // del que mató.
+                if (npc.boss)
+                    EcoSistema.AnunciarJefeMuerto(npc, player);
             }
             catch { }
         }

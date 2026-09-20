@@ -218,8 +218,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// v5.91 — Intervalo de daño por tick: 6 ticks = 0.1 segundos EXACTOS
         /// (petición del usuario: "daño en area y daño por cada 0.1 segundo").
-        /// SimpleStrikeNPC NO usa los immunity frames del NPC, así que cada
-        /// tick de la banda registra su propio golpe limpio.
+        /// v6.50 — el golpe va por GolpeMotor (el cauce del motor) en modo
+        /// bala (sin i-frames del NPC): cada tick de la banda registra su
+        /// propio golpe limpio.
         /// </summary>
         private const int DamageTickInterval = 6;
 
@@ -264,7 +265,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.width = 8;
             Projectile.height = 8;
             Projectile.tileCollide = false;
-            // Daño manual por frente de onda (SimpleStrikeNPC): sin colisión vanilla.
+            // Daño manual por frente de onda (GolpeMotor, v6.50): sin colisión vanilla.
             Projectile.friendly = false;
             Projectile.hostile = false;
             Projectile.DamageType = DamageClass.Magic;
@@ -300,9 +301,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float progress = MathHelper.Clamp(age / Math.Max(Duration, 1f), 0f, 1f);
                 float front = FrontRadius(age, Style, MaxRadius);
 
-                // === DAÑO POR FRENTE DE ONDA (solo autoridad) ===
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                    ApplyWaveDamage(front);
+                // === DAÑO POR FRENTE DE ONDA — v6.50 — GolpeMotor (el
+                //     cauce del motor: crítica real, varianza, on-hit y
+                //     sync MP del propio motor) ===
+                ApplyWaveDamage(front);
 
                 // === SOPORTE VISUAL (solo cliente) ===
                 if (Main.netMode != NetmodeID.Server)
@@ -464,32 +466,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (dist < bandInner || dist > bandOuter) continue;
                 _nextHitAt[i] = ageNow + DamageTickInterval;
 
-                // Dirección del empuje: hacia fuera en expansivas, hacia el
+                // El empuje del frente: hacia fuera en expansivas, hacia el
                 // centro en la inversa (la implosión arrastra hacia dentro).
-                int dir;
+                // La DIRECCIÓN la computa el cauce del motor (v6.50).
                 float knockBack;
                 if (Style == StyleChromaticInverse)
-                {
-                    dir = npc.Center.X < Projectile.Center.X ? 1 : -1;
                     knockBack = -4f;
-                }
                 else
-                {
-                    dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
                     knockBack = (Style == StyleFire || Style == StyleNova) ? 5f : 6f;
-                }
 
-                npc.SimpleStrikeNPC(Projectile.damage, dir, false, knockBack, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, knockBack, true);
 
                 // v5.96 — el anillo de Einstein aplica ShadowFlame (la luz
-                // lensada quema el alma, no la carne).
-                if (Style == StyleEinstein)
+                // lensada quema el alma, no la carne). (Buff de servidor.)
+                if (Style == StyleEinstein && Main.netMode != NetmodeID.MultiplayerClient)
                     npc.AddBuff(BuffID.ShadowFlame, 240);
 
                 // La onda de fuego aplica QUEMADURA de 10 s (v5.91: era 5 s).
                 // v5.97 — la ONDA NOVA también (es la nova del sol: una sola
-                // explosión donde sucede TODO).
-                if (Style == StyleFire || Style == StyleNova)
+                // explosión donde sucede TODO). (Buff de servidor.)
+                if ((Style == StyleFire || Style == StyleNova) && Main.netMode != NetmodeID.MultiplayerClient)
                     npc.AddBuff(BuffID.OnFire, 600);
             }
         }

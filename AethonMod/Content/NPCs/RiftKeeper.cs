@@ -135,12 +135,16 @@ namespace AethonMod.Content.NPCs
             // === LA GUARDIA: orbita a la presa (solo sólido o naciendo) ===
             if (_faseCruce != 1)
             {
-                _anguloOrbita += (sello ? 0.014f : 0.009f);
-                Vector2 punto = target.Center + new Vector2(
-                    MathF.Cos(_anguloOrbita), MathF.Sin(_anguloOrbita) * 0.7f) * 340f;
-                Vector2 deseada = (punto - NPC.Center) * 0.04f;
+                // v6.50 — LA CURVA DE LA CASA (EcosLib.CurvaAproximacion):
+                // la órbita a 340 px ahora respira con frecuencias
+                // INCONMENSURABLES (el strafe jamás sincroniza — no es
+                // un péndulo de relojería) y la aproximación se anticipa
+                // con un toque de tangente. El radio y el temple del
+                // guardián quedan intactos; la matemática, de la librería.
+                Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    340f, sello ? 6.0f : 4.2f, Main.GlobalTimeWrappedHourly,
+                    NPC.whoAmI * 137);
                 NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.10f);
-                if (_faseCruce == 1) NPC.velocity = Vector2.Zero;
             }
             else
             {

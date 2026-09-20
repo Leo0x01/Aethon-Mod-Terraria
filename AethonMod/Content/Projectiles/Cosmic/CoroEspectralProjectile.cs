@@ -35,8 +35,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// A UNA (cada una con su último anillo pequeño); la última nota
     /// entrega el ACORDE final (anillo doble). Vida 720 ticks = 12 s.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC bajo `Main.netMode != NetmodeID.
-    /// MultiplayerClient`. Determinismo por semilla de identity.
+    /// Daño MP-seguro: v6.50 — GolpeMotor (el cauce del motor: crítica
+    /// real, varianza, on-hit y sync MP del propio motor). Determinismo
+    /// por semilla de identity.
     /// </summary>
     public class CoroEspectralProjectile : ModProjectile
     {
@@ -206,8 +207,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 }
 
-                // EL DAÑO del frente (MP-seguro — el anillo ATRAVIESA).
-                if (Main.netMode != NetmodeID.MultiplayerClient && !anillo.Eco)
+                // EL DAÑO del frente (v6.50 — GolpeMotor: el cauce del
+                // motor; el anillo ATRAVIESA).
+                if (!anillo.Eco)
                 {
                     float r = RadioAnillo * OndaLib.Expansion(
                         anillo.Edad / AnilloTicks) * (anillo.Eco ? 0.5f : 1f);
@@ -219,8 +221,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         float dist = (npc.Center - anillo.Origen).Length();
                         if (MathF.Abs(dist - r) > 14f) continue;
                         anillo.Golpeados.Add(npc.whoAmI);
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1f,
-                            DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1f, true);
                     }
                 }
             }

@@ -151,9 +151,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             if (picadas >= 2) break;
                             if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                             if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > 420f * 420f) continue;
-                            npc.SimpleStrikeNPC(
-                                Math.Max(1, (int)(Projectile.damage * 0.5f)),
-                                npc.direction, false, 3f, DamageClass.Magic);
+                            Content.Systems.GolpeMotor.Golpear(Projectile, npc,
+                                Math.Max(1, (int)(Projectile.damage * 0.5f)), 3f, true);
                             picadas++;
                         }
                     }
@@ -523,15 +522,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 _golpeDado = true;
 
-                // === EL GOLPE (la autoridad del dueño + EsObjetivo). ===
+                // === EL GOLPE (la autoridad del dueño + EsObjetivo) — v6.50 —
+                //     GolpeMotor: el cauce del motor (crítica real, varianza,
+                //     on-hit y sync MP del propio motor). ===
                 if (Main.myPlayer == Projectile.owner)
                 {
                     foreach (NPC npc in Main.ActiveNPCs)
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.Distance(npc.Center, Projectile.Center) > RadioDetonacion) continue;
-                        npc.SimpleStrikeNPC(Projectile.damage,
-                            npc.Center.X < Projectile.Center.X ? -1 : 1, false, 8f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 8f, true);
                         npc.AddBuff(BuffID.OnFire, 200);
                     }
                 }

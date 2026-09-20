@@ -23,7 +23,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// LA MARCA: cada enemigo golpeado queda marcado con un halo fino
     /// que se CONTRAE durante 30 ticks y entonces IMPLOSIONA: daño
     /// adicional ×0.7 + una atracción de 6 px hacia el punto del golpe
-    /// (solo server/SP). Si el enemigo muere antes, la marca se apaga
+    /// (la atracción es server/SP; el daño, v6.50 — GolpeMotor). Si el
+    /// enemigo muere antes, la marca se apaga
     /// en silencio.
     /// </summary>
     public class FiloHorizonteProjectile : ModProjectile
@@ -164,12 +165,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// EL CORTE: atraviesa (i-frames 10, ×1.0), pierde velocidad con
         /// cada golpe y deja LA MARCA. La detección corre en todas las
-        /// máquinas (para dibujar los halos); el daño, solo server/SP.
+        /// máquinas (para dibujar los halos); el daño va por
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).
         /// </summary>
         private void Golpear()
         {
             int dmg = Math.Max(1, Projectile.damage);
-            bool puedeDañar = Main.netMode != NetmodeID.MultiplayerClient;
 
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -181,8 +183,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 _golpes[npc.whoAmI] = (int)_age;
                 _marcas[npc.whoAmI] = new Marca { Tick = (int)_age, Pos = Projectile.Center };
 
-                if (puedeDañar)
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 4f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 4f, true);
 
                 // ATRAVIESA perdiendo velocidad.
                 Projectile.velocity *= PerdidaGolpe;
@@ -215,15 +216,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (npc == null || !npc.active || !VFXCore.EsObjetivo(npc))
                     continue;   // la marca se apaga en silencio
 
-                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
+                    // v6.50 — GolpeMotor (el cauce del motor: crítica real,
+                    // varianza, on-hit y sync MP del propio motor).
                     int dmg = Math.Max(1, (int)(Projectile.damage * 0.7f));
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
 
-                    // LA ATRACCIÓN: 6 px hacia el punto del golpe.
-                    Vector2 hacia = m.Pos - npc.Center;
-                    if (hacia.LengthSquared() > 0.01f)
-                        npc.position += Vector2.Normalize(hacia) * 6f;
+                    // LA ATRACCIÓN: 6 px hacia el punto del golpe (server/SP).
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Vector2 hacia = m.Pos - npc.Center;
+                        if (hacia.LengthSquared() > 0.01f)
+                            npc.position += Vector2.Normalize(hacia) * 6f;
+                    }
                 }
 
                 if (Main.netMode != NetmodeID.Server)

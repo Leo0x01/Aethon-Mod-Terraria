@@ -48,8 +48,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · Al morir una ráfaga: LA FLOR DE FUEGO — el estallido radial de
     ///     seis lengüetas (PyraLib.Estallido, nacido de esta réplica).
     ///
-    /// CONVENCIONES DE LA CASA: daño manual solo en autoridad
-    /// (SimpleStrikeNPC + EsObjetivo), cero Main.rand en el render (el
+    /// CONVENCIONES DE LA CASA: daño por GolpeMotor en el cliente
+    /// dueño (v6.50 — el cauce del motor: crítica real, varianza, on-hit
+    /// y sync MP) + EsObjetivo, cero Main.rand en el render (el
     /// pulso y las órbitas son puro reloj), lote cerrado→cerrado.
     /// </summary>
     public class FragmentoSupernovaMinion : ModProjectile
@@ -192,7 +193,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         SoundEngine.PlaySound(SoundID.Item68 with { Volume = 0.5f, Pitch = -0.3f },
                             Projectile.Center);
 
-                    // El daño del rayo (solo autoridad — la escuela A).
+                    // El daño del rayo (cliente dueño — v6.50 GolpeMotor,
+                    // el cauce del motor).
                     if (Main.myPlayer == Projectile.owner)
                     {
                         Vector2 a = Projectile.Center;
@@ -209,8 +211,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             if (_edad - ultimo < 30) continue;
                             _golpesBeam[key] = _edad;
 
-                            npc.SimpleStrikeNPC((int)(Projectile.damage * 2.5f),
-                                npc.direction, false, 4f, DamageClass.Summon);
+                            Content.Systems.GolpeMotor.Golpear(Projectile, npc,
+                                (int)(Projectile.damage * 2.5f), 4f, true);
                         }
                     }
                 }
@@ -517,15 +519,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.tileCollide = false;
             Projectile.friendly = false;
 
-            // El golpe de área de la flor (solo autoridad — escuela A).
+            // El golpe de área de la flor (cliente dueño — v6.50 GolpeMotor).
             if (Main.myPlayer == Projectile.owner)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if (Vector2.Distance(npc.Center, Projectile.Center) > RadioFlor * 0.8f) continue;
-                    npc.SimpleStrikeNPC((int)(Projectile.damage * 0.8f),
-                        npc.direction, false, 3f, DamageClass.Summon);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc,
+                        (int)(Projectile.damage * 0.8f), 3f, true);
                 }
             }
 

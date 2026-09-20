@@ -28,7 +28,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     onda StyleNova de la casa y el fuego SolarFire de PyraLib.
     ///   · Vida 7 s.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class RedSupergiantProjectile : ModProjectile
@@ -135,9 +136,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
 
                 // === EL AURA: cada 10 ticks, el CUERPO entero (75% de
-                //     BodyPx ~ 67 px de radio) al 45% + OnFire ===
-                if (Main.netMode != NetmodeID.MultiplayerClient &&
-                    Age > 30f && Age % 10f == 0f && Projectile.scale > 0.25f)
+                //     BodyPx ~ 67 px de radio) al 45% + OnFire (v6.50:
+                //     GolpeMotor) ===
+                if (Age > 30f && Age % 10f == 0f && Projectile.scale > 0.25f)
                 {
                     float auraRadius = RedSupergiantRenderer.BodyPx * Projectile.scale * 0.75f;
                     int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
@@ -145,8 +146,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!VFXCore.EsObjetivo(npc)) continue;
                         if ((npc.Center - Projectile.Center).Length() > auraRadius) continue;
-                        npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
-                        npc.AddBuff(BuffID.OnFire, 300);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 2f, true);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            npc.AddBuff(BuffID.OnFire, 300);
                     }
                 }
             }
@@ -225,9 +227,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //  fuego SolarFire de PyraLib (paleta muestreada para el polvo)
             //  y la onda StyleNova de la casa.
             // ============================================================
+            // v6.50 — el AoE del epicentro va por GolpeMotor (el cauce del
+            //     motor: crítica real, varianza, on-hit y sync MP); la onda
+            //     nova y el debuff siguen en server/SP.
+            int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.8f));
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.8f));
                 float novaRadius = 560f;
 
                 // LA ONDA NOVA (el frente de espaciotiempo que LLEVA la nova).
@@ -239,16 +244,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,                                  // sin retardo
                     CosmicShockwaveProjectile.StyleNova,
                     novaRadius);                         // el radio del coloso
+            }
 
-                // EL AoE DEL EPICENTRO (el núcleo recién encendido).
+            // EL AoE DEL EPICENTRO (el núcleo recién encendido).
+            {
                 float coreR = 320f;
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > coreR) continue;
-                    npc.SimpleStrikeNPC(novaDamage, npc.direction, false,
-                        5f, DamageClass.Magic);
-                    npc.AddBuff(BuffID.OnFire, 600);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDamage, 5f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        npc.AddBuff(BuffID.OnFire, 600);
                 }
             }
 

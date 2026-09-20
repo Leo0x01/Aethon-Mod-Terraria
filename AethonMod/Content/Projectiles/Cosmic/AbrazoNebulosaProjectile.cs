@@ -157,12 +157,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             LuzNebulosa(radio);
 
-            // EL ABRAZO: DoT + lentitud (escuela A: solo server/SP).
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
-                if (_edadInst % DoTCada == 0) Morder(radio);
-                if (_edadInst % SlowCada == 0) Frenar(radio);
-            }
+            // EL ABRAZO: DoT (v6.50 — GolpeMotor: el cauce del motor) y
+            // lentitud (empuje de servidor, solo server/SP).
+            if (_edadInst % DoTCada == 0) Morder(radio);
+            if (Main.netMode != NetmodeID.MultiplayerClient && _edadInst % SlowCada == 0) Frenar(radio);
 
             // LAS ESTRELLITAS: una nueva cada 40 ticks...
             if (_edadInst >= BebeCada && _edadInst % BebeCada == 0 && _nBebes < MaxBebes)
@@ -177,7 +175,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>EL DoT DEL ABRAZO: ×0.06 a todos los de dentro.</summary>
+        /// <summary>EL DoT DEL ABRAZO: ×0.06 a todos los de dentro.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).</summary>
         private void Morder(float radio)
         {
             int dmg = Math.Max(1, (int)(Projectile.damage * 0.06f));
@@ -186,7 +186,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 float alcance = radio * 0.92f + Math.Max(npc.width, npc.height) * 0.5f;
                 if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 0f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);
             }
         }
 
@@ -218,22 +218,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 MathF.Cos(_bebes[k].Ang + giro), MathF.Sin(_bebes[k].Ang + giro)) * _bebes[k].Dist;
         }
 
-        /// <summary>EL MINI-POP: ×0.8 radio 60 con luz + destello + chispas.</summary>
+        /// <summary>EL MINI-POP: ×0.8 radio 60 con luz + destello + chispas.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).</summary>
         private void Reventar(int k)
         {
             _bebes[k].Pop = true;
             Vector2 pos = PosBebe(k);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            int dmg = Math.Max(1, (int)(Projectile.damage * 0.8f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int dmg = Math.Max(1, (int)(Projectile.damage * 0.8f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    float alcance = PopRadio + Math.Max(npc.width, npc.height) * 0.5f;
-                    if (Vector2.DistanceSquared(npc.Center, pos) > alcance * alcance) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
-                }
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float alcance = PopRadio + Math.Max(npc.width, npc.height) * 0.5f;
+                if (Vector2.DistanceSquared(npc.Center, pos) > alcance * alcance) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
             }
 
             if (Main.netMode != NetmodeID.Server)

@@ -123,10 +123,19 @@ namespace AethonMod.Content.NPCs
             }
 
             // === EL SALTO DEL GUARDIÁN (acercarse por aire si la presa vuela) ===
+            // v6.50 — EL SALTO QUE ARQUEA (EcosLib.CurvaAproximacion):
+            // el brinco antiaéreo ya no es puramente vertical — la curva de
+            // la casa decide el PASO HORIZONTAL del salto (anticipa dónde
+            // estará la presa, con un toque de tangente). Clampeado ±6:
+            // sigue siendo un coloso, no un péndulo.
             if (target.Center.Y < NPC.Center.Y - 90f && NPC.velocity.Y == 0f &&
                 _tickPorrazo <= 0 && Math.Abs(target.Center.X - NPC.Center.X) < 300f)
             {
+                Vector2 curva = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    110f, 6.5f, Main.GlobalTimeWrappedHourly, NPC.whoAmI * 7);
                 NPC.velocity.Y = -9f;
+                NPC.velocity.X = MathHelper.Clamp(curva.X, -6f, 6f);
+                NPC.netUpdate = true;
             }
 
             // === LAS PÚAS DEL SAGRARIO (90 t; 45 en furia) ===

@@ -154,9 +154,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.velocity *= 0.2f;
             }
 
-            // === LOS HACES BARREN (daño en rayo — SimpleStrikeNPC) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                age % 5f < 1f)   // cada 5 ticks: 12 golpes/s girando
+            // === LOS HACES BARREN (daño en rayo — v6.50: GolpeMotor, el
+            //     cauce del motor: crítica real, varianza, on-hit y sync) ===
+            if (age % 5f < 1f)   // cada 5 ticks: 12 golpes/s girando
             {
                 int beamDamage = Math.Max(1, (int)(Projectile.damage * 0.65f));
                 float mainAngle = spin;
@@ -176,9 +176,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     bool hitAnti = Math.Abs(AngleDiff(ang, antiAngle)) < halfAngle;
                     if (hitMain || hitAnti)
                     {
-                        npc.SimpleStrikeNPC(beamDamage, npc.direction, false, 1.5f, DamageClass.Summon);
-                        // radiación de sincrotrón: ELECTRIFIED (la firma)
-                        try { npc.AddBuff(BuffID.Electrified, 160); } catch { }
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, beamDamage, 1.5f, true);
+                        // radiación de sincrotrón: ELECTRIFIED (la firma) — server/SP
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            try { npc.AddBuff(BuffID.Electrified, 160); } catch { }
                     }
                 }
             }

@@ -34,9 +34,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///      arco (no en el marcaje): la herida llega cuando el tajo
     ///      existe — la causalidad del anime.
     ///
-    /// EL DAÑO (escuela A de la casa): cada arco golpea UNA vez, en su
-    ///      banda curva (|dist−radio| &lt; 50 && ángulo dentro del arco),
-    ///      SimpleStrikeNPC + EsObjetivo, SOLO en autoridad. El visual es
+    /// EL DAÑO — v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    ///      varianza, on-hit y sync MP del propio motor): cada arco golpea
+    ///      UNA vez, en su banda curva (|dist−radio| &lt; 50 && ángulo dentro
+    ///      del arco), EsObjetivo, resuelto en el cliente dueño. El visual es
     ///      solo cliente (PreDraw).
     ///
     /// CERO Main.rand en el render (todo Hash01); SIN hide (la lección
@@ -83,7 +84,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Projectile.width = 12;
             Projectile.height = 12;
-            Projectile.friendly = false;          // el daño es manual (escuela A)
+            Projectile.friendly = false;          // el daño va por GolpeMotor (v6.50)
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
             Projectile.timeLeft = PopInicial + Arcos * Stagger + VidaTajo + 8;
@@ -228,15 +229,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// EL DAÑO DEL ARCO (escuela A): todo NPC en la BANDA CURVA del
-        /// tajo (|dist al centro − radio| &lt; 50 y ángulo dentro del
-        /// arco) recibe el filo. SOLO autoridad (SimpleStrikeNPC); el
+        /// EL DAÑO DEL ARCO — v6.50 — GolpeMotor (el cauce del motor: crítica
+        /// real, varianza, on-hit y sync MP del propio motor, resuelto en el
+        /// cliente dueño): todo NPC en la BANDA CURVA del tajo (|dist al
+        /// centro − radio| &lt; 50 y ángulo dentro del arco) recibe el filo; el
         /// visual es solo cliente.
         /// </summary>
         private void GolpearArco(int i)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             int dmg = Math.Max(1, (int)(Projectile.damage * 0.75f));
             float aMin = Math.Min(_ang0[i], _ang1[i]);
             float aMax = Math.Max(_ang0[i], _ang1[i]);
@@ -252,7 +252,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float ang = (float)Math.Atan2(v.Y, v.X);
                 if (ang < aMin - 0.25f || ang > aMax + 0.25f) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 4f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 4f, true);
             }
         }
 

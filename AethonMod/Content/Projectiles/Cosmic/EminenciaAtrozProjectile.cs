@@ -282,7 +282,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// </summary>
         private void GolpearCuerpo(float growth)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
             float radio = 42f + 30f * growth;
             float mult = 1f + 0.85f * growth;
 
@@ -292,8 +291,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if ((npc.Center - Projectile.Center).Length() > radio + npc.width * 0.5f)
                     continue;
                 int dmg = (int)(Projectile.damage * mult);
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
-                if (npc.life <= 0) MuerteEspiritual(npc);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
+                if (npc.life <= 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                    MuerteEspiritual(npc);
             }
         }
 

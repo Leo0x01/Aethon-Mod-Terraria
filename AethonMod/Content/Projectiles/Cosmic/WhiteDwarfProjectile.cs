@@ -26,7 +26,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     de daño del aura mientras acrece — "les roba masa").
     ///   · Vida 8 s (la más longeva de la familia compacta).
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño — v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor, resuelto en el cliente
+    /// dueño; los debuffs siguen siendo autoridad).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class WhiteDwarfProjectile : ModProjectile
@@ -94,9 +96,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === ¿ESTÁ ACRECIENDO? (un enemigo a <150 px enciende el disco) ===
             NPC accretionTarget = FindNearestEnemy(WhiteDwarfRenderer.AccretionRange);
 
-            // === EL AURA CONSTANTE MODERADA (45%, cada 12 ticks, 90 px) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                Age > 24f && Age % 12f == 0f && Projectile.scale > 0.25f)
+            // === EL AURA CONSTANTE MODERADA (45%, cada 12 ticks, 90 px) —
+            //     v6.50 — GolpeMotor: el cauce del motor, resuelto en el
+            //     cliente dueño; la quemadura sigue autoridad. ===
+            if (Age > 24f && Age % 12f == 0f && Projectile.scale > 0.25f)
             {
                 // Mientras ACRECE, el aura sube +15% (la masa robada alimenta).
                 float mult = accretionTarget != null ? 0.52f : 0.45f;
@@ -105,8 +108,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 1f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
                 }
             }
 
@@ -183,17 +187,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // === EL DAÑO FINAL (MP-seguro): el cristal se rompe ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO FINAL: el cristal se rompe — v6.50 — GolpeMotor
+            //     (el cauce del motor, resuelto en el cliente dueño; la
+            //     quemadura sigue autoridad) ===
+            int burst = Math.Max(1, (int)(Projectile.damage * 0.8f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int burst = Math.Max(1, (int)(Projectile.damage * 0.8f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    if ((npc.Center - Projectile.Center).Length() > 110f) continue;
-                    npc.SimpleStrikeNPC(burst, npc.direction, false, 1.5f, DamageClass.Magic);
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                if ((npc.Center - Projectile.Center).Length() > 110f) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 1.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
-                }
             }
 
             if (Main.netMode == NetmodeID.Server) return;

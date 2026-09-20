@@ -39,7 +39,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// de 14 puntos propios con fase anclada (EstelaLib.Ribbon Comet).
     ///
     /// Contrato de la casa: batch PreDraw como SembradorPulsar · daño
-    /// manual MP + EsObjetivo + SimpleStrikeNPC · cero Main.rand visual
+    /// por v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+    /// on-hit y sync MP del propio motor) + EsObjetivo · cero Main.rand visual
     /// (Hash01 + identity).
     /// </summary>
     public class LagrimaSolarProjectile : ModProjectile
@@ -256,11 +257,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// EL MORDISCO: contacto circular con i-frames PROPIOS de 5 ticks por
         /// objetivo, quemadura cósmica de 7 s y tope de 18 golpes (al 18º la
-        /// gota REVIENTA). Escuela A: solo server/singleplayer.
+        /// gota REVIENTA). v6.50 — GolpeMotor (el cauce del motor: crítica
+        /// real, varianza, on-hit y sync MP del propio motor).
         /// </summary>
         private void Golpear()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
             if (_golpes >= MaxGolpes) return;
 
             int dmg = Math.Max(1, Projectile.damage);
@@ -275,16 +276,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
-                // El metal fundido se pega: quemadura cósmica 7 s (el debuff de la casa).
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
-
-                _golpes++;
-                if (_golpes >= MaxGolpes)
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    // LAS 18 LÁGRIMAS VERTIDAS: la gota no tiene más que llorar.
-                    Projectile.Kill();
-                    return;
+                    // El metal fundido se pega: quemadura cósmica 7 s (el debuff de la casa).
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+
+                    _golpes++;
+                    if (_golpes >= MaxGolpes)
+                    {
+                        // LAS 18 LÁGRIMAS VERTIDAS: la gota no tiene más que llorar.
+                        Projectile.Kill();
+                        return;
+                    }
                 }
             }
         }
@@ -299,14 +303,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// LA EXPLOSIÓN DEL DESVANECIMIENTO: daño de área ×1.5 en radio 90
         /// con quemadura — y el kick pequeño + flash + brasas del final.
-        /// Escuela A: el daño solo en server/singleplayer.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).
         /// </summary>
         private void Explotar()
         {
             if (_exploto) return;
             _exploto = true;
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoExplosion));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -314,8 +318,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     float alcance = RadioExplosion + Math.Max(npc.width, npc.height) * 0.5f;
                     if (Vector2.Distance(npc.Center, Projectile.Center) > alcance) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 4f, DamageClass.Magic);
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 4f, true);
+                    // La quemadura del área: server/SP (autoridad del debuff).
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
                 }
             }
 

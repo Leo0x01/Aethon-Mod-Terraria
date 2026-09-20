@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 
 namespace AethonMod.Content.Systems
 {
@@ -180,6 +181,13 @@ namespace AethonMod.Content.Systems
 
         public static void ApplyLifesteal(Player player, int damageDone, int level)
         {
+            // v6.50 — LA VIDA ES DEL DUEÑO (hallazgo auditoría MP nº2b): la
+            // HP del jugador la manda SU cliente (vanilla) — curar la
+            // réplica del server o de otros clientes era vida fantasma que
+            // la sincronización borra. Solo el cliente del portador sana.
+            if (Main.netMode == NetmodeID.Server) return;
+            if (player == null || player.whoAmI != Main.myPlayer) return;
+
             float pct = LifestealPercent(level);
             if (pct <= 0f || damageDone <= 0) return;
             int heal = (int)System.Math.Max(1, damageDone * pct);

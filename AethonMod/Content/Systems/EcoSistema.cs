@@ -73,11 +73,20 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// Anuncia la derrota de un jefe con la voz del Grimorio. Llamado
-        /// desde GlobalNPCXP.OnKill — el portador es el jugador cuyo libro
-        /// cobró la kill (v6.49: EcoRed la lleva a SU pantalla en MP).
-        /// v6.47: también los JEFES DEL MOD tienen su voz (Aethon, el
-        /// Titán Hueco, el Guardián del Rift y Los Ecos — que hablan al
-        /// caer el ÚLTIMO, como Los Gemelos).
+        /// desde GlobalNPCXP.OnKill.
+        /// v6.50 — EL DISEÑO MP DEL USUARIO, tal cual: "todos con sus
+        /// grimorios, uno mata al Rey Gelatina — el mensaje se activa
+        /// para TODOS… cada jugador verá su respectivo diálogo de su
+        /// propio grimorio". La derrota es DEL MUNDO (el evento dispara
+        /// para todos los portadores con libro visible), pero la VOZ es
+        /// privada: EcoRed lleva a cada portador SU variante (elegida por
+        /// la autoridad con reparto sin repetición — dos portadores en
+        /// la misma kill oyen líneas DISTINTAS de sus propios libros, y
+        /// nadie oye el libro del otro). La XP sigue siendo del que
+        /// mató (la cocina de GlobalNPCXP); la voz, del mundo.
+        /// Una derrota, UNA voz por portador: las partes en cascada no
+        /// hablan (ShardLevelSystem.EsParteDeJefe) y Los Gemelos (dos
+        /// cuerpos, un jefe) hablan cuando cae el ÚLTIMO.
         /// </summary>
         public static void AnunciarJefeMuerto(NPC npc, Player portador)
         {
@@ -129,17 +138,55 @@ namespace AethonMod.Content.Systems
                 _ultimaClave = clave;
                 _tickUltimaClave = Main.GameUpdateCount;
 
-                // v6.49 — LA VOZ CAMINA: la clave viaja por EcoRed y el
-                // portador la resuelve en SU idioma (el fallback de la
-                // clave rota se resuelve aquí, en la autoridad).
-                string claveVoz = "Mods.AethonMod.Eco.VozJefe." + clave;
-                string prueba = Language.GetTextValue(claveVoz);
+                // v6.50 — LA CLAVE BASE con TRES VARIANTES por jefe (la
+                // promesa del usuario: "deberían de haber varios diálogos
+                // para cada jefe"). El fallback de la clave rota se
+                // resuelve aquí, en la autoridad.
+                string claveBase = "Mods.AethonMod.Eco.VozJefe." + clave;
+                string prueba = Language.GetTextValue(claveBase + "1");
                 if (string.IsNullOrEmpty(prueba) || prueba.StartsWith("Mods.AethonMod"))
-                    claveVoz = "Mods.AethonMod.Eco.VozJefe.Desconocido";
+                    claveBase = "Mods.AethonMod.Eco.VozJefe.Desconocido";
 
-                EcoRed.HablarAlPortador(portador, claveVoz, ColorDeVoz(npc.type));
+                Color tinte = ColorDeVoz(npc.type);
+
+                // v6.50 — TODOS LOS PORTADORES CON LIBRO VISIBLE oyen a SU
+                // propio libro: la variante la reparte la AUTORIDAD
+                // (ElegirClave dentro de HablarVarianteAlPortador — dos
+                // portadores en la misma kill oyen líneas distintas) y
+                // EcoRed la entrega SOLO al destinatario (doble puerta).
+                // En SP: el portador local (el único que hay).
+                for (int i = 0; i < Main.player.Length; i++)
+                {
+                    Player oyente = Main.player[i];
+                    if (oyente == null || !oyente.active) continue;
+                    if (!TieneLibroVisible(oyente)) continue;
+                    EcoRed.HablarVarianteAlPortador(oyente, claveBase, 3, tinte);
+                }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.50 — ¿Este jugador carga un Grimorio visible (barra rápida,
+        /// slots 0–9)? El que OYE la voz del jefe caído es el libro que
+        /// está A MANO — guardado en la hucha o el cofre, el libro duerme
+        /// y la derrota pasa de largo para él.
+        /// </summary>
+        public static bool TieneLibroVisible(Player p)
+        {
+            try
+            {
+                if (p == null || !p.active) return false;
+                int tipoLibro = ModContent.ItemType<Content.Weapons.GrimoireEternal>();
+                for (int i = 0; i < 10; i++)
+                {
+                    Item inv = p.inventory[i];
+                    if (inv != null && !inv.IsAir && inv.type == tipoLibro)
+                        return true;
+                }
+                return false;
+            }
+            catch { return false; }
         }
 
         /// <summary>

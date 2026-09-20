@@ -111,8 +111,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             EstelaLib.Track(Projectile.whoAmI, 24).Push(Projectile.Center);
             if (_age % 120f == 0f) EstelaLib.PurgeTracks();
 
-            // === LAS CADENAS: cada 9 ticks, un rayo al enemigo cercano ===
-            if (_age % 9f == 0f && Main.netMode != NetmodeID.MultiplayerClient)
+            // === LAS CADENAS: cada 9 ticks, un rayo al enemigo cercano
+            //     (v6.50 — GolpeMotor: el golpe va por el cauce del motor,
+            //     resuelto en el cliente dueño; el visual de la cadena y el
+            //     debuff siguen siendo autoridad). ===
+            if (_age % 9f == 0f)
             {
                 NPC best = null;
                 float bestDist = 260f;
@@ -124,15 +127,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 if (best != null)
                 {
-                    int slot = (int)(_age / 9f) % 3;
-                    _chainFrom[slot] = Projectile.Center;
-                    _chainTo[slot] = best.Center;
-                    _chainLife[slot] = 9f;
+                    Content.Systems.GolpeMotor.Golpear(Projectile, best,
+                        Math.Max(1, (int)(Projectile.damage * 0.55f)), 1.5f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        int slot = (int)(_age / 9f) % 3;
+                        _chainFrom[slot] = Projectile.Center;
+                        _chainTo[slot] = best.Center;
+                        _chainLife[slot] = 9f;
 
-                    best.SimpleStrikeNPC(
-                        Math.Max(1, (int)(Projectile.damage * 0.55f)), best.direction,
-                        false, 1.5f, DamageClass.Magic);
-                    try { best.AddBuff(BuffID.Electrified, 180); } catch { }
+                        try { best.AddBuff(BuffID.Electrified, 180); } catch { }
+                    }
                 }
             }
 
@@ -149,8 +154,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 return;
             }
 
-            // === EL CONTACTO: enemigo tocado → LA SINFONÍA, YA ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age > 4f)
+            // === EL CONTACTO: enemigo tocado → LA SINFONÍA, YA (v6.50 —
+            //     GolpeMotor: cada máquina detecta el contacto con SU
+            //     copia; el golpe lo resuelve el cliente dueño). ===
+            if (_age > 4f)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
@@ -211,17 +218,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 OndaLib.Kick(9f, 16);
             }
 
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
-            // === EL DAÑO EN ÁREA (radio 140) ===
+            // === EL DAÑO EN ÁREA (radio 140) — v6.50 — GolpeMotor (el
+            //     cauce del motor: crítica real, varianza, on-hit y sync MP
+            //     del propio motor); el debuff sigue siendo autoridad. ===
             const float BurstR = 140f;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > BurstR) continue;
-                npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
-                    3.5f, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 3.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
             }
         }
 

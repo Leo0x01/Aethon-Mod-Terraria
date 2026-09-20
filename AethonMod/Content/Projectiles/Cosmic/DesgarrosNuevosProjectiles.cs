@@ -68,19 +68,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La luz de la corrupción (cian-violeta inestable).
             Lighting.AddLight(Projectile.Center, 0.35f, 0.55f, 0.85f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
-                // === LA CORRUPCIÓN DEL CÍRCULO (cada 20 ticks) ===
-                if (_age > Apertura && _age < Vida - Cierre && (_age - Apertura) % Iframes == 0)
-                    GolpearCirculo(1f, 3f);
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor).
+            // === LA CORRUPCIÓN DEL CÍRCULO (cada 20 ticks) ===
+            if (_age > Apertura && _age < Vida - Cierre && (_age - Apertura) % Iframes == 0)
+                GolpearCirculo(1f, 3f);
 
-                // === LOS RAYOS CUÁNTICOS (cada 45 ticks) ===
-                if (_age > Apertura + 10 && (_age - Apertura) % CadaRayos == 0)
-                    DispararRayos();
-            }
+            // === LOS RAYOS CUÁNTICOS (cada 45 ticks) ===
+            if (_age > Apertura + 10 && (_age - Apertura) % CadaRayos == 0)
+                DispararRayos();
         }
 
-        /// <summary>La corrupción: TODO EsObjetivo dentro del radio.</summary>
+        /// <summary>La corrupción: TODO EsObjetivo dentro del radio.
+        /// v6.50 — GolpeMotor (el cauce del motor).</summary>
         private void GolpearCirculo(float factor, float knockback)
         {
             int dmg = Math.Max(1, (int)(Projectile.damage * factor));
@@ -88,7 +88,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                 if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > Radio * Radio) continue;
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, knockback, true);
             }
         }
 
@@ -111,7 +111,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 _golpeados.Add(mejor.whoAmI);
                 // El rayo pega y se recuerda 8 ticks para el visual.
                 _rayos.Add((mejor.Center, 8));
-                mejor.SimpleStrikeNPC(dmg, mejor.direction, false, 2f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, mejor, dmg, 2f, true);
                 quedan--;
             }
             if (_golpeados.Count > 24) _golpeados.Clear();
@@ -243,17 +243,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             Lighting.AddLight(Projectile.Center, 0.30f, 0.50f, 0.75f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age > Apertura)
+            // v6.50 — la trituración del núcleo va por GolpeMotor (el cauce
+            // del motor); la succión sigue siendo lógica de servidor.
+            if (_age > Apertura)
             {
-                // === LA SUCCIÓN (la puerta tira de EsObjetivo en 300 px) ===
-                foreach (NPC npc in Main.ActiveNPCs)
+                // === LA SUCCIÓN (la puerta tira de EsObjetivo en 300 px) — servidor ===
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                    if (npc.boss) continue;                     // los jefes no se dejan arrastrar
-                    Vector2 alCentro = Projectile.Center - npc.Center;
-                    float d = alCentro.Length();
-                    if (d > RadioSucion || d < 8f) continue;
-                    npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.4f);
+                    foreach (NPC npc in Main.ActiveNPCs)
+                    {
+                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                        if (npc.boss) continue;                     // los jefes no se dejan arrastrar
+                        Vector2 alCentro = Projectile.Center - npc.Center;
+                        float d = alCentro.Length();
+                        if (d > RadioSucion || d < 8f) continue;
+                        npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.4f);
+                    }
                 }
 
                 // === LA TRITURACIÓN DEL NÚCLEO (cada 18 ticks) ===
@@ -264,7 +269,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > RadioNucleo * RadioNucleo) continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                     }
                 }
             }

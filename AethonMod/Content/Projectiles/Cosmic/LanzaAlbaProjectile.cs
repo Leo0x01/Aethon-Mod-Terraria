@@ -147,9 +147,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center);
             }
 
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
-            // === LA CADENA: 2 saltos desde el golpe (60% daño) ===
+            // === LA CADENA: 2 saltos desde el golpe (60% daño) — v6.50:
+            //     GolpeMotor en el cliente dueño (el cauce del motor) ===
             int chainDamage = Math.Max(1, (int)(Projectile.damage * 0.60f));
             var hitList = new List<NPC> { target };
             Vector2 origin = Projectile.Center;
@@ -171,9 +170,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 origin = best.Center;
                 hitList.Add(best);
 
-                best.SimpleStrikeNPC(chainDamage, best.direction, false,
-                    1.5f, DamageClass.Magic);
-                try { best.AddBuff(BuffID.Electrified, 180); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, best, chainDamage, 1.5f, true);
+                // La electrificación de la cadena: server/SP (autoridad del debuff).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { best.AddBuff(BuffID.Electrified, 180); } catch { }
             }
         }
 

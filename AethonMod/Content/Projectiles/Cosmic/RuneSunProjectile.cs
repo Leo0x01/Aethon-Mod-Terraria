@@ -136,9 +136,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === EL AURA DE DAÑO (cada 10 ticks — 45% del daño;
-            //     LA VEINTE ARDE MÁS: 55% — la Mejora Mayor) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 30f && _age % 10f == 0f && Projectile.scale > 0.25f)
+            //     LA VEINTE ARDE MÁS: 55% — la Mejora Mayor) — v6.50 —
+            //     GolpeMotor: el cauce del motor, resuelto en el cliente
+            //     dueño; la quemadura sigue siendo autoridad. ===
+            if (_age > 30f && _age % 10f == 0f && Projectile.scale > 0.25f)
             {
                 float auraRadius = RuneSunRenderer.BodyPx * Projectile.scale *
                                    (1.75f + 0.55f * LifeT);
@@ -151,8 +152,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
-                    npc.AddBuff(BuffID.OnFire, rg > 0f ? 600 : 300);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 2f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        npc.AddBuff(BuffID.OnFire, rg > 0f ? 600 : 300);
                 }
             }
 
@@ -239,15 +241,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //  LA NOVA RÚNICA — UNA SOLA EXPLOSIÓN (la lección v5.97):
             //  una onda nova (StyleNova, la de la familia del sol) + AoE
             //  del núcleo + la RÁFAGA DE RUNAS DE ECO — escalado por copia.
+            //  v6.50 — GolpeMotor: el AoE del núcleo va por el cauce del
+            //  motor (cliente dueño); la onda y la quemadura siguen
+            //  siendo autoridad.
             // ============================================================
+            // v6.26 — LA NOVA DEL SELLADO: la VEINTE revienta ×1.6 con
+            // el radio más grande del arma alguna (766 px).
+            bool supremo = tier >= 20;
+            int novaDamage = Math.Max(1, (int)(Projectile.damage * (supremo ? 1.6f : 1.25f)));
+            float novaRadius = 380f + 14f * (tier - 1) + (supremo ? 120f : 0f);
+
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                // v6.26 — LA NOVA DEL SELLADO: la VEINTE revienta ×1.6 con
-                // el radio más grande del arma alguna (766 px).
-                bool supremo = tier >= 20;
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * (supremo ? 1.6f : 1.25f)));
-                float novaRadius = 380f + 14f * (tier - 1) + (supremo ? 120f : 0f);
-
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
@@ -256,19 +261,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,                                  // sin retardo — TODO sucede YA
                     CosmicShockwaveProjectile.StyleNova,
                     novaRadius);                         // radio escalado por copia
+            }
 
-                // AoE del núcleo (el epicentro de la MISMA explosión).
-                float coreR = 260f + 12f * (tier - 1) + (supremo ? 90f : 0f);
-                foreach (NPC npc in Main.ActiveNPCs)
+            // AoE del núcleo (el epicentro de la MISMA explosión).
+            float coreR = 260f + 12f * (tier - 1) + (supremo ? 90f : 0f);
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float dist = (npc.Center - Projectile.Center).Length();
+                if (dist < coreR)
                 {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    float dist = (npc.Center - Projectile.Center).Length();
-                    if (dist < coreR)
-                    {
-                        npc.SimpleStrikeNPC(novaDamage, npc.direction,
-                            false, Projectile.knockBack, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDamage,
+                        Projectile.knockBack, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                         npc.AddBuff(BuffID.OnFire, 600);
-                    }
                 }
             }
 

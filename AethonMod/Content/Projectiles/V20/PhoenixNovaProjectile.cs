@@ -85,15 +85,16 @@ namespace AethonMod.Content.Projectiles.V20
                     }
                 }
 
-                // === v5.96 — AURA DE DAÑO DE ÁREA CRECIENTE ===
+                // === v5.96 — AURA DE DAÑO DE ÁREA CRECIENTE — v6.50 —
+                //     GolpeMotor: el cauce del motor, resuelto en el cliente
+                //     dueño; la quemadura sigue autoridad. ===
                 // Petición del usuario: "todo el daño deben ser daño de área y
                 // este debe extenderse por fuera del proyectil y crecer conforme
                 // el proyectil crece, se expande y explota". El radio del aura
                 // CRECE con la nova (45→155 px a lo largo de su vida — siempre
                 // POR FUERA del hitbox de 80px de diámetro): el daño acompaña a
                 // la expansión visual. Cada 10 ticks (0.166 s) + OnFire 5 s.
-                if (Main.netMode != NetmodeID.MultiplayerClient &&
-                    age > 4f && age % 10f == 0f)
+                if (age > 4f && age % 10f == 0f)
                 {
                     float progress = MathHelper.Clamp(age / 60f, 0f, 1f);
                     float auraRadius = 45f + 110f * progress;
@@ -103,9 +104,9 @@ namespace AethonMod.Content.Projectiles.V20
                         if (!VFXCore.EsObjetivo(npc)) continue;
                         float dist = (npc.Center - Projectile.Center).Length();
                         if (dist > auraRadius) continue;
-                        int dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
-                        npc.SimpleStrikeNPC(auraDamage, dir, false, 3f, DamageClass.Magic);
-                        npc.AddBuff(BuffID.OnFire, 300);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 3f, true);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            npc.AddBuff(BuffID.OnFire, 300);
                     }
                 }
 

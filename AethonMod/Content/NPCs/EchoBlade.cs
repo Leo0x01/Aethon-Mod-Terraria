@@ -111,18 +111,23 @@ namespace AethonMod.Content.NPCs
             switch (_fase)
             {
                 // =========================================================
-                //  ACECHO: teje hacia la presa (sinusoidal, nunca recto)
+                //  ACECHO: teje hacia la presa (la curva de la casa —
+                //  nunca en línea recta)
                 // =========================================================
                 case FaseAcecho:
                 {
                     Vector2 aT = target.Center - NPC.Center;
                     float dist = aT.Length();
-                    Vector2 hacia = aT.SafeNormalize(Vector2.UnitX);
-                    // EL TEJIDO: el eje del cuerpo oscila (el paso del duelo).
-                    float tejido = MathF.Sin(Main.GlobalTimeWrappedHourly * 3.2f) *
-                        (furia ? 1.15f : 0.85f);
-                    Vector2 lateral = new Vector2(-hacia.Y, hacia.X) * tejido;
-                    Vector2 deseada = hacia * (furia ? 8.5f : 6.5f) + lateral * 3.2f;
+                    // v6.50 — LA CURVA DEL DUELISTA (EcosLib.CurvaAproximacion):
+                    // el tejido sinusoidal a mano pasa a la librería — el
+                    // vaivén de frecuencias inconmensurables sustituye al
+                    // péndulo (el paso del duelo respira, no tictacea) y la
+                    // aproximación se anticipa con tangente. Radio 210:
+                    // apenas FUERA del filo de la marca (190) — acecha al
+                    // borde exacto de tu espada.
+                    Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                        210f, furia ? 8.5f : 6.5f, Main.GlobalTimeWrappedHourly,
+                        NPC.whoAmI * 31);
                     NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.10f);
 
                     // ¿CERCA? → LA MARCA.

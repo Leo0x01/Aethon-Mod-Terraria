@@ -127,7 +127,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.velocity = Vector2.Zero;
             Projectile.timeLeft = BoomTicks + 2;
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor); la quemadura, server/SP.
             {
                 int dmg = Math.Max(1, Projectile.damage);
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -135,8 +136,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     float alcance = RadioExplosion + Math.Max(npc.width, npc.height) * 0.5f;
                     if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
                 }
             }
 

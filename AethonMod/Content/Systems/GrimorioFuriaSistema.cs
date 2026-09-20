@@ -304,6 +304,12 @@ namespace AethonMod.Content.Systems
                     if (sp != null && !sp.DerrotaOleada10)
                     {
                         sp.DerrotaOleada10 = true;
+                        // v6.50 — el DERECHO CAMINA: la puerta de la tienda
+                        // la lee el Testigo en el CLIENTE del portador —
+                        // EcoRed.MsgCronica lleva la marca YA (antes vivía
+                        // solo en la réplica del server y el botón de las
+                        // esencias jamás se encendía en MP).
+                        EcoRed.SincronizarCronica(hambriento);
                         // v6.49 — EL AVISO PRIVADO: solo al portador (su
                         // derecho, su pantalla).
                         EcoRed.AnunciarAlPortador(hambriento,

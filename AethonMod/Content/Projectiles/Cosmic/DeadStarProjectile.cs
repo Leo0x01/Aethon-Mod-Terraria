@@ -16,8 +16,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// Un sol que agotó hasta su último fotón: mata LENTO.
     ///
     /// FÍSICA:
-    ///   · DAÑO DE ENTROPÍA: 8 p/s constantes en 120 px — SimpleStrikeNPC
-    ///     con daño BAJO y FRECUENTE (cada 15 ticks, ~2 por golpe: la
+    ///   · DAÑO DE ENTROPÍA: 8 p/s constantes en 120 px — GolpeMotor
+    ///     (v6.50 — el cauce del motor) con daño BAJO y FRECUENTE
+    ///     (cada 15 ticks, ~2 por golpe: la
     ///     entropía deshace, no revienta). Sin debuffs rápidos: la
     ///     muerte por enfriamiento no se apura.
     ///   · DERIVA errática lenta (el vagar de un cadáver: wander
@@ -27,7 +28,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     VISUAL del renderer (masa negra en AlphaBlend).
     ///   · Vida 10 s (la más longeva: la muerte es paciente).
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño MP-seguro: v6.50 — GolpeMotor (el cauce del motor: crítica
+    /// real, varianza, on-hit y sync MP del propio motor).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class DeadStarProjectile : ModProjectile
@@ -94,9 +96,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 0.8f;
 
             // === EL DAÑO DE ENTROPÍA: 8 p/s — daño BAJO y FRECUENTE
-            //     (SimpleStrikeNPC cada 15 ticks; ~2 por golpe) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                Age > 30f && Age % EntropyPeriod == 0f && Projectile.scale > 0.25f)
+            //     (v6.50 — GolpeMotor, el cauce del motor: cada 15 ticks,
+            //     ~2 por golpe; la quemadura es de servidor) ===
+            if (Age > 30f && Age % EntropyPeriod == 0f && Projectile.scale > 0.25f)
             {
                 // 4 golpes/s × ~2 = los 8 p/s de la entropía (escala con el
                 // arma por un 1% — la muerte no se compra con daño).
@@ -105,7 +107,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > EntropyRadius) continue;
-                    npc.SimpleStrikeNPC(dot, 0, false, 0f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dot, 0f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                         try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
                 }
             }
@@ -164,17 +167,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // === EL DAÑO FINAL (MP-seguro): el último suspiro (pequeño) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO FINAL: el último suspiro (pequeño) — v6.50 —
+            //     GolpeMotor (el cauce del motor); la quemadura es de servidor ===
+            int burst = Math.Max(1, (int)(Projectile.damage * 0.5f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int burst = Math.Max(1, (int)(Projectile.damage * 0.5f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    if ((npc.Center - Projectile.Center).Length() > 100f) continue;
-                    npc.SimpleStrikeNPC(burst, npc.direction, false, 0.5f, DamageClass.Magic);
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
-                }
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                if ((npc.Center - Projectile.Center).Length() > 100f) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 0.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
             }
 
             if (Main.netMode == NetmodeID.Server) return;

@@ -31,8 +31,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// detrás va dejando CHARCOS (puntos de contacto con el suelo para la
     /// bruma del renderer). Vida 900 ticks = 15 s de marea.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC bajo `Main.netMode != NetmodeID.
-    /// MultiplayerClient`. Determinismo por semilla de identity.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor). Determinismo por
+    /// semilla de identity.
     /// </summary>
     public class MareaGravitatoriaProjectile : ModProjectile
     {
@@ -201,8 +202,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 CharcoEdad[idx] = _age;
             }
 
-            // === EL ARRASTRE (daño + empujón + mojado, MP-seguro) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age % 6f == 0f)
+            // === EL ARRASTRE (daño por v6.50 — GolpeMotor; empujón y
+            //     mojado: server/SP) ===
+            if (_age % 6f == 0f)
                 ArrastrarEnemigos();
 
             // === EL SONIDO DE LA MAREA (el rumor periódico del agua) ===
@@ -237,8 +239,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return -1f;
         }
 
-        /// <summary>EL ARRASTRE: daña a los enemigos de la banda de la ola,
-        /// los EMPUJA en la dirección de la marea y los MOJA.</summary>
+        /// <summary>EL ARRASTRE: daña a los enemigos de la banda de la ola
+        /// (v6.50 — GolpeMotor), los EMPUJA en la dirección de la marea y
+        /// los MOJA (empujón y debuff: server/SP).</summary>
         private void ArrastrarEnemigos()
         {
             int dmg = Math.Max(1, (int)(BaseDamage * 0.20f));
@@ -249,10 +252,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (MathF.Abs(rel.X) > 64f) continue;
                 if (rel.Y < -70f || rel.Y > 60f) continue;
 
-                npc.SimpleStrikeNPC(dmg, Direccion, false, 3f, DamageClass.Magic);
-                npc.AddBuff(BuffID.Wet, 240);
-                // EL ARRASTRE físico: el agua se los LLEVA.
-                npc.velocity.X += Direccion * 2.6f;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    npc.AddBuff(BuffID.Wet, 240);
+                    // EL ARRASTRE físico: el agua se los LLEVA.
+                    npc.velocity.X += Direccion * 2.6f;
+                }
             }
         }
 
@@ -398,16 +404,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (MathF.Abs(Projectile.velocity.X) < 0.5f)
                 Projectile.velocity.X = Direccion * Velocidad * 0.75f;
 
-            // EL DAÑO por contacto (cada 10 ticks, banda pequeña).
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age % 10f == 0f)
+            // EL DAÑO por contacto (cada 10 ticks, banda pequeña) — v6.50:
+            // GolpeMotor (el cauce del motor).
+            if (_age % 10f == 0f)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 34f) continue;
-                    npc.SimpleStrikeNPC(Projectile.damage, Direccion, false, 2f,
-                        DamageClass.Magic);
-                    npc.AddBuff(BuffID.Wet, 180);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        npc.AddBuff(BuffID.Wet, 180);
                 }
             }
 

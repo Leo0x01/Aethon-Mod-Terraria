@@ -229,18 +229,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
             _novaPos = at;
             _novaTimer = 22;
 
-            // AoE: materia estelar caliente (SimpleStrikeNPC, patrón del sol)
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // AoE: materia estelar caliente — v6.50 — GolpeMotor (el cauce
+            // del motor: crítica real, varianza, on-hit y sync MP del propio
+            // motor, resuelto en el cliente dueño; patrón del sol). El
+            // debuff sigue siendo autoridad.
+            int novaDamage = Math.Max(1, (int)(Projectile.damage * 0.75f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * 0.75f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    float dist = (npc.Center - at).Length();
-                    if (dist > NovaRadius) continue;
-                    npc.SimpleStrikeNPC(novaDamage, npc.direction, false, 3f, DamageClass.Summon);
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float dist = (npc.Center - at).Length();
+                if (dist > NovaRadius) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDamage, 3f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     npc.AddBuff(BuffID.OnFire, 240);
-                }
             }
 
             if (Main.netMode != NetmodeID.Server)

@@ -34,8 +34,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · LA SENTENCIA (impacto o 150 ticks): EXPLOSIÓN — daño ×1.5 en
     ///     300 px + OndaLib.Shock + Kick 8 + partículas.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC bajo `Main.netMode != NetmodeID.
-    /// MultiplayerClient`. Determinismo por semilla de identity.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor). Determinismo por
+    /// semilla de identity.
     /// </summary>
     public class PenduloJuicioProjectile : ModProjectile
     {
@@ -153,9 +154,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.velocity = Vector2.Zero;   // colgado: sin inercia propia
                 Projectile.rotation = -_theta;   // el renderer la usa
 
-                // EL BARRIDO: daño ×1.2 con knockback TANGENCIAL.
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                    BarrerConLaMaza();
+                // EL BARRIDO: daño ×1.2 con knockback TANGENCIAL (v6.50 —
+                // GolpeMotor: el cauce del motor).
+                BarrerConLaMaza();
 
                 // LA ESTELA del arco (el rastro del barrido).
                 EstelaLib.Track(Projectile.whoAmI, 16).Push(Projectile.Center);
@@ -230,10 +231,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     _age - last < 18f) continue;
                 _golpeCd[npc.whoAmI] = _age;
 
-                npc.SimpleStrikeNPC(dmg, Math.Sign(tangente.X), false, 7f,
-                    DamageClass.Magic);
-                // EL EMPUJÓN TANGENCIAL físico (el barrido de verdad).
-                npc.velocity += tangente * 2.2f;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 7f, true);
+                // EL EMPUJÓN TANGENCIAL físico (el barrido de verdad): server/SP.
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    npc.velocity += tangente * 2.2f;
             }
         }
 
@@ -269,16 +270,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>LA SENTENCIA: la explosión final de la maza.</summary>
         private void LaSentencia()
         {
-            // === EL DAÑO (×1.5 en 300 px — MP-seguro) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO (×1.5 en 300 px) — v6.50: GolpeMotor (el cauce
+            //     del motor) ===
+            int dmgSentencia = Math.Max(1, (int)(BaseDamage * 1.5f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int dmg = Math.Max(1, (int)(BaseDamage * 1.5f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    if ((npc.Center - Projectile.Center).Length() > 300f) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 8f, DamageClass.Magic);
-                }
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                if ((npc.Center - Projectile.Center).Length() > 300f) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmgSentencia, 8f, true);
             }
 
             if (Main.netMode == NetmodeID.Server) { Projectile.Kill(); return; }

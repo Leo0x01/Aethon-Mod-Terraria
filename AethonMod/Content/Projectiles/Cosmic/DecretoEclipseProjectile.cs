@@ -38,9 +38,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// Determinismo MP: la cronología entera deriva de la edad (misma en
     /// todas las máquinas); la semilla visual es Projectile.identity; el
-    /// daño solo en `Main.netMode != MultiplayerClient` con
-    /// SimpleStrikeNPC (escuela A) + EsObjetivo; el visual solo cliente
-    /// (PreDraw) y SIN Main.rand (Hash01 + identity).
+    /// daño v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor) + EsObjetivo; el
+    /// visual solo cliente (PreDraw) y SIN Main.rand (Hash01 + identity).
     /// </summary>
     public class DecretoEclipseProjectile : ModProjectile
     {
@@ -196,20 +196,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==============================================================
-        //  LA EJECUCIÓN — el corazón (escuela A — solo server/singleplayer)
+        //  LA EJECUCIÓN — el corazón (v6.50 — GolpeMotor: el cauce del motor)
         // ==============================================================
 
         /// <summary>
         /// LA EJECUCIÓN CÍCLICA: la onda llegó al borde — TODO enemigo
         /// dentro del círculo recibe un corte ordenado por distancia al
         /// centro (daño `base·(0.2 + num/55)`, num=255 decreciente: ×4.83
-        /// el primero, mínimo ×0.2) + Quemadura Cósmica 3 s. Game feel
-        /// solo si hubo víctimas: flash + kick + tajo.
+        /// el primero, mínimo ×0.2) + Quemadura Cósmica 3 s (de servidor).
+        /// Game feel solo si hubo víctimas: flash + kick + tajo.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).
         /// </summary>
         private void Ejecutar()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             float radio = Radio;
             float radioSq = radio * radio;
             List<NPC> dentro = new();
@@ -233,10 +233,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float mult = MathF.Max(0.2f, 0.2f + num / 55f); // ×4.83 → ×0.2
                 num--;
                 int dmg = Math.Max(1, (int)(Projectile.damage * mult));
-                int dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
-                npc.SimpleStrikeNPC(dmg, dir, false, 0f, DamageClass.Magic);
-                // El decreto quema 3 s con cada corte.
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);
+                // El decreto quema 3 s con cada corte (servidor).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
             }
 
             // EL GAME FEEL del tajo (solo con víctimas).

@@ -212,7 +212,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.width = 16;
             Projectile.height = 128;
             Projectile.tileCollide = false;
-            Projectile.friendly = false;        // la mordida es manual (SimpleStrikeNPC)
+            Projectile.friendly = false;        // la mordida es manual (GolpeMotor, v6.50)
             Projectile.penetrate = -1;
             Projectile.timeLeft = Vida;
             Projectile.aiStyle = -1;
@@ -230,7 +230,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Vector2 arriba = Projectile.Center - Vector2.UnitY * (LargoFisura * 0.5f);
             Vector2 abajo = Projectile.Center + Vector2.UnitY * (LargoFisura * 0.5f);
 
-            // === LA MORDIDA (autoridad + EsObjetivo, 0,3× cada 10 ticks). ===
+            // === LA MORDIDA (v6.50 — GolpeMotor: el cauce del motor; EsObjetivo, 0,3× cada 10 ticks). ===
             // v6.43 — LA SECCIÓN EFICAZ REAL: antes "centro del NPC a menos
             // de 32+ancho·0.35 px" (un círculo generoso que sobre-mordía);
             // ahora el AABB del NPC contra LA GRIETA de verdad — el eje
@@ -244,8 +244,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                     if (!FormaLib.NPCEnSegmento(npc, arriba, abajo, GrosorMordida)) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.Center.X < Projectile.Center.X ? -1 : 1,
-                        false, 1.5f, DamageClass.Melee);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                 }
             }
 

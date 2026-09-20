@@ -165,16 +165,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 catch { }
             }
 
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
-            // === EL DAÑO EN ÁREA del punto de impacto ===
+            // === EL DAÑO EN ÁREA del punto de impacto — v6.50 — GolpeMotor
+            //     (el cauce del motor: crítica real, varianza, on-hit y sync
+            //     MP del propio motor, resuelto en el cliente dueño; el
+            //     debuff sigue siendo autoridad) ===
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - point).Length() > StrikeR) continue;
-                npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
-                    2.5f, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 200); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 200); } catch { }
             }
         }
 

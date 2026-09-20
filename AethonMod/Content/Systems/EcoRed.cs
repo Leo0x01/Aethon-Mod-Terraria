@@ -64,6 +64,14 @@ namespace AethonMod.Content.Systems
         public const byte MsgVoz = 3;      // la voz del libro → SU portador
         public const byte MsgHambre = 4;   // el estado del hambre → SU portador
         public const byte MsgLatidoXp = 5; // el pulso de la barra dorada → SU portador
+        // v6.50 — LOS LIBROS CAMINAN (la deuda nº1 de la auditoría MP):
+        // la XP la cuenta el SERVIDOR, pero el nivel manda en tooltips,
+        // daño y HUD del CLIENTE — sin este paquete la progresión era
+        // fantasma en MP (nivel 1 eterno en la pantalla del portador).
+        public const byte MsgLibro = 6;     // niveles/XP de los libros visibles → SU portador
+        public const byte MsgCronica = 7;   // crónica del Testigo + DerrotaOleada10 → SU portador
+        public const byte MsgPedirLibros = 8; // cliente → server: "dame mis libros" (al entrar)
+        public const byte MsgPedirFragmento = 9; // cliente → server: el Altar pide el Fragmento Génesis
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -200,6 +208,89 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  v6.50 — LOS LIBROS CAMINAN (nivel/XP del portador en MP)
+        // ================================================================
+
+        /// <summary>
+        /// EL ESTADO DE LOS LIBROS hacia SU portador: la XP la cobra el
+        /// SERVIDOR (autoridad), pero el NIVEL manda en el cliente
+        /// (ModifyWeaponDamage, tooltips, ShardHUD, NivelLibro). Este
+        /// paquete lleva (slot, nivel, XP, banderas) de cada Grimorio
+        /// visible del portador — el cliente lo aplica a SUS copias y
+        /// celebra la subida (FX locales) solo con el DELTA.
+        /// La llama la autoridad tras cada cobro (GlobalNPCXP), tras las
+        /// esencias (server) y como red de seguridad periódica. No-op en
+        /// SP y en clientes.
+        /// </summary>
+        public static void SincronizarLibros(Player portador)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                if (portador == null || !portador.active) return;
+
+                EnviarPaquete(portador, p =>
+                {
+                    p.Write(MsgLibro);
+                    p.Write((byte)portador.whoAmI);
+                    byte libros = 0;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Item inv = portador.inventory[i];
+                        if (inv != null && !inv.IsAir &&
+                            inv.type == ModContent.ItemType<Content.Weapons.GrimoireEternal>())
+                            libros++;
+                    }
+                    p.Write(libros);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Item inv = portador.inventory[i];
+                        if (inv == null || inv.IsAir ||
+                            inv.type != ModContent.ItemType<Content.Weapons.GrimoireEternal>())
+                            continue;
+                        var sl = inv.GetGlobalItem<Globals.ShardLevelItem>();
+                        p.Write((byte)i);
+                        p.Write(sl != null ? sl.Level : 1);
+                        p.Write(sl != null ? sl.XP : 0);
+                        p.Write((byte)((sl != null && sl.PrimeraCincoEstrellas) ? 1 : 0));
+                    }
+                });
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50 — LA CRÓNICA CAMINA: el Testigo lee la crónica y la puerta
+        /// de la tienda de esencias (DerrotaOleada10) en la copia del
+        /// JUGADOR LOCAL — pero quien las marca es el servidor. Este
+        /// paquete lleva la crónica completa hacia SU portador. La llama
+        /// GlobalNPCXP al marcar jefe devorado y GrimorioFuriaSistema al
+        /// cerrar la oleada 10.
+        /// </summary>
+        public static void SincronizarCronica(Player portador)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                if (portador == null || !portador.active) return;
+                var sp = portador.GetModPlayer<Players.ShardPlayer>();
+                if (sp == null) return;
+
+                EnviarPaquete(portador, p =>
+                {
+                    p.Write(MsgCronica);
+                    p.Write((byte)portador.whoAmI);
+                    p.Write((byte)(sp.DerrotaOleada10 ? 1 : 0));
+                    p.Write((byte)System.Math.Min(sp.CronicaJefes.Count, 255));
+                    for (int i = 0; i < sp.CronicaJefes.Count && i < 255; i++)
+                        p.Write((ushort)sp.CronicaJefes[i]);
+                    p.Write(sp.CronicaNarrada);
+                });
+            }
+            catch { }
+        }
+
+        // ================================================================
         //  LOS ANUNCIOS — el festín es del MUNDO (vanilla chat)
         // ================================================================
 
@@ -261,12 +352,47 @@ namespace AethonMod.Content.Systems
         /// en silencio — "solo el portador correcto ve los reclamos de
         /// su propio grimorio" (el Send(whoAmI) ya lo limita de red;
         /// este filtro es la doble puerta).
+        /// v6.50: también procesa el PEDIDO del cliente (MsgPedirLibros,
+        /// recibido en el SERVER al entrar al mundo) y aplica los libros
+        /// (MsgLibro) y la crónica (MsgCronica) en el cliente dueño.
         /// </summary>
-        public static void Recibir(BinaryReader reader)
+        public static void Recibir(BinaryReader reader, int quienEnvia = -1)
         {
             try
             {
                 byte tipo = reader.ReadByte();
+
+                // EL PEDIDO DE ENTRADA: el cliente recién llegado pide sus
+                // libros — el server contesta con la foto completa.
+                if (Main.netMode == NetmodeID.Server &&
+                    (tipo == MsgPedirLibros || tipo == MsgPedirFragmento))
+                {
+                    Player solicitante = quienEnvia >= 0 && quienEnvia < Main.player.Length
+                        ? Main.player[quienEnvia] : null;
+                    if (solicitante != null && solicitante.active)
+                    {
+                        if (tipo == MsgPedirLibros)
+                        {
+                            SincronizarLibros(solicitante);
+                            SincronizarCronica(solicitante);
+                            SincronizarHambre(solicitante);
+                        }
+                        else
+                        {
+                            // EL ALTAR HABLA CON EL SERVER: el RightClick de
+                            // tile corre SOLO en el cliente — el Fragmento
+                            // Génesis lo spawn- ea la AUTORIDAD (sin drops
+                            // fantasma) y vanilla lo difunde al mundo.
+                            int idx = Item.NewItem(solicitante.GetSource_GiftOrReward(),
+                                solicitante.Center,
+                                ModContent.ItemType<Content.Items.GenesisShard>());
+                            if (idx >= 0 && idx < Main.item.Length)
+                                Main.item[idx].noGrabDelay = 0;
+                        }
+                    }
+                    return;
+                }
+
                 byte destinatario = reader.ReadByte();
 
                 // LA DOBLE PUERTA: la voz de OTRO grimorio no me llega.
@@ -306,7 +432,97 @@ namespace AethonMod.Content.Systems
                         if (xp > 0) ShardHUDSystem.MarcarGanancia(xp);
                         break;
                     }
+
+                    case MsgLibro:
+                    {
+                        // LOS LIBROS DEL PORTADOR: aplicar (slot, nivel, XP,
+                        // bandera) a las copias LOCALES — la subida se
+                        // celebra solo con el DELTA (el servidor ya contó
+                        // la XP; el cliente ya no desincroniza).
+                        byte libros = reader.ReadByte();
+                        var yo = Main.LocalPlayer;
+                        if (yo == null) break;
+                        for (int k = 0; k < libros; k++)
+                        {
+                            byte slot = reader.ReadByte();
+                            int nivel = reader.ReadInt32();
+                            int xp = reader.ReadInt32();
+                            bool primera5 = reader.ReadByte() != 0;
+                            if (slot >= 10) continue;
+                            Item inv = yo.inventory[slot];
+                            if (inv == null || inv.IsAir ||
+                                inv.type != ModContent.ItemType<Content.Weapons.GrimoireEternal>())
+                                continue;
+                            var sl = inv.GetGlobalItem<Globals.ShardLevelItem>();
+                            if (sl == null) continue;
+                            int delta = nivel - sl.Level;
+                            sl.Level = System.Math.Max(1, nivel);
+                            sl.XP = System.Math.Max(0, xp);
+                            sl.PrimeraCincoEstrellas |= primera5;
+                            if (delta > 0)
+                                sl.CelebrarSubida(inv, delta);
+                        }
+                        break;
+                    }
+
+                    case MsgCronica:
+                    {
+                        byte derrota10 = reader.ReadByte();
+                        byte total = reader.ReadByte();
+                        var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
+                        if (sp == null) break;
+                        sp.DerrotaOleada10 = derrota10 != 0;
+                        sp.CronicaJefes.Clear();
+                        for (int k = 0; k < total; k++)
+                        {
+                            int tipoJefe = reader.ReadUInt16();
+                            if (!sp.CronicaJefes.Contains(tipoJefe))
+                                sp.CronicaJefes.Add(tipoJefe);
+                        }
+                        sp.CronicaNarrada = reader.ReadInt32();
+                        break;
+                    }
                 }
+            }
+            catch { }
+        }
+
+        // ================================================================
+        //  EL PEDIDO DE ENTRADA — el cliente pide sus libros al conectar
+        // ================================================================
+
+        /// <summary>
+        /// v6.50 — LA FOTO DE ENTRADA: el cliente que entra al mundo pide
+        /// el estado de SUS libros (nivel/XP/crónica/hambre) — vanilla
+        /// sincroniza el inventario, pero NO los datos de GlobalItem. Se
+        /// llama desde ShardPlayer.OnEnterWorld (solo cliente MP).
+        /// </summary>
+        public static void PedirMisLibros()
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgPedirLibros);
+                p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50 — EL ALTAR PIDE EL FRAGMENTO: el RightClick del tile corre
+        /// SOLO en el cliente; en MP el Fragmento Génesis debe nacer del
+        /// server (el drop client-side era fantasma — la auditoría nº5).
+        /// Llamado desde AncientAltar.RightClick (cliente MP).
+        /// </summary>
+        public static void PedirFragmentoGenesis()
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgPedirFragmento);
+                p.Send();
             }
             catch { }
         }

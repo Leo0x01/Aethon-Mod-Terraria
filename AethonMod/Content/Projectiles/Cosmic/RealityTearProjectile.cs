@@ -47,8 +47,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// Determinismo MP: la dirección se toma de la velocity SINCRONIZADA al
     /// nacer; la semilla es Projectile.identity (la misma en todas las
-    /// máquinas); el daño solo en `Main.netMode != MultiplayerClient` con
-    /// `SimpleStrikeNPC`; el visual solo cliente (PreDraw).
+    /// máquinas); el daño por v6.50 — GolpeMotor (el cauce del motor:
+    /// crítica real, varianza, on-hit y sync MP del propio motor); el
+    /// visual solo cliente (PreDraw).
     /// </summary>
     public class RealityTearProjectile : ModProjectile
     {
@@ -346,23 +347,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>
-        /// EL DAÑO DE LA LÍNEA (escuela A): todo NPC cuyo hitbox toque la cápsula
-        /// origin→punta recibe factor·damage. Determinismo MP: SOLO
-        /// server/singleplayer (SimpleStrikeNPC); el visual es solo cliente.
+        /// EL DAÑO DE LA LÍNEA: todo NPC cuyo hitbox toque la cápsula
+        /// origin→punta recibe factor·damage. v6.50 — GolpeMotor (el
+        /// cauce del motor: crítica real, varianza, on-hit y sync MP del
+        /// propio motor); el visual es solo cliente.
         /// </summary>
         private void GolpearLinea(float factor, float knockback)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             int dmg = Math.Max(1, (int)(Projectile.damage * factor));
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                 if (!RiftLib.LineaToca(_origin, _dir, TearLength, MaxWidth + 8f, npc.Hitbox)) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
-                // La herida electrifica lo que toca (la anomalía del desgarro).
-                try { npc.AddBuff(BuffID.Electrified, 90); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, knockback, true);
+                // La herida electrifica lo que toca (la anomalía del desgarro) — server/SP.
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 90); } catch { }
             }
         }
 

@@ -201,7 +201,7 @@ namespace AethonMod.Content.Projectiles.V20
             // DE FUEGO y el AoE del núcleo los genera EL SOL (autoridad de la
             // sincronización): cero dobles explosiones. Las novas standalone
             // (SupernovaStaff) conservan su explosión completa.
-            if (!SunInvoked && Main.netMode != NetmodeID.MultiplayerClient)
+            if (!SunInvoked)
             {
                 // === v5.86/v5.91 — 3 ONDAS EXPANSIVAS DE FUEGO (solo standalone) ===
                 // La onda final de la explosión: tres frentes ardientes
@@ -211,22 +211,27 @@ namespace AethonMod.Content.Projectiles.V20
                 // (OnFire, 10 s — v5.91: era 5 s).
                 // v5.95 — redimensionadas (criterio v5.94 del sol: 360/450/540
                 // → 240/300/360, a escala justa).
-                int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
-                float[] radii = { 240f, 300f, 360f };
-                for (int i = 0; i < 3; i++)
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    Projectile.NewProjectile(
-                        Projectile.GetSource_FromThis(),
-                        Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
-                        ModContent.ProjectileType<CosmicShockwaveProjectile>(),
-                        waveDamage, 0f, Projectile.owner,
-                        -i * 8f,                                      // edad: retardo escalonado
-                        CosmicShockwaveProjectile.StyleFire,
-                        radii[i]);                                    // radio máximo
+                    int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
+                    float[] radii = { 240f, 300f, 360f };
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Projectile.NewProjectile(
+                            Projectile.GetSource_FromThis(),
+                            Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
+                            ModContent.ProjectileType<CosmicShockwaveProjectile>(),
+                            waveDamage, 0f, Projectile.owner,
+                            -i * 8f,                                      // edad: retardo escalonado
+                            CosmicShockwaveProjectile.StyleFire,
+                            radii[i]);                                    // radio máximo
+                    }
                 }
 
-                // Daño AoE del núcleo de la nova: solo en la autoridad
-                // (standalone — la hija del sol deja este golpe al OnKill del sol).
+                // Daño AoE del núcleo de la nova — v6.50 — GolpeMotor (el
+                // cauce del motor: crítica real, varianza, on-hit y sync MP
+                // del propio motor, resuelto en el cliente dueño; standalone
+                // — la hija del sol deja este golpe al OnKill del sol).
                 // v5.95: 340 → 260 (mismo criterio v5.94 del sol).
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
@@ -234,9 +239,10 @@ namespace AethonMod.Content.Projectiles.V20
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist < 260f)
                     {
-                        npc.SimpleStrikeNPC(Projectile.damage, npc.direction,
-                            false, Projectile.knockBack, DamageClass.Magic);
-                        npc.AddBuff(BuffID.OnFire, 600); // quemadura 10 s (v5.91)
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage,
+                            Projectile.knockBack, true);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            npc.AddBuff(BuffID.OnFire, 600); // quemadura 10 s (v5.91)
                     }
                 }
             }

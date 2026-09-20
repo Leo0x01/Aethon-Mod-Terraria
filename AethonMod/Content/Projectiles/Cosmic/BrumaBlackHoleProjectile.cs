@@ -178,7 +178,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === AURA DE DAÑO: TICKS QUE ACELERAN CERCA DEL CENTRO (copia exacta) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && VisualsTime > 0f)
+            // v6.50 — el daño del aura va por GolpeMotor (el cauce del
+            // motor); el exprimido y la quemadura siguen en el servidor.
+            if (VisualsTime > 0f)
             {
                 float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
                 float auraRadius = ShieldRadius * (1.15f + 0.75f * lifeProgress);
@@ -194,14 +196,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     int interval = 6 + (int)(prox * 18f); // 6 (centro) → 24 (borde)
                     if ((t + npc.whoAmI) % interval != 0) continue;
 
-                    Vector2 toCenter = Projectile.Center - npc.Center;
-                    if (toCenter.LengthSquared() > 0.01f)
+                    // Lógica de servidor: el exprimido hacia el centro + quemadura.
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        toCenter.Normalize();
-                        npc.velocity += toCenter * 0.8f;
-                    }
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 0f, DamageClass.Magic);
+                        Vector2 toCenter = Projectile.Center - npc.Center;
+                        if (toCenter.LengthSquared() > 0.01f)
+                        {
+                            toCenter.Normalize();
+                            npc.velocity += toCenter * 0.8f;
+                        }
                         try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                    }
+                    // v6.50 — GolpeMotor (el cauce del motor: crítica real,
+                    // varianza, on-hit y sync MP del propio motor).
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 0f, true);
                 }
             }
 

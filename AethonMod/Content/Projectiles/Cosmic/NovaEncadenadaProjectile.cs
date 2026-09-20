@@ -23,8 +23,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     enemigos más cercanos AÚN SIN GOLPEAR (radio de búsqueda 400).
     ///
     /// CERO Main.rand: las presas se eligen por DISTANCIA (determinista).
-    /// Luz cálida + kick pequeño por cada nova. El daño SIEMPRE con guard
-    /// MP + EsObjetivo + SimpleStrikeNPC (escuela A).
+    /// Luz cálida + kick pequeño por cada nova. El daño por
+    /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+    /// on-hit y sync MP del propio motor) + EsObjetivo.
     /// </summary>
     public class NovaEncadenadaProjectile : ModProjectile
     {
@@ -215,12 +216,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// EL FRENTE DE LA NOVA: solo golpea a los que el anillo ATRAVIESA
         /// (|dist - frente| &lt; banda). Un golpe por enemigo por nova.
-        /// Escuela A: solo server/singleplayer.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor).
         /// </summary>
         private void GolpearFrente()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             float radio = Radios[_gen];
             float progreso = MathHelper.Clamp(_explAge / NovaTicks, 0f, 1f);
             float frente = radio * OndaLib.Expansion(progreso);
@@ -235,8 +235,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (MathF.Abs(d - frente) > banda) continue;
 
                 _golpeados.Add(npc.whoAmI);
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
+                // La quemadura del frente: server/SP (autoridad del debuff).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
             }
         }
 

@@ -37,7 +37,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// CONVENCIONES DE LA CASA: reloj por Main.GameUpdateCount (NUNCA
     /// GlobalTimeWrappedHourly — el render late distinto que el juego),
     /// cero Main.rand en el render, lote cerrado→cerrado, daño del faro
-    /// solo en autoridad con EsObjetivo.
+    /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+    /// on-hit y sync MP del propio motor) con EsObjetivo.
     ///
     /// v6.43 — LA COREOGRAFÍA DECLARATIVA (CompasLib): el latido de 30 t
     /// y el faro de 180 t ya no se programan con switches a mano — se
@@ -205,7 +206,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // El reloj del faro hacia adelante: 1..180.
                 float relojFaro = FaroTicks - _faroTicks;
 
-                // El haz pica a todo lo que cruza (solo autoridad). La
+                // El haz pica a todo lo que cruza (v6.50 — GolpeMotor:
+                // el cauce del motor, resuelto en el cliente dueño). La
                 // dirección sale del reloj SIN envolver: el faro dura
                 // EXACTAMENTE un ciclo del compás y en su tick final
                 // (reloj 180) la envoltura lo torcería a 0 — el viejo
@@ -228,7 +230,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Vector2 masCercano = a + ab * t;
                         if (Vector2.DistanceSquared(npc.Center, masCercano) < 42f * 42f)
                         {
-                            npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
+                            Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
                             _picotazos[npc.whoAmI] = 6;
                         }
                     }

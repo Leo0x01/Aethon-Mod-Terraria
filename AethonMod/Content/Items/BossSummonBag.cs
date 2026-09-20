@@ -1,5 +1,6 @@
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items
@@ -58,7 +59,10 @@ namespace AethonMod.Content.Items
 
         public override bool? UseItem(Player player)
         {
-            if (Main.myPlayer != player.whoAmI) return null;
+            // v6.50 — LA RED: los items NACEN en el server (el cliente MP
+            // solo ve cómo le caen — el drop fantasma client-side era el
+            // patrón del Altar que la auditoría marcó); el texto es local.
+            if (Main.netMode == NetmodeID.MultiplayerClient) return null;
 
             int given = 0;
             foreach (int summonerId in BossSummoners)
@@ -75,8 +79,9 @@ namespace AethonMod.Content.Items
                 }
             }
 
-            Main.NewText($"Bolsa abierta: {given} tipos de invocadores recibidos (999 c/u).",
-                new Microsoft.Xna.Framework.Color(245, 196, 81));
+            if (player.whoAmI == Main.myPlayer)
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Bolsa.Abierta", given),
+                    new Microsoft.Xna.Framework.Color(245, 196, 81));
             return true;
         }
     }

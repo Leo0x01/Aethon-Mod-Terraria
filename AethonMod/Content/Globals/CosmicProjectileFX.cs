@@ -101,7 +101,7 @@ namespace AethonMod.Content.Globals
                     {
                         // Buscar el Grimorio en el inventario del jugador (no solo HeldItem)
                         int grimorioLevel = 1;
-                        for (int i = 0; i < 58; i++)
+                        for (int i = 0; i < 59; i++)
                         {
                             Item inv = owner.inventory[i];
                             if (inv != null && inv.type == ModContent.ItemType<Weapons.GrimoireEternal>())
@@ -124,8 +124,12 @@ namespace AethonMod.Content.Globals
                                 float dist = Vector2.Distance(npc.Center, target.Center);
                                 if (dist < areaRadius)
                                 {
-                                    npc.SimpleStrikeNPC(areaDamage, projectile.direction,
-                                        false, 0, DamageClass.Magic, false, 0, false);
+                                    // v6.50 — EL CAUCE DEL MOTOR (hallazgo auditoría
+                                    // MP nº2): este AoE corría SIN guard de red — el
+                                    // daño client-side era fantasma en MP. GolpeMotor
+                                    // lo resuelve SOLO en el cliente dueño y el motor
+                                    // lo sincroniza (crítica real y on-hit incluidos).
+                                    Systems.GolpeMotor.Golpear(projectile, npc, areaDamage, 0f);
                                 }
                             }
                         }

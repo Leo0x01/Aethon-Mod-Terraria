@@ -85,7 +85,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Projectile.width = 24;
             Projectile.height = 24;
-            // Daño 100% manual por LÍNEA/ÁREA (la escuela A de la casa).
+            // Daño por LÍNEA/ÁREA — v6.50 — GolpeMotor (el cauce del motor:
+            // crítica real, varianza, on-hit y sync MP del propio motor).
             Projectile.friendly = false;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
@@ -363,20 +364,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==================================================================
-        //  EL DAÑO MANUAL (la escuela A — el determinismo MP gratis)
+        //  EL DAÑO — v6.50 — GolpeMotor (el cauce del motor: crítica real,
+        //  varianza, on-hit y sync MP del propio motor)
         // ==================================================================
 
         /// <summary>El haz golpea TODA la línea (con la muerte de ceniza).</summary>
         private void GolpearLinea(float mult)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if (!RiftLib.LineaToca(_origin, _dir, HazLongitud, HazAncho * 1.5f, npc.Hitbox))
                     continue;
                 int dmg = (int)(Projectile.damage * mult);
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
                 if (npc.life <= 0) MuerteCeniza(npc);
             }
         }
@@ -384,13 +385,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>Un golpe de área (brazos/ascuas) con la muerte de ceniza.</summary>
         private void GolpearCirculo(Vector2 centro, float radio, float mult)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - centro).Length() > radio + npc.width * 0.5f) continue;
                 int dmg = (int)(Projectile.damage * mult);
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
                 if (npc.life <= 0) MuerteCeniza(npc);
             }
         }

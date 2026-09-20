@@ -1,6 +1,7 @@
 
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.DataStructures;
 
 using Terraria.ModLoader;
@@ -59,13 +60,23 @@ namespace AethonMod.Content.Tiles
             }
             if (!hasShard)
             {
-                int item = Item.NewItem(
-                    player.GetSource_GiftOrReward(),
-                    player.Center,
-                    ModContent.ItemType<Items.GenesisShard>());
-                if (item >= 0 && item < Main.item.Length) // v5.59: bounds check
-                    Main.item[item].noGrabDelay = 0;
-                Main.NewText("Has reclamado el Fragmento Génesis. Combate para imprprimir tu rama.", new Color(245, 196, 81));
+                // v6.50 — EL FRAGMENTO ES DE LA AUTORIDAD (hallazgo auditoría
+                // MP nº5): el RightClick de tile corre SOLO en el cliente —
+                // spawn-ear aquí era un drop FANTASMA en MP. En SP nace
+                // local (mismo proceso); en MP el cliente pide el fragmento
+                // al server por EcoRed y el server lo spawn- ea + difunde.
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                    Systems.EcoRed.PedirFragmentoGenesis();
+                else
+                {
+                    int item = Item.NewItem(
+                        player.GetSource_GiftOrReward(),
+                        player.Center,
+                        ModContent.ItemType<Items.GenesisShard>());
+                    if (item >= 0 && item < Main.item.Length) // v5.59: bounds check
+                        Main.item[item].noGrabDelay = 0;
+                }
+                Main.NewText("Has reclamado el Fragmento Génesis.", new Color(245, 196, 81));
             }
             else
             {

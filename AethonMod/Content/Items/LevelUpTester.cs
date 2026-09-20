@@ -2,6 +2,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using AethonMod.Content.Globals;
+using AethonMod.Content.Systems;
 
 namespace AethonMod.Content.Items
 {
@@ -32,10 +33,15 @@ namespace AethonMod.Content.Items
 
         public override bool? UseItem(Player player)
         {
-            if (Main.myPlayer != player.whoAmI) return null;
+            // v6.50 — el doble gate muerto arreglado: el server corre este
+            // UseItem por el uso sincronizado del jugador remoto (y él es
+            // quien debe subir SU copia — EcoRed.SincronizarLibros lleva el
+            // nivel nuevo al portador). El texto es local.
+            // (El tester salta OnLevelUp a propósito: es una HERRAMIENTA de
+            // pruebas — el flujo real (GrantXP/SubirNivelDirecto) sí celebra.)
 
             // Buscar el primer Grimorio del Eterno en todo el inventario.
-            for (int i = 0; i < 58; i++)
+            for (int i = 0; i < 59; i++)
             {
                 Item inv = player.inventory[i];
                 if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>()) continue;
@@ -43,23 +49,31 @@ namespace AethonMod.Content.Items
                 var sl = inv.GetGlobalItem<ShardLevelItem>();
                 if (sl == null) continue;
 
-                sl.Level += LevelsPerUse;
-                Main.NewText($"✦ {inv.Name} subió +{LevelsPerUse} niveles (ahora nivel {sl.Level}).",
-                    new Microsoft.Xna.Framework.Color(245, 196, 81));
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    sl.Level += LevelsPerUse;
 
-                // Efectos visuales de subida de nivel.
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
-                for (int d = 0; d < 30; d++)
+                if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
                 {
-                    Dust.NewDustPerfect(player.Center, DustID.GoldFlame,
-                        new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
-                        100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
+                    Main.NewText($"✦ {inv.Name} subió +{LevelsPerUse} niveles (ahora nivel {sl.Level}).",
+                        new Microsoft.Xna.Framework.Color(245, 196, 81));
+
+                    // Efectos visuales de subida de nivel.
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4);
+                    for (int d = 0; d < 30; d++)
+                    {
+                        Dust.NewDustPerfect(player.Center, DustID.GoldFlame,
+                            new Microsoft.Xna.Framework.Vector2(Main.rand.NextFloat(-6, 6), Main.rand.NextFloat(-6, 6)),
+                            100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
+                    }
                 }
+
+                EcoRed.SincronizarLibros(player); // no-op fuera del server
                 return true;
             }
 
-            Main.NewText("No se encontró un Grimorio del Eterno en el inventario.",
-                new Microsoft.Xna.Framework.Color(255, 120, 120));
+            if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
+                Main.NewText("No se encontró un Grimorio del Eterno en el inventario.",
+                    new Microsoft.Xna.Framework.Color(255, 120, 120));
             return false;
         }
     }

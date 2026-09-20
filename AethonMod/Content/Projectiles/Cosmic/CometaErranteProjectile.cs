@@ -290,12 +290,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// EL NÚCLEO (×1.0, i-frames 15) y la COLA (×0.4, i-frames 8): dos
-        /// diccionarios separados. Escuela A: solo server/singleplayer.
+        /// diccionarios separados. v6.50 — GolpeMotor (el cauce del motor:
+        /// crítica real, varianza, on-hit y sync MP del propio motor); la
+        /// quemadura del núcleo es de servidor.
         /// </summary>
         private void GolpearNucleoYCola()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             int dmgNucleo = Math.Max(1, Projectile.damage);
             int dmgCola = Math.Max(1, (int)(Projectile.damage * DañoCola));
             Vector2[] cola = ColaPolvo();
@@ -311,8 +311,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!_golpeNucleo.TryGetValue(npc.whoAmI, out int u) || _age - u >= IframesNucleo)
                     {
                         _golpeNucleo[npc.whoAmI] = (int)_age;
-                        npc.SimpleStrikeNPC(dmgNucleo, npc.direction, false, 3f, DamageClass.Magic);
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmgNucleo, 3f, true);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
                     }
                 }
 
@@ -323,7 +324,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (TocaPolilinea(npc.Center, cola, radio))
                     {
                         _golpeCola[npc.whoAmI] = (int)_age;
-                        npc.SimpleStrikeNPC(dmgCola, npc.direction, false, 1f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmgCola, 1f, true);
                     }
                 }
             }
@@ -332,17 +333,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>EL ESTALLIDO DE HIELO-FUEGO (×1.2, radio 120) + despedida visual.</summary>
         private void Estallar()
         {
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor); la quemadura es de servidor.
+            int dmg = Math.Max(1, (int)(Projectile.damage * DañoEstallido));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int dmg = Math.Max(1, (int)(Projectile.damage * DañoEstallido));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    float alcance = RadioEstallido + Math.Max(npc.width, npc.height) * 0.5f;
-                    if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 5f, DamageClass.Magic);
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float alcance = RadioEstallido + Math.Max(npc.width, npc.height) * 0.5f;
+                if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }
-                }
             }
 
             if (Main.netMode != NetmodeID.Server)

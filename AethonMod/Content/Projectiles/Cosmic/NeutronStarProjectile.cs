@@ -25,7 +25,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///     temblor): sacudida OndaLib.Kick + anillo de onda en el
     ///     renderer + pulso de daño extra en el epicentro.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class NeutronStarProjectile : ModProjectile
@@ -111,24 +112,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 4.5f;
             }
 
-            // === EL AURA ULTRADENSA: daño ×3 el estándar en 60 px ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                Age > 20f && Age % 10f == 0f && Projectile.scale > 0.25f)
+            // === EL AURA ULTRADENSA: daño ×3 el estándar en 60 px (v6.50:
+            //     GolpeMotor) ===
+            if (Age > 20f && Age % 10f == 0f && Projectile.scale > 0.25f)
             {
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * 1.35f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 1f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
-                    try { npc.AddBuff(BuffID.CursedInferno, 90); } catch { }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                        try { npc.AddBuff(BuffID.CursedInferno, 90); } catch { }
+                    }
                 }
             }
 
             // === EL STARQUAKE: la corteza se rompe cada ~2 s (DETERMINISTA:
-            //     la fase vive en Age, no en estado local) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && Age > 60f)
+            //     la fase vive en Age, no en estado local) — v6.50: GolpeMotor ===
+            if (Age > 60f)
             {
                 float ph = QuakePhase;
                 if (ph < 1f)
@@ -140,8 +144,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!VFXCore.EsObjetivo(npc)) continue;
                         if ((npc.Center - Projectile.Center).Length() > 100f) continue;
-                        npc.SimpleStrikeNPC(quakeDamage, npc.direction, false, 2f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, quakeDamage, 2f, true);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
                     }
                     if (Main.netMode != NetmodeID.Server)
                     {
@@ -213,16 +218,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // === EL DAÑO FINAL (MP-seguro) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO FINAL: el núcleo se suelta (v6.50 — GolpeMotor) ===
             {
                 int burst = Math.Max(1, (int)(Projectile.damage * 1.0f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 120f) continue;
-                    npc.SimpleStrikeNPC(burst, npc.direction, false, 2f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 2f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
                 }
             }
 

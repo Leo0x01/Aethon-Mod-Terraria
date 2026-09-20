@@ -62,7 +62,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Projectile.width = 14;
             Projectile.height = 14;
-            // Daño 100% manual (escuela A): sin contacto de vanilla.
+            // Daño por sub-ataques — v6.50 — GolpeMotor (el cauce del
+            // motor): sin contacto de vanilla.
             Projectile.friendly = false;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
@@ -122,12 +123,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// EL VEREDICTO DEL POLÍGONO: todo enemigo DENTRO de la figura
-        /// cerrada recibe daño ×2.2 por estrella. Escuela A + ray-casting.
+        /// cerrada recibe daño ×2.2 por estrella. v6.50 — GolpeMotor (el
+        /// cauce del motor: crítica real, varianza, on-hit y sync MP del
+        /// propio motor) + ray-casting.
         /// </summary>
         private void Encender(List<Projectile> estrellas)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             // La figura: los vértices en orden de clavado (viejo → nuevo), cerrada.
             Vector2[] poligono = new Vector2[estrellas.Count];
             for (int i = 0; i < estrellas.Count; i++)
@@ -140,7 +141,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if (!PuntoEnPoligono(npc.Center, poligono)) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 4f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 4f, true);
             }
         }
 

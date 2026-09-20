@@ -273,6 +273,18 @@ namespace AethonMod.Content.Players
                 bool autoridad = Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient; // SP o server
                 int nivel = NivelLibro(false);
 
+                // v6.50 — LA RED DE SEGURIDAD: cada 10 s el server re-envía
+                // libros y crónica al portador (cubre al que entra a mitad
+                // de sesión, los movimientos de slot y cualquier deriva
+                // que un paquete perdido hubiera dejado — la foto de
+                // entrada se pide en OnEnterWorld; esto la repone).
+                if (Main.netMode == Terraria.ID.NetmodeID.Server && Player.active &&
+                    ((Main.GameUpdateCount + (ulong)Player.whoAmI * 37ul) % 600u) == 0ul)
+                {
+                    EcoRed.SincronizarLibros(Player);
+                    EcoRed.SincronizarCronica(Player);
+                }
+
                 if (autoridad)
                 {
                     if (nivel >= NivelMinimoHambre)
@@ -466,6 +478,15 @@ namespace AethonMod.Content.Players
             TicksSinMatar = 0;
             MomentosHambre = 0;
             EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
+        }
+
+        public override void OnEnterWorld()
+        {
+            // v6.50 — LA FOTO DE ENTRADA: el cliente MP recién llegado pide
+            // SUS libros (nivel/XP), SU crónica y SU hambre — vanilla
+            // sincroniza el inventario, pero no los datos de GlobalItem ni
+            // del ModPlayer. En SP no hay nada que pedir.
+            EcoRed.PedirMisLibros();
         }
 
         public override void SaveData(TagCompound tag)

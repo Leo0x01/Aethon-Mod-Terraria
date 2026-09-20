@@ -4,6 +4,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
 using AethonMod.Content.Globals;
+using AethonMod.Content.Systems;
 using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Items.Esencias
@@ -48,11 +49,13 @@ namespace AethonMod.Content.Items.Esencias
         /// <summary>
         /// La ESENCIA del guardián caído: el alma del jefe de oleada —
         /// sube UN NIVEL COMPLETO al Grimorio del Eterno.
+        /// v6.50 — EL ALMA ES DE LA AUTORIDAD: en MP el nivel real vive en
+        /// el server (la XP la cuenta él); el uso sincronizado la sube en
+        /// SU copia y EcoRed.MsgLibro lleva el nivel nuevo al portador
+        /// (que celebra el delta en su pantalla). En SP: como siempre.
         /// </summary>
         public override bool? UseItem(Player player)
         {
-            if (Main.myPlayer != player.whoAmI) return null;
-
             // LA PRIMERA COPIA VISIBLE del libro (slots 0–9).
             Item libro = null;
             for (int i = 0; i < 10; i++)
@@ -68,13 +71,21 @@ namespace AethonMod.Content.Items.Esencias
 
             if (libro == null)
             {
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.SinLibro"),
-                    new Color(255, 160, 90));
+                if (player.whoAmI == Main.myPlayer)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Esencia.SinLibro"),
+                        new Color(255, 160, 90));
                 return false;
             }
 
             var sl = libro.GetGlobalItem<ShardLevelItem>();
             if (sl == null) return false;
+
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+            {
+                // El cliente solo avisa: el server sube SU copia (uso
+                // sincronizado) y MsgLibro trae el nivel (con su fiesta).
+                return true;
+            }
 
             sl.SubirNivelDirecto(libro, 1);
             // LA VOZ del libro probando el alma (variantes por jefe —
@@ -89,6 +100,10 @@ namespace AethonMod.Content.Items.Esencias
                 Dust.NewDustPerfect(player.Center, DustID.GoldFlame,
                     new Vector2(Main.rand.NextFloat(-5f, 5f), Main.rand.NextFloat(-6f, 2f)),
                     100, new Color(245, 196, 81), 1.2f);
+
+            // v6.50 — el nivel camina: el server acaba de subir su copia;
+            // el cliente del portador recibe la nueva (y su celebración).
+            EcoRed.SincronizarLibros(player);
 
             return true;
         }

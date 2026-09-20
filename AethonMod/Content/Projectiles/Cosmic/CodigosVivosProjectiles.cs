@@ -247,9 +247,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La luz del sol de la danza (dorado suave).
             Lighting.AddLight(Projectile.Center, 0.35f, 0.26f, 0.10f);
 
-            // === LA QUEMADURA DE LOS ORBES (cada 10 ticks). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 12 && _age % CadaQuemadura == 0)
+            // === LA QUEMADURA DE LOS ORBES (cada 10 ticks) —
+            //     v6.50 — GolpeMotor (el cauce del motor). ===
+            if (_age > 12 && _age % CadaQuemadura == 0)
             {
                 int dmg = Math.Max(1, Projectile.damage);
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -264,8 +264,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (Vector2.DistanceSquared(npc.Center, _nodos[i].Pos) > r * r)
                             continue;
 
-                        npc.SimpleStrikeNPC((int)(dmg * mult), npc.direction,
-                            false, 2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc,
+                            (int)(dmg * mult), 2f, true);
                         break;   // un orbe por enemigo en este tick de cadencia
                     }
                 }
@@ -431,17 +431,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //     portal estable). Fuerza 0.62: LA MÁS FUERTE del arsenal. ===
             GravLens.Registrar(Projectile.Center, Radio * 2.4f, FuerzaLente, 0.10f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age > Apertura)
+            // v6.50 — el devorar y la mordida de la lente van por GolpeMotor
+            // (el cauce del motor: crítica real, varianza, on-hit y sync MP
+            // del propio motor); la succión sigue siendo lógica de servidor.
+            if (_age > Apertura)
             {
-                // === LA SUCCIÓN (la materia cae al pozo) ===
-                foreach (NPC npc in Main.ActiveNPCs)
+                // === LA SUCCIÓN (la materia cae al pozo) — servidor ===
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                    if (npc.boss) continue;
-                    Vector2 alCentro = Projectile.Center - npc.Center;
-                    float d = alCentro.Length();
-                    if (d > RadioSucion || d < 8f) continue;
-                    npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.5f);
+                    foreach (NPC npc in Main.ActiveNPCs)
+                    {
+                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                        if (npc.boss) continue;
+                        Vector2 alCentro = Projectile.Center - npc.Center;
+                        float d = alCentro.Length();
+                        if (d > RadioSucion || d < 8f) continue;
+                        npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.5f);
+                    }
                 }
 
                 // === EL DEVORAR DEL HORIZONTE DE SUCESOS (cada 12 ticks) ===
@@ -452,7 +458,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > RadioNucleo * RadioNucleo) continue;
-                        npc.SimpleStrikeNPC(dmg, 0, false, 0f, DamageClass.Magic);   // kb 0: devorado
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);   // kb 0: devorado
                     }
                 }
 
@@ -473,8 +479,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         _golpeados.Add(mejor.whoAmI);
                         if (_golpeados.Count > 8) _golpeados.Clear();
                         _mordidas.Add((mejor.Center, 10));
-                        mejor.SimpleStrikeNPC(Math.Max(1, (int)(Projectile.damage * DañoMordida)),
-                            0, false, 0f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, mejor,
+                            Math.Max(1, (int)(Projectile.damage * DañoMordida)), 0f, true);
                     }
                 }
             }
@@ -642,8 +648,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center,
                 0.55f * bloom, 0.33f * bloom, 0.11f * bloom);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > Apertura && _age < Vida - Cierre)
+            // v6.50 — la quemadura, el latido y las lenguas van por GolpeMotor
+            // (el cauce del motor: crítica real, varianza, on-hit y sync MP
+            // del propio motor).
+            if (_age > Apertura && _age < Vida - Cierre)
             {
                 // === LA QUEMADURA DEL AURA (cada 15 ticks) ===
                 if ((_age - Apertura) % CadaQuemadura == 0)
@@ -653,7 +661,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > RadioAura * RadioAura) continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
                     }
                 }
 
@@ -668,7 +676,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > RadioLatido * RadioLatido) continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
                     }
                 }
                 _prevCos = c;
@@ -698,7 +706,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (mejor == null) break;
                 _golpeados.Add(mejor.whoAmI);
                 _lenguas.Add((mejor.Center, 12));
-                mejor.SimpleStrikeNPC(dmg, mejor.direction, false, 2f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, mejor, dmg, 2f, true);
                 quedan--;
             }
             if (_golpeados.Count > 16) _golpeados.Clear();
@@ -968,9 +976,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, 0.18f, 0.18f, 0.12f);
 
             // === LA ESPINA QUEMA (cada 8 ticks — la cabeza golpea sola
-            //     por colisión del motor, como el leviatán v6.35). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaEspina == 0)
+            //     por colisión del motor, como el leviatán v6.35).
+            //     v6.50 — GolpeMotor (el cauce del motor). ===
+            if (_age > 10 && _age % CadaEspina == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoEspina));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -983,7 +991,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (Vector2.DistanceSquared(npc.Center, _segmentos[i]) > r * r)
                             continue;
 
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                         break;   // un eslabón por enemigo en este tick
                     }
                 }

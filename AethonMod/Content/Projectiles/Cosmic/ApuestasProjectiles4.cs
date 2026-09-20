@@ -281,15 +281,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // EL GOLPE DE LA NOVA (la autoridad es quien paró — el jugador local).
+            // EL GOLPE DE LA NOVA (v6.50 — GolpeMotor: el cauce del motor,
+            // resuelto en el cliente dueño — quien paró).
             if (Main.myPlayer != Projectile.owner) return;
             int dmg = Math.Max(1, Projectile.damage * 3);
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                 if (Vector2.Distance(npc.Center, Projectile.Center) > RadioNova) continue;
-                npc.SimpleStrikeNPC(dmg, npc.Center.X < Projectile.Center.X ? -1 : 1,
-                    Projectile.CritChance > 0, 9f, DamageClass.Melee);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 9f, true);
                 npc.AddBuff(BuffID.OnFire, 160);
             }
         }
@@ -387,7 +387,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                 if (Vector2.Distance(npc.Center, Projectile.Center) > RadioEmbestida) continue;
-                npc.SimpleStrikeNPC(dmg, dir, false, 9f, DamageClass.Melee);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 9f, true);
             }
         }
 

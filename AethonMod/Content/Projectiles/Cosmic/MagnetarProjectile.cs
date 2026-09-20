@@ -24,7 +24,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · PERSECUCIÓN firme (el magnetar ACECHA — no deriva).
     ///   · Vida 5 s (extrema y corta).
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class MagnetarProjectile : ModProjectile
@@ -92,31 +93,32 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 3f;
             }
 
-            // === EL AURA MAGNÉTICA (140 px, cada 10 ticks) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                Age > 20f && Age % 10f == 0f && Projectile.scale > 0.25f)
+            // === EL AURA MAGNÉTICA (140 px, cada 10 ticks) — v6.50: GolpeMotor ===
+            if (Age > 20f && Age % 10f == 0f && Projectile.scale > 0.25f)
             {
                 int auraDamage = Math.Max(1, (int)(Projectile.damage * 0.45f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 1f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: el campo magnético ELECTRIFICA
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: el campo magnético ELECTRIFICA
                 }
             }
 
             // === LAS CADENAS DE RAYO AUTOMÁTICAS (cada 20 ticks): hasta 3
-            //     enemigos en 240 px — 50% del daño + Electrified ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                Age > 20f && Age % MagnetarRenderer.ChainPeriod == 0f && Projectile.scale > 0.25f)
+            //     enemigos en 240 px — 50% del daño + Electrified (v6.50:
+            //     GolpeMotor) ===
+            if (Age > 20f && Age % MagnetarRenderer.ChainPeriod == 0f && Projectile.scale > 0.25f)
             {
                 int chainDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
                 List<NPC> targets = FindNearestEnemies(MagnetarRenderer.ChainRange, ChainTargets);
                 foreach (NPC npc in targets)
                 {
-                    npc.SimpleStrikeNPC(chainDamage, npc.direction, false, 2f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.Electrified, 150); } catch { }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, chainDamage, 2f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.Electrified, 150); } catch { }
                 }
 
                 // El TRUENO de la andanada (solo donde se oye).
@@ -209,16 +211,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // === EL DAÑO FINAL (MP-seguro): el CAMPO se suelta entero ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO FINAL: el CAMPO se suelta entero (v6.50 — GolpeMotor) ===
             {
                 int burst = Math.Max(1, (int)(Projectile.damage * 1.0f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 180f) continue;
-                    npc.SimpleStrikeNPC(burst, npc.direction, false, 3f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.Electrified, 180); } catch { }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 3f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.Electrified, 180); } catch { }
                 }
             }
 

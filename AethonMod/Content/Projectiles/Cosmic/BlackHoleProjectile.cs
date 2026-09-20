@@ -340,7 +340,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // según lo cerca que esté del horizonte: en el borde del aura ~24
             // ticks (0.4 s), pegado al centro 6 ticks (10 golpes/s). El campo
             // te MACHACA cuanto más te hundes.
-            if (Main.netMode != NetmodeID.MultiplayerClient && VisualsTime > 0f)
+            // v6.50 — el daño del aura va por GolpeMotor (el cauce del
+            // motor); el exprimido y la quemadura siguen en el servidor.
+            if (VisualsTime > 0f)
             {
                 float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
                 float auraRadius = ShieldRadius * (1.15f + 0.75f * lifeProgress);
@@ -358,15 +360,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((t + npc.whoAmI) % interval != 0) continue;
 
                     // Empuje suave hacia el centro (el campo los exprime hacia
-                    // el horizonte) + daño del aura.
-                    Vector2 toCenter = Projectile.Center - npc.Center;
-                    if (toCenter.LengthSquared() > 0.01f)
+                    // el horizonte) + quemadura: lógica de servidor.
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        toCenter.Normalize();
-                        npc.velocity += toCenter * 0.8f;
-                    }
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 0f, DamageClass.Magic);
+                        Vector2 toCenter = Projectile.Center - npc.Center;
+                        if (toCenter.LengthSquared() > 0.01f)
+                        {
+                            toCenter.Normalize();
+                            npc.velocity += toCenter * 0.8f;
+                        }
                         try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                    }
+                    // v6.50 — GolpeMotor (el cauce del motor: crítica real,
+                    // varianza, on-hit y sync MP del propio motor).
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 0f, true);
                 }
             }
 

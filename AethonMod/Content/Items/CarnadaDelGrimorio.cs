@@ -52,11 +52,11 @@ namespace AethonMod.Content.Items
 
         public override bool? UseItem(Player player)
         {
-            if (Main.myPlayer != player.whoAmI) return null;
-
             // === CLICK DERECHO: PREPARAR (ciclar 1..11 — el 11 es EL JUICIO) ===
+            // (local: el contador de prueba es un estado de esta máquina)
             if (player.altFunctionUse == 2)
             {
+                if (Main.myPlayer != player.whoAmI) return null;
                 OleadasPreparadas = OleadasPreparadas % 11 + 1;
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.Carnada.Preparadas", OleadasPreparadas),
                     new Color(198, 200, 206));
@@ -64,6 +64,11 @@ namespace AethonMod.Content.Items
             }
 
             // === CLICK IZQUIERDO: LA FURIA ===
+            // v6.50 — EL DOBLE GATE MUERTO (hallazgo auditoría MP nº5): el
+            // guard myPlayer bloqueaba al SERVER (que corre este UseItem
+            // por el uso sincronizado del jugador remoto) y el guard de
+            // netMode bloqueaba al cliente — en MP NADIE desataba la furia.
+            // El servidor es quien debe correrla (las oleadas son suyas).
             if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
 
             // las hambres reales del libro, si ya tenía (y eran más)

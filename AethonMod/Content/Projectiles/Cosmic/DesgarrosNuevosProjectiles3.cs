@@ -62,24 +62,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La luz del fuego estelar (naranja cálido).
             Lighting.AddLight(Projectile.Center, 0.50f, 0.28f, 0.06f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor).
+            // === LA QUEMADURA DEL CÍRCULO (cada 20 ticks) ===
+            if (_age > Apertura && _age < Vida - Cierre && (_age - Apertura) % Iframes == 0)
             {
-                // === LA QUEMADURA DEL CÍRCULO (cada 20 ticks) ===
-                if (_age > Apertura && _age < Vida - Cierre && (_age - Apertura) % Iframes == 0)
+                int dmg = Math.Max(1, Projectile.damage);
+                foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    int dmg = Math.Max(1, Projectile.damage);
-                    foreach (NPC npc in Main.ActiveNPCs)
-                    {
-                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                        if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > Radio * Radio) continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 3f, DamageClass.Magic);
-                    }
+                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                    if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > Radio * Radio) continue;
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
                 }
-
-                // === LAS LLAMARADAS (cada 30 ticks — los 2 más cercanos) ===
-                if (_age > Apertura + 10 && (_age - Apertura) % CadaLlamarada == 0)
-                    DispararLlamaradas();
             }
+
+            // === LAS LLAMARADAS (cada 30 ticks — los 2 más cercanos) ===
+            if (_age > Apertura + 10 && (_age - Apertura) % CadaLlamarada == 0)
+                DispararLlamaradas();
         }
 
         /// <summary>Las lenguas de fuego: los 2 EsObjetivo más cercanos en 420 px.</summary>
@@ -101,7 +100,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 _golpeados.Add(mejor.whoAmI);
                 // La llamarada pega y se recuerda 8 ticks para el visual.
                 _llamaradas.Add((mejor.Center, 8));
-                mejor.SimpleStrikeNPC(dmg, mejor.direction, false, 2f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, mejor, dmg, 2f, true);
                 quedan--;
             }
             if (_golpeados.Count > 16) _golpeados.Clear();
@@ -240,17 +239,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //     registro por tick con vida corta). ===
             GravLens.Registrar(Projectile.Center, Radio * 2.6f, 0.55f, 0.10f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age > Apertura)
+            // v6.50 — el devorar del núcleo va por GolpeMotor (el cauce del
+            // motor); la succión sigue siendo lógica de servidor.
+            if (_age > Apertura)
             {
-                // === LA SUCCIÓN FUERTE (la garganta tiene hambre) ===
-                foreach (NPC npc in Main.ActiveNPCs)
+                // === LA SUCCIÓN FUERTE (la garganta tiene hambre) — servidor ===
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                    if (npc.boss) continue;
-                    Vector2 alCentro = Projectile.Center - npc.Center;
-                    float d = alCentro.Length();
-                    if (d > RadioSucion || d < 8f) continue;
-                    npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.5f);
+                    foreach (NPC npc in Main.ActiveNPCs)
+                    {
+                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                        if (npc.boss) continue;
+                        Vector2 alCentro = Projectile.Center - npc.Center;
+                        float d = alCentro.Length();
+                        if (d > RadioSucion || d < 8f) continue;
+                        npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - d / RadioSucion + 0.5f);
+                    }
                 }
 
                 // === EL DEVORAR DEL NÚCLEO NEGRO (cada 15 ticks) ===
@@ -261,7 +265,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > RadioNucleo * RadioNucleo) continue;
-                        npc.SimpleStrikeNPC(dmg, 0, false, 0f, DamageClass.Magic);   // kb 0: devorado
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);   // kb 0: devorado
                     }
                 }
             }
@@ -370,8 +374,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float flick = 0.7f + 0.3f * MathF.Sin(Main.GlobalTimeWrappedHourly * 19f);
             Lighting.AddLight(Projectile.Center, 0.15f * flick, 0.40f * flick, 0.45f * flick);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > Apertura && _age < Vida - Cierre)
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor).
+            if (_age > Apertura && _age < Vida - Cierre)
             {
                 // === LA PICADURA EN LÍNEA (cada 12 ticks) ===
                 if ((_age - Apertura) % CadaPico == 0)
@@ -381,7 +386,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (!RiftLib.LineaToca(_ancla, Vector2.UnitX, Ancho, AnchoGolpe + 8f, npc.Hitbox)) continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                     }
                 }
 
@@ -413,7 +418,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (mejor == null) break;
                 _golpeados.Add(mejor.whoAmI);
                 _mordidas.Add((mejor.Center, 10));
-                mejor.SimpleStrikeNPC(dmg, 0, false, 0f, DamageClass.Magic);   // kb 0: la mandíbula sujetó
+                Content.Systems.GolpeMotor.Golpear(Projectile, mejor, dmg, 0f, true);   // kb 0: la mandíbula sujetó
                 quedan--;
             }
             if (_golpeados.Count > 12) _golpeados.Clear();

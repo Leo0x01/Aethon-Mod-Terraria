@@ -181,8 +181,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LAS CUENTAS QUEMAN (cada 10 ticks — una cuenta por
             //     enemigo por cadencia, como la danza). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 8 && _age % CadaCuenta == 0)
+            if (_age > 8 && _age % CadaCuenta == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoCuenta));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -192,15 +191,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _segs[i]) > 15f * 15f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                         break;
                     }
                 }
             }
 
             // === LA DETONACIÓN DEL COLAPSO: la espiral se cierra y el
-            //     anillo DETONA en el centro (×2.0 en 100 px). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && Projectile.timeLeft == 2)
+            //     anillo DETONA en el centro (×2.0 en 100 px). v6.50 —
+            //     GolpeMotor: el golpe corre en el cliente dueño; el
+            //     sonido y el trauma siguen en la autoridad. ===
+            if (Projectile.timeLeft == 2)
             {
                 Vector2 centro = Centro();
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoColapso));
@@ -209,10 +210,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                     if (Vector2.DistanceSquared(npc.Center, centro) > RadioColapso * RadioColapso)
                         continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 2f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2f, true);
                 }
-                AudioLib.Sonar(AudioLib.Familia.Vacia, "muerte", centro, 1f, -0.2f);
-                PulsoLib.Trauma(0.30f);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    AudioLib.Sonar(AudioLib.Familia.Vacia, "muerte", centro, 1f, -0.2f);
+                    PulsoLib.Trauma(0.30f);
+                }
             }
         }
 
@@ -456,8 +460,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, 0.16f, 0.22f, 0.18f);
 
             // === EL RASTRO LIMPIA EL PASILLO (cada 12 ticks). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 12 && _age % CadaRastro == 0)
+            if (_age > 12 && _age % CadaRastro == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoRastro));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -467,7 +470,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _segs[i]) > 14f * 14f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                         break;
                     }
                 }
@@ -661,8 +664,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LA CRESTA MUERDE (cada 12 ticks): crestas ×1.0, valles
             //     ×0.30 — el jugador aprende a rozar con la cresta. ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaMordida == 0)
+            if (_age > 10 && _age % CadaMordida == 0)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
@@ -675,7 +677,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             continue;
                         int dmg = Math.Max(1, (int)(Projectile.damage *
                             (cresta ? DañoCresta : DañoValle)));
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.4f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.4f, true);
                         break;
                     }
                 }
@@ -877,8 +879,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LAS RUNAS PLANTADAS PICAN (cada 12 ticks): la pata con
             //     sin(φ) < 0 está APOYADA — su pie es la runa. ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 12 && _age % CadaRuna == 0)
+            if (_age > 12 && _age % CadaRuna == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoRuna));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -890,7 +891,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Vector2 pie = PieDe(i);
                         if (Vector2.DistanceSquared(npc.Center, pie) > 14f * 14f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                         break;
                     }
                 }
@@ -1107,8 +1108,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(_pos[N - 1], luz, luz * 0.4f, luz * 0.25f);
 
             // === LA PUNTA GOLPEA ∝ SU VELOCIDAD (cada 8 ticks). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % 8 == 0)
+            if (_age > 10 && _age % 8 == 0)
             {
                 float mult = 0.5f + MathHelper.Clamp(vTip / 30f, 0f, 1f) * 1.0f;
                 int dmg = Math.Max(1, (int)(Projectile.damage * mult));
@@ -1119,7 +1119,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _pos[i]) > 15f * 15f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.8f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.8f, true);
                         break;
                     }
                 }
@@ -1131,17 +1131,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (vTip > UmbralCrack && _crackCd <= 0)
             {
                 _crackCd = 30;
-                if (Main.netMode != NetmodeID.MultiplayerClient)
+                // v6.50 — GolpeMotor: el chasquido corre en el cliente dueño
+                // (el golpe va por el cauce del motor).
+                Vector2 punta = _pos[N - 1];
+                int dmg = Math.Max(1, (int)(Projectile.damage * DañoCrack));
+                foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    Vector2 punta = _pos[N - 1];
-                    int dmg = Math.Max(1, (int)(Projectile.damage * DañoCrack));
-                    foreach (NPC npc in Main.ActiveNPCs)
-                    {
-                        if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                        if (Vector2.DistanceSquared(npc.Center, punta) > RadioCrack * RadioCrack)
-                            continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 2.4f, DamageClass.Magic);
-                    }
+                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
+                    if (Vector2.DistanceSquared(npc.Center, punta) > RadioCrack * RadioCrack)
+                        continue;
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 2.4f, true);
                 }
                 AudioLib.Sonar(AudioLib.Familia.Electrica, "impacto", _pos[N - 1], 1f, 0.10f);
                 PulsoLib.Trauma(0.35f);
@@ -1349,8 +1348,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, 0.14f, 0.10f, 0.18f);
 
             // === LAS PERLAS QUEMAN (cada 9 ticks — ×1.6 al comprimir). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaPerla == 0)
+            if (_age > 10 && _age % CadaPerla == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoPerla *
                     (1f + 0.6f * compresion)));
@@ -1362,7 +1360,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (Vector2.DistanceSquared(npc.Center, _hebraA[i]) > 12f * 12f &&
                             Vector2.DistanceSquared(npc.Center, _hebraB[i]) > 12f * 12f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.4f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.4f, true);
                         break;
                     }
                 }
@@ -1613,8 +1611,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, 0.16f, 0.12f, 0.22f);
 
             // === EL APRIETE (cada 10 ticks): ×(0.5 + 0.35·vueltas). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaApretar == 0)
+            if (_age > 10 && _age % CadaApretar == 0)
             {
                 int stacks = Math.Min((int)_vueltas, 10);
                 int dmg = Math.Max(1, (int)(Projectile.damage *
@@ -1626,7 +1623,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _segs[i]) > 17f * 17f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.4f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.4f, true);
                         break;
                     }
                 }
@@ -1825,7 +1822,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === LA MANO MUERDE (cada 9 ticks) y LA CADENA QUEMA (cada
             //     14) — solo si ESTÁ ALCANZANDO presa de verdad. ===
             bool alcanzando = Vector2.Distance(anclaViva, _objetivo) <= Alcance * 1.04f;
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age > 8)
+            if (_age > 8)
             {
                 if (_age % CadaMano == 0 && alcanzando)
                 {
@@ -1835,7 +1832,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                         if (Vector2.DistanceSquared(npc.Center, _segs[N - 1]) > 13f * 13f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.6f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.6f, true);
                     }
                 }
                 if (_age % CadaEslabon == 0)
@@ -1848,7 +1845,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         {
                             if (Vector2.DistanceSquared(npc.Center, _segs[i]) > 11f * 11f)
                                 continue;
-                            npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                            Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                             break;
                         }
                     }
@@ -2031,8 +2028,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === EL CORTE DE LA AURORA (cada 10 ticks): la cinta corta
             //     lo que toca — más duro con el viento (×0.5 → ×0.9). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaCorte == 0)
+            if (_age > 10 && _age % CadaCorte == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage *
                     (0.5f + 0.4f * MathHelper.Clamp(viento, 0f, 1f))));
@@ -2043,7 +2039,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _cuerpo[i]) > 14f * 14f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                         break;
                     }
                 }
@@ -2276,8 +2272,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LA CAZA (cada 10 ticks): cada cazador golpea CON SU
             //     PROPIA VELOCIDAD — la manada entera se vuelve arma. ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 10 && _age % CadaCaza == 0)
+            if (_age > 10 && _age % CadaCaza == 0)
             {
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
@@ -2288,15 +2283,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (Vector2.DistanceSquared(npc.Center, _caz[c]) > 13f * 13f)
                             continue;
                         int dmg = Math.Max(1, (int)(Projectile.damage * (0.55f + 0.85f * rap)));
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                         break;   // un cazador por enemigo en este tick
                     }
                 }
             }
 
             // === LAS COLAS QUEMAN (cada 12 ticks — ×0.30). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 12 && _age % CadaCola == 0)
+            if (_age > 12 && _age % CadaCola == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * 0.30f));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -2306,7 +2300,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     {
                         if (Vector2.DistanceSquared(npc.Center, _colas[idx]) > 9f * 9f)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.0f, DamageClass.Magic);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.0f, true);
                         break;
                     }
                 }
@@ -2535,8 +2529,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LA ESPINITA QUEMA (cada 12 ticks — ×0.4, la firma de la
             //     casa: la cabeza muerde por contacto de minion). ===
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > 8 && _age % CadaEspina == 0)
+            if (_age > 8 && _age % CadaEspina == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoEspina));
                 foreach (NPC npc in Main.ActiveNPCs)
@@ -2547,7 +2540,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         float r = MathHelper.Lerp(12f, 5f, i / (float)(N - 1)) + 6f;
                         if (Vector2.DistanceSquared(npc.Center, _segs[i]) > r * r)
                             continue;
-                        npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Summon);
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                         break;
                     }
                 }

@@ -32,9 +32,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// con más fuerza. El renderer añade afterimages fantasma en los
     /// enemigos tocados (visual solo cliente).
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC bajo `Main.netMode != NetmodeID.
-    /// MultiplayerClient`. Determinismo: semilla por identity; TODO el
-    /// estado de la arena se DERIVA de la edad (cero estado extra).
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor). Determinismo:
+    /// semilla por identity; TODO el estado de la arena se DERIVA de la
+    /// edad (cero estado extra).
     /// </summary>
     public class RelojArenaProjectile : ModProjectile
     {
@@ -153,8 +154,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.rotation = vueltas * MathHelper.Pi;
             }
 
-            // === EL PESO DE LA ARENA (daño MP-seguro) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL PESO DE LA ARENA (v6.50 — GolpeMotor: el cauce del
+            //     motor) ===
             {
                 bool cayendo = ciclo < CaidaTicks;
                 if (cayendo && _age - LastTickDamage >= 10f)
@@ -169,8 +170,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //  VACIÓ y el reloj se da la vuelta — la onda del tiempo.)
             if (ciclo >= CaidaTicks && ciclo < CaidaTicks + 1.5f && _age > GiroTicks)
             {
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                    PesarEnemigos(0.45f, 5.5f);
+                // v6.50 — GolpeMotor (el cauce del motor).
+                PesarEnemigos(0.45f, 5.5f);
 
                 if (Main.netMode != NetmodeID.Server)
                 {
@@ -195,8 +196,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Lighting.AddLight(Projectile.Center, 0.55f, 0.42f, 0.16f);
         }
 
-        /// <summary>EL PESO: daña a los enemigos en 160 px y los EMPUJA
-        /// hacia abajo — la gravedad aumentada del reloj (MP-seguro).</summary>
+        /// <summary>EL PESO: daña a los enemigos en 160 px (v6.50 — GolpeMotor:
+        /// el cauce del motor) y los EMPUJA hacia abajo — la gravedad
+        /// aumentada del reloj.</summary>
         private void PesarEnemigos(float mult, float hundimiento)
         {
             int dmg = Math.Max(1, (int)(BaseDamage * mult));
@@ -205,12 +207,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > 160f) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 1f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1f, true);
 
                 // EL PESO REAL: la velocidad del enemigo se hunde — gravedad
                 // aumentada local (esto no necesita red: la gravedad vanilla
                 // re-sincroniza el estado; el empujón es cosmético-físico).
-                if (npc.noGravity == false)
+                // v6.50: el empujón sigue en server/SP (autoridad del NPC).
+                if (Main.netMode != NetmodeID.MultiplayerClient && npc.noGravity == false)
                     npc.velocity.Y += hundimiento;
             }
         }

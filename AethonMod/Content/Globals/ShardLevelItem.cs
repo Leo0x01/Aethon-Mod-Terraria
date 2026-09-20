@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -112,11 +113,17 @@ namespace AethonMod.Content.Globals
         /// v6.46: respeta las banderas de la config
         /// (ShowLevelUpNotifications / ShowMilestoneNotifications) — antes
         /// eran promesas muertas: existían y nadie las leía.
+        /// v6.50: los FX viven SOLO donde hay pantalla (en MP el server
+        /// sube SU copia y EcoRed.MsgLibro trae el delta al portador,
+        /// que celebra en SU cliente — Main.LocalPlayer ya no se usa en
+        /// contexto de servidor).
         /// </summary>
         private void OnLevelUp(Item item, int nivelesGanados, bool cruzoHito, int nivelHito)
         {
             try
             {
+                if (Main.netMode == NetmodeID.Server) return; // sin pantalla
+
                 var config = ModContent.GetInstance<Content.AethonConfig>();
                 bool notificar = config == null || config.ShowLevelUpNotifications;
                 bool notificarHitos = config == null || config.ShowMilestoneNotifications;
@@ -159,6 +166,27 @@ namespace AethonMod.Content.Globals
         }
 
         // === Persistencia ===
+
+        /// <summary>
+        /// v6.50 — LA CELEBRACIÓN DEL DELTA: cuando EcoRed.MsgLibro trae el
+        /// nivel nuevo del servidor, el cliente aplica la copia local y
+        /// celebra SOLO lo subido (mismo mensaje condensado, mismo sonido,
+        /// mismas partículas doradas de la subida local — una sola fiesta
+        /// aunque el server y el cliente cuenten por separado).
+        /// </summary>
+        public void CelebrarSubida(Item item, int nivelesGanados)
+        {
+            try
+            {
+                if (nivelesGanados <= 0) return;
+                bool cruzoHito = false;
+                int nivelHito = 0;
+                for (int l = Level - nivelesGanados + 1; l <= Level; l++)
+                    if (l % 50 == 0) { cruzoHito = true; nivelHito = l; }
+                OnLevelUp(item, nivelesGanados, cruzoHito, nivelHito);
+            }
+            catch { }
+        }
 
         /// <summary>
         /// v6.48 — LA ESENCIA DEL GUARDIÁN: sube UN nivel COMPLETO al libro

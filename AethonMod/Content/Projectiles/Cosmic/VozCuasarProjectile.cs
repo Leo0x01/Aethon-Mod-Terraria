@@ -91,7 +91,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Projectile.width = 22;
             Projectile.height = 22;
-            // Daño 100% manual (escuela A): sin contacto de vanilla.
+            // Daño 100% sub-ataques — v6.50 — GolpeMotor (el cauce del
+            // motor): sin contacto de vanilla.
             Projectile.friendly = false;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
@@ -212,12 +213,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// EL HAZ QUE PERFORA TODO (×0.35, i-frames 6 por objetivo): prueba
-        /// el segmento principal y el rebote. Escuela A.
+        /// el segmento principal y el rebote. v6.50 — GolpeMotor (el cauce
+        /// del motor: crítica real, varianza, on-hit y sync MP del propio
+        /// motor, resuelto en el cliente dueño; el debuff sigue autoridad).
         /// </summary>
         private void GolpearHaz()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             int dmg = Math.Max(1, (int)(Projectile.damage * DañoHaz));
 
             foreach (NPC npc in Main.ActiveNPCs)
@@ -233,8 +234,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 1f, DamageClass.Magic);
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
             }
         }
 

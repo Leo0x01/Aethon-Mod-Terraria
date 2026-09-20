@@ -77,7 +77,12 @@ namespace AethonMod.Content.Items.Llamados
 
         public override bool? UseItem(Player player)
         {
-            if (Main.myPlayer != player.whoAmI) return null;
+            // v6.50 — EL DOBLE GATE MUERTO (hallazgo auditoría MP nº5): el
+            // guard myPlayer bloqueaba al SERVER (que corre este UseItem por
+            // el uso SINCRONIZADO del jugador remoto — "Called on local,
+            // server, and remote clients", doc oficial) y el guard de
+            // netMode bloqueaba al cliente — en MP NADIE convocaba al jefe.
+            // El servidor convoca y netUpdate lo difunde a todos.
             if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
 
             // Nace a la vista, frente al portador y en alto.

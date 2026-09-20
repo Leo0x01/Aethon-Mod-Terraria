@@ -25,7 +25,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · Pulso de luz SINCRONIZADO: la luz del mundo late con el giro.
     ///   · Vida 6 s.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC con Main.netMode != MultiplayerClient.
+    /// Daño por v6.50 — GolpeMotor (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor).
     /// Visual solo cliente (Main.netMode == Server → return).
     /// </summary>
     public class PulsarProjectile : ModProjectile
@@ -119,8 +120,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // === EL BARRIDO QUE GOLPEA: cada enemigo TOCADO por los haces
-            //     recibe daño ×1.5 con cooldown de 30 ticks POR NPC ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && Age > 24f)
+            //     recibe daño ×1.5 con cooldown de 30 ticks POR NPC (v6.50:
+            //     GolpeMotor — el cauce del motor) ===
+            if (Age > 24f)
             {
                 int beamDamage = Math.Max(1, (int)(Projectile.damage * 1.5f));
                 int now = (int)Age;
@@ -141,8 +143,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             now - lastHit < BeamCooldown) continue;
                         _beamHits[npc.whoAmI] = now;
 
-                        npc.SimpleStrikeNPC(beamDamage, npc.direction, false, 2.5f, DamageClass.Magic);
-                        try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                        Content.Systems.GolpeMotor.Golpear(Projectile, npc, beamDamage, 2.5f, true);
+                        // La electrificación del haz: server/SP.
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
                     }
                 }
             }
@@ -231,16 +235,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnKill(int timeLeft)
         {
-            // === EL DAÑO FINAL (MP-seguro): el faro se apaga de golpe ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // === EL DAÑO FINAL: el faro se apaga de golpe (v6.50 — GolpeMotor) ===
             {
                 int burst = Math.Max(1, (int)(Projectile.damage * 0.9f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 160f) continue;
-                    npc.SimpleStrikeNPC(burst, npc.direction, false, 2f, DamageClass.Magic);
-                    try { npc.AddBuff(BuffID.Electrified, 120); } catch { }   // v6.30: el pulso final ELECTRIFICA
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 2f, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.Electrified, 120); } catch { }   // v6.30: el pulso final ELECTRIFICA
                 }
             }
 

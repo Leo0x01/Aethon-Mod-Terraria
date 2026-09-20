@@ -33,8 +33,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// Determinismo MP: el punto objetivo y la fase magnética viajan en
     /// ai[] (paquete de spawn); la semilla visual es Projectile.identity;
-    /// el daño solo en `Main.netMode != MultiplayerClient` con
-    /// SimpleStrikeNPC (escuela A); el visual solo cliente (PreDraw).
+    /// el daño por GolpeMotor — v6.50 (el cauce del motor: crítica real,
+    /// varianza, on-hit y sync MP del propio motor, resuelto en el
+    /// cliente dueño); el visual solo cliente (PreDraw).
     /// </summary>
     public class SembradorPulsarProjectile : ModProjectile
     {
@@ -92,7 +93,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             Projectile.width = 18;
             Projectile.height = 18;
-            // Daño 100% manual (escuela A): sin contacto de vanilla.
+            // Daño 100% sub-ataques por GolpeMotor (v6.50 — el cauce del
+            // motor): sin contacto de vanilla.
             Projectile.friendly = false;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
@@ -213,12 +215,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         /// <summary>
         /// EL GOLPE DE ANCLAJE (×1.0): todo NPC en radio 110 del punto de
-        /// aterrizaje recibe el daño pleno. Escuela A: solo server/singleplayer.
+        /// aterrizaje recibe el daño pleno. v6.50 — GolpeMotor (el cauce
+        /// del motor: crítica real, varianza, on-hit y sync MP del propio
+        /// motor); el debuff sigue siendo autoridad.
         /// </summary>
         private void GolpearAnclaje()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             int dmg = Math.Max(1, Projectile.damage);
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -227,9 +229,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float alcance = RadioAnclaje + Math.Max(npc.width, npc.height) * 0.5f;
                 if (Vector2.Distance(npc.Center, _target) > alcance) continue;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 6f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 6f, true);
                 // La estrella muerta quema hacia dentro (20 s — el debuff de la casa).
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 1200); } catch { }
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 1200); } catch { }
                 // Los haces respetan SUS i-frames también tras el anclaje.
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
             }
@@ -238,12 +241,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// LOS HAZES-FARO (×0.25 por impacto): las DOS líneas-polares opuestas
         /// (500 px × radio 17) barriendo por el eje magnético. i-frames
-        /// PROPIOS de 10 ticks por objetivo. Escuela A: solo server/singleplayer.
+        /// PROPIOS de 10 ticks por objetivo. v6.50 — GolpeMotor (el cauce
+        /// del motor: crítica real, varianza, on-hit y sync MP del propio
+        /// motor); el debuff sigue siendo autoridad.
         /// </summary>
         private void GolpearHaces()
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             Vector2 eje = Eje();
             int dmg = Math.Max(1, (int)(Projectile.damage * DañoHaz));
 
@@ -260,9 +263,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                 // El plasma del haz reaviva la quemadura.
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
             }
         }
 

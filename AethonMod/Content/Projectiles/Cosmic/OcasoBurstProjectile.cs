@@ -126,9 +126,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
-            // === LA CADENA VIOLETA: 2 vecinos comen la descarga ===
+            // === LA CADENA VIOLETA: 2 vecinos comen la descarga (v6.50 —
+            //     GolpeMotor: el cauce del motor) ===
             int cadenas = 0;
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -138,10 +137,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float dist = (npc.Center - target.Center).Length();
                 if (dist > 220f) continue;
 
-                npc.SimpleStrikeNPC(
-                    (int)(Projectile.damage * 0.5f), npc.direction, false,
-                    2.5f, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: la cadena ELECTRIFICA
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc,
+                    (int)(Projectile.damage * 0.5f), 2.5f, true);
+                // La electrificación de la cadena: server/SP (autoridad del debuff).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: la cadena ELECTRIFICA
                 cadenas++;
             }
 

@@ -149,11 +149,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 _destellos.Add(npc.Center);
 
+                // v6.50 — GolpeMotor (el cauce del motor: crítica real,
+                // varianza, on-hit y sync MP del propio motor).
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Math.Max(1, Projectile.damage), 5f, true);
+                // La quemadura del rayo: server/SP (autoridad del debuff).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    npc.SimpleStrikeNPC(Math.Max(1, Projectile.damage), npc.direction, false, 5f, DamageClass.Magic);
                     try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }
-                }
             }
             _marcas.Clear();
 

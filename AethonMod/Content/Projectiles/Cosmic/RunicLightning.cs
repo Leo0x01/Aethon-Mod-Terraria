@@ -104,8 +104,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (!_hasStruck && _age >= TelegraphTicks)
             {
                 _hasStruck = true;
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                    Strike();
+                Strike();
 
                 if (Main.netMode != NetmodeID.Server)
                 {
@@ -168,7 +167,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
         }
 
-        /// <summary>EL GOLPE: columna cielo→suelo + estallido + cadena.</summary>
+        /// <summary>EL GOLPE: columna cielo→suelo + estallido + cadena.
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor — resuelto en el cliente
+        /// dueño; el debuff sigue siendo autoridad).</summary>
         private void Strike()
         {
             var hit = new List<NPC>();
@@ -182,9 +184,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 c2 = npc.Size + new Vector2(Margin * 2f, Margin * 2f);
                 if (!Collision.CheckAABBvLineCollision(c1, c2, _sky, _strike)) continue;
 
-                npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
-                    2.5f, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
                 hit.Add(npc);
             }
 
@@ -195,9 +197,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (!VFXCore.EsObjetivo(npc) || hit.Contains(npc)) continue;
                 if ((npc.Center - _strike).Length() > BurstR) continue;
 
-                npc.SimpleStrikeNPC(Projectile.damage, npc.direction, false,
-                    3f, DamageClass.Magic);
-                try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 3f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
                 hit.Add(npc);
             }
 
@@ -230,8 +232,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 _chainAlive[c] = true;
                 origin = best.Center;             // la cadena sigue desde el último.
 
-                best.SimpleStrikeNPC(chainDamage, best.direction, false, 1.5f, DamageClass.Magic);
-                try { best.AddBuff(BuffID.Electrified, 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, best, chainDamage, 1.5f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { best.AddBuff(BuffID.Electrified, 240); } catch { }
             }
         }
 

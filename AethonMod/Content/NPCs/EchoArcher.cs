@@ -116,9 +116,26 @@ namespace AethonMod.Content.NPCs
                 deseada = (-hacia * 3.2f + lateral * 2.6f) * (furia ? 1.25f : 1f);
             }
             else if (dist > 520f)
-                deseada = hacia * 4f + lateral * 1.5f;
+            {
+                // v6.50 — LA CURVA DEL ARCO (EcosLib.CurvaAproximacion):
+                // acercarse desde lejos ya no es línea recta — la
+                // aproximación se anticipa con tangente y llega al anillo
+                // de disparo (380) respirando con el vaivén inconmensurable.
+                deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    380f, furia ? 5.2f : 4.2f, Main.GlobalTimeWrappedHourly,
+                    NPC.whoAmI * 13);
+            }
             else
-                deseada = lateral * (furia ? 3.4f : 2.6f);
+            {
+                // v6.50 — EL ANILLO CON VAIVÉN: la media distancia mantiene
+                // la bandera lateral (su esquivón de identidad) pero la
+                // curva le pone el vaivén y la corrección de radio — ya no
+                // desliza en línea perfecta: ondula.
+                deseada = lateral * (furia ? 3.4f : 2.6f) +
+                    EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                        380f, 1.1f, Main.GlobalTimeWrappedHourly,
+                        NPC.whoAmI * 13);
+            }
             NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.08f);
 
             // === LAS FLECHAS ESTELARES (60 t; 38 en furia) ===

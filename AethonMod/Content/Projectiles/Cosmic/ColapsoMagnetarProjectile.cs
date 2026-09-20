@@ -39,8 +39,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// Determinismo MP: objetivo y fase magnética viajan en ai[]; la
     /// cronología entera deriva de la edad (misma en todas las
     /// máquinas); la semilla visual es Projectile.identity; el daño
-    /// solo en `Main.netMode != MultiplayerClient` con SimpleStrikeNPC
-    /// (escuela A); el visual solo cliente (PreDraw) y SIN Main.rand
+    /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+    /// on-hit y sync MP del propio motor); el visual solo cliente (PreDraw) y SIN Main.rand
     /// (Hash01 + identity).
     /// </summary>
     public class ColapsoMagnetarProjectile : ModProjectile
@@ -349,15 +349,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         // ==============================================================
-        //  EL DAÑO (escuela A — solo server/singleplayer)
+        //  EL DAÑO (v6.50 — GolpeMotor: el cauce del motor)
         // ==============================================================
 
         /// <summary>LOS DOS HACES CORTOS: líneas-polares opuestas (largo ×mult)
-        /// barriendo por el eje magnético. i-frames propios de 10 ticks.</summary>
+        /// barriendo por el eje magnético. i-frames propios de 10 ticks.
+        /// v6.50 — GolpeMotor (el cauce del motor); la quemadura es de servidor.</summary>
         private void GolpearHaces(float largoMult, float _, float dmgMult)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             Vector2 eje = new(MathF.Cos(_spinPhase + _magPhase), MathF.Sin(_spinPhase + _magPhase));
             int dmg = Math.Max(1, (int)(Projectile.damage * dmgMult));
             float largo = HazLargo * largoMult;
@@ -374,9 +373,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
 
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
-                // El plasma del haz reaviva la quemadura.
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
+                // El plasma del haz reaviva la quemadura (servidor).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
             }
         }
 
@@ -384,13 +384,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// EL FRENTE DEL STARQUAKE: solo golpea la CORONA que el anillo acaba
         /// de barrer este tick (de reachPrev a reach, ±20 px de margen) — el
         /// vacío central ya juzgado NO recibe un segundo golpe. Daño
-        /// base·(1.4+1.1·poder) → 308..550: SimpleStrikeNPC no lleva
-        /// armorpen, así que el número ES la sentencia.
+        /// base·(1.4+1.1·poder) → 308..550. v6.50 — GolpeMotor (el cauce
+        /// del motor: crítica real, varianza, on-hit y sync MP del propio
+        /// motor); la quemadura es de servidor.
         /// </summary>
         private void GolpearFrente(float reachPrev, float reach)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
             float poder = Poder;
             int dmg = Math.Max(1, (int)(Projectile.damage * (1.4f + 1.1f * poder)));
 
@@ -409,11 +408,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     continue;
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
 
-                // El knockback del original: empuja HACIA FUERA del frente.
-                int dir = npc.Center.X < Projectile.Center.X ? -1 : 1;
-                npc.SimpleStrikeNPC(dmg, dir, false, Projectile.knockBack * 2f, DamageClass.Magic);
-                // La reconexión magnética chamusca durante 20 s.
-                try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                // El knockback del original: empuja HACIA FUERA del frente
+                // (la dirección la computa el cauce del motor).
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, Projectile.knockBack * 2f, true);
+                // La reconexión magnética chamusca durante 20 s (servidor).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
             }
         }
 

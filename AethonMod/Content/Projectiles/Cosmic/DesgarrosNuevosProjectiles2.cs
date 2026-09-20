@@ -77,11 +77,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float d = Vector2.DistanceSquared(npc.Center, Projectile.Center);
                 if (d < mejorD) { mejorD = d; cercano = npc; }
 
-                if (Main.netMode == NetmodeID.MultiplayerClient) continue;
                 if (_age <= Apertura) continue;
 
-                // === LA CURVATURA: arrastra a EsObjetivo hacia el cuello ===
-                if (!npc.boss)
+                // === LA CURVATURA: arrastra a EsObjetivo hacia el cuello
+                //     (lógica de servidor) ===
+                if (Main.netMode != NetmodeID.MultiplayerClient && !npc.boss)
                 {
                     Vector2 alCentro = Projectile.Center - npc.Center;
                     float dist = alCentro.Length();
@@ -89,12 +89,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         npc.velocity += Vector2.Normalize(alCentro) * Traccion * (1f - dist / RadioCurvatura + 0.5f);
                 }
 
-                // === LA COMPRESIÓN DEL NÚCLEO NEGRO (cada 20 ticks) ===
+                // === LA COMPRESIÓN DEL NÚCLEO NEGRO (cada 20 ticks) —
+                //     v6.50 — GolpeMotor (el cauce del motor) ===
                 if ((_age - Apertura) % CadaCompresion == 0 &&
                     Vector2.DistanceSquared(npc.Center, Projectile.Center) < RadioNucleo * RadioNucleo)
                 {
                     int dmg = Math.Max(1, (int)(Projectile.damage * DañoCompresion));
-                    npc.SimpleStrikeNPC(dmg, 0, false, 0f, DamageClass.Magic);   // knockback 0: comprimido
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);   // knockback 0: comprimido
                 }
             }
 
@@ -209,8 +210,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float strobe = 0.7f + 0.3f * MathF.Sin(Main.GlobalTimeWrappedHourly * 22f);
             Lighting.AddLight(Projectile.Center, 0.20f * strobe, 0.45f * strobe, 0.65f * strobe);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                _age > Apertura && _age < Vida - Cierre &&
+            // v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+            // on-hit y sync MP del propio motor); el electrificado es de servidor.
+            if (_age > Apertura && _age < Vida - Cierre &&
                 (_age - Apertura) % CadaPicotazo == 0)
             {
                 int dmg = Math.Max(1, (int)(Projectile.damage * DañoPico));
@@ -218,9 +220,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
                     if (!RiftLib.LineaToca(_origin, _dir, Largo, AnchoMax + 8f, npc.Hitbox)) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.2f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                     // ELECTRIFICADO: el debuff vanilla que castiga el movimiento.
-                    try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
                 }
             }
         }

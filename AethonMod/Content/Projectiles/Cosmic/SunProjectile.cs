@@ -289,8 +289,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // ticks (+50% de golpes/s) y el área crece: 1.75→2.30× el radio
             // visual (la gigante roja ×1.85 la ARRASTRA: ~150→310 px), daño
             // del aura 45%.
-            if (Main.netMode != NetmodeID.MultiplayerClient &&
-                VisualsTime > 30f && VisualsTime % 10f == 0f && Projectile.scale > 0.25f)
+            // === v6.00 — AURA MÁS GRANDE + MÁS TICKS DE DAÑO — v6.50 —
+            //     GolpeMotor: el golpe va por el cauce del motor (resuelto
+            //     en el cliente dueño); la quemadura sigue autoridad. ===
+            if (VisualsTime > 30f && VisualsTime % 10f == 0f && Projectile.scale > 0.25f)
             {
                 float lifeT = MathHelper.Clamp(VisualsTime / SunLifetime, 0f, 1f);
                 float auraRadius = GetStarVisualRadius(Projectile) * (1.75f + 0.55f * lifeT);
@@ -300,9 +302,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     float dist = (npc.Center - Projectile.Center).Length();
                     if (dist > auraRadius) continue;
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 2f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 2f, true);
                     // El plasma ardiente inflama: quemadura que DOBLA en gigante.
-                    npc.AddBuff(BuffID.OnFire, RedGiantProgress > 0f ? 600 : 300);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        npc.AddBuff(BuffID.OnFire, RedGiantProgress > 0f ? 600 : 300);
                 }
             }
 
@@ -1127,21 +1130,24 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //  dobles. La SupernovaStaff standalone conserva su explosión completa.
             TryKillSupernova();
 
+            // v6.50 — GolpeMotor: el AoE del núcleo va por el cauce del
+            // motor (resuelto en el cliente dueño); la onda nova y la
+            // quemadura siguen siendo autoridad.
+            int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
+            // v5.97 — UNA SOLA EXPLOSIÓN DONDE SUCEDE TODO (petición del
+            // usuario: "el sol y el agujero negro tienen dos, digamos
+            // explosiones al terminar, solo deben tener una"): la muerte
+            // del sol ya no suelta 3 ondas de fuego + 1 onda de lente —
+            // suelta UNA SOLA ONDA NOVA DE LENTE (StyleNova): el frente de
+            // espaciotiempo QUE LLEVA EL FUEGO — triple anillo ardiente +
+            // frente blanco de choque + aberración CÁLIDA (oro/brasa, no
+            // RGB) — con el DAÑO DE LA NOVA COMPLETO (antes ×0.5 repartido
+            // entre 4 ondas) + quemadura 10 s en la banda, y registrada
+            // como fuente del BlackHoleLensSystem → el fondo se curva a su
+            // paso. Radio 380: el de la antigua onda mayor (360) + margen
+            // de lente.
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.25f));
-                // v5.97 — UNA SOLA EXPLOSIÓN DONDE SUCEDE TODO (petición del
-                // usuario: "el sol y el agujero negro tienen dos, digamos
-                // explosiones al terminar, solo deben tener una"): la muerte
-                // del sol ya no suelta 3 ondas de fuego + 1 onda de lente —
-                // suelta UNA SOLA ONDA NOVA DE LENTE (StyleNova): el frente de
-                // espaciotiempo QUE LLEVA EL FUEGO — triple anillo ardiente +
-                // frente blanco de choque + aberración CÁLIDA (oro/brasa, no
-                // RGB) — con el DAÑO DE LA NOVA COMPLETO (antes ×0.5 repartido
-                // entre 4 ondas) + quemadura 10 s en la banda, y registrada
-                // como fuente del BlackHoleLensSystem → el fondo se curva a su
-                // paso. Radio 380: el de la antigua onda mayor (360) + margen
-                // de lente.
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
                     Projectile.Center.X, Projectile.Center.Y, 0f, 0f,
@@ -1150,20 +1156,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0f,                                          // edad: sin retardo — TODO sucede YA
                     CosmicShockwaveProjectile.StyleNova,
                     380f);                                       // radio máximo
+            }
 
-                // Daño AoE del núcleo de la nova (el epicentro de la MISMA
-                // explosión — la onda única barre desde el centro, el núcleo
-                // golpea el punto ciego inicial). v5.94: 340 → 260.
-                foreach (NPC npc in Main.ActiveNPCs)
+            // Daño AoE del núcleo de la nova (el epicentro de la MISMA
+            // explosión — la onda única barre desde el centro, el núcleo
+            // golpea el punto ciego inicial). v5.94: 340 → 260.
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float dist = (npc.Center - Projectile.Center).Length();
+                if (dist < 260f)
                 {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    float dist = (npc.Center - Projectile.Center).Length();
-                    if (dist < 260f)
-                    {
-                        npc.SimpleStrikeNPC(novaDamage, npc.direction,
-                            false, Projectile.knockBack, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDamage,
+                        Projectile.knockBack, true);
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                         npc.AddBuff(BuffID.OnFire, 600); // quemadura 10 s
-                    }
                 }
             }
 

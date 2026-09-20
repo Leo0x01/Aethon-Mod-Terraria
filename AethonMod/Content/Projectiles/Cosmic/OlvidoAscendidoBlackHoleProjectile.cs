@@ -186,7 +186,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === AURA DE DAÑO: TICKS QUE ACELERAN CERCA DEL CENTRO ===
             // ASCENDIDO: ticks un 15% MÁS RÁPIDOS que el Olvido base
             // (intervalos ×0.87 → 5..20 en lugar de 6..24).
-            if (Main.netMode != NetmodeID.MultiplayerClient && VisualsTime > 0f)
+            // v6.50 — el golpe va por GolpeMotor (el cauce del motor); la
+            // succión y la quemadura siguen en server/SP.
+            if (VisualsTime > 0f)
             {
                 float lifeProgress = MathHelper.Clamp(1f - Projectile.timeLeft / 600f, 0f, 1f);
                 float auraRadius = ShieldRadius * (1.15f + 0.75f * lifeProgress);
@@ -202,14 +204,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     int interval = Math.Max(4, (int)((6 + prox * 18f) * 0.87f)); // 15% más rápido
                     if ((t + npc.whoAmI) % interval != 0) continue;
 
-                    Vector2 toCenter = Projectile.Center - npc.Center;
-                    if (toCenter.LengthSquared() > 0.01f)
+                    // LA SUCCIÓN del horizonte + la quemadura: server/SP.
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        toCenter.Normalize();
-                        npc.velocity += toCenter * 0.8f;
-                    }
-                    npc.SimpleStrikeNPC(auraDamage, npc.direction, false, 0f, DamageClass.Magic);
+                        Vector2 toCenter = Projectile.Center - npc.Center;
+                        if (toCenter.LengthSquared() > 0.01f)
+                        {
+                            toCenter.Normalize();
+                            npc.velocity += toCenter * 0.8f;
+                        }
                         try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 360); } catch { }
+                    }
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 0f, true);
                 }
             }
 

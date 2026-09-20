@@ -29,8 +29,11 @@ namespace AethonMod.Content.Systems
         /// Procesa un paquete recibido.
         /// v6.49 — EcoRed (voces/hambre/latido al portador) se enruta a su
         /// propio receptor: la doble puerta vive allá.
+        /// v6.50 — los LIBROS y la CRÓNICA caminan por el mismo cauce (y el
+        /// PEDIDO de entrada llega del CLIENTE: el whoAmI del remitente
+        /// decide a quién contesta el servidor).
         /// </summary>
-        public static void HandlePacket(BinaryReader reader)
+        public static void HandlePacket(BinaryReader reader, int whoAmI = -1)
         {
             try
             {
@@ -44,10 +47,13 @@ namespace AethonMod.Content.Systems
                     case EcoRed.MsgVoz:
                     case EcoRed.MsgHambre:
                     case EcoRed.MsgLatidoXp:
+                    case EcoRed.MsgLibro:
+                    case EcoRed.MsgCronica:
+                    case EcoRed.MsgPedirLibros:
                         // rewind 1 byte: EcoRed lee el TIPO de nuevo (su
                         // propio switch lo necesita para el filtro).
                         reader.BaseStream.Position -= 1L;
-                        EcoRed.Recibir(reader);
+                        EcoRed.Recibir(reader, whoAmI);
                         break;
                 }
             }

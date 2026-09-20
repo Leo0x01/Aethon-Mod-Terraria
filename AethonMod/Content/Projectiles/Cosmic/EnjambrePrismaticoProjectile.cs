@@ -29,9 +29,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     ///   EL PICOTEO: cada avispa tiene su COOLDOWN individual (45 ticks);
     ///   al tocar al objetivo (26 px) pica: destello + daño. En MP el
-    ///   daño del enjambre lo aplica la AUTORIDAD alrededor del CENTROIDE
-    ///   (que sigue al objetivo — el proyectil NO sincroniza las avispas:
-    ///   el visual es cliente, el daño es SimpleStrikeNPC MP-seguro).
+    ///   daño del enjambre lo aplica el MOTOR en el CLIENTE DUEÑO
+    ///   alrededor del CENTROIDE (que sigue al objetivo — el proyectil NO
+    ///   sincroniza las avispas: el visual es cliente, el daño es
+    ///   v6.50 — GolpeMotor: el cauce del motor, crítica real, varianza,
+    ///   on-hit y sync MP del propio motor).
     ///
     ///   LA MIGRACIÓN: cuando el objetivo muere, el enjambre elige al
     ///   siguiente enemigo más cercano (la nube entera se traslada).
@@ -224,16 +226,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             _ = vivas;
 
-            // === EL DAÑO DE AUTORIDAD (MP-seguro: el enjambre pica EN SERIO
-            //     alrededor del centroide que persigue a la presa) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient && _age % 9f == 0f && presa != null)
+            // === EL DAÑO DEL ENJAMBRE (v6.50 — GolpeMotor: el cauce del
+            //     motor; el enjambre pica EN SERIO alrededor del
+            //     centroide que persigue a la presa) ===
+            if (_age % 9f == 0f && presa != null)
             {
                 int dmg = Math.Max(1, (int)(BaseDamage * 0.26f));
                 foreach (NPC npc in Main.ActiveNPCs)
                 {
                     if (!VFXCore.EsObjetivo(npc)) continue;
                     if ((npc.Center - Projectile.Center).Length() > 170f) continue;
-                    npc.SimpleStrikeNPC(dmg, npc.direction, false, 1.5f, DamageClass.Magic);
+                    Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                 }
             }
 

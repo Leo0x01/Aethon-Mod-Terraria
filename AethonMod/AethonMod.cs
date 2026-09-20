@@ -29,7 +29,7 @@ namespace AethonMod
 
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
-            ShardSyncSystem.HandlePacket(reader);
+            ShardSyncSystem.HandlePacket(reader, whoAmI);
         }
     }
 }

@@ -48,8 +48,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// renderer) cuenta la historia del camino: violeta → dorado → rojo →
     /// blanco → azul.
     ///
-    /// Daño MP-seguro: SimpleStrikeNPC bajo `Main.netMode != NetmodeID.
-    /// MultiplayerClient`; visual solo cliente (`Main.netMode == Server`
+    /// Daño MP-seguro: v6.50 — GolpeMotor (el cauce del motor: crítica
+    /// real, varianza, on-hit y sync MP del propio motor); visual solo
+    /// cliente (`Main.netMode == Server`
     /// → return). Determinismo: semilla por identity.
     /// </summary>
     public class CicloEstelarProjectile : ModProjectile
@@ -211,19 +212,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             // ============================================================
-            //  EL AURA DE DAÑO (por acto — TODO MP-seguro)
+            //  EL AURA DE DAÑO (por acto) — v6.50: el daño va por GolpeMotor
+            //  (el cauce del motor); la quemadura sigue en el servidor.
             // ============================================================
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
-                if (act == 1 && _age > 30f && _age % 20f == 0f)
-                    Aura(0.25f, 100f, 0, 1.5f);            // el FRÍO leve de la nube
-                else if (act == 2 && _age > 10f && _age % 10f == 0f)
-                    Aura(0.45f, 140f, 300, 2f);            // el ARDOR de la secuencia
-                else if (act == 3 && _age % 10f == 0f)
-                    Aura(0.35f, 200f, 200, 3.5f);          // el horno + knockback suave
-                else if (act == 5 && _age % 10f == 0f)
-                    Aura(0.675f, 70f, 0, 2f);              // la enana: ×1.5 del 45%
-            }
+            if (act == 1 && _age > 30f && _age % 20f == 0f)
+                Aura(0.25f, 100f, 0, 1.5f);            // el FRÍO leve de la nube
+            else if (act == 2 && _age > 10f && _age % 10f == 0f)
+                Aura(0.45f, 140f, 300, 2f);            // el ARDOR de la secuencia
+            else if (act == 3 && _age % 10f == 0f)
+                Aura(0.35f, 200f, 200, 3.5f);          // el horno + knockback suave
+            else if (act == 5 && _age % 10f == 0f)
+                Aura(0.675f, 70f, 0, 2f);              // la enana: ×1.5 del 45%
 
             // ============================================================
             //  LAS TRANSICIONES DEL GUION (una sola vez cada una)
@@ -326,7 +325,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ==================================================================
 
         /// <summary>Golpea a los enemigos en `radio` px con `mult`× el daño
-        /// base del arma (+OnFire opcional y knockback propio del acto).</summary>
+        /// base del arma (+OnFire opcional y knockback propio del acto).
+        /// v6.50 — GolpeMotor (el cauce del motor: crítica real, varianza,
+        /// on-hit y sync MP del propio motor); la quemadura es de servidor.</summary>
         private void Aura(float mult, float radio, int fuegoTicks, float knockback)
         {
             int dmg = Math.Max(1, (int)(BaseDamage * mult));
@@ -334,8 +335,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 if ((npc.Center - Projectile.Center).Length() > radio) continue;
-                npc.SimpleStrikeNPC(dmg, npc.direction, false, knockback, DamageClass.Magic);
-                if (fuegoTicks > 0)
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, knockback, true);
+                if (fuegoTicks > 0 && Main.netMode != NetmodeID.MultiplayerClient)
                     npc.AddBuff(BuffID.OnFire, fuegoTicks);
             }
         }
@@ -347,16 +348,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private void DispararLaNova()
         {
             // === EL DAÑO MASIVO (×2 del daño del arma en 650 px + OnFire) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50 — GolpeMotor (el cauce del motor); la quemadura es de servidor.
+            int novaDmg = Math.Max(1, (int)(BaseDamage * 2f));
+            foreach (NPC npc in Main.ActiveNPCs)
             {
-                int novaDmg = Math.Max(1, (int)(BaseDamage * 2f));
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!VFXCore.EsObjetivo(npc)) continue;
-                    if ((npc.Center - Projectile.Center).Length() > 650f) continue;
-                    npc.SimpleStrikeNPC(novaDmg, npc.direction, false, 8f, DamageClass.Magic);
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                if ((npc.Center - Projectile.Center).Length() > 650f) continue;
+                Content.Systems.GolpeMotor.Golpear(Projectile, npc, novaDmg, 8f, true);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                     npc.AddBuff(BuffID.OnFire, 600);
-                }
             }
 
             if (Main.netMode == NetmodeID.Server) return;

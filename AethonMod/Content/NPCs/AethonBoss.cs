@@ -166,10 +166,15 @@ namespace AethonMod.Content.NPCs
                 }
                 case 3:
                 {
-                    // EL ACECHO LENTO: persigue sin prisa (la gravedad hace el trabajo).
-                    Vector2 aT = target.Center - NPC.Center;
-                    NPC.velocity = Vector2.Lerp(NPC.velocity,
-                        aT.SafeNormalize(Vector2.UnitY) * 6.5f, 0.05f);
+                    // v6.50 — EL ACECHO LENTO, CON CURVA (EcosLib.
+                    // CurvaAproximacion): la persecución recta pasa a la
+                    // librería — la gravedad sigue haciendo el trabajo, pero
+                    // ahora ella ESCONDE el rumbo: aproximación anticipada
+                    // + strafe inconmensurable a 300 px (esquivarla exige
+                    // leerla, no solo correr).
+                    Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                        300f, 5.5f, Main.GlobalTimeWrappedHourly, NPC.whoAmI * 53);
+                    NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.05f);
                     break;
                 }
                 case 4:
