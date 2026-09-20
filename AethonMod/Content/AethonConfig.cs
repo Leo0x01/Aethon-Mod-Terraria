@@ -43,5 +43,19 @@ namespace AethonMod.Content
         /// </summary>
         [DefaultValue(true)]
         public bool SagrarioAccesibleEnPruebas = true;
+
+        // ------------------------------------------------------------------
+        //  v6.45 — EL MODO PRUEBAS DEL MANÁ DEL MINIÓN
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// ¿La invocación del Orbe Cósmico del Grimorio es gratis? ON por
+        /// defecto: desde v6.42 TODO el arsenal de pruebas es sin maná y el
+        /// coste del minion era la última excepción viva. Es una
+        /// conveniencia de PRUEBAS, no el diseño final — apágala para
+        /// restaurar el coste real escalado por nivel (15 + nivel, tope 100).
+        /// </summary>
+        [DefaultValue(true)]
+        public bool ManaGratisEnPruebas = true;
     }
 }

@@ -1,5 +1,31 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.45 — EL GRIMORIO DE VERDAD: LA XP REAL DEL BESTIARIO
+
+**Petición del usuario**: maná del minion gratis para pruebas · quitar "disparo doble" de los hitos, mover el bonus de summon al sitio correcto y quitar el costo de maná por disparo · XP REAL usando la rareza y rango de estrellas del bestiario (coste inicial 100, jefes a tope, hardmode ×2) · el arma gana XP siempre que esté en el inventario, también por las kills de sus propios minions.
+
+### A. LA XP ES REAL (antes contaba kills disfrazadas de XP)
+  · **LA FUENTE: LAS ESTRELLAS DEL BESTIARIO** (ShardLevelSystem.XPForNPC): cada criatura vale su RANGO de rareza del bestiario — la tabla oficial `ContentSamples.NpcBestiaryRarityStars` (Dictionary por NPC.type), la MISMA que el juego usa para dibujar las estrellas de cada entrada (verificado contra el IL del binario real: `BestiaryEntry.Enemy/TownNPC/Critter` la pasan a `NPCPortraitInfoElement`; la fórmula vanilla por defecto es 1 + rareza del Lifeform Analyzer + bonus creciente + 0.5 jefe + poder estadístico por tramos, tope 5). Con fallback a la MISMA fórmula recalculada sobre el NPC vivo si la tabla no existe (carga temprana / servidor).
+  · **EL MAPEO**: 5 × estrellas² → 1★=5 · 2★=20 · 3★=45 · 4★=80 · 5★=125 XP. La rareza pesa al cuadrado: una 5★ vale 25 kills de 1★.
+  · **JEFES A TOPE (siguen siendo la fuente gorda)**: Moon Lord 100.000 · hardmode 25.000 · pre-hardmode 5.000 (la tabla v6.x intacta).
+  · **HARDMODE ×2**: al caer el Muro de Carne la ganancia de XP MEJORA AL DOBLE — mobs y jefes por igual (`Main.hardMode`).
+  · **LA CURVA**: coste inicial 100 y sube — `100 × nivel^1.5` (nivel 1→2: 100 XP · 10→11: ~3.162 · 20→21: ~8.944). El multiplicador de config XPMultiplier se aplica al final, con redondeo y piso de 1 XP.
+
+### B. EL ARMA VIVE EN EL INVENTARIO (XP desde cualquier slot)
+  · **GANA XP SIEMPRE QUE ESTÉ EN EL INVENTARIO** (GlobalNPCXP.OnKill): matar con OTRA arma también alimenta al Grimorio — se escanea TODO el inventario (58 slots, patrón de la casa) y TODAS las copias cobran (cada una sube su propio nivel).
+  · **LAS KILLS DE SUS PROPIOS MINIONS PAGAN**: los golpes del Orbe Cósmico (y cualquier proyectil del jugador) marcan `npc.playerInteraction[owner]` en OnHitByProjectile — FindKiller encuentra al dueño aunque el golpe final lo dé el minion. Idempotente con el comportamiento vanilla.
+
+### C. EL MANÁ DEL MINIÓN LIBRE (solo pruebas)
+  · **BANDERA `ManaGratisEnPruebas`** (AethonConfig, ON por defecto): la invocación del Orbe Cósmico NO cuesta maná — la última excepción viva del arsenal sin maná de v6.42. Apagarla restaura el coste escalado real (15 + nivel, tope 100) con su check de Mana Flower intacto. El tooltip solo anuncia el costo cuando está ACTIVO (mostrarlo en modo gratis sería mentir).
+
+### D. LAS PROMESAS ROTAS DEL TOOLTIP (alineadas con la verdad)
+  · **"Costo: X mana por disparo" ELIMINADA**: el bolt no cuesta maná desde v6.42 (Item.mana = 0) — la línea mentía. `WeaponScaling.ManaCost()` y sus 3 constantes muertas: eliminadas.
+  · **"+5% prob disparo doble" ELIMINADA de los hitos**: `DoubleShotChance()` jamás se llamaba desde ningún sitio — promesa muerta. Función eliminada. Los bolts extra REALES (ExtraProjectiles, usado en Shoot) siguen anunciándose.
+  · **EL BONUS DE SUMMON AL SITIO CORRECTO (doble corrección)**: (1) en el TOOLTIP, "+N slot(s) de minion" movido de la sección DAÑO a la sección ORBE CÓSMICO, junto al resto de stats del minion; (2) en el CÓDIGO, el +1% daño de invocación/nivel (+ el crítico mágico y la penetración, misma clase de bug) movido de `GrimoireEternal.ModifyWeaponDamage` a `ShardPlayer.PostUpdateEquips` — el hook viejo solo corría al calcular el daño del propio Grimorio, así que los minions atacando en otros ticks NO recibían nada (la misma clase de letra muerta que la regeneración R44). Ahora son stats persistentes de inventario, recalculadas cada tick tras ResetEffects.
+
+### E. VERIFICACIÓN
+  · Compilación: **0 errores / 0 warnings** contra tModLoader 2026.07.3.0 real (.NET 8.0.425) · hjson es/en en paridad exacta (tooltips del Grimorio con la XP real y el modo pruebas en ambos idiomas) · cero menciones externas · las reglas de la casa intactas en todo lo tocado.
+
 ## Commit v6.44 — EL ACCESO DEL PROBADOR: LOS LUGARES, LOS ÍTEMS Y LA SEGUNDA REVISIÓN FUNDACIONAL
 
 **Petición del usuario**: "No entiendo bien que fue lo último que hiciste, explícalo y si son ítems dáselo al jugador, si son lugares que estos sean accesibles al jugador, recuerda que todo es de pruebas por ahora · Luego dame más ideas para seguir mejorando el mod y también has otra revisión de código".

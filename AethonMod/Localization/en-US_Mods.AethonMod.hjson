@@ -9,7 +9,7 @@
         "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
-        "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.",
+        "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.\nEarns REAL XP from every kill: the bestiary rarity (0–5 stars)\nsets its worth, bosses pay top coin and hardmode doubles it.\nLevels up while in your inventory — minion kills count too.\nNo mana cost (testing).",
 
         "Items.BossSummonBag.DisplayName": "Summoner Bag",
         "Items.BossSummonBag.Tooltip": "Contains 999 of every boss summoner.\nTesting item — remove before release.",

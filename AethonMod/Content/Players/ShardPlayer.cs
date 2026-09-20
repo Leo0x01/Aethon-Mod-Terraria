@@ -14,6 +14,14 @@ namespace AethonMod.Content.Players
         /// <summary>
         /// PostUpdateEquips: aplica los bonuses del Grimorio que persisten
         /// aunque cambies de arma. Busca el Grimorio en TODO el inventario.
+        /// v6.45: además de slots/mana/vida, ahora también el bonus de daño
+        /// de invocación, el crítico mágico y la penetración de armadura —
+        /// movidos desde GrimoireEternal.ModifyWeaponDamage (el sitio
+        /// EQUIVOCADO: ese hook solo corre al calcular el daño del propio
+        /// grimorio, así que los minions atacando en otros ticks no
+        /// recibían nada — la misma clase de letra muerta que la
+        /// regeneración de la auditoría R44). PostUpdateEquips corre tras
+        /// ResetEffects: las stats aquí escritas cuentan de verdad.
         /// </summary>
         public override void PostUpdateEquips()
         {
@@ -35,6 +43,18 @@ namespace AethonMod.Content.Players
                         Player.statManaMax2 += WeaponScaling.BonusMana(level);
                         // Vida max
                         Player.statLifeMax2 += WeaponScaling.BonusLife(level);
+                        // v6.45: bonus de summon EN EL SITIO CORRECTO (persistente):
+                        // +1% daño de invocación por nivel (Infinito)
+                        Player.GetDamage(DamageClass.Summon) += WeaponScaling.SummonDamageBonus(level);
+                        // +0.2% crítico mágico por nivel (Máximo 100%)
+                        Player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(level);
+                        // Armor penetration +2% cada 5 niveles (Máximo 50%)
+                        Player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(level);
+                        // v6.45: la mitad de invocación del bonus por mana
+                        // faltante también es persistente (la mitad mágica
+                        // sigue evaluándose por golpe en ModifyWeaponDamage).
+                        Player.GetDamage(DamageClass.Summon) *=
+                            WeaponScaling.LowManaDamageMult(Player.statMana, Player.statManaMax2);
                         break;
                     }
                 }

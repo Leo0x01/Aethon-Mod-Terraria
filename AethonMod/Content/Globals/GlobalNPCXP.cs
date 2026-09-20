@@ -8,8 +8,10 @@ namespace AethonMod.Content.Globals
 {
     /// <summary>
     /// GlobalNPC que:
-    /// - Otorga XP al Grimorio sostenido cuando mata un NPC.
-    /// - Aplica lifesteal si el Grimorio tiene nivel >= 7.
+    /// - v6.45: otorga XP REAL (rareza del bestiario) a TODO Grimorio del
+    ///   inventario del jugador que mató — no solo al sostenido, y también
+    ///   por las kills de sus propios minions (el minion acredita al dueño).
+    /// - Aplica lifesteal si el Grimorio sostenido tiene nivel >= 7.
     /// - Hace que King Slime y Eye of Cthulhu dropeen el Fragmento Génesis.
     /// </summary>
     public class GlobalNPCXP : GlobalNPC
@@ -18,6 +20,10 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitByItem(NPC npc, Player player, Item item, NPC.HitInfo hit, int damageDone)
         {
+            // v6.45: garantiza el crédito de la kill para FindKiller
+            // (playerInteraction) aunque el motor no lo hubiera marcado.
+            if (player != null && player.whoAmI >= 0 && player.whoAmI < Main.player.Length)
+                npc.playerInteraction[player.whoAmI] = true;
             ApplyAethonLifesteal(player, damageDone);
         }
 
@@ -26,7 +32,16 @@ namespace AethonMod.Content.Globals
             if (projectile.owner < 0 || projectile.owner >= Main.player.Length) return;
             Player player = Main.player[projectile.owner];
             if (player != null && player.active)
+            {
+                // v6.45: LAS KILLS DE LOS MINIONS ACREDITAN AL DUEÑO. El Orbe
+                // Cósmico del Grimorio (y cualquier proyectil del jugador)
+                // deja marcado playerInteraction: FindKiller encuentra al
+                // dueño aunque la kill la dé el minion, y el Grimorio en su
+                // inventario cobra la XP. Idempotente: si el motor ya lo
+                // marcó, esto no cambia nada.
+                npc.playerInteraction[projectile.owner] = true;
                 ApplyAethonLifesteal(player, damageDone);
+            }
         }
 
         private void ApplyAethonLifesteal(Player player, int damageDone)
@@ -71,7 +86,12 @@ namespace AethonMod.Content.Globals
                 }
             }
 
-            // === OTORGAR XP AL GRIMORIO SOSTENIDO ===
+            // === v6.45: OTORGAR XP REAL A TODO GRIMORIO DEL INVENTARIO ===
+            // El arma gana XP SIEMPRE QUE ESTÉ EN EL INVENTARIO (no solo al
+            // sostenerla: matar con otra arma también la alimenta) y las
+            // kills de sus propios minions pagan igual (el minion acredita
+            // al dueño vía playerInteraction). TODAS las copias del Grimorio
+            // en el inventario cobran — cada una sube su propio nivel.
             Player player = FindKiller(npc);
             if (player == null) return;
 
@@ -79,13 +99,17 @@ namespace AethonMod.Content.Globals
             {
                 int baseXP = ShardLevelSystem.XPForNPC(npc);
                 int xp = ShardLevelSystem.ApplyXPMultiplier(baseXP);
-                Item heldItem = player.HeldItem;
-                if (heldItem != null && xp > 0 &&
-                    heldItem.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                if (xp > 0)
                 {
-                    var sl = heldItem.GetGlobalItem<ShardLevelItem>();
-                    if (sl != null)
-                        sl.GrantXP(heldItem, xp);
+                    for (int i = 0; i < 58; i++)
+                    {
+                        Item inv = player.inventory[i];
+                        if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                            continue;
+                        var sl = inv.GetGlobalItem<ShardLevelItem>();
+                        if (sl != null)
+                            sl.GrantXP(inv, xp);
+                    }
                 }
             }
             catch { }

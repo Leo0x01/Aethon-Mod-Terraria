@@ -16,9 +16,11 @@ namespace AethonMod.Content.Systems
         public const float UseSpeedPerLevel = 0.003f;
 
         // === MANA ===
-        public const int ManaBase = 3;
-        public const int ManaPer20Levels = 3;
-        public const int ManaMax = 30;
+        // v6.45: ManaBase/ManaPer20Levels/ManaMax y ManaCost() ELIMINADOS —
+        // el bolt es sin maná desde v6.42 (Item.mana = 0) y la única
+        // referencia que quedaba era la línea del tooltip que mentía.
+        // El coste del minion (MinionManaCost) vive: se activa apagando la
+        // bandera ManaGratisEnPruebas de la config.
 
         // ================================================================
         //  STATS BASE
@@ -70,15 +72,7 @@ namespace AethonMod.Content.Systems
         //  MANA
         // ================================================================
 
-        /// <summary>Costo de mana del bolt: 3 + nivel/20 * 3, tope 30.</summary>
-        public static int ManaCost(int level)
-        {
-            int cost = ManaBase + (level / 20) * ManaPer20Levels;
-            if (cost > ManaMax) cost = ManaMax;
-            return cost;
-        }
-
-        /// <summary>Costo de mana del minion: 15 + nivel, tope 100.</summary>
+        /// <summary>Costo de mana del minion: 15 + nivel, tope 100 (solo con ManaGratisEnPruebas = OFF).</summary>
         public static int MinionManaCost(int level)
         {
             int cost = 15 + level;
@@ -195,18 +189,6 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
-        //  PROBABILIDAD DE DISPARO DOBLE (cada 5 niveles, tope 50%)
-        // ================================================================
-
-        /// <summary>+5% prob de disparo doble cada 5 niveles (tope 50%).</summary>
-        public static float DoubleShotChance(int level)
-        {
-            float chance = (level / 5) * 0.05f;
-            if (chance > 0.5f) chance = 0.5f;
-            return chance;
-        }
-
-        // ================================================================
         //  DAÑO EN ÁREA DEL BOLT (+1px por nivel, tope 100px)
         // ================================================================
 
@@ -282,8 +264,10 @@ namespace AethonMod.Content.Systems
             if (milestone % 3 == 0) // nivel 15, 30, 45...
                 rewards.Add("+1 bolt extra");
 
-            // Probabilidad de disparo doble +5% cada 5 niveles
-            rewards.Add("+5% prob disparo doble");
+            // v6.45: "+5% prob disparo doble" ELIMINADO de los hitos —
+            // DoubleShotChance() nunca se llamaba desde ningún sitio: era
+            // una promesa rota en el texto. Los bolts extra reales son los
+            // de arriba (ExtraProjectiles, usado en Shoot).
 
             // Daño en área +1px cada 5 niveles
             rewards.Add("+1px daño en área");

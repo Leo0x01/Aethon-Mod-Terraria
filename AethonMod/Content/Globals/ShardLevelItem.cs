@@ -50,12 +50,14 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// XP necesaria para subir al próximo nivel.
-        /// Nivel 1→2: 1 XP (cualquier kill).
-        /// Nivel 2+: 80 * nivel^1.5.
+        /// v6.45: coste inicial 100 y sube desde ahí — 100 * nivel^1.5.
+        /// Nivel 1→2: 100 XP. Nivel 10→11: ~3.162 XP. Nivel 20→21: ~8.944 XP.
+        /// La XP ahora es REAL (rareza del bestiario, no kills): un jefe
+        /// pre-hardmode (5.000) paga ~un tercio del camino al nivel 20.
         /// </summary>
         public int XPForNextLevel()
         {
-            return (int)(80 * System.Math.Pow(Level, 1.5));
+            return (int)(100 * System.Math.Pow(Level, 1.5));
         }
 
         /// <summary>

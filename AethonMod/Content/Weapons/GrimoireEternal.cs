@@ -14,10 +14,13 @@ namespace AethonMod.Content.Weapons
     ///
     /// SISTEMA DE NIVELES:
     /// - Sube de nivel al matar enemigos (XP guardada en ShardLevelItem).
+    /// - v6.45: XP REAL por rareza del bestiario (0–5★), jefes a tope y
+    ///   hardmode ×2; el arma gana XP desde TODO el inventario.
     /// - Niveles infinitos. Sin dependencias de BranchType ni IsImprinted.
     ///
-    /// CLICK IZQUIERDO: dispara ArcaneBolt (homing). Cuesta 3 mana (+3 cada 20 niveles).
-    /// CLICK DERECHO: invoca CosmicOrbMinion. Cuesta 15 mana (+1 por nivel).
+    /// CLICK IZQUIERDO: dispara ArcaneBolt (homing). SIN MANÁ (v6.42, arsenal de pruebas).
+    /// CLICK DERECHO: invoca CosmicOrbMinion. SIN MANÁ en pruebas
+    /// (v6.45, bandera ManaGratisEnPruebas — apagarla restaura el coste).
     ///
     /// ESCALADO POR NIVEL:
     /// - +2.2% daño mágico, +1% daño summon, +0.2% crit, +0.4% armor pen
@@ -77,6 +80,17 @@ namespace AethonMod.Content.Weapons
             catch { return null; }
         }
 
+        /// <summary>
+        /// v6.45: ¿el minion NO cuesta maná? Bandera de pruebas en config
+        /// (ManaGratisEnPruebas, ON por defecto). Null-safe: sin config
+        /// cargada se asume modo pruebas (el mod entero lo es).
+        /// </summary>
+        private static bool ManaMinionGratis()
+        {
+            var config = ModContent.GetInstance<Content.AethonConfig>();
+            return config == null || config.ManaGratisEnPruebas;
+        }
+
         // ================================================================
         //  ESCALADO DE DAÑO
         // ================================================================
@@ -86,22 +100,24 @@ namespace AethonMod.Content.Weapons
             var sl = GetShard(Item);
             if (sl == null) return;
 
-            // +2.2% daño mágico por nivel (Infinito)
+            // +2.2% daño mágico por nivel (Infinito) — local a ESTE arma.
             damage *= WeaponScaling.MagicDamageMult(sl.Level);
 
-            // +1% daño de invocación por nivel (Infinito)
-            player.GetDamage(DamageClass.Summon) += WeaponScaling.SummonDamageBonus(sl.Level);
+            // BONUS POR MANA FALTANTE — la mitad mágica es por-golpe (aquí);
+            // la mitad de invocación vive en ShardPlayer (v6.45, ver abajo).
+            damage *= WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
 
-            // +0.2% critico magico por nivel (Máximo 100%)
-            player.GetCritChance(DamageClass.Magic) += WeaponScaling.CritBonus(sl.Level);
-
-            // Armor penetration +2% cada 5 niveles (Máximo 50%)
-            player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(sl.Level);
-
-            // BONUS POR MANA FALTANTE (aplica a magia Y summon, tope +50%)
-            float manaMult = WeaponScaling.LowManaDamageMult(player.statMana, player.statManaMax2);
-            damage *= manaMult;
-            player.GetDamage(DamageClass.Summon) *= manaMult;
+            // v6.45: EL BONUS DE SUMMON MOVIDO AL SITIO CORRECTO. Antes las
+            // tres líneas siguientes mutaban stats GLOBALES del jugador
+            // (daño de invocación, crítico mágico y penetración) desde este
+            // hook, que solo corre al calcular el daño de ESTE arma: los
+            // minions atacando en otros ticks no recibían nada (la misma
+            // clase de letra muerta que la regeneración de la auditoría R44).
+            // Ahora ShardPlayer.PostUpdateEquips las aplica persistentemente
+            // mientras el Grimorio esté en el inventario.
+            //   player.GetDamage(DamageClass.Summon)      += SummonDamageBonus
+            //   player.GetCritChance(DamageClass.Magic)   += CritBonus
+            //   player.GetArmorPenetration(DamageClass.Magic) += ArmorPenBonus
         }
 
         public override void ModifyWeaponKnockback(Player player, ref StatModifier knockback)
@@ -154,8 +170,11 @@ namespace AethonMod.Content.Weapons
             int level = sl?.Level ?? 1;
 
             // Click derecho (minion): permite Mana Flower (fix 48688dd)
+            // v6.45: en modo pruebas NO se exige maná (bandera); con la
+            // bandera OFF vuelve el coste escalado + Mana Flower.
             if (player.altFunctionUse == 2)
             {
+                if (ManaMinionGratis()) return true;
                 int minionCost = WeaponScaling.MinionManaCost(level);
                 return player.statMana >= minionCost || player.manaFlower;
             }
@@ -208,13 +227,19 @@ namespace AethonMod.Content.Weapons
                     return false;
                 }
 
-                // Cobrar mana del minion (fix 48688dd: maneja Mana Flower)
-                int minionCost = WeaponScaling.MinionManaCost(level);
-                if (player.statMana < minionCost && !player.manaFlower) return false;
-                if (player.statMana >= minionCost)
+                // v6.45: cobrar mana del minion SOLO con la bandera de coste
+                // activa ( ManaGratisEnPruebas = OFF ). En modo pruebas la
+                // invocación es gratis como el resto del arsenal (v6.42).
+                if (!ManaMinionGratis())
                 {
-                    player.statMana -= minionCost;
-                    if (player.statMana < 0) player.statMana = 0;
+                    // Cobrar mana del minion (fix 48688dd: maneja Mana Flower)
+                    int minionCost = WeaponScaling.MinionManaCost(level);
+                    if (player.statMana < minionCost && !player.manaFlower) return false;
+                    if (player.statMana >= minionCost)
+                    {
+                        player.statMana -= minionCost;
+                        if (player.statMana < 0) player.statMana = 0;
+                    }
                 }
 
                 // Invocar minion (EXACTAMENTE una vez)
@@ -338,7 +363,9 @@ namespace AethonMod.Content.Weapons
                 float lifeRegen = WeaponScaling.LifeRegen(sl.Level);
                 float dmgRed = WeaponScaling.DamageReduction(sl.Level) * 100f;
                 float kbBonus = (WeaponScaling.KnockbackMult(sl.Level) - 1f) * 100f;
-                int manaCost = WeaponScaling.ManaCost(sl.Level);
+                // v6.45: ManaCost eliminado — el bolt es SIN MANÁ desde v6.42
+                // (Item.mana = 0): la línea "Costo: X mana por disparo" era
+                // una promesa rota en el tooltip.
                 int minionCost = WeaponScaling.MinionManaCost(sl.Level);
                 int totalBolts = 1 + WeaponScaling.ExtraProjectiles(sl.Level);
                 int areaDmg = WeaponScaling.BoltAreaDamage(sl.Level);
@@ -357,8 +384,9 @@ namespace AethonMod.Content.Weapons
                     $"[c/FFAA55:+{critPct:F1}% probabilidad crítica]"));
                 tooltips.Add(new TooltipLine(Mod, "ArmorPen",
                     $"[c/55FFFF:+{armorPenPct:F0}% penetración de armadura]"));
-                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    $"[c/78FF96:+{bonusSlots} slot(s) de minion]"));
+                // v6.45: MinionSlots movido a la sección ORBE CÓSMICO — el
+                // bonus de summon en su sitio correcto, junto al resto de
+                // stats del minion (antes flotaba en la sección de DAÑO).
                 tooltips.Add(new TooltipLine(Mod, "Knockback",
                     $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
 
@@ -379,10 +407,14 @@ namespace AethonMod.Content.Weapons
                     $"[c/55AAFF:{totalBolts} proyectil(es) por disparo]"));
                 tooltips.Add(new TooltipLine(Mod, "AreaDmg",
                     $"[c/55AAFF:+{areaDmg}px daño en área]"));
-                tooltips.Add(new TooltipLine(Mod, "ManaBolt",
-                    $"[c/55AAFF:Costo: {manaCost} mana por disparo]"));
+                // v6.45: la línea "Costo: X mana por disparo" eliminada — el
+                // bolt no cuesta maná desde v6.42 (promesa rota).
 
                 tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
+                // v6.45: los slots de minion viven aquí — junto al resto del
+                // summon (antes en la sección DAÑO).
+                tooltips.Add(new TooltipLine(Mod, "MinionSlots",
+                    $"[c/78FF96:+{bonusSlots} slot(s) de minion]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño de contacto]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSpeed",
@@ -391,8 +423,14 @@ namespace AethonMod.Content.Weapons
                     $"[c/BE78FD:{detectRange:F0}px rango de detección]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionCd",
                     $"[c/BE78FD:{hitCd} frames de cooldown]"));
-                tooltips.Add(new TooltipLine(Mod, "ManaMinion",
-                    $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
+                // v6.45: el costo de invocación solo se anuncia cuando está
+                // ACTIVO (bandera de pruebas OFF) — en modo gratis mostrar
+                // un costo sería otra promesa rota.
+                if (!ManaMinionGratis())
+                {
+                    tooltips.Add(new TooltipLine(Mod, "ManaMinion",
+                        $"[c/55AAFF:Costo: {minionCost} mana por invocación]"));
+                }
 
                 tooltips.Add(new TooltipLine(Mod, "SectionBonus", "[c/FF5566:═══ BONUS ═══]"));
                 tooltips.Add(new TooltipLine(Mod, "LowMana",
