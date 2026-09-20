@@ -132,13 +132,24 @@ namespace AethonMod.Content.VFX
             }
 
             // === EL RÓTULO (el clic derecho ya manda) ===
+            // v6.49 — EL RÓTULO LOCALIZADO Y MEDIDO UNA VEZ (hallazgo
+            // AUD-C: "EL OCASO" estaba hardcodeado FUERA del hjson y se
+            // medía con MeasureString cada frame).
             var fuente = Terraria.GameContent.FontAssets.ItemStack.Value;
-            Vector2 med = fuente.MeasureString("EL OCASO") * 0.7f;
-            sb.DrawString(fuente, "EL OCASO",
-                centro + new Vector2(0f, -radio - 20f) - med * 0.5f,
+            if (_rotulo == null)
+            {
+                _rotulo = Terraria.Localization.Language.GetTextValue("Mods.AethonMod.Ocaso.Rotulo");
+                _rotuloMedida = fuente.MeasureString(_rotulo);
+            }
+            sb.DrawString(fuente, _rotulo,
+                centro + new Vector2(0f, -radio - 20f) - _rotuloMedida * (0.7f * 0.5f),
                 new Color(255, 220, 140) * (0.85f * vis * pulso), 0f, Vector2.Zero,
                 0.7f, SpriteEffects.None, 0f);
         }
+
+        // v6.49 — el cache del rótulo (texto localizado + medida).
+        private static string _rotulo;
+        private static Vector2 _rotuloMedida;
 
         // ==================================================================
         //  ESTADO 2 · EL OCASO ACTIVO (el drenaje de la lluvia)

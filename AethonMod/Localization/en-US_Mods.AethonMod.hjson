@@ -649,6 +649,17 @@
         "Items.EsenciaDeSkeletron.DisplayName": "Essence of Skeletron",
         "Items.EsenciaDeSkeletron.Tooltip": "The curse copied freehand.\nRaises the Eternal Grimoire ONE WHOLE LEVEL.",
 
+        "Items.EsenciaDelTitanHueco.DisplayName": "Essence of the Hollow Titan",
+        "Items.EsenciaDelTitanHueco.Tooltip": "The soul of the Sanctum's crystal colossus.\nRaises the Eternal Grimoire ONE WHOLE LEVEL.\nOnly drops 10 times per world: crystal doesn't repeat itself.",
+        "Items.EsenciaDelGuardianDelRift.DisplayName": "Essence of the Rift Keeper",
+        "Items.EsenciaDelGuardianDelRift.Tooltip": "The soul of the between-worlds sentinel.\nRaises the Eternal Grimoire ONE WHOLE LEVEL.\nOnly drops 10 times per world: the threshold repeats no guests.",
+        "Items.EsenciaDeLaArqueraEstelar.DisplayName": "Essence of the Stellar Archer",
+        "Items.EsenciaDeLaArqueraEstelar.Tooltip": "The soul of the echo who never dropped the bow.\nRaises the Eternal Grimoire ONE WHOLE LEVEL.\nOnly drops 10 times per world: echoes aren't cloned.",
+        "Items.EsenciaDelPrimerPortador.DisplayName": "Essence of the First Bearer",
+        "Items.EsenciaDelPrimerPortador.Tooltip": "The soul of the echo who never dropped the blade.\nRaises the Eternal Grimoire ONE WHOLE LEVEL.\nOnly drops 10 times per world: the blade isn't inherited.",
+        "Items.EsenciaDeAethon.DisplayName": "Essence of Aethon",
+        "Items.EsenciaDeAethon.Tooltip": "The soul of the Primordial Light — the one\nwho acknowledged you as an equal. Raises the Eternal\nGrimoire ONE WHOLE LEVEL. Only 10 per world: not even light gives twice.",
+
         "Items.CoronaRunicoAuraItem.DisplayName": "The Runic Aura Crown",
         "Items.CoronaRunicoAuraItem.Tooltip": "AURALIB's rune pentagon: a five-sided cage\nspinning around you — the Sanctum's violet at the\ncenter, the grimoire's GOLD on the edges.\nPure cosmetic (drawn by the additive BEARER).",
         "Items.FormaAscendidaItem.DisplayName": "The Ascended Form",
@@ -722,4 +733,28 @@
         "Furia.DerechoEsencias": "The Witness will open his DRAWER OF ESSENCES for you — wave 10 has been paid.",
         "Furia.OleadaEspecial": "THE JUDGMENT: all SEVEN wardens at once, ×15 on EVERYTHING. The final feast.",
         "Furia.MuertePortador": "The feast dies with its bearer. The book TAKES NOTE.",
+
+        "Esencia.CofreSeco": "{0}'s chest of souls is DRY in this world — ten pages, story closed.",
+        "Esencia.UltimaAlma": "{0}'s LAST soul fell. Its story in this world is complete.",
+
+        "HUD.Nivel": "Grimoire · Lv {0}",
+        "HUD.NivelHambre": "Grimoire · Lv {0}  (hunger…)",
+        "HUD.XP": "{0} / {1} XP",
+        "HUD.XPHM": "{0} / {1} XP   HM ×2",
+        "HUD.Ganancia": "+{0}",
+
+        "Ocaso.Rotulo": "THE DUSK",
+
+        "Presencia.Llegada": "The Witness has arrived. {0} is watching you.",
+
+        "Diag.Fps": "FPS: {0}",
+        "Diag.Factor": "Quality factor: {0}",
+        "Diag.Quads": "Frame quads: {0} / {1}",
+        "Diag.Eco": "Living voices (EcoLib): {0}",
+        "Diag.Aura": "Aura emitters (AuraLib): {0}",
+        "Diag.Pulso": "Screen force (PulsoLib): {0}",
+        "Diag.Furia": "Grimoire fury: {0}",
+        "Diag.FuriaInactivo": "silence",
+        "Diag.FuriaActiva": "wave {0}/{1} in progress",
+        "Diag.Ayuda": "[F8] closes the diagnostics · v6.49",
 }

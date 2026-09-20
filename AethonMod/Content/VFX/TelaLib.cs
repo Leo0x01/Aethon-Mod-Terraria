@@ -51,6 +51,53 @@ namespace AethonMod.Content.VFX
         private static readonly Dictionary<int, Cinta> _vivas = new Dictionary<int, Cinta>(16);
         private static readonly List<Cinta> _libres = new List<Cinta>(8);
 
+        // v6.49 — EL BARRENDERO (hallazgo AUD-A): _vivas solo vaciaba con
+        // Soltar manual — una muerte sin OnKill (despawn de red,
+        // active=false por sincronización) dejaba la cinta viva PARA
+        // SIEMPRE y el whoAmI reciclado HEREDABA la estela ajena. La
+        // cinta ahora ROTTEN a los 3 ticks sin empuje (el mismo contrato
+        // que EstelaTrack.PurgeTracks) y Purgar() se lleva a los muertos
+        // al pool — lo llama un ModSystem (BrumaSystem) cada 120 ticks.
+        private uint _últimoEmpujeAbsoluto;
+        private static int _tickUltimaPurga;
+
+        /// <summary>
+        /// v6.49 — LA PURGA PERIÓDICA: las cintas cuyo dueño lleva más de
+        /// 3 ticks sin empujar están huérfanas (muerte sin OnKill, despawn
+        // de red) — vuelven al pool. Barato: solo cuando hay vivas.
+        /// </summary>
+        public static void Purgar()
+        {
+            try
+            {
+                if (_vivas.Count == 0) return;
+                uint ahora = Main.GameUpdateCount;
+                // claves a liberar (el diccionario no se muta mientras se
+                // enumera: se apuntan primero).
+                _purgarBuffer.Clear();
+                foreach (var par in _vivas)
+                    if (ahora - par.Value._últimoEmpujeAbsoluto > 3u)
+                        _purgarBuffer.Add(par.Key);
+                for (int i = 0; i < _purgarBuffer.Count; i++)
+                    Soltar(_purgarBuffer[i]);
+            }
+            catch { }
+        }
+        private static readonly List<int> _purgarBuffer = new List<int>(8);
+
+        /// <summary>Tick de la purga (lo llama BrumaSystem con su PostUpdate).</summary>
+        internal static void TickPurga()
+        {
+            try
+            {
+                int tick = (int)(Main.GameUpdateCount % 120u);
+                if (tick == _tickUltimaPurga) return;
+                _tickUltimaPurga = tick;
+                Purgar();
+            }
+            catch { }
+        }
+
         /// <summary>
         /// ADQUIERE (o reutiliza del pool) la cinta de este dueño con la
         /// capacidad pedida. Reutiliza la existente si ya tenía una (cambia
@@ -83,6 +130,11 @@ namespace AethonMod.Content.VFX
                 _vivas.Remove(dueñoId);
                 c._n = 0;
                 c._arcoAcumulado = 0f;
+                // v6.49 — el reloj también se suelta: una re-adquisición del
+                // MISMO índice en el mismo frame no pierde su primer push
+                // por el path sub-step.
+                c._últimoFrameEmpujado = 0u;
+                c._últimoEmpujeAbsoluto = Main.GameUpdateCount;
                 if (_libres.Count < 12) _libres.Add(c);
             }
         }
@@ -129,6 +181,7 @@ namespace AethonMod.Content.VFX
         public void Empujar(Vector2 posMundo)
         {
             uint frame = Main.GameUpdateCount;
+            _últimoEmpujeAbsoluto = frame; // v6.49 — el reloj del barrendero
             if (frame == _últimoFrameEmpujado)
             {
                 // sub-paso: refresza la punta, no añade historial.

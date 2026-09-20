@@ -499,18 +499,23 @@ namespace AethonMod.Content.VFX
         private static Texture2D TexturaDe(string rutaModRelativa)
         {
             if (string.IsNullOrEmpty(rutaModRelativa)) return null;
-            if (!_texturas.TryGetValue(rutaModRelativa, out Asset<Texture2D> asset))
+            // v6.49 — EL FALLO TAMBIÉN SE CACHEA (hallazgo AUD-C): una ruta
+            // muerta reintentaba ModContent.Request + EXCEPCIÓN cada frame
+            // por capa rota (coste de excepción + GC por frame en pleno
+            // render). El diccionario admite null: la primera vez se
+            // aprende, las demás se saltan gratis.
+            if (_texturas.TryGetValue(rutaModRelativa, out Asset<Texture2D> asset))
+                return asset?.Value;
+            try
             {
-                try
-                {
-                    asset = ModContent.Request<Texture2D>(
-                        "AethonMod/" + rutaModRelativa, AssetRequestMode.AsyncLoad);
-                    _texturas[rutaModRelativa] = asset;
-                }
-                catch
-                {
-                    return null;    // la ruta no existe: la capa se salta en silencio
-                }
+                asset = ModContent.Request<Texture2D>(
+                    "AethonMod/" + rutaModRelativa, AssetRequestMode.AsyncLoad);
+                _texturas[rutaModRelativa] = asset;
+            }
+            catch
+            {
+                _texturas[rutaModRelativa] = null; // la ruta no existe: se salta en silencio, PARA SIEMPRE
+                return null;
             }
             return asset.Value;
         }

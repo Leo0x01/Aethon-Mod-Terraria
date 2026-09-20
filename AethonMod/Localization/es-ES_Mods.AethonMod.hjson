@@ -637,6 +637,17 @@
         "Items.EsenciaDeSkeletron.DisplayName": "Esencia de Skeletron",
         "Items.EsenciaDeSkeletron.Tooltip": "La maldición copiada a mano alzada.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
 
+        "Items.EsenciaDelTitanHueco.DisplayName": "Esencia del Titán Hueco",
+        "Items.EsenciaDelTitanHueco.Tooltip": "El alma del coloso de cristal del Sagrario.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: el cristal no se repite.",
+        "Items.EsenciaDelGuardianDelRift.DisplayName": "Esencia del Guardián del Rift",
+        "Items.EsenciaDelGuardianDelRift.Tooltip": "El alma del centinela del entre-mundos.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: el umbral no repite invitados.",
+        "Items.EsenciaDeLaArqueraEstelar.DisplayName": "Esencia de la Arquera Estelar",
+        "Items.EsenciaDeLaArqueraEstelar.Tooltip": "El alma del eco que nunca soltó el arco.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: los ecos no se clonan.",
+        "Items.EsenciaDelPrimerPortador.DisplayName": "Esencia del Primer Portador",
+        "Items.EsenciaDelPrimerPortador.Tooltip": "El alma del eco que nunca soltó la hoja.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: la hoja no se hereda.",
+        "Items.EsenciaDeAethon.DisplayName": "Esencia de Aethon",
+        "Items.EsenciaDeAethon.Tooltip": "El alma de la Luz Primordial — la que te\nreconoció como un par. Sube UN NIVEL COMPLETO al\nGrimorio del Eterno. Solo 10 por mundo: ni la luz se da dos veces.",
+
         "Items.CoronaRunicoAuraItem.DisplayName": "La Corona Rúnica de Aura",
         "Items.CoronaRunicoAuraItem.Tooltip": "El pentágono de runas de AURALIB: una jaula de\ncinco lados girando alrededor tuyo — el violeta del\nSagrario al centro, el ORO del grimorio en las aristas.\nCosmético puro (el dibuja el PORTADOR aditivo).",
         "Items.FormaAscendidaItem.DisplayName": "La Forma Ascendida",
@@ -710,4 +721,28 @@
         "Furia.DerechoEsencias": "El Testigo abrirá su CAJÓN DE ESENCIAS para ti — la oleada 10 quedó pagada.",
         "Furia.OleadaEspecial": "EL JUICIO: los SIETE guardianes a la vez, ×15 en TODO. El festín final.",
         "Furia.MuertePortador": "El festín muere con su portador. El libro TOMA NOTA.",
+
+        "Esencia.CofreSeco": "El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.",
+        "Esencia.UltimaAlma": "La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.",
+
+        "HUD.Nivel": "Grimorio · Nv {0}",
+        "HUD.NivelHambre": "Grimorio · Nv {0}  (hambre…)",
+        "HUD.XP": "{0} / {1} XP",
+        "HUD.XPHM": "{0} / {1} XP   HM ×2",
+        "HUD.Ganancia": "+{0}",
+
+        "Ocaso.Rotulo": "EL OCASO",
+
+        "Presencia.Llegada": "El Testigo ha llegado. {0} te observa.",
+
+        "Diag.Fps": "FPS: {0}",
+        "Diag.Factor": "Factor de calidad: {0}",
+        "Diag.Quads": "Quads del frame: {0} / {1}",
+        "Diag.Eco": "Voces vivas (EcoLib): {0}",
+        "Diag.Aura": "Emisores de aura (AuraLib): {0}",
+        "Diag.Pulso": "Fuerza de pantalla (PulsoLib): {0}",
+        "Diag.Furia": "Furia del grimorio: {0}",
+        "Diag.FuriaInactivo": "silencio",
+        "Diag.FuriaActiva": "oleada {0}/{1} en marcha",
+        "Diag.Ayuda": "[F8] cierra el diagnóstico · v6.49",
 }

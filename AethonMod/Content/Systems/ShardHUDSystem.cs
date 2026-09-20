@@ -50,8 +50,8 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// La XP cobrada por una kill: enciende el pulso y suelta el
-        /// "+XP" flotante. La llama GlobalNPCXP.OnKill cuando el killer
-        /// es el jugador local y el libro está en su barra rápida.
+        /// "+XP" flotante. La llama GlobalNPCXP.OnKill (en SP, el jugador
+        /// local; en MP llega por EcoRed.MsgLatidoXp al portador).
         /// </summary>
         public static void MarcarGanancia(int xp)
         {
@@ -166,21 +166,27 @@ namespace AethonMod.Content.Systems
                 }
 
                 // === TEXTO: nivel a la izquierda, XP a la derecha ===
-                string txtNivel = $"Grimorio · Nv {sl.Level}";
+                // v6.49 — LOCALIZADO + CACHEADO (hallazgo AUD-C: 5 textos
+                // hardcodeados fuera del hjson y 3-4 strings nuevos por
+                // frame en pleno HUD): las plantillas viven en el hjson
+                // ({0}/{1}) y el string + la MEDIDA solo se reconstruyen
+                // cuando cambia lo que dicen (nivel, XP, hambre, HM).
+                string txtNivel = hambre >= 8
+                    ? CacheTexto(ref _cacheNivelHambre, "Mods.AethonMod.HUD.NivelHambre", sl.Level, font)
+                    : CacheTexto(ref _cacheNivel, "Mods.AethonMod.HUD.Nivel", sl.Level, font);
                 Color tinteNivel = new Color(245, 196, 81) * 0.95f;
                 if (hambre > 0)
                 {
                     // el nombre también palidece… y con 8+ hambres, susurra
                     tinteNivel = Color.Lerp(tinteNivel, new Color(150, 148, 142) * 0.95f, palidez);
-                    if (hambre >= 8)
-                        txtNivel += "  (hambre…)";
                 }
                 sb.DrawString(font, txtNivel, new Vector2(x + 2f, YTexto),
                     tinteNivel, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
 
-                string txtXP = $"{sl.XP} / {xpNecesaria} XP";
-                if (Main.hardMode) txtXP += "   HM ×2";
-                Vector2 medXP = font.MeasureString(txtXP) * 0.85f;
+                string txtXP = Main.hardMode
+                    ? CacheTexto(ref _cacheXpHm, "Mods.AethonMod.HUD.XPHM", sl.XP, xpNecesaria, font)
+                    : CacheTexto(ref _cacheXp, "Mods.AethonMod.HUD.XP", sl.XP, xpNecesaria, font);
+                Vector2 medXP = MedidaDe(_cacheXpActiva); // la del formato ACTIVO
                 sb.DrawString(font, txtXP, new Vector2(x + ancho - medXP.X, YTexto),
                     (Main.hardMode ? new Color(255, 160, 90) : new Color(220, 220, 220)) * 0.9f,
                     0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
@@ -189,7 +195,10 @@ namespace AethonMod.Content.Systems
                 if (_edadGanancia >= 0 && _edadGanancia <= TicksGanancia)
                 {
                     float alfaG = 1f - (float)_edadGanancia / TicksGanancia;
-                    string txtGan = $"+{_ultimaGanancia}";
+                    // v6.49 — localizado y cacheado por cantidad (solo
+                    // cambia al cobrar una ganancia nueva).
+                    string txtGan = CacheTexto(ref _cacheGanancia, "Mods.AethonMod.HUD.Ganancia",
+                        _ultimaGanancia, font);
                     Vector2 posG = new Vector2(
                         x + ancho - 70f,
                         y - 6f - _edadGanancia * 0.45f);
@@ -202,7 +211,51 @@ namespace AethonMod.Content.Systems
             catch { }
         }
 
-        public override void OnWorldUnload() { _pulso = 0; _edadGanancia = -1; }
-        public override void Unload() { _pulso = 0; _edadGanancia = -1; }
+        // ================================================================
+        //  v6.49 — EL CACHE DE TEXTOS DEL HUD (hallazgo AUD-C: el HUD
+        //  interpolaba 3-4 strings y median MeasureString CADA frame).
+        //  El texto y su MEDIDA solo se reconstruyen cuando cambia el
+        //  argumento que alimenta la plantilla.
+        // ================================================================
+
+        private struct TextoCache
+        {
+            public long Argumento1, Argumento2;
+            public string Texto;
+            public Vector2 Medida; // medida ya ESCALADA (0.85)
+        }
+
+        private static TextoCache _cacheNivel, _cacheNivelHambre, _cacheXp, _cacheXpHm, _cacheGanancia;
+        private static TextoCache _cacheXpActiva; // el formato que se está dibujando
+
+        private static string CacheTexto(ref TextoCache cache, string clave, long arg, DynamicSpriteFont font)
+            => CacheTexto(ref cache, clave, arg, 0, font);
+
+        private static string CacheTexto(ref TextoCache cache, string clave, long arg1, long arg2,
+            DynamicSpriteFont font)
+        {
+            if (cache.Texto == null || cache.Argumento1 != arg1 || cache.Argumento2 != arg2)
+            {
+                cache.Argumento1 = arg1;
+                cache.Argumento2 = arg2;
+                cache.Texto = Terraria.Localization.Language.GetTextValue(clave, arg1, arg2);
+                cache.Medida = font.MeasureString(cache.Texto) * 0.85f;
+            }
+            if (clave.EndsWith("XP") || clave.EndsWith("XPHM")) _cacheXpActiva = cache;
+            return cache.Texto;
+        }
+
+        private static Vector2 MedidaDe(TextoCache cache)
+            => cache.Texto != null ? cache.Medida : Vector2.Zero;
+
+        public override void OnWorldUnload() { _pulso = 0; _edadGanancia = -1; LimpiarCaches(); }
+        public override void Unload() { _pulso = 0; _edadGanancia = -1; LimpiarCaches(); }
+
+        private static void LimpiarCaches()
+        {
+            _cacheNivel = default; _cacheNivelHambre = default;
+            _cacheXp = default; _cacheXpHm = default;
+            _cacheGanancia = default; _cacheXpActiva = default;
+        }
     }
 }

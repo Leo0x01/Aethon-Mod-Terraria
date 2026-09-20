@@ -200,6 +200,25 @@ namespace AethonMod.Content.VFX
             _flashDuration = 0;
             _flashCooldown = 0;
             _flashStrength = 0f;
+            // v6.49 — EL ASSET TAMBIÉN (hallazgo AUD-C: OcasoSystem sí lo
+            // anulaba; OndaSystem no — el Asset<T> estático sobrevivía a
+            // la recarga del mod).
+            _glow = null;
+        }
+
+        /// <summary>
+        /// v6.49 — EL MUNDO TAMBIÉN (hallazgo AUD-C): un flash/kick vivo
+        /// al salir del mundo se colaba en el siguiente. Ahora muere con
+        /// su mundo.
+        /// </summary>
+        public override void OnWorldUnload()
+        {
+            for (int i = 0; i < _kicks.Length; i++)
+                _kicks[i] = default;
+            _flashAge = 0;
+            _flashDuration = 0;
+            _flashCooldown = 0;
+            _flashStrength = 0f;
         }
     }
 }

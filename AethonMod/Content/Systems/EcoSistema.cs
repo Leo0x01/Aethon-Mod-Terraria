@@ -21,12 +21,12 @@ namespace AethonMod.Content.Systems
     /// el clásico de los mods de mensajes de estado: la voz del GRIMORIO
     /// devora la esencia del jefe caído y lo dice a pantalla completa.
     ///
-    /// DISPARO: GlobalNPCXP.OnKill → AnunciarJefeMuerto, SOLO para el
-    /// jugador local (SP-first; en MP la kill la resuelve el servidor y
-    /// la voz de cada cliente es TODO pendiente como el resto del sync).
-    /// Una derrota, UNA voz: las partes en cascada no hablan
-    /// (ShardLevelSystem.EsParteDeJefe) y Los Gemelos (dos cuerpos, un
-    /// jefe) hablan cuando cae el ÚLTIMO.
+    /// DISPARO: GlobalNPCXP.OnKill → AnunciarJefeMuerto, para el
+    /// PORTADOR que cobró la kill (v6.49: en SP habla directo; en MP el
+    /// servidor empaqueta la clave y SOLO el cliente del portador la
+    /// oye — EcoRed, el paquete de nivel 2). Una derrota, UNA voz: las
+    /// partes en cascada no hablan (ShardLevelSystem.EsParteDeJefe) y
+    /// Los Gemelos (dos cuerpos, un jefe) hablan cuando cae el ÚLTIMO.
     /// </summary>
     public class EcoSistema : ModSystem
     {
@@ -73,12 +73,13 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// Anuncia la derrota de un jefe con la voz del Grimorio. Llamado
-        /// desde GlobalNPCXP.OnKill cuando el killer es el jugador local.
+        /// desde GlobalNPCXP.OnKill — el portador es el jugador cuyo libro
+        /// cobró la kill (v6.49: EcoRed la lleva a SU pantalla en MP).
         /// v6.47: también los JEFES DEL MOD tienen su voz (Aethon, el
         /// Titán Hueco, el Guardián del Rift y Los Ecos — que hablan al
         /// caer el ÚLTIMO, como Los Gemelos).
         /// </summary>
-        public static void AnunciarJefeMuerto(NPC npc)
+        public static void AnunciarJefeMuerto(NPC npc, Player portador)
         {
             try
             {
@@ -128,11 +129,15 @@ namespace AethonMod.Content.Systems
                 _ultimaClave = clave;
                 _tickUltimaClave = Main.GameUpdateCount;
 
-                string texto = Language.GetTextValue("Mods.AethonMod.Eco.VozJefe." + clave);
-                if (string.IsNullOrEmpty(texto) || texto.StartsWith("Mods.AethonMod"))
-                    texto = Language.GetTextValue("Mods.AethonMod.Eco.VozJefe.Desconocido");
+                // v6.49 — LA VOZ CAMINA: la clave viaja por EcoRed y el
+                // portador la resuelve en SU idioma (el fallback de la
+                // clave rota se resuelve aquí, en la autoridad).
+                string claveVoz = "Mods.AethonMod.Eco.VozJefe." + clave;
+                string prueba = Language.GetTextValue(claveVoz);
+                if (string.IsNullOrEmpty(prueba) || prueba.StartsWith("Mods.AethonMod"))
+                    claveVoz = "Mods.AethonMod.Eco.VozJefe.Desconocido";
 
-                EcoLib.Hablar(texto, ColorDeVoz(npc.type));
+                EcoRed.HablarAlPortador(portador, claveVoz, ColorDeVoz(npc.type));
             }
             catch { }
         }
@@ -141,11 +146,12 @@ namespace AethonMod.Content.Systems
         /// v6.48 — EL SABOR DEL BIOMA: la primer línea del hambre sabe a
         /// DÓNDE está el libro — cada bioma tiene SUS propias muestras de
         /// "carne de jungla", "sal del infierno"… (3 por bioma, repartidas
-        /// por ElegirVariante sin repetir). La llama ShardPlayer en el
-        /// primer momento de hambre; el color y la escala los pone el
-        /// llamador. Devuelve "" si algo falla (el llamador calla).
+        /// por ElegirClave sin repetir). v6.49: devuelve LA CLAVE COMPLETA
+        /// (para EcoRed — la autoridad reparte, el portador resuelve).
+        /// El color y la escala los pone el llamador. Devuelve "" si algo
+        /// falla (el llamador calla).
         /// </summary>
-        public static string SusurroDelBioma(Player p)
+        public static string ClaveSusurroDelBioma(Player p)
         {
             try
             {
@@ -163,7 +169,7 @@ namespace AethonMod.Content.Systems
                 else if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight) pool = "Subsuelo";
                 else if (p.ZoneSkyHeight) pool = "Cielo";
                 else pool = "Superficie";
-                return EcoLib.ElegirVariante("Mods.AethonMod.Eco.Bioma." + pool, 3);
+                return EcoLib.ElegirClave("Mods.AethonMod.Eco.Bioma." + pool, 3);
             }
             catch { return ""; }
         }
@@ -250,14 +256,15 @@ namespace AethonMod.Content.Systems
         /// <summary>
         /// v6.47 — LA PRIMERA 5★: la primera criatura 5 estrellas que el
         /// libro se come merece su LÍNEA propia. La llama GlobalNPCXP al
-        /// detectarla (una vez por libro).
+        /// detectarla (una vez por libro). v6.49: viaja por EcoRed al
+        /// portador que la comió.
         /// </summary>
-        public static void SusurrarCincoEstrellas()
+        public static void SusurrarCincoEstrellas(Player portador)
         {
             try
             {
-                EcoLib.Hablar(
-                    Language.GetTextValue("Mods.AethonMod.Eco.VozCincoEstrellas"),
+                EcoRed.HablarAlPortador(portador,
+                    "Mods.AethonMod.Eco.VozCincoEstrellas",
                     new Color(255, 122, 218),  // magenta raro
                     rugido: false, escala: 0.62f);
             }

@@ -151,12 +151,22 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// SUAVIZADO por promedio móvil 0.25/0.5/0.25 — el camino de oldPos
         /// es una escalera de ticks; sin esto toda estela "rasegura".
+        ///
+        /// v6.49 (hallazgo AUD-A) — PURA DE VERDAD: con iterations PAR el
+        /// doble swap escribía el resultado SOBRE el array original y lo
+        /// devolvía — mutaba la entrada. Hoy ningún llamador lo sufre
+        /// (todos pasan copias frescas), pero el contrato decía puro: la
+        /// bomba latente se desactiva iterando siempre sobre copia propia.
         /// </summary>
         public static Vector2[] Smooth(Vector2[] pts, int iterations = 2)
         {
             if (pts == null || pts.Length < 3 || iterations <= 0) return pts;
 
-            Vector2[] src = pts;
+            // LA COPIA PROPIA: el resultado jamás pisa la entrada (la
+            // entrada puede ser el oldPos del proyectil, que el motor
+            // sigue usando).
+            Vector2[] src = new Vector2[pts.Length];
+            System.Array.Copy(pts, src, pts.Length);
             Vector2[] dst = new Vector2[pts.Length];
             for (int it = 0; it < iterations; it++)
             {
@@ -209,17 +219,58 @@ namespace AethonMod.Content.VFX
         //  EL RIBBON — el corazón de la librería
         // ==================================================================
 
-        /// <summary>La anchura por perfil (f: 0 nacimiento de la cola → 1 cabeza).</summary>
+        // v6.49 — LAS LUT DE ANCHURA (hallazgo AUD-A): AnchoDe llamaba
+        // MathF.Pow hasta ~130 veces por estela por frame (Sin^0.7,
+        // Sin^0.8, f^1.5 — el exponente NO cambia: la curva completa es
+        // una tabla). 33 muestras por perfil, interpolación lineal:
+        // el mismo perfil con cero trascendentales en el render.
+        private const int _anchoLutN = 33;
+        private static readonly float[] _lutHead = BuildLutPowSin(0.7f, MathHelper.PiOver2);
+        private static readonly float[] _lutCenter = BuildLutPowSin(0.8f, MathHelper.Pi);
+        private static readonly float[] _lutComet = BuildLutPowF(1.5f);
+
+        private static float[] BuildLutPowSin(float exp, float factor)
+        {
+            var lut = new float[_anchoLutN];
+            for (int i = 0; i < _anchoLutN; i++)
+            {
+                float f = i / (float)(_anchoLutN - 1);
+                lut[i] = MathF.Pow(MathF.Sin(f * factor), exp);
+            }
+            return lut;
+        }
+
+        private static float[] BuildLutPowF(float exp)
+        {
+            var lut = new float[_anchoLutN];
+            for (int i = 0; i < _anchoLutN; i++)
+            {
+                float f = i / (float)(_anchoLutN - 1);
+                lut[i] = MathF.Pow(f, exp);
+            }
+            return lut;
+        }
+
+        private static float LerpLut(float[] lut, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f) * (_anchoLutN - 1);
+            int i0 = (int)f;
+            int i1 = i0 + 1 < _anchoLutN ? i0 + 1 : i0;
+            float k = f - i0;
+            return lut[i0] + (lut[i1] - lut[i0]) * k;
+        }
+
+        /// <summary>La anchura por perfil (f: 0 nacimiento de la cola → 1 cabeza) — v6.49: por LUT.</summary>
         private static float AnchoDe(EstelaProfile profile, float f, float width, int seed, float time)
         {
             switch (profile)
             {
                 case EstelaProfile.Head:
-                    return width * MathF.Pow(MathF.Sin(f * MathHelper.PiOver2), 0.7f);
+                    return width * LerpLut(_lutHead, f);
                 case EstelaProfile.Center:
-                    return width * MathF.Pow(MathF.Sin(f * MathHelper.Pi), 0.8f);
+                    return width * LerpLut(_lutCenter, f);
                 case EstelaProfile.Comet:
-                    return width * MathF.Pow(f, 1.5f);
+                    return width * LerpLut(_lutComet, f);
                 default: // Alive
                     float n = BrumaNoise.Fbm(f * 3f + time * 0.31f, seed * 0.017f, seed, 2);
                     return width * (0.72f + 0.28f * n);

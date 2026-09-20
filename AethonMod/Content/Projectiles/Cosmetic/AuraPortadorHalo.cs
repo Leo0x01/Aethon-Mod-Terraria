@@ -35,10 +35,31 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// Patrón probado de AnilloRunicoDorsalHalo (v6.37): PreDraw cierra
     /// el lote del pase, AuraLib vuelca el SUYO aditivo y el lote del
     /// pase se reabre TAL CUAL. SIN hide (la lección v6.35).
+    ///
+    /// v6.49 (auditoría AUD-C) — EL CONTRATO DE VERDAD: el End manual del
+    /// patrón v6.10 peleaba con el bool de DibujarJugadorAditivo (doble
+    /// End → excepción tragada cada frame + estado a ciegas). Ahora es el
+    /// contrato de OleadaNPC: el BOOL decide, ReabrirLoteVanilla reabre.
+    /// Y los perfiles CoronaRunica()/FormaAscendida() se creaban NUEVOS en
+    /// cada llamada (2 por tick: AI + PreDraw) — ahora son cache estático
+    /// (son inmutables en la práctica; el modo hambre ya usaba el cache
+    /// de ShardPlayer).
     /// </summary>
     public class AuraPortadorHalo : ModProjectile
     {
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
+
+        // v6.49 — EL CACHE DE LOS PERFILES INMUTABLES (cero GC por frame).
+        private static AuraPerfil _perfilCorona;
+        private static AuraPerfil _perfilAscendida;
+
+        /// <summary>El perfil de la corona, creado UNA vez.</summary>
+        private static AuraPerfil PerfilCorona =>
+            _perfilCorona ??= AuraPerfil.CoronaRunica();
+
+        /// <summary>El perfil de la forma ascendida, creado UNA vez.</summary>
+        private static AuraPerfil PerfilAscendida =>
+            _perfilAscendida ??= AuraPerfil.FormaAscendida();
 
         public override void SetStaticDefaults()
         {
@@ -82,8 +103,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             switch (Modo)
             {
                 case 0: return duenio.GetModPlayer<ShardPlayer>().AuraHambrePublica();
-                case 1: return AuraPerfil.CoronaRunica();
-                case 2: return AuraPerfil.FormaAscendida();
+                case 1: return PerfilCorona;
+                case 2: return PerfilAscendida;
             }
             return null;
         }
@@ -124,26 +145,19 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             AuraPerfil p = Perfil(duenio);
             if (p == null) return false;
 
-            // EL PATRÓN A PRUEBA DE BALAS (v6.10): cerrar el lote del pase,
-            // AuraLib vuelca el SUYO aditivo y reabrir TAL CUAL estaba.
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
-
+            // v6.49 — EL CONTRATO DEL BOOL (el de OleadaNPC):
+            // DibujarJugadorAditivo cierra el lote del pase, vuelva SU
+            // aditivo y DEVUELVE true; aquí se reabre TAL CUAL. El End
+            // manual del patrón v6.10 moría con el End interno del
+            // FlushAdditive (excepción tragada + reapertura a ciegas).
             try
             {
-                AuraLib.DibujarJugadorAditivo(duenio, p);
+                if (AuraLib.DibujarJugadorAditivo(duenio, p))
+                    AuraLib.ReabrirLoteVanilla();
             }
-            catch
-            {
-                try { Main.spriteBatch.End(); } catch { }
-            }
+            catch { try { AuraLib.ReabrirLoteVanilla(); } catch { } }
 
-            if (wasActive)
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-            return false;
+            return false; // el halo SE dibuja solo (el vuelco fue el dibujo)
         }
     }
 }

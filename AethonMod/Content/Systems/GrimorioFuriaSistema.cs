@@ -133,13 +133,12 @@ namespace AethonMod.Content.Systems
 
             // LAS DOS VOCES: primero la ira, después la llamada — LA VOZ
             // DEL LIBRO VA PRIMERO (prioridad: se cuela al frente).
-            if (Main.netMode != NetmodeID.Server && jugador.whoAmI == Main.myPlayer)
-            {
-                EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Ira"),
-                    new Color(168, 96, 60), rugido: true, prioridad: true);
-                EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Llamada"),
-                    new Color(226, 64, 64), rugido: true, prioridad: true);
-            }
+            // v6.49: EcoRed las lleva SOLO al portador (en SP habla
+            // directo; en MP viajan al cliente del portador).
+            EcoRed.HablarAlPortador(jugador, "Mods.AethonMod.Eco.Furia.Ira",
+                new Color(168, 96, 60), rugido: true, prioridad: true);
+            EcoRed.HablarAlPortador(jugador, "Mods.AethonMod.Eco.Furia.Llamada",
+                new Color(226, 64, 64), rugido: true, prioridad: true);
         }
 
         // ==================================================================
@@ -227,9 +226,8 @@ namespace AethonMod.Content.Systems
                 // EL FINAL: saciedad y perdón
                 _fase = Fase.Fin;
                 _ticksFase = 0;
-                if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
-                    EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Saciado"),
-                        new Color(245, 196, 81), rugido: false, prioridad: true);
+                EcoRed.HablarAlPortador(hambriento, "Mods.AethonMod.Eco.Furia.Saciado",
+                    new Color(245, 196, 81), rugido: false, prioridad: true);
                 // la hambre del portador se perdona: el festín contó
                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                 sp?.PerdonarHambre();
@@ -243,16 +241,16 @@ namespace AethonMod.Content.Systems
             _bossIdx = -1;
 
             // EL ANUNCIO: la oleada k de N (la final se anuncia en negro y rojo)
-            if (Main.netMode != NetmodeID.Server)
-            {
-                if (_oleadaActual == _oleadasTotales && _oleadasTotales >= 5)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.OleadaFinal", _oleadaActual, _oleadasTotales),
-                        new Color(178, 26, 38));
-                else
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.Oleada", _oleadaActual, _oleadasTotales,
-                        _oleadaActual + 1),
-                        new Color(198, 200, 206));
-            }
+            // v6.49 — EL FESTÍN ES DEL MUNDO: el anuncio viaja a TODOS
+            // (ChatHelper en MP; el usuario lo pidió así — "el evento de
+            // uno es el evento del mundo", la VOZ sigue siendo del
+            // portador, el AVISO es del festín).
+            if (_oleadaActual == _oleadasTotales && _oleadasTotales >= 5)
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.OleadaFinal", new Color(178, 26, 38),
+                    _oleadaActual, _oleadasTotales);
+            else
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Oleada", new Color(198, 200, 206),
+                    _oleadaActual, _oleadasTotales, _oleadaActual + 1);
         }
 
         private static void FaseMonstruos(Player hambriento)
@@ -306,9 +304,11 @@ namespace AethonMod.Content.Systems
                     if (sp != null && !sp.DerrotaOleada10)
                     {
                         sp.DerrotaOleada10 = true;
-                        if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
-                            Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.DerechoEsencias"),
-                                new Color(196, 150, 255));
+                        // v6.49 — EL AVISO PRIVADO: solo al portador (su
+                        // derecho, su pantalla).
+                        EcoRed.AnunciarAlPortador(hambriento,
+                            "Mods.AethonMod.Furia.DerechoEsencias",
+                            new Color(196, 150, 255));
                     }
                 }
                 _fase = Fase.Interludio;
@@ -321,9 +321,8 @@ namespace AethonMod.Content.Systems
             // es un dilema de render.
             if (_ticksFase >= TicksJefeMax)
             {
-                if (Main.netMode != NetmodeID.Server)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.JefeHuido", jefe.FullName),
-                        new Color(150, 140, 148));
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.JefeHuido",
+                    new Color(150, 140, 148), jefe.FullName);
                 jefe.active = false; // despawn limpio (patrón HollowTitan)
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
@@ -367,15 +366,12 @@ namespace AethonMod.Content.Systems
             _ticksSuma = 0;
             _spawneados = 0;
 
-            // LA VOZ DEL JUICIO (prioridad: el libro manda).
-            if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
-            {
-                EcoLib.Hablar(Language.GetTextValue("Mods.AethonMod.Eco.Furia.Juicio"),
-                    new Color(178, 26, 38), rugido: true, prioridad: true);
-            }
-            if (Main.netMode != NetmodeID.Server)
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.OleadaEspecial"),
-                    new Color(178, 26, 38));
+            // LA VOZ DEL JUICIO (prioridad: el libro manda — solo al
+            // portador: es SU grimorio quien juzga).
+            EcoRed.HablarAlPortador(hambriento, "Mods.AethonMod.Eco.Furia.Juicio",
+                new Color(178, 26, 38), rugido: true, prioridad: true);
+            EcoRed.AnunciarMundo("Mods.AethonMod.Furia.OleadaEspecial",
+                new Color(178, 26, 38));
 
             // LOS DOS PRIMEROS: en pantalla YA.
             for (int i = 0; i < 2; i++) NacerGuardian(hambriento);
@@ -402,9 +398,8 @@ namespace AethonMod.Content.Systems
 
                 _spawneados++;
 
-                if (Main.netMode != NetmodeID.Server)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.Jefe", jefe.FullName, 15),
-                        new Color(226, 64, 64));
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Jefe",
+                    new Color(226, 64, 64), jefe.FullName, 15);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
             }
             catch { }
@@ -442,15 +437,13 @@ namespace AethonMod.Content.Systems
 
             if (_spawneados >= 7 && vivos == 0)
             {
-                // EL FINAL DEL JUICIO: la saciedad especial.
+                // EL FINAL DEL JUICIO: la saciedad especial (la variante la
+                // reparte la autoridad y viaja por EcoRed).
                 _fase = Fase.Fin;
                 _ticksFase = 0;
-                if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
-                {
-                    string linea = EcoLib.ElegirVariante("Mods.AethonMod.Eco.Furia.JuicioFin", 3);
-                    if (!string.IsNullOrEmpty(linea))
-                        EcoLib.Hablar(linea, new Color(245, 196, 81), rugido: false, prioridad: true);
-                }
+                EcoRed.HablarVarianteAlPortador(hambriento,
+                    "Mods.AethonMod.Eco.Furia.JuicioFin", 3,
+                    new Color(245, 196, 81), rugido: false, prioridad: true);
                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                 sp?.PerdonarHambre();
             }
@@ -470,16 +463,13 @@ namespace AethonMod.Content.Systems
         {
             try
             {
-                if (Main.netMode != NetmodeID.Server && hambriento.whoAmI == Main.myPlayer)
-                {
-                    string linea = EcoLib.ElegirVariante("Mods.AethonMod.Eco.Furia.Venganza", 4);
-                    if (!string.IsNullOrEmpty(linea))
-                        EcoLib.Hablar(linea, new Color(178, 26, 38),
-                            rugido: true, escala: 0.62f, prioridad: true);
-                }
-                if (Main.netMode != NetmodeID.Server)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.MuertePortador"),
-                        new Color(150, 140, 148));
+                // LA VENGANZA ES DEL LIBRO — la oye SOLO el portador muerto
+                // (prioridad: las voces de jefes esperan detrás).
+                EcoRed.HablarVarianteAlPortador(hambriento,
+                    "Mods.AethonMod.Eco.Furia.Venganza", 4,
+                    new Color(178, 26, 38), rugido: true, escala: 0.62f, prioridad: true);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.MuertePortador",
+                    new Color(150, 140, 148));
             }
             catch { }
         }
@@ -651,10 +641,8 @@ namespace AethonMod.Content.Systems
                 jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true);
                 jefe.netUpdate = true;
 
-                if (Main.netMode != NetmodeID.Server)
-                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Furia.Jefe", jefe.FullName,
-                        _oleadaActual + 1),
-                        new Color(226, 64, 64));
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Jefe",
+                    new Color(226, 64, 64), jefe.FullName, _oleadaActual + 1);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
             }
             catch { _bossIdx = -1; }
@@ -696,10 +684,30 @@ namespace AethonMod.Content.Systems
             _ticksSuma = 0;
         }
 
+        /// <summary>
+        /// v6.49 — EL DIAGNÓSTICO DEL FESTÍN (lo pinta el overlay F8): la
+        /// oleada y la fase, ya localizadas — o el silencio.
+        /// </summary>
+        public static string Diagnostico()
+        {
+            try
+            {
+                if (_fase == Fase.Inactivo)
+                    return Language.GetTextValue("Mods.AethonMod.Diag.FuriaInactivo");
+                return Language.GetTextValue("Mods.AethonMod.Diag.FuriaActiva",
+                    _oleadaActual, _oleadasTotales);
+            }
+            catch { return ""; }
+        }
+
         public override void OnWorldUnload()
         {
             Terminar();
             AuraLib.Reiniciar(); // los emisores de partículas mueren con el mundo
+            // v6.49 — EL BARRENDERO COMPLETO (auditoría AUD-C): el núcleo
+            // de VFX y el anti-coros de audio también mueren con el mundo.
+            try { VFXCore.Reiniciar(); } catch { }
+            try { AudioLib.Reiniciar(); } catch { }
         }
         public override void Unload()
         {

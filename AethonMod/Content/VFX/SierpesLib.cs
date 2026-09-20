@@ -1209,6 +1209,12 @@ namespace AethonMod.Content.VFX
         {
             if (n <= 1 || alpha <= 0.02f || Main.netMode == NetmodeID.Server) return;
             if (n > 24) n = 24;
+            // v6.49 — EL CLAMP DE LOS PARÁMETROS PARALELOS (hallazgo
+            // AUD-B: las hermanas clampean contra crestas/fasePata pero
+            // ESTA indexaba ang[i] sin check — un caller con ang más
+            // corto que segs se comía un IndexOutOfRangeException).
+            if (ang != null && ang.Length < n) n = ang.Length;
+            if (segs != null && segs.Length < n) n = segs.Length;
 
             Vector2 off = Main.screenPosition;
             for (int i = 0; i < n; i++) _scr[i] = segs[i] - off;

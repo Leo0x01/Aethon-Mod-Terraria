@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Systems;
 using AethonMod.Content.Projectiles.Jefes;
 
 namespace AethonMod.Content.NPCs
@@ -353,6 +354,10 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         public override void OnKill()
         {
+            // v6.49 — SU ALMA: la Esencia del Guardián del Rift (+1 nivel
+            // al Grimorio; 10 por mundo — EsenciasModSistema).
+            EsenciasModSistema.SoltarEsencia(NPC);
+
             // EL COLAPSO DEL UMBRAL: el desgarro final se lo traga.
             for (int d = 0; d < 36; d++)
             {

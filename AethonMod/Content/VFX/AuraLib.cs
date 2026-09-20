@@ -626,6 +626,42 @@ namespace AethonMod.Content.VFX
         private static readonly Dictionary<int, Emisor> _emisores = new Dictionary<int, Emisor>();
         private static Emisor _emisorJugador;
 
+        // v6.49 — EL BARRIDO PERIÓDICO (hallazgo AUD-C): un NPC muerto ya
+        // no corre AI → nadie llama Actualizar(!npc.active) → la entrada
+        // quedaba en el diccionario hasta el Reiniciar, y el whoAmI
+        // RECYCLADO heredaba las partículas a mitad de vida (glitch
+        // visual). Cada 240 ticks se barren las claves cuyo NPC ya no
+        // vive (barato: solo si hay emisores).
+        private static uint _ultimaBarrida;
+
+        /// <summary>
+        /// v6.49 — LA BASURA SE SACA SOLA: borra los emisores de NPCs
+        /// muertos/despawneados (el barrido que la muerte nunca hacía).
+        /// Lo llama Actualizar en su camino de lógica (no en render).
+        /// </summary>
+        private static void BarrerEmisores()
+        {
+            try
+            {
+                uint tick = Main.GameUpdateCount;
+                if (tick - _ultimaBarrida < 240u) return; // cada ~4 s
+                _ultimaBarrida = tick;
+                if (_emisores.Count == 0) return;
+
+                _barridoBuffer.Clear();
+                foreach (var par in _emisores)
+                {
+                    int idx = par.Key;
+                    if (idx < 0 || idx >= Main.maxNPCs || !Main.npc[idx].active)
+                        _barridoBuffer.Add(idx);
+                }
+                for (int i = 0; i < _barridoBuffer.Count; i++)
+                    _emisores.Remove(_barridoBuffer[i]);
+            }
+            catch { }
+        }
+        private static readonly List<int> _barridoBuffer = new List<int>(16);
+
         /// <summary>
         /// Avanza y emite las partículas del aura de un NPC (lo llama el
         /// consumidor desde AI — cada tick, no en el render). DETERMINISTA:
@@ -640,6 +676,7 @@ namespace AethonMod.Content.VFX
                 _emisores.Remove(npc.whoAmI);
                 return;
             }
+            BarrerEmisores(); // v6.49 — la basura de los que murieron SIN AI
             if (p == null || p.Particulas == null) return;
             if (!_emisores.TryGetValue(npc.whoAmI, out Emisor e))
             {
@@ -664,8 +701,14 @@ namespace AethonMod.Content.VFX
             float dt = 1f / 60f;
             uint tick = Main.GameUpdateCount;
             // la probabilidad POR SLOT y POR TICK que produce la TASA pedida
-            // en total (Tasa emisiones/seg repartidas entre los slots vivos)
-            float prob = cfg.Tasa * dt / Math.Max(1, cfg.Cantidad);
+            // en total (Tasa emisiones/seg repartidas entre los slots vivos).
+            // v6.49 — EL PRESUPUESTO ADAPTATIVO DE VERDAD (hallazgo AUD-C:
+            // "CalidadFpsSystem alimenta una máquina sin motor"): la TASA
+            // respira con VFXCore.FactorCalidad — si los FPS caen, las
+            // partículas del AURA adelgazan solas (factor 0.5 = mitad de
+            // emisión). Con factor 1 (el 99% del tiempo) es IDÉNTICO.
+            float factor = VFXCore.FactorCalidad;
+            float prob = cfg.Tasa * dt * factor / Math.Max(1, cfg.Cantidad);
 
             for (int i = 0; i < e.Ang.Length; i++)
             {
@@ -1031,11 +1074,15 @@ namespace AethonMod.Content.VFX
         //  HIGIENE DE LA CASA
         // ------------------------------------------------------------------
 
+        /// <summary>v6.49 — el número de emisores vivos (lo pinta el overlay F8).</summary>
+        public static int EmisoresVivos => _emisores.Count + (_emisorJugador != null ? 1 : 0);
+
         /// <summary>OnWorldUnload/Unload: emisores y texturas mueren con el mundo.</summary>
         public static void Reiniciar()
         {
             _emisores.Clear();
             _emisorJugador = null;
+            _ultimaBarrida = 0; // v6.49 — el reloj del barrido también
             try
             {
                 if (_ruido != null)

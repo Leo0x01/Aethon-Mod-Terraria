@@ -1214,5 +1214,19 @@ namespace AethonMod.Content.VFX
             backgroundColor.G = (byte)(int)(backgroundColor.G * f);
             backgroundColor.B = (byte)(int)MathF.Min(255f, backgroundColor.B * f + 26f * _actual);
         }
+
+        /// <summary>
+        /// v6.49 — LA HIGIENE (hallazgo AUD-B): al salir de un mundo con
+        /// un desgarro vivo, _pedido/_actual sobrevivían al cambio — el
+        /// mundo siguiente arrancaba con el CIELO OSCURECIDO hasta que
+        /// decayera solo (~30 ticks de oscuridad huérfana). Ahora el
+        /// mundo nuevo nace limpio.
+        /// </summary>
+        public override void OnWorldUnload()
+        {
+            _pedido = 0f;
+            _actual = 0f;
+            _lastTick = 0;
+        }
     }
 }

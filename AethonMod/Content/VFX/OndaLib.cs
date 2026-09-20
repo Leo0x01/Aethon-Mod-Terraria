@@ -298,23 +298,86 @@ namespace AethonMod.Content.VFX
                 SpriteEffects.None, 0f);
         }
 
+        /// <summary>
+        /// v6.49 — EL TELEGRAPH DE ANILLO (la idea nº1 de la auditoría
+        /// AUD-B: el Telegrafo de línea era el ÚNICO del arsenal y los
+        /// tres jefes con AoE repetían lógica a mano). El aviso de un
+        /// GOLPE DE ÁREA: el anillo EXTERIOR (la frontera del golpe, fija
+        /// y seria), el anillo INTERIOR que SE CIERRA al ritmo de la
+        /// carga (radio ×(1−progress) → 0 — cuando el interior toca al
+        /// exterior, el golpe cae: la señal más legible del repertorio),
+        /// el disco tenue del interior y EL CHILLIDO final (parpadeo a
+        /// 18 Hz en el último cuarto, igual que el Telegrafo de línea).
+        ///
+        /// CONTRATO: idéntico al de línea — batch ABIERTO (aditivo
+        /// recomendado), progress 0..1 (1 = golpe YA), cero Main.rand,
+        /// cero alocaciones (dos RingTex + un disco por llamada).
+        /// </summary>
+        /// <param name="batch">Batch ABIERTO (aditivo recomendado).</param>
+        /// <param name="centro">Centro del área (espacio del lote del llamador).</param>
+        /// <param name="radio">Radio EXTERIOR del golpe (la frontera).</param>
+        /// <param name="progress">0..1 del aviso (1 = el golpe dispara YA).</param>
+        /// <param name="color">El color del ataque que viene.</param>
+        public static void TelegrafoAnillo(SpriteBatch batch, Vector2 centro, float radio,
+            float progress, Color color)
+        {
+            if (batch == null || radio < 4f) return;
+            progress = MathHelper.Clamp(progress, 0f, 1f);
+
+            // EL CHILLIDO (el mismo del Telegrafo de línea).
+            float flick = 1f;
+            if (progress > 0.75f)
+            {
+                float t = (progress - 0.75f) / 0.25f;
+                flick = 0.6f + 0.4f * MathF.Sin(Main.GlobalTimeWrappedHourly * 18f * MathF.PI) * t + 0.4f * t;
+            }
+
+            float aExt = (0.12f + 0.55f * progress) * flick;
+            float aInt = (0.35f + 0.5f * progress) * flick;
+            float aDisco = 0.06f + 0.10f * progress;
+
+            // 1. LA FRONTERA: el anillo exterior (donde termina el golpe).
+            float sExt = radio * 2.174f;
+            batch.Draw(RingTex, centro, null, Tint(color, aExt), 0f,
+                new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
+                new Vector2(sExt, sExt) / new Vector2(RingTex.Width, RingTex.Height),
+                SpriteEffects.None, 0f);
+
+            // 2. EL CUERPO: el disco tenue del área entera.
+            float sDisco = radio * 2f;
+            batch.Draw(GlowTex, centro, null, Tint(color, aDisco), 0f,
+                new Vector2(GlowTex.Width, GlowTex.Height) * 0.5f,
+                new Vector2(sDisco, sDisco) / new Vector2(GlowTex.Width, GlowTex.Height),
+                SpriteEffects.None, 0f);
+
+            // 3. EL CUENTO: el anillo interior SE CIERRA con la carga —
+            //    cuando el interior alcanza la frontera, el golpe cae.
+            float rInt = radio * (1f - progress);
+            if (rInt > 2f)
+            {
+                float sInt = rInt * 2.174f;
+                batch.Draw(RingTex, centro, null, Tint(color, aInt), 0f,
+                    new Vector2(RingTex.Width, RingTex.Height) * 0.5f,
+                    new Vector2(sInt, sInt) / new Vector2(RingTex.Width, RingTex.Height),
+                    SpriteEffects.None, 0f);
+            }
+        }
+
         // ==================================================================
         //  LA ONDA DE SUELO — medio-anillo pegado al piso + polvo
         // ==================================================================
 
         /// <summary>
-        /// ONDA DE SUELO: medio-anillo pegado al piso (los impactos físicos
-        /// de las armas cuerpo a cuerpo — el frente SOLO visible encima del
-        /// suelo) + el PAQUETE DE POLVO que levanta (determinista: la
-        /// librería NO spawnea — devuelve el paquete para el ParticleManager
-        /// del llamador).
+        /// v6.49 — LA ONDA DE SUELO VISUAL (solo el medio-anillo, sin el
+        /// paquete de polvo): para las MARCAS DE TELEGRAPH pegadas al piso
+        /// (la estrella fugaz de la Arquera la usa — la promesa del
+        /// comentario de AtaqueJefeProjectile, CUMPLIDA por fin). El
+        /// mismo contrato de la casa: batch ABIERTO, cero Main.rand,
+        /// cero alocaciones.
         /// </summary>
-        /// <param name="gravDir">1 normal · −1 mundo invertido.</param>
-        public static void Ground(SpriteBatch batch, Vector2 center, float progress,
-            float maxRadius, Color color, float intensity, int seed,
-            out ParticleData[] dustKick, float gravDir = 1f)
+        public static void GroundVisual(SpriteBatch batch, Vector2 center, float progress,
+            float maxRadius, Color color, float intensity, float gravDir = 1f)
         {
-            dustKick = null;
             if (batch == null || maxRadius < 4f) return;
             progress = MathHelper.Clamp(progress, 0f, 1f);
             intensity = MathHelper.Clamp(intensity, 0f, 1f);
@@ -338,10 +401,34 @@ namespace AethonMod.Content.VFX
                 Vector2 p1 = center + new Vector2(MathF.Cos(ang1m), MathF.Sin(ang1m)) * r;
                 Seg(batch, p0, p1, grosor, Tint(color, a * 0.8f));
             }
+        }
+
+        /// <summary>
+        /// ONDA DE SUELO: medio-anillo pegado al piso (los impactos físicos
+        /// de las armas cuerpo a cuerpo — el frente SOLO visible encima del
+        /// suelo) + el PAQUETE DE POLVO que levanta (determinista: la
+        /// librería NO spawnea — devuelve el paquete para el ParticleManager
+        /// del llamador).
+        /// v6.49 — EL WRAPPER: la parte VISUAL vive en GroundVisual (para
+        /// las marcas de telegraph que NO quieren el paquete); este
+        /// método es visual + polvo (el original, contrato intacto).
+        /// </summary>
+        /// <param name="gravDir">1 normal · −1 mundo invertido.</param>
+        public static void Ground(SpriteBatch batch, Vector2 center, float progress,
+            float maxRadius, Color color, float intensity, int seed,
+            out ParticleData[] dustKick, float gravDir = 1f)
+        {
+            dustKick = null;
+            GroundVisual(batch, center, progress, maxRadius, color, intensity, gravDir);
+
+            if (batch == null || Main.netMode == NetmodeID.Server || maxRadius < 4f) return;
+            if (progress >= 0.45f) return; // el polvo solo nace al nacer la onda
+            progress = MathHelper.Clamp(progress, 0f, 1f);
+
+            float r = maxRadius * Expansion(progress);
 
             // === EL POLVO: el paquete determinista (chispas que caen con
             //     drag + motas que flotan — listo para ParticleManager). ===
-            if (Main.netMode != NetmodeID.Server && progress < 0.45f)
             {
                 int count = 6;
                 dustKick = new ParticleData[count];

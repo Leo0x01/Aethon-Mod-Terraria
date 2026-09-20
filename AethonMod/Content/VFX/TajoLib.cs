@@ -52,6 +52,73 @@ namespace AethonMod.Content.VFX
     public static class TajoLib
     {
         // ==================================================================
+        //  v6.49 — EL GOLPE DEL ARCO (la idea nº2 de la auditoría AUD-B:
+        //  los tajos son ARCOS que golpeaban como RECTAS — la hitbox no
+        //  acompañaba al dibujo). La primitiva espejo de RiftLib.LineaToca:
+        //  subdivide el arco en segmentos y prueba la cápsula de cada uno
+        //  contra la hitbox (el motor decide — la casa no inventa colisión).
+        // ==================================================================
+
+        /// <summary>
+        /// ¿El ARCO toca la hitbox? (centro + radio + sector ang0→ang1 +
+        /// ancho de filo). Subdivide el arco en N segmentos (N por la
+        /// longitud: ~12 px por segmento, 4..24) y prueba cada segmento
+        /// con Collision.CheckAABBvLineCollision sobre la hitbox INFLADA
+        /// por el medio-ancho del filo — cápsula curva por segmentos
+        /// rectos, la misma escuela de la casa.
+        /// Corre en LÓGICA (el llamador la usa en su tick de daño, con su
+        /// guard de netMode y su cooldown — la librería solo responde).
+        /// </summary>
+        /// <param name="centro">Centro del arco (coords de MUNDO).</param>
+        /// <param name="radio">Radio del arco (px).</param>
+        /// <param name="ang0">Ángulo inicial (radianes).</param>
+        /// <param name="ang1">Ángulo final (radianes; el arco va de ang0 a ang1).</param>
+        /// <param name="ancho">Ancho del filo (px).</param>
+        /// <param name="hitbox">La hitbox a probar (la del NPC o jugador).</param>
+        public static bool ArcoToca(Vector2 centro, float radio, float ang0, float ang1,
+            float ancho, Rectangle hitbox)
+        {
+            if (radio < 1f || ancho <= 0f) return false;
+
+            // EL ARCO NORMALIZADO: barre siempre hacia adelante (el
+            // llamador puede invertir las puntas — el Tajo lo permite).
+            float barrido = ang1 - ang0;
+            while (barrido > MathHelper.TwoPi) barrido -= MathHelper.TwoPi;
+            while (barrido < -MathHelper.TwoPi) barrido += MathHelper.TwoPi;
+
+            // LA SUBDIVISIÓN: ~12 px de cuerda por segmento (4..24).
+            float longitud = MathF.Abs(barrido) * radio;
+            int segs = (int)MathHelper.Clamp(longitud / 12f, 4f, 24f);
+
+            // Broad-phase: el AABB del arco entero contra la hitbox.
+            float rTotal = radio + ancho * 0.5f;
+            var caja = new Rectangle(
+                (int)(centro.X - rTotal), (int)(centro.Y - rTotal),
+                (int)(rTotal * 2f), (int)(rTotal * 2f));
+            if (!caja.Intersects(hitbox)) return false;
+
+            // Narrow-phase: cápsula por segmento (hitbox inflada por el
+            // medio-filo, la fórmula de RiftLib.LineaToca).
+            float r = MathF.Max(ancho * 0.5f, 4f);
+            var box = new Rectangle(
+                hitbox.X - (int)r, hitbox.Y - (int)r,
+                hitbox.Width + (int)r * 2, hitbox.Height + (int)r * 2);
+            var boxPos = new Vector2(box.X, box.Y);
+            var boxTam = new Vector2(box.Width, box.Height);
+
+            Vector2 prev = centro + new Vector2(MathF.Cos(ang0), MathF.Sin(ang0)) * radio;
+            for (int i = 1; i <= segs; i++)
+            {
+                float a = ang0 + barrido * (i / (float)segs);
+                Vector2 pt = centro + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radio;
+                if (Collision.CheckAABBvLineCollision(boxPos, boxTam, prev, pt))
+                    return true;
+                prev = pt;
+            }
+            return false;
+        }
+
+        // ==================================================================
         //  EL PINCEL (las bandas uniformes v6.39 + el glow de puntos)
         // ==================================================================
 
@@ -233,11 +300,31 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>El PERFIL DE LENTE del creciente: grosor máximo al
-        /// centro, fino en las puntas (la media luna).</summary>
+        /// centro, fino en las puntas (la media luna).
+        /// v6.49 — POR LUT (hallazgo AUD-B): se llamaba ~60 veces por tajo
+        /// por frame (20 segmentos × 3 capas) con Math.Pow cada vez — la
+        /// curva completa es UNA tabla de 33 muestras, interpolada.</summary>
         public static float PerfilLente(float u)
         {
-            float s = (float)Math.Sin(Math.PI * MathHelper.Clamp(u, 0f, 1f));
-            return (float)Math.Pow(Math.Max(s, 0.001f), 0.55f);
+            u = MathHelper.Clamp(u, 0f, 1f) * (_lenteLutN - 1);
+            int i0 = (int)u;
+            int i1 = i0 + 1 < _lenteLutN ? i0 + 1 : i0;
+            float k = u - i0;
+            return _lenteLut[i0] + (_lenteLut[i1] - _lenteLut[i0]) * k;
+        }
+
+        private const int _lenteLutN = 33;
+        private static readonly float[] _lenteLut = BuildLenteLut();
+
+        private static float[] BuildLenteLut()
+        {
+            var lut = new float[_lenteLutN];
+            for (int i = 0; i < _lenteLutN; i++)
+            {
+                float s = (float)Math.Sin(Math.PI * (i / (float)(_lenteLutN - 1)));
+                lut[i] = (float)Math.Pow(Math.Max(s, 0.001f), 0.55f);
+            }
+            return lut;
         }
 
         /// <summary>Punto del arco (centro + radio + ángulo).</summary>

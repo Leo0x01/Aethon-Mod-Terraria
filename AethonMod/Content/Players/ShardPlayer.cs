@@ -257,68 +257,80 @@ namespace AethonMod.Content.Players
         /// v6.47: EL CORAZÓN DE LA VOZ DEL HAMBRE. Corre cada tick: cuenta
         /// el tiempo sin matar (solo con libro visible y nivel alto),
         /// susurra cada momento de hambre y cruza el umbral de la furia.
+        ///
+        /// v6.49 — EL RÉGIMEN AUTORITATIVO: la AUTORIDAD del hambre es el
+        /// servidor (en SP, el propio proceso). El cliente MP NO cuenta
+        /// sus propios momentos — recibe el estado por EcoRed
+        /// (SincronizarHambre) para la barra palidecida, la ceniza del aura
+        /// y los celos del libro. Así "la voz y el hambre son del
+        /// portador": las siente ÉL, en SU pantalla, contadas UNA vez.
         /// </summary>
         public override void PostUpdate()
         {
             try
             {
                 bool local = Player.whoAmI == Main.myPlayer && Main.netMode != Terraria.ID.NetmodeID.Server;
+                bool autoridad = Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient; // SP o server
                 int nivel = NivelLibro(false);
 
-                if (nivel >= NivelMinimoHambre)
+                if (autoridad)
                 {
-                    TicksSinMatar++;
-                    int momentos = Math.Min(TicksSinMatar / (60 * SegundosPorMomento), MomentosMax);
-
-                    if (momentos > MomentosHambre)
+                    if (nivel >= NivelMinimoHambre)
                     {
-                        MomentosHambre = momentos;
+                        TicksSinMatar++;
+                        int momentos = Math.Min(TicksSinMatar / (60 * SegundosPorMomento), MomentosMax);
 
-                        // EL SUSURRO: la voz del libro en modo hambre — sin
-                        // rugido, escala menuda, gris pálido. Solo la oye el
-                        // portador (SP-first).
-                        // v6.48 — EL SAJOR DEL BIOMA: la primer línea de cada
-                        // momento cambia con el bioma ("carne de jungla",
-                        // "sal del infierno"…): el libro sabe DÓNDE está
-                        // hambriento. El resto del escalado sigue siendo el
-                        // de la casa (1→4).
-                        if (local)
+                        if (momentos > MomentosHambre)
                         {
+                            MomentosHambre = momentos;
+
+                            // v6.49 — el estado nuevo viaja al portador
+                            // (su barra, su aura, sus celos — en SU cliente).
+                            EcoRed.SincronizarHambre(Player);
+
+                            // EL SUSURRO: la voz del libro en modo hambre — sin
+                            // rugido, escala menuda, gris pálido. v6.49: la
+                            // clave la reparte la AUTORIDAD y EcoRed la lleva
+                            // SOLO al portador ("¿eso también mata?"… pero
+                            // de hambre).
+                            // v6.48 — EL SAJOR DEL BIOMA: la primer línea de cada
+                            // momento cambia con el bioma ("carne de jungla",
+                            // "sal del infierno"…): el libro sabe DÓNDE está
+                            // hambriento. El resto del escalado sigue siendo el
+                            // de la casa (1→4).
                             if (MomentosHambre == 1)
                             {
-                                string sabor = EcoSistema.SusurroDelBioma(Player);
-                                if (!string.IsNullOrEmpty(sabor))
-                                    EcoLib.Hablar(sabor,
-                                        new Microsoft.Xna.Framework.Color(176, 172, 168),
-                                        rugido: false, escala: 0.52f);
+                                string claveSabor = EcoSistema.ClaveSusurroDelBioma(Player);
+                                if (!string.IsNullOrEmpty(claveSabor))
+                                    EcoRed.SusurrarAlPortador(Player, claveSabor,
+                                        new Microsoft.Xna.Framework.Color(176, 172, 168));
                             }
                             else
                             {
-                                string clave = "Mods.AethonMod.Eco.Hambre.Susurro" +
-                                               Math.Min(MomentosHambre, 4);
-                                EcoLib.Hablar(
-                                    Terraria.Localization.Language.GetTextValue(clave),
-                                    new Microsoft.Xna.Framework.Color(176, 172, 168),
-                                    rugido: false, escala: 0.52f);
+                                EcoRed.SusurrarAlPortador(Player,
+                                    "Mods.AethonMod.Eco.Hambre.Susurro" +
+                                    Math.Min(MomentosHambre, 4),
+                                    new Microsoft.Xna.Framework.Color(176, 172, 168));
+                            }
+
+                            // LA FURIA: al cuarto momento, el evento (si la config
+                            // lo permite y el mundo está libre — un jefe o una
+                            // invasión lo BLOQUEA y la hambre sigue subiendo hasta
+                            // 10: por eso existen las 10 oleadas naturales).
+                            if (MomentosHambre >= MomentosParaFuria)
+                            {
+                                var config = ModContent.GetInstance<Content.AethonConfig>();
+                                bool evento = config == null || config.EventoHambreGrimorio;
+                                if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
+                                    GrimorioFuriaSistema.Provocar(Player, MomentosHambre);
                             }
                         }
-
-                        // LA FURIA: al cuarto momento, el evento (si la config
-                        // lo permite y el mundo está libre — un jefe o una
-                        // invasión lo BLOQUEA y la hambre sigue subiendo hasta
-                        // 10: por eso existen las 10 oleadas naturales).
-                        if (MomentosHambre >= MomentosParaFuria &&
-                            Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
-                        {
-                            var config = ModContent.GetInstance<Content.AethonConfig>();
-                            bool evento = config == null || config.EventoHambreGrimorio;
-                            if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
-                                GrimorioFuriaSistema.Provocar(Player, MomentosHambre);
-                        }
                     }
+                    // guardado el libro: DUERME — la hambre se congela.
                 }
-                // guardado el libro: DUERME — la hambre se congela.
 
+                // EL LIBRO CELOSO y EL AURA corren en el CLIENTE del
+                // portador (percepción local: lo que ÉL sostiene y viste).
                 if (local) ElLibroCeloso(nivel);
 
                 // EL AURA DEL HAMBRE: la ceniza del libro sobre su portador
@@ -415,12 +427,15 @@ namespace AethonMod.Content.Players
         /// <summary>
         /// El portador mató algo (lo llama GlobalNPCXP cuando el libro de
         /// su barra rápida ha comido): la hambre se perdona — la barra
-        /// dorada recupera su color y los susurros callan.
+        /// dorada recupera su color y los susurros callan. v6.49: el
+        /// estado nuevo viaja al portador (EcoRed) — en MP la autoridad
+        /// la perdona y el cliente del portador la VE perdonada.
         /// </summary>
         public void RegistrarKill()
         {
             TicksSinMatar = 0;
             MomentosHambre = 0;
+            EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
         }
 
         // === EL PERFIL DEL AURA DE HAMBRE (cacheado: cero GC por frame) ===
@@ -444,11 +459,13 @@ namespace AethonMod.Content.Players
         /// <summary>
         /// El festín terminó y el libro está saciado: la hambre del
         /// portador se perdona por completo (GrimorioFuriaSistema.Fin).
+        /// v6.49: el estado viaja por EcoRed al portador.
         /// </summary>
         public void PerdonarHambre()
         {
             TicksSinMatar = 0;
             MomentosHambre = 0;
+            EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
         }
 
         public override void SaveData(TagCompound tag)

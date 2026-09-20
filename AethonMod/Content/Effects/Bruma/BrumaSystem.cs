@@ -17,12 +17,24 @@ namespace AethonMod.Content.Effects.Bruma
     /// (los campos de brasas de PyraLib y los tracks de camino de
     /// EstelaLib) — la descarga queda LIMPIA de verdad.
     ///
+    /// v6.49 — LA HIGIENE AMPLIADA (auditorías AUD-A/C): la purga
+    /// periódica del pool de Cinta (cintas huérfanas por muertes sin
+    /// OnKill) cuelga del PostUpdate de este sistema (ya era EL ciclo de
+    /// vida de las librerías de VFX) y la descarga también suelta las
+    /// cintas, VFXCore y AudioLib — el barrendero único de la casa.
+    ///
     /// Las librerías en sí son INERTES: no dibujan nada por su cuenta;
     /// las usa quien las necesite desde su propio renderer con SU lote
     /// y SU contrato de batch.
     /// </summary>
     public class BrumaSystem : ModSystem
     {
+        /// <summary>v6.49 — la purga del pool de Cinta (cada 120 ticks, barata).</summary>
+        public override void PostUpdateWorld()
+        {
+            Cinta.TickPurga();
+        }
+
         public override void Unload()
         {
             // Disposición de TODAS las texturas horneadas en runtime.
@@ -31,6 +43,12 @@ namespace AethonMod.Content.Effects.Bruma
             // Estado estático de las librerías v6.25.
             PyraLib.ClearFields();
             EstelaLib.ClearTracks();
+
+            // v6.49 — el barrendero único también en la descarga: el pool
+            // de cintas y el NÚCLEO de VFX (búfer/presupuesto/factor) no
+            // eran limpiados por NADIE (hallazgo AUD-C).
+            try { Cinta.Purgar(); } catch { }
+            try { VFXCore.Reiniciar(); } catch { }
         }
     }
 }

@@ -752,6 +752,14 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 }
                             }
                         }
+                        // v6.49 — EL MEDIO-ANILLO DE SUELO que CRECE mientras la
+                        // estrella cae (OndaLib.GroundVisual — la promesa del
+                        // comentario por fin cumplida: la marca "respira" el
+                        // impacto que viene, pegada al piso de verdad).
+                        float progCaida = MathHelper.Clamp(_edad / 90f, 0f, 1f);
+                        OndaLib.GroundVisual(Main.spriteBatch, suelo,
+                            MathHelper.Min(progCaida * 1.3f, 1f), 74f,
+                            AmbarEstelar, 0.55f);
                         OrbitaLib.AnilloFino(suelo, 46f, 0f,
                             OrbitaLib.Tint(AmbarEstelar, 0.4f));
                         break;

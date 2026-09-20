@@ -77,6 +77,17 @@ namespace AethonMod.Content.VFX
         private static readonly Dictionary<int, int> _ultimoTick = new Dictionary<int, int>(32);
 
         /// <summary>
+        /// v6.49 — LA HIGIENE (hallazgo AUD-C: las hermanas limpian sus
+        /// estáticas; AudioLib no). El barrido perezoso de PuedeSonar
+        /// mantiene el diccionario plano DENTRO de un mundo, pero entre
+        /// mundos los ticks heredados frenaban los primeros sonidos.
+        /// </summary>
+        public static void Reiniciar()
+        {
+            _ultimoTick.Clear();
+        }
+
+        /// <summary>
         /// LA VOZ: hace sonar un momento de una familia. Este es el
         /// ÚNICO punto por el que el mod debería reproducir sonido de
         /// combate — aplica el pitch de la familia, el volumen base del

@@ -193,17 +193,24 @@ namespace AethonMod.Content.VFX
 
             Texture2D defaultTex = texture ?? SoftGlow;
 
-            if (endActiveBatch)
-                Main.spriteBatch.End();
-
-            // v6.41 — EL VOLCADO BLINDADO (try/finally): si UN Draw lanza
-            // (dispositivo perdido, textura nula por descarga caliente), el
-            // lote ANTERIOR quedaba ABIERTO para siempre → TODO el render
-            // del juego se corrompía hasta relogear, y el búfer nunca se
-            // limpiaba (los cuadros muertos se re-volcaban cada frame).
-            // Ahora: el End y la limpieza se garantizan pase lo que pase.
+            // v6.49 — EL END TAMBIÉN BLINDADO (hallazgo AUD-C): el End del
+            // lote del llamador vivía FUERA del try/finally — si lanzaba
+            // (lote ya cerrado por un consumidor del patrón viejo), el
+            // finally NUNCA corría: _quads quedaba sin limpiar y los
+            // cuadros muertos se re-volcaban y re-contaban CADA frame.
+            // Ahora TODO el vuelva es atómico: el búfer se limpia pase lo
+            // que pase, incluso en el error.
             try
             {
+                if (endActiveBatch)
+                    Main.spriteBatch.End();
+
+                // v6.41 — EL VOLCADO BLINDADO (try/finally): si UN Draw lanza
+                // (dispositivo perdido, textura nula por descarga caliente), el
+                // lote ANTERIOR quedaba ABIERTO para siempre → TODO el render
+                // del juego se corrompía hasta relogear, y el búfer nunca se
+                // limpiaba (los cuadros muertos se re-volcaban cada frame).
+                // Ahora: el End y la limpieza se garantizan pase lo que pase.
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -529,9 +536,9 @@ namespace AethonMod.Content.VFX
         public static float FactorCalidad => _factorCalidad;
 
         /// <summary>
-        /// v6.34 — REPORTA los FPS reales del juego (API para el futuro: la
-        /// llama un sistema externo — p. ej. un medidor que lea el frame
-        /// time — y NADIE la llama aún; no se crea ningún sistema nuevo aquí).
+        /// v6.34 — REPORTA los FPS reales del juego. v6.49 (auditoría
+        /// AUD-C): la llama CalidadFpsSystem.PostUpdateEverything — el
+        /// "nadie la llama" del comentario viejo era doc-rot.
         /// Lógica: media móvil EXPONENCIAL (0.9·prev + 0.1·fps) y el factor
         /// de calidad RESPIRA con ella — si el promedio cae por debajo de
         /// 45 FPS, el factor BAJA 0.05 por reporte (suelo 0.5: ni a la mitad
@@ -554,5 +561,30 @@ namespace AethonMod.Content.VFX
             else if (_fpsSuave > 55f)
                 _factorCalidad = Math.Min(_factorCalidad + 0.02f, 1f);
         }
+
+        // ------------------------------------------------------------------
+        //  v6.49 — LA HIGIENE DEL NÚCLEO (hallazgo AUD-C: "todas las
+        //  hermanas tienen Reiniciar; el núcleo no"). El búfer, las
+        //  texturas perezosas y el presupuesto se sueltan al recargar
+        //  el mod / cambiar de mundo — lo llama DiagnosticoVFXSystem
+        //  (que también es el overlay F8 de la casa).
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// v6.49 — LA LIMPIEZA DEL NÚCLEO: búfer vacío, presupuesto en
+        /// cero, factor y FPS de vuelta al nacimiento. Para Unload y
+        /// OnWorldUnload (las texturas pediosas se repiden solas).
+        /// </summary>
+        public static void Reiniciar()
+        {
+            try { _quads.Clear(); } catch { }
+            _quadsDelFrame = 0;
+            _frameDelPresupuesto = 0;
+            _factorCalidad = 1f;
+            _fpsSuave = 60f;
+        }
+
+        /// <summary>v6.49 — EL DIAGNÓSTICO del núcleo (lo pinta el overlay F8).</summary>
+        public static int QuadsDelFrame => _quadsDelFrame;
     }
 }

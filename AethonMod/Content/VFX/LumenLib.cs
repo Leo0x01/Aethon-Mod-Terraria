@@ -197,6 +197,14 @@ namespace AethonMod.Content.VFX
         //  1. EL BLOOM APILADO INVERTIDO — el corazón de la librería
         // ==================================================================
 
+        // v6.49 — LAS ESCALAS/ALFAS MEDIDAS COMO CONSTANTES DE CLASE
+        // (hallazgo AUD-A: cada Bloom() alocaba DOS arrays frescos — y
+        // Bloom/BloomPulse se llaman decenas de veces por frame: decenas
+        // de arrays basura por frame, GC churn continuo. El doc de la
+        // casa decía "cero GC por frame": ahora es verdad de nuevo).
+        private static readonly float[] _bloomScales = { 4.1f, 2.85f, 1.5f, 0.8f };
+        private static readonly float[] _bloomAlphas = { 0.25f, 0.67f, 0.70f, 1.0f };
+
         /// <summary>
         /// EL BLOOM: la textura radial universal apilada en capas INVERTIDAS
         /// (grande+tenue fuera, pequeño+brillante dentro). `size` = diámetro
@@ -211,9 +219,8 @@ namespace AethonMod.Content.VFX
             Color color, float intensity, int layers = 3)
         {
             if (intensity <= 0.02f) return;
-            // LAS ESCALAS/ALFAS MEDIDAS (4.1/2.85/1.5/0.8 · 0.25/0.67/0.7/1.0)
-            float[] scales = { 4.1f, 2.85f, 1.5f, 0.8f };
-            float[] alphas = { 0.25f, 0.67f, 0.70f, 1.0f };
+            float[] scales = _bloomScales;
+            float[] alphas = _bloomAlphas;
 
             int n = (int)MathHelper.Clamp(layers, 1, 4);
             for (int i = 4 - n; i < 4; i++)

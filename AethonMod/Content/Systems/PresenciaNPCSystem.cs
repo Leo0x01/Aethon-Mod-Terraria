@@ -65,8 +65,12 @@ namespace AethonMod.Content.Systems
                         if (idx >= 0 && idx < Main.maxNPCs)
                         {
                             Main.npc[idx].netUpdate = true;
+                            // v6.49 — LOCALIZADO (hallazgo AUD-C: el único
+                            // texto del sistema estaba hardcodeado).
                             if (Main.netMode != NetmodeID.Server)
-                                Main.NewText($"El Testigo ha llegado. {Main.npc[idx].FullName} te observa.",
+                                Main.NewText(
+                                    Terraria.Localization.Language.GetTextValue(
+                                        "Mods.AethonMod.Presencia.Llegada", Main.npc[idx].FullName),
                                     new Color(196, 150, 255));
                         }
                         return;

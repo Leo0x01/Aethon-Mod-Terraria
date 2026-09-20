@@ -42,6 +42,13 @@ namespace AethonMod.Content.VFX
     ///   última dicha para esa clave (matar al Rey Gelatina veinte veces
     ///   no puede escuchar siempre la misma línea).
     ///
+    /// v6.49 — LA VOZ CAMINA EN RED (con EcoRed):
+    /// - ElegirClave(clave, n): el REPARTO sin repetición devolviendo la
+    ///   CLAVE COMPLETA ("claveN") — EcoRed la empaqueta tal cual y el
+    ///   portador la resuelve en SU idioma: la variante la elige la
+    ///   AUTORIDAD (SP o servidor de MP) y todos los portadores ven la
+    ///   misma línea que la autoridad repartió.
+    ///
     /// REGLAS DE LA CASA:
     /// - Render 100% DETERMINISTA: cero Main.rand — la animación es pura
     ///   función de la edad del eco (tipeo, pop, deriva y fundido).
@@ -65,6 +72,16 @@ namespace AethonMod.Content.VFX
             public int TicksFundido = 42;  // desvanecer
             public bool Rugido = true;     // sonido grave al nacer
             public int Edad = 0;
+
+            // v6.49 — EL CACHE DE LA MEDIDA (auditoría AUD-C): medir el
+            // texto y el origen UNA vez al encolar; el render jamás
+            // vuelve a llamar MeasureString (era 2× por frame) ni recorta
+            // la máquina de escribir cada tick (solo cuando cambia el
+            // número de caracteres visibles).
+            public Vector2 Medida = Vector2.Zero;
+            public Vector2 Origen = Vector2.Zero;
+            public int UltimosVisibles = -1;
+            public string TextoTipeado = null;
         }
 
         private static readonly Queue<Eco> _cola = new Queue<Eco>();
@@ -100,6 +117,7 @@ namespace AethonMod.Content.VFX
                     Rugido = rugido,
                     Escala = MathHelper.Clamp(escala, 0.3f, 1.2f),
                 };
+                PrepararCache(eco);
                 if (prioridad && _cola.Count > 0)
                 {
                     // EL CULÓN DE LA COLA: la voz prioritaria pasa delante de
@@ -120,6 +138,30 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
+        /// v6.49 — LA PREPARACIÓN (una vez, fuera del render): mide el
+        /// texto completo, fija el origen y CALIBRA la máquina de
+        /// escribir por longitud (los textos largos tipean más rápido:
+        /// el "quieto" y el fundido ya no se pisan con líneas de 300
+        /// caracteres — hallazgo AUD-C).
+        /// </summary>
+        private static void PrepararCache(Eco eco)
+        {
+            try
+            {
+                var font = Terraria.GameContent.FontAssets.DeathText.Value;
+                // Medida VISIBLE (con escala — para el autoajuste de ancho)…
+                eco.Medida = font.MeasureString(eco.Texto) * eco.Escala;
+                // …y el ORIGEN en espacio de textura SIN escala (DrawString
+                // aplica la escala sobre el origen: pre-escalarlo descentraría).
+                eco.Origen = font.MeasureString(eco.Texto) * 0.5f;
+                // ~2 caracteres/tick con piso y techo (los susurros cortos
+                // respiran; las crónicas largas no eternizan el tipeo).
+                eco.TicksTipeo = (int)MathHelper.Clamp(eco.Texto.Length * 0.5f, 22f, 90f);
+            }
+            catch { eco.Medida = Vector2.Zero; eco.Origen = Vector2.Zero; }
+        }
+
+        /// <summary>
         /// v6.48 — EL REPARTO SIN REPETICIÓN: elige una de las variantes
         /// "clave1..claveN" DISTINTA de la última dicha para esa situación
         /// (aleatorio lógico — corre en la lógica del juego, nunca en el
@@ -128,9 +170,24 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static string ElegirVariante(string clave, int variantes)
         {
+            string completa = ElegirClave(clave, variantes);
+            if (string.IsNullOrEmpty(completa)) return "";
+            return Language.GetTextValue(completa);
+        }
+
+        /// <summary>
+        /// v6.49 — EL REPARTO QUE VIAJA: lo mismo que ElegirVariante pero
+        /// devuelve la CLAVE COMPLETA ("…Celos.Melee2") en vez del texto.
+        /// La AUTORIDAD la llama (SP o servidor MP); EcoRed empaqueta la
+        /// clave y el portador la resuelve en su idioma — la variante se
+        /// reparte UNA vez para todos, la memoria anti-repetición vive
+        /// con la autoridad.
+        /// </summary>
+        public static string ElegirClave(string clave, int variantes)
+        {
             try
             {
-                if (variantes <= 1) return Language.GetTextValue(clave + "1");
+                if (variantes <= 1) return clave + "1";
                 int ultima = -1;
                 _ultimaVariante.TryGetValue(clave, out ultima);
 
@@ -143,9 +200,9 @@ namespace AethonMod.Content.VFX
                     while (idx == ultima);
                 }
                 _ultimaVariante[clave] = idx;
-                return Language.GetTextValue(clave + idx);
+                return clave + idx;
             }
-            catch { return ""; }
+            catch { return clave + "1"; }
         }
 
         /// <summary>
@@ -199,6 +256,9 @@ namespace AethonMod.Content.VFX
         /// <summary>¿hay voz activa o pendiente? (diagnóstico).</summary>
         public static bool Hablando => _activo != null || _cola.Count > 0;
 
+        /// <summary>v6.49 — cuántas voces viven (1 activa + cola) — lo pinta el overlay F8.</summary>
+        public static int ColasPendientes => (_activo != null ? 1 : 0) + _cola.Count;
+
         /// <summary>
         /// Pinta la voz activa. DETERMINISTA: tipeo por edad, pop de
         /// nacimiento (1.14 → 1.0 en 10 ticks), deriva lenta hacia arriba
@@ -226,14 +286,23 @@ namespace AethonMod.Content.VFX
                 alpha = Microsoft.Xna.Framework.MathHelper.Clamp(alpha * nacer, 0f, 1f);
                 if (alpha <= 0f) return;
 
-                // === MÁQUINA DE ESCRIBIR (~2 caracteres/tick) ===
-                string texto = eco.Texto;
+                // === MÁQUINA DE ESCRIBIR (~2 caracteres/tick) — v6.49: el
+                // recorte SOLO cuando cambia el número de visibles (cero
+                // strings basura por frame; hallazgo AUD-C) ===
                 int visibles = eco.Edad * 2;
-                if (visibles < texto.Length)
-                    texto = texto.Substring(0, visibles);
+                if (visibles > eco.Texto.Length) visibles = eco.Texto.Length;
+                if (visibles != eco.UltimosVisibles)
+                {
+                    eco.UltimosVisibles = visibles;
+                    eco.TextoTipeado = visibles >= eco.Texto.Length
+                        ? eco.Texto : eco.Texto.Substring(0, visibles);
+                }
+                string texto = eco.TextoTipeado ?? eco.Texto;
 
                 var font = Terraria.GameContent.FontAssets.DeathText.Value;
-                Vector2 medidas = font.MeasureString(eco.Texto) * eco.Escala;
+                // v6.49 — LA MEDIDA CACHEADA (una vez al encolar): el render
+                // nunca vuelve a medir (era 2× por frame).
+                Vector2 medidas = eco.Medida;
 
                 // === AUTOAJUSTE de ancho (75% de pantalla, piso 0.3) ===
                 float escala = eco.Escala;
@@ -254,7 +323,7 @@ namespace AethonMod.Content.VFX
                 float pop = 1f + 0.14f * (1f - Microsoft.Xna.Framework.MathHelper.Clamp(eco.Edad / 10f, 0f, 1f));
                 float escalaFinal = escala * pop;
 
-                Vector2 origen = font.MeasureString(eco.Texto) * 0.5f;
+                Vector2 origen = eco.Origen;
 
                 // Sombra (doble de vanilla: desplazada y negra) + voz
                 sb.DrawString(font, texto, centro + new Vector2(3f, 3f),

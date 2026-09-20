@@ -399,6 +399,57 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.49 — LOS PRESETS DE PANTALLA (la idea nº1 de la auditoría
+        //  AUD-A): los CUATRO gestos (sacudir + flash + viñeta + onda)
+        //  calibrados juntos en UNA llamada — el golpe que YA se lee como
+        //  golpe sin que cada arma escriba sus 4 líneas a mano (el
+        //  patrón manual vivía en SupernovaProjectile: aquí, en un botón).
+        // ==================================================================
+
+        /// <summary>
+        /// EL PRESET DE IMPACTO: la sacudida (6·escala px, 0.30 s), el
+        /// flash (blanco cálido 0.18 s), la viñeta (0.6 s) y la onda
+        /// expansiva (radio 130·escala px, 0.35 s) — los cuatro gestos
+        /// calibrados de la casa para UN impacto.
+        /// escala 1 = el impacto estándar; 0.5 = un toque; 2 = el golpe
+        /// de un jefe (la sacudida escala LINEAL, el flash/viñeta no
+        /// saturan: son gestos, no candados).
+        /// </summary>
+        /// <param name="centroMundo">Centro del impacto (coords de mundo).</param>
+        /// <param name="escala">La fuerza del golpe (0.25..3 recomendado).</param>
+        /// <param name="color">El color del flash y la onda (null = blanco cálido).</param>
+        public static void PresetImpacto(Vector2 centroMundo, float escala = 1f,
+            Color? color = null)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            escala = MathHelper.Clamp(escala, 0.1f, 4f);
+
+            Color c = color ?? new Color(255, 236, 200);
+
+            Sacudir(6f * escala, 0.30f);
+            Flash(c, 0.18f, MathHelper.Clamp(0.45f * escala, 0.2f, 0.8f));
+            Vineta(MathHelper.Clamp(0.35f * escala, 0.15f, 0.6f), 0.6f);
+            OndaExpansiva(centroMundo, 130f * escala, 0.35f, c,
+                MathHelper.Clamp(40f * escala, 8f, 160f));
+        }
+
+        /// <summary>
+        /// EL PRESET DE GOLPE SECO (sin onda — para impactos en cadena o
+        /// espacios cerrados): sacudida corta + flash corto. El latido,
+        /// no la explosión.
+        /// </summary>
+        /// <param name="escala">La fuerza del golpe (0.25..3).</param>
+        /// <param name="color">El color del flash (null = blanco cálido).</param>
+        public static void PresetGolpeSeco(float escala = 1f, Color? color = null)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            escala = MathHelper.Clamp(escala, 0.1f, 4f);
+            Color c = color ?? new Color(255, 236, 200);
+            Sacudir(3.5f * escala, 0.16f);
+            Flash(c, 0.10f, MathHelper.Clamp(0.3f * escala, 0.15f, 0.6f));
+        }
+
+        // ==================================================================
         //  RESET (recargas limpias y cambios de mundo)
         // ==================================================================
 

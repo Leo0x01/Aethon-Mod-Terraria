@@ -141,7 +141,10 @@ namespace AethonMod.Content.Globals
                     // v6.48 — LA CRÓNICA DEL TESTIGO: el libro devoró a ESTE
                     // jefe con este portador — el Testigo ganará su línea
                     // humana de la misma derrota (dos narradores, un hecho).
-                    if (npc.boss && player.whoAmI == Main.myPlayer)
+                    // v6.49: sin filtro de jugador local — en MP la
+                    // autoridad es el SERVIDOR (la crónica se guarda en su
+                    // réplica del jugador y viaja al reconectar).
+                    if (npc.boss)
                         player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type);
 
                     bool cobro = false;
@@ -163,19 +166,28 @@ namespace AethonMod.Content.Globals
 
                     // v6.47 — LA VOZ DEL HAMBRE: la kill ALIMENTA el libro —
                     // la hambre se perdona (susurros y barra palidecida
-                    // vuelven a su sitio).
+                    // vuelven a su sitio). v6.49: el servidor manda el
+                    // estado nuevo al portador (EcoRed.SincronizarHambre
+                    // corre dentro de RegistrarKill).
                     if (cobro || xp > 0)
                         player.GetModPlayer<Players.ShardPlayer>()?.RegistrarKill();
 
-                    // La barra dorada late en la pantalla del dueño del libro.
-                    if (cobro && player.whoAmI == Main.myPlayer)
-                        ShardHUDSystem.MarcarGanancia(xp);
+                    // La barra dorada late en la pantalla del dueño del libro
+                    // (v6.49: en MP el latido viaja por EcoRed al portador).
+                    if (cobro)
+                    {
+                        if (Main.netMode != NetmodeID.MultiplayerClient &&
+                            player.whoAmI == Main.myPlayer)
+                            ShardHUDSystem.MarcarGanancia(xp); // SP: local
+                        else
+                            EcoRed.LatidoDeXp(player, xp);     // MP: al portador
+                    }
 
                     // v6.47 — LA PRIMERA 5★ CON VOZ PROPIA: la primera
                     // criatura 5 estrellas que el libro se come merece su
                     // línea ("Lo más raro que ha comido jamás") — una sola
                     // vez por libro, en la primera copia visible.
-                    if (player.whoAmI == Main.myPlayer && !Main.dedServ && !npc.boss && cobro)
+                    if (!npc.boss && cobro)
                     {
                         try
                         {
@@ -193,17 +205,18 @@ namespace AethonMod.Content.Globals
                                 ShardLevelSystem.EstrellasDe(npc) >= 5)
                             {
                                 sl5.PrimeraCincoEstrellas = true;
-                                EcoSistema.SusurrarCincoEstrellas();
+                                EcoSistema.SusurrarCincoEstrellas(player);
                             }
                         }
                         catch { }
                     }
 
                     // LA VOZ DEL GRIMORIO: la derrota de un jefe, contada
-                    // por el propio libro (EcoLib + hjson). Solo el
-                    // jugador local la oye (SP-first; MP = TODO de la casa).
-                    if (npc.boss && player.whoAmI == Main.myPlayer && !Main.dedServ)
-                        EcoSistema.AnunciarJefeMuerto(npc);
+                    // por el propio libro (EcoLib + hjson). v6.49 — LA VOZ
+                    // CAMINA EN RED: EcoRed la lleva a la pantalla del
+                    // portador que cobró (en SP habla directo).
+                    if (npc.boss)
+                        EcoSistema.AnunciarJefeMuerto(npc, player);
                 }
             }
             catch { }

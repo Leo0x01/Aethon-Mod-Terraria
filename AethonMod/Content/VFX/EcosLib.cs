@@ -198,5 +198,58 @@ namespace AethonMod.Content.VFX
                 VFXCore.Quad(pos, c, new Vector2(tamano.X * estira, tamano.Y) * (0.55f + 0.45f * f), ang);
             }
         }
+
+        // ==================================================================
+        //  v6.49 — LA CURVA DE APROXIMACIÓN (la idea nº1 de la auditoría
+        //  AUD-B): AethonBoss, HollowTitan y EchoBlade escriben el
+        //  "acercarse y orbitar" A MANO en cada AI. Esta primitiva lo
+        //  estandariza: aproximación suave hasta el radio orbital +
+        //  strafe tangencial CON FRECUENCIAS INCONMENSURABLES (jamás
+        //  sincroniza: 2.17 y 3.03 rad/s — el arco de la casa no es un
+        //  reloj) — jefes con curvas legibles y "astutas" sin esfuerzo.
+        // ==================================================================
+
+        /// <summary>
+        /// LA VELOCIDAD DE APROXIMACIÓN ORBITAL: acércate al objetivo
+        /// hasta radioOrbital y entonces GÍRALO (strafe tangencial con
+        /// vaivén — el jefe NO es un satélite de relojería).
+        /// </summary>
+        /// <param name="pos">La posición actual del cazador (coords de mundo).</param>
+        /// <param name="objetivo">La posición de la presa.</param>
+        /// <param name="radioOrbital">La distancia de caza (px).</param>
+        /// <param name="velocidad">La rapidez de aproximación (px/tick).</param>
+        /// <param name="tiempo">El reloj del mundo (GlobalTimeWrappedHourly).</param>
+        /// <param name="semilla">La identidad del cazador (0..999).</param>
+        /// <returns>El vector de velocidad a aplicar este tick.</returns>
+        public static Vector2 CurvaAproximacion(Vector2 pos, Vector2 objetivo,
+            float radioOrbital, float velocidad, float tiempo, int semilla = 0)
+        {
+            Vector2 delta = objetivo - pos;
+            float dist = delta.Length();
+            if (dist < 1f) return Vector2.Zero;
+
+            Vector2 hacia = delta / dist;      // unitario radial
+            Vector2 tangente = new Vector2(-hacia.Y, hacia.X);
+
+            // EL LADO DEL STRAFE: cada cazador elige UN lado y lo respeta
+            // (semilla fija — girar al azar cada tick es marear, no cazar).
+            float lado = (VFXCore.Hash01(semilla, 51, 311) < 0.5f) ? 1f : -1f;
+
+            // EL VAIVÉN: dos senos INCONMENSURABLES (2.17 y 3.03 rad/s)
+            // — el strafe respira sin período visible.
+            float vaiven = 0.35f * MathF.Sin(tiempo * 2.17f + semilla) +
+                           0.25f * MathF.Sin(tiempo * 3.03f + semilla * 0.7f);
+
+            if (dist > radioOrbital * 1.15f)
+            {
+                // APROXIMACIÓN: radial + un toque de tangente (la curva
+                // se anticipa, no llega en línea recta como un proyectil).
+                return (hacia * velocidad + tangente * (lado * velocidad * 0.25f * (radioOrbital / MathF.Max(dist, 1f))));
+            }
+
+            // ÓRBITA: mantén el radio (corrección radial suave) + strafe.
+            float correccion = (dist - radioOrbital) * 0.03f;
+            return tangente * (lado * velocidad * (0.8f + 0.2f * vaiven)) + hacia * correccion;
+        }
     }
 }

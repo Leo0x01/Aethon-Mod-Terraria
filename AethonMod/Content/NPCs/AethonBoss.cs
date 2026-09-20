@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Systems;
 using AethonMod.Content.Projectiles.Jefes;
 
 namespace AethonMod.Content.NPCs
@@ -654,6 +655,9 @@ namespace AethonMod.Content.NPCs
 
             // EL DROP CUMPLIDO (el TODO de v5, PAGADO): LA FORMA
             // ASCENDIDA — la propia forma de la Luz, reconocerte como un par.
+            // v6.49 — Y SU ALMA: la Esencia de Aethon (+1 nivel al
+            // Grimorio; 10 por mundo — el postre del mismo festín).
+            EsenciasModSistema.SoltarEsencia(NPC);
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                 ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(), 1);
 

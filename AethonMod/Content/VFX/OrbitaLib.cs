@@ -163,9 +163,27 @@ namespace AethonMod.Content.VFX
         //  SECCIÓN A · LOS HELPERS DE BATCH (el patrón del agujero negro)
         // ==================================================================
 
+        /// <summary>
+        /// v6.49 — ¿cerramos un lote AJENO al abrir? (el patrón del End
+        /// defensivo de MoldeLib.FlushPaseAlpha, hallazgo AUD-A aplicado
+        /// a TODA la familia: Orbita + Codigos). Si un consumidor llegaba
+        /// con su lote ABIERTO (contrato roto), el Begin lanzaba y el
+        /// catch de rescate cerraba el lote ajeno A CIEGAS — el render
+        /// posterior del frame se corrompía. Ahora: se cierra lo que haya
+        /// (a lo seguro), se apunta, y CerrarBatch DEVUELVE el estado
+        /// (reabre un lote estándar válido en vez de dejarlo roto).
+        /// </summary>
+        private static bool _loteAjenoAbierto;
+
         /// <summary>Abre el SpriteBatch en ADITIVO con la matriz del juego.</summary>
         public static void AbrirAdditive()
         {
+            // v6.49 — END DEFENSIVO PREVIO: si había lote ajeno abierto, se
+            // cierra y se apunta (el contrato se RESPETA incluso cuando el
+            // consumidor se equivoca; Begin jamás sobre un lote vivo).
+            _loteAjenoAbierto = false;
+            try { Main.spriteBatch.End(); _loteAjenoAbierto = true; }
+            catch { }
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -174,13 +192,37 @@ namespace AethonMod.Content.VFX
         /// <summary>Abre el SpriteBatch en ALFA (el pase de lo oscuro).</summary>
         public static void AbrirAlpha()
         {
+            // v6.49 — mismo blindaje (ver AbrirAdditive).
+            _loteAjenoAbierto = false;
+            try { Main.spriteBatch.End(); _loteAjenoAbierto = true; }
+            catch { }
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 
-        /// <summary>Cierra el SpriteBatch (el contrato: CERRADO al salir).</summary>
-        public static void CerrarBatch() => Main.spriteBatch.End();
+        /// <summary>
+        /// Cierra el SpriteBatch (el contrato: CERRADO al salir). v6.49:
+        /// si el ABRIR cerró un lote AJENO, aquí se le DEVUELVE un lote
+        /// válido (reapertura estándar) — el estado del llamador nunca
+        /// queda roto, solo "como estaba".
+        /// </summary>
+        public static void CerrarBatch()
+        {
+            try { Main.spriteBatch.End(); }
+            catch { }
+            if (_loteAjenoAbierto)
+            {
+                _loteAjenoAbierto = false;
+                try
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                }
+                catch { }
+            }
+        }
 
         /// <summary>Quad centrado al batch actual (tamaño total = size px).</summary>
         public static void Quad(Texture2D tex, Vector2 pos, Vector2 size, float rot, Color tint)
@@ -1079,8 +1121,10 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                // Cierre defensivo SOLO en el path de error.
-                try { Main.spriteBatch.End(); } catch { }
+                // Cierre defensivo SOLO en el path de error — por la
+                // PUERTA BLINDADA (v6.49): respeta al lote ajeno si lo
+                // había (le devuelve su estado en vez de cerrarlo a ciegas).
+                try { CerrarBatch(); } catch { }
             }
         }
     }

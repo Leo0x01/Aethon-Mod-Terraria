@@ -454,5 +454,22 @@ namespace AethonMod.Content.VFX
                 _ticksPantalla = 0;
             }
         }
+
+        /// <summary>
+        /// v6.49 — LA HIGIENE (hallazgo AUD-A: las estáticas del trauma y
+        /// de la pantalla sobrevivían al cambio de mundo). Lo llama
+        /// PulsoSistema en OnWorldUnload/Unload: cero trauma heredado,
+        /// cero flash colgando en el mundo siguiente.
+        /// </summary>
+        public static void Reset()
+        {
+            try { _veredictos.Clear(); } catch { }
+            _trauma = 0f;
+            _frameTrauma = 0;
+            _fuerzaPantalla = 0f;
+            _tintePantalla = Color.White;
+            _ticksPantalla = 0;
+            _framePantalla = 0;
+        }
     }
 }
