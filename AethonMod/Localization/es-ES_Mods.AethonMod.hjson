@@ -9,7 +9,7 @@
         "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
 
         "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
-        "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.\nGana XP REAL con cada baja: la rareza del bestiario (0–5 estrellas)\nmide su valor, los jefes pagan a tope y el hardmode lo duplica.\nSube de nivel mientras esté en el inventario — también por las\nkills de su propio Orbe Cósmico. Sin coste de maná (pruebas).",
+        "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.\nGana XP REAL con cada baja: la rareza del bestiario (0–5 estrellas)\nmide su valor, la PRIMERA kill de cada especie paga ×3 y el hardmode\nduplica a las criaturas; los jefes pagan XP FIJA (base + 10% de su\nvida + estrellas + un término que crece con tu nivel).\nLOS TRES ESTADOS: sostenido = todo el poder; en la barra rápida =\nsigue comiendo XP, conserva los slots de minion y vida/maná (tope\n+100); guardado = nada (los minions ya invocados permanecen).\nSin coste de maná (pruebas).",
 
         "Items.BossSummonBag.DisplayName": "Bolsa de Invocadores",
         "Items.BossSummonBag.Tooltip": "Contiene 999 invocadores de cada jefe.\nItem de testing — eliminar antes de release.",
@@ -487,4 +487,24 @@
 
         "Items.PrismaDePaisajesItem.DisplayName": "El Prisma de Paisajes",
         "Items.PrismaDePaisajesItem.Tooltip": "El probador de la librería del cielo: cada uso despliega UN PAISAJE\nentero sobre el fondo del mundo — capas con su parallax, su deriva,\nsu profundidad y sus tintes de cielo, luz y brillo.\nCiclo: Eclipse Umbral → Lluvia Estelar → Amanecer Primordial → Sagrario Violeta → cielo limpio.\nEL SAGRARIO VIOLETA: el paisaje del lugar, desplegable donde quieras.\nARMA DE PRUEBAS — sin coste de maná.",
+
+        "Eco.VozJefe.KingSlime": "La corona rueda por el suelo. El grimorio sorbe la esencia del rey gelatina: dulce, vacía, de un trono que nunca fue suyo.",
+        "Eco.VozJefe.EyeofCthulhu": "El ojo se cierra para siempre. El grimorio devora su vigilia hambrienta — ahora sabe soñar con lo que tú ves.",
+        "Eco.VozJefe.Deerclops": "El invierno caminante cae de rodillas. El grimorio bebe su escarcha ancestral y las páginas crujen, heladas, un solo instante.",
+        "Eco.VozJefe.EaterofWorlds": "El devorador de mundos ha sido devorado. La esencia de cien fauces corrompidas se derrama en el grimorio… y él pide más.",
+        "Eco.VozJefe.BrainofCthulhu": "El cerebro carmesí enmudece. El grimorio muerde sus reflejos y aprende a gritar en rojo.",
+        "Eco.VozJefe.QueenBee": "La colmena guarda luto. El grimorio lama la miel real de la abeja reina — dulzura con aguijón: su sabor favorito.",
+        "Eco.VozJefe.Skeletron": "Los huesos del guardián vuelven a ser polvo. El grimorio copia su maldición a mano alzada — la próxima puerta no lo detendrá.",
+        "Eco.VozJefe.WallofFlesh": "El muro que separaba los mundos arde hasta las cenizas. El grimorio traga su hambre antigua y DESPIERTA: desde hoy, todo lo que muera vale el doble.",
+        "Eco.VozJefe.QueenSlime": "La reina de cristal se derrite en azúcar. El grimorio prueba su esencia efímera — tan ligera que casi se le escapa entre las páginas.",
+        "Eco.VozJefe.Twins": "Los gemelos caen del cielo como estrellas rotas. El grimorio arranca sus lentes incendiadas y, por fin, ve doble.",
+        "Eco.VozJefe.Destroyer": "La serpiente de acero ruge y se apaga; mil sondas caen con ella. El grimorio enrolla su alma metálica como un hilo y la cose.",
+        "Eco.VozJefe.SkeletronPrime": "El Prime vuelve a su tumba sin cabeza. El grimorio desmonta sus cuatro brazos y firma con la sierra.",
+        "Eco.VozJefe.Plantera": "La jungla exhala por última vez. El grimorio estruja los pétalos de Plantera y bebe su clorofuria.",
+        "Eco.VozJefe.Golem": "El guardián de piedra se desmorona en el templo. El grimorio extrae su núcleo solar y lo usa de marcador de página.",
+        "Eco.VozJefe.DukeFishron": "El duque muere lejos de su tormenta. El grimorio saborea su esencia salada — cerdo, dragón y huracán en un solo bocado.",
+        "Eco.VozJefe.EmpressOfLight": "La emperatriz se disuelve en un destello. El grimorio no puede devorar la luz pura — la PRENSA entre dos páginas, para siempre.",
+        "Eco.VozJefe.LunaticCultist": "El culto queda sin voz. El grimorio se pone su máscara ritual y ensaya, en susurros, la invocación del fin.",
+        "Eco.VozJefe.MoonLord": "El Señor de la Luna exhala su última luz. El grimorio guarda silencio, por una vez… y luego escribe: «gracias por la comida».",
+        "Eco.VozJefe.Desconocido": "Un poder mayor ha caído. El grimorio devora su esencia sin preguntar el nombre.",
 }

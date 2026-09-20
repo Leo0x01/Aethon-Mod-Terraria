@@ -104,11 +104,22 @@ namespace AethonMod.Content.Systems
         /// <summary>+2 vida max cada 20 niveles (Infinito).</summary>
         public static int BonusLife(int level) => (level / 20) * 2;
 
-        /// <summary>+1 slot de minion cada 5 niveles (Infinito).</summary>
+        /// <summary>
+        /// v6.46: +1 slot de minion cada 10 NIVELES, tope +10 (nivel 100).
+        /// La capacidad del libro se SUMA a la base del juego y al resto
+        /// del equipamiento. Los slots se sostienen mientras el libro esté
+        /// SOSTENIDO o en la BARRA RÁPIDA; guardado el libro la capacidad
+        /// baja, pero los minions YA invocados permanecen (vanilla no
+        /// despawnea minions al bajar maxMinions — se van al
+        /// desinvocarlos o morir). Antes era +1 cada 5 niveles sin tope:
+        /// la nueva escalera (10 → 1 · 20 → 2 · … · 100 → 10) es la que
+        /// pidió el usuario.
+        /// </summary>
         public static int BonusMinionSlots(int level)
         {
-            if (level < 5) return 0;
-            return level / 5;
+            int extra = level / 10;
+            if (extra > 10) extra = 10;
+            return extra;
         }
 
         // ================================================================
@@ -235,18 +246,9 @@ namespace AethonMod.Content.Systems
         //  HITOS (cada 5 niveles, con múltiples mejoras por hito)
         // ================================================================
 
-        public static List<string> MilestonesForLevel(int level)
-        {
-            var list = new List<string>();
-            int milestoneNum = level / 5;
-            for (int m = 1; m <= milestoneNum; m++)
-            {
-                var rewards = MilestoneRewards(m);
-                foreach (var r in rewards)
-                    list.Add($"Nivel {m * 5}: {r}");
-            }
-            return list;
-        }
+        // v6.46: MilestonesForLevel() y NextMilestoneSummary() ELIMINADOS —
+        // cero usos en todo el mod (verificados por grep): helpers muertos
+        // de la era v5.x. El tooltip usa MilestoneRewards directamente.
 
         /// <summary>
         /// Devuelve TODAS las mejoras que se otorgan en un hito específico.
@@ -257,8 +259,10 @@ namespace AethonMod.Content.Systems
             var rewards = new List<string>();
             int level = milestone * 5;
 
-            // +1 slot de minion cada 5 niveles
-            rewards.Add("+1 slot de minion");
+            // +1 slot de minion cada 10 niveles (v6.46: tope +10 al nivel 100,
+            // sumado a la base del juego — antes decía "cada 5" y mentía)
+            if (milestone % 2 == 0 && level <= 100) // nivel 10, 20, … 100
+                rewards.Add("+1 slot de minion");
 
             // +1 bolt extra cada 3 niveles (en hitos múltiplos de 3)
             if (milestone % 3 == 0) // nivel 15, 30, 45...
@@ -355,19 +359,6 @@ namespace AethonMod.Content.Systems
                 rewards.Add("+1% crítico mágico");
 
             return rewards;
-        }
-
-        /// <summary>
-        /// Descripción corta del próximo hito (para el tooltip).
-        /// </summary>
-        public static string NextMilestoneSummary(int currentLevel)
-        {
-            int nextMilestoneNum = (currentLevel / 5) + 1;
-            int nextLevel = nextMilestoneNum * 5;
-            var rewards = MilestoneRewards(nextMilestoneNum);
-            if (rewards.Count == 0) return "Sin recompensa";
-            if (rewards.Count == 1) return rewards[0];
-            return $"{rewards.Count} mejoras";
         }
     }
 }

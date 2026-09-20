@@ -8,9 +8,10 @@ namespace AethonMod.Content.Globals
     /// GlobalItem — guarda el nivel y XP de CADA arma Aethon individualmente.
     ///
     /// Esto permite que cada arma tenga su propio progreso independiente:
-    /// - El SolbrandEdge que el jugador elige sube de nivel con kills.
-    /// - Las otras 2 armas (Lumina/Grimorio) NO suben hasta que sean elegidas.
-    /// - Si el jugador consigue otra copia del mismo item, esa copia empieza en nivel 1.
+    /// - El Grimorio del Eterno del jugador sube de nivel comiendo XP.
+    /// - El Fragmento Génesis base NO sube (es material, no arma).
+    /// - Si el jugador consigue otra copia del mismo item, esa copia
+    ///   empieza en nivel 1 con su propio progreso.
     /// </summary>
     public class ShardLevelItem : GlobalItem
     {
@@ -31,7 +32,7 @@ namespace AethonMod.Content.Globals
         public bool ShowExtendedTooltip = false;
 
         /// <summary>
-        /// Solo aplica a las 3 armas Aethon + el FragmentoGenesis.
+        /// Solo aplica a las 2 armas Aethon (Grimorio + Fragmento Génesis).
         /// DEFENSIVO: envuelto en try/catch porque se llama durante la carga del mod
         /// y ModContent.ItemType puede fallar si los items aún no están registrados.
         /// </summary>
@@ -53,7 +54,7 @@ namespace AethonMod.Content.Globals
         /// v6.45: coste inicial 100 y sube desde ahí — 100 * nivel^1.5.
         /// Nivel 1→2: 100 XP. Nivel 10→11: ~3.162 XP. Nivel 20→21: ~8.944 XP.
         /// La XP ahora es REAL (rareza del bestiario, no kills): un jefe
-        /// pre-hardmode (5.000) paga ~un tercio del camino al nivel 20.
+        /// pre-hardmode (5.000+) paga ~un tercio del camino al nivel 20.
         /// </summary>
         public int XPForNextLevel()
         {
@@ -61,7 +62,8 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// Otorga XP a ESTE item específico. Si sube de nivel, dispara OnLevelUp.
+        /// Otorga XP a ESTE item específico. Si sube de nivel, dispara
+        /// OnLevelUp UNA VEZ con el total de niveles ganados.
         /// DEFENSIVO: envuelto en try/catch para que un error NUNCA corrompa el kill.
         /// </summary>
         public void GrantXP(Item item, int amount)
@@ -72,12 +74,23 @@ namespace AethonMod.Content.Globals
                 if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
 
                 XP += amount;
+                int nivelesGanados = 0;
+                bool cruzoHito = false;
+                int nivelHito = 0;
                 while (XP >= XPForNextLevel())
                 {
                     XP -= XPForNextLevel();
                     Level++;
-                    OnLevelUp(item);
+                    nivelesGanados++;
+                    if (Level % 50 == 0) { cruzoHito = true; nivelHito = Level; }
                 }
+
+                // v6.46: una sola derrota de jefe a nivel bajo salta 10–15
+                // niveles de golpe — TODA la subida se anuncia en UN
+                // mensaje condensado (el spam de 15 "alcanzó el nivel N"
+                // seguidos era ruido, no información).
+                if (nivelesGanados > 0)
+                    OnLevelUp(item, nivelesGanados, cruzoHito, nivelHito);
             }
             catch
             {
@@ -86,24 +99,33 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// Se llama cuando ESTE item sube de nivel.
+        /// Se llama cuando ESTE item sube de nivel (v6.46: UNA vez por
+        /// cobro de XP, con el total de niveles ganados).
         /// DEFENSIVO: envuelto en try/catch para que un error NUNCA corrompa el kill.
+        /// v6.46: respeta las banderas de la config
+        /// (ShowLevelUpNotifications / ShowMilestoneNotifications) — antes
+        /// eran promesas muertas: existían y nadie las leía.
         /// </summary>
-        private void OnLevelUp(Item item)
+        private void OnLevelUp(Item item, int nivelesGanados, bool cruzoHito, int nivelHito)
         {
             try
             {
+                var config = ModContent.GetInstance<Content.AethonConfig>();
+                bool notificar = config == null || config.ShowLevelUpNotifications;
+                bool notificarHitos = config == null || config.ShowMilestoneNotifications;
+
                 // Efectos visuales en la posición del jugador (mantenidos por request del usuario):
-                // - mensaje dorado con el nivel alcanzado
+                // - mensaje dorado con el nivel alcanzado (CONDENSADO si hubo salto múltiple)
                 // - sonido corto
                 // - partículas doradas en torno al jugador
                 // (Los eventos cinematográficos — temblor de pantalla, grano, time-skip, lore —
                 //  fueron eliminados por request del usuario. Ver commit de eliminación de
                 //  LevelUpEventSystem.)
                 Player owner = Main.LocalPlayer;
-                if (owner != null)
+                if (owner != null && notificar && nivelesGanados > 0)
                 {
-                    Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}!",
+                    string salto = nivelesGanados > 1 ? $" (+{nivelesGanados} niveles de golpe)" : "";
+                    Main.NewText($"✦ {item.Name} alcanzó el nivel {Level}{salto}!",
                         new Microsoft.Xna.Framework.Color(245, 196, 81));
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item4);
                     for (int i = 0; i < 40; i++)
@@ -112,10 +134,13 @@ namespace AethonMod.Content.Globals
                             100, new Microsoft.Xna.Framework.Color(245, 196, 81), 1.5f);
                 }
 
-                // Hito especial cada 50 niveles (infinito)
-                if (Level % 50 == 0)
+                // Hito especial cada 50 niveles (infinito) — v6.46: el hito
+                // también se anuncia si la subida múltiple LO CRUZÓ sin
+                // aterrizar exactamente en él (nivelHito = el cruzado, no
+                // el nivel final del salto).
+                if (cruzoHito && notificarHitos && nivelHito > 0)
                 {
-                    Main.NewText($"✦✦ Hito nivel {Level}! {item.Name} resuena con poder. ✦✦",
+                    Main.NewText($"✦✦ Hito nivel {nivelHito}! {item.Name} resuena con poder. ✦✦",
                         new Microsoft.Xna.Framework.Color(245, 196, 81));
                     Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_EtherianPortalOpen);
                 }

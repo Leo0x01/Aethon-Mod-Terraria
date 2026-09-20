@@ -1,5 +1,42 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.46 — EL GRIMORIO DE TRES ESTADOS + LA DIETA DEL BESTIARIO + LAS VOCES
+
+**Petición del usuario**: XP de jefes FIJA (sin el ×2 del hardmode) con la fórmula (base + 10% vida + rareza) + 1.1·(nivel·111) · el combate exige sostener el libro; vida/maná +100 como tope sin sostener (desde la barra rápida); slots de minion nivel/10 hasta +10 sumados a la base del juego; minions ya invocados permanecen al guardarlo · XP solo en el inventario visible (barra rápida) · subida múltiple condensada en un mensaje · limpieza de helpers muertos · ×3 en la primera kill de cada especie (jefes excluidos) · barra dorada de XP junto al hotbar con pulso · voces personalizadas por jefe con su color (formato de mensaje de estado, librería propia para diálogos).
+
+### A. LA XP DE LOS JEFES ES FIJA (ShardLevelSystem.XPDeJefe)
+  · **LA FÓRMULA**: (base + 10% de la vida total del jefe + estrellas del bestiario) + 1.1 × (nivel del grimorio × 111). Base: Moon Lord (núcleo) 100.000 · vida alta >20.000 = 25.000 · resto 5.000. El término del nivel mantiene a los jefes relevantes cuando el libro ya está alto. Nivel de referencia: la PRIMERA copia de la barra rápida (la misma que manda en las stats).
+  · **INMUNE AL HARDMODE ×2 y AL ×3 DE PRIMERA KILL**: los jefes son la fuente gorda estable — el ×2 del hardmode y la dieta del bestiario son para las CRIATURAS.
+  · **UNA DERROTA, UN COBRO (EsParteDeJefe)**: los gusanos solo pagan por la CABEZA (Devorador de Mundos 13 · El Devorador 134 · Muro de Carne 113), el Golem por el CUERPO (245) y el Señor de la Luna por el NÚCLEO (398) — los segmentos, ojos y manos que mueren en cascada o como fase NO pagan. v6.45 pagaba por cada segmento del gusano y por cada parte del Señor de la Luna: una fuente de XP por error. Los Gemelos NO son parte: cada cuerpo cobra su fórmula.
+
+### B. LOS TRES ESTADOS DEL LIBRO (ShardPlayer.NivelLibro)
+  · **SOSTENIDO = TODO**: stats de combate (+1% summon/nivel, +0.2% crítico, +2% penetración cada 5, la mitad summon del bonus de mana bajo), regeneración, reducción de daño, vida/maná completos. El poder de combate exige BLANDIRLO.
+  · **BARRA RÁPIDA (slots 0–9) = CAPACIDAD**: sigue comiendo XP (todas las copias), conserva los slots de minion y la vida/maná extra — TOPE +100 cada uno sin sostener.
+  · **GUARDADO (inventario profundo, hucha/vaulta, cofre, suelo) = NADA**. Los minions YA INVOCADOS permanecen hasta que el jugador los desinvoque o mueran: el buff del orbe vive en el JUGADOR (no en el item) y vanilla no despawnea minions al bajar maxMinions — verificado, cero cambios necesarios.
+  · **Slots de minion (WeaponScaling.BonusMinionSlots)**: +1 cada 10 NIVELES, tope +10 al nivel 100 (antes: +1 cada 5, infinito) — SUMADO a la base del juego y al resto del equipamiento. Los hitos del tooltip decían "cada 5": corregidos.
+  · La detección está CENTRALIZADA en NivelLibro(soloSostenido) — PostUpdateEquips/PostUpdateBuffs/ModifyHurt cuentan la misma historia; las stats salen de la primera copia (sin stacking), la XP la cobran todas.
+
+### C. LA DIETA DEL BESTIARIO (×3 la primera kill de cada especie)
+  · **ConPrimeraKillDeEspecie**: la primera vez que matas cada especie paga ×3 — leído del tracker de kills del PROPIO bestiario vanilla (Main.BestiaryTracker.Kills.GetKillCount, el crédito por especie de GetBestiaryCreditId — las variantes visuales comparten entrada). VERIFICADO AL IL: NPCLoot llama RegisterKill ANTES de NPCLoader.OnKill, así que la primera kill ya cuenta 1 al llegar al hook (GetKillCount ≤ 1 = primera). Jefes excluidos: su XP es fija. Premia explorar el mundo en vez de farmear la misma babosa.
+
+### D. LA BARRA DORADA (ShardHUDSystem — nueva)
+  · La barra de XP del Grimorio JUNTO AL HOTBAR: nivel a la izquierda, "XP actual/total" a la derecha, chip "HM ×2" en hardmode (el pendiente de v6.45 — el indicador de que las criaturas pagan doble). Visible siempre que el libro esté en la barra rápida, con el inventario CERRADO (abierto: el tooltip ya lo cuenta).
+  · **EL PULSO**: al cobrar XP la barra LATE 90 ticks (brillo senoidal sobre el dorado) y un "+XP" flotante sube y se funde. Geometría leída del IL de GUIHotbarDrawInner (primer slot (20,20), fila ≈ 470px → la barra en y=80). Render 100% determinista (cero Main.rand), capa insertada tras "Vanilla: Hotbar" con InterfaceScaleType.UI.
+
+### E. LAS VOCES DEL GRIMORIO (EcoLib + EcoSistema — la séptima librería)
+  · **ECOLIB (Content/VFX)**: la librería de diálogos dramáticos — máquina de escribir (~2 caracteres/tick), pausa, fundido, pop de nacimiento, deriva lenta hacia arriba, rugido al nacer (SoundID.Roar), fuente DeathText (la del "Has muerto…" de vanilla), autoajuste al 75% de la pantalla, cola acotada (8), texto partido en líneas al encolar (una vez, fuera del render). Cero lotes propios: se dibuja en la capa que EcoSistema inserta tras "Vanilla: Death Text".
+  · **ECOSISTEMA (Content/Systems)**: el anfitrión + LA TABLA DE JEFES — 18 derrotas con su CLAVE hjson y su COLOR propio (gelatina turquesa, carnes, miel, hueso, infierno, clorofuria, destello prisma…), la voz genérica para jefes del mod/desconocidos, Los Gemelos hablan cuando cae el ÚLTIMO, anti-duplicado de 300 ticks por clave (si ambos gemelos caen el mismo tick no repite).
+  · **LOS TEXTOS**: 19 claves Eco.VozJefe.* en hjson es/en (paridad 381/381) — una línea personal por derrota, la VOZ del grimorio devorando la esencia del jefe. El Muro de Carne ANUNCIA el hardmode ("todo lo que muera vale el doble").
+
+### F. LIMPIEZA Y CONDENSADO
+  · **SUBIDA MÚLTIPLE EN UN MENSAJE**: una derrota de jefe a nivel bajo salta 10–15 niveles — TODO el salto se anuncia condensado ("alcanzó el nivel N (+X niveles de golpe)"), con el hito de 50 cruzado por el salto detectado correctamente (nivelHito, no el nivel final).
+  · **MilestonesForLevel()/NextMilestoneSummary() ELIMINADOS** (cero usos verificados por grep) · el comentario stalado de ShardLevelItem decía "las 3 armas" (son 2: Grimorio + Fragmento Génesis) y nombraba armas de la era v5 que ya no existen — reescrito.
+  · **LAS BANDERAS DE CONFIG YA NO MIENTEN**: ShowLevelUpNotifications y ShowMilestoneNotifications existían desde v5.x y NADIE las leía — ahora OnLevelUp las respeta.
+  · Lifesteal ya era solo-al-sostener (GlobalNPCXP revisa HeldItem): CONFIRMADO como diseño, ahora documentado.
+
+### G. VERIFICACIÓN
+  · Compilación: **0 errores / 0 warnings** contra tModLoader 2026.07.3.0 real (.NET 8.0.425) · hjson es/en paridad EXACTA 381/381 claves, mismo orden · cero Main.rand en render (los nuevos dibujan por función del tiempo) · cero menciones externas en todo el repo trackeado · cero ai[3]/ai[4] · estáticos con funeral completo (OnWorldUnload/Unload en EcoSistema y ShardHUDSystem) · las APIs verificadas contra el binario real antes de usarse (NPCKillsTracker.GetKillCount y su orden vs OnKill, DynamicSpriteFontExtensionMethods en ReLogic, la geometría del hotbar en GUIHotbarDrawInner, FontAssets.DeathText, las capas "Vanilla: Hotbar"/"Vanilla: Death Text").
+
 ## Commit v6.45 — EL GRIMORIO DE VERDAD: LA XP REAL DEL BESTIARIO
 
 **Petición del usuario**: maná del minion gratis para pruebas · quitar "disparo doble" de los hitos, mover el bonus de summon al sitio correcto y quitar el costo de maná por disparo · XP REAL usando la rareza y rango de estrellas del bestiario (coste inicial 100, jefes a tope, hardmode ×2) · el arma gana XP siempre que esté en el inventario, también por las kills de sus propios minions.

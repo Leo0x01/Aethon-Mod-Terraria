@@ -9,7 +9,7 @@
         "Items.ResonanceShard.Tooltip": "Cosmic currency. Dropped by bosses.",
 
         "Items.GrimoireEternal.DisplayName": "Grimoire of the Eternal",
-        "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.\nEarns REAL XP from every kill: the bestiary rarity (0–5 stars)\nsets its worth, bosses pay top coin and hardmode doubles it.\nLevels up while in your inventory — minion kills count too.\nNo mana cost (testing).",
+        "Items.GrimoireEternal.Tooltip": "Hybrid magic/summon weapon.\nLeft click: arcane bolt. Right click: summon minion.\nEarns REAL XP from every kill: the bestiary rarity (0–5 stars)\nsets its worth, the FIRST kill of each species pays ×3 and\nhardmode doubles creatures; bosses pay FIXED XP (base + 10% of\ntheir life + stars + a term that grows with your level).\nTHREE STATES: held = full power; in the hotbar = still eats XP,\nkeeps minion slots and life/mana (capped at +100); stored = nothing\n(already-summoned minions remain).\nNo mana cost (testing).",
 
         "Items.BossSummonBag.DisplayName": "Summoner Bag",
         "Items.BossSummonBag.Tooltip": "Contains 999 of every boss summoner.\nTesting item — remove before release.",
@@ -499,4 +499,24 @@
 
         "Items.PrismaDePaisajesItem.DisplayName": "The Landscape Prism",
         "Items.PrismaDePaisajesItem.Tooltip": "The sky library tester: each use unfurls AN ENTIRE LANDSCAPE\nover the world's background — layers with their own parallax, drift,\ndepth and their sky, light and brightness tints.\nCycle: Umbral Eclipse → Starfall Rain → Primordial Dawn → Violet Sanctum → clear sky.\nTHE VIOLET SANCTUM: the place's landscape, unfurled wherever you stand.\nTEST WEAPON — no mana cost.",
+
+        "Eco.VozJefe.KingSlime": "The crown rolls across the floor. The grimoire slurps the King Slime's essence: sweet, hollow, from a throne that was never his.",
+        "Eco.VozJefe.EyeofCthulhu": "The eye closes forever. The grimoire devours its hungry vigil — now it knows how to dream of what you see.",
+        "Eco.VozJefe.Deerclops": "The walking winter falls to its knees. The grimoire drinks its ancestral frost and the pages crackle, frozen, for a single breath.",
+        "Eco.VozJefe.EaterofWorlds": "The Eater of Worlds has been eaten. The essence of a hundred corrupted maws pours into the grimoire… and it asks for more.",
+        "Eco.VozJefe.BrainofCthulhu": "The crimson brain falls silent. The grimoire bites into its reflections and learns to scream in red.",
+        "Eco.VozJefe.QueenBee": "The hive mourns. The grimoire licks the royal honey from the Queen Bee — sweetness with a sting: its favorite flavor.",
+        "Eco.VozJefe.Skeletron": "The guardian's bones crumble back to dust. The grimoire copies his curse by hand — the next door won't stop it.",
+        "Eco.VozJefe.WallofFlesh": "The wall between worlds burns down to ash. The grimoire swallows its ancient hunger and AWAKENS: from today, everything that dies is worth double.",
+        "Eco.VozJefe.QueenSlime": "The crystal queen melts into sugar. The grimoire tastes her fleeting essence — so light it nearly slips between the pages.",
+        "Eco.VozJefe.Twins": "The twins fall from the sky like broken stars. The grimoire plucks their burning lenses and, at last, sees double.",
+        "Eco.VozJefe.Destroyer": "The steel serpent roars and goes dark; a thousand probes fall with it. The grimoire winds its metal soul like thread and harvests it.",
+        "Eco.VozJefe.SkeletronPrime": "The Prime returns to its tomb, headless. The grimoire takes its four arms apart and signs with the saw.",
+        "Eco.VozJefe.Plantera": "The jungle breathes its last. The grimoire crushes Plantera's petals and drinks her chloro-fury.",
+        "Eco.VozJefe.Golem": "The stone guardian crumbles in the temple. The grimoire extracts its solar core and uses it as a bookmark.",
+        "Eco.VozJefe.DukeFishron": "The Duke dies far from his storm. The grimoire savors his salty essence — pig, dragon and hurricane in a single bite.",
+        "Eco.VozJefe.EmpressOfLight": "The Empress dissolves into a flash. The grimoire cannot devour pure light — so it PRESSES it between two pages, forever.",
+        "Eco.VozJefe.LunaticCultist": "The cult falls voiceless. The grimoire dons his ritual mask and rehearses, in whispers, the summoning of the end.",
+        "Eco.VozJefe.MoonLord": "The Lord of the Moon exhales his last light. The grimoire stays silent, for once… then writes: 'thanks for the food.'",
+        "Eco.VozJefe.Desconocido": "A greater power has fallen. The grimoire devours its essence without asking for a name.",
 }

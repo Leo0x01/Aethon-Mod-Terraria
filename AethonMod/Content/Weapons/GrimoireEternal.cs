@@ -13,20 +13,23 @@ namespace AethonMod.Content.Weapons
     /// Grimorio del Eterno — arma mágica híbrida (magia + invocación).
     ///
     /// SISTEMA DE NIVELES:
-    /// - Sube de nivel al matar enemigos (XP guardada en ShardLevelItem).
-    /// - v6.45: XP REAL por rareza del bestiario (0–5★), jefes a tope y
-    ///   hardmode ×2; el arma gana XP desde TODO el inventario.
+    /// - Sube de nivel comiendo XP REAL (rareza del bestiario 0–5★,
+    ///   primera kill de cada especie ×3, hardmode ×2 en criaturas,
+    ///   jefes con fórmula FIJA que crece con su nivel).
+    /// - v6.46: LOS TRES ESTADOS — sostenido: TODO el poder; en la barra
+    ///   rápida: come XP + slots de minion + vida/maná (tope +100);
+    ///   guardado: nada (los minions ya invocados permanecen).
     /// - Niveles infinitos. Sin dependencias de BranchType ni IsImprinted.
     ///
     /// CLICK IZQUIERDO: dispara ArcaneBolt (homing). SIN MANÁ (v6.42, arsenal de pruebas).
     /// CLICK DERECHO: invoca CosmicOrbMinion. SIN MANÁ en pruebas
     /// (v6.45, bandera ManaGratisEnPruebas — apagarla restaura el coste).
     ///
-    /// ESCALADO POR NIVEL:
+    /// ESCALADO POR NIVEL (sostenido):
     /// - +2.2% daño mágico, +1% daño summon, +0.2% crit, +0.4% armor pen
     /// - -0.3% use time (tope -25%)
-    /// - +1 slot de minion cada 5 niveles
-    /// - +1 bolt extra cada 5 niveles
+    /// - +1 slot de minion cada 10 niveles (tope +10 — nivel 100)
+    /// - +1 bolt extra cada 3 niveles
     /// - Lifesteal nivel 7+: +0.1% cada 7 niveles
     /// - Bonus por mana faltante: +0.5% daño por 1% mana faltante (tope +50%)
     /// </summary>
@@ -391,10 +394,12 @@ namespace AethonMod.Content.Weapons
                     $"[c/FFAA55:+{kbBonus:F0}% retroceso]"));
 
                 tooltips.Add(new TooltipLine(Mod, "SectionResources", "[c/55AAFF:═══ RECURSOS ═══]"));
+                // v6.46: el tope +100 de la barra rápida anotado en la línea
+                // misma — el número grande es el de SOSTENER el libro.
                 tooltips.Add(new TooltipLine(Mod, "ManaMax",
-                    $"[c/55AAFF:+{bonusMana} mana máximo]"));
+                    $"[c/55AAFF:+{bonusMana} mana máximo (tope +100 sin sostener)]"));
                 tooltips.Add(new TooltipLine(Mod, "LifeMax",
-                    $"[c/55AAFF:+{bonusLife} vida máxima]"));
+                    $"[c/55AAFF:+{bonusLife} vida máxima (tope +100 sin sostener)]"));
                 tooltips.Add(new TooltipLine(Mod, "ManaRegen",
                     $"[c/55AAFF:+{manaRegen} mana/seg regeneración]"));
                 tooltips.Add(new TooltipLine(Mod, "LifeRegen",
@@ -412,9 +417,10 @@ namespace AethonMod.Content.Weapons
 
                 tooltips.Add(new TooltipLine(Mod, "SectionMinion", "[c/BE78FD:═══ ORBE CÓSMICO ═══]"));
                 // v6.45: los slots de minion viven aquí — junto al resto del
-                // summon (antes en la sección DAÑO).
+                // summon (antes en la sección DAÑO). v6.46: escalera nueva
+                // (cada 10 niveles, tope +10 — se sostienen en la barra rápida).
                 tooltips.Add(new TooltipLine(Mod, "MinionSlots",
-                    $"[c/78FF96:+{bonusSlots} slot(s) de minion]"));
+                    $"[c/78FF96:+{bonusSlots} slot(s) de minion (máx +10)]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionContactDmg",
                     $"[c/BE78FD:+{contactDmg:F0}% daño de contacto]"));
                 tooltips.Add(new TooltipLine(Mod, "MinionSpeed",

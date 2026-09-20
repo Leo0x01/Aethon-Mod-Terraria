@@ -8,11 +8,17 @@ namespace AethonMod.Content.Globals
 {
     /// <summary>
     /// GlobalNPC que:
-    /// - v6.45: otorga XP REAL (rareza del bestiario) a TODO Grimorio del
-    ///   inventario del jugador que mató — no solo al sostenido, y también
-    ///   por las kills de sus propios minions (el minion acredita al dueño).
-    /// - Aplica lifesteal si el Grimorio sostenido tiene nivel >= 7.
+    /// - v6.46: otorga XP REAL (rareza del bestiario + dieta ×3 de
+    ///   primera kill + jefes con fórmula FIJA) a todo Grimorio de la
+    ///   BARRA RÁPIDA (slots 0–9) del jugador que mató — el inventario
+    ///   visible de las teclas de número; sostenerlo también cuenta (el
+    ///   sostenido ES uno de esos slots). Las kills de los propios
+    ///   minions pagan igual (el minion acredita al dueño).
+    /// - Aplica lifesteal si el Grimorio SOSTENIDO tiene nivel >= 7
+    ///   (v6.46: el robo de vida es poder de combate — exige blandirlo).
     /// - Hace que King Slime y Eye of Cthulhu dropeen el Fragmento Génesis.
+    /// - Enciende el pulso de la barra dorada (ShardHUDSystem) y dispara
+    ///   la VOZ del grimorio cuando cae un jefe (EcoSistema).
     /// </summary>
     public class GlobalNPCXP : GlobalNPC
     {
@@ -37,7 +43,7 @@ namespace AethonMod.Content.Globals
                 // Cósmico del Grimorio (y cualquier proyectil del jugador)
                 // deja marcado playerInteraction: FindKiller encuentra al
                 // dueño aunque la kill la dé el minion, y el Grimorio en su
-                // inventario cobra la XP. Idempotente: si el motor ya lo
+                // barra rápida cobra la XP. Idempotente: si el motor ya lo
                 // marcó, esto no cambia nada.
                 npc.playerInteraction[projectile.owner] = true;
                 ApplyAethonLifesteal(player, damageDone);
@@ -86,30 +92,68 @@ namespace AethonMod.Content.Globals
                 }
             }
 
-            // === v6.45: OTORGAR XP REAL A TODO GRIMORIO DEL INVENTARIO ===
-            // El arma gana XP SIEMPRE QUE ESTÉ EN EL INVENTARIO (no solo al
-            // sostenerla: matar con otra arma también la alimenta) y las
-            // kills de sus propios minions pagan igual (el minion acredita
-            // al dueño vía playerInteraction). TODAS las copias del Grimorio
-            // en el inventario cobran — cada una sube su propio nivel.
+            // === v6.46: OTORGAR XP AL GRIMORIO DE LA BARRA RÁPIDA ===
+            // El libro come mientras esté en el INVENTARIO VISIBLE (la
+            // barra de las teclas de número, slots 0–9 — el sostenido es
+            // uno de ellos). Guardado más abajo, en la hucha/vaulta o en
+            // un cofre NO come: hay que tenerlo a mano. TODAS las copias
+            // visibles cobran (cada una su propio nivel); las stats solo
+            // salen de la primera (ShardPlayer) — coherente anti-exploit.
+            // Las kills de sus propios minions pagan igual: el orbe
+            // acredita a su dueño vía playerInteraction.
             Player player = FindKiller(npc);
             if (player == null) return;
 
             try
             {
-                int baseXP = ShardLevelSystem.XPForNPC(npc);
-                int xp = ShardLevelSystem.ApplyXPMultiplier(baseXP);
-                if (xp > 0)
+                // La fórmula de los JEFES escala con el nivel del libro:
+                // usa el de la PRIMERA copia visible (la misma que manda
+                // en las stats — una sola voz para una sola derrota).
+                int nivelGrimorio = 0;
+                bool libroVisible = false;
+                for (int i = 0; i < 10; i++)
                 {
-                    for (int i = 0; i < 58; i++)
+                    Item inv = player.inventory[i];
+                    if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                        continue;
+                    if (!libroVisible)
                     {
-                        Item inv = player.inventory[i];
-                        if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
-                            continue;
-                        var sl = inv.GetGlobalItem<ShardLevelItem>();
-                        if (sl != null)
-                            sl.GrantXP(inv, xp);
+                        var slx = inv.GetGlobalItem<ShardLevelItem>();
+                        if (slx != null) nivelGrimorio = slx.Level;
+                        libroVisible = true;
                     }
+                }
+
+                if (libroVisible)
+                {
+                    int baseXP = ShardLevelSystem.XPForNPC(npc, nivelGrimorio);
+                    int xp = ShardLevelSystem.ApplyXPMultiplier(baseXP);
+                    bool cobro = false;
+                    if (xp > 0)
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            Item inv = player.inventory[i];
+                            if (inv == null || inv.type != ModContent.ItemType<Weapons.GrimoireEternal>())
+                                continue;
+                            var sl = inv.GetGlobalItem<ShardLevelItem>();
+                            if (sl != null)
+                            {
+                                sl.GrantXP(inv, xp);
+                                cobro = true;
+                            }
+                        }
+                    }
+
+                    // La barra dorada late en la pantalla del dueño del libro.
+                    if (cobro && player.whoAmI == Main.myPlayer)
+                        ShardHUDSystem.MarcarGanancia(xp);
+
+                    // LA VOZ DEL GRIMORIO: la derrota de un jefe, contada
+                    // por el propio libro (EcoLib + hjson). Solo el
+                    // jugador local la oye (SP-first; MP = TODO de la casa).
+                    if (npc.boss && player.whoAmI == Main.myPlayer && !Main.dedServ)
+                        EcoSistema.AnunciarJefeMuerto(npc);
                 }
             }
             catch { }
