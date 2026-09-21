@@ -117,6 +117,9 @@ namespace AethonMod.Content.Projectiles.Jefes
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.light = 0.5f;
+            // v6.50.1 — los que entren a media pelea reciben las paredes/minas
+            // (vanilla lo hace con los proyectiles de jefe).
+            Projectile.netImportant = true;
         }
 
         public override void OnSpawn(IEntitySource source)
@@ -414,21 +417,33 @@ namespace AethonMod.Content.Projectiles.Jefes
                         if (tajo)
                         {
                             float dirCorte = (presa.Center - Projectile.Center).ToRotation();
-                            Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                                presa.Center, Vector2.Zero,
-                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                                (int)(Projectile.damage * 0.8f), 3f, Main.myPlayer,
-                                EstiloTajoPortador, dirCorte, Seed + 17);
+                            // v6.50.1 — FIX (MP ×N+1): la IA del proyectil
+                            // corre en server Y clientes (el dueño puede ser
+                            // 255 — spawn del server) — sin gate cada máquina
+                            // spawnnea su copia y NewProjectile la difunde.
+                            // Solo la autoridad spawnnea (los clientes no).
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                                    presa.Center, Vector2.Zero,
+                                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                    (int)(Projectile.damage * 0.8f), 3f, Main.myPlayer,
+                                    EstiloTajoPortador, dirCorte, Seed + 17);
+                            }
                         }
                         else
                         {
                             Vector2 vel = (presa.Center - Projectile.Center)
                                 .SafeNormalize(Vector2.UnitY) * 11f;
-                            Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                                Projectile.Center, vel,
-                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                                (int)(Projectile.damage * 0.7f), 2f, Main.myPlayer,
-                                EstiloPernoEstelar, 0f, Seed + 29);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                                    Projectile.Center, vel,
+                                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                    (int)(Projectile.damage * 0.7f), 2f, Main.myPlayer,
+                                    EstiloPernoEstelar, 0f, Seed + 29);
+                            }
                         }
                     }
                     if (_edad > 600) Projectile.Kill();
@@ -472,11 +487,16 @@ namespace AethonMod.Content.Projectiles.Jefes
             {
                 float ang = i * MathHelper.TwoPi / 5f + Seed * 0.01f;
                 Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 7f;
-                Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                    Projectile.Center, vel,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(Projectile.damage * 0.55f), 2f, Main.myPlayer,
-                    EstiloPernoEstelar, 0f, Seed + i * 7);
+                // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+                // (los clientes corren esta IA — la esquirla se difunde sola).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                        Projectile.Center, vel,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(Projectile.damage * 0.55f), 2f, Main.myPlayer,
+                        EstiloPernoEstelar, 0f, Seed + i * 7);
+                }
             }
             for (int d = 0; d < 8; d++)
             {
@@ -495,11 +515,16 @@ namespace AethonMod.Content.Projectiles.Jefes
         private void DetonarMina(Player presa)
         {
             // EL CUERPO: 20 t de radio honesto.
-            Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                Projectile.Center, Vector2.Zero,
-                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                Projectile.damage, 4f, Main.myPlayer,
-                EstiloEstallidoMina, 0f, Seed);
+            // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+            // (los clientes corren esta IA — el cuerpo se difunde solo).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                    Projectile.Center, Vector2.Zero,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    Projectile.damage, 4f, Main.myPlayer,
+                    EstiloEstallidoMina, 0f, Seed);
+            }
 
             for (int d = 0; d < 10; d++)
             {

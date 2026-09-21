@@ -292,8 +292,20 @@ namespace AethonMod.Content.Systems
         {
             NPC jefe = (_bossIdx >= 0 && _bossIdx < Main.maxNPCs) ? Main.npc[_bossIdx] : null;
 
-            // EL JEFE CALLÓ → la oleada se completa
-            if (jefe == null || !jefe.active || jefe.life <= 0)
+            // v6.50.1 — FIX (EL SLOT HUÉRFANO + LA HUIDA QUE ERA VICTORIA):
+            // (a) _bossIdx es un whoAmI reciclable — si el jefe moría y el
+            // slot se re-llenaba con otro NPC, la furia miraba al EXTRAÑO
+            // hasta el timeout (o lo "mataba" por él): el sello de
+            // OleadaNPC valida que el slot siga siendo del festín.
+            // (b) un jefe que se DESPAWNEA solo (amanecer, distancia) no
+            // debe entregar el DerrotaOleada10: solo la MUERTE (life ≤ 0,
+            // confirmada por el sello) paga. La instancia muerta conserva
+            // el sello (solo NewNPC lo resetea) y el reciclado lo pierde.
+            var sello = jefe != null ? jefe.GetGlobalNPC<Globals.OleadaNPC>() : null;
+            bool esDelFestin = sello != null && sello.EsJefeDeOleada;
+
+            // EL JEFE CALLÓ (vida ≤ 0 con sello) → la oleada se completa
+            if (esDelFestin && jefe.life <= 0)
             {
                 // v6.48 — LA OLEADA 10 VENCIDA: el portador gana el
                 // DERECHO A LAS ESENCIAS del Testigo (la tienda de 10
@@ -322,6 +334,15 @@ namespace AethonMod.Content.Systems
                 return;
             }
 
+            // EL JEFE YA NO ESTÁ (slot reciclado, nunca nació o se fue
+            // solo) → la furia sigue SIN crédito de victoria.
+            if (!esDelFestin || !jefe.active)
+            {
+                _fase = Fase.Interludio;
+                _ticksFase = 0;
+                return;
+            }
+
             // EL JEFE SE CANSÓ: se hunde insatisfecho (90 s) y la furia
             // sigue su curso — 10 jefes vivos a la vez no es un evento,
             // es un dilema de render.
@@ -330,6 +351,14 @@ namespace AethonMod.Content.Systems
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.JefeHuido",
                     new Color(150, 140, 148), jefe.FullName);
                 jefe.active = false; // despawn limpio (patrón HollowTitan)
+                // v6.50.1 — FIX (JEFE FANTASMA): este despawn corre en
+                // PostUpdateWorld (FUERA de la AI del NPC — vanilla difunde
+                // el 23 desde UpdateNetworkCode solo si el apagado pasa
+                // DENTRO de su update). Sin el 23 explícito, los clientes
+                // conservaban un jefe congelado/invulnerable hasta que el
+                // slot se reciclaba.
+                if (Main.netMode == NetmodeID.Server)
+                    Terraria.NetMessage.SendData(23, -1, -1, null, jefe.whoAmI);
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
             }
@@ -714,6 +743,10 @@ namespace AethonMod.Content.Systems
             // de VFX y el anti-coros de audio también mueren con el mundo.
             try { VFXCore.Reiniciar(); } catch { }
             try { AudioLib.Reiniciar(); } catch { }
+            // v6.50.1 — FIX: el contador de la carnada era un ESTÁTICO que
+            // sobrevivía al mundo (dato de mundo en campo de clase — la
+            // deuda nº recurrente de las auditorías). Vuelve al default.
+            try { Items.CarnadaDelGrimorio.OleadasPreparadas = 3; } catch { }
         }
         public override void Unload()
         {

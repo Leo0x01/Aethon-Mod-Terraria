@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.DataStructures;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Items.Esencias;
@@ -166,6 +168,46 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
+        //  EL VIAJE DEL SELLO POR LA RED (v6.50.1 — flags con el NPC)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.50.1 — FIX: los flags de oleada viajan con el NPC (el aura del
+        /// JUICIO se dibuja en los clientes de MP — antes solo el server los
+        /// tenía: los GlobalNPC de instancia NO viajan solos). Corre cuando
+        /// el NPC se sincroniza (MessageID.SyncNPC: netUpdate, creación y
+        /// jugadores que entran a media oleada). ESCRITURA SIMÉTRICA
+        /// EXACTA con ReceiveExtraAI (mismo orden y tipos: 3 bits + 1 byte).
+        /// </summary>
+        public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter writer)
+        {
+            bitWriter.WriteBit(EsDeOleada);
+            bitWriter.WriteBit(EsEspecial);
+            bitWriter.WriteBit(EsJefeDeOleada);
+            writer.Write((byte)Oleada);
+        }
+
+        /// <summary>
+        /// v6.50.1 — FIX (el simétrico de SendExtraAI): el cliente asigna los
+        /// flags de instancia con los datos leídos Y reconstruye el aura —
+        /// PreDraw/PostDraw leen Aura en el cliente y sin reconstruirla el
+        /// sello llegaba pero el JUICIO seguía invisible.
+        /// </summary>
+        public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader reader)
+        {
+            EsDeOleada = bitReader.ReadBit();
+            EsEspecial = bitReader.ReadBit();
+            EsJefeDeOleada = bitReader.ReadBit();
+            Oleada = reader.ReadByte();
+
+            if (EsDeOleada && Aura == null)
+            {
+                Aura = AuraPerfil.OleadaGrimorio(Oleada);
+                Aura.Radio = RadioSegun(npc, EsJefeDeOleada);
+            }
+        }
+
+        // ==================================================================
         //  LA AGRESIÓN (chusma Y jefes — la furia crece con la oleada)
         // ==================================================================
 
@@ -323,9 +365,16 @@ namespace AethonMod.Content.Globals
                         {
                             float ang = i * MathHelper.TwoPi / 8f;
                             Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 70f;
-                            Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, ang, i * 31 + Oleada);
+                            // v6.50.1 — FIX (MP ×N+1): la IA del NPC corre en
+                            // server Y clientes — sin gate cada máquina escupía
+                            // su ración de dientes y NewProjectile la
+                            // auto-difundía. Solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, ang, i * 31 + Oleada);
+                            }
                         }
                         break;
                     }
@@ -337,9 +386,13 @@ namespace AethonMod.Content.Globals
                         {
                             Vector2 pos = presa.Center + (i == 0 ? Vector2.Zero : new Vector2(90f, -40f));
                             float dir = Main.rand.NextFloat(MathHelper.TwoPi);
-                            Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, dir, Oleada * 7 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, dir, Oleada * 7 + i);
+                            }
                         }
                         break;
                     }
@@ -351,9 +404,13 @@ namespace AethonMod.Content.Globals
                         {
                             Vector2 pos = presa.Center + new Vector2(
                                 (i - 1) * 130f + Main.rand.NextFloat(-40f, 40f), -420f);
-                            Projectile.NewProjectile(src, pos, new Vector2(0f, 4f),
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 11 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, pos, new Vector2(0f, 4f),
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 11 + i);
+                            }
                         }
                         break;
                     }
@@ -365,9 +422,13 @@ namespace AethonMod.Content.Globals
                         for (int i = -2; i <= 2; i++)
                         {
                             Vector2 vel = baseDir.RotatedBy(i * 0.16f) * 11f;
-                            Projectile.NewProjectile(src, npc.Center, vel,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 13 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, npc.Center, vel,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 13 + i);
+                            }
                         }
                         break;
                     }
@@ -379,9 +440,13 @@ namespace AethonMod.Content.Globals
                         for (int i = -1; i <= 1; i++)
                         {
                             Vector2 vel = baseDir.RotatedBy(i * 0.35f) * 8f;
-                            Projectile.NewProjectile(src, npc.Center, vel,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 17 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, npc.Center, vel,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 17 + i);
+                            }
                         }
                         break;
                     }
@@ -393,9 +458,13 @@ namespace AethonMod.Content.Globals
                         {
                             float ang = i * MathHelper.TwoPi / 8f;
                             Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 9f;
-                            Projectile.NewProjectile(src, npc.Center, vel,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 19 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, npc.Center, vel,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 19 + i);
+                            }
                         }
                         break;
                     }
@@ -407,9 +476,13 @@ namespace AethonMod.Content.Globals
                         {
                             float ang = i * MathHelper.TwoPi / 3f;
                             Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 92f;
-                            Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                danio, 2f, Main.myPlayer, estilo, ang, Oleada * 23 + i);
+                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(src, pos, Vector2.Zero,
+                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                                    danio, 2f, Main.myPlayer, estilo, ang, Oleada * 23 + i);
+                            }
                         }
                         break;
                     }

@@ -126,6 +126,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // v6.50.1 — FIX (LA RECURSIÓN DE LA CADENA): la cadena nace SOLO
+            // del impacto REAL. Un golpe de GolpeMotor dispara este hook
+            // síncronamente — sin el guard, golpe→cadena→golpe→cadena…
+            // rebotaba entre blancos hasta matar a uno (StackOverflow con
+            // jefes; el contador `cadenas` limita por LLAMADA, no la
+            // recursión ENTRE llamadas).
+            if (Content.Systems.GolpeMotor.EnCurso(Projectile.whoAmI)) return;
+
             // === LA CADENA VIOLETA: 2 vecinos comen la descarga (v6.50 —
             //     GolpeMotor: el cauce del motor) ===
             int cadenas = 0;

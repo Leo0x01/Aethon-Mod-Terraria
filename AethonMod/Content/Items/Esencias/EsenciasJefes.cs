@@ -90,10 +90,12 @@ namespace AethonMod.Content.Items.Esencias
             sl.SubirNivelDirecto(libro, 1);
             // LA VOZ del libro probando el alma (variantes por jefe —
             // la clave general con 3 muestras para no repetir).
-            string sabor = EcoLib.ElegirVariante("Mods.AethonMod.Esencia.Sabor", 3);
-            if (!string.IsNullOrEmpty(sabor))
-                EcoLib.Hablar(sabor, new Color(245, 196, 81),
-                    rugido: false, escala: 0.55f);
+            // v6.50.1 — FIX (LA VOZ EN LA PANTALLA EQUIVOCADA): EcoLib.Hablar
+            // hablaba en la pantalla de QUIEN EJECUTA el server (el host oía
+            // el libro ajeno; en dedicado la voz moría sin render). La voz
+            // es del PORTADOR: viaja por EcoRed a SU cliente.
+            EcoRed.HablarVarianteAlPortador(player, "Mods.AethonMod.Esencia.Sabor", 3,
+                new Color(245, 196, 81), rugido: false, escala: 0.55f);
 
             // El alma se disuelve en chispas doradas.
             for (int i = 0; i < 18; i++)

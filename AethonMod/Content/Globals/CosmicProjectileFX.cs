@@ -89,6 +89,15 @@ namespace AethonMod.Content.Globals
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // === v6.50.1 — FIX (LA RECURSIÓN DEL AOE) ===
+            // El AoE nace SOLO del impacto REAL (el contacto del motor, sin
+            // golpe en curso). Un golpe de GolpeMotor dispara OnHitNPC
+            // síncronamente: sin este guard, golpe→AoE→golpe→AoE… rebotaba
+            // entre dos NPC hasta la muerte de uno (StackOverflow con jefes
+            // — el golpe tipo bala nunca marca npc.immune, la vieja defensa
+            // no sirve contra el ping-pong).
+            if (Systems.GolpeMotor.EnCurso(projectile.whoAmI)) return;
+
             // === v5.29: DAÑO EN ÁREA (BoltAreaDamage) ===
             // Finalmente implementado: daña NPCs cercanos al punto de impacto
             // según el nivel del Grimorio del jugador que disparó.

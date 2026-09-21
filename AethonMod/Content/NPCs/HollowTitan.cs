@@ -90,7 +90,12 @@ namespace AethonMod.Content.NPCs
 
             // === LA FURIA (&lt;50%): el coloso redobla ===
             bool furia = (float)NPC.life / NPC.lifeMax < 0.5f;
-            if (furia && _tickCoro == 0 && _tickPua == 0 && _tickPorrazo == 0 && _tickCarga == 0 &&
+            // v6.50.1 — FIX (anuncio de furia muerto): los contadores se
+            // deprimen por debajo de 0 sin clamp (_tickPorrazo llega a -1,
+            // -2, ... para siempre) — los == 0 jamás coincidían a la vez y
+            // el aviso NUNCA sonaba. La semántica real es "todos los
+            // timers inactivos" → <= 0.
+            if (furia && _tickCoro <= 0 && _tickPua <= 0 && _tickPorrazo <= 0 && _tickCarga <= 0 &&
                 NPC.localAI[0] < 1f)
             {
                 NPC.localAI[0] = 1f; // una sola vez
@@ -171,7 +176,12 @@ namespace AethonMod.Content.NPCs
                 _tickCarga = 1; // arranca el aviso
             }
 
-            NPC.ai[0]++;
+            // v6.50.1 — FIX (ai[0] pisa la IA fighter): aiStyle 2 usa ai[0]
+            // como timer de salto/bloqueo de vanilla y lo incrementábamos
+            // cada tick → saltos erráticos. El contador de la casa pasa a
+            // localAI[1] (no se sincroniza, pero solo gatilla ataques que
+            // con el gate de spawn ya corren en la autoridad).
+            NPC.localAI[1]++;
         }
 
         // ==================================================================
@@ -182,15 +192,21 @@ namespace AethonMod.Content.NPCs
         private void EscupirPuas(Player target)
         {
             Vector2 baseDir = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
-            for (int i = -1; i <= 1; i++)
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): el arco de púas solo lo
+            // escupe la autoridad (server/SP) — sin gate cada cliente clonaba
+            // las 3 espinas; el crujido sigue sonando en todas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Vector2 vel = baseDir.RotatedBy(i * 0.18f) * (9f + Math.Abs(i));
-                vel.Y -= 3f; // EL ARCO
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center + new Vector2(0f, -20f), vel,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.85f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloPuaSagrario, 0f, NPC.whoAmI * 31 + i);
+                for (int i = -1; i <= 1; i++)
+                {
+                    Vector2 vel = baseDir.RotatedBy(i * 0.18f) * (9f + Math.Abs(i));
+                    vel.Y -= 3f; // EL ARCO
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center + new Vector2(0f, -20f), vel,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.85f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloPuaSagrario, 0f, NPC.whoAmI * 31 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item27, NPC.Center);
         }
@@ -199,16 +215,22 @@ namespace AethonMod.Content.NPCs
         private void CantarElCoro()
         {
             bool furia = (float)NPC.life / NPC.lifeMax < 0.5f;
-            for (int i = 0; i < 6; i++)
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): el coro de 6 esquirlas
+            // solo lo canta la autoridad — sin gate cada cliente lanzaba su
+            // propio anillo; la nota sigue sonando en todas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                float ang = i * MathHelper.TwoPi / 6f;
-                Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 118f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.75f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloCoroCristal,
-                    furia ? -1f : ang, // Par &lt; 0 = coro rápido
-                    NPC.whoAmI * 13 + i);
+                for (int i = 0; i < 6; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 6f;
+                    Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 118f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.75f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloCoroCristal,
+                        furia ? -1f : ang, // Par &lt; 0 = coro rápido
+                        NPC.whoAmI * 13 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
         }
@@ -216,16 +238,22 @@ namespace AethonMod.Content.NPCs
         /// <summary>EL PORRAZO: onda de suelo + esquirlas radiales + kick.</summary>
         private void ElPorrazo()
         {
-            // 5 esquirlas raseras alrededor del golpe.
-            for (int i = 0; i < 5; i++)
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): las 5 esquirlas raseras
+            // solo las engendra la autoridad — sin gate cada cliente tiraba
+            // las suyas; kick, sonido y polvo siguen en todas las pantallas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                float ang = MathHelper.Pi + i * MathHelper.Pi / 4f; // el hemisferio del suelo
-                Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * -0.3f) * 8f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center + new Vector2(0f, 30f), vel,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.7f), 3f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloPuaSagrario, 0f, NPC.whoAmI * 7 + i);
+                // 5 esquirlas raseras alrededor del golpe.
+                for (int i = 0; i < 5; i++)
+                {
+                    float ang = MathHelper.Pi + i * MathHelper.Pi / 4f; // el hemisferio del suelo
+                    Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * -0.3f) * 8f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center + new Vector2(0f, 30f), vel,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.7f), 3f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloPuaSagrario, 0f, NPC.whoAmI * 7 + i);
+                }
             }
             // EL KICK de cámara (el golpe del coloso se SIENTE).
             OndaLib.Kick(7f, 14);
@@ -391,8 +419,13 @@ namespace AethonMod.Content.NPCs
             if (sp != null)
             {
                 sp.ResonanceShards += 8;
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Resonancia",
-                    NPC.FullName, 8), new Color(245, 196, 81));
+                // v6.50.1 — FIX (anuncio invisible en MP): OnKill solo corre
+                // en server/SP — el Main.NewText no llegaba a nadie en MP;
+                // el anuncio ahora viaja por EcoRed al portador que mató.
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
+                    new Color(245, 196, 81), NPC.FullName, 8);
+                // v6.50.1 — entrega inmediata del shard (MsgCronica, merge máximo).
+                EcoRed.SincronizarCronica(player);
             }
         }
     }

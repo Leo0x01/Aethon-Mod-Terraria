@@ -76,7 +76,13 @@ namespace AethonMod.Content.Tiles
                     if (item >= 0 && item < Main.item.Length) // v5.59: bounds check
                         Main.item[item].noGrabDelay = 0;
                 }
-                Main.NewText("Has reclamado el Fragmento Génesis.", new Color(245, 196, 81));
+                // v6.50.1 — FIX (MENSAJE PREMATURO): el texto no anuncia un
+                // hecho consumado — el server revalida (v6.50.1, anti-dupe)
+                // y puede rechazar. En SP es cierto; en MP es la SOLICITUD.
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                    Main.NewText("Solicitando el Fragmento Génesis al altar...", new Color(245, 196, 81));
+                else
+                    Main.NewText("Has reclamado el Fragmento Génesis.", new Color(245, 196, 81));
             }
             else
             {

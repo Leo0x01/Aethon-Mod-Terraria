@@ -183,18 +183,27 @@ namespace AethonMod.Content.NPCs
         /// <summary>LOS VIROTES: abanico de 3 (5 con el sello), con lead.</summary>
         private void LanzarVirotes(Player target, bool sello)
         {
-            // EL LEAD: apunta a dónde ESTARÁS (el centinela conoce tu rumbo).
-            Vector2 pred = target.Center + target.velocity * 18f;
-            Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitX);
-            int n = sello ? 5 : 3;
-            for (int i = -(n / 2); i <= n / 2; i++)
+            // v6.50.1 — FIX (PROYECTILES ×N+1): la IA de NPC corre en server
+            // Y en todos los clientes — sin gate, cada máquina spawneaba SU
+            // copia (NewProjectile auto-difunde con SendData(27) cuando el
+            // owner es Main.myPlayer) y la pared quedaba multiplicada por
+            // jugador. Vanilla cerca TODA spawn de IA con netMode != 1.
+            // El sonido sigue sonando en todas las pantallas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Vector2 vel = dir.RotatedBy(i * 0.14f) * 10.5f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center, vel,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.72f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloViroteVacio, 0f, NPC.whoAmI * 17 + i);
+                // EL LEAD: apunta a dónde ESTARÁS (el centinela conoce tu rumbo).
+                Vector2 pred = target.Center + target.velocity * 18f;
+                Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitX);
+                int n = sello ? 5 : 3;
+                for (int i = -(n / 2); i <= n / 2; i++)
+                {
+                    Vector2 vel = dir.RotatedBy(i * 0.14f) * 10.5f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, vel,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.72f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloViroteVacio, 0f, NPC.whoAmI * 17 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12, NPC.Center);
         }
@@ -205,18 +214,23 @@ namespace AethonMod.Content.NPCs
         /// </summary>
         private void SellarLaArena(Player target)
         {
-            for (int i = 0; i < 4; i++)
+            // v6.50.1 — FIX (PROYECTILES ×N+1): solo la AUTORIDAD siembra las
+            // paredes (ver LanzarVirotes); el anuncio y el sonido son de todos.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                float cardinal = i * MathHelper.PiOver2;
-                // Cada pared nace a 480 px del centro de la presa y AVANZA
-                // hacia ella (obliga a moverse: el sello estrecha).
-                Vector2 pos = target.Center + new Vector2(
-                    MathF.Cos(cardinal), MathF.Sin(cardinal)) * 480f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.6f), 3f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloCorteRealidad,
-                    cardinal + MathHelper.Pi, NPC.whoAmI * 23 + i);
+                for (int i = 0; i < 4; i++)
+                {
+                    float cardinal = i * MathHelper.PiOver2;
+                    // Cada pared nace a 480 px del centro de la presa y AVANZA
+                    // hacia ella (obliga a moverse: el sello estrecha).
+                    Vector2 pos = target.Center + new Vector2(
+                        MathF.Cos(cardinal), MathF.Sin(cardinal)) * 480f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.6f), 3f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloCorteRealidad,
+                        cardinal + MathHelper.Pi, NPC.whoAmI * 23 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item103, NPC.Center);
             Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Rift.Paredes"),
@@ -393,8 +407,15 @@ namespace AethonMod.Content.NPCs
             if (sp != null)
             {
                 sp.ResonanceShards += 45;
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Resonancia",
-                    NPC.FullName, 45), new Color(245, 196, 81));
+                // v6.50.1 — FIX (ONKILL INVISIBLE EN MP): OnKill solo corre
+                // en server/SP — Main.NewText no llegaba a ninguna pantalla.
+                // El aviso viaja al portador que mató (EcoRed + merge del
+                // shard en MsgCronica para que el .plr del cliente lo guarde).
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
+                    new Color(245, 196, 81), NPC.FullName, 45);
+                // v6.50.1 — entrega INMEDIATA (sin esperar la red de 10 s):
+                // MsgCronica lleva el total con merge máximo al portador.
+                EcoRed.SincronizarCronica(player);
             }
         }
     }

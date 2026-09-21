@@ -1,3 +1,4 @@
+using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -166,6 +167,42 @@ namespace AethonMod.Content.Globals
         }
 
         // === Persistencia ===
+
+        /// <summary>
+        /// v6.50.1 — LA RED: el nivel/XP del libro viaja con el ITEM cuando
+        /// vanilla sincroniza el inventario (al entrar sin SSC el cliente
+        /// manda sus slots al server con ItemIO — que solo transporta datos
+        /// de mod si el GlobalItem implementa esto). Sin él, la copia del
+        /// SERVER nacía fresca (nivel 1) en cada sesión y EcoRed.MsgLibro
+        /// pisoteaba la progresión real del cliente. Con esto la autoridad
+        /// cuenta desde los datos verdaderos.
+        /// </summary>
+        public override void NetSend(Item item, BinaryWriter writer)
+        {
+            try
+            {
+                writer.Write(Level);
+                writer.Write(XP);
+                writer.Write(PrimeraCincoEstrellas);
+            }
+            catch { }
+        }
+
+        public override void NetReceive(Item item, BinaryReader reader)
+        {
+            try
+            {
+                Level = System.Math.Max(1, reader.ReadInt32());
+                XP = reader.ReadInt32();
+                PrimeraCincoEstrellas = reader.ReadBoolean();
+            }
+            catch
+            {
+                Level = 1;
+                XP = 0;
+                PrimeraCincoEstrellas = false;
+            }
+        }
 
         /// <summary>
         /// v6.50 — LA CELEBRACIÓN DEL DELTA: cuando EcoRed.MsgLibro trae el

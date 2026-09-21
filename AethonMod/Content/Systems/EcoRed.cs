@@ -266,6 +266,10 @@ namespace AethonMod.Content.Systems
         /// paquete lleva la crónica completa hacia SU portador. La llama
         /// GlobalNPCXP al marcar jefe devorado y GrimorioFuriaSistema al
         /// cerrar la oleada 10.
+        /// v6.50.1 — RESONANCIA TAMBIÉN CAMINA: sin SSC el .plr lo escribe
+        /// el CLIENTE — los shards que acreditaba el server (OnKill de los
+        /// 5 jefes) morían con la sesión. Viajan aquí y el portador aplica
+        /// con merge (nunca degradar).
         /// </summary>
         public static void SincronizarCronica(Player portador)
         {
@@ -285,6 +289,7 @@ namespace AethonMod.Content.Systems
                     for (int i = 0; i < sp.CronicaJefes.Count && i < 255; i++)
                         p.Write((ushort)sp.CronicaJefes[i]);
                     p.Write(sp.CronicaNarrada);
+                    p.Write(sp.ResonanceShards);
                 });
             }
             catch { }
@@ -381,13 +386,28 @@ namespace AethonMod.Content.Systems
                         {
                             // EL ALTAR HABLA CON EL SERVER: el RightClick de
                             // tile corre SOLO en el cliente — el Fragmento
-                            // Génesis lo spawn- ea la AUTORIDAD (sin drops
+                            // Génesis lo spawn-ea la AUTORIDAD (sin drops
                             // fantasma) y vanilla lo difunde al mundo.
-                            int idx = Item.NewItem(solicitante.GetSource_GiftOrReward(),
-                                solicitante.Center,
-                                ModContent.ItemType<Content.Items.GenesisShard>());
-                            if (idx >= 0 && idx < Main.item.Length)
-                                Main.item[idx].noGrabDelay = 0;
+                            // v6.50.1 — FIX: la AUTORIDAD revalida (el chequeo
+                            // del cliente no basta: un cliente modificado — o un
+                            // doble click antes de recoger el ítem del suelo —
+                            // pediría fragmentos infinitos).
+                            bool yaTiene = false;
+                            for (int k = 0; k < 58 && !yaTiene; k++)
+                            {
+                                Item inv = solicitante.inventory[k];
+                                if (inv != null && !inv.IsAir &&
+                                    inv.type == ModContent.ItemType<Content.Items.GenesisShard>())
+                                    yaTiene = true;
+                            }
+                            if (!yaTiene)
+                            {
+                                int idx = Item.NewItem(solicitante.GetSource_GiftOrReward(),
+                                    solicitante.Center,
+                                    ModContent.ItemType<Content.Items.GenesisShard>());
+                                if (idx >= 0 && idx < Main.item.Length)
+                                    Main.item[idx].noGrabDelay = 0;
+                            }
                         }
                     }
                     return;
@@ -396,7 +416,14 @@ namespace AethonMod.Content.Systems
                 byte destinatario = reader.ReadByte();
 
                 // LA DOBLE PUERTA: la voz de OTRO grimorio no me llega.
-                if (Main.netMode != NetmodeID.MultiplayerClient || destinatario != Main.myPlayer)
+                // v6.50.1 — el HOST (listen server: netMode Server con
+                // pantalla propia) también es destinatario legítimo: sus
+                // paquetes viajan por la entrega local de EnviarPaquete.
+                // En dedicado el jugador 0 es REMOTO: Main.dedServ lo
+                // distingue.
+                bool soyYo = Main.netMode == NetmodeID.MultiplayerClient ||
+                             (Main.netMode == NetmodeID.Server && !Main.dedServ);
+                if (!soyYo || destinatario != Main.myPlayer)
                     return;
 
                 switch (tipo)
@@ -455,6 +482,20 @@ namespace AethonMod.Content.Systems
                                 continue;
                             var sl = inv.GetGlobalItem<Globals.ShardLevelItem>();
                             if (sl == null) continue;
+                            // v6.50.1 — FIX (integridad de progresión): aplicar
+                            // con MERGE, jamás degradar. Sin SSC la copia del
+                            // server puede llegar “fresca” (nivel 1) antes de
+                            // que ItemIO traiga los datos del libro — el
+                            // overwrite incondicional borraba progresión real
+                            // del .plr en cada reconexión. El NetSend/NetReceive
+                            // de ShardLevelItem alimenta al server con los
+                            // datos reales; este guard cubre la ventana previa
+                            // y cualquier deriva.
+                            if (nivel < sl.Level)
+                            {
+                                sl.PrimeraCincoEstrellas |= primera5;
+                                continue;
+                            }
                             int delta = nivel - sl.Level;
                             sl.Level = System.Math.Max(1, nivel);
                             sl.XP = System.Math.Max(0, xp);
@@ -471,15 +512,31 @@ namespace AethonMod.Content.Systems
                         byte total = reader.ReadByte();
                         var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
                         if (sp == null) break;
-                        sp.DerrotaOleada10 = derrota10 != 0;
-                        sp.CronicaJefes.Clear();
-                        for (int k = 0; k < total; k++)
+                        // v6.50.1 — FIX: MERGE, nunca wipe. La copia del
+                        // server nace vacía cada sesión (sin SSC el .plr
+                        // vive en el cliente): Clear() + overwrite borraba
+                        // la crónica real y el derecho a las esencias de
+                        // la copia persistente. Con el NetSend/NetReceive
+                        // de ShardLevelItem + este merge, la crónica que
+                        // manda es la MÁS RICA de las dos.
+                        sp.DerrotaOleada10 |= derrota10 != 0;
+                        if (total > 0)
                         {
-                            int tipoJefe = reader.ReadUInt16();
-                            if (!sp.CronicaJefes.Contains(tipoJefe))
-                                sp.CronicaJefes.Add(tipoJefe);
+                            sp.CronicaJefes.Clear();
+                            for (int k = 0; k < total; k++)
+                            {
+                                int tipoJefe = reader.ReadUInt16();
+                                if (!sp.CronicaJefes.Contains(tipoJefe))
+                                    sp.CronicaJefes.Add(tipoJefe);
+                            }
                         }
-                        sp.CronicaNarrada = reader.ReadInt32();
+                        // total == 0: el cauce sigue alineado (0 ushorts) y
+                        // la crónica local se conserva — nada que limpiar.
+                        sp.CronicaNarrada = System.Math.Max(sp.CronicaNarrada, reader.ReadInt32());
+                        // v6.50.1 — LA RESONANCIA CAMINA: acreditada por el
+                        // server (OnKill), persistida por el cliente —
+                        // merge máximo para que ningún lado la pierda.
+                        sp.ResonanceShards = System.Math.Max(sp.ResonanceShards, reader.ReadInt32());
                         break;
                     }
                 }
@@ -535,9 +592,30 @@ namespace AethonMod.Content.Systems
         /// Empaqueta y envía SOLO al cliente del portador (ModPacket con
         /// delegado para escribir el cuerpo sin repetir el boilerplate).
         /// Lógica de servidor: una llamada por evento, no por frame.
+        /// v6.50.1 — FIX (EL HOST SORDO): en un listen server (Host & Play)
+        /// el host es el jugador 0 y NO tiene socket de vuelta —
+        /// ModPacket.Send(0) no le llega a nadie. La entrega LOCAL
+        /// atraviesa el MISMO cauce (el cuerpo se serializa a memoria y
+        /// Recibir lo procesa como si viniera de red): la doble puerta ya
+        /// admite al host como destinatario. En dedicado el jugador 0 es
+        /// remoto y Main.dedServ mantiene el camino de red.
         /// </summary>
-        private static void EnviarPaquete(Player portador, System.Action<ModPacket> escribir)
+        private static void EnviarPaquete(Player portador, System.Action<BinaryWriter> escribir)
         {
+            if (Main.netMode == NetmodeID.Server && !Main.dedServ &&
+                portador.whoAmI == Main.myPlayer)
+            {
+                // EL HOST COMO DESTINATARIO: entrega local, mismo formato.
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    using (var w = new BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true))
+                        escribir(w);
+                    ms.Position = 0;
+                    using (var r = new BinaryReader(ms, System.Text.Encoding.UTF8, leaveOpen: true))
+                        Recibir(r, -1);
+                }
+                return;
+            }
             ModPacket p = AethonMod.Instance.GetPacket();
             escribir(p);
             p.Send(portador.whoAmI);

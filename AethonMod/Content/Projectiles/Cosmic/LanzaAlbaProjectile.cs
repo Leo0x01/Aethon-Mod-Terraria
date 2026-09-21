@@ -111,6 +111,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // v6.50.1 — FIX (LA RECURSIÓN DE LA CADENA): la cadena nace SOLO
+            // del impacto REAL. Un golpe de GolpeMotor dispara este hook
+            // síncronamente — sin el guard, golpe→cadena→golpe→cadena…
+            // rebotaba entre blancos hasta matar a uno (el hitList solo
+            // excluye blancos DENTRO de una misma llamada: entre niveles
+            // recursivos el blanco original volvía a comer).
+            if (Content.Systems.GolpeMotor.EnCurso(Projectile.whoAmI)) return;
+
             // v6.30 — LAS ARMAS ELÉCTRICAS ELECTRIFICAN (petición del
             // usuario): la hoja que desata cadenas de rayo prende al contacto.
             try { target.AddBuff(BuffID.Electrified, 180); } catch { }

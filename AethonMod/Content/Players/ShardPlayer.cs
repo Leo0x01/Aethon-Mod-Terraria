@@ -269,7 +269,12 @@ namespace AethonMod.Content.Players
         {
             try
             {
-                bool local = Player.whoAmI == Main.myPlayer && Main.netMode != Terraria.ID.NetmodeID.Server;
+                // v6.50.1 — FIX (EL HOST SORDO): en un listen server el host
+                // es netMode Server PERO tiene pantalla y es Main.myPlayer —
+                // el guard viejo lo excluía del Libro Celoso y del aura de
+                // ceniza. Main.dedServ separa al host del dedicado.
+                bool local = Player.whoAmI == Main.myPlayer &&
+                    (Main.netMode != Terraria.ID.NetmodeID.Server || !Main.dedServ);
                 bool autoridad = Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient; // SP o server
                 int nivel = NivelLibro(false);
 
@@ -278,11 +283,15 @@ namespace AethonMod.Content.Players
                 // de sesión, los movimientos de slot y cualquier deriva
                 // que un paquete perdido hubiera dejado — la foto de
                 // entrada se pide en OnEnterWorld; esto la repone).
+                // v6.50.1: también el HAMBRE (si un MsgHambre se pierde, la
+                // barra/aura quedaban desfasadas hasta el próximo cambio).
                 if (Main.netMode == Terraria.ID.NetmodeID.Server && Player.active &&
                     ((Main.GameUpdateCount + (ulong)Player.whoAmI * 37ul) % 600u) == 0ul)
                 {
                     EcoRed.SincronizarLibros(Player);
                     EcoRed.SincronizarCronica(Player);
+                    if (nivel >= NivelMinimoHambre)
+                        EcoRed.SincronizarHambre(Player);
                 }
 
                 if (autoridad)

@@ -47,7 +47,15 @@ namespace AethonMod.Content.Items
 
         public override bool CanUseItem(Player player)
         {
-            return player.whoAmI == Main.myPlayer;
+            // v6.50.1 — FIX (EL GATE QUE SOBREVIVIÓ): CanUseItem corre en
+            // local, server Y clientes remotos — en el server Main.myPlayer
+            // NO es el jugador que usa el ítem: devolvía false para
+            // cualquier remoto y el server jamás corría UseItem → la furia
+            // de la carnada no existía en MP para jugadores remotos (el fix
+            // v6.50 del doble-gate limpió UseItem pero dejó este guard). El
+            // clic-derecho (preparar) sigue auto-limitándose al local dentro
+            // de UseItem.
+            return true;
         }
 
         public override bool? UseItem(Player player)
@@ -79,13 +87,16 @@ namespace AethonMod.Content.Items
 
             if (GrimorioFuriaSistema.Activo)
             {
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Carnada.YaActivo"),
+                // v6.50.1 — FIX: en MP esta rama corre en el SERVER (el
+                // uso sincronizado del remoto) — Main.NewText no llega a
+                // ninguna pantalla: el aviso viaja al portador que la usó.
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Carnada.YaActivo",
                     new Color(178, 26, 38));
                 return false;
             }
             if (!GrimorioFuriaSistema.MundoLibre())
             {
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Carnada.Ocupado"),
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Carnada.Ocupado",
                     new Color(255, 160, 90));
                 return false;
             }

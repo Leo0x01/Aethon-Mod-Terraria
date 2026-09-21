@@ -151,11 +151,20 @@ namespace AethonMod.Content.NPCs
                         _tickFase = 0;
                         // EL TAJO DIFERIDO: florece DONDE ESTÁS (la marca te siguió).
                         float dir = (target.Center - NPC.Center).ToRotation();
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            target.Center, Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            (int)(NPC.damage * 0.85f), 3f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloTajoPortador, dir, NPC.whoAmI * 41);
+                        // v6.50.1 — FIX (proyectiles ×N+1 en MP): la IA del jefe
+                        // corre en server y clientes; sin gate cada máquina
+                        // spawnea su copia y NewProjectile la auto-difunde →
+                        // el tajo se multiplicaba ×(jugadores+1). Solo la
+                        // autoridad engendra (patrón vanilla); embestida y
+                        // sonido siguen en todas las pantallas.
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                target.Center, Vector2.Zero,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.85f), 3f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloTajoPortador, dir, NPC.whoAmI * 41);
+                        }
                         // LA EMBESTIDA: el portador CRUZA a través.
                         NPC.velocity = new Vector2(MathF.Cos(dir), MathF.Sin(dir)) * 16f;
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item1, NPC.Center);
@@ -195,13 +204,20 @@ namespace AethonMod.Content.NPCs
                         if (furia && _combos % 2 == 0)
                         {
                             float cardinal = _combos % 4 * MathHelper.PiOver2;
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                                target.Center + new Vector2(MathF.Cos(cardinal),
-                                    MathF.Sin(cardinal)) * 440f, Vector2.Zero,
-                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                                (int)(NPC.damage * 0.6f), 3f, Main.myPlayer,
-                                AtaqueJefeProjectile.EstiloCorteRealidad,
-                                cardinal + MathHelper.Pi, NPC.whoAmI * 43);
+                            // v6.50.1 — FIX (proyectiles ×N+1 en MP): gate de
+                            // spawn solo en la autoridad — la pared de desgarro
+                            // ya no se clona en cada cliente; el rugido sí
+                            // suena en todas.
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                    target.Center + new Vector2(MathF.Cos(cardinal),
+                                        MathF.Sin(cardinal)) * 440f, Vector2.Zero,
+                                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                    (int)(NPC.damage * 0.6f), 3f, Main.myPlayer,
+                                    AtaqueJefeProjectile.EstiloCorteRealidad,
+                                    cardinal + MathHelper.Pi, NPC.whoAmI * 43);
+                            }
                             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item103, NPC.Center);
                         }
                     }
@@ -216,14 +232,20 @@ namespace AethonMod.Content.NPCs
                 if (_tickOrbit >= 300)
                 {
                     _tickOrbit = 0;
-                    for (int i = 0; i < 3; i++)
+                    // v6.50.1 — FIX (proyectiles ×N+1 en MP): la guardia de
+                    // cuchillas solo se engendra en la autoridad — el bucle
+                    // entero queda tras el gate (antes 3 copias ×jugadores).
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        float ang = i * MathHelper.TwoPi / 3f;
-                        Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 104f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            (int)(NPC.damage * 0.65f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloCuchillaOrbit, ang, NPC.whoAmI * 47 + i);
+                        for (int i = 0; i < 3; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 3f;
+                            Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 104f;
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, Vector2.Zero,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.65f), 2f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloCuchillaOrbit, ang, NPC.whoAmI * 47 + i);
+                        }
                     }
                 }
             }
@@ -435,8 +457,13 @@ namespace AethonMod.Content.NPCs
             if (sp != null)
             {
                 sp.ResonanceShards += 120;
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Resonancia",
-                    NPC.FullName, 120), new Color(245, 196, 81));
+                // v6.50.1 — FIX (anuncio invisible en MP): OnKill solo corre
+                // en server/SP — el Main.NewText no llegaba a nadie en MP;
+                // el anuncio ahora viaja por EcoRed al portador que mató.
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
+                    new Color(245, 196, 81), NPC.FullName, 120);
+                // v6.50.1 — entrega inmediata del shard (MsgCronica, merge máximo).
+                EcoRed.SincronizarCronica(player);
             }
         }
     }

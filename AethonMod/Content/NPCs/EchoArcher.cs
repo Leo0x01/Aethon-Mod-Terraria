@@ -183,11 +183,17 @@ namespace AethonMod.Content.NPCs
             // EL LEAD: tu rumbo multiplicado por el tiempo de vuelo estimado.
             Vector2 pred = target.Center + target.velocity * 14f;
             Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitY);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                NPC.Center + dir * 22f, dir * 14f,
-                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                (int)(NPC.damage * 0.78f), 2f, Main.myPlayer,
-                AtaqueJefeProjectile.EstiloFlechaEstelar, 0f, NPC.whoAmI * 19);
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): gate de spawn solo en la
+            // autoridad (server/SP) — sin él cada máquina clonaba la flecha;
+            // el chasquido del arco sigue sonando en todas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center + dir * 22f, dir * 14f,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.78f), 2f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloFlechaEstelar, 0f, NPC.whoAmI * 19);
+            }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item5, NPC.Center);
         }
 
@@ -195,17 +201,23 @@ namespace AethonMod.Content.NPCs
         private void SembrarMinas(Player target)
         {
             int n = (float)NPC.life / NPC.lifeMax < 0.50f ? 5 : 3;
-            for (int i = 0; i < n; i++)
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): la siembra entera tras el
+            // gate de autoridad — sin él cada cliente sembraba su propio campo
+            // de minas; el ruido de siembra sigue en todas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                float ang = i * MathHelper.TwoPi / n + Main.rand.NextFloat(-0.4f, 0.4f);
-                float r = Main.rand.NextFloat(130f, 260f);
-                Vector2 pos = target.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * r;
-                // La mina CAE desde la arquera (arco corto) y se asienta.
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center, (pos - NPC.Center) * 0.03f,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.66f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloMinaEstelar, 0f, NPC.whoAmI * 29 + i);
+                for (int i = 0; i < n; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / n + Main.rand.NextFloat(-0.4f, 0.4f);
+                    float r = Main.rand.NextFloat(130f, 260f);
+                    Vector2 pos = target.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * r;
+                    // La mina CAE desde la arquera (arco corto) y se asienta.
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, (pos - NPC.Center) * 0.03f,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.66f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloMinaEstelar, 0f, NPC.whoAmI * 29 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item65, NPC.Center);
         }
@@ -213,15 +225,21 @@ namespace AethonMod.Content.NPCs
         /// <summary>LA LLUVIA: 8 estrellas fugaces con marca de suelo.</summary>
         private void LaLluviaEstelar(Player target)
         {
-            for (int i = 0; i < 8; i++)
+            // v6.50.1 — FIX (proyectiles ×N+1 en MP): la lluvia solo la
+            // engendra la autoridad — antes cada cliente tiraba sus 8
+            // estrellas; el estruendo y el aviso siguen en todas.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Vector2 pos = target.Center + new Vector2(
-                    (i - 3.5f) * 110f + Main.rand.NextFloat(-40f, 40f), -460f);
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    pos, new Vector2(0f, 6f),
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.7f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloEstrellaFugaz, 0f, NPC.whoAmI * 37 + i);
+                for (int i = 0; i < 8; i++)
+                {
+                    Vector2 pos = target.Center + new Vector2(
+                        (i - 3.5f) * 110f + Main.rand.NextFloat(-40f, 40f), -460f);
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        pos, new Vector2(0f, 6f),
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.7f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloEstrellaFugaz, 0f, NPC.whoAmI * 37 + i);
+                }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center);
             Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Arquera.Lluvia"),
@@ -412,8 +430,13 @@ namespace AethonMod.Content.NPCs
             if (sp != null)
             {
                 sp.ResonanceShards += 110;
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Resonancia",
-                    NPC.FullName, 110), new Color(245, 196, 81));
+                // v6.50.1 — FIX (anuncio invisible en MP): OnKill solo corre
+                // en server/SP — el Main.NewText no llegaba a nadie en MP;
+                // el anuncio ahora viaja por EcoRed al portador que mató.
+                EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
+                    new Color(245, 196, 81), NPC.FullName, 110);
+                // v6.50.1 — entrega inmediata del shard (MsgCronica, merge máximo).
+                EcoRed.SincronizarCronica(player);
             }
         }
     }

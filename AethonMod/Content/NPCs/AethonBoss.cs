@@ -115,7 +115,12 @@ namespace AethonMod.Content.NPCs
             if (hpPct < 0.6f) newPhase = 3;
             if (hpPct < 0.4f) newPhase = 4;
             if (hpPct < 0.2f) newPhase = 5;
-            if (newPhase != Phase)
+            // v6.50.1 — FIX (histéresis): SOLO SE AVANZA. OnPhaseChange
+            // cura +5% del máximo → al cruzar un umbral hacia abajo la vida
+            // re-basaba por encima y la fase VOLVÍA (doble flip: dos rugidos,
+            // dos curas — +10% de vida por cruce y la pelea rebotaba entre
+            // fases). Con newPhase > Phase la furia nunca retrocede.
+            if (newPhase > Phase)
             {
                 Phase = newPhase;
                 OnPhaseChange();
@@ -226,11 +231,17 @@ namespace AethonMod.Content.NPCs
                 {
                     float ang = giro + i * MathHelper.TwoPi / 7f;
                     Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 7.5f;
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        NPC.Center, vel,
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 61 + i);
+                    // v6.50.1 — FIX (MP ×N+1): la IA del NPC corre en server
+                    // Y clientes — sin gate cada máquina spawnnea su copia y
+                    // NewProjectile la auto-difunde. Solo la autoridad spawnnea.
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, vel,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 61 + i);
+                    }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9, NPC.Center);
             }
@@ -252,11 +263,16 @@ namespace AethonMod.Content.NPCs
                     float ang = Main.rand.NextFloat(MathHelper.TwoPi);
                     Vector2 pos = target.Center + new Vector2(
                         MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * Main.rand.NextFloat(180f, 330f);
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        pos, Vector2.Zero,
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloNubeNebulosa, 0f, NPC.whoAmI * 67 + i);
+                    // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+                    // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            pos, Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloNubeNebulosa, 0f, NPC.whoAmI * 67 + i);
+                    }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
             }
@@ -352,11 +368,16 @@ namespace AethonMod.Content.NPCs
                     {
                         float ang = baseAng + i * MathHelper.TwoPi / 6f;
                         Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 8f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            _posAgujero + vel * 6f, vel,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            (int)(NPC.damage * 0.5f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 71 + i);
+                        // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+                        // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                _posAgujero + vel * 6f, vel,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.5f), 2f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 71 + i);
+                        }
                     }
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9, _posAgujero);
                 }
@@ -422,20 +443,30 @@ namespace AethonMod.Content.NPCs
             for (int i = -3; i <= 3; i++)
             {
                 Vector2 vel = dir.RotatedBy(i * 0.13f) * 12f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center, vel,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.6f), 2f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 79 + i);
+                // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+                // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, vel,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.6f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 79 + i);
+                }
             }
 
             // EL GRAN TAJO: el corte diferido sobre la presa.
             float angTajo = dir.ToRotation();
-            Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                target.Center, Vector2.Zero,
-                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                (int)(NPC.damage * 0.9f), 4f, Main.myPlayer,
-                AtaqueJefeProjectile.EstiloTajoPortador, angTajo, NPC.whoAmI * 83);
+            // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+            // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    target.Center, Vector2.Zero,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.9f), 4f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloTajoPortador, angTajo, NPC.whoAmI * 83);
+            }
         }
 
         // ==================================================================
@@ -447,11 +478,16 @@ namespace AethonMod.Content.NPCs
         {
             Vector2 pred = target.Center + target.velocity * 10f;
             Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitY).RotatedBy(desvio);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                NPC.Center, dir * 11f,
-                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                (int)(NPC.damage * mult), 2f, Main.myPlayer,
-                AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 89);
+            // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+            // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, dir * 11f,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * mult), 2f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloPernoEstelar, 0f, NPC.whoAmI * 89);
+            }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9, NPC.Center);
         }
 
@@ -474,11 +510,16 @@ namespace AethonMod.Content.NPCs
         private void NacerRuna()
         {
             float fase = Main.rand.NextFloat(MathHelper.TwoPi);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                NPC.Center, Vector2.Zero,
-                ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                (int)(NPC.damage * 0.65f), 2f, Main.myPlayer,
-                AtaqueJefeProjectile.EstiloRunaMemorizada, fase, NPC.whoAmI * 97);
+            // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea
+            // (NewProjectile auto-difunde — sin gate, ×jugadores+1).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, Vector2.Zero,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.65f), 2f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloRunaMemorizada, fase, NPC.whoAmI * 97);
+            }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
         }
 
@@ -685,11 +726,24 @@ namespace AethonMod.Content.NPCs
                 if (player != null && player.active)
                 {
                     var sp = player.GetModPlayer<Players.ShardPlayer>();
-                    if (sp != null) sp.ResonanceShards += 250;
+                    if (sp != null)
+                    {
+                        sp.ResonanceShards += 250;
+                        // v6.50.1 — FIX (MP invisible): OnKill solo corre en
+                        // server/SP → el Main.NewText de la resonancia nadie
+                        // lo veía en MP. El aviso viaja por EcoRed AL PORTADOR
+                        // (el asesino), como en el resto de jefes.
+                        EcoRed.AnunciarAlPortador(player, "Mods.AethonMod.Jefe.Resonancia",
+                            new Color(245, 196, 81), NPC.FullName, 250);
+                        // v6.50.1 — entrega inmediata del shard (MsgCronica, merge máximo).
+                        EcoRed.SincronizarCronica(player);
+                    }
                 }
             }
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Reconocimiento"),
-                OroLuz);
+            // v6.50.1 — FIX (MP invisible): el reconocimiento de Aethon es
+            // un anuncio del MUNDO (ChatHelper lo difunde en MP; en SP
+            // NewText local como siempre — EcoRed.AnunciarMundo).
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reconocimiento", OroLuz);
         }
     }
 }
