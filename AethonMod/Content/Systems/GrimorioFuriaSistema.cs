@@ -64,6 +64,13 @@ namespace AethonMod.Content.Systems
         private static int _pulsoSpawn = 0;        // tempo entre escupitajos
         private static int _bossIdx = -1;          // whoAmI del jefe de la oleada
         private static int _jugador = -1;          // whoAmI del hambriento
+        // v6.50.2 — FIX (carrera del slot reciclado en FaseJefe): el TYPE del
+        // jefe de la oleada, fijado al spawnear. El sello de OleadaNPC
+        // valida el SLOT; el tipo valida la ESPECIE: un town NPC que recicle
+        // el slot del jefe muerto en el MISMO tick (UpdateTime corre ANTES
+        // de PostUpdateWorld) ya no puede colarse en la comparación del
+        // sello — el crédito de la oleada y el timeout miran SOLO al jefe.
+        private static int _tipoJefeOleada = -1;
 
         // === EL ESTADO DE LA OLEADA ESPECIAL ===
         private static int _spawneados = 0;         // cuántos guardián ya nacieron (la cuenta la valida el escaneo de sellos)
@@ -89,6 +96,31 @@ namespace AethonMod.Content.Systems
         public static int OleadaActual => Activo ? _oleadaActual : 0;
         /// <summary>¿Está corriendo LA OLEADA ESPECIAL (El Juicio)?</summary>
         public static bool EspecialActiva => Activo && _fase == Fase.Especial;
+
+        // ==================================================================
+        //  v6.50.2 — EL FESTÍN VISTO DESDE LOS CLIENTES (diagnóstico)
+        // ==================================================================
+        //
+        // La máquina de fases corre SOLO en el server (PostUpdateWorld):
+        // _fase/_oleadaActual/_oleadasTotales son CEROS eternos en un cliente
+        // remoto — el panel F8 mostraba "silencio" durante todo el festín.
+        // EcoRed.MsgHambre lleva (fase, oleada, total) al portador y llena
+        // estos estáticos en la recepción (red de seguridad 600t + cada
+        // cambio de fase del ciclo).
+
+        /// <summary>La fase del festín vista por el CLIENTE (0 = Inactivo … 6 = Fin).</summary>
+        public static int FaseCliente;
+        /// <summary>La oleada actual vista por el CLIENTE (0 si no hay festín).</summary>
+        public static int OleadaCliente;
+        /// <summary>Las oleadas totales vistas por el CLIENTE.</summary>
+        public static int TotalesCliente;
+
+        /// <summary>La fase del festín en el SERVER (lo serializa EcoRed.SincronizarHambre).</summary>
+        public static int FaseServidor => (int)_fase;
+        /// <summary>La oleada actual en el SERVER (lo serializa EcoRed).</summary>
+        public static int OleadaServidor => _oleadaActual;
+        /// <summary>Las oleadas totales en el SERVER (lo serializa EcoRed).</summary>
+        public static int TotalesServidor => _oleadasTotales;
 
         // ==================================================================
         //  EL DISPARO
@@ -130,6 +162,9 @@ namespace AethonMod.Content.Systems
             _jugador = jugador.whoAmI;
             _fase = Fase.Llamada;
             _ticksFase = 0;
+            // v6.50.2 — EL FESTÍN CAMINA (cada cambio de fase): el estado
+            // viaja al portador dentro del MsgHambre para SU diagnóstico.
+            EcoRed.SincronizarHambre(jugador); // no-op fuera del servidor
 
             // LAS DOS VOCES: primero la ira, después la llamada — LA VOZ
             // DEL LIBRO VA PRIMERO (prioridad: se cuela al frente).
@@ -230,7 +265,7 @@ namespace AethonMod.Content.Systems
                     new Color(245, 196, 81), rugido: false, prioridad: true);
                 // la hambre del portador se perdona: el festín contó
                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
-                sp?.PerdonarHambre();
+                sp?.PerdonarHambre(); // v6.50.2: PerdonarHambre ya viaja con el festín (MsgHambre)
                 return;
             }
 
@@ -239,6 +274,9 @@ namespace AethonMod.Content.Systems
             _ticksOleada = 0;
             _pulsoSpawn = 0;
             _bossIdx = -1;
+            _tipoJefeOleada = -1;
+            // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
+            EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
 
             // EL ANUNCIO: la oleada k de N (la final se anuncia en negro y rojo)
             // v6.49 — EL FESTÍN ES DEL MUNDO: el anuncio viaja a TODOS
@@ -285,6 +323,8 @@ namespace AethonMod.Content.Systems
                 _ticksFase = 0;
                 _bossIdx = -1;
                 SpawnJefeOleada(hambriento);
+                // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
+                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
             }
         }
 
@@ -302,7 +342,15 @@ namespace AethonMod.Content.Systems
             // confirmada por el sello) paga. La instancia muerta conserva
             // el sello (solo NewNPC lo resetea) y el reciclado lo pierde.
             var sello = jefe != null ? jefe.GetGlobalNPC<Globals.OleadaNPC>() : null;
-            bool esDelFestin = sello != null && sello.EsJefeDeOleada;
+            // v6.50.2 — FIX (carrera del slot reciclado en FaseJefe): además
+            // del sello, la ESPECIE — el type del jefe se fija al spawnear
+            // (_tipoJefeOleada). Un town NPC que recicle el slot del jefe
+            // muerto en el MISMO tick (UpdateTime corre ANTES de
+            // PostUpdateWorld) queda fuera del festín por AMBAS puertas: no
+            // roba el crédito de DerrotaOleada10 ni sufre el timeout como
+            // si fuera el guardián.
+            bool esDelFestin = sello != null && sello.EsJefeDeOleada &&
+                _tipoJefeOleada > 0 && jefe.type == _tipoJefeOleada;
 
             // EL JEFE CALLÓ (vida ≤ 0 con sello) → la oleada se completa
             if (esDelFestin && jefe.life <= 0)
@@ -331,6 +379,8 @@ namespace AethonMod.Content.Systems
                 }
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
+                // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
+                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
                 return;
             }
 
@@ -340,6 +390,8 @@ namespace AethonMod.Content.Systems
             {
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
+                // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
+                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
                 return;
             }
 
@@ -361,6 +413,8 @@ namespace AethonMod.Content.Systems
                     Terraria.NetMessage.SendData(23, -1, -1, null, jefe.whoAmI);
                 _fase = Fase.Interludio;
                 _ticksFase = 0;
+                // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
+                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
             }
         }
 
@@ -400,6 +454,9 @@ namespace AethonMod.Content.Systems
             _oleadaActual = 11;
             _ticksSuma = 0;
             _spawneados = 0;
+            // v6.50.2 — EL FESTÍN CAMINA: el Juicio empieza — fase nueva al
+            // portador (la oleada 11 también viaja).
+            EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
 
             // LA VOZ DEL JUICIO (prioridad: el libro manda — solo al
             // portador: es SU grimorio quien juzga).
@@ -460,11 +517,17 @@ namespace AethonMod.Content.Systems
             }
 
             // ¿VIVE ALGUNO? (los índices pueden reciclarse: valida tipo+marca)
+            // v6.50.2 — FIX (el Juicio se cerraba con el Devorador vivo):
+            // EoW (tipos 13/14/15) NO pone npc.boss=true en vanilla (lo
+            // trackean por tipo) → quedaba fuera del conteo y el Juicio
+            // terminaba "saciado" con el guardián ×15 aún en el mundo. El
+            // sello (EsDeOleada && EsEspecial && EsJefeDeOleada) ya valida
+            // de sobra — el filtro boss sobraba y mentía.
             int vivos = 0;
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC n = Main.npc[i];
-                if (n == null || !n.active || !n.boss) continue;
+                if (n == null || !n.active) continue;
                 var sello = n.GetGlobalNPC<OleadaNPC>();
                 if (sello != null && sello.EsDeOleada && sello.EsEspecial && sello.EsJefeDeOleada)
                     vivos++;
@@ -640,6 +703,16 @@ namespace AethonMod.Content.Systems
                 float dist = 380f + Main.rand.NextFloat(320f);
                 Vector2 pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
 
+                // v6.50.2 — FIX (spawns voladores FUERA del mundo): los
+                // noTileCollide (DemonEye, murciélagos, Harpy…) nacen donde
+                // caiga el anillo — junto al borde del mundo (océano, cielo)
+                // nacían MÁS ALLÁ de los límites y vanilla los descarta o
+                // los deja como zombis sin IA. Clamp ANTES de NewNPC (los
+                // que chocan con tiles siguen pasando por BuscarSuelo, que
+                // ya respeta bordes por su cuenta).
+                pos.X = Math.Clamp(pos.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
+                pos.Y = Math.Clamp(pos.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
+
                 NPC npc = Main.npc[NPC.NewNPC(hambriento.GetSource_FromAI(),
                     (int)pos.X, (int)pos.Y, tipo)];
                 if (npc == null || !npc.active) return;
@@ -672,6 +745,11 @@ namespace AethonMod.Content.Systems
                 NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
                 if (jefe == null || !jefe.active) return;
                 _bossIdx = idx;
+                // v6.50.2 — FIX (carrera del slot reciclado): la ESPECIE del
+                // jefe queda registrada al nacer — FaseJefe la valida junto
+                // al sello (un slot reciclado por un town NPC del mismo tick
+                // ya no pasa por jefe del festín).
+                _tipoJefeOleada = tipo;
 
                 jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true);
                 jefe.netUpdate = true;
@@ -680,7 +758,7 @@ namespace AethonMod.Content.Systems
                     new Color(226, 64, 64), jefe.FullName, _oleadaActual + 1);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
             }
-            catch { _bossIdx = -1; }
+            catch { _bossIdx = -1; _tipoJefeOleada = -1; }
         }
 
         /// <summary>
@@ -710,10 +788,25 @@ namespace AethonMod.Content.Systems
 
         private static void Terminar()
         {
+            // v6.50.2 — EL FESTÍN CAMINA: el estado final (Inactivo) también
+            // viaja — sin esto el F8 del portador mostraba el último festín
+            // "en marcha" para siempre. ANTES de resetear _jugador (lo
+            // necesita la réplica); seguro en unload (try/catch dentro de
+            // SincronizarHambre y la réplica ya puede no existir).
+            try
+            {
+                Player ultimo = (_jugador >= 0 && _jugador < Main.maxPlayers)
+                    ? Main.player[_jugador] : null;
+                if (ultimo != null && ultimo.active)
+                    EcoRed.SincronizarHambre(ultimo); // no-op fuera del servidor
+            }
+            catch { }
+
             _fase = Fase.Inactivo;
             _oleadasTotales = 0;
             _oleadaActual = 0;
             _bossIdx = -1;
+            _tipoJefeOleada = -1;
             _jugador = -1;
             _spawneados = 0;
             _ticksSuma = 0;
@@ -727,6 +820,19 @@ namespace AethonMod.Content.Systems
         {
             try
             {
+                // v6.50.2 — FIX (diagnóstico de furia siempre "inactivo" en
+                // clientes MP): la máquina vive SOLO en el server
+                // (PostUpdateWorld) — un remoto leía _fase == Inactivo
+                // eterno. En clientes MP se leen los estáticos que
+                // EcoRed.MsgHambre llena en la recepción (red de seguridad
+                // 600t + cada cambio de fase).
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                {
+                    if (FaseCliente == 0)
+                        return Language.GetTextValue("Mods.AethonMod.Diag.FuriaInactivo");
+                    return Language.GetTextValue("Mods.AethonMod.Diag.FuriaActiva",
+                        OleadaCliente, TotalesCliente);
+                }
                 if (_fase == Fase.Inactivo)
                     return Language.GetTextValue("Mods.AethonMod.Diag.FuriaInactivo");
                 return Language.GetTextValue("Mods.AethonMod.Diag.FuriaActiva",

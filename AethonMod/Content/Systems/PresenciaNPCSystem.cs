@@ -67,11 +67,15 @@ namespace AethonMod.Content.Systems
                             Main.npc[idx].netUpdate = true;
                             // v6.49 — LOCALIZADO (hallazgo AUD-C: el único
                             // texto del sistema estaba hardcodeado).
-                            if (Main.netMode != NetmodeID.Server)
-                                Main.NewText(
-                                    Terraria.Localization.Language.GetTextValue(
-                                        "Mods.AethonMod.Presencia.Llegada", Main.npc[idx].FullName),
-                                    new Color(196, 150, 255));
+                            // v6.50.2 — FIX ("El Testigo ha llegado" invisible
+                            // en MP): este código corre en el SERVER del
+                            // mundo (PostUpdateWorld) — el gate
+                            // netMode != Server lo dejaba SOLO en SP: ni el
+                            // host del listen server ni ningún remoto lo veía.
+                            // EcoRed.AnunciarMundo: SP = NewText local, host =
+                            // su pantalla, dedicado = difusión a TODOS.
+                            EcoRed.AnunciarMundo("Mods.AethonMod.Presencia.Llegada",
+                                new Color(196, 150, 255), Main.npc[idx].FullName);
                         }
                         return;
                     }

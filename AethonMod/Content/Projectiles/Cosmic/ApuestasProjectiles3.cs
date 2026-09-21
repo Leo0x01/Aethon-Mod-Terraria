@@ -89,7 +89,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Projectile.ai[0] > 0.5f) return;    // ya abrió (guard de reentrada)
             Projectile.ai[0] = 1f;
 
-            if (Main.netMode != NetmodeID.Server)
+            // v6.50.2 — FIX (host sordo a su fisura): AbrirFisura corre en
+            // todas las máquinas con copia del tajo — el viejo `!= Server`
+            // callaba al HOST (netMode 1 CON pantalla). "Con pantalla" =
+            // !Main.dedServ.
+            if (!Main.dedServ)
                 SoundEngine.PlaySound(SoundID.Item71 with { Volume = 0.4f, Pitch = -0.3f },
                     Projectile.Center);
 
@@ -105,7 +109,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -154,8 +158,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }
@@ -254,8 +258,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // MISMO radio; el filtro hostil && daño > 0 — los telegraphs
             // damage=0 quedan fuera por diseño — también vive allí; la
             // guardia friendly de la doble bandera se mantiene aquí).
-            if ((Main.myPlayer == Projectile.owner || Main.netMode == NetmodeID.SinglePlayer) &&
-                _edad % 2 == 0)
+            // v6.50.2 — FIX (la traga solo vivía en la pantalla del dueño):
+            // el `p.Kill()` de la bala devorada corre ahora en la AUTORIDAD
+            // (SP + server — el patrón de los agujeros, CosmicBlackHole
+            // ~L160): en el dedicado la bala muere de verdad y deja de
+            // dañar. El bookkeeping del HAMBRE y el FX se quedan en el
+            // cliente dueño (donde estaban — el daño del próximo tajo se
+            // computa ahí).
+            if (_edad % 2 == 0)
             {
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
@@ -263,22 +273,40 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (p == null || !p.active || p.friendly) continue;
                     if (!FormaLib.ProyectilHostilEnBanda(p, arriba, abajo, Banda * 2f)) continue;
 
-                    // EL HAMBRE crece (tope 2× el daño del arma — el diseño).
-                    ApuestasPlayer ap = Main.player[Projectile.owner].GetModPlayer<ApuestasPlayer>();
-                    int tope = Projectile.damage * 2;
-                    ap.HambreGuadana = Math.Min(tope, ap.HambreGuadana + p.damage);
+                    // LA DEVORACIÓN DE VERDAD — la AUTORIDAD mata (el Kill de
+                    // un cliente no viaja: verificado en el IL) y el CLIENTE
+                    // DUEÑO también tumba SU réplica local: el Hambre se
+                    // cuenta ahí — sin el Kill local la MISMA bala seguiría
+                    // alimentando el hambre cada 2 ticks y podría seguir
+                    // dañando al dueño (el daño hostil→jugador se evalúa en
+                    // su propio cliente). En SP la condición es una sola
+                    // (autoridad = dueño) → nunca hay doble Kill.
+                    if (Main.netMode != NetmodeID.MultiplayerClient ||
+                        Main.myPlayer == Projectile.owner)
+                        p.Kill();
 
-                    p.Kill();
-                    if (Main.netMode != NetmodeID.Server)
+                    if (Main.myPlayer == Projectile.owner || Main.netMode == NetmodeID.SinglePlayer)
                     {
-                        SoundEngine.PlaySound(SoundID.Item94 with { Volume = 0.3f, Pitch = 0.5f },
-                            Projectile.Center);
-                        for (int k = 0; k < 6; k++)
+                        // EL HAMBRE crece (tope 2× el daño del arma — el diseño).
+                        ApuestasPlayer ap = Main.player[Projectile.owner].GetModPlayer<ApuestasPlayer>();
+                        int tope = Projectile.damage * 2;
+                        ap.HambreGuadana = Math.Min(tope, ap.HambreGuadana + p.damage);
+
+                        // v6.50.2 — el FX de la devoración también era víctima
+                        // del gate netMode: el HOST (listen server, dueño de
+                        // la guadaña) no oía el tragón. "Con pantalla" es
+                        // !Main.dedServ.
+                        if (!Main.dedServ)
                         {
-                            Dust d = Dust.NewDustPerfect(p.Center, DustID.Crimson);
-                            d.velocity = (Projectile.Center - p.Center).SafeNormalize(Vector2.Zero) * 2.5f;
-                            d.scale = 1f;
-                            d.noGravity = true;
+                            SoundEngine.PlaySound(SoundID.Item94 with { Volume = 0.3f, Pitch = 0.5f },
+                                Projectile.Center);
+                            for (int k = 0; k < 6; k++)
+                            {
+                                Dust d = Dust.NewDustPerfect(p.Center, DustID.Crimson);
+                                d.velocity = (Projectile.Center - p.Center).SafeNormalize(Vector2.Zero) * 2.5f;
+                                d.scale = 1f;
+                                d.noGravity = true;
+                            }
                         }
                     }
                 }
@@ -298,7 +326,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             // v6.43 — LA LUZ DE LAS FORMAS (solo con FormaLib.Depuracion):
             // la mordida REAL (la grieta de 16 px) en cian y la banda de la
@@ -340,8 +368,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }

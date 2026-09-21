@@ -231,7 +231,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             //     motor: crítica real, varianza, on-hit y sync MP); la onda
             //     nova y el debuff siguen en server/SP.
             int novaDamage = Math.Max(1, (int)(Projectile.damage * 1.8f));
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50.2 — FIX (nova fantasma en MP): gate de MÁQUINA DUEÑA (el
+            // patrón de los agujeros) — el server (owner≠myPlayer) jamás
+            // difunde un NewProjectile ajeno; lo engendra el cliente dueño y
+            // se sincroniza solo.
+            if (Projectile.owner == Main.myPlayer)
             {
                 float novaRadius = 560f;
 

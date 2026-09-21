@@ -61,7 +61,12 @@ namespace AethonMod.Content.Systems
         public static int ApplyXPMultiplier(int amount)
         {
             if (amount <= 0) return 0;
-            var config = ModContent.GetInstance<Content.AethonConfig>();
+            // v6.50.2 — FIX (config ClientSide leída por la AUTORIDAD): el
+            // multiplicador lo aplica el SERVER en el cobro de XP — la
+            // decisión vive en AethonConfigServidor (ServerSide). Antes, en
+            // un dedicado, la lectura caía en el default del server y el
+            // ajuste del cliente era una ilusión.
+            var config = ModContent.GetInstance<Content.AethonConfigServidor>();
             if (config == null) return amount;
             float mult = config.XPMultiplier;
             if (mult <= 0f) return 0;

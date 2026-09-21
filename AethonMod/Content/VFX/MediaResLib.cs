@@ -365,11 +365,19 @@ namespace AethonMod.Content.VFX
                 // === 4. REABRIR el lote del mundo — SOLO si el llamador lo
                 //        tenía abierto al llegar (el estándar de restore de
                 //        la casa, idéntico al de cualquier PreDraw del mod:
-                //        cerrado→cerrado, abierto→abierto). ===
+                //        cerrado→cerrado, abierto→abierto). v6.50.2 — FIX:
+                //        el patrón EXACTO del pase de ENTIDADES de vanilla
+                //        (el llamador actual es el PreDraw de la vela, un
+                //        proyectil): Main.DefaultSamplerState +
+                //        Main.Rasterizer + Main.Transform — el restore
+                //        viejo (LinearClamp + CullNone + GameViewMatrix)
+                //        dejaba el resto del pase de proyectiles
+                //        muestreando BILINEAL: pixel-art borroso tras el
+                //        pase volumétrico. ===
                 if (_loteDelLlamadorAbierto)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None,
+                        Main.Rasterizer, null, Main.Transform);
             }
             catch
             {
@@ -381,9 +389,13 @@ namespace AethonMod.Content.VFX
                 {
                     try
                     {
+                        // v6.50.2 — FIX: misma reapertura del pase de
+                        // entidades de la casa que el camino normal (el
+                        // restore de emergencia no puede abrir un lote
+                        // DISTINTO al que habría abierto el camino feliz).
                         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
+                            Main.DefaultSamplerState, DepthStencilState.None,
+                            Main.Rasterizer, null, Main.Transform);
                     }
                     catch { }
                 }

@@ -319,6 +319,14 @@ namespace AethonMod.Content.Weapons.Cosmic
         public override bool CanUseItem(Player player)
         {
             ApuestasPlayer ap = player.GetModPlayer<ApuestasPlayer>();
+            // v6.50.2 — FIX (égida 2c, coherencia con el desync del stun): este
+            // gate queda COHERENTE con la nueva vida del testigo: tras un
+            // parry EXITOSO FreeDodge marca (ai[0]=1 + netUpdate) y tumba al
+            // GuardiaNovaProjectile → el testigo nunca aturde → Aturdido
+            // queda a 0 en TODAS las copias y este gate NO bloquea en falso.
+            // El Aturdido>0 (bloqueo de ambos clics) y el EnfriamientoGuardia
+            // (que el testigo ahora también pone al fallar) solo cortan tras
+            // un fallo REAL de la guardia.
             if (player.altFunctionUse == 2)
                 return ap.EnfriamientoGuardia <= 0 && ap.Aturdido <= 0;
             return ap.Aturdido <= 0;
@@ -342,7 +350,10 @@ namespace AethonMod.Content.Weapons.Cosmic
                     ModContent.ProjectileType<AnilloEnfriamientoProjectile>(),
                     damage, 0f, player.whoAmI);
 
-                if (Main.netMode != NetmodeID.Server)
+                // v6.50.2 — FIX (host mudo al alzar la guardia): Shoot corre
+                // solo en el cliente dueño — el viejo `!= Server` callaba al
+                // HOST (netMode 1 CON pantalla). "Con pantalla" = !dedServ.
+                if (!Main.dedServ)
                     SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.5f, Pitch = 0.3f },
                         player.Center);
             }
@@ -430,7 +441,9 @@ namespace AethonMod.Content.Weapons.Cosmic
                     }
                 }
 
-                if (Main.netMode != NetmodeID.Server)
+                // v6.50.2 — FIX (host sordo a su resonancia): mismo error raíz
+                // que el sonido de la guardia — !Main.dedServ.
+                if (!Main.dedServ)
                 {
                     SoundEngine.PlaySound(SoundID.Item72 with { Volume = 0.5f, Pitch = 0.5f },
                         player.Center);

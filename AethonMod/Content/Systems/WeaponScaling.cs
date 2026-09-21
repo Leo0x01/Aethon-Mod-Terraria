@@ -185,7 +185,13 @@ namespace AethonMod.Content.Systems
             // HP del jugador la manda SU cliente (vanilla) — curar la
             // réplica del server o de otros clientes era vida fantasma que
             // la sincronización borra. Solo el cliente del portador sana.
-            if (Main.netMode == NetmodeID.Server) return;
+            // v6.50.2 — FIX (lifesteal muerto en Host&Play): el viejo gate
+            // `netMode == Server` devolvía también en el LISTEN SERVER
+            // (netMode 1 CON pantalla — los golpes del host se resuelven EN
+            // el proceso server) → el host jamás sanaba. "Sin pantalla" es
+            // Main.dedServ, no netMode. La línea de abajo (whoAmI !=
+            // Main.myPlayer) ya protege las réplicas ajenas.
+            if (Main.dedServ) return;
             if (player == null || player.whoAmI != Main.myPlayer) return;
 
             float pct = LifestealPercent(level);

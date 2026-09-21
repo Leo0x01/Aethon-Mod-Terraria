@@ -8,14 +8,17 @@ namespace AethonMod.Content
 {
     /// <summary>
     /// Configuración del mod Aethon.
+    /// v6.50.2 — FIX (config ClientSide leída por la AUTORIDAD):
+    /// XPMultiplier y EventoHambreGrimorio eran decisions de la AUTORIDAD
+    /// (las leen ShardLevelSystem/ShardPlayer en el SERVER) pero vivían
+    /// aquí, en un scope ClientSide — en dedicado aplicaban los defaults
+    /// del server y la config del cliente era mentira. Ambas se mudaron a
+    /// AethonConfigServidor (ConfigScope.ServerSide). Esta clase conserva
+    /// las decisions de PANTALLA del jugador local.
     /// </summary>
     public class AethonConfig : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
-
-        [DefaultValue(1f)]
-        [Range(0.1f, 10f)]
-        public float XPMultiplier = 1f;
 
         [DefaultValue(0)]
         [Range(0, 500)]
@@ -57,20 +60,5 @@ namespace AethonMod.Content
         /// </summary>
         [DefaultValue(true)]
         public bool ManaGratisEnPruebas = true;
-
-        // ------------------------------------------------------------------
-        //  v6.47 — LA VOZ DEL HAMBRE Y LA FURIA
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// ¿El grimorio hambriento convoca sus OLEADAS cuando pasa
-        /// demasiado tiempo sin comer? ON por defecto (el evento ES
-        /// contenido del mod de pruebas). Apágalo para dejar SOLO los
-        /// susurros y la barra palidecida (puro sabor, cero castigo).
-        /// La Carnada del Grimorio (el ítem de prueba) funciona SIEMPRE,
-        /// con la bandera apagada o no.
-        /// </summary>
-        [DefaultValue(true)]
-        public bool EventoHambreGrimorio = true;
     }
 }

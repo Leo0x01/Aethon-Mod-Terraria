@@ -473,7 +473,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             // ============================================================
             //  CONTRATO DE BATCH v6.10 (a prueba de balas): en PreDraw el

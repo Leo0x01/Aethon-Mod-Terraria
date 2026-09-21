@@ -1,6 +1,7 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 using AethonMod.Content.Globals;
 using AethonMod.Content.Systems;
 
@@ -54,7 +55,10 @@ namespace AethonMod.Content.Items
 
                 if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
                 {
-                    Main.NewText($"✦ {inv.Name} subió +{LevelsPerUse} niveles (ahora nivel {sl.Level}).",
+                    // v6.50.2 — FIX (strings hardcodeados → hjson, regla de
+                    // la casa): los dos avisos del probador viajan por clave.
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.LevelUpTester.Subida",
+                            inv.Name, LevelsPerUse, sl.Level),
                         new Microsoft.Xna.Framework.Color(245, 196, 81));
 
                     // Efectos visuales de subida de nivel.
@@ -72,7 +76,7 @@ namespace AethonMod.Content.Items
             }
 
             if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
-                Main.NewText("No se encontró un Grimorio del Eterno en el inventario.",
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.LevelUpTester.SinGrimorio"),
                     new Microsoft.Xna.Framework.Color(255, 120, 120));
             return false;
         }

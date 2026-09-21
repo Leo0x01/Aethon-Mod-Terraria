@@ -388,17 +388,25 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             float sunGravity = baseStrength * chargeMult;
 
-            foreach (NPC npc in Main.ActiveNPCs)
+            // v6.50.2 — FIX (jitter de réplicas de NPC en clientes MP): el
+            // empuje de npc.velocity corre ahora SOLO en la autoridad (SP +
+            // server — la familia de agujeros gatea la misma succión así);
+            // en un cliente remoto el server corrige la posición por
+            // netUpdate y no hay doble empuje divergente.
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                if (!VFXCore.EsObjetivo(npc)) continue;
-                Vector2 toCenter = Projectile.Center - npc.Center;
-                float dist = toCenter.Length();
-                if (dist > gravityRadius || dist < 5f) continue;
-                float strength = (1f - dist / gravityRadius) * sunGravity;
-                if (toCenter.LengthSquared() > 0.01f)
+                foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    toCenter.Normalize();
-                    npc.velocity += toCenter * strength;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
+                    Vector2 toCenter = Projectile.Center - npc.Center;
+                    float dist = toCenter.Length();
+                    if (dist > gravityRadius || dist < 5f) continue;
+                    float strength = (1f - dist / gravityRadius) * sunGravity;
+                    if (toCenter.LengthSquared() > 0.01f)
+                    {
+                        toCenter.Normalize();
+                        npc.velocity += toCenter * strength;
+                    }
                 }
             }
 
@@ -1146,7 +1154,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // como fuente del BlackHoleLensSystem → el fondo se curva a su
             // paso. Radio 380: el de la antigua onda mayor (360) + margen
             // de lente.
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50.2 — FIX (nova fantasma en MP): gate de MÁQUINA DUEÑA (el
+            // patrón de los agujeros) — el server con owner=índice de jugador
+            // jamás difunde el NewProjectile; lo engendra el cliente dueño.
+            if (Projectile.owner == Main.myPlayer)
             {
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),

@@ -155,6 +155,11 @@ namespace AethonMod.Content.Globals
                     }
 
                     bool cobro = false;
+                    // v6.50.2 — FIX (bandwidth — 3 paquetes por kill): el latido
+                    // LLEVA el estado de la primera copia visible y la FOTO
+                    // COMPLETA de MsgLibro solo viaja si algún nivel SUBIÓ.
+                    bool subioNivel = false;
+                    int slotPrimero = -1, nivelPrimero = 0, xpPrimero = 0;
                     if (xp > 0)
                     {
                         for (int i = 0; i < 10; i++)
@@ -165,8 +170,18 @@ namespace AethonMod.Content.Globals
                             var sl = inv.GetGlobalItem<ShardLevelItem>();
                             if (sl != null)
                             {
+                                int nivelAntes = sl.Level;
                                 sl.GrantXP(inv, xp);
                                 cobro = true;
+                                if (sl.Level > nivelAntes)
+                                    subioNivel = true; // la foto completa tiene motivo
+                                if (slotPrimero < 0)
+                                {
+                                    // la PRIMERA copia (la que manda en stats/HUD)
+                                    slotPrimero = i;
+                                    nivelPrimero = sl.Level;
+                                    xpPrimero = sl.XP;
+                                }
                             }
                         }
                     }
@@ -181,19 +196,30 @@ namespace AethonMod.Content.Globals
 
                     // La barra dorada late en la pantalla del dueño del libro
                     // (v6.49: en MP el latido viaja por EcoRed al portador).
+                    // v6.50.2 — EL LATIDO LLEVA EL LIBRO: (slot, nivel, XP)
+                    // de la primera copia viaja en el MISMO paquete — el
+                    // cliente aplica el estado y pulsa la barra con UN
+                    // paquete por kill (antes: latido + hambre + foto).
                     if (cobro)
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient &&
                             player.whoAmI == Main.myPlayer)
                             ShardHUDSystem.MarcarGanancia(xp); // SP: local
                         else
-                            EcoRed.LatidoDeXp(player, xp);     // MP: al portador
+                            EcoRed.LatidoDeXp(player, xp, slotPrimero, nivelPrimero, xpPrimero); // MP: al portador
                     }
 
                     // v6.50 — LOS LIBROS CAMINAN: el server acaba de subir
                     // SU copia; EcoRed.MsgLibro lleva el nivel nuevo al
                     // portador (tooltips/daño/HUD viven en SU cliente).
-                    EcoRed.SincronizarLibros(player);
+                    // v6.50.2 — FIX (bandwidth): la FOTO COMPLETA (los 10
+                    // slots) ya NO viaja por kill — SOLO cuando un nivel
+                    // SUBIÓ (la celebración del delta necesita la foto), al
+                    // entrar al mundo (MsgPedirLibros) y en la red de
+                    // seguridad 600t. El resto de kills viaja en el latido
+                    // extendido de arriba: la barra sigue EXACTA.
+                    if (subioNivel)
+                        EcoRed.SincronizarLibros(player);
 
                     // v6.47 — LA PRIMERA 5★ CON VOZ PROPIA: la primera
                     // criatura 5 estrellas que el libro se come merece su

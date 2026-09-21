@@ -620,6 +620,13 @@ namespace AethonMod.Content.VFX
             public readonly float[] Vida = new float[16];
             public readonly float[] Tam = new float[16];
             public readonly float[] SemillaSlot = new float[16];
+
+            // v6.50.2 — FIX: el npc.type DEL DUEÑO al registrarse — un
+            // whoAmI reciclado DENTRO de los 240t del barrido heredaba el
+            // emisor ajeno (glitch de 1-2 s de partículas a mitad de vida
+            // orbitando al nuevo inquilino del índice). Con el tipo
+            // guardado, el barrido y Actualizar detectan al usurpador.
+            public int Tipo = -1;
         }
 
         /// <summary>Un emisor por NPC vivo (clave: whoAmI) + el del jugador local.</summary>
@@ -637,7 +644,10 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// v6.49 — LA BASURA SE SACA SOLA: borra los emisores de NPCs
         /// muertos/despawneados (el barrido que la muerte nunca hacía).
-        /// Lo llama Actualizar en su camino de lógica (no en render).
+        /// v6.50.2 — FIX: también expulsa al whoAmI RECICLADO — si el índice
+        /// lo ocupa OTRO NPC (type distinto del que registró el emisor),
+        /// las partículas no son suyas: se purgan igual que las de un
+        /// muerto. Lo llama Actualizar en su camino de lógica (no en render).
         /// </summary>
         private static void BarrerEmisores()
         {
@@ -652,7 +662,12 @@ namespace AethonMod.Content.VFX
                 foreach (var par in _emisores)
                 {
                     int idx = par.Key;
-                    if (idx < 0 || idx >= Main.maxNPCs || !Main.npc[idx].active)
+                    // v6.50.2 — FIX: además de "ya no vive", "ya no es ÉL":
+                    // un índice reciclado por OTRO tipo de NPC purga el
+                    // emisor heredado (mismo tipo = el dueño legítimo sigue
+                    // vivo: se queda, que es lo que quiere la vida corta).
+                    if (idx < 0 || idx >= Main.maxNPCs || !Main.npc[idx].active ||
+                        Main.npc[idx].type != par.Value.Tipo)
                         _barridoBuffer.Add(idx);
                 }
                 for (int i = 0; i < _barridoBuffer.Count; i++)
@@ -678,9 +693,15 @@ namespace AethonMod.Content.VFX
             }
             BarrerEmisores(); // v6.49 — la basura de los que murieron SIN AI
             if (p == null || p.Particulas == null) return;
-            if (!_emisores.TryGetValue(npc.whoAmI, out Emisor e))
+            if (!_emisores.TryGetValue(npc.whoAmI, out Emisor e) || e.Tipo != npc.type)
             {
-                e = new Emisor();
+                // v6.50.2 — FIX: whoAmI RECICLADO — el emisor hallado no fue
+                // registrado por ESTE npc (type distinto): era del inquilino
+                // anterior del índice y muere aquí, sin esperar al barrido
+                // de 240t (el glitch visual dura 1 tick en vez de ~2 s).
+                // También cubre el registro nuevo de toda la vida.
+                _emisores.Remove(npc.whoAmI);
+                e = new Emisor { Tipo = npc.type };
                 _emisores[npc.whoAmI] = e;
             }
             AvanzarEmisor(e, p, npc.Center, p.Radio);
@@ -782,17 +803,24 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// Reabre el lote de sprites en el estado del dibujado de NPCs de
-        /// vanilla (Deferred · AlphaBlend · LinearClamp · sin depth ·
-        /// CullNone · la matriz del mundo) — el contrato estándar de los
-        /// PreDraw/PostDraw que cambian de lote. Público a propósito:
+        /// Reabre el lote de sprites en el estado del dibujado de ENTIDADES
+        /// de vanilla — v6.50.2 — FIX: ahora el patrón EXACTO de la casa
+        /// (el de ~40 PreDraw/PostDraw del mod, medido en el decompile:
+        /// Deferred · AlphaBlend · <see cref="Main.DefaultSamplerState"/>
+        /// (PointClamp al dibujar a RT: pixel-art NÍTIDO) · sin depth ·
+        /// <see cref="Main.Rasterizer"/> · <see cref="Main.Transform"/>).
+        /// El LinearClamp + CullNone viejo dejaba el resto del pase de
+        /// NPCs/proyectiles muestreando BILINEAL — sprites borrosos tras
+        /// cualquier aura. Público a propósito:
         /// OleadaNPC (y cualquier consumidor futuro) reabre con esto.
         /// </summary>
         public static void ReabrirLoteVanilla()
         {
+            // v6.50.2 — FIX (restore del pase de entidades): sampler/rasterizer
+            // del pase de entidades de vanilla, no LinearClamp+CullNone.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
+                Main.DefaultSamplerState, DepthStencilState.None,
+                Main.Rasterizer, null, Main.Transform);
         }
 
         /// <summary>

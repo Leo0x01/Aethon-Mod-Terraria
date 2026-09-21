@@ -75,7 +75,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             Player duenio = Main.player[Projectile.owner];
             if (duenio == null || !duenio.active) return false;
@@ -104,8 +104,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }

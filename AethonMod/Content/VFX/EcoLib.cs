@@ -73,6 +73,11 @@ namespace AethonMod.Content.VFX
             public bool Rugido = true;     // sonido grave al nacer
             public int Edad = 0;
 
+            // v6.50.2 — FIX: marca de prioridad — el desalojo de la cola
+            // llena necesita saber qué pendientes son prioritarios para
+            // elegir bien a la víctima (el no-prioritario más viejo).
+            public bool Prioridad = false;
+
             // v6.49 — EL CACHE DE LA MEDIDA (auditoría AUD-C): medir el
             // texto y el origen UNA vez al encolar; el render jamás
             // vuelve a llamar MeasureString (era 2× por frame) ni recorta
@@ -101,6 +106,12 @@ namespace AethonMod.Content.VFX
         /// v6.48: prioridad opcional — la voz del LIBRO se cuela AL FRENTE
         /// de la cola (no corta la voz activa: la línea en curso termina
         /// y la del libro nace justo después; las demás esperan detrás).
+        /// v6.50.2 — FIX: con la cola LLENA la voz prioritaria ya NO se
+        /// descarta (furia, venganza y JuicioFin son TODAS prioritarias:
+        /// el return ciego se las comía) — desaloja el pendiente MÁS
+        /// VIEJO no prioritario; solo si TODOS son prioritarios sale el
+        /// más viejo de ellos. Las no prioritarias se descartan igual
+        /// que siempre (la cola acotada se mantiene).
         /// </summary>
         public static void Hablar(string texto, Color tinte, bool rugido = true,
             float escala = 0.62f, bool prioridad = false)
@@ -108,7 +119,37 @@ namespace AethonMod.Content.VFX
             try
             {
                 if (string.IsNullOrEmpty(texto)) return;
-                if (_cola.Count >= ColaMax) return; // desbordamiento: se descarta, sin crecer
+
+                if (_cola.Count >= ColaMax)
+                {
+                    // v6.50.2 — FIX (voz prioritaria con cola llena): en vez
+                    // de descartar la nueva, DESALOJA al pendiente MÁS VIEJO
+                    // NO prioritario (búsqueda desde el FRENTE de la cola);
+                    // si toda la cola es prioritaria, desaloja el más viejo.
+                    // Una voz NO prioritaria sigue descartándose (colas
+                    // acotadas: un asalto de jefes no puede crecer sin control).
+                    if (!prioridad) return; // desbordamiento: se descarta, sin crecer
+                    int víctima = 0;
+                    bool hayNoPrioritario = false;
+                    int idx = 0;
+                    foreach (var pendiente in _cola)
+                    {
+                        if (!pendiente.Prioridad) { víctima = idx; hayNoPrioritario = true; break; }
+                        idx++;
+                    }
+                    if (!hayNoPrioritario) víctima = 0; // todos prioritarios: el más viejo
+
+                    var supervivientes = new List<Eco>(_cola.Count);
+                    int j = 0;
+                    while (_cola.Count > 0)
+                    {
+                        var pendiente = _cola.Dequeue();
+                        if (j != víctima) supervivientes.Add(pendiente);
+                        j++;
+                    }
+                    for (int k = 0; k < supervivientes.Count; k++)
+                        _cola.Enqueue(supervivientes[k]);
+                }
 
                 var eco = new Eco
                 {
@@ -116,6 +157,7 @@ namespace AethonMod.Content.VFX
                     Tinte = tinte,
                     Rugido = rugido,
                     Escala = MathHelper.Clamp(escala, 0.3f, 1.2f),
+                    Prioridad = prioridad,
                 };
                 PrepararCache(eco);
                 if (prioridad && _cola.Count > 0)

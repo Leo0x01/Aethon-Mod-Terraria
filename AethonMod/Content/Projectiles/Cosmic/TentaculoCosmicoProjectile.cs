@@ -354,7 +354,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             // EL PATRÓN A PRUEBA DE BALAS: el lote del pase se cierra, el
             // tentáculo abre y cierra SUS dos pases, y el lote del pase se
@@ -378,8 +378,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
 
             // Nunca dibujar sprite (no lo hay: es TODO partículas).
             return false;

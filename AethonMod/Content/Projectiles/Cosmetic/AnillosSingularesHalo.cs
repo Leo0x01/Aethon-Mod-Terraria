@@ -79,7 +79,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             // EL PATRÓN A PRUEBA DE BALAS (v6.10): el lote del pase se
             // cierra, SelloVacio abre y cierra el SUYO (aditivo con
@@ -105,8 +105,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }

@@ -74,12 +74,14 @@ namespace AethonMod.Content.Players
 
             if (bolsas > 0 && Player.whoAmI == Main.myPlayer)
             {
+                // v6.50.2 — FIX (strings hardcodeados → hjson, regla de la
+                // casa): los avisos del kit de pruebas viajan por clave.
                 Terraria.Main.NewText(
-                    "Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.",
+                    Terraria.Localization.Language.GetTextValue("Mods.AethonMod.TestingPlayer.Bolsas"),
                     new Microsoft.Xna.Framework.Color(230, 196, 255));
                 if (dummies > 0)
                     Terraria.Main.NewText(
-                        $"Además: {dummies} dummies de prueba para el campo de entrenamiento.",
+                        Terraria.Localization.Language.GetTextValue("Mods.AethonMod.TestingPlayer.Dummies", dummies),
                         new Microsoft.Xna.Framework.Color(255, 216, 107));
             }
         }

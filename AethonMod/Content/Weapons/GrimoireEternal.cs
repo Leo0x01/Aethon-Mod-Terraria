@@ -247,16 +247,19 @@ namespace AethonMod.Content.Weapons
 
                 // Invocar minion (EXACTAMENTE una vez)
                 player.AddBuff(ModContent.BuffType<global::AethonMod.Content.Buffs.CosmicOrbBuff>(), 18000);
-                int minionProj = Projectile.NewProjectile(source, position, Vector2.Zero,
-                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
-                    damage, knockback, player.whoAmI);
                 // v5.29: Cachear el nivel del Grimorio en ai[2] para que el minion
                 // mantenga sus stats (velocidad, cooldown, rango, daño) aunque
                 // el jugador cambie de arma después de invocarlo.
-                if (minionProj >= 0 && minionProj < Main.maxProjectiles)
-                {
-                    Main.projectile[minionProj].ai[2] = level;
-                }
+                // v6.50.2 — FIX (ai[] post-spawn no viaja): el paquete 27 sale
+                // DENTRO de NewProjectile → la escritura de ai[2] DESPUÉS del
+                // spawn solo existía en la copia local (las réplicas del minion
+                // en el server y en los demás clientes leían ai[2]==0 y caían al
+                // fallback de HeldItem — stats desincronizadas en MP). El nivel
+                // viaja ahora como argumento ai2 del spawn (Shoot corre solo en
+                // el cliente dueño; el minion nunca escribe ai[2]).
+                Projectile.NewProjectile(source, position, Vector2.Zero,
+                    ModContent.ProjectileType<global::AethonMod.Content.Projectiles.CosmicOrbMinion>(),
+                    damage, knockback, player.whoAmI, 0f, 0f, level);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113);
                 return false;
             }

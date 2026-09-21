@@ -613,6 +613,16 @@
         "Carnada.YaActivo": "The fury is ALREADY unleashed — feed it or survive.",
         "Carnada.Ocupado": "The world is busy (a boss or an invasion). The bait waits its turn.",
 
+        "Altar.Solicitando": "Requesting the Genesis Shard from the altar...",
+        "Altar.Reclamado": "You have claimed the Genesis Shard.",
+        "Altar.YaPosees": "You already own the Genesis Shard.",
+        "Tiles.AncientAltar.MapEntry": "Ancient Altar",
+        "LevelUpTester.Subida": "✦ {0} gained +{1} levels (now level {2}).",
+        "LevelUpTester.SinGrimorio": "No Grimoire of the Eternal found in the inventory.",
+        "TestingPlayer.Bolsas": "The arsenal bags arrive with you (one per category): right click to open each one.",
+        "TestingPlayer.Dummies": "Also: {0} test dummies for the training field.",
+        "Configs.AethonConfigServidor.DisplayName": "Aethon (server)",
+
         "Testigo.Ambiente1": "I watched you before you had a name.",
         "Testigo.Ambiente2": "The book you carry… I saw the first one being born.",
         "Testigo.Ambiente3": "Every bearer ends up as a page. Yours is still being written.",

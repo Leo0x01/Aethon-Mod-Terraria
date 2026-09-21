@@ -78,6 +78,22 @@ namespace AethonMod.Content.Players
         /// <summary>Tope de momentos de hambre (= tope de oleadas).</summary>
         public const int MomentosMax = 10;
 
+        /// <summary>
+        /// v6.50.2 — LA SELECCIÓN DE LA CARNADA DEL REMOTO, vista por la
+        /// AUTORIDAD: OleadasPreparadas (CarnadaDelGrimorio) es un estático
+        /// POR MÁQUINA — en MP el clic derecho del remoto ciclaba SU
+        /// contador local y el server ejecutaba el clic izquierdo (uso
+        /// sincronizado) con SU propio default. EcoRed.MsgPrepararOleadas
+        /// deposita aquí la selección para que el UseItem del server lea
+        /// el número que el portador preparó.
+        /// CICLO DE VIDA: vive la SESIÓN completa — NO se resetea en
+        /// ResetEffects (se perdería a cada tick) ni al morir; NO se
+        /// persiste en el .plr (la selección es un estado de la sesión,
+        /// como el propio estático en SP). El default 0 = "nunca preparó"
+        /// → el UseItem cae al estático local del server (SP/host).
+        /// </summary>
+        public int OleadasPreparadasRemoto;
+
         // ================================================================
         //  v6.46 — LOS TRES ESTADOS DEL LIBRO
         // ================================================================
@@ -285,13 +301,16 @@ namespace AethonMod.Content.Players
                 // entrada se pide en OnEnterWorld; esto la repone).
                 // v6.50.1: también el HAMBRE (si un MsgHambre se pierde, la
                 // barra/aura quedaban desfasadas hasta el próximo cambio).
+                // v6.50.2: MsgHambre SIEMPRE (lleva además el FESTÍN —
+                // fase/oleada/total para el diagnóstico de furia del
+                // cliente; el estado de un portador sin hambre es 0/0 y
+                // no molesta).
                 if (Main.netMode == Terraria.ID.NetmodeID.Server && Player.active &&
                     ((Main.GameUpdateCount + (ulong)Player.whoAmI * 37ul) % 600u) == 0ul)
                 {
                     EcoRed.SincronizarLibros(Player);
                     EcoRed.SincronizarCronica(Player);
-                    if (nivel >= NivelMinimoHambre)
-                        EcoRed.SincronizarHambre(Player);
+                    EcoRed.SincronizarHambre(Player);
                 }
 
                 if (autoridad)
@@ -340,7 +359,13 @@ namespace AethonMod.Content.Players
                             // 10: por eso existen las 10 oleadas naturales).
                             if (MomentosHambre >= MomentosParaFuria)
                             {
-                                var config = ModContent.GetInstance<Content.AethonConfig>();
+                                // v6.50.2 — FIX (config ClientSide leída por la
+                                // AUTORIDAD): EventoHambreGrimorio es una
+                                // decisión del SERVER (el evento lo corre él) —
+                                // vive en AethonConfigServidor (ServerSide):
+                                // en dedicado manda la config del server, no
+                                // la ilusión del cliente.
+                                var config = ModContent.GetInstance<Content.AethonConfigServidor>();
                                 bool evento = config == null || config.EventoHambreGrimorio;
                                 if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
                                     GrimorioFuriaSistema.Provocar(Player, MomentosHambre);
@@ -451,12 +476,17 @@ namespace AethonMod.Content.Players
         /// dorada recupera su color y los susurros callan. v6.49: el
         /// estado nuevo viaja al portador (EcoRed) — en MP la autoridad
         /// la perdona y el cliente del portador la VE perdonada.
+        /// v6.50.2 — FIX (bandwidth): SOLO cuando el hambre CAMBIA — el
+        /// kill que no toca el estado (hambre ya en 0, la mayoría en
+        /// combate) ya no dispara un paquete por kill.
         /// </summary>
         public void RegistrarKill()
         {
             TicksSinMatar = 0;
+            bool cambio = MomentosHambre != 0;
             MomentosHambre = 0;
-            EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
+            if (cambio)
+                EcoRed.SincronizarHambre(Player); // no-op fuera del servidor
         }
 
         // === EL PERFIL DEL AURA DE HAMBRE (cacheado: cero GC por frame) ===

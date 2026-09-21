@@ -75,7 +75,14 @@ namespace AethonMod.Content.Players
 
                 // LA NOVA DEL PARRY (en la posición del jugador, con el
                 // índice de dirección del golpe como empujón).
-                if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                // v6.50.2 — FIX (nova muerta en Host&Play): el viejo gate
+                // `netMode != Server` bloqueaba el NewProjectile cuando el
+                // proceso ES un listen server (netMode 1) — y el host ES un
+                // jugador local legítimo con FreeDodge activo. Gate de dueño
+                // local: el propio NewProjectile sincroniza (el paquete 27
+                // sale con Owner == Main.myPlayer — verificado en el IL del
+                // motor: dec 10470-10475).
+                if (Player.whoAmI == Main.myPlayer)
                 {
                     int nova = Projectile.NewProjectile(Player.GetSource_FromThis(),
                         Player.Center, Vector2.Zero,
@@ -84,6 +91,30 @@ namespace AethonMod.Content.Players
                         9f, Player.whoAmI);
                     if (nova >= 0)
                         Main.projectile[nova].CritChance = 100;
+                }
+
+                // v6.50.2 — FIX (desync de stun de la égida en MP): el parry
+                // EXITOSO tumba aquí al TESTIGO (GuardiaNovaProjectile).
+                // ParryHecho solo existe en ESTE proceso (FreeDodge es
+                // local-only), así que la copia del testigo del server expiraría
+                // "sin parry" y aturdiría 30t server-side a un jugador que YA
+                // paró. Marca ai[0]=1 (viaja con el netUpdate del dueño: el
+                // motor sincroniza proyectiles del dueño al server y este los
+                // reenvía — doc del campo en el IL) y timeLeft=2 para apagar el
+                // aro YA: Kill() no viajaría Y además mataría el flush del
+                // netUpdate (el bloque de sync del Update solo corre con
+                // active).
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active &&
+                        p.type == ModContent.ProjectileType<Projectiles.Cosmic.GuardiaNovaProjectile>() &&
+                        p.owner == Player.whoAmI)
+                    {
+                        p.ai[0] = 1f;         // "parry exitoso" — el testigo no aturde
+                        p.netUpdate = true;  // dueño → server → resto
+                        p.timeLeft = 2;      // cae ya (de forma que el sync viva)
+                    }
                 }
                 return true;      // el golpe se deshace — vanilla devuelve 0.0
             }

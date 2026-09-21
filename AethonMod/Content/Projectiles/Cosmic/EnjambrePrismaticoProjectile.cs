@@ -126,6 +126,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             _age += 1f;
 
+            // v6.50.2 — FIX: la purga periódica de EstelaLib que todos los
+            // empujadores de tracks llevan (OcasoShard/Sinfonia/Pendulo/
+            // MareaGravitatoria/OcasoBurst/CicloEstelar). Este proyectil
+            // empuja SU track solo en la fase núcleo (1..26t): una vez
+            // nacido el enjambre, el track queda podrido (2t sin empuje) y
+            // SIN una purga su entrada vivía en el diccionario de EstelaLib
+            // PARA SIEMPRE (una por disparo). Va ARRIBA del todo (no pegado
+            // al Push como en las referencias) porque aquí el empuje muere
+            // a los 26t y el patrón % 120 solo dispara si la purga corre
+            // durante TODA la vida del proyectil.
+            if (_age % 120f == 0f) EstelaLib.PurgeTracks();
+
             // ================================================================
             //  FASE 1 · EL NÚCLEO (vuela y muere joven)
             // ================================================================

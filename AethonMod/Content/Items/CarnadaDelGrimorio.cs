@@ -66,6 +66,15 @@ namespace AethonMod.Content.Items
             {
                 if (Main.myPlayer != player.whoAmI) return null;
                 OleadasPreparadas = OleadasPreparadas % 11 + 1;
+                // v6.50.2 — FIX (la selección NO viajaba al server):
+                // OleadasPreparadas es un estático POR MÁQUINA — el server
+                // ejecuta el clic IZQUIERDO (uso sincronizado) con SU
+                // propio valor (default 3). En MP el nuevo valor viaja a
+                // la AUTORIDAD (EcoRed.MsgPrepararOleadas →
+                // ShardPlayer.OleadasPreparadasRemoto). En SP y en el HOST
+                // el estático YA es el del proceso que manda: cero red.
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                    EcoRed.EnviarPrepararOleadas(OleadasPreparadas);
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.Carnada.Preparadas", OleadasPreparadas),
                     new Color(198, 200, 206));
                 return true;
@@ -81,7 +90,14 @@ namespace AethonMod.Content.Items
 
             // las hambres reales del libro, si ya tenía (y eran más)
             var sp = player.GetModPlayer<Players.ShardPlayer>();
+            // v6.50.2 — FIX: en MP la selección del REMOTO vive en el
+            // ShardPlayer de la réplica del server (la mandó el clic derecho
+            // por EcoRed.MsgPrepararOleadas) — el estático local solo es
+            // fiable en SP y para el propio HOST (mismo proceso).
             int oleadas = OleadasPreparadas;
+            if (sp != null && sp.OleadasPreparadasRemoto >= 1 &&
+                Main.netMode == NetmodeID.Server && player.whoAmI != Main.myPlayer)
+                oleadas = sp.OleadasPreparadasRemoto;
             if (sp != null && sp.MomentosHambre > oleadas)
                 oleadas = sp.MomentosHambre;
 

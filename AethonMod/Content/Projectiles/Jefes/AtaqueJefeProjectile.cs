@@ -150,6 +150,48 @@ namespace AethonMod.Content.Projectiles.Jefes
             }
         }
 
+        /// <summary>
+        /// v6.50.2 — FIX (LA PÚA MORÍA AL CLAVARSE): el motor mata al
+        /// proyectil en la PRIMERA colisión de tile (OnTileCollide default
+        /// → true → Kill del else final del cauce) — la IA corría ANTES de
+        /// la colisión y jamás veía velocity≈0: _clavada nunca se ponía, las
+        /// 90 t de "respiración" y DetonarPua eran código muerto (en SP y
+        /// server igual). AHORA la colisión ES el clavado: velocidad a cero,
+        /// sin rebote y SIN muerte (return false — la IA detona a su tiempo).
+        /// La estrella fugaz recibía el mismo disparo del motor cuando su
+        /// chequeo manual de suelo perdía la carrera contra un tick rápido.
+        /// Corre en TODAS las máquinas: la simulación local de cada pantalla
+        /// queda idéntica (la autoridad detona; el visual acompaña).
+        /// </summary>
+        public override bool OnTileCollide(Vector2 oldVelocity)
+        {
+            if (Estilo == EstiloPuaSagrario || Estilo == EstiloEstrellaFugaz)
+            {
+                _clavada = true;
+                Projectile.velocity = Vector2.Zero;
+                return false; // ni muerte ni rebote: clavada
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// v6.50.2 — FIX (hitbox honesta del estallido): el cuerpo de la
+        /// mina dibuja ~130 px pero su caja de colisión era la de
+        /// SetDefaults (14×14) — solo dañaba al pisar el centro exacto.
+        /// Inflada a la talla del visual (golpea lo que SE VE que golpea).
+        /// </summary>
+        public override void ModifyDamageHitbox(ref Rectangle hitbox)
+        {
+            if (Estilo == EstiloEstallidoMina)
+            {
+                const int inflar = 96; // 14 → 110 px de cuerpo
+                hitbox.X -= inflar / 2;
+                hitbox.Y -= inflar / 2;
+                hitbox.Width += inflar;
+                hitbox.Height += inflar;
+            }
+        }
+
         /// <summary>La presa más cercana.</summary>
         private Player Presa()
         {
@@ -168,6 +210,19 @@ namespace AethonMod.Content.Projectiles.Jefes
         public override void AI()
         {
             _edad++;
+
+            // v6.50.2 — FIX (MP: el estado que OnSpawn no lleva): OnSpawn
+            // NO corre en los clientes que reciben el proyectil por red
+            // (msg 27 — payload sin tileCollide/timeLeft) → la púa
+            // ATRAVESABA el suelo en las pantallas remotas y el
+            // _centroOrbita quedaba (0,0) (coro/cuchilla/runa teleportados
+            // a la esquina del mundo — sus ataques jamás amenazaban a los
+            // remotos). Autocuración al inicio de cada IA: el estado se
+            // reconstruye desde lo que SÍ viaja (posición + ai[]).
+            if (_centroOrbita == Vector2.Zero) _centroOrbita = Projectile.Center;
+            Projectile.tileCollide = Estilo == EstiloPuaSagrario ||
+                                     Estilo == EstiloEstrellaFugaz;
+
             Player presa = Presa();
 
             switch (Estilo)
@@ -456,6 +511,13 @@ namespace AethonMod.Content.Projectiles.Jefes
                 case EstiloEstallidoMina:
                 {
                     Projectile.velocity = Vector2.Zero;
+                    // v6.50.2 — FIX (el fantasma de 7 s en clientes MP): el
+                    // timeLeft=20 se fija en OnSpawn, que NO corre al recibir
+                    // el msg 27 → las pantallas remotas mantenían la zona 420 t
+                    // (colisión hostil evaluada EN cada cliente local). La edad
+                    // SÍ corre en todas las máquinas: muerte por edad,
+                    // idempotente con el timeLeft de la autoridad.
+                    if (_edad > 20) Projectile.Kill();
                     break;
                 }
             }
@@ -557,7 +619,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         // ==================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -886,8 +948,8 @@ namespace AethonMod.Content.Projectiles.Jefes
             {
                 if (wasActive)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
             }
             return false;
         }

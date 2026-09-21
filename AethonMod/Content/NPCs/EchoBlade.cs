@@ -83,6 +83,13 @@ namespace AethonMod.Content.NPCs
         {
             if (_mem.Pos == null) _mem = EcosLib.Crear();
 
+            // v6.50.2 — FIX (el parry solo funcionaba UNA VEZ por vida del
+            // jefe): ModifyIncomingHit pone ParryCooldown=120 al bloquear,
+            // pero NADIE lo decrementaba → tras el primer parry la firma
+            // del duelista (20% de anular el golpe) moría para siempre y
+            // la vaina (L330/L382) quedaba apagada el resto de la pelea.
+            if (ParryCooldown > 0) ParryCooldown--;
+
             Player target = Main.player[NPC.target];
             if (!target.active || target.dead)
             {
@@ -282,7 +289,7 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -409,8 +416,8 @@ namespace AethonMod.Content.NPCs
             {
                 if (wasActive)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
             }
             return false; // el portador SE dibuja a sí mismo (cero sprite)
         }

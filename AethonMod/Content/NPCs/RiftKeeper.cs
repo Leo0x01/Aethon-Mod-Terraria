@@ -39,6 +39,8 @@ namespace AethonMod.Content.NPCs
         private int _tickAtaque = 0;      // la cadencia de los virotes
         private int _tickSello = 0;       // el frío del sello
         private float _anguloOrbita = 0f; // el rumbo de la guardia
+        // v6.50.2 — contador de cruces (la semilla determinista del teleport)
+        private int _cruces = 0;
         private Vector2 _posSalida = Vector2.Zero; // dónde se desgarró
 
         // 0 = sólido · 1 = disolviéndose en la grieta · 2 = naciendo al otro lado
@@ -116,11 +118,25 @@ namespace AethonMod.Content.NPCs
             {
                 // EL CRUCE: nace al otro lado (el ángulo opuesto de la
                 // guardia — el centinela SIEMPRE te flanquea).
+                // v6.50.2 — FIX (rubber-band en cada cruce MP): el ángulo
+                // usaba Main.rand, que corre en TODAS las máquinas con
+                // semillas DISTINTAS (NPC.AI corre en server Y clientes) →
+                // el cliente teleportaba a OTRO punto que el server y el
+                // netUpdate lo corregía con snap. Ángulo DETERMINISTA
+                // (semilla por whoAmI + número de cruces — el mismo en
+                // todas las pantallas) + clamp a los bordes del mundo
+                // (vanilla clampa sus teleports: el centinela no nace en
+                // el vacío si la presa está junto al borde).
                 _faseCruce = 2;
                 _tickTele = 0;
-                _anguloOrbita += MathHelper.Pi + Main.rand.NextFloat(-0.6f, 0.6f);
+                _anguloOrbita += MathHelper.Pi + (((NPC.whoAmI * 97 + _cruces * 13) % 121) - 60) * 0.01f;
+                _cruces++;
                 Vector2 posNueva = target.Center + new Vector2(
                     MathF.Cos(_anguloOrbita), MathF.Sin(_anguloOrbita)) * 340f;
+                posNueva.X = MathHelper.Clamp(posNueva.X,
+                    Main.leftWorld + 256f, Main.rightWorld - 256f);
+                posNueva.Y = MathHelper.Clamp(posNueva.Y,
+                    Main.topWorld + 256f, Main.bottomWorld - 256f);
                 NPC.Center = posNueva;
                 NPC.velocity = Vector2.Zero;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, NPC.Center);
@@ -242,7 +258,7 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -358,8 +374,8 @@ namespace AethonMod.Content.NPCs
             {
                 if (wasActive)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
             }
             return false; // el centinela LO dibuja la grieta (cero sprite)
         }

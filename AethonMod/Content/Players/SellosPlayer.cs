@@ -102,7 +102,14 @@ namespace AethonMod.Content.Players
                 }
             }
 
-            if (Main.netMode == NetmodeID.Server) return;
+            // v6.50.2 — FIX (host sin sus visuales en Host&Play): el viejo
+            // `netMode == Server` devolvía también en el LISTEN SERVER
+            // (netMode 1 CON pantalla): el host perdía la lente de los
+            // Anillos del Horizonte, las ascuas, el halo y las chispas de
+            // los otros dos sellos. "Sin pantalla" es Main.dedServ — y este
+            // bloque es TODO visual de cada pantalla (polvo/luz/lente +
+            // halos ya gateados a whoAmI == Main.myPlayer más abajo).
+            if (Main.dedServ) return;
             if (Player.dead) return;
 
             float time = Main.GlobalTimeWrappedHourly;

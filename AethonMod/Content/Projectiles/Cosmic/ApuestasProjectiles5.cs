@@ -154,7 +154,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// </summary>
         private void ReEmitir()
         {
-            if (Generacion >= MaxGeneraciones || ContarEcosVivos() >= MaxEcosVivos ||
+            if (Generacion >= MaxGeneraciones || ContarEcosVivos(Projectile.owner) >= MaxEcosVivos ||
                 (_presa == null || !_presa.active))
             {
                 // Sin presa o cadena agotada: el eco se disuelve con un
@@ -177,8 +177,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center);
         }
 
-        /// <summary>Los ecos vivos del arma (generación > 0) de este dueño.</summary>
-        public static int ContarEcosVivos()
+        /// <summary>Los ecos vivos del arma (generación > 0) de ESTE dueño.
+        /// v6.50.2 — FIX (tope GLOBAL de 6 en MP): el conteo no filtraba por
+        /// dueño y dos portadores del Eco Cuántico compartían el tope de 6
+        /// ecos vivos (la proliferación de uno se comía la del otro). El
+        /// doc-comment siempre dijo "de este dueño" — ahora el filtro existe.</summary>
+        public static int ContarEcosVivos(int owner)
         {
             int n = 0;
             for (int i = 0; i < Main.maxProjectiles; i++)
@@ -186,6 +190,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile p = Main.projectile[i];
                 if (p != null && p.active &&
                     p.type == ModContent.ProjectileType<PulsoEcoProjectile>() &&
+                    p.owner == owner &&
                     p.ai[0] > 0.5f)
                     n++;
             }
@@ -207,7 +212,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -275,8 +280,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }

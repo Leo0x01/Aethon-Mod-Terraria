@@ -251,7 +251,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
             int novaDamage = Math.Max(1, (int)(Projectile.damage * (supremo ? 1.6f : 1.25f)));
             float novaRadius = 380f + 14f * (tier - 1) + (supremo ? 120f : 0f);
 
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50.2 — FIX (nova fantasma en MP): el gate netMode dejaba
+            // el spawn en el SERVER con owner=índice de jugador ≠ myPlayer(255)
+            // → NewProjectile JAMÁS lo difundía (solo difunde owner==myPlayer,
+            // verificado en el IL) y el cliente dueño tampoco lo engendraba:
+            // visual Y daño de la nova perdidos para cualquier jugador no-host.
+            // El patrón de los agujeros (BlackHoleProjectile): lo engendra la
+            // máquina DUEÑA y el propio NewProjectile sincroniza.
+            if (Projectile.owner == Main.myPlayer)
             {
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),

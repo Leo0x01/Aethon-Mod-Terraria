@@ -38,7 +38,7 @@ namespace AethonMod.Content.Systems
         private static bool _teclaAntes;
 
         // EL CACHE (4 Hz — cero GC entre refrescos).
-        private static int _tickRefresco = -1000;
+        // v6.50.2 — _tickRefresco jubilado: el flanco del % 15u manda.
         private static readonly string[] _lineas = new string[8];
         private static readonly Vector2[] _medidas = new Vector2[8];
         private static int _nLineas;
@@ -56,12 +56,12 @@ namespace AethonMod.Content.Systems
 
             if (!_abierto) return;
 
-            int tick = (int)(Main.GameUpdateCount % 15u);
-            if (tick != _tickRefresco)
-            {
-                _tickRefresco = tick;
+            // v6.50.2 — FIX (refresco CADA frame): el viejo `% 15` cambiaba
+            // de valor en CADA tick (0..14 cíclico) → el != disparaba
+            // Refrescar() a 60 Hz — justo lo que el cache de 4 Hz prometía
+            // evitar. Refresco solo al flanco del período.
+            if (Main.GameUpdateCount % 15u == 0u)
                 Refrescar();
-            }
         }
 
         /// <summary>Reconstruye las líneas del panel (4 Hz cuando abierto).</summary>
@@ -87,6 +87,9 @@ namespace AethonMod.Content.Systems
                 Linea("Mods.AethonMod.Diag.Eco", EcoLib.ColasPendientes);
                 Linea("Mods.AethonMod.Diag.Aura", AuraLib.EmisoresVivos);
                 Linea("Mods.AethonMod.Diag.Pulso", PulsoLib.FuerzaPantalla);
+                // v6.50.2 — la furia en clientes MP llega por los estáticos
+                // que EcoRed.MsgHambre llena (GrimorioFuriaSistema.
+                // Diagnostico decide server vs cliente por netMode).
                 Linea("Mods.AethonMod.Diag.Furia", GrimorioFuriaSistema.Diagnostico());
                 Linea("Mods.AethonMod.Diag.Ayuda");
                 _nLineas = i;
@@ -130,7 +133,11 @@ namespace AethonMod.Content.Systems
                 for (int i = 0; i < _nLineas; i++)
                 {
                     if (_lineas[i] == null) continue;
-                    Color tinte = i == 6
+                    // v6.50.2 — FIX (tinte de la línea de ayuda caía en la de
+                    // FURIA): el orden real de Linea() es 0 Fps, 1 Factor,
+                    // 2 Quads, 3 Eco, 4 Aura, 5 Pulso, 6 Furia, 7 AYUDA —
+                    // ayuda es la 7 (la última), no la 6.
+                    Color tinte = i == 7
                         ? new Color(150, 148, 142) // la línea de ayuda, discreta
                         : new Color(196, 232, 255);
                     sb.DrawString(font, _lineas[i], new Vector2(x, y + i * 20f),

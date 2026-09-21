@@ -45,6 +45,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private static readonly Color ColorHilo = new(210, 235, 255);
         private static readonly Color ColorBlanco = new(255, 255, 255);
 
+        /// <summary>
+        /// v6.50.2 — FIX (alocación por frame): el búfer de estrellas se
+        /// REUTILIZA (el patrón de la casa — _clavesPicotazo de
+        /// MetronomoPulsarHalo): EstrellasDe() construía y ordenaba un List
+        /// NUEVO por estrella por tick (la AI y el hilo de cada estrella —
+        /// O(N²) + GC cada frame). Estático y despejado por uso: la AI corre
+        /// de una en una y el render nunca solapa con el update. Los
+        /// llamadores lo consumen íntegro ANTES de la siguiente llamada.
+        /// </summary>
+        private static readonly List<Projectile> _bufEstrellas = new List<Projectile>(16);
+
         private float _age;
         private bool _nacio;
         private Vector2 _target;
@@ -148,10 +159,14 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>
         /// LAS ESTRELLAS DEL TEJEDOR, ordenadas por EDAD (timeLeft
         /// ascendente: la más vieja primero — el orden de clavado).
+        /// v6.50.2 — FIX: devuelve el BÚFER ESTÁTICO reutilizado (Clear +
+        /// relleno + Sort por llamada — cero GC). El delegado del Sort no
+        /// captura nada → el compilador lo cachea (no se aloca por llamada);
+        /// sin LINQ.
         /// </summary>
         public static List<Projectile> EstrellasDe(int owner)
         {
-            var lista = new List<Projectile>();
+            _bufEstrellas.Clear();
             int tipo = ModContent.ProjectileType<TelarEstrellaProjectile>();
 
             for (int i = 0; i < Main.maxProjectiles; i++)
@@ -159,11 +174,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile p = Main.projectile[i];
                 if (p == null || !p.active || p.type != tipo || p.owner != owner)
                     continue;
-                lista.Add(p);
+                _bufEstrellas.Add(p);
             }
 
-            lista.Sort((a, b) => a.timeLeft.CompareTo(b.timeLeft));
-            return lista;
+            _bufEstrellas.Sort((a, b) => a.timeLeft.CompareTo(b.timeLeft));
+            return _bufEstrellas;
         }
 
         /// <summary>
@@ -202,7 +217,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             // ============================================================
             //  CONTRATO DE BATCH v6.10: cerrar, dibujar, restaurar.

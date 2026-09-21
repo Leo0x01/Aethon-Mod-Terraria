@@ -587,4 +587,52 @@ namespace AethonMod.Content.VFX
         /// <summary>v6.49 — EL DIAGNÓSTICO del núcleo (lo pinta el overlay F8).</summary>
         public static int QuadsDelFrame => _quadsDelFrame;
     }
+
+    /// <summary>
+    /// VFXCoreSystem — v6.50.2 — FIX: EL SUBSISTEMA QUE NADIE LLAMABA.
+    /// RegisterLayer/FlushOcclusion/Janitor existían desde v6.31 como
+    /// la protección documentada (volcar las capas de oclusión y anular
+    /// las texturas que RuneSunRenderer/CicloEstelarRenderer/SunProjectile/
+    /// BlackHoleProjectile dejan BIND-EADAS en los slots 1..3 del
+    /// dispositivo), pero grep-verificado NADIE invocaba la puerta
+    /// pública: la protección jamás corrió (subsistema muerto — el doc
+    /// prometía higiene que no existía).
+    ///
+    /// Este ModSystem la CONECTA en PostDrawTiles — el punto exacto que
+    /// la documentación de <see cref="VFXCore.FlushOcclusion"/> propone
+    /// («p. ej. un ModSystem.PostDrawTiles para que los NPCs tapen la
+    /// oclusión»): vanilla llama SystemLoader.PostDrawTiles() justo
+    /// después de cerrar el lote de tiles y ANTES de dibujar los
+    /// proyectiles (decompile: spriteBatch.End() → PostDrawTiles() →
+    /// DrawProjectiles()), así que el barrido del Janitor despeja los
+    /// slots ANTES del pase de entidades de cada frame (las texturas
+    /// bind-eadas por los renderizadores del frame anterior ya no
+    /// contaminan el dibujado siguiente).
+    ///
+    /// EL GUARD (netMode == Server) es el MISMO de todo el stack VFX de
+    /// la casa (ParticleManager.PostDrawTiles, RuneSun, auras…): devuelve
+    /// al servidor dedicado Y AL HOST del listen-server (netMode 2), donde
+    /// este mod no renderiza nada — no hay slots que limpiar ahí
+    /// (FlushOcclusion se auto-guarda igual, doble puerta). En el menú no
+    /// hay mundo ni renderizadores registrando nada.
+    /// </summary>
+    public class VFXCoreSystem : ModSystem
+    {
+        /// <summary>
+        /// EL PUNTO ÚNICO DEL VOLCADO DE CAPAS + LA HIGIENE: vuelca las
+        /// capas de oclusión registradas (nadie hoy: los _capas quedan
+        /// vacíos y el volcado es no-op) y corre el Janitor — la limpieza
+        /// de los slots de textura que los shaders del mod dejan pegados.
+        /// Con las capas vacías el coste es el barrido del Janitor (tres
+        /// asignaciones de slot nulas) — cero lotes abiertos.
+        /// </summary>
+        public override void PostDrawTiles()
+        {
+            // v6.50.2 — FIX (subsistema muerto): la llamada que faltaba.
+            // Solo procesos que dibujan; jamás romper el frame por higiene.
+            if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;
+            try { VFXCore.FlushOcclusion(); }
+            catch { }
+        }
+    }
 }

@@ -84,6 +84,10 @@ namespace AethonMod.Content.Projectiles.Oleadas
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.light = 0.6f;
+            // v6.50.2 — quien entre a media oleada recibe los dientes
+            // (vanilla lo hace con los proyectiles de jefe — la misma
+            // regla que su hermano AtaqueJefeProjectile).
+            Projectile.netImportant = true;
         }
 
         public override void OnSpawn(IEntitySource source)
@@ -110,6 +114,15 @@ namespace AethonMod.Content.Projectiles.Oleadas
         public override void AI()
         {
             _edad++;
+
+            // v6.50.2 — FIX (MP: _centroOrbita no viaja): OnSpawn NO corre
+            // en los clientes que reciben el proyectil por red (msg 27) →
+            // el anillo de las cuentas/calaveras quedaba centrado en (0,0)
+            // (esquina del mundo — teletransporte visual y cero amenaza en
+            // las pantallas remotas). Autocuración: el centro se reconstruye
+            // desde la posición recibida.
+            if (_centroOrbita == Vector2.Zero) _centroOrbita = Projectile.Center;
+
             Player presa = Presa();
 
             switch (Estilo)
@@ -288,7 +301,7 @@ namespace AethonMod.Content.Projectiles.Oleadas
         // ==================================================================
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -455,8 +468,8 @@ namespace AethonMod.Content.Projectiles.Oleadas
             {
                 if (wasActive)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
             }
             return false;
         }

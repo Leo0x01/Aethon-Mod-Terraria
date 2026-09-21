@@ -80,7 +80,13 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaType) FormaAscendida = true;
             }
 
-            if (Main.netMode == NetmodeID.Server) return;
+            // v6.50.2 — FIX (host sin sus visuales en Host&Play): mismo error
+            // raíz que SellosPlayer — `netMode == Server` también devolvía en
+            // el LISTEN SERVER (netMode 1 CON pantalla): el host perdía las
+            // chispas/luz de las coronas. "Sin pantalla" es Main.dedServ. El
+            // resto del bloque es polvo/luz por pantalla y los halos ya están
+            // gateados a whoAmI == Main.myPlayer.
+            if (Main.dedServ) return;
             if (Player.dead) return;
 
             // Centro de la cabeza (respeta la gravedad invertida).

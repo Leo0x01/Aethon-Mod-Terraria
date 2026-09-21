@@ -159,24 +159,42 @@ namespace AethonMod.Content.Projectiles.Cosmic
             return best;
         }
 
-        /// <summary>Los N enemigos más cercanos en rango (para las cadenas).</summary>
+        /// <summary>
+        /// v6.50.2 — FIX (alocación por andanada): los dos List de las
+        /// cadenas se REUTILIZAN (el patrón de la casa — _clavesPicotazo de
+        /// MetronomoPulsarHalo): FindNearestEnemies alocaba 2 List cada 20
+        /// ticks por magnetar (el comentario "cero GC" era falso — la
+        /// inserción ordenada de List.Insert no aloca, pero el new List sí).
+        /// Estáticos y despejados por uso: la AI corre de una en una y el
+        /// llamador consume el resultado ANTES de la siguiente llamada.
+        /// </summary>
+        private static readonly List<NPC> _bufCadenas = new List<NPC>(8);
+        private static readonly List<float> _bufDistsCadenas = new List<float>(8);
+
+        /// <summary>Los N enemigos más cercanos en rango (para las cadenas).
+        /// Devuelve el BÚFER ESTÁTICO reutilizado — consúmelo antes de la
+        /// siguiente llamada.</summary>
         private List<NPC> FindNearestEnemies(float maxRange, int count)
         {
-            var list = new List<NPC>();
-            var dists = new List<float>();
+            _bufCadenas.Clear();
+            _bufDistsCadenas.Clear();
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 if (!VFXCore.EsObjetivo(npc)) continue;
                 float dist = (npc.Center - Projectile.Center).Length();
                 if (dist > maxRange) continue;
                 // inserción ordenada (N pequeño: burbuja fina, cero GC).
-                int i = list.Count;
-                while (i > 0 && dists[i - 1] > dist) i--;
-                list.Insert(i, npc);
-                dists.Insert(i, dist);
-                if (list.Count > count) { list.RemoveAt(count); dists.RemoveAt(count); }
+                int i = _bufCadenas.Count;
+                while (i > 0 && _bufDistsCadenas[i - 1] > dist) i--;
+                _bufCadenas.Insert(i, npc);
+                _bufDistsCadenas.Insert(i, dist);
+                if (_bufCadenas.Count > count)
+                {
+                    _bufCadenas.RemoveAt(count);
+                    _bufDistsCadenas.RemoveAt(count);
+                }
             }
-            return list;
+            return _bufCadenas;
         }
 
         public override bool PreDraw(ref Color lightColor)

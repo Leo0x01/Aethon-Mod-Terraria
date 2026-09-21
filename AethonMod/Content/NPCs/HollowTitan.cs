@@ -40,6 +40,8 @@ namespace AethonMod.Content.NPCs
         private int _tickCoro = 0;       // cadencia del coro
         private int _tickPorrazo = 0;    // frío del porrazo
         private int _tickCarga = 0;      // LA CARGA (0 = libre)
+        // v6.50.2 — el reloj PROPIO de la carga (cuenta atrás independiente)
+        private int _tickCargaIdle = 420;
         private Vector2 _dirCarga = Vector2.Zero;
 
         // === LA PALETA DEL SAGRARIO ===
@@ -170,9 +172,18 @@ namespace AethonMod.Content.NPCs
             }
 
             // === LA CARGA: cada 420 t (280 en furia) si la presa está lejos ===
-            if (_tickPua == 0 && Vector2.Distance(target.Center, NPC.Center) > 260f &&
-                Main.GameUpdateCount % (furia ? 280u : 420u) == 0u)
+            // v6.50.2 — FIX (la carga CASI NUNCA disparaba): el arranque
+            // exigía que el tick exacto en que _tickPua==0 (1 de cada 90/45)
+            // COINCIDIERA con un múltiplo global de GameUpdateCount de
+            // 420/280 — gcd(90,420)=30 → 29 de cada 30 peleas la carga
+            // jamás arrancaba (y al alinear: cada 1260 t en vez de 420;
+            // furia: gcd(45,280)=5 → 4 de 5). Reloj PROPIO en cuenta atrás:
+            // dispara con presa lejos y se rearma solo.
+            if (_tickCargaIdle > 0) _tickCargaIdle--;
+            if (_tickCargaIdle <= 0 &&
+                Vector2.Distance(target.Center, NPC.Center) > 260f)
             {
+                _tickCargaIdle = furia ? 280 : 420; // rearme
                 _tickCarga = 1; // arranca el aviso
             }
 
@@ -271,7 +282,7 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -374,8 +385,8 @@ namespace AethonMod.Content.NPCs
             {
                 if (wasActive)
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
             }
             return false; // el cuerpo LO dibuja el coloso (cero sprite)
         }

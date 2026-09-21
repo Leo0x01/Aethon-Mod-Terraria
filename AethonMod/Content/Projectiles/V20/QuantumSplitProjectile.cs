@@ -57,7 +57,13 @@ namespace AethonMod.Content.Projectiles.V20
 
                 // === Split: si ai[0]==0 y timeLeft < 90 → split ===
                 // timeLeft=120 inicial → cuando timeLeft=90 han pasado ~30 frames.
-                if (Projectile.ai[0] == 0f && Projectile.timeLeft < 90)
+                // v6.50.2 — FIX (fantasmas ×N+1 en MP): la IA corre en TODAS
+                // las máquinas y el spawn de los 2 hijos no tenía gate de
+                // dueño — cada cliente engendraba 2 locales y el server otros
+                // 2 inertes. Gate de MÁQUINA DUEÑA (el patrón de la casa): el
+                // NewProjectile del dueño se sincroniza solo.
+                if (Projectile.ai[0] == 0f && Projectile.timeLeft < 90 &&
+                    Projectile.owner == Main.myPlayer)
                 {
                     Projectile.ai[0] = 1f;
                     SplitIntoThree();

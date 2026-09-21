@@ -137,7 +137,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             Player duenio = Main.player[Projectile.owner];
             if (duenio == null || !duenio.active || duenio.dead) return false;

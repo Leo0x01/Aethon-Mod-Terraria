@@ -59,7 +59,7 @@ namespace AethonMod.Content.VFX
         // que EstelaTrack.PurgeTracks) y Purgar() se lleva a los muertos
         // al pool — lo llama un ModSystem (BrumaSystem) cada 120 ticks.
         private uint _últimoEmpujeAbsoluto;
-        private static int _tickUltimaPurga;
+        private static uint _tickUltimaPurga;
 
         /// <summary>
         /// v6.49 — LA PURGA PERIÓDICA: las cintas cuyo dueño lleva más de
@@ -90,9 +90,18 @@ namespace AethonMod.Content.VFX
         {
             try
             {
-                int tick = (int)(Main.GameUpdateCount % 120u);
-                if (tick == _tickUltimaPurga) return;
-                _tickUltimaPurga = tick;
+                // v6.50.2 — FIX: la purga corre CADA 120 TICKS, no cada tick —
+                // el `GameUpdateCount % 120` viejo cambia de valor CADA tick,
+                // así que la comparación con _tickUltimaPurga casi siempre
+                // daba distinto y Purgar() corría TODOS los ticks (el "cada
+                // 120" del documento mentía; el coste era trivial pero el
+                // contrato era cada 120). Ahora solo en el tick múltiplo, y
+                // el reloj absoluto evita la doble purga si un frame llama
+                // dos veces (sub-pasos).
+                uint ahora = Main.GameUpdateCount;
+                if (ahora % 120u != 0u) return;      // solo el tick múltiplo
+                if (ahora == _tickUltimaPurga) return; // ya purgada en ESTE tick
+                _tickUltimaPurga = ahora;
                 Purgar();
             }
             catch { }

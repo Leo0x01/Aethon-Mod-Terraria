@@ -32,6 +32,8 @@ namespace AethonMod.Content.Systems
         /// v6.50 — los LIBROS y la CRÓNICA caminan por el mismo cauce (y el
         /// PEDIDO de entrada llega del CLIENTE: el whoAmI del remitente
         /// decide a quién contesta el servidor).
+        /// v6.50.2 — MsgPrepararOleadas (10) se suma al mismo cauce: la
+        /// selección de la Carnada viaja al server por aquí.
         /// </summary>
         public static void HandlePacket(BinaryReader reader, int whoAmI = -1)
         {
@@ -51,12 +53,17 @@ namespace AethonMod.Content.Systems
                     case EcoRed.MsgCronica:
                     case EcoRed.MsgPedirLibros:
                     case EcoRed.MsgPedirFragmento:
+                    case EcoRed.MsgPrepararOleadas:
                         // v6.50.1 — FIX: MsgPedirFragmento (9) no estaba en
                         // el switch — el paquete del Altar moría en silencio
                         // y el Fragmento Génesis era inobtenible en MP (el
                         // cliente veía el mensaje de reclamado sin que nada
                         // naciera). Rewind 1 byte: EcoRed lee el TIPO de
                         // nuevo (su propio switch lo necesita para el filtro).
+                        // v6.50.2 — FIX: MsgPrepararOleadas (10) en el mismo
+                        // grupo (el router de EcoRed lo cubre — sin case, la
+                        // selección de la carnada moriría igual que el
+                        // fragmento en su día).
                         reader.BaseStream.Position -= 1L;
                         EcoRed.Recibir(reader, whoAmI);
                         break;

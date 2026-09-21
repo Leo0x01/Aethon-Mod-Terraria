@@ -53,6 +53,19 @@ namespace AethonMod.Content.Systems
     ///   festín es del mundo).
     /// - AnunciarAlPortador(portador, clave, color, args): chat solo al
     ///   portador (sus logros privados: el derecho a las esencias).
+    /// - EnviarPrepararOleadas(oleadas): v6.50.2 — la selección de la
+    ///   Carnada (clic derecho) viaja del cliente a la AUTORIDAD (el
+    ///   estático por-máquina jamás llegó al server).
+    ///
+    /// v6.50.2 — BANDWIDTH (auditoría: 3 paquetes por kill):
+    /// - MsgLatidoXp LLEVA el estado del libro (slot/nivel/XP de la
+    ///   primera copia): un paquete por kill, la barra sigue exacta.
+    /// - MsgLibro (la foto completa) SOLO al subir de nivel, en
+    ///   OnEnterWorld y en la red de seguridad 600t — nunca por kill.
+    /// - MsgHambre SOLO cuando el hambre cambia o en la red de
+    ///   seguridad — y además lleva el FESTÍN (fase/oleada/total) para
+    ///   el diagnóstico de furia de los clientes (antes siempre
+    ///   "inactivo": las fases vivían solo en el server).
     ///
     /// REGLAS DE LA CASA: cero alocaciones en render (esto es lógica de
     /// juego — corre una vez por evento, no por frame); nada de texto
@@ -72,6 +85,13 @@ namespace AethonMod.Content.Systems
         public const byte MsgCronica = 7;   // crónica del Testigo + DerrotaOleada10 → SU portador
         public const byte MsgPedirLibros = 8; // cliente → server: "dame mis libros" (al entrar)
         public const byte MsgPedirFragmento = 9; // cliente → server: el Altar pide el Fragmento Génesis
+        // v6.50.2 — FIX (la selección de la carnada NO viajaba en MP):
+        // OleadasPreparadas era un ESTÁTICO por máquina — el remoto ciclaba
+        // SU contador y el server (que corre el clic izquierdo por el uso
+        // sincronizado) desataba la furia con SU propio 3. La selección
+        // viaja ahora del cliente del portador a la AUTORIDAD y vive en
+        // ShardPlayer.OleadasPreparadasRemoto (toda la sesión).
+        public const byte MsgPrepararOleadas = 10; // cliente → server: la Carnada prepara N oleadas
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -176,6 +196,16 @@ namespace AethonMod.Content.Systems
                     p.Write((byte)portador.whoAmI);
                     p.Write((byte)System.Math.Min(sp.MomentosHambre, 255));
                     p.Write(sp.TicksSinMatar);
+                    // v6.50.2 — FIX (furia siempre "inactiva" en clientes
+                    // MP): EL FESTÍN CAMINA con el hambre — fase, oleada y
+                    // total (3 bytes, simétricos con el case de recepción).
+                    // Lo mandan la red de seguridad 600t y cada cambio de
+                    // fase del ciclo (GrimorioFuriaSistema).
+                    p.Write((byte)GrimorioFuriaSistema.FaseServidor);
+                    p.Write((byte)System.Math.Max(0, System.Math.Min(
+                        GrimorioFuriaSistema.OleadaServidor, 255)));
+                    p.Write((byte)System.Math.Max(0, System.Math.Min(
+                        GrimorioFuriaSistema.TotalesServidor, 255)));
                 });
             }
             catch { }
@@ -189,8 +219,15 @@ namespace AethonMod.Content.Systems
         /// EL PULSO DE XP: la barra dorada del portador late cuando su
         /// libro cobra (en MP el cobro lo hace el servidor — el HUD vive
         /// en el cliente del portador). No-op en SP y en clientes.
+        /// v6.50.2 — FIX (bandwidth): EL LATIDO LLEVA EL LIBRO — (slot,
+        /// nivel, XP) de la primera copia visible viaja en el MISMO
+        /// paquete para que el cliente aplique el estado sin la FOTO
+        /// COMPLETA de MsgLibro (esa ya solo viaja al subir de nivel, en
+        /// OnEnterWorld y en la red de seguridad 600t — nunca por kill).
+        /// Simétrico con el case de recepción.
         /// </summary>
-        public static void LatidoDeXp(Player portador, int xp)
+        public static void LatidoDeXp(Player portador, int xp, int slot = -1,
+            int nivel = 0, int xpLibro = 0)
         {
             try
             {
@@ -202,6 +239,12 @@ namespace AethonMod.Content.Systems
                     p.Write(MsgLatidoXp);
                     p.Write((byte)portador.whoAmI);
                     p.Write(xp);
+                    // v6.50.2 — el estado del libro en el mismo paquete
+                    // (slot 255 = "sin libro que aplicar": solo pulsa la
+                    // barra — la aplicación la cubre la foto completa).
+                    p.Write((byte)(slot >= 0 && slot <= 9 ? slot : 255));
+                    p.Write(nivel);
+                    p.Write(xpLibro);
                 });
             }
             catch { }
@@ -369,8 +412,11 @@ namespace AethonMod.Content.Systems
 
                 // EL PEDIDO DE ENTRADA: el cliente recién llegado pide sus
                 // libros — el server contesta con la foto completa.
+                // v6.50.2 — también el pedido de la CARNADA (la selección
+                // del clic derecho viaja a la autoridad).
                 if (Main.netMode == NetmodeID.Server &&
-                    (tipo == MsgPedirLibros || tipo == MsgPedirFragmento))
+                    (tipo == MsgPedirLibros || tipo == MsgPedirFragmento ||
+                     tipo == MsgPrepararOleadas))
                 {
                     Player solicitante = quienEnvia >= 0 && quienEnvia < Main.player.Length
                         ? Main.player[quienEnvia] : null;
@@ -381,6 +427,19 @@ namespace AethonMod.Content.Systems
                             SincronizarLibros(solicitante);
                             SincronizarCronica(solicitante);
                             SincronizarHambre(solicitante);
+                        }
+                        else if (tipo == MsgPrepararOleadas)
+                        {
+                            // v6.50.2 — LA SELECCIÓN DE LA CARNADA CAMINA: el
+                            // clic derecho cicla un estático LOCAL — este
+                            // paquete lo deja en la réplica del server para
+                            // que SU UseItem (el uso sincronizado) lea el
+                            // valor que el REMOTO preparó. Vive en el
+                            // ShardPlayer (sesión completa, sin persistir).
+                            byte oleadas = reader.ReadByte();
+                            var spc = solicitante.GetModPlayer<Players.ShardPlayer>();
+                            if (spc != null && oleadas >= 1 && oleadas <= 11)
+                                spc.OleadasPreparadasRemoto = oleadas;
                         }
                         else
                         {
@@ -400,7 +459,23 @@ namespace AethonMod.Content.Systems
                                     inv.type == ModContent.ItemType<Content.Items.GenesisShard>())
                                     yaTiene = true;
                             }
-                            if (!yaTiene)
+                            // v6.50.2 — FIX (anti-dupe del SUELO): el
+                            // escenario que el propio comentario de arriba
+                            // describe — el DOBLE CLICK antes de recoger el
+                            // ítem — dejaba nacer el segundo: la
+                            // revalidación solo miraba el inventario. Si YA
+                            // vive un Fragmento Génesis en el suelo a menos
+                            // de 400px del solicitante, no nace otro.
+                            bool enSuelo = false;
+                            for (int k = 0; k < Main.maxItems && !enSuelo; k++)
+                            {
+                                Item suelto = Main.item[k];
+                                if (suelto == null || !suelto.active || suelto.IsAir) continue;
+                                if (suelto.type != ModContent.ItemType<Content.Items.GenesisShard>()) continue;
+                                if (Vector2.DistanceSquared(suelto.Center, solicitante.Center) < 400f * 400f)
+                                    enSuelo = true;
+                            }
+                            if (!yaTiene && !enSuelo)
                             {
                                 int idx = Item.NewItem(solicitante.GetSource_GiftOrReward(),
                                     solicitante.Center,
@@ -444,6 +519,15 @@ namespace AethonMod.Content.Systems
                     {
                         byte momentos = reader.ReadByte();
                         int ticks = reader.ReadInt32();
+                        // v6.50.2 — EL FESTÍN CAMINA (3 bytes simétricos con
+                        // el writer de SincronizarHambre): llenan los
+                        // estáticos públicos que GrimorioFuriaSistema.
+                        // Diagnostico lee en clientes MP (antes la furia
+                        // aparecía siempre "inactiva": las fases vivían
+                        // solo en la máquina del server).
+                        GrimorioFuriaSistema.FaseCliente = reader.ReadByte();
+                        GrimorioFuriaSistema.OleadaCliente = reader.ReadByte();
+                        GrimorioFuriaSistema.TotalesCliente = reader.ReadByte();
                         var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
                         if (sp != null)
                         {
@@ -456,7 +540,46 @@ namespace AethonMod.Content.Systems
                     case MsgLatidoXp:
                     {
                         int xp = reader.ReadInt32();
+                        // v6.50.2 — EL LIBRO EN EL LATIDO (simétrico con el
+                        // writer de LatidoDeXp): el cliente aplica el estado
+                        // de la primera copia Y pulsa la barra — sin la foto
+                        // completa (MsgLibro ya solo viaja al subir nivel /
+                        // entrar / red de seguridad).
+                        byte slot = reader.ReadByte();
+                        int nivel = reader.ReadInt32();
+                        int xpLibro = reader.ReadInt32();
                         if (xp > 0) ShardHUDSystem.MarcarGanancia(xp);
+                        if (slot < 10) // 255 = sin libro: solo el pulso
+                        {
+                            var yo = Main.LocalPlayer;
+                            if (yo != null)
+                            {
+                                Item inv = yo.inventory[slot];
+                                if (inv != null && !inv.IsAir &&
+                                    inv.type == ModContent.ItemType<Content.Weapons.GrimoireEternal>())
+                                {
+                                    var sl = inv.GetGlobalItem<Globals.ShardLevelItem>();
+                                    if (sl != null)
+                                    {
+                                        // MERGE (el contrato de MsgLibro):
+                                        // jamás degradar. El latido solo
+                                        // llega cuando NO subió nivel (la
+                                        // subida dispara la foto completa):
+                                        // a nivel igual gana la XP más rica;
+                                        // a nivel mayor se asigna en
+                                        // silencio — la fiesta la celebra
+                                        // MsgLibro con su delta (una sola).
+                                        if (nivel > sl.Level)
+                                        {
+                                            sl.Level = System.Math.Max(1, nivel);
+                                            sl.XP = System.Math.Max(0, xpLibro);
+                                        }
+                                        else if (nivel == sl.Level)
+                                            sl.XP = System.Math.Max(sl.XP, System.Math.Max(0, xpLibro));
+                                    }
+                                }
+                            }
+                        }
                         break;
                     }
 
@@ -497,8 +620,17 @@ namespace AethonMod.Content.Systems
                                 continue;
                             }
                             int delta = nivel - sl.Level;
+                            // v6.50.2 — FIX (XP degradada a nivel igual): el
+                            // overwrite incondicional pisaba la XP local (más
+                            // rica) cuando el nivel coincidía — la misma
+                            // ventana pre-ItemIO que el guard del nivel cubre.
+                            // A nivel igual: máximo. A nivel mayor: la del
+                            // server (es la autoridad que acaba de contar).
+                            bool mismoNivel = nivel == sl.Level;
                             sl.Level = System.Math.Max(1, nivel);
-                            sl.XP = System.Math.Max(0, xp);
+                            sl.XP = mismoNivel
+                                ? System.Math.Max(sl.XP, System.Math.Max(0, xp))
+                                : System.Math.Max(0, xp);
                             sl.PrimeraCincoEstrellas |= primera5;
                             if (delta > 0)
                                 sl.CelebrarSubida(inv, delta);
@@ -522,7 +654,13 @@ namespace AethonMod.Content.Systems
                         sp.DerrotaOleada10 |= derrota10 != 0;
                         if (total > 0)
                         {
-                            sp.CronicaJefes.Clear();
+                            // v6.50.2 — FIX (wipe disfrazado de merge): el
+                            // Clear() destraba la unión — el Contains del
+                            // bucle ya la hace (add si falta). Con Clear la
+                            // crónica histórica del .plr se reemplazaba por
+                            // la copia fresca del server y el Testigo callaba
+                            // para siempre; SIN Clear la lista resultante es
+                            // la MÁS RICA de las dos (la unión real).
                             for (int k = 0; k < total; k++)
                             {
                                 int tipoJefe = reader.ReadUInt16();
@@ -579,6 +717,28 @@ namespace AethonMod.Content.Systems
                 if (Main.netMode != NetmodeID.MultiplayerClient) return;
                 ModPacket p = AethonMod.Instance.GetPacket();
                 p.Write(MsgPedirFragmento);
+                p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.2 — LA CARNADA PREPARA: el clic derecho del ítem cicla un
+        /// contador LOCAL (la UI del clic solo corre en el cliente que
+        /// clica) — este paquete lleva la selección NUEVA a la AUTORIDAD
+        /// para que el clic izquierdo (el uso SINCRONIZADO que corre el
+        /// server) lea el número que el portador preparó y no el estático
+        /// por defecto de la máquina del server. Llamado desde
+        /// CarnadaDelGrimorio.UseItem (cliente MP).
+        /// </summary>
+        public static void EnviarPrepararOleadas(int oleadas)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgPrepararOleadas);
+                p.Write((byte)System.Math.Max(1, System.Math.Min(oleadas, 11)));
                 p.Send();
             }
             catch { }

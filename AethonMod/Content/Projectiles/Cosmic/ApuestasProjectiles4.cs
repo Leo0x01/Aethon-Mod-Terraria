@@ -71,10 +71,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Lighting.AddLight(Projectile.Center, new Vector3(1f, 0.78f, 0.4f) * 0.55f);
 
             // === EL TESTIGO DEL FALLO: la guardia expiró sin parar nada. ===
-            if (Projectile.timeLeft <= 1 && !duenio.GetModPlayer<ApuestasPlayer>().ParryHecho)
+            // v6.50.2 — FIX: (a) ai[0]=1 es la marca "parry exitoso" que
+            // escribe FreeDodge en el dueño (viaja por netUpdate) — el
+            // testigo la respeta y NO aturde; (b) la rama de fallo también
+            // pone EnfriamientoGuardia=480 (el anillo visual de 8 s ya estaba
+            // en el mundo — sin el cooldown se podía re-alzar la guardia al
+            // instante tras el aturdimiento y el anillo mentía).
+            if (Projectile.timeLeft <= 1 && Projectile.ai[0] != 1f &&
+                !duenio.GetModPlayer<ApuestasPlayer>().ParryHecho)
             {
                 duenio.GetModPlayer<ApuestasPlayer>().Aturdido = 30;
-                if (Main.netMode != NetmodeID.Server)
+                duenio.GetModPlayer<ApuestasPlayer>().EnfriamientoGuardia = 480;   // v6.50.2 — FIX (spam tras fallo)
+                // v6.50.2 — el latido del error también sonaba mudo para el
+                // HOST (listen server = netMode 1 CON pantalla): "con
+                // pantalla" es !Main.dedServ.
+                if (!Main.dedServ)
                 {
                     SoundEngine.PlaySound(SoundID.Item86 with { Volume = 0.4f, Pitch = -0.5f },
                         Projectile.Center);
@@ -86,7 +97,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -143,8 +154,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }
@@ -194,7 +205,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -230,8 +241,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }
@@ -296,7 +307,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -331,8 +342,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }
@@ -393,7 +404,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (Main.netMode == NetmodeID.Server) return false;
+            if (Main.dedServ) return false;
 
             bool wasActive = true;
             try { Main.spriteBatch.End(); }
@@ -418,8 +429,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (wasActive)
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
             return false;
         }
     }

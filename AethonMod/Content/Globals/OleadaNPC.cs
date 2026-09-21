@@ -177,14 +177,32 @@ namespace AethonMod.Content.Globals
         /// tenía: los GlobalNPC de instancia NO viajan solos). Corre cuando
         /// el NPC se sincroniza (MessageID.SyncNPC: netUpdate, creación y
         /// jugadores que entran a media oleada). ESCRITURA SIMÉTRICA
-        /// EXACTA con ReceiveExtraAI (mismo orden y tipos: 3 bits + 1 byte).
+        /// EXACTA con ReceiveExtraAI (mismo orden y tipos).
+        /// v6.50.2 — LOS STATS ESCALADOS TAMBIÉN CAMINAN: el msg 23 de
+        /// vanilla NO lleva damage/defense/lifeMax (solo life, con el bit
+        /// life==lifeMax fijando life=lifeMax VAINILLA) — el daño
+        /// NPC→jugador se evalúa en el CLIENTE con SU copia → los remotos
+        /// recibían daño ×1 (la promesa "la 10 golpea ×11" no existía en
+        /// MP). Con el 4º bit se envían los 5 stats EXACTOS del server y
+        /// el cliente los ASIGNA (idempotente por construcción: cada sync
+        /// re-asigna los mismos valores — nunca se re-multiplican).
         /// </summary>
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter writer)
         {
             bitWriter.WriteBit(EsDeOleada);
             bitWriter.WriteBit(EsEspecial);
             bitWriter.WriteBit(EsJefeDeOleada);
+            bitWriter.WriteBit(EsDeOleada); // lleva stats: solo las bestias del festín
             writer.Write((byte)Oleada);
+            if (EsDeOleada)
+            {
+                // Los stats ESCALADOS de la autoridad (tal cual los tiene).
+                writer.Write(npc.lifeMax);
+                writer.Write(npc.life);
+                writer.Write(npc.damage);
+                writer.Write(npc.defense);
+                writer.Write(npc.knockBackResist);
+            }
         }
 
         /// <summary>
@@ -192,13 +210,28 @@ namespace AethonMod.Content.Globals
         /// flags de instancia con los datos leídos Y reconstruye el aura —
         /// PreDraw/PostDraw leen Aura en el cliente y sin reconstruirla el
         /// sello llegaba pero el JUICIO seguía invisible.
+        /// v6.50.2 — ASIGNA los stats escalados (exactos del server): el
+        /// handler del msg 23 corre ANTES de este hook (life incluida — el
+        /// bit life==lifeMax del vanilla fija una lifeMax SIN escalar: esta
+        /// asignación la corrige con el valor real). Asignación, nunca
+        /// multiplicación: cada sync deja la copia idéntica a la autoridad.
         /// </summary>
         public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader reader)
         {
             EsDeOleada = bitReader.ReadBit();
             EsEspecial = bitReader.ReadBit();
             EsJefeDeOleada = bitReader.ReadBit();
+            bool llevaStats = bitReader.ReadBit();
             Oleada = reader.ReadByte();
+
+            if (llevaStats)
+            {
+                npc.lifeMax = reader.ReadInt32();
+                npc.life = reader.ReadInt32();
+                npc.damage = reader.ReadInt32();
+                npc.defense = reader.ReadInt32();
+                npc.knockBackResist = reader.ReadSingle();
+            }
 
             if (EsDeOleada && Aura == null)
             {

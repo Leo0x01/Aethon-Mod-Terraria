@@ -1,5 +1,6 @@
 using System.IO;
 
+using Terraria;
 using Terraria.ModLoader;
 using AethonMod.Content.Systems;
 using AethonMod.Content.VFX;
@@ -45,6 +46,18 @@ namespace AethonMod
             // (BlackHoleLensSystem, MediaResLib) y las limpiezas de los
             // ModSystems ya corrieron: esto remata las referencias que
             // quedan, incluidas las de clases futuras.
+            //
+            // v6.50.2 — FIX: el barrendero NO cubría lo que prometía:
+            // (a) RenderTarget2D declarado como tal (y demás
+            //     GraphicsResource) no era ancla → se quedaba vivo (y sin
+            //     Dispose) tras la descarga;
+            // (b) arrays de anclas (Texture2D[], Asset<Texture2D>[],
+            //     jagged Texture2D[][]) mantenían TODOS sus elementos;
+            // (c) diccionarios con valor-ancla
+            //     (Dictionary<string, Asset<Texture2D>>) sostenían las
+            //     entradas. Ahora se barren los tres, conservando TODO el
+            // patrón defensivo (solo estáticos, try/catch POR CAMPO —
+            // tML ya pudo descargar content entre medias).
             try
             {
                 const System.Reflection.BindingFlags Flags =
@@ -62,8 +75,49 @@ namespace AethonMod
                     {
                         try
                         {
-                            if (EsAnclaDeDescarga(campo.FieldType))
+                            System.Type t = campo.FieldType;
+
+                            // v6.50.2 — FIX (b): ARRAYS de anclas — se
+                            // anulan (y disponen si son GPU) los ELEMENTOS
+                            // (recursivo: los jagged Texture2D[][] llevan
+                            // arrays dentro) y el array entero se suelta.
+                            if (t.IsArray)
+                            {
+                                System.Type elem = t.GetElementType();
+                                if (elem != null && EsAnclaDeDescarga(elem))
+                                {
+                                    AnularAnclasArray(campo.GetValue(null) as System.Array);
+                                    campo.SetValue(null, null);
+                                }
+                                continue;
+                            }
+
+                            // v6.50.2 — FIX (c): DICCIONARIOS con valor de
+                            // ancla (Dictionary<string, Asset<Texture2D>>…)
+                            // — Clear() suelta todas las entradas y el
+                            // contenedor se anula como cualquier campo.
+                            if (t.IsGenericType &&
+                                typeof(System.Collections.IDictionary).IsAssignableFrom(t))
+                            {
+                                System.Type[] args = t.GetGenericArguments();
+                                if (args.Length == 2 && EsAnclaDeDescarga(args[1]))
+                                {
+                                    try { (campo.GetValue(null) as System.Collections.IDictionary)?.Clear(); }
+                                    catch { }
+                                    campo.SetValue(null, null);
+                                }
+                                continue;
+                            }
+
+                            if (EsAnclaDeDescarga(t))
+                            {
+                                // v6.50.2 — FIX (a): si el valor es un
+                                // GraphicsResource (RenderTarget2D, textura
+                                // o blend propios) se DISPONE antes de
+                                // anular — la GPU no se libera con el GC.
+                                SoltarGpu(campo.GetValue(null));
                                 campo.SetValue(null, null);
+                            }
                         }
                         catch { } // nunca dejar que la descarga reviente
                     }
@@ -94,11 +148,24 @@ namespace AethonMod
                 t.GetGenericArguments()[0] == typeof(Microsoft.Xna.Framework.Graphics.Effect))
                 return true;
 
-            // El shader, la textura o el estado de blend directamente.
-            if (t == typeof(Microsoft.Xna.Framework.Graphics.Effect) ||
-                t == typeof(Microsoft.Xna.Framework.Graphics.Texture2D) ||
-                t == typeof(Microsoft.Xna.Framework.Graphics.BlendState))
+            // v6.50.2 — FIX: TODO recurso de GPU cuenta. Antes solo los
+            // tipos EXACTOS Effect/Texture2D/BlendState: un RenderTarget2D
+            // declarado como RenderTarget2D (MediaResLib, la lente) NO era
+            // ancla y sobrevivía a la descarga — igual que RasterizerState,
+            // SamplerState o cualquier GraphicsResource futuro. (El Dispose
+            // defensivo de estos valores corre en el barrido.)
+            if (typeof(Microsoft.Xna.Framework.Graphics.GraphicsResource).IsAssignableFrom(t))
                 return true;
+
+            // v6.50.2 — FIX: ARRAYS de anclas — el ELEMENTO es el ancla
+            // (Texture2D[], Asset<Texture2D>[], BlendState[]… y los
+            // jagged Texture2D[][] por recursión): el barrido anula y
+            // dispone los elementos y suelta el array entero.
+            if (t.IsArray)
+            {
+                System.Type elem = t.GetElementType();
+                return elem != null && EsAnclaDeDescarga(elem);
+            }
 
             // Listas de delegados de render (los closures capturan las
             // instancias del pipeline — p.ej. las capas de VFXCore).
@@ -108,6 +175,65 @@ namespace AethonMod
                 return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// v6.50.2 — FIX: suelta un VALOR de GPU si es un GraphicsResource
+        /// (RenderTarget2D, textura o blend PROPIOS del mod): el barrendero
+        /// solo anulaba referencias y los recursos nativos pedían Dispose
+        /// (la GPU no se libera con el GC — vanilla usa el mismo cast en su
+        /// limpieza: ((GraphicsResource)target).Dispose()). Idempotente
+        /// (re-Dispose es no-op) y 100% defensivo: TODO en try/catch para
+        /// que la descarga jamás reviente.
+        ///
+        /// LECCIÓN v5.87 DE LA CASA (BlackHoleLensSystem/MediaResLib, ya
+        /// vivida): Mod.Unload corre en el hilo secundario de carga de tML
+        /// y FNA3D exige el Dispose de recursos gráficos en el hilo
+        /// principal — el Dispose se ENCOLA vía Main.QueueMainThreadAction
+        /// (cola drenada en Main.Update cada frame, incluso durante la
+        /// pantalla de carga del reload) y el closure captura solo la
+        /// referencia al recurso.
+        /// </summary>
+        private static void SoltarGpu(object valor)
+        {
+            if (valor is Microsoft.Xna.Framework.Graphics.GraphicsResource recurso)
+            {
+                try
+                {
+                    Main.QueueMainThreadAction(() =>
+                    {
+                        try { recurso.Dispose(); }
+                        catch { }
+                    });
+                }
+                catch
+                {
+                    // Encolado imposible (apagado total del proceso): se
+                    // abandona la referencia — el driver libera los recursos
+                    // del proceso al terminar de todos modos.
+                }
+            }
+        }
+
+        /// <summary>
+        /// v6.50.2 — FIX: anula (y dispone si son GPU) los elementos de un
+        /// array de anclas — recursivo para los jagged (Texture2D[][]:
+        /// cada elemento es otro array). Nada de reventar: cada paso en
+        /// try/catch (el mismo contrato del barrendero por campo).
+        /// </summary>
+        private static void AnularAnclasArray(System.Array array)
+        {
+            if (array == null) return;
+            for (int i = 0; i < array.Length; i++)
+            {
+                object v = null;
+                try { v = array.GetValue(i); } catch { }
+                if (v is System.Array interno)
+                    AnularAnclasArray(interno);
+                else
+                    SoltarGpu(v);
+                try { array.SetValue(null, i); } catch { }
+            }
         }
 
         public override void HandlePacket(BinaryReader reader, int whoAmI)

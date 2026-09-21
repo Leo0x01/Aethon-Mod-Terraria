@@ -118,12 +118,29 @@ namespace AethonMod.Content.Globals
         /// sube SU copia y EcoRed.MsgLibro trae el delta al portador,
         /// que celebra en SU cliente — Main.LocalPlayer ya no se usa en
         /// contexto de servidor).
+        /// v6.50.2 — FIX (Host&Play sin fiesta propia): el gate
+        /// netMode==Server callaba al HOST del listen server (netMode 1 CON
+        /// pantalla): SU propia subida no mostraba nada. Main.dedServ separa
+        /// al DEDICADO (sin pantalla) del host — y el chequeo de pertenencia
+        /// evita pintar en la pantalla del host las subidas de libros AJENOS
+        /// (las copias de la réplica de un remoto que el server acaba de
+        /// cobrar).
         /// </summary>
         private void OnLevelUp(Item item, int nivelesGanados, bool cruzoHito, int nivelHito)
         {
             try
             {
-                if (Main.netMode == NetmodeID.Server) return; // sin pantalla
+                // v6.50.2 — FIX (Host&Play): Main.dedServ (no netMode==Server):
+                // el host del listen server TIENE pantalla y ES Main.myPlayer
+                // — su propia subida se celebra. El DEDICADO sigue sin fiesta.
+                if (Main.dedServ) return; // sin pantalla
+                // ... y solo la subida de UN LIBRO PROPIO: en el host, el
+                // server-side OnKill también sube las copias de los REMOTOS
+                // — sin este chequeo, la pantalla del host pintaría las
+                // subidas ajenas (el remoto ya las celebra en SU cliente vía
+                // MsgLibro). La lógica de DATOS (GrantXP) corre igual en
+                // todas partes — esto es puro FX.
+                if (!PerteneceAlJugadorLocal(item)) return;
 
                 var config = ModContent.GetInstance<Content.AethonConfig>();
                 bool notificar = config == null || config.ShowLevelUpNotifications;
@@ -164,6 +181,25 @@ namespace AethonMod.Content.Globals
             {
                 // Silenciar: nunca lanzar desde OnLevelUp.
             }
+        }
+
+        /// <summary>
+        /// v6.50.2 — ¿El ítem vive en el inventario del jugador LOCAL?
+        /// Búsqueda por REFERENCIA en los 59 slots (0..58 — el 58 es el
+        /// mouse item de tML): distingue los libros propios de las copias
+        /// de la réplica del server (las de los remotos) en el host.
+        /// </summary>
+        private static bool PerteneceAlJugadorLocal(Item item)
+        {
+            if (item == null) return false;
+            Player yo = Main.LocalPlayer;
+            if (yo == null) return false;
+            for (int i = 0; i < 59; i++)
+            {
+                if (ReferenceEquals(yo.inventory[i], item))
+                    return true;
+            }
+            return false;
         }
 
         // === Persistencia ===

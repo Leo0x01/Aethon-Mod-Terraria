@@ -839,10 +839,16 @@ namespace AethonMod.Content.VFX
     /// se cierra ENCIMA de todo: la oscuridad es el último plano).
     ///
     /// Al final, SOLO si algún dibujado cerró el lote de la interfaz
-    /// (<see cref="Pantalla._loteDeUiCerrado"/>), la REAPERTURA ESTÁNDAR
-    /// del lote del juego — la copia exacta del restore de la casa (la de
-    /// cualquier PreDraw y renderer del mod): Deferred, AlphaBlend,
-    /// LinearClamp, sin depth, CullNone, Main.GameViewMatrix. Está en
+    /// (<see cref="Pantalla._loteDeUiCerrado"/>), la REAPERTURA del lote
+    /// DE INTERFAZ — el que vanilla tenía abierto aquí. PostDrawInterface
+    /// corre dentro de DrawInterface_33_MouseText (capa "Vanilla: Mouse
+    /// Text", InterfaceScaleType.UI): TODO el pipeline de interfaz corre
+    /// con PlayerInput.SetZoom_UI() y <see cref="Main.UIScaleMatrix"/> —
+    /// v6.50.2 — FIX: el restore viejo reabría con la MATRIZ DEL MUNDO
+    /// (GameViewMatrix) y los tooltips/textos de vanilla salían DESPLAZADOS
+    /// tras cualquier onda/flash con zoom ≠ 100% o UI scale > 100%. Ahora:
+    /// Deferred, AlphaBlend, LinearClamp, sin depth, CullCounterClockwise
+    /// (los defaults del lote de UI), Main.UIScaleMatrix. Está en
     /// finally: aunque un efecto tire (dispositivo perdido, textura
     /// descargada en caliente), el juego sigue dibujando normal — y el
     /// frame SIN efectos no toca el spriteBatch ni una vez (la lección
@@ -880,8 +886,13 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                // LA REAPERTURA ESTÁNDAR DE LA CASA — la copia exacta del
-                // restore de cualquier PreDraw del mod — SOLO si algo se
+                // LA REAPERTURA DEL LOTE DE INTERFAZ — v6.50.2 — FIX: el
+                // restore reabría con la MATRIZ DEL MUNDO, pero este punto
+                // del frame dibuja la INTERFAZ (DrawInterface corre tras
+                // PlayerInput.SetZoom_UI() con el lote de UIScaleMatrix):
+                // los tooltips de vanilla quedaban desplazados tras
+                // cualquier onda/flash. Solo cambia la matriz (y el
+                // rasterizer que la casa de UI usa) — SOLO si algo se
                 // cerró: el juego sigue dibujando normal pase lo que pase
                 // arriba, y el frame vacío no pisa el lote de tML.
                 if (Pantalla._loteDeUiCerrado)
@@ -889,8 +900,8 @@ namespace AethonMod.Content.VFX
                     try
                     {
                         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                            null, Main.GameViewMatrix.TransformationMatrix);
+                            SamplerState.LinearClamp, DepthStencilState.None,
+                            RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                     }
                     catch { }
                 }

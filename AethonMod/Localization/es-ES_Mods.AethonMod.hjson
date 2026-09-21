@@ -601,6 +601,16 @@
         "Carnada.YaActivo": "La furia YA está desatada — aliméntala o sobrevive.",
         "Carnada.Ocupado": "El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.",
 
+        "Altar.Solicitando": "Solicitando el Fragmento Génesis al altar…",
+        "Altar.Reclamado": "Has reclamado el Fragmento Génesis.",
+        "Altar.YaPosees": "Ya posees el Fragmento Génesis.",
+        "Tiles.AncientAltar.MapEntry": "Altar Antiguo",
+        "LevelUpTester.Subida": "✦ {0} subió +{1} niveles (ahora nivel {2}).",
+        "LevelUpTester.SinGrimorio": "No se encontró un Grimorio del Eterno en el inventario.",
+        "TestingPlayer.Bolsas": "Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.",
+        "TestingPlayer.Dummies": "Además: {0} dummies de prueba para el campo de entrenamiento.",
+        "Configs.AethonConfigServidor.DisplayName": "Aethon (servidor)",
+
         "Testigo.Ambiente1": "Te he observado antes de que tuvieras nombre.",
         "Testigo.Ambiente2": "El libro que llevas… yo vi nacer al primero.",
         "Testigo.Ambiente3": "Todo portador termina en una página. Tú aún estás escribiendo la tuya.",

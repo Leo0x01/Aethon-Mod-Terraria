@@ -57,8 +57,14 @@ namespace AethonMod.Content.Items.Bolsas
 
         public override void RightClick(Player player)
         {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
+            // v6.50.2 — FIX (las 16 bolsas NO entregaban NADA en MP):
+            // RightClick corre SOLO en el cliente que clica (ItemSlot lo
+            // llama desde la UI — el server JAMAS lo ejecuta), así que el
+            // guard "MPClient → return" mataba la entrega en la ÚNICA
+            // máquina que la hacía. El inventario ES client-authoritative
+            // en vanilla (se sincroniza solo): Dar() escribe slots y el
+            // juego los difunde. El guard server viejo cubría un caso que
+            // no existe.
             int entregados = 0;
             foreach ((int tipo, int pila) in Contenido())
             {
@@ -70,7 +76,9 @@ namespace AethonMod.Content.Items.Bolsas
             }
 
             // === LA APERTURA (el momento de la casa: FX + texto) ===
-            if (Main.netMode != NetmodeID.Server)
+            // (host incluido: Main.dedServ es "sin pantalla", netMode 1
+            // en listen server SÍ la tiene)
+            if (!Main.dedServ)
             {
                 // 24 chispas del color de la categoría alrededor del jugador.
                 for (int i = 0; i < 24; i++)
@@ -149,6 +157,10 @@ namespace AethonMod.Content.Items.Bolsas
                     return;
                 }
             }
+            // v6.50.2 — nota honesta: inventario LLENO → el ítem cae al
+            // suelo. En SP/server el drop es real; en un cliente MP es
+            // un fallback local (Item.NewItem no difunde desde clientes —
+            // caso raro: la bolsa solo entrega lo que FALTA).
             int drop = Item.NewItem(player.GetSource_GiftOrReward(),
                 player.Center, itemType, stack);
             if (drop >= 0 && drop < Main.item.Length)

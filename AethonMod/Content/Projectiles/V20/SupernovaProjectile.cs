@@ -211,7 +211,11 @@ namespace AethonMod.Content.Projectiles.V20
                 // (OnFire, 10 s — v5.91: era 5 s).
                 // v5.95 — redimensionadas (criterio v5.94 del sol: 360/450/540
                 // → 240/300/360, a escala justa).
-                if (Main.netMode != NetmodeID.MultiplayerClient)
+                // v6.50.2 — FIX (ondas fantasma en MP): gate de MÁQUINA DUEÑA
+                // (el patrón de los agujeros) — el server con owner=índice de
+                // jugador jamás difunde el NewProjectile; lo engendra el
+                // cliente dueño y el propio spawn sincroniza.
+                if (Projectile.owner == Main.myPlayer)
                 {
                     int waveDamage = Math.Max(1, (int)(Projectile.damage * 0.5f));
                     float[] radii = { 240f, 300f, 360f };

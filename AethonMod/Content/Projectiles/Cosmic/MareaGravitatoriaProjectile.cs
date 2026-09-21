@@ -269,7 +269,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private void RomperContraLaPared()
         {
             // === LAS 3 OLAS MENORES (diagonales, rebotan solas) ===
-            if (Main.netMode != NetmodeID.MultiplayerClient)
+            // v6.50.2 — FIX (olas fantasma en MP): gate de MÁQUINA DUEÑA (el
+            // patrón de los agujeros) — el server con owner=índice de jugador
+            // jamás difunde el NewProjectile; lo engendra el cliente dueño y
+            // el propio spawn sincroniza.
+            if (Projectile.owner == Main.myPlayer)
             {
                 for (int i = 0; i < 3; i++)
                 {

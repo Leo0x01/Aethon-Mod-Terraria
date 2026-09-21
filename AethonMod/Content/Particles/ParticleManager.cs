@@ -95,6 +95,25 @@ namespace AethonMod.Content.Particles
             _buffer = null;
             _textures = null;
             _textureCount = 0;
+            // v6.50.2 — FIX: el boost global también se suelta — un agujero
+            // muerto SIN Kill (descarga del mod con el mundo abierto)
+            // dejaba PullToGlobalBoost clavado en 6× para el próximo mundo.
+            PullToGlobalBoost = 1f;
+        }
+
+        /// <summary>
+        /// v6.50.2 — FIX (cambio de mundo): las partículas del mundo viejo
+        /// sobrevivían ~1,25 s (75 ticks a 60 fps de vida media) tras la
+        /// puerta, orbitando coordenadas que ya no existen. El buffer muere
+        /// con su mundo — y el boost del PullTo muere con el agujero que lo
+        /// disparó (un mundo NUEVO no puede heredar una succión ×6).
+        /// </summary>
+        public override void OnWorldUnload()
+        {
+            Clear();
+            // v6.50.2 — FIX: mismo reset que Unload — el OnKill del agujero
+            // no corre en la salida de mundo.
+            PullToGlobalBoost = 1f;
         }
 
         /// <summary>

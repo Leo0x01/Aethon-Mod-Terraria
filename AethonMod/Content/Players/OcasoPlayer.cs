@@ -76,7 +76,10 @@ namespace AethonMod.Content.Players
 
                     // EL CORTE nunca es en seco (la lección de las armas supremas de referencia): un
                     // lamento de vapor + destello tenue + sacudida pequeña.
-                    if (Main.netMode != NetmodeID.Server)
+                    // v6.50.2 — FIX (host sin su FX): el viejo `!= Server`
+                    // también bloqueaba al LISTEN SERVER (netMode 1 CON
+                    // pantalla). "Sin pantalla" es Main.dedServ.
+                    if (!Main.dedServ)
                     {
                         ElCorteDelOcaso();
                     }
@@ -124,7 +127,9 @@ namespace AethonMod.Content.Players
             if (antes < GaugeMax && Gauge >= GaugeMax)
             {
                 // EL AVISO DE LISTO: un pulso de luz dorada + el sonido sutil.
-                if (Main.netMode != NetmodeID.Server)
+                // v6.50.2 — FIX (host sin su FX): igual que ElCorteDelOcaso
+                // — Main.dedServ es "sin pantalla", no netMode.
+                if (!Main.dedServ)
                 {
                     Terraria.Audio.SoundEngine.PlaySound(
                         Terraria.ID.SoundID.Item4.WithPitchOffset(0.45f),
@@ -156,7 +161,9 @@ namespace AethonMod.Content.Players
             // === LA IGNICIÓN DEL OCASO (el telegraph de 20 ticks de la
             //     la lección de las armas supremas de referencia vive en el propio FX: Kick + Flash
             //     + la corona de chispas) ===
-            if (Main.netMode != NetmodeID.Server)
+            // v6.50.2 — FIX (host sin su FX): igual que ElCorteDelOcaso —
+            // Main.dedServ es "sin pantalla", no netMode.
+            if (!Main.dedServ)
             {
                 OndaLib.Kick(11f, 22);
                 OndaLib.Flash(new Color(255, 130, 45), 0.30f, 16);
