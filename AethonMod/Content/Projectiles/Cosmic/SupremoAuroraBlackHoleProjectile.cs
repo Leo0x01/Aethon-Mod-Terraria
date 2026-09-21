@@ -130,17 +130,26 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === ATRACCIÓN GRAVITACIONAL DE ENEMIGOS (550px — supremo) ===
             float gravityRadius = GravityRadius * (1f + expansion * 0.6f);
             const float gravityStrength = 2.6f;
-            foreach (NPC npc in Main.ActiveNPCs)
+            // v6.50.3 — FIX (la promesa del SunProjectile v6.50.2 estaba rota:
+            // "la familia de agujeros gatea la misma succión así" — solo el SOL
+            // la gateaba): el empuje de npc.velocity corre SOLO en la autoridad
+            // (SP + server); en un cliente remoto el server corrige la posición
+            // por netUpdate y no hay doble empuje divergente (el jitter de
+            // réplicas que v6.50.2 curó en el sol, ahora en toda la familia).
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                if (!VFXCore.EsObjetivo(npc)) continue;
-                Vector2 toCenter = Projectile.Center - npc.Center;
-                float dist = toCenter.Length();
-                if (dist > gravityRadius || dist < 5f) continue;
-                float strength = (1f - dist / gravityRadius) * gravityStrength;
-                if (toCenter.LengthSquared() > 0.01f)
+                foreach (NPC npc in Main.ActiveNPCs)
                 {
-                    toCenter.Normalize();
-                    npc.velocity += toCenter * strength;
+                    if (!VFXCore.EsObjetivo(npc)) continue;
+                    Vector2 toCenter = Projectile.Center - npc.Center;
+                    float dist = toCenter.Length();
+                    if (dist > gravityRadius || dist < 5f) continue;
+                    float strength = (1f - dist / gravityRadius) * gravityStrength;
+                    if (toCenter.LengthSquared() > 0.01f)
+                    {
+                        toCenter.Normalize();
+                        npc.velocity += toCenter * strength;
+                    }
                 }
             }
 

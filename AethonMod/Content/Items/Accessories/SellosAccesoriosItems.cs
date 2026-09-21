@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Accessories
@@ -42,13 +43,13 @@ namespace AethonMod.Content.Items.Accessories
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "S",
-                "[c/FFD54F:═══ EL SELLO DEL GÉNESIS ═══]"));
+                Language.GetTextValue("Mods.AethonMod.Items.SelloGenesisItem.Titulo")));
             tooltips.Add(new TooltipLine(Mod, "S2",
-                "[c/FFC107:Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,\ny dentro el sello azul-estelar contrarrotando con el glifo del astro]"));
+                Language.GetTextValue("Mods.AethonMod.Items.SelloGenesisItem.Linea1")));
             tooltips.Add(new TooltipLine(Mod, "S3",
-                "[c/9FA8DA:+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico]"));
+                Language.GetTextValue("Mods.AethonMod.Items.SelloGenesisItem.Linea2")));
             tooltips.Add(new TooltipLine(Mod, "S4",
-                "[c/78788C:La escritura solar vive en huecos de accesorio o de vanidad.\nFirmada por las librerías de signos mágicos de la casa]"));
+                Language.GetTextValue("Mods.AethonMod.Items.SelloGenesisItem.Linea3")));
         }
 
         public override void AddRecipes()
@@ -97,13 +98,13 @@ namespace AethonMod.Content.Items.Accessories
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "S",
-                "[c/FFB74D:═══ LOS ANILLOS DEL SOL RÚNICO ═══]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosSolRunicoItem.Titulo")));
             tooltips.Add(new TooltipLine(Mod, "S2",
-                "[c/FFD180:Siete aros rúnicos orbitan tu cuerpo en planos alternos:\npar horario, impar antihorario, precesando vivos con sus runas a lomos]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosSolRunicoItem.Linea1")));
             tooltips.Add(new TooltipLine(Mod, "S3",
-                "[c/A7FFEB:+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosSolRunicoItem.Linea2")));
             tooltips.Add(new TooltipLine(Mod, "S4",
-                "[c/78788C:Cada tercer aro viste el azul-estelar frío de los soles de tier alto.\nEl sistema vive en huecos de accesorio o de vanidad]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosSolRunicoItem.Linea3")));
         }
 
         public override void AddRecipes()
@@ -154,13 +155,13 @@ namespace AethonMod.Content.Items.Accessories
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "S",
-                "[c/FF7043:═══ LOS ANILLOS DEL HORIZONTE DE SUCESOS ═══]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosHorizonteItem.Titulo")));
             tooltips.Add(new TooltipLine(Mod, "S2",
-                "[c/FFAB91:El disco de acreción te orbita: veinte bandas incandescentes viajando,\nlos fotones corriendo el vórtice y el aro fino del horizonte]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosHorizonteItem.Linea1")));
             tooltips.Add(new TooltipLine(Mod, "S3",
-                "[c/FF8A65:LA LENTE: el fondo se curva a tu alrededor · LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosHorizonteItem.Linea2")));
             tooltips.Add(new TooltipLine(Mod, "S4",
-                "[c/80CBC4:+10% de velocidad y +5% de daño universal.\nLos anillos viven en huecos de accesorio o de vanidad]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnillosHorizonteItem.Linea3")));
         }
 
         public override void AddRecipes()

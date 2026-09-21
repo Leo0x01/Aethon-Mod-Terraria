@@ -582,9 +582,11 @@ namespace AethonMod.Content.VFX
             catch { }
 
             if (habiaLote)
+                // v6.50.3 — FIX (patrón v6.50.2): restore del pase de entidades con
+                // el sampler/rasterizer del pase de entidades de vanilla.
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                    Main.DefaultSamplerState, DepthStencilState.None,
+                    Main.Rasterizer, null, Main.Transform);
         }
     }
 }

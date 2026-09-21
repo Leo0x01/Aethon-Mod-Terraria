@@ -460,6 +460,7 @@
         "Projectiles.AnillosSolaresHalo.DisplayName": "Solar Rings",
         "Projectiles.SelloGenesisHalo.DisplayName": "Genesis Seal",
         "Projectiles.AnilloRunicoDorsalHalo.DisplayName": "Dorsal Rune Ring",
+        "Projectiles.AuraPortadorHalo.DisplayName": "Bearer's Aura",
 
         "Items.TomoApatiaNula.DisplayName": "Tome of Null Apathy",
         "Items.TomoApatiaNula.Tooltip": "The tome that feels nothing spits void tentacles:\nthey gestate for 2 seconds without harming (imploding pulses),\nthen lash out in three curves toward your cursor, teleporting\nbetween curves. Hits everything it touches (90×90) · each\nsuccessive hit weighs less.\nTEST WEAPON (exact replica of its study source).",
@@ -630,6 +631,7 @@
         "Conditions.TiendaEsencias": "Survive wave 10 of the grimoire's fury",
 
         "Projectiles.AtaqueJefeProjectile.DisplayName": "Warden's Fang",
+        "Projectiles.AtaqueOleadaProjectile.DisplayName": "Wave Fang",
 
         "Jefe.Resonancia": "You absorbed {1} resonance shards from {0}!",
 
@@ -803,6 +805,50 @@
         "Ocaso.Rotulo": "THE DUSK",
 
         "Presencia.Llegada": "The Witness has arrived. {0} is watching you.",
+
+        "Items.VoidCrownItem.Titulo": "[c/FF1738:═══ CROWN OF THE VOID QUEEN ═══]",
+        "Items.VoidCrownItem.Linea1": "[c/FF66AA:Five crimson→magenta neon ribbons with incandescent orange knots,\narched JUST BEHIND your head]",
+        "Items.VoidCrownItem.Linea2": "[c/78788C:The original crown of the Crimson Black Hole — taken off the projectile\nand made into a jewel. It breathes, it sways, it sheds pink embers]",
+        "Items.VoidCrownItem.Linea3": "[c/78788C:Pure cosmetic: zero stats. Equip it in any accessory slot,\nfunctional or vanity]",
+
+        "Items.RuneCrownItem.Titulo": "[c/FF0055:═══ ASTRAL RUNE CROWN ═══]",
+        "Items.RuneCrownItem.Linea1": "[c/FF66AA:Eight runic glyphs of fuchsia light floating in an arc above your head,\neach one with its pale-pink pearl at the tip]",
+        "Items.RuneCrownItem.Linea2": "[c/78788C:The lance, the chalice, the gate, the star, the bolt, the bow, the spiral\nand the throne — living script that breathes and sheds rising sparks]",
+        "Items.RuneCrownItem.Linea3": "[c/78788C:Pure cosmetic: zero stats. Equip it in any accessory slot,\nfunctional or vanity]",
+
+        "Items.AnilloRunicoDorsalItem.Titulo": "[c/FFC36B:═══ THE RUNIC BACK RING ═══]",
+        "Items.AnilloRunicoDorsalItem.Linea1": "[c/FFE7B0:The black hole's circle of conjuring hangs from your back: the vortices'\nLITERAL triple runic crown — eight golden runes spinning with the ensemble]",
+        "Items.AnilloRunicoDorsalItem.Linea2": "[c/CDA8FF:six violet runes counter-rotating farther out and the intimate white circle pulsing\nbeside the photon ring — runes standing upright, breathing, each with its pearl]",
+        "Items.AnilloRunicoDorsalItem.Linea3": "[c/78788C:Pure cosmetic: zero stats. Equip it in any accessory slot,\nfunctional or vanity]",
+
+        "Items.SelloGenesisItem.Titulo": "[c/FFD54F:═══ THE SEAL OF GENESIS ═══]",
+        "Items.SelloGenesisItem.Linea1": "[c/FFC107:The sun's magic signs surround you: the double ring with its eight runes spinning,\nand inside, the star-blue seal counter-rotating with the glyph of the Astro]",
+        "Items.SelloGenesisItem.Linea2": "[c/9FA8DA:+40 max mana, +8% magic damage and +4% magic crit]",
+        "Items.SelloGenesisItem.Linea3": "[c/78788C:The solar script lives in accessory or vanity slots alike.\nSigned by the house's magic-sign libraries]",
+
+        "Items.AnillosSolRunicoItem.Titulo": "[c/FFB74D:═══ THE RUNE SUN'S RINGS ═══]",
+        "Items.AnillosSolRunicoItem.Linea1": "[c/FFD180:Seven runic rings orbit your body on alternating planes:\neven clockwise, odd counter-clockwise, precessing alive with their runes riding along]",
+        "Items.AnillosSolRunicoItem.Linea2": "[c/A7FFEB:+2 life regeneration, +8% melee damage, +3% melee crit and +3 defense]",
+        "Items.AnillosSolRunicoItem.Linea3": "[c/78788C:Every third ring wears the cold star-blue of high-tier suns.\nThe system lives in accessory or vanity slots alike]",
+
+        "Items.AnillosHorizonteItem.Titulo": "[c/FF7043:═══ THE EVENT HORIZON RINGS ═══]",
+        "Items.AnillosHorizonteItem.Linea1": "[c/FFAB91:The accretion disk orbits you: twenty incandescent bands traveling,\nphotons running the vortex and the horizon's fine ring]",
+        "Items.AnillosHorizonteItem.Linea2": "[c/FF8A65:THE LENS: the background bends around you · THE PULL: nearby enemies slide toward you]",
+        "Items.AnillosHorizonteItem.Linea3": "[c/80CBC4:+10% speed and +5% universal damage.\nThe rings live in accessory or vanity slots alike]",
+
+        "Items.PrismaDePaisajesItem.Titulo": "[c/BE8CFF:═══ THE LANDSCAPE PRISM ═══]",
+        "Items.PrismaDePaisajesItem.Linea1": "[c/78788C:The sky library's tester: it unfurls entire landscapes\nover the world's background — layers with parallax, drift and tints\n(v6.44: includes THE VIOLET SANCTUM, the place turned into a scene)]",
+        "Items.PrismaDePaisajesItem.MensajeApagado": "The prism goes dark: the sky returns to its owner.",
+        "Items.PrismaDePaisajesItem.MensajeEscena": "The prism unfurls: {0}.",
+
+        "Items.BolsaCategoria.Titulo": "[c/{0}:{1}]",
+        "Items.BolsaCategoria.Linea1": "[c/E6B0FF:Right-click to deploy this category of the arsenal]",
+        "Items.BolsaCategoria.Linea2": "[c/FFD66B:Only delivers what you're missing — reopen it whenever you lose a weapon]",
+        "Items.BolsaCategoria.Nota": "[c/78788C:{0}]",
+        "Items.BolsaCategoria.Abierta": "The {0} opens: {1} new items.",
+        "Items.BolsaCategoria.Completa": "The {0} is already complete with you.",
+        "Armas.ResonanciaEcos": "The resonance awakens {0} echo(s).",
+        "Armas.SlotsMinionLlenos": "Minion slots full: {0}/{1}.",
 
         "Diag.Fps": "FPS: {0}",
         "Diag.Factor": "Quality factor: {0}",

@@ -37,6 +37,23 @@ namespace AethonMod.Content
         public float XPMultiplier = 1f;
 
         // ------------------------------------------------------------------
+        //  v6.50.3 — EL TOPE DE NIVEL (la mudanza de la config muerta)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Tope de nivel del Grimorio del Eterno (0 = sin tope). Existía en
+        /// AethonConfig desde el inicio y NADIE lo leía (opción fantasma):
+        /// v6.50.3 lo CONECTA de verdad — ShardLevelItem.GrantXP deja de
+        /// subir al llegar al tope y satura la XP en el umbral. Es decisión
+        /// de la AUTORIDAD (el nivel lo cuenta el server en MP), por eso
+        /// vive AQUÍ y no en la config de pantalla (el mismo diagnóstico
+        /// del split v6.50.2).
+        /// </summary>
+        [DefaultValue(0)]
+        [Range(0, 500)]
+        public int MaxShardLevel = 0;
+
+        // ------------------------------------------------------------------
         //  v6.47 — LA VOZ DEL HAMBRE Y LA FURIA
         // ------------------------------------------------------------------
 

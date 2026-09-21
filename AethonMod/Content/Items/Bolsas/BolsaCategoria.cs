@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Bolsas
@@ -43,14 +44,15 @@ namespace AethonMod.Content.Items.Bolsas
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "B",
-                $"[c/{ColorHex(ColorFiesta)}:{Titulo.ToUpper()}]"));
+                Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Titulo",
+                    ColorHex(ColorFiesta), Titulo.ToUpper())));
             tooltips.Add(new TooltipLine(Mod, "B2",
-                "[c/E6B0FF:Clic derecho para desplegar esta categoría del arsenal]"));
+                Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Linea1")));
             tooltips.Add(new TooltipLine(Mod, "B3",
-                "[c/FFD66B:Solo entrega lo que te falte — reábrela cuando pierdas un arma]"));
+                Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Linea2")));
             if (!string.IsNullOrEmpty(Nota))
                 tooltips.Add(new TooltipLine(Mod, "B4",
-                    $"[c/78788C:{Nota}]"));
+                    Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Nota", Nota)));
         }
 
         public override bool CanRightClick() => true;
@@ -102,9 +104,13 @@ namespace AethonMod.Content.Items.Bolsas
 
             if (player.whoAmI == Main.myPlayer)
             {
+                // v6.50.3 — FIX (strings→hjson, la regla v6.50.2): los dos
+                // mensajes de la apertura viajan por localización.
                 Main.NewText(entregados > 0
-                    ? $"La {NombreCorto} se abre: {entregados} objetos nuevos."
-                    : $"La {NombreCorto} ya está completa contigo.",
+                    ? Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Abierta",
+                        NombreCorto, entregados)
+                    : Language.GetTextValue("Mods.AethonMod.Items.BolsaCategoria.Completa",
+                        NombreCorto),
                     new Color(230, 196, 255));
             }
         }

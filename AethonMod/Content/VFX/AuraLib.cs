@@ -521,7 +521,29 @@ namespace AethonMod.Content.VFX
         /// </summary>
         private static void AsegurarTexturas()
         {
-            if (_ruido != null) return;
+            // v6.50.3 — FIX (texturas muertas): el guard solo miraba null —
+            // una Dispose ajena (descarga parcial, device reseteado) dejaba
+            // el array con cadáveres y las auras morían en silencio. NOTA
+            // honesta: el Texture2D PLANO de FNA no expone IsContentLost
+            // (solo los RenderTarget lo tienen — verificado contra el FNA.dll
+            // real); el guard cubre null/IsDisposed, que es lo que esta API
+            // permite observar. La primera llamada puede venir del camino de
+            // DIBUJO (documentado desde v6.49: System.Random determinista por
+            // variante, NO Main.rand) y corre UNA vez por sesión.
+            if (_ruido != null)
+            {
+                try
+                {
+                    for (int v = 0; v < _ruido.Length; v++)
+                        if (_ruido[v] == null || _ruido[v].IsDisposed)
+                        {
+                            DisposeRuido();
+                            break;
+                        }
+                }
+                catch { DisposeRuido(); }
+                if (_ruido != null) return;
+            }
             try
             {
                 var device = Main.graphics?.GraphicsDevice;
@@ -1105,12 +1127,10 @@ namespace AethonMod.Content.VFX
         /// <summary>v6.49 — el número de emisores vivos (lo pinta el overlay F8).</summary>
         public static int EmisoresVivos => _emisores.Count + (_emisorJugador != null ? 1 : 0);
 
-        /// <summary>OnWorldUnload/Unload: emisores y texturas mueren con el mundo.</summary>
-        public static void Reiniciar()
+        /// <summary>v6.50.3 — funeral del ruido (compartido por Reiniciar y
+        /// la autocomprobación de device-lost de AsegurarTexturas).</summary>
+        private static void DisposeRuido()
         {
-            _emisores.Clear();
-            _emisorJugador = null;
-            _ultimaBarrida = 0; // v6.49 — el reloj del barrido también
             try
             {
                 if (_ruido != null)
@@ -1124,6 +1144,18 @@ namespace AethonMod.Content.VFX
             }
             catch { }
             _ruido = null;
+        }
+
+        /// <summary>
+        /// v6.49 — LA PURGA de emergencia (Unloaded/reinicios): emisores
+        /// fuera, reloj a cero, el ruido al funeral.
+        /// </summary>
+        public static void Reiniciar()
+        {
+            _emisores.Clear();
+            _emisorJugador = null;
+            _ultimaBarrida = 0; // v6.49 — el reloj del barrido también
+            DisposeRuido();
         }
     }
 }

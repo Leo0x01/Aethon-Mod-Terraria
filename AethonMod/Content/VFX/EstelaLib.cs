@@ -52,8 +52,16 @@ namespace AethonMod.Content.VFX
     /// CONTRATO (idéntico al de StormLib/LumenLib/BrumaFX): los métodos
     /// de DIBUJO dibujan en el SpriteBatch ABIERTO que el llamador tenga
     /// (aditivo recomendado) y NO lo tocan. TODO determinista por
-    /// semilla: misma secuencia SIEMPRE, cero estado de ondas, cero GC
-    /// por frame (buffers reutilizados).
+    /// semilla: misma secuencia SIEMPRE, cero estado de ondas, cero
+    /// Main.rand.
+    /// v6.50.3 — DOC HONESTA: el viejo "cero GC por frame (buffers
+    /// reutilizados)" era una promesa rota — el camino de Ribbon
+    /// (Sanitize→Smooth(2 arrays)→Resample(1) + Track.Points()) aloca
+    /// 3-4 arrays pequeños por estela por frame (churn real, no crisis:
+    /// ~24-64 Vector2 por array). NO se cachean a propósito: los métodos
+    /// son PÚBLICOS y devuelven el array — un scratch estático mutaría
+    /// bajo los pies de cualquier llamador que retenga el resultado (la
+    /// lección AUD-A de la mutación de entrada).
     /// </summary>
     public static class EstelaLib
     {
@@ -398,13 +406,17 @@ namespace AethonMod.Content.VFX
                 SpriteEffects.None, 0f);
         }
 
-        /// <summary>Tinte de INTENSIDAD LINEAL premultiplicado (el de la casa v6.25).</summary>
+        /// <summary>Tinte de intensidad LINEAL de verdad (v6.50.3 — el Additive de
+        /// FNA es (SourceAlpha, One): el alfa GATEA; RGB intacto, alfa=f; el
+        /// premultiplicado v6.25 atenuaba ×f²).</summary>
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
 
         // ==================================================================

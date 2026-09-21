@@ -437,7 +437,11 @@ namespace AethonMod.Content.Particles
                 // grandes escaladas (hasta ~4x una textura de 128px)
                 var bounds = new CameraBounds(Main.screenPosition,
                     new Vector2(Main.screenWidth, Main.screenHeight));
-                const float cullMargin = 320f;
+                // v6.50.3 — FIX (pop-in de borde): 320 < radio dibujado de los
+                // RingPulse mayores (~540 px sobre el Ring.png de 1024): el
+                // anillo centrado a >320 fuera de pantalla se culleaba con el
+                // borde AÚN VISIBLE. Margen 600 — cubre la familia entera.
+                const float cullMargin = 600f;
 
                 // === Pass 1: AlphaBlend ===
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, transform);
@@ -488,7 +492,11 @@ namespace AethonMod.Content.Particles
                 var transform = Main.GameViewMatrix.TransformationMatrix;
                 var bounds = new CameraBounds(Main.screenPosition,
                     new Vector2(Main.screenWidth, Main.screenHeight));
-                const float cullMargin = 320f;
+                // v6.50.3 — FIX (pop-in de borde): 320 < radio dibujado de los
+                // RingPulse mayores (~540 px sobre el Ring.png de 1024): el
+                // anillo centrado a >320 fuera de pantalla se culleaba con el
+                // borde AÚN VISIBLE. Margen 600 — cubre la familia entera.
+                const float cullMargin = 600f;
 
                 // === Pass 1: AlphaBlend ===
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, transform);

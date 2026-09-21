@@ -635,9 +635,13 @@ namespace AethonMod.Content.VFX
 
                     float prog = (float)((Main.GameUpdateCount - f.FrameInicio) / (60.0 * f.DuracionSeg));
 
-                    // ALFA = intensidad · ease-out cuadrático (el contrato).
-                    float easeOut = 1f - (1f - prog) * (1f - prog);
-                    float alfa = MathHelper.Clamp(f.Intensidad * easeOut, 0f, 1f);
+                    // ALFA = intensidad · (1−p)² (el contrato del doc: ease-out
+                    // cuadrático de DECAIMIENTO). v6.50.3 — FIX (easing
+                    // INVERTIDO): se usaba 1−(1−p)² — la curva ease-out de
+                    // CRECIMIENTO — como multiplicador directo: el flash nacía
+                    // INVISIBLE, subía hasta la intensidad y moría de un pop.
+                    // (La gemela OndaSystem.cs ya decaía bien: a = f·vida².)
+                    float alfa = MathHelper.Clamp(f.Intensidad * (1f - prog) * (1f - prog), 0f, 1f);
                     if (alfa <= 0.004f) continue;
 
                     // RGB íntegro + alfa en el canal alfa: la mezcla clásica

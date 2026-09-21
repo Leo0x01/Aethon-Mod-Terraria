@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.Systems;
@@ -21,7 +22,9 @@ namespace AethonMod.Content.Weapons
     ///   guardado: nada (los minions ya invocados permanecen).
     /// - Niveles infinitos. Sin dependencias de BranchType ni IsImprinted.
     ///
-    /// CLICK IZQUIERDO: dispara ArcaneBolt (homing). SIN MANÁ (v6.42, arsenal de pruebas).
+    /// CLICK IZQUIERDO: dispara el Nightglow vanilla (931 — el homing de
+    /// verdad desde el fix 48688dd; el ArcaneBolt propio quedó archivado
+    /// como API futura). SIN MANÁ (v6.42, arsenal de pruebas).
     /// CLICK DERECHO: invoca CosmicOrbMinion. SIN MANÁ en pruebas
     /// (v6.45, bandera ManaGratisEnPruebas — apagarla restaura el coste).
     ///
@@ -225,7 +228,9 @@ namespace AethonMod.Content.Weapons
                 if (currentMinions >= maxMinions)
                 {
                     if (Main.myPlayer == player.whoAmI)
-                        Main.NewText($"Slots de minion llenos: {currentMinions}/{maxMinions}.",
+                        // v6.50.3 — strings→hjson (hallazgo V-3)
+                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.SlotsMinionLlenos",
+                            currentMinions, maxMinions),
                             new Color(255, 120, 120));
                     return false;
                 }

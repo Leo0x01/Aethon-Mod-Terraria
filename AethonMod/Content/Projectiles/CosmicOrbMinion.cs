@@ -133,8 +133,14 @@ namespace AethonMod.Content.Projectiles
                 // Radio compacto: 30px base + 4px por minion (tope ~80px con 12+ minions)
                 float orbitRadius = 30f + System.Math.Min(Projectile.minionPos * 4f, 50f);
 
-                // Separación angular uniforme entre minions (360° / numMinions)
-                float angleOffset = orbitAngle + (Projectile.minionPos * MathHelper.TwoPi / 8f);
+                // Separación angular uniforme entre minions — v6.50.3 —
+                // FIX (el comentario mentía): ponía TwoPi/8f FIJO (huecos de
+                // 45° sin importar cuántos hubiera — 2 minions quedaban
+                // amontonados a 45°) mientras el comentario prometía
+                // "360°/numMinions". Ahora de VERDAD: el reparto uniforme
+                // de vanilla (ownedProjectileCounts).
+                int misHermanos = System.Math.Max(1, owner.ownedProjectileCounts[Projectile.type]);
+                float angleOffset = orbitAngle + (Projectile.minionPos * MathHelper.TwoPi / misHermanos);
 
                 Vector2 orbitOffset = new Vector2(
                     (float)System.Math.Cos(angleOffset) * orbitRadius,
@@ -198,7 +204,15 @@ namespace AethonMod.Content.Projectiles
             }
 
             if (!hasBuff) Projectile.Kill();
-            else owner.AddBuff(buffType, 18000);
+            else
+            {
+                // v6.50.3 — FIX (el ÚNICO minion de la casa que no refrescaba
+                // la vida: sus 5 hermanos hacen timeLeft=2 con el comentario
+                // "el timeLeft nunca expira" — este expiraba a los ~5 min de
+                // uso con el buff PERFECTAMENTE activo).
+                Projectile.timeLeft = 2;
+                owner.AddBuff(buffType, 18000);
+            }
         }
 
         private NPC FindHostileTarget(Player owner, int level)
@@ -236,7 +250,27 @@ namespace AethonMod.Content.Projectiles
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {
             int level = (int)Projectile.ai[2];
-            if (level < 1) level = 1;
+            if (level < 1)
+            {
+                // v6.50.3 — FIX (paridad con la IA): mismo fallback de HeldItem
+                // que usa el AI — un minion viejo o invocado sin cache cobraba
+                // multiplicador de nivel 1 aunque el grimorio fuera alto.
+                Player owner = Main.player[Projectile.owner];
+                if (owner != null && owner.active)
+                {
+                    Item held = owner.HeldItem;
+                    if (held != null && held.type == ModContent.ItemType<Weapons.GrimoireEternal>())
+                    {
+                        try
+                        {
+                            var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
+                            if (sl != null) level = sl.Level;
+                        }
+                        catch { }
+                    }
+                }
+                if (level < 1) level = 1;
+            }
             modifiers.SourceDamage *= WeaponScaling.MinionContactDamageMult(level);
         }
 

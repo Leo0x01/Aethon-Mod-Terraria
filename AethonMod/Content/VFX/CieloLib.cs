@@ -389,7 +389,11 @@ namespace AethonMod.Content.VFX
                 // Se reabre SOLO si nosotros lo cerramos: mismos parámetros
                 // canónicos de la fase de fondo (diferido, alfa, LinearClamp
                 // y la matriz de vista del FONDO — el mismo espacio en el que
-                // el juego dibuja su paisaje).
+                // el juego dibuja su paisaje). v6.50.3 — NOTA de la unificación
+                // de restores: el patrón v6.50.2 (DefaultSamplerState) es para
+                // el pase de ENTIDADES; el de FONDO sigue en LinearClamp AQUÍ A
+                // PROPÓSITO — el paisaje son gradientes suaves, PointClamp los
+                // destrozaría en escalones (la matriz de fondo ya era la correcta).
                 if (loteDelFondoAbierto)
                 {
                     try

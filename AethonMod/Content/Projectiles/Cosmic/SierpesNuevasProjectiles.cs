@@ -88,13 +88,34 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnSpawn(IEntitySource source)
         {
+            Sembrar(desdeOnSpawn: true);
+        }
+
+        /// <summary>v6.50.3 — FIX (hallazgo V-1, la autocuración de la casa):
+        /// netImportant corre la IA en los remotos pero OnSpawn NO viaja en
+        /// el msg 27 — el anillo nacía vírgen (ceros) y la IA lo arrastraba a
+        /// la esquina del mundo (Center=_segs[0]≈(0,0) + rubber-band contra
+        /// el sync — el mismo diagnóstico de las órbitas de v6.50.2). Estado
+        /// vírgen → se siembra alrededor de la posición SINCRONIZADA (el
+        /// patrón de AtaqueJefe/AtaqueOleada con _centroOrbita).</summary>
+        private void Sembrar(bool desdeOnSpawn)
+        {
             Seed = (int)Projectile.ai[2] % 9973;
 
-            // El anillo nace alrededor del portador (la posición exacta la
-            // fija el primer tick del puntero).
-            Player duenio = Main.player[Projectile.owner];
-            Vector2 centro = duenio != null && duenio.active
-                ? duenio.Center : Projectile.Center;
+            // El anillo nace alrededor del dueño (nacimiento local) o de la
+            // posición SINCRONIZADA (autocura de un remoto — la que trae el
+            // msg 27).
+            Vector2 centro;
+            if (desdeOnSpawn)
+            {
+                Player duenio = Main.player[Projectile.owner];
+                centro = duenio != null && duenio.active
+                    ? duenio.Center : Projectile.Center;
+            }
+            else
+            {
+                centro = Projectile.Center;
+            }
             for (int i = 0; i < N; i++)
             {
                 float a = i * MathHelper.TwoPi / N;
@@ -103,6 +124,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     MathF.Sin(a + MathHelper.PiOver2)) * Vel;
             }
             Projectile.Center = centro;
+            _sembrado = true;
         }
 
         public override void AI()
@@ -114,6 +136,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.Kill();
                 return;
             }
+
+            if (!_sembrado) Sembrar(desdeOnSpawn: false); // v6.50.3 — autocura del remoto
 
             float time = Main.GlobalTimeWrappedHourly;
 
@@ -275,6 +299,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         private readonly Vector2[] _segs = new Vector2[N];
         private readonly Vector2[] _vels = new Vector2[N];
+        private bool _sembrado;   // v6.50.3 — la autocuración MP
         private float _slotAng;
         private float _age;
 
@@ -428,8 +453,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === LA MEMORIA: el camino del faro se apunta (la cola del
             //     histórico — solo lo que el cuerpo aún necesita). ===
             _ruta.Add(Projectile.Center);
-            while (_ruta.Count > Historia + 2 && _ruta.Count > N)
-                _ruta.RemoveAt(0);
+            // v6.50.3 — FIX (O(n²) → O(n)): el while con RemoveAt(0) corría
+            // DESPLAZANDO la lista ENTERA por cada elemento sobrante (n
+            // elementos muertos = n desplazamientos de n). RemoveRange: UN
+            // solo desplazamiento.
+            int excesoRuta = _ruta.Count - System.Math.Max(Historia + 2, N);
+            if (excesoRuta > 0)
+                _ruta.RemoveRange(0, excesoRuta);
 
             // === EL CUERPO: cada eslabón muestrea el camino a arclength
             //     i·Tamano DETRÁS del faro — la trayectoria EXACTA. ===
@@ -1254,6 +1284,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnSpawn(IEntitySource source)
         {
+            Sembrar();
+        }
+
+        /// <summary>v6.50.3 — FIX (hallazgo V-1): la autocuración MP de la
+        /// casa — netImportant corre la IA en los remotos pero OnSpawn no
+        /// viaja en el msg 27; sin esto la víbora nacía en (0,0) para los
+        /// remotos (misma familia que las órbitas de v6.50.2).</summary>
+        private void Sembrar()
+        {
             Seed = (int)Projectile.ai[2] % 9973;
             _rumbo = Projectile.velocity.LengthSquared() > 0.01f
                 ? Projectile.velocity.ToRotation() : 0f;
@@ -1262,6 +1301,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 MathF.Sin(_rumbo + MathHelper.Pi));
             for (int i = 0; i < N; i++)
                 _espina[i] = Projectile.Center + atras * (i * 2f);
+            _sembrado = true;
         }
 
         public override void AI()
@@ -1273,6 +1313,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.Kill();
                 return;
             }
+
+            if (!_sembrado) Sembrar(); // v6.50.3 — autocura del remoto
 
             float time = Main.GlobalTimeWrappedHourly;
 
@@ -1401,6 +1443,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private readonly Vector2[] _espina = new Vector2[N];
         private readonly Vector2[] _hebraA = new Vector2[N];
         private readonly Vector2[] _hebraB = new Vector2[N];
+        private bool _sembrado;   // v6.50.3 — la autocuración MP
         private float _rumbo;
         private float _trenza;
         private float _giroSuave;
@@ -2139,6 +2182,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnSpawn(IEntitySource source)
         {
+            Sembrar();
+        }
+
+        /// <summary>v6.50.3 — FIX (hallazgo V-1): la autocuración MP de la
+        /// casa — netImportant corre la IA en los remotos pero OnSpawn no
+        /// viaja en el msg 27; sin esto la manada nacía en (0,0) para los
+        /// remotos y su Center se arrastraba a la esquina del mundo
+        /// (misma familia que las órbitas de v6.50.2).</summary>
+        private void Sembrar()
+        {
             Seed = (int)Projectile.ai[2] % 9973;
 
             // La manada nace en vuelo en círculo alrededor del punto.
@@ -2152,6 +2205,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     _colas[c * ColaN + k] = _caz[c];
             }
             _orden[0] = 0;
+            _sembrado = true;
         }
 
         public override void AI()
@@ -2163,6 +2217,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Projectile.Kill();
                 return;
             }
+
+            if (!_sembrado) Sembrar(); // v6.50.3 — autocura del remoto
 
             float time = Main.GlobalTimeWrappedHourly;
 
@@ -2195,12 +2251,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (_age % 15 == 0)
             {
                 // El orden de la cadena: por cercanía a la presa.
-                int[] idx = new int[Caz];
-                for (int c = 0; c < Caz; c++) idx[c] = c;
-                Array.Sort(idx, (a, b) =>
-                    Vector2.DistanceSquared(_caz[a], objetivoP).CompareTo(
-                        Vector2.DistanceSquared(_caz[b], objetivoP)));
-                for (int m = 0; m < Caz; m++) _orden[m] = idx[m];
+                // v6.50.3 — FIX (cero GC): new int[6] + Array.Sort con CLOSURE
+                // (delegado nuevo + array nuevo) cada 15 ticks — churn evitable.
+                // Insertion-sort IN PLACE sobre _orden (Caz=6: el algoritmo
+                // chico gana de sobra y no aloca NADA).
+                if (!_ordenInit)
+                {
+                    for (int c = 0; c < Caz; c++) _orden[c] = c;
+                    _ordenInit = true;
+                }
+                for (int a = 1; a < Caz; a++)
+                {
+                    int v = _orden[a];
+                    float dv = Vector2.DistanceSquared(_caz[v], objetivoP);
+                    int b = a - 1;
+                    while (b >= 0 && Vector2.DistanceSquared(_caz[_orden[b]], objetivoP) > dv)
+                    {
+                        _orden[b + 1] = _orden[b];
+                        b--;
+                    }
+                    _orden[b + 1] = v;
+                }
             }
             int lider = _orden[0];
 
@@ -2344,6 +2415,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private readonly Vector2[] _vel = new Vector2[Caz];
         private readonly Vector2[] _colas = new Vector2[Caz * ColaN];
         private readonly int[] _orden = new int[Caz];
+        private bool _ordenInit;   // v6.50.3 — la inicialización perezosa del orden
+        private bool _sembrado;   // v6.50.3 — la autocuración MP
         private readonly float[] _rapidez = new float[Caz];
         private float _age;
 
@@ -2419,8 +2492,17 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override void OnSpawn(IEntitySource source)
         {
-            // La semilla viaja con la identidad (determinista en todos los
-            // clientes — la regla de la casa para los renders).
+            Sembrar();
+        }
+
+        /// <summary>v6.50.3 — FIX (hallazgo V-1): la autocuración MP de la
+        /// casa — netImportant corre la IA en los remotos pero OnSpawn no
+        /// viaja en el msg 27; sin esto la cría nacía en (0,0) para los
+        /// remotos (misma familia que las órbitas de v6.50.2). La semilla
+        /// viaja con la identidad (determinista en todos los clientes —
+        /// la regla de la casa para los renders).</summary>
+        private void Sembrar()
+        {
             Seed = (Projectile.identity * 31 + 17) % 9973;
             _rumbo = Projectile.velocity.LengthSquared() > 0.01f
                 ? Projectile.velocity.ToRotation() : 0f;
@@ -2429,6 +2511,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 MathF.Sin(_rumbo + MathHelper.Pi));
             for (int i = 0; i < N; i++)
                 _segs[i] = Projectile.Center + atras * (i * 2f);
+            _sembrado = true;
         }
 
         public override void AI()
@@ -2442,6 +2525,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
 
             CheckMinionBuff(duenio);
+
+            if (!_sembrado) Sembrar(); // v6.50.3 — autocura del remoto
 
             float time = Main.GlobalTimeWrappedHourly;
 
@@ -2638,6 +2723,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private readonly Vector2[] _segs = new Vector2[N];
         private readonly float[] _angulos = new float[N];
         private NPC _presaFija;
+        private bool _sembrado;   // v6.50.3 — la autocuración MP
         private float _rumbo;
         private float _age;
 

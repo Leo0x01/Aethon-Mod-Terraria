@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.Players;
 using AethonMod.Content.Projectiles.Cosmic;
@@ -231,13 +232,15 @@ namespace AethonMod.Content.Weapons.Cosmic
 
         public override bool AltFunctionUse(Player player) => true;
 
-        public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
-        {
-            // EL HAMBRE: el daño devorado se suma al tajo (y se gasta).
-            ApuestasPlayer ap = player.GetModPlayer<ApuestasPlayer>();
-            if (ap.HambreGuadana > 0)
-                damage.Base += ap.HambreGuadana;
-        }
+        // v6.50.3 — FIX (doble aplicación del Hambre): el hook de
+        // ModifyWeaponDamage YA alimenta el parámetro `damage` de Shoot a
+        // través del pipeline de tML (GetWeaponDamage → ItemLoader.Shoot —
+        // el mismo flujo en el que confía GrimoireEternal). Con el bono AQUÍ
+        // y la suma manual en Shoot, el tajo y la fisura salían con
+        // base+2×hambre (y el tope de la fisura, Projectile.damage×2,
+        // quedaba inflado). El Hambre pertenece SOLO AL TAJO (el diseño:
+        // "se suma al tajo y se gasta") — la hoja melee NO lo lleva. La
+        // suma única vive en Shoot; este hook se retira.
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
@@ -449,7 +452,8 @@ namespace AethonMod.Content.Weapons.Cosmic
                         player.Center);
                     PulsoLib.EmpujarPantalla(new Color(150, 210, 255), 0.25f, 10);
                     if (coro > 0)
-                        Main.NewText($"La resonancia despierta {coro} eco(s).",
+                        // v6.50.3 — strings→hjson (hallazgo V-3)
+                        Main.NewText(Language.GetTextValue("Mods.AethonMod.Armas.ResonanciaEcos", coro),
                             new Color(170, 220, 255));
                 }
             }

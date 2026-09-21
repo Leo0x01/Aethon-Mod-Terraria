@@ -65,7 +65,7 @@ namespace AethonMod.Content.Weapons.V20
             tooltips.Add(new TooltipLine(Mod, "SN_Desc",
                 "[c/FFE0A0:Una estrella que colapsa hacia el blanco calor durante 3 segundos y estalla en 3 ondas expansivas de fuego]"));
             tooltips.Add(new TooltipLine(Mod, "SN_Desc2",
-                "[c/78788C:Cada onda hace daño al pasar y provoca quemadura (5 s) a los enemigos alcanzados]"));
+                "[c/78788C:Cada onda hace daño al pasar y provoca quemadura (10 s) a los enemigos alcanzados]")); // v6.50.3 — FIX: el proyectil aplica OnFire 600 ticks = 10 s (v5.91 cambió el efecto, el tooltip no se siguió)
         }
 
         public override void AddRecipes()

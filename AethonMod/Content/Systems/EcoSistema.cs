@@ -93,40 +93,15 @@ namespace AethonMod.Content.Systems
             try
             {
                 if (npc == null || !npc.boss) return;
-
-                // Los Gemelos son UN jefe con dos cuerpos: la voz suena
-                // cuando cae el ÚLTIMO gemelo, no con cada uno.
-                if (npc.type == NPCID.Retinazer || npc.type == NPCID.Spazmatism)
-                {
-                    for (int i = 0; i < Main.maxNPCs; i++)
-                    {
-                        NPC otro = Main.npc[i];
-                        if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
-                            (otro.type == NPCID.Retinazer || otro.type == NPCID.Spazmatism))
-                            return; // aún vive un gemelo: la derrota no es completa
-                    }
-                }
-                // v6.47 — LOS ECOS DEL MOD son lo mismo: la Arquera y el
-                // Primer Portador son DOS cuerpos de la MISMA historia
-                // (los portadores anteriores); la voz suena al caer el
-                // último de los dos.
-                else if (npc.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                         npc.type == ModContent.NPCType<Content.NPCs.EchoBlade>())
-                {
-                    for (int i = 0; i < Main.maxNPCs; i++)
-                    {
-                        NPC otro = Main.npc[i];
-                        if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
-                            (otro.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                             otro.type == ModContent.NPCType<Content.NPCs.EchoBlade>()))
-                            return; // aún vive un eco: la derrota no es completa
-                    }
-                }
-                // Partes en cascada (segmentos, ojos, manos, cabezas): no hablan.
-                else if (ShardLevelSystem.EsParteDeJefe(npc))
-                {
-                    return;
-                }
+                // v6.50.3 — LA DERROTA COMPLETA (un helper, dos consumidores):
+                // la VOZ (aquí) y LA CRÓNICA del Testigo (GlobalNPCXP) aplican
+                // LAS MISMAS reglas — una derrota, una voz y UNA página. Antes
+                // la crónica se fiaba solo de npc.boss: los SEGMENTOS con
+                // boss=true (El Devorador: 80 cuerpos; el Señor de la Luna:
+                // cabeza/manos; el Muro: el ojo; Golem: las cabezas) escribían
+                // PÁGINAS FANTASMA por cada parte y disparaban un paquete
+                // MsgCronica por cada segmento muerto.
+                if (!EsDerrotaCompleta(npc)) return;
 
                 string clave = ClaveDeVoz(npc.type);
 
@@ -164,6 +139,56 @@ namespace AethonMod.Content.Systems
                 }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// v6.50.3 — ¿Es ESTA muerte la DERROTA COMPLETA del jefe? Las reglas
+        /// que la voz ya aplicaba, ahora también para la CRÓNICA del Testigo
+        /// (la llama GlobalNPCXP antes de marcar página):
+        /// · Los Gemelos son UN jefe con dos cuerpos: cuenta al caer el
+        ///   ÚLTIMO (y solo el último escribe su página — ambos comparten la
+        ///   clave "Twins" en ClaveDeVoz: una derrota, una página).
+        /// · Los Ecos del mod (Arquera + Primer Portador): idem, clave
+        ///   "LosEcos" compartida.
+        /// · Partes en cascada (ShardLevelSystem.EsParteDeJefe): NUNCA son
+        ///   derrota — la cabeza y las manos del SEÑOR DE LA LUNA son
+        ///   boss=true en vanilla y morían como fases ANTES del núcleo
+        ///   (3 páginas fantasma + 3 paquetes por derrota, verificado al
+        ///   IL); el cuerpo/cola del Devorador, el ojo del Muro y las
+        ///   cabezas de Golem tienen boss=false (cubiertos igual por el
+        ///   guard por si un mod externo los marca).
+        /// </summary>
+        public static bool EsDerrotaCompleta(NPC npc)
+        {
+            if (npc == null || !npc.active) return false;
+            // Los Gemelos: solo cuando cae el último.
+            if (npc.type == NPCID.Retinazer || npc.type == NPCID.Spazmatism)
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC otro = Main.npc[i];
+                    if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
+                        (otro.type == NPCID.Retinazer || otro.type == NPCID.Spazmatism))
+                        return false; // aún vive un gemelo
+                }
+                return true;
+            }
+            // Los Ecos del mod: dos cuerpos, la misma historia.
+            if (npc.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                npc.type == ModContent.NPCType<Content.NPCs.EchoBlade>())
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC otro = Main.npc[i];
+                    if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
+                        (otro.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
+                         otro.type == ModContent.NPCType<Content.NPCs.EchoBlade>()))
+                        return false; // aún vive un eco
+                }
+                return true;
+            }
+            // Partes en cascada (segmentos, ojos, manos, cabezas): no cuentan.
+            return !ShardLevelSystem.EsParteDeJefe(npc);
         }
 
         /// <summary>

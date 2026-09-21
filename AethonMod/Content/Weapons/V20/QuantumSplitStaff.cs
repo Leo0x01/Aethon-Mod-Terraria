@@ -57,7 +57,7 @@ namespace AethonMod.Content.Weapons.V20
             tooltips.Add(new TooltipLine(Mod, "QS_Title",
                 "[c/FF40FF:═══ DIVISIÓN CUÁNTICA ═══]"));
             tooltips.Add(new TooltipLine(Mod, "QS_Desc",
-                "[c/D040FF:Proyectil que se divide en tres trayectorias paralelas]"));
+                "[c/D040FF:Proyectil que se divide en tres trayectorias divergentes]")); // v6.50.3 — FIX: el split es a ±30°, no paralelas
         }
 
         public override void AddRecipes()

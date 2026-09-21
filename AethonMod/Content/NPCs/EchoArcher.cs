@@ -21,7 +21,7 @@ namespace AethonMod.Content.NPCs
     /// · ARTE 100% CÓDIGO: la fantasma ámbar (capas translúcidas, la
     /// falda deshaciéndose), la CORONA DE ESTRELLAS, el ARCO VIVO (un
     /// arco de cápsulas que SE TENSIONA de verdad antes de soltar) y la
-    /// ESTELA DE ECOS (EcosLib: los fantasmas de sus posiciones
+    /// ESTELA DE ECOS (EspectroLib: los fantasmas de sus posiciones
     /// pasadas la siguen — es un eco, se dibuja como eco).
     /// · LAS FLECHAS ESTELARES: corrección de rumbo real y apuntado con
     ///   LEAD (predice tu rumbo — la arquera no dispara a donde ESTÁS).
@@ -41,7 +41,7 @@ namespace AethonMod.Content.NPCs
         private int _tickLluvia = 0;      // la tormenta (fase 2)
         private int _dirStrafe = 1;       // el lado del esquivón
         private int _tickStrafe = 0;      // cambia de lado cada 180 t
-        private EcosLib.Memoria _mem;     // la estela de ecos
+        private EspectroLib.Memoria _mem;     // la estela de ecos
 
         // === LA PALETA ÁMBAR DE LOS PORTADORES ===
         private static readonly Color AmbarFantasma = new(255, 178, 96);
@@ -74,7 +74,7 @@ namespace AethonMod.Content.NPCs
 
         public override void AI()
         {
-            if (_mem.Pos == null) _mem = EcosLib.Crear(); // la memoria nace con ella
+            if (_mem.Pos == null) _mem = EspectroLib.Crear(); // la memoria nace con ella
 
             Player target = Main.player[NPC.target];
             if (!target.active || target.dead)
@@ -94,8 +94,9 @@ namespace AethonMod.Content.NPCs
             {
                 NPC.localAI[0] = 1f;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Arquera.Furia"),
-                    AmbarFantasma);
+                // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+                // server — Main.NewText no llega a ninguna pantalla de remotos.
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Arquera.Furia", AmbarFantasma);
                 NPC.netUpdate = true;
             }
 
@@ -117,11 +118,11 @@ namespace AethonMod.Content.NPCs
             }
             else if (dist > 520f)
             {
-                // v6.50 — LA CURVA DEL ARCO (EcosLib.CurvaAproximacion):
+                // v6.50 — LA CURVA DEL ARCO (EspectroLib.CurvaAproximacion):
                 // acercarse desde lejos ya no es línea recta — la
                 // aproximación se anticipa con tangente y llega al anillo
                 // de disparo (380) respirando con el vaivén inconmensurable.
-                deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                deseada = EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                     380f, furia ? 5.2f : 4.2f, Main.GlobalTimeWrappedHourly,
                     NPC.whoAmI * 13);
             }
@@ -132,7 +133,7 @@ namespace AethonMod.Content.NPCs
                 // curva le pone el vaivén y la corrección de radio — ya no
                 // desliza en línea perfecta: ondula.
                 deseada = lateral * (furia ? 3.4f : 2.6f) +
-                    EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                         380f, 1.1f, Main.GlobalTimeWrappedHourly,
                         NPC.whoAmI * 13);
             }
@@ -168,7 +169,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // LA MEMORIA: la estela de ecos (un registro por tick).
-            EcosLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
+            EspectroLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
 
             Lighting.AddLight(NPC.Center, new Vector3(0.5f, 0.4f, 0.1f));
         }
@@ -242,8 +243,8 @@ namespace AethonMod.Content.NPCs
                 }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center);
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Arquera.Lluvia"),
-                OroEstelar);
+            // v6.50.3 — FIX (anuncio invisible en MP): vía EcoRed al mundo.
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Arquera.Lluvia", OroEstelar);
         }
 
         // ==================================================================
@@ -360,13 +361,13 @@ namespace AethonMod.Content.NPCs
                 LumenLib.Bloom(Main.spriteBatch, pos, 24f, AmbarTenue,
                     (furia ? 0.45f : 0.3f) * aliento);
 
-                // === LA ESTELA DE ECOS (los fantasmas de EcosLib — 4
+                // === LA ESTELA DE ECOS (los fantasmas de EspectroLib — 4
                 //     posiciones pasadas desvaneciéndose detrás) ===
-                if (EcosLib.Profundidad(in _mem) > 6)
+                if (EspectroLib.Profundidad(in _mem) > 6)
                 {
                     for (int g = 1; g <= 4; g++)
                     {
-                        Vector2 pasado = EcosLib.Pasado(in _mem, g * 5);
+                        Vector2 pasado = EspectroLib.Pasado(in _mem, g * 5);
                         if (pasado == Vector2.Zero) continue;
                         Vector2 eco = pasado - Main.screenPosition;
                         float alfa = 0.30f * (1f - g / 5f);

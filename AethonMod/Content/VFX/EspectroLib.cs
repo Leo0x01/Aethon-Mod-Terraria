@@ -5,10 +5,17 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// EcosLib — v6.41 — LA LIBRERÍA DE LOS FANTASMAS.
+    /// EspectroLib — v6.50.3 (antes EcosLib, v6.41) — LA LIBRERÍA DE LOS
+    /// FANTASMAS.
+    ///
+    /// v6.50.3 — EL RENAME: se llamaba "EcosLib" — A UNA LETRA de EcoLib
+    /// (la librería de las VOCES del grimorio) y el nombre confundía:
+    /// EcoLib habla, EspectroLib deja clones. Mismo contrato, nuevo nombre
+    /// sin trampa. (EcoLib = diálogos en pantalla; EspectroLib = estelas,
+    /// espejos orbitales y CurvaAproximacion — nada que ver.)
     ///
     /// EL AGUJERO que la casa tenía (el análisis v6.41 del arsenal visual):
-    /// TODO efecto premium del ecosistema vive de LOS ECOS — el cuerpo que
+    /// TODO efecto premium del ecosistema vive de LOS ESPECTROS — el cuerpo que
     /// se repite en su pasado (el dash con estela de clones, la espada que
     /// deja copias de sí misma en el arco, el jefe con espejitos orbitando)
     /// — y cada arma nuestra se construía su bucle a mano. Esta librería
@@ -36,7 +43,7 @@ namespace AethonMod.Content.VFX
     /// instancia — cada cliente la reconstruye por su cuenta con el MISMO
     /// reloj: determinista por construcción).
     /// </summary>
-    public static class EcosLib
+    public static class EspectroLib
     {
         // ==================================================================
         //  LA MEMORIA — el búfer circular de posiciones del cuerpo

@@ -430,6 +430,14 @@ namespace AethonMod.Content.VFX
                 device.Textures[1] = null;
                 device.Textures[2] = null;
                 device.Textures[3] = null;
+                // v6.50.3 — FIX (los samplers quedaban PEGADOS): los shaders
+                // del sol registran SamplerStates[1..2] = LinearWrap y NADIE
+                // los restauraba (el conservaje cubría solo las texturas —
+                // un draw futuro del slot 1 sin sampler propio muestreaba en
+                // WRAP). LinearClamp: el neutro de los slots de ruido.
+                device.SamplerStates[1] = SamplerState.LinearClamp;
+                device.SamplerStates[2] = SamplerState.LinearClamp;
+                device.SamplerStates[3] = SamplerState.LinearClamp;
             }
             catch { }
         }

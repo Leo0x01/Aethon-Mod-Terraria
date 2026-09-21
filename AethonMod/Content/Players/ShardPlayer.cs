@@ -463,11 +463,16 @@ namespace AethonMod.Content.Players
         /// v6.48 — LA CRÓNICA: apunta que EL LIBRO devoró a este jefe con
         /// este portador (lo llama GlobalNPCXP al cobrar la kill — antes
         /// de la voz). El Testigo contará su versión humana.
+        /// v6.50.3 — devuelve TRUE solo si la página es NUEVA (el llamador
+        /// sincroniza por EcoRed únicamente entonces: antes el Devorador
+        /// disparaba ~80 MsgCronica idénticos por una sola derrota).
         /// </summary>
-        public void CronicaMarcar(int npcType)
+        public bool CronicaMarcar(int npcType)
         {
-            if (npcType <= 0) return;
-            if (!CronicaJefes.Contains(npcType)) CronicaJefes.Add(npcType);
+            if (npcType <= 0) return false;
+            if (CronicaJefes.Contains(npcType)) return false;
+            CronicaJefes.Add(npcType);
+            return true;
         }
 
         /// <summary>
@@ -490,8 +495,15 @@ namespace AethonMod.Content.Players
         }
 
         // === EL PERFIL DEL AURA DE HAMBRE (cacheado: cero GC por frame) ===
-        private static AuraPerfil _auraHambre;
-        private static int _auraHambreIntensidad = -1;
+        // v6.50.3 — FIX (cache ESTÁTICO en un ModPlayer): los campos static
+        // se comparten entre TODAS las instancias — en SP (un jugador) la
+        // caché acertaba por casualidad, pero en el SERVER de MP el hook
+        // corre por cada portador: dos hambres distintas = MISS por frame
+        // por jugador (la promesa "cero GC" moría justo donde hay más
+        // jugadores). Campos de INSTANCIA: una caché POR JUGADOR, como
+        // siempre debió ser.
+        private AuraPerfil _auraHambre;
+        private int _auraHambreIntensidad = -1;
 
         /// <summary>El perfil del hambre a la intensidad actual (creado SOLO cuando cambia).</summary>
         private AuraPerfil AuraHambre()

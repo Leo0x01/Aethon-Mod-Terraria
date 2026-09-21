@@ -32,7 +32,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///   · LAS AFTERIMAGES ORBITALES — LA FIRMA: 4 clones crema (alfa 50)
     ///     orbitando a 8px + 3 clones naranjas (alfa 77) a 16px, girando
     ///     y RESPIRANDO con el pulso triangular de 4 segundos (el bucle
-    ///     EXACTO del original, trasladado a EcosLib).
+    ///     EXACTO del original, trasladado a EspectroLib).
     ///   · EL HALO: anillo dorado + glow Goldenrod PULSANDO con periodo
     ///     1.4 s (el número exacto) + luz naranja ×1.25 (exacta).
     ///
@@ -284,8 +284,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
             float rot = Projectile.rotation;
 
             // === EL PULSO TRIANGULAR DE 4s (el reloj de los espejos). ===
-            float pulso = EcosLib.PulsoTriangular(tiempo + Seed * 0.13f);
-            float tempo = EcosLib.TempoEspejos(tiempo, _edad);
+            float pulso = EspectroLib.PulsoTriangular(tiempo + Seed * 0.13f);
+            float tempo = EspectroLib.TempoEspejos(tiempo, _edad);
             LlenarEcos(centro, tempo, pulso);
 
             // --- PASO 1 (aditivo): los ecos + el cuerpo + el halo. ---
@@ -384,9 +384,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private void LlenarEcos(Vector2 centro, float tempo, float pulso)
         {
             for (int i = 0; i < 4; i++)
-                _ecos[i] = EcosLib.EcoOrbital(centro, tempo, i * 0.25f, 8f * (0.6f + 0.4f * pulso));
+                _ecos[i] = EspectroLib.EcoOrbital(centro, tempo, i * 0.25f, 8f * (0.6f + 0.4f * pulso));
             for (int i = 0; i < 3; i++)
-                _ecos[4 + i] = EcosLib.EcoOrbital(centro, tempo, i * 0.34f, 16f * (0.6f + 0.4f * pulso));
+                _ecos[4 + i] = EspectroLib.EcoOrbital(centro, tempo, i * 0.34f, 16f * (0.6f + 0.4f * pulso));
         }
 
         /// <summary>Un quad estirado de A a B sobre el lote abierto (el rayo).</summary>
@@ -407,7 +407,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// El dardo ardiente de la volea del fragmento (el calco del
     /// proyectil de ataque del original): vuela ACELERANDO ×1.01 por
-    /// tick con su cola de fantasmas (EcosLib — la memoria de la casa),
+    /// tick con su cola de fantasmas (EspectroLib — la memoria de la casa),
     /// y al morir FLORECE: la FLOR DE FUEGO radial de seis lengüetas
     /// (PyraLib.Estallido — nacido de esta réplica) con su daño en área.
     /// </summary>
@@ -422,7 +422,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private int _edad;
         private bool _muriendo;
         private int _golpes;
-        private EcosLib.Memoria _memoria;
+        private EspectroLib.Memoria _memoria;
 
         /// <summary>Semilla determinista por identidad.</summary>
         private int Seed => Math.Max(1, Projectile.identity + 271);
@@ -447,7 +447,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 12;
             Projectile.aiStyle = -1;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
         }
 
         public override void AI()
@@ -463,7 +463,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // La luz del dardo (naranja fuerte — la del original ×1.75).
                 Lighting.AddLight(Projectile.Center, Color.OrangeRed.ToVector3() * 1.75f);
 
-                EcosLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
+                EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
 
                 // === LA MUERTE: tiempo agotado → LA FLOR. ===
                 if (Projectile.timeLeft <= 1)
@@ -548,7 +548,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     // === LA COLA DE FANTASMAS (búfer de VFXCore + su volcado
                     //     propio — no hay lote abierto: lo maneja Flush). ===
-                    EcosLib.ColaHistoria(ref _memoria, 2, 5,
+                    EspectroLib.ColaHistoria(ref _memoria, 2, 5,
                         new Color(255, 216, 150), new Vector2(30f, 12f), 0.5f, 1.2f);
                     VFXCore.FlushAdditive(null, false);
                 }

@@ -11,7 +11,7 @@ using AethonMod.Content.Items.Cosmetics;
 namespace AethonMod.Content.Items.Bolsas
 {
     // ======================================================================
-    //  v6.29 — LAS DIEZ BOLSAS POR CATEGORÍA
+    //  v6.29 — LAS BOLSAS POR CATEGORÍA (v6.50.3 — doc-rot: son DIECISÉIS)
     //
     //  Petición del usuario: "crea varias bolsas para todas las armas que me
     //  tienes que dar no solo una y separalas por categorías, una categoría
@@ -109,7 +109,7 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>4 — LOS AGUJEROS NEGROS: los diez definitivos.</summary>
+    /// <summary>4 — LOS AGUJEROS NEGROS: los once definitivos (doc-rot v6.50.3).</summary>
     public class BolsaAgujerosNegros : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de los Agujeros Negros";

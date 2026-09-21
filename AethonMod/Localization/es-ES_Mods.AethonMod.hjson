@@ -448,6 +448,7 @@
         "Projectiles.AnillosSolaresHalo.DisplayName": "Anillos Solares",
         "Projectiles.SelloGenesisHalo.DisplayName": "Sello del Génesis",
         "Projectiles.AnilloRunicoDorsalHalo.DisplayName": "Anillo Rúnico Dorsal",
+        "Projectiles.AuraPortadorHalo.DisplayName": "Aura del Portador",
 
         "Items.TomoApatiaNula.DisplayName": "El Tomo de la Apatía Nula",
         "Items.TomoApatiaNula.Tooltip": "El tomo que ya no siente nada escupe tentáculos de vacío:\ngestan 2 segundos sin dañar (pulsos que imploden) y luego azotan\nen tres curvas hacia tu mira, teletransportándose entre curva y curva.\nGolpea todo lo que toca (90×90) · cada impacto sucesivo pesa menos.\nARMA DE PRUEBAS (réplica exacta de su fuente de estudio).",
@@ -618,6 +619,7 @@
         "Conditions.TiendaEsencias": "Sobrevive a la oleada 10 de la furia del grimorio",
 
         "Projectiles.AtaqueJefeProjectile.DisplayName": "Diente de guardián",
+        "Projectiles.AtaqueOleadaProjectile.DisplayName": "Diente de oleada",
 
         "Jefe.Resonancia": "¡Has absorbido {1} fragmentos de resonancia de {0}!",
 
@@ -791,6 +793,50 @@
         "Ocaso.Rotulo": "EL OCASO",
 
         "Presencia.Llegada": "El Testigo ha llegado. {0} te observa.",
+
+        "Items.VoidCrownItem.Titulo": "[c/FF1738:═══ CORONA DE LA REINA DEL VACÍO ═══]",
+        "Items.VoidCrownItem.Linea1": "[c/FF66AA:Cinco lazos de neón carmesí→magenta con nudos naranja incandescentes,\narqueados JUSTO DETRÁS de tu cabeza]",
+        "Items.VoidCrownItem.Linea2": "[c/78788C:La corona original del Agujero Negro Carmesí — retirada del proyectil\ny hecha joya. Respira, se balancea y suelta ascuas rosas]",
+        "Items.VoidCrownItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]",
+
+        "Items.RuneCrownItem.Titulo": "[c/FF0055:═══ CORONA RÚNICA ESTELAR ═══]",
+        "Items.RuneCrownItem.Linea1": "[c/FF66AA:Ocho glifos rúnicos de luz fucsia flotando en arco sobre tu cabeza,\ncada uno con su perla rosa pálido en la punta]",
+        "Items.RuneCrownItem.Linea2": "[c/78788C:La lanza, el cáliz, la puerta, la estrella, el rayo, el arco, la espiral\ny el trono — escritura mágica que respira y suelta chispas ascendentes]",
+        "Items.RuneCrownItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]",
+
+        "Items.AnilloRunicoDorsalItem.Titulo": "[c/FFC36B:═══ EL ANILLO RÚNICO DORSAL ═══]",
+        "Items.AnilloRunicoDorsalItem.Linea1": "[c/FFE7B0:El círculo de conjuro del agujero negro cuelga de tu espalda: la triple\ncorona rúnica LITERAL de los vórtices — ocho runas doradas girando con el conjunto]",
+        "Items.AnilloRunicoDorsalItem.Linea2": "[c/CDA8FF:seis runas violetas contrarrotando más afuera y el círculo blanco íntimo latiendo\njunto al anillo de fotones — runas de pie, respirando, con sus perlas]",
+        "Items.AnilloRunicoDorsalItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípalo en cualquier hueco\nde accesorio, funcional o de vanidad]",
+
+        "Items.SelloGenesisItem.Titulo": "[c/FFD54F:═══ EL SELLO DEL GÉNESIS ═══]",
+        "Items.SelloGenesisItem.Linea1": "[c/FFC107:Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,\ny dentro el sello azul-estelar contrarrotando con el glifo del astro]",
+        "Items.SelloGenesisItem.Linea2": "[c/9FA8DA:+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico]",
+        "Items.SelloGenesisItem.Linea3": "[c/78788C:La escritura solar vive en huecos de accesorio o de vanidad.\nFirmada por las librerías de signos mágicos de la casa]",
+
+        "Items.AnillosSolRunicoItem.Titulo": "[c/FFB74D:═══ LOS ANILLOS DEL SOL RÚNICO ═══]",
+        "Items.AnillosSolRunicoItem.Linea1": "[c/FFD180:Siete aros rúnicos orbitan tu cuerpo en planos alternos:\npar horario, impar antihorario, precesando vivos con sus runas a lomos]",
+        "Items.AnillosSolRunicoItem.Linea2": "[c/A7FFEB:+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa]",
+        "Items.AnillosSolRunicoItem.Linea3": "[c/78788C:Cada tercer aro viste el azul-estelar frío de los soles de tier alto.\nEl sistema vive en huecos de accesorio o de vanidad]",
+
+        "Items.AnillosHorizonteItem.Titulo": "[c/FF7043:═══ LOS ANILLOS DEL HORIZONTE DE SUCESOS ═══]",
+        "Items.AnillosHorizonteItem.Linea1": "[c/FFAB91:El disco de acreción te orbita: veinte bandas incandescentes viajando,\nlos fotones corriendo el vórtice y el aro fino del horizonte]",
+        "Items.AnillosHorizonteItem.Linea2": "[c/FF8A65:LA LENTE: el fondo se curva a tu alrededor · LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti]",
+        "Items.AnillosHorizonteItem.Linea3": "[c/80CBC4:+10% de velocidad y +5% de daño universal.\nLos anillos viven en huecos de accesorio o de vanidad]",
+
+        "Items.PrismaDePaisajesItem.Titulo": "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]",
+        "Items.PrismaDePaisajesItem.Linea1": "[c/78788C:El probador de la librería del cielo: despliega paisajes enteros\nsobre el fondo del mundo — capas con parallax, deriva y tintes\n(v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]",
+        "Items.PrismaDePaisajesItem.MensajeApagado": "El prisma se apaga: el cielo vuelve a su dueño.",
+        "Items.PrismaDePaisajesItem.MensajeEscena": "El prisma despliega: {0}.",
+
+        "Items.BolsaCategoria.Titulo": "[c/{0}:{1}]",
+        "Items.BolsaCategoria.Linea1": "[c/E6B0FF:Clic derecho para desplegar esta categoría del arsenal]",
+        "Items.BolsaCategoria.Linea2": "[c/FFD66B:Solo entrega lo que te falte — reábrela cuando pierdas un arma]",
+        "Items.BolsaCategoria.Nota": "[c/78788C:{0}]",
+        "Items.BolsaCategoria.Abierta": "La {0} se abre: {1} objetos nuevos.",
+        "Items.BolsaCategoria.Completa": "La {0} ya está completa contigo.",
+        "Armas.ResonanciaEcos": "La resonancia despierta {0} eco(s).",
+        "Armas.SlotsMinionLlenos": "Slots de minion llenos: {0}/{1}.",
 
         "Diag.Fps": "FPS: {0}",
         "Diag.Factor": "Factor de calidad: {0}",

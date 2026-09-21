@@ -526,8 +526,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
         //  HELPERS
         // ------------------------------------------------------------------
 
-        /// <summary>La tabla de glifos del agujero (3 glifos representativos).</summary>
-        private static Vector2[][] RuneGlyphs => new Vector2[][]
+        /// <summary>La tabla de glifos del agujero (3 glifos representativos). v6.50.3 — FIX (cero GC): era PROPIEDAD —
+        /// el jagged array se alocaba CADA FRAME desde el PreDraw (3 glifos ×
+        /// N proyectiles × 60 fps); ahora static readonly: UNA vez.</summary>
+        private static readonly Vector2[][] RuneGlyphs = new Vector2[][]
         {
             // EL SOL ROTO
             new Vector2[] { new(0f, -7f), new(0f, 7f), new(-3.5f, -3f), new(0f, -6.5f), new(3.5f, -3f), new(0f, -6.5f), new(-3.5f, 3.5f), new(3.5f, 3.5f), new(-2f, 5.5f), new(2f, 5.5f) },

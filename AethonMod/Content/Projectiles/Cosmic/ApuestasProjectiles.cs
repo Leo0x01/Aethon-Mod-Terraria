@@ -418,13 +418,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// PulsoPulsarProjectile — v6.42 — EL PULSO DEL METRÓNOMO.
     ///
     /// El disparo del compás: una astilla de radio blanco-frío con su
-    /// cola de fantasmas (EcosLib — la memoria de la casa). El arma le
+    /// cola de fantasmas (EspectroLib — la memoria de la casa). El arma le
     /// puso el crítico y el abanico EN EL NACIMIENTO según el compás;
     /// aquí solo vuela, brilla y muere con su pequeña onda.
     /// </summary>
     public class PulsoPulsarProjectile : ModProjectile
     {
-        private EcosLib.Memoria _memoria;
+        private EspectroLib.Memoria _memoria;
         private int _edad;
 
         private int Seed => Math.Max(1, Projectile.identity + 613);
@@ -444,7 +444,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.timeLeft = 90;
             Projectile.tileCollide = true;
             Projectile.aiStyle = -1;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
         }
 
         public override void AI()
@@ -452,7 +452,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             _edad++;
             Projectile.rotation = Projectile.velocity.ToRotation();
             Lighting.AddLight(Projectile.Center, new Vector3(0.35f, 0.5f, 0.8f));
-            EcosLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
+            EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
         }
 
         public override void OnKill(int timeLeft)
@@ -479,7 +479,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             try
             {
                 // LA COLA DE FANTASMAS (búfer de VFXCore + volcado).
-                EcosLib.ColaHistoria(ref _memoria, 2, 6,
+                EspectroLib.ColaHistoria(ref _memoria, 2, 6,
                     new Color(120, 190, 255), new Vector2(26f, 10f), 0.55f, 1.5f);
                 VFXCore.FlushAdditive(null, false);
 

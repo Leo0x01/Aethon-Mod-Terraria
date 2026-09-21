@@ -19,7 +19,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// generación: daño ×0,6 (el 60% de la física de decoherencia:
     /// 1−e⁻¹ = la pérdida natural de un T2), visual fantasmal del
     /// frío del vacío (LumenPalettes.VoidCold + el parpadeo de los
-    /// espejos de EcosLib).
+    /// espejos de EspectroLib).
     ///
     /// TRES generaciones (100% → 60% → 36% → 21,6%): 2,176× de daño
     /// total por disparo si toda la cadena encuentra a quién morder.
@@ -41,7 +41,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public const int MaxGeneraciones = 3;
         public const int MaxEcosVivos = 6;
 
-        private EcosLib.Memoria _memoria;
+        private EspectroLib.Memoria _memoria;
         private NPC _presa;
 
         private int Seed => Math.Max(1, Projectile.identity + 1493);
@@ -70,7 +70,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 20;
             Projectile.aiStyle = -1;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
         }
 
         public override void AI()
@@ -85,7 +85,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     ? new Color(0.9f, 0.85f, 0.55f)
                     : new Color(0.45f, 0.75f, 0.9f);
                 Lighting.AddLight(Projectile.Center, luz.ToVector3() * 0.8f);
-                EcosLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
+                EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
 
                 // LA DECOHERENCIA: 180 px volados → la semilla.
                 if (Projectile.ai[2] >= DistanciaDecoherencia)
@@ -170,7 +170,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.ai[2] = 0f;
             Fase = 0f;
             Projectile.netUpdate = true;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
 
             if (Main.netMode != NetmodeID.Server)
                 SoundEngine.PlaySound(SoundID.Item9 with { Volume = 0.3f, Pitch = 0.45f },
@@ -227,7 +227,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Fase != 0f)
                 {
                     // LA SEMILLA: quieta, parpadeando como un espejo que decide.
-                    float parpadeo = EcosLib.TempoEspejos(Main.GlobalTimeWrappedHourly, Seed);
+                    float parpadeo = EspectroLib.TempoEspejos(Main.GlobalTimeWrappedHourly, Seed);
                     VFXCore.Quad(Projectile.Center, tinte * (0.5f * parpadeo),
                         new Vector2(30f, 30f));
                     VFXCore.Quad(Projectile.Center, Color.White * (0.35f * parpadeo),
@@ -236,7 +236,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 else
                 {
-                    EcosLib.ColaHistoria(ref _memoria, 2, 6, tinte,
+                    EspectroLib.ColaHistoria(ref _memoria, 2, 6, tinte,
                         new Vector2(24f, 10f), eco ? 0.5f : 0.6f, 1.4f);
                     VFXCore.FlushAdditive(null, false);
                 }

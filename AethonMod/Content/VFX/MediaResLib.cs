@@ -145,6 +145,13 @@ namespace AethonMod.Content.VFX
         /// VFXCore.Presupuesto).</summary>
         private static uint _frameDelPase;
 
+        /// <summary>v6.50.3 — EL CONTADOR DE ANIDAMIENTO: cuántos Empezar
+        /// anidados (ignorados en silencio) están vivos. Sin él, el Terminar
+        /// del ANIDADO cerraba el pase del EXTERIOR (Terminar no distinguía
+        /// quién abrió) — con el único call-site de hoy no ocurría, pero es
+        /// la trampa latente para el segundo consumidor.</summary>
+        private static int _anidados;
+
         /// <summary>
         /// AUDITORÍA v6.43 (T4) — ¿Tenía el LLAMADOR su lote ABIERTO cuando
         /// Empezar cerró defensivamente? Terminar reabre el lote estándar
@@ -233,7 +240,12 @@ namespace AethonMod.Content.VFX
             if (EnPase)
             {
                 if (_frameDelPase == Main.GameUpdateCount)
-                    return;                 // anidamiento real: se ignora en silencio
+                {
+                    // v6.50.3 — el anidado se ignora y se CUENTA: su Terminar
+                    // solo descuenta — el pase exterior vive hasta SU Terminar.
+                    _anidados++;
+                    return;             // anidamiento real: se ignora en silencio
+                }
                 SanarPaseColgado();         // pase abandonado de un frame anterior
             }
 
@@ -321,6 +333,17 @@ namespace AethonMod.Content.VFX
             if (!EnPase)
                 return;
 
+            // v6.50.3 — FIX (hazard de anidamiento): el Empezar anidado se
+            // ignora, pero este Terminar es el del ANIDADO — solo descuenta
+            // la profundidad y NO toca el pase del exterior (antes lo cerraba
+            // en mitad del dibujado ajeno: composición prematura + bindings
+            // restaurados bajo los pies del dueño del pase).
+            if (_anidados > 0)
+            {
+                _anidados--;
+                return;
+            }
+
             GraphicsDevice gd = null;
             try { gd = Main.graphics?.GraphicsDevice; } catch { }
 
@@ -406,6 +429,7 @@ namespace AethonMod.Content.VFX
                 _bindingsGuardados = null;
                 EnPase = false;
                 _loteDelLlamadorAbierto = false;
+                _anidados = 0;   // v6.50.3 — el cierre real destruye la profundidad
             }
         }
 
@@ -535,6 +559,7 @@ namespace AethonMod.Content.VFX
             _bindingsGuardados = null;
             EnPase = false;
             _loteDelLlamadorAbierto = false;
+            _anidados = 0;   // v6.50.3 — sanar también la profundidad
         }
 
         // ------------------------------------------------------------------
@@ -559,6 +584,7 @@ namespace AethonMod.Content.VFX
             EnPase = false;
             _loteDelLlamadorAbierto = false;
             _pixelado = false;
+            _anidados = 0;   // v6.50.3
 
             RenderTarget2D target = _rt;
             _rt = null;                        // la referencia se anula YA

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Cosmetics
@@ -48,10 +49,10 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FF0055:═══ CORONA RÚNICA ESTELAR ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:Ocho glifos rúnicos de luz fucsia flotando en arco sobre tu cabeza,\ncada uno con su perla rosa pálido en la punta]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:La lanza, el cáliz, la puerta, la estrella, el rayo, el arco, la espiral\ny el trono — escritura mágica que respira y suelta chispas ascendentes]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]"));
+            tooltips.Add(new TooltipLine(Mod, "C", Language.GetTextValue("Mods.AethonMod.Items.RuneCrownItem.Titulo")));
+            tooltips.Add(new TooltipLine(Mod, "D", Language.GetTextValue("Mods.AethonMod.Items.RuneCrownItem.Linea1")));
+            tooltips.Add(new TooltipLine(Mod, "D2", Language.GetTextValue("Mods.AethonMod.Items.RuneCrownItem.Linea2")));
+            tooltips.Add(new TooltipLine(Mod, "D3", Language.GetTextValue("Mods.AethonMod.Items.RuneCrownItem.Linea3")));
         }
 
         public override void AddRecipes()

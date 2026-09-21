@@ -172,10 +172,6 @@ namespace AethonMod.Content.VFX
             float a = _flashStrength * vida * vida;
             if (a <= 0.005f) return;
 
-            // EL VELO RADIAL: SoftGlow a pantalla completa — centro
-            // brillante, caída suave a las esquinas (el destello clásico
-            // "center-weighted", no una placa plana). Con el lote de la
-            // interfaz TAL CUAL (velo alfa, cero manipulación de estado).
             var c = new Color(
                 (byte)(int)(_flashColor.R * a),
                 (byte)(int)(_flashColor.G * a),
@@ -185,7 +181,35 @@ namespace AethonMod.Content.VFX
             var destino = new Rectangle(
                 -Main.screenWidth / 6, -Main.screenHeight / 6,
                 Main.screenWidth * 4 / 3, Main.screenHeight * 4 / 3);
-            spriteBatch.Draw(tex, destino, c);
+
+            // v6.50.3 — FIX (guard de lote + anclaje exacto): el velo se
+            // dibujaba "TAL CUAL" en el lote de UI: si otro mod dejaba el
+            // lote CERRADO, InvalidOperationException SIN capturar; y el
+            // rect en píxeles bajo Main.UIScaleMatrix quedaba desalineado
+            // con UI-scale ≠ 100%. El patrón de la casa (PantallaLib):
+            // cerrar, dibujar en Identity (pantalla EXACTA) y reabrir el
+            // lote de interfaz con SU matriz — todo en try/catch/finally
+            // (la lección v6.41: nunca dejar el lote abierto).
+            try
+            {
+                try { Main.spriteBatch.End(); } catch { }
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    RasterizerState.CullCounterClockwise, null, Matrix.Identity);
+                Main.spriteBatch.Draw(tex, destino, c);
+            }
+            catch { }
+            finally
+            {
+                try
+                {
+                    Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                        SamplerState.LinearClamp, DepthStencilState.None,
+                        RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+                }
+                catch { }
+            }
         }
 
         // ==================================================================

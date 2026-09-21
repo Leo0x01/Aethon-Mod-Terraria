@@ -13,9 +13,11 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// ARMA DE PRUEBAS (la petición del usuario): la réplica exacta del
     /// arma original cuyo proyectil se copió en TentaculoCosmicoProjectile
-    /// — hasta los NÚMEROS son los del original (daño 63, maná 26,
+    /// — hasta los NÚMEROS son los del original (daño 63,
     /// useTime 8 / useAnimation 20 / reuseDelay 8, knockback 5.5, rareza
     /// Roja) y el disparo con la dispersión ±0.7 rad del Shoot original.
+    /// (v6.50.3 — doc honesta: el "maná 26" era del ORIGINAL; la réplica
+    /// es maná 0 desde v6.42 — la regla del arsenal de pruebas.)
     ///
     /// La apatía nula: el tomo que ya no siente nada — escupe tentáculos
     /// de vacío que no hacen daño durante SU GESTACIÓN (2 segundos de

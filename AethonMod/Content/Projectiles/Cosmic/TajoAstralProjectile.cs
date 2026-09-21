@@ -18,7 +18,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// decidieron esperar.
     ///
     /// LAS TRES FASES (los tiempos medidos de la investigación):
-    ///   1. EL DESEMBAINO (ticks 0..6): el proyectil VUEA al punto marcado
+    ///   1. EL DESEMBAINO (ticks 0..6): el proyectil VUELA al punto marcado
     ///      — un hilo de anticipación tenue (la katana saliendo, sin
     ///      ruido). Llega al destino en el tick 6.
     ///   2. EL MARCAJE (ticks 6..16): el punto de destino SUSURRA — una

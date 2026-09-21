@@ -148,10 +148,22 @@ namespace AethonMod.Content.Globals
                     // lee la crónica en el CLIENTE; EcoRed.MsgCronica lleva
                     // la marca al portador YA (tienda de esencias y páginas
                     // del cronista funcionan en MP desde ahora).
-                    if (npc.boss)
+                    // v6.50.3 — FIX (crónica fantasma de segmentos): la marca
+                    // usa las MISMAS reglas que la voz (EcoSistema.EsDerrotaCompleta).
+                    // Los curados de verdad (verificado al IL de este tML): el
+                    // SEÑOR DE LA LUNA (cabeza 396 y manos 397 son boss=true y
+                    // mueren como fases ANTES del núcleo: 3 páginas + 3 paquetes
+                    // por derrota) y LOS GEMELOS (dos tipos con boss=true y una
+                    // sola derrota: 2 páginas). (El Devorador, el ojo del Muro y
+                    // las cabezas de Golem tienen boss=FALSE en vanilla — la
+                    // nota v6.50.3 original exageraba; el guard los cubre igual
+                    // por si un mod externo los marca.) Ahora: solo derrota
+                    // completa, y el paquete SOLO si la página es nueva
+                    // (CronicaMarcar devuelve si añadió).
+                    if (npc.boss && EcoSistema.EsDerrotaCompleta(npc))
                     {
-                        player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type);
-                        EcoRed.SincronizarCronica(player);
+                        if (player.GetModPlayer<Players.ShardPlayer>()?.CronicaMarcar(npc.type) == true)
+                            EcoRed.SincronizarCronica(player);
                     }
 
                     bool cobro = false;

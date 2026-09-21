@@ -29,7 +29,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// espaciotiempo a su paso (fuente sutil del pase B del
     /// BlackHoleLensSystem: donde nada, el fondo se dobla un poco).
     ///
-    /// ATQUE — los NEMATOCISTOS: cuando la campana se contrae cerca de una
+    /// ATAQUE — los NEMATOCISTOS: cuando la campana se contrae cerca de una
     /// víctima, DESCARGA UN RAYO QUE CAE DEL CIELO (NebulaLightning) con
     /// QUEMADURA DE HIELO (Frostburn — la quemadura fría del vacío) + el
     /// contacto de la campana daña. Al desvanecer: se disuelve en polvo de

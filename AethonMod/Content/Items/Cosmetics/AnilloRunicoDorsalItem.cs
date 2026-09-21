@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Cosmetics
@@ -56,13 +57,13 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FFC36B:═══ EL ANILLO RÚNICO DORSAL ═══]"));
+            tooltips.Add(new TooltipLine(Mod, "C", Language.GetTextValue("Mods.AethonMod.Items.AnilloRunicoDorsalItem.Titulo")));
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/FFE7B0:El círculo de conjuro del agujero negro cuelga de tu espalda: la triple\ncorona rúnica LITERAL de los vórtices — ocho runas doradas girando con el conjunto]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnilloRunicoDorsalItem.Linea1")));
             tooltips.Add(new TooltipLine(Mod, "D2",
-                "[c/CDA8FF:seis runas violetas contrarrotando más afuera y el círculo blanco íntimo latiendo\njunto al anillo de fotones — runas de pie, respirando, con sus perlas]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnilloRunicoDorsalItem.Linea2")));
             tooltips.Add(new TooltipLine(Mod, "D3",
-                "[c/78788C:Puro cosmético: cero estadísticas. Equípalo en cualquier hueco\nde accesorio, funcional o de vanidad]"));
+                Language.GetTextValue("Mods.AethonMod.Items.AnilloRunicoDorsalItem.Linea3")));
         }
 
         public override void AddRecipes()

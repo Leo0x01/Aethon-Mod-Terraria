@@ -20,9 +20,11 @@ namespace AethonMod.Content
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
 
-        [DefaultValue(0)]
-        [Range(0, 500)]
-        public int MaxShardLevel = 0;
+        // v6.50.3 — FIX (config muerta): MaxShardLevel VIVÍA aquí desde
+        // siempre y NADIE lo leía (opción fantasma en el menú). Se muda a
+        // AethonConfigServidor — es una decisión de la AUTORIDAD (el nivel
+        // lo cuenta el server en MP; el mismo diagnóstico del split
+        // v6.50.2) y ahora SÍ se aplica en ShardLevelItem.GrantXP.
 
         [DefaultValue(true)]
         public bool ShowLevelUpNotifications = true;
@@ -30,6 +32,10 @@ namespace AethonMod.Content
         [DefaultValue(true)]
         public bool ShowMilestoneNotifications = true;
 
+        // v6.50.3 — FIX (config muerta): ShowDebugInfo tampoco la leía nadie.
+        // AHORA: true = el overlay F8 de diagnóstico arranca ABIERTO al entrar
+        // al mundo (la herramienta del probador a la vista); F8 lo alterna
+        // como siempre. Se lee en DiagnosticoVFXSystem.OnWorldLoad.
         [DefaultValue(false)]
         public bool ShowDebugInfo = false;
 

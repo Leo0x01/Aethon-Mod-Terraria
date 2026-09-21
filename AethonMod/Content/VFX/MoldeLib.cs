@@ -491,9 +491,13 @@ namespace AethonMod.Content.VFX
                     {
                         try
                         {
+                            // v6.50.3 — FIX (patrón v6.50.2): el restore del pase
+                            // de ENTIDADES con LinearClamp+CullNone dejaba el resto
+                            // del pase muestreando BILINEAL — pixel-art borroso tras
+                            // el pase alpha. Sampler/rasterizer del pase de entidades.
                             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                                null, Main.GameViewMatrix.TransformationMatrix);
+                                Main.DefaultSamplerState, DepthStencilState.None,
+                                Main.Rasterizer, null, Main.Transform);
                         }
                         catch { }
                     }

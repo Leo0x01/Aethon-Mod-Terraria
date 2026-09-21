@@ -42,15 +42,19 @@ namespace AethonMod.Content.VFX
     /// ("líneas intermitentes de un color más oscuro o claro, brillo y
     /// desenfoque CORTADO POR SECCIONES"):
     ///
-    ///   RAÍZ 1 — EL ALFA ES INVISIBLE EN EL LOTE ADITIVO. BlendState.Additive
-    ///   de XNA/FNA es (Src=One, Dst=One): aporte.rgb = textura.rgb ×
-    ///   tinte.rgb — el canal alfa de AMBOS no entra NUNCA en la ecuación.
-    ///   Las texturas Bolt* v6.21 llevaban el filamento SOLO en el alfa
-    ///   (RGB=blanco) y StormLib.Tint ponía la intensidad SOLO en el alfa
-    ///   del tinte → en el juego los rayos dibujaban RECTÁNGULOS SÓLIDOS a
-    ///   brillo máximo (la convención correcta — perfil horneado en RGB —
-    ///   existe en la casa desde v5.x: SoftGlow, GlowOrb…). v6.39 regenera
-    ///   las texturas premultiplicadas y hace Tint premultiplicado.
+    ///   RAÍZ 1 — EL PERFIL VIVE EN EL RGB. La teoría v6.39 decía que
+    ///   BlendState.Additive de XNA/FNA era (Src=One, Dst=One) y que el
+    ///   alfa "no entraba nunca" — v6.50.3 lo SONDEÓ contra el FNA.dll
+    ///   real del tML 2026.07.3.0: Additive es (SourceAlpha, One) — el
+    ///   alfa GATEA el aporte de verdad. Las texturas Bolt* v6.21 llevaban
+    ///   el filamento SOLO en el alfa (RGB=blanco) → contribution =
+    ///   blanco·alfa — el filamento SÍ se veía, pero sin color propio y a
+    ///   brillo plano; la convención de la casa (perfil horneado en RGB,
+    ///   SoftGlow, GlowOrb… desde v5.x) es la correcta y v6.39 la aplicó.
+    ///   v6.50.3 corrige la MITAD que quedaba: el Tint premultiplicado
+    ///   (RGB·f + alfa·f) atenuaba DOS VECES bajo (SourceAlpha, One) →
+    ///   intensidad real f² (el halo 0.30 salía a 0.09). Ahora RGB intacto
+    ///   + alfa=f: LINEAL, el mismo patrón verificado de TajoLib (v6.40).
     ///
     ///   RAÍZ 2 — EL RIBBON SE CORTABA. Cada sub-segmento solapaba al vecino
     ///   `subLen + w*2` → el aditivo APILABA el brillo en cada junta (las
@@ -76,8 +80,9 @@ namespace AethonMod.Content.VFX
     ///   1. TEXTURAS DE FILAMENTO — v6.39: BoltHalo y BoltCore son BANDAS
     ///      UNIFORMES a lo largo (solo 3 px de fundido antialias en los
     ///      extremos) con el perfil PREMULTIPLICADO en RGB (la convención
-    ///      SoftGlow de la casa — el lote aditivo PASA del alfa). La
-    ///      nitidez de un rayo vive en la GEOMETRÍA multi-escala y en el
+    ///      SoftGlow de la casa — v6.50.3: el RGB es lo que el lote aditivo
+    ///      PESA; el alfa del TINT es el que lo gatea — sonda FNA real).
+    ///      La nitidez de un rayo vive en la GEOMETRÍA multi-escala y en el
     ///      crackle por punto, NUNCA en ruido horneado a lo largo de la
     ///      textura (eso era el "cortado por secciones").
     ///
@@ -108,9 +113,9 @@ namespace AethonMod.Content.VFX
     ///
     /// CONTRATO (el de siempre, heredado de la primera generación): los
     /// métodos de DIBUJO reciben el batch ABIERTO en modo aditivo y no lo
-    /// tocan — se pueden aninar dentro de un renderer mayor. Coordenadas
-    /// tal cual lleguen. (Por eso el Tint premultiplicado: TODO lo que
-    /// dibuja esta librería vive en el lote aditivo.)
+    /// tocan — se pueden ANIDAR dentro de un renderer mayor. Coordenadas
+    /// tal cual lleguen. (Por eso el Tint LINEAL: TODO lo que dibuja esta
+    /// librería vive en el lote aditivo, y su alfa gatea el aporte.)
     /// </summary>
     public static class StormLib
     {
@@ -1076,9 +1081,11 @@ namespace AethonMod.Content.VFX
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
     }
 }

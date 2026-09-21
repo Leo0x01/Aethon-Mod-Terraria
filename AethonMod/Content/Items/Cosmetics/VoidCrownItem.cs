@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Cosmetics
@@ -46,10 +47,10 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            tooltips.Add(new TooltipLine(Mod, "C", "[c/FF1738:═══ CORONA DE LA REINA DEL VACÍO ═══]"));
-            tooltips.Add(new TooltipLine(Mod, "D", "[c/FF66AA:Cinco lazos de neón carmesí→magenta con nudos naranja incandescentes,\narqueados JUSTO DETRÁS de tu cabeza]"));
-            tooltips.Add(new TooltipLine(Mod, "D2", "[c/78788C:La corona original del Agujero Negro Carmesí — retirada del proyectil\ny hecha joya. Respira, se balancea y suelta ascuas rosas]"));
-            tooltips.Add(new TooltipLine(Mod, "D3", "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]"));
+            tooltips.Add(new TooltipLine(Mod, "C", Language.GetTextValue("Mods.AethonMod.Items.VoidCrownItem.Titulo")));
+            tooltips.Add(new TooltipLine(Mod, "D", Language.GetTextValue("Mods.AethonMod.Items.VoidCrownItem.Linea1")));
+            tooltips.Add(new TooltipLine(Mod, "D2", Language.GetTextValue("Mods.AethonMod.Items.VoidCrownItem.Linea2")));
+            tooltips.Add(new TooltipLine(Mod, "D3", Language.GetTextValue("Mods.AethonMod.Items.VoidCrownItem.Linea3")));
         }
 
         public override void AddRecipes()

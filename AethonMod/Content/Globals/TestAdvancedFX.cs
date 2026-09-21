@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Globals
 {
@@ -105,6 +106,14 @@ namespace AethonMod.Content.Globals
         }
 
         // === HELPER: dibuja textura con additive blending ===
+        // v6.50.3 — FIX (el único archivo legacy que quedó FUERA de la
+        // migración v6.10 del contrato de lote): cerraba el lote del pase de
+        // proyectiles y lo reabría con Begin de 2 ARGUMENTOS (sin matriz: con
+        // zoom≠100% el FX se dibujaba desplazado) y el restore pelado en
+        // Identity dejaba TODO lo posterior del pase (el sprite original del
+        // 931 incluido) sin zoom. Ahora: additive con el estado del pase de
+        // entidades + Main.Transform, y restore con el patrón v6.50.2
+        // (AuraLib.ReabrirLoteVanilla — sampler/rasterizer medidos en el IL).
         private void DrawTex(string path, Vector2 worldPos, float scale, Color color, float rotation)
         {
             try
@@ -114,10 +123,12 @@ namespace AethonMod.Content.Globals
                 Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
                 Vector2 drawPos = worldPos - Main.screenPosition;
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
                 Main.spriteBatch.Draw(tex, drawPos, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                AuraLib.ReabrirLoteVanilla();
             }
             catch { }
         }

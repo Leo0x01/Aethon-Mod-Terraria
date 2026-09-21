@@ -114,19 +114,33 @@ namespace AethonMod.Content.Projectiles.V20
 
         public override bool PreDraw(ref Color lightColor)
         {
+            Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            Texture2D beamCyan = ModContent.Request<Texture2D>("AethonMod/Content/Effects/BeamCyan").Value;
+            if (softGlow == null || beamCyan == null) return false;
+
+            // v6.50.3 — BLINDAJE (hallazgo V-1): el End+restore vivía DENTRO del
+            // try con catch vacío — una excepción a mitad de draw dejaba el lote
+            // aditivo ABIERTO el resto del pase del frame. El restore ahora
+            // vive en finally (como los hermanos PhoenixNova/Supernova).
             try
             {
-                Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                Texture2D beamCyan = ModContent.Request<Texture2D>("AethonMod/Content/Effects/BeamCyan").Value;
-                if (softGlow == null || beamCyan == null) return false;
-
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 Vector2 glowOrigin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
                 float t = Projectile.ai[0];
                 float pulse = 0.7f + 0.3f * (float)Math.Sin(t * 0.25f);
 
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                // v6.50.3 — FIX (contrato de lote de la casa — el único archivo
+                // V20 que lo incumplía): 2 args = SIN matriz (con zoom≠100%
+                // el orbe se dibujaba desplazado) y SIN sampler/rasterizer;
+                // el restore en Identity + AlphaBlend pelado dejaba el RESTO
+                // del pase de proyectiles del frame dibujándose sin zoom.
+                // Ahora: additive con el sampler/rasterizer del pase de
+                // entidades + Main.Transform, y el RESTORE con el patrón
+                // exacto de v6.50.2 (AuraLib.ReabrirLoteVanilla, medido en IL).
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
 
                 // === Plasma orb (purple-magenta pulsing) ===
                 // Outer magenta halo
@@ -168,11 +182,13 @@ namespace AethonMod.Content.Projectiles.V20
                         new Vector2(beamScale, 1.0f + (float)Math.Sin(t * 0.5f) * 0.3f),
                         SpriteEffects.None, 0f);
                 }
-
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
             catch { }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+                try { AuraLib.ReabrirLoteVanilla(); } catch { } // restore del pase de entidades (v6.50.2)
+            }
             return false;
         }
     }

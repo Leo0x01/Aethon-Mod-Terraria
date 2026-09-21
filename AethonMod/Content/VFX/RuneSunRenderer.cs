@@ -128,6 +128,13 @@ namespace AethonMod.Content.VFX
 
         private static Asset<Texture2D> _glow;
         private static Asset<Texture2D> _ring;
+        // v6.50.3 — FIX (4 lookups de asset por estrella por frame): el mismo
+        // cache de la casa (el barrendero de Unload barre estas anclas por
+        // reflexión — v6.49).
+        private static Asset<Texture2D> _bloom;
+        private static Asset<Texture2D> _wavy;
+        private static Asset<Texture2D> _psy;
+        private static Asset<Texture2D> _dend;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
@@ -1202,8 +1209,8 @@ namespace AethonMod.Content.VFX
                 // === 1. BACKGLOW (pase ALFA — el resplandor profundo): las
                 //     proporciones EXACTAS del sol (0.95 y 1.61 × R/BodyPx). ===
                 BeginAlpha();
-                Texture2D bloom = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+                Texture2D bloom = (_bloom ??= ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/BloomCircleSmall")).Value;
                 float bScale = R / BodyPx;
                 Color glowHot = backHot; glowHot.A = 0;
                 Main.spriteBatch.Draw(bloom, drawPos, null, glowHot * (0.7f * alphaMul), 0f,
@@ -1215,8 +1222,8 @@ namespace AethonMod.Content.VFX
 
                 // === 2. AURA (RadialShineShader — el ruido de energía):
                 //     la proporción del sol, 2.72 × el ANCHO (2R) del cuerpo. ===
-                Texture2D wavyBlotch = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+                Texture2D wavyBlotch = (_wavy ??= ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise")).Value;
                 if (_shineShader != null && _shineShader.Value != null)
                 {
                     Effect shine = _shineShader.Value;
@@ -1237,10 +1244,10 @@ namespace AethonMod.Content.VFX
                 if (_sunShader != null && _sunShader.Value != null)
                 {
                     Effect shader = _sunShader.Value;
-                    Texture2D psychedelic = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
-                    Texture2D dendritic = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+                    Texture2D psychedelic = (_psy ??= ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap")).Value;
+                    Texture2D dendritic = (_dend ??= ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut")).Value;
 
                     shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                     shader.Parameters["mainColor"].SetValue(mainColor.ToVector3());

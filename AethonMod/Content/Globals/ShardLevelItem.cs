@@ -59,6 +59,18 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
+        /// v6.50.3 — El tope de nivel de la config del SERVER (0 = sin
+        /// tope). Se lee directo en cada GrantXP: es un diccionario vivo de
+        /// tML (sin caching manual — la config puede cambiar en caliente).
+        /// DEFENSIVO: sin config (carga temprana) = 0.
+        /// </summary>
+        private static int NivelTope()
+        {
+            try { return ModContent.GetInstance<AethonConfigServidor>()?.MaxShardLevel ?? 0; }
+            catch { return 0; }
+        }
+
+        /// <summary>
         /// XP necesaria para subir al próximo nivel.
         /// v6.45: coste inicial 100 y sube desde ahí — 100 * nivel^1.5.
         /// Nivel 1→2: 100 XP. Nivel 10→11: ~3.162 XP. Nivel 20→21: ~8.944 XP.
@@ -82,6 +94,19 @@ namespace AethonMod.Content.Globals
                 // Solo sube de nivel si es un arma (no el FragmentoGenesis base).
                 if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
 
+                // v6.50.3 — MAXSHARDLEVEL CONECTADO (la config fantasma por
+                // fin respira): la opción existía desde el inicio y nadie la
+                // leía. 0 = sin tope (el default de siempre).
+                int tope = NivelTope();
+                if (tope > 0 && Level >= tope)
+                {
+                    // Tope alcanzado: la XP se SATURA en el umbral del
+                    // siguiente nivel (el tooltip no promete lo que no hay).
+                    int umbral = XPForNextLevel();
+                    if (XP >= umbral) XP = System.Math.Max(0, umbral - 1);
+                    return;
+                }
+
                 XP += amount;
                 int nivelesGanados = 0;
                 bool cruzoHito = false;
@@ -92,6 +117,16 @@ namespace AethonMod.Content.Globals
                     Level++;
                     nivelesGanados++;
                     if (Level % 50 == 0) { cruzoHito = true; nivelHito = Level; }
+                    // v6.50.3 — el tope también corta DENTRO de una subida
+                    // múltiple (un jefe a nivel bajo saltaba 15 niveles de
+                    // golpe: el tope frena la escalera en el peldaño justo) y
+                    // SATURA la XP en el umbral (mismo criterio que el
+                    // early-return: la barra se pinta llena pero no engaña).
+                    if (tope > 0 && Level >= tope)
+                    {
+                        XP = System.Math.Max(0, XPForNextLevel() - 1);
+                        break;
+                    }
                 }
 
                 // v6.46: una sola derrota de jefe a nivel bajo salta 10–15
@@ -266,6 +301,12 @@ namespace AethonMod.Content.Globals
         /// (la vía directa de las esencias de los jefes de oleada — no
         /// pasa por la XP: el alma ES el nivel). Anuncia como una subida
         /// normal (condensada, con hitos y config respetadas).
+        /// v6.50.3 — FIX (hallazgo V-4: el BYPASS del tope): la esencia no
+        /// consultaba MaxShardLevel — con el libro en el tope, un alma lo
+        /// saltaba por encima (server-side, difundido por MsgLibro). El
+        /// tope de la config ahora TAMBIÉN manda aquí (al tope: la esencia
+        /// no hace nada — el alma no se desperdicia silenciosamente: el
+        /// announce cuenta solo lo subido DE VERDAD).
         /// </summary>
         public void SubirNivelDirecto(Item item, int niveles = 1)
         {
@@ -273,6 +314,13 @@ namespace AethonMod.Content.Globals
             {
                 if (niveles <= 0) return;
                 if (item.type == ModContent.ItemType<Items.GenesisShard>()) return;
+
+                int tope = NivelTope();
+                if (tope > 0 && Level >= tope) return; // ya EN el tope: nada que subir
+                if (tope > 0 && Level + niveles > tope)
+                    niveles = tope - Level;            // el tope corta la escalera
+                if (niveles <= 0) return;
+
                 Level += niveles;
                 bool cruzoHito = false;
                 int nivelHito = 0;

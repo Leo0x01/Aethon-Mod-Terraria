@@ -23,8 +23,9 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// al núcleo, CÍRCULO DE RUNAS doradas ENORME CON HUECOS y brasas
     /// con estelas. 100% CÓDIGO.
     ///
-    /// Hermano del BlackHoleStaff, Crimson, Fusión, Olvido y Cósmico —
-    /// todos quedan INTACTOS.
+    /// Hermano del BlackHoleStaff, Olvido y Cósmico (v6.50.3 — doc
+    /// podrida retirada: "Crimson" y "Fusión" no existen en el código
+    /// actual — solo en el CHANGES.md histórico).
     /// </summary>
     public class UmbralBlackHoleStaff : ModItem
     {

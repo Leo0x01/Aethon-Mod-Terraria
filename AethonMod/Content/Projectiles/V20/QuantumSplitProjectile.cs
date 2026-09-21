@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.V20
 {
@@ -52,7 +53,14 @@ namespace AethonMod.Content.Projectiles.V20
         {
             try
             {
-                Projectile.ai[0] += 0f; // no usamos ai[0] como contador, solo como flag
+                // v6.50.3 — FIX (estela que nunca existió): TrailingMode=0 es
+                // MANUAL y la IA jamás escribía oldPos — el bucle de la estela
+                // del PreDraw era letra muerta (TrailCacheLength=10 vacío
+                // para siempre). Patrón vanilla: desplazar y anclar.
+                for (int i = ProjectileID.Sets.TrailCacheLength[Type] - 1; i > 0; i--)
+                    Projectile.oldPos[i] = Projectile.oldPos[i - 1];
+                Projectile.oldPos[0] = Projectile.position;
+
                 Projectile.rotation += 0.15f;
 
                 // === Split: si ai[0]==0 y timeLeft < 90 → split ===
@@ -203,11 +211,15 @@ namespace AethonMod.Content.Projectiles.V20
 
         public override bool PreDraw(ref Color lightColor)
         {
+            Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+            if (softGlow == null) return false;
+
+            // v6.50.3 — BLINDAJE (hallazgo V-1): el End+restore vivía DENTRO del
+            // try con catch vacío — una excepción a mitad de draw dejaba el lote
+            // aditivo ABIERTO el resto del pase del frame. El restore ahora
+            // vive en finally (como los hermanos PhoenixNova/Supernova).
             try
             {
-                Texture2D softGlow = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                if (softGlow == null) return false;
-
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
                 Vector2 origin = new Vector2(softGlow.Width / 2f, softGlow.Height / 2f);
                 float t = Main.GameUpdateCount;
@@ -215,7 +227,16 @@ namespace AethonMod.Content.Projectiles.V20
                 Color baseColor = RainbowColor(t);
 
                 Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+                // v6.50.3 — FIX (contrato de lote de la casa — el único archivo
+                // V20 que lo incumplía junto a PlasmaStorm): 2 args = SIN
+                // matriz (con zoom≠100% el dibujo salía desplazado) y SIN
+                // sampler/rasterizer; el restore en Identity + AlphaBlend
+                // pelado rompía el RESTO del pase de proyectiles del frame.
+                // Ahora: additive con el estado del pase de entidades +
+                // Main.Transform, y el RESTORE con el patrón exacto v6.50.2.
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.Transform);
 
                 // === TRAIL con oldPos ===
                 int trailLen = ProjectileID.Sets.TrailCacheLength[Type];
@@ -247,11 +268,13 @@ namespace AethonMod.Content.Projectiles.V20
                 Main.spriteBatch.Draw(softGlow, drawPos, null,
                     new Color(255, 255, 255, 220),
                     0f, origin, 0.4f, SpriteEffects.None, 0f);
-
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             }
             catch { }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+                try { AuraLib.ReabrirLoteVanilla(); } catch { } // restore del pase de entidades (v6.50.2)
+            }
             return false;
         }
     }

@@ -968,13 +968,17 @@ namespace AethonMod.Content.VFX
         /// <summary>Hash determinista [0,1) (VFXCore, sin estado).</summary>
         private static float H01(int seed, int a, int b) => VFXCore.Hash01(seed, a, b);
 
-        /// <summary>Tinte de INTENSIDAD LINEAL premultiplicado (el de la casa v6.25).</summary>
+        /// <summary>Tinte de intensidad LINEAL de verdad (v6.50.3 — el Additive de
+        /// FNA es (SourceAlpha, One): el alfa GATEA; RGB intacto, alfa=f; el
+        /// premultiplicado v6.25 atenuaba ×f²).</summary>
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
 
         /// <summary>Aplica el tinte de canal del eco (null = tal cual).</summary>

@@ -235,9 +235,12 @@ namespace AethonMod.Content.VFX
                 try { Main.spriteBatch.End(); }
                 catch { /* el End de rescate nunca puede tirar */ }
                 if (habiaLote)
+                    // v6.50.3 — FIX (patrón v6.50.2): restore del pase de entidades
+                    // con el sampler/rasterizer del pase (LinearClamp dejaba el resto
+                    // del pase muestreando bilineal — sprites borrosos).
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
+                        Main.DefaultSamplerState, DepthStencilState.None,
+                        Main.Rasterizer, null, Main.Transform);
             }
         }
 

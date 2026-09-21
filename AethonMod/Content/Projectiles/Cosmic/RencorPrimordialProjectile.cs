@@ -768,8 +768,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Capsule(mid, len, ancho, rot, Tint(SombraBrazo, 0.88f * alpha));
         }
 
-        /// <summary>Los glifos del círculo del rencor.</summary>
-        private static Vector2[][] GlifosRencor => new Vector2[][]
+        /// <summary>Los glifos del círculo del rencor. v6.50.3 — FIX (cero GC): era PROPIEDAD —
+        /// el jagged array se alocaba CADA FRAME desde el PreDraw (3 glifos ×
+        /// N proyectiles × 60 fps); ahora static readonly: UNA vez.</summary>
+        private static readonly Vector2[][] GlifosRencor = new Vector2[][]
         {
             // EL COLMILLO
             new Vector2[] { new(-3.5f, 6f), new(0f, -6.5f), new(0f, -6.5f), new(3.5f, 6f), new(-2f, 2f), new(2f, 2f) },

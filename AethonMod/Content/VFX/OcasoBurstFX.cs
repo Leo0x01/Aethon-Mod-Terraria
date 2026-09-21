@@ -62,31 +62,39 @@ namespace AethonMod.Content.VFX
 
         /// <summary>El dibujo por FRAME con el lote de la interfaz TAL CUAL
         /// (lo llama OcasoSystem en PostDrawInterface; RiftLib.Tear dibuja
-        /// quads de paleta que componen igual en alfa que en aditivo).</summary>
+        /// quads de paleta que componen igual en alfa que en aditivo).
+        /// v6.50.3 — blindado con try/catch (el lote de UI puede venir
+        /// CERRADO si otro mod lo dejó así) y el anclaje documentado: coords
+        /// de MUNDO restadas a secas (aproximado con zoom ≠ 100%, el mismo
+        /// anclaje deliberado de Pantalla.OndaExpansiva).</summary>
         internal static void Dibujar(SpriteBatch batch)
         {
             if (_vivos.Count == 0) return;
             float time = Main.GlobalTimeWrappedHourly;
 
-            for (int i = 0; i < _vivos.Count; i++)
+            try
             {
-                Desgarro d = _vivos[i];
-                float t = d.Age / (float)Vida;
+                for (int i = 0; i < _vivos.Count; i++)
+                {
+                    Desgarro d = _vivos[i];
+                    float t = d.Age / (float)Vida;
 
-                // LA APERTURA y el CIERRE de la herida (el arco de la casa:
-                // abre rápido, respira, cierra — nunca en seco).
-                float progress;
-                if (t < 0.15f) progress = t / 0.15f * 0.5f;          // abre
-                else if (t < 0.75f) progress = 0.5f + (t - 0.15f) / 0.6f * 0.5f; // respira llena
-                else progress = 1f;                                    // cierre
+                    // LA APERTURA y el CIERRE de la herida (el arco de la casa:
+                    // abre rápido, respira, cierra — nunca en seco).
+                    float progress;
+                    if (t < 0.15f) progress = t / 0.15f * 0.5f;          // abre
+                    else if (t < 0.75f) progress = 0.5f + (t - 0.15f) / 0.6f * 0.5f; // respira llena
+                    else progress = 1f;                                    // cierre
 
-                // La intensidad MUERE con la herida.
-                float intensidad = 0.8f * (1f - t * t);
+                    // La intensidad MUERE con la herida.
+                    float intensidad = 0.8f * (1f - t * t);
 
-                RiftLib.Tear(batch, d.Pos - Main.screenPosition, d.Dir,
-                    150f, progress, 22f, RiftPaletas.Carmesi,
-                    intensidad, d.Seed, time + i * 0.7f);
+                    RiftLib.Tear(batch, d.Pos - Main.screenPosition, d.Dir,
+                        150f, progress, 22f, RiftPaletas.Carmesi,
+                        intensidad, d.Seed, time + i * 0.7f);
+                }
             }
+            catch { }
         }
 
         /// <summary>Vaciado en las descargas (recargas limpias).</summary>

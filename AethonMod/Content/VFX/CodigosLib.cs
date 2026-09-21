@@ -67,7 +67,8 @@ namespace AethonMod.Content.VFX
         /// <summary>Buffer de conversión mundo→pantalla (cero GC).</summary>
         private static readonly Vector2[] _scr = new Vector2[32];
 
-        /// <summary>Tinte premultiplicado de la casa (RGB·f, alfa 255·f).</summary>
+        /// <summary>Tinte de intensidad LINEAL de la casa (delega en OrbitaLib.Tint:
+        /// RGB intacto, alfa=f — v6.50.3, el Additive de FNA es (SourceAlpha, One)).</summary>
         private static Color Tint(Color c, float f) => OrbitaLib.Tint(c, f);
 
         // ==================================================================

@@ -37,6 +37,22 @@ namespace AethonMod.Content.Systems
         private static bool _abierto;
         private static bool _teclaAntes;
 
+        /// <summary>
+        /// v6.50.3 — SHOWDEBUGINFO CONECTADO (la config fantasma): la opción
+        /// existía desde el inicio y nadie la leía. true = el panel arranca
+        /// ABIERTO al entrar al mundo (la herramienta del probador a la
+        /// vista sin tocar F8); F8 lo alterna como siempre. En MP es una
+        /// decisión de PANTALLA — la config ClientSide de cada jugador.
+        /// </summary>
+        public override void OnWorldLoad()
+        {
+            try { _abierto = ModContent.GetInstance<global::AethonMod.Content.AethonConfig>()?.ShowDebugInfo ?? false; }
+            catch { _abierto = false; }
+        }
+
+        /// <summary>Al descargar el mundo: el panel muere con él.</summary>
+        public override void OnWorldUnload() => _abierto = false;
+
         // EL CACHE (4 Hz — cero GC entre refrescos).
         // v6.50.2 — _tickRefresco jubilado: el flanco del % 15u manda.
         private static readonly string[] _lineas = new string[8];

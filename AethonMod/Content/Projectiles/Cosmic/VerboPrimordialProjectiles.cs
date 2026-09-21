@@ -33,7 +33,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///                        la luz a su paso; lo que toca, lo tajea.
     ///   VII · LA SINFONÍA — TODAS A LA VEZ: CodigosLib.SolVivo de núcleo,
     ///                        SierpesLib la cría orbitando, NebulaLib el
-    ///                        gas, TelaLib la cinta, EcosLib los fantasmas
+    ///                        gas, TelaLib la cinta, EspectroLib los fantasmas
     ///                        del viaje, EstelaLib la estela, ParticleManager
     ///                        la lluvia, OndaLib el telegraph del final…
     ///                        y al último tick: LA DETONACIÓN.
@@ -60,7 +60,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private int _edad;
         private readonly Vector2[] _segs = new Vector2[10];
         private readonly float[] _segsAng = new float[10];
-        private EcosLib.Memoria _memoria;
+        private EspectroLib.Memoria _memoria;
         private readonly Vector2[] _camino = new Vector2[16];
         private readonly List<(Vector2 pos, int edad)> _tajos = new(8);
 
@@ -86,7 +86,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 20;
             Projectile.aiStyle = -1;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
         }
 
         public override void AI()
@@ -98,7 +98,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // === EL VUELO: recto y sereno (la palabra no se apresura). ===
             Projectile.rotation = Projectile.velocity.ToRotation();
             Lighting.AddLight(Projectile.Center, PalabraBlanca.ToVector3() * 0.9f);
-            EcosLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
+            EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
 
             // EL CAMINO (el historial para la estela y el desgarro).
             if (_edad % 4 == 0)
@@ -265,7 +265,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 // ==============================================================
                 //  FASE 1 — EL BÚFER (coords de MUNDO): SigiloLib, NebulaLib,
-                //  EcosLib y los quads sueltos. Se vuelca ANTES de todo lote.
+                //  EspectroLib y los quads sueltos. Se vuelca ANTES de todo lote.
                 // ==============================================================
                 if (mov == 1)
                 {
@@ -283,7 +283,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     // del viaje completo + el aura de la palabra.
                     NebulaLib.Nube(Projectile.Center, 52f, time, Seed,
                         new Color(255, 245, 220), new Color(140, 110, 220), 0.11f, 14);
-                    EcosLib.ColaHistoria(ref _memoria, 8, 7, new Color(255, 248, 225),
+                    EspectroLib.ColaHistoria(ref _memoria, 8, 7, new Color(255, 248, 225),
                         new Vector2(30f, 14f), 0.5f, 1.3f);
                     VFXCore.Quad(Projectile.Center, TinteDe(6) * 0.30f, new Vector2(120f, 120f));
                 }

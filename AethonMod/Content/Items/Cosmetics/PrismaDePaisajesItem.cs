@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using AethonMod.Content.VFX;
 
@@ -64,7 +65,7 @@ namespace AethonMod.Content.Items.Cosmetics
             if (siguiente == null)
             {
                 CieloLib.DesactivarTodas();
-                Main.NewText("El prisma se apaga: el cielo vuelve a su dueño.",
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.PrismaDePaisajesItem.MensajeApagado"),
                     new Color(150, 150, 170));
             }
             else
@@ -74,7 +75,7 @@ namespace AethonMod.Content.Items.Cosmetics
                     : siguiente == CieloEscenas.NombreSagrario ? CieloEscenas.SagrarioVioleta
                     : CieloEscenas.AmanecerPrimordial;
                 CieloLib.Activar(escena);
-                Main.NewText($"El prisma despliega: {siguiente}.",
+                Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.PrismaDePaisajesItem.MensajeEscena", siguiente),
                     new Color(210, 160, 255));
             }
 
@@ -105,9 +106,9 @@ namespace AethonMod.Content.Items.Cosmetics
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             tooltips.Add(new TooltipLine(Mod, "C",
-                "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]"));
+                Language.GetTextValue("Mods.AethonMod.Items.PrismaDePaisajesItem.Titulo")));
             tooltips.Add(new TooltipLine(Mod, "D",
-                "[c/78788C:El probador de la librería del cielo: despliega paisajes enteros\nsobre el fondo del mundo — capas con parallax, deriva y tintes\n(v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]"));
+                Language.GetTextValue("Mods.AethonMod.Items.PrismaDePaisajesItem.Linea1")));
         }
     }
 }

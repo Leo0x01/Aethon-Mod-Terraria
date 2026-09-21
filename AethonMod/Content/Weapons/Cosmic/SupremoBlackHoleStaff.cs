@@ -22,8 +22,9 @@ namespace AethonMod.Content.Weapons.Cosmic
     ///
     /// La esfera más grande del mod (55px), atracción en 550px y el
     /// conjunto más REGIO: el oro/carmesí DOMINA, el violeta/azul
-    /// ACENTÚA. Hermano del BlackHoleStaff, Crimson, Fusión, Olvido,
-    /// Cósmico, Umbral y Bruma — todos quedan INTACTOS.
+    /// ACENTÚA. Hermano del BlackHoleStaff, Olvido, Cósmico, Umbral y
+    /// Bruma (v6.50.3 — doc podrida retirada: "Crimson" y "Fusión"
+    /// NO existen en el código actual — solo en el CHANGES.md histórico).
     /// </summary>
     public class SupremoBlackHoleStaff : ModItem
     {

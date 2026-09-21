@@ -75,7 +75,8 @@ namespace AethonMod.Content.VFX
         /// <summary>Buffer de conversión mundo→pantalla (cero GC).</summary>
         private static readonly Vector2[] _scr = new Vector2[64];
 
-        /// <summary>Tinte premultiplicado de la casa (RGB·f, alfa 255·f).</summary>
+        /// <summary>Tinte de intensidad LINEAL de la casa (delega en OrbitaLib.Tint:
+        /// RGB intacto, alfa=f — v6.50.3, el Additive de FNA es (SourceAlpha, One)).</summary>
         private static Color Tint(Color c, float f) => OrbitaLib.Tint(c, f);
 
         // ==================================================================
@@ -697,6 +698,21 @@ namespace AethonMod.Content.VFX
         {
             if (n <= 1 || alpha <= 0.02f || Main.netMode == NetmodeID.Server) return;
             if (n > 24) n = 24;
+            // v6.50.3 — FIX (el ÚNICO compositor sin defensa): confiar 100% en
+            // el llamador era la trampa — hebra nula o corta = IndexOutOfRange
+            // en el bucle de las cuentas. Mismo n para TODOS: el mínimo de lo
+            // que de verdad hay (la espina manda; las hebras siguen su largo).
+            if (espina == null) return;
+            if (hebraA == null || hebraB == null)
+            {
+                n = 0;
+            }
+            else
+            {
+                n = Math.Min(n, Math.Min(hebraA.Length, hebraB.Length));
+            }
+            n = Math.Min(n, espina.Length);
+            if (n <= 1) return;
 
             Vector2 off = Main.screenPosition;
             for (int i = 0; i < n; i++) _scr[i] = espina[i] - off;

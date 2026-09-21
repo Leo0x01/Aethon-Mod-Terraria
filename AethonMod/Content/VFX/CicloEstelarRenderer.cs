@@ -150,6 +150,12 @@ namespace AethonMod.Content.VFX
         private static Asset<Texture2D> _glow;
         private static Asset<Texture2D> _orb;
         private static Asset<Texture2D> _ring;
+        // v6.50.3 — FIX (4 lookups de asset por estrella por frame): el mismo
+        // cache de la casa (barrido en Unload por reflexión — v6.49).
+        private static Asset<Texture2D> _bloom;
+        private static Asset<Texture2D> _wavy;
+        private static Asset<Texture2D> _psy;
+        private static Asset<Texture2D> _dend;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
@@ -411,8 +417,8 @@ namespace AethonMod.Content.VFX
 
             // === 1. BACKGLOW (alpha — el resplandor profundo: BloomCircleSmall ×2) ===
             BeginAlpha();
-            Texture2D bloom = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+            Texture2D bloom = (_bloom ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Textures/BloomCircleSmall")).Value;
             Color glowHot = Color.Lerp(new Color(255, 230, 100), new Color(255, 90, 30), rg);
             glowHot.A = 0;
             Main.spriteBatch.Draw(bloom, pos, null, glowHot * 0.62f, 0f,
@@ -424,8 +430,8 @@ namespace AethonMod.Content.VFX
             Main.spriteBatch.End();
 
             // === 2. EL AURA (RadialShineShader — el ruido de energía) ===
-            Texture2D wavyBlotch = ModContent.Request<Texture2D>(
-                "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+            Texture2D wavyBlotch = (_wavy ??= ModContent.Request<Texture2D>(
+                "AethonMod/Content/Effects/Textures/WavyBlotchNoise")).Value;
             if (_shineShader != null && _shineShader.Value != null)
             {
                 Effect shine = _shineShader.Value;
@@ -446,10 +452,10 @@ namespace AethonMod.Content.VFX
             if (_sunShader != null && _sunShader.Value != null)
             {
                 Effect shader = _sunShader.Value;
-                Texture2D psychedelic = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
-                Texture2D dendritic = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+                Texture2D psychedelic = (_psy ??= ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap")).Value;
+                Texture2D dendritic = (_dend ??= ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut")).Value;
 
                 shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
                 shader.Parameters["mainColor"].SetValue(
@@ -875,9 +881,11 @@ namespace AethonMod.Content.VFX
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
 
         // ==================================================================

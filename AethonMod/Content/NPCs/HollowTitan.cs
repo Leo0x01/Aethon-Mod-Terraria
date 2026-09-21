@@ -102,8 +102,9 @@ namespace AethonMod.Content.NPCs
             {
                 NPC.localAI[0] = 1f; // una sola vez
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Titan.Furia"),
-                    Cristal);
+                // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+                // server — Main.NewText no llega a ninguna pantalla de remotos.
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Titan.Furia", Cristal);
                 NPC.netUpdate = true;
             }
 
@@ -130,7 +131,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // === EL SALTO DEL GUARDIÁN (acercarse por aire si la presa vuela) ===
-            // v6.50 — EL SALTO QUE ARQUEA (EcosLib.CurvaAproximacion):
+            // v6.50 — EL SALTO QUE ARQUEA (EspectroLib.CurvaAproximacion):
             // el brinco antiaéreo ya no es puramente vertical — la curva de
             // la casa decide el PASO HORIZONTAL del salto (anticipa dónde
             // estará la presa, con un toque de tangente). Clampeado ±6:
@@ -138,7 +139,7 @@ namespace AethonMod.Content.NPCs
             if (target.Center.Y < NPC.Center.Y - 90f && NPC.velocity.Y == 0f &&
                 _tickPorrazo <= 0 && Math.Abs(target.Center.X - NPC.Center.X) < 300f)
             {
-                Vector2 curva = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                Vector2 curva = EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                     110f, 6.5f, Main.GlobalTimeWrappedHourly, NPC.whoAmI * 7);
                 NPC.velocity.Y = -9f;
                 NPC.velocity.X = MathHelper.Clamp(curva.X, -6f, 6f);

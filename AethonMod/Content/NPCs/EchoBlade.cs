@@ -46,7 +46,7 @@ namespace AethonMod.Content.NPCs
         private int _tickFase = 0;
         private int _combos = 0;         // cada DOS combos (furia): la pared
         private int _tickOrbit = 0;      // la guardia de cuchillas
-        private EcosLib.Memoria _mem;    // la estela del eco
+        private EspectroLib.Memoria _mem;    // la estela del eco
 
         private int ParryCooldown = 0;
 
@@ -81,7 +81,7 @@ namespace AethonMod.Content.NPCs
 
         public override void AI()
         {
-            if (_mem.Pos == null) _mem = EcosLib.Crear();
+            if (_mem.Pos == null) _mem = EspectroLib.Crear();
 
             // v6.50.2 — FIX (el parry solo funcionaba UNA VEZ por vida del
             // jefe): ModifyIncomingHit pone ParryCooldown=120 al bloquear,
@@ -108,8 +108,9 @@ namespace AethonMod.Content.NPCs
             {
                 NPC.localAI[0] = 1f;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Portador.Furia"),
-                    EmberVivo);
+                // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+                // server — Main.NewText no llega a ninguna pantalla de remotos.
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Portador.Furia", EmberVivo);
                 NPC.netUpdate = true;
             }
 
@@ -125,14 +126,14 @@ namespace AethonMod.Content.NPCs
                 {
                     Vector2 aT = target.Center - NPC.Center;
                     float dist = aT.Length();
-                    // v6.50 — LA CURVA DEL DUELISTA (EcosLib.CurvaAproximacion):
+                    // v6.50 — LA CURVA DEL DUELISTA (EspectroLib.CurvaAproximacion):
                     // el tejido sinusoidal a mano pasa a la librería — el
                     // vaivén de frecuencias inconmensurables sustituye al
                     // péndulo (el paso del duelo respira, no tictacea) y la
                     // aproximación se anticipa con tangente. Radio 210:
                     // apenas FUERA del filo de la marca (190) — acecha al
                     // borde exacto de tu espada.
-                    Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    Vector2 deseada = EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                         210f, furia ? 8.5f : 6.5f, Main.GlobalTimeWrappedHourly,
                         NPC.whoAmI * 31);
                     NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.10f);
@@ -261,7 +262,7 @@ namespace AethonMod.Content.NPCs
             if (_flashParry > 0) _flashParry--;
 
             // LA MEMORIA (la estela del eco).
-            EcosLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
+            EspectroLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
 
             Lighting.AddLight(NPC.Center, new Vector3(0.5f, 0.3f, 0.1f));
         }
@@ -391,13 +392,13 @@ namespace AethonMod.Content.NPCs
                         pos + new Vector2(-NPC.direction * 13f, 2f), 9f, Rescoldo,
                         0.8f, t, 5f);
 
-                // === LA ESTELA DEL ECO (los fantasmas de EcosLib — solo en
+                // === LA ESTELA DEL ECO (los fantasmas de EspectroLib — solo en
                 //     la embestida: el portador se REPITE al moverse rápido) ===
-                if (EcosLib.Profundidad(in _mem) > 6 && NPC.velocity.LengthSquared() > 60f)
+                if (EspectroLib.Profundidad(in _mem) > 6 && NPC.velocity.LengthSquared() > 60f)
                 {
                     for (int g = 1; g <= 3; g++)
                     {
-                        Vector2 pasado = EcosLib.Pasado(in _mem, g * 4);
+                        Vector2 pasado = EspectroLib.Pasado(in _mem, g * 4);
                         if (pasado == Vector2.Zero) continue;
                         Vector2 eco = pasado - Main.screenPosition;
                         float alfa = 0.26f * (1f - g / 4f);

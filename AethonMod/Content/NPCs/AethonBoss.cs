@@ -58,7 +58,7 @@ namespace AethonMod.Content.NPCs
         private int _tickJets = 0;       // fase 4: los jets del disco
         private int _tickRunas = 0;      // fase 5: el rebaño de runas
         private int _tickRecordar = 0;   // fase 5: EL RECORDAR
-        private EcosLib.Memoria _mem;    // la estela de la danza
+        private EspectroLib.Memoria _mem;    // la estela de la danza
 
         // === LA PALETA DE LA LUZ PRIMORDIAL ===
         private static readonly Color OroLuz = new(255, 240, 190);
@@ -92,7 +92,7 @@ namespace AethonMod.Content.NPCs
 
         public override void AI()
         {
-            if (_mem.Pos == null) _mem = EcosLib.Crear();
+            if (_mem.Pos == null) _mem = EspectroLib.Crear();
 
             // === LA PRESA (y el despawn limpio de la casa) ===
             Player target = Main.player[NPC.target];
@@ -139,7 +139,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // LA MEMORIA de la danza.
-            EcosLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
+            EspectroLib.Registrar(ref _mem, NPC.Center, NPC.velocity.ToRotation());
 
             // LA LUZ de la Luz.
             Lighting.AddLight(NPC.Center, new Vector3(0.6f, 0.4f, 0.8f));
@@ -171,13 +171,13 @@ namespace AethonMod.Content.NPCs
                 }
                 case 3:
                 {
-                    // v6.50 — EL ACECHO LENTO, CON CURVA (EcosLib.
+                    // v6.50 — EL ACECHO LENTO, CON CURVA (EspectroLib.
                     // CurvaAproximacion): la persecución recta pasa a la
                     // librería — la gravedad sigue haciendo el trabajo, pero
                     // ahora ella ESCONDE el rumbo: aproximación anticipada
                     // + strafe inconmensurable a 300 px (esquivarla exige
                     // leerla, no solo correr).
-                    Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                    Vector2 deseada = EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                         300f, 5.5f, Main.GlobalTimeWrappedHourly, NPC.whoAmI * 53);
                     NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.05f);
                     break;
@@ -315,8 +315,9 @@ namespace AethonMod.Content.NPCs
             player.AddBuff(BuffID.Gravitation, 180);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, player.Center);
             OndaLib.Kick(6f, 12);
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Gravedad"),
-                VioletaLuz);
+            // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+            // server — Main.NewText no llega a ninguna pantalla de remotos.
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Gravedad", VioletaLuz);
         }
 
         // ====================================================================
@@ -435,8 +436,8 @@ namespace AethonMod.Content.NPCs
         private void ElRecordar(Player target)
         {
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Recordar"),
-                OroLuz);
+            // v6.50.3 — FIX (anuncio invisible en MP): vía EcoRed al mundo.
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Recordar", OroLuz);
 
             // LOS SIETE PERNOS (el abanico de los siete movimientos).
             Vector2 dir = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
@@ -530,8 +531,10 @@ namespace AethonMod.Content.NPCs
             NPC.life = Math.Min(NPC.lifeMax, NPC.life + NPC.lifeMax / 20);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
             OndaLib.Kick(10f, 20);
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Aethon.Fase",
-                Phase, PhaseName()), OroLuz);
+            // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+            // server — Main.NewText no llega a ninguna pantalla de remotos.
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Fase",
+                OroLuz, Phase, PhaseName());
             NPC.netUpdate = true;
             _agujeroOn = false;
             _cicloAgujero = 0;
@@ -656,11 +659,11 @@ namespace AethonMod.Content.NPCs
                 }
 
                 // === FASE 5: LA ESTELA DE LA DANZA (los ecos del ocho) ===
-                if (Phase == 5 && EcosLib.Profundidad(in _mem) > 8)
+                if (Phase == 5 && EspectroLib.Profundidad(in _mem) > 8)
                 {
                     for (int g = 1; g <= 4; g++)
                     {
-                        Vector2 pasado = EcosLib.Pasado(in _mem, g * 4);
+                        Vector2 pasado = EspectroLib.Pasado(in _mem, g * 4);
                         if (pasado == Vector2.Zero) continue;
                         Vector2 eco = pasado - Main.screenPosition;
                         float alfa = 0.35f * (1f - g / 5f);

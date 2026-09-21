@@ -404,13 +404,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     ///
     /// La astilla de sol que la vela escupe: cometa de fuego solar
     /// (o de PLASMA azul-blanco si nació de la fusión — ai[0] lo
-    /// recuerda) con su cola de fantasmas de EcosLib y su pequeña
+    /// recuerda) con su cola de fantasmas de EspectroLib y su pequeña
     /// flor de fuego al morir (PyraLib.Estallido — el idioma de la
     /// casa para las muertes ardientes).
     /// </summary>
     public class RafagaSolarProjectile : ModProjectile
     {
-        private EcosLib.Memoria _memoria;
+        private EspectroLib.Memoria _memoria;
 
         private int Seed => Math.Max(1, Projectile.identity + 977);
 
@@ -431,7 +431,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.timeLeft = 120;
             Projectile.tileCollide = true;
             Projectile.aiStyle = -1;
-            _memoria = EcosLib.Crear();
+            _memoria = EspectroLib.Crear();
         }
 
         public override void AI()
@@ -440,7 +440,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             bool fusion = EsFusion(Projectile);
             Color luz = fusion ? new Color(0.6f, 0.8f, 1f) : new Color(1f, 0.6f, 0.25f);
             Lighting.AddLight(Projectile.Center, luz.ToVector3());
-            EcosLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
+            EspectroLib.Registrar(ref _memoria, Projectile.Center, Projectile.rotation);
         }
 
         public override void OnKill(int timeLeft)
@@ -470,7 +470,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 bool fusion = EsFusion(Projectile);
                 Color tinte = fusion ? new Color(150, 210, 255) : new Color(255, 170, 80);
 
-                EcosLib.ColaHistoria(ref _memoria, 2, 5, tinte,
+                EspectroLib.ColaHistoria(ref _memoria, 2, 5, tinte,
                     new Vector2(24f, 10f), 0.5f, 1.4f);
                 VFXCore.FlushAdditive(null, false);
 

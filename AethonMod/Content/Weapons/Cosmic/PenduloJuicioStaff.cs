@@ -22,7 +22,7 @@ namespace AethonMod.Content.Weapons.Cosmic
     /// (daño ×1.2 y knockback TANGENCIAL fuerte). Con cada vaivén el arco
     /// SE AMPLÍA (energía inyectada: +8% por oscilación hasta ±150°) y el
     /// hilo brilla más. A los 8 s el hilo SE CORTA (chispas) y la maza
-    /// VUEA balística hasta EXPLOTAR (onda de choque + Kick 8).
+    /// VUELA balística hasta EXPLOTAR (onda de choque + Kick 8).
     ///
     /// Daño 250, useTime 65, sin maná, HoldUp, autoReuse, rareza Quest.
     /// </summary>

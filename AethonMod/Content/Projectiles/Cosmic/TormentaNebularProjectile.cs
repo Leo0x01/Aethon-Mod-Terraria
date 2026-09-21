@@ -416,7 +416,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
 
         /// <summary>La tabla de glifos del agujero (3 glifos representativos).</summary>
-        private static Vector2[][] RuneGlyphs => new Vector2[][]
+        private static readonly Vector2[][] RuneGlyphs = new Vector2[][]
         {
             // EL TRONO
             new Vector2[] { new(-3.5f, 7f), new(-3.5f, -5f), new(-3.5f, -5f), new(3.5f, -5f), new(3.5f, -5f), new(3.5f, 7f), new(-3.5f, -5f), new(0f, -7f), new(-1.5f, 1.5f), new(1.5f, 1.5f) },

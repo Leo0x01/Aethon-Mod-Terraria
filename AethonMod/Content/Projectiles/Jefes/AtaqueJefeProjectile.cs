@@ -27,7 +27,7 @@ namespace AethonMod.Content.Projectiles.Jefes
     ///   2  VIROTE DE VACÍO (Rift): lanza entre-mundos que PARPADEA entre
     ///      fases (medio dentro del desgarro, medio fuera).
     ///   3  FLECHA ESTELAR (Arquera): flecha con corrección de rumbo y
-    ///      ESTELA DE FANTASMAS (EcosLib — la cola historia).
+    ///      ESTELA DE FANTASMAS (EspectroLib — la cola historia).
     ///   4  MINA ESTELAR (Arquera): LA MINA DE VERDAD — se ARMA con
     ///      pulso de aviso (OndaLib) y DETONA en un ARCO VOLTAICO a la
     ///      presa (StormLib.ChainBolt + ImpactFlash) — ya no una bala

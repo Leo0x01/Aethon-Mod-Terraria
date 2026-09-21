@@ -153,13 +153,20 @@ namespace AethonMod.Content.VFX
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
 
-            DrawCorona(center, R, time, seed, alphaMul, formT, ultima);
-            DrawCromosfera(center, R, time, seed, alphaMul, formT);
-            DrawProminencias(center, R, time, seed, alphaMul, formT);
-            DrawAnilloDeDiamante(center, R, time, seed, alphaMul, formT, ultima);
-            DrawRayosFugitivos(center, R, time, seed, alphaMul);
-
-            Main.spriteBatch.End();
+            // v6.50.3 — BLINDAJE (la lección v6.41): End en finally — una
+            // excepción en cualquiera de las 5 capas no deja el lote abierto.
+            try
+            {
+                DrawCorona(center, R, time, seed, alphaMul, formT, ultima);
+                DrawCromosfera(center, R, time, seed, alphaMul, formT);
+                DrawProminencias(center, R, time, seed, alphaMul, formT);
+                DrawAnilloDeDiamante(center, R, time, seed, alphaMul, formT, ultima);
+                DrawRayosFugitivos(center, R, time, seed, alphaMul);
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
 
             // === 4. LOS TRES CÍRCULOS RÚNICOS (la firma — lote propio) ===
             DrawRuneCircles(center, R, time, seed, alphaMul);
@@ -192,25 +199,33 @@ namespace AethonMod.Content.VFX
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
 
-            float flash = MathF.Sin(progress * MathHelper.Pi);   // 0→1→0
-            if (flash > 0.02f)
+            // v6.50.3 — BLINDAJE (lección v6.41): End en finally.
+            try
             {
-                // EL ESTALLIDO CEGADOR (×2 capas de bloom + la cruz ×2 pares).
-                Quad(Glow, center, new Vector2(sunR * 5.5f, sunR * 5.5f) * (0.5f + 0.8f * flash), 0f,
-                    Tint(WhiteIncan, 0.55f * flash));
-                Quad(Glow, center, new Vector2(sunR * 3.6f, sunR * 3.6f) * (0.6f + 0.8f * flash), 0f,
-                    Tint(WhiteIncan, 0.85f * flash));
-                Quad(Glow, center, new Vector2(sunR * 1.8f, sunR * 1.8f), 0f,
-                    Tint(SunGold, 0.65f * flash));
-                // LA CRUZ del destello (la espiga ×2 pares — ancha y fina).
-                StarQuad(center, 0f, sunR * 6.4f * flash, MathF.Max(3.0f, sunR * 0.07f),
-                    Tint(WhiteIncan, 0.9f * flash));
-                StarQuad(center, MathHelper.PiOver2, sunR * 6.4f * flash, MathF.Max(3.0f, sunR * 0.07f),
-                    Tint(WhiteIncan, 0.9f * flash));
-                StarQuad(center, 0f, sunR * 3.8f * flash, MathF.Max(2.0f, sunR * 0.04f),
-                    Tint(SunGold, 0.85f * flash));
-                StarQuad(center, MathHelper.PiOver2, sunR * 3.8f * flash, MathF.Max(2.0f, sunR * 0.04f),
-                    Tint(SunGold, 0.85f * flash));
+                float flash = MathF.Sin(progress * MathHelper.Pi);   // 0→1→0
+                if (flash > 0.02f)
+                {
+                    // EL ESTALLIDO CEGADOR (×2 capas de bloom + la cruz ×2 pares).
+                    Quad(Glow, center, new Vector2(sunR * 5.5f, sunR * 5.5f) * (0.5f + 0.8f * flash), 0f,
+                        Tint(WhiteIncan, 0.55f * flash));
+                    Quad(Glow, center, new Vector2(sunR * 3.6f, sunR * 3.6f) * (0.6f + 0.8f * flash), 0f,
+                        Tint(WhiteIncan, 0.85f * flash));
+                    Quad(Glow, center, new Vector2(sunR * 1.8f, sunR * 1.8f), 0f,
+                        Tint(SunGold, 0.65f * flash));
+                    // LA CRUZ del destello (la espiga ×2 pares — ancha y fina).
+                    StarQuad(center, 0f, sunR * 6.4f * flash, MathF.Max(3.0f, sunR * 0.07f),
+                        Tint(WhiteIncan, 0.9f * flash));
+                    StarQuad(center, MathHelper.PiOver2, sunR * 6.4f * flash, MathF.Max(3.0f, sunR * 0.07f),
+                        Tint(WhiteIncan, 0.9f * flash));
+                    StarQuad(center, 0f, sunR * 3.8f * flash, MathF.Max(2.0f, sunR * 0.04f),
+                        Tint(SunGold, 0.85f * flash));
+                    StarQuad(center, MathHelper.PiOver2, sunR * 3.8f * flash, MathF.Max(2.0f, sunR * 0.04f),
+                        Tint(SunGold, 0.85f * flash));
+                }
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
             }
 
             // === EL DISCO MURIENDO: el ocultador se arremolina al centro ===
@@ -218,17 +233,20 @@ namespace AethonMod.Content.VFX
             // se ve TRAGÁNDOSE a sí misma; pow 2.2: el colapso SE LEE.)
             if (diskDie < 0.99f)
             {
-                Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
-                float rDie = sunR * DiscoK * (1f - diskDie);
-                Quad(Black, center, new Vector2(rDie * 2.2f, rDie * 2.2f), 0f,
-                    Tint(Color.Black, 0.96f * (1f - diskDie * 0.6f)));
-                Main.spriteBatch.End();
-                return;
+                try
+                {
+                    float rDie = sunR * DiscoK * (1f - diskDie);
+                    Quad(Black, center, new Vector2(rDie * 2.2f, rDie * 2.2f), 0f,
+                        Tint(Color.Black, 0.96f * (1f - diskDie * 0.6f)));
+                }
+                finally
+                {
+                    try { Main.spriteBatch.End(); } catch { }
+                }
             }
-            Main.spriteBatch.End();
         }
 
         // ==================================================================
@@ -246,6 +264,10 @@ namespace AethonMod.Content.VFX
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
+
+            // v6.50.3 — BLINDAJE (lección v6.41): End en finally.
+            try
+            {
 
             // EL LIMBO caliente (el borde del sol ARDE más que el centro —
             // el limb darkening al revés, el lenguaje de la casa).
@@ -270,7 +292,11 @@ namespace AethonMod.Content.VFX
                     Tint(SunGold, 0.16f * cell * aMul));
             }
 
-            Main.spriteBatch.End();
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         // ==================================================================
@@ -300,24 +326,39 @@ namespace AethonMod.Content.VFX
             Vector2 offset = new Vector2(-R * 2.6f, -R * 0.5f) * (1f - slide)
                              + new Vector2(settle, settle * 0.4f);
 
-            // EL DISCO (ligeramente MENOR que el sol: el creciente).
+            // EL DISCO (ligeramente MENOR que el sol: el creciente) — el
+            // centro y el radio viven FUERA del primer try: el RIM (su
+            // propio lote) los reutiliza.
             float diskR = R * DiscoK;
             Vector2 diskC = center + offset;
-            Quad(Black, diskC, new Vector2(diskR * 2.1f, diskR * 2.1f), 0f,
-                Tint(Color.Black, 0.97f * aMul));
 
-            Main.spriteBatch.End();
+            // v6.50.3 — BLINDAJE (lección v6.41): End en finally.
+            try
+            {
+                Quad(Black, diskC, new Vector2(diskR * 2.1f, diskR * 2.1f), 0f,
+                    Tint(Color.Black, 0.97f * aMul));
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
 
             // EL RIM (aditivo, tras el disco): la luz doblándose.
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
-            float rimA = 0.34f * aMul * (0.75f + 0.25f * MathF.Sin(time * 3.1f + seed));
-            Quad(Ring, diskC, new Vector2(diskR * 2.06f, diskR * 2.06f), 0f,
-                Tint(NightViolet, rimA));
-            Quad(Ring, diskC, new Vector2(diskR * 2.0f, diskR * 2.0f), 0f,
-                Tint(WhiteIncan, rimA * 0.85f));
-            Main.spriteBatch.End();
+            try
+            {
+                float rimA = 0.34f * aMul * (0.75f + 0.25f * MathF.Sin(time * 3.1f + seed));
+                Quad(Ring, diskC, new Vector2(diskR * 2.06f, diskR * 2.06f), 0f,
+                    Tint(NightViolet, rimA));
+                Quad(Ring, diskC, new Vector2(diskR * 2.0f, diskR * 2.0f), 0f,
+                    Tint(WhiteIncan, rimA * 0.85f));
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         // ==================================================================
@@ -617,6 +658,10 @@ namespace AethonMod.Content.VFX
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
 
+            // v6.50.3 — BLINDAJE (lección v6.41): End en finally.
+            try
+            {
+
             float gs = Math.Max(rr / 118f, 0.30f) * 1.05f;
 
             // EL CÍRCULO BLANCO ÍNTIMO — 6 runas CW rápido (el lazo interior).
@@ -637,7 +682,11 @@ namespace AethonMod.Content.VFX
                 DrawRune(center, rr, time, g, RingViolet, RuneViolet, RuneVioletTip,
                     gs * 0.85f, 6, -0.075f, 3, aMul);
 
-            Main.spriteBatch.End();
+            }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+            }
         }
 
         /// <summary>
@@ -764,9 +813,11 @@ namespace AethonMod.Content.VFX
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
     }
 }

@@ -389,13 +389,16 @@ namespace AethonMod.Content.VFX
                 SpriteEffects.None, 0f);
         }
 
-        /// <summary>Tinte premultiplicado de la casa.</summary>
+        /// <summary>Tinte de intensidad LINEAL de la casa (v6.50.3 — RGB intacto,
+        /// alfa=f; el Additive de FNA es (SourceAlpha, One): el alfa GATEA).</summary>
         private static Color Tinte(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
+            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
+            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
+            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
+            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
         }
     }
 }

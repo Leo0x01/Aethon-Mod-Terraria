@@ -98,7 +98,9 @@ namespace AethonMod.Content.NPCs
             {
                 NPC.localAI[0] = 1f;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Rift.Sello"), TealUmbral);
+                // v6.50.3 — FIX (anuncio invisible en MP): la IA corre en el
+                // server — Main.NewText no llega a ninguna pantalla de remotos.
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Rift.Sello", TealUmbral);
                 NPC.netUpdate = true;
             }
 
@@ -151,13 +153,13 @@ namespace AethonMod.Content.NPCs
             // === LA GUARDIA: orbita a la presa (solo sólido o naciendo) ===
             if (_faseCruce != 1)
             {
-                // v6.50 — LA CURVA DE LA CASA (EcosLib.CurvaAproximacion):
+                // v6.50 — LA CURVA DE LA CASA (EspectroLib.CurvaAproximacion):
                 // la órbita a 340 px ahora respira con frecuencias
                 // INCONMENSURABLES (el strafe jamás sincroniza — no es
                 // un péndulo de relojería) y la aproximación se anticipa
                 // con un toque de tangente. El radio y el temple del
                 // guardián quedan intactos; la matemática, de la librería.
-                Vector2 deseada = EcosLib.CurvaAproximacion(NPC.Center, target.Center,
+                Vector2 deseada = EspectroLib.CurvaAproximacion(NPC.Center, target.Center,
                     340f, sello ? 6.0f : 4.2f, Main.GlobalTimeWrappedHourly,
                     NPC.whoAmI * 137);
                 NPC.velocity = Vector2.Lerp(NPC.velocity, deseada, 0.10f);
@@ -249,8 +251,8 @@ namespace AethonMod.Content.NPCs
                 }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item103, NPC.Center);
-            Main.NewText(Language.GetTextValue("Mods.AethonMod.Jefe.Rift.Paredes"),
-                VioletaVacio);
+            // v6.50.3 — FIX (anuncio invisible en MP): vía EcoRed al mundo.
+            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Rift.Paredes", VioletaVacio);
         }
 
         // ==================================================================

@@ -60,37 +60,50 @@ namespace AethonMod.Content.VFX
         {
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === PRIMERO LAS HERIDAS de las muertes de estrella (el
-            //     desgarro del apagón vive sobre TODO, en coords de mundo) ===
-            OcasoBurstFX.Dibujar(spriteBatch);
+            // v6.50.3 — GUARD DE LOTE: el dibujado asumía el lote de UI
+            // ABIERTO "TAL CUAL" — si otro mod lo dejaba cerrado, la
+            // primera Draw disparaba una InvalidOperationException SIN
+            // capturar. Todo el cuerpo blindado (la lección v6.41).
+            //
+            // ANCLAJE: coords de MUNDO restadas a secas (sin zoom ni
+            // UI-scale — el arro flota sobre la cabeza del jugador de forma
+            // APROXIMADA con zoom ≠ 100%): anclaje deliberado y documentado,
+            // el mismo de Pantalla.OndaExpansiva.
+            try
+            {
+                // === PRIMERO LAS HERIDAS de las muertes de estrella (el
+                //     desgarro del apagón vive sobre TODO, en coords de mundo) ===
+                OcasoBurstFX.Dibujar(spriteBatch);
 
-            Player p = Main.LocalPlayer;
-            if (p == null || !p.active) return;
+                Player p = Main.LocalPlayer;
+                if (p == null || !p.active) return;
 
-            var op = p.GetModPlayer<OcasoPlayer>();
+                var op = p.GetModPlayer<OcasoPlayer>();
 
-            // === VISIBILIDAD: siempre con el arma en la mano; con fade si
-            //     se disparó hace poco (el fade vive en OcasoPlayer) ===
-            bool sosteniendo = p.HeldItem != null && p.HeldItem.type ==
-                ModContent.ItemType<global::AethonMod.Content.Weapons.Cosmic.OcasoAethonStaff>();
-            float vis = sosteniendo ? 1f : MathHelper.Clamp(op.UiFade, 0f, 1f);
-            if (vis <= 0.02f) return;
+                // === VISIBILIDAD: siempre con el arma en la mano; con fade si
+                //     se disparó hace poco (el fade vive en OcasoPlayer) ===
+                bool sosteniendo = p.HeldItem != null && p.HeldItem.type ==
+                    ModContent.ItemType<global::AethonMod.Content.Weapons.Cosmic.OcasoAethonStaff>();
+                float vis = sosteniendo ? 1f : MathHelper.Clamp(op.UiFade, 0f, 1f);
+                if (vis <= 0.02f) return;
 
-            float time = Main.GlobalTimeWrappedHourly;
-            Vector2 centro = p.Center - Main.screenPosition + new Vector2(0f, -46f);
-            float radio = 34f;
+                float time = Main.GlobalTimeWrappedHourly;
+                Vector2 centro = p.Center - Main.screenPosition + new Vector2(0f, -46f);
+                float radio = 34f;
 
-            // === EL HALO DE FONDO (el aura del medidor) ===
-            Color fondo = op.OcasoActivo
-                ? new Color(255, 120, 60)
-                : op.Sobrecalentado ? new Color(255, 60, 40)
-                : new Color(150, 90, 255);
-            Quad(spriteBatch, centro, fondo, radio * 2.6f, 0.06f * vis);
+                // === EL HALO DE FONDO (el aura del medidor) ===
+                Color fondo = op.OcasoActivo
+                    ? new Color(255, 120, 60)
+                    : op.Sobrecalentado ? new Color(255, 60, 40)
+                    : new Color(150, 90, 255);
+                Quad(spriteBatch, centro, fondo, radio * 2.6f, 0.06f * vis);
 
-            // === EL ESTADO DEL ARO ===
-            if (op.OcasoActivo) DibujarOcaso(spriteBatch, op, centro, radio, time, vis);
-            else if (op.Sobrecalentado) DibujarLockout(spriteBatch, op, centro, radio, time, vis);
-            else DibujarCarga(spriteBatch, op, centro, radio, time, vis);
+                // === EL ESTADO DEL ARO ===
+                if (op.OcasoActivo) DibujarOcaso(spriteBatch, op, centro, radio, time, vis);
+                else if (op.Sobrecalentado) DibujarLockout(spriteBatch, op, centro, radio, time, vis);
+                else DibujarCarga(spriteBatch, op, centro, radio, time, vis);
+            }
+            catch { }
         }
 
         // ==================================================================

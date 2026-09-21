@@ -29,6 +29,10 @@ namespace AethonMod.Content.DrawLayers
         {
             Player p = drawInfo.drawPlayer;
             if (p == null || p.dead || p.whoAmI < 0) return false;
+            // v6.50.3 — FIX (las coronas delataban al SIGILOSO): el stealth de
+            // vanilla (p.invis — champiñón, vorazine...) oculta el cuerpo; la
+            // corona quedaba flotando ENORME delatándolo. Se esconde con él.
+            if (p.invis) return false;
             return p.GetModPlayer<CosmeticPlayer>().VoidCrown;
         }
 
