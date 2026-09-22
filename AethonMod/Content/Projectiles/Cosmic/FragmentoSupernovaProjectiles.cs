@@ -55,6 +55,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class FragmentoSupernovaMinion : ModProjectile
     {
+        // La textura FANTASMA de los proyectiles 100%-código (el patrón de
+        // AuraPortadorHalo/AtaqueJefeProjectile): tML exige el asset default
+        // de la clase aunque el PreDraw (quads de MoldeLib) jamás la dibuje
+        // — sin este override, MissingResourceException y TODO el mod se
+        // desactiva al cargar (la lección del client.log de la v6.50.3).
+        public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
+
         // === EL CICLO (180 ticks: media vuelta de volea, media de beam). ===
         private const int Ciclo = 180;
         private const int TickVolea = 40;          // el disparo de la volea
@@ -413,6 +420,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class RafagaNovaProjectile : ModProjectile
     {
+        // La textura FANTASMA de los proyectiles 100%-código (el patrón de
+        // AuraPortadorHalo/AtaqueJefeProjectile): tML exige el asset default
+        // de la clase aunque el PreDraw (la cola de EspectroLib) jamás la dibuje
+        // — sin este override, MissingResourceException y TODO el mod se
+        // desactiva al cargar (la lección del client.log de la v6.50.3).
+        public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
+
         /// <summary>Los ticks de la flor de fuego al morir.</summary>
         private const int MuerteTicks = 30;
 

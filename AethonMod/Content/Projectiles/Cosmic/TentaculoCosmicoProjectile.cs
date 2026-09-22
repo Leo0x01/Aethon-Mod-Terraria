@@ -47,6 +47,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
     /// </summary>
     public class TentaculoCosmicoProjectile : ModProjectile
     {
+        // La textura FANTASMA de los proyectiles 100%-código (el patrón de
+        // AuraPortadorHalo/AtaqueJefeProjectile): tML exige el asset default
+        // de la clase aunque el PreDraw (los quads del azote) jamás la dibuje
+        // — sin este override, MissingResourceException y TODO el mod se
+        // desactiva al cargar (la lección del client.log de la v6.50.3).
+        public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
+
         // ==================================================================
         //  EL CEREBRO (los campos del original, 1:1)
         // ==================================================================
