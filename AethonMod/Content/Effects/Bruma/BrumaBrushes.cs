@@ -68,8 +68,11 @@ namespace AethonMod.Content.Effects.Bruma
 
         // [variante][tier] — textura en TIRA VERTICAL (width = size,
         // height = size × frames; cada frame es una fila).
-        private static readonly Texture2D[][] _puffs = new Texture2D[Variantes][];
-        private static readonly Texture2D[][] _vapors = new Texture2D[VaporVariantes][];
+        // v6.50.5 — SIN readonly: el barrendero de Unload anula los
+        // ELEMENTOS por reflexión y .NET 8 prohíbe escribir initonly —
+        // ver VFXCore._capas (la traza del client.log v6.50.4).
+        private static Texture2D[][] _puffs = new Texture2D[Variantes][];
+        private static Texture2D[][] _vapors = new Texture2D[VaporVariantes][];
 
         // ==================================================================
         //  LA ESCALERA — qué escalón le toca a un radio

@@ -165,8 +165,10 @@ namespace AethonMod.Content.VFX
         /// <summary>El nombre de la escena ACTIVA (null si el cielo está limpio).</summary>
         public static string NombreEscenaActiva => _activa?.Nombre;
 
-        // --- EL CACHE DE TEXTURAS (Asset, resolución diferida — la casa) ---
-        private static readonly Dictionary<string, Asset<Texture2D>> _texturas =
+        // --- EL CACHE DE TEXTURAS (Asset, resolución diferida — la casa).
+        // v6.50.5 — SIN readonly: el barrendero de Unload lo anula por
+        // reflexión y .NET 8 prohíbe escribir initonly — ver VFXCore._capas.
+        private static Dictionary<string, Asset<Texture2D>> _texturas =
             new Dictionary<string, Asset<Texture2D>>(16);
 
         // ==================================================================

@@ -77,6 +77,19 @@ namespace AethonMod
                         {
                             System.Type t = campo.FieldType;
 
+                            // v6.50.5 — .NET 8 prohíbe por reflexión la
+                            // escritura de campos initonly (static readonly):
+                            // RtFieldInfo.SetValue lanza FieldAccessException
+                            // (la traza del client.log v6.50.4 — _texturas/
+                            // _capas/_puffs/_vapors). Para esos campos: los
+                            // ELEMENTOS/entradas se limpian IGUAL (eso suelta
+                            // casi todo el ancla de memoria) y el campo en sí
+                            // se deja — el AssemblyLoadContext del reload
+                            // trae estáticos frescos. (Los 4 ancla readonly
+                            // históricos ya son mutables en v6.50.5; esto es
+                            // la red para futuros.)
+                            bool esInitOnly = campo.IsInitOnly && !campo.IsLiteral;
+
                             // v6.50.2 — FIX (b): ARRAYS de anclas — se
                             // anulan (y disponen si son GPU) los ELEMENTOS
                             // (recursivo: los jagged Texture2D[][] llevan
@@ -87,7 +100,7 @@ namespace AethonMod
                                 if (elem != null && EsAnclaDeDescarga(elem))
                                 {
                                     AnularAnclasArray(campo.GetValue(null) as System.Array);
-                                    campo.SetValue(null, null);
+                                    if (!esInitOnly) campo.SetValue(null, null);
                                 }
                                 continue;
                             }
@@ -104,7 +117,7 @@ namespace AethonMod
                                 {
                                     try { (campo.GetValue(null) as System.Collections.IDictionary)?.Clear(); }
                                     catch { }
-                                    campo.SetValue(null, null);
+                                    if (!esInitOnly) campo.SetValue(null, null);
                                 }
                                 continue;
                             }
@@ -115,8 +128,11 @@ namespace AethonMod
                                 // GraphicsResource (RenderTarget2D, textura
                                 // o blend propios) se DISPONE antes de
                                 // anular — la GPU no se libera con el GC.
+                                // (v6.50.5: el Dispose del VALOR sí corre
+                                // para initonly — es una llamada al objeto,
+                                // no una escritura del campo.)
                                 SoltarGpu(campo.GetValue(null));
-                                campo.SetValue(null, null);
+                                if (!esInitOnly) campo.SetValue(null, null);
                             }
                         }
                         catch { } // nunca dejar que la descarga reviente

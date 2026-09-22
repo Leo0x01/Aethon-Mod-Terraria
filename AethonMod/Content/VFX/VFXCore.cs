@@ -364,8 +364,12 @@ namespace AethonMod.Content.VFX
             SobreNPCs = 2,
         }
 
-        // (delegados por capa: el llamador registra su dibujo del frame)
-        private static readonly List<Action<SpriteBatch>>[] _capas =
+        // (delegados por capa: el llamador registra su dibujo del frame).
+        // v6.50.5 — SIN readonly: el barrendero de Unload lo anula por
+        // reflexión y .NET 8 prohíbe escribir campos initonly (la traza
+        // del client.log v6.50.4 — FieldAccessException) — el ancla se
+        // quedaba viva tras la descarga ("mod class still using memory").
+        private static List<Action<SpriteBatch>>[] _capas =
         {
             new List<Action<SpriteBatch>>(32),
             new List<Action<SpriteBatch>>(32),
