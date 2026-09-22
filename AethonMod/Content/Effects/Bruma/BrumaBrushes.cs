@@ -236,26 +236,34 @@ namespace AethonMod.Content.Effects.Bruma
             // Recolectar primero (el cierre solo captura locales — las
             // estáticas ya quedan en null para la próxima carga).
             List<Texture2D> moribundas = new();
-            for (int v = 0; v < Variantes; v++)
-            {
-                if (_puffs[v] == null) continue;
-                for (int t = 0; t < _puffs[v].Length; t++)
+            // v6.50.6 — FIX (el segundo dominó del client.log v6.50.5):
+            // _puffs/_vapors son mutables desde v6.50.5 y el barrendero de
+            // AethonMod.cs (Mod.Unload) corre ANTES que BrumaSystem.Unload
+            // — los arrays pueden llegar YA anulados (el elemento null se
+            // guardaba, pero el ARRAY en sí no: _puffs[v] sobre _puffs ==
+            // null reventaba con NullReferenceException). Guard por array.
+            if (_puffs != null)
+                for (int v = 0; v < Variantes; v++)
                 {
-                    if (_puffs[v][t] != null) moribundas.Add(_puffs[v][t]);
-                    _puffs[v][t] = null;
+                    if (_puffs[v] == null) continue;
+                    for (int t = 0; t < _puffs[v].Length; t++)
+                    {
+                        if (_puffs[v][t] != null) moribundas.Add(_puffs[v][t]);
+                        _puffs[v][t] = null;
+                    }
+                    _puffs[v] = null;
                 }
-                _puffs[v] = null;
-            }
-            for (int v = 0; v < VaporVariantes; v++)
-            {
-                if (_vapors[v] == null) continue;
-                for (int t = 0; t < _vapors[v].Length; t++)
+            if (_vapors != null)
+                for (int v = 0; v < VaporVariantes; v++)
                 {
-                    if (_vapors[v][t] != null) moribundas.Add(_vapors[v][t]);
-                    _vapors[v][t] = null;
+                    if (_vapors[v] == null) continue;
+                    for (int t = 0; t < _vapors[v].Length; t++)
+                    {
+                        if (_vapors[v][t] != null) moribundas.Add(_vapors[v][t]);
+                        _vapors[v][t] = null;
+                    }
+                    _vapors[v] = null;
                 }
-                _vapors[v] = null;
-            }
 
             if (moribundas.Count == 0) return;
 

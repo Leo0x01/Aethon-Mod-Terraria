@@ -217,7 +217,16 @@ namespace AethonMod.Content.VFX
         {
             _activa = null;
             _saliente = null;
-            _texturas.Clear();
+            // v6.50.6 — FIX DEL FATAL QUE CERRABA EL JUEGO (client.log
+            // v6.50.5, 12:58:07): tML llama Mod.Unload() (el barrendero de
+            // AethonMod.cs) ANTES que los Unload() de los ModSystem — y
+            // desde v6.50.5 _texturas es mutable, así que el barrendero ya
+            // lo dejó en null para este pase. El .Clear() desnudo lanzaba
+            // NullReferenceException, la excepción subía hasta tML y lo
+            // escalaba a FATAL ("tModLoader debe reiniciarse"): el juego se
+            // cerraba solo tras recompilar desde el menú. Nulo-seguro — el
+            // contrato del barrendero es "las anclas llegan vacías o nulas".
+            _texturas?.Clear();
             _estiloSanctum = null;
             _estiloSanctuSubsuelo = null;
             _frameCambio = 0;
@@ -572,7 +581,14 @@ namespace AethonMod.Content.VFX
                 // Programación defensiva: el detach del hook jamás puede
                 // impedir que la desactivación del mod continúe (la casa).
             }
-            CieloLib.Reiniciar();
+            // v6.50.6 — la casa: tML no envuelve los Unload() de los
+            // ModSystem — una excepción que escape de aquí escala a FATAL
+            // y fuerza el reinicio del juego (fue el cierre del client.log
+            // v6.50.5). Reiniciar() ya es nulo-seguro; este catch es la
+            // segunda red (la lección del mensaje del propio tML: "los
+            // modders deben usar programación defensiva").
+            try { CieloLib.Reiniciar(); }
+            catch { }
         }
 
         /// <summary>Al dejar el mundo el cielo vuelve a su dueño.</summary>

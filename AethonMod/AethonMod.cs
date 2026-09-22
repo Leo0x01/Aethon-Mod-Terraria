@@ -42,10 +42,25 @@ namespace AethonMod
             // mantiene vivo el AssemblyLoadContext del mod tras la
             // descarga (los de ModProjectile ni siquiera TIENEN hook Unload:
             // por eso el barrendero es un barrido por reflexión y no 43
-            // métodos a mano). Los disposals explícitos de RenderTargets
-            // (BlackHoleLensSystem, MediaResLib) y las limpiezas de los
-            // ModSystems ya corrieron: esto remata las referencias que
-            // quedan, incluidas las de clases futuras.
+            // métodos a mano).
+            //
+            // v6.50.6 — EL CONTRATO DE ORDEN (la lección del client.log
+            // v6.50.5, verificada en el fuente del tML 2026.07.3.0,
+            // Mod.Internals.cs/UnloadContent): OnModUnload corre ANTES de
+            // esto, pero Unload() (este barrendero) corre ANTES que los
+            // Unload() de TODOS los ModSystem/content — NO al revés (el
+            // texto v6.50.1 decía que "las limpiezas de los ModSystems ya
+            // corrieron": falso). Consecuencia: todo lo que los Unload()
+            // posteriores toquen de estos estáticos puede llegar VACÍO
+            // (contenedor limpiado) o NULO (ancla mutable anulada) — los
+            // métodos de limpieza (Reiniciar/Unload/Clear*) deben ser
+            // nulo-seguros (?. y guards) y sus llamadas van envueltas: una
+            // excepción que escape de un Unload de ModSystem la escala tML
+            // a FATAL y reinicia el juego. Auditado en v6.50.6:
+            // CieloLib.Reiniciar (?.), BrumaBrushes.Unload (guards),
+            // AuraLib/MediaResLib/BlackHoleLens (ya nulo-seguros) y
+            // EcoLib/AudioLib/PyraLib/EstelaLib/OcasoBurstFX/PulsoLib/
+            // PantallaLib (contenedores readonly no-ancla, nunca barridos).
             //
             // v6.50.2 — FIX: el barrendero NO cubría lo que prometía:
             // (a) RenderTarget2D declarado como tal (y demás
