@@ -22,10 +22,15 @@ namespace AethonMod.Content.VFX
     ///     dibujar el mundo. Amplitud: strength·(1−age/dur)²·sin(age·2.1)
     ///     (frecuencia ~13 Hz con decay cuadrático), cap 14 px.
     ///
-    ///   · EL DESTELLO (OndaLib.Flash): UN velo radial (SoftGlow a
-    ///     pantalla completa — centro brillante, caída suave) dibujado en
-    ///     PostDrawInterface con el LOTE DE LA INTERFAZ TAL CUAL (cero
-    ///     manipulación de estado: el velo alfa es el look clásico).
+    ///   · EL DESTELLO (OndaLib.Flash): v6.50.7 — EL GRADIENTE LOCAL
+    ///     DEL ARMA. Antes era UN velo radial a PANTALLA COMPLETA (SoftGlow
+    ///     gigante centrado en la pantalla): ahogaba el cuadro entero en
+    ///     color cada vez que un arma destellaba. Ahora nace en el CENTRO
+    ///     DEL PROYECTIL del arma (coords de mundo, anclaje de
+    ///     OndaExpansiva), con degradado radial que muere al alejarse del
+    ///     centro — núcleo + falda ancha, lote ADITIVO propio en Identity,
+    ///     restaurando el lote de interfaz con SU matriz (todo en
+    ///     try/catch/finally).
     ///     Máx 1 activo + cooldown 30 ticks (presupuesto anti-mareo).
     ///
     /// Todo CLIENTE-ONLY (los servidores no ven pantallas).
@@ -50,9 +55,14 @@ namespace AethonMod.Content.VFX
         private static int _flashAge;
         private static int _flashCooldown;
 
+        // v6.50.7 — EL FOCO DEL ARMA: dónde nace el destello (coords de
+        // MUNDO). Sin ancla (llamadores viejos) cae al centro del jugador.
+        private static Vector2 _flashOrigen;
+        private static bool _flashAnclado;
+
         private static Asset<Texture2D> _glow;
 
-        /// <summary>El brillo radial del velo del destello.</summary>
+        /// <summary>El brillo radial del destello local.</summary>
         private static Texture2D GlowTex =>
             (_glow ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
@@ -92,8 +102,11 @@ namespace AethonMod.Content.VFX
             _kicks[slot] = k;
         }
 
-        /// <summary>Registra el destello (máx 1 activo + cooldown anti-mareo).</summary>
-        internal static void Flash(Color color, float strength, int durationTicks)
+        /// <summary>Registra el destello (máx 1 activo + cooldown
+        /// anti-mareo). v6.50.7 — LOCAL: <paramref name="centroMundo"/> es
+        /// el CENTRO del proyectil del arma (null = el jugador local); el
+        /// destello vive y muere ahí, con degradado radial hacia afuera.</summary>
+        internal static void Flash(Color color, float strength, int durationTicks, Vector2? centroMundo)
         {
             if (_flashAge < _flashDuration || _flashCooldown > 0) return;   // presupuesto
             _flashColor = color;
@@ -101,6 +114,8 @@ namespace AethonMod.Content.VFX
             _flashDuration = (int)MathHelper.Clamp(durationTicks, 2f, 30f);
             _flashAge = 0;
             _flashCooldown = 30;
+            _flashAnclado = centroMundo.HasValue;
+            _flashOrigen = centroMundo ?? Vector2.Zero;
         }
 
         // ==================================================================
@@ -156,7 +171,7 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL DESTELLO — el velo radial sobre TODO (lote de UI tal cual)
+        //  EL DESTELLO — el gradiente LOCAL del arma (núcleo + falda)
         // ==================================================================
 
         public override void PostDrawInterface(SpriteBatch spriteBatch)
@@ -167,36 +182,57 @@ namespace AethonMod.Content.VFX
             Texture2D tex = GlowTex;
             if (tex == null) return;
 
-            // Alpha decayente del velo (cuadrático — muere como una onda).
+            // Alpha decayente del destello (cuadrático — muere como una onda).
             float vida = 1f - _flashAge / (float)_flashDuration;
-            float a = _flashStrength * vida * vida;
+            float a = MathHelper.Clamp(_flashStrength * 2.4f, 0f, 0.85f) * vida * vida;
             if (a <= 0.005f) return;
 
-            var c = new Color(
-                (byte)(int)(_flashColor.R * a),
-                (byte)(int)(_flashColor.G * a),
-                (byte)(int)(_flashColor.B * a),
+            // v6.50.7 — EL FOCO DEL ARMA: el destello nace en el CENTRO DEL
+            // PROYECTIL (coords de mundo → pantalla restando screenPosition:
+            // el anclaje documentado de OndaExpansiva, exacto a zoom 1). Sin
+            // ancla (llamadores sin origen): el jugador local — el arma vive
+            // cerca de su dueño. UN GRADIENTE LOCAL: el velo de pantalla
+            // completa ahogaba TODO el cuadro en color a cada disparo.
+            Vector2 centro = _flashAnclado ? _flashOrigen
+                : (Main.LocalPlayer?.Center ?? Vector2.Zero);
+            Vector2 pos = centro - Main.screenPosition;
+            if (pos.X < -600f || pos.Y < -600f ||
+                pos.X > Main.screenWidth + 600f || pos.Y > Main.screenHeight + 600f)
+                return;   // fuera de cuadro: ni un quad
+
+            // El radio RESPIRA: nace apretado y se abre ~26% al morir (el
+            // "pop" del fogonazo que se disipa).
+            float radio = (150f + 340f * _flashStrength) * (0.82f + 0.36f * (1f - vida));
+
+            // EL TINTE LINEAL (deliberado, distinto del Tint premultiplicado
+            // de la casa): Additive=(SourceAlpha,One) sobre la SoftGlow
+            // premultiplicada ⇒ aporte = g²·color·a — núcleo a tope y
+            // degradado empinado hacia afuera. EL FOCO, no el velo.
+            var c = new Color(_flashColor.R, _flashColor.G, _flashColor.B,
                 (byte)(int)(255f * a));
+            var falda = new Color(_flashColor.R, _flashColor.G, _flashColor.B,
+                (byte)(int)(255f * a * 0.28f));
 
-            var destino = new Rectangle(
-                -Main.screenWidth / 6, -Main.screenHeight / 6,
-                Main.screenWidth * 4 / 3, Main.screenHeight * 4 / 3);
-
-            // v6.50.3 — FIX (guard de lote + anclaje exacto): el velo se
-            // dibujaba "TAL CUAL" en el lote de UI: si otro mod dejaba el
-            // lote CERRADO, InvalidOperationException SIN capturar; y el
-            // rect en píxeles bajo Main.UIScaleMatrix quedaba desalineado
-            // con UI-scale ≠ 100%. El patrón de la casa (PantallaLib):
-            // cerrar, dibujar en Identity (pantalla EXACTA) y reabrir el
-            // lote de interfaz con SU matriz — todo en try/catch/finally
-            // (la lección v6.41: nunca dejar el lote abierto).
+            // v6.50.3 — FIX (guard de lote + anclaje exacto; v6.50.7 mantiene
+            // el patrón): cerrar, dibujar en Identity (pantalla EXACTA) y
+            // reabrir el lote de interfaz con SU matriz — todo en
+            // try/catch/finally (la lección v6.41: nunca dejar el lote abierto).
             try
             {
                 try { Main.spriteBatch.End(); } catch { }
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     RasterizerState.CullCounterClockwise, null, Matrix.Identity);
-                Main.spriteBatch.Draw(tex, destino, c);
+
+                Vector2 size = new Vector2(radio * 2f, radio * 2f);
+                Vector2 origen = tex.Size() * 0.5f;
+                // EL NÚCLEO (el fogonazo del arma).
+                Main.spriteBatch.Draw(tex, pos, null, c, 0f, origen,
+                    size / tex.Size(), SpriteEffects.None, 0f);
+                // LA FALDA (×1.6 de radio al 28%): el degradado ALCANZA más
+                // lejos sin lavar el foco — dos quads, cero estado.
+                Main.spriteBatch.Draw(tex, pos, null, falda, 0f, origen,
+                    size * 1.6f / tex.Size(), SpriteEffects.None, 0f);
             }
             catch { }
             finally
@@ -224,6 +260,8 @@ namespace AethonMod.Content.VFX
             _flashDuration = 0;
             _flashCooldown = 0;
             _flashStrength = 0f;
+            _flashAnclado = false;
+            _flashOrigen = Vector2.Zero;
             // v6.49 — EL ASSET TAMBIÉN (hallazgo AUD-C: OcasoSystem sí lo
             // anulaba; OndaSystem no — el Asset<T> estático sobrevivía a
             // la recarga del mod).
@@ -243,6 +281,8 @@ namespace AethonMod.Content.VFX
             _flashDuration = 0;
             _flashCooldown = 0;
             _flashStrength = 0f;
+            _flashAnclado = false;
+            _flashOrigen = Vector2.Zero;
         }
     }
 }

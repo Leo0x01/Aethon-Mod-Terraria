@@ -185,7 +185,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             OcasoBurstFX.ProgramarDesgarro(Projectile.Center, dir, Seed);
 
             OndaLib.Kick(9f, 18);
-            OndaLib.Flash(new Color(255, 150, 60), 0.16f, 10);
+            OndaLib.Flash(new Color(255, 150, 60), 0.16f, 10, Projectile.Center);
 
             for (int i = 0; i < 18; i++)
             {

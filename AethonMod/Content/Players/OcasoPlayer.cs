@@ -97,7 +97,7 @@ namespace AethonMod.Content.Players
         /// <summary>El lamento del corte del ocaso (FX de cliente).</summary>
         private void ElCorteDelOcaso()
         {
-            OndaLib.Flash(new Color(255, 90, 40), 0.12f, 10);
+            OndaLib.Flash(new Color(255, 90, 40), 0.12f, 10, Player.Center);
             OndaLib.Kick(5f, 14);
             for (int i = 0; i < 10; i++)
             {
@@ -166,7 +166,7 @@ namespace AethonMod.Content.Players
             if (!Main.dedServ)
             {
                 OndaLib.Kick(11f, 22);
-                OndaLib.Flash(new Color(255, 130, 45), 0.30f, 16);
+                OndaLib.Flash(new Color(255, 130, 45), 0.30f, 16, Player.Center);
                 for (int i = 0; i < 36; i++)
                 {
                     float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);

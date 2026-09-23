@@ -291,7 +291,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     catch { }
                     // Sacudida 4+4·p + el destello de la sobre-exposición.
                     OndaLib.Kick(4f + 4f * p, 10);
-                    OndaLib.Flash(ColorBlanco, 0.30f, 8);
+                    OndaLib.Flash(ColorBlanco, 0.30f, 8, Projectile.Center);
                 }
             }
         }
@@ -326,7 +326,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item94.WithPitchOffset(0.55f), Projectile.Center); }
                     catch { }
-                    OndaLib.Flash(ColorVioleta, 0.16f, 6);
+                    OndaLib.Flash(ColorVioleta, 0.16f, 6, Projectile.Center);
                 }
             }
         }
@@ -454,7 +454,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La superviviente agotada colapsa en un último destello.
             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(-0.2f), Projectile.Center); }
             catch { }
-            OndaLib.Flash(ColorVioleta, 0.20f, 6);
+            OndaLib.Flash(ColorVioleta, 0.20f, 6, Projectile.Center);
             OndaLib.Kick(2.2f, 6);
             RiftLib.ChispasAnomalia(Projectile.Center, 14, Paleta, Seed + 99, out ParticleData[] motas);
             Spawn(motas);
@@ -801,11 +801,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
-            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
-            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
-            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
-            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
+            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
+            // estaba incompleta): el pipeline REAL premultiplica los PNG al
+            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
+            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
+            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
+            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
+            // color SIN escalar en los lotes de masa (bruma fantasma
+            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
+            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
+            // correcto para AMBOS presets de FNA.
+            return new Color(
+                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
+                (byte)(int)(255f * f));
         }
     }
 }

@@ -41,8 +41,10 @@ namespace AethonMod.Content.VFX
     ///     onda se "gasta" ensanchándose: 4px → 14px en una de 300px).
     ///   · LA EXPANSIÓN FAST-OUT: r(t) = maxR·(1−(1−t)^2.2) — sale como
     ///     una explosión y frena (física leída por el ojo).
-    ///   · EL PAQUETE: onda + sacudida de cámara (Kick) + destello de
-    ///     pantalla (Flash) — TRES líneas en el call-site.
+    ///   · EL PAQUETE: onda + sacudida de cámara (Kick) + destello
+    ///     LOCAL del arma (Flash, v6.50.7: el gradiente nace en el centro
+    ///     del proyectil y muere al alejarse — ya no es un velo de
+    ///     pantalla completa) — TRES líneas en el call-site.
     ///
     /// CONTRATO DE LOTE (la casa): Shock/Pulse dibujan en el SpriteBatch
     /// ABIERTO que el llamador tenga (aditivo recomendado) y NO lo tocan.
@@ -109,11 +111,19 @@ namespace AethonMod.Content.VFX
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.3 — FIX (sonda IL contra el FNA real): BlendState.Additive
-            // de FNA es (SourceAlpha, One) — el alfa GATEA el aporte. El Tint
-            // premultiplicado v6.25 atenuaba DOS VECES (intensidad real f²:
-            // el halo 0.30 salía a 0.09). RGB intacto, alfa=f: LINEAL.
-            return new Color(c.R, c.G, c.B, (byte)(int)(255f * f));
+            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
+            // estaba incompleta): el pipeline REAL premultiplica los PNG al
+            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
+            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
+            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
+            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
+            // color SIN escalar en los lotes de masa (bruma fantasma
+            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
+            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
+            // correcto para AMBOS presets de FNA.
+            return new Color(
+                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
+                (byte)(int)(255f * f));
         }
 
         // ==================================================================
@@ -486,17 +496,21 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// DESTELLO de pantalla: velo radial aditivo (centro brillante, el
-        /// SoftGlow a pantalla completa) con alpha decayente, dibujado por
-        /// OndaSystem en PostDrawInterface — SIN render targets, SIN tocar
-        /// el estado del lote de la interfaz (se dibuja con el lote tal
-        /// cual: el velo alfa es el look clásico del destello). Máx 1
-        /// destello activo, fuerza por defecto 0.18, cooldown 30 ticks.
+        /// DESTELLO LOCAL DEL ARMA (v6.50.7 — rediseñado a pedido): un
+        /// GRADIENTE RADIAL que nace en <paramref name="centroMundo"/> (el
+        /// CENTRO del proyectil del arma) y se apaga al alejarse — núcleo
+        /// brillante + falda ancha, lote aditivo propio con Identity y el
+        /// lote de interfaz restaurado (try/catch/finally). Antes era un
+        /// velo a PANTALLA COMPLETA que ahogaba el cuadro entero en color.
+        /// Máx 1 destello activo, fuerza por defecto 0.18, cooldown 30
+        /// ticks. Sin origen (null): cae al centro del jugador local.
         /// </summary>
-        public static void Flash(Color color, float strength = 0.18f, int durationTicks = 8)
+        /// <param name="centroMundo">El centro del proyectil del arma (coords de mundo; null = jugador local).</param>
+        public static void Flash(Color color, float strength = 0.18f, int durationTicks = 8,
+            Vector2? centroMundo = null)
         {
             if (Main.netMode == NetmodeID.Server) return;
-            OndaSystem.Flash(color, strength, durationTicks);
+            OndaSystem.Flash(color, strength, durationTicks, centroMundo);
         }
     }
 }
