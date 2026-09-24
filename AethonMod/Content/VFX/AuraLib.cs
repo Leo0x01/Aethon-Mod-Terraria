@@ -506,7 +506,8 @@ namespace AethonMod.Content.VFX
         //  LAS TEXTURAS DE RUIDO — generadas EN CÓDIGO (cero assets)
         // ------------------------------------------------------------------
 
-        /// <summary>Cuatro variantes de ruido (128², blanco + alfa = ruido).</summary>
+        /// <summary>Cuatro variantes de ruido (128², PREMULTIPLICADAS:
+        /// RGB = alfa = ruido — v6.50.8, la lección de BrumaBrushes).</summary>
         private static Texture2D[] _ruido;
         private const int LadoRuido = 128;
         private const int VariantesRuido = 4;
@@ -575,7 +576,25 @@ namespace AethonMod.Content.VFX
                             // curva suave: contraste medio, sin aplastar
                             n = n * n * (3f - 2f * n);
                             byte a = (byte)(n * 255f);
-                            data[y * LadoRuido + x] = new Color(255, 255, 255, a);
+                            // v6.50.8 — FIX (LAS CAJAS BLANCAS del reporte
+                            // del usuario): RGB = 255 CONSTANTE con el perfil
+                            // SOLO en el alfa es EL anti-patrón de las
+                            // texturas runtime — exactamente "el bug de los
+                            // rectángulos" que BrumaBrushes v6.25 documentó
+                            // y reparó ("premultiplicar o morir"): el lote
+                            // ADITIVO de FNA es (One, One) — el alfa NUNCA
+                            // gatea el aporte — y el premultiplicado del
+                            // loader de PNG NO aplica a texturas creadas con
+                            // SetData. Con RGB blanco plano, cada gajo del
+                            // aura dibujaba un RECTÁNGULO BLANCO
+                            // semitransparente (el "solo cajas blancas" del
+                            // accesorio). Con el RGB premultiplicado (= alfa)
+                            // el perfil de ruido vive en el canal que el
+                            // aditivo suma de verdad → NUBES de ruido de
+                            // verdad en el lote aditivo y velo suave en el
+                            // de alfa (la misma receta de BrumaBrushes y de
+                            // las bandas Bolt* de StormLib).
+                            data[y * LadoRuido + x] = new Color(a, a, a, a);
                         }
                     }
                     var tex = new Texture2D(device, LadoRuido, LadoRuido);

@@ -61,14 +61,17 @@ namespace AethonMod.Content.VFX
     ///
     ///   RAÍZ 2 — EL RIBBON SE CORTABA. Cada sub-segmento solapaba al vecino
     ///   `subLen + w*2` → el aditivo APILABA el brillo en cada junta (las
-    ///   "cuentas" claras) y el crackle aleatorio POR SUB-SEGMENTO lo
-    ///   entrecortaba (las oscuras). v6.39 pinta el filamento como un ribbon
-    ///   DE VERDAD: quads BORDE A BORDE con la NORMAL MEDIA en las juntas y
-    ///   el LARGO EXACTO proyectado (la geometría del round-join de RiftLib
-    ///   v6.31: extensión adaptativa w/2·tan(δ/2) SOLO donde el camino gira
-    ///   de verdad), con la BANDA UNIFORME a lo largo (el brillo continuo de
-    ///   punta a punta) y el crackle POR PUNTO interpolado (la variación de
-    ///   brillo respira a lo largo del rayo, nunca a saltos de 42 px).
+    ///   "cuentas" claras del v6.21). v6.39 lo enterró: quads BORDE A
+    ///   BORDE con la normal media y el largo exacto proyectado.
+    ///
+    ///   v6.50.8 — RAÍZ 3 (el reporte del usuario: "los rayos son solo
+    ///   líneas discontinuas, no son rayos de verdad"): ChainBolt dibujaba
+    ///   su cuerpo con ChainTex — la textura de ESLABONES, un patrón de
+    ///   GUIONES a lo largo — y el tronco era un ZigPath de UNA sola
+    ///   escala. Reconstruido con la receta canónica de los relámpagos 2D
+    ///   (midpoint displacement multi-escala + ramas + bandas suaves):
+    ///   ver ChainBolt/Bolt/MultiBolt. BoltChain.png queda como asset
+    ///   retirado (la convención de la casa).
     ///
     /// Nace de la investigación profunda y metódica del ecosistema (los
     /// sistemas de rayos de los grandes mods de VFX, estudiados a fondo:
@@ -140,6 +143,11 @@ namespace AethonMod.Content.VFX
             (_coreTex ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/BoltCore")).Value;
 
+        /// <summary>v6.50.8 — RETIRADA del consumo: la banda de ESLABONES
+        /// (patrón de guiones) era la causa del reporte del usuario ("los
+        /// rayos son solo líneas discontinuas"). El asset BoltChain.png y
+        /// esta carga se conservan por la convención de la casa con lo
+        /// retirado — NADIE la dibuja desde v6.50.8.</summary>
         private static Texture2D ChainTex =>
             (_chainTex ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/BoltChain")).Value;
@@ -384,24 +392,90 @@ namespace AethonMod.Content.VFX
             => StrandImpl(batch, pts, seed, flick, width, halo, core, alpha, taper, CoreTex, HaloTex);
 
         /// <summary>
-        /// La CADENA eléctrica: el mismo filamento pero con la textura de
-        /// eslabones (los saltos entre enemigos, las cadenas de bolas).
+        /// v6.50.8 — LA DESCARGA DE VERDAD ENTRE DOS ANCLAJES (la
+        /// reconstrucción del reporte del usuario: "los rayos son solo
+        /// líneas discontinuas, no son rayos de verdad").
+        ///
+        /// Hasta v6.50.7 este método dibujaba su CUERPO con ChainTex (la
+        /// textura de ESLABONES, un patrón de guiones premultiplicado a lo
+        /// largo de la banda) sobre un ZigPath de UNA sola escala → el
+        /// resultado literal era una LÍNEA DISCONTINUA, no un rayo. El
+        /// usuario pidió investigar la librería pre-auditoría + cómo se
+        /// crean los rayos reales: la receta canónica de los efectos de
+        /// relámpago 2D ("How to Generate Shockingly Good 2D Lightning
+        /// Effects", la escuela clásica del midpoint displacement) es:
+        ///
+        ///   1. EL TRONCO por MIDPOINT DISPLACEMENT MULTI-ESCALA
+        ///      (FractalPath: cada generación parte el segmento por su
+        ///      punto medio desplazado la perpendicular con offset que SE
+        ///      DIVIDE A LA MITAD — lazadas grandes + micro-detalle) más
+        ///      el refino cúbico de la casa (Refine).
+        ///   2. LAS RAMAS (la firma visual de una descarga): ForkTree
+        ///      camina 2-3 horquillas con auto-corrección de curvatura,
+        ///      heredando ~½ del ancho y ~85% del brillo — y sus puntas
+        ///      llevan gorro de descarga (StrandImpl los añade).
+        ///   3. EL PINTADO de 3 capas con las BANDAS PREMULTIPLICADAS
+        ///      (halo/cuerpo/vena — StrandImpl borde a borde con la
+        ///      normal media y el crackle por punto).
+        ///
+        /// La textura de eslabones (ChainTex/BoltChain.png) queda como
+        /// asset sin consumidores (la convención de la casa con lo
+        /// retirado). Determinista por (seed, flick) — todas las máquinas
+        /// ven el MISMO rayo; el llamador lo REGENERA con flick para que
+        /// la descarga VIVA (IsLit/FlickTick siguen siendo la receta).
         /// </summary>
         public static void ChainBolt(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int flick, float width, Color halo, Color core,
             float alpha = 1f, int segments = 8, float amp = 12f)
         {
-            Vector2[] pts = ZigPath(start, end, seed, flick, segments, amp);
-            StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
-                StormTaper.Linear, ChainTex, HaloTex);
+            float len = Vector2.Distance(start, end);
+            if (len < 4f || alpha <= 0.01f || width <= 0.05f) return;
+
+            // === 1. EL TRONCO FRACTAL (midpoint displacement + refino) ===
+            // segments→generaciones (potencias de 2 de tramos base) y
+            // amp(px absolutos)→chaos (fracción de la longitud: los arcos
+            // largos rugosos, los cortos contenidos — invarianza de escala).
+            int gens = Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 2, 4);
+            float chaos = Math.Clamp(amp * 2.2f / Math.Max(len, 40f), 0.05f, 0.25f);
+            Vector2[] trunk = Refine(
+                FractalPath(start, end, seed, flick, gens, chaos), seed, flick);
+
+            // El tronco a brillo completo (taper lineal: tenso al anclaje
+            // de destino, como la vena de una descarga que se disipa).
+            StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
+                StormTaper.Linear, CoreTex, HaloTex);
+
+            // === 2. LAS RAMAS (la lectura "rayo de verdad") ===
+            List<StormStrand> forks = ForkTree(trunk, seed, flick, 0.55f, 3);
+            for (int f = 1; f < forks.Count; f++)
+            {
+                StormStrand s = forks[f];
+                StrandImpl(batch, s.Points, seed + 23 + f, flick,
+                    width * s.WidthScale, halo, core, alpha * s.Alpha,
+                    StormTaper.Linear, CoreTex, HaloTex);
+            }
         }
 
-        /// <summary>Atajo: UN filamento recto de A a B.</summary>
+        /// <summary>
+        /// Atajo: UN filamento de A a B — v6.50.8: el tronco también es
+        /// FRACTAL multi-escala (midpoint displacement + refino cúbico,
+        /// la receta ChainBolt) en vez del ZigPath de una sola escala —
+        /// los rayos de TODOS los renderers de la casa (lluvia naranja del
+        /// Umbral, rayos fugitivos del Supremo, saltos del Sol Rúnico,
+        /// bordes de los portales) ganan la rugosidad de las descargas
+        /// de verdad.
+        /// </summary>
         public static void Bolt(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int flick, float width, Color halo, Color core,
             float alpha = 1f, int segments = 12, float amp = 24f)
         {
-            Vector2[] pts = ZigPath(start, end, seed, flick, segments, amp);
+            float len = Vector2.Distance(start, end);
+            if (len < 4f) return;
+
+            int gens = Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5);
+            float chaos = Math.Clamp(amp * 2.0f / Math.Max(len, 60f), 0.06f, 0.26f);
+            Vector2[] pts = Refine(
+                FractalPath(start, end, seed, flick, gens, chaos), seed, flick);
             StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
                 StormTaper.Center, CoreTex, HaloTex);
         }
@@ -418,9 +492,15 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color haloA, Color haloB, Color core,
             float alpha = 1f, float amp = 26f, int segments = 12)
         {
-            // === EL TRONCO PRINCIPAL (base + refino fractal) ===
+            // === EL TRONCO PRINCIPAL (base + refino fractal) — v6.50.8:
+            // el midpoint displacement multi-escala de la receta canónica
+            // (antes ZigPath de una sola escala) ===
             Vector2[] trunk = Refine(
-                ZigPath(start, end, seed, flick, segments, amp), seed, flick);
+                FractalPath(start, end, seed, flick,
+                    Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5),
+                    Math.Clamp(amp * 2.0f / Math.Max(Vector2.Distance(start, end), 60f),
+                        0.06f, 0.26f)),
+                seed, flick);
             StrandImpl(batch, trunk, seed, flick, width, haloA, core, alpha,
                 StormTaper.Center, CoreTex, HaloTex);
 
