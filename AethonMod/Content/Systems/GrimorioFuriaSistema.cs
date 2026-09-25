@@ -156,6 +156,12 @@ namespace AethonMod.Content.Systems
             if (Main.netMode == NetmodeID.MultiplayerClient) return; // el servidor manda
             if (Activo) return;                                      // un festín a la vez
             if (jugador == null || !jugador.active) return;
+            // v6.50.10 — FIX: la furia no se provoca sobre un CAÍDO —
+            // Paso la cancelaría al primer tick con VenganzaPorMuerte
+            // (el festín naciendo-muriendo mientras el portador
+            // respawnea). La hambre ya no crece muerto (ShardPlayer);
+            // esto cierra la puerta a la Carnada/otros llamadores.
+            if (jugador.dead) return;
 
             _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 11);
             _oleadaActual = 0;
@@ -810,6 +816,14 @@ namespace AethonMod.Content.Systems
             _jugador = -1;
             _spawneados = 0;
             _ticksSuma = 0;
+
+            // v6.50.10 — FIX: también las RÉPLICAS de cliente (el F8 de
+            // un remoto mostraba el último festín "en marcha" para
+            // siempre tras cambiar de mundo — fantasmas estáticos que
+            // nadie reseteaba; Terminar corre vía OnWorldUnload).
+            FaseCliente = 0;
+            OleadaCliente = 0;
+            TotalesCliente = 0;
         }
 
         /// <summary>

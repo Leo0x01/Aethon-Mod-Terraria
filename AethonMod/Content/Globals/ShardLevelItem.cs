@@ -336,13 +336,24 @@ namespace AethonMod.Content.Globals
 
         public override void SaveData(Item item, TagCompound tag)
         {
-            if (Level > 1 || XP > 0)
+            // v6.50.10 — ARMADURA: ItemIO.SaveGlobals llama a
+            // GlobalItem.SaveData SIN try/catch (IL-verificado contra el
+            // tML 2026.07.3.0 — a diferencia del ModPlayer/ModSystem) y
+            // corre en la cadena de guardado del jugador: una excepción
+            // aquí abortaría el guardado entero. El cuerpo no puede
+            // lanzar hoy (3 escalares + 1 bool) pero la armadura es
+            // gratis (el patrón de LoadData/NetSend de este mismo archivo).
+            try
             {
-                tag["aethonLevel"] = Level;
-                tag["aethonXP"] = XP;
+                if (Level > 1 || XP > 0)
+                {
+                    tag["aethonLevel"] = Level;
+                    tag["aethonXP"] = XP;
+                }
+                if (PrimeraCincoEstrellas)
+                    tag["aethonPrimera5"] = true;
             }
-            if (PrimeraCincoEstrellas)
-                tag["aethonPrimera5"] = true;
+            catch { }
         }
 
         public override void LoadData(Item item, TagCompound tag)

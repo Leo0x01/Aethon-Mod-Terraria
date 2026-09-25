@@ -315,7 +315,15 @@ namespace AethonMod.Content.Players
 
                 if (autoridad)
                 {
-                    if (nivel >= NivelMinimoHambre)
+                    // v6.50.10 — FIX: UN MUERTO NO ALIMENTA EL LIBRO.
+                    // La hambre crecía con el portador caído (5 min de
+                    // respawn bastaban para los 10 momentos) y la furia
+                    // PROVOCABA con él muerto — el festín nacía y moría al
+                    // primer tick (VenganzaPorMuerte) con el churn de
+                    // voces de ira/venganza encima del respawn. Ahora el
+                    // hambre se CONGELA mientras yace (como guardado el
+                    // libro: DUERME) y reanuda al levantarse.
+                    if (!Player.dead && nivel >= NivelMinimoHambre)
                     {
                         TicksSinMatar++;
                         int momentos = Math.Min(TicksSinMatar / (60 * SegundosPorMomento), MomentosMax);

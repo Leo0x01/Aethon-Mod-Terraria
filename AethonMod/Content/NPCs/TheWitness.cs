@@ -214,10 +214,20 @@ namespace AethonMod.Content.NPCs
             int level = NivelDelGrimorio();
             if (level >= 50 && Main.LocalPlayer.BuyItem(Item.buyPrice(0, 0, 10, 0)))
             {
-                Item.NewItem(
-                    Main.LocalPlayer.GetSource_GiftOrReward(),
-                    Main.LocalPlayer.Center,
-                    ModContent.ItemType<Items.ResonanceShard>());
+                // v6.50.10 — FIX (regla de la casa — el drop fantasma del
+                // Testigo): Item.NewItem en el CLIENTE nace local y sin
+                // difusión — en MP el comprador pagaba y el fragmento
+                // nunca existía (el mismo anti-patrón del Altar v6.50).
+                // SP: lo crea aquí (el proceso ES la autoridad). MP: se
+                // pide al server (EcoRed revalida el nivel 50 del libro y
+                // lo spawn-ea él — vanilla lo difunde).
+                if (Main.netMode == Terraria.ID.NetmodeID.MultiplayerClient)
+                    EcoRed.PedirResonancia();
+                else
+                    Item.NewItem(
+                        Main.LocalPlayer.GetSource_GiftOrReward(),
+                        Main.LocalPlayer.Center,
+                        ModContent.ItemType<Items.ResonanceShard>());
                 Main.NewText(Language.GetTextValue("Mods.AethonMod.Testigo.ResonanciaEntregada"),
                     new Color(245, 196, 81));
             }

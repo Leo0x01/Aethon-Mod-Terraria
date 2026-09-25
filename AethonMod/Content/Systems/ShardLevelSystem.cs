@@ -85,6 +85,17 @@ namespace AethonMod.Content.Systems
             if (npc == null || !npc.active) return 0;
             if (npc.friendly || npc.townNPC) return 0;
 
+            // v6.50.10 — FIX (las partes en cascada valen cero en TODAS
+            // las ramas): cuerpo/cola de los gusanos, ojo del Muro,
+            // manos/cabeza del Lord y cabeza del Golem son boss=false y
+            // caían a la rama MOB — ~80 OnKill del Devorador pagando XP
+            // de estrellas + hardmode (+primera kill) CADA UNO: el
+            // grimorio subía a saltos absurdos tras cada gusano ("se
+            // corrompe el jugador"). XPDeJefe ya las anulaba para la
+            // rama de jefes (v6.46); ahora valen cero SIEMPRE — una
+            // derrota, un cobro (la cabeza/fase final paga la fórmula).
+            if (EsParteDeJefe(npc)) return 0;
+
             // === JEFES: XP FIJA, la fuente gorda del libro ===
             if (npc.boss)
                 return XPDeJefe(npc, nivelGrimorio);

@@ -75,6 +75,14 @@ namespace AethonMod.Content.Globals
         private int _tickAtaque = 0;   // el tempo de los dientes
         private int _tickLunge = 0;    // el tempo de los embites
 
+        // v6.50.10 — LAS BASES DEL SELLO (idempotencia de Marcar): las
+        // stats capturadas en la PRIMERA marca; toda re-marca recalcula
+        // desde aquí — nunca encadena multiplicadores (ver Marcar).
+        private int _vidaBase = -1;
+        private int _danoBase = 0;
+        private int _defensaBase = 0;
+        private float _kbBase = 1f;
+
         // ==================================================================
         //  EL SELLADO
         // ==================================================================
@@ -90,6 +98,32 @@ namespace AethonMod.Content.Globals
         {
             try
             {
+                // v6.50.10 — IDEMPOTENCIA (EL FIX DE LA CORRUPCIÓN DEL
+                // FESTÍN): Marcar podía llegar DOS VECES al mismo NPC.
+                // La herencia de OnSpawn corre DENTRO de NPC.NewNPC y
+                // sella PRIMERO (el anillo de la chusma nace a 380-700px
+                // del portador — casi siempre a <800px de un marcado:
+                // hereda el sello); y el convocador (SpawnMonstruo /
+                // SpawnJefeOleada / el Juicio) sella DESPUÉS al volver de
+                // NewNPC. El cuerpo viejo re-escalaba lifeMax/damage desde
+                // los valores YA escalados y re-multiplicaba
+                // knockBackResist → ×(k+1)² de vida y daño (×121 en la
+                // oleada 10, ×225 en El Juicio) con el knockback resistido
+                // al 12%: monstruos inmortales de 4-5 cifras que no se
+                // interrumpen — "se corrompe el mundo" durante el festín.
+                // AHORA la PRIMERA marca captura las stats BASE y toda
+                // re-marca recalcula DESDE ELLAS con el sello FINAL (el
+                // convocador manda: su oleada/jefe/especial pisan a la
+                // herencia — la cabeza del jefe queda con stats de JEFE,
+                // no de chusma contagiada).
+                if (!EsDeOleada || _vidaBase < 0)
+                {
+                    _vidaBase = npc.lifeMax;
+                    _danoBase = npc.damage;
+                    _defensaBase = npc.defense;
+                    _kbBase = npc.knockBackResist;
+                }
+
                 EsDeOleada = true;
                 EsEspecial = especial;
                 Oleada = especial ? 11 : (oleada < 1 ? 1 : (oleada > 10 ? 10 : oleada));
@@ -98,16 +132,17 @@ namespace AethonMod.Content.Globals
                 // === STATS: LA LETRA DEL USUARIO (v6.48) ===
                 // La oleada k: vida Y daño ×(k+1) — la 1 ×2, la 10 ×11,
                 // para chusma Y jefes. LA ESPECIAL: ×15.
+                // (v6.50.10: siempre DESDE LAS BASES — jamás encadenado.)
                 float mult = MultiplicadorStats;
 
-                int nuevaVida = (int)(npc.lifeMax * mult);
+                int nuevaVida = (int)(_vidaBase * mult);
                 if (nuevaVida < 1) nuevaVida = 1;
                 npc.lifeMax = nuevaVida;
                 npc.life = nuevaVida;
-                if (npc.damage > 0)
-                    npc.damage = (int)(npc.damage * mult);
-                npc.defense += jefe ? 6 * Oleada : 2 * Oleada;
-                npc.knockBackResist *= 0.35f; // la furia no se interrumpe
+                if (_danoBase > 0)
+                    npc.damage = (int)(_danoBase * mult);
+                npc.defense = _defensaBase + (jefe ? 6 * Oleada : 2 * Oleada);
+                npc.knockBackResist = _kbBase * 0.35f; // la furia no se interrumpe
 
                 // === EL AURA ===
                 Aura = AuraPerfil.OleadaGrimorio(Oleada);
@@ -539,6 +574,13 @@ namespace AethonMod.Content.Globals
         public override void OnKill(NPC npc)
         {
             if (!EsDeOleada) return;
+            // v6.50.10 — FIX: LAS PARTES EN CASCADA NO COBRAN. Los
+            // segmentos de gusano heredan el sello por propagación
+            // (diseño: "segmentos de gusano, Creepers…") y caían aquí:
+            // ~80 cuerpos del EoW soltando k monedas CADA UNO (800 de
+            // oro por derrota en la oleada 10) — una derrota, UN cobro
+            // (la cabeza es quien paga, como en la XP v6.46).
+            if (Content.Systems.ShardLevelSystem.EsParteDeJefe(npc)) return;
             try
             {
                 int monedas = EsEspecial ? 15 : Oleada;

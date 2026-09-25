@@ -856,7 +856,7 @@ namespace AethonMod.Content.VFX
                 Vector2 prev = i > 0 ? pts[i] - pts[i - 1] : seg;
                 Vector2 next = i < pts.Length - 2 ? pts[i + 2] - pts[i + 1] : seg;
                 Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (avg.LengthSquared() < 0.001f) avg = seg;
+                if (!(avg.LengthSquared() >= 0.001f)) avg = seg; // v6.50.10 — también atrapa NaN (Normalize de un vector cero: "NaN < 0.001" es false y esquivaba el guard)
                 avg = Vector2.Normalize(avg);
                 float rot = (float)Math.Atan2(avg.Y, avg.X);
                 Vector2 pos = (pts[i] + pts[i + 1]) * 0.5f;
@@ -956,7 +956,7 @@ namespace AethonMod.Content.VFX
                 Vector2 prev = i > 0 ? pts[i] - pts[i - 1] : seg;
                 Vector2 next = i < pts.Length - 2 ? pts[i + 2] - pts[i + 1] : seg;
                 Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (avg.LengthSquared() < 0.001f) avg = seg;
+                if (!(avg.LengthSquared() >= 0.001f)) avg = seg; // v6.50.10 — también atrapa NaN (Normalize de un vector cero: "NaN < 0.001" es false y esquivaba el guard)
                 avg = Vector2.Normalize(avg);
                 float rot = (float)Math.Atan2(avg.Y, avg.X);
                 Vector2 pos = (pts[i] + pts[i + 1]) * 0.5f;
@@ -1085,7 +1085,7 @@ namespace AethonMod.Content.VFX
                 Vector2 prev = i > 0 ? a - pts[i - 1] : seg;
                 Vector2 next = i < pts.Length - 2 ? pts[i + 2] - b : seg;
                 Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (avg.LengthSquared() < 0.001f) avg = seg;
+                if (!(avg.LengthSquared() >= 0.001f)) avg = seg; // v6.50.10 — también atrapa NaN (Normalize de un vector cero: "NaN < 0.001" es false y esquivaba el guard)
                 avg = Vector2.Normalize(avg);
 
                 float rot = (float)Math.Atan2(avg.Y, avg.X);

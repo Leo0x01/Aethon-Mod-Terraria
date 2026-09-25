@@ -42,6 +42,14 @@ namespace AethonMod.Content.Players
     {
         public override void OnEnterWorld()
         {
+            // v6.50.10 — ARMADURA: PlayerLoader.OnEnterWorld NO envuelve el
+            // hook en try/catch (IL-verificado contra el tML 2026.07.3.0 —
+            // a diferencia de SaveData/LoadData) y este cuerpo muta el
+            // INVENTARIO en cada entrada: una excepción aquí abortaría la
+            // entrada al mundo. La armadura es gratis (mismo patrón que
+            // SaveData/NetSend del ShardLevelItem).
+            try
+            {
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
@@ -84,6 +92,8 @@ namespace AethonMod.Content.Players
                         Terraria.Localization.Language.GetTextValue("Mods.AethonMod.TestingPlayer.Dummies", dummies),
                         new Microsoft.Xna.Framework.Color(255, 216, 107));
             }
+            }
+            catch { } // v6.50.10 — la armadura de arriba
         }
 
         /// <summary>Entrega el ítem si no se tiene; devuelve 1 si se entregó.</summary>
