@@ -121,6 +121,14 @@ namespace AethonMod.Content.VFX
     /// decide la mezcla. El BORDE además tiñe el halo de glow y (en el
     /// patrón Polígono) las aristas de la jaula: "colorear bordes, centro
     /// y zonas intermedias" es literal aquí.
+    ///
+    /// v6.50.12 — LA CAPA VIVA (la investigación de auras, destilada de
+    /// los tutoriales de AE + el canon VFX de juego): Borde (la cáscara
+    /// de energía — rim hacia blanco en la frontera), Parpadeo (el
+    /// flicker orgánico de dos senos inconmensurables), Hervor (la
+    /// ebullición: flipbook de las 4 variantes de ruido con crossfade por
+    /// el pase de blur), Rayos (las agujas radiales de la corona) y
+    /// Latido (el doble golpe de 84 bpm que reemplaza la respiración).
     /// </summary>
     public sealed class AuraPerfil
     {
@@ -178,6 +186,50 @@ namespace AethonMod.Content.VFX
         /// <summary>Multiplicador del halo de glow exterior.</summary>
         public float Glow = 1.3f;
 
+        // === v6.50.12 — LA CAPA VIVA (la investigación de auras) ===
+        // Las cinco técnicas que faltaban, destiladas de los tutoriales
+        // de aura de AE (composición por capas: glow + turbulencia +
+        // gradient + flicker + agujas) y del canon VFX de juego (Keyser /
+        // Schreibt: forma dura sobre masa blanda, ruido que HIERVE):
+
+        /// <summary>
+        /// EL BORDE CALIENTE (0..1): la CÁSCARA de energía — los gajos de
+        /// la zona exterior tienden a blanco al llegar a la frontera (el
+        /// "rim glow": la silueta del aura se LEE contra el fondo). 0 = el
+        /// look plano de v6.50.11.
+        /// </summary>
+        public float Borde = 0.25f;
+
+        /// <summary>
+        /// EL PARPADEO ORGÁNICO (0..0.15 recomendado): un vaivén de brillo
+        /// de dos senos inconmensurables (nunca se repite) — el aura VIVA.
+        /// Sutil a propósito: energía respirando, no estrobo. 0 = quieto.
+        /// </summary>
+        public float Parpadeo = 0.06f;
+
+        /// <summary>
+        /// LA EBULLICIÓN (variaciones de ruido por segundo): el índice de
+        /// la textura de ruido AVANZA (flipbook de las 4 variantes del
+        /// generador) con fase propia por gajo, y el pase de blur dibuja
+        /// la variante SIGUIENTE — crossfade gratis entre fases. 0 = el
+        /// ruido estático de siempre.
+        /// </summary>
+        public float Hervor = 5f;
+
+        /// <summary>
+        /// LOS RAYOS RADIALES (agujas de luz del contorno; 0 = off): finas
+        /// líneas del cuerpo al borde que laten desfasadas — la corona
+        /// radiante de los tutoriales (cuesta exactamente Rayos quads).
+        /// </summary>
+        public int Rayos = 0;
+
+        /// <summary>
+        /// EL LATIDO DEL CORAZÓN: el doble golpe (~84 bpm: golpe + eco a
+        /// 0.18 del ciclo) reemplaza la respiración suave — el aura que
+        /// ACECHA (el Hambre, el Juicio) late; la que acompaña, respira.
+        /// </summary>
+        public bool Latido = false;
+
         // === SEMILLA Y PARTÍCULAS ===
         /// <summary>Semilla determinista: la MISMA apariencia siempre.</summary>
         public int Semilla = 0;
@@ -219,6 +271,16 @@ namespace AethonMod.Content.VFX
         public AuraPerfil ConBlur(float v) { Blur = v; return this; }
         /// <summary>Multiplicador del halo de glow.</summary>
         public AuraPerfil ConGlow(float v) { Glow = v; return this; }
+        /// <summary>v6.50.12 — El borde caliente (la cáscara de energía, 0..1).</summary>
+        public AuraPerfil ConBorde(float v) { Borde = v; return this; }
+        /// <summary>v6.50.12 — El parpadeo orgánico del brillo (0 = quieto).</summary>
+        public AuraPerfil ConParpadeo(float v) { Parpadeo = v; return this; }
+        /// <summary>v6.50.12 — El ritmo de ebullición del ruido (0 = estático).</summary>
+        public AuraPerfil ConHervor(float v) { Hervor = v; return this; }
+        /// <summary>v6.50.12 — Los rayos radiales del contorno (0 = sin agujas).</summary>
+        public AuraPerfil ConRayos(int v) { Rayos = Math.Max(0, v); return this; }
+        /// <summary>v6.50.12 — El latido del corazón (true = doble golpe).</summary>
+        public AuraPerfil ConLatido(bool v) { Latido = v; return this; }
         /// <summary>Semilla determinista del aura.</summary>
         public AuraPerfil ConSemilla(int v) { Semilla = v; return this; }
         /// <summary>La configuración de partículas (null = sin partículas).</summary>
@@ -277,6 +339,14 @@ namespace AethonMod.Content.VFX
                 });
                 p.Glow = 1.9f;
                 p.Distorsion = 1.35f;
+                // v6.50.12 — EL JUICIO viste la CORONA RADIANTE: agujas de
+                // luz alrededor, ebullición furiosa y el borde al máximo —
+                // el clímax se lee por DENSIDAD de técnicas, no por tamaño.
+                p.Rayos = 10;
+                p.Borde = 0.45f;
+                p.Parpadeo = 0.10f;
+                p.Hervor = 7f;
+                p.Latido = true;
             }
             else if (oleada >= 10)
             {
@@ -297,6 +367,11 @@ namespace AethonMod.Content.VFX
                     Vida = 0.9f,
                 });
                 p.Glow = 1.6f;
+                // v6.50.12 — la oleada podrida LATE (84 bpm): el corazón
+                // del hambre se oye con los ojos.
+                p.Latido = true;
+                p.Borde = 0.35f;     // la costra roja del borde, más presente
+                p.Parpadeo = 0.08f;  // la carne vibra
             }
             else
             {
@@ -347,6 +422,12 @@ namespace AethonMod.Content.VFX
                 AlfaTrasera = 0.30f,
                 AlfaFrontal = 0.05f,
                 VeloFrontal = true,
+                // v6.50.12 — la corona RADIA: agujas doradas + el borde
+                // caliente realza la jaula pentagonal.
+                Rayos = 8,
+                Borde = 0.40f,
+                Parpadeo = 0.05f,
+                Hervor = 4f,   // ebullición serena: es una corona, no un incendio
             };
             // LOS TINTES DEL MOD: violeta del Sagrario al centro, el oro
             // del grimorio en el BORDE (las aristas de la jaula dorada).
@@ -392,6 +473,12 @@ namespace AethonMod.Content.VFX
                 AlfaTrasera = 0.28f,
                 AlfaFrontal = 0.06f,
                 VeloFrontal = true,
+                // v6.50.12 — LA LUZ PRIMORDIAL: la corona radiante más
+                // amplia de la casa (12 agujas) con el borde sereno: la
+                // luz no ACECHA, RESPLANDECE.
+                Rayos = 12,
+                Borde = 0.30f,
+                Parpadeo = 0.04f,
             };
             p.ConTrasera(new Color(255, 236, 170), new Color(196, 150, 255), new Color(255, 251, 230));
             p.ConFrontal(new Color(255, 240, 180), new Color(200, 156, 255), new Color(255, 253, 240));
@@ -435,6 +522,13 @@ namespace AethonMod.Content.VFX
                 AlfaTrasera = 0.15f,
                 AlfaFrontal = 0.05f,
                 VeloFrontal = true,
+                // v6.50.12 — EL AVISO LATE: el hambre del portador pulsa a
+                // 84 bpm (se nota, pero sutil — el recordatorio, no el
+                // castigo: los valores mínimos de la casa).
+                Latido = true,
+                Borde = 0.15f,
+                Parpadeo = 0.05f,
+                Hervor = 4f,
             };
             p.ConTrasera(new Color(118, 114, 110), new Color(138, 136, 130), new Color(158, 158, 156));
             p.ConFrontal(new Color(120, 116, 112), new Color(140, 138, 132), new Color(160, 160, 158));
@@ -947,11 +1041,37 @@ namespace AethonMod.Content.VFX
             if (tex0 == null) return; // sin dispositivo aún: nada que dibujar
 
             float t = Main.GlobalTimeWrappedHourly;
-            float R = radio * VFXCore.Breathe(t, 1.05f, 0f, 0.05f);
+
+            // v6.50.12 — EL PARPADEO ORGÁNICO: dos senos de frecuencia
+            // inconmensurable (9.3 y 15.1 — el cociente nunca es racional)
+            // = un vaivén que NO se repite en una sesión. El flicker de
+            // los tutoriales de aura, domesticado: ±Parpadeo, sutil a
+            // propósito. Energía viva, no estrobo.
+            float flick = 1f;
+            if (p.Parpadeo > 0.001f)
+                flick = 1f + p.Parpadeo * (0.6f * MathF.Sin(t * 9.3f + p.Semilla)
+                                         + 0.4f * MathF.Sin(t * 15.1f + p.Semilla * 2.7f));
+
+            // v6.50.12 — RESPIRAR o LATIR: el doble golpe de ~84 bpm (pico
+            // afilado sin^14 + eco al 0.18 del ciclo) reemplaza la
+            // respiración suave cuando el perfil acecha. El LATIDO mueve
+            // el radio; el parpadeo, el brillo: se combinan sin pisarse.
+            float pulso;
+            if (p.Latido)
+            {
+                float b = Frac(t * 1.4f);
+                float golpe = MathF.Pow(MathF.Sin(MathHelper.Pi * b), 14f);
+                float eco = MathF.Pow(MathF.Sin(MathHelper.Pi * Frac(b + 0.18f)), 14f);
+                pulso = 1f + 0.07f * (golpe + 0.55f * eco);
+            }
+            else
+                pulso = VFXCore.Breathe(t, 1.05f, 0f, 0.05f);
+
+            float R = radio * pulso;
             Color cC = frontal ? p.FCentro : p.TCentro;
             Color cM = frontal ? p.FMedio : p.TMedio;
             Color cB = frontal ? p.FBorde : p.TBorde;
-            float alfaCapa = frontal ? p.AlfaFrontal : p.AlfaTrasera;
+            float alfaCapa = (frontal ? p.AlfaFrontal : p.AlfaTrasera) * flick;
 
             // === 1. EL HALO DE GLOW (el aliento exterior, color BORDE) ===
             // Dos cuadros SoftGlow concéntricos: el aura "respira" luz.
@@ -964,6 +1084,26 @@ namespace AethonMod.Content.VFX
                 VFXCore.Quad(centro, cM * (alfaCapa * 0.4f * p.Glow), new Vector2(corR * 2.0f, corR * 2.0f));
             }
 
+            // === 1b. v6.50.12 — LOS RAYOS RADIALES (la corona radiante) ===
+            // Las agujas de luz del tutorial de auras, traducidas al Line
+            // de la casa: finas, del cuerpo al borde, cada una latiendo
+            // con su fase (i*2.4 desacopla el latir de la aguja i de la
+            // i+1) y su largo (Hash01) — la jerarquía visual del clímax.
+            if (p.Rayos > 0 && VFXCore.Presupuesto(p.Rayos))
+            {
+                for (int i = 0; i < p.Rayos; i++)
+                {
+                    float hR = VFXCore.Hash01(p.Semilla ^ 0x5A17, i, 3);
+                    float ang = i * (MathHelper.TwoPi / p.Rayos) + t * p.Giro * 0.6f;
+                    float largo = R * (1.0f + 0.22f * hR);
+                    Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                    float aR = alfaCapa * 0.55f * (0.55f + 0.45f * MathF.Sin(t * 1.6f + i * 2.4f));
+                    if (aR > 0.004f)
+                        VFXCore.Line(centro + dir * (R * 0.45f), centro + dir * largo,
+                            cB * aR, 1.6f + 1.4f * hR);
+                }
+            }
+
             // === 2. EL CUERPO: los gajos de ruido (patrón Perlin/Poligono) ===
             if (p.Patron != PatronAura.Anillos)
             {
@@ -974,11 +1114,17 @@ namespace AethonMod.Content.VFX
                     {
                         float fracR = (r + 1f) / p.Anillos;
                         float dir = (r % 2 == 0) ? 1f : -1f; // contrarrotación
-                        Texture2D tex = Ruido(r);            // variante de ruido por anillo
 
                         for (int i = 0; i < p.Gajos; i++)
                         {
                             float h = VFXCore.Hash01(p.Semilla, i, r);
+                            // v6.50.12 — LA EBULLICIÓN: el índice de la
+                            // variante AVANZA con el tiempo con fase propia
+                            // por gajo (hierve todo, pero no a la vez — el
+                            // "turbulent displace" de AE traducido a
+                            // flipbook: las 4 variantes del generador).
+                            int idxR = r + (int)(t * p.Hervor + h * 2f);
+                            Texture2D tex = Ruido(idxR);
                             // ciclo de humo del gajo: nace dentro, deriva fuera y muere
                             float cyc = Frac(t * p.Deriva + h * 1.7f + r * 0.33f);
 
@@ -1009,6 +1155,19 @@ namespace AethonMod.Content.VFX
                             // COLOR POR ZONA: la fracción radial decide la mezcla
                             float rr = MathHelper.Clamp((rad / R - 0.45f) * 0.85f, 0f, 1f);
                             Color col = Zona(cC, cM, cB, rr);
+
+                            // v6.50.12 — EL BORDE CALIENTE (la cáscara): los
+                            // gajos de la zona exterior tienden a BLANCO (en
+                            // aditivo, blanco = más luz — el "rim glow" de
+                            // los tutoriales): la frontera del aura SE LEE
+                            // contra el fondo. El smoothstep lo concentra
+                            // justo donde el ojo espera la silueta.
+                            if (p.Borde > 0.001f && rr > 0.55f)
+                            {
+                                float rim = MathHelper.Clamp((rr - 0.55f) / 0.45f, 0f, 1f);
+                                rim *= rim * (3f - 2f * rim);
+                                col = Color.Lerp(col, Color.White, p.Borde * rim);
+                            }
                             float alfa = alfaCapa
                                        * MathF.Sin(MathHelper.Pi * cyc)  // nace y muere suave
                                        * (0.55f + 0.45f * h);            // variedad por gajo
@@ -1022,12 +1181,18 @@ namespace AethonMod.Content.VFX
                             VFXCore.Quad(pos, col * alfa, new Vector2(w, hgt), rot, tex);
 
                             // EL DESENFOQUE BARATO: el mismo gajo, desplazado
-                            // por la normal y a media alfa — el doble-pase suave.
+                            // por la normal y a media alfa — el doble-pase
+                            // suave. v6.50.12 — el pase de blur dibuja la
+                            // variante SIGUIENTE del flipbook: cuando el
+                            // índice avanza, la que era "próxima" ya estaba
+                            // pintada (al 40%) — CROSSFADE gratis entre fases
+                            // de la ebullición.
                             if (p.Blur > 0.5f)
                             {
                                 Vector2 normal = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
                                 VFXCore.Quad(pos + normal * (2.5f + 1.5f * p.Blur),
-                                    col * (alfa * 0.4f), new Vector2(w * 1.15f, hgt * 1.2f), rot, tex);
+                                    col * (alfa * 0.4f), new Vector2(w * 1.15f, hgt * 1.2f), rot,
+                                    Ruido(idxR + 1));
                             }
                         }
                     }
@@ -1059,6 +1224,15 @@ namespace AethonMod.Content.VFX
                         float rad = R * (0.45f + 0.75f * fase);
                         float alfa = alfaCapa * MathF.Sin(MathHelper.Pi * fase);
                         Color col = Zona(cC, cM, cB, fase);
+
+                        // v6.50.12 — el borde caliente de los pulsos: el
+                        // sonar muere BRILLANDO (la cáscara en la frontera).
+                        if (p.Borde > 0.001f && fase > 0.55f)
+                        {
+                            float rim = MathHelper.Clamp((fase - 0.55f) / 0.45f, 0f, 1f);
+                            rim *= rim * (3f - 2f * rim);
+                            col = Color.Lerp(col, Color.White, p.Borde * rim);
+                        }
                         Vector2 size = VFXCore.RingQuadSize(rad);
                         VFXCore.Quad(centro, col * alfa, size, VFXCore.Ring);
                         // su gemelo de glow (el eco del pulso)
@@ -1099,6 +1273,11 @@ namespace AethonMod.Content.VFX
                 if (e.Edad[i] < 0f || e.Vida[i] <= 0f) continue;
                 float vida01 = e.Edad[i] / e.Vida[i];
                 float alfa = alfaP * MathF.Sin(MathHelper.Pi * vida01);
+                // v6.50.12 — EL DESTELLO: las partículas veladas TITILAN
+                // (nunca las sólidas — la materia no parpadea, la energía
+                // sí). El twinkle del tutorial: brillo que va y viene.
+                if (!cfg.Solidas)
+                    alfa *= 0.8f + 0.2f * MathF.Sin(Main.GlobalTimeWrappedHourly * 11f + i * 1.9f);
                 if (alfa <= 0.01f) continue;
 
                 Vector2 pos = centro + new Vector2(MathF.Cos(e.Ang[i]), MathF.Sin(e.Ang[i])) * e.Rad[i];
