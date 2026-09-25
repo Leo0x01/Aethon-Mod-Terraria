@@ -16,6 +16,35 @@ namespace AethonMod
             // Sistema simplificado: el SkillTree y el Codex fueron eliminados.
             // No hay inicializacion extra necesaria.
 
+            // v6.50.13 — EL GUARDIÁN DE IDENTIDAD (la lección de "el jugador y
+            // el mundo se corrompen"). En tModLoader el NOMBRE del mod es el
+            // nombre de la CARPETA que contiene build.txt (ModCompile.
+            // ReadBuildInfo: Path.GetFileName(modFolder), verificado contra el
+            // IL del tML 2026.07.3.0) — no hay campo 'name' en build.txt que
+            // pueda anclarlo. Los .plr/.twld guardan sus datos de mod por
+            // ESE nombre: si este mod se compila desde una carpeta llamada de
+            // otra forma (p. ej. un clon sin el argumento de carpeta destino:
+            // 'git clone <url> AethonMod'), se convierte en un mod DISTINTO y
+            // todos los personajes y mundos guardados con "AethonMod" aparecen
+            // como corruptos/faltantes. Mejor fallar AQUÍ, con instrucciones,
+            // que huérfanar los guardados en silencio.
+            if (Name != "AethonMod")
+                throw new System.Exception(
+                    "[AethonMod] La carpeta de este mod debe llamarse EXACTAMENTE 'AethonMod' " +
+                    "(en tModLoader el nombre del mod es el nombre de su carpeta de fuentes). " +
+                    $"La actual es '{Name}'. Renombra la carpeta a 'AethonMod' dentro de ModSources " +
+                    "y vuelve a compilar (Develop Mods > Build & Reload), o descarga el " +
+                    "AethonMod.tmod oficial de https://github.com/Leo0x01/Aethon-Mod-Terraria/releases. " +
+                    "Con otro nombre, tus personajes y mundos guardarían datos de un mod distinto " +
+                    "y parecerían corruptos.");
+
+            // v6.50.13 — EL SELLO DE VERSIÓN (para que el client.log siempre
+            // muestre qué build corre: la 6.50.6 del usuario siguió cargando
+            // semanas sin que ningún fix le llegara). Mod.Version viene del
+            // build.txt empaquetado en el .tmod — es la verdad, no una
+            // constante del código.
+            Logger.Info($"AethonMod {Version} (tML {TModLoaderVersion}) — build oficial de github.com/Leo0x01/Aethon-Mod-Terraria");
+
             // v6.43 — CIELOLIB: EL REGISTRO DE LAS TEXTURAS DE FONDO DEL
             // SAGRARIO (los slots de fondo de esta versión se dan de alta
             // aquí — el estilo de bioma las pide por su ruta relativa).

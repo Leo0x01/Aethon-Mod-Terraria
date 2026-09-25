@@ -69,3 +69,8 @@ obj/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# === Heredado del .gitignore del mod (v6.50.13, fusión tras reestructurar) ===
+*.suo
+.tmod/
+*.tar.gz

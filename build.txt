@@ -1,7 +1,7 @@
 author = AethonModTeam
-version = 6.50.12
+version = 6.50.13
 displayName = Aethon, la Luz Primordial
 homepage = https://github.com/Leo0x01/Aethon-Mod-Terraria
 modReferences =
-buildIgnore = *.csproj, *.csproj.user, obj/*, bin/*, *.bak, *.md, *.py, research/*, tools/*, tests
+buildIgnore = *.csproj, *.csproj.user, obj/*, bin/*, *.bak, *.md, *.py, *.sh, research/*, tools/*, tests, _masters/*
 side = Both
