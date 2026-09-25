@@ -121,9 +121,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.dedServ) return false;
 
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try
             {
@@ -154,13 +156,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            if (wasActive)
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
+            // llegó cerrado por un mod ajeno, se cura — el restore condicional
+            // devolvía el veneno y tML mataba al proyectil: active=false).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -279,9 +281,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.dedServ) return false;
 
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try
             {
@@ -291,13 +295,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            if (wasActive)
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
+            // llegó cerrado por un mod ajeno, se cura — el restore condicional
+            // devolvía el veneno y tML mataba al proyectil: active=false).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

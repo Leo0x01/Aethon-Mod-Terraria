@@ -113,7 +113,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -145,7 +145,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

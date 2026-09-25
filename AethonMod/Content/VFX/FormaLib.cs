@@ -554,16 +554,16 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// Abre el lote de depuración de la casa: End defensivo (si no
-        /// había lote, se recuerda) y Begin Inmediato+Aditivo con la
-        /// GameViewMatrix — el MISMO contrato que el resto de los lotes
-        /// propios del mod.
+        /// Abre el lote de depuración de la casa: v6.50.11 — SONDA (el End
+        /// solo si hay un Begin vivo — cero first-chance) y Begin
+        /// Inmediato+Aditivo con la GameViewMatrix — el MISMO contrato que
+        /// el resto de los lotes propios del mod.
         /// </summary>
         private static bool AbrirLoteDebug()
         {
-            bool habiaLote = true;
-            try { Main.spriteBatch.End(); }
-            catch { habiaLote = false; }
+            // v6.50.11 — el rastreo del lote ajeno por sonda (exacto).
+            bool habiaLote = VFXCore.LoteAbierto;
+            if (habiaLote) Main.spriteBatch.End();
 
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
@@ -572,21 +572,18 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// Cierra el lote de depuración y reabre el lote estándar (Deferred
-        /// + AlphaBlend) si había uno abierto al llegar — el pipeline del
-        /// llamador queda como estaba.
+        /// Cierra el lote de depuración y devuelve el lote SIEMPRE ABIERTO
+        /// y vanilla (v6.50.11 — el contrato de curación; antes solo
+        /// reabría si había lote al llegar y devolvía el veneno si no lo
+        /// había).
         /// </summary>
         private static void CerrarLoteDebug(bool habiaLote)
         {
-            try { Main.spriteBatch.End(); }
-            catch { }
+            VFXCore.CerrarLoteSiAbierto();
 
-            if (habiaLote)
-                // v6.50.3 — FIX (patrón v6.50.2): restore del pase de entidades con
-                // el sampler/rasterizer del pase de entidades de vanilla.
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None,
-                    Main.Rasterizer, null, Main.Transform);
+            // v6.50.11 — curación incondicional (los parámetros vanilla
+            // exactos; idempotente por sonda).
+            VFXCore.ReabrirLoteVanilla();
         }
     }
 }

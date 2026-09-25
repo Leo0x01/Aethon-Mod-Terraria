@@ -353,13 +353,12 @@ namespace AethonMod.Content.VFX
             SpriteBatch batch = Main.spriteBatch;
 
             // === EL FIN DEL LOTE DEL FONDO (la defensa de estado) ===
-            // Si el fondo dejó un lote ABIERTO, este End lo cierra (y hay que
-            // reabrirlo al terminar, como lo tenía). Si ya estaba cerrado, el
-            // End no tiene lote que cerrar y lo avisa con una excepción — la
-            // detectamos y NO reabrimos: el estado queda exactamente como estaba.
-            bool loteDelFondoAbierto = false;
-            try { batch.End(); loteDelFondoAbierto = true; }
-            catch { loteDelFondoAbierto = false; }
+            // v6.50.11 — SONDA: cierra el lote del fondo SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML
+            // 2026.07 registra como "Excepción silenciosa"; el rastreo ahora
+            // es EXACTO y con fallback clásico). El estado se devuelve CURADO
+            // (ver el finally).
+            bool loteDelFondoAbierto = VFXCore.CerrarLoteSiAbierto();
 
             try
             {
@@ -394,18 +393,20 @@ namespace AethonMod.Content.VFX
             {
                 // El lote propio queda SIEMPRE cerrado (aunque un Draw tire a
                 // mitad de pase — la lección del volcado blindado de v6.41).
-                try { batch.End(); } catch { }
+                // v6.50.11 — por sonda: cero first-chance.
+                VFXCore.CerrarLoteSiAbierto();
 
-                // === LA REAPERTURA: el lote del fondo como lo tenía ===
-                // Se reabre SOLO si nosotros lo cerramos: mismos parámetros
-                // canónicos de la fase de fondo (diferido, alfa, LinearClamp
-                // y la matriz de vista del FONDO — el mismo espacio en el que
-                // el juego dibuja su paisaje). v6.50.3 — NOTA de la unificación
-                // de restores: el patrón v6.50.2 (DefaultSamplerState) es para
-                // el pase de ENTIDADES; el de FONDO sigue en LinearClamp AQUÍ A
-                // PROPÓSITO — el paisaje son gradientes suaves, PointClamp los
-                // destrozaría en escalones (la matriz de fondo ya era la correcta).
-                if (loteDelFondoAbierto)
+                // === LA CURACIÓN DEL LOTE DE FONDO (v6.50.11) ===
+                // Mismos parámetros canónicos de la fase de fondo (diferido,
+                // alfa, LinearClamp y la matriz de vista del FONDO — el mismo
+                // espacio en el que el juego dibuja su paisaje). v6.50.3 —
+                // NOTA de la unificación de restores: el patrón v6.50.2
+                // (DefaultSamplerState) es para el pase de ENTIDADES; el de
+                // FONDO sigue en LinearClamp AQUÍ A PROPÓSITO — el paisaje son
+                // gradientes suaves, PointClamp los destrozaría en escalones.
+                // La sonda decide: si hay un Begin vivo no se pisa; si llegó
+                // cerrado (mod ajeno), se CURA con el lote de fondo correcto.
+                if (!VFXCore.LoteAbierto)
                 {
                     try
                     {

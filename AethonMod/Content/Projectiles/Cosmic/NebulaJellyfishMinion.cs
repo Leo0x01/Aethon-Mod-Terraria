@@ -453,8 +453,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (BlackHoleLensSystem.LensActive)
                 return false;
 
-            if (DrawJellyfishVisuals(Projectile, true))
-                RestoreSpriteBatch();
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla
+            // (idempotente por sonda: si el dibujado no lo tocó, no-op).
+            DrawJellyfishVisuals(Projectile, true);
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -500,8 +502,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float sy = 1f - 0.20f * contract;
                 float sx = 1f + 0.09f * contract;
 
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin vivo
+                // (cero first-chance — el End crudo disparaba una que tML 2026.07
+                // registraba como "Excepción silenciosa").
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -570,7 +575,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 return true;
             }
         }

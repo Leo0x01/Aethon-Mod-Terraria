@@ -219,7 +219,7 @@ namespace AethonMod.Content.VFX
             // try/catch/finally (la lección v6.41: nunca dejar el lote abierto).
             try
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     RasterizerState.CullCounterClockwise, null, Matrix.Identity);
@@ -237,14 +237,21 @@ namespace AethonMod.Content.VFX
             catch { }
             finally
             {
-                try
+                // v6.50.11 — SONDA + CURACIÓN: cierra lo nuestro sin
+                // first-chance y devuelve el lote de INTERFAZ (con SU
+                // matriz) SIEMPRE que no haya ya un Begin vivo — si llegó
+                // cerrado, se cura.
+                VFXCore.CerrarLoteSiAbierto();
+                if (!VFXCore.LoteAbierto)
                 {
-                    Main.spriteBatch.End();
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None,
-                        RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+                    try
+                    {
+                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None,
+                            RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
 

@@ -315,18 +315,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try
             {
                 MareaGravitatoriaRenderer.Draw(this, _age, Seed);
             }
-            catch { try { Main.spriteBatch.End(); } catch { } }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
 
-            if (wasActive)
-                RestoreSpriteBatch();
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
+            // llegó cerrado por un mod ajeno, se cura — el restore condicional
+            // devolvía el veneno y tML mataba al proyectil: active=false).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -439,22 +443,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         public override bool PreDraw(ref Color lightColor)
         {
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try
             {
                 MareaGravitatoriaRenderer.DrawMinor(this, _age, Seed);
             }
-            catch { try { Main.spriteBatch.End(); } catch { } }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
 
-            if (wasActive)
-            {
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
-            }
+            VFXCore.ReabrirLoteVanilla(); // v6.50.11 — curación (lote siempre abierto y vanilla)
             return false;
         }
     }

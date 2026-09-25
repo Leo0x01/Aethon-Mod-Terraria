@@ -682,7 +682,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             DrawCoreVisuals(Projectile, true);
 
-            RestoreSpriteBatch();
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -716,8 +717,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // v5.90 — era púrpura (60,20,90): ahora ámbar profundo, en la
                 // misma familia cálida del disco de acreción.
                 Texture2D glowTex = ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow").Value;
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin vivo
+                // (cero first-chance — el End crudo disparaba una que tML 2026.07
+                // registraba como "Excepción silenciosa").
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -807,7 +811,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // excepción interrumpió un Begin a medias, lo cerramos aquí
                 // (si el batch ya estaba cerrado, el End lanza y se ignora —
                 // caso raro y registrado una sola vez por tML, no cada frame).
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

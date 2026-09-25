@@ -218,9 +218,10 @@ namespace AethonMod.Content.VFX
             //  evaluación queda fijado de aquí en adelante)
             Instante inst = c.En(reloj);
 
-            bool habiaLote = true;
-            try { Main.spriteBatch.End(); }
-            catch { habiaLote = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin
+            // vivo (cero first-chance — el rastreo del lote ajeno por sonda).
+            bool habiaLote = VFXCore.LoteAbierto;
+            if (habiaLote) Main.spriteBatch.End();
 
             try
             {
@@ -232,15 +233,10 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); }
-                catch { /* el End de rescate nunca puede tirar */ }
-                if (habiaLote)
-                    // v6.50.3 — FIX (patrón v6.50.2): restore del pase de entidades
-                    // con el sampler/rasterizer del pase (LinearClamp dejaba el resto
-                    // del pase muestreando bilineal — sprites borrosos).
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        Main.DefaultSamplerState, DepthStencilState.None,
-                        Main.Rasterizer, null, Main.Transform);
+                VFXCore.CerrarLoteSiAbierto();
+                // v6.50.11 — curación: el lote sale SIEMPRE ABIERTO y vanilla
+                // (la rama condicional devolvía el veneno; idempotente por sonda).
+                VFXCore.ReabrirLoteVanilla();
             }
         }
 

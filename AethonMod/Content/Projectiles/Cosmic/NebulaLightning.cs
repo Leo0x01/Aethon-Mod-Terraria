@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Projectiles.Cosmic
 {
@@ -187,7 +188,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Vector2 dir = delta / len;
                 Vector2 perp = new Vector2(-dir.Y, dir.X);
 
-                Main.spriteBatch.End();
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin
+                // vivo (cero first-chance — el End crudo disparaba una que
+                // tML 2026.07 registraba como "Excepción silenciosa").
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -263,18 +267,15 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     star.Size() * 0.5f, (10f * fade) / (star.Width * 0.5f),
                     SpriteEffects.None, 0f);
 
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                VFXCore.CerrarLoteSiAbierto();
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                VFXCore.CerrarLoteSiAbierto();
             }
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla
+            // (idempotente por sonda: no pisa un Begin vivo).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

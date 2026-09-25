@@ -382,7 +382,10 @@ namespace AethonMod.Content.Projectiles.V20
             {
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-                Main.spriteBatch.End();
+                // v6.50.11 — sonda (el End pelado disparaba first-chance
+                // cuando el lote llegó cerrado — el catch lo tragaba, pero
+                // tML 2026.07 lo registra como "Excepción silenciosa").
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -396,12 +399,14 @@ namespace AethonMod.Content.Projectiles.V20
                 // v5.90 — cierre defensivo solo si una excepción cortó el Begin
                 // (el try{End} incondicional de v5.88 disparaba una first-chance
                 // cada frame que tML registraba como "Excepción silenciosa").
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            // v6.50.11 — curación con sonda (antes Begin incondicional pelado:
+            // Main.Rasterizer/Main.Transform via CullCounterClockwise/
+            // GameViewMatrix — equivalentes en juego, pero sin el guard de
+            // no-pisar-un-Begin-vivo ni el try interno).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

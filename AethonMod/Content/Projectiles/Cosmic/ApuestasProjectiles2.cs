@@ -228,9 +228,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.dedServ) return false;
 
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             CalcularVela();
 
@@ -259,15 +261,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 }
                 catch
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    VFXCore.CerrarLoteSiAbierto();
                 }
             }
 
             // === LA ESTRUCTURA FINA (resolución NATIVA): las costillas y el
             // corazón son trazos DEFINIDOS del arte — la media resolución
             // se los comería. ===
+            // v6.50.11 — H1 (hallazgo V-5): la curación de MediaResLib.Terminar
+            // deja el lote ABIERTO vanilla — el Begin aditivo pelado lanzaba
+            // InvalidOperationException CADA FRAME (FNA: Begin sobre Begin)
+            // y el catch lo tragaba: las costillas NUNCA se dibujaban + una
+            // first-chance por frame por vela. Sonda antes del Begin.
             try
             {
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -277,13 +285,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            if (wasActive)
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
+            // llegó cerrado por un mod ajeno, se cura — el restore condicional
+            // devolvía el veneno y tML mataba al proyectil: active=false).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -461,9 +469,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.dedServ) return false;
 
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try
             {
@@ -492,13 +502,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            if (wasActive)
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
+            // llegó cerrado por un mod ajeno, se cura — el restore condicional
+            // devolvía el veneno y tML mataba al proyectil: active=false).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

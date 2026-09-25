@@ -561,15 +561,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // nunca lo disparó). Ahora restauramos SOLO si la onda tomó el
             // batch (y lo dejó CERRADO); si no, el batch sigue exactamente
             // como tML lo dejó → nada que hacer.
-            if (DrawWaveVisual(Projectile, true))
-            {
-                // Restaurar el SpriteBatch al estado que tML espera tras
-                // PreDraw: el path de dibujado deja el batch CERRADO, basta
-                // con re-abrirlo.
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-            }
+            DrawWaveVisual(Projectile, true);
+
+            // v6.50.11 — CURACIÓN con sonda: sustituye al restore condicional
+            // v5.92 con la MISMA semántica sin contabilidad — si la onda no
+            // tocó el lote (frente de 0 px), el lote sigue ABIERTO y la sonda
+            // hace no-op; si lo tomó, se reabre vanilla. SIEMPRE válido.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -631,8 +629,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // factor de compensación para que un radio pedido R aparezca a R.
                 float thinComp = 1f / 0.92f;
 
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin
+                // vivo (cero first-chance).
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -780,7 +780,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // (Begin interrumpido → lo cerramos; ya cerrado → el End lanza
                 // y se ignora) → devolvemos true para que el llamador lo
                 // re-abra con los parámetros estándar de tML.
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 return true;
             }
         }

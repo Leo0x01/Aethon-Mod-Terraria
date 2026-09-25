@@ -814,7 +814,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             DrawStarVisuals(Projectile, true);
 
-            RestoreSpriteBatch();
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla.
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -880,8 +881,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // como se dimensiona con starR, la GIGANTE ROJA (×1.85) lo
                 // arrastra con ella — el crecimiento sigue al TAMAÑO del sol.
                 // La carga de la Supernova hija sigue dibujándose detrás también.
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin vivo
+                // (cero first-chance — el End crudo disparaba una que tML 2026.07
+                // registraba como "Excepción silenciosa").
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -992,7 +996,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // (El try{End} incondicional de v5.88 disparaba una excepción
                 // first-chance cada frame — tML la registraba como "Excepción
                 // silenciosa" en el client.log.)
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

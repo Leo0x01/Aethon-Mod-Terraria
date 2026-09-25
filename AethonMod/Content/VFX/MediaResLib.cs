@@ -274,14 +274,15 @@ namespace AethonMod.Content.VFX
                         RenderTargetUsage.DiscardContents);
                 }
 
-                // === 2. Lote abierto del llamador: se cierra DEFENSIVAMENTE
-                //        (sus draws pendientes se vuelcan al destino ACTUAL,
-                //        que todavía es el suyo). Si HABÍA lote, Terminar
-                //        reabrirá el estándar del mundo; si no lo había, el
-                //        estado que el llamador encontró (cerrado) es el que
-                //        se le devuelve — restauración exacta. ===
-                try { Main.spriteBatch.End(); _loteDelLlamadorAbierto = true; }
-                catch { _loteDelLlamadorAbierto = false; }
+                // === 2. Lote abierto del llamador: la SONDA decide (v6.50.11
+                //        — antes: try{End}catch disparaba una first-chance
+                //        que tML 2026.07 registra como "Excepción
+                //        silenciosa" en el flujo NORMAL). Si HABÍA lote,
+                //        Terminar aplica el CONTRATO DE CURACIÓN y
+                //        devuelve un lote vanilla ABIERTO — siempre. El
+                //        helper devuelve el estado EXACTO (con fallback
+                //        clásico si un FNA futuro sin sonda). ===
+                _loteDelLlamadorAbierto = VFXCore.CerrarLoteSiAbierto();
 
                 // === 3. Guardar los bindings actuales (solo durante el pase). ===
                 _bindingsGuardados = gd.GetRenderTargets();
@@ -317,12 +318,13 @@ namespace AethonMod.Content.VFX
         /// protección de uso de la lección de arriba — el contenido
         /// SOBREVIVE al restore), vuelca el RT COMPLETO escalado ×2 a
         /// pantalla del destino con el blend de capa premultiplicada y el
-        /// sampler elegido, y REABRE el lote estándar del mundo SOLO si el
-        /// llamador tenía el lote ABIERTO al llegar (cerrado→cerrado,
-        /// abierto→abierto — el contrato de FlushAdditive: el que llega
-        /// con el lote ya cerrado gestiona sus lotes él mismo). TODO el
-        /// cuerpo en try/catch/finally: si algo tira, la restauración de
-        /// emergencia hace el mejor esfuerzo (End defensivo, restore de
+        /// sampler elegido, y devuelve el lote del mundo ABIERTO y válido
+        /// (v6.50.11 — EL CONTRATO DE CURACIÓN: los parámetros EXACTOS del
+        /// pase de entidades de vanilla, SIEMPRE — la vieja rama
+        /// "cerrado→cerrado" devolvía el veneno que tML castiga con
+        /// projectile.active=false). TODO el cuerpo en
+        /// try/catch/finally: si algo tira, la restauración de emergencia
+        /// hace el mejor esfuerzo (End defensivo por sonda, restore de
         /// bindings, bandera caída) — la lección v6.41: un lote abierto
         /// corrompe el render para siempre.
         /// </summary>
@@ -351,7 +353,7 @@ namespace AethonMod.Content.VFX
             try
             {
                 // === 1. Cerrar el lote del pase (los quads van al RT). ===
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
 
                 // === 2. VOLVER al destino del llamador (con la protección
                 //        de uso: sin ella, re-bindear un DiscardContents como
@@ -381,47 +383,31 @@ namespace AethonMod.Content.VFX
                     }
                     finally
                     {
-                        try { Main.spriteBatch.End(); } catch { }
+                        VFXCore.CerrarLoteSiAbierto();
                     }
                 }
 
-                // === 4. REABRIR el lote del mundo — SOLO si el llamador lo
-                //        tenía abierto al llegar (el estándar de restore de
-                //        la casa, idéntico al de cualquier PreDraw del mod:
-                //        cerrado→cerrado, abierto→abierto). v6.50.2 — FIX:
-                //        el patrón EXACTO del pase de ENTIDADES de vanilla
-                //        (el llamador actual es el PreDraw de la vela, un
-                //        proyectil): Main.DefaultSamplerState +
-                //        Main.Rasterizer + Main.Transform — el restore
-                //        viejo (LinearClamp + CullNone + GameViewMatrix)
-                //        dejaba el resto del pase de proyectiles
-                //        muestreando BILINEAL: pixel-art borroso tras el
-                //        pase volumétrico. ===
-                if (_loteDelLlamadorAbierto)
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        Main.DefaultSamplerState, DepthStencilState.None,
-                        Main.Rasterizer, null, Main.Transform);
+                // === 4. v6.50.11 — EL CONTRATO DE CURACIÓN: el lote del
+                //        mundo SIEMPRE se devuelve ABIERTO y válido (los
+                //        parámetros EXACTOS del pase de entidades de
+                //        vanilla, el patrón v6.50.2). La rama condicional
+                //        "cerrado→cerrado" devolvía el veneno: tML 2026.07
+                //        mata al proyectil que dibuja con el lote cerrado
+                //        (DrawProjectiles → active=false) y su End final
+                //        lanza. Idempotente por sonda: no pisa un Begin
+                //        vivo. ===
+                VFXCore.ReabrirLoteVanilla();
             }
             catch
             {
                 // === RESTAURACIÓN DE EMERGENCIA (mejor esfuerzo). ===
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 if (!destinoRestaurado)
                     VolverAlDestino(gd);
-                if (_loteDelLlamadorAbierto)
-                {
-                    try
-                    {
-                        // v6.50.2 — FIX: misma reapertura del pase de
-                        // entidades de la casa que el camino normal (el
-                        // restore de emergencia no puede abrir un lote
-                        // DISTINTO al que habría abierto el camino feliz).
-                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            Main.DefaultSamplerState, DepthStencilState.None,
-                            Main.Rasterizer, null, Main.Transform);
-                    }
-                    catch { }
-                }
+                // v6.50.11 — curación también en emergencia (idempotente
+                // por sonda; el Begin pelado de v6.50.2 con su try/catch
+                // ya no hace falta).
+                VFXCore.ReabrirLoteVanilla();
             }
             finally
             {
@@ -548,7 +534,7 @@ namespace AethonMod.Content.VFX
             // El lote del pase abandonado: End defensivo (sus draws pendientes
             // caen donde caigan — el daño de un pase abandonado ya está hecho;
             // esto desbloquea el FUTURO).
-            try { Main.spriteBatch.End(); } catch { }
+            VFXCore.CerrarLoteSiAbierto();
 
             if (gd != null && _bindingsGuardados != null &&
                 _frameDelPase == Main.GameUpdateCount)

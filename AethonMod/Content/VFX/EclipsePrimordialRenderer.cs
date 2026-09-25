@@ -165,7 +165,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
             // === 4. LOS TRES CÍRCULOS RÚNICOS (la firma — lote propio) ===
@@ -225,7 +225,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
             // === EL DISCO MURIENDO: el ocultador se arremolina al centro ===
@@ -244,7 +244,7 @@ namespace AethonMod.Content.VFX
                 }
                 finally
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    VFXCore.CerrarLoteSiAbierto();
                 }
             }
         }
@@ -295,7 +295,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -340,7 +340,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
             // EL RIM (aditivo, tras el disco): la luz doblándose.
@@ -357,7 +357,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -685,7 +685,7 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

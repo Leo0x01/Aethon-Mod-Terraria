@@ -470,7 +470,8 @@ namespace AethonMod.Content.Particles
             catch
             {
                 // Si algo falla con el estado del spriteBatch, asegurarse de restaurarlo
-                try { sb.End(); } catch { }
+                // v6.50.11 — por sonda (cero first-chance en el camino de error).
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -524,7 +525,8 @@ namespace AethonMod.Content.Particles
             }
             catch
             {
-                try { sb.End(); } catch { }
+                // v6.50.11 — por sonda (cero first-chance en el camino de error).
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

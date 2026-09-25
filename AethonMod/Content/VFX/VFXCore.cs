@@ -202,8 +202,12 @@ namespace AethonMod.Content.VFX
             // que pase, incluso en el error.
             try
             {
+                // v6.50.11 — SONDA: el End del lote del llamador sin
+                // first-chance (antes: End pelado que lanzaba si el
+                // consumidor ya lo había cerrado — la excepción escapaba
+                // del try/finally al llamador tras la limpieza).
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    CerrarLoteSiAbierto();
 
                 // v6.41 — EL VOLCADO BLINDADO (try/finally): si UN Draw lanza
                 // (dispositivo perdido, textura nula por descarga caliente), el
@@ -229,8 +233,9 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); }
-                catch { /* el End del lote de rescate nunca puede tirar */ }
+                // v6.50.11 — sonda: cierra NUESTRO lote aditivo (y solo si
+                // sigue vivo — cero first-chance).
+                CerrarLoteSiAbierto();
                 ContarQuads(_quads.Count);
                 _quads.Clear();
             }
@@ -271,6 +276,92 @@ namespace AethonMod.Content.VFX
             }
 
             _quads.Clear();
+        }
+
+        // ==================================================================
+        //  SECCIÓN v6.50.11 · LA SONDA DE LOTE (el fin de las first-chance)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.50.11 — ¿Tiene Main.spriteBatch un Begin vivo?
+        ///
+        /// LA HISTORIA: el End defensivo de la casa ({try { End } catch {}})
+        /// nunca dejó escapar nada, pero cada disparo sobre un lote ya
+        /// cerrado lanzaba una InvalidOperationException FIRST-CHANCE — y
+        /// tML 2026.07 LAS REGISTRA (AppDomain.FirstChanceException → el
+        /// WARN "Excepción silenciosa", deduplicado una vez por stack
+        /// único: el client.log v6.50.6 del usuario llevaba 27 de NUESTROS
+        /// End defensivos, TODAS capturadas por el propio catch — ruido
+        /// puro que ensuciaba el diagnóstico de cualquier otra cosa).
+        ///
+        /// La sonda PREGUNTA antes de tocar: el campo privado "beginCalled"
+        /// del SpriteBatch de FNA (verificado en el decompile del tML
+        /// 2026.07.3.0 real), cacheado por reflexión una sola vez. Si un
+        /// FNA futuro lo renombrara, la sonda devuelve false y los
+        /// ayudantes caen al End defensivo clásico (compatible).
+        /// </summary>
+        private static readonly System.Reflection.FieldInfo _fiBeginCalled =
+            typeof(SpriteBatch).GetField("beginCalled",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        /// <summary>True si Main.spriteBatch tiene un Begin vivo (sonda).</summary>
+        public static bool LoteAbierto =>
+            _fiBeginCalled != null && Main.spriteBatch != null &&
+            _fiBeginCalled.GetValue(Main.spriteBatch) is bool abierto && abierto;
+
+        /// <summary>
+        /// Cierra el lote del juego SOLO si hay un Begin vivo — cero
+        /// excepciones, cero first-chance en el log (el End defensivo de
+        /// la casa SIN su costo). DEVUELVE true si cerró un lote vivo (el
+        /// rastreo exacto del "lote ajeno" para quien deba reapertura).
+        /// Fallback: si la sonda no está disponible (FNA futuro), el End
+        /// defensivo clásico.
+        /// </summary>
+        public static bool CerrarLoteSiAbierto()
+        {
+            if (_fiBeginCalled == null)
+            {
+                try { Main.spriteBatch.End(); return true; }
+                catch { return false; }
+            }
+            if (LoteAbierto)
+            {
+                Main.spriteBatch.End();
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// v6.50.11 — EL CONTRATO DE CURACIÓN. Reabre el lote con los
+        /// parámetros EXACTOS del pase de entidades de vanilla
+        /// (Main.DrawProjectiles, medido en el decompile: Deferred ·
+        /// AlphaBlend · DefaultSamplerState · None · Main.Rasterizer ·
+        /// null · Main.Transform — el patrón v6.50.2).
+        ///
+        /// LA LECCIÓN DEL client.log: el restore condicional de la casa
+        /// ({if (wasActive) Begin}) dejaba el lote CERRADO cuando el
+        /// PreDraw lo encontró cerrado — "restauración exacta" que en
+        /// realidad devolvía el veneno: tML mata al proyectil que dibuja
+        /// con el lote cerrado (try/catch de DrawProjectiles →
+        /// projectile.active = false) y el End final del bucle lanza. Un
+        /// PreDraw de la casa SIEMPRE sale con el lote ABIERTO y válido —
+        /// si llegó roto (mod ajeno), se CURA. Idempotente por sonda: si
+        /// ya hay un Begin vivo no lo pisa (Begin sobre Begin lanza en
+        /// FNA) — el estado abierto preexistente se respeta y el Begin se
+        /// envuelve a prueba de todo.
+        /// </summary>
+        public static void ReabrirLoteVanilla()
+        {
+            if (_fiBeginCalled != null && LoteAbierto)
+                return; // ya hay un Begin vivo: no lo pisamos
+            try
+            {
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None,
+                    Main.Rasterizer, null, Main.Transform);
+            }
+            catch { }
         }
 
         // ------------------------------------------------------------------

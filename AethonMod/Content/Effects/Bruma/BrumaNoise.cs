@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Effects.Bruma
 {

@@ -120,7 +120,7 @@ namespace AethonMod.Content.VFX
             }
             catch (Exception ex)
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 try { Terraria.ModLoader.Logging.PublicLogger.Error("[AethonMod] RedSupergiantRenderer.Draw falló: " + ex.Message, ex); } catch { }
             }
         }

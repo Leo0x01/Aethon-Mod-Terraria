@@ -122,7 +122,9 @@ namespace AethonMod.Content.Globals
                 if (tex == null) return;
                 Vector2 origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
                 Vector2 drawPos = worldPos - Main.screenPosition;
-                Main.spriteBatch.End();
+                // v6.50.11 — sonda: cierra el lote del pase SOLO si hay Begin
+                // vivo (cero first-chance; el heal final lo hace 131).
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
                     null, Main.Transform);

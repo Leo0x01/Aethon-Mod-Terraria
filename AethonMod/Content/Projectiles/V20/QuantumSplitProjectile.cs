@@ -272,7 +272,7 @@ namespace AethonMod.Content.Projectiles.V20
             catch { }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 try { AuraLib.ReabrirLoteVanilla(); } catch { } // restore del pase de entidades (v6.50.2)
             }
             return false;

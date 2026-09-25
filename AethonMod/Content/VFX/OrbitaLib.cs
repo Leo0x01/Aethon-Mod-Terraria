@@ -164,26 +164,32 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// v6.49 — ¿cerramos un lote AJENO al abrir? (el patrón del End
-        /// defensivo de MoldeLib.FlushPaseAlpha, hallazgo AUD-A aplicado
-        /// a TODA la familia: Orbita + Codigos). Si un consumidor llegaba
-        /// con su lote ABIERTO (contrato roto), el Begin lanzaba y el
-        /// catch de rescate cerraba el lote ajeno A CIEGAS — el render
-        /// posterior del frame se corrompía. Ahora: se cierra lo que haya
-        /// (a lo seguro), se apunta, y CerrarBatch DEVUELVE el estado
-        /// (reabre un lote estándar válido en vez de dejarlo roto).
+        /// v6.50.11 — ¿cerramos un lote AJENO al abrir? (la sonda de
+        /// VFXCore.LoteAbierto reemplaza al End defensivo de v6.49, que
+        /// disparaba una first-chance por llamada en el flujo NORMAL —
+        /// el PreDraw del llamador ya había cerrado el lote — y tML
+        /// 2026.07 las registraba como "Excepción silenciosa"). El
+        /// rastreo es EXACTO: true solo si de verdad había un Begin vivo
+        /// — y CerrarBatch aplica el CONTRATO DE CURACIÓN (lote vanilla
+        /// ABIERTO al salir, siempre — la restauración exacta de v6.49
+        /// devolvía el veneno cuando encontraba el lote cerrado).
         /// </summary>
         private static bool _loteAjenoAbierto;
 
         /// <summary>Abre el SpriteBatch en ADITIVO con la matriz del juego.</summary>
         public static void AbrirAdditive()
         {
-            // v6.49 — END DEFENSIVO PREVIO: si había lote ajeno abierto, se
-            // cierra y se apunta (el contrato se RESPETA incluso cuando el
-            // consumidor se equivoca; Begin jamás sobre un lote vivo).
-            _loteAjenoAbierto = false;
-            try { Main.spriteBatch.End(); _loteAjenoAbierto = true; }
-            catch { }
+            // v6.50.11 — SONDA (adiós a la first-chance): el End defensivo
+            // solo cuando hay un Begin vivo — la pareja try{End}catch de
+            // v6.49 disparaba una first-chance CADA VEZ que el PreDraw del
+            // llamador ya había cerrado el lote (el flujo NORMAL de la
+            // casa), y tML 2026.07 las registra como "Excepción
+            // silenciosa" — 27 stacks únicos en el client.log del
+            // usuario, todas capturadas por el propio catch: ruido puro.
+            // El rastreo del lote ajeno ahora es EXACTO (la sonda no
+            // miente; y el helper lleva el fallback clásico por si un FNA
+            // futuro renombra el campo).
+            _loteAjenoAbierto = VFXCore.CerrarLoteSiAbierto();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -192,36 +198,37 @@ namespace AethonMod.Content.VFX
         /// <summary>Abre el SpriteBatch en ALFA (el pase de lo oscuro).</summary>
         public static void AbrirAlpha()
         {
-            // v6.49 — mismo blindaje (ver AbrirAdditive).
-            _loteAjenoAbierto = false;
-            try { Main.spriteBatch.End(); _loteAjenoAbierto = true; }
-            catch { }
+            // v6.50.11 — mismo blindaje por sonda (ver AbrirAdditive).
+            _loteAjenoAbierto = VFXCore.CerrarLoteSiAbierto();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>
-        /// Cierra el SpriteBatch (el contrato: CERRADO al salir). v6.49:
-        /// si el ABRIR cerró un lote AJENO, aquí se le DEVUELVE un lote
-        /// válido (reapertura estándar) — el estado del llamador nunca
-        /// queda roto, solo "como estaba".
+        /// Cierra el SpriteBatch del efecto y devuelve el lote ABIERTO y
+        /// válido (v6.50.11 — EL CONTRATO DE CURACIÓN). v6.49 devolvía
+        /// "como estaba" (abierto→abierto, cerrado→cerrado): la rama
+        /// cerrado→cerrado era la "restauración exacta" que en realidad
+        /// devolvía el veneno — tML 2026.07 mata al proyectil que dibuja
+        /// con el lote cerrado (el try/catch de DrawProjectiles hace
+        /// projectile.active = false) y el End final del bucle de
+        /// proyectiles lanza. Ahora: si el ABRIR cerró un lote ajeno se le
+        /// devuelve su lote (con los parámetros EXACTOS del pase de
+        /// entidades de vanilla — antes LinearClamp+CullNone, que dejaba
+        /// el resto del pase muestreando bilineal); y si el ABRIR lo
+        /// encontró CERRADO, aquí SE CURA: un lote vanilla vivo al salir,
+        /// siempre. Idempotente por sonda (ReabrirLoteVanilla no pisa un
+        /// Begin vivo).
         /// </summary>
         public static void CerrarBatch()
         {
-            try { Main.spriteBatch.End(); }
-            catch { }
-            if (_loteAjenoAbierto)
-            {
-                _loteAjenoAbierto = false;
-                try
-                {
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                }
-                catch { }
-            }
+            // v6.50.11 — sonda: cierra NUESTRO lote (el del efecto) sin
+            // first-chance.
+            VFXCore.CerrarLoteSiAbierto();
+            _loteAjenoAbierto = false;
+            // La curación incondicional (los parámetros vanilla exactos).
+            VFXCore.ReabrirLoteVanilla();
         }
 
         /// <summary>Quad centrado al batch actual (tamaño total = size px).</summary>
@@ -1117,7 +1124,8 @@ namespace AethonMod.Content.VFX
                 OndasDistorsion(center, radius, time, seed, 2, 2.4f, cVivo);
 
                 CerrarBatch();
-                // El batch queda CERRADO (contrato).
+                // v6.50.11 — el lote sale ABIERTO y vanilla (el contrato
+                // de curación; era "CERRADO al salir" en v6.49).
             }
             catch
             {

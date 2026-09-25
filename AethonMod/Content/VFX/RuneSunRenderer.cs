@@ -224,7 +224,7 @@ namespace AethonMod.Content.VFX
             catch
             {
                 // Cierre defensivo SOLO en el path de error (contrato v6.10).
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -649,7 +649,7 @@ namespace AethonMod.Content.VFX
             // MUNDO — el MISMO código que viste a los soles y a las coronas):
             // cerrar el batch del llamador, volcar la tanda propia y REABRIR
             // el aditivo para las capas restantes (salida: ABIERTO).
-            try { Main.spriteBatch.End(); } catch { }
+            VFXCore.CerrarLoteSiAbierto();
             VFXCore.Begin();
             EmitRingSystem(center + Main.screenPosition, R, time, seed,
                 tier, 0f, 0f, alphaMul);
@@ -1284,7 +1284,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
     }

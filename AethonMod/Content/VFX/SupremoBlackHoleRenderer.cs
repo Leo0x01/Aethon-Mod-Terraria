@@ -376,7 +376,7 @@ namespace AethonMod.Content.VFX
             catch
             {
                 // Cierre defensivo SOLO en el path de error (v6.10).
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 

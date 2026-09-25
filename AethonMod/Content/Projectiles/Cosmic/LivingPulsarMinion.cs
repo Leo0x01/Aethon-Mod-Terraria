@@ -303,8 +303,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (BlackHoleLensSystem.LensActive)
                 return false;
 
-            if (DrawPulsarVisuals(Projectile, true))
-                RestoreSpriteBatch();
+            // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla
+            // (idempotente por sonda: si el dibujado no lo tocó, no-op).
+            DrawPulsarVisuals(Projectile, true);
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 
@@ -333,8 +335,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Texture2D softGlow = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
 
+                // v6.50.11 — sonda: cierra el lote del juego SOLO si hay Begin vivo
+                // (cero first-chance — el End crudo disparaba una que tML 2026.07
+                // registraba como "Excepción silenciosa").
                 if (endActiveBatch)
-                    Main.spriteBatch.End();
+                    VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -406,7 +411,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             }
             catch
             {
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
                 return true;
             }
         }

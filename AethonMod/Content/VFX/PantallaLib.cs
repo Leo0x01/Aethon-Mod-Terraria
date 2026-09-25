@@ -516,8 +516,10 @@ namespace AethonMod.Content.VFX
             // propio. SOLO en frames CON ondas (el frame vacío de la casa
             // no toca el spriteBatch); y si no había lote, el catch lo
             // traga — la bandera queda a false y nadie reabre de más.
-            try { Main.spriteBatch.End(); _loteDeUiCerrado = true; }
-            catch { }
+            // v6.50.11 — SONDA: el End solo si hay un Begin vivo (cero
+            // first-chance; el rastreo de la bandera es EXACTO).
+            _loteDeUiCerrado = VFXCore.LoteAbierto;
+            if (_loteDeUiCerrado) Main.spriteBatch.End();
 
             try
             {
@@ -572,9 +574,9 @@ namespace AethonMod.Content.VFX
             finally
             {
                 // El End de rescate de la casa (v6.41): un lote abierto
-                // corrompe el render PARA SIEMPRE — este End nunca puede tirar.
-                try { Main.spriteBatch.End(); }
-                catch { }
+                // corrompe el render PARA SIEMPRE — v6.50.11: por sonda
+                // (nunca puede tirar NI disparar first-chance).
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
 
@@ -618,8 +620,10 @@ namespace AethonMod.Content.VFX
 
             // End defensivo (mismo contrato que las ondas: la bandera
             // ampara la reapertura de PantallaSistema).
-            try { Main.spriteBatch.End(); _loteDeUiCerrado = true; }
-            catch { }
+            // v6.50.11 — SONDA: el End solo si hay un Begin vivo (cero
+            // first-chance; el rastreo de la bandera es EXACTO).
+            _loteDeUiCerrado = VFXCore.LoteAbierto;
+            if (_loteDeUiCerrado) Main.spriteBatch.End();
 
             try
             {
@@ -703,8 +707,8 @@ namespace AethonMod.Content.VFX
             }
             finally
             {
-                try { Main.spriteBatch.End(); }
-                catch { }
+                // v6.50.11 — sonda: el End de rescate sin first-chance.
+                VFXCore.CerrarLoteSiAbierto();
             }
         }
     }
@@ -896,10 +900,15 @@ namespace AethonMod.Content.VFX
                 // PlayerInput.SetZoom_UI() con el lote de UIScaleMatrix):
                 // los tooltips de vanilla quedaban desplazados tras
                 // cualquier onda/flash. Solo cambia la matriz (y el
-                // rasterizer que la casa de UI usa) — SOLO si algo se
-                // cerró: el juego sigue dibujando normal pase lo que pase
-                // arriba, y el frame vacío no pisa el lote de tML.
-                if (Pantalla._loteDeUiCerrado)
+                // rasterizer que la casa de UI usa).
+                //
+                // v6.50.11 — SONDA + CURACIÓN (la lección del client.log):
+                // la reapertura ya no depende de la bandera del frame sino
+                // del ESTADO REAL del lote — si llega cerrado (mod ajeno,
+                // error propio) se CURA con el lote de interfaz correcto;
+                // si hay un Begin vivo no se pisa (el frame vacío sigue
+                // sin tocar el spriteBatch NI UNA vez).
+                if (!VFXCore.LoteAbierto)
                 {
                     try
                     {

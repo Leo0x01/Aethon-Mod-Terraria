@@ -249,15 +249,16 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // ============================================================
             //  CONTRATO DE BATCH v6.10: cerrar, dibujar, restaurar.
             // ============================================================
-            bool wasActive = true;
-            try { Main.spriteBatch.End(); }
-            catch { wasActive = false; }
+            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
+            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
+            // registra como "Excepción silenciosa" — 27 stacks únicos en el
+            // client.log del usuario, todas capturadas: ruido de diagnóstico).
+            VFXCore.CerrarLoteSiAbierto();
 
             try { DrawDisco(); }
-            catch { try { Main.spriteBatch.End(); } catch { } }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
 
-            if (wasActive)
-                RestauraBatch();
+            VFXCore.ReabrirLoteVanilla(); // v6.50.11 — curación (lote siempre abierto y vanilla)
             return false;
         }
 

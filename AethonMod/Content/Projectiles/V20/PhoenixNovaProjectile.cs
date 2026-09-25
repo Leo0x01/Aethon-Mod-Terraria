@@ -167,7 +167,10 @@ namespace AethonMod.Content.Projectiles.V20
                 // === STANDALONE (PhoenixNovaStaff): se dibuja a sí misma ===
                 Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-                Main.spriteBatch.End();
+                // v6.50.11 — sonda (el End pelado disparaba first-chance
+                // cuando el lote llegó cerrado — el catch lo tragaba, pero
+                // tML 2026.07 lo registra como "Excepción silenciosa").
+                VFXCore.CerrarLoteSiAbierto();
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -180,13 +183,15 @@ namespace AethonMod.Content.Projectiles.V20
             {
                 // Cierre defensivo solo si una excepción cortó un Begin a
                 // medias (el path normal deja las capas balanceadas).
-                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
             }
 
-            // Restauración EXACTA del estado que tML espera tras PreDraw.
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
-                null, Main.GameViewMatrix.TransformationMatrix);
+            // v6.50.11 — curación con sonda: el lote SIEMPRE abierto y
+            // vanilla al salir (equivalente al Begin pelado anterior —
+            // Main.Rasterizer/Main.Transform via CullCounterClockwise/
+            // GameViewMatrix — pero con el guard de no-pisar-un-Begin-vivo
+            // y el try interno).
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
 

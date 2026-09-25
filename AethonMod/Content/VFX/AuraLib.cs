@@ -854,14 +854,18 @@ namespace AethonMod.Content.VFX
         /// NPCs/proyectiles muestreando BILINEAL — sprites borrosos tras
         /// cualquier aura. Público a propósito:
         /// OleadaNPC (y cualquier consumidor futuro) reabre con esto.
+        ///
+        /// v6.50.11 — ahora DELEGA en VFXCore.ReabrirLoteVanilla (la
+        /// implementación canónica con SONDA: idempotente — no pisa un
+        /// Begin vivo — y con el Begin blindado; misma firma, mismos
+        /// parámetros, cero first-chance).
         /// </summary>
         public static void ReabrirLoteVanilla()
         {
             // v6.50.2 — FIX (restore del pase de entidades): sampler/rasterizer
             // del pase de entidades de vanilla, no LinearClamp+CullNone.
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None,
-                Main.Rasterizer, null, Main.Transform);
+            // v6.50.11 — delegación en el núcleo (sonda + curación).
+            VFXCore.ReabrirLoteVanilla();
         }
 
         /// <summary>

@@ -438,27 +438,24 @@ namespace AethonMod.Content.VFX
             /// Llamarlo DESPUÉS del FlushAdditive — ese es el contrato
             /// "pupila al final".
             ///
-            /// AUDITORÍA v6.43 (T4) — End defensivo previo + reapertura
-            /// condicional (el contrato de lote de la casa): si un
-            /// llamador llegara con el lote del juego ABIERTO, el Begin de
-            /// abajo tiraría y el End de rescate del finally cerraría UN
-            /// LOTE AJENO (corrupción de render). Ahora: el End defensivo
-            /// detecta el estado, el propio lote se abre limpio, y el
-            /// finally solo reabre el estándar si FUIMOS NOSOTROS quienes
-            /// cerramos el lote del llamador (cerrado→cerrado — el flujo
-            /// real del fragmento: ya cerrado tras el FlushAdditive, así
-            /// que nada se reabre y el PreDraw del llamador sigue mandando).
+            /// v6.50.11 — SONDA + CURACIÓN: el End previo pregunta por
+            /// reflexión (VFXCore.LoteAbierto) en vez de disparar la
+            /// first-chance del try{End}catch, y el finally devuelve el
+            /// lote SIEMPRE ABIERTO y vanilla (idempotente por sonda —
+            /// antes solo reabría si nosotros cerramos un lote ajeno, y
+            /// devolvía el veneno cuando se encontró cerrado).
             /// </summary>
             public void FlushPaseAlpha()
             {
                 if (_pendientesAlpha.Count == 0) return;
                 if (Main.netMode == NetmodeID.Server) return;
 
-                // End defensivo previo: ¿había lote abierto? (el contrato
-                // de la casa: Begin JAMÁS sobre un lote ajeno abierto).
-                bool loteAjenoAbierto = false;
-                try { Main.spriteBatch.End(); loteAjenoAbierto = true; }
-                catch { }
+                // v6.50.11 — SONDA (el End defensivo de la casa SIN su
+                // first-chance: el try{End}catch disparaba una excepción
+                // que tML 2026.07 registra como "Excepción silenciosa"
+                // cada vez que el PreDraw del llamador ya cerró el lote —
+                // el flujo NORMAL de la casa; el finally cura SIEMPRE).
+                VFXCore.CerrarLoteSiAbierto();
 
                 try
                 {
@@ -481,26 +478,21 @@ namespace AethonMod.Content.VFX
                 }
                 finally
                 {
-                    try { Main.spriteBatch.End(); }
-                    catch { /* el End del lote de rescate nunca puede tirar */ }
+                    // v6.50.11 — sonda: cierra NUESTRO lote alpha sin
+                    // first-chance.
+                    VFXCore.CerrarLoteSiAbierto();
                     _pendientesAlpha.Clear();
 
-                    // Reapertura estándar SOLO si cerramos un lote ajeno:
-                    // el estado del llamador se devuelve como estaba.
-                    if (loteAjenoAbierto)
-                    {
-                        try
-                        {
-                            // v6.50.3 — FIX (patrón v6.50.2): el restore del pase
-                            // de ENTIDADES con LinearClamp+CullNone dejaba el resto
-                            // del pase muestreando BILINEAL — pixel-art borroso tras
-                            // el pase alpha. Sampler/rasterizer del pase de entidades.
-                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                                Main.DefaultSamplerState, DepthStencilState.None,
-                                Main.Rasterizer, null, Main.Transform);
-                        }
-                        catch { }
-                    }
+                    // v6.50.11 — EL CONTRATO DE CURACIÓN: el lote sale
+                    // SIEMPRE ABIERTO y vanilla (los parámetros EXACTOS
+                    // del pase de entidades — v6.50.2 medido en IL). La
+                    // reapertura condicional "solo si cerramos un lote
+                    // ajeno" devolvía el veneno cuando se encontró
+                    // cerrado: tML 2026.07 mata al proyectil que dibuja
+                    // con el lote cerrado (DrawProjectiles →
+                    // active=false) y su End final lanza. Idempotente por
+                    // sonda: no pisa un Begin vivo.
+                    VFXCore.ReabrirLoteVanilla();
                 }
             }
 
