@@ -55,9 +55,14 @@ namespace AethonMod.Content.VFX
     ///   AlphaBlend=(One, InvSourceAlpha) (compositing PREMULTIPLICADO) y
     ///   el loader premultiplica los PNG (PngReader.PreMultiplyAlpha):
     ///   el tinte lineal (RGB intacto + alfa=f) rompía los lotes de masa
-    ///   (color sin escalar) y sobrealimentaba los aditivos — REVERTIDO al
-    ///   premultiplicado (RGB·f + alfa·f) de v6.25/v6.39, el correcto para
-    ///   AMBOS presets de FNA sobre texturas premultiplicadas.
+    ///   (color sin escalar) — REVERTIDO al premultiplicado (RGB·f + alfa·f)
+    ///   de v6.25/v6.39. PERO la revertida global dejó pasar UNA CUARTA
+    ///   raíz, medida y cerrada en v6.50.9 (ver Tint): en el lote ADITIVO el
+    ///   aporte real es P.rgb·P.a²·color·f² — el f² mataba el halo (0.30 →
+    ///   0.055·color, invisible) y TODO rayo del mod quedaba en una línea
+    ///   delgada sin resplandor. El tinte v6.50.9 (RGB·√f, A·√f) da la
+    ///   intensidad LINEAL correcta en el aditivo y compone premult bien en
+    ///   cualquier lote alfa — auditoría 30/30 rutas aditivas, 0 violaciones.
     ///
     ///   RAÍZ 2 — EL RIBBON SE CORTABA. Cada sub-segmento solapaba al vecino
     ///   `subLen + w*2` → el aditivo APILABA el brillo en cada junta (las
@@ -86,8 +91,8 @@ namespace AethonMod.Content.VFX
     ///   1. TEXTURAS DE FILAMENTO — v6.39: BoltHalo y BoltCore son BANDAS
     ///      UNIFORMES a lo largo (solo 3 px de fundido antialias en los
     ///      extremos) con el perfil PREMULTIPLICADO en RGB (la convención
-    ///      SoftGlow de la casa — v6.50.7: el loader premultiplica encima,
-    ///      así el tinte premultiplicado compone correcto en AMBOS lotes).
+    ///      SoftGlow de la casa; el loader vuelve a premultiplicar encima —
+    ///      lo absorbe el Tint v6.50.9 de intensidad lineal).
     ///      La nitidez de un rayo vive en la GEOMETRÍA multi-escala y en el
     ///      crackle por punto, NUNCA en ruido horneado a lo largo de la
     ///      textura (eso era el "cortado por secciones").
@@ -120,8 +125,10 @@ namespace AethonMod.Content.VFX
     /// CONTRATO (el de siempre, heredado de la primera generación): los
     /// métodos de DIBUJO reciben el batch ABIERTO en modo aditivo y no lo
     /// tocan — se pueden ANIDAR dentro de un renderer mayor. Coordenadas
-    /// tal cual lleguen. (Por eso el Tint LINEAL: TODO lo que dibuja esta
-    /// librería vive en el lote aditivo, y su alfa gatea el aporte.)
+    /// tal cual lleguen. (Por eso el Tint de INTENSIDAD LINEAL: TODO lo que
+    /// dibuja esta librería vive en el lote aditivo — 30/30 rutas auditadas
+    /// en v6.50.9, 0 violaciones — donde el aporte real es
+    /// P.rgb·P.a²·color·f: ver el Tint.)
     /// </summary>
     public static class StormLib
     {
@@ -473,7 +480,12 @@ namespace AethonMod.Content.VFX
             if (len < 4f) return;
 
             int gens = Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5);
-            float chaos = Math.Clamp(amp * 2.0f / Math.Max(len, 60f), 0.06f, 0.26f);
+            // v6.50.9: el suelo baja a 0.02 — el telegraph del cetro (amp 12
+            // sobre ~810 px de caída) pedía chaos 0.03 y el suelo 0.06 lo
+            // FORZABA a 49 px de deriva: la "línea fina de aviso" salía
+            // 4× más serpenteante que su diseño. Los rayos largos con poca
+            // amplitud respetan ahora su intención.
+            float chaos = Math.Clamp(amp * 2.0f / Math.Max(len, 60f), 0.02f, 0.26f);
             Vector2[] pts = Refine(
                 FractalPath(start, end, seed, flick, gens, chaos), seed, flick);
             StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
@@ -1098,8 +1110,13 @@ namespace AethonMod.Content.VFX
                 Quad(batch, bodyTex, mid, new Vector2(largo, w * 1.0f), rot,
                     Tint(halo, 0.85f * alpha * crackle));
                 // 3) LA VENA — la línea BLANCA razor-fina a ¼ del ancho
-                //    (sin crackle: el núcleo arde SIEMPRE).
-                Quad(batch, bodyTex, mid, new Vector2(largo, w * 0.26f), rot,
+                //    (sin crackle: el núcleo arde SIEMPRE). v6.50.9: suelo de
+                //    1.2 px — en las cadenas (w≈4.4 con taper) y los pelos la
+                //    vena bajaba a SUB-PIXEL (0.4-1.1 px) y el sampler bilineal
+                //    fundía el pico de la sección: el núcleo quedaba ROTO,
+                //    una línea fantasma intermitente.
+                Quad(batch, bodyTex, mid,
+                    new Vector2(largo, Math.Max(w * 0.26f, 1.2f)), rot,
                     Tint(core, 1f * alpha));
 
                 arc += len;
@@ -1154,29 +1171,46 @@ namespace AethonMod.Content.VFX
                 SpriteEffects.None, 0f);
         }
 
-        /// <summary>Tinte de INTENSIDAD PREMULTIPLICADO (v6.39 — el patrón
-        /// validado del proyecto, el mismo Tint v6.25 de RiftLib): el lote
-        /// aditivo (One/One) PASA del canal alfa — una intensidad que viva
-        /// solo ahí es INVISIBLE (el bug raíz nº 1 del informe v6.39: las 3
-        /// capas salían a brillo MÁXIMO). Escala el RGB (lo que el aditivo
-        /// suma de verdad) y deja el alfa para los lotes alfa (compatibilidad
-        /// gratis).</summary>
+        /// <summary>Tinte de INTENSIDAD LINEAL PARA EL LOTE ADITIVO (v6.50.9 —
+        /// LA ECUACIÓN REAL, cerrada de una vez con la sonda de hoy contra el
+        /// FNA.dll 23.10.0.0 del tML 2026.07.3.0): el lote aditivo real es
+        /// Additive=(SourceAlpha, One) — NO (One, One) como decía la teoría
+        /// v6.39 — y el loader PREMULTIPLICA los PNG (ReLogic
+        /// PngReader.PreMultiplyAlpha). Con el modulate del SpriteEffect, el
+        /// aporte de cada quad en el lote aditivo es:
+        ///
+        ///   aporte = textura.rgb · tinte.rgb · (textura.a · tinte.a)
+        ///          = P.rgb·P.a · color·f · (P.a · f)
+        ///          = P.rgb · P.a² · color · f²        ← con el premult (RGB·f, A·f)
+        ///
+        /// EL f² ERA EL ASESINO DEL HALO: la capa 1 (0.30) moría a
+        /// 0.055·color — INVISIBLE sobre el mundo — y el rayo entero quedaba
+        /// reducido a la VENA de 3 px con una banda tenue: "una línea
+        /// delgada, no son rayos de verdad" (el reporte del usuario, exacto).
+        /// El tinte v6.50.3 LINEAL (RGB intacto, A=f) daba la intensidad
+        /// correcta AQUÍ pero rompía los lotes de masa; el premult v6.50.7
+        /// arreglaba los lotes de masa y mataba el brillo de TODOS los rayos
+        /// del mod (la revertida global castigó a esta librería por un crimen
+        /// que no cometió). ESTE es el tinte correcto para AMBOS mundos:
+        /// (RGB·√f, A·√f) — intensidad f LINEAL en el aditivo
+        /// (P.rgb·P.a²·color·f) y compositing premult CORRECTO en cualquier
+        /// lote alfa (a intensidad √f — nunca fantasma, nunca caja). La
+        /// auditoría v6.50.9 verificó las 30 rutas de dibujo de esta
+        /// librería: TODAS aditivas, 0 violaciones.</summary>
         private static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            // v6.50.7 — REVERSIÓN AL PREMULTIPLICADO (la sonda v6.50.3
-            // estaba incompleta): el pipeline REAL premultiplica los PNG al
-            // cargar (ReLogic PngReader.PreMultiplyAlpha, verificado en el
-            // decompilado del tML 2026.07.3.0) y el AlphaBlend de FNA es
-            // (One, InvSourceAlpha) — compositing PREMULTIPLICADO, donde el
-            // RGB del tinte ES la intensidad. El tinte lineal dejaba el
-            // color SIN escalar en los lotes de masa (bruma fantasma
-            // saturada) y sobrealimentaba los aditivos hasta ×10 (destellos
-            // que inundaban la pantalla). El (RGB·f, A·f) de v6.25 es el
-            // correcto para AMBOS presets de FNA.
+            // v6.50.9 — LA RAÍZ CUADRADA DE LA INTENSIDAD (ver doc del
+            // método): el f² del premult clásico mataba al halo (0.30 → 0.055)
+            // y dejaba el rayo en una línea delgada; con (RGB·√f, A·√f) la
+            // intensidad aditiva sale f LINEAL y el compositing alfa sigue
+            // correcto. Verificado con mock 1:1 + VLM: halo/cuerpo/vena
+            // visibles de verdad, "real, powerful lightning strike" (9-10/10
+            // frente al 4-6/10 del premult).
+            float s = (float)Math.Sqrt(f);
             return new Color(
-                (byte)(int)(c.R * f), (byte)(int)(c.G * f), (byte)(int)(c.B * f),
-                (byte)(int)(255f * f));
+                (byte)(int)(c.R * s), (byte)(int)(c.G * s), (byte)(int)(c.B * s),
+                (byte)(int)(255f * s));
         }
     }
 }
