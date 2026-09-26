@@ -204,7 +204,13 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>7 — LAS ARMAS DE LAS LIBRERÍAS: las que usan nuestras VFX.</summary>
+    /// <summary>7 — LAS ARMAS DE LAS LIBRERÍAS: las que usan nuestras VFX
+    /// (v6.50.18 — EL CETRO DEL TRUENO PERLIN entra en la bolsa: el arma
+    /// de rayos por ruido de v6.50.17 nació SOLO con receta de 5 maderas y
+    /// el usuario la pidió en mano — petición: «la nueva arma, Cetro del
+    /// Trueno Perlin tienes que dársela al jugador». Va junto a su
+    /// hermano de rayos, el Cetro del Trueno Rúnico, que ya vive aquí.)
+    /// </summary>
     public class BolsaArmasLibrerias : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Armas de las Librerías";
@@ -221,6 +227,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.EclipsePrimordialStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.DesgarroRealityStaff>(), 1));
+            // v6.50.18 — EL CETRO DEL TRUENO PERLIN: el séptimo concierto
+            // (la librería nueva de rayos por ruido de Perlin).
+            l.Add((ModContent.ItemType<Weapons.Cosmic.TruenoPerlinStaff>(), 1));
             return l;
         }
     }
