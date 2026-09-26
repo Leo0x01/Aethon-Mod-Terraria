@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using AethonMod.Content.NPCs;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Effects
 {
@@ -82,6 +83,12 @@ namespace AethonMod.Content.Effects
             if (!(minDepth < 8.2f && minDepth > 1.5f)) return;
             _pintadoEsteFrame = true;
 
+            // v6.50.20 — red de seguridad PURA (el flujo normal ya no
+            // lanza: ver PintarCola). v6.50.19 tenía el bug de lote: el
+            // Begin propio contra el lote del fondo ABIERTO de vanilla
+            // (InvalidOperationException) — este catch lo tragaba y
+            // apagaba el cielo, y PostUpdateWorld lo re-encendía: bucle
+            // de "Excepción silenciosa" por frame y cola INVISIBLE.
             try { PintarCola(spriteBatch); }
             catch
             {
@@ -93,6 +100,20 @@ namespace AethonMod.Content.Effects
 
         // ==================================================================
         //  LA COLA — los huesos proyectados al paisaje
+        //
+        //  v6.50.20 — EL CONTRATO DEL LOTE (la lección del client.log):
+        //  CustomSky.Draw corre DENTRO del lote del fondo de vanilla
+        //  (Main.Draw: Begin(Deferred·Alpha·LinearClamp·None·Rasterizer·
+        //  transformaciónDelFondo) → DrawBG() → DrawSurfaceBG() →
+        //  SkyManager.DrawToDepth → AQUÍ, lote ABIERTO → ... → End).
+        //  El patrón v6.50.19 (Begin propio sin más) lanzaba
+        //  InvalidOperationException (Begin sobre Begin) en CADA frame.
+        //  EL PATRÓN DEL DoGSky de Calamity (la referencia de
+        //  producción): End del lote de vanilla → lotes propios con LA
+        //  MISMA MATRIZ del fondo → devolver el lote del fondo ABIERTO
+        //  para que el End de vanilla lo cierre con naturalidad. La
+        //  sonda de la casa blindan cada cierre (cero first-chance si
+        //  un mod ajeno dejó el lote en un estado raro).
         // ==================================================================
         private void PintarCola(SpriteBatch sb)
         {
@@ -128,65 +149,101 @@ namespace AethonMod.Content.Effects
 
             float t = Main.GlobalTimeWrappedHourly;
 
-            // === 1) LA SILUETA ATMOSFÉRICA (lote alfa — la niebla del horizonte) ===
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.LinearClamp, DepthStencilState.None,
-                RasterizerState.CullNone, null, Matrix.Identity);
+            // === LA MATRIZ DEL PAISAJE — la reconstrucción EXACTA del lote
+            // del fondo (la misma corrección que Main.Draw le hace a
+            // BackgroundViewMatrix; literal del DoGSky/Calamity): los
+            // huesos "pertenecen" al fondo y heredan su espacio. ===
+            Matrix m = Main.BackgroundViewMatrix.TransformationMatrix;
+            m.Translation -= Main.BackgroundViewMatrix.ZoomMatrix.Translation *
+                new Vector3(1f,
+                    Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically) ? -1f : 1f,
+                    1f);
+
+            // === 0. CERRAR el lote del fondo de vanilla (llega ABIERTO —
+            // el contrato; por sonda: si un mod ajeno lo dejó cerrado,
+            // aquí NO lanza) ===
+            VFXCore.CerrarLoteSiAbierto();
             try
             {
-                for (int k = 0; k < huesos.Count; k++)
+                // === 1) LA SILUETA ATMOSFÉRICA (lote alfa — la niebla del horizonte) ===
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, m);
+                try
                 {
-                    var (c, rot, idx) = huesos[k];
-                    bool esCola = idx >= 999;
-                    int prof = Math.Min(huesos.Count, Math.Max(1, idx - AethonSierpeCuerpo.UMBRAL_FONDO + 1));
+                    for (int k = 0; k < huesos.Count; k++)
+                    {
+                        var (c, rot, idx) = huesos[k];
+                        bool esCola = idx >= 999;
+                        int prof = Math.Min(huesos.Count, Math.Max(1, idx - AethonSierpeCuerpo.UMBRAL_FONDO + 1));
 
-                    // LA PROYECCIÓN DEL DoG: el mundo visto desde lejos.
-                    Vector2 proy = (c - centroPantalla) * f + centroPantalla;
-                    // EL VAIVÉN (la cola viva en el horizonte — se ENREDA).
-                    proy.Y += MathF.Sin(t * 1.8f + k * 0.55f) * 9f;
-                    proy.X += MathF.Sin(t * 0.7f + k * 0.4f) * 5f;
-                    Vector2 pos = proy - Main.screenPosition;
+                        // LA PROYECCIÓN DEL DoG: el mundo visto desde lejos.
+                        Vector2 proy = (c - centroPantalla) * f + centroPantalla;
+                        // EL VAIVÉN (la cola viva en el horizonte — se ENREDA).
+                        proy.Y += MathF.Sin(t * 1.8f + k * 0.55f) * 9f;
+                        proy.X += MathF.Sin(t * 0.7f + k * 0.4f) * 5f;
+                        Vector2 pos = proy - Main.screenPosition;
 
-                    // La escala: se encoge hacia la punta (perspectiva lejana).
-                    float esc = (esCola ? 0.58f : 0.66f - 0.14f * prof / 13f) * 1.5f;
+                        // La escala: se encoge hacia la punta (perspectiva lejana).
+                        float esc = (esCola ? 0.58f : 0.66f - 0.14f * prof / 13f) * 1.5f;
 
-                    // El TINTE del horizonte: hueso azul-violeta, translúcido,
-                    // más tenue cuanto más atrás (atmósfera de verdad).
-                    float desvanecer = (1f - prof / 26f) * 0.28f + 0.42f;
-                    Color silueta = new Color(96, 88, 126) * (_alpha * desvanecer);
+                        // El TINTE del horizonte: hueso azul-violeta, translúcido,
+                        // más tenue cuanto más atrás (atmósfera de verdad).
+                        float desvanecer = (1f - prof / 26f) * 0.28f + 0.42f;
+                        Color silueta = new Color(96, 88, 126) * (_alpha * desvanecer);
 
-                    sb.Draw(esCola ? texCola : texVertebra, pos, null, silueta,
-                        rot, esCola ? origenC : origenV, esc, SpriteEffects.None, 0f);
+                        sb.Draw(esCola ? texCola : texVertebra, pos, null, silueta,
+                            rot, esCola ? origenC : origenV, esc, SpriteEffects.None, 0f);
+                    }
                 }
-            }
-            finally { sb.End(); }
+                finally { VFXCore.CerrarLoteSiAbierto(); } // el propio, sin first-chance
 
-            // === 2) EL RIM DORADO (lote aditivo — la Luz brilla incluso lejos) ===
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.LinearClamp, DepthStencilState.None,
-                RasterizerState.CullNone, null, Matrix.Identity);
-            try
+                // === 2) EL RIM DORADO (lote aditivo — la Luz brilla incluso lejos) ===
+                sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None,
+                    Main.Rasterizer, null, m);
+                try
+                {
+                    Texture2D glow = VFXCore.SoftGlow; // el pincel cacheado de la casa
+                    for (int k = 0; k < huesos.Count; k += 2) // cada 2 huesos: puntual y barato
+                    {
+                        var (c, rot, idx) = huesos[k];
+                        bool esCola = idx >= 999;
+                        int prof = Math.Min(huesos.Count, Math.Max(1, idx - AethonSierpeCuerpo.UMBRAL_FONDO + 1));
+                        Vector2 proy = (c - centroPantalla) * f + centroPantalla;
+                        proy.Y += MathF.Sin(t * 1.8f + k * 0.55f) * 9f;
+                        proy.X += MathF.Sin(t * 0.7f + k * 0.4f) * 5f;
+                        Vector2 pos = proy - Main.screenPosition;
+
+                        float latido = 0.6f + 0.4f * MathF.Sin(t * 3.1f + k * 0.9f);
+                        float brillo = 0.20f * _alpha * (1f - prof / 30f) * latido;
+                        sb.Draw(glow, pos, null, new Color(255, 226, 140) * brillo,
+                            rot, new Vector2(glow.Width, glow.Height) * 0.5f, (esCola ? 0.30f : 0.38f),
+                            SpriteEffects.None, 0f);
+                    }
+                }
+                finally { VFXCore.CerrarLoteSiAbierto(); } // el propio, sin first-chance
+            }
+            finally
             {
-                for (int k = 0; k < huesos.Count; k += 2) // cada 2 huesos: puntual y barato
+                // === 3. DEVOLVER EL LOTE DEL FONDO ABIERTO (el End de
+                // vanilla tras DrawBG lo cerrará con naturalidad — el
+                // patrón del DoGSky). Los parámetros EXACTOS del lote
+                // del fondo de vanilla: Deferred · AlphaBlend ·
+                // LinearClamp · None · Main.Rasterizer · la matriz m. 
+                // Por sonda: no se pisa un Begin vivo (si llegó abierto
+                // de un mod ajeno, se respeta y se CURA solo). ===
+                if (!VFXCore.LoteAbierto)
                 {
-                    var (c, rot, idx) = huesos[k];
-                    bool esCola = idx >= 999;
-                    int prof = Math.Min(huesos.Count, Math.Max(1, idx - AethonSierpeCuerpo.UMBRAL_FONDO + 1));
-                    Vector2 proy = (c - centroPantalla) * f + centroPantalla;
-                    proy.Y += MathF.Sin(t * 1.8f + k * 0.55f) * 9f;
-                    proy.X += MathF.Sin(t * 0.7f + k * 0.4f) * 5f;
-                    Vector2 pos = proy - Main.screenPosition;
-
-                    float latido = 0.6f + 0.4f * MathF.Sin(t * 3.1f + k * 0.9f);
-                    float brillo = 0.20f * _alpha * (1f - prof / 30f) * latido;
-                    Texture2D glow = ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Effects/SoftGlow").Value;
-                    sb.Draw(glow, pos, null, new Color(255, 226, 140) * brillo,
-                        rot, glow.Size() * 0.5f, (esCola ? 0.30f : 0.38f),
-                        SpriteEffects.None, 0f);
+                    try
+                    {
+                        sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None,
+                            Main.Rasterizer, null, m);
+                    }
+                    catch { }
                 }
             }
-            finally { sb.End(); }
         }
 
         // accesores internos para el sistema registrador (mismo archivo)
