@@ -1,882 +1,2182 @@
-{
-        "Mods.AethonMod.DisplayName": "Aethon, la Luz Primordial",
-
-        "Items.GenesisShard.DisplayName": "Fragmento Génesis",
-        "Items.GenesisShard.Tooltip": "Arma de luz que dispara partículas autoguiadas.\nMaterial para craftear el Grimorio del Eterno.\nDropea de King Slime y Eye of Cthulhu.",
-
-        "Items.AncientAltarItem.DisplayName": "Altar Antiguo",
-        "Items.ResonanceShard.DisplayName": "Fragmento de Resonancia",
-        "Items.ResonanceShard.Tooltip": "Moneda cósmica. Se obtiene de jefes.",
-
-        "Items.GrimoireEternal.DisplayName": "Grimorio del Eterno",
-        "Items.GrimoireEternal.Tooltip": "Arma híbrida mágica/de invocación.\nClick izq: bolt arcano. Click der: invoca minion.\nGana XP REAL con cada baja: la rareza del bestiario (0–5 estrellas)\nmide su valor, la PRIMERA kill de cada especie paga ×3 y el hardmode\nduplica a las criaturas; los jefes pagan XP FIJA (base + 10% de su\nvida + estrellas + un término que crece con tu nivel).\nLOS TRES ESTADOS: sostenido = todo el poder; en la barra rápida =\nsigue comiendo XP, conserva los slots de minion y vida/maná (tope\n+100); guardado = nada (los minions ya invocados permanecen).\nSin coste de maná (pruebas).",
-
-        "Items.BossSummonBag.DisplayName": "Bolsa de Invocadores",
-        "Items.BossSummonBag.Tooltip": "Contiene 999 invocadores de cada jefe.\nItem de testing — eliminar antes de release.",
-        "Items.LevelUpTester.DisplayName": "Verdugo de Niveles",
-        "Items.LevelUpTester.Tooltip": "Da +10 niveles al Grimorio del Eterno.\nBusca en todo el inventario.\nItem de testing — eliminar antes de release.",
-
-        "Items.CarnadaDelGrimorio.DisplayName": "La Carnada del Grimorio",
-        "Items.CarnadaDelGrimorio.Tooltip": "Provoca LAS OLEADAS DEL HAMBRE sin esperar.\nClic izq: desata la furia (las oleadas preparadas).\nClic der: prepara 1..11 oleadas (11 = EL JUICIO: los 7 guardianes ×15).\nTodo lo que muera en la oleada k paga XP ×(k+1); la especial, ×15.\nItem de testing — eliminar antes de release.",
-
-        "Items.CristalDelTitanHueco.DisplayName": "Cristal del Titán Hueco",
-        "Items.CristalDelTitanHueco.Tooltip": "Fragmento del coloso cristalino del Sagrario.\nConvoca al TITÁN HUECO.\nSOLO FUNCIONA DE DÍA — la noche es de los muertos.",
-
-        "Items.SelloDelRift.DisplayName": "Sello del Rift",
-        "Items.SelloDelRift.Tooltip": "La llave del que existe mitad aquí, mitad entre mundos.\nConvoca al GUARDIÁN DEL RIFT.\nSOLO FUNCIONA DE DÍA.",
-
-        "Items.PlumaDeLaArquera.DisplayName": "Pluma de la Arquera",
-        "Items.PlumaDeLaArquera.Tooltip": "Cayó del cielo la vez que ella intentó derribar a Aethon.\nConvoca al ECO DE LA ARQUERA ESTELAR.\nSOLO FUNCIONA DE DÍA.",
-
-        "Items.SombraDelPortador.DisplayName": "Sombra del Portador",
-        "Items.SombraDelPortador.Tooltip": "La silueta del primer alma que se ató a un fragmento.\nConvoca al ECO DEL PRIMER PORTADOR.\nSOLO FUNCIONA DE DÍA.",
-
-        "Items.NombreDeAethon.DisplayName": "El Nombre de Aethon",
-        "Items.NombreDeAethon.Tooltip": "«Ve al Sagrario Hueco y llama su nombre.»\nConvoca a AETHON, LA LUZ PRIMORDIAL.\nSOLO FUNCIONA DE DÍA.\nLas cinco fases esperan — el reconocimiento final.",
-
-        "Projectiles.ArcaneBolt.DisplayName": "Bolt Arcano",
-        "Projectiles.GenesisLight.DisplayName": "Luz del Génesis",
-        "Projectiles.CosmicOrbMinion.DisplayName": "Orbe Cósmico",
-        "Projectiles.CosmicOrbBolt.DisplayName": "Bolt Cósmico",
-        "Projectiles.AnillosSingularesHalo.DisplayName": "Anillos del Horizonte",
-
-        "Buffs.CosmicOrbBuff.DisplayName": "Orbe Cósmico",
-        "Buffs.CosmicOrbBuff.Description": "Un orbe de luz cósmica te sigue y dispara a tus enemigos",
-
-        "Items.MedusaNebularStaff.DisplayName": "Báculo de la Medusa Nebular",
-        "Items.MedusaNebularStaff.Tooltip": "Invoca LA MEDUSA NEBULAR.\nUna campana translúcida con una galaxia espiral dentro, nadando a pulsos de gravedad.\nSu campana dispara LÁTIGOS ELÉCTRICOS que salen de ella misma, dejando la quemadura fría del vacío.",
-
-        "Projectiles.NebulaJellyfishMinion.DisplayName": "Medusa Nebular",
-        "Projectiles.NebulaLightning.DisplayName": "Rayo Nebular",
-
-        "Buffs.NebulaJellyfishBuff.DisplayName": "Medusa Nebular",
-        "Buffs.NebulaJellyfishBuff.Description": "Una medusa de nebulosa deriva a tu lado a pulsos de gravedad",
-
-        "Items.LivingCometStaff.DisplayName": "Báculo del Cometa Estelar",
-        "Items.LivingCometStaff.Tooltip": "Invoca EL COMETA ESTELAR.\nUn cometa vivo con corona de 8 puntas estelares, orbitándote en una elipse excéntrica.\nCAE EN PICADO sobre tus enemigos y estalla en una pequeña nova.",
-
-        "Projectiles.StellarCometMinion.DisplayName": "Cometa Estelar",
-
-        "Buffs.StellarCometBuff.DisplayName": "Cometa Estelar",
-        "Buffs.StellarCometBuff.Description": "Un cometa vivo orbita a tu lado y cae en picado sobre tus enemigos",
-
-        "Items.LivingPulsarStaff.DisplayName": "Báculo del Púlsar Vivo",
-        "Items.LivingPulsarStaff.Tooltip": "Invoca EL PÚLSAR VIVO.\nUna estrella de neutrones girando a tu lado, barriendo el campo con dos haces de faro de radiación.\nTodo lo que cruzan queda ELECTRIFICADO.",
-
-        "Projectiles.LivingPulsarMinion.DisplayName": "Púlsar Vivo",
-
-        "Buffs.LivingPulsarBuff.DisplayName": "Púlsar Vivo",
-        "Buffs.LivingPulsarBuff.Description": "Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos",
-
-        "Buffs.QuemaduraCosmica.DisplayName": "Quemadura cósmica",
-        "Buffs.QuemaduraCosmica.Description": "El horizonte de eventos te lame: el fuego que arde hacia dentro",
-        "Buffs.OcasoActivoBuff.DisplayName": "El Ocaso",
-        "Buffs.OcasoActivoBuff.Description": "El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución",
-        "Buffs.SobrecalentadoBuff.DisplayName": "Sobrecalentada",
-        "Buffs.SobrecalentadoBuff.Description": "El bastón humea y calla: no dispara mientras se enfría",
-
-        "Items.BolsaProbador.DisplayName": "Bolsa del Probador",
-        "Items.BolsaProbador.Tooltip": "Las herramientas de pruebas de Aethon.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.\nLa bolsa es permanente: reábrela cuando pierdas algo.",
-        "Items.BolsaFundacionales.DisplayName": "Bolsa de los Bastones Fundacionales",
-        "Items.BolsaFundacionales.Tooltip": "Los cuatro bastones que empezaron todo.\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
-        "Items.BolsaClasicosCosmicos.DisplayName": "Bolsa de los Clásicos Cósmicos",
-        "Items.BolsaClasicosCosmicos.Tooltip": "El sol primordial y sus criaturas vivas.\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
-        "Items.BolsaAgujerosNegros.DisplayName": "Bolsa de los Agujeros Negros",
-        "Items.BolsaAgujerosNegros.Tooltip": "Diez formas de devorar la luz.\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
-        "Items.BolsaSolesRunicos.DisplayName": "Bolsa de los Soles Rúnicos",
-        "Items.BolsaSolesRunicos.Tooltip": "Del sol de un anillo al Gran Sellado (los 20).\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
-        "Items.BolsaEstrellasReales.DisplayName": "Bolsa de las Estrellas Reales",
-        "Items.BolsaEstrellasReales.Tooltip": "Física de verdad convertida en armas (las 7).\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-        "Items.BolsaArmasLibrerias.DisplayName": "Bolsa de las Armas de las Librerías",
-        "Items.BolsaArmasLibrerias.Tooltip": "Cada arma es un concierto de nuestras librerías VFX (las 7).\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-        "Items.BolsaBastonesCreativos.DisplayName": "Bolsa de los Bastones Creativos",
-        "Items.BolsaBastonesCreativos.Tooltip": "El gauge, el péndulo, el coro y demás rarezas (los 6).\nClic derecho para desplegarlos.\nSolo entrega lo que te falte.",
-        "Items.BolsaExhumados.DisplayName": "Bolsa de los Exhumados",
-        "Items.BolsaExhumados.Tooltip": "Las formas exhumadas: el rencor y la eminencia.\nLas formas exhumadas originales del arsenal.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-        "Items.BolsaCosmeticos.DisplayName": "Bolsa de los Cosméticos",
-        "Items.BolsaCosmeticos.Tooltip": "Coronas, sellos y anillos que se ciñen a tu personaje.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-        "Items.BolsaDosFormas.DisplayName": "Bolsa de las Dos Formas",
-        "Items.BolsaDosFormas.Tooltip": "Las armas de las dos formas de uso: cada una despliega su forma alternativa.\nLas cuatro que aprendieron a decir dos cosas a la vez.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-        "Items.BolsaDesgarros.DisplayName": "Bolsa de los Desgarros",
-        "Items.BolsaDesgarros.Tooltip": "Los bastones que rajan la realidad: sutura, portal, pliegue, herida,\ncorazón, garganta, umbral y leviatán. Cada desgarro se abre distinto.\nClic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-
-        "Items.RencorPrimordialStaff.DisplayName": "El Rencor Primordial",
-        "Items.RencorPrimordialStaff.Tooltip": "La forma exhumada del arsenal: EL RENCOR PRIMORDIAL.\nClava un círculo de transmutación rúnico a 380 px.\n3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.\nAl tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).\nLos enemigos del haz se desintegran en ceniza. Sin maná.",
-
-        "Items.EminenciaAtrozStaff.DisplayName": "La Eminencia Atroz",
-        "Items.EminenciaAtrozStaff.Tooltip": "La forma exhumada del arsenal: LA EMINENCIA ATROZ.\nSostén el uso: la congregación de espíritus canaliza cerca del cursor.\n14 s de acumulación → LA ABOMINACIÓN, control total.\nEl daño crece del 100% al 185% mientras se acumula.\nSi sueltas el canal, la masa decae y se disipa. Sin maná.",
-
-        "Projectiles.RencorPrimordialProjectile.DisplayName": "Círculo del Rencor",
-        "Projectiles.EminenciaAtrozProjectile.DisplayName": "Congregación de Espíritus",
-
-        "Items.OcasoAethonStaff.DisplayName": "Bastón del Ocaso de Aethon",
-        "Items.OcasoAethonStaff.Tooltip": "El arma suprema del medidor: carga → estallido → bloqueo.\nCada impacto de un fragmento carga el aro de tu cabeza.\nAro lleno: CLIC DERECHO enciende EL OCASO (8 s de muertes de estrella ×3).\nBajo el 50% de vida del objetivo, la muerte EJECUTA.\nDespués: 2 s de sobrecalentada. Sin maná.",
-
-        "Projectiles.OcasoShardProjectile.DisplayName": "Fragmento del Ocaso",
-        "Projectiles.OcasoBurstProjectile.DisplayName": "Muerte de Estrella",
-
-        "NPCs.HollowTitan.DisplayName": "El Titán Hueco",
-        "NPCs.AethonBoss.DisplayName": "Aethon, la Luz Primordial",
-        "NPCs.TheWitness.DisplayName": "El Testigo",
-        "NPCs.EchoBlade.DisplayName": "Eco del Primer Portador",
-        "NPCs.EchoArcher.DisplayName": "Eco de la Arquera Estelar",
-        "NPCs.RiftKeeper.DisplayName": "El Guardián del Rift",
-
-        "Items.TestMagicRing.DisplayName": "Anillo Mágico de Prueba",
-        "Items.TestSparkle.DisplayName": "Destello de Prueba",
-        "Items.ProjBeam.DisplayName": "Rayo de Prueba",
-        "Items.TestMagicRingV2.DisplayName": "Anillo Mágico de Prueba V2",
-        "Items.SeerOrb.DisplayName": "Orbe del Vidente",
-        "Items.BlackHoleStaff.DisplayName": "Agujero Negro",
-        "Items.SunStaff.DisplayName": "Sol",
-        "Items.SupernovaStaff.DisplayName": "Supernova",
-        "Items.PlasmaStormStaff.DisplayName": "Tormenta de Plasma",
-        "Items.PhoenixNovaStaff.DisplayName": "Nova del Fénix",
-        "Items.QuantumSplitStaff.DisplayName": "División Cuántica",
-
-        // v6.18: LOS 4 AGUJEROS QUE SE QUEDAN — nombres correctos en español
-        // (antes se veía el nombre de clase auto-generado en inglés).
-        "Items.CosmicBlackHoleStaff.DisplayName": "Bastón del Agujero Cósmico",
-        "Items.UmbralBlackHoleStaff.DisplayName": "Bastón del Agujero del Umbral",
-        "Items.BrumaBlackHoleStaff.DisplayName": "Bastón del Agujero de la Bruma",
-        "Items.OlvidoBlackHoleStaff.DisplayName": "Bastón del Agujero del Olvido",
-        // v6.18: LOS CINCO NUEVOS — el Supremo y los 4 Ascendidos
-        "Items.SupremoBlackHoleStaff.DisplayName": "Bastón del Agujero Negro Supremo",
-        // v6.20: el hermano AURORA del Supremo (gradiente negro→morado→azul→dorado)
-        "Items.SupremoAuroraBlackHoleStaff.DisplayName": "Bastón del Agujero Supremo Aurora",
-        "Items.UmbralAscendidoBlackHoleStaff.DisplayName": "Bastón del Umbral Ascendido",
-        "Items.BrumaAscendidoBlackHoleStaff.DisplayName": "Bastón de la Bruma Ascendida",
-        "Items.CosmicAscendidoBlackHoleStaff.DisplayName": "Bastón del Cósmico Ascendido",
-        "Items.OlvidoAscendidoBlackHoleStaff.DisplayName": "Bastón del Olvido Ascendido",
-        "Items.VoidCrownItem.DisplayName": "Corona de la Reina del Vacío",
-        "Items.VoidCrownItem.Tooltip": "La corona original del agujero negro carmesí, hoy cosmético portable.\nCinco arcos de neón carmesí con nudos naranjas arqueados JUSTO DETRÁS de tu cabeza.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
-
-        "Items.RuneCrownItem.DisplayName": "Corona Rúnica Estelar",
-        "Items.RuneCrownItem.Tooltip": "Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia\nflotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.\nPuro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.",
-
-        // v6.35: LOS TRES ACCESORIOS DE LAS LIBRERÍAS DE SIGNOS MÁGICOS —
-        // los sellos y anillos que RODEAN AL JUGADOR (SigiloLib + OrbitaLib).
-        "Items.SelloGenesisItem.DisplayName": "El Sello del Génesis",
-        "Items.SelloGenesisItem.Tooltip": "Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,\ny dentro el sello azul-estelar contrarrotando con el glifo del astro.\n+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico.\nVale en huecos de accesorio o de vanidad.",
-
-        "Items.AnillosSolRunicoItem.DisplayName": "Los Anillos del Sol Rúnico",
-        "Items.AnillosSolRunicoItem.Tooltip": "Siete aros rúnicos orbitan tu cuerpo en planos alternos:\npar horario, impar antihorario, precesando vivos con sus runas a lomos.\n+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa.\nVale en huecos de accesorio o de vanidad.",
-
-        "Items.AnillosHorizonteItem.DisplayName": "Los Anillos del Horizonte de Sucesos",
-        "Items.AnillosHorizonteItem.Tooltip": "El disco de acreción te orbita: veinte bandas incandescentes viajando,\nlos fotones corriendo el vórtice y el aro fino del horizonte.\nLA LENTE: el fondo se curva a tu alrededor. LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti.\n+10% de velocidad y +5% de daño universal. Vale en huecos de accesorio o de vanidad.",
-
-        // v6.19: LA FAMILIA DE LOS SOLES RÚNICOS — 10 copias del Sol
-        // (el Sol original queda INTACTO) con N anillos rúnicos en planos
-        // orbitales de giros alternos, mejoras progresivas por copia.
-        "Items.SolRunico1Staff.DisplayName": "Bastón del Sol Rúnico I",
-        "Items.SolRunico2Staff.DisplayName": "Bastón del Sol Rúnico II",
-        "Items.SolRunico3Staff.DisplayName": "Bastón del Sol Rúnico III",
-        "Items.SolRunico4Staff.DisplayName": "Bastón del Sol Rúnico IV",
-        "Items.SolRunico5Staff.DisplayName": "Bastón del Sol Rúnico V",
-        "Items.SolRunico6Staff.DisplayName": "Bastón del Sol Rúnico VI",
-        "Items.SolRunico7Staff.DisplayName": "Bastón del Sol Rúnico VII",
-        "Items.SolRunico8Staff.DisplayName": "Bastón del Sol Rúnico VIII",
-        "Items.SolRunico9Staff.DisplayName": "Bastón del Sol Rúnico IX",
-        "Items.SolRunico10Staff.DisplayName": "Bastón del Sol Rúnico X",
-        // v6.22: LA SEGUNDA DÉCADA — soles 11..20 (el cometa, la lluvia
-        // rúnica, la aurora polar, la estrella compañera, el cinturón de
-        // asteroides, la tormenta total, la corona y las lanzas prismáticas,
-        // el corazón de nova y EL GRAN SELLADO de la copia XX)
-        "Items.SolRunico11Staff.DisplayName": "Bastón del Sol Rúnico XI",
-        "Items.SolRunico12Staff.DisplayName": "Bastón del Sol Rúnico XII",
-        "Items.SolRunico13Staff.DisplayName": "Bastón del Sol Rúnico XIII",
-        "Items.SolRunico14Staff.DisplayName": "Bastón del Sol Rúnico XIV",
-        "Items.SolRunico15Staff.DisplayName": "Bastón del Sol Rúnico XV",
-        "Items.SolRunico16Staff.DisplayName": "Bastón del Sol Rúnico XVI",
-        "Items.SolRunico17Staff.DisplayName": "Bastón del Sol Rúnico XVII",
-        "Items.SolRunico18Staff.DisplayName": "Bastón del Sol Rúnico XVIII",
-        "Items.SolRunico19Staff.DisplayName": "Bastón del Sol Rúnico XIX",
-        "Items.SolRunico20Staff.DisplayName": "Bastón del Sol Rúnico XX",
-        // v6.22: EL ECLIPSE PRIMORDIAL — el Sol de los 20 Anillos fundido
-        // con TODOS los agujeros negros (luz + bruma + humo + rayos)
-        "Items.EclipsePrimordialStaff.DisplayName": "Bastón del Eclipse Primordial",
-        // (v6.24: la ENVOLTURA DE FUEGO y la ENVOLTURA DE RAYOS fueron
-        // BORRADAS — petición del usuario.)
-        // v6.24: LAS TRES ARMAS DE LAS LIBRERÍAS — cada una usa TODAS
-        // (StormLib rayos + BrumaFX humo + LumenLib luz + runas)
-        "Items.SinfoniaPrimordialStaff.DisplayName": "Bastón de la Sinfonía Primordial",
-        "Items.TormentaNebularStaff.DisplayName": "Cetro de la Tormenta Nebular",
-        "Items.LanzaAlbaStaff.DisplayName": "Lanza del Alba Rúnica",
-        // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)
-        "Items.StormRuneStaff.DisplayName": "Cetro del Trueno Rúnico",
-        // v6.50.17: EL CETRO DEL TRUENO PERLIN — el arco eléctrico de ruido
-        "Items.TruenoPerlinStaff.DisplayName": "Cetro del Trueno Perlin",
-
-        // v6.50.19: LAS SEIS IDEAS DE PROYECTILES DEL GRIMORIO — la bolsa 17
-        "Items.BolsaIdeasGrimorio.DisplayName": "Bolsa de las Ideas del Grimorio",
-        "Items.BolsaIdeasGrimorio.Tooltip": "Los seis futuros del proyectil del grimorio.\nCada idea EVOLUCIONA con el nivel del Grimorio del Eterno que lleves (6 · 12 · 20).\nClic derecho para desplegarlas. Solo entrega lo que te falte.",
-        "Items.IdeasFolioErrante.DisplayName": "El Folio Errante",
-        "Items.IdeasFolioErrante.Tooltip": "IDEA 1 para el proyectil del grimorio: LA PÁGINA.\nUna página que ondula y perfora (nivel 6: motas y más filo · nivel 12: se rompe en 3 mini-páginas homing · nivel 20: las rotas persiguen más duras).\nSin maná — la evolución sigue al GRIMORIO que lleves encima.",
-        "Items.IdeasPlumaPrimordial.DisplayName": "La Pluma Primordial",
-        "Items.IdeasPlumaPrimordial.Tooltip": "IDEA 2: LA PLUMA QUE ESCRIBIÓ EL LIBRO.\nDardo perforante (nivel 6: abanico de 3 · nivel 12: al clavar ESCRIBE una runa que arde · nivel 20: la pluma ORO escribe EL VERSO — seis glifos secuenciales).\nSin maná.",
-        "Items.IdeasSelloErrante.DisplayName": "El Sello Errante",
-        "Items.IdeasSelloErrante.Tooltip": "IDEA 3: EL SELLO QUE CAMINA.\nUn círculo lento que detona en aro (nivel 6: seis pernos radiales · nivel 12: ENCADENA — nace un sello junto al siguiente enemigo · nivel 20: TRES sellos).\nSin maná.",
-        "Items.IdeasLenguaTinta.DisplayName": "La Lengua de Tinta",
-        "Items.IdeasLenguaTinta.Tooltip": "IDEA 4: LA SIERPE DE TINTA.\nUna lengua que serpentea hacia la presa (nivel 6: 14 segmentos y más rápida · nivel 12: al morder SE BIFURCA en dos · nivel 20: LA HYDRA — tres lenguas desde el arranque).\nSin maná.",
-        "Items.IdeasOjoTexto.DisplayName": "El Ojo del Texto",
-        "Items.IdeasOjoTexto.Tooltip": "IDEA 5: EL OJO QUE LEE — el sucesor conceptual del proyectil actual.\nUn ojo homing que mira a su presa (nivel 6: dos pupilas lo escoltan · nivel 12: cada 80 t dispara un glifo a lo que lee · nivel 20: LA MIRADA — lee a TRES presas a la vez).\nSin maná.",
-        "Items.IdeasVersoVivo.DisplayName": "El Verso Vivo",
-        "Items.IdeasVersoVivo.Tooltip": "IDEA 6: LA PALABRA HECHA PROYECTIL.\nGlifos en formación que golpean por letra (nivel 6: la ola de 5 · nivel 12: EL PALÍNDROMO — la palabra rebota y vuelve a golpear · nivel 20: LA SENTENCIA — 7 glifos en dos filas y EL PUNTO FINAL que detona).\nSin maná.",
-
-        "Projectiles.FolioErranteProjectile.DisplayName": "Página del Grimorio",
-        "Projectiles.PlumaPrimordialProjectile.DisplayName": "Pluma Primordial",
-        "Projectiles.SelloErranteProjectile.DisplayName": "Sello Errante",
-        "Projectiles.LenguaTintaProjectile.DisplayName": "Lengua de Tinta",
-        "Projectiles.OjoTextoProjectile.DisplayName": "Ojo del Texto",
-        "Projectiles.VersoVivoProjectile.DisplayName": "Glifo Vivo",
-
-        // v6.50.19: LA SIERPE DE HUESO — los segmentos del jefe final
-        "NPCs.AethonSierpeCuerpo.DisplayName": "Vértebra de la Sierpe de Aethon",
-        "NPCs.AethonSierpeCola.DisplayName": "Cola de la Sierpe de Aethon",
-
-        // v6.18: LAS ALAS FUERON BORRADAS DEL MOD (petición del usuario).
-
-        "Projectiles.BlackHoleProjectile.DisplayName": "Agujero Negro",
-        "Projectiles.SunProjectile.DisplayName": "Sol",
-        "Projectiles.CosmicShockwaveProjectile.DisplayName": "Onda de Choque Cósmica",
-        "Projectiles.SupernovaProjectile.DisplayName": "Supernova",
-        "Projectiles.PlasmaStormProjectile.DisplayName": "Tormenta de Plasma",
-        "Projectiles.PhoenixNovaProjectile.DisplayName": "Nova del Fénix",
-        "Projectiles.QuantumSplitProjectile.DisplayName": "División Cuántica",
-        "Projectiles.CosmicBlackHoleProjectile.DisplayName": "Agujero Cósmico",
-        "Projectiles.UmbralBlackHoleProjectile.DisplayName": "Agujero del Umbral",
-        "Projectiles.BrumaBlackHoleProjectile.DisplayName": "Agujero de la Bruma",
-        "Projectiles.OlvidoBlackHoleProjectile.DisplayName": "Agujero del Olvido",
-        "Projectiles.SupremoBlackHoleProjectile.DisplayName": "Agujero Negro Supremo",
-        "Projectiles.SupremoAuroraBlackHoleProjectile.DisplayName": "Agujero Negro Supremo Aurora",
-        "Projectiles.UmbralAscendidoBlackHoleProjectile.DisplayName": "Umbral Ascendido",
-        "Projectiles.BrumaAscendidoBlackHoleProjectile.DisplayName": "Bruma Ascendida",
-        "Projectiles.CosmicAscendidoBlackHoleProjectile.DisplayName": "Cósmico Ascendido",
-        "Projectiles.OlvidoAscendidoBlackHoleProjectile.DisplayName": "Olvido Ascendido",
-        // v6.22: EL ECLIPSE PRIMORDIAL
-        "Projectiles.EclipsePrimordialProjectile.DisplayName": "Eclipse Primordial",
-
-        // v6.19: los proyectiles de los soles rúnicos y del rayo del cetro
-        "Projectiles.RuneSunProjectile.DisplayName": "Sol Rúnico",
-        "Projectiles.RunicLightning.DisplayName": "Trueno Rúnico",
-
-
-        // v6.26 — LA NUEVA ARSÉNICA: el desgarro, las estrellas reales,
-        // el ciclo estelar y los cinco bastones creativos
-        "Items.DesgarroRealityStaff.DisplayName": "Bastón del Desgarro en la Realidad",
-        "Items.DesgarroRealityStaff.Tooltip": "Dispara un DESGARRO en la realidad.\nLa grieta atraviesa paredes y daña con su línea.\nAl cerrarse deja una grieta persistente que drena.\nMientras vive, el mundo se oscurece herido.",
-
-        // v6.31 — EL SEMBRADOR: el púlsar ancla del cementerio estelar
-        "Items.SembradorCementeralStaff.DisplayName": "Sembrador del Cementerio Estelar",
-        "Items.SembradorCementeralStaff.Tooltip": "Siembra PÚLSARES que frenan en seco y se anclan donde apuntas.\nCada púlsar gira acelerando y barre con dos haces-faro opuestos.\nGolpe de anclaje a plena potencia; los haces pican sin descanso.\nMáximo 3 púlsares: la nueva siembra se come a la más vieja.",
-
-        // v6.31 — EL COLAPSO: la estrella que frena, tiembla y estalla
-        "Items.ColapsoMagnetarStaff.DisplayName": "El Colapso del Magnetar",
-        "Items.ColapsoMagnetarStaff.Tooltip": "Dispara una estrella magnetar que frena hasta casi detenerse.\nCuanto más aprieta el freno, más devasta el STARQUAKE.\nEl anillo solo golpea con su FRENTE y perfora armaduras.\nLa superviviente entra en overclock y muere en un destello.",
-
-        // v6.31 — LAS LÁGRIMAS: la escopeta de lágrimas orbitales del sol moribundo
-        "Items.LagrimasSolMoribundoStaff.DisplayName": "Las Lágrimas del Sol Moribundo",
-        "Items.LagrimasSolMoribundoStaff.Tooltip": "Derrama TRES LÁGRIMAS de un sol moribundo.\nCada lágrima orbita 2,5 s encendiéndose de chamuscado a oro.\nLuego caza sin descanso: hasta 18 mordiscos con quemadura cósmica.\nAl desvanecerse estalla en metal fundido.",
-
-        // v6.31 — EL DECRETO: el círculo del eclipse que crece y ejecuta
-        "Items.DecretoEclipseStaff.DisplayName": "El Decreto del Eclipse",
-        "Items.DecretoEclipseStaff.Tooltip": "Clava un CÍRCULO DE ECLIPSE en el punto del cursor.\nCrece hasta 660 px mientras vive y ejecuta cada 15 ticks:\nla onda viaja al borde y TODO lo de dentro recibe el corte.\nEl más cercano al centro paga ×4,8 · el ojo se contrae antes del tajo.",
-
-        // v6.32 — W2-a: CUATRO ARMAS CÓSMICAS NUEVAS (cometa, nova, cuásar, telar)
-        "Items.CometaErranteStaff.DisplayName": "El Cometa Errante",
-        "Items.CometaErranteStaff.Tooltip": "Captura un cometa en ÓRBITA ELÍPTICA a tu alrededor durante 6 vueltas.\nEl núcleo de hielo-fuego golpea a plena potencia; la cola de polvo pica a ×0.4.\nLa cola apunta SIEMPRE hacia afuera de la órbita, como los cometas reales.\nTras 420 ticks se lanza en cacería y estalla en hielo-fuego.",
-        "Items.NovaEncadenadaStaff.DisplayName": "La Nova Encadenada",
-        "Items.NovaEncadenadaStaff.Tooltip": "Una esfera de nova lenta que estalla al tocar enemigo o suelo.\nCada nova encadena 3 hijas ×0.65 y 2 nietas ×0.42 — hasta 3 generaciones.\nEl frente del anillo es lo que golpea · cero azar: presas por distancia.",
-        "Items.VozCuasarStaff.DisplayName": "La Voz del Cuásar",
-        "Items.VozCuasarStaff.Tooltip": "Invoca un cuásar que carga 40 ticks y suelta un HAZ CONTINUO de 460 px.\nEl haz PERFORA TODO · DOPPLER: el borde delantero azul, la cola roja.\nRebota una vez en las paredes · muere con un destello.",
-        "Items.TelarConstelacionesStaff.DisplayName": "El Telar de Constelaciones",
-        "Items.TelarConstelacionesStaff.Tooltip": "Cada uso clava una ESTRELLITA donde estaba tu cursor.\nSe conectan solas con hilos de luz: la constelación se dibuja sola.\nCon 4 o más, cada 30 ticks la FIGURA SE ENCIENDE:\ntodo enemigo dentro del polígono recibe ×2.2 por estrella.",
-
-        // v6.33 — W2-b: CUATRO ARMAS CÓSMICAS MÁS (lluvia, nebulosa, horizonte, rayo gamma)
-        "Items.LluviaMeteorosStaff.DisplayName": "La Lluvia de Meteoros",
-        "Items.LluviaMeteorosStaff.Tooltip": "Marca la zona del cursor con un telégrafo ámbar de 30 ticks.\nLuego caen 8 meteoros escalonados, uno cada 4 ticks, en diagonal con estela de fuego.\nCada impacto estalla ×1.0 en radio 70 y quema con la quemadura cósmica 3 s.",
-        "Items.AbrazoNebulosaStaff.DisplayName": "El Abrazo de la Nebulosa",
-        "Items.AbrazoNebulosaStaff.Tooltip": "Instala una nebulosa en el cursor: nube magenta-cian-violeta de 300 ticks.\nLos de dentro reciben ×0.06 cada 3 ticks y quedan lentos.\nEn su seno nacen estrellitas que revientan en mini-pops ×0.8.\nAl morir se disipa en polvo de estrellas.",
-        "Items.FiloHorizonteStaff.DisplayName": "El Filo del Horizonte",
-        "Items.FiloHorizonteStaff.Tooltip": "Lanza un disco negro — un horizonte de sucesos — con línea de fotón en el ecuador.\nAtraviesa a los enemigos perdiendo velocidad y vuelve como bumerán.\nCada golpe deja una marca que implosiona 30 ticks después: ×0.7 + arrastre.",
-        "Items.RayoGammaStaff.DisplayName": "El Rayo Gamma",
-        "Items.RayoGammaStaff.Tooltip": "Un haz fino de 700 px cruza TODO al instante... pero aún no hace daño.\nCada enemigo tocado queda marcado con un contorno brillante.\nTras 30 ticks, todas las marcas liquidan a la vez:\nclang, destello, daño ×1.0 y quemadura cósmica 5 s.",
-
-        "Items.NeutronStarStaff.DisplayName": "Bastón de la Estrella de Neutrones",
-        "Items.NeutronStarStaff.Tooltip": "Un núcleo de 12 px ultradenso.\nAura de 60 px con daño triplicado.\nStarquakes periódicos que sacuden el suelo.\nGravita hacia sus presas.",
-        "Items.PulsarStaff.DisplayName": "Bastón del Púlsar",
-        "Items.PulsarStaff.Tooltip": "El faro cósmico: dos haces polares barriendo a 1 rev/s.\nCada barrido que toca a un enemigo lo golpea con fuerza.\nPulsos de luz sincronizados con el giro.",
-        "Items.WhiteDwarfStaff.DisplayName": "Bastón de la Enana Blanca",
-        "Items.WhiteDwarfStaff.Tooltip": "El rescoldo cristalino de una estrella vieja.\nSiete facetas de luz fría girando lento.\nAnillo de acreción que roba brillo a los enemigos cercanos.",
-        "Items.DeadStarStaff.DisplayName": "Bastón de la Estrella Muerta",
-        "Items.DeadStarStaff.Tooltip": "La enana negra: lo que queda cuando todo se apaga.\nMasa oscura que devora la luz.\nEntropía constante en su alrededor.\nEcos de runas a 0,2 Hz: la vida que fue.",
-        "Items.RedSupergiantStaff.DisplayName": "Bastón de la Supergigante Roja",
-        "Items.RedSupergiantStaff.Tooltip": "El coloso moribundo de 90 px.\nCeldas de convección latiendo despacio.\nAl morir se COLAPSA y luego revienta en nova.",
-        "Items.MagnetarStaff.DisplayName": "Bastón del Magnetar",
-        "Items.MagnetarStaff.Tooltip": "La estrella de neutrones EXTREMA.\nCampo magnético violeta con líneas retorcidas.\nCadenas de rayo automáticas a los enemigos.\nEl latido es una arritmia determinista.",
-
-        "Items.CicloEstelarStaff.DisplayName": "Bastón del Ciclo Estelar",
-        "Items.CicloEstelarStaff.Tooltip": "Una estrella que VIVE una vida completa:\nnebulosa que se contrae → ignición → gigante roja\n→ colapso y SUPERNOVA → estrella de neutrones.\nLa estela cuenta la historia en cinco colores.",
-
-        "Items.RelojArenaStaff.DisplayName": "Bastón del Reloj de Arena Cósmico",
-        "Items.RelojArenaStaff.Tooltip": "Un reloj de arena vivo flotando en el aire.\nLa arena son motas de luz que caen y pican.\nCuando la cámara se vacía, el tiempo se invierte.",
-        "Items.MareaGravitatoriaStaff.DisplayName": "Bastón de la Marea Gravitatoria",
-        "Items.MareaGravitatoriaStaff.Tooltip": "Una ola de luz que avanza pegada al terreno.\nArrastra a los enemigos con la corriente.\nSi golpea una pared, se rompe en tres olas menores.",
-        "Items.EnjambrePrismaticoStaff.DisplayName": "Bastón del Enjambre Prismático",
-        "Items.EnjambrePrismaticoStaff.Tooltip": "Un núcleo que revienta en doce avispas de luz.\nEl enjambre orbita y migra de presa en presa.\nCada avispa pica con su color del prisma.",
-        "Items.PenduloJuicioStaff.DisplayName": "Bastón del Péndulo del Juicio",
-        "Items.PenduloJuicioStaff.Tooltip": "Un péndulo de luz con física real colgado del aire.\nCada vaivén amplía el arco del juicio.\nAl soltarse, la maza vuela y estalla.",
-        "Items.CoroEspectralStaff.DisplayName": "Bastón del Coro Espectral",
-        "Items.CoroEspectralStaff.Tooltip": "Seis notas de luz cantando en órbita lenta.\nCada nota emite su anillo de onda a su turno.\nEl coro se despide apagándose de a una.",
-
-        "Projectiles.SembradorPulsarProjectile.DisplayName": "Púlsar del Cementerio",
-        "Projectiles.LagrimaSolarProjectile.DisplayName": "Lágrima Solar",
-        "Projectiles.ColapsoMagnetarProjectile.DisplayName": "Magnetar del Colapso",
-        "Projectiles.DecretoEclipseProjectile.DisplayName": "Círculo del Eclipse",
-        "Projectiles.CometaErranteProjectile.DisplayName": "Cometa Errante",
-        "Projectiles.NovaEncadenadaProjectile.DisplayName": "Nova Encadenada",
-        "Projectiles.VozCuasarProjectile.DisplayName": "Voz del Cuásar",
-        "Projectiles.TelarEstrellaProjectile.DisplayName": "Estrella del Telar",
-        "Projectiles.LluviaMeteorosProjectile.DisplayName": "Lluvia de Meteoros",
-        "Projectiles.MeteoroProjectile.DisplayName": "Meteoro",
-        "Projectiles.AbrazoNebulosaProjectile.DisplayName": "Abrazo de la Nebulosa",
-        "Projectiles.FiloHorizonteProjectile.DisplayName": "Filo del Horizonte",
-        "Projectiles.RayoGammaProjectile.DisplayName": "Rayo Gamma",
-        "Projectiles.NeutronStarProjectile.DisplayName": "Estrella de Neutrones",
-        "Projectiles.PulsarProjectile.DisplayName": "Púlsar",
-        "Projectiles.WhiteDwarfProjectile.DisplayName": "Enana Blanca",
-        "Projectiles.DeadStarProjectile.DisplayName": "Estrella Muerta",
-        "Projectiles.RedSupergiantProjectile.DisplayName": "Supergigante Roja",
-        "Projectiles.MagnetarProjectile.DisplayName": "Magnetar",
-        "Projectiles.CicloEstelarProjectile.DisplayName": "Ciclo Estelar",
-        "Projectiles.RelojArenaProjectile.DisplayName": "Reloj de Arena Cósmico",
-        "Projectiles.MareaGravitatoriaProjectile.DisplayName": "Marea Gravitatoria",
-        "Projectiles.MareaChicaProjectile.DisplayName": "Ola Menor",
-        "Projectiles.EnjambrePrismaticoProjectile.DisplayName": "Enjambre Prismático",
-        "Projectiles.PenduloJuicioProjectile.DisplayName": "Péndulo del Juicio",
-        "Projectiles.CoroEspectralProjectile.DisplayName": "Coro Espectral",
-        "Projectiles.LanzaAlbaProjectile.DisplayName": "Lanza del Alba",
-        "Projectiles.RealityTearProjectile.DisplayName": "Desgarro de Realidad",
-        "Projectiles.SinfoniaPrimordialProjectile.DisplayName": "Sinfonía Primordial",
-        "Projectiles.TormentaNebularProjectile.DisplayName": "Tormenta Nebular",
-
-        "Items.SuturaCuanticaStaff.DisplayName": "La Sutura Cuántica",
-        "Items.SuturaCuanticaStaff.Tooltip": "Abre un DESGARRO GLITCH donde apuntas.\nCorrompe a todo enemigo dentro del círculo.\nCada 45 ticks dispara rayos cuánticos a los 3 más cercanos.",
-        "Items.PortalDimensionalStaff.DisplayName": "El Portal Dimensional",
-        "Items.PortalDimensionalStaff.Tooltip": "Abre la puerta de anillos donde apuntas.\nSucción suave en 300 px: el que cruza el núcleo blanco es triturado.\nEl portal respira 6 segundos.",
-        "Items.PliegueEspacioStaff.DisplayName": "El Pliegue del Espacio",
-        "Items.PliegueEspacioStaff.Tooltip": "Abre el OJO donde apuntas: la doble elipse con el núcleo negro.\nDobla el espacio en 350 px y arrastra a los enemigos.\nEl que toca el núcleo es comprimido.",
-        "Items.HeridaElectricaStaff.DisplayName": "La Herida Eléctrica",
-        "Items.HeridaElectricaStaff.Tooltip": "Abre LA GRIETA hacia donde apuntas.\nPica en línea y aplica ELECTRIFICADO.\nLa corriente nunca se corta.",
-
-        // v6.35: LOS CUATRO DESGARROS NUEVOS (segunda tanda de referencias).
-        "Items.CorazonColapsoStaff.DisplayName": "El Corazón del Colapso",
-        "Items.CorazonColapsoStaff.Tooltip": "Enciende la ESTRELLA DE CUATRO PUNTAS de fuego estelar.\nQuema a todo enemigo dentro del corazón.\nCada 30 ticks los filamentos lanzan llamaradas a los 2 más cercanos.",
-
-        "Items.GargantaVacioStaff.DisplayName": "La Garganta del Vacío",
-        "Items.GargantaVacioStaff.Tooltip": "Abre el vórtice devorador: núcleo negro absoluto y anillo magenta.\nLa lente curva el fondo y la succión arrastra en 320 px.\nEl que toca el núcleo negro es devorado.",
-
-        "Items.UmbralRotoStaff.DisplayName": "El Umbral Roto",
-        "Items.UmbralRotoStaff.Tooltip": "Raja la realidad con un corte horizontal perfecto.\nArriba el vacío con el esqueleto espectral; abajo, el mundo.\nPica en línea y cada 60 ticks la otra realidad muerde.",
-
-        "Items.LeviatanEspectralStaff.DisplayName": "El Leviatán Espectral",
-        "Items.LeviatanEspectralStaff.Tooltip": "Lanza a la criatura de hueso etéreo: catorce vértebras nadando en S.\nAtraviesa todo lo que toca y gira hacia el enemigo más cercano.\n4 segundos de nado espectral.",
-
-        "Projectiles.DesgarroCuanticoProjectile.DisplayName": "Sutura Cuántica",
-        "Projectiles.PortalDimensionalProjectile.DisplayName": "Portal Dimensional",
-        "Projectiles.PliegueEspacioProjectile.DisplayName": "Pliegue del Espacio",
-        "Projectiles.HeridaElectricaProjectile.DisplayName": "Herida Eléctrica",
-        "Projectiles.CorazonColapsoProjectile.DisplayName": "Corazón del Colapso",
-        "Projectiles.GargantaVacioProjectile.DisplayName": "Garganta del Vacío",
-        "Projectiles.UmbralRotoProjectile.DisplayName": "Umbral Roto",
-        "Projectiles.LeviatanEspectralProjectile.DisplayName": "Leviatán Espectral",
-
-        // v6.36: LOS CUATRO CÓDIGOS VIVOS (los códigos de las imágenes
-        // del usuario traducidos a armas) + EL ANILLO RÚNICO DORSAL.
-        "Items.DanzaOrbesStaff.DisplayName": "La Danza de los Orbes",
-        "Items.DanzaOrbesStaff.Tooltip": "Invoca el código vivo de la cadena: un minisistema solar orbitándote.\nTodo orbe quema al que toca: sol ×1.0, planetas ×0.7, lunas ×0.5.\n12 segundos de danza · un sistema a la vez · sin coste de maná.",
-
-        "Items.LenteAbismoStaff.DisplayName": "La Lente del Abismo",
-        "Items.LenteAbismoStaff.Tooltip": "Planta el código vivo del agujero negro: disco de veinte bandas,\nhorizonte negro y estrellas dobladas cayendo en espiral.\nLa lente curva el fondo · succión en 300 px · devora ×1.2 · enfoca y muerde ×0.6.",
-
-        "Items.SolVivoStaff.DisplayName": "El Sol Vivo",
-        "Items.SolVivoStaff.Tooltip": "Enciende el código vivo del sol: latiendo con el pulso exacto del original.\nEl aura quema ×0.55 · cada pico del pulso LATE ×0.7 · las prominencias azotan ×0.85.\n5 segundos de sol · un sol a la vez · sin coste de maná.",
-
-        "Items.SierpeEstelarStaff.DisplayName": "La Sierpe Estelar",
-        "Items.SierpeEstelarStaff.Tooltip": "Libera el código vivo de la criatura: dieciséis segmentos — cabeza,\naletas gemelas y espina — nadando en vueltas alrededor de tu cursor.\nLa cabeza atraviesa todo · la espina quema ×0.4 · una sierpe a la vez.",
-
-        "Items.AnilloRunicoDorsalItem.DisplayName": "El Anillo Rúnico Dorsal",
-        "Items.AnilloRunicoDorsalItem.Tooltip": "El círculo de conjuro del agujero negro cuelga de tu espalda:\nla triple corona rúnica LITERAL de los vórtices — dorada, violeta\ncontrarrotante y blanca íntima junto al anillo de fotones.\nPuro cosmético: cero estadísticas.",
-
-        "Items.BolsaCodigosVivos.DisplayName": "Bolsa de los Códigos Vivos",
-        "Items.BolsaCodigosVivos.Tooltip": "Los códigos de las imágenes hechos armas: la danza de los orbes,\nla lente del abismo, el sol vivo y la sierpe estelar.\nCada código aprendió a vivir aquí. Clic derecho para desplegarlas.\nSolo entrega lo que te falte.",
-
-        "Projectiles.DanzaOrbesProjectile.DisplayName": "Danza de los Orbes",
-        "Projectiles.LenteAbismoProjectile.DisplayName": "Lente del Abismo",
-        "Projectiles.SolVivoProjectile.DisplayName": "Sol Vivo",
-        "Projectiles.SierpeEstelarProjectile.DisplayName": "Sierpe Estelar",
-
-        // v6.38: LA CAMADA DE LAS SIERPES (10 formas nuevas de mover la
-        // misma cadena + la cría, el minion — la original INTACTA).
-        "Items.OuroborosAstralStaff.DisplayName": "El Ouroboros Astral",
-        "Items.OuroborosAstralStaff.Tooltip": "Doce cuentas se persiguen en círculo apuntando adelante — nadie manda.\nCada cuenta barre ×0.55; al expirar la espiral se cierra y DETONA ×2.0.\n10 segundos de anillo · sin coste de maná.",
-
-        "Items.CaravanaEspectralStaff.DisplayName": "La Caravana Espectral",
-        "Items.CaravanaEspectralStaff.Tooltip": "El cuerpo repite la trayectoria EXACTA del faro: el camino-memoria.\nEl rastro limpia el pasillo ×0.35 — con giros dibujas muros en S.\n9 segundos de caravana · sin coste de maná.",
-
-        "Items.AnguilaSolarStaff.DisplayName": "La Anguila Solar",
-        "Items.AnguilaSolarStaff.Tooltip": "El cuerpo ES una fórmula: la onda viajera de la anguila, λ ≈ el cuerpo.\nLas CRESTAS muerden ×1.0, los valles solo ×0.30 — roza con la cresta.\n8 segundos de nado en S · sin coste de maná.",
-
-        "Items.CienpiesRunicoStaff.DisplayName": "El Ciempiés Rúnico",
-        "Items.CienpiesRunicoStaff.Tooltip": "Doce placas pegadas al suelo con una pata desfasada Δφ=45° cada una.\nLas patas plantadas dejan su RUNA: la runa pica ×0.40.\nLa marcha sube de frecuencia lejos de la presa · sin coste de maná.",
-
-        "Items.FlageloEstelarStaff.DisplayName": "El Flagelo Estelar",
-        "Items.FlageloEstelarStaff.Tooltip": "El látigo de Verlet con constraint por masa: la energía corre a la punta.\nLa punta golpea ∝ su velocidad (×0.5 → ×1.5); sobre 26 px/tick,\nEL CHASQUIDO: ×2.2 + sacudida. 8 segundos · sin coste de maná.",
-
-        "Items.ViboraGenesiacaStaff.DisplayName": "La Víbora Genesíaca",
-        "Items.ViboraGenesiacaStaff.Tooltip": "Un esqueleto, dos cuerpos: la espina de la sierpe y DOS HEBRAS trenzadas.\nLas perlas queman ×0.45; al enroscar el rumbo la hélice se comprime ×1.6.\n9 segundos de víbora · sin coste de maná.",
-
-        "Items.BoaEclipseStaff.DisplayName": "La Boa del Eclipse",
-        "Items.BoaEclipseStaff.Tooltip": "La cabeza hace la servo-espiral sobre la presa y el cuerpo la envuelve.\nCada vuelta completa es un stack de APRIETE: ×0.5 → ×4.0.\nLa presa cae y busca la siguiente. 10 segundos · sin coste de maná.",
-
-        "Items.FarolGuardianStaff.DisplayName": "El Farol Guardián",
-        "Items.FarolGuardianStaff.Tooltip": "La base es un farol colgante y la PUNTA persigue a la presa (FABRIK).\nLa mano muerde ×1.0 y la cadena quema ×0.40 — el cuerpo se TENSA.\n12 segundos de guardián · sin coste de maná.",
-
-        "Items.CintaAuroraStaff.DisplayName": "La Cinta Aurora",
-        "Items.CintaAuroraStaff.Tooltip": "El estandarte vivo: la espina anclada a tu espalda y dos senos inconmensurables.\nLa cinta corta ×0.5; la amplitud es TU VELOCIDAD — corre y se vuelve látigo.\n12 segundos de estandarte · sin coste de maná.",
-
-        "Items.ManadaAstralStaff.DisplayName": "La Manada Astral",
-        "Items.ManadaAstralStaff.Tooltip": "Seis cazadores con distancia ELÁSTICA y liderazgo que SALTA.\nCada cazador golpea con SU PROPIA velocidad: ×0.55 → ×1.4.\n10 segundos de cacería · sin coste de maná.",
-
-        "Items.CriaEstelarStaff.DisplayName": "La Cría Estelar",
-        "Items.CriaEstelarStaff.Tooltip": "La hijita de la sierpe estelar: el MISMO ADN, pero cachorra y despierta.\nEn reposo nada a tu alrededor; en caza embiste (mordida de minion).\nOcupa 1 espacio de sirviente · nunca expira · sin coste de maná.",
-
-        "Items.BolsaSierpes.DisplayName": "Bolsa de las Sierpes",
-        "Items.BolsaSierpes.Tooltip": "La sierpe estelar y sus once descendientes: cada una nada distinto.\nEl anillo, la caravana, la anguila, el ciempiés, el látigo, la víbora,\nla boa, el farol, la cinta, la manada y la cría. Clic derecho.\nSolo entrega lo que te falte.",
-
-        "Projectiles.OuroborosAstralProjectile.DisplayName": "Ouroboros Astral",
-        "Projectiles.CaravanaEspectralProjectile.DisplayName": "Caravana Espectral",
-        "Projectiles.AnguilaSolarProjectile.DisplayName": "Anguila Solar",
-        "Projectiles.CienpiesRunicoProjectile.DisplayName": "Ciempiés Rúnico",
-        "Projectiles.FlageloEstelarProjectile.DisplayName": "Flagelo Estelar",
-        "Projectiles.ViboraGenesiacaProjectile.DisplayName": "Víbora Genesíaca",
-        "Projectiles.BoaEclipseProjectile.DisplayName": "Boa del Eclipse",
-        "Projectiles.FarolGuardianProjectile.DisplayName": "Farol Guardián",
-        "Projectiles.CintaAuroraProjectile.DisplayName": "Cinta Aurora",
-        "Projectiles.ManadaAstralProjectile.DisplayName": "Manada Astral",
-        "Projectiles.CriaEstelarMinion.DisplayName": "Cría Estelar",
-
-        "Buffs.CriaEstelarBuff.DisplayName": "Cría Estelar",
-        "Buffs.CriaEstelarBuff.Description": "Una cría de sierpe estelar nada a tu lado y caza a tus enemigos",
-
-        "Items.TajosAstralesStaff.DisplayName": "El Bastón de los Tajos Astrales",
-        "Items.TajosAstralesStaff.Tooltip": "Marca el punto donde apuntas — y diez ticks después EL CORTE FLORECE:\nsiete medias lunas blancas en todas direcciones, creciendo de punta a punta.\nLa herida llega cuando el tajo aparece (causalidad retrasada).\nCada arco corta una vez su banda curva · sin coste de maná.",
-
-        "Projectiles.TajoAstralProjectile.DisplayName": "Tajo Astral",
-
-        "Projectiles.AnillosSolaresHalo.DisplayName": "Anillos Solares",
-        "Projectiles.SelloGenesisHalo.DisplayName": "Sello del Génesis",
-        "Projectiles.AnilloRunicoDorsalHalo.DisplayName": "Anillo Rúnico Dorsal",
-        "Projectiles.AuraPortadorHalo.DisplayName": "Aura del Portador",
-
-        "Items.TomoApatiaNula.DisplayName": "El Tomo de la Apatía Nula",
-        "Items.TomoApatiaNula.Tooltip": "El tomo que ya no siente nada escupe tentáculos de vacío:\ngestan 2 segundos sin dañar (pulsos que imploden) y luego azotan\nen tres curvas hacia tu mira, teletransportándose entre curva y curva.\nGolpea todo lo que toca (90×90) · cada impacto sucesivo pesa menos.\nARMA DE PRUEBAS (réplica exacta de su fuente de estudio).",
-
-        "Projectiles.TentaculoCosmicoProjectile.DisplayName": "Tentáculo del Vacío",
-
-        "Items.FragmentoSupernovaStaff.DisplayName": "El Fragmento de Supernova",
-        "Items.FragmentoSupernovaStaff.Tooltip": "La singularidad alada hecha sirviente: el ojo alado con sus\nafterimages orbitando y respirando a su alrededor (la firma).\nVOLEA de 5 ráfagas nova en abanico · BEAM telegrafiado de 900px (×2.5)\n· flor de fuego al morir cada ráfaga · sin coste de maná.\nMINION: ocupa 1 espacio de sirviente · nunca expira.\nARMA DE PRUEBAS (réplica del jefe de la singularidad alada).",
-
-        "Projectiles.FragmentoSupernovaMinion.DisplayName": "Fragmento de Supernova",
-        "Projectiles.RafagaNovaProjectile.DisplayName": "Ráfaga Nova",
-
-        "Buffs.FragmentoSupernovaBuff.DisplayName": "Fragmento de Supernova",
-        "Buffs.FragmentoSupernovaBuff.Description": "Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos",
-
-        "Items.BolsaHuespedes.DisplayName": "Bolsa de los Huéspedes",
-        "Items.BolsaHuespedes.Tooltip": "Las réplicas de prueba: el tentáculo del vacío, el fragmento\nde supernova y los tajos astrales. Clic derecho.\nSolo entrega lo que te falte.",
-
-        "Items.MetronomoPulsar.DisplayName": "El Metrónomo de Púlsar",
-        "Items.MetronomoPulsar.Tooltip": "El arma que dispara AL COMPÁS: el púlsar sobre tu cabeza late cada 0,5 s.\nPERFECT (±0,05 s): crítico garantizado + abanico doble.\nGOOD (±0,1 s): crítico garantizado. Fuera de compás: el combo se pierde.\n8 aciertos seguidos: EL FARO — 3 s de haz giratorio de 900 px.\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.MetronomoPulsarHalo.DisplayName": "Metrónomo de Púlsar",
-        "Projectiles.PulsoPulsarProjectile.DisplayName": "Pulso de Púlsar",
-
-        "Items.VelaSolar.DisplayName": "La Vela Solar",
-        "Items.VelaSolar.Tooltip": "Mantén pulsado: la vela de fotones se despliega y la cadencia sube\nde 12 a 30 disparos/s con el calor (daño ×1 → ×1,6).\nAl calor pleno: LA FUSIÓN — 1,5 s de plasma ×2 y luego la vela se funde (3 s).\nSoltar a tiempo conserva ~70% del calor.\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.VelaSolarProjectile.DisplayName": "Vela Solar",
-        "Projectiles.RafagaSolarProjectile.DisplayName": "Ráfaga Solar",
-
-        "Items.GuadanaDesgarro.DisplayName": "La Guadaña del Desgarro",
-        "Items.GuadanaDesgarro.Tooltip": "El tajo vuela 220 px y donde muere abre UNA FISURA VERTICAL de realidad (2 s):\ntodo lo que la cruza sangra, y los proyectiles enemigos que la tocan\nDESAPARECEN — los traga y su daño se suma AL PRÓXIMO Tajo (EL HAMBRE).\nClic der: la fisura se abre directamente en tu mira (≤480 px).\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.TajoGuadanaProjectile.DisplayName": "Tajo de la Guadaña",
-        "Projectiles.FisuraDesgarroProjectile.DisplayName": "Fisura de Realidad",
-
-        "Items.EgidaNova.DisplayName": "La Égida de Nova",
-        "Items.EgidaNova.Tooltip": "Clic izq: EL EMBESTÓN — golpe de escudo con empujón 9.\nClic der: ALZAR LA GUARDIA (0,3 s): un golpe en la ventana perfecta\nNO EXISTE — detona LA NOVA (3× + quemadura + 1 s invulnerable).\nLa guardia que expira sin parar te aturde 0,5 s. Enfriamiento 8 s (anillo visible).\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.GuardiaNovaProjectile.DisplayName": "Guardia de Nova",
-        "Projectiles.AnilloEnfriamientoProjectile.DisplayName": "Anillo de Enfriamiento",
-        "Projectiles.NovaParryProjectile.DisplayName": "Nova del Parry",
-        "Projectiles.EmbestidaNovaProjectile.DisplayName": "Embestida de Nova",
-
-        "Items.EcoCuantico.DisplayName": "El Eco Cuántico",
-        "Items.EcoCuantico.Tooltip": "Cada pulso vuela y decohiere en una semilla que se re-emite como ECO\ncontra el enemigo más cercano (60% · 36% · 21,6%: 2,17× por cadena completa).\nClic der: LA RESONANCIA — todas las semillas disparan A LA VEZ (5 s de recarga).\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.PulsoEcoProjectile.DisplayName": "Pulso Cuántico",
-
-        "Items.VerboPrimordialStaff.DisplayName": "El Verbo Primordial",
-        "Items.VerboPrimordialStaff.Tooltip": "La palabra que pronunció la primera luz — SIETE MOVIMIENTOS:\nI EL PULSO · II EL SELLO · III LA CORONA · IV LA TORMENTA\nV EL FUEGO · VI EL DESGARRO · VII LA SINFONÍA\nCada movimiento habla con las bibliotecas de la casa; el daño crece ×1,0 → ×1,4\ny al séptimo segundo: LA DETONACIÓN (2,5× + quemadura).\nARMA DE PRUEBAS — sin coste de maná.",
-        "Projectiles.VerboPrimordialProjectile.DisplayName": "El Verbo Primordial",
-        "Projectiles.VerboDetonacionProjectile.DisplayName": "Detonación del Verbo",
-
-        "Items.BolsaApuestas.DisplayName": "Bolsa de las Apuestas",
-        "Items.BolsaApuestas.Tooltip": "Las cinco apuestas de la casa (el ritmo, la cadencia, la zona,\nel parry y el eco) y EL VERBO PRIMORDIAL que las une. Clic derecho.\nSolo entrega lo que te falte.",
-
-        "Common.LevelUp": "Tu arma ha alcanzado el nivel {0}!",
-        "Common.Milestone": "Hito alcanzado: {0}",
-
-        "Items.PrismaDePaisajesItem.DisplayName": "El Prisma de Paisajes",
-        "Items.PrismaDePaisajesItem.Tooltip": "El probador de la librería del cielo: cada uso despliega UN PAISAJE\nentero sobre el fondo del mundo — capas con su parallax, su deriva,\nsu profundidad y sus tintes de cielo, luz y brillo.\nCiclo: Eclipse Umbral → Lluvia Estelar → Amanecer Primordial → Sagrario Violeta → cielo limpio.\nEL SAGRARIO VIOLETA: el paisaje del lugar, desplegable donde quieras.\nARMA DE PRUEBAS — sin coste de maná.",
-
-        "Eco.VozJefe.KingSlime1": "La corona rueda por el suelo. El grimorio sorbe la esencia del rey gelatina: dulce, vacía, de un trono que nunca fue suyo.",
-        "Eco.VozJefe.KingSlime2": "Un rey de gelatina: todo el reino, ninguno el hueso. El grimorio lo bebe de un trago y eructa un trueno azul.",
-        "Eco.VozJefe.KingSlime3": "El rey gelatina se deshace en la hierba. El grimorio mastica la corona aparte — el metal no sabe a nada, pero la guarda por educación.",
-        "Eco.VozJefe.EyeofCthulhu1": "El ojo se cierra para siempre. El grimorio devora su vigilia hambrienta — ahora sabe soñar con lo que tú ves.",
-        "Eco.VozJefe.EyeofCthulhu2": "El gran ojo se apaga sin cerrar los párpados — nunca los tuvo. El grimorio lo desmenuza y aprende a llorar hacia dentro.",
-        "Eco.VozJefe.EyeofCthulhu3": "Cthulhu lo perdió todo menos la vista. El grimorio se queda la vista: ahora mira lo que TÚ miras, cuando quiere.",
-        "Eco.VozJefe.Deerclops1": "El invierno caminante cae de rodillas. El grimorio bebe su escarcha ancestral y las páginas crujen, heladas, un solo instante.",
-        "Eco.VozJefe.Deerclops2": "El ciervo de un solo ojo ya no vera la ventisca. El grimorio sorbe su invierno y las letras del índice escarchan.",
-        "Eco.VozJefe.Deerclops3": "El guardián del bosque cae como un árbol. El grimorio cuenta sus anillos de escarcha — cena de siglos, trago de un invierno.",
-        "Eco.VozJefe.EaterofWorlds1": "El devorador de mundos ha sido devorado. La esencia de cien fauces corrompidas se derrama en el grimorio… y él pide más.",
-        "Eco.VozJefe.EaterofWorlds2": "Cien fauces y ni una palabra. El grimorio lo devora segmento a segmento, como quien pela una fruta amarga.",
-        "Eco.VozJefe.EaterofWorlds3": "El devorador, devorado: así se siente la culpa. El grimorio lame la corrupción del plato y deja el tenedor limpio.",
-        "Eco.VozJefe.BrainofCthulhu1": "El cerebro carmesí enmudece. El grimorio muerde sus reflejos y aprende a gritar en rojo.",
-        "Eco.VozJefe.BrainofCthulhu2": "El cerebro carmesí pensó que podía con todo. El grimorio lo piensa por él ahora — y lo piensa HAMBRIENTO.",
-        "Eco.VozJefe.BrainofCthulhu3": "Se deshace la masa pensante en reflejos rosados. El grimorio copia sus nervios en la marginatura: letra caligráfica, tensa, viva.",
-        "Eco.VozJefe.QueenBee1": "La colmena guarda luto. El grimorio lama la miel real de la abeja reina — dulzura con aguijón: su sabor favorito.",
-        "Eco.VozJefe.QueenBee2": "La reina muere y la colmena olvida su nombre. El grimorio lo apunta por ella: «dulce, con ira, breve como el verano».",
-        "Eco.VozJefe.QueenBee3": "Zumbido último de la abeja real. El grimorio guarda el aguijón de broche — cierra el capítulo y hiere al siguiente.",
-        "Eco.VozJefe.Skeletron1": "Los huesos del guardián vuelven a ser polvo. El grimorio copia su maldición a mano alzada — la próxima puerta no lo detendrá.",
-        "Eco.VozJefe.Skeletron2": "El guardián de la puerta muerde el polvo que era. El grimorio recoge la calavera: pesa poco, prometía mucho.",
-        "Eco.VozJefe.Skeletron3": "Maldición cumplida, huesos pagados. El grimorio firma el recibo con la mano del viejo — la letra tiembla, la cuenta está saldada.",
-        "Eco.VozJefe.WallofFlesh1": "El muro que separaba los mundos arde hasta las cenizas. El grimorio traga su hambre antigua y DESPIERTA: desde hoy, todo lo que muera vale el doble.",
-        "Eco.VozJefe.WallofFlesh2": "El muro ardía de hambre vieja y la vieja hambre ardió. El grimorio se traga EL LÍMITE y abre los ojos de par en par.",
-        "Eco.VozJefe.WallofFlesh3": "Caía el muro y el mundo respiró hondo por primera vez. El grimorio también: ahora sabe a qué sabe el alba.",
-        "Eco.VozJefe.QueenSlime1": "La reina de cristal se derrite en azúcar. El grimorio prueba su esencia efímera — tan ligera que casi se le escapa entre las páginas.",
-        "Eco.VozJefe.QueenSlime2": "Azúcar y cristal: la reina se derrite en su propio carnaval. El grimorio pide repetir el postre en voz bajita.",
-        "Eco.VozJefe.QueenSlime3": "La reina saltarina se desinfla en confeti. El grimorio lo barre TODO con la lengua — también el confeti.",
-        "Eco.VozJefe.Twins1": "Los gemelos caen del cielo como estrellas rotas. El grimorio arranca sus lentes incendiadas y, por fin, ve doble.",
-        "Eco.VozJefe.Twins2": "Dos ojos, una sola manera de mirar: la tuya, ardiendo. El grimorio los guarda en páginas opuestas y los hace competir.",
-        "Eco.VozJefe.Twins3": "Retinazer y Spazmatism, extintos a la vez. El grimorio parpadea con ambos y ve el doble de futuro.",
-        "Eco.VozJefe.Destroyer1": "La serpiente de acero ruge y se apaga; mil sondas caen con ella. El grimorio enrolla su alma metálica como un hilo y la cose.",
-        "Eco.VozJefe.Destroyer2": "Mil ojos rojos se apagan en fila, como una ciudad de noche. El grimorio bebe la luz de cada uno: brindis por sonda.",
-        "Eco.VozJefe.Destroyer3": "La serpiente de acero ya no perfora el cielo. El grimorio devana su alma metálica y cose con ella el lomo del tomo.",
-        "Eco.VozJefe.SkeletronPrime1": "El Prime vuelve a su tumba sin cabeza. El grimorio desmonta sus cuatro brazos y firma con la sierra.",
-        "Eco.VozJefe.SkeletronPrime2": "Cuatro brazos y ni una cabeza que los anime. El grimorio hereda las herramientas y se pone a trabajar.",
-        "Eco.VozJefe.SkeletronPrime3": "El Prime encaja sus piezas por última vez. El grimorio emborrona su tumba con el taladro — subrayado definitivo.",
-        "Eco.VozJefe.Plantera1": "La jungla exhala por última vez. El grimorio estruja los pétalos de Plantera y bebe su clorofuria.",
-        "Eco.VozJefe.Plantera2": "La furia verde se marchita de golpe. El grimorio aspira el polen de la derrota — le sube a la cabeza, le encanta.",
-        "Eco.VozJefe.Plantera3": "Plantera cae y la jungla se queda más quieta. El grimorio prensa su clorofuria entre dos hojas: tinta viva para el siguiente mapa.",
-        "Eco.VozJefe.Golem1": "El guardián de piedra se desmorona en el templo. El grimorio extrae su núcleo solar y lo usa de marcador de página.",
-        "Eco.VozJefe.Golem2": "El guardián de piedra deja de arder. El grimorio se bebe el núcleo como un sorbo de sol — y eructa arena cálida.",
-        "Eco.VozJefe.Golem3": "Piedra que caminaba, sol que guardaba. El grimorio toma el sol, deja la piedra — aprende a elegir.",
-        "Eco.VozJefe.DukeFishron1": "El duque muere lejos de su tormenta. El grimorio saborea su esencia salada — cerdo, dragón y huracán en un solo bocado.",
-        "Eco.VozJefe.DukeFishron2": "El duque muere con la tormenta fuera de casa. El grimorio lo sirve en tres tiempos: cerdo, dragón, tornado frío.",
-        "Eco.VozJefe.DukeFishron3": "Tiburón-jabalí de los vientos: receta rara. El grimorio la archiva entre las delicias — «cocinar con rabia», anota.",
-        "Eco.VozJefe.EmpressOfLight1": "La emperatriz se disuelve en un destello. El grimorio no puede devorar la luz pura — la PRENSA entre dos páginas, para siempre.",
-        "Eco.VozJefe.EmpressOfLight2": "La emperatriz de la luz no cayó: se rindió al prisma. El grimorio guarda un destello de su falda como ilustración de portada.",
-        "Eco.VozJefe.EmpressOfLight3": "Luz pura no se digiere — se respeta. El grimorio la dobla en cuatro y la guarda junto a la definición de «belleza».",
-        "Eco.VozJefe.LunaticCultist1": "El culto queda sin voz. El grimorio se pone su máscara ritual y ensaya, en susurros, la invocación del fin.",
-        "Eco.VozJefe.LunaticCultist2": "El último cultista muere sin terminar la frase. El grimorio la termina por él — y la frase era el fin del mundo.",
-        "Eco.VozJefe.LunaticCultist3": "La máscara rueda sobre el altar. El grimorio la recoge del suelo y la prueba: le queda ancha, pero el odio es de su talla.",
-        "Eco.VozJefe.MoonLord1": "El Señor de la Luna exhala su última luz. El grimorio guarda silencio, por una vez… y luego escribe: «gracias por la comida».",
-        "Eco.VozJefe.MoonLord2": "El Señor de la Luna suelta la última luz y todo se queda quieto. El grimorio cierra el menú: «banquete terminado — volveré a abrir al alba».",
-        "Eco.VozJefe.MoonLord3": "Cae el que miraba por los tres. El grimorio se queda las tres miradas — una para el pasado, otra para ti, la última para lo que viene.",
-        "Eco.VozJefe.Desconocido1": "Un poder mayor ha caído. El grimorio devora su esencia sin preguntar el nombre.",
-        "Eco.VozJefe.Desconocido2": "Algo enorme murió aquí y nadie apuntó el nombre. El grimorio se come igual la esencia — el anonimato también alimenta.",
-        "Eco.VozJefe.Desconocido3": "Un poder sin etiqueta cae del cielo. El grimorio lo devora a ciegas y lo archiva bajo «D»: de delicioso.",
-
-        "Eco.VozJefe.Aethon1": "La Luz Primordial se apaga por su propia voluntad. El grimorio guarda la página en blanco — por primera vez, come en silencio.",
-        "Eco.VozJefe.Aethon2": "La Luz Primordial elige su propia sombra. El grimorio reserva su página en blanco — hay comidas que se digieren rezando.",
-        "Eco.VozJefe.Aethon3": "Aethon se apaga como un aula al terminar la clase. El grimorio copia la última lección DE MEMORIA — y la firma con miedo.",
-        "Eco.VozJefe.HollowTitan1": "El coloso de cristal se derrumba en campanadas. El grimorio sorbe su eco hueco: resonancia de un guardián que ya no guarda nada.",
-        "Eco.VozJefe.HollowTitan2": "El coloso suena por dentro una última vez: campana rota. El grimorio bebe la resonancia y ahora el lomo del tomo suena al pisar.",
-        "Eco.VozJefe.HollowTitan3": "El guardián hueco se vacía del todo. El grimorio ocupa el hueco — hay sitios que se heredan masticando.",
-        "Eco.VozJefe.RiftKeeper1": "El guardián se pliega sobre su propio rift y desaparece. El grimorio aprende el truco y lo guarda entre los capítulos.",
-        "Eco.VozJefe.RiftKeeper2": "El guardián se cierra como una puerta que era. El grimorio aprende el plano de la cerradura: LOS DIENTES del tomo cambian de forma.",
-        "Eco.VozJefe.RiftKeeper3": "Se pliega el centinela sobre su costura del mundo. El grimorio la copia al margen — página desgarrada, conocimiento entero.",
-        "Eco.VozJefe.LosEcos1": "Los portadores anteriores vuelven al polvo de estrellas que ya fueron. El grimorio cierra sus expedientes — y hojea el TUYO.",
-        "Eco.VozJefe.LosEcos2": "Arquera y duelista vuelven al polvo que fueron. El grimorio hojea SUS líneas y borra el nombre del anterior portador — ya sabes cuál.",
-        "Eco.VozJefe.LosEcos3": "Los portadores que fuiste caen juntos: la casa se limpia. El grimorio abre TU expediente en la página de en medio y chasquea la lengua.",
-
-        "Eco.VozCincoEstrellas": "Lo más raro que ha comido jamás. El grimorio guarda la receta — por si vuelve a tener suerte.",
-
-        "Eco.Hambre.Susurro1": "El grimorio tiene hambre…",
-        "Eco.Hambre.Susurro2": "El grimorio tiene hambre… las páginas se lamen…",
-        "Eco.Hambre.Susurro3": "El grimorio TIENE HAMBRE… los cierres crujen…",
-        "Eco.Hambre.Susurro4": "…hambre… HAMBRE… HAMBRE…",
-
-        "Eco.Furia.Ira": "El grimorio está FURIOSO por pasar demasiado tiempo sin comer…",
-        "Eco.Furia.Llamada": "El grimorio llama a su comida…",
-        "Eco.Furia.Saciado": "El grimorio está saciado… por ahora.",
-
-        "Furia.Oleada": "Oleada {0} de {1} — el grimorio escupe a su comida. XP ×{2} en esta oleada.",
-        "Furia.OleadaFinal": "OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.",
-        "Furia.Jefe": "El hambre convoca un guardián: {0} (XP ×{1})",
-        "Furia.JefeHuido": "{0} se hunde, insatisfecho…",
-
-        "Llamado.SoloDia": "El llamado solo responde DE DÍA — la noche es de los ojos y los muertos.",
-        "Llamado.YaVive": "Ya vive uno. El llamado no se dobla.",
-
-        "Carnada.Preparadas": "La carnada repartirá {0} oleadas. (Clic derecho para cambiar)",
-        "Bolsa.Abierta": "Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).",
-        "Carnada.YaActivo": "La furia YA está desatada — aliméntala o sobrevive.",
-        "Carnada.Ocupado": "El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.",
-
-        "Altar.Solicitando": "Solicitando el Fragmento Génesis al altar…",
-        "Altar.Reclamado": "Has reclamado el Fragmento Génesis.",
-        "Altar.YaPosees": "Ya posees el Fragmento Génesis.",
-        "Tiles.AncientAltar.MapEntry": "Altar Antiguo",
-        "LevelUpTester.Subida": "✦ {0} subió +{1} niveles (ahora nivel {2}).",
-        "LevelUpTester.SinGrimorio": "No se encontró un Grimorio del Eterno en el inventario.",
-        "TestingPlayer.Bolsas": "Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.",
-        "TestingPlayer.Dummies": "Además: {0} dummies de prueba para el campo de entrenamiento.",
-        "Configs.AethonConfigServidor.DisplayName": "Aethon (servidor)",
-
-        "Testigo.Ambiente1": "Te he observado antes de que tuvieras nombre.",
-        "Testigo.Ambiente2": "El libro que llevas… yo vi nacer al primero.",
-        "Testigo.Ambiente3": "Todo portador termina en una página. Tú aún estás escribiendo la tuya.",
-
-        "Conditions.TiendaEsencias": "Sobrevive a la oleada 10 de la furia del grimorio",
-
-        "Projectiles.AtaqueJefeProjectile.DisplayName": "Diente de guardián",
-        "Projectiles.AtaqueOleadaProjectile.DisplayName": "Diente de oleada",
-
-        "Jefe.Resonancia": "¡Has absorbido {1} fragmentos de resonancia de {0}!",
-
-        "Jefe.Titan.Furia": "EL TITÁN HUECO REDOBLA — el cristal cruje de furia. El coro viene en modo rápido.",
-        "Jefe.Rift.Sello": "EL GUARDIÁN SELLA LOS RIFT — el entre-mundos se cierra sobre ti.",
-        "Jefe.Rift.Paredes": "Las PAREDES DE DESGARRO avanzan — la arena se estrecha.",
-        "Jefe.Arquera.Furia": "LA ARQUERA NO OLVIDA — el arco tensa doble y las minas llueven.",
-        "Jefe.Arquera.Lluvia": "La Arquera llama a la LLUVIA DE ESTRELLAS — mira las marcas del suelo.",
-        "Jefe.Portador.Furia": "EL PRIMER PORTADOR DESENAÑINA LA REALIDAD — su arma ya no es solo la hoja.",
-        "Jefe.Aethon.Fase": "Aethon — FASE {0}: {1}",
-        "Jefe.Aethon.Nombre1": "El Polvo Estelar",
-        "Jefe.Aethon.Nombre2": "La Nebulosa",
-        "Jefe.Aethon.Nombre3": "La Gravedad",
-        "Jefe.Aethon.Nombre4": "El Agujero Negro",
-        "Jefe.Aethon.Nombre5": "El Reconocimiento",
-        "Jefe.Aethon.Gravedad": "Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!",
-        "Jefe.Aethon.Recordar": "AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.",
-        "Jefe.Aethon.Reconocimiento": "Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.",
-        "Jefe.Aethon.Presentacion": "La tierra tiembla. LA SIERPE DE HUESO DE LA LUZ se alza del subsuelo — su cola se enreda en el horizonte.",
-        "Jefe.Aethon.Muerte": "La sierpe se desarticula. La Luz Primordial se escapa de sus huesos.",
-
-        "Testigo.Chat.SinLibro": "Te he observado. Aún no has reclamado el Fragmento Génesis. Busca el Sagrario Hueco bajo tierra.",
-        "Testigo.Chat.Debil": "Tu fragmento brilla con nivel {0}. Aún es débil. Sigue combatiendo.",
-        "Testigo.Chat.Recuerda": "Nivel {0}… El fragmento empieza a recordar su origen. La Lluvia de Luz Estelar se acerca.",
-        "Testigo.Chat.Sagrario": "Nivel {0}. El Sagrario Hueco responde a tu poder. Rifts dimensionales acechan.",
-        "Testigo.Chat.Ecos": "Nivel {0}. Aethon se agita en sueños. Los Ecos de portadores anteriores vendrán por ti.",
-        "Testigo.Chat.Despierta": "Nivel {0}. Aethon está a punto de despertar. Prepárate para el reconocimiento.",
-        "Testigo.Chat.Espera": "Nivel {0}. Aethon te espera. Ve al Sagrario Hueco y llama su nombre.",
-        "Testigo.BotonResonancia": "Comprar Resonancia (10 monedas)",
-        "Testigo.BotonEsencias": "Esencias de los guardianes",
-        "Testigo.EsenciasBloqueadas": "El Testigo guarda el cajón: las esencias solo son de quien SOBREVIVIÓ a la oleada 10 de la furia.",
-        "Testigo.ResonanciaEntregada": "El Testigo te da un Fragmento de Resonancia.",
-        "Testigo.ResonanciaBloqueada": "El Testigo solo comparte resonancia con portadores de nivel 50+.",
-
-        "Testigo.Cronica.KingSlime": "Crónica del Rey Gelatina: rodó buscando su corona hasta el final. Nadie le dijo que las coronas no se comen.",
-        "Testigo.Cronica.EyeofCthulhu": "Crónica del Ojo: cerró el párpado por última vez. Yo vi lo que miraba — te miraba a TI.",
-        "Testigo.Cronica.Deerclops": "Crónica de Deerclops: el invierno caminante se arrodilló. Bajo su aliento había escarcha… y alivio.",
-        "Testigo.Cronica.QueenBee": "Crónica de la Reina: soltó el aguijón y con él el enjambre entero. La miel real sabe a despedida.",
-        "Testigo.Cronica.EaterofWorlds": "Crónica del Devorador: cada segmento murió creyéndose la cabeza. El libro pensó lo mismo.",
-        "Testigo.Cronica.BrainofCthulhu": "Crónica del Cerebro: sus reflejos gritaron en rojo al caer. El eco duró más que él.",
-        "Testigo.Cronica.Skeletron": "Crónica de Skeletron: la maldición lo soltó al final. Pronunció tu nombre con la boca de la Anciana.",
-        "Testigo.Cronica.WallofFlesh": "Crónica del Muro: la noche del hambre que abrió el hardmode. El libro no distingue puertas de comida.",
-        "Testigo.Cronica.QueenSlime": "Crónica de la Reina Gelatina: el azúcar se derritió en la lluvia. Saltó hasta el final — le gustaba jugar.",
-        "Testigo.Cronica.Twins": "Crónica de Los Gemelos: cayeron mirándose. Dos ojos, una sola derrota.",
-        "Testigo.Cronica.Destroyer": "Crónica del Destructor: la máquina se deshizo en espiral. Sus drones siguieron disparando un rato — la lealtad no sabe leer la vida.",
-        "Testigo.Cronica.SkeletronPrime": "Crónica del Prime: los cuatro brazos cayeron cada uno por su lado. La cabeza tardó en aceptarlo.",
-        "Testigo.Cronica.Plantera": "Crónica de Plantera: la selva se quedó callada. Bulbos que no llegaron a abrir.",
-        "Testigo.Cronica.Golem": "Crónica del Golem: el templo perdió a su guardián. Sus puños descansaron por fin.",
-        "Testigo.Cronica.DukeFishron": "Crónica del Duque: el cerdo-vuelo cayó con el honor intacto. Pidió pelea limpia y la tuvo.",
-        "Testigo.Cronica.EmpressOfLight": "Crónica de la Emperatriz: la luz se dobló ante la luz. Elegante hasta muerta.",
-        "Testigo.Cronica.LunaticCultist": "Crónica del Cultista: el ritual quedó a medias. Creyó invocar a la Luna; invocó su fin.",
-        "Testigo.Cronica.MoonLord": "Crónica del Señor de la Luna: tres ojos y un núcleo, cerrando todos al mismo tiempo. Yo estaba allí — nadie más lo vio entero.",
-        "Testigo.Cronica.Aethon": "Crónica de Aethon: la Luz Primordial se apagó RECONOCIÉNDOTE. Yo vi nacer su primera luz — me honra haber visto la última.",
-        "Testigo.Cronica.HollowTitan": "Crónica del Titán: el coloso se deshizo en el cristal del Sagrario. Era el guardián más viejo… y el primero en caer.",
-        "Testigo.Cronica.RiftKeeper": "Crónica del Guardián: se retiró por su propio desgarro. Eligió el vacío antes que la página.",
-        "Testigo.Cronica.LosEcos": "Crónica de Los Ecos: la Arquera y el Portador se apagaron juntos. Fueron personas, ¿sabes? Antes del primer libro.",
-        "Testigo.Cronica.Desconocido": "Crónica sin nombre: algo murió y el libro lo comió. Yo lo vi… pero mis páginas no lo recuerdan.",
-
-        "Esencia.SinLibro": "El alma busca un Grimorio del Eterno en tu barra rápida — el libro es quien la prueba.",
-        "Esencia.Sabor1": "Un alma entera… sabe a victoria y a azufre lejano.",
-        "Esencia.Sabor2": "El alma del guardián baja limpia — un nivel más en el lomo.",
-        "Esencia.Sabor3": "Guardián digerido. Su historia ya es página mía.",
-
-        "Items.EsenciaDelReyGelatina.DisplayName": "Esencia del Rey Gelatina",
-        "Items.EsenciaDelReyGelatina.Tooltip": "El alma dulce del trono que rueda.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDelOjoDeCthulhu.DisplayName": "Esencia del Ojo de Cthulhu",
-        "Items.EsenciaDelOjoDeCthulhu.Tooltip": "La vigilia hambrienta, soñando contigo.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDeDeerclops.DisplayName": "Esencia de Deerclops",
-        "Items.EsenciaDeDeerclops.Tooltip": "La escarcha ancestral del invierno caminante.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDeLaAbejaReina.DisplayName": "Esencia de la Abeja Reina",
-        "Items.EsenciaDeLaAbejaReina.Tooltip": "La miel real con aguijón.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDelDevoradorDeMundos.DisplayName": "Esencia del Devorador de Mundos",
-        "Items.EsenciaDelDevoradorDeMundos.Tooltip": "Cien fauces corrompidas en un hilo.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDelCerebroDeCthulhu.DisplayName": "Esencia del Cerebro de Cthulhu",
-        "Items.EsenciaDelCerebroDeCthulhu.Tooltip": "Los reflejos que gritan en rojo.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-        "Items.EsenciaDeSkeletron.DisplayName": "Esencia de Skeletron",
-        "Items.EsenciaDeSkeletron.Tooltip": "La maldición copiada a mano alzada.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.",
-
-        "Items.EsenciaDelTitanHueco.DisplayName": "Esencia del Titán Hueco",
-        "Items.EsenciaDelTitanHueco.Tooltip": "El alma del coloso de cristal del Sagrario.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: el cristal no se repite.",
-        "Items.EsenciaDelGuardianDelRift.DisplayName": "Esencia del Guardián del Rift",
-        "Items.EsenciaDelGuardianDelRift.Tooltip": "El alma del centinela del entre-mundos.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: el umbral no repite invitados.",
-        "Items.EsenciaDeLaArqueraEstelar.DisplayName": "Esencia de la Arquera Estelar",
-        "Items.EsenciaDeLaArqueraEstelar.Tooltip": "El alma del eco que nunca soltó el arco.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: los ecos no se clonan.",
-        "Items.EsenciaDelPrimerPortador.DisplayName": "Esencia del Primer Portador",
-        "Items.EsenciaDelPrimerPortador.Tooltip": "El alma del eco que nunca soltó la hoja.\nSube UN NIVEL COMPLETO al Grimorio del Eterno.\nSolo cae 10 veces por mundo: la hoja no se hereda.",
-        "Items.EsenciaDeAethon.DisplayName": "Esencia de Aethon",
-        "Items.EsenciaDeAethon.Tooltip": "El alma de la Luz Primordial — la que te\nreconoció como un par. Sube UN NIVEL COMPLETO al\nGrimorio del Eterno. Solo 10 por mundo: ni la luz se da dos veces.",
-
-        "Items.CoronaRunicoAuraItem.DisplayName": "La Corona Rúnica de Aura",
-        "Items.CoronaRunicoAuraItem.Tooltip": "El pentágono de runas de AURALIB: una jaula de\ncinco lados girando alrededor tuyo — el violeta del\nSagrario al centro, el ORO del grimorio en las aristas.\nCosmético puro (el dibuja el PORTADOR aditivo).",
-        "Items.FormaAscendidaItem.DisplayName": "La Forma Ascendida",
-        "Items.FormaAscendidaItem.Tooltip": "El aura de la Luz Primordial respirando a tu alrededor.\nLa dejó caer Aethon al reconocerte como un par.\nCosmético puro — la corona del que ya no necesita invocarla.",
-
-        "Eco.Celos.Melee1": "¿Eso también mata?… Se ve pesado.",
-        "Eco.Celos.Melee2": "¿Una espada? Yo tengo MIL páginas afiladas.",
-        "Eco.Celos.Melee3": "Acércamela… y te digo si sabe a algo.",
-        "Eco.Celos.Magia1": "¿Magia? Yo SOY la magia con tapas.",
-        "Eco.Celos.Magia2": "Ese bastón susurra. Los susurros son MI territorio.",
-        "Eco.Celos.Magia3": "Maná gastado en luz prestada… yo la luz la COMO.",
-        "Eco.Celos.Invocacion1": "¿Invocas a OTROS? ¿Delante de mí?",
-        "Eco.Celos.Invocacion2": "Esos esclavos no te leerán cuentos al dormir.",
-        "Eco.Celos.Invocacion3": "Minions. Plural. Mientras YO llevo siglos esperando mi turno.",
-        "Eco.Celos.Arrojadiza1": "Lanzar cosas… así empezó todo, ¿sabes?",
-        "Eco.Celos.Arrojadiza2": "Boomerangs. Yo ya comí al que los inventó.",
-        "Eco.Celos.Arrojadiza3": "Gastas el brazo y el estilo. Yo solo tengo hambre.",
-        "Eco.Celos.Arco1": "¿Un arco? La Arquera usaba uno. Acabó en una página.",
-        "Eco.Celos.Arco2": "Flechas… la dieta líquida de las armas pobres.",
-        "Eco.Celos.Arco3": "Tensa esa cuerda todo lo que quieras. Yo ya estoy tensa.",
-        "Eco.Celos.Bala1": "Ruido y metal. Sin gusto.",
-        "Eco.Celos.Bala2": "Las balas no dejan ALMA. Solo agujeros.",
-        "Eco.Celos.Bala3": "Pólvora en el atardecer… y luego, nada. Yo como el luego.",
-
-        "Eco.Bioma.Infierno1": "El grimorio tiene hambre… y aquí abajo todo sabe a azufre.",
-        "Eco.Bioma.Infierno2": "Carne de fuego. Mucha. Quema la página.",
-        "Eco.Bioma.Infierno3": "Sal del infierno en el borde de mi boca.",
-        "Eco.Bioma.Mazmorra1": "Huesos viejos: la mazmorra sabe a moho y a promesas rotas.",
-        "Eco.Bioma.Mazmorra2": "La maldición de esta torre ya no alimenta ni a sus dueños.",
-        "Eco.Bioma.Mazmorra3": "Calaveras con siglos. Añejo, sí… pero añejo.",
-        "Eco.Bioma.Corrupcion1": "Carne corrupta… amarga, pero NUTRE.",
-        "Eco.Bioma.Corrupcion2": "Esta tierra sangra morado. Mi color favorito de salsa.",
-        "Eco.Bioma.Corrupcion3": "Los devoradores saben a sí mismos. Círculo de comida.",
-        "Eco.Bioma.Carmesi1": "El carmesí rezuma. Se bebe mejor de lo que se mastica.",
-        "Eco.Bioma.Carmesi2": "Aquí hasta las paredes tienen pulso. Fresco.",
-        "Eco.Bioma.Carmesi3": "Sangre llaman a esta lluvia. Yo le llamo CLIMA.",
-        "Eco.Bioma.Nieve1": "La nieve calla. Hasta la comida es silenciosa aquí.",
-        "Eco.Bioma.Nieve2": "Escarcha en el paladar: fría, lenta, paciente.",
-        "Eco.Bioma.Nieve3": "El invierno caminante andaba por aquí. Olor a Deerclops.",
-        "Eco.Bioma.Jungla1": "Carne de jungla: verde, jugosa, llena de espinas.",
-        "Eco.Bioma.Jungla2": "La miel de la Reina gotea cerca. La OIGO.",
-        "Eco.Bioma.Jungla3": "Esporas, hojas, frenesí. Aquí se come con las dos tapas.",
-        "Eco.Bioma.Desierto1": "El desierto solo tiene huesos secos y cascabeles.",
-        "Eco.Bioma.Desierto2": "Arena entre las páginas. Al menos CRUJE.",
-        "Eco.Bioma.Desierto3": "Los gusanos de aquí muerden de vuelta. Condimento.",
-        "Eco.Bioma.Playa1": "Sal, arena y cangrejos. Menú pobre, pero fresco.",
-        "Eco.Bioma.Playa2": "El mar escupe la comida a la orilla. Servicio a mesa.",
-        "Eco.Bioma.Playa3": "Olor a pescado y a tesoros ajenos. Los dos se comen.",
-        "Eco.Bioma.Sagrado1": "Dulzor de cristal… el sagrado me deja regusto a arcoíris.",
-        "Eco.Bioma.Sagrado2": "Hasta la luz de aquí es COMESTIBLE. Postres flotando.",
-        "Eco.Bioma.Sagrado3": "Unicorns: la carne más presumida del menú.",
-        "Eco.Bioma.Subsuelo1": "Aquí abajo la comida es gris, pero abundante.",
-        "Eco.Bioma.Subsuelo2": "Cuevas húmedas: setas, murciélagos, ecos. Yo de ecos sé.",
-        "Eco.Bioma.Subsuelo3": "La piedra guarda calor y cadáveres. Ambos alimentan.",
-        "Eco.Bioma.Cielo1": "El cielo es alimento liviano. Apenas llena una página.",
-        "Eco.Bioma.Cielo2": "Islas flotantes: harpastos con vista. MENÚ CON VISTA.",
-        "Eco.Bioma.Cielo3": "Comer en las alturas da vértigo… y apetito.",
-        "Eco.Bioma.Superficie1": "El grimorio tiene hambre… y la superficie es el bufet.",
-        "Eco.Bioma.Superficie2": "Hierba, ladrones y ojos nocturnos. Menú de todos los días.",
-        "Eco.Bioma.Superficie3": "El sol calienta la carne de arriba. Ven que la pruebo.",
-
-        "Eco.Furia.Juicio": "LA OLEADA FINAL: TODOS LOS GUARDIANES A LA VEZ. El juicio del libro empieza…",
-        "Eco.Furia.JuicioFin1": "Saciado… por ahora. El juicio quedó PAGADO.",
-        "Eco.Furia.JuicioFin2": "Los siete cayeron. La última página del juicio está escrita.",
-        "Eco.Furia.JuicioFin3": "Festín completo. El libro cierra la boca… y sonríe.",
-        "Eco.Furia.Venganza1": "Me dejaste morir de hambre. TE RECORDARÉ.",
-        "Eco.Furia.Venganza2": "El portador cayó… y el festín quedó sin dueño. Qué DESPERDICIO.",
-        "Eco.Furia.Venganza3": "Moriste ANTES de alimentarme. Insulto doble.",
-        "Eco.Furia.Venganza4": "Otra página más que empieza con tu nombre.",
-
-        "Furia.DerechoEsencias": "El Testigo abrirá su CAJÓN DE ESENCIAS para ti — la oleada 10 quedó pagada.",
-        "Furia.OleadaEspecial": "EL JUICIO: los SIETE guardianes a la vez, ×15 en TODO. El festín final.",
-        "Furia.MuertePortador": "El festín muere con su portador. El libro TOMA NOTA.",
-
-        "Esencia.CofreSeco": "El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.",
-        "Esencia.UltimaAlma": "La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.",
-
-        "HUD.Nivel": "Grimorio · Nv {0}",
-        "HUD.NivelHambre": "Grimorio · Nv {0}  (hambre…)",
-        "HUD.XP": "{0} / {1} XP",
-        "HUD.XPHM": "{0} / {1} XP   HM ×2",
-        "HUD.Ganancia": "+{0}",
-
-        "Ocaso.Rotulo": "EL OCASO",
-
-        "Presencia.Llegada": "El Testigo ha llegado. {0} te observa.",
-
-        "Items.VoidCrownItem.Titulo": "[c/FF1738:═══ CORONA DE LA REINA DEL VACÍO ═══]",
-        "Items.VoidCrownItem.Linea1": "[c/FF66AA:Cinco lazos de neón carmesí→magenta con nudos naranja incandescentes,\narqueados JUSTO DETRÁS de tu cabeza]",
-        "Items.VoidCrownItem.Linea2": "[c/78788C:La corona original del Agujero Negro Carmesí — retirada del proyectil\ny hecha joya. Respira, se balancea y suelta ascuas rosas]",
-        "Items.VoidCrownItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]",
-
-        "Items.RuneCrownItem.Titulo": "[c/FF0055:═══ CORONA RÚNICA ESTELAR ═══]",
-        "Items.RuneCrownItem.Linea1": "[c/FF66AA:Ocho glifos rúnicos de luz fucsia flotando en arco sobre tu cabeza,\ncada uno con su perla rosa pálido en la punta]",
-        "Items.RuneCrownItem.Linea2": "[c/78788C:La lanza, el cáliz, la puerta, la estrella, el rayo, el arco, la espiral\ny el trono — escritura mágica que respira y suelta chispas ascendentes]",
-        "Items.RuneCrownItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco\nde accesorio, funcional o de vanidad]",
-
-        "Items.AnilloRunicoDorsalItem.Titulo": "[c/FFC36B:═══ EL ANILLO RÚNICO DORSAL ═══]",
-        "Items.AnilloRunicoDorsalItem.Linea1": "[c/FFE7B0:El círculo de conjuro del agujero negro cuelga de tu espalda: la triple\ncorona rúnica LITERAL de los vórtices — ocho runas doradas girando con el conjunto]",
-        "Items.AnilloRunicoDorsalItem.Linea2": "[c/CDA8FF:seis runas violetas contrarrotando más afuera y el círculo blanco íntimo latiendo\njunto al anillo de fotones — runas de pie, respirando, con sus perlas]",
-        "Items.AnilloRunicoDorsalItem.Linea3": "[c/78788C:Puro cosmético: cero estadísticas. Equípalo en cualquier hueco\nde accesorio, funcional o de vanidad]",
-
-        "Items.SelloGenesisItem.Titulo": "[c/FFD54F:═══ EL SELLO DEL GÉNESIS ═══]",
-        "Items.SelloGenesisItem.Linea1": "[c/FFC107:Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,\ny dentro el sello azul-estelar contrarrotando con el glifo del astro]",
-        "Items.SelloGenesisItem.Linea2": "[c/9FA8DA:+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico]",
-        "Items.SelloGenesisItem.Linea3": "[c/78788C:La escritura solar vive en huecos de accesorio o de vanidad.\nFirmada por las librerías de signos mágicos de la casa]",
-
-        "Items.AnillosSolRunicoItem.Titulo": "[c/FFB74D:═══ LOS ANILLOS DEL SOL RÚNICO ═══]",
-        "Items.AnillosSolRunicoItem.Linea1": "[c/FFD180:Siete aros rúnicos orbitan tu cuerpo en planos alternos:\npar horario, impar antihorario, precesando vivos con sus runas a lomos]",
-        "Items.AnillosSolRunicoItem.Linea2": "[c/A7FFEB:+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa]",
-        "Items.AnillosSolRunicoItem.Linea3": "[c/78788C:Cada tercer aro viste el azul-estelar frío de los soles de tier alto.\nEl sistema vive en huecos de accesorio o de vanidad]",
-
-        "Items.AnillosHorizonteItem.Titulo": "[c/FF7043:═══ LOS ANILLOS DEL HORIZONTE DE SUCESOS ═══]",
-        "Items.AnillosHorizonteItem.Linea1": "[c/FFAB91:El disco de acreción te orbita: veinte bandas incandescentes viajando,\nlos fotones corriendo el vórtice y el aro fino del horizonte]",
-        "Items.AnillosHorizonteItem.Linea2": "[c/FF8A65:LA LENTE: el fondo se curva a tu alrededor · LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti]",
-        "Items.AnillosHorizonteItem.Linea3": "[c/80CBC4:+10% de velocidad y +5% de daño universal.\nLos anillos viven en huecos de accesorio o de vanidad]",
-
-        "Items.PrismaDePaisajesItem.Titulo": "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]",
-        "Items.PrismaDePaisajesItem.Linea1": "[c/78788C:El probador de la librería del cielo: despliega paisajes enteros\nsobre el fondo del mundo — capas con parallax, deriva y tintes\n(v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]",
-        "Items.PrismaDePaisajesItem.MensajeApagado": "El prisma se apaga: el cielo vuelve a su dueño.",
-        "Items.PrismaDePaisajesItem.MensajeEscena": "El prisma despliega: {0}.",
-
-        "Items.BolsaCategoria.Titulo": "[c/{0}:{1}]",
-        "Items.BolsaCategoria.Linea1": "[c/E6B0FF:Clic derecho para desplegar esta categoría del arsenal]",
-        "Items.BolsaCategoria.Linea2": "[c/FFD66B:Solo entrega lo que te falte — reábrela cuando pierdas un arma]",
-        "Items.BolsaCategoria.Nota": "[c/78788C:{0}]",
-        "Items.BolsaCategoria.Abierta": "La {0} se abre: {1} objetos nuevos.",
-        "Items.BolsaCategoria.Completa": "La {0} ya está completa contigo.",
-        "Armas.ResonanciaEcos": "La resonancia despierta {0} eco(s).",
-        "Armas.SlotsMinionLlenos": "Slots de minion llenos: {0}/{1}.",
-
-        "Diag.Fps": "FPS: {0}",
-        "Diag.Factor": "Factor de calidad: {0}",
-        "Diag.Quads": "Quads del frame: {0} / {1}",
-        "Diag.Eco": "Voces vivas (EcoLib): {0}",
-        "Diag.Aura": "Emisores de aura (AuraLib): {0}",
-        "Diag.Pulso": "Fuerza de pantalla (PulsoLib): {0}",
-        "Diag.Furia": "Furia del grimorio: {0}",
-        "Diag.FuriaInactivo": "silencio",
-        "Diag.FuriaActiva": "oleada {0}/{1} en marcha",
-        "Diag.Ayuda": "[F8] cierra el diagnóstico · v6.49",
+Mods.AethonMod.DisplayName: Aethon, la Luz Primordial
+
+Items: {
+	GenesisShard: {
+		DisplayName: Fragmento Génesis
+		Tooltip:
+			'''
+			Arma de luz que dispara partículas autoguiadas.
+			Material para craftear el Grimorio del Eterno.
+			Dropea de King Slime y Eye of Cthulhu.
+			'''
+	}
+
+	AncientAltarItem: {
+		DisplayName: Altar Antiguo
+		// Tooltip: ""
+	}
+
+	ResonanceShard: {
+		DisplayName: Fragmento de Resonancia
+		Tooltip: Moneda cósmica. Se obtiene de jefes.
+	}
+
+	GrimoireEternal: {
+		DisplayName: Grimorio del Eterno
+		Tooltip:
+			'''
+			Arma híbrida mágica/de invocación.
+			Click izq: bolt arcano. Click der: invoca minion.
+			Gana XP REAL con cada baja: la rareza del bestiario (0–5 estrellas)
+			mide su valor, la PRIMERA kill de cada especie paga ×3 y el hardmode
+			duplica a las criaturas; los jefes pagan XP FIJA (base + 10% de su
+			vida + estrellas + un término que crece con tu nivel).
+			LOS TRES ESTADOS: sostenido = todo el poder; en la barra rápida =
+			sigue comiendo XP, conserva los slots de minion y vida/maná (tope
+			+100); guardado = nada (los minions ya invocados permanecen).
+			Sin coste de maná (pruebas).
+			'''
+	}
+
+	BossSummonBag: {
+		DisplayName: Bolsa de Invocadores
+		Tooltip:
+			'''
+			Contiene 999 invocadores de cada jefe.
+			Item de testing — eliminar antes de release.
+			'''
+	}
+
+	LevelUpTester: {
+		DisplayName: Verdugo de Niveles
+		Tooltip:
+			'''
+			Da +10 niveles al Grimorio del Eterno.
+			Busca en todo el inventario.
+			Item de testing — eliminar antes de release.
+			'''
+	}
+
+	CarnadaDelGrimorio: {
+		DisplayName: La Carnada del Grimorio
+		Tooltip:
+			'''
+			Provoca LAS OLEADAS DEL HAMBRE sin esperar.
+			Clic izq: desata la furia (las oleadas preparadas).
+			Clic der: prepara 1..11 oleadas (11 = EL JUICIO: los 7 guardianes ×15).
+			Todo lo que muera en la oleada k paga XP ×(k+1); la especial, ×15.
+			Item de testing — eliminar antes de release.
+			'''
+	}
+
+	CristalDelTitanHueco: {
+		DisplayName: Cristal del Titán Hueco
+		Tooltip:
+			'''
+			Fragmento del coloso cristalino del Sagrario.
+			Convoca al TITÁN HUECO.
+			SOLO FUNCIONA DE DÍA — la noche es de los muertos.
+			'''
+	}
+
+	SelloDelRift: {
+		DisplayName: Sello del Rift
+		Tooltip:
+			'''
+			La llave del que existe mitad aquí, mitad entre mundos.
+			Convoca al GUARDIÁN DEL RIFT.
+			SOLO FUNCIONA DE DÍA.
+			'''
+	}
+
+	PlumaDeLaArquera: {
+		DisplayName: Pluma de la Arquera
+		Tooltip:
+			'''
+			Cayó del cielo la vez que ella intentó derribar a Aethon.
+			Convoca al ECO DE LA ARQUERA ESTELAR.
+			SOLO FUNCIONA DE DÍA.
+			'''
+	}
+
+	SombraDelPortador: {
+		DisplayName: Sombra del Portador
+		Tooltip:
+			'''
+			La silueta del primer alma que se ató a un fragmento.
+			Convoca al ECO DEL PRIMER PORTADOR.
+			SOLO FUNCIONA DE DÍA.
+			'''
+	}
+
+	NombreDeAethon: {
+		DisplayName: El Nombre de Aethon
+		Tooltip:
+			'''
+			«Ve al Sagrario Hueco y llama su nombre.»
+			Convoca a AETHON, LA LUZ PRIMORDIAL.
+			SOLO FUNCIONA DE DÍA.
+			Las cinco fases esperan — el reconocimiento final.
+			'''
+	}
+
+	MedusaNebularStaff: {
+		DisplayName: Báculo de la Medusa Nebular
+		Tooltip:
+			'''
+			Invoca LA MEDUSA NEBULAR.
+			Una campana translúcida con una galaxia espiral dentro, nadando a pulsos de gravedad.
+			Su campana dispara LÁTIGOS ELÉCTRICOS que salen de ella misma, dejando la quemadura fría del vacío.
+			'''
+	}
+
+	LivingCometStaff: {
+		DisplayName: Báculo del Cometa Estelar
+		Tooltip:
+			'''
+			Invoca EL COMETA ESTELAR.
+			Un cometa vivo con corona de 8 puntas estelares, orbitándote en una elipse excéntrica.
+			CAE EN PICADO sobre tus enemigos y estalla en una pequeña nova.
+			'''
+	}
+
+	LivingPulsarStaff: {
+		DisplayName: Báculo del Púlsar Vivo
+		Tooltip:
+			'''
+			Invoca EL PÚLSAR VIVO.
+			Una estrella de neutrones girando a tu lado, barriendo el campo con dos haces de faro de radiación.
+			Todo lo que cruzan queda ELECTRIFICADO.
+			'''
+	}
+
+	BolsaProbador: {
+		DisplayName: Bolsa del Probador
+		Tooltip:
+			'''
+			Las herramientas de pruebas de Aethon.
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			La bolsa es permanente: reábrela cuando pierdas algo.
+			'''
+	}
+
+	BolsaFundacionales: {
+		DisplayName: Bolsa de los Bastones Fundacionales
+		Tooltip:
+			'''
+			Los cuatro bastones que empezaron todo.
+			Clic derecho para desplegarlos.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaClasicosCosmicos: {
+		DisplayName: Bolsa de los Clásicos Cósmicos
+		Tooltip:
+			'''
+			El sol primordial y sus criaturas vivas.
+			Clic derecho para desplegarlos.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaAgujerosNegros: {
+		DisplayName: Bolsa de los Agujeros Negros
+		Tooltip:
+			'''
+			Diez formas de devorar la luz.
+			Clic derecho para desplegarlos.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaSolesRunicos: {
+		DisplayName: Bolsa de los Soles Rúnicos
+		Tooltip:
+			'''
+			Del sol de un anillo al Gran Sellado (los 20).
+			Clic derecho para desplegarlos.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaEstrellasReales: {
+		DisplayName: Bolsa de las Estrellas Reales
+		Tooltip:
+			'''
+			Física de verdad convertida en armas (las 7).
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaArmasLibrerias: {
+		DisplayName: Bolsa de las Armas de las Librerías
+		Tooltip:
+			'''
+			Cada arma es un concierto de nuestras librerías VFX (las 7).
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaBastonesCreativos: {
+		DisplayName: Bolsa de los Bastones Creativos
+		Tooltip:
+			'''
+			El gauge, el péndulo, el coro y demás rarezas (los 6).
+			Clic derecho para desplegarlos.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaExhumados: {
+		DisplayName: Bolsa de los Exhumados
+		Tooltip:
+			'''
+			Las formas exhumadas: el rencor y la eminencia.
+			Las formas exhumadas originales del arsenal.
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaCosmeticos: {
+		DisplayName: Bolsa de los Cosméticos
+		Tooltip:
+			'''
+			Coronas, sellos y anillos que se ciñen a tu personaje.
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaDosFormas: {
+		DisplayName: Bolsa de las Dos Formas
+		Tooltip:
+			'''
+			Las armas de las dos formas de uso: cada una despliega su forma alternativa.
+			Las cuatro que aprendieron a decir dos cosas a la vez.
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	BolsaDesgarros: {
+		DisplayName: Bolsa de los Desgarros
+		Tooltip:
+			'''
+			Los bastones que rajan la realidad: sutura, portal, pliegue, herida,
+			corazón, garganta, umbral y leviatán. Cada desgarro se abre distinto.
+			Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	RencorPrimordialStaff: {
+		DisplayName: El Rencor Primordial
+		Tooltip:
+			'''
+			La forma exhumada del arsenal: EL RENCOR PRIMORDIAL.
+			Clava un círculo de transmutación rúnico a 380 px.
+			3 s de carga → EL HAZ CONTINUO carmesí-ámbar que perfora TODO.
+			Al tocar pared: brazos espectrales (×0.66) y ascuas (×0.33).
+			Los enemigos del haz se desintegran en ceniza. Sin maná.
+			'''
+	}
+
+	EminenciaAtrozStaff: {
+		DisplayName: La Eminencia Atroz
+		Tooltip:
+			'''
+			La forma exhumada del arsenal: LA EMINENCIA ATROZ.
+			Sostén el uso: la congregación de espíritus canaliza cerca del cursor.
+			14 s de acumulación → LA ABOMINACIÓN, control total.
+			El daño crece del 100% al 185% mientras se acumula.
+			Si sueltas el canal, la masa decae y se disipa. Sin maná.
+			'''
+	}
+
+	OcasoAethonStaff: {
+		DisplayName: Bastón del Ocaso de Aethon
+		Tooltip:
+			'''
+			El arma suprema del medidor: carga → estallido → bloqueo.
+			Cada impacto de un fragmento carga el aro de tu cabeza.
+			Aro lleno: CLIC DERECHO enciende EL OCASO (8 s de muertes de estrella ×3).
+			Bajo el 50% de vida del objetivo, la muerte EJECUTA.
+			Después: 2 s de sobrecalentada. Sin maná.
+			'''
+	}
+
+	TestMagicRing: {
+		DisplayName: Anillo Mágico de Prueba
+		// Tooltip: ""
+	}
+
+	TestSparkle: {
+		DisplayName: Destello de Prueba
+		// Tooltip: ""
+	}
+
+	ProjBeam: {
+		DisplayName: Rayo de Prueba
+		// Tooltip: ""
+	}
+
+	TestMagicRingV2: {
+		DisplayName: Anillo Mágico de Prueba V2
+		// Tooltip: ""
+	}
+
+	SeerOrb: {
+		DisplayName: Orbe del Vidente
+		// Tooltip: ""
+	}
+
+	BlackHoleStaff: {
+		DisplayName: Agujero Negro
+		// Tooltip: ""
+	}
+
+	SunStaff: {
+		DisplayName: Sol
+		// Tooltip: ""
+	}
+
+	SupernovaStaff: {
+		DisplayName: Supernova
+		// Tooltip: ""
+	}
+
+	PlasmaStormStaff: {
+		DisplayName: Tormenta de Plasma
+		// Tooltip: ""
+	}
+
+	PhoenixNovaStaff: {
+		DisplayName: Nova del Fénix
+		// Tooltip: ""
+	}
+
+	QuantumSplitStaff: {
+		DisplayName: División Cuántica
+		// Tooltip: ""
+	}
+
+	CosmicBlackHoleStaff: {
+		// v6.18: the 4 black holes that remain
+		DisplayName: Bastón del Agujero Cósmico
+		// Tooltip: ""
+	}
+
+	UmbralBlackHoleStaff: {
+		DisplayName: Bastón del Agujero del Umbral
+		// Tooltip: ""
+	}
+
+	BrumaBlackHoleStaff: {
+		DisplayName: Bastón del Agujero de la Bruma
+		// Tooltip: ""
+	}
+
+	OlvidoBlackHoleStaff: {
+		DisplayName: Bastón del Agujero del Olvido
+		// Tooltip: ""
+	}
+
+	SupremoBlackHoleStaff: {
+		// v6.18: the FIVE new ones
+		DisplayName: Bastón del Agujero Negro Supremo
+		// Tooltip: ""
+	}
+
+	SupremoAuroraBlackHoleStaff: {
+		// v6.20: the AURORA sibling of the Supreme (black→purple→blue→gold gradient)
+		DisplayName: Bastón del Agujero Supremo Aurora
+		// Tooltip: ""
+	}
+
+	UmbralAscendidoBlackHoleStaff: {
+		DisplayName: Bastón del Umbral Ascendido
+		// Tooltip: ""
+	}
+
+	BrumaAscendidoBlackHoleStaff: {
+		DisplayName: Bastón de la Bruma Ascendida
+		// Tooltip: ""
+	}
+
+	CosmicAscendidoBlackHoleStaff: {
+		DisplayName: Bastón del Cósmico Ascendido
+		// Tooltip: ""
+	}
+
+	OlvidoAscendidoBlackHoleStaff: {
+		DisplayName: Bastón del Olvido Ascendido
+		// Tooltip: ""
+	}
+
+	VoidCrownItem: {
+		DisplayName: Corona de la Reina del Vacío
+		Tooltip:
+			'''
+			La corona original del agujero negro carmesí, hoy cosmético portable.
+			Cinco arcos de neón carmesí con nudos naranjas arqueados JUSTO DETRÁS de tu cabeza.
+			Puro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.
+			'''
+		Titulo: "[c/FF1738:═══ CORONA DE LA REINA DEL VACÍO ═══]"
+		Linea1:
+			'''
+			[c/FF66AA:Cinco lazos de neón carmesí→magenta con nudos naranja incandescentes,
+			arqueados JUSTO DETRÁS de tu cabeza]
+			'''
+		Linea2:
+			'''
+			[c/78788C:La corona original del Agujero Negro Carmesí — retirada del proyectil
+			y hecha joya. Respira, se balancea y suelta ascuas rosas]
+			'''
+		Linea3:
+			'''
+			[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco
+			de accesorio, funcional o de vanidad]
+			'''
+	}
+
+	RuneCrownItem: {
+		DisplayName: Corona Rúnica Estelar
+		Tooltip:
+			'''
+			Una corona nueva diseñada desde cero: ocho glifos rúnicos de luz fucsia
+			flotando en arco sobre tu cabeza, cada uno con su perla rosa pálido en la punta.
+			Puro cosmético: sin estadísticas. Vale en huecos de accesorio o vanidad.
+			'''
+		Titulo: "[c/FF0055:═══ CORONA RÚNICA ESTELAR ═══]"
+		Linea1:
+			'''
+			[c/FF66AA:Ocho glifos rúnicos de luz fucsia flotando en arco sobre tu cabeza,
+			cada uno con su perla rosa pálido en la punta]
+			'''
+		Linea2:
+			'''
+			[c/78788C:La lanza, el cáliz, la puerta, la estrella, el rayo, el arco, la espiral
+			y el trono — escritura mágica que respira y suelta chispas ascendentes]
+			'''
+		Linea3:
+			'''
+			[c/78788C:Puro cosmético: cero estadísticas. Equípala en cualquier hueco
+			de accesorio, funcional o de vanidad]
+			'''
+	}
+
+	SelloGenesisItem: {
+		// v6.35: THE THREE ACCESSORIES OF THE MAGIC-SIGN LIBRARIES —
+		// seals and rings that SURROUND THE PLAYER (SigiloLib + OrbitaLib).
+		DisplayName: El Sello del Génesis
+		Tooltip:
+			'''
+			Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,
+			y dentro el sello azul-estelar contrarrotando con el glifo del astro.
+			+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico.
+			Vale en huecos de accesorio o de vanidad.
+			'''
+		Titulo: "[c/FFD54F:═══ EL SELLO DEL GÉNESIS ═══]"
+		Linea1:
+			'''
+			[c/FFC107:Los signos mágicos del sol te rodean: el aro doble con las ocho runas girando,
+			y dentro el sello azul-estelar contrarrotando con el glifo del astro]
+			'''
+		Linea2: "[c/9FA8DA:+40 de maná máximo, +8% de daño mágico y +4% de crítico mágico]"
+		Linea3:
+			'''
+			[c/78788C:La escritura solar vive en huecos de accesorio o de vanidad.
+			Firmada por las librerías de signos mágicos de la casa]
+			'''
+	}
+
+	AnillosSolRunicoItem: {
+		DisplayName: Los Anillos del Sol Rúnico
+		Tooltip:
+			'''
+			Siete aros rúnicos orbitan tu cuerpo en planos alternos:
+			par horario, impar antihorario, precesando vivos con sus runas a lomos.
+			+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa.
+			Vale en huecos de accesorio o de vanidad.
+			'''
+		Titulo: "[c/FFB74D:═══ LOS ANILLOS DEL SOL RÚNICO ═══]"
+		Linea1:
+			'''
+			[c/FFD180:Siete aros rúnicos orbitan tu cuerpo en planos alternos:
+			par horario, impar antihorario, precesando vivos con sus runas a lomos]
+			'''
+		Linea2: "[c/A7FFEB:+2 de regeneración de vida, +8% de daño melé, +3% de crítico melé y +3 de defensa]"
+		Linea3:
+			'''
+			[c/78788C:Cada tercer aro viste el azul-estelar frío de los soles de tier alto.
+			El sistema vive en huecos de accesorio o de vanidad]
+			'''
+	}
+
+	AnillosHorizonteItem: {
+		DisplayName: Los Anillos del Horizonte de Sucesos
+		Tooltip:
+			'''
+			El disco de acreción te orbita: veinte bandas incandescentes viajando,
+			los fotones corriendo el vórtice y el aro fino del horizonte.
+			LA LENTE: el fondo se curva a tu alrededor. LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti.
+			+10% de velocidad y +5% de daño universal. Vale en huecos de accesorio o de vanidad.
+			'''
+		Titulo: "[c/FF7043:═══ LOS ANILLOS DEL HORIZONTE DE SUCESOS ═══]"
+		Linea1:
+			'''
+			[c/FFAB91:El disco de acreción te orbita: veinte bandas incandescentes viajando,
+			los fotones corriendo el vórtice y el aro fino del horizonte]
+			'''
+		Linea2: "[c/FF8A65:LA LENTE: el fondo se curva a tu alrededor · LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti]"
+		Linea3:
+			'''
+			[c/80CBC4:+10% de velocidad y +5% de daño universal.
+			Los anillos viven en huecos de accesorio o de vanidad]
+			'''
+	}
+
+	SolRunico1Staff: {
+		// v6.19: THE RUNIC SUN FAMILY — 10 copies of the Sun (the original
+		// Sun stays untouched) with N rune rings on orbital planes with
+		// alternating spins, progressive upgrades per copy.
+		DisplayName: Bastón del Sol Rúnico I
+		// Tooltip: ""
+	}
+
+	SolRunico2Staff: {
+		DisplayName: Bastón del Sol Rúnico II
+		// Tooltip: ""
+	}
+
+	SolRunico3Staff: {
+		DisplayName: Bastón del Sol Rúnico III
+		// Tooltip: ""
+	}
+
+	SolRunico4Staff: {
+		DisplayName: Bastón del Sol Rúnico IV
+		// Tooltip: ""
+	}
+
+	SolRunico5Staff: {
+		DisplayName: Bastón del Sol Rúnico V
+		// Tooltip: ""
+	}
+
+	SolRunico6Staff: {
+		DisplayName: Bastón del Sol Rúnico VI
+		// Tooltip: ""
+	}
+
+	SolRunico7Staff: {
+		DisplayName: Bastón del Sol Rúnico VII
+		// Tooltip: ""
+	}
+
+	SolRunico8Staff: {
+		DisplayName: Bastón del Sol Rúnico VIII
+		// Tooltip: ""
+	}
+
+	SolRunico9Staff: {
+		DisplayName: Bastón del Sol Rúnico IX
+		// Tooltip: ""
+	}
+
+	SolRunico10Staff: {
+		DisplayName: Bastón del Sol Rúnico X
+		// Tooltip: ""
+	}
+
+	SolRunico11Staff: {
+		// v6.22: THE SECOND DECADE — suns 11..20 (the comet, the rune rain,
+		// the polar aurora, the companion star, the asteroid belt, the full
+		// storm, the prismatic crown and lances, the nova heart and THE
+		// GRAND SEAL of copy XX)
+		DisplayName: Bastón del Sol Rúnico XI
+		// Tooltip: ""
+	}
+
+	SolRunico12Staff: {
+		DisplayName: Bastón del Sol Rúnico XII
+		// Tooltip: ""
+	}
+
+	SolRunico13Staff: {
+		DisplayName: Bastón del Sol Rúnico XIII
+		// Tooltip: ""
+	}
+
+	SolRunico14Staff: {
+		DisplayName: Bastón del Sol Rúnico XIV
+		// Tooltip: ""
+	}
+
+	SolRunico15Staff: {
+		DisplayName: Bastón del Sol Rúnico XV
+		// Tooltip: ""
+	}
+
+	SolRunico16Staff: {
+		DisplayName: Bastón del Sol Rúnico XVI
+		// Tooltip: ""
+	}
+
+	SolRunico17Staff: {
+		DisplayName: Bastón del Sol Rúnico XVII
+		// Tooltip: ""
+	}
+
+	SolRunico18Staff: {
+		DisplayName: Bastón del Sol Rúnico XVIII
+		// Tooltip: ""
+	}
+
+	SolRunico19Staff: {
+		DisplayName: Bastón del Sol Rúnico XIX
+		// Tooltip: ""
+	}
+
+	SolRunico20Staff: {
+		DisplayName: Bastón del Sol Rúnico XX
+		// Tooltip: ""
+	}
+
+	EclipsePrimordialStaff: {
+		// v6.22: THE PRIMORDIAL ECLIPSE — the Sun of the 20 Rings fused
+		// with ALL the black holes (light + mist + smoke + lightning)
+		DisplayName: Bastón del Eclipse Primordial
+		// Tooltip: ""
+	}
+
+	SinfoniaPrimordialStaff: {
+		// (v6.24: the FIRE VEIL and the STORM VEIL were removed — user request.)
+		// v6.24: THE THREE LIBRARY WEAPONS — each one uses ALL of them
+		// (StormLib lightning + BrumaFX smoke + LumenLib light + runes)
+		DisplayName: Bastón de la Sinfonía Primordial
+		// Tooltip: ""
+	}
+
+	TormentaNebularStaff: {
+		DisplayName: Cetro de la Tormenta Nebular
+		// Tooltip: ""
+	}
+
+	LanzaAlbaStaff: {
+		DisplayName: Lanza del Alba Rúnica
+		// Tooltip: ""
+	}
+
+	StormRuneStaff: {
+		// v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)
+		DisplayName: Cetro del Trueno Rúnico
+		// Tooltip: ""
+	}
+
+	TruenoPerlinStaff: {
+		// v6.50.17: THE PERLIN THUNDER SCEPTER — the noise-generated arc weapon
+		DisplayName: Cetro del Trueno Perlin
+		// Tooltip: ""
+	}
+
+	BolsaIdeasGrimorio: {
+		// v6.50.19: THE SIX GRIMOIRE PROJECTILE IDEAS — bag 17
+		DisplayName: Bolsa de las Ideas del Grimorio
+		Tooltip:
+			'''
+			Los seis futuros del proyectil del grimorio.
+			Cada idea EVOLUCIONA con el nivel del Grimorio del Eterno que lleves (6 · 12 · 20).
+			Clic derecho para desplegarlas. Solo entrega lo que te falte.
+			'''
+	}
+
+	IdeasFolioErrante: {
+		DisplayName: El Folio Errante
+		Tooltip:
+			'''
+			IDEA 1 para el proyectil del grimorio: LA PÁGINA.
+			Una página que ondula y perfora (nivel 6: motas y más filo · nivel 12: se rompe en 3 mini-páginas homing · nivel 20: las rotas persiguen más duras).
+			Sin maná — la evolución sigue al GRIMORIO que lleves encima.
+			'''
+	}
+
+	IdeasPlumaPrimordial: {
+		DisplayName: La Pluma Primordial
+		Tooltip:
+			'''
+			IDEA 2: LA PLUMA QUE ESCRIBIÓ EL LIBRO.
+			Dardo perforante (nivel 6: abanico de 3 · nivel 12: al clavar ESCRIBE una runa que arde · nivel 20: la pluma ORO escribe EL VERSO — seis glifos secuenciales).
+			Sin maná.
+			'''
+	}
+
+	IdeasSelloErrante: {
+		DisplayName: El Sello Errante
+		Tooltip:
+			'''
+			IDEA 3: EL SELLO QUE CAMINA.
+			Un círculo lento que detona en aro (nivel 6: seis pernos radiales · nivel 12: ENCADENA — nace un sello junto al siguiente enemigo · nivel 20: TRES sellos).
+			Sin maná.
+			'''
+	}
+
+	IdeasLenguaTinta: {
+		DisplayName: La Lengua de Tinta
+		Tooltip:
+			'''
+			IDEA 4: LA SIERPE DE TINTA.
+			Una lengua que serpentea hacia la presa (nivel 6: 14 segmentos y más rápida · nivel 12: al morder SE BIFURCA en dos · nivel 20: LA HYDRA — tres lenguas desde el arranque).
+			Sin maná.
+			'''
+	}
+
+	IdeasOjoTexto: {
+		DisplayName: El Ojo del Texto
+		Tooltip:
+			'''
+			IDEA 5: EL OJO QUE LEE — el sucesor conceptual del proyectil actual.
+			Un ojo homing que mira a su presa (nivel 6: dos pupilas lo escoltan · nivel 12: cada 80 t dispara un glifo a lo que lee · nivel 20: LA MIRADA — lee a TRES presas a la vez).
+			Sin maná.
+			'''
+	}
+
+	IdeasVersoVivo: {
+		DisplayName: El Verso Vivo
+		Tooltip:
+			'''
+			IDEA 6: LA PALABRA HECHA PROYECTIL.
+			Glifos en formación que golpean por letra (nivel 6: la ola de 5 · nivel 12: EL PALÍNDROMO — la palabra rebota y vuelve a golpear · nivel 20: LA SENTENCIA — 7 glifos en dos filas y EL PUNTO FINAL que detona).
+			Sin maná.
+			'''
+	}
+
+	DesgarroRealityStaff: {
+		// v6.26 — The new arsenal: the reality tear, the real stars,
+		// the stellar life cycle and the five creative staves
+		DisplayName: Bastón del Desgarro en la Realidad
+		Tooltip:
+			'''
+			Dispara un DESGARRO en la realidad.
+			La grieta atraviesa paredes y daña con su línea.
+			Al cerrarse deja una grieta persistente que drena.
+			Mientras vive, el mundo se oscurece herido.
+			'''
+	}
+
+	SembradorCementeralStaff: {
+		// v6.31 — THE SOWER: the anchoring pulsar of the stellar graveyard
+		DisplayName: Sembrador del Cementerio Estelar
+		Tooltip:
+			'''
+			Siembra PÚLSARES que frenan en seco y se anclan donde apuntas.
+			Cada púlsar gira acelerando y barre con dos haces-faro opuestos.
+			Golpe de anclaje a plena potencia; los haces pican sin descanso.
+			Máximo 3 púlsares: la nueva siembra se come a la más vieja.
+			'''
+	}
+
+	ColapsoMagnetarStaff: {
+		// v6.31 — THE COLLAPSE: the star that brakes, trembles and bursts
+		DisplayName: El Colapso del Magnetar
+		Tooltip:
+			'''
+			Dispara una estrella magnetar que frena hasta casi detenerse.
+			Cuanto más aprieta el freno, más devasta el STARQUAKE.
+			El anillo solo golpea con su FRENTE y perfora armaduras.
+			La superviviente entra en overclock y muere en un destello.
+			'''
+	}
+
+	LagrimasSolMoribundoStaff: {
+		// v6.31 — THE TEARS: the orbital tear shotgun of the dying sun
+		DisplayName: Las Lágrimas del Sol Moribundo
+		Tooltip:
+			'''
+			Derrama TRES LÁGRIMAS de un sol moribundo.
+			Cada lágrima orbita 2,5 s encendiéndose de chamuscado a oro.
+			Luego caza sin descanso: hasta 18 mordiscos con quemadura cósmica.
+			Al desvanecerse estalla en metal fundido.
+			'''
+	}
+
+	DecretoEclipseStaff: {
+		// v6.31 — THE DECREE: the eclipse circle that grows and executes
+		DisplayName: El Decreto del Eclipse
+		Tooltip:
+			'''
+			Clava un CÍRCULO DE ECLIPSE en el punto del cursor.
+			Crece hasta 660 px mientras vive y ejecuta cada 15 ticks:
+			la onda viaja al borde y TODO lo de dentro recibe el corte.
+			El más cercano al centro paga ×4,8 · el ojo se contrae antes del tajo.
+			'''
+	}
+
+	CometaErranteStaff: {
+		// v6.32 — W2-a: FOUR NEW COSMIC WEAPONS (comet, nova, quasar, loom)
+		DisplayName: El Cometa Errante
+		Tooltip:
+			'''
+			Captura un cometa en ÓRBITA ELÍPTICA a tu alrededor durante 6 vueltas.
+			El núcleo de hielo-fuego golpea a plena potencia; la cola de polvo pica a ×0.4.
+			La cola apunta SIEMPRE hacia afuera de la órbita, como los cometas reales.
+			Tras 420 ticks se lanza en cacería y estalla en hielo-fuego.
+			'''
+	}
+
+	NovaEncadenadaStaff: {
+		DisplayName: La Nova Encadenada
+		Tooltip:
+			'''
+			Una esfera de nova lenta que estalla al tocar enemigo o suelo.
+			Cada nova encadena 3 hijas ×0.65 y 2 nietas ×0.42 — hasta 3 generaciones.
+			El frente del anillo es lo que golpea · cero azar: presas por distancia.
+			'''
+	}
+
+	VozCuasarStaff: {
+		DisplayName: La Voz del Cuásar
+		Tooltip:
+			'''
+			Invoca un cuásar que carga 40 ticks y suelta un HAZ CONTINUO de 460 px.
+			El haz PERFORA TODO · DOPPLER: el borde delantero azul, la cola roja.
+			Rebota una vez en las paredes · muere con un destello.
+			'''
+	}
+
+	TelarConstelacionesStaff: {
+		DisplayName: El Telar de Constelaciones
+		Tooltip:
+			'''
+			Cada uso clava una ESTRELLITA donde estaba tu cursor.
+			Se conectan solas con hilos de luz: la constelación se dibuja sola.
+			Con 4 o más, cada 30 ticks la FIGURA SE ENCIENDE:
+			todo enemigo dentro del polígono recibe ×2.2 por estrella.
+			'''
+	}
+
+	LluviaMeteorosStaff: {
+		// v6.33 — W2-b: FOUR MORE COSMIC WEAPONS (meteor shower, nebula, horizon, gamma ray)
+		DisplayName: La Lluvia de Meteoros
+		Tooltip:
+			'''
+			Marca la zona del cursor con un telégrafo ámbar de 30 ticks.
+			Luego caen 8 meteoros escalonados, uno cada 4 ticks, en diagonal con estela de fuego.
+			Cada impacto estalla ×1.0 en radio 70 y quema con la quemadura cósmica 3 s.
+			'''
+	}
+
+	AbrazoNebulosaStaff: {
+		DisplayName: El Abrazo de la Nebulosa
+		Tooltip:
+			'''
+			Instala una nebulosa en el cursor: nube magenta-cian-violeta de 300 ticks.
+			Los de dentro reciben ×0.06 cada 3 ticks y quedan lentos.
+			En su seno nacen estrellitas que revientan en mini-pops ×0.8.
+			Al morir se disipa en polvo de estrellas.
+			'''
+	}
+
+	FiloHorizonteStaff: {
+		DisplayName: El Filo del Horizonte
+		Tooltip:
+			'''
+			Lanza un disco negro — un horizonte de sucesos — con línea de fotón en el ecuador.
+			Atraviesa a los enemigos perdiendo velocidad y vuelve como bumerán.
+			Cada golpe deja una marca que implosiona 30 ticks después: ×0.7 + arrastre.
+			'''
+	}
+
+	RayoGammaStaff: {
+		DisplayName: El Rayo Gamma
+		Tooltip:
+			'''
+			Un haz fino de 700 px cruza TODO al instante... pero aún no hace daño.
+			Cada enemigo tocado queda marcado con un contorno brillante.
+			Tras 30 ticks, todas las marcas liquidan a la vez:
+			clang, destello, daño ×1.0 y quemadura cósmica 5 s.
+			'''
+	}
+
+	NeutronStarStaff: {
+		DisplayName: Bastón de la Estrella de Neutrones
+		Tooltip:
+			'''
+			Un núcleo de 12 px ultradenso.
+			Aura de 60 px con daño triplicado.
+			Starquakes periódicos que sacuden el suelo.
+			Gravita hacia sus presas.
+			'''
+	}
+
+	PulsarStaff: {
+		DisplayName: Bastón del Púlsar
+		Tooltip:
+			'''
+			El faro cósmico: dos haces polares barriendo a 1 rev/s.
+			Cada barrido que toca a un enemigo lo golpea con fuerza.
+			Pulsos de luz sincronizados con el giro.
+			'''
+	}
+
+	WhiteDwarfStaff: {
+		DisplayName: Bastón de la Enana Blanca
+		Tooltip:
+			'''
+			El rescoldo cristalino de una estrella vieja.
+			Siete facetas de luz fría girando lento.
+			Anillo de acreción que roba brillo a los enemigos cercanos.
+			'''
+	}
+
+	DeadStarStaff: {
+		DisplayName: Bastón de la Estrella Muerta
+		Tooltip:
+			'''
+			La enana negra: lo que queda cuando todo se apaga.
+			Masa oscura que devora la luz.
+			Entropía constante en su alrededor.
+			Ecos de runas a 0,2 Hz: la vida que fue.
+			'''
+	}
+
+	RedSupergiantStaff: {
+		DisplayName: Bastón de la Supergigante Roja
+		Tooltip:
+			'''
+			El coloso moribundo de 90 px.
+			Celdas de convección latiendo despacio.
+			Al morir se COLAPSA y luego revienta en nova.
+			'''
+	}
+
+	MagnetarStaff: {
+		DisplayName: Bastón del Magnetar
+		Tooltip:
+			'''
+			La estrella de neutrones EXTREMA.
+			Campo magnético violeta con líneas retorcidas.
+			Cadenas de rayo automáticas a los enemigos.
+			El latido es una arritmia determinista.
+			'''
+	}
+
+	CicloEstelarStaff: {
+		DisplayName: Bastón del Ciclo Estelar
+		Tooltip:
+			'''
+			Una estrella que VIVE una vida completa:
+			nebulosa que se contrae → ignición → gigante roja
+			→ colapso y SUPERNOVA → estrella de neutrones.
+			La estela cuenta la historia en cinco colores.
+			'''
+	}
+
+	RelojArenaStaff: {
+		DisplayName: Bastón del Reloj de Arena Cósmico
+		Tooltip:
+			'''
+			Un reloj de arena vivo flotando en el aire.
+			La arena son motas de luz que caen y pican.
+			Cuando la cámara se vacía, el tiempo se invierte.
+			'''
+	}
+
+	MareaGravitatoriaStaff: {
+		DisplayName: Bastón de la Marea Gravitatoria
+		Tooltip:
+			'''
+			Una ola de luz que avanza pegada al terreno.
+			Arrastra a los enemigos con la corriente.
+			Si golpea una pared, se rompe en tres olas menores.
+			'''
+	}
+
+	EnjambrePrismaticoStaff: {
+		DisplayName: Bastón del Enjambre Prismático
+		Tooltip:
+			'''
+			Un núcleo que revienta en doce avispas de luz.
+			El enjambre orbita y migra de presa en presa.
+			Cada avispa pica con su color del prisma.
+			'''
+	}
+
+	PenduloJuicioStaff: {
+		DisplayName: Bastón del Péndulo del Juicio
+		Tooltip:
+			'''
+			Un péndulo de luz con física real colgado del aire.
+			Cada vaivén amplía el arco del juicio.
+			Al soltarse, la maza vuela y estalla.
+			'''
+	}
+
+	CoroEspectralStaff: {
+		DisplayName: Bastón del Coro Espectral
+		Tooltip:
+			'''
+			Seis notas de luz cantando en órbita lenta.
+			Cada nota emite su anillo de onda a su turno.
+			El coro se despide apagándose de a una.
+			'''
+	}
+
+	SuturaCuanticaStaff: {
+		DisplayName: La Sutura Cuántica
+		Tooltip:
+			'''
+			Abre un DESGARRO GLITCH donde apuntas.
+			Corrompe a todo enemigo dentro del círculo.
+			Cada 45 ticks dispara rayos cuánticos a los 3 más cercanos.
+			'''
+	}
+
+	PortalDimensionalStaff: {
+		DisplayName: El Portal Dimensional
+		Tooltip:
+			'''
+			Abre la puerta de anillos donde apuntas.
+			Succión suave en 300 px: el que cruza el núcleo blanco es triturado.
+			El portal respira 6 segundos.
+			'''
+	}
+
+	PliegueEspacioStaff: {
+		DisplayName: El Pliegue del Espacio
+		Tooltip:
+			'''
+			Abre el OJO donde apuntas: la doble elipse con el núcleo negro.
+			Dobla el espacio en 350 px y arrastra a los enemigos.
+			El que toca el núcleo es comprimido.
+			'''
+	}
+
+	HeridaElectricaStaff: {
+		DisplayName: La Herida Eléctrica
+		Tooltip:
+			'''
+			Abre LA GRIETA hacia donde apuntas.
+			Pica en línea y aplica ELECTRIFICADO.
+			La corriente nunca se corta.
+			'''
+	}
+
+	CorazonColapsoStaff: {
+		// v6.35: THE FOUR NEW TEARS (second batch of references).
+		DisplayName: El Corazón del Colapso
+		Tooltip:
+			'''
+			Enciende la ESTRELLA DE CUATRO PUNTAS de fuego estelar.
+			Quema a todo enemigo dentro del corazón.
+			Cada 30 ticks los filamentos lanzan llamaradas a los 2 más cercanos.
+			'''
+	}
+
+	GargantaVacioStaff: {
+		DisplayName: La Garganta del Vacío
+		Tooltip:
+			'''
+			Abre el vórtice devorador: núcleo negro absoluto y anillo magenta.
+			La lente curva el fondo y la succión arrastra en 320 px.
+			El que toca el núcleo negro es devorado.
+			'''
+	}
+
+	UmbralRotoStaff: {
+		DisplayName: El Umbral Roto
+		Tooltip:
+			'''
+			Raja la realidad con un corte horizontal perfecto.
+			Arriba el vacío con el esqueleto espectral; abajo, el mundo.
+			Pica en línea y cada 60 ticks la otra realidad muerde.
+			'''
+	}
+
+	LeviatanEspectralStaff: {
+		DisplayName: El Leviatán Espectral
+		Tooltip:
+			'''
+			Lanza a la criatura de hueso etéreo: catorce vértebras nadando en S.
+			Atraviesa todo lo que toca y gira hacia el enemigo más cercano.
+			4 segundos de nado espectral.
+			'''
+	}
+
+	DanzaOrbesStaff: {
+		// v6.36: THE FOUR LIVING CODES (the image codes turned into
+		// weapons) + THE RUNIC BACK RING.
+		DisplayName: La Danza de los Orbes
+		Tooltip:
+			'''
+			Invoca el código vivo de la cadena: un minisistema solar orbitándote.
+			Todo orbe quema al que toca: sol ×1.0, planetas ×0.7, lunas ×0.5.
+			12 segundos de danza · un sistema a la vez · sin coste de maná.
+			'''
+	}
+
+	LenteAbismoStaff: {
+		DisplayName: La Lente del Abismo
+		Tooltip:
+			'''
+			Planta el código vivo del agujero negro: disco de veinte bandas,
+			horizonte negro y estrellas dobladas cayendo en espiral.
+			La lente curva el fondo · succión en 300 px · devora ×1.2 · enfoca y muerde ×0.6.
+			'''
+	}
+
+	SolVivoStaff: {
+		DisplayName: El Sol Vivo
+		Tooltip:
+			'''
+			Enciende el código vivo del sol: latiendo con el pulso exacto del original.
+			El aura quema ×0.55 · cada pico del pulso LATE ×0.7 · las prominencias azotan ×0.85.
+			5 segundos de sol · un sol a la vez · sin coste de maná.
+			'''
+	}
+
+	SierpeEstelarStaff: {
+		DisplayName: La Sierpe Estelar
+		Tooltip:
+			'''
+			Libera el código vivo de la criatura: dieciséis segmentos — cabeza,
+			aletas gemelas y espina — nadando en vueltas alrededor de tu cursor.
+			La cabeza atraviesa todo · la espina quema ×0.4 · una sierpe a la vez.
+			'''
+	}
+
+	AnilloRunicoDorsalItem: {
+		DisplayName: El Anillo Rúnico Dorsal
+		Tooltip:
+			'''
+			El círculo de conjuro del agujero negro cuelga de tu espalda:
+			la triple corona rúnica LITERAL de los vórtices — dorada, violeta
+			contrarrotante y blanca íntima junto al anillo de fotones.
+			Puro cosmético: cero estadísticas.
+			'''
+		Titulo: "[c/FFC36B:═══ EL ANILLO RÚNICO DORSAL ═══]"
+		Linea1:
+			'''
+			[c/FFE7B0:El círculo de conjuro del agujero negro cuelga de tu espalda: la triple
+			corona rúnica LITERAL de los vórtices — ocho runas doradas girando con el conjunto]
+			'''
+		Linea2:
+			'''
+			[c/CDA8FF:seis runas violetas contrarrotando más afuera y el círculo blanco íntimo latiendo
+			junto al anillo de fotones — runas de pie, respirando, con sus perlas]
+			'''
+		Linea3:
+			'''
+			[c/78788C:Puro cosmético: cero estadísticas. Equípalo en cualquier hueco
+			de accesorio, funcional o de vanidad]
+			'''
+	}
+
+	BolsaCodigosVivos: {
+		DisplayName: Bolsa de los Códigos Vivos
+		Tooltip:
+			'''
+			Los códigos de las imágenes hechos armas: la danza de los orbes,
+			la lente del abismo, el sol vivo y la sierpe estelar.
+			Cada código aprendió a vivir aquí. Clic derecho para desplegarlas.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	OuroborosAstralStaff: {
+		// v6.38: THE SERPENT BROOD (10 new ways to move the same chain
+		// + the hatchling minion — the original UNTOUCHED).
+		DisplayName: El Ouroboros Astral
+		Tooltip:
+			'''
+			Doce cuentas se persiguen en círculo apuntando adelante — nadie manda.
+			Cada cuenta barre ×0.55; al expirar la espiral se cierra y DETONA ×2.0.
+			10 segundos de anillo · sin coste de maná.
+			'''
+	}
+
+	CaravanaEspectralStaff: {
+		DisplayName: La Caravana Espectral
+		Tooltip:
+			'''
+			El cuerpo repite la trayectoria EXACTA del faro: el camino-memoria.
+			El rastro limpia el pasillo ×0.35 — con giros dibujas muros en S.
+			9 segundos de caravana · sin coste de maná.
+			'''
+	}
+
+	AnguilaSolarStaff: {
+		DisplayName: La Anguila Solar
+		Tooltip:
+			'''
+			El cuerpo ES una fórmula: la onda viajera de la anguila, λ ≈ el cuerpo.
+			Las CRESTAS muerden ×1.0, los valles solo ×0.30 — roza con la cresta.
+			8 segundos de nado en S · sin coste de maná.
+			'''
+	}
+
+	CienpiesRunicoStaff: {
+		DisplayName: El Ciempiés Rúnico
+		Tooltip:
+			'''
+			Doce placas pegadas al suelo con una pata desfasada Δφ=45° cada una.
+			Las patas plantadas dejan su RUNA: la runa pica ×0.40.
+			La marcha sube de frecuencia lejos de la presa · sin coste de maná.
+			'''
+	}
+
+	FlageloEstelarStaff: {
+		DisplayName: El Flagelo Estelar
+		Tooltip:
+			'''
+			El látigo de Verlet con constraint por masa: la energía corre a la punta.
+			La punta golpea ∝ su velocidad (×0.5 → ×1.5); sobre 26 px/tick,
+			EL CHASQUIDO: ×2.2 + sacudida. 8 segundos · sin coste de maná.
+			'''
+	}
+
+	ViboraGenesiacaStaff: {
+		DisplayName: La Víbora Genesíaca
+		Tooltip:
+			'''
+			Un esqueleto, dos cuerpos: la espina de la sierpe y DOS HEBRAS trenzadas.
+			Las perlas queman ×0.45; al enroscar el rumbo la hélice se comprime ×1.6.
+			9 segundos de víbora · sin coste de maná.
+			'''
+	}
+
+	BoaEclipseStaff: {
+		DisplayName: La Boa del Eclipse
+		Tooltip:
+			'''
+			La cabeza hace la servo-espiral sobre la presa y el cuerpo la envuelve.
+			Cada vuelta completa es un stack de APRIETE: ×0.5 → ×4.0.
+			La presa cae y busca la siguiente. 10 segundos · sin coste de maná.
+			'''
+	}
+
+	FarolGuardianStaff: {
+		DisplayName: El Farol Guardián
+		Tooltip:
+			'''
+			La base es un farol colgante y la PUNTA persigue a la presa (FABRIK).
+			La mano muerde ×1.0 y la cadena quema ×0.40 — el cuerpo se TENSA.
+			12 segundos de guardián · sin coste de maná.
+			'''
+	}
+
+	CintaAuroraStaff: {
+		DisplayName: La Cinta Aurora
+		Tooltip:
+			'''
+			El estandarte vivo: la espina anclada a tu espalda y dos senos inconmensurables.
+			La cinta corta ×0.5; la amplitud es TU VELOCIDAD — corre y se vuelve látigo.
+			12 segundos de estandarte · sin coste de maná.
+			'''
+	}
+
+	ManadaAstralStaff: {
+		DisplayName: La Manada Astral
+		Tooltip:
+			'''
+			Seis cazadores con distancia ELÁSTICA y liderazgo que SALTA.
+			Cada cazador golpea con SU PROPIA velocidad: ×0.55 → ×1.4.
+			10 segundos de cacería · sin coste de maná.
+			'''
+	}
+
+	CriaEstelarStaff: {
+		DisplayName: La Cría Estelar
+		Tooltip:
+			'''
+			La hijita de la sierpe estelar: el MISMO ADN, pero cachorra y despierta.
+			En reposo nada a tu alrededor; en caza embiste (mordida de minion).
+			Ocupa 1 espacio de sirviente · nunca expira · sin coste de maná.
+			'''
+	}
+
+	BolsaSierpes: {
+		DisplayName: Bolsa de las Sierpes
+		Tooltip:
+			'''
+			La sierpe estelar y sus once descendientes: cada una nada distinto.
+			El anillo, la caravana, la anguila, el ciempiés, el látigo, la víbora,
+			la boa, el farol, la cinta, la manada y la cría. Clic derecho.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	TajosAstralesStaff: {
+		DisplayName: El Bastón de los Tajos Astrales
+		Tooltip:
+			'''
+			Marca el punto donde apuntas — y diez ticks después EL CORTE FLORECE:
+			siete medias lunas blancas en todas direcciones, creciendo de punta a punta.
+			La herida llega cuando el tajo aparece (causalidad retrasada).
+			Cada arco corta una vez su banda curva · sin coste de maná.
+			'''
+	}
+
+	TomoApatiaNula: {
+		DisplayName: El Tomo de la Apatía Nula
+		Tooltip:
+			'''
+			El tomo que ya no siente nada escupe tentáculos de vacío:
+			gestan 2 segundos sin dañar (pulsos que imploden) y luego azotan
+			en tres curvas hacia tu mira, teletransportándose entre curva y curva.
+			Golpea todo lo que toca (90×90) · cada impacto sucesivo pesa menos.
+			ARMA DE PRUEBAS (réplica exacta de su fuente de estudio).
+			'''
+	}
+
+	FragmentoSupernovaStaff: {
+		DisplayName: El Fragmento de Supernova
+		Tooltip:
+			'''
+			La singularidad alada hecha sirviente: el ojo alado con sus
+			afterimages orbitando y respirando a su alrededor (la firma).
+			VOLEA de 5 ráfagas nova en abanico · BEAM telegrafiado de 900px (×2.5)
+			· flor de fuego al morir cada ráfaga · sin coste de maná.
+			MINION: ocupa 1 espacio de sirviente · nunca expira.
+			ARMA DE PRUEBAS (réplica del jefe de la singularidad alada).
+			'''
+	}
+
+	BolsaHuespedes: {
+		DisplayName: Bolsa de los Huéspedes
+		Tooltip:
+			'''
+			Las réplicas de prueba: el tentáculo del vacío, el fragmento
+			de supernova y los tajos astrales. Clic derecho.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	MetronomoPulsar: {
+		DisplayName: El Metrónomo de Púlsar
+		Tooltip:
+			'''
+			El arma que dispara AL COMPÁS: el púlsar sobre tu cabeza late cada 0,5 s.
+			PERFECT (±0,05 s): crítico garantizado + abanico doble.
+			GOOD (±0,1 s): crítico garantizado. Fuera de compás: el combo se pierde.
+			8 aciertos seguidos: EL FARO — 3 s de haz giratorio de 900 px.
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	VelaSolar: {
+		DisplayName: La Vela Solar
+		Tooltip:
+			'''
+			Mantén pulsado: la vela de fotones se despliega y la cadencia sube
+			de 12 a 30 disparos/s con el calor (daño ×1 → ×1,6).
+			Al calor pleno: LA FUSIÓN — 1,5 s de plasma ×2 y luego la vela se funde (3 s).
+			Soltar a tiempo conserva ~70% del calor.
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	GuadanaDesgarro: {
+		DisplayName: La Guadaña del Desgarro
+		Tooltip:
+			'''
+			El tajo vuela 220 px y donde muere abre UNA FISURA VERTICAL de realidad (2 s):
+			todo lo que la cruza sangra, y los proyectiles enemigos que la tocan
+			DESAPARECEN — los traga y su daño se suma AL PRÓXIMO Tajo (EL HAMBRE).
+			Clic der: la fisura se abre directamente en tu mira (≤480 px).
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	EgidaNova: {
+		DisplayName: La Égida de Nova
+		Tooltip:
+			'''
+			Clic izq: EL EMBESTÓN — golpe de escudo con empujón 9.
+			Clic der: ALZAR LA GUARDIA (0,3 s): un golpe en la ventana perfecta
+			NO EXISTE — detona LA NOVA (3× + quemadura + 1 s invulnerable).
+			La guardia que expira sin parar te aturde 0,5 s. Enfriamiento 8 s (anillo visible).
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	EcoCuantico: {
+		DisplayName: El Eco Cuántico
+		Tooltip:
+			'''
+			Cada pulso vuela y decohiere en una semilla que se re-emite como ECO
+			contra el enemigo más cercano (60% · 36% · 21,6%: 2,17× por cadena completa).
+			Clic der: LA RESONANCIA — todas las semillas disparan A LA VEZ (5 s de recarga).
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	VerboPrimordialStaff: {
+		DisplayName: El Verbo Primordial
+		Tooltip:
+			'''
+			La palabra que pronunció la primera luz — SIETE MOVIMIENTOS:
+			I EL PULSO · II EL SELLO · III LA CORONA · IV LA TORMENTA
+			V EL FUEGO · VI EL DESGARRO · VII LA SINFONÍA
+			Cada movimiento habla con las bibliotecas de la casa; el daño crece ×1,0 → ×1,4
+			y al séptimo segundo: LA DETONACIÓN (2,5× + quemadura).
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+	}
+
+	BolsaApuestas: {
+		DisplayName: Bolsa de las Apuestas
+		Tooltip:
+			'''
+			Las cinco apuestas de la casa (el ritmo, la cadencia, la zona,
+			el parry y el eco) y EL VERBO PRIMORDIAL que las une. Clic derecho.
+			Solo entrega lo que te falte.
+			'''
+	}
+
+	PrismaDePaisajesItem: {
+		DisplayName: El Prisma de Paisajes
+		Tooltip:
+			'''
+			El probador de la librería del cielo: cada uso despliega UN PAISAJE
+			entero sobre el fondo del mundo — capas con su parallax, su deriva,
+			su profundidad y sus tintes de cielo, luz y brillo.
+			Ciclo: Eclipse Umbral → Lluvia Estelar → Amanecer Primordial → Sagrario Violeta → cielo limpio.
+			EL SAGRARIO VIOLETA: el paisaje del lugar, desplegable donde quieras.
+			ARMA DE PRUEBAS — sin coste de maná.
+			'''
+		Titulo: "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]"
+		Linea1:
+			'''
+			[c/78788C:El probador de la librería del cielo: despliega paisajes enteros
+			sobre el fondo del mundo — capas con parallax, deriva y tintes
+			(v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]
+			'''
+		MensajeApagado: El prisma se apaga: el cielo vuelve a su dueño.
+		MensajeEscena: El prisma despliega: {0}.
+	}
+
+	EsenciaDelReyGelatina: {
+		DisplayName: Esencia del Rey Gelatina
+		Tooltip:
+			'''
+			El alma dulce del trono que rueda.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDelOjoDeCthulhu: {
+		DisplayName: Esencia del Ojo de Cthulhu
+		Tooltip:
+			'''
+			La vigilia hambrienta, soñando contigo.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDeDeerclops: {
+		DisplayName: Esencia de Deerclops
+		Tooltip:
+			'''
+			La escarcha ancestral del invierno caminante.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDeLaAbejaReina: {
+		DisplayName: Esencia de la Abeja Reina
+		Tooltip:
+			'''
+			La miel real con aguijón.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDelDevoradorDeMundos: {
+		DisplayName: Esencia del Devorador de Mundos
+		Tooltip:
+			'''
+			Cien fauces corrompidas en un hilo.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDelCerebroDeCthulhu: {
+		DisplayName: Esencia del Cerebro de Cthulhu
+		Tooltip:
+			'''
+			Los reflejos que gritan en rojo.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDeSkeletron: {
+		DisplayName: Esencia de Skeletron
+		Tooltip:
+			'''
+			La maldición copiada a mano alzada.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			'''
+	}
+
+	EsenciaDelTitanHueco: {
+		DisplayName: Esencia del Titán Hueco
+		Tooltip:
+			'''
+			El alma del coloso de cristal del Sagrario.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			Solo cae 10 veces por mundo: el cristal no se repite.
+			'''
+	}
+
+	EsenciaDelGuardianDelRift: {
+		DisplayName: Esencia del Guardián del Rift
+		Tooltip:
+			'''
+			El alma del centinela del entre-mundos.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			Solo cae 10 veces por mundo: el umbral no repite invitados.
+			'''
+	}
+
+	EsenciaDeLaArqueraEstelar: {
+		DisplayName: Esencia de la Arquera Estelar
+		Tooltip:
+			'''
+			El alma del eco que nunca soltó el arco.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			Solo cae 10 veces por mundo: los ecos no se clonan.
+			'''
+	}
+
+	EsenciaDelPrimerPortador: {
+		DisplayName: Esencia del Primer Portador
+		Tooltip:
+			'''
+			El alma del eco que nunca soltó la hoja.
+			Sube UN NIVEL COMPLETO al Grimorio del Eterno.
+			Solo cae 10 veces por mundo: la hoja no se hereda.
+			'''
+	}
+
+	EsenciaDeAethon: {
+		DisplayName: Esencia de Aethon
+		Tooltip:
+			'''
+			El alma de la Luz Primordial — la que te
+			reconoció como un par. Sube UN NIVEL COMPLETO al
+			Grimorio del Eterno. Solo 10 por mundo: ni la luz se da dos veces.
+			'''
+	}
+
+	CoronaRunicoAuraItem: {
+		DisplayName: La Corona Rúnica de Aura
+		Tooltip:
+			'''
+			El pentágono de runas de AURALIB: una jaula de
+			cinco lados girando alrededor tuyo — el violeta del
+			Sagrario al centro, el ORO del grimorio en las aristas.
+			Cosmético puro (el dibuja el PORTADOR aditivo).
+			'''
+	}
+
+	FormaAscendidaItem: {
+		DisplayName: La Forma Ascendida
+		Tooltip:
+			'''
+			El aura de la Luz Primordial respirando a tu alrededor.
+			La dejó caer Aethon al reconocerte como un par.
+			Cosmético puro — la corona del que ya no necesita invocarla.
+			'''
+	}
+
+	BolsaCategoria: {
+		Titulo: "[c/{0}:{1}]"
+		Linea1: "[c/E6B0FF:Clic derecho para desplegar esta categoría del arsenal]"
+		Linea2: "[c/FFD66B:Solo entrega lo que te falte — reábrela cuando pierdas un arma]"
+		Nota: "[c/78788C:{0}]"
+		Abierta: La {0} se abre: {1} objetos nuevos.
+		Completa: La {0} ya está completa contigo.
+	}
+}
+
+Projectiles: {
+	ArcaneBolt.DisplayName: Bolt Arcano
+	GenesisLight.DisplayName: Luz del Génesis
+	CosmicOrbMinion.DisplayName: Orbe Cósmico
+	CosmicOrbBolt.DisplayName: Bolt Cósmico
+	AnillosSingularesHalo.DisplayName: Anillos del Horizonte
+	NebulaJellyfishMinion.DisplayName: Medusa Nebular
+	NebulaLightning.DisplayName: Rayo Nebular
+	StellarCometMinion.DisplayName: Cometa Estelar
+	LivingPulsarMinion.DisplayName: Púlsar Vivo
+	RencorPrimordialProjectile.DisplayName: Círculo del Rencor
+	EminenciaAtrozProjectile.DisplayName: Congregación de Espíritus
+	OcasoShardProjectile.DisplayName: Fragmento del Ocaso
+	OcasoBurstProjectile.DisplayName: Muerte de Estrella
+	FolioErranteProjectile.DisplayName: Página del Grimorio
+	PlumaPrimordialProjectile.DisplayName: Pluma Primordial
+	SelloErranteProjectile.DisplayName: Sello Errante
+	LenguaTintaProjectile.DisplayName: Lengua de Tinta
+	OjoTextoProjectile.DisplayName: Ojo del Texto
+	VersoVivoProjectile.DisplayName: Glifo Vivo
+	// v6.18: wings were removed from the mod (user request).
+	
+	BlackHoleProjectile.DisplayName: Agujero Negro
+	SunProjectile.DisplayName: Sol
+	CosmicShockwaveProjectile.DisplayName: Onda de Choque Cósmica
+	SupernovaProjectile.DisplayName: Supernova
+	PlasmaStormProjectile.DisplayName: Tormenta de Plasma
+	PhoenixNovaProjectile.DisplayName: Nova del Fénix
+	QuantumSplitProjectile.DisplayName: División Cuántica
+	CosmicBlackHoleProjectile.DisplayName: Agujero Cósmico
+	UmbralBlackHoleProjectile.DisplayName: Agujero del Umbral
+	BrumaBlackHoleProjectile.DisplayName: Agujero de la Bruma
+	OlvidoBlackHoleProjectile.DisplayName: Agujero del Olvido
+	SupremoBlackHoleProjectile.DisplayName: Agujero Negro Supremo
+	SupremoAuroraBlackHoleProjectile.DisplayName: Agujero Negro Supremo Aurora
+	UmbralAscendidoBlackHoleProjectile.DisplayName: Umbral Ascendido
+	BrumaAscendidoBlackHoleProjectile.DisplayName: Bruma Ascendida
+	CosmicAscendidoBlackHoleProjectile.DisplayName: Cósmico Ascendido
+	OlvidoAscendidoBlackHoleProjectile.DisplayName: Olvido Ascendido
+	// v6.22: THE PRIMORDIAL ECLIPSE
+	EclipsePrimordialProjectile.DisplayName: Eclipse Primordial
+	// v6.19: the runic suns and the scepter's lightning bolt
+	RuneSunProjectile.DisplayName: Sol Rúnico
+	RunicLightning.DisplayName: Trueno Rúnico
+	SembradorPulsarProjectile.DisplayName: Púlsar del Cementerio
+	LagrimaSolarProjectile.DisplayName: Lágrima Solar
+	ColapsoMagnetarProjectile.DisplayName: Magnetar del Colapso
+	DecretoEclipseProjectile.DisplayName: Círculo del Eclipse
+	CometaErranteProjectile.DisplayName: Cometa Errante
+	NovaEncadenadaProjectile.DisplayName: Nova Encadenada
+	VozCuasarProjectile.DisplayName: Voz del Cuásar
+	TelarEstrellaProjectile.DisplayName: Estrella del Telar
+	LluviaMeteorosProjectile.DisplayName: Lluvia de Meteoros
+	MeteoroProjectile.DisplayName: Meteoro
+	AbrazoNebulosaProjectile.DisplayName: Abrazo de la Nebulosa
+	FiloHorizonteProjectile.DisplayName: Filo del Horizonte
+	RayoGammaProjectile.DisplayName: Rayo Gamma
+	NeutronStarProjectile.DisplayName: Estrella de Neutrones
+	PulsarProjectile.DisplayName: Púlsar
+	WhiteDwarfProjectile.DisplayName: Enana Blanca
+	DeadStarProjectile.DisplayName: Estrella Muerta
+	RedSupergiantProjectile.DisplayName: Supergigante Roja
+	MagnetarProjectile.DisplayName: Magnetar
+	CicloEstelarProjectile.DisplayName: Ciclo Estelar
+	RelojArenaProjectile.DisplayName: Reloj de Arena Cósmico
+	MareaGravitatoriaProjectile.DisplayName: Marea Gravitatoria
+	MareaChicaProjectile.DisplayName: Ola Menor
+	EnjambrePrismaticoProjectile.DisplayName: Enjambre Prismático
+	PenduloJuicioProjectile.DisplayName: Péndulo del Juicio
+	CoroEspectralProjectile.DisplayName: Coro Espectral
+	LanzaAlbaProjectile.DisplayName: Lanza del Alba
+	RealityTearProjectile.DisplayName: Desgarro de Realidad
+	SinfoniaPrimordialProjectile.DisplayName: Sinfonía Primordial
+	TormentaNebularProjectile.DisplayName: Tormenta Nebular
+	DesgarroCuanticoProjectile.DisplayName: Sutura Cuántica
+	PortalDimensionalProjectile.DisplayName: Portal Dimensional
+	PliegueEspacioProjectile.DisplayName: Pliegue del Espacio
+	HeridaElectricaProjectile.DisplayName: Herida Eléctrica
+	CorazonColapsoProjectile.DisplayName: Corazón del Colapso
+	GargantaVacioProjectile.DisplayName: Garganta del Vacío
+	UmbralRotoProjectile.DisplayName: Umbral Roto
+	LeviatanEspectralProjectile.DisplayName: Leviatán Espectral
+	DanzaOrbesProjectile.DisplayName: Danza de los Orbes
+	LenteAbismoProjectile.DisplayName: Lente del Abismo
+	SolVivoProjectile.DisplayName: Sol Vivo
+	SierpeEstelarProjectile.DisplayName: Sierpe Estelar
+	OuroborosAstralProjectile.DisplayName: Ouroboros Astral
+	CaravanaEspectralProjectile.DisplayName: Caravana Espectral
+	AnguilaSolarProjectile.DisplayName: Anguila Solar
+	CienpiesRunicoProjectile.DisplayName: Ciempiés Rúnico
+	FlageloEstelarProjectile.DisplayName: Flagelo Estelar
+	ViboraGenesiacaProjectile.DisplayName: Víbora Genesíaca
+	BoaEclipseProjectile.DisplayName: Boa del Eclipse
+	FarolGuardianProjectile.DisplayName: Farol Guardián
+	CintaAuroraProjectile.DisplayName: Cinta Aurora
+	ManadaAstralProjectile.DisplayName: Manada Astral
+	CriaEstelarMinion.DisplayName: Cría Estelar
+	TajoAstralProjectile.DisplayName: Tajo Astral
+	AnillosSolaresHalo.DisplayName: Anillos Solares
+	SelloGenesisHalo.DisplayName: Sello del Génesis
+	AnilloRunicoDorsalHalo.DisplayName: Anillo Rúnico Dorsal
+	AuraPortadorHalo.DisplayName: Aura del Portador
+	TentaculoCosmicoProjectile.DisplayName: Tentáculo del Vacío
+	FragmentoSupernovaMinion.DisplayName: Fragmento de Supernova
+	RafagaNovaProjectile.DisplayName: Ráfaga Nova
+	MetronomoPulsarHalo.DisplayName: Metrónomo de Púlsar
+	PulsoPulsarProjectile.DisplayName: Pulso de Púlsar
+	VelaSolarProjectile.DisplayName: Vela Solar
+	RafagaSolarProjectile.DisplayName: Ráfaga Solar
+	TajoGuadanaProjectile.DisplayName: Tajo de la Guadaña
+	FisuraDesgarroProjectile.DisplayName: Fisura de Realidad
+	GuardiaNovaProjectile.DisplayName: Guardia de Nova
+	AnilloEnfriamientoProjectile.DisplayName: Anillo de Enfriamiento
+	NovaParryProjectile.DisplayName: Nova del Parry
+	EmbestidaNovaProjectile.DisplayName: Embestida de Nova
+	PulsoEcoProjectile.DisplayName: Pulso Cuántico
+	VerboPrimordialProjectile.DisplayName: El Verbo Primordial
+	VerboDetonacionProjectile.DisplayName: Detonación del Verbo
+	AtaqueJefeProjectile.DisplayName: Diente de guardián
+	AtaqueOleadaProjectile.DisplayName: Diente de oleada
+	// TruenoPerlinProjectile.DisplayName: Trueno Perlin Projectile
+}
+
+Buffs: {
+	CosmicOrbBuff: {
+		DisplayName: Orbe Cósmico
+		Description: Un orbe de luz cósmica te sigue y dispara a tus enemigos
+	}
+
+	NebulaJellyfishBuff: {
+		DisplayName: Medusa Nebular
+		Description: Una medusa de nebulosa deriva a tu lado a pulsos de gravedad
+	}
+
+	StellarCometBuff: {
+		DisplayName: Cometa Estelar
+		Description: Un cometa vivo orbita a tu lado y cae en picado sobre tus enemigos
+	}
+
+	LivingPulsarBuff: {
+		DisplayName: Púlsar Vivo
+		Description: Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos
+	}
+
+	QuemaduraCosmica: {
+		DisplayName: Quemadura cósmica
+		Description: El horizonte de eventos te lame: el fuego que arde hacia dentro
+	}
+
+	OcasoActivoBuff: {
+		DisplayName: El Ocaso
+		Description: El ocaso arde: 8 segundos de muertes de estrella a daño ×3 con ejecución
+	}
+
+	SobrecalentadoBuff: {
+		DisplayName: Sobrecalentada
+		Description: El bastón humea y calla: no dispara mientras se enfría
+	}
+
+	CriaEstelarBuff: {
+		DisplayName: Cría Estelar
+		Description: Una cría de sierpe estelar nada a tu lado y caza a tus enemigos
+	}
+
+	FragmentoSupernovaBuff: {
+		DisplayName: Fragmento de Supernova
+		Description: Una singularidad alada flota a tu hombro y dispara ráfagas y rayos a tus enemigos
+	}
+}
+
+NPCs: {
+	HollowTitan.DisplayName: El Titán Hueco
+	AethonBoss.DisplayName: Aethon, la Luz Primordial
+
+	TheWitness: {
+		DisplayName: El Testigo
+
+		TownNPCMood: {
+			// Content: I am content.
+			// NoHome: I hate not having a home.
+			// FarFromHome: I am too far from home.
+			// LoveSpace: I love having so much space.
+			// DislikeCrowded: I dislike how crowded I am.
+			// HateCrowded: I hate how crowded I am.
+			// LikeNPC_Princess: I like {NPCName}.
+			// Princess_LovesNPC: I like {NPCName}.
+		}
+	}
+
+	EchoBlade.DisplayName: Eco del Primer Portador
+	EchoArcher.DisplayName: Eco de la Arquera Estelar
+	RiftKeeper.DisplayName: El Guardián del Rift
+	// v6.50.19: THE BONE SERPENT — final boss segments
+	AethonSierpeCuerpo.DisplayName: Vértebra de la Sierpe de Aethon
+	AethonSierpeCola.DisplayName: Cola de la Sierpe de Aethon
+}
+
+Common: {
+	LevelUp: Tu arma ha alcanzado el nivel {0}!
+	Milestone: Hito alcanzado: {0}
+}
+
+Eco: {
+	VozJefe: {
+		KingSlime1: La corona rueda por el suelo. El grimorio sorbe la esencia del rey gelatina: dulce, vacía, de un trono que nunca fue suyo.
+		KingSlime2: Un rey de gelatina: todo el reino, ninguno el hueso. El grimorio lo bebe de un trago y eructa un trueno azul.
+		KingSlime3: El rey gelatina se deshace en la hierba. El grimorio mastica la corona aparte — el metal no sabe a nada, pero la guarda por educación.
+		EyeofCthulhu1: El ojo se cierra para siempre. El grimorio devora su vigilia hambrienta — ahora sabe soñar con lo que tú ves.
+		EyeofCthulhu2: El gran ojo se apaga sin cerrar los párpados — nunca los tuvo. El grimorio lo desmenuza y aprende a llorar hacia dentro.
+		EyeofCthulhu3: Cthulhu lo perdió todo menos la vista. El grimorio se queda la vista: ahora mira lo que TÚ miras, cuando quiere.
+		Deerclops1: El invierno caminante cae de rodillas. El grimorio bebe su escarcha ancestral y las páginas crujen, heladas, un solo instante.
+		Deerclops2: El ciervo de un solo ojo ya no vera la ventisca. El grimorio sorbe su invierno y las letras del índice escarchan.
+		Deerclops3: El guardián del bosque cae como un árbol. El grimorio cuenta sus anillos de escarcha — cena de siglos, trago de un invierno.
+		EaterofWorlds1: El devorador de mundos ha sido devorado. La esencia de cien fauces corrompidas se derrama en el grimorio… y él pide más.
+		EaterofWorlds2: Cien fauces y ni una palabra. El grimorio lo devora segmento a segmento, como quien pela una fruta amarga.
+		EaterofWorlds3: El devorador, devorado: así se siente la culpa. El grimorio lame la corrupción del plato y deja el tenedor limpio.
+		BrainofCthulhu1: El cerebro carmesí enmudece. El grimorio muerde sus reflejos y aprende a gritar en rojo.
+		BrainofCthulhu2: El cerebro carmesí pensó que podía con todo. El grimorio lo piensa por él ahora — y lo piensa HAMBRIENTO.
+		BrainofCthulhu3: Se deshace la masa pensante en reflejos rosados. El grimorio copia sus nervios en la marginatura: letra caligráfica, tensa, viva.
+		QueenBee1: La colmena guarda luto. El grimorio lama la miel real de la abeja reina — dulzura con aguijón: su sabor favorito.
+		QueenBee2: La reina muere y la colmena olvida su nombre. El grimorio lo apunta por ella: «dulce, con ira, breve como el verano».
+		QueenBee3: Zumbido último de la abeja real. El grimorio guarda el aguijón de broche — cierra el capítulo y hiere al siguiente.
+		Skeletron1: Los huesos del guardián vuelven a ser polvo. El grimorio copia su maldición a mano alzada — la próxima puerta no lo detendrá.
+		Skeletron2: El guardián de la puerta muerde el polvo que era. El grimorio recoge la calavera: pesa poco, prometía mucho.
+		Skeletron3: Maldición cumplida, huesos pagados. El grimorio firma el recibo con la mano del viejo — la letra tiembla, la cuenta está saldada.
+		WallofFlesh1: El muro que separaba los mundos arde hasta las cenizas. El grimorio traga su hambre antigua y DESPIERTA: desde hoy, todo lo que muera vale el doble.
+		WallofFlesh2: El muro ardía de hambre vieja y la vieja hambre ardió. El grimorio se traga EL LÍMITE y abre los ojos de par en par.
+		WallofFlesh3: Caía el muro y el mundo respiró hondo por primera vez. El grimorio también: ahora sabe a qué sabe el alba.
+		QueenSlime1: La reina de cristal se derrite en azúcar. El grimorio prueba su esencia efímera — tan ligera que casi se le escapa entre las páginas.
+		QueenSlime2: Azúcar y cristal: la reina se derrite en su propio carnaval. El grimorio pide repetir el postre en voz bajita.
+		QueenSlime3: La reina saltarina se desinfla en confeti. El grimorio lo barre TODO con la lengua — también el confeti.
+		Twins1: Los gemelos caen del cielo como estrellas rotas. El grimorio arranca sus lentes incendiadas y, por fin, ve doble.
+		Twins2: Dos ojos, una sola manera de mirar: la tuya, ardiendo. El grimorio los guarda en páginas opuestas y los hace competir.
+		Twins3: Retinazer y Spazmatism, extintos a la vez. El grimorio parpadea con ambos y ve el doble de futuro.
+		Destroyer1: La serpiente de acero ruge y se apaga; mil sondas caen con ella. El grimorio enrolla su alma metálica como un hilo y la cose.
+		Destroyer2: Mil ojos rojos se apagan en fila, como una ciudad de noche. El grimorio bebe la luz de cada uno: brindis por sonda.
+		Destroyer3: La serpiente de acero ya no perfora el cielo. El grimorio devana su alma metálica y cose con ella el lomo del tomo.
+		SkeletronPrime1: El Prime vuelve a su tumba sin cabeza. El grimorio desmonta sus cuatro brazos y firma con la sierra.
+		SkeletronPrime2: Cuatro brazos y ni una cabeza que los anime. El grimorio hereda las herramientas y se pone a trabajar.
+		SkeletronPrime3: El Prime encaja sus piezas por última vez. El grimorio emborrona su tumba con el taladro — subrayado definitivo.
+		Plantera1: La jungla exhala por última vez. El grimorio estruja los pétalos de Plantera y bebe su clorofuria.
+		Plantera2: La furia verde se marchita de golpe. El grimorio aspira el polen de la derrota — le sube a la cabeza, le encanta.
+		Plantera3: Plantera cae y la jungla se queda más quieta. El grimorio prensa su clorofuria entre dos hojas: tinta viva para el siguiente mapa.
+		Golem1: El guardián de piedra se desmorona en el templo. El grimorio extrae su núcleo solar y lo usa de marcador de página.
+		Golem2: El guardián de piedra deja de arder. El grimorio se bebe el núcleo como un sorbo de sol — y eructa arena cálida.
+		Golem3: Piedra que caminaba, sol que guardaba. El grimorio toma el sol, deja la piedra — aprende a elegir.
+		DukeFishron1: El duque muere lejos de su tormenta. El grimorio saborea su esencia salada — cerdo, dragón y huracán en un solo bocado.
+		DukeFishron2: El duque muere con la tormenta fuera de casa. El grimorio lo sirve en tres tiempos: cerdo, dragón, tornado frío.
+		DukeFishron3: Tiburón-jabalí de los vientos: receta rara. El grimorio la archiva entre las delicias — «cocinar con rabia», anota.
+		EmpressOfLight1: La emperatriz se disuelve en un destello. El grimorio no puede devorar la luz pura — la PRENSA entre dos páginas, para siempre.
+		EmpressOfLight2: La emperatriz de la luz no cayó: se rindió al prisma. El grimorio guarda un destello de su falda como ilustración de portada.
+		EmpressOfLight3: Luz pura no se digiere — se respeta. El grimorio la dobla en cuatro y la guarda junto a la definición de «belleza».
+		LunaticCultist1: El culto queda sin voz. El grimorio se pone su máscara ritual y ensaya, en susurros, la invocación del fin.
+		LunaticCultist2: El último cultista muere sin terminar la frase. El grimorio la termina por él — y la frase era el fin del mundo.
+		LunaticCultist3: La máscara rueda sobre el altar. El grimorio la recoge del suelo y la prueba: le queda ancha, pero el odio es de su talla.
+		MoonLord1: El Señor de la Luna exhala su última luz. El grimorio guarda silencio, por una vez… y luego escribe: «gracias por la comida».
+		MoonLord2: El Señor de la Luna suelta la última luz y todo se queda quieto. El grimorio cierra el menú: «banquete terminado — volveré a abrir al alba».
+		MoonLord3: Cae el que miraba por los tres. El grimorio se queda las tres miradas — una para el pasado, otra para ti, la última para lo que viene.
+		Desconocido1: Un poder mayor ha caído. El grimorio devora su esencia sin preguntar el nombre.
+		Desconocido2: Algo enorme murió aquí y nadie apuntó el nombre. El grimorio se come igual la esencia — el anonimato también alimenta.
+		Desconocido3: Un poder sin etiqueta cae del cielo. El grimorio lo devora a ciegas y lo archiva bajo «D»: de delicioso.
+		Aethon1: La Luz Primordial se apaga por su propia voluntad. El grimorio guarda la página en blanco — por primera vez, come en silencio.
+		Aethon2: La Luz Primordial elige su propia sombra. El grimorio reserva su página en blanco — hay comidas que se digieren rezando.
+		Aethon3: Aethon se apaga como un aula al terminar la clase. El grimorio copia la última lección DE MEMORIA — y la firma con miedo.
+		HollowTitan1: El coloso de cristal se derrumba en campanadas. El grimorio sorbe su eco hueco: resonancia de un guardián que ya no guarda nada.
+		HollowTitan2: El coloso suena por dentro una última vez: campana rota. El grimorio bebe la resonancia y ahora el lomo del tomo suena al pisar.
+		HollowTitan3: El guardián hueco se vacía del todo. El grimorio ocupa el hueco — hay sitios que se heredan masticando.
+		RiftKeeper1: El guardián se pliega sobre su propio rift y desaparece. El grimorio aprende el truco y lo guarda entre los capítulos.
+		RiftKeeper2: El guardián se cierra como una puerta que era. El grimorio aprende el plano de la cerradura: LOS DIENTES del tomo cambian de forma.
+		RiftKeeper3: Se pliega el centinela sobre su costura del mundo. El grimorio la copia al margen — página desgarrada, conocimiento entero.
+		LosEcos1: Los portadores anteriores vuelven al polvo de estrellas que ya fueron. El grimorio cierra sus expedientes — y hojea el TUYO.
+		LosEcos2: Arquera y duelista vuelven al polvo que fueron. El grimorio hojea SUS líneas y borra el nombre del anterior portador — ya sabes cuál.
+		LosEcos3: Los portadores que fuiste caen juntos: la casa se limpia. El grimorio abre TU expediente en la página de en medio y chasquea la lengua.
+	}
+
+	VozCincoEstrellas: Lo más raro que ha comido jamás. El grimorio guarda la receta — por si vuelve a tener suerte.
+
+	Hambre: {
+		Susurro1: El grimorio tiene hambre…
+		Susurro2: El grimorio tiene hambre… las páginas se lamen…
+		Susurro3: El grimorio TIENE HAMBRE… los cierres crujen…
+		Susurro4: …hambre… HAMBRE… HAMBRE…
+	}
+
+	Furia: {
+		Ira: El grimorio está FURIOSO por pasar demasiado tiempo sin comer…
+		Llamada: El grimorio llama a su comida…
+		Saciado: El grimorio está saciado… por ahora.
+		Juicio: LA OLEADA FINAL: TODOS LOS GUARDIANES A LA VEZ. El juicio del libro empieza…
+		JuicioFin1: Saciado… por ahora. El juicio quedó PAGADO.
+		JuicioFin2: Los siete cayeron. La última página del juicio está escrita.
+		JuicioFin3: Festín completo. El libro cierra la boca… y sonríe.
+		Venganza1: Me dejaste morir de hambre. TE RECORDARÉ.
+		Venganza2: El portador cayó… y el festín quedó sin dueño. Qué DESPERDICIO.
+		Venganza3: Moriste ANTES de alimentarme. Insulto doble.
+		Venganza4: Otra página más que empieza con tu nombre.
+	}
+
+	Celos: {
+		Melee1: ¿Eso también mata?… Se ve pesado.
+		Melee2: ¿Una espada? Yo tengo MIL páginas afiladas.
+		Melee3: Acércamela… y te digo si sabe a algo.
+		Magia1: ¿Magia? Yo SOY la magia con tapas.
+		Magia2: Ese bastón susurra. Los susurros son MI territorio.
+		Magia3: Maná gastado en luz prestada… yo la luz la COMO.
+		Invocacion1: ¿Invocas a OTROS? ¿Delante de mí?
+		Invocacion2: Esos esclavos no te leerán cuentos al dormir.
+		Invocacion3: Minions. Plural. Mientras YO llevo siglos esperando mi turno.
+		Arrojadiza1: Lanzar cosas… así empezó todo, ¿sabes?
+		Arrojadiza2: Boomerangs. Yo ya comí al que los inventó.
+		Arrojadiza3: Gastas el brazo y el estilo. Yo solo tengo hambre.
+		Arco1: ¿Un arco? La Arquera usaba uno. Acabó en una página.
+		Arco2: Flechas… la dieta líquida de las armas pobres.
+		Arco3: Tensa esa cuerda todo lo que quieras. Yo ya estoy tensa.
+		Bala1: Ruido y metal. Sin gusto.
+		Bala2: Las balas no dejan ALMA. Solo agujeros.
+		Bala3: Pólvora en el atardecer… y luego, nada. Yo como el luego.
+	}
+
+	Bioma: {
+		Infierno1: El grimorio tiene hambre… y aquí abajo todo sabe a azufre.
+		Infierno2: Carne de fuego. Mucha. Quema la página.
+		Infierno3: Sal del infierno en el borde de mi boca.
+		Mazmorra1: Huesos viejos: la mazmorra sabe a moho y a promesas rotas.
+		Mazmorra2: La maldición de esta torre ya no alimenta ni a sus dueños.
+		Mazmorra3: Calaveras con siglos. Añejo, sí… pero añejo.
+		Corrupcion1: Carne corrupta… amarga, pero NUTRE.
+		Corrupcion2: Esta tierra sangra morado. Mi color favorito de salsa.
+		Corrupcion3: Los devoradores saben a sí mismos. Círculo de comida.
+		Carmesi1: El carmesí rezuma. Se bebe mejor de lo que se mastica.
+		Carmesi2: Aquí hasta las paredes tienen pulso. Fresco.
+		Carmesi3: Sangre llaman a esta lluvia. Yo le llamo CLIMA.
+		Nieve1: La nieve calla. Hasta la comida es silenciosa aquí.
+		Nieve2: Escarcha en el paladar: fría, lenta, paciente.
+		Nieve3: El invierno caminante andaba por aquí. Olor a Deerclops.
+		Jungla1: Carne de jungla: verde, jugosa, llena de espinas.
+		Jungla2: La miel de la Reina gotea cerca. La OIGO.
+		Jungla3: Esporas, hojas, frenesí. Aquí se come con las dos tapas.
+		Desierto1: El desierto solo tiene huesos secos y cascabeles.
+		Desierto2: Arena entre las páginas. Al menos CRUJE.
+		Desierto3: Los gusanos de aquí muerden de vuelta. Condimento.
+		Playa1: Sal, arena y cangrejos. Menú pobre, pero fresco.
+		Playa2: El mar escupe la comida a la orilla. Servicio a mesa.
+		Playa3: Olor a pescado y a tesoros ajenos. Los dos se comen.
+		Sagrado1: Dulzor de cristal… el sagrado me deja regusto a arcoíris.
+		Sagrado2: Hasta la luz de aquí es COMESTIBLE. Postres flotando.
+		Sagrado3: Unicorns: la carne más presumida del menú.
+		Subsuelo1: Aquí abajo la comida es gris, pero abundante.
+		Subsuelo2: Cuevas húmedas: setas, murciélagos, ecos. Yo de ecos sé.
+		Subsuelo3: La piedra guarda calor y cadáveres. Ambos alimentan.
+		Cielo1: El cielo es alimento liviano. Apenas llena una página.
+		Cielo2: Islas flotantes: harpastos con vista. MENÚ CON VISTA.
+		Cielo3: Comer en las alturas da vértigo… y apetito.
+		Superficie1: El grimorio tiene hambre… y la superficie es el bufet.
+		Superficie2: Hierba, ladrones y ojos nocturnos. Menú de todos los días.
+		Superficie3: El sol calienta la carne de arriba. Ven que la pruebo.
+	}
+}
+
+Furia: {
+	Oleada: Oleada {0} de {1} — el grimorio escupe a su comida. XP ×{2} en esta oleada.
+	OleadaFinal: OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.
+	Jefe: El hambre convoca un guardián: {0} (XP ×{1})
+	JefeHuido: "{0} se hunde, insatisfecho…"
+	DerechoEsencias: El Testigo abrirá su CAJÓN DE ESENCIAS para ti — la oleada 10 quedó pagada.
+	OleadaEspecial: EL JUICIO: los SIETE guardianes a la vez, ×15 en TODO. El festín final.
+	MuertePortador: El festín muere con su portador. El libro TOMA NOTA.
+}
+
+Llamado: {
+	SoloDia: El llamado solo responde DE DÍA — la noche es de los ojos y los muertos.
+	YaVive: Ya vive uno. El llamado no se dobla.
+}
+
+Carnada: {
+	Preparadas: La carnada repartirá {0} oleadas. (Clic derecho para cambiar)
+	YaActivo: La furia YA está desatada — aliméntala o sobrevive.
+	Ocupado: El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.
+}
+
+Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
+
+Altar: {
+	Solicitando: Solicitando el Fragmento Génesis al altar…
+	Reclamado: Has reclamado el Fragmento Génesis.
+	YaPosees: Ya posees el Fragmento Génesis.
+}
+
+Tiles.AncientAltar.MapEntry: Altar Antiguo
+
+LevelUpTester: {
+	Subida: ✦ {0} subió +{1} niveles (ahora nivel {2}).
+	SinGrimorio: No se encontró un Grimorio del Eterno en el inventario.
+}
+
+TestingPlayer: {
+	Bolsas: Las bolsas del arsenal llegan contigo (una por categoría): clic derecho para abrir cada una.
+	Dummies: Además: {0} dummies de prueba para el campo de entrenamiento.
+}
+
+Configs: {
+	AethonConfigServidor: {
+		DisplayName: Aethon (servidor)
+
+		XPMultiplier: {
+			// Label: X P Multiplier
+			// Tooltip: ""
+		}
+
+		MaxShardLevel: {
+			// Label: Max Shard Level
+			// Tooltip: ""
+		}
+
+		EventoHambreGrimorio: {
+			// Label: Evento Hambre Grimorio
+			// Tooltip: ""
+		}
+	}
+
+	AethonConfig: {
+		// DisplayName: Aethon Config
+
+		ShowLevelUpNotifications: {
+			// Label: Show Level Up Notifications
+			// Tooltip: ""
+		}
+
+		ShowMilestoneNotifications: {
+			// Label: Show Milestone Notifications
+			// Tooltip: ""
+		}
+
+		ShowDebugInfo: {
+			// Label: Show Debug Info
+			// Tooltip: ""
+		}
+
+		SagrarioAccesibleEnPruebas: {
+			// Label: Sagrario Accesible En Pruebas
+			// Tooltip: ""
+		}
+
+		ManaGratisEnPruebas: {
+			// Label: Mana Gratis En Pruebas
+			// Tooltip: ""
+		}
+	}
+}
+
+Testigo: {
+	Ambiente1: Te he observado antes de que tuvieras nombre.
+	Ambiente2: El libro que llevas… yo vi nacer al primero.
+	Ambiente3: Todo portador termina en una página. Tú aún estás escribiendo la tuya.
+
+	Chat: {
+		SinLibro: Te he observado. Aún no has reclamado el Fragmento Génesis. Busca el Sagrario Hueco bajo tierra.
+		Debil: Tu fragmento brilla con nivel {0}. Aún es débil. Sigue combatiendo.
+		Recuerda: Nivel {0}… El fragmento empieza a recordar su origen. La Lluvia de Luz Estelar se acerca.
+		Sagrario: Nivel {0}. El Sagrario Hueco responde a tu poder. Rifts dimensionales acechan.
+		Ecos: Nivel {0}. Aethon se agita en sueños. Los Ecos de portadores anteriores vendrán por ti.
+		Despierta: Nivel {0}. Aethon está a punto de despertar. Prepárate para el reconocimiento.
+		Espera: Nivel {0}. Aethon te espera. Ve al Sagrario Hueco y llama su nombre.
+	}
+
+	BotonResonancia: Comprar Resonancia (10 monedas)
+	BotonEsencias: Esencias de los guardianes
+	EsenciasBloqueadas: El Testigo guarda el cajón: las esencias solo son de quien SOBREVIVIÓ a la oleada 10 de la furia.
+	ResonanciaEntregada: El Testigo te da un Fragmento de Resonancia.
+	ResonanciaBloqueada: El Testigo solo comparte resonancia con portadores de nivel 50+.
+
+	Cronica: {
+		KingSlime: Crónica del Rey Gelatina: rodó buscando su corona hasta el final. Nadie le dijo que las coronas no se comen.
+		EyeofCthulhu: Crónica del Ojo: cerró el párpado por última vez. Yo vi lo que miraba — te miraba a TI.
+		Deerclops: Crónica de Deerclops: el invierno caminante se arrodilló. Bajo su aliento había escarcha… y alivio.
+		QueenBee: Crónica de la Reina: soltó el aguijón y con él el enjambre entero. La miel real sabe a despedida.
+		EaterofWorlds: Crónica del Devorador: cada segmento murió creyéndose la cabeza. El libro pensó lo mismo.
+		BrainofCthulhu: Crónica del Cerebro: sus reflejos gritaron en rojo al caer. El eco duró más que él.
+		Skeletron: Crónica de Skeletron: la maldición lo soltó al final. Pronunció tu nombre con la boca de la Anciana.
+		WallofFlesh: Crónica del Muro: la noche del hambre que abrió el hardmode. El libro no distingue puertas de comida.
+		QueenSlime: Crónica de la Reina Gelatina: el azúcar se derritió en la lluvia. Saltó hasta el final — le gustaba jugar.
+		Twins: Crónica de Los Gemelos: cayeron mirándose. Dos ojos, una sola derrota.
+		Destroyer: Crónica del Destructor: la máquina se deshizo en espiral. Sus drones siguieron disparando un rato — la lealtad no sabe leer la vida.
+		SkeletronPrime: Crónica del Prime: los cuatro brazos cayeron cada uno por su lado. La cabeza tardó en aceptarlo.
+		Plantera: Crónica de Plantera: la selva se quedó callada. Bulbos que no llegaron a abrir.
+		Golem: Crónica del Golem: el templo perdió a su guardián. Sus puños descansaron por fin.
+		DukeFishron: Crónica del Duque: el cerdo-vuelo cayó con el honor intacto. Pidió pelea limpia y la tuvo.
+		EmpressOfLight: Crónica de la Emperatriz: la luz se dobló ante la luz. Elegante hasta muerta.
+		LunaticCultist: Crónica del Cultista: el ritual quedó a medias. Creyó invocar a la Luna; invocó su fin.
+		MoonLord: Crónica del Señor de la Luna: tres ojos y un núcleo, cerrando todos al mismo tiempo. Yo estaba allí — nadie más lo vio entero.
+		Aethon: Crónica de Aethon: la Luz Primordial se apagó RECONOCIÉNDOTE. Yo vi nacer su primera luz — me honra haber visto la última.
+		HollowTitan: Crónica del Titán: el coloso se deshizo en el cristal del Sagrario. Era el guardián más viejo… y el primero en caer.
+		RiftKeeper: Crónica del Guardián: se retiró por su propio desgarro. Eligió el vacío antes que la página.
+		LosEcos: Crónica de Los Ecos: la Arquera y el Portador se apagaron juntos. Fueron personas, ¿sabes? Antes del primer libro.
+		Desconocido: Crónica sin nombre: algo murió y el libro lo comió. Yo lo vi… pero mis páginas no lo recuerdan.
+	}
+}
+
+Conditions.TiendaEsencias: Sobrevive a la oleada 10 de la furia del grimorio
+
+Jefe: {
+	Resonancia: ¡Has absorbido {1} fragmentos de resonancia de {0}!
+	Titan.Furia: EL TITÁN HUECO REDOBLA — el cristal cruje de furia. El coro viene en modo rápido.
+
+	Rift: {
+		Sello: EL GUARDIÁN SELLA LOS RIFT — el entre-mundos se cierra sobre ti.
+		Paredes: Las PAREDES DE DESGARRO avanzan — la arena se estrecha.
+	}
+
+	Arquera: {
+		Furia: LA ARQUERA NO OLVIDA — el arco tensa doble y las minas llueven.
+		Lluvia: La Arquera llama a la LLUVIA DE ESTRELLAS — mira las marcas del suelo.
+	}
+
+	Portador.Furia: EL PRIMER PORTADOR DESENAÑINA LA REALIDAD — su arma ya no es solo la hoja.
+
+	Aethon: {
+		Fase: Aethon — FASE {0}: {1}
+		Nombre1: El Polvo Estelar
+		Nombre2: La Nebulosa
+		Nombre3: La Gravedad
+		Nombre4: El Agujero Negro
+		Nombre5: El Reconocimiento
+		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
+		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
+		Reconocimiento: Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.
+		Presentacion: La tierra tiembla. LA SIERPE DE HUESO DE LA LUZ se alza del subsuelo — su cola se enreda en el horizonte.
+		Muerte: La sierpe se desarticula. La Luz Primordial se escapa de sus huesos.
+	}
+}
+
+Esencia: {
+	SinLibro: El alma busca un Grimorio del Eterno en tu barra rápida — el libro es quien la prueba.
+	Sabor1: Un alma entera… sabe a victoria y a azufre lejano.
+	Sabor2: El alma del guardián baja limpia — un nivel más en el lomo.
+	Sabor3: Guardián digerido. Su historia ya es página mía.
+	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
+	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
+}
+
+HUD: {
+	Nivel: Grimorio · Nv {0}
+	NivelHambre: Grimorio · Nv {0}  (hambre…)
+	XP: "{0} / {1} XP"
+	XPHM: "{0} / {1} XP   HM ×2"
+	Ganancia: +{0}
+}
+
+Ocaso.Rotulo: EL OCASO
+Presencia.Llegada: El Testigo ha llegado. {0} te observa.
+
+Armas: {
+	ResonanciaEcos: La resonancia despierta {0} eco(s).
+	SlotsMinionLlenos: Slots de minion llenos: {0}/{1}.
+}
+
+Diag: {
+	Fps: FPS: {0}
+	Factor: Factor de calidad: {0}
+	Quads: Quads del frame: {0} / {1}
+	Eco: Voces vivas (EcoLib): {0}
+	Aura: Emisores de aura (AuraLib): {0}
+	Pulso: Fuerza de pantalla (PulsoLib): {0}
+	Furia: Furia del grimorio: {0}
+	FuriaInactivo: silencio
+	FuriaActiva: oleada {0}/{1} en marcha
+	Ayuda: "[F8] cierra el diagnóstico · v6.49"
+}
+
+Biomes: {
+	HollowSanctumBiome: {
+		// DisplayName: Hollow Sanctum Biome
+		// TownNPCDialogueName: the Hollow Sanctum Biome
+	}
 }
