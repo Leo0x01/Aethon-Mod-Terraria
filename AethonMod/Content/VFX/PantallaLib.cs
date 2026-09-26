@@ -83,6 +83,11 @@ namespace AethonMod.Content.VFX
             public float Intensidad;
             public double DuracionSeg;
             public double FrameInicio;
+            // v6.50.15 — EL FOCO DEL FLASH (el fin del velo a pantalla
+            // completa: el reporte del usuario — "al explotar crea un
+            // destello blanco que cubre toda la pantalla"). Coords de
+            // MUNDO del origen; sin origen = el jugador local.
+            public Vector2 CentroMundo;
         }
 
         /// <summary>LA VIÑETA (única: la nueva reemplaza a la vieja).</summary>
@@ -251,18 +256,24 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// EL FLASH: un velo de COLOR a pantalla completa (MagicPixel) que
-        /// se desvanece con ease-out cuadrático — alfa = intensidad·(1−p)².
-        /// Hasta 4 SIMULTÁNEOS (cada uno con su color y su reloj); si
-        /// llegan más, la nueva ocupa el slot del más cercano a morir.
-        ///
-        /// El canal alfa del color se IGNORA: el dueño del alfa es la
-        /// envolvente (el flash es una curva, no un color fijo).
+        /// EL FLASH: v6.50.15 — EL GRADIENTE RADIAL DEL IMPACTO (antes era
+        /// un VELO a PANTALLA COMPLETA — un MagicPixel plano sobre TODO el
+        /// cuadro — y "al explotar creaba un destello blanco que cubría
+        /// toda la pantalla", el reporte del usuario: el arma Sol, el
+        /// Agujero Negro y varios más). AHORA: UN GRADIENTE que nace en
+        /// <paramref name="centroMundo"/> (el centro de la explosión) y
+        /// MUERE hacia los bordes de la pantalla — dos plumones SoftGlow
+        /// concéntricos (núcleo + falda ancha) en el lote de UI: el golpe
+        /// se LEE en el punto del impacto, el resto del cuadro respira.
+        /// Sin origen (null): el jugador local. Hasta 4 SIMULTÁNEOS; el
+        /// alfa decae con ease-out cuadrático (intensidad·(1−p)²).
         /// </summary>
-        /// <param name="color">El color del velo (RGB; el alfa lo pone la curva).</param>
+        /// <param name="color">El color del destello (RGB; el alfa lo pone la curva).</param>
         /// <param name="duracionSeg">Vida completa (0.05..8).</param>
-        /// <param name="intensidad">Alfa de nacimiento (0..1).</param>
-        public static void Flash(Color color, float duracionSeg = 0.25f, float intensidad = 0.6f)
+        /// <param name="intensidad">Brillo de nacimiento (0..1).</param>
+        /// <param name="centroMundo">El centro de la explosión (coords de mundo; null = jugador local).</param>
+        public static void Flash(Color color, float duracionSeg = 0.25f, float intensidad = 0.6f,
+            Vector2? centroMundo = null)
         {
             if (Main.netMode == NetmodeID.Server) return;
             if (intensidad <= 0f) return;
@@ -290,6 +301,7 @@ namespace AethonMod.Content.VFX
                 Intensidad = intensidad,
                 DuracionSeg = duracionSeg,
                 FrameInicio = Main.GameUpdateCount,
+                CentroMundo = centroMundo ?? (Main.LocalPlayer?.Center ?? Vector2.Zero),
             };
         }
 
@@ -427,7 +439,7 @@ namespace AethonMod.Content.VFX
             Color c = color ?? new Color(255, 236, 200);
 
             Sacudir(6f * escala, 0.30f);
-            Flash(c, 0.18f, MathHelper.Clamp(0.45f * escala, 0.2f, 0.8f));
+            Flash(c, 0.18f, MathHelper.Clamp(0.45f * escala, 0.2f, 0.8f), centroMundo);
             Vineta(MathHelper.Clamp(0.35f * escala, 0.15f, 0.6f), 0.6f);
             OndaExpansiva(centroMundo, 130f * escala, 0.35f, c,
                 MathHelper.Clamp(40f * escala, 8f, 160f));
@@ -631,7 +643,13 @@ namespace AethonMod.Content.VFX
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Matrix.Identity);
 
-                // === 1. LOS FLASHES (debajo de la viñeta) ===
+                // === 1. LOS FLASHES (debajo de la viñeta) — v6.50.15: EL
+                // GRADIENTE RADIAL DEL IMPACTO (antes: velo a pantalla
+                // completa — "un destello blanco que cubre toda la
+                // pantalla", el reporte del usuario). Dos plumones
+                // SoftGlow (núcleo + falda) nacen en el FOCO de la
+                // explosión y mueren hacia los bordes: el golpe se LEE
+                // donde pasó. ===
                 for (int i = 0; i < _flashes.Length; i++)
                 {
                     ref FlashSlot f = ref _flashes[i];
@@ -639,21 +657,34 @@ namespace AethonMod.Content.VFX
 
                     float prog = (float)((Main.GameUpdateCount - f.FrameInicio) / (60.0 * f.DuracionSeg));
 
-                    // ALFA = intensidad · (1−p)² (el contrato del doc: ease-out
-                    // cuadrático de DECAIMIENTO). v6.50.3 — FIX (easing
-                    // INVERTIDO): se usaba 1−(1−p)² — la curva ease-out de
-                    // CRECIMIENTO — como multiplicador directo: el flash nacía
-                    // INVISIBLE, subía hasta la intensidad y moría de un pop.
-                    // (La gemela OndaSystem.cs ya decaía bien: a = f·vida².)
+                    // ALFA = intensidad · (1−p)² (ease-out cuadrático de
+                    // DECAIMIENTO — v6.50.3 corrigió el easing invertido).
                     float alfa = MathHelper.Clamp(f.Intensidad * (1f - prog) * (1f - prog), 0f, 1f);
                     if (alfa <= 0.004f) continue;
 
-                    // RGB íntegro + alfa en el canal alfa: la mezcla clásica
-                    // hacia el color del flash (el píxel blanco del juego hace
-                    // el resto — un quad, cero texturas propias).
-                    Color c = f.Color;
-                    c.A = (byte)(255f * alfa);
-                    Main.spriteBatch.Draw(pixel, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), c);
+                    // EL FOCO: la explosión en coords de pantalla (capa de
+                    // UI, Matrix.Identity). El radio respira al nacer.
+                    Vector2 foco = f.CentroMundo - Main.screenPosition;
+                    float diag = MathF.Sqrt(Main.screenWidth * Main.screenWidth
+                                          + Main.screenHeight * Main.screenHeight);
+                    float radio = diag * 0.34f * (0.86f + 0.14f * alfa);
+
+                    Texture2D texGlow = VFXCore.SoftGlow;
+                    Vector2 origen = texGlow.Size() * 0.5f;
+                    Vector2 escala = new Vector2(radio * 2f, radio * 2f) / texGlow.Size();
+
+                    // LA FALDA ANCHA (el baño del impacto — ya desvanecido
+                    // en los bordes: el resto del cuadro NO se lava).
+                    Color cFalda = f.Color;
+                    cFalda.A = (byte)(255f * alfa * 0.55f);
+                    Main.spriteBatch.Draw(texGlow, foco, null, cFalda, 0f, origen, escala,
+                        SpriteEffects.None, 0f);
+
+                    // EL NÚCLEO (el destello cegador del punto de impacto).
+                    Color cNucleo = Color.Lerp(f.Color, Color.White, 0.35f);
+                    cNucleo.A = (byte)(255f * alfa * 0.85f);
+                    Main.spriteBatch.Draw(texGlow, foco, null, cNucleo, 0f, origen,
+                        escala * 0.52f, SpriteEffects.None, 0f);
                 }
 
                 // === 2. LA VIÑETA (encima: el túnel se cierra) ===

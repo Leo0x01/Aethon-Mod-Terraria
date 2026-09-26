@@ -224,20 +224,27 @@ namespace AethonMod.Content.Globals
         /// </summary>
         public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter writer)
         {
-            bitWriter.WriteBit(EsDeOleada);
-            bitWriter.WriteBit(EsEspecial);
-            bitWriter.WriteBit(EsJefeDeOleada);
-            bitWriter.WriteBit(EsDeOleada); // lleva stats: solo las bestias del festín
-            writer.Write((byte)Oleada);
-            if (EsDeOleada)
+            // v6.50.15 — ARMADURA (auditoría R55-c): tML NO envuelve el
+            // SendExtraAI (el receive sí lo captura) — una excepción aquí
+            // rompería la sincronización del NPC en toda la sesión MP.
+            try
             {
-                // Los stats ESCALADOS de la autoridad (tal cual los tiene).
-                writer.Write(npc.lifeMax);
-                writer.Write(npc.life);
-                writer.Write(npc.damage);
-                writer.Write(npc.defense);
-                writer.Write(npc.knockBackResist);
+                bitWriter.WriteBit(EsDeOleada);
+                bitWriter.WriteBit(EsEspecial);
+                bitWriter.WriteBit(EsJefeDeOleada);
+                bitWriter.WriteBit(EsDeOleada); // lleva stats: solo las bestias del festín
+                writer.Write((byte)Oleada);
+                if (EsDeOleada)
+                {
+                    // Los stats ESCALADOS de la autoridad (tal cual los tiene).
+                    writer.Write(npc.lifeMax);
+                    writer.Write(npc.life);
+                    writer.Write(npc.damage);
+                    writer.Write(npc.defense);
+                    writer.Write(npc.knockBackResist);
+                }
             }
+            catch { }
         }
 
         /// <summary>
@@ -253,25 +260,40 @@ namespace AethonMod.Content.Globals
         /// </summary>
         public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader reader)
         {
-            EsDeOleada = bitReader.ReadBit();
-            EsEspecial = bitReader.ReadBit();
-            EsJefeDeOleada = bitReader.ReadBit();
-            bool llevaStats = bitReader.ReadBit();
-            Oleada = reader.ReadByte();
-
-            if (llevaStats)
+            // v6.50.15 — ARMADURA (auditoría R55-c): si el paquete llega
+            // truncado/corrupto (versión mixta, desconexión a mitad de
+            // sync), degrada a "NPC sin festín" en vez de envenenar el
+            // estado de la sesión.
+            try
             {
-                npc.lifeMax = reader.ReadInt32();
-                npc.life = reader.ReadInt32();
-                npc.damage = reader.ReadInt32();
-                npc.defense = reader.ReadInt32();
-                npc.knockBackResist = reader.ReadSingle();
+                EsDeOleada = bitReader.ReadBit();
+                EsEspecial = bitReader.ReadBit();
+                EsJefeDeOleada = bitReader.ReadBit();
+                bool llevaStats = bitReader.ReadBit();
+                Oleada = reader.ReadByte();
+
+                if (llevaStats)
+                {
+                    npc.lifeMax = reader.ReadInt32();
+                    npc.life = reader.ReadInt32();
+                    npc.damage = reader.ReadInt32();
+                    npc.defense = reader.ReadInt32();
+                    npc.knockBackResist = reader.ReadSingle();
+                }
+
+                if (EsDeOleada && Aura == null)
+                {
+                    Aura = AuraPerfil.OleadaGrimorio(Oleada);
+                    Aura.Radio = RadioSegun(npc, EsJefeDeOleada);
+                }
             }
-
-            if (EsDeOleada && Aura == null)
+            catch
             {
-                Aura = AuraPerfil.OleadaGrimorio(Oleada);
-                Aura.Radio = RadioSegun(npc, EsJefeDeOleada);
+                EsDeOleada = false;
+                EsEspecial = false;
+                EsJefeDeOleada = false;
+                Oleada = 0;
+                Aura = null;
             }
         }
 

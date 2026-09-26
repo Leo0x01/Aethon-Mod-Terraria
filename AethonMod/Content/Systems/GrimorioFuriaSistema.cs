@@ -857,8 +857,12 @@ namespace AethonMod.Content.Systems
 
         public override void OnWorldUnload()
         {
-            Terminar();
-            AuraLib.Reiniciar(); // los emisores de partículas mueren con el mundo
+            // v6.50.15 — ARMADURA (auditoría R55-c): Terminar() y el
+            // Reiniciar del aura ya son nulo-seguros, pero OnWorldUnload
+            // corre en la cadena de descarga — el mismo blindaje que los
+            // vecinos de abajo.
+            try { Terminar(); } catch { }
+            try { AuraLib.Reiniciar(); } catch { } // los emisores de partículas mueren con el mundo
             // v6.49 — EL BARRENDERO COMPLETO (auditoría AUD-C): el núcleo
             // de VFX y el anti-coros de audio también mueren con el mundo.
             try { VFXCore.Reiniciar(); } catch { }

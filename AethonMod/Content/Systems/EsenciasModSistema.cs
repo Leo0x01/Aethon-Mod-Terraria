@@ -94,8 +94,14 @@ namespace AethonMod.Content.Systems
 
         public override void SaveWorldData(TagCompound tag)
         {
-            tag["esenciasModDadas"] = _dadas;
-            tag["esenciasModAvisadas"] = _avisadoSeco;
+            // v6.50.15 — ARMADURA (auditoría R55-c): simetría con
+            // LoadWorldData — el patrón de la casa.
+            try
+            {
+                tag["esenciasModDadas"] = _dadas;
+                tag["esenciasModAvisadas"] = _avisadoSeco;
+            }
+            catch { }
         }
 
         public override void LoadWorldData(TagCompound tag)

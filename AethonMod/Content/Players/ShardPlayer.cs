@@ -550,12 +550,19 @@ namespace AethonMod.Content.Players
 
         public override void SaveData(TagCompound tag)
         {
-            tag["resonanceShards"] = ResonanceShards;
-            tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
-            // v6.48 — la crónica del Testigo y el derecho a las esencias.
-            tag["cronicaJefes"] = CronicaJefes;
-            tag["cronicaNarrada"] = CronicaNarrada;
-            tag["derrotaOleada10"] = DerrotaOleada10;
+            // v6.50.15 — ARMADURA (auditoría R55-c): tML captura las
+            // excepciones del SaveData y escribe un tag "error", pero el
+            // cuerpo es gratis de blindar — el patrón de la casa.
+            try
+            {
+                tag["resonanceShards"] = ResonanceShards;
+                tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
+                // v6.48 — la crónica del Testigo y el derecho a las esencias.
+                tag["cronicaJefes"] = CronicaJefes;
+                tag["cronicaNarrada"] = CronicaNarrada;
+                tag["derrotaOleada10"] = DerrotaOleada10;
+            }
+            catch { }
         }
 
         public override void LoadData(TagCompound tag)

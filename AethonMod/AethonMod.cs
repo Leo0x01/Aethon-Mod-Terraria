@@ -1,5 +1,4 @@
-using System.IO;
-
+using System.IO; // BinaryReader (HandlePacket) — NO estaba muerto
 using Terraria;
 using Terraria.ModLoader;
 using AethonMod.Content.Systems;

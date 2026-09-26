@@ -1024,7 +1024,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // v6.43 — PantallaLib: el flash violeta + la viñeta de la
             // implosión final (la singularidad se libera y el túnel se
             // CIERRA sobre el jugador — el color del colapso).
-            Pantalla.Flash(new Color(190, 120, 255), 0.3f, 0.6f);
+            // v6.50.15 — EL FLASH YA NO ES UN VELO A PANTALLA COMPLETA
+            // (el reporte del usuario): el gradiente radial nace EN LA
+            // SINGULARIDAD y muere hacia los bordes — el golpe se lee
+            // donde pasó, el resto del cuadro respira.
+            Pantalla.Flash(new Color(190, 120, 255), 0.3f, 0.6f, Projectile.Center);
             Pantalla.Vineta(0.65f, 1.5f);
 
             // === PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===

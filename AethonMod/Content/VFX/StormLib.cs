@@ -438,28 +438,47 @@ namespace AethonMod.Content.VFX
             float len = Vector2.Distance(start, end);
             if (len < 4f || alpha <= 0.01f || width <= 0.05f) return;
 
-            // === 1. EL TRONCO FRACTAL (midpoint displacement + refino) ===
-            // segments→generaciones (potencias de 2 de tramos base) y
-            // amp(px absolutos)→chaos (fracción de la longitud: los arcos
-            // largos rugosos, los cortos contenidos — invarianza de escala).
+            // === 1. EL TRONCO FRACTAL (midpoint displacement) ===
+            // segments→generaciones (potencias de 2 de tramos base).
+            // v6.50.15 — EL CONTRATO ABSOLUTO DEL AMP (defecto 4 del
+            // forense R55-d): la v6.50.8 volvió el amp RELATIVO
+            // (chaos = amp·2.2/len) y las cadenas de 80-150px derivaban
+            // 20-37px de su cuerda — garabatos, no arcos tensos. La
+            // vieja buena (v6.39) prometía amp EN PX capados al 30% del
+            // largo (ampLen = min(amp, len·0.30)): ESE contrato vuelve —
+            // la gen-0 desplaza como MUCHO amp px, estire o encoga la
+            // cadena. Y SIN el Refine extra: el midpoint displacement ya
+            // es multi-escala; el refino cúbico encima solo SUMABA
+            // wiggle (defecto 6).
             int gens = Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 2, 4);
-            float chaos = Math.Clamp(amp * 2.2f / Math.Max(len, 40f), 0.05f, 0.25f);
-            Vector2[] trunk = Refine(
-                FractalPath(start, end, seed, flick, gens, chaos), seed, flick);
+            float ampPx = Math.Min(amp, len * 0.30f);
+            float chaos = Math.Clamp(ampPx / Math.Max(len, 1f), 0.02f, 0.30f);
+            Vector2[] trunk = FractalPath(start, end, seed, flick, gens, chaos);
 
             // El tronco a brillo completo (taper lineal: tenso al anclaje
             // de destino, como la vena de una descarga que se disipa).
             StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
                 StormTaper.Linear, CoreTex, HaloTex);
 
-            // === 2. LAS RAMAS (la lectura "rayo de verdad") ===
-            List<StormStrand> forks = ForkTree(trunk, seed, flick, 0.55f, 3);
-            for (int f = 1; f < forks.Count; f++)
+            // === 2. LAS RAMAS — v6.50.15 (defecto 5 del forense): la
+            // firma de la descarga PERTENECE a los rayos LARGOS. La
+            // v6.50.8 pintaba 3 horquillas SIEMPRE — en cadenas cortas
+            // (60-150px, las de los saltos entre enemigos) eran puro
+            // ruido cosiendo garabatos. PROGRESIVO (la receta vanilla:
+            // máx 2, y solo si hay longitud para leerlas): 1 rama si
+            // len>150, 2 si len>350 (MultiBolt/FractalBolt siguen
+            // siendo el rayo ramificado de la casa). ===
+            if (len > 150f)
             {
-                StormStrand s = forks[f];
-                StrandImpl(batch, s.Points, seed + 23 + f, flick,
-                    width * s.WidthScale, halo, core, alpha * s.Alpha,
-                    StormTaper.Linear, CoreTex, HaloTex);
+                int ramas = len > 350f ? 2 : 1;
+                List<StormStrand> forks = ForkTree(trunk, seed, flick, 0.55f, ramas);
+                for (int f = 1; f < forks.Count; f++)
+                {
+                    StormStrand s = forks[f];
+                    StrandImpl(batch, s.Points, seed + 23 + f, flick,
+                        width * s.WidthScale, halo, core, alpha * s.Alpha,
+                        StormTaper.Linear, CoreTex, HaloTex);
+                }
             }
         }
 
@@ -485,9 +504,12 @@ namespace AethonMod.Content.VFX
             // FORZABA a 49 px de deriva: la "línea fina de aviso" salía
             // 4× más serpenteante que su diseño. Los rayos largos con poca
             // amplitud respetan ahora su intención.
-            float chaos = Math.Clamp(amp * 2.0f / Math.Max(len, 60f), 0.02f, 0.26f);
-            Vector2[] pts = Refine(
-                FractalPath(start, end, seed, flick, gens, chaos), seed, flick);
+            // v6.50.15 — EL CONTRATO ABSOLUTO DEL AMP (ChainBolt lo
+            // documenta completo): la deriva de la gen-0 vuelve a medir
+            // amp PX de verdad, y SIN el Refine extra encima.
+            float ampPx = Math.Min(amp, len * 0.30f);
+            float chaos = Math.Clamp(ampPx / Math.Max(len, 1f), 0.02f, 0.26f);
+            Vector2[] pts = FractalPath(start, end, seed, flick, gens, chaos);
             StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
                 StormTaper.Center, CoreTex, HaloTex);
         }
@@ -504,15 +526,15 @@ namespace AethonMod.Content.VFX
             int seed, int flick, float width, Color haloA, Color haloB, Color core,
             float alpha = 1f, float amp = 26f, int segments = 12)
         {
-            // === EL TRONCO PRINCIPAL (base + refino fractal) — v6.50.8:
-            // el midpoint displacement multi-escala de la receta canónica
-            // (antes ZigPath de una sola escala) ===
-            Vector2[] trunk = Refine(
-                FractalPath(start, end, seed, flick,
-                    Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5),
-                    Math.Clamp(amp * 2.0f / Math.Max(Vector2.Distance(start, end), 60f),
-                        0.06f, 0.26f)),
-                seed, flick);
+            // === EL TRONCO PRINCIPAL (midpoint displacement multi-escala) —
+            // v6.50.15: amp ABSOLUTO como ChainBolt/Bolt (min(amp, 30%·len))
+            // y sin el Refine extra — la firma del MultiBolt es la PILA de
+            // filamentos, no el wiggle extra del refino. ===
+            float lenMb = Vector2.Distance(start, end);
+            float ampPxMb = Math.Min(amp, lenMb * 0.30f);
+            Vector2[] trunk = FractalPath(start, end, seed, flick,
+                Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5),
+                Math.Clamp(ampPxMb / Math.Max(lenMb, 1f), 0.06f, 0.26f));
             StrandImpl(batch, trunk, seed, flick, width, haloA, core, alpha,
                 StormTaper.Center, CoreTex, HaloTex);
 
@@ -1033,9 +1055,9 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// EL MOTOR DEL FILAMENTO (v6.39 — EL RIBBON DE VERDAD): recorre la
-        /// polilínea SEGMENTO A SEGMENTO pintando las TRES capas con quads
-        /// que se tocan BORDE A BORDE:
+        /// EL MOTOR DEL FILAMENTO (v6.39 — EL RIBBON DE VERDAD; v6.50.15 —
+        /// LAS CUATRO CAPAS): recorre la polilínea SEGMENTO A SEGMENTO
+        /// pintando las capas con quads que se tocan BORDE A BORDE:
         ///
         ///   · LA NORMAL MEDIA: la dirección del quad es el promedio de las
         ///     direcciones ADYACENTES — los dos quads que comparten un
@@ -1047,13 +1069,24 @@ namespace AethonMod.Content.VFX
         ///     tramos rectos, solo lo geométricamente necesario en las
         ///     esquinas) + 1.2 px de margen antialias que la textura cubre
         ///     con su fundido de 3 px (las rampas complementarias suman ~1:
-        ///     la junta es INVISIBLE, no apila).
+        ///     la junta es INVISIBLE, no apila). v6.50.15: LA EXTENSIÓN ES
+        ///     POR CAPA (defecto 3 del forense R55-d: la v6.39 la calculaba
+        ///     UNA vez con el w del CUERPO y la compartía entre las tres —
+        ///     el halo (2w) recibía la MITAD de lo que le tocaba → muescas
+        ///     en cada quiebre; la vena (¼w) recibía DEMASIADO → cuentas
+        ///     brillantes del núcleo en cada junta, multiplicadas por los
+        ///     16-33 quiebres del FractalPath).
+        ///   · v6.50.15 — LAS CUATRO CAPAS (la receta de los grandes: el
+        ///     halo legible mide 4-8× el núcleo — BLOOM ×4.6 tenue · HALO
+        ///     ×2.2 · CUERPO ×1 · VENA ×¼ — sobre las bandas LINEALES
+        ///     re-horneadas (RGB=255, alfa=√perfil: el aporte cae
+        ///     perfil·color·f — la v6.39 al cubo colapsaba la gaussiana a
+        ///     un hilo de 1-2px, el defecto 1 del forense).
         ///   · EL CRACKLE POR PUNTO: el brillo se sorteaba en los VÉRTICES
         ///     (baja frecuencia) y se INTERPOLA entre ellos — el rayo
-        ///     respira a lo largo sin UNA sola sección dura (el v6.21 lo
-        ///     sorteaba por sub-segmento de 42 px: el brillo se cortaba en
-        ///     escalones — el reporte del usuario). La VENA no lleva crackle
-        ///     (el núcleo caliente arde SIEMPRE — es el ancla visual).
+        ///     respira a lo largo sin UNA sola sección dura. La VENA no
+        ///     lleva crackle (el núcleo caliente arde SIEMPRE — es el ancla
+        ///     visual).
         /// </summary>
         private static void StrandImpl(SpriteBatch batch, Vector2[] pts, int seed, int flick,
             float width, Color halo, Color core, float alpha, StormTaper taper,
@@ -1096,19 +1129,43 @@ namespace AethonMod.Content.VFX
                 float w = width * TaperFactor(taper, tMid);
                 float crackle = (Brillo(i) + Brillo(i + 1)) * 0.5f;
 
-                // === LA EXTENSIÓN ADAPTATIVA DE GIRO (el round-join) ===
+                // === LA EXTENSIÓN ADAPTATIVA DE GIRO (el round-join) —
+                // v6.50.15: POR CAPA (cada ancho con SU geometría; el
+                // forense R55-d defecto 3: compartirla dejaba muescas en
+                // el halo y cuentas en la vena) ===
                 float largo = Vector2.Dot(seg, avg);
                 if (largo < 0.35f) { arc += len; continue; }
-                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
-                       + ExtensionJunta(w, AnguloEntre(seg, next));
+                float dPrev = AnguloEntre(prev, seg);
+                float dNext = AnguloEntre(seg, next);
 
+                // v6.50.15 — LOS ANCHOS DE LA PILA (la receta de los
+                // grandes: el halo legible mide 4-8× el núcleo —
+                // bloom ×4.6 · halo ×2.2 · cuerpo ×1 · vena ×¼ con su
+                // suelo subido a 2.0px: el 1.2 de v6.50.9 quedaba
+                // SUB-PÍXEL tras el sampler bilineal y el núcleo blanco
+                // desaparecía — "tubo de neón frío", el VLM del mock).
+                float wBloom = w * 4.6f;
+                float wHalo = w * 2.2f;
+                float wVena = Math.Max(w * 0.26f, 2.0f);
+
+                // 0) EL BLOOM — la funda EXTERIOR ancha y tenue: sin esta
+                //    capa el rayo es un tubo de neón, no una descarga
+                //    (el aire ionizado alrededor del canal brilla).
+                Quad(batch, haloTex, mid,
+                    new Vector2(largo + ExtensionJunta(wBloom, dPrev)
+                              + ExtensionJunta(wBloom, dNext), wBloom), rot,
+                    Tint(halo, 0.16f * alpha * crackle));
                 // 1) EL HALO — banda suave ancha, del color (el contenido:
                 //    el halo NO debe engullir al filamento).
-                Quad(batch, haloTex, mid, new Vector2(largo, w * 2.0f), rot,
+                Quad(batch, haloTex, mid,
+                    new Vector2(largo + ExtensionJunta(wHalo, dPrev)
+                              + ExtensionJunta(wHalo, dNext), wHalo), rot,
                     Tint(halo, 0.30f * alpha * crackle));
                 // 2) EL CUERPO — el filamento de color.
-                Quad(batch, bodyTex, mid, new Vector2(largo, w * 1.0f), rot,
-                    Tint(halo, 0.85f * alpha * crackle));
+                Quad(batch, bodyTex, mid,
+                    new Vector2(largo + ExtensionJunta(w, dPrev)
+                              + ExtensionJunta(w, dNext), w), rot,
+                    Tint(halo, 0.80f * alpha * crackle));
                 // 3) LA VENA — la línea BLANCA razor-fina a ¼ del ancho
                 //    (sin crackle: el núcleo arde SIEMPRE). v6.50.9: suelo de
                 //    1.2 px — en las cadenas (w≈4.4 con taper) y los pelos la
@@ -1116,7 +1173,8 @@ namespace AethonMod.Content.VFX
                 //    fundía el pico de la sección: el núcleo quedaba ROTO,
                 //    una línea fantasma intermitente.
                 Quad(batch, bodyTex, mid,
-                    new Vector2(largo, Math.Max(w * 0.26f, 1.2f)), rot,
+                    new Vector2(largo + ExtensionJunta(wVena, dPrev)
+                              + ExtensionJunta(wVena, dNext), wVena), rot,
                     Tint(core, 1f * alpha));
 
                 arc += len;

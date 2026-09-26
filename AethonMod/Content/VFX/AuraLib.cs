@@ -743,6 +743,256 @@ namespace AethonMod.Content.VFX
         }
 
         // ------------------------------------------------------------------
+        //  v6.50.15 — LOS FLIPBOOKS DE LA PILA DE CAPAS (la investigación
+        //  R55-b: "solo es ruido perlin, desenfoque, blur y glow, todo por
+        //  capas con un poco de turbulencia, todo generado por codigo").
+        //
+        //  Un aura NO es una textura de ruido rotando (el abanico de gajos
+        //  de v6.48/v6.50.12 era mecánico por eso): es una PILA de capas
+        //  con papeles distintos, y la turbulencia NO viene de rotar más
+        //  rápido — viene del WARP DE DOMINIO (ruido de ruido: Inigo
+        //  Quilez, el "Turbulent Displace" de After Effects) ciclado en
+        //  el tiempo + contrarrotación lenta + ascenso vertical horneado.
+        //
+        //  CADA LÁMINA DEL FLIPBOOK (16 frames, ciclo perfecto porque los
+        //  offsets de warp avanzan PERÍODOS ENTEROS del ruido envolvente):
+        //    1. fBm de value noise (la retícula envolvente de siempre).
+        //    2. WARP DE DOMINIO: q = fBm(p + t·(1,0)) — el campo que DOBLA
+        //       las coordenadas; r = fBm(p + 0.45·q) — el segundo doblez;
+        //       v = fBm(p + 0.45·r) — "un poco de turbulencia".
+        //    3. BLUR horneado: 3 pasadas de box blur separable (≈gaussiana
+        //       por el teorema central del límite) — el desenfoque SIN
+        //       shaders (Slembcke: el blur se hornea, no se calcula).
+        //    4. MÁSCARA RADIAL premultiplicada DESPUÉS del warp (la regla
+        //       anti-cajas: la máscara vive EN la textura, simétrica
+        //       circular — la rotación jamás revela esquinas).
+        //    5. α = √valor horneado: el aporte en el lote aditivo cae
+        //       valor·color·f LINEAL (la lección de perfil³ de los rayos).
+        // ------------------------------------------------------------------
+
+        /// <summary>16 láminas de fBm warpeado + blur + máscara radial — EL CUERPO del aura.</summary>
+        private static Texture2D[] _flipCuerpo;
+
+        /// <summary>16 láminas de fBm fino + ascenso vertical horneado — LAS LLAMAS del aura.</summary>
+        private static Texture2D[] _flipLlamas;
+
+        private const int FlipFrames = 16;
+
+        /// <summary>Un campo de fBm autocontenido (4 octavas envolventes).</summary>
+        private sealed class CampoFbm
+        {
+            private readonly float[,] _g8, _g16, _g32, _g64;
+
+            internal CampoFbm(System.Random rnd)
+            {
+                _g8 = Reticula(rnd, 8);
+                _g16 = Reticula(rnd, 16);
+                _g32 = Reticula(rnd, 32);
+                _g64 = Reticula(rnd, 64);
+            }
+
+            /// <summary>fBm 0..1 (pesos 8/4/2/1 + curva suave — el canónico de Book of Shaders).</summary>
+            internal float Sample(float fx, float fy)
+            {
+                float n = Muestrear(_g8, 8, fx, fy) * 0.5f
+                        + Muestrear(_g16, 16, fx, fy) * 0.25f
+                        + Muestrear(_g32, 32, fx, fy) * 0.125f
+                        + Muestrear(_g64, 64, fx, fy) * 0.0625f;
+                n = MathHelper.Clamp(n, 0f, 1f);
+                return n * n * (3f - 2f * n);
+            }
+        }
+
+        /// <summary>Box blur separable de radio r (una pasada por eje, in place sobre buffer doble).</summary>
+        private static void BlurCaja(float[,] m, int lado, int r)
+        {
+            if (r < 1) return;
+            float[,] tmp = new float[lado, lado];
+            int w = 2 * r + 1;
+
+            for (int y = 0; y < lado; y++)
+                for (int x = 0; x < lado; x++)
+                {
+                    float s = 0f;
+                    for (int k = -r; k <= r; k++)
+                    {
+                        int xx = x + k; if (xx < 0) xx += lado; else if (xx >= lado) xx -= lado;
+                        s += m[xx, y];
+                    }
+                    tmp[x, y] = s / w;
+                }
+            for (int y = 0; y < lado; y++)
+                for (int x = 0; x < lado; x++)
+                {
+                    float s = 0f;
+                    for (int k = -r; k <= r; k++)
+                    {
+                        int yy = y + k; if (yy < 0) yy += lado; else if (yy >= lado) yy -= lado;
+                        s += tmp[x, yy];
+                    }
+                    m[x, y] = s / w;
+                }
+        }
+
+        /// <summary>El smoothstep de la máscara radial (la anti-caja de
+        /// R55-b). d llega NORMALIZADO al semilado (1.0 = punto medio del
+        /// borde, 1.41 = esquina): la máscara MUERE DENTRO de la textura —
+        /// una máscara que no llegue a cero antes del borde dibuja la CAJA
+        /// (el defecto que el VLM cazó en el mock 1:1 de v6.50.15).</summary>
+        private static float MascaraRadial(float d, float desde, float hasta)
+        {
+            float t = MathHelper.Clamp((d - desde) / MathF.Max(0.001f, hasta - desde), 0f, 1f);
+            return 1f - t * t * (3f - 2f * t);
+        }
+
+        /// <summary>
+        /// Genera los DOS flipbooks (una sola vez por sesión, perezoso —
+        /// el mismo contrato de _ruido). ~33k píxeles × 16 láminas × 5
+        /// campos de fBm: una pasada de ~100 ms al primer frame dibujado.
+        /// </summary>
+        private static void AsegurarFlipbooks()
+        {
+            try
+            {
+                var device = Main.graphics?.GraphicsDevice;
+                if (device == null || device.IsDisposed) return;
+                if (_flipCuerpo != null && _flipLlamas != null)
+                {
+                    bool vivo = true;
+                    for (int i = 0; i < FlipFrames && vivo; i++)
+                        vivo = _flipCuerpo[i] != null && !_flipCuerpo[i].IsDisposed
+                            && _flipLlamas[i] != null && !_flipLlamas[i].IsDisposed;
+                    if (vivo) return;
+                    DisposeFlipbooks();
+                }
+
+                int L = LadoRuido;
+                var rndQx = new System.Random(0x464C4950); // "FLIP" — q horizontal
+                var rndQy = new System.Random(0x464C4951);
+                var rndV = new System.Random(0x464C4952);
+                var rndF = new System.Random(0x464C4953);  // el campo fino de las llamas
+                var qx = new CampoFbm(rndQx);
+                var qy = new CampoFbm(rndQy);
+                var vb = new CampoFbm(rndV);
+                var fn = new CampoFbm(rndF);
+
+                var cuerpo = new float[FlipFrames][,];
+                var llamas = new float[FlipFrames][,];
+
+                for (int f = 0; f < FlipFrames; f++)
+                {
+                    float t = f / (float)FlipFrames; // el ciclo: t=1 ≡ t=0 (períodos enteros)
+
+                    var cap = new float[L, L];
+                    var lam = new float[L, L];
+                    for (int y = 0; y < L; y++)
+                    {
+                        float fy = y / (float)L;
+                        for (int x = 0; x < L; x++)
+                        {
+                            float fx = x / (float)L;
+
+                            // === EL CUERPO: fBm con warp de dominio ===
+                            float wq = qx.Sample(fx + t, fy) * 2f - 1f;
+                            float wq2 = qy.Sample(fx, fy + t) * 2f - 1f;
+                            float wx = fx + 0.45f * wq, wy = fy + 0.45f * wq2;
+                            float v = vb.Sample(wx + 0.17f, wy + 0.31f);
+                            v = MathF.Pow(v, 1.6f); // contraste medio (Godot: el tiling pierde contraste)
+
+                            // === LAS LLAMAS: campo FINO + ASCENSO horneado
+                            // (muestrear cada vez más ABAJO = el contenido
+                            // SUBE un período exacto por ciclo) ===
+                            float u = fn.Sample(fx + 0.5f * wq, fy * 1.35f - t + 0.5f * wq2);
+                            u = MathF.Pow(u, 2.0f); // las llamas viven de picos
+
+                            // LA MÁSCARA (después del warp, la regla
+                            // anti-caja) — d NORMALIZADO AL SEMILADO
+                            // (1.0 = borde, 1.41 = esquina): el cuerpo
+                            // muere a 0.97·semilado (≈1.03R del quad) y las
+                            // llamas a 0.62 — JAMÁS dibujan la caja.
+                            float dx = fx - 0.5f, dy = fy - 0.5f;
+                            float d = MathF.Sqrt(dx * dx + dy * dy) * 2f;
+                            float mC = MascaraRadial(d, 0.42f, 0.97f);
+                            float mL = MascaraRadial(d, 0.20f, 0.62f);
+                            cap[x, y] = v * mC;
+                            lam[x, y] = u * mL;
+                        }
+                    }
+
+                    // EL BLUR HORNEADO: 3 pasadas ≈ gaussiana (cuerpo, σ≈4)
+                    // y 1 pasada (llamas, un poco de suavizado nada más).
+                    for (int b = 0; b < 3; b++) BlurCaja(cap, L, 3);
+                    BlurCaja(lam, L, 2);
+
+                    cuerpo[f] = cap;
+                    llamas[f] = lam;
+                }
+
+                _flipCuerpo = new Texture2D[FlipFrames];
+                _flipLlamas = new Texture2D[FlipFrames];
+                for (int f = 0; f < FlipFrames; f++)
+                {
+                    _flipCuerpo[f] = HornearLamina(cuerpo[f], L, device);
+                    _flipLlamas[f] = HornearLamina(llamas[f], L, device);
+                }
+            }
+            catch
+            {
+                DisposeFlipbooks(); // reintento silencioso al próximo frame
+            }
+        }
+
+        /// <summary>
+        /// Cuantiza UNA lámina a textura con la convención LINEAL de la
+        /// casa v6.50.15: (q,q,q,q) con q = √valor — el aporte en el lote
+        /// aditivo cae valor·color·f (premult runtime, SIN el perfil² de
+        /// la v6.50.8 que aplastaba las nubes de ruido).
+        /// </summary>
+        private static Texture2D HornearLamina(float[,] m, int lado, GraphicsDevice device)
+        {
+            var data = new Color[lado * lado];
+            for (int y = 0; y < lado; y++)
+                for (int x = 0; x < lado; x++)
+                {
+                    float v = MathHelper.Clamp(m[x, y], 0f, 1f);
+                    byte q = (byte)(MathF.Sqrt(v) * 255f);
+                    data[y * lado + x] = new Color(q, q, q, q);
+                }
+            var tex = new Texture2D(device, lado, lado);
+            tex.SetData(data);
+            return tex;
+        }
+
+        /// <summary>La lámina f del CUERPO (null si aún no hay dispositivo).</summary>
+        private static Texture2D FlipCuerpo(int f)
+        {
+            AsegurarFlipbooks();
+            return _flipCuerpo?[(f % FlipFrames + FlipFrames) % FlipFrames];
+        }
+
+        /// <summary>La lámina f de las LLAMAS (null si aún no hay dispositivo).</summary>
+        private static Texture2D FlipLlamas(int f)
+        {
+            AsegurarFlipbooks();
+            return _flipLlamas?[(f % FlipFrames + FlipFrames) % FlipFrames];
+        }
+
+        /// <summary>
+        /// v6.50.15 — EL TINTE ADITIVO LINEAL: RGB·f con alfa a tope. Con
+        /// las láminas (q,q,q,q) el aporte en el lote aditivo sale
+        /// valor·color·f LINEAL en f (el multiplicador clásico `Color·f`
+        /// escalaba el alfa también y la intensidad caía f² — el f² que
+        /// v6.50.9 destapó en los rayos vivía AQUÍ en cada capa del aura).
+        /// Solo para capas que van al lote ADITIVO — el velo frontal
+        /// (DrawData, lote alfa) sigue con el tinte clásico.
+        /// </summary>
+        private static Color TintAditivo(Color c, float f)
+        {
+            f = MathHelper.Clamp(f, 0f, 1f);
+            return new Color((byte)(c.R * f), (byte)(c.G * f), (byte)(c.B * f), 255);
+        }
+
+        // ------------------------------------------------------------------
         //  EL EMISOR DE PARTÍCULAS (estado por entidad, cero GC por frame)
         // ------------------------------------------------------------------
 
@@ -977,7 +1227,7 @@ namespace AethonMod.Content.VFX
             {
                 Player pl = drawInfo.drawPlayer;
                 if (pl == null || pl.dead) return;
-                Emitir(pl.Center, p.Radio, p, frontal, 511);
+                Emitir(pl.Center, p.Radio, p, frontal, 511, loteAlfa: true);
                 VFXCore.AppendToPlayerDraw(ref drawInfo);
             }
             catch { }
@@ -1035,7 +1285,8 @@ namespace AethonMod.Content.VFX
         /// el jugador). 100% determinista: t = GlobalTimeWrappedHourly,
         /// variedad por Hash01(semilla, gajo, anillo).
         /// </summary>
-        private static void Emitir(Vector2 centro, float radio, AuraPerfil p, bool frontal, int idEntidad)
+        private static void Emitir(Vector2 centro, float radio, AuraPerfil p, bool frontal, int idEntidad,
+            bool loteAlfa = false)
         {
             Texture2D tex0 = Ruido(0);
             if (tex0 == null) return; // sin dispositivo aún: nada que dibujar
@@ -1104,101 +1355,114 @@ namespace AethonMod.Content.VFX
                 }
             }
 
-            // === 2. EL CUERPO: los gajos de ruido (patrón Perlin/Poligono) ===
+            // === 2. v6.50.15 — EL CUERPO EN CAPAS (la pila de la
+            // investigación R55-b; el abanico de gajos de v6.48/12 era
+            // un ventilador mecánico — el usuario lo vio bien: "todavía
+            // representan mal el aura"). LA PILA, de atrás hacia
+            // delante: CUERPO (fBm warpeado, rotación LENTA) → LLAMAS
+            // (fBm fino con ascenso horneado, CONTRARROTACIÓN) → RIM
+            // (los arcos de energía de la silueta — sin esta capa no hay
+            // aura, hay humo). Todo por capas, todo generado por código.
+            // ===
             if (p.Patron != PatronAura.Anillos)
             {
-                int cuadros = p.Anillos * p.Gajos * (p.Blur > 0.5f ? 2 : 1);
-                if (VFXCore.Presupuesto(cuadros + 4))
+                // El presupuesto de la pila: cuerpo 1 + llamas 1 + rim
+                // (7 arcos × 3 segmentos × doble pasada) + la jaula.
+                if (VFXCore.Presupuesto(48 + (p.Patron == PatronAura.Poligono ? p.Lados : 0)))
                 {
-                    for (int r = 0; r < p.Anillos; r++)
+                    bool aditivo = !loteAlfa; // el VELO frontal del jugador va por DrawData (lote alfa); TODO lo demás es aditivo (incluido el frontal de los NPCs)
+                    float escalaR = p.Patron == PatronAura.Poligono ? 0.88f : 1f; // la jaula abraza la pila
+
+                    // --- L1 — EL CUERPO: el flipbook de fBm con warp de
+                    //     dominio + blur + máscara radial horneada (la
+                    //     anti-caja). Rotación LENTA (+Giro rad/s ≈ 14°/s
+                    //     con el valor por defecto de la casa) y la
+                    //     respiración ±6% a 0.5 Hz de la investigación. ---
+                    Texture2D texC = FlipCuerpo((int)(t * (10f + 18f * p.Deriva)));
+                    if (texC != null)
                     {
-                        float fracR = (r + 1f) / p.Anillos;
-                        float dir = (r % 2 == 0) ? 1f : -1f; // contrarrotación
+                        float respC = 1f + 0.06f * MathF.Sin(t * MathHelper.Pi + p.Semilla);
+                        float rotC = t * p.Giro + MathF.Sin(t * 0.7f + p.Semilla) * 0.05f * p.Distorsion;
+                        float ladoC = 2f * R * escalaR * 1.06f * respC;
+                        Color colC = Zona(cC, cM, cB, 0.45f);
+                        float fC = MathHelper.Clamp(alfaCapa * 1.35f, 0f, 1f);
+                        VFXCore.Quad(centro, aditivo ? TintAditivo(colC, fC) : colC * fC,
+                            new Vector2(ladoC, ladoC), rotC, texC);
+                    }
 
-                        for (int i = 0; i < p.Gajos; i++)
+                    // --- L2 — LAS LLAMAS: el flipbook FINO con el ascenso
+                    //     VERTICAL horneado (un período exacto por ciclo:
+                    //     sube sin despegarse del portador) y la
+                    //     CONTRARROTACIÓN (−(0.35+0.8·Fluir) rad/s: la
+                    //     interferencia de las dos capas es el "hervir"
+                    //     emergente — gamedev.SE, la técnica del haz del
+                    //     medic-gun del TF2). Más calientes: la zona de
+                    //     color sube y un toque de blanco. ---
+                    Texture2D texL = FlipLlamas((int)(t * (12f + 14f * p.Deriva + 1.5f * p.Hervor)));
+                    if (texL != null)
+                    {
+                        float respL = 1f + 0.08f * MathF.Sin(t * MathHelper.Pi * 1.3f + p.Semilla * 2f);
+                        float rotL = -t * (0.35f + 0.8f * p.Fluir)
+                                   + MathF.Sin(t * 1.1f + p.Semilla * 3f) * 0.07f * p.Distorsion;
+                        float ladoL = 2f * R * escalaR * 0.74f * respL;
+                        Color colL = Color.Lerp(Zona(cC, cM, cB, 0.75f), Color.White, 0.12f);
+                        float fL = MathHelper.Clamp(alfaCapa * 1.15f, 0f, 1f);
+                        VFXCore.Quad(centro, aditivo ? TintAditivo(colL, fL) : colL * fL,
+                            new Vector2(ladoL, ladoL), rotL, texL);
+                    }
+
+                    // --- L3 — EL RIM: los ARCOS DE ENERGÍA de la
+                    //     silueta (la capa que el ojo LEE como "aura":
+                    //     ~0.88R, casi blancos, rotación viva +50°/s y
+                    //     pulsos). El anillo ROTO en arcos: cada uno
+                    //     nace/muere con su fase hash — la cáscara de
+                    //     los tutoriales, traducida a Lines de la casa.
+                    //     DOBLE PASADA por arco (la lección del VLM del
+                    //     mock: trazo ancho tenue + trazo fino BRILLANTE
+                    //     — el "bright ring" que separa el aura del
+                    //     cuerpo). ---
+                    {
+                        float rotR = t * (0.55f + 1.4f * p.Giro);
+                        float rR = R * 0.88f * escalaR * (1f + 0.04f * MathF.Sin(t * 7.5f + p.Semilla));
+                        Color colRim = Color.Lerp(cB, Color.White, 0.62f);
+                        float fR = MathHelper.Clamp(alfaCapa * (0.55f + 0.9f * p.Borde) * 1.6f, 0f, 1f);
+                        const int Arcos = 7;
+                        for (int i = 0; i < Arcos; i++)
                         {
-                            float h = VFXCore.Hash01(p.Semilla, i, r);
-                            // v6.50.12 — LA EBULLICIÓN: el índice de la
-                            // variante AVANZA con el tiempo con fase propia
-                            // por gajo (hierve todo, pero no a la vez — el
-                            // "turbulent displace" de AE traducido a
-                            // flipbook: las 4 variantes del generador).
-                            int idxR = r + (int)(t * p.Hervor + h * 2f);
-                            Texture2D tex = Ruido(idxR);
-                            // ciclo de humo del gajo: nace dentro, deriva fuera y muere
-                            float cyc = Frac(t * p.Deriva + h * 1.7f + r * 0.33f);
-
-                            float ang = i * (MathHelper.TwoPi / p.Gajos)
-                                      + t * p.Fluir * dir
-                                      + r * 0.35f
-                                      + MathF.Sin(t * 2.3f + i * 2.7f) * 0.05f * p.Distorsion;
-
-                            float rad = R * (0.55f + 0.5f * fracR)
-                                      + cyc * R * 0.34f
-                                      + MathF.Sin(t * 1.7f + h * 6.28f) * 4f * p.Distorsion;
-
-                            // PATRÓN POLÍGONO: el radio se pega a la función
-                            // radial del N-gono que gira — la jaula geométrica.
-                            if (p.Patron == PatronAura.Poligono)
+                            float h = VFXCore.Hash01(p.Semilla ^ 0x51AA, i, 3);
+                            float latido = 0.45f + 0.55f * MathF.Sin(t * (2.2f + 1.7f * h) + i * 2.63f);
+                            if (latido <= 0.12f) continue; // el arco descansa
+                            float a0 = rotR + i * (MathHelper.TwoPi / Arcos)
+                                     + MathF.Sin(t * 1.9f + i * 1.7f) * 0.10f * p.Distorsion;
+                            float span = (0.38f + 0.30f * h) * latido; // el arco respira su largo
+                            const int Pasos = 3;
+                            Vector2 prev = Vector2.Zero;
+                            for (int s = 0; s <= Pasos; s++)
                             {
-                                float a2 = ang + t * p.Giro;
-                                float sector = MathHelper.TwoPi / p.Lados;
-                                float local = ((a2 % sector) + sector) % sector - sector * 0.5f;
-                                float k = MathF.Cos(MathHelper.Pi / p.Lados) /
-                                          MathF.Max(0.35f, MathF.Cos(local));
-                                rad *= 0.55f + 0.45f * MathHelper.Clamp(k, 0.5f, 1.25f);
-                            }
-
-                            Vector2 pos = centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rad;
-                            pos.Y -= cyc * p.Ascenso * 0.55f; // el humo sube
-
-                            // COLOR POR ZONA: la fracción radial decide la mezcla
-                            float rr = MathHelper.Clamp((rad / R - 0.45f) * 0.85f, 0f, 1f);
-                            Color col = Zona(cC, cM, cB, rr);
-
-                            // v6.50.12 — EL BORDE CALIENTE (la cáscara): los
-                            // gajos de la zona exterior tienden a BLANCO (en
-                            // aditivo, blanco = más luz — el "rim glow" de
-                            // los tutoriales): la frontera del aura SE LEE
-                            // contra el fondo. El smoothstep lo concentra
-                            // justo donde el ojo espera la silueta.
-                            if (p.Borde > 0.001f && rr > 0.55f)
-                            {
-                                float rim = MathHelper.Clamp((rr - 0.55f) / 0.45f, 0f, 1f);
-                                rim *= rim * (3f - 2f * rim);
-                                col = Color.Lerp(col, Color.White, p.Borde * rim);
-                            }
-                            float alfa = alfaCapa
-                                       * MathF.Sin(MathHelper.Pi * cyc)  // nace y muere suave
-                                       * (0.55f + 0.45f * h);            // variedad por gajo
-
-                            // tamaño tangencial: cubrir la cuerda del arco
-                            float w = MathHelper.TwoPi * rad / p.Gajos * 1.5f;
-                            float hgt = w * (0.5f + 0.5f * h);
-                            float rot = ang + MathHelper.PiOver2
-                                      + MathF.Sin(t * 3f + i) * 0.09f * p.Distorsion;
-
-                            VFXCore.Quad(pos, col * alfa, new Vector2(w, hgt), rot, tex);
-
-                            // EL DESENFOQUE BARATO: el mismo gajo, desplazado
-                            // por la normal y a media alfa — el doble-pase
-                            // suave. v6.50.12 — el pase de blur dibuja la
-                            // variante SIGUIENTE del flipbook: cuando el
-                            // índice avanza, la que era "próxima" ya estaba
-                            // pintada (al 40%) — CROSSFADE gratis entre fases
-                            // de la ebullición.
-                            if (p.Blur > 0.5f)
-                            {
-                                Vector2 normal = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
-                                VFXCore.Quad(pos + normal * (2.5f + 1.5f * p.Blur),
-                                    col * (alfa * 0.4f), new Vector2(w * 1.15f, hgt * 1.2f), rot,
-                                    Ruido(idxR + 1));
+                                float a = a0 + span * (s / (float)Pasos);
+                                Vector2 v = centro + new Vector2(MathF.Cos(a), MathF.Sin(a)) * rR;
+                                if (s > 0)
+                                {
+                                    float brillo = 0.35f + 0.65f * latido;
+                                    // la falda del arco (ancha, tenue)
+                                    Color cAncho = aditivo
+                                        ? TintAditivo(colRim, fR * brillo * 0.4f)
+                                        : colRim * (fR * brillo * 0.4f);
+                                    VFXCore.Line(prev, v, cAncho, 4.2f);
+                                    // el filo del arco (fino, BRILLANTE — el anillo que ancla)
+                                    Color cFino = aditivo
+                                        ? TintAditivo(colRim, fR * brillo)
+                                        : colRim * (fR * brillo);
+                                    VFXCore.Line(prev, v, cFino, 1.7f);
+                                }
+                                prev = v;
                             }
                         }
                     }
 
-                    // Las ARISTAS del polígono (patrón Poligono): la jaula
-                    // dibuja sus bordes con el COLOR DE BORDE del perfil.
+                    // --- LA JAULA del polígono (patrón Poligono): las
+                    //     aristas con el COLOR DE BORDE — la firma rúnica
+                    //     vive ENCIMA de la pila de energía. ---
                     if (p.Patron == PatronAura.Poligono)
                     {
                         float rotP = t * p.Giro;
@@ -1348,9 +1612,32 @@ namespace AethonMod.Content.VFX
             _ruido = null;
         }
 
+        /// <summary>v6.50.15 — funeral de los flipbooks de la pila de capas.</summary>
+        private static void DisposeFlipbooks()
+        {
+            try
+            {
+                if (_flipCuerpo != null)
+                    for (int i = 0; i < _flipCuerpo.Length; i++)
+                    {
+                        _flipCuerpo[i]?.Dispose();
+                        _flipCuerpo[i] = null;
+                    }
+                if (_flipLlamas != null)
+                    for (int i = 0; i < _flipLlamas.Length; i++)
+                    {
+                        _flipLlamas[i]?.Dispose();
+                        _flipLlamas[i] = null;
+                    }
+            }
+            catch { }
+            _flipCuerpo = null;
+            _flipLlamas = null;
+        }
+
         /// <summary>
         /// v6.49 — LA PURGA de emergencia (Unloaded/reinicios): emisores
-        /// fuera, reloj a cero, el ruido al funeral.
+        /// fuera, reloj a cero, el ruido y los flipbooks al funeral.
         /// </summary>
         public static void Reiniciar()
         {
@@ -1358,6 +1645,7 @@ namespace AethonMod.Content.VFX
             _emisorJugador = null;
             _ultimaBarrida = 0; // v6.49 — el reloj del barrido también
             DisposeRuido();
+            DisposeFlipbooks();
         }
     }
 }
