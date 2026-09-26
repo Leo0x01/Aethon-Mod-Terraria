@@ -78,6 +78,45 @@ namespace AethonMod.Content.VFX
     ///   ver ChainBolt/Bolt/MultiBolt. BoltChain.png queda como asset
     ///   retirado (la convención de la casa).
     ///
+    ///   v6.50.22 — LA GENERACIÓN 100% CÓDIGO (el reporte del usuario:
+    ///   «los rayos se siguen viendo mal, se nota que son líneas que se
+    ///   unen a otra línea, creo que usas un sprite para los rayos,
+    ///   recuerda que los rayos deben ser creados mediante código, nada
+    ///   de sprite»). Tenía razón DOS veces: (1) el "sprite" existía —
+    ///   BoltHalo.png/BoltCore.png, bandas horneadas con perfil
+    ///   transversal (¡y con SUELO de alfa ~50 en los bordes largos de
+    ///   BoltHalo! medido por píxeles: cada capa del rayo dibujaba
+    ///   BORDES DUROS de banda — de ahí el look de "líneas"); (2) la
+    ///   referencia del usuario (el commit v5.54) era el rayo DEL MOTOR:
+    ///   el LightningArc 466 de vanilla — que NO usa sprite de rayo del
+    ///   mod, sino EL MOTOR: 3 pasadas apiladas de ancho decreciente
+    ///   (0.6/0.4/0.2 · color×0.5, aditivo) sobre el camino jagged — el
+    ///   PERFIL transversal suave ES LA SUMA de las pasadas sólidas.
+    ///
+    ///   LA RECONSTRUCCIÓN: el pincel pasa a ser EL PIXEL 1×1 BLANCO del
+    ///   motor (TextureAssets.MagicPixel — la primitiva de rectángulo
+    ///   sólido que vanilla expone; cero arte del mod) y el filamento se
+    ///   pinta con LA PILA DE 6 PASADAS + VENA (la receta 466 extendida):
+    ///   anchos [5.2, 3.6, 2.5, 1.7, 1.15, 0.72]×w con brillos
+    ///   telescópicos [0.06 … 0.42] + la vena BLANCA al 34% — la suma de
+    ///   las pasadas ES la gaussiana transversal (cada pasada aporta
+    ///   color·f EXACTO: el pixel es sólido, sin perfil de textura que
+    ///   elevar al cuadrado). Juntas BORDE A BORDE exactas (mismo avg →
+    ///   líneas de corte colineales: la regla de relleno del rasterizador
+    ///   tesela sin hueco) + extensión de giro por pasada con suelo
+    ///   0.35px (la regla top-left mata el hueco de 1-ulp; el suelo
+    ///   mataría el riesgo de driver). BoltHalo/BoltCore se RETIRAN del
+    ///   consumo (la convención de la casa con BoltChain).
+    ///
+    ///   EL IMPACTO (el otro reporte: «se ve el cuadrado cuando aparece,
+    ///   debería tener un degradado suave y difuminarse al final, hacia
+    ///   los bordes quedar transparente»): BoltImpact.png estaba RECORTADO
+    ///   por el lienzo — alfa ~29 en todo el perímetro (medido) → el borde
+    ///   del quad se leía como un cuadrado. Re-horneado con el contrato
+    ///   NovaBurst de la casa: perfil monotónico 236→0 que MUERE a 0
+    ///   EXACTO en el borde (verificado por píxeles por el generador
+    ///   tools/gen_boltimpact_v65022.py).
+    ///
     /// Nace de la investigación profunda y metódica del ecosistema (los
     /// sistemas de rayos de los grandes mods de VFX, estudiados a fondo:
     /// generación, flicker, multi-filamento, tapers, perfiles de textura,
@@ -167,16 +206,43 @@ namespace AethonMod.Content.VFX
             (_glowTex ??= ModContent.Request<Texture2D>(
                 "AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
-        /// <summary>v6.39 — LA BANDA UNIFORME del halo, pública: para quien
-        /// emite cuadros de luz al buffer de VFXCore (SeekArc, BoltRenderer)
-        /// y necesita la banda premultiplicada que el lote aditivo respeta —
-        /// SoftGlow es RADIAL (funde a lo largo) y estirado produce las
-        /// franjas por junta.</summary>
+        /// <summary>v6.50.22 — RETIRADA DEL CONSUMO (como BoltChain en
+        /// v6.50.8): el rayo ya no usa bandas horneadas — el pincel es EL
+        /// PIXEL del motor (VFXCore.Pixel) y el perfil transversal ES LA
+        /// SUMA de las pasadas de la pila. El asset se conserva por la
+        /// convención de la casa con lo retirado — NADIE la dibuja desde
+        /// v6.50.22.</summary>
         public static Texture2D BandaTex => HaloTex;
 
-        /// <summary>v6.39 — LA VENA (el filamento núcleo), pública por la
-        /// misma razón que <see cref="BandaTex"/>.</summary>
+        /// <summary>v6.50.22 — RETIRADA DEL CONSUMO (la vena es también un
+        /// quad del pixel del motor ahora). Conservada por convención.</summary>
         public static Texture2D VenaTex => CoreTex;
+
+        // ==================================================================
+        //  v6.50.22 — LA PILA DE PASADAS (el filamento 100% código)
+        // ==================================================================
+
+        /// <summary>
+        /// LOS ANCHOS DE LA PILA (múltiplos del ancho base w): la receta
+        /// del LightningArc 466 de vanilla (0.6/0.4/0.2 del scale)
+        /// extendida a 6 pasadas para que la suma lea como una gaussiana
+        /// suave — con el pincel SÓLIDO (el pixel del motor) cada paso de
+        /// intensidad entre pasadas tiene que ser pequeño para que el
+        /// ojo no lea "anillos". PÚBLICA: BoltRenderer (el rayo del buffer
+        /// de VFXCore) comparte LA MISMA receta — una sola anatomía de
+        /// rayo en todo el mod.
+        /// </summary>
+        public static readonly float[] PilaW = { 5.2f, 3.6f, 2.5f, 1.7f, 1.15f, 0.72f };
+
+        /// <summary>
+        /// LOS BRILLOS DE LA PILA (telescópicos): la suma acumulada al
+        /// centro es 1.17·color + la vena blanca — el mismo balance de la
+        /// v6.50.15 (bloom 0.066 + halo 0.123 + cuerpo 0.774 ≈ 0.96 tras
+        /// el a² de las bandas viejas). Con el pixel sólido el aporte es
+        /// color·f EXACTO (sin el a² de la textura) — de ahí los valores
+        /// más bajos por pasada.
+        /// </summary>
+        public static readonly float[] PilaF = { 0.06f, 0.09f, 0.13f, 0.19f, 0.28f, 0.42f };
 
         // ==================================================================
         //  EL RELOJ Y EL PARPADEO (deterministas)
@@ -529,7 +595,7 @@ namespace AethonMod.Content.VFX
         /// <param name="core">Color del núcleo (casi blanco de verdad).</param>
         public static void Strand(SpriteBatch batch, Vector2[] pts, int seed, int flick,
             float width, Color halo, Color core, float alpha = 1f, StormTaper taper = StormTaper.Center)
-            => StrandImpl(batch, pts, seed, flick, width, halo, core, alpha, taper, CoreTex, HaloTex);
+            => StrandImpl(batch, pts, seed, flick, width, halo, core, alpha, taper);
 
         /// <summary>
         /// v6.50.8 — LA DESCARGA DE VERDAD ENTRE DOS ANCLAJES (la
@@ -591,7 +657,7 @@ namespace AethonMod.Content.VFX
             // El tronco a brillo completo (taper lineal: tenso al anclaje
             // de destino, como la vena de una descarga que se disipa).
             StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
-                StormTaper.Linear, CoreTex, HaloTex);
+                StormTaper.Linear);
 
             // === 2. v6.50.17 — LAS RAMAS DEL ÁRBOL FRACTAL (ramas de ramas,
             //     CONECTADAS por vértices: el final de un segmento es el
@@ -607,7 +673,7 @@ namespace AethonMod.Content.VFX
                     StormStrand s = arbol[f];
                     StrandImpl(batch, s.Points, seed + 23 + f, flick,
                         width * s.WidthScale, halo, core, alpha * s.Alpha,
-                        StormTaper.Linear, CoreTex, HaloTex);
+                        StormTaper.Linear);
                 }
             }
         }
@@ -641,7 +707,7 @@ namespace AethonMod.Content.VFX
             float chaos = Math.Clamp(ampPx / Math.Max(len, 1f), 0.02f, 0.26f);
             Vector2[] pts = FractalPath(start, end, seed, flick, gens, chaos);
             StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
-                StormTaper.Center, CoreTex, HaloTex);
+                StormTaper.Center);
         }
 
         /// <summary>
@@ -690,8 +756,7 @@ namespace AethonMod.Content.VFX
                 Color cHalo = f == 0 ? haloA : (f % 2 == 1 ? haloB : haloA);
                 StrandImpl(batch, s.Points, seed + 17 + f * 13, flick,
                     width * s.WidthScale, cHalo, core, alpha * s.Alpha,
-                    f == 0 ? StormTaper.Center : StormTaper.Linear,
-                    CoreTex, HaloTex);
+                    f == 0 ? StormTaper.Center : StormTaper.Linear);
             }
         }
 
@@ -782,7 +847,7 @@ namespace AethonMod.Content.VFX
 
             // === EL TRONCO (el canal que meandra) ===
             StrandImpl(batch, canal, seed, flick, width, halo, core, alpha,
-                StormTaper.Center, CoreTex, HaloTex);
+                StormTaper.Center);
 
             // === LAS RAMAS EN LOS MÁXIMOS LOCALES DEL MEANDRO (la regla
             //     del ruido: la curvatura máxima del canal es donde la
@@ -825,7 +890,7 @@ namespace AethonMod.Content.VFX
                     seedR, flick, gens, 0.12f);
 
                 StrandImpl(batch, rama, seedR, flick, width * 0.60f, halo, core,
-                    alpha * 0.55f, StormTaper.Linear, CoreTex, HaloTex);
+                    alpha * 0.55f, StormTaper.Linear);
 
                 // LA RAMITA (segundo nivel — el arbolito del canal).
                 var hojas = new List<StormStrand>();
@@ -835,7 +900,7 @@ namespace AethonMod.Content.VFX
                     StormStrand s = hojas[h];
                     StrandImpl(batch, s.Points, seedR + 17 + h, flick,
                         width * s.WidthScale, halo, core, alpha * s.Alpha,
-                        StormTaper.Linear, CoreTex, HaloTex);
+                        StormTaper.Linear);
                 }
                 ramas++;
             }
@@ -894,7 +959,7 @@ namespace AethonMod.Content.VFX
                 pts[i] = center + new Vector2((float)Math.Cos(ang) * r, (float)Math.Sin(ang) * r);
             }
             StrandImpl(batch, pts, seed, flick, width, halo, core, alpha,
-                StormTaper.Center, CoreTex, HaloTex);
+                StormTaper.Center);
         }
 
         // ------------------------------------------------------------------
@@ -1046,7 +1111,7 @@ namespace AethonMod.Content.VFX
 
             // === EL TRONCO a brillo completo ===
             StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
-                StormTaper.Center, CoreTex, HaloTex);
+                StormTaper.Center);
 
             // === LAS RAMAS DE SUBDIVISIÓN (nacieron al partir) ===
             int forks = 0;
@@ -1081,7 +1146,7 @@ namespace AethonMod.Content.VFX
                         Math.Max(2, generations - 2), 0.12f);
                     StrandImpl(batch, branch, seed + 313 + g * 17 + idx, flick,
                         width * 0.5f, halo, core, alpha * 0.4f,
-                        StormTaper.Linear, CoreTex, HaloTex);
+                        StormTaper.Linear);
                     forks++;
                 }
             }
@@ -1125,12 +1190,15 @@ namespace AethonMod.Content.VFX
             PintaArco(batch, start, end, seed + 977, slotB, width, glow, mid, coreC, alphaB);
         }
 
-        /// <summary>Una pasada del arco — v6.39: LAS 3 CAPAS CON LA BANDA
-        /// UNIFORME (BoltHalo halo/cuerpo + BoltCore vena) y el LARGO EXACTO
-        /// proyectado + la extensión de giro. El v6.33 estiraba SOFTGLOW
-        /// (RADIAL: funde a 0 en los dos extremos de cada quad) y compensaba
-        /// con solapes sl+w·1.6/0.8/0.4 → franjas oscuras + apiles claros =
-        /// EL "brillo cortado por secciones" del reporte. Muerto.</summary>
+        /// <summary>Una pasada del arco — v6.50.22 — LA PILA DE PASADAS
+        /// (el filamento 100% código): el pincel es EL PIXEL del motor y
+        /// el perfil transversal ES LA SUMA de 6 pasadas + vena (la
+        /// receta del LightningArc 466 de vanilla, extendida) — las
+        /// pasadas 0-3 con el color GLOW (la funda azul oscura), las 4-5
+        /// con el MID (#5EB3FF, el cuerpo) y la vena BLANCA. El v6.39
+        /// estiraba BANDAS horneadas (con suelo de alfa en los bordes —
+        /// el look "líneas"); el v6.33 antes estiraba SOFTGLOW (RADIAL:
+        /// franjas oscuras + apiles claros). Muertos ambos.</summary>
         private static void PintaArco(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int slot, float width, Color glow, Color mid, Color coreC, float alpha)
         {
@@ -1170,16 +1238,12 @@ namespace AethonMod.Content.VFX
                 // borde — nada de solapes que el aditivo apila).
                 float largo = Vector2.Dot(seg, avg);
                 if (largo < 0.30f) { arc += sl; continue; }
-                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
-                       + ExtensionJunta(w, AnguloEntre(seg, next));
 
-                // LAS 3 CAPAS (receta eléctrica): halo ×1.6 · cuerpo ×0.8 · vena ×0.30.
-                Quad(batch, HaloTex, pos, new Vector2(largo, w * 1.6f), rot,
-                    Tint(glow, 0.30f * alpha));
-                Quad(batch, HaloTex, pos, new Vector2(largo, w * 0.8f), rot,
-                    Tint(mid, 0.55f * alpha));
-                Quad(batch, CoreTex, pos, new Vector2(largo, w * 0.30f), rot,
-                    Tint(coreC, 0.90f * alpha));
+                // v6.50.22 — LA PILA DE PASADAS (100% código: la suma de
+                // quads SÓLIDOS del pixel del motor ES el degradado).
+                PilaFilamento(batch, pos, rot, largo,
+                    AnguloEntre(prev, seg), AnguloEntre(seg, next), w,
+                    glow, mid, coreC, alpha, 1f);
                 arc += sl;
             }
         }
@@ -1269,14 +1333,24 @@ namespace AethonMod.Content.VFX
                 // v6.39 — EL LARGO EXACTO + LA EXTENSIÓN DE GIRO.
                 float largo = Vector2.Dot(seg, avg);
                 if (largo < 0.30f) { arc += sl; continue; }
-                largo += ExtensionJunta(w, AnguloEntre(prev, seg))
-                       + ExtensionJunta(w, AnguloEntre(seg, next));
 
-                // LAS 3 CAPAS (receta eléctrica): halo ×1.6 · cuerpo ×0.8 · vena ×0.30
-                // — con TEXTURA de banda propia (la sobrecarga v6.08 de Quad).
-                VFXCore.Quad(pos, Tint(cBase, 0.30f * alpha), new Vector2(largo, w * 1.6f), rot, HaloTex);
-                VFXCore.Quad(pos, Tint(cMedia, 0.55f * alpha), new Vector2(largo, w * 0.8f), rot, HaloTex);
-                VFXCore.Quad(pos, Tint(cNucleo, 0.90f * alpha), new Vector2(largo, w * 0.30f), rot, CoreTex);
+                // v6.50.22 — LA PILA DE PASADAS emitida al buffer de VFXCore
+                // (100% código: los quads llevan EL PIXEL del motor — la
+                // suma de las pasadas ES el degradado, sin banda horneada).
+                for (int k = 0; k < PilaW.Length; k++)
+                {
+                    float wk = w * PilaW[k];
+                    float ext = ExtensionJunta(wk, AnguloEntre(prev, seg))
+                              + ExtensionJunta(wk, AnguloEntre(seg, next));
+                    Color c = k >= 4 ? cMedia : cBase;
+                    VFXCore.Quad(pos, Tint(c, PilaF[k] * alpha),
+                        new Vector2(largo + ext, wk), rot, VFXCore.Pixel);
+                }
+                float wv = Math.Max(w * 0.34f, 1.5f);
+                float extV = ExtensionJunta(wv, AnguloEntre(prev, seg))
+                           + ExtensionJunta(wv, AnguloEntre(seg, next));
+                VFXCore.Quad(pos, Tint(cNucleo, alpha),
+                    new Vector2(largo + extV, wv), rot, VFXCore.Pixel);
                 arc += sl;
             }
         }
@@ -1336,42 +1410,24 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// EL MOTOR DEL FILAMENTO (v6.39 — EL RIBBON DE VERDAD; v6.50.15 —
-        /// LAS CUATRO CAPAS): recorre la polilínea SEGMENTO A SEGMENTO
-        /// pintando las capas con quads que se tocan BORDE A BORDE:
+        /// EL MOTOR DEL FILAMENTO (v6.50.22 — 100% CÓDIGO: el pincel es EL
+        /// PIXEL 1×1 del motor, cero textura de banda): recorre la
+        /// polilínea SEGMENTO A SEGMENTO pintando LA PILA de pasadas
+        /// sólidas que SUMAN el perfil transversal — la receta del
+        /// LightningArc 466 de vanilla extendida a 6+1 (ver PilaW/PilaF).
         ///
-        ///   · LA NORMAL MEDIA: la dirección del quad es el promedio de las
-        ///     direcciones ADYACENTES — los dos quads que comparten un
-        ///     vértice cortan la junta con la MISMA orientación (mata las
-        ///     lentes de doble brillo de las rotaciones dispares).
-        ///   · EL LARGO EXACTO: la distancia proyectada sobre la dirección
-        ///     media + LA EXTENSIÓN ADAPTATIVA DE GIRO (w/2·tan(δ/2) — la
-        ///     geometría del round-join de RiftLib v6.31: cero en los
-        ///     tramos rectos, solo lo geométricamente necesario en las
-        ///     esquinas) + 1.2 px de margen antialias que la textura cubre
-        ///     con su fundido de 3 px (las rampas complementarias suman ~1:
-        ///     la junta es INVISIBLE, no apila). v6.50.15: LA EXTENSIÓN ES
-        ///     POR CAPA (defecto 3 del forense R55-d: la v6.39 la calculaba
-        ///     UNA vez con el w del CUERPO y la compartía entre las tres —
-        ///     el halo (2w) recibía la MITAD de lo que le tocaba → muescas
-        ///     en cada quiebre; la vena (¼w) recibía DEMASIADO → cuentas
-        ///     brillantes del núcleo en cada junta, multiplicadas por los
-        ///     16-33 quiebres del FractalPath).
-        ///   · v6.50.15 — LAS CUATRO CAPAS (la receta de los grandes: el
-        ///     halo legible mide 4-8× el núcleo — BLOOM ×4.6 tenue · HALO
-        ///     ×2.2 · CUERPO ×1 · VENA ×¼ — sobre las bandas LINEALES
-        ///     re-horneadas (RGB=255, alfa=√perfil: el aporte cae
-        ///     perfil·color·f — la v6.39 al cubo colapsaba la gaussiana a
-        ///     un hilo de 1-2px, el defecto 1 del forense).
-        ///   · EL CRACKLE POR PUNTO: el brillo se sorteaba en los VÉRTICES
-        ///     (baja frecuencia) y se INTERPOLA entre ellos — el rayo
-        ///     respira a lo largo sin UNA sola sección dura. La VENA no
-        ///     lleva crackle (el núcleo caliente arde SIEMPRE — es el ancla
-        ///     visual).
+        /// Las juntas: cada segmento se corta PERPENDICULAR a la NORMAL
+        /// MEDIA del vértice compartido — los dos quads adyacentes usan
+        /// la MISMA línea de corte (colineales por construcción) → la
+        /// regla de relleno top-left del rasterizador TESLA SIN HUECO NI
+        /// SOLAPE en las rectas, y la EXTENSIÓN DE GIRO por pasada cubre
+        /// la cuña exterior de las esquinas (solape mínimo calculado,
+        /// no un suelo grande). El crackle interpolado por vértices
+        /// (v6.39) sigue modulando las pasadas de color; la VENA arde
+        /// SIEMPRE.
         /// </summary>
         private static void StrandImpl(SpriteBatch batch, Vector2[] pts, int seed, int flick,
-            float width, Color halo, Color core, float alpha, StormTaper taper,
-            Texture2D bodyTex, Texture2D haloTex)
+            float width, Color halo, Color core, float alpha, StormTaper taper)
         {
             if (pts == null || pts.Length < 2 || alpha <= 0.01f || width <= 0.05f) return;
 
@@ -1410,53 +1466,17 @@ namespace AethonMod.Content.VFX
                 float w = width * TaperFactor(taper, tMid);
                 float crackle = (Brillo(i) + Brillo(i + 1)) * 0.5f;
 
-                // === LA EXTENSIÓN ADAPTATIVA DE GIRO (el round-join) —
-                // v6.50.15: POR CAPA (cada ancho con SU geometría; el
-                // forense R55-d defecto 3: compartirla dejaba muescas en
-                // el halo y cuentas en la vena) ===
+                // === v6.50.22 — LA PILA DE PASADAS (el filamento 100%
+                //     código: quads SÓLIDOS del pixel del motor cuya SUMA
+                //     es el degradado transversal — el mismo truco del
+                //     LightningArc 466 de vanilla, con 6+1 pasadas). ===
                 float largo = Vector2.Dot(seg, avg);
                 if (largo < 0.35f) { arc += len; continue; }
                 float dPrev = AnguloEntre(prev, seg);
                 float dNext = AnguloEntre(seg, next);
 
-                // v6.50.15 — LOS ANCHOS DE LA PILA (la receta de los
-                // grandes: el halo legible mide 4-8× el núcleo —
-                // bloom ×4.6 · halo ×2.2 · cuerpo ×1 · vena ×¼ con su
-                // suelo subido a 2.0px: el 1.2 de v6.50.9 quedaba
-                // SUB-PÍXEL tras el sampler bilineal y el núcleo blanco
-                // desaparecía — "tubo de neón frío", el VLM del mock).
-                float wBloom = w * 4.6f;
-                float wHalo = w * 2.2f;
-                float wVena = Math.Max(w * 0.26f, 2.0f);
-
-                // 0) EL BLOOM — la funda EXTERIOR ancha y tenue: sin esta
-                //    capa el rayo es un tubo de neón, no una descarga
-                //    (el aire ionizado alrededor del canal brilla).
-                Quad(batch, haloTex, mid,
-                    new Vector2(largo + ExtensionJunta(wBloom, dPrev)
-                              + ExtensionJunta(wBloom, dNext), wBloom), rot,
-                    Tint(halo, 0.16f * alpha * crackle));
-                // 1) EL HALO — banda suave ancha, del color (el contenido:
-                //    el halo NO debe engullir al filamento).
-                Quad(batch, haloTex, mid,
-                    new Vector2(largo + ExtensionJunta(wHalo, dPrev)
-                              + ExtensionJunta(wHalo, dNext), wHalo), rot,
-                    Tint(halo, 0.30f * alpha * crackle));
-                // 2) EL CUERPO — el filamento de color.
-                Quad(batch, bodyTex, mid,
-                    new Vector2(largo + ExtensionJunta(w, dPrev)
-                              + ExtensionJunta(w, dNext), w), rot,
-                    Tint(halo, 0.80f * alpha * crackle));
-                // 3) LA VENA — la línea BLANCA razor-fina a ¼ del ancho
-                //    (sin crackle: el núcleo arde SIEMPRE). v6.50.9: suelo de
-                //    1.2 px — en las cadenas (w≈4.4 con taper) y los pelos la
-                //    vena bajaba a SUB-PIXEL (0.4-1.1 px) y el sampler bilineal
-                //    fundía el pico de la sección: el núcleo quedaba ROTO,
-                //    una línea fantasma intermitente.
-                Quad(batch, bodyTex, mid,
-                    new Vector2(largo + ExtensionJunta(wVena, dPrev)
-                              + ExtensionJunta(wVena, dNext), wVena), rot,
-                    Tint(core, 1f * alpha));
+                PilaFilamento(batch, mid, rot, largo, dPrev, dNext, w,
+                    halo, halo, core, alpha, crackle);
 
                 arc += len;
             }
@@ -1464,6 +1484,39 @@ namespace AethonMod.Content.VFX
             // Los GORROS de descarga en ambos extremos.
             EndCap(batch, pts[0], width, halo, core, alpha);
             EndCap(batch, pts[pts.Length - 1], width, halo, core, alpha);
+        }
+
+        /// <summary>
+        /// v6.50.22 — LA PILA: 6 pasadas SÓLIDAS de ancho/brillo telescópicos
+        /// (la suma ES la gaussiana transversal — así se construye un
+        /// degradado SIN textura, apilando rectángulos del pixel del motor)
+        /// + LA VENA BLANCA al 34% del ancho (mínimo 1.5 px — con el pincel
+        /// sólido NO hay fusión bilineal que la coma: el núcleo es un
+        /// rectángulo CRISPO de color·f exacto). Las pasadas 0-3 usan el
+        /// color HALO (la funda), las 4-5 el color MEDIA (el cuerpo — para
+        /// los arcos de 3 colores de PintaArco/SeekArc; la familia Strand
+        /// pasa halo dos veces). La VENA arde SIEMPRE (sin crackle).
+        /// Cada pasada lleva SU extensión de giro (geometría por ancho —
+        /// la lección v6.50.15).
+        /// </summary>
+        private static void PilaFilamento(SpriteBatch batch, Vector2 mid, float rot,
+            float largo, float dPrev, float dNext, float w,
+            Color halo, Color media, Color core, float alpha, float crackle)
+        {
+            for (int k = 0; k < PilaW.Length; k++)
+            {
+                float wk = w * PilaW[k];
+                float ext = ExtensionJunta(wk, dPrev) + ExtensionJunta(wk, dNext);
+                Color c = k >= 4 ? media : halo;
+                Quad(batch, VFXCore.Pixel, mid, new Vector2(largo + ext, wk), rot,
+                    Tint(c, PilaF[k] * alpha * crackle));
+            }
+
+            // LA VENA — la línea BLANCA razor-fina (núcleo del canal).
+            float wv = Math.Max(w * 0.34f, 1.5f);
+            float extV = ExtensionJunta(wv, dPrev) + ExtensionJunta(wv, dNext);
+            Quad(batch, VFXCore.Pixel, mid, new Vector2(largo + extV, wv), rot,
+                Tint(core, alpha));
         }
 
         /// <summary>El ángulo (0..π) entre dos direcciones (el GIRO de la junta).</summary>
@@ -1477,12 +1530,17 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// LA EXTENSIÓN DE JUNTA (la geometría del round-join, medida de
         /// RiftLib v6.31): dos bandas de ancho w que giran δ necesitan
-        /// e = w/2·tan(δ/2) para que sus esquinas se crucen. Suelo 1.2 px
-        /// (el margen antialias que el fundido de 3 px de la textura hace
-        /// invisible), techo w/2 (en los giros de 90°+ el solape clásico).
+        /// e = w/2·tan(δ/2) para que sus esquinas se crucen. v6.50.22 — el
+        /// SUELO 1.2 px de las bandas horneadas MUERE: era el margen del
+        /// fundido de 3 px de la textura; con el PIXEL SÓLIDO las rectas
+        /// teselan EXACTO (líneas de corte colineales + regla top-left) y
+        /// el suelo viejo solo APILABA cuentas aditivas en las venas
+        /// finas. Suelo 0.35 px (el seguro contra quirkies de redondeo del
+        /// driver — invisible al ojo, mata el hueco de 1-ulp), techo w/2
+        /// (los giros de 90°+ el solape clásico).
         /// </summary>
         private static float ExtensionJunta(float w, float giro)
-            => MathHelper.Clamp(w * 0.5f * MathF.Tan(giro * 0.5f) + 1.2f, 1.2f, w * 0.5f + 1.2f);
+            => MathHelper.Clamp(w * 0.5f * MathF.Tan(giro * 0.5f), 0.35f, w * 0.5f);
 
         /// <summary>La curva de anchura (el contrato del taper).</summary>
         private static float TaperFactor(StormTaper taper, float t)
@@ -1535,8 +1593,13 @@ namespace AethonMod.Content.VFX
         /// (P.rgb·P.a²·color·f) y compositing premult CORRECTO en cualquier
         /// lote alfa (a intensidad √f — nunca fantasma, nunca caja). La
         /// auditoría v6.50.9 verificó las 30 rutas de dibujo de esta
-        /// librería: TODAS aditivas, 0 violaciones.</summary>
-        private static Color Tint(Color c, float f)
+        /// librería: TODAS aditivas, 0 violaciones.
+        ///
+        /// PÚBLICA v6.50.22: BoltRenderer y cualquier emisor al buffer
+        /// aditivo de VFXCore necesitan el MISMO tinte lineal — el
+        /// `Color * f` de XNA escala RGB y A a la vez → aporte c·f²
+        /// (el hallo v6.50.9 otra vez).</summary>
+        public static Color Tint(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
             // v6.50.9 — LA RAÍZ CUADRADA DE LA INTENSIDAD (ver doc del

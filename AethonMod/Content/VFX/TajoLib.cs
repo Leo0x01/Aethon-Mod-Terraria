@@ -119,18 +119,23 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  EL PINCEL (las bandas uniformes v6.39 + el glow de puntos)
+        //  EL PINCEL (v6.50.22 — EL PIXEL DEL MOTOR: las bandas BoltHalo/
+        //  BoltCore se retiran del consumo — el mismo defecto de SUELO de
+        //  alfa en los bordes que los rayos; el filo del tajo pasa a ser
+        //  100% código con pasadas apiladas)
         // ==================================================================
 
-        private static Asset<Texture2D> _banda;   // BoltHalo: el halo ancho
-        private static Asset<Texture2D> _vena;    // BoltCore: el filo fino
+        /// <summary>El pincel de banda — v6.50.22: EL PIXEL 1×1 del motor
+        /// (la banda horneada BoltHalo tenía SUELO de alfa ~50 en los
+        /// bordes largos — bordes duros medidos por píxeles).</summary>
+        private static Texture2D Banda => VFXCore.Pixel;
+
+        /// <summary>El pincel del filo — v6.50.22: EL PIXEL del motor (el
+        /// filo es ahora un rectángulo CRISPO — como conviene a una
+        /// hoja).</summary>
+        private static Texture2D Vena => VFXCore.Pixel;
+
         private static Asset<Texture2D> _glow;    // SoftGlow: los puntos
-
-        private static Texture2D Banda =>
-            (_banda ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BoltHalo")).Value;
-
-        private static Texture2D Vena =>
-            (_vena ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BoltCore")).Value;
 
         private static Texture2D Glow =>
             (_glow ??= ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
@@ -190,8 +195,10 @@ namespace AethonMod.Content.VFX
                     Tint(nucleo, 0.14f * brillo * (0.4f + 0.6f * gu)));
             }
 
-            // --- 2. EL HALO (el color: BoltHalo ancho, PARPADEA — el
-            //     parpadeo vive SOLO aquí, nunca en el núcleo). ---
+            // --- 2. EL HALO (el color: DOS PASADAS APILADAS del pixel del
+            //     motor — el degradado transversal ES LA SUMA, la receta
+            //     v6.50.22; PARPADEA — el parpadeo vive SOLO aquí, nunca
+            //     en el núcleo). ---
             for (int i = 0; i < Segmentos; i++)
             {
                 float u0 = i / (float)Segmentos;
@@ -202,7 +209,10 @@ namespace AethonMod.Content.VFX
                     (float)Math.Sin(time * 38f + i * 2.7f + seed % 7);
                 SegmentoArco(Banda, centro, radio, ang0, span, u0, um,
                     ancho * 6.2f * (0.45f + 0.55f * gu),
-                    Tint(halo, 0.20f * brillo * flick * (0.35f + 0.65f * gu)));
+                    Tint(halo, 0.08f * brillo * flick * (0.35f + 0.65f * gu)));
+                SegmentoArco(Banda, centro, radio, ang0, span, u0, um,
+                    ancho * 3.4f * (0.45f + 0.55f * gu),
+                    Tint(halo, 0.13f * brillo * flick * (0.35f + 0.65f * gu)));
             }
 
             // --- 3. EL NÚCLEO (el filo blanco-caliente: BoltCore fino,

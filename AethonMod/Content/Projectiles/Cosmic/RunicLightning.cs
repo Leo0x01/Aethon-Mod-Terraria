@@ -334,7 +334,9 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (len < 0.5f) continue;
                 float rot = (float)Math.Atan2(seg.Y, seg.X);
                 Vector2 mid = (path[i] + path[i + 1]) * 0.5f;
-                Quad(StormLib_Halo(), mid, new Vector2(len + 6f, 3.5f + 2.5f * pulse * charge),
+                // v6.50.22 — EL PIXEL del motor (la banda BoltHalo se
+                // retira del consumo: suelo de alfa en los bordes).
+                Quad(VFXCore.Pixel, mid, new Vector2(len + 6f, 3.5f + 2.5f * pulse * charge),
                     rot, Tint(GoldWarm, 0.35f * charge));
             }
 
@@ -425,9 +427,6 @@ namespace AethonMod.Content.Projectiles.Cosmic
         // ------------------------------------------------------------------
         //  HELPERS
         // ------------------------------------------------------------------
-
-        private static Texture2D StormLib_Halo()
-            => ModContent.Request<Texture2D>("AethonMod/Content/Effects/Procedural/BoltHalo").Value;
 
         private static Texture2D StormLib_Glow()
             => VFXCore.SoftGlow;

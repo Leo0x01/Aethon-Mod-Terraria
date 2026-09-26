@@ -160,6 +160,28 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        private static Texture2D _pixel;
+
+        /// <summary>
+        /// v6.50.22 — EL PIXEL BLANCO 1×1 DEL MOTOR (TextureAssets.MagicPixel
+        /// de vanilla): EL PINCEL DEL DIBUJO 100% CÓDIGO. No es un asset del
+        /// mod ni un sprite de rayo — es la primitiva de rectángulo sólido
+        /// que el propio motor expone (el mismo que usa el cursor, las
+        /// barras y mil detalles de vanilla). Con él, un filamento eléctrico
+        /// se construye APILANDO PASADAS SÓLIDAS de ancho decreciente (la
+        /// receta del lightning 466 de vanilla): el degradado transversal ES
+        /// LA SUMA de las pasadas — cero textura de banda, cero arte.
+        /// </summary>
+        public static Texture2D Pixel
+        {
+            get
+            {
+                if (_pixel == null)
+                    _pixel = Terraria.GameContent.TextureAssets.MagicPixel.Value;
+                return _pixel;
+            }
+        }
+
         /// <summary>
         /// Tamaño de cuadro para que el TRAZO VISIBLE de la textura Ring
         /// (1024px, círculo gráfico a ~0.92 del semiancho) caiga en el radio

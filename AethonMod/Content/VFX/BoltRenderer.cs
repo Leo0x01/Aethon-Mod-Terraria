@@ -6,8 +6,8 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// BoltRenderer — v6.39 — EL RELÁMPAGO DETERMINISTA DE PRIMERA GENERACIÓN,
-    /// REPARADO CON EL RIBBON DE LA CASA.
+    /// BoltRenderer — v6.50.22 — EL RELÁMPAGO DETERMINISTA DE PRIMERA
+    /// GENERACIÓN, REPARADO CON LA PILA 100% CÓDIGO.
     ///
     /// Rayos en zigzag nacidos del mismo principio que el látigo eléctrico
     /// de la medusa nebulosa: el zigzag se deriva de (semilla, flick,
@@ -15,18 +15,16 @@ namespace AethonMod.Content.VFX
     /// sincronizar nada, y el rayo se REGENERAR cada pocos ticks (flick) —
     /// está VIVO, no es una textura estática.
     ///
-    /// v6.39 — LA REPARACIÓN (informe research/v637): la versión v6.03
-    /// estiraba SoftGlow (RADIAL: funde a 0 en los dos extremos de cada
-    /// quad) con solapes `segLen + width` → el aditivo APILABA cada junta
-    /// (cuentas claras) y los fundidos dejaban franjas oscuras — EL brillo
-    /// "cortado por secciones" que el usuario reportó en los desgarros.
-    /// La nueva receta es la de StormLib v6.39: quads BORDE A BORDE con la
-    /// NORMAL MEDIA en las juntas, LARGO EXACTO proyectado + extensión
-    /// adaptativa de giro (w/2·tan(δ/2)), y LAS TEXTURAS DE BANDA UNIFORME
-    /// (BoltHalo halo + BoltCore núcleo — premultiplicadas: el lote aditivo
-    /// respeta su perfil). Las ramas laterales y los gorros de extremo
-    /// siguen siendo glows RADIALES (puntos, no tiras: ahí SoftGlow es el
-    /// pincel correcto).
+    /// v6.50.22 — LA PILA DE PASADAS (la reconstrucción del reporte del
+    /// usuario: "los rayos deben ser creados mediante código, nada de
+    /// sprite"): el pincel pasa a ser EL PIXEL 1×1 del motor
+    /// (VFXCore.Pixel) y el perfil transversal ES LA SUMA de las 6
+    /// pasadas + vena de StormLib (la receta del LightningArc 466 de
+    /// vanilla, extendida) — las bandas horneadas BoltHalo/BoltCore
+    /// (con SUELO de alfa en los bordes: el look "líneas") se retiran
+    /// del consumo. La geometría de juntas sigue siendo la de la casa:
+    /// normal media (líneas de corte colineales: tesela SIN hueco) +
+    /// extensión de giro por pasada.
     ///
     /// Uso (biblioteca): VFXCore.Begin() → ComputeQuads(...) →
     /// VFXCore.FlushAdditive(...).
@@ -75,10 +73,12 @@ namespace AethonMod.Content.VFX
             pts[0] = start;
             pts[Segments] = end;
 
-            // Trazos: halo de banda + vena fina por segmento — BORDE A BORDE
+            // Trazos: LA PILA DE PASADAS por segmento (100% código — el
+            // pincel es EL PIXEL del motor; la suma de las pasadas ES el
+            // degradado transversal) — BORDE A BORDE con la normal media
             // (v6.39: la normal media orienta la junta; el largo es la
-            // proyección sobre esa dirección + la extensión de giro; las
-            // texturas son las BANDAS UNIFORMES de la casa).
+            // proyección sobre esa dirección; la extensión de giro por
+            // pasada cubre la cuña de las esquinas).
             for (int s = 0; s < Segments; s++)
             {
                 Vector2 a = pts[s];
@@ -100,12 +100,23 @@ namespace AethonMod.Content.VFX
                 // EL LARGO EXACTO + la extensión de giro del round-join.
                 float largo = Vector2.Dot(seg, avg);
                 if (largo < 0.5f) continue;
-                largo += ExtJunta(width, Angulo(prev, seg)) + ExtJunta(width, Angulo(seg, next));
+                float dPrev = Angulo(prev, seg);
+                float dNext = Angulo(seg, next);
 
-                // LAS DOS CAPAS: banda del halo (×2) + vena del núcleo (×0.4)
-                // — con textura propia (la sobrecarga v6.08 de Quad).
-                VFXCore.Quad(mid, haloColor * alpha, new Vector2(largo, width * 2.0f), rot, StormLib.BandaTex);
-                VFXCore.Quad(mid, coreColor * alpha, new Vector2(largo, width * 0.42f), rot, StormLib.VenaTex);
+                // LA PILA (la misma de StormLib): 6 pasadas + vena — con
+                // el TINTE LINEAL de la casa (el `Color*f` de XNA sería
+                // aporte c·f² en el lote aditivo — el hallo v6.50.9).
+                for (int k = 0; k < StormLib.PilaW.Length; k++)
+                {
+                    float wk = width * StormLib.PilaW[k];
+                    float ext = ExtJunta(wk, dPrev) + ExtJunta(wk, dNext);
+                    VFXCore.Quad(mid, StormLib.Tint(haloColor, StormLib.PilaF[k] * alpha),
+                        new Vector2(largo + ext, wk), rot, VFXCore.Pixel);
+                }
+                float wv = Math.Max(width * 0.34f, 1.5f);
+                float extV = ExtJunta(wv, dPrev) + ExtJunta(wv, dNext);
+                VFXCore.Quad(mid, StormLib.Tint(coreColor, alpha),
+                    new Vector2(largo + extV, wv), rot, VFXCore.Pixel);
 
                 // RAMA lateral corta donde el hash lo pide.
                 if (s > 0 && s < Segments - 1 && VFXCore.Hash01(seed, flick, s + 91) > 0.62f)
@@ -116,10 +127,16 @@ namespace AethonMod.Content.VFX
                     Vector2 bEnd = b + branchDir * branchLen;
                     Vector2 bMid = (b + bEnd) * 0.5f;
                     float bRot = (float)Math.Atan2(branchDir.Y, branchDir.X);
-                    VFXCore.Quad(bMid, haloColor * (0.6f * alpha),
-                        new Vector2(branchLen + width * 0.6f, width * 1.3f), bRot, StormLib.BandaTex);
-                    VFXCore.Quad(bMid, coreColor * (0.6f * alpha),
-                        new Vector2(branchLen + width * 0.2f, width * 0.34f), bRot, StormLib.VenaTex);
+                    // v6.50.22 — la rama también con LA PILA (×0.6 brillo).
+                    for (int k = 0; k < StormLib.PilaW.Length; k++)
+                    {
+                        float wk = width * StormLib.PilaW[k] * 0.7f;
+                        VFXCore.Quad(bMid, StormLib.Tint(haloColor, StormLib.PilaF[k] * 0.6f * alpha),
+                            new Vector2(branchLen + width * 0.6f, wk), bRot, VFXCore.Pixel);
+                    }
+                    float wvB = Math.Max(width * 0.34f, 1.5f);
+                    VFXCore.Quad(bMid, StormLib.Tint(coreColor, 0.6f * alpha),
+                        new Vector2(branchLen + width * 0.2f, wvB), bRot, VFXCore.Pixel);
                 }
             }
 
@@ -140,8 +157,11 @@ namespace AethonMod.Content.VFX
             return (float)Math.Acos(dot);
         }
 
-        /// <summary>La extensión del round-join (w/2·tan(δ/2), suelo 1.2 px).</summary>
+        /// <summary>La extensión del round-join (w/2·tan(δ/2), suelo
+        /// 0.35 px — el margen 1.2 era de las bandas horneadas: con el
+        /// PIXEL sólido las rectas teselan exacto y el suelo viejo solo
+        /// apilaba cuentas).</summary>
         private static float ExtJunta(float w, float giro)
-            => MathHelper.Clamp(w * 0.5f * (float)Math.Tan(giro * 0.5f) + 1.2f, 1.2f, w * 0.5f + 1.2f);
+            => MathHelper.Clamp(w * 0.5f * (float)Math.Tan(giro * 0.5f), 0.35f, w * 0.5f);
     }
 }
