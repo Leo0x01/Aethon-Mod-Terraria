@@ -23,20 +23,29 @@ namespace AethonMod
             // IL del tML 2026.07.3.0) — no hay campo 'name' en build.txt que
             // pueda anclarlo. Los .plr/.twld guardan sus datos de mod por
             // ESE nombre: si este mod se compila desde una carpeta llamada de
-            // otra forma (p. ej. un clon sin el argumento de carpeta destino:
-            // 'git clone <url> AethonMod'), se convierte en un mod DISTINTO y
-            // todos los personajes y mundos guardados con "AethonMod" aparecen
-            // como corruptos/faltantes. Mejor fallar AQUÍ, con instrucciones,
-            // que huérfanar los guardados en silencio.
+            // otra forma, se convierte en un mod DISTINTO y todos los
+            // personajes y mundos guardados con "AethonMod" aparecen como
+            // corruptos/faltantes. Mejor fallar AQUÍ, con instrucciones, que
+            // huérfanar los guardados en silencio.
+            //
+            // v6.50.14 — EL MENSAJE SE ADAPTA A LA NUEVA ESTRUCTURA: el repo
+            // ya NO es la carpeta del mod (v6.50.13); el mod vive en la
+            // SUBCARPETA 'AethonMod' del repo y ESA es la carpeta que debe
+            // quedar como hija directa de ModSources (tML no escanea niveles
+            // anidados — FindModSources: TopDirectoryOnly). El mensaje del
+            // guardián ahora lo explica con el flujo correcto.
             if (Name != "AethonMod")
                 throw new System.Exception(
                     "[AethonMod] La carpeta de este mod debe llamarse EXACTAMENTE 'AethonMod' " +
                     "(en tModLoader el nombre del mod es el nombre de su carpeta de fuentes). " +
-                    $"La actual es '{Name}'. Renombra la carpeta a 'AethonMod' dentro de ModSources " +
-                    "y vuelve a compilar (Develop Mods > Build & Reload), o descarga el " +
-                    "AethonMod.tmod oficial de https://github.com/Leo0x01/Aethon-Mod-Terraria/releases. " +
-                    "Con otro nombre, tus personajes y mundos guardarían datos de un mod distinto " +
-                    "y parecerían corruptos.");
+                    $"La actual es '{Name}'. La carpeta del mod es la SUBCARPETA 'AethonMod' " +
+                    "del repo (github.com/Leo0x01/Aethon-Mod-Terraria): cópiala DENTRO de " +
+                    "ModSources con ese nombre exacto (o usa ACTUALIZAR-FUENTE.bat / " +
+                    "actualizar-fuente.sh, que lo hacen por ti) y vuelve a compilar " +
+                    "(Develop Mods > Build & Reload). O descarga el AethonMod.tmod oficial de " +
+                    "https://github.com/Leo0x01/Aethon-Mod-Terraria/releases. Con otro nombre, " +
+                    "tus personajes y mundos guardarían datos de un mod distinto y " +
+                    "parecerían corruptos.");
 
             // v6.50.13 — EL SELLO DE VERSIÓN (para que el client.log siempre
             // muestre qué build corre: la 6.50.6 del usuario siguió cargando

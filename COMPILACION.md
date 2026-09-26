@@ -18,6 +18,11 @@ En tModLoader **el nombre del mod es el nombre de la carpeta que contiene
 - La carpeta del mod debe ser una carpeta **directa** de `ModSources`
   (tModLoader no escanea subcarpetas anidadas).
 
+**Desde la v6.50.14 el repo tiene el mod dentro de la subcarpeta `AethonMod/`**
+(más fácil de identificar: esa carpeta ES el mod; todo lo demás del repo son
+docs y material de desarrollo que no se empaqueta). La carpeta que va a
+`ModSources` es **esa subcarpeta**, no la raíz del repo.
+
 Rutas habituales:
 
 | | Ruta |
@@ -31,7 +36,8 @@ Rutas habituales:
 
 1. Abre <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases>.
 2. En la última versión, descarga **`AethonMod.tmod`**.
-3. Cópialo a la carpeta **Mods** (tabla de arriba).
+3. Cópialo a la carpeta **Mods** (tabla de arriba), reemplazando cualquier
+   `AethonMod.tmod` viejo.
 4. tModLoader → **Mods** → activa *Aethon, la Luz Primordial*.
 5. **Verifica en la lista de mods que la versión sea la del release.**
 
@@ -40,35 +46,42 @@ es la vía sin riesgo de identidad.
 
 ---
 
-## 🚀 VÍA 2 — Clon del repo en ModSources (git, ideal para siempre-a-la-última)
+## 🚀 VÍA 2 — Fuente en ModSources (git, ideal para siempre-a-la-última)
 
 ```bash
-# UNA SOLA VEZ — borra cualquier carpeta AethonMod vieja dentro de ModSources:
-cd "Documentos\My Games\Terraria\tModLoader\ModSources"
-# IMPORTANTE: el argumento final 'AethonMod' fija el nombre de la carpeta
-# (el repo se llama distinto en GitHub, pero la carpeta del mod debe llamarse AethonMod):
-git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git AethonMod
+# UNA SOLA VEZ (clona el repo donde quieras, p. ej. en Documentos):
+cd "Documentos"
+git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git
+cd Aethon-Mod-Terraria
 
-# CADA VEZ QUE SALGA UNA VERSIÓN NUEVA:
-cd AethonMod
-git pull
+# INSTALAR LA FUENTE Y ACTUALIZAR SIEMPRE CON EL SCRIPT:
+ACTUALIZAR-FUENTE.bat        # Windows
+./actualizar-fuente.sh       # Linux / macOS
 ```
 
-Después, en el juego: **Mods → Develop Mods → AethonMod → Build + Reload**.
-El número de versión del menú de Mods debe subir (`6.50.13`, `6.50.14`, …).
+El script hace todo: `git pull` + copia espejo de la subcarpeta
+**`AethonMod/`** del repo → `ModSources\AethonMod`. Después, en el juego:
+**Mods → Develop Mods → AethonMod → Build + Reload**. El número de versión
+del menú de Mods debe subir (`6.50.14`, `6.50.15`, …).
 
-> **¿Por qué antes no funcionaba?** El repo antiguo tenía el mod ANIDADO
-> (`Aethon-Mod-Terraria/AethonMod/build.txt`): un clon no cabía en ModSources
-> (tML solo escanea carpetas directas) y actualizar exigía copiar a mano —
-> de ahí que las versiones nuevas nunca llegaban y el juego siguiera cargando
-> builds viejas. Desde v6.50.13 **la raíz del repo ES la carpeta del mod** y
-> `git pull` + Build & Reload basta.
+> **A mano** (si prefieres): copia la subcarpeta `AethonMod` del repo DENTRO
+> de `ModSources` con ese nombre exacto, de forma que quede
+> `ModSources\AethonMod\build.txt`. Para actualizar: `git pull` en el clon y
+> vuelve a copiar. No metas el repo entero en ModSources (la raíz del repo no
+> tiene `build.txt` y tModLoader no escanea niveles anidados).
+
+> **¿Por qué cambió otra vez?** La v6.50.13 aplanó el repo (el mod en la
+> raíz) para que un clon directo cupiera en ModSources. La contrapartida:
+> la raíz del repo se confundía con la carpeta del mod y mezclaba docs con
+> fuentes. La v6.50.14 vuelve a la estructura clásica y clara — **el mod es
+> la subcarpeta `AethonMod`** — y el script de actualización automatiza el
+> paso de copia para que "actualizar" siga siendo un solo comando.
 
 ### Si no quieres git nunca más
 
-Descarga el ZIP del release ("Source code") o directamente el `.tmod` (VÍA 1).
-Si usas el ZIP: descomprímelo DENTRO de ModSources con el nombre exacto
-`AethonMod` y Build & Reload.
+Descarga el `.tmod` de la VÍA 1 (recomendado) o el ZIP del release
+("Source code"): descomprímelo y copia **la subcarpeta `AethonMod`** dentro
+de `ModSources` (no la carpeta del repo entera), y Build & Reload.
 
 ---
 
@@ -86,7 +99,8 @@ Si usas el ZIP: descomprímelo DENTRO de ModSources con el nombre exacto
 ### Vía oficial (la que usa el juego)
 
 1. tModLoader → **Mods → Develop Mods**.
-2. Selecciona **AethonMod** (la carpeta clonada en ModSources).
+2. Selecciona **AethonMod** (la carpeta `ModSources\AethonMod` que dejó el
+   script — o tu copia manual).
 3. **Build + Reload**. El `.tmod` resultante cae en la carpeta **Mods** y se
    activa solo.
 
@@ -95,19 +109,24 @@ Si usas el ZIP: descomprímelo DENTRO de ModSources con el nombre exacto
 
 ### Vía IDE (opcional, para desarrollar)
 
-Abre `AethonMod.csproj` en Rider/VS/VS Code: el `Import` de
+Abre `AethonMod/AethonMod.csproj` en Rider/VS/VS Code: el `Import` de
 `tModLoader.targets` se resuelve solo cuando el proyecto vive dentro de
-ModSources.
+ModSources (`..\tModLoader.targets` apunta a ModSources).
 
 ### Vía línea de comandos (CI/automatización)
 
 ```bash
 # Con el tModLoader instalado (ruta de ejemplo de Steam en Windows):
 "C:\...\tModLoader\tModLoader.bat" -build "Documentos\My Games\Terraria\tModLoader\ModSources\AethonMod"
+
+# También funciona directamente sobre la subcarpeta del clon (sin pasar por ModSources):
+"C:\...\tModLoader\tModLoader.bat" -build "Aethon-Mod-Terraria\AethonMod"
 ```
 
 `tModLoader -build <carpeta>` compila, empaqueta y sale sin abrir ventana
-(es la vía con la que se genera el `AethonMod.tmod` de los releases).
+(es la vía con la que se genera el `AethonMod.tmod` de los releases). El
+nombre del mod lo pone la carpeta que le pases: pásale la subcarpeta
+`AethonMod`.
 
 ---
 
@@ -128,39 +147,42 @@ ModSources.
 | Síntoma | Causa y solución |
 |---------|------------------|
 | "Personaje/mundo corrupto" al cargar | Estás corriendo una build vieja con bugs ya reparados, o el mod se compiló desde una carpeta con otro nombre. Actualiza por VÍA 1 (`.tmod` del release) y comprueba la versión en el menú Mods. |
-| El mod se llama distinto en la lista | La carpeta de fuentes no se llama `AethonMod`. Renómbrala (o borra el build del menú Mods y baja el `.tmod` oficial). |
-| El número de versión no sube | Tu carpeta de fuentes no es un clon de git: no hay nada que actualizar. Bórrala y clona de nuevo (VÍA 2). |
-| El mod no aparece en Develop Mods | La carpeta está anidada: `build.txt` debe estar directamente en `ModSources\AethonMod\build.txt`. |
-| Build falla con errores CS | Falta el .NET 8 SDK, o hay archivos `.cs` ajenos dentro de la carpeta del mod (no metas carpetas raras en el clon). |
-| Texturas moradas/faltantes | Mezcla de archivos de builds viejas: haz un clon limpio y recompila. |
-| Error al cargar con mensaje de "carpeta debe llamarse AethonMod" | El guardián de identidad v6.50.13: renombra la carpeta exactamente a `AethonMod` y Build & Reload. |
+| El mod se llama distinto en la lista | La carpeta de fuentes no se llama `AethonMod`. El guardián de identidad te dirá cómo arreglarlo: la subcarpeta `AethonMod` del repo debe quedar como `ModSources\AethonMod`. |
+| El número de versión no sube | Tu carpeta `ModSources\AethonMod` es una copia suelta: no hay nada que actualizar. Haz `git pull` en el clon y ejecuta `ACTUALIZAR-FUENTE.bat` (o re-copia la subcarpeta), o pasa a la VÍA 1. |
+| El mod no aparece en Develop Mods | `build.txt` debe quedar en `ModSources\AethonMod\build.txt`: copiaste la carpeta del REPO en vez de la SUBCARPETA `AethonMod`, o la anidaste demasiado. Usa el script de actualización. |
+| Build falla con errores CS | Falta el .NET 8 SDK, o hay archivos `.cs` ajenos dentro de la carpeta del mod (no metas carpetas raras dentro de `ModSources\AethonMod`). |
+| Texturas moradas/faltantes | Mezcla de archivos de builds viejas: re-ejecuta el script de actualización (copia espejo) y recompila. |
+| Error al cargar con mensaje de "carpeta debe llamarse AethonMod" | El guardián de identidad: la carpeta del mod debe llamarse EXACTAMENTE `AethonMod` (la subcarpeta del repo). Renombra/re-copia y Build & Reload. |
 
 ---
 
 ## 🔧 Notas de los shaders
 
-- Los shaders viven en `Content/Effects/Shaders/`: cada `.fx` es la FUENTE
-  y cada `.fxc` es la versión compilada que el juego carga (tModLoader
+- Los shaders viven en `AethonMod/Content/Effects/Shaders/`: cada `.fx` es la
+  FUENTE y cada `.fxc` es la versión compilada que el juego carga (tModLoader
   registra el lector para `.fxc`; los `.fx` no se compilan solos).
 - Si se modifica un `.fx`, hay que recompilarlo al perfil `fx_2_0` para
   regenerar el `.fxc` correspondiente antes de empaquetar el mod.
 - Las texturas de ruido/glow de `Content/Effects/Textures/` se regeneran
-  con los scripts de `tools/` (ruido procedural determinista).
+  con los scripts de `tools/` (ruido procedural determinista; herramientas de
+  desarrollo, fuera de la carpeta del mod).
 
 ---
 
-## 📁 Estructura del repo (v6.50.13+)
+## 📁 Estructura del repo (v6.50.14)
 
 ```
-AethonMod/              <- RAÍZ del repo = carpeta del mod
-├── build.txt           # Metadatos: ¡AQUÍ vive la versión!
-├── description.txt
-├── icon.png / icon_small.png
-├── AethonMod.cs        # Punto de entrada + guardián de identidad
-├── AethonMod.csproj    # Solo IDE
-├── Content/            # 282 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
-├── Localization/       # es-ES / en-US (hjson)
-├── tools/              # Generadores de assets (excluidos del .tmod via buildIgnore)
-├── _masters/           # Sprites maestros (excluidos del .tmod via buildIgnore)
-└── *.md                # Docs (excluidas del .tmod via buildIgnore)
+Aethon-Mod-Terraria/      <- raíz del repo (docs y herramientas FUERA del mod)
+├── AethonMod/            <- EL MOD: esto es lo que se compila/empaqueta
+│   ├── build.txt           # Metadatos: ¡AQUÍ vive la versión!
+│   ├── description.txt
+│   ├── icon.png / icon_small.png
+│   ├── AethonMod.cs        # Punto de entrada + guardián de identidad
+│   ├── AethonMod.csproj    # Solo IDE
+│   ├── Content/            # 282 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
+│   └── Localization/       # es-ES / en-US (hjson)
+├── README.md / COMPILACION.md / CHANGES.md / …   # Documentación del repo
+├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh  # repo -> ModSources
+├── _masters/               # Sprites maestros (referencia, NO del mod)
+└── tools/                  # Generadores de assets (desarrollo, NO del mod)
 ```

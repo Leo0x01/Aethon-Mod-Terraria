@@ -2,6 +2,13 @@
 
 Un mod de Terraria (tModLoader) centrado en una entidad cósmica antigua que es el jefe final.
 
+> **Estructura del repo (v6.50.14):** el mod vive DENTRO de la carpeta
+> **`AethonMod/`** de este repositorio (todo lo que tModLoader compila:
+> `build.txt`, `Content/`, `Localization/`, iconos…). Todo lo demás de este
+> repo (esta documentación, `_masters/`, `tools/`) NO forma parte del mod y
+> está fuera de esa carpeta. Para jugar solo necesitas la subcarpeta
+> `AethonMod` o el `.tmod` oficial.
+
 ## 🔧 Instalar / actualizar (LEER PRIMERO)
 
 > **Regla de oro:** en tModLoader el **nombre del mod es el nombre de su carpeta de
@@ -15,31 +22,36 @@ Un mod de Terraria (tModLoader) centrado en una entidad cósmica antigua que es 
 1. Ve a **<https://github.com/Leo0x01/Aethon-Mod-Terraria/releases>**.
 2. Descarga **`AethonMod.tmod`** de la última versión.
 3. Cópialo en la carpeta **Mods** de tModLoader
-   (Windows: `Documentos\My Games\Terraria\tModLoader\Mods`).
+   (Windows: `Documentos\My Games\Terraria\tModLoader\Mods`), **reemplazando**
+   cualquier `AethonMod.tmod` viejo que hubiera.
 4. Actívalo en **Mods → tModLoader**. Comprueba en la lista que la **versión**
    coincide con la del release.
 
-### Opción 2 — Clonar el repo en ModSources (git, siempre a la última)
+### Opción 2 — Fuente en ModSources (git, siempre a la última)
+
+El repo contiene el mod **dentro** de la subcarpeta `AethonMod/`; esa subcarpeta
+(y SOLO ella) es lo que va a tu carpeta **ModSources**:
 
 ```bash
-# UNA SOLA VEZ (borra antes cualquier carpeta vieja AethonMod dentro de ModSources):
-cd "<tu carpeta>\Documentos\My Games\Terraria\tModLoader\ModSources"
-# ¡CON EL ARGUMENTO 'AethonMod'! (la carpeta del clon DEBE llamarse AethonMod)
-git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git AethonMod
+# UNA SOLA VEZ (clona donde quieras, p. ej. en Documentos):
+cd "Documentos"
+git clone https://github.com/Leo0x01/Aethon-Mod-Terraria.git
+cd Aethon-Mod-Terraria
 
-# CADA VEZ QUE SALGA UNA VERSIÓN:
-cd AethonMod
-git pull
+# Copia el mod a ModSources y actualízalo SIEMPRE con esto:
+ACTUALIZAR-FUENTE.bat        # Windows
+./actualizar-fuente.sh       # Linux / macOS
 ```
 
+El script hace `git pull` + copia espejo de `AethonMod/` → `ModSources\AethonMod`
+(ruta típica: `Documentos\My Games\Terraria\tModLoader\ModSources\AethonMod`).
 Después, en el juego: **Mods → Develop Mods → AethonMod → Build + Reload**.
 
-> El repo está estructurado para que **la raíz del clon SEA la carpeta del mod**
-> (`build.txt` en la raíz): un `git pull` + Build & Reload y estás en la última.
-> Si tu carpeta de fuentes no es un clon de git (una copia suelta), **no hay forma
-> de actualizarla** — bórrala y clona de nuevo. Y si un día clonas sin el
-> argumento `AethonMod`, el propio mod te avisará al cargar con las
-> instrucciones para renombrar la carpeta.
+> A mano sería: copia la **subcarpeta `AethonMod`** del repo dentro de
+> `ModSources`, con ese nombre exacto. **Ojo:** la carpeta del mod debe ser
+> hija DIRECTA de ModSources (`ModSources\AethonMod\build.txt`) — no metas el
+> repo entero ahí ni lo anides más. Si la carpeta se llama distinto, el propio
+> mod te avisará al cargar con las instrucciones para arreglarlo.
 
 ## 📖 Descripción
 
@@ -64,8 +76,7 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
   desgarros de realidad…) — render 100% procedural, 0 sprites de arte.
 - **Árboles de habilidades procedurales** (95 nodos totales: 30+30+35).
 - **Capstone de Absorción de Lore** — memoriza armas del juego base + mods.
-- **Bioma Sagrario Hueco** (stub lógico; 5 conceptos de bioma diseñados en
-  `research/estrategia_v626/INFORME_BIOMAS.md`).
+- **Bioma Sagrario Hueco** (stub lógico; 5 conceptos de bioma diseñados).
 - **6 jefes** (mini-jefe, ecos, cósmicos, jefe final Aethon de 5 fases).
 - **Economía de Fragmentos de Resonancia**.
 - **NPC "El Testigo"** que narra lore y vende runas.
@@ -89,23 +100,26 @@ Enfréntate a Aethon, la entidad cósmica de 5 fases, como jefe final opcional.
    carga el aro sobre tu cabeza; aro lleno → **CLIC DERECHO** y llueven
    8 segundos de muertes de estrella a daño ×3.
 
-## 📦 Estructura
+## 📦 Estructura del repo
 
 ```
-AethonMod/          <- la RAÍZ del repo ES la carpeta del mod (build.txt aquí)
-├── build.txt              # Metadatos del mod (¡la versión vive aquí!)
-├── description.txt        # Descripción
-├── icon.png               # Icono del mod
-├── AethonMod.csproj       # Proyecto .NET 8 (solo para el IDE)
-├── AethonMod.cs           # Punto de entrada (+ guardián de identidad)
-├── COMPILACION.md         # Guía de compilación/actualización
-├── README.md              # Este archivo
-├── Content/               # TODO el contenido del mod
-│   ├── Items/  Weapons/  NPCs/  Projectiles/  VFX/  ...
-│   └── (282 archivos .cs en total)
-├── Localization/          # es-ES / en-US (hjson)
-├── tools/                 # Scripts generadores de assets (NO se empaquetan)
-└── _masters/              # Sprites maestros de referencia (NO se empaquetan)
+Aethon-Mod-Terraria/      <- raíz del repo (clonalo con el nombre que sea)
+├── AethonMod/            <- EL MOD (esto es lo que va a ModSources)
+│   ├── build.txt              # Metadatos del mod (¡la versión vive aquí!)
+│   ├── description.txt        # Descripción
+│   ├── icon.png / icon_small.png
+│   ├── AethonMod.cs           # Punto de entrada (+ guardián de identidad)
+│   ├── AethonMod.csproj       # Proyecto .NET 8 (solo para el IDE)
+│   ├── Content/               # TODO el contenido del mod (282 .cs)
+│   └── Localization/          # es-ES / en-US (hjson)
+├── README.md                  # Este archivo (fuera del mod)
+├── COMPILACION.md             # Guía de compilación/actualización
+├── CHANGES.md                 # Historial de versiones
+├── CARACTERISTICAS.md / DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md
+├── ACTUALIZAR-FUENTE.bat      # Script: repo -> ModSources (Windows)
+├── actualizar-fuente.sh       # Script: repo -> ModSources (Linux/macOS)
+├── _masters/                  # Sprites maestros de referencia (NO son del mod)
+└── tools/                     # Scripts generadores de assets (NO son del mod)
 ```
 
 ## 🛠️ Compilación
@@ -118,14 +132,14 @@ IntelliSense y NO participa en el build del mod).
 
 ## 📊 Estado
 
-- **282 archivos C#** · **6.50.13**
+- **282 archivos C#** · **6.50.14**
 - **352+ sprites** (estilo Terraria) + librerías VFX procedurales
 - **2 UIs visuales** (árbol + códex)
 - Historial completo de versiones en `CHANGES.md`
 
 ## 📜 Licencia
 
-MIT License — ver `LICENSE`.
+MIT License — ver `AethonMod/LICENSE`.
 
 ## 🤝 Contribuir
 

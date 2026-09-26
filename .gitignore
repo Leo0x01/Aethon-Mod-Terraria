@@ -1,9 +1,10 @@
 # ==================================================================
-#  AethonMod — .gitignore del repositorio (v6.42)
+#  AethonMod — .gitignore del repositorio (v6.50.14)
 #
-#  EL REPO ES SOLO EL MOD: AethonMod/ + su documentación. Todo lo
-#  demás que viva en el directorio de trabajo es material del
-#  entorno de desarrollo y NO se publica.
+#  EL REPO: la subcarpeta AethonMod/ ES el mod (build.txt ahí dentro)
+#  + documentación y herramientas fuera de ella. Todo lo demás que
+#  viva en el directorio de trabajo es material del entorno de
+#  desarrollo y NO se publica.
 # ==================================================================
 
 # === El entorno web del sandbox (no forma parte del proyecto) ===
