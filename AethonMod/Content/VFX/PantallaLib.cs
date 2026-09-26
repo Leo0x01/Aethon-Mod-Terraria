@@ -673,16 +673,37 @@ namespace AethonMod.Content.VFX
                     Vector2 origen = texGlow.Size() * 0.5f;
                     Vector2 escala = new Vector2(radio * 2f, radio * 2f) / texGlow.Size();
 
-                    // LA FALDA ANCHA (el baño del impacto — ya desvanecido
-                    // en los bordes: el resto del cuadro NO se lava).
-                    Color cFalda = f.Color;
-                    cFalda.A = (byte)(255f * alfa * 0.55f);
+                    // v6.50.16 — EL COLOR PREMULTIPLICADO (el fin del círculo
+                    // sólido). Cadena verificada contra los binarios reales:
+                    // el loader del tML PREMULTIPLICA las texturas
+                    // (rgb·alfa), el SpriteEffect de FNA calcula src =
+                    // texel·color (NO premultiplica el color) y su
+                    // BlendState.AlphaBlend es (One, InverseSourceAlpha):
+                    //
+                    //   out.rgb = tex.rgb·texA·color.rgb + dst·(1 − texA·color.a)
+                    //
+                    // Con un color de RGB pleno y alfa bajo (el v6.50.15:
+                    // new Color(255,255,255, 255·k)) el TÉRMINO FUENTE entraba
+                    // SIN escalar por el alfa — 255·texA plenos — y sobre el
+                    // epicentro brillante de la explosión el velo CLIPEABA a
+                    // blanco sólido hasta r≈0.45·radio: "un círculo gigante
+                    // blanco sólido", el reporte. El mismo bug hacía que el
+                    // VIEJO velo a pantalla completa (MagicPixel, textura
+                    // opaca) pintara la pantalla entera a BLANCO PLENO sin
+                    // importar el alfa. El gesto correcto en este pipeline:
+                    // Color·k — el operador escala RGB y A a la vez, y el
+                    // velo compone a opacidad REAL k·texA.
+                    //
+                    // LA FALDA ANCHA (el degradado del impacto — sube 0.55 →
+                    // 0.65: con el velo a opacidad verdadera el degradado
+                    // necesita el peso).
+                    Color cFalda = f.Color * (alfa * 0.65f);
                     Main.spriteBatch.Draw(texGlow, foco, null, cFalda, 0f, origen, escala,
                         SpriteEffects.None, 0f);
 
-                    // EL NÚCLEO (el destello cegador del punto de impacto).
-                    Color cNucleo = Color.Lerp(f.Color, Color.White, 0.35f);
-                    cNucleo.A = (byte)(255f * alfa * 0.85f);
+                    // EL NÚCLEO (el punto caliente del impacto — premult
+                    // igual, 0.85 → 0.90).
+                    Color cNucleo = Color.Lerp(f.Color, Color.White, 0.35f) * (alfa * 0.90f);
                     Main.spriteBatch.Draw(texGlow, foco, null, cNucleo, 0f, origen,
                         escala * 0.52f, SpriteEffects.None, 0f);
                 }

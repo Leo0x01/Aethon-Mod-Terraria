@@ -253,16 +253,23 @@ namespace AethonMod.Content.Projectiles.V20
 
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === FLASH BLANCO GIGANTE (SoftGlow aditivo de corta vida) ===
+            // === PUNTO CALIENTE DEL ESTALLIDO (SoftGlow aditivo compacto) ===
+            // v6.50.16 — EL FLASH GIGANTE SE RETIRA: con el velo de
+            // Pantalla.Flash arreglado (colores premultiplicados — el
+            // círculo sólido era EL BUG, no el diseño), esta partícula ya
+            // no tiene que CARGAR con el destello entero: 6.5→3.2 (416 →
+            // 205 px) y alfa 255→200. Queda lo que debe quedar: el punto
+            // blanco-caliente del estallido en el epicentro — el degradado
+            // suave grande lo pone la capa de pantalla.
             var flash = new ParticleData
             {
                 Position = Projectile.Center,
                 Velocity = Vector2.Zero,
-                Scale = Vector2.One * 6.5f,
-                PackedColor = ParticleManager.PackColor(new Color(255, 255, 245, 255)),
-                PackedStartColor = ParticleManager.PackColor(new Color(255, 255, 245, 255)),
-                TimeLeft = 14,
-                Duration = 14,
+                Scale = Vector2.One * 3.2f,
+                PackedColor = ParticleManager.PackColor(new Color(255, 255, 245, 200)),
+                PackedStartColor = ParticleManager.PackColor(new Color(255, 255, 245, 200)),
+                TimeLeft = 12,
+                Duration = 12,
                 TextureId = ParticleTex.SoftGlow,
                 BlendMode = 1,
                 LayerPriority = LayerPriorities.AboveTiles,
