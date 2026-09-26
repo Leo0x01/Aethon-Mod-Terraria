@@ -84,4 +84,53 @@ namespace AethonMod.Content.Items.Cosmetics
             return true;
         }
     }
+
+    /// <summary>
+    /// BrasaDelEclipseItem — v6.50.23 — LA BRASA DEL ECLIPSE.
+    ///
+    /// EL CUARTO TIPO DE AURA (la petición con nombre y apellidos: «crea
+    /// un nuevo accesorio con algún tipo nuevo de aura usando luz, bruma,
+    /// desenfoque, distorsión, bloom, glow, ruido perlin, y que sea un
+    /// aura negra en los bordes, dorado en el medio y roja en el centro,
+    /// todo por código»).
+    ///
+    /// LO QUE VISTE: el patrón BRUMA de AURALIB — la única pila de la
+    /// casa con una capa NO aditiva. Humo NEGRO-VIOLETA de fBm de doble
+    /// warp de dominio (ruido perlin 100% código, con blur box horneado
+    /// = el DESENFOQUE) OSCURECIENDO el mundo en los BORDES por
+    /// alfa-blend; encima, por el aditivo: el halo de LUZ (glow: derrame
+    /// dorado + calor rojo), el NÚCLEO ROJO latiendo (84 bpm), el CUERPO
+    /// DORADO con su ESCALERA DE BLOOM y los FANTASMAS de la DISTORSIÓN
+    /// (heat-haze). Las brasas (chispas) escapan del humo y la luz de
+    /// mundo late cálida. Cosmético puro, como sus dos hermanas.
+    /// </summary>
+    public class BrasaDelEclipseItem : ModItem
+    {
+        public override void SetDefaults()
+        {
+            Item.width = 30;
+            Item.height = 30;
+            Item.accessory = true;     // huecos funcionales Y de vanidad
+            Item.rare = ItemRarityID.Quest;
+            Item.value = Item.buyPrice(gold: 8);
+        }
+
+        public override void UpdateAccessory(Player player, bool hideVisual)
+        {
+            // Puro cosmético: la detección la hace CosmeticPlayer.
+        }
+
+        public override void UpdateVanity(Player player) { }
+
+        public override bool CanEquipAccessory(Player player, int slot, bool modded)
+        {
+            return true; // siempre equipable: es un adorno
+        }
+
+        public override void AddRecipes()
+        {
+            // La receta de pruebas de la casa (madera, como la Corona Rúnica).
+            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
+        }
+    }
 }

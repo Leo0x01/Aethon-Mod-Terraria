@@ -1595,6 +1595,17 @@ Items: {
 			'''
 	}
 
+	BrasaDelEclipseItem: {
+		DisplayName: La Brasa del Eclipse
+		Tooltip:
+			'''
+			El cuarto tipo de aura: la BRUMA que oscurece.
+			Humo negro de doble Perlin en los bordes, ORO fundido en
+			el medio y un NÚCLEO ROJO que late — luz, bruma, desenfoque,
+			distorsión, bloom y glow, TODO por código.
+			'''
+	}
+
 	BolsaCategoria: {
 		Titulo: "[c/{0}:{1}]"
 		Linea1: "[c/E6B0FF:Clic derecho para desplegar esta categoría del arsenal]"

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -20,13 +21,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// queda DETRÁS del cuerpo (la profundidad del look, igual que los
     /// NPCs) y con el brillo de neón de verdad.
     ///
-    /// LOS TRES PORTADORES (ai[0] = modo):
+    /// LOS CUATRO PORTADORES (ai[0] = modo):
     ///   0 — LA CENIZA DEL HAMBRE: el aura gris del grimorio hambriento
     ///       (la lee de ShardPlayer, el jugador local la viste).
     ///   1 — LA CORONA RÚNICA: el pentágono Polígono(5) violeta-oro de
     ///       la Bolsa de Cosméticos (CosmeticPlayer la enciende).
     ///   2 — LA FORMA ASCENDIDA: el aura dorada-violeta de la Luz
     ///       Primordial (el drop cumplido de Aethon).
+    ///   3 — v6.50.23 — LA BRASA DEL ECLIPSE: el cuarto tipo de aura —
+    ///       el patrón BRUMA (humo negro en los bordes por ALFA-blend,
+    ///       oro en el medio y núcleo rojo aditivos, con luz de mundo
+    ///       cálida que LATE con el corazón de la brasa).
     ///
     /// El VELO FRONTAL (el 6% que pisa el cuerpo) sigue por DrawData
     /// (AuraJugadorFrontal): a esa transparencia no necesita neón y la
@@ -52,6 +57,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         // v6.49 — EL CACHE DE LOS PERFILES INMUTABLES (cero GC por frame).
         private static AuraPerfil _perfilCorona;
         private static AuraPerfil _perfilAscendida;
+        private static AuraPerfil _perfilBrasa;
 
         /// <summary>El perfil de la corona, creado UNA vez.</summary>
         private static AuraPerfil PerfilCorona =>
@@ -60,6 +66,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// <summary>El perfil de la forma ascendida, creado UNA vez.</summary>
         private static AuraPerfil PerfilAscendida =>
             _perfilAscendida ??= AuraPerfil.FormaAscendida();
+
+        /// <summary>v6.50.23 — El perfil de la brasa del eclipse, creado UNA vez.</summary>
+        private static AuraPerfil PerfilBrasa =>
+            _perfilBrasa ??= AuraPerfil.BrasaDelEclipse();
 
         public override void SetStaticDefaults()
         {
@@ -78,7 +88,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Projectile.netImportant = true;
         }
 
-        /// <summary>El modo del portador (0 hambre · 1 corona · 2 ascendida).</summary>
+        /// <summary>El modo del portador (0 hambre · 1 corona · 2 ascendida · 3 brasa).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -93,6 +103,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().CoronaRunicaAura;
                 case 2:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendida;
+                case 3:
+                    return duenio.GetModPlayer<CosmeticPlayer>().BrasaDelEclipse;
             }
             return false;
         }
@@ -105,6 +117,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 0: return duenio.GetModPlayer<ShardPlayer>().AuraHambrePublica();
                 case 1: return PerfilCorona;
                 case 2: return PerfilAscendida;
+                case 3: return PerfilBrasa;
             }
             return null;
         }
@@ -133,7 +146,21 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // La luz suave del modo (la corona ilumina, el hambre oscurece).
             if (Modo == 1) Lighting.AddLight(Projectile.Center, 0.14f, 0.08f, 0.02f);
             else if (Modo == 2) Lighting.AddLight(Projectile.Center, 0.20f, 0.16f, 0.08f);
+            // v6.50.23 — LA BRASA: la LUZ de la petición — cálida (oro
+            // con rojo) y LATE con el corazón de la brasa (el doble
+            // golpe de 84 bpm del perfil, la misma curva de AuraLib).
+            else if (Modo == 3)
+            {
+                float b = FracLatido(Main.GlobalTimeWrappedHourly * 1.4f);
+                float golpe = MathF.Pow(MathF.Sin(MathHelper.Pi * b), 14f);
+                float eco = MathF.Pow(MathF.Sin(MathHelper.Pi * FracLatido(b + 0.18f)), 14f);
+                float lat = 1f + 0.45f * (golpe + 0.55f * eco);
+                Lighting.AddLight(Projectile.Center, 0.30f * lat, 0.13f * lat, 0.02f * lat);
+            }
         }
+
+        /// <summary>La parte fraccionaria (siempre positiva).</summary>
+        private static float FracLatido(float x) => x - MathF.Floor(x);
 
         public override bool PreDraw(ref Color lightColor)
         {

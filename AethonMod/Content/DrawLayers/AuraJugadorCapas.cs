@@ -72,6 +72,7 @@ namespace AethonMod.Content.DrawLayers
             if (cp != null)
             {
                 if (cp.FormaAscendida) return AuraPerfil.FormaAscendida();
+                if (cp.BrasaDelEclipse) return AuraPerfil.BrasaDelEclipse();
                 if (cp.CoronaRunicaAura) return AuraPerfil.CoronaRunica();
             }
             return null;

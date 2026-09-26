@@ -32,6 +32,21 @@ namespace AethonMod.Content.VFX
         /// fuera como pulsos de sonar, coloreados por zona.
         /// </summary>
         Anillos = 2,
+        /// <summary>
+        /// v6.50.23 — LA BRUMA (el cuarto tipo de aura — la Brasa del
+        /// Eclipse): el ÚNICO patrón con una capa NO aditiva. Una BRUMA
+        /// de humo negro-violeta (fBm de doble warp de dominio, ascenso
+        /// horneado y máscara ANULAR — el corazón queda ABIERTO) se
+        /// dibuja con ALFA-blend OSCURECIENDO el mundo en los BORDES;
+        /// encima, la pila brillante aditiva: el halo de luz (glow), el
+        /// NÚCLEO ROJO (las llamas finas latiendo), el CUERPO DORADO
+        /// (fBm warpeado con su escalera de BLOOM) y los FANTASMAS de
+        /// la DISTORSIÓN (pasadas desplazadas en dirección de ruido —
+        /// el heat haze de la investigación R62-a). La receta de la
+        /// investigación: negro-bordes/dorado-medio/rojo-centro, la
+        /// separación humo/emisivo de Battlefront II.
+        /// </summary>
+        Bruma = 3,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -230,6 +245,27 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public bool Latido = false;
 
+        // === v6.50.23 — EL PATRÓN BRUMA (la Brasa del Eclipse) ===
+
+        /// <summary>
+        /// EL ALFA DE LA BRUMA OSCURA (0..1): la densidad del humo
+        /// negro-violeta que OSCURECE el mundo en los bordes (la única
+        /// capa NO aditiva de la casa — en el lote aditivo negro = suma
+        /// 0 = invisible, la lección #1 de la investigación R62-a). Solo
+        /// el patrón Bruma la lee.
+        /// </summary>
+        public float AlfaBruma = 0.58f;
+
+        /// <summary>
+        /// LA ESCALERA DE BLOOM (0..3): las pasadas apiladas del cuerpo
+        /// dorado — escala creciente, alfa decreciente (1.00/1.26/1.55 ·
+        /// 1.0/0.45/0.20): la gaussiana final ES la SUMA de las pasadas
+        /// (la misma receta de la pila 6+1 de los rayos v6.50.22 — y la
+        /// regla AAA de la investigación R62-a: bloom = blur + capa
+        /// encima). Solo el patrón Bruma la lee.
+        /// </summary>
+        public int Bloom = 3;
+
         // === SEMILLA Y PARTÍCULAS ===
         /// <summary>Semilla determinista: la MISMA apariencia siempre.</summary>
         public int Semilla = 0;
@@ -281,6 +317,10 @@ namespace AethonMod.Content.VFX
         public AuraPerfil ConRayos(int v) { Rayos = Math.Max(0, v); return this; }
         /// <summary>v6.50.12 — El latido del corazón (true = doble golpe).</summary>
         public AuraPerfil ConLatido(bool v) { Latido = v; return this; }
+        /// <summary>v6.50.23 — El alfa de la bruma oscura del patrón Bruma.</summary>
+        public AuraPerfil ConAlfaBruma(float v) { AlfaBruma = v; return this; }
+        /// <summary>v6.50.23 — Las pasadas de la escalera de bloom (0..3).</summary>
+        public AuraPerfil ConBloom(int v) { Bloom = Math.Clamp(v, 0, 3); return this; }
         /// <summary>Semilla determinista del aura.</summary>
         public AuraPerfil ConSemilla(int v) { Semilla = v; return this; }
         /// <summary>La configuración de partículas (null = sin partículas).</summary>
@@ -494,6 +534,78 @@ namespace AethonMod.Content.VFX
                 Ascenso = 30f,
                 Tamano = 9f,
                 Vida = 1.3f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.50.23 — LA BRASA DEL ECLIPSE: el CUARTO tipo de aura de la
+        /// casa (la petición con nombre y apellidos: «un accesorio con
+        /// algún tipo nuevo de aura usando luz, bruma, desenfoque,
+        /// distorsión, bloom, glow, ruido perlin, negra en los bordes,
+        /// dorada en el medio y roja en el centro, todo por código»).
+        ///
+        /// LA PILA (la receta destilada de la investigación R62-a — la
+        /// separación humo/emisivo de Battlefront II y el negro-violeta
+        /// ~RGB(14,11,18) que "ensucia" en vez de apagar):
+        ///   · LA BRUMA (alfa-blend, NO aditiva): fBm de DOBLE warp de
+        ///     dominio con ascenso horneado y máscara ANULAR — humo
+        ///     negro-violeta OSCURECIENDO el mundo en los BORDES, el
+        ///     corazón abierto. Dos capas parallax (escala/contrarrota).
+        ///   · LA LUZ: el halo de glow — derrame dorado 1.5R + calor
+        ///     rojo 0.85R (el billboard-blob de GTA V).
+        ///   · EL NÚCLEO ROJO: las llamas finas (fBm de picos) latiendo
+        ///     RÁPIDO con el Hervor — el corazón casi blanco.
+        ///   · EL CUERPO DORADO: el fBm warpeado con la ESCALERA DE
+        ///     BLOOM (3 pasadas: 1.00/1.26/1.55 × 1.0/0.45/0.20).
+        ///   · LOS FANTASMAS: 2 pasadas desplazadas en dirección de
+        ///     ruido — la DISTORSIÓN heat-haze sin shaders.
+        ///   · EL DESENFOQUE: blur box horneado en cada lámina.
+        ///   · LA LUZ DE MUNDO: el portador la enciende (Lighting).
+        /// ZONAS: TCentro = el ROJO del núcleo, TMedio = el ORO del
+        /// medio, TBorde = el NEGRO-VIOLETA de la bruma — el contrato
+        /// de siempre: «negra en los bordes, dorada en el medio y roja
+        /// en el centro», LITERAL en la API de las tres zonas.
+        /// </summary>
+        public static AuraPerfil BrasaDelEclipse()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 62f,
+                Patron = PatronAura.Bruma,
+                Fluir = 0.55f,      // el churn de la bruma (contrarrotación del núcleo)
+                Deriva = 0.18f,     // el humo se despega hacia fuera
+                Ascenso = 24f,      // las brasas suben (partículas)
+                Distorsion = 1.25f, // LOS FANTASMAS del heat haze + el wobble
+                Blur = 1f,          // el desenfoque horneado de las láminas
+                Glow = 1.65f,       // el halo de luz (la capa "luz")
+                Semilla = 65023,    // "65023": la versión que nació
+                AlfaTrasera = 0.30f, // la pila brillante aditiva
+                AlfaBruma = 0.66f,  // LA BRUMA oscura (alfa-blend — el valor del mock VLM 9/10)
+                AlfaFrontal = 0.05f,
+                VeloFrontal = true,
+                Bloom = 3,          // la escalera del cuerpo dorado
+                Parpadeo = 0.07f,   // el vaivén de brillo orgánico
+                Hervor = 6f,        // el núcleo late RÁPIDO
+                Latido = true,      // la brasa ACECHA (84 bpm)
+            };
+            // LAS TRES ZONAS DE LA LETRA: rojo al centro, oro en el
+            // medio, negro-violeta en los bordes (la bruma tiñe con TBorde).
+            p.ConTrasera(new Color(255, 56, 38), new Color(255, 186, 64), new Color(14, 11, 18));
+            p.ConFrontal(new Color(120, 18, 12), new Color(140, 84, 20), new Color(20, 14, 24));
+            // LAS BRASAS: chispas del núcleo que escapan del humo.
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 12,
+                Forma = FormaParticula.Chispa,
+                Color = new Color(255, 96, 28),
+                Alfa = 0.60f,
+                Solidas = false,
+                Tasa = 1.1f,
+                Velocidad = 30f,
+                Ascenso = 55f,
+                Tamano = 11f,
+                Vida = 0.9f,
             });
             return p;
         }
@@ -770,12 +882,16 @@ namespace AethonMod.Content.VFX
         //       valor·color·f LINEAL (la lección de perfil³ de los rayos).
         // ------------------------------------------------------------------
 
-        /// <summary>16 láminas de la SILUETA DE LLAMA — v6.50.17: el
-        /// aura-llama de 7 lenguas (el flipbook ÚNICO: el cuerpo fBm
-        /// enmascarado por DISCO radial era «un círculo liso» — el
-        /// reporte del usuario — y el ascenso vertical de las viejas
-        /// llamas leía como «líneas de mal olor»).</summary>
-        private static Texture2D[] _flipLlama;
+        /// <summary>16 láminas de fBm warpeado + blur + máscara radial — EL CUERPO del aura.</summary>
+        private static Texture2D[] _flipCuerpo;
+
+        /// <summary>16 láminas de fBm fino + ascenso vertical horneado — LAS LLAMAS del aura.</summary>
+        private static Texture2D[] _flipLlamas;
+
+        /// <summary>v6.50.23 — 16 láminas de fBm de DOBLE warp + ascenso +
+        /// máscara ANULAR — LA BRUMA del patrón Bruma (la Brasa del
+        /// Eclipse): humo negro-violeta en los bordes, corazón abierto.</summary>
+        private static Texture2D[] _flipBruma;
 
         private const int FlipFrames = 16;
 
@@ -846,29 +962,11 @@ namespace AethonMod.Content.VFX
             return 1f - t * t * (3f - 2f * t);
         }
 
-        /// <summary>
-        /// v6.50.17 — Genera EL FLIPBOOK DE LA LLAMA (una sola vez por
-        /// sesión, perezoso): 16 láminas de la SILUETA DE AURA-LLAMA.
-        ///
-        /// LA ANATOMÍA (investigación R57-a — la receta DBZ medida):
-        ///   · LA SILUETA es UNA LLAMA envolvente (NO un disco): perfil
-        ///     base estrecho en los pies (falda 0.50), pleno arriba (1.0),
-        ///     modulado por 7 LENGUAS de lóbulos afilados |cos(3.5·θ)|^2.2
-        ///     + irregularidad fBm — puntas afiladas que muerden el
-        ///     contorno (el ojo lee «llama», no «círculo liso»).
-        ///   · LA FRONTERA: pleno hasta el 62% del radio LOCAL de la
-        ///     silueta, caída suave hasta 0 EN la frontera (nunca un borde
-        ///     duro circular).
-        ///   · EL CALOR INTERIOR: fBm con WARP DE DOMINIO que ASCIENDE un
-        ///     período exacto por ciclo (muestrear cada vez más abajo =
-        ///     el contenido sube: ~60 px/s a 7 fps — la regla del fuego)
-        ///     — LA ASCENSIÓN VIVE DENTRO de la silueta, no como squiggles
-        ///     sueltos (el look «mal olor» de v6.50.15: muerto).
-        ///   · EL RIM: la banda de la frontera BRILLA (pow² — el borde
-        ///     caliente del aura-llama DBZ: sin rim es humo, no llama).
-        ///
-        /// Ciclo perfecto: los offsets avanzan PERÍODOS ENTEROS del ruido
-        /// envolvente (t=1 ≡ t=0).
+        /// <summary>Genera los DOS flipbooks (una sola vez por sesión, perezoso —
+        /// el mismo contrato de _ruido). ~33k píxeles × 16 láminas × 5
+        /// campos de fBm: una pasada de ~100 ms al primer frame dibujado.
+        /// v6.50.23 — ahora TRES flipbooks: + LA BRUMA (doble warp +
+        /// máscara anular, la Brasa del Eclipse).
         /// </summary>
         private static void AsegurarFlipbooks()
         {
@@ -876,11 +974,13 @@ namespace AethonMod.Content.VFX
             {
                 var device = Main.graphics?.GraphicsDevice;
                 if (device == null || device.IsDisposed) return;
-                if (_flipLlama != null)
+                if (_flipCuerpo != null && _flipLlamas != null && _flipBruma != null)
                 {
                     bool vivo = true;
                     for (int i = 0; i < FlipFrames && vivo; i++)
-                        vivo = _flipLlama[i] != null && !_flipLlama[i].IsDisposed;
+                        vivo = _flipCuerpo[i] != null && !_flipCuerpo[i].IsDisposed
+                            && _flipLlamas[i] != null && !_flipLlamas[i].IsDisposed
+                            && _flipBruma[i] != null && !_flipBruma[i].IsDisposed;
                     if (vivo) return;
                     DisposeFlipbooks();
                 }
@@ -895,97 +995,97 @@ namespace AethonMod.Content.VFX
                 var vb = new CampoFbm(rndV);
                 var fn = new CampoFbm(rndF);
 
-                var llama = new float[FlipFrames][,];
+                var cuerpo = new float[FlipFrames][,];
+                var llamas = new float[FlipFrames][,];
+                var bruma = new float[FlipFrames][,];
 
                 for (int f = 0; f < FlipFrames; f++)
                 {
-                    float t = f / (float)FlipFrames; // el ciclo: t=1 ≡ t=0
+                    float t = f / (float)FlipFrames; // el ciclo: t=1 ≡ t=0 (períodos enteros)
 
+                    var cap = new float[L, L];
                     var lam = new float[L, L];
+                    var bru = new float[L, L];
                     for (int y = 0; y < L; y++)
                     {
                         float fy = y / (float)L;
                         for (int x = 0; x < L; x++)
                         {
                             float fx = x / (float)L;
-                            float dx = fx - 0.5f, dy = fy - 0.5f;  // y hacia ABAJO
 
-                            // === EL ESPACIO ELÍPTICO de la llama: la caja de
-                            //     la silueta ocupa 0.80 del ancho y 0.97 del
-                            //     alto de la textura (la llama es ALTA) ===
-                            float ex = dx / 0.40f;
-                            float ey = dy / 0.485f;
-                            float rr = MathF.Sqrt(ex * ex + ey * ey);
-
-                            // upness: 1 en la COPA, 0 en la BASE (la
-                            // inclinación de cada dirección de la llama).
-                            float upness = MathHelper.Clamp(
-                                0.5f - 0.5f * (rr > 0.0001f ? ey / rr : 0f), 0f, 1f);
-                            float ang = MathF.Atan2(ex, -ey);      // 0 = arriba
-
-                            // === EL PERFIL BASE: falda corta en los pies,
-                            //     copa plena arriba (la envolvente DBZ) ===
-                            float bas = 0.50f + 0.50f * MathF.Pow(upness, 0.75f);
-
-                            // === LAS 7 LENGUAS: lóbulos afilados que
-                            //     muerden el contorno + irregularidad fBm
-                            //     ANIMADA (las lenguas se re-esculpen) ===
-                            float lob = MathF.Pow(MathF.Abs(
-                                MathF.Cos(3.5f * ang + 0.9f * MathF.Sin(t * MathHelper.TwoPi))), 2.2f);
-                            float irr = fn.Sample(ang / MathHelper.TwoPi + 0.5f, t);
-                            float tong = MathHelper.Clamp(0.55f * lob + 0.45f * irr, 0f, 1f);
-                            float sil = bas * (0.58f + 0.42f * tong);
-                            if (sil < 0.08f) continue;
-
-                            // === LA FRONTERA: pleno hasta el 62% del radio
-                            //     LOCAL, muere EN la silueta — la banda de
-                            //     caída es el tramo exterior de CADA lengua
-                            //     (gradiente suave, jamás un borde circular) ===
-                            float edge = MascaraRadial(rr, sil * 0.62f, sil * 0.99f);
-                            if (edge <= 0.001f) continue;
-
-                            // === EL CALOR INTERIOR: fBm con warp de dominio
-                            //     + ASCENSO horneado (muestrear cada vez más
-                            //     ABAJO = el contenido SUBE un período exacto
-                            //     por ciclo — DENTRO de la silueta) ===
+                            // === EL CUERPO: fBm con warp de dominio ===
                             float wq = qx.Sample(fx + t, fy) * 2f - 1f;
                             float wq2 = qy.Sample(fx, fy + t) * 2f - 1f;
                             float wx = fx + 0.45f * wq, wy = fy + 0.45f * wq2;
-                            float heat = vb.Sample(wx + 0.17f, wy + 0.31f + t);
-                            // El clamp ANTES del pow (defensa v6.50.17: el warp
-                            // puede empujar el muestreo a la extrapolación del
-                            // retículo envolvente → valores < 0 → MathF.Pow
-                            // devolvería NaN y la lámina quedaría rota).
-                            heat = MathF.Pow(MathHelper.Clamp(heat, 0f, 1f), 1.4f);
+                            float v = vb.Sample(wx + 0.17f, wy + 0.31f);
+                            v = MathF.Pow(v, 1.6f); // contraste medio (Godot: el tiling pierde contraste)
 
-                            // === EL RIM: la banda de la frontera BRILLA (el
-                            //     borde caliente de la llama — sin rim es
-                            //     humo, no llama) ===
-                            float rim = MathF.Pow(
-                                MathHelper.Clamp((rr - sil * 0.55f) /
-                                    MathF.Max(0.001f, sil * 0.37f), 0f, 1f), 2.0f);
+                            // === LAS LLAMAS: campo FINO + ASCENSO horneado
+                            // (muestrear cada vez más ABAJO = el contenido
+                            // SUBE un período exacto por ciclo) ===
+                            float u = fn.Sample(fx + 0.5f * wq, fy * 1.35f - t + 0.5f * wq2);
+                            u = MathF.Pow(u, 2.0f); // las llamas viven de picos
 
-                            // EL NÚCLEO CÁLIDO: junto al cuerpo del portador
-                            // la llama arde un poco más.
-                            float nucleo = MascaraRadial(rr, 0.10f, 0.55f) * 0.30f;
+                            // === v6.50.23 — LA BRUMA: fBm de DOBLE warp de
+                            // dominio (iq: f(p)=fbm(p+4·fbm(p)) — el humo
+                            // orgánico de la investigación R62-a) + ASCENSO
+                            // horneado (un período exacto por ciclo, igual
+                            // que las llamas — la bruma PESA: viene del blur
+                            // y de las octavas gruesas, no de la velocidad) ===
+                            float bq = qx.Sample(fx + t, fy + 0.33f) * 2f - 1f;
+                            float bq2 = qy.Sample(fx + 0.27f, fy + t) * 2f - 1f;
+                            float bwx = fx + 0.5f * bq, bwy = fy + 0.5f * bq2;
+                            // el SEGUNDO doblez: el campo fino CURVA las
+                            // coordenadas ya curvadas — turbulencia real
+                            float br = fn.Sample(bwx + 0.21f, bwy + 0.43f) * 2f - 1f;
+                            float br2 = fn.Sample(bwx + 0.67f, bwy + 0.11f) * 2f - 1f;
+                            float bvx = bwx + 0.4f * br;
+                            float bvy = bwy + 0.4f * br2;
+                            float b = vb.Sample(bvx + 0.34f, bvy * 1.25f - t + 0.55f);
+                            b = MathF.Pow(b, 1.35f); // humo DENSO con huecos de verdad
 
-                            float v = edge * MathHelper.Clamp(
-                                0.24f + 0.52f * heat + 0.46f * rim + nucleo, 0f, 1f);
-                            lam[x, y] = v;
+                            // LA MÁSCARA (después del warp, la regla
+                            // anti-caja) — d NORMALIZADO AL SEMILADO
+                            // (1.0 = borde, 1.41 = esquina): el cuerpo
+                            // muere a 0.97·semilado (≈1.03R del quad) y las
+                            // llamas a 0.62 — JAMÁS dibujan la caja.
+                            float dx = fx - 0.5f, dy = fy - 0.5f;
+                            float d = MathF.Sqrt(dx * dx + dy * dy) * 2f;
+                            float mC = MascaraRadial(d, 0.42f, 0.97f);
+                            float mL = MascaraRadial(d, 0.20f, 0.62f);
+                            // LA MÁSCARA ANULAR de la bruma: el CORAZÓN
+                            // ABIERTO (0 hasta d≈0.34: ahí vive el núcleo
+                            // ROJO sin humo encima) y la muerte a 0.97
+                            // (anti-caja de siempre).
+                            float mB = (1f - MascaraRadial(d, 0.34f, 0.62f))
+                                     * MascaraRadial(d, 0.72f, 0.97f);
+                            cap[x, y] = v * mC;
+                            lam[x, y] = u * mL;
+                            bru[x, y] = b * mB;
                         }
                     }
 
-                    // EL BLUR HORNEADO: UNA pasada suave (la llama vive de
-                    // la CONTRASTADA silueta — el blur triple de v6.50.15
-                    // era lo que convertía el ruido en «círculo liso»).
+                    // EL BLUR HORNEADO: 3 pasadas ≈ gaussiana (cuerpo, σ≈4)
+                    // y 1 pasada (llamas, un poco de suavizado nada más).
+                    // La bruma: 2 pasadas de radio 3 — el humo PESA.
+                    for (int b = 0; b < 3; b++) BlurCaja(cap, L, 3);
                     BlurCaja(lam, L, 2);
+                    for (int b = 0; b < 2; b++) BlurCaja(bru, L, 3);
 
-                    llama[f] = lam;
+                    cuerpo[f] = cap;
+                    llamas[f] = lam;
+                    bruma[f] = bru;
                 }
 
-                _flipLlama = new Texture2D[FlipFrames];
+                _flipCuerpo = new Texture2D[FlipFrames];
+                _flipLlamas = new Texture2D[FlipFrames];
+                _flipBruma = new Texture2D[FlipFrames];
                 for (int f = 0; f < FlipFrames; f++)
-                    _flipLlama[f] = HornearLamina(llama[f], L, device);
+                {
+                    _flipCuerpo[f] = HornearLamina(cuerpo[f], L, device);
+                    _flipLlamas[f] = HornearLamina(llamas[f], L, device);
+                    _flipBruma[f] = HornearLamina(bruma[f], L, device);
+                }
             }
             catch
             {
@@ -1014,11 +1114,25 @@ namespace AethonMod.Content.VFX
             return tex;
         }
 
-        /// <summary>La lámina f de la LLAMA (null si aún no hay dispositivo).</summary>
-        private static Texture2D FlipLlama(int f)
+        /// <summary>La lámina f del CUERPO (null si aún no hay dispositivo).</summary>
+        private static Texture2D FlipCuerpo(int f)
         {
             AsegurarFlipbooks();
-            return _flipLlama?[(f % FlipFrames + FlipFrames) % FlipFrames];
+            return _flipCuerpo?[(f % FlipFrames + FlipFrames) % FlipFrames];
+        }
+
+        /// <summary>La lámina f de las LLAMAS (null si aún no hay dispositivo).</summary>
+        private static Texture2D FlipLlamas(int f)
+        {
+            AsegurarFlipbooks();
+            return _flipLlamas?[(f % FlipFrames + FlipFrames) % FlipFrames];
+        }
+
+        /// <summary>v6.50.23 — La lámina f de la BRUMA (null si aún no hay dispositivo).</summary>
+        private static Texture2D FlipBruma(int f)
+        {
+            AsegurarFlipbooks();
+            return _flipBruma?[(f % FlipFrames + FlipFrames) % FlipFrames];
         }
 
         /// <summary>
@@ -1210,6 +1324,11 @@ namespace AethonMod.Content.VFX
             if (npc == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (frontal && !p.VeloFrontal) return false;
 
+            // v6.50.23 — EL PATRÓN BRUMA camina por SU camino (la doble
+            // fase: bruma ALFA + pila aditiva — el mismo contrato del bool).
+            if (p.Patron == PatronAura.Bruma)
+                return DibujarBrumaYPila(npc.Center, p.Radio * npcScale(npc), p, frontal, npc.whoAmI);
+
             try
             {
                 float factor = npcScale(npc);
@@ -1295,6 +1414,12 @@ namespace AethonMod.Content.VFX
         {
             if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
             if (pl.dead) return false;
+
+            // v6.50.23 — EL PATRÓN BRUMA camina por SU camino (la doble
+            // fase: bruma ALFA + pila aditiva — el mismo contrato del bool).
+            if (p.Patron == PatronAura.Bruma)
+                return DibujarBrumaYPila(pl.Center, p.Radio, p, frontal: false, 511);
+
             try
             {
                 Emitir(pl.Center, p.Radio, p, frontal: false, 511);
@@ -1321,6 +1446,258 @@ namespace AethonMod.Content.VFX
             return 0.75f + 0.45f * (s - 1f);
         }
 
+        // ==================================================================
+        //  v6.50.23 — EL PATRÓN BRUMA: LA BRASA DEL ECLIPSE
+        //  (la petición: «luz, bruma, desenfoque, distorsión, bloom, glow,
+        //  ruido perlin — negra en los bordes, dorada en el medio y roja
+        //  en el centro, todo por código» — la investigación R62-a)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.50.23 — EL DOBLE VOLCADO del patrón Bruma: la ÚNICA pila de
+        /// la casa con una capa NO aditiva (la lección #1 de R62-a: en el
+        /// lote aditivo negro = suma 0 = invisible — para oscurecer hay
+        /// que SALIR del aditivo). FASE 1: LA BRUMA (humo negro-violeta)
+        /// se vuelca con ALFA-blend OSCURECIENDO el mundo; FASE 2: la
+        /// pila brillante (glow + núcleo + cuerpo + bloom + fantasmas +
+        /// partículas) se vuelca ADITIVA encima — la separación
+        /// humo/emisivo de Battlefront II (misma geometría, dos blends).
+        /// CONTRATO: idéntico al de DibujarJugadorAditivo — DEVUELVE
+        /// true si el lote del llamador fue CERRADO (reabrir con
+        /// ReabrirLoteVanilla); en el error, el lote queda ABIERTO aquí.
+        /// </summary>
+        private static bool DibujarBrumaYPila(Vector2 centro, float radio, AuraPerfil p, bool frontal, int idEntidad)
+        {
+            try
+            {
+                // el presupuesto de la pila entera: bruma 2 + glow 2 +
+                // núcleo 2 + cuerpo (1+bloom) + fantasmas 2 + partículas.
+                if (!VFXCore.Presupuesto(10 + Math.Max(1, p.Bloom) + (p.Particulas?.Cantidad ?? 0)))
+                    return false;
+
+                bool cerroLote = false;
+
+                // === FASE 1 — LA BRUMA NEGRA (alfa-blend): SOLO la capa
+                // trasera — el frontal de los NPCs es aditivo (lo oscuro
+                // no suma nada: el velo frontal va por DrawData/brasa) ===
+                if (!frontal && p.AlfaBruma > 0.02f)
+                {
+                    EmitirBruma(centro, radio, p);
+                    if (VFXCore.QuadCount > 0)
+                    {
+                        VFXCore.FlushAlpha(null, true); // cierra el lote del llamador
+                        cerroLote = true;
+                    }
+                }
+
+                // === FASE 2 — LA PILA BRILLANTE (aditiva) + partículas ===
+                EmitirBrasa(centro, radio, p, frontal);
+                EmitirParticulas(centro, p, frontal, idEntidad);
+                if (VFXCore.QuadCount > 0)
+                {
+                    // (si la fase 1 ya cerró el lote del llamador, la sonda
+                    // de CerrarLoteSiAbierto lo ignora — cero first-chance)
+                    VFXCore.FlushAdditive(null, !cerroLote);
+                    cerroLote = true;
+                }
+                return cerroLote;
+            }
+            catch
+            {
+                // el contrato de rescate de la casa: lote ABIERTO pase lo que pase.
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.50.23 — FASE 1: LA BRUMA. El humo negro-violeta de los
+        /// BORDES — dos láminas PARALLAX del flipbook de doble warp (la
+        /// técnica de gamedev.SE 186479: misma textura, escala/rotación
+        /// distintas = densidad y profundidad) tinteadas con el color de
+        /// BORDE del perfil (TBorde: el negro-violeta ~RGB(14,11,18) de
+        /// la investigación — "ensucia", no apaga). TINTE CLÁSICO (RGB·f,
+        /// A·f): esta capa va al lote ALFA (premult (One, InvSrcAlpha))
+        /// — aporte = q·color + fondo·(1−q): el humo TAPA de verdad.
+        /// </summary>
+        private static void EmitirBruma(Vector2 centro, float radio, AuraPerfil p)
+        {
+            Texture2D texB = FlipBruma((int)(Main.GlobalTimeWrappedHourly * (6f + 10f * p.Deriva)));
+            if (texB == null) return;
+
+            float t = Main.GlobalTimeWrappedHourly;
+            float R = radio * PulsoDe(p, t);
+
+            // la respiración lenta del humo (la lente que respira: micro-escala)
+            float resp = 1f + 0.05f * MathF.Sin(t * MathF.PI + p.Semilla);
+            float rot = t * p.Giro + MathF.Sin(t * 0.8f + p.Semilla * 2f) * 0.08f * p.Distorsion;
+
+            // el color del BORDE (el negro de la letra) con el tinte CLÁSICO:
+            // RGB y A escalados a la vez — la semántica premult del lote alfa.
+            Color colM = p.TBorde * MathHelper.Clamp(p.AlfaBruma, 0f, 1f);
+
+            // pasada 1 — el CUERPO de la bruma (1.02R: hasta donde llega el aura)
+            float lado1 = 2f * R * 1.02f * resp;
+            VFXCore.Quad(centro, colM, new Vector2(lado1, lado1), rot, texB);
+
+            // pasada 2 — la CAPA DE PARALLAX (más ancha, CONTRARROTA, más
+            // tenue): el solapamiento de las dos ES el "volumen" del humo
+            float lado2 = 2f * R * 1.17f * resp;
+            VFXCore.Quad(centro, p.TBorde * MathHelper.Clamp(p.AlfaBruma * 0.55f, 0f, 1f),
+                new Vector2(lado2, lado2), -rot * 0.7f, texB);
+        }
+
+        /// <summary>
+        /// v6.50.23 — FASE 2: LA PILA BRILLANTE (todo aditivo — la parte
+        /// emisiva de la separación humo/emisivo). De atrás (primero en
+        /// el búfer) hacia delante: LA LUZ (el halo de glow — derrame
+        /// dorado + calor rojo) → EL NÚCLEO ROJO (las llamas finas
+        /// latiendo rápido, corazón casi blanco) → EL CUERPO DORADO con
+        /// LA ESCALERA DE BLOOM (pasadas apiladas de escala creciente y
+        /// alfa decreciente) → LOS FANTASMAS (la distorsión heat-haze:
+        /// dos pasadas desplazadas en dirección de ruido, tenues).
+        /// El frontal del NPC: un susurro DORADO (lo oscuro no suma).
+        /// </summary>
+        private static void EmitirBrasa(Vector2 centro, float radio, AuraPerfil p, bool frontal)
+        {
+            float t = Main.GlobalTimeWrappedHourly;
+
+            if (frontal)
+            {
+                // EL FRENTE ADITIVO de los NPCs: un velo dorado tenue (el
+                // equivalente del 6% de la casa — la bruma negra NO vive
+                // en el aditivo, su velo frontal va por DrawData).
+                Texture2D texV = FlipCuerpo((int)(t * 8f));
+                if (texV != null && p.AlfaFrontal > 0.01f)
+                    VFXCore.Quad(centro, TintAditivo(p.TMedio,
+                        MathHelper.Clamp(p.AlfaFrontal * 2.5f, 0f, 1f)),
+                        new Vector2(2f * radio * 0.9f, 2f * radio * 0.9f), t * p.Giro, texV);
+                return;
+            }
+
+            float flick = FlickDe(p, t);
+            float R = radio * PulsoDe(p, t);
+            float alfa = MathHelper.Clamp(p.AlfaTrasera, 0f, 1f) * flick;
+
+            // === 1. LA LUZ — el halo de glow (el billboard-blob de GTA V):
+            //     el DERRAME dorado por FUERA (tenue: no lava el centro) y el
+            //     CALOR rojo CERRADO 0.62R (el corazón calienta su zona) —
+            //     los valores del mock 1:1 VLM 9/10 ===
+            if (p.Glow > 0.05f)
+            {
+                VFXCore.Quad(centro, TintAditivo(p.TMedio, alfa * 0.12f * p.Glow),
+                    new Vector2(2f * R * 1.5f, 2f * R * 1.5f));
+                VFXCore.Quad(centro, TintAditivo(p.TCentro, alfa * 0.42f * p.Glow),
+                    new Vector2(2f * R * 0.62f, 2f * R * 0.62f));
+            }
+
+            // === 2. EL NÚCLEO ROJO — DOMINANTE en el centro (la suma de sus
+            //     pasadas ×2.4 gana al oro: el centro LEE rojo, no blanco):
+            //     las llamas finas al doble de ritmo (Hervor) y CONTRARROTANDO,
+            //     con un toque de blanco al 8% (nunca puro — la lección de GTA V
+            //     sobre cores quemados) + su pasada ancha de bloom al 0.70 ===
+            Texture2D texN = FlipLlamas((int)(t * (16f + 10f * p.Hervor)));
+            if (texN != null)
+            {
+                float rotN = -t * (0.5f + 1.1f * p.Fluir)
+                           + MathF.Sin(t * 1.3f + p.Semilla) * 0.06f * p.Distorsion;
+                Color colN = Color.Lerp(p.TCentro, Color.White, 0.08f);
+                VFXCore.Quad(centro, TintAditivo(colN, MathHelper.Clamp(alfa * 2.4f, 0f, 1f)),
+                    new Vector2(2f * R * 0.56f, 2f * R * 0.56f), rotN, texN);
+                // el bloom del núcleo: la pasada ancha que alimenta el rojo del medio
+                VFXCore.Quad(centro, TintAditivo(p.TCentro, alfa * 0.70f),
+                    new Vector2(2f * R * 0.82f, 2f * R * 0.82f), rotN * 0.8f, texN);
+            }
+
+            // === 3. EL CUERPO DORADO + LA ESCALERA DE BLOOM: la gaussiana
+            //     final ES la suma de las pasadas (escala↑ alfa↓) — la
+            //     misma receta de la pila 6+1 de los rayos v6.50.22. Al 0.80:
+            //     el oro es el MEDIO, no invade el centro del núcleo ===
+            Texture2D texC = FlipCuerpo((int)(t * (9f + 14f * p.Deriva)));
+            if (texC != null)
+            {
+                float respC = 1f + 0.05f * MathF.Sin(t * MathF.PI * 1.15f + p.Semilla);
+                float rotC = t * p.Giro + MathF.Sin(t * 0.7f + p.Semilla) * 0.05f * p.Distorsion;
+                Color colC = p.TMedio; // EL ORO DEL MEDIO
+
+                float[] escalas = { 1.00f, 1.26f, 1.55f };
+                float[] alfas = { 1.0f, 0.45f, 0.20f };
+                int pasadas = Math.Max(1, Math.Min(p.Bloom, 3));
+                for (int k = 0; k < pasadas; k++)
+                {
+                    float lado = 2f * R * escalas[k] * respC;
+                    VFXCore.Quad(centro, TintAditivo(colC, alfa * 0.80f * alfas[k]),
+                        new Vector2(lado, lado), rotC * (1f - 0.12f * k), texC);
+                }
+
+                // === 4. LOS FANTASMAS — la DISTORSIÓN heat-haze SIN shaders
+                //     (la traducción 2D del shader de Wrath of the Gods:
+                //     desplazar el muestreo en DIRECCIÓN dictada por ruido):
+                //     dos pasadas tenues desplazadas en círculo lentísimo —
+                //     el shimmer refractivo sobre el dorado ===
+                if (p.Distorsion > 0.5f)
+                {
+                    for (int g = 0; g < 2; g++)
+                    {
+                        float ang = t * (1.6f + 0.9f * g) + p.Semilla + g * MathF.PI;
+                        Vector2 off = new Vector2(MathF.Cos(ang), MathF.Sin(ang))
+                                     * (2.5f * p.Distorsion);
+                        float ladoG = 2f * R * 1.0f * respC;
+                        VFXCore.Quad(centro + off, TintAditivo(colC, alfa * 0.12f),
+                            new Vector2(ladoG, ladoG), rotC, texC);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// v6.50.23 — EL VELO FRONTAL del patrón Bruma (el camino DrawData
+        /// de DibujarJugador — lote alfa del jugador): la bruma al 5%
+        /// PISANDO el cuerpo (el portador "respira" su propio humo — tinte
+        /// clásico premult) más un susurro dorado encima.
+        /// </summary>
+        private static void EmitirVeloBruma(Vector2 centro, float radio, AuraPerfil p, bool frontal)
+        {
+            float t = Main.GlobalTimeWrappedHourly;
+            float R = radio * PulsoDe(p, t);
+            float f = MathHelper.Clamp(frontal ? p.AlfaFrontal : p.AlfaBruma, 0f, 1f);
+
+            // el velo de BRUMA (tinte CLÁSICO: el lote de DrawData es alfa)
+            Texture2D texB = FlipBruma((int)(t * (6f + 10f * p.Deriva)));
+            if (texB != null && f > 0.01f)
+            {
+                float rot = t * p.Giro;
+                VFXCore.Quad(centro, p.TBorde * f, new Vector2(2f * R * 0.95f, 2f * R * 0.95f), rot, texB);
+            }
+
+            // el susurro DORADO del medio (la brasa asoma)
+            Texture2D texC = FlipCuerpo((int)(t * 9f));
+            if (texC != null && p.AlfaFrontal > 0.01f)
+                VFXCore.Quad(centro, p.TMedio * p.AlfaFrontal, new Vector2(2f * R * 0.62f, 2f * R * 0.62f),
+                    t * p.Giro, texC);
+        }
+
+        /// <summary>v6.50.23 — El parpadeo orgánico (el mismo de Emitir, aislado).</summary>
+        private static float FlickDe(AuraPerfil p, float t)
+        {
+            if (p.Parpadeo <= 0.001f) return 1f;
+            return 1f + p.Parpadeo * (0.6f * MathF.Sin(t * 9.3f + p.Semilla)
+                                   + 0.4f * MathF.Sin(t * 15.1f + p.Semilla * 2.7f));
+        }
+
+        /// <summary>v6.50.23 — El pulso (respirar o latir — el mismo de Emitir, aislado).</summary>
+        private static float PulsoDe(AuraPerfil p, float t)
+        {
+            if (p.Latido)
+            {
+                float b = Frac(t * 1.4f);
+                float golpe = MathF.Pow(MathF.Sin(MathHelper.Pi * b), 14f);
+                float eco = MathF.Pow(MathF.Sin(MathHelper.Pi * Frac(b + 0.18f)), 14f);
+                return 1f + 0.07f * (golpe + 0.55f * eco);
+            }
+            return VFXCore.Breathe(t, 1.05f, 0f, 0.05f);
+        }
+
         // --- LA EMISIÓN (la matemática compartida por ambos caminos) ---
 
         /// <summary>
@@ -1336,6 +1713,16 @@ namespace AethonMod.Content.VFX
             if (tex0 == null) return; // sin dispositivo aún: nada que dibujar
 
             float t = Main.GlobalTimeWrappedHourly;
+
+            // v6.50.23 — EL PATRÓN BRUMA no pasa por aquí en el camino
+            // trasero (va por DibujarBrumaYPila, su doble volcado); SOLO
+            // llega por EL VELO FRONTAL del camino DrawData (lote alfa).
+            if (p.Patron == PatronAura.Bruma)
+            {
+                EmitirVeloBruma(centro, radio, p, frontal);
+                EmitirParticulas(centro, p, frontal, idEntidad);
+                return;
+            }
 
             // v6.50.12 — EL PARPADEO ORGÁNICO: dos senos de frecuencia
             // inconmensurable (9.3 y 15.1 — el cociente nunca es racional)
@@ -1368,16 +1755,15 @@ namespace AethonMod.Content.VFX
             Color cB = frontal ? p.FBorde : p.TBorde;
             float alfaCapa = (frontal ? p.AlfaFrontal : p.AlfaTrasera) * flick;
 
-            // === 1. EL HALO DE GLOW (el aliento exterior) — v6.50.17: UN
-            // solo glow VERTICAL estirado (antes eran DOS círculos
-            // concéntricos — parte de los «dos círculos lisos
-            // semitransparentes» del reporte): la respiración de luz ya
-            // no dibuja geometría propia — la SILUETA es de la llama. ===
+            // === 1. EL HALO DE GLOW (el aliento exterior, color BORDE) ===
+            // Dos cuadros SoftGlow concéntricos: el aura "respira" luz.
             if (p.Glow > 0.05f)
             {
-                float haloA = alfaCapa * 0.40f * p.Glow;
-                Vector2 anclaH = new Vector2(centro.X, centro.Y - R * 0.10f);
-                VFXCore.Quad(anclaH, cB * haloA, new Vector2(R * 1.7f, R * 2.3f));
+                float haloR = R * 1.55f;
+                float haloA = (alfaCapa * 0.55f * p.Glow);
+                VFXCore.Quad(centro, cB * haloA, new Vector2(haloR * 2.0f, haloR * 2.0f));
+                float corR = R * 1.15f;
+                VFXCore.Quad(centro, cM * (alfaCapa * 0.4f * p.Glow), new Vector2(corR * 2.0f, corR * 2.0f));
             }
 
             // === 1b. v6.50.12 — LOS RAYOS RADIALES (la corona radiante) ===
@@ -1400,78 +1786,75 @@ namespace AethonMod.Content.VFX
                 }
             }
 
-            // === 2. v6.50.17 — EL AURA-LLAMA (la reconstrucción completa:
-            // «dos círculos lisos semitransparentes sin degradado suave» +
-            // «parece como si el personaje tuviera mal olor» = discos
-            // radiales + squiggles sueltos. La receta R57-a (el aura DBZ
-            // medida): LA SILUETA DE LLAMA de 7 lenguas que ABRAZA al
-            // portador — base en los pies, copa lamiendo sobre la cabeza,
-            // el calor ASCIENDE dentro de la silueta, la frontera BRILLA.
-            // De atrás hacia delante: LA LLAMA (silueta) → EL NÚCLEO (la
-            // columna cálida del cuerpo) → EL PENACHO (el haz exterior) →
-            // LOS ARCOS (los detalles de energía). Todo por capas, todo
-            // generado por código. ===
+            // === 2. v6.50.15 — EL CUERPO EN CAPAS (la pila de la
+            // investigación R55-b; el abanico de gajos de v6.48/12 era
+            // un ventilador mecánico — el usuario lo vio bien: "todavía
+            // representan mal el aura"). LA PILA, de atrás hacia
+            // delante: CUERPO (fBm warpeado, rotación LENTA) → LLAMAS
+            // (fBm fino con ascenso horneado, CONTRARROTACIÓN) → RIM
+            // (los arcos de energía de la silueta — sin esta capa no hay
+            // aura, hay humo). Todo por capas, todo generado por código.
+            // ===
             if (p.Patron != PatronAura.Anillos)
             {
-                // El presupuesto de la pila: llama + penacho + núcleo +
-                // arcos (7 × 3 segmentos × doble pasada) + la jaula.
+                // El presupuesto de la pila: cuerpo 1 + llamas 1 + rim
+                // (7 arcos × 3 segmentos × doble pasada) + la jaula.
                 if (VFXCore.Presupuesto(48 + (p.Patron == PatronAura.Poligono ? p.Lados : 0)))
                 {
                     bool aditivo = !loteAlfa; // el VELO frontal del jugador va por DrawData (lote alfa); TODO lo demás es aditivo (incluido el frontal de los NPCs)
-                    float escalaR = p.Patron == PatronAura.Poligono ? 0.88f : 1f; // la jaula abraza la llama
+                    float escalaR = p.Patron == PatronAura.Poligono ? 0.88f : 1f; // la jaula abraza la pila
 
-                    // --- L1 — LA LLAMA: la silueta de 7 lenguas con el
-                    //     calor ascendente y el rim brillante horneados.
-                    //     ANCLA VERTICAL: la base abraza los pies (0.54R
-                    //     bajo el centro), la copa lame ~R·1.7 sobre la
-                    //     cabeza — la llama APUNTA ARRIBA: cero rotación
-                    //     de disco, solo el VAIVÉN sutil del fuego (~2°).
-                    //     ~7-11 fps: el calor interior asciende ~60 px/s
-                    //     (la regla del fuego de la investigación). ---
-                    Texture2D texF = FlipLlama((int)(t * (7f + 4f * p.Deriva + 2f * p.Hervor)));
-                    if (texF != null)
+                    // --- L1 — EL CUERPO: el flipbook de fBm con warp de
+                    //     dominio + blur + máscara radial horneada (la
+                    //     anti-caja). Rotación LENTA (+Giro rad/s ≈ 14°/s
+                    //     con el valor por defecto de la casa) y la
+                    //     respiración ±6% a 0.5 Hz de la investigación. ---
+                    Texture2D texC = FlipCuerpo((int)(t * (10f + 18f * p.Deriva)));
+                    if (texC != null)
                     {
-                        float respF = 1f + 0.05f * MathF.Sin(t * MathHelper.Pi + p.Semilla);
-                        float sway = MathF.Sin(t * 1.3f + p.Semilla) * 0.035f;
-                        float ladoF = 2.35f * R * escalaR * respF;   // ALTO de la llama
-                        float anchoF = ladoF * 0.60f;                 // ancho ≈ 1.4R
-                        Vector2 anclaF = new Vector2(centro.X, centro.Y + R * 0.54f - ladoF * 0.5f);
-
-                        Color colF = Zona(cC, cM, cB, 0.55f);
-                        float fF = MathHelper.Clamp(alfaCapa * 1.35f, 0f, 1f);
-                        VFXCore.Quad(anclaF, aditivo ? TintAditivo(colF, fF) : colF * fF,
-                            new Vector2(anchoF, ladoF), sway, texF);
-
-                        // --- L2b — EL PENACHO (el haz exterior): la MISMA
-                        //     llama ×1.35 y tenue — el calor exhalado
-                        //     alrededor del fuego (receta: plume ×1.3-1.5,
-                        //     alfa 0.12-0.20). ---
-                        Color colP = Zona(cC, cM, cB, 0.85f);
-                        float fP = MathHelper.Clamp(alfaCapa * 0.32f, 0f, 1f);
-                        VFXCore.Quad(anclaF, aditivo ? TintAditivo(colP, fP) : colP * fP,
-                            new Vector2(anchoF * 1.35f, ladoF * 1.35f), sway * 1.5f, texF);
+                        float respC = 1f + 0.06f * MathF.Sin(t * MathHelper.Pi + p.Semilla);
+                        float rotC = t * p.Giro + MathF.Sin(t * 0.7f + p.Semilla) * 0.05f * p.Distorsion;
+                        float ladoC = 2f * R * escalaR * 1.06f * respC;
+                        Color colC = Zona(cC, cM, cB, 0.45f);
+                        float fC = MathHelper.Clamp(alfaCapa * 1.35f, 0f, 1f);
+                        VFXCore.Quad(centro, aditivo ? TintAditivo(colC, fC) : colC * fC,
+                            new Vector2(ladoC, ladoC), rotC, texC);
                     }
 
-                    // --- L2 — EL NÚCLEO CÁLIDO: el cuerpo del portador
-                    //     ARDE — SoftGlow VERTICAL estirado (la columna
-                    //     blanca-cálida del corazón de la llama DBZ). ---
+                    // --- L2 — LAS LLAMAS: el flipbook FINO con el ascenso
+                    //     VERTICAL horneado (un período exacto por ciclo:
+                    //     sube sin despegarse del portador) y la
+                    //     CONTRARROTACIÓN (−(0.35+0.8·Fluir) rad/s: la
+                    //     interferencia de las dos capas es el "hervir"
+                    //     emergente — gamedev.SE, la técnica del haz del
+                    //     medic-gun del TF2). Más calientes: la zona de
+                    //     color sube y un toque de blanco. ---
+                    Texture2D texL = FlipLlamas((int)(t * (12f + 14f * p.Deriva + 1.5f * p.Hervor)));
+                    if (texL != null)
                     {
-                        Color colN = Color.Lerp(Zona(cC, cM, cB, 0.35f), Color.White, 0.15f);
-                        float fN = MathHelper.Clamp(alfaCapa * 0.72f, 0f, 1f);
-                        VFXCore.Quad(centro + new Vector2(0f, R * 0.05f),
-                            aditivo ? TintAditivo(colN, fN) : colN * fN,
-                            new Vector2(R * 0.80f * escalaR, R * 1.60f * escalaR));
+                        float respL = 1f + 0.08f * MathF.Sin(t * MathHelper.Pi * 1.3f + p.Semilla * 2f);
+                        float rotL = -t * (0.35f + 0.8f * p.Fluir)
+                                   + MathF.Sin(t * 1.1f + p.Semilla * 3f) * 0.07f * p.Distorsion;
+                        float ladoL = 2f * R * escalaR * 0.74f * respL;
+                        Color colL = Color.Lerp(Zona(cC, cM, cB, 0.75f), Color.White, 0.12f);
+                        float fL = MathHelper.Clamp(alfaCapa * 1.15f, 0f, 1f);
+                        VFXCore.Quad(centro, aditivo ? TintAditivo(colL, fL) : colL * fL,
+                            new Vector2(ladoL, ladoL), rotL, texL);
                     }
 
-                    // --- L3 — LOS ARCOS DE ENERGÍA (los detalles crispados
-                    //     DENTRO de la llama — v6.50.17: 0.88R → 0.62R: la
-                    //     frontera ahora es de la SILUETA de la llama y
-                    //     los arcos viven en el cuerpo del fuego, latiendo
-                    //     con su fase hash — DOBLE PASADA por arco (falda
-                    //     tenue + filo BRILLANTE). ---
+                    // --- L3 — EL RIM: los ARCOS DE ENERGÍA de la
+                    //     silueta (la capa que el ojo LEE como "aura":
+                    //     ~0.88R, casi blancos, rotación viva +50°/s y
+                    //     pulsos). El anillo ROTO en arcos: cada uno
+                    //     nace/muere con su fase hash — la cáscara de
+                    //     los tutoriales, traducida a Lines de la casa.
+                    //     DOBLE PASADA por arco (la lección del VLM del
+                    //     mock: trazo ancho tenue + trazo fino BRILLANTE
+                    //     — el "bright ring" que separa el aura del
+                    //     cuerpo). ---
                     {
                         float rotR = t * (0.55f + 1.4f * p.Giro);
-                        float rR = R * 0.62f * escalaR * (1f + 0.04f * MathF.Sin(t * 7.5f + p.Semilla));
+                        float rR = R * 0.88f * escalaR * (1f + 0.04f * MathF.Sin(t * 7.5f + p.Semilla));
                         Color colRim = Color.Lerp(cB, Color.White, 0.62f);
                         float fR = MathHelper.Clamp(alfaCapa * (0.55f + 0.9f * p.Borde) * 1.6f, 0f, 1f);
                         const int Arcos = 7;
@@ -1665,15 +2048,29 @@ namespace AethonMod.Content.VFX
         {
             try
             {
-                if (_flipLlama != null)
-                    for (int i = 0; i < _flipLlama.Length; i++)
+                if (_flipCuerpo != null)
+                    for (int i = 0; i < _flipCuerpo.Length; i++)
                     {
-                        _flipLlama[i]?.Dispose();
-                        _flipLlama[i] = null;
+                        _flipCuerpo[i]?.Dispose();
+                        _flipCuerpo[i] = null;
+                    }
+                if (_flipLlamas != null)
+                    for (int i = 0; i < _flipLlamas.Length; i++)
+                    {
+                        _flipLlamas[i]?.Dispose();
+                        _flipLlamas[i] = null;
+                    }
+                if (_flipBruma != null)
+                    for (int i = 0; i < _flipBruma.Length; i++)
+                    {
+                        _flipBruma[i]?.Dispose();
+                        _flipBruma[i] = null;
                     }
             }
             catch { }
-            _flipLlama = null;
+            _flipCuerpo = null;
+            _flipLlamas = null;
+            _flipBruma = null;
         }
 
         /// <summary>

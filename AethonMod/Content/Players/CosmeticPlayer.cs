@@ -45,6 +45,11 @@ namespace AethonMod.Content.Players
         /// Primordial, el drop cumplido de Aethon)?</summary>
         public bool FormaAscendida;
 
+        /// <summary>¿Lleva LA BRASA DEL ECLIPSE (v6.50.23 — el cuarto tipo
+        /// de aura: el patrón Bruma de AuraLib, humo negro en los bordes,
+        /// oro en el medio y núcleo rojo, por el portador aditivo+alfa)?</summary>
+        public bool BrasaDelEclipse;
+
         public override void ResetEffects()
         {
             VoidCrown = false;
@@ -52,6 +57,7 @@ namespace AethonMod.Content.Players
             AnilloDorsal = false;
             CoronaRunicaAura = false;
             FormaAscendida = false;
+            BrasaDelEclipse = false;
         }
 
         public override void PostUpdate()
@@ -63,6 +69,7 @@ namespace AethonMod.Content.Players
             int anilloType = ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>();
             int coronaAuraType = ModContent.ItemType<Items.Cosmetics.CoronaRunicoAuraItem>();
             int ascendidaType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>();
+            int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -78,6 +85,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == anilloType) AnilloDorsal = true;
                 else if (item.type == coronaAuraType) CoronaRunicaAura = true;
                 else if (item.type == ascendidaType) FormaAscendida = true;
+                else if (item.type == brasaType) BrasaDelEclipse = true;
             }
 
             // v6.50.2 — FIX (host sin sus visuales en Host&Play): mismo error
@@ -190,6 +198,13 @@ namespace AethonMod.Content.Players
                         Player.Center, Vector2.Zero,
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 2f);
+                }
+                if (BrasaDelEclipse && !EspiarPortador(3))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("BrasaDelEclipse"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 3f);
                 }
             }
 

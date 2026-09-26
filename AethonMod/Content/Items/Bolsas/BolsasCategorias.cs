@@ -297,6 +297,7 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Cosmetics.AnilloRunicoDorsalItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.CoronaRunicoAuraItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
+            l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             return l;
         }
     }

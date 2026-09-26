@@ -264,6 +264,65 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
+        /// v6.50.23 — VUELCA EL BUFFER CON BLENDING ALFA: la capa que
+        /// OSCURECE. La hermana gemela de <see cref="FlushAdditive"/> para
+        /// el patrón Bruma de AuraLib (la Brasa del Eclipse) — el humo
+        /// negro de los bordes que NO puede existir en el lote aditivo
+        /// (negro = suma 0 = invisible: para oscurecer hay que SALIR del
+        /// aditivo). EL MISMO CONTRATO ATÓMICO de la casa (sonda +
+        /// try/finally + limpieza SIEMPRE), mismo parámetros, misma
+        /// semántica de escala — solo cambia el BlendState.
+        ///
+        /// LA SONDA DE LA CASA (v6.50.3, verificada contra el FNA real):
+        /// BlendState.AlphaBlend = (One, InverseSourceAlpha) — blending
+        /// PREMULTIPLICADO: los cuadros del patrón Bruma llevan el TINTE
+        /// CLÁSICO (Color·f: RGB y A escalados a la vez) y las láminas
+        /// (q,q,q,q) → aporte = q·color + fondo·(1−q·f): el humo TAPA.
+        /// </summary>
+        /// <param name="texture">Textura de los cuadros (SoftGlow por defecto).</param>
+        /// <param name="endActiveBatch">True si puede haber un batch abierto
+        /// que haya que cerrar antes (p. ej. venimos de un PreDraw).</param>
+        public static void FlushAlpha(Texture2D texture = null, bool endActiveBatch = true)
+        {
+            if (_quads.Count == 0) return;
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
+
+            Texture2D defaultTex = texture ?? SoftGlow;
+
+            try
+            {
+                // la sonda de la casa: el End del lote del llamador sin
+                // first-chance (idempotente — no pisa un Begin vivo).
+                if (endActiveBatch)
+                    CerrarLoteSiAbierto();
+
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+
+                Vector2 screen = Main.screenPosition;
+                for (int i = 0; i < _quads.Count; i++)
+                {
+                    GlowQuad q = _quads[i];
+                    if (q.Color.A == 0) continue;
+
+                    Texture2D tex = q.Texture ?? defaultTex;
+                    Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
+                    Main.spriteBatch.Draw(tex, q.Position - screen, null,
+                        q.Color, q.Rotation, tex.Size() * 0.5f, q.Scale * invTex, SpriteEffects.None, 0f);
+                }
+            }
+            finally
+            {
+                // el vuelco atómico de la casa: pase lo que pase, NUESTRO
+                // lote se cierra (por sonda) y el búfer se limpia.
+                CerrarLoteSiAbierto();
+                ContarQuads(_quads.Count);
+                _quads.Clear();
+            }
+        }
+
+        /// <summary>
         /// Vuelca el buffer como DrawData dentro de la capa de dibujado de un
         /// jugador (PlayerDrawLayer): se añaden al DrawDataCache y tML los
         /// compone con el resto del jugador — el camino oficial, sin tocar

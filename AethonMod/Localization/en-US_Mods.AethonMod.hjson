@@ -1596,6 +1596,17 @@ Items: {
 			'''
 	}
 
+	BrasaDelEclipseItem: {
+		DisplayName: The Eclipse Ember
+		Tooltip:
+			'''
+			The fourth type of aura: the darkening MIST.
+			Double-Perlin black smoke at the edges, molten GOLD in
+			the middle and a beating RED core — light, mist, blur,
+			distortion, bloom and glow, ALL by code.
+			'''
+	}
+
 	BolsaCategoria: {
 		Titulo: "[c/{0}:{1}]"
 		Linea1: "[c/E6B0FF:Right-click to deploy this category of the arsenal]"
