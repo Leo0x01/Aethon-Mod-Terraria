@@ -49,6 +49,20 @@ namespace AethonMod.Content.NPCs
         /// <summary>Separación entre huesos (px).</summary>
         public const float HUECO = 54f;
 
+        /// <summary>
+        /// v6.50.21 — LA TEXTURA EXPLÍCITA (EL FIX DEL CARGADOR). Sin esta
+        /// línea tML resuelve la textura por CONVENCIÓN de nombre:
+        /// "Content/NPCs/AethonSierpeCuerpo.rawimg", que NO EXISTE en el
+        /// paquete (el sprite de la vértebra vive como AethonSierpeVertebra
+        /// y así lo piden ColaSierpeSky y las mandíbulas). Resultado en la
+        /// 6.50.19/6.50.20: MissingResourceException en
+        /// Mod.TransferAllAssets — EL MOD ENTERO QUEDABA DESACTIVADO AL
+        /// CARGAR ("Se ha producido un error al cargar AethonMod...").
+        /// El idioma de la casa (13 clases ya lo hacen) apunta a la textura
+        /// real y el paquete vuelve a ser cerrado.
+        /// </summary>
+        public override string Texture => "AethonMod/Content/NPCs/AethonSierpeVertebra";
+
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 1;
@@ -133,8 +147,12 @@ namespace AethonMod.Content.NPCs
                     null, Main.GameViewMatrix.TransformationMatrix);
                 try
                 {
-                    var glow = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>(
-                        "AethonMod/Content/Effects/SoftGlow").Value;
+                    // v6.50.21 — la ruta estaba MAL ("Effects/SoftGlow" sin
+                    // "/Procedural/"): el Request reventaba cada frame, el
+                    // catch se lo tragaba y la runa dorada de las vértebras
+                    // JAMÁS llegó a brillar. Ahora el SoftGlow CACHEADO de
+                    // VFXCore (la workhorse de la librería).
+                    var glow = VFXCore.SoftGlow;
                     Vector2 pos = NPC.Center - Main.screenPosition;
                     // v2 tras el VLM del mock: el glow pequeño y TENUE — el
                     // HUESO es el protagonista (la runa vive DENTRO).
