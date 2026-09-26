@@ -14,7 +14,7 @@ namespace AethonMod.Content.Players
     /// jugador también dale 99 Dummy para probar las armas"). OnEnterWorld
     /// entrega:
     ///
-    ///   · LAS DIECISÉIS BOLSAS (una por categoría del arsenal — cada una se
+    ///   · LAS DIECISIETE BOLSAS (una por categoría del arsenal — cada una se
     ///     abre con clic derecho y solo entrega lo que falte):
     ///       1. La Bolsa del Probador          (herramientas de prueba)
     ///       2. La Bolsa de los Fundacionales  (los 4 del alba)
@@ -32,6 +32,7 @@ namespace AethonMod.Content.Players
     ///      14. La Bolsa de las Sierpes     (v6.38 — la familia)
     ///      15. La Bolsa de los Huéspedes   (v6.41 — las réplicas de prueba)
     ///      16. La Bolsa de las Apuestas   (v6.42 — las 5 apuestas + el Verbo)
+    ///      17. La Bolsa de las Ideas del Grimorio (v6.50.19 — los 6 futuros del proyectil)
     ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
     ///     entrenamiento directo en el inventario).
     ///
@@ -53,7 +54,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS DIECISÉIS BOLSAS (garantizadas en cada entrada) ===
+            // === LAS DIECISIETE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -71,6 +72,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaSierpes>());        // v6.38: LA FAMILIA DE LAS SIERPES
             bolsas += Entregar(ModContent.ItemType<BolsaHuespedes>());      // v6.41: LAS RÉPLICAS DE PRUEBA
             bolsas += Entregar(ModContent.ItemType<BolsaApuestas>());        // v6.42: LAS 5 APUESTAS + EL VERBO
+            bolsas += Entregar(ModContent.ItemType<BolsaIdeasGrimorio>());   // v6.50.19: LAS 6 IDEAS DEL GRIMORIO
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

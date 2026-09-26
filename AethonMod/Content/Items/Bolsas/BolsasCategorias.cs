@@ -453,4 +453,32 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>17 — LAS IDEAS DEL GRIMORIO (v6.50.19): LOS SEIS CONCEPTOS
+    /// de lo que será EL PROYECTIL DEL GRIMORIO (hoy dispara el Nightglow
+    /// vanilla — el proyectil del arma de la Emperatriz de la Luz). Cada
+    /// arma es una IDEA completa que EVOLUCIONA con el nivel del Grimorio
+    /// del Eterno que lleves encima: empieza simple y sube su escalera
+    /// (nivel 6 · 12 · 20). Petición del usuario: "si tienes ideas sobre
+    /// tipos de proyectiles para el grimorio, crea varias armas con esas
+    /// ideas y ponlas en una nueva bolsa de ideas de proyectiles".</summary>
+    public class BolsaIdeasGrimorio : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Ideas del Grimorio";
+        protected override string NombreCorto => "Bolsa de las Ideas del Grimorio";
+        protected override Color ColorFiesta => new(196, 150, 255);
+        protected override string Nota => "Seis futuros del proyectil del grimorio: evolucionan con su nivel";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasFolioErrante>(), 1));      // la página rebaño
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasPlumaPrimordial>(), 1));   // la pluma que escribe
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasSelloErrante>(), 1));      // el sello que encadena
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasLenguaTinta>(), 1));       // la sierpe de tinta
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasOjoTexto>(), 1));          // el ojo que lee
+            l.Add((ModContent.ItemType<Weapons.Cosmic.IdeasVersoVivo>(), 1));         // la palabra viva
+            return l;
+        }
+    }
 }

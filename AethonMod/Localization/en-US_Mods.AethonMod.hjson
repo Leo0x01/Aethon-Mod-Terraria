@@ -205,19 +205,33 @@
         "Items.StormRuneStaff.DisplayName": "Runic Thunder Scepter",
         // v6.50.17: THE PERLIN THUNDER SCEPTER — the noise-generated arc weapon
         "Items.TruenoPerlinStaff.DisplayName": "Perlin Thunder Scepter",
-        // v6.18: wings were removed from the mod (user request).
 
-        // v6.18: wings were removed from the mod (user request).
+        // v6.50.19: THE SIX GRIMOIRE PROJECTILE IDEAS — bag 17
+        "Items.BolsaIdeasGrimorio.DisplayName": "Grimoire Ideas Bag",
+        "Items.BolsaIdeasGrimorio.Tooltip": "The six futures of the grimoire's projectile.\nEach idea EVOLVES with the level of the Eternal Grimoire you carry (6 · 12 · 20).\nRight-click to deploy them. Only delivers what you're missing.",
+        "Items.IdeasFolioErrante.DisplayName": "The Wandering Folio",
+        "Items.IdeasFolioErrante.Tooltip": "IDEA 1: THE PAGE.\nA waving, piercing page (level 6: ink motes and more bite · level 12: tears into 3 homing mini-pages · level 20: the torn ones hunt harder).\nNo mana — evolution follows the GRIMOIRE you carry.",
+        "Items.IdeasPlumaPrimordial.DisplayName": "The Primordial Quill",
+        "Items.IdeasPlumaPrimordial.Tooltip": "IDEA 2: THE QUILL THAT WROTE THE BOOK.\nPiercing dart (level 6: fan of 3 · level 12: on hit it WRITES a burning rune · level 20: the GOLD quill writes THE VERSE — six sequential glyphs).\nNo mana.",
+        "Items.IdeasSelloErrante.DisplayName": "The Wandering Seal",
+        "Items.IdeasSelloErrante.Tooltip": "IDEA 3: THE SEAL THAT WALKS.\nA slow circle that detonates in a ring (level 6: six radial bolts · level 12: CHAINS — a new seal by the next enemy · level 20: THREE seals).\nNo mana.",
+        "Items.IdeasLenguaTinta.DisplayName": "The Ink Tongue",
+        "Items.IdeasLenguaTinta.Tooltip": "IDEA 4: THE INK SERPENT.\nA tongue that slithers at prey (level 6: 14 segments and faster · level 12: FORKS on bite · level 20: THE HYDRA — three tongues from the start).\nNo mana.",
+        "Items.IdeasOjoTexto.DisplayName": "The Eye of the Text",
+        "Items.IdeasOjoTexto.Tooltip": "IDEA 5: THE EYE THAT READS — the conceptual successor of the current projectile.\nA homing eye that watches its prey (level 6: two pupil escorts · level 12: fires a glyph at what it reads · level 20: THE STARE — reads THREE prey at once).\nNo mana.",
+        "Items.IdeasVersoVivo.DisplayName": "The Living Verse",
+        "Items.IdeasVersoVivo.Tooltip": "IDEA 6: THE WORD AS PROJECTILE.\nGlyphs in formation striking per letter (level 6: the wave of 5 · level 12: THE PALINDROME — the word bounces back · level 20: THE SENTENCE — 7 glyphs in two rows and the detonating FINAL PERIOD).\nNo mana.",
 
-        // v6.18: wings were removed from the mod (user request).
+        "Projectiles.FolioErranteProjectile.DisplayName": "Grimoire Page",
+        "Projectiles.PlumaPrimordialProjectile.DisplayName": "Primordial Quill",
+        "Projectiles.SelloErranteProjectile.DisplayName": "Wandering Seal",
+        "Projectiles.LenguaTintaProjectile.DisplayName": "Ink Tongue",
+        "Projectiles.OjoTextoProjectile.DisplayName": "Eye of the Text",
+        "Projectiles.VersoVivoProjectile.DisplayName": "Living Glyph",
 
-        // v6.18: wings were removed from the mod (user request).
-
-        // v6.18: wings were removed from the mod (user request).
-
-        // v6.18: wings were removed from the mod (user request).
-
-        // v6.18: wings were removed from the mod (user request).
+        // v6.50.19: THE BONE SERPENT — final boss segments
+        "NPCs.AethonSierpeCuerpo.DisplayName": "Aethon Serpent Vertebra",
+        "NPCs.AethonSierpeCola.DisplayName": "Aethon Serpent Tail",
 
         // v6.18: wings were removed from the mod (user request).
 
@@ -652,6 +666,8 @@
         "Jefe.Aethon.Gravedad": "Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!",
         "Jefe.Aethon.Recordar": "AETHON REMEMBERS — the runes he memorized from you return to their owner.",
         "Jefe.Aethon.Reconocimiento": "Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.",
+        "Jefe.Aethon.Presentacion": "The earth trembles. THE BONE SERPENT OF THE LIGHT rises from below — its tail entangles the horizon.",
+        "Jefe.Aethon.Muerte": "The serpent comes apart. The Primordial Light escapes its bones.",
 
         "Testigo.Chat.SinLibro": "I have watched you. You have not yet claimed the Genesis Shard. Look for the Hollow Sanctum underground.",
         "Testigo.Chat.Debil": "Your shard glows at level {0}. Still weak. Keep fighting.",

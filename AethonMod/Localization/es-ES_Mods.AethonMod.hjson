@@ -207,6 +207,33 @@
         // v6.50.17: EL CETRO DEL TRUENO PERLIN — el arco eléctrico de ruido
         "Items.TruenoPerlinStaff.DisplayName": "Cetro del Trueno Perlin",
 
+        // v6.50.19: LAS SEIS IDEAS DE PROYECTILES DEL GRIMORIO — la bolsa 17
+        "Items.BolsaIdeasGrimorio.DisplayName": "Bolsa de las Ideas del Grimorio",
+        "Items.BolsaIdeasGrimorio.Tooltip": "Los seis futuros del proyectil del grimorio.\nCada idea EVOLUCIONA con el nivel del Grimorio del Eterno que lleves (6 · 12 · 20).\nClic derecho para desplegarlas. Solo entrega lo que te falte.",
+        "Items.IdeasFolioErrante.DisplayName": "El Folio Errante",
+        "Items.IdeasFolioErrante.Tooltip": "IDEA 1 para el proyectil del grimorio: LA PÁGINA.\nUna página que ondula y perfora (nivel 6: motas y más filo · nivel 12: se rompe en 3 mini-páginas homing · nivel 20: las rotas persiguen más duras).\nSin maná — la evolución sigue al GRIMORIO que lleves encima.",
+        "Items.IdeasPlumaPrimordial.DisplayName": "La Pluma Primordial",
+        "Items.IdeasPlumaPrimordial.Tooltip": "IDEA 2: LA PLUMA QUE ESCRIBIÓ EL LIBRO.\nDardo perforante (nivel 6: abanico de 3 · nivel 12: al clavar ESCRIBE una runa que arde · nivel 20: la pluma ORO escribe EL VERSO — seis glifos secuenciales).\nSin maná.",
+        "Items.IdeasSelloErrante.DisplayName": "El Sello Errante",
+        "Items.IdeasSelloErrante.Tooltip": "IDEA 3: EL SELLO QUE CAMINA.\nUn círculo lento que detona en aro (nivel 6: seis pernos radiales · nivel 12: ENCADENA — nace un sello junto al siguiente enemigo · nivel 20: TRES sellos).\nSin maná.",
+        "Items.IdeasLenguaTinta.DisplayName": "La Lengua de Tinta",
+        "Items.IdeasLenguaTinta.Tooltip": "IDEA 4: LA SIERPE DE TINTA.\nUna lengua que serpentea hacia la presa (nivel 6: 14 segmentos y más rápida · nivel 12: al morder SE BIFURCA en dos · nivel 20: LA HYDRA — tres lenguas desde el arranque).\nSin maná.",
+        "Items.IdeasOjoTexto.DisplayName": "El Ojo del Texto",
+        "Items.IdeasOjoTexto.Tooltip": "IDEA 5: EL OJO QUE LEE — el sucesor conceptual del proyectil actual.\nUn ojo homing que mira a su presa (nivel 6: dos pupilas lo escoltan · nivel 12: cada 80 t dispara un glifo a lo que lee · nivel 20: LA MIRADA — lee a TRES presas a la vez).\nSin maná.",
+        "Items.IdeasVersoVivo.DisplayName": "El Verso Vivo",
+        "Items.IdeasVersoVivo.Tooltip": "IDEA 6: LA PALABRA HECHA PROYECTIL.\nGlifos en formación que golpean por letra (nivel 6: la ola de 5 · nivel 12: EL PALÍNDROMO — la palabra rebota y vuelve a golpear · nivel 20: LA SENTENCIA — 7 glifos en dos filas y EL PUNTO FINAL que detona).\nSin maná.",
+
+        "Projectiles.FolioErranteProjectile.DisplayName": "Página del Grimorio",
+        "Projectiles.PlumaPrimordialProjectile.DisplayName": "Pluma Primordial",
+        "Projectiles.SelloErranteProjectile.DisplayName": "Sello Errante",
+        "Projectiles.LenguaTintaProjectile.DisplayName": "Lengua de Tinta",
+        "Projectiles.OjoTextoProjectile.DisplayName": "Ojo del Texto",
+        "Projectiles.VersoVivoProjectile.DisplayName": "Glifo Vivo",
+
+        // v6.50.19: LA SIERPE DE HUESO — los segmentos del jefe final
+        "NPCs.AethonSierpeCuerpo.DisplayName": "Vértebra de la Sierpe de Aethon",
+        "NPCs.AethonSierpeCola.DisplayName": "Cola de la Sierpe de Aethon",
+
         // v6.18: LAS ALAS FUERON BORRADAS DEL MOD (petición del usuario).
 
         "Projectiles.BlackHoleProjectile.DisplayName": "Agujero Negro",
@@ -640,6 +667,8 @@
         "Jefe.Aethon.Gravedad": "Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!",
         "Jefe.Aethon.Recordar": "AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.",
         "Jefe.Aethon.Reconocimiento": "Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.",
+        "Jefe.Aethon.Presentacion": "La tierra tiembla. LA SIERPE DE HUESO DE LA LUZ se alza del subsuelo — su cola se enreda en el horizonte.",
+        "Jefe.Aethon.Muerte": "La sierpe se desarticula. La Luz Primordial se escapa de sus huesos.",
 
         "Testigo.Chat.SinLibro": "Te he observado. Aún no has reclamado el Fragmento Génesis. Busca el Sagrario Hueco bajo tierra.",
         "Testigo.Chat.Debil": "Tu fragmento brilla con nivel {0}. Aún es débil. Sigue combatiendo.",
