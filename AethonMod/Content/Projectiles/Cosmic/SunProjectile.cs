@@ -1192,8 +1192,12 @@ namespace AethonMod.Content.Projectiles.Cosmic
             if (Main.netMode == NetmodeID.Server) return;
 
             // === NOVA MASIVA (segundo 10, sincronizada con la explosión de la Supernova) ===
-            // Ráfaga principal con interpolación blanco→naranja
-            ParticlePresets.Explosion(Projectile.Center, 170f, 40,
+            // Ráfaga principal con interpolación blanco→naranja.
+            // v6.50.17 — 40 → 22 y 170 → 190: el preset Explosion ahora es
+            // un ANILLO que RODEA al gradiente (el bloom NovaFlash lo pone
+            // la Supernova hija en ESTE mismo tick) — la pila total queda a
+            // la mitad y el centro respira el degradado suave.
+            ParticlePresets.Explosion(Projectile.Center, 190f, 22,
                 new Color(255, 245, 200), new Color(255, 90, 20), 50);
             // DOBLE ONDA EXPANSIVA (dorada rápida + roja retardada)
             // v5.94 — tamaños proporcionales a las ondas nuevas (la librería
@@ -1237,14 +1241,18 @@ namespace AethonMod.Content.Projectiles.Cosmic
             catch { }
 
             // === NOVA FINAL: explosión masiva de fuego (dusts, capa frontal) ===
+            // v6.50.17 — NACEN EN ANILLO (la misma regla anti-bola-sólida):
+            // 60 GoldFlame desde 25-80 px del epicentro.
             for (int i = 0; i < 60; i++)
             {
                 float angle = (MathHelper.TwoPi / 60) * i;
                 Vector2 dir = new Vector2(
                     (float)Math.Cos(angle) * Main.rand.NextFloat(6f, 14f),
                     (float)Math.Sin(angle) * Main.rand.NextFloat(6f, 14f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    dir, 240, new Color(255, 200, 100), 1.7f);
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                Dust d = Dust.NewDustPerfect(
+                    Projectile.Center + outward * Main.rand.NextFloat(50f, 100f),
+                    DustID.GoldFlame, dir, 240, new Color(255, 200, 100), 1.7f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

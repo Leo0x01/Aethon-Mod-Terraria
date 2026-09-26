@@ -697,7 +697,12 @@ namespace AethonMod.Content.VFX
                     // LA FALDA ANCHA (el degradado del impacto — sube 0.55 →
                     // 0.65: con el velo a opacidad verdadera el degradado
                     // necesita el peso).
-                    Color cFalda = f.Color * (alfa * 0.65f);
+                    // v6.50.17 — 0.65 → 0.58 y el núcleo 0.52 → 0.45: el
+                    // punto caliente del epicentro ahora lo lleva la
+                    // partícula NovaBurst (el bloom de gradiente suave) —
+                    // el velo pinta SOLO la falda amplia y la pila velo+
+                    // bloom ya no puede clipear a círculo plano.
+                    Color cFalda = f.Color * (alfa * 0.58f);
                     Main.spriteBatch.Draw(texGlow, foco, null, cFalda, 0f, origen, escala,
                         SpriteEffects.None, 0f);
 
@@ -705,7 +710,7 @@ namespace AethonMod.Content.VFX
                     // igual, 0.85 → 0.90).
                     Color cNucleo = Color.Lerp(f.Color, Color.White, 0.35f) * (alfa * 0.90f);
                     Main.spriteBatch.Draw(texGlow, foco, null, cNucleo, 0f, origen,
-                        escala * 0.52f, SpriteEffects.None, 0f);
+                        escala * 0.45f, SpriteEffects.None, 0f);
                 }
 
                 // === 2. LA VIÑETA (encima: el túnel se cierra) ===

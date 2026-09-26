@@ -372,6 +372,139 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
+        //  v6.50.17 — EL ÁRBOL DE DESCARGA (la estructura que el usuario
+        //  pide con nombre y apellidos: «un rayo debe estar creado como
+        //  rama de un árbol, el final de una línea debe conectarse con el
+        //  inicio de otra, en zigzag, extendiéndose como ramas de un árbol
+        //  tipo fractal»)
+        // ==================================================================
+
+        /// <summary>El presupuesto de ramas del árbol (tronco aparte).</summary>
+        private const int MaxRamasArbol = 10;
+
+        /// <summary>
+        /// EL ÁRBOL DEL RAYO: el tronco + sus ramas RECURSIVAS (ramas de
+        /// ramas — cada nivel hereda ×0.62 de ancho y ×0.74 de brillo).
+        ///
+        /// LA CONEXIÓN (lo que el usuario describe): cada rama NACE en un
+        /// VÉRTICE del padre — el FINAL de un segmento del padre es el
+        /// PRINCIPIO de la rama — y cada rama es a su vez un ZIGZAG FRACTAL
+        /// (FractalPath multi-escala), no un paseo recto. La longitud de
+        /// cada rama es proporcional a lo que QUEDA del padre (la regla del
+        /// árbol: cerca de la meta, ramitas; en la raíz, ramas grandes).
+        /// Determinista por (seed, flick): todas las máquinas ven el MISMO
+        /// árbol, y el flick lo RE-GERMINA a 15 Hz.
+        ///
+        /// Devuelve strands[0] = el tronco (1,1) + las ramas con sus
+        /// WidthScale/Alpha ya escalados por nivel.
+        /// </summary>
+        public static List<StormStrand> BuildTree(Vector2[] trunk, int seed, int flick,
+            int profundidad, float lenTronco)
+        {
+            var strands = new List<StormStrand> { new StormStrand(trunk, 1f, 1f) };
+            Ramificar(strands, trunk, seed, flick, 1f, 1f, profundidad, lenTronco);
+            return strands;
+        }
+
+        /// <summary>
+        /// LA RECURSIÓN del árbol: recorre los VÉRTICES del camino padre y
+        /// donde el hash lo pide germina una rama fractal que a su vez
+        /// llama a ESTE método (el fractal de árbol de verdad — profundidad
+        /// 2-3: rama → ramita → retonito).
+        /// </summary>
+        private static void Ramificar(List<StormStrand> strands, Vector2[] padre, int seed, int flick,
+            float wPadre, float aPadre, int prof, float lenPadre)
+        {
+            if (prof <= 0 || strands.Count >= MaxRamasArbol + 1) return;
+            float largoPadre = PathLength(padre);
+            if (largoPadre < 36f || padre.Length < 4) return;
+
+            int n = padre.Length;
+            for (int i = 1; i < n - 1 && strands.Count < MaxRamasArbol + 1; i++)
+            {
+                float t = i / (float)(n - 1);
+
+                // La probabilidad por vértice: MÁS ramas cerca del origen
+                // (la raíz alimenta), menos hacia la meta — y el nivel 1
+                // germina más que el 2.
+                float pRama = 0.30f * (1f - 0.55f * t) * (prof >= 2 ? 1.15f : 0.85f);
+                if (VFXCore.Hash01(seed, flick * 13 + prof, i * 37 + 11) > pRama) continue;
+
+                // La TANGENTE LOCAL del padre en el vértice (la rama
+                // continúa la dirección del tramo, girada a su lado).
+                Vector2 tang = padre[Math.Min(i + 1, n - 1)] - padre[Math.Max(i - 1, 0)];
+                float tl = tang.Length();
+                if (tl < 0.01f) continue;
+                tang /= tl;
+
+                float lado = VFXCore.Hash01(seed, flick + i, 613 + prof) > 0.5f ? 1f : -1f;
+                float ang = lado * (0.30f + 0.40f * VFXCore.Hash01(seed, i * 7, 617 + prof)); // 17°..40°
+                Vector2 dir = tang.RotatedBy(ang);
+
+                // La regla del árbol: la rama mide una fracción de lo que
+                // QUEDA del padre (30-60% del resto).
+                float restante = lenPadre * MathF.Max(0f, 1f - t);
+                float largo = restante * (0.30f + 0.30f * VFXCore.Hash01(seed, i, 619 + prof));
+                if (largo < 16f) continue;
+
+                // LA RAMA ES FRACTAL TAMBIÉN: zigzag multi-escala (no un
+                // paseo recto) — el material del rayo es el mismo en cada
+                // escala del árbol.
+                int gens = Math.Clamp((int)MathF.Round(MathF.Log2(MathF.Max(4f, largo / 12f))), 2, 4);
+                int seedRama = seed + 313 + i * 17 + prof * 101;
+                Vector2[] rama = FractalPath(padre[i], padre[i] + dir * largo,
+                    seedRama, flick, gens, 0.14f);
+
+                float w = wPadre * 0.62f;
+                float a = aPadre * 0.74f;
+                strands.Add(new StormStrand(rama, w, a));
+
+                // LA RECURSIÓN: las ramas tienen ramas (el árbol fractal).
+                Ramificar(strands, rama, seedRama, flick, w, a, prof - 1, largo);
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.17 — EL RUIDO 1D (el motor del PerlinBolt: value noise
+        //  determinista por semilla sobre el hash de la casa + fBm de
+        //  octavas — la MISMA matemática del CampoFbm del aura, en 1D)
+        // ==================================================================
+
+        /// <summary>
+        /// EL VALUE NOISE 1D: retícula de valores hash interpolados con
+        /// smoothstep (el Perlin «de andar por casa» — determinista por
+        /// semilla, cero estado, cero GC).
+        /// </summary>
+        public static float Ruido1D(float x, int semilla)
+        {
+            int i = (int)MathF.Floor(x);
+            float f = x - i;
+            float u = f * f * (3f - 2f * f);
+            float a = VFXCore.Hash01(semilla, i, 1013);
+            float b = VFXCore.Hash01(semilla, i + 1, 1013);
+            return a + (b - a) * u;
+        }
+
+        /// <summary>
+        /// EL fBm 1D (fractal Brownian motion): octavas con lacunaridad 2
+        /// y persistencia 0.5 (los pesos canónicos 1/0.5/0.25… — la receta
+        /// de la investigación R57-a). Devuelve 0..1.
+        /// </summary>
+        public static float Fbm1D(float x, int semilla, int octavas = 3)
+        {
+            if (octavas < 1) octavas = 1;
+            float suma = 0f, peso = 1f, norma = 0f, freq = 1f;
+            for (int o = 0; o < octavas; o++)
+            {
+                suma += Ruido1D(x * freq, semilla + o * 131) * peso;
+                norma += peso;
+                peso *= 0.5f;
+                freq *= 2f;
+            }
+            return suma / MathF.Max(norma, 0.0001f);
+        }
+
+        // ==================================================================
         //  EL RENDER — triple capa borde a borde (batch ABIERTO aditivo)
         // ==================================================================
 
@@ -460,21 +593,18 @@ namespace AethonMod.Content.VFX
             StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
                 StormTaper.Linear, CoreTex, HaloTex);
 
-            // === 2. LAS RAMAS — v6.50.15 (defecto 5 del forense): la
-            // firma de la descarga PERTENECE a los rayos LARGOS. La
-            // v6.50.8 pintaba 3 horquillas SIEMPRE — en cadenas cortas
-            // (60-150px, las de los saltos entre enemigos) eran puro
-            // ruido cosiendo garabatos. PROGRESIVO (la receta vanilla:
-            // máx 2, y solo si hay longitud para leerlas): 1 rama si
-            // len>150, 2 si len>350 (MultiBolt/FractalBolt siguen
-            // siendo el rayo ramificado de la casa). ===
-            if (len > 150f)
+            // === 2. v6.50.17 — LAS RAMAS DEL ÁRBOL FRACTAL (ramas de ramas,
+            //     CONECTADAS por vértices: el final de un segmento es el
+            //     inicio de la rama — la estructura de árbol que el
+            //     usuario pide). PROGRESIVAS: 1 nivel si len>120, 2 si
+            //     len>350 (las cadenas cortas son puro ruido con ramas). ===
+            if (len > 120f)
             {
-                int ramas = len > 350f ? 2 : 1;
-                List<StormStrand> forks = ForkTree(trunk, seed, flick, 0.55f, ramas);
-                for (int f = 1; f < forks.Count; f++)
+                int prof = len > 350f ? 2 : 1;
+                List<StormStrand> arbol = BuildTree(trunk, seed, flick, prof, len);
+                for (int f = 1; f < arbol.Count; f++)
                 {
-                    StormStrand s = forks[f];
+                    StormStrand s = arbol[f];
                     StrandImpl(batch, s.Points, seed + 23 + f, flick,
                         width * s.WidthScale, halo, core, alpha * s.Alpha,
                         StormTaper.Linear, CoreTex, HaloTex);
@@ -515,83 +645,234 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL RAYO DE VERDAD: MULTI-FILAMENTO — un tronco principal con
-        /// REFINO FRACTAL (jaggedness multi-escala) al ancho completo +
-        /// filamentos acompañantes (½ y ⅜) + DOS PELOS caóticos finísimos
-        /// (el "hair" que rodea a las descargas reales) + RAMAS con
-        /// auto-corrección. Es la superposición la que lee "descarga
-        /// real", no un solo path.
+        /// EL RAYO DE VERDAD: EL ÁRBOL — v6.50.17 (la re-construcción que el
+        /// usuario pide: «un rayo debe estar creado como rama de un árbol,
+        /// el final de una línea debe conectarse con el inicio de otra, en
+        /// zigzag, extendiéndose como ramas de un árbol tipo fractal, las
+        /// líneas no deben ser individuales»).
+        ///
+        /// Hasta v6.50.16 este método era un tronco + DOS FILAMENTOS
+        /// PARALELOS + DOS PELOS — literalmente «líneas una detrás de
+        /// otra», el reporte exacto del usuario. LA NUEVA ANATOMÍA es el
+        /// ÁRBOL CONECTADO: UN tronco fractal multi-escala del que germinan
+        /// ramas en sus VÉRTICES (el final de un segmento = el inicio de
+        /// una rama), cada rama es a su vez fractal y germina ramitas —
+        /// profundidad 2-3, ancho ×0.62 y brillo ×0.74 por nivel, la
+        /// longitud proporcional a lo que queda del padre. UNA SOLA
+        /// ESTRUCTURA conectada de punta a punta: cero líneas suéltas.
+        /// Las ramas alternan los DOS colores del arsenal (haloA/haloB).
         /// </summary>
         public static void MultiBolt(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int flick, float width, Color haloA, Color haloB, Color core,
             float alpha = 1f, float amp = 26f, int segments = 12)
         {
-            // === EL TRONCO PRINCIPAL (midpoint displacement multi-escala) —
-            // v6.50.15: amp ABSOLUTO como ChainBolt/Bolt (min(amp, 30%·len))
-            // y sin el Refine extra — la firma del MultiBolt es la PILA de
-            // filamentos, no el wiggle extra del refino. ===
+            // === EL TRONCO FRACTAL (midpoint displacement multi-escala):
+            // amp ABSOLUTO (min(amp, 30%·len)) — el contrato v6.50.15. ===
             float lenMb = Vector2.Distance(start, end);
+            if (lenMb < 4f) return;
             float ampPxMb = Math.Min(amp, lenMb * 0.30f);
             Vector2[] trunk = FractalPath(start, end, seed, flick,
-                Math.Clamp((int)MathF.Round(MathF.Log2(Math.Max(4, segments))), 3, 5),
+                Math.Clamp((int)MathF.Round(MathF.Log2(MathF.Max(4, segments))), 3, 5),
                 Math.Clamp(ampPxMb / Math.Max(lenMb, 1f), 0.06f, 0.26f));
-            StrandImpl(batch, trunk, seed, flick, width, haloA, core, alpha,
+
+            // === v6.50.17 — EL ÁRBOL COMPLETO: tronco + ramas RECURSIVAS
+            // (conectadas por vértices, cada una fractal). Profundidad 2;
+            // 3 para los rayos largos (el árbol se lee cuando hay tela). ===
+            int prof = lenMb > 300f ? 3 : 2;
+            float largoTronco = PathLength(trunk);
+            List<StormStrand> arbol = BuildTree(trunk, seed, flick, prof, largoTronco);
+
+            for (int f = 0; f < arbol.Count; f++)
+            {
+                StormStrand s = arbol[f];
+                // El tronco al color A a brillo pleno; las ramas alternan
+                // A/B (la riqueza de DOS colores sin líneas paralelas).
+                Color cHalo = f == 0 ? haloA : (f % 2 == 1 ? haloB : haloA);
+                StrandImpl(batch, s.Points, seed + 17 + f * 13, flick,
+                    width * s.WidthScale, cHalo, core, alpha * s.Alpha,
+                    f == 0 ? StormTaper.Center : StormTaper.Linear,
+                    CoreTex, HaloTex);
+            }
+        }
+
+        /// <summary>
+        /// v6.50.17 — EL RAYO PERLIN: la descarga generada con RUIDO (el
+        /// método DISTINTO que pide el usuario para el arma nueva — el
+        /// propio Terraria tiene rayos; esta es nuestra idea mejorada).
+        ///
+        /// LA DIFERENCIA con el fractal (midpoint displacement): aquel
+        /// produce zigzag autosimilar con esquinas en TODAS las escalas
+        /// («cristal roto»); EL PERLIN produce un CANAL que MEANDRA con
+        /// curvatura continua — el arco eléctrico entre dos electrodos.
+        /// La receta (investigación R57-a, defaults medidos de
+        /// SamyBlue/Lightning-Beams + NVIDIA + drilian):
+        ///
+        ///   p(t) = lerp(A,B,t) + perp·a·(0.62·meandro + 0.38·jitter + 0.45·arco)·env(t)
+        ///
+        ///   · a = 12% de la longitud (MaxRadius), capado al 30%.
+        ///   · MEANDRO: fBm 3 octavas a 2.8 ciclos/largo — el serpenteo
+        ///     suave de baja frecuencia. SU FASE RESBALA 0.15/flick.
+        ///   · JITTER: fBm 2 octavas a 10 ciclos (el nerviosismo fino).
+        ///     Fase 0.47/flick — el rayo SERPENTEA en vez de
+        ///     tele-transportarse (la firma Perlin).
+        ///   · ARCO: noise casi CONGELADO (t·0.5) — la combadura lenta del
+        ///     canal entre electrodos, la personalidad del arco sostenido.
+        ///   · ENVOLVENTE exp(−5000·(t−0.5)^10): clava los anclajes
+        ///     EXACTOS y deja el 60% central a plena amplitud.
+        ///   · RAMAS: germinan en los MÁXIMOS LOCALES del meandro (los
+        ///     puntos de mayor curvatura del canal — ESTABLES mientras la
+        ///     fase resbala): ±20-45°, ×0.55 de lo que resta, ancho ×0.6,
+        ///     brillo ×0.55, UNA ramita de segundo nivel (el árbol chico
+        ///     del arco).
+        /// </summary>
+        public static void PerlinBolt(SpriteBatch batch, Vector2 start, Vector2 end,
+            int seed, int flick, float width, Color halo, Color core,
+            float alpha = 1f, float ampFrac = 0f)
+        {
+            float len = Vector2.Distance(start, end);
+            if (len < 4f || alpha <= 0.01f || width <= 0.05f) return;
+
+            Vector2 dir = (end - start) / len;
+            Vector2 perp = new Vector2(-dir.Y, dir.X);
+
+            // LA AMPLITUD: 12% del largo (la medida de los defaults reales).
+            float a = ampFrac > 0.001f ? ampFrac * len : 0.12f * len;
+            a = MathF.Min(a, len * 0.30f);
+
+            // LAS FASES DESLIZANTES (el meandro lento + el jitter rápido).
+            float faseM = flick * 0.15f;
+            float faseJ = flick * 0.47f;
+
+            // 48 puntos (el meandro necesita resolución: 32 dejaba la
+            // escalera de vértices que el VLM del mock reportó) + UNA pasada
+            // de Chaikin al final = la curvatura continua del canal.
+            const int N = 48;
+            var pts = new Vector2[N + 1];
+            var mvals = new float[N + 1];       // el meandro, para las ramas
+            for (int i = 0; i <= N; i++)
+            {
+                float t = i / (float)N;
+
+                // EL MEANDRO (fBm 3 octavas, 2.8 ciclos) y el JITTER (fBm 2
+                // octavas, 10 ciclos — el nerviosismo del canal).
+                float m = (Fbm1D(t * 2.8f + faseM, seed, 3) - 0.5f) * 2f;
+                float j = (Fbm1D(t * 10f + faseJ, seed + 77, 2) - 0.5f) * 2f;
+
+                // EL ARCO LENTO (congelado por semilla: la combadura del
+                // canal entre electrodos — no se anima, se sostiene).
+                float arco = (Ruido1D(t * 0.5f + seed * 0.013f, seed + 55) - 0.5f) * 2f;
+
+                // LA ENVOLVENTE: clava los anclajes, plana en el centro.
+                float d = t - 0.5f;
+                float d2 = d * d;
+                float d5 = d2 * d2 * d;          // (t-0.5)^5
+                float env = MathF.Exp(-5000f * d5 * d5);   // ^10
+
+                float off = (m * 0.62f + j * 0.38f) * a + arco * 0.45f * a;
+                pts[i] = start + dir * (len * t) + perp * (off * env);
+                mvals[i] = m;
+            }
+            pts[0] = start;
+            pts[N] = end;                        // anclajes EXACTOS
+
+            // === EL ALISADO CHAIKIN (el meandro suave — la firma Perlin;
+            //     el mock+VLM v6.50.17 lo pidió: sin él el canal lee
+            //     «escalera» y no «serpenteo») ===
+            Vector2[] canal = Chaikin(pts, 1);
+
+            // === EL TRONCO (el canal que meandra) ===
+            StrandImpl(batch, canal, seed, flick, width, halo, core, alpha,
                 StormTaper.Center, CoreTex, HaloTex);
 
-            // === LAS RAMAS (con auto-corrección, finas) ===
-            List<StormStrand> forks = ForkTree(trunk, seed, flick, 0.40f, 4);
-            for (int f = 1; f < forks.Count; f++)
+            // === LAS RAMAS EN LOS MÁXIMOS LOCALES DEL MEANDRO (la regla
+            //     del ruido: la curvatura máxima del canal es donde la
+            //     descarga salta) — hasta 3, cada una con SU ramita. Las
+            //     ramas parten del CANAL ALISADO (conectadas de verdad). ===
+            float maxAbs = 0.001f;
+            for (int i = 1; i < N; i++)
+                maxAbs = MathF.Max(maxAbs, MathF.Abs(mvals[i]));
+
+            int ramas = 0;
+            for (int i = 6; i < N - 5 && ramas < 3; i++)
             {
-                StormStrand s = forks[f];
-                StrandImpl(batch, s.Points, seed + 17 + f, flick,
-                    width * s.WidthScale, haloA, core, alpha * s.Alpha,
-                    StormTaper.Linear, CoreTex, HaloTex);
+                bool maximo = mvals[i] > mvals[i - 1] && mvals[i] >= mvals[i + 1]
+                           || mvals[i] < mvals[i - 1] && mvals[i] <= mvals[i + 1];
+                if (!maximo) continue;
+                if (MathF.Abs(mvals[i]) < 0.60f * maxAbs) continue;
+
+                // La dirección de la rama: la tangente local del canal
+                // girada 20-45° al lado del meandro.
+                Vector2 tang = canal[Math.Min(i * 2 - 1, canal.Length - 1)]
+                             - canal[Math.Max(i * 2 - 3, 0)];
+                float tl = tang.Length();
+                if (tl < 0.01f) continue;
+                tang /= tl;
+                float lado = mvals[i] >= 0f ? 1f : -1f;
+                float ang = lado * (0.35f + 0.44f * VFXCore.Hash01(seed, i, 733));
+                Vector2 dirR = tang.RotatedBy(ang);
+
+                // El ORIGEN de la rama: el vértice equivalente del canal
+                // alisado (i·2-2, el punto más cercano al vértice i).
+                Vector2 origen = canal[Math.Clamp(i * 2 - 2, 0, canal.Length - 1)];
+                float t0 = i / (float)N;
+                float restante = len * (1f - t0);
+                float largo = restante * (0.38f + 0.24f * VFXCore.Hash01(seed, i, 739));
+                if (largo < 18f) continue;
+
+                int gens = Math.Clamp((int)MathF.Round(MathF.Log2(MathF.Max(4f, largo / 12f))), 2, 4);
+                int seedR = seed + 733 + i * 19;
+                Vector2[] rama = FractalPath(origen, origen + dirR * largo,
+                    seedR, flick, gens, 0.12f);
+
+                StrandImpl(batch, rama, seedR, flick, width * 0.60f, halo, core,
+                    alpha * 0.55f, StormTaper.Linear, CoreTex, HaloTex);
+
+                // LA RAMITA (segundo nivel — el arbolito del canal).
+                var hojas = new List<StormStrand>();
+                Ramificar(hojas, rama, seedR, flick, 0.60f, 0.55f, 1, largo);
+                for (int h = 0; h < hojas.Count; h++)
+                {
+                    StormStrand s = hojas[h];
+                    StrandImpl(batch, s.Points, seedR + 17 + h, flick,
+                        width * s.WidthScale, halo, core, alpha * s.Alpha,
+                        StormTaper.Linear, CoreTex, HaloTex);
+                }
+                ramas++;
             }
 
-            // === LOS FILAMENTOS ACOMPAÑANTES + LOS PELOS ===
-            Vector2 dir = end - start;
-            float len = dir.Length();
-            if (len > 40f)
+            // LOS GORROS de descarga (los electrodos arden).
+            EndCap(batch, canal[0], width, halo, core, alpha);
+            EndCap(batch, canal[canal.Length - 1], width * 0.8f, halo, core, alpha);
+        }
+
+        /// <summary>
+        /// v6.50.17 — EL ALISADO CHAIKIN (el meandro de verdad): corta cada
+        /// esquina de la polilínea a ¼-¾ (Q = ¾·P[i]+¼·P[i+1],
+        /// R = ¼·P[i]+¾·P[i+1]) — el canal Perlin gana la CURVATURA CONTINUA
+        /// que lo distingue del zigzag fractal (la firma del «arco eléctrico
+        /// que serpentea»). Los extremos quedan EXACTOS.
+        /// </summary>
+        public static Vector2[] Chaikin(Vector2[] pts, int pasadas = 1)
+        {
+            if (pts == null || pts.Length < 3 || pasadas < 1) return pts;
+            Vector2[] actuales = pts;
+            for (int p = 0; p < pasadas; p++)
             {
-                dir /= len;
-                Vector2 normal = new Vector2(-dir.Y, dir.X);
-
-                // Filamento B: ½ ancho, color secundario, deriva a un lado.
-                if (IsLit(seed + 101, flick, 0.55f))
+                int n = actuales.Length;
+                // [P0, Q0,R0, Q1,R1, …, Qn-2,Rn-2, Pn-1] = 2 + 2·(n−1)
+                var suaves = new Vector2[(n - 1) * 2 + 2];
+                suaves[0] = actuales[0];
+                suaves[suaves.Length - 1] = actuales[n - 1];
+                int k = 1;
+                for (int i = 0; i < n - 1; i++)
                 {
-                    Vector2 off = normal * (len * 0.035f);
-                    Vector2[] ptsB = Refine(ZigPath(start + off * 1.2f, end + off * 0.4f,
-                        seed + 211, flick, segments, amp * 0.8f), seed + 211, flick);
-                    StrandImpl(batch, ptsB, seed + 211, flick, width * 0.52f,
-                        haloB, core, alpha * 0.85f, StormTaper.Center, CoreTex, HaloTex);
+                    Vector2 a = actuales[i], b = actuales[i + 1];
+                    suaves[k++] = a * 0.75f + b * 0.25f;
+                    suaves[k++] = a * 0.25f + b * 0.75f;
                 }
-
-                // Filamento C: ⅜ ancho, al otro lado, más nervioso.
-                if (IsLit(seed + 307, flick, 0.45f))
-                {
-                    Vector2 off = -normal * (len * 0.045f);
-                    Vector2[] ptsC = Refine(ZigPath(start + off * 0.8f, end + off * 0.3f,
-                        seed + 419, flick, segments + 3, amp * 0.9f), seed + 419, flick);
-                    StrandImpl(batch, ptsC, seed + 419, flick, width * 0.38f,
-                        haloA, core, alpha * 0.70f, StormTaper.Center, CoreTex, HaloTex);
-                }
-
-                // LOS PELOS: filamentos caóticos finísimos con jitter amplio
-                // alrededor del tronco — el "hair" de la descarga real.
-                for (int hair = 0; hair < 2; hair++)
-                {
-                    if (!IsLit(seed + 533 + hair * 97, flick, hair == 0 ? 0.50f : 0.40f))
-                        continue;
-                    int hseed = seed + 533 + hair * 97;
-                    Vector2 off = normal * ((hair == 0 ? 1f : -1f) *
-                        len * (0.02f + 0.03f * VFXCore.Hash01(hseed, 3, 997)));
-                    Vector2[] ptsH = Refine(ZigPath(start + off, end + off * 0.2f,
-                        hseed, flick, segments + 5, amp * 1.35f), hseed, flick, 0.7f);
-                    StrandImpl(batch, ptsH, hseed, flick, width * (hair == 0 ? 0.24f : 0.20f),
-                        hair == 0 ? haloB : haloA, core, alpha * 0.55f,
-                        StormTaper.Center, CoreTex, HaloTex);
-                }
+                actuales = suaves;
             }
+            return actuales;
         }
 
         /// <summary>

@@ -11,6 +11,16 @@ namespace AethonMod.Content.Particles
         /// <summary>
         /// Explosión: ráfaga radial con interpolación de color núcleo→borde,
         /// anillo expansivo de shockwave y chispas con desaceleración.
+        ///
+        /// v6.50.17 — EL ANILLO ANTI-MESETA (la causa raíz del «círculo
+        /// gigante blanco sólido» del destello final): la ráfaga nacía
+        /// repartida por TODO el disco (0.2·r → r) y la SUMA aditiva de
+        /// decenas de glows solapados saturaba el centro a blanco plano
+        /// — la meseta de la convolución. Ahora la ráfaga es un ANILLO
+        /// (0.55·r → r): el CENTRO le pertenece al gradiente único del
+        /// <see cref="NovaFlash"/> y las partículas son el DETALLE que
+        /// rodea, con el 80% del alfa de antes para que la pila jamás
+        /// clipee.
         /// </summary>
         public static void Explosion(Vector2 center, float radius, int count,
             Color coreColor, Color edgeColor, int duration = 45)
@@ -22,9 +32,9 @@ namespace AethonMod.Content.Particles
             {
                 Velocity = Vector2.Zero,
                 Scale = Vector2.One * Main.rand.NextFloat(0.9f, 1.6f),
-                PackedColor = ParticleManager.PackColor(coreColor),
-                PackedStartColor = ParticleManager.PackColor(coreColor),
-                PackedEndColor = ParticleManager.PackColor(edgeColor),
+                PackedColor = ParticleManager.PackColor(ConAlfa(coreColor, 0.8f)),
+                PackedStartColor = ParticleManager.PackColor(ConAlfa(coreColor, 0.8f)),
+                PackedEndColor = ParticleManager.PackColor(ConAlfa(edgeColor, 0.8f)),
                 TimeLeft = duration,
                 Duration = duration,
                 TextureId = ParticleTex.SoftGlow,
@@ -38,7 +48,9 @@ namespace AethonMod.Content.Particles
             for (int i = 0; i < count; i++)
             {
                 float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                float dist = Main.rand.NextFloat(radius * 0.2f, radius);
+                // v6.50.17 — EL ANILLO: 0.55·r → r (antes 0.2·r → r): el
+                // centro es del gradiente NovaFlash, la ráfaga lo RODEA.
+                float dist = Main.rand.NextFloat(radius * 0.55f, radius);
                 ParticleData p = template;
                 p.Position = center + new Vector2(
                     (float)System.Math.Cos(angle) * dist,
@@ -94,6 +106,54 @@ namespace AethonMod.Content.Particles
             spark.EnableComponent(ComponentFlag.FadeOut);
             ParticleManager.SpawnShape(center, ShapeDescriptor.Circle(radius * 1.2f), count / 3, spark);
         }
+
+        /// <summary>
+        /// v6.50.17 — EL DESTELLO FINAL DE GRADIENTE SUAVE (la respuesta al
+        /// reporte: «el destello final de Sol todavía tiene esos círculos
+        /// planos»). UNA sola partícula NovaBurst — núcleo pequeño + falda
+        /// larga con caída monótona — que EXPANDE desde 0 y se disuelve:
+        /// el degradado grande que antes intentaban conseguir ~90 SoftGlow
+        /// apilados (y su suma saturaba el centro a un círculo blanco
+        /// plano). Compañero natural del velo de Pantalla.Flash: el velo
+        /// da el GOLPE instantáneo, esto da el BLOOM que respira.
+        ///
+        /// Contrato: `sizePx` = diámetro FINAL en píxeles (la partícula
+        /// crece desde 0 hasta él — el bloom «estalla» hacia afuera);
+        /// `duracionTicks` ≈ 14 (crece ~8, se disuelve el resto).
+        /// </summary>
+        public static void NovaFlash(Vector2 center, float sizePx, Color coreColor,
+            Color skirtColor, int duracionTicks = 14)
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
+
+            float escala = sizePx / 256f;   // NovaBurst es 256x256
+            var p = new ParticleData
+            {
+                Position = center,
+                Velocity = Vector2.Zero,
+                Scale = Vector2.One * 0.05f,
+                PackedColor = ParticleManager.PackColor(coreColor),
+                PackedStartColor = ParticleManager.PackColor(coreColor),
+                PackedEndColor = ParticleManager.PackColor(ConAlfa(skirtColor, 0.7f)),
+                TimeLeft = duracionTicks,
+                Duration = duracionTicks,
+                TextureId = ParticleTex.NovaBurst,
+                BlendMode = 1, // Additive
+                LayerPriority = LayerPriorities.AboveTiles,
+            };
+            p.UserData1 = escala;          // ScaleUp: crece desde 0 hasta el tamaño final
+            p.UserData2 = escala;
+            p.EnableComponent(ComponentFlag.ScaleUp);
+            p.EnableComponent(ComponentFlag.FadeOut);
+            p.EnableComponent(ComponentFlag.ColorShift);
+            ParticleManager.Spawn(p);
+        }
+
+        /// <summary>El color con el alfa remultiplicado (RGB intacto: en el
+        /// lote aditivo el alfa GATEA la intensidad — el mando correcto
+        /// para dosar la pila sin apagar el tono).</summary>
+        private static Color ConAlfa(Color c, float f)
+            => new Color(c.R, c.G, c.B, (byte)MathHelper.Clamp(c.A * f, 0f, 255f));
 
         /// <summary>
         /// Implosión: partículas convergen en espiral hacia el centro

@@ -1031,13 +1031,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Pantalla.Flash(new Color(190, 120, 255), 0.3f, 0.6f, Projectile.Center);
             Pantalla.Vineta(0.65f, 1.5f);
 
+            // v6.50.17 — EL BLOOM DE GRADIENTE SUAVE (la misma mejora del
+            // destello final del Sol, aplicada al agujero negro): el velo
+            // da el golpe violeta instantáneo y ESTA partícula es el bloom
+            // que respira — una sola NovaBurst, no una pila de glows.
+            ParticlePresets.NovaFlash(Projectile.Center, 500f,
+                new Color(245, 228, 255), new Color(178, 120, 255), 15);
+
             // === PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===
             // (v5.90: paleta cálida — antes los presets eran violeta)
             // Implosión: la materia visible colapsa hacia la singularidad
             ParticlePresets.Implosion(Projectile.Center, 165f, 46,
                 new Color(255, 180, 90), 26);
             // Explosión: liberación de energía del colapso
-            ParticlePresets.Explosion(Projectile.Center, 130f, 28,
+            // v6.50.17 — el preset es ahora ANILLO (rodea el gradiente) —
+            // 28 → 22 con radio 140 para abrazar el NovaFlash.
+            ParticlePresets.Explosion(Projectile.Center, 140f, 22,
                 new Color(255, 240, 200), new Color(255, 120, 40), 40);
 
             // === COLAPSO FINAL: implosión + explosión (dusts, capa frontal) ===

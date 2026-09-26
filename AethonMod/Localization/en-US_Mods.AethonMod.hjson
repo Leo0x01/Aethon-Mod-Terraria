@@ -203,6 +203,8 @@
         "Items.LanzaAlbaStaff.DisplayName": "Lance of the Runic Dawn",
         // v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Runic Thunder Scepter",
+        // v6.50.17: THE PERLIN THUNDER SCEPTER — the noise-generated arc weapon
+        "Items.TruenoPerlinStaff.DisplayName": "Perlin Thunder Scepter",
         // v6.18: wings were removed from the mod (user request).
 
         // v6.18: wings were removed from the mod (user request).

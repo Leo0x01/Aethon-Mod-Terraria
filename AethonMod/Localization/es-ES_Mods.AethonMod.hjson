@@ -204,6 +204,8 @@
         "Items.LanzaAlbaStaff.DisplayName": "Lanza del Alba Rúnica",
         // v6.19: EL CETRO DEL TRUENO — el arma de rayos (LightningCore)
         "Items.StormRuneStaff.DisplayName": "Cetro del Trueno Rúnico",
+        // v6.50.17: EL CETRO DEL TRUENO PERLIN — el arco eléctrico de ruido
+        "Items.TruenoPerlinStaff.DisplayName": "Cetro del Trueno Perlin",
 
         // v6.18: LAS ALAS FUERON BORRADAS DEL MOD (petición del usuario).
 

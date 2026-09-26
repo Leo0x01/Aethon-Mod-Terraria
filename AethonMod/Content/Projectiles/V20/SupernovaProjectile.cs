@@ -253,33 +253,22 @@ namespace AethonMod.Content.Projectiles.V20
 
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === PUNTO CALIENTE DEL ESTALLIDO (SoftGlow aditivo compacto) ===
-            // v6.50.16 — EL FLASH GIGANTE SE RETIRA: con el velo de
-            // Pantalla.Flash arreglado (colores premultiplicados — el
-            // círculo sólido era EL BUG, no el diseño), esta partícula ya
-            // no tiene que CARGAR con el destello entero: 6.5→3.2 (416 →
-            // 205 px) y alfa 255→200. Queda lo que debe quedar: el punto
-            // blanco-caliente del estallido en el epicentro — el degradado
-            // suave grande lo pone la capa de pantalla.
-            var flash = new ParticleData
-            {
-                Position = Projectile.Center,
-                Velocity = Vector2.Zero,
-                Scale = Vector2.One * 3.2f,
-                PackedColor = ParticleManager.PackColor(new Color(255, 255, 245, 200)),
-                PackedStartColor = ParticleManager.PackColor(new Color(255, 255, 245, 200)),
-                TimeLeft = 12,
-                Duration = 12,
-                TextureId = ParticleTex.SoftGlow,
-                BlendMode = 1,
-                LayerPriority = LayerPriorities.AboveTiles,
-            };
-            flash.EnableComponent(ComponentFlag.FadeOut);
-            flash.EnableComponent(ComponentFlag.ScaleDown);
-            ParticleManager.Spawn(flash);
+            // === v6.50.17 — EL BLOOM DE GRADIENTE SUAVE (el final del círculo
+            // plano): UNA partícula NovaBurst (núcleo + falda larga, caída
+            // monótona) que EXPANDE desde 0 y se disuelve. El degradado
+            // grande que antes intentaban ~90 SoftGlow apilados — y su
+            // SUMA saturaba el centro a blanco plano (la meseta que el
+            // usuario veía como «círculo gigante blanco sólido»). El velo
+            // de Pantalla.Flash da el golpe instantáneo; ESTE es el bloom
+            // que respira. ===
+            ParticlePresets.NovaFlash(Projectile.Center, 560f,
+                new Color(255, 255, 248), new Color(255, 196, 110), 15);
 
             // Ráfaga de núcleo: interpolación blanco → naranja profundo.
-            ParticlePresets.Explosion(Projectile.Center, 200f, 46,
+            // v6.50.17 — 46 → 30: el preset ya es un ANILLO (rodea el
+            // gradiente, no lo tapa) y la cuenta baja para que la pila
+            // no vuelva a clipear.
+            ParticlePresets.Explosion(Projectile.Center, 210f, 30,
                 new Color(255, 250, 220), new Color(255, 100, 30), 42);
 
             // === VIENTO ESTELAR: estelas radiales largas ===
@@ -322,6 +311,10 @@ namespace AethonMod.Content.Projectiles.V20
             Pantalla.Sacudir(10f, 0.5f);
 
             // === DUSTS FRONTALES: 70 lenguas de fuego ===
+            // v6.50.17 — NACEN EN ANILLO (30-90 px del epicentro): antes
+            // nacían TODAS en el centro y el primer frame era una bola
+            // sólida — parte de la meseta del «círculo blanco». El frente
+            // de fuego nace YA expandiéndose.
             for (int i = 0; i < 70; i++)
             {
                 float angle = (MathHelper.TwoPi / 70) * i + Main.rand.NextFloat(-0.1f, 0.1f);
@@ -332,20 +325,23 @@ namespace AethonMod.Content.Projectiles.V20
                 Color color = Main.rand.NextBool(3)
                     ? new Color(255, 245, 190)
                     : new Color(255, 230, 150);
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
-                    vel, 240, color, 1.8f);
+                Vector2 outward = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                Dust d = Dust.NewDustPerfect(
+                    Projectile.Center + outward * Main.rand.NextFloat(55f, 110f),
+                    DustID.GoldFlame, vel, 240, color, 1.8f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }
 
-            // 25 chispas blancas encantadas
+            // 25 chispas blancas encantadas (nacidas alrededor, no encima)
             for (int i = 0; i < 25; i++)
             {
                 Vector2 v = new Vector2(
                     Main.rand.NextFloat(-10f, 10f),
                     Main.rand.NextFloat(-10f, 10f));
-                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Gold,
-                    v, 255, Color.White, 1.2f);
+                Dust d = Dust.NewDustPerfect(
+                    Projectile.Center + v * 4f,
+                    DustID.Enchanted_Gold, v, 255, Color.White, 1.2f);
                 d.noGravity = true;
                 d.fadeIn = 0f;
             }

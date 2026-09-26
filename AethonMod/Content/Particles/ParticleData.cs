@@ -147,5 +147,10 @@ namespace AethonMod.Content.Particles
         public const ushort SparkleStar = 9;
         /// <summary>Estela degradada 32x8.</summary>
         public const ushort TrailGlow = 10;
+        /// <summary>v6.50.17 — EL DESTELLO DE GRADIENTE SUAVE (256x256): núcleo
+        /// pequeño + falda larga cinematográfica, caída monótona SIN meseta
+        /// (el pincel del flash final — el que la suma de ~90 SoftGlow
+        /// apilados convertía en «círculo gigante blanco sólido»).</summary>
+        public const ushort NovaBurst = 11;
     }
 }
