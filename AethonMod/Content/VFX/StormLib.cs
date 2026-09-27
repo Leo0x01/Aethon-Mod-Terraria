@@ -17,6 +17,10 @@ namespace AethonMod.Content.VFX
         Linear,
         /// <summary>Fino al nacer, GRUESO en el impacto (la caída del cielo).</summary>
         Impact,
+        /// <summary>v6.50.25 — SIN curva propia (factor 1): el ancho lo
+        /// gobierna el llamador POR NODO (la OLA de vanilla de RayoLib —
+        /// RayoStrip.anchoPorNodo).</summary>
+        Flat,
     }
 
     /// <summary>Un filamento de la tormenta: puntos + anchura relativa + alpha.</summary>
@@ -654,28 +658,40 @@ namespace AethonMod.Content.VFX
             float chaos = Math.Clamp(ampPx / Math.Max(len, 1f), 0.02f, 0.30f);
             Vector2[] trunk = FractalPath(start, end, seed, flick, gens, chaos);
 
-            // El tronco a brillo completo (taper lineal: tenso al anclaje
-            // de destino, como la vena de una descarga que se disipa).
-            StrandImpl(batch, trunk, seed, flick, width, halo, core, alpha,
-                StormTaper.Linear);
-
-            // === 2. v6.50.17 — LAS RAMAS DEL ÁRBOL FRACTAL (ramas de ramas,
-            //     CONECTADAS por vértices: el final de un segmento es el
-            //     inicio de la rama — la estructura de árbol que el
-            //     usuario pide). PROGRESIVAS: 1 nivel si len>120, 2 si
-            //     len>350 (las cadenas cortas son puro ruido con ramas). ===
-            if (len > 120f)
+            // v6.50.25 — EL TRONCO + SUS RAMAS EN UN SOLO LOTE de
+            // primitivas (un baile por cadena; gorros SOLO en los
+            // extremos del tronco — las ramas mueren finas).
+            RayoStrip.AbrirLote();
+            try
             {
-                int prof = len > 350f ? 2 : 1;
-                List<StormStrand> arbol = BuildTree(trunk, seed, flick, prof, len);
-                for (int f = 1; f < arbol.Count; f++)
+                // El tronco a brillo completo (taper lineal: tenso al anclaje
+                // de destino, como la vena de una descarga que se disipa).
+                RayoStrip.FilamentoEnLote(trunk, width, halo, core, alpha,
+                    StormTaper.Linear, seed, flick, suavizar: true, crackle: true);
+
+                // === 2. v6.50.17 — LAS RAMAS DEL ÁRBOL FRACTAL (ramas de ramas,
+                //     CONECTADAS por vértices: el final de un segmento es el
+                //     inicio de la rama — la estructura de árbol que el
+                //     usuario pide). PROGRESIVAS: 1 nivel si len>120, 2 si
+                //     len>350 (las cadenas cortas son puro ruido con ramas). ===
+                if (len > 120f)
                 {
-                    StormStrand s = arbol[f];
-                    StrandImpl(batch, s.Points, seed + 23 + f, flick,
-                        width * s.WidthScale, halo, core, alpha * s.Alpha,
-                        StormTaper.Linear);
+                    int prof = len > 350f ? 2 : 1;
+                    List<StormStrand> arbol = BuildTree(trunk, seed, flick, prof, len);
+                    for (int f = 1; f < arbol.Count; f++)
+                    {
+                        StormStrand s = arbol[f];
+                        RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, halo, core,
+                            alpha * s.Alpha, StormTaper.Linear, seed + 23 + f, flick,
+                            suavizar: true, crackle: true);
+                    }
                 }
             }
+            finally { RayoStrip.CerrarLote(); }
+
+            // Los GORROS de descarga SOLO en los extremos del tronco.
+            EndCap(batch, trunk[0], width, halo, core, alpha);
+            EndCap(batch, trunk[trunk.Length - 1], width * 0.8f, halo, core, alpha);
         }
 
         /// <summary>
@@ -748,15 +764,34 @@ namespace AethonMod.Content.VFX
             float largoTronco = PathLength(trunk);
             List<StormStrand> arbol = BuildTree(trunk, seed, flick, prof, largoTronco);
 
-            for (int f = 0; f < arbol.Count; f++)
+            // v6.50.25 — TODO EL ÁRBOL EN UN SOLO LOTE de primitivas (un
+            // solo baile End→primitivas→Begin por descarga) y LOS GORROS
+            // SOLO EN EL TRONCO: los gorros de las puntas de rama eran los
+            // «puntos difuminados alrededor de la línea» del reporte — las
+            // ramas ahora MUEREN FINAS (taper Linear hasta el 25%), como
+            // las descargas de verdad.
+            RayoStrip.AbrirLote();
+            try
             {
-                StormStrand s = arbol[f];
-                // El tronco al color A a brillo pleno; las ramas alternan
-                // A/B (la riqueza de DOS colores sin líneas paralelas).
-                Color cHalo = f == 0 ? haloA : (f % 2 == 1 ? haloB : haloA);
-                StrandImpl(batch, s.Points, seed + 17 + f * 13, flick,
-                    width * s.WidthScale, cHalo, core, alpha * s.Alpha,
-                    f == 0 ? StormTaper.Center : StormTaper.Linear);
+                for (int f = 0; f < arbol.Count; f++)
+                {
+                    StormStrand s = arbol[f];
+                    // El tronco al color A a brillo pleno; las ramas alternan
+                    // A/B (la riqueza de DOS colores sin líneas paralelas).
+                    Color cHalo = f == 0 ? haloA : (f % 2 == 1 ? haloB : haloA);
+                    RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, cHalo, core,
+                        alpha * s.Alpha, f == 0 ? StormTaper.Center : StormTaper.Linear,
+                        seed + 17 + f * 13, flick, suavizar: true, crackle: true);
+                }
+            }
+            finally { RayoStrip.CerrarLote(); }
+
+            // Los GORROS de descarga SOLO en los extremos del tronco.
+            if (arbol.Count > 0)
+            {
+                Vector2[] troncoPts = arbol[0].Points;
+                EndCap(batch, troncoPts[0], width, haloA, core, alpha);
+                EndCap(batch, troncoPts[troncoPts.Length - 1], width, haloA, core, alpha);
             }
         }
 
@@ -845,9 +880,17 @@ namespace AethonMod.Content.VFX
             //     «escalera» y no «serpenteo») ===
             Vector2[] canal = Chaikin(pts, 1);
 
+            // === v6.50.25 — TODO EL CANAL EN UN SOLO LOTE de primitivas
+            //     (el baile End→primitivas→Begin UNA vez por descarga; los
+            //     gorros solo en los ELECTRODOS, al final, con el lote del
+            //     juego ya reabierto). El canal ya viene alisado por el
+            //     Chaikin del meandro: sin doble suavizado. ===
+            RayoStrip.AbrirLote();
+            try
+            {
             // === EL TRONCO (el canal que meandra) ===
-            StrandImpl(batch, canal, seed, flick, width, halo, core, alpha,
-                StormTaper.Center);
+            RayoStrip.FilamentoEnLote(canal, width, halo, core, alpha,
+                StormTaper.Center, seed, flick, suavizar: false, crackle: true);
 
             // === LAS RAMAS EN LOS MÁXIMOS LOCALES DEL MEANDRO (la regla
             //     del ruido: la curvatura máxima del canal es donde la
@@ -889,8 +932,9 @@ namespace AethonMod.Content.VFX
                 Vector2[] rama = FractalPath(origen, origen + dirR * largo,
                     seedR, flick, gens, 0.12f);
 
-                StrandImpl(batch, rama, seedR, flick, width * 0.60f, halo, core,
-                    alpha * 0.55f, StormTaper.Linear);
+                RayoStrip.FilamentoEnLote(rama, width * 0.60f, halo, core,
+                    alpha * 0.55f, StormTaper.Linear, seedR, flick,
+                    suavizar: true, crackle: true);
 
                 // LA RAMITA (segundo nivel — el arbolito del canal).
                 var hojas = new List<StormStrand>();
@@ -898,14 +942,18 @@ namespace AethonMod.Content.VFX
                 for (int h = 0; h < hojas.Count; h++)
                 {
                     StormStrand s = hojas[h];
-                    StrandImpl(batch, s.Points, seedR + 17 + h, flick,
-                        width * s.WidthScale, halo, core, alpha * s.Alpha,
-                        StormTaper.Linear);
+                    RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, halo, core,
+                        alpha * s.Alpha, StormTaper.Linear, seedR + 17 + h, flick,
+                        suavizar: true, crackle: true);
                 }
                 ramas++;
             }
+            }
+            finally { RayoStrip.CerrarLote(); }
 
-            // LOS GORROS de descarga (los electrodos arden).
+            // LOS GORROS de descarga (SOLO los electrodos arden — las
+            // puntas de rama mueren finas, sin puntos de glow alrededor
+            // del canal: v6.50.25).
             EndCap(batch, canal[0], width, halo, core, alpha);
             EndCap(batch, canal[canal.Length - 1], width * 0.8f, halo, core, alpha);
         }
@@ -1434,54 +1482,33 @@ namespace AethonMod.Content.VFX
             float total = PathLength(pts);
             if (total < 1f) return;
 
-            // EL CRACKLE INTERPOLADO POR CONSTRUCCIÓN (v6.39): el brillo de
-            // un segmento es la media de los brillos de SUS DOS VÉRTICES
-            // (cada uno 0.66..1.0 por hash de baja frecuencia) — continuo de
-            // punta a punta, cero secciones duras, cero búfer.
-            // La VENA no lleva crackle (el núcleo caliente arde SIEMPRE).
-            float Brillo(int i)
-                => 0.66f + 0.34f * VFXCore.Hash01(seed, flick, i * 41 + 17);
+            // v6.50.25 — LA TIRA DE PRIMITIVAS (el reporte del usuario:
+            // «el rayo no es una línea lisa… lleno de pequeños bultos como
+            // puntos difuminados… lineas discontinuas y se nota que son
+            // lineas individuales»). LA CAUSA: la pila de rectángulos del
+            // pixel del motor SOLAPABA SU EXTENSIÓN DE GIRO en cada vértice
+            // del zigzag → en el lote aditivo cada solape era UN PUNTO
+            // BRILLANTE («los bultos»), y las 6 pasadas telescópicas leían
+            // como bandas apiladas («líneas pegadas una a otras»). El
+            // SpriteBatch solo sabe dibujar RECTÁNGULOS: en una esquina, o
+            // hay hueco o hay solape — la línea lisa no existe con quads.
+            // LA SOLUCIÓN: RayoStrip — la TIRA TRIANGULADA de primitivas
+            // con COLOR POR VÉRTICE (la técnica del StormLightningDrawer de
+            // vanilla): geometría CONTINUA de punta a punta (trapecios que
+            // COMPARTEN sus vértices: cero juntas, cero solapes), perfil
+            // transversal = la INTERPOLACIÓN LINEAL de 5 columnas de la
+            // funda + 3 de la vena (degradado REAL, no escalones), CRACKLE
+            // por vértice (contino de punta a punta, igual que la pila) y
+            // EL ALISADO CHAIKIN que deshace las esquinas del fractal.
+            // CERO SPRITES: ni pixel ni banda — solo vértices y color.
+            // (El baile del lote: cierra el SpriteBatch aditivo de la casa,
+            // dibuja las primitivas y lo reabre con LOS MISMOS parámetros —
+            // el aditivo es conmutativo, el Deferred no ordena: invisible.)
+            RayoStrip.Filamento(pts, width, halo, core, alpha, taper, seed, flick,
+                suavizar: true, crackle: true);
 
-            float arc = 0f;
-            for (int i = 0; i < pts.Length - 1; i++)
-            {
-                Vector2 a = pts[i];
-                Vector2 b = pts[i + 1];
-                Vector2 seg = b - a;
-                float len = seg.Length();
-                if (len < 0.35f) { arc += len; continue; }
-
-                // === LA NORMAL MEDIA (la lección del ribbon) ===
-                Vector2 prev = i > 0 ? a - pts[i - 1] : seg;
-                Vector2 next = i < pts.Length - 2 ? pts[i + 2] - b : seg;
-                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (!(avg.LengthSquared() >= 0.001f)) avg = seg; // v6.50.10 — también atrapa NaN (Normalize de un vector cero: "NaN < 0.001" es false y esquivaba el guard)
-                avg = Vector2.Normalize(avg);
-
-                float rot = (float)Math.Atan2(avg.Y, avg.X);
-                Vector2 mid = (a + b) * 0.5f;
-                float tMid = (arc + len * 0.5f) / total;
-
-                // El TAPER y el CRACKLE (interpolado entre los vértices).
-                float w = width * TaperFactor(taper, tMid);
-                float crackle = (Brillo(i) + Brillo(i + 1)) * 0.5f;
-
-                // === v6.50.22 — LA PILA DE PASADAS (el filamento 100%
-                //     código: quads SÓLIDOS del pixel del motor cuya SUMA
-                //     es el degradado transversal — el mismo truco del
-                //     LightningArc 466 de vanilla, con 6+1 pasadas). ===
-                float largo = Vector2.Dot(seg, avg);
-                if (largo < 0.35f) { arc += len; continue; }
-                float dPrev = AnguloEntre(prev, seg);
-                float dNext = AnguloEntre(seg, next);
-
-                PilaFilamento(batch, mid, rot, largo, dPrev, dNext, w,
-                    halo, halo, core, alpha, crackle);
-
-                arc += len;
-            }
-
-            // Los GORROS de descarga en ambos extremos.
+            // Los GORROS de descarga en ambos extremos (sprites con el
+            // lote ABIERTO — son PUNTOS de descarga, no la línea).
             EndCap(batch, pts[0], width, halo, core, alpha);
             EndCap(batch, pts[pts.Length - 1], width, halo, core, alpha);
         }
@@ -1551,6 +1578,8 @@ namespace AethonMod.Content.VFX
                     return MathHelper.Lerp(1f, 0.38f, t);
                 case StormTaper.Impact:
                     return MathHelper.Lerp(0.30f, 1f, (float)Math.Pow(t, 0.6));
+                case StormTaper.Flat:
+                    return 1f;
                 default: // Center
                     return Math.Max(0.35f,
                         (float)Math.Pow(Math.Sin(t * Math.PI), 0.65));

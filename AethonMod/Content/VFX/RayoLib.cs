@@ -567,13 +567,14 @@ namespace AethonMod.Content.VFX
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// DIBUJA un rayo del árbol (batch ABIERTO aditivo). LA PILA DE LA
-        /// CASA (la receta pública StormLib.PilaW/PilaF — pasadas SÓLIDAS del
-        /// pixel del motor cuya SUMA es el degradado transversal, la receta
-        /// del LightningArc 466 de vanilla) pero con el ANCHO y el COLOR
-        /// gobernados por la OLA y el TAPER de vanilla — el frente que
+        /// DIBUJA un rayo del árbol (DENTRO del lote de primitivas de
+        /// RayoStrip — ver RayoSistema.PostDrawTiles). v6.50.25 — LA TIRA
+        /// DE PRIMITIVAS: la geometría CONTINUA de trapecios que COMPARTEN
+        /// vértices (cero juntas, cero solapes — la línea LISA que el
+        /// SpriteBatch de rectángulos no podía dar) con el ANCHO y el COLOR
+        /// gobernados por la OLA de vanilla EN LOS VÉRTICES — el frente que
         /// energiza, la retirada que apaga, la horquilla que muere en punta.
-        /// SIN textura NI horneada: el pincel es el pixel 1×1 del motor.
+        /// SIN textura NI horneada NI sprite: solo vértices y color.
         /// </summary>
         public static void Dibujar(SpriteBatch batch, RayoBolt bolt, Color color, Color nucleo,
             float ancho, float progreso, float intensidad, AnimRayo anim)
@@ -600,62 +601,33 @@ namespace AethonMod.Content.VFX
                                   MathHelper.Clamp(intensidad, 0f, 1.5f);
                 if (alfaGlobal <= 0.01f) return;
 
-                Texture2D pixel = Pixel;
-                if (pixel == null) return;
-
                 int n = bolt.Puntos.Length;
-                float[] rots = bolt.Rotaciones;
-                if (rots == null || rots.Length != n)
-                { rots = CalcRotaciones(bolt.Puntos); bolt.Rotaciones = rots; }
-
                 Vector2 pantalla = Main.screenPosition;
 
-                for (int i = 0; i < n - 1; i++)
+                // === LA OLA POR NODO (los atributos del vértice de vanilla):
+                //     el brillo (OlaColor) y el ancho (OlaAncho) de CADA
+                //     vértice del canal — la tira los interpola LINEALMENTE
+                //     de nodo a nodo (lo que la pila de rectángulos tenía
+                //     que aproximar por tramos con sus solapes de junta). ===
+                var pts = new Vector2[n];
+                var alfaNodo = new float[n];
+                var anchoNodo = new float[n];
+                float anchoSeguro = Math.Max(ancho, 0.05f);
+                for (int i = 0; i < n; i++)
                 {
-                    Vector2 a = bolt.Puntos[i] - pantalla;
-                    Vector2 b = bolt.Puntos[i + 1] - pantalla;
+                    pts[i] = bolt.Puntos[i] - pantalla;
                     float t = i / (float)(n - 1);
-
-                    // LA OLA en este tramo (el color del vértice de vanilla).
-                    float ola = OlaColor(t, progreso, bolt.Rango, anim);
-                    if (ola <= 0.004f) continue;
-
-                    // EL ANCHO de este tramo (el half-width de vanilla).
-                    float w = OlaAncho(t, progreso, bolt.Rango, ancho, bolt.EsTronco);
-                    if (w <= 0.05f) continue;
-
-                    // la rotación del tramo y la junta de la casa.
-                    float rot = rots[i];
-                    Vector2 seg = b - a;
-                    float len = seg.Length();
-                    if (len < 0.35f) continue;
-                    float largo = Math.Abs(Vector2.Dot(seg, rot.ToRotationVector2()));
-                    if (largo < 0.35f) continue;
-                    float dPrev = i > 0 ? Angulo(rots[i - 1], rot) : 0f;
-                    float dNext = i < n - 2 ? Angulo(rot, rots[i + 1]) : 0f;
-                    Vector2 mid = (a + b) * 0.5f;
-
-                    float f = alfaGlobal * ola;
-
-                    // === LA PILA (la receta pública de StormLib — pasadas
-                    //     SÓLIDAS del pixel del motor cuya SUMA es el
-                    //     degradado; la OLA de vanilla gobierna la f) ===
-                    for (int k = 0; k < StormLib.PilaW.Length; k++)
-                    {
-                        float wk = w * StormLib.PilaW[k];
-                        float ext = Junta(wk, dPrev) + Junta(wk, dNext);
-                        Quad(batch, pixel, mid, new Vector2(largo + ext, wk), rot,
-                            Tinte(color, StormLib.PilaF[k] * f));
-                    }
-
-                    // LA VENA — la línea BLANCA razor (arde SIEMPRE, como el
-                    // núcleo de vanilla; suelo 1.5 px — el pincel sólido
-                    // mantiene la línea CRISPA).
-                    float wVena = Math.Max(w * 0.34f, 1.5f);
-                    float extV = Junta(wVena, dPrev) + Junta(wVena, dNext);
-                    Quad(batch, pixel, mid, new Vector2(largo + extV, wVena), rot,
-                        Tinte(nucleo, f));
+                    alfaNodo[i] = OlaColor(t, progreso, bolt.Rango, anim);
+                    anchoNodo[i] = Math.Max(0f,
+                        OlaAncho(t, progreso, bolt.Rango, anchoSeguro, bolt.EsTronco)) / anchoSeguro;
                 }
+
+                // LA TIRA: taper FLAT (la OLA es la única curva de ancho),
+                // sin crackle (la OLA gobierna el brillo), alisado Chaikin
+                // (la línea LISA del raymarch de vanilla).
+                RayoStrip.FilamentoEnLote(pts, anchoSeguro, color, nucleo, alfaGlobal,
+                    StormTaper.Flat, 0, 0, suavizar: true, crackle: false,
+                    alphaPorNodo: alfaNodo, anchoPorNodo: anchoNodo);
             }
             catch { }
         }
@@ -898,9 +870,13 @@ namespace AethonMod.Content.VFX
             // aquí: PostDrawTiles, encima de NPCs y proyectiles).
             try
             {
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
+                // v6.50.25 — UN SOLO LOTE DE PRIMITIVAS para TODOS los canales
+                // vivos (un solo baile End→primitivas→Begin por frame: la
+                // tira de vértices de RayoStrip vuelca los 24 canales del
+                // pozo en UN solo pase del dispositivo — la línea LISA).
+                RayoStrip.AbrirLote();
+                try
+                {
 
                 for (int i = 0; i < Capacidad; i++)
                 {
@@ -974,6 +950,9 @@ namespace AethonMod.Content.VFX
                             ancho, progreso, r.Intensidad, r.Anim);
                     }
                 }
+
+                }
+                finally { RayoStrip.CerrarLote(); }
             }
             catch { }
             finally

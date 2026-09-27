@@ -6,28 +6,26 @@ using Terraria;
 namespace AethonMod.Content.VFX
 {
     /// <summary>
-    /// BoltRenderer — v6.50.22 — EL RELÁMPAGO DETERMINISTA DE PRIMERA
-    /// GENERACIÓN, REPARADO CON LA PILA 100% CÓDIGO.
+    /// BoltRenderer — v6.50.25 — EL RELÁMPAGO DETERMINISTA DE PRIMERA
+    /// GENERACIÓN, MONTADO SOBRE LA TIRA DE PRIMITIVAS DE RAYOSTRIP.
     ///
     /// Rayos en zigzag nacidos del mismo principio que el látigo eléctrico
     /// de la medusa nebulosa: el zigzag se deriva de (semilla, flick,
     /// segmento) con hash puro → TODAS las máquinas ven el MISMO rayo sin
-    /// sincronizar nada, y el rayo se REGENERAR cada pocos ticks (flick) —
+    /// sincronizar nada, y el rayo se REGENERA cada pocos ticks (flick) —
     /// está VIVO, no es una textura estática.
     ///
-    /// v6.50.22 — LA PILA DE PASADAS (la reconstrucción del reporte del
-    /// usuario: "los rayos deben ser creados mediante código, nada de
-    /// sprite"): el pincel pasa a ser EL PIXEL 1×1 del motor
-    /// (VFXCore.Pixel) y el perfil transversal ES LA SUMA de las 6
-    /// pasadas + vena de StormLib (la receta del LightningArc 466 de
-    /// vanilla, extendida) — las bandas horneadas BoltHalo/BoltCore
-    /// (con SUELO de alfa en los bordes: el look "líneas") se retiran
-    /// del consumo. La geometría de juntas sigue siendo la de la casa:
-    /// normal media (líneas de corte colineales: tesela SIN hueco) +
-    /// extensión de giro por pasada.
+    /// v6.50.25 — LA LÍNEA LISA (el reporte del usuario: «el rayo no es
+    /// una línea lisa… lleno de pequeños bultos como puntos difuminados»):
+    /// el pincel pasa a ser LA TIRA DE VÉRTICES de RayoStrip — geometría
+    /// CONTINUA (trapecios que comparten vértices: cero juntas, cero
+    /// solapes — el SpriteBatch de rectángulos no podía dibujar una esquina
+    /// sin hueco o sin solape, y el solape aditivo era EL BULTO de cada
+    /// vértice) con el perfil transversal en el COLOR DE LOS VÉRTICES
+    /// (degradado interpolado, no escalones de pasadas apiladas).
     ///
-    /// Uso (biblioteca): VFXCore.Begin() → ComputeQuads(...) →
-    /// VFXCore.FlushAdditive(...).
+    /// Uso: recibe coordenadas de MUNDO y se dibuja directo (el baile del
+    /// lote de primitivas lo gestiona RayoStrip.Filamento).
     /// </summary>
     public static class BoltRenderer
     {
@@ -36,10 +34,10 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// Calcula un rayo de <paramref name="start"/> a <paramref name="end"/>
-        /// como cuadros de luz en el buffer de VFXCore (coords de MUNDO).
+        /// (coords de MUNDO) y lo dibuja como TIRA de primitivas.
         /// </summary>
-        /// <param name="start">Origen del rayo.</param>
-        /// <param name="end">Destino del rayo.</param>
+        /// <param name="start">Origen del rayo (mundo).</param>
+        /// <param name="end">Destino del rayo (mundo).</param>
         /// <param name="seed">Semilla determinista (misma = mismo rayo).</param>
         /// <param name="flick">El "parpadeo" actual: cámbialo cada ~4-9 ticks
         /// para que el zigzag se regenere y el rayo VIVA.</param>
@@ -53,13 +51,14 @@ namespace AethonMod.Content.VFX
         {
             Vector2 delta = end - start;
             float length = delta.Length();
-            if (length < 4f) return;
+            if (length < 4f || alpha <= 0.01f || width <= 0.05f) return;
 
             Vector2 dir = delta / length;
             Vector2 normal = new Vector2(-dir.Y, dir.X);
             float amp = Math.Min(length * 0.16f, 14f) * ampFactor;
 
-            // Puntos del zigzag (en coords de mundo).
+            // Puntos del zigzag (coords de PANTALLA para la tira).
+            Vector2 screen = Main.screenPosition;
             Vector2[] pts = new Vector2[Segments + 1];
             for (int s = 0; s <= Segments; s++)
             {
@@ -68,100 +67,53 @@ namespace AethonMod.Content.VFX
                 // tensión en el centro, quieto en los anclajes).
                 float envelope = (float)Math.Sin(t * Math.PI);
                 float jitter = (VFXCore.Hash01(seed, flick, s) - 0.5f) * 2f * amp * envelope;
-                pts[s] = start + dir * (length * t) + normal * jitter;
+                pts[s] = start + dir * (length * t) + normal * jitter - screen;
             }
-            pts[0] = start;
-            pts[Segments] = end;
+            pts[0] = start - screen;
+            pts[Segments] = end - screen;
 
-            // Trazos: LA PILA DE PASADAS por segmento (100% código — el
-            // pincel es EL PIXEL del motor; la suma de las pasadas ES el
-            // degradado transversal) — BORDE A BORDE con la normal media
-            // (v6.39: la normal media orienta la junta; el largo es la
-            // proyección sobre esa dirección; la extensión de giro por
-            // pasada cubre la cuña de las esquinas).
-            for (int s = 0; s < Segments; s++)
+            // LA TIRA DEL TRONCO (la línea LISA — un solo volcado).
+            RayoStrip.Filamento(pts, width, haloColor, coreColor, alpha,
+                StormTaper.Center, seed, flick, suavizar: true, crackle: true);
+
+            // RAMAS laterales cortas donde el hash lo pide.
+            for (int s = 1; s < Segments - 1; s++)
             {
-                Vector2 a = pts[s];
-                Vector2 b = pts[s + 1];
-                Vector2 seg = b - a;
-                float segLen = seg.Length();
-                if (segLen < 0.5f) continue;
+                if (VFXCore.Hash01(seed, flick, s + 91) <= 0.62f) continue;
+                float side = VFXCore.Hash01(seed, flick, s + 37) > 0.5f ? 1f : -1f;
+                float branchLen = (0.35f + 0.4f * VFXCore.Hash01(seed, flick, s + 53)) * length * 0.25f;
+                Vector2 branchDir = (dir * 0.45f + normal * side).SafeNormalize(Vector2.UnitY);
+                Vector2 bEnd = pts[s + 1] + branchDir * branchLen;
 
-                // LA NORMAL MEDIA (la lección del ribbon).
-                Vector2 prev = s > 0 ? a - pts[s - 1] : seg;
-                Vector2 next = s < Segments - 1 ? pts[s + 2] - b : seg;
-                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (avg.LengthSquared() < 0.001f) avg = seg;
-                avg = Vector2.Normalize(avg);
-
-                Vector2 mid = (a + b) * 0.5f;
-                float rot = (float)Math.Atan2(avg.Y, avg.X);
-
-                // EL LARGO EXACTO + la extensión de giro del round-join.
-                float largo = Vector2.Dot(seg, avg);
-                if (largo < 0.5f) continue;
-                float dPrev = Angulo(prev, seg);
-                float dNext = Angulo(seg, next);
-
-                // LA PILA (la misma de StormLib): 6 pasadas + vena — con
-                // el TINTE LINEAL de la casa (el `Color*f` de XNA sería
-                // aporte c·f² en el lote aditivo — el hallo v6.50.9).
-                for (int k = 0; k < StormLib.PilaW.Length; k++)
-                {
-                    float wk = width * StormLib.PilaW[k];
-                    float ext = ExtJunta(wk, dPrev) + ExtJunta(wk, dNext);
-                    VFXCore.Quad(mid, StormLib.Tint(haloColor, StormLib.PilaF[k] * alpha),
-                        new Vector2(largo + ext, wk), rot, VFXCore.Pixel);
-                }
-                float wv = Math.Max(width * 0.34f, 1.5f);
-                float extV = ExtJunta(wv, dPrev) + ExtJunta(wv, dNext);
-                VFXCore.Quad(mid, StormLib.Tint(coreColor, alpha),
-                    new Vector2(largo + extV, wv), rot, VFXCore.Pixel);
-
-                // RAMA lateral corta donde el hash lo pide.
-                if (s > 0 && s < Segments - 1 && VFXCore.Hash01(seed, flick, s + 91) > 0.62f)
-                {
-                    float side = VFXCore.Hash01(seed, flick, s + 37) > 0.5f ? 1f : -1f;
-                    float branchLen = (0.35f + 0.4f * VFXCore.Hash01(seed, flick, s + 53)) * length * 0.25f;
-                    Vector2 branchDir = (dir * 0.45f + normal * side).SafeNormalize(Vector2.UnitY);
-                    Vector2 bEnd = b + branchDir * branchLen;
-                    Vector2 bMid = (b + bEnd) * 0.5f;
-                    float bRot = (float)Math.Atan2(branchDir.Y, branchDir.X);
-                    // v6.50.22 — la rama también con LA PILA (×0.6 brillo).
-                    for (int k = 0; k < StormLib.PilaW.Length; k++)
-                    {
-                        float wk = width * StormLib.PilaW[k] * 0.7f;
-                        VFXCore.Quad(bMid, StormLib.Tint(haloColor, StormLib.PilaF[k] * 0.6f * alpha),
-                            new Vector2(branchLen + width * 0.6f, wk), bRot, VFXCore.Pixel);
-                    }
-                    float wvB = Math.Max(width * 0.34f, 1.5f);
-                    VFXCore.Quad(bMid, StormLib.Tint(coreColor, 0.6f * alpha),
-                        new Vector2(branchLen + width * 0.2f, wvB), bRot, VFXCore.Pixel);
-                }
+                // v6.50.25 — la rama también con LA TIRA (×0.6 brillo, sin
+                // gorro: las puntas de rama mueren finas — los gorros eran
+                // los «puntos difuminados alrededor de la línea»).
+                var rama = new Vector2[] { pts[s + 1], bEnd };
+                RayoStrip.Filamento(rama, width * 0.6f, haloColor, coreColor,
+                    0.6f * alpha, StormTaper.Linear, seed + s * 7, flick,
+                    suavizar: true, crackle: true, vena: false);
             }
 
             // Extremos brillantes (descarga en el origen, frente de impacto)
-            // — puntos radiales: aquí SoftGlow (via FlushAdditive) es el
-            // pincel CORRECTO (los gorros son puntos, no tiras).
-            VFXCore.Quad(start, coreColor * (0.9f * alpha), new Vector2(width * 3.2f, width * 3.2f));
-            VFXCore.Quad(start, haloColor * (0.8f * alpha), new Vector2(width * 5.0f, width * 5.0f));
-            VFXCore.Quad(end, coreColor * (0.9f * alpha), new Vector2(width * 2.6f, width * 2.6f));
-            VFXCore.Quad(end, haloColor * (0.7f * alpha), new Vector2(width * 4.0f, width * 4.0f));
+            // — puntos radiales SOFT GLOW con el lote del juego reabierto
+            // (los gorros son PUNTOS, no tiras).
+            try
+            {
+                if (VFXCore.SoftGlow != null)
+                {
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, pts[0], null,
+                        StormLib.Tint(coreColor, 0.9f * alpha), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(width * 2.4f, width * 2.4f) / VFXCore.SoftGlow.Size(),
+                        SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, pts[Segments], null,
+                        StormLib.Tint(coreColor, 0.9f * alpha), 0f,
+                        VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(width * 2.0f, width * 2.0f) / VFXCore.SoftGlow.Size(),
+                        SpriteEffects.None, 0f);
+                }
+            }
+            catch { }
         }
-
-        /// <summary>El ángulo (0..π) entre dos direcciones (el giro de la junta).</summary>
-        private static float Angulo(Vector2 d0, Vector2 d1)
-        {
-            if (d0.LengthSquared() < 0.0001f || d1.LengthSquared() < 0.0001f) return 0f;
-            float dot = MathHelper.Clamp(Vector2.Dot(Vector2.Normalize(d0), Vector2.Normalize(d1)), -1f, 1f);
-            return (float)Math.Acos(dot);
-        }
-
-        /// <summary>La extensión del round-join (w/2·tan(δ/2), suelo
-        /// 0.35 px — el margen 1.2 era de las bandas horneadas: con el
-        /// PIXEL sólido las rectas teselan exacto y el suelo viejo solo
-        /// apilaba cuentas).</summary>
-        private static float ExtJunta(float w, float giro)
-            => MathHelper.Clamp(w * 0.5f * (float)Math.Tan(giro * 0.5f), 0.35f, w * 0.5f);
     }
 }

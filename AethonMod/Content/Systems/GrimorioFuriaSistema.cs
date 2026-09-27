@@ -667,7 +667,25 @@ namespace AethonMod.Content.Systems
             if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight)
                 return new int[] { NPCID.CaveBat, NPCID.Skeleton, NPCID.BlueSlime };
 
-            // === SUPERFICIE ===
+            // === SUPERFICIE (v6.50.25 — CONCIENTE DE LA HORA Y DEL MUNDO,
+            //     el reporte: «las oleadas del grimorio no se activan por
+            //     el dia, recuerda que las oleadas deben tomar los
+            //     monstruos de la zona y usarlos»: el OJO DEMONÍCO HUYE del
+            //     sol recién nacido (su IA de vanilla lo despega del suelo
+            //     y lo manda a des-spawnear) — la mitad de la chusma de
+            //     superficie EVAPORABA al nacer de día y la oleada leía
+            //     como «no se activa». DE DÍA la zona manda LIMOS (los que
+            //     de verdad viven en la superficie al sol); de noche, el
+            //     repertorio clásico; en hardmode, los de la zona
+            //     hardmode) ===
+            if (Main.hardMode)
+            {
+                if (Main.dayTime)
+                    return new int[] { NPCID.BlueSlime, NPCID.GreenSlime, NPCID.BlueSlime };
+                return new int[] { NPCID.Werewolf, NPCID.WanderingEye, NPCID.Zombie };
+            }
+            if (Main.dayTime)
+                return new int[] { NPCID.GreenSlime, NPCID.BlueSlime, NPCID.PurpleSlime };
             return new int[] { NPCID.Zombie, NPCID.DemonEye, NPCID.GreenSlime, NPCID.BlueSlime };
         }
 
@@ -692,25 +710,39 @@ namespace AethonMod.Content.Systems
         /// </summary>
         private static int JefeDelLugar(Player p)
         {
-            if (p.ZoneUnderworldHeight) return NPCID.EyeofCthulhu; // el ojo los caza en el infierno
+            // v6.50.25 — LOS JEFES NO VEN LA HORA (el reporte del usuario:
+            // «en los jefes estos no se pueden ver afectados por el dia»).
+            // EL OJO DE CTHULHU HUYE DEL SOL (su IA de vanilla lo manda a
+            // despegar en cuanto amanece y se des-spawnea): DE DÍA el
+            // guardián es uno que NO duerme — donde el ojo no puede, la
+            // CORONA manda (y en la superficie la paridad no muere:
+            // alterna REY/DEERCLOPS, los dos guardías que no huyen).
+            bool deDia = Main.dayTime;
+
+            if (p.ZoneUnderworldHeight)
+                return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu; // el ojo los caza en el infierno; de día la corona reina en el fuego
             if (p.ZoneDungeon) return NPCID.SkeletronHead;          // v6.48: SIN hora — el guardián no duerme
-            if (p.ZoneSnow) return NPCID.Deerclops;
-            if (p.ZoneJungle) return NPCID.QueenBee;
+            if (p.ZoneSnow) return NPCID.Deerclops;                  // Deerclops no mira el sol
+            if (p.ZoneJungle) return NPCID.QueenBee;                 // la colmena no duerme
             if (p.ZoneCorrupt) return NPCID.EaterofWorldsHead;
             if (p.ZoneCrimson) return NPCID.BrainofCthulhu;
 
             // DESIERTO (v6.48 — zona SIN guardián, ahora con el Rey).
             if (p.ZoneDesert) return NPCID.KingSlime;
 
-            // PLAYA y CIELO (v6.48 — zonas sin guardián, ahora con el Ojo).
-            if (p.ZoneBeach) return NPCID.EyeofCthulhu;
-            if (p.ZoneSkyHeight) return NPCID.EyeofCthulhu;
+            // PLAYA y CIELO (v6.48 — zonas sin guardián, ahora con el Ojo
+            // — de día, el Rey: el vigía no puede volar bajo el sol).
+            if (p.ZoneBeach) return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu;
+            if (p.ZoneSkyHeight) return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu;
 
             // SUBSUELO sin bioma: el mal del mundo (o el Rey, en mundos limpios)
             if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight)
                 return WorldGen.crimson ? NPCID.BrainofCthulhu : NPCID.EaterofWorldsHead;
 
-            // SUPERFICIE: por PARIDAD de oleada (sin hora — la 1 Rey, la 2 Ojo…)
+            // SUPERFICIE: por PARIDAD de oleada (sin hora — la 1 Rey, la 2 Ojo…
+            // de día la paridad sigue VIVA: Rey/Deerclops, los que no huyen).
+            if (deDia)
+                return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.Deerclops;
             return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.EyeofCthulhu;
         }
 

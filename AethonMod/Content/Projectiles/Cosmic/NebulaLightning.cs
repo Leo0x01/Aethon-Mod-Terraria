@@ -207,44 +207,48 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 float flicker = 0.86f + 0.14f *
                     (float)Math.Sin(Main.GlobalTimeWrappedHourly * 61f);
 
-                // === el ZIGZAG: nace del hash (semilla, flick, segmento) ===
+                // === v6.50.25 — EL ZIGZAG: LA TIRA DE PRIMITIVAS (la línea
+                //     LISA de RayoStrip — antes eran CÁPSULAS de glow
+                //     estirado: una tira de energía difusa, la primera
+                //     generación). El camino nace del hash (semilla, flick,
+                //     segmento) — el MISMO rayo en todas las máquinas — y la
+                //     tira lo pinta CONTINUO de punta a punta con su perfil
+                //     suave por vértice y la VENA blanca caliente. ===
                 int flick = (int)(Main.GlobalTimeWrappedHourly * 20f); // ~3 ticks
                 int seed = (int)Projectile.ai[1];
                 int segs = Math.Max(4, (int)(len / 26f) + 1);
 
-                for (int s = 0; s < segs; s++)
+                var camino = new Vector2[segs + 1];
+                for (int s = 0; s <= segs; s++)
                 {
-                    float t0 = s / (float)segs;
-                    float t1 = (s + 1) / (float)segs;
                     // el zigzag se AMPLIA en el medio (un rayo real tiene la
-                    // parte media más ramificada) y afina al llegar a la punta
-                    float amp = 16f * (float)Math.Sin(t0 * Math.PI);
-                    float j0 = (Hash01(seed, flick, s) - 0.5f) * 2f * amp;
-                    float j1 = (Hash01(seed, flick, s + 1) - 0.5f) * 2f *
-                               16f * (float)Math.Sin(t1 * Math.PI);
-                    Vector2 p0 = origin + dir * (t0 * len) + perp * j0;
-                    Vector2 p1 = origin + dir * (t1 * len) + perp * j1;
+                    // parte media más ramificada)
+                    float t = s / (float)segs;
+                    float amp = 16f * (float)Math.Sin(t * Math.PI);
+                    float j = (Hash01(seed, flick, s) - 0.5f) * 2f * amp;
+                    camino[s] = origin + dir * (t * len) + perp * j;
+                }
+                camino[0] = origin;
+                camino[segs] = head;
 
-                    // v6.00 — TRES capas: halo ANCHO + funda + NÚCLEO 255
-                    float f = fade * flicker;
-                    DrawSegment(glow, p0, p1, 11f * f,
-                        new Color(70, 210, 255, (byte)(150 * f)));
-                    DrawSegment(glow, p0, p1, 4.6f * f,
-                        new Color(170, 240, 255, (byte)(225 * f)));
-                    DrawSegment(glow, p0, p1, 1.9f * f,
-                        new Color(255, 255, 255, (byte)(255 * f)));
+                float f = fade * flicker;
+                RayoStrip.Filamento(camino, 2.1f,
+                    new Color(70, 210, 255), new Color(255, 255, 255),
+                    0.85f * f, StormTaper.Flat, seed, flick,
+                    suavizar: true, crackle: true);
 
-                    // RAMA lateral corta (una de cada dos segmentos, aleatoria)
-                    if (s > 0 && s < segs - 1 && Hash01(seed, flick, s + 91) > 0.60f)
-                    {
-                        float side = Hash01(seed, flick, s + 37) > 0.5f ? 1f : -1f;
-                        Vector2 bEnd = p0 + (perp * side - dir * 0.45f) *
-                            (20f + 14f * Hash01(seed, flick, s + 53));
-                        DrawSegment(glow, p0, bEnd, 4.5f * f,
-                            new Color(120, 230, 255, (byte)(140 * f)));
-                        DrawSegment(glow, p0, bEnd, 1.8f * f,
-                            new Color(240, 252, 255, (byte)(200 * f)));
-                    }
+                // RAMA lateral corta (una de cada dos segmentos, aleatoria)
+                // — también con la tira (fina, sin vena: muere en punta).
+                for (int s = 1; s < segs - 1; s++)
+                {
+                    if (Hash01(seed, flick, s + 91) <= 0.60f) continue;
+                    float side = Hash01(seed, flick, s + 37) > 0.5f ? 1f : -1f;
+                    Vector2 bEnd = camino[s] + (perp * side - dir * 0.45f) *
+                        (20f + 14f * Hash01(seed, flick, s + 53));
+                    RayoStrip.Filamento(new Vector2[] { camino[s], bEnd }, 0.85f,
+                        new Color(120, 230, 255), new Color(240, 252, 255),
+                        0.55f * f, StormTaper.Linear, seed + s, flick,
+                        suavizar: false, crackle: false, vena: false);
                 }
 
                 // === la PUNTA: el frente del látigo brilla mientras vuela ===

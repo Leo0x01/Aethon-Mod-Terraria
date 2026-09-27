@@ -321,24 +321,22 @@ namespace AethonMod.Content.Projectiles.Cosmic
         /// <summary>LA LÍNEA DE AVISO del telegraph + el anillo objetivo.</summary>
         private void DrawTelegraph(Vector2 sky, Vector2 strike, float time, int seed, int flick)
         {
-            // La línea fina: una tira de halo de 3 px del cielo al objetivo
-            // con el FILAMENTO tenue encendido a ráfagas (la carga).
+            // v6.50.25 — LA LÍNEA FINA: UNA TIRA de primitivas (la línea
+            // LISA del cielo al objetivo). ANTES eran quads por tramo con
+            // la extensión +6px SOLAPÁNDOSE en cada vértice — el reporte
+            // del usuario: «su rayo son solo lineas pegadas una a otras,
+            // son lineas discontinuas y se nota que son lineas
+            // individuales». La tira es CONTINUA de punta a punta: los
+            // trapecios COMPARTEN vértices (cero juntas, cero solapes) y
+            // el perfil suave vive en el color de los vértices.
             Vector2[] path = StormLib.ZigPath(sky, strike, seed, flick, 10, 14f);
             float charge = MathHelper.Clamp(_age / TelegraphTicks, 0f, 1f);
             float pulse = 0.55f + 0.45f * (float)Math.Sin(time * 9f);
 
-            for (int i = 0; i < path.Length - 1; i++)
-            {
-                Vector2 seg = path[i + 1] - path[i];
-                float len = seg.Length();
-                if (len < 0.5f) continue;
-                float rot = (float)Math.Atan2(seg.Y, seg.X);
-                Vector2 mid = (path[i] + path[i + 1]) * 0.5f;
-                // v6.50.22 — EL PIXEL del motor (la banda BoltHalo se
-                // retira del consumo: suelo de alfa en los bordes).
-                Quad(VFXCore.Pixel, mid, new Vector2(len + 6f, 3.5f + 2.5f * pulse * charge),
-                    rot, Tint(GoldWarm, 0.35f * charge));
-            }
+            RayoStrip.Filamento(path, 0.67f + 0.48f * pulse * charge,
+                GoldWarm, WhiteIncan,
+                0.45f * charge, StormTaper.Center, seed, flick,
+                suavizar: true, crackle: false, vena: false);
 
             // El filamento de carga: encendido a ráfagas cada vez más rápido.
             if (StormLib.IsLit(seed, flick, 0.30f + 0.45f * charge))
