@@ -708,18 +708,27 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     // FLASH DE LIBERACIÓN central (primeros ~16 ticks):
                     // brillo cálido que se apaga mientras el anillo despega.
+                    // v6.50.18 — SOFTGLOW → NOVABURST (el círculo plano
+                    // morado del final del Agujero Negro — el reporte del
+                    // usuario): la gaussiana compacta del SoftGlow a radio
+                    // fijo se leía como un DISCO; el perfil monótono de
+                    // caída larga del NovaBurst es un gradiente que muere
+                    // en su propio borde — la liberación de la luz del
+                    // colapso, suave de punta a punta.
                     if (age < 16f)
                     {
-                        Texture2D softGlow = ModContent.Request<Texture2D>(
-                            "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
-                        float flashT = MathHelper.Clamp(age / 16f, 0f, 1f);
-                        float flashAlpha = (1f - flashT) * (1f - flashT);
-                        float flashR = MathHelper.Lerp(120f, 46f, flashT);
-                        float flashScale = flashR / (softGlow.Width * 0.5f);
-                        Main.spriteBatch.Draw(softGlow, drawPos, null,
-                            new Color(255, 246, 225, (byte)(alpha * flashAlpha * 235f)),
-                            0f, new Vector2(softGlow.Width * 0.5f, softGlow.Height * 0.5f),
-                            flashScale, SpriteEffects.None, 0f);
+                        Texture2D novaTex = VFXCore.NovaBurst;
+                        if (novaTex != null && !novaTex.IsDisposed)
+                        {
+                            float flashT = MathHelper.Clamp(age / 16f, 0f, 1f);
+                            float flashAlpha = (1f - flashT) * (1f - flashT);
+                            float flashR = MathHelper.Lerp(150f, 60f, flashT);
+                            float flashScale = flashR / (novaTex.Width * 0.5f);
+                            Main.spriteBatch.Draw(novaTex, drawPos, null,
+                                new Color(255, 246, 225, (byte)(alpha * flashAlpha * 235f)),
+                                0f, new Vector2(novaTex.Width * 0.5f, novaTex.Height * 0.5f),
+                                flashScale, SpriteEffects.None, 0f);
+                        }
                     }
 
                     // Halo interior: la luz lensada acumulándose por dentro.

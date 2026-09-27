@@ -482,4 +482,39 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>18 — LOS RAYOS (v6.50.18): LA BOLSA EXCLUSIVA DE LAS ARMAS
+    /// DE RAYO — la petición con nombre y apellidos: "pon las nuevas armas
+    /// de rayos más las viejas en una bolsa exclusiva para armas de rayo".
+    /// Las TRES NUEVAS (el Rayo Primordial — el rayo del clima de Terraria
+    /// 1.4.5 portado 1:1 con LA OLA de energizado; el Arco de Sobretensión
+    /// — el Arc Surge de vanilla: arcos carmesí mano→cursor enganchados a
+    /// la mano; y v6.50.24 el Colmillo de Vena Trueno — la caída del dragón
+    /// de Coralite: el trío parpadeante) MÁS las VIEJAS (el Cetro del
+    /// Trueno Rúnico y el Cetro del Trueno Perlin).</summary>
+    public class BolsaArmasRayo : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Armas de Rayo";
+        protected override string NombreCorto => "Bolsa de los Rayos";
+        protected override Color ColorFiesta => new(150, 225, 255);
+        protected override string Nota => "El rayo de Terraria de verdad y todo el arsenal eléctrico";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // LAS NUEVAS (v6.50.18 — el puerto del sistema de vanilla 1.4.5)
+            l.Add((ModContent.ItemType<Weapons.Cosmic.RayoPrimordialStaff>(), 1));   // el rayo del clima, de 1000 px
+            l.Add((ModContent.ItemType<Weapons.Cosmic.ArcoSobretensionStaff>(), 1)); // el Arc Surge: arcos carmesí mano→cursor
+            // v6.50.24 — EL COLMILLO DE VENA TRUENO (la petición: "para los
+            // rayos crea una nueva arma basada en thundervein dragon Coralite
+            // mod terraria"): la caída del dragón de Coralite — trío
+            // parpadeante 1 naranja + 2 amarillos que cae del cielo,
+            // telegrafiada, con cadena de 3.
+            l.Add((ModContent.ItemType<Weapons.Cosmic.VenaTruenoStaff>(), 1));       // el dragón de Coralite: el trío de la caída
+            // LAS VIEJAS
+            l.Add((ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>(), 1));        // el trueno rúnico del cielo
+            l.Add((ModContent.ItemType<Weapons.Cosmic.TruenoPerlinStaff>(), 1));     // el arco de ruido Perlin
+            return l;
+        }
+    }
 }

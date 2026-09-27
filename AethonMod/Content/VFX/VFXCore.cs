@@ -160,6 +160,34 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        // v6.50.18 — el NovaBurst entra al club de las workhouses: el
+        // degradado monótono de caída larga (la textura que el usuario
+        // pidió por nombre para los destellos finales).
+        private static Asset<Texture2D> _novaBurst;
+
+        /// <summary>
+        /// v6.50.18 — EL GRADIENTE DEL DESTELLO FINAL (NovaBurst.png, 256²,
+        /// caída monótona 255→0 que muere exactamente en su borde): la
+        /// textura que sustituye a los discos gaussianos compactos en TODO
+        /// destello de explosión — la firma visual de «degradado suave, no
+        /// círculo plano».
+        /// Null-safe (recargas calientes): null si el asset aún no vive.
+        /// </summary>
+        public static Texture2D NovaBurst
+        {
+            get
+            {
+                try
+                {
+                    if (_novaBurst == null)
+                        _novaBurst = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/Procedural/NovaBurst");
+                    return _novaBurst.IsLoaded ? _novaBurst.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
         private static Texture2D _pixel;
 
         /// <summary>

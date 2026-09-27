@@ -137,6 +137,31 @@ namespace AethonMod.Content.VFX
         private static readonly OndaSlot[] _ondas = new OndaSlot[6];
 
         /// <summary>
+        /// v6.50.18 — LA TEXTURA DEL FLASH (NovaBurst.png, la que el usuario
+        /// pidió por nombre para el destello final). Carga perezosa con la
+        /// sonda de la casa: si el asset aún no está (primer frame de una
+        /// recarga caliente), el flash simplemente no pinta ese frame —
+        /// jamás tira.
+        /// </summary>
+        private static Texture2D _novaTex;
+
+        /// <summary>La textura del degradado del flash (null-safe).</summary>
+        internal static Texture2D NovaBurstTex
+        {
+            get
+            {
+                try
+                {
+                    if (_novaTex == null || _novaTex.IsDisposed)
+                        _novaTex = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/Procedural/NovaBurst").Value;
+                    return _novaTex;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>
         /// ¿Se cerró el lote de la interfaz en ESTE frame? La ponen los
         /// métodos de dibujado justo tras su End defensivo, y
         /// <see cref="PantallaSistema"/> la consulta en finally: SOLO se
@@ -669,48 +694,36 @@ namespace AethonMod.Content.VFX
                                           + Main.screenHeight * Main.screenHeight);
                     float radio = diag * 0.34f * (0.86f + 0.14f * alfa);
 
-                    Texture2D texGlow = VFXCore.SoftGlow;
-                    Vector2 origen = texGlow.Size() * 0.5f;
-                    Vector2 escala = new Vector2(radio * 2f, radio * 2f) / texGlow.Size();
+                    // v6.50.18 — UN SOLO NOVABURST, NO DOS SOFTGLOW (el
+                    // círculo plano del final del Sol y del Agujero Negro —
+                    // el reporte del usuario: "un sprite de destello que es
+                    // solo un círculo plano… quítalo o cambia el sprite por
+                    // otro como NovaBurst.png"). Los DOS quads SoftGlow del
+                    // velo (falda + núcleo) dibujaban DOS gaussianas
+                    // compactas una encima de la otra: su huella circular
+                    // se leía como UN DISCO con borde visible — el velo era
+                    // el único elemento en forma de círculo que compartían
+                    // el Sol (blanco) y el Agujero Negro (violeta), exacto
+                    // los dos casos del reporte. NovaBurst (la textura del
+                    // bloom de la casa, 256², perfil MONÓTONO de caída
+                    // larga 255→0 que muere en el borde) es la que el
+                    // usuario pidió por nombre: UN gradiente, UN quad, el
+                    // golpe instantáneo del flash que se disuelve SUAVE.
+                    Texture2D texNova = Pantalla.NovaBurstTex;
+                    if (texNova != null && !texNova.IsDisposed)
+                    {
+                        Vector2 origenNova = texNova.Size() * 0.5f;
+                        Vector2 escalaNova = new Vector2(radio * 2f, radio * 2f) / texNova.Size();
 
-                    // v6.50.16 — EL COLOR PREMULTIPLICADO (el fin del círculo
-                    // sólido). Cadena verificada contra los binarios reales:
-                    // el loader del tML PREMULTIPLICA las texturas
-                    // (rgb·alfa), el SpriteEffect de FNA calcula src =
-                    // texel·color (NO premultiplica el color) y su
-                    // BlendState.AlphaBlend es (One, InverseSourceAlpha):
-                    //
-                    //   out.rgb = tex.rgb·texA·color.rgb + dst·(1 − texA·color.a)
-                    //
-                    // Con un color de RGB pleno y alfa bajo (el v6.50.15:
-                    // new Color(255,255,255, 255·k)) el TÉRMINO FUENTE entraba
-                    // SIN escalar por el alfa — 255·texA plenos — y sobre el
-                    // epicentro brillante de la explosión el velo CLIPEABA a
-                    // blanco sólido hasta r≈0.45·radio: "un círculo gigante
-                    // blanco sólido", el reporte. El mismo bug hacía que el
-                    // VIEJO velo a pantalla completa (MagicPixel, textura
-                    // opaca) pintara la pantalla entera a BLANCO PLENO sin
-                    // importar el alfa. El gesto correcto en este pipeline:
-                    // Color·k — el operador escala RGB y A a la vez, y el
-                    // velo compone a opacidad REAL k·texA.
-                    //
-                    // LA FALDA ANCHA (el degradado del impacto — sube 0.55 →
-                    // 0.65: con el velo a opacidad verdadera el degradado
-                    // necesita el peso).
-                    // v6.50.17 — 0.65 → 0.58 y el núcleo 0.52 → 0.45: el
-                    // punto caliente del epicentro ahora lo lleva la
-                    // partícula NovaBurst (el bloom de gradiente suave) —
-                    // el velo pinta SOLO la falda amplia y la pila velo+
-                    // bloom ya no puede clipear a círculo plano.
-                    Color cFalda = f.Color * (alfa * 0.58f);
-                    Main.spriteBatch.Draw(texGlow, foco, null, cFalda, 0f, origen, escala,
-                        SpriteEffects.None, 0f);
-
-                    // EL NÚCLEO (el punto caliente del impacto — premult
-                    // igual, 0.85 → 0.90).
-                    Color cNucleo = Color.Lerp(f.Color, Color.White, 0.35f) * (alfa * 0.90f);
-                    Main.spriteBatch.Draw(texGlow, foco, null, cNucleo, 0f, origen,
-                        escala * 0.45f, SpriteEffects.None, 0f);
+                        // v6.50.16 — EL COLOR PREMULTIPLICADO (el fin del
+                        // círculo sólido): Color·k escala RGB y A a la vez y
+                        // el velo compone a opacidad REAL k·texA — con el
+                        // perfil monótono de NovaBurst el aporte decae de
+                        // punta a punta SIN meseta y SIN huella de disco.
+                        Color cFalda = Color.Lerp(f.Color, Color.White, 0.25f) * (alfa * 0.72f);
+                        Main.spriteBatch.Draw(texNova, foco, null, cFalda, 0f, origenNova,
+                            escalaNova, SpriteEffects.None, 0f);
+                    }
                 }
 
                 // === 2. LA VIÑETA (encima: el túnel se cierra) ===

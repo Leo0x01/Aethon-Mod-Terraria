@@ -471,7 +471,10 @@ namespace AethonMod.Content.Systems
             EcoRed.AnunciarMundo("Mods.AethonMod.Furia.OleadaEspecial",
                 new Color(178, 26, 38));
 
-            // LOS DOS PRIMEROS: en pantalla YA.
+            // v6.50.18 — FUERA DE PANTALLA TAMBIÉN (antes "LOS DOS PRIMEROS:
+            // en pantalla YA" — el reporte del usuario no distingue: NINGÚN
+            // monstruo del festín nace a la vista; los guardianes llegan
+            // desde fuera del cuadro como el resto del Juicio).
             for (int i = 0; i < 2; i++) NacerGuardian(hambriento);
         }
 
@@ -482,9 +485,27 @@ namespace AethonMod.Content.Systems
             {
                 if (_spawneados >= 7) return;
                 int tipo = LosSiete()[_spawneados];
+
+                // v6.50.18 — LA CUNA DEL GUARDIÁN: anillo en la distancia
+                // REAL fuera de pantalla (antes 520 px fijo — EN PANTALLA),
+                // con la caja de paredes validada; si el mundo no ofrece
+                // hueco en 8 intentos, el guardián espera al próximo pulso
+                // (el Juicio suma cada 15 s — no se pierde, se retrasa).
                 float ang = _spawneados * (MathHelper.TwoPi / 7f) + 0.7f;
-                Vector2 pos = hambriento.Center + new Vector2(
-                    MathF.Cos(ang), MathF.Sin(ang)) * 520f - new Vector2(0f, 180f);
+                float distMin = DistanciaFueraDePantalla();
+                Vector2 pos = Vector2.Zero;
+                for (int intento = 0; intento < 8; intento++)
+                {
+                    float angI = ang + intento * (MathHelper.TwoPi / 8f);
+                    Vector2 candidato = hambriento.Center + new Vector2(
+                        MathF.Cos(angI), MathF.Sin(angI)) *
+                        (distMin + Main.rand.NextFloat(160f)) - new Vector2(0f, 120f);
+                    candidato.X = Math.Clamp(candidato.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
+                    candidato.Y = Math.Clamp(candidato.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
+                    if (CajaLibre(candidato.X - 40f, candidato.Y - 50f, 80f, 100f))
+                    { pos = candidato; break; }
+                }
+                if (pos == Vector2.Zero) return; // sin cuna: espera al próximo pulso
 
                 int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo);
                 NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
@@ -704,20 +725,18 @@ namespace AethonMod.Content.Systems
             {
                 int tipo = pool[(int)(Main.rand.NextFloat() * pool.Length) % pool.Length];
 
-                // posición: anillo alrededor del portador (fuera de pantalla a ser posible)
-                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                float dist = 380f + Main.rand.NextFloat(320f);
-                Vector2 pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
-
-                // v6.50.2 — FIX (spawns voladores FUERA del mundo): los
-                // noTileCollide (DemonEye, murciélagos, Harpy…) nacen donde
-                // caiga el anillo — junto al borde del mundo (océano, cielo)
-                // nacían MÁS ALLÁ de los límites y vanilla los descarta o
-                // los deja como zombis sin IA. Clamp ANTES de NewNPC (los
-                // que chocan con tiles siguen pasando por BuscarSuelo, que
-                // ya respeta bordes por su cuenta).
-                pos.X = Math.Clamp(pos.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
-                pos.Y = Math.Clamp(pos.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
+                // v6.50.18 — FUERA DE PANTALLA Y FUERA DE PAREDES (el
+                // reporte del usuario: "los monstruos deben aparecer fuera
+                // de la pantalla y no deben aparecer dentro de paredes").
+                // ANTES: anillo 380-700 px del portador — con una pantalla
+                // de 1920 (semidiagonal ~1100 px) TODO ese anillo caía
+                // DENTRO del cuadro visible. AHORA: la distancia mínima es
+                // la SEMIDIAGONAL REAL del área visible en coords de mundo
+                // (respeta el zoom) + 200 px de margen, y cada intento se
+                // valida contra tiles sólidos (caja ancho×alto del NPC) —
+                // hasta 8 intentos; si ningún hueco vive, este no nace.
+                Vector2 pos = BuscarCuna(hambriento, 20, 40, 8);
+                if (pos == Vector2.Zero) return; // sin hueco digno: este no nace
 
                 NPC npc = Main.npc[NPC.NewNPC(hambriento.GetSource_FromAI(),
                     (int)pos.X, (int)pos.Y, tipo)];
@@ -728,6 +747,13 @@ namespace AethonMod.Content.Systems
                 {
                     Vector2 good = BuscarSuelo(pos);
                     if (good == Vector2.Zero) { npc.active = false; return; } // sin hueco: este no nace
+                    // v6.50.18 — VALIDACIÓN DE LA CUNA: el suelo hallado
+                    // también debe estar despejado (el BuscarSuelo viejo
+                    // podía devolver la CARA de un muro — el monstruo
+                    // nacía EMPOTRADO en la pared lateral).
+                    if (!CajaLibre(good.X - npc.width * 0.5f,
+                            good.Y - npc.height - 2f, npc.width, npc.height))
+                    { npc.active = false; return; }
                     npc.position = good - new Vector2(npc.width / 2f, npc.height);
                 }
                 npc.netUpdate = true;
@@ -744,8 +770,14 @@ namespace AethonMod.Content.Systems
             try
             {
                 int tipo = JefeDelLugar(hambriento);
-                Vector2 pos = hambriento.Center + new Vector2(
-                    hambriento.direction * -560f, -240f); // frente al portador, arriba
+                // v6.50.18 — FUERA DE PANTALLA (antes: 560 px delante y 240
+                // arriba — EN PANTALLA en cualquier monitor grande): el
+                // jefe nace a la distancia real fuera del cuadro + margen,
+                // con la misma validación de paredes que los monstruos.
+                Vector2 pos = BuscarCuna(hambriento, 80, 100, 6);
+                if (pos == Vector2.Zero)
+                    pos = hambriento.Center + new Vector2(
+                        hambriento.direction * -900f, -360f); // último recurso: lejos y arriba
 
                 int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo);
                 NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
@@ -765,6 +797,96 @@ namespace AethonMod.Content.Systems
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
             }
             catch { _bossIdx = -1; _tipoJefeOleada = -1; }
+        }
+
+        // ==================================================================
+        //  v6.50.18 — LA CUNA (dónde nace un monstruo del festín)
+        // ==================================================================
+
+        /// <summary>
+        /// LA DISTANCIA FUERA DE PANTALLA: la semidiagonal del área VISIBLE
+        /// en coords de mundo (Main.screenWidth/Height son px de interfaz —
+        /// con zoom &gt; 1 el mundo visible ENCOGE: se divide por el zoom de
+        /// la vista) + 200 px de margen. Es la barrera REAL de "fuera de la
+        /// pantalla", no un fijo de 380 px que cabía dentro del cuadro.
+        /// </summary>
+        private static float DistanciaFueraDePantalla()
+        {
+            try
+            {
+                Vector2 zoom = Main.GameViewMatrix.Zoom;
+                float zx = zoom.X <= 0.05f ? 1f : zoom.X;
+                float zy = zoom.Y <= 0.05f ? 1f : zoom.Y;
+                Vector2 visMundo = new Vector2(Main.screenWidth / zx, Main.screenHeight / zy);
+                return visMundo.Length() * 0.5f + 200f;
+            }
+            catch { return 900f; }
+        }
+
+        /// <summary>
+        /// BUSCA LA CUNA: una posición FUERA del cuadro visible (a partir de
+        /// la distancia real + un extra aleatorio) y SIN tiles sólidos en la
+        /// caja (margen ancho×margen alto alrededor del punto). Hasta
+        /// <paramref name="intentos"/> ángulos distintos; devuelve
+        /// Vector2.Zero si nada digno se encuentra (el llamador NO engendra).
+        /// Bordes del mundo respetados (clamp 400 px).
+        /// </summary>
+        private static Vector2 BuscarCuna(Player hambriento, float margenAncho,
+            float margenAlto, int intentos)
+        {
+            float distMin = DistanciaFueraDePantalla();
+            for (int i = 0; i < intentos; i++)
+            {
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                // el primer intento mira hacia DONDE NO MIRA el jugador
+                // (la espalda es la cuna natural de la emboscada).
+                if (i == 0)
+                {
+                    float espalda = hambriento.Center.X < Main.screenPosition.X + Main.screenWidth * 0.5f
+                        ? MathHelper.Pi : 0f; // lado izquierdo o derecho del cuadro
+                    ang = espalda + Main.rand.NextFloat(-0.5f, 0.5f);
+                }
+                float dist = distMin + Main.rand.NextFloat(240f);
+                Vector2 pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
+
+                pos.X = Math.Clamp(pos.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
+                pos.Y = Math.Clamp(pos.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
+
+                if (CajaLibre(pos.X - margenAncho * 0.5f, pos.Y - margenAlto * 0.5f,
+                        margenAncho, margenAlto))
+                    return pos;
+            }
+            return Vector2.Zero;
+        }
+
+        /// <summary>
+        /// ¿La caja (px de mundo) está LIBRE de tiles sólidos? Recorre las
+        /// tiles que la caja toca (redondeo generoso de 1 tile de margen en
+        /// cada lado) — un solo tile sólido dentro y la respuesta es NO.
+        /// Fuera del mundo → NO (nada nace en el vacío de los bordes).
+        /// </summary>
+        private static bool CajaLibre(float x0, float y0, float ancho, float alto)
+        {
+            try
+            {
+                int tx0 = (int)(x0 / 16f) - 1;
+                int ty0 = (int)(y0 / 16f) - 1;
+                int tx1 = (int)((x0 + ancho) / 16f) + 1;
+                int ty1 = (int)((y0 + alto) / 16f) + 1;
+                for (int x = tx0; x <= tx1; x++)
+                {
+                    for (int y = ty0; y <= ty1; y++)
+                    {
+                        if (x < 5 || x >= Main.maxTilesX - 5 || y < 5 || y >= Main.maxTilesY - 5)
+                            return false;
+                        Tile tile = Main.tile[x, y];
+                        if (tile != null && tile.HasTile && Main.tileSolid[tile.TileType])
+                            return false;
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
         }
 
         /// <summary>

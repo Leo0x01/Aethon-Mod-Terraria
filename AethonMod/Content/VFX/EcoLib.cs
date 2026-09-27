@@ -199,6 +199,16 @@ namespace AethonMod.Content.VFX
                 // ~2 caracteres/tick con piso y techo (los susurros cortos
                 // respiran; las crónicas largas no eternizan el tipeo).
                 eco.TicksTipeo = (int)MathHelper.Clamp(eco.Texto.Length * 0.5f, 22f, 90f);
+
+                // v6.50.18 — EL TIEMPO DE LECTURA (el reporte del usuario:
+                // "los dialogos del libro duran poco tiempo no da tiempo de
+                // leer"). El texto completo quieto ya no es un fijo de 150
+                // ticks (2,5 s — ni de lejos para una crónica): escala con
+                // la LONGITUD (~4 ticks por carácter, el ritmo de lectura
+                // en pantalla) con piso de 4 s y techo de 10 s. El fundido
+                // acompaña (42 → 70: la salida respira, no corta).
+                eco.TicksMuestra = (int)MathHelper.Clamp(eco.Texto.Length * 4f, 240f, 600f);
+                eco.TicksFundido = 70;
             }
             catch { eco.Medida = Vector2.Zero; eco.Origen = Vector2.Zero; }
         }
