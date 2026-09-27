@@ -235,7 +235,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 RayoStrip.Filamento(camino, 2.1f,
                     new Color(70, 210, 255), new Color(255, 255, 255),
                     0.85f * f, StormTaper.Flat, seed, flick,
-                    suavizar: true, crackle: true);
+                    suavizar: false, crackle: true);
 
                 // RAMA lateral corta (una de cada dos segmentos, aleatoria)
                 // — también con la tira (fina, sin vena: muere en punta).

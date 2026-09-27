@@ -73,8 +73,9 @@ namespace AethonMod.Content.VFX
             pts[Segments] = end - screen;
 
             // LA TIRA DEL TRONCO (la línea LISA — un solo volcado).
+            // v6.50.26 — KINKS AGUDOS: sin Chaikin (stepped leaders).
             RayoStrip.Filamento(pts, width, haloColor, coreColor, alpha,
-                StormTaper.Center, seed, flick, suavizar: true, crackle: true);
+                StormTaper.Center, seed, flick, suavizar: false, crackle: true);
 
             // RAMAS laterales cortas donde el hash lo pide.
             for (int s = 1; s < Segments - 1; s++)
@@ -91,7 +92,7 @@ namespace AethonMod.Content.VFX
                 var rama = new Vector2[] { pts[s + 1], bEnd };
                 RayoStrip.Filamento(rama, width * 0.6f, haloColor, coreColor,
                     0.6f * alpha, StormTaper.Linear, seed + s * 7, flick,
-                    suavizar: true, crackle: true, vena: false);
+                    suavizar: false, crackle: true, vena: false);
             }
 
             // Extremos brillantes (descarga en el origen, frente de impacto)

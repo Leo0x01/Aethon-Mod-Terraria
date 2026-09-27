@@ -37,17 +37,27 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// EL CUERPO — una vértebra con su par de costillas y la runa de oro
     /// de la Luz Primordial encendida en el centrum.
+    ///
+    /// v6.50.26 — LA SIERPE MÁS GRANDE (el reporte: «su tamaño no es
+    /// suficiente, no es lo bastante grande»): 46 vértebras (34 de mundo
+    /// + 12 del fondo), HUECO 64 px y TODO el arte dibujado a ESC 1.4 —
+    /// la columna mide ~3.200 px de punta a punta y cada hueso es 40%
+    /// más grande. El PreDraw ahora dibuja EL HUESO ÉL MISMO (a escala)
+    /// porque tML solo sabe dibujar el sprite a 1:1.
     /// </summary>
     public class AethonSierpeCuerpo : ModNPC
     {
         /// <summary>Índice del PRIMER segmento que vive en el FONDO.</summary>
-        public const int UMBRAL_FONDO = 26;
+        public const int UMBRAL_FONDO = 34;
 
-        /// <summary>Vértebras TOTALES de la cadena (26 mundo + 12 fondo).</summary>
-        public const int TOTAL_VERTEBRAS = 38;
+        /// <summary>Vértebras TOTALES de la cadena (34 mundo + 12 fondo).</summary>
+        public const int TOTAL_VERTEBRAS = 46;
 
         /// <summary>Separación entre huesos (px).</summary>
-        public const float HUECO = 54f;
+        public const float HUECO = 64f;
+
+        /// <summary>v6.50.26 — LA ESCALA DEL ARTE (la sierpe del final).</summary>
+        public const float ESC = 1.40f;
 
         /// <summary>
         /// v6.50.21 — LA TEXTURA EXPLÍCITA (EL FIX DEL CARGADOR). Sin esta
@@ -73,9 +83,9 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 56;
-            NPC.height = 56;
-            NPC.damage = 55;
+            NPC.width = 78;
+            NPC.height = 78;
+            NPC.damage = 62;
             NPC.defense = 30;
             NPC.lifeMax = 100;               // la vida REAL vive en la cabeza (realLife)
             NPC.HitSound = SoundID.NPCHit2;  // hueso
@@ -128,17 +138,38 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// LA RUNA DEL CENTRUM que RESPIRA — el glow se emite en el pase de
-        /// dibujado (el patrón PreDraw de la casa; el búfer de VFXCore solo
-        /// vive si algo lo vuelca en el render). Cada 2 huesos: barato.
+        /// v6.50.26 — EL HUESO DIBUJADO A ESCALA (tML solo pinta el sprite
+        /// 1:1 — la sierpe del final es 40% más grande): el hueso se dibuja
+        /// AQUÍ (lote alfa) y LA RUNA DEL CENTRUM respira encima en el
+        /// MISMO baile (lote aditivo) — un solo par Begin/End por vértebra.
         /// </summary>
         public override bool PreDraw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            if (Main.dedServ || NPC.hide || (NPC.ai[3] % 2f) != 0f) return true; // el sprite lo dibuja tML
+            if (Main.dedServ || NPC.hide) return false; // escondido: nada que pintar
             VFXCore.CerrarLoteSiAbierto();
             try
             {
                 float latido = 0.5f + 0.5f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.6f + NPC.ai[3] * 0.7f);
+
+                // === 1) EL HUESO (lote alfa — el cuerpo de la columna) ===
+                spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred,
+                    Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend,
+                    Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp,
+                    Microsoft.Xna.Framework.Graphics.DepthStencilState.None,
+                    Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                try
+                {
+                    var tex = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Content/NPCs/AethonSierpeVertebra").Value;
+                    Vector2 pos = NPC.Center - Main.screenPosition;
+                    spriteBatch.Draw(tex, pos, null, drawColor,
+                        NPC.rotation, tex.Size() * 0.5f, ESC,
+                        Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0f);
+                }
+                finally { VFXCore.CerrarLoteSiAbierto(); }
+
+                // === 2) LA RUNA DORADA (lote aditivo — la Luz del centrum,
+                //     el SoftGlow CACHEADO de la casa) ===
                 spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred,
                     Microsoft.Xna.Framework.Graphics.BlendState.Additive,
                     Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp,
@@ -147,25 +178,20 @@ namespace AethonMod.Content.NPCs
                     null, Main.GameViewMatrix.TransformationMatrix);
                 try
                 {
-                    // v6.50.21 — la ruta estaba MAL ("Effects/SoftGlow" sin
-                    // "/Procedural/"): el Request reventaba cada frame, el
-                    // catch se lo tragaba y la runa dorada de las vértebras
-                    // JAMÁS llegó a brillar. Ahora el SoftGlow CACHEADO de
-                    // VFXCore (la workhorse de la librería).
                     var glow = VFXCore.SoftGlow;
                     Vector2 pos = NPC.Center - Main.screenPosition;
-                    // v2 tras el VLM del mock: el glow pequeño y TENUE — el
-                    // HUESO es el protagonista (la runa vive DENTRO).
+                    // el glow pequeño y TENUE — el HUESO es el protagonista
+                    // (la runa vive DENTRO).
                     spriteBatch.Draw(glow, pos, null,
                         new Color(255, 226, 140) * (0.38f * latido),
-                        NPC.rotation, glow.Size() * 0.5f, new Vector2(0.30f, 0.42f),
+                        NPC.rotation, glow.Size() * 0.5f, new Vector2(0.30f, 0.42f) * ESC,
                         Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0f);
                 }
-                finally { spriteBatch.End(); }
+                finally { VFXCore.CerrarLoteSiAbierto(); }
             }
             catch { }
             finally { VFXCore.ReabrirLoteVanilla(); }
-            return true; // y ENCIMA el sprite del hueso
+            return false; // el hueso ya se dibujó aquí (a escala)
         }
 
         public override bool? CanBeHitByProjectile(Projectile projectile) => true;

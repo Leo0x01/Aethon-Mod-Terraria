@@ -356,7 +356,15 @@ namespace AethonMod.Content.Globals
                     if (!presaValida) return;
                     Vector2 dir = presa.Center - npc.Center;
                     float d = dir.Length();
-                    if (d > 1500f || d < 1f) return;
+                    // v6.50.26 — LA CARGA DE LA FURIA NO SE APAGA A 1500 PX:
+                    // los monstruos nacen FUERA DE PANTALLA (la semidiagonal
+                    // real + 200 px ≈ 1300-1550 px) y el viejo radio los
+                    // dejaba PARADOS en su cuna — con la IA pasiva de los
+                    // limos de día, la oleada entera se quedaba saltando
+                    // tras la colina y el festín leía como «no salen
+                    // enemigos». El hambre los trae CORRIENDO desde donde
+                    // nazcan (el libro los llama: vienen).
+                    if (d > 4600f || d < 1f) return;
                     npc.velocity += dir / d * (0.16f + 0.02f * Oleada);
                     float techo = 10f + 0.5f * Oleada;
                     float vel = npc.velocity.Length();

@@ -666,8 +666,9 @@ namespace AethonMod.Content.VFX
             {
                 // El tronco a brillo completo (taper lineal: tenso al anclaje
                 // de destino, como la vena de una descarga que se disipa).
+                // v6.50.26 — KINKS AGUDOS (stepped leaders): sin Chaikin.
                 RayoStrip.FilamentoEnLote(trunk, width, halo, core, alpha,
-                    StormTaper.Linear, seed, flick, suavizar: true, crackle: true);
+                    StormTaper.Linear, seed, flick, suavizar: false, crackle: true);
 
                 // === 2. v6.50.17 — LAS RAMAS DEL ÁRBOL FRACTAL (ramas de ramas,
                 //     CONECTADAS por vértices: el final de un segmento es el
@@ -683,7 +684,7 @@ namespace AethonMod.Content.VFX
                         StormStrand s = arbol[f];
                         RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, halo, core,
                             alpha * s.Alpha, StormTaper.Linear, seed + 23 + f, flick,
-                            suavizar: true, crackle: true);
+                            suavizar: false, crackle: true);
                     }
                 }
             }
@@ -781,7 +782,7 @@ namespace AethonMod.Content.VFX
                     Color cHalo = f == 0 ? haloA : (f % 2 == 1 ? haloB : haloA);
                     RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, cHalo, core,
                         alpha * s.Alpha, f == 0 ? StormTaper.Center : StormTaper.Linear,
-                        seed + 17 + f * 13, flick, suavizar: true, crackle: true);
+                        seed + 17 + f * 13, flick, suavizar: false, crackle: true);
                 }
             }
             finally { RayoStrip.CerrarLote(); }
@@ -934,7 +935,7 @@ namespace AethonMod.Content.VFX
 
                 RayoStrip.FilamentoEnLote(rama, width * 0.60f, halo, core,
                     alpha * 0.55f, StormTaper.Linear, seedR, flick,
-                    suavizar: true, crackle: true);
+                    suavizar: false, crackle: true);
 
                 // LA RAMITA (segundo nivel — el arbolito del canal).
                 var hojas = new List<StormStrand>();
@@ -944,7 +945,7 @@ namespace AethonMod.Content.VFX
                     StormStrand s = hojas[h];
                     RayoStrip.FilamentoEnLote(s.Points, width * s.WidthScale, halo, core,
                         alpha * s.Alpha, StormTaper.Linear, seedR + 17 + h, flick,
-                        suavizar: true, crackle: true);
+                        suavizar: false, crackle: true);
                 }
                 ramas++;
             }
@@ -1238,15 +1239,13 @@ namespace AethonMod.Content.VFX
             PintaArco(batch, start, end, seed + 977, slotB, width, glow, mid, coreC, alphaB);
         }
 
-        /// <summary>Una pasada del arco — v6.50.22 — LA PILA DE PASADAS
-        /// (el filamento 100% código): el pincel es EL PIXEL del motor y
-        /// el perfil transversal ES LA SUMA de 6 pasadas + vena (la
-        /// receta del LightningArc 466 de vanilla, extendida) — las
-        /// pasadas 0-3 con el color GLOW (la funda azul oscura), las 4-5
-        /// con el MID (#5EB3FF, el cuerpo) y la vena BLANCA. El v6.39
-        /// estiraba BANDAS horneadas (con suelo de alfa en los bordes —
-        /// el look "líneas"); el v6.33 antes estiraba SOFTGLOW (RADIAL:
-        /// franjas oscuras + apiles claros). Muertos ambos.</summary>
+        /// <summary>Una pasada del arco — v6.50.26 — LA TIRA DE PRIMITIVAS
+        /// (la receta de 3 capas de la casa, ahora CONTINUA de punta a
+        /// punta): la funda GLOW ancha y tenue + el cuerpo MID con la VENA
+        /// BLANCA encima — cero juntas de quads, cero solapes de extensión,
+        /// y el lote de pantalla (soft-add) que no se quema al cruzarse con
+        /// otro arco. El BOIL doble de los midpoints vive (hierve más donde
+        /// se partió).</summary>
         private static void PintaArco(SpriteBatch batch, Vector2 start, Vector2 end,
             int seed, int slot, float width, Color glow, Color mid, Color coreC, float alpha)
         {
@@ -1262,38 +1261,12 @@ namespace AethonMod.Content.VFX
                     (VFXCore.Hash01(seed, slot + 31, i * 23 + 3) - 0.5f) * 2f * amp);
             }
 
-            float total = PathLength(pts);
-            if (total < 1f) return;
-            float arc = 0f;
-            for (int i = 0; i < pts.Length - 1; i++)
-            {
-                Vector2 seg = pts[i + 1] - pts[i];
-                float sl = seg.Length();
-                if (sl < 0.30f) { arc += sl; continue; }
-                // NORMAL MEDIA (la lección del ribbon): la perpendicular al promedio de las
-                // direcciones adyacentes — mata los puntos brillantes de las juntas.
-                Vector2 prev = i > 0 ? pts[i] - pts[i - 1] : seg;
-                Vector2 next = i < pts.Length - 2 ? pts[i + 2] - pts[i + 1] : seg;
-                Vector2 avg = Vector2.Normalize(prev) + Vector2.Normalize(next);
-                if (!(avg.LengthSquared() >= 0.001f)) avg = seg; // v6.50.10 — también atrapa NaN (Normalize de un vector cero: "NaN < 0.001" es false y esquivaba el guard)
-                avg = Vector2.Normalize(avg);
-                float rot = (float)Math.Atan2(avg.Y, avg.X);
-                Vector2 pos = (pts[i] + pts[i + 1]) * 0.5f;
-                float tMid = (arc + sl * 0.5f) / total;
-                float w = width * MathHelper.Clamp((float)Math.Sin(tMid * Math.PI) + 0.35f, 0.3f, 1f);
-
-                // v6.39 — EL LARGO EXACTO + LA EXTENSIÓN DE GIRO (borde a
-                // borde — nada de solapes que el aditivo apila).
-                float largo = Vector2.Dot(seg, avg);
-                if (largo < 0.30f) { arc += sl; continue; }
-
-                // v6.50.22 — LA PILA DE PASADAS (100% código: la suma de
-                // quads SÓLIDOS del pixel del motor ES el degradado).
-                PilaFilamento(batch, pos, rot, largo,
-                    AnguloEntre(prev, seg), AnguloEntre(seg, next), w,
-                    glow, mid, coreC, alpha, 1f);
-                arc += sl;
-            }
+            // v6.50.26 — LAS DOS CAPAS EN TIRAS (glow de funda + mid/vena):
+            // cada Filamento hace su baile de lote idempotente (la casa).
+            RayoStrip.Filamento(pts, width * 1.30f, glow, mid, alpha * 0.80f,
+                StormTaper.Center, seed, slot, suavizar: false, crackle: true);
+            RayoStrip.Filamento(pts, width * 0.62f, mid, coreC, alpha,
+                StormTaper.Center, seed + 5, slot, suavizar: false, crackle: true);
         }
 
         // ==================================================================
@@ -1505,7 +1478,7 @@ namespace AethonMod.Content.VFX
             // dibuja las primitivas y lo reabre con LOS MISMOS parámetros —
             // el aditivo es conmutativo, el Deferred no ordena: invisible.)
             RayoStrip.Filamento(pts, width, halo, core, alpha, taper, seed, flick,
-                suavizar: true, crackle: true);
+                suavizar: false, crackle: true);
 
             // Los GORROS de descarga en ambos extremos (sprites con el
             // lote ABIERTO — son PUNTOS de descarga, no la línea).

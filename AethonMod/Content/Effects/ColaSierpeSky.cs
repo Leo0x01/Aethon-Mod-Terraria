@@ -119,6 +119,30 @@ namespace AethonMod.Content.Effects
         {
             if (Main.gameMenu) return;
 
+            // === v6.50.26 — LA LLEGADA (el reporte: «no aparece una
+            //     sección de él en el fondo cuando está llegando»):
+            //     mientras el CRÁNEO se materializa (alpha alto — el
+            //     nacimiento), la SILUETA GIGANTE de la sierpe cruza el
+            //     cielo del fondo — un leviatán de hueso nadando ENTRE
+            //     las capas del paisaje, con los OJOS DE ORO avanzando.
+            //     Cuando la cabeza termina de nacer, la silueta se
+            //     disuelve (~1.5 s de recuerdo). ===
+            float llegada = 0f;
+            int tipoCabeza = ModContent.NPCType<AethonBoss>();
+            try
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipoCabeza &&
+                        !n.dontTakeDamage) // el cine de muerte no invoca
+                        llegada = Math.Max(llegada, n.alpha / 255f);
+                }
+            }
+            catch { }
+            if (llegada > 0.01f) _llegadaVista = llegada;
+            else _llegadaVista *= 0.965f; // el fade de salida del leviatán
+
             // === RECOLECTAR los huesos del fondo (índices altos + cola) ===
             int tipoCuerpo = ModContent.NPCType<AethonSierpeCuerpo>();
             int tipoCola = ModContent.NPCType<AethonSierpeCola>();
@@ -132,7 +156,7 @@ namespace AethonMod.Content.Effects
                 else if (n.type == tipoCuerpo && n.ai[3] >= AethonSierpeCuerpo.UMBRAL_FONDO)
                     huesos.Add((n.Center, n.rotation, (int)n.ai[3]));
             }
-            if (huesos.Count == 0) return;
+            if (huesos.Count == 0 && llegada <= 0.01f) return;
             huesos.Sort((a, b) => a.idx.CompareTo(b.idx)); // de la 26 a la punta
 
             // === EL CENTRO DE LA PANTALLA (el ancla del parallax) ===
@@ -195,6 +219,69 @@ namespace AethonMod.Content.Effects
                         sb.Draw(esCola ? texCola : texVertebra, pos, null, silueta,
                             rot, esCola ? origenC : origenV, esc, SpriteEffects.None, 0f);
                     }
+
+                    // === v6.50.26 — EL LEVIATÁN DE LA LLEGADA (la
+                    //     silueta GIGANTE cruzando el cielo del fondo:
+                    //     16 vértebras ×2.5 + el CRÁNEO al frente — el
+                    //     arribo del final, tapado por los ÁRBOLES y
+                    //     tapando las MONTAÑAS: enredado de verdad) ===
+                    if (_llegadaVista > 0.02f)
+                    {
+                        Texture2D texCab = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/NPCs/AethonSierpeCabeza").Value;
+                        Vector2 origenCab = texCab.Size() * 0.5f;
+
+                        const int NB = 16;
+                        float cx = Main.screenWidth * 0.5f;
+                        float anchoCielo = Main.screenWidth * 1.05f;
+                        float baseY = Main.screenHeight * 0.34f;
+
+                        for (int b = NB - 1; b >= 0; b--) // de la COLA a la CABEZA
+                        {
+                            float u = (b - (NB - 1) * 0.5f) / ((NB - 1) * 0.5f); // -1..1
+                            // EL MEANDRO del leviatán: una ola lenta que
+                            // respira (nada, no está parado).
+                            float y = baseY
+                                - MathF.Sin(u * MathF.PI * 0.9f + 0.4f) * 90f
+                                + MathF.Sin(t * 0.9f + u * 2.6f) * 16f;
+                            float x = cx + u * anchoCielo * 0.5f
+                                + MathF.Sin(t * 0.35f) * 60f;
+                            // la tangente local (la rotación del hueso)
+                            float yNext = baseY
+                                - MathF.Sin((u + 0.06f) * MathF.PI * 0.9f + 0.4f) * 90f
+                                + MathF.Sin(t * 0.9f + (u + 0.06f) * 2.6f) * 16f;
+                            float rotL = MathF.Atan2(yNext - y, anchoCielo * 0.5f * 0.06f)
+                                + MathHelper.PiOver2;
+
+                            float escL = 2.6f - MathF.Abs(u) * 0.55f; // encoge a la cola
+                            Color sil = new Color(84, 76, 116) *
+                                (_alpha * _llegadaVista * 0.40f);
+
+                            if (b == 0)
+                            {
+                                // EL CRÁNEO AL FRENTE (u = +1: la cabeza
+                                // guía el nado — la sierpe llega MIRANDO).
+                                float uH = 1f;
+                                float yH = baseY
+                                    - MathF.Sin(uH * MathF.PI * 0.9f + 0.4f) * 90f
+                                    + MathF.Sin(t * 0.9f + uH * 2.6f) * 16f;
+                                float yHn = baseY
+                                    - MathF.Sin((uH + 0.06f) * MathF.PI * 0.9f + 0.4f) * 90f
+                                    + MathF.Sin(t * 0.9f + (uH + 0.06f) * 2.6f) * 16f;
+                                float rotH = MathF.Atan2(yHn - yH, anchoCielo * 0.5f * 0.06f)
+                                    + MathHelper.PiOver2;
+                                float xC = cx + anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
+                                sb.Draw(texCab, new Vector2(xC, yH), null,
+                                    new Color(96, 88, 130) * (_alpha * _llegadaVista * 0.46f),
+                                    rotH, origenCab, 2.3f, SpriteEffects.None, 0f);
+                            }
+                            else
+                            {
+                                sb.Draw(texVertebra, new Vector2(x, y), null, sil,
+                                    rotL, origenV, escL, SpriteEffects.None, 0f);
+                            }
+                        }
+                    }
                 }
                 finally { VFXCore.CerrarLoteSiAbierto(); } // el propio, sin first-chance
 
@@ -220,6 +307,46 @@ namespace AethonMod.Content.Effects
                         sb.Draw(glow, pos, null, new Color(255, 226, 140) * brillo,
                             rot, new Vector2(glow.Width, glow.Height) * 0.5f, (esCola ? 0.30f : 0.38f),
                             SpriteEffects.None, 0f);
+                    }
+
+                    // === v6.50.26 — LOS OJOS DEL LEVIATÁN (la llegada
+                    //     tiene MIRADA: dos brasas de ORO en el cráneo del
+                    //     fondo + el latido tenue de cada 4ª vértebra) ===
+                    if (_llegadaVista > 0.02f)
+                    {
+                        const int NB = 16;
+                        float cx = Main.screenWidth * 0.5f;
+                        float anchoCielo = Main.screenWidth * 1.05f;
+                        float baseY = Main.screenHeight * 0.34f;
+
+                        // EL CRÁNEO al frente (la misma fórmula de la silueta)
+                        float xC = cx + anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
+                        float yC = baseY
+                            - MathF.Sin(1f * MathF.PI * 0.9f + 0.4f) * 90f
+                            + MathF.Sin(t * 0.9f + 1f * 2.6f) * 16f;
+                        float pulso = 0.55f + 0.45f * MathF.Sin(t * 2.6f);
+                        for (int e = 0; e < 2; e++)
+                        {
+                            Vector2 ojo = new Vector2(xC - 30f + e * 18f, yC - 14f);
+                            sb.Draw(glow, ojo, null,
+                                new Color(255, 240, 190) * (0.55f * _llegadaVista * pulso),
+                                0f, new Vector2(glow.Width, glow.Height) * 0.5f,
+                                new Vector2(0.16f, 0.16f), SpriteEffects.None, 0f);
+                        }
+
+                        // el latido de la columna (cada 4 vértebras, tenue)
+                        for (int b = 4; b < NB; b += 4)
+                        {
+                            float u = (b - (NB - 1) * 0.5f) / ((NB - 1) * 0.5f);
+                            float y = baseY
+                                - MathF.Sin(u * MathF.PI * 0.9f + 0.4f) * 90f
+                                + MathF.Sin(t * 0.9f + u * 2.6f) * 16f;
+                            float x = cx + u * anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
+                            sb.Draw(glow, new Vector2(x, y), null,
+                                new Color(255, 226, 140) * (0.10f * _llegadaVista),
+                                0f, new Vector2(glow.Width, glow.Height) * 0.5f,
+                                new Vector2(0.20f, 0.20f), SpriteEffects.None, 0f);
+                        }
                     }
                 }
                 finally { VFXCore.CerrarLoteSiAbierto(); } // el propio, sin first-chance
@@ -249,6 +376,10 @@ namespace AethonMod.Content.Effects
         // accesores internos para el sistema registrador (mismo archivo)
         internal bool ActivoInterno => _activo;
         internal float AlfaInterno => _alpha;
+
+        // v6.50.26 — LA LLEGADA: la intensidad del leviatán del fondo
+        // (vive mientras el cráneo se materializa; se disuelve después).
+        private float _llegadaVista = 0f;
     }
 
     // ======================================================================

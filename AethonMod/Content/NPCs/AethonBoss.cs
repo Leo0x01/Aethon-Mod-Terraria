@@ -55,7 +55,28 @@ namespace AethonMod.Content.NPCs
     /// patrón DoG CheckDead→false + DeathAnimationTimer).
     /// Desbloqueo: el Fragmento Génesis alcanza nivel 150; convócala
     /// con El Nombre de Aethon (de día).
+    ///
+    /// v6.50.26 — EL JEFE DEL FINAL DE VERDAD (el reporte: «debes mejorar
+    /// al jefe final Aethon, su arte, su animación, su IA, sus ataques y
+    /// también su tamaño, no es lo suficientemente grande; no aparece
+    /// una sección de él en el fondo cuando está llegando; no tiene
+    /// barra de vida de jefe como otros jefes»):
+    /// · LA BARRA DE VIDA: [AutoloadBossHead] + el icono
+    ///   AethonBoss_Head_Boss.png — el índice de cabeza de jefe engancha
+    ///   la BARRA COMÚN DE VANILLA (CommonBossBigProgressBar la muestra
+    ///   para todo NPC con cabeza de jefe — verificado en el decompile).
+    /// · MÁS GRANDE: 46 vértebras (34 de mundo + 12 del fondo) a 64 px de
+    ///   HUECO, TODO el arte a ESC 1.4 — ~3.400 px de columna.
+    /// · LA LLEGADA: ColaSierpeSky pinta la SILUETA GIGANTE cruzando el
+    ///   cielo del fondo mientras el cráneo se materializa.
+    /// · LA IA NUEVA: EL RAM HORIZONTAL (telegraph + embestida a la
+    ///   altura de la presa) y EL ALIENTO PRIMORDIAL (el arco de rayo
+    ///   BocaPos→presa, con lluvia de pernos — los rayos de la casa).
+    /// · LA ANIMACIÓN: el mordisco al cerrar el arco, el cabeceo
+    ///   serpenteo del cráneo, el cháchara de mandíbula del aliento y
+    ///   la fare de ojos al disparar.
     /// </summary>
+    [AutoloadBossHead]
     public class AethonBoss : ModNPC
     {
         // === LOS ESTADOS DE LA SIERPE ===
@@ -64,6 +85,7 @@ namespace AethonMod.Content.NPCs
         private const int EST_EMERGIENDO = 2;   // EL LUNGE
         private const int EST_SUPERFICIE = 3;   // el arco sobre la presa
         private const int EST_HUNDIENDO = 4;    // el clavado
+        private const int EST_CARGA = 5;        // v6.50.26 — EL RAM HORIZONTAL
         private const int EST_MURIENDO = 99;    // el cine final
 
         private int _estado = EST_NACIENDO;
@@ -71,6 +93,13 @@ namespace AethonMod.Content.NPCs
         private bool _cadenaCreada = false;
         private bool _bajoTierra = true;        // el detector de superficie
         private float _aberturaMandibula = 0.06f; // las fauces cinéticas
+
+        // === v6.50.26 — EL RAM Y EL ALIENTO ===
+        private int _dirCarga = 1;              // hacia qué lado embiste
+        private int _arcos = 0;                 // arcos completados (el ram alterna)
+        private int _aliento = 0;               // 0: no · 1: cargando · 2: escupiendo
+        private int _tickAliento = 0;           // el tempo del aliento
+        private bool _alientoEsteCiclo = false; // una vez por ciclo de superficie
 
         // === LA FASE DE SIEMPRE (los umbrales de la casa) ===
         private int Phase = 1;
@@ -106,9 +135,9 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 92;      // el hitbox del cráneo
-            NPC.height = 92;
-            NPC.damage = 80;     // EL MORDISCO
+            NPC.width = 128;     // v6.50.26 — el cráneo a ESC 1.4 (la boca del final)
+            NPC.height = 128;
+            NPC.damage = 95;     // EL MORDISCO (la boca es más grande)
             NPC.defense = 40;
             NPC.lifeMax = 2_400_000;
             NPC.HitSound = SoundID.NPCHit2;   // hueso
@@ -197,7 +226,11 @@ namespace AethonMod.Content.NPCs
                 case EST_EMERGIENDO: EstadoEmergiendo(target); break;
                 case EST_SUPERFICIE: EstadoSuperficie(target); break;
                 case EST_HUNDIENDO: EstadoHundiendose(target); break;
+                case EST_CARGA: EstadoCarga(target); break;
             }
+
+            // === v6.50.26 — EL ALIENTO PRIMORDIAL (el rayo de la boca) ===
+            AlientoTick(target);
 
             // === LOS ATAQUES DE FASE (nacen TODOS de la BOCA) ===
             switch (Phase)
@@ -211,6 +244,15 @@ namespace AethonMod.Content.NPCs
 
             // LA LUZ del cráneo (la Luz Primordial vive en las cuencas).
             Lighting.AddLight(NPC.Center, new Vector3(0.6f, 0.4f, 0.8f));
+
+            // v6.50.26 — EL ESTADO VIAJA en ai[0], el ALIENTO en ai[1] y
+            // EL TICK DEL ESTADO en ai[2] (los clientes dibujan el telegraph
+            // del ram, la estela, el arco del aliento y la silueta de
+            // llegada con este estado — la casa: el render lee lo
+            // SINCRONIZADO, jamás lógica local sin sincronizar).
+            NPC.ai[0] = _estado;
+            NPC.ai[1] = _aliento;
+            NPC.ai[2] = _tickEstado;
 
             // MP: la sierpe respira por el cable cada 12 ticks.
             if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
@@ -229,6 +271,10 @@ namespace AethonMod.Content.NPCs
             for (int i = 0; i < AethonSierpeCuerpo.TOTAL_VERTEBRAS; i++)
             {
                 int y = (int)(NPC.Center.Y + AethonSierpeCuerpo.HUECO * (i + 1));
+                // v6.50.26 — la cadena es MÁS LARGA (46 × 64 ≈ 2.950 px):
+                // clampear al fondo del mundo (una invocación a las puertas
+                // del infierno no puede parir huesos en el vacío).
+                y = Math.Min(y, (Main.maxTilesY - 60) * 16);
                 int idx = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, y, tipoB, NPC.whoAmI);
                 NPC s = Main.npc[idx];
                 s.realLife = NPC.whoAmI;    // la vida compartida
@@ -240,6 +286,7 @@ namespace AethonMod.Content.NPCs
                 prev = idx;
             }
             int yT = (int)(NPC.Center.Y + AethonSierpeCuerpo.HUECO * (AethonSierpeCuerpo.TOTAL_VERTEBRAS + 1));
+            yT = Math.Min(yT, (Main.maxTilesY - 60) * 16);
             int cola = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, yT,
                 ModContent.NPCType<AethonSierpeCola>(), NPC.whoAmI);
             Main.npc[cola].realLife = NPC.whoAmI;
@@ -358,11 +405,42 @@ namespace AethonMod.Content.NPCs
             Vector2 punto = centro + new Vector2(MathF.Cos(_angArco) * radio,
                 MathF.Sin(_angArco) * alto - 90f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.11f, 0.16f);
-            _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.10f, 0.08f);
 
-            // media vuelta (o el respiro de 300 t) → A HUNDIRSE.
+            // v6.50.26 — EL MORDISCO: al ENTRAR al arco las fauces cierran
+            // DE UN MORDISCO (lerp rápido los primeros 25 ticks; luego el
+            // reposo lento de siempre — la animación de la caza).
+            float rate = _tickEstado < 25 ? 0.35f : 0.08f;
+            _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.10f, rate);
+
+            // v6.50.26 — EL ALIENTO: en fase 3+, al poco de entrar al arco
+            // (una vez por ciclo de superficie).
+            if (Phase >= 3 && !_alientoEsteCiclo && _aliento == 0 && _tickEstado >= 30)
+            {
+                _alientoEsteCiclo = true;
+                _aliento = 1;
+                _tickAliento = 0;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                NPC.netUpdate = true; // el cliente arranca el arco YA
+            }
+
+            // media vuelta (o el respiro de 300 t) → el RAM o A HUNDIRSE.
             if (_recorridoArco >= MathHelper.Pi || _tickEstado >= 300)
             {
+                _arcos++;
+                // v6.50.26 — EL RAM HORIZONTAL (fase 2+, cada DOS arcos —
+                // el acecho alterna entre el círculo y la embestida).
+                if (Phase >= 2 && (_arcos % 2) == 0)
+                {
+                    _estado = EST_CARGA;
+                    _tickEstado = 0;
+                    _dirCarga = NPC.Center.X < target.Center.X ? 1 : -1;
+                    NPC.velocity *= 0.3f;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", OroLuz);
+                    OndaLib.Kick(7f, 14);
+                    NPC.netUpdate = true;
+                    return;
+                }
                 _estado = EST_HUNDIENDO;
                 _tickEstado = 0;
                 // el clavado: tangente del arco + peso.
@@ -377,6 +455,9 @@ namespace AethonMod.Content.NPCs
             NPC.velocity.Y += 0.28f;      // el peso del hueso
             NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.velocity.SafeNormalize(Vector2.UnitY) * 22f, 0.05f);
             _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.05f, 0.10f);
+
+            // v6.50.26 — el aliento se corta al clavarse (el arco muere).
+            if (_aliento != 0) { _aliento = 0; _tickAliento = 0; NPC.netUpdate = true; }
 
             // FASE 4 — SE LA TRAGA: al clavarse, la singularidad nace donde
             // ESTÁS (ella se lo lleva debajo y el mundo se curva).
@@ -394,6 +475,126 @@ namespace AethonMod.Content.NPCs
             {
                 _estado = EST_BAJO_TIERRA;
                 _tickEstado = 0;
+                _alientoEsteCiclo = false; // el próximo arco puede volver a escupir
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.26 — EL RAM HORIZONTAL (la embestida de superficie)
+        // ==================================================================
+
+        /// <summary>
+        /// LA CARGA DEL GUSANO: telegraph de 36 ticks (frena, ruge, la
+        /// runa frontal se enciende y las fauces se ABREN al máximo) y
+        /// EMBESTIDA horizontal a la altura de la presa — el dash del
+        /// Devourer of Gods, la firma de los gusanos grandes. En fase 4+
+        /// el ram SIEMBRA pernos con la boca mientras cruza.
+        /// </summary>
+        private void EstadoCarga(Player target)
+        {
+            // === EL TELEGRAPH (0..36): la sierpe se yergue y avisa ===
+            if (_tickEstado <= 36)
+            {
+                NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.12f);
+                _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.52f, 0.15f);
+                if (_tickEstado == 1)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    OndaLib.Kick(7f, 14);
+                }
+                // se ALZA sobre la línea de la presa: el rumbo del ram.
+                Vector2 ancla = new Vector2(
+                    target.Center.X - _dirCarga * 340f,
+                    target.Center.Y - 160f);
+                NPC.velocity += (ancla - NPC.Center) * 0.004f;
+                return;
+            }
+
+            // === EL RAM: horizontal a la altura de la presa ===
+            float vel = 26f + Phase * 2.5f;
+            Vector2 hacia = new Vector2(_dirCarga * vel,
+                (target.Center.Y - 60f - NPC.Center.Y) * 0.05f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, hacia, 0.10f);
+            _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.46f, 0.12f);
+
+            // LA ESTELA del hueso viajando (el rastro del ram).
+            if (!Main.dedServ && (_tickEstado & 3) == 0)
+            {
+                for (int d = 0; d < 2; d++)
+                {
+                    int idx = Dust.NewDust(NPC.Center, 80, 80, DustID.Bone,
+                        -_dirCarga * Main.rand.NextFloat(3f, 8f), Main.rand.NextFloat(-3f, 3f));
+                    Main.dust[idx].noGravity = true;
+                }
+            }
+
+            // FASE 4+: la boca SIEMBRA pernos mientras cruza.
+            if (Phase >= 4 && (_tickEstado % 22) == 0)
+                DispararPernoApuntado(target, 0.45f, Main.rand.NextFloat(-0.25f, 0.25f));
+
+            // el cruce termina: se hunde al otro lado (o si se pasó de largo).
+            if (_tickEstado > 160 || ((_dirCarga > 0 && NPC.Center.X > target.Center.X + 1500f) ||
+                                      (_dirCarga < 0 && NPC.Center.X < target.Center.X - 1500f)))
+            {
+                _estado = EST_HUNDIENDO;
+                _tickEstado = 0;
+                NPC.velocity = new Vector2(_dirCarga * 9f, 21f);
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.26 — EL ALIENTO PRIMORDIAL (el rayo de la boca)
+        // ==================================================================
+
+        /// <summary>
+        /// EL ALIENTO: 40 ticks de CARGA (las fauces se abren, la luz se
+        /// acumula en la garganta — el cliente dibuja el crescendo) y 70
+        /// de FUEGO: el ARCO de rayo BocaPos→presa arde en el render y la
+        /// boca llueve pernos alrededor de la presa (el daño real — el
+        /// arco es CINE en el PreDraw de cada máquina, los pernos son
+        /// proyectiles sincronizados).
+        /// </summary>
+        private void AlientoTick(Player target)
+        {
+            if (_aliento == 0) return;
+            _tickAliento++;
+
+            if (_aliento == 1)
+            {
+                // LA CARGA: la boca se abre, la garganta se llena.
+                _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.55f, 0.14f);
+                if (_tickAliento >= 40)
+                {
+                    _aliento = 2;
+                    _tickAliento = 0;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Aliento", VioletaLuz);
+                    NPC.netUpdate = true; // el arco arranca YA en los clientes
+                }
+                return;
+            }
+
+            // EL FUEGO: la boca cháchara y llueven pernos sobre la presa.
+            _aberturaMandibula = 0.46f + 0.10f * MathF.Sin(_tickAliento * 0.55f);
+            if ((_tickAliento % 8) == 0 && _tickAliento <= 64)
+            {
+                Vector2 pos = target.Center + new Vector2(
+                    Main.rand.NextFloat(-120f, 120f),
+                    Main.rand.NextFloat(-260f, -80f));
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, new Vector2(0f, 7f),
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.42f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                        NPC.whoAmI * 97 + _tickAliento);
+                }
+            }
+            if (_tickAliento >= 70)
+            {
+                _aliento = 0;
+                _tickAliento = 0;
+                NPC.netUpdate = true;
             }
         }
 
@@ -426,7 +627,7 @@ namespace AethonMod.Content.NPCs
         {
             Vector2 adelante = NPC.velocity.SafeNormalize(Vector2.UnitY);
             if (NPC.velocity == Vector2.Zero) adelante = -Vector2.UnitY.RotatedBy(NPC.rotation);
-            return NPC.Center + adelante * 58f;  // más allá de los colmillos
+            return NPC.Center + adelante * (58f * AethonSierpeCuerpo.ESC);  // más allá de los colmillos (ESC 1.4)
         }
 
         private void Fase1PolvoEstelar()
@@ -754,9 +955,10 @@ namespace AethonMod.Content.NPCs
             //  en el pase de render, y el cine no puede depender de
             //  otros renderizadores.)
 
-            // LA DESARTICULACIÓN: cada 5 ticks muere UN hueso (de la cola
-            // hacia la cabeza — el esqueleto se deshace por detrás).
-            if ((_tickMuerte % 5u) == 0u && _tickMuerte < 170)
+            // LA DESARTICULACIÓN: cada 4 ticks muere UN hueso (de la cola
+            // hacia la cabeza — el esqueleto se deshace por detrás). La
+            // cadena es más larga (46): cadencia 4, hasta el tick 200.
+            if ((_tickMuerte % 4u) == 0u && _tickMuerte < 200)
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
@@ -787,7 +989,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // EL FINAL: el estallido + el botín + lo que quede de huesos.
-            if (_tickMuerte >= 190)
+            if (_tickMuerte >= 220)
             {
                 OndaLib.Kick(14f, 30);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath2, NPC.Center);
@@ -855,6 +1057,9 @@ namespace AethonMod.Content.NPCs
 
         // ==================================================================
         //  EL ARTE — EL CRÁNEO, LAS MANDÍBULAS CINÉTICAS Y LA LUZ
+        //  v6.50.26 — TODO A ESC 1.4 (la sierpe del final) + el cabeceo
+        //  serpenteo, el rim trasero del hueso, las motas orbitantes y
+        //  EL ALIENTO (el arco de rayo de la boca al pecho de la presa).
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
@@ -869,9 +1074,15 @@ namespace AethonMod.Content.NPCs
                 Texture2D texMandibula = ModContent.Request<Texture2D>(
                     "AethonMod/Content/NPCs/AethonSierpeMandibula").Value;
 
+                float esc = AethonSierpeCuerpo.ESC;
                 float visibilidad = 1f - (NPC.alpha / 255f);
                 if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 190f));
                 Color luz = Color.White * visibilidad;
+
+                // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo: la
+                // física no se toca): el cráneo ondula como la columna.
+                float t = Main.GlobalTimeWrappedHourly;
+                float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
 
                 // === EL CRÁNEO + LAS DOS HEMIMANDÍBULAS (lote alfa) ===
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -881,42 +1092,49 @@ namespace AethonMod.Content.NPCs
                 {
                     Vector2 pos = NPC.Center - Main.screenPosition;
                     Vector2 origen = new Vector2(texCraneo.Width, texCraneo.Height) * 0.5f;
+                    float rot = NPC.rotation + cabeceo;
                     spriteBatch.Draw(texCraneo, pos, null, luz,
-                        NPC.rotation, origen, 1f, SpriteEffects.None, 0f);
+                        rot, origen, esc, SpriteEffects.None, 0f);
 
-                    // LAS FAUCES: pivotes en las APÓFISIS DEL CUADRADO
-                    // del cráneo (±34, +52 del centro — donde cuelgan) —
-                    // giran ABRIRSE (±abertura).
-                    Vector2 pivDer = NPC.Center + new Vector2(34f, 52f).RotatedBy(NPC.rotation);
-                    Vector2 pivIzq = NPC.Center + new Vector2(-34f, 52f).RotatedBy(NPC.rotation);
-                    Vector2 origenM = new Vector2(30f, 101f); // la bola articular
+                    // LAS FAUCES: pivotes en las APÓFISIS DEL CUADRADO del
+                    // cráneo (±34, +52 del centro ESCALADOS — donde cuelgan)
+                    // — giran ABRIRSE (±abertura) y CHÁCHARAN en el aliento.
+                    Vector2 pivDer = NPC.Center + new Vector2(34f * esc, 52f * esc).RotatedBy(rot);
+                    Vector2 pivIzq = NPC.Center + new Vector2(-34f * esc, 52f * esc).RotatedBy(rot);
+                    Vector2 origenM = new Vector2(30f * esc, 101f * esc); // la bola articular (escalada)
                     float ab = _aberturaMandibula;
                     spriteBatch.Draw(texMandibula, pivDer - Main.screenPosition, null, luz,
-                        NPC.rotation + ab, origenM, 1f, SpriteEffects.None, 0f);
+                        rot + ab, origenM, esc, SpriteEffects.None, 0f);
                     spriteBatch.Draw(texMandibula, pivIzq - Main.screenPosition, null, luz,
-                        NPC.rotation - ab, origenM, 1f, SpriteEffects.FlipHorizontally, 0f);
+                        rot - ab, origenM, esc, SpriteEffects.FlipHorizontally, 0f);
                 }
                 finally { spriteBatch.End(); }
 
                 // === LA LUZ DE LAS CUENCAS Y LA CORONA (búfer de quads) ===
-                float t = Main.GlobalTimeWrappedHourly;
                 float latido = 0.85f + 0.15f * MathF.Sin(t * (2.2f + Phase * 0.6f));
                 float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 190f))) : 1f;
 
-                // las CUENCAS (el oro que MIRA — sprite (±22, +6) del centro).
+                // v6.50.26 — LA FARE DE OJOS: los ojos se encanden al
+                // disparar (el aliento y el telegraph del ram los encienden).
+                float fare = 1f + _aberturaMandibula * 0.9f;
+
+                // las CUENCAS (el oro que MIRA — escaladas).
                 for (int sx = -1; sx <= 1; sx += 2)
                 {
-                    Vector2 cuenca = NPC.Center + new Vector2(sx * 22f, 6f).RotatedBy(NPC.rotation);
-                    VFXCore.Quad(cuenca, OroLuz * (0.65f * latido * alphaLuz * visibilidad),
-                        new Vector2(16f, 16f));
-                    VFXCore.Quad(cuenca, NucleoBlanco * (0.45f * latido * alphaLuz * visibilidad),
-                        new Vector2(8f, 8f));
+                    Vector2 cuenca = NPC.Center + new Vector2(sx * 22f * esc, 6f * esc).RotatedBy(NPC.rotation + cabeceo);
+                    VFXCore.Quad(cuenca, OroLuz * (0.65f * latido * alphaLuz * visibilidad * fare),
+                        new Vector2(16f * esc * fare, 16f * esc * fare));
+                    VFXCore.Quad(cuenca, NucleoBlanco * (0.45f * latido * alphaLuz * visibilidad * fare),
+                        new Vector2(8f * esc * fare, 8f * esc * fare));
                 }
-                // LA GARGANTA brilla cuando la boca está ABIERTA.
+                // LA GARGANTA brilla cuando la boca está ABIERTA — y ARDE
+                // en la carga del aliento (la luz se acumula).
                 if (_aberturaMandibula > 0.15f)
                 {
-                    VFXCore.Quad(BocaPos(), OroLuz * (0.30f * _aberturaMandibula * 2f * alphaLuz),
-                        new Vector2(26f, 30f), NPC.rotation);
+                    float carga = _aliento == 1 ? Math.Min(1f, _tickAliento / 40f) : 0f;
+                    VFXCore.Quad(BocaPos(),
+                        OroLuz * ((0.30f + 0.55f * carga) * _aberturaMandibula * 2f * alphaLuz),
+                        new Vector2(26f * esc, 30f * esc) * (1f + carga * 0.5f), NPC.rotation);
                 }
                 VFXCore.FlushAdditive(null, false);
 
@@ -928,14 +1146,33 @@ namespace AethonMod.Content.NPCs
                 {
                     Vector2 posC = NPC.Center - Main.screenPosition;
 
+                    // v6.50.26 — EL RIM TRASERO DEL HUESO (el cráneo lee
+                    // contra el cielo: el resplandor tibio DETRÁS de la
+                    // calavera antes de los anillos).
+                    LumenLib.Bloom(spriteBatch, posC, 150f * esc, OroLuz, 0.10f * alphaLuz * visibilidad, 2);
+                    LumenLib.Bloom(spriteBatch, posC, 90f * esc, VioletaLuz, 0.07f * alphaLuz * visibilidad, 2);
+
+                    // v6.50.26 — LAS MOTAS ORBITANTES (el enjambre de la
+                    // Luz: tres chispas girando el cráneo — oro en fase baja,
+                    // violeta en la alta).
+                    Color cMota = Phase >= 3 ? VioletaLuz : OroLuz;
+                    for (int m = 0; m < 3; m++)
+                    {
+                        float ang = t * (0.8f + m * 0.35f) + m * 2.1f;
+                        float r = 86f * esc + 10f * MathF.Sin(t * 2.2f + m);
+                        Vector2 mota = posC + new Vector2(MathF.Cos(ang) * r, MathF.Sin(ang) * r * 0.62f);
+                        LumenLib.Bloom(spriteBatch, mota, 13f * esc, cMota,
+                            (0.35f + 0.20f * MathF.Sin(t * 3f + m * 1.7f)) * alphaLuz, 2);
+                    }
+
                     // EL CINE DE MUERTE: LA LUZ SE ESCAPA POR LA BOCA
                     // (crece con el timer — el alma abandona el hueso).
                     if (_muriendo)
                     {
                         float tm = Math.Min(1f, _tickMuerte / 190f);
-                        LumenLib.Bloom(spriteBatch, posC, 40f * (1f + tm * 3f),
+                        LumenLib.Bloom(spriteBatch, posC, 40f * (1f + tm * 3f) * esc,
                             NucleoBlanco, 0.7f * (1f - tm) + 0.08f, 2);
-                        LumenLib.Bloom(spriteBatch, posC, 72f * (1f + tm * 2.5f),
+                        LumenLib.Bloom(spriteBatch, posC, 72f * (1f + tm * 2.5f) * esc,
                             OroLuz, 0.38f * (1f - tm * 0.7f), 2);
                     }
 
@@ -946,10 +1183,33 @@ namespace AethonMod.Content.NPCs
                         4 => new Color(120, 70, 200),
                         _ => OroLuz,
                     };
-                    OrbitaLib.AnilloFino(posC, 64f, t * 0.8f,
+                    OrbitaLib.AnilloFino(posC, 64f * esc, t * 0.8f,
                         OrbitaLib.Tint(colorA, 0.38f * alphaLuz));
-                    OrbitaLib.AnilloFino(posC, 92f, -t * 0.5f,
+                    OrbitaLib.AnilloFino(posC, 92f * esc, -t * 0.5f,
                         OrbitaLib.Tint(VioletaLuz, 0.25f * alphaLuz));
+
+                    // v6.50.26 — EL TELEGRAPH DEL RAM: el anillo de aviso
+                    // crece mientras carga (el aviso de la embestida —
+                    // ai[2] es el tick DEL ESTADO, sincronizado).
+                    if (NPC.ai[0] == EST_CARGA && NPC.ai[2] <= 36f && !_muriendo)
+                    {
+                        float prog = NPC.ai[2] / 36f;
+                        OndaLib.Pulse(spriteBatch, posC, prog, 200f * esc, OroLuz, 0.55f, NPC.whoAmI);
+                    }
+
+                    // v6.50.26 — LA ESTELA DEL RAM (el rastro de luz del
+                    // cráneo viajando — tres fantasmas detrás de la velocidad).
+                    if (NPC.ai[0] == EST_CARGA && NPC.ai[2] > 36f && !_muriendo &&
+                        NPC.velocity.LengthSquared() > 100f)
+                    {
+                        Vector2 atras = -Vector2.Normalize(NPC.velocity);
+                        for (int g = 1; g <= 3; g++)
+                        {
+                            Vector2 fantasma = posC + atras * (g * 42f * esc);
+                            LumenLib.Bloom(spriteBatch, fantasma, 34f * esc,
+                                OroLuz, 0.20f / g * alphaLuz, 2);
+                        }
+                    }
 
                     // === FASE 3: EL AVISO PREVOLTEO (de siempre) ===
                     if (Phase >= 3 && _estado == EST_SUPERFICIE)
@@ -979,6 +1239,41 @@ namespace AethonMod.Content.NPCs
                     }
                 }
                 finally { spriteBatch.End(); }
+
+                // v6.50.26 — EL ALIENTO PRIMORDIAL: el ARCO de rayo de la
+                // BOCA al pecho de la presa (PerlinBolt — el arco eléctrico
+                // serpenteante de la casa; en la CARGA crece fino y tenue,
+                // en el FUEGO arde completo). Corre en TODAS las máquinas:
+                // lee ai[1] (sincronizado) y la posición LOCAL de la presa.
+                // EL TEMPO LOCAL: si ai[1] no cambió desde el frame pasado,
+                // el contador sigue contando (el crescendo es suave — los
+                // paquetes de sync llegan cada 12 ticks, el arco cada 1).
+                if (NPC.ai[1] != _alientoPrevio)
+                {
+                    _alientoPrevio = NPC.ai[1];
+                    _tickAlientoLocal = 0f;
+                }
+                else if (NPC.ai[1] != 0f)
+                    _tickAlientoLocal++;
+                if (!_muriendo && (NPC.ai[1] == 1f || NPC.ai[1] == 2f))
+                {
+                    Player presa = Main.player[NPC.target];
+                    if (presa != null && presa.active && !presa.dead)
+                    {
+                        bool cargando = NPC.ai[1] == 1f;
+                        float prog = cargando
+                            ? Math.Min(1f, _tickAlientoLocal / 40f)
+                            : 1f;
+                        Vector2 boca = BocaPos() - Main.screenPosition;
+                        Vector2 pecho = presa.Center - Main.screenPosition;
+                        Color haloA = Phase >= 3 ? VioletaLuz : OroLuz;
+                        float ancho = (0.9f + 2.6f * prog) * (cargando ? 0.6f : 1f);
+                        int flick = (int)(Main.GameUpdateCount / 3u); // ~20 Hz de meandro
+                        StormLib.PerlinBolt(spriteBatch, boca, pecho,
+                            NPC.whoAmI * 71 + 13, flick, ancho, haloA, NucleoBlanco,
+                            (cargando ? 0.35f : 0.9f) * visibilidad);
+                    }
+                }
             }
             catch
             {
@@ -991,5 +1286,11 @@ namespace AethonMod.Content.NPCs
             }
             return false; // el cráneo se dibuja a sí mismo
         }
+
+        // v6.50.26 — el tempo LOCAL del aliento (el cliente cuenta su
+        // propio tick para el crescendo suave — ai[1] solo viaja por
+        // paquetes cada 12 ticks; el arco no puede esperarlos).
+        private float _tickAlientoLocal = 0f;
+        private float _alientoPrevio = 0f;
     }
 }

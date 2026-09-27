@@ -295,6 +295,20 @@ namespace AethonMod.Content.Systems
             else
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Oleada", new Color(198, 200, 206),
                     _oleadaActual, _oleadasTotales, _oleadaActual + 1);
+
+            // v6.50.26 — LA OLEADA ES UNA HORDA DE GOLPE (la letra del
+            // usuario: «lo que debe hacer las oleadas es AUMENTAR
+            // CONSIDERABLEMENTE la cantidad de enemigos que aparecen y
+            // hacerlo EN FORMA DE OLEADAS, con cada oleada haciendo que
+            // salgan MÁS enemigos»): la CAMADA DE APERTURA nace DE GOLPE
+            // con el anuncio — 6+3k monstruos irrumpiendo a la vez (la 1
+            // son 9, la 10 son 36) y la marea sigue por pulsos. La furia
+            // los trae CORRIENDO (OleadaNPC: la carga ya no se apaga a
+            // 1500 px — llegan desde fuera de pantalla).
+            int[] poolApertura = PoolMonstruos(hambriento);
+            int camada = 6 + 3 * _oleadaActual;
+            for (int s = 0; s < camada; s++)
+                SpawnMonstruo(hambriento, poolApertura);
         }
 
         private static void FaseMonstruos(Player hambriento)
@@ -302,16 +316,20 @@ namespace AethonMod.Content.Systems
             int duracion = Math.Max(600, TicksEvento / Math.Max(1, _oleadasTotales)); // ≥ 10 s por oleada
             _ticksOleada++;
 
-            // === LOS ESCUPITAJOS DE CHUSMA ===
+            // === LA MAREA (los escupitajos de chusma) ===
+            // v6.50.26 — LA OLEADA ES UNA HORDA: pulso cada 60 ticks (1 s
+            // — era 90), camadas de 3+k por pulso (la 1 repone 4/s, la 10
+            // repone 13/s) y el TOPE VIVO escala ×5 por oleada (la 1: 13
+            // vivos, la 10: 58 — «con cada oleada salen más enemigos»).
             _pulsoSpawn++;
-            if (_pulsoSpawn >= 90) // cada 1.5 s
+            if (_pulsoSpawn >= 60)
             {
                 _pulsoSpawn = 0;
                 int vivos = ContarChusma();
-                int tope = VivosBase + 2 * _oleadaActual;
+                int tope = VivosBase + 5 * _oleadaActual;
                 if (vivos < tope)
                 {
-                    int porPulso = 2 + (_oleadaActual + 2) / 3; // 3..6
+                    int porPulso = 3 + _oleadaActual;
                     int[] pool = PoolMonstruos(hambriento);
                     for (int s = 0; s < porPulso; s++)
                         SpawnMonstruo(hambriento, pool);
@@ -681,7 +699,7 @@ namespace AethonMod.Content.Systems
             if (Main.hardMode)
             {
                 if (Main.dayTime)
-                    return new int[] { NPCID.BlueSlime, NPCID.GreenSlime, NPCID.BlueSlime };
+                    return new int[] { NPCID.BlueSlime, NPCID.GreenSlime, NPCID.Derpling, NPCID.BlueSlime };
                 return new int[] { NPCID.Werewolf, NPCID.WanderingEye, NPCID.Zombie };
             }
             if (Main.dayTime)
@@ -792,6 +810,12 @@ namespace AethonMod.Content.Systems
 
                 // EL SELLO (marca + stats + aura)
                 npc.GetGlobalNPC<OleadaNPC>().Marcar(npc, _oleadaActual, jefe: false);
+
+                // v6.50.26 — LA FURIA LOS TRAE CORRIENDO: objetivo fijado
+                // DESDE EL NACIMIENTO (la chusma del festín no se distrae
+                // ni espera a que su IA se decida — vienen por la comida).
+                npc.TargetClosest(false);
+                npc.netUpdate = true;
             }
             catch { }
         }

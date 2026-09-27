@@ -623,10 +623,14 @@ namespace AethonMod.Content.VFX
                 }
 
                 // LA TIRA: taper FLAT (la OLA es la única curva de ancho),
-                // sin crackle (la OLA gobierna el brillo), alisado Chaikin
-                // (la línea LISA del raymarch de vanilla).
+                // sin crackle (la OLA gobierna el brillo). v6.50.26 — SIN
+                // Chaikin: el raymarch de vanilla YA trae su multi-escala
+                // angular (8 px por paso + 4-5 capas) y el suavizado encima
+                // REDONDEABA los kinks (el reporte: «demasiado redondeado
+                // cuando la línea se curva» — los rayos de verdad quiebran
+                // AGUDO, stepped leaders).
                 RayoStrip.FilamentoEnLote(pts, anchoSeguro, color, nucleo, alfaGlobal,
-                    StormTaper.Flat, 0, 0, suavizar: true, crackle: false,
+                    StormTaper.Flat, 0, 0, suavizar: false, crackle: false,
                     alphaPorNodo: alfaNodo, anchoPorNodo: anchoNodo);
             }
             catch { }

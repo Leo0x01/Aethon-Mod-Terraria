@@ -336,7 +336,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             RayoStrip.Filamento(path, 0.67f + 0.48f * pulse * charge,
                 GoldWarm, WhiteIncan,
                 0.45f * charge, StormTaper.Center, seed, flick,
-                suavizar: true, crackle: false, vena: false);
+                suavizar: false, crackle: false, vena: false);
 
             // El filamento de carga: encendido a ráfagas cada vez más rápido.
             if (StormLib.IsLit(seed, flick, 0.30f + 0.45f * charge))

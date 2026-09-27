@@ -7,6 +7,29 @@ namespace AethonMod.Content.VFX
 {
     /// <summary>
     /// RayoStrip — v6.50.25 — EL FILAMENTO DE PRIMITIVAS DE VÉRTICES.
+    /// v6.50.26 — LA LECCIÓN DE LA INVESTIGACIÓN (R63-a: rayos reales +
+    /// Calamity/drilian/jvm-gaming): (1) EL ALFA DEL VÉRTICE NO ESCALA
+    /// EL COLOR — el BasicEffect del motor pasa el COLOR sin pre-multiplicar
+    /// y el lote aditivo (One,One) SUMA el rgb TAL CUAL: el alfa por
+    /// columna era LETRA MUERTA y la funda salía como BANDA SÓLIDA de
+    /// color pleno («el brillo es muy intenso… se rompe en los bordes
+    /// cuando toca el brillo de otra línea» — el borde duro de la banda
+    /// + el clipeo al cruzarse dos bandas). EL FIX DE RAÍZ: el rgb se
+    /// PRE-MULTIPLICA por el factor en el vértice (el contrato de
+    /// Color·f de TODA la casa, que RayoStrip violaba). (2) EL BLEND
+    /// DE PANTALLA (soft-add): SourceBlend=InverseDestinationColor,
+    /// DestBlend=One → dst += rgb·(1−dst): la acumulación es
+    /// ASINTÓTICA (0.3→0.51→0.66…) y NUNCA clipea — dos rayos que se
+    /// cruzan SE SUMAN SIN ROMPERSE, el fix clásico del «disco blanco
+    /// plano» del aditivo puro. (3) EL PERFIL DE LOS RAYOS DE VERDAD:
+    /// núcleo fino (~1/5 del ancho total, casi blanco) + halo 4× más
+    /// ancho con alfa BAJO (10-26%) — «todo lo que pueda solaparse
+    /// debe quedar lejos de 1.0; solo el núcleo único llega a blanco».
+    /// (4) ESQUINAS AGUDAS: los rayos reales son zigzag fractal con
+    /// KINKS BRUSCOS (stepped leaders) — el Chaikin que redondeaba
+    /// cada curva («demasiado redondeado cuando la línea se curva»)
+    /// pasa a OPT-IN: solo el canal Perlin (el arco eléctrico de la
+    /// vida real, curvatura CONTINUA) lo usa.
     ///
     /// EL DIAGNÓSTICO (el reporte del usuario, literal): «todos los rayos
     /// nuevos presentan el mismo problema, el rayo no es una línea lisa…
@@ -81,12 +104,27 @@ namespace AethonMod.Content.VFX
         public static int Profundidad => _profundidad;
 
         // LAS COLUMNAS DE LA FUNDA (fracción del semiancho · alfa relativo).
+        // v6.50.26 — EL PERFIL DE VERDAD: halo BAJO (0.05/0.26/0.62 — la
+        // investigación: 10-26% de alfa en el halo; el centro 0.62 porque
+        // la VENA blanca encima lo sube) y BORDES QUE MUEREN en 0.05.
         private static readonly float[] ColF = { -1f, -0.44f, 0f, 0.44f, 1f };
-        private static readonly float[] ColA = { 0.08f, 0.46f, 1.0f, 0.46f, 0.08f };
+        private static readonly float[] ColA = { 0.05f, 0.26f, 0.62f, 0.26f, 0.05f };
 
-        // LAS COLUMNAS DE LA VENA (el núcleo caliente).
-        private static readonly float[] VenF = { -0.36f, 0f, 0.36f };
-        private static readonly float[] VenA = { 0.30f, 0.95f, 0.30f };
+        // LAS COLUMNAS DE LA VENA (el núcleo caliente — 1/5 del ancho total).
+        private static readonly float[] VenF = { -0.30f, 0f, 0.30f };
+        private static readonly float[] VenA = { 0.16f, 0.88f, 0.16f };
+
+        // v6.50.26 — EL BLEND DE PANTALLA (soft-add): dst += rgb·(1−dst).
+        // La acumulación asintótica NUNCA clipea — el fix del «brillo que
+        // se rompe al cruzarse» (receta del foro jvm-gaming, verificada en
+        // la documentación de MonoGame: Blend.InverseDestinationColor).
+        private static readonly BlendState _pantalla = new BlendState
+        {
+            ColorSourceBlend = Blend.InverseDestinationColor,
+            ColorDestinationBlend = Blend.One,
+            AlphaSourceBlend = Blend.One,
+            AlphaDestinationBlend = Blend.One,
+        };
 
         // ==================================================================
         //  EL LOTE (el baile End → primitivas → Begin, anidable)
@@ -139,14 +177,16 @@ namespace AethonMod.Content.VFX
         /// <param name="taper">La curva de anchura a lo largo.</param>
         /// <param name="seed">Semilla del crackle.</param>
         /// <param name="flick">El flick actual (regenera el crackle).</param>
-        /// <param name="suavizar">Chaikin ×1 (después de las esquinas del fractal).</param>
+        /// <param name="suavizar">Chaikin ×1 (SOLO el canal Perlin: los rayos
+        /// de verdad tienen kinks AGUDOS — stepped leaders — y el suavizado
+        /// los redondeaba como tubos).</param>
         /// <param name="crackle">El brillo por vértice (la casa lo usa en Strand).</param>
         /// <param name="vena">Dibujar la vena blanca (true salvo capas raras).</param>
         /// <param name="alphaPorNodo">Alfa extra por nodo (la OLA de RayoLib) o null.</param>
         /// <param name="anchoPorNodo">Multiplicador de ancho por nodo (la OLA) o null.</param>
         public static void Filamento(Vector2[] pts, float width, Color halo, Color nucleo,
             float alpha = 1f, StormTaper taper = StormTaper.Center,
-            int seed = 0, int flick = 0, bool suavizar = true, bool crackle = true,
+            int seed = 0, int flick = 0, bool suavizar = false, bool crackle = true,
             bool vena = true, float[] alphaPorNodo = null, float[] anchoPorNodo = null)
         {
             AbrirLote();
@@ -167,14 +207,18 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static void FilamentoEnLote(Vector2[] pts, float width, Color halo, Color nucleo,
             float alpha = 1f, StormTaper taper = StormTaper.Center,
-            int seed = 0, int flick = 0, bool suavizar = true, bool crackle = true,
+            int seed = 0, int flick = 0, bool suavizar = false, bool crackle = true,
             bool vena = true, float[] alphaPorNodo = null, float[] anchoPorNodo = null)
         {
             if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return;
             if (pts == null || pts.Length < 2 || alpha <= 0.01f || width <= 0.05f) return;
 
-            // EL ALISADO CHAIKIN (la línea LISA): corta cada esquina al
-            // 25%/75% — el zigzag vive pero la curva fluye. Anclas exactas.
+            // v6.50.26 — EL ALISADO CHAIKIN ES OPT-IN (el reporte:
+            // «demasiado redondeado cuando la línea se curva»): los rayos
+            // reales son zigzag con KINKS AGUDOS — la tira continua ya ES
+            // lisa (cero juntas por construcción); solo el canal Perlin
+            // (el ARCO eléctrico, curvatura continua en la vida real)
+            // conserva el meandro suavizado.
             if (suavizar) pts = Chaikin1(pts);
 
             int n = pts.Length;
@@ -212,6 +256,9 @@ namespace AethonMod.Content.VFX
                 norm[i] = new Vector2(-avg.Y, avg.X);
 
                 // EL ANCHO: taper × OLA (si la trae) × suelos de visibilidad.
+                // v6.50.26 — LA FUNDA 2.0×w (era 2.6×: el halo 4× el ancho
+                // total, la proporción de la investigación: halo 4-8× el
+                // núcleo de 0.6×w → 4.0w/0.6w = 6.7× ✓).
                 // (LOS ARRAYS POR NODO del llamador son del camino ORIGINAL
                 // — tras el Chaikin el índice ya NO coincide: se muestrean
                 // POR FRACCIÓN de camino con interpolación lineal.)
@@ -219,8 +266,8 @@ namespace AethonMod.Content.VFX
                 if (anchoPorNodo != null)
                     w *= Muestrear(anchoPorNodo, t);
                 if (w < 0.05f) w = 0.05f;
-                semi[i] = Math.Max(2.6f * w, 2.5f);
-                semiV[i] = Math.Max(0.36f * w, 0.8f);
+                semi[i] = Math.Max(2.0f * w, 1.9f);
+                semiV[i] = Math.Max(0.32f * w, 0.7f);
 
                 // EL ALFA: global × crackle (la vena arde SIEMPRE) × OLA.
                 float cr = crackle ? 0.66f + 0.34f * VFXCore.Hash01(seed, flick, i * 41 + 17) : 1f;
@@ -305,13 +352,18 @@ namespace AethonMod.Content.VFX
                 new Vector3(c.X, c.Y, 0f), VertColor(color, fc));
         }
 
-        /// <summary>El color de vértice (RGB intacto, alfa = f — el aporte
-        /// aditivo rgb·f sale LINEAL, la semántica del Tint de la casa sin
-        /// la raíz: aquí no hay textura que elevar al cuadrado).</summary>
+        /// <summary>v6.50.26 — EL COLOR PRE-MULTIPLICADO (EL FIX DE RAÍZ):
+        /// el BasicEffect pasa el color del vértice SIN multiplicar por su
+        /// alfa y el lote SUMA el rgb TAL CUAL — el alfa del vértice era
+        /// LETRA MUERTA (la funda salía como banda SÓLIDA: «el brillo es
+        /// muy intenso, se rompe en los bordes»). Ahora el rgb escala por
+        /// f AQUÍ, en la CPU — el contrato Color·f de TODA la casa, y el
+        /// lote de pantalla (soft-add) lo compone sin clipear.</summary>
         private static Color VertColor(Color c, float f)
         {
             f = MathHelper.Clamp(f, 0f, 1f);
-            return new Color(c.R, c.G, c.B, (byte)(int)(f * 255f + 0.5f));
+            return new Color((byte)(int)(c.R * f + 0.5f), (byte)(int)(c.G * f + 0.5f),
+                (byte)(int)(c.B * f + 0.5f), 255);
         }
 
         // ==================================================================
@@ -339,7 +391,12 @@ namespace AethonMod.Content.VFX
                 _fx.Projection = Matrix.CreateOrthographicOffCenter(
                     0, Main.screenWidth, Main.screenHeight, 0, 0, -1);
 
-                gd.BlendState = BlendState.Additive;
+                // v6.50.26 — EL LOTE DE PANTALLA (soft-add) en vez del
+                // aditivo puro: dst += rgb·(1−dst) — la acumulación es
+                // asintótica y NUNCA clipea (el fix del brillo que «se
+                // rompe en los bordes cuando toca el brillo de otra
+                // línea»: dos fundas cruzadas se SUMAN, no se queman).
+                gd.BlendState = _pantalla;
                 gd.DepthStencilState = DepthStencilState.None;
                 gd.RasterizerState = RasterizerState.CullNone;
 
