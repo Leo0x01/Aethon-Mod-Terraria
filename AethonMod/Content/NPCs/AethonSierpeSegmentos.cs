@@ -138,60 +138,40 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// v6.50.26 — EL HUESO DIBUJADO A ESCALA (tML solo pinta el sprite
-        /// 1:1 — la sierpe del final es 40% más grande): el hueso se dibuja
-        /// AQUÍ (lote alfa) y LA RUNA DEL CENTRUM respira encima en el
-        /// MISMO baile (lote aditivo) — un solo par Begin/End por vértebra.
+        /// v6.50.27 — EL ARTE NUEVO DE LA SIERPE ESTELAR (el reporte:
+        /// «el arte del jefe se ve horrible, deberías cambiarlo por
+        /// completo, algo al estilo de la sierpe en el arma La Sierpe
+        /// Estelar»): el hueso SPRITE muere — cada vértebra es AHORA
+        /// CRIATURA DE CÓDIGO (AethonSierpeArte.Vertebra): el cuerpo de
+        /// vacío del pase alfa (la silueta con contraste) + la Luz de la
+        /// columna (velo, espina, apófisis estelar, centrum ardiendo) +
+        /// LAS ALETAS de varillas en los huesos 6, 14 y 22 (alternando
+        /// lado — el rasgo de pez de La Sierpe Estelar). El TAPER es
+        /// muscular: 31 px junto al cráneo → 9 en la punta de mundo.
         /// </summary>
         public override bool PreDraw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.dedServ || NPC.hide) return false; // escondido: nada que pintar
-            VFXCore.CerrarLoteSiAbierto();
             try
             {
-                float latido = 0.5f + 0.5f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.6f + NPC.ai[3] * 0.7f);
+                int idx = (int)NPC.ai[3];
+                float visibilidad = 1f - (NPC.alpha / 255f);
+                // EL TAPER: el radio del hueso (graso junto al cráneo,
+                // afilado hacia el fondo).
+                float radio = MathHelper.Lerp(31f, 9f, Math.Clamp(idx / (float)(UMBRAL_FONDO - 1), 0f, 1f)) * ESC;
+                // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2).
+                float rumbo = NPC.rotation - MathHelper.PiOver2;
+                // LAS ALETAS: en los huesos 6, 14 y 22 (lado alternado).
+                float ladoAleta = 0f;
+                if (idx == 6) ladoAleta = 1f;
+                else if (idx == 14) ladoAleta = -1f;
+                else if (idx == 22) ladoAleta = 1f;
 
-                // === 1) EL HUESO (lote alfa — el cuerpo de la columna) ===
-                spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred,
-                    Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend,
-                    Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp,
-                    Microsoft.Xna.Framework.Graphics.DepthStencilState.None,
-                    Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                try
-                {
-                    var tex = ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>("AethonMod/Content/NPCs/AethonSierpeVertebra").Value;
-                    Vector2 pos = NPC.Center - Main.screenPosition;
-                    spriteBatch.Draw(tex, pos, null, drawColor,
-                        NPC.rotation, tex.Size() * 0.5f, ESC,
-                        Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0f);
-                }
-                finally { VFXCore.CerrarLoteSiAbierto(); }
-
-                // === 2) LA RUNA DORADA (lote aditivo — la Luz del centrum,
-                //     el SoftGlow CACHEADO de la casa) ===
-                spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred,
-                    Microsoft.Xna.Framework.Graphics.BlendState.Additive,
-                    Microsoft.Xna.Framework.Graphics.SamplerState.LinearClamp,
-                    Microsoft.Xna.Framework.Graphics.DepthStencilState.None,
-                    Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                try
-                {
-                    var glow = VFXCore.SoftGlow;
-                    Vector2 pos = NPC.Center - Main.screenPosition;
-                    // el glow pequeño y TENUE — el HUESO es el protagonista
-                    // (la runa vive DENTRO).
-                    spriteBatch.Draw(glow, pos, null,
-                        new Color(255, 226, 140) * (0.38f * latido),
-                        NPC.rotation, glow.Size() * 0.5f, new Vector2(0.30f, 0.42f) * ESC,
-                        Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0f);
-                }
-                finally { VFXCore.CerrarLoteSiAbierto(); }
+                AethonSierpeArte.Vertebra(NPC.Center - Main.screenPosition, rumbo,
+                    radio, Main.GlobalTimeWrappedHourly, idx, visibilidad, ladoAleta);
             }
             catch { }
-            finally { VFXCore.ReabrirLoteVanilla(); }
-            return false; // el hueso ya se dibujó aquí (a escala)
+            return false; // el arte de código ya se dibujó aquí
         }
 
         public override bool? CanBeHitByProjectile(Projectile projectile) => true;

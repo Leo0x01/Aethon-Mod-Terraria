@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 
@@ -147,6 +148,67 @@ namespace AethonMod.Content.Particles
             p.EnableComponent(ComponentFlag.FadeOut);
             p.EnableComponent(ComponentFlag.ColorShift);
             ParticleManager.Spawn(p);
+        }
+
+        /// <summary>
+        /// v6.50.27 — EL DESTELLO DE RAYOS ESTELARES (el final del «círculo
+        /// grande y liso», reporte 3ª vez: «lo mejor es quitarlo o crear un
+        /// sprite de destello que se vea bien»). El degradado radial — por
+        /// suave que muera — SIEMPRE se lee como un círculo liso: la forma
+        /// de un destello de verdad son los RAYOS (el lens-flare
+        /// anamórfico). DOS partículas: la CRUZ DE 8 BRAZOS (crece de 0.55×
+        /// a 1.2× y se disuelve) y el CORAZÓN caliente (SoftGlow pequeño
+        /// que dura MENOS — el flash aprieta y suelta).
+        ///
+        /// Contrato: `sizePx` = envergadura FINAL de la cruz (los rayos
+        /// horizontales llegan a ~0.97×); `duracionTicks` ≈ 11.
+        /// </summary>
+        public static void DestelloFinal(Vector2 center, float sizePx, Color coreColor,
+            Color rayColor, int duracionTicks = 11)
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) return;
+
+            // === LA CRUZ DE RAYOS (la forma del destello) ===
+            float escala = sizePx / 256f;   // DestelloFinal.png es 256x256
+            var p = new ParticleData
+            {
+                Position = center,
+                Velocity = Vector2.Zero,
+                Scale = Vector2.One * 0.55f,
+                PackedColor = ParticleManager.PackColor(coreColor),
+                PackedStartColor = ParticleManager.PackColor(coreColor),
+                PackedEndColor = ParticleManager.PackColor(ConAlfa(rayColor, 0.7f)),
+                TimeLeft = duracionTicks,
+                Duration = duracionTicks,
+                TextureId = ParticleTex.DestelloFinal,
+                BlendMode = 1, // Additive
+                LayerPriority = LayerPriorities.AboveTiles,
+            };
+            p.UserData1 = escala * 1.2f;    // ScaleUp: nace a 0.55× y ESTALLA a 1.2×
+            p.UserData2 = escala * 1.2f;
+            p.EnableComponent(ComponentFlag.ScaleUp);
+            p.EnableComponent(ComponentFlag.FadeOut);
+            p.EnableComponent(ComponentFlag.ColorShift);
+            ParticleManager.Spawn(p);
+
+            // === EL CORAZÓN (el punto cegador — muere ANTES que los rayos) ===
+            var c = new ParticleData
+            {
+                Position = center,
+                Velocity = Vector2.Zero,
+                Scale = Vector2.One * (sizePx * 0.16f / 64f),   // SoftGlow 64x64
+                PackedColor = ParticleManager.PackColor(coreColor),
+                PackedStartColor = ParticleManager.PackColor(coreColor),
+                PackedEndColor = ParticleManager.PackColor(ConAlfa(rayColor, 0.55f)),
+                TimeLeft = Math.Max(4, duracionTicks * 2 / 3),
+                Duration = Math.Max(4, duracionTicks * 2 / 3),
+                TextureId = ParticleTex.SoftGlow,
+                BlendMode = 1, // Additive
+                LayerPriority = LayerPriorities.AboveTiles,
+            };
+            c.EnableComponent(ComponentFlag.FadeOut);
+            c.EnableComponent(ComponentFlag.ColorShift);
+            ParticleManager.Spawn(c);
         }
 
         /// <summary>El color con el alfa remultiplicado (RGB intacto: en el

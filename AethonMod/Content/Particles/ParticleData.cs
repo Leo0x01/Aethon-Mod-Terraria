@@ -152,5 +152,12 @@ namespace AethonMod.Content.Particles
         /// (el pincel del flash final — el que la suma de ~90 SoftGlow
         /// apilados convertía en «círculo gigante blanco sólido»).</summary>
         public const ushort NovaBurst = 11;
+        /// <summary>v6.50.27 — EL DESTELLO DE RAYOS ESTELARES (256x256): la
+        /// CRUZ DE 8 BRAZOS del flash final (4 rayos largos en los ejes +
+        /// 4 cortos en las diagonales + núcleo caliente pequeño). Un
+        /// degradado radial — por suave que sea — SIEMPRE se lee como
+        /// «círculo grande y liso»; la forma de destello de verdad son los
+        /// RAYOS (el lens-flare anamórfico del cine).</summary>
+        public const ushort DestelloFinal = 12;
     }
 }

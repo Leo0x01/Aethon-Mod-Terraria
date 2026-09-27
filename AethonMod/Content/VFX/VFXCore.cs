@@ -188,6 +188,30 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        // v6.50.27 — la cruz de 8 rayos (el destello con FORMA de destello:
+        // un degradado radial siempre se leyó como «círculo grande y liso»).
+        private static Asset<Texture2D> _destelloFinal;
+
+        /// <summary>
+        /// v6.50.27 — EL DESTELLO DE RAYOS ESTELARES (DestelloFinal.png,
+        /// 256²): 4 rayos largos en los ejes + 4 cortos en las diagonales +
+        /// núcleo caliente — la forma del lens-flare del cine. Null-safe.
+        /// </summary>
+        public static Texture2D DestelloFinal
+        {
+            get
+            {
+                try
+                {
+                    if (_destelloFinal == null)
+                        _destelloFinal = ModContent.Request<Texture2D>(
+                            "AethonMod/Content/Effects/Procedural/DestelloFinal");
+                    return _destelloFinal.IsLoaded ? _destelloFinal.Value : null;
+                }
+                catch { return null; }
+            }
+        }
+
         private static Texture2D _pixel;
 
         /// <summary>

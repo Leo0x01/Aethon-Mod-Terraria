@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.DataStructures;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Systems;
 using AethonMod.Content.Items.Esencias;
 
 namespace AethonMod.Content.Globals
@@ -74,6 +75,7 @@ namespace AethonMod.Content.Globals
         private int _tickAggro = 0;
         private int _tickAtaque = 0;   // el tempo de los dientes
         private int _tickLunge = 0;    // el tempo de los embites
+        private int _tickRecuna = 0;   // v6.50.27 — el tempo de la re-cuna
 
         // v6.50.10 — LAS BASES DEL SELLO (idempotencia de Marcar): las
         // stats capturadas en la PRIMERA marca; toda re-marca recalcula
@@ -301,6 +303,34 @@ namespace AethonMod.Content.Globals
         //  LA AGRESIÓN (chusma Y jefes — la furia crece con la oleada)
         // ==================================================================
 
+        // ==================================================================
+        //  v6.50.27 — LA INMUNIDAD DE DESPAWN (LA CAUSA RAÍZ del reporte
+        //  «las oleadas sigue sin funcionar, la activo y no veo enemigos»)
+        //  ==================================================================
+
+        /// <summary>
+        /// EL SELLO NO SE APAGA SOLO: NPC.CheckActive desactiva a cualquier
+        /// hostil que pase 750 ticks (12,5 s) fuera del rectángulo
+        /// pantalla+tamaño de TODOS los jugadores (verificado en el
+        /// decompile: timeLeft-- hasta 0 → active=false). La cuna del
+        /// festín nace FUERA de ese rectángulo por diseño («fuera de
+        /// pantalla»): la chusma despertaba condenada — los limos saltaban
+        /// tras la colina durante 12,5 segundos y DESAPARECÍAN sin que el
+        /// jugador viera UNO. Mientras el festín vive, los convocados por
+        /// el libro son del EVENTO: viven hasta que los maten o la furia
+        /// termine. (Terminado el festín, este hook devuelve true y los
+        /// sobrevivientes se apagan por el camino de vanilla.)
+        /// </summary>
+        public override bool CheckActive(NPC npc)
+        {
+            try
+            {
+                if (EsDeOleada && GrimorioFuriaSistema.Activo) return false;
+            }
+            catch { }
+            return true;
+        }
+
         /// <summary>
         /// PreAI: la chusma de la oleada re-elige objetivo cada 30 ticks —
         /// no se distraen, van a por la comida del libro.
@@ -356,6 +386,24 @@ namespace AethonMod.Content.Globals
                     if (!presaValida) return;
                     Vector2 dir = presa.Center - npc.Center;
                     float d = dir.Length();
+
+                    // v6.50.27 — LA RE-CUNA (la garantía de llegada): si la
+                    // chusma quedó a más de 2300 px (atorada tras una colina,
+                    // nacida en el borde de una pantalla gigante, empujada
+                    // por la IA pasiva), el libro la VUELVE A LLAMAR: cada 90
+                    // ticks se re-cruña en un BORDE fresco del cuadro — la
+                    // horda SIEMPRE converge (como los festines de vanilla:
+                    // los que se pierden renacen en el borde). Solo la
+                    // autoridad (SP/server).
+                    _tickRecuna++;
+                    if (_tickRecuna >= 90 && d > 2300f &&
+                        Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        _tickRecuna = 0;
+                        Recunar(npc, presa);
+                        return;
+                    }
+
                     // v6.50.26 — LA CARGA DE LA FURIA NO SE APAGA A 1500 PX:
                     // los monstruos nacen FUERA DE PANTALLA (la semidiagonal
                     // real + 200 px ≈ 1300-1550 px) y el viejo radio los
@@ -364,9 +412,12 @@ namespace AethonMod.Content.Globals
                     // tras la colina y el festín leía como «no salen
                     // enemigos». El hambre los trae CORRIENDO desde donde
                     // nazcan (el libro los llama: vienen).
+                    // v6.50.27 — el empuje sube (0.16→0.20): con la
+                    // inmunidad de CheckActive ahora SÍ llegan — que lleguen
+                    // PRONTO.
                     if (d > 4600f || d < 1f) return;
-                    npc.velocity += dir / d * (0.16f + 0.02f * Oleada);
-                    float techo = 10f + 0.5f * Oleada;
+                    npc.velocity += dir / d * (0.20f + 0.02f * Oleada);
+                    float techo = 11f + 0.5f * Oleada;
                     float vel = npc.velocity.Length();
                     if (vel > techo)
                         npc.velocity = npc.velocity * (techo / vel);
@@ -415,6 +466,76 @@ namespace AethonMod.Content.Globals
                     {
                         _tickAtaque = 0;
                         EscupirDientes(npc, presa);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // ==================================================================
+        //  v6.50.27 — LA RE-CUNA (la garantía de llegada de la horda)
+        // ==================================================================
+
+        /// <summary>
+        /// EL LIBRO LA VUELVE A LLAMAR: teletransporta a la chusma perdida a
+        /// un BORDE fresco del cuadro (fuera de pantalla, a la altura de la
+        /// presa, con el suelo validado) — el patrón de los festines de
+        /// vanilla: los que se pierden renacen en el borde y la horda
+        /// SIEMPRE converge. Corre solo en la autoridad (SP/server); el
+        /// netUpdate lleva la posición nueva a los clientes.
+        /// </summary>
+        private static void Recunar(NPC npc, Player presa)
+        {
+            try
+            {
+                bool espaldaIzq = presa.Center.X <
+                    Main.screenPosition.X + Main.screenWidth * 0.5f;
+                // los dos lados del cuadro (la espalda primero).
+                for (int lado = 0; lado < 2; lado++)
+                {
+                    float sign = lado == 0
+                        ? (espaldaIzq ? -1f : 1f)
+                        : (espaldaIzq ? 1f : -1f);
+                    float x = sign < 0f
+                        ? Main.screenPosition.X - 140f
+                        : Main.screenPosition.X + Main.screenWidth + 140f;
+                    float y = presa.Center.Y + Main.rand.NextFloat(-360f, 90f);
+
+                    int tx = (int)(x / 16f);
+                    int ty = (int)(y / 16f);
+                    if (tx < 10 || tx >= Main.maxTilesX - 10 || ty < 10 || ty >= Main.maxTilesY - 10)
+                        continue;
+
+                    // EL SUELO: el primer sólido hacia abajo (40 tiles)…
+                    for (int k = 0; k < 40 && ty + k < Main.maxTilesY - 10; k++)
+                    {
+                        Tile t = Main.tile[tx, ty + k];
+                        if (t == null || !t.HasTile || !Main.tileSolid[t.TileType]) continue;
+
+                        // …con la CAJA encima LIBRE (la altura del bicho + margen).
+                        int altoTiles = Math.Max(3, npc.height / 16 + 2);
+                        bool libre = true;
+                        for (int dx = -1; dx <= 1 && libre; dx++)
+                        {
+                            for (int dy = 1; dy <= altoTiles && libre; dy++)
+                            {
+                                Tile t2 = Main.tile[tx + dx, ty + k - dy];
+                                if (t2 != null && t2.HasTile && Main.tileSolid[t2.TileType])
+                                    libre = false;
+                            }
+                        }
+                        if (!libre) break; // este suelo está sucio: otro borde
+
+                        Vector2 pos = new Vector2(
+                            tx * 16f + 8f - npc.width * 0.5f,
+                            (ty + k) * 16f - npc.height - 2f);
+                        if (pos.Y < 40f || pos.Y > Main.bottomWorld - 400f) break;
+
+                        npc.position = pos;
+                        npc.velocity *= 0.3f;
+                        npc.TargetClosest(false);
+                        npc.netUpdate = true;
+                        return;
                     }
                 }
             }

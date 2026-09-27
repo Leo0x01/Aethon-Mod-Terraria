@@ -859,12 +859,20 @@ namespace AethonMod.Content.Systems
         //  v6.50.18 — LA CUNA (dónde nace un monstruo del festín)
         // ==================================================================
 
+        /// <summary>El TOPE de la cuna: nada del festín nace a más de
+        /// 1600 px (v6.50.27) — en pantallas grandes la semidiagonal real
+        /// (2400+ px en 4K) excede la ZONA ACTIVA de vanilla y la chusma
+        /// despertaba ya condenada: nacía fuera del alcance y moría sin
+        /// ser vista (NPC.CheckActive apaga a los hostiles lejanos).</summary>
+        private const float TopeCuna = 1600f;
+
         /// <summary>
         /// LA DISTANCIA FUERA DE PANTALLA: la semidiagonal del área VISIBLE
         /// en coords de mundo (Main.screenWidth/Height son px de interfaz —
         /// con zoom &gt; 1 el mundo visible ENCOGE: se divide por el zoom de
-        /// la vista) + 200 px de margen. Es la barrera REAL de "fuera de la
-        /// pantalla", no un fijo de 380 px que cabía dentro del cuadro.
+        /// la vista) + 200 px de margen… CON TOPE (v6.50.27): la barrera
+        /// real de "fuera de la pantalla" clampeada a lo que una criatura
+        /// de verdad puede caminar antes de aburrirse.
         /// </summary>
         private static float DistanciaFueraDePantalla()
         {
@@ -874,16 +882,40 @@ namespace AethonMod.Content.Systems
                 float zx = zoom.X <= 0.05f ? 1f : zoom.X;
                 float zy = zoom.Y <= 0.05f ? 1f : zoom.Y;
                 Vector2 visMundo = new Vector2(Main.screenWidth / zx, Main.screenHeight / zy);
-                return visMundo.Length() * 0.5f + 200f;
+                return MathF.Min(visMundo.Length() * 0.5f + 200f, TopeCuna);
             }
             catch { return 900f; }
         }
 
         /// <summary>
-        /// BUSCA LA CUNA: una posición FUERA del cuadro visible (a partir de
-        /// la distancia real + un extra aleatorio) y SIN tiles sólidos en la
-        /// caja (margen ancho×margen alto alrededor del punto). Hasta
-        /// <paramref name="intentos"/> ángulos distintos; devuelve
+        /// v6.50.27 — EL BORDE DEL CUADRO (la cuna de las invasiones): la
+        /// posición JUSTO FUERA del lado visible, a la altura de la presa.
+        /// Los festines de vanilla (goblins, luna de sangre, legión de
+        /// escarcha) nacen ASÍ — en los bordes laterales del cuadro — y
+        /// CAMINAN hacia la comida: el jugador VE llegar la horda. Es
+        /// "fuera de la pantalla" de verdad EN CUALQUIER RESOLUCIÓN (el
+        /// borde es el borde) y la distancia es la MÍNIMA posible fuera
+        /// del cuadro: la oleada llega en segundos, no en minutos.
+        /// </summary>
+        private static Vector2 PosicionBorde(int lado, Player hambriento, float extra)
+        {
+            float x;
+            if (lado < 0)
+                x = Main.screenPosition.X - 60f - extra;               // justo fuera del lado IZQUIERDO
+            else
+                x = Main.screenPosition.X + Main.screenWidth + 60f + extra; // justo fuera del DERECHO
+            // la altura de la presa con sesgo AL CIELO (la caja libre de
+            // tiles vive arriba: abajo está el suelo que CajaLibre rechaza).
+            float y = hambriento.Center.Y + Main.rand.NextFloat(-420f, 90f);
+            return new Vector2(x, y);
+        }
+
+        /// <summary>
+        /// BUSCA LA CUNA: PRIMERO los BORDES del cuadro (la cuna de las
+        /// invasiones — se la ve llegar caminando; el primer intento a la
+        /// ESPALDA de la presa), después el anillo clásico (tope 1600 px).
+        /// Sin tiles sólidos en la caja (margen ancho×margen alto alrededor
+        /// del punto). Hasta <paramref name="intentos"/> intentos; devuelve
         /// Vector2.Zero si nada digno se encuentra (el llamador NO engendra).
         /// Bordes del mundo respetados (clamp 400 px).
         /// </summary>
@@ -891,19 +923,29 @@ namespace AethonMod.Content.Systems
             float margenAlto, int intentos)
         {
             float distMin = DistanciaFueraDePantalla();
+            // ¿la presa está en la MITAD izquierda o derecha del cuadro? La
+            // espalda es la cuna natural de la emboscada.
+            bool espaldaIzq = hambriento.Center.X <
+                Main.screenPosition.X + Main.screenWidth * 0.5f;
             for (int i = 0; i < intentos; i++)
             {
-                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                // el primer intento mira hacia DONDE NO MIRA el jugador
-                // (la espalda es la cuna natural de la emboscada).
-                if (i == 0)
+                Vector2 pos;
+                if (i < 3)
                 {
-                    float espalda = hambriento.Center.X < Main.screenPosition.X + Main.screenWidth * 0.5f
-                        ? MathHelper.Pi : 0f; // lado izquierdo o derecho del cuadro
-                    ang = espalda + Main.rand.NextFloat(-0.5f, 0.5f);
+                    // v6.50.27 — LOS BORDES (60% de los intentos): lado 0 =
+                    // la espalda, lado 1 = el frente, lado 2 = la espalda de
+                    // nuevo con otro margen.
+                    int lado = (i == 1) ? (espaldaIzq ? 1 : -1) : (espaldaIzq ? -1 : 1);
+                    pos = PosicionBorde(lado, hambriento, Main.rand.NextFloat(30f, 240f));
                 }
-                float dist = distMin + Main.rand.NextFloat(240f);
-                Vector2 pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
+                else
+                {
+                    // EL ANILLO CLÁSICO (topeado): ángulo libre, distancia
+                    // mínima real clampeada a 1600 px.
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    float dist = distMin + Main.rand.NextFloat(240f);
+                    pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
+                }
 
                 pos.X = Math.Clamp(pos.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
                 pos.Y = Math.Clamp(pos.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);

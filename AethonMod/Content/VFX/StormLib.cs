@@ -1053,14 +1053,18 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// El GORRO de descarga en un extremo del rayo: glow a DOS escalas
         /// apiladas (el truco del doble-draw para intensidad barata).
+        /// v6.50.27 — EL GORRO FINO (el reporte: «el resplandor sigue siendo
+        /// muy fuerte»): el halo exterior era 3.2×width al 0.42 — una FAROLA
+        /// en cada punta; ahora 2.2×width al 0.18 y el núcleo al 0.55. El
+        /// punto de descarga sigue leyéndose, el brillo ya no inunda.
         /// </summary>
         public static void EndCap(SpriteBatch batch, Vector2 pos, float width,
             Color halo, Color core, float alpha)
         {
-            Quad(batch, GlowTex, pos, new Vector2(width * 3.2f, width * 3.2f), 0f,
-                Tint(halo, 0.42f * alpha));
-            Quad(batch, GlowTex, pos, new Vector2(width * 1.8f, width * 1.8f), 0f,
-                Tint(core, 0.78f * alpha));
+            Quad(batch, GlowTex, pos, new Vector2(width * 2.2f, width * 2.2f), 0f,
+                Tint(halo, 0.18f * alpha));
+            Quad(batch, GlowTex, pos, new Vector2(width * 1.3f, width * 1.3f), 0f,
+                Tint(core, 0.55f * alpha));
         }
 
         // ------------------------------------------------------------------

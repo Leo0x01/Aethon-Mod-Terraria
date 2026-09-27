@@ -708,21 +708,19 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                     // FLASH DE LIBERACIÓN central (primeros ~16 ticks):
                     // brillo cálido que se apaga mientras el anillo despega.
-                    // v6.50.18 — SOFTGLOW → NOVABURST (el círculo plano
-                    // morado del final del Agujero Negro — el reporte del
-                    // usuario): la gaussiana compacta del SoftGlow a radio
-                    // fijo se leía como un DISCO; el perfil monótono de
-                    // caída larga del NovaBurst es un gradiente que muere
-                    // en su propio borde — la liberación de la luz del
-                    // colapso, suave de punta a punta.
+                    // v6.50.27 — NOVABURST → DESTELLOFINAL (el reporte:
+                    // «sigue siendo un círculo grande y liso»): un gradiente
+                    // radial — por suave que muera — siempre se lee como un
+                    // círculo; la liberación de la luz del colapso son RAYOS:
+                    // la cruz de 8 brazos encajada en el anillo de Einstein.
                     if (age < 16f)
                     {
-                        Texture2D novaTex = VFXCore.NovaBurst;
+                        Texture2D novaTex = VFXCore.DestelloFinal;
                         if (novaTex != null && !novaTex.IsDisposed)
                         {
                             float flashT = MathHelper.Clamp(age / 16f, 0f, 1f);
                             float flashAlpha = (1f - flashT) * (1f - flashT);
-                            float flashR = MathHelper.Lerp(150f, 60f, flashT);
+                            float flashR = MathHelper.Lerp(170f, 70f, flashT);
                             float flashScale = flashR / (novaTex.Width * 0.5f);
                             Main.spriteBatch.Draw(novaTex, drawPos, null,
                                 new Color(255, 246, 225, (byte)(alpha * flashAlpha * 235f)),

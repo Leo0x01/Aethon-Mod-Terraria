@@ -99,7 +99,15 @@ namespace AethonMod.Content.Effects
         }
 
         // ==================================================================
-        //  LA COLA — los huesos proyectados al paisaje
+        //  LA COLA — v6.50.27 — EL LEVIATÁN DE CÓDIGO (el arte nuevo)
+        //
+        //  EL REPORTE: «el arte del jefe se ve horrible, deberías
+        //  cambiarlo por completo, algo al estilo de la sierpe en el arma
+        //  La Sierpe Estelar». EL FONDO TAMBIÉN VISTE EL ARTE NUEVO: los
+        //  sprites de vértebra/cola/cráneo mueren — la silueta del
+        //  horizonte son CÁPSULAS y ORBES (el mismo ADN del cuerpo
+        //  visible, proyectado entre las capas del paisaje) + el rim
+        //  dorado de siempre + las APOFISIS estelares latiendo.
         //
         //  v6.50.20 — EL CONTRATO DEL LOTE (la lección del client.log):
         //  CustomSky.Draw corre DENTRO del lote del fondo de vanilla
@@ -123,8 +131,8 @@ namespace AethonMod.Content.Effects
             //     sección de él en el fondo cuando está llegando»):
             //     mientras el CRÁNEO se materializa (alpha alto — el
             //     nacimiento), la SILUETA GIGANTE de la sierpe cruza el
-            //     cielo del fondo — un leviatán de hueso nadando ENTRE
-            //     las capas del paisaje, con los OJOS DE ORO avanzando.
+            //     cielo del fondo — un leviatán de luz nadando ENTRE las
+            //     capas del paisaje, con los OJOS DE ORO avanzando.
             //     Cuando la cabeza termina de nacer, la silueta se
             //     disuelve (~1.5 s de recuerdo). ===
             float llegada = 0f;
@@ -164,12 +172,10 @@ namespace AethonMod.Content.Effects
                 new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
             Vector2 f = new Vector2(1f / Profundidad, 0.9f / Profundidad);
 
-            Texture2D texVertebra = ModContent.Request<Texture2D>(
-                "AethonMod/Content/NPCs/AethonSierpeVertebra").Value;
-            Texture2D texCola = ModContent.Request<Texture2D>(
-                "AethonMod/Content/NPCs/AethonSierpeCola").Value;
-            Vector2 origenV = new Vector2(texVertebra.Width, texVertebra.Height) * 0.5f;
-            Vector2 origenC = new Vector2(texCola.Width, texCola.Height) * 0.5f;
+            Texture2D glow = VFXCore.SoftGlow;          // el pincel de las cápsulas
+            Texture2D estrella = AethonSierpeArte.EstrellaDelFondo();
+            Texture2D orbe = VFXCore.GlowOrb;            // el cráneo del leviatán
+            Vector2 origenGlow = new Vector2(glow.Width, glow.Height) * 0.5f;
 
             float t = Main.GlobalTimeWrappedHourly;
 
@@ -189,7 +195,8 @@ namespace AethonMod.Content.Effects
             VFXCore.CerrarLoteSiAbierto();
             try
             {
-                // === 1) LA SILUETA ATMOSFÉRICA (lote alfa — la niebla del horizonte) ===
+                // === 1) LA SILUETA ATMOSFÉRICA (lote alfa — la niebla del
+                //     horizonte): CÁPSULAS de vacío + la punta estelar) ===
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
                     Main.Rasterizer, null, m);
@@ -210,27 +217,29 @@ namespace AethonMod.Content.Effects
 
                         // La escala: se encoge hacia la punta (perspectiva lejana).
                         float esc = (esCola ? 0.58f : 0.66f - 0.14f * prof / 13f) * 1.5f;
+                        float rumbo = rot - MathHelper.PiOver2; // la dirección del hueso
 
                         // El TINTE del horizonte: hueso azul-violeta, translúcido,
                         // más tenue cuanto más atrás (atmósfera de verdad).
                         float desvanecer = (1f - prof / 26f) * 0.28f + 0.42f;
-                        Color silueta = new Color(96, 88, 126) * (_alpha * desvanecer);
+                        Color silueta = new Color(88, 80, 120) * (_alpha * desvanecer);
 
-                        sb.Draw(esCola ? texCola : texVertebra, pos, null, silueta,
-                            rot, esCola ? origenC : origenV, esc, SpriteEffects.None, 0f);
+                        // LA CÁPSULA del hueso (el cuerpo de vacío del fondo).
+                        float largo = (esCola ? 46f : 64f) * esc;
+                        float ancho = (esCola ? 14f : 30f) * esc;
+                        sb.Draw(glow, pos, null, silueta, rumbo, origenGlow,
+                            new Vector2((largo + ancho) / glow.Width, ancho * 1.9f / glow.Height),
+                            SpriteEffects.None, 0f);
                     }
 
-                    // === v6.50.26 — EL LEVIATÁN DE LA LLEGADA (la
+                    // === v6.50.27 — EL LEVIATÁN DE LA LLEGADA (la
                     //     silueta GIGANTE cruzando el cielo del fondo:
-                    //     16 vértebras ×2.5 + el CRÁNEO al frente — el
+                    //     16 vértebras cápsula ×2.6 + el CRÁNEO orbe al
+                    //     frente y sus DOS HOJAS de mandíbula — el
                     //     arribo del final, tapado por los ÁRBOLES y
                     //     tapando las MONTAÑAS: enredado de verdad) ===
                     if (_llegadaVista > 0.02f)
                     {
-                        Texture2D texCab = ModContent.Request<Texture2D>(
-                            "AethonMod/Content/NPCs/AethonSierpeCabeza").Value;
-                        Vector2 origenCab = texCab.Size() * 0.5f;
-
                         const int NB = 16;
                         float cx = Main.screenWidth * 0.5f;
                         float anchoCielo = Main.screenWidth * 1.05f;
@@ -252,33 +261,49 @@ namespace AethonMod.Content.Effects
                                 + MathF.Sin(t * 0.9f + (u + 0.06f) * 2.6f) * 16f;
                             float rotL = MathF.Atan2(yNext - y, anchoCielo * 0.5f * 0.06f)
                                 + MathHelper.PiOver2;
+                            float rumboL = rotL - MathHelper.PiOver2;
 
                             float escL = 2.6f - MathF.Abs(u) * 0.55f; // encoge a la cola
-                            Color sil = new Color(84, 76, 116) *
-                                (_alpha * _llegadaVista * 0.40f);
+                            Color sil = new Color(80, 72, 112) *
+                                (_alpha * _llegadaVista * 0.42f);
 
                             if (b == 0)
                             {
-                                // EL CRÁNEO AL FRENTE (u = +1: la cabeza
-                                // guía el nado — la sierpe llega MIRANDO).
+                                // EL CRÁNEO ORBE (u = +1: la cabeza guía el
+                                // nado — la sierpe llega MIRANDO) + sus DOS
+                                // HOJAS de mandíbula abiertas en V.
                                 float uH = 1f;
                                 float yH = baseY
                                     - MathF.Sin(uH * MathF.PI * 0.9f + 0.4f) * 90f
                                     + MathF.Sin(t * 0.9f + uH * 2.6f) * 16f;
-                                float yHn = baseY
-                                    - MathF.Sin((uH + 0.06f) * MathF.PI * 0.9f + 0.4f) * 90f
-                                    + MathF.Sin(t * 0.9f + (uH + 0.06f) * 2.6f) * 16f;
-                                float rotH = MathF.Atan2(yHn - yH, anchoCielo * 0.5f * 0.06f)
-                                    + MathHelper.PiOver2;
                                 float xC = cx + anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
-                                sb.Draw(texCab, new Vector2(xC, yH), null,
-                                    new Color(96, 88, 130) * (_alpha * _llegadaVista * 0.46f),
-                                    rotH, origenCab, 2.3f, SpriteEffects.None, 0f);
+                                float tam = 96f * 2.3f;
+                                sb.Draw(orbe, new Vector2(xC, yH), null,
+                                    new Color(92, 84, 128) * (_alpha * _llegadaVista * 0.46f),
+                                    rumboL, new Vector2(orbe.Width, orbe.Height) * 0.5f,
+                                    tam / orbe.Width, SpriteEffects.None, 0f);
+                                for (int mm = -1; mm <= 1; mm += 2)
+                                {
+                                    float dirM = rumboL + mm * 0.62f;
+                                    Vector2 piv = new Vector2(xC, yH) +
+                                        new Vector2(MathF.Cos(rumboL), MathF.Sin(rumboL)) * 30f;
+                                    Vector2 finM = piv + new Vector2(MathF.Cos(dirM), MathF.Sin(dirM)) * 74f;
+                                    sb.Draw(glow, (piv + finM) * 0.5f, null,
+                                        new Color(92, 84, 128) * (_alpha * _llegadaVista * 0.40f),
+                                        dirM, origenGlow,
+                                        new Vector2(84f / glow.Width, 26f / glow.Height),
+                                        SpriteEffects.None, 0f);
+                                }
                             }
                             else
                             {
-                                sb.Draw(texVertebra, new Vector2(x, y), null, sil,
-                                    rotL, origenV, escL, SpriteEffects.None, 0f);
+                                // LA VÉRTEBRA CÁPSULA del leviatán.
+                                float largoL = 64f * escL;
+                                float anchoL = 30f * escL * (1f - MathF.Abs(u) * 0.3f);
+                                sb.Draw(glow, new Vector2(x, y), null, sil, rumboL,
+                                    origenGlow,
+                                    new Vector2((largoL + anchoL) / glow.Width, anchoL * 1.9f / glow.Height),
+                                    SpriteEffects.None, 0f);
                             }
                         }
                     }
@@ -291,7 +316,6 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    Texture2D glow = VFXCore.SoftGlow; // el pincel cacheado de la casa
                     for (int k = 0; k < huesos.Count; k += 2) // cada 2 huesos: puntual y barato
                     {
                         var (c, rot, idx) = huesos[k];
@@ -301,12 +325,36 @@ namespace AethonMod.Content.Effects
                         proy.Y += MathF.Sin(t * 1.8f + k * 0.55f) * 9f;
                         proy.X += MathF.Sin(t * 0.7f + k * 0.4f) * 5f;
                         Vector2 pos = proy - Main.screenPosition;
+                        float esc = (esCola ? 0.58f : 0.66f - 0.14f * prof / 13f) * 1.5f;
 
                         float latido = 0.6f + 0.4f * MathF.Sin(t * 3.1f + k * 0.9f);
                         float brillo = 0.20f * _alpha * (1f - prof / 30f) * latido;
                         sb.Draw(glow, pos, null, new Color(255, 226, 140) * brillo,
-                            rot, new Vector2(glow.Width, glow.Height) * 0.5f, (esCola ? 0.30f : 0.38f),
+                            rot, new Vector2(glow.Width, glow.Height) * 0.5f,
+                            new Vector2((esCola ? 0.24f : 0.34f)),
                             SpriteEffects.None, 0f);
+
+                        // v6.50.27 — LA APOFISIS ESTELAR (cada 2 huesos: la
+                        // estrella de 4 puntas latiendo en el centrum).
+                        float tw = 0.5f + 0.5f * MathF.Sin(t * 2.8f + k * 1.7f);
+                        float tamS = 16f * esc;
+                        sb.Draw(estrella, pos, null,
+                            new Color(255, 240, 190) * (0.22f * _alpha * tw),
+                            rot + t * 0.5f, new Vector2(estrella.Width, estrella.Height) * 0.5f,
+                            tamS / estrella.Width, SpriteEffects.None, 0f);
+                    }
+
+                    // v6.50.27 — LA PUNTA DE LUZ (la cola muere en
+                    // ESTRELLA — el final del leviatán).
+                    if (huesos.Count > 0)
+                    {
+                        var (cC, rotC, _) = huesos[huesos.Count - 1];
+                        Vector2 proyC = (cC - centroPantalla) * f + centroPantalla;
+                        Vector2 posC2 = proyC - Main.screenPosition;
+                        sb.Draw(estrella, posC2, null,
+                            new Color(255, 226, 140) * (0.30f * _alpha * (0.6f + 0.4f * MathF.Sin(t * 2.2f))),
+                            t * 1.2f, new Vector2(estrella.Width, estrella.Height) * 0.5f,
+                            22f / estrella.Width, SpriteEffects.None, 0f);
                     }
 
                     // === v6.50.26 — LOS OJOS DEL LEVIATÁN (la llegada
@@ -327,11 +375,11 @@ namespace AethonMod.Content.Effects
                         float pulso = 0.55f + 0.45f * MathF.Sin(t * 2.6f);
                         for (int e = 0; e < 2; e++)
                         {
-                            Vector2 ojo = new Vector2(xC - 30f + e * 18f, yC - 14f);
+                            Vector2 ojo = new Vector2(xC - 34f + e * 24f, yC - 12f);
                             sb.Draw(glow, ojo, null,
-                                new Color(255, 240, 190) * (0.55f * _llegadaVista * pulso),
+                                new Color(255, 240, 190) * (0.60f * _llegadaVista * pulso),
                                 0f, new Vector2(glow.Width, glow.Height) * 0.5f,
-                                new Vector2(0.16f, 0.16f), SpriteEffects.None, 0f);
+                                new Vector2(0.20f, 0.20f), SpriteEffects.None, 0f);
                         }
 
                         // el latido de la columna (cada 4 vértebras, tenue)

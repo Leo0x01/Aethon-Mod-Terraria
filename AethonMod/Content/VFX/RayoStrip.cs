@@ -104,15 +104,21 @@ namespace AethonMod.Content.VFX
         public static int Profundidad => _profundidad;
 
         // LAS COLUMNAS DE LA FUNDA (fracción del semiancho · alfa relativo).
-        // v6.50.26 — EL PERFIL DE VERDAD: halo BAJO (0.05/0.26/0.62 — la
-        // investigación: 10-26% de alfa en el halo; el centro 0.62 porque
-        // la VENA blanca encima lo sube) y BORDES QUE MUEREN en 0.05.
-        private static readonly float[] ColF = { -1f, -0.44f, 0f, 0.44f, 1f };
-        private static readonly float[] ColA = { 0.05f, 0.26f, 0.62f, 0.26f, 0.05f };
+        // v6.50.27 — EL HALO DE VERDAD, TENUE (el reporte: «el resplandor
+        // o brillo de los rayos sigue siendo muy fuerte y en los rayos
+        // grandes el brillo se solapa y se ven como cortes»): la funda era
+        // una BANDA GRUESA al 0.62 de intensidad DELANTE del núcleo — al
+        // solaparse dos fundas (ramas junto al tronco, arcos cruzados) el
+        // salto 0.62→0.86 marcaba el borde de la intersección como un
+        // CORTE. La fotografía de rayos reales lo dice claro: el halo
+        // acompañante vive al 10-24% — el NÚCLEO manda, el aura susurra.
+        // Dos fundas solapadas ahora suman ~0.38: suave, sin borde.
+        private static readonly float[] ColF = { -1f, -0.42f, 0f, 0.42f, 1f };
+        private static readonly float[] ColA = { 0.03f, 0.10f, 0.24f, 0.10f, 0.03f };
 
-        // LAS COLUMNAS DE LA VENA (el núcleo caliente — 1/5 del ancho total).
+        // LAS COLUMNAS DE LA VENA (el núcleo caliente — el protagonista).
         private static readonly float[] VenF = { -0.30f, 0f, 0.30f };
-        private static readonly float[] VenA = { 0.16f, 0.88f, 0.16f };
+        private static readonly float[] VenA = { 0.14f, 0.85f, 0.14f };
 
         // v6.50.26 — EL BLEND DE PANTALLA (soft-add): dst += rgb·(1−dst).
         // La acumulación asintótica NUNCA clipea — el fix del «brillo que
@@ -256,9 +262,10 @@ namespace AethonMod.Content.VFX
                 norm[i] = new Vector2(-avg.Y, avg.X);
 
                 // EL ANCHO: taper × OLA (si la trae) × suelos de visibilidad.
-                // v6.50.26 — LA FUNDA 2.0×w (era 2.6×: el halo 4× el ancho
-                // total, la proporción de la investigación: halo 4-8× el
-                // núcleo de 0.6×w → 4.0w/0.6w = 6.7× ✓).
+                // v6.50.27 — LA FUNDA ESTRECHA: 1.55×w de semiancho (±1.55w
+                // = 3.1w de halo total — era 2.0×w/4w: la falda GORDA es la
+                // mitad del «brillo muy fuerte» y del área de solape que
+                // cortaba). La vena engorda un pelo para seguir mandando.
                 // (LOS ARRAYS POR NODO del llamador son del camino ORIGINAL
                 // — tras el Chaikin el índice ya NO coincide: se muestrean
                 // POR FRACCIÓN de camino con interpolación lineal.)
@@ -266,8 +273,8 @@ namespace AethonMod.Content.VFX
                 if (anchoPorNodo != null)
                     w *= Muestrear(anchoPorNodo, t);
                 if (w < 0.05f) w = 0.05f;
-                semi[i] = Math.Max(2.0f * w, 1.9f);
-                semiV[i] = Math.Max(0.32f * w, 0.7f);
+                semi[i] = Math.Max(1.55f * w, 1.55f);
+                semiV[i] = Math.Max(0.34f * w, 0.75f);
 
                 // EL ALFA: global × crackle (la vena arde SIEMPRE) × OLA.
                 float cr = crackle ? 0.66f + 0.34f * VFXCore.Hash01(seed, flick, i * 41 + 17) : 1f;

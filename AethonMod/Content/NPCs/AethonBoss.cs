@@ -1056,10 +1056,22 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
-        //  EL ARTE — EL CRÁNEO, LAS MANDÍBULAS CINÉTICAS Y LA LUZ
-        //  v6.50.26 — TODO A ESC 1.4 (la sierpe del final) + el cabeceo
-        //  serpenteo, el rim trasero del hueso, las motas orbitantes y
-        //  EL ALIENTO (el arco de rayo de la boca al pecho de la presa).
+        //  EL ARTE — v6.50.27 — LA SIERPE ESTELAR DEL FINAL
+        //
+        //  El reporte: «el arte del jefe se ve horrible, deberías
+        //  cambiarlo por completo, algo al estilo de la sierpe en el arma
+        //  La Sierpe Estelar». EL CRÁNEO SPRITE MUERE: la cabeza es
+        //  AHORA el ensamblaje de CÓDIGO de AethonSierpeArte.Cabeza — el
+        //  respaldo de vacío (la silueta), el CRÁNEO ORBE con su corazón
+        //  blanco, LAS FAUCES EN V (los filos de luz girando con la
+        //  abertura, colmillos-estrella en las puntas), LOS DOS OJOS
+        //  fareando, la CRESTA dorsal y LAS CINCO CHISPAS orbitantes
+        //  (la firma de La Sierpe Estelar). El cabeceo serpenteo del
+        //  v6.50.26 vive (solo en el dibujo).
+        //  LOS FX DE BATALLA se conservan: la garganta ardiendo en la
+        //  carga del aliento, la corona de anillos, las motas, el
+        //  telegraph del ram, la estela, el cine de muerte y la
+        //  singularidad de la fase 4.
         // ==================================================================
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
@@ -1069,66 +1081,24 @@ namespace AethonMod.Content.NPCs
             VFXCore.CerrarLoteSiAbierto();
             try
             {
-                Texture2D texCraneo = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/NPCs/AethonSierpeCabeza").Value;
-                Texture2D texMandibula = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/NPCs/AethonSierpeMandibula").Value;
-
                 float esc = AethonSierpeCuerpo.ESC;
                 float visibilidad = 1f - (NPC.alpha / 255f);
                 if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 190f));
-                Color luz = Color.White * visibilidad;
 
                 // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo: la
                 // física no se toca): el cráneo ondula como la columna.
                 float t = Main.GlobalTimeWrappedHourly;
                 float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
 
-                // === EL CRÁNEO + LAS DOS HEMIMANDÍBULAS (lote alfa) ===
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                    null, Main.GameViewMatrix.TransformationMatrix);
-                try
-                {
-                    Vector2 pos = NPC.Center - Main.screenPosition;
-                    Vector2 origen = new Vector2(texCraneo.Width, texCraneo.Height) * 0.5f;
-                    float rot = NPC.rotation + cabeceo;
-                    spriteBatch.Draw(texCraneo, pos, null, luz,
-                        rot, origen, esc, SpriteEffects.None, 0f);
+                // === 1. LA CABEZA DE LA SIERPE ESTELAR (el arte de código:
+                //     2 pases propios — vacío + luz, la sonda de la casa) ===
+                Vector2 pos = NPC.Center - Main.screenPosition;
+                AethonSierpeArte.Cabeza(pos, NPC.rotation + cabeceo, _aberturaMandibula,
+                    t, Phase, visibilidad, esc);
 
-                    // LAS FAUCES: pivotes en las APÓFISIS DEL CUADRADO del
-                    // cráneo (±34, +52 del centro ESCALADOS — donde cuelgan)
-                    // — giran ABRIRSE (±abertura) y CHÁCHARAN en el aliento.
-                    Vector2 pivDer = NPC.Center + new Vector2(34f * esc, 52f * esc).RotatedBy(rot);
-                    Vector2 pivIzq = NPC.Center + new Vector2(-34f * esc, 52f * esc).RotatedBy(rot);
-                    Vector2 origenM = new Vector2(30f * esc, 101f * esc); // la bola articular (escalada)
-                    float ab = _aberturaMandibula;
-                    spriteBatch.Draw(texMandibula, pivDer - Main.screenPosition, null, luz,
-                        rot + ab, origenM, esc, SpriteEffects.None, 0f);
-                    spriteBatch.Draw(texMandibula, pivIzq - Main.screenPosition, null, luz,
-                        rot - ab, origenM, esc, SpriteEffects.FlipHorizontally, 0f);
-                }
-                finally { spriteBatch.End(); }
-
-                // === LA LUZ DE LAS CUENCAS Y LA CORONA (búfer de quads) ===
-                float latido = 0.85f + 0.15f * MathF.Sin(t * (2.2f + Phase * 0.6f));
+                // === 2. LA GARGANTA ARDIENDO (la carga del aliento — el
+                //     búfer de quads de VFXCore, coords de MUNDO) ===
                 float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 190f))) : 1f;
-
-                // v6.50.26 — LA FARE DE OJOS: los ojos se encanden al
-                // disparar (el aliento y el telegraph del ram los encienden).
-                float fare = 1f + _aberturaMandibula * 0.9f;
-
-                // las CUENCAS (el oro que MIRA — escaladas).
-                for (int sx = -1; sx <= 1; sx += 2)
-                {
-                    Vector2 cuenca = NPC.Center + new Vector2(sx * 22f * esc, 6f * esc).RotatedBy(NPC.rotation + cabeceo);
-                    VFXCore.Quad(cuenca, OroLuz * (0.65f * latido * alphaLuz * visibilidad * fare),
-                        new Vector2(16f * esc * fare, 16f * esc * fare));
-                    VFXCore.Quad(cuenca, NucleoBlanco * (0.45f * latido * alphaLuz * visibilidad * fare),
-                        new Vector2(8f * esc * fare, 8f * esc * fare));
-                }
-                // LA GARGANTA brilla cuando la boca está ABIERTA — y ARDE
-                // en la carga del aliento (la luz se acumula).
                 if (_aberturaMandibula > 0.15f)
                 {
                     float carga = _aliento == 1 ? Math.Min(1f, _tickAliento / 40f) : 0f;
@@ -1138,7 +1108,7 @@ namespace AethonMod.Content.NPCs
                 }
                 VFXCore.FlushAdditive(null, false);
 
-                // === LA CORONA DE ANILLOS (la firma de la Luz — fina) ===
+                // === 3. LA CORONA DE ANILLOS (la firma de la Luz — fina) ===
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
@@ -1146,15 +1116,9 @@ namespace AethonMod.Content.NPCs
                 {
                     Vector2 posC = NPC.Center - Main.screenPosition;
 
-                    // v6.50.26 — EL RIM TRASERO DEL HUESO (el cráneo lee
-                    // contra el cielo: el resplandor tibio DETRÁS de la
-                    // calavera antes de los anillos).
-                    LumenLib.Bloom(spriteBatch, posC, 150f * esc, OroLuz, 0.10f * alphaLuz * visibilidad, 2);
-                    LumenLib.Bloom(spriteBatch, posC, 90f * esc, VioletaLuz, 0.07f * alphaLuz * visibilidad, 2);
-
-                    // v6.50.26 — LAS MOTAS ORBITANTES (el enjambre de la
-                    // Luz: tres chispas girando el cráneo — oro en fase baja,
-                    // violeta en la alta).
+                    // v6.50.27 — LAS MOTAS ORBITANTES (el enjambre de la
+                    // Luz: tres chispas girando el cráneo — oro en fase
+                    // baja, violeta en la alta).
                     Color cMota = Phase >= 3 ? VioletaLuz : OroLuz;
                     for (int m = 0; m < 3; m++)
                     {
@@ -1284,7 +1248,7 @@ namespace AethonMod.Content.NPCs
                 // v6.50.11 — el lote sale SIEMPRE abierto y vanilla.
                 VFXCore.ReabrirLoteVanilla();
             }
-            return false; // el cráneo se dibuja a sí mismo
+            return false; // la cabeza de código se dibuja a sí misma
         }
 
         // v6.50.26 — el tempo LOCAL del aliento (el cliente cuenta su

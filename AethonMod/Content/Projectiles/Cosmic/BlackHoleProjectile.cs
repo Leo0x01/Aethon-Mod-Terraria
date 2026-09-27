@@ -1031,12 +1031,13 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Pantalla.Flash(new Color(190, 120, 255), 0.3f, 0.6f, Projectile.Center);
             Pantalla.Vineta(0.65f, 1.5f);
 
-            // v6.50.17 — EL BLOOM DE GRADIENTE SUAVE (la misma mejora del
-            // destello final del Sol, aplicada al agujero negro): el velo
-            // da el golpe violeta instantáneo y ESTA partícula es el bloom
-            // que respira — una sola NovaBurst, no una pila de glows.
-            ParticlePresets.NovaFlash(Projectile.Center, 500f,
-                new Color(245, 228, 255), new Color(178, 120, 255), 15);
+            // v6.50.27 — EL DESTELLO DE RAYOS ESTELARES (la misma corrección
+            // del Sol — el reporte: «sigue siendo un círculo grande y
+            // liso»): el gradiente radial NO puede dejar de ser un círculo;
+            // la forma de un destello de verdad son los RAYOS. La cruz
+            // violeta de 8 brazos nace en la singularidad.
+            ParticlePresets.DestelloFinal(Projectile.Center, 560f,
+                new Color(245, 228, 255), new Color(178, 120, 255), 12);
 
             // === PRESETS DE LA LIBRERÍA — colapso gravitatorio completo ===
             // (v5.90: paleta cálida — antes los presets eran violeta)

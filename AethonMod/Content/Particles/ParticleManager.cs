@@ -89,6 +89,7 @@ namespace AethonMod.Content.Particles
             RegisterTexture("AethonMod/Content/Effects/SparkleStar");              // ID 9
             RegisterTexture("AethonMod/Content/Effects/TrailGlow");                // ID 10
             RegisterTexture("AethonMod/Content/Effects/Procedural/NovaBurst");    // ID 11 — v6.50.17: el destello de gradiente suave
+            RegisterTexture("AethonMod/Content/Effects/Procedural/DestelloFinal"); // ID 12 — v6.50.27: el destello de rayos estelares (la cruz de 8 brazos)
         }
 
         public override void Unload()

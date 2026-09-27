@@ -253,16 +253,20 @@ namespace AethonMod.Content.Projectiles.V20
 
             if (Main.netMode == NetmodeID.Server) return;
 
-            // === v6.50.17 — EL BLOOM DE GRADIENTE SUAVE (el final del círculo
-            // plano): UNA partícula NovaBurst (núcleo + falda larga, caída
-            // monótona) que EXPANDE desde 0 y se disuelve. El degradado
-            // grande que antes intentaban ~90 SoftGlow apilados — y su
-            // SUMA saturaba el centro a blanco plano (la meseta que el
-            // usuario veía como «círculo gigante blanco sólido»). El velo
-            // de Pantalla.Flash da el golpe instantáneo; ESTE es el bloom
-            // que respira. ===
-            ParticlePresets.NovaFlash(Projectile.Center, 560f,
-                new Color(255, 255, 248), new Color(255, 196, 110), 15);
+            // === v6.50.27 — EL DESTELLO DE RAYOS ESTELARES (el reporte, 3ª
+            // vez: «el destello final en Sol se ve horrible, sigue siendo
+            // un círculo grande y liso, lo mejor es quitarlo o crear un
+            // sprite de destello que se vea bien»). LA CAUSA: NovaBurst ES
+            // un disco de gradiente radial — dibujado a 560 px se lee
+            // EXACTAMENTE como «un círculo grande y liso» (un degradado ES
+            // un círculo por definición). LA SOLUCIÓN (la letra del
+            // usuario): UN SPRITE DE DESTELLO DE VERDAD — DestelloFinal,
+            // la CRUZ DE 8 RAYOS (4 largos en los ejes + 4 cortos en las
+            // diagonales + corazón caliente): la forma del lens-flare del
+            // cine. El velo de Pantalla.Flash sigue dando el golpe
+            // instantáneo; los rayos dan la FORMA. ===
+            ParticlePresets.DestelloFinal(Projectile.Center, 620f,
+                new Color(255, 255, 248), new Color(255, 206, 120), 12);
 
             // Ráfaga de núcleo: interpolación blanco → naranja profundo.
             // v6.50.17 — 46 → 30: el preset ya es un ANILLO (rodea el
