@@ -2,10 +2,10 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.Graphics.CameraModifiers;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.Particles;
 
 namespace AethonMod.Content.VFX
 {
@@ -20,7 +20,9 @@ namespace AethonMod.Content.VFX
     ///   · <see cref="Sacudir"/> — la SACUDIDA con modelo trauma (la cámara
     ///     tiembla por <see cref="SacudidaTrauma"/>, un modificador REAL del
     ///     motor: Terraria.Graphics.CameraModifiers.ICameraModifier).
-    ///   · <see cref="Flash"/> — el FLASH de pantalla (hasta 4 simultáneos).
+    ///   · <see cref="Flash"/> — el FLASH: la CRUZ de 8 rayos de
+    ///     <see cref="ParticlePresets.DestelloFinal"/> estallando EN EL
+    ///     MUNDO (v6.50.28: el velo circular de la interfaz murió).
     ///   · <see cref="Vineta"/> — la VIÑETA (el túnel que se cierra sobre
     ///     el jugador: 10 plumones de SoftGlow NEGRO en anillo).
     ///   · <see cref="OndaExpansiva"/> — la ONDA (anillo de choque que se
@@ -34,7 +36,7 @@ namespace AethonMod.Content.VFX
     /// auto-entierro (cuando el progreso pasa de 1) vive en el dibujado.
     ///
     /// CONTRATO DE MEMORIA: todo el estado vive en ARRAYS ESTÁTICOS
-    /// pre-asignados (4 sacudidas, 4 flashes, 1 viñeta, 6 ondas + 4
+    /// pre-asignados (4 sacudidas, 1 viñeta, 6 ondas + 4
     /// proxies <see cref="SacudidaTrauma"/> de nacimiento eterno). Un frame
     /// típico no aloca NADA: los senos y las curvas son matemática de pila.
     ///
@@ -75,21 +77,6 @@ namespace AethonMod.Content.VFX
             public double FrameInicio;
         }
 
-        /// <summary>UN FLASH de pantalla (el contrato mínimo: color + curva).</summary>
-        private struct FlashSlot
-        {
-            public bool Activo;
-            public Color Color;
-            public float Intensidad;
-            public double DuracionSeg;
-            public double FrameInicio;
-            // v6.50.15 — EL FOCO DEL FLASH (el fin del velo a pantalla
-            // completa: el reporte del usuario — "al explotar crea un
-            // destello blanco que cubre toda la pantalla"). Coords de
-            // MUNDO del origen; sin origen = el jugador local.
-            public Vector2 CentroMundo;
-        }
-
         /// <summary>LA VIÑETA (única: la nueva reemplaza a la vieja).</summary>
         private struct VinetaSlot
         {
@@ -127,39 +114,11 @@ namespace AethonMod.Content.VFX
             new SacudidaTrauma(0), new SacudidaTrauma(1), new SacudidaTrauma(2), new SacudidaTrauma(3),
         };
 
-        /// <summary>Máx 4 flashes simultáneos.</summary>
-        private static readonly FlashSlot[] _flashes = new FlashSlot[4];
-
         /// <summary>LA viñeta (máx 1: la nueva REEMPLAZA).</summary>
         private static VinetaSlot _vineta;
 
         /// <summary>Máx 6 ondas simultáneas.</summary>
         private static readonly OndaSlot[] _ondas = new OndaSlot[6];
-
-        /// <summary>
-        /// v6.50.18 — LA TEXTURA DEL FLASH (NovaBurst.png, la que el usuario
-        /// pidió por nombre para el destello final). Carga perezosa con la
-        /// sonda de la casa: si el asset aún no está (primer frame de una
-        /// recarga caliente), el flash simplemente no pinta ese frame —
-        /// jamás tira.
-        /// </summary>
-        private static Texture2D _novaTex;
-
-        /// <summary>La textura del degradado del flash (null-safe).</summary>
-        internal static Texture2D NovaBurstTex
-        {
-            get
-            {
-                try
-                {
-                    if (_novaTex == null || _novaTex.IsDisposed)
-                        _novaTex = ModContent.Request<Texture2D>(
-                            "AethonMod/Content/Effects/Procedural/NovaBurst").Value;
-                    return _novaTex;
-                }
-                catch { return null; }
-            }
-        }
 
         /// <summary>
         /// ¿Se cerró el lote de la interfaz en ESTE frame? La ponen los
@@ -281,53 +240,49 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// EL FLASH: v6.50.15 — EL GRADIENTE RADIAL DEL IMPACTO (antes era
-        /// un VELO a PANTALLA COMPLETA — un MagicPixel plano sobre TODO el
-        /// cuadro — y "al explotar creaba un destello blanco que cubría
-        /// toda la pantalla", el reporte del usuario: el arma Sol, el
-        /// Agujero Negro y varios más). AHORA: UN GRADIENTE que nace en
-        /// <paramref name="centroMundo"/> (el centro de la explosión) y
-        /// MUERE hacia los bordes de la pantalla — dos plumones SoftGlow
-        /// concéntricos (núcleo + falda ancha) en el lote de UI: el golpe
-        /// se LEE en el punto del impacto, el resto del cuadro respira.
-        /// Sin origen (null): el jugador local. Hasta 4 SIMULTÁNEOS; el
-        /// alfa decae con ease-out cuadrático (intensidad·(1−p)²).
+        /// EL FLASH: v6.50.28 — LA MUERTE DEL VELO (el reporte del usuario,
+        /// 4ª vez: «todavía el destello se ve como un círculo plano… el
+        /// bastón de rayo primordial también tiene el destello de círculo
+        /// plano en azul y el bastón colmillo de vena de trueno también…
+        /// lo mejor es quitarlo de donde sea que salga… todos esos
+        /// deberían un destello real, con degradado transparente al final
+        /// y no ser plano»). LA CAUSA FORENSE: el velo dibujaba UN DISCO
+        /// NovaBurst de radio 0.34× la DIAGONAL de pantalla (~750 px en
+        /// 1080p) EN LA CAPA DE UI — ENCIMA de todo el mundo, TAPANDO la
+        /// cruz de rayos que estallaba debajo: por eso «no le atinaba» —
+        /// el código del destello bueno jamás era el que se veía. La
+        /// historia completa: MagicPixel a pantalla completa (v6.50.15) →
+        /// dos SoftGlow (disco) → UN NovaBurst gigante (disco) — un
+        /// degradado radial, por suave que muera, SIEMPRE se lee como
+        /// «un círculo grande y liso».
+        ///
+        /// AHORA: Flash ES LA CRUZ DE 8 RAYOS — delega en
+        /// <see cref="ParticlePresets.DestelloFinal"/> (la del Sol y del
+        /// Agujero Negro desde v6.50.27): UN DESTELLO DE VERDAD, rayos
+        /// que se disuelven a TRANSPARENTE + corazón cegador que muere
+        /// antes. La envergadura escala con <paramref name="intensidad"/>
+        /// (160+260·i px); sin origen (null): el jugador local. Cero
+        /// estado, cero lote de UI, cero círculo.
         /// </summary>
-        /// <param name="color">El color del destello (RGB; el alfa lo pone la curva).</param>
-        /// <param name="duracionSeg">Vida completa (0.05..8).</param>
-        /// <param name="intensidad">Brillo de nacimiento (0..1).</param>
+        /// <param name="color">El color de los rayos (el corazón va a blanco cálido).</param>
+        /// <param name="duracionSeg">Vida completa (0.05..8 → ticks de la cruz).</param>
+        /// <param name="intensidad">Fuerza del destello (0..1 → envergadura de la cruz).</param>
         /// <param name="centroMundo">El centro de la explosión (coords de mundo; null = jugador local).</param>
         public static void Flash(Color color, float duracionSeg = 0.25f, float intensidad = 0.6f,
             Vector2? centroMundo = null)
         {
             if (Main.netMode == NetmodeID.Server) return;
             if (intensidad <= 0f) return;
-            duracionSeg = MathHelper.Clamp(duracionSeg, 0.05f, 8f);
-            intensidad = MathHelper.Clamp(intensidad, 0f, 1f);
 
-            int slot = -1;
-            for (int i = 0; i < _flashes.Length; i++)
-                if (!_flashes[i].Activo) { slot = i; break; }
-            if (slot < 0)
-            {
-                // Los 4 vivos: cede el asiento el más desvanecido.
-                double progresoMaximo = -1.0;
-                for (int i = 0; i < _flashes.Length; i++)
-                {
-                    double p = (Main.GameUpdateCount - _flashes[i].FrameInicio) / (60.0 * _flashes[i].DuracionSeg);
-                    if (p > progresoMaximo) { progresoMaximo = p; slot = i; }
-                }
-            }
-
-            _flashes[slot] = new FlashSlot
-            {
-                Activo = true,
-                Color = color,
-                Intensidad = intensidad,
-                DuracionSeg = duracionSeg,
-                FrameInicio = Main.GameUpdateCount,
-                CentroMundo = centroMundo ?? (Main.LocalPlayer?.Center ?? Vector2.Zero),
-            };
+            // LA CRUZ ESTALLA EN EL MUNDO — no hay velo, no hay disco, no
+            // hay capa de UI: los rayos con su degradado a transparente
+            // SON el destello (los dibuja ParticleManager, aditivo,
+            // AboveTiles — DEBAJO de la interfaz, como todo el mundo).
+            Vector2 centro = centroMundo ?? (Main.LocalPlayer?.Center ?? Vector2.Zero);
+            float envergadura = 160f + 260f * MathHelper.Clamp(intensidad, 0f, 1f);
+            int ticks = Math.Max(8, (int)(MathHelper.Clamp(duracionSeg, 0.05f, 8f) * 60f));
+            ParticlePresets.DestelloFinal(centro, envergadura,
+                Color.Lerp(color, Color.White, 0.65f), color, ticks);
         }
 
         // ==================================================================
@@ -445,7 +400,9 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// EL PRESET DE IMPACTO: la sacudida (6·escala px, 0.30 s), el
-        /// flash (blanco cálido 0.18 s), la viñeta (0.6 s) y la onda
+        /// flash — LA CRUZ DE RAYOS de <see cref="Flash"/> (v6.50.28: ya
+        /// NO es un velo circular — un destello de verdad, rayos con
+        /// degradado a transparente) —, la viñeta (0.6 s) y la onda
         /// expansiva (radio 130·escala px, 0.35 s) — los cuatro gestos
         /// calibrados de la casa para UN impacto.
         /// escala 1 = el impacto estándar; 0.5 = un toque; 2 = el golpe
@@ -454,7 +411,7 @@ namespace AethonMod.Content.VFX
         /// </summary>
         /// <param name="centroMundo">Centro del impacto (coords de mundo).</param>
         /// <param name="escala">La fuerza del golpe (0.25..3 recomendado).</param>
-        /// <param name="color">El color del flash y la onda (null = blanco cálido).</param>
+        /// <param name="color">El color de la cruz y la onda (null = blanco cálido).</param>
         public static void PresetImpacto(Vector2 centroMundo, float escala = 1f,
             Color? color = null)
         {
@@ -472,11 +429,11 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// EL PRESET DE GOLPE SECO (sin onda — para impactos en cadena o
-        /// espacios cerrados): sacudida corta + flash corto. El latido,
-        /// no la explosión.
+        /// espacios cerrados): sacudida corta + la CRUZ corta de
+        /// <see cref="Flash"/>. El latido, no la explosión.
         /// </summary>
         /// <param name="escala">La fuerza del golpe (0.25..3).</param>
-        /// <param name="color">El color del flash (null = blanco cálido).</param>
+        /// <param name="color">El color de la cruz (null = blanco cálido).</param>
         public static void PresetGolpeSeco(float escala = 1f, Color? color = null)
         {
             if (Main.netMode == NetmodeID.Server) return;
@@ -506,8 +463,6 @@ namespace AethonMod.Content.VFX
                 _sacudidas[i] = default;
                 _proxies[i].Finalizar();
             }
-            for (int i = 0; i < _flashes.Length; i++)
-                _flashes[i] = default;
             _vineta = default;
             for (int i = 0; i < _ondas.Length; i++)
                 _ondas[i] = default;
@@ -618,27 +573,19 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// FLASH + VIÑETA — un SOLO lote alfa propio (los dos son velos de
-        /// pantalla que componen igual en alfa): PRIMERO los flashes
-        /// (debajo), DESPUÉS la viñeta (encima: el túnel se cierra sobre
-        /// el destello — el orden cinematográfico del impacto). El flash
-        /// no pasa por la puerta de calidad (un quad por efecto, coste
-        /// marginal); la viñeta sí (familia PostProceso: oscurecer la
-        /// pantalla ES post-proceso).
+        /// VIÑETA — v6.50.28: el velo alfa de la capa de UI dibuja SOLO el
+        /// túnel que se cierra sobre el jugador. EL FLASH YA NO VIVE AQUÍ
+        /// (la saga del círculo plano, 4 informes: velo a pantalla
+        /// completa → dos SoftGlow → UN NovaBurst de 0.34× diagonal — un
+        /// degradado radial SIEMPRE se lee como círculo, y ENCIMA tapaba
+        /// la cruz que vivía debajo en el mundo): <see cref="Flash"/> es
+        /// ahora la cruz de <see cref="ParticlePresets.DestelloFinal"/>.
+        /// La viñeta pasa por la puerta de calidad (familia PostProceso:
+        /// oscurecer la pantalla ES post-proceso).
         /// </summary>
-        internal static void DibujarFlashYVineta()
+        internal static void DibujarVineta()
         {
-            // Auto-entierro de flashes caducados + ¿queda alguno?
-            bool hayFlash = false;
-            for (int i = 0; i < _flashes.Length; i++)
-            {
-                if (!_flashes[i].Activo) continue;
-                if ((Main.GameUpdateCount - _flashes[i].FrameInicio) / (60.0 * _flashes[i].DuracionSeg) >= 1.0)
-                    _flashes[i].Activo = false;
-                else hayFlash = true;
-            }
-
-            // La viñeta tras la puerta de calidad de la casa.
+            // Auto-entierro de la viñeta caducada + la puerta de calidad.
             bool hayVineta = false;
             if (_vineta.Activo)
             {
@@ -646,14 +593,10 @@ namespace AethonMod.Content.VFX
                     _vineta.Activo = false;
                 else hayVineta = VFXCore.CalidadPermitida(VFXCore.CalidadFX.PostProceso);
             }
-            if (!hayFlash && !hayVineta) return;
+            if (!hayVineta) return;
 
-            Texture2D pixel = TextureAssets.MagicPixel?.Value;
-            if (pixel == null) return;
-
-            Texture2D glow = hayVineta ? VFXCore.SoftGlow : null;
-            if (hayVineta && (glow == null || glow.IsDisposed)) hayVineta = false;
-            if (!hayFlash && !hayVineta) return;
+            Texture2D glow = VFXCore.SoftGlow;
+            if (glow == null || glow.IsDisposed) return;
 
             // End defensivo (mismo contrato que las ondas: la bandera
             // ampara la reapertura de PantallaSistema).
@@ -668,65 +611,7 @@ namespace AethonMod.Content.VFX
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Matrix.Identity);
 
-                // === 1. LOS FLASHES (debajo de la viñeta) — v6.50.15: EL
-                // GRADIENTE RADIAL DEL IMPACTO (antes: velo a pantalla
-                // completa — "un destello blanco que cubre toda la
-                // pantalla", el reporte del usuario). Dos plumones
-                // SoftGlow (núcleo + falda) nacen en el FOCO de la
-                // explosión y mueren hacia los bordes: el golpe se LEE
-                // donde pasó. ===
-                for (int i = 0; i < _flashes.Length; i++)
-                {
-                    ref FlashSlot f = ref _flashes[i];
-                    if (!f.Activo) continue;
-
-                    float prog = (float)((Main.GameUpdateCount - f.FrameInicio) / (60.0 * f.DuracionSeg));
-
-                    // ALFA = intensidad · (1−p)² (ease-out cuadrático de
-                    // DECAIMIENTO — v6.50.3 corrigió el easing invertido).
-                    float alfa = MathHelper.Clamp(f.Intensidad * (1f - prog) * (1f - prog), 0f, 1f);
-                    if (alfa <= 0.004f) continue;
-
-                    // EL FOCO: la explosión en coords de pantalla (capa de
-                    // UI, Matrix.Identity). El radio respira al nacer.
-                    Vector2 foco = f.CentroMundo - Main.screenPosition;
-                    float diag = MathF.Sqrt(Main.screenWidth * Main.screenWidth
-                                          + Main.screenHeight * Main.screenHeight);
-                    float radio = diag * 0.34f * (0.86f + 0.14f * alfa);
-
-                    // v6.50.18 — UN SOLO NOVABURST, NO DOS SOFTGLOW (el
-                    // círculo plano del final del Sol y del Agujero Negro —
-                    // el reporte del usuario: "un sprite de destello que es
-                    // solo un círculo plano… quítalo o cambia el sprite por
-                    // otro como NovaBurst.png"). Los DOS quads SoftGlow del
-                    // velo (falda + núcleo) dibujaban DOS gaussianas
-                    // compactas una encima de la otra: su huella circular
-                    // se leía como UN DISCO con borde visible — el velo era
-                    // el único elemento en forma de círculo que compartían
-                    // el Sol (blanco) y el Agujero Negro (violeta), exacto
-                    // los dos casos del reporte. NovaBurst (la textura del
-                    // bloom de la casa, 256², perfil MONÓTONO de caída
-                    // larga 255→0 que muere en el borde) es la que el
-                    // usuario pidió por nombre: UN gradiente, UN quad, el
-                    // golpe instantáneo del flash que se disuelve SUAVE.
-                    Texture2D texNova = Pantalla.NovaBurstTex;
-                    if (texNova != null && !texNova.IsDisposed)
-                    {
-                        Vector2 origenNova = texNova.Size() * 0.5f;
-                        Vector2 escalaNova = new Vector2(radio * 2f, radio * 2f) / texNova.Size();
-
-                        // v6.50.16 — EL COLOR PREMULTIPLICADO (el fin del
-                        // círculo sólido): Color·k escala RGB y A a la vez y
-                        // el velo compone a opacidad REAL k·texA — con el
-                        // perfil monótono de NovaBurst el aporte decae de
-                        // punta a punta SIN meseta y SIN huella de disco.
-                        Color cFalda = Color.Lerp(f.Color, Color.White, 0.25f) * (alfa * 0.72f);
-                        Main.spriteBatch.Draw(texNova, foco, null, cFalda, 0f, origenNova,
-                            escalaNova, SpriteEffects.None, 0f);
-                    }
-                }
-
-                // === 2. LA VIÑETA (encima: el túnel se cierra) ===
+                // === LA VIÑETA (el túnel se cierra) ===
                 if (hayVineta)
                 {
                     double t = (Main.GameUpdateCount - _vineta.FrameInicio) / 60.0;
@@ -960,7 +845,7 @@ namespace AethonMod.Content.VFX
             try
             {
                 Pantalla.DibujarOndas();          // 1. el frente de choque (aditivo)
-                Pantalla.DibujarFlashYVineta();   // 2. el destello y el túnel (alfa)
+                Pantalla.DibujarVineta();           // 2. el túnel que se cierra (alfa)
             }
             finally
             {
