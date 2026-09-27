@@ -2026,6 +2026,8 @@ Eco: {
 }
 
 Furia: {
+	Indicador: Oleada {0}: {1}
+	IndicadorTitulo: Furia del grimorio
 	Oleada: Oleada {0} de {1} — el grimorio escupe a su comida. XP ×{2} en esta oleada.
 	OleadaFinal: OLEADA FINAL {0} de {1} — el libro está negro de rabia. El aura se pudre: gris-negra, bordes rojos.
 	Jefe: El hambre convoca un guardián: {0} (XP ×{1})

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -13,6 +14,40 @@ namespace AethonMod.Content.Systems
     /// GrimorioFuriaSistema — LA FURIA DEL GRIMORIO: el evento de las
     /// OLEADAS DE HAMBRE.
     ///
+    /// v6.50.29 — EL MOTOR DE VANILLA (la orden del usuario: «deberías
+    /// investigar cómo funcionan las oleadas reales en terraria, y usar
+    /// su mismo sistema, solo es cambiar los valores para aumentarla a
+    /// medida que el nivel de oleada del grimorio aumente y además poner
+    /// un indicador de oleada igual que los que se usan en terraria
+    /// original»). LA INVESTIGACIÓN (decompile del Terraria real
+    /// 2026.07.3.0 — NPC.SpawnNPC, CheckProgressFrostMoon, Main.
+    /// DrawInvasionProgress):
+    ///
+    /// · CÓMO SPAWNEAN LAS LUNAS DE CALABAZA/ESCAMARCHA: NUNCA llaman a
+    ///   NewNPC ellas mismas — multiplican el MOTOR NATURAL de spawn
+    ///   (spawnRate × 0.2, maxSpawns × 2) y REEMPLAZAN el pool de la
+    ///   zona. El motor de vanilla elige el tile (dentro del anillo
+    ///   0.52–0.7× pantalla alrededor del jugador — JUSTO FUERA DEL
+    ///   CUADRO, «deberían estar más cerca»), valida el suelo, el aire,
+    ///   el agua y la lava — imposible nacer en pared. tModLoader
+    ///   expone EXACTAMENTE esos mandos: GlobalNPC.EditSpawnRate +
+    ///   GlobalNPC.EditSpawnPool (viven en OleadaNPC).
+    /// · CÓMO AVANZAN: POR MUERTES. Cada NPC del evento vale puntos (la
+    ///   chusma 1–5, los mini-jefes 10–50, Pumpking/Reina 100–150 ×
+    ///   expert/master); waveKills acumula y al cruzar la tabla
+    ///   MoonEventRequiredPointsPerWaveLookup[waveNumber] (25, 40, 50,
+    ///   80, 100, 160…) → waveKills=0, waveNumber++ y anuncio en el
+    ///   chat. NOSOTROS: chusma = 1 punto, requeridos = 12+6k (la 1 se
+    ///   paga con 18 muertes, la 10 con 72) — «solo es cambiar los
+    ///   valores».
+    /// · CÓMO SE VE: Main.ReportInvasionProgress → DrawInvasionProgress
+    ///   pinta ABAJO A LA DERECHA la caja «Oleada {0}: {1}%» + la barra
+    ///   amarilla/naranja/negra + la cajita del título con el icono del
+    ///   evento. Clonado EXACTO en PostDrawInterface (los pinceles son
+    ///   los de vanilla: Utils.DrawInvBG, ColorBar, MagicPixel,
+    ///   DrawBorderString) con NUESTRO icono (el grimorio) y
+    ///   NUESTRO título («Furia del grimorio»).
+    ///
     /// EL CUENTO ENTERO:
     /// 1. LA VOZ DEL HAMBRE (ShardPlayer): con el libro a nivel alto
     ///    (25+), cada 75 segundos sin matar es un MOMENTO DE HAMBRE —
@@ -24,20 +59,18 @@ namespace AethonMod.Content.Systems
     ///    "El grimorio llama a su comida…".
     /// 3. EL EVENTO (5 minutos de oleadas): UNA OLEADA POR CADA MOMENTO
     ///    DE HAMBRE acumulado, hasta 10. Cada oleada: LA CHUSMA del
-    ///    bioma con stats ×(k+1) (la 1 ×2, la 10 ×11 — la letra del
-    ///    usuario), y AL FINAL UN JEFE PRE-HARDMODE del bioma — v6.48
-    ///    SIN importar la hora (los guardianes de la furia no duermen:
-    ///    cada zona tiene SU guardián fijo y la superficie alterna Rey
-    ///    Gelatina/Ojo por paridad de oleada, para que no se repita).
-    ///    El pago: k monedas de oro por monstruo, k de platino + SU
-    ///    ESENCIA por jefe, y TODO paga XP ×(k+1).
-    /// 4. LA OLEADA ESPECIAL — EL JUICIO (v6.48): tras la oleada 10 (o
-    ///    directa con la Carnada preparada en 11), TODOS los guardianes
-    ///    a la vez: siete jefes ×15 en vida, daño y XP, con el aura del
-    ///    JUICIO y sin pausa en los dientes. Empiezan DOS EN PANTALLA y
-    ///    el resto se van sumando cada 15 s — el festín final. Cuando
-    ///    cae el último: "El grimorio está saciado… por ahora." y el
-    ///    perdón de la hambre.
+    ///    bioma NACE DEL MOTOR NATURAL DE VANILLA (EditSpawnRate ×0.2 y
+    ///    menguando por oleada — la 10 escupe a ×0.08; tope de vivos
+    ///    10+4k) con stats ×(k+1) (la 1 ×2, la 10 ×11), y AL FINAL UN
+    ///    JEFE PRE-HARDMODE del bioma — SIN importar la hora. La
+    ///    oleada AVANZA por MUERTES (los puntos) con el reloj solo de
+    ///    red de seguridad. El pago: k monedas de oro por monstruo, k
+    ///    de platino + SU ESENCIA por jefe, y TODO paga XP ×(k+1).
+    /// 4. LA OLEADA ESPECIAL — EL JUICIO (tras la 10 o directa con la
+    ///    Carnada en 11): TODOS los guardianes a la vez, ×15 en TODO y
+    ///    sin pausa en los dientes. Empiezan DOS y el resto se va sumando
+    ///    cada 15 s — el festín final. Cuando cae el último: "El grimorio
+    ///    está saciado… por ahora." y el perdón de la hambre.
     /// 5. LA MUERTE DEL PORTADOR (v6.48): si el jugador cae durante el
     ///    festín, EL EVENTO TERMINA y el libro TOMA VENGANZA — varias
     ///    líneas (la voz del libro SIEMPRE con prioridad: se cuela al
@@ -60,8 +93,19 @@ namespace AethonMod.Content.Systems
         private static int _ticksFase = 0;
         private static int _oleadasTotales = 0;    // N (1..10, 11 = solo especial)
         private static int _oleadaActual = 0;      // k (1..N)
-        private static int _ticksOleada = 0;       // reloj de la fase de chusma
-        private static int _pulsoSpawn = 0;        // tempo entre escupitajos
+        private static int _ticksOleada = 0;       // reloj de la red de seguridad
+        // v6.50.29 — LOS PUNTOS DE LA OLEADA (el waveKills de vanilla): cada
+        // muerte de chusma sellada suma 1; al cruzar PuntosRequeridos(k) la
+        // oleada avanza — LA PROGRESIÓN ES DE MUERTES, como las lunas de
+        // vanilla (CheckProgressFrostMoon: waveKills += puntos; si cruza la
+        // tabla → waveNumber++). El reloj de abajo es SOLO la red de
+        // seguridad (que el festín nunca se cuelgue si el portador no mata).
+        private static int _puntosOleada = 0;
+        // v6.50.29 — EL POOL DE LA OLEADA (caché): los tipos que el motor
+        // natural puede escupir durante ESTA oleada (el bioma del portador
+        // al arrancar la oleada — estable mientras dure; lo lee
+        // OleadaNPC.EditSpawnPool).
+        private static int[] _poolActual = null;
         private static int _bossIdx = -1;          // whoAmI del jefe de la oleada
         private static int _jugador = -1;          // whoAmI del hambriento
         // v6.50.2 — FIX (carrera del slot reciclado en FaseJefe): el TYPE del
@@ -85,8 +129,6 @@ namespace AethonMod.Content.Systems
         public const int TicksLlamada = 200;
         /// <summary>El respiro entre oleadas.</summary>
         private const int TicksInterludio = 90;
-        /// <summary>Tope de chusma viva por oleada: 8 + 2k.</summary>
-        private const int VivosBase = 8;
         /// <summary>Cada cuánto se suma un guardián más en LA ESPECIAL.</summary>
         private const int TicksSumaEspecial = 900; // 15 s
 
@@ -96,6 +138,63 @@ namespace AethonMod.Content.Systems
         public static int OleadaActual => Activo ? _oleadaActual : 0;
         /// <summary>¿Está corriendo LA OLEADA ESPECIAL (El Juicio)?</summary>
         public static bool EspecialActiva => Activo && _fase == Fase.Especial;
+
+        // ==================================================================
+        //  v6.50.29 — LOS MANDOS DEL MOTOR NATURAL (lo que OleadaNPC lee)
+        //  ==================================================================
+
+        /// <summary>
+        /// ¿La CHUSMA está en marcha? (fase Monstruos — la ventana en la que
+        /// el MOTOR NATURAL de vanilla escupe la horda: OleadaNPC.
+        /// EditSpawnRate/EditSpawnPool aceleran y reemplazan el pool SOLO
+        /// aquí, exactamente como las lunas de vanilla multiplican el motor
+        /// mientras el evento vive).
+        /// </summary>
+        public static bool ChusmaEnMarcha => Activo && _fase == Fase.Monstruos && _poolActual != null;
+
+        /// <summary>
+        /// EL POOL de la oleada en marcha (los tipos que el motor natural
+        /// puede escupir — el bioma del portador). null fuera de la fase de
+        /// chusma.
+        /// </summary>
+        public static int[] PoolDeOleada => ChusmaEnMarcha ? _poolActual : null;
+
+        /// <summary>EL PORTADOR del festín (a quien la horda converge).</summary>
+        public static Player Portador => (_jugador >= 0 && _jugador < Main.maxPlayers)
+            ? Main.player[_jugador] : null;
+
+        /// <summary>
+        /// v6.50.29 — LOS PUNTOS REQUERIDOS por oleada (la tabla de vanilla,
+        /// con NUESTROS valores): la 1 se paga con 18 muertes, la 5 con 42,
+        /// la 10 con 72 — «solo es cambiar los valores para aumentarla a
+        /// medida que el nivel de oleada del grimorio aumente».
+        /// </summary>
+        public static int PuntosRequeridos(int k) => 12 + 6 * Math.Max(1, Math.Min(10, k));
+
+        /// <summary>
+        /// v6.50.29 — LA DENSIDAD DEL MOTOR (los valores de vanilla):
+        /// spawnRate × (0.20 − 0.012k) — la 1 ×0.19, la 5 ×0.14, la 10 ×0.08
+        /// (la luna de calabaza usa ×0.2 fijo; la furia APRIETA con cada
+        /// oleada) y el tope de vivos 10+4k (la 1: 14, la 10: 50 — vanilla
+        /// dobla maxSpawns: 10; el libro hambriento lo CUADRUPLA al final).
+        /// </summary>
+        public static float MultiplicadorSpawnRate(int k)
+            => MathF.Max(0.08f, 0.20f - 0.012f * Math.Max(1, Math.Min(10, k)));
+        /// <summary>El TOPE DE VIVOS del motor natural durante la oleada k.</summary>
+        public static int TopeVivos(int k) => 10 + 4 * Math.Max(1, Math.Min(10, k));
+
+        /// <summary>
+        /// v6.50.29 — EL PUNTO DE MUERTE (el corazón de la progresión de
+        /// vanilla): cada chusma sellada que cae suma SU punto. Lo llama
+        /// OleadaNPC.OnKill. Cruza el umbral → la oleada AVANZA (el Jefe
+        /// nace); el clamp evita que el indicador pase del 100% (vanilla
+        /// resetea waveKills al cruzar — el reset lo hace el cambio de fase).
+        /// </summary>
+        public static void PuntoDeMuerte(int puntos = 1)
+        {
+            if (!ChusmaEnMarcha || puntos <= 0) return;
+            _puntosOleada = Math.Min(_puntosOleada + puntos, PuntosRequeridos(_oleadaActual));
+        }
 
         // ==================================================================
         //  v6.50.2 — EL FESTÍN VISTO DESDE LOS CLIENTES (diagnóstico)
@@ -114,6 +213,11 @@ namespace AethonMod.Content.Systems
         public static int OleadaCliente;
         /// <summary>Las oleadas totales vistas por el CLIENTE.</summary>
         public static int TotalesCliente;
+        // v6.50.29 — EL INDICADOR EN MP: los puntos y el umbral de la oleada
+        /// <summary>Los PUNTOS de la oleada vista por el CLIENTE (para el indicador).</summary>
+        public static int PuntosCliente;
+        /// <summary>Los puntos REQUERIDOS de la oleada vista por el CLIENTE.</summary>
+        public static int RequeridosCliente;
 
         /// <summary>La fase del festín en el SERVER (lo serializa EcoRed.SincronizarHambre).</summary>
         public static int FaseServidor => (int)_fase;
@@ -121,6 +225,10 @@ namespace AethonMod.Content.Systems
         public static int OleadaServidor => _oleadaActual;
         /// <summary>Las oleadas totales en el SERVER (lo serializa EcoRed).</summary>
         public static int TotalesServidor => _oleadasTotales;
+        /// <summary>Los PUNTOS de la oleada en el SERVER (los serializa EcoRed para el indicador).</summary>
+        public static int PuntosServidor => _puntosOleada;
+        /// <summary>Los puntos REQUERIDOS de la oleada actual en el SERVER.</summary>
+        public static int RequeridosServidor => PuntosRequeridos(_oleadaActual);
 
         // ==================================================================
         //  EL DISPARO
@@ -278,9 +386,14 @@ namespace AethonMod.Content.Systems
             _fase = Fase.Monstruos;
             _ticksFase = 0;
             _ticksOleada = 0;
-            _pulsoSpawn = 0;
+            _puntosOleada = 0;      // v6.50.29 — el waveKills de la oleada nueva
             _bossIdx = -1;
             _tipoJefeOleada = -1;
+            // v6.50.29 — EL POOL DE LA OLEADA (caché del bioma del portador
+            // al arrancar — lo lee OleadaNPC.EditSpawnPool en cada ciclo del
+            // motor natural; el pool estable evita recomputar zonas por tick).
+            _poolActual = PoolMonstruos(hambriento);
+
             // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
             EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
 
@@ -296,53 +409,44 @@ namespace AethonMod.Content.Systems
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Oleada", new Color(198, 200, 206),
                     _oleadaActual, _oleadasTotales, _oleadaActual + 1);
 
-            // v6.50.26 — LA OLEADA ES UNA HORDA DE GOLPE (la letra del
-            // usuario: «lo que debe hacer las oleadas es AUMENTAR
-            // CONSIDERABLEMENTE la cantidad de enemigos que aparecen y
-            // hacerlo EN FORMA DE OLEADAS, con cada oleada haciendo que
-            // salgan MÁS enemigos»): la CAMADA DE APERTURA nace DE GOLPE
-            // con el anuncio — 6+3k monstruos irrumpiendo a la vez (la 1
-            // son 9, la 10 son 36) y la marea sigue por pulsos. La furia
-            // los trae CORRIENDO (OleadaNPC: la carga ya no se apaga a
-            // 1500 px — llegan desde fuera de pantalla).
-            int[] poolApertura = PoolMonstruos(hambriento);
-            int camada = 6 + 3 * _oleadaActual;
-            for (int s = 0; s < camada; s++)
-                SpawnMonstruo(hambriento, poolApertura);
+            // v6.50.29 — NADA MÁS QUE ESPERAR: la horda la trae EL MOTOR
+            // NATURAL DE VANILLA (OleadaNPC.EditSpawnRate/EditSpawnPool
+            // activados por ChusmaEnMarcha). El motor de vanilla es el que
+            // mantiene el mundo lleno de enemigos desde 2011 — la furia
+            // solo lo ACELERA (×0.2 menguante) y le SUSTITUYE el pool (el
+            // bioma del portador). Los monstruos nacen en el anillo
+            // 0.52–0.7× pantalla — JUSTO FUERA DEL CUADRO (más cerca que
+            // nunca) — sobre suelo validado por el propio motor (jamás en
+            // pared) y vienen CORRIENDO por el empuje del sello.
         }
 
         private static void FaseMonstruos(Player hambriento)
         {
-            int duracion = Math.Max(600, TicksEvento / Math.Max(1, _oleadasTotales)); // ≥ 10 s por oleada
             _ticksOleada++;
 
-            // === LA MAREA (los escupitajos de chusma) ===
-            // v6.50.26 — LA OLEADA ES UNA HORDA: pulso cada 60 ticks (1 s
-            // — era 90), camadas de 3+k por pulso (la 1 repone 4/s, la 10
-            // repone 13/s) y el TOPE VIVO escala ×5 por oleada (la 1: 13
-            // vivos, la 10: 58 — «con cada oleada salen más enemigos»).
-            _pulsoSpawn++;
-            if (_pulsoSpawn >= 60)
-            {
-                _pulsoSpawn = 0;
-                int vivos = ContarChusma();
-                int tope = VivosBase + 5 * _oleadaActual;
-                if (vivos < tope)
-                {
-                    int porPulso = 3 + _oleadaActual;
-                    int[] pool = PoolMonstruos(hambriento);
-                    for (int s = 0; s < porPulso; s++)
-                        SpawnMonstruo(hambriento, pool);
-                }
-            }
+            // === v6.50.29 — LA PROGRESIÓN ES DE MUERTES (como las lunas de
+            // vanilla): cada chusma sellada que cae suma su punto en
+            // PuntoDeMuerte (OleadaNPC.OnKill). Al cruzar el umbral la
+            // oleada SE PAGA y nace el guardián. El reloj de abajo es SOLO
+            // la red de seguridad — el festín nunca se cuelga si el
+            // portador no mata, pero el que MANDA es el machete.
+            int requeridos = PuntosRequeridos(_oleadaActual);
+            bool porMuertes = _puntosOleada >= requeridos;
 
-            // === ¿SE ACABÓ LA OLEADA? ===
-            // Por reloj (su parte de los 5 minutos) o porque la chusma se
-            // limpió habiendo pasado al menos media fase.
+            // LA RED DE SEGURIDAD (el reparto de los 5 minutos — mínimo 10 s
+            // por oleada): si el portador no mata, la furia igual avanza.
+            int duracion = Math.Max(600, TicksEvento / Math.Max(1, _oleadasTotales));
             bool porReloj = _ticksOleada >= duracion;
-            bool limpia = ContarChusma() == 0 && _ticksOleada >= duracion / 2;
-            if (porReloj || limpia)
+
+            // EL LATIDO MP: cada 60 t el estado camina al portador (el
+            // indicador de oleada del cliente remoto lee los PUNTOS — sin
+            // esto la barra de MP quedaba congelada hasta el cambio de fase).
+            if ((_ticksOleada % 60) == 0)
+                EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
+
+            if (porMuertes || porReloj)
             {
+                _poolActual = null;  // el motor natural vuelve a lo suyo YA
                 _fase = Fase.Jefe;
                 _ticksFase = 0;
                 _bossIdx = -1;
@@ -496,7 +600,7 @@ namespace AethonMod.Content.Systems
             for (int i = 0; i < 2; i++) NacerGuardian(hambriento);
         }
 
-        /// <summary>Nace UN guardián de la ESPECIAL en su anillo alrededor del portador.</summary>
+        /// <summary>Nace UN guardián de la ESPECIAL en el BORDE del cuadro del portador.</summary>
         private static void NacerGuardian(Player hambriento)
         {
             try
@@ -504,26 +608,17 @@ namespace AethonMod.Content.Systems
                 if (_spawneados >= 7) return;
                 int tipo = LosSiete()[_spawneados];
 
-                // v6.50.18 — LA CUNA DEL GUARDIÁN: anillo en la distancia
-                // REAL fuera de pantalla (antes 520 px fijo — EN PANTALLA),
-                // con la caja de paredes validada; si el mundo no ofrece
-                // hueco en 8 intentos, el guardián espera al próximo pulso
-                // (el Juicio suma cada 15 s — no se pierde, se retrasa).
-                float ang = _spawneados * (MathHelper.TwoPi / 7f) + 0.7f;
-                float distMin = DistanciaFueraDePantalla();
-                Vector2 pos = Vector2.Zero;
-                for (int intento = 0; intento < 8; intento++)
-                {
-                    float angI = ang + intento * (MathHelper.TwoPi / 8f);
-                    Vector2 candidato = hambriento.Center + new Vector2(
-                        MathF.Cos(angI), MathF.Sin(angI)) *
-                        (distMin + Main.rand.NextFloat(160f)) - new Vector2(0f, 120f);
-                    candidato.X = Math.Clamp(candidato.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
-                    candidato.Y = Math.Clamp(candidato.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
-                    if (CajaLibre(candidato.X - 40f, candidato.Y - 50f, 80f, 100f))
-                    { pos = candidato; break; }
-                }
-                if (pos == Vector2.Zero) return; // sin cuna: espera al próximo pulso
+                // v6.50.29 — LA CUNA DEL GUARDIÁN: el BORDE DEL CUADRO (el
+                // patrón de las invasiones de vanilla) — alternando lados y
+                // SIN validación de caja: son JEFES (Rey Gelatina se
+                // teletransporta, el Ojo y la Reina vuelan, Deerclops cae
+                // y camina…) — la validación de tiles de la cuna vieja era
+                // la que podía TRAGARSE al guardián (sin hueco libre en 8
+                // intentos, el Juicio se quedaba SIN guardianes: "activo
+                // la oleada y no veo NINGUNO"). NPC.sWidth es el tamaño
+                // de pantalla SERVER-SEGURO de vanilla (1920 por defecto
+                // en dedicados — el mismo que usa el motor de spawn).
+                Vector2 pos = PosicionBordeJefe(hambriento, _spawneados % 2 == 0 ? -1 : 1);
 
                 int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo);
                 NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
@@ -615,20 +710,6 @@ namespace AethonMod.Content.Systems
                     new Color(150, 140, 148));
             }
             catch { }
-        }
-
-        /// <summary>Cuánta chusma de ESTA oleada sigue viva.</summary>
-        private static int ContarChusma()
-        {
-            int vivos = 0;
-            for (int i = 0; i < Main.maxNPCs; i++)
-            {
-                NPC n = Main.npc[i];
-                if (n == null || !n.active) continue;
-                var sello = n.GetGlobalNPC<OleadaNPC>();
-                if (sello != null && sello.EsDeOleada && !n.boss) vivos++;
-            }
-            return vivos;
         }
 
         // ==================================================================
@@ -765,59 +846,29 @@ namespace AethonMod.Content.Systems
         }
 
         // ==================================================================
-        //  LOS SPAWNS
-        // ==================================================================
+        //  LOS SPAWNS DE LOS GUARDIANES (los jefes NO salen del motor
+        //  natural — vanilla tampoco: los jefes de evento se convocan)
+        //  ==================================================================
 
-        /// <summary>Escupe UN monstruo de la oleada alrededor del portador.</summary>
-        private static void SpawnMonstruo(Player hambriento, int[] pool)
+        /// <summary>
+        /// v6.50.29 — EL BORDE DEL CUADRO para un guardián: x = medio
+        /// NPC.sWidth + margen (la medida SERVER-SEGURA de pantalla que el
+        /// propio motor de spawn de vanilla usa — Main.screenPosition NO
+        /// existe en un servidor dedicado), y = algo sobre la línea de la
+        /// presa (los voladores aprovechan, los caminantes caen). Sin
+        /// validación de tiles — los JEFES resuelven el terreno solos (el
+        /// Rey se teletransporta, el Ojo vuela, Deerclops cae): la caja
+        /// libre de la cuna vieja podía TRAGARSE al guardián entero.
+        /// Bordes del mundo respetados.
+        /// </summary>
+        private static Vector2 PosicionBordeJefe(Player p, int lado)
         {
-            try
-            {
-                int tipo = pool[(int)(Main.rand.NextFloat() * pool.Length) % pool.Length];
-
-                // v6.50.18 — FUERA DE PANTALLA Y FUERA DE PAREDES (el
-                // reporte del usuario: "los monstruos deben aparecer fuera
-                // de la pantalla y no deben aparecer dentro de paredes").
-                // ANTES: anillo 380-700 px del portador — con una pantalla
-                // de 1920 (semidiagonal ~1100 px) TODO ese anillo caía
-                // DENTRO del cuadro visible. AHORA: la distancia mínima es
-                // la SEMIDIAGONAL REAL del área visible en coords de mundo
-                // (respeta el zoom) + 200 px de margen, y cada intento se
-                // valida contra tiles sólidos (caja ancho×alto del NPC) —
-                // hasta 8 intentos; si ningún hueco vive, este no nace.
-                Vector2 pos = BuscarCuna(hambriento, 20, 40, 8);
-                if (pos == Vector2.Zero) return; // sin hueco digno: este no nace
-
-                NPC npc = Main.npc[NPC.NewNPC(hambriento.GetSource_FromAI(),
-                    (int)pos.X, (int)pos.Y, tipo)];
-                if (npc == null || !npc.active) return;
-
-                // los que chocan con tiles necesitan SUELO: buscar hacia abajo
-                if (!npc.noTileCollide)
-                {
-                    Vector2 good = BuscarSuelo(pos);
-                    if (good == Vector2.Zero) { npc.active = false; return; } // sin hueco: este no nace
-                    // v6.50.18 — VALIDACIÓN DE LA CUNA: el suelo hallado
-                    // también debe estar despejado (el BuscarSuelo viejo
-                    // podía devolver la CARA de un muro — el monstruo
-                    // nacía EMPOTRADO en la pared lateral).
-                    if (!CajaLibre(good.X - npc.width * 0.5f,
-                            good.Y - npc.height - 2f, npc.width, npc.height))
-                    { npc.active = false; return; }
-                    npc.position = good - new Vector2(npc.width / 2f, npc.height);
-                }
-                npc.netUpdate = true;
-
-                // EL SELLO (marca + stats + aura)
-                npc.GetGlobalNPC<OleadaNPC>().Marcar(npc, _oleadaActual, jefe: false);
-
-                // v6.50.26 — LA FURIA LOS TRAE CORRIENDO: objetivo fijado
-                // DESDE EL NACIMIENTO (la chusma del festín no se distrae
-                // ni espera a que su IA se decida — vienen por la comida).
-                npc.TargetClosest(false);
-                npc.netUpdate = true;
-            }
-            catch { }
+            float dx = NPC.sWidth * 0.5f + 140f;
+            float x = p.Center.X + (lado < 0 ? -dx : dx);
+            float y = p.Center.Y - 240f + Main.rand.NextFloat(-80f, 80f);
+            x = Math.Clamp(x, Main.leftWorld + 400f, Main.rightWorld - 400f);
+            y = Math.Clamp(y, Main.topWorld + 400f, Main.bottomWorld - 400f);
+            return new Vector2(x, y);
         }
 
         /// <summary>Convoca al JEFE (versión especial de la oleada) del bioma.</summary>
@@ -826,14 +877,13 @@ namespace AethonMod.Content.Systems
             try
             {
                 int tipo = JefeDelLugar(hambriento);
-                // v6.50.18 — FUERA DE PANTALLA (antes: 560 px delante y 240
-                // arriba — EN PANTALLA en cualquier monitor grande): el
-                // jefe nace a la distancia real fuera del cuadro + margen,
-                // con la misma validación de paredes que los monstruos.
-                Vector2 pos = BuscarCuna(hambriento, 80, 100, 6);
-                if (pos == Vector2.Zero)
-                    pos = hambriento.Center + new Vector2(
-                        hambriento.direction * -900f, -360f); // último recurso: lejos y arriba
+                // v6.50.29 — EL BORDE DEL CUADRO (lado trasero preferido):
+                // el jefe llega CAMINANDO/VOLANDO al cuadro como las
+                // invasiones de vanilla — visible en segundos, sin la
+                // caja-libre que podía tragárselo. Sin hueco no hay
+                // problema: los jefes resuelven el terreno.
+                int lado = (Main.rand.Next(4) == 0) ? 1 : (hambriento.direction >= 0 ? -1 : 1);
+                Vector2 pos = PosicionBordeJefe(hambriento, lado);
 
                 int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo);
                 NPC jefe = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
@@ -856,158 +906,19 @@ namespace AethonMod.Content.Systems
         }
 
         // ==================================================================
-        //  v6.50.18 — LA CUNA (dónde nace un monstruo del festín)
-        // ==================================================================
-
-        /// <summary>El TOPE de la cuna: nada del festín nace a más de
-        /// 1600 px (v6.50.27) — en pantallas grandes la semidiagonal real
-        /// (2400+ px en 4K) excede la ZONA ACTIVA de vanilla y la chusma
-        /// despertaba ya condenada: nacía fuera del alcance y moría sin
-        /// ser vista (NPC.CheckActive apaga a los hostiles lejanos).</summary>
-        private const float TopeCuna = 1600f;
-
-        /// <summary>
-        /// LA DISTANCIA FUERA DE PANTALLA: la semidiagonal del área VISIBLE
-        /// en coords de mundo (Main.screenWidth/Height son px de interfaz —
-        /// con zoom &gt; 1 el mundo visible ENCOGE: se divide por el zoom de
-        /// la vista) + 200 px de margen… CON TOPE (v6.50.27): la barrera
-        /// real de "fuera de la pantalla" clampeada a lo que una criatura
-        /// de verdad puede caminar antes de aburrirse.
-        /// </summary>
-        private static float DistanciaFueraDePantalla()
-        {
-            try
-            {
-                Vector2 zoom = Main.GameViewMatrix.Zoom;
-                float zx = zoom.X <= 0.05f ? 1f : zoom.X;
-                float zy = zoom.Y <= 0.05f ? 1f : zoom.Y;
-                Vector2 visMundo = new Vector2(Main.screenWidth / zx, Main.screenHeight / zy);
-                return MathF.Min(visMundo.Length() * 0.5f + 200f, TopeCuna);
-            }
-            catch { return 900f; }
-        }
-
-        /// <summary>
-        /// v6.50.27 — EL BORDE DEL CUADRO (la cuna de las invasiones): la
-        /// posición JUSTO FUERA del lado visible, a la altura de la presa.
-        /// Los festines de vanilla (goblins, luna de sangre, legión de
-        /// escarcha) nacen ASÍ — en los bordes laterales del cuadro — y
-        /// CAMINAN hacia la comida: el jugador VE llegar la horda. Es
-        /// "fuera de la pantalla" de verdad EN CUALQUIER RESOLUCIÓN (el
-        /// borde es el borde) y la distancia es la MÍNIMA posible fuera
-        /// del cuadro: la oleada llega en segundos, no en minutos.
-        /// </summary>
-        private static Vector2 PosicionBorde(int lado, Player hambriento, float extra)
-        {
-            float x;
-            if (lado < 0)
-                x = Main.screenPosition.X - 60f - extra;               // justo fuera del lado IZQUIERDO
-            else
-                x = Main.screenPosition.X + Main.screenWidth + 60f + extra; // justo fuera del DERECHO
-            // la altura de la presa con sesgo AL CIELO (la caja libre de
-            // tiles vive arriba: abajo está el suelo que CajaLibre rechaza).
-            float y = hambriento.Center.Y + Main.rand.NextFloat(-420f, 90f);
-            return new Vector2(x, y);
-        }
-
-        /// <summary>
-        /// BUSCA LA CUNA: PRIMERO los BORDES del cuadro (la cuna de las
-        /// invasiones — se la ve llegar caminando; el primer intento a la
-        /// ESPALDA de la presa), después el anillo clásico (tope 1600 px).
-        /// Sin tiles sólidos en la caja (margen ancho×margen alto alrededor
-        /// del punto). Hasta <paramref name="intentos"/> intentos; devuelve
-        /// Vector2.Zero si nada digno se encuentra (el llamador NO engendra).
-        /// Bordes del mundo respetados (clamp 400 px).
-        /// </summary>
-        private static Vector2 BuscarCuna(Player hambriento, float margenAncho,
-            float margenAlto, int intentos)
-        {
-            float distMin = DistanciaFueraDePantalla();
-            // ¿la presa está en la MITAD izquierda o derecha del cuadro? La
-            // espalda es la cuna natural de la emboscada.
-            bool espaldaIzq = hambriento.Center.X <
-                Main.screenPosition.X + Main.screenWidth * 0.5f;
-            for (int i = 0; i < intentos; i++)
-            {
-                Vector2 pos;
-                if (i < 3)
-                {
-                    // v6.50.27 — LOS BORDES (60% de los intentos): lado 0 =
-                    // la espalda, lado 1 = el frente, lado 2 = la espalda de
-                    // nuevo con otro margen.
-                    int lado = (i == 1) ? (espaldaIzq ? 1 : -1) : (espaldaIzq ? -1 : 1);
-                    pos = PosicionBorde(lado, hambriento, Main.rand.NextFloat(30f, 240f));
-                }
-                else
-                {
-                    // EL ANILLO CLÁSICO (topeado): ángulo libre, distancia
-                    // mínima real clampeada a 1600 px.
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    float dist = distMin + Main.rand.NextFloat(240f);
-                    pos = hambriento.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
-                }
-
-                pos.X = Math.Clamp(pos.X, Main.leftWorld + 400f, Main.rightWorld - 400f);
-                pos.Y = Math.Clamp(pos.Y, Main.topWorld + 400f, Main.bottomWorld - 400f);
-
-                if (CajaLibre(pos.X - margenAncho * 0.5f, pos.Y - margenAlto * 0.5f,
-                        margenAncho, margenAlto))
-                    return pos;
-            }
-            return Vector2.Zero;
-        }
-
-        /// <summary>
-        /// ¿La caja (px de mundo) está LIBRE de tiles sólidos? Recorre las
-        /// tiles que la caja toca (redondeo generoso de 1 tile de margen en
-        /// cada lado) — un solo tile sólido dentro y la respuesta es NO.
-        /// Fuera del mundo → NO (nada nace en el vacío de los bordes).
-        /// </summary>
-        private static bool CajaLibre(float x0, float y0, float ancho, float alto)
-        {
-            try
-            {
-                int tx0 = (int)(x0 / 16f) - 1;
-                int ty0 = (int)(y0 / 16f) - 1;
-                int tx1 = (int)((x0 + ancho) / 16f) + 1;
-                int ty1 = (int)((y0 + alto) / 16f) + 1;
-                for (int x = tx0; x <= tx1; x++)
-                {
-                    for (int y = ty0; y <= ty1; y++)
-                    {
-                        if (x < 5 || x >= Main.maxTilesX - 5 || y < 5 || y >= Main.maxTilesY - 5)
-                            return false;
-                        Tile tile = Main.tile[x, y];
-                        if (tile != null && tile.HasTile && Main.tileSolid[tile.TileType])
-                            return false;
-                    }
-                }
-                return true;
-            }
-            catch { return false; }
-        }
-
-        /// <summary>
-        /// Busca el primer tile SÓLIDO bajo la posición (hasta 50 tiles
-        /// abajo); devuelve el punto DE ENCIMA o Vector2.Zero si no hay.
-        /// Bordes del mundo respetados (índices clampeados).
-        /// </summary>
-        private static Vector2 BuscarSuelo(Vector2 pos)
-        {
-            int x = (int)(pos.X / 16f);
-            int y = (int)(pos.Y / 16f);
-            if (x < 5 || x >= Main.maxTilesX - 5 || y < 5 || y >= Main.maxTilesY - 5)
-                return Vector2.Zero; // fuera del mundo: este no nace
-            for (int i = 0; i < 50; i++)
-            {
-                if (y + i >= Main.maxTilesY - 5) break;
-                Tile tile = Main.tile[x, y + i];
-                if (tile != null && tile.HasTile && Main.tileSolid[tile.TileType])
-                    return new Vector2(pos.X, (y + i) * 16f);
-            }
-            return Vector2.Zero;
-        }
-
+        //  v6.50.29 — NOTA DE MIGRACIÓN: LA CUNA ENTERA MURIÓ.
+        //  BuscarCuna/PosicionBorde/CajaLibre/BuscarSuelo/
+        //  DistanciaFueraDePantalla/SpawnMonstruo/ContarChusma — toda la
+        //  maquinaria de spawn manual fue SUSTITUIDA por el MOTOR NATURAL
+        //  de vanilla (EditSpawnRate/EditSpawnPool en OleadaNPC, el mismo
+        //  que las lunas de calabaza/escamarcha usan): él elige el tile
+        //  (anillo 0.52–0.7× pantalla — más cerca que nunca), valida el
+        //  suelo/el aire/el agua/la lava (jamás en pared) y respeta los
+        //  límites del mundo. La vieja cuna podía fallar en cadena: si
+        //  CajaLibre no hallaba hueco, el monstruo "no nacía" — con el
+        //  Juicio de por medio, la furia entera podía pasar SIN UN SOLO
+        //  enemigo visible. El motor de vanilla no falla: es el mismo que
+        //  llena el mundo de enemigos desde 2011.
         // ==================================================================
         //  EL FINAL
         // ==================================================================
@@ -1031,6 +942,8 @@ namespace AethonMod.Content.Systems
             _fase = Fase.Inactivo;
             _oleadasTotales = 0;
             _oleadaActual = 0;
+            _puntosOleada = 0;
+            _poolActual = null;      // el motor natural vuelve a lo suyo
             _bossIdx = -1;
             _tipoJefeOleada = -1;
             _jugador = -1;
@@ -1044,6 +957,8 @@ namespace AethonMod.Content.Systems
             FaseCliente = 0;
             OleadaCliente = 0;
             TotalesCliente = 0;
+            PuntosCliente = 0;
+            RequeridosCliente = 0;
         }
 
         /// <summary>
@@ -1075,6 +990,137 @@ namespace AethonMod.Content.Systems
             catch { return ""; }
         }
 
+        // ==================================================================
+        //  v6.50.29 — EL INDICADOR DE OLEADA (el clon de vanilla)
+        // ==================================================================
+
+        /// <summary>El alfa del indicador (el fade de vanilla: ±0.05/tick).</summary>
+        private static float _alfaIndicador = 0f;
+        /// <summary>El icono del título (el grimorio — cacheado).</summary>
+        private static Microsoft.Xna.Framework.Graphics.Texture2D _iconoTitulo = null;
+
+        /// <summary>
+        /// v6.50.29 — EL INDICADOR DE OLEADA IGUAL QUE TERRARIA ORIGINAL
+        /// (la orden del usuario): el clon EXACTO de Main.
+        /// DrawInvasionProgress — la caja de abajo a la derecha con
+        /// «Oleada {0}: {1}%» + la barra amarilla/naranja/negra sobre
+        /// ColorBar, y la cajita del título con el icono y el nombre del
+        /// evento (como la cajita de la luna de calabaza, pero con NUESTRO
+        /// grimorio y «Furia del grimorio»). Los pinceles son LOS DE
+        /// VANILLA: Utils.DrawInvBG, TextureAssets.ColorBar,
+        /// TextureAssets.MagicPixel, Utils.DrawBorderString — píxel a
+        /// píxel el mismo look. PERSISTENTE mientras el festín vive (como
+        /// la barra del Ejército del Antiguo) y se desvanece al terminar
+        /// (el ±0.05 de vanilla).
+        /// </summary>
+        public override void PostDrawInterface(SpriteBatch spriteBatch)
+        {
+            try { DibujarIndicador(); }
+            catch { _alfaIndicador = 0f; }
+        }
+
+        private static void DibujarIndicador()
+        {
+            if (Main.gameMenu) return;
+
+            // === ¿VIVO? — desde la primera oleada hasta el Juicio; la
+            // llamada y el final lo desvanecen (el fade de vanilla).
+            bool enCliente = Main.netMode == NetmodeID.MultiplayerClient;
+            int faseVista = enCliente ? FaseCliente : (int)_fase;
+            bool vivo = faseVista == (int)Fase.Monstruos || faseVista == (int)Fase.Jefe ||
+                        faseVista == (int)Fase.Interludio || faseVista == (int)Fase.Especial;
+            _alfaIndicador = MathHelper.Clamp(_alfaIndicador + (vivo ? 0.05f : -0.05f), 0f, 1f);
+            if (_alfaIndicador <= 0.001f) return;
+
+            int oleada = enCliente ? OleadaCliente : _oleadaActual;
+            if (oleada <= 0) return;
+
+            // === LOS NÚMEROS ===
+            int puntos, requeridos;
+            if (faseVista == (int)Fase.Especial)
+            {
+                // EL JUICIO: la barra cuenta los guardianes CAÍDOS de los 7
+                // (los sellos viajan por SendExtraAI — el conteo funciona
+                // también en el cliente remoto).
+                int vivos = 0;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active) continue;
+                    var sello = n.GetGlobalNPC<OleadaNPC>();
+                    if (sello != null && sello.EsDeOleada && sello.EsEspecial &&
+                        sello.EsJefeDeOleada) vivos++;
+                }
+                puntos = Math.Max(0, 7 - vivos);
+                requeridos = 7;
+            }
+            else if (enCliente)
+            {
+                puntos = PuntosCliente;
+                requeridos = RequeridosCliente > 0 ? RequeridosCliente
+                    : PuntosRequeridos(Math.Min(oleada, 10));
+            }
+            else
+            {
+                puntos = _puntosOleada;
+                requeridos = PuntosRequeridos(_oleadaActual);
+            }
+            // La fase del guardián: la oleada YA ESTÁ PAGADA — barra llena
+            // (el jugador lee «oleada cobrada, jefe pendiente»).
+            if (faseVista == (int)Fase.Jefe || faseVista == (int)Fase.Interludio)
+                puntos = requeridos;
+
+            float num = 0.5f + _alfaIndicador * 0.5f;
+
+            // === LA CAJA DE LA OLEADA (clon píxel a píxel) ===
+            int w = (int)(200f * num), h = (int)(45f * num);
+            Vector2 centro = new Vector2(Main.screenWidth - 120, Main.screenHeight - 40);
+            var sb = Main.spriteBatch;
+            Utils.DrawInvBG(sb, new Rectangle((int)centro.X - w / 2, (int)centro.Y - h / 2, w, h),
+                new Color(63, 65, 151, 255) * 0.785f);
+
+            string texto = Language.GetTextValue("Mods.AethonMod.Furia.Indicador",
+                oleada,
+                requeridos != 0 ? ((int)(puntos * 100f / requeridos)).ToString() + "%" : puntos.ToString());
+
+            Texture2D barra = Terraria.GameContent.TextureAssets.ColorBar.Value;
+            float frac = requeridos != 0 ? MathHelper.Clamp((float)puntos / requeridos, 0f, 1f) : 1f;
+            float largo = 169f * num, alto = 8f * num;
+            Vector2 pos = centro + Vector2.UnitY * alto + Vector2.UnitX * 1f;
+            Utils.DrawBorderString(sb, texto, pos, Color.White * _alfaIndicador, num, 0.5f, 1f);
+            sb.Draw(barra, centro, null, Color.White * _alfaIndicador, 0f,
+                new Vector2(barra.Width / 2, 0f), num, SpriteEffects.None, 0f);
+            pos += Vector2.UnitX * (frac - 0.5f) * largo;
+            sb.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, pos,
+                new Rectangle(0, 0, 1, 1), new Color(255, 241, 51) * _alfaIndicador, 0f,
+                new Vector2(1f, 0.5f), new Vector2(largo * frac, alto), SpriteEffects.None, 0f);
+            sb.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, pos,
+                new Rectangle(0, 0, 1, 1), new Color(255, 165, 0, 127) * _alfaIndicador, 0f,
+                new Vector2(1f, 0.5f), new Vector2(2f, alto), SpriteEffects.None, 0f);
+            sb.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, pos,
+                new Rectangle(0, 0, 1, 1), Color.Black * _alfaIndicador, 0f,
+                new Vector2(0f, 0.5f), new Vector2(largo * (1f - frac), alto), SpriteEffects.None, 0f);
+
+            // === LA CAJITA DEL TÍTULO (el grimorio + «Furia del grimorio») ===
+            if (_iconoTitulo == null || _iconoTitulo.IsDisposed)
+                _iconoTitulo = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimoireEternal").Value;
+            Texture2D icono = _iconoTitulo;
+            string titulo = Language.GetTextValue("Mods.AethonMod.Furia.IndicadorTitulo");
+            Vector2 medTitulo = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(titulo);
+            float offX = 120f;
+            if (medTitulo.X > 200f) offX += medTitulo.X - 200f;
+            Rectangle r2 = Utils.CenteredRectangle(
+                new Vector2(Main.screenWidth - offX, Main.screenHeight - 80),
+                (medTitulo + new Vector2(icono.Width + 12, 6f)) * num);
+            Utils.DrawInvBG(sb, r2, new Color(122, 62, 66) * 0.5f);
+            sb.Draw(icono, r2.Left() + Vector2.UnitX * num * 8f, null,
+                Color.White * _alfaIndicador, 0f, new Vector2(0f, icono.Height / 2),
+                num * 0.8f, SpriteEffects.None, 0f);
+            Utils.DrawBorderString(sb, titulo, r2.Right() + Vector2.UnitX * num * -22f,
+                Color.White * _alfaIndicador, num * 0.9f, 1f, 0.4f);
+        }
+
         public override void OnWorldUnload()
         {
             // v6.50.15 — ARMADURA (auditoría R55-c): Terminar() y el
@@ -1095,6 +1141,8 @@ namespace AethonMod.Content.Systems
         public override void Unload()
         {
             Terminar();
+            _iconoTitulo = null;   // el asset muere con el mod
+            _alfaIndicador = 0f;
             AuraLib.Reiniciar(); // las texturas de ruido también
         }
     }

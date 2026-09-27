@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,10 +18,25 @@ namespace AethonMod.Content.Globals
     /// OleadaNPC — EL SELLO DE LAS OLEADAS DEL GRIMORIO. Todo monstruo o
     /// jefe que el libro hambriento CONVOCA lleva esta marca:
     ///
+    /// - v6.50.29 — EL MOTOR NATURAL DE VANILLA (la orden del usuario:
+    ///   «investiga cómo funcionan las oleadas reales en terraria y usa
+    ///   su mismo sistema»): las lunas de calabaza/escamarcha NO
+    ///   engendran a nadie — multiplican el MOTOR NATURAL (spawnRate ×
+    ///   0.2, maxSpawns × 2) y le REEMPLAZAN el pool. ESTA clase hace
+    ///   EXACTAMENTE eso mientras la furia vive (EditSpawnRate +
+    ///   EditSpawnPool): el motor de vanilla elige el tile en el anillo
+    ///   0.52–0.7× pantalla del jugador (JUSTO FUERA DEL CUADRO —
+    ///   «deberían estar más cerca»), valida suelo/aire/agua/lava (jamás
+    ///   nacen en pared — la ruina de la cuna manual) y respeta los
+    ///   límites del mundo. OnSpawn sella a los que el motor trae.
     /// - STATS ENFURECIDAS (v6.48, LA LETRA DEL USUARIO): la oleada k
     ///   multiplica la vida Y el ataque por ×(k+1) — la 1 golpea ×2 y la
     ///   10 ×11, monstruos Y jefes; LA OLEADA ESPECIAL (11) los viste a
     ///   ×15. La defensa sigue escalando aparte (chusma +2k, jefes +6k).
+    /// - LA PROGRESIÓN ES DE MUERTES (v6.50.29 — como vanilla): cada
+    ///   chusma sellada que cae suma su punto en OnKill →
+    ///   GrimorioFuriaSistema.PuntoDeMuerte → el indicador y el avance
+    ///   de oleada (el waveKills de las lunas de vanilla).
     /// - AGRESIÓN REAL (v6.48, CRECIENTE): la chusma re-objetiva y
     ///   empuja hacia la presa MÁS FUERTE con cada oleada (empuje
     ///   0.16+0.02k, techo 10+0.5k); los JEFES ya no son sagrados:
@@ -75,7 +91,6 @@ namespace AethonMod.Content.Globals
         private int _tickAggro = 0;
         private int _tickAtaque = 0;   // el tempo de los dientes
         private int _tickLunge = 0;    // el tempo de los embites
-        private int _tickRecuna = 0;   // v6.50.27 — el tempo de la re-cuna
 
         // v6.50.10 — LAS BASES DEL SELLO (idempotencia de Marcar): las
         // stats capturadas en la PRIMERA marca; toda re-marca recalcula
@@ -176,29 +191,46 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// LA PROPAGACIÓN: si nace un NPC hostil SIN sello a menos de 800px
-        /// de una criatura de la oleada, hereda su furia (segmentos de
-        /// gusano, Creepers del Cerebro, Sirvientes del Ojo… y los spawns
-        /// naturales que caigan en medio del festín).
+        /// v6.50.29 — EL SELLO EN EL NACIMIENTO (el motor natural trae a la
+        /// horda — el sello la viste):
+        ///
+        /// · MIENTRAS LA CHUSMA ESTÁ EN MARCHA (fase Monstruos): TODO hostil
+        ///   no-town no-jefe que nace — el natural del motor reemplazado,
+        ///   el de una estatua, el colado — queda sellado como chusma de la
+        ///   oleada actual: el festín es del mundo, el mundo entero es
+        ///   comida. (Los spawns del motor ya son SOLO del pool de la furia
+        ///   para el portador — esto sella también a los que nazcan de otra
+        ///   ventana.)
+        /// · HERENCIA POR PADRE (cualquier fase): los segmentos que los
+        ///   jefes engendran (el Devorador, los Creepers del Cerebro, los
+        ///   Sirvientes del Ojo…) heredan el sello DEL PADRE — el festín no
+        ///   regala XP ni monedas por las piezas en cascada.
         /// </summary>
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
             try
             {
                 if (EsDeOleada) return; // ya sellado por su convocador
-                if (npc.friendly || npc.townNPC || npc.boss) return;
 
-                for (int i = 0; i < Main.maxNPCs; i++)
+                // LA HERENCIA POR PADRE (segmentos de gusano, Creepers,
+                // Sirvientes): el sello del que los escupe.
+                if (source is EntitySource_Parent padre && padre.Entity is NPC papi &&
+                    papi.active)
                 {
-                    NPC otro = Main.npc[i];
-                    if (otro == null || !otro.active || i == npc.whoAmI) continue;
-                    var sello = otro.GetGlobalNPC<OleadaNPC>();
-                    if (sello == null || !sello.EsDeOleada) continue;
-                    if (Vector2.DistanceSquared(otro.Center, npc.Center) > 800f * 800f) continue;
+                    var selloPapi = papi.GetGlobalNPC<OleadaNPC>();
+                    if (selloPapi != null && selloPapi.EsDeOleada)
+                    {
+                        Marcar(npc, selloPapi.Oleada, selloPapi.EsJefeDeOleada, selloPapi.EsEspecial);
+                        return;
+                    }
+                }
 
-                    // hereda la oleada del vecino (como chusma, no como jefe)
-                    Marcar(npc, sello.Oleada, false, sello.EsEspecial);
-                    break;
+                // EL SELLO DE LA FURIA (fase de chusma): todo hostil nuevo
+                // es comida del libro.
+                if (GrimorioFuriaSistema.ChusmaEnMarcha &&
+                    !npc.friendly && !npc.townNPC && !npc.boss && !npc.SpawnedFromStatue)
+                {
+                    Marcar(npc, GrimorioFuriaSistema.OleadaActual, jefe: false);
                 }
             }
             catch { }
@@ -308,6 +340,73 @@ namespace AethonMod.Content.Globals
         //  «las oleadas sigue sin funcionar, la activo y no veo enemigos»)
         //  ==================================================================
 
+        // ==================================================================
+        //  v6.50.29 — LOS MANDOS DEL MOTOR NATURAL DE VANILLA
+        //  (el mismo asiento que usan las lunas de calabaza/escamarcha:
+        //  NPC.SpawnNPC consulta estos hooks ANTES de elegir el tile y
+        //  la criatura — la furia solo APRIETA el acelerador y cambia
+        //  el menú; el MOTOR de vanilla hace TODO el trabajo de siempre:
+        //  el anillo 0.52-0.7 pantalla, el suelo, el aire, el agua)
+        //  ==================================================================
+
+        /// <summary>
+        /// EL ACELERADOR: mientras la chusma está en marcha, el motor
+        /// natural del portador se MULTIPLICA como el de las lunas de
+        /// vanilla (spawnRate × 0.2 — la furia aprieta MÁS con cada
+        /// oleada: la 10 corre a ×0.08, un monstruo cada ~1.2 s por
+        /// intento de tick) y el tope de vivos crece con la oleada
+        /// (10+4k: la 1 sostiene 14, la 10 sostiene 50 — «cada oleada
+        /// salen MÁS enemigos»). Solo el ciclo del PORTADOR (la comida
+        /// es suya); los demás jugadores ven el mundo normal.
+        /// </summary>
+        public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns)
+        {
+            try
+            {
+                if (!GrimorioFuriaSistema.ChusmaEnMarcha) return;
+                Player portador = GrimorioFuriaSistema.Portador;
+                if (portador == null || player == null || player.whoAmI != portador.whoAmI) return;
+
+                int k = GrimorioFuriaSistema.OleadaActual;
+                float mult = GrimorioFuriaSistema.MultiplicadorSpawnRate(k);
+                if (spawnRate > 1)
+                    spawnRate = Math.Max(1, (int)(spawnRate * mult));
+                maxSpawns = Math.Max(maxSpawns, GrimorioFuriaSistema.TopeVivos(k));
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// EL MENÚ: mientras la chusma está en marcha, el pool de spawns
+        /// del portador es REEMPLAZADO por el menú del bioma (el mismo
+        /// reemplazo que hace la luna de calabaza con sus rutinas — aquí
+        /// con el pool ponderado de tModLoader). El motor de vanilla
+        /// sigue eligiendo DÓNDE (anillo 0.52-0.7× pantalla: justo fuera
+        /// del cuadro, MÁS CERCA que la cuna manual de 1300-1600 px) y
+        /// VALIDANDO el tile (suelo/aire/agua/lava — jamás en pared).
+        /// </summary>
+        public override void EditSpawnPool(IDictionary<int, float> pool, NPCSpawnInfo spawnInfo)
+        {
+            try
+            {
+                if (!GrimorioFuriaSistema.ChusmaEnMarcha) return;
+                Player portador = GrimorioFuriaSistema.Portador;
+                if (portador == null || spawnInfo.Player == null ||
+                    spawnInfo.Player.whoAmI != portador.whoAmI) return;
+
+                int[] menu = GrimorioFuriaSistema.PoolDeOleada;
+                if (menu == null || menu.Length == 0) return;
+
+                // EL MENÚ DEL FESTÍN (limpio y ponderado): el motor solo
+                // escupe la comida del libro mientras la oleada viva.
+                pool.Clear();
+                for (int i = 0; i < menu.Length; i++)
+                    if (menu[i] > 0)
+                        pool[menu[i]] = 1f;
+            }
+            catch { }
+        }
+
         /// <summary>
         /// EL SELLO NO SE APAGA SOLO: NPC.CheckActive desactiva a cualquier
         /// hostil que pase 750 ticks (12,5 s) fuera del rectángulo
@@ -387,23 +486,11 @@ namespace AethonMod.Content.Globals
                     Vector2 dir = presa.Center - npc.Center;
                     float d = dir.Length();
 
-                    // v6.50.27 — LA RE-CUNA (la garantía de llegada): si la
-                    // chusma quedó a más de 2300 px (atorada tras una colina,
-                    // nacida en el borde de una pantalla gigante, empujada
-                    // por la IA pasiva), el libro la VUELVE A LLAMAR: cada 90
-                    // ticks se re-cruña en un BORDE fresco del cuadro — la
-                    // horda SIEMPRE converge (como los festines de vanilla:
-                    // los que se pierden renacen en el borde). Solo la
-                    // autoridad (SP/server).
-                    _tickRecuna++;
-                    if (_tickRecuna >= 90 && d > 2300f &&
-                        Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        _tickRecuna = 0;
-                        Recunar(npc, presa);
-                        return;
-                    }
-
+                    // v6.50.29 — LA RE-CUNA MURIÓ: el motor natural de
+                    // vanilla ya nace a la chusma EN el anillo 0.52-0.7×
+                    // pantalla (justo fuera del cuadro) — no hay "perdidos
+                    // a 2300 px" que re-llamar: nacen CERCA y el empuje de
+                    // abajo los trae.
                     // v6.50.26 — LA CARGA DE LA FURIA NO SE APAGA A 1500 PX:
                     // los monstruos nacen FUERA DE PANTALLA (la semidiagonal
                     // real + 200 px ≈ 1300-1550 px) y el viejo radio los
@@ -466,76 +553,6 @@ namespace AethonMod.Content.Globals
                     {
                         _tickAtaque = 0;
                         EscupirDientes(npc, presa);
-                    }
-                }
-            }
-            catch { }
-        }
-
-        // ==================================================================
-        //  v6.50.27 — LA RE-CUNA (la garantía de llegada de la horda)
-        // ==================================================================
-
-        /// <summary>
-        /// EL LIBRO LA VUELVE A LLAMAR: teletransporta a la chusma perdida a
-        /// un BORDE fresco del cuadro (fuera de pantalla, a la altura de la
-        /// presa, con el suelo validado) — el patrón de los festines de
-        /// vanilla: los que se pierden renacen en el borde y la horda
-        /// SIEMPRE converge. Corre solo en la autoridad (SP/server); el
-        /// netUpdate lleva la posición nueva a los clientes.
-        /// </summary>
-        private static void Recunar(NPC npc, Player presa)
-        {
-            try
-            {
-                bool espaldaIzq = presa.Center.X <
-                    Main.screenPosition.X + Main.screenWidth * 0.5f;
-                // los dos lados del cuadro (la espalda primero).
-                for (int lado = 0; lado < 2; lado++)
-                {
-                    float sign = lado == 0
-                        ? (espaldaIzq ? -1f : 1f)
-                        : (espaldaIzq ? 1f : -1f);
-                    float x = sign < 0f
-                        ? Main.screenPosition.X - 140f
-                        : Main.screenPosition.X + Main.screenWidth + 140f;
-                    float y = presa.Center.Y + Main.rand.NextFloat(-360f, 90f);
-
-                    int tx = (int)(x / 16f);
-                    int ty = (int)(y / 16f);
-                    if (tx < 10 || tx >= Main.maxTilesX - 10 || ty < 10 || ty >= Main.maxTilesY - 10)
-                        continue;
-
-                    // EL SUELO: el primer sólido hacia abajo (40 tiles)…
-                    for (int k = 0; k < 40 && ty + k < Main.maxTilesY - 10; k++)
-                    {
-                        Tile t = Main.tile[tx, ty + k];
-                        if (t == null || !t.HasTile || !Main.tileSolid[t.TileType]) continue;
-
-                        // …con la CAJA encima LIBRE (la altura del bicho + margen).
-                        int altoTiles = Math.Max(3, npc.height / 16 + 2);
-                        bool libre = true;
-                        for (int dx = -1; dx <= 1 && libre; dx++)
-                        {
-                            for (int dy = 1; dy <= altoTiles && libre; dy++)
-                            {
-                                Tile t2 = Main.tile[tx + dx, ty + k - dy];
-                                if (t2 != null && t2.HasTile && Main.tileSolid[t2.TileType])
-                                    libre = false;
-                            }
-                        }
-                        if (!libre) break; // este suelo está sucio: otro borde
-
-                        Vector2 pos = new Vector2(
-                            tx * 16f + 8f - npc.width * 0.5f,
-                            (ty + k) * 16f - npc.height - 2f);
-                        if (pos.Y < 40f || pos.Y > Main.bottomWorld - 400f) break;
-
-                        npc.position = pos;
-                        npc.velocity *= 0.3f;
-                        npc.TargetClosest(false);
-                        npc.netUpdate = true;
-                        return;
                     }
                 }
             }
@@ -725,6 +742,15 @@ namespace AethonMod.Content.Globals
         public override void OnKill(NPC npc)
         {
             if (!EsDeOleada) return;
+            // v6.50.29 — EL PUNTO DE MUERTE (el corazón de la progresión
+            // de vanilla): cada chusma sellada que cae suma SU punto — el
+            // waveKills de las lunas de calabaza/escamarcha. Al cruzar el
+            // umbral de la oleada, el guardián nace (GrimorioFuriaSistema.
+            // FaseMonstruos). Las piezas en cascada y los jefes NO pagan
+            // puntos: los puntos son de la CHUSMA (el jefe cierra la
+            // oleada — su muerte la cierra, no la empuja).
+            if (!EsJefeDeOleada && !Content.Systems.ShardLevelSystem.EsParteDeJefe(npc))
+                GrimorioFuriaSistema.PuntoDeMuerte(1);
             // v6.50.10 — FIX: LAS PARTES EN CASCADA NO COBRAN. Los
             // segmentos de gusano heredan el sello por propagación
             // (diseño: "segmentos de gusano, Creepers…") y caían aquí:

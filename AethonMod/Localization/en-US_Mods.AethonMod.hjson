@@ -2027,6 +2027,8 @@ Eco: {
 }
 
 Furia: {
+	Indicador: Wave {0}: {1}
+	IndicadorTitulo: Grimoire's Fury
 	Oleada: Wave {0} of {1} — the grimoire spits out its food. XP ×{2} this wave.
 	OleadaFinal: FINAL WAVE {0} of {1} — the book is black with rage. The aura rots: black-gray, red edges.
 	Jefe: The hunger summons a guardian: {0} (XP ×{1})

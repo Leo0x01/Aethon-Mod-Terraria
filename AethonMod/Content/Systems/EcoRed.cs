@@ -207,6 +207,14 @@ namespace AethonMod.Content.Systems
                         GrimorioFuriaSistema.OleadaServidor, 255)));
                     p.Write((byte)System.Math.Max(0, System.Math.Min(
                         GrimorioFuriaSistema.TotalesServidor, 255)));
+                    // v6.50.29 — EL INDICADOR DE OLEADA EN MP: los PUNTOS
+                    // y el UMBRAL de la oleada (la barra de progreso del
+                    // cliente remoto — FaseMonstruos los refresca cada 60 t
+                    // y cada muerte llega con el siguiente latido).
+                    p.Write((byte)System.Math.Max(0, System.Math.Min(
+                        GrimorioFuriaSistema.PuntosServidor, 255)));
+                    p.Write((byte)System.Math.Max(0, System.Math.Min(
+                        GrimorioFuriaSistema.RequeridosServidor, 255)));
                 });
             }
             catch { }
@@ -556,6 +564,11 @@ namespace AethonMod.Content.Systems
                         GrimorioFuriaSistema.FaseCliente = reader.ReadByte();
                         GrimorioFuriaSistema.OleadaCliente = reader.ReadByte();
                         GrimorioFuriaSistema.TotalesCliente = reader.ReadByte();
+                        // v6.50.29 — EL INDICADOR EN MP (2 bytes simétricos
+                        // con el writer de SincronizarHambre): los puntos y
+                        // el umbral de la oleada — la barra del indicador.
+                        GrimorioFuriaSistema.PuntosCliente = reader.ReadByte();
+                        GrimorioFuriaSistema.RequeridosCliente = reader.ReadByte();
                         var sp = Main.LocalPlayer?.GetModPlayer<Players.ShardPlayer>();
                         if (sp != null)
                         {
