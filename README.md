@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.33 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.34 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,9 +14,9 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-28, v6.50.33)
+## ¿Dónde estamos? (actualizado 2026-09-28, v6.50.34)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.33`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.34`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 399 entradas auditado.
@@ -24,7 +24,13 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del
   destello circular plano, brillo de rayos sin cortes.
-- **v6.50.33 — EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE**: el jefe rediseñado
+- **v6.50.34 — LA SIERPE ESTELAR, SEÑORA DEL MUNDO**: el dragón de sprites
+  BORRADO por decreto («se ve horrible») y la sierpe estelar de la v6.50.27
+  recuperada como jefe — pero MASIVA (ESC 1.85, 68 vértebras, ~5.700 px de
+  columna) y con LA IA MEJORADA: el clavado aéreo, la rotación que nunca repite
+  ataque, el ram en cadena del DoG, la predicción adaptativa, el anti-camping
+  y la furia de fase 5 con aliento doble.
+- **v6.50.33 — EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE** (borrada): el jefe rediseñado
   COMPLETO con **sprites por segmento** (la petición: como el Devourer of Gods
   de Calamity): set de 7 sprites generado por código (tools/gen_slifer_sprites_v6533.py,
   5 rondas de QA con visión artificial) — cabeza con máscara plateada + colmillos

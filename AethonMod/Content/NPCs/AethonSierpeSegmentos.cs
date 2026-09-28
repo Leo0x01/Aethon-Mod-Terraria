@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -45,20 +44,34 @@ namespace AethonMod.Content.NPCs
     /// la columna mide ~3.200 px de punta a punta y cada hueso es 40%
     /// más grande. El PreDraw ahora dibuja EL HUESO ÉL MISMO (a escala)
     /// porque tML solo sabe dibujar el sprite a 1:1.
+    ///
+    /// v6.50.34 — LA SEÑORA DEL MUNDO (el reporte: «en cambio crea como
+    /// jefe a la misma sierpe, pero mas grande y mas largo»): la cadena
+    /// crece a 68 VÉRTEBRAS (54 de mundo + 14 del fondo), HUECO 84 px y
+    /// TODO el arte a ESC 1.85 — la columna mide ~5.700 px de punta a
+    /// punta (tres pantallas y media de 1080p) y cada hueso es 32%
+    /// más grande que la v6.50.33. Los UMBRALES del taper y las ALETAS
+    /// escalan con UMBRAL_FONDO — el cuerpo largo es MÚSCULO: grueso
+    /// junto al cráneo, látigo en la punta.
     /// </summary>
     public class AethonSierpeCuerpo : ModNPC
     {
-        /// <summary>Índice del PRIMER segmento que vive en el FONDO.</summary>
-        public const int UMBRAL_FONDO = 34;
+        /// <summary>Índice del PRIMER segmento que vive en el FONDO
+        /// (v6.50.34: 54 — el cuerpo de mundo es MÁS LARGO).</summary>
+        public const int UMBRAL_FONDO = 54;
 
-        /// <summary>Vértebras TOTALES de la cadena (34 mundo + 12 fondo).</summary>
-        public const int TOTAL_VERTEBRAS = 46;
+        /// <summary>Vértebras TOTALES de la cadena
+        /// (v6.50.34: 54 mundo + 14 fondo = 68).</summary>
+        public const int TOTAL_VERTEBRAS = 68;
 
-        /// <summary>Separación entre huesos (px).</summary>
-        public const float HUECO = 64f;
+        /// <summary>Separación entre huesos (px) — v6.50.34: escala con
+        /// ESC 1.85 (los anillos se SOLAPAN ~30 px: la cuenta de
+        /// La Sierpe Estelar, huesos encadenados, no un tubo).</summary>
+        public const float HUECO = 84f;
 
-        /// <summary>v6.50.26 — LA ESCALA DEL ARTE (la sierpe del final).</summary>
-        public const float ESC = 1.40f;
+        /// <summary>v6.50.26 — LA ESCALA DEL ARTE (v6.50.34 — la Señora
+        /// del Mundo: 1.4 → 1.85, cada hueso 32% más grande).</summary>
+        public const float ESC = 1.85f;
 
         /// <summary>
         /// v6.50.21 — LA TEXTURA EXPLÍCITA (EL FIX DEL CARGADOR). Sin esta
@@ -84,8 +97,8 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 78;
-            NPC.height = 78;
+            NPC.width = 100;    // v6.50.34 — el hueso a ESC 1.85
+            NPC.height = 100;
             NPC.damage = 62;
             NPC.defense = 30;
             NPC.lifeMax = 100;               // la vida REAL vive en la cabeza (realLife)
@@ -133,54 +146,54 @@ namespace AethonMod.Content.NPCs
             NPC.hide = alFondo;
             if (alFondo) NPC.damage = 0;     // lejanos: no muerden
 
-            // LA LUZ que la columna deja en el mundo (v6.50.32 — el
-            // resplandor GRANATE del Dragón del Cielo: antes dorada).
+            // LA LUZ que la columna deja en el mundo.
             if (!alFondo)
-                Lighting.AddLight(NPC.Center, new Vector3(0.30f, 0.10f, 0.05f));
+                Lighting.AddLight(NPC.Center, new Vector3(0.35f, 0.26f, 0.10f));
         }
 
         /// <summary>
-        /// v6.50.33 — EL ANILLO DEL DRAGÓN (la petición: «podrias crear
-        /// sprite segmentados basados en slifer… como Devourer of Gods de
-        /// Calamity sprites por segmento»): cada vértebra pinta SU SPRITE
-        /// (AethonSierpeVertebra — chevrones de escama, aleta dorsal en
-        /// teja, vientre de pizarra, filado frontal) con LA CURVA DE
-        /// ESCALA anatómica: CUELLO fino junto al cráneo (0.50 — el
-        /// cráneo manda y el ojo queda libre) → TORSO (1.0 del 6º al
-        /// 14º) → PUNTA de látigo (0.36 en la 33). Los anillos se
-        /// solapan 64 px (HUECO) y el filado claro del borde frontal lee
-        /// «anillos encadenados» — el truco del DoG.
+        /// v6.50.27 — EL ARTE NUEVO DE LA SIERPE ESTELAR (el reporte:
+        /// «el arte del jefe se ve horrible, deberías cambiarlo por
+        /// completo, algo al estilo de la sierpe en el arma La Sierpe
+        /// Estelar»): el hueso SPRITE muere — cada vértebra es AHORA
+        /// CRIATURA DE CÓDIGO (AethonSierpeArte.Vertebra): el cuerpo de
+        /// vacío del pase alfa (la silueta con contraste) + la Luz de la
+        /// columna (velo, espina, apófisis estelar, centrum ardiendo) +
+        /// LAS ALETAS de varillas cada 8 huesos (alternando lado — el
+        /// rasgo de pez de La Sierpe Estelar). El TAPER es muscular:
+        /// 33 px junto al cráneo → 10 en la punta de mundo.
+        ///
+        /// v6.50.34 — LA SEÑORA DEL MUNDO: con 54 huesos de mundo las
+        /// ALETAS recorren toda la columna (6, 14, 22, 30, 38 y 46 —
+        /// el abanico cada 8, el lado alterna) y el TAPER se afina
+        /// (33→10): el cuerpo LARGO lee músculo de acecho, no tubo.
         /// </summary>
         public override bool PreDraw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.dedServ || NPC.hide) return false; // escondido: nada que pintar
             try
             {
-                var tex = AethonSierpeArte.Vertebra();
-                if (tex == null) return false;
                 int idx = (int)NPC.ai[3];
-
-                // LA CURVA DE ESCALA: cuello → torso → punta.
-                float cuello = MathHelper.Lerp(0.50f, 1f, Math.Min(1f, idx / 6f));
-                float punta = idx <= 6 ? 1f
-                    : MathHelper.Lerp(1f, 0.36f, Math.Clamp((idx - 6) / 27f, 0f, 1f));
-                float escala = cuello * punta * ESC;
-
-                // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2) — el
-                // sprite es HORIZONTAL: gira con el rumbo del viaje.
-                float rumbo = NPC.rotation - MathHelper.PiOver2;
-
-                // EL SUELO DE LUZ (el mismo del cráneo: la columna nunca
-                // es un recorte negro — y el fade de nacimiento/muerte).
                 float visibilidad = 1f - (NPC.alpha / 255f);
-                Color c = Color.Lerp(drawColor, Color.White, 0.45f) * visibilidad;
+                // EL TAPER: el radio del hueso (graso junto al cráneo,
+                // afilado hacia el fondo). v6.50.34 — 33→10: el cuerpo
+                // largo se afila MÁS (el látigo de la Señora del Mundo).
+                float radio = MathHelper.Lerp(33f, 10f, Math.Clamp(idx / (float)(UMBRAL_FONDO - 1), 0f, 1f)) * ESC;
+                // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2).
+                float rumbo = NPC.rotation - MathHelper.PiOver2;
+                // v6.50.34 — LAS ALETAS: cada 8 huesos desde el 6º, el
+                // lado alterna (6,14,22,30,38,46 — el abanico recorre
+                // TODA la columna larga).
+                float ladoAleta = 0f;
+                int nAleta = (idx - 6) / 8;
+                if (idx >= 6 && (idx - 6) % 8 == 0 && nAleta < 6)
+                    ladoAleta = (nAleta & 1) == 0 ? 1f : -1f;
 
-                spriteBatch.Draw(tex, NPC.Center - screenPos, null, c, rumbo,
-                    new Vector2(tex.Width, tex.Height) * 0.5f, escala,
-                    SpriteEffects.None, 0f);
+                AethonSierpeArte.Vertebra(NPC.Center - Main.screenPosition, rumbo,
+                    radio, Main.GlobalTimeWrappedHourly, idx, visibilidad, ladoAleta);
             }
             catch { }
-            return false; // el sprite del anillo ya se dibujó aquí
+            return false; // el arte de código ya se dibujó aquí
         }
 
         public override bool? CanBeHitByProjectile(Projectile projectile) => true;
@@ -213,8 +226,8 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 40;
-            NPC.height = 40;
+            NPC.width = 52;     // v6.50.34 — la cola a ESC 1.85
+            NPC.height = 52;
             NPC.damage = 0;               // vive en el horizonte: no muerde
             NPC.defense = 30;
             NPC.lifeMax = 100;

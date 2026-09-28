@@ -75,6 +75,31 @@ namespace AethonMod.Content.NPCs
     /// · LA ANIMACIÓN: el mordisco al cerrar el arco, el cabeceo
     ///   serpenteo del cráneo, el cháchara de mandíbula del aliento y
     ///   la fare de ojos al disparar.
+    ///
+    /// v6.50.34 — LA SEÑORA DEL MUNDO (el reporte: «se ve horrible
+    /// jajajajaja, mejor borra a ese jefe y olvidemonos de el — en cambio
+    /// crea como jefe a la misma sierpe, pero mas grande y mas largo, y
+    /// mejora su IA»): EL DRAGÓN DE SPRITES (v6.50.32/33) MUERE — el
+    /// jefe vuelve a ser LA SIERPE ESTELAR de la v6.50.27 (el
+    /// cráneo-eclipse de código, las placas de vacío, la espina de oro)
+    /// PERO a ESCALA DE DIOSA:
+    /// · MÁS GRANDE: ESC 1.4 → 1.85 (cada hueso 32% más grande).
+    /// · MÁS LARGA: 46 → 68 vértebras (54 de mundo + 14 del fondo), la
+    ///   columna ~5.700 px — tres pantallas y media de 1080p.
+    /// · LA IA (la letra del pedido):
+    ///   - LA ROTACIÓN: fase 2+, el cierre de cada arco lanza RAM o
+    ///     CLAVADO — NUNCA el mismo dos veces: hay que cubrir el eje
+    ///     horizontal Y el vertical a la vez.
+    ///   - EL CLAVADO AÉREO (nuevo, EST_CLAVADO): telegraph de 20 t
+    ///     encima de la presa + caída a través de ella hasta la tierra.
+    ///   - LA CADENA: el ram de fase 3+ ENCADENA embestidas (2, y 3 en
+    ///     la furia) desde lados opuestos — la vuelta en U del DoG.
+    ///   - LA PREDICCIÓN ADAPTATIVA: el lead del lunge/clavado escala
+    ///     con la distancia (lejos anticipa, cerca dispara franco).
+    ///   - EL ANTI-CAMPING: presa quieta 1,5 s → la paciencia de la
+    ///     emboscada se derrite (110→24 t).
+    ///   - LA FURIA (P5): nado/lunge/ram más rápidos, telegraphs cortos
+    ///     (36→26, encadenados 14) y EL ALIENTO DOBLE por arco.
     /// </summary>
     [AutoloadBossHead]
     public class AethonBoss : ModNPC
@@ -86,6 +111,7 @@ namespace AethonMod.Content.NPCs
         private const int EST_SUPERFICIE = 3;   // el arco sobre la presa
         private const int EST_HUNDIENDO = 4;    // el clavado
         private const int EST_CARGA = 5;        // v6.50.26 — EL RAM HORIZONTAL
+        private const int EST_CLAVADO = 6;      // v6.50.34 — EL CLAVADO AÉREO
         private const int EST_MURIENDO = 99;    // el cine final
 
         private int _estado = EST_NACIENDO;
@@ -100,6 +126,28 @@ namespace AethonMod.Content.NPCs
         private int _aliento = 0;               // 0: no · 1: cargando · 2: escupiendo
         private int _tickAliento = 0;           // el tempo del aliento
         private bool _alientoEsteCiclo = false; // una vez por ciclo de superficie
+
+        // === v6.50.34 — LA CAZA INTELIGENTE (el reporte: «mejora su IA») ===
+        // · LA ROTACIÓN: la sierpe ALTERNA sus ataques de superficie — si
+        //   acababa de RAMear, ahora CLAVA desde el cielo; si clavó, ramea.
+        //   Nunca repite el mismo patrón dos veces seguidas (leerla es
+        //   IMPOSIBLE: la única defensa es moverse).
+        // · LA CADENA: el ram de la fase 3+ ENCADENA embestidas del DoG
+        //   (2 en P3/P4, 3 en la furia) — cada una desde el lado opuesto.
+        // · LA PREDICCIÓN ADAPTATIVA: el lead del lunge/clavado escala con
+        //   la distancia (lejos = mucha anticipación, cerca = tiro franco).
+        // · EL ANTI-CAMPING: la presa parada 1,5 s derrite la paciencia
+        //   de la emboscada — quedarse quieto es invitación al lunge.
+        // · LA FURIA (P5): todo más rápido — nado, lunge, ram y telegraphs.
+        private int _ultimoAtaque = 0;          // 0: ninguno · 1: ram · 2: clavado
+        private int _cargasEnCadena = 0;        // cuántos ram lleva la cadena
+        private int _ticksPresaQuieta = 0;      // el contador anti-camping
+        private bool _alientoDoble = false;     // P5: el segundo aliento del ciclo
+        private int _telegraphCarga = 36;       // ticks del aviso (viaja en ai[3])
+
+        /// <summary>v6.50.34 — LA FURIA: la fase final es MÁS RÁPIDA en
+        /// todo (nado, lunge, ram, telegraphs y el aliento doble).</summary>
+        private bool Furia => Phase >= 5;
 
         // === LA FASE DE SIEMPRE (los umbrales de la casa) ===
         private int Phase = 1;
@@ -135,8 +183,8 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 128;     // v6.50.26 — el cráneo a ESC 1.4 (la boca del final)
-            NPC.height = 128;
+            NPC.width = 168;     // v6.50.34 — el cráneo a ESC 1.85 (la Señora del Mundo)
+            NPC.height = 168;
             NPC.damage = 95;     // EL MORDISCO (la boca es más grande)
             NPC.defense = 40;
             NPC.lifeMax = 2_400_000;
@@ -176,6 +224,13 @@ namespace AethonMod.Content.NPCs
                     return;
                 }
             }
+
+            // v6.50.34 — EL DETECTOR DE PRESA QUIETA (el anti-camping):
+            // 1,5 s sin moverse y la paciencia de la emboscada SE DERRITE
+            // (el acecho castiga al que planta bandera — el reporte:
+            // «mejora su IA»).
+            if (target.velocity.LengthSquared() < 0.36f) _ticksPresaQuieta++;
+            else _ticksPresaQuieta = 0;
 
             // === LA PRESENTACIÓN: reposicionar BAJO TIERRA (primer tick) ===
             if (!_cadenaCreada)
@@ -227,6 +282,7 @@ namespace AethonMod.Content.NPCs
                 case EST_SUPERFICIE: EstadoSuperficie(target); break;
                 case EST_HUNDIENDO: EstadoHundiendose(target); break;
                 case EST_CARGA: EstadoCarga(target); break;
+                case EST_CLAVADO: EstadoClavado(target); break;
             }
 
             // === v6.50.26 — EL ALIENTO PRIMORDIAL (el rayo de la boca) ===
@@ -253,6 +309,11 @@ namespace AethonMod.Content.NPCs
             NPC.ai[0] = _estado;
             NPC.ai[1] = _aliento;
             NPC.ai[2] = _tickEstado;
+            // v6.50.34 — ai[3] (libre en la cabeza): la DURACIÓN del
+            // telegraph del ram (36 el primero de la cadena, 20 los
+            // encadenados, −30% en la furia) — el cliente dibuja el anillo
+            // de aviso CON el tempo real, no con un 36 clavado.
+            NPC.ai[3] = _telegraphCarga;
 
             // MP: la sierpe respira por el cable cada 12 ticks.
             if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
@@ -336,7 +397,7 @@ namespace AethonMod.Content.NPCs
         /// <summary>LA CAZA SUBTERRÁNEA: nada BAJO la presa esperando el eje.</summary>
         private void EstadoBajoTierra(Player target)
         {
-            float vel = 13f + Phase * 1.5f;
+            float vel = 13f + Phase * 1.5f + (Furia ? 2f : 0f);
             Vector2 deseado = new Vector2(
                 target.Center.X + target.velocity.X * 12f,
                 target.Center.Y + 720f);
@@ -344,19 +405,39 @@ namespace AethonMod.Content.NPCs
             NPC.velocity = Vector2.Lerp(NPC.velocity, hacia, 0.045f);
             _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.05f, 0.08f);
 
+            // v6.50.34 — LA PACIENCIA DINÁMICA: cada fase acecha MENOS
+            // (110 t en P1 → 62 en P5)… y la presa QUIETA la derrite por
+            // completo (anti-camping: pararse es regalarle el lunge).
+            int paciencia = Math.Max(40, 110 - (Phase - 1) * 12);
+            if (_ticksPresaQuieta > 90) paciencia = Math.Min(paciencia, 24);
+
             // EL RUMBO de la emboscada: cerca del eje Y de la presa (X) y
             // con la paciencia contada → EL LUNGE.
             bool alineada = MathF.Abs(NPC.Center.X - target.Center.X) < 300f;
-            if (alineada && _tickEstado > 110)
+            if (alineada && _tickEstado > paciencia)
             {
                 _estado = EST_EMERGIENDO;
                 _tickEstado = 0;
-                Vector2 pred = target.Center + target.velocity * 22f;
+                Vector2 pred = PredPresa(target);
                 Vector2 dir = (pred - NPC.Center).SafeNormalize(Vector2.UnitY);
-                NPC.velocity = dir * (24f + Phase * 2.2f);
+                NPC.velocity = dir * (24f + Phase * 2.2f + (Furia ? 2f : 0f));
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
                 OndaLib.Kick(6f, 12);
             }
+        }
+
+        /// <summary>
+        /// v6.50.34 — LA PREDICCIÓN ADAPTATIVA: el lead de la presa ESCALA
+        /// con la distancia (lejos = hasta 34 t de anticipación — apunta a
+        /// donde VAS a estar; cerca = 10 t — tiro franco). La sierpe vieja
+        /// lead-eaba fijo 22 t: el que corría en línea la esquivaba por
+        /// pura geometría. La nueva LEE tu carrera.
+        /// </summary>
+        private Vector2 PredPresa(Player target)
+        {
+            float dist = Vector2.Distance(NPC.Center, target.Center);
+            float lead = MathHelper.Clamp(dist / 35f, 10f, 34f);
+            return target.Center + target.velocity * lead;
         }
 
         /// <summary>EL EMERGER: el lunge vertical con la boca ABIERTA.</summary>
@@ -431,25 +512,58 @@ namespace AethonMod.Content.NPCs
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
                 NPC.netUpdate = true; // el cliente arranca el arco YA
             }
+            // v6.50.34 — LA FURIA (P5): EL ALIENTO DOBLE — a mitad del
+            // arco, cuando el primero ya murió, la garganta SE RECARGA y
+            // escupe el segundo (la fase final no da respiro).
+            else if (Furia && _alientoEsteCiclo && !_alientoDoble && _aliento == 0 && _tickEstado >= 150)
+            {
+                _alientoDoble = true;
+                _aliento = 1;
+                _tickAliento = 0;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                NPC.netUpdate = true;
+            }
 
-            // media vuelta (o el respiro de 300 t) → el RAM o A HUNDIRSE.
+            // media vuelta (o el respiro de 300 t) → EL ATAQUE QUE TOCA.
             if (_recorridoArco >= MathHelper.Pi || _tickEstado >= 300)
             {
                 _arcos++;
-                // v6.50.26 — EL RAM HORIZONTAL (fase 2+, cada DOS arcos —
-                // el acecho alterna entre el círculo y la embestida).
-                if (Phase >= 2 && (_arcos % 2) == 0)
+
+                // v6.50.34 — LA ROTACIÓN (la IA nueva): fase 2+, el cierre
+                // del arco SIEMPRE lanza un ataque — y NUNCA el mismo dos
+                // veces seguidas: si acabo de ramear → CLAVADO desde el
+                // cielo; si acabo de clavarme → RAM horizontal. La presa
+                // tiene que cubrir el eje horizontal Y el vertical a la
+                // vez: leerla de memoria es imposible. (P1 aprende: solo
+                // el hundido de siempre.)
+                if (Phase >= 2)
                 {
-                    _estado = EST_CARGA;
+                    if (_ultimoAtaque != 1)
+                    {
+                        // EL RAM HORIZONTAL (v6.50.26 — el dash del DoG).
+                        _ultimoAtaque = 1;
+                        _cargasEnCadena = 1;
+                        _estado = EST_CARGA;
+                        _tickEstado = 0;
+                        _dirCarga = NPC.Center.X < target.Center.X ? 1 : -1;
+                        NPC.velocity *= 0.3f;
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                        EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", OroLuz);
+                        OndaLib.Kick(7f, 14);
+                        NPC.netUpdate = true;
+                        return;
+                    }
+                    // EL CLAVADO AÉREO (v6.50.34 — la muerte desde el cielo).
+                    _ultimoAtaque = 2;
+                    _estado = EST_CLAVADO;
                     _tickEstado = 0;
-                    _dirCarga = NPC.Center.X < target.Center.X ? 1 : -1;
-                    NPC.velocity *= 0.3f;
+                    NPC.velocity *= 0.25f;
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", OroLuz);
                     OndaLib.Kick(7f, 14);
                     NPC.netUpdate = true;
                     return;
                 }
+
                 _estado = EST_HUNDIENDO;
                 _tickEstado = 0;
                 // el clavado: tangente del arco + peso.
@@ -485,6 +599,7 @@ namespace AethonMod.Content.NPCs
                 _estado = EST_BAJO_TIERRA;
                 _tickEstado = 0;
                 _alientoEsteCiclo = false; // el próximo arco puede volver a escupir
+                _alientoDoble = false;     // v6.50.34 — y la furia recarga el doble
             }
         }
 
@@ -493,16 +608,22 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// LA CARGA DEL GUSANO: telegraph de 36 ticks (frena, ruge, la
-        /// runa frontal se enciende y las fauces se ABREN al máximo) y
-        /// EMBESTIDA horizontal a la altura de la presa — el dash del
-        /// Devourer of Gods, la firma de los gusanos grandes. En fase 4+
-        /// el ram SIEMBRA pernos con la boca mientras cruza.
+        /// LA CARGA DEL GUSANO: telegraph (frena, ruge, la runa frontal se
+        /// enciende y las fauces se ABREN al máximo) y EMBESTIDA
+        /// horizontal a la altura de la presa — el dash del Devourer of
+        /// Gods, la firma de los gusanos grandes. En fase 4+ el ram
+        /// SIEMBRA pernos con la boca mientras cruza.
+        ///
+        /// v6.50.34 — LA CADENA (la firma del DoG de verdad): en fase 3+ el
+        /// ram no termina al cruzar — VUELVE desde el lado opuesto (2
+        /// embestidas en P3/P4, 3 EN LA FURIA), cada una con telegraph
+        /// corto (la vuelta en U ES el aviso). La sierpe vieja golpeaba
+        /// una vez y se iba: la nueva es un péndulo.
         /// </summary>
         private void EstadoCarga(Player target)
         {
-            // === EL TELEGRAPH (0..36): la sierpe se yergue y avisa ===
-            if (_tickEstado <= 36)
+            // === EL TELEGRAPH (0.._telegraphCarga): la sierpe se yergue y avisa ===
+            if (_tickEstado <= _telegraphCarga)
             {
                 NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.12f);
                 _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.52f, 0.15f);
@@ -520,7 +641,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // === EL RAM: horizontal a la altura de la presa ===
-            float vel = 26f + Phase * 2.5f;
+            float vel = 26f + Phase * 2.5f + (Furia ? 3f : 0f);
             Vector2 hacia = new Vector2(_dirCarga * vel,
                 (target.Center.Y - 60f - NPC.Center.Y) * 0.05f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, hacia, 0.10f);
@@ -541,13 +662,98 @@ namespace AethonMod.Content.NPCs
             if (Phase >= 4 && (_tickEstado % 22) == 0)
                 DispararPernoApuntado(target, 0.45f, Main.rand.NextFloat(-0.25f, 0.25f));
 
-            // el cruce termina: se hunde al otro lado (o si se pasó de largo).
-            if (_tickEstado > 160 || ((_dirCarga > 0 && NPC.Center.X > target.Center.X + 1500f) ||
-                                      (_dirCarga < 0 && NPC.Center.X < target.Center.X - 1500f)))
+            // el cruce termina: ¿OTRA embestida o tierra?
+            bool cruzo = (_dirCarga > 0 && NPC.Center.X > target.Center.X + 1500f) ||
+                         (_dirCarga < 0 && NPC.Center.X < target.Center.X - 1500f);
+            if (_tickEstado > 160 || cruzo)
             {
+                // v6.50.34 — LA CADENA: fase 3+ y quedan embestidas → la
+                // VUELTA EN U del DoG: dirección invertida, telegraph
+                // corto (la curva es el aviso) y a pasar OTRA VEZ.
+                int maxCadena = Furia ? 3 : 2;
+                if (Phase >= 3 && _cargasEnCadena < maxCadena && cruzo)
+                {
+                    _cargasEnCadena++;
+                    _dirCarga *= -1;
+                    _tickEstado = 0;
+                    _telegraphCarga = Furia ? 14 : 20;
+                    NPC.velocity = new Vector2(_dirCarga * 6f, -4f); // la curva arranca
+                    NPC.netUpdate = true;
+                    return;
+                }
                 _estado = EST_HUNDIENDO;
                 _tickEstado = 0;
+                _telegraphCarga = Furia ? 26 : 36;   // el próximo ciclo arranca largo
                 NPC.velocity = new Vector2(_dirCarga * 9f, 21f);
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.34 — EL CLAVADO AÉREO (la muerte desde el cielo)
+        // ==================================================================
+
+        /// <summary>
+        /// LA NUEVA FIRMA VERTICAL: la sierpe se YERGE sobre la presa
+        /// (telegraph de 20 t — se congela, las fauces se abren al máximo)
+        /// y se CLAVA a toda velocidad en la posición PREDICHA — A
+        /// TRAVÉS de la presa y directo a la tierra, donde la caza
+        /// continúa. El complemento del ram: el ram cubre el eje
+        /// horizontal, el clavado el vertical — la ROTACIÓN los alterna
+        /// y la presa no puede cubrir ambos de memoria.
+        /// En fase 4+ la boca siembra pernos en la caída.
+        /// </summary>
+        private void EstadoClavado(Player target)
+        {
+            // === EL TELEGRAPH (0..20): se yerge y APUNTA ===
+            if (_tickEstado <= 20)
+            {
+                NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.14f);
+                _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.55f, 0.18f);
+                if (_tickEstado == 1)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    OndaLib.Kick(7f, 14);
+                }
+                // se ALZA sobre la presa: el punto de la caída.
+                Vector2 ancla = new Vector2(target.Center.X, target.Center.Y - 420f);
+                NPC.velocity += (ancla - NPC.Center) * 0.010f;
+                return;
+            }
+
+            // === LA CAÍDA: el rayo de hueso a la presa PREDICHA ===
+            float vel = 30f + Phase * 2.5f + (Furia ? 3f : 0f);
+            Vector2 hacia = (PredPresa(target) - NPC.Center).SafeNormalize(Vector2.UnitY);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, hacia * vel, 0.25f);
+            _aberturaMandibula = MathHelper.Lerp(_aberturaMandibula, 0.50f, 0.12f);
+
+            // LA ESTELA de la caída (el rastro vertical del hueso).
+            if (!Main.dedServ && (_tickEstado & 3) == 0)
+            {
+                for (int d = 0; d < 2; d++)
+                {
+                    int idx = Dust.NewDust(NPC.Center, 90, 90, DustID.Bone,
+                        Main.rand.NextFloat(-3f, 3f), -Main.rand.NextFloat(3f, 9f));
+                    Main.dust[idx].noGravity = true;
+                }
+            }
+
+            // FASE 4+: la boca SIEMBRA pernos mientras cae.
+            if (Phase >= 4 && (_tickEstado % 20) == 0)
+                DispararPernoApuntado(target, 0.45f, Main.rand.NextFloat(-0.25f, 0.25f));
+
+            // la caída termina: atravesó la tierra → la caza sigue ABAJO.
+            if (_bajoTierra && _tickEstado > 24)
+            {
+                _estado = EST_BAJO_TIERRA;
+                _tickEstado = 0;
+                _alientoEsteCiclo = false;
+                _alientoDoble = false;
+            }
+            else if (_tickEstado > 130)
+            {
+                // (seguro de mundo abierto: jamás se queda colgando)
+                _estado = EST_HUNDIENDO;
+                _tickEstado = 0;
             }
         }
 
@@ -631,67 +837,12 @@ namespace AethonMod.Content.NPCs
         //  LAS FASES — LOS ATAQUES SALEN DE LA CABEZA (BocaPos)
         // ==================================================================
 
-        /// <summary>La boca abierta: donde nacen TODOS sus ataques (v6.50.33 —
-        /// el cráneo SPRITE: los colmillos sable llegan a 129 px del centro
-        /// a ESC 1.4; el disparo nace justo más allá, 98·esc).</summary>
+        /// <summary>La boca abierta: donde nacen TODOS sus ataques.</summary>
         private Vector2 BocaPos()
         {
             Vector2 adelante = NPC.velocity.SafeNormalize(Vector2.UnitY);
             if (NPC.velocity == Vector2.Zero) adelante = -Vector2.UnitY.RotatedBy(NPC.rotation);
-            return NPC.Center + adelante * (98f * AethonSierpeCuerpo.ESC);
-        }
-
-        // v6.50.32 — EL ANCLAJE DE LAS ALAS: el HOMBRO del Dragón del Cielo
-        // es la 3ª vértebra. v6.50.33 — EL BUG DEL GUÍA, ARREGLADO DE RAÍZ:
-        // la v6.50.32 leía NPC.ai[0] como «el hijo que me sigue»… pero la
-        // IA de la CABEZA sobrescribe ai[0] con EL ESTADO cada tick
-        // (línea ~253) → Segmento(2) arrancaba en Main.npc[estado] (¡el
-        // 0 = EL GUÍA!) y las ALAS SE PEGABAN AL GUÍA (el reporte:
-        // «lo que se supone que son las alas del jefe se pegan al guia»).
-        // LA CADENA SEGURA: escanear por (tipo + ai[2]=la cabeza +
-        // ai[3]=índice) con caché del primer eslabón — los ai[0] de las
-        // VÉRTEBRAS sí son válidos (la IA de la cabeza no los toca) y el
-        // recorrido los valida eslabón a eslabón.
-        private int _idxPrimerSeg = -1;
-
-        private NPC Segmento(int n)
-        {
-            // === EL PRIMER ESLABÓN: caché + re-escaneo si murió ===
-            NPC primero = null;
-            if (_idxPrimerSeg >= 0 && _idxPrimerSeg < Main.maxNPCs)
-            {
-                NPC c = Main.npc[_idxPrimerSeg];
-                if (c != null && c.active && c.type == ModContent.NPCType<AethonSierpeCuerpo>() &&
-                    c.ai[2] == NPC.whoAmI && c.ai[3] == 0f)
-                    primero = c;
-            }
-            if (primero == null)
-            {
-                int tipoB = ModContent.NPCType<AethonSierpeCuerpo>();
-                _idxPrimerSeg = -1;
-                for (int i = 0; i < Main.maxNPCs; i++)
-                {
-                    NPC s = Main.npc[i];
-                    if (s != null && s.active && s.type == tipoB &&
-                        s.ai[2] == NPC.whoAmI && s.ai[3] == 0f)
-                    { primero = s; _idxPrimerSeg = i; break; }
-                }
-            }
-            if (primero == null) return null;
-
-            // === EL RESTO DE LA CADENA: los ai[0] de las vértebras ===
-            NPC actual = primero;
-            for (int i = 0; i < n; i++)
-            {
-                int idx = (int)actual.ai[0];
-                if (idx < 0 || idx >= Main.maxNPCs) return null;
-                NPC s = Main.npc[idx];
-                if (s == null || !s.active ||
-                    s.type != ModContent.NPCType<AethonSierpeCuerpo>() ||
-                    s.ai[2] != NPC.whoAmI) return null;
-                actual = s;
-            }
-            return actual;
+            return NPC.Center + adelante * (58f * AethonSierpeCuerpo.ESC);  // más allá de los colmillos (ESC 1.4)
         }
 
         private void Fase1PolvoEstelar()
@@ -1021,8 +1172,9 @@ namespace AethonMod.Content.NPCs
 
             // LA DESARTICULACIÓN: cada 4 ticks muere UN hueso (de la cola
             // hacia la cabeza — el esqueleto se deshace por detrás). La
-            // cadena es más larga (46): cadencia 4, hasta el tick 200.
-            if ((_tickMuerte % 4u) == 0u && _tickMuerte < 200)
+            // cadena es más larga (v6.50.34: 68 huesos → hasta el tick 276:
+            // TODOS se desarticulan uno a uno antes del estallido).
+            if ((_tickMuerte % 4u) == 0u && _tickMuerte < 276)
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
@@ -1053,7 +1205,7 @@ namespace AethonMod.Content.NPCs
             }
 
             // EL FINAL: el estallido + el botín + lo que quede de huesos.
-            if (_tickMuerte >= 220)
+            if (_tickMuerte >= 296)
             {
                 OndaLib.Kick(14f, 30);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath2, NPC.Center);
@@ -1120,110 +1272,18 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
-        //  v6.50.33 — EL ENSAMBLAJE DEL DRAGÓN (los sprites del set).
+        //  EL ARTE — v6.50.27 — LA SIERPE ESTELAR DEL FINAL
         //
-        //  Se pinta en el LOTE ENTRANTE del PreDraw (Deferred·Alpha, la
-        //  matriz del mundo — el estándar de las entidades) y en orden de
-        //  profundidad: ALA LEJANA → ALA CERCANA → MANDÍBULA → CRÁNEO.
-        //  La iluminación respeta la de vanilla con un SUELO de luz (un
-        //  jefe del final jamás se vuelve un recorte negro en la cueva).
-        // ==================================================================
-        private void DibujarDragon(SpriteBatch spriteBatch, Color drawColor)
-        {
-            float esc = AethonSierpeCuerpo.ESC;
-            float t = Main.GlobalTimeWrappedHourly;
-            float visibilidad = 1f - (NPC.alpha / 255f);
-            if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 190f));
-
-            // EL SUELO DE LUZ: 45% blanco — la luz de vanilla manda, pero
-            // el Dragón del Cielo nunca se apaga del todo.
-            Color colorLuz = Color.Lerp(drawColor, Color.White, 0.45f) * visibilidad;
-
-            // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo).
-            float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
-            Vector2 pos = NPC.Center - Main.screenPosition;
-            float rotC = NPC.rotation + cabeceo;
-            float rumboC = rotC - MathHelper.PiOver2;
-
-            Texture2D texCabeza = AethonSierpeArte.Cabeza();
-            Texture2D texMandibula = AethonSierpeArte.Mandibula();
-            Texture2D texAla = AethonSierpeArte.Ala();
-            if (texCabeza == null || texMandibula == null) return;
-
-            // === 1. LAS ALAS (el ala-brazo de murciélago del set) ===
-            //     EL ANCLA: el HOMBRO = la 3ª vértebra (Segmento(2), ya
-            //     sin el bug del Guía); la caída si no hay cadena: 152·esc
-            //     detrás del cráneo. LA FIRMA: el EJE MIRA AL CIELO
-            //     (arriba-mundo — el Dragón del Cielo), con el vaivén del
-            //     aleteo a 1.15 Hz y la inclinación echada hacia atrás.
-            if (texAla != null)
-            {
-                Vector2 frenteDibujo = new(MathF.Cos(rumboC), MathF.Sin(rumboC));
-                Vector2 hombro = pos - frenteDibujo * (152f * esc);
-                NPC segHombro = Segmento(2);
-                if (segHombro != null) hombro = segHombro.Center - Main.screenPosition;
-                hombro += Vector2.UnitY * 6f; // la raíz se ENTERRA en el anillo
-
-                // la raíz del ala (local 168,202) es el origen: nace del
-                // hombro y se yergue (rotación 0 = la punta al cielo).
-                Vector2 origenAla = new(168f, 202f);
-                // ¿hacia qué lado nada? — el ala cercana SIEMPRE barre hacia atrás
-                bool haciaDerecha = MathF.Abs(MathHelper.WrapAngle(rumboC)) <= MathHelper.PiOver2;
-                SpriteEffects fxCerca = haciaDerecha ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-                SpriteEffects fxLejos = haciaDerecha ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-                float aleteo = MathF.Sin(t * 1.15f * MathHelper.TwoPi);
-                float inclinacion = haciaDerecha ? -0.16f : 0.16f;
-
-                // EL ALA LEJANA (detrás: espejada, más pequeña, más
-                // oscura — la pareja del otro costado) con el aleteo
-                // DESFASADO (el vaivén de dos velas, no un péndulo).
-                Color colorLejos = colorLuz * 0.55f;
-                spriteBatch.Draw(texAla, hombro, null, colorLejos,
-                    inclinacion * -0.6f + aleteo * -0.13f, origenAla,
-                    0.88f * esc, fxLejos, 0f);
-                // EL ALA CERCANA (la protagonista: huesos vivos, garra).
-                spriteBatch.Draw(texAla, hombro, null, colorLuz,
-                    inclinacion + aleteo * 0.10f, origenAla,
-                    esc, fxCerca, 0f);
-            }
-
-            // === 2. LA MANDÍBULA GIRATORIA (la boca de acero con la
-            //     SEGUNDA BOCA dentro): la bisagra del cráneo (local
-            //     100,94) casa con la de la mandíbula (local 12,50) — el
-            //     ángulo de la IA (0.05..0.55) mapea a 0..0.32 rad y el
-            //     TRIÁNGULO INTERIOR del sprite cubre la rendija al
-            //     abrirse (cerrada queda escondida tras el hocico) ===
-            Vector2 origCabeza = new(texCabeza.Width * 0.5f, texCabeza.Height * 0.5f);
-            Vector2 bisagra = pos + new Vector2(100f - origCabeza.X, 94f - origCabeza.Y).RotatedBy(rotC) * esc;
-            float apertura = Math.Clamp(_aberturaMandibula, 0f, 1f) * 0.58f;
-            spriteBatch.Draw(texMandibula, bisagra, null, colorLuz,
-                rotC + apertura, new Vector2(12f, 50f), esc, SpriteEffects.None, 0f);
-
-            // === 3. EL CRÁNEO (la máscara plateada, los colmillos
-            //     sable, la corona de 5 llamas, el ojo de oro y la gema
-            //     azul — todo en el sprite; el cuello estrecho queda
-            //     bajo las vértebras, que dibujan después) ===
-            spriteBatch.Draw(texCabeza, pos, null, colorLuz, rotC,
-                origCabeza, esc, SpriteEffects.None, 0f);
-        }
-
-        // ==================================================================
-        //  EL ARTE — v6.50.33 — EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE
-        //
-        //  La saga del arte del jefe: la v6.50.19 lo parió de huesos, la
-        //  v6.50.27 lo hizo código estelar, la v6.50.32 intentó a Slifer
-        //  con pinceles en runtime — y el veredicto del usuario fue
-        //  literal: «no se parece en nada jajajajajaa… mejor rediseña al
-        //  jefe completo, podrias crear sprite segmentados basados en
-        //  slifer, por ejemplo puedes usar Devourer of Gods de Calamity
-        //  sprites por segmento y rediseñarlos cambiando el color y el
-        //  arte». EL ARTE ES AHORA UNA CADENA DE SPRITES (el patrón del
-        //  DoG): cráneo + mandíbula GIRATORIA (la boca que se abre de
-        //  verdad, con la SEGUNDA BOCA asomando) + vértebras con su
-        //  aleta + alas de murciélago — el set de
-        //  tools/tools/gen_slifer_sprites_v6533.py, canon cromático de
-        //  las referencias (3 rondas de control de calidad con visión
-        //  artificial: cel-shading en bandas duras, paleta limitada).
+        //  El reporte: «el arte del jefe se ve horrible, deberías
+        //  cambiarlo por completo, algo al estilo de la sierpe en el arma
+        //  La Sierpe Estelar». EL CRÁNEO SPRITE MUERE: la cabeza es
+        //  AHORA el ensamblaje de CÓDIGO de AethonSierpeArte.Cabeza — el
+        //  respaldo de vacío (la silueta), el CRÁNEO ORBE con su corazón
+        //  blanco, LAS FAUCES EN V (los filos de luz girando con la
+        //  abertura, colmillos-estrella en las puntas), LOS DOS OJOS
+        //  fareando, la CRESTA dorsal y LAS CINCO CHISPAS orbitantes
+        //  (la firma de La Sierpe Estelar). El cabeceo serpenteo del
+        //  v6.50.26 vive (solo en el dibujo).
         //  LOS FX DE BATALLA se conservan: la garganta ardiendo en la
         //  carga del aliento, la corona de anillos, las motas, el
         //  telegraph del ram, la estela, el cine de muerte y la
@@ -1233,37 +1293,46 @@ namespace AethonMod.Content.NPCs
         {
             if (Main.dedServ) return false;
 
-            // === 0. EL DRAGÓN DE SPRITES (v6.50.33) — al LOTE ENTRANTE
-            //     (llega ABIERTO): alas → mandíbula → cráneo, en ese
-            //     orden de sumisión. El PreDraw de la CABEZA corre
-            //     PRIMERO que el de las vértebras (whoAmI más bajo):
-            //     las alas quedan POR DETRÁS de toda la columna (la
-            //     silueta del anime) y las vértebras del cuello montan
-            //     sobre la nuca del cráneo por pura orden de dibujo. ===
-            try { DibujarDragon(spriteBatch, drawColor); }
-            catch { }
-
             // v6.50.11 — sonda de lote (la casa).
             VFXCore.CerrarLoteSiAbierto();
             try
             {
                 float esc = AethonSierpeCuerpo.ESC;
                 float visibilidad = 1f - (NPC.alpha / 255f);
-                if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 190f));
+                if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 270f));
 
                 // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo: la
                 // física no se toca): el cráneo ondula como la columna.
                 float t = Main.GlobalTimeWrappedHourly;
+                float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
+
+                // === 1. LA CABEZA DE LA SIERPE ESTELAR (el arte de código:
+                //     2 pases propios — vacío + luz, la sonda de la casa) ===
+                Vector2 pos = NPC.Center - Main.screenPosition;
+                AethonSierpeArte.Cabeza(pos, NPC.rotation + cabeceo, _aberturaMandibula,
+                    t, Phase, visibilidad, esc);
+
+                // v6.50.31 — FIX (la pareja de «Excepción silenciosa» del
+                // client.log: Begin-sobre-Begin de FNA, CADA frame de la
+                // pelea): Cabeza() sale con el lote ABIERTO — su CerrarBatch
+                // aplica el CONTRATO DE CURACIÓN y reabre vanilla — pero este
+                // PreDraw asumía que seguía CERRADO (lo cerró la sonda de
+                // arriba, línea ~1090). Con las fauces ABIERTAS reventaba el
+                // Begin de FlushAdditive (había quads: sin early-return);
+                // con las fauces CERRADAS reventaba el Begin de la corona de
+                // abajo (el Flush hacía early-return sin cerrar nada). La
+                // sonda de la casa cierra aquí: cero first-chance, los DOS
+                // caminos quedan limpios.
+                VFXCore.CerrarLoteSiAbierto();
 
                 // === 2. LA GARGANTA ARDIENDO (la carga del aliento — el
-                //     búfer de quads de VFXCore, coords de MUNDO; v6.50.32:
-                //     BRASA granate — la Thunder Force del Dragón del Cielo) ===
-                float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 190f))) : 1f;
+                //     búfer de quads de VFXCore, coords de MUNDO) ===
+                float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 270f))) : 1f;
                 if (_aberturaMandibula > 0.15f)
                 {
                     float carga = _aliento == 1 ? Math.Min(1f, _tickAliento / 40f) : 0f;
                     VFXCore.Quad(BocaPos(),
-                        new Color(255, 128, 48) * ((0.30f + 0.55f * carga) * _aberturaMandibula * 2f * alphaLuz),
+                        OroLuz * ((0.30f + 0.55f * carga) * _aberturaMandibula * 2f * alphaLuz),
                         new Vector2(26f * esc, 30f * esc) * (1f + carga * 0.5f), NPC.rotation);
                 }
                 VFXCore.FlushAdditive(null, false);
@@ -1293,7 +1362,7 @@ namespace AethonMod.Content.NPCs
                     // (crece con el timer — el alma abandona el hueso).
                     if (_muriendo)
                     {
-                        float tm = Math.Min(1f, _tickMuerte / 190f);
+                        float tm = Math.Min(1f, _tickMuerte / 270f);
                         LumenLib.Bloom(spriteBatch, posC, 40f * (1f + tm * 3f) * esc,
                             NucleoBlanco, 0.7f * (1f - tm) + 0.08f, 2);
                         LumenLib.Bloom(spriteBatch, posC, 72f * (1f + tm * 2.5f) * esc,
@@ -1307,23 +1376,36 @@ namespace AethonMod.Content.NPCs
                         4 => new Color(120, 70, 200),
                         _ => OroLuz,
                     };
-                    OrbitaLib.AnilloFino(posC, 76f * esc, t * 0.8f,
+                    OrbitaLib.AnilloFino(posC, 64f * esc, t * 0.8f,
                         OrbitaLib.Tint(colorA, 0.38f * alphaLuz));
-                    OrbitaLib.AnilloFino(posC, 106f * esc, -t * 0.5f,
+                    OrbitaLib.AnilloFino(posC, 92f * esc, -t * 0.5f,
                         OrbitaLib.Tint(VioletaLuz, 0.25f * alphaLuz));
 
                     // v6.50.26 — EL TELEGRAPH DEL RAM: el anillo de aviso
                     // crece mientras carga (el aviso de la embestida —
-                    // ai[2] es el tick DEL ESTADO, sincronizado).
-                    if (NPC.ai[0] == EST_CARGA && NPC.ai[2] <= 36f && !_muriendo)
+                    // ai[2] es el tick DEL ESTADO y ai[3] su DURACIÓN,
+                    // ambos sincronizados; v6.50.34: el telegraph de la
+                    // CADENA es corto y el anillo lo SABE — nada de 36
+                    // clavados).
+                    if (NPC.ai[0] == EST_CARGA && !_muriendo && NPC.ai[2] <= NPC.ai[3])
                     {
-                        float prog = NPC.ai[2] / 36f;
+                        float tTele = MathF.Max(1f, NPC.ai[3]);
+                        float prog = NPC.ai[2] / tTele;
                         OndaLib.Pulse(spriteBatch, posC, prog, 200f * esc, OroLuz, 0.55f, NPC.whoAmI);
+                    }
+
+                    // v6.50.34 — EL TELEGRAPH DEL CLAVADO: el pulso violeta
+                    // de la muerte desde el cielo (la sierpe se congela
+                    // encima — la sombra crece antes de la caída).
+                    if (NPC.ai[0] == EST_CLAVADO && !_muriendo && NPC.ai[2] <= 20f)
+                    {
+                        float prog = NPC.ai[2] / 20f;
+                        OndaLib.Pulse(spriteBatch, posC, prog, 150f * esc, VioletaLuz, 0.55f, NPC.whoAmI + 7);
                     }
 
                     // v6.50.26 — LA ESTELA DEL RAM (el rastro de luz del
                     // cráneo viajando — tres fantasmas detrás de la velocidad).
-                    if (NPC.ai[0] == EST_CARGA && NPC.ai[2] > 36f && !_muriendo &&
+                    if (NPC.ai[0] == EST_CARGA && NPC.ai[2] > NPC.ai[3] && !_muriendo &&
                         NPC.velocity.LengthSquared() > 100f)
                     {
                         Vector2 atras = -Vector2.Normalize(NPC.velocity);
@@ -1332,6 +1414,20 @@ namespace AethonMod.Content.NPCs
                             Vector2 fantasma = posC + atras * (g * 42f * esc);
                             LumenLib.Bloom(spriteBatch, fantasma, 34f * esc,
                                 OroLuz, 0.20f / g * alphaLuz, 2);
+                        }
+                    }
+
+                    // v6.50.34 — LA ESTELA DEL CLAVADO (la caída vertical:
+                    // fantasmas violetas sobre la línea de la muerte).
+                    if (NPC.ai[0] == EST_CLAVADO && NPC.ai[2] > 20f && !_muriendo &&
+                        NPC.velocity.LengthSquared() > 100f)
+                    {
+                        Vector2 atrasC = -Vector2.Normalize(NPC.velocity);
+                        for (int g = 1; g <= 3; g++)
+                        {
+                            Vector2 fantasma = posC + atrasC * (g * 46f * esc);
+                            LumenLib.Bloom(spriteBatch, fantasma, 30f * esc,
+                                VioletaLuz, 0.22f / g * alphaLuz, 2);
                         }
                     }
 

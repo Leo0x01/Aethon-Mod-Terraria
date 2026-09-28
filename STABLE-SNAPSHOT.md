@@ -1,69 +1,67 @@
-# AethonMod — ESTADO ACTUAL (v6.50.33)
+# AethonMod — ESTADO ACTUAL (v6.50.34)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-28 (tag `v6.50.33`, release publicada).
+> Última actualización: 2026-09-28 (tag `v6.50.34`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.33`.
-- **v6.50.33 = EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE** (la petición: «mejor
-  rediseña al jefe completo, podrias crear sprite segmentados basados en
-  slifer… como Devourer of Gods de Calamity sprites por segmento»):
-  1. **EL BUG DEL GUÍA, ARREGLADO**: las alas se pegaban al Guía porque
-     `Segmento()` leía `NPC.ai[0]` (que la IA sobrescribe con EL ESTADO cada
-     tick) como puntero de cadena → caía en `Main.npc[0]` = el Guía. Ahora la
-     cadena se halla por IDENTIDAD (tipo + ai[2] + ai[3]) con caché.
-  2. **EL SET DE 7 SPRITES** generado por `tools/tools/gen_slifer_sprites_v6533.py`
-     (motor de pintura procedural: supersampling ×3 + cel-shading en 3 bandas
-     duras + AO + contorno de 2 px) con el canon cromático VLM de las
-     referencias: CABEZA (máscara plateada, colmillos sable, corona de 5
-     llamas, ojo de oro, gema azul), MANDÍBULA (con el interior oscuro + LA
-     SEGUNDA BOCA), VÉRTEBRA (chevrones + aleta + vientre de pizarra), COLA
-     (pala espatulada), ALA (huesos sobre el paño + garra), retrato e icono
-     32×32. **5 rondas de control de calidad con visión artificial** (la
-     última: mock 1:1 de la matemática del C#, 6/6 aprobado).
-  3. **EL ENSAMBLAJE**: alas (lejos/cerca, aleteo 1.15 Hz, eje al cielo) →
-     mandíbula GIRATORIA (bisagra local 100,94↔12,50; 0..0.32 rad) → cráneo,
-     en el lote entrante del PreDraw; las vértebras con LA CURVA DE ESCALA
-     anatómica (cuello 0.50 → torso 1.0 → punta 0.36) y el filado frontal que
-     lee «anillos encadenados»; el leviatán del fondo lleva AHORA el cráneo
-     real silueteado + la mandíbula abierta + la cola de pala.
-  4. **LA LIBRERÍA ADELGAZADA**: AethonSierpeArte pierde los ensamblajes de
-     código y los pinceles de la v6.50.32 (687→~110 líneas); quedan la
-     estrella del fondo y los accessors de los sprites.
+  "el repo de github siempre es el verdadero"): tag `v6.50.34`.
+- **v6.50.34 = LA SIERPE ESTELAR, SEÑORA DEL MUNDO** (la petición: «se ve horrible
+  jajajajaja, mejor borra a ese jefe y olvidemonos de el — en cambio crea como jefe
+  a la misma sierpe, pero mas grande y mas largo, y mejora su IA»):
+  1. **EL DRAGÓN, BORRADO**: reversión a v6.50.31 del arte completo (los 4 .cs +
+     los 6 sprites) y `AethonSierpeAla.png` eliminado — el paquete vuelve a 399
+     entradas. El bug del Guía muere con él (ya no existe `Segmento()` — DLL verificada).
+  2. **MÁS GRANDE**: ESC 1.4→1.85 (cada hueso +32%); cráneo 168 px, vértebra 100,
+     cola 52; las ALETAS del abanico recorren toda la columna (6/14/22/30/38/46).
+  3. **MÁS LARGA**: 46→68 vértebras (54 de mundo + 14 del fondo), HUECO 84 — la
+     columna ~5.700 px (tres pantallas y media de 1080p); el cine de muerte se
+     estira (276 t de desarticulación: TODOS los huesos, uno a uno).
+  4. **LA IA MEJORADA**: EL CLAVADO AÉREO (nuevo estado vertical: telegraph 20 t +
+     caída a través de la presa), LA ROTACIÓN (fase 2+: ram ↔ clavado, NUNCA el
+     mismo dos veces — impredecible), EL RAM EN CADENA (fase 3+: 2-3 embestidas
+     desde lados opuestos — la vuelta en U del DoG), LA PREDICCIÓN ADAPTATIVA
+     (lead 10-34 t según distancia), EL ANTI-CAMPING (presa quieta 1,5 s →
+     paciencia 24 t), LA FURIA P5 (todo más rápido + EL ALIENTO DOBLE por arco),
+     y el render 100% sincronizado (ai[0]/ai[2]/ai[3] — el contrato de la casa).
+- **v6.50.33 = el dragón de sprites** (veredicto del usuario: «se ve horrible» —
+  BORRADO por completo en v6.50.34).
 - **v6.50.32 = el intento 100 % código** (veredicto del usuario: «no se parece
-  en nada» — sustituido por completo en v6.50.33).
+  en nada» — sustituido en v6.50.33 y ahora revertido del todo).
 - **v6.50.31 = FIXES FORENSES del client.log** (verificados por el usuario: "bien,
   ya no hay errores"): Begin-sobre-Begin del PreDraw, funeral de texturas al hilo
-  principal, .plr corrupto documentado, simetría hjson ×18.
+  principal, .plr corrupto documentado, simetría hjson ×18. **El fix del
+  CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.33**: 6.411.549 bytes, md5 ab2c7ba5…, **400 entradas** auditadas
-  byte a byte (mapa 317→22529, blobs hasta EOF exacto, todas inflan a su tamaño
-  declarado); los 7 sprites a w×h×4+12 bytes exactos; DLL inspeccionada
-  (DibujarDragon PRESENTE; pinceles/paleta muertos AUSENTES).
-- **hjson es-ES/en-US simétricos** (621=621 claves, parser con soporte de bloques ''').
+- **`.tmod` v6.50.34**: 6.320.731 bytes, md5 23c5419f…, **399 entradas** auditadas
+  byte a byte (tabla→22485, blobs hasta EOF exacto, todas inflan a su tamaño
+  declarado, 24 planas); sprites del jefe = los de la sierpe v6.50.31; DLL
+  inspeccionada (EstadoClavado/PredPresa/get_Furia/_cargasEnCadena PRESENTES;
+  DibujarDragon/_idxPrimerSeg AUSENTES — la librería estelar viva).
+- **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.33>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.34>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.33 está implementada y build-verificada, pero **el usuario aún
-no ha probado la v6.50.33 en partida**. Checklist:
+Toda la cadena v6.50.24 → v6.50.34 está implementada y build-verificada, pero **el usuario aún
+no ha probado la v6.50.34 en partida**. Checklist:
 
-1. **EL JEFE AETHON — EL DRAGÓN DE SPRITES (v6.50.33, LO PRIMERO)**: pelear al jefe y
-   verificar: (a) la CABEZA con la MÁSCARA PLATEADA del hocico, los DOS COLMILLOS
-   SABLE de marfil, la CORONA DE 5 LLAMAS, el OJO DE ORO y la GEMA AZUL, (b) LA
-   MANDÍBULA ABRIÉNDOSE de verdad al rugir/emergir — y al abrirse, LA SEGUNDA BOCA
-   plateada asomando entre los dientes con la garganta ardiendo detrás, (c) el CUERPO
-   DE ANILLOS ESCAMADOS con la aleta dorsal y el vientre de pizarra (cuello fino →
-   torso grueso → cola látigo), (d) LAS DOS ALAS DE MURCIÉLAGO aleteando al cielo
-   ANCLADAS AL CUERPO (¡ya NO al Guía! — el bug), (e) la COLA con la pala espatulada
-   enredada en el fondo + el LEVIATÁN de la llegada con el cráneo real, (f) el icono
-   nuevo en la BARRA DE VIDA y el retrato del bestiario, (g) que NO hay «Excepción
-   silenciosa» nuevas en el client.log y que el Guía vive ajeno a la pelea.
+1. **EL JEFE AETHON — LA SIERPE ESTELAR SEÑORA DEL MUNDO (v6.50.34, LO PRIMERO)**:
+   pelear al jefe y verificar: (a) LA SIERPE ESTELAR de siempre (el cráneo-eclipse
+   con su anillo de oro y corazón blanco, las placas de vacío con espina de oro,
+   las aletas de varillas — el arte de la v6.50.27-31, NO el dragón), (b) EL
+   TAMAÑO: cada hueso 32% más grande y la columna EL DOBLE de larga (~5.700 px,
+   68 vértebras — la cola tarda en llegar), (c) LA IA NUEVA: el RAM vuelve DESDE
+   EL OTRO LADO (la cadena, fase 3+), EL CLAVADO AÉREO (la sierpe se congela
+   arriba con el pulso violeta y CAE a través tuyo — fase 2+), la ROTACIÓN que
+   nunca repite el mismo ataque, y en fase 5 TODO más rápido con el ALIENTO
+   DOBLE, (d) la paciencia: si te QUITAS QUIETO 1,5 s bajo tierra, el lunge
+   llega YA, (e) el cine de muerte: TODOS los huesos desarticulándose uno a uno
+   (68 × 4 t), (f) que NO hay «Excepción silenciosa» nuevas en el client.log.
 2. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
 3. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
@@ -94,9 +92,10 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 2. **Precio de las esencias**: `Item.value = buyPrice(0,10,0,0)` = **10 de ORO**, pero los
    comentarios (TheWitness.cs, EsenciasJefes.cs) y docs dicen "10 de PLATINO". Decidir cuál
    es el valor deseado y alinear código+comentarios+hjson.
-3. **Sprites muertos**: RESUELTO en v6.50.33 — `AethonSierpeCabeza/Mandibula/Cola.png`
-   ya no están muertos: son EL SET NUEVO del Dragón del Cielo (y `AethonSierpeAla.png`
-   se une). Sin deuda.
+3. **Sprites dormidos (de vuelta con la reversión)**: `AethonSierpeCabeza.png` y
+   `AethonSierpeMandibula.png` viajan en el paquete pero NADIE los pide (el arte
+   de la sierpe es 100% código; `AethonSierpeCola.png` resuelve por convención la
+   clase de la cola). El ala del dragón (`AethonSierpeAla.png`) sí fue BORRADA.
 4. **Los otros 4 jefes no tienen icono `_Head_Boss`** (solo Aethon tiene barra con icono).
 5. **Sin bestiario** (cero `SetBestiary` en jefes; segmentos ocultos).
 6. **`ParticlePresets.NovaFlash` + `VFXCore.NovaBurst` sin llamadores** (comentarios viejos
@@ -110,9 +109,9 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.33 en juego** con el checklist de arriba — la pelea contra
-   Aethon es LA prueba del rediseño (el dragón de sprites + la boca que se abre + las
-   alas ancladas al cuerpo y no al Guía).
+1. **El usuario prueba v6.50.34 en juego** con el checklist de arriba — la pelea contra
+   Aethon es LA prueba de la SIERPE GIGANTE (el tamaño, la longitud y el cerebro nuevo:
+   rotación + cadena + clavado aéreo + furia).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -143,7 +142,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.33** | ✅ Build-verificada, ⏳ en juego | EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE: set de 7 sprites por segmento (DoG) + mandíbula giratoria con segunda boca + bug del Guía fixeado + leviatán con el cráneo real |
+| **v6.50.34** | ✅ Build-verificada, ⏳ en juego | LA SIERPE ESTELAR, SEÑORA DEL MUNDO: el dragón BORRADO (reversión a v6.50.31) + ESC 1.85 y 68 vértebras (~5.700 px) + IA mejorada (clavado aéreo + rotación + ram en cadena + predicción adaptativa + anti-camping + furia con aliento doble) |
+| **v6.50.33** | ✅ (borrada por decreto) | EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE: set de 7 sprites por segmento (DoG) — veredicto: «se ve horrible»; revertida por completo en v6.50.34 |
 | **v6.50.32** | ✅ (sustituida) | El intento 100 % código de Slifer — «no se parece en nada»; su arte fue reemplazado por el set de sprites en v6.50.33 |
 | **v6.50.31** | ✅ Build-verificada, ✔ en juego | FIXES FORENSES del client.log: Begin-sobre-Begin del jefe (garganta/corona/arco no se dibujaban) · funeral de texturas al hilo principal (leak de GPU) · simetría hjson (18 claves es-ES) |
 | **v6.50.30** (`1d26716`) | ✅ Build-verificada, ⏳ en juego | El dado del invierno (Deerclops 1 %) · diálogos de devorar por jefe · voz en silencio · avalancha del emerger |
