@@ -45,7 +45,7 @@ namespace AethonMod.Content.NPCs
     /// más grande. El PreDraw ahora dibuja EL HUESO ÉL MISMO (a escala)
     /// porque tML solo sabe dibujar el sprite a 1:1.
     ///
-    /// v6.50.34 — LA SEÑORA DEL MUNDO (el reporte: «en cambio crea como
+    /// v6.50.34 — EL SEÑOR DEL MUNDO (el reporte: «en cambio crea como
     /// jefe a la misma sierpe, pero mas grande y mas largo»): la cadena
     /// crece a 68 VÉRTEBRAS (54 de mundo + 14 del fondo), HUECO 84 px y
     /// TODO el arte a ESC 1.85 — la columna mide ~5.700 px de punta a
@@ -69,7 +69,7 @@ namespace AethonMod.Content.NPCs
         /// La Sierpe Estelar, huesos encadenados, no un tubo).</summary>
         public const float HUECO = 84f;
 
-        /// <summary>v6.50.26 — LA ESCALA DEL ARTE (v6.50.34 — la Señora
+        /// <summary>v6.50.26 — LA ESCALA DEL ARTE (v6.50.34 — el Señor
         /// del Mundo: 1.4 → 1.85, cada hueso 32% más grande).</summary>
         public const float ESC = 1.85f;
 
@@ -163,7 +163,7 @@ namespace AethonMod.Content.NPCs
         /// rasgo de pez de La Sierpe Estelar). El TAPER es muscular:
         /// 33 px junto al cráneo → 10 en la punta de mundo.
         ///
-        /// v6.50.34 — LA SEÑORA DEL MUNDO: con 54 huesos de mundo las
+        /// v6.50.34 — EL SEÑOR DEL MUNDO: con 54 huesos de mundo las
         /// ALETAS recorren toda la columna (6, 14, 22, 30, 38 y 46 —
         /// el abanico cada 8, el lado alterna) y el TAPER se afina
         /// (33→10): el cuerpo LARGO lee músculo de acecho, no tubo.
@@ -177,7 +177,7 @@ namespace AethonMod.Content.NPCs
                 float visibilidad = 1f - (NPC.alpha / 255f);
                 // EL TAPER: el radio del hueso (graso junto al cráneo,
                 // afilado hacia el fondo). v6.50.34 — 33→10: el cuerpo
-                // largo se afila MÁS (el látigo de la Señora del Mundo).
+                // largo se afila MÁS (el látigo del Señor del Mundo).
                 float radio = MathHelper.Lerp(33f, 10f, Math.Clamp(idx / (float)(UMBRAL_FONDO - 1), 0f, 1f)) * ESC;
                 // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2).
                 float rumbo = NPC.rotation - MathHelper.PiOver2;

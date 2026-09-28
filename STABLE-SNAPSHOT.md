@@ -1,13 +1,22 @@
-# AethonMod — ESTADO ACTUAL (v6.50.34)
+# AethonMod — ESTADO ACTUAL (v6.50.35)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-28 (tag `v6.50.34`, release publicada).
+> Última actualización: 2026-09-28 (tag `v6.50.35`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.34`.
-- **v6.50.34 = LA SIERPE ESTELAR, SEÑORA DEL MUNDO** (la petición: «se ve horrible
+  "el repo de github siempre es el verdadero"): tag `v6.50.35`.
+- **v6.50.35 = EL SEÑOR DEL MUNDO (la corrección de género)** (la petición: «porque
+  señora, la sierpe es macho asi que seria señor del mundo»): (1) el título
+  ESTRENA EN EL JUEGO — el anuncio de aparición del jefe ahora dice «LA SIERPE
+  DE HUESO DE LA LUZ — EL SEÑOR DEL MUNDO — se alza del subsuelo» (es-ES) /
+  «THE BONE SERPENT OF THE LIGHT — THE LORD OF THE WORLD» (en-US); (2) "her
+  line" → "his line" (la embestida en-US); (3) 7 comentarios de código
+  (6× Señora→Señor + 1× Diosa→Dios); (4) el release v6.50.34 RENOMBRADO en
+  GitHub (nombre + body vía API, 0 "Señora" residual). "Ella me RECONOCIÓ"
+  queda: es Aethon, LA LUZ (sustantivo femenino), no la sierpe.
+- **v6.50.34 = LA SIERPE ESTELAR, SEÑOR DEL MUNDO** (la petición: «se ve horrible
   jajajajaja, mejor borra a ese jefe y olvidemonos de el — en cambio crea como jefe
   a la misma sierpe, pero mas grande y mas largo, y mejora su IA»):
   1. **EL DRAGÓN, BORRADO**: reversión a v6.50.31 del arte completo (los 4 .cs +
@@ -35,22 +44,26 @@
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.34**: 6.320.731 bytes, md5 23c5419f…, **399 entradas** auditadas
-  byte a byte (tabla→22485, blobs hasta EOF exacto, todas inflan a su tamaño
-  declarado, 24 planas); sprites del jefe = los de la sierpe v6.50.31; DLL
-  inspeccionada (EstadoClavado/PredPresa/get_Furia/_cargasEnCadena PRESENTES;
+- **`.tmod` v6.50.35**: 6.323.585 bytes, md5 82f8f220…, **399 entradas** auditadas
+  byte a byte (sets de nombres idénticos a la v6.50.34, EOF exacto, todas inflan
+  a su tamaño declarado, 24 planas); cadenas de género verificadas DENTRO DEL
+  PAQUETE (SEÑOR DEL MUNDO / LORD OF THE WORLD / his line PRESENTES; Señora /
+  her line AUSENTES); DLL con delta de tamaño 0 bytes (los comentarios no tocan
+  el IL — solo MVID/timestamp de recompilación); sprites del jefe = los de la
+  sierpe v6.50.31 (sin cambios); DLL inspeccionada en v6.50.34
+  (EstadoClavado/PredPresa/get_Furia/_cargasEnCadena PRESENTES;
   DibujarDragon/_idxPrimerSeg AUSENTES — la librería estelar viva).
 - **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.34>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.35>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.34 está implementada y build-verificada, pero **el usuario aún
-no ha probado la v6.50.34 en partida**. Checklist:
+Toda la cadena v6.50.24 → v6.50.35 está implementada y build-verificada, pero **el usuario aún
+no ha probado la v6.50.34/v6.50.35 en partida**. Checklist:
 
-1. **EL JEFE AETHON — LA SIERPE ESTELAR SEÑORA DEL MUNDO (v6.50.34, LO PRIMERO)**:
+1. **EL JEFE AETHON — LA SIERPE ESTELAR, EL SEÑOR DEL MUNDO (v6.50.34/35, LO PRIMERO)**:
    pelear al jefe y verificar: (a) LA SIERPE ESTELAR de siempre (el cráneo-eclipse
    con su anillo de oro y corazón blanco, las placas de vacío con espina de oro,
    las aletas de varillas — el arte de la v6.50.27-31, NO el dragón), (b) EL
@@ -61,7 +74,9 @@ no ha probado la v6.50.34 en partida**. Checklist:
    nunca repite el mismo ataque, y en fase 5 TODO más rápido con el ALIENTO
    DOBLE, (d) la paciencia: si te QUITAS QUIETO 1,5 s bajo tierra, el lunge
    llega YA, (e) el cine de muerte: TODOS los huesos desarticulándose uno a uno
-   (68 × 4 t), (f) que NO hay «Excepción silenciosa» nuevas en el client.log.
+   (68 × 4 t), (f) que NO hay «Excepción silenciosa» nuevas en el client.log,
+   (g) v6.50.35: el anuncio de aparición presenta al «SEÑOR DEL MUNDO» (y en
+   inglés «THE LORD OF THE WORLD» — ya nadie lo llama señora).
 2. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
 3. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
@@ -109,7 +124,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.34 en juego** con el checklist de arriba — la pelea contra
+1. **El usuario prueba v6.50.34/v6.50.35 en juego** con el checklist de arriba — la pelea contra
    Aethon es LA prueba de la SIERPE GIGANTE (el tamaño, la longitud y el cerebro nuevo:
    rotación + cadena + clavado aéreo + furia).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
@@ -142,7 +157,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.34** | ✅ Build-verificada, ⏳ en juego | LA SIERPE ESTELAR, SEÑORA DEL MUNDO: el dragón BORRADO (reversión a v6.50.31) + ESC 1.85 y 68 vértebras (~5.700 px) + IA mejorada (clavado aéreo + rotación + ram en cadena + predicción adaptativa + anti-camping + furia con aliento doble) |
+| **v6.50.35** | ✅ Build-verificada, ⏳ en juego | EL SEÑOR DEL MUNDO (corrección de género): el título estrena EN EL JUEGO (anuncio de aparición es-ES/en-US) · her→his line · 7 comentarios · release v6.50.34 renombrado en GitHub |
+| **v6.50.34** | ✅ Build-verificada, ⏳ en juego | LA SIERPE ESTELAR, SEÑOR DEL MUNDO: el dragón BORRADO (reversión a v6.50.31) + ESC 1.85 y 68 vértebras (~5.700 px) + IA mejorada (clavado aéreo + rotación + ram en cadena + predicción adaptativa + anti-camping + furia con aliento doble) |
 | **v6.50.33** | ✅ (borrada por decreto) | EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE: set de 7 sprites por segmento (DoG) — veredicto: «se ve horrible»; revertida por completo en v6.50.34 |
 | **v6.50.32** | ✅ (sustituida) | El intento 100 % código de Slifer — «no se parece en nada»; su arte fue reemplazado por el set de sprites en v6.50.33 |
 | **v6.50.31** | ✅ Build-verificada, ✔ en juego | FIXES FORENSES del client.log: Begin-sobre-Begin del jefe (garganta/corona/arco no se dibujaban) · funeral de texturas al hilo principal (leak de GPU) · simetría hjson (18 claves es-ES) |

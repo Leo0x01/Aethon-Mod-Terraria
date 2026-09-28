@@ -24,7 +24,14 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del
   destello circular plano, brillo de rayos sin cortes.
-- **v6.50.34 — LA SIERPE ESTELAR, SEÑORA DEL MUNDO**: el dragón de sprites
+- **v6.50.35 — EL SEÑOR DEL MUNDO (corrección de género)**: «la sierpe es macho
+  así que sería señor del mundo» — el título corregido en TODOS los frentes y
+  ESTRENADO EN EL JUEGO: el anuncio de aparición del jefe ahora dice «LA SIERPE
+  DE HUESO DE LA LUZ — EL SEÑOR DEL MUNDO — se alza del subsuelo» (es-ES) /
+  «THE LORD OF THE WORLD» (en-US); "her line" → "his line" en la embestida
+  en-US; 7 comentarios de código (Señora→Señor, Diosa→Dios) y el release
+  v6.50.34 renombrado en GitHub.
+- **v6.50.34 — LA SIERPE ESTELAR, SEÑOR DEL MUNDO**: el dragón de sprites
   BORRADO por decreto («se ve horrible») y la sierpe estelar de la v6.50.27
   recuperada como jefe — pero MASIVA (ESC 1.85, 68 vértebras, ~5.700 px de
   columna) y con LA IA MEJORADA: el clavado aéreo, la rotación que nunca repite

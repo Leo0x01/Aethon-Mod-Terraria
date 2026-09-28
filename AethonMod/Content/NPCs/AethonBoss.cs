@@ -76,13 +76,13 @@ namespace AethonMod.Content.NPCs
     ///   serpenteo del cráneo, el cháchara de mandíbula del aliento y
     ///   la fare de ojos al disparar.
     ///
-    /// v6.50.34 — LA SEÑORA DEL MUNDO (el reporte: «se ve horrible
+    /// v6.50.34 — EL SEÑOR DEL MUNDO (el reporte: «se ve horrible
     /// jajajajaja, mejor borra a ese jefe y olvidemonos de el — en cambio
     /// crea como jefe a la misma sierpe, pero mas grande y mas largo, y
     /// mejora su IA»): EL DRAGÓN DE SPRITES (v6.50.32/33) MUERE — el
     /// jefe vuelve a ser LA SIERPE ESTELAR de la v6.50.27 (el
     /// cráneo-eclipse de código, las placas de vacío, la espina de oro)
-    /// PERO a ESCALA DE DIOSA:
+    /// PERO a ESCALA DE DIOS:
     /// · MÁS GRANDE: ESC 1.4 → 1.85 (cada hueso 32% más grande).
     /// · MÁS LARGA: 46 → 68 vértebras (54 de mundo + 14 del fondo), la
     ///   columna ~5.700 px — tres pantallas y media de 1080p.
@@ -183,7 +183,7 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 168;     // v6.50.34 — el cráneo a ESC 1.85 (la Señora del Mundo)
+            NPC.width = 168;     // v6.50.34 — el cráneo a ESC 1.85 (el Señor del Mundo)
             NPC.height = 168;
             NPC.damage = 95;     // EL MORDISCO (la boca es más grande)
             NPC.defense = 40;
