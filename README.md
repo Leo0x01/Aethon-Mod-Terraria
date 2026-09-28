@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.31 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.33 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,9 +14,9 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-28, v6.50.31)
+## ¿Dónde estamos? (actualizado 2026-09-28, v6.50.33)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.31`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.33`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 399 entradas auditado.
@@ -24,22 +24,33 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del
   destello circular plano, brillo de rayos sin cortes.
-- **v6.50.31 — FIXES FORENSES del client.log del usuario**: la pareja de
+- **v6.50.33 — EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE**: el jefe rediseñado
+  COMPLETO con **sprites por segmento** (la petición: como el Devourer of Gods
+  de Calamity): set de 7 sprites generado por código (tools/gen_slifer_sprites_v6533.py,
+  5 rondas de QA con visión artificial) — cabeza con máscara plateada + colmillos
+  sable + corona de 5 llamas + ojo de oro + gema azul, **mandíbula giratoria con
+  LA SEGUNDA BOCA**, anillos escamados con curva cuello→torso→punta, alas de
+  murciélago, cola espatulada; **el bug de las alas pegadas al Guía, fixeado de
+  raíz** (la IA sobrescribía el puntero de cadena con el estado → Main.npc[0]).
+- **v6.50.32 — el intento 100 % código de Slifer** (veredicto: «no se parece en
+  nada» — sustituido por los sprites en v6.50.33).
+- **v6.50.31 — FIXES FORENSES del client.log del usuario** (verificados: "bien, ya
+  no hay errores"): la pareja de
   «Excepción silenciosa» del jefe Aethon (Begin-sobre-Begin de FNA — la garganta
   ardiendo, la corona y el arco del aliento JAMÁS se dibujaban en pelea), la
   ThreadStateException + leak de GPU en cada salida de mundo (funeral de texturas
   al hilo principal) y la simetría hjson (18 claves activadas y traducidas en es-ES).
-- **Falta: verificación EN JUEGO por el usuario** de toda la cadena v6.50.24→v6.50.31.
+- **Falta: verificación EN JUEGO por el usuario** de toda la cadena v6.50.24→v6.50.33.
 
 ## Mapa de documentación (qué leer según qué necesites)
 
 | Archivo | Contenido | Para quién |
 |---|---|---|
-| **STABLE-SNAPSHOT.md** | Estado exacto de v6.50.31: qué se entregó, qué falta verificar en juego, doc-rot conocida, próximos pasos | RETOMAR TRABAJO — leer primero |
+| **STABLE-SNAPSHOT.md** | Estado exacto de v6.50.33: qué se entregó, qué falta verificar en juego, doc-rot conocida, próximos pasos | RETOMAR TRABAJO — leer primero |
 | **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de todos los sistemas (grimorio, hambre, furia/oleadas, esencias, Testigo, voz del libro, jefes, pipeline de rayos, stack VFX, red, persistencia) con mapa de archivos | Entender CÓMO funciona algo |
 | **CARACTERISTICAS.md** | Inventario total de contenido: ~115 armas por familia, 18 bolsas, jefes, minions, buffs, cosméticos, sistemas, conteos | Saber QUÉ existe |
 | **COMPILACION.md** | Cómo instalar/compilar/actualizar (usuario) + pipeline de build headless y release (desarrollo) | Compilar / publicar |
-| **CHANGES.md** | Historial detallado versión a versión (150 entradas ricas, hasta v6.50.31) | Historia / qué cambió |
+| **CHANGES.md** | Historial detallado versión a versión (150 entradas ricas, hasta v6.50.33) | Historia / qué cambió |
 
 ## Protocolo para retomar el trabajo (sesiones IA / humanos)
 
@@ -55,7 +66,7 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 ```
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.50.31)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.50.33)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # 296 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
 │   └── Localization/          # es-ES / en-US (hjson simétricos, ~2290 líneas c/u)

@@ -631,29 +631,67 @@ namespace AethonMod.Content.NPCs
         //  LAS FASES — LOS ATAQUES SALEN DE LA CABEZA (BocaPos)
         // ==================================================================
 
-        /// <summary>La boca abierta: donde nacen TODOS sus ataques (v6.50.32 — la
-        /// punta del hocico nuevo: los colmillos sable quedan ATRÁS del disparo).</summary>
+        /// <summary>La boca abierta: donde nacen TODOS sus ataques (v6.50.33 —
+        /// el cráneo SPRITE: los colmillos sable llegan a 129 px del centro
+        /// a ESC 1.4; el disparo nace justo más allá, 98·esc).</summary>
         private Vector2 BocaPos()
         {
             Vector2 adelante = NPC.velocity.SafeNormalize(Vector2.UnitY);
             if (NPC.velocity == Vector2.Zero) adelante = -Vector2.UnitY.RotatedBy(NPC.rotation);
-            return NPC.Center + adelante * (72f * AethonSierpeCuerpo.ESC);  // más allá de los colmillos (ESC 1.4)
+            return NPC.Center + adelante * (98f * AethonSierpeCuerpo.ESC);
         }
 
-        // v6.50.32 — EL ANCLAJE DE LAS ALAS: recorre la cadena (ai[0] = el
-        // hijo que me sigue) hasta la n-ésima vértebra — el HOMBRO del
-        // Dragón del Cielo es la 3ª vértebra (v6.50.32: el cuello limpio).
+        // v6.50.32 — EL ANCLAJE DE LAS ALAS: el HOMBRO del Dragón del Cielo
+        // es la 3ª vértebra. v6.50.33 — EL BUG DEL GUÍA, ARREGLADO DE RAÍZ:
+        // la v6.50.32 leía NPC.ai[0] como «el hijo que me sigue»… pero la
+        // IA de la CABEZA sobrescribe ai[0] con EL ESTADO cada tick
+        // (línea ~253) → Segmento(2) arrancaba en Main.npc[estado] (¡el
+        // 0 = EL GUÍA!) y las ALAS SE PEGABAN AL GUÍA (el reporte:
+        // «lo que se supone que son las alas del jefe se pegan al guia»).
+        // LA CADENA SEGURA: escanear por (tipo + ai[2]=la cabeza +
+        // ai[3]=índice) con caché del primer eslabón — los ai[0] de las
+        // VÉRTEBRAS sí son válidos (la IA de la cabeza no los toca) y el
+        // recorrido los valida eslabón a eslabón.
+        private int _idxPrimerSeg = -1;
+
         private NPC Segmento(int n)
         {
-            int idx = (int)NPC.ai[0];
-            for (int i = 0; i < n && idx >= 0 && idx < Main.maxNPCs; i++)
+            // === EL PRIMER ESLABÓN: caché + re-escaneo si murió ===
+            NPC primero = null;
+            if (_idxPrimerSeg >= 0 && _idxPrimerSeg < Main.maxNPCs)
             {
-                NPC s = Main.npc[idx];
-                if (s == null || !s.active) return null;
-                idx = (int)s.ai[0];
+                NPC c = Main.npc[_idxPrimerSeg];
+                if (c != null && c.active && c.type == ModContent.NPCType<AethonSierpeCuerpo>() &&
+                    c.ai[2] == NPC.whoAmI && c.ai[3] == 0f)
+                    primero = c;
             }
-            return (idx >= 0 && idx < Main.maxNPCs && Main.npc[idx] != null && Main.npc[idx].active)
-                ? Main.npc[idx] : null;
+            if (primero == null)
+            {
+                int tipoB = ModContent.NPCType<AethonSierpeCuerpo>();
+                _idxPrimerSeg = -1;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC s = Main.npc[i];
+                    if (s != null && s.active && s.type == tipoB &&
+                        s.ai[2] == NPC.whoAmI && s.ai[3] == 0f)
+                    { primero = s; _idxPrimerSeg = i; break; }
+                }
+            }
+            if (primero == null) return null;
+
+            // === EL RESTO DE LA CADENA: los ai[0] de las vértebras ===
+            NPC actual = primero;
+            for (int i = 0; i < n; i++)
+            {
+                int idx = (int)actual.ai[0];
+                if (idx < 0 || idx >= Main.maxNPCs) return null;
+                NPC s = Main.npc[idx];
+                if (s == null || !s.active ||
+                    s.type != ModContent.NPCType<AethonSierpeCuerpo>() ||
+                    s.ai[2] != NPC.whoAmI) return null;
+                actual = s;
+            }
+            return actual;
         }
 
         private void Fase1PolvoEstelar()
@@ -1082,18 +1120,110 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
-        //  EL ARTE — v6.50.27 — LA SIERPE ESTELAR DEL FINAL
+        //  v6.50.33 — EL ENSAMBLAJE DEL DRAGÓN (los sprites del set).
         //
-        //  El reporte: «el arte del jefe se ve horrible, deberías
-        //  cambiarlo por completo, algo al estilo de la sierpe en el arma
-        //  La Sierpe Estelar». EL CRÁNEO SPRITE MUERE: la cabeza es
-        //  AHORA el ensamblaje de CÓDIGO de AethonSierpeArte.Cabeza — el
-        //  respaldo de vacío (la silueta), el CRÁNEO ORBE con su corazón
-        //  blanco, LAS FAUCES EN V (los filos de luz girando con la
-        //  abertura, colmillos-estrella en las puntas), LOS DOS OJOS
-        //  fareando, la CRESTA dorsal y LAS CINCO CHISPAS orbitantes
-        //  (la firma de La Sierpe Estelar). El cabeceo serpenteo del
-        //  v6.50.26 vive (solo en el dibujo).
+        //  Se pinta en el LOTE ENTRANTE del PreDraw (Deferred·Alpha, la
+        //  matriz del mundo — el estándar de las entidades) y en orden de
+        //  profundidad: ALA LEJANA → ALA CERCANA → MANDÍBULA → CRÁNEO.
+        //  La iluminación respeta la de vanilla con un SUELO de luz (un
+        //  jefe del final jamás se vuelve un recorte negro en la cueva).
+        // ==================================================================
+        private void DibujarDragon(SpriteBatch spriteBatch, Color drawColor)
+        {
+            float esc = AethonSierpeCuerpo.ESC;
+            float t = Main.GlobalTimeWrappedHourly;
+            float visibilidad = 1f - (NPC.alpha / 255f);
+            if (_muriendo) visibilidad *= 0.5f + 0.5f * (1f - Math.Min(1f, _tickMuerte / 190f));
+
+            // EL SUELO DE LUZ: 45% blanco — la luz de vanilla manda, pero
+            // el Dragón del Cielo nunca se apaga del todo.
+            Color colorLuz = Color.Lerp(drawColor, Color.White, 0.45f) * visibilidad;
+
+            // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo).
+            float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
+            Vector2 pos = NPC.Center - Main.screenPosition;
+            float rotC = NPC.rotation + cabeceo;
+            float rumboC = rotC - MathHelper.PiOver2;
+
+            Texture2D texCabeza = AethonSierpeArte.Cabeza();
+            Texture2D texMandibula = AethonSierpeArte.Mandibula();
+            Texture2D texAla = AethonSierpeArte.Ala();
+            if (texCabeza == null || texMandibula == null) return;
+
+            // === 1. LAS ALAS (el ala-brazo de murciélago del set) ===
+            //     EL ANCLA: el HOMBRO = la 3ª vértebra (Segmento(2), ya
+            //     sin el bug del Guía); la caída si no hay cadena: 152·esc
+            //     detrás del cráneo. LA FIRMA: el EJE MIRA AL CIELO
+            //     (arriba-mundo — el Dragón del Cielo), con el vaivén del
+            //     aleteo a 1.15 Hz y la inclinación echada hacia atrás.
+            if (texAla != null)
+            {
+                Vector2 frenteDibujo = new(MathF.Cos(rumboC), MathF.Sin(rumboC));
+                Vector2 hombro = pos - frenteDibujo * (152f * esc);
+                NPC segHombro = Segmento(2);
+                if (segHombro != null) hombro = segHombro.Center - Main.screenPosition;
+                hombro += Vector2.UnitY * 6f; // la raíz se ENTERRA en el anillo
+
+                // la raíz del ala (local 168,202) es el origen: nace del
+                // hombro y se yergue (rotación 0 = la punta al cielo).
+                Vector2 origenAla = new(168f, 202f);
+                // ¿hacia qué lado nada? — el ala cercana SIEMPRE barre hacia atrás
+                bool haciaDerecha = MathF.Abs(MathHelper.WrapAngle(rumboC)) <= MathHelper.PiOver2;
+                SpriteEffects fxCerca = haciaDerecha ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                SpriteEffects fxLejos = haciaDerecha ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+                float aleteo = MathF.Sin(t * 1.15f * MathHelper.TwoPi);
+                float inclinacion = haciaDerecha ? -0.16f : 0.16f;
+
+                // EL ALA LEJANA (detrás: espejada, más pequeña, más
+                // oscura — la pareja del otro costado) con el aleteo
+                // DESFASADO (el vaivén de dos velas, no un péndulo).
+                Color colorLejos = colorLuz * 0.55f;
+                spriteBatch.Draw(texAla, hombro, null, colorLejos,
+                    inclinacion * -0.6f + aleteo * -0.13f, origenAla,
+                    0.88f * esc, fxLejos, 0f);
+                // EL ALA CERCANA (la protagonista: huesos vivos, garra).
+                spriteBatch.Draw(texAla, hombro, null, colorLuz,
+                    inclinacion + aleteo * 0.10f, origenAla,
+                    esc, fxCerca, 0f);
+            }
+
+            // === 2. LA MANDÍBULA GIRATORIA (la boca de acero con la
+            //     SEGUNDA BOCA dentro): la bisagra del cráneo (local
+            //     100,94) casa con la de la mandíbula (local 12,50) — el
+            //     ángulo de la IA (0.05..0.55) mapea a 0..0.32 rad y el
+            //     TRIÁNGULO INTERIOR del sprite cubre la rendija al
+            //     abrirse (cerrada queda escondida tras el hocico) ===
+            Vector2 origCabeza = new(texCabeza.Width * 0.5f, texCabeza.Height * 0.5f);
+            Vector2 bisagra = pos + new Vector2(100f - origCabeza.X, 94f - origCabeza.Y).RotatedBy(rotC) * esc;
+            float apertura = Math.Clamp(_aberturaMandibula, 0f, 1f) * 0.58f;
+            spriteBatch.Draw(texMandibula, bisagra, null, colorLuz,
+                rotC + apertura, new Vector2(12f, 50f), esc, SpriteEffects.None, 0f);
+
+            // === 3. EL CRÁNEO (la máscara plateada, los colmillos
+            //     sable, la corona de 5 llamas, el ojo de oro y la gema
+            //     azul — todo en el sprite; el cuello estrecho queda
+            //     bajo las vértebras, que dibujan después) ===
+            spriteBatch.Draw(texCabeza, pos, null, colorLuz, rotC,
+                origCabeza, esc, SpriteEffects.None, 0f);
+        }
+
+        // ==================================================================
+        //  EL ARTE — v6.50.33 — EL DRAGÓN DEL CIELO, ENCARNACIÓN SPRITE
+        //
+        //  La saga del arte del jefe: la v6.50.19 lo parió de huesos, la
+        //  v6.50.27 lo hizo código estelar, la v6.50.32 intentó a Slifer
+        //  con pinceles en runtime — y el veredicto del usuario fue
+        //  literal: «no se parece en nada jajajajajaa… mejor rediseña al
+        //  jefe completo, podrias crear sprite segmentados basados en
+        //  slifer, por ejemplo puedes usar Devourer of Gods de Calamity
+        //  sprites por segmento y rediseñarlos cambiando el color y el
+        //  arte». EL ARTE ES AHORA UNA CADENA DE SPRITES (el patrón del
+        //  DoG): cráneo + mandíbula GIRATORIA (la boca que se abre de
+        //  verdad, con la SEGUNDA BOCA asomando) + vértebras con su
+        //  aleta + alas de murciélago — el set de
+        //  tools/tools/gen_slifer_sprites_v6533.py, canon cromático de
+        //  las referencias (3 rondas de control de calidad con visión
+        //  artificial: cel-shading en bandas duras, paleta limitada).
         //  LOS FX DE BATALLA se conservan: la garganta ardiendo en la
         //  carga del aliento, la corona de anillos, las motas, el
         //  telegraph del ram, la estela, el cine de muerte y la
@@ -1102,6 +1232,16 @@ namespace AethonMod.Content.NPCs
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.dedServ) return false;
+
+            // === 0. EL DRAGÓN DE SPRITES (v6.50.33) — al LOTE ENTRANTE
+            //     (llega ABIERTO): alas → mandíbula → cráneo, en ese
+            //     orden de sumisión. El PreDraw de la CABEZA corre
+            //     PRIMERO que el de las vértebras (whoAmI más bajo):
+            //     las alas quedan POR DETRÁS de toda la columna (la
+            //     silueta del anime) y las vértebras del cuello montan
+            //     sobre la nuca del cráneo por pura orden de dibujo. ===
+            try { DibujarDragon(spriteBatch, drawColor); }
+            catch { }
 
             // v6.50.11 — sonda de lote (la casa).
             VFXCore.CerrarLoteSiAbierto();
@@ -1114,41 +1254,6 @@ namespace AethonMod.Content.NPCs
                 // v6.50.26 — EL CABECEO SERPENTE (solo en el dibujo: la
                 // física no se toca): el cráneo ondula como la columna.
                 float t = Main.GlobalTimeWrappedHourly;
-                float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
-
-                // === 0. LAS ALAS DEL DRAGÓN DEL CIELO (v6.50.32 — LA
-                //     NOVEDAD de las referencias: dos alas de murciélago
-                //     inmensas arqueadas al cielo, naciendo del HOMBRO —
-                //     la 3ª vértebra — POR DETRÁS de todo: el PreDraw de la
-                //     cabeza corre PRIMERO (whoAmI más bajo) y las alas
-                //     quedan tras el cuello y el cuerpo, como en el anime) ===
-                Vector2 pos = NPC.Center - Main.screenPosition;
-                float rotC = NPC.rotation + cabeceo;
-                float rumboC = rotC - MathHelper.PiOver2;
-                Vector2 frenteDibujo = new(MathF.Cos(rumboC), MathF.Sin(rumboC));
-                Vector2 hombro = pos - frenteDibujo * (152f * esc);
-                NPC segHombro = Segmento(2);
-                if (segHombro != null) hombro = segHombro.Center - Main.screenPosition;
-                AethonSierpeArte.Alas(hombro, rumboC, t, Phase, visibilidad, esc);
-
-                // === 1. LA CABEZA DE SLIFER (el arte de código de las
-                //     referencias: hocico de acero, colmillos sable, corona
-                //     de llamas, gema azul, ojos de fase — 2 pases propios) ===
-                AethonSierpeArte.Cabeza(pos, rotC, _aberturaMandibula,
-                    t, Phase, visibilidad, esc);
-
-                // v6.50.31 — FIX (la pareja de «Excepción silenciosa» del
-                // client.log: Begin-sobre-Begin de FNA, CADA frame de la
-                // pelea): Cabeza() sale con el lote ABIERTO — su CerrarBatch
-                // aplica el CONTRATO DE CURACIÓN y reabre vanilla — pero este
-                // PreDraw asumía que seguía CERRADO (lo cerró la sonda de
-                // arriba, línea ~1090). Con las fauces ABIERTAS reventaba el
-                // Begin de FlushAdditive (había quads: sin early-return);
-                // con las fauces CERRADAS reventaba el Begin de la corona de
-                // abajo (el Flush hacía early-return sin cerrar nada). La
-                // sonda de la casa cierra aquí: cero first-chance, los DOS
-                // caminos quedan limpios.
-                VFXCore.CerrarLoteSiAbierto();
 
                 // === 2. LA GARGANTA ARDIENDO (la carga del aliento — el
                 //     búfer de quads de VFXCore, coords de MUNDO; v6.50.32:

@@ -174,7 +174,19 @@ namespace AethonMod.Content.Effects
 
             Texture2D glow = VFXCore.SoftGlow;          // el pincel de las cápsulas
             Texture2D estrella = AethonSierpeArte.EstrellaDelFondo();
-            Texture2D orbe = VFXCore.GlowOrb;            // el cráneo del leviatán
+            Texture2D orbe = VFXCore.GlowOrb;            // respaldo del cráneo
+            // v6.50.33 — LOS SPRITES DEL DRAGÓN para el leviatán: la
+            // llegada del fondo ya tiene la cara del jefe de verdad.
+            Texture2D cabezaSlifer = null;
+            Texture2D mandibulaSlifer = null;
+            Texture2D colaSlifer = null;
+            try
+            {
+                cabezaSlifer = AethonSierpeArte.Cabeza();
+                mandibulaSlifer = AethonSierpeArte.Mandibula();
+                colaSlifer = AethonSierpeArte.Cola();
+            }
+            catch { }
             Vector2 origenGlow = new Vector2(glow.Width, glow.Height) * 0.5f;
 
             float t = Main.GlobalTimeWrappedHourly;
@@ -225,12 +237,24 @@ namespace AethonMod.Content.Effects
                         float desvanecer = (1f - prof / 26f) * 0.28f + 0.42f;
                         Color silueta = new Color(104, 60, 54) * (_alpha * desvanecer);
 
-                        // LA CÁPSULA del hueso (el cuerpo de vacío del fondo).
-                        float largo = (esCola ? 46f : 64f) * esc;
-                        float ancho = (esCola ? 14f : 30f) * esc;
-                        sb.Draw(glow, pos, null, silueta, rumbo, origenGlow,
-                            new Vector2((largo + ancho) / glow.Width, ancho * 1.9f / glow.Height),
-                            SpriteEffects.None, 0f);
+                        if (esCola && colaSlifer != null)
+                        {
+                            // v6.50.33 — LA COLA DE VERDAD: la pala espatulada del
+                            // set, silueteada a granate (la punta del sprite mira
+                            // ATRÁS: el rumbo del hueso la deja arrastrando).
+                            sb.Draw(colaSlifer, pos, null, silueta, rumbo,
+                                new Vector2(colaSlifer.Width, colaSlifer.Height) * 0.5f,
+                                esc * 0.78f, SpriteEffects.None, 0f);
+                        }
+                        else
+                        {
+                            // LA CÁPSULA del hueso (el cuerpo de vacío del fondo).
+                            float largo = (esCola ? 46f : 64f) * esc;
+                            float ancho = (esCola ? 14f : 30f) * esc;
+                            sb.Draw(glow, pos, null, silueta, rumbo, origenGlow,
+                                new Vector2((largo + ancho) / glow.Width, ancho * 1.9f / glow.Height),
+                                SpriteEffects.None, 0f);
+                        }
                     }
 
                     // === v6.50.27 — EL LEVIATÁN DE LA LLEGADA (la
@@ -270,30 +294,45 @@ namespace AethonMod.Content.Effects
 
                             if (b == 0)
                             {
-                                // EL CRÁNEO ORBE (u = +1: la cabeza guía el
-                                // nado — la sierpe llega MIRANDO) + sus DOS
-                                // HOJAS de mandíbula abiertas en V.
+                                // v6.50.33 — EL CRÁNEO DEL DRAGÓN (u = +1: la
+                                // cabeza guía el nado): el SPRITE REAL de la
+                                // cabeza silueteado a granate (la máscara de
+                                // acero y los colmillos se adivinan en la
+                                // lejanía) + LA MANDÍBULA ABIERTA girada —
+                                // el leviatán llega RUGIENDO. Respaldo: el
+                                // orbe de siempre si el asset no vive.
                                 float uH = 1f;
                                 float yH = baseY
                                     - MathF.Sin(uH * MathF.PI * 0.9f + 0.4f) * 90f
                                     + MathF.Sin(t * 0.9f + uH * 2.6f) * 16f;
                                 float xC = cx + anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
-                                float tam = 96f * 2.3f;
-                                sb.Draw(orbe, new Vector2(xC, yH), null,
-                                    new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.46f),
-                                    rumboL, new Vector2(orbe.Width, orbe.Height) * 0.5f,
-                                    tam / orbe.Width, SpriteEffects.None, 0f);
-                                for (int mm = -1; mm <= 1; mm += 2)
+                                if (cabezaSlifer != null)
                                 {
-                                    float dirM = rumboL + mm * 0.62f;
-                                    Vector2 piv = new Vector2(xC, yH) +
-                                        new Vector2(MathF.Cos(rumboL), MathF.Sin(rumboL)) * 30f;
-                                    Vector2 finM = piv + new Vector2(MathF.Cos(dirM), MathF.Sin(dirM)) * 74f;
-                                    sb.Draw(glow, (piv + finM) * 0.5f, null,
-                                        new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.40f),
-                                        dirM, origenGlow,
-                                        new Vector2(84f / glow.Width, 26f / glow.Height),
-                                        SpriteEffects.None, 0f);
+                                    float tamH = 96f * 2.3f;
+                                    float escH = tamH / cabezaSlifer.Width;
+                                    Vector2 origH = new Vector2(cabezaSlifer.Width, cabezaSlifer.Height) * 0.5f;
+                                    sb.Draw(cabezaSlifer, new Vector2(xC, yH), null,
+                                        new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.46f),
+                                        rumboL, origH, escH, SpriteEffects.None, 0f);
+                                    if (mandibulaSlifer != null)
+                                    {
+                                        // la bisagra del cráneo (local 100,94) manda
+                                        Vector2 bis = new Vector2(xC, yH) +
+                                            new Vector2(100f - origH.X, 94f - origH.Y)
+                                                .RotatedBy(rumboL) * escH;
+                                        sb.Draw(mandibulaSlifer, bis, null,
+                                            new Color(96, 54, 48) * (_alpha * _llegadaVista * 0.42f),
+                                            rumboL + 0.35f, new Vector2(12f, 50f),
+                                            escH, SpriteEffects.None, 0f);
+                                    }
+                                }
+                                else
+                                {
+                                    float tam = 96f * 2.3f;
+                                    sb.Draw(orbe, new Vector2(xC, yH), null,
+                                        new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.46f),
+                                        rumboL, new Vector2(orbe.Width, orbe.Height) * 0.5f,
+                                        tam / orbe.Width, SpriteEffects.None, 0f);
                                 }
                             }
                             else

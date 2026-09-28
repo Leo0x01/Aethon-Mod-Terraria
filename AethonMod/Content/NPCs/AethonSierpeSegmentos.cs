@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -139,34 +140,47 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// v6.50.32 — SLIFER, EL DRAGÓN DEL CIELO (la petición: «te daré
-        /// unas referencias y mediante código debes replicarlo… debe
-        /// ser solo código»): cada vértebra es la CARNE de dos tonos
-        /// de las referencias (AethonSierpeArte.Vertebra): lomo
-        /// ESCARLATA + VIENTRE de pizarra con su filo, la SOMBRA DE
-        /// PLACA que lee el cuerpo segmentado y LA VELA DORSAL cada 2
-        /// huesos (desde el 4º — el cuello va limpio hasta el hombro
-        /// donde anclan LAS ALAS). El TAPER es el de siempre: 31 px
-        /// junto al cráneo → 9 en la punta de mundo.
+        /// v6.50.33 — EL ANILLO DEL DRAGÓN (la petición: «podrias crear
+        /// sprite segmentados basados en slifer… como Devourer of Gods de
+        /// Calamity sprites por segmento»): cada vértebra pinta SU SPRITE
+        /// (AethonSierpeVertebra — chevrones de escama, aleta dorsal en
+        /// teja, vientre de pizarra, filado frontal) con LA CURVA DE
+        /// ESCALA anatómica: CUELLO fino junto al cráneo (0.50 — el
+        /// cráneo manda y el ojo queda libre) → TORSO (1.0 del 6º al
+        /// 14º) → PUNTA de látigo (0.36 en la 33). Los anillos se
+        /// solapan 64 px (HUECO) y el filado claro del borde frontal lee
+        /// «anillos encadenados» — el truco del DoG.
         /// </summary>
         public override bool PreDraw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.dedServ || NPC.hide) return false; // escondido: nada que pintar
             try
             {
+                var tex = AethonSierpeArte.Vertebra();
+                if (tex == null) return false;
                 int idx = (int)NPC.ai[3];
-                float visibilidad = 1f - (NPC.alpha / 255f);
-                // EL TAPER: el radio del hueso (graso junto al cráneo,
-                // afilado hacia el fondo).
-                float radio = MathHelper.Lerp(31f, 9f, Math.Clamp(idx / (float)(UMBRAL_FONDO - 1), 0f, 1f)) * ESC;
-                // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2).
+
+                // LA CURVA DE ESCALA: cuello → torso → punta.
+                float cuello = MathHelper.Lerp(0.50f, 1f, Math.Min(1f, idx / 6f));
+                float punta = idx <= 6 ? 1f
+                    : MathHelper.Lerp(1f, 0.36f, Math.Clamp((idx - 6) / 27f, 0f, 1f));
+                float escala = cuello * punta * ESC;
+
+                // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2) — el
+                // sprite es HORIZONTAL: gira con el rumbo del viaje.
                 float rumbo = NPC.rotation - MathHelper.PiOver2;
 
-                AethonSierpeArte.Vertebra(NPC.Center - Main.screenPosition, rumbo,
-                    radio, Main.GlobalTimeWrappedHourly, idx, visibilidad);
+                // EL SUELO DE LUZ (el mismo del cráneo: la columna nunca
+                // es un recorte negro — y el fade de nacimiento/muerte).
+                float visibilidad = 1f - (NPC.alpha / 255f);
+                Color c = Color.Lerp(drawColor, Color.White, 0.45f) * visibilidad;
+
+                spriteBatch.Draw(tex, NPC.Center - screenPos, null, c, rumbo,
+                    new Vector2(tex.Width, tex.Height) * 0.5f, escala,
+                    SpriteEffects.None, 0f);
             }
             catch { }
-            return false; // el arte de código ya se dibujó aquí
+            return false; // el sprite del anillo ya se dibujó aquí
         }
 
         public override bool? CanBeHitByProjectile(Projectile projectile) => true;
