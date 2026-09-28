@@ -631,12 +631,29 @@ namespace AethonMod.Content.NPCs
         //  LAS FASES — LOS ATAQUES SALEN DE LA CABEZA (BocaPos)
         // ==================================================================
 
-        /// <summary>La boca abierta: donde nacen TODOS sus ataques.</summary>
+        /// <summary>La boca abierta: donde nacen TODOS sus ataques (v6.50.32 — la
+        /// punta del hocico nuevo: los colmillos sable quedan ATRÁS del disparo).</summary>
         private Vector2 BocaPos()
         {
             Vector2 adelante = NPC.velocity.SafeNormalize(Vector2.UnitY);
             if (NPC.velocity == Vector2.Zero) adelante = -Vector2.UnitY.RotatedBy(NPC.rotation);
-            return NPC.Center + adelante * (58f * AethonSierpeCuerpo.ESC);  // más allá de los colmillos (ESC 1.4)
+            return NPC.Center + adelante * (72f * AethonSierpeCuerpo.ESC);  // más allá de los colmillos (ESC 1.4)
+        }
+
+        // v6.50.32 — EL ANCLAJE DE LAS ALAS: recorre la cadena (ai[0] = el
+        // hijo que me sigue) hasta la n-ésima vértebra — el HOMBRO del
+        // Dragón del Cielo es la 3ª vértebra (v6.50.32: el cuello limpio).
+        private NPC Segmento(int n)
+        {
+            int idx = (int)NPC.ai[0];
+            for (int i = 0; i < n && idx >= 0 && idx < Main.maxNPCs; i++)
+            {
+                NPC s = Main.npc[idx];
+                if (s == null || !s.active) return null;
+                idx = (int)s.ai[0];
+            }
+            return (idx >= 0 && idx < Main.maxNPCs && Main.npc[idx] != null && Main.npc[idx].active)
+                ? Main.npc[idx] : null;
         }
 
         private void Fase1PolvoEstelar()
@@ -1099,10 +1116,25 @@ namespace AethonMod.Content.NPCs
                 float t = Main.GlobalTimeWrappedHourly;
                 float cabeceo = MathF.Sin(t * 1.15f + NPC.whoAmI) * 0.045f;
 
-                // === 1. LA CABEZA DE LA SIERPE ESTELAR (el arte de código:
-                //     2 pases propios — vacío + luz, la sonda de la casa) ===
+                // === 0. LAS ALAS DEL DRAGÓN DEL CIELO (v6.50.32 — LA
+                //     NOVEDAD de las referencias: dos alas de murciélago
+                //     inmensas arqueadas al cielo, naciendo del HOMBRO —
+                //     la 3ª vértebra — POR DETRÁS de todo: el PreDraw de la
+                //     cabeza corre PRIMERO (whoAmI más bajo) y las alas
+                //     quedan tras el cuello y el cuerpo, como en el anime) ===
                 Vector2 pos = NPC.Center - Main.screenPosition;
-                AethonSierpeArte.Cabeza(pos, NPC.rotation + cabeceo, _aberturaMandibula,
+                float rotC = NPC.rotation + cabeceo;
+                float rumboC = rotC - MathHelper.PiOver2;
+                Vector2 frenteDibujo = new(MathF.Cos(rumboC), MathF.Sin(rumboC));
+                Vector2 hombro = pos - frenteDibujo * (152f * esc);
+                NPC segHombro = Segmento(2);
+                if (segHombro != null) hombro = segHombro.Center - Main.screenPosition;
+                AethonSierpeArte.Alas(hombro, rumboC, t, Phase, visibilidad, esc);
+
+                // === 1. LA CABEZA DE SLIFER (el arte de código de las
+                //     referencias: hocico de acero, colmillos sable, corona
+                //     de llamas, gema azul, ojos de fase — 2 pases propios) ===
+                AethonSierpeArte.Cabeza(pos, rotC, _aberturaMandibula,
                     t, Phase, visibilidad, esc);
 
                 // v6.50.31 — FIX (la pareja de «Excepción silenciosa» del
@@ -1119,13 +1151,14 @@ namespace AethonMod.Content.NPCs
                 VFXCore.CerrarLoteSiAbierto();
 
                 // === 2. LA GARGANTA ARDIENDO (la carga del aliento — el
-                //     búfer de quads de VFXCore, coords de MUNDO) ===
+                //     búfer de quads de VFXCore, coords de MUNDO; v6.50.32:
+                //     BRASA granate — la Thunder Force del Dragón del Cielo) ===
                 float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 190f))) : 1f;
                 if (_aberturaMandibula > 0.15f)
                 {
                     float carga = _aliento == 1 ? Math.Min(1f, _tickAliento / 40f) : 0f;
                     VFXCore.Quad(BocaPos(),
-                        OroLuz * ((0.30f + 0.55f * carga) * _aberturaMandibula * 2f * alphaLuz),
+                        new Color(255, 128, 48) * ((0.30f + 0.55f * carga) * _aberturaMandibula * 2f * alphaLuz),
                         new Vector2(26f * esc, 30f * esc) * (1f + carga * 0.5f), NPC.rotation);
                 }
                 VFXCore.FlushAdditive(null, false);
@@ -1169,9 +1202,9 @@ namespace AethonMod.Content.NPCs
                         4 => new Color(120, 70, 200),
                         _ => OroLuz,
                     };
-                    OrbitaLib.AnilloFino(posC, 64f * esc, t * 0.8f,
+                    OrbitaLib.AnilloFino(posC, 76f * esc, t * 0.8f,
                         OrbitaLib.Tint(colorA, 0.38f * alphaLuz));
-                    OrbitaLib.AnilloFino(posC, 92f * esc, -t * 0.5f,
+                    OrbitaLib.AnilloFino(posC, 106f * esc, -t * 0.5f,
                         OrbitaLib.Tint(VioletaLuz, 0.25f * alphaLuz));
 
                     // v6.50.26 — EL TELEGRAPH DEL RAM: el anillo de aviso

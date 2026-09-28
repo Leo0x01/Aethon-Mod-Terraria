@@ -132,22 +132,22 @@ namespace AethonMod.Content.NPCs
             NPC.hide = alFondo;
             if (alFondo) NPC.damage = 0;     // lejanos: no muerden
 
-            // LA LUZ que la columna deja en el mundo.
+            // LA LUZ que la columna deja en el mundo (v6.50.32 — el
+            // resplandor GRANATE del Dragón del Cielo: antes dorada).
             if (!alFondo)
-                Lighting.AddLight(NPC.Center, new Vector3(0.35f, 0.26f, 0.10f));
+                Lighting.AddLight(NPC.Center, new Vector3(0.30f, 0.10f, 0.05f));
         }
 
         /// <summary>
-        /// v6.50.27 — EL ARTE NUEVO DE LA SIERPE ESTELAR (el reporte:
-        /// «el arte del jefe se ve horrible, deberías cambiarlo por
-        /// completo, algo al estilo de la sierpe en el arma La Sierpe
-        /// Estelar»): el hueso SPRITE muere — cada vértebra es AHORA
-        /// CRIATURA DE CÓDIGO (AethonSierpeArte.Vertebra): el cuerpo de
-        /// vacío del pase alfa (la silueta con contraste) + la Luz de la
-        /// columna (velo, espina, apófisis estelar, centrum ardiendo) +
-        /// LAS ALETAS de varillas en los huesos 6, 14 y 22 (alternando
-        /// lado — el rasgo de pez de La Sierpe Estelar). El TAPER es
-        /// muscular: 31 px junto al cráneo → 9 en la punta de mundo.
+        /// v6.50.32 — SLIFER, EL DRAGÓN DEL CIELO (la petición: «te daré
+        /// unas referencias y mediante código debes replicarlo… debe
+        /// ser solo código»): cada vértebra es la CARNE de dos tonos
+        /// de las referencias (AethonSierpeArte.Vertebra): lomo
+        /// ESCARLATA + VIENTRE de pizarra con su filo, la SOMBRA DE
+        /// PLACA que lee el cuerpo segmentado y LA VELA DORSAL cada 2
+        /// huesos (desde el 4º — el cuello va limpio hasta el hombro
+        /// donde anclan LAS ALAS). El TAPER es el de siempre: 31 px
+        /// junto al cráneo → 9 en la punta de mundo.
         /// </summary>
         public override bool PreDraw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
@@ -161,14 +161,9 @@ namespace AethonMod.Content.NPCs
                 float radio = MathHelper.Lerp(31f, 9f, Math.Clamp(idx / (float)(UMBRAL_FONDO - 1), 0f, 1f)) * ESC;
                 // LA DIRECCIÓN del hueso (tML guarda el rumbo + π/2).
                 float rumbo = NPC.rotation - MathHelper.PiOver2;
-                // LAS ALETAS: en los huesos 6, 14 y 22 (lado alternado).
-                float ladoAleta = 0f;
-                if (idx == 6) ladoAleta = 1f;
-                else if (idx == 14) ladoAleta = -1f;
-                else if (idx == 22) ladoAleta = 1f;
 
                 AethonSierpeArte.Vertebra(NPC.Center - Main.screenPosition, rumbo,
-                    radio, Main.GlobalTimeWrappedHourly, idx, visibilidad, ladoAleta);
+                    radio, Main.GlobalTimeWrappedHourly, idx, visibilidad);
             }
             catch { }
             return false; // el arte de código ya se dibujó aquí

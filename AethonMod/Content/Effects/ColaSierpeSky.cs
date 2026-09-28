@@ -219,10 +219,11 @@ namespace AethonMod.Content.Effects
                         float esc = (esCola ? 0.58f : 0.66f - 0.14f * prof / 13f) * 1.5f;
                         float rumbo = rot - MathHelper.PiOver2; // la dirección del hueso
 
-                        // El TINTE del horizonte: hueso azul-violeta, translúcido,
+                        // El TINTE del horizonte: hueso granate-gris (v6.50.32 — el
+                        // Dragón del Cielo tiñe de escarlata su propia lejanía), translúcido,
                         // más tenue cuanto más atrás (atmósfera de verdad).
                         float desvanecer = (1f - prof / 26f) * 0.28f + 0.42f;
-                        Color silueta = new Color(88, 80, 120) * (_alpha * desvanecer);
+                        Color silueta = new Color(104, 60, 54) * (_alpha * desvanecer);
 
                         // LA CÁPSULA del hueso (el cuerpo de vacío del fondo).
                         float largo = (esCola ? 46f : 64f) * esc;
@@ -264,7 +265,7 @@ namespace AethonMod.Content.Effects
                             float rumboL = rotL - MathHelper.PiOver2;
 
                             float escL = 2.6f - MathF.Abs(u) * 0.55f; // encoge a la cola
-                            Color sil = new Color(80, 72, 112) *
+                            Color sil = new Color(96, 54, 48) *
                                 (_alpha * _llegadaVista * 0.42f);
 
                             if (b == 0)
@@ -279,7 +280,7 @@ namespace AethonMod.Content.Effects
                                 float xC = cx + anchoCielo * 0.5f + MathF.Sin(t * 0.35f) * 60f;
                                 float tam = 96f * 2.3f;
                                 sb.Draw(orbe, new Vector2(xC, yH), null,
-                                    new Color(92, 84, 128) * (_alpha * _llegadaVista * 0.46f),
+                                    new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.46f),
                                     rumboL, new Vector2(orbe.Width, orbe.Height) * 0.5f,
                                     tam / orbe.Width, SpriteEffects.None, 0f);
                                 for (int mm = -1; mm <= 1; mm += 2)
@@ -289,7 +290,7 @@ namespace AethonMod.Content.Effects
                                         new Vector2(MathF.Cos(rumboL), MathF.Sin(rumboL)) * 30f;
                                     Vector2 finM = piv + new Vector2(MathF.Cos(dirM), MathF.Sin(dirM)) * 74f;
                                     sb.Draw(glow, (piv + finM) * 0.5f, null,
-                                        new Color(92, 84, 128) * (_alpha * _llegadaVista * 0.40f),
+                                        new Color(108, 62, 56) * (_alpha * _llegadaVista * 0.40f),
                                         dirM, origenGlow,
                                         new Vector2(84f / glow.Width, 26f / glow.Height),
                                         SpriteEffects.None, 0f);

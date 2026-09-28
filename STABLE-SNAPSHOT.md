@@ -1,65 +1,76 @@
-# AethonMod — ESTADO ACTUAL (v6.50.31)
+# AethonMod — ESTADO ACTUAL (v6.50.32)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-28 (tag `v6.50.31`, release publicada).
+> Última actualización: 2026-09-28 (tag `v6.50.32`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.31`.
-- **v6.50.31 = FIXES FORENSES del client.log del usuario** (sesión 28/9/2026, 8
-  «Excepción silenciosa» de 3 familias):
-  1. **AethonBoss.PreDraw — la pareja Begin-sobre-Begin** (fauces abiertas →
-     FlushAdditive reventaba; fauces cerradas → el Begin de la corona): una línea
-     (`VFXCore.CerrarLoteSiAbierto()` tras `Cabeza()`) cura los DOS caminos. La
-     garganta ardiendo, la corona, las motas y el arco del aliento vuelven a dibujarse.
-  2. **AuraLib.Reiniciar — ThreadStateException + leak de GPU** en cada salida de
-     mundo (OnWorldUnload corre en el ThreadPool): funeral de texturas al hilo
-     principal via `Main.QueueMainThreadAction` (patrón v5.87) + `DesecharLote`.
-  3. **FormatException "Expected Re-Logic file format"** = un `.plr` corrupto del
-     jugador (NO del mod): borrar el dañado de `Players\`.
-  4. **Simetría hjson**: 18 claves activadas y traducidas en es-ES (TownNPCMood del
-     Testigo ×8, Labels de config ×9, HollowSanctumBiome ×2 — más 4 DisplayName de
-     los proyectiles de las armas de rayo).
-- **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL (verify.csproj
-  reconstruido tras el wipe del sandbox — mismo hash 666f6996 que el build del usuario + el `-build` real).
-- **`.tmod` v6.50.31**: 399 entradas, 6.328.798 bytes, tabla auditada byte a byte; DLL
-  inspeccionada (DesecharLote/QueueMainThreadAction/CerrarLoteSiAbierto presentes,
-  DisposeRuido/DisposeFlipbooks vivos para device-lost).
-- **hjson es-ES/en-US simétricos** (auditados en el paquete con parser propio).
+  "el repo de github siempre es el verdadero"): tag `v6.50.32`.
+- **v6.50.32 = SLIFER, EL DRAGÓN DEL CIELO** (el arte del jefe replicado de las
+  referencias del usuario — 100 % código, cero sprites):
+  1. **LOS PINCELES DE CÓDIGO**: triángulo (apuntiable, anclado a la base) y rombo
+     generados EN RUNTIME desde píxeles (auto-regenerables si el device los pierde) —
+     la mejora de precisión que pidió el usuario.
+  2. **LA CABEZA**: cráneo en cuña ESCARLATA + HOCICO PLATEADO (40 %) con
+     cel-shading + DOS COLMILLOS SABLE de marfil + mandíbula de acero GIRANDO con
+     la abertura + dientes-clavija + OJOS almendrados (dorado → cian fase 3 →
+     violeta) + LA GEMA AZUL (rombo) + CORONA DE 5 LLAMAS con puntas a brasa.
+  3. **EL CUERPO DE DOS TONOS**: lomo escarlata + vientre de pizarra + sombra de
+     placa (segmentado) + VELAS DORSALES cada 2 huesos; luz de la columna granate.
+  4. **LAS ALAS DE MURCIÉLAGO** (nuevas): 4 struts + paño granate festoneado +
+     garra de marfil + brasa del borde; aleteo 1.35 Hz con paño que rezaga; ancladas
+     a la 3ª vértebra, arqueadas AL CIELO, detrás de todo el cuerpo.
+  5. **Cohesión**: garganta a brasa granate, anillos 76/106·esc, leviatán del fondo
+     granate-gris (ojos dorados intactos).
+- **v6.50.31 = FIXES FORENSES del client.log** (verificados por el usuario: "bien,
+  ya no hay errores"): Begin-sobre-Begin del PreDraw, funeral de texturas al hilo
+  principal, .plr corrupto documentado, simetría hjson ×18.
+- **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
+  (verify.csproj + el `-build` real, mismo hash 666f6996 que el build del usuario).
+- **`.tmod` v6.50.32**: 6.330.804 bytes, md5 4a774bef…, 399 entradas auditadas byte
+  a byte (tabla→22485, suma comprimida EXACTA, las 399 inflan a su tamaño declarado);
+  DLL inspeccionada (11 firmas nuevas PRESENTES, 5 muertas AUSENTES).
+- **hjson es-ES/en-US simétricos** (621=621 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.31>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.32>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.31 está implementada y build-verificada, pero **el usuario aún
+Toda la cadena v6.50.24 → v6.50.32 está implementada y build-verificada, pero **el usuario aún
 no la ha probado en partida**. Checklist:
 
-1. **EL JEFE AETHON — LOS FIXES v6.50.31 (LO PRIMERO)**: pelear al jefe y verificar que (a) NO
-   aparecen «Excepción silenciosa» nuevas en el client.log, (b) la GARGANTA ARDIENDO se ve al
-   cargar el aliento, (c) la CORONA DE ANILLOS + las 3 motas orbitantes se ven, (d) el ARCO DE
-   RAYO boca→presa durante el Aliento Primordial, (e) al SALIR DEL MUNDO (guardar y salir) NO
-   hay ThreadStateException en el log (y el juego no engorda la VRAM con los días).
-2. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
+1. **EL JEFE AETHON — EL ARTE DE SLIFER (v6.50.32, LO PRIMERO)**: pelear al jefe y verificar el
+   DRAGÓN DEL CIELO: (a) la CABEZA en cuña escarlata con el HOCICO PLATEADO y los DOS
+   COLMILLOS SABLE de marfil que sobresalen de la boca cerrada, (b) LA CORONA DE 5 LLAMAS
+   con puntas a brasa y EL DIAMANTE AZUL de la frente, (c) LOS OJOS dorados que se vuelven
+   CIAN en fase 3 y violeta en la 4+, (d) el CUERPO DE DOS TONOS (lomo escarlata + vientre
+   de pizarra) con las velas dorsales cada 2 segmentos, (e) LAS DOS ALAS DE MURCIÉLAGO
+   aleteando despacio detrás del cuello (paño granate translúcido, garra de marfil, se
+   arquean al CIELO), (f) la mandíbula ABRIÉNDOSE al rugir con el fuego interior en las
+   fauces, (g) que TODO se ve tras el terreno al bucear (behindTiles) y que NO hay
+   «Excepción silenciosa» nuevas en el client.log.
+2. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
+   al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
+3. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
    (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
    recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-3. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
+4. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
    ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
    paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
    invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-4. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
+5. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
    opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-5. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
+6. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
    (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-6. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-7. **El jefe Aethon**: la avalancha del EMERGER murió (una sola volleada por emersión), el
-   arte estelar 100 % código (eclipse + fauces + 46 vértebras + leviatán de llegada + fondo
-   ColaSierpeSky), la barra de vida con icono, el RAM y el Aliento.
-8. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
+7. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
+8. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
+   emersión), la barra de vida con icono, el RAM y el Aliento.
+9. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
    disco plano (los velos de la capa de UI murieron en v6.50.28).
-9. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
-   no hacen "cortes" ni clipean.
+10. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
+    no hacen "cortes" ni clipean.
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
 
