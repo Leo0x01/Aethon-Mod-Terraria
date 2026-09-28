@@ -3,6 +3,9 @@
 Este documento explica cómo recibir las versiones del mod de forma fiable y
 cómo compilarlo en un `.tmod` jugable en tModLoader 2026.07.3.0 (.NET 8).
 
+> **Versión actual: 6.50.30** (tag y release publicados). El mod vive en la
+> subcarpeta `AethonMod/` del repo — 297 `.cs`, ~106.500 líneas, sin dependencias.
+
 ---
 
 ## ⚠️ LA REGLA DE ORO (léela una vez, ahórrate mundos corruptos)
@@ -39,7 +42,8 @@ Rutas habituales:
 3. Cópialo a la carpeta **Mods** (tabla de arriba), reemplazando cualquier
    `AethonMod.tmod` viejo.
 4. tModLoader → **Mods** → activa *Aethon, la Luz Primordial*.
-5. **Verifica en la lista de mods que la versión sea la del release.**
+5. **Verifica en la lista de mods que la versión sea la del release**
+   (la 6.50.30 a día de hoy).
 
 El `.tmod` ya lleva dentro el nombre `AethonMod` y la versión correcta:
 es la vía sin riesgo de identidad.
@@ -130,15 +134,54 @@ nombre del mod lo pone la carpeta que le pases: pásale la subcarpeta
 
 ---
 
+## 🏭 Pipeline de verificación de la casa (DESARROLLO — cómo se genera cada release)
+
+La cadena OBLIGATORIA antes de publicar cualquier versión (ver STABLE-SNAPSHOT.md
+y el worklog del entorno de desarrollo):
+
+1. **verify.csproj** — compilar los 297 `.cs` contra las 9 referencias del tML
+   real (`/home/z/.verify/verify.csproj`): tModLoader.dll, FNA, ReLogic,
+   TerrariaHooks, Steamworks.NET, log4net, CsvHelper, MP3Sharp, NVorbis.
+   Gate: **0 errores / 0 warnings**.
+2. **`-build` REAL** — `tModLoader -build <subcarpeta AethonMod>` headless
+   (compila y empaqueta sin abrir ventana; el entorno de desarrollo usa
+   `/tmp/tml` con el tML 2026.07.3.0 y `/tmp/sdk` con el dotnet SDK 8.0.404
+   — si el sandbox se resetea, re-descargar ambos y regenerar verify.csproj).
+3. **Auditoría del `.tmod`** — parsear la tabla de entradas byte a byte
+   (7-bit lengths desde el offset 317): contar entradas, tamaño, y que la
+   versión del `build.txt` viajó bien.
+4. **Inspección de la DLL** — extraer el ensamblado del `.tmod` (magic MZ) y
+   verificar que las firmas nuevas de la versión están presentes (y las
+   muertas, ausentes).
+5. **hjson simétricos** — es-ES y en-US con las mismas claves en el paquete.
+6. **Servidor headless** — arrancar el server dedicado con el mod: debe cargar
+   SIN excepciones (Sandboxing → Adding → Configuring → Finalizing → menú de
+   mundos).
+7. **Entrega** — commit con mensaje detallado + **tag** `vX.YY.ZZ` + **push**
+   + **GitHub Release** con el `AethonMod.tmod` adjunto (verificar que la
+   descarga desde el CDN es byte-idéntica) + entrada en el worklog + actualizar
+   README/STABLE-SNAPSHOT/CHANGES (script `update-changes.sh`).
+
+> Los `.md`, `.py`, `tools/`, `research/` y `_masters/` están en
+> `buildIgnore` — NUNCA entran al `.tmod`. Actualizar docs NO requiere bump de
+> versión del mod.
+
+---
+
 ## 🧪 Testeo en juego
 
 1. Compila/instala (arriba) y activa el mod.
-2. Entra a un mundo (un jugador): recibes **LA BOLSA DEL ARSENAL
-   PRIMORDIAL** — el kit de pruebas completo en una sola ranura.
-3. Clic derecho sobre la bolsa: se despliega TODO el arsenal.
-4. Mata enemigos con daño Ranged/Melee/Magic → el fragmento se "imprime".
-5. **K** = árbol de habilidades · **J** = códex de memoria · **F8** = panel
-   de diagnóstico VFX del probador.
+2. Entra a un mundo (un jugador): recibes **LAS 18 BOLSAS** de categorías
+   (más 99 Training Dummies) — el kit de pruebas completo.
+3. Clic derecho sobre una bolsa: despliega su familia completa con semántica
+   de garantía (solo lo que falte; reabrirla repone).
+4. Mata enemigos con el Grimorio en la barra rápida → gana XP y nivel.
+5. **F8** = panel de diagnóstico VFX del probador (fps, presupuesto, lotes).
+6. **La Carnada del Grimorio** (bolsa del Probador): clic derecho cicla el
+   número de oleadas (1..10, 11 = El Juicio), clic izquierdo provoca LA FURIA
+   al instante para probar las oleadas.
+7. Sube el grimorio a nivel 25+ y NO mates nada durante ~5 minutos para ver
+   el hambre natural y la furia automática.
 
 ---
 
@@ -169,20 +212,22 @@ nombre del mod lo pone la carpeta que le pases: pásale la subcarpeta
 
 ---
 
-## 📁 Estructura del repo (v6.50.14)
+## 📁 Estructura del repo (v6.50.30)
 
 ```
 Aethon-Mod-Terraria/      <- raíz del repo (docs y herramientas FUERA del mod)
 ├── AethonMod/            <- EL MOD: esto es lo que se compila/empaqueta
-│   ├── build.txt           # Metadatos: ¡AQUÍ vive la versión!
+│   ├── build.txt           # Metadatos: ¡AQUÍ vive la versión! (6.50.30)
 │   ├── description.txt
 │   ├── icon.png / icon_small.png
 │   ├── AethonMod.cs        # Punto de entrada + guardián de identidad
 │   ├── AethonMod.csproj    # Solo IDE
-│   ├── Content/            # 282 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
-│   └── Localization/       # es-ES / en-US (hjson)
-├── README.md / COMPILACION.md / CHANGES.md / …   # Documentación del repo
+│   ├── Content/            # 296 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
+│   └── Localization/       # es-ES / en-US (hjson, ~2290 líneas c/u)
+├── README.md / COMPILACION.md / CHANGES.md / CARACTERISTICAS.md /
+│   DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md        # Documentación del repo
 ├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh  # repo -> ModSources
+├── update-changes.sh       # CHANGES.md <- último commit
 ├── _masters/               # Sprites maestros (referencia, NO del mod)
-└── tools/                  # Generadores de assets (desarrollo, NO del mod)
+└── tools/                  # Generadores de assets + mocks VLM (desarrollo)
 ```
