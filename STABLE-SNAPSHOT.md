@@ -1,45 +1,64 @@
-# AethonMod — ESTADO ACTUAL (v6.50.30)
+# AethonMod — ESTADO ACTUAL (v6.50.31)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-28 (commit `1d26716`, tag `v6.50.30`, release publicada).
+> Última actualización: 2026-09-28 (tag `v6.50.31`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
-- **GitHub = fuente de la verdad**, local == remoto (verificado con fetch en la sesión del
-  2026-09-28): commit `1d26716`, tag `v6.50.30`.
+- **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
+  "el repo de github siempre es el verdadero"): tag `v6.50.31`.
+- **v6.50.31 = FIXES FORENSES del client.log del usuario** (sesión 28/9/2026, 8
+  «Excepción silenciosa» de 3 familias):
+  1. **AethonBoss.PreDraw — la pareja Begin-sobre-Begin** (fauces abiertas →
+     FlushAdditive reventaba; fauces cerradas → el Begin de la corona): una línea
+     (`VFXCore.CerrarLoteSiAbierto()` tras `Cabeza()`) cura los DOS caminos. La
+     garganta ardiendo, la corona, las motas y el arco del aliento vuelven a dibujarse.
+  2. **AuraLib.Reiniciar — ThreadStateException + leak de GPU** en cada salida de
+     mundo (OnWorldUnload corre en el ThreadPool): funeral de texturas al hilo
+     principal via `Main.QueueMainThreadAction` (patrón v5.87) + `DesecharLote`.
+  3. **FormatException "Expected Re-Logic file format"** = un `.plr` corrupto del
+     jugador (NO del mod): borrar el dañado de `Players\`.
+  4. **Simetría hjson**: 18 claves activadas y traducidas en es-ES (TownNPCMood del
+     Testigo ×8, Labels de config ×9, HollowSanctumBiome ×2 — más 4 DisplayName de
+     los proyectiles de las armas de rayo).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL (verify.csproj
-  con los 297 `.cs` + el `-build` real de tML).
-- **`.tmod` v6.50.30**: 399 entradas, 6.325.717 bytes, tabla auditada byte a byte; DLL
-  inspeccionada (firmas nuevas presentes: `NacerJefeRaro`, `LosSeis`, `GuardianesJuicio`,
-  `JefeRaro` — `LosSiete` ausente).
-- **hjson es-ES/en-US simétricos** (auditados en el paquete).
+  reconstruido tras el wipe del sandbox — mismo hash 666f6996 que el build del usuario + el `-build` real).
+- **`.tmod` v6.50.31**: 399 entradas, 6.328.798 bytes, tabla auditada byte a byte; DLL
+  inspeccionada (DesecharLote/QueueMainThreadAction/CerrarLoteSiAbierto presentes,
+  DisposeRuido/DisposeFlipbooks vivos para device-lost).
+- **hjson es-ES/en-US simétricos** (auditados en el paquete con parser propio).
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.30>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.31>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.30 está implementada y build-verificada, pero **el usuario aún
+Toda la cadena v6.50.24 → v6.50.31 está implementada y build-verificada, pero **el usuario aún
 no la ha probado en partida**. Checklist:
 
-1. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
+1. **EL JEFE AETHON — LOS FIXES v6.50.31 (LO PRIMERO)**: pelear al jefe y verificar que (a) NO
+   aparecen «Excepción silenciosa» nuevas en el client.log, (b) la GARGANTA ARDIENDO se ve al
+   cargar el aliento, (c) la CORONA DE ANILLOS + las 3 motas orbitantes se ven, (d) el ARCO DE
+   RAYO boca→presa durante el Aliento Primordial, (e) al SALIR DEL MUNDO (guardar y salir) NO
+   hay ThreadStateException en el log (y el juego no engorda la VRAM con los días).
+2. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
    (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
    recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-2. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
+3. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
    ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
    paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
    invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-3. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
+4. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
    opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-4. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
+5. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
    (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-5. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-6. **El jefe Aethon**: la avalancha del EMERGER murió (una sola volleada por emersión), el
+6. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
+7. **El jefe Aethon**: la avalancha del EMERGER murió (una sola volleada por emersión), el
    arte estelar 100 % código (eclipse + fauces + 46 vértebras + leviatán de llegada + fondo
    ColaSierpeSky), la barra de vida con icono, el RAM y el Aliento.
-7. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
+8. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
    disco plano (los velos de la capa de UI murieron en v6.50.28).
-8. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
+9. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
    no hacen "cortes" ni clipean.
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
@@ -67,8 +86,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.30 en juego** con el checklist de arriba (lo más barato: bajar el
-   `.tmod` del release; o `ACTUALIZAR-FUENTE.bat` + Build & Reload).
+1. **El usuario prueba v6.50.31 en juego** con el checklist de arriba — la pelea contra Aethon
+   es LA prueba de los fixes (garganta + corona + arco visibles y log limpio).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -99,6 +118,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.31** | ✅ Build-verificada, ⏳ en juego | FIXES FORENSES del client.log: Begin-sobre-Begin del jefe (garganta/corona/arco no se dibujaban) · funeral de texturas al hilo principal (leak de GPU) · simetría hjson (18 claves es-ES) |
 | **v6.50.30** (`1d26716`) | ✅ Build-verificada, ⏳ en juego | El dado del invierno (Deerclops 1 %) · diálogos de devorar por jefe · voz en silencio · avalancha del emerger |
 | v6.50.29 | ✅ Build-verificada | **EL MOTOR DE OLEADAS DE VANILLA** (5ª y buena) + indicador de oleada |
 | v6.50.28 | ✅ | Muerte del velo: el destello circular plano de la UI |

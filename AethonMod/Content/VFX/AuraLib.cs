@@ -2076,14 +2076,74 @@ namespace AethonMod.Content.VFX
         /// <summary>
         /// v6.49 — LA PURGA de emergencia (Unloaded/reinicios): emisores
         /// fuera, reloj a cero, el ruido y los flipbooks al funeral.
+        ///
+        /// v6.50.31 — EL FUNERAL AL HILO PRINCIPAL (la ThreadStateException
+        /// del client.log): OnWorldUnload corre en el hilo del ThreadPool
+        /// (WorldGen.SaveAndQuitCallBack → SystemLoader) y FNA3D exige el
+        /// Dispose de texturas en el hilo principal — el Dispose directo
+        /// lanzaba «most FNA3D audio/graphics functions must be called on
+        /// the main thread» (capturada por el catch propio: puro ruido en
+        /// el log) y las texturas QUEDABAN VIVAS: leak de GPU en CADA
+        /// salida de mundo. EL PATRÓN v5.87 DE LA CASA (MediaResLib.Detach
+        /// / BlackHoleLensSystem / AethonMod.SoltarGpu): capturar las
+        /// referencias en locales, anular los campos YA (el mundo nuevo no
+        /// debe ver los arrays viejos ni un instante) y encolar el funeral
+        /// via Main.QueueMainThreadAction — cola drenada en Main.Update
+        /// cada frame, incluso durante la pantalla de carga del reload; el
+        /// closure captura solo los arrays de FNA, así que la acción es
+        /// autosuficiente aunque esta clase ya esté descargada. Unload del
+        /// mod (hilo principal incluido) usa la MISMA vía: drena al
+        /// siguiente Update, cero costo.
         /// </summary>
         public static void Reiniciar()
         {
             _emisores.Clear();
             _emisorJugador = null;
             _ultimaBarrida = 0; // v6.49 — el reloj del barrido también
-            DisposeRuido();
-            DisposeFlipbooks();
+            // v6.50.31 — capturar y despegar (el funeral va encolado).
+            Texture2D[] ruido = _ruido; _ruido = null;
+            Texture2D[] flipCuerpo = _flipCuerpo; _flipCuerpo = null;
+            Texture2D[] flipLlamas = _flipLlamas; _flipLlamas = null;
+            Texture2D[] flipBruma = _flipBruma; _flipBruma = null;
+            try
+            {
+                Main.QueueMainThreadAction(() =>
+                {
+                    try
+                    {
+                        DesecharLote(ruido);
+                        DesecharLote(flipCuerpo);
+                        DesecharLote(flipLlamas);
+                        DesecharLote(flipBruma);
+                    }
+                    catch
+                    {
+                        // Defensivo: una excepción aquí subiría hasta
+                        // Main.Update() y rompería el bucle del juego.
+                    }
+                });
+            }
+            catch
+            {
+                // Encolado imposible (apagado total del proceso): se
+                // abandonan las referencias — el driver libera los
+                // recursos del proceso al terminar de todos modos.
+            }
+        }
+
+        /// <summary>
+        /// v6.50.31 — el funeral de un lote de texturas (nulo-seguro,
+        /// lámina a lámina): la mitad encolada de los viejos
+        /// DisposeRuido/DisposeFlipbooks, reutilizable por cualquier lote.
+        /// </summary>
+        private static void DesecharLote(Texture2D[] lote)
+        {
+            if (lote == null) return;
+            for (int i = 0; i < lote.Length; i++)
+            {
+                try { lote[i]?.Dispose(); } catch { }
+                lote[i] = null;
+            }
         }
     }
 }

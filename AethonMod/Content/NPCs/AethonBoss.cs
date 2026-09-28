@@ -1105,6 +1105,19 @@ namespace AethonMod.Content.NPCs
                 AethonSierpeArte.Cabeza(pos, NPC.rotation + cabeceo, _aberturaMandibula,
                     t, Phase, visibilidad, esc);
 
+                // v6.50.31 — FIX (la pareja de «Excepción silenciosa» del
+                // client.log: Begin-sobre-Begin de FNA, CADA frame de la
+                // pelea): Cabeza() sale con el lote ABIERTO — su CerrarBatch
+                // aplica el CONTRATO DE CURACIÓN y reabre vanilla — pero este
+                // PreDraw asumía que seguía CERRADO (lo cerró la sonda de
+                // arriba, línea ~1090). Con las fauces ABIERTAS reventaba el
+                // Begin de FlushAdditive (había quads: sin early-return);
+                // con las fauces CERRADAS reventaba el Begin de la corona de
+                // abajo (el Flush hacía early-return sin cerrar nada). La
+                // sonda de la casa cierra aquí: cero first-chance, los DOS
+                // caminos quedan limpios.
+                VFXCore.CerrarLoteSiAbierto();
+
                 // === 2. LA GARGANTA ARDIENDO (la carga del aliento — el
                 //     búfer de quads de VFXCore, coords de MUNDO) ===
                 float alphaLuz = _muriendo ? (0.4f * (1f - Math.Min(1f, _tickMuerte / 190f))) : 1f;
