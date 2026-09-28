@@ -19,12 +19,13 @@ namespace AethonMod.Content.NPCs
     ///   narradores, un mismo hecho: el libro dice "comí" y el Testigo
     ///   dice "yo lo vi caer". Cada charla nueva revela LA SIGUIENTE
     ///   página del cuento (el cursor CronicaNarrada persiste).
-    /// · LA TIENDA DE ESENCIAS: vende las almas de los SIETE guardianes
-    ///   de las oleadas (EsenciaDeJefeItem — un nivel completo por alma,
-    ///   10 monedas de platino cada una)… a quien SOBREVIVIÓ a la
-    ///   oleada 10 de la furia (DerrotaOleada10). El botón siempre está
-    ///   a la vista (el probador lo quiere a mano); el Testigo solo
-    ///   abre el cajón al que aguantó el festín completo.
+    /// · LA TIENDA DE ESENCIAS: vende las almas de los guardianes de
+    ///   las oleadas (SEIS de oleada + Deerclops, el raro del 1% —
+    ///   EsenciaDeJefeItem, un nivel completo por alma, 10 monedas de
+    ///   platino cada una)… a quien SOBREVIVIÓ a la oleada 10 de la
+    ///   furia (DerrotaOleada10). El botón siempre está a la vista
+    ///   (el probador lo quiere a mano); el Testigo solo abre el
+    ///   cajón al que aguantó el festín completo.
     ///
     /// v6.47 — LAS BURBUJAS: habla por EcoLib al acercarte (violeta,
     /// sin rugido). El chat clásico (GetChat) cuenta la crónica y el
@@ -62,8 +63,9 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// EL CAJÓN DE LAS ALMAS: las SIETE esencias de los guardianes de
-        /// las oleadas — cada una sube UN NIVEL COMPLETO al Grimorio
+        /// EL CAJÓN DE LAS ALMAS: las SIETE esencias (SEIS guardianes de
+        /// oleada + Deerclops, el raro del 1%) — cada una sube UN NIVEL
+        /// COMPLETO al Grimorio
         /// (EsenciaDeJefeItem, precio 10 de platino en su SetDefaults).
         /// La CONDICIÓN de la casa: solo las compra quien derrotó la
         /// oleada 10 de la furia (ShardPlayer.DerrotaOleada10).

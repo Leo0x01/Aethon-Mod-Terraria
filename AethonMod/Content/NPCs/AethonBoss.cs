@@ -368,13 +368,22 @@ namespace AethonMod.Content.NPCs
             Vector2 hacia = (pred - NPC.Center).SafeNormalize(Vector2.UnitY) * NPC.velocity.Length();
             NPC.velocity = Vector2.Lerp(NPC.velocity, hacia, 0.015f);
 
-            // LA BOCA DISPARA AL EMERGER (la firma de cada fase).
-            switch (Phase)
+            // LA BOCA DISPARA AL EMERGER — UNA VEZ (la firma de cada fase).
+            // v6.50.30 — FIX (EL ALUVIÓN DEL EMERGER): el switch viejo
+            // disparaba CADA TICK del lunge (hasta 100 ticks: 700 pernos
+            // en fase 1, 100 tajos+rugidos+anuncios en la 5 — la
+            // avalancha de proyectiles y el grito repetido del reporte).
+            // AHORA: UNA sola volleada al tick 12 (medio lunge, la boca
+            // ya fuera de la tierra). La fase 5 NO dispara aquí — su
+            // ElRecordar ya lo suelta Fase5Reconocimiento (1 vez, tick 3).
+            if (_tickEstado == 12)
             {
-                case 1: VolleadaEspiral(); break;
-                case 2: VolleadaNebulosa(target); break;
-                case 3: VolleadaDoble(target); break;
-                case 5: ElRecordar(target); break;
+                switch (Phase)
+                {
+                    case 1: VolleadaEspiral(); break;
+                    case 2: VolleadaNebulosa(target); break;
+                    case 3: VolleadaDoble(target); break;
+                }
             }
 
             // el ápice: cuando el impulso vertical muere → el ARCO.

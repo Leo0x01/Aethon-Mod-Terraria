@@ -284,7 +284,15 @@ namespace AethonMod.Content.VFX
 
         /// <summary>
         /// Avanza la voz activa un tick (la llama EcoSistema.UpdateUI,
-        /// solo cliente). Al nacer una voz suena el rugido.
+        /// solo cliente). v6.50.30 — LA VOZ EN SILENCIO: la letra del
+        /// usuario («el sonido que hace el libro al hablar es molesto,
+        /// no debería hacer sonido al hablar… ese que tiene como el
+        /// grito de los jefes») — el libro HABLA, no ruge: la voz nace
+        /// SIN sonido (el flag Rugido queda como API heredada para el
+        /// cable de EcoRed, pero NINGUNA voz lo reproduce ya). Los
+        /// rugidos que se oyen en el festín son de los JEFES que
+        /// LLEGAN (SpawnJefeOleada/NacerGuardian — el suyo propio), no
+        /// de la voz del libro.
         /// </summary>
         public static void Update()
         {
@@ -295,8 +303,7 @@ namespace AethonMod.Content.VFX
                     if (_cola.Count == 0) return;
                     _activo = _cola.Dequeue();
                     _activo.Edad = 0;
-                    if (_activo.Rugido)
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar);
+                    // v6.50.30 — sin rugido: las palabras no gritan.
                 }
                 _activo.Edad++;
                 if (_activo.Edad >= _activo.TicksTipeo + _activo.TicksMuestra + _activo.TicksFundido)

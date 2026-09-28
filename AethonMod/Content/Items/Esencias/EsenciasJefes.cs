@@ -88,13 +88,19 @@ namespace AethonMod.Content.Items.Esencias
             }
 
             sl.SubirNivelDirecto(libro, 1);
-            // LA VOZ del libro probando el alma (variantes por jefe —
-            // la clave general con 3 muestras para no repetir).
+            // LA VOZ del libro probando el alma — v6.50.30 — LA QUE
+            // CORRESPONDE AL GUARDIÁN (la letra del usuario: «los
+            // diálogos deben corresponder con el jefe al que pertenecen
+            // la esencia»): cada esencia lleva SU ClaveJefe y la voz
+            // prueba la variante de SU jefe (3 muestras para no
+            // repetir) — el Rey sabe a dulce, el Ojo a vigilia, la
+            // escarcha a invierno… cada alma con su propio sabor.
             // v6.50.1 — FIX (LA VOZ EN LA PANTALLA EQUIVOCADA): EcoLib.Hablar
             // hablaba en la pantalla de QUIEN EJECUTA el server (el host oía
             // el libro ajeno; en dedicado la voz moría sin render). La voz
             // es del PORTADOR: viaja por EcoRed a SU cliente.
-            EcoRed.HablarVarianteAlPortador(player, "Mods.AethonMod.Esencia.Sabor", 3,
+            EcoRed.HablarVarianteAlPortador(player,
+                "Mods.AethonMod.Esencia.Sabor." + ClaveJefe, 3,
                 new Color(245, 196, 81), rugido: false, escala: 0.55f);
 
             // El alma se disuelve en chispas doradas.
@@ -134,7 +140,12 @@ namespace AethonMod.Content.Items.Esencias
             return 0;
         }
 
-        /// <summary>Las SIETE esencias, en orden de oleadas (la tienda del Testigo).</summary>
+        /// <summary>
+        /// Las esencias de los guardianes, en orden de oleadas (la tienda
+        /// del Testigo): SEIS de oleada + Deerclops (v6.50.30: ya no es
+        /// guardián probable — el raro del 1%, y su alma es la más cara
+        /// de la vitrina).
+        /// </summary>
         public static int[] Todas()
         {
             return new int[]

@@ -551,17 +551,20 @@ namespace AethonMod.Content.Systems
         // ==================================================================
 
         /// <summary>
-        /// LOS SIETE GUARDIANES de las oleadas (el reparto completo de
-        /// zonas) — TODOS juntos en la ESPECIAL, cada uno vestido de
-        /// ×15 y con el aura del JUICIO.
+        /// LOS SEIS GUARDIANES de las oleadas (el reparto de zonas sin el
+        /// invierno caminante) — TODOS juntos en la ESPECIAL, cada uno
+        /// vestido de ×15 y con el aura del JUICIO.
+        /// v6.50.30 — DEERCLOPS FUERA (la letra del usuario: «quita al
+        /// Derrclops como jefe probable»): el Juicio son SEIS. Su esencia
+        /// sigue siendo de los guardianes (la rareza la hace CARA) y su
+        /// único camino es EL DADO del 1%.
         /// </summary>
-        private static int[] LosSiete()
+        private static int[] LosSeis()
         {
             return new int[]
             {
                 NPCID.KingSlime,
                 NPCID.EyeofCthulhu,
-                NPCID.Deerclops,
                 NPCID.QueenBee,
                 NPCID.EaterofWorldsHead,
                 NPCID.BrainofCthulhu,
@@ -570,10 +573,16 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
+        /// v6.50.30 — EL NÚMERO DE GUARDIANES DEL JUICIO (los que nacen
+        /// en la ESPECIAL y los que cuenta el indicador).
+        /// </summary>
+        private const int GuardianesJuicio = 6;
+
+        /// <summary>
         /// ARRANCA EL JUICIO: la voz del libro anuncia el festín final y
         /// los guardianes empiezan a nacer — DOS EN PANTALLA desde el
         /// primer segundo (la letra del usuario) y el resto se suma cada
-        /// 15 s hasta los siete.
+        /// 15 s hasta los seis (v6.50.30: el Juicio sin Deerclops).
         /// </summary>
         private static void ArrancarEspecial(Player hambriento)
         {
@@ -605,8 +614,8 @@ namespace AethonMod.Content.Systems
         {
             try
             {
-                if (_spawneados >= 7) return;
-                int tipo = LosSiete()[_spawneados];
+                if (_spawneados >= GuardianesJuicio) return;
+                int tipo = LosSeis()[_spawneados];
 
                 // v6.50.29 — LA CUNA DEL GUARDIÁN: el BORDE DEL CUADRO (el
                 // patrón de las invasiones de vanilla) — alternando lados y
@@ -639,14 +648,14 @@ namespace AethonMod.Content.Systems
 
         /// <summary>
         /// EL JUICIO EN MARCHA: cada 15 s nace OTRO guardián hasta los
-        /// siete (siempre ≥ 2 en pantalla mientras vivan). El festín
+        /// SEIS (siempre ≥ 2 en pantalla mientras vivan). El festín
         /// termina cuando cae el ÚLTIMO — entonces la saciedad especial
         /// y el perdón de la hambre.
         /// </summary>
         private static void FaseEspecial(Player hambriento)
         {
-            // LA SUMA: otro guardián cada 15 s (hasta 7).
-            if (_spawneados < 7)
+            // LA SUMA: otro guardián cada 15 s (hasta 6).
+            if (_spawneados < GuardianesJuicio)
             {
                 _ticksSuma++;
                 if (_ticksSuma >= TicksSumaEspecial)
@@ -673,7 +682,7 @@ namespace AethonMod.Content.Systems
                     vivos++;
             }
 
-            if (_spawneados >= 7 && vivos == 0)
+            if (_spawneados >= GuardianesJuicio && vivos == 0)
             {
                 // EL FINAL DEL JUICIO: la saciedad especial (la variante la
                 // reparte la autoridad y viaja por EcoRed).
@@ -801,9 +810,15 @@ namespace AethonMod.Content.Systems
         ///   · playa y cielo → OJO DE CTHULHU (el vigía que vuela)
         ///   · granito/mármol/subsuelo → el MAL DEL MUNDO (Devorador o
         ///     Cerebro según el mundo)
-        ///   · nieve → Deerclops · jungla → Abeja Reina · corrupción →
-        ///     Devorador · carmesí → Cerebro · mazmorra → Skeletron ·
-        ///     infierno → el Ojo los caza.
+        ///   · nieve → Skeletron (el hueso congelado) · jungla → Abeja
+        ///     Reina · corrupción → Devorador · carmesí → Cerebro ·
+        ///     mazmorra → Skeletron · infierno → el Ojo los caza.
+        /// v6.50.30 — DEERCLOPS YA NO ES GUARDIÁN PROBABLE (la letra del
+        ///     usuario: «quita al Derrclops como jefe probable, has que
+        ///     sea un jefe que salga con una probalidad de 1% en
+        ///     oleadas»): salió del reparto de zonas y del Juicio — el
+        ///     invierno caminante AHORA solo llega por EL DADO: 1% por
+        ///     oleada (NacerJefeRaro, anunciado aparte).
         /// El Muro de Carne sigue EXCLUIDO a propósito (una furia
         /// involuntaria no abre el hardmode).
         /// </summary>
@@ -814,14 +829,18 @@ namespace AethonMod.Content.Systems
             // EL OJO DE CTHULHU HUYE DEL SOL (su IA de vanilla lo manda a
             // despegar en cuanto amanece y se des-spawnea): DE DÍA el
             // guardián es uno que NO duerme — donde el ojo no puede, la
-            // CORONA manda (y en la superficie la paridad no muere:
-            // alterna REY/DEERCLOPS, los dos guardías que no huyen).
+            // CORONA manda. v6.50.30 — DEERCLOPS FUERA DEL REPARTO (la
+            // letra del usuario): la nieve la guarda ahora el HUESO
+            // CONGELADO (Skeletron: no duerme, no huye del sol) y la
+            // paridad de superficie de día pasa a REY/SKELETRON. El
+            // invierno caminante SOLO llega por EL DADO: 1% por oleada
+            // (NacerJefeRaro).
             bool deDia = Main.dayTime;
 
             if (p.ZoneUnderworldHeight)
                 return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu; // el ojo los caza en el infierno; de día la corona reina en el fuego
             if (p.ZoneDungeon) return NPCID.SkeletronHead;          // v6.48: SIN hora — el guardián no duerme
-            if (p.ZoneSnow) return NPCID.Deerclops;                  // Deerclops no mira el sol
+            if (p.ZoneSnow) return NPCID.SkeletronHead;             // v6.50.30: el hueso congelado — la nieve no duerme
             if (p.ZoneJungle) return NPCID.QueenBee;                 // la colmena no duerme
             if (p.ZoneCorrupt) return NPCID.EaterofWorldsHead;
             if (p.ZoneCrimson) return NPCID.BrainofCthulhu;
@@ -839,9 +858,9 @@ namespace AethonMod.Content.Systems
                 return WorldGen.crimson ? NPCID.BrainofCthulhu : NPCID.EaterofWorldsHead;
 
             // SUPERFICIE: por PARIDAD de oleada (sin hora — la 1 Rey, la 2 Ojo…
-            // de día la paridad sigue VIVA: Rey/Deerclops, los que no huyen).
+            // de día la paridad sigue VIVA: Rey/Skeletron, los que no huyen).
             if (deDia)
-                return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.Deerclops;
+                return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.SkeletronHead;
             return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.EyeofCthulhu;
         }
 
@@ -901,8 +920,53 @@ namespace AethonMod.Content.Systems
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Jefe",
                     new Color(226, 64, 64), jefe.FullName, _oleadaActual + 1);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
+
+                // v6.50.30 — EL DADO DEL INVIERNO (la letra del usuario:
+                // «has que sea un jefe que salga con una probalidad de 1%
+                // en oleadas»): Deerclops YA NO es guardián de zona ni del
+                // Juicio — cada vez que nace un jefe de oleada se tira UN
+                // dado de 100: al 1, EL INVIERNO CAMINANTE se sienta a la
+                // mesa como INVITADO EXTRA (borde opuesto, sello de la
+                // MISMA oleada, su esencia y sus dientes de escarcha). No
+                // cuenta para la fase: la oleada se paga con el guardián
+                // oficial — el raro es el POSTRE.
+                if (Main.rand.Next(100) == 0)
+                    NacerJefeRaro(hambriento, lado);
             }
             catch { _bossIdx = -1; _tipoJefeOleada = -1; }
+        }
+
+        /// <summary>
+        /// v6.50.30 — EL JEFE RARO DE LAS OLEADAS: DEERCLOPS, el invierno
+        /// caminante. 1% por oleada (el dado de SpawnJefeOleada). Nace en
+        /// el BORDE OPUESTO del guardián oficial, vestido con el sello de
+        /// la MISMA oleada (stats ×(k+1), XP ×(k+1), aura y dientes de
+        /// escarcha) y deja caer SU ESENCIA. Es un INVITADO: la oleada se
+        /// completa con el guardián oficial — si el raro sobrevive al
+        /// festín, el mundo se encarga de él al terminar (CheckActive
+        /// vuelve a la normalidad cuando la furia muere).
+        /// </summary>
+        private static void NacerJefeRaro(Player hambriento, int ladoGuardian)
+        {
+            try
+            {
+                // el lado OPUESTO del guardián: el festín rodea.
+                Vector2 pos = PosicionBordeJefe(hambriento, ladoGuardian < 0 ? 1 : -1);
+
+                int idx = NPC.NewNPC(hambriento.GetSource_FromAI(), (int)pos.X, (int)pos.Y,
+                    NPCID.Deerclops);
+                NPC raro = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
+                if (raro == null || !raro.active) return;
+
+                raro.GetGlobalNPC<OleadaNPC>().Marcar(raro, _oleadaActual, jefe: true);
+                raro.netUpdate = true;
+
+                // EL ANUNCIO DE LA RAREZA (color propio: la escarcha).
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.JefeRaro",
+                    new Color(137, 178, 212), raro.FullName, _oleadaActual);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, raro.Center);
+            }
+            catch { }
         }
 
         // ==================================================================
@@ -1039,9 +1103,9 @@ namespace AethonMod.Content.Systems
             int puntos, requeridos;
             if (faseVista == (int)Fase.Especial)
             {
-                // EL JUICIO: la barra cuenta los guardianes CAÍDOS de los 7
-                // (los sellos viajan por SendExtraAI — el conteo funciona
-                // también en el cliente remoto).
+                // EL JUICIO: la barra cuenta los guardianes CAÍDOS de los
+                // SEIS (los sellos viajan por SendExtraAI — el conteo
+                // funciona también en el cliente remoto).
                 int vivos = 0;
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
@@ -1051,8 +1115,8 @@ namespace AethonMod.Content.Systems
                     if (sello != null && sello.EsDeOleada && sello.EsEspecial &&
                         sello.EsJefeDeOleada) vivos++;
                 }
-                puntos = Math.Max(0, 7 - vivos);
-                requeridos = 7;
+                puntos = Math.Max(0, GuardianesJuicio - vivos);
+                requeridos = GuardianesJuicio;
             }
             else if (enCliente)
             {
