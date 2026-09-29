@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.41 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.42 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,12 +14,33 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.41)
+## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.42)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.41`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.42`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 395 entradas auditado.
+- **v6.50.42 — EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo)**:
+  «el sol avanza como está previsto, pero al llegar al centro no queda fijo
+  en el centro y el jefe no aparece» — DOS síntomas, **UNA sola causa**,
+  cazada y VERIFICADA en servidor headless (la llegada completa corre en
+  el CI con un truco de cliente-fantasma que enciende el loop del
+  servidor): la materialización de la v6.50.41 usaba la matemática
+  pantalla→mundo **en la máquina que corre la IA**, y el servidor no tiene
+  pantalla (`screenWidth=0`, matrices identidad) → el jefe nacía en
+  **(0, ~5516), FUERA DEL MUNDO, y MORÍA** al materializarse → el espejo
+  soltaba el reloj → el sol seguía su curso. AHORA
+  `PosicionBajoElSol` es **server-segura** (sobre el jugador — la cámara
+  lo centra: «bajo el sol» es el cielo de SU pantalla), exacta en cliente,
+  **NUNCA enterrada** (mínimo 300 px sobre el jugador) y **NUNCA fuera del
+  mundo** (clamp a los límites). Además **EL CERROJO DEL MEDIODÍA**: con
+  el climax/la pelea vivos, un reloj que se pasó de 27001 VUELVE
+  activamente a 27000 — jamás la vuelta entera a 110×. **Validación
+  empírica completa**: carrera → aterrizaje 27000 exacto → materialización
+  visible (−420 px sobre el jugador) → fade → pelea de 360 t con
+  `time=27000.00` y `rate=0.00` congelados → deriva inyectada (32400)
+  curada al 27000 en el mismo tick → reanudación del reloj al irse el
+  jefe.
 - **v6.50.41 — EL MEDIO DÍA DEL DESTELLO** (cuatro pedidos en uno):
   (1) **LA CAPA DE OSCURIDAD MUERE DE RAÍZ** — «mejor quita la capa de
   oscuridad, no se ve nada bien, se ve horrible»: VeloLib (el velo bajo la

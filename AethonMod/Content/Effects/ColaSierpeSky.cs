@@ -461,6 +461,11 @@ namespace AethonMod.Content.Effects
 
         public override void OnWorldUnload()
         {
+            // v6.50.42 — el servidor NUNCA registró el cielo (Load hace
+            // return con dedServ): desactivarlo ahí era un error de
+            // «effect not found» en cada descarga de mundo (ruido en el
+            // log del servidor, nada más).
+            if (Main.dedServ) return;
             try { SkyManager.Instance.Deactivate("AethonMod:ColaSierpe"); }
             catch { }
             try { _cielo?.Reset(); }
@@ -473,7 +478,10 @@ namespace AethonMod.Content.Effects
         /// </summary>
         public override void PostUpdateWorld()
         {
-            if (ColaSierpeSky.Descargado || Main.gameMenu) return;
+            // v6.50.42 — el cielo es un VISUAL DE CLIENTE: el servidor no
+            // lo registró (Load hace return con dedServ) y Activarlo ahí
+            // solo escupía «Unable to find effect» al log.
+            if (Main.dedServ || ColaSierpeSky.Descargado || Main.gameMenu) return;
             bool jefeVivo = false;
             try
             {

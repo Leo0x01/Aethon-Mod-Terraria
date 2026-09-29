@@ -14,6 +14,20 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.42 — EL JEFE QUE NO APARECÍA MUERE AQUÍ (reproducido y
+    /// verificado en servidor headless): la materialización BAJO el sol
+    /// de la v6.50.41 usaba la matemática pantalla→mundo EN LA MÁQUINA
+    /// QUE CORRE LA IA — en el servidor (host MP/dedicado) no hay
+    /// pantalla (screenWidth=0, matrices identidad) y la posición salía
+    /// (0, ~5500): FUERA DEL MUNDO — el jefe MORÍA al materializarse
+    /// (tick 44 del climax, ANTES del fade), el espejo dejaba de verlo,
+    /// soltaba el reloj… y el sol NO se quedaba fijo en el centro (los
+    /// DOS síntomas de la .41, una sola causa). AHORA: PosicionBajoElSol
+    /// es SEGURA en servidor (sobre el jugador — la cámara lo centra:
+    /// «bajo el sol» es el cielo de SU pantalla), exacta en cliente,
+    /// NUNCA enterrada (mínimo 300 px sobre el jugador) y NUNCA fuera
+    /// del mundo (clamp a los límites).
+    ///
     /// v6.50.41 — EL MEDIO DÍA DEL DESTELLO: «mejor quita la capa de
     /// oscuridad, no se ve nada bien, se ve horrible» (LA OSCURIDAD Y
     /// EL SOL NEGRO MUEREN — VeloLib borrada de raíz) + «el sol no se
@@ -341,7 +355,7 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// LA LLEGADA (v6.50.41) — EL MEDIO DÍA DEL DESTELLO:
+        /// LA LLEGADA (v6.50.41/.42) — EL MEDIO DÍA DEL DESTELLO:
         /// (10) EL MUNDO TIEMBLA — la tierra sacude la pantalla 2.5 s;
         /// (11) EL TIEMPO CORRE — SIN TELETRANSPORTE (v6.50.41: «el sol
         /// no se haga teletransportación… si está más allá del centro,
@@ -419,7 +433,10 @@ namespace AethonMod.Content.NPCs
                         // LA MATERIALIZACIÓN: bajo el sol, en el borde
                         // inferior de su halo (invisible aún: el fade
                         // empieza en el tick 45 y el brillo lo envuelve).
-                        NPC.Center = PosicionBajoElSol(220f);
+                        // v6.50.42 — NUNCA MÁS SIN EL target: la posición
+                        // SEGURA del servidor lo necesita (es la cámara
+                        // del jugador la que define «el cielo»).
+                        NPC.Center = PosicionBajoElSol(target, 220f);
                         NPC.netUpdate = true;
                     }
                     if (_tickEstado == 52)
@@ -455,26 +472,73 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// LA POSICIÓN BAJO EL SOL (v6.50.41): Aethon NO nace del centro
-        /// del sol — nace BAJO él, en el borde inferior de su halo. El
-        /// sol vive en el ESPACIO DEL FONDO (la réplica del decompile de
-        /// DrawSunAndMoon transformada por la matriz del fondo → píxeles
-        /// de pantalla); el jefe vive en el MUNDO: la conversión es la
-        /// INVERSA de la matriz de vista (+ screenPosition).
+        /// LA POSICIÓN BAJO EL SOL (v6.50.42 — LA CORRECCIÓN DEL JEFE
+        /// QUE NO APARECÍA). Aethon NO nace del centro del sol — nace
+        /// BAJO él, en el borde inferior de su halo. PERO la matemática
+        /// pantalla→mundo de la v6.50.41 solo existe en la máquina CON
+        /// CÁMARA (SP / cliente): en el SERVIDOR no hay pantalla
+        /// (screenWidth=0, matrices identidad) y la posición salía
+        /// (0, ~5500) — FUERA DEL MUNDO — y el jefe MORÍA al
+        /// materializarse (el espejo dejaba de verlo, soltaba el reloj
+        /// y el sol NO se quedaba fijo: los DOS síntomas de la .41).
+        ///
+        /// Las TRES REGLAS de la .42:
+        ///   1. CON PANTALLA (SP/cliente): la matemática EXACTA del sol
+        ///      (fondo→pantalla→mundo, como vanilla dibuja el sol).
+        ///   2. SIN PANTALLA (servidor): el sol del mediodía vive en el
+        ///      CENTRO del cielo DEL JUGADOR — la cámara lo sigue — así
+        ///      que «bajo el sol» es SOBRE el jugador, en el cielo de
+        ///      SU pantalla (la posición .40, probada visible).
+        ///   3. SIEMPRE: NUNCA ENTERRADO (mínimo 300 px sobre el
+        ///      jugador — el jefe nace en el CIELO, no dentro del
+        ///      terreno) y NUNCA FUERA DEL MUNDO (clamp a los límites:
+        ///      jamás otra muerte por OOB).
         /// </summary>
-        private Vector2 PosicionBajoElSol(float debajoPx)
+        private Vector2 PosicionBajoElSol(Player target, float debajoPx)
         {
-            Vector2 posSol = Vector2.Transform(PosicionSolEnCielo(),
-                Main.BackgroundViewMatrix.EffectMatrix);
-            posSol.Y += debajoPx;   // BAJO el sol — no en su centro
-            Matrix mVista = Main.GameViewMatrix.TransformationMatrix;
-            Matrix.Invert(ref mVista, out Matrix inversa);
-            Vector2 mundo = Vector2.Transform(posSol, inversa) + Main.screenPosition;
-            // LA RED DE SEGURIDAD: jamás un NaN en la posición de un jefe
-            // (se propagaría por el cable y corrompería la pelea).
-            if (!float.IsFinite(mundo.X) || !float.IsFinite(mundo.Y))
-                return NPC.Center;
-            return mundo;
+            Vector2 pos;
+            // EL GATE ES LA PANTALLA (no el netMode): el servidor dedicado
+            // NUNCA tiene pantalla (screenWidth=0); el cliente SIEMPRE.
+            bool pantallaReal = Main.screenWidth > 1 && Main.screenHeight > 1;
+            if (pantallaReal)
+            {
+                // El sol vive en el ESPACIO DEL FONDO (la réplica del
+                // decompile de DrawSunAndMoon transformada por la matriz
+                // del fondo → píxeles de pantalla); el jefe vive en el
+                // MUNDO: la conversión es la INVERSA de la matriz de
+                // vista (+ screenPosition).
+                Vector2 posSol = Vector2.Transform(PosicionSolEnCielo(),
+                    Main.BackgroundViewMatrix.EffectMatrix);
+                posSol.Y += debajoPx;   // BAJO el sol — no en su centro
+                Matrix mVista = Main.GameViewMatrix.TransformationMatrix;
+                Matrix.Invert(ref mVista, out Matrix inversa);
+                pos = Vector2.Transform(posSol, inversa) + Main.screenPosition;
+                // LA RED DE SEGURIDAD: jamás un NaN en la posición de un
+                // jefe (se propagaría por el cable y corrompería la pelea).
+                if (!float.IsFinite(pos.X) || !float.IsFinite(pos.Y))
+                    pos = target.Center + new Vector2(0f, -420f);
+            }
+            else
+            {
+                // SERVIDOR (host MP / dedicado): sin cámara no hay sol en
+                // pantalla — el sol del mediodía está en el centro del
+                // cielo DEL JUGADOR: «bajo el sol» ≈ sobre el jugador.
+                pos = target.Center + new Vector2(0f, -420f);
+            }
+
+            // NUNCA ENTERRADO: el jefe nace en el CIELO. Si el sol quedó
+            // bajo el horizonte del terreno del jugador (montaña, suelo
+            // alto — la Y del sol depende de worldSurface, no del
+            // jugador), que nazca en el cielo de TODOS MODOS.
+            float cielo = target.Center.Y - 300f;
+            if (pos.Y > cielo) pos.Y = cielo;
+
+            // NUNCA FUERA DEL MUNDO: la lección del servidor — el jefe
+            // que nace fuera de los límites MUERE (y mataba el reloj).
+            float margen = 320f;
+            pos.X = MathHelper.Clamp(pos.X, margen, Main.maxTilesX * 16f - margen);
+            pos.Y = MathHelper.Clamp(pos.Y, margen, Main.maxTilesY * 16f - margen);
+            return pos;
         }
 
         /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>

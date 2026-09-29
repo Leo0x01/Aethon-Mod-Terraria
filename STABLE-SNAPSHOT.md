@@ -1,12 +1,36 @@
-# AethonMod — ESTADO ACTUAL (v6.50.41)
+# AethonMod — ESTADO ACTUAL (v6.50.42)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.41`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.42`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.41`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.42`.
+- **v6.50.42 = EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo)** —
+  feedback sobre la .41: «el sol avanza como está previsto, pero al llegar
+  al centro no queda fijo en el centro y el jefe no aparece». DOS síntomas,
+  UNA causa, **reproducida empíricamente en servidor headless**: la
+  materialización bajo el sol computaba la posición con la matemática
+  pantalla→mundo EN LA MÁQUINA QUE CORRE LA IA — y el servidor (host MP /
+  dedicado) NO tiene pantalla (`screenWidth=0`, matrices identidad) → el
+  jefe nacía en (0, ~5516), FUERA DEL MUNDO, y MORÍA en el tick 44 del
+  climax (antes del fade) → el espejo soltaba el reloj → el sol seguía su
+  curso. **EL FIX (PosicionBajoElSol con TRES reglas)**: server-segura
+  (sobre el jugador: `target.Center + (0, −420)`, la posición .40 probada),
+  exacta en cliente, NUNCA enterrada (mínimo 300 px sobre el jugador) y
+  NUNCA fuera del mundo (clamp `[320, maxTiles·16−320]`). **EL CERROJO DEL
+  MEDIODÍA**: con el climax/pelea vivos, un reloj pasado de 27001 VUELVE
+  activamente a 27000 (jamás la vuelta entera a 110× de la .41).
+  **VALIDACIÓN EMPÍRICA COMPLETA** (la técnica nueva de la casa: el
+  CLIENTE FANTASMA — un `ISocket` falso en `Netplay.Clients[0]` enciende el
+  loop vanilla del servidor): mañana → transición → materialización −420
+  sobre el jugador → fade → **pelea de 360 t con time=27000.00/rate=0.00**
+  → deriva inyectada 32400 → CURADA a 27000 en el mismo tick → reanudación
+  al despawn; tarde → día completo por la noche (rate 110 → desaceleración
+  1.43 → aterrizaje 27000) → congelación; .tmod 6.312.422 bytes (md5
+  2cf800cee5e1429e8226174dbde1d123), 395 entradas, EOF exacto, sonda
+  JAMÁS empaquetada.
 - **v6.50.41 = EL MEDIO DÍA DEL DESTELLO** (cuatro pedidos en uno):
   (1) **LA CAPA DE OSCURIDAD MUERE DE RAÍZ** («mejor quita la capa de
   oscuridad, no se ve nada bien, se ve horrible»): VeloLib.cs +
@@ -214,61 +238,60 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.41 está implementada y build-verificada. El usuario vio la
-v6.50.39/.40 en juego y pidió: quitar la capa de oscuridad + el sol sin teletransporte +
-el destello nacido del sol + el jefe fuera del centro del sol.
-Checklist de la v6.50.41:
+Toda la cadena v6.50.24 → v6.50.42 está implementada y build-verificada. El usuario probó la
+v6.50.41 y reportó: el sol no quedaba fijo al llegar al centro + el jefe no aparecía (caza
+completa en v6.50.42 — una sola causa para ambos, verificada en headless).
+Checklist de la v6.50.42:
 
-1. **LA LLEGADA LIMPIA — EL MEDIO DÍA DEL DESTELLO (v6.50.41, EL PRIMERO)**:
-   invocar a Aethon y verificar: (a) **CERO OSCURIDAD** — el mundo NUNCA se
-   apaga (ni velo, ni sol negro, ni apagón, ni mensaje «TODA LA LUZ HA SIDO
-   CONCENTRADA…» — todo eso murió); (b) **EL SOL SIN TELETRANSPORTE**:
-   invocarlo EN LA TARDE (sol pasado el centro) y ver la carrera COMPLETA —
-   el sol sigue su tarde, el OCASO, la NOCHE ENTERA (la luna barre el cielo),
-   el AMANECER y la mañana del nuevo día hasta que el sol SE POSA en el
-   centro con frenada progresiva (~12-14 s, timelapse legible — JAMÁS un
-   salto, JAMÁS hacia atrás); invocarlo DE MAÑANA: directo al centro;
-   invocarlo DE NOCHE: la noche corre y el alba llega sola; (c) **EL
-   DESTELLO NACE DEL SOL**: en el climax, un BRILLO RADIAL centrado EN EL
-   SOL que crece hasta inundar la pantalla y se difumina hasta ser
-   TRANSPARENTE justo en los bordes (nada de flash blanco de pantalla
-   completa); (d) **EL SOL NO SE APAGA**: sigue visible y ardiendo TODO el
-   combate (clavado en el centro mientras la luz viva); (e) **AETHON NO
-   NACE DEL CENTRO DEL SOL**: se materializa BAJO él, en el borde inferior
-   de su halo, envuelto en el pico del destello — y luego desciende a su
-   órbita de pelea; (f) el temblor del acto 1 + los destellos del cielo +
-   las siete columnas lejanas + la ventana siguiendo al sol durante la
-   carrera (todo lo heredado que SIGUE vivo).
-2. **EL JEFE AETHON — LO HEREDADO VIVO**: (a) MÁS GRANDE (el sol de código
+1. **EL JEFE APARECE Y EL SOL SE QUEDA FIJO (v6.50.42, EL PRIMERO)**:
+   invocar a Aethon (en SP y, si se puede, en host MP) y verificar:
+   (a) **EL SOL LLEGA Y SE QUEDA**: la carrera como siempre (tarde → noche
+   completa → amanecer → mediodía, o mañana directo) y al llegar al
+   centro **QUEDA CLAVADO** — ya NO sigue su curso: el jefe VIVE y el
+   mediodía es eterno mientras la pelea dure; (b) **AETHON SE
+   MATERIALIZA**: tras el destello del sol, el jefe APARECE (fade) EN EL
+   CIELO sobre el jugador — visible siempre (nunca enterrado, nunca fuera
+   del mundo) — y luego desciende a su órbita de pelea; (c) al matarlo (o
+   si muere el jugador), el sol RECUPERA su curso desde el mediodía; (d)
+   el resto de la llegada heredada (temblor, destello radial del sol,
+   ventana del cielo, columnas lejanas) sigue vivo; (e) sin excepciones
+   nuevas en el client.log.
+2. **LA LLEGADA LIMPIA — EL MEDIO DÍA DEL DESTELLO (v6.50.41, lo heredado
+   que YA se vio bien)**: (a) CERO OSCURIDAD (todo eso murió); (b) el sol
+   sin teletransporte (tarde → noche → amanecer → se POSA; mañana →
+   directo); (c) el destello radial naciendo DEL SOL, difuminado a
+   transparente en los bordes; (d) el sol NUNCA se apaga; (e) el jefe no
+   nace del centro del sol.
+3. **EL JEFE AETHON — LO HEREDADO VIVO**: (a) MÁS GRANDE (el sol de código
    ×1.5 — núcleo 130 px); (b) LOS SEIS ATAQUES (juicio/rayo/nova/cruz/
    destello/eclipse — el ECLIPSE sigue encogiendo SU propia luz y poniendo
    el cielo violeta mientras dura el ATAQUE); (c) LA MUERTE: la contracción,
    EL ESTALLIDO final CEGANDO, el sol RECUPERANDO su curso y el anuncio
    «La luz ESTALLA y su resplandor REGRESA al mundo…»; (d) que NO hay
    excepciones nuevas en el client.log.
-3. **EL COMPILE SIN CIERRES (v6.50.39)**: compilar el mod en tModLoader
+4. **EL COMPILE SIN CIERRES (v6.50.39)**: compilar el mod en tModLoader
    (Develop Mods → Build & Reload) VARIAS veces seguidas — el juego YA NO se
    cierra (y ahora con aún MENOS superficie: la oscuridad entera fue
    borrada).
-4. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
+5. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
-5. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
+6. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
    (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
    recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-6. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
+7. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
    ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
    paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
    invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-7. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
+8. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
    opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-8. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
+9. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
    (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-9. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-10. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
+10. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
+11. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
     emersión), la barra de vida con icono, el RAM y el Aliento.
-11. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
+12. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
     disco plano (los velos de la capa de UI murieron en v6.50.28).
-12. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
+13. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
     no hacen "cortes" ni clipean.
 
 
@@ -297,10 +320,10 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.41 en juego** con el checklist de arriba — LA
-   PRUEBA DEL FIX: el sol SIN teletransporte (en la tarde → día completo por
-   la noche), el destello radial nacido del sol y Aethon materializándose
-   BAJO él, con CERO oscuridad.
+1. **El usuario prueba v6.50.42 en juego** con el checklist de arriba — LA
+   PRUEBA DEL FIX: el jefe APARECE tras el destello (en el cielo sobre el
+   jugador) y el sol SE QUEDA clavado en el centro toda la pelea (en SP y,
+   si se puede, en host MP — el bug vivía en el servidor).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -331,7 +354,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.41** | ✅ Build-verificada, ⏳ en juego | EL MEDIO DÍA DEL DESTELLO (cuatro pedidos): (1) LA CAPA DE OSCURIDAD MUERE DE RAÍZ (VeloLib + VeloDona borradas; fuera el sol negro, las luces, el aviso del Grimorio y el flash de pantalla completa — paquete 396→395) · (2) EL SOL SIN TELETRANSPORTE DE VERDAD (bug de la v6.50.40: la tarde disparaba el aterrizaje al instante y el sol saltaba HACIA ATRÁS; ventana [26999, 27001] + restante hasta el PRÓXIMO mediodía POR LA NOCHE: tarde → ocaso → noche completa → amanecer → mediodía, 110× máx con aterrizaje — simulado en 5 escenarios, jamás hacia atrás) · (3) EL DESTELLO NACE DEL SOL (brillo radial centrado en él, difuminado a TRANSPARENTE en los bordes — y el sol NO se apaga) · (4) AETHON NO NACE DEL CENTRO DEL SOL (se materializa BAJO él vía la inversa de la matriz de vista; acto 13 = EL DESCENSO) |
+| **v6.50.42** | ✅ Build-verificada + validada en headless, ⏳ en juego | EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo) — feedback de la .41: «el sol avanza como está previsto, pero al llegar al centro no queda fijo y el jefe no aparece»: UNA causa para ambos — la materialización usaba la matemática pantalla→mundo en la máquina que corre la IA y el servidor NO tiene pantalla → el jefe nacía FUERA DEL MUNDO y moría en el tick 44 del climax → el espejo soltaba el reloj → el sol seguía su curso. REPRODUCIDO en servidor headless (la técnica del CLIENTE FANTASMA: un `ISocket` falso enciende el loop vanilla del servidor) y VERIFICADO el fix: PosicionBajoElSol server-segura (sobre el jugador), exacta en cliente, NUNCA enterrada (≥300 px sobre el jugador), NUNCA fuera del mundo (clamp) · EL CERROJO DEL MEDIODÍA (un reloj pasado de 27001 VUELVE a 27000; jamás la vuelta entera) · limpieza ColaSierpe en servidor |
+| **v6.50.41** | ✅ Build-verificada, ⏳ probada (con bug cazado) | EL MEDIO DÍA DEL DESTELLO (cuatro pedidos): (1) LA CAPA DE OSCURIDAD MUERE DE RAÍZ (VeloLib + VeloDona borradas; fuera el sol negro, las luces, el aviso del Grimorio y el flash de pantalla completa — paquete 396→395) · (2) EL SOL SIN TELETRANSPORTE DE VERDAD (bug de la v6.50.40: la tarde disparaba el aterrizaje al instante y el sol saltaba HACIA ATRÁS; ventana [26999, 27001] + restante hasta el PRÓXIMO mediodía POR LA NOCHE: tarde → ocaso → noche completa → amanecer → mediodía, 110× máx con aterrizaje — simulado en 5 escenarios, jamás hacia atrás) · (3) EL DESTELLO NACE DEL SOL (brillo radial centrado en él, difuminado a TRANSPARENTE en los bordes — y el sol NO se apaga) · (4) AETHON NO NACE DEL CENTRO DEL SOL (se materializa BAJO él vía la inversa de la matriz de vista; acto 13 = EL DESCENSO) — el usuario la probó: la carrera bien, PERO el jefe no aparecía y el sol no se quedaba fijo (la materialización server-rota) → v6.50.42 |
 | **v6.50.40** | ✅ Build-verificada, ⏳ probada (retirada) | LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ (feedback de la v6.50.39: «la capa no debe estar sobre todo… no debe cubrir ni al jugador ni al jefe, la luz que tienen se supone que quita esa oscuridad»): el velo muda de `OnPostDraw` a **LA PRIMERA CAPA DE LA INTERFAZ** (HUD/mapa/chat/cursor usables) y deja de ser un rectángulo entero — **EL MOSAICO DISJUNTO** (bandas de velo pleno + una DONA radial por luz, de la chica a la grande y recortada: cada píxel pintado UNA vez) · Aethon ENTERO visible (agujero 780 px; 360 violeta en eclipse), círculo del jugador 235 px SOLO Grimorio ≥50, balas 88/130 · luces por TICK (sin parpadeo a 144 Hz ni apagón en pausa) · contrato anti-crash intacto (cero RTs/shaders/blends, cerrojo + log) — el usuario la vio en juego y pidió QUITAR la oscuridad → v6.50.41 |
 | **v6.50.39** | ✅ Build-verificada, ✔ probada en juego | LA TÉCNICA DE WRATH OF THE GODS: la máscara de luz MUERE (rechazada por el usuario) y nace **VELOLIB** — la oscuridad como en WotG (velo sobre el frame en `OnPostDraw` + las luces dibujadas DESPUÉS) · EL SOL ya no se teletransporta (noche entera a 300× + aterrizaje desacelerado al mediodía, sin corte al alba y sin snap) · el fix de «al compilar el juego se cierra» (cero GraphicsDevice/RTs, cerrojo de 3 caídas + log) — probada por el usuario: «bueno, parece estar bien», con dos correcciones pedidas → v6.50.40 |
 | **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) — el usuario la probó y la técnica entera fue reemplazada en v6.50.39 |

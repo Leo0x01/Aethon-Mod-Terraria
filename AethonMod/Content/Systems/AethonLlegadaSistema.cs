@@ -9,7 +9,7 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Systems
 {
     // ======================================================================
-    //  LA LLEGADA DE LA LUZ (v6.50.41) — EL RELOJ Y EL TEMBLOR.
+    //  LA LLEGADA DE LA LUZ (v6.50.42) — EL RELOJ, EL CERROJO Y EL TEMBLOR.
     //
     //  LA OSCURIDAD MURIÓ (v6.50.39/.40 → 41): «mejor quita la capa de
     //  oscuridad, no se ve nada bien, se ve horrible». VeloLib (el velo
@@ -30,10 +30,10 @@ namespace AethonMod.Content.Systems
     //     entero en ~14 s) y al acercarse desacelera en aproximación
     //     (rate = distancia × 0.08, piso 1) hasta ATERRIZAR en 27000
     //     exacto: el sol se POSA en el centro, jamás se teletransporta.
-    //     (El bug de la v6.50.40: «en el centro» era «time >= 26999» —
-    //     con el sol en la TARDE eso ya se cumplía y el jefe saltaba
-    //     el reloj HACIA ATRÁS al mediodía en el primer tick de la
-    //     carrera. Ahora «en el centro» es la VENTANA [26999, 27001].)
+    //     Y EL CERROJO DE LA v6.50.42: con el climax/la pelea vivos, un
+    //     reloj que se pasó del mediodía VUELVE activamente a 27000 (el
+    //     bug de la .41: pasado 27001 la carrera REVIVÍA por la noche a
+    //     110× y el sol del cliente daba la vuelta entera).
     //
     //  2. EL TEMBLOR: los kicks de la casa durante el acto 1 (y suave
     //     mientras el tiempo corre) — cada cliente padece el suyo.
@@ -85,12 +85,37 @@ namespace AethonMod.Content.Systems
             bool enPelea = jefe.ai[0] >= 1f && jefe.ai[0] <= 7f;
             bool muriendo = jefe.ai[0] == 99f;
 
-            // === EL RELOJ — LA REGLA DE LA v6.50.41 ======================
+            // === EL RELOJ — LA REGLA DE LA v6.50.41 + EL CERROJO DE LA .42
             // «en el centro» es la VENTANA del mediodía [26999, 27001]:
             // la TARDE ya no cuenta como centro (el bug del salto hacia
             // atrás). Cada máquina corre SU propio reloj hacia el
             // PRÓXIMO mediodía — por la noche si hace falta — y el
             // aterrizaje es CONVERGENTE: nadie teletransporta nada.
+            bool climaxLucha = (sub >= 12 || enPelea) && !muriendo;
+
+            // EL CERROJO DE LA v6.50.42 — LA CONGELACIÓN ACTIVA (corre
+            // ANTES de leer el estado, para que el tick que corrige
+            // TAMBIÉN congele): un reloj que se PASÓ del mediodía
+            // (cliente adelantado, deriva de red) VUELVE al centro —
+            // un snap sub-tick, invisible. El bug de la .41: pasado
+            // 27001, «enCentro» moría, la carrera REVIVÍA por la rama
+            // «próximo mediodía por la noche» y el sol del cliente daba
+            // LA VUELTA COMPLETA a 110×. Y si la deriva fue tan grande
+            // que hasta cambió el día: de vuelta al mediodía, sin
+            // vueltas.
+            if (climaxLucha)
+            {
+                if (!Main.dayTime)
+                {
+                    Main.dayTime = true;
+                    Main.time = 27000.0;
+                }
+                else if (Main.time > 27001.0)
+                {
+                    Main.time = 27000.0;
+                }
+            }
+
             bool enCentro = Main.dayTime &&
                 Main.time >= 26999.0 && Main.time <= 27001.0;
 
@@ -98,11 +123,12 @@ namespace AethonMod.Content.Systems
             // para llegar (un cliente que se enteró tarde del climax
             // TERMINA su carrera: el sol llega al centro, no salta).
             AethonBoss.TiempoCorriendo =
-                (sub == 11 || ((sub >= 12 || enPelea) && !enCentro)) && !muriendo;
+                (sub == 11 || (climaxLucha && Main.dayTime && Main.time < 26999.0)) &&
+                !muriendo;
 
             // congela: el climax en adelante — pero SOLO si ya llegó (un
             // reloj a medio camino sigue corriendo hasta clavarse solo).
-            AethonBoss.TiempoCongelado = (sub >= 12 || enPelea) && enCentro;
+            AethonBoss.TiempoCongelado = climaxLucha && enCentro;
 
             // el aterrizaje exacto: si el propio reloj pasó de 26999 (la
             // desaceleración aterriza a ≤ 1 unidad por tick), clavarlo — es
