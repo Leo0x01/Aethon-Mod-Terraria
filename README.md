@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.37 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.38 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,12 +14,25 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-28, v6.50.34)
+## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.38)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.34`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.38`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 399 entradas auditado.
+  sin excepciones; `.tmod` de 396 entradas auditado.
+- **v6.50.38 — LA OSCURIDAD ENFOCADA**: «la oscuridad solo hace que la
+  pantalla se apague» — CORREGIDO. La máscara de luz aplicaba la
+  transformación de zoom DOS VECES (los agujeros ya estaban en píxeles de
+  dispositivo y el quad de estampado volvía a pasar por ZoomMatrix): con
+  zoom 100% coincidía por casualidad, pero Terraria FUERZA zoom > 1 en
+  pantallas grandes (1440p = 1.33×, 4K = 2×) y los agujeros de luz volaban
+  fuera de la pantalla — quedaba el apagón plano. Ahora la máscara se
+  estampa con IDENTIDAD sobre el viewport: **Aethon dorado, el círculo del
+  Grimorio ≥50 y las balas brillan EN SU SITIO a cualquier zoom**. De yapa:
+  el render target se devuelve en un `finally` blindado (una excepción ya
+  no puede amarrar la máscara al dispositivo y matar la pantalla) y los
+  fallos se ESCRIBEN en el log (si algo rompe, cae al velo simple y el log
+  lo cuenta).
 - **TODO lo acumulado está IMPLEMENTADO** (ver STABLE-SNAPSHOT.md §"Pendiente de verificación"):
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del

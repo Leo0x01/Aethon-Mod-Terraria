@@ -1,12 +1,27 @@
-# AethonMod — ESTADO ACTUAL (v6.50.37)
+# AethonMod — ESTADO ACTUAL (v6.50.38)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.37`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.38`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.37`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.38`.
+- **v6.50.38 = LA OSCURIDAD ENFOCADA** (el reporte del usuario tras probar la
+  v6.50.37: «la oscuridad solo hace que la pantalla se apague»): los agujeros
+  de luz NO salían — la máscara se estampaba con `ZoomMatrix` aplicada DOS
+  VECES (los agujeros ya están en píxeles de dispositivo; el quad volvía a
+  transformarse). Con zoom 100% coincidía POR CASUALIDAD, pero Terraria
+  FUERZA zoom > 1 en pantallas grandes (`ForcedMinimumZoom =
+  max(ancho/1920, alto/1200)` — 1440p = 1.33×, 4K = 2×) y los agujeros
+  volaban fuera de la pantalla: apagón plano. **EL FIX**: la máscara se
+  estampa con `Matrix.Identity` sobre el rect del VIEWPORT — UNA sola
+  transformación, a CUALQUIER zoom. **EL BLINDAJE**: el render target se
+  devuelve en un `finally` inquebrantable (una excepción ya no puede amarrar
+  la máscara y matar la pantalla), el lote de la capa se restaura con los
+  parámetros EXACTOS del decompile (`DepthStencilState.None`), y si la
+  máscara falla una vez el sistema cae al MODO VELO y **lo escribe en el
+  log** (`Logging.PublicLogger.Error` + stack — cero `catch {}` ciegos).
 - **v6.50.37 = EL MEDIO DÍA DE LA OSCURIDAD** (la petición: «has que sea mas
   grande el jefe… cuando Aethon aparece el mundo debe temblar… si es de noche
   se hace de dia y si es de dia el tiempo avanza hasta que el sol quede
@@ -108,28 +123,33 @@
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.37**: 6.334.018 bytes, md5 ea0074b3…, **396 entradas** auditadas
-  byte a byte (EOF exacto, todas inflan — 395 + AgujeroLuz.rawimg nueva);
-  cadenas verificadas DENTRO DEL PAQUETE (TODA LA LUZ HA SIDO CONCENTRADA /
-  SOLO ÉL BRILLA / GATHERED INTO ONE PLACE / ONLY HE SHINES / OscuridadGrimorio);
-  DLL: los 18 símbolos nuevos PRESENTES (PosicionSolEnCielo, DibujarTelegrafos,
-  SubFaseLlegada, NivelGrimorioPublico, ModifyTimeRate, PreUpdateTime,
-  ModifyInterfaceLayers, DibujarOscuridad, DibujarSolNegro, DibujarAgujero,
-  AsegurarMascara, TiempoCorriendo, TiempoCongelado, OscuridadObjetivo,
-  get_FaseOscuridad, ContarTickClimax, OscuridadSistema, EstadoNaciendo).
-  NOTA: el "WARN: Image loading failed" del empaquetado es PRE-EXISTENTE
-  (reproducido compilando el HEAD v6.50.36 — benigno, paquete íntegro).
+- **`.tmod` v6.50.38**: 6.331.688 bytes, md5 04734810…, **396 entradas** auditadas
+  (EOF exacto, set idéntico al de la v6.50.37); cadenas del CERROJO verificadas
+  DENTRO DEL PAQUETE en UTF-16 («la máscara de luz falló» / «cayendo al velo
+  simple» / «error dibujando la oscuridad») y símbolos clave PRESENTES
+  (DibujarOscuridad, mascaraRota, PosicionSolEnCielo, DibujarTelegrafos).
 - **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.37>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.38>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.37 está implementada y build-verificada, pero **el usuario aún
-no ha probado la v6.50.37 en partida**. Checklist:
+Toda la cadena v6.50.24 → v6.50.38 está implementada y build-verificada. El usuario YA PROBÓ la
+v6.50.37 y reportó el bug de la oscuridad («solo hace que la pantalla se apague») — corregido
+en la v6.50.38 (LA OSCURIDAD ENFOCADA). Checklist de la v6.50.38:
 
-1. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (v6.50.37, LO PRIMERO)**:
+1. **LA OSCURIDAD PRIMORDIAL — EL FIX PRIMERO (v6.50.38)**: invocar a Aethon
+   en el MISMO monitor de siempre y verificar que AHORA SÍ: (a) AETHON
+   BRILLA DORADO en su sitio (1.060 px de luz pura — se le ve el cuerpo
+   radiante en la negrura); (b) el PEQUEÑO círculo del jugador SOLO con
+   Grimorio nivel 50+ (con libro < 50: oscuridad total y el texto lo
+   explica); (c) LAS BALAS del jefe se ven venir (pernos/columnas/runas
+   con su pequeño halo); (d) los telegraphs SIEMPRE visibles y el HUD
+   usable; (e) NADA de pantallas muertas (el blindaje del render target).
+   Si ALGO falla: el client.log ahora LO CUENTA («la máscara de luz falló»
+   con stack completo) — mandar el log.
+2. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (lo heredado de v6.50.37)**:
    invocarlo (de día Y de noche, para ver los dos caminos) y verificar:
    (a) MÁS GRANDE (el sol de código ×1.5 — núcleo 130 px); (b) LA LLEGADA
    COMPLETA: EL MUNDO TIEMBLA (la pantalla sacudida ~2.5 s — como la sierpe),
@@ -194,9 +214,9 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.36 en juego** con el checklist de arriba — la pelea contra
-   LA LUZ es LA prueba del sol vivo (los seis ataques + la llegada encendida +
-   el eclipse).
+1. **El usuario prueba v6.50.38 en juego** con el checklist de arriba — LA
+   PRUEBA DEL FIX: la oscuridad con sus agujeros de luz ENFOCADOS (Aethon
+   dorado + el círculo del Grimorio + las balas).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -227,6 +247,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) |
+| **v6.50.37** | ✅ Build-verificada, ⏳ parcialmente probada | EL MEDIO DÍA DE LA OSCURIDAD: jefe ×1.5 + LA LLEGADA en cuatro actos (temblor → carrera del sol a 240× → flash → sol negro) + LA OSCURIDAD PRIMORDIAL (máscara de luz Don't-Starve mejorada). El usuario la probó y reportó el bug de la oscuridad → fix en v6.50.38 |
 | **v6.50.36** | ✅ Build-verificada, ⏳ en juego | AETHON, LA LUZ PRIMORDIAL: la sierpe MUERE — el jefe es UNA LUZ BRILLANTE (sol vivo de código) + SEIS ataques devastadores (juicio de columnas + rayo + nova con huecos + cruz + destello + ECLIPSE) + el cielo se ENCIENDE + género de Aethon (Él) |
 | **v6.50.35** | ✅ Build-verificada, ⏳ en juego | EL SEÑOR DEL MUNDO (corrección de género): el título estrena EN EL JUEGO (anuncio de aparición es-ES/en-US) · her→his line · 7 comentarios · release v6.50.34 renombrado en GitHub |
 | **v6.50.34** | ✅ Build-verificada, ⏳ en juego | LA SIERPE ESTELAR, SEÑOR DEL MUNDO: el dragón BORRADO (reversión a v6.50.31) + ESC 1.85 y 68 vértebras (~5.700 px) + IA mejorada (clavado aéreo + rotación + ram en cadena + predicción adaptativa + anti-camping + furia con aliento doble) |

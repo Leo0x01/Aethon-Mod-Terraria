@@ -70,6 +70,15 @@ namespace AethonMod.Content.Systems
         private static float _flashBlanco = 0f;
         private static bool _avisoGrimorioHecho = false;
 
+        /// <summary>
+        /// v6.50.38 — EL CERROJO. Si la máscara de luz falla UNA vez (GPU
+        /// exótica, asset ausente, device lost), el sistema cae al MODO
+        /// VELO (oscuridad simple sin agujeros) y LO ESCRIBE en el log —
+        /// el juego NUNCA se queda con la pantalla muerta y el fallo
+        /// queda diagnosticado para la casa.
+        /// </summary>
+        private static bool _mascaraRota = false;
+
         /// <summary>La intensidad de LA OSCURIDAD en esta máquina (0..1).</summary>
         public static float FaseOscuridad => _faseOscuridad;
 
@@ -288,9 +297,32 @@ namespace AethonMod.Content.Systems
         //  EL DIBUJO DE LA OSCURIDAD (la capa de interfaz #0)
         //
         //  EL CONTRATO DEL LOTE: tML abre el lote de la capa (Deferred ·
-        //  AlphaBlend · ZoomMatrix) y lo CIERRA al volver — este método
-        //  lo cierra para sus pases propios y lo devuelve ABIERTO con los
-        //  parámetros EXACTOS (la lección del client.log de la casa).
+        //  AlphaBlend · LinearClamp · DepthStencil.None · CullCCW ·
+        //  ZoomMatrix) y lo CIERRA al volver — este método lo cierra
+        //  para sus pases propios y lo devuelve ABIERTO con los
+        //  parámetros EXACTOS (literal del decompile de
+        //  GameInterfaceLayer.Draw de tML 2026.07).
+        //
+        //  v6.50.38 — LA CORRECCIÓN DEL ENFOQUE: los AGUJEROS se pintan
+        //  en la máscara YA TRANSFORMADOS a píxeles de dispositivo
+        //  (Vector2.Transform(posVista, ZoomMatrix) — la MISMA receta de
+        //  vanilla para su barra de respiración), así que la máscara SE
+        //  ESTAMPA CON IDENTIDAD sobre el rect del VIEWPORT. La versión
+        //  anterior estampaba con ZoomMatrix: con zoom 100% ZoomMatrix
+        //  es la identidad y todo coincidía POR CASUALIDAD, pero Terraria
+        //  FUERZA zoom > 1 en pantallas grandes (ForcedMinimumZoom =
+        //  max(ancho/1920, alto/1200) — 1440p = 1.33×, 4K = 2×) y los
+        //  agujeros salían desplazados hasta VOLAR fuera de la pantalla:
+        //  el mundo entero quedaba bajo el negro («la oscuridad solo
+        //  hace que la pantalla se apague»). Ahora: UNA sola
+        //  transformación, a CUALQUIER zoom.
+        //
+        //  v6.50.38 — EL BLINDAJE: el render target se devuelve en un
+        //  finally que NO se salta nada (antes, cualquier excepción
+        //  dejaba la máscara AMARRADA al dispositivo: TODO el juego se
+        //  dibujaba dentro de ella y la pantalla MORÍA), y las
+        //  excepciones se ESCRIBEN en el log de verdad — cero catch
+        //  vacíos, cero diagnósticos ciegos.
         // ==================================================================
         private static void DibujarOscuridad()
         {
@@ -298,15 +330,18 @@ namespace AethonMod.Content.Systems
             if (_faseOscuridad <= 0.002f && _solNegro <= 0.002f && _flashBlanco <= 0.002f)
                 return;   // nada que hacer: el lote de la capa queda intacto
 
+            SpriteBatch sb = Main.spriteBatch;
+            GraphicsDevice gd = Main.graphics.GraphicsDevice;
+            if (sb == null || gd == null) return;
+
             try
             {
-                SpriteBatch sb = Main.spriteBatch;
-                GraphicsDevice gd = Main.graphics.GraphicsDevice;
                 int w = Main.screenWidth;
                 int h = Main.screenHeight;
                 if (w < 8 || h < 8) return;
 
                 Matrix mVista = Main.GameViewMatrix.ZoomMatrix;
+                Viewport vp = gd.Viewport;    // el destino REAL del frame
                 float t = Main.GlobalTimeWrappedHourly;
                 float respira = 1f + 0.03f * MathF.Sin(t * 0.7f);   // la oscuridad respira
 
@@ -314,87 +349,125 @@ namespace AethonMod.Content.Systems
                 VFXCore.CerrarLoteSiAbierto();
                 try
                 {
-                    // ============ 1. LA MÁSCARA DE LUZ (media resolución) ============
-                    AsegurarMascara(gd, w, h);
-                    if (_mascara != null)
+                    RenderTargetBinding[] previos = null;
+                    try
                     {
-                        // EL GRIS DEL MUNDO: 1 = día normal → 0.035 = la
-                        // oscuridad casi total (las siluetas fantasma — la
-                        // mejora sobre The Constant, que apaga TODO).
-                        float gris = MathHelper.Lerp(1f, 0.035f, _faseOscuridad);
-                        RenderTargetBinding[] previos = gd.GetRenderTargets();
-                        gd.SetRenderTarget(_mascara);
-                        gd.Clear(new Color(gris, gris, gris));
+                        // ========= 1. LA MÁSCARA DE LUZ (media resolución) =========
+                        if (!_mascaraRota)
+                        {
+                            AsegurarMascara(gd, vp.Width, vp.Height);
+                            if (_mascara != null)
+                            {
+                                // EL GRIS DEL MUNDO: 1 = día normal → 0.035 = la
+                                // oscuridad casi total (las siluetas fantasma —
+                                // la mejora sobre The Constant, que apaga TODO).
+                                float gris = MathHelper.Lerp(1f, 0.035f, _faseOscuridad);
+                                previos = gd.GetRenderTargets();
+                                gd.SetRenderTarget(_mascara);
+                                try
+                                {
+                                    gd.Clear(new Color(gris, gris, gris));
 
-                        sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                                    sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                                        SamplerState.LinearClamp, DepthStencilState.None,
+                                        RasterizerState.CullNone, null, Matrix.Identity);
+                                    try
+                                    {
+                                        // la máscara vive a media resolución del
+                                        // VIEWPORT (el destino real del frame)
+                                        float esc = (float)_mascara.Width /
+                                            Math.Max(1, vp.Width);
+
+                                        // === EL AGUJERO DE AETHON (ES la luz pura) ===
+                                        NPC jefe = BuscarJefe();
+                                        if (jefe != null && jefe.alpha < 200)
+                                        {
+                                            bool eclipse = jefe.ai[1] == 3f;
+                                            // en el ECLIPSE hasta SU luz muere: el agujero
+                                            // se encoge y se vuelve violeta — la oscuridad
+                                            // le cierra la mano encima
+                                            float radio = eclipse ? 360f : 1060f;
+                                            Color tinte = eclipse
+                                                ? new Color(150, 105, 220)
+                                                : new Color(255, 240, 200);
+                                            DibujarAgujero(sb, jefe.Center - Main.screenPosition,
+                                                radio * respira, tinte, esc, mVista);
+                                        }
+
+                                        // === EL CÍRCULO DEL JUGADOR (solo Grimorio ≥ 50) ===
+                                        if (NivelGrimorio() >= 50)
+                                        {
+                                            Player p = Main.LocalPlayer;
+                                            if (p != null && p.active)
+                                                DibujarAgujero(sb, p.Center - Main.screenPosition,
+                                                    235f * respira, new Color(225, 232, 255), esc, mVista);
+                                        }
+
+                                        // === LAS BALAS DE LA LUZ (pernos, columnas, runas:
+                                        //     la única luz que se MUEVE por el mundo) ===
+                                        int tipo = ModContent.ProjectileType<AtaqueJefeProjectile>();
+                                        int huecos = 0;
+                                        for (int i = 0; i < Main.maxProjectiles && huecos < 26; i++)
+                                        {
+                                            Projectile pr = Main.projectile[i];
+                                            if (pr == null || !pr.active || pr.type != tipo) continue;
+                                            int estilo = (int)pr.ai[0];
+                                            if (estilo != AtaqueJefeProjectile.EstiloPernoEstelar &&
+                                                estilo != AtaqueJefeProjectile.EstiloColumnaJuicio &&
+                                                estilo != AtaqueJefeProjectile.EstiloRunaMemorizada) continue;
+                                            float rBala = estilo == AtaqueJefeProjectile.EstiloColumnaJuicio
+                                                ? 130f : 88f;
+                                            DibujarAgujero(sb, pr.Center - Main.screenPosition,
+                                                rBala, new Color(255, 244, 214), esc, mVista);
+                                            huecos++;
+                                        }
+                                    }
+                                    finally { sb.End(); }
+                                }
+                                finally
+                                {
+                                    // EL BLINDAJE: el dispositivo SIEMPRE vuelve a su
+                                    // destino — ni una excepción puede amarrar la
+                                    // máscara y matar la pantalla del jugador
+                                    gd.SetRenderTargets(previos);
+                                }
+                            }
+                        }
+                    }
+                    catch (System.Exception e)
+                    {
+                        // EL CERROJO: una falla y el sistema cae al velo simple —
+                        // el juego SIGUE VIVO y el log cuenta qué pasó
+                        _mascaraRota = true;
+                        try
+                        {
+                            Terraria.ModLoader.Logging.PublicLogger.Error(
+                                "[AethonMod] OscuridadSistema: la máscara de luz falló — cayendo al velo simple (reportar con el client.log)", e);
+                        }
+                        catch { }
+                        try { if (previos != null) gd.SetRenderTargets(previos); }
+                        catch { }
+                    }
+
+                    // ========= 2. LA MULTIPLICACIÓN (escena × máscara) =========
+                    // LA CORRECCIÓN DEL ENFOQUE: la máscara vive en PÍXELES DE
+                    // DISPOSITIVO (los agujeros ya llevan el ZoomMatrix
+                    // transformado dentro) → se estampa con IDENTIDAD sobre el
+                    // rect del VIEWPORT: UNA transformación, a CUALQUIER zoom.
+                    if (!_mascaraRota && _mascara != null)
+                    {
+                        sb.Begin(SpriteSortMode.Deferred, Multiplicar,
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullNone, null, Matrix.Identity);
                         try
                         {
-                            float esc = 0.5f;   // la máscara vive a media resolución
-
-                            // === EL AGUJERO DE AETHON (ES la luz pura) ===
-                            NPC jefe = BuscarJefe();
-                            if (jefe != null && jefe.alpha < 200)
-                            {
-                                bool eclipse = jefe.ai[1] == 3f;
-                                // en el ECLIPSE hasta SU luz muere: el agujero
-                                // se encoge y se vuelve violeta — la oscuridad
-                                // le cierra la mano encima
-                                float radio = eclipse ? 360f : 1060f;
-                                Color tinte = eclipse
-                                    ? new Color(150, 105, 220)
-                                    : new Color(255, 240, 200);
-                                DibujarAgujero(sb, jefe.Center - Main.screenPosition,
-                                    radio * respira, tinte, esc, mVista);
-                            }
-
-                            // === EL CÍRCULO DEL JUGADOR (solo Grimorio ≥ 50) ===
-                            if (NivelGrimorio() >= 50)
-                            {
-                                Player p = Main.LocalPlayer;
-                                if (p != null && p.active)
-                                    DibujarAgujero(sb, p.Center - Main.screenPosition,
-                                        235f * respira, new Color(225, 232, 255), esc, mVista);
-                            }
-
-                            // === LAS BALAS DE LA LUZ (pernos, columnas, runas:
-                            //     la única luz que se MUEVE por el mundo) ===
-                            int tipo = ModContent.ProjectileType<AtaqueJefeProjectile>();
-                            int huecos = 0;
-                            for (int i = 0; i < Main.maxProjectiles && huecos < 26; i++)
-                            {
-                                Projectile pr = Main.projectile[i];
-                                if (pr == null || !pr.active || pr.type != tipo) continue;
-                                int estilo = (int)pr.ai[0];
-                                if (estilo != AtaqueJefeProjectile.EstiloPernoEstelar &&
-                                    estilo != AtaqueJefeProjectile.EstiloColumnaJuicio &&
-                                    estilo != AtaqueJefeProjectile.EstiloRunaMemorizada) continue;
-                                float rBala = estilo == AtaqueJefeProjectile.EstiloColumnaJuicio
-                                    ? 130f : 88f;
-                                DibujarAgujero(sb, pr.Center - Main.screenPosition,
-                                    rBala, new Color(255, 244, 214), esc, mVista);
-                                huecos++;
-                            }
-                        }
-                        finally { sb.End(); }
-                        gd.SetRenderTargets(previos);
-                    }
-
-                    // ============ 2. LA MULTIPLICACIÓN (escena × máscara) ============
-                    if (_mascara != null)
-                    {
-                        sb.Begin(SpriteSortMode.Deferred, Multiplicar,
-                            SamplerState.LinearClamp, DepthStencilState.None,
-                            RasterizerState.CullNone, null, mVista);
-                        try
-                        {
-                            sb.Draw(_mascara, new Rectangle(0, 0, w, h), Color.White);
+                            sb.Draw(_mascara, new Rectangle(0, 0, vp.Width, vp.Height),
+                                Color.White);
                         }
                         finally { sb.End(); }
                     }
 
-                    // ============ 3. EL VELO Y EL FLASH (alfa, espacio de vista) ============
+                    // ========= 3. EL VELO Y EL FLASH (alfa, espacio de vista) =========
                     sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                         SamplerState.LinearClamp, DepthStencilState.None,
                         RasterizerState.CullNone, null, mVista);
@@ -412,12 +485,12 @@ namespace AethonMod.Content.Systems
                     }
                     finally { sb.End(); }
 
-                    // ============ 4. EL SOL NEGRO (píxeles de dispositivo:
-                    //     la posición EXACTA del sol de vanilla congelado) ============
+                    // ========= 4. EL SOL NEGRO (píxeles de dispositivo:
+                    //     la posición EXACTA del sol de vanilla congelado) =========
                     if (_solNegro > 0.002f)
                         DibujarSolNegro(sb, gd, t);
 
-                    // ============ 5. LOS TELEGRAPHS SOBRE LA OSCURIDAD ============
+                    // ========= 5. LOS TELEGRAPHS SOBRE LA OSCURIDAD =========
                     // (la línea guía del destello y el pulso de la nova —
                     //  el aviso de la casa SIEMPRE se ve)
                     if (_faseOscuridad >= 0.3f)
@@ -440,17 +513,28 @@ namespace AethonMod.Content.Systems
                 finally
                 {
                     // DEVOLVER EL LOTE DE LA CAPA EXACTO (lo que tML abrió:
-                    // Deferred · AlphaBlend · defaults · ZoomMatrix)
+                    // Deferred · AlphaBlend · LinearClamp · DepthStencil.NONE
+                    // · CullCCW · ZoomMatrix — literal del decompile)
                     try
                     {
                         sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                            SamplerState.LinearClamp, DepthStencilState.Default,
+                            SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullCounterClockwise, null, mVista);
                     }
                     catch { }
                 }
             }
-            catch { }
+            catch (System.Exception e)
+            {
+                // ni un catch vacío más: si ALGO rompe la oscuridad, el log
+                // lo canta — el diagnóstico llega a la casa
+                try
+                {
+                    Terraria.ModLoader.Logging.PublicLogger.Error(
+                        "[AethonMod] OscuridadSistema: error dibujando la oscuridad", e);
+                }
+                catch { }
+            }
         }
 
         /// <summary>Un agujero de luz en la máscara (aditivo: las luces suman).</summary>
@@ -634,6 +718,7 @@ namespace AethonMod.Content.Systems
             _solNegro = 0f;
             _flashBlanco = 0f;
             _avisoGrimorioHecho = false;
+            _mascaraRota = false;
             try { if (_mascara != null && !_mascara.IsDisposed) _mascara.Dispose(); }
             catch { }
             _mascara = null;
