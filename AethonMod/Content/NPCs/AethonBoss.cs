@@ -14,14 +14,25 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.41 — EL MEDIO DÍA DEL DESTELLO: «mejor quita la capa de
+    /// oscuridad, no se ve nada bien, se ve horrible» (LA OSCURIDAD Y
+    /// EL SOL NEGRO MUEREN — VeloLib borrada de raíz) + «el sol no se
+    /// haga teletransportación… si está más allá del centro, un día
+    /// completo avanza con noche completa, un nuevo día hasta el
+    /// amanecer» (el bug de la v6.50.40: con el sol en la tarde, el
+    /// aterrizaje se disparaba al INSTANTE y el sol saltaba HACIA
+    /// ATRÁS; ahora la VENTANA de aterrizaje es [26999, 27001] y la
+    /// carrera da la vuelta entera por la noche) + EL DESTELLO nace
+    /// DEL SOL («un brillo que viene del mismo sol, centrado en el sol
+    /// y difuminándose hacia los bordes hasta ser transparente») y
+    /// Aethon NO NACE DEL CENTRO del sol: se materializa BAJO él.
+    ///
     /// v6.50.37 — MÁS GRANDE Y LA LLEGADA DEFINITIVA (EL MEDIO DÍA DE
     /// LA OSCURIDAD): «has que sea mas grande el jefe… cuando Aethon
     /// aparece el mundo debe temblar… si es de noche se hace de dia y
     /// si es de dia el tiempo avanza hasta que el sol quede centrado…
     /// destellos de luz aparecen en el cielo… el sol brilla con
-    /// intensidad y de ahi aparece Aethon, luego el sol se vuelve
-    /// negro… TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR… la oscuridad
-    /// misma toma el control de todo».
+    /// intensidad y de ahi aparece Aethon…».
     ///
     /// Petición del usuario: «el jefe se ve feo, intenta mejorar por
     /// código… ese jefe se supone que es Aethon, creo que en vez de
@@ -93,8 +104,8 @@ namespace AethonMod.Content.NPCs
         //     rayo 0-3) ===
         public const int SUB_TEMBLOR = 10;      // el mundo tiembla (150 t)
         public const int SUB_CARRERA = 11;      // el tiempo CORRE al mediodía
-        public const int SUB_CLIMAX = 12;       // el sol brilla con intensidad + EL FLASH
-        public const int SUB_OSCURIDAD = 13;    // el sol negro + LA OSCURIDAD
+        public const int SUB_CLIMAX = 12;       // EL DESTELLO nace del sol + Aethon nace BAJO él
+        public const int SUB_DESCENSO = 13;     // la luz cae a su órbita de pelea
 
         // === EL ESTADO DEL MUNDO (el espejo de AethonLlegadaSistema lo
         //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
@@ -108,9 +119,6 @@ namespace AethonMod.Content.NPCs
 
         /// <summary>EL TIEMPO CONGELADO: el sol clavado en el centro del cielo.</summary>
         public static bool TiempoCongelado = false;
-
-        /// <summary>LA OSCURIDAD ACTIVA: toda la luz está concentrada en Aethon.</summary>
-        public static bool OscuridadObjetivo = false;
 
         /// <summary>
         /// LA POSICIÓN DEL SOL EN EL CIELO (espacio del fondo) — LITERAL
@@ -267,12 +275,13 @@ namespace AethonMod.Content.NPCs
                 OnPhaseChange();
             }
 
-            // === EL FADE DE NACIMIENTO (la materialización DENTRO del
-            //     FLASH del climax — antes de eso la luz está RECOGIÉNDOSE) ===
+            // === EL FADE DE NACIMIENTO (la materialización BAJO el sol,
+            //     envuelta en el pico del DESTELLO — antes de eso la luz
+            //     está RECOGIÉNDOSE) ===
             if (NPC.alpha > 0)
             {
                 bool materializar = _estado == EST_NACIENDO &&
-                    _subLlegada == SUB_CLIMAX && _tickEstado >= 100;
+                    _subLlegada == SUB_CLIMAX && _tickEstado >= 45;
                 if (materializar)
                     NPC.alpha = Math.Max(0, NPC.alpha - 13);
                 if (NPC.alpha == 0) NPC.dontTakeDamage = false;
@@ -308,7 +317,7 @@ namespace AethonMod.Content.NPCs
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
             NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
-            //     llegada: 10 temblor · 11 carrera · 12 climax · 13 oscuridad
+            //     llegada: 10 temblor · 11 carrera · 12 climax · 13 descenso
             //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo · 3 ECLIPSE
             NPC.ai[2] = _tickEstado;
             NPC.ai[3] = _angDestello;   // el rumbo del destello (la línea guía del cliente)
@@ -332,20 +341,27 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// LA LLEGADA DEFINITIVA (v6.50.39) — EL MEDIO DÍA DE LA OSCURIDAD:
+        /// LA LLEGADA (v6.50.41) — EL MEDIO DÍA DEL DESTELLO:
         /// (10) EL MUNDO TIEMBLA — la tierra sacude la pantalla 2.5 s;
-        /// (11) EL TIEMPO CORRE — SIN SALTOS (v6.50.39: «no dar un salto
-        /// como si se teletransportara al centro»): si era de noche, la
-        /// NOCHE ENTERA corre primero (la luna barre y el alba llega sola)
-        /// y de día el reloj DESESPERA — lejos vuela (300×) y al acercarse
-        /// al mediodía desacelera en aproximación y ATERRIZA en 27000
-        /// exacto: el sol se POSA en el centro, no se teletransporta;
-        /// (12) EL SOL BRILLA CON INTENSIDAD — crece, se vuelve cegador…
-        /// y en el pico del FLASH, AETHON SE MATERIALIZA DE ÉL;
-        /// (13) EL SOL SE VUELVE NEGRO — toda la luz del mundo está ahora
-        /// en UN LUGAR: la oscuridad toma el control (VeloLib, la técnica
-        /// de Wrath of the Gods — el velo sobre el frame y las luces
-        /// viviendo SOBRE la oscuridad).
+        /// (11) EL TIEMPO CORRE — SIN TELETRANSPORTE (v6.50.41: «el sol
+        /// no se haga teletransportación… si está más allá del centro,
+        /// un día completo avanza con noche completa, un nuevo día hasta
+        /// el amanecer»): si el sol está MÁS ALLÁ del centro, la carrera
+        /// recorre el RESTO del día, la NOCHE COMPLETA y el nuevo día
+        /// desde el amanecer hasta el mediodía — un día entero pasando
+        /// VISIBLEMENTE; si está ANTES del centro, solo corre hasta él.
+        /// El reloj aterriza en 27000 exacto, desacelerando: el sol se
+        /// POSA, no salta (el bug de la v6.50.40: con el sol en la tarde
+        /// la condición «time >= 26999» se cumplía al INSTANTE y el sol
+        /// saltaba HACIA ATRÁS al mediodía);
+        /// (12) EL DESTELLO NACE DEL SOL — un brillo radial CENTRADO en
+        /// el sol que se difumina hacia los bordes hasta ser transparente
+        /// (lo pinta ColaSierpeSky). El sol NO SE APAGA: sigue ahí,
+        /// ardiendo. Y Aethon NO NACE DEL CENTRO del sol: se materializa
+        /// BAJO él, en el borde inferior de su halo;
+        /// (13) EL DESCENSO — la luz cae del mediodía a su órbita de
+        /// pelea (la oscuridad y el sol negro MURIERON con la v6.50.41:
+        /// «mejor quita la capa de oscuridad, no se ve nada bien»).
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
@@ -364,18 +380,22 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_CARRERA:
                 {
-                    // EL TIEMPO CORRE, DE FORMA NATURAL (v6.50.39):
+                    // EL TIEMPO CORRE, DE FORMA NATURAL (v6.50.41):
                     // AethonLlegadaSistema.ModifyTimeRate lleva el reloj —
-                    // la noche entera primero (la luna barre, el alba llega
-                    // sola) y de día la carrera DESESPERA: vuela lejos y
-                    // desacelera en aproximación, ATERRIZANDO en 27000 —
-                    // el sol se POSA en el centro, jamás se teletransporta.
+                    // el RESTANTE hasta el PRÓXIMO mediodía (por la noche
+                    // completa si el sol ya pasó el centro: la carrera
+                    // recorre la tarde, la noche, el amanecer y la mañana
+                    // del nuevo día — un día entero, VISIBLEMENTE) y el
+                    // aterrizaje desacelera hasta POSARSE en 27000.
                     NPC.velocity = Vector2.Zero;
                     if (Main.netMode != NetmodeID.MultiplayerClient &&
-                        Main.dayTime && Main.time >= 26999.0)
+                        Main.dayTime && Main.time >= 26999.0 && Main.time <= 27001.0)
                     {
-                        // EL MEDIO DÍA EXACTO: el aterrizaje (menos de un
-                        // tick de sol — la corrección sub-tick, no un salto).
+                        // EL MEDIO DÍA EXACTO — y SOLO desde la llegada de la
+                        // mañana: la ventana [26999, 27001] es el aterrizaje
+                        // (menos de un tick de sol — la corrección sub-tick,
+                        // no un salto). La TARDE ya NO dispara esto: el sol
+                        // pasó el centro y la carrera da la vuelta entera.
                         Main.time = 27000.0;
                         TiempoCorriendo = false;
                         TiempoCongelado = true;
@@ -388,28 +408,36 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_CLIMAX:
                 {
-                    // EL SOL BRILLA CON INTENSIDAD: la ventana del cielo
-                    // CRECE hasta lo cegador… y AETHON NACE DEL FLASH.
+                    // EL DESTELLO NACE DEL SOL: el brillo radial centrado
+                    // en él, difuminándose hacia los bordes (ColaSierpeSky
+                    // lo pinta en el cielo — el sol sigue ARDIENDO, no se
+                    // apaga). Y en el pico, Aethon se materializa BAJO el
+                    // sol — no en su centro.
                     NPC.velocity = Vector2.Zero;
-                    if (_tickEstado == 100)
+                    if (_tickEstado == 44)
                     {
-                        // EL FLASH: la luz inunda TODO y en su pico nace él.
+                        // LA MATERIALIZACIÓN: bajo el sol, en el borde
+                        // inferior de su halo (invisible aún: el fade
+                        // empieza en el tick 45 y el brillo lo envuelve).
+                        NPC.Center = PosicionBajoElSol(220f);
+                        NPC.netUpdate = true;
+                    }
+                    if (_tickEstado == 52)
+                    {
+                        // EL PICO DEL DESTELLO: el sol CIEGA y la luz RUGE.
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
                     }
-                    if (_tickEstado >= 120) SubFaseLlegada(SUB_OSCURIDAD);
+                    if (_tickEstado >= 120) SubFaseLlegada(SUB_DESCENSO);
                     break;
                 }
 
-                case SUB_OSCURIDAD:
+                case SUB_DESCENSO:
                 {
-                    // EL SOL NEGRO + LA OSCURIDAD: toda la luz del mundo está
-                    // en ÉL. Desciende del cielo a su órbita de pelea.
-                    if (_tickEstado == 1)
-                    {
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center); // el apagón
-                        EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.LlegadaOscuridad", VioletaLuz);
-                    }
+                    // EL DESCENSO: la luz cae del mediodía a su órbita de
+                    // pelea. (El sol negro y LA OSCURIDAD murieron en la
+                    // v6.50.41 — el sol sigue clavado en el centro
+                    // mientras la luz viva.)
                     Vector2 punto = target.Center + new Vector2(0f, -420f);
                     NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
                     if (_tickEstado >= 90)
@@ -424,6 +452,29 @@ namespace AethonMod.Content.NPCs
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// LA POSICIÓN BAJO EL SOL (v6.50.41): Aethon NO nace del centro
+        /// del sol — nace BAJO él, en el borde inferior de su halo. El
+        /// sol vive en el ESPACIO DEL FONDO (la réplica del decompile de
+        /// DrawSunAndMoon transformada por la matriz del fondo → píxeles
+        /// de pantalla); el jefe vive en el MUNDO: la conversión es la
+        /// INVERSA de la matriz de vista (+ screenPosition).
+        /// </summary>
+        private Vector2 PosicionBajoElSol(float debajoPx)
+        {
+            Vector2 posSol = Vector2.Transform(PosicionSolEnCielo(),
+                Main.BackgroundViewMatrix.EffectMatrix);
+            posSol.Y += debajoPx;   // BAJO el sol — no en su centro
+            Matrix mVista = Main.GameViewMatrix.TransformationMatrix;
+            Matrix.Invert(ref mVista, out Matrix inversa);
+            Vector2 mundo = Vector2.Transform(posSol, inversa) + Main.screenPosition;
+            // LA RED DE SEGURIDAD: jamás un NaN en la posición de un jefe
+            // (se propagaría por el cable y corrompería la pelea).
+            if (!float.IsFinite(mundo.X) || !float.IsFinite(mundo.Y))
+                return NPC.Center;
+            return mundo;
         }
 
         /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
@@ -1176,12 +1227,10 @@ namespace AethonMod.Content.NPCs
                             NucleoBlanco, 0.45f * prog * visibilidad, 3);
                     }
 
-                    // === 8. LOS TELEGRAPHS (la casa: todo ataque se anuncia.
-                    //     Con LA OSCURIDAD activa se dibujan ENCIMA de ella —
-                    //     el pintor de AethonLlegadaSistema los repite en su
-                    //     propio pase, sobre el velo) ===
-                    if (Velo.Intensidad < 0.3f)
-                        DibujarTelegrafos(spriteBatch, NPC, posC);
+                    // === 8. LOS TELEGRAPHS (la casa: todo ataque se
+                    //     anuncia — y con la oscuridad MUERTA (v6.50.41)
+                    //     SIEMPRE se ven, en el propio pase del mundo) ===
+                    DibujarTelegrafos(spriteBatch, NPC, posC);
 
                     // === 9. LA ESTELA DEL DESTELLO (los fantasmas del cruce) ===
                     if (NPC.ai[0] == EST_DESTELLO && NPC.ai[2] > 20f && !_muriendo &&
@@ -1255,9 +1304,7 @@ namespace AethonMod.Content.NPCs
         /// <summary>
         /// LOS TELEGRAPHS PÚBLICOS (v6.50.37): la línea guía del destello
         /// y el pulso de la nova — dibujables desde CUALQUIER lote
-        /// aditivo: el PreDraw del mundo… o ENCIMA DE LA OSCURIDAD (que
-        /// el pintor de AethonLlegadaSistema pide en su pase para que el
-        /// aviso siga viéndose cuando el mundo entero está apagado).
+        /// aditivo (el PreDraw del mundo los pide en su propio pase).
         /// </summary>
         internal static void DibujarTelegrafos(SpriteBatch sb, NPC npc, Vector2 posC)
         {

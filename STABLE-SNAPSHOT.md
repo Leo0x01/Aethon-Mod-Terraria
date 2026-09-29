@@ -1,12 +1,40 @@
-# AethonMod — ESTADO ACTUAL (v6.50.40)
+# AethonMod — ESTADO ACTUAL (v6.50.41)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.40`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.41`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.40`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.41`.
+- **v6.50.41 = EL MEDIO DÍA DEL DESTELLO** (cuatro pedidos en uno):
+  (1) **LA CAPA DE OSCURIDAD MUERE DE RAÍZ** («mejor quita la capa de
+  oscuridad, no se ve nada bien, se ve horrible»): VeloLib.cs +
+  VeloDona.rawimg BORRADOS (paquete 396→395, diff quirúrgico de una
+  textura); fuera el pintor, EL SOL NEGRO, las luces del frame, el aviso
+  del Grimorio y el flash blanco de pantalla completa — AethonLlegadaSistema
+  queda con EL ESPEJO + EL RELOJ + el temblor; los telegraphs vuelven a
+  dibujarse SIEMPRE en el pase del mundo; el horizonte vuelve al DORADO
+  vivo (el violeta muerto fuera; el violeta del ECLIPSE —el ataque— se
+  queda); los textos `LlegadaOscuridad/OscuridadGrimorio/OscuridadSinGrimorio`
+  ELIMINADOS y `Muerte` reescrita. (2) **EL SOL SIN TELETRANSPORTE DE
+  VERDAD** — el bug de la v6.50.40: con el sol en la TARDE el aterrizaje
+  (`time >= 26999`) se disparaba al INSTANTE y el sol saltaba HACIA ATRÁS
+  al mediodía; ahora la ventana es **[26999, 27001]** (en el jefe Y en el
+  espejo) y `ModifyTimeRate` mide EL RESTANTE hasta el PRÓXIMO mediodía
+  **POR LA NOCHE** (`restante = resto del día + nightLength + mañana`):
+  rate = restante × 0.08 (techo 110×, piso 1) — tarde → ocaso → NOCHE
+  COMPLETA → amanecer → mañana → mediodía (~12-14 s el peor caso, timelapse
+  VISIBLE); antes del centro → directo; aterrizaje desacelerado en 27000.
+  SIMULADO en 5 escenarios: JAMÁS salta hacia atrás. (3) **EL DESTELLO NACE
+  DEL SOL**: brillo radial CENTRADO en el sol (brazo hasta la esquina más
+  lejana ×1.06 — TRANSPARENTE en los bordes; halo cálido; núcleo cegador;
+  8 rayos), curva crece(0-45)/ARDE(45-75)/disuelve(75-120) con smoothstep,
+  pintado por ColaSierpeSky sobre la posición REAL del sol — y el sol NO SE
+  APAGA (aditivo encima del sol vivo). (4) **AETHON NO NACE DEL CENTRO DEL
+  SOL**: `PosicionBajoElSol(220)` lo materializa BAJO él (espacio del fondo
+  → mundo vía `Matrix.Invert(GameViewMatrix)` + red anti-NaN); el acto 13
+  es EL DESCENSO (sin apagón ni mensaje).
 - **v6.50.40 = LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ** (la
   retroalimentación del usuario sobre la v6.50.39: «bueno, parece estar
   bien, pero la capa de oscuridad no debe estar sobre todo, la capa debe
@@ -166,92 +194,83 @@
   principal, .plr corrupto documentado, simetría hjson ×18. **El fix del
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
-  (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.40**: 6.341.228 bytes, md5 4de4555c…, **396 entradas** auditadas
-  (EOF exacto con doble fórmula, TODAS inflan, 24 planas; la set de la v6.50.39 +
-  `VeloDona.rawimg`); **la dona verificada píxel a píxel DENTRO del paquete** (el
-  formato rawimg real: cabecera de 12 bytes versión+ancho+alto + BGRA premult —
-  el "256²·4+4" del log viejo era aritmética equivocada): centro alpha 0, las 4
-  esquinas alpha 255 (el empalme con las bandas), pleno a 120 px; cadenas UTF-16
-  verificadas ("AethonMod: VeloLib — la Oscuridad", la ruta de la dona, las del
-  cerrojo) y símbolos clave PRESENTES (`DibujarVeloMosaico`/`RestarPlaza`/
-  `CapaDelVelo`/`PintoresVivos`/`LuzAgujero`/`FRACCION_NUCLEO`/
-  `ModifyInterfaceLayers`) con el viejo `DibujarElVelo` AUSENTE.
-- **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
+  (verify.csproj 10 refs + el `-build` real con `DOTNET_ROLL_FORWARD=Minor`).
+- **`.tmod` v6.50.41**: 6.318.486 bytes, md5 f18eea6f…, **395 entradas** auditadas
+  (diff quirúrgico contra la v6.50.40: SOLO muere `VeloDona.rawimg`; EOF exacto
+  tabla+blobs = fsize, TODAS inflan, 24 planas); hjson: las 3 claves muertas
+  (`LlegadaOscuridad/OscuridadGrimorio/OscuridadSinGrimorio`) AUSENTES en ambos
+  idiomas y la baja SIMÉTRICA (es 496→493, en 498→495 — la brecha restante es
+  la de siempre: los 6 falsos positivos multilineales Ciclo/Telegrafiada vs
+  Cycle/Telegraphed/Afterwards/Hold); DLL: 13 símbolos muertos AUSENTES
+  (DibujarSolNegro/DibujarVeloMosaico/VeloSistema/PintarSobreElVelo/
+  RegistrarLuces/OscuridadObjetivo/…) y los nuevos PRESENTES
+  (`PosicionBajoElSol`/`SUB_DESCENSO`/`ModifyTimeRate`/…); literales UTF-16
+  verificados DENTRO del paquete (los muertos fuera, LlegadaLuz/Presentacion/
+  Muerte dentro); **la simulación del reloj en 5 escenarios** (mañana/tarde/
+  noche/mediodía exacto/tarde+1: JAMÁS salto hacia atrás).
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.40>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.41>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.40 está implementada y build-verificada. El usuario probó la
-v6.50.39 y pidió las dos correcciones de la oscuridad (bajo la interfaz + los agujeros).
-Checklist de la v6.50.40:
+Toda la cadena v6.50.24 → v6.50.41 está implementada y build-verificada. El usuario vio la
+v6.50.39/.40 en juego y pidió: quitar la capa de oscuridad + el sol sin teletransporte +
+el destello nacido del sol + el jefe fuera del centro del sol.
+Checklist de la v6.50.41:
 
-1. **LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS (v6.50.40, EL PRIMERO)**:
-   invocar a Aethon y verificar: (a) EL VELO cayendo sobre el MUNDO pero
-   **DEBAJO de la interfaz** — el HUD, el mapa de la esquina, la barra del
-   jefe, el chat y el cursor quedan NORMALES (la v6.50.39 los apagaba);
-   (b) **AETHON ENTERO VISIBLE en su agujero de 780 px** (la luz que tiene
-   QUITA la oscuridad — su cuerpo de sol completo, no solo un brillo
-   encima del negro; en su eclipse el agujero se encoge a 360 y se vuelve
-   violeta); (c) **el PEQUEÑO CÍRCULO del jugador (235 px) SOLO con
-   Grimorio ≥50** — el jugador visible con su luz, con Grimorio <50
-   oscuridad total (el texto lo explica); (d) LAS BALAS abriendo sus
-   agujeros pequeños (88/130 px — se ve venir el castigo); (e) EL SOL
-   NEGRO con rim y corona + los telegraphs, ahora BAJO la interfaz;
-   (f) LA PENUMBRA suave en el borde de cada agujero (el falloff de
-   Don't Starve) y SIN costuras ni parches más oscuros donde se cruzan
-   las luces (el mosaico es disjunto); (g) EL MAPA A PANTALLA COMPLETA
-   legible (el velo no lo apaga). Si algo falla: el client.log LO CUENTA
-   («VeloLib: el velo falló al dibujarse» / «el pintor del velo falló»).
-2. **EL SOL NO SE TELETRANSPORTA (v6.50.39, heredado)**: invocarlo DE NOCHE y verificar
-   que la luna barre el cielo, el alba llega SOLA y el sol POSA en el centro
-   con frenada progresiva — SIN salto. De día igual: nada de teletransporte
-   al mediodía, ni en SP ni (si se puede) en MP con clientes atrasados.
+1. **LA LLEGADA LIMPIA — EL MEDIO DÍA DEL DESTELLO (v6.50.41, EL PRIMERO)**:
+   invocar a Aethon y verificar: (a) **CERO OSCURIDAD** — el mundo NUNCA se
+   apaga (ni velo, ni sol negro, ni apagón, ni mensaje «TODA LA LUZ HA SIDO
+   CONCENTRADA…» — todo eso murió); (b) **EL SOL SIN TELETRANSPORTE**:
+   invocarlo EN LA TARDE (sol pasado el centro) y ver la carrera COMPLETA —
+   el sol sigue su tarde, el OCASO, la NOCHE ENTERA (la luna barre el cielo),
+   el AMANECER y la mañana del nuevo día hasta que el sol SE POSA en el
+   centro con frenada progresiva (~12-14 s, timelapse legible — JAMÁS un
+   salto, JAMÁS hacia atrás); invocarlo DE MAÑANA: directo al centro;
+   invocarlo DE NOCHE: la noche corre y el alba llega sola; (c) **EL
+   DESTELLO NACE DEL SOL**: en el climax, un BRILLO RADIAL centrado EN EL
+   SOL que crece hasta inundar la pantalla y se difumina hasta ser
+   TRANSPARENTE justo en los bordes (nada de flash blanco de pantalla
+   completa); (d) **EL SOL NO SE APAGA**: sigue visible y ardiendo TODO el
+   combate (clavado en el centro mientras la luz viva); (e) **AETHON NO
+   NACE DEL CENTRO DEL SOL**: se materializa BAJO él, en el borde inferior
+   de su halo, envuelto en el pico del destello — y luego desciende a su
+   órbita de pelea; (f) el temblor del acto 1 + los destellos del cielo +
+   las siete columnas lejanas + la ventana siguiendo al sol durante la
+   carrera (todo lo heredado que SIGUE vivo).
+2. **EL JEFE AETHON — LO HEREDADO VIVO**: (a) MÁS GRANDE (el sol de código
+   ×1.5 — núcleo 130 px); (b) LOS SEIS ATAQUES (juicio/rayo/nova/cruz/
+   destello/eclipse — el ECLIPSE sigue encogiendo SU propia luz y poniendo
+   el cielo violeta mientras dura el ATAQUE); (c) LA MUERTE: la contracción,
+   EL ESTALLIDO final CEGANDO, el sol RECUPERANDO su curso y el anuncio
+   «La luz ESTALLA y su resplandor REGRESA al mundo…»; (d) que NO hay
+   excepciones nuevas en el client.log.
 3. **EL COMPILE SIN CIERRES (v6.50.39)**: compilar el mod en tModLoader
    (Develop Mods → Build & Reload) VARIAS veces seguidas — el juego YA NO se
-   cierra: la nueva oscuridad no toca el GraphicsDevice y todo vive con
-   cerrojo + log.
-4. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (lo heredado de v6.50.37)**:
-   invocarlo (de día Y de noche, para ver los dos caminos) y verificar:
-   (a) MÁS GRANDE (el sol de código ×1.5 — núcleo 130 px); (b) LA LLEGADA
-   COMPLETA: EL MUNDO TIEMBLA (la pantalla sacudida ~2.5 s — como la sierpe),
-   EL TIEMPO CORRE (el sol ATRAVIESANDO el cielo — ahora con aterrizaje
-   natural, ver ítem 2 arriba) hasta quedar CLAVADO EN EL CENTRO,
-   LOS DESTELLOS en el cielo, EL SOL BRILLANDO CON INTENSIDAD (la ventana
-   cegadora creciendo)… EL FLASH BLANCO… y AETHON NACIENDO DE ÉL; (c) EL SOL
-   NEGRO (disco oscuro + rim dorado + corona, centrado en el cielo TODO el
-   combate) y el mensaje «TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR…»; (d)
-   LA OSCURIDAD: el mundo ENTERO apagado salvo AETHON (brillando dorado e
-   intenso) y — SOLO si el Grimorio va nivel 50+ — el PEQUEÑO círculo del
-   jugador (probar con libro < 50: oscuridad TOTAL); las balas del jefe se
-   ven venir (los telegraphs también); el HUD (mapa/barra) SIGUE USABLE;
-   (e) LOS SEIS ATAQUES (heredados) + EL ECLIPSE ahora ENCOGE el brillo del
-   propio Aethon; (f) LA MUERTE: la oscuridad disolviéndose DURANTE la
-   contracción, EL FLASH final CEGANDO, el sol RECUPERANDO su curso y el
-   anuncio «La luz ESTALLA…»; (g) que NO hay «Excepción silenciosa» nuevas
-   en el client.log (en especial nada del render de la máscara/oscuridad).
-5. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
+   cierra (y ahora con aún MENOS superficie: la oscuridad entera fue
+   borrada).
+4. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
-6. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
+5. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
    (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
    recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-7. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
+6. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
    ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
    paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
    invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-8. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
+7. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
    opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-9. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
+8. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
    (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-10. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-11. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
-   emersión), la barra de vida con icono, el RAM y el Aliento.
-12. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
-   disco plano (los velos de la capa de UI murieron en v6.50.28).
-13. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
+9. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
+10. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
+    emersión), la barra de vida con icono, el RAM y el Aliento.
+11. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
+    disco plano (los velos de la capa de UI murieron en v6.50.28).
+12. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
     no hacen "cortes" ni clipean.
+
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
 
@@ -278,9 +297,10 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.40 en juego** con el checklist de arriba — LA
-   PRUEBA DEL FIX: el velo BAJO la interfaz y los AGUJEROS de luz (Aethon
-   entero + el círculo del Grimorio + las balas).
+1. **El usuario prueba v6.50.41 en juego** con el checklist de arriba — LA
+   PRUEBA DEL FIX: el sol SIN teletransporte (en la tarde → día completo por
+   la noche), el destello radial nacido del sol y Aethon materializándose
+   BAJO él, con CERO oscuridad.
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -311,7 +331,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.40** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ (feedback de la v6.50.39: «la capa no debe estar sobre todo… no debe cubrir ni al jugador ni al jefe, la luz que tienen se supone que quita esa oscuridad»): el velo muda de `OnPostDraw` a **LA PRIMERA CAPA DE LA INTERFAZ** (HUD/mapa/chat/cursor usables) y deja de ser un rectángulo entero — **EL MOSAICO DISJUNTO** (bandas de velo pleno + una DONA radial por luz, de la chica a la grande y recortada: cada píxel pintado UNA vez) · Aethon ENTERO visible (agujero 780 px; 360 violeta en eclipse), círculo del jugador 235 px SOLO Grimorio ≥50, balas 88/130 · luces por TICK (sin parpadeo a 144 Hz ni apagón en pausa) · contrato anti-crash intacto (cero RTs/shaders/blends, cerrojo + log) |
+| **v6.50.41** | ✅ Build-verificada, ⏳ en juego | EL MEDIO DÍA DEL DESTELLO (cuatro pedidos): (1) LA CAPA DE OSCURIDAD MUERE DE RAÍZ (VeloLib + VeloDona borradas; fuera el sol negro, las luces, el aviso del Grimorio y el flash de pantalla completa — paquete 396→395) · (2) EL SOL SIN TELETRANSPORTE DE VERDAD (bug de la v6.50.40: la tarde disparaba el aterrizaje al instante y el sol saltaba HACIA ATRÁS; ventana [26999, 27001] + restante hasta el PRÓXIMO mediodía POR LA NOCHE: tarde → ocaso → noche completa → amanecer → mediodía, 110× máx con aterrizaje — simulado en 5 escenarios, jamás hacia atrás) · (3) EL DESTELLO NACE DEL SOL (brillo radial centrado en él, difuminado a TRANSPARENTE en los bordes — y el sol NO se apaga) · (4) AETHON NO NACE DEL CENTRO DEL SOL (se materializa BAJO él vía la inversa de la matriz de vista; acto 13 = EL DESCENSO) |
+| **v6.50.40** | ✅ Build-verificada, ⏳ probada (retirada) | LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ (feedback de la v6.50.39: «la capa no debe estar sobre todo… no debe cubrir ni al jugador ni al jefe, la luz que tienen se supone que quita esa oscuridad»): el velo muda de `OnPostDraw` a **LA PRIMERA CAPA DE LA INTERFAZ** (HUD/mapa/chat/cursor usables) y deja de ser un rectángulo entero — **EL MOSAICO DISJUNTO** (bandas de velo pleno + una DONA radial por luz, de la chica a la grande y recortada: cada píxel pintado UNA vez) · Aethon ENTERO visible (agujero 780 px; 360 violeta en eclipse), círculo del jugador 235 px SOLO Grimorio ≥50, balas 88/130 · luces por TICK (sin parpadeo a 144 Hz ni apagón en pausa) · contrato anti-crash intacto (cero RTs/shaders/blends, cerrojo + log) — el usuario la vio en juego y pidió QUITAR la oscuridad → v6.50.41 |
 | **v6.50.39** | ✅ Build-verificada, ✔ probada en juego | LA TÉCNICA DE WRATH OF THE GODS: la máscara de luz MUERE (rechazada por el usuario) y nace **VELOLIB** — la oscuridad como en WotG (velo sobre el frame en `OnPostDraw` + las luces dibujadas DESPUÉS) · EL SOL ya no se teletransporta (noche entera a 300× + aterrizaje desacelerado al mediodía, sin corte al alba y sin snap) · el fix de «al compilar el juego se cierra» (cero GraphicsDevice/RTs, cerrojo de 3 caídas + log) — probada por el usuario: «bueno, parece estar bien», con dos correcciones pedidas → v6.50.40 |
 | **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) — el usuario la probó y la técnica entera fue reemplazada en v6.50.39 |
 | **v6.50.37** | ✅ Build-verificada, ⏳ parcialmente probada | EL MEDIO DÍA DE LA OSCURIDAD: jefe ×1.5 + LA LLEGADA en cuatro actos (temblor → carrera del sol a 240× → flash → sol negro) + LA OSCURIDAD PRIMORDIAL (máscara de luz Don't-Starve mejorada). El usuario la probó y reportó el bug de la oscuridad → fix en v6.50.38 |

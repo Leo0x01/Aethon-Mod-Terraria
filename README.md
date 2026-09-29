@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.40 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.41 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,31 +14,44 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.40)
+## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.41)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.40`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.41`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 396 entradas auditado.
-- **v6.50.40 — LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ**: «la
-  capa de oscuridad no debe estar sobre todo, la capa debe estar por
-  debajo de la interfaz de usuario» + «no debe cubrir ni al jugador ni al
-  jefe, la luz que tienen se supone que quita esa oscuridad». (1) El velo
-  ya no vive en `OnPostDraw` (encima de TODO — tapaba el HUD): es **LA
-  PRIMERA CAPA DE LA INTERFAZ** — el mundo se apaga, el HUD/el mapa/la
-  barra/el chat/el cursor quedan USABLES (y el mapa a pantalla completa
-  no se apaga). (2) El velo ya no es un rectángulo entero: es **EL
-  MOSAICO DISJUNTO** — bandas de velo pleno que esquivan las plazas de
-  las luces + una DONA radial por luz (núcleo limpio + penumbra)
-  recortada alrededor de las ya dibujadas: **Aethon visible ENTERO en su
-  agujero de 780 px** (360 violeta en su eclipse), el **pequeño círculo
-  del jugador de 235 px SOLO con Grimorio ≥50**, las balas 88/130 px —
-  cada píxel del velo lo pinta UNA sola pieza (sin doble oscurecimiento,
-  sin costuras, la luz chica nunca tapada por la penumbra de la grande —
-  verificado por simulación). De yapa: las luces viven por TICK y no por
-  frame (sin parpadeo a 144 Hz ni apagón al pausar). El contrato
-  anti-crash de la v6.50.39 queda INTACTO (cero RTs/shaders/blends,
-  cerrojo de 3 caídas + log).
+  sin excepciones; `.tmod` de 395 entradas auditado.
+- **v6.50.41 — EL MEDIO DÍA DEL DESTELLO** (cuatro pedidos en uno):
+  (1) **LA CAPA DE OSCURIDAD MUERE DE RAÍZ** — «mejor quita la capa de
+  oscuridad, no se ve nada bien, se ve horrible»: VeloLib (el velo bajo la
+  interfaz con el mosaico de agujeros), **EL SOL NEGRO**, las luces del
+  frame, el aviso del Grimorio y el flash blanco de pantalla completa
+  BORRADOS — la llegada queda LIMPIA: temblor → carrera del sol → destello
+  → descenso. (2) **EL SOL SIN TELETRANSPORTE DE VERDAD** — el bug de la
+  v6.50.40 cazado: con el sol en la TARDE el aterrizaje se disparaba al
+  INSTANTE y el sol saltaba HACIA ATRÁS al mediodía; ahora la ventana de
+  aterrizaje es [26999, 27001] y la carrera mide EL RESTANTE hasta el
+  PRÓXIMO mediodía POR LA NOCHE: **tarde → ocaso → NOCHE COMPLETA →
+  amanecer → mañana → mediodía** («si está más allá del centro, un día
+  completo avanza con noche completa, un nuevo día hasta el amanecer» —
+  simulado en 5 escenarios, jamás salta hacia atrás; ~12-14 s el peor caso,
+  el sol y la luna ATRAVIESAN el cielo visiblemente). Si está ANTES del
+  centro: directo al centro con aterrizaje desacelerado. (3) **EL DESTELLO
+  NACE DEL SOL**: un brillo radial CENTRADO en el sol que crece hasta
+  inundar la pantalla y muere TRANSPARENTE justo en los bordes (el
+  degradé termina donde termina la pantalla) — y **EL SOL NO SE APAGA**:
+  sigue ahí, vivo, ardiendo bajo el destello. (4) **AETHON YA NO NACE DEL
+  CENTRO DEL SOL**: se materializa BAJO él, en el borde inferior de su
+  halo (conversión espacio-del-fondo → mundo vía la INVERSA de la matriz
+  de vista), envuelto en el pico del destello.
+- **v6.50.40 — LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ**
+  (RETIRADA en v6.50.41 por petición): «la capa de oscuridad no debe estar
+  sobre todo, la capa debe estar por debajo de la interfaz de usuario» +
+  «no debe cubrir ni al jugador ni al jefe»: el velo pasó a ser LA PRIMERA
+  CAPA DE LA INTERFAZ y EL MOSAICO DISJUNTO abrió los agujeros de luz
+  (Aethon 780 px entero, el círculo del jugador 235 px solo con Grimorio
+  ≥50, las balas 88/130) — verificado por simulación, sin costuras ni
+  dobles. La técnica quedó documentada en CHANGES.md para futura
+  referencia, pero YA NO VIVE en el mod.
 - **v6.50.39 — LA TÉCNICA DE WRATH OF THE GODS**: tres pedidos en uno.
   (1) «quitemos ese sistema… en su lugar revisa como lo hace el mod
   wrath of the gods, y crea una libreria para eso»: ingeniería inversa

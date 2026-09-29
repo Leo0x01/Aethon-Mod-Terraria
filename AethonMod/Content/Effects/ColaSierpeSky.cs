@@ -10,14 +10,12 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Effects
 {
     // ======================================================================
-    //  v6.50.37 — EL CIELO DE LA LLEGADA DEFINITIVA (EL MEDIO DÍA DE LA
-    //  OSCURIDAD).
+    //  v6.50.41 — EL CIELO DE LA LLEGADA (EL MEDIO DÍA DEL DESTELLO).
     //
-    //  Petición del usuario: «cuando Aethon aparece destellos de luz
-    //  aparecen en el cielo, el sol se vuelve negro y este queda
-    //  centrado justo en el centro del cielo… antes de que Aethon
-    //  aparezca, cuando el sol esta centrado en el cielo, el sol brilla
-    //  con intensidad y de ahi aparece Aethon».
+    //  Petición del usuario: «el destello inicial de cuando aparece el
+    //  jefe debe ser un brillo que viene del mismo sol en donde aparece
+    //  el jefe, debe estar centrado en el sol y difuminarse hacia los
+    //  bordes hasta ser transparente, además el sol no se apaga».
     //
     //  LA SECUENCIA (leída del espejo AethonBoss.SubLlegada — vive en
     //  TODAS las máquinas):
@@ -27,12 +25,16 @@ namespace AethonMod.Content.Effects
     //    abriéndose DONDE ESTÁ EL SOL.
     //  · SUB 11 (EL TIEMPO CORRE): el sol ATRAVIESA el cielo — LA
     //    VENTANA LO SIGUE (la puerta de la luz persiguiendo a su dueño).
-    //  · SUB 12 (EL SOL BRILLA CON INTENSIDAD): la ventana se vuelve
-    //    un HOYO CEGADOR en el cielo — el blanco que crece hasta que
-    //    el VELO de VeloLib lo reemplaza con EL FLASH de pantalla completa.
-    //  · SUB 13+ (LA OSCURIDAD): el cielo se APAGA — el resplandor
-    //    dorado permanente muere a un violeta de ultratumba (la luz del
-    //    mundo ya no está aquí: está en ÉL).
+    //  · SUB 12 (EL DESTELLO NACE DEL SOL): EL BRILLO RADIAL — centrado
+    //    en el sol, creciendo hasta inundar la pantalla y muriendo en
+    //    TRANSPARENTE justo en los bordes (el degradé del SoftGlow
+    //    termina donde termina la pantalla); en su pico, Aethon se
+    //    materializa BAJO el sol. El sol NO SE APAGA: el brillo es
+    //    aditivo ENCIMA de él — brilla con intensidad, vivo.
+    //  · SUB 13 (EL DESCENSO): el cielo de la llegada se disuelve — la
+    //    oscuridad y el sol negro MURIERON (v6.50.41); solo queda el
+    //    resplandor dorado permanente mientras la luz viva (y el
+    //    violeta del ECLIPSE, el ataque, cuando la luz se apaga).
     //
     //  El mecanismo es EL MISMO DE SIEMPRE (el hallazgo R59-a que la
     //  casa hereda): SkyManager.DrawToDepth pinta ENTRE LAS CAPAS del
@@ -160,15 +162,13 @@ namespace AethonMod.Content.Effects
             }
             catch { }
 
-            // LA LLEGADA: intensidad 1 mientras los subs 10-12; al llegar
-            // la oscuridad (13) la luz YA NO ESTÁ en el cielo — se apaga.
+            // LA LLEGADA: intensidad 1 mientras los subs 10-12; en el
+            // descenso (13) la puerta de la luz se disuelve.
             float objetivoLlegada = (sub >= 10 && sub <= 12) ? 1f : 0f;
             float pasoLlegada = objetivoLlegada > _llegadaVista ? (1f / 25f) : (1f / 22f);
             _llegadaVista = MathHelper.Clamp(
                 _llegadaVista + MathF.Sign(objetivoLlegada - _llegadaVista) * pasoLlegada,
                 0f, 1f);
-
-            bool oscuro = AethonBoss.OscuridadObjetivo || AethonBoss.TiempoCongelado;
 
             // === LA MATRIZ DEL PAISAJE (la reconstrucción EXACTA del lote
             //     del fondo — literal del DoGSky/Calamity) ===
@@ -195,17 +195,17 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    // EL COLOR del cielo: dorado vivo… violeta del eclipse…
-                    // o el VIOLETA MUERTO de LA OSCURIDAD (la luz ya no
-                    // está aquí — está TODA en un solo lugar).
+                    // EL COLOR del cielo: dorado vivo… o el violeta del
+                    // ECLIPSE (el ataque — la oscuridad de la llegada
+                    // MURIÓ en la v6.50.41; mientras la luz vive, el
+                    // horizonte ARDE dorado).
                     Color cLuz = eclipse ? new Color(110, 70, 190)
-                        : (oscuro ? new Color(70, 46, 130) : new Color(255, 226, 140));
+                        : new Color(255, 226, 140);
 
                     // EL RESPLANDOR PERMANENTE: mientras la luz vive, el
-                    // horizonte arde suave… salvo en la oscuridad, donde
-                    // solo queda un fantasma violeta.
+                    // horizonte arde suave.
                     float pulso = 0.82f + 0.18f * MathF.Sin(t * 0.9f);
-                    float baseBrillo = eclipse ? 0.05f : (oscuro ? 0.028f : 0.10f);
+                    float baseBrillo = eclipse ? 0.05f : 0.10f;
                     sb.Draw(glow, new Vector2(w * 0.5f, -h * 0.55f), null,
                         cLuz * (_alpha * baseBrillo * pulso), 0f, origen,
                         new Vector2(w * 2.6f / glow.Width, h * 1.6f / glow.Height),
@@ -236,49 +236,118 @@ namespace AethonMod.Content.Effects
                                 SpriteEffects.None, 0f);
                         }
 
-                        // === LA VENTANA — DONDE ESTÁ EL SOL (la puerta de
-                        //     la luz): durante la carrera SIGUE al sol en su
-                        //     carrera; en el climax se vuelve CEGADORA. La
-                        //     posición es la EXACTA de vanilla (el decompile
-                        //     de DrawSunAndMoon — la casa la replica).
-                        //     v6.50.39: de NOCHE no hay sol en el cielo (la
-                        //     luna barre y el alba llega sola) — la puerta de
-                        //     la luz no abre donde no hay sol: la ventana
-                        //     espera al alba de LA CARRERA. ===
+                        // === LA VENTANA Y EL DESTELLO — DONDE ESTÁ EL
+                        //     SOL: durante la carrera la puerta de la luz
+                        //     SIGUE al sol; en el climax EL DESTELLO nace
+                        //     de él: UN BRILLO RADIAL centrado en el sol
+                        //     que crece hasta inundar la pantalla y muere
+                        //     TRANSPARENTE justo en los bordes. La
+                        //     posición es la EXACTA de vanilla (el
+                        //     decompile de DrawSunAndMoon — la casa la
+                        //     replica) y vive CADA FRAME: el brillo
+                        //     PERSIGUE a su dueño. De NOCHE no hay sol en
+                        //     el cielo — la puerta espera al alba de LA
+                        //     CARRERA. ===
                         if (Main.dayTime)
                         {
                             Vector2 posSol = AethonBoss.PosicionSolEnCielo();
-                            float crescendo = sub == 12 ? Math.Min(1f, ContarTickClimax() / 90f) : 0f;
-                            float tam = (34f + 66f * av + 390f * crescendo) *
-                                (0.92f + 0.08f * MathF.Sin(t * (3.2f + 6f * crescendo)));
 
-                            // EL NÚCLEO CEGADOR (blanco puro al climax)
-                            sb.Draw(orbe, posSol, null,
-                                new Color(255, 250, 224) * (_alpha * (av * 0.55f + 0.45f * crescendo)),
-                                0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
-                                tam / orbe.Width, SpriteEffects.None, 0f);
-                            // el halo de la ventana
-                            sb.Draw(glow, posSol, null,
-                                cLuz * (_alpha * (av * 0.20f + 0.25f * crescendo)), 0f, origen,
-                                new Vector2(tam * 2.6f / glow.Width, tam * 2.6f / glow.Height),
-                                SpriteEffects.None, 0f);
-
-                            // LOS RAYOS DEL CLIMAX (cuando el sol BRILLA con
-                            // intensidad, sus rayos se alargan por el cielo)
-                            if (crescendo > 0.05f)
+                            if (sub == 12)
                             {
-                                Vector2 origenR = new Vector2(glow.Width, glow.Height) * 0.5f;
-                                for (int i = 0; i < 8; i++)
+                                // ============ EL DESTELLO (v6.50.41) ============
+                                // «un brillo que viene del mismo sol, centrado
+                                // en el sol y difuminándose hacia los bordes
+                                // hasta ser transparente». LA CURVA: crece
+                                // (0-45 t), ARDE en el pico (45-75 t — ahí
+                                // nace Aethon, BAJO el sol) y se disuelve
+                                // (75-120 t) hasta volverse la ventana.
+                                float tick = ContarTickClimax();
+                                float f;
+                                if (tick < 45f) f = tick / 45f;
+                                else if (tick < 75f) f = 1f;
+                                else f = Math.Max(0f, 1f - (tick - 75f) / 45f);
+                                float suave = f * f * (3f - 2f * f);   // smoothstep
+                                float latidoF = 0.90f + 0.10f *
+                                    MathF.Sin(t * (3.2f + 8f * suave));
+
+                                // EL ALCANCE: del sol a la ESQUINA más
+                                // lejana de la pantalla — ahí muere el
+                                // degradé: en los bordes ya es transparente.
+                                float dEsq = MathF.Max(
+                                    Vector2.Distance(posSol, new Vector2(w, h)),
+                                    Vector2.Distance(posSol, Vector2.Zero));
+                                float alcance = MathF.Max(dEsq,
+                                    MathF.Max(Vector2.Distance(posSol, new Vector2(w, 0f)),
+                                        Vector2.Distance(posSol, new Vector2(0f, h))));
+
+                                // 1) EL BRAZO DEL DESTELLO — el degradé que
+                                //    llena la pantalla desde el sol.
+                                float radio = MathHelper.Lerp(120f, alcance * 1.06f, suave);
+                                sb.Draw(glow, posSol, null,
+                                    new Color(255, 250, 226) *
+                                    (_alpha * av * (0.30f + 0.62f * suave) * latidoF),
+                                    0f, origen,
+                                    new Vector2(radio * 2f / glow.Width,
+                                                radio * 2f / glow.Height),
+                                    SpriteEffects.None, 0f);
+
+                                // 2) EL HALO CÁLIDO — la temperatura del sol.
+                                float radioH = MathHelper.Lerp(170f, alcance * 0.52f, suave);
+                                sb.Draw(glow, posSol, null,
+                                    cLuz * (_alpha * av * (0.22f + 0.50f * suave) * latidoF),
+                                    0f, origen,
+                                    new Vector2(radioH * 2f / glow.Width,
+                                                radioH * 2f / glow.Height),
+                                    SpriteEffects.None, 0f);
+
+                                // 3) EL NÚCLEO — el corazón del sol, cegador
+                                //    en el pico (el sol NO se apaga: brilla
+                                //    con intensidad, VIVO, bajo el destello).
+                                float tamN = MathHelper.Lerp(58f, 250f, suave) * latidoF;
+                                sb.Draw(orbe, posSol, null,
+                                    new Color(255, 252, 238) *
+                                    (_alpha * av * (0.60f + 0.40f * suave)),
+                                    0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
+                                    tamN / orbe.Width, SpriteEffects.None, 0f);
+
+                                // 4) LOS RAYOS DEL DESTELLO — los brazos del
+                                //    sol alargándose por el cielo en el pico.
+                                if (suave > 0.04f)
                                 {
-                                    float ang = i * MathHelper.PiOver4 + t * 0.3f;
-                                    float largo = tam * (1.4f + 1.2f * crescendo);
-                                    sb.Draw(glow, posSol + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
-                                        (tam * 0.8f + largo * 0.5f), null,
-                                        new Color(255, 244, 200) * (_alpha * 0.30f * crescendo),
-                                        ang, origenR,
-                                        new Vector2(largo / glow.Width, (6f + 10f * crescendo) / glow.Height),
-                                        SpriteEffects.None, 0f);
+                                    Vector2 origenR = new Vector2(glow.Width, glow.Height) * 0.5f;
+                                    for (int i = 0; i < 8; i++)
+                                    {
+                                        float ang = i * MathHelper.PiOver4 + t * 0.3f;
+                                        float largo = (tamN * 0.9f + alcance * 0.34f) * suave;
+                                        sb.Draw(glow, posSol + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                                            (tamN * 0.7f + largo * 0.5f), null,
+                                            new Color(255, 244, 200) * (_alpha * av * 0.30f * suave),
+                                            ang, origenR,
+                                            new Vector2(largo / glow.Width,
+                                                        (6f + 10f * suave) / glow.Height),
+                                            SpriteEffects.None, 0f);
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                // ============ LA VENTANA (la carrera) ============
+                                // la puerta de la luz siguiendo al sol en su
+                                // carrera a través del cielo.
+                                float tam = (34f + 66f * av) *
+                                    (0.92f + 0.08f * MathF.Sin(t * 3.2f));
+
+                                // EL NÚCLEO de la ventana
+                                sb.Draw(orbe, posSol, null,
+                                    new Color(255, 250, 224) * (_alpha * av * 0.55f),
+                                    0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
+                                    tam / orbe.Width, SpriteEffects.None, 0f);
+                                // el halo de la ventana
+                                sb.Draw(glow, posSol, null,
+                                    cLuz * (_alpha * av * 0.20f), 0f, origen,
+                                    new Vector2(tam * 2.6f / glow.Width,
+                                                tam * 2.6f / glow.Height),
+                                    SpriteEffects.None, 0f);
                             }
                         }
                     }
