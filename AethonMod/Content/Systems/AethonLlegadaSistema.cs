@@ -32,13 +32,18 @@ namespace AethonMod.Content.Systems
     //     ATERRIZA en 27000 exacto, sin snap, sin salto: el sol se POSA
     //     en el centro como un avión, no como un teletransporte.
     //
-    //  2. LA OSCURIDAD: ahora es VeloLib (la técnica de Wrath of the
-    //     Gods — TotalScreenOverlaySystem): EL VELO sobre el frame
-    //     terminado + LAS LUCES dibujadas después (las excepciones de
-    //     la petición original: Aethon brilla dorado porque ES luz pura;
-    //     el jugador solo un pequeño círculo — SOLO si su Grimorio es
-    //     nivel 50 o superior; las balas de la luz, para ver venir el
-    //     castigo) + EL SOL NEGRO y los telegraphs, encima de todo.
+    //  2. LA OSCURIDAD: VeloLib v6.50.40 — EL VELO BAJO LA INTERFAZ
+    //     (la petición: «la capa de oscuridad no debe estar sobre todo,
+    //     la capa debe estar por debajo de la interfaz de usuario»)
+    //     CON AGUJEROS DE LUZ («no debe cubrir ni al jugador ni al jefe,
+    //     la luz que tienen se supone que quita esa oscuridad»): el velo
+    //     es LA PRIMERA CAPA DE LA INTERFAZ (el mundo se apaga, el HUD,
+    //     el mapa y el chat quedan USABLES) y ya no es un rectángulo
+    //     entero — es un MOSAICO con el agujero de cada luz (Aethon
+    //     dorado en su círculo, el pequeño círculo del jugador — SOLO si
+    //     su Grimorio es nivel 50 o superior —, las balas de la luz para
+    //     ver venir el castigo) + EL SOL NEGRO y los telegraphs encima
+    //     de la oscuridad, todo bajo la interfaz.
     // ======================================================================
     public class AethonLlegadaSistema : ModSystem
     {
@@ -252,9 +257,12 @@ namespace AethonMod.Content.Systems
         }
 
         // ==================================================================
-        //  LAS LUCES DEL FRAME — las excepciones de la oscuridad:
-        //  · AETHON brilla dorado (ES luz pura); en su eclipse hasta su
-        //    luz muere: se encoge y se vuelve violeta.
+        //  LAS LUCES DEL FRAME — las excepciones de la oscuridad (cada una
+        //  ABRE su agujero en el velo + su brillo aditivo encima):
+        //  · AETHON: ES la luz pura — el agujero cubre su cuerpo entero
+        //    (el velo visual de 540 px cabe holgado en los 780 del
+        //    núcleo limpio); en su eclipse hasta su luz muere: el agujero
+        //    se encoge a 360 y se vuelve violeta.
         //  · EL JUGADOR: solo un pequeño círculo — SOLO con Grimorio ≥ 50.
         //  · LAS BALAS de la luz (pernos, columnas, runas): se ve venir
         //    el castigo, no el terreno.
@@ -264,17 +272,18 @@ namespace AethonMod.Content.Systems
             float t = Main.GlobalTimeWrappedHourly;
             float respira = 1f + 0.03f * MathF.Sin(t * 0.7f);   // la luz respira
 
-            // === EL AGUJERO… LA LUZ DE AETHON (ES la luz pura) ===
+            // === LA LUZ DE AETHON (ES la luz pura) ===
             if (jefe != null && jefe.active && jefe.alpha < 200)
             {
                 bool eclipse = jefe.ai[1] == 3f && jefe.ai[0] != 0f;
-                // en el ECLIPSE hasta SU luz muere: se encoge y se vuelve
-                // violeta — la oscuridad le cierra la mano encima
-                float radio = eclipse ? 210f : 430f;
+                // en el ECLIPSE hasta SU luz muere: el agujero se encoge
+                // y se vuelve violeta — la oscuridad le cierra la mano encima
+                float agujero = eclipse ? 360f : 780f;
+                float brillo = eclipse ? 210f : 430f;
                 Color tinte = eclipse
                     ? new Color(150, 105, 220)
                     : new Color(255, 240, 200);
-                Velo.Luz(jefe.Center, radio * respira, tinte, true);
+                Velo.Luz(jefe.Center, agujero * respira, brillo, tinte, true);
             }
 
             // === EL CÍRCULO DEL JUGADOR (solo Grimorio ≥ 50) ===
@@ -282,7 +291,8 @@ namespace AethonMod.Content.Systems
             {
                 Player p = Main.LocalPlayer;
                 if (p != null && p.active && !p.dead)
-                    Velo.Luz(p.Center, 235f * respira, new Color(225, 232, 255), false);
+                    Velo.Luz(p.Center, 235f * respira, 235f,
+                        new Color(225, 232, 255), false);
             }
 
             // === LAS BALAS DE LA LUZ (la única luz que se MUEVE por el mundo) ===
@@ -298,15 +308,15 @@ namespace AethonMod.Content.Systems
                     estilo != AtaqueJefeProjectile.EstiloRunaMemorizada) continue;
                 float rBala = estilo == AtaqueJefeProjectile.EstiloColumnaJuicio
                     ? 130f : 88f;
-                Velo.Luz(pr.Center, rBala, new Color(255, 244, 214), false);
+                Velo.Luz(pr.Center, rBala, rBala, new Color(255, 244, 214), false);
                 huecos++;
             }
         }
 
         // ==================================================================
-        //  EL PINTOR — LO QUE VIVE SOBRE LA OSCURIDAD (el contrato de la
-        //  casa: el lote llega ABIERTO en aditivo·identidad y se devuelve
-        //  ABIERTO en aditivo·identidad):
+        //  EL PINTOR — LO QUE VIVE SOBRE LA OSCURIDAD, BAJO LA INTERFAZ
+        //     (el contrato de la casa: el lote llega ABIERTO en
+        //     aditivo·identidad y se devuelve ABIERTO en aditivo·identidad):
         //  1. EL SOL NEGRO (el eclipse de la concentración — el disco que
         //     CUBRE al sol real, el rim dorado latiendo, la corona).
         //  2. LOS DESTELLOS LEJANOS (la oscuridad está VIVA).

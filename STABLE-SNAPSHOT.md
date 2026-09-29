@@ -1,12 +1,38 @@
-# AethonMod — ESTADO ACTUAL (v6.50.39)
+# AethonMod — ESTADO ACTUAL (v6.50.40)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.39`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.40`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.39`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.40`.
+- **v6.50.40 = LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ** (la
+  retroalimentación del usuario sobre la v6.50.39: «bueno, parece estar
+  bien, pero la capa de oscuridad no debe estar sobre todo, la capa debe
+  estar por debajo de la interfaz de usuario, ademas no debe cubrir ni al
+  jugador ni al jefe, la luz que tienen se supone que quita esa
+  oscuridad"): (1) el velo MUDA DE PUNTO — de `Main.OnPostDraw` (la capa
+  MÁS ALTA del frame, sobre el mundo Y la interfaz) a **LA PRIMERA CAPA
+  DE LA INTERFAZ** (`ModifyInterfaceLayers` + `LegacyGameInterfaceLayer`
+  índice 0 — la técnica probada de v6.50.37/.38, con el contrato del lote
+  del decompile en un `finally` inquebrantable): el mundo se apaga, el
+  HUD/el mapa/el chat/el cursor quedan USABLES (el mapa a pantalla
+  completa tampoco se apaga). (2) **EL MOSAICO**: el velo ya no es un
+  rectángulo entero — bandas de velo pleno que esquivan las PLAZAS de las
+  luces + una DONA radial por luz (`VeloDona.png`: núcleo limpio 0.76 /
+  penumbra smoothstep / pleno 0.90 hasta las esquinas) dibujada de la luz
+  CHICA a la GRANDE y recortada alrededor de las ya pintadas (resta de
+  rectángulos con ping-pong de buffers): **cada píxel del velo lo pinta
+  UNA sola pieza** — sin doble oscurecimiento, sin costuras, la luz chica
+  JAMÁS tapada (verificado por simulación: cobertura completa, cero
+  dobles, oscuridad 0 en cada centro). (3) LOS AGUJEROS: Aethon 780 px
+  (ENTERO visible; 360 violeta en eclipse) + brillo 430; el jugador 235
+  px SOLO con Grimorio ≥50; las balas 88/130. (4) las luces viven por
+  TICK y no por frame (sello de `GameUpdateCount`: sin parpadeo a 144 Hz,
+  sin apagón al pausar; `PintoresSiempre` vence a los 2 ticks). (5) el
+  contrato anti-crash INTACTO: cero RTs/shaders/blends custom — solo
+  rectángulos y UNA textura; cerrojo de 3 caídas + log.
 - **v6.50.39 = LA TÉCNICA DE WRATH OF THE GODS** (tres pedidos en uno):
   (1) la máscara de luz MUERE — el usuario la rechazó («solo hace que todo
   este negro y no es el oscurecer que quiero»); la ingeniería inversa del
@@ -141,39 +167,45 @@
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.39**: 6.322.305 bytes, md5 1d7b8c44…, **395 entradas** auditadas
-  (EOF exacto, set de la 38 menos AgujeroLuz.rawimg); cadenas del cerrojo verificadas
-  DENTRO DEL PAQUETE en UTF-16 («VeloLib: el velo falló al dibujarse» / «el pintor
-  del velo falló») y símbolos clave PRESENTES (VeloSistema, AethonLlegadaSistema,
-  PintarSobreElVelo, DibujarSolNegro) con TODA la máscara AUSENTE
-  (OscuridadSistema/DibujarOscuridad/DibujarAgujero/AsegurarMascara/FaseOscuridad).
+- **`.tmod` v6.50.40**: 6.341.228 bytes, md5 4de4555c…, **396 entradas** auditadas
+  (EOF exacto con doble fórmula, TODAS inflan, 24 planas; la set de la v6.50.39 +
+  `VeloDona.rawimg`); **la dona verificada píxel a píxel DENTRO del paquete** (el
+  formato rawimg real: cabecera de 12 bytes versión+ancho+alto + BGRA premult —
+  el "256²·4+4" del log viejo era aritmética equivocada): centro alpha 0, las 4
+  esquinas alpha 255 (el empalme con las bandas), pleno a 120 px; cadenas UTF-16
+  verificadas ("AethonMod: VeloLib — la Oscuridad", la ruta de la dona, las del
+  cerrojo) y símbolos clave PRESENTES (`DibujarVeloMosaico`/`RestarPlaza`/
+  `CapaDelVelo`/`PintoresVivos`/`LuzAgujero`/`FRACCION_NUCLEO`/
+  `ModifyInterfaceLayers`) con el viejo `DibujarElVelo` AUSENTE.
 - **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.39>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.40>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.39 está implementada y build-verificada. El usuario probó la
-v6.50.37 y reportó el bug de la oscuridad — el fix v6.50.38 no bastó («solo hace que todo
-este negro y no es el oscurecer que quiero») y la técnica entera fue REMPLAZADA por la de
-Wrath of the Gods. Checklist de la v6.50.39:
+Toda la cadena v6.50.24 → v6.50.40 está implementada y build-verificada. El usuario probó la
+v6.50.39 y pidió las dos correcciones de la oscuridad (bajo la interfaz + los agujeros).
+Checklist de la v6.50.40:
 
-1. **LA OSCURIDAD — LA TÉCNICA DE WOTG (v6.50.39, EL PRIMERO)**: invocar a
-   Aethon y verificar que AHORA SÍ (como en Wrath of the Gods): (a) EL VELO
-   cayendo sobre TODO (mundo, interfaz y cursor — como su TotalScreenOverlay-
-   System) con el mundo a siluetas del 7%; (b) AETHON ARDIENDO DORADO encima
-   de la oscuridad (430 px de luz pura con su brasa — se ve SU brillo, no
-   un agujero); (c) el PEQUEÑO círculo del jugador SOLO con Grimorio 50+
-   (con libro < 50: oscuridad total y el texto lo explica); (d) LAS BALAS
-   visibles; (e) EL SOL NEGRO con rim y corona + los telegraphs encima de
-   todo; (f) EL FLASH del climax: blanco ciego que se apaga EN GRIS hasta
-   el negro (el crossfade vivo — «la oscuridad toma el control»);
-   (g) LA MUERTE: el velo disolviéndose DURANTE la contracción, el sol negro
-   despidiéndose LENTO (más lento que la oscuridad) y el sol RECUPERANDO su
-   curso. Si algo falla: el client.log LO CUENTA («VeloLib: el velo falló
-   al dibujarse» / «el pintor del velo falló») — mandar el log.
-2. **EL SOL NO SE TELETRANSPORTA (v6.50.39)**: invocarlo DE NOCHE y verificar
+1. **LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS (v6.50.40, EL PRIMERO)**:
+   invocar a Aethon y verificar: (a) EL VELO cayendo sobre el MUNDO pero
+   **DEBAJO de la interfaz** — el HUD, el mapa de la esquina, la barra del
+   jefe, el chat y el cursor quedan NORMALES (la v6.50.39 los apagaba);
+   (b) **AETHON ENTERO VISIBLE en su agujero de 780 px** (la luz que tiene
+   QUITA la oscuridad — su cuerpo de sol completo, no solo un brillo
+   encima del negro; en su eclipse el agujero se encoge a 360 y se vuelve
+   violeta); (c) **el PEQUEÑO CÍRCULO del jugador (235 px) SOLO con
+   Grimorio ≥50** — el jugador visible con su luz, con Grimorio <50
+   oscuridad total (el texto lo explica); (d) LAS BALAS abriendo sus
+   agujeros pequeños (88/130 px — se ve venir el castigo); (e) EL SOL
+   NEGRO con rim y corona + los telegraphs, ahora BAJO la interfaz;
+   (f) LA PENUMBRA suave en el borde de cada agujero (el falloff de
+   Don't Starve) y SIN costuras ni parches más oscuros donde se cruzan
+   las luces (el mosaico es disjunto); (g) EL MAPA A PANTALLA COMPLETA
+   legible (el velo no lo apaga). Si algo falla: el client.log LO CUENTA
+   («VeloLib: el velo falló al dibujarse» / «el pintor del velo falló»).
+2. **EL SOL NO SE TELETRANSPORTA (v6.50.39, heredado)**: invocarlo DE NOCHE y verificar
    que la luna barre el cielo, el alba llega SOLA y el sol POSA en el centro
    con frenada progresiva — SIN salto. De día igual: nada de teletransporte
    al mediodía, ni en SP ni (si se puede) en MP con clientes atrasados.
@@ -246,9 +278,9 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.38 en juego** con el checklist de arriba — LA
-   PRUEBA DEL FIX: la oscuridad con sus agujeros de luz ENFOCADOS (Aethon
-   dorado + el círculo del Grimorio + las balas).
+1. **El usuario prueba v6.50.40 en juego** con el checklist de arriba — LA
+   PRUEBA DEL FIX: el velo BAJO la interfaz y los AGUJEROS de luz (Aethon
+   entero + el círculo del Grimorio + las balas).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -279,7 +311,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.39** | ✅ Build-verificada, ⏳ en juego | LA TÉCNICA DE WRATH OF THE GODS: la máscara de luz MUERE (rechazada por el usuario) y nace **VELOLIB** — la oscuridad como en WotG (velo sobre el frame en `OnPostDraw` + las luces dibujadas DESPUÉS) · EL SOL ya no se teletransporta (noche entera a 300× + aterrizaje desacelerado al mediodía, sin corte al alba y sin snap) · el fix de «al compilar el juego se cierra» (cero GraphicsDevice/RTs, cerrojo de 3 caídas + log) |
+| **v6.50.40** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ (feedback de la v6.50.39: «la capa no debe estar sobre todo… no debe cubrir ni al jugador ni al jefe, la luz que tienen se supone que quita esa oscuridad»): el velo muda de `OnPostDraw` a **LA PRIMERA CAPA DE LA INTERFAZ** (HUD/mapa/chat/cursor usables) y deja de ser un rectángulo entero — **EL MOSAICO DISJUNTO** (bandas de velo pleno + una DONA radial por luz, de la chica a la grande y recortada: cada píxel pintado UNA vez) · Aethon ENTERO visible (agujero 780 px; 360 violeta en eclipse), círculo del jugador 235 px SOLO Grimorio ≥50, balas 88/130 · luces por TICK (sin parpadeo a 144 Hz ni apagón en pausa) · contrato anti-crash intacto (cero RTs/shaders/blends, cerrojo + log) |
+| **v6.50.39** | ✅ Build-verificada, ✔ probada en juego | LA TÉCNICA DE WRATH OF THE GODS: la máscara de luz MUERE (rechazada por el usuario) y nace **VELOLIB** — la oscuridad como en WotG (velo sobre el frame en `OnPostDraw` + las luces dibujadas DESPUÉS) · EL SOL ya no se teletransporta (noche entera a 300× + aterrizaje desacelerado al mediodía, sin corte al alba y sin snap) · el fix de «al compilar el juego se cierra» (cero GraphicsDevice/RTs, cerrojo de 3 caídas + log) — probada por el usuario: «bueno, parece estar bien», con dos correcciones pedidas → v6.50.40 |
 | **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) — el usuario la probó y la técnica entera fue reemplazada en v6.50.39 |
 | **v6.50.37** | ✅ Build-verificada, ⏳ parcialmente probada | EL MEDIO DÍA DE LA OSCURIDAD: jefe ×1.5 + LA LLEGADA en cuatro actos (temblor → carrera del sol a 240× → flash → sol negro) + LA OSCURIDAD PRIMORDIAL (máscara de luz Don't-Starve mejorada). El usuario la probó y reportó el bug de la oscuridad → fix en v6.50.38 |
 | **v6.50.36** | ✅ Build-verificada, ⏳ en juego | AETHON, LA LUZ PRIMORDIAL: la sierpe MUERE — el jefe es UNA LUZ BRILLANTE (sol vivo de código) + SEIS ataques devastadores (juicio de columnas + rayo + nova con huecos + cruz + destello + ECLIPSE) + el cielo se ENCIENDE + género de Aethon (Él) |
