@@ -10,21 +10,29 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Effects
 {
     // ======================================================================
-    //  v6.50.36 — EL CIELO SE ENCIENDE (la llegada de LA LUZ PRIMORDIAL).
+    //  v6.50.37 — EL CIELO DE LA LLEGADA DEFINITIVA (EL MEDIO DÍA DE LA
+    //  OSCURIDAD).
     //
-    //  Petición del usuario: «mejor hacerlo una luz brillante, el jefe es
-    //  una potente luz que ataca al jugador». La sierpe MURIÓ — su cola
-    //  enredada en el paisaje (v6.50.19-35) muere con ella. Cuando
-    //  AETHON, LA LUZ PRIMORDIAL desciende, EL CIELO ENTERO SE ENCIENDE:
+    //  Petición del usuario: «cuando Aethon aparece destellos de luz
+    //  aparecen en el cielo, el sol se vuelve negro y este queda
+    //  centrado justo en el centro del cielo… antes de que Aethon
+    //  aparezca, cuando el sol esta centrado en el cielo, el sol brilla
+    //  con intensidad y de ahi aparece Aethon».
     //
-    //  · LA LLEGADA (mientras el núcleo se materializa): un RESPLANDOR
-    //    DORADO creciente que inunda el horizonte + SIETE COLUMNAS DE
-    //    LUZ lejanas alzándose del borde del mundo (el eco del Juicio
-    //    que viene) + LA VENTANA: el orbe del núcleo creciendo en el
-    //    centro del cielo — la puerta por la que entra la luz.
-    //  · MIENTRAS VIVE: el resplandor dorado PERMANECE en lo alto (la
-    //    atmósfera del sol viviente — y en el ECLIPSE (ai[1]==3) se
-    //    APAGA a un violeta moribundo: el cielo también muere un rato).
+    //  LA SECUENCIA (leída del espejo AethonBoss.SubLlegada — vive en
+    //  TODAS las máquinas):
+    //  · SUB 10 (EL MUNDO TIEMBLA): LOS DESTELLOS — chispas de luz
+    //    naciendo y muriendo por todo el cielo + las SIETE COLUMNAS
+    //    lejanas alzándose (el eco del Juicio) + LA VENTANA pequeña
+    //    abriéndose DONDE ESTÁ EL SOL.
+    //  · SUB 11 (EL TIEMPO CORRE): el sol ATRAVIESA el cielo — LA
+    //    VENTANA LO SIGUE (la puerta de la luz persiguiendo a su dueño).
+    //  · SUB 12 (EL SOL BRILLA CON INTENSIDAD): la ventana se vuelve
+    //    un HOYO CEGADOR en el cielo — el blanco que crece hasta que
+    //    OscuridadSistema lo reemplaza con EL FLASH de pantalla completa.
+    //  · SUB 13+ (LA OSCURIDAD): el cielo se APAGA — el resplandor
+    //    dorado permanente muere a un violeta de ultratumba (la luz del
+    //    mundo ya no está aquí: está en ÉL).
     //
     //  El mecanismo es EL MISMO DE SIEMPRE (el hallazgo R59-a que la
     //  casa hereda): SkyManager.DrawToDepth pinta ENTRE LAS CAPAS del
@@ -43,6 +51,17 @@ namespace AethonMod.Content.Effects
 
         /// <summary>Bandera de descarga (la casa: el cielo muerto jamás toca ModContent).</summary>
         public static bool Descargado = false;
+
+        // === LOS DESTELLOS DEL CIELO (las chispas de la llegada) ===
+        private struct Destello
+        {
+            public Vector2 Pos;
+            public int Edad;
+            public int Vida;
+            public float Tam;
+        }
+        private readonly Destello[] _destellos = new Destello[18];
+        private int _cursor = 0;
 
         // ==================================================================
         //  EL CICLO DE VIDA (GameEffect 2026: Activate/Deactivate con params)
@@ -67,6 +86,24 @@ namespace AethonMod.Content.Effects
             float paso = _activo ? (1f / 120f) : (1f / 90f);
             _alpha = MathHelper.Clamp(_alpha + MathF.Sign(objetivo - _alpha) * paso, 0f, 1f);
             _pintadoEsteFrame = false;
+
+            // === LOS DESTELLOS NACEN (subs 10-12: el cielo se llena de
+            //     chispas que nacen y mueren — cada cliente los ve suyos) ===
+            int sub = AethonBoss.SubLlegada;
+            if (!Main.gameMenu && sub >= 10 && sub <= 12 && Main.rand.NextBool(5))
+            {
+                ref Destello d = ref _destellos[_cursor];
+                d.Pos = new Vector2(
+                    Main.screenWidth * Main.rand.NextFloat(0.04f, 0.96f),
+                    Main.screenHeight * Main.rand.NextFloat(0.04f, 0.42f));
+                d.Edad = 0;
+                d.Vida = Main.rand.Next(26, 52);
+                d.Tam = Main.rand.NextFloat(22f, 58f);
+                _cursor = (_cursor + 1) % _destellos.Length;
+            }
+            // todos envejecen
+            for (int i = 0; i < _destellos.Length; i++)
+                if (_destellos[i].Edad < _destellos[i].Vida) _destellos[i].Edad++;
         }
 
         // ==================================================================
@@ -91,7 +128,7 @@ namespace AethonMod.Content.Effects
         }
 
         // ==================================================================
-        //  EL RESPLANDOR — v6.50.36 — LA LUZ EN EL PAISAJE
+        //  EL RESPLANDOR — v6.50.37 — EL CIELO DE LA LLEGADA
         //
         //  EL CONTRATO DEL LOTE (la lección del client.log, v6.50.20):
         //  CustomSky.Draw corre DENTRO del lote del fondo de vanilla
@@ -104,9 +141,9 @@ namespace AethonMod.Content.Effects
         {
             if (Main.gameMenu) return;
 
-            // === LEER AL JEFE: la llegada (alpha alto = naciendo) y el
-            //     eclipse (ai[1]==3 — el cielo también se apaga) ===
-            float llegada = 0f;
+            // === LEER EL ESTADO DEL MUNDO (el espejo de la casa — vive
+            //     en todas las máquinas leyendo ai[] del jefe) ===
+            int sub = AethonBoss.SubLlegada;
             bool eclipse = false;
             int tipoJefe = ModContent.NPCType<AethonBoss>();
             try
@@ -114,16 +151,24 @@ namespace AethonMod.Content.Effects
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
                     NPC n = Main.npc[i];
-                    if (n != null && n.active && n.type == tipoJefe)
+                    if (n != null && n.active && n.type == tipoJefe && n.ai[1] == 3f)
                     {
-                        if (!n.dontTakeDamage) llegada = Math.Max(llegada, n.alpha / 255f);
-                        if (n.ai[1] == 3f) eclipse = true;
+                        eclipse = true;
+                        break;
                     }
                 }
             }
             catch { }
-            if (llegada > 0.01f) _llegadaVista = llegada;
-            else _llegadaVista *= 0.965f; // el fade de salida (el eco de la ventana)
+
+            // LA LLEGADA: intensidad 1 mientras los subs 10-12; al llegar
+            // la oscuridad (13) la luz YA NO ESTÁ en el cielo — se apaga.
+            float objetivoLlegada = (sub >= 10 && sub <= 12) ? 1f : 0f;
+            float pasoLlegada = objetivoLlegada > _llegadaVista ? (1f / 25f) : (1f / 22f);
+            _llegadaVista = MathHelper.Clamp(
+                _llegadaVista + MathF.Sign(objetivoLlegada - _llegadaVista) * pasoLlegada,
+                0f, 1f);
+
+            bool oscuro = AethonBoss.OscuridadObjetivo || AethonBoss.TiempoCongelado;
 
             // === LA MATRIZ DEL PAISAJE (la reconstrucción EXACTA del lote
             //     del fondo — literal del DoGSky/Calamity) ===
@@ -150,19 +195,23 @@ namespace AethonMod.Content.Effects
                     Main.Rasterizer, null, m);
                 try
                 {
-                    // EL COLOR del cielo: dorado vivo… o el violeta del eclipse.
-                    Color cLuz = eclipse ? new Color(110, 70, 190) : new Color(255, 226, 140);
+                    // EL COLOR del cielo: dorado vivo… violeta del eclipse…
+                    // o el VIOLETA MUERTO de LA OSCURIDAD (la luz ya no
+                    // está aquí — está TODA en un solo lugar).
+                    Color cLuz = eclipse ? new Color(110, 70, 190)
+                        : (oscuro ? new Color(70, 46, 130) : new Color(255, 226, 140));
 
                     // EL RESPLANDOR PERMANENTE: mientras la luz vive, el
-                    // horizonte arde suave (la atmósfera del sol).
+                    // horizonte arde suave… salvo en la oscuridad, donde
+                    // solo queda un fantasma violeta.
                     float pulso = 0.82f + 0.18f * MathF.Sin(t * 0.9f);
-                    float baseBrillo = eclipse ? 0.05f : 0.10f;
+                    float baseBrillo = eclipse ? 0.05f : (oscuro ? 0.028f : 0.10f);
                     sb.Draw(glow, new Vector2(w * 0.5f, -h * 0.55f), null,
                         cLuz * (_alpha * baseBrillo * pulso), 0f, origen,
                         new Vector2(w * 2.6f / glow.Width, h * 1.6f / glow.Height),
                         SpriteEffects.None, 0f);
 
-                    // === LA LLEGADA: EL CIELO SE ENCIENDE DE VERDAD ===
+                    // === LA LLEGADA ===
                     if (_llegadaVista > 0.02f)
                     {
                         float av = _llegadaVista;
@@ -187,19 +236,76 @@ namespace AethonMod.Content.Effects
                                 SpriteEffects.None, 0f);
                         }
 
-                        // LA VENTANA: el orbe del núcleo creciendo en el
-                        // centro del cielo — la puerta de la luz (donde
-                        // va a nacer Aethon).
-                        float tam = (30f + 130f * av) * (0.92f + 0.08f * MathF.Sin(t * 3.2f));
-                        sb.Draw(orbe, new Vector2(w * 0.5f, h * 0.30f), null,
-                            new Color(255, 246, 210) * (_alpha * av * 0.55f),
+                        // === LA VENTANA — DONDE ESTÁ EL SOL (la puerta de
+                        //     la luz): durante la carrera SIGUE al sol en su
+                        //     carrera; en el climax se vuelve CEGADORA. La
+                        //     posición es la EXACTA de vanilla (el decompile
+                        //     de DrawSunAndMoon — la casa la replica). ===
+                        Vector2 posSol = AethonBoss.PosicionSolEnCielo();
+                        float crescendo = sub == 12 ? Math.Min(1f, ContarTickClimax() / 90f) : 0f;
+                        float tam = (34f + 66f * av + 390f * crescendo) *
+                            (0.92f + 0.08f * MathF.Sin(t * (3.2f + 6f * crescendo)));
+
+                        // EL NÚCLEO CEGADOR (blanco puro al climax)
+                        sb.Draw(orbe, posSol, null,
+                            new Color(255, 250, 224) * (_alpha * (av * 0.55f + 0.45f * crescendo)),
                             0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
                             tam / orbe.Width, SpriteEffects.None, 0f);
                         // el halo de la ventana
-                        sb.Draw(glow, new Vector2(w * 0.5f, h * 0.30f), null,
-                            cLuz * (_alpha * av * 0.20f), 0f, origen,
+                        sb.Draw(glow, posSol, null,
+                            cLuz * (_alpha * (av * 0.20f + 0.25f * crescendo)), 0f, origen,
                             new Vector2(tam * 2.6f / glow.Width, tam * 2.6f / glow.Height),
                             SpriteEffects.None, 0f);
+
+                        // LOS RAYOS DEL CLIMAX (cuando el sol BRILLA con
+                        // intensidad, sus rayos se alargan por el cielo)
+                        if (crescendo > 0.05f)
+                        {
+                            Vector2 origenR = new Vector2(glow.Width, glow.Height) * 0.5f;
+                            for (int i = 0; i < 8; i++)
+                            {
+                                float ang = i * MathHelper.PiOver4 + t * 0.3f;
+                                float largo = tam * (1.4f + 1.2f * crescendo);
+                                sb.Draw(glow, posSol + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                                    (tam * 0.8f + largo * 0.5f), null,
+                                    new Color(255, 244, 200) * (_alpha * 0.30f * crescendo),
+                                    ang, origenR,
+                                    new Vector2(largo / glow.Width, (6f + 10f * crescendo) / glow.Height),
+                                    SpriteEffects.None, 0f);
+                            }
+                        }
+                    }
+
+                    // === LOS DESTELLOS DEL CIELO (las chispas de la
+                    //     llegada: nacen, arden y mueren — el cielo anuncia
+                    //     que la luz está LLEGANDO) ===
+                    for (int i = 0; i < _destellos.Length; i++)
+                    {
+                        Destello d = _destellos[i];
+                        if (d.Edad >= d.Vida) continue;
+                        float progreso = d.Edad / (float)d.Vida;
+                        float brillo = MathF.Sin(progreso * MathHelper.Pi);   // nace y muere
+                        if (brillo <= 0f) continue;
+                        // EL CRUZADO: la chispa con estrella (la firma de
+                        // la casa para los destellos con FORMA)
+                        Texture2D cruz = VFXCore.DestelloFinal;
+                        if (cruz != null)
+                        {
+                            sb.Draw(cruz, d.Pos, null,
+                                new Color(255, 248, 220) * (_alpha * 0.30f * brillo),
+                                d.Edad * 0.06f,
+                                new Vector2(cruz.Width, cruz.Height) * 0.5f,
+                                d.Tam * (0.8f + 0.4f * brillo) / cruz.Width,
+                                SpriteEffects.None, 0f);
+                        }
+                        else
+                        {
+                            sb.Draw(glow, d.Pos, null,
+                                new Color(255, 248, 220) * (_alpha * 0.30f * brillo),
+                                0f, origen,
+                                new Vector2(d.Tam / glow.Width, d.Tam / glow.Height),
+                                SpriteEffects.None, 0f);
+                        }
                     }
                 }
                 finally { VFXCore.CerrarLoteSiAbierto(); } // el propio, sin first-chance
@@ -221,12 +327,29 @@ namespace AethonMod.Content.Effects
             }
         }
 
+        /// <summary>El tick del climax leído del jefe (para el crescendo de la ventana).</summary>
+        private static float ContarTickClimax()
+        {
+            try
+            {
+                int tipo = ModContent.NPCType<AethonBoss>();
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipo && n.ai[0] == 0f)
+                        return n.ai[2];
+                }
+            }
+            catch { }
+            return 0f;
+        }
+
         // accesores internos para el sistema registrador (mismo archivo)
         internal bool ActivoInterno => _activo;
         internal float AlfaInterno => _alpha;
 
-        // LA LLEGADA: la intensidad del encendido (vive mientras el
-        // núcleo se materializa; se disuelve después).
+        // LA LLEGADA: la intensidad del encendido (vive mientras la luz
+        // llega; se disuelve cuando la oscuridad toma el control).
         private float _llegadaVista = 0f;
     }
 

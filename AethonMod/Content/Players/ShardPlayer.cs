@@ -114,6 +114,15 @@ namespace AethonMod.Content.Players
         // NivelLibro() para que todos los hooks cuenten la misma historia.
 
         /// <summary>
+        /// v6.50.37 — EL NIVEL DEL GRIMORIO, EXPUESTO PARA EL MUNDO.
+        /// Lo lee LA OSCURIDAD PRIMORDIAL: cuando Aethon concentra toda la
+        /// luz del mundo, SOLO un Grimorio de nivel 50 o superior (en la
+        /// mano o en la barra rápida — acompañándote) sostiene un círculo
+        /// de luz alrededor del portador.
+        /// </summary>
+        public int NivelGrimorioPublico => NivelLibro(false);
+
+        /// <summary>
         /// El nivel del libro que manda para el jugador.
         /// soloSostenido = true → SOLO el sostenido (poder de combate).
         /// soloSostenido = false → sostenido, o la primera copia de la

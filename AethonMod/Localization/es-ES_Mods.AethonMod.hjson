@@ -2192,8 +2192,12 @@ Jefe: {
 		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
 		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
 		Reconocimiento: Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.
-		Presentacion: El cielo se ENCIENDE. AETHON, LA LUZ PRIMORDIAL, desciende — la noche se vuelve día.
-		Muerte: La luz se apaga. El principio de todo se disuelve en el aire.
+		Presentacion: El mundo TIEMBLA: el tiempo se DOBLA y el sol CORRE hacia el centro del cielo.
+		LlegadaLuz: El sol queda CLAVADO en el centro del cielo y brilla con una intensidad que NO es de este mundo…
+		LlegadaOscuridad: TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR. El sol se ha vuelto negro: la oscuridad toma el control del mundo — SOLO ÉL BRILLA.
+		OscuridadGrimorio: Tu Grimorio (nivel {0}) arde en la oscuridad y sostiene un pequeño círculo de luz a tu alrededor.
+		OscuridadSinGrimorio: La oscuridad es TOTAL a tu alrededor… Solo un Grimorio de nivel 50 o superior sostiene un círculo de luz.
+		Muerte: La luz ESTALLA: TODO lo concentrado REGRESA al mundo. El sol recupera su curso y la oscuridad se disuelve.
 		Carga: EL DESTELLO — la luz cruza el mundo: no estés en su línea.
 		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
 		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.

@@ -14,6 +14,15 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.37 — MÁS GRANDE Y LA LLEGADA DEFINITIVA (EL MEDIO DÍA DE
+    /// LA OSCURIDAD): «has que sea mas grande el jefe… cuando Aethon
+    /// aparece el mundo debe temblar… si es de noche se hace de dia y
+    /// si es de dia el tiempo avanza hasta que el sol quede centrado…
+    /// destellos de luz aparecen en el cielo… el sol brilla con
+    /// intensidad y de ahi aparece Aethon, luego el sol se vuelve
+    /// negro… TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR… la oscuridad
+    /// misma toma el control de todo».
+    ///
     /// Petición del usuario: «el jefe se ve feo, intenta mejorar por
     /// código… ese jefe se supone que es Aethon, creo que en vez de
     /// hacerlo una sierpe, mejor hacerlo una luz brillante, el jefe es
@@ -79,9 +88,62 @@ namespace AethonMod.Content.NPCs
         private const int EST_ECLIPSE = 7;      // la luz se apaga
         private const int EST_MURIENDO = 99;    // la contracción final
 
+        // === LA LLEGADA — LOS SUB-ESTADOS (viajan en ai[1] durante
+        //     EST_NACIENDO; 10-13 para NO chocar con el contrato del
+        //     rayo 0-3) ===
+        public const int SUB_TEMBLOR = 10;      // el mundo tiembla (150 t)
+        public const int SUB_CARRERA = 11;      // el tiempo CORRE al mediodía
+        public const int SUB_CLIMAX = 12;       // el sol brilla con intensidad + EL FLASH
+        public const int SUB_OSCURIDAD = 13;    // el sol negro + LA OSCURIDAD
+
+        // === EL ESTADO DEL MUNDO (el espejo de OscuridadSistema lo
+        //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
+        //     lo escribe aquí, cada cliente lo reconstruye) ===
+
+        /// <summary>El sub-estado de LA LLEGADA (0 = no está llegando).</summary>
+        public static int SubLlegada = 0;
+
+        /// <summary>EL TIEMPO CORRE: ModifyTimeRate acelera el día (la carrera al mediodía).</summary>
+        public static bool TiempoCorriendo = false;
+
+        /// <summary>EL TIEMPO CONGELADO: el sol clavado en el centro del cielo.</summary>
+        public static bool TiempoCongelado = false;
+
+        /// <summary>LA OSCURIDAD ACTIVA: toda la luz está concentrada en Aethon.</summary>
+        public static bool OscuridadObjetivo = false;
+
+        /// <summary>
+        /// LA POSICIÓN DEL SOL EN EL CIELO (espacio del fondo) — LITERAL
+        /// del decompile de Main.DrawSunAndMoon (2026.07): x avanza lineal
+        /// con el tiempo (de −sunW a totalWidth+sunW a lo largo del día) e
+        /// y cabalga una PARÁBOLA (250 px de caída desde bgTopY+180 en el
+        /// alba hasta el cenit del mediodía y de vuelta al ocaso). Con el
+        /// tiempo CONGELADO en el mediodía exacto (time=27000) degenera a
+        /// x = totalWidth·0.5 (el centro EXACTO de la pantalla) e y =
+        /// bgTopY + 180 — y durante LA CARRERA sigue al sol en su barrida
+        /// (la ventana del cielo LO PERSIGUE). bgTopY (interno de Main) se
+        /// replica: worldSurface·16 − screenPosition.Y + 16. Para espacio
+        /// de PANTALLA: transformar con Main.BackgroundViewMatrix.EffectMatrix.
+        /// </summary>
+        public static Vector2 PosicionSolEnCielo()
+        {
+            float solW = 80f;
+            try { solW = Terraria.GameContent.TextureAssets.Sun.Value.Width; }
+            catch { }
+            double t = Main.dayTime ? Math.Max(0.0, Math.Min(Main.dayLength, Main.time)) : Main.dayLength * 0.5;
+            float x = (float)(t / 54000.0 * (Main.screenWidth + solW * 2f)) - solW;
+            double parab = t < 27000.0
+                ? Math.Pow(1.0 - t / 54000.0 * 2.0, 2.0)
+                : Math.Pow((t / 54000.0 - 0.5) * 2.0, 2.0);
+            float bgTopY = (float)((int)Main.worldSurface * 16) - Main.screenPosition.Y + 16f;
+            float y = bgTopY + (float)(parab * 250.0) + 180f;
+            return new Vector2(x, y);
+        }
+
         private int _estado = EST_NACIENDO;
         private int _tickEstado = 0;
         private bool _nacio = false;
+        private int _subLlegada = SUB_TEMBLOR;   // v6.50.37 — la fase de LA LLEGADA
 
         // === EL RAYO (heredero del aliento: 1 carga · 2 fuego) ===
         private int _rayo = 0;
@@ -126,8 +188,8 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 160;     // el sol (v6.50.36 — la luz no tiene huesos)
-            NPC.height = 160;
+            NPC.width = 220;     // v6.50.37 — MÁS GRANDE (el sol creció ×1.5)
+            NPC.height = 220;
             NPC.damage = 120;    // TOCAR LA LUZ quema (devastador, decretado)
             NPC.defense = 50;
             NPC.lifeMax = 2_400_000;
@@ -170,17 +232,29 @@ namespace AethonMod.Content.NPCs
             if (target.velocity.LengthSquared() < 0.36f) _ticksPresaQuieta++;
             else _ticksPresaQuieta = 0;
 
-            // === LA LLEGADA: nace EN EL CIELO (primer tick) ===
+            // === LA LLEGADA — EL PRIMER TICK (v6.50.37: la secuencia completa) ===
             if (!_nacio)
             {
-                int lado = target.Center.X < NPC.Center.X ? 1 : -1;
-                NPC.Center = target.Center + new Vector2(-lado * 420f, -980f);
+                NPC.Center = target.Center + new Vector2(0f, -860f);   // escondido SOBRE el cielo
                 NPC.velocity = Vector2.Zero;
-                NPC.alpha = 255;          // se materializa al descender
+                NPC.alpha = 255;          // invisible hasta EL FLASH del climax
                 NPC.dontTakeDamage = true;
+                _subLlegada = SUB_TEMBLOR;
+                _tickEstado = 0;
+                _estado = EST_NACIENDO;
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    // «si es de noche se hace de dia» — el corte al alba
+                    if (!Main.dayTime)
+                    {
+                        Main.dayTime = true;
+                        Main.time = 0.0;
+                    }
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Presentacion", OroLuz);
+                }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Presentacion", OroLuz);
                 _nacio = true;
+                NPC.netUpdate = true;
             }
 
             // === LA FASE POR VIDA (los umbrales de siempre, histéresis) ===
@@ -196,10 +270,14 @@ namespace AethonMod.Content.NPCs
                 OnPhaseChange();
             }
 
-            // === EL FADE DE NACIMIENTO (y la invulnerabilidad del arribo) ===
+            // === EL FADE DE NACIMIENTO (la materialización DENTRO del
+            //     FLASH del climax — antes de eso la luz está RECOGIÉNDOSE) ===
             if (NPC.alpha > 0)
             {
-                NPC.alpha = Math.Max(0, NPC.alpha - 2);
+                bool materializar = _estado == EST_NACIENDO &&
+                    _subLlegada == SUB_CLIMAX && _tickEstado >= 100;
+                if (materializar)
+                    NPC.alpha = Math.Max(0, NPC.alpha - 13);
                 if (NPC.alpha == 0) NPC.dontTakeDamage = false;
             }
 
@@ -226,13 +304,15 @@ namespace AethonMod.Content.NPCs
 
             // === LA LUZ DEL MUNDO: la luz inunda (y en el eclipse MUERE) ===
             if (_rayo == 3f || _estado == EST_ECLIPSE)
-                Lighting.AddLight(NPC.Center, new Vector3(0.10f, 0.06f, 0.16f)); // la luz apagada
+                Lighting.AddLight(NPC.Center, new Vector3(0.06f, 0.04f, 0.10f)); // la luz apagada
             else
-                Lighting.AddLight(NPC.Center, new Vector3(1.1f, 0.95f, 0.65f));  // el sol vivo
+                Lighting.AddLight(NPC.Center, new Vector3(1.55f, 1.35f, 0.95f)); // el sol vivo (más grande)
 
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
-            NPC.ai[1] = _rayo;          // 0 nada · 1 rayo cargando · 2 rayo ardiendo · 3 ECLIPSE
+            NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
+            //     llegada: 10 temblor · 11 carrera · 12 climax · 13 oscuridad
+            //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo · 3 ECLIPSE
             NPC.ai[2] = _tickEstado;
             NPC.ai[3] = _angDestello;   // el rumbo del destello (la línea guía del cliente)
 
@@ -254,17 +334,97 @@ namespace AethonMod.Content.NPCs
         //  LOS ESTADOS
         // ==================================================================
 
-        /// <summary>LA LLEGADA: 3.3 s descendiendo del cielo encendido.</summary>
+        /// <summary>
+        /// LA LLEGADA DEFINITIVA (v6.50.37) — EL MEDIO DÍA DE LA OSCURIDAD:
+        /// (10) EL MUNDO TIEMBLA — si era de noche, YA ES DE DÍA (el corte
+        /// al alba del primer tick) y la tierra sacude la pantalla 2.5 s;
+        /// (11) EL TIEMPO CORRE — el sol ATRAVIESA el cielo (240× el ritmo:
+        /// el día entero en ~4 s) hasta quedar CLAVADO EN EL CENTRO;
+        /// (12) EL SOL BRILLA CON INTENSIDAD — crece, se vuelve cegador…
+        /// y en el pico del FLASH, AETHON SE MATERIALIZA DE ÉL;
+        /// (13) EL SOL SE VUELVE NEGRO — toda la luz del mundo está ahora
+        /// en UN LUGAR: la oscuridad toma el control (OscuridadSistema).
+        /// </summary>
         private void EstadoNaciendo(Player target)
         {
-            Vector2 punto = target.Center + new Vector2(0f, -420f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
-            if (_tickEstado >= 200)
+            switch (_subLlegada)
             {
-                _estado = EST_FLOTAR;
-                _tickEstado = 0;
-                _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                case SUB_TEMBLOR:
+                {
+                    // escondido sobre el cielo, el mundo SACUDE la pantalla
+                    // (los kicks los padece cada cliente vía el espejo).
+                    NPC.velocity = Vector2.Zero;
+                    if (_tickEstado == 1)
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                    if (_tickEstado >= 150) SubFaseLlegada(SUB_CARRERA);
+                    break;
+                }
+
+                case SUB_CARRERA:
+                {
+                    // EL TIEMPO DOBLADO: OscuridadSistema.ModifyTimeRate corre
+                    // el reloj (240×) — el sol cruza el cielo ante tus ojos.
+                    NPC.velocity = Vector2.Zero;
+                    if (Main.netMode != NetmodeID.MultiplayerClient &&
+                        Main.dayTime && Main.time >= 27000.0)
+                    {
+                        // EL MEDIO DÍA EXACTO: el sol clavado en el centro.
+                        Main.time = 27000.0;
+                        TiempoCorriendo = false;
+                        TiempoCongelado = true;
+                        SubFaseLlegada(SUB_CLIMAX);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                        EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.LlegadaLuz", OroLuz);
+                    }
+                    break;
+                }
+
+                case SUB_CLIMAX:
+                {
+                    // EL SOL BRILLA CON INTENSIDAD: la ventana del cielo
+                    // CRECE hasta lo cegador… y AETHON NACE DEL FLASH.
+                    NPC.velocity = Vector2.Zero;
+                    if (_tickEstado == 100)
+                    {
+                        // EL FLASH: la luz inunda TODO y en su pico nace él.
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    }
+                    if (_tickEstado >= 120) SubFaseLlegada(SUB_OSCURIDAD);
+                    break;
+                }
+
+                case SUB_OSCURIDAD:
+                {
+                    // EL SOL NEGRO + LA OSCURIDAD: toda la luz del mundo está
+                    // en ÉL. Desciende del cielo a su órbita de pelea.
+                    if (_tickEstado == 1)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center); // el apagón
+                        EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.LlegadaOscuridad", VioletaLuz);
+                    }
+                    Vector2 punto = target.Center + new Vector2(0f, -420f);
+                    NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
+                    if (_tickEstado >= 90)
+                    {
+                        _estado = EST_FLOTAR;
+                        _tickEstado = 0;
+                        _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                        NPC.alpha = 0;
+                        NPC.dontTakeDamage = false;
+                        NPC.netUpdate = true;
+                    }
+                    break;
+                }
             }
+        }
+
+        /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
+        private void SubFaseLlegada(int sub)
+        {
+            _subLlegada = sub;
+            _tickEstado = 0;
+            NPC.netUpdate = true;
         }
 
         /// <summary>
@@ -904,7 +1064,7 @@ namespace AethonMod.Content.NPCs
                         spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
                             new Color(16, 8, 30) * (0.96f * visibilidad),
                             0f, new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f,
-                            new Vector2(2.2f * pulsoE, 2.2f * pulsoE), SpriteEffects.None, 0f);
+                            new Vector2(3.2f * pulsoE, 3.2f * pulsoE), SpriteEffects.None, 0f);
                     }
                     finally { spriteBatch.End(); }
                 }
@@ -919,11 +1079,11 @@ namespace AethonMod.Content.NPCs
                     float brillo = eclipse ? 0.10f : (faseInt * colapso);
 
                     // === 1. EL VELO (el aura violeta de la profundidad) ===
-                    LumenLib.Bloom(spriteBatch, posC, 360f, VioletaLuz,
+                    LumenLib.Bloom(spriteBatch, posC, 540f, VioletaLuz,
                         0.10f * brillo * visibilidad, 2);
 
                     // === 2. EL HALO DORADO (la corona del sol) ===
-                    LumenLib.BloomPulse(spriteBatch, posC, 200f * latido, OroLuz,
+                    LumenLib.BloomPulse(spriteBatch, posC, 295f * latido, OroLuz,
                         0.50f * brillo * visibilidad, t, 1.6f);
 
                     // === 3. LOS RAYOS RADIALES (la rueda de luz girando) ===
@@ -935,9 +1095,9 @@ namespace AethonMod.Content.NPCs
                         for (int i = 0; i < nRayos; i++)
                         {
                             float ang = giro + i * MathHelper.TwoPi / nRayos;
-                            float largo = (170f + 110f * faseInt) *
+                            float largo = (255f + 165f * faseInt) *
                                 (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f)) * colapso;
-                            float ancho = 26f - 10f * faseInt;
+                            float ancho = 34f - 12f * faseInt;
                             Color cR = (Phase >= 4) ?
                                 Color.Lerp(OroLuz, VioletaLuz, 0.45f) : OroLuz;
                             spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
@@ -953,8 +1113,8 @@ namespace AethonMod.Content.NPCs
                     //     en sentidos opuestos — el efecto 3D) ===
                     for (int anillo = 0; anillo < 2; anillo++)
                     {
-                        float rx = (anillo == 0 ? 150f : 205f) * colapso;
-                        float ry = (anillo == 0 ? 92f : 62f) * colapso;
+                        float rx = (anillo == 0 ? 218f : 300f) * colapso;
+                        float ry = (anillo == 0 ? 134f : 90f) * colapso;
                         float w = anillo == 0 ? 0.55f : -0.38f;          // sentidos opuestos
                         Color cP = anillo == 0 ? OroLuz : VioletaLuz;
                         int nPerlas = 13;
@@ -976,21 +1136,21 @@ namespace AethonMod.Content.NPCs
                     for (int m = 0; m < nChispas; m++)
                     {
                         float ang = t * (1.1f + m * 0.17f) + m * 2.1f;
-                        float r = 120f * colapso + 12f * MathF.Sin(t * 2.4f + m);
+                        float r = 176f * colapso + 16f * MathF.Sin(t * 2.4f + m);
                         Vector2 mota = posC + new Vector2(MathF.Cos(ang) * r,
                             MathF.Sin(ang) * r * 0.72f);
-                        LumenLib.Bloom(spriteBatch, mota, 14f * colapso, cMota,
+                        LumenLib.Bloom(spriteBatch, mota, 20f * colapso, cMota,
                             (eclipse ? 0.05f : 0.40f) * brillo * visibilidad, 2);
                     }
 
                     // === 6. EL NÚCLEO (el corazón blanco de Aethon) ===
-                    float tamNucleo = 88f * latido * colapso;
+                    float tamNucleo = 130f * latido * colapso;
                     if (eclipse)
                     {
                         // EL ECLIPSE: solo el RIM dorado del cuerpo muerto.
-                        LumenLib.Bloom(spriteBatch, posC, 74f, OroLuz,
+                        LumenLib.Bloom(spriteBatch, posC, 108f, OroLuz,
                             0.10f * visibilidad, 2);
-                        LumenLib.Bloom(spriteBatch, posC, 30f, new Color(120, 80, 190),
+                        LumenLib.Bloom(spriteBatch, posC, 44f, new Color(120, 80, 190),
                             0.12f * visibilidad, 2);
                     }
                     else
@@ -1005,36 +1165,15 @@ namespace AethonMod.Content.NPCs
                     if (NPC.ai[1] == 1f && !_muriendo)
                     {
                         float prog = Math.Min(1f, _tickRayoLocal / 40f);
-                        LumenLib.Bloom(spriteBatch, posC, 60f + 90f * prog,
+                        LumenLib.Bloom(spriteBatch, posC, 88f + 132f * prog,
                             NucleoBlanco, 0.45f * prog * visibilidad, 3);
                     }
 
-                    // === 8. LOS TELEGRAPHS (la casa: todo ataque se anuncia) ===
-                    // EL DESTELLO: la LÍNEA GUÍA — el rayo de puntería
-                    // creciendo en el rumbo del cruce (ai[3] = el ángulo).
-                    if (NPC.ai[0] == EST_DESTELLO && !_muriendo && NPC.ai[2] <= 20f)
-                    {
-                        float prog = NPC.ai[2] / 20f;
-                        float angD = NPC.ai[3];
-                        Vector2 dirD = new Vector2(MathF.Cos(angD), MathF.Sin(angD));
-                        Vector2 origenL = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
-                        float largoL = 1900f * prog;
-                        spriteBatch.Draw(VFXCore.SoftGlow, posC + dirD * (largoL * 0.5f), null,
-                            OroLuz * (0.30f + 0.25f * prog), angD, origenL,
-                            new Vector2(largoL / VFXCore.SoftGlow.Width,
-                                        (7f + 9f * prog) / VFXCore.SoftGlow.Height),
-                            SpriteEffects.None, 0f);
-                        // EL ANILLO que se cierra (el compás del cruce).
-                        OndaLib.Pulse(spriteBatch, posC, prog, 220f, OroLuz, 0.55f, NPC.whoAmI);
-                    }
-
-                    // LA NOVA: la contracción (el pulso que se APRIETA).
-                    if (NPC.ai[0] == EST_NOVA && !_muriendo && NPC.ai[2] <= 45f)
-                    {
-                        float prog = NPC.ai[2] / 45f;
-                        OndaLib.Pulse(spriteBatch, posC, 1f - prog,
-                            420f - 300f * prog, OroLuz, 0.60f, NPC.whoAmI + 3);
-                    }
+                    // === 8. LOS TELEGRAPHS (la casa: todo ataque se anuncia.
+                    //     Con LA OSCURIDAD activa se dibujan ENCIMA de ella —
+                    //     OscuridadSistema los repite en su propio pase) ===
+                    if (OscuridadSistema.FaseOscuridad < 0.3f)
+                        DibujarTelegrafos(spriteBatch, NPC, posC);
 
                     // === 9. LA ESTELA DEL DESTELLO (los fantasmas del cruce) ===
                     if (NPC.ai[0] == EST_DESTELLO && NPC.ai[2] > 20f && !_muriendo &&
@@ -1043,8 +1182,8 @@ namespace AethonMod.Content.NPCs
                         Vector2 atras = -Vector2.Normalize(NPC.velocity);
                         for (int g = 1; g <= 4; g++)
                         {
-                            Vector2 fantasma = posC + atras * (g * 52f);
-                            LumenLib.Bloom(spriteBatch, fantasma, 44f - g * 6f,
+                            Vector2 fantasma = posC + atras * (g * 74f);
+                            LumenLib.Bloom(spriteBatch, fantasma, 62f - g * 9f,
                                 OroLuz, 0.26f / g * visibilidad, 2);
                         }
                     }
@@ -1054,10 +1193,10 @@ namespace AethonMod.Content.NPCs
                     {
                         float fp = (_tickMuerte - 110) / 25f;   // 0→1: la inundación
                         LumenLib.Bloom(spriteBatch, posC,
-                            600f + 2600f * fp, NucleoBlanco,
+                            850f + 3300f * fp, NucleoBlanco,
                             0.9f * (1f - fp * 0.6f), 3);
                         LumenLib.Bloom(spriteBatch, posC,
-                            400f + 1800f * fp, OroLuz,
+                            560f + 2500f * fp, OroLuz,
                             0.6f * (1f - fp * 0.5f), 2);
                     }
                 }
@@ -1104,5 +1243,41 @@ namespace AethonMod.Content.NPCs
         // el crescendo — ai[1] viaja por paquetes cada 12 ticks).
         private float _tickRayoLocal = 0f;
         private float _rayoPrevio = 0f;
+
+        /// <summary>
+        /// LOS TELEGRAPHS PÚBLICOS (v6.50.37): la línea guía del destello
+        /// y el pulso de la nova — dibujables desde CUALQUIER lote
+        /// aditivo: el PreDraw del mundo… o ENCIMA DE LA OSCURIDAD (que
+        /// OscuridadSistema pide en su pase para que el aviso siga
+        /// viéndose cuando el mundo entero está apagado).
+        /// </summary>
+        internal static void DibujarTelegrafos(SpriteBatch sb, NPC npc, Vector2 posC)
+        {
+            // EL DESTELLO: la LÍNEA GUÍA — el rayo de puntería creciendo
+            // en el rumbo del cruce (ai[3] = el ángulo).
+            if (npc.ai[0] == EST_DESTELLO && npc.ai[2] <= 20f)
+            {
+                float prog = npc.ai[2] / 20f;
+                float angD = npc.ai[3];
+                Vector2 dirD = new Vector2(MathF.Cos(angD), MathF.Sin(angD));
+                Vector2 origenL = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
+                float largoL = 1900f * prog;
+                sb.Draw(VFXCore.SoftGlow, posC + dirD * (largoL * 0.5f), null,
+                    OroLuz * (0.30f + 0.25f * prog), angD, origenL,
+                    new Vector2(largoL / VFXCore.SoftGlow.Width,
+                                (7f + 9f * prog) / VFXCore.SoftGlow.Height),
+                    SpriteEffects.None, 0f);
+                // EL ANILLO que se cierra (el compás del cruce).
+                OndaLib.Pulse(sb, posC, prog, 220f, OroLuz, 0.55f, npc.whoAmI);
+            }
+
+            // LA NOVA: la contracción (el pulso que se APRIETA).
+            if (npc.ai[0] == EST_NOVA && npc.ai[2] <= 45f)
+            {
+                float prog = npc.ai[2] / 45f;
+                OndaLib.Pulse(sb, posC, 1f - prog,
+                    420f - 300f * prog, OroLuz, 0.60f, npc.whoAmI + 3);
+            }
+        }
     }
 }

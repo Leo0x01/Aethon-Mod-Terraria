@@ -2193,8 +2193,12 @@ Jefe: {
 		Gravedad: Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
 		Reconocimiento: Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.
-		Presentacion: The sky IGNITES. AETHON, THE PRIMORDIAL LIGHT, descends — night turns to day.
-		Muerte: The light goes out. The beginning of everything dissolves into the air.
+		Presentacion: The world TREMBLES: time BENDS and the sun RACES to the center of the sky.
+		LlegadaLuz: The sun locks dead-center in the sky, blazing with an intensity NOT of this world…
+		LlegadaOscuridad: ALL THE LIGHT HAS BEEN GATHERED INTO ONE PLACE. The sun has turned black: darkness takes control of the world — ONLY HE SHINES.
+		OscuridadGrimorio: Your Grimoire (level {0}) burns in the darkness, holding a small circle of light around you.
+		OscuridadSinGrimorio: The darkness around you is TOTAL… Only a Grimoire of level 50 or higher holds a circle of light.
+		Muerte: The light EXPLODES: everything gathered RETURNS to the world. The sun takes back its course and the darkness dissolves.
 		Carga: THE FLASH — light crosses the world: stay off its line.
 		Juicio: THE JUDGMENT OF LIGHT — pillars of light fall from the sky: run.
 		Nova: THE PRIMORDIAL NOVA — the light bursts: find the gap.

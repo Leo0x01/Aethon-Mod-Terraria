@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.34 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.37 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -24,6 +24,22 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del
   destello circular plano, brillo de rayos sin cortes.
+- **v6.50.37 — EL MEDIO DÍA DE LA OSCURIDAD**: «has que sea mas grande el
+  jefe… cuando Aethon aparece el mundo debe temblar… si es de noche se hace
+  de dia y si es de dia el tiempo avanza hasta que el sol quede centrado…
+  el sol brilla con intensidad y de ahi aparece Aethon, luego el sol se
+  vuelve negro… toda la luz ha sido concentrada en un lugar… la oscuridad
+  misma toma el control». EL JEFE ×1.5 (hitbox 220, núcleo 130 px) y LA
+  LLEGADA DEFINITIVA EN CUATRO ACTOS: EL MUNDO TIEMBLA (kicks 4→13 px) →
+  EL TIEMPO CORRE a 240× (el sol atraviesa el cielo) hasta quedar CLAVADO
+  EN EL CENTRO (congelado en el mediodía exacto) → EL SOL BRILLA hasta lo
+  cegador… EL FLASH BLANCO… y AETHON NACE DE ÉL → EL SOL SE VUELVE NEGRO
+  («TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR — SOLO ÉL BRILLA»). Y LA
+  OSCURIDAD PRIMORDIAL (la de Don't Starve, MEJORADA): máscara de luz
+  multiplicada sobre el mundo — todo se apaga salvo AETHON (1.060 px de
+  luz dorada pura) y el PEQUEÑO círculo del jugador… SOLO con Grimorio
+  nivel 50+. Las balas del jefe brillan en la negrura; el HUD sigue
+  usable. Al morir: la luz ESTALLA, el sol recupera su curso.
 - **v6.50.36 — AETHON, LA LUZ PRIMORDIAL, LA ENCARNACIÓN**: la sierpe MUERE
   («el jefe se ve feo… mejor hacerlo una luz brillante») y el jefe ES LA LUZ
   MISMA: un SOL VIVO de código puro (núcleo blanco + halo dorado + rayos

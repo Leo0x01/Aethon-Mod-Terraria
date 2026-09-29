@@ -1,12 +1,50 @@
-# AethonMod — ESTADO ACTUAL (v6.50.36)
+# AethonMod — ESTADO ACTUAL (v6.50.37)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.36`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.37`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.36`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.37`.
+- **v6.50.37 = EL MEDIO DÍA DE LA OSCURIDAD** (la petición: «has que sea mas
+  grande el jefe… cuando Aethon aparece el mundo debe temblar… si es de noche
+  se hace de dia y si es de dia el tiempo avanza hasta que el sol quede
+  centrado… destellos de luz aparecen en el cielo… el sol brilla con
+  intensidad y de ahi aparece Aethon, luego el sol se vuelve negro… toda la
+  luz a sido concentrada en un lugar… usa la oscuridad de dont starve y
+  mejora esa oscuridad… el mundo se vuelve oscuro menos los alrededores del
+  jugador y Aethon… solo un pequeño circulo si el grimorio es nivel 50 o
+  superior"):
+  1. **MÁS GRANDE ×1.5**: hitbox 220×220, núcleo 130 px, halo 295, rayos
+     255-420, coronas 218×134/300×90, luz del mundo 1.55/1.35/0.95.
+  2. **LA LLEGADA EN CUATRO ACTOS** (ai[1]=10·11·12·13): EL MUNDO TIEMBLA
+     (corte al alba si era de noche + kicks 4→13 px) → EL TIEMPO CORRE
+     (240×: el sol atraviesa el cielo y queda CLAVADO en el mediodía exacto
+     — time=27000, x=centro EXACTO, congelado mientras la luz viva) →
+     EL SOL BRILLA CON INTENSIDAD (la ventana cegadora de 490 px + EL FLASH
+     blanco de pantalla completa — Aethon SE MATERIALIZA DE ÉL) → EL SOL SE
+     VUELVE NEGRO (el mensaje «TODA LA LUZ HA SIDO CONCENTRADA EN UN
+     LUGAR… SOLO ÉL BRILLA» + LA OSCURIDAD entra).
+  3. **LA OSCURIDAD PRIMORDIAL** (OscuridadSistema.cs, NUEVO): la máscara de
+     luz — RenderTarget a media resolución limpiado a gris (1→0.035) con
+     AGUJEROS ADITIVOS (AgujeroLuz.png) multiplicado sobre la escena
+     (BlendState multiplicativo): AETHON brilla dorado a 1.060 px (ES luz
+     pura; en su ECLIPSE se encoge a 360 violeta), EL JUGADOR solo un
+     círculo de 235 px **si el Grimorio ≥ 50** (NivelGrimorioPublico), LAS
+     BALAS del jefe abren agujeros pequeños, LOS TELEGRAPHS se redibujan
+     sobre la oscuridad y EL HUD queda USABLE (capa #0 de la interfaz).
+  4. **EL SOL NEGRO**: disco absoluto (cubre al sol real — posición LITERAL
+     del decompile de DrawSunAndMoon vía BackgroundViewMatrix.EffectMatrix)
+     + rim dorado latiendo + corona de 12 filamentos + destellos fantasma.
+  5. **EL CIELO DE LA LLEGADA** (ColaSierpeSky): 18 destellos con estrella,
+     la VENTANA SIGUIENDO AL SOL en su carrera, el horizonte MUERTO a
+     violeta (0.028) cuando la oscuridad manda.
+  6. **LA SINCRONÍA**: PreUpdateTime (todas las máquinas, tras la IA y antes
+     de UpdateTime — verificado en decompile) reconstruye el estado desde
+     ai[]: el servidor manda, cada cliente padece su propia carrera del sol.
+     Al morir: el tiempo REANUDA, la oscuridad se disuelve en 45 t DURANTE
+     la contracción (el FLASH final CEGA) y el sol negro se despide lento.
 - **v6.50.36 = AETHON, LA LUZ PRIMORDIAL, LA ENCARNACIÓN** (la petición: «el
   jefe se ve feo… mejor hacerlo una luz brillante, el jefe es una potente luz
   que ataca al jugador con ataques devastadores» + «Aethon es masculino»):
@@ -70,38 +108,46 @@
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.36**: 6.315.822 bytes, md5 823173db…, **395 entradas** auditadas
-  byte a byte (EOF exacto, todas inflan, 24 planas; los 4 sprites de la sierpe
-  AUSENTES — las 3 "Sierpe" restantes son del ARMA); cadenas nuevas verificadas
-  DENTRO DEL PAQUETE (SE ENCIENDE/JUICIO/NOVA/ECLIPSE/DESTELLO/Me RECONOCIÓ/He
-  RECOGNIZED PRESENTES; Señora/Ella me/tasted her AUSENTES); DLL: 11 símbolos
-  nuevos PRESENTES (EstadoJuicio/EstadoEclipse/EstiloColumnaJuicio/PintarResplandor…)
-  y TODA la sierpe AUSENTE (AethonSierpeCuerpo/Cola/Arte/CrearCadena/EstadoClavado/
-  DibujarDragon/UMBRAL_FONDO).
+- **`.tmod` v6.50.37**: 6.334.018 bytes, md5 ea0074b3…, **396 entradas** auditadas
+  byte a byte (EOF exacto, todas inflan — 395 + AgujeroLuz.rawimg nueva);
+  cadenas verificadas DENTRO DEL PAQUETE (TODA LA LUZ HA SIDO CONCENTRADA /
+  SOLO ÉL BRILLA / GATHERED INTO ONE PLACE / ONLY HE SHINES / OscuridadGrimorio);
+  DLL: los 18 símbolos nuevos PRESENTES (PosicionSolEnCielo, DibujarTelegrafos,
+  SubFaseLlegada, NivelGrimorioPublico, ModifyTimeRate, PreUpdateTime,
+  ModifyInterfaceLayers, DibujarOscuridad, DibujarSolNegro, DibujarAgujero,
+  AsegurarMascara, TiempoCorriendo, TiempoCongelado, OscuridadObjetivo,
+  get_FaseOscuridad, ContarTickClimax, OscuridadSistema, EstadoNaciendo).
+  NOTA: el "WARN: Image loading failed" del empaquetado es PRE-EXISTENTE
+  (reproducido compilando el HEAD v6.50.36 — benigno, paquete íntegro).
 - **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.36>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.37>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.36 está implementada y build-verificada, pero **el usuario aún
-no ha probado la v6.50.36 en partida**. Checklist:
+Toda la cadena v6.50.24 → v6.50.37 está implementada y build-verificada, pero **el usuario aún
+no ha probado la v6.50.37 en partida**. Checklist:
 
-1. **EL JEFE AETHON — LA LUZ PRIMORDIAL (v6.50.36, LO PRIMERO)**:
-   pelear al jefe y verificar: (a) EL SOL VIVO: núcleo blanco pulsante, halo
-   dorado, rayos radiales girando, LAS DOS CORONAS de perlas (los anillos
-   elípticos en sentidos opuestos) y las chispas — SIN sierpe, sin huesos,
-   sin cola: SOLO LUZ; (b) LA LLEGADA: el cielo SE ENCIENDE (resplandor + 7
-   columnas lejanas + la ventana del núcleo) y el anuncio «El cielo se
-   ENCIENDE. AETHON, LA LUZ PRIMORDIAL, desciende»; (c) LOS SEIS ATAQUES:
-   LAS COLUMNAS DEL JUICIO (la línea de luz que baja lenta… y ACELERA), EL
-   RAYO (el arco grueso + la lluvia), LA NOVA con huecos, LA CRUZ girando
-   (P3+), EL DESTELLO con línea guía (P3+) y EL ECLIPSE (P4+: el mundo se
-   apaga, la atracción tira, SOLO LAS BALAS BRILLAN… y la luz VUELVE con
-   nova); (d) LA BARRA con el icono EL SOL; (e) LA MUERTE: la contracción
-   total… y EL FLASH que inunda la pantalla; (f) que NO hay «Excepción
-   silenciosa» nuevas en el client.log.
+1. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (v6.50.37, LO PRIMERO)**:
+   invocarlo (de día Y de noche, para ver los dos caminos) y verificar:
+   (a) MÁS GRANDE (el sol de código ×1.5 — núcleo 130 px); (b) LA LLEGADA
+   COMPLETA: EL MUNDO TIEMBLA (la pantalla sacudida ~2.5 s — como la sierpe),
+   si era de noche SE HACE DE DÍA (el corte al alba), EL TIEMPO CORRE (el sol
+   ATRAVIESANDO el cielo a toda velocidad) hasta quedar CLAVADO EN EL CENTRO,
+   LOS DESTELLOS en el cielo, EL SOL BRILLANDO CON INTENSIDAD (la ventana
+   cegadora creciendo)… EL FLASH BLANCO… y AETHON NACIENDO DE ÉL; (c) EL SOL
+   NEGRO (disco oscuro + rim dorado + corona, centrado en el cielo TODO el
+   combate) y el mensaje «TODA LA LUZ HA SIDO CONCENTRADA EN UN LUGAR…»; (d)
+   LA OSCURIDAD: el mundo ENTERO apagado salvo AETHON (brillando dorado e
+   intenso) y — SOLO si el Grimorio va nivel 50+ — el PEQUEÑO círculo del
+   jugador (probar con libro < 50: oscuridad TOTAL); las balas del jefe se
+   ven venir (los telegraphs también); el HUD (mapa/barra) SIGUE USABLE;
+   (e) LOS SEIS ATAQUES (heredados) + EL ECLIPSE ahora ENCOGE el brillo del
+   propio Aethon; (f) LA MUERTE: la oscuridad disolviéndose DURANTE la
+   contracción, EL FLASH final CEGANDO, el sol RECUPERANDO su curso y el
+   anuncio «La luz ESTALLA…»; (g) que NO hay «Excepción silenciosa» nuevas
+   en el client.log (en especial nada del render de la máscara/oscuridad).
 2. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
 3. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
