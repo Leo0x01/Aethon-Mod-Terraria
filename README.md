@@ -24,6 +24,15 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   dado del 1% de Deerclops, diálogos de devorar por jefe, libro sin rugido, avalancha de Aethon,
   arte del jefe en código (eclipse estelar), motor de oleadas de vanilla + indicador, muerte del
   destello circular plano, brillo de rayos sin cortes.
+- **v6.50.36 — AETHON, LA LUZ PRIMORDIAL, LA ENCARNACIÓN**: la sierpe MUERE
+  («el jefe se ve feo… mejor hacerlo una luz brillante») y el jefe ES LA LUZ
+  MISMA: un SOL VIVO de código puro (núcleo blanco + halo dorado + rayos
+  radiales + coronas de perlas + chispas) con SEIS ataques devastadores:
+  EL JUICIO DE LUZ (columnas del cielo), EL RAYO PRIMORDIAL, LA NOVA con
+  huecos, LA CRUZ giratoria (P3+), EL DESTELLO encadenado (P3+) y EL
+  ECLIPSE (P4+: la luz se apaga, solo las balas brillan — y vuelve con
+  nova). La llegada: EL CIELO SE ENCIENDE. Y el género de Aethon corregido:
+  ÉL (el título "La Luz Primordial" queda).
 - **v6.50.35 — EL SEÑOR DEL MUNDO (corrección de género)**: «la sierpe es macho
   así que sería señor del mundo» — el título corregido en TODOS los frentes y
   ESTRENADO EN EL JUEGO: el anuncio de aparición del jefe ahora dice «LA SIERPE

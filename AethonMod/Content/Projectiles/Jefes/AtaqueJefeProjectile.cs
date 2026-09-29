@@ -73,6 +73,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloNubeNebulosa = 10;
         public const int EstiloRunaMemorizada = 11;
         public const int EstiloEstallidoMina = 12;
+        public const int EstiloColumnaJuicio = 13;   // v6.50.36 — Aethon, LA LUZ
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -146,6 +147,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 case EstiloPernoEstelar: Projectile.timeLeft = 220; break;
                 case EstiloNubeNebulosa: Projectile.timeLeft = 360; break;
                 case EstiloRunaMemorizada: Projectile.timeLeft = 600; break;
+                case EstiloColumnaJuicio: Projectile.timeLeft = 210; break;
                 case EstiloEstallidoMina: Projectile.timeLeft = 20; break;
             }
         }
@@ -222,6 +224,17 @@ namespace AethonMod.Content.Projectiles.Jefes
             if (_centroOrbita == Vector2.Zero) _centroOrbita = Projectile.Center;
             Projectile.tileCollide = Estilo == EstiloPuaSagrario ||
                                      Estilo == EstiloEstrellaFugaz;
+
+            // v6.50.36 — LA COLUMNA DEL JUICIO: la forma LARGA (la
+            // autocuración de la casa: OnSpawn no corre en los clientes
+            // remotos — la forma se reconstruye desde lo que SÍ viaja).
+            if (Estilo == EstiloColumnaJuicio && Projectile.height < 100)
+            {
+                Vector2 c = Projectile.Center;
+                Projectile.width = 56;
+                Projectile.height = 210;
+                Projectile.Center = c;
+            }
 
             Player presa = Presa();
 
@@ -419,6 +432,43 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // OBLIGA a moverse — el campo del duelista).
                     Projectile.velocity = new Vector2(MathF.Cos(Par), MathF.Sin(Par)) * 3.4f;
                     if (_edad > 330) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  LA COLUMNA DEL JUICIO — la luz que cae del cielo (v6.50.36)
+                // =============================================================
+                case EstiloColumnaJuicio:
+                {
+                    // 45 t de CAÍDA LENTA (la línea de luz descendiendo —
+                    // EL TELEGRAPH del juicio) y luego LA ACELERACIÓN:
+                    // 52 px/t atravesando el mundo hasta el fondo.
+                    if (_edad < 45)
+                    {
+                        Projectile.velocity = new Vector2(0f, 7f);
+                        Projectile.ai[1] = 0f;
+                    }
+                    else
+                    {
+                        if (Projectile.ai[1] < 1f)
+                        {
+                            Projectile.ai[1] = 1f;
+                            Projectile.velocity = new Vector2(0f, 52f);
+                            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122,
+                                Projectile.Center);
+                        }
+                        // LA ESTELA de la caída (el rastro de la columna).
+                        if (!Main.dedServ && ((int)_edad % 4) == 0)
+                        {
+                            int idx = Dust.NewDust(Projectile.Center, 40, 40,
+                                DustID.GoldFlame,
+                                Main.rand.NextFloat(-2f, 2f), -Main.rand.NextFloat(1f, 4f));
+                            Main.dust[idx].noGravity = true;
+                        }
+                    }
+                    if (Projectile.Center.Y > (Main.maxTilesY - 30) * 16f ||
+                        _edad > 200)
+                        Projectile.Kill();
                     break;
                 }
 
@@ -697,6 +747,20 @@ namespace AethonMod.Content.Projectiles.Jefes
                             new Vector2(8f, 8f), Projectile.rotation);
                         break;
 
+                    case EstiloColumnaJuicio:
+                    {
+                        // EL MANTO DE LA COLUMNA: el velo dorado vertical
+                        // (coords de MUNDO — la columna entera, más ALTA
+                        // que la hitbox: la luz siempre llega antes).
+                        float caida = Projectile.ai[1] >= 1f ? 1f :
+                            0.35f + 0.65f * (_edad / 45f);   // crece mientras telegrafea
+                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.55f * caida),
+                            new Vector2(56f, 1100f));
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.75f * caida),
+                            new Vector2(22f, 950f));
+                        break;
+                    }
+
                     case EstiloNubeNebulosa:
                     {
                         // LAS FLORES DE HUMO: 6 puffs orbitando con Hash01.
@@ -904,6 +968,23 @@ namespace AethonMod.Content.Projectiles.Jefes
                     {
                         LumenLib.BloomPulse(Main.spriteBatch, pos, 20f, LuzPrimordial,
                             0.85f, t, 5f);
+                        break;
+                    }
+
+                    // === LA COLUMNA: la punta que cae y el latido del juicio ===
+                    case EstiloColumnaJuicio:
+                    {
+                        float intensidad = Projectile.ai[1] >= 1f ? 1f : 0.35f + 0.65f * (_edad / 45f);
+                        // LA PUNTA: la cabeza de la columna (donde nace el manto).
+                        LumenLib.BloomPulse(Main.spriteBatch, pos, 34f * intensidad,
+                            BlancoCaliente, 0.9f * intensidad, t, 6f);
+                        // EL LATIDO del juicio (el pulso que anuncia la caída).
+                        if (Projectile.ai[1] < 1f)
+                        {
+                            OndaLib.Pulse(Main.spriteBatch, pos,
+                                (_edad % 45f) / 45f, 120f * intensidad,
+                                OroGrimorio, 0.5f, Seed);
+                        }
                         break;
                     }
 

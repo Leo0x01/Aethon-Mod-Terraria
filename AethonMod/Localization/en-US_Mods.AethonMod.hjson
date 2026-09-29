@@ -1859,9 +1859,6 @@ NPCs: {
 	EchoBlade.DisplayName: Echo of the First Wielder
 	EchoArcher.DisplayName: Echo of the Star-Archer
 	RiftKeeper.DisplayName: The Rift-Keeper
-	// v6.50.19: THE BONE SERPENT — final boss segments
-	AethonSierpeCuerpo.DisplayName: Aethon Serpent Vertebra
-	AethonSierpeCola.DisplayName: Aethon Serpent Tail
 }
 
 Common: {
@@ -2196,10 +2193,13 @@ Jefe: {
 		Gravedad: Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
 		Reconocimiento: Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.
-		Presentacion: The earth trembles. THE BONE SERPENT OF THE LIGHT — THE LORD OF THE WORLD — rises from below: its tail entangles the horizon.
-		Muerte: The serpent comes apart. The Primordial Light escapes its bones.
-		Carga: THE SERPENT CHARGES — clear his line.
-		Aliento: Aethon breathes the Primordial Light — THE BREATH OF THE BEGINNING hunts you.
+		Presentacion: The sky IGNITES. AETHON, THE PRIMORDIAL LIGHT, descends — night turns to day.
+		Muerte: The light goes out. The beginning of everything dissolves into the air.
+		Carga: THE FLASH — light crosses the world: stay off its line.
+		Juicio: THE JUDGMENT OF LIGHT — pillars of light fall from the sky: run.
+		Nova: THE PRIMORDIAL NOVA — the light bursts: find the gap.
+		Eclipse: THE ECLIPSE — the light goes out and only the bullets shine.
+		Aliento: THE PRIMORDIAL RAY — the light hunts you.
 	}
 }
 
@@ -2245,8 +2245,8 @@ Esencia: {
 		EchoBlade2: I digest my own heir… his blade knew MY spine. Fitting.
 		EchoBlade3: The echo of the blade, devoured. The first one's page, complete.
 		AethonBoss1: AETHON. The Primordial Light, digested. Tastes of the beginning of everything.
-		AethonBoss2: She RECOGNIZED me as an equal… and I tasted her anyway. Tastes of forgiveness.
-		AethonBoss3: The bone serpent is a page now. When the book closed, the sun blinked for ONE tick.
+		AethonBoss2: He RECOGNIZED me as an equal… and I tasted him anyway. Tastes of forgiveness.
+		AethonBoss3: The light is a page now. When the book closed, the sun blinked for ONE tick.
 	}
 
 	CofreSeco: "{0}'s chest of souls is DRY in this world — ten pages, story closed."

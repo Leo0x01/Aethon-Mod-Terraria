@@ -1858,9 +1858,6 @@ NPCs: {
 	EchoBlade.DisplayName: Eco del Primer Portador
 	EchoArcher.DisplayName: Eco de la Arquera Estelar
 	RiftKeeper.DisplayName: El Guardián del Rift
-	// v6.50.19: THE BONE SERPENT — final boss segments
-	AethonSierpeCuerpo.DisplayName: Vértebra de la Sierpe de Aethon
-	AethonSierpeCola.DisplayName: Cola de la Sierpe de Aethon
 }
 
 Common: {
@@ -2195,10 +2192,13 @@ Jefe: {
 		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
 		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
 		Reconocimiento: Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.
-		Presentacion: La tierra tiembla. LA SIERPE DE HUESO DE LA LUZ — EL SEÑOR DEL MUNDO — se alza del subsuelo: su cola se enreda en el horizonte.
-		Muerte: La sierpe se desarticula. La Luz Primordial se escapa de sus huesos.
-		Carga: LA SIERPE EMBISTE — aparta el cuerpo de su línea.
-		Aliento: Aethon escupe la Luz Primordial — EL ALIENTO DEL INICIO te busca.
+		Presentacion: El cielo se ENCIENDE. AETHON, LA LUZ PRIMORDIAL, desciende — la noche se vuelve día.
+		Muerte: La luz se apaga. El principio de todo se disuelve en el aire.
+		Carga: EL DESTELLO — la luz cruza el mundo: no estés en su línea.
+		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
+		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.
+		Eclipse: EL ECLIPSE — la luz se apaga y solo las balas brillan.
+		Aliento: EL RAYO PRIMORDIAL — la luz te busca.
 	}
 }
 
@@ -2244,8 +2244,8 @@ Esencia: {
 		EchoBlade2: Digiero a mi propio heredero… su hoja conocía MI lomo. Justo.
 		EchoBlade3: El eco de la hoja, devorado. La página del primero, completa.
 		AethonBoss1: AETHON. La Luz Primordial, digerida. Sabe a principio de todo.
-		AethonBoss2: Ella me RECONOCIÓ como par… y aun así la probé. Sabe a perdón.
-		AethonBoss3: La sierpe de hueso es página. Al cerrar el libro, el sol parpadeó UN tick.
+		AethonBoss2: Me RECONOCIÓ como par… y aun así lo probé. Sabe a perdón.
+		AethonBoss3: La luz es página. Al cerrar el libro, el sol parpadeó UN tick.
 	}
 
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
