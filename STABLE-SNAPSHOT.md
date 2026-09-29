@@ -1,12 +1,30 @@
-# AethonMod — ESTADO ACTUAL (v6.50.38)
+# AethonMod — ESTADO ACTUAL (v6.50.39)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.38`, release publicada).
+> Última actualización: 2026-09-29 (tag `v6.50.39`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
-  "el repo de github siempre es el verdadero"): tag `v6.50.38`.
+  "el repo de github siempre es el verdadero"): tag `v6.50.39`.
+- **v6.50.39 = LA TÉCNICA DE WRATH OF THE GODS** (tres pedidos en uno):
+  (1) la máscara de luz MUERE — el usuario la rechazó («solo hace que todo
+  este negro y no es el oscurecer que quiero»); la ingeniería inversa del
+  addon (TheFifthCircle/WrathOfTheGodsPublic, su `TotalScreenOverlaySystem`:
+  velo sobre el frame en `Main.OnPostDraw` + contenido dibujado DESPUÉS)
+  dio la técnica, y **VELOLIB** la librería nueva de la casa:
+  `Velo.Ver/Apagar/Luz/SobreElVelo/PintoresSiempre` — el velo violeta-negro
+  al 93% con EL FLASH del climax como crossfade vivo blanco→negro, Aethon
+  dorado 430 px (210 violeta en eclipse), el círculo 235 px SOLO con Grimorio
+  ≥50, las balas, EL SOL NEGRO y los telegraphs por el pintor.
+  (2) **el sol ya no se teletransporta**: sin corte al alba y sin snap — la
+  noche entera corre a 300× (la luna barre, el alba llega sola) y el mediodía
+  se reacha con aterrizaje desacelerado (`rate = distancia×0.08`, piso 1):
+  el sol se POSA, y el espejo es CONVERGENTE (un cliente atrasado termina su
+  carrera antes de congelarse).
+  (3) **«al compilar el juego se cierra»**: la clase de riesgo muere con la
+  máscara — cero GraphicsDevice/RTs/capas de interfaz; OnPostDraw con Begin/End
+  propios; cerrojo de tres caídas + TODO escrito en el log.
 - **v6.50.38 = LA OSCURIDAD ENFOCADA** (el reporte del usuario tras probar la
   v6.50.37: «la oscuridad solo hace que la pantalla se apague»): los agujeros
   de luz NO salían — la máscara se estampaba con `ZoomMatrix` aplicada DOS
@@ -123,38 +141,52 @@
   CerrarLoteSiAbierto viaja con la reversión de v6.50.34** (vivió en v6.50.31).
 - **Build headless 0 errores / 0 warnings** contra tModLoader 2026.07.3.0 REAL
   (verify.csproj reconstruido tras el wipe del sandbox + el `-build` real).
-- **`.tmod` v6.50.38**: 6.331.688 bytes, md5 04734810…, **396 entradas** auditadas
-  (EOF exacto, set idéntico al de la v6.50.37); cadenas del CERROJO verificadas
-  DENTRO DEL PAQUETE en UTF-16 («la máscara de luz falló» / «cayendo al velo
-  simple» / «error dibujando la oscuridad») y símbolos clave PRESENTES
-  (DibujarOscuridad, mascaraRota, PosicionSolEnCielo, DibujarTelegrafos).
+- **`.tmod` v6.50.39**: 6.322.305 bytes, md5 1d7b8c44…, **395 entradas** auditadas
+  (EOF exacto, set de la 38 menos AgujeroLuz.rawimg); cadenas del cerrojo verificadas
+  DENTRO DEL PAQUETE en UTF-16 («VeloLib: el velo falló al dibujarse» / «el pintor
+  del velo falló») y símbolos clave PRESENTES (VeloSistema, AethonLlegadaSistema,
+  PintarSobreElVelo, DibujarSolNegro) con TODA la máscara AUSENTE
+  (OscuridadSistema/DibujarOscuridad/DibujarAgujero/AsegurarMascara/FaseOscuridad).
 - **hjson es-ES/en-US simétricos** (487=487 claves, parser con soporte de bloques ''').
 - **Servidor headless CARGA sin excepciones** (Sandboxing → Finalizing → Choose World).
 - **Release de GitHub** con el `AethonMod.tmod` adjunto:
-  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.38>
+  <https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.39>
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.38 está implementada y build-verificada. El usuario YA PROBÓ la
-v6.50.37 y reportó el bug de la oscuridad («solo hace que la pantalla se apague») — corregido
-en la v6.50.38 (LA OSCURIDAD ENFOCADA). Checklist de la v6.50.38:
+Toda la cadena v6.50.24 → v6.50.39 está implementada y build-verificada. El usuario probó la
+v6.50.37 y reportó el bug de la oscuridad — el fix v6.50.38 no bastó («solo hace que todo
+este negro y no es el oscurecer que quiero») y la técnica entera fue REMPLAZADA por la de
+Wrath of the Gods. Checklist de la v6.50.39:
 
-1. **LA OSCURIDAD PRIMORDIAL — EL FIX PRIMERO (v6.50.38)**: invocar a Aethon
-   en el MISMO monitor de siempre y verificar que AHORA SÍ: (a) AETHON
-   BRILLA DORADO en su sitio (1.060 px de luz pura — se le ve el cuerpo
-   radiante en la negrura); (b) el PEQUEÑO círculo del jugador SOLO con
-   Grimorio nivel 50+ (con libro < 50: oscuridad total y el texto lo
-   explica); (c) LAS BALAS del jefe se ven venir (pernos/columnas/runas
-   con su pequeño halo); (d) los telegraphs SIEMPRE visibles y el HUD
-   usable; (e) NADA de pantallas muertas (el blindaje del render target).
-   Si ALGO falla: el client.log ahora LO CUENTA («la máscara de luz falló»
-   con stack completo) — mandar el log.
-2. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (lo heredado de v6.50.37)**:
+1. **LA OSCURIDAD — LA TÉCNICA DE WOTG (v6.50.39, EL PRIMERO)**: invocar a
+   Aethon y verificar que AHORA SÍ (como en Wrath of the Gods): (a) EL VELO
+   cayendo sobre TODO (mundo, interfaz y cursor — como su TotalScreenOverlay-
+   System) con el mundo a siluetas del 7%; (b) AETHON ARDIENDO DORADO encima
+   de la oscuridad (430 px de luz pura con su brasa — se ve SU brillo, no
+   un agujero); (c) el PEQUEÑO círculo del jugador SOLO con Grimorio 50+
+   (con libro < 50: oscuridad total y el texto lo explica); (d) LAS BALAS
+   visibles; (e) EL SOL NEGRO con rim y corona + los telegraphs encima de
+   todo; (f) EL FLASH del climax: blanco ciego que se apaga EN GRIS hasta
+   el negro (el crossfade vivo — «la oscuridad toma el control»);
+   (g) LA MUERTE: el velo disolviéndose DURANTE la contracción, el sol negro
+   despidiéndose LENTO (más lento que la oscuridad) y el sol RECUPERANDO su
+   curso. Si algo falla: el client.log LO CUENTA («VeloLib: el velo falló
+   al dibujarse» / «el pintor del velo falló») — mandar el log.
+2. **EL SOL NO SE TELETRANSPORTA (v6.50.39)**: invocarlo DE NOCHE y verificar
+   que la luna barre el cielo, el alba llega SOLA y el sol POSA en el centro
+   con frenada progresiva — SIN salto. De día igual: nada de teletransporte
+   al mediodía, ni en SP ni (si se puede) en MP con clientes atrasados.
+3. **EL COMPILE SIN CIERRES (v6.50.39)**: compilar el mod en tModLoader
+   (Develop Mods → Build & Reload) VARIAS veces seguidas — el juego YA NO se
+   cierra: la nueva oscuridad no toca el GraphicsDevice y todo vive con
+   cerrojo + log.
+4. **EL JEFE AETHON — EL MEDIO DÍA DE LA OSCURIDAD (lo heredado de v6.50.37)**:
    invocarlo (de día Y de noche, para ver los dos caminos) y verificar:
    (a) MÁS GRANDE (el sol de código ×1.5 — núcleo 130 px); (b) LA LLEGADA
    COMPLETA: EL MUNDO TIEMBLA (la pantalla sacudida ~2.5 s — como la sierpe),
-   si era de noche SE HACE DE DÍA (el corte al alba), EL TIEMPO CORRE (el sol
-   ATRAVIESANDO el cielo a toda velocidad) hasta quedar CLAVADO EN EL CENTRO,
+   EL TIEMPO CORRE (el sol ATRAVIESANDO el cielo — ahora con aterrizaje
+   natural, ver ítem 2 arriba) hasta quedar CLAVADO EN EL CENTRO,
    LOS DESTELLOS en el cielo, EL SOL BRILLANDO CON INTENSIDAD (la ventana
    cegadora creciendo)… EL FLASH BLANCO… y AETHON NACIENDO DE ÉL; (c) EL SOL
    NEGRO (disco oscuro + rim dorado + corona, centrado en el cielo TODO el
@@ -168,25 +200,25 @@ en la v6.50.38 (LA OSCURIDAD ENFOCADA). Checklist de la v6.50.38:
    contracción, EL FLASH final CEGANDO, el sol RECUPERANDO su curso y el
    anuncio «La luz ESTALLA…»; (g) que NO hay «Excepción silenciosa» nuevas
    en el client.log (en especial nada del render de la máscara/oscuridad).
-2. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
+5. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
    al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
-3. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
+6. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
    (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
    recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-4. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
+7. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
    ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
    paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
    invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-5. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
+8. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
    opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-6. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
+9. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
    (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-7. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-8. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
+10. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
+11. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
    emersión), la barra de vida con icono, el RAM y el Aliento.
-9. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
+12. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
    disco plano (los velos de la capa de UI murieron en v6.50.28).
-10. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
+13. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
     no hacen "cortes" ni clipean.
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
@@ -247,7 +279,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) |
+| **v6.50.39** | ✅ Build-verificada, ⏳ en juego | LA TÉCNICA DE WRATH OF THE GODS: la máscara de luz MUERE (rechazada por el usuario) y nace **VELOLIB** — la oscuridad como en WotG (velo sobre el frame en `OnPostDraw` + las luces dibujadas DESPUÉS) · EL SOL ya no se teletransporta (noche entera a 300× + aterrizaje desacelerado al mediodía, sin corte al alba y sin snap) · el fix de «al compilar el juego se cierra» (cero GraphicsDevice/RTs, cerrojo de 3 caídas + log) |
+| **v6.50.38** | ✅ Build-verificada, ⏳ en juego | LA OSCURIDAD ENFOCADA (fix del reporte «la oscuridad solo hace que la pantalla se apague»): la máscara de luz se estampaba con el zoom aplicado DOS VECES y en pantallas grandes (ForcedMinimumZoom > 1) los agujeros volaban fuera — ahora identidad + viewport, a cualquier zoom · blindaje del render target (finally inquebrantable) · cerrojo con log real (cae al velo simple si falla) — el usuario la probó y la técnica entera fue reemplazada en v6.50.39 |
 | **v6.50.37** | ✅ Build-verificada, ⏳ parcialmente probada | EL MEDIO DÍA DE LA OSCURIDAD: jefe ×1.5 + LA LLEGADA en cuatro actos (temblor → carrera del sol a 240× → flash → sol negro) + LA OSCURIDAD PRIMORDIAL (máscara de luz Don't-Starve mejorada). El usuario la probó y reportó el bug de la oscuridad → fix en v6.50.38 |
 | **v6.50.36** | ✅ Build-verificada, ⏳ en juego | AETHON, LA LUZ PRIMORDIAL: la sierpe MUERE — el jefe es UNA LUZ BRILLANTE (sol vivo de código) + SEIS ataques devastadores (juicio de columnas + rayo + nova con huecos + cruz + destello + ECLIPSE) + el cielo se ENCIENDE + género de Aethon (Él) |
 | **v6.50.35** | ✅ Build-verificada, ⏳ en juego | EL SEÑOR DEL MUNDO (corrección de género): el título estrena EN EL JUEGO (anuncio de aparición es-ES/en-US) · her→his line · 7 comentarios · release v6.50.34 renombrado en GitHub |

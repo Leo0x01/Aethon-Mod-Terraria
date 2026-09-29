@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.38 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.39 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,12 +14,31 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.38)
+## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.39)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.38`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.39`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 396 entradas auditado.
+  sin excepciones; `.tmod` de 395 entradas auditado.
+- **v6.50.39 — LA TÉCNICA DE WRATH OF THE GODS**: tres pedidos en uno.
+  (1) «quitemos ese sistema… en su lugar revisa como lo hace el mod
+  wrath of the gods, y crea una libreria para eso»: ingeniería inversa
+  del addon (código público) — su oscuridad NO es una máscara: es UN
+  VELO dibujado sobre el frame terminado (`Main.OnPostDraw`) y las
+  cosas que deben verse se dibujan DESPUÉS, en el mismo lote. La
+  máscara de luz MUERE y nace **VELOLIB**, la librería de la oscuridad
+  estilo WotG (`Velo.Ver/Apagar/Luz/SobreElVelo/PintoresSiempre`):
+  el velo violeta-negro al 93%, Aethon ardiendo dorado encima (430 px;
+  210 violeta en su eclipse), el círculo del jugador SOLO con Grimorio
+  ≥50, las balas visibles, EL FLASH blanco del climax como crossfade
+  vivo, el sol negro y los telegraphs por el pintor. (2) «el sol no
+  debe saltar… correr el tiempo hasta llegar a su posición de forma
+  natural»: el corte al alba y el snap ELIMINADOS — la noche entera
+  corre a 300× (la luna barre, el alba llega sola) y el mediodía se
+  reacha con aterrizaje desacelerado: el sol se POSA, no se teletransporta.
+  (3) «al compilar en tmodloader el juego se cierra»: la clase de riesgo
+  entera muere con la máscara — cero GraphicsDevice, cero render targets,
+  cero capas de interfaz; cerrojo de tres caídas y TODO escrito en el log.
 - **v6.50.38 — LA OSCURIDAD ENFOCADA**: «la oscuridad solo hace que la
   pantalla se apague» — CORREGIDO. La máscara de luz aplicaba la
   transformación de zoom DOS VECES (los agujeros ya estaban en píxeles de

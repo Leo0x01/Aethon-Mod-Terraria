@@ -29,7 +29,7 @@ namespace AethonMod.Content.Effects
     //    VENTANA LO SIGUE (la puerta de la luz persiguiendo a su dueño).
     //  · SUB 12 (EL SOL BRILLA CON INTENSIDAD): la ventana se vuelve
     //    un HOYO CEGADOR en el cielo — el blanco que crece hasta que
-    //    OscuridadSistema lo reemplaza con EL FLASH de pantalla completa.
+    //    el VELO de VeloLib lo reemplaza con EL FLASH de pantalla completa.
     //  · SUB 13+ (LA OSCURIDAD): el cielo se APAGA — el resplandor
     //    dorado permanente muere a un violeta de ultratumba (la luz del
     //    mundo ya no está aquí: está en ÉL).
@@ -240,38 +240,45 @@ namespace AethonMod.Content.Effects
                         //     la luz): durante la carrera SIGUE al sol en su
                         //     carrera; en el climax se vuelve CEGADORA. La
                         //     posición es la EXACTA de vanilla (el decompile
-                        //     de DrawSunAndMoon — la casa la replica). ===
-                        Vector2 posSol = AethonBoss.PosicionSolEnCielo();
-                        float crescendo = sub == 12 ? Math.Min(1f, ContarTickClimax() / 90f) : 0f;
-                        float tam = (34f + 66f * av + 390f * crescendo) *
-                            (0.92f + 0.08f * MathF.Sin(t * (3.2f + 6f * crescendo)));
-
-                        // EL NÚCLEO CEGADOR (blanco puro al climax)
-                        sb.Draw(orbe, posSol, null,
-                            new Color(255, 250, 224) * (_alpha * (av * 0.55f + 0.45f * crescendo)),
-                            0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
-                            tam / orbe.Width, SpriteEffects.None, 0f);
-                        // el halo de la ventana
-                        sb.Draw(glow, posSol, null,
-                            cLuz * (_alpha * (av * 0.20f + 0.25f * crescendo)), 0f, origen,
-                            new Vector2(tam * 2.6f / glow.Width, tam * 2.6f / glow.Height),
-                            SpriteEffects.None, 0f);
-
-                        // LOS RAYOS DEL CLIMAX (cuando el sol BRILLA con
-                        // intensidad, sus rayos se alargan por el cielo)
-                        if (crescendo > 0.05f)
+                        //     de DrawSunAndMoon — la casa la replica).
+                        //     v6.50.39: de NOCHE no hay sol en el cielo (la
+                        //     luna barre y el alba llega sola) — la puerta de
+                        //     la luz no abre donde no hay sol: la ventana
+                        //     espera al alba de LA CARRERA. ===
+                        if (Main.dayTime)
                         {
-                            Vector2 origenR = new Vector2(glow.Width, glow.Height) * 0.5f;
-                            for (int i = 0; i < 8; i++)
+                            Vector2 posSol = AethonBoss.PosicionSolEnCielo();
+                            float crescendo = sub == 12 ? Math.Min(1f, ContarTickClimax() / 90f) : 0f;
+                            float tam = (34f + 66f * av + 390f * crescendo) *
+                                (0.92f + 0.08f * MathF.Sin(t * (3.2f + 6f * crescendo)));
+
+                            // EL NÚCLEO CEGADOR (blanco puro al climax)
+                            sb.Draw(orbe, posSol, null,
+                                new Color(255, 250, 224) * (_alpha * (av * 0.55f + 0.45f * crescendo)),
+                                0f, new Vector2(orbe.Width, orbe.Height) * 0.5f,
+                                tam / orbe.Width, SpriteEffects.None, 0f);
+                            // el halo de la ventana
+                            sb.Draw(glow, posSol, null,
+                                cLuz * (_alpha * (av * 0.20f + 0.25f * crescendo)), 0f, origen,
+                                new Vector2(tam * 2.6f / glow.Width, tam * 2.6f / glow.Height),
+                                SpriteEffects.None, 0f);
+
+                            // LOS RAYOS DEL CLIMAX (cuando el sol BRILLA con
+                            // intensidad, sus rayos se alargan por el cielo)
+                            if (crescendo > 0.05f)
                             {
-                                float ang = i * MathHelper.PiOver4 + t * 0.3f;
-                                float largo = tam * (1.4f + 1.2f * crescendo);
-                                sb.Draw(glow, posSol + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
-                                    (tam * 0.8f + largo * 0.5f), null,
-                                    new Color(255, 244, 200) * (_alpha * 0.30f * crescendo),
-                                    ang, origenR,
-                                    new Vector2(largo / glow.Width, (6f + 10f * crescendo) / glow.Height),
-                                    SpriteEffects.None, 0f);
+                                Vector2 origenR = new Vector2(glow.Width, glow.Height) * 0.5f;
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    float ang = i * MathHelper.PiOver4 + t * 0.3f;
+                                    float largo = tam * (1.4f + 1.2f * crescendo);
+                                    sb.Draw(glow, posSol + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                                        (tam * 0.8f + largo * 0.5f), null,
+                                        new Color(255, 244, 200) * (_alpha * 0.30f * crescendo),
+                                        ang, origenR,
+                                        new Vector2(largo / glow.Width, (6f + 10f * crescendo) / glow.Height),
+                                        SpriteEffects.None, 0f);
+                                }
                             }
                         }
                     }

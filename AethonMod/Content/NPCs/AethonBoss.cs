@@ -96,7 +96,7 @@ namespace AethonMod.Content.NPCs
         public const int SUB_CLIMAX = 12;       // el sol brilla con intensidad + EL FLASH
         public const int SUB_OSCURIDAD = 13;    // el sol negro + LA OSCURIDAD
 
-        // === EL ESTADO DEL MUNDO (el espejo de OscuridadSistema lo
+        // === EL ESTADO DEL MUNDO (el espejo de AethonLlegadaSistema lo
         //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
         //     lo escribe aquí, cada cliente lo reconstruye) ===
 
@@ -244,12 +244,9 @@ namespace AethonMod.Content.NPCs
                 _estado = EST_NACIENDO;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    // «si es de noche se hace de dia» — el corte al alba
-                    if (!Main.dayTime)
-                    {
-                        Main.dayTime = true;
-                        Main.time = 0.0;
-                    }
+                    // v6.50.39 — NUNCA MÁS EL CORTE AL ALBA: si era de noche,
+                    // la noche entera CORRE en el acto 11 (la luna barre el
+                    // cielo y el alba llega SOLA) — el sol no se teletransporta.
                     EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Presentacion", OroLuz);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
@@ -335,15 +332,20 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// LA LLEGADA DEFINITIVA (v6.50.37) — EL MEDIO DÍA DE LA OSCURIDAD:
-        /// (10) EL MUNDO TIEMBLA — si era de noche, YA ES DE DÍA (el corte
-        /// al alba del primer tick) y la tierra sacude la pantalla 2.5 s;
-        /// (11) EL TIEMPO CORRE — el sol ATRAVIESA el cielo (240× el ritmo:
-        /// el día entero en ~4 s) hasta quedar CLAVADO EN EL CENTRO;
+        /// LA LLEGADA DEFINITIVA (v6.50.39) — EL MEDIO DÍA DE LA OSCURIDAD:
+        /// (10) EL MUNDO TIEMBLA — la tierra sacude la pantalla 2.5 s;
+        /// (11) EL TIEMPO CORRE — SIN SALTOS (v6.50.39: «no dar un salto
+        /// como si se teletransportara al centro»): si era de noche, la
+        /// NOCHE ENTERA corre primero (la luna barre y el alba llega sola)
+        /// y de día el reloj DESESPERA — lejos vuela (300×) y al acercarse
+        /// al mediodía desacelera en aproximación y ATERRIZA en 27000
+        /// exacto: el sol se POSA en el centro, no se teletransporta;
         /// (12) EL SOL BRILLA CON INTENSIDAD — crece, se vuelve cegador…
         /// y en el pico del FLASH, AETHON SE MATERIALIZA DE ÉL;
         /// (13) EL SOL SE VUELVE NEGRO — toda la luz del mundo está ahora
-        /// en UN LUGAR: la oscuridad toma el control (OscuridadSistema).
+        /// en UN LUGAR: la oscuridad toma el control (VeloLib, la técnica
+        /// de Wrath of the Gods — el velo sobre el frame y las luces
+        /// viviendo SOBRE la oscuridad).
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
@@ -362,13 +364,18 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_CARRERA:
                 {
-                    // EL TIEMPO DOBLADO: OscuridadSistema.ModifyTimeRate corre
-                    // el reloj (240×) — el sol cruza el cielo ante tus ojos.
+                    // EL TIEMPO CORRE, DE FORMA NATURAL (v6.50.39):
+                    // AethonLlegadaSistema.ModifyTimeRate lleva el reloj —
+                    // la noche entera primero (la luna barre, el alba llega
+                    // sola) y de día la carrera DESESPERA: vuela lejos y
+                    // desacelera en aproximación, ATERRIZANDO en 27000 —
+                    // el sol se POSA en el centro, jamás se teletransporta.
                     NPC.velocity = Vector2.Zero;
                     if (Main.netMode != NetmodeID.MultiplayerClient &&
-                        Main.dayTime && Main.time >= 27000.0)
+                        Main.dayTime && Main.time >= 26999.0)
                     {
-                        // EL MEDIO DÍA EXACTO: el sol clavado en el centro.
+                        // EL MEDIO DÍA EXACTO: el aterrizaje (menos de un
+                        // tick de sol — la corrección sub-tick, no un salto).
                         Main.time = 27000.0;
                         TiempoCorriendo = false;
                         TiempoCongelado = true;
@@ -1171,8 +1178,9 @@ namespace AethonMod.Content.NPCs
 
                     // === 8. LOS TELEGRAPHS (la casa: todo ataque se anuncia.
                     //     Con LA OSCURIDAD activa se dibujan ENCIMA de ella —
-                    //     OscuridadSistema los repite en su propio pase) ===
-                    if (OscuridadSistema.FaseOscuridad < 0.3f)
+                    //     el pintor de AethonLlegadaSistema los repite en su
+                    //     propio pase, sobre el velo) ===
+                    if (Velo.Intensidad < 0.3f)
                         DibujarTelegrafos(spriteBatch, NPC, posC);
 
                     // === 9. LA ESTELA DEL DESTELLO (los fantasmas del cruce) ===
@@ -1248,8 +1256,8 @@ namespace AethonMod.Content.NPCs
         /// LOS TELEGRAPHS PÚBLICOS (v6.50.37): la línea guía del destello
         /// y el pulso de la nova — dibujables desde CUALQUIER lote
         /// aditivo: el PreDraw del mundo… o ENCIMA DE LA OSCURIDAD (que
-        /// OscuridadSistema pide en su pase para que el aviso siga
-        /// viéndose cuando el mundo entero está apagado).
+        /// el pintor de AethonLlegadaSistema pide en su pase para que el
+        /// aviso siga viéndose cuando el mundo entero está apagado).
         /// </summary>
         internal static void DibujarTelegrafos(SpriteBatch sb, NPC npc, Vector2 posC)
         {
