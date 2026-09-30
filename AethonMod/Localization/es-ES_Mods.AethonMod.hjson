@@ -52,6 +52,7 @@ Items: {
 		Tooltip:
 			'''
 			Da +10 niveles al Grimorio del Eterno.
+			Reutilizable — no se consume.
 			Busca en todo el inventario.
 			Item de testing — eliminar antes de release.
 			'''
@@ -115,7 +116,7 @@ Items: {
 			'''
 			«Ve al Sagrario Hueco y llama su nombre.»
 			Convoca a AETHON, LA LUZ PRIMORDIAL.
-			SOLO FUNCIONA DE DÍA.
+			A CUALQUIER HORA — la llegada corre el tiempo hasta el mediodía.
 			Las cinco fases esperan — el reconocimiento final.
 			'''
 	}

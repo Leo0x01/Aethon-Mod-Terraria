@@ -11,6 +11,13 @@ namespace AethonMod.Content.Items
     /// Verdugo de Niveles (TEMPORAL) — item de testing.
     /// Da +10 niveles al primer Grimorio del Eterno encontrado en el inventario.
     /// No requiere sostenerlo: busca en todos los slots.
+    ///
+    /// v6.50.43 — YA NO ES CONSUMIBLE (petición del usuario: «el item
+    /// que sube de nivel el grimorio es un consumible, has que no sea
+    /// consumible que cada vez que lo active suba 10 niveles sin
+    /// consumirse»): cada activación suma +10 niveles y el ítem QUEDA
+    /// en la mano — como toda herramienta de pruebas de la casa (el
+    /// patrón de la Carnada: reutilizable, pila 1).
     /// </summary>
     public class LevelUpTester : ModItem
     {
@@ -22,8 +29,11 @@ namespace AethonMod.Content.Items
         {
             Item.width = 28;
             Item.height = 28;
-            Item.maxStack = 99;
-            Item.consumable = true;
+            Item.maxStack = 1;
+            // v6.50.43 — NO CONSUMIBLE: cada uso sube +10 niveles y el
+            // ítem NO se gasta (el patrón de la Carnada: herramienta de
+            // pruebas reutilizable).
+            Item.consumable = false;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.useTime = 20;
             Item.useAnimation = 20;

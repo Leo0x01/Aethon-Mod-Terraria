@@ -52,6 +52,7 @@ Items: {
 		Tooltip:
 			'''
 			Grants +10 levels to the Grimoire of the Eternal.
+			Reusable — not consumed.
 			Searches the whole inventory.
 			Testing item — remove before release.
 			'''
@@ -115,7 +116,7 @@ Items: {
 			'''
 			'Go to the Hollow Sanctum and call its name.'
 			Summons AETHON, THE PRIMORDIAL LIGHT.
-			ONLY WORKS BY DAY.
+			WORKS AT ANY HOUR — the arrival races time to high noon.
 			Five phases await — the final acknowledgment.
 			'''
 	}

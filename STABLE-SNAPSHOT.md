@@ -1,10 +1,33 @@
-# AethonMod — ESTADO ACTUAL (v6.50.42)
+# AethonMod — ESTADO ACTUAL (v6.50.43)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-29 (tag `v6.50.42`, release publicada).
+> Última actualización: 2026-09-30 (tag `v6.50.43`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.43 = EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se
+  gasta)** — feedback sobre la .42: «el jefe no puedo invocarlo de noche,
+  ya que dice solo de día… no tiene sentido eso ya que al invocar el jefe
+  el tiempo pasa hasta que el sol está en el centro del cielo, así que no
+  importa la hora de invocarlo» + «el item que sube de nivel el grimorio
+  es un consumible, has que no sea consumible que cada vez que lo active
+  suba 10 niveles sin consumirse». (1) `LlamadoDeJefe` gana
+  `ConvocableDeNoche` (virtual, false): los CUATRO GUARDIANES siguen de
+  día (lore + mensaje intactos — su presencia NO mueve el reloj) y **EL
+  NOMBRE DE AETHON responde A CUALQUIER HORA** — su llegada YA sabía
+  correr la noche (rama nocturna simulada en .41, recorrida empíricamente
+  en .42-S2; despawn solo por presa, nunca por hora); el gate del ítem
+  era el único bloqueo. Tooltip: «A CUALQUIER HORA — la llegada corre el
+  tiempo hasta el mediodía.» / «WORKS AT ANY HOUR». (2) `LevelUpTester`:
+  `consumable=false`, `maxStack=1` (patrón Carnada) — **+10 niveles por
+  uso, SIN consumirse**. Verificación: verify 0/0 (64 refs) · build real
+  0/0 · .tmod 6.317.960 bytes (md5 ecdfa08e1297dd6873f6b1388a5c8c45),
+  395 entradas (set idéntico), EOF exacto, `ConvocableDeNoche` en DLL,
+  cirugía de tooltips verificada por bloque dentro del paquete, keysets
+  es=493/en=495 CERO deriva vs .42 · servidor headless carga sin
+  excepciones. **Pendiente: verificación EN JUEGO** (invocar de noche →
+  timelapse nocturno → sol posado en el centro → jefe; Verdugo martillado
+  sin gastarse).
 - **GitHub = fuente de la verdad** (regla de la casa, re-confirmada por el usuario:
   "el repo de github siempre es el verdadero"): tag `v6.50.42`.
 - **v6.50.42 = EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo)** —
@@ -354,6 +377,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.43** | ✅ Build-verificada, ⏳ en juego | EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se gasta) — feedback de la .42: «no puedo invocar al jefe de noche… no tiene sentido ya que al invocar el jefe el tiempo pasa hasta que el sol está en el centro del cielo» + «el item que sube de nivel el grimorio es un consumible, que no sea consumible, +10 niveles por uso sin consumirse»: (1) `ConvocableDeNoche` en `LlamadoDeJefe` — EL NOMBRE DE AETHON responde A CUALQUIER HORA (la llegada ya sabía correr la noche: rama nocturna de la carrera simulada en .41 + recorrida empíricamente en .42-S2; despawn solo por presa); los cuatro guardianes siguen de día (lore intacto, su presencia no mueve el reloj) · (2) Verdugo de Niveles: `consumable=false`, `maxStack=1` (patrón Carnada) — +10 niveles por uso SIN gastarse · tooltips actualizados es+en («A CUALQUIER HORA» / «Reutilizable») |
 | **v6.50.42** | ✅ Build-verificada + validada en headless, ⏳ en juego | EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo) — feedback de la .41: «el sol avanza como está previsto, pero al llegar al centro no queda fijo y el jefe no aparece»: UNA causa para ambos — la materialización usaba la matemática pantalla→mundo en la máquina que corre la IA y el servidor NO tiene pantalla → el jefe nacía FUERA DEL MUNDO y moría en el tick 44 del climax → el espejo soltaba el reloj → el sol seguía su curso. REPRODUCIDO en servidor headless (la técnica del CLIENTE FANTASMA: un `ISocket` falso enciende el loop vanilla del servidor) y VERIFICADO el fix: PosicionBajoElSol server-segura (sobre el jugador), exacta en cliente, NUNCA enterrada (≥300 px sobre el jugador), NUNCA fuera del mundo (clamp) · EL CERROJO DEL MEDIODÍA (un reloj pasado de 27001 VUELVE a 27000; jamás la vuelta entera) · limpieza ColaSierpe en servidor |
 | **v6.50.41** | ✅ Build-verificada, ⏳ probada (con bug cazado) | EL MEDIO DÍA DEL DESTELLO (cuatro pedidos): (1) LA CAPA DE OSCURIDAD MUERE DE RAÍZ (VeloLib + VeloDona borradas; fuera el sol negro, las luces, el aviso del Grimorio y el flash de pantalla completa — paquete 396→395) · (2) EL SOL SIN TELETRANSPORTE DE VERDAD (bug de la v6.50.40: la tarde disparaba el aterrizaje al instante y el sol saltaba HACIA ATRÁS; ventana [26999, 27001] + restante hasta el PRÓXIMO mediodía POR LA NOCHE: tarde → ocaso → noche completa → amanecer → mediodía, 110× máx con aterrizaje — simulado en 5 escenarios, jamás hacia atrás) · (3) EL DESTELLO NACE DEL SOL (brillo radial centrado en él, difuminado a TRANSPARENTE en los bordes — y el sol NO se apaga) · (4) AETHON NO NACE DEL CENTRO DEL SOL (se materializa BAJO él vía la inversa de la matriz de vista; acto 13 = EL DESCENSO) — el usuario la probó: la carrera bien, PERO el jefe no aparecía y el sol no se quedaba fijo (la materialización server-rota) → v6.50.42 |
 | **v6.50.40** | ✅ Build-verificada, ⏳ probada (retirada) | LA OSCURIDAD BAJO LA INTERFAZ, CON AGUJEROS DE LUZ (feedback de la v6.50.39: «la capa no debe estar sobre todo… no debe cubrir ni al jugador ni al jefe, la luz que tienen se supone que quita esa oscuridad»): el velo muda de `OnPostDraw` a **LA PRIMERA CAPA DE LA INTERFAZ** (HUD/mapa/chat/cursor usables) y deja de ser un rectángulo entero — **EL MOSAICO DISJUNTO** (bandas de velo pleno + una DONA radial por luz, de la chica a la grande y recortada: cada píxel pintado UNA vez) · Aethon ENTERO visible (agujero 780 px; 360 violeta en eclipse), círculo del jugador 235 px SOLO Grimorio ≥50, balas 88/130 · luces por TICK (sin parpadeo a 144 Hz ni apagón en pausa) · contrato anti-crash intacto (cero RTs/shaders/blends, cerrojo + log) — el usuario la vio en juego y pidió QUITAR la oscuridad → v6.50.41 |

@@ -13,20 +13,31 @@ namespace AethonMod.Content.Items.Llamados
     //  Petición del usuario: "para cada jefe un ítem invocador y que se
     //  invoque de día". Los cinco jefes del mod eran FANTASMAS de código
     //  (ningún spawn natural, ningún invocador: no había forma de verlos
-    //  en el juego). Ahora cada uno responde a su llamado — SOLO DE DÍA
-    //  (la noche es del Ojo y de los muertos; la luz primordial no
-    //  contesta en la oscuridad).
+    //  en el juego). Ahora cada uno responde a su llamado — DE DÍA los
+    //  cuatro guardianes (la noche es del Ojo y de los muertos)…
+    //  Y A CUALQUIER HORA EL NOMBRE DE AETHON (v6.50.43): «no tiene
+    //  sentido eso ya que al invocar el jefe el tiempo pasa hasta que
+    //  el sol está en el centro del cielo, así que no importa la hora
+    //  de invocarlo» — su llegada trae el mediodía consigo.
     //
     //  Contrato de la casa para todos: reutilizables (no consumibles —
     //  el mod entero es de pruebas), rugido al nacer, aviso de "ya vive
     //  uno" si intentas doblar, y el mensaje localizado de noche.
     // ======================================================================
 
-    /// <summary>EL LLAMADO COMÚN: la maquinaria de los invocadores de día.</summary>
+    /// <summary>EL LLAMADO COMÚN: la maquinaria de los invocadores.</summary>
     public abstract class LlamadoDeJefe : ModItem
     {
         /// <summary>El NPC que convoca (el tipo del mod).</summary>
         protected abstract int NpcConvocado { get; }
+
+        /// <summary>
+        /// ¿Se puede llamar de NOCHE? (v6.50.43) — false por defecto: los
+        /// guardianes son criaturas del día. EL NOMBRE DE AETHON lo rompe:
+        /// su llegada CORRE EL TIEMPO hasta el próximo mediodía — la hora
+        /// del llamado no importa (la noche solo hace el viaje más largo).
+        /// </summary>
+        protected virtual bool ConvocableDeNoche => false;
 
         public override void SetStaticDefaults() { }
 
@@ -57,8 +68,11 @@ namespace AethonMod.Content.Items.Llamados
 
         public override bool CanUseItem(Player player)
         {
-            // SOLO DE DÍA: la noche es de los ojos y los muertos.
-            if (!Main.dayTime)
+            // SOLO DE DÍA — salvo los CONVOCABLES DE NOCHE (v6.50.43: para
+            // Aethon el gate no tenía sentido — su llegada CORRE el reloj
+            // hasta el mediodía; de noche, la noche entera pasa visiblemente
+            // y el sol SE POSA en el centro del cielo).
+            if (!ConvocableDeNoche && !Main.dayTime)
             {
                 if (player.whoAmI == Main.myPlayer)
                     Main.NewText(Language.GetTextValue("Mods.AethonMod.Llamado.SoloDia"),
@@ -138,9 +152,16 @@ namespace AethonMod.Content.Items.Llamados
     /// "Ve al Sagrario Hueco y llama su nombre." El llamado del final:
     /// no exige nivel 150 aquí porque el mod es de PRUEBAS — el lore
     /// queda en el tooltip y el Testigo lo cuenta.
+    ///
+    /// v6.50.43 — A CUALQUIER HORA: la llegada corre el tiempo hasta el
+    /// próximo mediodía (de noche: la noche entera + el amanecer, en un
+    /// timelapse visible) — no importa la hora del llamado.
     /// </summary>
     public class NombreDeAethon : LlamadoDeJefe
     {
         protected override int NpcConvocado => ModContent.NPCType<AethonBoss>();
+
+        /// <summary>La luz primordial contesta a CUALQUIER hora: su llegada trae el mediodía consigo.</summary>
+        protected override bool ConvocableDeNoche => true;
     }
 }

@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.42 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.43 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,12 +14,22 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-29, v6.50.42)
+## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.43)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.42`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.43`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 395 entradas auditado.
+- **v6.50.43 — EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se
+  gasta)**: «el jefe no puedo invocarlo de noche… no tiene sentido eso ya
+  que al invocar el jefe el tiempo pasa hasta que el sol está en el centro
+  del cielo, así que no importa la hora de invocarlo» — EL NOMBRE DE
+  AETHON ya se puede usar **DE NOCHE** (su llegada corre el reloj hasta el
+  próximo mediodía: la noche entera pasa en timelapse y el sol SE POSA en
+  el centro); los otros cuatro invocadores siguen siendo de día (su
+  presencia no mueve el reloj). Y el **Verdugo de Niveles** ya NO es
+  consumible: cada uso suma **+10 niveles** al Grimorio del Eterno **sin
+  consumirse** (el patrón de la Carnada).
 - **v6.50.42 — EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo)**:
   «el sol avanza como está previsto, pero al llegar al centro no queda fijo
   en el centro y el jefe no aparece» — DOS síntomas, **UNA sola causa**,
