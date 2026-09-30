@@ -2157,9 +2157,9 @@ Jefe: {
 	Aethon: {
 		Fase: Aethon — PHASE {0}: {1}
 		Nombre1: The Stardust
-		Nombre2: The Nebula
+		Nombre2: The Song of Time
 		Nombre3: The Gravity
-		Nombre4: The Black Hole
+		Nombre4: The Loom
 		Nombre5: The Acknowledgment
 		Gravedad: Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
@@ -2170,8 +2170,10 @@ Jefe: {
 		Carga: THE FLASH — light crosses the world: stay off its line.
 		Juicio: THE JUDGMENT OF LIGHT — pillars of light fall from the sky: run.
 		Nova: THE PRIMORDIAL NOVA — the light bursts: find the gap.
-		Eclipse: THE ECLIPSE — the light goes out and only the bullets shine.
 		Aliento: THE PRIMORDIAL RAY — the light hunts you.
+		// v6.50.46 — THE ECLIPSE IS DEAD ("the light goes out and only the
+		// bullets shine, it looks bad, remove it") — its successor: THE VORTEX.
+		Vortice: THE PRIMORDIAL VORTEX — the light swirls around you: move with the maelstrom.
 		// v6.50.45 — THE FIVE NEW WEAPON ANNOUNCES
 		Reloj: THE COSMIC HOURGLASS — time falls from the sky: don't fly beneath its weight.
 		Coro: THE SPECTRAL CHOIR — the notes sing around you: move with the ring.

@@ -14,6 +14,26 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN (el fix que despertó tres
+    /// ataques muertos) + EL ECLIPSE MUERE: la ronda de feedback sobre
+    /// la v6.50.45 reveló que EL CORO, EL TELAR y EL DECRETO NUNCA
+    /// HABÍAN FUNCIONADO — el estilo del proyectil vive en ai[0] y los
+    /// tres lo SOBRESCRIBÍAN con sus propios datos (el ancla del coro,
+    /// el centro del telar, el radio del decreto) en sus primeros
+    /// ticks: el estilo moría, la IA y el render dejaban de matchear y
+    /// el ataque quedaba INVISIBLE E INERTE («el jefe lo hace mal»,
+    /// «no lo usa al cambio de fase» — el jefe se quedaba CLAVADO
+    /// decretando un círculo que no existía). EL FIX: NADIE toca ai[0]
+    /// jamás. Y el resto de la ronda: EL ANILLO DEL TIEMPO (cuatro
+    /// relojes ×5.2 cayendo alrededor de la presa), EL TELAR TRAZA LA
+    /// ESTRELLA (pentagrama/heptagrama de punta en punta — la figura
+    /// que dibuja el jefe ES la jaula), EL VÓRTICE PRIMORDIAL (el
+    /// relevo del eclipse: la galaxia de pernos que gira y colapsa —
+    /// «la luz se apaga y solo brillan las balas, se ve mal, quitala»),
+    /// LOS TAJOS MUEREN (las runas disparan abanicos de pernos) y LA
+    /// GRAVEDAD DE VERDAD (el volteo es inmediato y real — el anuncio
+    /// ya no miente).
+    ///
     /// v6.50.45 — EL JEFE QUE SE ESFUMABA A MEDIAS LA INVOCACIÓN + LAS
     /// CINCO ARMAS DEL MOD EN SUS MANOS: «si el jefe es invocado y el
     /// jugador se mueve el jefe desaparece / a veces no termina de ser
@@ -138,7 +158,7 @@ namespace AethonMod.Content.NPCs
         private const int EST_NOVA = 4;         // la contracción y el estallido
         private const int EST_CRUZ = 5;         // los cuatro chorros girando
         private const int EST_DESTELLO = 6;     // la embestida a velocidad luz
-        private const int EST_ECLIPSE = 7;      // la luz se apaga
+        private const int EST_VORTICE = 7;      // v6.50.46 — EL VÓRTICE PRIMORDIAL (el eclipse MURIÓ: «la luz se apaga y solo brillan las balas, se ve mal, quitala»)
         private const int EST_RELOJ = 8;        // v6.50.45 — EL RELOJ DE ARENA GIGANTE
         private const int EST_CORO = 9;         // v6.50.45 — EL CORO ESPECTRAL
         private const int EST_MANADA = 10;      // v6.50.45 — LA MANADA ASTRAL (camada)
@@ -227,6 +247,11 @@ namespace AethonMod.Content.NPCs
         // === EL VOLTEO Y LAS RUNAS (heredados de la sierpe) ===
         private int _tickGravedad = 0;
         private int _tickRunas = 0;
+
+        // === v6.50.46 — EL TELAR: EL TRAZO DE LA ESTRELLA (qué punta
+        //     visita el jefe y cuánto lleva en la pierna del salto) ===
+        private int _telarPaso = 0;
+        private int _tickPierna = 0;
 
         // === LA FASE (los umbrales de siempre) ===
         private int Phase = 1;
@@ -364,7 +389,7 @@ namespace AethonMod.Content.NPCs
                 case EST_NOVA: EstadoNova(target); break;
                 case EST_CRUZ: EstadoCruz(target); break;
                 case EST_DESTELLO: EstadoDestello(target); break;
-                case EST_ECLIPSE: EstadoEclipse(target); break;
+                case EST_VORTICE: EstadoVortice(target); break;
                 case EST_RELOJ: EstadoReloj(target); break;
                 case EST_CORO: EstadoCoro(target); break;
                 case EST_MANADA: EstadoManada(target); break;
@@ -379,21 +404,20 @@ namespace AethonMod.Content.NPCs
                 case 5: Fase5FuriaFondo(target); break;
             }
 
-            // === LA LUZ DEL MUNDO: la luz inunda (y en el eclipse MUERE) ===
-            if (_rayo == 3f || _estado == EST_ECLIPSE)
-                Lighting.AddLight(NPC.Center, new Vector3(0.06f, 0.04f, 0.10f)); // la luz apagada
-            else
-                Lighting.AddLight(NPC.Center, new Vector3(1.55f, 1.35f, 0.95f)); // el sol vivo (más grande)
+            // === LA LUZ DEL MUNDO: la luz inunda SIEMPRE (el eclipse y su
+            //     apagón MURIERON con la v6.50.46 — el sol no se apaga más) ===
+            Lighting.AddLight(NPC.Center, new Vector3(1.55f, 1.35f, 0.95f)); // el sol vivo (más grande)
 
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
             NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
             //     llegada: 10 temblor · 11 carrera · 12 climax · 13 descenso
-            //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo · 3 ECLIPSE
+            //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo
             //     (v6.50.45: los estados nuevos — 8 reloj · 9 coro · 10 manada
             //      · 11 telar · 12 decreto — viajan en ai[0] y usan ai[1]=0
             //      salvo el decreto, que manda LA FASE por ai[1] al círculo
-            //      desde su spawn, no desde aquí)
+            //      desde su spawn, no desde aquí. v6.50.46: el 3 del eclipse
+            //      MURIÓ con él — ai[1] jamás vuelve a 3 en la pelea)
             NPC.ai[2] = _tickEstado;
             NPC.ai[3] = _angDestello;   // el rumbo del destello (la línea guía del cliente)
 
@@ -739,8 +763,13 @@ namespace AethonMod.Content.NPCs
                 1 => new[] { EST_JUICIO, EST_RAYO },
                 2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO },
                 3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA },
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
+                // v6.50.46 — EL ECLIPSE MUERE EN TODOS LOS MENÚS: la fase
+                // final ya NO es «la luz se apaga y solo brillan las balas»
+                // (se veía mal — la petición fue LITERAL) — su lugar lo toma
+                // EL VÓRTICE PRIMORDIAL: la galaxia de pernos dorados que
+                // gira y colapsa sobre la presa.
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -765,6 +794,9 @@ namespace AethonMod.Content.NPCs
                 if (plato == EST_RELOJ && alto) peso = 5;                  // el volador
                 if (plato == EST_CORO && _ticksPresaQuieta > 30) peso = 5; // el quieto
                 if (plato == EST_TELAR && velH > 7f) peso = 5;             // el corredor
+                // v6.50.46 — EL VÓRTICE es la firma de la FURIA: la galaxia
+                // le pertenece a la fase final.
+                if (plato == EST_VORTICE && Furia) peso = 4;
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -1180,79 +1212,94 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
-        //  EL ECLIPSE — LA LUZ SE APAGA (fase 4+)
+        //  v6.50.46 — EL VÓRTICE PRIMORDIAL (el relevo del eclipse)
+        //  (la petición: «la fase final, la luz se apaga y solo brillan
+        //  las balas, se ve mal, quitala y crea una nueva fase que sea
+        //  mejor») — el apagón MURIÓ: la luz ya no se apaga NUNCA. El
+        //  relevo es TODO lo contrario: MÁS luz. El jefe se alza sobre
+        //  la presa, sus rayos GIRAN más rápido (el sol que acelera) y
+        //  decreta LA GALAXIA: brazos de pernos dorados nacen en
+        //  espiral alrededor del jugador y ROTAN mientras COLAPSAN
+        //  hacia el centro — un remolino de estrellas que hay que leer
+        //  y cruzar POR LOS HUECOS, moviéndose CON el giro. Tres
+        //  oleadas (cuatro en furia), cada una girada y más hambrienta.
         // ==================================================================
 
         /// <summary>
-        /// EL ATAQUE FIRMA: la luz SE APAGA (ai[1]=3: el núcleo se
-        /// oscurece en el render de cada máquina, la luz del mundo muere
-        /// a un violeta tenue) y el campo se LLENA de orbes lentos que
-        /// convergen sobre la presa — SOLO LAS BALAS BRILLAN. La
-        /// atracción del núcleo muerto tira de ti hacia el cuerpo (la
-        /// gravedad del agujero heredada). Al final: EL REGRESO — la
-        /// luz VUELVE y estalla una nova GRATIS (el flash del alba).
+        /// LA FIRMA DE LA FASE FINAL: la luz no se apaga — se ENROSACA.
+        /// El jefe canaliza arriba (40 t de crescendo: los rayos del sol
+        /// giran a cuádruple velocidad en el render) y suelta LA GALAXIA:
+        /// 3 brazos (4 en furia) de 12 pernos cada uno, sembrados a lo
+        /// largo de una espiral alrededor de la presa y lanzados con
+        /// velocidad TANGENCIAL (el giro) + HUNDIMIENTO hacia adentro (el
+        /// colapso) — el remolino que se cierra. Segunda galaxia girada
+        /// (y tercera en furia): los huecos se mueven, el giro no se
+        /// detiene. La luz INUNDA el campo: nada de oscuridad, SOLO
+        /// estrellas doradas girando alrededor tuyo.
         /// </summary>
-        private void EstadoEclipse(Player target)
+        private void EstadoVortice(Player target)
         {
-            int duracion = Furia ? 200 : 260;
-            _rayo = 3; // el contrato del eclipse (viaja en ai[1])
+            // SE ALZA y casi se clava: el sol que ordena su propia luz.
+            Vector2 punto = target.Center + new Vector2(0f, -480f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 1)
             {
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center); // el apagón
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Eclipse", VioletaLuz);
-                OndaLib.Kick(9f, 18);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Vortice", OroLuz);
+                OndaLib.Kick(6f, 14);
             }
 
-            // LA DERIVA LENTA: el cuerpo muerto se cierne.
-            Vector2 punto = target.Center + new Vector2(0f, -340f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.06f);
+            // LAS GALAXIAS: dos oleadas (tres en furia), cada una GIRADA
+            // y con más hambre de colapso.
+            bool segunda = _tickEstado == (Furia ? 110 : 120);
+            bool tercera = Furia && _tickEstado == 190;
+            if (_tickEstado == 40 || segunda || tercera)
+                SoltarGalaxia(target, _tickEstado == 40 ? 0 : (segunda ? 1 : 2));
 
-            // LA ATRACCIÓN del cuerpo apagado (la herencia del agujero).
-            for (int i = 0; i < Main.maxPlayers; i++)
-            {
-                Player pl = Main.player[i];
-                if (pl == null || !pl.active || pl.dead) continue;
-                Vector2 aH = NPC.Center - pl.Center;
-                float d = aH.Length();
-                if (d > 900f || d < 60f) continue;
-                float fuerza = 0.16f * (1f - d / 900f);
-                pl.velocity += aH.SafeNormalize(Vector2.Zero) * fuerza;
-            }
+            if (_tickEstado >= 250) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
 
-            // LAS BALAS (v6.50.44 — LAS BALAS QUE TE BUSCAN): orbes
-            // GUIADOS desde los bordes, convergiendo (ai[1]=1: el perno
-            // estelar curva SUAVE hacia ti y ACELERA al acercarse — la
-            // oscuridad no dispara a un punto, TE PERSIGUE).
-            if ((_tickEstado % 12) == 0 && _tickEstado < duracion - 40)
+        /// <summary>
+        /// LA SIEMBRA DE UNA GALAXIA: brazos en espiral alrededor de la
+        /// presa — cada perno nace en su lugar de la espiral (radio de
+        /// 150 a 630 px) y sale disparado TANGENCIALMENTE (la rotación
+        /// del remolino) con un HUNDIMIENTO hacia adentro (el colapso).
+        /// Los HUECOS entre brazos son las puertas — y giran con el
+        /// remolino.
+        /// </summary>
+        private void SoltarGalaxia(Player target, int indice)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            int brazos = Furia ? 4 : 3;
+            float giro0 = indice * 0.95f + Main.rand.NextFloat(0.35f);
+            float hambre = 0.65f + indice * 0.45f;   // cada oleada colapsa más rápido
+            for (int b = 0; b < brazos; b++)
             {
-                for (int o = 0; o < 2; o++)
+                float faseBrazo = giro0 + b * MathHelper.TwoPi / brazos;
+                for (int p = 0; p < 12; p++)
                 {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    Vector2 borde = target.Center + new Vector2(
-                        MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * 820f;
-                    Vector2 v = (target.Center - borde).SafeNormalize(Vector2.UnitY) * 3.4f;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            borde, v,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPernoEstelar, 1f,
-                            NPC.whoAmI * 89 + _tickEstado + o * 13);
-                    }
+                    float tP = p / 11f;                          // 0→1 a lo largo del brazo
+                    float ang = faseBrazo + tP * 1.9f;           // el enrollado
+                    float r = 150f + tP * 480f;                  // del borde interno al externo
+                    Vector2 pos = target.Center +
+                        new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.78f) * r;
+                    // LA VELOCIDAD DEL REMOLINO: tangencial (ω·r — gira
+                    // más rápido cuanto más lejos, como un disco) + el
+                    // hundimiento hacia adentro (la galaxia colapsa).
+                    Vector2 radial = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.78f);
+                    Vector2 tangencial = new Vector2(-radial.Y, radial.X);
+                    Vector2 v = tangencial * (r * 0.021f) - radial * hambre;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, v,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                        NPC.whoAmI * 61 + indice * 29 + b * 13 + p);
                 }
             }
-
-            // EL REGRESO: la luz VUELVE — y trae una nova.
-            if (_tickEstado >= duracion)
-            {
-                _rayo = 0;
-                _tickEstado = 45;        // el estallido YA (EstadoNova salta al clímax)
-                _estado = EST_NOVA;
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
-                NPC.netUpdate = true;
-            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.2f), NPC.Center);
+            OndaLib.Kick(8f, 16);
+            NPC.netUpdate = true;
         }
 
         // ==================================================================
@@ -1261,18 +1308,20 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// EL RELOJ DE ARENA CÓSMICO GIGANTE (la petición: «el jefe deberia
-        /// usar el proyectil de baston del reloj de arena cosmica pero en
-        /// gigante»). La luz se alza, gira el cielo sobre tu RITMO y DEJA
-        /// CAER el reloj de arena GIGANTE (×2.6 el del bastón): la arena
-        /// estelar cae por el cuello y su PESO aplasta — daño constante y
-        /// empuje hacia ABAJO a quien viva debajo (el castigo del
-        /// volador) — y cada vez que la cámara superior se vacía el reloj
-        /// SE INVIERTE y el pulso HUNDE con más fuerza.
+        /// EL RELOJ DE ARENA CÓSMICO GIGANTE (v6.50.46 — la SEGUNDA
+        /// ronda sobre el pedido: «solo lo lanza en un lugar, deberia
+        /// ser mas grande, mucho mas grande, y ser lanzado varios al
+        /// rededor del jugador»). Ya no ES un reloj — es EL ANILLO DEL
+        /// TIEMPO: CUATRO relojes GIGANTES (×5.2 — edificios de arena
+        /// estelar) CAEN del cielo en cruz diagonal alrededor de la
+        /// presa y quedan flotando en sus puestos — la lluvia del
+        /// peso cubre el anillo entero: no hay rincón seguro dentro,
+        /// hay que SALIR o pagar. La arena aplasta cada 10 t y cada
+        /// INVERSIÓN es el pulso que HUNDE de verdad.
         /// </summary>
         private void EstadoReloj(Player target)
         {
-            // SE ALZA (el reloj necesita cielo) y convoca sobre la PREDICCIÓN.
+            // SE ALZA (el anillo necesita cielo) y siembra sobre la PREDICCIÓN.
             Vector2 punto = target.Center + new Vector2(0f, -560f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
@@ -1280,20 +1329,29 @@ namespace AethonMod.Content.NPCs
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        PredPresa(target), Vector2.Zero,
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        (int)(NPC.damage * 0.50f), 0f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloRelojGigante,
-                        Furia ? 1f : 0f, NPC.whoAmI * 31);
+                    // EL ANILLO: CUATRO gigantes en cruz diagonal alrededor
+                    // de la presa — cada uno CAE del cielo hasta su puesto.
+                    Vector2 centro = PredPresa(target);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float ang = i * MathHelper.PiOver2 + MathHelper.PiOver4;
+                        Vector2 pos = centro +
+                            new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.72f) * 330f;
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            pos - new Vector2(0f, 430f), new Vector2(0f, 13f),
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.50f), 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloRelojGigante,
+                            Furia ? 1f : 0f, NPC.whoAmI * 31 + i);
+                    }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.4f), NPC.Center);
                 EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", OroLuz);
-                OndaLib.Kick(6f, 14);
+                OndaLib.Kick(7f, 16);
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 150) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 170) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         /// <summary>
@@ -1395,46 +1453,85 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// EL TELAR DE CONSTELACIONES — LA FASE ALTA (la petición: «el jefe
-        /// cuando llegue a una fase alta, deberia moverse rapido alrededor
-        /// del jugador en circulo y usar el proyectil de El telar de
-        /// Constelaciones para atrapar al jugador y provocar daño»). La
-        /// luz CORRE en círculo alrededor de la presa — un cometa dorado
-        /// trazando la órbita — mientras EL TELAR clava las ESTRELLAS una
-        /// a una alrededor del jugador: cuando la figura se CIERRA, el
-        /// polígono se ENCIENDE y quien quedó DENTRO paga el corte. Corre,
-        /// luz, corre — y teje.
+        /// EL TELAR DE CONSTELACIONES — LA FIGURA DE ESTRELLA (v6.50.46 —
+        /// la corrección LITERAL del pedido: «el jefe debe moverse
+        /// formando una figura de tantas puntas como proyectiles se
+        /// puedan lanzar al rededor del jugador y rapidamente»). El
+        /// jefe YA NO corre el círculo: TRAZA LA ESTRELLA — vuela de
+        /// PUNTA EN PUNTA por el SALTO DE LA ESTRELLA (pentagrama +2 en
+        /// fase 4 · heptagrama +3 en furia) y cada vez que PASA por una
+        /// punta, SU ESTRELLA se clava ahí: la figura que dibuja el
+        /// jefe ES la jaula que te atrapa. Con la figura cerrada, el
+        /// polígono se ENCIENDE cada 30 t y TODO jugador DENTRO paga —
+        /// y el jefe sigue el círculo veloz vigilando su trampa.
         /// </summary>
         private void EstadoTelar(Player target)
         {
+            // LAS PUNTAS: 5 en fase 4 (pentagrama) · 7 en furia (heptagrama).
+            int puntas = Furia ? 7 : 5;
+
             if (_tickEstado == 1)
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
+                    // EL TELAR: ai[2] = el whoAmI DEL JEFE — el proyectil
+                    // vigila su paso por las puntas y clava cada estrella.
                     Projectile.NewProjectile(NPC.GetSource_FromAI(),
                         target.Center, Vector2.Zero,
                         ModContent.ProjectileType<AtaqueJefeProjectile>(),
                         (int)(NPC.damage * 0.55f), 0f, Main.myPlayer,
                         AtaqueJefeProjectile.EstiloTelarJefe,
-                        Furia ? 1f : 0f, NPC.whoAmI * 41);
+                        Furia ? 1f : 0f, NPC.whoAmI);
                 }
+                _telarPaso = 0;
+                _tickPierna = 0;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
                 EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Telar", OroLuz);
                 OndaLib.Kick(8f, 16);
                 NPC.netUpdate = true;
             }
 
-            // EL CÍRCULO VELOZ: la órbita apretada y RÁPIDA (una vuelta
-            // cada ~2 s — el jefe barre la circunferencia mientras las
-            // estrellas cierran la figura por dentro).
-            float velAng = (Furia ? 0.062f : 0.052f) * _sentidoOrbita;
-            _angOrbita += velAng;
-            Vector2 punto = target.Center + new Vector2(
-                MathF.Cos(_angOrbita) * 470f,
-                MathF.Sin(_angOrbita) * 470f * 0.80f - 150f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.24f, 0.38f);
+            // EL CENTRO de la figura: el telar sembrado (SU posición — la
+            // misma que leen TODAS las máquinas; si aún no llegó, la presa).
+            Vector2 centro = target.Center;
+            Projectile telar = BuscarTelar();
+            if (telar != null) centro = telar.Center;
 
-            // LA ESTELA DEL CORREDOR (el cometa que traza la órbita).
+            if (_telarPaso <= puntas)
+            {
+                // === EL TRAZO DE LA ESTRELLA: de punta en punta, por el
+                //     SALTO (pentagrama +2 · heptagrama +3) — RÁPIDO ===
+                int paso = (_telarPaso * (puntas == 7 ? 3 : 2)) % puntas;
+                Vector2 punta = AtaqueJefeProjectile.PuntaTelar(
+                    centro, paso, puntas, NPC.whoAmI);
+
+                // VUELO RÁPIDO a la punta (el trazo no se detiene).
+                NPC.velocity = Vector2.Lerp(NPC.velocity,
+                    (punta - NPC.Center) * 0.20f, 0.32f);
+
+                // ¿LLEGÓ? (rozó la punta o el compás de la pierna murió —
+                // el trazo jamás se cuelga aunque lo bloqueen).
+                _tickPierna++;
+                if (Vector2.Distance(NPC.Center, punta) < 80f || _tickPierna > 40)
+                {
+                    _telarPaso++;
+                    _tickPierna = 0;
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item4.WithPitchOffset(0.25f), NPC.Center);
+                }
+            }
+            else
+            {
+                // === LA FIGURA CERRADA: el CÍRCULO VELOZ alrededor de la
+                //     jaula (la luz vigila su trampa — el cometa de siempre) ===
+                _angOrbita += 0.058f * _sentidoOrbita;
+                Vector2 punto = centro + new Vector2(
+                    MathF.Cos(_angOrbita) * 470f,
+                    MathF.Sin(_angOrbita) * 470f * 0.80f - 120f);
+                NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.24f, 0.38f);
+            }
+
+            // LA ESTELA DEL CORREDOR (el cometa que traza la figura).
             if (!Main.dedServ && Main.rand.NextBool(2))
             {
                 Dust d = Dust.NewDustPerfect(
@@ -1445,21 +1542,41 @@ namespace AethonMod.Content.NPCs
                 d.noGravity = true;
             }
 
-            if (_tickEstado >= 330) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 340) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         /// <summary>
-        /// EL DECRETO DEL ECLIPSE — EL CAMBIO DE FASE (la petición: «el jefe
-        /// debe usar el proyectil el decreto del eclipse en el cambio de
-        /// fases y por cada fase que sea mas grande, al usar este
-        /// proyectil el jefe queda inmovil asi le da tiempo al jugador a
-        /// escapar»). La luz se CLAVA donde está — INMÓVIL, canalizando —
-        /// y decreta: EL CÍRCULO DEL ECLIPSE nace pequeño sobre el jugador
-        /// y CRECE +2 px/t, MÁS GRANDE con cada fase (P2 660 → P5 930 px
-        /// de radio), con la MARCA DEL OJO y las EJECUCIONES del bastón
-        /// cada 15 t. El jefe queda INMÓVIL TODO el decreto — ESO es la
-        /// ventana de escape: el círculo tarda en cerrarse y la luz no se
-        /// mueve; el que corre, sale.
+        /// v6.50.46 — EL TELAR DEL JEFE: su proyectil sembrado (ai[2] =
+        /// el whoAmI de ESTE jefe — el contrato para que ambos dibujen
+        /// la MISMA figura).
+        /// </summary>
+        private Projectile BuscarTelar()
+        {
+            int tipo = ModContent.ProjectileType<AtaqueJefeProjectile>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.type != tipo) continue;
+                if ((int)p.ai[0] == AtaqueJefeProjectile.EstiloTelarJefe &&
+                    (int)p.ai[2] == NPC.whoAmI)
+                    return p;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// EL DECRETO DEL ECLIPSE — EL CAMBIO DE FASE (v6.50.46 — la
+        /// corrección del pedido: «el jefe no lo usa al cambio de fase» —
+        /// NO lo usaba porque su proyectil SE ROMPÍA en el segundo tick:
+        /// el estilo vive en ai[0] y el círculo SOBRESCRIBÍA ai[0] con su
+        /// radio → la IA moría, el render moría, el decreto era un
+        /// círculo invisible congelado. EL FIX está en el proyectil — y
+        /// este estado AHORA SÍ es lo pedido: el jefe se CLAVA donde
+        /// está — INMÓVIL, canalizando — y decreta: EL CÍRCULO DEL
+        /// ECLIPSE nace pequeño sobre el jugador y CRECE, MÁS GRANDE
+        /// con cada fase (P2 600 → P5 960 px de radio), con LA MARCA DEL
+        /// OJO y las EJECUCIONES del bastón cada 15 t. El jefe queda
+        /// INMÓVIL TODO el decreto — ESO es la ventana de escape.
         /// </summary>
         private void EstadoDecreto(Player target)
         {
@@ -1486,7 +1603,9 @@ namespace AethonMod.Content.NPCs
 
             // EL JEFE ESPERA TODO el decreto (la vida del círculo: nace a
             // 80 px y crece +2 px/t hasta su radio máximo) + un respiro.
-            float radioMax = 660f + (Phase - 2) * 90f;
+            // v6.50.46 — MÁS GRANDE POR FASE: P2 600 → P3 720 → P4 840
+            // → P5 960 (la fórmula gemela de la del proyectil).
+            float radioMax = 600f + (Phase - 2) * 120f;
             int espera = 24 + (int)((radioMax - 80f) / 2f) + 25;
             if (_tickEstado >= espera) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
@@ -1517,7 +1636,16 @@ namespace AethonMod.Content.NPCs
 
         private void FlipGravity(Player player)
         {
+            // v6.50.46 — LA GRAVEDAD DE VERDAD (la petición: «hay efectos
+            // y cosas que dice el jefe que no se hacen realmente, como lo
+            // de alterar la gravedad»): el anuncio prometía «EL SUELO YA
+            // NO ES TUYO» y lo único que pasaba era un buff silencioso
+            // que nadie notaba. AHORA el volteo es INMEDIATO y REAL —
+            // gravDir invertido EN EL ACTO (el mundo se da la vuelta de
+            // golpe) + el buff de gravitación 3 s para que el jugador
+            // tenga el control del aterrizaje.
             player.AddBuff(BuffID.Gravitation, 180);
+            if (player.gravDir > 0f) player.gravDir = -1f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, player.Center);
             OndaLib.Kick(6f, 12);
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Gravedad", VioletaLuz);
@@ -1738,7 +1866,10 @@ namespace AethonMod.Content.NPCs
                 float t = Main.GlobalTimeWrappedHourly;
                 Vector2 posC = NPC.Center - Main.screenPosition;
                 float visibilidad = 1f - (NPC.alpha / 255f);
-                bool eclipse = NPC.ai[1] == 3f || (_muriendo && _tickMuerte < 120);
+                // v6.50.46 — el eclipse MURIÓ como ataque: este look SOLO
+                // vive en el cine de muerte (la luz se recoge antes del
+                // estallido). En plena pelea el sol NUNCA se apaga.
+                bool eclipse = _muriendo && _tickMuerte < 120;
                 float faseInt = 0.55f + 0.45f * (Phase - 1) / 4f;   // la furia brilla más
 
                 // === LA MUERTE: la contracción (todo hacia el punto) ===
@@ -1779,11 +1910,13 @@ namespace AethonMod.Content.NPCs
                     LumenLib.BloomPulse(spriteBatch, posC, 295f * latido, OroLuz,
                         0.50f * brillo * visibilidad, t, 1.6f);
 
-                    // === 3. LOS RAYOS RADIALES (la rueda de luz girando) ===
+                    // === 3. LOS RAYOS RADIALES (la rueda de luz girando —
+                    //     y en EL VÓRTICE la rueda ACELERA ×4: el sol que
+                    //     enrosca su propia luz antes de soltar la galaxia) ===
                     if (!eclipse)
                     {
                         int nRayos = 8 + Phase * 2;                       // 10 en P1 → 18 en P5
-                        float giro = t * 0.10f;
+                        float giro = t * (NPC.ai[0] == EST_VORTICE ? 0.42f : 0.10f);
                         Vector2 origen = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
                         for (int i = 0; i < nRayos; i++)
                         {

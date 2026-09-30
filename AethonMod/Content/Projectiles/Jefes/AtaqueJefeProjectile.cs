@@ -12,6 +12,19 @@ namespace AethonMod.Content.Projectiles.Jefes
     /// <summary>
     /// AtaqueJefeProjectile — v6.48 — LOS DIENTES DE LOS CINCO.
     ///
+    /// v6.50.46 — LA LEY DE ORO (la que despertó tres ataques muertos):
+    /// EL ESTILO VIVE EN ai[0] Y NADIE LO TOCA. El coro, el telar y el
+    /// decreto de la v6.50.45 NUNCA funcionaron: cada uno sobrescribía
+    /// ai[0] con sus propios datos (ancla, centro, radio) en sus
+    /// primeros ticks — el estilo moría, la IA y el render dejaban de
+    /// matchear y el ataque quedaba INVISIBLE E INERTE. El ancla ES el
+    /// cuerpo del proyectil; el radio se COMPUTA de la edad. Y la ronda:
+    /// el reloj ×5.2 en anillos de cuatro que caen del cielo, el telar
+    /// clava sus estrellas DONDE PASA EL JEFE (la figura de estrella que
+    /// él mismo traza) y las runas disparan abanicos de pernos (LOS
+    /// TAJOS DEL JEFE MURIERON — «el ataque de tajos que hace el jefe es
+    /// feo, quitalo»).
+    ///
     /// EL ARSENAL COMPLETO de los jefes del MOD (Aethon · el Titán Hueco
     /// · el Guardián del Rift · la Arquera · el Primer Portador): cada
     /// jefe v6.48 pelea con LAS LIBRERÍAS DE LA CASA — nada de
@@ -115,8 +128,33 @@ namespace AethonMod.Content.Projectiles.Jefes
         // === v6.50.45 — EL TELAR DEL JEFE (las estrellas clavadas) ===
         private readonly Vector2[] _estrellas = new Vector2[7];
         private readonly bool[] _estrellaClavada = new bool[7];
-        private bool _telarCentroFijo;
         private float _telarFlash;
+
+        /// <summary>
+        /// v6.50.46 — LA PUNTA i DE LA FIGURA DEL TELAR: la MISMA fórmula
+        /// que usa el jefe para trazar la estrella (el contrato para que
+        /// ambos dibujen la MISMA figura: el jefe vuela a estas puntas, el
+        /// telar clava las estrellas en ellas).
+        /// </summary>
+        internal static Vector2 PuntaTelar(Vector2 centro, int i, int n, float semilla)
+        {
+            float ang = semilla * 0.013f + i * MathHelper.TwoPi / n;
+            return centro + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * 430f;
+        }
+
+        /// <summary>
+        /// v6.50.46 — LAS ESTRELLAS CLAVADAS EN ORDEN DE ÍNDICE (el orden
+        /// del polígono — el jefe las clava por el SALTO de la estrella,
+        /// pero la JAULA conecta las puntas en su orden natural).
+        /// </summary>
+        private int EstrellasClavadas(Vector2[] destino)
+        {
+            int puntas = Par > 0.5f ? 7 : 5;
+            int n = 0;
+            for (int i = 0; i < puntas; i++)
+                if (_estrellaClavada[i]) destino[n++] = _estrellas[i];
+            return n;
+        }
 
         // === LAS PALETAS DE LOS CINCO ===
         private static readonly Color TealCristal = new(168, 232, 255);
@@ -192,10 +230,12 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // === v6.50.45 — LAS ARMAS DEL MOD EN MANOS DEL JEFE ===
                 case EstiloRelojGigante:
                     // EL RELOJ GIGANTE: contacto con el CUERPO del reloj
-                    // (×2.6 — un edificio de tiempo) + el peso de la arena.
+                    // (v6.50.46 — ×5.2: UN EDIFICIO de tiempo) + el peso
+                    // de la arena. La autocuración de la talla vive en AI
+                    // (el msg 27 no lleva OnSpawn).
                     Projectile.timeLeft = 520;
-                    Projectile.width = 110;
-                    Projectile.height = 140;
+                    Projectile.width = 220;
+                    Projectile.height = 280;
                     break;
 
                 case EstiloCoroJefe:
@@ -318,6 +358,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                 Estilo == EstiloDecretoJefe)
             {
                 Projectile.hostile = false;
+            }
+
+            // v6.50.46 — EL RELOJ GIGANTE ×5.2: la autocuración de la
+            // TALLA también (el msg 27 no lleva el OnSpawn — sin esto los
+            // remotos colisionaban con una caja de 14×14 en vez del
+            // edificio de tiempo de 220×280).
+            if (Estilo == EstiloRelojGigante && Projectile.width < 200)
+            {
+                Vector2 cR = Projectile.Center;
+                Projectile.width = 220;
+                Projectile.height = 280;
+                Projectile.Center = cR;
             }
 
             Player presa = Presa();
@@ -618,32 +670,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                         new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 150f;
                     Projectile.rotation = ang;
 
-                    // EL DISPARO: cada 110 t la runa RECUERDA uno de TUS
-                    // movimientos y lo repite — un tajo diferido o un perno.
+                    // EL DISPARO (v6.50.46 — LOS TAJOS MUEREN: la petición
+                    // fue LITERAL — «el ataque de tajos que hace el jefe es
+                    // feo, quitalo»): cada 110 t la runa RECUERDA tu estilo
+                    // con un ABANICO de pernos — tres líneas de luz que se
+                    // leen y se esquivan (nada de media lunas feas).
                     if (_edad % 110 == 0 && _edad > 0 && presa != null)
                     {
-                        bool tajo = (Seed + _edad / 110) % 2 == 0;
-                        if (tajo)
+                        float dirBase = (presa.Center - Projectile.Center).ToRotation();
+                        for (int l = 0; l < 3; l++)
                         {
-                            float dirCorte = (presa.Center - Projectile.Center).ToRotation();
-                            // v6.50.1 — FIX (MP ×N+1): la IA del proyectil
-                            // corre en server Y clientes (el dueño puede ser
-                            // 255 — spawn del server) — sin gate cada máquina
-                            // spawnnea su copia y NewProjectile la difunde.
-                            // Solo la autoridad spawnnea (los clientes no).
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(Projectile.GetSource_FromAI(),
-                                    presa.Center, Vector2.Zero,
-                                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                                    (int)(Projectile.damage * 0.8f), 3f, Main.myPlayer,
-                                    EstiloTajoPortador, dirCorte, Seed + 17);
-                            }
-                        }
-                        else
-                        {
-                            Vector2 vel = (presa.Center - Projectile.Center)
-                                .SafeNormalize(Vector2.UnitY) * 11f;
+                            float angF = dirBase + (l - 1) * 0.17f;
+                            Vector2 vel = new Vector2(MathF.Cos(angF), MathF.Sin(angF)) * 10.5f;
                             // v6.50.1 — FIX (MP ×N+1): solo la autoridad spawnnea.
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
@@ -651,7 +689,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                     Projectile.Center, vel,
                                     ModContent.ProjectileType<AtaqueJefeProjectile>(),
                                     (int)(Projectile.damage * 0.7f), 2f, Main.myPlayer,
-                                    EstiloPernoEstelar, 0f, Seed + 29);
+                                    EstiloPernoEstelar, 0f, Seed + 17 + l);
                             }
                         }
                     }
@@ -740,23 +778,39 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //  proyectil de bastón del reloj de arena cósmica pero en
                 //  GIGANTE»): la MISMA línea de tiempo del bastón (290 t
                 //  de caída + 26 de inversión, 26 granos, giros de π
-                //  acumulados) a ×2.6 — y el PESO invertido: la arena
-                //  aplasta a los JUGADORES de abajo (daño cada 10 t +
-                //  empuje hacia ABAJO — el castigo del volador) y cada
-                //  INVERSIÓN es el pulso que HUNDE de verdad.
+                //  acumulados) — v6.50.46 a ×5.2 y en ANILLOS DE CUATRO
+                //  que CAEN del cielo alrededor de la presa — y el PESO
+                //  invertido: la arena aplasta a los JUGADORES de abajo
+                //  (daño cada 10 t + empuje hacia ABAJO — el castigo del
+                //  volador) y cada INVERSIÓN es el pulso que HUNDE.
+                //  v6.50.46 — LA CAÍDA: los primeros 26 t caen firmes
+                //  (13 px/t — vienen del cielo), después frenan y quedan
+                //  FLOTANDO en su puesto del anillo; el peso solo pesa
+                //  YA ATERRIZADO (nadie paga por un reloj que aún viaja).
                 // =============================================================
                 case EstiloRelojGigante:
                 {
-                    // LA LLEGADA: frena y queda flotando (un objeto de
-                    // escritorio ENORME).
-                    Projectile.velocity *= 0.86f;
-                    if (Projectile.velocity.LengthSquared() < 0.01f)
-                        Projectile.velocity = Vector2.Zero;
+                    // LA CAÍDA DEL CIELO: 26 t de caída firme, luego el
+                    // freno flotante (velocity *= 0.86 hasta el reposo).
+                    if (_edad < 26f)
+                    {
+                        // cae firme (el spawn lo trae a 13 px/t)
+                    }
+                    else
+                    {
+                        Projectile.velocity *= 0.86f;
+                        if (Projectile.velocity.LengthSquared() < 0.01f)
+                            Projectile.velocity = Vector2.Zero;
+                    }
+                    bool aterrizado = _edad >= 40f;
 
                     // LA LÍNEA DE TIEMPO del bastón (la MISMA: la fuente
-                    // única de la casa — 290 + 26, giro π suave).
-                    float cicloR = _edad % 316f;
-                    int vueltasR = (int)(_edad / 316f);
+                    // única de la casa — 290 + 26, giro π suave). El reloj
+                    // empieza a correr YA ATERRIZADO (la edad de la arena
+                    // empieza cuando el reloj se posa).
+                    float edadArena = Math.Max(0f, _edad - 34f);
+                    float cicloR = edadArena % 316f;
+                    int vueltasR = (int)(edadArena / 316f);
                     if (cicloR >= 290f)
                     {
                         float g = (cicloR - 290f) / 26f;
@@ -766,15 +820,17 @@ namespace AethonMod.Content.Projectiles.Jefes
                     else
                         Projectile.rotation = vueltasR * MathHelper.Pi;
 
-                    // EL PESO DE LA ARENA (mientras cae, cada 10 t).
+                    // EL PESO DE LA ARENA (mientras cae, cada 10 t — solo
+                    // YA ATERRIZADO).
                     bool cayendoR = cicloR < 290f;
-                    if (cayendoR && _edad >= 10f && ((int)_edad % 10) == 0)
-                        PesarJugadores(0.35f, 2.6f, 300f);
+                    if (aterrizado && cayendoR && edadArena >= 10f &&
+                        ((int)edadArena % 10) == 0)
+                        PesarJugadores(0.35f, 2.6f, 340f);
 
                     // LA INVERSIÓN: el pulso que HUNDE.
-                    if (cicloR >= 290f && cicloR < 291.5f && _edad > 26f)
+                    if (aterrizado && cicloR >= 290f && cicloR < 291.5f && edadArena > 26f)
                     {
-                        PesarJugadores(0.90f, 6.0f, 340f);
+                        PesarJugadores(0.90f, 6.0f, 380f);
                         if (Main.netMode != NetmodeID.Server)
                         {
                             OndaLib.Kick(4f, 12);
@@ -792,7 +848,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                     }
 
-                    if (_edad > 500f) Projectile.Kill();
+                    if (_edad > 560f) Projectile.Kill();
                     break;
                 }
 
@@ -804,28 +860,27 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //  su anillo: el FRENTE del anillo corta a quien atraviesa
                 //  (|dist − radio| < 16). Daño bajo pero FRECUENTE: el
                 //  canto castiga al que se queda quieto.
+                //  v6.50.46 — EL FIX QUE LO DESPERTÓ: este proyectil NUNCA
+                //  funcionó — escribía su ancla en ai[0]/ai[1] y el
+                //  ESTILO vive en ai[0] (el estilo moría en el tick 2 y
+                //  el coro quedaba invisible e inerte para siempre). EL
+                //  ANCLA AHORA ES EL PROYECTIL MISMO: el cuerpo ES el
+                //  ancla (deriva moviéndose a sí mismo — la posición ya
+                //  viaja por el cable con netImportant) y ai[0] queda
+                //  INTACTO para siempre.
                 // =============================================================
                 case EstiloCoroJefe:
                 {
                     Projectile.velocity = Vector2.Zero;
                     Player presaC = Presa();
 
-                    // EL ANCLA (ai[0..1] — por el cable) deriva hacia la presa.
-                    Vector2 ancla = new Vector2(Projectile.ai[0], Projectile.ai[1]);
-                    if (_edad <= 1f || ancla == Vector2.Zero)
-                    {
-                        ancla = Projectile.Center;
-                        Projectile.ai[0] = ancla.X;
-                        Projectile.ai[1] = ancla.Y;
-                    }
+                    // EL ANCLA (el cuerpo del proyectil) deriva hacia la presa.
                     if (presaC != null)
                     {
-                        Vector2 dir = (presaC.Center - ancla).SafeNormalize(Vector2.Zero);
-                        ancla += dir * 0.9f;
+                        Vector2 dir = (presaC.Center - Projectile.Center).SafeNormalize(Vector2.Zero);
+                        Projectile.Center += dir * 0.9f;
                     }
-                    Projectile.Center = ancla;
-                    Projectile.ai[0] = ancla.X;
-                    Projectile.ai[1] = ancla.Y;
+                    Vector2 ancla = Projectile.Center;
 
                     // LA SIEMBRA (órbitas propias: radio, velocidad y
                     // sentido por nota — el coro nunca se alinea).
@@ -892,48 +947,48 @@ namespace AethonMod.Content.Projectiles.Jefes
                 }
 
                 // =============================================================
-                //  v6.50.45 — EL TELAR DE CONSTELACIONES (la petición: «usar
-                //  el proyectil de El telar de Constelaciones para ATRAPAR
-                //  al jugador y provocar daño», con el jefe corriendo en
-                //  círculo alrededor): la PRIMERA estrella fija el CENTRO
-                //  de la figura DONDE ESTÁS y las siete se clavan cada 24 t
-                //  en el mundo (la figura NACE alrededor tuyo y QUEDA
-                //  CLAVADA — la ventana de escape es real); con ≥4 estrellas
-                //  la figura se ENCIENDE cada 30 t y TODO jugador DENTRO
-                //  del polígono paga el corte (ray-casting, como el bastón).
+                //  v6.50.46 — EL TELAR DE CONSTELACIONES — LA FIGURA QUE
+                //  DIBUJA EL JEFE (la corrección LITERAL: «el jefe debe
+                //  moverse formando una figura de tantas puntas como
+                //  proyectiles se puedan lanzar al rededor del jugador
+                //  y rapidamente»). EL TELAR YA NO CLAVA SOLO: el jefe
+                //  TRAZA LA ESTRELLA de punta en punta (pentagrama de 5
+                //  · heptagrama de 7 en furia) y cada vez que PASA por
+                //  una punta, SU ESTRELLA se clava ahí — la figura que
+                //  dibuja el jefe ES la jaula. Con ≥4 clavadas la figura
+                //  se ENCIENDE cada 30 t y TODO jugador DENTRO del
+                //  polígono paga el corte (ray-casting, como el bastón).
+                //  EL FIX QUE LO DESPERTÓ: este proyectil NUNCA funcionó
+                //  — escribía su centro en ai[0]/ai[1] y el ESTILO vive
+                //  en ai[0] (las estrellas jamás se clavaron: la IA murió
+                //  en el tick 20 y el jefe corría el círculo para nadie).
+                //  AHORA el centro ES el proyectil (clavado donde nació)
+                //  y ai[0] queda INTACTO para siempre.
                 // =============================================================
                 case EstiloTelarJefe:
                 {
                     Projectile.velocity = Vector2.Zero;
-                    Player presaT = Presa();
+                    int puntasT = Par > 0.5f ? 7 : 5;
 
-                    // LA PRIMERA ESTRELLA fija el centro (a los 20 t — un
-                    // respiro para LEER lo que viene).
-                    if (!_telarCentroFijo && _edad >= 20f && presaT != null)
+                    // EL JEFE traza la figura (ai[2] = su whoAmI): cuando
+                    // pasa cerca de una punta SIN clavar, LA ESTRELLA se
+                    // clava ahí — la jaula nace del TRAZO de la luz.
+                    int quienT = (int)Projectile.ai[2];
+                    NPC jefeT = (quienT >= 0 && quienT < Main.maxNPCs)
+                        ? Main.npc[quienT] : null;
+                    bool jefeVivo = jefeT != null && jefeT.active;
+                    for (int i = 0; i < puntasT; i++)
                     {
-                        _telarCentroFijo = true;
-                        Projectile.Center = presaT.Center;
-                        Projectile.ai[0] = presaT.Center.X;   // por el cable
-                        Projectile.ai[1] = presaT.Center.Y;
-                    }
-
-                    // EL CLAVADO: una estrella cada 24 t (siete — la figura
-                    // se cierra a los ~165 t).
-                    int clavadas = 0;
-                    for (int i = 0; i < 7; i++) if (_estrellaClavada[i]) clavadas++;
-                    int proxima = -1;
-                    for (int i = 0; i < 7; i++) if (!_estrellaClavada[i]) { proxima = i; break; }
-                    if (proxima >= 0 && _telarCentroFijo && _edad >= 20f + proxima * 24f)
-                    {
-                        float ang = proxima * MathHelper.TwoPi / 7f + Seed * 0.013f;
-                        float radio = 340f + 40f * VFXCore.Hash01(Seed, proxima, 83);
-                        _estrellas[proxima] = Projectile.Center +
-                            new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * radio;
-                        _estrellaClavada[proxima] = true;
-                        if (Main.netMode != NetmodeID.Server)
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                SoundID.Item4.WithPitchOffset(0.3f + proxima * 0.06f),
-                                _estrellas[proxima]);
+                        if (_estrellaClavada[i]) continue;
+                        Vector2 puntaT = PuntaTelar(Projectile.Center, i, puntasT, Seed);
+                        if (jefeVivo && Vector2.Distance(jefeT.Center, puntaT) < 110f)
+                        {
+                            _estrellas[i] = puntaT;
+                            _estrellaClavada[i] = true;
+                            if (Main.netMode != NetmodeID.Server)
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item4.WithPitchOffset(0.3f + i * 0.06f), puntaT);
+                        }
                     }
 
                     // EL FLASH de la ignición se apaga.
@@ -942,6 +997,13 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                     // LA IGNICIÓN (≥4 estrellas, cada 30 t): el corte a
                     // TODO jugador DENTRO del polígono (el telar ATRAPA).
+                    // v6.50.46 — LA JAULA en ORDEN DE ÍNDICE: el jefe clava
+                    // las estrellas por el SALTO de la estrella (0,2,4,1,3…)
+                    // pero el polígono que ATRAPA conecta las puntas en su
+                    // orden natural — el veredicto y los hilos dibujan la
+                    // MISMA jaula.
+                    Vector2[] jaula = new Vector2[7];
+                    int clavadas = EstrellasClavadas(jaula);
                     if (clavadas >= 4 && ((int)_edad % 30) == 0 && _edad > 30f)
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -950,30 +1012,36 @@ namespace AethonMod.Content.Projectiles.Jefes
                             {
                                 Player p = Main.player[pl];
                                 if (p == null || !p.active || p.dead) continue;
-                                if (PuntoEnPoligono(p.Center, _estrellas, clavadas))
+                                if (PuntoEnPoligono(p.Center, jaula, clavadas))
                                     HerirJugador(p, (int)(Projectile.damage * 0.65f),
                                         Projectile.Center);
                             }
                         }
                         _telarFlash = 1f;
-                        if (clavadas >= 7 && Main.netMode != NetmodeID.Server)
+                        if (clavadas >= puntasT && Main.netMode != NetmodeID.Server)
                             Terraria.Audio.SoundEngine.PlaySound(
                                 SoundID.Item122.WithPitchOffset(0.4f), Projectile.Center);
                     }
 
-                    if (_edad > 480f) Projectile.Kill();
+                    if (_edad > 560f) Projectile.Kill();
                     break;
                 }
 
                 // =============================================================
-                //  v6.50.45 — EL DECRETO DEL ECLIPSE (la petición: «el
+                //  v6.50.46 — EL DECRETO DEL ECLIPSE (la petición: «el
                 //  proyectil el decreto del eclipse EN EL CAMBIO DE FASES y
                 //  POR CADA FASE QUE SEA MÁS GRANDE, al usarlo el jefe queda
-                //  INMÓVIL así le da tiempo al jugador a escapar»): el
-                //  círculo nace pequeño sobre el jugador, CRECE +2 px/t
-                //  hasta su radio máximo (P2 660 → P5 930 — ai[1] = la
-                //  fase) y cada 15 t LA EJECUCIÓN: la onda viaja del centro
-                //  al borde y corta a TODO jugador del círculo. El jefe
+                //  INMÓVIL así le da tiempo al jugador a escapar»):
+                //  NUNCA FUNCIONÓ — el círculo escribía su radio en ai[0]
+                //  (¡donde vive el ESTILO!) en su PRIMER tick: la IA y el
+                //  render morían al instante y quedaba un círculo invisible
+                //  congelado (el jefe CLAVADO decretando para nadie — «el
+                //  jefe no lo usa al cambio de fase»). EL FIX: el radio se
+                //  COMPUTA de la edad (determinista, la misma en todas las
+                //  máquinas) y ai[0] queda INTACTO. El círculo nace a 80 px
+                //  sobre el jugador, CRECE +2 px/t hasta su radio máximo
+                //  (P2 600 → P5 960 — ai[1] = la fase) y cada 15 t LA
+                //  EJECUCIÓN corta a TODO jugador del círculo. El jefe
                 //  inmóvil en su estado ES la ventana de escape — y la
                 //  última ejecución (círculo lleno) ES LA SENTENCIA: paga
                 //  doble.
@@ -982,11 +1050,11 @@ namespace AethonMod.Content.Projectiles.Jefes
                 {
                     Projectile.velocity = Vector2.Zero;
 
-                    // EL RADIO: 80 + 2·edad, tope LA FASE.
+                    // EL RADIO: 80 + 2·edad, tope LA FASE (computado — NUNCA
+                    // escrito en ai[0]: el estilo vive ahí).
                     int faseD = Math.Max(2, (int)Par);
-                    float radioMaxD = 660f + (faseD - 2) * 90f;
+                    float radioMaxD = 600f + (faseD - 2) * 120f;
                     float radio = Math.Min(80f + 2f * _edad, radioMaxD);
-                    Projectile.ai[0] = radio;   // por el cable (el visual remoto)
 
                     // LA EJECUCIÓN CÍCLICA (cada 15 t — el beat del bastón).
                     if (((int)_edad % 15) == 0 && _edad >= 15f &&
@@ -1181,7 +1249,7 @@ namespace AethonMod.Content.Projectiles.Jefes
             // CERRADO, el contrato v6.10).
             if (Estilo == EstiloRelojGigante)
             {
-                RelojArenaRenderer.Draw(Projectile, _edad, Seed, 2.6f);
+                RelojArenaRenderer.Draw(Projectile, Math.Max(0f, _edad - 34f), Seed, 5.2f);   // v6.50.46 — ×5.2 y la MISMA edad de arena de la IA (el giro visual y el pulso coinciden)
                 VFXCore.ReabrirLoteVanilla();
                 return false;
             }
@@ -1379,19 +1447,25 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     estrella a estrella, cerrándose N → 1) ===
                     case EstiloTelarJefe:
                     {
-                        int clavadasV = 0;
-                        for (int i = 0; i < 7; i++) if (_estrellaClavada[i]) clavadasV++;
-                        if (clavadasV >= 2)
+                        // v6.50.46 — LOS HILOS en ORDEN DE ÍNDICE (la jaula
+                        // conecta las puntas en su orden natural, aunque el
+                        // jefe las haya clavado por el SALTO de la estrella).
+                        int puntasV = Par > 0.5f ? 7 : 5;
+                        Vector2[] clavadasV = new Vector2[7];
+                        int nV = 0;
+                        for (int i = 0; i < puntasV; i++)
+                            if (_estrellaClavada[i]) clavadasV[nV++] = _estrellas[i];
+                        if (nV >= 2)
                         {
                             float brillo = 0.35f + 0.65f * _telarFlash;
                             Color cHilo = Color.Lerp(new Color(150, 170, 255), new Color(255, 255, 255), _telarFlash);
-                            for (int i = 0; i < clavadasV; i++)
+                            for (int i = 0; i < nV; i++)
                             {
-                                int sig = (i + 1) % clavadasV;
-                                // el último hilo CIERRA la figura solo con las 7
-                                if (sig == 0 && clavadasV < 7) sig = clavadasV - 1;
+                                int sig = (i + 1) % nV;
+                                // el último hilo CIERRA la jaula solo con TODAS
+                                if (sig == 0 && nV < puntasV) sig = nV - 1;
                                 if (i == sig) continue;
-                                VFXCore.Line(_estrellas[i], _estrellas[sig],
+                                VFXCore.Line(clavadasV[i], clavadasV[sig],
                                     cHilo * (0.4f * brillo), 2.4f + 2.6f * _telarFlash);
                             }
                         }
@@ -1403,8 +1477,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     ejecución — el contrato del bastón) ===
                     case EstiloDecretoJefe:
                     {
-                        float radioD = Projectile.ai[0] > 1f ? Projectile.ai[0] :
-                            Math.Min(80f + 2f * _edad, 660f);
+                        // v6.50.46 — el radio se COMPUTA de la edad (ai[0]
+                        // es el ESTILO — jamás se escribe).
+                        float radioD = Math.Min(80f + 2f * _edad, 960f);
                         int beatIdx = (int)(_edad / 15f);
                         for (int i = 0; i < 24; i++)
                         {
@@ -1691,7 +1766,8 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     estrellas — destellos de 4 puntas con parpadeo propio) ===
                     case EstiloTelarJefe:
                     {
-                        for (int i = 0; i < 7; i++)
+                        int puntasR = Par > 0.5f ? 7 : 5;
+                        for (int i = 0; i < puntasR; i++)
                         {
                             if (!_estrellaClavada[i]) continue;
                             Vector2 sp = _estrellas[i] - Main.screenPosition;
@@ -1705,12 +1781,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                         // LA SEÑAL del centro (donde nació la figura — el
                         // compás que la presa debe leer).
-                        if (_telarCentroFijo)
-                        {
-                            OndaLib.Pulse(Main.spriteBatch, pos,
-                                (_edad % 40f) / 40f, 120f,
-                                new Color(150, 170, 255), 0.4f, Seed);
-                        }
+                        OndaLib.Pulse(Main.spriteBatch, pos,
+                            (_edad % 40f) / 40f, 120f,
+                            new Color(150, 170, 255), 0.4f, Seed);
                         break;
                     }
 
@@ -1719,9 +1792,8 @@ namespace AethonMod.Content.Projectiles.Jefes
                     case EstiloDecretoJefe:
                     {
                         int faseD = Math.Max(2, (int)Par);
-                        float radioMaxD = 660f + (faseD - 2) * 90f;
-                        float radio = Projectile.ai[0] > 1f ? Projectile.ai[0] :
-                            Math.Min(80f + 2f * _edad, radioMaxD);
+                        float radioMaxD = 600f + (faseD - 2) * 120f;
+                        float radio = Math.Min(80f + 2f * _edad, radioMaxD);
                         float cyc = _edad % 15f;
                         float flare = cyc < 5f ? 1f - cyc / 5f : 0f;
 

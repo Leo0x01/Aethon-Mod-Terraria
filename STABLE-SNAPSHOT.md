@@ -1,10 +1,52 @@
-# AethonMod — ESTADO ACTUAL (v6.50.45)
+# AethonMod — ESTADO ACTUAL (v6.50.46)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-30 (tag `v6.50.45`, release publicada).
+> Última actualización: 2026-09-30 (tag `v6.50.46`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.46 = LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL + EL
+  ANILLO DEL TIEMPO + EL TELAR QUE TRAZA LA ESTRELLA** — la ronda de
+  feedback sobre la .45, SIETE pedidos: (0) **EL HALLAZGO**: el estilo de
+  cada proyectil vive en `ai[0]` y el CORO, el TELAR y el DECRETO de la
+  .45 LO SOBRESCRIBÍAN con sus propios datos en sus primeros ticks → el
+  ataque moría INVISIBLE E INERTE (por eso «el jefe lo hace mal» y «no
+  lo usa al cambio de fase»); LEY DE ORO: nadie toca ai[0] — el ancla
+  ES el cuerpo, el centro ES el proyectil, el radio se COMPUTA de la
+  edad; (1) LOS TAJOS DEL JEFE MUEREN (las runas disparan abanicos de 3
+  pernos — `EstiloTajoPortador` vive, es del Portador); (2) EL ANILLO
+  DEL TIEMPO: CUATRO relojes ×5.2 CAEN del cielo en cruz diagonal
+  alrededor de la presa (anillo 330 px, caída 26 t + freno flotante; la
+  arena corre solo YA ATERRIZADO y el renderer recibe la MISMA edad de
+  arena — giro visual = pulso de daño); (3) EL TELAR TRAZA LA ESTRELLA:
+  el jefe vuela de PUNTA EN PUNTA por el SALTO (pentagrama 5 puntas en
+  fase 4 · heptagrama 7 en furia — 0→2→4→1→3→0) y cada punta que toca
+  CLAVA su estrella (el proyectil lo vigila vía ai[2]); la JAULA conecta
+  las puntas en orden natural (`EstrellasClavadas` compacta — el
+  veredicto y los hilos dibujan la MISMA figura); con la figura cerrada
+  el jefe sigue el CÍRCULO VELOZ vigilando su trampa; (4) EL DECRETO
+  FUNCIONA: cambio de fase → jefe INMÓVIL + círculo 80→600+120·(fase−2)
+  px (P2 600 → P5 960), MARCA DEL OJO y ejecuciones cada 15 t (la FINAL
+  doble); (5) EL ECLIPSE MURIÓ DE RAÍZ (estado, apagón, orbes guiados,
+  anuncio es+en, contrato ai[1]=3 — el look oscuro solo vive en el cine
+  de muerte) y su relevo es **EL VÓRTICE PRIMORDIAL**: el jefe se alza,
+  sus rayos giran ×4 y suelta LA GALAXIA — 3-4 brazos de 12 pernos en
+  espiral (150→630 px) con velocidad TANGENCIAL + hundimiento: el
+  remolino que gira y COLAPSA (2 oleadas, 3 en furia, cada una girada);
+  (6) LA GRAVEDAD DE VERDAD (volteo inmediato `gravDir=−1` + buff 3 s)
+  y los diálogos AUDITADOS: Nombre2 → «La Canción del Tiempo»,
+  Nombre4 → «El Telar» (los que prometían cosas que no pasaban).
+  Verificación: verify 0/0 · build real 0/0 · .tmod 6.335.925 bytes
+  (md5 af79edf3be572fea503d33bf24dfd66c), 394 entradas (set idéntico
+  a la .45), EOF exacto, 24 planas, DLL con EstadoVortice/SoltarGalaxia/
+  PuntaTelar/BuscarTelar/EstrellasClavadas PRESENTES y EstadoEclipse
+  AUSENTE, keysets es 497→497 / en 498→498 con diff SIMÉTRICA EXACTA
+  (−Eclipse +Vortice en ambos), literales verificados en el paquete
+  inflado · servidor headless carga sin excepciones.
+  **Pendiente: verificación EN JUEGO** (las tres armas despertadas: el
+  coro cantando, el telar con su estrella y su jaula, el decreto en el
+  cambio de fase; el anillo del tiempo cayendo; el vórtice; el volteo
+  de gravedad REAL; y que las runas ya no tiran tajos).
 - **v6.50.45 = EL JEFE QUE SE ESFUMABA + LAS CINCO ARMAS DEL MOD + LA
   FORMA ASCENDIDA DIVINA + EL ALTAR REESCRITO** — la segunda ronda sobre
   la .44, NUEVE pedidos: (1-2) los DOS bugs de despawn con UNA causa
@@ -45,8 +87,12 @@
   rawimg), EOF exacto, 24 planas, símbolos vivos en DLL + muertos de la
   .44 ausentes, keysets es 491→496 / en 493→498 (+5 simétricas), literales
   nuevos dentro del paquete · servidor headless carga sin excepciones.
-  **Pendiente: verificación EN JUEGO** (la llegada sin esfumarse moviéndose
-  el jugador; las cinco armas; el divino del cosmético; el altar nuevo).
+  **Probada EN JUEGO — con bug reportado**: la llegada y el despawn
+  quedaron BIEN (el jefe ya no se esfuma), el divino y el altar también —
+  pero el CORO/TELAR/DECRETO resultaron MUERTOS al probarlos (el bug
+  ai[0] cazado y enterrado en la .46) y el feedback de la ronda lleva a
+  la v6.50.46 (tajos fuera, reloj más grande y múltiple, telar con figura
+  de estrella, decreto visible, eclipse muerto, gravedad real).
 - **v6.50.44 = EL DESCENSO DEL CIELO + EL JEFE QUE TE LEE + dos ítems
   borrados + sprites del origen** — cinco pedidos: (1) la aparición estilo
   EMPERATRIZ: pilar de luz cayendo del cielo + jefe materializado en la
@@ -437,6 +483,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.46** | ✅ Build-verificada, ⏳ en juego | LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL — feedback de la .45 (SIETE pedidos): (0) EL HALLAZGO: el estilo del proyectil vive en ai[0] y el coro/telar/decreto de la .45 LO SOBRESCRIBÍAN → los TRES ataques estaban MUERTOS (invisible e inerte desde sus primeros ticks — por eso «el jefe lo hace mal» y «no lo usa al cambio de fase»); LEY DE ORO: nadie toca ai[0] · (1) LOS TAJOS DEL JEFE MUEREN (runas con abanico de 3 pernos) · (2) EL ANILLO DEL TIEMPO: 4 relojes ×5.2 cayendo del cielo alrededor de la presa (arena corre ya aterrizado; renderer con la MISMA edad de arena) · (3) EL TELAR TRAZA LA ESTRELLA: pentagrama (5) en fase 4 · heptagrama (7) en furia — cada punta que el jefe toca CLAVA su estrella; jaula en orden natural (EstrellasClavadas compacta) + círculo veloz vigilando · (4) EL DECRETO FUNCIONA: inmóvil + 80→600+120·(fase−2) px (P5 960), ejecuciones cada 15 t · (5) EL ECLIPSE MURIÓ de raíz → EL VÓRTICE PRIMORDIAL (galaxia de 3-4 brazos × 12 pernos, tangencial + colapso; rayos del sol ×4 mientras) · (6) LA GRAVEDAD DE VERDAD (volteo inmediato) + diálogos auditados (Nombre2 «La Canción del Tiempo», Nombre4 «El Telar») |
+| **v6.50.45** | ✅ Build-verificada, ⏳ probada (con bug) | EL JEFE QUE SE ESFUMABA (CheckActive cine + sombra que sigue) + LAS CINCO ARMAS DEL MOD (reloj ×2.6, coro, manada CazadorAstral, telar, decreto) + LA FORMA ASCENDIDA DIVINA (patrón de 7 capas) + EL ALTAR REESCRITO — probada en juego: el despawn quedó BIEN, pero el CORO/TELAR/DECRETO resultaron MUERTOS (el bug ai[0] de la .46), el reloj era uno solo y pequeño, el telar corría el círculo sin figura, los tajos de las runas eran feos, el eclipse final se veía mal y la gravedad no se notaba → v6.50.46 |
 | **v6.50.44** | ✅ Build-verificada, ⏳ en juego | EL DESCENSO DEL CIELO (la entrada de la Emperatriz: pilar de luz del cielo + jefe bajando por él) + EL JEFE QUE TE LEE (memoria de ritmo, fintas, bolsa ponderada, seis ataques mejorados con espirales/guiados/minas/contracruz) + Anillos del Horizonte BORRADOS + Corona Rúnica fusionada en La Forma Ascendida DIVINA (corona de 7 luces, rayo del cielo, huella, pulso) + sprites de Génesis y Altar regenerados |
 | **v6.50.43** | ✅ Build-verificada, ⏳ en juego | EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se gasta) — feedback de la .42: «no puedo invocar al jefe de noche… no tiene sentido ya que al invocar el jefe el tiempo pasa hasta que el sol está en el centro del cielo» + «el item que sube de nivel el grimorio es un consumible, que no sea consumible, +10 niveles por uso sin consumirse»: (1) `ConvocableDeNoche` en `LlamadoDeJefe` — EL NOMBRE DE AETHON responde A CUALQUIER HORA (la llegada ya sabía correr la noche: rama nocturna de la carrera simulada en .41 + recorrida empíricamente en .42-S2; despawn solo por presa); los cuatro guardianes siguen de día (lore intacto, su presencia no mueve el reloj) · (2) Verdugo de Niveles: `consumable=false`, `maxStack=1` (patrón Carnada) — +10 niveles por uso SIN gastarse · tooltips actualizados es+en («A CUALQUIER HORA» / «Reutilizable») |
 | **v6.50.42** | ✅ Build-verificada + validada en headless, ⏳ en juego | EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo) — feedback de la .41: «el sol avanza como está previsto, pero al llegar al centro no queda fijo y el jefe no aparece»: UNA causa para ambos — la materialización usaba la matemática pantalla→mundo en la máquina que corre la IA y el servidor NO tiene pantalla → el jefe nacía FUERA DEL MUNDO y moría en el tick 44 del climax → el espejo soltaba el reloj → el sol seguía su curso. REPRODUCIDO en servidor headless (la técnica del CLIENTE FANTASMA: un `ISocket` falso enciende el loop vanilla del servidor) y VERIFICADO el fix: PosicionBajoElSol server-segura (sobre el jugador), exacta en cliente, NUNCA enterrada (≥300 px sobre el jugador), NUNCA fuera del mundo (clamp) · EL CERROJO DEL MEDIODÍA (un reloj pasado de 27001 VUELVE a 27000; jamás la vuelta entera) · limpieza ColaSierpe en servidor |

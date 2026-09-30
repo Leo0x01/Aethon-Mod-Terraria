@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.45 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.46 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,8 +14,32 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.45)
+## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.46)
 
+- **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
+  ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
+  NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el
+  coro, el telar y el decreto LO SOBRESCRIBÍAN con sus propios datos en
+  sus primeros ticks: el ataque moría invisible e inerte (por eso «el jefe
+  lo hace mal» y «no lo usa al cambio de fase»). EL FIX: nadie toca ai[0]
+  — y ahora SÍ son lo pedido: **EL TELAR TRAZA LA ESTRELLA** (el jefe vuela
+  de punta en punta por el salto de la estrella — pentagrama de 5 en fase
+  4, heptagrama de 7 en furia — y cada punta que toca CLAVA su estrella:
+  la figura que dibuja ES la jaula que atrapa), **EL DECRETO** funciona en
+  cada cambio de fase (más grande por fase: P2 600 → P5 960 px; el jefe
+  INMÓVIL todo el decreto), **EL ANILLO DEL TIEMPO** (cuatro relojes
+  gigantes ×5.2 CAEN del cielo alrededor del jugador), **EL ECLIPSE MURIÓ**
+  («la luz se apaga y solo brillan las balas, se ve mal») y su relevo es
+  **EL VÓRTICE PRIMORDIAL** (la galaxia de pernos dorados que gira y
+  colapsa sobre la presa — la firma de la fase final), **LOS TAJOS DEL
+  JEFE MURIERON** (las runas disparan abanicos de pernos) y **LA GRAVEDAD
+  ES DE VERDAD** (el volteo es inmediato — «EL SUELO YA NO ES TUYO» ya no
+  miente; los nombres de fase 2 y 4 renombrados a lo que de verdad pasa:
+  «La Canción del Tiempo» y «El Telar»).
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.46`,
+  release con `AethonMod.tmod` adjunto y verificado byte a byte).
+- Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
+  sin excepciones; `.tmod` de 394 entradas auditado.
 - **v6.50.45 — EL JEFE QUE SE ESFUMABA + LAS CINCO ARMAS DEL MOD**: los DOS
   bugs de despawn tenían UNA causa (vanilla `CheckActive` mataba en secreto
   al jefe a media llegada — nacía 860 px fuera del rectángulo que refresca

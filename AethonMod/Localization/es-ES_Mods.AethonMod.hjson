@@ -2156,9 +2156,9 @@ Jefe: {
 	Aethon: {
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar
-		Nombre2: La Nebulosa
+		Nombre2: La Canción del Tiempo
 		Nombre3: La Gravedad
-		Nombre4: El Agujero Negro
+		Nombre4: El Telar
 		Nombre5: El Reconocimiento
 		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
 		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
@@ -2169,8 +2169,10 @@ Jefe: {
 		Carga: EL DESTELLO — la luz cruza el mundo: no estés en su línea.
 		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
 		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.
-		Eclipse: EL ECLIPSE — la luz se apaga y solo las balas brillan.
 		Aliento: EL RAYO PRIMORDIAL — la luz te busca.
+		// v6.50.46 — EL ECLIPSE MURIÓ («la luz se apaga y solo brillan las
+		// balas, se ve mal, quitala») — su relevo: EL VÓRTICE PRIMORDIAL.
+		Vortice: EL VÓRTICE PRIMORDIAL — la luz gira alrededor tuyo: muévete con el remolino.
 		// v6.50.45 — THE FIVE NEW WEAPON ANNOUNCES
 		Reloj: EL RELOJ DE ARENA CÓSMICO — el tiempo cae del cielo: no vueles bajo su peso.
 		Coro: EL CORO ESPECTRAL — las notas cantan alrededor tuyo: muévete con el anillo.
