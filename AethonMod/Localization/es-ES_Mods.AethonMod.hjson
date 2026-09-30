@@ -519,29 +519,6 @@ Items: {
 			'''
 	}
 
-	AnillosHorizonteItem: {
-		DisplayName: Los Anillos del Horizonte de Sucesos
-		Tooltip:
-			'''
-			El disco de acreción te orbita: veinte bandas incandescentes viajando,
-			los fotones corriendo el vórtice y el aro fino del horizonte.
-			LA LENTE: el fondo se curva a tu alrededor. LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti.
-			+10% de velocidad y +5% de daño universal. Vale en huecos de accesorio o de vanidad.
-			'''
-		Titulo: "[c/FF7043:═══ LOS ANILLOS DEL HORIZONTE DE SUCESOS ═══]"
-		Linea1:
-			'''
-			[c/FFAB91:El disco de acreción te orbita: veinte bandas incandescentes viajando,
-			los fotones corriendo el vórtice y el aro fino del horizonte]
-			'''
-		Linea2: "[c/FF8A65:LA LENTE: el fondo se curva a tu alrededor · LA SUCCIÓN: los enemigos cercanos se deslizan hacia ti]"
-		Linea3:
-			'''
-			[c/80CBC4:+10% de velocidad y +5% de daño universal.
-			Los anillos viven en huecos de accesorio o de vanidad]
-			'''
-	}
-
 	SolRunico1Staff: {
 		// v6.19: THE RUNIC SUN FAMILY — 10 copies of the Sun (the original
 		// Sun stays untouched) with N rune rings on orbital planes with
@@ -1622,24 +1599,15 @@ Items: {
 			'''
 	}
 
-	CoronaRunicoAuraItem: {
-		DisplayName: La Corona Rúnica de Aura
-		Tooltip:
-			'''
-			El pentágono de runas de AURALIB: una jaula de
-			cinco lados girando alrededor tuyo — el violeta del
-			Sagrario al centro, el ORO del grimorio en las aristas.
-			Cosmético puro (el dibuja el PORTADOR aditivo).
-			'''
-	}
-
 	FormaAscendidaItem: {
 		DisplayName: La Forma Ascendida
 		Tooltip:
 			'''
 			El aura de la Luz Primordial respirando a tu alrededor.
 			La dejó caer Aethon al reconocerte como un par.
-			Cosmético puro — la corona del que ya no necesita invocarla.
+			La corona del ascenso sobre tu cabeza, el rayo del cielo
+			cayendo sobre ti, la huella de luz a tu paso y el pulso
+			de un dios — TODO a la vez.
 			'''
 	}
 

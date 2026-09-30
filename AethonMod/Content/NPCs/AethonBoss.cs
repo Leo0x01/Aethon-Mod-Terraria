@@ -179,6 +179,18 @@ namespace AethonMod.Content.NPCs
         // === EL ANTI-CAMPING (heredado) ===
         private int _ticksPresaQuieta = 0;
 
+        // === LA MEMORIA DE LA PRESA (v6.50.44 — la predicción con
+        //     pasado): un anillo de las últimas 8 posiciones — la luz
+        //     no lee tu velocidad de AHORA, lee tu RITMO (y castiga la
+        //     línea recta, no el quiebre honesto) ===
+        private Vector2[] _memPresa = new Vector2[8];
+        private int _idxMem = 0;
+        private bool _memLlena = false;
+
+        // === LA ESTELA MINADA DEL DESTELLO (v6.50.44): una mina por
+        //     cruzamiento — el punto por el que VOLVISTE ya no es seguro ===
+        private bool _minaPuesta = false;
+
         // === EL VOLTEO Y LAS RUNAS (heredados de la sierpe) ===
         private int _tickGravedad = 0;
         private int _tickRunas = 0;
@@ -254,6 +266,13 @@ namespace AethonMod.Content.NPCs
             if (target.velocity.LengthSquared() < 0.36f) _ticksPresaQuieta++;
             else _ticksPresaQuieta = 0;
 
+            // === LA MEMORIA DE LA PRESA (v6.50.44): guarda el ritmo —
+            //     el anillo de las últimas 8 posiciones (la predicción
+            //     nueva lo lee cada vez que apunta) ===
+            _memPresa[_idxMem] = target.Center;
+            _idxMem = (_idxMem + 1) & 7;
+            if (_idxMem == 0) _memLlena = true;
+
             // === LA LLEGADA — EL PRIMER TICK (v6.50.37: la secuencia completa) ===
             if (!_nacio)
             {
@@ -289,9 +308,9 @@ namespace AethonMod.Content.NPCs
                 OnPhaseChange();
             }
 
-            // === EL FADE DE NACIMIENTO (la materialización BAJO el sol,
-            //     envuelta en el pico del DESTELLO — antes de eso la luz
-            //     está RECOGIÉNDOSE) ===
+            // === EL FADE DE NACIMIENTO (la materialización en la CÚSPIDE
+            //     DEL PILAR, envuelta en el pico del destello del cielo —
+            //     v6.50.44: la luz cae del CIELO, no del sol) ===
             if (NPC.alpha > 0)
             {
                 bool materializar = _estado == EST_NACIENDO &&
@@ -341,13 +360,37 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
-        //  LA PREDICCIÓN ADAPTATIVA (heredada de la v6.50.34)
+        //  LA PREDICCIÓN ADAPTATIVA (v6.50.44 — LA QUE LEE TU RITMO)
         // ==================================================================
         private Vector2 PredPresa(Player target)
         {
+            // v6.50.44 — LA PREDICCIÓN LEE TU RITMO, NO TU INSTANTE: la
+            // velocidad MEDIA de las últimas 8 posiciones (el ritmo real
+            // de tu esquivo) en vez de la velocidad de ESTE tick (que
+            // miente cuando zigzagueas — el jitter del control no es
+            // rumbo). Correr en línea recta queda EXPUESTO; el quiebre
+            // honesto, premiado.
+            Vector2 velMedia = target.velocity;
+            if (_memLlena)
+            {
+                velMedia = Vector2.Zero;
+                for (int i = 0; i < 8; i++)
+                {
+                    int nuevo = (_idxMem - 1 - i) & 7;
+                    int viejo = (_idxMem - 2 - i) & 7;
+                    velMedia += _memPresa[nuevo] - _memPresa[viejo];
+                }
+                velMedia /= 8f;   // px/tick promediados
+            }
+
+            // LA FINTA: si estás CAMBIANDO de dirección (la media apunta
+            // CONTRA tu velocidad actual), la luz NO muerde el anzuelo —
+            // recorta el lead a la mitad (respeta el quiebre, castiga la
+            // costumbre).
             float dist = Vector2.Distance(NPC.Center, target.Center);
             float lead = MathHelper.Clamp(dist / 35f, 10f, 34f);
-            return target.Center + target.velocity * lead;
+            if (Vector2.Dot(velMedia, target.velocity) < 0f) lead *= 0.5f;
+            return target.Center + velMedia * lead;
         }
 
         // ==================================================================
@@ -422,26 +465,44 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_CLIMAX:
                 {
-                    // EL DESTELLO NACE DEL SOL: el brillo radial centrado
-                    // en él, difuminándose hacia los bordes (ColaSierpeSky
-                    // lo pinta en el cielo — el sol sigue ARDIENDO, no se
-                    // apaga). Y en el pico, Aethon se materializa BAJO el
-                    // sol — no en su centro.
+                    // v6.50.44 — EL DESCENSO DEL CIELO (la petición: «el
+                    // jefe no apareció desde el punto del sol, ya que no
+                    // aparece ahí… que aparezca un destello de luz desde
+                    // arriba y que el jefe aparezca desde ahí bajando del
+                    // cielo, como la emperatriz de la luz»). El nacimiento
+                    // «bajo el sol» MUERE — en la práctica el jefe nunca
+                    // estaba DONDE el sol (la cámara de cada jugador mira
+                    // a otro lado): ahora la luz NO baja del sol, baja DEL
+                    // CIELO: UN PILAR DE LUZ cae desde lo alto sobre la
+                    // arena y Aethon se materializa EN SU CÚSPIDE,
+                    // envuelto en el destello, y DESCIENDE por él.
                     NPC.velocity = Vector2.Zero;
+                    if (_tickEstado == 1 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        // EL PILAR: la columna de luz que cae del cielo
+                        // (cosmética — daño 0; la dibuja
+                        // AtaqueJefeProjectile.EstiloPilarAparicion con el
+                        // manto dorado y el charco de luz en la base).
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            PosicionAparicion(target), Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            0, 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloPilarAparicion, 0f,
+                            NPC.whoAmI);
+                    }
                     if (_tickEstado == 44)
                     {
-                        // LA MATERIALIZACIÓN: bajo el sol, en el borde
-                        // inferior de su halo (invisible aún: el fade
-                        // empieza en el tick 45 y el brillo lo envuelve).
-                        // v6.50.42 — NUNCA MÁS SIN EL target: la posición
-                        // SEGURA del servidor lo necesita (es la cámara
-                        // del jugador la que define «el cielo»).
-                        NPC.Center = PosicionBajoElSol(target, 220f);
+                        // LA MATERIALIZACIÓN: en la CÚSPIDE del pilar — alto
+                        // en el cielo, sobre la arena. Posición
+                        // SERVER-SEGURA de la v6.50.42 (relativa al jugador
+                        // + clamps, SIN matemática de pantalla — la lección
+                        // queda grabada para siempre).
+                        NPC.Center = PosicionAparicion(target) - new Vector2(0f, 760f);
                         NPC.netUpdate = true;
                     }
                     if (_tickEstado == 52)
                     {
-                        // EL PICO DEL DESTELLO: el sol CIEGA y la luz RUGE.
+                        // EL PICO DEL DESTELLO: el cielo CIEGA y la luz RUGE.
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
                     }
@@ -451,12 +512,28 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_DESCENSO:
                 {
-                    // EL DESCENSO: la luz cae del mediodía a su órbita de
-                    // pelea. (El sol negro y LA OSCURIDAD murieron en la
-                    // v6.50.41 — el sol sigue clavado en el centro
-                    // mientras la luz viva.)
+                    // v6.50.44 — EL DESCENSO DEL CIELO: la luz BAJA desde
+                    // la cúspide del pilar hasta su órbita de pelea,
+                    // dejando una lluvia de chispas doradas (el rastro de
+                    // la caída — «bajando del cielo», como la emperatriz).
+                    // El sol sigue clavado en el centro mientras la luz
+                    // viva (el congelado del mediodía de la v6.50.42).
                     Vector2 punto = target.Center + new Vector2(0f, -420f);
                     NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
+
+                    // LA LLUVIA DE LUZ: chispas que caen con la luz.
+                    if (!Main.dedServ && Main.rand.NextBool(3))
+                    {
+                        Dust d = Dust.NewDustPerfect(
+                            NPC.Center + new Vector2(Main.rand.NextFloat(-100f, 100f),
+                                Main.rand.NextFloat(-50f, 50f)),
+                            DustID.GoldFlame,
+                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
+                                Main.rand.NextFloat(1f, 3f)),
+                            180, OroLuz, 1.4f);
+                        d.noGravity = true;
+                    }
+
                     if (_tickEstado >= 90)
                     {
                         _estado = EST_FLOTAR;
@@ -472,69 +549,27 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// LA POSICIÓN BAJO EL SOL (v6.50.42 — LA CORRECCIÓN DEL JEFE
-        /// QUE NO APARECÍA). Aethon NO nace del centro del sol — nace
-        /// BAJO él, en el borde inferior de su halo. PERO la matemática
-        /// pantalla→mundo de la v6.50.41 solo existe en la máquina CON
-        /// CÁMARA (SP / cliente): en el SERVIDOR no hay pantalla
-        /// (screenWidth=0, matrices identidad) y la posición salía
-        /// (0, ~5500) — FUERA DEL MUNDO — y el jefe MORÍA al
-        /// materializarse (el espejo dejaba de verlo, soltaba el reloj
-        /// y el sol NO se quedaba fijo: los DOS síntomas de la .41).
-        ///
-        /// Las TRES REGLAS de la .42:
-        ///   1. CON PANTALLA (SP/cliente): la matemática EXACTA del sol
-        ///      (fondo→pantalla→mundo, como vanilla dibuja el sol).
-        ///   2. SIN PANTALLA (servidor): el sol del mediodía vive en el
-        ///      CENTRO del cielo DEL JUGADOR — la cámara lo sigue — así
-        ///      que «bajo el sol» es SOBRE el jugador, en el cielo de
-        ///      SU pantalla (la posición .40, probada visible).
-        ///   3. SIEMPRE: NUNCA ENTERRADO (mínimo 300 px sobre el
-        ///      jugador — el jefe nace en el CIELO, no dentro del
-        ///      terreno) y NUNCA FUERA DEL MUNDO (clamp a los límites:
-        ///      jamás otra muerte por OOB).
+        /// v6.50.44 — LA BASE DEL PILAR DE LA APARICIÓN: el punto del cielo
+        /// sobre el que cae la columna de luz (la entrada de la
+        /// EMPERATRIZ: el destello desde arriba y el jefe bajando del
+        /// cielo). La lección de la v6.50.42 queda grabada: NADA de
+        /// matemática de pantalla — la posición es relativa al JUGADOR
+        /// (la cámara lo sigue) y SIEMPRE clamped dentro del mundo
+        /// (jamás otra muerte por fuera-de-límites).
         /// </summary>
-        private Vector2 PosicionBajoElSol(Player target, float debajoPx)
+        private Vector2 PosicionAparicion(Player target)
         {
-            Vector2 pos;
-            // EL GATE ES LA PANTALLA (no el netMode): el servidor dedicado
-            // NUNCA tiene pantalla (screenWidth=0); el cliente SIEMPRE.
-            bool pantallaReal = Main.screenWidth > 1 && Main.screenHeight > 1;
-            if (pantallaReal)
-            {
-                // El sol vive en el ESPACIO DEL FONDO (la réplica del
-                // decompile de DrawSunAndMoon transformada por la matriz
-                // del fondo → píxeles de pantalla); el jefe vive en el
-                // MUNDO: la conversión es la INVERSA de la matriz de
-                // vista (+ screenPosition).
-                Vector2 posSol = Vector2.Transform(PosicionSolEnCielo(),
-                    Main.BackgroundViewMatrix.EffectMatrix);
-                posSol.Y += debajoPx;   // BAJO el sol — no en su centro
-                Matrix mVista = Main.GameViewMatrix.TransformationMatrix;
-                Matrix.Invert(ref mVista, out Matrix inversa);
-                pos = Vector2.Transform(posSol, inversa) + Main.screenPosition;
-                // LA RED DE SEGURIDAD: jamás un NaN en la posición de un
-                // jefe (se propagaría por el cable y corrompería la pelea).
-                if (!float.IsFinite(pos.X) || !float.IsFinite(pos.Y))
-                    pos = target.Center + new Vector2(0f, -420f);
-            }
-            else
-            {
-                // SERVIDOR (host MP / dedicado): sin cámara no hay sol en
-                // pantalla — el sol del mediodía está en el centro del
-                // cielo DEL JUGADOR: «bajo el sol» ≈ sobre el jugador.
-                pos = target.Center + new Vector2(0f, -420f);
-            }
+            // La órbita de pelea (target − 420): el pilar termina donde la
+            // luz va a quedar flotando — el descenso TERMINA en su puesto.
+            Vector2 pos = target.Center + new Vector2(0f, -420f);
 
-            // NUNCA ENTERRADO: el jefe nace en el CIELO. Si el sol quedó
-            // bajo el horizonte del terreno del jugador (montaña, suelo
-            // alto — la Y del sol depende de worldSurface, no del
-            // jugador), que nazca en el cielo de TODOS MODOS.
+            // NUNCA ENTERRADO: la base del pilar vive en el CIELO de la
+            // arena (montaña o suelo alto no la hunden en el terreno).
             float cielo = target.Center.Y - 300f;
             if (pos.Y > cielo) pos.Y = cielo;
 
-            // NUNCA FUERA DEL MUNDO: la lección del servidor — el jefe
-            // que nace fuera de los límites MUERE (y mataba el reloj).
+            // NUNCA FUERA DEL MUNDO: los clamps de la v6.50.42 — el jefe
+            // que nace (o materializa) fuera de límites MUERE.
             float margen = 320f;
             pos.X = MathHelper.Clamp(pos.X, margen, Main.maxTilesX * 16f - margen);
             pos.Y = MathHelper.Clamp(pos.Y, margen, Main.maxTilesY * 16f - margen);
@@ -558,7 +593,12 @@ namespace AethonMod.Content.NPCs
         {
             float velAng = (0.014f + Phase * 0.003f) * _sentidoOrbita;
             _angOrbita += velAng;
-            float radio = Furia ? 320f : (Phase >= 4 ? 380f : 440f);
+            // v6.50.44 — LA ÓRBITA QUE RESPIRA: el radio ONDULA (la luz no
+            // patrulla un circuito muerto — se acerca y se aleja en olas)
+            // y en la FURIA se APRIETA (la distancia de seguridad muere:
+            // 320 → 260 con la misma ola encima).
+            float radio = Furia ? 260f : (Phase >= 4 ? 380f : 440f);
+            radio += MathF.Sin(_angOrbita * 3f) * 30f;
             Vector2 punto = target.Center + new Vector2(
                 MathF.Cos(_angOrbita) * radio,
                 -260f + MathF.Sin(_angOrbita) * 90f);
@@ -587,9 +627,14 @@ namespace AethonMod.Content.NPCs
         }
 
         /// <summary>
-        /// LA ROTACIÓN (heredada de la v6.50.34, la firma de la casa):
-        /// el menú crece con la fase y NUNCA sale el mismo plato dos
-        /// veces — la luz no tiene patrón, tiene humor.
+        /// LA ROTACIÓN (v6.50.44 — LA LUZ TE LEE): el menú crece con la
+        /// fase y NUNCA sale el mismo plato dos veces — pero ahora el
+        /// plato sale de una BOLSA PONDERADA por lo que ESTÁS HACIENDO:
+        /// correr en línea recta invita al DESTELLO (te va a cruzar el
+        /// camino), quedarte quieto invita a la NOVA (el castigo del
+        /// anti-camping), volar alto invita al JUICIO (las columnas caen
+        /// del cielo) y pegarte invita a la CRUZ (los chorros barren).
+        /// La luz no tiene patrón — tiene LECTURA.
         /// </summary>
         private void ElegirAtaque(Player target)
         {
@@ -602,7 +647,25 @@ namespace AethonMod.Content.NPCs
                 4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE },
                 _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_JUICIO },
             };
-            int elegido = menu[Main.rand.Next(menu.Length)];
+
+            // LA LECTURA (v6.50.44): pesos por comportamiento.
+            float velH = Math.Abs(target.velocity.X);
+            bool alto = target.Center.Y < NPC.Center.Y - 160f;          // el volador
+            bool cerca = Vector2.Distance(NPC.Center, target.Center) < 300f; // el pegado
+
+            int[] bolsa = new int[menu.Length * 6];
+            int n = 0;
+            foreach (int plato in menu)
+            {
+                int peso = 2;                                              // base
+                if (plato == EST_DESTELLO && velH > 7f) peso = 5;         // el corredor
+                if (plato == EST_NOVA && _ticksPresaQuieta > 30) peso = 6; // el quieto
+                if (plato == EST_JUICIO && alto) peso = 5;                 // el volador
+                if (plato == EST_CRUZ && cerca) peso = 5;                  // el pegado
+                for (int w = 0; w < peso; w++) bolsa[n++] = plato;
+            }
+            int elegido = bolsa[Main.rand.Next(n)];
+
             if (elegido == _ultimoAtaque && menu.Length > 1)
                 elegido = menu[(Array.IndexOf(menu, elegido) + 1) % menu.Length];
             _ultimoAtaque = elegido;
@@ -624,10 +687,14 @@ namespace AethonMod.Content.NPCs
 
         /// <summary>
         /// LA PRIMERA LEY: la luz cae. 30 t de alzarse (el anuncio) y
-        /// N COLUMNAS nacen ARRIBA de las posiciones PREDICHAS — el
-        /// proyectil se telegrafea solo: cae LENTO (la línea de luz
-        /// descendiendo) y a los 45 t ACELERA a toda velocidad. Donde
-        /// estabas parado, ya no existe.
+        /// LA PRIMERA OLEADA de N COLUMNAS nace ARRIBA de las posiciones
+        /// PREDICHAS — el proyectil se telegrafea solo: cae LENTO (la
+        /// línea de luz descendiendo) y a los 45 t ACELERA a toda
+        /// velocidad. Y v6.50.44 — LA SEGUNDA OLEADA (la ley que se
+        /// aprende): 25 t después, MÁS APRETADA y sobre tu POSICIÓN
+        /// ACTUAL — castiga al que esquivó la primera y se quedó a
+        /// mirar. Donde estabas parado, ya no existe; donde ESTÁS,
+        /// tampoco.
         /// </summary>
         private void EstadoJuicio(Player target)
         {
@@ -635,11 +702,16 @@ namespace AethonMod.Content.NPCs
             Vector2 punto = target.Center + new Vector2(0f, -480f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
-            if (_tickEstado == 30)
+            bool primera = _tickEstado == 30;
+            bool segunda = _tickEstado == 55;
+            if (primera || segunda)
             {
                 int n = Math.Min(6, 2 + Phase);       // 3 en P1 → 6 en P5
                 float sep = 190f - Phase * 10f;       // más apretado con la fase
-                float centro = PredPresa(target).X;
+                if (segunda) sep *= 0.78f;            // v6.50.44: la red SE CIERRA
+                // la primera cae sobre tu RITMO (PredPresa); la segunda,
+                // sobre TI (la posición cruda).
+                float centro = segunda ? target.Center.X : PredPresa(target).X;
                 for (int i = 0; i < n; i++)
                 {
                     float x = centro + (i - (n - 1) * 0.5f) * sep +
@@ -651,15 +723,18 @@ namespace AethonMod.Content.NPCs
                             ModContent.ProjectileType<AtaqueJefeProjectile>(),
                             (int)(NPC.damage * 0.95f), 3f, Main.myPlayer,
                             AtaqueJefeProjectile.EstiloColumnaJuicio, 0f,
-                            NPC.whoAmI * 61 + i);
+                            NPC.whoAmI * 61 + i + (segunda ? 40 : 0));
                     }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
-                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Juicio", OroLuz);
-                OndaLib.Kick(8f, 16);
+                if (primera)
+                {
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Juicio", OroLuz);
+                    OndaLib.Kick(8f, 16);
+                }
             }
 
-            if (_tickEstado >= 100) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 130) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         // ==================================================================
@@ -710,19 +785,29 @@ namespace AethonMod.Content.NPCs
                 return;
             }
 
-            // EL FUEGO: la luz escupe pernos SOBRE la presa (denso y rápido).
-            if ((_tickRayo % (Furia ? 3 : 4)) == 0 && _tickRayo <= 64)
+            // EL FUEGO (v6.50.44 — LAS LANZAS QUE TE BUSCAN): ya no
+            // llueven a ciegas sobre tu cabeza — cada VOLVERA nace en el
+            // borde de la luz y VUELA hacia tu RITMO (PredPresa), en
+            // abanico de tres: una al centro y dos a los flancos (la
+            // cortina que hay que atravesar POR DECISIÓN, no por suerte).
+            if ((_tickRayo % (Furia ? 6 : 8)) == 0 && _tickRayo <= 64)
             {
-                Vector2 pos = PredPresa(target) + new Vector2(
-                    Main.rand.NextFloat(-150f, 150f),
-                    Main.rand.NextFloat(-320f, -120f));
-                if (Main.netMode != NetmodeID.MultiplayerClient)
+                Vector2 pred = PredPresa(target);
+                for (int l = 0; l < 3; l++)
                 {
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, new Vector2(0f, 11f),
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
-                        NPC.whoAmI * 97 + _tickRayo);
+                    Vector2 pos = NPC.Center + new Vector2(
+                        Main.rand.NextFloat(-170f, 170f),
+                        Main.rand.NextFloat(-30f, 70f));
+                    float ang = (pred - pos).ToRotation() + (l - 1) * 0.11f;
+                    Vector2 v = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 12.5f;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, v,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.45f), 2f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                            NPC.whoAmI * 97 + _tickRayo * 3 + l);
+                    }
                 }
             }
             if (_tickRayo >= 70)
@@ -740,8 +825,11 @@ namespace AethonMod.Content.NPCs
         /// <summary>
         /// 45 t de contracción (el núcleo CRECE y se APRIETA — el pulso
         /// acelera en el render) y EL ESTALLIDO: 2-3 anillos de orbes
-        /// con HUECOS (esquivable por diseño — hay que BUSCAR EL HUECO,
-        /// el anuncio lo enseña). En la furia, el tercer anillo.
+        /// ESPIRALES con HUECOS (v6.50.44: los anillos giran al abrirse
+        /// — la nova que BARRE, no la que solo empuja — y los huecos se
+        /// CIERRAN con la fase). En la FURIA: LA SEGUNDA NOVA — 20 t
+        /// después, dos anillos rápidos con los huecos girados: la
+        /// trampa para quien encontró el primer hueco y se quedó en él.
         /// </summary>
         private void EstadoNova(Player target)
         {
@@ -760,21 +848,28 @@ namespace AethonMod.Content.NPCs
 
             if (_tickEstado == 45)
             {
-                // EL ESTALLIDO: anillos con huecos (4 gaps de 30°).
+                // EL ESTALLIDO: anillos espirales con huecos (4 gaps de ~30°
+                // que se cierran con la fase: 0.26 rad en P1 → 0.17 en P5).
                 int anillos = Furia ? 3 : (Phase >= 3 ? 3 : 2);
                 for (int a = 0; a < anillos; a++)
                 {
                     float vel = 6.5f + a * 2.2f;
                     float desfase = a * MathHelper.Pi / 9f;
+                    float hueco = Math.Max(0.17f, 0.26f - (Phase - 1) * 0.022f);
                     for (int i = 0; i < 18; i++)
                     {
                         float ang = i * MathHelper.TwoPi / 18f + desfase;
-                        // LOS HUECOS: 4 sectores libres de 30° (la salida).
+                        // LOS HUECOS: 4 sectores libres (la salida).
                         float grad = Math.Abs(MathHelper.WrapAngle(ang - desfase));
-                        if (grad < 0.26f || Math.Abs(grad - MathHelper.PiOver2) < 0.26f ||
-                            Math.Abs(grad - MathHelper.Pi) < 0.26f ||
-                            Math.Abs(grad - MathHelper.Pi * 1.5f) < 0.26f) continue;
-                        Vector2 v = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * vel;
+                        if (grad < hueco || Math.Abs(grad - MathHelper.PiOver2) < hueco ||
+                            Math.Abs(grad - MathHelper.Pi) < hueco ||
+                            Math.Abs(grad - MathHelper.Pi * 1.5f) < hueco) continue;
+                        // v6.50.44 — LA ESPIRAL: componente TANGENCIAL (el
+                        // anillo GIRA mientras se abre — las balas no
+                        // radian, BARREN).
+                        Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                        Vector2 tan = new Vector2(-dir.Y, dir.X) * (1.1f + a * 0.55f);
+                        Vector2 v = dir * vel + tan;
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
                             Projectile.NewProjectile(NPC.GetSource_FromAI(),
@@ -791,7 +886,42 @@ namespace AethonMod.Content.NPCs
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 90) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            // v6.50.44 — LA SEGUNDA NOVA (solo FURIA): 20 t después, dos
+            // anillos RÁPIDOS con los huecos GIRADOS — el hueco de la
+            // primera ya NO sirve: hay que leer la segunda.
+            if (Furia && _tickEstado == 65)
+            {
+                for (int a = 0; a < 2; a++)
+                {
+                    float vel = 9.5f + a * 2.5f;
+                    float desfase = MathHelper.Pi / 5f + a * 0.4f;   // girados
+                    float hueco = 0.17f;
+                    for (int i = 0; i < 18; i++)
+                    {
+                        float ang = i * MathHelper.TwoPi / 18f + desfase;
+                        float grad = Math.Abs(MathHelper.WrapAngle(ang - desfase));
+                        if (grad < hueco || Math.Abs(grad - MathHelper.PiOver2) < hueco ||
+                            Math.Abs(grad - MathHelper.Pi) < hueco ||
+                            Math.Abs(grad - MathHelper.Pi * 1.5f) < hueco) continue;
+                        Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                        Vector2 tan = new Vector2(-dir.Y, dir.X) * (1.4f + a * 0.6f);
+                        Vector2 v = dir * vel + tan;
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                NPC.Center, v,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.55f), 2f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                                NPC.whoAmI * 73 + a * 23 + i);
+                        }
+                    }
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                OndaLib.Kick(9f, 18);
+            }
+
+            if (_tickEstado >= 95) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         // ==================================================================
@@ -801,8 +931,11 @@ namespace AethonMod.Content.NPCs
         /// <summary>
         /// LA ASPIRADORA: la luz se queda CASI quieta en su órbita y
         /// escupe CUATRO chorros de pernos en cruz — la cruz GIRA lento
-        /// (0.011 rad/t: una vuelta cada ~9.5 s) y barre la arena. La
-        /// única defensa es orbitarla a su ritmo.
+        /// (0.011 rad/t: una vuelta cada ~9.5 s) y barre la arena. Y
+        /// v6.50.44 — LA RESPIRACIÓN y LA CONTRACRUZ: los chorros ONDULAN
+        /// su velocidad (olas de presión — hay ventanas honestas para
+        /// acercarse) y en P4+ TRES chorros más giran AL REVÉS: la doble
+        /// cruz que no se puede orbitar tranquila.
         /// </summary>
         private void EstadoCruz(Player target)
         {
@@ -814,10 +947,13 @@ namespace AethonMod.Content.NPCs
             if (_tickEstado >= 30 && (_tickEstado % (Furia ? 6 : 8)) == 0 && _tickEstado <= 200)
             {
                 float giro = _tickEstado * 0.011f * (Furia ? 1.5f : 1f);
+                // v6.50.44 — LA RESPIRACIÓN: la velocidad ONDULA (9 ± 2.6
+                // — olas de presión, ventanas para acercarse).
+                float pulsar = 9f + MathF.Sin(_tickEstado * 0.05f) * 2.6f;
                 for (int b = 0; b < 4; b++)
                 {
                     float ang = giro + b * MathHelper.PiOver2;
-                    Vector2 v = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 9f;
+                    Vector2 v = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * pulsar;
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         Projectile.NewProjectile(NPC.GetSource_FromAI(),
@@ -826,6 +962,25 @@ namespace AethonMod.Content.NPCs
                             (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
                             AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
                             NPC.whoAmI * 83 + _tickEstado + b * 7);
+                    }
+                }
+                // v6.50.44 — LA CONTRACRUZ (P4+): tres chorros girando AL
+                // REVÉS (×1.35 más rápido) — la doble cruz.
+                if (Phase >= 4)
+                {
+                    for (int b = 0; b < 3; b++)
+                    {
+                        float ang = -giro * 1.35f + b * (MathHelper.TwoPi / 3f);
+                        Vector2 v = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (pulsar * 0.85f);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                                NPC.Center, v,
+                                ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                                (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
+                                AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                                NPC.whoAmI * 87 + _tickEstado + b * 11);
+                        }
                     }
                 }
                 if ((_tickEstado % 24) == 0)
@@ -839,11 +994,22 @@ namespace AethonMod.Content.NPCs
         //  EL DESTELLO — LA EMBESTIDA A VELOCIDAD LUZ
         // ==================================================================
 
-        /// <summary>Prepara un destello: rumbo a la presa PREDICHA.</summary>
+        /// <summary>Prepara un destello: rumbo al CORTE DE LA HUIDA.</summary>
         private void PrepararDestello(Player target)
         {
+            // v6.50.44 — EL CORTE DE LA HUIDA: el rumbo ya no apunta A tu
+            // predicción sino DONDE NO PUEDES estar cuando llegue — alterna
+            // el flanco derecho e izquierdo de tu carrera (el ziguezagueo
+            // perezoso ya no basta: hay que CAMBIAR el rumbo, no solo la
+            // velocidad).
             Vector2 pred = PredPresa(target);
-            _angDestello = (pred - NPC.Center).ToRotation();
+            Vector2 rumboVec = pred - NPC.Center;
+            Vector2 perp = new Vector2(-rumboVec.Y, rumboVec.X);
+            if (perp.LengthSquared() > 0.001f) perp.Normalize();
+            float lado = (_cadenasDestello % 2 == 0) ? 1f : -1f;
+            Vector2 corte = pred + perp * (150f * lado);
+            _angDestello = (corte - NPC.Center).ToRotation();
+            _minaPuesta = false;   // la mina es una por cruzamiento
             NPC.velocity *= 0.25f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Carga", OroLuz);
@@ -873,6 +1039,25 @@ namespace AethonMod.Content.NPCs
             float vel = 44f + Phase * 2.5f + (Furia ? 4f : 0f);
             Vector2 rumbo = new Vector2(MathF.Cos(_angDestello), MathF.Sin(_angDestello));
             NPC.velocity = Vector2.Lerp(NPC.velocity, rumbo * vel, 0.30f);
+
+            // v6.50.44 — LA ESTELA MINADA (P3+): al pasar junto a tu
+            // posición, la luz deja UNA MINA ESTELAR — el punto donde
+            // estabas deja de ser seguro (castiga el esquivo perezoso:
+            // volver corriendo por donde viniste).
+            if (Phase >= 3 && !_minaPuesta && _tickEstado > 20 &&
+                Vector2.Distance(NPC.Center, target.Center) < 240f)
+            {
+                _minaPuesta = true;
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        target.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.70f), 2f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloMinaEstelar, 0f,
+                        NPC.whoAmI * 53 + _cadenasDestello);
+                }
+            }
 
             // el cruce terminó: ¿OTRO destello o el descanso?
             bool cruzo = Vector2.Distance(NPC.Center, target.Center) > 1900f;
@@ -932,7 +1117,10 @@ namespace AethonMod.Content.NPCs
                 pl.velocity += aH.SafeNormalize(Vector2.Zero) * fuerza;
             }
 
-            // LAS BALAS: orbes LENTOS desde los bordes, convergiendo.
+            // LAS BALAS (v6.50.44 — LAS BALAS QUE TE BUSCAN): orbes
+            // GUIADOS desde los bordes, convergiendo (ai[1]=1: el perno
+            // estelar curva SUAVE hacia ti y ACELERA al acercarse — la
+            // oscuridad no dispara a un punto, TE PERSIGUE).
             if ((_tickEstado % 12) == 0 && _tickEstado < duracion - 40)
             {
                 for (int o = 0; o < 2; o++)
@@ -947,7 +1135,7 @@ namespace AethonMod.Content.NPCs
                             borde, v,
                             ModContent.ProjectileType<AtaqueJefeProjectile>(),
                             (int)(NPC.damage * 0.50f), 2f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPernoEstelar, 0f,
+                            AtaqueJefeProjectile.EstiloPernoEstelar, 1f,
                             NPC.whoAmI * 89 + _tickEstado + o * 13);
                     }
                 }

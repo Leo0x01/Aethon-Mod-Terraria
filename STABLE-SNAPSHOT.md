@@ -1,10 +1,29 @@
-# AethonMod — ESTADO ACTUAL (v6.50.43)
+# AethonMod — ESTADO ACTUAL (v6.50.44)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-30 (tag `v6.50.43`, release publicada).
+> Última actualización: 2026-09-30 (tag `v6.50.44`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.44 = EL DESCENSO DEL CIELO + EL JEFE QUE TE LEE + dos ítems
+  borrados + sprites del origen** — cinco pedidos: (1) la aparición estilo
+  EMPERATRIZ: pilar de luz cayendo del cielo + jefe materializado en la
+  cúspide bajando por él (PosicionBajoElSol muerta — jamás matemática de
+  pantalla en la IA); (2) IA mejorada: memoria de ritmo + fintas leídas +
+  bolsa ponderada por comportamiento + órbita que respira + los SEIS
+  ataques mejorados (2 oleadas de juicio, lanzas en abanico, nova espiral
+  con segunda nova en furia, doble cruz, destello con corte de huida +
+  minas, eclipse con pernos guiados); (3) Anillos del Horizonte BORRADOS;
+  (4) Corona Rúnica de Aura fusionada en La Forma Ascendida (la VERSIÓN
+  DIVINA: aura 74px/16 agujas/18 orbes + corona de 7 luces + rayo divino
+  + huella de luz + pulso); (5) sprites de Fragmento Génesis y Altar
+  Antiguo regenerados (gen_sprites_v65044.py). Verificación: verify 0/0 ·
+  build real 0/0 · .tmod 6.315.842 bytes (md5 1cdfedde53cbe244e4d7a48c2
+  4a783ad), 393 entradas (−2 quirúrgicas), EOF exacto, símbolos
+  vivos/muertos verificados en DLL, keysets es=491/en=493 (−2 simétricas),
+  tooltips nuevos dentro del paquete · servidor headless carga sin
+  excepciones. **Pendiente: verificación EN JUEGO** (el pilar cayendo + el
+  descenso; la IA nueva; el cosmético divino; los sprites).
 - **v6.50.43 = EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se
   gasta)** — feedback sobre la .42: «el jefe no puedo invocarlo de noche,
   ya que dice solo de día… no tiene sentido eso ya que al invocar el jefe
@@ -377,6 +396,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.44** | ✅ Build-verificada, ⏳ en juego | EL DESCENSO DEL CIELO (la entrada de la Emperatriz: pilar de luz del cielo + jefe bajando por él) + EL JEFE QUE TE LEE (memoria de ritmo, fintas, bolsa ponderada, seis ataques mejorados con espirales/guiados/minas/contracruz) + Anillos del Horizonte BORRADOS + Corona Rúnica fusionada en La Forma Ascendida DIVINA (corona de 7 luces, rayo del cielo, huella, pulso) + sprites de Génesis y Altar regenerados |
 | **v6.50.43** | ✅ Build-verificada, ⏳ en juego | EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se gasta) — feedback de la .42: «no puedo invocar al jefe de noche… no tiene sentido ya que al invocar el jefe el tiempo pasa hasta que el sol está en el centro del cielo» + «el item que sube de nivel el grimorio es un consumible, que no sea consumible, +10 niveles por uso sin consumirse»: (1) `ConvocableDeNoche` en `LlamadoDeJefe` — EL NOMBRE DE AETHON responde A CUALQUIER HORA (la llegada ya sabía correr la noche: rama nocturna de la carrera simulada en .41 + recorrida empíricamente en .42-S2; despawn solo por presa); los cuatro guardianes siguen de día (lore intacto, su presencia no mueve el reloj) · (2) Verdugo de Niveles: `consumable=false`, `maxStack=1` (patrón Carnada) — +10 niveles por uso SIN gastarse · tooltips actualizados es+en («A CUALQUIER HORA» / «Reutilizable») |
 | **v6.50.42** | ✅ Build-verificada + validada en headless, ⏳ en juego | EL JEFE QUE NO APARECÍA (y el sol que no se quedaba fijo) — feedback de la .41: «el sol avanza como está previsto, pero al llegar al centro no queda fijo y el jefe no aparece»: UNA causa para ambos — la materialización usaba la matemática pantalla→mundo en la máquina que corre la IA y el servidor NO tiene pantalla → el jefe nacía FUERA DEL MUNDO y moría en el tick 44 del climax → el espejo soltaba el reloj → el sol seguía su curso. REPRODUCIDO en servidor headless (la técnica del CLIENTE FANTASMA: un `ISocket` falso enciende el loop vanilla del servidor) y VERIFICADO el fix: PosicionBajoElSol server-segura (sobre el jugador), exacta en cliente, NUNCA enterrada (≥300 px sobre el jugador), NUNCA fuera del mundo (clamp) · EL CERROJO DEL MEDIODÍA (un reloj pasado de 27001 VUELVE a 27000; jamás la vuelta entera) · limpieza ColaSierpe en servidor |
 | **v6.50.41** | ✅ Build-verificada, ⏳ probada (con bug cazado) | EL MEDIO DÍA DEL DESTELLO (cuatro pedidos): (1) LA CAPA DE OSCURIDAD MUERE DE RAÍZ (VeloLib + VeloDona borradas; fuera el sol negro, las luces, el aviso del Grimorio y el flash de pantalla completa — paquete 396→395) · (2) EL SOL SIN TELETRANSPORTE DE VERDAD (bug de la v6.50.40: la tarde disparaba el aterrizaje al instante y el sol saltaba HACIA ATRÁS; ventana [26999, 27001] + restante hasta el PRÓXIMO mediodía POR LA NOCHE: tarde → ocaso → noche completa → amanecer → mediodía, 110× máx con aterrizaje — simulado en 5 escenarios, jamás hacia atrás) · (3) EL DESTELLO NACE DEL SOL (brillo radial centrado en él, difuminado a TRANSPARENTE en los bordes — y el sol NO se apaga) · (4) AETHON NO NACE DEL CENTRO DEL SOL (se materializa BAJO él vía la inversa de la matriz de vista; acto 13 = EL DESCENSO) — el usuario la probó: la carrera bien, PERO el jefe no aparecía y el sol no se quedaba fijo (la materialización server-rota) → v6.50.42 |

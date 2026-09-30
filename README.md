@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.43 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.44 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,9 +14,22 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.43)
+## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.44)
 
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.43`,
+- **v6.50.44 — EL DESCENSO DEL CIELO + EL JEFE QUE TE LEE**: el jefe ya no
+  nace «bajo el sol» (nunca estaba ahí) — ahora **UN PILAR DE LUZ CAE DEL
+  CIELO** y Aethon se materializa en su cúspide y **BAJA por él hasta la
+  órbita de pelea** (la entrada de la Emperatriz de la Luz). La IA aprendió
+  a LEERTE: predice tu **ritmo** (memoria de 8 posiciones, respeta las
+  fintas), elige el ataque según lo que HACES (corredor→destello, quieto→
+  nova, volador→juicio, pegado→cruz), y los seis ataques mejorados (juicio
+  en dos oleadas, lanzas en abanico, nova espiral + segunda nova en furia,
+  doble cruz contrarrotante, destello que corta la huida y deja minas,
+  eclipse con balas guiadas). Además: **Anillos del Horizonte BORRADOS**,
+  **Corona Rúnica de Aura fusionada en La Forma Ascendida** (ahora con
+  corona de 7 luces, rayo divino, huella de luz y pulso — digna de un
+  dios), y **sprites nuevos** para el Fragmento Génesis y el Altar.
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.44`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 395 entradas auditado.

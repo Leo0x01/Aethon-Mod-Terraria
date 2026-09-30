@@ -21,13 +21,14 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// queda DETRÁS del cuerpo (la profundidad del look, igual que los
     /// NPCs) y con el brillo de neón de verdad.
     ///
-    /// LOS CUATRO PORTADORES (ai[0] = modo):
+    /// LOS TRES PORTADORES (ai[0] = modo):
     ///   0 — LA CENIZA DEL HAMBRE: el aura gris del grimorio hambriento
     ///       (la lee de ShardPlayer, el jugador local la viste).
-    ///   1 — LA CORONA RÚNICA: el pentágono Polígono(5) violeta-oro de
-    ///       la Bolsa de Cosméticos (CosmeticPlayer la enciende).
     ///   2 — LA FORMA ASCENDIDA: el aura dorada-violeta de la Luz
-    ///       Primordial (el drop cumplido de Aethon).
+    ///       Primordial (el drop cumplido de Aethon; v6.50.44 — LA
+    ///       CORONA RÚNICA murió fusionada en ella: «los item La forma
+    ///       Ascendida y la corona runica de aura son lo mismo, dejar
+    ///       solo La Forma Ascendida»).
     ///   3 — v6.50.23 — LA BRASA DEL ECLIPSE: el cuarto tipo de aura —
     ///       el patrón BRUMA (humo negro en los bordes por ALFA-blend,
     ///       oro en el medio y núcleo rojo aditivos, con luz de mundo
@@ -45,23 +46,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// patrón v6.10 peleaba con el bool de DibujarJugadorAditivo (doble
     /// End → excepción tragada cada frame + estado a ciegas). Ahora es el
     /// contrato de OleadaNPC: el BOOL decide, ReabrirLoteVanilla reabre.
-    /// Y los perfiles CoronaRunica()/FormaAscendida() se creaban NUEVOS en
-    /// cada llamada (2 por tick: AI + PreDraw) — ahora son cache estático
-    /// (son inmutables en la práctica; el modo hambre ya usaba el cache
-    /// de ShardPlayer).
+    /// Y los perfiles se creaban NUEVOS en cada llamada (2 por tick:
+    /// AI + PreDraw) — ahora son cache estático (son inmutables en la
+    /// práctica; el modo hambre ya usaba el cache de ShardPlayer).
     /// </summary>
     public class AuraPortadorHalo : ModProjectile
     {
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
         // v6.49 — EL CACHE DE LOS PERFILES INMUTABLES (cero GC por frame).
-        private static AuraPerfil _perfilCorona;
         private static AuraPerfil _perfilAscendida;
         private static AuraPerfil _perfilBrasa;
-
-        /// <summary>El perfil de la corona, creado UNA vez.</summary>
-        private static AuraPerfil PerfilCorona =>
-            _perfilCorona ??= AuraPerfil.CoronaRunica();
 
         /// <summary>El perfil de la forma ascendida, creado UNA vez.</summary>
         private static AuraPerfil PerfilAscendida =>
@@ -88,7 +83,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             Projectile.netImportant = true;
         }
 
-        /// <summary>El modo del portador (0 hambre · 1 corona · 2 ascendida · 3 brasa).</summary>
+        /// <summary>El modo del portador (0 hambre · 2 ascendida · 3 brasa —
+        /// el 1 era la corona rúnica, muerta en la v6.50.44).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -99,8 +95,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 0:
                     return duenio.whoAmI == Main.myPlayer &&
                            duenio.GetModPlayer<ShardPlayer>().MomentosHambre > 0;
-                case 1:
-                    return duenio.GetModPlayer<CosmeticPlayer>().CoronaRunicaAura;
                 case 2:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendida;
                 case 3:
@@ -115,7 +109,6 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             switch (Modo)
             {
                 case 0: return duenio.GetModPlayer<ShardPlayer>().AuraHambrePublica();
-                case 1: return PerfilCorona;
                 case 2: return PerfilAscendida;
                 case 3: return PerfilBrasa;
             }
@@ -144,8 +137,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 AuraLib.ActualizarJugador(duenio, p);
 
             // La luz suave del modo (la corona ilumina, el hambre oscurece).
-            if (Modo == 1) Lighting.AddLight(Projectile.Center, 0.14f, 0.08f, 0.02f);
-            else if (Modo == 2) Lighting.AddLight(Projectile.Center, 0.20f, 0.16f, 0.08f);
+            // v6.50.44 — LA LUZ DIVINA del ascendido: más cálida, más
+            // ancha y RESPIRANDO (el pulso lento de un dios).
+            else if (Modo == 2)
+            {
+                float alba = 0.85f + 0.15f * MathF.Sin(Main.GlobalTimeWrappedHourly * 1.6f);
+                Lighting.AddLight(Projectile.Center, 0.30f * alba, 0.24f * alba, 0.11f * alba);
+            }
             // v6.50.23 — LA BRASA: la LUZ de la petición — cálida (oro
             // con rojo) y LATE con el corazón de la brasa (el doble
             // golpe de 84 bpm del perfil, la misma curva de AuraLib).

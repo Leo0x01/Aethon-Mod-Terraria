@@ -519,29 +519,6 @@ Items: {
 			'''
 	}
 
-	AnillosHorizonteItem: {
-		DisplayName: The Event Horizon Rings
-		Tooltip:
-			'''
-			The accretion disk orbits you: twenty incandescent bands traveling,
-			photons running the vortex and the horizon's fine ring.
-			THE LENS: the background bends around you. THE PULL: nearby enemies drift toward you.
-			+10% speed and +5% universal damage. Works in accessory or vanity slots.
-			'''
-		Titulo: "[c/FF7043:═══ THE EVENT HORIZON RINGS ═══]"
-		Linea1:
-			'''
-			[c/FFAB91:The accretion disk orbits you: twenty incandescent bands traveling,
-			photons running the vortex and the horizon's fine ring]
-			'''
-		Linea2: "[c/FF8A65:THE LENS: the background bends around you · THE PULL: nearby enemies slide toward you]"
-		Linea3:
-			'''
-			[c/80CBC4:+10% speed and +5% universal damage.
-			The rings live in accessory or vanity slots alike]
-			'''
-	}
-
 	SolRunico1Staff: {
 		// v6.19: THE RUNIC SUN FAMILY — 10 copies of the Sun (the original
 		// Sun stays untouched) with N rune rings on orbital planes with
@@ -1623,24 +1600,15 @@ Items: {
 			'''
 	}
 
-	CoronaRunicoAuraItem: {
-		DisplayName: The Runic Aura Crown
-		Tooltip:
-			'''
-			AURALIB's rune pentagon: a five-sided cage
-			spinning around you — the Sanctum's violet at the
-			center, the grimoire's GOLD on the edges.
-			Pure cosmetic (drawn by the additive BEARER).
-			'''
-	}
-
 	FormaAscendidaItem: {
 		DisplayName: The Ascended Form
 		Tooltip:
 			'''
 			The Primordial Light's aura breathing around you.
 			Aethon dropped it upon acknowledging you as an equal.
-			Pure cosmetic — the crown of one who no longer needs to summon it.
+			The crown of ascension above your head, the sky's ray
+			falling upon you, the trail of light at your feet and
+			the pulse of a god — ALL at once.
 			'''
 	}
 

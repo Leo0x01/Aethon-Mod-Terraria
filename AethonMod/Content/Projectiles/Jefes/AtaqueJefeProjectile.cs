@@ -74,6 +74,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloRunaMemorizada = 11;
         public const int EstiloEstallidoMina = 12;
         public const int EstiloColumnaJuicio = 13;   // v6.50.36 — Aethon, LA LUZ
+        public const int EstiloPilarAparicion = 14;  // v6.50.44 — EL PILAR DEL CIELO (cosmético: la entrada de la emperatriz)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -88,6 +89,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         private bool _lanzado;           // esquirla/cuchilla ya disparada
         private bool _clavada;           // la púa ya se hundió en el suelo
         private Vector2 _posAnterior;    // la cola del virote
+        private int _ticksDisolver;      // v6.50.44 — el fade del pilar de la aparición
 
         // === LAS PALETAS DE LOS CINCO ===
         private static readonly Color TealCristal = new(168, 232, 255);
@@ -149,6 +151,14 @@ namespace AethonMod.Content.Projectiles.Jefes
                 case EstiloRunaMemorizada: Projectile.timeLeft = 600; break;
                 case EstiloColumnaJuicio: Projectile.timeLeft = 210; break;
                 case EstiloEstallidoMina: Projectile.timeLeft = 20; break;
+                case EstiloPilarAparicion:
+                    // v6.50.44 — EL PILAR: cosmético puro (daño 0, jamás
+                    // hostil) — cae del cielo, sostiene el descenso del
+                    // jefe y se disuelve cuando la luz llega a su puesto.
+                    Projectile.timeLeft = 340;
+                    Projectile.hostile = false;
+                    Projectile.damage = 0;
+                    break;
             }
         }
 
@@ -234,6 +244,15 @@ namespace AethonMod.Content.Projectiles.Jefes
                 Projectile.width = 56;
                 Projectile.height = 210;
                 Projectile.Center = c;
+            }
+
+            // v6.50.44 — EL PILAR DE LA APARICIÓN: cosmético (la
+            // autocuración también — hostile/damage no viajan enteros por
+            // el msg 27: jamás una columna de luz que golpea).
+            if (Estilo == EstiloPilarAparicion)
+            {
+                Projectile.hostile = false;
+                Projectile.damage = 0;
             }
 
             Player presa = Presa();
@@ -473,11 +492,31 @@ namespace AethonMod.Content.Projectiles.Jefes
                 }
 
                 // =============================================================
-                //  EL PERNO ESTELAR — recto con latido
+                //  EL PERNO ESTELAR — recto con latido (o GUIADO: ai[1]=1,
+                //  las balas del eclipse que te persiguen)
                 // =============================================================
                 case EstiloPernoEstelar:
                 {
                     Projectile.rotation = Projectile.velocity.ToRotation();
+
+                    // v6.50.44 — EL PERNO GUIADO (ai[1]=1 — las balas del
+                    // ECLIPSE): una curva SUAVE hacia la presa (≤0.055
+                    // rad/t, solo si está a <900 px) y una aceleración
+                    // siniestra al acercarse — la oscuridad no dispara a un
+                    // punto: TE BUSCA. Los pernos comunes (ai[1]=0) siguen
+                    // siendo balística honesta.
+                    if (Par == 1f && _edad > 8 && presa != null &&
+                        Vector2.Distance(presa.Center, Projectile.Center) < 900f)
+                    {
+                        float deseado = (presa.Center - Projectile.Center).ToRotation();
+                        float giro = MathHelper.WrapAngle(deseado - Projectile.rotation);
+                        if (Math.Abs(giro) > 0.055f) giro = Math.Sign(giro) * 0.055f;
+                        Projectile.velocity = Projectile.velocity.RotatedBy(giro);
+                        if (Projectile.velocity.Length() < 9.5f)
+                            Projectile.velocity *= 1.014f;
+                        Projectile.rotation = Projectile.velocity.ToRotation();
+                    }
+
                     if (_edad > 220) Projectile.Kill();
                     break;
                 }
@@ -570,6 +609,66 @@ namespace AethonMod.Content.Projectiles.Jefes
                     if (_edad > 20) Projectile.Kill();
                     break;
                 }
+
+                // =============================================================
+                //  EL PILAR DE LA APARICIÓN — la columna de luz que cae del
+                //  cielo (v6.50.44 — la entrada de la EMPERATRIZ: el
+                //  destello desde arriba y el jefe bajando por él)
+                // =============================================================
+                case EstiloPilarAparicion:
+                {
+                    Projectile.velocity = Vector2.Zero;
+
+                    // ¿El jefe sigue BAJANDO? (ai[2] = su whoAmI). Cuando la
+                    // luz llega a su órbita (o muere/se va), el pilar se
+                    // DISUELVE (ai[1]=1 viaja por el cable: todas las
+                    // pantallas se enteran).
+                    if (Projectile.ai[1] < 1f)
+                    {
+                        bool jefeVivo = false;
+                        int who = (int)Projectile.ai[2];
+                        if (who >= 0 && who < Main.maxNPCs)
+                        {
+                            NPC jefe = Main.npc[who];
+                            // EST_NACIENDO (ai[0]=0) con climax (ai[1]=12) o
+                            // descenso (ai[1]=13) — el pilar vive mientras
+                            // la llegada no haya terminado.
+                            jefeVivo = jefe != null && jefe.active &&
+                                jefe.ai[0] == 0f &&
+                                (jefe.ai[1] == 12f || jefe.ai[1] == 13f);
+                        }
+                        if (!jefeVivo) Projectile.ai[1] = 1f;   // DISOLVERSE
+                    }
+                    else
+                    {
+                        // disuelto: 40 t de fade y fuera.
+                        if (_edad > 240 || _ticksDisolver >= 40) Projectile.Kill();
+                        _ticksDisolver++;
+                    }
+
+                    // LA LLUVIA DEL VELO: chispas doradas cayendo por el
+                    // cuerpo del pilar (la luz que se derrama).
+                    if (!Main.dedServ && Main.rand.NextBool(2))
+                    {
+                        float p = Math.Min(1f, _edad / 40f);
+                        float y = Projectile.Center.Y - 900f * Main.rand.NextFloat(0.05f, 0.98f * p);
+                        Dust d = Dust.NewDustPerfect(
+                            new Vector2(Projectile.Center.X + Main.rand.NextFloat(-55f, 55f), y),
+                            DustID.GoldFlame,
+                            new Vector2(Main.rand.NextFloat(-0.6f, 0.6f), Main.rand.NextFloat(1f, 2.6f)),
+                            170, OroGrimorio, 1.1f);
+                        d.noGravity = true;
+                    }
+
+                    // LA LUZ del cielo abierto (la columna ilumina la arena).
+                    if (!Main.dedServ)
+                    {
+                        Lighting.AddLight(Projectile.Center, new Vector3(0.85f, 0.72f, 0.42f));
+                        Lighting.AddLight(Projectile.Center - new Vector2(0f, 450f),
+                            new Vector3(0.55f, 0.46f, 0.26f));
+                    }
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -583,6 +682,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     => new Vector3(0.45f, 0.16f, 0.07f),
                 EstiloNubeNebulosa => new Vector3(0.20f, 0.10f, 0.34f),
                 EstiloRunaMemorizada or EstiloPernoEstelar => new Vector3(0.38f, 0.28f, 0.10f),
+                EstiloPilarAparicion => Vector3.Zero,   // su luz la pone SU caso (la columna doble)
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -758,6 +858,61 @@ namespace AethonMod.Content.Projectiles.Jefes
                             new Vector2(56f, 1100f));
                         VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.75f * caida),
                             new Vector2(22f, 950f));
+                        break;
+                    }
+
+                    case EstiloPilarAparicion:
+                    {
+                        // v6.50.44 — EL PILAR DEL CIELO: la columna de luz
+                        // que CAE (0-40 t: la punta desciende del cielo a la
+                        // base), SE SOSTIENE mientras el jefe baja por ella
+                        // y se DISUELVE al final (fade por ai[1]). TRES
+                        // velos apilados (el manto dorado ancho, el cuerpo
+                        // blanco y el núcleo cegador) + el CHARCO DE LUZ en
+                        // la base + la PUNTA brillante mientras cae.
+                        float p = Math.Min(1f, _edad / 40f);          // el descenso
+                        float disolver = Projectile.ai[1] >= 1f
+                            ? Math.Max(0f, 1f - _ticksDisolver / 40f) : 1f;
+                        float pulso = 0.85f + 0.15f * MathF.Sin(t * 5f + Seed);
+                        const float altura = 900f;
+
+                        // el cuerpo del pilar (anclado arriba, la punta baja).
+                        float punta = Projectile.Center.Y - altura * (1f - p);
+                        float centroY = (Projectile.Center.Y - altura + punta) * 0.5f;
+                        Vector2 centro = new Vector2(Projectile.Center.X, centroY);
+                        float alto = altura * p;
+
+                        if (alto > 4f)
+                        {
+                            VFXCore.Quad(centro, OroGrimorio * (0.40f * disolver * pulso),
+                                new Vector2(110f, alto));
+                            VFXCore.Quad(centro, BlancoCaliente * (0.55f * disolver * pulso),
+                                new Vector2(46f, alto));
+                            VFXCore.Quad(centro, LuzPrimordial * (0.30f * disolver),
+                                new Vector2(160f, alto * 0.92f));
+                            VFXCore.Quad(centro, new Color(255, 253, 244) * (0.80f * disolver),
+                                new Vector2(18f, alto));
+                        }
+
+                        // EL CHARCO DE LUZ en la base (donde la columna se
+                        // posa — el escenario de la pelea queda BAÑADO).
+                        if (p >= 1f)
+                        {
+                            VFXCore.Quad(Projectile.Center, OroGrimorio * (0.50f * disolver * pulso),
+                                new Vector2(170f, 34f));
+                            VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.45f * disolver),
+                                new Vector2(80f, 16f));
+                        }
+
+                        // LA PUNTA que cae (la cabeza del destello mientras
+                        // desciende — lo que se ve venir del cielo).
+                        if (p < 1f)
+                        {
+                            Vector2 tip = new Vector2(Projectile.Center.X, punta);
+                            VFXCore.Quad(tip, OroGrimorio * 0.85f, new Vector2(90f, 40f));
+                            VFXCore.Quad(tip, new Color(255, 253, 244) * 0.90f,
+                                new Vector2(40f, 18f));
+                        }
                         break;
                     }
 
@@ -984,6 +1139,25 @@ namespace AethonMod.Content.Projectiles.Jefes
                             OndaLib.Pulse(Main.spriteBatch, pos,
                                 (_edad % 45f) / 45f, 120f * intensidad,
                                 OroGrimorio, 0.5f, Seed);
+                        }
+                        break;
+                    }
+
+                    // === EL PILAR: el bloom de la base y de la punta viva ===
+                    case EstiloPilarAparicion:
+                    {
+                        float p = Math.Min(1f, _edad / 40f);
+                        float disolver = Projectile.ai[1] >= 1f
+                            ? Math.Max(0f, 1f - _ticksDisolver / 40f) : 1f;
+                        // LA BASE: el corazón del charco de luz.
+                        LumenLib.BloomPulse(Main.spriteBatch, pos,
+                            60f * disolver, OroGrimorio, 0.85f * disolver, t, 3.2f);
+                        // LA PUNTA mientras cae: el cometa que desciende.
+                        if (p < 1f)
+                        {
+                            Vector2 tip = pos - new Vector2(0f, 900f * (1f - p));
+                            LumenLib.Bloom(Main.spriteBatch, tip, 44f,
+                                BlancoCaliente, 0.95f, 2);
                         }
                         break;
                     }

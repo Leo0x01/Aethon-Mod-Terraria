@@ -436,87 +436,45 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// v6.48 — LA CORONA RÚNICA DE AURA: el patrón POLÍGONO con
-        /// ConLados(5) y los tintes de la casa (violeta del Sagrario +
-        /// oro del grimorio) hecho COSMÉTICO — un pentágono de runas
-        /// girando alrededor del jugador con chispas doradas. Cuesta UN
-        /// PRESET (no un arma): la Bolsa de Cosméticos la reparte.
-        /// </summary>
-        public static AuraPerfil CoronaRunica()
-        {
-            var p = new AuraPerfil
-            {
-                Radio = 54f,
-                Anillos = 2,
-                Gajos = 10,
-                Patron = PatronAura.Poligono,
-                Lados = 5,
-                Giro = 0.35f,
-                Fluir = 0.5f,
-                Deriva = 0.10f,
-                Ascenso = 8f,
-                Distorsion = 0.55f,
-                Blur = 0.6f,
-                Glow = 1.5f,
-                Semilla = 5150, // "5150": pentágono rúnico
-                AlfaTrasera = 0.30f,
-                AlfaFrontal = 0.05f,
-                VeloFrontal = true,
-                // v6.50.12 — la corona RADIA: agujas doradas + el borde
-                // caliente realza la jaula pentagonal.
-                Rayos = 8,
-                Borde = 0.40f,
-                Parpadeo = 0.05f,
-                Hervor = 4f,   // ebullición serena: es una corona, no un incendio
-            };
-            // LOS TINTES DEL MOD: violeta del Sagrario al centro, el oro
-            // del grimorio en el BORDE (las aristas de la jaula dorada).
-            p.ConTrasera(new Color(122, 66, 200), new Color(158, 96, 232), new Color(255, 214, 130));
-            p.ConFrontal(new Color(126, 70, 204), new Color(162, 100, 236), new Color(255, 226, 150));
-            p.ConParticulas(new ParticulasAura
-            {
-                Cantidad = 8,
-                Forma = FormaParticula.Chispa,
-                Color = new Color(255, 214, 130),
-                Alfa = 0.55f,
-                Solidas = false,
-                Tasa = 0.8f,
-                Velocidad = 20f,
-                Ascenso = 26f,
-                Tamano = 9f,
-                Vida = 1.2f,
-            });
-            return p;
-        }
-
-        /// <summary>
         /// v6.48 — LA FORMA ASCENDIDA: el aura de la Luz Primordial que
         /// Aethon deja caer al reconocerte como un par (su drop prometido
         /// desde v5, cumplido). Luz dorada-violeta respirando alrededor
         /// del portador — la corona del que ya no necesita invocarla.
+        ///
+        /// v6.50.44 — LA VERSIÓN DIVINA (la petición: «dejar solo La
+        /// Forma Ascendida e intentar mejorar su efecto con mas efectos,
+        /// debe ser un item cosmetico digno de un dios» — la corona
+        /// rúnica murió fusionada en esta): el aura MÁS ANCHA (radio
+        /// 60→74), la corona radiante de 16 AGUJAS (antes 12) con MÁS
+        /// GLOW (1.8→2.6) y DISTORSIÓN de calor (0.7→0.9 — el aire se
+        /// dobla alrededor del dios), el doble de ORBES de luz (18,
+        /// antes 10) subiendo más alto y viviendo más — y encima, en
+        /// CosmeticPlayer: LA CORONA DEL ASCENSO (siete puntos de luz
+        /// sobre la cabeza), EL RAYO DIVINO (polvo de luz cayendo del
+        /// cielo sobre el portador), LA HUELLA DE LUZ (el rastro al
+        /// moverse) y EL PULSO (la onda que respira cada ~2.5 s).
         /// </summary>
         public static AuraPerfil FormaAscendida()
         {
             var p = new AuraPerfil
             {
-                Radio = 60f,
+                Radio = 74f,          // v6.50.44 — más ancha: un dios OCUPA más cielo
                 Anillos = 3,
                 Gajos = 14,
                 Patron = PatronAura.Perlin,
                 Fluir = 0.6f,
                 Deriva = 0.12f,
-                Ascenso = 10f,
-                Distorsion = 0.7f,
+                Ascenso = 12f,       // sube más alto
+                Distorsion = 0.9f,    // v6.50.44 — el aire se DOBLA alrededor
                 Blur = 1f,
-                Glow = 1.8f,
+                Glow = 2.6f,          // v6.50.44 — el resplandor de la divinidad
                 Semilla = 150,
                 AlfaTrasera = 0.28f,
                 AlfaFrontal = 0.06f,
                 VeloFrontal = true,
-                // v6.50.12 — LA LUZ PRIMORDIAL: la corona radiante más
-                // amplia de la casa (12 agujas) con el borde sereno: la
-                // luz no ACECHA, RESPLANDECE.
-                Rayos = 12,
+                // v6.50.12 — LA LUZ PRIMORDIAL; v6.50.44 — la corona
+                // radiante DIVINA: DIECISÉIS agujas (antes 12).
+                Rayos = 16,
                 Borde = 0.30f,
                 Parpadeo = 0.04f,
             };
@@ -524,16 +482,16 @@ namespace AethonMod.Content.VFX
             p.ConFrontal(new Color(255, 240, 180), new Color(200, 156, 255), new Color(255, 253, 240));
             p.ConParticulas(new ParticulasAura
             {
-                Cantidad = 10,
+                Cantidad = 18,        // v6.50.44 — el doble de orbes de luz
                 Forma = FormaParticula.Orbe,
                 Color = new Color(255, 240, 190),
                 Alfa = 0.5f,
                 Solidas = false,
-                Tasa = 1.0f,
-                Velocidad = 18f,
-                Ascenso = 30f,
+                Tasa = 1.2f,
+                Velocidad = 20f,
+                Ascenso = 34f,
                 Tamano = 9f,
-                Vida = 1.3f,
+                Vida = 1.6f,
             });
             return p;
         }

@@ -10,7 +10,7 @@ namespace AethonMod.Content.Players
     /// <summary>
     /// SellosPlayer — v6.35 — EL RASTREADOR DE LOS SIGNOS MÁGICOS.
     ///
-    /// El ModPlayer de LOS TRES ACCESORIOS DE LAS LIBRERÍAS: escanea
+    /// El ModPlayer de LOS DOS ACCESORIOS DE LAS LIBRERÍAS: escanea
     /// TANTO los huecos de accesorio funcionales como los de VANIDAD
     /// (un signo es un signo viva donde lo lleves — la misma regla de
     /// las coronas) y respeta el OJITO de ocultar accesorio: las
@@ -23,9 +23,13 @@ namespace AethonMod.Content.Players
     /// como COLOR PLANO — el reporte del usuario): ahora invocan sus
     /// HALOS proyectiles (SelloGenesisHalo / AnillosSolaresHalo), que
     /// vuelcan por SU lote aditivo — el MISMO camino por el que salen
-    /// los anillos de los soles rúnicos reales. La succión, las ascuas
-    /// y la lente de los Anillos del Horizonte siguen aquí (su halo ya
-    /// iba por el camino aditivo desde v6.35).
+    /// los anillos de los soles rúnicos reales.
+    ///
+    /// v6.50.44 — LOS ANILLOS DEL HORIZONTE DE SUCESOS FUERON BORRADOS
+    /// por petición del usuario («el item, los anillos del horizonte de
+    /// sucesos lo puedes borrar») — su lente, sus ascuas, su succión y
+    /// su halo murieron con él (GravLens sigue vivo: lo usan los
+    /// agujeros negros de las armas cósmicas).
     ///
     /// Lo que hace VIVO cada accesorio:
     ///   · EL SELLO DEL GÉNESIS — chispas doradas que escapan de las
@@ -33,11 +37,6 @@ namespace AethonMod.Content.Players
     ///     de oro suave.
     ///   · LOS ANILLOS DEL SOL RÚNICO — motas de polvo solar cayendo
     ///     en órbita y luz cálida de estrella.
-    ///   · LOS ANILLOS DEL HORIZONTE — la LENTE GRAVITACIONAL de
-    ///     GravLens curvando el fondo alrededor del portador (re-
-    ///     registrada cada tick, el patrón del portal estable), ascuas
-    ///     rojas que caen HACIA el jugador (la succión visible) y la
-    ///     SUCCIÓN real: los enemigos cercanos se deslizan hacia ti.
     /// </summary>
     public class SellosPlayer : ModPlayer
     {
@@ -47,14 +46,10 @@ namespace AethonMod.Content.Players
         /// <summary>¿Lleva LOS ANILLOS DEL SOL RÚNICO?</summary>
         public bool AnillosSol;
 
-        /// <summary>¿Lleva LOS ANILLOS DEL HORIZONTE DE SUCESOS?</summary>
-        public bool AnillosVacio;
-
         public override void ResetEffects()
         {
             SelloGenesis = false;
             AnillosSol = false;
-            AnillosVacio = false;
         }
 
         public override void PostUpdate()
@@ -64,7 +59,6 @@ namespace AethonMod.Content.Players
             //     13..19 de vanidad (siempre visibles). ===
             int sello = ModContent.ItemType<Items.Accessories.SelloGenesisItem>();
             int sol = ModContent.ItemType<Items.Accessories.AnillosSolRunicoItem>();
-            int vacio = ModContent.ItemType<Items.Accessories.AnillosHorizonteItem>();
 
             for (int i = 3; i <= 19; i++)
             {
@@ -76,30 +70,6 @@ namespace AethonMod.Content.Players
 
                 if (item.type == sello) SelloGenesis = true;
                 else if (item.type == sol) AnillosSol = true;
-                else if (item.type == vacio) AnillosVacio = true;
-            }
-
-            // v6.50 — LA SUCCIÓN ANTES DEL MURO (hallazgo auditoría MP nº3):
-            // los cosméticos son del cliente, pero la FÍSICA (npc.velocity
-            // hacia el portador) es de la AUTORIDAD — el viejo `return` del
-            // server se la tragaba y el gate del bloque (≠ client) la
-            // bloqueaba en el cliente: en MP NADIE la corría (muerta).
-            // Ahora: server en MP, y el proceso local en SP — como toda
-            // física honesta del juego.
-            if (AnillosVacio && Main.netMode != NetmodeID.MultiplayerClient && !Player.dead)
-            {
-                foreach (NPC npc in Main.ActiveNPCs)
-                {
-                    if (!npc.active || !VFXCore.EsObjetivo(npc)) continue;
-                    if (npc.boss) continue;
-
-                    Vector2 hacia = Player.Center - npc.Center;
-                    float dist = hacia.Length();
-                    if (dist > 140f || dist < 12f) continue;
-
-                    npc.velocity += Vector2.Normalize(hacia) *
-                        0.05f * (1f - dist / 140f + 0.35f);
-                }
             }
 
             // v6.50.2 — FIX (host sin sus visuales en Host&Play): el viejo
@@ -181,62 +151,6 @@ namespace AethonMod.Content.Players
                         0, 0f, Player.whoAmI);
                 }
             }
-
-            // ==============================================================
-            //  LOS ANILLOS DEL HORIZONTE — la lente, las ascuas y la
-            //  succión.
-            // ==============================================================
-            if (AnillosVacio)
-            {
-                // --- LA LENTE (el signature): el fondo se curva alrededor
-                //     del portador — re-registro cada tick con vida corta,
-                //     el patrón del portal estable de GravLens. Fuerza
-                //     0.30: presente sin devorar la pantalla. ---
-                GravLens.Registrar(Player.Center, 78f, 0.30f, 0.10f);
-
-                // --- LAS ASCUAS DE LA SUCCIÓN: chispas rojas que CAEN
-                //     HACIA el jugador (la materia cayendo al pozo). ---
-                if (Main.rand.NextBool(30))
-                {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    Vector2 pos = Player.Center + new Vector2(
-                        (float)System.Math.Cos(ang) * 92f,
-                        (float)System.Math.Sin(ang) * 60f);
-                    Vector2 hacia = Player.Center - pos;
-                    Dust d = Dust.NewDustPerfect(pos, DustID.Torch,
-                        Vector2.Normalize(hacia) * Main.rand.NextFloat(1.2f, 2.4f),
-                        160, new Color(255, 120, 60), 0.7f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
-
-                // --- LA LUZ del disco (rojo-naranja tenue). ---
-                Lighting.AddLight(Player.Center, new Vector3(0.22f, 0.07f, 0.02f));
-
-                // --- EL HALO: el proyectil cosmético que dibuja los
-                //     anillos (SelloVacio en su propio batch) lo invoca
-                //     el dueño local y tML lo sincroniza al resto. ---
-                if (Player.whoAmI == Main.myPlayer && !EspiarHalo())
-                {
-                    Projectile.NewProjectile(Player.GetSource_Misc("AnillosHorizonte"),
-                        Player.Center, Vector2.Zero,
-                        ModContent.ProjectileType<AnillosSingularesHalo>(),
-                        0, 0f, Player.whoAmI);
-                }
-            }
-        }
-
-        /// <summary>¿Ya vive mi halo de anillos del vacío?</summary>
-        private bool EspiarHalo()
-        {
-            int tipo = ModContent.ProjectileType<AnillosSingularesHalo>();
-            for (int i = 0; i < Main.maxProjectiles; i++)
-            {
-                Projectile p = Main.projectile[i];
-                if (p.active && p.owner == Player.whoAmI && p.type == tipo)
-                    return true;
-            }
-            return false;
         }
 
         /// <summary>¿Ya vive mi halo del sello del génesis?</summary>
