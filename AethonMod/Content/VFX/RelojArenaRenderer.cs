@@ -46,6 +46,14 @@ namespace AethonMod.Content.VFX
         /// <summary>Media altura del reloj: 27 px → ~54 px de alto.</summary>
         public const float HalfH = 27f;
 
+        /// <summary>v6.50.45 — LA ESCALA DEL JEFE: el reloj GIGANTE de
+        /// Aethon (×2.6 — la petición: «el proyectil de bastón del reloj
+        /// de arena cósmica pero en gigante») reusa ESTE renderer íntegro:
+        /// Escala multiplica TODA la geometría local (Transform) y los
+        /// grosores — el mismo reloj de relojería, del tamaño de un
+        /// edificio. 1f = el tamaño del bastón.</summary>
+        private static float Escala = 1f;
+
         /// <summary>Media anchura de las TAPAS (el extremo ancho).</summary>
         private const float HalfW = 13f;
 
@@ -84,13 +92,34 @@ namespace AethonMod.Content.VFX
         /// devuelve CERRADO (contrato v6.10).</summary>
         public static void Draw(Projectile p, float age, int seed)
         {
+            Draw(p, age, seed, 1f);
+        }
+
+        /// <summary>v6.50.45 — EL RELOJ GIGANTE DEL JEFE: la misma máquina,
+        /// la misma arena — ESCALADA (1f = el del bastón; el jefe lo invoca
+        /// a 2.6f: ~140 px de alto, un edificio de tiempo).</summary>
+        public static void Draw(Projectile p, float age, int seed, float escala)
+        {
+            Escala = MathHelper.Clamp(escala, 0.25f, 6f);
+            try
+            {
+                DrawInterno(p, age, seed);
+            }
+            finally
+            {
+                Escala = 1f;   // sin estado entre relojes
+            }
+        }
+
+        private static void DrawInterno(Projectile p, float age, int seed)
+        {
             _current = p;   // para los fantasmas (el rango del tiempo lento)
             try
             {
                 float time = Main.GlobalTimeWrappedHourly;
 
                 // === LA FLOTACIÓN (visual — el reloj de relojería respira) ===
-                float bob = MathF.Sin(age * 0.045f) * 5f;
+                float bob = MathF.Sin(age * 0.045f) * 5f * Escala;
                 Vector2 center = p.Center - Main.screenPosition + new Vector2(0f, bob);
 
                 // === LA FASE DEL CICLO (determinista por edad) ===
@@ -100,13 +129,13 @@ namespace AethonMod.Content.VFX
 
                 // === 1. LA MASA (AlphaBlend PRIMERO — el polvo que OCLUYE) ===
                 BrumaFX.BeginMass();
-                BrumaFX.Cloud(center, 46f, AuraMasa, seed + 11, time * 0.22f,
+                BrumaFX.Cloud(center, 46f * Escala, AuraMasa, seed + 11, time * 0.22f,
                     puffs: 5, alpha: 0.13f);
                 Main.spriteBatch.End();
 
                 // === 2. LOS AFTERIMAGES DEL TIEMPO LENTO (los fantasmas de
                 //     los enemigos cercanos — sus sprites re-dibujados) ===
-                DrawFantasmas();
+                if (Escala <= 1.2f) DrawFantasmas();   // solo el del bastón
 
                 // === 3. EL RELOJ (Additive: marco + arena + corriente) ===
                 BeginAdditive();
@@ -120,7 +149,7 @@ namespace AethonMod.Content.VFX
                 {
                     float g = (ciclo - Caida) / (float)Giro;
                     BeginAdditive();
-                    OndaLib.Pulse(Main.spriteBatch, center, g * 0.9f, 190f,
+                    OndaLib.Pulse(Main.spriteBatch, center, g * 0.9f, 190f * Escala,
                         PulsoOnda, 0.8f, seed);
                     Main.spriteBatch.End();
                 }
@@ -191,7 +220,7 @@ namespace AethonMod.Content.VFX
                 float rx = MathF.Cos(ang) * (HalfW + 5f);
                 Vector2 local = new(rx, ry);
                 Vector2 world = Transform(center, local, rot);
-                Quad(Glow, world, new Vector2(4.5f, 4.5f), 0f, Tint(VidrioAlma, 0.5f));
+                Quad(Glow, world, new Vector2(4.5f * Escala, 4.5f * Escala), 0f, Tint(VidrioAlma, 0.5f));
             }
         }
 
@@ -232,7 +261,7 @@ namespace AethonMod.Content.VFX
                     float half = HalfAnchoEn(MathF.Abs(y));
                     float x = (VFXCore.Hash01(seed, i, 17) - 0.5f) * 2f * half * 0.8f;
                     Vector2 world = Transform(center, new Vector2(x, y), rot);
-                    Quad(Glow, world, new Vector2(2.4f, 2.4f), 0f, Tint(Arena, 0.55f));
+                    Quad(Glow, world, new Vector2(2.4f * Escala, 2.4f * Escala), 0f, Tint(Arena, 0.55f));
                 }
                 else if (c < inicio + Cruce)
                 {
@@ -248,13 +277,13 @@ namespace AethonMod.Content.VFX
                         (VFXCore.Hash01(seed, i, 29) - 0.5f) * 2f;
                     Vector2 world = Transform(center, local, rot);
                     // El grano en vuelo es el MÁS BRILLANTE (la corriente).
-                    Quad(Glow, world, new Vector2(3.0f, 3.0f), 0f, Tint(ArenaCaliente, 0.8f));
+                    Quad(Glow, world, new Vector2(3.0f * Escala, 3.0f * Escala), 0f, Tint(ArenaCaliente, 0.8f));
                 }
                 else
                 {
                     // YA ABAJO: su sitio fijo del montículo creciente.
                     Vector2 world = Transform(center, PosMonticulo(i, seed, sAbajo), rot);
-                    Quad(Glow, world, new Vector2(2.4f, 2.4f), 0f, Tint(Arena, 0.6f));
+                    Quad(Glow, world, new Vector2(2.4f * Escala, 2.4f * Escala), 0f, Tint(Arena, 0.6f));
                 }
             }
 
@@ -264,12 +293,12 @@ namespace AethonMod.Content.VFX
             {
                 Vector2 cuelloTop = Transform(center, new Vector2(0f, sArriba * NeckY), rot);
                 Vector2 cuelloBot = Transform(center, new Vector2(0f, sAbajo * NeckY), rot);
-                CapsulaWorld(cuelloTop, cuelloBot, 2.2f, Tint(ArenaCaliente, 0.5f));
+                CapsulaWorld(cuelloTop, cuelloBot, 2.2f * Escala, Tint(ArenaCaliente, 0.5f));
                 // EL DESTELLO del cuello (la boca de la corriente).
-                LumenLib.Flare(Main.spriteBatch, cuelloTop, 14f, Arena, 0.5f, time * 1.4f);
+                LumenLib.Flare(Main.spriteBatch, cuelloTop, 14f * Escala, Arena, 0.5f, time * 1.4f);
                 // El respirar del montículo lleno: brillo creciente abajo.
                 Vector2 monticulo = Transform(center, new Vector2(0f, sAbajo * (HalfH - 4f)), rot);
-                LumenLib.Bloom(Main.spriteBatch, monticulo, 10f, Arena, 0.28f, 2);
+                LumenLib.Bloom(Main.spriteBatch, monticulo, 10f * Escala, Arena, 0.28f, 2);
             }
 
             // === EL VAIVÉN de todo el polvo (la vida sutil): una mota
@@ -279,8 +308,8 @@ namespace AethonMod.Content.VFX
                 float ang = time * (0.32f + 0.14f * k) * ((k & 1) == 0 ? 1f : -1f)
                             + VFXCore.Hash01(seed, 3 + k, 5) * MathHelper.TwoPi;
                 Vector2 world = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.55f)
-                    * (HalfW + 14f + 6f * MathF.Sin(time * 0.5f + k));
-                Quad(Glow, world, new Vector2(2.0f, 2.0f), 0f, Tint(Arena, 0.35f));
+                    * ((HalfW + 14f + 6f * MathF.Sin(time * 0.5f + k)) * Escala);
+                Quad(Glow, world, new Vector2(2.0f * Escala, 2.0f * Escala), 0f, Tint(Arena, 0.35f));
             }
         }
 
@@ -373,10 +402,12 @@ namespace AethonMod.Content.VFX
                 "AethonMod/Content/Effects/Procedural/SoftGlow")).Value;
 
         /// <summary>Transforma un punto LOCAL del reloj a pantalla (con la
-        /// rotación de la inversión acumulada).</summary>
+        /// rotación de la inversión acumulada — y LA ESCALA v6.50.45: el
+        /// gigante del jefe es el MISMO reloj, multiplicado).</summary>
         private static Vector2 Transform(Vector2 center, Vector2 local, float rot)
         {
             float c = MathF.Cos(rot), s = MathF.Sin(rot);
+            local *= Escala;
             return center + new Vector2(local.X * c - local.Y * s, local.X * s + local.Y * c);
         }
 
@@ -384,6 +415,8 @@ namespace AethonMod.Content.VFX
         private static void CapsulaLocal(Vector2 center, float rot, Vector2 a, Vector2 b,
             float width, float extra, Color tint)
         {
+            width *= Escala;
+            extra *= Escala;
             Vector2 wa = Transform(center, a, rot);
             Vector2 wb = Transform(center, b, rot);
             Vector2 mid = (wa + wb) * 0.5f;

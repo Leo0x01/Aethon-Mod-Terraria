@@ -198,50 +198,25 @@ namespace AethonMod.Content.Players
                 }
             }
 
-            // === LA FORMA ASCENDIDA — v6.50.44, LA VERSIÓN DIVINA ===
-            //     «debe ser un item cosmetico digno de un dios»: el aura
-            //     base vive por el PORTADOR (arriba) — y aquí viven sus
-            //     CUATRO milagros de polvo y luz.
+            // === LA FORMA ASCENDIDA — v6.50.45, EL PATRÓN DIVINO ===
+            //     «se sigue viendo simple, no es nada divina, además tiene
+            //     2 círculos de color plano semitransparentes»: el aura
+            //     vive por el PORTADOR (arriba) con el patrón Divino NUEVO
+            //     de AuraLib (EL HALO DORADO de perlas sobre la cabeza,
+            //     las ALAS DE LUZ que se despliegan al correr, el CÍRCULO
+            //     RÚNICO bajo los pies, LOS RAYOS DIVINOS, los ECOS y las
+            //     CHISPAS — y CERO discos planos: los 2 círculos murieron).
+            //     Aquí solo quedan los DOS milagros de SUELO que el patrón
+            //     no cubre: la HUELLA y el PULSO.
             if (FormaAscendida)
             {
                 Vector2 centro = Player.Center;
-                float t = Main.GlobalTimeWrappedHourly;
 
-                // --- LA CORONA DEL ASCENSO: SIETE puntos de luz en arco
-                //     sobre la cabeza, respirando (la diadema del dios —
-                //     el del centro más alto: el arco lee como corona). ---
-                for (int c = 0; c < 7; c++)
-                {
-                    float f = c / 6f;                                  // 0..1
-                    float ang = -MathHelper.PiOver2 + (f - 0.5f) * 2.4f; // arco ±69°
-                    float alza = 1f + 0.28f * (1f - MathF.Abs(f - 0.5f) * 2f); // el del centro más alto
-                    float r = 26f * scale * alza * (1f + 0.06f * MathF.Sin(t * 2.2f + c));
-                    Vector2 punto = head + new Vector2(MathF.Cos(ang) * r, MathF.Sin(ang) * r * Player.gravDir);
-                    if (Main.rand.NextBool(10))
-                    {
-                        Dust d = Dust.NewDustPerfect(punto, DustID.Enchanted_Gold,
-                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f),
-                                        -Main.rand.NextFloat(0.2f, 0.5f) * Player.gravDir),
-                            200, new Color(255, 238, 170), 0.65f);
-                        d.noGravity = true;
-                        d.fadeIn = 0f;
-                    }
-                }
-
-                // --- EL RAYO DIVINO: polvo de luz CAYENDO DEL CIELO sobre
-                //     el portador (la bendición vertical — el dios camina
-                //     bajo su propio rayo de sol). ---
-                if (Main.rand.NextBool(4))
-                {
-                    Dust d = Dust.NewDustPerfect(
-                        centro + new Vector2(Main.rand.NextFloat(-16f, 16f),
-                            -Main.rand.NextFloat(170f, 210f)),
-                        DustID.GoldFlame,
-                        new Vector2(Main.rand.NextFloat(-0.3f, 0.3f), Main.rand.NextFloat(1.6f, 2.6f)),
-                        130, new Color(255, 244, 200), 0.9f);
-                    d.noGravity = true;
-                    d.fadeIn = 0f;
-                }
+                // v6.50.45 — LA CORONA DEL ASCENSO y EL RAYO DIVINO
+                //     (los milagros de polvo de la .44) MURIERON aquí: el
+                //     patrón Divino de AuraLib ya dibuja EL HALO DE PERLAS
+                //     sobre la cabeza y LOS RAYOS DIVINOS del cielo — dos
+                //     capas encima era RUIDO, no divinidad.
 
                 // --- LA HUELLA DE LUZ: al moverse, el suelo queda sembrado
                 //     de motas doradas (el rastro del tránsito). ---

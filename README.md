@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.44 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.45 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,8 +14,31 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.44)
+## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.45)
 
+- **v6.50.45 — EL JEFE QUE SE ESFUMABA + LAS CINCO ARMAS DEL MOD**: los DOS
+  bugs de despawn tenían UNA causa (vanilla `CheckActive` mataba en secreto
+  al jefe a media llegada — nacía 860 px fuera del rectángulo que refresca
+  su `timeLeft`, y desde la .43 la llegada puede durar la noche entera):
+  la llegada y la muerte son CINE (`CheckActive` false) y la sombra SIGUE AL
+  JUGADOR cada tick. Y el jefe usa **LOS CINCO PROYECTILES DE LOS BASTONES
+  DEL MOD**: el RELOJ DE ARENA CÓSMICO a ×2.6 (el renderer del bastón
+  escalado + EL PESO que aplasta y hunde), el CORO ESPECTRAL (seis notas
+  orbitando a la presa, cada una canta su anillo y el frente corta), la
+  MANADA ASTRAL como NPC de verdad (`CazadorAstral`: MENOS vida, MÁS
+  lento, EN CAMADAS de hasta diez — se matan, se apagan con su luz), el
+  TELAR DE CONSTELACIONES en fase alta (el jefe CORRE el círculo alrededor
+  del jugador mientras las siete estrellas se clavan y la figura encendida
+  ATRAPA), y el DECRETO DEL ECLIPSE en cada cambio de fase (más grande por
+  fase, el jefe INMÓVIL todo el decreto — la ventana de escape literal).
+  Además: **La Forma Ascendida DIVINA de verdad** (patrón `Divino`: halo de
+  perlas, alas de luz, círculo rúnico, rayos divinos — LOS DOS CÍRCULOS
+  PLANOS MUERTOS) y **el Altar Antiguo reescrito** (cristal gema con filo
+  de oro, runas talladas «F»/«∠», medallón del sol, vetas kintsugi).
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.45`,
+  release con `AethonMod.tmod` adjunto y verificado byte a byte).
+- Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
+  sin excepciones; `.tmod` de 394 entradas auditado.
 - **v6.50.44 — EL DESCENSO DEL CIELO + EL JEFE QUE TE LEE**: el jefe ya no
   nace «bajo el sol» (nunca estaba ahí) — ahora **UN PILAR DE LUZ CAE DEL
   CIELO** y Aethon se materializa en su cúspide y **BAJA por él hasta la

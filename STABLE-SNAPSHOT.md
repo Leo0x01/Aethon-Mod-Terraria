@@ -1,10 +1,52 @@
-# AethonMod — ESTADO ACTUAL (v6.50.44)
+# AethonMod — ESTADO ACTUAL (v6.50.45)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-30 (tag `v6.50.44`, release publicada).
+> Última actualización: 2026-09-30 (tag `v6.50.45`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.45 = EL JEFE QUE SE ESFUMABA + LAS CINCO ARMAS DEL MOD + LA
+  FORMA ASCENDIDA DIVINA + EL ALTAR REESCRITO** — la segunda ronda sobre
+  la .44, NUEVE pedidos: (1-2) los DOS bugs de despawn con UNA causa
+  (decompile de `NPC.CheckActive`: `timeLeft` 937 t refrescado solo con
+  jugador a ±(1180,760) px — el jefe nacía 860 px fuera del rectángulo
+  vertical y, desde que la .43 lo hizo invocable A CUALQUIER HORA, la
+  llegada podía durar la noche entera → moría en secreto a los 15,6 s):
+  la llegada y la muerte son CINE (`CheckActive` false) y la sombra
+  SIGUE AL JUGADOR cada tick (`SeguirEscondido` — nace sobre TI, no
+  sobre el punto del llamado); (3) La Forma Ascendida con el patrón
+  `Divino` NUEVO (`EmitirDivino` en 7 capas: cuerpo flipbook, rayos
+  divinos, círculo rúnico, HALO de 26 perlas con profundidad, ALAS que
+  se despliegan con la velocidad, ecos, chispas estelares) y LOS DOS
+  CÍRCULOS PLANOS MUERTOS (`Glow=0/Rayos=0/Anillos=0` — jamás pasa por
+  el glow de `Emitir`); en CosmeticPlayer murieron la corona de 7 puntos
+  y el rayo de polvo de la .44 (ruido sobre el patrón); (4) el Altar
+  Antiguo reescrito (cristal gema 13×14 con filo de oro + satélites +
+  sombra, runas talladas «F»/«∠» con marco hundido, MEDALLÓN DEL SOL
+  con sigilo, vetas kintsugi, esquinas desportilladas — ítem 24×24
+  idem); (5) EL RELOJ DE ARENA CÓSMICO GIGANTE (el renderer del bastón
+  escalado ×2.6 + EL PESO que aplasta y hunde, la inversión como pulso);
+  (6) EL CORO ESPECTRAL (6 notas orbitando al ancla que deriva hacia la
+  presa; cada ciclo la nota siguiente canta su anillo y el FRENTE
+  corta); (7) LA MANADA ASTRAL como NPC nuevo `CazadorAstral` (vida
+  5000 = MENOS, velocidad 6.5 = la mitad del bastón, camadas de 5 hasta
+  10 vivos = MAYOR NÚMERO; 24 s de vida; se apagan si Aethon muere;
+  textura de bestiario 34×20); (8) EL TELAR DE CONSTELACIONES en fase 4+
+  (el jefe CORRE el círculo — órbita 470 px, una vuelta cada ~2 s —
+  mientras 7 estrellas se clavan cada 24 t y la figura encendida corta
+  a TODO jugador DENTRO por ray-casting); (9) EL DECRETO DEL ECLIPSE en
+  CADA cambio de fase (círculo 80→660+90·(fase−2) px creciendo +2 px/t,
+  ejecución cada 15 t, LA MARCA DEL OJO, y el jefe INMÓVIL TODO el
+  decreto — la ventana de escape literal). Estados 8-12 también son
+  «pelea» para el cerrojo del mediodía del espejo. Anuncios es+en nuevos
+  (Reloj/Coro/Manada/Telar/Decreto) + `CazadorAstral.DisplayName`.
+  Verificación: verify 0/0 · build real 0/0 · .tmod 6.337.827 bytes
+  (md5 28a196d66a2cd70fbce8085c985be2aa), 394 entradas (393+CazadorAstral.
+  rawimg), EOF exacto, 24 planas, símbolos vivos en DLL + muertos de la
+  .44 ausentes, keysets es 491→496 / en 493→498 (+5 simétricas), literales
+  nuevos dentro del paquete · servidor headless carga sin excepciones.
+  **Pendiente: verificación EN JUEGO** (la llegada sin esfumarse moviéndose
+  el jugador; las cinco armas; el divino del cosmético; el altar nuevo).
 - **v6.50.44 = EL DESCENSO DEL CIELO + EL JEFE QUE TE LEE + dos ítems
   borrados + sprites del origen** — cinco pedidos: (1) la aparición estilo
   EMPERATRIZ: pilar de luz cayendo del cielo + jefe materializado en la
@@ -22,8 +64,7 @@
   4a783ad), 393 entradas (−2 quirúrgicas), EOF exacto, símbolos
   vivos/muertos verificados en DLL, keysets es=491/en=493 (−2 simétricas),
   tooltips nuevos dentro del paquete · servidor headless carga sin
-  excepciones. **Pendiente: verificación EN JUEGO** (el pilar cayendo + el
-  descenso; la IA nueva; el cosmético divino; los sprites).
+  excepciones.
 - **v6.50.43 = EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se
   gasta)** — feedback sobre la .42: «el jefe no puedo invocarlo de noche,
   ya que dice solo de día… no tiene sentido eso ya que al invocar el jefe

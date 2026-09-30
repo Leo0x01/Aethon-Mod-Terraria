@@ -75,6 +75,10 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloEstallidoMina = 12;
         public const int EstiloColumnaJuicio = 13;   // v6.50.36 — Aethon, LA LUZ
         public const int EstiloPilarAparicion = 14;  // v6.50.44 — EL PILAR DEL CIELO (cosmético: la entrada de la emperatriz)
+        public const int EstiloRelojGigante = 15;    // v6.50.45 — EL RELOJ DE ARENA GIGANTE del bastón, ×2.6
+        public const int EstiloCoroJefe = 16;        // v6.50.45 — EL CORO ESPECTRAL alrededor de la presa
+        public const int EstiloTelarJefe = 17;       // v6.50.45 — EL TELAR DE CONSTELACIONES (la trampa)
+        public const int EstiloDecretoJefe = 18;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -91,6 +95,29 @@ namespace AethonMod.Content.Projectiles.Jefes
         private Vector2 _posAnterior;    // la cola del virote
         private int _ticksDisolver;      // v6.50.44 — el fade del pilar de la aparición
 
+        // === v6.50.45 — EL CORO ESPECTRAL DEL JEFE (sub-entidades lógicas,
+        //     el patrón de la casa: NADA de proyectiles extra) ===
+        private sealed class AnilloCoro
+        {
+            public Vector2 Origen;
+            public float Edad;
+            public int Nota;
+        }
+        private readonly Vector2[] _coroNotas = new Vector2[6];
+        private readonly float[] _coroFase = new float[6];
+        private readonly float[] _coroRadio = new float[6];
+        private readonly float[] _coroVel = new float[6];
+        private readonly float[] _coroAlto = new float[6];
+        private readonly System.Collections.Generic.List<AnilloCoro> _coroAnillos = new(10);
+        private bool _coroSembrada;
+        private int _coroNotaActual;
+
+        // === v6.50.45 — EL TELAR DEL JEFE (las estrellas clavadas) ===
+        private readonly Vector2[] _estrellas = new Vector2[7];
+        private readonly bool[] _estrellaClavada = new bool[7];
+        private bool _telarCentroFijo;
+        private float _telarFlash;
+
         // === LAS PALETAS DE LOS CINCO ===
         private static readonly Color TealCristal = new(168, 232, 255);
         private static readonly Color TealVacio = new(96, 224, 220);
@@ -101,6 +128,8 @@ namespace AethonMod.Content.Projectiles.Jefes
         private static readonly Color OroGrimorio = new(245, 196, 81);
         private static readonly Color BlancoCaliente = new(255, 240, 190);
         private static readonly Color NebulosaNube = new(55, 42, 71); // violeta oscuro premezclado (XNA Color no define +)
+        private static readonly Color ColorOroEclipse = new(255, 214, 110);  // v6.50.45 — el oro del decreto
+        private static readonly Color ColorVioletaEclipse = new(150, 80, 255); // v6.50.45 — el fuego oscuro del decreto
 
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
@@ -158,6 +187,33 @@ namespace AethonMod.Content.Projectiles.Jefes
                     Projectile.timeLeft = 340;
                     Projectile.hostile = false;
                     Projectile.damage = 0;
+                    break;
+
+                // === v6.50.45 — LAS ARMAS DEL MOD EN MANOS DEL JEFE ===
+                case EstiloRelojGigante:
+                    // EL RELOJ GIGANTE: contacto con el CUERPO del reloj
+                    // (×2.6 — un edificio de tiempo) + el peso de la arena.
+                    Projectile.timeLeft = 520;
+                    Projectile.width = 110;
+                    Projectile.height = 140;
+                    break;
+
+                case EstiloCoroJefe:
+                    // EL CORO: las notas y sus anillos son TODO el daño.
+                    Projectile.timeLeft = 640;
+                    Projectile.hostile = false;
+                    break;
+
+                case EstiloTelarJefe:
+                    // EL TELAR: las estrellas y la ignición son TODO el daño.
+                    Projectile.timeLeft = 490;
+                    Projectile.hostile = false;
+                    break;
+
+                case EstiloDecretoJefe:
+                    // EL DECRETO: el círculo y sus ejecuciones son TODO el daño.
+                    Projectile.timeLeft = 470;
+                    Projectile.hostile = false;
                     break;
             }
         }
@@ -253,6 +309,15 @@ namespace AethonMod.Content.Projectiles.Jefes
             {
                 Projectile.hostile = false;
                 Projectile.damage = 0;
+            }
+
+            // v6.50.45 — LAS ARMAS SIN CONTACTO (coro/telar/decreto): la
+            // misma autocuración MP del pilar — el msg 27 no lleva el
+            // OnSpawn, y sin esto los remotos evaluaban colisión hostil.
+            if (Estilo == EstiloCoroJefe || Estilo == EstiloTelarJefe ||
+                Estilo == EstiloDecretoJefe)
+            {
+                Projectile.hostile = false;
             }
 
             Player presa = Presa();
@@ -669,6 +734,283 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                     break;
                 }
+
+                // =============================================================
+                //  v6.50.45 — EL RELOJ DE ARENA GIGANTE (la petición: «el
+                //  proyectil de bastón del reloj de arena cósmica pero en
+                //  GIGANTE»): la MISMA línea de tiempo del bastón (290 t
+                //  de caída + 26 de inversión, 26 granos, giros de π
+                //  acumulados) a ×2.6 — y el PESO invertido: la arena
+                //  aplasta a los JUGADORES de abajo (daño cada 10 t +
+                //  empuje hacia ABAJO — el castigo del volador) y cada
+                //  INVERSIÓN es el pulso que HUNDE de verdad.
+                // =============================================================
+                case EstiloRelojGigante:
+                {
+                    // LA LLEGADA: frena y queda flotando (un objeto de
+                    // escritorio ENORME).
+                    Projectile.velocity *= 0.86f;
+                    if (Projectile.velocity.LengthSquared() < 0.01f)
+                        Projectile.velocity = Vector2.Zero;
+
+                    // LA LÍNEA DE TIEMPO del bastón (la MISMA: la fuente
+                    // única de la casa — 290 + 26, giro π suave).
+                    float cicloR = _edad % 316f;
+                    int vueltasR = (int)(_edad / 316f);
+                    if (cicloR >= 290f)
+                    {
+                        float g = (cicloR - 290f) / 26f;
+                        float suave = g * g * (3f - 2f * g);
+                        Projectile.rotation = (vueltasR + suave) * MathHelper.Pi;
+                    }
+                    else
+                        Projectile.rotation = vueltasR * MathHelper.Pi;
+
+                    // EL PESO DE LA ARENA (mientras cae, cada 10 t).
+                    bool cayendoR = cicloR < 290f;
+                    if (cayendoR && _edad >= 10f && ((int)_edad % 10) == 0)
+                        PesarJugadores(0.35f, 2.6f, 300f);
+
+                    // LA INVERSIÓN: el pulso que HUNDE.
+                    if (cicloR >= 290f && cicloR < 291.5f && _edad > 26f)
+                    {
+                        PesarJugadores(0.90f, 6.0f, 340f);
+                        if (Main.netMode != NetmodeID.Server)
+                        {
+                            OndaLib.Kick(4f, 12);
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item45.WithPitchOffset(-0.35f), Projectile.Center);
+                            for (int i = 0; i < 10; i++)
+                            {
+                                float ang = i / 10f * MathHelper.TwoPi + Seed * 0.13f;
+                                Dust d = Dust.NewDustPerfect(Projectile.Center, DustID.GoldFlame,
+                                    new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                                    Main.rand.NextFloat(1.2f, 3.2f),
+                                    150, new Color(255, 220, 130), 1.0f);
+                                d.noGravity = true;
+                            }
+                        }
+                    }
+
+                    if (_edad > 500f) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  v6.50.45 — EL CORO ESPECTRAL (la petición: «el proyectil
+                //  de bastón del coro espectral»): seis notas de luz
+                //  orbitan al ANCLA (que deriva hacia la presa — el coro
+                //  te sigue cantando) y cada ciclo LA NOTA SIGUIENTE emite
+                //  su anillo: el FRENTE del anillo corta a quien atraviesa
+                //  (|dist − radio| < 16). Daño bajo pero FRECUENTE: el
+                //  canto castiga al que se queda quieto.
+                // =============================================================
+                case EstiloCoroJefe:
+                {
+                    Projectile.velocity = Vector2.Zero;
+                    Player presaC = Presa();
+
+                    // EL ANCLA (ai[0..1] — por el cable) deriva hacia la presa.
+                    Vector2 ancla = new Vector2(Projectile.ai[0], Projectile.ai[1]);
+                    if (_edad <= 1f || ancla == Vector2.Zero)
+                    {
+                        ancla = Projectile.Center;
+                        Projectile.ai[0] = ancla.X;
+                        Projectile.ai[1] = ancla.Y;
+                    }
+                    if (presaC != null)
+                    {
+                        Vector2 dir = (presaC.Center - ancla).SafeNormalize(Vector2.Zero);
+                        ancla += dir * 0.9f;
+                    }
+                    Projectile.Center = ancla;
+                    Projectile.ai[0] = ancla.X;
+                    Projectile.ai[1] = ancla.Y;
+
+                    // LA SIEMBRA (órbitas propias: radio, velocidad y
+                    // sentido por nota — el coro nunca se alinea).
+                    if (!_coroSembrada)
+                    {
+                        for (int i = 0; i < 6; i++)
+                        {
+                            _coroFase[i] = VFXCore.Hash01(Seed, i, 71) * MathHelper.TwoPi;
+                            _coroRadio[i] = 200f + 130f * VFXCore.Hash01(Seed, i, 73);
+                            _coroVel[i] = (0.018f + 0.014f * VFXCore.Hash01(Seed, i, 77))
+                                * ((i & 1) == 0 ? 1f : -1f);
+                            _coroAlto[i] = -40f + 80f * VFXCore.Hash01(Seed, i, 79);
+                            _coroNotas[i] = ancla;
+                        }
+                        _coroSembrada = true;
+                    }
+
+                    // EL VUELO de las notas (elipses propias).
+                    for (int i = 0; i < 6; i++)
+                    {
+                        _coroFase[i] += _coroVel[i];
+                        _coroNotas[i] = ancla + new Vector2(
+                            MathF.Cos(_coroFase[i]) * _coroRadio[i],
+                            MathF.Sin(_coroFase[i]) * _coroRadio[i] * 0.6f + _coroAlto[i]);
+                    }
+
+                    // EL CANTO: cada ciclo (48 t — 36 en furia) la nota
+                    // siguiente EMITE su anillo.
+                    int cicloC = Par > 0.5f ? 36 : 48;
+                    if (((int)_edad % cicloC) == 0 && _edad > 8f && _edad < 540f)
+                    {
+                        int nota = _coroNotaActual++ % 6;
+                        _coroAnillos.Add(new AnilloCoro
+                        { Origen = _coroNotas[nota], Edad = 0f, Nota = nota });
+                        if (Main.netMode != NetmodeID.Server)
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item70.WithPitchOffset(-0.35f + nota * 0.13f),
+                                _coroNotas[nota]);
+                    }
+
+                    // LOS ANILLOS crecen y su FRENTE corta (autoridad).
+                    float radioFinalC = Par > 0.5f ? 300f : 260f;
+                    for (int a = _coroAnillos.Count - 1; a >= 0; a--)
+                    {
+                        AnilloCoro anillo = _coroAnillos[a];
+                        anillo.Edad += 1f;
+                        float radio = radioFinalC * (anillo.Edad / 44f);
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            for (int pl = 0; pl < Main.maxPlayers; pl++)
+                            {
+                                Player p = Main.player[pl];
+                                if (p == null || !p.active || p.dead) continue;
+                                float dP = Vector2.Distance(p.Center, anillo.Origen);
+                                if (Math.Abs(dP - radio) < 16f)
+                                    HerirJugador(p, (int)(Projectile.damage * 0.6f), anillo.Origen);
+                            }
+                        }
+                        if (anillo.Edad > 44f) _coroAnillos.RemoveAt(a);
+                    }
+
+                    if (_edad > 620f) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  v6.50.45 — EL TELAR DE CONSTELACIONES (la petición: «usar
+                //  el proyectil de El telar de Constelaciones para ATRAPAR
+                //  al jugador y provocar daño», con el jefe corriendo en
+                //  círculo alrededor): la PRIMERA estrella fija el CENTRO
+                //  de la figura DONDE ESTÁS y las siete se clavan cada 24 t
+                //  en el mundo (la figura NACE alrededor tuyo y QUEDA
+                //  CLAVADA — la ventana de escape es real); con ≥4 estrellas
+                //  la figura se ENCIENDE cada 30 t y TODO jugador DENTRO
+                //  del polígono paga el corte (ray-casting, como el bastón).
+                // =============================================================
+                case EstiloTelarJefe:
+                {
+                    Projectile.velocity = Vector2.Zero;
+                    Player presaT = Presa();
+
+                    // LA PRIMERA ESTRELLA fija el centro (a los 20 t — un
+                    // respiro para LEER lo que viene).
+                    if (!_telarCentroFijo && _edad >= 20f && presaT != null)
+                    {
+                        _telarCentroFijo = true;
+                        Projectile.Center = presaT.Center;
+                        Projectile.ai[0] = presaT.Center.X;   // por el cable
+                        Projectile.ai[1] = presaT.Center.Y;
+                    }
+
+                    // EL CLAVADO: una estrella cada 24 t (siete — la figura
+                    // se cierra a los ~165 t).
+                    int clavadas = 0;
+                    for (int i = 0; i < 7; i++) if (_estrellaClavada[i]) clavadas++;
+                    int proxima = -1;
+                    for (int i = 0; i < 7; i++) if (!_estrellaClavada[i]) { proxima = i; break; }
+                    if (proxima >= 0 && _telarCentroFijo && _edad >= 20f + proxima * 24f)
+                    {
+                        float ang = proxima * MathHelper.TwoPi / 7f + Seed * 0.013f;
+                        float radio = 340f + 40f * VFXCore.Hash01(Seed, proxima, 83);
+                        _estrellas[proxima] = Projectile.Center +
+                            new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * radio;
+                        _estrellaClavada[proxima] = true;
+                        if (Main.netMode != NetmodeID.Server)
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item4.WithPitchOffset(0.3f + proxima * 0.06f),
+                                _estrellas[proxima]);
+                    }
+
+                    // EL FLASH de la ignición se apaga.
+                    if (_telarFlash > 0.003f) _telarFlash *= 0.85f;
+                    else _telarFlash = 0f;
+
+                    // LA IGNICIÓN (≥4 estrellas, cada 30 t): el corte a
+                    // TODO jugador DENTRO del polígono (el telar ATRAPA).
+                    if (clavadas >= 4 && ((int)_edad % 30) == 0 && _edad > 30f)
+                    {
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            for (int pl = 0; pl < Main.maxPlayers; pl++)
+                            {
+                                Player p = Main.player[pl];
+                                if (p == null || !p.active || p.dead) continue;
+                                if (PuntoEnPoligono(p.Center, _estrellas, clavadas))
+                                    HerirJugador(p, (int)(Projectile.damage * 0.65f),
+                                        Projectile.Center);
+                            }
+                        }
+                        _telarFlash = 1f;
+                        if (clavadas >= 7 && Main.netMode != NetmodeID.Server)
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(0.4f), Projectile.Center);
+                    }
+
+                    if (_edad > 480f) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  v6.50.45 — EL DECRETO DEL ECLIPSE (la petición: «el
+                //  proyectil el decreto del eclipse EN EL CAMBIO DE FASES y
+                //  POR CADA FASE QUE SEA MÁS GRANDE, al usarlo el jefe queda
+                //  INMÓVIL así le da tiempo al jugador a escapar»): el
+                //  círculo nace pequeño sobre el jugador, CRECE +2 px/t
+                //  hasta su radio máximo (P2 660 → P5 930 — ai[1] = la
+                //  fase) y cada 15 t LA EJECUCIÓN: la onda viaja del centro
+                //  al borde y corta a TODO jugador del círculo. El jefe
+                //  inmóvil en su estado ES la ventana de escape — y la
+                //  última ejecución (círculo lleno) ES LA SENTENCIA: paga
+                //  doble.
+                // =============================================================
+                case EstiloDecretoJefe:
+                {
+                    Projectile.velocity = Vector2.Zero;
+
+                    // EL RADIO: 80 + 2·edad, tope LA FASE.
+                    int faseD = Math.Max(2, (int)Par);
+                    float radioMaxD = 660f + (faseD - 2) * 90f;
+                    float radio = Math.Min(80f + 2f * _edad, radioMaxD);
+                    Projectile.ai[0] = radio;   // por el cable (el visual remoto)
+
+                    // LA EJECUCIÓN CÍCLICA (cada 15 t — el beat del bastón).
+                    if (((int)_edad % 15) == 0 && _edad >= 15f &&
+                        Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        bool sentencia = radio >= radioMaxD - 4f;   // la FINAL paga doble
+                        for (int pl = 0; pl < Main.maxPlayers; pl++)
+                        {
+                            Player p = Main.player[pl];
+                            if (p == null || !p.active || p.dead) continue;
+                            if (Vector2.Distance(p.Center, Projectile.Center) <= radio)
+                                HerirJugador(p, (int)(Projectile.damage *
+                                    (sentencia ? 1.1f : 0.55f)), Projectile.Center);
+                        }
+                        if (Main.netMode != NetmodeID.Server)
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(-0.3f), Projectile.Center);
+                    }
+
+                    // La vida: el círculo terminó de crecer + un compás.
+                    float vidaD = (radioMaxD - 80f) / 2f + 25f;
+                    if (_edad > vidaD) Projectile.Kill();
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -683,6 +1025,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloNubeNebulosa => new Vector3(0.20f, 0.10f, 0.34f),
                 EstiloRunaMemorizada or EstiloPernoEstelar => new Vector3(0.38f, 0.28f, 0.10f),
                 EstiloPilarAparicion => Vector3.Zero,   // su luz la pone SU caso (la columna doble)
+                EstiloRelojGigante => Vector3.Zero,      // su luz la pone SU renderer (la del bastón)
+                EstiloCoroJefe => new Vector3(0.42f, 0.32f, 0.14f),
+                EstiloTelarJefe => new Vector3(0.26f, 0.26f, 0.44f),
+                EstiloDecretoJefe => Vector3.Zero,       // su caso pone la suya (el eclipse)
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -691,6 +1037,58 @@ namespace AethonMod.Content.Projectiles.Jefes
         // ==================================================================
         //  LAS DETONACIONES (lógica del juego — polvos y cuerpos del motor)
         // ==================================================================
+
+        // ==================================================================
+        //  v6.50.45 — LOS CORTES HONESTOS A JUGADORES (el cauce del motor:
+        //  Hurt respeta iframes, escudos y esquiva — nada de daño crudo).
+        //  Solo la AUTORIDAD hiere (SP/servidor); los remotos simulan el
+        //  visual con su propia IA (netImportant, el patrón del coro del
+        //  bastón).
+        // ==================================================================
+
+        /// <summary>El corte a un jugador (desde un punto — la dirección
+        /// del golpe sale sola).</summary>
+        private void HerirJugador(Player p, int dmg, Vector2 desde)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            if (p == null || !p.active || p.dead || dmg <= 0) return;
+            int dir = p.Center.X < desde.X ? -1 : 1;
+            // tML 2026.07: ByProjectile(int projectile, int damage) — el
+            // daño entra en la RAZÓN de la muerte (lo que dice el log).
+            p.Hurt(Terraria.DataStructures.PlayerDeathReason.ByProjectile(
+                Projectile.whoAmI, dmg), dmg, dir);
+        }
+
+        /// <summary>EL PESO DEL RELOJ: daño + HUNDIR a los jugadores en el
+        /// radio (la gravedad aumentada del tiempo).</summary>
+        private void PesarJugadores(float mult, float hundimiento, float radio)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            for (int i = 0; i < Main.maxPlayers; i++)
+            {
+                Player p = Main.player[i];
+                if (p == null || !p.active || p.dead) continue;
+                if (Vector2.Distance(p.Center, Projectile.Center) > radio) continue;
+                HerirJugador(p, (int)(Projectile.damage * mult), Projectile.Center);
+                p.velocity.Y += hundimiento;
+            }
+        }
+
+        /// <summary>Punto-en-polígono por ray-casting (el veredicto del
+        /// telar — el MISMO algoritmo del bastón).</summary>
+        private static bool PuntoEnPoligono(Vector2 punto, Vector2[] vertices, int n)
+        {
+            if (n < 3) return false;
+            bool dentro = false;
+            for (int i = 0, j = n - 1; i < n; j = i++)
+            {
+                if (((vertices[i].Y > punto.Y) != (vertices[j].Y > punto.Y)) &&
+                    (punto.X < (vertices[j].X - vertices[i].X) * (punto.Y - vertices[i].Y) /
+                        (vertices[j].Y - vertices[i].Y) + vertices[i].X))
+                    dentro = !dentro;
+            }
+            return dentro;
+        }
 
         /// <summary>La púa estalla en ESQUIRLAS radiales (el coloso las escupe).</summary>
         private void DetonarPua()
@@ -776,6 +1174,17 @@ namespace AethonMod.Content.Projectiles.Jefes
             // registra como "Excepción silenciosa" — 27 stacks únicos en el
             // client.log del usuario, todas capturadas: ruido de diagnóstico).
             VFXCore.CerrarLoteSiAbierto();
+
+            // v6.50.45 — EL RELOJ GIGANTE camina por SU camino (el renderer
+            // del BASTÓN escalado ×2.6: gestiona SUS lotes enteros — la
+            // masa, el reloj y la onda de la inversión — y devuelve el lote
+            // CERRADO, el contrato v6.10).
+            if (Estilo == EstiloRelojGigante)
+            {
+                RelojArenaRenderer.Draw(Projectile, _edad, Seed, 2.6f);
+                VFXCore.ReabrirLoteVanilla();
+                return false;
+            }
 
             try
             {
@@ -961,6 +1370,50 @@ namespace AethonMod.Content.Projectiles.Jefes
                             VFXCore.Quad(Projectile.Center + off,
                                 AmbarEstelar * (0.8f * (1f - prog)),
                                 new Vector2(14f, 14f) * (1f - prog * 0.5f));
+                        }
+                        break;
+                    }
+
+                    // === v6.50.45 — EL TELAR: LOS HILOS de la constelación
+                    //     (coords de MUNDO — la figura que se dibuja sola,
+                    //     estrella a estrella, cerrándose N → 1) ===
+                    case EstiloTelarJefe:
+                    {
+                        int clavadasV = 0;
+                        for (int i = 0; i < 7; i++) if (_estrellaClavada[i]) clavadasV++;
+                        if (clavadasV >= 2)
+                        {
+                            float brillo = 0.35f + 0.65f * _telarFlash;
+                            Color cHilo = Color.Lerp(new Color(150, 170, 255), new Color(255, 255, 255), _telarFlash);
+                            for (int i = 0; i < clavadasV; i++)
+                            {
+                                int sig = (i + 1) % clavadasV;
+                                // el último hilo CIERRA la figura solo con las 7
+                                if (sig == 0 && clavadasV < 7) sig = clavadasV - 1;
+                                if (i == sig) continue;
+                                VFXCore.Line(_estrellas[i], _estrellas[sig],
+                                    cHilo * (0.4f * brillo), 2.4f + 2.6f * _telarFlash);
+                            }
+                        }
+                        break;
+                    }
+
+                    // === v6.50.45 — EL DECRETO: LOS GLIFOS rúnicos cabalgando
+                    //     el anillo (24 cápsulas que se RE-ESCRIBEN en cada
+                    //     ejecución — el contrato del bastón) ===
+                    case EstiloDecretoJefe:
+                    {
+                        float radioD = Projectile.ai[0] > 1f ? Projectile.ai[0] :
+                            Math.Min(80f + 2f * _edad, 660f);
+                        int beatIdx = (int)(_edad / 15f);
+                        for (int i = 0; i < 24; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 24f + t * 0.10f;
+                            Vector2 g = Projectile.Center +
+                                new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.86f) * radioD;
+                            float h = VFXCore.Hash01(Seed, i, 91 + (beatIdx % 7));
+                            VFXCore.Quad(g, ColorOroEclipse * (0.5f + 0.4f * h),
+                                new Vector2(5f + 5f * h, 2.2f), ang + MathHelper.PiOver2);
                         }
                         break;
                     }
@@ -1192,6 +1645,134 @@ namespace AethonMod.Content.Projectiles.Jefes
                             AmbarEstelar, 1f - prog, t);
                         OndaLib.Pulse(Main.spriteBatch, pos, prog, 130f,
                             OroGrimorio, 0.7f * (1f - prog), Seed);
+                        break;
+                    }
+
+                    // === v6.50.45 — EL CORO ESPECTRAL: las notas y sus anillos ===
+                    case EstiloCoroJefe:
+                    {
+                        // LA ESCALA (dorada → ceniza — la del bastón).
+                        Color[] escala =
+                        {
+                            new(255, 214, 110), new(255, 190, 92), new(225, 165, 96),
+                            new(198, 140, 82), new(172, 112, 66), new(150, 96, 55),
+                        };
+                        // LAS NOTAS: orbes de luz con su latido propio.
+                        for (int i = 0; i < 6; i++)
+                        {
+                            Vector2 np = _coroNotas[i] - Main.screenPosition;
+                            float tw = 0.6f + 0.4f * MathF.Sin(t * 3f + i * 2.1f);
+                            LumenLib.Bloom(Main.spriteBatch, np, 16f * tw,
+                                escala[i], 0.8f * tw, 2);
+                            LumenLib.Bloom(Main.spriteBatch, np, 6f,
+                                new Color(255, 248, 220), 0.9f, 2);
+                        }
+                        // LOS ANILLOS: frentes de onda expandiéndose (y su ECO
+                        // tenue detrás — la despedida del canto).
+                        float radioFinalV = Par > 0.5f ? 300f : 260f;
+                        for (int a = 0; a < _coroAnillos.Count; a++)
+                        {
+                            AnilloCoro anillo = _coroAnillos[a];
+                            Vector2 rp = anillo.Origen - Main.screenPosition;
+                            float prog = anillo.Edad / 44f;
+                            OndaLib.Pulse(Main.spriteBatch, rp, prog, radioFinalV,
+                                escala[anillo.Nota % 6], 0.65f * (1f - prog * 0.5f),
+                                Seed + anillo.Nota * 13);
+                            if (prog > 0.25f)
+                                OndaLib.Pulse(Main.spriteBatch, rp,
+                                    prog - 0.25f, radioFinalV,
+                                    escala[anillo.Nota % 6], 0.22f, Seed + anillo.Nota * 7);
+                        }
+                        break;
+                    }
+
+                    // === v6.50.45 — EL TELAR: las ESTRELLAS clavadas (la figura
+                    //     la dibujan los hilos de la FASE 1; aquí viven las
+                    //     estrellas — destellos de 4 puntas con parpadeo propio) ===
+                    case EstiloTelarJefe:
+                    {
+                        for (int i = 0; i < 7; i++)
+                        {
+                            if (!_estrellaClavada[i]) continue;
+                            Vector2 sp = _estrellas[i] - Main.screenPosition;
+                            float tw = 0.55f + 0.45f * MathF.Sin(t * 2.6f + i * 1.9f);
+                            Color cE = LumenLib.Hue(VFXCore.Hash01(Seed, i, 87) * 0.86f,
+                                0.62f, 0.95f);
+                            LumenLib.Flare(Main.spriteBatch, sp, 26f + 14f * _telarFlash,
+                                cE, (0.55f + 0.45f * _telarFlash) * tw, t * 0.7f + i);
+                            LumenLib.Bloom(Main.spriteBatch, sp, 10f,
+                                new Color(255, 255, 255), 0.85f * tw, 2);
+                        }
+                        // LA SEÑAL del centro (donde nació la figura — el
+                        // compás que la presa debe leer).
+                        if (_telarCentroFijo)
+                        {
+                            OndaLib.Pulse(Main.spriteBatch, pos,
+                                (_edad % 40f) / 40f, 120f,
+                                new Color(150, 170, 255), 0.4f, Seed);
+                        }
+                        break;
+                    }
+
+                    // === v6.50.45 — EL DECRETO DEL ECLIPSE: el círculo, la onda
+                    //     viajera, LA MARCA DEL OJO y el flash de la ejecución ===
+                    case EstiloDecretoJefe:
+                    {
+                        int faseD = Math.Max(2, (int)Par);
+                        float radioMaxD = 660f + (faseD - 2) * 90f;
+                        float radio = Projectile.ai[0] > 1f ? Projectile.ai[0] :
+                            Math.Min(80f + 2f * _edad, radioMaxD);
+                        float cyc = _edad % 15f;
+                        float flare = cyc < 5f ? 1f - cyc / 5f : 0f;
+
+                        // EL ANILLO de fuego oscuro (dos aros contrarrotantes
+                        // + el borde ámbar DESGARRADO del bastón).
+                        OrbitaLib.AnilloFino(pos, radio * 0.99f, t * 0.22f,
+                            OrbitaLib.Tint(ColorVioletaEclipse, 0.55f));
+                        OrbitaLib.AnilloFino(pos, radio * 1.04f, -t * 0.16f,
+                            OrbitaLib.Tint(ColorOroEclipse, 0.4f + 0.3f * flare));
+                        LumenLib.Bloom(Main.spriteBatch, pos, radio * 0.5f,
+                            ColorVioletaEclipse, 0.10f + 0.10f * flare, 2);
+
+                        // LA ONDA VIAJERA: del centro al borde en los 8 t
+                        // previos a la ejecución (el telégrafo del tajo).
+                        if (cyc >= 7f)
+                        {
+                            float prog = (cyc - 7f) / 8f;
+                            OndaLib.Pulse(Main.spriteBatch, pos, prog, radio,
+                                ColorOroEclipse, 0.55f, Seed);
+                        }
+
+                        // LA MARCA DEL OJO sobre la presa más cercana dentro
+                        // (esclerótica + iris + PUPILA VERTICAL que se
+                        // CONTRAE los 6 t previos al tajo — el ojo del bastón).
+                        Player marcado = Presa();
+                        if (marcado != null &&
+                            Vector2.Distance(marcado.Center, Projectile.Center) <= radio)
+                        {
+                            Vector2 ep = marcado.Center - Main.screenPosition
+                                - new Vector2(0f, 58f);
+                            float contraccion = cyc >= 9f ? (cyc - 9f) / 6f : 0f;
+                            // esclerótica (aplanada — un ojo que FLOTa).
+                            LumenLib.Bloom(Main.spriteBatch, ep, 30f,
+                                new Color(255, 244, 214), 0.35f, 2);
+                            // iris.
+                            LumenLib.Bloom(Main.spriteBatch, ep, 14f,
+                                ColorVioletaEclipse, 0.7f, 2);
+                            // LA PUPILA VERTICAL: se cierra antes del corte.
+                            float anchoP = MathHelper.Lerp(5.5f, 1.2f, contraccion);
+                            Main.spriteBatch.Draw(VFXCore.SoftGlow, ep, null,
+                                new Color(255, 250, 230) * 0.9f, 0f,
+                                new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f,
+                                new Vector2(anchoP / VFXCore.SoftGlow.Width,
+                                            16f / VFXCore.SoftGlow.Height),
+                                SpriteEffects.None, 0f);
+                        }
+
+                        // EL FLASH de la ejecución (la sobre-exposición).
+                        if (flare > 0f)
+                            LumenLib.Bloom(Main.spriteBatch, pos, radio * 1.1f,
+                                new Color(255, 244, 214), 0.22f * flare, 2);
                         break;
                     }
                 }

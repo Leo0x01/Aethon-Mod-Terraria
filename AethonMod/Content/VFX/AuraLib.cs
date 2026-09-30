@@ -40,13 +40,23 @@ namespace AethonMod.Content.VFX
         /// dibuja con ALFA-blend OSCURECIENDO el mundo en los BORDES;
         /// encima, la pila brillante aditiva: el halo de luz (glow), el
         /// NÚCLEO ROJO (las llamas finas latiendo), el CUERPO DORADO
-        /// (fBm warpeado con su escalera de BLOOM) y los FANTASMAS de
-        /// la DISTORSIÓN (pasadas desplazadas en dirección de ruido —
-        /// el heat haze de la investigación R62-a). La receta de la
-        /// investigación: negro-bordes/dorado-medio/rojo-centro, la
-        /// separación humo/emisivo de Battlefront II.
+        /// ... (véase BrasaDelEclipse para el resto de la pila).
         /// </summary>
         Bruma = 3,
+        /// <summary>
+        /// v6.50.45 — EL PATRÓN DIVINO (la Forma Ascendida reescrita de
+        /// raíz: «se sigue viendo simple, no es nada divina, además tiene
+        /// 2 círculos de color plano semitransparentes»): la investigación
+        /// de cómo los juegos visten a un DIOS — halo dorado sobre la
+        /// cabeza (el #1 del lenguaje visual divino), ALAS DE LUZ que se
+        /// despliegan al correr, CÍRCULO RÚNICO girando bajo los pies,
+        /// RAYOS DIVINOS cayendo del cielo, ECOS de luz tras el portador
+        /// y CHISPAS estelares parpadeando — TODO aditivo, TODO suave
+        /// (CERO discos planos: los 2 círculos del glow viejo MURIERON
+        /// con este patrón — no pasa por EL HALO DE GLOW plano de
+        /// Emitir, tiene SU propio camino: EmitirDivino).
+        /// </summary>
+        Divino = 4,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -441,40 +451,35 @@ namespace AethonMod.Content.VFX
         /// desde v5, cumplido). Luz dorada-violeta respirando alrededor
         /// del portador — la corona del que ya no necesita invocarla.
         ///
-        /// v6.50.44 — LA VERSIÓN DIVINA (la petición: «dejar solo La
-        /// Forma Ascendida e intentar mejorar su efecto con mas efectos,
-        /// debe ser un item cosmetico digno de un dios» — la corona
-        /// rúnica murió fusionada en esta): el aura MÁS ANCHA (radio
-        /// 60→74), la corona radiante de 16 AGUJAS (antes 12) con MÁS
-        /// GLOW (1.8→2.6) y DISTORSIÓN de calor (0.7→0.9 — el aire se
-        /// dobla alrededor del dios), el doble de ORBES de luz (18,
-        /// antes 10) subiendo más alto y viviendo más — y encima, en
-        /// CosmeticPlayer: LA CORONA DEL ASCENSO (siete puntos de luz
-        /// sobre la cabeza), EL RAYO DIVINO (polvo de luz cayendo del
-        /// cielo sobre el portador), LA HUELLA DE LUZ (el rastro al
-        /// moverse) y EL PULSO (la onda que respira cada ~2.5 s).
+        /// v6.50.45 — EL PATRÓN DIVINO (la reescritura TOTAL: «se sigue
+        /// viendo simple, no es nada divina, además tiene 2 círculos de
+        /// color plano semitransparentes»): Patron = Divino — el halo
+        /// dorado sobre la cabeza, las alas de luz que se despliegan al
+        /// correr, el círculo rúnico bajo los pies, los rayos divinos,
+        /// los ecos y las chispas estelares (todo en EmitirDivino) — y
+        /// Glow = 0 y Rayos = 0: LOS DOS CÍRCULOS PLANOS (el halo de
+        /// glow de quads sin textura) y las agujas genéricas MUEREN —
+        /// este perfil NUNCA pasa por ese camino.
         /// </summary>
         public static AuraPerfil FormaAscendida()
         {
             var p = new AuraPerfil
             {
-                Radio = 74f,          // v6.50.44 — más ancha: un dios OCUPA más cielo
-                Anillos = 3,
-                Gajos = 14,
-                Patron = PatronAura.Perlin,
+                Radio = 74f,          // el dios OCUPA más cielo
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Divino,   // v6.50.45 — SU propio camino
                 Fluir = 0.6f,
                 Deriva = 0.12f,
-                Ascenso = 12f,       // sube más alto
-                Distorsion = 0.9f,    // v6.50.44 — el aire se DOBLA alrededor
+                Ascenso = 12f,
+                Distorsion = 0.9f,
                 Blur = 1f,
-                Glow = 2.6f,          // v6.50.44 — el resplandor de la divinidad
+                Glow = 0f,            // v6.50.45 — CERO DISCOS PLANOS (el reclamo, muerto)
                 Semilla = 150,
                 AlfaTrasera = 0.28f,
                 AlfaFrontal = 0.06f,
-                VeloFrontal = true,
-                // v6.50.12 — LA LUZ PRIMORDIAL; v6.50.44 — la corona
-                // radiante DIVINA: DIECISÉIS agujas (antes 12).
-                Rayos = 16,
+                VeloFrontal = false,  // v6.50.45 — el divino es TODO trasero aditivo
+                Rayos = 0,            // v6.50.45 — las agujas genéricas mueren (el halo reina)
                 Borde = 0.30f,
                 Parpadeo = 0.04f,
             };
@@ -482,7 +487,7 @@ namespace AethonMod.Content.VFX
             p.ConFrontal(new Color(255, 240, 180), new Color(200, 156, 255), new Color(255, 253, 240));
             p.ConParticulas(new ParticulasAura
             {
-                Cantidad = 18,        // v6.50.44 — el doble de orbes de luz
+                Cantidad = 14,        // los orbes que suben (viven en EmitirDivino §8)
                 Forma = FormaParticula.Orbe,
                 Color = new Color(255, 240, 190),
                 Alfa = 0.5f,
@@ -1378,6 +1383,12 @@ namespace AethonMod.Content.VFX
             if (p.Patron == PatronAura.Bruma)
                 return DibujarBrumaYPila(pl.Center, p.Radio, p, frontal: false, 511);
 
+            // v6.50.45 — EL PATRÓN DIVINO camina por SU camino (la Forma
+            // Ascendida reescrita: el halo, las alas, el círculo rúnico y
+            // los rayos — el mismo contrato del bool).
+            if (p.Patron == PatronAura.Divino)
+                return DibujarDivino(pl, p);
+
             try
             {
                 Emitir(pl.Center, p.Radio, p, frontal: false, 511);
@@ -1402,6 +1413,234 @@ namespace AethonMod.Content.VFX
             if (s < 1f) s = 1f;
             if (s > 3f) s = 3f;
             return 0.75f + 0.45f * (s - 1f);
+        }
+
+        // ==================================================================
+        //  v6.50.45 — EL PATRÓN DIVINO: LA FORMA ASCENDIDA REESCRITA
+        //  (la petición: «La Forma Ascendida se sigue viendo simple, no
+        //  es nada divina, además tiene 2 círculos de color plano
+        //  semitransparentes lo que hace que se vea raro, investiga en
+        //  internet y otros mods como darle una apariencia divina al
+        //  jugador»). LA INVESTIGACIÓN (el lenguaje visual de lo divino
+        //  en los juegos — halos de ángeles, god rays, alas de luz,
+        //  círculos mágicos, ecos etéreos):
+        //    · EL HALO DORADO sobre la cabeza — EL signo divino por
+        //      excelencia: un aro inclinado de perlas con profundidad
+        //      (las de delante brillan más) y 3 chispas girando en él.
+        //    · LAS ALAS DE LUZ — dos abanicos de plumas de luz detrás
+        //      del portador que se DESPLIEGAN al correr/volar (y
+        //      respiran quietas — la presencia, no la anatomía).
+        //    · EL CÍRCULO RÚNICO bajo los pies — la proyección achatada
+        //      de un anillo de 16 segmentos girando + el anillo interno
+        //      al revés (el magic circle de los hechiceros).
+        //    · LOS RAYOS DIVINOS — columnas verticales de luz cayendo
+        //      del cielo sobre el portador (crepusculares, sutiles).
+        //    · LOS ECOS — tras el portador al moverse (el rastro etéreo).
+        //    · LAS CHISPAS ESTELARES — cruces de luz parpadeando (el
+        //      twinkle de lo sagrado).
+        //  Y EL CUERPO: el flipbook Perlin suave de siempre (el respiro
+        //  de luz — la base que SÍ funcionaba). CERO DISCOS PLANOS: el
+        //  halo de glow plano (LOS 2 CÍRCULOS del reclamo) jamás se
+        //  emite en este camino.
+        // ==================================================================
+
+        /// <summary>
+        /// EL CAMINO ADITIVO DEL PATRÓN DIVINO (el contrato del bool de
+        /// DibujarJugadorAditivo: devuelve true si el lote del llamador
+        /// fue cerrado — reabrir con ReabrirLoteVanilla).
+        /// </summary>
+        public static bool DibujarDivino(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>LA EMISIÓN DIVINA — las SIETE capas del dios (coords de
+        /// MUNDO al búfer de VFXCore; deterministas: cero Main.rand).</summary>
+        private static void EmitirDivino(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(150)) return;   // el techo de la casa
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN global (el dios late despacio).
+            float respira = 1f + 0.05f * MathF.Sin(t * MathHelper.Pi);
+
+            // EL RITMO (las alas leen la velocidad).
+            float rapidez = MathHelper.Clamp(pl.velocity.Length() / 9f, 0f, 1f);
+
+            // === 1. EL CUERPO DE LUZ (el flipbook Perlin suave — el respiro
+            //     de la base que SÍ funcionaba, SIN los discos planos) ===
+            Texture2D texC = FlipCuerpo((int)(t * (10f + 18f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * p.Radio * 1.02f * respira;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.45f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.50f),
+                    new Vector2(ladoC, ladoC), t * 0.10f, texC);
+            }
+
+            // === 2. LOS RAYOS DIVINOS (columnas de luz cayendo del cielo —
+            //     cinco, con vaivén lento y alfa bajo: la bendición) ===
+            for (int i = 0; i < 5; i++)
+            {
+                float fx = VFXCore.Hash01(p.Semilla ^ 0xD177, i, 3);
+                float x = centro.X + (fx - 0.5f) * p.Radio * 2.2f +
+                    MathF.Sin(t * 0.5f + i * 1.7f) * 12f;
+                float alto = 320f + 110f * MathF.Sin(t * 0.8f + i * 2.3f);
+                float alfa = 0.09f + 0.05f * MathF.Sin(t * 1.3f + i * 2.9f);
+                Vector2 cR = new Vector2(x, centro.Y - alto * 0.5f - 70f);
+                VFXCore.Quad(cR, p.TMedio * alfa, new Vector2(34f, alto));
+                VFXCore.Quad(cR, new Color(255, 252, 240) * (alfa * 0.45f),
+                    new Vector2(11f, alto * 0.96f));
+            }
+
+            // === 3. EL CÍRCULO RÚNICO bajo los pies (la proyección achatada
+            //     del anillo de 16 segmentos girando + el interno al revés) ===
+            Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 5f);
+            {
+                float rx = p.Radio * 0.92f;
+                float ry = p.Radio * 0.30f;
+                for (int i = 0; i < 16; i++)
+                {
+                    float ang = t * 0.35f + i * MathHelper.TwoPi / 16f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx, MathF.Sin(ang) * ry);
+                    float tw = 0.5f + 0.5f * MathF.Sin(t * 2.4f + i * 1.3f);
+                    // cada TERCER segmento es una RUNA (más larga y caliente).
+                    bool runa = (i % 4) == 0;
+                    VFXCore.Quad(seg, TintAditivo(runa ? p.TCentro : p.TMedio, 0.30f + 0.30f * tw),
+                        runa ? new Vector2(13f, 3.6f) : new Vector2(8f, 2.6f),
+                        ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+                // EL ANILLO INTERNO (10 segmentos, al revés — el contragiro).
+                for (int i = 0; i < 10; i++)
+                {
+                    float ang = -t * 0.55f + i * MathHelper.TwoPi / 10f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx * 0.58f,
+                        MathF.Sin(ang) * ry * 0.58f);
+                    VFXCore.Quad(seg, TintAditivo(p.TBorde, 0.26f),
+                        new Vector2(7f, 2.4f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 4. EL HALO DORADO (sobre la cabeza — EL signo divino): el
+            //     aro inclinado de perlas con PROFUNDIDAD (las de delante
+            //     brillan más) + el brillo del aro + 3 chispas girando ===
+            {
+                float bobH = MathF.Sin(t * 1.6f) * 3f;
+                Vector2 haloC = new Vector2(centro.X,
+                    centro.Y - (pl.height * 0.5f + 26f) * gravedad + bobH * gravedad);
+                float rxH = 26f * respira;
+                float ryH = 9f;
+                for (int i = 0; i < 26; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 26f;
+                    Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH,
+                        MathF.Sin(ang) * ryH);
+                    float frente = (MathF.Sin(ang) + 1f) * 0.5f;   // la profundidad del aro
+                    VFXCore.Quad(perla, TintAditivo(p.TCentro, 0.35f + 0.50f * frente),
+                        new Vector2(5.5f, 5.5f), 0f, VFXCore.SoftGlow);
+                }
+                // EL BRILLO del aro (la aureola suave — NUNCA un disco plano:
+                // textura radial, dos capas respirando).
+                VFXCore.Quad(haloC, TintAditivo(p.TCentro, 0.16f * respira),
+                    new Vector2(rxH * 3.4f, rxH * 1.7f), 0f, VFXCore.SoftGlow);
+                // LAS TRES CHISPAS girando en el aro (la vida del halo).
+                for (int i = 0; i < 3; i++)
+                {
+                    float ang = t * (1.1f + 0.35f * i) + i * MathHelper.TwoPi / 3f;
+                    Vector2 chispa = haloC + new Vector2(MathF.Cos(ang) * rxH,
+                        MathF.Sin(ang) * ryH);
+                    VFXCore.Quad(chispa, TintAditivo(new Color(255, 253, 240), 0.55f),
+                        new Vector2(9f, 9f), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 5. LAS ALAS DE LUZ (dos abanicos de plumas detrás — se
+            //     DESPLIEGAN con la velocidad y RESPIRAN quietas) ===
+            {
+                float despliegue = 0.72f + 0.5f * rapidez;
+                for (int lado = -1; lado <= 1; lado += 2)
+                {
+                    for (int pluma = 0; pluma < 7; pluma++)
+                    {
+                        float f = pluma / 6f;
+                        // EL ABANICO: desde arriba del hombro, barriendo
+                        // hacia afuera y abajo (el arco del ala). 
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.28f + f * 1.15f) * despliegue;
+                        float flutter = 1f + 0.10f * MathF.Sin(t * 2.2f + pluma * 0.9f + lado);
+                        float r = (p.Radio * 0.52f + f * p.Radio * 0.72f) * flutter;
+                        Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 8f;
+                        Color cPluma = Color.Lerp(p.TCentro, p.TBorde, f);
+                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.34f - 0.16f * f) * despliegue),
+                            new Vector2(largo, 10f - 4.5f * f), ang, VFXCore.SoftGlow);
+                        // EL FILO de la pluma (la línea fina más caliente).
+                        VFXCore.Quad(medio + new Vector2(0f, 2f),
+                            TintAditivo(new Color(255, 253, 240), 0.18f * despliegue),
+                            new Vector2(largo * 0.9f, 3f), ang, VFXCore.SoftGlow);
+                    }
+                }
+            }
+
+            // === 6. LOS ECOS (el rastro etéreo al moverse — 3 luces
+            //     desvaneciéndose tras el portador) ===
+            if (rapidez > 0.12f)
+            {
+                Vector2 atras = -Vector2.Normalize(pl.velocity);
+                for (int g = 1; g <= 3; g++)
+                {
+                    Vector2 eco = centro + atras * (g * 30f);
+                    VFXCore.Quad(eco, TintAditivo(p.TMedio, 0.30f * rapidez / g),
+                        new Vector2(26f / g, 34f / g), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 7. LAS CHISPAS ESTELARES (cruces de luz parpadeando —
+            //     deterministas por hash, re-sembradas cada ~0.8 s) ===
+            for (int i = 0; i < 6; i++)
+            {
+                float semillaViva = (int)(t * 1.25f);
+                float h1 = VFXCore.Hash01(p.Semilla ^ 0x5CA, i, (int)semillaViva);
+                float h2 = VFXCore.Hash01(p.Semilla ^ 0x5CB, i, (int)semillaViva);
+                float brillo = MathF.Pow(h2, 2.2f);   // pocas brillan MUCHO
+                if (brillo < 0.06f) continue;
+                float angO = h1 * MathHelper.TwoPi + t * 0.22f;
+                Vector2 chispa = centro + new Vector2(MathF.Cos(angO), MathF.Sin(angO) * 0.7f) *
+                    (p.Radio * (0.7f + 0.5f * h1));
+                // LA CRUZ (dos barras finas cruzadas + el corazón).
+                VFXCore.Quad(chispa, TintAditivo(new Color(255, 250, 225), 0.55f * brillo),
+                    new Vector2(16f, 2.2f), h1 * MathHelper.Pi, VFXCore.SoftGlow);
+                VFXCore.Quad(chispa, TintAditivo(new Color(255, 250, 225), 0.55f * brillo),
+                    new Vector2(2.2f, 16f), h1 * MathHelper.Pi, VFXCore.SoftGlow);
+                VFXCore.Quad(chispa, TintAditivo(new Color(255, 255, 245), 0.70f * brillo),
+                    new Vector2(5f, 5f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 8. LAS PARTÍCULAS del perfil (los orbes que suben — de la
+            //     casa, siguen vivos) ===
+            EmitirParticulas(centro, p, false, 511);
         }
 
         // ==================================================================

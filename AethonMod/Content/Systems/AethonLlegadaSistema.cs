@@ -82,7 +82,10 @@ namespace AethonMod.Content.Systems
             bool enLlegada = jefe.ai[0] == 0f;                 // EST_NACIENDO
             int sub = enLlegada ? (int)jefe.ai[1] : 0;
             AethonBoss.SubLlegada = sub;
-            bool enPelea = jefe.ai[0] >= 1f && jefe.ai[0] <= 7f;
+            // v6.50.45 — LOS ESTADOS NUEVOS (8 reloj · 9 coro · 10 manada ·
+            // 11 telar · 12 decreto) TAMBIÉN SON LA PELEA: el mediodía
+            // clavado los cubre (si no, el sol se escapaba a media manada).
+            bool enPelea = jefe.ai[0] >= 1f && jefe.ai[0] <= 12f;
             bool muriendo = jefe.ai[0] == 99f;
 
             // === EL RELOJ — LA REGLA DE LA v6.50.41 + EL CERROJO DE LA .42

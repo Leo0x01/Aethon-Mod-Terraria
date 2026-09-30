@@ -1828,6 +1828,8 @@ NPCs: {
 	EchoBlade.DisplayName: Echo of the First Wielder
 	EchoArcher.DisplayName: Echo of the Star-Archer
 	RiftKeeper.DisplayName: The Rift-Keeper
+	// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
+	CazadorAstral.DisplayName: Astral Hunter
 }
 
 Common: {
@@ -2170,6 +2172,12 @@ Jefe: {
 		Nova: THE PRIMORDIAL NOVA — the light bursts: find the gap.
 		Eclipse: THE ECLIPSE — the light goes out and only the bullets shine.
 		Aliento: THE PRIMORDIAL RAY — the light hunts you.
+		// v6.50.45 — THE FIVE NEW WEAPON ANNOUNCES
+		Reloj: THE COSMIC HOURGLASS — time falls from the sky: don't fly beneath its weight.
+		Coro: THE SPECTRAL CHOIR — the notes sing around you: move with the ring.
+		Manada: THE ASTRAL PACK — the light unleashes the hounds of heaven: kill them or outrun them.
+		Telar: THE CONSTELLATION LOOM — the stars weave the cage: get out of the figure.
+		Decreto: THE DECREE OF THE ECLIPSE — the circle grows and the light does NOT move: run, now is the time.
 	}
 }
 

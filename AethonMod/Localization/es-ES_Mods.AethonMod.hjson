@@ -1827,6 +1827,8 @@ NPCs: {
 	EchoBlade.DisplayName: Eco del Primer Portador
 	EchoArcher.DisplayName: Eco de la Arquera Estelar
 	RiftKeeper.DisplayName: El Guardián del Rift
+	// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
+	CazadorAstral.DisplayName: Cazador Astral
 }
 
 Common: {
@@ -2169,6 +2171,12 @@ Jefe: {
 		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.
 		Eclipse: EL ECLIPSE — la luz se apaga y solo las balas brillan.
 		Aliento: EL RAYO PRIMORDIAL — la luz te busca.
+		// v6.50.45 — THE FIVE NEW WEAPON ANNOUNCES
+		Reloj: EL RELOJ DE ARENA CÓSMICO — el tiempo cae del cielo: no vueles bajo su peso.
+		Coro: EL CORO ESPECTRAL — las notas cantan alrededor tuyo: muévete con el anillo.
+		Manada: LA MANADA ASTRAL — la luz suelta a los perros del cielo: mátalos o córreles.
+		Telar: EL TELAR DE CONSTELACIONES — las estrellas tejen la jaula: sal de la figura.
+		Decreto: EL DECRETO DEL ECLIPSE — el círculo crece y la luz NO se mueve: corre, ahora es cuando.
 	}
 }
 

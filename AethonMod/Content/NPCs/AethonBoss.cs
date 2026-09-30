@@ -14,6 +14,34 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.45 — EL JEFE QUE SE ESFUMABA A MEDIAS LA INVOCACIÓN + LAS
+    /// CINCO ARMAS DEL MOD EN SUS MANOS: «si el jefe es invocado y el
+    /// jugador se mueve el jefe desaparece / a veces no termina de ser
+    /// invocado y a veces desaparece» — CAUSA RAÍZ (decompilado de
+    /// NPC.CheckActive, tML 2026.07.3.0): vanilla mata a CUALQUIER NPC
+    /// cuyo timeLeft expire (NewNPC lo pone en 937 t) y SOLO lo refresca
+    /// si un jugador vive dentro del rectángulo ±(sWidth/2+ancho,
+    /// sHeight/2+alto) ≈ ±(1180, 760) px del NPC. El jefe nace 860 px
+    /// SOBRE el jugador (FUERA del rectángulo VERTICAL desde el tick 1)
+    /// y durante temblor+carrera (hasta 150+900 t desde la v6.50.43, que
+    /// lo hizo invocable A CUALQUIER HORA) NO SE MUEVE NI SE ACERCA:
+    /// timeLeft jamás se refresca → si la llegada dura más de 15,6 s el
+    /// jefe MUERE EN SECRETO a media llegada (invocado cerca del
+    /// mediodía llegaba; por la tarde/noche, moría — el «a veces» del
+    /// usuario). EL FIX DOBLE: (1) CheckActive() devuelve false durante
+    /// la LLEGADA y la MUERTE (el cine manda — vanilla no lo toca) y
+    /// (2) el jefe escondido SIGUE AL JUGADOR cada tick (nace sobre TI,
+    /// no sobre el punto del llamado). Y LAS ARMAS PEDIDAS: el jefe usa
+    /// LOS PROYECTILES DE LOS BASTONES DEL MOD — EL RELOJ DE ARENA
+    /// CÓSMICO GIGANTE (EST_RELOJ), EL CORO ESPECTRAL alrededor de la
+    /// presa (EST_CORO), LA MANADA ASTRAL en camada — cazadores NPC de
+    /// verdad: MENOS VIDA, MÁS LENTOS, EN MAYOR NÚMERO (EST_MANADA), EL
+    /// TELAR DE CONSTELACIONES con el jefe CORRIENDO EN CÍRCULO alrededor
+    /// del jugador y las estrellas CLAVÁNDOSE para atraparlo (EST_TELAR,
+    /// fase 4+) y EL DECRETO DEL ECLIPSE en CADA CAMBIO DE FASE — el
+    /// círculo MÁS GRANDE con cada fase y el jefe INMÓVIL todo el
+    /// decreto (la ventana de escape del jugador).
+    ///
     /// v6.50.42 — EL JEFE QUE NO APARECÍA MUERE AQUÍ (reproducido y
     /// verificado en servidor headless): la materialización BAJO el sol
     /// de la v6.50.41 usaba la matemática pantalla→mundo EN LA MÁQUINA
@@ -111,6 +139,11 @@ namespace AethonMod.Content.NPCs
         private const int EST_CRUZ = 5;         // los cuatro chorros girando
         private const int EST_DESTELLO = 6;     // la embestida a velocidad luz
         private const int EST_ECLIPSE = 7;      // la luz se apaga
+        private const int EST_RELOJ = 8;        // v6.50.45 — EL RELOJ DE ARENA GIGANTE
+        private const int EST_CORO = 9;         // v6.50.45 — EL CORO ESPECTRAL
+        private const int EST_MANADA = 10;      // v6.50.45 — LA MANADA ASTRAL (camada)
+        private const int EST_TELAR = 11;       // v6.50.45 — EL TELAR (el círculo veloz)
+        private const int EST_DECRETO = 12;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
         private const int EST_MURIENDO = 99;    // la contracción final
 
         // === LA LLEGADA — LOS SUB-ESTADOS (viajan en ai[1] durante
@@ -332,6 +365,11 @@ namespace AethonMod.Content.NPCs
                 case EST_CRUZ: EstadoCruz(target); break;
                 case EST_DESTELLO: EstadoDestello(target); break;
                 case EST_ECLIPSE: EstadoEclipse(target); break;
+                case EST_RELOJ: EstadoReloj(target); break;
+                case EST_CORO: EstadoCoro(target); break;
+                case EST_MANADA: EstadoManada(target); break;
+                case EST_TELAR: EstadoTelar(target); break;
+                case EST_DECRETO: EstadoDecreto(target); break;
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
@@ -352,11 +390,40 @@ namespace AethonMod.Content.NPCs
             NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
             //     llegada: 10 temblor · 11 carrera · 12 climax · 13 descenso
             //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo · 3 ECLIPSE
+            //     (v6.50.45: los estados nuevos — 8 reloj · 9 coro · 10 manada
+            //      · 11 telar · 12 decreto — viajan en ai[0] y usan ai[1]=0
+            //      salvo el decreto, que manda LA FASE por ai[1] al círculo
+            //      desde su spawn, no desde aquí)
             NPC.ai[2] = _tickEstado;
             NPC.ai[3] = _angDestello;   // el rumbo del destello (la línea guía del cliente)
 
             // MP: la luz respira por el cable cada 12 ticks.
             if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
+        }
+
+        /// <summary>
+        /// v6.50.45 — EL FIX DEL JEFE QUE SE ESFUMABA (los DOS síntomas del
+        /// usuario: «si el jefe es invocado y el jugador se mueve el jefe
+        /// desaparece» + «a veces no termina de ser invocado»): vanilla
+        /// CheckActive mata a cualquier NPC cuyo timeLeft expire — NewNPC
+        /// lo pone en 937 t y SOLO se refresca si un jugador vive dentro del
+        /// rectángulo ±(1180, 760) px del NPC. El jefe nace 860 px SOBRE el
+        /// jugador (FUERA del rectángulo vertical desde el TICK 1) y durante
+        /// la LLEGADA (temblor 150 + carrera hasta ~900 t desde que la
+        /// v6.50.43 lo hizo invocable A CUALQUIER HORA) jamás se acerca:
+        /// timeLeft NUNCA se refresca y a los 15,6 s la luz MUERE EN SECRETO
+        /// a media llegada — invocado cerca del mediodía llegaba vivo, por
+        /// la tarde/noche moría en cámara: el «a veces». AHORA la LLEGADA y
+        /// la MUERTE son CINE (nadie las interrumpe — la vida del jefe las
+        /// maneja su IA) y el jefe escondido SIGUE AL JUGADOR cada tick
+        /// (SeguirEscondido). Durante la PELEA el comportamiento vanilla
+        /// queda intacto (el jefe persigue: siempre está cerca).
+        /// </summary>
+        public override bool CheckActive()
+        {
+            if (_estado == EST_NACIENDO) return false;   // la llegada es cine
+            if (_muriendo) return false;                 // la muerte es cine
+            return base.CheckActive();
         }
 
         // ==================================================================
@@ -428,7 +495,12 @@ namespace AethonMod.Content.NPCs
                 {
                     // escondido sobre el cielo, el mundo SACUDE la pantalla
                     // (los kicks los padece cada cliente vía el espejo).
-                    NPC.velocity = Vector2.Zero;
+                    // v6.50.45 — LA SOMBRA QUE TE SIGUE: el jefe escondido
+                    // CAMINA CONTIGO (nace 860 px sobre TI, no sobre el punto
+                    // del llamado — el jugador que se muda durante el temblor
+                    // no se lo lleva puesto, y vanilla CheckActive agradece
+                    // la cercanía que ya no puede matarlo).
+                    SeguirEscondido(target);
                     if (_tickEstado == 1)
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
                     if (_tickEstado >= 150) SubFaseLlegada(SUB_CARRERA);
@@ -437,6 +509,11 @@ namespace AethonMod.Content.NPCs
 
                 case SUB_CARRERA:
                 {
+                    // v6.50.45 — LA SOMBRA SIGUE CAMINANDO CONTIGO (la lección
+                    // del bug: el jefe clavado en el punto del llamado era un
+                    // muerto que caminaba — el reloj corre, la sombra acompaña).
+                    SeguirEscondido(target);
+
                     // EL TIEMPO CORRE, DE FORMA NATURAL (v6.50.41):
                     // AethonLlegadaSistema.ModifyTimeRate lleva el reloj —
                     // el RESTANTE hasta el PRÓXIMO mediodía (por la noche
@@ -576,6 +653,24 @@ namespace AethonMod.Content.NPCs
             return pos;
         }
 
+        /// <summary>
+        /// v6.50.45 — LA SOMBRA QUE TE SIGUE: el jefe escondido (temblor y
+        /// carrera) vive 860 px SOBRE LA PRESA — sobre el JUGADOR, no
+        /// sobre el punto del llamado — y la sigue cada tick (con los
+        /// clamps de la casa: jamás fuera del mundo). Matar el bug con
+        /// estilo: vanilla CheckActive ya no puede ejecutarlo (véase
+        /// CheckActive), y de paso el jugador que se muda durante la
+        /// llegada no le roba el clímax.
+        /// </summary>
+        private void SeguirEscondido(Player target)
+        {
+            Vector2 pos = target.Center + new Vector2(0f, -860f);
+            pos.X = MathHelper.Clamp(pos.X, 320f, Main.maxTilesX * 16f - 320f);
+            pos.Y = MathHelper.Clamp(pos.Y, 160f, Main.maxTilesY * 16f - 320f);
+            NPC.Center = pos;
+            NPC.velocity = Vector2.Zero;
+        }
+
         /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
         private void SubFaseLlegada(int sub)
         {
@@ -642,10 +737,10 @@ namespace AethonMod.Content.NPCs
             int[] menu = Phase switch
             {
                 1 => new[] { EST_JUICIO, EST_RAYO },
-                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO },
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_JUICIO },
+                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO },
+                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA },
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_ECLIPSE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -662,6 +757,14 @@ namespace AethonMod.Content.NPCs
                 if (plato == EST_NOVA && _ticksPresaQuieta > 30) peso = 6; // el quieto
                 if (plato == EST_JUICIO && alto) peso = 5;                 // el volador
                 if (plato == EST_CRUZ && cerca) peso = 5;                  // el pegado
+                // v6.50.45 — LAS ARMAS NUEVAS LEEN TU COMPORTAMIENTO TAMBIÉN:
+                // el RELOJ castiga al VOLADOR (el peso del tiempo lo baja),
+                // el CORO castiga al QUIETO (los anillos lo encuentran
+                // quieto) y el TELAR castiga al CORREDOR (las estrellas le
+                // cierran el camino por delante).
+                if (plato == EST_RELOJ && alto) peso = 5;                  // el volador
+                if (plato == EST_CORO && _ticksPresaQuieta > 30) peso = 5; // el quieto
+                if (plato == EST_TELAR && velH > 7f) peso = 5;             // el corredor
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -1153,6 +1256,242 @@ namespace AethonMod.Content.NPCs
         }
 
         // ==================================================================
+        //  v6.50.45 — LAS ARMAS DEL MOD EN MANOS DE LA LUZ
+        //  (la petición: el jefe usa LOS PROYECTILES DE LOS BASTONES)
+        // ==================================================================
+
+        /// <summary>
+        /// EL RELOJ DE ARENA CÓSMICO GIGANTE (la petición: «el jefe deberia
+        /// usar el proyectil de baston del reloj de arena cosmica pero en
+        /// gigante»). La luz se alza, gira el cielo sobre tu RITMO y DEJA
+        /// CAER el reloj de arena GIGANTE (×2.6 el del bastón): la arena
+        /// estelar cae por el cuello y su PESO aplasta — daño constante y
+        /// empuje hacia ABAJO a quien viva debajo (el castigo del
+        /// volador) — y cada vez que la cámara superior se vacía el reloj
+        /// SE INVIERTE y el pulso HUNDE con más fuerza.
+        /// </summary>
+        private void EstadoReloj(Player target)
+        {
+            // SE ALZA (el reloj necesita cielo) y convoca sobre la PREDICCIÓN.
+            Vector2 punto = target.Center + new Vector2(0f, -560f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
+
+            if (_tickEstado == 30)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        PredPresa(target), Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.50f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloRelojGigante,
+                        Furia ? 1f : 0f, NPC.whoAmI * 31);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.4f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", OroLuz);
+                OndaLib.Kick(6f, 14);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 150) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>
+        /// EL CORO ESPECTRAL (la petición: «el jefe deberia usar el
+        /// proyectil de baston del coro espectral»). Seis notas de luz
+        /// fantasmales orbitan a la PRESA — cada ciclo canta la nota
+        /// siguiente y su anillo de onda se expande: el frente del anillo
+        /// corta a quien atraviesa. Daño bajo pero FRECUENTE: el canto
+        /// castiga al que se queda quieto escuchándolo.
+        /// </summary>
+        private void EstadoCoro(Player target)
+        {
+            // LA CANTORA: se aparta a flanco (el coro canta alrededor TUYO,
+            // no de ella).
+            Vector2 lejos = target.Center + new Vector2(
+                MathF.Cos(_angOrbita) * 560f, -320f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 40)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        target.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.42f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloCoroJefe,
+                        Furia ? 1f : 0f, NPC.whoAmI * 37);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item70.WithPitchOffset(-0.2f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Coro", OroLuz);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 140) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>
+        /// LA MANADA ASTRAL (la petición: «el jefe deberia usar el
+        /// proyectil de la manada astral, pero con menos vida y mas
+        /// lentos, pero en mayor numero»). Los cazadores del bastón, al
+        /// servicio de la luz — pero de VERDAD: son NPCs con vida propia
+        /// (MENOS VIDA: se matan), persiguen DESPACIO (MÁS LENTOS) y
+        /// llegan en CAMADA (MÁS NÚMERO: dos oleadas de cinco). La luz
+        /// suelta a los perros del cielo.
+        /// </summary>
+        private void EstadoManada(Player target)
+        {
+            // LA CAMADA: el jefe se alza y abre las jaulas.
+            Vector2 punto = target.Center + new Vector2(0f, -560f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
+
+            if (_tickEstado == 30 || _tickEstado == 80)
+            {
+                SoltarManada(target);
+                if (_tickEstado == 30)
+                {
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Manada", VioletaLuz);
+                    OndaLib.Kick(7f, 15);
+                }
+            }
+
+            if (_tickEstado >= 140) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>La jaula se abre: hasta 10 cazadores astrales vivos (la casa: NUNCA más).</summary>
+        private void SoltarManada(Player target)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            int vivos = ContarCazadores();
+            int n = Math.Min(5, 10 - vivos);
+            for (int i = 0; i < n; i++)
+            {
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * 90f;
+                int idx = NPC.NewNPC(NPC.GetSource_FromAI(),
+                    (int)pos.X, (int)pos.Y, ModContent.NPCType<CazadorAstral>(),
+                    0, target.whoAmI);
+                if (idx >= 0 && idx < Main.maxNPCs)
+                {
+                    Main.npc[idx].netUpdate = true;
+                }
+            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.5f), NPC.Center);
+            NPC.netUpdate = true;
+        }
+
+        /// <summary>Los cazadores astrales vivos en el campo.</summary>
+        internal static int ContarCazadores()
+        {
+            int tipo = ModContent.NPCType<CazadorAstral>();
+            int n = 0;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC c = Main.npc[i];
+                if (c != null && c.active && c.type == tipo) n++;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// EL TELAR DE CONSTELACIONES — LA FASE ALTA (la petición: «el jefe
+        /// cuando llegue a una fase alta, deberia moverse rapido alrededor
+        /// del jugador en circulo y usar el proyectil de El telar de
+        /// Constelaciones para atrapar al jugador y provocar daño»). La
+        /// luz CORRE en círculo alrededor de la presa — un cometa dorado
+        /// trazando la órbita — mientras EL TELAR clava las ESTRELLAS una
+        /// a una alrededor del jugador: cuando la figura se CIERRA, el
+        /// polígono se ENCIENDE y quien quedó DENTRO paga el corte. Corre,
+        /// luz, corre — y teje.
+        /// </summary>
+        private void EstadoTelar(Player target)
+        {
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        target.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.55f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloTelarJefe,
+                        Furia ? 1f : 0f, NPC.whoAmI * 41);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Telar", OroLuz);
+                OndaLib.Kick(8f, 16);
+                NPC.netUpdate = true;
+            }
+
+            // EL CÍRCULO VELOZ: la órbita apretada y RÁPIDA (una vuelta
+            // cada ~2 s — el jefe barre la circunferencia mientras las
+            // estrellas cierran la figura por dentro).
+            float velAng = (Furia ? 0.062f : 0.052f) * _sentidoOrbita;
+            _angOrbita += velAng;
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Cos(_angOrbita) * 470f,
+                MathF.Sin(_angOrbita) * 470f * 0.80f - 150f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.24f, 0.38f);
+
+            // LA ESTELA DEL CORREDOR (el cometa que traza la órbita).
+            if (!Main.dedServ && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(
+                    NPC.Center + new Vector2(Main.rand.NextFloat(-60f, 60f),
+                        Main.rand.NextFloat(-60f, 60f)),
+                    DustID.GoldFlame,
+                    -NPC.velocity * 0.06f, 170, OroLuz, 1.1f);
+                d.noGravity = true;
+            }
+
+            if (_tickEstado >= 330) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>
+        /// EL DECRETO DEL ECLIPSE — EL CAMBIO DE FASE (la petición: «el jefe
+        /// debe usar el proyectil el decreto del eclipse en el cambio de
+        /// fases y por cada fase que sea mas grande, al usar este
+        /// proyectil el jefe queda inmovil asi le da tiempo al jugador a
+        /// escapar»). La luz se CLAVA donde está — INMÓVIL, canalizando —
+        /// y decreta: EL CÍRCULO DEL ECLIPSE nace pequeño sobre el jugador
+        /// y CRECE +2 px/t, MÁS GRANDE con cada fase (P2 660 → P5 930 px
+        /// de radio), con la MARCA DEL OJO y las EJECUCIONES del bastón
+        /// cada 15 t. El jefe queda INMÓVIL TODO el decreto — ESO es la
+        /// ventana de escape: el círculo tarda en cerrarse y la luz no se
+        /// mueve; el que corre, sale.
+        /// </summary>
+        private void EstadoDecreto(Player target)
+        {
+            // INMÓVIL (la sentencia no se dicta corriendo).
+            NPC.velocity = Vector2.Zero;
+
+            if (_tickEstado == 24)
+            {
+                // EL CÍRCULO: nace sobre el JUGADOR — ai[1] = la FASE (el
+                // tamaño del decreto crece con la ira).
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        target.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.80f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloDecretoJefe,
+                        Phase, NPC.whoAmI * 43);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Decreto", VioletaLuz);
+                NPC.netUpdate = true;
+            }
+
+            // EL JEFE ESPERA TODO el decreto (la vida del círculo: nace a
+            // 80 px y crece +2 px/t hasta su radio máximo) + un respiro.
+            float radioMax = 660f + (Phase - 2) * 90f;
+            int espera = 24 + (int)((radioMax - 80f) / 2f) + 25;
+            if (_tickEstado >= espera) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        // ==================================================================
         //  LOS FONDOS DE FASE (heredados de la sierpe)
         // ==================================================================
 
@@ -1216,7 +1555,7 @@ namespace AethonMod.Content.NPCs
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
         }
 
-        /// <summary>EL CAMBIO DE FASE (el respiro curita de la casa).</summary>
+        /// <summary>EL CAMBIO DE FASE (v6.50.45: con EL DECRETO — el jefe se clava y decreta el círculo del eclipse; el jugador gana LA ventana de escape).</summary>
         private void OnPhaseChange()
         {
             NPC.life = Math.Min(NPC.lifeMax, NPC.life + NPC.lifeMax / 20);
@@ -1225,6 +1564,20 @@ namespace AethonMod.Content.NPCs
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Fase",
                 OroLuz, Phase, PhaseName());
             NPC.netUpdate = true;
+
+            // v6.50.45 — EL DECRETO DEL ECLIPSE EN CADA CAMBIO DE FASE: el
+            // jefe se CLAVA (inmóvil) y el círculo nace sobre el jugador,
+            // MÁS GRANDE con cada fase — la ventana de escape es LITERAL
+            // (el jefe no se mueve mientras el círculo crece). Solo si no
+            // está YA en pleno decreto (los cambios de fase encadenados por
+            // DPS no re-decretan: un decreto a la vez).
+            if (Phase >= 2 && _estado != EST_DECRETO)
+            {
+                _estado = EST_DECRETO;
+                _tickEstado = 0;
+                _rayo = 0;
+                NPC.netUpdate = true;
+            }
         }
 
         private string PhaseName() => Phase switch
@@ -1283,8 +1636,38 @@ namespace AethonMod.Content.NPCs
                     }
                 }
                 DropBotin();
+                DisolverManada();   // v6.50.45 — sin luz que los mande, los cazadores se apagan
                 NPC.active = false;
                 NPC.netUpdate = true;
+            }
+        }
+
+        /// <summary>
+        /// v6.50.45 — LA MANADA SE APAGA CON SU LUZ: al morir el jefe, los
+        /// cazadores astrales vivos se DESHACEN en polvo estelar (nada de
+        /// huérfanos persiguiendo al jugador toda la sesión).
+        /// </summary>
+        private void DisolverManada()
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            int tipo = ModContent.NPCType<CazadorAstral>();
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC c = Main.npc[i];
+                if (c == null || !c.active || c.type != tipo) continue;
+                if (!Main.dedServ)
+                {
+                    for (int d = 0; d < 8; d++)
+                    {
+                        Dust dd = Dust.NewDustPerfect(c.Center, DustID.PurpleTorch,
+                            new Vector2(Main.rand.NextFloat(-3f, 3f),
+                                Main.rand.NextFloat(-3f, 1f)), 180,
+                            new Color(150, 200, 255), 1.0f);
+                        dd.noGravity = true;
+                    }
+                }
+                c.active = false;
+                c.netUpdate = true;
             }
         }
 
