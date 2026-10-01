@@ -1,10 +1,54 @@
-# AethonMod — ESTADO ACTUAL (v6.50.46)
+# AethonMod — ESTADO ACTUAL (v6.50.47)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-09-30 (tag `v6.50.46`, release publicada).
+> Última actualización: 2026-10-01 (tag `v6.50.47`, release publicada).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.47 = LOS NPC FANTASMA + LA APOTEOSIS DE LA FORMA ASCENDIDA** —
+  la cuarta ronda de feedback sobre la .46, DOS pedidos: (1) **EL FIX DE
+  PROFUNDIDAD** («algunos ataques del jefe hacen que los NPC sean
+  semitransparentes»): los CUATRO ataques de estructura (RELOJ GIGANTE ×4,
+  CORO, TELAR, DECRETO) dibujaban en el pase normal de proyectiles —
+  DESPUÉS de los NPCs — y sus velos gigantes (la MASA alpha-blend del
+  reloj, «el polvo que OCLUYE», + la arena ×5.2) cubrían a los NPCs del
+  pueblo: vistos A TRAVÉS del ataque = semitransparentes. El fix es UN
+  override: `DrawBehind → DrawCacheProjsBehindNPCs` — el pase de tML que
+  dibuja DESPUÉS de los tiles y ANTES de TODOS los NPCs y el jugador
+  (verificado en el decompile: `DrawCachedProjs` abre su propio lote, el
+  contrato de la casa cerrar→dibujar→reabrir sobrevive, su `End` cierra
+  limpio): las criaturas SIEMPRE sólidas encima; los proyectiles rápidos
+  (pernos/flechas) siguen en el pase normal pasando por delante como toda
+  bala de vanilla; la MASA del reloj VIVE (detrás de todos ya es pura
+  atmósfera). (2) **LA APOTEOSIS** («más divino, más sagrado»): el patrón
+  Divino pasa de 7 a ONCE capas — EL CORAZÓN BLANCO (el alma ardiendo a
+  través del pecho) · **LA COLUMNA DEL CIELO** (el rayo que cae del cielo
+  SOBRE el portador y lo SIGUE: 3 velos anidados 640-750 px + EL CHARCO
+  de luz — la puerta del cielo abierta para uno solo) · SIETE rayos
+  divinos (5→7, 430-580 px) · EL CÍRCULO RÚNICO TRIPLE (+ LA BANDA DE
+  ESCRITURAS: 20 glifos contragirando al borde) · **EL GRAN HALO
+  CELESTIAL DOBLE** (30 perlas rx 40 — era 26 a 26 px — con 12 ticks
+  rúnicos + EL ARO FANTASMA de 18 perlas contragirando + doble aureola +
+  4 chispas) · **LA CORONA DE LA SANTIDAD** (5 estrellas-cruz en arco
+  sobre el halo) · **LAS ALAS DEL SERAFÍN** (7→12 plumas por lado en DOS
+  bancos: 8 primarias hasta Radio×1.55 + 4 secundarias; aleteo majestuoso
+  que acelera al correr) · los ecos · OCHO chispas (6→8) · **LAS PLUMAS
+  QUE CAEN** (3 plumas doradas descendiendo en cámara lenta, meciéndose,
+  naciendo y muriendo suaves) · 22 orbes (14→22). Perfil: Radio 74→88,
+  AlfaTrasera 0.28→0.34, Ascenso 12→16; la luz del mundo 0.34/0.27/0.13 →
+  0.46/0.36/0.17 (un FARO). Tooltip es+en de la apoteosis. La HUELLA y el
+  PULSO de la .45 siguen vivos.
+  Verificación: verify 0/0 · build real 0/0 · .tmod 6.333.537 bytes
+  (md5 176da964dba2cbc8789efa0fc6044016), 394 entradas (set idéntico a
+  la .46), EOF exacto, 24 planas, DLL con **DrawBehind PRESENTE** +
+  EstadoVortice PRESENTE / EstadoEclipse AUSENTE (los vivos/muertos de la
+  .46 intactos), keysets es+en IDÉNTICOS git↔paquete (los tooltips
+  cambian TEXTO, no claves), literales de la apoteosis DENTRO del paquete
+  inflado · servidor headless carga sin excepciones.
+  **Pendiente: verificación EN JUEGO** (los NPCs del pueblo sólidos
+  durante el reloj/coro/telar/decreto; la apoteosis completa de la Forma
+  Ascendida — columna del cielo, gran halo doble, corona, alas de serafín,
+  plumas cayendo).
 - **v6.50.46 = LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL + EL
   ANILLO DEL TIEMPO + EL TELAR QUE TRAZA LA ESTRELLA** — la ronda de
   feedback sobre la .45, SIETE pedidos: (0) **EL HALLAZGO**: el estilo de
@@ -483,7 +527,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.46** | ✅ Build-verificada, ⏳ en juego | LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL — feedback de la .45 (SIETE pedidos): (0) EL HALLAZGO: el estilo del proyectil vive en ai[0] y el coro/telar/decreto de la .45 LO SOBRESCRIBÍAN → los TRES ataques estaban MUERTOS (invisible e inerte desde sus primeros ticks — por eso «el jefe lo hace mal» y «no lo usa al cambio de fase»); LEY DE ORO: nadie toca ai[0] · (1) LOS TAJOS DEL JEFE MUEREN (runas con abanico de 3 pernos) · (2) EL ANILLO DEL TIEMPO: 4 relojes ×5.2 cayendo del cielo alrededor de la presa (arena corre ya aterrizado; renderer con la MISMA edad de arena) · (3) EL TELAR TRAZA LA ESTRELLA: pentagrama (5) en fase 4 · heptagrama (7) en furia — cada punta que el jefe toca CLAVA su estrella; jaula en orden natural (EstrellasClavadas compacta) + círculo veloz vigilando · (4) EL DECRETO FUNCIONA: inmóvil + 80→600+120·(fase−2) px (P5 960), ejecuciones cada 15 t · (5) EL ECLIPSE MURIÓ de raíz → EL VÓRTICE PRIMORDIAL (galaxia de 3-4 brazos × 12 pernos, tangencial + colapso; rayos del sol ×4 mientras) · (6) LA GRAVEDAD DE VERDAD (volteo inmediato) + diálogos auditados (Nombre2 «La Canción del Tiempo», Nombre4 «El Telar») |
+| **v6.50.47** | ✅ Build-verificada, ⏳ en juego | LOS NPC FANTASMA + LA APOTEOSIS — feedback de la .46 (DOS pedidos): (1) «algunas ataques del jefe, hace que los NPC sean semitransparente»: los CUATRO ataques de estructura (reloj gigante ×4, coro, telar, decreto) dibujaban en el pase normal de proyectiles, DESPUÉS de los NPCs — sus velos (la MASA alpha-blend «el polvo que OCLUYE» + la arena ×5.2) cubrían a los NPC del pueblo = fantasmas. FIX: `DrawBehind → behindNPCs` (el pase que dibuja tras los tiles y ANTES de toda criatura, verificado en el decompile): NPCs y jugador SIEMPRE sólidos encima; balas rápidas siguen pasando por delante · (2) «la forma Ascendida no se ve tan divino y sagrado… tiene que ser mas divino, mas sagrado»: LA APOTEOSIS — el patrón Divino de 7 a ONCE capas (EL CORAZÓN BLANCO ardiendo en el pecho · LA COLUMNA DEL CIELO que sigue al portador + su charco de luz · 7 rayos divinos · CÍRCULO RÚNICO TRIPLE con banda de escrituras · GRAN HALO CELESTIAL DOBLE de 30 perlas + aro fantasma contragirando + 12 ticks · CORONA DE LA SANTIDAD de 5 estrellas · ALAS DEL SERAFÍN de 12 plumas en dos bancos con aleteo majestuoso · 8 chispas · LAS PLUMAS QUE CAEN · 22 orbes); Radio 74→88, luz del mundo ×1.35, tooltip es+en nuevo |
+| **v6.50.46** | ✅ Build-verificada, ⏳ probada (con feedback) | LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL — feedback de la .45 (SIETE pedidos): (0) EL HALLAZGO: el estilo del proyectil vive en ai[0] y el coro/telar/decreto de la .45 LO SOBRESCRIBÍAN → los TRES ataques estaban MUERTOS (invisible e inerte desde sus primeros ticks — por eso «el jefe lo hace mal» y «no lo usa al cambio de fase»); LEY DE ORO: nadie toca ai[0] · (1) LOS TAJOS DEL JEFE MUEREN (runas con abanico de 3 pernos) · (2) EL ANILLO DEL TIEMPO: 4 relojes ×5.2 cayendo del cielo alrededor de la presa (arena corre ya aterrizado; renderer con la MISMA edad de arena) · (3) EL TELAR TRAZA LA ESTRELLA: pentagrama (5) en fase 4 · heptagrama (7) en furia — cada punta que el jefe toca CLAVA su estrella; jaula en orden natural (EstrellasClavadas compacta) + círculo veloz vigilando · (4) EL DECRETO FUNCIONA: inmóvil + 80→600+120·(fase−2) px (P5 960), ejecuciones cada 15 t · (5) EL ECLIPSE MURIÓ de raíz → EL VÓRTICE PRIMORDIAL (galaxia de 3-4 brazos × 12 pernos, tangencial + colapso; rayos del sol ×4 mientras) · (6) LA GRAVEDAD DE VERDAD (volteo inmediato) + diálogos auditados (Nombre2 «La Canción del Tiempo», Nombre4 «El Telar») — probada en juego: la ronda quedó BIEN, pero los ataques de estructura volvían fantasmas a los NPCs y la Forma Ascendida seguía sin verse divina → v6.50.47 |
 | **v6.50.45** | ✅ Build-verificada, ⏳ probada (con bug) | EL JEFE QUE SE ESFUMABA (CheckActive cine + sombra que sigue) + LAS CINCO ARMAS DEL MOD (reloj ×2.6, coro, manada CazadorAstral, telar, decreto) + LA FORMA ASCENDIDA DIVINA (patrón de 7 capas) + EL ALTAR REESCRITO — probada en juego: el despawn quedó BIEN, pero el CORO/TELAR/DECRETO resultaron MUERTOS (el bug ai[0] de la .46), el reloj era uno solo y pequeño, el telar corría el círculo sin figura, los tajos de las runas eran feos, el eclipse final se veía mal y la gravedad no se notaba → v6.50.46 |
 | **v6.50.44** | ✅ Build-verificada, ⏳ en juego | EL DESCENSO DEL CIELO (la entrada de la Emperatriz: pilar de luz del cielo + jefe bajando por él) + EL JEFE QUE TE LEE (memoria de ritmo, fintas, bolsa ponderada, seis ataques mejorados con espirales/guiados/minas/contracruz) + Anillos del Horizonte BORRADOS + Corona Rúnica fusionada en La Forma Ascendida DIVINA (corona de 7 luces, rayo del cielo, huella, pulso) + sprites de Génesis y Altar regenerados |
 | **v6.50.43** | ✅ Build-verificada, ⏳ en juego | EL LLAMADO A CUALQUIER HORA (y el Verdugo que ya no se gasta) — feedback de la .42: «no puedo invocar al jefe de noche… no tiene sentido ya que al invocar el jefe el tiempo pasa hasta que el sol está en el centro del cielo» + «el item que sube de nivel el grimorio es un consumible, que no sea consumible, +10 niveles por uso sin consumirse»: (1) `ConvocableDeNoche` en `LlamadoDeJefe` — EL NOMBRE DE AETHON responde A CUALQUIER HORA (la llegada ya sabía correr la noche: rama nocturna de la carrera simulada en .41 + recorrida empíricamente en .42-S2; despawn solo por presa); los cuatro guardianes siguen de día (lore intacto, su presencia no mueve el reloj) · (2) Verdugo de Niveles: `consumable=false`, `maxStack=1` (patrón Carnada) — +10 niveles por uso SIN gastarse · tooltips actualizados es+en («A CUALQUIER HORA» / «Reutilizable») |

@@ -465,18 +465,18 @@ namespace AethonMod.Content.VFX
         {
             var p = new AuraPerfil
             {
-                Radio = 74f,          // el dios OCUPA más cielo
+                Radio = 88f,          // v6.50.47 — LA APOTEOSIS: el dios OCUPA MÁS cielo (74 → 88)
                 Anillos = 0,
                 Gajos = 0,
                 Patron = PatronAura.Divino,   // v6.50.45 — SU propio camino
                 Fluir = 0.6f,
                 Deriva = 0.12f,
-                Ascenso = 12f,
+                Ascenso = 16f,        // v6.50.47 — los orbes suben con MÁS fervor (12 → 16)
                 Distorsion = 0.9f,
                 Blur = 1f,
                 Glow = 0f,            // v6.50.45 — CERO DISCOS PLANOS (el reclamo, muerto)
                 Semilla = 150,
-                AlfaTrasera = 0.28f,
+                AlfaTrasera = 0.34f,  // v6.50.47 — la santidad ARDE un poco más (0.28 → 0.34)
                 AlfaFrontal = 0.06f,
                 VeloFrontal = false,  // v6.50.45 — el divino es TODO trasero aditivo
                 Rayos = 0,            // v6.50.45 — las agujas genéricas mueren (el halo reina)
@@ -487,7 +487,7 @@ namespace AethonMod.Content.VFX
             p.ConFrontal(new Color(255, 240, 180), new Color(200, 156, 255), new Color(255, 253, 240));
             p.ConParticulas(new ParticulasAura
             {
-                Cantidad = 14,        // los orbes que suben (viven en EmitirDivino §8)
+                Cantidad = 22,        // v6.50.47 — la apoteosis: MÁS orbes al cielo (14 → 22)
                 Forma = FormaParticula.Orbe,
                 Color = new Color(255, 240, 190),
                 Alfa = 0.5f,
@@ -1471,11 +1471,24 @@ namespace AethonMod.Content.VFX
             }
         }
 
-        /// <summary>LA EMISIÓN DIVINA — las SIETE capas del dios (coords de
-        /// MUNDO al búfer de VFXCore; deterministas: cero Main.rand).</summary>
+        /// <summary>
+        /// v6.50.47 — LA EMISIÓN DIVINA, LA APOTEOSIS (la petición: «la
+        /// forma Ascendida no se ve tan divino y sagrado como deberia,
+        /// tiene que ser mas divino, mas sagrado»). Las ONCE capas del
+        /// dios (coords de MUNDO al búfer de VFXCore; deterministas:
+        /// cero Main.rand): el cuerpo con CORAZÓN BLANCO · LA COLUMNA
+        /// DEL CIELO (el rayo que te sigue — la conexión cielo↔portador)
+        /// · SIETE rayos divinos · EL CÍRCULO RÚNICO TRIPLE con su banda
+        /// de escrituras · EL GRAN HALO CELESTIAL (doble aro con perlas,
+        /// ticks rúnicos y chispas) · LA CORONA DE LA SANTIDAD (cinco
+        /// estrellas en arco) · LAS ALAS DEL SERAFÍN (12 plumas por lado
+        /// en DOS bancos, aleteo majestuoso) · los ecos · OCHO chispas
+        /// estelares · LAS PLUMAS QUE CAEN (la bendición eterna) · los
+        /// orbes que suben. TODO aditivo, CERO discos planos.
+        /// </summary>
         private static void EmitirDivino(Player pl, AuraPerfil p)
         {
-            if (!VFXCore.Presupuesto(150)) return;   // el techo de la casa
+            if (!VFXCore.Presupuesto(320)) return;   // la apoteosis ocupa MÁS cielo
 
             float t = Main.GlobalTimeWrappedHourly;
             Vector2 centro = pl.Center;
@@ -1487,8 +1500,14 @@ namespace AethonMod.Content.VFX
             // EL RITMO (las alas leen la velocidad).
             float rapidez = MathHelper.Clamp(pl.velocity.Length() / 9f, 0f, 1f);
 
+            // LA PALETA DE LA SANTIDAD (el blanco que no quema y el oro vivo).
+            Color blancoSagrado = new Color(255, 252, 238);
+            Color oroVivo = new Color(255, 234, 152);
+
             // === 1. EL CUERPO DE LUZ (el flipbook Perlin suave — el respiro
-            //     de la base que SÍ funcionaba, SIN los discos planos) ===
+            //     de la base que SÍ funcionaba, SIN los discos planos) +
+            //     EL CORAZÓN BLANCO (el alma vista a través del pecho —
+            //     un dios ARDE por dentro) ===
             Texture2D texC = FlipCuerpo((int)(t * (10f + 18f * p.Deriva)));
             if (texC != null)
             {
@@ -1497,24 +1516,56 @@ namespace AethonMod.Content.VFX
                 VFXCore.Quad(centro, TintAditivo(colC, 0.50f),
                     new Vector2(ladoC, ladoC), t * 0.10f, texC);
             }
+            VFXCore.Quad(centro, TintAditivo(blancoSagrado, 0.26f * respira),
+                new Vector2(p.Radio * 0.62f, p.Radio * 0.80f), t * 0.23f,
+                VFXCore.SoftGlow);
 
-            // === 2. LOS RAYOS DIVINOS (columnas de luz cayendo del cielo —
-            //     cinco, con vaivén lento y alfa bajo: la bendición) ===
-            for (int i = 0; i < 5; i++)
+            // === 2. LA COLUMNA DEL CIELO (v6.50.47 — LA FIRMA DE LA
+            //     APOTEOSIS: un rayo de luz que cae del cielo SOBRE el
+            //     portador y lo SIGUE — la puerta del cielo abierta para
+            //     uno solo. TRES velos anidados que se desvanecen hacia
+            //     arriba + el charco de luz donde el cielo toca al dios) ===
             {
-                float fx = VFXCore.Hash01(p.Semilla ^ 0xD177, i, 3);
-                float x = centro.X + (fx - 0.5f) * p.Radio * 2.2f +
-                    MathF.Sin(t * 0.5f + i * 1.7f) * 12f;
-                float alto = 320f + 110f * MathF.Sin(t * 0.8f + i * 2.3f);
-                float alfa = 0.09f + 0.05f * MathF.Sin(t * 1.3f + i * 2.9f);
-                Vector2 cR = new Vector2(x, centro.Y - alto * 0.5f - 70f);
-                VFXCore.Quad(cR, p.TMedio * alfa, new Vector2(34f, alto));
-                VFXCore.Quad(cR, new Color(255, 252, 240) * (alfa * 0.45f),
-                    new Vector2(11f, alto * 0.96f));
+                float altoCol = 640f + 110f * MathF.Sin(t * 0.7f);
+                Vector2 baseCol = new Vector2(centro.X,
+                    centro.Y - (pl.height * 0.5f + 14f) * gravedad);
+                Vector2 medioCol = baseCol - new Vector2(0f, altoCol * 0.5f * gravedad);
+                // EL MANTO dorado (ancho, apenas susurrado).
+                VFXCore.Quad(medioCol, TintAditivo(p.TMedio, 0.055f * respira),
+                    new Vector2(148f * respira, altoCol));
+                // EL CUERPO blanco de la columna.
+                VFXCore.Quad(medioCol, TintAditivo(p.TBorde, 0.085f),
+                    new Vector2(60f, altoCol));
+                // EL NÚCLEO cegador (la vena por la que baja la luz).
+                VFXCore.Quad(medioCol, TintAditivo(blancoSagrado, 0.11f),
+                    new Vector2(20f, altoCol * 0.98f));
+                // LA PUERTA: el charco de luz donde la columna ABRAZA al portador.
+                VFXCore.Quad(centro + new Vector2(0f, 8f * gravedad),
+                    TintAditivo(oroVivo, 0.10f * respira),
+                    new Vector2(96f * respira, 26f));
             }
 
-            // === 3. EL CÍRCULO RÚNICO bajo los pies (la proyección achatada
-            //     del anillo de 16 segmentos girando + el interno al revés) ===
+            // === 3. LOS RAYOS DIVINOS (columnas de luz cayendo del cielo —
+            //     SIETE ahora, más altas: la bendición que rodea la
+            //     columna central como una corte de ángeles) ===
+            for (int i = 0; i < 7; i++)
+            {
+                float fx = VFXCore.Hash01(p.Semilla ^ 0xD177, i, 3);
+                float x = centro.X + (fx - 0.5f) * p.Radio * 2.6f +
+                    MathF.Sin(t * 0.5f + i * 1.7f) * 12f;
+                float alto = 430f + 150f * MathF.Sin(t * 0.8f + i * 2.3f);
+                float alfa = 0.11f + 0.06f * MathF.Sin(t * 1.3f + i * 2.9f);
+                Vector2 cR = new Vector2(x, centro.Y - alto * 0.5f - 70f);
+                VFXCore.Quad(cR, p.TMedio * alfa, new Vector2(38f, alto));
+                VFXCore.Quad(cR, new Color(255, 252, 240) * (alfa * 0.45f),
+                    new Vector2(12f, alto * 0.96f));
+            }
+
+            // === 4. EL CÍRCULO RÚNICO TRIPLE bajo los pies (la proyección
+            //     achatada: el anillo de 16 segmentos girando + el interno
+            //     al revés + LA BANDA DE ESCRITURAS — 20 glifos finos
+            //     CONTRAGIRANDO en el borde exterior: la ley del cielo
+            //     escrita alrededor del dios) ===
             Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 5f);
             {
                 float rx = p.Radio * 0.92f;
@@ -1539,72 +1590,153 @@ namespace AethonMod.Content.VFX
                     VFXCore.Quad(seg, TintAditivo(p.TBorde, 0.26f),
                         new Vector2(7f, 2.4f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
                 }
+                // v6.50.47 — LA BANDA DE ESCRITURAS (el tercer anillo: 20
+                // glifos finos al 16% más afuera, CONTRAGIRANDO lento —
+                // cada glifo una rayita con SU longitud por hash: el
+                // pergamino de la santidad, vivo bajo los pies).
+                for (int i = 0; i < 20; i++)
+                {
+                    float ang = -t * 0.22f + i * MathHelper.TwoPi / 20f;
+                    Vector2 seg = suelo + new Vector2(MathF.Cos(ang) * rx * 1.16f,
+                        MathF.Sin(ang) * ry * 1.16f);
+                    float lg = 4f + 7f * VFXCore.Hash01(p.Semilla ^ 0xE5C2, i, 17);
+                    float twE = 0.5f + 0.5f * MathF.Sin(t * 1.8f + i * 2.2f);
+                    VFXCore.Quad(seg, TintAditivo(oroVivo, 0.16f + 0.16f * twE),
+                        new Vector2(lg, 1.8f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
             }
 
-            // === 4. EL HALO DORADO (sobre la cabeza — EL signo divino): el
-            //     aro inclinado de perlas con PROFUNDIDAD (las de delante
-            //     brillan más) + el brillo del aro + 3 chispas girando ===
+            // === 5. EL GRAN HALO CELESTIAL (v6.50.47 — el signo divino
+            //     DOBLADO en grande: el ARO EXTERIOR de 30 perlas con
+            //     PROFUNDIDAD (las de delante ARDEN) + 12 TICKS rúnicos
+            //     entre perlas + EL ARO FANTASMA interior de 18 perlas
+            //     CONTRAGIRANDO (la aureola doble del arte sacro) + la
+            //     aureola suave + CUATRO chispas peregrinas) ===
             {
                 float bobH = MathF.Sin(t * 1.6f) * 3f;
                 Vector2 haloC = new Vector2(centro.X,
                     centro.Y - (pl.height * 0.5f + 26f) * gravedad + bobH * gravedad);
-                float rxH = 26f * respira;
-                float ryH = 9f;
-                for (int i = 0; i < 26; i++)
+                // EL ARO EXTERIOR (el grande: rx 40 — la corona del santo).
+                float rxH = 40f * respira;
+                float ryH = 14f;
+                for (int i = 0; i < 30; i++)
                 {
-                    float ang = i * MathHelper.TwoPi / 26f;
+                    float ang = i * MathHelper.TwoPi / 30f;
                     Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH,
                         MathF.Sin(ang) * ryH);
                     float frente = (MathF.Sin(ang) + 1f) * 0.5f;   // la profundidad del aro
                     VFXCore.Quad(perla, TintAditivo(p.TCentro, 0.35f + 0.50f * frente),
-                        new Vector2(5.5f, 5.5f), 0f, VFXCore.SoftGlow);
+                        new Vector2(6.5f, 6.5f), 0f, VFXCore.SoftGlow);
                 }
-                // EL BRILLO del aro (la aureola suave — NUNCA un disco plano:
-                // textura radial, dos capas respirando).
-                VFXCore.Quad(haloC, TintAditivo(p.TCentro, 0.16f * respira),
-                    new Vector2(rxH * 3.4f, rxH * 1.7f), 0f, VFXCore.SoftGlow);
-                // LAS TRES CHISPAS girando en el aro (la vida del halo).
-                for (int i = 0; i < 3; i++)
+                // LOS DOCE TICKS rúnicos entre perlas (las marcas del
+                // zodíaco del cielo — rayitas radiales girando lentito).
+                for (int i = 0; i < 12; i++)
                 {
-                    float ang = t * (1.1f + 0.35f * i) + i * MathHelper.TwoPi / 3f;
+                    float ang = t * 0.18f + i * MathHelper.TwoPi / 12f;
+                    Vector2 tick = haloC + new Vector2(MathF.Cos(ang) * rxH * 1.22f,
+                        MathF.Sin(ang) * ryH * 1.22f);
+                    float twT = 0.5f + 0.5f * MathF.Sin(t * 2.0f + i * 1.4f);
+                    VFXCore.Quad(tick, TintAditivo(oroVivo, 0.20f + 0.22f * twT),
+                        new Vector2(7f, 2.0f), ang, VFXCore.SoftGlow);
+                }
+                // EL ARO FANTASMA (el halo interno del arte sacro — 18
+                // perlas tenues CONTRAGIRANDO: la santidad tiene capas).
+                for (int i = 0; i < 18; i++)
+                {
+                    float ang = -t * 0.42f + i * MathHelper.TwoPi / 18f;
+                    Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH * 0.62f,
+                        MathF.Sin(ang) * ryH * 0.62f);
+                    VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.14f),
+                        new Vector2(4f, 4f), 0f, VFXCore.SoftGlow);
+                }
+                // LA AUREOLA (el resplandor del aro — dos capas respirando;
+                // textura radial, NUNCA un disco plano).
+                VFXCore.Quad(haloC, TintAditivo(p.TCentro, 0.16f * respira),
+                    new Vector2(rxH * 3.6f, rxH * 1.8f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.07f * respira),
+                    new Vector2(rxH * 5.0f, rxH * 2.4f), 0f, VFXCore.SoftGlow);
+                // LAS CUATRO CHISPAS peregrinas del aro (la vida del halo).
+                for (int i = 0; i < 4; i++)
+                {
+                    float ang = t * (1.1f + 0.28f * i) + i * MathHelper.TwoPi / 4f;
                     Vector2 chispa = haloC + new Vector2(MathF.Cos(ang) * rxH,
                         MathF.Sin(ang) * ryH);
-                    VFXCore.Quad(chispa, TintAditivo(new Color(255, 253, 240), 0.55f),
-                        new Vector2(9f, 9f), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(chispa, TintAditivo(blancoSagrado, 0.55f),
+                        new Vector2(10f, 10f), 0f, VFXCore.SoftGlow);
+                }
+
+                // === 6. LA CORONA DE LA SANTIDAD (v6.50.47 — cinco
+                //     ESTRELLAS en arco SOBRE el halo — la diadema del
+                //     cielo: cruces de luz descendiendo en tamaño hacia
+                //     los extremos, cada una con SU latido) ===
+                for (int i = 0; i < 5; i++)
+                {
+                    float fC = (i - 2f) / 2f;                       // −1 .. 1
+                    float angC = -MathHelper.PiOver2 + fC * 0.52f;  // el arco
+                    float rC = rxH * 1.5f + 6f;
+                    Vector2 estrella = haloC + new Vector2(MathF.Cos(angC) * rC,
+                        MathF.Sin(angC) * rC * 0.9f);
+                    float tamE = (11f - 1.6f * MathF.Abs(fC)) * respira;
+                    float twC = 0.55f + 0.45f * MathF.Sin(t * 2.6f + i * 1.9f);
+                    VFXCore.Quad(estrella, TintAditivo(blancoSagrado, 0.65f * twC),
+                        new Vector2(tamE * 2.2f, 2.4f), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(estrella, TintAditivo(blancoSagrado, 0.65f * twC),
+                        new Vector2(2.4f, tamE * 2.2f), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(estrella, TintAditivo(oroVivo, 0.55f * twC),
+                        new Vector2(tamE, tamE), 0f, VFXCore.SoftGlow);
                 }
             }
 
-            // === 5. LAS ALAS DE LUZ (dos abanicos de plumas detrás — se
-            //     DESPLIEGAN con la velocidad y RESPIRAN quietas) ===
+            // === 7. LAS ALAS DEL SERAFÍN (v6.50.47 — DOCE plumas por
+            //     lado en DOS bancos: las OCHO PRIMARIAS largas barriendo
+            //     el arco del ala + CUATRO SECUNDARIAS cortas rellenando
+            //     la espalda; ALETEO majestuoso lento que se ACELERA al
+            //     correr, despliegue completo con la velocidad) ===
             {
                 float despliegue = 0.72f + 0.5f * rapidez;
+                // EL ALETEO: la batida lenta del serafín (más ancha al correr).
+                float aleteo = MathF.Sin(t * (1.5f + 2.2f * rapidez)) * (0.06f + 0.10f * rapidez);
                 for (int lado = -1; lado <= 1; lado += 2)
                 {
-                    for (int pluma = 0; pluma < 7; pluma++)
+                    Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
+                    // EL BANCO PRIMARIO (8 plumas — el abanico clásico,
+                    // ahora MÁS LARGO: hasta Radio×1.55).
+                    for (int pluma = 0; pluma < 8; pluma++)
                     {
-                        float f = pluma / 6f;
-                        // EL ABANICO: desde arriba del hombro, barriendo
-                        // hacia afuera y abajo (el arco del ala). 
+                        float f = pluma / 7f;
                         float ang = -MathHelper.PiOver2 + lado *
-                            (0.28f + f * 1.15f) * despliegue;
+                            (0.26f + f * 1.24f) * despliegue + lado * aleteo * (0.6f + 0.4f * f);
                         float flutter = 1f + 0.10f * MathF.Sin(t * 2.2f + pluma * 0.9f + lado);
-                        float r = (p.Radio * 0.52f + f * p.Radio * 0.72f) * flutter;
-                        Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
+                        float r = (p.Radio * 0.52f + f * p.Radio * 1.03f) * flutter;
                         Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
                         Vector2 medio = (baseP + punta) * 0.5f;
                         float largo = Vector2.Distance(baseP, punta) + 8f;
                         Color cPluma = Color.Lerp(p.TCentro, p.TBorde, f);
-                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.34f - 0.16f * f) * despliegue),
-                            new Vector2(largo, 10f - 4.5f * f), ang, VFXCore.SoftGlow);
+                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.36f - 0.16f * f) * despliegue),
+                            new Vector2(largo, 11f - 5f * f), ang, VFXCore.SoftGlow);
                         // EL FILO de la pluma (la línea fina más caliente).
                         VFXCore.Quad(medio + new Vector2(0f, 2f),
-                            TintAditivo(new Color(255, 253, 240), 0.18f * despliegue),
-                            new Vector2(largo * 0.9f, 3f), ang, VFXCore.SoftGlow);
+                            TintAditivo(blancoSagrado, 0.20f * despliegue),
+                            new Vector2(largo * 0.9f, 3.2f), ang, VFXCore.SoftGlow);
+                    }
+                    // EL BANCO SECUNDARIO (4 plumas cortas pegadas a la
+                    // espalda — la densidad del ala de serafín).
+                    for (int pluma = 0; pluma < 4; pluma++)
+                    {
+                        float f = pluma / 4f;
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.14f + f * 0.62f) * despliegue + lado * aleteo * 1.2f;
+                        float r = p.Radio * (0.42f + f * 0.38f);
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 6f;
+                        VFXCore.Quad(medio, TintAditivo(p.TMedio, 0.24f * despliegue),
+                            new Vector2(largo, 8f - 3f * f), ang, VFXCore.SoftGlow);
                     }
                 }
             }
 
-            // === 6. LOS ECOS (el rastro etéreo al moverse — 3 luces
+            // === 8. LOS ECOS (el rastro etéreo al moverse — 3 luces
             //     desvaneciéndose tras el portador) ===
             if (rapidez > 0.12f)
             {
@@ -1617,9 +1749,10 @@ namespace AethonMod.Content.VFX
                 }
             }
 
-            // === 7. LAS CHISPAS ESTELARES (cruces de luz parpadeando —
-            //     deterministas por hash, re-sembradas cada ~0.8 s) ===
-            for (int i = 0; i < 6; i++)
+            // === 9. LAS CHISPAS ESTELARES (cruces de luz parpadeando —
+            //     deterministas por hash, re-sembradas cada ~0.8 s; OCHO
+            //     ahora: más cielo santificado) ===
+            for (int i = 0; i < 8; i++)
             {
                 float semillaViva = (int)(t * 1.25f);
                 float h1 = VFXCore.Hash01(p.Semilla ^ 0x5CA, i, (int)semillaViva);
@@ -1630,15 +1763,37 @@ namespace AethonMod.Content.VFX
                 Vector2 chispa = centro + new Vector2(MathF.Cos(angO), MathF.Sin(angO) * 0.7f) *
                     (p.Radio * (0.7f + 0.5f * h1));
                 // LA CRUZ (dos barras finas cruzadas + el corazón).
-                VFXCore.Quad(chispa, TintAditivo(new Color(255, 250, 225), 0.55f * brillo),
+                VFXCore.Quad(chispa, TintAditivo(blancoSagrado, 0.55f * brillo),
                     new Vector2(16f, 2.2f), h1 * MathHelper.Pi, VFXCore.SoftGlow);
-                VFXCore.Quad(chispa, TintAditivo(new Color(255, 250, 225), 0.55f * brillo),
+                VFXCore.Quad(chispa, TintAditivo(blancoSagrado, 0.55f * brillo),
                     new Vector2(2.2f, 16f), h1 * MathHelper.Pi, VFXCore.SoftGlow);
                 VFXCore.Quad(chispa, TintAditivo(new Color(255, 255, 245), 0.70f * brillo),
                     new Vector2(5f, 5f), 0f, VFXCore.SoftGlow);
             }
 
-            // === 8. LAS PARTÍCULAS del perfil (los orbes que suben — de la
+            // === 10. LAS PLUMAS QUE CAEN (v6.50.47 — la bendición eterna:
+            //     TRES plumas doradas cayendo en cámara lenta alrededor
+            //     del portador, meciéndose al descender — deterministas
+            //     por hash, re-sembradas cada ciclo de ~2.2 s) ===
+            for (int i = 0; i < 3; i++)
+            {
+                float hP1 = VFXCore.Hash01(p.Semilla ^ 0xFEA7, i, 23);
+                float hP2 = VFXCore.Hash01(p.Semilla ^ 0xFEA7, i, 29);
+                float cicloP = (t * 0.45f + hP1) % 1f;      // 0..1: el descenso
+                float ladoP = (i % 2 == 0) ? 1f : -1f;
+                float x = centro.X + ladoP * (p.Radio * (0.55f + 0.75f * hP1)) +
+                    MathF.Sin(t * 1.1f + i * 2.3f) * (10f + 6f * hP2);   // el mecerse
+                float y = centro.Y - 150f * gravedad + cicloP * 300f * gravedad;
+                Vector2 pluma = new Vector2(x, y);
+                float fadeP = MathF.Sin(cicloP * MathHelper.Pi);  // nace y muere suave
+                float giroP = MathHelper.PiOver2 + MathF.Sin(t * 0.9f + i * 1.7f) * 0.35f;
+                VFXCore.Quad(pluma, TintAditivo(oroVivo, 0.34f * fadeP),
+                    new Vector2(15f, 4.4f), giroP, VFXCore.SoftGlow);
+                VFXCore.Quad(pluma, TintAditivo(blancoSagrado, 0.22f * fadeP),
+                    new Vector2(9f, 2.2f), giroP, VFXCore.SoftGlow);
+            }
+
+            // === 11. LAS PARTÍCULAS del perfil (los orbes que suben — de la
             //     casa, siguen vivos) ===
             EmitirParticulas(centro, p, false, 511);
         }

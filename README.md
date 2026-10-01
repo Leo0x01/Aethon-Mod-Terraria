@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.46 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.47 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,8 +14,34 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-09-30, v6.50.46)
+## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.47)
 
+- **v6.50.47 — LOS NPC FANTASMA + LA APOTEOSIS**: dos pedidos, dos balas.
+  (1) **EL FIX DE PROFUNDIDAD**: «algunos ataques del jefe hacen que los
+  NPC sean semitransparentes» — los CUATRO ataques de estructura (el reloj
+  gigante ×4, el coro, el telar y el decreto) dibujaban en el pase normal
+  de proyectiles, DESPUÉS de los NPCs: sus velos gigantes (la MASA
+  alpha-blend del reloj — «el polvo que OCLUYE» — y la arena a ×5.2)
+  cubrían a los NPCs del pueblo y los volvían fantasmas. Ahora se
+  registran en `DrawBehind → behindNPCs` (el pase de tML que dibuja tras
+  los tiles y ANTES de todas las criaturas — verificado en el decompile):
+  **el reloj es un edificio y las trampas son del suelo del mundo; los
+  NPCs y el jugador SIEMPRE sólidos encima**. Las balas rápidas siguen
+  pasando por delante, como toda bala de Terraria. (2) **LA APOTEOSIS DE
+  LA FORMA ASCENDIDA**: «tiene que ser más divino, más sagrado» — el
+  patrón Divino pasa de 7 a ONCE capas: **LA COLUMNA DEL CIELO** (el rayo
+  que cae del cielo SOBRE el portador y lo sigue — la puerta del cielo
+  abierta para uno solo), **EL GRAN HALO CELESTIAL DOBLE** (30 perlas + 12
+  ticks rúnicos + el aro fantasma contragirando — la aureola doble del
+  arte sacro), **LA CORONA DE LA SANTIDAD** (cinco estrellas en arco),
+  **LAS ALAS DEL SERAFÍN** (12 plumas por lado en dos bancos, con aleteo
+  majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
+  blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
+  subiendo y la luz del mundo ×1.35 — un FARO de santidad.
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.47`,
+  release con `AethonMod.tmod` adjunto y verificado byte a byte).
+- Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
+  sin excepciones; `.tmod` de 394 entradas auditado.
 - **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
   ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
   NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el

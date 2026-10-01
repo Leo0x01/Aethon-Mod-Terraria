@@ -315,6 +315,33 @@ namespace AethonMod.Content.Projectiles.Jefes
             return mejor;
         }
 
+        /// <summary>
+        /// v6.50.47 — LAS ESTRUCTURAS DE CAMPO DEL JEFE DIBUJAN DETRÁS DE
+        /// LAS CRIATURAS (el fix de «algunos ataques del jefe hacen que
+        /// los NPC sean semitransparentes»). EL RELOJ GIGANTE, EL CORO,
+        /// EL TELAR y EL DECRETO son EDIFICIOS y TRAMPAS que viven
+        /// SEGUNDOS en pantalla: dibujados en el pase normal de
+        /// proyectiles (DESPUÉS de los NPCs), sus velos gigantes —
+        /// la MASA alpha-blend del reloj («el polvo que OCLUYE») y las
+        /// capas aditivas de arena/anillos/jaula — cubrían a los NPC del
+        /// pueblo y los volvían FANTASMAS (vistos a través del ataque).
+        /// REGISTRADOS en behindNPCs dibujan en el pase de
+        /// DrawCachedProjs(DrawCacheProjsBehindNPCs) — DESPUÉS de los
+        /// tiles, ANTES de TODOS los NPCs y del jugador (verificado en el
+        /// decompile del tML 2026.07.3.0): las criaturas SIEMPRE sólidas
+        /// encima, las estructuras de luz debajo. Los proyectiles RÁPIDOS
+        /// (pernos, flechas, tajos) siguen en el pase normal — pasan POR
+        /// DELANTE como toda bala de Terraria.
+        /// </summary>
+        public override void DrawBehind(int index, System.Collections.Generic.List<int> behindNPCsAndTiles,
+            System.Collections.Generic.List<int> behindNPCs, System.Collections.Generic.List<int> behindProjectiles,
+            System.Collections.Generic.List<int> overPlayers, System.Collections.Generic.List<int> overWiresUI)
+        {
+            if (Estilo == EstiloRelojGigante || Estilo == EstiloCoroJefe ||
+                Estilo == EstiloTelarJefe || Estilo == EstiloDecretoJefe)
+                behindNPCs.Add(index);
+        }
+
         public override void AI()
         {
             _edad++;

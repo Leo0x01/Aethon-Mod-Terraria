@@ -247,9 +247,12 @@ namespace AethonMod.Content.Players
                 }
 
                 // --- LA LUZ de la forma ascendida: la luz primordial,
-                //     TIBIA y ANCHA (más que nunca — un dios alumbra). ---
+                //     TIBIA y ANCHA (más que nunca — un dios alumbra).
+                //     v6.50.47 — LA APOTEOSIS: la luz también crece
+                //     (0.34/0.27/0.13 → 0.46/0.36/0.17 — el portador
+                //     de la Forma es un FARO de santidad). ---
                 Lighting.AddLight(centro - new Vector2(0f, 10f),
-                    new Vector3(0.34f, 0.27f, 0.13f));
+                    new Vector3(0.46f, 0.36f, 0.17f));
             }
         }
 
