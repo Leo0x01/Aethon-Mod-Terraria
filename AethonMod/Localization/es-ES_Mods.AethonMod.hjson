@@ -2213,8 +2213,6 @@ Jefe: {
 		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
 		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
 		Reconocimiento: Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.
-		Presentacion: El mundo TIEMBLA: el tiempo se DOBLA y el sol CORRE hacia el centro del cielo.
-		LlegadaLuz: El sol queda CLAVADO en el centro del cielo y brilla con una intensidad que NO es de este mundo…
 		Muerte: La luz ESTALLA y su resplandor REGRESA al mundo. El sol recupera su curso.
 		Carga: EL DESTELLO — la luz cruza el mundo: no estés en su línea.
 		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
@@ -2316,4 +2314,8 @@ Biomes: {
 		DisplayName: Bioma del Sagrario Hueco
 		TownNPCDialogueName: el Bioma del Sagrario Hueco
 	}
+}
+
+Mensajes: {
+	RegaloPruebas: PRUEBAS — La Luz te entrega sus tres regalos: Forma Ascendida 2, Forma Ascendida 3 y el Aethon Menor ({0} recibidos).
 }

@@ -2213,8 +2213,6 @@ Jefe: {
 		Gravedad: Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
 		Reconocimiento: Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.
-		Presentacion: The world TREMBLES: time BENDS and the sun RACES to the center of the sky.
-		LlegadaLuz: The sun locks dead-center in the sky, blazing with an intensity NOT of this world…
 		Muerte: The light EXPLODES and its radiance RETURNS to the world. The sun takes back its course.
 		Carga: THE FLASH — light crosses the world: stay off its line.
 		Juicio: THE JUDGMENT OF LIGHT — pillars of light fall from the sky: run.
@@ -2316,4 +2314,8 @@ Biomes: {
 		DisplayName: Hollow Sanctum Biome
 		TownNPCDialogueName: the Hollow Sanctum Biome
 	}
+}
+
+Mensajes: {
+	RegaloPruebas: TESTING — The Light hands you its three gifts: Ascended Form 2, Ascended Form 3 and the Lesser Aethon ({0} received).
 }

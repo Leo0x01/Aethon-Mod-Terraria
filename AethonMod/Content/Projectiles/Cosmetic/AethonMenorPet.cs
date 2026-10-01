@@ -173,8 +173,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 if (VFXCore.QuadCount > 0)
                 {
-                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
-                    return true;                        // el vuelco fue el dibujo
+                    // v6.50.50 — EL CRASH DE LA MASCOTA, MUERTO DE RAÍZ:
+                    // el contrato viejo (FlushAdditive + return true) dejaba
+                    // el lote CERRADO y tML dibujaba encima → «Draw was
+                    // called, but Begin has not yet been called» y el End
+                    // final del bucle mataba el motor. EL CONTRATO DE LA
+                    // CASA: salir SIEMPRE con el lote ABIERTO y vanilla —
+                    // y el vuelco YA fue el dibujo (return false: tML no
+                    // añade sprite encima).
+                    VFXCore.FlushAdditive(null, true); // vuela el lote aditivo (queda cerrado)
+                    VFXCore.ReabrirLoteVanilla();      // y SE REABRE — lote vivo para el siguiente
+                    return false;
                 }
                 return false;
             }

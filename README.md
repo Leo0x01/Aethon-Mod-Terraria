@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.49 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.50 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,36 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.49)
+## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.50)
+- **v6.50.50 - LA SÉPTIMA RONDA — EL CRASH DE LA MASCOTA + EL REGALO DE PRUEBAS + EL TRONO SIN HUMO + LA EMPERATRIZ PALABRA POR PALABRA**:
+  (1) **EL CRASH DE LA MASCOTA, MUERTO DE RAÍZ**: el client.log lo cazó —
+  `AethonMenorPet.PreDraw` dejaba el SpriteBatch CERRADO y devolvía
+  `true` → tML dibujaba encima → «Draw was called, but Begin has not
+  yet been called» y el `End` final del bucle mataba el motor
+  (exactamente al invocarla). El contrato de la casa ahora vive ahí
+  también: `FlushAdditive` + `ReabrirLoteVanilla` + `return false`.
+  En el mismo log: las «Excepciones silenciosas» de SolVivo/LenteAbismo
+  (Begin pelado tras un helper que deja el lote abierto — las
+  mordidas/lenguas jamás se dibujaron) también curadas.
+  (2) **LOS ÍTEMS NUEVOS SIN RECETAS, DIRECTO AL JUGADOR**: las tres
+  recetas de prueba BORRADAS y en su lugar EL REGALO DE PRUEBAS —
+  al entrar al mundo, el jugador recibe la Forma 2, la Forma 3 y el
+  Aethon Menor si no los tiene ya (una copia por ítem + mensaje).
+  (3) **LA FORMA ASCENDIDA 3: DEL HUMO A LA JOYERÍA** — la .49 era TODO
+  SoftGlow (13 capas de brillo difuso = UNA MANCHA); ahora cada
+  estructura lleva SU NÚCLEO NÍTIDO: el arcoíris es UNA LÍNEA
+  (aros continuos de Ring con perlas GlowOrb), la CRUZ lleva SU beam
+  sólido de Pixel, la corona de 24 estrellas y las chispas son
+  DestelloFinal (4+4 rayos), los ofanim tienen PUPILA de verdad y
+  cada pluma del serafín lleva SU CÁLAMO.
+  (4) **LA ENTRADA DE LA EMPERATRIZ, PALABRA POR PALABRA** (AI_120
+  case 0 del decompile, 180 t): EL AURORA DE NACIMIENTO (el proyectil
+  vanilla 874 HallowBossDeathAurora), el SoundID.Item161, LA LLUVIA
+  ARCOÍRIS (dust 267, el matiz recorre el espectro con la intro), la
+  caída (0,5) que se frena ×0.95 y el FADE IN de 3 s — SU Opacity.
+  (5) **EL .plr CORRUPTO**: el «Expected Re-Logic file format» del log
+  es un archivo de PERSONAJE dañado del usuario (ajeno al mod) — si un
+  personaje no carga, borrar su .plr de la carpeta Players.
 - **v6.50.49 - LA SEXTA RONDA — EL VUELO QUE NUNCA VOLÓ + EL TRONO**:
   (1) **EL FIX DEL VUELO INFINITO**: el código de la .48 JAMÁS corrió —
   las banderas se encendían en `PostUpdate`, UN HOOK TARDE (el decompile
@@ -88,10 +117,10 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.49`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.50`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 398 entradas auditado (diff quirúrgico: −3 del segundo jefe, +3 del trono y el menor).
+  sin excepciones; `.tmod` de 398 entradas auditado (set idéntico al de la .49: diff quirúrgico de contenido, cero texturas nuevas).
 - **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
   ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
   NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el

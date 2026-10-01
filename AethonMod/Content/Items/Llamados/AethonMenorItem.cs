@@ -49,11 +49,10 @@ namespace AethonMod.Content.Items.Llamados
             return true;
         }
 
-        public override void AddRecipes()
-        {
-            // La receta de pruebas de la casa (madera, como la Brasa):
-            // el mod es de PRUEBAS — la mascota se invoca cuando se quiere.
-            CreateRecipe().AddIngredient(ItemID.Wood, 5).Register();
-        }
+        // v6.50.50 — SIN RECETA (la petición: «esos item nuevos no pongas
+        // recetas, daselos directamente al jugador, recuerda que todo esto
+        // es una prueba»): la mascota se ENTREGA al entrar al mundo
+        // (ShardPlayer.EntregarRegaloDePruebas). El drop del 20% del jefe
+        // se queda: es su recuerdo vivo, no una receta.
     }
 }

@@ -182,7 +182,7 @@ namespace AethonMod.Content.NPCs
         //     con el contrato del rayo 0-3 y para que el cielo de
         //     ColaSierpeSky — que enciende sus destellos con sub 10-12 —
         //     viva durante la presentación.) ===
-        public const int SUB_PRESENTA = 10;     // la luz se materializa y presenta (≈45 t)
+        public const int SUB_PRESENTA = 10;     // la presentación: 180 t — la curva LITERAL de la Emperatriz
 
         // === EL ESTADO DEL MUNDO (el espejo de AethonLlegadaSistema lo
         //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
@@ -341,28 +341,22 @@ namespace AethonMod.Content.NPCs
             _idxMem = (_idxMem + 1) & 7;
             if (_idxMem == 0) _memLlena = true;
 
-            // === LA ENTRADA — EL PRIMER TICK (v6.50.49: LA ENTRADA DE LA
-            //     EMPERATRIZ — el invocador ya lo dejó DONDE nace la
-            //     Emperatriz: 200 px ENCIMA del jugador, con el jitter
-            //     circular de 50 del case 661. AQUÍ NO SE TELETRANSPORTA:
-            //     la luz se materializa DONDE ESTÁ — como la Emperatriz
-            //     materializándose sobre la luciérnaga muerta) ===
+            // === LA ENTRADA — EL PRIMER TICK (v6.50.50: LA ENTRADA EXACTA DE
+            //     LA EMPERATRIZ, ACTO POR ACTO. El invocador ya la dejó DONDE
+            //     nace la Emperatriz (200 px ENCIMA del jugador, el jitter
+            //     circular de 50 del case 661) y su SpawnBoss ya dijo SU
+            //     anuncio («ha despertado», el de vanilla — como la Emperatriz,
+            //     NI UN texto más). Aquí solo el nacimiento: invisible (alpha
+            //     255) e intocable — la PRESENTACIÓN (EstadoNaciendo, 180 t)
+            //     lo trae al mundo con la curva LITERAL de su Opacity) ===
             if (!_nacio)
             {
-                // Nace a la vista, arriba del portador — SIN esconderse
-                // en el cielo: la presentación es CORTA y vanilla
-                // CheckActive ya no puede matarlo a escondidas.
                 NPC.velocity = Vector2.Zero;
-                NPC.alpha = 255;          // invisible hasta el destello de la materialización
+                NPC.alpha = 255;          // invisible hasta que la presentación lo traiga
                 NPC.dontTakeDamage = true;
                 _subLlegada = SUB_PRESENTA;
                 _tickEstado = 0;
                 _estado = EST_NACIENDO;
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Presentacion", OroLuz);
-                }
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
                 _nacio = true;
                 NPC.netUpdate = true;
             }
@@ -380,16 +374,11 @@ namespace AethonMod.Content.NPCs
                 OnPhaseChange();
             }
 
-            // === EL FADE DE NACIMIENTO (v6.50.49 — LA MATERIALIZACIÓN DE
-            //     LA EMPERATRIZ: la luz aparece DONDE nació, deshaciéndose
-            //     en luz — el destello prisma de su entrada) ===
-            if (NPC.alpha > 0)
-            {
-                bool materializar = _estado == EST_NACIENDO && _tickEstado >= 8;
-                if (materializar)
-                    NPC.alpha = Math.Max(0, NPC.alpha - 17);
-                if (NPC.alpha == 0) NPC.dontTakeDamage = false;
-            }
+            // === EL FADE DE NACIMIENTO (v6.50.50): la PRESENTACIÓN tomó el
+            //     rampa ENTERA — la curva LITERAL de la Emperatriz (alpha =
+            //     255·(1 − t/180), su Opacity clavada) vive ahora en
+            //     EstadoNaciendo con dueño ÚNICO (el −17/t de la .49 murió:
+            //     la Emperatriz no se materializa en 15 ticks). ===
 
             // === EL MOTOR DE ESTADOS ===
             _tickEstado++;
@@ -498,63 +487,96 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// v6.50.49 — LA PRESENTACIÓN DE LA EMPERATRIZ (la letra:
-        /// «para la entrada del Aethon original, modifiquemosla y que
-        /// sea exactamente como la emperatris de la luz»). El invocador
-        /// la deja DONDE nace la Emperatriz (200 px sobre tu cabeza,
-        /// la fórmula literal del case 661) — aquí la luz se
-        /// MATERIALIZA (el destello prisma del tick 8, con su lluvia de
-        /// chispas), RESPIRA flotando en su sitio (~45 t, el mismo
-        /// compás de la Emperatriz apareciendo sobre la luciérnaga) y
-        /// sube a su órbita de pelea. La CARRERA AL MEDIODÍA murió con
-        /// su temblor, su pilar y su descenso: la Emperatriz no toca el
-        /// reloj del mundo.
+        /// v6.50.50 — LA PRESENTACIÓN EXACTA DE LA EMPERATRIZ (la letra:
+        /// «el jefe no entra como la emperatriz de la luz ni tiene sus
+        /// efectos al entrar»). EL DECOMPILE MANDA: AI_120_HallowBoss,
+        /// case 0, PALABRA POR PALABRA — 180 ticks (3 s):
+        ///   t=0:    velocity (0,5) + EL AURORA DE NACIMIENTO (el proyectil
+        ///           vanilla 874 HallowBossDeathAurora — EL EFECTO de su
+        ///           entrada) en Center+(0,-80);
+        ///   t=10:   SoundID.Item161 (su sonido de nacimiento);
+        ///   10-150: LA LLUVIA ARCOÍRIS — 2 polvos/tick (dust 267
+        ///           RainbowMk2, el del Last Prism), el matiz recorre el
+        ///           ESPECTRO con la intro (hslToRgb(t/180)), naciendo 150
+        ///           px encima y CAYENDO (velocity += UnitY·3) con su clon
+        ///           blanco a media escala;
+        ///   cada t: velocity *= 0.95 (la caída que se frena sola);
+        ///   el FADE IN: alpha = 255·(1 − t/180) — SU Opacity, clavada;
+        ///   t=180:  a la pelea (TargetClosest + netUpdate).
+        /// La CARRERA AL MEDIODÍA sigue muerta (la Emperatriz no toca el
+        /// reloj) y el anuncio es el de SpawnBoss («ha despertado», el de
+        /// vanilla — NI UN texto más).
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
-            // LA RESPIRACIÓN: flotando donde nació — el compás sereno
-            // de la Emperatriz presentándose (sin perseguir, sin huir).
-            Vector2 punto = target.Center + new Vector2(0f, -260f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.015f, 0.08f);
+            // LA CUENTA (la ai[1] de la Emperatriz): _tickEstado llega +1
+            // por el ++ del motor — el t de vanilla, sin descuentos.
+            int t = _tickEstado;
 
-            // EL DESTELLO DE LA MATERIALIZACIÓN (tick 8: el fade
-            // empieza — el cielo PRISMA saluda a la nueva luz).
-            if (_tickEstado == 8 && !Main.dedServ)
+            // t=0/1 — LA CAÍDA INICIAL + EL AURORA (la firma de su
+            //     nacimiento: el mismo proyectil de la Emperatriz).
+            if (t <= 1)
             {
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                for (int i = 0; i < 60; i++)
+                NPC.velocity = new Vector2(0f, 5f);
+                if (Main.netMode != NetmodeID.MultiplayerClient && !Main.dedServ)
                 {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    float vel = Main.rand.NextFloat(2f, 8f);
-                    Dust d = Dust.NewDustPerfect(NPC.Center, DustID.GoldFlame,
-                        new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * vel,
-                        190, i % 3 == 0 ? NucleoBlanco : OroLuz, 1.6f);
-                    d.noGravity = true;
+                    // (GetSpawnSource_ForProjectile es interno de vanilla:
+                    // el equivalente público de la casa es GetSource_FromAI.)
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center + new Vector2(0f, -80f), Vector2.Zero,
+                        ProjectileID.HallowBossDeathAurora, 0, 0f, Main.myPlayer);
                 }
             }
 
-            // EL DESTELLO DE VIDA: chispas doradas mientras se presenta.
-            if (!Main.dedServ && Main.rand.NextBool(4))
+            // t=10 — EL SONIDO DE SU NACIMIENTO (en SU tick, palabra por palabra).
+            if (t == 11 && !Main.dedServ)
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
+
+            // LA CAÍDA QUE SE FRENA (cada tick: ×0.95 — como la Emperatriz).
+            NPC.velocity *= 0.95f;
+
+            // 10-150 — LA LLUVIA ARCOÍRIS (2 polvos por tick, LITERAL).
+            if (t > 11 && t < 150 && !Main.dedServ)
             {
-                Dust d = Dust.NewDustPerfect(
-                    NPC.Center + new Vector2(Main.rand.NextFloat(-110f, 110f),
-                        Main.rand.NextFloat(-60f, 60f)),
-                    DustID.GoldFlame,
-                    new Vector2(Main.rand.NextFloat(-1.2f, 1.2f),
-                        Main.rand.NextFloat(-1.6f, -0.4f)),
-                    180, OroLuz, 1.3f);
-                d.noGravity = true;
+                for (int k = 0; k < 2; k++)
+                {
+                    float opacidad = MathHelper.Clamp(t / 180f, 0f, 1f);
+                    float num52 = MathHelper.Lerp(1.3f, 0.7f, opacidad) *
+                        Utils.GetLerpValue(0f, 120f, t, true);
+                    Color newColor = Main.hslToRgb(t / 180f, 1f, 0.5f, 255);
+                    int idx = Dust.NewDust(NPC.position, NPC.width, NPC.height,
+                        DustID.RainbowMk2, 0f, 0f, 0, newColor);
+                    Main.dust[idx].position = NPC.Center +
+                        Main.rand.NextVector2Circular(NPC.width * 3f, NPC.height * 3f) +
+                        new Vector2(0f, -150f);
+                    Main.dust[idx].velocity *= Main.rand.NextFloat() * 0.8f;
+                    Main.dust[idx].noGravity = true;
+                    Main.dust[idx].fadeIn = 0.6f + Main.rand.NextFloat() * 0.7f * num52;
+                    Main.dust[idx].velocity += Vector2.UnitY * 3f;
+                    Main.dust[idx].scale = 0.35f;
+                    if (idx != 6000)
+                    {
+                        Dust clon = Dust.CloneDust(idx);
+                        clon.scale /= 2f;
+                        clon.fadeIn *= 0.85f;
+                        clon.color = new Color(255, 255, 255, 255);
+                    }
+                }
             }
 
-            // A LA PELEA: la presentación completa dura ~45 t — la luz
-            // sube a su órbita y elige su primer castigo.
-            if (_tickEstado >= 45)
+            // EL FADE IN (la curva de la Emperatriz: SU Opacity, t/180).
+            NPC.alpha = (int)Math.Round(255f * (1f - MathHelper.Clamp(t / 180f, 0f, 1f)));
+            if (NPC.alpha == 0) NPC.dontTakeDamage = false;
+
+            // t=180 — A LA PELEA (como la Emperatriz: TargetClosest + netUpdate).
+            if (t >= 180)
             {
                 _estado = EST_FLOTAR;
                 _tickEstado = 0;
                 _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
                 NPC.alpha = 0;
                 NPC.dontTakeDamage = false;
+                NPC.TargetClosest();
                 NPC.netUpdate = true;
             }
         }

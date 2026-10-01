@@ -75,16 +75,9 @@ namespace AethonMod.Content.Items.Cosmetics
             return true; // siempre equipable: es un adorno
         }
 
-        public override void AddRecipes()
-        {
-            // LA RECETA DEL TRONO: la Forma 2 + los fragmentos del
-            // génesis de la Luz Primordial (su jefe la deja caer) — la
-            // tercera luz se FORJA de las dos primeras.
-            CreateRecipe()
-                .AddIngredient< FormaAscendidaDosItem >(1)
-                .AddIngredient< global::AethonMod.Content.Items.GenesisShard >(20)
-                .AddTile(Terraria.ID.TileID.WorkBenches)
-                .Register();
-        }
+        // v6.50.50 — SIN RECETA (la petición: «esos item nuevos no pongas
+        // recetas, daselos directamente al jugador, recuerda que todo esto
+        // es una prueba»): el trono se ENTREGA al entrar al mundo
+        // (ShardPlayer.EntregarRegaloDePruebas).
     }
 }

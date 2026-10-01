@@ -555,6 +555,84 @@ namespace AethonMod.Content.Players
             // sincroniza el inventario, pero no los datos de GlobalItem ni
             // del ModPlayer. En SP no hay nada que pedir.
             EcoRed.PedirMisLibros();
+
+            // v6.50.50 — EL MODO PRUEBA (la petición literal: «esos item
+            // nuevos no pongas recetas, daselos directamente al jugador,
+            // recuerda que todo esto es una prueba»): los ítems NUEVOS del
+            // ciclo (la Forma Ascendida 2, la Forma Ascendida 3 y el Aethon
+            // Menor) ya no tienen receta — se ENTREGAN al entrar al mundo,
+            // una sola copia por ítem (si ya la tiene — inventario, hueco
+            // funcional, vanidad o misceláneo — no se repite).
+            if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
+                EntregarRegaloDePruebas();
+        }
+
+        // ================================================================
+        //  v6.50.50 — EL REGALO DE PRUEBAS (los ítems nuevos, directo)
+        // ================================================================
+
+        /// <summary>
+        /// Entrega al jugador LOCAL los ítems nuevos del ciclo de pruebas
+        /// si no los tiene ya (inventario, accesorios, vanidad o misc).
+        /// Los que no caben caen al suelo junto a él (QuickSpawnItem).
+        /// </summary>
+        private void EntregarRegaloDePruebas()
+        {
+            try
+            {
+                int entregados = 0;
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDosItem>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaTresItem>());
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
+
+                if (entregados > 0)
+                {
+                    Main.NewText(Terraria.Localization.Language.GetTextValue(
+                        "Mods.AethonMod.Mensajes.RegaloPruebas", entregados),
+                        new Microsoft.Xna.Framework.Color(255, 240, 180));
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// True si el jugador ya lleva un ítem de este tipo puesto o en el
+        /// inventario (revisa inventario 0-58, armor 0-19 y misc 0-9).
+        /// </summary>
+        private static bool YaLoTiene(Player p, int tipo)
+        {
+            for (int i = 0; i < 59; i++)
+                if (p.inventory[i] != null && !p.inventory[i].IsAir && p.inventory[i].type == tipo)
+                    return true;
+            for (int i = 0; i < 20; i++)
+                if (p.armor[i] != null && !p.armor[i].IsAir && p.armor[i].type == tipo)
+                    return true;
+            for (int i = 0; i < 10; i++)
+                if (p.miscEquips[i] != null && !p.miscEquips[i].IsAir && p.miscEquips[i].type == tipo)
+                    return true;
+            return false;
+        }
+
+        /// <summary>Entrega UNA copia si no la tiene; devuelve 1 si entregó.</summary>
+        private int EntregarSiNoTiene(int tipo)
+        {
+            if (YaLoTiene(Player, tipo)) return 0;
+
+            // Al inventario (primer hueco libre de las 50 primeras ranuras).
+            int hueco = -1;
+            for (int i = 0; i < 50; i++)
+                if (Player.inventory[i] == null || Player.inventory[i].IsAir) { hueco = i; break; }
+
+            Item nuevo = new Item();
+            nuevo.SetDefaults(tipo);
+            if (hueco >= 0)
+                Player.inventory[hueco] = nuevo;
+            else
+                Player.QuickSpawnItem(Player.GetSource_Misc("RegaloDePruebas"), tipo, 1);
+            return 1;
         }
 
         public override void SaveData(TagCompound tag)

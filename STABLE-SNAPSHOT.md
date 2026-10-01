@@ -1,11 +1,45 @@
-# AethonMod — ESTADO ACTUAL (v6.50.49)
+# AethonMod — ESTADO ACTUAL (v6.50.50)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-10-01 (tag `v6.50.49`, commit local + bundle en /home/sync —
-> **PUSH PENDIENTE: el token GitHub del usuario EXPIRÓ durante la sesión**; la próxima
-> sesión con token nuevo hace `git push origin main --tags` + la release).
+> Última actualización: 2026-10-01 (v6.50.50 local: commit + tag + bundle en /home/sync —
+> **PUSH PENDIENTE: el token GitHub SE PERDIÓ CON EL WIPE DEL SANDBOX** (solo queda el prefijo
+> `github_pat_11BWPN…` en el worklog); cuando el usuario dé token nuevo: `git push origin main --tags`
+> + release con `AethonMod.tmod` + verificación CDN.
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
+
+- **v6.50.50 = EL CRASH DE LA MASCOTA + EL REGALO DE PRUEBAS + EL TRONO SIN
+  HUMO + LA EMPERATRIZ PALABRA POR PALABRA** — la séptima ronda sobre la .49:
+  (1) **EL CRASH DE LA MASCOTA** (el client.log del usuario lo cazó):
+  `AethonMenorPet.PreDraw` hacía `FlushAdditive(null, true); return true;`
+  — el Flush deja el lote CERRADO y el `true` mandaba a tML a dibujar
+  ENCIMA → «Draw was called…» + «End without Begin» en
+  `Main.DrawProjectiles:18973` → **Main engine crash al invocarla**.
+  El contrato de la casa restaurado: `FlushAdditive` +
+  `ReabrirLoteVanilla()` + `return false`. Y las DOS «Excepciones
+  silenciosas» del mismo log (SolVivo línea 741 / LenteAbismo 510:
+  Begin pelado tras helper que deja el lote abierto — mordidas/lenguas
+  JAMÁS dibujadas) curadas con la sonda `CerrarLoteSiAbierto()`.
+  (2) **EL REGALO DE PRUEBAS** («no pongas recetas, daselos directamente
+  al jugador»): las tres recetas BORRADAS; `ShardPlayer.OnEnterWorld`
+  entrega Forma 2 + Forma 3 + Aethon Menor al entrar al mundo (una
+  copia por ítem — `YaLoTiene` mira inventario+armadura+misc — con
+  mensaje `Mensajes.RegaloPruebas` es+en).
+  (3) **EL TRONO SIN HUMO** («la menos divina de todas, solo es humo»):
+  la .49 era TODO SoftGlow — 13 capas difusas = UNA MANCHA; ahora cada
+  estructura lleva SU NÚCLEO NÍTIDO (aros de Ring, cuentas de GlowOrb,
+  trazos sólidos de Pixel, estrellas de DestelloFinal): el arcoíris ES
+  UNA LÍNEA, la cruz lleva SU beam, los ofanim tienen PUPILA y cada
+  pluma SU CÁLAMO. Llaves huérfanas Presentacion/LlegadaLuz BORRADAS.
+  (4) **LA ENTRADA EXACTA DE LA EMPERATRIZ** (AI_120 case 0, LITERAL,
+  180 t): proyectil vanilla 874 HallowBossDeathAurora en Center+(0,−80)
+  + SoundID.Item161 al t=10 + LA LLUVIA ARCOÍRIS (dust 267 RainbowMk2,
+  hslToRgb(t/180)) + caída (0,5)·0.95 + FADE IN alpha=255·(1−t/180) +
+  TargetClosest al t=180; anuncio SOLO el de SpawnBoss. `GetSource_FromAI`
+  reemplaza al interno `GetSpawnSource_ForProjectile`.
+  (5) **EL .plr CORRUPTO del usuario** («Expected Re-Logic file format»):
+  archivo de personaje dañado, ajeno al mod — borrar el .plr roto de
+  la carpeta Players si un personaje no carga.
 
 - **v6.50.49 = EL FIX DEL VUELO INFINITO + LA FORMA ASCENDIDA 3: EL TRONO +
   EL SEGUNDO JEFE BORRADO + LA ENTRADA DE LA EMPERATRIZ PARA EL PRIMER JEFE +
@@ -502,61 +536,30 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-Toda la cadena v6.50.24 → v6.50.42 está implementada y build-verificada. El usuario probó la
-v6.50.41 y reportó: el sol no quedaba fijo al llegar al centro + el jefe no aparecía (caza
-completa en v6.50.42 — una sola causa para ambos, verificada en headless).
-Checklist de la v6.50.42:
+La v6.50.50 está implementada y build-verificada. Checklist de la .50:
 
-1. **EL JEFE APARECE Y EL SOL SE QUEDA FIJO (v6.50.42, EL PRIMERO)**:
-   invocar a Aethon (en SP y, si se puede, en host MP) y verificar:
-   (a) **EL SOL LLEGA Y SE QUEDA**: la carrera como siempre (tarde → noche
-   completa → amanecer → mediodía, o mañana directo) y al llegar al
-   centro **QUEDA CLAVADO** — ya NO sigue su curso: el jefe VIVE y el
-   mediodía es eterno mientras la pelea dure; (b) **AETHON SE
-   MATERIALIZA**: tras el destello del sol, el jefe APARECE (fade) EN EL
-   CIELO sobre el jugador — visible siempre (nunca enterrado, nunca fuera
-   del mundo) — y luego desciende a su órbita de pelea; (c) al matarlo (o
-   si muere el jugador), el sol RECUPERA su curso desde el mediodía; (d)
-   el resto de la llegada heredada (temblor, destello radial del sol,
-   ventana del cielo, columnas lejanas) sigue vivo; (e) sin excepciones
-   nuevas en el client.log.
-2. **LA LLEGADA LIMPIA — EL MEDIO DÍA DEL DESTELLO (v6.50.41, lo heredado
-   que YA se vio bien)**: (a) CERO OSCURIDAD (todo eso murió); (b) el sol
-   sin teletransporte (tarde → noche → amanecer → se POSA; mañana →
-   directo); (c) el destello radial naciendo DEL SOL, difuminado a
-   transparente en los bordes; (d) el sol NUNCA se apaga; (e) el jefe no
-   nace del centro del sol.
-3. **EL JEFE AETHON — LO HEREDADO VIVO**: (a) MÁS GRANDE (el sol de código
-   ×1.5 — núcleo 130 px); (b) LOS SEIS ATAQUES (juicio/rayo/nova/cruz/
-   destello/eclipse — el ECLIPSE sigue encogiendo SU propia luz y poniendo
-   el cielo violeta mientras dura el ATAQUE); (c) LA MUERTE: la contracción,
-   EL ESTALLIDO final CEGANDO, el sol RECUPERANDO su curso y el anuncio
-   «La luz ESTALLA y su resplandor REGRESA al mundo…»; (d) que NO hay
-   excepciones nuevas en el client.log.
-4. **EL COMPILE SIN CIERRES (v6.50.39)**: compilar el mod en tModLoader
-   (Develop Mods → Build & Reload) VARIAS veces seguidas — el juego YA NO se
-   cierra (y ahora con aún MENOS superficie: la oscuridad entera fue
-   borrada).
-5. **LOS FIXES v6.50.31 (ya confirmados por el usuario: "bien, ya no hay errores")**: garganta
-   al cargar el aliento, corona de anillos, motas, arco boca→presa y salida de mundo limpia.
-6. **Las 5 armas de rayo** (bolsa 18): el Bastón de Rayo Primordial, el Arco de Sobretensión
-   (anclado a la mano), el **Colmillo de Vena Trueno** (trío naranja+amarillo cayendo con
-   recada/parpadeo), el Rúnico y el Perlin (el arco que sigue al cursor).
-7. **LA FURIA con el motor de vanilla (v6.50.29)**: la chusma del bioma NACE (5º intento —
-   ahora via el motor natural de spawn de Terraria, anillo 0.52-0.7× pantalla, nunca en
-   paredes), el **indicador de oleada** abajo-derecha («Oleada k: X %» + barra estilo
-   invasión), el guardián por zona al borde del cuadro, el avance por muertes (18 en la 1).
-8. **El dado del invierno (v6.50.30)**: Deerclops SOLO al 1 % por jefe de oleada (borde
-   opuesto, anuncio propio) — ya NO es guardián de nieve ni del Juicio.
-9. **Los diálogos de devorar** (v6.50.30): cada esencia usa la voz del SABOR DE SU JEFE
-   (12 jefes × 3 variantes), con tiempo de lectura 4-10 s.
-10. **El libro YA NO RUGE al hablar** (v6.50.30 — el rugido solo suena cuando LLEGA un jefe).
-11. **El jefe Aethon — combate**: la avalancha del EMERGER murió (una sola volleada por
-    emersión), la barra de vida con icono, el RAM y el Aliento.
-12. **El destello del Sol / Supernova / BlackHole**: la cruz de 8 rayos (`DestelloFinal`) sin
-    disco plano (los velos de la capa de UI murieron en v6.50.28).
-13. **El brillo de los rayos**: funda gaussiana al 24 % + soft-add — dos rayos cruzándose ya
-    no hacen "cortes" ni clipean.
+1. **LA MASCOTA YA NO CRASHEA (EL PRIMERO)**: invocar al Aethon Menor —
+   el juego NO se cierra; la mascota vuela a tu hombro con su arcoíris.
+   De yapa: si antes se usaron las varas de Códigos Vivos, la lente y el
+   sol ya NO sueltan «Excepción silenciosa» al golpear (las mordidas de
+   la lente y las lenguas del sol por fin SE DIBUJAN).
+2. **EL REGALO DE PRUEBAS**: entrar a un mundo con un personaje que NO
+   tenga los ítems → recibir la Forma 2, la Forma 3 y el Aethon Menor
+   (con el mensaje dorado «PRUEBAS — La Luz te entrega sus tres
+   regalos»); reentrar → NO duplica (ni en inventario, ni equipados).
+3. **EL TRONO SIN HUMO**: equipar la Forma Ascendida 3 — el arcoíris se
+   lee como LÍNEA (no mancha), la cruz tiene SU beam, los ofanan tienen
+   PUPILA, la corona de 24 estrellas tiene FORMA de destello y las
+   plumas llevan su CÁLAMO blanco. ¿Ahora sí lee MÁS divino que la
+   Forma 2?
+4. **LA ENTRADA DE LA EMPERATRIZ**: invocar al jefe — nace 200 px
+   encima con su AURORA (el proyectil prisma de vanilla), suena SU
+   sonido (Item161, t=10), cae LA LLUVIA ARCOÍRIS mientras SE MATERIALIZA
+   (fade de 3 s — SU Opacity), el anuncio es SOLO «ha despertado» (el de
+   vanilla) y a los 3 s exactos (180 t) empieza la pelea.
+5. **EL .plr CORRUPTO**: si algún personaje no carga (error
+   «Expected Re-Logic file format»), su .plr está dañado — borrarlo de
+   la carpeta Players (ajeno al mod).
 
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
@@ -618,7 +621,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.49** | ✅ Build-verificada, ⏳ en juego | LA SEXTA RONDA — feedback de la .48 (CUATRO frentes): (1) **EL FIX DEL VUELO INFINITO QUE NUNCA CORRIÓ**: el código de la .48 estaba muerto por timing (banderas encendidas en `PostUpdate`, un hook TARDE — decompile: ResetEffects 24723 → PostUpdateEquips 24914 → PostUpdate 27293); ahora los ítems las encienden en `UpdateAccessory`/`UpdateVanity` (dentro de UpdateEquips, como vanilla con empressBrooch) + relleno duro de wingTime + wingsLogic 27 (Mothron) sin sprite (Player.wings=0: las plumas del aura son las alas) · el diagnóstico del «parpadea/reinicia su posición» = cero escrituras del mod a la física del jugador + el velo frontal allocaba un AuraPerfil POR FRAME (ahora cacheado) · (2) **LA FORMA ASCENDIDA 3: EL TRONO** (FormaAscendidaTresItem = Forma 2 + 20 Fragmento Génesis): la iconografía del Apocalipsis — ARCOÍRIS alrededor del trono (2 aros de 36+28 perlas, cada una su color del espectro) · MAR DE VIDRIO (placa + retícula de 24 destellos) · SIETE LÁMPARAS DE FUEGO orbitando · RUEDAS DE OFANIM (16+10 ojos de luz contrarrotando) · HALO TRIPLE (30+20+12 + las 12 marcas del zodíaco) · CORONA DE VEINTICUATRO ESTRELLAS (3 arcos de 8) · LA CRUZ DE LUZ de la Maiestas Domini (columna del cielo + brazo del horizonte DETRÁS del dios) · ALAS PRISMÁTICAS (4 bancos, 28 plumas/lado, cada pluma SU matiz del arcoíris) · luz de mundo blanca entera · Radio 132 · 36 orbes · vuelo infinito · (3) **EL SEGUNDO JEFE BORRADO** (AethonSegundo + AtaqueJefe2Projectile + invocador + 3 texturas + 12 claves; la Forma 2 SE QUEDÓ) · (4) **LA ENTRADA DE LA EMPERATRIZ para el primer jefe**: case 661 literal (200px+jitter50+SpawnBoss) + presentación de ~45 t — LA CARRERA AL MEDIODÍA MURIÓ (temblor/reloj/pilar/descenso borrados; el reloj del mundo YA NO SE TOCA; CheckActive ya no puede matarlo: nace dentro del rectángulo) · (5) **EL AETHON MENOR**: la mascota de luz de vanilla (lightPet+NeedsUUID) — el sprite del jefe a media escala, corona de 8 perlas, luz del arcoíris girando (drop 20% + 5 maderas) |
+| **v6.50.50** | ✅ Build-verificada, ⏳ en juego | LA SÉPTIMA RONDA — feedback de la .49 (CUATRO frentes): (1) **EL CRASH DE LA MASCOTA** (client.log): `AethonMenorPet.PreDraw` hacía `FlushAdditive(null,true); return true` — el Flush deja el lote CERRADO y el `true` mandaba a tML a dibujar ENCIMA → «Draw was called, but Begin has not yet been called» + «End was called, but Begin has not yet been called» en Main.DrawProjectiles:18973 = Main engine crash AL INVOCARLA; contrato de la casa restaurado (`FlushAdditive` + `ReabrirLoteVanilla()` + `return false`) · las DOS «Excepciones silenciosas» del mismo log (SolVivo línea 741 / LenteAbismo 510: Begin pelado tras helper que deja el lote ABIERTO — mordidas/lenguas JAMÁS dibujadas) curadas con `CerrarLoteSiAbierto()` · el «Expected Re-Logic file format» del log = un .plr CORRUPTO del usuario (ajeno al mod) · (2) **EL REGALO DE PRUEBAS** («no pongas recetas, daselos directamente al jugador»): las tres recetas BORRADAS (Forma 2: 10 maderas · Forma 3: Forma 2+20 Fragmento Génesis · Menor: 5 maderas); `ShardPlayer.OnEnterWorld` entrega Forma 2 + Forma 3 + Aethon Menor al ENTRAR AL MUNDO (una copia por ítem — `YaLoTiene` inventario 0-58 + armadura 0-19 + misc 0-9; al hueco libre o QuickSpawnItem; mensaje `Mensajes.RegaloPruebas` es+en) · (3) **EL TRONO SIN HUMO** («la menos divina de todas, solo es humo»): la .49 era TODO SoftGlow (13 capas difusas = UNA MANCHA); EL NÚCLEO NÍTIDO — el arcoíris son DOS LÍNEAS continuas de Ring con 36+14 perlas GlowOrb + 4 joyas DestelloFinal · la CRUZ lleva SU beam sólido de Pixel (7 px, 0.9) + flare en el cruce · el MAR DE VIDRIO tiene SU ARO (Ring) + retícula de Pixel · los OFANIM: GlowOrb 18×11 + PUPILA sólida de Pixel · el HALO TRIPLE son TRES aros de Ring + 12 perlas + ticks de Pixel · la CORONA de 24 estrellas y las chispas son DestelloFinal + cuenta GlowOrb · cada pluma del serafín SU CÁLAMO de Pixel + punta de luz · llaves huérfanas Presentacion/LlegadaLuz BORRADAS (es+en) · (4) **LA ENTRADA DE LA EMPERATRIZ, PALABRA POR PALABRA** (AI_120 case 0 del decompile, 180 t): proyectil vanilla 874 HallowBossDeathAurora en Center+(0,−80) + SoundID.Item161 al t=10 + LLUVIA ARCOÍRIS (dust 267 RainbowMk2, hslToRgb(t/180), 2/tick + clon blanco) + caída (0,5)·×0.95 + FADE IN alpha=255·(1−t/180) + TargetClosest al t=180; anuncio SOLO el de SpawnBoss («ha despertado»); `GetSource_FromAI` por el interno `GetSpawnSource_ForProjectile` |
+| **v6.50.49** | ✅ Build-verificada, ⏳ probada (con feedback) | LA SEXTA RONDA — feedback de la .48 (CUATRO frentes): (1) **EL FIX DEL VUELO INFINITO QUE NUNCA CORRIÓ**: el código de la .48 estaba muerto por timing (banderas encendidas en `PostUpdate`, un hook TARDE — decompile: ResetEffects 24723 → PostUpdateEquips 24914 → PostUpdate 27293); ahora los ítems las encienden en `UpdateAccessory`/`UpdateVanity` (dentro de UpdateEquips, como vanilla con empressBrooch) + relleno duro de wingTime + wingsLogic 27 (Mothron) sin sprite (Player.wings=0: las plumas del aura son las alas) · el diagnóstico del «parpadea/reinicia su posición» = cero escrituras del mod a la física del jugador + el velo frontal allocaba un AuraPerfil POR FRAME (ahora cacheado) · (2) **LA FORMA ASCENDIDA 3: EL TRONO** (FormaAscendidaTresItem = Forma 2 + 20 Fragmento Génesis): la iconografía del Apocalipsis — ARCOÍRIS alrededor del trono (2 aros de 36+28 perlas, cada una su color del espectro) · MAR DE VIDRIO (placa + retícula de 24 destellos) · SIETE LÁMPARAS DE FUEGO orbitando · RUEDAS DE OFANIM (16+10 ojos de luz contrarrotando) · HALO TRIPLE (30+20+12 + las 12 marcas del zodíaco) · CORONA DE VEINTICUATRO ESTRELLAS (3 arcos de 8) · LA CRUZ DE LUZ de la Maiestas Domini (columna del cielo + brazo del horizonte DETRÁS del dios) · ALAS PRISMÁTICAS (4 bancos, 28 plumas/lado, cada pluma SU matiz del arcoíris) · luz de mundo blanca entera · Radio 132 · 36 orbes · vuelo infinito · (3) **EL SEGUNDO JEFE BORRADO** (AethonSegundo + AtaqueJefe2Projectile + invocador + 3 texturas + 12 claves; la Forma 2 SE QUEDÓ) · (4) **LA ENTRADA DE LA EMPERATRIZ para el primer jefe**: case 661 literal (200px+jitter50+SpawnBoss) + presentación de ~45 t — LA CARRERA AL MEDIODÍA MURIÓ (temblor/reloj/pilar/descenso borrados; el reloj del mundo YA NO SE TOCA; CheckActive ya no puede matarlo: nace dentro del rectángulo) · (5) **EL AETHON MENOR**: la mascota de luz de vanilla (lightPet+NeedsUUID) — el sprite del jefe a media escala, corona de 8 perlas, luz del arcoíris girando (drop 20% + 5 maderas) — probada en juego: el vuelo infinito SÍ voló, pero la mascota CRASHEABA al invocarla (el contrato del lote), la Forma 3 se leía como humo, la entrada del jefe no tenía NADA de la Emperatriz y los ítems nuevos venían con recetas que nadie pidió → v6.50.50 |
 | **v6.50.48** | ✅ Build-verificada, ⏳ probada (con feedback) | LA QUINTA RONDA (la más grande del ciclo) — feedback de la .47: (1) **LA FORMA ASCENDIDA 2** (un ítem NUEVO, la 1 intacta): la apoteosis ABSOLUTA — las once capas elevadas (Radio 88→116, orbes 22→30, columna 760 px, 12 rayos, halo 36+24+16) + LAS CINCO CAPAS DEL ARTE SACRO (MANDORLA · CORONA DE DOCE ESTRELLAS · SIETE CANDELEROS · RÍO DE LUZ · plumas dobles) + LAS ALAS 28 plumas/lado en 4 bancos con extensión −82°..+78° COMPLETA (la .47 abarcaba la mitad superior) + VUELO INFINITO en ambas (empressBrooch; sin alas: wingsLogic inyectada, wings=0 — las plumas del aura SON las alas) · (2) **BARRA XP ADAPTATIVA** (baila bajo la última fila de buffs: ceil/11 a 50 px) · (3) **AETHON, LA SEGUNDA LUZ** (invocador #2, entrada LITERAL de la Emperatriz: 200px+jitter50+SpawnBoss del case 661; 5 fases que HEREDAN TODO: lemniscata→carrera prismática→parpadeo→pentagrama→furia con LA CORONA; arsenal Astilla/Prisma/Anillo/Lluvia/Corona/CambioPrisma; drop la Forma 2; texturas por remapa HSL violeta→rosa/oro→cian) · (4) **TRES FIXES DE OLEADA**: préstamo de zona (Cerebro/Devorador ya NO SE VAN — vanilla los mataba fuera de su bioma), Skeletron sin 9999 de día (aiStyle 11 lo vestía de guardián), y el hook de la barra escala la referencia fresca por multiplicador×factor de largo (el desborde era vida×oleada ÷ vida-vanilla; fill sin Clamp) · (5) **COREOGRAFÍAS TEMÁTICAS**: 6 dientes de librería MUERTOS; cada guardián convoca a LOS SUYOS con material vanilla (abejas 566/181+aguijón 719 · sirvientes 5 · limos+GEL como proyectil con gravedad/rebote/salpicón · creepers+Carmesí · Devorador 3× (67→192, enlaze AI_006)+Corrupción · esqueletos 21+HUESOS 21 en 3 figuras) — probada en juego: el vuelo infinito que prometía salía MUERTO (las banderas se encendían un hook tarde: ver la .49), el movimiento de las formas no se leía fluido, el segundo jefe «se ve horrible» y la entrada de la Emperatriz había que dársela al PRIMERO → v6.50.49 |
 | **v6.50.47** | ✅ Build-verificada, ⏳ probada (con feedback) | LOS NPC FANTASMA + LA APOTEOSIS — feedback de la .46 (DOS pedidos): (1) «algunas ataques del jefe, hace que los NPC sean semitransparente»: los CUATRO ataques de estructura (reloj gigante ×4, coro, telar, decreto) dibujaban en el pase normal de proyectiles, DESPUÉS de los NPCs — sus velos (la MASA alpha-blend «el polvo que OCLUYE» + la arena ×5.2) cubrían a los NPC del pueblo = fantasmas. FIX: `DrawBehind → behindNPCs` (el pase que dibuja tras los tiles y ANTES de toda criatura, verificado en el decompile): NPCs y jugador SIEMPRE sólidos encima; balas rápidas siguen pasando por delante · (2) «la forma Ascendida no se ve tan divino y sagrado… tiene que ser mas divino, mas sagrado»: LA APOTEOSIS — el patrón Divino de 7 a ONCE capas (EL CORAZÓN BLANCO ardiendo en el pecho · LA COLUMNA DEL CIELO que sigue al portador + su charco de luz · 7 rayos divinos · CÍRCULO RÚNICO TRIPLE con banda de escrituras · GRAN HALO CELESTIAL DOBLE de 30 perlas + aro fantasma contragirando + 12 ticks · CORONA DE LA SANTIDAD de 5 estrellas · ALAS DEL SERAFÍN de 12 plumas en dos bancos con aleteo majestuoso · 8 chispas · LAS PLUMAS QUE CAEN · 22 orbes); Radio 74→88, luz del mundo ×1.35, tooltip es+en nuevo — probada en juego: el fix de profundidad quedó BIEN, pero la apoteosis aún no leía como divina, las alas se quedaban a media altura y había que crear un ítem NUEVO en vez de cambiar el existente → v6.50.48 |
 | **v6.50.46** | ✅ Build-verificada, ⏳ probada (con feedback) | LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL — feedback de la .45 (SIETE pedidos): (0) EL HALLAZGO: el estilo del proyectil vive en ai[0] y el coro/telar/decreto de la .45 LO SOBRESCRIBÍAN → los TRES ataques estaban MUERTOS (invisible e inerte desde sus primeros ticks — por eso «el jefe lo hace mal» y «no lo usa al cambio de fase»); LEY DE ORO: nadie toca ai[0] · (1) LOS TAJOS DEL JEFE MUEREN (runas con abanico de 3 pernos) · (2) EL ANILLO DEL TIEMPO: 4 relojes ×5.2 cayendo del cielo alrededor de la presa (arena corre ya aterrizado; renderer con la MISMA edad de arena) · (3) EL TELAR TRAZA LA ESTRELLA: pentagrama (5) en fase 4 · heptagrama (7) en furia — cada punta que el jefe toca CLAVA su estrella; jaula en orden natural (EstrellasClavadas compacta) + círculo veloz vigilando · (4) EL DECRETO FUNCIONA: inmóvil + 80→600+120·(fase−2) px (P5 960), ejecuciones cada 15 t · (5) EL ECLIPSE MURIÓ de raíz → EL VÓRTICE PRIMORDIAL (galaxia de 3-4 brazos × 12 pernos, tangencial + colapso; rayos del sol ×4 mientras) · (6) LA GRAVEDAD DE VERDAD (volteo inmediato) + diálogos auditados (Nombre2 «La Canción del Tiempo», Nombre4 «El Telar») — probada en juego: la ronda quedó BIEN, pero los ataques de estructura volvían fantasmas a los NPCs y la Forma Ascendida seguía sin verse divina → v6.50.47 |

@@ -507,6 +507,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // LAS MORDIDAS VIVAS (la lente enfocando — 10 ticks de destello).
                 if (_mordidas.Count > 0)
                 {
+                    // v6.50.50 — sonda ANTES del Begin: OjoAbismo sale con el
+                    // lote ABIERTO (CerrarBatch reabre vanilla) y el Begin pelado
+                    // lanzaba «Begin has been called before calling End» cada
+                    // vez que había mordidas vivas (nunca se dibujaron).
+                    VFXCore.CerrarLoteSiAbierto();
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                         SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);
@@ -738,6 +743,11 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 // 12 ticks): fuego de verdad del borde al enemigo.
                 if (_lenguas.Count > 0)
                 {
+                    // v6.50.50 — sonda ANTES del Begin: SolVivo sale con el
+                    // lote ABIERTO (CerrarBatch reabre vanilla) y el Begin
+                    // pelado lanzaba «Begin has been called before calling End»
+                    // cada vez que había lenguas vivas (nunca se dibujaron).
+                    VFXCore.CerrarLoteSiAbierto();
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                         SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                         null, Main.GameViewMatrix.TransformationMatrix);

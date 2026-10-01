@@ -68,11 +68,9 @@ namespace AethonMod.Content.Items.Cosmetics
             return true;
         }
 
-        public override void AddRecipes()
-        {
-            // La receta de pruebas de la casa (la Brasa usa 5 maderas; el
-            // dios mayor, el doble): el mod es de PRUEBAS.
-            CreateRecipe().AddIngredient(ItemID.Wood, 10).Register();
-        }
+        // v6.50.50 — SIN RECETA (la petición: «esos item nuevos no pongas
+        // recetas, daselos directamente al jugador, recuerda que todo esto
+        // es una prueba»): la Forma 2 se ENTREGA al entrar al mundo
+        // (ShardPlayer.EntregarRegaloDePruebas).
     }
 }
