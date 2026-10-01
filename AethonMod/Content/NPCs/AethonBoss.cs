@@ -166,13 +166,23 @@ namespace AethonMod.Content.NPCs
         private const int EST_DECRETO = 12;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
         private const int EST_MURIENDO = 99;    // la contracción final
 
-        // === LA LLEGADA — LOS SUB-ESTADOS (viajan en ai[1] durante
-        //     EST_NACIENDO; 10-13 para NO chocar con el contrato del
-        //     rayo 0-3) ===
-        public const int SUB_TEMBLOR = 10;      // el mundo tiembla (150 t)
-        public const int SUB_CARRERA = 11;      // el tiempo CORRE al mediodía
-        public const int SUB_CLIMAX = 12;       // EL DESTELLO nace del sol + Aethon nace BAJO él
-        public const int SUB_DESCENSO = 13;     // la luz cae a su órbita de pelea
+        // === LA ENTRADA — v6.50.49 — LA ENTRADA DE LA EMPERATRIZ, EXACTA
+        //     (la letra: «para la entrada del Aethon original,
+        //     modifiquemosla y que sea exactamente como la emperatris de
+        //     la luz, para ello revisa como terraria maneja su entrada y
+        //     copiala»). El invocador usa LA FÓRMULA LITERAL del case 661
+        //     del decompile (la muerte de la luciérnaga prisma):
+        //     Center + (0,-200) + NextVector2Circular(50,50) + SpawnBoss
+        //     — y aquí solo queda LA PRESENTACIÓN: la luz se
+        //     materializa flotando donde nació (200 px sobre tu cabeza,
+        //     como la Emperatriz), con su destello y su respiración,
+        //     y a la pelea. La CARRERA AL MEDIODÍA (temblor · carrera ·
+        //     pilar · descenso) MURIÓ: la Emperatriz no toca el reloj.
+        //     (Viaja en ai[1] durante EST_NACIENDO; 10 para NO chocar
+        //     con el contrato del rayo 0-3 y para que el cielo de
+        //     ColaSierpeSky — que enciende sus destellos con sub 10-12 —
+        //     viva durante la presentación.) ===
+        public const int SUB_PRESENTA = 10;     // la luz se materializa y presenta (≈45 t)
 
         // === EL ESTADO DEL MUNDO (el espejo de AethonLlegadaSistema lo
         //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
@@ -218,7 +228,7 @@ namespace AethonMod.Content.NPCs
         private int _estado = EST_NACIENDO;
         private int _tickEstado = 0;
         private bool _nacio = false;
-        private int _subLlegada = SUB_TEMBLOR;   // v6.50.37 — la fase de LA LLEGADA
+        private int _subLlegada = SUB_PRESENTA;   // v6.50.49 — LA PRESENTACIÓN de la Emperatriz
 
         // === EL RAYO (heredero del aliento: 1 carga · 2 fuego) ===
         private int _rayo = 0;
@@ -331,21 +341,25 @@ namespace AethonMod.Content.NPCs
             _idxMem = (_idxMem + 1) & 7;
             if (_idxMem == 0) _memLlena = true;
 
-            // === LA LLEGADA — EL PRIMER TICK (v6.50.37: la secuencia completa) ===
+            // === LA ENTRADA — EL PRIMER TICK (v6.50.49: LA ENTRADA DE LA
+            //     EMPERATRIZ — el invocador ya lo dejó DONDE nace la
+            //     Emperatriz: 200 px ENCIMA del jugador, con el jitter
+            //     circular de 50 del case 661. AQUÍ NO SE TELETRANSPORTA:
+            //     la luz se materializa DONDE ESTÁ — como la Emperatriz
+            //     materializándose sobre la luciérnaga muerta) ===
             if (!_nacio)
             {
-                NPC.Center = target.Center + new Vector2(0f, -860f);   // escondido SOBRE el cielo
+                // Nace a la vista, arriba del portador — SIN esconderse
+                // en el cielo: la presentación es CORTA y vanilla
+                // CheckActive ya no puede matarlo a escondidas.
                 NPC.velocity = Vector2.Zero;
-                NPC.alpha = 255;          // invisible hasta EL FLASH del climax
+                NPC.alpha = 255;          // invisible hasta el destello de la materialización
                 NPC.dontTakeDamage = true;
-                _subLlegada = SUB_TEMBLOR;
+                _subLlegada = SUB_PRESENTA;
                 _tickEstado = 0;
                 _estado = EST_NACIENDO;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    // v6.50.39 — NUNCA MÁS EL CORTE AL ALBA: si era de noche,
-                    // la noche entera CORRE en el acto 11 (la luna barre el
-                    // cielo y el alba llega SOLA) — el sol no se teletransporta.
                     EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Presentacion", OroLuz);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
@@ -366,15 +380,14 @@ namespace AethonMod.Content.NPCs
                 OnPhaseChange();
             }
 
-            // === EL FADE DE NACIMIENTO (la materialización en la CÚSPIDE
-            //     DEL PILAR, envuelta en el pico del destello del cielo —
-            //     v6.50.44: la luz cae del CIELO, no del sol) ===
+            // === EL FADE DE NACIMIENTO (v6.50.49 — LA MATERIALIZACIÓN DE
+            //     LA EMPERATRIZ: la luz aparece DONDE nació, deshaciéndose
+            //     en luz — el destello prisma de su entrada) ===
             if (NPC.alpha > 0)
             {
-                bool materializar = _estado == EST_NACIENDO &&
-                    _subLlegada == SUB_CLIMAX && _tickEstado >= 45;
+                bool materializar = _estado == EST_NACIENDO && _tickEstado >= 8;
                 if (materializar)
-                    NPC.alpha = Math.Max(0, NPC.alpha - 13);
+                    NPC.alpha = Math.Max(0, NPC.alpha - 17);
                 if (NPC.alpha == 0) NPC.dontTakeDamage = false;
             }
 
@@ -411,7 +424,8 @@ namespace AethonMod.Content.NPCs
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
             NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
-            //     llegada: 10 temblor · 11 carrera · 12 climax · 13 descenso
+            //     entrada: 10 la presentación de la Emperatriz (v6.50.49 —
+            //      el temblor/carrera/climax/descenso MURIERON con ella)
             //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo
             //     (v6.50.45: los estados nuevos — 8 reloj · 9 coro · 10 manada
             //      · 11 telar · 12 decreto — viajan en ai[0] y usan ai[1]=0
@@ -429,23 +443,18 @@ namespace AethonMod.Content.NPCs
         /// v6.50.45 — EL FIX DEL JEFE QUE SE ESFUMABA (los DOS síntomas del
         /// usuario: «si el jefe es invocado y el jugador se mueve el jefe
         /// desaparece» + «a veces no termina de ser invocado»): vanilla
-        /// CheckActive mata a cualquier NPC cuyo timeLeft expire — NewNPC
-        /// lo pone en 937 t y SOLO se refresca si un jugador vive dentro del
-        /// rectángulo ±(1180, 760) px del NPC. El jefe nace 860 px SOBRE el
-        /// jugador (FUERA del rectángulo vertical desde el TICK 1) y durante
-        /// la LLEGADA (temblor 150 + carrera hasta ~900 t desde que la
-        /// v6.50.43 lo hizo invocable A CUALQUIER HORA) jamás se acerca:
-        /// timeLeft NUNCA se refresca y a los 15,6 s la luz MUERE EN SECRETO
-        /// a media llegada — invocado cerca del mediodía llegaba vivo, por
-        /// la tarde/noche moría en cámara: el «a veces». AHORA la LLEGADA y
-        /// la MUERTE son CINE (nadie las interrumpe — la vida del jefe las
-        /// maneja su IA) y el jefe escondido SIGUE AL JUGADOR cada tick
-        /// (SeguirEscondido). Durante la PELEA el comportamiento vanilla
-        /// queda intacto (el jefe persigue: siempre está cerca).
+        /// CheckActive mata a cualquier NPC cuyo timeLeft expire. v6.50.49
+        /// — con LA ENTRADA DE LA EMPERATRIZ el jefe nace 200 px ENCIMA del
+        /// jugador (DENTRO del rectángulo de CheckActive desde el tick 1) y
+        /// la presentación es BREVE (~45 t): el bug raíz murió con la
+        /// llegada vieja. El cine queda por cortesía (la presentación y la
+        /// muerte no se interrumpen) y SpawnBoss ya trajo el timeLife ×20.
+        /// Durante la PELEA el comportamiento vanilla queda intacto (el
+        /// jefe persigue: siempre está cerca).
         /// </summary>
         public override bool CheckActive()
         {
-            if (_estado == EST_NACIENDO) return false;   // la llegada es cine
+            if (_estado == EST_NACIENDO) return false;   // la presentación es cine
             if (_muriendo) return false;                 // la muerte es cine
             return base.CheckActive();
         }
@@ -489,218 +498,65 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// LA LLEGADA (v6.50.41/.42) — EL MEDIO DÍA DEL DESTELLO:
-        /// (10) EL MUNDO TIEMBLA — la tierra sacude la pantalla 2.5 s;
-        /// (11) EL TIEMPO CORRE — SIN TELETRANSPORTE (v6.50.41: «el sol
-        /// no se haga teletransportación… si está más allá del centro,
-        /// un día completo avanza con noche completa, un nuevo día hasta
-        /// el amanecer»): si el sol está MÁS ALLÁ del centro, la carrera
-        /// recorre el RESTO del día, la NOCHE COMPLETA y el nuevo día
-        /// desde el amanecer hasta el mediodía — un día entero pasando
-        /// VISIBLEMENTE; si está ANTES del centro, solo corre hasta él.
-        /// El reloj aterriza en 27000 exacto, desacelerando: el sol se
-        /// POSA, no salta (el bug de la v6.50.40: con el sol en la tarde
-        /// la condición «time >= 26999» se cumplía al INSTANTE y el sol
-        /// saltaba HACIA ATRÁS al mediodía);
-        /// (12) EL DESTELLO NACE DEL SOL — un brillo radial CENTRADO en
-        /// el sol que se difumina hacia los bordes hasta ser transparente
-        /// (lo pinta ColaSierpeSky). El sol NO SE APAGA: sigue ahí,
-        /// ardiendo. Y Aethon NO NACE DEL CENTRO del sol: se materializa
-        /// BAJO él, en el borde inferior de su halo;
-        /// (13) EL DESCENSO — la luz cae del mediodía a su órbita de
-        /// pelea (la oscuridad y el sol negro MURIERON con la v6.50.41:
-        /// «mejor quita la capa de oscuridad, no se ve nada bien»).
+        /// v6.50.49 — LA PRESENTACIÓN DE LA EMPERATRIZ (la letra:
+        /// «para la entrada del Aethon original, modifiquemosla y que
+        /// sea exactamente como la emperatris de la luz»). El invocador
+        /// la deja DONDE nace la Emperatriz (200 px sobre tu cabeza,
+        /// la fórmula literal del case 661) — aquí la luz se
+        /// MATERIALIZA (el destello prisma del tick 8, con su lluvia de
+        /// chispas), RESPIRA flotando en su sitio (~45 t, el mismo
+        /// compás de la Emperatriz apareciendo sobre la luciérnaga) y
+        /// sube a su órbita de pelea. La CARRERA AL MEDIODÍA murió con
+        /// su temblor, su pilar y su descenso: la Emperatriz no toca el
+        /// reloj del mundo.
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
-            switch (_subLlegada)
+            // LA RESPIRACIÓN: flotando donde nació — el compás sereno
+            // de la Emperatriz presentándose (sin perseguir, sin huir).
+            Vector2 punto = target.Center + new Vector2(0f, -260f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.015f, 0.08f);
+
+            // EL DESTELLO DE LA MATERIALIZACIÓN (tick 8: el fade
+            // empieza — el cielo PRISMA saluda a la nueva luz).
+            if (_tickEstado == 8 && !Main.dedServ)
             {
-                case SUB_TEMBLOR:
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                for (int i = 0; i < 60; i++)
                 {
-                    // escondido sobre el cielo, el mundo SACUDE la pantalla
-                    // (los kicks los padece cada cliente vía el espejo).
-                    // v6.50.45 — LA SOMBRA QUE TE SIGUE: el jefe escondido
-                    // CAMINA CONTIGO (nace 860 px sobre TI, no sobre el punto
-                    // del llamado — el jugador que se muda durante el temblor
-                    // no se lo lleva puesto, y vanilla CheckActive agradece
-                    // la cercanía que ya no puede matarlo).
-                    SeguirEscondido(target);
-                    if (_tickEstado == 1)
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
-                    if (_tickEstado >= 150) SubFaseLlegada(SUB_CARRERA);
-                    break;
-                }
-
-                case SUB_CARRERA:
-                {
-                    // v6.50.45 — LA SOMBRA SIGUE CAMINANDO CONTIGO (la lección
-                    // del bug: el jefe clavado en el punto del llamado era un
-                    // muerto que caminaba — el reloj corre, la sombra acompaña).
-                    SeguirEscondido(target);
-
-                    // EL TIEMPO CORRE, DE FORMA NATURAL (v6.50.41):
-                    // AethonLlegadaSistema.ModifyTimeRate lleva el reloj —
-                    // el RESTANTE hasta el PRÓXIMO mediodía (por la noche
-                    // completa si el sol ya pasó el centro: la carrera
-                    // recorre la tarde, la noche, el amanecer y la mañana
-                    // del nuevo día — un día entero, VISIBLEMENTE) y el
-                    // aterrizaje desacelera hasta POSARSE en 27000.
-                    NPC.velocity = Vector2.Zero;
-                    if (Main.netMode != NetmodeID.MultiplayerClient &&
-                        Main.dayTime && Main.time >= 26999.0 && Main.time <= 27001.0)
-                    {
-                        // EL MEDIO DÍA EXACTO — y SOLO desde la llegada de la
-                        // mañana: la ventana [26999, 27001] es el aterrizaje
-                        // (menos de un tick de sol — la corrección sub-tick,
-                        // no un salto). La TARDE ya NO dispara esto: el sol
-                        // pasó el centro y la carrera da la vuelta entera.
-                        Main.time = 27000.0;
-                        TiempoCorriendo = false;
-                        TiempoCongelado = true;
-                        SubFaseLlegada(SUB_CLIMAX);
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
-                        EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.LlegadaLuz", OroLuz);
-                    }
-                    break;
-                }
-
-                case SUB_CLIMAX:
-                {
-                    // v6.50.44 — EL DESCENSO DEL CIELO (la petición: «el
-                    // jefe no apareció desde el punto del sol, ya que no
-                    // aparece ahí… que aparezca un destello de luz desde
-                    // arriba y que el jefe aparezca desde ahí bajando del
-                    // cielo, como la emperatriz de la luz»). El nacimiento
-                    // «bajo el sol» MUERE — en la práctica el jefe nunca
-                    // estaba DONDE el sol (la cámara de cada jugador mira
-                    // a otro lado): ahora la luz NO baja del sol, baja DEL
-                    // CIELO: UN PILAR DE LUZ cae desde lo alto sobre la
-                    // arena y Aethon se materializa EN SU CÚSPIDE,
-                    // envuelto en el destello, y DESCIENDE por él.
-                    NPC.velocity = Vector2.Zero;
-                    if (_tickEstado == 1 && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        // EL PILAR: la columna de luz que cae del cielo
-                        // (cosmética — daño 0; la dibuja
-                        // AtaqueJefeProjectile.EstiloPilarAparicion con el
-                        // manto dorado y el charco de luz en la base).
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            PosicionAparicion(target), Vector2.Zero,
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            0, 0f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloPilarAparicion, 0f,
-                            NPC.whoAmI);
-                    }
-                    if (_tickEstado == 44)
-                    {
-                        // LA MATERIALIZACIÓN: en la CÚSPIDE del pilar — alto
-                        // en el cielo, sobre la arena. Posición
-                        // SERVER-SEGURA de la v6.50.42 (relativa al jugador
-                        // + clamps, SIN matemática de pantalla — la lección
-                        // queda grabada para siempre).
-                        NPC.Center = PosicionAparicion(target) - new Vector2(0f, 760f);
-                        NPC.netUpdate = true;
-                    }
-                    if (_tickEstado == 52)
-                    {
-                        // EL PICO DEL DESTELLO: el cielo CIEGA y la luz RUGE.
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
-                    }
-                    if (_tickEstado >= 120) SubFaseLlegada(SUB_DESCENSO);
-                    break;
-                }
-
-                case SUB_DESCENSO:
-                {
-                    // v6.50.44 — EL DESCENSO DEL CIELO: la luz BAJA desde
-                    // la cúspide del pilar hasta su órbita de pelea,
-                    // dejando una lluvia de chispas doradas (el rastro de
-                    // la caída — «bajando del cielo», como la emperatriz).
-                    // El sol sigue clavado en el centro mientras la luz
-                    // viva (el congelado del mediodía de la v6.50.42).
-                    Vector2 punto = target.Center + new Vector2(0f, -420f);
-                    NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
-
-                    // LA LLUVIA DE LUZ: chispas que caen con la luz.
-                    if (!Main.dedServ && Main.rand.NextBool(3))
-                    {
-                        Dust d = Dust.NewDustPerfect(
-                            NPC.Center + new Vector2(Main.rand.NextFloat(-100f, 100f),
-                                Main.rand.NextFloat(-50f, 50f)),
-                            DustID.GoldFlame,
-                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
-                                Main.rand.NextFloat(1f, 3f)),
-                            180, OroLuz, 1.4f);
-                        d.noGravity = true;
-                    }
-
-                    if (_tickEstado >= 90)
-                    {
-                        _estado = EST_FLOTAR;
-                        _tickEstado = 0;
-                        _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
-                        NPC.alpha = 0;
-                        NPC.dontTakeDamage = false;
-                        NPC.netUpdate = true;
-                    }
-                    break;
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    float vel = Main.rand.NextFloat(2f, 8f);
+                    Dust d = Dust.NewDustPerfect(NPC.Center, DustID.GoldFlame,
+                        new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * vel,
+                        190, i % 3 == 0 ? NucleoBlanco : OroLuz, 1.6f);
+                    d.noGravity = true;
                 }
             }
-        }
 
-        /// <summary>
-        /// v6.50.44 — LA BASE DEL PILAR DE LA APARICIÓN: el punto del cielo
-        /// sobre el que cae la columna de luz (la entrada de la
-        /// EMPERATRIZ: el destello desde arriba y el jefe bajando del
-        /// cielo). La lección de la v6.50.42 queda grabada: NADA de
-        /// matemática de pantalla — la posición es relativa al JUGADOR
-        /// (la cámara lo sigue) y SIEMPRE clamped dentro del mundo
-        /// (jamás otra muerte por fuera-de-límites).
-        /// </summary>
-        private Vector2 PosicionAparicion(Player target)
-        {
-            // La órbita de pelea (target − 420): el pilar termina donde la
-            // luz va a quedar flotando — el descenso TERMINA en su puesto.
-            Vector2 pos = target.Center + new Vector2(0f, -420f);
+            // EL DESTELLO DE VIDA: chispas doradas mientras se presenta.
+            if (!Main.dedServ && Main.rand.NextBool(4))
+            {
+                Dust d = Dust.NewDustPerfect(
+                    NPC.Center + new Vector2(Main.rand.NextFloat(-110f, 110f),
+                        Main.rand.NextFloat(-60f, 60f)),
+                    DustID.GoldFlame,
+                    new Vector2(Main.rand.NextFloat(-1.2f, 1.2f),
+                        Main.rand.NextFloat(-1.6f, -0.4f)),
+                    180, OroLuz, 1.3f);
+                d.noGravity = true;
+            }
 
-            // NUNCA ENTERRADO: la base del pilar vive en el CIELO de la
-            // arena (montaña o suelo alto no la hunden en el terreno).
-            float cielo = target.Center.Y - 300f;
-            if (pos.Y > cielo) pos.Y = cielo;
-
-            // NUNCA FUERA DEL MUNDO: los clamps de la v6.50.42 — el jefe
-            // que nace (o materializa) fuera de límites MUERE.
-            float margen = 320f;
-            pos.X = MathHelper.Clamp(pos.X, margen, Main.maxTilesX * 16f - margen);
-            pos.Y = MathHelper.Clamp(pos.Y, margen, Main.maxTilesY * 16f - margen);
-            return pos;
-        }
-
-        /// <summary>
-        /// v6.50.45 — LA SOMBRA QUE TE SIGUE: el jefe escondido (temblor y
-        /// carrera) vive 860 px SOBRE LA PRESA — sobre el JUGADOR, no
-        /// sobre el punto del llamado — y la sigue cada tick (con los
-        /// clamps de la casa: jamás fuera del mundo). Matar el bug con
-        /// estilo: vanilla CheckActive ya no puede ejecutarlo (véase
-        /// CheckActive), y de paso el jugador que se muda durante la
-        /// llegada no le roba el clímax.
-        /// </summary>
-        private void SeguirEscondido(Player target)
-        {
-            Vector2 pos = target.Center + new Vector2(0f, -860f);
-            pos.X = MathHelper.Clamp(pos.X, 320f, Main.maxTilesX * 16f - 320f);
-            pos.Y = MathHelper.Clamp(pos.Y, 160f, Main.maxTilesY * 16f - 320f);
-            NPC.Center = pos;
-            NPC.velocity = Vector2.Zero;
-        }
-
-        /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
-        private void SubFaseLlegada(int sub)
-        {
-            _subLlegada = sub;
-            _tickEstado = 0;
-            NPC.netUpdate = true;
+            // A LA PELEA: la presentación completa dura ~45 t — la luz
+            // sube a su órbita y elige su primer castigo.
+            if (_tickEstado >= 45)
+            {
+                _estado = EST_FLOTAR;
+                _tickEstado = 0;
+                _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                NPC.alpha = 0;
+                NPC.dontTakeDamage = false;
+                NPC.netUpdate = true;
+            }
         }
 
         /// <summary>
@@ -1807,6 +1663,12 @@ namespace AethonMod.Content.NPCs
             EsenciasModSistema.SoltarEsencia(NPC);
             Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
                 ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>(), 1);
+            // v6.50.49 — EL AETHON MENOR (la mascota de luz: «una pequeña
+            //     mascota de luz que sea Aethon original pero mas pequeño»)
+            //     cae de su amo un 20% de las veces — su recuerdo vivo.
+            if (Main.rand.NextFloat() < 0.20f)
+                Item.NewItem(NPC.GetSource_Loot(), NPC.Center,
+                    ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1);
 
             int killerWho = NPC.lastInteraction;
             if (killerWho < 0 || killerWho >= Main.player.Length)

@@ -57,6 +57,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         // v6.49 — EL CACHE DE LOS PERFILES INMUTABLES (cero GC por frame).
         private static AuraPerfil _perfilAscendida;
         private static AuraPerfil _perfilAscendidaDos;
+        private static AuraPerfil _perfilAscendidaTres;
         private static AuraPerfil _perfilBrasa;
 
         /// <summary>El perfil de la forma ascendida, creado UNA vez.</summary>
@@ -69,6 +70,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// el río de luz y el DOBLE de plumas en las alas), creado UNA vez.</summary>
         private static AuraPerfil PerfilAscendidaDos =>
             _perfilAscendidaDos ??= AuraPerfil.FormaAscendidaDos();
+
+        /// <summary>v6.50.49 — El perfil de LA FORMA ASCENDIDA 3 (EL
+        /// TRONO: la iconografía del Apocalipsis — el arcoíris alrededor
+        /// del trono, el mar de vidrio, las siete lámparas de fuego, las
+        /// ruedas de ofanim y la cruz de luz), creado UNA vez.</summary>
+        private static AuraPerfil PerfilAscendidaTres =>
+            _perfilAscendidaTres ??= AuraPerfil.FormaAscendidaTres();
 
         /// <summary>v6.50.23 — El perfil de la brasa del eclipse, creado UNA vez.</summary>
         private static AuraPerfil PerfilBrasa =>
@@ -92,7 +100,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         /// <summary>El modo del portador (0 hambre · 2 ascendida · 3 brasa ·
-        /// 4 ascendida 2 — el 1 era la corona rúnica, muerta en la v6.50.44).</summary>
+        /// 4 ascendida 2 · 5 ascendida 3 — el 1 era la corona rúnica,
+        /// muerta en la v6.50.44).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -109,6 +118,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().BrasaDelEclipse;
                 case 4:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaDos;
+                case 5:
+                    return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaTres;
             }
             return false;
         }
@@ -122,6 +133,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 2: return PerfilAscendida;
                 case 3: return PerfilBrasa;
                 case 4: return PerfilAscendidaDos;
+                case 5: return PerfilAscendidaTres;
             }
             return null;
         }

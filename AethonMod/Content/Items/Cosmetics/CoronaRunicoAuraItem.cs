@@ -35,10 +35,22 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
-            // Puro cosmético: la detección la hace CosmeticPlayer.
+            // v6.50.49 — LA BANDERA EN VIVO (el fix del vuelo infinito):
+            // encenderla AQUÍ (dentro de Player.UpdateEquips, vía
+            // ApplyEquipFunctional) hace que PostUpdateEquips — el hook
+            // que inyecta la física de alas — la vea ENCENDIDA en este
+            // MISMO tick. El patrón es el de vanilla: empressBrooch se
+            // enciende igual. (En la .48 la única detección vivía en
+            // PostUpdate: tarde por un hook — el vuelo jamás corrió.)
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().FormaAscendida = true;
         }
 
-        public override void UpdateVanity(Player player) { }
+        public override void UpdateVanity(Player player)
+        {
+            // Lo mismo en el hueco de VANIDAD: un cosmético es un
+            // cosmético viva donde lo pongas.
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().FormaAscendida = true;
+        }
 
         public override bool CanEquipAccessory(Player player, int slot, bool modded)
         {
@@ -78,10 +90,15 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
-            // Puro cosmético: la detección la hace CosmeticPlayer.
+            // v6.50.49 — LA BANDERA EN VIVO (el fix del vuelo, como la
+            // Forma Ascendida: UpdateEquips la ve, el aura la viste).
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().BrasaDelEclipse = true;
         }
 
-        public override void UpdateVanity(Player player) { }
+        public override void UpdateVanity(Player player)
+        {
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().BrasaDelEclipse = true;
+        }
 
         public override bool CanEquipAccessory(Player player, int slot, bool modded)
         {

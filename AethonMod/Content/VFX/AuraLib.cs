@@ -70,6 +70,15 @@ namespace AethonMod.Content.VFX
         /// menos el doble»).
         /// </summary>
         Divino2 = 5,
+        /// <summary>
+        /// v6.50.49 — LA FORMA ASCENDIDA 3 (EL TRONO): la divinidad
+        /// celestial CANÓNICA — la iconografía del trono del
+        /// Apocalipsis (el arcoíris alrededor del trono, el mar de
+        /// vidrio, las siete lámparas de fuego, las ruedas de ofanim)
+        /// y la CRUZ DE LUZ de la Maiestas Domini. Su propio camino:
+        /// EmitirDivino3.
+        /// </summary>
+        Divino3 = 6,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -562,6 +571,63 @@ namespace AethonMod.Content.VFX
                 Ascenso = 42f,
                 Tamano = 10f,
                 Vida = 1.8f,
+            });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.50.49 — LA FORMA ASCENDIDA 3: EL TRONO (la letra del
+        /// usuario: «agrega un 3 forma ascendida que se vea aun mas
+        /// divino, investiga mods y busca en internet como es verse con
+        /// divinidad celestial»). LA INVESTIGACIÓN: la iconografía del
+        /// trono celestial — el lenguaje visual CANÓNICO de la
+        /// divinidad (Ap 4 / Ez 1 / la Maiestas Domini del arte sacro):
+        /// el ARCOÍRIS alrededor del trono (Ap 4:3), el MAR DE VIDRIO
+        /// (Ap 4:6), LAS SIETE LÁMPARAS DE FUEGO (Ap 4:5), LAS RUEDAS
+        /// DE OFANIM llenas de ojos (Ez 1) y LA CRUZ DE LUZ. El perfil:
+        /// más grande que la apoteosis (Radio 116 → 132), más orbes
+        /// (30 → 36) y la paleta PRISMA: blanco que contiene TODOS los
+        /// colores al centro, oro blanco al medio y celeste al borde.
+        /// </summary>
+        public static AuraPerfil FormaAscendidaTres()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 132f,         // EL TRONO OCUPA el cielo entero
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.Divino3,   // SU propio camino (EmitirDivino3)
+                Fluir = 0.8f,
+                Deriva = 0.16f,
+                Ascenso = 26f,        // los orbes suben con el fervor del trono
+                Distorsion = 1.0f,
+                Blur = 1f,
+                Glow = 0f,            // CERO discos planos (el contrato de la .45)
+                Semilla = 949,
+                AlfaTrasera = 0.44f,  // el trono ARDE más que la apoteosis
+                AlfaFrontal = 0.06f,
+                VeloFrontal = false,
+                Rayos = 0,
+                Borde = 0.34f,
+                Parpadeo = 0.04f,
+            };
+            // LA PALETA PRISMA: blanco total al centro · oro blanco al
+            // medio · celeste al borde (los colores VIVOS llegan por las
+            // perlas del arcoíris y las plumas prismáticas).
+            p.ConTrasera(new Color(255, 255, 255), new Color(255, 244, 214), new Color(198, 238, 255));
+            p.ConFrontal(new Color(255, 252, 245), new Color(255, 246, 220), new Color(225, 244, 255));
+            p.ConParticulas(new ParticulasAura
+            {
+                Cantidad = 36,        // la corte del trono: MÁS orbes que nunca
+                Forma = FormaParticula.Orbe,
+                Color = new Color(255, 250, 226),
+                Alfa = 0.55f,
+                Solidas = false,
+                Tasa = 1.5f,
+                Velocidad = 26f,
+                Ascenso = 46f,
+                Tamano = 10f,
+                Vida = 1.9f,
             });
             return p;
         }
@@ -2343,6 +2409,467 @@ namespace AethonMod.Content.VFX
 
             // === 11. LAS PARTICULAS del perfil (los orbes que suben) ===
             EmitirParticulas(centro, p, false, 511);
+        }
+
+        // ==================================================================
+        //  v6.50.49 — EL PATRÓN DIVINO 3: LA FORMA ASCENDIDA 3, EL TRONO
+        //  (la letra: «agrega un 3 forma ascendida que se vea aun mas
+        //  divino, investiga mods y busca en internet como es verse con
+        //  divinidad celestial»). LA INVESTIGACIÓN — la iconografía del
+        //  trono celestial, el lenguaje visual CANÓNICO de la divinidad
+        //  (el que el arte sacro fijó y los juegos prestan — Diablo,
+        //  Bayonetta, Final Fantasy):
+        //    · «Y había un ARCOÍRIS ALREDEDOR DEL TRONO» (Ap 4:3) — DOS
+        //      aros elípticos de perlas, cada una con SU color del
+        //      espectro, contragirando alrededor del portador.
+        //    · «Un MAR DE VIDRIO semejante al cristal» (Ap 4:6) — el
+        //      suelo de cristal bajo los pies: la placa achatada + la
+        //      retícula de destellos que titilan por hash.
+        //    · «SIETE LÁMPARAS DE FUEGO ardiendo delante del trono»
+        //      (Ap 4:5 — los siete espíritus de Dios) — siete llamas
+        //      ORBITANDO al dios, cada una con su tempo.
+        //    · «UNA RUEDA DENTRO DE OTRA RUEDA… y sus aros llenos de
+        //      OJOS» (Ez 1 — los OFANIM, las ruedas del trono) — dos
+        //      anillos de OJOS DE LUZ contrarrotando bajo los pies.
+        //    · LA MAIESTAS DOMINI — LA CRUZ DE LUZ: la columna vertical
+        //      del cielo + el brazo HORIZONTAL del horizonte, cruzando
+        //      DETRÁS del dios (el mandorla cruzado del Cristo en
+        //      gloria — el gesto divino por excelencia del arte sacro).
+        //    · LA CORONA DE VEINTICUATRO ESTRELLAS (los veinticuatro
+        //      ancianos, Ap 4:10) — tres arcos de ocho estrellas sobre
+        //      el triple halo.
+        //    · LAS ALAS PRISMÁTICAS — los CUATRO bancos de la Forma 2
+        //      (28 plumas por lado, extensión completa de arriba abajo)
+        //      con cada pluma llevando SU matiz del arcoíris: el serafín
+        //      del trono. Y las plumas que caen SON arcoíris.
+        // ==================================================================
+
+        /// <summary>
+        /// EL CAMINO ADITIVO DEL PATRÓN DIVINO 3 (EL TRONO) — el mismo
+        /// contrato del bool de DibujarJugadorAditivo.
+        /// </summary>
+        public static bool DibujarDivino3(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirDivino3(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// v6.50.49 — LA EMISIÓN DEL TRONO (coords de MUNDO al búfer de
+        /// VFXCore; deterministas: cero Main.rand — el contrato de la
+        /// casa). TODO aditivo, CERO discos planos.
+        /// </summary>
+        private static void EmitirDivino3(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(760)) return;   // el trono ocupa MÁS cielo que la apoteosis
+
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = pl.Center;
+            float gravedad = pl.gravDir;
+
+            // LA RESPIRACIÓN global (el trono late aún más hondo).
+            float respira = 1f + 0.07f * MathF.Sin(t * MathHelper.Pi);
+
+            // EL RITMO (las alas leen la velocidad).
+            float rapidez = MathHelper.Clamp(pl.velocity.Length() / 9f, 0f, 1f);
+
+            // LA PALETA DEL TRONO: el blanco que contiene todos los
+            // colores, el oro blanco y el arcoíris vivo.
+            Color blancoSagrado = new Color(255, 255, 252);
+            Color oroBlanco = new Color(255, 246, 216);
+
+            // === 1. EL CUERPO DE LUZ (el flipbook Perlin — el cuerpo del
+            //     trono, blanco PRISMA) + EL CORAZÓN BLANCO (el alma
+            //     ardiendo a través del pecho — más grande que nunca) ===
+            Texture2D texC = FlipCuerpo((int)(t * (10f + 18f * p.Deriva)));
+            if (texC != null)
+            {
+                float ladoC = 2f * p.Radio * 1.02f * respira;
+                Color colC = Zona(p.TCentro, p.TMedio, p.TBorde, 0.45f);
+                VFXCore.Quad(centro, TintAditivo(colC, 0.52f),
+                    new Vector2(ladoC, ladoC), t * 0.10f, texC);
+            }
+            VFXCore.Quad(centro, TintAditivo(blancoSagrado, 0.30f * respira),
+                new Vector2(p.Radio * 0.68f, p.Radio * 0.88f), t * 0.23f,
+                VFXCore.SoftGlow);
+
+            // === 2. LA CRUZ DE LUZ (LA MAIESTAS DOMINI — la firma del
+            //     trono): LA COLUMNA vertical del cielo (tres velos
+            //     anidados) + EL BRAZO horizontal del horizonte (tres
+            //     velos achatados) — cruzando DETRÁS del dios ===
+            {
+                // LA COLUMNA (la vertical — la conexión cielo↔trono).
+                float altoCol = 700f + 130f * MathF.Sin(t * 0.7f);
+                Vector2 medioCol = centro - new Vector2(0f, altoCol * 0.5f * gravedad - 40f * gravedad);
+                VFXCore.Quad(medioCol, TintAditivo(oroBlanco, 0.050f * respira),
+                    new Vector2(170f * respira, altoCol));
+                VFXCore.Quad(medioCol, TintAditivo(p.TBorde, 0.075f),
+                    new Vector2(66f, altoCol));
+                VFXCore.Quad(medioCol, TintAditivo(blancoSagrado, 0.10f),
+                    new Vector2(22f, altoCol * 0.98f));
+
+                // EL BRAZO (la horizontal — el horizonte del dios).
+                float anchoBrazo = p.Radio * 3.6f + 60f * MathF.Sin(t * 0.5f);
+                Vector2 medioBrazo = centro + new Vector2(0f, -26f * gravedad);
+                VFXCore.Quad(medioBrazo, TintAditivo(oroBlanco, 0.040f * respira),
+                    new Vector2(anchoBrazo, 120f));
+                VFXCore.Quad(medioBrazo, TintAditivo(p.TBorde, 0.060f),
+                    new Vector2(anchoBrazo * 0.94f, 46f));
+                VFXCore.Quad(medioBrazo, TintAditivo(blancoSagrado, 0.085f),
+                    new Vector2(anchoBrazo * 0.80f, 16f));
+            }
+
+            // === 3. EL ARCOÍRIS ALREDEDOR DEL TRONO (Ap 4:3 — DOS aros
+            //     elípticos de perlas, cada una con SU color del
+            //     espectro, contragirando alrededor del dios) ===
+            {
+                // EL ARO EXTERIOR (el grande: 36 perlas del espectro).
+                float rxA = p.Radio * 1.62f * respira;
+                float ryA = p.Radio * 0.52f;
+                for (int i = 0; i < 36; i++)
+                {
+                    float ang = t * 0.22f + i * MathHelper.TwoPi / 36f;
+                    Vector2 perla = centro + new Vector2(MathF.Cos(ang) * rxA,
+                        MathF.Sin(ang) * ryA - 14f * gravedad);
+                    Color cPrisma = ColorPrisma(ang / MathHelper.TwoPi + t * 0.03f);
+                    VFXCore.Quad(perla, TintAditivo(cPrisma, 0.46f),
+                        new Vector2(9f, 9f), 0f, VFXCore.SoftGlow);
+                }
+                // EL ARO INTERIOR (28 perlas, al revés — el contragiro
+                // del espectro: la rueda de colores opuesta).
+                for (int i = 0; i < 28; i++)
+                {
+                    float ang = -t * 0.34f + i * MathHelper.TwoPi / 28f;
+                    Vector2 perla = centro + new Vector2(MathF.Cos(ang) * rxA * 0.66f,
+                        MathF.Sin(ang) * ryA * 0.66f - 10f * gravedad);
+                    Color cPrisma = ColorPrisma(0.5f - ang / MathHelper.TwoPi + t * 0.03f);
+                    VFXCore.Quad(perla, TintAditivo(cPrisma, 0.30f),
+                        new Vector2(6f, 6f), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 4. EL MAR DE VIDRIO (Ap 4:6 — la placa de cristal bajo
+            //     los pies: la placa achatada + SU retícula de destellos
+            //     que titilan por hash — el suelo del trono) ===
+            Vector2 suelo = new Vector2(centro.X, centro.Y + pl.height * 0.5f * gravedad + 6f);
+            {
+                float rxM = p.Radio * 1.30f * respira;
+                float ryM = p.Radio * 0.34f;
+                // LA PLACA (la placa de vidrio — dos velos).
+                VFXCore.Quad(suelo + new Vector2(0f, 4f * gravedad), TintAditivo(p.TBorde, 0.11f * respira),
+                    new Vector2(rxM * 2.1f, ryM * 1.5f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(suelo + new Vector2(0f, 2f * gravedad), TintAditivo(blancoSagrado, 0.07f),
+                    new Vector2(rxM * 1.4f, ryM * 0.8f), 0f, VFXCore.SoftGlow);
+                // LA RETÍCULA (los destellos del cristal: 24 titilando
+                // por hash en la elipse del mar).
+                for (int i = 0; i < 24; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 24f + t * 0.10f;
+                    float hM = VFXCore.Hash01(p.Semilla ^ 0x5EA4, i, 7);
+                    float twM = 0.35f + 0.65f * MathF.Sin(t * (1.4f + 0.6f * hM) + i * 1.21f);
+                    if (twM < 0.30f) continue;
+                    Vector2 destello = suelo + new Vector2(MathF.Cos(ang) * rxM * (0.35f + 0.6f * hM),
+                        MathF.Sin(ang) * ryM * (0.35f + 0.6f * hM));
+                    VFXCore.Quad(destello, TintAditivo(blancoSagrado, 0.34f * twM),
+                        new Vector2(4.5f, 1.8f), ang, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 5. LAS SIETE LÁMPARAS DE FUEGO (Ap 4:5 — los siete
+            //     espíritus de Dios: siete llamas ORBITANDO al dios,
+            //     cada una con SU tempo) ===
+            for (int i = 0; i < 7; i++)
+            {
+                float ang = t * (0.55f + 0.05f * i) + i * MathHelper.TwoPi / 7f;
+                float hL = VFXCore.Hash01(p.Semilla ^ 0x7A5E, i, 19);
+                Vector2 pos = centro + new Vector2(MathF.Cos(ang) * p.Radio * 1.05f,
+                    MathF.Sin(ang) * p.Radio * 0.38f - 8f * gravedad);
+                float velo = 0.7f + 0.5f * MathF.Sin(t * (6.5f + 1.5f * hL) + i * 2.4f);
+                float alturaL = (17f + 11f * hL) * velo;
+                // LA LLAMA (el cuerpo + la punta + el platillo).
+                VFXCore.Quad(pos - new Vector2(0f, alturaL * 0.5f * gravedad),
+                    TintAditivo(oroBlanco, 0.36f + 0.22f * (velo - 0.7f)),
+                    new Vector2(7.5f, alturaL), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(pos - new Vector2(0f, alturaL * gravedad),
+                    TintAditivo(blancoSagrado, 0.44f),
+                    new Vector2(4.5f, 7.5f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(pos + new Vector2(0f, 4f * gravedad),
+                    TintAditivo(ColorPrisma(i / 7f + t * 0.03f), 0.20f),
+                    new Vector2(11f, 3f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 6. LAS RUEDAS DE OFANIM (Ez 1 — «una rueda dentro de
+            //     otra rueda… y sus aros llenos de OJOS»: dos anillos de
+            //     OJOS DE LUZ contrarrotando — el ojo es un óvalo
+            //     brillante con la pupila vertical más caliente) ===
+            {
+                float rxO = p.Radio * 0.95f;
+                float ryO = p.Radio * 0.31f;
+                // LA RUEDA EXTERIOR (16 ojos, gira con el tiempo).
+                for (int i = 0; i < 16; i++)
+                {
+                    float ang = t * 0.40f + i * MathHelper.TwoPi / 16f;
+                    Vector2 ojo = suelo - new Vector2(0f, 26f * gravedad) +
+                        new Vector2(MathF.Cos(ang) * rxO, MathF.Sin(ang) * ryO);
+                    float mirada = 0.5f + 0.5f * MathF.Sin(t * 2.2f + i * 1.7f);
+                    // EL BLANCO DEL OJO (el óvalo).
+                    VFXCore.Quad(ojo, TintAditivo(blancoSagrado, 0.20f + 0.22f * mirada),
+                        new Vector2(11f, 7f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                    // LA PUPILA (la rendija vertical — más caliente).
+                    VFXCore.Quad(ojo, TintAditivo(oroBlanco, 0.30f + 0.30f * mirada),
+                        new Vector2(3f, 6f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+                // LA RUEDA INTERIOR (10 ojos, al revés — la rueda dentro
+                // de la rueda).
+                for (int i = 0; i < 10; i++)
+                {
+                    float ang = -t * 0.62f + i * MathHelper.TwoPi / 10f;
+                    Vector2 ojo = suelo - new Vector2(0f, 26f * gravedad) +
+                        new Vector2(MathF.Cos(ang) * rxO * 0.55f, MathF.Sin(ang) * ryO * 0.55f);
+                    float mirada = 0.5f + 0.5f * MathF.Sin(t * 2.6f + i * 2.1f);
+                    VFXCore.Quad(ojo, TintAditivo(blancoSagrado, 0.16f + 0.18f * mirada),
+                        new Vector2(8f, 5f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                    VFXCore.Quad(ojo, TintAditivo(oroBlanco, 0.24f + 0.24f * mirada),
+                        new Vector2(2.4f, 4.4f), ang + MathHelper.PiOver2, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 7. EL HALO TRIPLE (el signo divino TRIPlicado: TRES
+            //     aros de perlas anidados sobre la cabeza — el aro
+            //     exterior lleva las DOCE marcas del zodíaco) ===
+            Vector2 haloC;
+            {
+                float bobH = MathF.Sin(t * 1.6f) * 3f;
+                haloC = new Vector2(centro.X,
+                    centro.Y - (pl.height * 0.5f + 30f) * gravedad + bobH * gravedad);
+                float rxH = 44f * respira;
+                float ryH = 15f;
+                // LOS TRES AROS (30 perlas el exterior · 20 el medio ·
+                // 12 el interior — cada uno con su giro).
+                int[] perlasAro = { 30, 20, 12 };
+                for (int aro = 0; aro < 3; aro++)
+                {
+                    float escala = 1f - aro * 0.30f;
+                    for (int i = 0; i < perlasAro[aro]; i++)
+                    {
+                        float ang = (aro % 2 == 0 ? 1f : -1f) * t * (0.15f + 0.08f * aro) +
+                            i * MathHelper.TwoPi / perlasAro[aro];
+                        Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH * escala,
+                            MathF.Sin(ang) * ryH * escala);
+                        float frente = (MathF.Sin(ang) + 1f) * 0.5f;
+                        VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.32f + 0.46f * frente),
+                            new Vector2(6.5f, 6.5f), 0f, VFXCore.SoftGlow);
+                    }
+                }
+                // LAS DOCE MARCAS del zodíaco en el aro exterior.
+                for (int i = 0; i < 12; i++)
+                {
+                    float ang = t * 0.18f + i * MathHelper.TwoPi / 12f;
+                    Vector2 tick = haloC + new Vector2(MathF.Cos(ang) * rxH * 1.26f,
+                        MathF.Sin(ang) * ryH * 1.26f);
+                    float twT = 0.5f + 0.5f * MathF.Sin(t * 2.0f + i * 1.4f);
+                    VFXCore.Quad(tick, TintAditivo(oroBlanco, 0.20f + 0.24f * twT),
+                        new Vector2(8f, 2.2f), ang, VFXCore.SoftGlow);
+                }
+                // LA AUREOLA (el resplandor del triple aro — dos capas).
+                VFXCore.Quad(haloC, TintAditivo(p.TCentro, 0.17f * respira),
+                    new Vector2(rxH * 3.9f, rxH * 1.9f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.08f * respira),
+                    new Vector2(rxH * 5.4f, rxH * 2.6f), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 8. LA CORONA DE VEINTICUATRO ESTRELLAS (Ap 4:10 — los
+            //     veinticuatro ancianos: TRES arcos de ocho estrellas
+            //     sobre el triple halo) ===
+            for (int arco = 0; arco < 3; arco++)
+            {
+                float rC = 62f * (1.55f - arco * 0.28f) * respira;
+                for (int i = 0; i < 8; i++)
+                {
+                    float fC = (i - 3.5f) / 3.5f;
+                    float angC = -MathHelper.PiOver2 + fC * (0.62f - arco * 0.10f);
+                    Vector2 estrella = haloC + new Vector2(MathF.Cos(angC) * rC,
+                        MathF.Sin(angC) * rC * 0.9f);
+                    float hE = VFXCore.Hash01(p.Semilla ^ 0xE4E1, arco * 8 + i, 23);
+                    float twC = 0.55f + 0.45f * MathF.Sin(t * (1.8f + 0.4f * hE) + i * 1.53f + arco);
+                    float tamE = (13f - 2.4f * MathF.Abs(fC) - arco * 1.6f) * respira;
+                    Color cEstrella = arco == 0 ? blancoSagrado : ColorPrisma((arco - 1) / 3f + i / 24f + t * 0.02f);
+                    VFXCore.Quad(estrella, TintAditivo(cEstrella, 0.64f * twC),
+                        new Vector2(tamE * 2.2f, 2.4f), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(estrella, TintAditivo(cEstrella, 0.64f * twC),
+                        new Vector2(2.4f, tamE * 2.2f), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(estrella, TintAditivo(oroBlanco, 0.55f * twC),
+                        new Vector2(tamE, tamE), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 9. LAS ALAS PRISMÁTICAS (el serafín del trono: los
+            //     CUATRO bancos de la Forma 2 — 28 plumas por lado, la
+            //     extensión completa de arriba abajo — con cada pluma
+            //     llevando SU matiz del arcoíris) ===
+            {
+                float despliegue = 0.72f + 0.5f * rapidez;
+                float aleteo = MathF.Sin(t * (1.5f + 2.2f * rapidez)) * (0.06f + 0.10f * rapidez);
+                for (int lado = -1; lado <= 1; lado += 2)
+                {
+                    Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
+                    // EL BANCO ALTO (10 plumas — por encima de la cabeza).
+                    for (int pluma = 0; pluma < 10; pluma++)
+                    {
+                        float f = pluma / 9f;
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.18f + f * 0.78f) * despliegue + lado * aleteo * (0.6f + 0.4f * f);
+                        float flutter = 1f + 0.10f * MathF.Sin(t * 2.2f + pluma * 0.9f + lado);
+                        float r = (p.Radio * 0.50f + f * p.Radio * 1.34f) * flutter;
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 8f;
+                        // CADA PLUMA SU COLOR del espectro (el arcoíris
+                        // vivo — el matiz gira lentito con el tiempo).
+                        Color cPluma = ColorPrisma(pluma / 10f * 0.5f + (lado < 0 ? 0f : 0.5f) + t * 0.015f);
+                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.38f - 0.14f * f) * despliegue),
+                            new Vector2(largo, 12f - 5f * f), ang, VFXCore.SoftGlow);
+                        VFXCore.Quad(medio + new Vector2(0f, 2f),
+                            TintAditivo(blancoSagrado, 0.22f * despliegue),
+                            new Vector2(largo * 0.9f, 3.4f), ang, VFXCore.SoftGlow);
+                    }
+                    // EL BANCO MEDIO (8 plumas).
+                    for (int pluma = 0; pluma < 8; pluma++)
+                    {
+                        float f = pluma / 7f;
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.30f + f * 1.02f) * despliegue + lado * aleteo * 1.1f;
+                        float r = (p.Radio * 0.46f + f * p.Radio * 1.10f);
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 7f;
+                        Color cPluma = ColorPrisma(0.2f + pluma / 8f * 0.5f + (lado < 0 ? 0f : 0.5f) + t * 0.015f);
+                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.34f - 0.12f * f) * despliegue),
+                            new Vector2(largo, 10f - 4f * f), ang, VFXCore.SoftGlow);
+                    }
+                    // EL BANCO BAJO (6 plumas — hasta por debajo de los pies).
+                    for (int pluma = 0; pluma < 6; pluma++)
+                    {
+                        float f = pluma / 5f;
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.55f + f * 1.05f) * despliegue + lado * aleteo * 1.2f;
+                        float r = (p.Radio * 0.42f + f * p.Radio * 0.86f);
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 6f;
+                        Color cPluma = ColorPrisma(0.4f + pluma / 6f * 0.5f + (lado < 0 ? 0f : 0.5f) + t * 0.015f);
+                        VFXCore.Quad(medio, TintAditivo(cPluma, (0.30f - 0.10f * f) * despliegue),
+                            new Vector2(largo, 9f - 4f * f), ang, VFXCore.SoftGlow);
+                    }
+                    // EL BANCO SUB (4 plumas pegadas a la espalda).
+                    for (int pluma = 0; pluma < 4; pluma++)
+                    {
+                        float f = pluma / 4f;
+                        float ang = -MathHelper.PiOver2 + lado *
+                            (0.14f + f * 0.62f) * despliegue + lado * aleteo * 1.2f;
+                        float r = p.Radio * (0.42f + f * 0.38f);
+                        Vector2 punta = baseP + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * gravedad) * r;
+                        Vector2 medio = (baseP + punta) * 0.5f;
+                        float largo = Vector2.Distance(baseP, punta) + 6f;
+                        VFXCore.Quad(medio, TintAditivo(oroBlanco, 0.26f * despliegue),
+                            new Vector2(largo, 8f - 3f * f), ang, VFXCore.SoftGlow);
+                    }
+                }
+            }
+
+            // === 10. LOS ECOS PRISMÁTICOS (el rastro etéreo al moverse —
+            //     tres luces del espectro desvaneciéndose tras el dios) ===
+            if (rapidez > 0.12f)
+            {
+                Vector2 atras = -Vector2.Normalize(pl.velocity);
+                for (int g = 1; g <= 3; g++)
+                {
+                    Color cEco = ColorPrisma(g / 3f + t * 0.05f);
+                    Vector2 eco = centro + atras * (g * 30f);
+                    VFXCore.Quad(eco, TintAditivo(cEco, 0.32f * rapidez / g),
+                        new Vector2(26f / g, 34f / g), 0f, VFXCore.SoftGlow);
+                }
+            }
+
+            // === 11. LAS CHISPAS ESTELARES (las cruces de luz del cielo
+            //     del trono — diez, re-sembradas cada ~0.8 s) ===
+            for (int i = 0; i < 10; i++)
+            {
+                float semillaViva = (int)(t * 1.25f);
+                float h1 = VFXCore.Hash01(p.Semilla ^ 0x6CA, i, (int)semillaViva);
+                float h2 = VFXCore.Hash01(p.Semilla ^ 0x6CB, i, (int)semillaViva);
+                float brillo = MathF.Pow(h2, 2.2f);
+                if (brillo < 0.06f) continue;
+                float angO = h1 * MathHelper.TwoPi + t * 0.22f;
+                Vector2 chispa = centro + new Vector2(MathF.Cos(angO), MathF.Sin(angO) * 0.7f) *
+                    (p.Radio * (0.7f + 0.5f * h1));
+                float tamZ = (7f + 9f * brillo);
+                VFXCore.Quad(chispa, TintAditivo(blancoSagrado, 0.55f * brillo),
+                    new Vector2(tamZ * 2.2f, 2.2f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(chispa, TintAditivo(blancoSagrado, 0.55f * brillo),
+                    new Vector2(2.2f, tamZ * 2.2f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(chispa, TintAditivo(ColorPrisma(h1 + t * 0.02f), 0.45f * brillo),
+                    new Vector2(tamZ, tamZ), 0f, VFXCore.SoftGlow);
+            }
+
+            // === 12. LAS PLUMAS PRISMÁTICAS QUE CAEN (la bendición
+            //     eterna del trono — cinco plumas del espectro en cámara
+            //     lenta, meciéndose, fundiéndose) ===
+            for (int i = 0; i < 5; i++)
+            {
+                float hP = VFXCore.Hash01(p.Semilla ^ 0x9D3, i, 29);
+                float cicloP = Frac(t * (0.055f + 0.02f * hP) + hP);
+                float x = centro.X + (hP - 0.5f) * p.Radio * 3.1f +
+                    MathF.Sin(t * 1.1f + i * 2.3f) * (10f + 6f * hP);
+                float y = centro.Y - 190f * gravedad + cicloP * 380f * gravedad;
+                Vector2 pluma = new Vector2(x, y);
+                float fadeP = MathF.Sin(cicloP * MathHelper.Pi);
+                float giroP = MathHelper.PiOver2 + MathF.Sin(t * 0.9f + i * 1.7f) * 0.35f;
+                Color cPrisma = ColorPrisma(hP + cicloP * 0.25f + t * 0.02f);
+                VFXCore.Quad(pluma, TintAditivo(cPrisma, 0.38f * fadeP),
+                    new Vector2(16f, 4.6f), giroP, VFXCore.SoftGlow);
+                VFXCore.Quad(pluma, TintAditivo(blancoSagrado, 0.24f * fadeP),
+                    new Vector2(10f, 2.4f), giroP, VFXCore.SoftGlow);
+            }
+
+            // === 13. LAS PARTÍCULAS del perfil (la corte del trono —
+            //     los orbes que suben) ===
+            EmitirParticulas(centro, p, false, 511);
+        }
+
+        /// <summary>
+        /// v6.50.49 — EL COLOR DEL PRISMA (el arcoíris del trono): el
+        /// matiz h ∈ [0,1) → el Color del espectro (rojo→amarillo→
+        /// verde→cian→azul→magenta→rojo), a TODO el brillo — para el
+        /// lote aditivo el color ya viene encendido.
+        /// </summary>
+        private static Color ColorPrisma(float h)
+        {
+            h -= MathF.Floor(h);              // wrap a [0,1)
+            float r, g, b;
+            if (h < 1f / 6f) { r = 1f; g = h * 6f; b = 0f; }
+            else if (h < 2f / 6f) { r = 2f - h * 6f; g = 1f; b = 0f; }
+            else if (h < 3f / 6f) { r = 0f; g = 1f; b = h * 6f - 2f; }
+            else if (h < 4f / 6f) { r = 0f; g = 4f - h * 6f; b = 1f; }
+            else if (h < 5f / 6f) { r = h * 6f - 4f; g = 0f; b = 1f; }
+            else { r = 1f; g = 0f; b = 6f - h * 6f; }
+            return new Color((int)(r * 255f), (int)(g * 255f), (int)(b * 255f));
         }
 
         // ==================================================================

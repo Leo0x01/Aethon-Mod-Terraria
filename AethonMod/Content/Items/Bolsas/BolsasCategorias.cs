@@ -63,9 +63,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Items.Llamados.PlumaDeLaArquera>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.SombraDelPortador>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
-            // v6.50.48 — EL INVOCADOR NUMERO 2: la segunda luz también
-            // responde a su llamado.
-            l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethonSegundo>(), 1));
+            // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
+            // al segundo jefe, se ve horrible, dejemos al primero, es
+            // mucho mejor») — la bolsa solo sirve al primero.
             return l;
         }
     }
@@ -300,6 +300,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
             // v6.50.48 — LA FORMA ASCENDIDA 2: la apoteosis absoluta.
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDosItem>(), 1));
+            // v6.50.49 — LA FORMA ASCENDIDA 3: EL TRONO (la divinidad
+            // celestial canonica) + EL AETHON MENOR (la mascota de luz).
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaTresItem>(), 1));
+            l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             return l;
         }

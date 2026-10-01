@@ -156,42 +156,34 @@ namespace AethonMod.Content.Items.Llamados
     /// v6.50.43 — A CUALQUIER HORA: la llegada corre el tiempo hasta el
     /// próximo mediodía (de noche: la noche entera + el amanecer, en un
     /// timelapse visible) — no importa la hora del llamado.
+    /// v6.50.49 — LA ENTRADA DE LA EMPERATRIZ, EXACTA (la letra: «para
+    /// la entrada del Aethon original, modifiquemosla y que sea
+    /// exactamente como la emperatris de la luz, para ello revisa como
+    /// terraria maneja su entrada y copiala»): LA CARRERA AL MEDIODÍA
+    /// MURIÓ (con su temblor, su pilar y su descenso). Ahora es
+    /// LITERAL el case 661 del decompile (la muerte de la luciérnaga
+    /// prisma): nace 200 px ENCIMA del portador + jitter circular de 50
+    /// + NPC.SpawnBoss (que trae el «ha despertado», el target fijado y
+    /// el timeLeft ×20) — y una presentación breve flotando ahí
+    /// (EST_NACIENDO con SUB_PRESENTA) antes de la pelea. La hora da
+    /// igual: la Emperatriz nace de noche y su cielo no se toca.
     /// </summary>
     public class NombreDeAethon : LlamadoDeJefe
     {
         protected override int NpcConvocado => ModContent.NPCType<AethonBoss>();
 
-        /// <summary>La luz primordial contesta a CUALQUIER hora: su llegada trae el mediodía consigo.</summary>
-        protected override bool ConvocableDeNoche => true;
-    }
-
-    /// <summary>
-    /// v6.50.48 — EL NOMBRE DEL SEGUNDO AETHON — EL INVOCADOR NUMERO 2
-    /// (la letra del usuario: «ahora crea un nuevo jefe Aethon con un
-    /// nuevo invocador, que sera el invocador numero 2, este jefe
-    /// tambien es una luz, pero dale la entrada exacta que tiene la
-    /// emperatriz de la luz»).
-    ///
-    /// LA ENTRADA ES LA DE LA EMPERATRIZ, LITERAL DEL DECOMPILE (case
-    /// 661 — la muerte de la luciérnaga prisma):
-    ///   Vector2 pos = Center + (0, -200) + NextVector2Circular(50, 50);
-    ///   SpawnBoss(x, y, 636, target);
-    /// La segunda luz nace 200 px ENCIMA del portador con el mismo
-    /// jitter circular de 50 y el mismo SpawnBoss de vanilla (que trae
-    /// el «ha despertado», el target fijado y el timeLeft x20).
-    /// </summary>
-    public class NombreDeAethonSegundo : LlamadoDeJefe
-    {
-        protected override int NpcConvocado => ModContent.NPCType<AethonSegundo>();
-
-        /// <summary>La segunda luz tampoco consulta el reloj: contesta a CUALQUIER hora.</summary>
+        /// <summary>La luz primordial contesta a CUALQUIER hora (como la Emperatriz: el reloj no la toca).</summary>
         protected override bool ConvocableDeNoche => true;
 
         /// <summary>
-        /// EL USO: la entrada EXACTA de la Emperatriz (el override total
-        /// del UseItem de la casa: ni el offset lateral del común ni su
-        /// NewNPC — el SpawnBoss de vanilla con la fórmula de la
-        /// luciérnaga). El server manda (MP: el servidor convoca).
+        /// EL USO: la entrada EXACTA de la Emperatriz (LITERAL del
+        /// decompile, case 661 — la muerte de la luciérnaga prisma,
+        /// palabra por palabra):
+        ///   Vector2 pos = Center + (0, -200) + NextVector2Circular(50, 50);
+        ///   SpawnBoss(x, y, 636, target);
+        /// Ni el offset lateral del común ni su NewNPC: el SpawnBoss de
+        /// vanilla con la fórmula de la luciérnaga. El server manda
+        /// (MP: el servidor convoca).
         /// </summary>
         public override bool? UseItem(Player player)
         {

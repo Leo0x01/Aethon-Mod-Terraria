@@ -116,19 +116,20 @@ Items: {
 			'''
 			«Ve al Sagrario Hueco y llama su nombre.»
 			Convoca a AETHON, LA LUZ PRIMORDIAL.
-			A CUALQUIER HORA — la llegada corre el tiempo hasta el mediodía.
+			La entrada de la EMPERATRIZ DE LUZ, exacta: nace 200 pies
+			sobre tu cabeza y se presenta antes de la pelea.
 			Las cinco fases esperan — el reconocimiento final.
 			'''
 	}
 
-	NombreDeAethonSegundo: {
-		DisplayName: El Nombre del Segundo Aethon
+	AethonMenorItem: {
+		DisplayName: El Aethon Menor
 		Tooltip:
 			'''
-			«La primera luz tenía una hermana.»
-			Convoca a AETHON, LA SEGUNDA LUZ — el invocador número 2.
-			A CUALQUIER HORA — nace 200 pies sobre tu cabeza, como la Emperatriz.
-			Cinco fases que HEREDAN todo: cada una, mejor que la anterior.
+			Una chispa viva de la Luz Primordial.
+			Invoca al AETHON MENOR — la mascota de luz: el mismo Aethon
+			pero más pequeño, flotando a tu hombro, coronado de perlas
+			y alumbrando con el arcoíris del trono.
 			'''
 	}
 
@@ -1638,6 +1639,22 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaTresItem: {
+		DisplayName: La Forma Ascendida 3
+		Tooltip:
+			'''
+			EL TRONO — la tercera luz, la divinidad celestial canónica.
+			EL ARCOÍRIS alrededor del trono girando en dos aros,
+			EL MAR DE VIDRIO bajo tus pies, LAS SIETE LÁMPARAS DE FUEGO
+			orbitándote y LAS RUEDAS DE OFANIM — ojos de luz girando
+			en contra. Y detrás de ti, LA CRUZ DE LUZ de la Maiestas Domini —
+			la columna del cielo y el brazo del horizonte.
+			Las alas del serafín con sus 28 plumas PRISMÁTICAS — cada
+			pluma, su color del arcoíris.
+			Y VUELO INFINITO (como sus dos hermanas).
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: La Brasa del Eclipse
 		Tooltip:
@@ -1783,13 +1800,18 @@ Projectiles: {
 	ArcoSobretensionProjectile.DisplayName: Arco de Sobretensión
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
-	// AtaqueJefe2Projectile.DisplayName: Ataque Jefe2 Projectile
+	// AethonMenorPet.DisplayName: Aethon Menor Pet
 }
 
 Buffs: {
 	CosmicOrbBuff: {
 		DisplayName: Orbe Cósmico
 		Description: Un orbe de luz cósmica te sigue y dispara a tus enemigos
+	}
+
+	AethonMenorBuff: {
+		DisplayName: Aethon Menor
+		Description: Una chispa viva de la Luz Primordial alumbra tu camino con el arcoíris
 	}
 
 	NebulaJellyfishBuff: {
@@ -1836,7 +1858,6 @@ Buffs: {
 NPCs: {
 	HollowTitan.DisplayName: El Titán Hueco
 	AethonBoss.DisplayName: Aethon, la Luz Primordial
-	AethonSegundo.DisplayName: Aethon, la Segunda Luz
 
 	TheWitness: {
 		DisplayName: El Testigo
@@ -2208,18 +2229,6 @@ Jefe: {
 		Manada: LA MANADA ASTRAL — la luz suelta a los perros del cielo: mátalos o córreles.
 		Telar: EL TELAR DE CONSTELACIONES — las estrellas tejen la jaula: sal de la figura.
 		Decreto: EL DECRETO DEL ECLIPSE — el círculo crece y la luz NO se mueve: corre, ahora es cuando.
-	}
-
-	AethonSegundo: {
-		Fase: Aethon, la Segunda Luz — FASE {0}: {1}
-		Nombre1: El Paseo del Ocho
-		Nombre2: La Carrera Prismática
-		Nombre3: El Parpadeo
-		Nombre4: El Pentagrama
-		Nombre5: La Furia Blanca
-		Presentacion: La segunda luz se enciende sobre tu cabeza — la entrada de la Emperatriz, aprendida de memoria.
-		Muerte: La segunda luz se pliega — y su prisma regresa al mundo.
-		Reconocimiento: La Segunda Luz te reconoce como un par. LA FORMA ASCENDIDA 2 cae a tus pies.
 	}
 }
 

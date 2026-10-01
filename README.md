@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.48 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.49 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,8 +14,35 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.48)
-- **v6.50.48 - LA QUINTA RONDA, LA MAS GRANDE**: cinco frentes en uno.
+## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.49)
+- **v6.50.49 - LA SEXTA RONDA — EL VUELO QUE NUNCA VOLÓ + EL TRONO**:
+  (1) **EL FIX DEL VUELO INFINITO**: el código de la .48 JAMÁS corrió —
+  las banderas se encendían en `PostUpdate`, UN HOOK TARDE (el decompile
+  lo selló: `ResetEffects` 24723 → `PostUpdateEquips` 24914 → `PostUpdate`
+  27293); ahora los ítems las encienden en `UpdateAccessory`/
+  `UpdateVanity` (dentro de `UpdateEquips`, como vanilla enciende su
+  propia `empressBrooch`) y el vuelo ES INFINITO DE VERDAD (la Insignia
+  del Alba prestada + relleno duro de `wingTime`; sin alas puestas, la
+  física de Mothron se inyecta y las plumas del aura SON las alas).
+  (2) **LA FORMA ASCENDIDA 3: EL TRONO** — la iconografía del
+  Apocalipsis investigada como pidió: EL ARCOÍRIS alrededor del trono
+  (dos aros de perlas, cada una su color del espectro), EL MAR DE VIDRIO
+  bajo los pies, LAS SIETE LÁMPARAS DE FUEGO orbitando, LAS RUEDAS DE
+  OFANIM (ojos de luz contrarrotando), LA CORONA DE VEINTICUATRO
+  ESTRELLAS, LA CRUZ DE LUZ de la Maiestas Domini detrás del portador y
+  LAS ALAS PRISMÁTICAS (28 plumas por lado, cada pluma su matiz del
+  arcoíris). (3) **EL SEGUNDO JEFE BORRADO** («se ve horrible, dejemos
+  al primero») — con su invocador y texturas; la Forma 2 SE QUEDA
+  («déjalo»). (4) **LA ENTRADA DE LA EMPERATRIZ para el Aethon
+  original**: el case 661 literal (200 px encima + jitter circular 50 +
+  SpawnBoss) y una presentación de ~45 t — LA CARRERA AL MEDIODÍA MURIÓ
+  (temblor, reloj, pilar y descenso: la Emperatriz no toca el reloj).
+  (5) **EL AETHON MENOR**: la mascota de luz — Aethon original pero más
+  pequeño, con su corona de perlas y su arcoíris (drop 20% del jefe +
+  5 maderas).
+
+- **v6.50.48 - LA QUINTA RONDA** (probada con feedback: el vuelo
+  infinito que prometía salía muerto — ver la .49): cinco frentes en uno.
   (1) **LA FORMA ASCENDIDA 2** - un item NUEVO (la 1 intacta): la
   apoteosis ABSOLUTA con las cinco capas del arte sacro que faltaban
   (LA MANDORLA, LA CORONA DE DOCE ESTRELLAS, LOS SIETE CANDELEROS, EL
@@ -61,10 +88,10 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.48`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.49`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 398 entradas auditado.
+  sin excepciones; `.tmod` de 398 entradas auditado (diff quirúrgico: −3 del segundo jefe, +3 del trono y el menor).
 - **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
   ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
   NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el

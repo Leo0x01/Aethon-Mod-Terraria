@@ -4,8 +4,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace AethonMod.Content.Items.Cosmetics
-{
-    // ======================================================================
+{    // ======================================================================
     //  v6.50.48 — LA FORMA ASCENDIDA 2: UN ITEM NUEVO, NO UN CAMBIO.
     //
     //  La letra del usuario: «tenias que crear un nuevo item de la forma
@@ -50,10 +49,19 @@ namespace AethonMod.Content.Items.Cosmetics
 
         public override void UpdateAccessory(Player player, bool hideVisual)
         {
-            // Puro cosmético + el vuelo: la detección la hace CosmeticPlayer.
+            // v6.50.49 — LA BANDERA EN VIVO (el fix del vuelo infinito:
+            // UpdateEquips la enciende, PostUpdateEquips la ve en el
+            // MISMO tick — en la .48 vivía solo en PostUpdate, tarde
+            // por un hook, y el vuelo jamás corrió).
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().FormaAscendidaDos = true;
         }
 
-        public override void UpdateVanity(Player player) { }
+        public override void UpdateVanity(Player player)
+        {
+            // En el hueco de vanidad también: un cosmético es un
+            // cosmético viva donde lo pongas.
+            player.GetModPlayer<global::AethonMod.Content.Players.CosmeticPlayer>().FormaAscendidaDos = true;
+        }
 
         public override bool CanEquipAccessory(Player player, int slot, bool modded)
         {

@@ -114,21 +114,21 @@ Items: {
 		DisplayName: The Name of Aethon
 		Tooltip:
 			'''
-			'Go to the Hollow Sanctum and call its name.'
 			Summons AETHON, THE PRIMORDIAL LIGHT.
-			WORKS AT ANY HOUR — the arrival races time to high noon.
+			The EMPRESS OF LIGHT's entrance, exact: born 200 feet
+			above your head, presenting herself before the fight.
 			Five phases await — the final acknowledgment.
 			'''
 	}
 
-	NombreDeAethonSegundo: {
-		DisplayName: The Second Aethon's Name
+	AethonMenorItem: {
+		DisplayName: The Lesser Aethon
 		Tooltip:
 			'''
-			"The first light had a sister."
-			Summons AETHON, THE SECOND LIGHT — summoner number 2.
-			AT ANY HOUR — it is born 200 feet above your head, like the Empress.
-			Five phases that INHERIT everything: each one better than the last.
+			A living spark of the Primordial Light.
+			Summons THE LESSER AETHON — the light pet: the same Aethon
+			but smaller, floating by your shoulder, crowned with pearls
+			and shining with the rainbow of the throne.
 			'''
 	}
 
@@ -1638,6 +1638,23 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaTresItem: {
+		DisplayName: The Ascended Form 3
+		Tooltip:
+			'''
+			THE THRONE — the third light: canonical celestial divinity.
+			THE RAINBOW round about the throne spinning in two rings,
+			THE SEA OF GLASS beneath your feet, THE SEVEN LAMPS OF
+			FIRE orbiting you, and THE OPHANIM WHEELS — wheels of
+			eyes of light turning against each other. And behind you,
+			THE CROSS OF LIGHT of the Maiestas Domini: the pillar of
+			heaven and the arm of the horizon.
+			The seraph wings with their 28 PRISMATIC feathers — every
+			feather, its own color of the rainbow.
+			And INFINITE FLIGHT (like its two sisters).
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: The Eclipse Ember
 		Tooltip:
@@ -1783,13 +1800,18 @@ Projectiles: {
 	ArcoSobretensionProjectile.DisplayName: Arco Sobretension Projectile
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
-	AtaqueJefe2Projectile.DisplayName: Ataque Jefe2 Projectile
+	AethonMenorPet.DisplayName: Aethon Menor Pet
 }
 
 Buffs: {
 	CosmicOrbBuff: {
 		DisplayName: Cosmic Orb
 		Description: A cosmic orb of light follows you and shoots at your enemies
+	}
+
+	AethonMenorBuff: {
+		DisplayName: Lesser Aethon
+		Description: A living spark of the Primordial Light lights your way with the rainbow
 	}
 
 	NebulaJellyfishBuff: {
@@ -1836,7 +1858,6 @@ Buffs: {
 NPCs: {
 	HollowTitan.DisplayName: The Hollow Titan
 	AethonBoss.DisplayName: Aethon, the Primordial Light
-	AethonSegundo.DisplayName: Aethon, the Second Light
 
 	TheWitness: {
 		DisplayName: The Witness
@@ -2208,18 +2229,6 @@ Jefe: {
 		Manada: THE ASTRAL PACK — the light unleashes the hounds of heaven: kill them or outrun them.
 		Telar: THE CONSTELLATION LOOM — the stars weave the cage: get out of the figure.
 		Decreto: THE DECREE OF THE ECLIPSE — the circle grows and the light does NOT move: run, now is the time.
-	}
-
-	AethonSegundo: {
-		Fase: Aethon, the Second Light — PHASE {0}: {1}
-		Nombre1: The Eightfold Stroll
-		Nombre2: The Prismatic Dash
-		Nombre3: The Blink
-		Nombre4: The Pentagram
-		Nombre5: The White Fury
-		Presentacion: The second light ignites above your head — the Empress' entrance, learned by heart.
-		Muerte: The second light folds — and its prism returns to the world.
-		Reconocimiento: The Second Light acknowledges you as an equal. THE ASCENDED FORM 2 falls at your feet.
 	}
 }
 

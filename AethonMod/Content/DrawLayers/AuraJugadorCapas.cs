@@ -55,10 +55,16 @@ namespace AethonMod.Content.DrawLayers
         }
 
         /// <summary>
-        /// El perfil del VELO: la primera aura viva del jugador (hambre →
-        /// forma ascendida → corona rúnica). La ceniza del hambre es solo
-        /// del jugador LOCAL (el hambre es tuya); los cosméticos, de quien
-        /// los lleve puesto.
+        /// El perfil del VELO: la primera aura viva del jugador (hambre
+        /// → forma ascendida → forma 2 → forma 3 → brasa). La ceniza del
+        /// hambre es solo del jugador LOCAL (el hambre es tuya); los
+        /// cosméticos, de quien los lleve puesto.
+        /// v6.50.49 — LOS PERFILES CACHEADOS (hallazgo del diagnóstico
+        /// del parpadeo: esta vía creaba un AuraPerfil NUEVO cada frame
+        /// — el cache del v6.49 cubría solo el portador; ahora también
+        /// el velo) y las Formas 2 y 3 reconocidas aquí (si algún perfil
+        /// divino enciende VeloFrontal, su velo ya vive; hoy todos son
+        /// TODO-trasero por diseño — pero la detección ya no miente).
         /// </summary>
         internal static AuraPerfil PerfilDe(Player p)
         {
@@ -71,10 +77,15 @@ namespace AethonMod.Content.DrawLayers
             var cp = p.GetModPlayer<CosmeticPlayer>();
             if (cp != null)
             {
-                if (cp.FormaAscendida) return AuraPerfil.FormaAscendida();
-                if (cp.BrasaDelEclipse) return AuraPerfil.BrasaDelEclipse();
+                if (cp.FormaAscendidaTres) return _veloTres ??= AuraPerfil.FormaAscendidaTres();
+                if (cp.FormaAscendidaDos) return _veloDos ??= AuraPerfil.FormaAscendidaDos();
+                if (cp.FormaAscendida) return _veloUno ??= AuraPerfil.FormaAscendida();
+                if (cp.BrasaDelEclipse) return _veloBrasa ??= AuraPerfil.BrasaDelEclipse();
             }
             return null;
         }
+
+        // v6.50.49 — el cache de los perfiles del velo (cero GC por frame).
+        private static AuraPerfil _veloUno, _veloDos, _veloTres, _veloBrasa;
     }
 }
