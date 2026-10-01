@@ -164,4 +164,44 @@ namespace AethonMod.Content.Items.Llamados
         /// <summary>La luz primordial contesta a CUALQUIER hora: su llegada trae el mediodía consigo.</summary>
         protected override bool ConvocableDeNoche => true;
     }
+
+    /// <summary>
+    /// v6.50.48 — EL NOMBRE DEL SEGUNDO AETHON — EL INVOCADOR NUMERO 2
+    /// (la letra del usuario: «ahora crea un nuevo jefe Aethon con un
+    /// nuevo invocador, que sera el invocador numero 2, este jefe
+    /// tambien es una luz, pero dale la entrada exacta que tiene la
+    /// emperatriz de la luz»).
+    ///
+    /// LA ENTRADA ES LA DE LA EMPERATRIZ, LITERAL DEL DECOMPILE (case
+    /// 661 — la muerte de la luciérnaga prisma):
+    ///   Vector2 pos = Center + (0, -200) + NextVector2Circular(50, 50);
+    ///   SpawnBoss(x, y, 636, target);
+    /// La segunda luz nace 200 px ENCIMA del portador con el mismo
+    /// jitter circular de 50 y el mismo SpawnBoss de vanilla (que trae
+    /// el «ha despertado», el target fijado y el timeLeft x20).
+    /// </summary>
+    public class NombreDeAethonSegundo : LlamadoDeJefe
+    {
+        protected override int NpcConvocado => ModContent.NPCType<AethonSegundo>();
+
+        /// <summary>La segunda luz tampoco consulta el reloj: contesta a CUALQUIER hora.</summary>
+        protected override bool ConvocableDeNoche => true;
+
+        /// <summary>
+        /// EL USO: la entrada EXACTA de la Emperatriz (el override total
+        /// del UseItem de la casa: ni el offset lateral del común ni su
+        /// NewNPC — el SpawnBoss de vanilla con la fórmula de la
+        /// luciérnaga). El server manda (MP: el servidor convoca).
+        /// </summary>
+        public override bool? UseItem(Player player)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient) return null; // el servidor manda
+
+            // LA FÓRMULA DE LA LUCIÉRNAGA (case 661, palabra por palabra):
+            // 200 px encima + jitter circular de 50 + SpawnBoss.
+            Vector2 pos = player.Center + new Vector2(0f, -200f) + Main.rand.NextVector2Circular(50f, 50f);
+            NPC.SpawnBoss((int)pos.X, (int)pos.Y, NpcConvocado, player.whoAmI);
+            return true;
+        }
+    }
 }

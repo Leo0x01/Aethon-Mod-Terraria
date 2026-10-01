@@ -121,6 +121,17 @@ Items: {
 			'''
 	}
 
+	NombreDeAethonSegundo: {
+		DisplayName: El Nombre del Segundo Aethon
+		Tooltip:
+			'''
+			«La primera luz tenía una hermana.»
+			Convoca a AETHON, LA SEGUNDA LUZ — el invocador número 2.
+			A CUALQUIER HORA — nace 200 pies sobre tu cabeza, como la Emperatriz.
+			Cinco fases que HEREDAN todo: cada una, mejor que la anterior.
+			'''
+	}
+
 	MedusaNebularStaff: {
 		DisplayName: Báculo de la Medusa Nebular
 		Tooltip:
@@ -1612,6 +1623,21 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaDosItem: {
+		DisplayName: La Forma Ascendida 2
+		Tooltip:
+			'''
+			La apoteosis absoluta de la segunda luz.
+			Las once capas de la Forma Ascendida, elevadas — más LA MANDORLA
+			que te enmarca, LA CORONA DE DOCE ESTRELLAS, LOS SIETE
+			CANDELEROS de la espalda y EL RÍO DE LUZ bajo tus pies.
+			Las alas del serafín con el DOBLE de plumas y la extensión
+			COMPLETA de arriba abajo: por encima de tu cabeza y por debajo
+			de tus pies.
+			Y VUELO INFINITO (como su hermana).
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: La Brasa del Eclipse
 		Tooltip:
@@ -1757,6 +1783,7 @@ Projectiles: {
 	ArcoSobretensionProjectile.DisplayName: Arco de Sobretensión
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
+	// AtaqueJefe2Projectile.DisplayName: Ataque Jefe2 Projectile
 }
 
 Buffs: {
@@ -1809,6 +1836,7 @@ Buffs: {
 NPCs: {
 	HollowTitan.DisplayName: El Titán Hueco
 	AethonBoss.DisplayName: Aethon, la Luz Primordial
+	AethonSegundo.DisplayName: Aethon, la Segunda Luz
 
 	TheWitness: {
 		DisplayName: El Testigo
@@ -2171,8 +2199,8 @@ Jefe: {
 		Juicio: EL JUICIO DE LUZ — columnas de luz caen del cielo: corre.
 		Nova: LA NOVA PRIMORDIAL — la luz estalla: busca el hueco.
 		Aliento: EL RAYO PRIMORDIAL — la luz te busca.
-		// v6.50.46 — EL ECLIPSE MURIÓ («la luz se apaga y solo brillan las
-		// balas, se ve mal, quitala») — su relevo: EL VÓRTICE PRIMORDIAL.
+		// v6.50.46 — THE ECLIPSE IS DEAD ("the light goes out and only the
+		// bullets shine, it looks bad, remove it") — its successor: THE VORTEX.
 		Vortice: EL VÓRTICE PRIMORDIAL — la luz gira alrededor tuyo: muévete con el remolino.
 		// v6.50.45 — THE FIVE NEW WEAPON ANNOUNCES
 		Reloj: EL RELOJ DE ARENA CÓSMICO — el tiempo cae del cielo: no vueles bajo su peso.
@@ -2180,6 +2208,18 @@ Jefe: {
 		Manada: LA MANADA ASTRAL — la luz suelta a los perros del cielo: mátalos o córreles.
 		Telar: EL TELAR DE CONSTELACIONES — las estrellas tejen la jaula: sal de la figura.
 		Decreto: EL DECRETO DEL ECLIPSE — el círculo crece y la luz NO se mueve: corre, ahora es cuando.
+	}
+
+	AethonSegundo: {
+		Fase: Aethon, la Segunda Luz — FASE {0}: {1}
+		Nombre1: El Paseo del Ocho
+		Nombre2: La Carrera Prismática
+		Nombre3: El Parpadeo
+		Nombre4: El Pentagrama
+		Nombre5: La Furia Blanca
+		Presentacion: La segunda luz se enciende sobre tu cabeza — la entrada de la Emperatriz, aprendida de memoria.
+		Muerte: La segunda luz se pliega — y su prisma regresa al mundo.
+		Reconocimiento: La Segunda Luz te reconoce como un par. LA FORMA ASCENDIDA 2 cae a tus pies.
 	}
 }
 

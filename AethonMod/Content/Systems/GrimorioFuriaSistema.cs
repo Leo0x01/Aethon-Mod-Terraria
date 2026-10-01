@@ -116,6 +116,168 @@ namespace AethonMod.Content.Systems
         // sello — el crédito de la oleada y el timeout miran SOLO al jefe.
         private static int _tipoJefeOleada = -1;
 
+        // ==================================================================
+        //  v6.50.48 - EL CENSO DE LA BARRA + LA EXTENSION DEL DEVORADOR
+        // ==================================================================
+
+        // EL CENSO (el fix del desborde): la barra de vanilla de los
+        // jefes multi-pieza divide las vidas ACTUALES (multiplicadas por
+        // la oleada) entre la vida de una pieza FRESCA (vanilla, sin
+        // multiplicar) por un numero ASUMIDO de piezas. La oleada 2
+        // hacia desbordar UN marco; la 10, ONCE. El hook de
+        // OleadaNPC.SetDefaults escala la referencia con EL MISMO
+        // multiplicador y el FACTOR DE LARGO REAL (nacidas/asumidas).
+        private static float _multDevorador = 1f;
+        private static int _inicialDevorador = 0;   // piezas nacidas (cabeza+cuerpos+cola)
+        private static float _multCerebro = 1f;
+        private static int _inicialCerebro = 0;     // creepers nacidos
+
+        // EL PENDIENTE DEL DEVORADOR: la cabeza acaba de nacer; la
+        // cadena de vanilla se construye en los primeros AI. Cuando
+        // este lista, la EXTENDemos (la letra: «el devorador debe ser
+        // mas largo, al menos 3 veces mas largo»).
+        private static int _pendCabeza = -1;        // whoAmI de la cabeza
+        private static int _pendTicks = 0;         // la espera de la cadena
+        private static int _pendIntentos = 0;      // reintentos antes de rendirse
+
+        /// <summary>Pieza del Devorador nacida (la llama Marcar): el censo se refresca.</summary>
+        public static void PiezaDevoradorNacio(float mult)
+        {
+            if (mult > _multDevorador) _multDevorador = mult;
+            _inicialDevorador = ContarPiezas(NPCID.EaterofWorldsHead, NPCID.EaterofWorldsTail);
+        }
+
+        /// <summary>Creeper nacido (la llama Marcar): el censo se refresca.</summary>
+        public static void PiezaCerebroNacio(float mult)
+        {
+            if (mult > _multCerebro) _multCerebro = mult;
+            _inicialCerebro = ContarPiezas(NPCID.Creeper, NPCID.Creeper);
+        }
+
+        /// <summary>Las piezas VIVAS de la familia (min..max), selladas por la furia.</summary>
+        private static int ContarPiezas(int min, int max)
+        {
+            int n = 0;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC c = Main.npc[i];
+                if (c == null || !c.active || c.type < min || c.type > max) continue;
+                var sello = c.GetGlobalNPC<OleadaNPC>();
+                if (sello != null && sello.EsDeOleada) n++;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// LA ESCALA DE LA REFERENCIA DEL DEVORADOR para la barra:
+        /// multiplicador de la oleada x factor de largo real
+        /// (nacidas / asumidas). La llama OleadaNPC.SetDefaults cuando
+        /// la barra reconstruye su cuerpo de referencia (cada frame).
+        /// </summary>
+        public static float EscalaBarraDevorador()
+        {
+            if (_inicialDevorador < 1 || _multDevorador <= 1f) return 1f;
+            float asumidas = NPC.GetEaterOfWorldsSegmentsCount() + 2;
+            return _multDevorador * (_inicialDevorador / asumidas);
+        }
+
+        /// <summary>LA ESCALA DE LA REFERENCIA DEL CEREBRO (los creepers).</summary>
+        public static float EscalaBarraCerebro()
+        {
+            if (_inicialCerebro < 1 || _multCerebro <= 1f) return 1f;
+            float asumidos = NPC.GetBrainOfCthuluCreepersCount();
+            return _multCerebro * (_inicialCerebro / asumidos);
+        }
+
+        /// <summary>
+        /// LA EXTENSION DEL DEVORADOR (la letra del usuario: «el devorador
+        /// debe ser mas largo, al menos 3 veces mas largo»): cuando la
+        /// cadena de vanilla esta completa, se INSERTAN cuerpos nuevos
+        /// entre el ultimo cuerpo y la cola, con la convencion de enlaze
+        /// de AI_006 (ai[1] = el de adelante, ai[0] = el de atras) — el
+        /// gusano crece sin romper la fisica. Tope 192 piezas: el motor
+        /// solo tiene 200 NPC (en expert la cadena base ya es 72: la
+        /// extension la lleva hasta el tope; en normal son 197 = 3.0x).
+        /// Cada pieza nueva nace como HIJA del ultimo cuerpo: hereda el
+        /// sello (aura, stats y XP de la oleada) — y el censo de la
+        /// barra crece con la cadena.
+        /// </summary>
+        private static void ProcesarExtensionDevorador()
+        {
+            if (_pendCabeza < 0) return;
+            try
+            {
+                NPC cabeza = (_pendCabeza < Main.maxNPCs) ? Main.npc[_pendCabeza] : null;
+                if (cabeza == null || !cabeza.active || cabeza.type != NPCID.EaterofWorldsHead)
+                { _pendCabeza = -1; return; }
+
+                if (_pendTicks > 0) { _pendTicks--; return; }
+
+                // ¿La cadena esta completa? Caminamos desde la cabeza
+                // (ai[0] apunta al de atras) hasta la pieza sin atras:
+                // ESA es la cola.
+                NPC cola = null;
+                int cur = _pendCabeza;
+                for (int paso = 0; paso < 250; paso++)
+                {
+                    if (cur < 0 || cur >= Main.maxNPCs) { _pendCabeza = -1; return; }
+                    NPC pieza = Main.npc[cur];
+                    if (pieza == null || !pieza.active) { _pendCabeza = -1; return; }
+                    int atras = (int)pieza.ai[0];
+                    if (atras <= 0 || atras >= Main.maxNPCs || atras == cur) { cola = pieza; break; }
+                    cur = atras;
+                }
+                if (cola == null || cola.type != NPCID.EaterofWorldsTail)
+                {
+                    // aun no: la cadena de vanilla sigue construyendose
+                    if (++_pendIntentos >= 6) { _pendCabeza = -1; return; }
+                    _pendTicks = 15;
+                    return;
+                }
+
+                int vivos = ContarPiezas(NPCID.EaterofWorldsHead, NPCID.EaterofWorldsTail);
+                int objetivo = Math.Min(NPC.GetEaterOfWorldsSegmentsCount() * 3 + 2, 192);
+                if (vivos >= objetivo) { _pendCabeza = -1; return; }
+
+                NPC ultimoCuerpo = (cola.ai[1] > 0 && cola.ai[1] < Main.maxNPCs)
+                    ? Main.npc[(int)cola.ai[1]] : null;
+                if (ultimoCuerpo == null || !ultimoCuerpo.active ||
+                    ultimoCuerpo.type != NPCID.EaterofWorldsBody)
+                { _pendCabeza = -1; return; }
+
+                int hechos = 0;
+                for (int i = 0; i < objetivo - vivos; i++)
+                {
+                    int idx = NPC.NewNPC(ultimoCuerpo.GetSource_FromAI(),
+                        (int)ultimoCuerpo.Center.X, (int)ultimoCuerpo.Center.Y,
+                        NPCID.EaterofWorldsBody, 0);
+                    if (idx < 0 || idx >= Main.maxNPCs) break; // el mundo lleno: se queda como este
+                    NPC nuevo = Main.npc[idx];
+                    if (nuevo == null || !nuevo.active) break;
+
+                    // EL ENLACE (la convencion de AI_006):
+                    nuevo.ai[1] = ultimoCuerpo.whoAmI;  // el de adelante
+                    nuevo.ai[0] = cola.whoAmI;          // mi atras es la cola
+                    nuevo.ai[2] = 0f;                  // sin presupuesto: enlazado a mano
+                    nuevo.target = cabeza.target;
+                    ultimoCuerpo.ai[0] = nuevo.whoAmI; // el de atras del ultimo soy yo
+                    cola.ai[1] = nuevo.whoAmI;         // el de adelante de la cola soy yo
+
+                    nuevo.netUpdate = true;
+                    ultimoCuerpo.netUpdate = true;
+                    cola.netUpdate = true;
+                    ultimoCuerpo = nuevo;
+                    hechos++;
+                }
+
+                // el censo crece con la cadena (Marcar ya conto cada pieza
+                // al nacer; el refresco final clava el numero).
+                _inicialDevorador = Math.Max(_inicialDevorador, vivos + hechos);
+                _pendCabeza = -1;
+            }
+            catch { _pendCabeza = -1; }
+        }
+
         // === EL ESTADO DE LA OLEADA ESPECIAL ===
         private static int _spawneados = 0;         // cuántos guardián ya nacieron (la cuenta la valida el escaneo de sellos)
         private static int _ticksSuma = 0;          // tempo de las sumas
@@ -296,6 +458,9 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateWorld()
         {
+            // v6.50.48 - LA EXTENSION DEL DEVORADOR corre siempre que haya
+            // un pendiente (la fase puede cambiar debajo).
+            try { ProcesarExtensionDevorador(); } catch { _pendCabeza = -1; }
             if (_fase == Fase.Inactivo) return;
             try { Paso(); }
             catch { Terminar(); }
@@ -916,6 +1081,16 @@ namespace AethonMod.Content.Systems
 
                 jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true);
                 jefe.netUpdate = true;
+
+                // v6.50.48 - LA EXTENSION DEL DEVORADOR: la cabeza acaba
+                // de nacer; cuando su cadena de vanilla este completa
+                // (unos ticks), la alargamos 3x.
+                if (tipo == NPCID.EaterofWorldsHead)
+                {
+                    _pendCabeza = idx;
+                    _pendTicks = 45;
+                    _pendIntentos = 0;
+                }
 
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Jefe",
                     new Color(226, 64, 64), jefe.FullName, _oleadaActual + 1);

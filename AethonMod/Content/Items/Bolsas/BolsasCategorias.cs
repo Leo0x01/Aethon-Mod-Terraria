@@ -63,6 +63,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Items.Llamados.PlumaDeLaArquera>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.SombraDelPortador>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
+            // v6.50.48 — EL INVOCADOR NUMERO 2: la segunda luz también
+            // responde a su llamado.
+            l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethonSegundo>(), 1));
             return l;
         }
     }
@@ -295,6 +298,8 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Accessories.AnillosSolRunicoItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.AnilloRunicoDorsalItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaItem>(), 1));
+            // v6.50.48 — LA FORMA ASCENDIDA 2: la apoteosis absoluta.
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaDosItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             return l;
         }

@@ -121,6 +121,17 @@ Items: {
 			'''
 	}
 
+	NombreDeAethonSegundo: {
+		DisplayName: The Second Aethon's Name
+		Tooltip:
+			'''
+			"The first light had a sister."
+			Summons AETHON, THE SECOND LIGHT — summoner number 2.
+			AT ANY HOUR — it is born 200 feet above your head, like the Empress.
+			Five phases that INHERIT everything: each one better than the last.
+			'''
+	}
+
 	MedusaNebularStaff: {
 		DisplayName: Nebula Jellyfish Staff
 		Tooltip:
@@ -1613,6 +1624,20 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaDosItem: {
+		DisplayName: The Ascended Form 2
+		Tooltip:
+			'''
+			The absolute apotheosis of the second light.
+			The eleven layers of the Ascended Form, elevated — plus THE
+			MANDORLA framing you, THE TWELVE-STAR CROWN, THE SEVEN
+			CANDLEHOLDERS at your back and THE RIVER OF LIGHT beneath your feet.
+			The seraph wings with TWICE the feathers and the FULL extension
+			from top to bottom: above your head and below your feet.
+			And INFINITE FLIGHT (like its sister).
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: The Eclipse Ember
 		Tooltip:
@@ -1758,6 +1783,7 @@ Projectiles: {
 	ArcoSobretensionProjectile.DisplayName: Arco Sobretension Projectile
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
+	AtaqueJefe2Projectile.DisplayName: Ataque Jefe2 Projectile
 }
 
 Buffs: {
@@ -1810,6 +1836,7 @@ Buffs: {
 NPCs: {
 	HollowTitan.DisplayName: The Hollow Titan
 	AethonBoss.DisplayName: Aethon, the Primordial Light
+	AethonSegundo.DisplayName: Aethon, the Second Light
 
 	TheWitness: {
 		DisplayName: The Witness
@@ -2181,6 +2208,18 @@ Jefe: {
 		Manada: THE ASTRAL PACK — the light unleashes the hounds of heaven: kill them or outrun them.
 		Telar: THE CONSTELLATION LOOM — the stars weave the cage: get out of the figure.
 		Decreto: THE DECREE OF THE ECLIPSE — the circle grows and the light does NOT move: run, now is the time.
+	}
+
+	AethonSegundo: {
+		Fase: Aethon, the Second Light — PHASE {0}: {1}
+		Nombre1: The Eightfold Stroll
+		Nombre2: The Prismatic Dash
+		Nombre3: The Blink
+		Nombre4: The Pentagram
+		Nombre5: The White Fury
+		Presentacion: The second light ignites above your head — the Empress' entrance, learned by heart.
+		Muerte: The second light folds — and its prism returns to the world.
+		Reconocimiento: The Second Light acknowledges you as an equal. THE ASCENDED FORM 2 falls at your feet.
 	}
 }
 

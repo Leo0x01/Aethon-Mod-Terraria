@@ -69,6 +69,23 @@ namespace AethonMod.Content.Globals
     /// su lote aditivo cerrando el activo; aquí se REABRE el lote del
     /// sprite de vanilla justo después (Deferred/AlphaBlend/LinearClamp
     /// con la matriz del mundo — el estado del dibujado de NPCs).
+    ///
+    /// v6.50.48 — LA QUINTA RONDA (la petición literal): «todos esas
+    /// formas de ataques extras de los jefes, o sea los proyectiles
+    /// brillantes y los tajos que tienen no combinan nada con el jefe»:
+    /// LOS DIENTES DE LIBRERÍA MUEREN para los seis guardianes y nacen
+    /// LAS COREOGRAFÍAS TEMÁTICAS — cada jefe invoca a LOS SUYOS (los
+    /// monstruos y proyectiles ORIGINALES de Terraria): la Abeja Reina
+    /// suelta ENJAMBRES de abejas vanilla, el Ojo convoca a sus
+    /// Sirvientes, el Rey Gelatina escupe BOLAS DE GEL (el ítem Gel
+    /// dibujado como proyectil) al saltar y aterrizar, el Cerebro
+    /// ENGENDRA más Creepers + los monstruos del Carmesí, el Devorador
+    /// se hace 3 VECES MÁS LARGO + los monstruos de la Corrupción, y
+    /// Skeletron invoca esqueletos y lanza HUESOS (el proyectil vanilla
+    /// del ítem Hueso). Y LOS TRES FIXES de la oleada: el préstamo de
+    /// zona (el Devorador y el Cerebro ya NO SE VAN), el día ya no
+    /// encierra a Skeletron en 9999 de defensa, y la BARRA DE VIDA de
+    /// los jefes multi-pieza vuelve a caber en su marco.
     /// </summary>
     public class OleadaNPC : GlobalNPC
     {
@@ -100,6 +117,27 @@ namespace AethonMod.Content.Globals
         private int _defensaBase = 0;
         private float _kbBase = 1f;
 
+        // v6.50.48 — EL PRE-ESCALADO DEL HOOK DE LA BARRA: si este NPC
+        // nació (SetDefaults) mientras la barra de su familia estaba
+        // viva, su lifeMax llegó YA multiplicado — Marcar lo DESHACE para
+        // no encadenar el multiplicador (la pieza real queda a SU talla;
+        // la referencia de la barra, que nunca pasa por Marcar, conserva
+        // la escala y el denominador de la barra casa con el numerador).
+        private float _preEscala = 1f;
+
+        // v6.50.48 — EL PRÉSTAMO DE ZONA (el fix del jefe que SE VA):
+        // el estado del flag original del jugador mientras dura el AI
+        // de esta pieza (PreAI lo presta, PostAI lo devuelve).
+        private bool _zonaPrestada = false;
+        private bool _zonaCrimsonOriginal = false;
+        private bool _zonaCorruptOriginal = false;
+
+        // v6.50.48 — EL RITMO DEL REY (la física del salto leída de la
+        // velocidad, no de su ai[]): la caída y el aterrizaje del Rey
+        // Gelatina escupen las BOLAS DE GEL.
+        private float _prevVelY = 0f;
+        private bool _prevEnSuelo = false;
+
         // ==================================================================
         //  EL SELLADO
         // ==================================================================
@@ -115,6 +153,14 @@ namespace AethonMod.Content.Globals
         {
             try
             {
+                // v6.50.48 — EL DESHACE DEL PRE-ESCALADO: si el hook de la
+                // barra ya multiplicó este lifeMax en su nacimiento (la
+                // referencia fresca de la familia), las BASES se capturan
+                // SIN la escala — la pieza real queda a SU talla exacta y
+                // la referencia de la barra conserva la suya.
+                float esc = _preEscala > 1f ? _preEscala : 1f;
+                _preEscala = 1f;
+
                 // v6.50.10 — IDEMPOTENCIA (EL FIX DE LA CORRUPCIÓN DEL
                 // FESTÍN): Marcar podía llegar DOS VECES al mismo NPC.
                 // La herencia de OnSpawn corre DENTRO de NPC.NewNPC y
@@ -135,7 +181,7 @@ namespace AethonMod.Content.Globals
                 // no de chusma contagiada).
                 if (!EsDeOleada || _vidaBase < 0)
                 {
-                    _vidaBase = npc.lifeMax;
+                    _vidaBase = esc > 1f ? Math.Max(1, (int)(npc.lifeMax / esc)) : npc.lifeMax;
                     _danoBase = npc.damage;
                     _defensaBase = npc.defense;
                     _kbBase = npc.knockBackResist;
@@ -166,8 +212,76 @@ namespace AethonMod.Content.Globals
                 Aura.Radio = RadioSegun(npc, jefe);
 
                 npc.netUpdate = true; // MP: mejor esfuerzo de la casa (SP-first)
+
+                // v6.50.48 — EL CENSO DE LAS PIEZAS (la maquinaria del
+                // fix de la barra): cada pieza de multi-jefe (segmentos
+                // del Devorador, Creepers del Cerebro) que nace sellada
+                // se cuenta — el denominador de la barra de vanilla
+                // (vida de una pieza FRESCA × número ASUMIDO de piezas)
+                // se recalibra con el multiplicador y el largo REAL.
+                if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.EaterofWorldsBody ||
+                    npc.type == NPCID.EaterofWorldsTail)
+                    GrimorioFuriaSistema.PiezaDevoradorNacio(MultiplicadorStats);
+                else if (npc.type == NPCID.Creeper)
+                    GrimorioFuriaSistema.PiezaCerebroNacio(MultiplicadorStats);
             }
             catch { EsDeOleada = false; }
+        }
+
+        // ==================================================================
+        //  v6.50.48 - EL HOOK DE LA BARRA (EL FIX DEL DESBORDE)
+        // ==================================================================
+
+        /// <summary>
+        /// LA REFERENCIA DE LA BARRA, ESCALADA COMO SUS PIEZAS.
+        ///
+        /// LA CAUSA (decompile de EaterOfWorldsProgressBar y
+        /// BrainOfCthuluBigProgressBar): la barra de vida de vanilla para
+        /// los jefes multi-pieza divide la suma de las vidas ACTUALES
+        /// (que la oleada multiplica x(k+1)) entre la vida de una pieza
+        /// FRESCA (SetDefaults(14/267) cada frame, vida VAINILLA) x un
+        /// numero ASUMIDO de piezas. Con la oleada 2 (x3) el relleno ya
+        /// se salia del marco; en la 10 (x11) la barra media ONCE
+        /// marcos. EL FIX: este hook ve nacer ESA referencia (tML pasa
+        /// por los GlobalNPC.SetDefaults de TODO NPC, incluida la
+        /// efimera de la barra) y la multiplica por EL MISMO
+        /// multiplicador de la oleada y por el FACTOR DE LARGO REAL
+        /// (piezas nacidas / piezas asumidas): el denominador vuelve a
+        /// casa con el numerador y el relleno NUNCA supera el marco.
+        /// Las piezas REALES que nacen mientras la barra vive tambien
+        /// pasan por aqui: llegan pre-escaladas y Marcar las deshace
+        /// (nunca se encadena el multiplicador).
+        /// </summary>
+        public override void SetDefaults(NPC npc)
+        {
+            try
+            {
+                // EL DEVORADOR: la barra referencia un CUERPO fresco (14)
+                // y asume GetEaterOfWorldsSegmentsCount()+2 piezas.
+                if (npc.type == NPCID.EaterofWorldsBody)
+                {
+                    float escala = GrimorioFuriaSistema.EscalaBarraDevorador();
+                    if (escala > 1f)
+                    {
+                        npc.lifeMax = Math.Max(1, (int)(npc.lifeMax * escala));
+                        npc.life = npc.lifeMax;
+                        _preEscala = escala;
+                    }
+                }
+                // EL CEREBRO: la barra referencia un CREEPER fresco (267)
+                // y asume GetBrainOfCthuluCreepersCount() creepers.
+                else if (npc.type == NPCID.Creeper)
+                {
+                    float escala = GrimorioFuriaSistema.EscalaBarraCerebro();
+                    if (escala > 1f)
+                    {
+                        npc.lifeMax = Math.Max(1, (int)(npc.lifeMax * escala));
+                        npc.life = npc.lifeMax;
+                        _preEscala = escala;
+                    }
+                }
+            }
+            catch { _preEscala = 1f; }
         }
 
         /// <summary>
@@ -431,11 +545,43 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
-        /// PreAI: la chusma de la oleada re-elige objetivo cada 30 ticks —
-        /// no se distraen, van a por la comida del libro.
+        /// PreAI v6.50.48 - EL PRESTAMO DE ZONA (el fix de los dos jefes
+        /// que SE VAN) + el ritmo del Rey.
+        ///
+        /// LA CAUSA (decompile): la IA vanilla del Cerebro (aiStyle 26)
+        /// sube al jefe hacia el cielo y lo hace FANTASMA (alpha 10)
+        /// cuando su presa NO esta en el Carmesi, y la IA del Devorador
+        /// (aiStyle 6) MATA toda la cadena si NINGUN jugador vive en la
+        /// Corrupcion. La oleada los convoca donde ESTE el portador (la
+        /// letra del sistema: el guardian del bioma del festin) - y a los
+        /// dos ticks de nacer, el jefe SE IBA («son invocados pero se
+        /// van»). EL FIX: durante el AI de esta pieza, la presa lleva
+        /// PRESTADA la zona de su guardián (Carmesí para el Cerebro,
+        /// Corrupción para el Devorador): la IA de vanilla lee SU bioma,
+        /// el jefe se queda. PostAI devuelve el flag original al
+        /// jugador (el prestamo dura lo que dura UN AI de esta pieza).
         /// </summary>
         public override bool PreAI(NPC npc)
         {
+            try
+            {
+                if (EsDeOleada && EsJefeDeOleada && _zonaPrestada == false &&
+                    (npc.type == NPCID.BrainofCthulhu || npc.type == NPCID.EaterofWorldsHead) &&
+                    npc.target >= 0 && npc.target < Main.maxPlayers)
+                {
+                    Player presa = Main.player[npc.target];
+                    if (presa != null && presa.active && !presa.dead)
+                    {
+                        _zonaCrimsonOriginal = presa.ZoneCrimson;
+                        _zonaCorruptOriginal = presa.ZoneCorrupt;
+                        if (npc.type == NPCID.BrainofCthulhu) presa.ZoneCrimson = true;
+                        else presa.ZoneCorrupt = true;
+                        _zonaPrestada = true;
+                    }
+                }
+            }
+            catch { }
+
             if (EsDeOleada && !npc.boss)
             {
                 _tickAggro++;
@@ -468,6 +614,61 @@ namespace AethonMod.Content.Globals
         {
             try
             {
+                // v6.50.48 - LA DEVOLUCION DEL PRESTAMO (lo primero de
+                // todo: el AI de esta pieza ya corrio; el jugador recupera
+                // SU zona. El prestamo dura exactamente un AI).
+                if (_zonaPrestada)
+                {
+                    _zonaPrestada = false;
+                    if (npc.target >= 0 && npc.target < Main.maxPlayers)
+                    {
+                        Player pl = Main.player[npc.target];
+                        if (pl != null && pl.active)
+                        {
+                            pl.ZoneCrimson = _zonaCrimsonOriginal;
+                            pl.ZoneCorrupt = _zonaCorruptOriginal;
+                        }
+                    }
+                }
+
+                // v6.50.48 - EL DIA YA NO ENCOLERA A SKELETRON (el fix de
+                // «esqueletron tiene una defensa muy alta aunque eso solo
+                // pasa a veces, solo le hago 1 de daño»). LA CAUSA
+                // (decompile de su aiStyle 11): cuando Main.IsItDay(), su
+                // IA lo viste de damage 1000 / defense 9999 (el modo
+                // guardian) - y la oleada lo convoca de DIA a proposito
+                // (la paridad Rey/Skeletron de JefeDelLugar). De noche el
+                // daño era normal y de dia UNO: «solo pasa a veces». EL
+                // FIX: despues de su AI, la oleada lo devuelve a SU talla
+                // (las bases de su sello) - el giro visual queda (le queda
+                // bien), los numeros no.
+                if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.SkeletronHead && Main.dayTime)
+                {
+                    npc.defense = _defensaBase + 6 * Oleada;
+                    if (_danoBase > 0)
+                        npc.damage = (int)(_danoBase * MultiplicadorStats);
+                }
+
+                // v6.50.48 - EL RITMO DEL REY (la coreografia del salto):
+                // el Rey Gelatina de la oleada escupe BOLAS DE GEL al
+                // despegar y AL ATERRIZAR (la fisica leida de la velocidad,
+                // no de su ai[]): la caida veloz que se frena de golpe es
+                // el instante del impacto.
+                if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.KingSlime)
+                {
+                    // LA POLARIDAD DE TERRARIA: caer es velocity.Y POSITIVA
+                    // (abajo = +Y). EL ATERRIZAJE: venía cayendo fuerte y la
+                    // velocidad COLAPSÓ (el suelo la frenó). EL DESPEGUE: del
+                    // reposo al salto violento hacia arriba (-Y).
+                    bool veniaCayendo = _prevVelY >= 7f;
+                    bool aterrizo = veniaCayendo && npc.velocity.Y < _prevVelY * 0.3f;
+                    bool despego = npc.velocity.Y < -5f && _prevVelY > -5f;
+                    if (aterrizo && !_prevEnSuelo) ReyAterriza(npc);
+                    if (despego) ReyDespega(npc);
+                    _prevVelY = npc.velocity.Y;
+                    _prevEnSuelo = aterrizo;
+                }
+
                 // las partículas del aura: SIEMPRE (también los jefes de
                 // la oleada visten chispas)
                 if (Aura != null)
@@ -543,8 +744,11 @@ namespace AethonMod.Content.Globals
                     }
                 }
 
-                // LOS DIENTES: los ataques nuevos de librería, con cadencia
-                // que crece con la oleada (la 10 y la especial, sin pausa).
+                // v6.50.48 - LA COREOGRAFIA DEL GUARDIAN: los ataques
+                // de libreria (proyectiles brillantes y tajos) MURIERON
+                // («no combinan nada con el jefe»); ahora cada guardián
+                // convoca a LOS SUYOS con la misma cadencia de siempre
+                // (la 10 y la especial, sin pausa).
                 if (presaValida)
                 {
                     _tickAtaque++;
@@ -552,7 +756,7 @@ namespace AethonMod.Content.Globals
                     if (_tickAtaque >= cadencia)
                     {
                         _tickAtaque = 0;
-                        EscupirDientes(npc, presa);
+                        Coreografia(npc, presa);
                     }
                 }
             }
@@ -560,175 +764,361 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
-        //  LOS DIENTES — el ataque nuevo de cada guardián (librerías)
+        //  v6.50.48 - LAS COREOGRAFIAS: EL ATAQUE DE CADA GUARDIAN ES
+        //  CONVOCAR A LOS SUYOS
+        //
+        //  La letra del usuario: «todos esas formas de ataques extras
+        //  de los jefes, o sea los proyectiles brillantes y los tajos
+        //  que tienen no combinan nada con el jefe». Cada guardián
+        //  invoca a los MONSTRUOS y PROYECTILES ORIGINALES de su mundo
+        //  (la guía de IDs verificada contra el decompile):
+        //
+        //  · REY GELATINA: invoca MUCHOS limos (BlueSlime) y con cada
+        //    salto escupe BOLAS DE GEL (el ítem Gel dibujado como
+        //    proyectil, gravedad y rebote) al despegar y AL ATERRIZAR
+        //    una lluvia de bolas hacia TODAS las direcciones al azar.
+        //  · OJO DE CTHULHU: invoca SIRVIENTES DEL OJO (los monstruos
+        //    originales, NPCID 5) en anillo alrededor de la presa -
+        //    ellos hacen el resto (su IA vanilla ya embiste).
+        //  · ABEJA REINA: el ENJAMBRE (abejas gigantes del arma de
+        //    abejas vanilla, proyectil 566) volando alrededor de la
+        //    reina + andanadas de abejas (566/181) lanzadas desde un
+        //    anillo alrededor de la presa + su AGUIJON original (719).
+        //  · CEREBRO: mas CREEPERS (los que vuelan a su alrededor, 267)
+        //    + los monstruos de su bioma (Carmesí: cara monstruo /
+        //    trepador de sangre / crimera).
+        //  · DEVORADOR: los monstruos de su bioma (Corrupción: devorador
+        //    de almas / gusano devorador / limo corrupto) y la cadena
+        //    3 veces mas larga la arma GrimorioFuriaSistema.
+        //  · SKELETRON: invoca ESQUELETOS (el monstruo original, 21) y
+        //    lanza HUESOS (el proyectil vanilla del ítem Hueso, 21)
+        //    en tres figuras: abanico, anillo convergente y lluvia.
+        //  · DEERCLOPS conserva sus látigos de escarcha (le quedan).
         // ==================================================================
 
-        /// <summary>El estilo de diente que corresponde a cada guardián.</summary>
-        private static int EstiloDe(NPC npc)
-        {
-            if (npc.type == NPCID.KingSlime) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloReyGelatina;
-            if (npc.type == NPCID.EyeofCthulhu) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloOjo;
-            if (npc.type == NPCID.Deerclops) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDeerclops;
-            if (npc.type == NPCID.QueenBee) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloAbeja;
-            if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.EaterofWorldsBody ||
-                npc.type == NPCID.EaterofWorldsTail)
-                return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDevorador;
-            if (npc.type == NPCID.BrainofCthulhu) return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro;
-            if (npc.type == NPCID.SkeletronHead)
-                return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloSkeletron;
-            // guardián sin diente propio (no debería pasar): el estallido
-            return Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro;
-        }
+        /// <summary>El daño que llevan los proyectiles hostiles de la coreografía (la talla de la oleada).</summary>
+        private int DanoRacion => Math.Max(1, (int)(16f * MultiplicadorStats));
 
         /// <summary>
-        /// Escupe UN RACIÓN de dientes del estilo del guardián (los patrones
-        /// completos de AtaqueOleadaProjectile — cada grupo es el "ataque").
+        /// SIRVE LA RACION del guardián: LOS SUYOS. Solo la autoridad
+        /// (server / SP) - la casa MP de siempre.
         /// </summary>
-        private void EscupirDientes(NPC npc, Player presa)
+        private void Coreografia(NPC npc, Player presa)
         {
             try
             {
-                int estilo = EstiloDe(npc);
-                int danio = (int)(16f * MultiplicadorStats);
-                var src = npc.GetSource_FromAI();
-
-                switch (estilo)
+                if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                switch (npc.type)
                 {
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloReyGelatina:
-                    {
-                        // EL SELLO DEL TRONO: ocho cuentas de la corona.
-                        for (int i = 0; i < 8; i++)
-                        {
-                            float ang = i * MathHelper.TwoPi / 8f;
-                            Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 70f;
-                            // v6.50.1 — FIX (MP ×N+1): la IA del NPC corre en
-                            // server Y clientes — sin gate cada máquina escupía
-                            // su ración de dientes y NewProjectile la
-                            // auto-difundía. Solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, ang, i * 31 + Oleada);
-                            }
-                        }
+                    case NPCID.KingSlime: CoroRey(npc, presa); break;
+                    case NPCID.EyeofCthulhu: CoroOjo(npc, presa); break;
+                    case NPCID.QueenBee: CoroAbeja(npc, presa); break;
+                    case NPCID.BrainofCthulhu: CoroCerebro(npc, presa); break;
+                    case NPCID.EaterofWorldsHead:
+                    case NPCID.EaterofWorldsBody:
+                    case NPCID.EaterofWorldsTail: CoroDevorador(npc, presa); break;
+                    case NPCID.SkeletronHead: CoroSkeletron(npc, presa); break;
+                    case NPCID.Deerclops:
+                        // El invierno caminante conserva sus latigos: le
+                        // quedan (la escarcha SI es su tema).
+                        LatigosDeerclops(npc, presa);
                         break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloOjo:
-                    {
-                        // LOS TAJOS DEL VIGÍA: dos marcas sobre la presa.
-                        for (int i = 0; i < 2; i++)
-                        {
-                            Vector2 pos = presa.Center + (i == 0 ? Vector2.Zero : new Vector2(90f, -40f));
-                            float dir = Main.rand.NextFloat(MathHelper.TwoPi);
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, dir, Oleada * 7 + i);
-                            }
-                        }
-                        break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDeerclops:
-                    {
-                        // LOS LÁTIGOS DE ESCARCHA: tres espinas del cielo.
-                        for (int i = 0; i < 3; i++)
-                        {
-                            Vector2 pos = presa.Center + new Vector2(
-                                (i - 1) * 130f + Main.rand.NextFloat(-40f, 40f), -420f);
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, pos, new Vector2(0f, 4f),
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 11 + i);
-                            }
-                        }
-                        break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloAbeja:
-                    {
-                        // EL ABANICO DE AGUIJONES: cinco con corrección.
-                        Vector2 baseDir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY);
-                        for (int i = -2; i <= 2; i++)
-                        {
-                            Vector2 vel = baseDir.RotatedBy(i * 0.16f) * 11f;
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, npc.Center, vel,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 13 + i);
-                            }
-                        }
-                        break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDevorador:
-                    {
-                        // LAS FAUCES CORRUPTAS: tres bocas que curvan.
-                        Vector2 baseDir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
-                        for (int i = -1; i <= 1; i++)
-                        {
-                            Vector2 vel = baseDir.RotatedBy(i * 0.35f) * 8f;
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, npc.Center, vel,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 17 + i);
-                            }
-                        }
-                        break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloCerebro:
-                    {
-                        // EL ESTALLIDO CARMESÍ: ocho reflejos radiales.
-                        for (int i = 0; i < 8; i++)
-                        {
-                            float ang = i * MathHelper.TwoPi / 8f;
-                            Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 9f;
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, npc.Center, vel,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, 0f, Oleada * 19 + i);
-                            }
-                        }
-                        break;
-                    }
-
-                    case Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloSkeletron:
-                    {
-                        // LAS CALAVERAS EN ÓRBITA: tres cráneos que se lanzan.
-                        for (int i = 0; i < 3; i++)
-                        {
-                            float ang = i * MathHelper.TwoPi / 3f;
-                            Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 92f;
-                            // v6.50.1 — FIX (MP ×N+1): solo la autoridad escupe.
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Projectile.NewProjectile(src, pos, Vector2.Zero,
-                                    ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
-                                    danio, 2f, Main.myPlayer, estilo, ang, Oleada * 23 + i);
-                            }
-                        }
-                        break;
-                    }
                 }
-
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, npc.Center);
             }
             catch { }
         }
 
+        /// <summary>
+        /// CONVOCAR UN MONSTRUO de la coreografia: nace como hijo del
+        /// guardián (hereda el sello y sus stats) pero pasa a cobrar
+        /// como CHUSMA (oro y puntos, no platino): son los INVITADOS
+        /// del festín, no la cabeza de mesa.
+        /// </summary>
+        private static NPC Convocar(NPC jefe, int tipo, Vector2 pos, float vx = 0f, float vy = 0f)
+        {
+            int idx = NPC.NewNPC(jefe.GetSource_FromAI(), (int)pos.X, (int)pos.Y, tipo, 0, vx, vy, 0f, 0f);
+            if (idx < 0 || idx >= Main.maxNPCs) return null;
+            NPC n = Main.npc[idx];
+            if (n == null || !n.active) return null;
+            var sello = n.GetGlobalNPC<OleadaNPC>();
+            if (sello != null && sello.EsDeOleada) sello.EsJefeDeOleada = false; // chusma: oro, no platino
+            n.netUpdate = true;
+            return n;
+        }
+
+        /// <summary>
+        /// LANZA UN PROYECTIL VANILLA HOSTIL (la letra: los proyectiles
+        /// ORIGINALES de Terraria - abejas, aguijones, huesos). Los de
+        /// la casa vienen friendly de fábrica: se voltean aquí.
+        /// </summary>
+        private static Projectile LanzarHostil(NPC jefe, int tipo, Vector2 pos, Vector2 vel, int danio, float kb = 2f)
+        {
+            int idx = Projectile.NewProjectile(jefe.GetSource_FromAI(), pos, vel, tipo,
+                danio, kb, Main.myPlayer);
+            if (idx < 0 || idx >= Main.maxProjectiles) return null;
+            Projectile p = Main.projectile[idx];
+            if (p == null || !p.active) return null;
+            if (p.friendly) { p.friendly = false; p.hostile = true; }
+            if (p.timeLeft < 540) p.timeLeft = 540;
+            p.netUpdate = true;
+            return p;
+        }
+
+        // ==================================================================
+        //  EL REY GELATINA - MUCHOS LIMOS + LAS BOLAS DE GEL DEL SALTO
+        // ==================================================================
+
+        /// <summary>LA RACION DEL REY: muchos, PERO MUCHOS limos alrededor de la presa.</summary>
+        private void CoroRey(NPC npc, Player presa)
+        {
+            int cantidad = 5 + Oleada / 2;                 // 5..10 (especial: 12)
+            if (EsEspecial) cantidad = 12;
+            for (int i = 0; i < cantidad; i++)
+            {
+                float ang = i * MathHelper.TwoPi / cantidad + Main.rand.NextFloat(-0.2f, 0.2f);
+                Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 260f;
+                Convocar(npc, NPCID.BlueSlime, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
+        }
+
+        /// <summary>EL DESPEGUE DEL REY: cuatro bolas de gel hacia atras y abajo.</summary>
+        private void ReyDespega(NPC npc)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                float ang = MathHelper.PiOver2 + Main.rand.NextFloat(-0.9f, 0.9f); // abajo, abierto
+                if (npc.direction < 0) ang = MathHelper.Pi - ang;
+                Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * Main.rand.NextFloat(5f, 9f);
+                LanzarBolaGel(npc, npc.Center + new Vector2(0f, 20f), vel);
+            }
+        }
+
+        /// <summary>
+        /// EL ATERRIZAJE DEL REY (la letra: «al caer muchas de esas bolas
+        /// salpican del jefe hacia todas las direcciones de forma
+        /// aleatoria»): DOCE bolas de gel al azar + TRES limos mas de
+        /// rebote.
+        /// </summary>
+        private void ReyAterriza(NPC npc)
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);       // TODAS las direcciones
+                float rap = Main.rand.NextFloat(4f, 10f);                 // al azar
+                Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rap;
+                vel.Y -= 2.5f;                                            // el salpicón se alza
+                LanzarBolaGel(npc, npc.Center + new Vector2(0f, 30f), vel);
+            }
+            for (int i = 0; i < 3; i++)
+                Convocar(npc, NPCID.BlueSlime, npc.Center + new Vector2(Main.rand.NextFloat(-160f, 160f), -20f),
+                    Main.rand.NextFloat(-3f, 3f), -4f);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
+        }
+
+        /// <summary>LA BOLA DE GEL (el ítem Gel de Terraria dibujado como proyectil con gravedad y rebote).</summary>
+        private void LanzarBolaGel(NPC npc, Vector2 pos, Vector2 vel)
+        {
+            int idx = Projectile.NewProjectile(npc.GetSource_FromAI(), pos, vel,
+                ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                DanoRacion, 2f, Main.myPlayer,
+                Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloBolaGel, 0f, Main.rand.Next(9973));
+            if (idx < 0 || idx >= Main.maxProjectiles) return;
+            Projectile p = Main.projectile[idx];
+            if (p == null) return;
+            p.tileCollide = true;   // la bola es física: cae, rebota y salpica
+            p.netUpdate = true;
+        }
+
+        // ==================================================================
+        //  EL OJO - LOS SIRVIENTES EN ANILLO (los ojos pequeños que ya
+        //  existen como monstruos, la letra del usuario)
+        // ==================================================================
+
+        private void CoroOjo(NPC npc, Player presa)
+        {
+            int cantidad = 4 + Math.Min(4, 1 + Oleada / 3);      // 5..8 (especial 9)
+            if (EsEspecial) cantidad = 9;
+            for (int i = 0; i < cantidad; i++)
+            {
+                float ang = i * MathHelper.TwoPi / cantidad;
+                Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 300f;
+                pos.Y -= 60f;
+                Convocar(npc, NPCID.ServantofCthulhu, pos, MathF.Cos(ang) * 4f, -2f);
+            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Zombie104, npc.Center); // el nido abriendo
+        }
+
+        // ==================================================================
+        //  LA ABEJA REINA - EL ENJAMBRE + LAS ANDANADAS + EL AGUIJON
+        // ==================================================================
+
+        private void CoroAbeja(NPC npc, Player presa)
+        {
+            // (1) EL ENJAMBRE: abejas gigantes alrededor de la REINA -
+            // vuelan a su alrededor (la IA vanilla de las abejas las
+            // pegara a su colmena viviente).
+            int enjambre = 6 + Math.Min(4, 1 + Oleada / 3);
+            if (EsEspecial) enjambre = 12;
+            for (int i = 0; i < enjambre; i++)
+            {
+                float ang = i * MathHelper.TwoPi / enjambre;
+                Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * 90f;
+                // tangencial: nacen girando alrededor de ella
+                Vector2 vel = new Vector2(-MathF.Sin(ang), MathF.Cos(ang)) * 6f;
+                LanzarHostil(npc, i % 3 == 0 ? ProjectileID.GiantBee : ProjectileID.Bee, pos, vel, DanoRacion);
+            }
+
+            // (2) LA ANDANADA: abejas desde un anillo alrededor de la
+            // PRESA, rumbo a la reina - la nube barre la posición del
+            // jugador de camino a su colmena.
+            int andanada = 6 + Math.Min(4, 1 + Oleada / 3);
+            if (EsEspecial) andanada = 10;
+            Vector2 rumbo = (npc.Center - presa.Center).SafeNormalize(Vector2.UnitY);
+            for (int i = 0; i < andanada; i++)
+            {
+                float ang = i * MathHelper.TwoPi / andanada;
+                Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 240f;
+                Vector2 vel = rumbo.RotatedBy((i % 2 == 0 ? 1f : -1f) * 0.35f) * Main.rand.NextFloat(8f, 11f);
+                LanzarHostil(npc, i % 2 == 0 ? ProjectileID.GiantBee : ProjectileID.Bee, pos, vel, DanoRacion);
+            }
+
+            // (3) EL AGUIJON ORIGINAL: su arma de fábrica, en abanico.
+            Vector2 dir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY);
+            for (int i = -1; i <= 1; i++)
+                LanzarHostil(npc, ProjectileID.QueenBeeStinger, npc.Center, dir.RotatedBy(i * 0.14f) * 10f, DanoRacion);
+
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Zombie104, npc.Center);
+        }
+
+        // ==================================================================
+        //  EL CEREBRO - MAS CREEPERS + LOS MONSTRUOS DEL CARMESI
+        // ==================================================================
+
+        private void CoroCerebro(NPC npc, Player presa)
+        {
+            // (1) MAS DE ESAS COSAS QUE VUELAN A SU ALREDEDOR: creepers
+            // extra alrededor del cerebro (la letra del usuario).
+            int extra = 6 + Math.Min(4, 1 + Oleada / 3);
+            if (EsEspecial) extra = 12;
+            for (int i = 0; i < extra; i++)
+            {
+                float ang = i * MathHelper.TwoPi / extra;
+                Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.5f) * 130f;
+                Convocar(npc, NPCID.Creeper, pos, MathF.Cos(ang) * 3f, -1f);
+            }
+
+            // (2) LOS MONSTRUOS DE SU BIOMA: el Carmesí según la depth.
+            bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
+            int cantidad = 2 + Math.Min(3, 1 + Oleada / 4);
+            for (int i = 0; i < cantidad; i++)
+            {
+                int tipo = subsuelo
+                    ? (Main.rand.NextBool() ? NPCID.FaceMonster : NPCID.BloodCrawler)
+                    : NPCID.Crimera;
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 220f;
+                pos.Y -= 40f;
+                Convocar(npc, tipo, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+            }
+        }
+
+        // ==================================================================
+        //  EL DEVORADOR - LOS MONSTRUOS DE LA CORRUPCION (la cadena la
+        //  arma GrimorioFuriaSistema: 3 veces mas larga)
+        // ==================================================================
+
+        private void CoroDevorador(NPC npc, Player presa)
+        {
+            bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
+            int cantidad = 2 + Math.Min(3, 1 + Oleada / 4);
+            for (int i = 0; i < cantidad; i++)
+            {
+                int tipo = subsuelo
+                    ? (Main.rand.NextBool() ? NPCID.DevourerHead : NPCID.CorruptSlime)
+                    : NPCID.EaterofSouls;
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 240f;
+                Convocar(npc, tipo, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+            }
+        }
+
+        // ==================================================================
+        //  SKELETRON - LOS ESQUELETOS + LOS HUESOS (el proyectil vanilla)
+        // ==================================================================
+
+        private void CoroSkeletron(NPC npc, Player presa)
+        {
+            // (1) LOS ESQUELETOS: los monstruos originales, en anillo.
+            int cantidad = 3 + Math.Min(3, 1 + Oleada / 3);
+            for (int i = 0; i < cantidad; i++)
+            {
+                float ang = i * MathHelper.TwoPi / cantidad;
+                Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 280f;
+                Convocar(npc, NPCID.Skeleton, pos, MathF.Cos(ang) * 3f, -2f);
+            }
+
+            // (2) LOS HUESOS: el proyectil del ítem Hueso (vanilla, el
+            // abanico/arco/lluvia de toda la vida) en TRES figuras que
+            // rotan por ración.
+            int figura = (int)((Main.GameUpdateCount / 60u) % 3u);
+            if (figura == 0)
+            {
+                // EL ABANICO: cinco huesos en arco hacia la presa.
+                Vector2 dir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY);
+                for (int i = -2; i <= 2; i++)
+                {
+                    Vector2 vel = dir.RotatedBy(i * 0.18f) * Main.rand.NextFloat(8f, 11f);
+                    vel.Y -= 3f;                                   // el arco de los huesos
+                    LanzarHostil(npc, ProjectileID.Bone, npc.Center, vel, DanoRacion);
+                }
+            }
+            else if (figura == 1)
+            {
+                // EL ANILLO CONVERGENTE: ocho huesos naciendo alrededor
+                // de la presa y volando hacia ella.
+                for (int i = 0; i < 8; i++)
+                {
+                    float ang = i * MathHelper.TwoPi / 8f;
+                    Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * 300f;
+                    Vector2 vel = (presa.Center - pos).SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(9f, 12f);
+                    vel.Y -= 3.5f;
+                    LanzarHostil(npc, ProjectileID.Bone, pos, vel, DanoRacion);
+                }
+            }
+            else
+            {
+                // LA LLUVIA: huesos del cielo sobre la presa.
+                for (int i = 0; i < 6; i++)
+                {
+                    Vector2 pos = presa.Center + new Vector2(Main.rand.NextFloat(-260f, 260f), -430f);
+                    Vector2 vel = new Vector2(Main.rand.NextFloat(-2.5f, 2.5f), Main.rand.NextFloat(7f, 10f));
+                    LanzarHostil(npc, ProjectileID.Bone, pos, vel, DanoRacion);
+                }
+            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, npc.Center);
+        }
+
+        // ==================================================================
+        //  DEERCLOPS (invitado de la .30) - SUS LATIGOS DE ESCARCHA
+        // ==================================================================
+
+        private void LatigosDeerclops(NPC npc, Player presa)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 pos = presa.Center + new Vector2(
+                    (i - 1) * 130f + Main.rand.NextFloat(-40f, 40f), -420f);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(npc.GetSource_FromAI(), pos, new Vector2(0f, 4f),
+                        ModContent.ProjectileType<Projectiles.Oleadas.AtaqueOleadaProjectile>(),
+                        DanoRacion, 2f, Main.myPlayer,
+                        Projectiles.Oleadas.AtaqueOleadaProjectile.EstiloDeerclops, 0f,
+                        Oleada * 11 + i);
+                }
+            }
+        }
         // ==================================================================
         //  LA MUERTE PAGA — monedas y esencias
         // ==================================================================

@@ -23,6 +23,18 @@ namespace AethonMod.Content.Systems
     /// a escala 1 (56px) ≈ 470px de fila, fondo ≈ y=76. La barra vive
     /// justo debajo: x=20, y=80.
     ///
+    /// v6.50.48 — LA BARRA ADAPTATIVA (la letra del usuario: «la barra de
+    /// experiencia del libro esta justo debajo del inventario, pero esta
+    /// sobre la parte donde aparecen los buff y debuff del jugador, la
+    /// barra de ex del grimorio deberia estar un poco mas abajo y deberia
+    /// adaptarse al espacio en caso de que se coloque muchos buff o
+    /// debuff»). LA GEOMETRÍA DE LOS BUFFS (leída del IL de
+    /// DrawInterface_Resources_Buffs): fila de 11 iconos, x = 32 + slot*38,
+    /// PRIMERA FILA y=76, +50 por fila extra. La barra XP ahora BAILA
+    /// DEBAJO DE LA ÚLTIMA FILA de buffs: filas = ceil(activos/11),
+    /// y = 76 + filas*50 + 4 — sin buffs baja a 80 (donde siempre vivió),
+    /// con 12 buffs (2 filas) se muda a 180: NUNCA más pisa a los iconos.
+    ///
     /// EL PULSO: al cobrar XP (MarcarGanancia, llamado desde
     /// GlobalNPCXP.OnKill del jugador local) la barra LATE 90 ticks —
     /// brillo senoidal sobre el relleno dorado — y un "+XP" flotante se
@@ -117,7 +129,18 @@ namespace AethonMod.Content.Systems
 
                 int ancho = (int)MathHelper.Min(AnchoBarra, Main.screenWidth - 60);
                 float x = XBarra;
-                float y = YBarra;
+
+                // === v6.50.48 — EL BAILE DE LA BARRA: debajo de la última
+                //     fila de buffs/debuffs del jugador (y adaptándose si
+                //     se colocan muchos). Filas de 11 (el vanilla de
+                //     DrawInterface_Resources_Buffs), 50px por fila.
+                int buffs = 0;
+                for (int b = 0; b < p.buffType.Length; b++)
+                    if (p.buffType[b] > 0) buffs++;
+                int filas = buffs > 0 ? (buffs + 10) / 11 : 0;   // 0..11 -> 0; 12..22 -> 1...
+                if (buffs > 11) filas = (buffs + 10) / 11;        // 12+ abren la segunda fila
+                float y = filas > 0 ? 76f + filas * 50f + 4f : YBarra;
+                float yTexto = y + 14f;
 
                 // === v6.47 — LA PALIDEZ DEL HAMBRE ===
                 // La Voz del Hambre: cada momento sin comer apaga el dorado
@@ -180,14 +203,14 @@ namespace AethonMod.Content.Systems
                     // el nombre también palidece… y con 8+ hambres, susurra
                     tinteNivel = Color.Lerp(tinteNivel, new Color(150, 148, 142) * 0.95f, palidez);
                 }
-                sb.DrawString(font, txtNivel, new Vector2(x + 2f, YTexto),
+                sb.DrawString(font, txtNivel, new Vector2(x + 2f, yTexto),
                     tinteNivel, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
 
                 string txtXP = Main.hardMode
                     ? CacheTexto(ref _cacheXpHm, "Mods.AethonMod.HUD.XPHM", sl.XP, xpNecesaria, font)
                     : CacheTexto(ref _cacheXp, "Mods.AethonMod.HUD.XP", sl.XP, xpNecesaria, font);
                 Vector2 medXP = MedidaDe(_cacheXpActiva); // la del formato ACTIVO
-                sb.DrawString(font, txtXP, new Vector2(x + ancho - medXP.X, YTexto),
+                sb.DrawString(font, txtXP, new Vector2(x + ancho - medXP.X, yTexto),
                     (Main.hardMode ? new Color(255, 160, 90) : new Color(220, 220, 220)) * 0.9f,
                     0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
 

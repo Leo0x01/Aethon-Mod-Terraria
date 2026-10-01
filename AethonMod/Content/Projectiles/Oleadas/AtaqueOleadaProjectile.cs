@@ -10,50 +10,36 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Oleadas
 {
     /// <summary>
-    /// AtaqueOleadaProjectile — v6.48 — LOS DIENTES DE LOS GUARDIANES.
+    /// AtaqueOleadaProjectile — v6.48 — LOS PROYECTILES DE LOS GUARDIANES.
     ///
-    /// LOS ATAQUES NUEVOS de los jefes de las oleadas: cada guardián
-    /// convocado por la furia del grimorio tiene un ARMA PROPIA hecha con
-    /// las librerías de la casa (OndaLib, TajoLib, StormLib, LumenLib y
-    /// VFXCore) — corresponden con su tema, su apariencia y su bioma:
+    /// v6.50.48 — LA QUINTA RONDA (la letra del usuario): «todos esas
+    /// formas de ataques extras de los jefes, o sea los proyectiles
+    /// brillantes y los tajos que tienen no combinan nada con el jefe».
+    /// SEIS de los siete dientes de librería MURIERON (las cuentas del
+    /// trono, los tajos del vigía, el abanico de aguijones, las fauces
+    /// corruptas, el estallido carmesí y las calaveras en órbita): los
+    /// guardianes ahora CONVOCAN A LOS SUYOS (monstruos y proyectiles
+    /// ORIGINALES de Terraria — véase OleadaNPC.Coreografia). Quedan
+    /// en este proyectil solo los dos que SÍ son su tema:
     ///
-    ///   Estilo 0 — REY GELATINA, "El Sello del Trono": las cuentas de la
-    ///     corona — orbes turquesa en anillo giratorio que se abren hacia
-    ///     fuera (OndaLib.Pulse al paso + la voz del rey).
-    ///   Estilo 1 — OJO DE CTHULHU, "Los Tajos del Vigía": marcas carmesí
-    ///     telegrafiadas (OndaLib.Pulse contraído) y CORTES DIFERIDOS
-    ///     (TajoLib) — el arco aparece donde estabas, no donde estás.
     ///   Estilo 2 — DEERCLOPS, "Látigos de Escarcha": espinas de hielo
     ///     que caen del cielo en zigzag (StormLib.ChainBolt) y estallan
-    ///     al clavarse (polvo de hielo + sonido).
-    ///   Estilo 3 — ABEJA REINA, "El Abanico de Aguijones": cinco
-    ///     aguijones dorados en abanico con corrección de rumbo — la
-    ///     reina no perdona el errar.
-    ///   Estilo 4 — DEVORADOR, "Las Fauces Corruptas": relámpagos
-    ///     corruptos que CURVAN hacia la presa (FractalBolt morado con
-    ///     búsqueda — la boca que persigue).
-    ///   Estilo 5 — CEREBRO, "El Estallido Carmesí": ráfaga radial de
-    ///     reflejos — el estallido psíquico, corto y violento.
-    ///   Estilo 6 — SKELETRON, "Las Calaveras en Órbita": calaveras
-    ///     girando alrededor de un centro a la deriva que SE LANZAN al
-    ///     portador cuando el hambre lo ordena.
+    ///     al clavarse (polvo de hielo + sonido). La escarcha ES él.
+    ///   Estilo 7 — REY GELATINA, "La Bola de Gel": EL ÍTEM GEL de
+    ///     Terraria dibujado como proyectil (la letra: «bolas de slime
+    ///     que es un item de terraria, creo que se llama Gel») con
+    ///     gravedad de verdad, REBOTE (dos picos) y SALPICÓN de polvo
+    ///     azul al morir — al despegar el Rey y AL ATERRIZAR, doce
+    ///     bolas hacia todas las direcciones al azar.
     ///
-    /// DAÑO por colisión del MOTOR (hostil, hitbox honesta — nada de
-    /// daño manual: la casa prefiere la física del juego). El daño y la
-    /// cadencia los fija OleadaNPC al convocarlos (escalan con la oleada:
-    /// ×(k+1); la ESPECIAL ×15). Cero Main.rand en el render; SIN hide
-    /// (la lección v6.35); el contrato de lote cerrado→cerrado.
+    /// REGLAS DE LA CASA: daño por COLISIÓN del motor, cero Main.rand
+    /// en el render, SIN hide, el contrato de lote cerrado->cerrado.
     /// </summary>
     public class AtaqueOleadaProjectile : ModProjectile
     {
-        // === LOS ESTILOS (ai[0]): un diente por guardián ===
-        public const int EstiloReyGelatina = 0;
-        public const int EstiloOjo = 1;
-        public const int EstiloDeerclops = 2;
-        public const int EstiloAbeja = 3;
-        public const int EstiloDevorador = 4;
-        public const int EstiloCerebro = 5;
-        public const int EstiloSkeletron = 6;
+        // === LOS ESTILOS (ai[0]) ===
+        public const int EstiloDeerclops = 2;   // el invierno caminante (le queda)
+        public const int EstiloBolaGel = 7;     // el Rey Gelatina: el ítem Gel como proyectil
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -62,9 +48,11 @@ namespace AethonMod.Content.Projectiles.Oleadas
 
         // === EL ESTADO (por estilo) ===
         private float _edad;
-        private Vector2 _centroOrbita; // el anillo de las cuentas/calaveras
-        private bool _lanzada;         // la calavera ya se lanzó
-        private Vector2 _posAnterior;  // para el relámpago del devorador
+
+        // LA BOLA DE GEL: su física propia.
+        private Vector2 _velAnterior;   // para leer el rebote del motor
+        private int _botes;             // dos picos y salpica
+        private float _giro;            // el rodar del gel
 
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
@@ -81,19 +69,15 @@ namespace AethonMod.Content.Projectiles.Oleadas
             Projectile.friendly = false;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 300;
-            Projectile.tileCollide = false;
+            Projectile.tileCollide = false;   // la BOLA la enciende su lanzador
             Projectile.ignoreWater = true;
             Projectile.light = 0.6f;
-            // v6.50.2 — quien entre a media oleada recibe los dientes
-            // (vanilla lo hace con los proyectiles de jefe — la misma
-            // regla que su hermano AtaqueJefeProjectile).
             Projectile.netImportant = true;
         }
 
         public override void OnSpawn(IEntitySource source)
         {
-            _posAnterior = Projectile.Center;
-            _centroOrbita = Projectile.Center;
+            _velAnterior = Projectile.velocity;
         }
 
         /// <summary>La presa más cercana (el portador del libro).</summary>
@@ -115,62 +99,12 @@ namespace AethonMod.Content.Projectiles.Oleadas
         {
             _edad++;
 
-            // v6.50.2 — FIX (MP: _centroOrbita no viaja): OnSpawn NO corre
-            // en los clientes que reciben el proyectil por red (msg 27) →
-            // el anillo de las cuentas/calaveras quedaba centrado en (0,0)
-            // (esquina del mundo — teletransporte visual y cero amenaza en
-            // las pantallas remotas). Autocuración: el centro se reconstruye
-            // desde la posición recibida.
-            if (_centroOrbita == Vector2.Zero) _centroOrbita = Projectile.Center;
-
-            Player presa = Presa();
-
             switch (Estilo)
             {
                 // =============================================================
-                //  EL SELLO DEL TRONO — las cuentas de la corona del Rey
-                // =============================================================
-                case EstiloReyGelatina:
-                {
-                    // El anillo gira y SE ABRE hacia fuera (la corona
-                    // estallando en cuentas). ai[1] = ángulo base.
-                    float ang = Projectile.ai[1] + _edad * 0.030f;
-                    float radio = 70f + _edad * 1.35f; // se abre
-                    Projectile.Center = _centroOrbita +
-                        new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio;
-                    if (_edad >= 150) Projectile.Kill();
-                    break;
-                }
-
-                // =============================================================
-                //  LOS TAJOS DEL VIGÍA — marca telegrafiada + corte diferido
-                // =============================================================
-                case EstiloOjo:
-                {
-                    if (_edad < 26)
-                    {
-                        // LA MARCA: el proyectil YA voló a la marca (la fija
-                        // el convocador cerca de la presa) y ESPERA — la
-                        // tensión antes del corte.
-                        Projectile.velocity *= 0.80f;
-                    }
-                    else if (_edad == 26)
-                    {
-                        // EL CORTE: arranque violento — el tajo aparece de
-                        // golpe en la dirección que trae (ai[1]).
-                        float a = Projectile.ai[1];
-                        Projectile.velocity = new Vector2(MathF.Cos(a), MathF.Sin(a)) * 13f;
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item71, Projectile.Center);
-                    }
-                    else
-                    {
-                        if (_edad > 70) Projectile.Kill();
-                    }
-                    break;
-                }
-
-                // =============================================================
-                //  LOS LÁTIGOS DE ESCARCHA — caída en zigzag + estallido
+                //  LOS LATIGOS DE ESCARCHA — caída en zigzag + estallido
+                //  (DEERCLOPS: la escarcha ES su tema — sobrevivió a la
+                //  quinta ronda porque le queda)
                 // =============================================================
                 case EstiloDeerclops:
                 {
@@ -205,108 +139,83 @@ namespace AethonMod.Content.Projectiles.Oleadas
                 }
 
                 // =============================================================
-                //  EL ABANICO DE AGUIJONES — corrección de rumbo real
+                //  LA BOLA DE GEL (el Rey Gelatina) — el ítem Gel de
+                //  Terraria como proyectil: gravedad, REBOTE y salpicón
                 // =============================================================
-                case EstiloAbeja:
+                case EstiloBolaGel:
                 {
-                    if (presa != null && _edad < 40)
-                    {
-                        Vector2 deseada = (presa.Center - Projectile.Center).SafeNormalize(Vector2.UnitY) * 11f;
-                        Projectile.velocity = Vector2.Lerp(Projectile.velocity, deseada, 0.06f);
-                    }
-                    if (_edad > 90) Projectile.Kill();
-                    break;
-                }
+                    // LA GRAVEDAD de verdad (la bola es física).
+                    Projectile.velocity.Y = Math.Min(Projectile.velocity.Y + 0.34f, 16f);
+                    _giro += Projectile.velocity.X * 0.06f;
 
-                // =============================================================
-                //  LAS FAUCES CORRUPTAS — el relámpago que CURVA a la presa
-                // =============================================================
-                case EstiloDevorador:
-                {
-                    if (presa != null)
+                    // EL REBOTE: el motor de colisiones ZERO la velocidad
+                    // al chocar — la lectura de la velocidad ANTERIOR dice
+                    // qué eje murió y la bola SALTA.
+                    bool piso = _velAnterior.Y > 3f && Projectile.velocity.Y < _velAnterior.Y * 0.3f;
+                    bool techo = _velAnterior.Y < -3f && Projectile.velocity.Y > _velAnterior.Y * 0.3f;
+                    bool pared = Math.Abs(_velAnterior.X) > 3f &&
+                                 Math.Abs(Projectile.velocity.X) < Math.Abs(_velAnterior.X) * 0.3f;
+                    if (piso || techo || pared)
                     {
-                        Vector2 lado = new Vector2(-Projectile.velocity.Y, Projectile.velocity.X)
-                            .SafeNormalize(Vector2.Zero);
-                        // La curva: aceleración lateral hacia la presa (la
-                        // boca que persigue, no la bala que va recta).
-                        float signo = Vector2.Dot(lado, presa.Center - Projectile.Center) >= 0 ? 1f : -1f;
-                        Projectile.velocity += lado * (0.16f * signo);
-                        float vel = Projectile.velocity.Length();
-                        if (vel > 9f) Projectile.velocity *= 9f / vel;
-                    }
-                    _posAnterior = Projectile.Center - Projectile.velocity * 2.2f;
-                    if (_edad > 110) Projectile.Kill();
-                    break;
-                }
-
-                // =============================================================
-                //  EL ESTALLIDO CARMESÍ — ráfaga radial corta y violenta
-                // =============================================================
-                case EstiloCerebro:
-                {
-                    if (_edad > 46) Projectile.Kill();
-                    break;
-                }
-
-                // =============================================================
-                //  LAS CALAVERAS EN ÓRBITA — giran, a la deriva, y SE LANZAN
-                // =============================================================
-                case EstiloSkeletron:
-                {
-                    // El centro a la deriva hacia la presa (lento).
-                    if (presa != null && _edad % 8 == 0)
-                    {
-                        Vector2 dir = (presa.Center - _centroOrbita).SafeNormalize(Vector2.Zero);
-                        _centroOrbita += dir * 3.2f;
-                    }
-
-                    if (!_lanzada && _edad < 120)
-                    {
-                        // LA ÓRBITA: la calavera gira en su anillo.
-                        float ang = Projectile.ai[1] + _edad * 0.045f;
-                        Projectile.Center = _centroOrbita +
-                            new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 92f;
-                        Projectile.velocity = Vector2.Zero;
-                    }
-                    else if (!_lanzada)
-                    {
-                        // EL HAMBRE LO ORDENA: la calavera se lanza a la presa.
-                        _lanzada = true;
-                        if (presa != null)
+                        _botes++;
+                        if (_botes >= 2)
                         {
-                            Projectile.velocity = (presa.Center - Projectile.Center)
-                                .SafeNormalize(Vector2.UnitY) * 14f;
+                            SalpicarGel();
+                            break;
                         }
+                        // EL PICO: la bola rebota muriendo un poco.
+                        Projectile.velocity = new Vector2(
+                            _velAnterior.X * (pared ? -0.62f : 0.72f),
+                            _velAnterior.Y * (piso ? -0.55f : (techo ? -0.55f : 0.72f)));
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item10, Projectile.Center);
                     }
-                    if (_edad > 210) Projectile.Kill();
+                    _velAnterior = Projectile.velocity;
+
+                    if (_edad > 300) SalpicarGel();
                     break;
                 }
             }
 
-            // La luz del diente (el color propio de su furia).
-            if (Estilo == EstiloOjo || Estilo == EstiloCerebro)
-                Lighting.AddLight(Projectile.Center, new Vector3(0.45f, 0.08f, 0.10f));
-            else if (Estilo == EstiloDevorador)
-                Lighting.AddLight(Projectile.Center, new Vector3(0.24f, 0.08f, 0.42f));
-            else if (Estilo == EstiloSkeletron)
-                Lighting.AddLight(Projectile.Center, new Vector3(0.30f, 0.28f, 0.22f));
+            // La luz del proyectil (el color propio de su tema).
+            if (Estilo == EstiloDeerclops)
+                Lighting.AddLight(Projectile.Center, new Vector3(0.68f, 0.86f, 0.95f));
+            else if (Estilo == EstiloBolaGel)
+                Lighting.AddLight(Projectile.Center, new Vector3(0.22f, 0.36f, 0.92f)); // el azul del gel
+        }
+
+        /// <summary>
+        /// EL SALPICÓN (la muerte de la bola): «al caer muchas de esas
+        /// bolas salpican del jefe hacia todas las direcciones» — la
+        /// bola revienta en polvo azul de gel hacia todos lados.
+        /// </summary>
+        private void SalpicarGel()
+        {
+            if (!Main.dedServ)
+            {
+                for (int d = 0; d < 9; d++)
+                {
+                    float ang = d * MathHelper.TwoPi / 9f;
+                    int idx = Dust.NewDust(Projectile.Center, 8, 8, DustID.BlueMoss,
+                        MathF.Cos(ang) * Main.rand.NextFloat(2.5f, 5f),
+                        MathF.Sin(ang) * Main.rand.NextFloat(2.5f, 5f) - 1.5f);
+                    Main.dust[idx].noGravity = true;
+                    Main.dust[idx].scale = 1.1f;
+                }
+            }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item10, Projectile.Center);
+            Projectile.Kill();
         }
 
         // ==================================================================
-        //  EL RENDER — cada diente con SU librería. EL FLUJO DE LA CASA:
+        //  EL RENDER — cada proyectil con SU tema. EL FLUJO DE LA CASA:
         //  (1) los quads al BÚFER (coords de MUNDO) y su volcado propio;
         //  (2) el lote aditivo NUESTRO para las librerías de coords de
-        //  PANTALLA (OndaLib/StormLib/TajoLib/LumenLib/OrbitaLib);
-        //  (3) el lote del pase reabierto TAL CUAL (cerrado→cerrado).
+        //  PANTALLA; (3) el lote del pase reabierto TAL CUAL.
         // ==================================================================
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ) return false;
 
-            // v6.50.11 — sonda: cierra el lote del juego SOLO si hay un Begin
-            // vivo (el try{End}catch disparaba una first-chance que tML 2026.07
-            // registra como "Excepción silenciosa" — 27 stacks únicos en el
-            // client.log del usuario, todas capturadas: ruido de diagnóstico).
             VFXCore.CerrarLoteSiAbierto();
 
             try
@@ -317,41 +226,21 @@ namespace AethonMod.Content.Projectiles.Oleadas
                 // === FASE 1 — EL BÚFER DE QUADS (coords de MUNDO) ===
                 switch (Estilo)
                 {
-                    case EstiloReyGelatina:
-                        VFXCore.Quad(Projectile.Center, new Color(62, 219, 191) * 0.75f,
-                            new Vector2(22f, 22f));
-                        VFXCore.Quad(Projectile.Center, new Color(190, 255, 240) * 0.6f,
-                            new Vector2(10f, 10f));
-                        break;
-
                     case EstiloDeerclops:
                         VFXCore.Quad(Projectile.Center, new Color(230, 245, 255) * 0.8f,
                             new Vector2(12f, 18f), Projectile.velocity.ToRotation() + MathHelper.PiOver2);
                         break;
 
-                    case EstiloAbeja:
-                        VFXCore.Quad(Projectile.Center, new Color(255, 192, 55) * 0.85f,
-                            new Vector2(18f, 7f), Projectile.velocity.ToRotation());
-                        VFXCore.Line(Projectile.Center - Projectile.velocity * 2f,
-                            Projectile.Center, new Color(255, 220, 130) * 0.4f, 3f);
-                        break;
-
-                    case EstiloCerebro:
-                        VFXCore.Quad(Projectile.Center,
-                            new Color(255, 102, 140) * (0.85f * (1f - _edad / 46f)),
-                            new Vector2(16f, 16f));
-                        break;
-
-                    case EstiloSkeletron:
-                        VFXCore.Quad(Projectile.Center, new Color(216, 208, 180) * 0.9f,
-                            new Vector2(26f, 24f));
-                        VFXCore.Quad(Projectile.Center + new Vector2(-6f, -3f),
-                            new Color(20, 16, 20) * 0.8f, new Vector2(7f, 7f));
-                        VFXCore.Quad(Projectile.Center + new Vector2(6f, -3f),
-                            new Color(20, 16, 20) * 0.8f, new Vector2(7f, 7f));
-                        if (_lanzada)
-                            VFXCore.Quad(Projectile.Center + new Vector2(0f, 3f),
-                                new Color(216, 60, 50) * 0.9f, new Vector2(8f, 6f));
+                    case EstiloBolaGel:
+                        // LA BOLA: el SPRITE DEL ÍTEM GEL dibujado tal cual
+                        // (la letra del usuario: es un item de terraria).
+                        if (!Main.dedServ)
+                        {
+                            Texture2D gel = Terraria.GameContent.TextureAssets.Item[ItemID.Gel].Value;
+                            Main.spriteBatch.Draw(gel, Projectile.Center - Main.screenPosition, null,
+                                Microsoft.Xna.Framework.Color.White * 0.96f, _giro,
+                                gel.Size() * 0.5f, 1.15f, SpriteEffects.None, 0f);
+                        }
                         break;
                 }
                 VFXCore.FlushAdditive(null, false);
@@ -363,44 +252,7 @@ namespace AethonMod.Content.Projectiles.Oleadas
 
                 switch (Estilo)
                 {
-                    // === EL SELLO DEL TRONO: la cuenta + su pulso ===
-                    case EstiloReyGelatina:
-                    {
-                        float prog = (_edad % 30f) / 30f;
-                        OndaLib.Pulse(Main.spriteBatch, pos, prog, 44f,
-                            new Color(62, 219, 191), 0.55f, Seed);
-                        LumenLib.Bloom(Main.spriteBatch, pos, 18f,
-                            new Color(62, 219, 191), 0.6f);
-                        break;
-                    }
-
-                    // === LOS TAJOS DEL VIGÍA: la marca, luego el corte ===
-                    case EstiloOjo:
-                    {
-                        if (_edad <= 25)
-                        {
-                            float prog = _edad / 25f;
-                            OndaLib.Pulse(Main.spriteBatch, pos, 1f - prog, 54f,
-                                new Color(226, 64, 64), 0.8f, Seed);
-                            LumenLib.Bloom(Main.spriteBatch, pos, 26f,
-                                new Color(226, 64, 64), 0.5f + 0.4f * prog);
-                        }
-                        else
-                        {
-                            float prog = MathF.Min(1f, (_edad - 26f) / 8f);
-                            float ang = Projectile.velocity.ToRotation();
-                            TajoLib.Tajo(pos, 46f,
-                                ang - 0.55f, ang + 0.55f,
-                                prog, 1f - prog * 0.3f, 11f,
-                                new Color(226, 64, 64), new Color(255, 238, 230),
-                                Seed, t);
-                            LumenLib.Bloom(Main.spriteBatch, pos, 24f,
-                                new Color(226, 64, 64), 0.7f * (1f - prog));
-                        }
-                        break;
-                    }
-
-                    // === LOS LÁTIGOS DE ESCARCHA: el zigzag helado ===
+                    // === LOS LATIGOS DE ESCARCHA: el zigzag helado ===
                     case EstiloDeerclops:
                     {
                         Vector2 cola = pos - Projectile.velocity * 2.4f;
@@ -412,51 +264,11 @@ namespace AethonMod.Content.Projectiles.Oleadas
                         break;
                     }
 
-                    // === EL ABANICO DE AGUIJONES: el aguijón dorado ===
-                    case EstiloAbeja:
+                    // === LA BOLA DE GEL: el brillo azul del ítem ===
+                    case EstiloBolaGel:
                     {
-                        LumenLib.Bloom(Main.spriteBatch, pos, 18f,
-                            new Color(255, 192, 55), 0.55f);
-                        break;
-                    }
-
-                    // === LAS FAUCES CORRUPTAS: el relámpago morado curvado ===
-                    case EstiloDevorador:
-                    {
-                        Vector2 cola = _posAnterior - Main.screenPosition;
-                        StormLib.FractalBolt(Main.spriteBatch, cola, pos, Seed,
-                            StormLib.FlickTick(t, 14f), 2.8f,
-                            new Color(140, 60, 220), new Color(230, 190, 255), 0.9f);
-                        LumenLib.Bloom(Main.spriteBatch, pos, 24f,
-                            new Color(170, 102, 235), 0.75f);
-                        break;
-                    }
-
-                    // === EL ESTALLIDO CARMESÍ: el reflejo que se apaga ===
-                    case EstiloCerebro:
-                    {
-                        if (_edad < 10)
-                        {
-                            float prog = _edad / 10f;
-                            TajoLib.Tajo(pos, 38f,
-                                Projectile.velocity.ToRotation() - 0.4f,
-                                Projectile.velocity.ToRotation() + 0.4f,
-                                prog, 1f - _edad / 46f, 8f,
-                                new Color(255, 102, 140), new Color(255, 236, 230),
-                                Seed, t);
-                        }
-                        LumenLib.Bloom(Main.spriteBatch, pos, 20f,
-                            new Color(255, 102, 140), 0.6f * (1f - _edad / 46f));
-                        break;
-                    }
-
-                    // === LAS CALAVERAS EN ÓRBITA: la calavera de luz ===
-                    case EstiloSkeletron:
-                    {
-                        OrbitaLib.AnilloFino(pos, 22f, t * 1.2f,
-                            OrbitaLib.Tint(new Color(216, 208, 180), 0.35f));
-                        LumenLib.Bloom(Main.spriteBatch, pos, 24f,
-                            new Color(216, 208, 180), 0.5f);
+                        LumenLib.Bloom(Main.spriteBatch, pos, 26f,
+                            new Color(80, 140, 255), 0.45f);
                         break;
                     }
                 }
@@ -468,9 +280,6 @@ namespace AethonMod.Content.Projectiles.Oleadas
             }
             finally
             {
-                // v6.50.11 — CURACIÓN: el lote sale SIEMPRE ABIERTO y vanilla (si
-                // llegó cerrado por un mod ajeno, se cura — el restore condicional
-                // devolvía el veneno y tML mataba al proyectil: active=false).
                 VFXCore.ReabrirLoteVanilla();
             }
             return false;

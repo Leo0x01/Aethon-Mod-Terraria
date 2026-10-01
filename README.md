@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.47 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.48 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,30 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.47)
+## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.48)
+- **v6.50.48 - LA QUINTA RONDA, LA MAS GRANDE**: cinco frentes en uno.
+  (1) **LA FORMA ASCENDIDA 2** - un item NUEVO (la 1 intacta): la
+  apoteosis ABSOLUTA con las cinco capas del arte sacro que faltaban
+  (LA MANDORLA, LA CORONA DE DOCE ESTRELLAS, LOS SIETE CANDELEROS, EL
+  RIO DE LUZ), las alas con VEINTIOCHO plumas por lado y la extension
+  COMPLETA de arriba abajo, y **VUELO INFINITO en ambas formas** (la
+  Insignia del Alba de vanilla prestada; sin alas puestas, las plumas
+  del aura SON las alas). (2) **LA BARRA XP ADAPTATIVA** - baila debajo
+  de la ultima fila de buffs, nunca mas los pisa. (3) **AETHON, LA
+  SEGUNDA LUZ** - el invocador numero 2 con la entrada EXACTA de la
+  Emperatriz (200 px + jitter 50 + SpawnBoss) y CINCO FASES QUE HEREDAN
+  TODO: el Paseo del Ocho, la Carrera Prismatica, el Parpadeo, el
+  Pentagrama y la Furia Blanca con LA CORONA (la galaxia). Drop: la
+  Forma Ascendida 2. (4) **LOS TRES FIXES DE LA OLEADA**: el Devorador y
+  el Cerebro ya NO SE VAN (prestamo de zona), Skeletron ya no viste 9999
+  de defensa de dia, y la barra de vida de los multi-pieza vuelve a
+  caber en su marco (el hook escala la referencia como sus piezas). (5)
+  **LAS COREOGRAFIAS TEMATICAS**: cada guardian de la oleada convoca a
+  LOS SUYOS - abejas vanilla + el aguijon original, sirvientes del Ojo,
+  limos + BOLAS DE GEL (el item Gel como proyectil con gravedad y
+  rebote), mas creepers + el Carmesi, el Devorador 3x mas largo + la
+  Corrupcion, y esqueletos + HUESOS en tres figuras.
+
 
 - **v6.50.47 — LOS NPC FANTASMA + LA APOTEOSIS**: dos pedidos, dos balas.
   (1) **EL FIX DE PROFUNDIDAD**: «algunos ataques del jefe hacen que los
@@ -38,10 +61,10 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.47`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.48`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 394 entradas auditado.
+  sin excepciones; `.tmod` de 398 entradas auditado.
 - **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
   ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
   NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el

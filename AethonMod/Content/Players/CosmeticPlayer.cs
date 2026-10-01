@@ -49,12 +49,34 @@ namespace AethonMod.Content.Players
         /// oro en el medio y núcleo rojo, por el portador aditivo+alfa)?</summary>
         public bool BrasaDelEclipse;
 
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 2 (v6.50.48 — la APOTEOSIS
+        /// ABSOLUTA: un ítem NUEVO junto al original, «más divino, más
+        /// sagrado» — las once capas de la .47 elevadas, las alas del
+        /// serafín con el DOBLE de plumas y el vuelo completo de arriba
+        /// a abajo, más la MANDORLA, la corona de doce estrellas, los
+        /// siete candeleros y el río de luz del arte sacro)?</summary>
+        public bool FormaAscendidaDos;
+
+        /// <summary>
+        /// v6.50.48 — EL VUELO INFINITO (la letra: «ademas la forma
+        /// ascendida y la forma ascendida 2 deben dar vuelo infinito»):
+        /// cualquier de las dos formas enciende el empressBrooch de
+        /// vanilla (la Insignia del Alba: wingTime = wingTimeMax cada
+        /// tick — la semántica EXACTA del vuelo infinito del juego) y,
+        /// si el portador NO lleva alas puestas, las alas del aura SON
+        /// las alas: la FÍSICA de alas se inyecta (wingsLogic) sin el
+        /// sprite vanilla (wings queda 0) — el serafín vuela con SUS
+        /// plumas de luz, no con unas alas prestadas.
+        /// </summary>
+        public bool VueloDivino => FormaAscendida || FormaAscendidaDos;
+
         public override void ResetEffects()
         {
             VoidCrown = false;
             RuneCrown = false;
             AnilloDorsal = false;
             FormaAscendida = false;
+            FormaAscendidaDos = false;
             BrasaDelEclipse = false;
         }
 
@@ -66,6 +88,7 @@ namespace AethonMod.Content.Players
             int runeType = ModContent.ItemType<Items.Cosmetics.RuneCrownItem>();
             int anilloType = ModContent.ItemType<Items.Cosmetics.AnilloRunicoDorsalItem>();
             int ascendidaType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>();
+            int ascendidaDosType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaDosItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
 
             for (int i = 3; i <= 19; i++)
@@ -81,6 +104,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == runeType) RuneCrown = true;
                 else if (item.type == anilloType) AnilloDorsal = true;
                 else if (item.type == ascendidaType) FormaAscendida = true;
+                else if (item.type == ascendidaDosType) FormaAscendidaDos = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
             }
 
@@ -189,6 +213,13 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 2f);
                 }
+                if (FormaAscendidaDos && !EspiarPortador(4))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaDos"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 4f);
+                }
                 if (BrasaDelEclipse && !EspiarPortador(3))
                 {
                     Projectile.NewProjectile(Player.GetSource_Misc("BrasaDelEclipse"),
@@ -208,7 +239,7 @@ namespace AethonMod.Content.Players
             //     CHISPAS — y CERO discos planos: los 2 círculos murieron).
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
-            if (FormaAscendida)
+            if (FormaAscendida || FormaAscendidaDos)
             {
                 Vector2 centro = Player.Center;
 
@@ -251,9 +282,41 @@ namespace AethonMod.Content.Players
                 //     v6.50.47 — LA APOTEOSIS: la luz también crece
                 //     (0.34/0.27/0.13 → 0.46/0.36/0.17 — el portador
                 //     de la Forma es un FARO de santidad). ---
-                Lighting.AddLight(centro - new Vector2(0f, 10f),
-                    new Vector3(0.46f, 0.36f, 0.17f));
+                // v6.50.48 — la Forma 2 es un FARO aún mayor: la
+                // apoteosis absoluta alumbra el doble.
+                Vector3 luz = FormaAscendidaDos
+                    ? new Vector3(0.92f, 0.72f, 0.34f)
+                    : new Vector3(0.46f, 0.36f, 0.17f);
+                Lighting.AddLight(centro - new Vector2(0f, 10f), luz);
             }
+        }
+
+        /// <summary>
+        /// v6.50.48 — EL VUELO INFINITO (PostUpdateEquips: después del
+        /// escaneo de equipo de vanilla, antes de la física del tick —
+        /// la ventana exacta). La Insignia del Alba de vanilla
+        /// (empressBrooch) mantiene wingTime = wingTimeMax mientras no
+        /// llegue a 0: vuelo SIN FIN con la semántica del juego (y su
+        /// aceleración de dios en el aire). Sin alas puestas: la física
+        /// de alas se INYECTA (wingsLogic del ala dorada) con SU tiempo
+        /// de vuelo — y SIN el sprite vanilla (wings queda 0): las alas
+        /// que se VEN son las del serafín del aura.
+        /// </summary>
+        public override void PostUpdateEquips()
+        {
+            if (!VueloDivino) return;
+            try
+            {
+                Player.empressBrooch = true; // la Insignia del Alba prestada
+                if (Player.wingsLogic <= 0 && !Player.mount.Active)
+                {
+                    Player.wingsLogic = 27;                                   // la física de unas alas (la dorada)
+                    Player.wingTimeMax = Player.GetWingStats(27).FlyTime;    // su tiempo de vuelo
+                    Player.wingTime = Player.wingTimeMax;                    // y lleno (la insignia lo mantiene)
+                    // Player.wings queda 0: el sprite vanilla NO — las alas del aura SON el visual
+                }
+            }
+            catch { }
         }
 
         /// <summary>¿Ya vive mi portador de aura con este modo?</summary>
