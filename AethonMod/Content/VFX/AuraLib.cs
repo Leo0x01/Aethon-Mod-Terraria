@@ -2471,28 +2471,26 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// v6.50.50 — LA EMISIÓN DEL TRONO, REESCRITA (la letra: «la forma
-        /// ascendida 3 es la menos divina de todas, solo es humo»).
+        /// v6.50.51 — LA EMISIÓN DEL TRONO, TERCERA RONDA (las letras: «yo
+        /// no veo nada» [el arcoíris] + «la forma ascendida 3 no se ve
+        /// nada celestial ni divino»).
         ///
-        /// EL DIAGNÓSTICO: la .49 era TODO SoftGlow a alfas 0.05-0.65 —
-        /// trece capas de brillo difuso apiladas = UNA MANCHA. El ojo no
-        /// encuentra UNA sola arista: ni el arcoíris (64 puntitos de 9 px
-        /// se fundían en una banda borrosa), ni la cruz (velos al 5-10 %
-        /// = niebla), ni el mar de vidrio (2 velos al 7-11 % = humo).
+        /// EL DIAGNÓSTICO DE LA .50: la cura del «humo» fue TODA micro-
+        /// detalle — hilos finos, perlas de 10 px, chispas — y el ojo, a
+        /// distancia de juego, no encuentra NI UNA forma que lea como
+        /// «arcoíris» o «divino». Era joyería de relojero vista a un
+        /// metro; Terraria se juega a DIEZ.
         ///
-        /// LA CURA — EL NÚCLEO NÍTIDO: cada estructura DIVINA lleva ahora
-        /// SU PASADA CRUZADA (el idioma visual de la joyería, no del humo):
-        ///   · EL HILO — aros CONTINUOS de Ring (el trazo del anillo, 2-4
-        ///     px): el arcoíris es UNA LÍNEA que se ve, con sus perlas
-        ///     GlowOrb (NÚCLEO SÓLIDO) montadas encima;
-        ///   · EL TRAZO — líneas SÓLIDAS de Pixel (el beam de la cruz, los
-        ///     ejes de las plumas, los ticks del zodíaco): blanco puro a
-        ///     0.55-0.9 — LO QUE SE LEE COMO LUZ ESTRUCTURADA;
-        ///   · LA ESTRELLA — DestelloFinal (4 rayos largos + 4 cortos +
-        ///     núcleo caliente): la corona de 24 estrellas y las chispas
-        ///     ya tienen FORMA de destello, no de mancha;
-        ///   · y el SoftGlow queda como el ALCOHOL de la joya: solo el
-        ///     halo de atmósfera alrededor de cada núcleo (alfas BAJAS).
+        /// LA CURA DE LA .51 — LAS FORMAS QUE EL OJO LEE DE LEJOS:
+        ///   · EL NIMBO DEL PANTOCRÁTOR — el disco dorado de los iconos
+        ///     bizantinos y su aro: LA primera forma que el ojo humano
+        ///     lee como «esto es un dios»;
+        ///   · EL ARCOÍRIS DE VERDAD — LA BANDA HORNEADA de siete franjas
+        ///     saturadas (VFXCore.Arcoiris): ~80 px de grosor al radio
+        ///     del trono. Ap 4:3 deja de ser una promesa de puntitos;
+        ///   · y la joyería de la .50 SE QUEDA montada sobre las formas
+        ///     grandes (las perlas sobre la banda, el cálamo de las
+        ///     plumas, los ticks del zodíaco, las estrellas con forma).
         /// TODO aditivo, coords de MUNDO, deterministas (cero Main.rand).
         /// </summary>
         private static void EmitirDivino3(Player pl, AuraPerfil p)
@@ -2513,6 +2511,22 @@ namespace AethonMod.Content.VFX
             // colores, el oro blanco y el arcoíris vivo.
             Color blancoSagrado = new Color(255, 255, 252);
             Color oroBlanco = new Color(255, 246, 216);
+
+            // === 0. EL NIMBO DEL PANTOCRÁTOR (v6.50.51 — «no se ve nada
+            //     celestial ni divino»: LA HOJA DE ORO de las
+            //     iconografías — el gran disco dorado detrás del dios y
+            //     su aro, el fondo de todo icono bizantino. Es lo PRIMERO
+            //     que el ojo lee como «esto es divino») ===
+            {
+                Vector2 cNimbo = centro - new Vector2(0f, 10f * gravedad);
+                // EL DISCO (la hoja de oro — el resplandor entero).
+                VFXCore.Quad(cNimbo, TintAditivo(oroBlanco, 0.15f * respira),
+                    new Vector2(p.Radio * 2.7f, p.Radio * 3.0f), 0f, VFXCore.GlowOrb);
+                // EL ARO (el borde dorado del nimbo — la línea del icono).
+                VFXCore.Quad(cNimbo, TintAditivo(oroBlanco, 0.34f),
+                    new Vector2(p.Radio * 1.26f * 2.174f, p.Radio * 1.40f * 2.174f),
+                    0f, VFXCore.Ring);
+            }
 
             // === 1. EL CUERPO DE LUZ (el flipbook Perlin) + EL CORAZÓN
             //     BLANCO — ahora con NÚCLEO SÓLIDO (GlowOrb) y su
@@ -2575,47 +2589,53 @@ namespace AethonMod.Content.VFX
                         new Vector2(190f, 190f), t * 0.07f, VFXCore.DestelloFinal);
             }
 
-            // === 3. EL ARCOÍRIS ALREDEDOR DEL TRONO (Ap 4:3) — ahora ES
-            //     UNA LÍNEA: DOS HILOS CONTINUOS de Ring (el trazo del
-            //     aro, 2-4 px de ancho — SE VE como arcoíris) con las
-            //     perlas del espectro montadas como cuentas de GlowOrb
-            //     (NÚCLEO SÓLIDO, cada una SU color) y sus cuatro joyas
-            //     de DestelloFinal girando por el hilo exterior ===
+            // === 3. EL ARCOÍRIS ALREDEDOR DEL TRONO (Ap 4:3) — v6.50.51:
+            //     LA BANDA DE VERDAD. El diagnóstico de la .50: «hilos»
+            //     de Ring BLANCOS + perlas de 10 px = CONFETI — el
+            //     usuario no veía NINGÚN arcoíris («la forma ascendida 3
+            //     no se ve nada celestial ni divino»). LA CURA: LA BANDA
+            //     HORNEADA — el anillo de SIETE franjas saturadas del
+            //     espectro (VFXCore.Arcoiris, 512², rojo fuera → violeta
+            //     dentro), GRUESA (~80 px al radio del trono), girando
+            //     despacito como un aro de cuenta — con las perlas
+            //     montadas SOBRE la banda y las cuatro joyas de
+            //     DestelloFinal por el borde: ES un arcoíris, se lee a
+            //     cien pantallas de distancia ===
             {
-                float rxA = p.Radio * 1.62f * respira;
-                float ryA = p.Radio * 0.52f;
+                float rxA = p.Radio * 1.72f * respira;
+                float ryA = p.Radio * 0.56f;
                 Vector2 cAro = centro - new Vector2(0f, 14f * gravedad);
 
-                // LOS HILOS (el trazo continuo — LA LÍNEA del arcoíris).
-                VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.60f),
-                    new Vector2(rxA * 2.174f, ryA * 2.174f), 0f, VFXCore.Ring);
-                VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.50f),
-                    new Vector2(rxA * 0.66f * 2.174f, ryA * 0.66f * 2.174f), 0f, VFXCore.Ring);
-
-                // LAS CUENTAS (el hilo exterior: 36 perlas del espectro —
-                // núcleos SÓLIDOS de 10 px, cada una SU color).
-                for (int i = 0; i < 36; i++)
+                // LA BANDA (las siete franjas del espectro — EL ARCOÍRIS).
+                Texture2D banda = VFXCore.Arcoiris;
+                if (banda != null)
                 {
-                    float ang = t * 0.22f + i * MathHelper.TwoPi / 36f;
+                    VFXCore.Quad(cAro, TintAditivo(new Color(255, 255, 255), 0.92f),
+                        new Vector2(rxA * 2.174f, ryA * 2.174f), t * 0.05f, banda);
+                    // LA ATMÓSFERA (el halo que la hace arder).
+                    VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.10f * respira),
+                        new Vector2(rxA * 2.55f, ryA * 2.75f), t * 0.05f, VFXCore.SoftGlow);
+                }
+                // EL RIM INTERIOR (el borde de la banda hacia el trono —
+                // una línea blanca fina: la joya que cierra el aro).
+                VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.50f),
+                    new Vector2(rxA * 0.60f * 2.174f, ryA * 0.60f * 2.174f), 0f, VFXCore.Ring);
+
+                // LAS CUENTAS (24 perlas montadas SOBRE la banda — cada
+                // una SU color del espectro, brillando por su franja).
+                for (int i = 0; i < 24; i++)
+                {
+                    float ang = t * 0.22f + i * MathHelper.TwoPi / 24f;
                     Vector2 perla = cAro + new Vector2(MathF.Cos(ang) * rxA,
                         MathF.Sin(ang) * ryA);
                     Color cPrisma = ColorPrisma(ang / MathHelper.TwoPi + t * 0.03f);
                     VFXCore.Quad(perla, TintAditivo(cPrisma, 0.88f),
-                        new Vector2(10f, 10f), 0f, VFXCore.GlowOrb);
+                        new Vector2(11f, 11f), 0f, VFXCore.GlowOrb);
+                    VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.45f),
+                        new Vector2(4.5f, 4.5f), 0f, VFXCore.GlowOrb);
                 }
-                // LAS CUENTAS DEL HILO INTERIOR (14 perlas — las demás ya
-                // las dibuja el hilo: la rueda contraria al mínimo).
-                for (int i = 0; i < 14; i++)
-                {
-                    float ang = -t * 0.34f + i * MathHelper.TwoPi / 14f;
-                    Vector2 perla = cAro + new Vector2(MathF.Cos(ang) * rxA * 0.66f,
-                        MathF.Sin(ang) * ryA * 0.66f);
-                    Color cPrisma = ColorPrisma(0.5f - ang / MathHelper.TwoPi + t * 0.03f);
-                    VFXCore.Quad(perla, TintAditivo(cPrisma, 0.62f),
-                        new Vector2(7f, 7f), 0f, VFXCore.GlowOrb);
-                }
-                // LAS CUATRO JOYAS (DestelloFinal blanco girando por el
-                // hilo exterior — los broches del arcoíris).
+                // LAS CUATRO JOYAS (DestelloFinal blanco por el borde
+                // exterior — los broches del arcoíris).
                 if (VFXCore.DestelloFinal != null)
                     for (int i = 0; i < 4; i++)
                     {

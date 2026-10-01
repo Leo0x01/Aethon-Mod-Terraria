@@ -2316,6 +2316,4 @@ Biomes: {
 	}
 }
 
-Mensajes: {
-	RegaloPruebas: TESTING — The Light hands you its three gifts: Ascended Form 2, Ascended Form 3 and the Lesser Aethon ({0} received).
-}
+Mensajes.RegaloPruebas: TESTING — The Light hands you its three gifts: Ascended Form 2, Ascended Form 3 and the Lesser Aethon ({0} received).

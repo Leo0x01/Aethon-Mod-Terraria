@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.50 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.51 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,32 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.50)
+## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.51)
+- **v6.50.51 - LA OCTAVA RONDA — EL ARCOÍRIS DE VERDAD + LA ENTRADA EN BLANCO Y TODO EL CIELO + LA CARRERA QUE RETROCEDE + EL NIMBO**:
+  (1) **EL ARCOÍRIS DE VERDAD**: la .49/.50 prometían arcoíris con
+  puntitos invisibles — ahora es **LA BANDA HORNEADA** (`VFXCore.
+  Arcoiris`: 512² generada EN CÓDIGO, siete franjas saturadas rojo→
+  violeta, ~80 px de grosor al radio del trono) y vive en LOS TRES
+  SITIOS: alrededor del TRONO de la Forma 3 (con sus perlas montadas
+  sobre la banda), alrededor DEL JEFE en plena pelea (la corona del
+  espectro) y en MINIATURA alrededor de la mascota.
+  (2) **LA FORMA 3 CELESTIAL**: EL NIMBO DEL PANTOCRÁTOR — la hoja de
+  oro de los iconos bizantinos (el gran disco dorado + su aro detrás
+  del dios): la forma que el ojo lee como «esto es un dios».
+  (3) **LA ENTRADA: SOLO COLOR LUZ, TODO EL CIELO**: la lluvia de la
+  presentación ya no es multicolor — blanco y oro de la casa,
+  naciendo en el rectángulo ENTERO de la cámara alrededor del
+  jugador; el aurora 874 (un proyectil prisma) MURIÓ.
+  (4) **LA CARRERA AL MEDIODÍA DE VUELTA — EL RELOJ BIDIRECCIONAL**
+  (la petición palabra por palabra): la llegada es CINCO ACTOS —
+  presentación (180 t) → TEMBLOR (150 t, la luz asciende al cielo) →
+  LA CARRERA: el tiempo AVANZA o RETROCEDE según el lado del sol
+  (tarde/noche nueva → retrocede; madrugada/mañana → avanza —
+  siempre el camino más corto al mediodía, velocidad proporcional
+  a la distancia, el sol SE POSA, nunca teletransporta) → CLIMAX
+  (EL PILAR cae del cielo + EL DESTELLO del sol) → DESCENSO (con su
+  lluvia de chispas doradas). Simulación verificada: los 4 ejemplos
+  del usuario + 8 bordes, todos aterrizan en el mediodía exacto.
 - **v6.50.50 - LA SÉPTIMA RONDA — EL CRASH DE LA MASCOTA + EL REGALO DE PRUEBAS + EL TRONO SIN HUMO + LA EMPERATRIZ PALABRA POR PALABRA**:
   (1) **EL CRASH DE LA MASCOTA, MUERTO DE RAÍZ**: el client.log lo cazó —
   `AethonMenorPet.PreDraw` dejaba el SpriteBatch CERRADO y devolvía
@@ -117,10 +142,11 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.50`,
+- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.51`,
   release con `AethonMod.tmod` adjunto y verificado byte a byte).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
-  sin excepciones; `.tmod` de 398 entradas auditado (set idéntico al de la .49: diff quirúrgico de contenido, cero texturas nuevas).
+  sin excepciones; `.tmod` de 398 entradas auditado (set idéntico al de la .50: la banda arcoíris
+  es HORNEADA EN CÓDIGO — cero texturas nuevas).
 - **v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN + EL VÓRTICE PRIMORDIAL**: la
   ronda de feedback destapó que **TRES de las cinco armas nuevas de la .45
   NUNCA habían funcionado** — el estilo del proyectil vive en `ai[0]` y el

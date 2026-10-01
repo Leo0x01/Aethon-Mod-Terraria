@@ -212,6 +212,95 @@ namespace AethonMod.Content.VFX
             }
         }
 
+        // v6.50.51 — EL ANILLO ARCOÍRIS (la textura que faltaba). El
+        // diagnóstico de la .50: «hilos» de Ring BLANCOS + perlas de 10 px
+        // = confeti invisible — nadie veía NINGÚN arcoíris. LA CURA: UNA
+        // BANDA REAL, HORNEADA (512², cero assets nuevos: el set de
+        // entradas del .tmod NO se toca): siete franjas SATURADAS del
+        // espectro — rojo FUERA, violeta DENTRO — entre 0.58 y 0.92 del
+        // semiancho (la MISMA convención del Ring: sprite 2.174× el radio
+        // visible). El RGB viene PREMULTIPLICADO por la máscara (la
+        // convención (q,q,q,q) de la casa: en el lote aditivo el aporte
+        // cae máscara·color·f LINEAL).
+        private static Texture2D _arcoiris;
+
+        /// <summary>
+        /// v6.50.51 — LA BANDA ARCOÍRIS HORNEADA: el anillo de siete
+        /// franjas del espectro (rojo exterior → violeta interior, bordes
+        /// suaves). Null-safe (servidor dedicado / sin dispositivo).
+        /// </summary>
+        public static Texture2D Arcoiris
+        {
+            get
+            {
+                try
+                {
+                    if (_arcoiris == null || _arcoiris.IsDisposed)
+                        _arcoiris = HornearArcoiris();
+                    return _arcoiris;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>
+        /// v6.50.51 — EL HORNEADO: 512², banda anular [0.58, 0.92] del
+        /// semiancho, SIETE franjas del espectro de FUERA hacia DENTRO
+        /// (rojo→naranja→amarillo→verde→cian→azul→violeta), bordes de la
+        /// banda con smoothstep (±0.012) y franjas CRUJIENTES (el linear
+        /// filtering del motor suaviza el píxel de frontera solo).
+        /// </summary>
+        private static Texture2D HornearArcoiris()
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return null;
+            var device = Main.graphics?.GraphicsDevice;
+            if (device == null) return null;
+
+            const int L = 512;
+            const float RInt = 0.58f, RExt = 0.92f;
+
+            // LAS SIETE FRANJAS (índice 0 = VIOLETA interior … 6 = ROJO exterior)
+            int[] fr = { 200, 255, 255,  80,  70,  90, 255 };
+            int[] fg = { 100, 150, 235, 240, 230, 150,  60 };
+            int[] fb = { 255,  30,  80, 110, 240, 255,  50 };
+
+            var data = new Color[L * L];
+            float c = (L - 1) * 0.5f;
+            for (int y = 0; y < L; y++)
+            {
+                float fy = (y - c) / c;
+                for (int x = 0; x < L; x++)
+                {
+                    float fx = (x - c) / c;
+                    float r = MathF.Sqrt(fx * fx + fy * fy);
+
+                    // LA MÁSCARA (la banda con bordes suaves).
+                    float m = Suave(r, RInt - 0.012f, RInt + 0.012f) *
+                              (1f - Suave(r, RExt - 0.012f, RExt + 0.012f));
+                    if (m <= 0.001f) continue;
+
+                    // LA FRANJA (la posición radial → su color del espectro).
+                    float s = MathHelper.Clamp((r - RInt) / (RExt - RInt), 0f, 1f) * 6f;
+                    int idx = (int)s;                       // 0 violeta … 6 rojo
+                    if (idx > 6) idx = 6;
+                    data[y * L + x] = new Color(
+                        (byte)(fr[idx] * m), (byte)(fg[idx] * m), (byte)(fb[idx] * m),
+                        (byte)(m * 255f));
+                }
+            }
+
+            var tex = new Texture2D(device, L, L);
+            tex.SetData(data);
+            return tex;
+        }
+
+        /// <summary>El smoothstep de la casa (0→1 entre a y b).</summary>
+        private static float Suave(float x, float a, float b)
+        {
+            float t = MathHelper.Clamp((x - a) / (b - a), 0f, 1f);
+            return t * t * (3f - 2f * t);
+        }
+
         private static Texture2D _pixel;
 
         /// <summary>
@@ -814,6 +903,10 @@ namespace AethonMod.Content.VFX
         public static void Reiniciar()
         {
             try { _quads.Clear(); } catch { }
+            // v6.50.51 — el anillo horneado también se suelta (la textura
+            // perezosa se rehornea sola al próximo uso — 1 ms).
+            try { _arcoiris?.Dispose(); } catch { }
+            _arcoiris = null;
             _quadsDelFrame = 0;
             _frameDelPresupuesto = 0;
             _factorCalidad = 1f;

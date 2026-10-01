@@ -2316,6 +2316,4 @@ Biomes: {
 	}
 }
 
-Mensajes: {
-	RegaloPruebas: PRUEBAS — La Luz te entrega sus tres regalos: Forma Ascendida 2, Forma Ascendida 3 y el Aethon Menor ({0} recibidos).
-}
+Mensajes.RegaloPruebas: PRUEBAS — La Luz te entrega sus tres regalos: Forma Ascendida 2, Forma Ascendida 3 y el Aethon Menor ({0} recibidos).

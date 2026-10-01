@@ -89,10 +89,12 @@ namespace AethonMod.Content.Effects
             _alpha = MathHelper.Clamp(_alpha + MathF.Sign(objetivo - _alpha) * paso, 0f, 1f);
             _pintadoEsteFrame = false;
 
-            // === LOS DESTELLOS NACEN (subs 10-12: el cielo se llena de
-            //     chispas que nacen y mueren — cada cliente los ve suyos) ===
+            // === LOS DESTELLOS NACEN (subs 9-12: presentación, temblor y
+            //     carrera — v6.50.51: el 9 es la presentación de la
+            //     Emperatriz — el cielo se llena de chispas que nacen y
+            //     mueren, cada cliente las ve suyas) ===
             int sub = AethonBoss.SubLlegada;
-            if (!Main.gameMenu && sub >= 10 && sub <= 12 && Main.rand.NextBool(5))
+            if (!Main.gameMenu && sub >= 9 && sub <= 12 && Main.rand.NextBool(5))
             {
                 ref Destello d = ref _destellos[_cursor];
                 d.Pos = new Vector2(
@@ -162,9 +164,10 @@ namespace AethonMod.Content.Effects
             }
             catch { }
 
-            // LA LLEGADA: intensidad 1 mientras los subs 10-12; en el
-            // descenso (13) la puerta de la luz se disuelve.
-            float objetivoLlegada = (sub >= 10 && sub <= 12) ? 1f : 0f;
+            // LA LLEGADA: intensidad 1 mientras los subs 9-12 (v6.50.51 —
+            // la presentación de la Emperatriz también es LA LLEGADA); en
+            // el descenso (13) la puerta de la luz se disuelve.
+            float objetivoLlegada = (sub >= 9 && sub <= 12) ? 1f : 0f;
             float pasoLlegada = objetivoLlegada > _llegadaVista ? (1f / 25f) : (1f / 22f);
             _llegadaVista = MathHelper.Clamp(
                 _llegadaVista + MathF.Sign(objetivoLlegada - _llegadaVista) * pasoLlegada,

@@ -166,23 +166,36 @@ namespace AethonMod.Content.NPCs
         private const int EST_DECRETO = 12;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
         private const int EST_MURIENDO = 99;    // la contracción final
 
-        // === LA ENTRADA — v6.50.49 — LA ENTRADA DE LA EMPERATRIZ, EXACTA
-        //     (la letra: «para la entrada del Aethon original,
-        //     modifiquemosla y que sea exactamente como la emperatris de
-        //     la luz, para ello revisa como terraria maneja su entrada y
-        //     copiala»). El invocador usa LA FÓRMULA LITERAL del case 661
-        //     del decompile (la muerte de la luciérnaga prisma):
-        //     Center + (0,-200) + NextVector2Circular(50,50) + SpawnBoss
-        //     — y aquí solo queda LA PRESENTACIÓN: la luz se
-        //     materializa flotando donde nació (200 px sobre tu cabeza,
-        //     como la Emperatriz), con su destello y su respiración,
-        //     y a la pelea. La CARRERA AL MEDIODÍA (temblor · carrera ·
-        //     pilar · descenso) MURIÓ: la Emperatriz no toca el reloj.
-        //     (Viaja en ai[1] durante EST_NACIENDO; 10 para NO chocar
-        //     con el contrato del rayo 0-3 y para que el cielo de
-        //     ColaSierpeSky — que enciende sus destellos con sub 10-12 —
-        //     viva durante la presentación.) ===
-        public const int SUB_PRESENTA = 10;     // la presentación: 180 t — la curva LITERAL de la Emperatriz
+        // === LA ENTRADA — v6.50.51 — LOS DOS MUNDOS, POR FIN JUNTOS:
+        //     LA ENTRADA DE LA EMPERATRIZ (la .49/.50: «que sea exactamente
+        //     como la emperatris de la luz») + LA CARRERA AL MEDIODÍA DE
+        //     VUELTA (la petición: «mantén estas características para el
+        //     jefe (temblor/reloj/pilar/descenso)») — Y EL RELOJ APRENDE
+        //     A RETROCEDER («el tiempo avanza o retrocede en consecuencia
+        //     de qué tan lejos o cerca esté el sol del objetivo que es
+        //     tenerlo en centro»: tarde/noche nueva → RETROCEDE,
+        //     madrugada/mañana → AVANZA — siempre el camino más corto,
+        //     la velocidad proporcional a la distancia, y el sol SE POSA
+        //     en 27000, jamás teletransporta).
+        //     CINCO ACTOS (viajan en ai[1] durante EST_NACIENDO — 9-13
+        //     para NO chocar con el contrato del rayo 0-3; el 9 y no el
+        //     10 para que el cielo de ColaSierpeSky — que enciende sus
+        //     destellos con sub 9-12 — viva durante la presentación):
+        //       9  LA PRESENTACIÓN de la Emperatriz (180 t) — la lluvia
+        //          SOLO COLOR LUZ cayendo en TODO EL CIELO;
+        //       10 EL TEMBLOR (150 t) — el mundo sacude la pantalla
+        //          mientras la luz ASCIENDE al cielo;
+        //       11 LA CARRERA — el reloj corre al mediodía, AVANZANDO o
+        //          RETROCEDIENDO (lo lleva AethonLlegadaSistema);
+        //       12 EL CLIMAX — EL PILAR cae del cielo, EL DESTELLO nace
+        //          del sol y la luz se posa en la cúspide;
+        //       13 EL DESCENSO — la luz cae del pilar a su órbita de
+        //          pelea con su lluvia de chispas doradas. ===
+        public const int SUB_PRESENTA = 9;      // la presentación de la Emperatriz: la lluvia de luz en TODO el cielo
+        public const int SUB_TEMBLOR = 10;      // el mundo tiembla (150 t) — la luz asciende
+        public const int SUB_CARRERA = 11;      // el tiempo CORRE al mediodía — AVANZA o RETROCEDE (el camino más corto)
+        public const int SUB_CLIMAX = 12;       // EL PILAR cae del cielo + EL DESTELLO nace del sol
+        public const int SUB_DESCENSO = 13;     // la luz cae a su órbita de pelea
 
         // === EL ESTADO DEL MUNDO (el espejo de AethonLlegadaSistema lo
         //     sincroniza en TODAS las máquinas leyendo ai[] — el servidor
@@ -413,8 +426,8 @@ namespace AethonMod.Content.NPCs
             // === EL CONTRATO MP (la casa): estado/subfase/tick/param viajan ===
             NPC.ai[0] = _estado;
             NPC.ai[1] = _estado == EST_NACIENDO ? _subLlegada : _rayo;
-            //     entrada: 10 la presentación de la Emperatriz (v6.50.49 —
-            //      el temblor/carrera/climax/descenso MURIERON con ella)
+            //     entrada: 9 presenta · 10 temblor · 11 carrera · 12 climax
+            //      · 13 descenso (v6.50.51 — la llegada en CINCO actos)
             //     pelea: 0 nada · 1 rayo cargando · 2 rayo ardiendo
             //     (v6.50.45: los estados nuevos — 8 reloj · 9 coro · 10 manada
             //      · 11 telar · 12 decreto — viajan en ai[0] y usan ai[1]=0
@@ -432,18 +445,20 @@ namespace AethonMod.Content.NPCs
         /// v6.50.45 — EL FIX DEL JEFE QUE SE ESFUMABA (los DOS síntomas del
         /// usuario: «si el jefe es invocado y el jugador se mueve el jefe
         /// desaparece» + «a veces no termina de ser invocado»): vanilla
-        /// CheckActive mata a cualquier NPC cuyo timeLeft expire. v6.50.49
-        /// — con LA ENTRADA DE LA EMPERATRIZ el jefe nace 200 px ENCIMA del
-        /// jugador (DENTRO del rectángulo de CheckActive desde el tick 1) y
-        /// la presentación es BREVE (~45 t): el bug raíz murió con la
-        /// llegada vieja. El cine queda por cortesía (la presentación y la
-        /// muerte no se interrumpen) y SpawnBoss ya trajo el timeLife ×20.
+        /// CheckActive mata a cualquier NPC cuyo timeLeft expire. v6.50.51
+        /// — la llegada en CINCO actos vuelve a subir al jefe al cielo
+        /// (temblor/carrera hasta 760 px sobre la presa, cúspide del pilar
+        /// aún más arriba): el cine de la llegada NO se interrumpe
+        /// (la presentación · el temblor · la carrera · el climax · el
+        /// descenso), SpawnBoss ya trajo el timeLife ×20 y la luz SIGUE
+        /// al jugador en todo momento (SeguirCielo — jamás clavada en el
+        /// punto del llamado, la lección de la .45).
         /// Durante la PELEA el comportamiento vanilla queda intacto (el
         /// jefe persigue: siempre está cerca).
         /// </summary>
         public override bool CheckActive()
         {
-            if (_estado == EST_NACIENDO) return false;   // la presentación es cine
+            if (_estado == EST_NACIENDO) return false;   // la llegada es cine (5 actos)
             if (_muriendo) return false;                 // la muerte es cine
             return base.CheckActive();
         }
@@ -487,25 +502,53 @@ namespace AethonMod.Content.NPCs
         // ==================================================================
 
         /// <summary>
-        /// v6.50.50 — LA PRESENTACIÓN EXACTA DE LA EMPERATRIZ (la letra:
-        /// «el jefe no entra como la emperatriz de la luz ni tiene sus
-        /// efectos al entrar»). EL DECOMPILE MANDA: AI_120_HallowBoss,
-        /// case 0, PALABRA POR PALABRA — 180 ticks (3 s):
-        ///   t=0:    velocity (0,5) + EL AURORA DE NACIMIENTO (el proyectil
-        ///           vanilla 874 HallowBossDeathAurora — EL EFECTO de su
-        ///           entrada) en Center+(0,-80);
-        ///   t=10:   SoundID.Item161 (su sonido de nacimiento);
-        ///   10-150: LA LLUVIA ARCOÍRIS — 2 polvos/tick (dust 267
-        ///           RainbowMk2, el del Last Prism), el matiz recorre el
-        ///           ESPECTRO con la intro (hslToRgb(t/180)), naciendo 150
-        ///           px encima y CAYENDO (velocity += UnitY·3) con su clon
-        ///           blanco a media escala;
-        ///   cada t: velocity *= 0.95 (la caída que se frena sola);
-        ///   el FADE IN: alpha = 255·(1 − t/180) — SU Opacity, clavada;
-        ///   t=180:  a la pelea (TargetClosest + netUpdate).
-        /// La CARRERA AL MEDIODÍA sigue muerta (la Emperatriz no toca el
-        /// reloj) y el anuncio es el de SpawnBoss («ha despertado», el de
-        /// vanilla — NI UN texto más).
+        /// v6.50.51 — LA LLEGADA EN CINCO ACTOS: LA ENTRADA DE LA EMPERATRIZ
+        /// (conservada — pero SOLO COLOR LUZ y en TODO EL CIELO) + LA
+        /// CARRERA AL MEDIODÍA DE VUELTA (temblor · reloj · pilar ·
+        /// descenso — y el reloj BIDIRECCIONAL).
+        ///
+        ///   ACTO 1 — LA PRESENTACIÓN (180 t): la coreografía de la
+        ///   Emperatriz (AI_120 case 0), pero la lluvia ya NO es
+        ///   multicolor: SOLO COLOR LUZ (blanco y oro — la firma de la
+        ///   casa) y nace EN TODO EL CIELO (el rectángulo de la cámara
+        ///   ENTERO alrededor del jugador, no el halo del jefe):
+        ///     t=0:    velocity (0,5) (SU caída que se frena ×0.95);
+        ///     t=10:   SoundID.Item161 (su sonido de nacimiento);
+        ///     10-155: LA LLUVIA DE LUZ — 4 polvos/tick (dust 267
+        ///             RainbowMk2, el del Last Prism — que HONRA el color
+        ///             que le das), blanco y oro alternados cayendo por
+        ///             TODO el ancho del cielo, con su clon blanco;
+        ///     el FADE IN: alpha = 255·(1 − t/180) — SU Opacity, clavada.
+        ///   (El aurora 874 HallowBossDeathAurora MURIÓ: es un proyectil
+        ///   PRISMA — su efecto es inherentemente multicolor. «Intenta
+        ///   que sea solo color luz».)
+        ///
+        ///   ACTO 2 — EL TEMBLOR (150 t): el mundo SACUDE la pantalla
+        ///   (los kicks los padece cada cliente vía el espejo) mientras
+        ///   la luz ASCIENDE despacio hacia el cielo — el dios sube a
+        ///   buscar a su sol.
+        ///
+        ///   ACTO 3 — LA CARRERA: EL RELOJ BIDIRECCIONAL (la petición
+        ///   literal: «el tiempo avanza o retrocede en consecuencia de
+        ///   qué tan lejos o cerca esté el sol del objetivo que es
+        ///   tenerlo en centro»). Lo lleva AethonLlegadaSistema en TODAS
+        ///   las máquinas: madrugada/mañana → AVANZA (el día entero pasa
+        ///   VISIBLEMENTE); tarde/noche-que-empieza → RETROCEDE (el sol
+        ///   vuelve por donde vino). El rate es proporcional a la
+        ///   distancia (×0.08, techo 110×, piso 1) y el sol SE POSA en
+        ///   27000 exacto — nunca teletransporta. La luz sigue subiendo
+        ///   mientras el cielo entero corre hacia el mediodía.
+        ///
+        ///   ACTO 4 — EL CLIMAX (120 t): EL PILAR DE LUZ cae del cielo
+        ///   (AtaqueJefeProjectile.EstiloPilarAparicion: el manto dorado
+        ///   y el charco en la base — cosmético, daño 0), EL DESTELLO
+        ///   nace del sol (lo pinta ColaSierpeSky con SU curva 45/75/120)
+        ///   y Aethon se posa en la CÚSPIDE del pilar.
+        ///
+        ///   ACTO 5 — EL DESCENSO (90 t): la luz cae del pilar a su
+        ///   órbita de pelea, dejando su lluvia de chispas doradas — y a
+        ///   PELEAR. El anuncio sigue siendo SOLO el de SpawnBoss
+        ///   («ha despertado», el de vanilla — NI UN texto más).
         /// </summary>
         private void EstadoNaciendo(Player target)
         {
@@ -513,72 +556,243 @@ namespace AethonMod.Content.NPCs
             // por el ++ del motor — el t de vanilla, sin descuentos.
             int t = _tickEstado;
 
-            // t=0/1 — LA CAÍDA INICIAL + EL AURORA (la firma de su
-            //     nacimiento: el mismo proyectil de la Emperatriz).
-            if (t <= 1)
+            switch (_subLlegada)
             {
-                NPC.velocity = new Vector2(0f, 5f);
-                if (Main.netMode != NetmodeID.MultiplayerClient && !Main.dedServ)
+                // ==============================================================
+                //  ACTO 1 — LA PRESENTACIÓN (la Emperatriz, pero SOLO LUZ y
+                //  TODO EL CIELO: «es multicolor como en la emperatriz,
+                //  intenta que sea solo color luz y que se reproduzca en
+                //  todo el cielo»)
+                // ==============================================================
+                case SUB_PRESENTA:
                 {
-                    // (GetSpawnSource_ForProjectile es interno de vanilla:
-                    // el equivalente público de la casa es GetSource_FromAI.)
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        NPC.Center + new Vector2(0f, -80f), Vector2.Zero,
-                        ProjectileID.HallowBossDeathAurora, 0, 0f, Main.myPlayer);
-                }
-            }
+                    // t=0/1 — LA CAÍDA INICIAL (SU velocity (0,5)).
+                    if (t <= 1)
+                        NPC.velocity = new Vector2(0f, 5f);
 
-            // t=10 — EL SONIDO DE SU NACIMIENTO (en SU tick, palabra por palabra).
-            if (t == 11 && !Main.dedServ)
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
+                    // t=10 — EL SONIDO DE SU NACIMIENTO (en SU tick, palabra por palabra).
+                    if (t == 11 && !Main.dedServ)
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
 
-            // LA CAÍDA QUE SE FRENA (cada tick: ×0.95 — como la Emperatriz).
-            NPC.velocity *= 0.95f;
+                    // LA CAÍDA QUE SE FRENA (cada tick: ×0.95 — como la Emperatriz).
+                    NPC.velocity *= 0.95f;
 
-            // 10-150 — LA LLUVIA ARCOÍRIS (2 polvos por tick, LITERAL).
-            if (t > 11 && t < 150 && !Main.dedServ)
-            {
-                for (int k = 0; k < 2; k++)
-                {
-                    float opacidad = MathHelper.Clamp(t / 180f, 0f, 1f);
-                    float num52 = MathHelper.Lerp(1.3f, 0.7f, opacidad) *
-                        Utils.GetLerpValue(0f, 120f, t, true);
-                    Color newColor = Main.hslToRgb(t / 180f, 1f, 0.5f, 255);
-                    int idx = Dust.NewDust(NPC.position, NPC.width, NPC.height,
-                        DustID.RainbowMk2, 0f, 0f, 0, newColor);
-                    Main.dust[idx].position = NPC.Center +
-                        Main.rand.NextVector2Circular(NPC.width * 3f, NPC.height * 3f) +
-                        new Vector2(0f, -150f);
-                    Main.dust[idx].velocity *= Main.rand.NextFloat() * 0.8f;
-                    Main.dust[idx].noGravity = true;
-                    Main.dust[idx].fadeIn = 0.6f + Main.rand.NextFloat() * 0.7f * num52;
-                    Main.dust[idx].velocity += Vector2.UnitY * 3f;
-                    Main.dust[idx].scale = 0.35f;
-                    if (idx != 6000)
+                    // 10-155 — LA LLUVIA DE LUZ (TODO EL CIELO, SOLO COLOR
+                    // LUZ: el rectángulo de la cámara entero — relativo al
+                    // JUGADOR, no al jefe: la lluvia cae por TODOS lados).
+                    if (t > 11 && t < 155 && !Main.dedServ)
                     {
-                        Dust clon = Dust.CloneDust(idx);
-                        clon.scale /= 2f;
-                        clon.fadeIn *= 0.85f;
-                        clon.color = new Color(255, 255, 255, 255);
+                        float anchoCielo = Math.Max(920f, Main.screenWidth * 0.62f);
+                        float techoCielo = Math.Max(520f, Main.screenHeight * 0.62f);
+                        for (int k = 0; k < 4; k++)
+                        {
+                            float opacidad = MathHelper.Clamp(t / 180f, 0f, 1f);
+                            float num52 = MathHelper.Lerp(1.3f, 0.7f, opacidad) *
+                                Utils.GetLerpValue(0f, 120f, t, true);
+                            // SOLO COLOR LUZ: blanco y oro de la casa,
+                            // alternados — NI UN matiz del espectro.
+                            Color colLuz = (k & 1) == 0
+                                ? new Color(255, 255, 250, 255)
+                                : new Color(255, 244, 204, 255);
+                            int idx = Dust.NewDust(NPC.position, NPC.width, NPC.height,
+                                DustID.RainbowMk2, 0f, 0f, 0, colLuz);
+                            Main.dust[idx].position = target.Center +
+                                new Vector2(Main.rand.NextFloat(-anchoCielo, anchoCielo),
+                                    -Main.rand.NextFloat(60f, techoCielo));
+                            Main.dust[idx].velocity *= Main.rand.NextFloat() * 0.8f;
+                            Main.dust[idx].noGravity = true;
+                            Main.dust[idx].fadeIn = 0.6f + Main.rand.NextFloat() * 0.7f * num52;
+                            Main.dust[idx].velocity += Vector2.UnitY * 3f;
+                            Main.dust[idx].scale = 0.45f;
+                            if (idx != 6000)
+                            {
+                                Dust clon = Dust.CloneDust(idx);
+                                clon.scale /= 2f;
+                                clon.fadeIn *= 0.85f;
+                                clon.color = new Color(255, 255, 255, 255);
+                            }
+                        }
                     }
+
+                    // EL FADE IN (la curva de la Emperatriz: SU Opacity, t/180).
+                    NPC.alpha = (int)Math.Round(255f * (1f - MathHelper.Clamp(t / 180f, 0f, 1f)));
+
+                    // t=180 — AL TEMBLOR (la presentación terminó: el dios
+                    // existe — ahora sube a buscar a su sol).
+                    if (t >= 180)
+                    {
+                        NPC.alpha = 0;
+                        SubFaseLlegada(SUB_TEMBLOR);
+                    }
+                    break;
+                }
+
+                // ==============================================================
+                //  ACTO 2 — EL TEMBLOR (150 t): el mundo sacude la pantalla
+                //  mientras la luz ASCIENDE al cielo (los kicks los padece
+                //  cada cliente vía el espejo: sub 10 crece hasta 13 px).
+                // ==============================================================
+                case SUB_TEMBLOR:
+                {
+                    if (_tickEstado == 1 && !Main.dedServ)
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                    SeguirCielo(target, 560f);
+                    if (_tickEstado >= 150) SubFaseLlegada(SUB_CARRERA);
+                    break;
+                }
+
+                // ==============================================================
+                //  ACTO 3 — LA CARRERA (el reloj bidireccional): lo lleva
+                //  AethonLlegadaSistema en TODAS las máquinas (AVANZA o
+                //  RETROCEDE por el camino más corto — la IA solo espera
+                //  el ATERRIZAJE). La luz sigue subiendo despacito.
+                // ==============================================================
+                case SUB_CARRERA:
+                {
+                    SeguirCielo(target, 760f);
+                    // EL MEDIODÍA EXACTO — el aterrizaje (la ventana
+                    // [26999, 27001] es sub-tick: el sol SE POSA). El
+                    // server manda (en MP cada cliente remata su propia
+                    // carrera vía el espejo — nadie salta).
+                    if (Main.netMode != NetmodeID.MultiplayerClient &&
+                        Main.dayTime && Main.time >= 26999.0 && Main.time <= 27001.0)
+                    {
+                        Main.time = 27000.0;
+                        SubFaseLlegada(SUB_CLIMAX);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                    }
+                    break;
+                }
+
+                // ==============================================================
+                //  ACTO 4 — EL CLIMAX (120 t): EL PILAR cae del cielo y
+                //  EL DESTELLO nace del sol (ColaSierpeSky, con SU curva
+                //  45/75/120). La luz se posa en la CÚSPIDE del pilar.
+                // ==============================================================
+                case SUB_CLIMAX:
+                {
+                    NPC.velocity = Vector2.Zero;
+                    if (_tickEstado == 1 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        // EL PILAR: la columna de luz que cae del cielo
+                        // (cosmética — daño 0; la dibuja
+                        // AtaqueJefeProjectile.EstiloPilarAparicion con el
+                        // manto dorado y el charco de luz en la base).
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            PosicionAparicion(target), Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            0, 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloPilarAparicion, 0f,
+                            NPC.whoAmI);
+                    }
+                    // LA CÚSPIDE: la luz sube a la cabeza del pilar —
+                    // suave, sin teletransporte (la posición SERVER-SEGURA
+                    // de la v6.50.42: relativa al jugador + clamps, SIN
+                    // matemática de pantalla).
+                    if (_tickEstado <= 44)
+                    {
+                        Vector2 cuspide = PosicionAparicion(target) - new Vector2(0f, 760f);
+                        NPC.Center = Vector2.Lerp(NPC.Center, cuspide, 0.10f);
+                        NPC.netUpdate = true;
+                    }
+                    if (_tickEstado == 52)
+                    {
+                        // EL PICO DEL DESTELLO: el cielo CIEGA y la luz RUGE.
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, NPC.Center);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                    }
+                    if (_tickEstado >= 120) SubFaseLlegada(SUB_DESCENSO);
+                    break;
+                }
+
+                // ==============================================================
+                //  ACTO 5 — EL DESCENSO (90 t): la luz BAJA de la cúspide
+                //  del pilar hasta su órbita de pelea, dejando su lluvia
+                //  de chispas doradas — y a PELEAR.
+                // ==============================================================
+                case SUB_DESCENSO:
+                {
+                    Vector2 punto = target.Center + new Vector2(0f, -420f);
+                    NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.02f, 0.10f);
+
+                    // LA LLUVIA DE LUZ: chispas que caen con la luz.
+                    if (!Main.dedServ && Main.rand.NextBool(3))
+                    {
+                        Dust d = Dust.NewDustPerfect(
+                            NPC.Center + new Vector2(Main.rand.NextFloat(-100f, 100f),
+                                Main.rand.NextFloat(-50f, 50f)),
+                            DustID.GoldFlame,
+                            new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
+                                Main.rand.NextFloat(1f, 3f)),
+                            180, OroLuz, 1.4f);
+                        d.noGravity = true;
+                    }
+
+                    if (_tickEstado >= 90)
+                    {
+                        _estado = EST_FLOTAR;
+                        _tickEstado = 0;
+                        _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
+                        NPC.alpha = 0;
+                        NPC.dontTakeDamage = false;
+                        NPC.netUpdate = true;
+                    }
+                    break;
                 }
             }
+        }
 
-            // EL FADE IN (la curva de la Emperatriz: SU Opacity, t/180).
-            NPC.alpha = (int)Math.Round(255f * (1f - MathHelper.Clamp(t / 180f, 0f, 1f)));
-            if (NPC.alpha == 0) NPC.dontTakeDamage = false;
+        /// <summary>
+        /// v6.50.44 → v6.50.51 — LA BASE DEL PILAR DE LA APARICIÓN: el punto
+        /// del cielo sobre el que cae la columna de luz. La lección de la
+        /// v6.50.42 queda grabada: NADA de matemática de pantalla — la
+        /// posición es relativa al JUGADOR (la cámara lo sigue) y SIEMPRE
+        /// clamped dentro del mundo (jamás otra muerte por fuera-de-límites).
+        /// </summary>
+        private Vector2 PosicionAparicion(Player target)
+        {
+            // La órbita de pelea (target − 420): el pilar termina donde la
+            // luz va a quedar flotando — el descenso TERMINA en su puesto.
+            Vector2 pos = target.Center + new Vector2(0f, -420f);
 
-            // t=180 — A LA PELEA (como la Emperatriz: TargetClosest + netUpdate).
-            if (t >= 180)
-            {
-                _estado = EST_FLOTAR;
-                _tickEstado = 0;
-                _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
-                NPC.alpha = 0;
-                NPC.dontTakeDamage = false;
-                NPC.TargetClosest();
-                NPC.netUpdate = true;
-            }
+            // NUNCA ENTERRADO: la base del pilar vive en el CIELO de la
+            // arena (montaña o suelo alto no la hunden en el terreno).
+            float cielo = target.Center.Y - 300f;
+            if (pos.Y > cielo) pos.Y = cielo;
+
+            // NUNCA FUERA DEL MUNDO: los clamps de la v6.50.42 — el jefe
+            // que nace (o materializa) fuera de límites MUERE.
+            float margen = 320f;
+            pos.X = MathHelper.Clamp(pos.X, margen, Main.maxTilesX * 16f - margen);
+            pos.Y = MathHelper.Clamp(pos.Y, margen, Main.maxTilesY * 16f - margen);
+            return pos;
+        }
+
+        /// <summary>
+        /// v6.50.51 — LA LUZ QUE SIGUE AL CIELO: durante el temblor y la
+        /// carrera la luz VIVE `altura` px SOBRE LA PRESA (sobre el
+        /// JUGADOR, no sobre el punto del llamado — la lección de la .45:
+        /// el jugador que se muda durante la llegada no se pierde el
+        /// clímax, y vanilla CheckActive — que la llegada tiene censada —
+        /// agradece la cercanía). Suave (lerp 0.08), con los clamps de la
+        /// casa: jamás fuera del mundo.
+        /// </summary>
+        private void SeguirCielo(Player target, float altura)
+        {
+            Vector2 pos = target.Center + new Vector2(0f, -altura);
+            pos.X = MathHelper.Clamp(pos.X, 320f, Main.maxTilesX * 16f - 320f);
+            pos.Y = MathHelper.Clamp(pos.Y, 160f, Main.maxTilesY * 16f - 320f);
+            // El lerp vive en la VELOCIDAD (la red interpola con ella —
+            // el MP lo ve suave, sin rubber-banding).
+            NPC.velocity = (pos - NPC.Center) * 0.08f;
+        }
+
+        /// <summary>El cambio de sub-fase de la llegada (resetea el tick local).</summary>
+        private void SubFaseLlegada(int sub)
+        {
+            _subLlegada = sub;
+            _tickEstado = 0;
+            NPC.netUpdate = true;
         }
 
         /// <summary>
@@ -1837,6 +2051,40 @@ namespace AethonMod.Content.NPCs
                             LumenLib.Bloom(spriteBatch, perla, 12f * colapso, cP,
                                 (eclipse ? 0.06f : 0.42f) * (0.5f + 0.5f * tw) *
                                 brillo * visibilidad, 2);
+                        }
+                    }
+
+                    // === 4.5 EL ANILLO ARCOÍRIS (v6.50.51 — «yo no veo
+                    //     nada, ni en el jefe»: LA CORONA DEL ESPECTRO —
+                    //     Ap 4:3, el arcoíris alrededor del trono, el del
+                    //     dios de la luz). LA BANDA HORNEADA de siete
+                    //     franjas (VFXCore.Arcoiris) — GRUESA, saturada,
+                    //     girando despacito alrededor del sol: EL ARCOÍRIS
+                    //     que la .49/.50 prometía con puntitos invisibles
+                    //     y nunca se veía ===
+                    if (!eclipse)
+                    {
+                        Texture2D bandaArcoiris = VFXCore.Arcoiris;
+                        if (bandaArcoiris != null)
+                        {
+                            float rxAr = 348f * colapso;
+                            float ryAr = 126f * colapso;
+                            Vector2 orgAr = new Vector2(bandaArcoiris.Width, bandaArcoiris.Height) * 0.5f;
+                            // LA BANDA (siete franjas del espectro — la geometría del arcoíris).
+                            spriteBatch.Draw(bandaArcoiris, posC, null,
+                                new Color(255, 255, 255) * (0.42f * brillo * visibilidad),
+                                t * 0.05f, orgAr,
+                                new Vector2(rxAr * 2.174f / bandaArcoiris.Width,
+                                            ryAr * 2.174f / bandaArcoiris.Height),
+                                SpriteEffects.None, 0f);
+                            // LA ATMÓSFERA (el halo blanco de la banda — la joya arde).
+                            spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
+                                new Color(255, 255, 250) * (0.07f * brillo * visibilidad),
+                                t * 0.05f,
+                                new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f,
+                                new Vector2(rxAr * 2.6f / VFXCore.SoftGlow.Width,
+                                            ryAr * 2.8f / VFXCore.SoftGlow.Height),
+                                SpriteEffects.None, 0f);
                         }
                     }
 

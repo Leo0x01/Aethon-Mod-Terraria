@@ -165,7 +165,18 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         new Vector2(6f, 6f), 0f, VFXCore.SoftGlow);
                 }
 
-                // === 4. LA CHISPA PRISMA (el latido del arcoíris — la
+                // === 4. EL ARCOÍRIS EN MINIATURA (v6.50.51 — «ni en la
+                //     mascota»: antes «el arcoíris» de la criatura era una
+                //     lucecita cambiando de color — NADIE lo veía. AHORA
+                //     es LA BANDA HORNEADA de siete franjas (VFXCore.
+                //     Arcoiris, la del trono), en pequeñito alrededor de
+                //     la chispa: el anillo del espectro de su dios) ===
+                Texture2D banda = VFXCore.Arcoiris;
+                if (banda != null)
+                    VFXCore.Quad(c, new Color(255, 255, 255, 255) * (0.50f * aliento),
+                        new Vector2(38f * 2.174f, 14f * 2.174f), t * 0.30f, banda);
+
+                // === 5. LA CHISPA PRISMA (el latido del arcoíris — la
                 //     lucecita que cambia de color como su luz de mundo) ===
                 Color prisma = Prisma(t * 0.05f);
                 VFXCore.Quad(c + new Vector2(0f, -30f), new Color(prisma.R, prisma.G, prisma.B, 255) * 0.55f,
