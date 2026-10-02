@@ -585,6 +585,9 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDosItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaTresItem>());
+                // v6.50.53 — LA FORMA ASCENDIDA 4 (EL SERAFÍN — la cuarta luz).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCuatroItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
 

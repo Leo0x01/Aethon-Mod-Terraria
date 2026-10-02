@@ -303,6 +303,9 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.50.49 — LA FORMA ASCENDIDA 3: EL TRONO (la divinidad
             // celestial canonica) + EL AETHON MENOR (la mascota de luz).
             l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaTresItem>(), 1));
+            // v6.50.53 — LA FORMA ASCENDIDA 4: EL SERAFÍN (la cuarta luz —
+            // el que arde: seis alas, halo triple, corona, bruma y rayos).
+            l.Add((ModContent.ItemType<Cosmetics.FormaAscendidaCuatroItem>(), 1));
             l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
             l.Add((ModContent.ItemType<Cosmetics.BrasaDelEclipseItem>(), 1));
             return l;

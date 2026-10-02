@@ -92,6 +92,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloCoroJefe = 16;        // v6.50.45 — EL CORO ESPECTRAL alrededor de la presa
         public const int EstiloTelarJefe = 17;       // v6.50.45 — EL TELAR DE CONSTELACIONES (la trampa)
         public const int EstiloDecretoJefe = 18;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
+        public const int EstiloEstallidoRadiante = 19; // v6.50.53 — EL ESTALLIDO RADIANTE (la imagen del usuario: el punto de luz que ARDE y lo arrasa TODO — núcleo blanco-oro, anillo SEGMENTADO de emisores, 44 rayos en 360° de largo variable, la cruz anamórfica, las chispas que vuelan y el destello que inunda la pantalla)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -255,6 +256,15 @@ namespace AethonMod.Content.Projectiles.Jefes
                     Projectile.timeLeft = 470;
                     Projectile.hostile = false;
                     break;
+
+                case EstiloEstallidoRadiante:
+                    // v6.50.53 — EL ESTALLIDO: daño SOLO en la ventana de
+                    // la ONDA (los primeros 12 t — la autocuración de la IA
+                    // lo reconstruye cada tick: el msg 27 no lleva este
+                    // OnSpawn) y 152 t de espectáculo derritiéndose (los
+                    // rayos de la imagen viven hasta el final).
+                    Projectile.timeLeft = 152;
+                    break;
             }
         }
 
@@ -297,6 +307,20 @@ namespace AethonMod.Content.Projectiles.Jefes
                 hitbox.Y -= inflar / 2;
                 hitbox.Width += inflar;
                 hitbox.Height += inflar;
+            }
+
+            // v6.50.53 — EL ESTALLIDO RADIANTE: la ONDA golpea en el radio
+            // TELEGRAFEADO (600 px — el aro que el jefe pintó durante toda
+            // la carga): la hitbox honesta de la mina, pero de 1200×1200 y
+            // SOLO durante la ventana de la onda (los primeros 12 t) —
+            // después el cuerpo es puro espectáculo y no toca a nadie.
+            if (Estilo == EstiloEstallidoRadiante && _edad <= 12f)
+            {
+                const int inflarE = 1186; // 14 → 1200 px de onda (radio 600)
+                hitbox.X -= inflarE / 2;
+                hitbox.Y -= inflarE / 2;
+                hitbox.Width += inflarE;
+                hitbox.Height += inflarE;
             }
         }
 
@@ -397,6 +421,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                 Projectile.width = 220;
                 Projectile.height = 280;
                 Projectile.Center = cR;
+            }
+
+            // v6.50.53 — EL ESTALLIDO RADIANTE: la autocuración de la casa
+            // (el msg 27 no lleva el OnSpawn) — hostil/daño se reconstruyen
+            // de lo que SÍ viaja (ai[0] el estilo · ai[1] el daño) y el
+            // cuerpo queda CLAVADO donde nació: el estallido no se muda.
+            if (Estilo == EstiloEstallidoRadiante)
+            {
+                Projectile.velocity = Vector2.Zero;
+                bool ventana = _edad <= 12f;
+                Projectile.hostile = ventana;
+                Projectile.damage = ventana ? Math.Max(1, (int)Projectile.ai[1]) : 0;
             }
 
             Player presa = Presa();
@@ -1106,6 +1142,51 @@ namespace AethonMod.Content.Projectiles.Jefes
                     if (_edad > vidaD) Projectile.Kill();
                     break;
                 }
+
+                // =============================================================
+                //  v6.50.53 — EL ESTALLIDO RADIANTE (LA IMAGEN DEL USUARIO:
+                //  «te envié una imagen, crea por código un ataque del jefe
+                //  que sea igual que la imagen» — el punto de luz potente:
+                //  la explosión radiante con anillo segmentado, rayos en
+                //  360°, chispas y el destello que inunda)
+                // =============================================================
+                case EstiloEstallidoRadiante:
+                {
+                    // CLAVADO donde nació (estalló donde estaba el jefe) —
+                    // la autocuración del inicio ya puso hostil/daño de la
+                    // ventana de la ONDA (los primeros 12 t: el radio 600
+                    // TELEGRAFEADO por el aro de la carga).
+                    Projectile.velocity = Vector2.Zero;
+
+                    // LA LUZ QUE INUNDA EL MUNDO (el flash de la imagen: la
+                    // escena entera queda BAÑADA en blanco-oro — 2,5 s de
+                    // día dentro de la pelea) — VIVO, no el 0.5 plano del
+                    // SetDefaults: la luz de un dios que se enciende.
+                    float luzE = Math.Max(0f, 1f - _edad / 150f);
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(2.4f, 2.1f, 1.5f) * luzE);
+
+                    // EL NACIMIENTO (t=1): el estampido + LAS CHISPAS QUE
+                    // VUELAN (los streaks radiales de la imagen — cada
+                    // cliente ve las suyas: es polvo, pura decoración).
+                    if (_edad <= 1f)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Projectile.Center);
+                        OndaLib.Kick(13f, 26);
+                        for (int i = 0; i < 42; i++)
+                        {
+                            float ang = i * MathHelper.TwoPi / 42f +
+                                Main.rand.NextFloat(-0.06f, 0.06f);
+                            float v = Main.rand.NextFloat(6f, 17f);
+                            Dust d = Dust.NewDustPerfect(Projectile.Center,
+                                DustID.GoldFlame,
+                                new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * v);
+                            d.noGravity = true;
+                            d.scale = Main.rand.NextFloat(1.1f, 1.9f);
+                        }
+                    }
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -1124,6 +1205,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloCoroJefe => new Vector3(0.42f, 0.32f, 0.14f),
                 EstiloTelarJefe => new Vector3(0.26f, 0.26f, 0.44f),
                 EstiloDecretoJefe => Vector3.Zero,       // su caso pone la suya (el eclipse)
+                EstiloEstallidoRadiante => Vector3.Zero, // v6.50.53 — su caso pone la suya (el flash que inunda)
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -1519,6 +1601,102 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                         break;
                     }
+
+                    // === v6.50.53 — EL ESTALLIDO RADIANTE, FASE MUNDO (LA
+                    //     IMAGEN DEL USUARIO hecha quads — TODO determinista:
+                    //     Hash01 hace que TODAS las pantallas dibujen EL
+                    //     MISMO estallido): LOS 44 RAYOS de largo VARIABLE
+                    //     (los hay cortos al 25% y los que CRUZAN la
+                    //     pantalla — cada uno con SU línea núcleo BLANCA y
+                    //     SU halo que se CALIENTA con la distancia: oro →
+                    //     ámbar → brasa, el degradé de la imagen), EL ANILLO
+                    //     SEGMENTADO (14
+                    //     EMISORES brillantes creciendo hacia afuera — NO un
+                    //     aro continuo: la firma de la imagen) y LA CRUZ
+                    //     ANAMÓRFICA (el bloom que estira H y V — el
+                    //     lens-flare del cine) ===
+                    case EstiloEstallidoRadiante:
+                    {
+                        // EL TEMPO: crece (0-14 t), ARDE (14-55) y se
+                        // disuelve (55-150) — la rotación LENTA de la
+                        // imagen (~0.5 RPM).
+                        float crec = Math.Min(1f, _edad / 14f);
+                        float fade = _edad < 55f ? 1f : Math.Max(0f, 1f - (_edad - 55f) / 95f);
+                        float giro = _edad * 0.0045f;
+                        Vector2 cE = Projectile.Center;
+
+                        // === (a) LOS RAYOS (el corazón de la imagen) ===
+                        for (int i = 0; i < 44; i++)
+                        {
+                            float h0 = VFXCore.Hash01(Seed, i, 10);
+                            float h1 = VFXCore.Hash01(Seed, i, 11);
+                            float h2 = VFXCore.Hash01(Seed, i, 12);
+                            float h3 = VFXCore.Hash01(Seed, i, 13);
+                            float ang = giro + i * MathHelper.TwoPi / 44f +
+                                (h0 - 0.5f) * (MathHelper.TwoPi / 44f) * 1.15f;
+                            // el largo: de 250 (el rayo corto) a 980 (el que
+                            // cruza la pantalla entera) — la VARIANZA de la
+                            // imagen, no un abanico matemático.
+                            float largo = (250f + 730f * h1) * crec;
+                            // la vida propia: cada rayo muere a SU tiempo.
+                            float vidaR = 75f + 45f * h2;
+                            float alfaR = fade * (_edad < vidaR ? 1f :
+                                Math.Max(0f, 1f - (_edad - vidaR) / 22f));
+                            if (alfaR <= 0.02f || largo < 8f) continue;
+                            Vector2 dirR = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                            // LA LÍNEA NÚCLEO (blanca — la doble línea de la
+                            // imagen: cada rayo tiene su corazón fino).
+                            VFXCore.Quad(cE + dirR * (46f + largo * 0.5f),
+                                BlancoCaliente * (0.85f * alfaR),
+                                new Vector2(largo, 3.2f + 2.6f * h3), ang);
+                            // EL HALO (más corto, más ancho — y CALIENTE:
+                            // el degradé blanco→oro→ámbar→brasa de la imagen).
+                            Color cHalo = Color.Lerp(OroGrimorio,
+                                Color.Lerp(AmbarEstelar, EmberPortador, h3 * 0.7f),
+                                0.35f + 0.45f * h3);
+                            VFXCore.Quad(cE + dirR * (34f + largo * 0.34f),
+                                cHalo * (0.40f * alfaR),
+                                new Vector2(largo * 0.68f, 12f + 9f * h0), ang);
+                        }
+
+                        // === (b) EL ANILLO SEGMENTADO (14 EMISORES creciendo
+                        //     hacia afuera con su flicker — 150 → 760 px) ===
+                        float rAnillo = MathHelper.Lerp(150f, 760f,
+                            Math.Min(1f, _edad / 55f));
+                        float alfaA = _edad < 70f ? 1f :
+                            Math.Max(0f, 1f - (_edad - 70f) / 45f);
+                        if (alfaA > 0.02f)
+                        {
+                            int beatE = (int)(_edad / 6f);   // el flicker segmentado
+                            for (int i = 0; i < 14; i++)
+                            {
+                                float angE = giro * 1.6f + i * MathHelper.TwoPi / 14f;
+                                float hE = VFXCore.Hash01(Seed, i, 60 + (beatE % 5));
+                                Vector2 e = cE + new Vector2(MathF.Cos(angE), MathF.Sin(angE)) * rAnillo;
+                                VFXCore.Quad(e,
+                                    BlancoCaliente * (0.80f * alfaA * (0.7f + 0.3f * hE)),
+                                    new Vector2(26f + 10f * hE, 26f + 10f * hE));
+                                VFXCore.Quad(e, OroGrimorio * (0.45f * alfaA),
+                                    new Vector2(58f, 58f));
+                            }
+                        }
+
+                        // === (c) LA CRUZ ANAMÓRFICA (el bloom estirado en H
+                        //     y V — vive solo en el AUGE, muere a los 55 t) ===
+                        float alfaC = Math.Max(0f, 1f - _edad / 55f) * 0.55f;
+                        if (alfaC > 0.02f)
+                        {
+                            VFXCore.Quad(cE, BlancoCaliente * alfaC,
+                                new Vector2(1150f * crec, 7f));
+                            VFXCore.Quad(cE, BlancoCaliente * alfaC,
+                                new Vector2(7f, 1150f * crec));
+                            VFXCore.Quad(cE, OroGrimorio * (alfaC * 0.6f),
+                                new Vector2(760f * crec, 16f));
+                            VFXCore.Quad(cE, OroGrimorio * (alfaC * 0.6f),
+                                new Vector2(16f, 760f * crec));
+                        }
+                        break;
+                    }
                 }
                 VFXCore.FlushAdditive(null, false);
 
@@ -1872,6 +2050,66 @@ namespace AethonMod.Content.Projectiles.Jefes
                         if (flare > 0f)
                             LumenLib.Bloom(Main.spriteBatch, pos, radio * 1.1f,
                                 new Color(255, 244, 214), 0.22f * flare, 2);
+                        break;
+                    }
+
+                    // === v6.50.53 — EL ESTALLIDO RADIANTE, FASE PANTALLA (EL
+                    //     PUNTO DE LUZ de la imagen): EL NÚCLEO que crece
+                    //     hasta ~950 px y RESPIRA, LA ESTRELLA de 8 rayos
+                    //     girando LENTA (el lens-flare del cine), LA ONDA
+                    //     expansiva y LAS BOKEH (los puntos de luz dispersos
+                    //     de la imagen — deterministas, como todo lo demás) ===
+                    case EstiloEstallidoRadiante:
+                    {
+                        float crecS = Math.Min(1f, _edad / 16f);
+                        float fadeS = _edad < 55f ? 1f :
+                            Math.Max(0f, 1f - (_edad - 55f) / 95f);
+                        float respira = 0.95f + 0.05f * MathF.Sin(t * 4.2f);
+
+                        // EL NÚCLEO INUNDANDO (el blanco que crece hasta
+                        // ~950 px — el corazón que se queda viendo).
+                        LumenLib.Bloom(Main.spriteBatch, pos,
+                            (170f + 780f * crecS) * respira, BlancoCaliente,
+                            0.95f * fadeS, 4);
+                        LumenLib.BloomPulse(Main.spriteBatch, pos,
+                            150f + 190f * crecS, OroGrimorio,
+                            0.55f * fadeS, t, 2.6f);
+
+                        // LA ESTRELLA DE DESTELLO (el flare de 8 rayos + núcleo
+                        // caliente — la rotación LENTA de la imagen).
+                        Texture2D dest = VFXCore.DestelloFinal;
+                        if (dest != null)
+                        {
+                            float esc = (1500f * crecS) / dest.Width *
+                                (0.92f + 0.08f * MathF.Sin(t * 3.4f));
+                            Main.spriteBatch.Draw(dest, pos, null,
+                                OrbitaLib.Tint(BlancoCaliente, 0.60f * fadeS),
+                                t * 0.06f,
+                                new Vector2(dest.Width, dest.Height) * 0.5f, esc,
+                                SpriteEffects.None, 0f);
+                        }
+
+                        // LA ONDA EXPANSIVA (el frente que barre — una sola,
+                        // clara: el golpe ya pasó, esto es la firma).
+                        if (_edad < 80f)
+                            OndaLib.Pulse(Main.spriteBatch, pos, _edad / 80f,
+                                760f, OroGrimorio, 0.50f * (1f - _edad / 80f), Seed);
+
+                        // LAS BOKEH (los puntos de luz dispersos de la imagen:
+                        // 26 chispas fijas que giran despacito y titilan).
+                        for (int i = 0; i < 26; i++)
+                        {
+                            float h0 = VFXCore.Hash01(Seed, i, 30);
+                            float h1 = VFXCore.Hash01(Seed, i, 31);
+                            float tw = 0.35f + 0.65f *
+                                (0.5f + 0.5f * MathF.Sin(t * 2.6f + i * 1.9f));
+                            float rB = (90f + 640f * h1) * crecS;
+                            float angB = h0 * MathHelper.TwoPi + t * 0.05f;
+                            Vector2 b = pos + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rB;
+                            LumenLib.Bloom(Main.spriteBatch, b, 8f + 10f * h1,
+                                (i % 2 == 0) ? OroGrimorio : AmbarEstelar,
+                                0.45f * fadeS * tw, 2);
+                        }
                         break;
                     }
                 }

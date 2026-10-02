@@ -164,6 +164,7 @@ namespace AethonMod.Content.NPCs
         private const int EST_MANADA = 10;      // v6.50.45 — LA MANADA ASTRAL (camada)
         private const int EST_TELAR = 11;       // v6.50.45 — EL TELAR (el círculo veloz)
         private const int EST_DECRETO = 12;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
+        private const int EST_ESTALLIDO = 13;   // v6.50.53 — EL ESTALLIDO RADIANTE (la imagen del usuario: el punto de luz que ARDE y lo arrasa todo — 60 t de recogida telegrafiada y la explosión de 360° con rayos, anillo segmentado, cruz y chispas)
         private const int EST_MURIENDO = 99;    // la contracción final
 
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
@@ -402,6 +403,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_MANADA: EstadoManada(target); break;
                 case EST_TELAR: EstadoTelar(target); break;
                 case EST_DECRETO: EstadoDecreto(target); break;
+                case EST_ESTALLIDO: EstadoEstallido(target); break;
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
@@ -803,14 +805,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 1 => new[] { EST_JUICIO, EST_RAYO },
                 2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA },
+                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_ESTALLIDO },
                 // v6.50.46 — EL ECLIPSE MUERE EN TODOS LOS MENÚS: la fase
                 // final ya NO es «la luz se apaga y solo brillan las balas»
                 // (se veía mal — la petición fue LITERAL) — su lugar lo toma
                 // EL VÓRTICE PRIMORDIAL: la galaxia de pernos dorados que
                 // gira y colapsa sobre la presa.
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR },
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_ESTALLIDO },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_ESTALLIDO },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -838,6 +840,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // v6.50.46 — EL VÓRTICE es la firma de la FURIA: la galaxia
                 // le pertenece a la fase final.
                 if (plato == EST_VORTICE && Furia) peso = 4;
+                // v6.50.53 — EL ESTALLIDO RADIANTE castiga al PEGADO: el que
+                // abraza al sol tiene 60 t de aro encendido para ARREPENTIRSE
+                // — el radio 600 telegrafiado es LA LEY del ataque.
+                if (plato == EST_ESTALLIDO && cerca) peso = 5;              // el pegado
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -1098,6 +1104,55 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
 
             if (_tickEstado >= 95) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        // ==================================================================
+        //  v6.50.53 — EL ESTALLIDO RADIANTE (LA IMAGEN DEL USUARIO: «te
+        //  envié una imagen, crea por código un ataque del jefe que sea
+        //  igual que la imagen» — el punto de luz potente: la explosión
+        //  radiante con núcleo blanco-oro, anillo segmentado de emisores,
+        //  rayos radiales de largo variable en 360°, chispas que vuelan y
+        //  el destello que inunda la pantalla)
+        // ==================================================================
+
+        /// <summary>
+        /// LA RECOGIDA (60 t SIEMPRE — ni en FURIA se acorta: el telegrafo
+        /// debe leerse IGUAL todas las veces): el jefe se DETIENE, SE LLENA
+        /// y el anillo se CIERRA sobre él (DibujarTelegrafos lo pinta
+        /// leyendo ai[2] en cada pantalla)… y al tick 60 NACE EL PUNTO DE
+        /// LUZ — el proyectil del estallido: daño en radio 600 (EL ARO que
+        /// se telegrafeó) durante los primeros 12 t (la onda) y TODO el
+        /// espectáculo de la imagen (los 44 rayos, el anillo de emisores,
+        /// la cruz, las chispas, el flash que inunda) derritiéndose durante
+        /// 2,5 s. El jefe queda PARADO en el centro de su estallido — el
+        /// sol no se esconde de su propia luz.
+        /// </summary>
+        private void EstadoEstallido(Player target)
+        {
+            // LA RECOGIDA: la luz se detiene y se junta.
+            NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.15f);
+
+            if (_tickEstado == 1)
+            {
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Estallido", OroLuz);
+                OndaLib.Kick(5f, 10);
+            }
+
+            // EL ESTALLIDO (t=60): nace EL PUNTO DE LUZ — la imagen entera.
+            if (_tickEstado == 60 && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int dano = (int)(NPC.damage * 0.95f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, Vector2.Zero,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    dano, 3f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloEstallidoRadiante,
+                    dano, NPC.whoAmI * 79 + _tickEstado);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 98) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         // ==================================================================
@@ -2111,6 +2166,20 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
             finally
             {
+                // v6.50.53 — EL FANTASMA DE LOS NPCS, MUERTO: el PerlinBolt
+                // del RAYO (la carga y el fuego, ai[1] 1-2) deja el lote
+                // ABIERTO EN ADITIVO — RayoStrip.CerrarLote reabre con
+                // BlendState.Additive para los gorros del rayo, y el
+                // ReabrirLoteVanilla de abajo era un NO-OP («ya hay Begin
+                // vivo: no lo pisamos») → TODO NPC dibujado después del
+                // jefe salía ADITIVO: el FANTASMA TRANSPARENTE del usuario
+                // («hay algun ataque del jefe que al hacerlo los npc se
+                // vuelven transparente, creo que es cuando lanza rayo»).
+                // LA CURA: si quedó un lote abierto que NO es el de
+                // vanilla, se CIERRA y se reabre el de vanilla — el estado
+                // de salida de PreDraw es SIEMPRE el lote NPC de vanilla
+                // (AlphaBlend + Main.Transform), con rayo o sin él.
+                VFXCore.CerrarLoteSiAbierto();
                 VFXCore.ReabrirLoteVanilla();
             }
             return false; // el sol de código se dibuja a sí mismo
@@ -2152,6 +2221,62 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 float prog = npc.ai[2] / 45f;
                 OndaLib.Pulse(sb, posC, 1f - prog,
                     420f - 300f * prog, OroLuz, 0.60f, npc.whoAmI + 3);
+            }
+
+            // v6.50.53 — EL ESTALLIDO RADIANTE: LA RECOGIDA — 60 t de
+            //     telegrafo con CUATRO señales: EL LÍMITE (el aro del radio
+            //     de peligro PULSANDO: «fuera del anillo se vive»), LAS
+            //     CATORCE BRASAS (el anillo segmentado de la imagen
+            //     CAYÉNDOSE en espiral hacia el centro), EL NÚCLEO que SE
+            //     LLENA (el punto de luz creciendo) y LAS AGUJAS (la luz
+            //     CORRIENDO hacia el punto — la succión de la recogida).
+            if (npc.ai[0] == EST_ESTALLIDO && npc.ai[2] < 60f)
+            {
+                float prog = npc.ai[2] / 60f;
+                float tg = Main.GlobalTimeWrappedHourly;
+
+                // (a) EL LÍMITE: el aro fino del radio de peligro (600 px —
+                //     LA MISMA cifra de la hitbox de la onda) pulsando y
+                //     ENCENDIÉNDOSE a medida que el estallido llega.
+                float alfaL = 0.22f + 0.30f * prog + 0.10f * MathF.Sin(tg * 9f);
+                Vector2 ringTam = new Vector2(VFXCore.Ring.Width, VFXCore.Ring.Height);
+                sb.Draw(VFXCore.Ring, posC, null, OroLuz * alfaL, 0f,
+                    ringTam * 0.5f, VFXCore.RingQuadSize(600f) / ringTam,
+                    SpriteEffects.None, 0f);
+
+                // (b) LAS CATORCE BRASAS: el anillo segmentado CAYENDO al
+                //     centro (760 → 150 — las brasas de la imagen, pero en
+                //     reversa: se RECOGEN antes de explotar hacia afuera).
+                float rB = MathHelper.Lerp(760f, 150f, prog);
+                for (int i = 0; i < 14; i++)
+                {
+                    float angB = i * MathHelper.TwoPi / 14f + prog * 2.4f + tg * 0.25f;
+                    Vector2 e = posC + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rB;
+                    LumenLib.Bloom(sb, e, 22f + 8f * prog, OroLuz,
+                        0.5f + 0.3f * prog, 2);
+                }
+
+                // (c) EL NÚCLEO que se llena (el punto de luz creciendo —
+                //     el crescendo del rayo, pero GRANDE: este es EL estallido).
+                LumenLib.Bloom(sb, posC, 90f + 140f * prog, NucleoBlanco,
+                    0.35f + 0.50f * prog, 3);
+
+                // (d) LAS AGUJAS que convergen (la luz CORRIENDO hacia el
+                //     punto — deterministas: Hash01 con el flick del rayo).
+                Vector2 origenS = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
+                int flick = (int)(Main.GameUpdateCount / 3u);
+                for (int i = 0; i < 10; i++)
+                {
+                    float angA = VFXCore.Hash01(npc.whoAmI, i, 50) * MathHelper.TwoPi + tg * 0.5f;
+                    float rA = 620f * (0.30f + 0.70f * VFXCore.Hash01(npc.whoAmI, i, 51 + (flick % 3)));
+                    float len = 120f + 80f * prog;
+                    Vector2 dirA = new Vector2(MathF.Cos(angA), MathF.Sin(angA));
+                    Vector2 centroA = posC + dirA * (rA - len * 0.5f);
+                    sb.Draw(VFXCore.SoftGlow, centroA, null,
+                        OroLuz * (0.30f + 0.20f * prog), angA, origenS,
+                        new Vector2(len / VFXCore.SoftGlow.Width, 4f / VFXCore.SoftGlow.Height),
+                        SpriteEffects.None, 0f);
+                }
             }
         }
     }

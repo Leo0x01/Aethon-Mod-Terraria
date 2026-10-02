@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.52 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.53 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,32 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.52)
+## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.53)
+- **v6.50.53 - LA DÉCIMA RONDA — EL ARCOÍRIS DE LA FORMA 3 + EL SERAFÍN + EL FANTASMA MUERTO + LA MASCOTA-JEFE + EL ESTALLIDO RADIANTE**:
+  (1) **EL ARCOÍRIS DE LA FORMA 3 POR FIN EXISTE**: bug de TRES
+  versiones — el dispatcher de auras NUNCA llamaba a `DibujarDivino3`:
+  el trono entero (nimbo, cruz, ofanim, alas prismáticas y la banda
+  arcoíris de Ap 4:3) JAMÁS se dibujó; ahora sí.
+  (2) **LA FORMA ASCENDIDA 4: EL SERAFÍN** («algo divino: alas, halo,
+  corona, aura celestial, luz, bruma, más luz y destello» — Isaías 6):
+  SEIS ALAS en tres pares, HALO TRIPLE con trisagión, CORONA del Rey
+  de Gloria, NIMBO mayor, RAYOS DE DIOS, BRUMA SANTA, cuerpo que
+  ARDE, destello, plumas que caen y la luz de mundo mayor de todas.
+  (3) **EL FANTASMA DE LOS NPCS MUERTO**: el PerlinBolt del rayo dejaba
+  el lote ABIERTO EN ADITIVO → todo NPC dibujado después salía
+  TRANSPARENTE; el finally de PreDraw ahora cierra y devuelve SIEMPRE
+  el lote de vanilla.
+  (4) **LA MASCOTA ES EL JEFE EN MINIATURA**: las SEIS secciones del
+  sol de código del jefe replicadas a escala 0.22 con el MISMO
+  compás (latido, giro, coronas de perlas, chispas).
+  (5) **EL ESTALLIDO RADIANTE** (la imagen del usuario hecha ataque):
+  60 t de recogida telegrafiada (el aro del radio de peligro + 14
+  brasas cayendo en espiral + el núcleo que se llena) y la explosión
+  de la foto: 44 rayos en 360° de largo variable con línea núcleo
+  blanca y halo que se calienta, anillo SEGMENTADO de emisores, cruz
+  anamórfica, núcleo que respira, estrella de 8 rayos, 26 bokeh,
+  chispas GoldFlame, la onda y LA LUZ QUE INUNDA EL MUNDO — todo por
+  código, TODO determinista.
 - **v6.50.52 - LA NOVENA RONDA — EL ARCOÍRIS DEL ÍTEM + EL JEFE SIN ARCOÍRIS + LA ENTRADA EN DOS ACTOS Y EL ESPEJO PURO**:
   (1) **EL ARCOÍRIS DEL ÍTEM**: el icono de la Forma Ascendida 3
   ahora lleva un ARO ARCOÍRIS ANGULAR VIVO horneado en el png (visible
@@ -168,11 +193,9 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — tag `v6.50.51` pusheado y su release
-  verificada byte a byte; la v6.50.52 está sellada LOCALMENTE (commit + tag +
-  bundle en /home/sync) — **PUSH PENDIENTE: el token GitHub se perdió con el
-  wipe del sandbox** (el de la .51 ya no vive en .env ni en el credential
-  store); con un token nuevo, `bash push-v6.50.52.sh` entrega todo en 1 comando.
+- **GitHub es la FUENTE DE LA VERDAD** — tags `v6.50.50`/`v6.50.51`/`v6.50.52` pusheados con
+  releases verificadas byte a byte (la .52: release 401940561, md5 0aca9b63…); la v6.50.53 se
+  sella en esta entrega (commit + tag + release + CDN verificado).
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 398 entradas auditado (set idéntico al de la .50: la banda arcoíris
   es HORNEADA EN CÓDIGO — cero texturas nuevas).

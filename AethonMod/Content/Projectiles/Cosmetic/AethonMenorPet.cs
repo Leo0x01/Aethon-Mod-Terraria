@@ -9,14 +9,12 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Cosmetic
 {
     /// <summary>
-    /// AethonMenorPet — v6.50.49 — EL AETHON MENOR (la mascota de luz).
-    ///
-    /// La letra: «crea una pequeña mascota de luz que sea Aethon
-    /// original pero mas pequeño». Es LA LUZ PRIMORDIAL EN MINIATURA:
-    /// su mismo núcleo (el sprite del jefe a media escala, aditivo),
-    /// su corona de perlas (ocho, girando en su elipse) y su halo —
-    /// flotando a tu lado, con la LUZ DE MUNDO girando por el espectro
-    /// (la luz del arcoíris de la casa, en pequeñito).
+    /// AethonMenorPet — v6.50.49 — EL AETHON MENOR (la mascota de luz) ·
+    /// v6.50.53 — EL JEFE EXACTO EN MINIATURA: «hazlo que sea exactamente
+    /// el jefe pero mas pequeño» — LAS SEIS SECCIONES DEL SOL DE CÓDIGO
+    /// del PreDraw del jefe (velo violeta, halo dorado, rueda de rayos,
+    /// dos coronas de perlas, chispas orbitantes y núcleo blanco con
+    /// corazón dorado) a la ESCALA 0.22.
     ///
     /// EL PATRÓN DE MASCOTA DE LUZ de vanilla (verificado contra el
     /// tML real): Main.projPet (persiste) + ProjectileID.Sets.LightPet
@@ -84,15 +82,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
             Projectile.rotation += 0.02f;   // el núcleo gira despacito (el sol en miniatura)
 
-            // === LA LUZ DE MUNDO (la firma de la mascota de LUZ): el
-            //     arcoíris de la casa girando por el espectro — la
-            //     misita del trono, alumbra TODO el arcoíris ===
-            float h = Frac(t * 0.05f);
-            Color prisma = Prisma(h);
-            Lighting.AddLight(Projectile.Center,
-                0.9f * (prisma.R / 255f) + 0.25f,
-                0.9f * (prisma.G / 255f) + 0.25f,
-                0.9f * (prisma.B / 255f) + 0.25f);
+            // === LA LUZ DE MUNDO (v6.50.53 — exactamente el JEFE: su luz
+            //     dorada-blanca (1.55, 1.35, 0.95) a escala de mascota —
+            //     el prisma rotativo murió: el jefe NO es arcoíris, es
+            //     ORO Y NÚCLEO BLANCO, y la mascota es SU retrato) ===
+            Lighting.AddLight(Projectile.Center, 0.85f, 0.72f, 0.48f);
 
             // === LAS CHISPAS (el rastro de la criatura de luz) ===
             if (!Main.dedServ && Main.rand.NextBool(14))
@@ -108,27 +102,23 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             }
         }
 
-        /// <summary>La parte fraccionaria (siempre positiva).</summary>
-        private static float Frac(float x) => x - MathF.Floor(x);
-
-        /// <summary>El color del espectro en el matiz h ∈ [0,1).</summary>
-        private static Color Prisma(float h)
-        {
-            h = Frac(h);
-            float r, g, b;
-            if (h < 1f / 6f) { r = 1f; g = h * 6f; b = 0f; }
-            else if (h < 2f / 6f) { r = 2f - h * 6f; g = 1f; b = 0f; }
-            else if (h < 3f / 6f) { r = 0f; g = 1f; b = h * 6f - 2f; }
-            else if (h < 4f / 6f) { r = 0f; g = 4f - h * 6f; b = 1f; }
-            else if (h < 5f / 6f) { r = h * 6f - 4f; g = 0f; b = 1f; }
-            else { r = 1f; g = 0f; b = 6f - h * 6f; }
-            return new Color((int)(r * 255f), (int)(g * 255f), (int)(b * 255f));
-        }
-
         // ==================================================================
-        //  EL DIBUJADO — LA LUZ PRIMORDIAL EN MINIATURA (el contrato del
-        //  bool de la casa: PreDraw cierra el lote del pase, vuela el
-        //  SUYO aditivo y DEVUELVE true → el llamador reabre)
+        //  EL DIBUJADO — v6.50.53 — EL JEFE EXACTO, EN MINIATURA (la
+        //  letra: «las mascota del jefe no se parece en nada al jefe,
+        //  hazlo que sea exactamente el jefe pero mas pequeño»). EL
+        //  DIAGNÓSTICO: el jefe EN JUEGO NO es su sprite png — es EL SOL
+        //  DE CÓDIGO del PreDraw (el velo violeta, el halo dorado, LA
+        //  RUEDA DE RAYOS RADIALES, LAS DOS CORONAS DE PERLAS, las
+        //  chispas orbitantes y el NÚCLEO BLANCO con su corazón dorado);
+        //  la mascota dibujaba el PNG crudo a 34 px = un disco chico que
+        //  NO se parecía en NADA. LA CURA: LAS SEIS SECCIONES DEL JEFE
+        //  replicadas UNA A UNA a la ESCALA 0.22 (el velo del jefe mide
+        //  540 px; el de la mascota, 119) — el MISMO dibujo, la MISMA
+        //  proporción, el MISMO compás (el latido 1.6 Hz, el giro 0.10
+        //  de la rueda, los sentidos opuestos de las coronas: +0.55 y
+        //  −0.38). El contrato del bool de la casa: PreDraw cierra el
+        //  lote del pase, vuela el SUYO aditivo y lo DEVUELVE ABIERTO
+        //  (v6.50.50 — el crash de la .49 murió así).
         // ==================================================================
         public override bool PreDraw(ref Color lightColor)
         {
@@ -139,48 +129,105 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 float t = Main.GlobalTimeWrappedHourly;
                 Vector2 c = Projectile.Center;
 
-                // === 1. EL HALO (el resplandor de la chispa — dos velos) ===
-                float aliento = 1f + 0.08f * MathF.Sin(t * 1.4f);
-                VFXCore.Quad(c, new Color(255, 244, 200, 255) * 0.16f,
-                    new Vector2(64f * aliento, 64f * aliento), 0f, VFXCore.SoftGlow);
-                VFXCore.Quad(c, new Color(255, 255, 250, 255) * 0.10f,
-                    new Vector2(110f * aliento, 110f * aliento), 0f, VFXCore.SoftGlow);
+                // === LA ESCALA: el jefe mide ~540 px de velo — la
+                //     mascota es SU RETRATO a 0.22 ===
+                const float S = 0.22f;
 
-                // === 2. EL NÚCLEO (el sprite del JEFE a media escala —
-                //     ES él, más pequeño — girando despacito) ===
-                Texture2D nucleo = Terraria.GameContent.TextureAssets.Npc[
-                    ModContent.NPCType<global::AethonMod.Content.NPCs.AethonBoss>()].Value;
-                if (nucleo != null)
-                    VFXCore.Quad(c, new Color(255, 255, 255, 230),
-                        new Vector2(34f, 34f), Projectile.rotation, nucleo);
+                // EL MISMO LATIDO y el MISMO BRILLO del jefe (su PreDraw).
+                float latido = 0.84f + 0.16f * MathF.Sin(t * 1.6f);
+                float brillo = 1f;
 
-                // === 3. LA CORONA DE PERLAS (ocho perlas en su elipse —
-                //     la doble órbita del jefe, en miniatura) ===
-                for (int i = 0; i < 8; i++)
+                // === 1. EL VELO VIOLETA (la profundidad del sol — la
+                //     sección 1 del jefe: Bloom 540, VioletaLuz, 0.10) ===
+                VFXCore.Quad(c, new Color(196, 150, 255, 255) * (0.055f * brillo),
+                    new Vector2(540f * 1.5f * S, 540f * 1.5f * S), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(196, 150, 255, 255) * (0.10f * brillo),
+                    new Vector2(540f * 0.8f * S, 540f * 0.8f * S), 0f, VFXCore.SoftGlow);
+
+                // === 2. EL HALO DORADO (la corona del sol — la sección 2
+                //     del jefe: BloomPulse 295·latido, OroLuz, 0.50) ===
+                float pulsoH = 0.82f + 0.18f * MathF.Sin(t * 1.6f);
+                float halo = 295f * latido * S;
+                VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.32f * brillo * pulsoH),
+                    new Vector2(halo * 2.85f, halo * 2.85f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 248, 225, 255) * (0.42f * brillo * pulsoH),
+                    new Vector2(halo * 1.5f, halo * 1.5f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 252, 240, 255) * (0.50f * brillo * pulsoH),
+                    new Vector2(halo * 0.8f, halo * 0.8f), 0f, VFXCore.SoftGlow);
+
+                // === 3. LA RUEDA DE RAYOS RADIALES (la sección 3 del
+                //     jefe: 10 rayos de la fase 1 girando a 0.10 — el sol
+                //     de Aethon es una RUEDA DE LUZ; el quad mide 2×largo
+                //     × 2×ancho como el Draw del jefe: el rayo sale del
+                //     centro hacia AMBOS lados) ===
                 {
-                    float ang = t * 1.1f + i * MathHelper.TwoPi / 8f;
-                    Vector2 perla = c + new Vector2(MathF.Cos(ang) * 30f, MathF.Sin(ang) * 12f - 2f);
-                    float frente = (MathF.Sin(ang) + 1f) * 0.5f;
-                    VFXCore.Quad(perla, new Color(255, 240, 190, 255) * (0.30f + 0.40f * frente),
-                        new Vector2(6f, 6f), 0f, VFXCore.SoftGlow);
+                    int nRayos = 10;
+                    float giro = t * 0.10f;
+                    for (int i = 0; i < nRayos; i++)
+                    {
+                        float ang = giro + i * MathHelper.TwoPi / nRayos;
+                        float largo = (255f + 165f * 0.55f) * S *          // faseInt 0.55 (la fase 2)
+                            (0.78f + 0.22f * MathF.Sin(t * 2.1f + i * 1.9f));
+                        float ancho = (34f - 12f * 0.55f) * S;
+                        VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.30f * brillo),
+                            new Vector2(largo * 2f, ancho * 2f), ang, VFXCore.SoftGlow);
+                    }
                 }
 
-                // === 4. EL ARCOÍRIS EN MINIATURA (v6.50.51 — «ni en la
-                //     mascota»: antes «el arcoíris» de la criatura era una
-                //     lucecita cambiando de color — NADIE lo veía. AHORA
-                //     es LA BANDA HORNEADA de siete franjas (VFXCore.
-                //     Arcoiris, la del trono), en pequeñito alrededor de
-                //     la chispa: el anillo del espectro de su dios) ===
-                Texture2D banda = VFXCore.Arcoiris;
-                if (banda != null)
-                    VFXCore.Quad(c, new Color(255, 255, 255, 255) * (0.50f * aliento),
-                        new Vector2(38f * 2.174f, 14f * 2.174f), t * 0.30f, banda);
+                // === 4. LAS DOS CORONAS DE PERLAS (la sección 4 del jefe:
+                //     13 perlas por anillo, rx 218/ry 134 y rx 300/ry 90,
+                //     sentidos OPUESTOS +0.55/−0.38 — el efecto 3D de
+                //     Saturno) ===
+                for (int anillo = 0; anillo < 2; anillo++)
+                {
+                    float rx = (anillo == 0 ? 218f : 300f) * S;
+                    float ry = (anillo == 0 ? 134f : 90f) * S;
+                    float w = anillo == 0 ? 0.55f : -0.38f;          // sentidos opuestos
+                    Color cP = anillo == 0 ? new Color(255, 240, 190) : new Color(196, 150, 255);
+                    for (int i = 0; i < 13; i++)
+                    {
+                        float ang = t * w + i * MathHelper.TwoPi / 13f;
+                        Vector2 perla = c + new Vector2(MathF.Cos(ang) * rx,
+                            MathF.Sin(ang) * ry);
+                        float tw = 0.5f + 0.5f * MathF.Sin(t * 3f + i * 2.1f + anillo);
+                        // LA PERLA (Bloom 12 → 2.6 px + su halo).
+                        VFXCore.Quad(perla, new Color(cP.R, cP.G, cP.B, 255) *
+                            (0.42f * (0.5f + 0.5f * tw) * brillo),
+                            new Vector2(12f * 1.5f * S, 12f * 1.5f * S), 0f, VFXCore.SoftGlow);
+                        VFXCore.Quad(perla, new Color(255, 250, 235, 255) *
+                            (0.42f * (0.5f + 0.5f * tw) * brillo),
+                            new Vector2(12f * 0.8f * S, 12f * 0.8f * S), 0f, VFXCore.SoftGlow);
+                    }
+                }
 
-                // === 5. LA CHISPA PRISMA (el latido del arcoíris — la
-                //     lucecita que cambia de color como su luz de mundo) ===
-                Color prisma = Prisma(t * 0.05f);
-                VFXCore.Quad(c + new Vector2(0f, -30f), new Color(prisma.R, prisma.G, prisma.B, 255) * 0.55f,
-                    new Vector2(10f, 10f), 0f, VFXCore.SoftGlow);
+                // === 5. LAS CHISPAS ORBITANTES (la sección 5 del jefe:
+                //     6 motas en r 176·0.72 elíptico) ===
+                for (int m = 0; m < 6; m++)
+                {
+                    float ang = t * (1.1f + m * 0.17f) + m * 2.1f;
+                    float r = 176f * S + 3.5f * MathF.Sin(t * 2.4f + m);
+                    Vector2 mota = c + new Vector2(MathF.Cos(ang) * r,
+                        MathF.Sin(ang) * r * 0.72f);
+                    VFXCore.Quad(mota, new Color(255, 240, 190, 255) * (0.40f * brillo),
+                        new Vector2(20f * 1.5f * S, 20f * 1.5f * S), 0f, VFXCore.SoftGlow);
+                    VFXCore.Quad(mota, new Color(255, 252, 240, 255) * (0.40f * brillo),
+                        new Vector2(20f * 0.8f * S, 20f * 0.8f * S), 0f, VFXCore.SoftGlow);
+                }
+
+                // === 6. EL NÚCLEO (la sección 6 del jefe: el corazón
+                //     BLANCO de 130·latido al 1.0 + su alma DORADA de
+                //     0.42× al 0.65 — el centro del dios) ===
+                float tamNucleo = 130f * latido * S;
+                VFXCore.Quad(c, new Color(255, 252, 240, 255) * (1.0f * brillo),
+                    new Vector2(tamNucleo * 2.85f, tamNucleo * 2.85f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 252, 240, 255) * (1.0f * brillo),
+                    new Vector2(tamNucleo * 1.5f, tamNucleo * 1.5f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 252, 240, 255) * (1.0f * brillo),
+                    new Vector2(tamNucleo * 0.8f, tamNucleo * 0.8f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.65f * brillo),
+                    new Vector2(tamNucleo * 0.42f * 1.5f, tamNucleo * 0.42f * 1.5f), 0f, VFXCore.SoftGlow);
+                VFXCore.Quad(c, new Color(255, 240, 190, 255) * (0.65f * brillo),
+                    new Vector2(tamNucleo * 0.42f * 0.8f, tamNucleo * 0.42f * 0.8f), 0f, VFXCore.SoftGlow);
 
                 if (VFXCore.QuadCount > 0)
                 {

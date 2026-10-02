@@ -66,6 +66,15 @@ namespace AethonMod.Content.Players
         /// canonica, prismatic de punta a punta)?</summary>
         public bool FormaAscendidaTres;
 
+        /// <summary>¿Lleva LA FORMA ASCENDIDA 4 (v6.50.53 — EL SERAFÍN:
+        /// la cuarta luz, «crea una 4 forma ascendida, asegurate de que
+        /// sea algo divino, alas, halo, corona, aura celestial, luz,
+        /// bruma, mas luz y destello, mejor iluminacion» — la
+        /// iconografía del serafín de Isaías 6: LAS SEIS ALAS, EL CUERPO
+        /// QUE ARDE, EL HALO TRIPLE con el trisagión, LA CORONA DEL REY
+        /// DE GLORIA, LOS RAYOS DE DIOS y LA BRUMA SANTA del templo)?</summary>
+        public bool FormaAscendidaCuatro;
+
         /// <summary>
         /// v6.50.48 — EL VUELO INFINITO (la letra: «ademas la forma
         /// ascendida y la forma ascendida 2 deben dar vuelo infinito») ·
@@ -87,7 +96,7 @@ namespace AethonMod.Content.Players
         /// «if (drawPlayer.wings <= 0) return») — el serafín vuela con
         /// SUS plumas de luz.
         /// </summary>
-        public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres;
+        public bool VueloDivino => FormaAscendida || FormaAscendidaDos || FormaAscendidaTres || FormaAscendidaCuatro;
 
         public override void ResetEffects()
         {
@@ -97,6 +106,7 @@ namespace AethonMod.Content.Players
             FormaAscendida = false;
             FormaAscendidaDos = false;
             FormaAscendidaTres = false;
+            FormaAscendidaCuatro = false;
             BrasaDelEclipse = false;
         }
 
@@ -110,6 +120,7 @@ namespace AethonMod.Content.Players
             int ascendidaType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaItem>();
             int ascendidaDosType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaDosItem>();
             int ascendidaTresType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaTresItem>();
+            int ascendidaCuatroType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
 
             for (int i = 3; i <= 19; i++)
@@ -127,6 +138,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaType) FormaAscendida = true;
                 else if (item.type == ascendidaDosType) FormaAscendidaDos = true;
                 else if (item.type == ascendidaTresType) FormaAscendidaTres = true;
+                else if (item.type == ascendidaCuatroType) FormaAscendidaCuatro = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
             }
 
@@ -249,6 +261,13 @@ namespace AethonMod.Content.Players
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 5f);
                 }
+                if (FormaAscendidaCuatro && !EspiarPortador(6))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("FormaAscendidaCuatro"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 6f);
+                }
                 if (BrasaDelEclipse && !EspiarPortador(3))
                 {
                     Projectile.NewProjectile(Player.GetSource_Misc("BrasaDelEclipse"),
@@ -268,7 +287,7 @@ namespace AethonMod.Content.Players
             //     CHISPAS — y CERO discos planos: los 2 círculos murieron).
             //     Aquí solo quedan los DOS milagros de SUELO que el patrón
             //     no cubre: la HUELLA y el PULSO.
-            if (FormaAscendida || FormaAscendidaDos)
+            if (FormaAscendida || FormaAscendidaDos || FormaAscendidaTres || FormaAscendidaCuatro)
             {
                 Vector2 centro = Player.Center;
 
@@ -315,11 +334,13 @@ namespace AethonMod.Content.Players
                 // apoteosis absoluta alumbra el doble. v6.50.49 — la
                 // Forma 3 es EL TRONO: la luz del arcoíris, BLANCA
                 // entera (el blanco que contiene TODOS los colores).
-                Vector3 luz = FormaAscendidaTres
-                    ? new Vector3(1.15f, 1.05f, 0.95f)
-                    : FormaAscendidaDos
-                        ? new Vector3(0.92f, 0.72f, 0.34f)
-                        : new Vector3(0.46f, 0.36f, 0.17f);
+                Vector3 luz = FormaAscendidaCuatro
+                    ? new Vector3(1.55f, 1.38f, 1.02f)
+                    : FormaAscendidaTres
+                        ? new Vector3(1.15f, 1.05f, 0.95f)
+                        : FormaAscendidaDos
+                            ? new Vector3(0.92f, 0.72f, 0.34f)
+                            : new Vector3(0.46f, 0.36f, 0.17f);
                 Lighting.AddLight(centro - new Vector2(0f, 10f), luz);
             }
         }

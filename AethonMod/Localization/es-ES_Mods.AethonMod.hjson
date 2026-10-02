@@ -1655,6 +1655,22 @@ Items: {
 			'''
 	}
 
+	FormaAscendidaCuatroItem: {
+		DisplayName: La Forma Ascendida 4
+		Tooltip:
+			'''
+			EL SERAFÍN — la cuarta luz: EL QUE ARDE (Isaías 6).
+			LAS SEIS ALAS — dos que cubren tu rostro, dos que cubren
+			tus pies y dos con las que vuelas. EL CUERPO QUE ARDE con sus
+			lenguas de fuego, EL HALO TRIPLE con el trisagión («santo,
+			santo, santo»), LA CORONA DEL REY DE GLORIA con sus picos
+			y joyas, LOS RAYOS DE DIOS girando detrás de ti, LA BRUMA
+			SANTA que llena el templo y EL DESTELLO del corazón.
+			La ILUMINACIÓN mayor de las cuatro formas — el que arde, ALUMBRA.
+			Y VUELO INFINITO (como sus tres hermanas).
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: La Brasa del Eclipse
 		Tooltip:
@@ -2227,6 +2243,8 @@ Jefe: {
 		Manada: LA MANADA ASTRAL — la luz suelta a los perros del cielo: mátalos o córreles.
 		Telar: EL TELAR DE CONSTELACIONES — las estrellas tejen la jaula: sal de la figura.
 		Decreto: EL DECRETO DEL ECLIPSE — el círculo crece y la luz NO se mueve: corre, ahora es cuando.
+		// v6.50.53 — THE USER'S IMAGE, MADE AN ATTACK: THE RADIANT BURST
+		Estallido: EL ESTALLIDO RADIANTE — toda la luz del mundo se junta y ARDE: fuera del anillo.
 	}
 }
 
