@@ -165,6 +165,9 @@ namespace AethonMod.Content.NPCs
         private const int EST_TELAR = 11;       // v6.50.45 — EL TELAR (el círculo veloz)
         private const int EST_DECRETO = 12;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
         private const int EST_ESTALLIDO = 13;   // v6.50.53 — EL ESTALLIDO RADIANTE (la imagen del usuario: el punto de luz que ARDE y lo arrasa todo — 60 t de recogida telegrafiada y la explosión de 360° con rayos, anillo segmentado, cruz y chispas)
+        private const int EST_DANZA = 14;      // v6.50.54 — LA DANZA SOLAR (la investigación EoL: SUN DANCE — la rueda de rayos del dios girando sobre la presa, el ataque que un dios-sol DEBÍA tener)
+        private const int EST_LANZAS = 15;     // v6.50.54 — LAS LANZAS ETERNAS (ETHEREAL LANCE: la luz sembrada DETRÁS de tu carrera, telegrafiada y translúcida hasta volar — castiga la línea recta)
+        private const int EST_CORONA = 16;     // v6.50.54 — LA CORONA ETERNA (EVERLASTING RAINBOW: el anillo de 14 plumas prismáticas espiralando alrededor de la presa)
         private const int EST_MURIENDO = 99;    // la contracción final
 
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
@@ -257,6 +260,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // === LA ESTELA MINADA DEL DESTELLO (v6.50.44): una mina por
         //     cruzamiento — el punto por el que VOLVISTE ya no es seguro ===
         private bool _minaPuesta = false;
+
+        // === v6.50.54 — EL COMPÁS DEL ESTALLIDO (la frecuencia pedida: «1 vez
+        //     en la fase 1, 2 veces en la fase 2 y ser un poco más grande, y
+        //     en la fase 3 debe hacerla cada un número de veces aleatorio
+        //     entre 1 a 9 ataques de otro tipo»): P1/P2 gastan un PRESUPUESTO
+        //     por fase (1 y 2 usos); P3+ lo FUERZA un contador aleatorio 1-9
+        //     que se RE-TIRA tras cada estallido) ===
+        private int _estallidosUsadosEnFase = 0;
+        private int _ataquesDesdeEstallido = 0;
+        private int _proximoEstallidoEn = 999;    // en P1/P2 no aplica (presupuesto)
+        private float _proximaExplosion = 60f;    // viaja en ai[3]: el tick de la PRÓXIMA explosión (el telegrafo del cliente)
 
         // === EL VOLTEO Y LAS RUNAS (heredados de la sierpe) ===
         private int _tickGravedad = 0;
@@ -404,6 +418,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_TELAR: EstadoTelar(target); break;
                 case EST_DECRETO: EstadoDecreto(target); break;
                 case EST_ESTALLIDO: EstadoEstallido(target); break;
+                case EST_DANZA: EstadoDanza(target); break;
+                case EST_LANZAS: EstadoLanzas(target); break;
+                case EST_CORONA: EstadoCorona(target); break;
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
@@ -430,7 +447,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             //      desde su spawn, no desde aquí. v6.50.46: el 3 del eclipse
             //      MURIÓ con él — ai[1] jamás vuelve a 3 en la pelea)
             NPC.ai[2] = _tickEstado;
-            NPC.ai[3] = _angDestello;   // el rumbo del destello (la línea guía del cliente)
+            // v6.50.54 — ai[3] DUPLA: en EL DESTELLO sigue siendo el rumbo (la
+            // línea guía del cliente); en EL ESTALLIDO viaja el tick de la
+            // PRÓXIMA explosión (el aro del telegrafo se re-dibuja antes de
+            // CADA detonación — el compás del multi-estallido).
+            NPC.ai[3] = _estado == EST_ESTALLIDO ? _proximaExplosion : _angDestello;
 
             // MP: la luz respira por el cable cada 12 ticks.
             if ((Main.GameUpdateCount % 12u) == 0u) NPC.netUpdate = true;
@@ -800,19 +821,35 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void ElegirAtaque(Player target)
         {
-            // el menú de la fase
+            // v6.50.54 — EL COMPÁS DEL ESTALLIDO (fase 3+, la letra del
+            // usuario: «en la fase 3 debe hacerla cada un número de veces
+            // aleatorio entre 1 a 9 ataques de otro tipo»): cuando el
+            // contador de ataques de OTRO tipo llega al número tirado, la
+            // luz ARDE sí o sí — el estallido YA NO es «poco común».
+            if (Phase >= 3 && _ataquesDesdeEstallido >= _proximoEstallidoEn)
+            {
+                _ataquesDesdeEstallido = 0;
+                _proximoEstallidoEn = Main.rand.Next(1, 10);   // 1-9, re-tirado
+                _estallidosUsadosEnFase++;
+                _ultimoAtaque = EST_ESTALLIDO;
+                _estado = EST_ESTALLIDO;
+                _tickEstado = 0;
+                NPC.netUpdate = true;
+                return;
+            }
+
+            // el menú de la fase (v6.50.54 — EL ESTALLIDO SALE de los menús
+            // de 3/4/5: su frecuencia la manda EL COMPÁS de arriba; en P1/P2
+            // queda en el menú con su PRESUPUESTO — 1 y 2 usos por fase.
+            // Y LAS TRES ARMAS NUEVAS DE LA INVESTIGACIÓN EoL: LA DANZA
+            // SOLAR desde P3, LAS LANZAS y LA CORONA desde P4).
             int[] menu = Phase switch
             {
-                1 => new[] { EST_JUICIO, EST_RAYO },
-                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_ESTALLIDO },
-                // v6.50.46 — EL ECLIPSE MUERE EN TODOS LOS MENÚS: la fase
-                // final ya NO es «la luz se apaga y solo brillan las balas»
-                // (se veía mal — la petición fue LITERAL) — su lugar lo toma
-                // EL VÓRTICE PRIMORDIAL: la galaxia de pernos dorados que
-                // gira y colapsa sobre la presa.
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_ESTALLIDO },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_ESTALLIDO },
+                1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO },
+                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO },
+                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA },
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -824,6 +861,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             int n = 0;
             foreach (int plato in menu)
             {
+                // v6.50.54 — EL PRESUPUESTO DEL ESTALLIDO (P1/P2): 1 uso en
+                // toda la fase 1, 2 en la fase 2 — gastado, el plato SALE
+                // del menú hasta la siguiente fase.
+                if (plato == EST_ESTALLIDO && Phase <= 2 &&
+                    _estallidosUsadosEnFase >= Phase)
+                    continue;
+
                 int peso = 2;                                              // base
                 if (plato == EST_DESTELLO && velH > 7f) peso = 5;         // el corredor
                 if (plato == EST_NOVA && _ticksPresaQuieta > 30) peso = 6; // el quieto
@@ -844,6 +888,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // abraza al sol tiene 60 t de aro encendido para ARREPENTIRSE
                 // — el radio 600 telegrafiado es LA LEY del ataque.
                 if (plato == EST_ESTALLIDO && cerca) peso = 5;              // el pegado
+                // v6.50.54 — LAS TRES ARMAS NUEVAS TAMBIÉN LEEN TU COMPORTAMIENTO
+                // (la investigación EoL): LA DANZA caza al VOLADOR (la rueda
+                // lo alcanza arriba), LAS LANZAS al CORREDOR (nacen DONDE
+                // VAS — la línea recta las encuentra de frente) y LA CORONA
+                // al QUIETO (el anillo que espirala lo encuentra parado).
+                if (plato == EST_DANZA && alto) peso = 5;                    // el volador
+                if (plato == EST_LANZAS && velH > 7f) peso = 5;               // el corredor
+                if (plato == EST_CORONA && _ticksPresaQuieta > 30) peso = 5;  // el quieto
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
@@ -851,6 +903,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (elegido == _ultimoAtaque && menu.Length > 1)
                 elegido = menu[(Array.IndexOf(menu, elegido) + 1) % menu.Length];
             _ultimoAtaque = elegido;
+
+            // v6.50.54 — EL COMPÁS: los ataques de OTRO tipo alimentan el
+            // contador del estallido (y cada estallido gasta su presupuesto).
+            if (elegido == EST_ESTALLIDO)
+            {
+                _estallidosUsadosEnFase++;
+                _ataquesDesdeEstallido = 0;
+            }
+            else _ataquesDesdeEstallido++;
 
             _estado = elegido;
             _tickEstado = 0;
@@ -1126,6 +1187,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// la cruz, las chispas, el flash que inunda) derritiéndose durante
         /// 2,5 s. El jefe queda PARADO en el centro de su estallido — el
         /// sol no se esconde de su propia luz.
+        /// v6.50.54 — EL MULTI-ESTALLIDO (la letra: «1 vez en la fase 1,
+        /// 2 veces en la fase 2… y en la fase 3 cada 1-9 ataques de otro
+        /// tipo»): cada activación suelta 1 explosión en P1, 2 en P2 y 3
+        /// en P3+ (t=60/105/150) — y CADA una con SU recogida telegrafiada
+        /// (ai[3] lleva el tick de la próxima: el aro se re-dibuja SIEMPRE).
+        /// La ESCALA («un poco más grande») viaja en ai[2] del proyectil
+        /// (fase·8192 + seed) y crece con la ira del dios.
         /// </summary>
         private void EstadoEstallido(Player target)
         {
@@ -1139,20 +1207,191 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 OndaLib.Kick(5f, 10);
             }
 
-            // EL ESTALLIDO (t=60): nace EL PUNTO DE LUZ — la imagen entera.
-            if (_tickEstado == 60 && Main.netMode != NetmodeID.MultiplayerClient)
+            // EL MULTI-ESTALLIDO: 1 detonación en P1 · 2 en P2 · 3 en P3+.
+            int detonaciones = Phase >= 3 ? 3 : Phase;
+            int[] ticksDet = { 60, 105, 150 };
+            for (int d = 0; d < detonaciones; d++)
             {
-                int dano = (int)(NPC.damage * 0.95f);
-                Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                    NPC.Center, Vector2.Zero,
-                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                    dano, 3f, Main.myPlayer,
-                    AtaqueJefeProjectile.EstiloEstallidoRadiante,
-                    dano, NPC.whoAmI * 79 + _tickEstado);
+                if (_tickEstado == ticksDet[d] && Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    int dano = (int)(NPC.damage * 0.95f);
+                    // LA ESCALA VIAJA EN EL SEED: ai[2] = fase·8192 + seed —
+                    // el proyectil la separa (Seed = ai[2]%9973, fase = ai[2]/8192)
+                    // y TODO el espectáculo crece con la ira del dios.
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        dano, 3f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloEstallidoRadiante,
+                        dano, NPC.whoAmI * 79 + _tickEstado + Phase * 8192);
+                    NPC.netUpdate = true;
+                }
+            }
+
+            // LA PRÓXIMA DETONACIÓN (viaja en ai[3]: el aro del telegrafo
+            // se dibuja en los 60 t previos a CADA explosión — la señal
+            // nunca falta, ni antes de la segunda ni de la tercera).
+            _proximaExplosion = -1f;
+            for (int d = 0; d < detonaciones; d++)
+                if (_tickEstado < ticksDet[d]) { _proximaExplosion = ticksDet[d]; break; }
+
+            int finEst = ticksDet[detonaciones - 1] + 45;
+            if (_tickEstado >= finEst) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        // ==================================================================
+        //  v6.50.54 — LAS TRES ARMAS NUEVAS DE LA INVESTIGACIÓN EMPERATRIZ
+        //  (la petición: «intenta mejorar los ataques del jefe y su IA,
+        //  investiga el mod mas popular de la emperatris de la luz, que la
+        //  mejora sea tanto visual como de variedad, y que los ataques
+        //  tengan sentido para un jefe de tipo DIOS»): LA DANZA SOLAR
+        //  (Sun Dance — la rueda de rayos girando), LAS LANZAS ETERNAS
+        //  (Ethereal Lance — la luz sembrada DONDE VAS, telegrafiada y
+        //  translúcida hasta volar) y LA CORONA ETERNA (Everlasting
+        //  Rainbow — el anillo de plumas prismáticas espiralando).
+        // ==================================================================
+
+        /// <summary>
+        /// LA DANZA SOLAR — EL ATAQUE QUE UN DIOS-SOL DEBÍA TENER: el jefe
+        /// se cierne sobre la presa y despliega SU RUEDA — SEIS rayos
+        /// largos (860 px) que GIRAN despacio (una vuelta cada ~8,4 s) en
+        /// TRES tandas desfasadas, cada una naciendo TRANSLÚCIDA los
+        /// primeros 25 t (la regla de legibilidad de Fargo's: lo que aún
+        /// no daña, se ve translúcido — el rayo se ENCIENDE de verdad
+        /// cuando ya mata). La rueda CABALGA con el jefe (ai[2] = su
+        /// whoAmI): hay que caminar ENTRE los rayos, moviéndose con el
+        /// giro — la firma de la Emperatriz, el compás de un dios.
+        /// </summary>
+        private void EstadoDanza(Player target)
+        {
+            // SE ALZA sobre la presa: la danza barre desde arriba.
+            Vector2 punto = target.Center + new Vector2(0f, -420f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
+
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    // LA RUEDA: nace en el jefe y LO SIGUE (ai[2] = whoAmI).
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.55f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloDanzaSolar,
+                        Furia ? 1f : 0f, NPC.whoAmI);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item117, NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Danza", OroLuz);
+                OndaLib.Kick(7f, 14);
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 98) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 580) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>
+        /// LAS LANZAS ETERNAS — EL TELEGRAFO MÁS ELEGANTE DE VANILLA, en
+        /// manos del dios: DOS tandas de lanzas de luz sembradas LEJOS
+        /// (620 px, en el arco DETRÁS de tu carrera — donde VAS, no donde
+        /// estás: el corredor en línea recta las encuentra de frente) que
+        /// primero DIBUJAN SU TRAYECTORIA (la línea fina translúcida —
+        /// inofensiva mientras se ve así) y a los 50 t VUELAN a su punto.
+        /// La SEGUNDA tanda es LA SENTENCIA: cae sobre tu posición ACTUAL
+        /// — el que esquivó la primera mirando, paga la segunda moviéndose.
+        /// </summary>
+        private void EstadoLanzas(Player target)
+        {
+            // A FLANCO (el arquero divino no dispara de frente).
+            Vector2 lejos = target.Center + new Vector2(
+                MathF.Cos(_angOrbita) * 500f, -280f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
+
+            bool primera = _tickEstado == 30;
+            bool segunda = _tickEstado == 92;
+            if (primera || segunda)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    SembrarLanzas(target, segunda);
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(segunda ? 0.25f : -0.1f), NPC.Center);
+                if (primera)
+                {
+                    EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Lanzas", OroLuz);
+                    OndaLib.Kick(6f, 12);
+                }
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 175) { _estado = EST_FLOTAR; _tickEstado = 0; }
+        }
+
+        /// <summary>LA SIEMBRA: n lanzas alrededor del ancla — cada una
+        /// con SU origen (620 px, el arco trasero de tu carrera) y SU
+        /// destino (el punto que van a atravesar) — el proyectil dibuja
+        /// la línea y vuela (ai[1]/ai[2] = el destino · ai[3] = el daño).</summary>
+        private void SembrarLanzas(Player target, bool sentencia)
+        {
+            int n = Math.Min(14, 8 + Phase);
+            // EL ARCO: la primera tanda nace DETRÁS de tu RITMO (donde VAS);
+            // LA SENTENCIA nace alrededor de tu posición ACTUAL.
+            Vector2 ancla = sentencia ? target.Center : PredPresa(target);
+            Vector2 atras = target.velocity.LengthSquared() > 1f
+                ? Vector2.Normalize(target.velocity) : new Vector2(0f, -1f);
+            float angBase = atras.ToRotation();
+            for (int i = 0; i < n; i++)
+            {
+                float f = (i - (n - 1) * 0.5f) / Math.Max(1f, n - 1);   // -1..1
+                float ang = angBase + f * 2.1f + (sentencia ? MathHelper.Pi : 0f);
+                Vector2 origen = ancla + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * 620f;
+                // EL DESTINO: el punto que la lanza ATRAVIESA — el ancla con
+                // el abanico (la cortina que hay que cruzar por decisión).
+                Vector2 destino = ancla + new Vector2(f * 360f, MathF.Abs(f) * -70f);
+                // LA FIRMA (ai0 = el estilo · ai[1]/ai[2] = EL DESTINO · el
+                // daño viaja en el PARÁMETRO damage — el daño manual es del
+                // cauce de la casa: HerirJugador con Projectile.damage).
+                Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    origen.X, origen.Y, 0f, 0f,
+                    ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.75f), 0f, Main.myPlayer,
+                    AtaqueJefeProjectile.EstiloLanzaEterna,
+                    destino.X, destino.Y);
+            }
+        }
+
+        /// <summary>
+        /// LA CORONA ETERNA — EL ANILLO ARCOÍRIS DE LA EMPERATRIZ: CATORCE
+        /// plumas prismáticas (cada una SU color del espectro) en círculo
+        /// alrededor de la presa, espiralando HACIA AFUERA y LUEGO HACIA
+        /// ADENTRO (el mismo sentido, girando — la jaula que respira) y
+        /// dejando el anillo guía translúcido como única advertencia. El
+        /// ancla DERIVA hacia ti (el coro de la casa): la corona TE SIGUE
+        /// cantando — hay que cruzarla en el compás justo.
+        /// </summary>
+        private void EstadoCorona(Player target)
+        {
+            // EL DIOS OBSERDA desde su flanco (la corona espira alrededor TUYO).
+            Vector2 lejos = target.Center + new Vector2(
+                MathF.Cos(_angOrbita) * 540f, -320f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (lejos - NPC.Center) * 0.05f, 0.10f);
+
+            if (_tickEstado == 30)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        target.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.50f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloCoronaEterna,
+                        Furia ? 1f : 0f, NPC.whoAmI * 53);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item70.WithPitchOffset(-0.3f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Corona", OroLuz);
+                OndaLib.Kick(6f, 13);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado >= 230) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         // ==================================================================
@@ -1225,21 +1464,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         //  EL DESTELLO — LA EMBESTIDA A VELOCIDAD LUZ
         // ==================================================================
 
-        /// <summary>Prepara un destello: rumbo al CORTE DE LA HUIDA.</summary>
+        /// <summary>Prepara un destello: rumbo DIRECTO a la presa.</summary>
         private void PrepararDestello(Player target)
         {
-            // v6.50.44 — EL CORTE DE LA HUIDA: el rumbo ya no apunta A tu
-            // predicción sino DONDE NO PUEDES estar cuando llegue — alterna
-            // el flanco derecho e izquierdo de tu carrera (el ziguezagueo
-            // perezoso ya no basta: hay que CAMBIAR el rumbo, no solo la
-            // velocidad).
+            // v6.50.54 — CENTRADO EN EL JUGADOR (la letra: «ese dash que sea
+            // mas corto y que este centrado en el jugador"): el rumbo apunta
+            // DIRECTO a la posición predicha — el CORTE LATERAL de la .44
+            // (pred + perp·150, el flanco de la huida) mandaba la luz «a
+            // ningún lado» cuando la presa cambiaba de rumbo. El dios embiste
+            // DONDE ESTÁS, no donde no puedes estar.
             Vector2 pred = PredPresa(target);
-            Vector2 rumboVec = pred - NPC.Center;
-            Vector2 perp = new Vector2(-rumboVec.Y, rumboVec.X);
-            if (perp.LengthSquared() > 0.001f) perp.Normalize();
-            float lado = (_cadenasDestello % 2 == 0) ? 1f : -1f;
-            Vector2 corte = pred + perp * (150f * lado);
-            _angDestello = (corte - NPC.Center).ToRotation();
+            _angDestello = (pred - NPC.Center).ToRotation();
             _minaPuesta = false;   // la mina es una por cruzamiento
             NPC.velocity *= 0.25f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
@@ -1266,8 +1501,10 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 return;
             }
 
-            // === EL CRUCE: a velocidad luz por la línea ===
-            float vel = 44f + Phase * 2.5f + (Furia ? 4f : 0f);
+            // === EL CRUCE: a velocidad luz por la línea (v6.50.54 — MÁS
+            //     CORTO: 44→34 px/t — la embestida legible que CRUZA tu
+            //     posición y frena, no la que desaparece del mapa) ===
+            float vel = 34f + Phase * 2f + (Furia ? 3f : 0f);
             Vector2 rumbo = new Vector2(MathF.Cos(_angDestello), MathF.Sin(_angDestello));
             NPC.velocity = Vector2.Lerp(NPC.velocity, rumbo * vel, 0.30f);
 
@@ -1290,9 +1527,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
             }
 
-            // el cruce terminó: ¿OTRO destello o el descanso?
-            bool cruzo = Vector2.Distance(NPC.Center, target.Center) > 1900f;
-            if (_tickEstado > 90 || cruzo)
+            // el cruce terminó (v6.50.54 — CORTO Y CENTRADO): pasó AL
+            // jugador y se apagó — cuando se ALEJA del objetivo, a los 58 t
+            // o a 1200 px, la embestida muere (antes: 1900 px y 90 t = el
+            // «dash que no va a ninguna parte»).
+            float distD = Vector2.Distance(NPC.Center, target.Center);
+            bool alejando = Vector2.Dot(NPC.velocity, target.Center - NPC.Center) < 0f;
+            if (_tickEstado > 34 && (alejando || _tickEstado > 58 || distD > 1200f))
             {
                 int maxCadena = Furia ? 3 : (Phase >= 3 ? 2 : 1);
                 if (_cadenasDestello < maxCadena)
@@ -1404,50 +1645,42 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // ==================================================================
 
         /// <summary>
-        /// EL RELOJ DE ARENA CÓSMICO GIGANTE (v6.50.46 — la SEGUNDA
-        /// ronda sobre el pedido: «solo lo lanza en un lugar, deberia
-        /// ser mas grande, mucho mas grande, y ser lanzado varios al
-        /// rededor del jugador»). Ya no ES un reloj — es EL ANILLO DEL
-        /// TIEMPO: CUATRO relojes GIGANTES (×5.2 — edificios de arena
-        /// estelar) CAEN del cielo en cruz diagonal alrededor de la
-        /// presa y quedan flotando en sus puestos — la lluvia del
-        /// peso cubre el anillo entero: no hay rincón seguro dentro,
-        /// hay que SALIR o pagar. La arena aplasta cada 10 t y cada
-        /// INVERSIÓN es el pulso que HUNDE de verdad.
+        /// v6.50.54 — EL RELOJ DE LA CORONA (la letra: «son 4 ataques
+        /// grandes, pero no debe ser asi, debe ser un solo ataque grande
+        /// centrado en el jefe y que debe moverse con el jefe»): YA NO EL
+        /// ANILLO DE CUATRO — UN SOLO RELOJ GIGANTE (×7.5 — la catedral del
+        /// tiempo) que NACE EN EL JEFE y CABALGA CON ÉL: el proyectil lee
+        /// ai[2] = el whoAmI del dios y lo SIGUE (la goma suave de Lerp).
+        /// El PESO de la arena aplasta alrededor DEL JEFE (radio 560) y
+        /// cada INVERSIÓN es el pulso que HUNDE — el tiempo cae del cielo
+        /// DONDE ESTÁ EL DIOS, no donde estabas tú.
         /// </summary>
         private void EstadoReloj(Player target)
         {
-            // SE ALZA (el anillo necesita cielo) y siembra sobre la PREDICCIÓN.
-            Vector2 punto = target.Center + new Vector2(0f, -560f);
+            // SE ALZA (el reloj necesita cielo sobre su presa).
+            Vector2 punto = target.Center + new Vector2(0f, -460f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.06f, 0.12f);
 
             if (_tickEstado == 30)
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    // EL ANILLO: CUATRO gigantes en cruz diagonal alrededor
-                    // de la presa — cada uno CAE del cielo hasta su puesto.
-                    Vector2 centro = PredPresa(target);
-                    for (int i = 0; i < 4; i++)
-                    {
-                        float ang = i * MathHelper.PiOver2 + MathHelper.PiOver4;
-                        Vector2 pos = centro +
-                            new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.72f) * 330f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                            pos - new Vector2(0f, 430f), new Vector2(0f, 13f),
-                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                            (int)(NPC.damage * 0.50f), 0f, Main.myPlayer,
-                            AtaqueJefeProjectile.EstiloRelojGigante,
-                            Furia ? 1f : 0f, NPC.whoAmI * 31 + i);
-                    }
+                    // EL RELOJ ÚNICO: nace EN EL JEFE y lo SIGUE — ai[2] =
+                    // su whoAmI (el caballo del reloj).
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        (int)(NPC.damage * 0.60f), 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloRelojGigante,
+                        Furia ? 1f : 0f, NPC.whoAmI);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.4f), NPC.Center);
                 EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", OroLuz);
-                OndaLib.Kick(7f, 16);
+                OndaLib.Kick(8f, 18);
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 170) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 210) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
 
         /// <summary>
@@ -1676,21 +1909,33 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void EstadoDecreto(Player target)
         {
-            // INMÓVIL (la sentencia no se dicta corriendo).
-            NPC.velocity = Vector2.Zero;
+            // v6.50.54 — YA NO INMÓVIL (la letra: «ese ataque debe estar
+            // centrado en el jefe, moverse con el jefe»): el decreto
+            // CABALGA con el dios — órbita LENTA alrededor de la presa
+            // mientras el círculo lo sigue (el proyectil lee ai[2] = su
+            // whoAmI). La ventana de escape sigue existiendo: el círculo
+            // crece DESPACIO y el aro se ve venir — pero hay que leerlo
+            // EN MOVIMIENTO, como se lee a un dios de verdad.
+            _angOrbita += 0.010f * _sentidoOrbita;
+            Vector2 punto = target.Center + new Vector2(
+                MathF.Cos(_angOrbita) * 380f,
+                -240f + MathF.Sin(_angOrbita) * 70f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.05f, 0.10f);
 
             if (_tickEstado == 24)
             {
-                // EL CÍRCULO: nace sobre el JUGADOR — ai[1] = la FASE (el
-                // tamaño del decreto crece con la ira).
+                // v6.50.54 — EL CÍRCULO: nace EN EL JEFE y LO SIGUE (la
+                // petición: centrado en el jefe, moviéndose con el jefe) —
+                // ai[1] = la FASE (el tamaño crece con la ira) · ai[2] = el
+                // whoAmI DEL JEFE (el caballo del círculo).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        target.Center, Vector2.Zero,
+                        NPC.Center, Vector2.Zero,
                         ModContent.ProjectileType<AtaqueJefeProjectile>(),
                         (int)(NPC.damage * 0.80f), 0f, Main.myPlayer,
                         AtaqueJefeProjectile.EstiloDecretoJefe,
-                        Phase, NPC.whoAmI * 43);
+                        Phase, NPC.whoAmI);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, NPC.Center);
                 EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Decreto", VioletaLuz);
@@ -1779,7 +2024,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item4, NPC.Center);
         }
 
-        /// <summary>EL CAMBIO DE FASE (v6.50.45: con EL DECRETO — el jefe se clava y decreta el círculo del eclipse; el jugador gana LA ventana de escape).</summary>
+        /// <summary>EL CAMBIO DE FASE (v6.50.45: con EL DECRETO — el círculo nace en el JEFE y CABALGA con él; el jugador gana LA ventana de escape leyendo el aro en movimiento).</summary>
         private void OnPhaseChange()
         {
             NPC.life = Math.Min(NPC.lifeMax, NPC.life + NPC.lifeMax / 20);
@@ -1789,12 +2034,20 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 OroLuz, Phase, PhaseName());
             NPC.netUpdate = true;
 
+            // v6.50.54 — EL COMPÁS DEL ESTALLIDO SE RE-ARMA EN CADA FASE: el
+            // presupuesto de P1/P2 vuelve a CERO (1 uso en P1, 2 en P2) y en
+            // P3+ se TIRA el primer número 1-9 (el estallido vuelve a ser
+            // una CERTEZA que acecha, no una casualidad del menú).
+            _estallidosUsadosEnFase = 0;
+            _ataquesDesdeEstallido = 0;
+            if (Phase >= 3) _proximoEstallidoEn = Main.rand.Next(1, 10);
+
             // v6.50.45 — EL DECRETO DEL ECLIPSE EN CADA CAMBIO DE FASE: el
-            // jefe se CLAVA (inmóvil) y el círculo nace sobre el jugador,
-            // MÁS GRANDE con cada fase — la ventana de escape es LITERAL
-            // (el jefe no se mueve mientras el círculo crece). Solo si no
-            // está YA en pleno decreto (los cambios de fase encadenados por
-            // DPS no re-decretan: un decreto a la vez).
+            // círculo nace EN EL JEFE y LO SIGUE (v6.50.54 — centrado en el
+            // dios y moviéndose con él), MÁS GRANDE con cada fase — la
+            // ventana de escape se lee EN MOVIMIENTO. Solo si no está YA en
+            // pleno decreto (los cambios encadenados por DPS no re-decretan:
+            // un decreto a la vez).
             if (Phase >= 2 && _estado != EST_DECRETO)
             {
                 _estado = EST_DECRETO;
@@ -1803,6 +2056,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
         }
+
+        /// <summary>LA ESCALA DEL ESTALLIDO POR FASE (v6.50.54 — «ser un
+        /// poco más grande»: 1.15 en P1 → 1.39 en P5 — LA MISMA fórmula que
+        /// lee el proyectil desde la fase que viaja en su ai[2]).</summary>
+        internal static float EscalaEstallido(int fase) =>
+            1.15f + 0.06f * Math.Max(0, fase - 1);
 
         private string PhaseName() => Phase switch
         {
@@ -2018,7 +2277,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     if (!eclipse)
                     {
                         int nRayos = 8 + Phase * 2;                       // 10 en P1 → 18 en P5
-                        float giro = t * (NPC.ai[0] == EST_VORTICE ? 0.42f : 0.10f);
+                        float giro = t * (NPC.ai[0] == EST_VORTICE || NPC.ai[0] == EST_DANZA ? 0.42f : 0.10f);
                         Vector2 origen = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
                         for (int i = 0; i < nRayos; i++)
                         {
@@ -2105,7 +2364,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // === 8. LOS TELEGRAPHS (la casa: todo ataque se
                     //     anuncia — y con la oscuridad MUERTA (v6.50.41)
                     //     SIEMPRE se ven, en el propio pase del mundo) ===
-                    DibujarTelegrafos(spriteBatch, NPC, posC);
+                    DibujarTelegrafos(spriteBatch, NPC, posC, Phase);
 
                     // === 9. LA ESTELA DEL DESTELLO (los fantasmas del cruce) ===
                     if (NPC.ai[0] == EST_DESTELLO && NPC.ai[2] > 20f && !_muriendo &&
@@ -2195,7 +2454,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// y el pulso de la nova — dibujables desde CUALQUIER lote
         /// aditivo (el PreDraw del mundo los pide en su propio pase).
         /// </summary>
-        internal static void DibujarTelegrafos(SpriteBatch sb, NPC npc, Vector2 posC)
+        internal static void DibujarTelegrafos(SpriteBatch sb, NPC npc, Vector2 posC, int faseTelegrafo)
         {
             // EL DESTELLO: la LÍNEA GUÍA — el rayo de puntería creciendo
             // en el rumbo del cruce (ai[3] = el ángulo).
@@ -2223,31 +2482,35 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     420f - 300f * prog, OroLuz, 0.60f, npc.whoAmI + 3);
             }
 
-            // v6.50.53 — EL ESTALLIDO RADIANTE: LA RECOGIDA — 60 t de
-            //     telegrafo con CUATRO señales: EL LÍMITE (el aro del radio
-            //     de peligro PULSANDO: «fuera del anillo se vive»), LAS
-            //     CATORCE BRASAS (el anillo segmentado de la imagen
-            //     CAYÉNDOSE en espiral hacia el centro), EL NÚCLEO que SE
-            //     LLENA (el punto de luz creciendo) y LAS AGUJAS (la luz
-            //     CORRIENDO hacia el punto — la succión de la recogida).
-            if (npc.ai[0] == EST_ESTALLIDO && npc.ai[2] < 60f)
+            // v6.50.53/54 — EL ESTALLIDO RADIANTE: LA RECOGIDA — 60 t de
+            //     telegrafo antes de CADA detonación (ai[3] lleva el tick de
+            //     la PRÓXIMA — el multi-estallido re-dibuja su aro SIEMPRE)
+            //     con CUATRO señales: EL LÍMITE (el aro del radio de peligro
+            //     PULSANDO y creciendo con la fase — 600·ESCALA: la MISMA
+            //     cifra de la hitbox), LAS CATORCE BRASAS (el anillo
+            //     segmentado CAYÉNDOSE en espiral), EL NÚCLEO que SE LLENA
+            //     y LAS AGUJAS (la luz CORRIENDO hacia el punto).
+            if (npc.ai[0] == EST_ESTALLIDO && npc.ai[3] > 0f &&
+                npc.ai[2] >= npc.ai[3] - 60f && npc.ai[2] < npc.ai[3])
             {
-                float prog = npc.ai[2] / 60f;
+                float proxima = npc.ai[3];
+                float prog = (npc.ai[2] - (proxima - 60f)) / 60f;
+                float escalaR = EscalaEstallido(faseTelegrafo);   // el aro telegrafiado = la hitbox
                 float tg = Main.GlobalTimeWrappedHourly;
 
-                // (a) EL LÍMITE: el aro fino del radio de peligro (600 px —
-                //     LA MISMA cifra de la hitbox de la onda) pulsando y
+                // (a) EL LÍMITE: el aro fino del radio de peligro (600·escala
+                //     px — LA MISMA cifra de la hitbox de la onda) pulsando y
                 //     ENCENDIÉNDOSE a medida que el estallido llega.
                 float alfaL = 0.22f + 0.30f * prog + 0.10f * MathF.Sin(tg * 9f);
                 Vector2 ringTam = new Vector2(VFXCore.Ring.Width, VFXCore.Ring.Height);
                 sb.Draw(VFXCore.Ring, posC, null, OroLuz * alfaL, 0f,
-                    ringTam * 0.5f, VFXCore.RingQuadSize(600f) / ringTam,
+                    ringTam * 0.5f, VFXCore.RingQuadSize(600f * escalaR) / ringTam,
                     SpriteEffects.None, 0f);
 
                 // (b) LAS CATORCE BRASAS: el anillo segmentado CAYENDO al
-                //     centro (760 → 150 — las brasas de la imagen, pero en
-                //     reversa: se RECOGEN antes de explotar hacia afuera).
-                float rB = MathHelper.Lerp(760f, 150f, prog);
+                //     centro (760·escala → 150 — las brasas de la imagen,
+                //     pero en reversa: se RECOGEN antes de explotar).
+                float rB = MathHelper.Lerp(760f * escalaR, 150f, prog);
                 for (int i = 0; i < 14; i++)
                 {
                     float angB = i * MathHelper.TwoPi / 14f + prog * 2.4f + tg * 0.25f;
@@ -2268,7 +2531,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 for (int i = 0; i < 10; i++)
                 {
                     float angA = VFXCore.Hash01(npc.whoAmI, i, 50) * MathHelper.TwoPi + tg * 0.5f;
-                    float rA = 620f * (0.30f + 0.70f * VFXCore.Hash01(npc.whoAmI, i, 51 + (flick % 3)));
+                    float rA = 620f * escalaR * (0.30f + 0.70f * VFXCore.Hash01(npc.whoAmI, i, 51 + (flick % 3)));
                     float len = 120f + 80f * prog;
                     Vector2 dirA = new Vector2(MathF.Cos(angA), MathF.Sin(angA));
                     Vector2 centroA = posC + dirA * (rA - len * 0.5f);

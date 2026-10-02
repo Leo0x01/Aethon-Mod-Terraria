@@ -93,6 +93,9 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloTelarJefe = 17;       // v6.50.45 — EL TELAR DE CONSTELACIONES (la trampa)
         public const int EstiloDecretoJefe = 18;     // v6.50.45 — EL DECRETO DEL ECLIPSE (cambio de fase)
         public const int EstiloEstallidoRadiante = 19; // v6.50.53 — EL ESTALLIDO RADIANTE (la imagen del usuario: el punto de luz que ARDE y lo arrasa TODO — núcleo blanco-oro, anillo SEGMENTADO de emisores, 44 rayos en 360° de largo variable, la cruz anamórfica, las chispas que vuelan y el destello que inunda la pantalla)
+        public const int EstiloDanzaSolar = 20;     // v6.50.54 — LA DANZA SOLAR (Sun Dance — la rueda de SEIS rayos girando que cabalga con el jefe)
+        public const int EstiloLanzaEterna = 21;    // v6.50.54 — LA LANZA ETERNA (Ethereal Lance — telegrafiada translúcida y hostil solo al volar)
+        public const int EstiloCoronaEterna = 22;   // v6.50.54 — LA CORONA ETERNA (Everlasting Rainbow — 14 plumas prismáticas espiralando)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -100,6 +103,13 @@ namespace AethonMod.Content.Projectiles.Jefes
         private float Par => Projectile.ai[1];
         /// <summary>Semilla determinista (ai[2]).</summary>
         private int Seed => Math.Max(1, (int)Projectile.ai[2] % 9973);
+
+        // === v6.50.54 — EL ESTALLIDO ESCALADO: la FASE viaja en ai[2]
+        //     empaquetada por el jefe (fase·8192 + seed — Seed sigue siendo
+        //     ai[2]%9973 y la fase se lee ai[2]/8192; 0 si no vino) —
+        //     «un poco más grande» con la ira del dios ===
+        private int FaseEstallido => (int)(Projectile.ai[2] / 8192f);
+        private float EscalaEstallido => 1.15f + 0.06f * Math.Max(0, FaseEstallido - 1);
 
         // === EL ESTADO (por estilo) ===
         private float _edad;
@@ -170,6 +180,25 @@ namespace AethonMod.Content.Projectiles.Jefes
         private static readonly Color ColorOroEclipse = new(255, 214, 110);  // v6.50.45 — el oro del decreto
         private static readonly Color ColorVioletaEclipse = new(150, 80, 255); // v6.50.45 — el fuego oscuro del decreto
 
+        /// <summary>v6.50.54 — EL COLOR DEL PRISMA (el mismo espectro de la
+        /// Forma 3 — la banda de siete franjas: h ∈ [0,1) recorre rojo →
+        /// violeta) para LAS PLUMAS DE LA CORONA.</summary>
+        private static Color ColorPrismaLocal(float h)
+        {
+            h -= MathF.Floor(h);
+            float paso = h * 7f;
+            int i = (int)paso % 7;
+            float f = paso - MathF.Floor(paso);
+            Color[] franjas =
+            {
+                new Color(255, 60, 60), new Color(255, 150, 50),
+                new Color(255, 235, 60), new Color(90, 255, 110),
+                new Color(80, 190, 255), new Color(120, 100, 255),
+                new Color(210, 90, 255),
+            };
+            return Color.Lerp(franjas[i], franjas[(i + 1) % 7], f);
+        }
+
         public override string Texture => "AethonMod/Content/Projectiles/Cosmetic/AnillosSingularesHalo";
 
         public override void SetStaticDefaults()
@@ -230,13 +259,34 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                 // === v6.50.45 — LAS ARMAS DEL MOD EN MANOS DEL JEFE ===
                 case EstiloRelojGigante:
-                    // EL RELOJ GIGANTE: contacto con el CUERPO del reloj
-                    // (v6.50.46 — ×5.2: UN EDIFICIO de tiempo) + el peso
-                    // de la arena. La autocuración de la talla vive en AI
-                    // (el msg 27 no lleva OnSpawn).
-                    Projectile.timeLeft = 520;
-                    Projectile.width = 220;
-                    Projectile.height = 280;
+                    // EL RELOJ GIGANTE (v6.50.54 — LA CATEDRAL DEL TIEMPO:
+                    // ×7.5 — UNO SOLO, nacido en el jefe y cabalgando con
+                    // él) + el peso de la arena en 560 px. La autocuración
+                    // de la talla vive en AI (el msg 27 no lleva OnSpawn).
+                    Projectile.timeLeft = 640;
+                    Projectile.width = 300;
+                    Projectile.height = 380;
+                    break;
+
+                case EstiloDanzaSolar:
+                    // v6.50.54 — LA DANZA: los rayos son TODO el daño (el
+                    // corte honesto por sector — el cuerpo no toca a nadie).
+                    Projectile.timeLeft = 560;
+                    Projectile.hostile = false;
+                    break;
+
+                case EstiloLanzaEterna:
+                    // v6.50.54 — LA LANZA: daño 100% MANUAL (ai[3] lo lleva:
+                    // el telegrafo es INOFENSIVO — la regla de legibilidad de
+                    // Fargo's — y solo el VUELO corta).
+                    Projectile.timeLeft = 150;
+                    Projectile.hostile = false;
+                    break;
+
+                case EstiloCoronaEterna:
+                    // v6.50.54 — LA CORONA: las plumas son TODO el daño.
+                    Projectile.timeLeft = 660;
+                    Projectile.hostile = false;
                     break;
 
                 case EstiloCoroJefe:
@@ -309,14 +359,14 @@ namespace AethonMod.Content.Projectiles.Jefes
                 hitbox.Height += inflar;
             }
 
-            // v6.50.53 — EL ESTALLIDO RADIANTE: la ONDA golpea en el radio
-            // TELEGRAFEADO (600 px — el aro que el jefe pintó durante toda
-            // la carga): la hitbox honesta de la mina, pero de 1200×1200 y
-            // SOLO durante la ventana de la onda (los primeros 12 t) —
-            // después el cuerpo es puro espectáculo y no toca a nadie.
+            // v6.50.53/54 — EL ESTALLIDO RADIANTE: la ONDA golpea en el radio
+            // TELEGRAFEADO (600·ESCALA px — el aro que el jefe pintó durante
+            // toda la carga): la hitbox honesta de la mina, pero de
+            // 1200·ESCALA y SOLO durante la ventana de la onda (los
+            // primeros 12 t) — después el cuerpo es puro espectáculo.
             if (Estilo == EstiloEstallidoRadiante && _edad <= 12f)
             {
-                const int inflarE = 1186; // 14 → 1200 px de onda (radio 600)
+                int inflarE = (int)(1186f * EscalaEstallido); // 14 → 1200·esc px de onda
                 hitbox.X -= inflarE / 2;
                 hitbox.Y -= inflarE / 2;
                 hitbox.Width += inflarE;
@@ -362,7 +412,8 @@ namespace AethonMod.Content.Projectiles.Jefes
             System.Collections.Generic.List<int> overPlayers, System.Collections.Generic.List<int> overWiresUI)
         {
             if (Estilo == EstiloRelojGigante || Estilo == EstiloCoroJefe ||
-                Estilo == EstiloTelarJefe || Estilo == EstiloDecretoJefe)
+                Estilo == EstiloTelarJefe || Estilo == EstiloDecretoJefe ||
+                Estilo == EstiloDanzaSolar)
                 behindNPCs.Add(index);
         }
 
@@ -405,21 +456,39 @@ namespace AethonMod.Content.Projectiles.Jefes
             // v6.50.45 — LAS ARMAS SIN CONTACTO (coro/telar/decreto): la
             // misma autocuración MP del pilar — el msg 27 no lleva el
             // OnSpawn, y sin esto los remotos evaluaban colisión hostil.
+            // v6.50.54 — LA DANZA, LA LANZA y LA CORONA también (sus daños
+            // son 100% manuales — la casa de HerirJugador).
             if (Estilo == EstiloCoroJefe || Estilo == EstiloTelarJefe ||
-                Estilo == EstiloDecretoJefe)
+                Estilo == EstiloDecretoJefe || Estilo == EstiloDanzaSolar ||
+                Estilo == EstiloLanzaEterna || Estilo == EstiloCoronaEterna)
             {
                 Projectile.hostile = false;
             }
 
-            // v6.50.46 — EL RELOJ GIGANTE ×5.2: la autocuración de la
+            // v6.50.54 — LOS CABALGADORES (el reloj, el decreto y la danza
+            // SIGUEN AL JEFE — ai[2] = su whoAmI: la goma suave de Lerp).
+            if (Estilo == EstiloRelojGigante || Estilo == EstiloDecretoJefe ||
+                Estilo == EstiloDanzaSolar)
+            {
+                int quienJ = (int)Projectile.ai[2];
+                if (quienJ >= 0 && quienJ < Main.maxNPCs && Main.npc[quienJ] != null &&
+                    Main.npc[quienJ].active)
+                {
+                    Vector2 hacia = Main.npc[quienJ].Center;
+                    if (Vector2.DistanceSquared(hacia, Projectile.Center) > 4f)
+                        Projectile.Center = Vector2.Lerp(Projectile.Center, hacia, 0.30f);
+                }
+            }
+
+            // v6.50.46/54 — EL RELOJ GIGANTE ×7.5: la autocuración de la
             // TALLA también (el msg 27 no lleva el OnSpawn — sin esto los
-            // remotos colisionaban con una caja de 14×14 en vez del
-            // edificio de tiempo de 220×280).
-            if (Estilo == EstiloRelojGigante && Projectile.width < 200)
+            // remotos colisionaban con una caja de 14×14 en vez de la
+            // CATEDRAL de tiempo de 300×380).
+            if (Estilo == EstiloRelojGigante && Projectile.width < 300)
             {
                 Vector2 cR = Projectile.Center;
-                Projectile.width = 220;
-                Projectile.height = 280;
+                Projectile.width = 300;
+                Projectile.height = 380;
                 Projectile.Center = cR;
             }
 
@@ -853,25 +922,15 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // =============================================================
                 case EstiloRelojGigante:
                 {
-                    // LA CAÍDA DEL CIELO: 26 t de caída firme, luego el
-                    // freno flotante (velocity *= 0.86 hasta el reposo).
-                    if (_edad < 26f)
-                    {
-                        // cae firme (el spawn lo trae a 13 px/t)
-                    }
-                    else
-                    {
-                        Projectile.velocity *= 0.86f;
-                        if (Projectile.velocity.LengthSquared() < 0.01f)
-                            Projectile.velocity = Vector2.Zero;
-                    }
-                    bool aterrizado = _edad >= 40f;
+                    // v6.50.54 — LA CATEDRAL DEL TIEMPO: YA NO CAE del cielo
+                    // ni aterriza — NACE EN EL JEFE (el cabalgador de arriba
+                    // lo pega a él) y su arena corre DESDE EL TICK CERO.
+                    Projectile.velocity = Vector2.Zero;
 
                     // LA LÍNEA DE TIEMPO del bastón (la MISMA: la fuente
-                    // única de la casa — 290 + 26, giro π suave). El reloj
-                    // empieza a correr YA ATERRIZADO (la edad de la arena
-                    // empieza cuando el reloj se posa).
-                    float edadArena = Math.Max(0f, _edad - 34f);
+                    // única de la casa — 290 + 26, giro π suave) — corriendo
+                    // desde que el reloj nace.
+                    float edadArena = _edad;
                     float cicloR = edadArena % 316f;
                     int vueltasR = (int)(edadArena / 316f);
                     if (cicloR >= 290f)
@@ -883,17 +942,16 @@ namespace AethonMod.Content.Projectiles.Jefes
                     else
                         Projectile.rotation = vueltasR * MathHelper.Pi;
 
-                    // EL PESO DE LA ARENA (mientras cae, cada 10 t — solo
-                    // YA ATERRIZADO).
+                    // EL PESO DE LA ARENA (mientras cae, cada 10 t — alrededor
+                    // DEL JEFE: radio 560, la sombra de la catedral entera).
                     bool cayendoR = cicloR < 290f;
-                    if (aterrizado && cayendoR && edadArena >= 10f &&
-                        ((int)edadArena % 10) == 0)
-                        PesarJugadores(0.35f, 2.6f, 340f);
+                    if (cayendoR && edadArena >= 10f && ((int)edadArena % 10) == 0)
+                        PesarJugadores(0.35f, 2.6f, 560f);
 
                     // LA INVERSIÓN: el pulso que HUNDE.
-                    if (aterrizado && cicloR >= 290f && cicloR < 291.5f && edadArena > 26f)
+                    if (cicloR >= 290f && cicloR < 291.5f && edadArena > 26f)
                     {
-                        PesarJugadores(0.90f, 6.0f, 380f);
+                        PesarJugadores(0.90f, 6.0f, 600f);
                         if (Main.netMode != NetmodeID.Server)
                         {
                             OndaLib.Kick(4f, 12);
@@ -911,7 +969,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                     }
 
-                    if (_edad > 560f) Projectile.Kill();
+                    if (_edad > 620f) Projectile.Kill();
                     break;
                 }
 
@@ -1111,6 +1169,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 // =============================================================
                 case EstiloDecretoJefe:
                 {
+                    // v6.50.54 — EL CÍRCULO CABALGA CON EL DIOS: el
+                    // cabalgador de la AI lo pega al jefe (ai[2] = su
+                    // whoAmI) — el decreto se lee EN MOVIMIENTO.
                     Projectile.velocity = Vector2.Zero;
 
                     // EL RADIO: 80 + 2·edad, tope LA FASE (computado — NUNCA
@@ -1161,10 +1222,11 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // LA LUZ QUE INUNDA EL MUNDO (el flash de la imagen: la
                     // escena entera queda BAÑADA en blanco-oro — 2,5 s de
                     // día dentro de la pelea) — VIVO, no el 0.5 plano del
-                    // SetDefaults: la luz de un dios que se enciende.
+                    // SetDefaults: la luz de un dios que se enciende (y que
+                    // CRECE con la fase — la escala de la .54).
                     float luzE = Math.Max(0f, 1f - _edad / 150f);
                     Lighting.AddLight(Projectile.Center,
-                        new Vector3(2.4f, 2.1f, 1.5f) * luzE);
+                        new Vector3(2.4f, 2.1f, 1.5f) * luzE * EscalaEstallido);
 
                     // EL NACIMIENTO (t=1): el estampido + LAS CHISPAS QUE
                     // VUELAN (los streaks radiales de la imagen — cada
@@ -1187,6 +1249,166 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                     break;
                 }
+
+                // =============================================================
+                //  v6.50.54 — LA DANZA SOLAR (Sun Dance): la rueda de SEIS
+                //  rayos que gira LENTO y cabalga con el jefe — TRES tandas
+                //  de 175 t (cada tanda desfasada en el reloj), cada rayo
+                //  con SU hitbox de barra honesta (dot/cruz contra los SEIS
+                //  rumbos — la geometría de la Espada Zenia). Los primeros
+                //  25 t de cada tanda los rayos son TRANSLÚCIDOS e
+                //  inofensivos (la regla Fargo's: lo que aún no daña se ve
+                //  translúcido — se ENCIENDEN al matar).
+                // =============================================================
+                case EstiloDanzaSolar:
+                {
+                    Projectile.velocity = Vector2.Zero;
+
+                    // LA TANDA y su fase local.
+                    int tanda = (int)(_edad / 175f);
+                    float tEdad = _edad % 175f;
+                    bool ardiendo = tEdad > 25f && tanda < 3 && _edad < 520f;
+
+                    if (ardiendo && Main.netMode != NetmodeID.MultiplayerClient &&
+                        ((int)_edad % 5) == 0)
+                    {
+                        float giroDan = _edad * 0.0125f + tanda * 0.35f;
+                        for (int pl = 0; pl < Main.maxPlayers; pl++)
+                        {
+                            Player p = Main.player[pl];
+                            if (p == null || !p.active || p.dead) continue;
+                            Vector2 rel = p.Center - Projectile.Center;
+                            for (int r = 0; r < 6; r++)
+                            {
+                                float angR = giroDan + r * MathHelper.TwoPi / 6f;
+                                Vector2 dirR = new Vector2(MathF.Cos(angR), MathF.Sin(angR));
+                                float dot = Vector2.Dot(rel, dirR);
+                                if (dot < 50f || dot > 920f) continue;
+                                float cruz = MathF.Abs(rel.X * dirR.Y - rel.Y * dirR.X);
+                                if (cruz < 24f)
+                                {
+                                    HerirJugador(p, (int)(Projectile.damage * 0.9f),
+                                        Projectile.Center);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // EL LATIDO de la tanda (el sonido del compás — cada
+                    // tanda nueva suena a sol).
+                    if (tEdad < 1f && tanda > 0 && Main.netMode != NetmodeID.Server)
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
+
+                    if (_edad > 555f) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  v6.50.54 — LA LANZA ETERNA (Ethereal Lance): 50 t de
+                //  TELEGRAFO (la línea fina translúcida de origen a destino
+                //  — inofensiva) y EL VUELO (15 px/t a su destino — el daño
+                //  manual viaja en ai[3]). El destino viaja en ai[1]/ai[2].
+                // =============================================================
+                case EstiloLanzaEterna:
+                {
+                    Vector2 destinoL = new Vector2(Projectile.ai[1], Projectile.ai[2]);
+
+                    if (_edad < 50f)
+                    {
+                        // EL TELEGRAFO: quieta, translúcida, inofensiva.
+                        Projectile.velocity = Vector2.Zero;
+                        Projectile.rotation = (destinoL - Projectile.Center).ToRotation();
+                    }
+                    else
+                    {
+                        // EL VUELO: 15 px/t hacia su destino — el corte.
+                        if (Projectile.velocity.LengthSquared() < 0.01f)
+                        {
+                            Vector2 dirL = destinoL - Projectile.Center;
+                            if (dirL.LengthSquared() > 1f) dirL.Normalize();
+                            Projectile.velocity = dirL * 15f;
+                            Projectile.rotation = dirL.ToRotation();
+                            if (Main.netMode != NetmodeID.Server)
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item4.WithPitchOffset(0.4f), Projectile.Center);
+                        }
+                        // EL CORTE MANUAL (hostil=false siempre — el cauce de
+                        // la casa: HerirJugador respeta iframes; el daño
+                        // llegó en el spawn — en SP/servidor vive entero).
+                        if (Main.netMode != NetmodeID.MultiplayerClient &&
+                            ((int)_edad % 4) == 0)
+                        {
+                            int danoL = Math.Max(1, Projectile.damage);
+                            for (int pl = 0; pl < Main.maxPlayers; pl++)
+                            {
+                                Player p = Main.player[pl];
+                                if (p == null || !p.active || p.dead) continue;
+                                if (Vector2.Distance(p.Center, Projectile.Center) < 30f)
+                                    HerirJugador(p, danoL, Projectile.Center);
+                            }
+                        }
+                    }
+
+                    // el vuelo termina al alejarse de su destino.
+                    if (_edad > 60f &&
+                        Vector2.DistanceSquared(Projectile.Center, destinoL) < 90f * 90f)
+                        Projectile.Kill();
+                    if (_edad > 145f) Projectile.Kill();
+                    break;
+                }
+
+                // =============================================================
+                //  v6.50.54 — LA CORONA ETERNA (Everlasting Rainbow): el
+                //  ancla DERIVA hacia la presa (0.5 px/t — el coro de la
+                //  casa) y CATORCE plumas prismáticas espiralan alrededor:
+                //  el radio ABRE (240→640 en 300 t) y CIERRA (640→240) —
+                //  la jaula que respira, girando siempre (0.024 rad/t).
+                //  Cada pluma corta por contacto (radio 26 — manual).
+                // =============================================================
+                case EstiloCoronaEterna:
+                {
+                    Projectile.velocity = Vector2.Zero;
+                    Player presaC = Presa();
+                    if (presaC != null)
+                    {
+                        Vector2 dirC = (presaC.Center - Projectile.Center).SafeNormalize(Vector2.Zero);
+                        Projectile.Center += dirC * 0.5f;
+                    }
+
+                    // EL RADIO DE LA CORONA (abre y cierra — 300 t cada lado).
+                    float cicloC = _edad % 600f;
+                    float radioC = cicloC < 300f
+                        ? MathHelper.Lerp(240f, 640f, cicloC / 300f)
+                        : MathHelper.Lerp(640f, 240f, (cicloC - 300f) / 300f);
+                    float giroC = _edad * 0.024f;
+
+                    // EL CORTE de las plumas (cada 4 t — autoridad).
+                    if (Main.netMode != NetmodeID.MultiplayerClient && ((int)_edad % 4) == 0)
+                    {
+                        for (int pl = 0; pl < Main.maxPlayers; pl++)
+                        {
+                            Player p = Main.player[pl];
+                            if (p == null || !p.active || p.dead) continue;
+                            for (int f = 0; f < 14; f++)
+                            {
+                                float angF = giroC + f * MathHelper.TwoPi / 14f;
+                                Vector2 pluma = Projectile.Center + new Vector2(
+                                    MathF.Cos(angF) * radioC,
+                                    MathF.Sin(angF) * radioC * 0.85f);
+                                if (Vector2.Distance(p.Center, pluma) < 26f)
+                                {
+                                    HerirJugador(p, (int)(Projectile.damage * 0.95f), pluma);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (_edad > 655f) Projectile.Kill();
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -1206,6 +1428,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloTelarJefe => new Vector3(0.26f, 0.26f, 0.44f),
                 EstiloDecretoJefe => Vector3.Zero,       // su caso pone la suya (el eclipse)
                 EstiloEstallidoRadiante => Vector3.Zero, // v6.50.53 — su caso pone la suya (el flash que inunda)
+                EstiloDanzaSolar => new Vector3(1.05f, 0.95f, 0.62f),   // v6.50.54 — la rueda alumbra
+                EstiloLanzaEterna => new Vector3(0.50f, 0.45f, 0.24f),  // v6.50.54 — el filo dorado
+                EstiloCoronaEterna => new Vector3(0.55f, 0.50f, 0.30f), // v6.50.54 — el prisma suave
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -1352,13 +1577,13 @@ namespace AethonMod.Content.Projectiles.Jefes
             // client.log del usuario, todas capturadas: ruido de diagnóstico).
             VFXCore.CerrarLoteSiAbierto();
 
-            // v6.50.45 — EL RELOJ GIGANTE camina por SU camino (el renderer
-            // del BASTÓN escalado ×2.6: gestiona SUS lotes enteros — la
-            // masa, el reloj y la onda de la inversión — y devuelve el lote
-            // CERRADO, el contrato v6.10).
+            // v6.50.45/54 — EL RELOJ GIGANTE camina por SU camino (el renderer
+            //     del BASTÓN escalado ×7.5 — LA CATEDRAL DEL TIEMPO: gestiona
+            //     SUS lotes enteros — la masa, el reloj y la onda de la
+            //     inversión — y devuelve el lote CERRADO, el contrato v6.10).
             if (Estilo == EstiloRelojGigante)
             {
-                RelojArenaRenderer.Draw(Projectile, Math.Max(0f, _edad - 34f), Seed, 5.2f);   // v6.50.46 — ×5.2 y la MISMA edad de arena de la IA (el giro visual y el pulso coinciden)
+                RelojArenaRenderer.Draw(Projectile, _edad, Seed, 7.5f);   // v6.50.54 — ×7.5: la edad de arena corre desde el nacimiento (la AI ya no le resta la caída)
                 VFXCore.ReabrirLoteVanilla();
                 return false;
             }
@@ -1636,8 +1861,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 (h0 - 0.5f) * (MathHelper.TwoPi / 44f) * 1.15f;
                             // el largo: de 250 (el rayo corto) a 980 (el que
                             // cruza la pantalla entera) — la VARIANZA de la
-                            // imagen, no un abanico matemático.
-                            float largo = (250f + 730f * h1) * crec;
+                            // imagen, no un abanico matemático (v6.50.54: ×ESCALA
+                            // — «un poco más grande» con la fase).
+                            float largo = (250f + 730f * h1) * crec * EscalaEstallido;
                             // la vida propia: cada rayo muere a SU tiempo.
                             float vidaR = 75f + 45f * h2;
                             float alfaR = fade * (_edad < vidaR ? 1f :
@@ -1660,9 +1886,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
 
                         // === (b) EL ANILLO SEGMENTADO (14 EMISORES creciendo
-                        //     hacia afuera con su flicker — 150 → 760 px) ===
+                        //     hacia afuera con su flicker — 150 → 760·ESCALA px) ===
                         float rAnillo = MathHelper.Lerp(150f, 760f,
-                            Math.Min(1f, _edad / 55f));
+                            Math.Min(1f, _edad / 55f)) * EscalaEstallido;
                         float alfaA = _edad < 70f ? 1f :
                             Math.Max(0f, 1f - (_edad - 70f) / 45f);
                         if (alfaA > 0.02f)
@@ -1687,13 +1913,134 @@ namespace AethonMod.Content.Projectiles.Jefes
                         if (alfaC > 0.02f)
                         {
                             VFXCore.Quad(cE, BlancoCaliente * alfaC,
-                                new Vector2(1150f * crec, 7f));
+                                new Vector2(1150f * crec * EscalaEstallido, 7f));
                             VFXCore.Quad(cE, BlancoCaliente * alfaC,
-                                new Vector2(7f, 1150f * crec));
+                                new Vector2(7f, 1150f * crec * EscalaEstallido));
                             VFXCore.Quad(cE, OroGrimorio * (alfaC * 0.6f),
-                                new Vector2(760f * crec, 16f));
+                                new Vector2(760f * crec * EscalaEstallido, 16f));
                             VFXCore.Quad(cE, OroGrimorio * (alfaC * 0.6f),
-                                new Vector2(16f, 760f * crec));
+                                new Vector2(16f, 760f * crec * EscalaEstallido));
+                        }
+                        break;
+                    }
+
+                    // === v6.50.54 — LA DANZA SOLAR (fase mundo): LA RUEDA —
+                    //     seis rayos de 860 px (núcleo blanco + halo dorado —
+                    //     las primitivas del Estallido) girando LENTO; cada
+                    //     tanda nace TRANSLÚCIDA (alfa 0.35 — la regla Fargo)
+                    //     y se ENCIENDE cuando mata ===
+                    case EstiloDanzaSolar:
+                    {
+                        int tandaV = (int)(_edad / 175f);
+                        float tEdadV = _edad % 175f;
+                        float alfaT = tEdadV <= 25f
+                            ? 0.35f
+                            : Math.Min(1f, 0.35f + (tEdadV - 25f) / 20f * 0.65f);
+                        float fadeV = _edad > 520f
+                            ? Math.Max(0f, 1f - (_edad - 520f) / 35f) : 1f;
+                        float giroV = _edad * 0.0125f + tandaV * 0.35f;
+                        const float largoD = 860f;
+                        for (int i = 0; i < 6; i++)
+                        {
+                            float angV = giroV + i * MathHelper.TwoPi / 6f;
+                            Vector2 dirV = new Vector2(MathF.Cos(angV), MathF.Sin(angV));
+                            // LA LÍNEA NÚCLEO (blanca) y EL HALO (dorado).
+                            VFXCore.Quad(Projectile.Center + dirV * (60f + largoD * 0.5f),
+                                BlancoCaliente * (0.70f * alfaT * fadeV),
+                                new Vector2(largoD, 4.5f), angV);
+                            VFXCore.Quad(Projectile.Center + dirV * (40f + largoD * 0.34f),
+                                OroGrimorio * (0.30f * alfaT * fadeV),
+                                new Vector2(largoD * 0.68f, 26f), angV);
+                            // LA PUNTA (la cuenta de luz del borde).
+                            VFXCore.Quad(Projectile.Center + dirV * (60f + largoD),
+                                BlancoCaliente * (0.55f * alfaT * fadeV),
+                                new Vector2(14f, 14f));
+                        }
+                        // EL CUBO de la rueda (el núcleo que la sostiene).
+                        VFXCore.Quad(Projectile.Center,
+                            BlancoCaliente * (0.55f * alfaT * fadeV),
+                            new Vector2(95f, 95f));
+                        VFXCore.Quad(Projectile.Center,
+                            OroGrimorio * (0.30f * alfaT * fadeV),
+                            new Vector2(190f, 190f));
+                        break;
+                    }
+
+                    // === v6.50.54 — LA LANZA ETERNA (fase mundo): el
+                    //     TELEGRAFO (la línea fina translúcida de origen a
+                    //     destino + la punta pulsando) y EL VUELO (el filo
+                    //     blanco largo + el halo) ===
+                    case EstiloLanzaEterna:
+                    {
+                        Vector2 destinoV = new Vector2(Projectile.ai[1], Projectile.ai[2]);
+                        Vector2 segV = destinoV - Projectile.Center;
+                        float largoSeg = segV.Length();
+                        if (largoSeg > 4f)
+                        {
+                            float angSeg = segV.ToRotation();
+                            if (_edad < 50f)
+                            {
+                                // EL TELEGRAFO (translúcido — inofensivo).
+                                float pulsoL = 0.25f + 0.15f * MathF.Sin(t * 6f + Seed);
+                                float llenado = Math.Min(1f, _edad / 50f);
+                                Vector2 medioSeg = Projectile.Center + segV * (0.5f * llenado);
+                                VFXCore.Quad(medioSeg, OroGrimorio * pulsoL,
+                                    new Vector2(largoSeg * llenado, 3f), angSeg);
+                                // LA PUNTA (donde va a golpear — la marca).
+                                VFXCore.Quad(destinoV, BlancoCaliente * (0.5f + 0.3f * MathF.Sin(t * 8f)),
+                                    new Vector2(16f, 16f));
+                                VFXCore.Quad(destinoV, OroGrimorio * 0.25f,
+                                    new Vector2(34f, 34f));
+                            }
+                            else
+                            {
+                                // EL VUELO: el filo blanco largo + el halo.
+                                VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.85f,
+                                    new Vector2(46f, 5.5f), Projectile.rotation);
+                                VFXCore.Quad(Projectile.Center, OroGrimorio * 0.35f,
+                                    new Vector2(64f, 16f), Projectile.rotation);
+                                VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.9f,
+                                    new Vector2(12f, 12f));
+                            }
+                        }
+                        break;
+                    }
+
+                    // === v6.50.54 — LA CORONA ETERNA (fase mundo): el ANILLO
+                    //     guía translúcido + LAS CATORCE PLUMAS prismáticas
+                    //     (cada una SU color del espectro + núcleo blanco +
+                    //     la estela corta de la rotación) ===
+                    case EstiloCoronaEterna:
+                    {
+                        float cicloCV = _edad % 600f;
+                        float radioCV = cicloCV < 300f
+                            ? MathHelper.Lerp(240f, 640f, cicloCV / 300f)
+                            : MathHelper.Lerp(640f, 240f, (cicloCV - 300f) / 300f);
+                        float giroCV = _edad * 0.024f;
+                        float fadeCV = _edad > 610f
+                            ? Math.Max(0f, 1f - (_edad - 610f) / 45f) : 1f;
+
+                        // EL ANILLO GUÍA (la única advertencia — translúcido).
+                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.14f * fadeCV),
+                            new Vector2(radioCV * 2.174f, radioCV * 0.85f * 2.174f), 0f,
+                            VFXCore.Ring);
+
+                        // LAS PLUMAS.
+                        for (int f = 0; f < 14; f++)
+                        {
+                            float angF = giroCV + f * MathHelper.TwoPi / 14f;
+                            Vector2 dirF = new Vector2(MathF.Cos(angF), MathF.Sin(angF) * 0.85f);
+                            Vector2 plumaF = Projectile.Center + dirF * radioCV;
+                            Color cPrisma = ColorPrismaLocal(f / 14f + _edad * 0.003f);
+                            // EL CUERPO de la pluma (SU color + el núcleo blanco).
+                            VFXCore.Quad(plumaF, cPrisma * (0.85f * fadeCV),
+                                new Vector2(20f, 20f));
+                            VFXCore.Quad(plumaF, BlancoCaliente * (0.85f * fadeCV),
+                                new Vector2(8f, 8f));
+                            // LA ESTELA (la cola corta de la rotación).
+                            Vector2 atrasF = new Vector2(dirF.Y, -dirF.X / 0.85f);
+                            VFXCore.Quad(plumaF + atrasF * 22f, cPrisma * (0.35f * fadeCV),
+                                new Vector2(34f, 7f), atrasF.ToRotation());
                         }
                         break;
                     }
@@ -2065,14 +2412,15 @@ namespace AethonMod.Content.Projectiles.Jefes
                         float fadeS = _edad < 55f ? 1f :
                             Math.Max(0f, 1f - (_edad - 55f) / 95f);
                         float respira = 0.95f + 0.05f * MathF.Sin(t * 4.2f);
+                        float escS = EscalaEstallido;   // v6.50.54 — «un poco más grande»
 
                         // EL NÚCLEO INUNDANDO (el blanco que crece hasta
-                        // ~950 px — el corazón que se queda viendo).
+                        // ~950·escala px — el corazón que se queda viendo).
                         LumenLib.Bloom(Main.spriteBatch, pos,
-                            (170f + 780f * crecS) * respira, BlancoCaliente,
+                            (170f + 780f * crecS) * respira * escS, BlancoCaliente,
                             0.95f * fadeS, 4);
                         LumenLib.BloomPulse(Main.spriteBatch, pos,
-                            150f + 190f * crecS, OroGrimorio,
+                            (150f + 190f * crecS) * escS, OroGrimorio,
                             0.55f * fadeS, t, 2.6f);
 
                         // LA ESTRELLA DE DESTELLO (el flare de 8 rayos + núcleo
@@ -2080,7 +2428,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                         Texture2D dest = VFXCore.DestelloFinal;
                         if (dest != null)
                         {
-                            float esc = (1500f * crecS) / dest.Width *
+                            float esc = (1500f * crecS * escS) / dest.Width *
                                 (0.92f + 0.08f * MathF.Sin(t * 3.4f));
                             Main.spriteBatch.Draw(dest, pos, null,
                                 OrbitaLib.Tint(BlancoCaliente, 0.60f * fadeS),
@@ -2093,7 +2441,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                         // clara: el golpe ya pasó, esto es la firma).
                         if (_edad < 80f)
                             OndaLib.Pulse(Main.spriteBatch, pos, _edad / 80f,
-                                760f, OroGrimorio, 0.50f * (1f - _edad / 80f), Seed);
+                                760f * escS, OroGrimorio, 0.50f * (1f - _edad / 80f), Seed);
 
                         // LAS BOKEH (los puntos de luz dispersos de la imagen:
                         // 26 chispas fijas que giran despacito y titilan).
@@ -2103,7 +2451,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                             float h1 = VFXCore.Hash01(Seed, i, 31);
                             float tw = 0.35f + 0.65f *
                                 (0.5f + 0.5f * MathF.Sin(t * 2.6f + i * 1.9f));
-                            float rB = (90f + 640f * h1) * crecS;
+                            float rB = (90f + 640f * h1) * crecS * escS;
                             float angB = h0 * MathHelper.TwoPi + t * 0.05f;
                             Vector2 b = pos + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rB;
                             LumenLib.Bloom(Main.spriteBatch, b, 8f + 10f * h1,

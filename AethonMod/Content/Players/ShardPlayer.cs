@@ -590,6 +590,10 @@ namespace AethonMod.Content.Players
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCuatroItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
+                // v6.50.54 — EL HALO ARCOÍRIS (el arcoíris de la Forma 3
+                // hecho adorno: pequeño, alrededor de la cabeza).
+                entregados += EntregarSiNoTiene(ModContent.ItemType
+                    <global::AethonMod.Content.Items.Cosmetics.HaloArcoirisItem>());
 
                 if (entregados > 0)
                 {
@@ -603,17 +607,23 @@ namespace AethonMod.Content.Players
 
         /// <summary>
         /// True si el jugador ya lleva un ítem de este tipo puesto o en el
-        /// inventario (revisa inventario 0-58, armor 0-19 y misc 0-9).
+        /// inventario (revisa inventario, armadura y misc — v6.50.54 — EL FIX
+        /// DEL CRASH DEL client.log: los bucles iban a CIFRAS FIJAS (59/20/10)
+        /// y en tML 2026.08 el array de inventario MIDO MENOS en algunos
+        /// contextos → IndexOutOfRangeException en OnEnterWorld: si el jugador
+        /// NO llevaba encima un ítem del regalo, la entrega MORÍA en el índice
+        /// 58 y los ítems NUNCA llegaban (la mascota del log del usuario). LA
+        /// CURA: los bucles leen .Length — el tamaño REAL, sea el que sea).
         /// </summary>
         private static bool YaLoTiene(Player p, int tipo)
         {
-            for (int i = 0; i < 59; i++)
+            for (int i = 0; i < p.inventory.Length; i++)
                 if (p.inventory[i] != null && !p.inventory[i].IsAir && p.inventory[i].type == tipo)
                     return true;
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < p.armor.Length; i++)
                 if (p.armor[i] != null && !p.armor[i].IsAir && p.armor[i].type == tipo)
                     return true;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < p.miscEquips.Length; i++)
                 if (p.miscEquips[i] != null && !p.miscEquips[i].IsAir && p.miscEquips[i].type == tipo)
                     return true;
             return false;

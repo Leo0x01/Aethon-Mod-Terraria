@@ -1,19 +1,51 @@
-# AethonMod — ESTADO ACTUAL (v6.50.53)
+# AethonMod — ESTADO ACTUAL (v6.50.54)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-10-02 (v6.50.53 ENTREGADA: commit + tag + .tmod + bundle en
-> /home/sync + push + release con AethonMod.tmod y CDN verificado byte a byte — la .52
-> también quedó publicada: release 401940561, md5 0aca9b63…).
+> Última actualización: 2026-10-02 (v6.50.54 SELLADA LOCALMENTE: commit + tag + .tmod +
+> bundle en /home/sync — esperando el token para push + release; la .53 quedó publicada:
+> release 402101571, md5 64b4faf6…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.54 = EL DECRETO CABALGA + EL ESTALLIDO CON COMPÁS + EL DASH CORTO + EL RELOJ ÚNICO
+  + LAS TRES ARMAS DE LA EMPERATRIZ + EL HALO ARCOÍRIS + LA FORMA 3 MÁS VIVA + EL CRASH DEL
+  REGALO MUERTO** — la undécima ronda sobre la .53:
+  (1) **EL DECRETO CABALGA**: el círculo del cambio de fase nace EN `NPC.Center` y LO SIGUE
+  (ai[2] = whoAmI, Lerp 0.30) mientras el jefe ORBITA LENTO en vez de clavarse — el anuncio
+  actualizado (es+en) lo dice: «el círculo CABALGA CON EL DIOS».
+  (2) **EL ESTALLIDO CON COMPÁS**: P1 = 1 uso por fase (menú), P2 = 2, y P3+ = FUERZA un
+  contador aleatorio 1-9 de ataques de otro tipo (re-tirado tras cada estallido y en cada
+  cambio de fase); cada activación = 1/2/3 detonaciones (t=60/105/150) con SU aro telegrafiado
+  antes de CADA una (ai[3] = la próxima explosión) y LA ESCALA por fase viajando en ai[2]
+  (fase·8192+seed — 1.15 en P1 → 1.39 en P5: rayos, anillo, hitbox 1200·esc y la LUZ).
+  (3) **EL DASH CORTO Y CENTRADO**: rumbo DIRECTO a PredPresa (el corte lateral de la .44
+  murió), 44→34 px/t, y muere al ALEJARSE / 58 t / 1200 px (antes 1900/90).
+  (4) **EL RELOJ ÚNICO GIGANTE**: ×7.5 (300×380), nace EN el jefe, LO SIGUE, arena desde el
+  tick 0, peso radio 560 (600 en inversión), daño 0.60× — ya no hay 4 relojes alrededor del jugador.
+  (5) **LAS TRES ARMAS DE LA EMPERATRIZ** (la investigación: Sun Dance/Ethereal Lance/
+  Everlasting Rainbow de vanilla + Fargo's Eternity como el mod popular que la rehace):
+  LA DANZA SOLAR (EST_DANZA f3+ — 6 rayos de 860 px girando 0.0125 rad/t en 3 tandas
+  desfasadas, translúcidos los primeros 25 t — la regla Fargo — cabalgando con el jefe, daño
+  por hitbox de BARRA 0.55×, peso 5 al volador), LAS LANZAS ETERNAS (EST_LANZAS f4+ —
+  8-14 lanzas sembradas a 620 px DETRÁS de tu carrera, telegrafo translúcido 50 t + vuelo 15 px/t,
+  daño 0.75× manual, dos tandas — la segunda LA SENTENCIA sobre tu posición actual, peso 5 al
+  corredor) y LA CORONA ETERNA (EST_CORONA f4+ — 14 plumas prismáticas espiralando 240↔640
+  girando 0.024 rad/t, ancla que deriva hacia ti, daño 0.50× por pluma, peso 5 al quieto) —
+  16 ESTADOS en total, 3 anuncios nuevos (es+en) y la rueda del jefe ACELERA ×4 en la danza.
+  (6) **EL HALO ARCOÍRIS**: ítem NUEVO (accessory+vanity, modo 7 del portador, patrón 8 de
+  PatronAura): la banda `VFXCore.Arcoiris` (rx 42) alrededor de la cabeza girando (t·0.10) con
+  12 perlas zodiacales de color, rim blanco, atmósfera y luz discreta; PNG 30×30 horneado,
+  anillo animado en el icono, SIN RECETA (regalo al entrar).
+  (7) **LA FORMA 3 MÁS VIVA**: banda a t·0.10 + EL SEGUNDO ARO fino al revés (0.74·radio),
+  perlas 11→13 px (alfa 0.95), joyas 34→46 px, LOS 12 RAYOS DEL MANDORLA en el nimbo,
+  lámparas ×1.25, aleteo ×1.35, y la LUZ DE MUNDO del trono (1.25/1.15/0.90 respirando).
+  (8) **EL CRASH DEL REGALO MUERTO**: `YaLoTiene` con bucles `.Length` (el IndexOutOfRange
+  del client.log — la entrega MORÍA en el índice 58 y los ítems no llegaban).
 - **v6.50.53 = EL ARCOÍRIS DE LA FORMA 3 + EL SERAFÍN + EL FANTASMA DE LOS NPCS MUERTO
   + LA MASCOTA-JEFE + EL ESTALLIDO RADIANTE** — la décima ronda sobre la .52:
   (1) **EL ARCOÍRIS DE LA FORMA 3 POR FIN EXISTE** (bug de TRES versiones): el
   dispatcher `DibujarJugadorAditivo` NUNCA llamaba a `DibujarDivino3` — el trono
-  entero (nimbo del Pantocrátor, cruz, mar de vidrio, lámparas, ofanim, alas
-  prismáticas y EL ARCOÍRIS) JAMÁS se dibujó en .49→.52; UNA línea de dispatcher
-  lo cura.
+  entero JAMÁS se dibujó en .49→.52; UNA línea de dispatcher lo cura.
   (2) **LA FORMA ASCENDIDA 4: EL SERAFÍN** (Isaías 6 — "el que arde"): SEIS ALAS
   en tres pares (8+10+7 plumas con cálamo y punta de luz), HALO TRIPLE con
   trisagión contrarrotando, CORONA del Rey de Gloria, NIMBO mayor (Radio×3.4),
@@ -653,30 +685,35 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.53 está implementada y build-verificada. Checklist de la .53:
+La v6.50.54 está implementada y build-verificada. Checklist de la .54:
 
-1. **EL ARCOÍRIS DE LA FORMA 3 (EL GRAN TEST)**: equipar la Forma Ascendida 3
-   y VER el trono completo — nimbo dorado, cruz de luz, mar de vidrio,
-   lámparas, ruedas de ofanim, alas prismáticas y LA BANDA ARCOÍRIS de siete
-   franjas (~80 px) girando alrededor (el trono JAMÁS se había dibujado — el
-   bug del dispatcher de tres versiones).
-2. **LA FORMA 4: EL SERAFÍN**: invocar/equipar la Forma Ascendida 4 — seis
-   alas en tres pares, halo triple, corona, rayos de dios, bruma, cuerpo que
-   arde, plumas que caen; la luz de mundo MÁS grande de las cuatro formas +
-   VUELO INFINITO.
-3. **EL FANTASMA MUERTO**: pelear al jefe y QUE EL JEFE LANZE EL RAYO con NPCs
-   del pueblo en pantalla — los NPCs deben verse SÓLIDOS SIEMPRE (antes:
-   transparentes durante el rayo).
-4. **LA MASCOTA-JEFE**: invocar al Aethon Menor — debe ser EL JEFE EXACTO en
-   miniatura (velo violeta, halo dorado, rueda de rayos, dos coronas de perlas,
-   chispas y núcleo blanco, a escala 0.22).
-5. **EL ESTALLIDO RADIANTE (LA IMAGEN)**: en fase 3+ el jefe se DETIENE y se
-   llena (el aro de peligro pulsando + brasas cayendo en espiral, 1 s) y
-   ESTALLA: los 44 rayos en 360° de largo variable, el anillo segmentado
-   creciendo, la cruz, el núcleo blanco cegador, las chispas y la luz que
-   INUNDA el mundo por 2,5 s — adentro del aro (600 px) duele, afuera no.
-6. **REGRESIÓN**: la entrada en dos actos, el arcoíris del ítem, el regalo de
-   pruebas y el mediodía eterno siguen intactos.
+1. **EL DECRETO CABALGA (EL CAMBIO DE FASE)**: bajar al jefe a 80% de vida y VER el
+   círculo del eclipse NACIENDO EN EL JEFE y MOVIÉNDOSE CON ÉL (el jefe orbita lento,
+   ya no se clava) — el aro crece mientras cabalga.
+2. **EL ESTALLIDO CON COMPÁS**: en fase 1 el estallido sale UNA vez; en fase 2, DOS; y
+   en fase 3+ aparece cada POCOS ataques (1-9 aleatorio) — y cada activación son 1/2/3
+   explosiones seguidas con su telegrafo ANTES de cada una; todo un 15-39% MÁS GRANDE
+   según la fase.
+3. **EL DASH**: el destello SIEMPRE embiste hacia el jugador (nunca «a ninguna parte»),
+   más corto y frena al pasar.
+4. **EL RELOJ ÚNICO**: el ataque del Bastón del Reloj de Arena Cósmico es UN SOLO reloj
+   GIGANTE centrado en el jefe que se MUEVE con él (ya no son 4 alrededor del jugador).
+5. **LAS TRES ARMAS NUEVAS (fase 3+)**: LA DANZA SOLAR (la rueda de 6 rayos girando,
+   translúcida al nacer), LAS LANZAS ETERNAS (las líneas translúcidas que se vuelven
+   lanzas — castigan correr en línea recta) y LA CORONA ETERNA (el anillo de plumas de
+   colores que espirala alrededor tuyo) — fase 4+ para las dos últimas.
+6. **EL HALO ARCOÍRIS**: al entrar al mundo llega EL HALO ARCOÍRIS (regalo) — equiparlo
+   y ver el aro pequeño de siete franjas girando alrededor de la cabeza (combina con
+   cualquier forma ascendida).
+7. **LA FORMA 3 MÁS VIVA + EL REGALO COMPLETO**: el trono con la banda arcoíris DOBLE
+   (girando más rápido), los rayos del nimbo, las perlas mayores y la iluminación de
+   mundo; y que el regalo entregue TODO sin errores (el crash del log, muerto).
+8. **REGRESIÓN**: la Forma 4 (Serafín), la mascota-jefe, el rayo sin fantasmas y la
+   entrada en dos actos siguen intactos.
+
+*(El checklist de la .53 — trono con arcoíris, Serafín, rayo sin fantasmas, mascota-jefe
+y estallido — sigue en el historial de abajo: todo cubierto por los puntos 1, 7 y 8 de
+arriba y por la regresión.)*
 
 
 ## 🗑️ DOC-ROT / DEUDA TÉCNICA CONOCIDA (detectada, sin arreglar)
@@ -738,7 +775,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.53** | ✅ Build-verificada, ⏳ en juego | LA DÉCIMA RONDA — feedback de la .52 (CINCO frentes): (1) **EL ARCOÍRIS DE LA FORMA 3** («el arcoíris debería estar en la forma ascendida 3»): BUG DE TRES VERSIONES — el dispatcher `DibujarJugadorAditivo` despachaba `Divino`/`Divino2` pero el caso `Divino3` NO EXISTÍA: `DibujarDivino3` compilaba y viajaba en la DLL… y NADIE lo llamaba (el trono entero — nimbo, cruz, mar de vidrio, lámparas, ofanim, alas prismáticas y EL ARCOÍRIS de Ap 4:3 — JAMÁS se dibujó en .49→.52); LA CURA = UNA línea de dispatcher · (2) **LA FORMA 4: EL SERAFÍN** («crea una 4 forma ascendida, asegúrate de que sea algo divino: alas, halo, corona, aura celestial, luz, bruma, más luz y destello, mejor iluminación» — Isaías 6): SEIS ALAS en tres pares (8+10+7, cálamo+punta), HALO TRIPLE trisagión, CORONA Ap 19:12, NIMBO Radio×3.4, RAYOS DE DIOS, BRUMA SANTA Is 6:4, CUERPO QUE ARDE, destello, plumas; Radio 140, luz 1.55/1.38/1.02, ítem horneado+anillo animado, regalo al entrar, vuelo infinito · (3) **EL FANTASMA DE LOS NPCS** («hay algún ataque que vuelve transparentes a los NPCs, creo que cuando lanza rayo»): el PerlinBolt dejaba el lote ABIERTO EN ADITIVO (RayoStrip reabría para sus gorros; ReabrirLoteVanilla = NO-OP) → todo NPC tras el jefe salía aditivo/transparente; el finally cierra y devuelve SIEMPRE el lote de vanilla · (4) **LA MASCOTA-JEFE** («que sea exactamente el jefe pero más pequeño»): las SEIS secciones del sol de código a escala 0.22 con el MISMO compás · (5) **EL ESTALLIDO RADIANTE** («te envié una imagen, crea por código un ataque igual a la imagen»): EST_ESTALLIDO (fase 3+, peso 5 al pegado) — 60 t de recogida (aro 600 px + 14 brasas en espiral + núcleo + agujas) y EL PUNTO DE LUZ (proyectil 19): onda 0,95× radio 600 (12 t, hitbox autocurada) + 152 t de 44 rayos 360° (250-980 px, núcleo blanco + halo oro→ámbar→brasa), anillo segmentado 14 emisores, cruz anamórfica, núcleo Bloom×4 ~950 px respirando, estrella 8 rayos, onda, 26 bokeh, 42 GoldFlame, LUZ QUE INUNDA 2,4/2,1/1,5, Item122+kick 13 px — TODO determinista (Hash01), anuncio `Jefe.Aethon.Estallido` es+en |
+| **v6.50.54** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ sellada localmente | LA UNDÉCIMA RONDA — feedback de la .53 (OCHO frentes): (1) **EL DECRETO CABALGA**: el ataque del cambio de fase centrado EN EL JEFE y moviéndose CON él (2) **EL ESTALLIDO CON COMPÁS**: 1×P1, 2×P2 + más grande, P3+ cada 1-9 ataques ALEATORIO, y 1/2/3 detonaciones por activación (3) **EL DASH CORTO Y CENTRADO** (4) **EL RELOJ ÚNICO GIGANTE** ×7.5 siguiendo al dios (5) **LAS TRES ARMAS DE LA EMPERATRIZ**: DANZA SOLAR + LANZAS ETERNAS + CORONA ETERNA (6) **EL HALO ARCOÍRIS** (ítem nuevo, la banda de la Forma 3 alrededor de la cabeza) (7) **LA FORMA 3 MÁS VIVA** (banda doble, perlas mayores, rayos del mandorla, luz de mundo) (8) **EL CRASH DEL REGALO MUERTO** (YaLoTiene con .Length — el IndexOutOfRange del client.log) |
+| **v6.50.53** | ✅ Build-verificada, ✔ publicada (release 402101571, CDN byte a byte), ⏳ en juego | LA DÉCIMA RONDA — feedback de la .52 (CINCO frentes): (1) **EL ARCOÍRIS DE LA FORMA 3** («el arcoíris debería estar en la forma ascendida 3»): BUG DE TRES VERSIONES — el dispatcher `DibujarJugadorAditivo` despachaba `Divino`/`Divino2` pero el caso `Divino3` NO EXISTÍA: `DibujarDivino3` compilaba y viajaba en la DLL… y NADIE lo llamaba (el trono entero — nimbo, cruz, mar de vidrio, lámparas, ofanim, alas prismáticas y EL ARCOÍRIS de Ap 4:3 — JAMÁS se dibujó en .49→.52); LA CURA = UNA línea de dispatcher · (2) **LA FORMA 4: EL SERAFÍN** («crea una 4 forma ascendida, asegúrate de que sea algo divino: alas, halo, corona, aura celestial, luz, bruma, más luz y destello, mejor iluminación» — Isaías 6): SEIS ALAS en tres pares (8+10+7, cálamo+punta), HALO TRIPLE trisagión, CORONA Ap 19:12, NIMBO Radio×3.4, RAYOS DE DIOS, BRUMA SANTA Is 6:4, CUERPO QUE ARDE, destello, plumas; Radio 140, luz 1.55/1.38/1.02, ítem horneado+anillo animado, regalo al entrar, vuelo infinito · (3) **EL FANTASMA DE LOS NPCS** («hay algún ataque que vuelve transparentes a los NPCs, creo que cuando lanza rayo»): el PerlinBolt dejaba el lote ABIERTO EN ADITIVO (RayoStrip reabría para sus gorros; ReabrirLoteVanilla = NO-OP) → todo NPC tras el jefe salía aditivo/transparente; el finally cierra y devuelve SIEMPRE el lote de vanilla · (4) **LA MASCOTA-JEFE** («que sea exactamente el jefe pero más pequeño»): las SEIS secciones del sol de código a escala 0.22 con el MISMO compás · (5) **EL ESTALLIDO RADIANTE** («te envié una imagen, crea por código un ataque igual a la imagen»): EST_ESTALLIDO (fase 3+, peso 5 al pegado) — 60 t de recogida (aro 600 px + 14 brasas en espiral + núcleo + agujas) y EL PUNTO DE LUZ (proyectil 19): onda 0,95× radio 600 (12 t, hitbox autocurada) + 152 t de 44 rayos 360° (250-980 px, núcleo blanco + halo oro→ámbar→brasa), anillo segmentado 14 emisores, cruz anamórfica, núcleo Bloom×4 ~950 px respirando, estrella 8 rayos, onda, 26 bokeh, 42 GoldFlame, LUZ QUE INUNDA 2,4/2,1/1,5, Item122+kick 13 px — TODO determinista (Hash01), anuncio `Jefe.Aethon.Estallido` es+en |
 | **v6.50.52** | ✅ Build-verificada, ✔ publicada (release 401940561, CDN byte a byte), ⏳ en juego | LA NOVENA RONDA — feedback de la .51 (CUATRO frentes): (1) **EL ARCOÍRIS DEL ÍTEM** («no se ve el arcoíris en el item de la forma ascendida 3»): el borde desaturado del png → EL ARO ANGULAR HORNEADO (rojo arriba girando por el espectro, núcleo blanco intacto) + EL ANILLO ANIMADO en `PostDrawInInventory` (la banda `VFXCore.Arcoiris` girando alrededor del icono, MISMO lote de la UI, cero Begin/End) · (2) **EL JEFE SIN ARCOÍRIS** («el jefe no necesita tener un arcoiris»): sección 4.5 del PreDraw MUERTA — el dios es oro y núcleo blanco; la banda vive en Forma 3 + mascota · (3) **LA ENTRADA EN DOS ACTOS** («la presentación debe durar hasta que el sol llegue al centro, luego aparece el jefe» + «demora mucho el suelo temblando»): ACTO 1 PRESENTACIÓN=CARRERA (lluvia todo el cielo hasta el final + temblor creciente solo aquí + reloj bidireccional TODO JUNTO, jefe INVISIBLE, mín 150 t) → ACTO 2 EL APARECER (80 t: PILAR + DESTELLO curva 20/40/80 + materialización 24 t DENTRO del pilar directo a la órbita — nada fuera de pantalla) · (4) **EL ESPEJO PURO + PARACAÍDAS** (la cura del «no aparece»: la .51 avanzaba vía rate de vanilla y si vanilla no lo aplicaba se colgaba): vanilla a rate 0 durante TODA la carrera, el espejo mueve Main.time a mano en AMBAS direcciones (cruces alba/ocaso en ambos sentidos; rate=dist×0.25 techo 220× — peor caso 3,6 s; POSADO en 27000 sin deriva) + a los 570 t la IA posa el sol a mano — el jefe APARECE SIEMPRE · SIMULACIÓN 17/17 + 20.000 aleatorias × 400 t |
 | **v6.50.51** | ✅ Build-verificada, ⏳ en juego | LA OCTAVA RONDA — feedback de la .50 (CUATRO frentes): (1) **EL ARCOÍRIS DE VERDAD** («yo no veo nada, ni en la forma ascendida 3 ni en el jefe, ni en la mascota»): la .50 lo prometía con hilos BLANCOS + perlas de 10 px = confeti; LA CURA = **LA BANDA HORNEADA** `VFXCore.Arcoiris` (512² EN CÓDIGO, cero assets: siete franjas saturadas rojo→violeta, banda [0.58,0.92] del semiancho, RGB premultiplicado, ~80 px de grosor) en los TRES sitios: el trono de la Forma 3 (24 perlas SOBRE la banda + 4 joyas + rim), el jefe en plena pelea (sección 4.5 del PreDraw) y la mascota en miniatura · (2) **EL NIMBO DEL PANTOCRÁTOR** («no se ve nada celestial ni divino»): el disco dorado + aro de los iconos bizantinos detrás del dios · (3) **LA ENTRADA SOLO COLOR LUZ Y TODO EL CIELO** («es multicolor… que sea solo color luz y que se reprodusca en todo el cielo»): lluvia BLANCA y DORADA alternada (hslToRgb muerto) naciendo en el rectángulo entero de la cámara alrededor del jugador (4/tick + clon); el AURORA 874 MURIÓ (prisma por naturaleza) · (4) **LA CARRERA AL MEDIODÍA DE VUELTA — RELOJ BIDIRECCIONAL** («mantén temblor/reloj/pilar/descenso… el tiempo avanza o retrocede según qué tan lejos o cerca esté el sol del centro»): CINCO ACTOS (presenta 180 t sub 9 → temblor 150 t sub 10 con la luz ascendiendo `SeguirCielo` → carrera sub 11 `TicksHaciaElMediodia` camino más corto: tarde/noche nueva RETROCEDE (el espejo resta a mano en PreUpdateTime con cruces en reversa), madrugada/mañana AVANZA (rate vanilla), rate=dist×0.08 techo 110× piso 1, el sol SE POSA en 27000 → climax 120 t sub 12 (PILAR + DESTELLO del sol) → descenso 90 t sub 13 con chispas doradas); cerrojo .42 vivo; ColaSierpeSky sub 9-12; SIMULACIÓN 12/12 casos con la dirección exacta de los 4 ejemplos del usuario |
 | **v6.50.50** | ✅ Build-verificada, ⏳ en juego | LA SÉPTIMA RONDA — feedback de la .49 (CUATRO frentes): (1) **EL CRASH DE LA MASCOTA** (client.log): `AethonMenorPet.PreDraw` hacía `FlushAdditive(null,true); return true` — el Flush deja el lote CERRADO y el `true` mandaba a tML a dibujar ENCIMA → «Draw was called, but Begin has not yet been called» + «End was called, but Begin has not yet been called» en Main.DrawProjectiles:18973 = Main engine crash AL INVOCARLA; contrato de la casa restaurado (`FlushAdditive` + `ReabrirLoteVanilla()` + `return false`) · las DOS «Excepciones silenciosas» del mismo log (SolVivo línea 741 / LenteAbismo 510: Begin pelado tras helper que deja el lote ABIERTO — mordidas/lenguas JAMÁS dibujadas) curadas con `CerrarLoteSiAbierto()` · el «Expected Re-Logic file format» del log = un .plr CORRUPTO del usuario (ajeno al mod) · (2) **EL REGALO DE PRUEBAS** («no pongas recetas, daselos directamente al jugador»): las tres recetas BORRADAS (Forma 2: 10 maderas · Forma 3: Forma 2+20 Fragmento Génesis · Menor: 5 maderas); `ShardPlayer.OnEnterWorld` entrega Forma 2 + Forma 3 + Aethon Menor al ENTRAR AL MUNDO (una copia por ítem — `YaLoTiene` inventario 0-58 + armadura 0-19 + misc 0-9; al hueco libre o QuickSpawnItem; mensaje `Mensajes.RegaloPruebas` es+en) · (3) **EL TRONO SIN HUMO** («la menos divina de todas, solo es humo»): la .49 era TODO SoftGlow (13 capas difusas = UNA MANCHA); EL NÚCLEO NÍTIDO — el arcoíris son DOS LÍNEAS continuas de Ring con 36+14 perlas GlowOrb + 4 joyas DestelloFinal · la CRUZ lleva SU beam sólido de Pixel (7 px, 0.9) + flare en el cruce · el MAR DE VIDRIO tiene SU ARO (Ring) + retícula de Pixel · los OFANIM: GlowOrb 18×11 + PUPILA sólida de Pixel · el HALO TRIPLE son TRES aros de Ring + 12 perlas + ticks de Pixel · la CORONA de 24 estrellas y las chispas son DestelloFinal + cuenta GlowOrb · cada pluma del serafín SU CÁLAMO de Pixel + punta de luz · llaves huérfanas Presentacion/LlegadaLuz BORRADAS (es+en) · (4) **LA ENTRADA DE LA EMPERATRIZ, PALABRA POR PALABRA** (AI_120 case 0 del decompile, 180 t): proyectil vanilla 874 HallowBossDeathAurora en Center+(0,−80) + SoundID.Item161 al t=10 + LLUVIA ARCOÍRIS (dust 267 RainbowMk2, hslToRgb(t/180), 2/tick + clon blanco) + caída (0,5)·×0.95 + FADE IN alpha=255·(1−t/180) + TargetClosest al t=180; anuncio SOLO el de SpawnBoss («ha despertado»); `GetSource_FromAI` por el interno `GetSpawnSource_ForProjectile` |

@@ -75,6 +75,14 @@ namespace AethonMod.Content.Players
         /// DE GLORIA, LOS RAYOS DE DIOS y LA BRUMA SANTA del templo)?</summary>
         public bool FormaAscendidaCuatro;
 
+        /// <summary>¿Lleva EL HALO ARCOÍRIS (v6.50.54 — el arcoíris de la
+        /// Forma 3 destilado a adorno: «toma el arcoiris de la forma
+        /// ascendida 3 y crea un nuevo item solo con ese arcoiris, que
+        /// sea pequeño y rodee la cabeza del jugador» — la banda de
+        /// siete franjas girando alrededor de la cabeza, SIN el resto
+        /// del trono)?</summary>
+        public bool HaloArcoiris;
+
         /// <summary>
         /// v6.50.48 — EL VUELO INFINITO (la letra: «ademas la forma
         /// ascendida y la forma ascendida 2 deben dar vuelo infinito») ·
@@ -107,6 +115,7 @@ namespace AethonMod.Content.Players
             FormaAscendidaDos = false;
             FormaAscendidaTres = false;
             FormaAscendidaCuatro = false;
+            HaloArcoiris = false;
             BrasaDelEclipse = false;
         }
 
@@ -121,6 +130,7 @@ namespace AethonMod.Content.Players
             int ascendidaDosType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaDosItem>();
             int ascendidaTresType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaTresItem>();
             int ascendidaCuatroType = ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>();
+            int haloArcoirisType = ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>();
             int brasaType = ModContent.ItemType<Items.Cosmetics.BrasaDelEclipseItem>();
 
             for (int i = 3; i <= 19; i++)
@@ -139,6 +149,7 @@ namespace AethonMod.Content.Players
                 else if (item.type == ascendidaDosType) FormaAscendidaDos = true;
                 else if (item.type == ascendidaTresType) FormaAscendidaTres = true;
                 else if (item.type == ascendidaCuatroType) FormaAscendidaCuatro = true;
+                else if (item.type == haloArcoirisType) HaloArcoiris = true;
                 else if (item.type == brasaType) BrasaDelEclipse = true;
             }
 
@@ -267,6 +278,14 @@ namespace AethonMod.Content.Players
                         Player.Center, Vector2.Zero,
                         ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
                         0, 0f, Player.whoAmI, 6f);
+                }
+                // v6.50.54 — EL HALO ARCOÍRIS (el modo 7 del portador).
+                if (HaloArcoiris && !EspiarPortador(7))
+                {
+                    Projectile.NewProjectile(Player.GetSource_Misc("HaloArcoiris"),
+                        Player.Center, Vector2.Zero,
+                        ModContent.ProjectileType<Projectiles.Cosmetic.AuraPortadorHalo>(),
+                        0, 0f, Player.whoAmI, 7f);
                 }
                 if (BrasaDelEclipse && !EspiarPortador(3))
                 {

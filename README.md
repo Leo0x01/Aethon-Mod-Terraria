@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.53 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.54 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,28 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.53)
+## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.54)
+- **v6.50.54 - LA UNDÉCIMA RONDA — EL DECRETO CABALGA + EL ESTALLIDO CON COMPÁS + EL DASH CORTO + EL RELOJ ÚNICO + LAS TRES ARMAS DE LA EMPERATRIZ + EL HALO ARCOÍRIS + LA FORMA 3 MÁS VIVA + EL CRASH DEL REGALO MUERTO**:
+  (1) **EL DECRETO CABALGA**: el ataque del cambio de fase nace EN EL JEFE
+  y LO SIGUE (el jefe orbita lento mientras el círculo crece con él).
+  (2) **EL ESTALLIDO CON COMPÁS**: 1 vez en P1, 2 en P2 (más grande), y
+  en P3+ cada 1-9 ataques de otro tipo (ALEATORIO, re-tirado) — y cada
+  activación suelta 1/2/3 detonaciones seguidas, cada una con SU telegrafo.
+  (3) **EL DASH CORTO Y CENTRADO**: el destello embiste DIRECTO a la
+  presa, a 34 px/t, y muere al pasar — no más cruces de 1900 px a ninguna parte.
+  (4) **EL RELOJ ÚNICO GIGANTE**: la catedral del tiempo ×7.5 que nace en
+  el jefe y cabalga con él (ya no son 4 relojes alrededor del jugador).
+  (5) **LAS TRES ARMAS DE LA EMPERATRIZ** (la investigación pedida):
+  LA DANZA SOLAR (6 rayos girando, translúcidos hasta encenderse),
+  LAS LANZAS ETERNAS (el telegrafo elegante que castiga la línea recta)
+  y LA CORONA ETERNA (14 plumas prismáticas espiralando) — 16 estados.
+  (6) **EL HALO ARCOÍRIS**: el arcoíris de la Forma 3 destilado a ítem —
+  la banda de siete franjas, pequeña, alrededor de la cabeza.
+  (7) **LA FORMA 3 MÁS VIVA**: banda doble girando al doble, perlas y
+  joyas mayores, los 12 rayos del mandorla, lámparas más altas, alas
+  más vivas y la luz de mundo del trono.
+  (8) **EL CRASH DEL REGALO MUERTO**: el IndexOutOfRange del client.log
+  (bucles a cifra fija en YaLoTiene) — ahora leen .Length.
 - **v6.50.53 - LA DÉCIMA RONDA — EL ARCOÍRIS DE LA FORMA 3 + EL SERAFÍN + EL FANTASMA MUERTO + LA MASCOTA-JEFE + EL ESTALLIDO RADIANTE**:
   (1) **EL ARCOÍRIS DE LA FORMA 3 POR FIN EXISTE**: bug de TRES
   versiones — el dispatcher de auras NUNCA llamaba a `DibujarDivino3`:

@@ -60,6 +60,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil _perfilAscendidaTres;
         private static AuraPerfil _perfilAscendidaCuatro;
         private static AuraPerfil _perfilBrasa;
+        private static AuraPerfil _perfilHaloArcoiris;
 
         /// <summary>El perfil de la forma ascendida, creado UNA vez.</summary>
         private static AuraPerfil PerfilAscendida =>
@@ -87,6 +88,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         private static AuraPerfil PerfilAscendidaCuatro =>
             _perfilAscendidaCuatro ??= AuraPerfil.FormaAscendidaCuatro();
 
+        /// <summary>v6.50.54 — El perfil de EL HALO ARCOÍRIS (el arcoíris
+        /// de la Forma 3 destilado: SOLO la banda pequeña alrededor de la
+        /// cabeza), creado UNA vez.</summary>
+        private static AuraPerfil PerfilHaloArcoiris =>
+            _perfilHaloArcoiris ??= AuraPerfil.HaloArcoiris();
+
         /// <summary>v6.50.23 — El perfil de la brasa del eclipse, creado UNA vez.</summary>
         private static AuraPerfil PerfilBrasa =>
             _perfilBrasa ??= AuraPerfil.BrasaDelEclipse();
@@ -109,8 +116,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         }
 
         /// <summary>El modo del portador (0 hambre · 2 ascendida · 3 brasa ·
-        /// 4 ascendida 2 · 5 ascendida 3 · 6 ascendida 4 — el 1 era la
-        /// corona rúnica, muerta en la v6.50.44).</summary>
+        /// 4 ascendida 2 · 5 ascendida 3 · 6 ascendida 4 · 7 halo arcoíris —
+        /// el 1 era la corona rúnica, muerta en la v6.50.44).</summary>
         private int Modo => (int)Projectile.ai[0];
 
         /// <summary>¿El dueño sigue VISTIENDO el aura de este modo?</summary>
@@ -131,6 +138,8 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaTres;
                 case 6:
                     return duenio.GetModPlayer<CosmeticPlayer>().FormaAscendidaCuatro;
+                case 7:
+                    return duenio.GetModPlayer<CosmeticPlayer>().HaloArcoiris;
             }
             return false;
         }
@@ -146,6 +155,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 case 4: return PerfilAscendidaDos;
                 case 5: return PerfilAscendidaTres;
                 case 6: return PerfilAscendidaCuatro;
+                case 7: return PerfilHaloArcoiris;
             }
             return null;
         }
@@ -189,6 +199,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 float eco = MathF.Pow(MathF.Sin(MathHelper.Pi * FracLatido(b + 0.18f)), 14f);
                 float lat = 1f + 0.45f * (golpe + 0.55f * eco);
                 Lighting.AddLight(Projectile.Center, 0.30f * lat, 0.13f * lat, 0.02f * lat);
+            }
+            // v6.50.54 — EL HALO ARCOÍRIS: la luz blanca del prisma (suave,
+            // constante — el aro no molesta: ADORNA).
+            else if (Modo == 7)
+            {
+                Lighting.AddLight(Projectile.Center - new Vector2(0f, 18f),
+                    new Vector3(0.26f, 0.24f, 0.20f));
             }
         }
 

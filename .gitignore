@@ -75,3 +75,6 @@ yarn-error.log*
 *.suo
 .tmod/
 *.tar.gz
+
+# v6.50.54 — EL ORÁCULO DE COMPILACIÓN local (nunca se commitea: herramienta del entorno)
+verify.csproj

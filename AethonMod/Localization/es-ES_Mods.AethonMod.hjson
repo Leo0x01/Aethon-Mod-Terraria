@@ -1671,6 +1671,19 @@ Items: {
 			'''
 	}
 
+	// v6.50.54 — THE RAINBOW HALO (Form 3's rainbow, distilled into an adornment).
+	HaloArcoirisItem: {
+		DisplayName: El Halo Arcoíris
+		Tooltip:
+			'''
+			EL ARCOÍRIS DE LA FORMA 3, DESTILADO (Ap 4:3).
+			Nada de trono, nada de cruz, nada de mar de vidrio: SOLO
+			LA BANDA de siete franjas — pequeña, alrededor de tu cabeza,
+			girando despacito con sus doce perlas zodiacales de color.
+			El aro del trono, hecho adorno. Y una luz blanca suave.
+			'''
+	}
+
 	BrasaDelEclipseItem: {
 		DisplayName: La Brasa del Eclipse
 		Tooltip:
@@ -2242,9 +2255,13 @@ Jefe: {
 		Coro: EL CORO ESPECTRAL — las notas cantan alrededor tuyo: muévete con el anillo.
 		Manada: LA MANADA ASTRAL — la luz suelta a los perros del cielo: mátalos o córreles.
 		Telar: EL TELAR DE CONSTELACIONES — las estrellas tejen la jaula: sal de la figura.
-		Decreto: EL DECRETO DEL ECLIPSE — el círculo crece y la luz NO se mueve: corre, ahora es cuando.
+		Decreto: EL DECRETO DEL ECLIPSE — el círculo CABALGA CON EL DIOS: córrele o sal YA de su sombra.
 		// v6.50.53 — THE USER'S IMAGE, MADE AN ATTACK: THE RADIANT BURST
 		Estallido: EL ESTALLIDO RADIANTE — toda la luz del mundo se junta y ARDE: fuera del anillo.
+		// v6.50.54 — THE THREE NEW EMPRESS WEAPONS (the research)
+		Danza: LA DANZA SOLAR — los rayos del dios giran: camina ENTRE la luz, con el giro.
+		Lanzas: LAS LANZAS ETERNAS — la luz apunta DONDE VAS: rompe la línea recta.
+		Corona: LA CORONA ETERNA — el arcoíris te asedia: muévete con las plumas.
 	}
 }
 

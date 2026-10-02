@@ -95,6 +95,16 @@ namespace AethonMod.Content.VFX
         /// EmitirDivino4.
         /// </summary>
         Divino4 = 7,
+
+        /// <summary>
+        /// v6.50.54 — EL HALO ARCOÍRIS (la petición: «toma el arcoiris de
+        /// la forma ascendida 3 y crea un nuevo item solo con ese arcoiris,
+        /// que sea pequeño y rodee la cabeza del jugador»): la banda de
+        /// Ap 4:3 DESTILADA — sin trono, sin cruz, sin mar de vidrio: SOLO
+        /// EL ARO pequeño de siete franjas alrededor de la cabeza. Su
+        /// propio camino: EmitirHaloArcoiris.
+        /// </summary>
+        HaloArcoiris = 8,
     }
 
     /// <summary>La FORMA de las partículas del aura.</summary>
@@ -699,6 +709,42 @@ namespace AethonMod.Content.VFX
                 Tamano = 10f,
                 Vida = 2.0f,
             });
+            return p;
+        }
+
+        /// <summary>
+        /// v6.50.54 — EL HALO ARCOÍRIS (la petición: «toma el arcoiris de la
+        /// forma ascendida 3 y crea un nuevo item solo con ese arcoiris, que
+        /// sea pequeño y rodee la cabeza del jugador»): el perfil MÍNIMO —
+        /// la banda de siete franjas de la Forma 3 (VFXCore.Arcoiris) en un
+        /// aro pequeño (rx 42 px) alrededor de la cabeza, con SUS perlas
+        /// zodiacales de color y el rim blanco. Radio pequeño (46 — es un
+        /// adorno, no un trono) y la paleta del prisma.
+        /// </summary>
+        public static AuraPerfil HaloArcoiris()
+        {
+            var p = new AuraPerfil
+            {
+                Radio = 46f,          // pequeño — rodea la CABEZA, no el cielo
+                Anillos = 0,
+                Gajos = 0,
+                Patron = PatronAura.HaloArcoiris,   // SU propio camino (EmitirHaloArcoiris)
+                Fluir = 0.8f,
+                Deriva = 0.0f,
+                Ascenso = 0f,
+                Distorsion = 0f,
+                Blur = 0f,
+                Glow = 0f,
+                Semilla = 3313,
+                AlfaTrasera = 0.0f,   // NADA de Emitir genérico: TODO lo dibuja el camino propio
+                AlfaFrontal = 0.0f,
+                VeloFrontal = false,
+                Rayos = 0,
+                Borde = 0f,
+                Parpadeo = 0f,
+            };
+            p.ConTrasera(new Color(255, 255, 255), new Color(255, 255, 255), new Color(255, 255, 255));
+            p.ConFrontal(new Color(255, 255, 255), new Color(255, 255, 255), new Color(255, 255, 255));
             return p;
         }
 
@@ -1610,6 +1656,11 @@ namespace AethonMod.Content.VFX
             // SERAFÍN — la cuarta luz, el que arde).
             if (p.Patron == PatronAura.Divino4)
                 return DibujarDivino4(pl, p);
+
+            // v6.50.54 — EL PATRÓN HALO ARCOÍRIS (el arcoíris de la Forma 3
+            // destilado a adorno — el mismo contrato del bool).
+            if (p.Patron == PatronAura.HaloArcoiris)
+                return DibujarHaloArcoiris(pl, p);
 
             try
             {
@@ -2602,7 +2653,9 @@ namespace AethonMod.Content.VFX
             //     celestial ni divino»: LA HOJA DE ORO de las
             //     iconografías — el gran disco dorado detrás del dios y
             //     su aro, el fondo de todo icono bizantino. Es lo PRIMERO
-            //     que el ojo lee como «esto es divino») ===
+            //     que el ojo lee como «esto es divino». v6.50.54 — LOS
+            //     DOCE RAYOS DEL MANDORLA: picos cortos de luz alrededor
+            //     del aro — el disco RAYADO de los iconos de Cristo) ===
             {
                 Vector2 cNimbo = centro - new Vector2(0f, 10f * gravedad);
                 // EL DISCO (la hoja de oro — el resplandor entero).
@@ -2612,6 +2665,17 @@ namespace AethonMod.Content.VFX
                 VFXCore.Quad(cNimbo, TintAditivo(oroBlanco, 0.34f),
                     new Vector2(p.Radio * 1.26f * 2.174f, p.Radio * 1.40f * 2.174f),
                     0f, VFXCore.Ring);
+                // v6.50.54 — LOS DOCE RAYOS (los picos del mandorla — cada
+                //     uno SU trazo sólido, respirando por su cuenta).
+                for (int i = 0; i < 12; i++)
+                {
+                    float angN = i * MathHelper.TwoPi / 12f + t * 0.06f;
+                    float largoN = (26f + 14f * MathF.Sin(t * 1.8f + i * 1.31f));
+                    Vector2 medioN = cNimbo + new Vector2(MathF.Cos(angN), MathF.Sin(angN)) *
+                        (p.Radio * 1.26f + largoN * 0.5f);
+                    VFXCore.Quad(medioN, TintAditivo(oroBlanco, 0.55f),
+                        new Vector2(largoN, 3.2f), angN, VFXCore.Pixel);
+                }
             }
 
             // === 1. EL CUERPO DE LUZ (el flipbook Perlin) + EL CORAZÓN
@@ -2693,14 +2757,21 @@ namespace AethonMod.Content.VFX
                 Vector2 cAro = centro - new Vector2(0f, 14f * gravedad);
 
                 // LA BANDA (las siete franjas del espectro — EL ARCOÍRIS).
+                // v6.50.54 — MÁS VIVA: el giro DOBLADO (t·0.10 — se VE
+                // girar ahora) y la atmósfera que ARDE más.
                 Texture2D banda = VFXCore.Arcoiris;
                 if (banda != null)
                 {
                     VFXCore.Quad(cAro, TintAditivo(new Color(255, 255, 255), 0.92f),
-                        new Vector2(rxA * 2.174f, ryA * 2.174f), t * 0.05f, banda);
+                        new Vector2(rxA * 2.174f, ryA * 2.174f), t * 0.10f, banda);
                     // LA ATMÓSFERA (el halo que la hace arder).
-                    VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.10f * respira),
-                        new Vector2(rxA * 2.55f, ryA * 2.75f), t * 0.05f, VFXCore.SoftGlow);
+                    VFXCore.Quad(cAro, TintAditivo(blancoSagrado, 0.13f * respira),
+                        new Vector2(rxA * 2.55f, ryA * 2.75f), t * 0.10f, VFXCore.SoftGlow);
+                    // v6.50.54 — EL SEGUNDO ARO (el eco fino del espectro
+                    // girando AL REVÉS — la banda doble: la riqueza del aro).
+                    VFXCore.Quad(cAro, TintAditivo(new Color(255, 255, 255), 0.42f),
+                        new Vector2(rxA * 0.74f * 2.174f, ryA * 0.74f * 2.174f),
+                        -t * 0.16f, banda);
                 }
                 // EL RIM INTERIOR (el borde de la banda hacia el trono —
                 // una línea blanca fina: la joya que cierra el aro).
@@ -2708,28 +2779,31 @@ namespace AethonMod.Content.VFX
                     new Vector2(rxA * 0.60f * 2.174f, ryA * 0.60f * 2.174f), 0f, VFXCore.Ring);
 
                 // LAS CUENTAS (24 perlas montadas SOBRE la banda — cada
-                // una SU color del espectro, brillando por su franja).
+                // una SU color del espectro, brillando por su franja —
+                // v6.50.54: MÁS GRANDES Y MÁS BRILLANTES: se leen a
+                // distancia de juego).
                 for (int i = 0; i < 24; i++)
                 {
                     float ang = t * 0.22f + i * MathHelper.TwoPi / 24f;
                     Vector2 perla = cAro + new Vector2(MathF.Cos(ang) * rxA,
                         MathF.Sin(ang) * ryA);
                     Color cPrisma = ColorPrisma(ang / MathHelper.TwoPi + t * 0.03f);
-                    VFXCore.Quad(perla, TintAditivo(cPrisma, 0.88f),
-                        new Vector2(11f, 11f), 0f, VFXCore.GlowOrb);
-                    VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.45f),
-                        new Vector2(4.5f, 4.5f), 0f, VFXCore.GlowOrb);
+                    VFXCore.Quad(perla, TintAditivo(cPrisma, 0.95f),
+                        new Vector2(13f, 13f), 0f, VFXCore.GlowOrb);
+                    VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.50f),
+                        new Vector2(5.5f, 5.5f), 0f, VFXCore.GlowOrb);
                 }
                 // LAS CUATRO JOYAS (DestelloFinal blanco por el borde
-                // exterior — los broches del arcoíris).
+                // exterior — los broches del arcoíris — v6.50.54: MÁS
+                // GRANDES: los broches se ven de lejos).
                 if (VFXCore.DestelloFinal != null)
                     for (int i = 0; i < 4; i++)
                     {
                         float ang = -t * 0.22f + i * MathHelper.PiOver2;
                         Vector2 joya = cAro + new Vector2(MathF.Cos(ang) * rxA,
                             MathF.Sin(ang) * ryA);
-                        VFXCore.Quad(joya, TintAditivo(blancoSagrado, 0.66f),
-                            new Vector2(34f, 34f), t * 0.10f, VFXCore.DestelloFinal);
+                        VFXCore.Quad(joya, TintAditivo(blancoSagrado, 0.70f),
+                            new Vector2(46f, 46f), t * 0.10f, VFXCore.DestelloFinal);
                     }
             }
 
@@ -2773,7 +2847,7 @@ namespace AethonMod.Content.VFX
                 Vector2 pos = centro + new Vector2(MathF.Cos(ang) * p.Radio * 1.05f,
                     MathF.Sin(ang) * p.Radio * 0.38f - 8f * gravedad);
                 float velo = 0.7f + 0.5f * MathF.Sin(t * (6.5f + 1.5f * hL) + i * 2.4f);
-                float alturaL = (17f + 11f * hL) * velo;
+                float alturaL = (17f + 11f * hL) * velo * 1.25f;   // v6.50.54 — MÁS ALTAS: las llamas SE LEEN
                 // EL PLATILLO (la cuenta sólida de la lámpara).
                 VFXCore.Quad(pos + new Vector2(0f, 2f * gravedad),
                     TintAditivo(oroBlanco, 0.85f),
@@ -2896,7 +2970,7 @@ namespace AethonMod.Content.VFX
             //     ESTRUCTURA el abanico — antes solo abaniques de humo) ===
             {
                 float despliegue = 0.72f + 0.5f * rapidez;
-                float aleteo = MathF.Sin(t * (1.5f + 2.2f * rapidez)) * (0.06f + 0.10f * rapidez);
+                float aleteo = MathF.Sin(t * (1.5f + 2.2f * rapidez)) * (0.06f + 0.10f * rapidez) * 1.35f;   // v6.50.54 — MÁS VIVO: el aleteo ×1.35 — las alas RESPONAN
                 for (int lado = -1; lado <= 1; lado += 2)
                 {
                     Vector2 baseP = centro + new Vector2(-pl.direction * 8f, -4f * gravedad);
@@ -3036,6 +3110,13 @@ namespace AethonMod.Content.VFX
             // === 13. LAS PARTÍCULAS del perfil (la corte del trono —
             //     los orbes que suben) ===
             EmitirParticulas(centro, p, false, 511);
+
+            // === 14. v6.50.54 — LA ILUMINACIÓN DE MUNDO DEL TRONO (la
+            //     petición de la .53 para la 4, aplicada a la 3: el
+            //     portador del trono ILUMINA de verdad — blanco sagrado
+            //     que respira con él) ===
+            float albaT = 0.85f + 0.15f * MathF.Sin(t * 1.6f);
+            Lighting.AddLight(centro, new Vector3(1.25f, 1.15f, 0.90f) * albaT);
         }
 
         /// <summary>
@@ -3090,6 +3171,99 @@ namespace AethonMod.Content.VFX
         //  (el del corazón + las chispas estelares) · mejor iluminación
         //  (todo lo anterior, junto, TODO aditivo).
         // ==================================================================
+
+        // ==================================================================
+        //  v6.50.54 — EL CAMINO ADITIVO DEL HALO ARCOÍRIS (el arcoíris de
+        //  la Forma 3 destilado a adorno: la banda de siete franjas de
+        //  VFXCore.Arcoiris en un ARO PEQUEÑO alrededor de la cabeza, con
+        //  SUS doce perlas zodiacales de color, el rim blanco del borde y
+        //  una atmósfera suave — nada más: la petición fue LITERAL,
+        //  «SOLO ese arcoiris, pequeño, rodee la cabeza»).
+        // ==================================================================
+
+        /// <summary>
+        /// EL CAMINO ADITIVO DEL PATRÓN HALO ARCOÍRIS — el mismo contrato
+        /// del bool de DibujarJugadorAditivo.
+        /// </summary>
+        public static bool DibujarHaloArcoiris(Player pl, AuraPerfil p)
+        {
+            if (pl == null || p == null || Main.netMode == NetmodeID.Server) return false;
+            if (pl.dead) return false;
+
+            try
+            {
+                EmitirHaloArcoiris(pl, p);
+                if (VFXCore.QuadCount > 0)
+                {
+                    VFXCore.FlushAdditive(null, true); // cierra el lote del llamador
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                try { ReabrirLoteVanilla(); } catch { }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// LA EMISIÓN DEL HALO: la banda horneada (la MISMA de la Forma 3)
+        /// en un aro elíptico pequeño sobre la cabeza — girando despacito
+        /// como un aro de cuenta — con las doce perlas zodiacales montadas
+        /// SOBRE la banda (cada una SU color del espectro, como el trono)
+        /// y el rim blanco que la cierra. TODO aditivo, coords de MUNDO,
+        /// determinista (cero Main.rand).
+        /// </summary>
+        private static void EmitirHaloArcoiris(Player pl, AuraPerfil p)
+        {
+            if (!VFXCore.Presupuesto(80)) return;
+
+            float t = Main.GlobalTimeWrappedHourly;
+            float gravedad = pl.gravDir;
+            float respira = 1f + 0.05f * MathF.Sin(t * MathHelper.Pi);
+            Color blancoSagrado = new Color(255, 255, 252);
+
+            // EL CENTRO: la cabeza (con el bob suave del halo del trono).
+            float bobH = MathF.Sin(t * 1.6f) * 3f;
+            Vector2 haloC = new Vector2(pl.Center.X,
+                pl.Center.Y - (pl.height * 0.5f + 30f) * gravedad + bobH * gravedad);
+            float rxH = 42f * respira;      // pequeño — el tamaño del halo del trono
+            float ryH = 15f;
+
+            // LA BANDA (las siete franjas del espectro — EL ARCOÍRIS de la
+            // Forma 3, la MISMA textura horneada, la MISMA firma).
+            Texture2D banda = VFXCore.Arcoiris;
+            if (banda != null)
+            {
+                VFXCore.Quad(haloC, TintAditivo(new Color(255, 255, 255), 0.92f),
+                    new Vector2(rxH * 2.174f, ryH * 2.174f), t * 0.10f, banda);
+                // LA ATMÓSFERA (el halo suave que la hace arder).
+                VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.10f * respira),
+                    new Vector2(rxH * 2.6f, ryH * 2.9f), t * 0.10f, VFXCore.SoftGlow);
+            }
+            // EL RIM INTERIOR (el borde blanco hacia la cabeza — la joya).
+            VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.50f),
+                new Vector2(rxH * 0.58f * 2.174f, ryH * 0.58f * 2.174f), 0f, VFXCore.Ring);
+
+            // LAS DOCE PERLAS ZODIACALES (montadas SOBRE la banda — cada una
+            // SU color del espectro, girando en contra: el trono en miniatura).
+            for (int i = 0; i < 12; i++)
+            {
+                float ang = -t * 0.22f + i * MathHelper.TwoPi / 12f;
+                Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH,
+                    MathF.Sin(ang) * ryH);
+                Color cPrisma = ColorPrisma(ang / MathHelper.TwoPi + t * 0.03f);
+                float frente = (MathF.Sin(ang) + 1f) * 0.5f;
+                VFXCore.Quad(perla, TintAditivo(cPrisma, 0.70f + 0.25f * frente),
+                    new Vector2(8.5f, 8.5f), 0f, VFXCore.GlowOrb);
+                VFXCore.Quad(perla, TintAditivo(blancoSagrado, 0.45f),
+                    new Vector2(3.5f, 3.5f), 0f, VFXCore.GlowOrb);
+            }
+
+            // LA LUZ DEL PRISMA (blanca y suave — el aro ilumina sin encandilar).
+            Lighting.AddLight(haloC, new Vector3(0.30f, 0.28f, 0.24f));
+        }
 
         /// <summary>
         /// EL CAMINO ADITIVO DEL PATRÓN DIVINO 4 (EL SERAFÍN) — el mismo
