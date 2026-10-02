@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.51 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.52 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,33 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-01, v6.50.51)
+## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.52)
+- **v6.50.52 - LA NOVENA RONDA — EL ARCOÍRIS DEL ÍTEM + EL JEFE SIN ARCOÍRIS + LA ENTRADA EN DOS ACTOS Y EL ESPEJO PURO**:
+  (1) **EL ARCOÍRIS DEL ÍTEM**: el icono de la Forma Ascendida 3
+  ahora lleva un ARO ARCOÍRIS ANGULAR VIVO horneado en el png (visible
+  en inventario, hotbar y suelo) + EL ANILLO ANIMADO girando alrededor
+  del icono en el inventario (la misma banda de siete franjas del
+  trono, dibujada en el mismo lote de la UI — cero Begin/End).
+  (2) **EL JEFE SIN ARCOÍRIS**: «el jefe no necesita tener un
+  arcoiris» — la corona del espectro de la .51 MURIÓ; el dios de la
+  luz es oro y núcleo blanco (la banda vive en la Forma 3 y la
+  mascota, donde sí se pidió).
+  (3) **LA ENTRADA EN DOS ACTOS** («la presentación debe durar hasta
+  que el sol llegue al centro, luego aparece el jefe»): la
+  presentación ES la carrera — lluvia de luz en todo el cielo +
+  temblor creciente + el reloj AVANZANDO o RETROCEDIENDO hacia el
+  mediodía, TODO JUNTO, con el jefe INVISIBLE; cuando el sol se posa
+  en el centro → EL APARECER (80 t): el pilar cae, el destello nace
+  del sol y la luz se materializa DENTRO del pilar, directo en su
+  órbita — y a pelear. Máximo ~3,6 s de presentación (la .51: hasta
+  20 s) y NADA fuera de pantalla.
+  (4) **EL JEFE APARECE SIEMPRE**: la carrera de la .51 era un
+  híbrido frágil (avanzar vía el rate de vanilla + retroceder a
+  mano) — si vanilla no aplicaba el rate, se colgaba: «el jefe no
+  aparece». AHORA es EL ESPEJO PURO (vanilla a rate 0; el mismo
+  código mueve el tiempo en ambas direcciones) + EL PARACAÍDAS (a
+  los 570 t el sol se posa a mano aunque todo falle). Simulación:
+  17/17 casos + 20.000 carreras aleatorias, todas aterrizan.
 - **v6.50.51 - LA OCTAVA RONDA — EL ARCOÍRIS DE VERDAD + LA ENTRADA EN BLANCO Y TODO EL CIELO + LA CARRERA QUE RETROCEDE + EL NIMBO**:
   (1) **EL ARCOÍRIS DE VERDAD**: la .49/.50 prometían arcoíris con
   puntitos invisibles — ahora es **LA BANDA HORNEADA** (`VFXCore.
@@ -142,8 +168,11 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
   majestuoso), **LAS PLUMAS QUE CAEN** (la bendición eterna), el corazón
   blanco ardiendo, la banda de escrituras bajo los pies, 22 orbes
   subiendo y la luz del mundo ×1.35 — un FARO de santidad.
-- **GitHub es la FUENTE DE LA VERDAD** — local == remoto (tag `v6.50.51`,
-  release con `AethonMod.tmod` adjunto y verificado byte a byte).
+- **GitHub es la FUENTE DE LA VERDAD** — tag `v6.50.51` pusheado y su release
+  verificada byte a byte; la v6.50.52 está sellada LOCALMENTE (commit + tag +
+  bundle en /home/sync) — **PUSH PENDIENTE: el token GitHub se perdió con el
+  wipe del sandbox** (el de la .51 ya no vive en .env ni en el credential
+  store); con un token nuevo, `bash push-v6.50.52.sh` entrega todo en 1 comando.
 - Build headless **0 errores / 0 warnings** contra tML 2026.07.3.0 real; servidor headless carga
   sin excepciones; `.tmod` de 398 entradas auditado (set idéntico al de la .50: la banda arcoíris
   es HORNEADA EN CÓDIGO — cero texturas nuevas).

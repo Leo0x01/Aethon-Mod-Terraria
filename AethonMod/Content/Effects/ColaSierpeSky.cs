@@ -89,12 +89,12 @@ namespace AethonMod.Content.Effects
             _alpha = MathHelper.Clamp(_alpha + MathF.Sign(objetivo - _alpha) * paso, 0f, 1f);
             _pintadoEsteFrame = false;
 
-            // === LOS DESTELLOS NACEN (subs 9-12: presentación, temblor y
-            //     carrera — v6.50.51: el 9 es la presentación de la
-            //     Emperatriz — el cielo se llena de chispas que nacen y
+            // === LOS DESTELLOS NACEN (subs 9-10: la presentación (la
+            //     carrera) y la aparición — v6.50.52: la presentación ES
+            //     la carrera; el cielo se llena de chispas que nacen y
             //     mueren, cada cliente las ve suyas) ===
             int sub = AethonBoss.SubLlegada;
-            if (!Main.gameMenu && sub >= 9 && sub <= 12 && Main.rand.NextBool(5))
+            if (!Main.gameMenu && (sub == 9 || sub == 10) && Main.rand.NextBool(5))
             {
                 ref Destello d = ref _destellos[_cursor];
                 d.Pos = new Vector2(
@@ -164,10 +164,10 @@ namespace AethonMod.Content.Effects
             }
             catch { }
 
-            // LA LLEGADA: intensidad 1 mientras los subs 9-12 (v6.50.51 —
-            // la presentación de la Emperatriz también es LA LLEGADA); en
-            // el descenso (13) la puerta de la luz se disuelve.
-            float objetivoLlegada = (sub >= 9 && sub <= 12) ? 1f : 0f;
+            // LA LLEGADA: intensidad 1 mientras los subs 9-10 (v6.50.52 —
+            // la presentación ES la carrera; la aparición es el sub 10);
+            // después la puerta de la luz se disuelve.
+            float objetivoLlegada = (sub == 9 || sub == 10) ? 1f : 0f;
             float pasoLlegada = objetivoLlegada > _llegadaVista ? (1f / 25f) : (1f / 22f);
             _llegadaVista = MathHelper.Clamp(
                 _llegadaVista + MathF.Sign(objetivoLlegada - _llegadaVista) * pasoLlegada,
@@ -255,20 +255,21 @@ namespace AethonMod.Content.Effects
                         {
                             Vector2 posSol = AethonBoss.PosicionSolEnCielo();
 
-                            if (sub == 12)
+                            if (sub == 10)
                             {
-                                // ============ EL DESTELLO (v6.50.41) ============
+                                // ============ EL DESTELLO (v6.50.41 → .52) ============
                                 // «un brillo que viene del mismo sol, centrado
                                 // en el sol y difuminándose hacia los bordes
-                                // hasta ser transparente». LA CURVA: crece
-                                // (0-45 t), ARDE en el pico (45-75 t — ahí
-                                // nace Aethon, BAJO el sol) y se disuelve
-                                // (75-120 t) hasta volverse la ventana.
+                                // hasta ser transparente». LA CURVA COMPRIMIDA
+                                // (el aparecer dura 80 t): crece (0-20 t),
+                                // ARDE en el pico (20-40 t — ahí se materializa
+                                // Aethon, BAJO el sol) y se disuelve (40-80 t)
+                                // hasta volverse la ventana.
                                 float tick = ContarTickClimax();
                                 float f;
-                                if (tick < 45f) f = tick / 45f;
-                                else if (tick < 75f) f = 1f;
-                                else f = Math.Max(0f, 1f - (tick - 75f) / 45f);
+                                if (tick < 20f) f = tick / 20f;
+                                else if (tick < 40f) f = 1f;
+                                else f = Math.Max(0f, 1f - (tick - 40f) / 40f);
                                 float suave = f * f * (3f - 2f * f);   // smoothstep
                                 float latidoF = 0.90f + 0.10f *
                                     MathF.Sin(t * (3.2f + 8f * suave));

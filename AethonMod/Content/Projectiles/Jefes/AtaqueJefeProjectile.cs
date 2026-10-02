@@ -760,12 +760,12 @@ namespace AethonMod.Content.Projectiles.Jefes
                         if (who >= 0 && who < Main.maxNPCs)
                         {
                             NPC jefe = Main.npc[who];
-                            // EST_NACIENDO (ai[0]=0) con climax (ai[1]=12) o
-                            // descenso (ai[1]=13) — el pilar vive mientras
-                            // la llegada no haya terminado.
+                            // EST_NACIENDO (ai[0]=0) con aparición (ai[1]=10
+                            // — v6.50.52, la llegada en DOS actos) — el pilar
+                            // vive mientras la llegada no haya terminado.
                             jefeVivo = jefe != null && jefe.active &&
                                 jefe.ai[0] == 0f &&
-                                (jefe.ai[1] == 12f || jefe.ai[1] == 13f);
+                                jefe.ai[1] == 10f;
                         }
                         if (!jefeVivo) Projectile.ai[1] = 1f;   // DISOLVERSE
                     }

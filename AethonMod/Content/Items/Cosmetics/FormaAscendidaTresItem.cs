@@ -1,6 +1,10 @@
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Items.Cosmetics
 {
@@ -79,5 +83,52 @@ namespace AethonMod.Content.Items.Cosmetics
         // recetas, daselos directamente al jugador, recuerda que todo esto
         // es una prueba»): el trono se ENTREGA al entrar al mundo
         // (ShardPlayer.EntregarRegaloDePruebas).
+
+        // ==================================================================
+        //  v6.50.52 — EL ARCOÍRIS DEL ICONO («no se ve el arcoíris en el
+        //  item de la forma ascendida 3»). El borde que traía el png era
+        //  un matiz desaturado de 4-5 px que a escala de inventario nadie
+        //  veía. DOS capas ahora:
+        //    (1) EL ARO HORNEADO — el png del ítem lleva un borde
+        //        ARCOÍRIS VIVO por ángulo (rojo arriba girando por el
+        //        espectro) — visible en el inventario, el hotbar, el
+        //        suelo y el boticario, SIN código;
+        //    (2) EL ANILLO ANIMADO — la banda de siete franjas
+        //        (VFXCore.Arcoiris — la MISMA banda que gira alrededor
+        //        del trono de la Forma 3 en juego) girando despacito
+        //        alrededor del icono con su pulso — dibujada en el
+        //        MISMO lote de la UI (cero Begin/End: la lección de la
+        //        .50 — nunca se toca el lote del llamador).
+        // ==================================================================
+        public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position,
+            Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
+        {
+            Texture2D banda = VFXCore.Arcoiris;
+            if (banda == null) return;
+
+            float t = Main.GlobalTimeWrappedHourly;
+
+            // EL CENTRO EXACTO del ícono dibujado (independiente de la
+            // convención de origin del llamador: el centro del sprite en
+            // pantalla ES position + (medioFrame − origin)·scale).
+            Vector2 centro = position + (frame.Size() * 0.5f - origin) * scale;
+
+            // EL ALCANCE: la banda abrazando el borde del ícono (su borde
+            // externo apenas por fuera del sprite) — la convención de la
+            // casa: el cuadro del anillo mide 2.174× su radio visible.
+            float bordeExterno = frame.Width * scale * 0.62f;
+            float quad = bordeExterno * 2.174f;
+            Vector2 escala = new Vector2(quad / banda.Width, quad / banda.Height);
+
+            // EL GIRO LENTO + EL PULSO (la banda de Ap 4:3 alrededor del
+            // trono — la misma que gira alrededor de la Forma 3 en juego).
+            float giro = t * 0.35f;
+            float alfa = 0.55f + 0.20f * MathF.Sin(t * 2.2f);
+
+            spriteBatch.Draw(banda, centro, null,
+                new Color(255, 255, 255, 255) * alfa,
+                giro, new Vector2(banda.Width, banda.Height) * 0.5f,
+                escala, SpriteEffects.None, 0f);
+        }
     }
 }
