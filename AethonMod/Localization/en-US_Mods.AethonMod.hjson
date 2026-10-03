@@ -1830,6 +1830,7 @@ Projectiles: {
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
+	MiniEstallidoPet.DisplayName: Mini Estallido Pet
 }
 
 Buffs: {

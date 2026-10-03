@@ -15,6 +15,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// del PreDraw del jefe (velo violeta, halo dorado, rueda de rayos,
     /// dos coronas de perlas, chispas orbitantes y núcleo blanco con
     /// corazón dorado) a la ESCALA 0.22.
+    /// v6.50.55 — LA MINI-EXPLOSIÓN: «ya que la mascota seria aburrida si
+    /// fuera un punto de luz constante, has que tenga una pequeña
+    /// animacion, de vez en cuando y de forma aleatoria» — la mascota
+    /// hace LA MISMA explosión de luz del jefe original, pero MUY
+    /// PEQUEÑA (el MiniEstallidoPet: ~0.13× del estallido). LO PRIMERO
+    /// que hace al ser invocada es el SALUDO DE LUZ (a los 45 t), y
+    /// luego el compás aleatorio: de base ~1 vez cada 20 min, cada
+    /// enemigo cerca del dueño SUBE la probabilidad (la animación
+    /// «aumenta la probabilidad de hacerse cuantos mas enemigos haya
+    /// en pantalla»), y EL GARANTE: a la hora exacta (216000 t) sale
+    /// sí o sí — «al menos 1 vez cada hora».
     ///
     /// EL PATRÓN DE MASCOTA DE LUZ de vanilla (verificado contra el
     /// tML real): Main.projPet (persiste) + ProjectileID.Sets.LightPet
@@ -25,6 +36,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// </summary>
     public class AethonMenorPet : ModProjectile
     {
+        // === v6.50.55 — EL COMPÁS DE LA MINI-EXPLOSIÓN ===
+        private float _tDesdeMini;   // ticks desde el último destello (o el nacimiento)
+        private bool _saludoHecho;   // LO PRIMERO que hace la mascota ES la luz
+        private bool _miniCerca;     // su propio destello está vivo a su lado (sincronizado: TODAS las pantallas lo ven igual)
+
         public override string Texture => "AethonMod/Content/NPCs/AethonBoss";
 
         public override void SetStaticDefaults()
@@ -88,8 +104,70 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             //     ORO Y NÚCLEO BLANCO, y la mascota es SU retrato) ===
             Lighting.AddLight(Projectile.Center, 0.85f, 0.72f, 0.48f);
 
-            // === LAS CHISPAS (el rastro de la criatura de luz) ===
-            if (!Main.dedServ && Main.rand.NextBool(14))
+            // === v6.50.55 — LA MINI-EXPLOSIÓN (el compás). Solo el cliente
+            //     del dueño decide CUÁNDO (Main.rand del dueño, cero azar
+            //     sincronizado): el destello nace por el cable y TODAS las
+            //     pantallas ven la MISMA luz ===
+            if (Projectile.owner == Main.myPlayer)
+            {
+                _tDesdeMini++;
+                // LO PRIMERO que hace la mascota ES la luz: el saludo a los
+                // 45 t de vida (llegó, se asentó... y ARDIÓ).
+                bool toca = !_saludoHecho && _tDesdeMini >= 45f;
+                if (!toca && _saludoHecho && _tDesdeMini > 600f)
+                {
+                    // LA COMPAÑÍA SUBE EL PULSO: cada enemigo cerca del dueño
+                    // (a 1300 px — «en pantalla») suma su granito.
+                    int enemigos = 0;
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n != null && n.active && !n.friendly && !n.townNPC &&
+                            n.lifeMax > 5 &&
+                            Vector2.DistanceSquared(n.Center, duenio.Center) < 1300f * 1300f)
+                            enemigos++;
+                    }
+                    // EL RANURAZO: de base ~1 vez cada 20 min (1/72000 por
+                    // tick), cada enemigo acelera (con 10 ≈ 1 vez cada 90 s,
+                    // tope 20) — y EL GARANTE: a la hora exacta (216000 t)
+                    // sale sí o sí («al menos 1 vez cada hora»).
+                    float p = 1f / 72000f + Math.Min(enemigos, 20) * (1f / 60000f);
+                    if (_tDesdeMini >= 216000f || Main.rand.NextFloat() < p)
+                        toca = true;
+                }
+                if (toca)
+                {
+                    _saludoHecho = true;
+                    _tDesdeMini = 0f;
+                    // LA SEMILLA viaja en ai[0]: cada pantalla dibuja SU
+                    // mismo estallido (Hash01 — el patrón de la .53).
+                    Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                        Projectile.Center, Vector2.Zero,
+                        ModContent.ProjectileType<MiniEstallidoPet>(),
+                        15, 1.5f, Main.myPlayer,
+                        Main.rand.Next(1, 999999), 0f, 0f);
+                }
+            }
+
+            // === LA PROXIMIDAD DEL PROPIO DESTELLO (determinista en todas
+            //     las pantallas: lee el proyectil SINCRONIZADO) — para
+            //     engordar su brillo mientras carga y su goteo de chispas ===
+            _miniCerca = false;
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile pr = Main.projectile[i];
+                if (pr != null && pr.active &&
+                    pr.type == ModContent.ProjectileType<MiniEstallidoPet>() &&
+                    Vector2.DistanceSquared(pr.Center, Projectile.Center) < 56f * 56f)
+                {
+                    _miniCerca = true;
+                    break;
+                }
+            }
+
+            // === LAS CHISPAS (el rastro de la criatura de luz — y cuatriplica
+            //     el goteo mientras carga su mini-estallido) ===
+            if (!Main.dedServ && Main.rand.NextBool(_miniCerca ? 4 : 14))
             {
                 Dust d = Dust.NewDustPerfect(
                     Projectile.Center + new Vector2(Main.rand.NextFloat(-8f, 8f),
@@ -135,7 +213,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 // EL MISMO LATIDO y el MISMO BRILLO del jefe (su PreDraw).
                 float latido = 0.84f + 0.16f * MathF.Sin(t * 1.6f);
-                float brillo = 1f;
+                // v6.50.55 — EL BRILLO DEL QUE ARDE: cuando su destello vive
+                // a su lado, la fuente SE ENCIENDE (×1.45 — determinista:
+                // lee el proyectil sincronizado, todas las pantallas igual).
+                float brillo = _miniCerca ? 1.45f : 1f;
 
                 // === 1. EL VELO VIOLETA (la profundidad del sol — la
                 //     sección 1 del jefe: Bloom 540, VioletaLuz, 0.10) ===

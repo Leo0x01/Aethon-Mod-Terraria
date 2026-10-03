@@ -1,12 +1,35 @@
-# AethonMod — ESTADO ACTUAL (v6.50.54)
+# AethonMod — ESTADO ACTUAL (v6.50.55)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-10-02 (v6.50.54 SELLADA LOCALMENTE: commit + tag + .tmod +
-> bundle en /home/sync — esperando el token para push + release; la .53 quedó publicada:
-> release 402101571, md5 64b4faf6…, CDN verificado byte a byte).
+> Última actualización: 2026-10-03 (v6.50.55: LA MINI-EXPLOSIÓN DE LA MASCOTA — la .54
+> publicada con release 402229633, md5 f3c8d203…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.55 = LA MINI-EXPLOSIÓN DE LA MASCOTA** — la duodécima ronda sobre la .54
+  («ya que la mascota seria aburrida si fuera un punto de luz constante, has que
+  tenga una pequeña animacion, de vez en cuando y de forma aleatoria…»):
+  (1) **EL SALUDO DE LUZ**: lo PRIMERO que hace el Aethon Menor al ser invocado
+  (45 t de vida) es DISPARAR su mini-estallido — y luego sigue el compás para siempre.
+  (2) **EL COMPÁS**: base ~1 vez cada 20 min (1/72000 por tick); cada enemigo a
+  1300 px del dueño suma 1/60000 (10 enemigos ≈ cada 90 s, tope 20 contados);
+  EL GARANTE: a las 216000 t (1 hora exacta) del último destello sale SÍ o SÍ.
+  Solo el cliente del dueño decide el cuándo (cero azar por el cable).
+  (3) **EL ESTALLIDO EN MINIATURA (~0.13×)** — las SIETE PIEZAS de la .53:
+  14 rayos (34-130 px, núcleo blanco + halo oro→ámbar→brasa, vida propia por
+  rayo), anillo segmentado de 7 emisores (20→105), cruz anamórfica, núcleo Bloom
+  hasta ~130 px respirando, estrella DestelloFinal de 8 rayos, onda y 8 bokeh +
+  chispas convergentes/voladoras, luz de mundo pequeña (1.25/1.08/0.70) y el
+  estampido chiquito (Item122 vol 0.35 pitch +0.42 + kick 2 px).
+  (4) **LA RECOGIDA (45 t, regla Fargo)**: aro fino de 135 px pulsando (LA MISMA
+  cifra de la hitbox), núcleo que se llena, 6 agujas convergiendo — y la FUENTE
+  SE ENCIENDE: el pet brilla ×1.45 y gotea chispas ×4 mientras carga.
+  (5) **EL DAÑO SIMBÓLICO**: 15 plano, hitbox honesta 270×270 (radio 135) SOLO
+  los primeros 8 t de onda, cada enemigo UNA vez (localNPCImmunity −1).
+  (6) **LA GRATITUD**: cada enemigo tocado cura 1% de la vida MÁXIMA del dueño
+  (tope 5% por destello — HealEffect + statLife, solo el cliente del dueño).
+  (7) **SINCRONIZACIÓN**: semilla en ai[0] → todas las pantallas dibujan EL MISMO
+  destello (Hash01); CERO texturas nuevas (todo con las primitivas de la casa).
 - **v6.50.54 = EL DECRETO CABALGA + EL ESTALLIDO CON COMPÁS + EL DASH CORTO + EL RELOJ ÚNICO
   + LAS TRES ARMAS DE LA EMPERATRIZ + EL HALO ARCOÍRIS + LA FORMA 3 MÁS VIVA + EL CRASH DEL
   REGALO MUERTO** — la undécima ronda sobre la .53:
@@ -685,7 +708,29 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.54 está implementada y build-verificada. Checklist de la .54:
+La v6.50.55 está implementada y build-verificada. Checklist de la .55:
+
+1. **EL SALUDO DE LUZ**: invocar al Aethon Menor (o entrar al mundo con el buff) y
+   VER que a ~1 segundo de nacer hace su MINI-EXPLOSIÓN (primero el aro fino que
+   pulsa con las agujas convergiendo ~0.75 s, luego el destello pequeño).
+2. **EL COMPÁS**: con la mascota fuera, esperar — de base sale ~1 vez cada 20 min;
+   EN COMBATE (muchos enemigos en pantalla) sale mucho más seguido; y JAMÁS pasa
+   más de 1 HORA sin que salga una.
+3. **LA MINI-EXPLOSIÓN EN SÍ**: es pequeña (~130 px), ilumina alredor, tiene los
+   rayos/anillo/estrella del jefe en miniatura, suena bajito, apenas empuja la
+   pantalla (kick 2 px) y la mascota BRILLA más mientras la carga.
+4. **EL DAÑO Y LA GRATITUD**: acercar enemigos al destello — reciben un daño
+   pequeño (15) UNA vez cada uno, y por CADA enemigo golpeado sube el número
+   verde de cura (1% de la vida máxima; máximo 5% por destello).
+5. **REGRESIÓN**: todo lo de la .54 sigue intacto (el decreto que cabalga, el
+   estallido con compás, el dash, el reloj único, las tres armas de la Emperatriz,
+   el halo arcoíris, el regalo sin crash).
+
+*(El checklist de la .54 — decreto que cabalga, estallido con compás, dash corto,
+reloj único, las tres armas de la Emperatriz, halo arcoíris, forma 3 viva y el
+regalo completo — sigue justo abajo, aún vigente.)*
+
+Checklist de la .54 (vigente hasta que el usuario la recorra):
 
 1. **EL DECRETO CABALGA (EL CAMBIO DE FASE)**: bajar al jefe a 80% de vida y VER el
    círculo del eclipse NACIENDO EN EL JEFE y MOVIÉNDOSE CON ÉL (el jefe orbita lento,
@@ -741,10 +786,10 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.53 en juego** con el checklist de arriba — LOS
-   TESTS CRÍTICOS: el trono de la Forma 3 CON SU ARCOÍRIS (jamás dibujado
-   antes), la Forma 4 Serafín, el rayo sin volver fantasmas a los NPCs, la
-   mascota-jefe en miniatura y EL ESTALLIDO RADIANTE (la imagen).
+1. **El usuario prueba v6.50.55 en juego** con el checklist de arriba — LOS
+   TESTS CRÍTICOS: el SALUDO DE LUZ de la mascota al invocarla, el compás
+   (más enemigos = más a menudo, garante de 1 hora) y la gratitud que cura 1%
+   por enemigo golpeado (y el checklist de la .54 aún vigente).
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -775,7 +820,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.54** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ sellada localmente | LA UNDÉCIMA RONDA — feedback de la .53 (OCHO frentes): (1) **EL DECRETO CABALGA**: el ataque del cambio de fase centrado EN EL JEFE y moviéndose CON él (2) **EL ESTALLIDO CON COMPÁS**: 1×P1, 2×P2 + más grande, P3+ cada 1-9 ataques ALEATORIO, y 1/2/3 detonaciones por activación (3) **EL DASH CORTO Y CENTRADO** (4) **EL RELOJ ÚNICO GIGANTE** ×7.5 siguiendo al dios (5) **LAS TRES ARMAS DE LA EMPERATRIZ**: DANZA SOLAR + LANZAS ETERNAS + CORONA ETERNA (6) **EL HALO ARCOÍRIS** (ítem nuevo, la banda de la Forma 3 alrededor de la cabeza) (7) **LA FORMA 3 MÁS VIVA** (banda doble, perlas mayores, rayos del mandorla, luz de mundo) (8) **EL CRASH DEL REGALO MUERTO** (YaLoTiene con .Length — el IndexOutOfRange del client.log) |
+| **v6.50.55** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas — idénticas a la .54, headless 0 excepciones), ⏳ en juego | LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA (un pedido): «la mascota seria aburrida si fuera un punto de luz constante» → EL SALUDO DE LUZ (lo primero al invocar: 45 t) + EL COMPÁS (base ~1/20 min, +1/60000 por enemigo cerca, tope 20; EL GARANTE de 1 hora) + EL ESTALLIDO DEL JEFE EN MINIATURA ~0.13× (las SIETE piezas de la .53: 14 rayos, anillo de 7 emisores, cruz, núcleo Bloom ~130 px, estrella, onda, 8 bokeh + chispas + luz pequeña + estampido bajito) + LA RECOGIDA translúcida (aro 135 px, 6 agujas, el pet ×1.45 mientras) + EL DAÑO SIMBÓLICO (15 plano, hitbox honesta 270×270 solo 8 t, 1 golpe por enemigo) + LA GRATITUD (cura 1% de vida máx por enemigo, tope 5%) — TODO determinista (semilla en ai[0]), CERO texturas nuevas |
+| **v6.50.54** | ✅ Build-verificada, ✔ publicada (release 402229633, CDN byte a byte), ⏳ en juego | LA UNDÉCIMA RONDA — feedback de la .53 (OCHO frentes): (1) **EL DECRETO CABALGA**: el ataque del cambio de fase centrado EN EL JEFE y moviéndose CON él (2) **EL ESTALLIDO CON COMPÁS**: 1×P1, 2×P2 + más grande, P3+ cada 1-9 ataques ALEATORIO, y 1/2/3 detonaciones por activación (3) **EL DASH CORTO Y CENTRADO** (4) **EL RELOJ ÚNICO GIGANTE** ×7.5 siguiendo al dios (5) **LAS TRES ARMAS DE LA EMPERATRIZ**: DANZA SOLAR + LANZAS ETERNAS + CORONA ETERNA (6) **EL HALO ARCOÍRIS** (ítem nuevo, la banda de la Forma 3 alrededor de la cabeza) (7) **LA FORMA 3 MÁS VIVA** (banda doble, perlas mayores, rayos del mandorla, luz de mundo) (8) **EL CRASH DEL REGALO MUERTO** (YaLoTiene con .Length — el IndexOutOfRange del client.log) |
 | **v6.50.53** | ✅ Build-verificada, ✔ publicada (release 402101571, CDN byte a byte), ⏳ en juego | LA DÉCIMA RONDA — feedback de la .52 (CINCO frentes): (1) **EL ARCOÍRIS DE LA FORMA 3** («el arcoíris debería estar en la forma ascendida 3»): BUG DE TRES VERSIONES — el dispatcher `DibujarJugadorAditivo` despachaba `Divino`/`Divino2` pero el caso `Divino3` NO EXISTÍA: `DibujarDivino3` compilaba y viajaba en la DLL… y NADIE lo llamaba (el trono entero — nimbo, cruz, mar de vidrio, lámparas, ofanim, alas prismáticas y EL ARCOÍRIS de Ap 4:3 — JAMÁS se dibujó en .49→.52); LA CURA = UNA línea de dispatcher · (2) **LA FORMA 4: EL SERAFÍN** («crea una 4 forma ascendida, asegúrate de que sea algo divino: alas, halo, corona, aura celestial, luz, bruma, más luz y destello, mejor iluminación» — Isaías 6): SEIS ALAS en tres pares (8+10+7, cálamo+punta), HALO TRIPLE trisagión, CORONA Ap 19:12, NIMBO Radio×3.4, RAYOS DE DIOS, BRUMA SANTA Is 6:4, CUERPO QUE ARDE, destello, plumas; Radio 140, luz 1.55/1.38/1.02, ítem horneado+anillo animado, regalo al entrar, vuelo infinito · (3) **EL FANTASMA DE LOS NPCS** («hay algún ataque que vuelve transparentes a los NPCs, creo que cuando lanza rayo»): el PerlinBolt dejaba el lote ABIERTO EN ADITIVO (RayoStrip reabría para sus gorros; ReabrirLoteVanilla = NO-OP) → todo NPC tras el jefe salía aditivo/transparente; el finally cierra y devuelve SIEMPRE el lote de vanilla · (4) **LA MASCOTA-JEFE** («que sea exactamente el jefe pero más pequeño»): las SEIS secciones del sol de código a escala 0.22 con el MISMO compás · (5) **EL ESTALLIDO RADIANTE** («te envié una imagen, crea por código un ataque igual a la imagen»): EST_ESTALLIDO (fase 3+, peso 5 al pegado) — 60 t de recogida (aro 600 px + 14 brasas en espiral + núcleo + agujas) y EL PUNTO DE LUZ (proyectil 19): onda 0,95× radio 600 (12 t, hitbox autocurada) + 152 t de 44 rayos 360° (250-980 px, núcleo blanco + halo oro→ámbar→brasa), anillo segmentado 14 emisores, cruz anamórfica, núcleo Bloom×4 ~950 px respirando, estrella 8 rayos, onda, 26 bokeh, 42 GoldFlame, LUZ QUE INUNDA 2,4/2,1/1,5, Item122+kick 13 px — TODO determinista (Hash01), anuncio `Jefe.Aethon.Estallido` es+en |
 | **v6.50.52** | ✅ Build-verificada, ✔ publicada (release 401940561, CDN byte a byte), ⏳ en juego | LA NOVENA RONDA — feedback de la .51 (CUATRO frentes): (1) **EL ARCOÍRIS DEL ÍTEM** («no se ve el arcoíris en el item de la forma ascendida 3»): el borde desaturado del png → EL ARO ANGULAR HORNEADO (rojo arriba girando por el espectro, núcleo blanco intacto) + EL ANILLO ANIMADO en `PostDrawInInventory` (la banda `VFXCore.Arcoiris` girando alrededor del icono, MISMO lote de la UI, cero Begin/End) · (2) **EL JEFE SIN ARCOÍRIS** («el jefe no necesita tener un arcoiris»): sección 4.5 del PreDraw MUERTA — el dios es oro y núcleo blanco; la banda vive en Forma 3 + mascota · (3) **LA ENTRADA EN DOS ACTOS** («la presentación debe durar hasta que el sol llegue al centro, luego aparece el jefe» + «demora mucho el suelo temblando»): ACTO 1 PRESENTACIÓN=CARRERA (lluvia todo el cielo hasta el final + temblor creciente solo aquí + reloj bidireccional TODO JUNTO, jefe INVISIBLE, mín 150 t) → ACTO 2 EL APARECER (80 t: PILAR + DESTELLO curva 20/40/80 + materialización 24 t DENTRO del pilar directo a la órbita — nada fuera de pantalla) · (4) **EL ESPEJO PURO + PARACAÍDAS** (la cura del «no aparece»: la .51 avanzaba vía rate de vanilla y si vanilla no lo aplicaba se colgaba): vanilla a rate 0 durante TODA la carrera, el espejo mueve Main.time a mano en AMBAS direcciones (cruces alba/ocaso en ambos sentidos; rate=dist×0.25 techo 220× — peor caso 3,6 s; POSADO en 27000 sin deriva) + a los 570 t la IA posa el sol a mano — el jefe APARECE SIEMPRE · SIMULACIÓN 17/17 + 20.000 aleatorias × 400 t |
 | **v6.50.51** | ✅ Build-verificada, ⏳ en juego | LA OCTAVA RONDA — feedback de la .50 (CUATRO frentes): (1) **EL ARCOÍRIS DE VERDAD** («yo no veo nada, ni en la forma ascendida 3 ni en el jefe, ni en la mascota»): la .50 lo prometía con hilos BLANCOS + perlas de 10 px = confeti; LA CURA = **LA BANDA HORNEADA** `VFXCore.Arcoiris` (512² EN CÓDIGO, cero assets: siete franjas saturadas rojo→violeta, banda [0.58,0.92] del semiancho, RGB premultiplicado, ~80 px de grosor) en los TRES sitios: el trono de la Forma 3 (24 perlas SOBRE la banda + 4 joyas + rim), el jefe en plena pelea (sección 4.5 del PreDraw) y la mascota en miniatura · (2) **EL NIMBO DEL PANTOCRÁTOR** («no se ve nada celestial ni divino»): el disco dorado + aro de los iconos bizantinos detrás del dios · (3) **LA ENTRADA SOLO COLOR LUZ Y TODO EL CIELO** («es multicolor… que sea solo color luz y que se reprodusca en todo el cielo»): lluvia BLANCA y DORADA alternada (hslToRgb muerto) naciendo en el rectángulo entero de la cámara alrededor del jugador (4/tick + clon); el AURORA 874 MURIÓ (prisma por naturaleza) · (4) **LA CARRERA AL MEDIODÍA DE VUELTA — RELOJ BIDIRECCIONAL** («mantén temblor/reloj/pilar/descenso… el tiempo avanza o retrocede según qué tan lejos o cerca esté el sol del centro»): CINCO ACTOS (presenta 180 t sub 9 → temblor 150 t sub 10 con la luz ascendiendo `SeguirCielo` → carrera sub 11 `TicksHaciaElMediodia` camino más corto: tarde/noche nueva RETROCEDE (el espejo resta a mano en PreUpdateTime con cruces en reversa), madrugada/mañana AVANZA (rate vanilla), rate=dist×0.08 techo 110× piso 1, el sol SE POSA en 27000 → climax 120 t sub 12 (PILAR + DESTELLO del sol) → descenso 90 t sub 13 con chispas doradas); cerrojo .42 vivo; ColaSierpeSky sub 9-12; SIMULACIÓN 12/12 casos con la dirección exacta de los 4 ejemplos del usuario |

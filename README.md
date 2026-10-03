@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.54 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.55 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,21 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-02, v6.50.54)
+## ¿Dónde estamos? (actualizado 2026-10-03, v6.50.55)
+- **v6.50.55 - LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA**:
+  El Aethon Menor ya no es un punto de luz constante: **hace LA MISMA explosión de
+  luz del jefe original, pero MUY PEQUEÑA (~130 px)**. **LO PRIMERO** que hace al
+  ser invocado es el SALUDO DE LUZ (a 1 s de nacer, arde); luego el COMPÁS
+  aleatorio: ~1 vez cada 20 min de base, **más probable cuantos más enemigos
+  haya en pantalla** (cada enemigo cerca del dueño acelera el reloj), y JAMÁS
+  pasa más de 1 HORA sin luz (el garante). La mini-explosión tiene las SIETE
+  piezas del estallido del jefe en miniatura (rayos, anillo segmentado, cruz,
+  núcleo, estrella, onda y bokeh — TODO determinista por semilla), SOLO ilumina
+  (luz de mundo pequeña + estampido bajito), hace **15 de daño** a los enemigos
+  cercanos (UNA vez cada uno, solo en los primeros instantes de la onda) y
+  **CURA el 1% de la vida máxima por cada enemigo golpeado** (tope 5% por
+  destello) — una animación para bonito, con su telegrafo translúcido de 0,75 s
+  y la mascota brillando más mientras carga.
 - **v6.50.54 - LA UNDÉCIMA RONDA — EL DECRETO CABALGA + EL ESTALLIDO CON COMPÁS + EL DASH CORTO + EL RELOJ ÚNICO + LAS TRES ARMAS DE LA EMPERATRIZ + EL HALO ARCOÍRIS + LA FORMA 3 MÁS VIVA + EL CRASH DEL REGALO MUERTO**:
   (1) **EL DECRETO CABALGA**: el ataque del cambio de fase nace EN EL JEFE
   y LO SIGUE (el jefe orbita lento mientras el círculo crece con él).
