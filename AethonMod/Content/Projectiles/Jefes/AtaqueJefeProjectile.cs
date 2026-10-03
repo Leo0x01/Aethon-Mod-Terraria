@@ -96,6 +96,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloDanzaSolar = 20;     // v6.50.54 — LA DANZA SOLAR (Sun Dance — la rueda de SEIS rayos girando que cabalga con el jefe)
         public const int EstiloLanzaEterna = 21;    // v6.50.54 — LA LANZA ETERNA (Ethereal Lance — telegrafiada translúcida y hostil solo al volar)
         public const int EstiloCoronaEterna = 22;   // v6.50.54 — LA CORONA ETERNA (Everlasting Rainbow — 14 plumas prismáticas espiralando)
+        public const int EstiloBolaFinal = 23;     // v6.50.56 — LA BOLA FINAL (la muerte del dios: su ÚLTIMO aliento — una bola de energía como el proyectil sol pero BLANCO-DORADA y con MUCHO brillo)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -315,6 +316,16 @@ namespace AethonMod.Content.Projectiles.Jefes
                     // rayos de la imagen viven hasta el final).
                     Projectile.timeLeft = 152;
                     break;
+
+                case EstiloBolaFinal:
+                    // v6.50.56 — LA BOLA FINAL: el último aliento del dios
+                    // — 7 s de fuego blanco-dorado persiguiendo a su
+                    // asesino (la autocuración de la IA reconstruye talla/
+                    // hostil/daño: el msg 27 no lleva este OnSpawn).
+                    Projectile.timeLeft = 420;
+                    Projectile.width = 88;
+                    Projectile.height = 88;
+                    break;
             }
         }
 
@@ -372,6 +383,9 @@ namespace AethonMod.Content.Projectiles.Jefes
                 hitbox.Width += inflarE;
                 hitbox.Height += inflarE;
             }
+
+            // v6.50.56 — LA BOLA FINAL: la caja YA nace a 88×88 (la talla del
+            // corazón blanco) — cero inflado: golpea lo que SE VE.
         }
 
         /// <summary>La presa más cercana.</summary>
@@ -502,6 +516,22 @@ namespace AethonMod.Content.Projectiles.Jefes
                 bool ventana = _edad <= 12f;
                 Projectile.hostile = ventana;
                 Projectile.damage = ventana ? Math.Max(1, (int)Projectile.ai[1]) : 0;
+            }
+
+            // v6.50.56 — LA BOLA FINAL: la autocuración de la casa (talla,
+            // hostil y daño — el msg 27 no lleva el OnSpawn; ai[1] lleva el
+            // daño que el jefe le sopló al morir).
+            if (Estilo == EstiloBolaFinal)
+            {
+                if (Projectile.width < 88)
+                {
+                    Vector2 cB = Projectile.Center;
+                    Projectile.width = 88;
+                    Projectile.height = 88;
+                    Projectile.Center = cB;
+                }
+                Projectile.hostile = true;
+                Projectile.damage = Math.Max(1, (int)Projectile.ai[1]);
             }
 
             Player presa = Presa();
@@ -1409,6 +1439,82 @@ namespace AethonMod.Content.Projectiles.Jefes
                     if (_edad > 655f) Projectile.Kill();
                     break;
                 }
+
+                // =============================================================
+                //  v6.50.56 — LA BOLA FINAL (el último aliento del dios):
+                //  la bola de energía como EL PROYECTIL SOL pero
+                //  BLANCO-DORADA y con MUCHO brillo (la letra: «al final
+                //  de la muerte del jefe… debe lanzar un ataque de brillo
+                //  aun mayor creando una bola de energia similar al
+                //  proyectil sol pero de color blanco dorado y con mucho
+                //  brillo»). Nace del cuerpo del jefe al morir, persigue
+                //  a su asesino con suavidad (se esquiva: es un adiós, no
+                //  una ejecución), ALUMBRA como un pequeño sol y al
+                //  apagarse suelta un ÚLTIMO destello.
+                // =============================================================
+                case EstiloBolaFinal:
+                {
+                    // LA CARRERA SERENA: deriva lenta + homing suave a la
+                    // presa (el sol del bastón también gravita — tope 5).
+                    Player presaB = Presa();
+                    if (presaB != null)
+                    {
+                        Vector2 hacia = presaB.Center - Projectile.Center;
+                        float d = hacia.Length();
+                        if (d > 40f)
+                            Projectile.velocity += hacia / d * 0.06f;
+                    }
+                    float velB = Projectile.velocity.Length();
+                    if (velB > 5f)
+                        Projectile.velocity *= 5f / velB;
+                    Projectile.rotation += 0.015f;
+
+                    // LA LUZ QUE INUNDA (más que el estallido — es SU
+                    // ataque más brillante: el cielo entero se dora).
+                    float apagon = Math.Min(1f, _edad / 30f) *
+                        (Projectile.timeLeft < 60f ? Projectile.timeLeft / 60f : 1f);
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(2.6f, 2.35f, 1.7f) * apagon);
+
+                    // LA ESTELA DE FUEGO BLANCO (chispas doradas cayendo
+                    // del corazón — puro adorno del cliente).
+                    if (!Main.dedServ && Main.rand.NextBool(3))
+                    {
+                        Dust dB = Dust.NewDustPerfect(
+                            Projectile.Center + new Vector2(Main.rand.NextFloat(-30f, 30f),
+                                Main.rand.NextFloat(-30f, 30f)),
+                            DustID.GoldFlame,
+                            new Vector2(Main.rand.NextFloat(-0.8f, 0.8f),
+                                Main.rand.NextFloat(-1.6f, -0.4f)),
+                            190, new Color(255, 248, 220), 0.9f);
+                        dB.noGravity = true;
+                    }
+
+                    // EL NACIMIENTO (el estampido del aliento) y LA MUERTE
+                    // (el último destello: la bola SE APAGA encendida).
+                    if (_edad <= 1f && !Main.dedServ)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(-0.25f), Projectile.Center);
+                        OndaLib.Kick(9f, 18);
+                    }
+                    if (Projectile.timeLeft <= 2 && !Main.dedServ)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(0.3f), Projectile.Center);
+                        for (int dF = 0; dF < 26; dF++)
+                        {
+                            float angF = dF * MathHelper.TwoPi / 26f;
+                            Dust dF2 = Dust.NewDustPerfect(Projectile.Center,
+                                DustID.GoldFlame,
+                                new Vector2(MathF.Cos(angF), MathF.Sin(angF)) *
+                                Main.rand.NextFloat(3f, 8f),
+                                190, new Color(255, 250, 230), 1.2f);
+                            dF2.noGravity = true;
+                        }
+                    }
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -1431,6 +1537,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloDanzaSolar => new Vector3(1.05f, 0.95f, 0.62f),   // v6.50.54 — la rueda alumbra
                 EstiloLanzaEterna => new Vector3(0.50f, 0.45f, 0.24f),  // v6.50.54 — el filo dorado
                 EstiloCoronaEterna => new Vector3(0.55f, 0.50f, 0.30f), // v6.50.54 — el prisma suave
+                EstiloBolaFinal => Vector3.Zero,     // v6.50.56 — su caso pone la suya (el cielo dorado)
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -2044,6 +2151,56 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                         break;
                     }
+
+                    // === v6.50.56 — LA BOLA FINAL, FASE MUNDO (EL SOL EN
+                    //     MINIATURA BLANCO-DORADO: la rueda de 12 rayos
+                    //     girando + las dos coronas de perlas — las MISMAS
+                    //     secciones del sol del jefe, SU paleta) ===
+                    case EstiloBolaFinal:
+                    {
+                        float nace = Math.Min(1f, _edad / 24f);
+                        float latidoB = 0.86f + 0.14f * MathF.Sin(t * 1.9f);
+
+                        // LA RUEDA DE RAYOS (12 — el sol de Aethon es una
+                        // RUEDA DE LUZ: el rayo sale del centro a AMBOS lados).
+                        float giroB = t * 0.16f;
+                        for (int i = 0; i < 12; i++)
+                        {
+                            float angB = giroB + i * MathHelper.TwoPi / 12f;
+                            float largoB = (120f + 60f * nace) *
+                                (0.80f + 0.20f * MathF.Sin(t * 2.2f + i * 1.7f));
+                            VFXCore.Quad(Projectile.Center, BlancoCaliente * (0.34f * nace),
+                                new Vector2(largoB * 2f, 20f), angB, VFXCore.SoftGlow);
+                        }
+
+                        // LAS DOS CORONAS DE PERLAS (los anillos de Saturno
+                        // del jefe — sentidos opuestos, a escala del aliento).
+                        for (int anilloB = 0; anilloB < 2; anilloB++)
+                        {
+                            float rxB = (anilloB == 0 ? 118f : 158f) * nace;
+                            float ryB = (anilloB == 0 ? 72f : 48f) * nace;
+                            float wB = anilloB == 0 ? 0.55f : -0.38f;
+                            Color cPB = anilloB == 0 ? BlancoCaliente : OroGrimorio;
+                            for (int i = 0; i < 11; i++)
+                            {
+                                float angPB = t * wB + i * MathHelper.TwoPi / 11f;
+                                Vector2 perlaB = Projectile.Center + new Vector2(
+                                    MathF.Cos(angPB) * rxB, MathF.Sin(angPB) * ryB);
+                                float twB = 0.5f + 0.5f * MathF.Sin(t * 3f + i * 2.1f + anilloB);
+                                VFXCore.Quad(perlaB, cPB * (0.50f * nace * (0.5f + 0.5f * twB)),
+                                    new Vector2(16f, 16f), 0f, VFXCore.SoftGlow);
+                            }
+                        }
+
+                        // EL NÚCLEO (el corazón blanco que ARDE — latido).
+                        float nucleoB = 84f * latidoB * nace;
+                        VFXCore.Quad(Projectile.Center, BlancoCaliente * (1.0f * nace),
+                            new Vector2(nucleoB * 1.5f, nucleoB * 1.5f), 0f, VFXCore.SoftGlow);
+                        VFXCore.Quad(Projectile.Center, OroGrimorio * (0.65f * nace),
+                            new Vector2(nucleoB * 0.42f * 1.5f, nucleoB * 0.42f * 1.5f),
+                            0f, VFXCore.SoftGlow);
+                        break;
+                    }
                 }
                 VFXCore.FlushAdditive(null, false);
 
@@ -2457,6 +2614,63 @@ namespace AethonMod.Content.Projectiles.Jefes
                             LumenLib.Bloom(Main.spriteBatch, b, 8f + 10f * h1,
                                 (i % 2 == 0) ? OroGrimorio : AmbarEstelar,
                                 0.45f * fadeS * tw, 2);
+                        }
+                        break;
+                    }
+
+                    // === v6.50.56 — LA BOLA FINAL, FASE PANTALLA (EL
+                    //     DESTELLO del aliento: la estrella de 8 rayos
+                    //     girando + el bloom blanco-dorado que respira +
+                    //     LAS CHISPAS ORBITANTES — el lens-flare del sol
+                    //     del bastón, en SU idioma de color) ===
+                    case EstiloBolaFinal:
+                    {
+                        float naceS = Math.Min(1f, _edad / 24f);
+                        float fadeBS = Projectile.timeLeft < 45f
+                            ? Projectile.timeLeft / 45f : 1f;
+                        float respiraB = 0.95f + 0.05f * MathF.Sin(t * 4.2f);
+
+                        // EL NÚCLEO BLANCO-DORADO (el corazón que crece
+                        // hasta ~300 px y RESPIRA — mucho brillo).
+                        LumenLib.Bloom(Main.spriteBatch, pos,
+                            (120f + 180f * naceS) * respiraB, BlancoCaliente,
+                            0.95f * naceS * fadeBS, 4);
+                        LumenLib.BloomPulse(Main.spriteBatch, pos,
+                            90f + 40f * naceS, OroGrimorio,
+                            0.60f * naceS * fadeBS, t, 2.4f);
+
+                        // LA ESTRELLA DE DESTELLO (el flare de 8 rayos —
+                        // DOS: la blanca grande y la dorada al revés).
+                        Texture2D destB = VFXCore.DestelloFinal;
+                        if (destB != null)
+                        {
+                            float escB = (520f * naceS) / destB.Width *
+                                (0.92f + 0.08f * MathF.Sin(t * 3.4f));
+                            Main.spriteBatch.Draw(destB, pos, null,
+                                OrbitaLib.Tint(BlancoCaliente, 0.60f * naceS * fadeBS),
+                                t * 0.10f,
+                                new Vector2(destB.Width, destB.Height) * 0.5f, escB,
+                                SpriteEffects.None, 0f);
+                            Main.spriteBatch.Draw(destB, pos, null,
+                                OrbitaLib.Tint(OroGrimorio, 0.40f * naceS * fadeBS),
+                                -t * 0.07f + 0.4f,
+                                new Vector2(destB.Width, destB.Height) * 0.5f, escB * 0.6f,
+                                SpriteEffects.None, 0f);
+                        }
+
+                        // LAS CHISPAS ORBITANTES (8 motas deterministas que
+                        // giran despacito y titilan — el enjambre cercano).
+                        for (int i = 0; i < 8; i++)
+                        {
+                            float h0B = VFXCore.Hash01(Seed, i, 40);
+                            float twB = 0.35f + 0.65f *
+                                (0.5f + 0.5f * MathF.Sin(t * 2.6f + i * 1.9f));
+                            float rB2 = (60f + 130f * h0B) * naceS;
+                            float angB2 = h0B * MathHelper.TwoPi + t * 0.22f;
+                            Vector2 b2 = pos + new Vector2(MathF.Cos(angB2), MathF.Sin(angB2)) * rB2;
+                            LumenLib.Bloom(Main.spriteBatch, b2, 7f + 8f * h0B,
+                                (i % 2 == 0) ? BlancoCaliente : OroGrimorio,
+                                0.50f * naceS * fadeBS * twB, 2);
                         }
                         break;
                     }

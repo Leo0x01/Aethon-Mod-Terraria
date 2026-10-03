@@ -3214,6 +3214,16 @@ namespace AethonMod.Content.VFX
         /// SOBRE la banda (cada una SU color del espectro, como el trono)
         /// y el rim blanco que la cierra. TODO aditivo, coords de MUNDO,
         /// determinista (cero Main.rand).
+        /// v6.50.56 — LA LETRA DEL USUARIO: «el halo arcoiris esta muy
+        /// arriba de la cabeza, debe estar un poquito mas cerca, y ademas
+        /// no debe estar girando de forma vertical, solo horizontal».
+        /// (1) 30→13 px sobre la cabeza: UN POQUITO más cerca. (2) LA
+        /// BANDA YA NO ROTA: la rotación del quad (t*0.10) volteaba el aro
+        /// entero — a los 15 s quedaba VERTICAL (el volteo que vio el
+        /// usuario). El aro queda FIJO EN HORIZONTAL (un halo de santo) y
+        /// el giro vive en LAS PERLAS, que recorren el aro — girar «solo
+        /// horizontal» es exactamente eso: la cuenta dando la vuelta al
+        /// aro plano, como Saturno visto un poco desde arriba.
         /// </summary>
         private static void EmitirHaloArcoiris(Player pl, AuraPerfil p)
         {
@@ -3224,33 +3234,37 @@ namespace AethonMod.Content.VFX
             float respira = 1f + 0.05f * MathF.Sin(t * MathHelper.Pi);
             Color blancoSagrado = new Color(255, 255, 252);
 
-            // EL CENTRO: la cabeza (con el bob suave del halo del trono).
+            // EL CENTRO: la cabeza (con el bob suave del halo del trono) —
+            // v6.50.56: 13 px sobre la coronilla (antes 30: MUY arriba).
             float bobH = MathF.Sin(t * 1.6f) * 3f;
             Vector2 haloC = new Vector2(pl.Center.X,
-                pl.Center.Y - (pl.height * 0.5f + 30f) * gravedad + bobH * gravedad);
+                pl.Center.Y - (pl.height * 0.5f + 13f) * gravedad + bobH * gravedad);
             float rxH = 42f * respira;      // pequeño — el tamaño del halo del trono
             float ryH = 15f;
 
             // LA BANDA (las siete franjas del espectro — EL ARCOÍRIS de la
-            // Forma 3, la MISMA textura horneada, la MISMA firma).
+            // Forma 3, la MISMA textura horneada, la MISMA firma) —
+            // v6.50.56: rotación FIJA en 0 (el aro plano, JAMÁS vertical).
             Texture2D banda = VFXCore.Arcoiris;
             if (banda != null)
             {
                 VFXCore.Quad(haloC, TintAditivo(new Color(255, 255, 255), 0.92f),
-                    new Vector2(rxH * 2.174f, ryH * 2.174f), t * 0.10f, banda);
+                    new Vector2(rxH * 2.174f, ryH * 2.174f), 0f, banda);
                 // LA ATMÓSFERA (el halo suave que la hace arder).
                 VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.10f * respira),
-                    new Vector2(rxH * 2.6f, ryH * 2.9f), t * 0.10f, VFXCore.SoftGlow);
+                    new Vector2(rxH * 2.6f, ryH * 2.9f), 0f, VFXCore.SoftGlow);
             }
             // EL RIM INTERIOR (el borde blanco hacia la cabeza — la joya).
             VFXCore.Quad(haloC, TintAditivo(blancoSagrado, 0.50f),
                 new Vector2(rxH * 0.58f * 2.174f, ryH * 0.58f * 2.174f), 0f, VFXCore.Ring);
 
             // LAS DOCE PERLAS ZODIACALES (montadas SOBRE la banda — cada una
-            // SU color del espectro, girando en contra: el trono en miniatura).
+            // SU color del espectro): v6.50.56 — EL GIRO HORIZONTAL: las
+            // perlas RECORREN el aro plano (la cuenta de Saturno — el único
+            // movimiento de un halo que gira «solo horizontal»).
             for (int i = 0; i < 12; i++)
             {
-                float ang = -t * 0.22f + i * MathHelper.TwoPi / 12f;
+                float ang = -t * 0.55f + i * MathHelper.TwoPi / 12f;
                 Vector2 perla = haloC + new Vector2(MathF.Cos(ang) * rxH,
                     MathF.Sin(ang) * ryH);
                 Color cPrisma = ColorPrisma(ang / MathHelper.TwoPi + t * 0.03f);

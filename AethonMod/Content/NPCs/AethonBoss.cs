@@ -2101,14 +2101,56 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void CineMuerte()
         {
             _tickMuerte++;
-            // LA CONTRACCIÓN: todo el brillo se recoge (el sol se hace punto).
+            // LA RECOGIDA: el cuerpo se aquieta (la luz ya no camina).
             NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
+
+            // v6.50.56 — LA AGONÍA YA NO SE OSCURECE (la letra: «al final
+            // de la muerte del jefe, este se oscurece, no, lo que debe
+            // hacer es lanzar un ataque de brillo aun mayor»): el dios
+            // muerto SE ENCIENDE — la luz del mundo CRECE hasta el
+            // disparo final (×3 al límite) y las motas de fuego CAEN a su
+            // cuerpo desde todas partes (la carga del último aliento).
+            float carga = Math.Min(1f, _tickMuerte / 110f);
+            Lighting.AddLight(NPC.Center,
+                1.6f + 2.2f * carga, 1.45f + 2.0f * carga, 1.05f + 1.5f * carga);
+
+            if (!Main.dedServ && _tickMuerte < 110 && Main.rand.NextBool(2))
+            {
+                float angM = Main.rand.NextFloat(MathHelper.TwoPi);
+                float rM = 380f + Main.rand.NextFloat(220f);
+                Vector2 posM = NPC.Center + new Vector2(MathF.Cos(angM), MathF.Sin(angM)) * rM;
+                Dust dm = Dust.NewDustPerfect(posM, DustID.GoldFlame,
+                    -posM.DirectionTo(NPC.Center) * (rM / 22f), 180,
+                    new Color(255, 248, 220), 0.9f);
+                dm.noGravity = true;
+            }
 
             if (_tickMuerte >= 120)
             {
                 OndaLib.Kick(14f, 30);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath55, NPC.Center);
+
+                // v6.50.56 — EL ÚLTIMO ALIENTO: LA BOLA FINAL (la letra:
+                // «creando una bola de energia similar al proyectil sol
+                // pero de color blanco dorado y con mucho brillo») — nace
+                // del corazón del dios y va rumbo a su asesino: 7 s de
+                // fuego blanco-dorado que ALUMBRA el cielo entero.
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    int danoBola = Math.Max(1, (int)(NPC.damage * 1.3f));
+                    Vector2 rumbo = -Vector2.UnitY * 6.5f;
+                    Player presa = Main.player[NPC.target];
+                    if (presa != null && presa.active && !presa.dead)
+                        rumbo = (presa.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 6.5f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, rumbo,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        danoBola, 3f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloBolaFinal,
+                        danoBola, 0f);
+                }
+
                 if (!Main.dedServ)
                 {
                     for (int d = 0; d < 90; d++)
@@ -2227,31 +2269,22 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 float t = Main.GlobalTimeWrappedHourly;
                 Vector2 posC = NPC.Center - Main.screenPosition;
                 float visibilidad = 1f - (NPC.alpha / 255f);
-                // v6.50.46 — el eclipse MURIÓ como ataque: este look SOLO
-                // vive en el cine de muerte (la luz se recoge antes del
-                // estallido). En plena pelea el sol NUNCA se apaga.
-                bool eclipse = _muriendo && _tickMuerte < 120;
+                // v6.50.56 — EL ECLIPSE MURIÓ DEL TODO (la letra: «al final
+                // de la muerte del jefe, este se oscurece, NO»): el disco
+                // oscuro y el apagón del cine de muerte FUERA — el dios
+                // muerto JAMÁS se apaga; su luz CRECE (brilloMuerte) hasta
+                // el disparo de LA BOLA FINAL, su ataque más brillante.
                 float faseInt = 0.55f + 0.45f * (Phase - 1) / 4f;   // la furia brilla más
 
-                // === LA MUERTE: la contracción (todo hacia el punto) ===
+                // === LA MUERTE: LA CARGA (todo se recoge al punto que
+                //     ARDE — el sol se hace punta de lanza, no ceniza) ===
                 float colapso = 1f;
-                if (_muriendo) colapso = Math.Max(0.05f, 1f - _tickMuerte / 110f);
-
-                // === EL ECLIPSE: el disco oscuro (el cuerpo muerto de la luz) ===
-                if (eclipse)
+                float brilloMuerte = 1f;
+                if (_muriendo)
                 {
-                    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
-                        null, Main.GameViewMatrix.TransformationMatrix);
-                    try
-                    {
-                        float pulsoE = 0.90f + 0.10f * MathF.Sin(t * 0.8f);
-                        spriteBatch.Draw(VFXCore.SoftGlow, posC, null,
-                            new Color(16, 8, 30) * (0.96f * visibilidad),
-                            0f, new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f,
-                            new Vector2(3.2f * pulsoE, 3.2f * pulsoE), SpriteEffects.None, 0f);
-                    }
-                    finally { spriteBatch.End(); }
+                    float cargaM = Math.Min(1f, _tickMuerte / 110f);
+                    colapso = MathHelper.Lerp(1f, 0.55f, cargaM);   // se recoge…
+                    brilloMuerte = 1f + 1.4f * cargaM;               // …ARDIENDO: el brillo SUBE (×2.4 al final)
                 }
 
                 // === EL SOL (lote aditivo — TODO lo que brilla) ===
@@ -2261,7 +2294,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 try
                 {
                     float latido = 0.84f + 0.16f * MathF.Sin(t * 1.6f);
-                    float brillo = eclipse ? 0.10f : (faseInt * colapso);
+                    // v6.50.56 — LA AGONÍA ARDE: brilloMuerte SUBE mientras
+                    // muere (antes: eclipse → 0.10 — el apagón de la letra).
+                    float brillo = faseInt * brilloMuerte;
 
                     // === 1. EL VELO (el aura violeta de la profundidad) ===
                     LumenLib.Bloom(spriteBatch, posC, 540f, VioletaLuz,
@@ -2273,11 +2308,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
                     // === 3. LOS RAYOS RADIALES (la rueda de luz girando —
                     //     y en EL VÓRTICE la rueda ACELERA ×4: el sol que
-                    //     enrosca su propia luz antes de soltar la galaxia) ===
-                    if (!eclipse)
+                    //     enrosca su propia luz antes de soltar la galaxia.
+                    //     v6.50.56 — también ACELERA al morir: la carga del
+                    //     último aliento gira la rueda más y más rápido) ===
                     {
                         int nRayos = 8 + Phase * 2;                       // 10 en P1 → 18 en P5
-                        float giro = t * (NPC.ai[0] == EST_VORTICE || NPC.ai[0] == EST_DANZA ? 0.42f : 0.10f);
+                        float giro = t * ((_muriendo || NPC.ai[0] == EST_VORTICE || NPC.ai[0] == EST_DANZA) ? 0.42f : 0.10f);
                         Vector2 origen = new Vector2(VFXCore.SoftGlow.Width, VFXCore.SoftGlow.Height) * 0.5f;
                         for (int i = 0; i < nRayos; i++)
                         {
@@ -2312,7 +2348,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                                 MathF.Sin(ang) * ry);
                             float tw = 0.5f + 0.5f * MathF.Sin(t * 3f + i * 2.1f + anillo);
                             LumenLib.Bloom(spriteBatch, perla, 12f * colapso, cP,
-                                (eclipse ? 0.06f : 0.42f) * (0.5f + 0.5f * tw) *
+                                0.42f * (0.5f + 0.5f * tw) *
                                 brillo * visibilidad, 2);
                         }
                     }
@@ -2332,20 +2368,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         Vector2 mota = posC + new Vector2(MathF.Cos(ang) * r,
                             MathF.Sin(ang) * r * 0.72f);
                         LumenLib.Bloom(spriteBatch, mota, 20f * colapso, cMota,
-                            (eclipse ? 0.05f : 0.40f) * brillo * visibilidad, 2);
+                            0.40f * brillo * visibilidad, 2);
                     }
 
-                    // === 6. EL NÚCLEO (el corazón blanco de Aethon) ===
+                    // === 6. EL NÚCLEO (el corazón blanco de Aethon —
+                    //     v6.50.56: NUNCA más el rim del eclipse: el corazón
+                    //     ARDE entero hasta el último tick) ===
                     float tamNucleo = 130f * latido * colapso;
-                    if (eclipse)
-                    {
-                        // EL ECLIPSE: solo el RIM dorado del cuerpo muerto.
-                        LumenLib.Bloom(spriteBatch, posC, 108f, OroLuz,
-                            0.10f * visibilidad, 2);
-                        LumenLib.Bloom(spriteBatch, posC, 44f, new Color(120, 80, 190),
-                            0.12f * visibilidad, 2);
-                    }
-                    else
                     {
                         LumenLib.Bloom(spriteBatch, posC, tamNucleo, NucleoBlanco,
                             1.0f * brillo * visibilidad, 3);

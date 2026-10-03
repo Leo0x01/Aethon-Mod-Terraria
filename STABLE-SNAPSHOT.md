@@ -1,11 +1,48 @@
-# AethonMod — ESTADO ACTUAL (v6.50.55)
+# AethonMod — ESTADO ACTUAL (v6.50.56)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: 2026-10-03 (v6.50.55: LA MINI-EXPLOSIÓN DE LA MASCOTA — la .54
-> publicada con release 402229633, md5 f3c8d203…, CDN verificado byte a byte).
+> Última actualización: v6.50.56 (LA DECIMOTERCERA RONDA — la .55 publicada con
+> release 402236002, md5 ad36780e…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.56 = LA DECIMOTERCERA RONDA — LOS 2 CRASHES + EL HALO PLANO + LA
+  MINI-EXPLOSIÓN QUE CABALGA + LA MUERTE QUE SE ENCIENDE (LA BOLA FINAL) + EL
+  REY GELATINA DE VERDAD + LA CHUSMA FUERA DE LOS MUROS** (la letra de la .55):
+  (1) **EL GEL INVISIBLE** (crash 1 del client.log: `Draw was called, but Begin
+  has not yet been called` en AtaqueOleadaProjectile:240): la bola de gel
+  dibujaba el sprite del ítem SIN lote abierto → excepción cada frame y el gel
+  JAMÁS se pintaba (por eso «no usaba el ítem Gel»: volaba invisible) — ahora
+  SU PROPIO LOTE ALFA en la FASE 1.
+  (2) **EL FUNERAL EN HILO AJENO** (crash 2: `ThreadStateException` al salir del
+  mundo): VFXCore.Reiniciar disponía la textura _arcoiris desde el hilo del
+  guardado — ahora EL PATRÓN DE AURALIB (QueueMainThreadAction) con el hilo
+  principal aprendido en PostDrawTiles (AprenderHiloPrincipal).
+  (3) **EL HALO ARCOÍRIS**: 30→13 px sobre la cabeza + el aro PLANO (rotación 0
+  — antes t·0.10 lo VOLTEABA vertical a los 15 s); el giro vive en las 12 perlas
+  recorriendo el aro (0.55 rad/s) — giro 100% horizontal.
+  (4) **LA MINI-EXPLOSIÓN CABALGA**: ai[1] del MiniEstallidoPet = whoAmI del pet;
+  el destello LE PEGA el centro a su fuente cada tick (determinista en todas las
+  pantallas); EL ARO CIRCULAR MURIÓ (ni el AnilloFino de la carga ni el anillo
+  segmentado del estallido: SOLO BRILLO — rayos, cruz, núcleo, estrella, onda,
+  bokeh); y la mascota ALUMBRA ×1.6 (1.35/1.15/0.78).
+  (5) **LA MUERTE DEL DIOS**: el eclipse del cine de muerte MURIÓ DEL TODO — la
+  agonía SE ENCIENDE (colapso con piso 0.55, brillo ×1→×2.4, rueda ×4, luz
+  (3.8, 3.45, 2.55), motas cayendo) y al tick 120 dispara LA BOLA FINAL
+  (EstiloBolaFinal=23): el proyectil sol pero BLANCO-DORADO — 88×88, 7 s con
+  homing suave (tope 5 px/t), daño 1.3×, luz (2.6, 2.35, 1.7), rueda de 12
+  rayos + 2 coronas de perlas + núcleo late + DOS DestelloFinal + 8 chispas +
+  estela GoldFlame + nacimiento/apagado con estampido.
+  (6) **EL REY GELATINA**: los limos NACEN DE SU CUERPO (abanico ±60° hacia la
+  presa — antes un anillo a 260 px EN EL AIRE alrededor del jugador); el gel
+  salpica CON CADA SALTO (velocidad: −8/−6/−13 al despegar + aterrizaje) Y CON
+  CADA TELETRANSPORTE (ai[1] 5→6 del aiStyle 15, verificado en decompile:
+  4 bolas al desvanecer + 6 al materializar + las 12 de la caída) — y SOLO la
+  autoridad dispara (guard MP).
+  (7) **LA CASA DE LA CHUSMA**: con el portador en SUPERFICIE, el motor natural
+  YA NO nazca enemigos en tiles con MURO de fondo ni bajo sus pies
+  (SpawnTileY > PlayerFloorY+6 → pool.Clear() → el motor reintenta en otro
+  tile) — la chusma llega por el AIRE LIBRE; en el subsuelo todo sigue igual.
 - **v6.50.55 = LA MINI-EXPLOSIÓN DE LA MASCOTA** — la duodécima ronda sobre la .54
   («ya que la mascota seria aburrida si fuera un punto de luz constante, has que
   tenga una pequeña animacion, de vez en cuando y de forma aleatoria…»):
@@ -708,7 +745,33 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.55 está implementada y build-verificada. Checklist de la .55:
+La v6.50.56 está implementada y build-verificada. Checklist de la .56:
+
+1. **SIN CRASHES**: jugar con la oleada del Rey Gelatina (bolas de gel visibles
+   volando/rebotando) y SALIR DEL MUNDO (guardar y salir) — el client.log NO
+   debe tener NINGUNA «Excepción silenciosa» nueva ni el ThreadStateException.
+2. **EL HALO ARCOÍRIS**: equiparlo — el aro queda MÁS CERCA de la cabeza y
+   PLANO para siempre (jamás se voltea vertical); las perlas dan la vuelta al
+   aro (giro horizontal).
+3. **LA MINI-EXPLOSIÓN DE LA MASCOTA**: cuando estalle, el destello SIGUE a la
+   mascota mientras vuela (no se queda atrás), NO hay aro circular (solo el
+   brillo: rayos, cruz, núcleo, estrella, onda) y la mascota alumbra MÁS el
+   entorno (un farol andante).
+4. **LA MUERTE DEL JEFE**: al matarlo, NUNCA se oscurece — ARDE cada vez más
+   (brillo subiendo, rueda acelerando, motas cayendo a su cuerpo) y al final
+   DISPARA LA BOLA FINAL: una bola blanco-dorada como el proyectil sol, con
+   MUCHO brillo, que persigue al jugador ~7 segundos y se apaga con un destello.
+5. **EL REY GELATINA**: sus limos SALEN DE SU CUERPO (escupidos hacia ti, no en
+   el aire alrededor) y con CADA salto y CADA teletransporte salpica BOLAS DE
+   GEL (el ítem Gel, ahora VISIBLE) hacia todas direcciones.
+6. **LAS OLEADAS EN SUPERFICIE**: ningún enemigo de la oleada nace ENTRE LOS
+   MUROS ni BAJO TIERRA — llegan por el aire libre (con el portador en cuevas
+   el comportamiento subterráneo sigue como siempre).
+7. **REGRESIÓN**: todo lo de la .55/.54 sigue intacto (saludo y compás de la
+   mascota, daño/cura del destello, decreto que cabalga, estallido con compás,
+   dash, reloj único, tres armas de la Emperatriz, regalo completo).
+
+Checklist de la .55 (vigente hasta que el usuario la recorra):
 
 1. **EL SALUDO DE LUZ**: invocar al Aethon Menor (o entrar al mundo con el buff) y
    VER que a ~1 segundo de nacer hace su MINI-EXPLOSIÓN (primero el aro fino que
@@ -820,7 +883,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.55** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas — idénticas a la .54, headless 0 excepciones), ⏳ en juego | LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA (un pedido): «la mascota seria aburrida si fuera un punto de luz constante» → EL SALUDO DE LUZ (lo primero al invocar: 45 t) + EL COMPÁS (base ~1/20 min, +1/60000 por enemigo cerca, tope 20; EL GARANTE de 1 hora) + EL ESTALLIDO DEL JEFE EN MINIATURA ~0.13× (las SIETE piezas de la .53: 14 rayos, anillo de 7 emisores, cruz, núcleo Bloom ~130 px, estrella, onda, 8 bokeh + chispas + luz pequeña + estampido bajito) + LA RECOGIDA translúcida (aro 135 px, 6 agujas, el pet ×1.45 mientras) + EL DAÑO SIMBÓLICO (15 plano, hitbox honesta 270×270 solo 8 t, 1 golpe por enemigo) + LA GRATITUD (cura 1% de vida máx por enemigo, tope 5%) — TODO determinista (semilla en ai[0]), CERO texturas nuevas |
+| **v6.50.56** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMOTERCERA RONDA — feedback de la .55 (SIETE frentes): (1) **EL GEL INVISIBLE** (crash 1: Draw sin Begin en la bola de gel — SU PROPIO LOTE ALFA) (2) **EL FUNERAL EN HILO AJENO** (crash 2: ThreadStateException al salir del mundo — QueueMainThreadAction + AprenderHiloPrincipal) (3) **EL HALO ARCOÍRIS PLANO Y MÁS CERCA** (13 px, rotación 0, giro en las perlas) (4) **LA MINI-EXPLOSIÓN CABALGA CON LA MASCOTA** (ai[1]=whoAmI) **SIN ARO CIRCULAR** (solo brillo) (5) **LA MASCOTA ALUMBRA ×1.6** (6) **LA MUERTE QUE SE ENCIENDE + LA BOLA FINAL BLANCO-DORADA** (EstiloBolaFinal=23: el proyectil sol en blanco-oro, 7 s, luz 2.6/2.35/1.7) (7) **EL REY GELATINA**: limos DESDE SU CUERPO + gel con cada salto Y teletransporte + LA CHUSMA sin muros ni subsuelo (SpawnTileY/WallType) |
+| **v6.50.55** | ✅ Build-verificada, ✔ publicada (release 402236002, CDN byte a byte), ⏳ probada (con feedback → .56) | LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA (un pedido): «la mascota seria aburrida si fuera un punto de luz constante» → EL SALUDO DE LUZ (lo primero al invocar: 45 t) + EL COMPÁS (base ~1/20 min, +1/60000 por enemigo cerca, tope 20; EL GARANTE de 1 hora) + EL ESTALLIDO DEL JEFE EN MINIATURA ~0.13× (las SIETE piezas de la .53: 14 rayos, anillo de 7 emisores, cruz, núcleo Bloom ~130 px, estrella, onda, 8 bokeh + chispas + luz pequeña + estampido bajito) + LA RECOGIDA translúcida (aro 135 px, 6 agujas, el pet ×1.45 mientras) + EL DAÑO SIMBÓLICO (15 plano, hitbox honesta 270×270 solo 8 t, 1 golpe por enemigo) + LA GRATITUD (cura 1% de vida máx por enemigo, tope 5%) — TODO determinista (semilla en ai[0]), CERO texturas nuevas |
 | **v6.50.54** | ✅ Build-verificada, ✔ publicada (release 402229633, CDN byte a byte), ⏳ en juego | LA UNDÉCIMA RONDA — feedback de la .53 (OCHO frentes): (1) **EL DECRETO CABALGA**: el ataque del cambio de fase centrado EN EL JEFE y moviéndose CON él (2) **EL ESTALLIDO CON COMPÁS**: 1×P1, 2×P2 + más grande, P3+ cada 1-9 ataques ALEATORIO, y 1/2/3 detonaciones por activación (3) **EL DASH CORTO Y CENTRADO** (4) **EL RELOJ ÚNICO GIGANTE** ×7.5 siguiendo al dios (5) **LAS TRES ARMAS DE LA EMPERATRIZ**: DANZA SOLAR + LANZAS ETERNAS + CORONA ETERNA (6) **EL HALO ARCOÍRIS** (ítem nuevo, la banda de la Forma 3 alrededor de la cabeza) (7) **LA FORMA 3 MÁS VIVA** (banda doble, perlas mayores, rayos del mandorla, luz de mundo) (8) **EL CRASH DEL REGALO MUERTO** (YaLoTiene con .Length — el IndexOutOfRange del client.log) |
 | **v6.50.53** | ✅ Build-verificada, ✔ publicada (release 402101571, CDN byte a byte), ⏳ en juego | LA DÉCIMA RONDA — feedback de la .52 (CINCO frentes): (1) **EL ARCOÍRIS DE LA FORMA 3** («el arcoíris debería estar en la forma ascendida 3»): BUG DE TRES VERSIONES — el dispatcher `DibujarJugadorAditivo` despachaba `Divino`/`Divino2` pero el caso `Divino3` NO EXISTÍA: `DibujarDivino3` compilaba y viajaba en la DLL… y NADIE lo llamaba (el trono entero — nimbo, cruz, mar de vidrio, lámparas, ofanim, alas prismáticas y EL ARCOÍRIS de Ap 4:3 — JAMÁS se dibujó en .49→.52); LA CURA = UNA línea de dispatcher · (2) **LA FORMA 4: EL SERAFÍN** («crea una 4 forma ascendida, asegúrate de que sea algo divino: alas, halo, corona, aura celestial, luz, bruma, más luz y destello, mejor iluminación» — Isaías 6): SEIS ALAS en tres pares (8+10+7, cálamo+punta), HALO TRIPLE trisagión, CORONA Ap 19:12, NIMBO Radio×3.4, RAYOS DE DIOS, BRUMA SANTA Is 6:4, CUERPO QUE ARDE, destello, plumas; Radio 140, luz 1.55/1.38/1.02, ítem horneado+anillo animado, regalo al entrar, vuelo infinito · (3) **EL FANTASMA DE LOS NPCS** («hay algún ataque que vuelve transparentes a los NPCs, creo que cuando lanza rayo»): el PerlinBolt dejaba el lote ABIERTO EN ADITIVO (RayoStrip reabría para sus gorros; ReabrirLoteVanilla = NO-OP) → todo NPC tras el jefe salía aditivo/transparente; el finally cierra y devuelve SIEMPRE el lote de vanilla · (4) **LA MASCOTA-JEFE** («que sea exactamente el jefe pero más pequeño»): las SEIS secciones del sol de código a escala 0.22 con el MISMO compás · (5) **EL ESTALLIDO RADIANTE** («te envié una imagen, crea por código un ataque igual a la imagen»): EST_ESTALLIDO (fase 3+, peso 5 al pegado) — 60 t de recogida (aro 600 px + 14 brasas en espiral + núcleo + agujas) y EL PUNTO DE LUZ (proyectil 19): onda 0,95× radio 600 (12 t, hitbox autocurada) + 152 t de 44 rayos 360° (250-980 px, núcleo blanco + halo oro→ámbar→brasa), anillo segmentado 14 emisores, cruz anamórfica, núcleo Bloom×4 ~950 px respirando, estrella 8 rayos, onda, 26 bokeh, 42 GoldFlame, LUZ QUE INUNDA 2,4/2,1/1,5, Item122+kick 13 px — TODO determinista (Hash01), anuncio `Jefe.Aethon.Estallido` es+en |
 | **v6.50.52** | ✅ Build-verificada, ✔ publicada (release 401940561, CDN byte a byte), ⏳ en juego | LA NOVENA RONDA — feedback de la .51 (CUATRO frentes): (1) **EL ARCOÍRIS DEL ÍTEM** («no se ve el arcoíris en el item de la forma ascendida 3»): el borde desaturado del png → EL ARO ANGULAR HORNEADO (rojo arriba girando por el espectro, núcleo blanco intacto) + EL ANILLO ANIMADO en `PostDrawInInventory` (la banda `VFXCore.Arcoiris` girando alrededor del icono, MISMO lote de la UI, cero Begin/End) · (2) **EL JEFE SIN ARCOÍRIS** («el jefe no necesita tener un arcoiris»): sección 4.5 del PreDraw MUERTA — el dios es oro y núcleo blanco; la banda vive en Forma 3 + mascota · (3) **LA ENTRADA EN DOS ACTOS** («la presentación debe durar hasta que el sol llegue al centro, luego aparece el jefe» + «demora mucho el suelo temblando»): ACTO 1 PRESENTACIÓN=CARRERA (lluvia todo el cielo hasta el final + temblor creciente solo aquí + reloj bidireccional TODO JUNTO, jefe INVISIBLE, mín 150 t) → ACTO 2 EL APARECER (80 t: PILAR + DESTELLO curva 20/40/80 + materialización 24 t DENTRO del pilar directo a la órbita — nada fuera de pantalla) · (4) **EL ESPEJO PURO + PARACAÍDAS** (la cura del «no aparece»: la .51 avanzaba vía rate de vanilla y si vanilla no lo aplicaba se colgaba): vanilla a rate 0 durante TODA la carrera, el espejo mueve Main.time a mano en AMBAS direcciones (cruces alba/ocaso en ambos sentidos; rate=dist×0.25 techo 220× — peor caso 3,6 s; POSADO en 27000 sin deriva) + a los 570 t la IA posa el sol a mano — el jefe APARECE SIEMPRE · SIMULACIÓN 17/17 + 20.000 aleatorias × 400 t |

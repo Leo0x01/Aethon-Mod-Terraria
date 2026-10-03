@@ -101,8 +101,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // === LA LUZ DE MUNDO (v6.50.53 — exactamente el JEFE: su luz
             //     dorada-blanca (1.55, 1.35, 0.95) a escala de mascota —
             //     el prisma rotativo murió: el jefe NO es arcoíris, es
-            //     ORO Y NÚCLEO BLANCO, y la mascota es SU retrato) ===
-            Lighting.AddLight(Projectile.Center, 0.85f, 0.72f, 0.48f);
+            //     ORO Y NÚCLEO BLANCO, y la mascota es SU retrato).
+            //     v6.50.56 — LA LETRA: «la mascota debe iluminar un poco
+            //     mas el entorno, tiene poca iluminacion» — ×1.6: la
+            //     criatura de luz ALUMBRA de verdad (1.35/1.15/0.78 —
+            //     el rango de un antorcha solar). ===
+            Lighting.AddLight(Projectile.Center, 1.35f, 1.15f, 0.78f);
 
             // === v6.50.55 — LA MINI-EXPLOSIÓN (el compás). Solo el cliente
             //     del dueño decide CUÁNDO (Main.rand del dueño, cero azar
@@ -139,13 +143,17 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 {
                     _saludoHecho = true;
                     _tDesdeMini = 0f;
-                    // LA SEMILLA viaja en ai[0]: cada pantalla dibuja SU
-                    // mismo estallido (Hash01 — el patrón de la .53).
+                    // LA SEMILLA viaja en ai[0] (cada pantalla dibuja SU
+                    // mismo estallido — Hash01, el patrón de la .53) y EL
+                    // WHOAMI DE LA MASCOTA viaja en ai[1]: el destello le
+                    // PEGA el centro a su fuente mientras viva (v6.50.56 —
+                    // «la explocion debe seguir a la mascota no quedarse
+                    // atras» — el patrón de los cabalgadores de la .54).
                     Projectile.NewProjectile(Projectile.GetSource_FromAI(),
                         Projectile.Center, Vector2.Zero,
                         ModContent.ProjectileType<MiniEstallidoPet>(),
                         15, 1.5f, Main.myPlayer,
-                        Main.rand.Next(1, 999999), 0f, 0f);
+                        Main.rand.Next(1, 999999), Projectile.whoAmI, 0f);
                 }
             }
 

@@ -234,13 +234,25 @@ namespace AethonMod.Content.Projectiles.Oleadas
                     case EstiloBolaGel:
                         // LA BOLA: el SPRITE DEL ÍTEM GEL dibujado tal cual
                         // (la letra del usuario: es un item de terraria).
-                        if (!Main.dedServ)
+                        // v6.50.56 — FIX DEL CRASH DEL client.log: este Draw
+                        // corría con el lote vanilla ya CERRADO (línea de
+                        // arriba) y SIN Begin propio → InvalidOperationException
+                        // cada frame («Draw was called, but Begin has not yet
+                        // been called») y la bola quedaba INVISIBLE (por eso
+                        // «no está usando el item Gel como proyectil»: las
+                        // bolas VOLABAN, rebotaban y golpeaban… a ciegas).
+                        // SU PROPIO LOTE ALFA: el ítem se ve como el ítem.
+                        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                            SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                            null, Main.GameViewMatrix.TransformationMatrix);
+                        try
                         {
                             Texture2D gel = Terraria.GameContent.TextureAssets.Item[ItemID.Gel].Value;
-                            Main.spriteBatch.Draw(gel, Projectile.Center - Main.screenPosition, null,
+                            Main.spriteBatch.Draw(gel, pos, null,
                                 Microsoft.Xna.Framework.Color.White * 0.96f, _giro,
                                 gel.Size() * 0.5f, 1.15f, SpriteEffects.None, 0f);
                         }
+                        finally { Main.spriteBatch.End(); }
                         break;
                 }
                 VFXCore.FlushAdditive(null, false);

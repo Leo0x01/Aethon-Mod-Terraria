@@ -899,18 +899,58 @@ namespace AethonMod.Content.VFX
         /// v6.49 — LA LIMPIEZA DEL NÚCLEO: búfer vacío, presupuesto en
         /// cero, factor y FPS de vuelta al nacimiento. Para Unload y
         /// OnWorldUnload (las texturas pediosas se repiden solas).
+        /// v6.50.56 — FIX DEL CRASH DEL client.log: OnWorldUnload corre en
+        /// la cadena de guardado (.NET TP Worker) y el Dispose directo de
+        /// la textura es una OPERACIÓN GRÁFICA («most FNA3D audio/graphics
+        /// functions must be called on the main thread» —
+        /// ThreadStateException al salir del mundo). EL FUNERAL ENCOLADO,
+        /// el patrón de AuraLib.Reiniciar: capturar, despegar y dejar que
+        /// el hilo principal lo entierre (Main.QueueMainThreadAction); si
+        /// ya estamos EN el hilo principal, entierro inmediato.
         /// </summary>
         public static void Reiniciar()
         {
             try { _quads.Clear(); } catch { }
             // v6.50.51 — el anillo horneado también se suelta (la textura
             // perezosa se rehornea sola al próximo uso — 1 ms).
-            try { _arcoiris?.Dispose(); } catch { }
+            Texture2D arcoirisViejo = _arcoiris;
             _arcoiris = null;
+            if (arcoirisViejo != null)
+            {
+                try
+                {
+                    if (Main.dedServ ||
+                        System.Threading.Thread.CurrentThread.ManagedThreadId == _hiloPrincipal)
+                    {
+                        arcoirisViejo.Dispose();
+                    }
+                    else
+                    {
+                        Main.QueueMainThreadAction(() =>
+                        {
+                            try { arcoirisViejo.Dispose(); } catch { }
+                        });
+                    }
+                }
+                catch { }
+            }
             _quadsDelFrame = 0;
             _frameDelPresupuesto = 0;
             _factorCalidad = 1f;
             _fpsSuave = 60f;
+        }
+
+        /// <summary>
+        /// v6.50.56 — EL HILO PRINCIPAL DE LA CASA: se aprende en el primer
+        /// PostDrawTiles (que vanilla SIEMPRE corre en el hilo del juego) —
+        /// el Reiniciar lo consulta antes de tocar una textura.
+        /// </summary>
+        private static int _hiloPrincipal = -1;
+
+        /// <summary>v6.50.56 — APRENDE el hilo principal (lo llama VFXCoreSystem.PostDrawTiles).</summary>
+        internal static void AprenderHiloPrincipal()
+        {
+            _hiloPrincipal = System.Threading.Thread.CurrentThread.ManagedThreadId;
         }
 
         /// <summary>v6.49 — EL DIAGNÓSTICO del núcleo (lo pinta el overlay F8).</summary>
@@ -957,6 +997,11 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public override void PostDrawTiles()
         {
+            // v6.50.56 — EL HILO PRINCIPAL, APRENDIDO (este hook corre
+            // SIEMPRE en el hilo del juego — el Reiniciar de OnWorldUnload
+            // [hilo worker] lo consulta antes de disponer una textura).
+            VFXCore.AprenderHiloPrincipal();
+
             // v6.50.2 — FIX (subsistema muerto): la llamada que faltaba.
             // Solo procesos que dibujan; jamás romper el frame por higiene.
             if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;

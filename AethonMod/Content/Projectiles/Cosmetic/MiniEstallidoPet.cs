@@ -16,22 +16,29 @@ namespace AethonMod.Content.Projectiles.Cosmetic
     /// de salud al jugador si golpea a un enemigo»).
     ///
     /// ES EL ESTALLIDO RADIANTE DEL JEFE (la .53) EN MINIATURA, a ~0.13×:
-    /// LAS MISMAS SIETE PIEZAS — los RAYOS (14 de 34-130 px: línea núcleo
-    /// blanca + halo oro→ámbar→brasa, cada rayo su vida propia), EL ANILLO
-    /// SEGMENTADO (7 emisores 20→105 px con flicker), LA CRUZ ANAMÓRFICA,
+    /// los RAYOS (14 de 34-130 px: línea núcleo blanca + halo
+    /// oro→ámbar→brasa, cada rayo su vida propia), LA CRUZ ANAMÓRFICA,
     /// EL NÚCLEO que inunda (Bloom hasta ~130 px), LA ESTRELLA de 8 rayos
     /// (DestelloFinal), LA ONDA expansiva y LAS BOKEH que titilan — más
     /// LA LUZ DE MUNDO pequeña y el estampido chiquito (Item122 agudo y
     /// bajito + kick de 2 px).
     ///
+    /// v6.50.56 — LA LETRA NUEVA: «la explocion debe seguir a la mascota
+    /// no quedarse atras… parece tener un halo circular, quitalo, solo
+    /// debe estar el brillo». (1) CABALGA CON LA MASCOTA: ai[1] lleva el
+    /// whoAmI del AethonMenorPet y el destello LE PEGA el centro a su
+    /// fuente mientras viva (determinista: lee el proyectil sincronizado
+    /// en TODAS las pantallas). (2) EL ARO CIRCULAR MURIÓ: ni el límite
+    /// de la carga ni el anillo segmentado del estallido — SOLO BRILLO
+    /// (rayos, cruz, núcleo, estrella, onda y bokeh).
+    ///
     /// LA RECOGIDA (45 t): la regla Fargo de la casa — el telegrafo es
-    /// TRANSLÚCIDO e inofensivo (EL LÍMITE: el aro fino de 135 px pulsando
-    /// — la MISMA cifra de la hitbox —, el núcleo que se llena y LAS 6
-    /// AGUJAS convergiendo). EL ESTALLIDO: daño 15 (MUY poco — es
-    /// decorativo) en la hitbox HONESTA de radio 135 SOLO los primeros
-    /// 8 t de onda, y LA GRATITUD: cada enemigo tocado cura el 1% de la
-    /// vida MÁXIMA del dueño (tope 5% por estallido — la sanación de la
-    /// casa: solo el cliente del dueño escribe su vida).
+    /// TRANSLÚCIDO e inofensivo (el núcleo que se llena y LAS 6 AGUJAS
+    /// convergiendo). EL ESTALLIDO: daño 15 (MUY poco — es decorativo)
+    /// en la hitbox HONESTA de radio 135 SOLO los primeros 8 t de onda,
+    /// y LA GRATITUD: cada enemigo tocado cura el 1% de la vida MÁXIMA
+    /// del dueño (tope 5% por estallido — la sanación de la casa: solo
+    /// el cliente del dueño escribe su vida).
     ///
     /// TODO determinista: la semilla viaja en ai[0] y cada pantalla dibuja
     /// EL MISMO estallido (Hash01 — el patrón de la .53). Nace del
@@ -82,6 +89,25 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         public override void AI()
         {
             _edad++;
+
+            // === v6.50.56 — LA EXPLOSIÓN CABALGA CON LA MASCOTA (la letra:
+            //     «la explocion debe seguir a la mascota no quedarse atras»)
+            //     — ai[1] lleva el whoAmI del AethonMenorPet que la sembró:
+            //     mientras viva, el destello LE PEGA el centro a su fuente
+            //     (determinista en TODAS las pantallas: lee el proyectil
+            //     SINCRONIZADO — el mismo patrón del _miniCerca del pet). Si
+            //     la mascota murió, el destello queda donde estaba. ===
+            int quienPet = (int)Projectile.ai[1];
+            if (quienPet >= 0 && quienPet < Main.maxProjectiles)
+            {
+                Projectile pet = Main.projectile[quienPet];
+                if (pet != null && pet.active &&
+                    pet.type == ModContent.ProjectileType<AethonMenorPet>())
+                {
+                    Projectile.Center = pet.Center;
+                    Projectile.velocity = Vector2.Zero;
+                }
+            }
 
             if (_edad <= 45f)
             {
@@ -255,28 +281,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                             new Vector2(largo * 0.68f, 6.5f + 4.5f * h0), ang);
                     }
 
-                    // === (b) EL ANILLO SEGMENTADO (7 EMISORES creciendo
-                    //     hacia afuera con su flicker — 20 → 105 px) ===
-                    float rAnillo = MathHelper.Lerp(20f, 105f,
-                        Math.Min(1f, tB / 50f));
-                    float alfaA = tB < 65f ? 1f :
-                        Math.Max(0f, 1f - (tB - 65f) / 40f);
-                    if (alfaA > 0.02f)
-                    {
-                        int beatE = (int)(tB / 6f);   // el flicker segmentado
-                        for (int i = 0; i < 7; i++)
-                        {
-                            float angE = giro * 1.6f + i * MathHelper.TwoPi / 7f;
-                            float hE = VFXCore.Hash01(seed, i, 60 + (beatE % 5));
-                            Vector2 e = Projectile.Center +
-                                new Vector2(MathF.Cos(angE), MathF.Sin(angE)) * rAnillo;
-                            VFXCore.Quad(e,
-                                BlancoCaliente * (0.80f * alfaA * (0.7f + 0.3f * hE)),
-                                new Vector2(10f + 4f * hE, 10f + 4f * hE));
-                            VFXCore.Quad(e, OroGrimorio * (0.45f * alfaA),
-                                new Vector2(24f, 24f));
-                        }
-                    }
+                    // === (b) v6.50.56 — EL ANILLO SEGMENTADO MURIÓ (la
+                    //     letra: «la explocion parece tener un halo circular,
+                    //     quitalo, solo debe estar el brillo»): quedan LOS
+                    //     RAYOS, la cruz, el núcleo que inunda, la estrella,
+                    //     la onda y las bokeh — SOLO BRILLO, cero aros. ===
 
                     // === (c) LA CRUZ ANAMÓRFICA (el bloom estirado en H y V
                     //     — vive solo en el AUGE, muere a los 50 t) ===
@@ -303,12 +312,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
                 if (_edad <= 45f)
                 {
-                    // LA RECOGIDA: EL LÍMITE (el aro fino de 135 px pulsando
-                    // — la MISMA cifra de la hitbox — translúcido, la regla
-                    // Fargo) y el núcleo que se llena.
+                    // LA RECOGIDA: v6.50.56 — EL ARO DEL LÍMITE MURIÓ (la
+                    // letra: «quitalo, solo debe estar el brillo»): queda el
+                    // NÚCLEO que se llena (las agujas convergentes viven en
+                    // la FASE 1 — son líneas, no aros).
                     float c = _edad / 45f;
-                    OrbitaLib.AnilloFino(pos, 135f * (0.92f + 0.08f * MathF.Sin(t * 7f)),
-                        0f, OrbitaLib.Tint(OroGrimorio, 0.35f + 0.20f * c));
                     LumenLib.Bloom(Main.spriteBatch, pos, 22f + 26f * c,
                         OroGrimorio, 0.35f + 0.35f * c, 3);
                 }

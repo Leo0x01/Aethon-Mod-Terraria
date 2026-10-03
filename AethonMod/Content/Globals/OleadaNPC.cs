@@ -137,6 +137,11 @@ namespace AethonMod.Content.Globals
         // Gelatina escupen las BOLAS DE GEL.
         private float _prevVelY = 0f;
         private bool _prevEnSuelo = false;
+        // v6.50.56 — EL TELETRANSPORTE DEL REY (ai[1] de su aiStyle 15:
+        // 5 = desvaneciendo, 6 = materializando, 0-3 = ciclo de saltos):
+        // leer el ESTADO además de la velocidad — el teletransporte ES su
+        // «salto» más firma y la velocidad lo atraviesa sin verlo.
+        private float _prevAi1Rey = 0f;
 
         // ==================================================================
         //  EL SELLADO
@@ -508,6 +513,43 @@ namespace AethonMod.Content.Globals
                 if (portador == null || spawnInfo.Player == null ||
                     spawnInfo.Player.whoAmI != portador.whoAmI) return;
 
+                // ==============================================================
+                //  v6.50.56 — LA CASA DE LA CHUSMA: ni entre muros ni bajo
+                //  tierra (la letra: «algunos enemigos de las oleadas se
+                //  siguen generando entre los muros y bajo tierra entre la
+                //  tierra»). El motor natural de vanilla puede elegir
+                //  bolsas de aire SUBTERRÁNEAS del anillo de spawn (la
+                //  cueva sellada bajo tus pies, el hueco entre los muros
+                //  de una estructura): mientras el portador esté en la
+                //  SUPERFICIE, todo intento de nacimiento en un tile con
+                //  MURO de fondo (muro natural = dentro de la tierra;
+                //  muro colocado = dentro de una casa) o claramente POR
+                //  DEBAJO de sus pies VACÍA el menú — este intento no nace
+                //  nada y el motor reintenta en otro tile al próximo tick
+                //  (como toda invasión: la chusma llega POR EL AIRE
+                //  LIBRE). En el subsuelo (el portador abajo) la cueva es
+                //  su casa y el motor sigue como siempre.
+                // ==============================================================
+                Player pl = spawnInfo.Player;
+                bool portadorEnSuperficie = !pl.ZoneDirtLayerHeight && !pl.ZoneRockLayerHeight &&
+                                             !pl.ZoneUnderworldHeight && !pl.ZoneDungeon;
+                if (portadorEnSuperficie)
+                {
+                    int sx = spawnInfo.SpawnTileX, sy = spawnInfo.SpawnTileY;
+                    bool bajoTierra = sy > spawnInfo.PlayerFloorY + 6;
+                    bool entreMuros = false;
+                    if (sx > 5 && sx < Main.maxTilesX - 5 && sy > 5 && sy < Main.maxTilesY - 5)
+                    {
+                        Tile tl = Main.tile[sx, sy];
+                        entreMuros = tl != null && tl.WallType != 0;  // muro natural o colocado = DENTRO de algo
+                    }
+                    if (bajoTierra || entreMuros)
+                    {
+                        pool.Clear();   // este intento no nace: el motor prueba otro tile
+                        return;
+                    }
+                }
+
                 int[] menu = GrimorioFuriaSistema.PoolDeOleada;
                 if (menu == null || menu.Length == 0) return;
 
@@ -654,6 +696,14 @@ namespace AethonMod.Content.Globals
                 // despegar y AL ATERRIZAR (la fisica leida de la velocidad,
                 // no de su ai[]): la caida veloz que se frena de golpe es
                 // el instante del impacto.
+                // v6.50.56 — CON CADA SALTO, DE VERDAD (la letra: «no esta
+                // usando el item Gel como proyectil tipo salpicadura con
+                // cada salto»): (a) las bolas YA ERAN INVISIBLES (el crash
+                // del dibujado del gel — AtaqueOleadaProjectile, curado
+                // esta versión: dibujaban SIN lote abierto); (b) EL
+                // TELETRANSPORTE TAMBIÉN SALPICA (ai[1] 5→6→0 — el "salto"
+                // más firma del Rey); (c) solo la AUTORIDAD dispara (SP y
+                // server — antes un cliente MP disparaba bolas fantasma).
                 if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.KingSlime)
                 {
                     // LA POLARIDAD DE TERRARIA: caer es velocity.Y POSITIVA
@@ -663,10 +713,21 @@ namespace AethonMod.Content.Globals
                     bool veniaCayendo = _prevVelY >= 7f;
                     bool aterrizo = veniaCayendo && npc.velocity.Y < _prevVelY * 0.3f;
                     bool despego = npc.velocity.Y < -5f && _prevVelY > -5f;
-                    if (aterrizo && !_prevEnSuelo) ReyAterriza(npc);
-                    if (despego) ReyDespega(npc);
+                    // EL TELETRANSPORTE: entra en el estado 6 (materializa
+                    // en el NUEVO sitio) — el salpicón de la llegada.
+                    bool aparece = npc.ai[1] == 6f && _prevAi1Rey != 6f;
+                    // …y el 5 (desvanece) se despide del viejo con 4 bolas.
+                    bool seVa = npc.ai[1] == 5f && _prevAi1Rey != 5f;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        if (aterrizo && !_prevEnSuelo) ReyAterriza(npc);
+                        if (despego) ReyDespega(npc);
+                        if (aparece) ReyAparece(npc);
+                        if (seVa) ReyDespega(npc);
+                    }
                     _prevVelY = npc.velocity.Y;
                     _prevEnSuelo = aterrizo;
+                    _prevAi1Rey = npc.ai[1];
                 }
 
                 // las partículas del aura: SIEMPRE (también los jefes de
@@ -868,16 +929,29 @@ namespace AethonMod.Content.Globals
         //  EL REY GELATINA - MUCHOS LIMOS + LAS BOLAS DE GEL DEL SALTO
         // ==================================================================
 
-        /// <summary>LA RACION DEL REY: muchos, PERO MUCHOS limos alrededor de la presa.</summary>
+        /// <summary>
+        /// LA RACION DEL REY: muchos, PERO MUCHOS limos — y v6.50.56 nacen
+        /// TODOS DESDE EL CUERPO DEL REY (la letra: «los slime debe
+        /// aparecer desde el rey slime», como las bolas SlimeSpawn del Rey
+        /// vanilla): escupidos de su masa en abanico hacia la presa, con
+        /// su arco al aire — NUNCA MÁS el anillo en el cielo alrededor del
+        /// jugador.
+        /// </summary>
         private void CoroRey(NPC npc, Player presa)
         {
             int cantidad = 5 + Oleada / 2;                 // 5..10 (especial: 12)
             if (EsEspecial) cantidad = 12;
+            float rumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY).ToRotation();
+            float paso = cantidad > 1 ? 1f / (cantidad - 1) : 0.5f;
             for (int i = 0; i < cantidad; i++)
             {
-                float ang = i * MathHelper.TwoPi / cantidad + Main.rand.NextFloat(-0.2f, 0.2f);
-                Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 260f;
-                Convocar(npc, NPCID.BlueSlime, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+                // EL ABANICO: ±60° alrededor del rumbo a la presa.
+                float ang = rumbo + ((i * paso) - 0.5f) * (MathHelper.Pi * 2f / 3f);
+                Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                    Main.rand.NextFloat(4f, 8f);
+                vel.Y -= 3f;   // el escupitajo se alza (nace del cuerpo y vuela)
+                Convocar(npc, NPCID.BlueSlime,
+                    npc.Center + new Vector2(0f, -12f), vel.X, vel.Y);
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
         }
@@ -898,7 +972,7 @@ namespace AethonMod.Content.Globals
         /// EL ATERRIZAJE DEL REY (la letra: «al caer muchas de esas bolas
         /// salpican del jefe hacia todas las direcciones de forma
         /// aleatoria»): DOCE bolas de gel al azar + TRES limos mas de
-        /// rebote.
+        /// rebote (naciendo DE su cuerpo, v6.50.56).
         /// </summary>
         private void ReyAterriza(NPC npc)
         {
@@ -911,9 +985,27 @@ namespace AethonMod.Content.Globals
                 LanzarBolaGel(npc, npc.Center + new Vector2(0f, 30f), vel);
             }
             for (int i = 0; i < 3; i++)
-                Convocar(npc, NPCID.BlueSlime, npc.Center + new Vector2(Main.rand.NextFloat(-160f, 160f), -20f),
+                Convocar(npc, NPCID.BlueSlime, npc.Center + new Vector2(Main.rand.NextFloat(-120f, 120f), -12f),
                     Main.rand.NextFloat(-3f, 3f), -4f);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
+        }
+
+        /// <summary>
+        /// v6.50.56 — LA LLEGADA DEL TELETRANSPORTE (ai[1] 5→6): el cuerpo
+        /// recién materializado SALPICA su gel — el «salto» más firma del
+        /// Rey Gelatina también paga en bolas (la letra: gel «con cada
+        /// salto»).
+        /// </summary>
+        private void ReyAparece(NPC npc)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
+                    Main.rand.NextFloat(3f, 7f);
+                vel.Y -= 2f;
+                LanzarBolaGel(npc, npc.Center, vel);
+            }
         }
 
         /// <summary>LA BOLA DE GEL (el ítem Gel de Terraria dibujado como proyectil con gravedad y rebote).</summary>

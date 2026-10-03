@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.55 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.56 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,30 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado 2026-10-03, v6.50.55)
+## ¿Dónde estamos? (actualizado para v6.50.56)
+- **v6.50.56 - LA DECIMOTERCERA RONDA — LOS 2 CRASHES DEL client.log + EL HALO
+  PLANO Y MÁS CERCA + LA MINI-EXPLOSIÓN QUE SIGUE A LA MASCOTA + LA MUERTE QUE
+  SE ENCIENDE Y DISPARA LA BOLA FINAL BLANCO-DORADA + EL REY GELATINA DE VERDAD + LA CHUSMA FUERA DE LOS MUROS**:
+  (1) **LOS DOS CRASHES MUERTOS**: la bola de gel dibujaba SIN lote abierto
+  (InvalidOperationException cada frame — y el gel quedaba INVISIBLE: por eso
+  «no usaba el ítem Gel») y el Reiniciar del VFX disponía una textura en el
+  hilo del guardado al salir del mundo (ThreadStateException) — ambos curados.
+  (2) **EL HALO ARCOÍRIS**: 13 px sobre la cabeza (no 30) y el aro PLANO para
+  siempre (la banda ya no se voltea vertical: giran las 12 perlas alrededor,
+  giro 100% horizontal).
+  (3) **LA MINI-EXPLOSIÓN DE LA MASCOTA**: ahora CABALGA con la mascota (no se
+  queda atrás), SIN aro circular (solo rayos, cruz, núcleo, estrella, onda y
+  bokeh — puro brillo) y la mascota ALUMBRA ×1.6 más (un farol andante).
+  (4) **LA MUERTE DEL JEFE**: sin oscurecimiento — la agonía SE ENCIENDE (el
+  brillo sube ×2.4, la rueda acelera, la luz inunda y las motas caen) y al
+  final dispara LA BOLA FINAL: una bola de energía como el proyectil sol pero
+  BLANCO-DORADA y con MUCHO brillo, 7 s persiguiendo al asesino.
+  (5) **EL REY GELATINA DE LA OLEADA**: los limos NACEN DE SU CUERPO (escupidos
+  en abanico, no en anillo en el aire) y el gel salpica CON CADA SALTO y con
+  CADA TELETRANSPORTE (ida y llegada) — y ya se VE (era el crash invisible).
+  (6) **LAS OLEADAS**: la chusma YA NO NACE entre muros ni bajo tierra — con
+  el portador en la superficie solo nace en AIRE LIBRE (sin muro de fondo y a
+  nivel de sus pies), como una invasión de verdad.
 - **v6.50.55 - LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA**:
   El Aethon Menor ya no es un punto de luz constante: **hace LA MISMA explosión de
   luz del jefe original, pero MUY PEQUEÑA (~130 px)**. **LO PRIMERO** que hace al
