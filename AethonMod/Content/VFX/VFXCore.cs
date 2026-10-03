@@ -365,12 +365,15 @@ namespace AethonMod.Content.VFX
             // que pase, incluso en el error.
             try
             {
-                // v6.50.11 — SONDA: el End del lote del llamador sin
-                // first-chance (antes: End pelado que lanzaba si el
-                // consumidor ya lo había cerrado — la excepción escapaba
-                // del try/finally al llamador tras la limpieza).
-                if (endActiveBatch)
-                    CerrarLoteSiAbierto();
+                // v6.50.58 — LA SONDA YA NO CONFÍA EN NADIE: antes, con
+                // endActiveBatch=false, el Begin de abajo pisaba un Begin
+                // vivo del llamador (el EchoArcher lo hacía CADA frame →
+                // InvalidOperationException deduplicada a una línea en el
+                // client.log, con medio draw muerto). La sonda pregunta
+                // SIEMPRE: si hay un lote vivo, se cierra aquí — el vuelco
+                // jamás hace Begin sobre Begin (el llamador descuidado
+                // pierde UN frame de adornos, no el draw entero).
+                CerrarLoteSiAbierto();
 
                 // v6.41 — EL VOLCADO BLINDADO (try/finally): si UN Draw lanza
                 // (dispositivo perdido, textura nula por descarga caliente), el
@@ -432,10 +435,11 @@ namespace AethonMod.Content.VFX
 
             try
             {
-                // la sonda de la casa: el End del lote del llamador sin
-                // first-chance (idempotente — no pisa un Begin vivo).
-                if (endActiveBatch)
-                    CerrarLoteSiAbierto();
+                // v6.50.58 — LA MISMA SONDA INCONDICIONAL que FlushAdditive:
+                // nunca Begin sobre Begin, aunque el llamador jura que no
+                // hay lote abierto (ver el fix del EchoArcher — client.log
+                // 12:31:33).
+                CerrarLoteSiAbierto();
 
                 Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,

@@ -347,7 +347,20 @@ namespace AethonMod.Content.NPCs
                         BlancoEstelar * 0.5f, 1.5f);
                     VFXCore.Line(nock + Main.screenPosition, tipB + Main.screenPosition,
                         BlancoEstelar * 0.5f, 1.5f);
-                    VFXCore.FlushAdditive(null, false);
+                    // v6.50.58 — FIX (la InvalidOperationException del client.log
+                    // 12:31:33 — CADA frame que la arquera dibujaba, deduplicada
+                    // a UNA línea por tML): este FlushAdditive corría con
+                    // NUESTRO lote de la FASE 2 ABIERTO y endActiveBatch=false
+                    // → el Begin del vuelco pisaba el Begin vivo → la excepción
+                    // mataba el draw a medias (la corona, el aliento y la
+                    // estela de ecos JAMÁS se dibujaban). La cadena correcta:
+                    // FlushAdditive CIERRA nuestro lote (true — la sonda lo ve
+                    // abierto), vuela, cierra el suyo… y nosotros REABRIMOS el
+                    // lote de pantalla para lo que queda de la FASE 2.
+                    VFXCore.FlushAdditive(null, true);
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
                 }
 
                 // === LA CORONA DE ESTRELLAS (las tres que aún lleva) ===

@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.57 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.58 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,28 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.57)
+## ¿Dónde estamos? (actualizado para v6.50.58)
+- **v6.50.58 - LA DECIMOQUINTA RONDA — EL SOL PERSIGUE DE VERDAD + EL DISCO
+  DEL PROYECTIL SOL + LA BRUMA MASIVA + EL CRASH DE LA ARQUERA**:
+  (1) **LA PERSIGA DE VERDAD**: la "persiga" de la .57 era una aceleración
+  tan débil que la inercia del lanzamiento la enterraba — el sol cruzaba el
+  cielo sin cazar. Ahora el RUMBO GIRA hacia el jugador (converge en ~1.2 s),
+  la rapidez decae a la persiga lenta (7.2 → 4.4 px/t) y la gravedad es la
+  COMBA del rumbo: te persigue LENTO, pero PERSIGUE.
+  (2) **EL DISCO DEL PROYECTIL SOL**: el sol del dios VISTE la superficie de
+  plasma del ARMA (el MISMO pipeline del SunProjectile: glow coronal +
+  backglow + aura de ruido + EL DISCO del SunShader), recolor
+  **BLANCO-DORADO** que ENROJECE en la gigante — encima de los
+  rayos/perlas/núcleo que ya tenía (la explosión sigue siendo la NUESTRA:
+  brillo, ondas y esquirlas — NO la nova del arma).
+  (3) **LA BRUMA MASIVA**: al explotar el sol escupe **120 NUBES EN TRES
+  CAPAS** (velo interior denso + frente medio + polvo exterior) y sigue
+  goteando bruma mientras la luz muere — una estrella que muere LIBERA su
+  materia.
+  (4) **EL CRASH DE LA ARQUERA MUERTO** (la InvalidOperationException del
+  client.log: Begin sobre Begin CADA frame): la cadena correcta de lotes en
+  el EchoArcher + LA SONDA INCONDICIONAL en FlushAdditive/FlushAlpha — jamás
+  Begin sobre Begin de nuevo.
 - **v6.50.57 - LA DECIMOCUARTA RONDA — EL SOL DEL DIOS + LA COREOGRAFÍA + LA IA
   DEL DUELISTA + LAS CALAVERAS POTENCIADAS + EL VOLTEO DE GRAVEDAD MUERTO**:
   (1) **EL SOL DEL DIOS (EL ATAQUE ESPECIAL)**: el jefe **SE CONVIERTE EN SOL**

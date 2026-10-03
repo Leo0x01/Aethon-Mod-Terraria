@@ -1,11 +1,13 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.VFX;
+using AethonMod.Content.Projectiles.Cosmic;
 
 namespace AethonMod.Content.Projectiles.Jefes
 {
@@ -120,6 +122,14 @@ namespace AethonMod.Content.Projectiles.Jefes
         private bool _clavada;           // la púa ya se hundió en el suelo
         private Vector2 _posAnterior;    // la cola del virote
         private int _ticksDisolver;      // v6.50.44 — el fade del pilar de la aparición
+
+        // === v6.50.58 — LOS SHADERS DEL DISCO DEL SOL DEL DIOS (los del
+        //     arma SunProjectile — el cacheo de la casa: Request UNA vez,
+        //     flag si el asset no está y jamás volver a tocarlo) ===
+        private static Ref<Effect> _solDiscoShader;
+        private static bool _solDiscoFallo;
+        private static Ref<Effect> _solAuraShader;
+        private static bool _solAuraFallo;
 
         // === v6.50.45 — EL CORO ESPECTRAL DEL JEFE (sub-entidades lógicas,
         //     el patrón de la casa: NADA de proyectiles extra) ===
@@ -1618,20 +1628,36 @@ namespace AethonMod.Content.Projectiles.Jefes
                             Projectile.netUpdate = true;
                         }
 
-                        // LA PERSIGA LENTA + LA GRAVEDAD (la letra: «perseguir
-                        // lentamente al jugador, tener gravedad»).
+                        // v6.50.58 — LA PERSIGA DE VERDAD (la letra de la
+                        // ronda: «el sol que lanza el jefe, no persigue al
+                        // jugador»): la aceleración de 0.05/t quedaba
+                        // ENTERRADA bajo la inercia del cañonazo (7.2 px/t
+                        // en línea recta, con la gravedad ganándole la
+                        // pulse) — el sol cruzaba el cielo sin cazar NADA.
+                        // Ahora el RUMBO GIRA hacia la presa (steering:
+                        // converge en ~1.2 s), la rapidez decae del
+                        // cañonazo a la persiga lenta (7.2 → 4.4 px/t) y
+                        // la GRAVEDAD es la COMBA del rumbo (el peso se
+                        // nota, la caza GANA — «perseguir lentamente al
+                        // jugador, tener gravedad», de verdad esta vez).
                         Player presaV = Presa();
+                        Vector2 dirSol = Projectile.velocity.SafeNormalize(-Vector2.UnitY);
                         if (presaV != null)
                         {
-                            Vector2 hacia = presaV.Center - Projectile.Center;
-                            float d = hacia.Length();
-                            if (d > 60f)
-                                Projectile.velocity += hacia / d * 0.05f;
+                            Vector2 haciaSol = (presaV.Center - Projectile.Center)
+                                .SafeNormalize(dirSol);
+                            dirSol = Vector2.Lerp(dirSol, haciaSol, 0.045f); // EL GIRO
+                            dirSol.Y += 0.018f;                              // EL PESO
+                            dirSol = dirSol.SafeNormalize(dirSol);
                         }
-                        Projectile.velocity.Y += 0.055f;         // EL PESO del sol
-                        float velS = Projectile.velocity.Length();
-                        if (velS > 5.2f)
-                            Projectile.velocity *= 5.2f / velS;
+                        else
+                        {
+                            dirSol.Y += 0.05f;   // sin presa: el peso manda
+                            dirSol = dirSol.SafeNormalize(dirSol);
+                        }
+                        float rapidoSol = MathHelper.Clamp(
+                            Projectile.velocity.Length() - 0.055f, 4.4f, 7.2f);
+                        Projectile.velocity = dirSol * rapidoSol;
                         Projectile.rotation += 0.012f;
 
                         // LA ESTELA DE FUEGO BLANCO.
@@ -1708,7 +1734,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 OndaLib.Kick(13f, 28);
                                 if (!Main.dedServ)
                                 {
-                                    for (int dX = 0; dX < 70; dX++)
+                                    for (int dX = 0; dX < 90; dX++)
                                     {
                                         float angX = Main.rand.NextFloat(MathHelper.TwoPi);
                                         Dust dX2 = Dust.NewDustPerfect(Projectile.Center,
@@ -1720,6 +1746,41 @@ namespace AethonMod.Content.Projectiles.Jefes
                                                 ? new Color(255, 120, 50)
                                                 : new Color(255, 235, 190), 1.6f);
                                         dX2.noGravity = true;
+                                    }
+
+                                    // v6.50.58 — LA BRUMA DE LA ESTRELLA (la
+                                    // letra: «necesitan mucha bruma al explotar
+                                    // ya que la explocion de una estrella libera
+                                    // mucha energie y polvo»): 120 NUBES en
+                                    // TRES CAPAS — el VELO interior (denso y
+                                    // cálido, deriva lenta), el FRENTE medio (el
+                                    // muro que empuja la onda) y el POLVO
+                                    // exterior (la ceniza que vuela) — la
+                                    // estrella se DESHACE en humo.
+                                    for (int nB = 0; nB < 120; nB++)
+                                    {
+                                        int capaB = nB % 3;
+                                        float angN = Main.rand.NextFloat(MathHelper.TwoPi);
+                                        float velN = capaB == 0
+                                            ? Main.rand.NextFloat(0.6f, 2.0f)
+                                            : capaB == 1
+                                                ? Main.rand.NextFloat(2.2f, 5.5f)
+                                                : Main.rand.NextFloat(5.5f, 10.5f);
+                                        float escN = capaB == 0
+                                            ? Main.rand.NextFloat(3.6f, 5.8f)
+                                            : capaB == 1
+                                                ? Main.rand.NextFloat(2.4f, 4.2f)
+                                                : Main.rand.NextFloat(1.3f, 2.6f);
+                                        Color cN = capaB == 0
+                                            ? new Color(255, 196, 138)
+                                            : capaB == 1
+                                                ? new Color(232, 128, 78)
+                                                : new Color(176, 128, 108);
+                                        Dust nube = Dust.NewDustPerfect(Projectile.Center,
+                                            DustID.Smoke,
+                                            new Vector2(MathF.Cos(angN), MathF.Sin(angN)) * velN,
+                                            Main.rand.Next(80, 130), cN, escN);
+                                        nube.noGravity = true;
                                     }
                                 }
                                 if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -1739,19 +1800,23 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 Projectile.netUpdate = true;
                             }
 
-                            // LA BRUMA residual que se derrite (el espectáculo
-                            // de los últimos ticks: la nube que se apaga).
-                            if (!Main.dedServ && Main.rand.NextBool(3))
+                            // LA BRUMA RESIDUAL a RÍO (v6.50.58: 3 nubes por
+                            // tick — la nube que sigue goteando mientras la
+                            // luz muere: la estrella DESHACIÉNDOSE en polvo).
+                            if (!Main.dedServ)
                             {
-                                float angB2 = Main.rand.NextFloat(MathHelper.TwoPi);
-                                Dust bruma = Dust.NewDustPerfect(
-                                    Projectile.Center + new Vector2(
-                                        MathF.Cos(angB2), MathF.Sin(angB2)) *
-                                        Main.rand.NextFloat(60f, 380f),
-                                    DustID.Smoke,
-                                    new Vector2(MathF.Cos(angB2), MathF.Sin(angB2)) * 1.1f,
-                                    120, new Color(255, 150, 80), 2.2f);
-                                bruma.noGravity = true;
+                                for (int rB = 0; rB < 3; rB++)
+                                {
+                                    float angB2 = Main.rand.NextFloat(MathHelper.TwoPi);
+                                    Dust bruma = Dust.NewDustPerfect(
+                                        Projectile.Center + new Vector2(
+                                            MathF.Cos(angB2), MathF.Sin(angB2)) *
+                                            Main.rand.NextFloat(60f, 420f),
+                                        DustID.Smoke,
+                                        new Vector2(MathF.Cos(angB2), MathF.Sin(angB2)) * 1.1f,
+                                        120, new Color(255, 150, 80), 2.6f);
+                                    bruma.noGravity = true;
+                                }
                             }
                             // LA LUZ DE LA EXPLOSIÓN muriendo en grande.
                             float apX = Math.Max(0f,
@@ -2548,8 +2613,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 new Vector2(60f, 500f), t * 0.02f, VFXCore.SoftGlow);
 
                             // LA BRUMA (nubes de fuego translúcidas derivando
-                            // hacia afuera — deterministas por semilla).
-                            for (int i = 0; i < 10; i++)
+                            // hacia afuera — deterministas por semilla;
+                            // v6.50.58: 10 → 18 nubes y alfa 0.16 → 0.20:
+                            // «necesitan MUCHA bruma al explotar»).
+                            for (int i = 0; i < 18; i++)
                             {
                                 float hB = VFXCore.Hash01(Seed + 1, i, 7);
                                 float angB = hB * MathHelper.TwoPi;
@@ -2559,7 +2626,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 float tamB = (180f + 240f * hB) * (0.6f + 0.4f * fp);
                                 Color cBruma = Color.Lerp(
                                     new Color(255, 170, 90), new Color(200, 90, 60), hB);
-                                VFXCore.Quad(brumaQ, cBruma * (0.16f * derrite),
+                                VFXCore.Quad(brumaQ, cBruma * (0.20f * derrite),
                                     new Vector2(tamB, tamB * 0.8f), angB + fp * 0.4f,
                                     VFXCore.SoftGlow);
                             }
@@ -2592,6 +2659,14 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                 }
                 VFXCore.FlushAdditive(null, false);
+
+                // v6.50.58 — EL DISCO DEL PROYECTIL SOL (encima de todo lo
+                // demás del sol del dios: la SUPERFICIE DE PLASMA del arma —
+                // la letra: «el proyectil debe ser el mismo que lanza el
+                // jefe actualmente mas el proyectil Sol funcionando»;
+                // la explosión sigue siendo LA NUESTRA — NO la nova del arma).
+                if (Estilo == EstiloSolJefe)
+                    DibujarDiscoSolDios();
 
                 // === FASE 2 — EL LOTE ADITIVO DE LAS LIBRERÍAS (PANTALLA) ===
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
@@ -3143,6 +3218,178 @@ namespace AethonMod.Content.Projectiles.Jefes
                 VFXCore.ReabrirLoteVanilla();
             }
             return false;
+        }
+
+        // ==================================================================
+        //  v6.50.58 — EL DISCO DEL PROYECTIL SOL (la superficie de plasma
+        //  del ARMA, encima del sol del dios)
+        // ==================================================================
+
+        /// <summary>
+        /// v6.50.58 — EL SOL DEL DIOS VISTE EL PROYECTIL SOL (la letra de la
+        /// ronda: «el proyectil debe ser el mismo que lanza el jefe
+        /// actualmente mas el proyectil Sol funcionando, pero que no use la
+        /// explocion del proyectil sol, que usa la explocion del brillo
+        /// actual»): ENCIMA de los rayos/perlas/núcleo que ya tenía, el sol
+        /// gana la SUPERFICIE DE PLASMA del arma — el MISMO pipeline del
+        /// SunProjectile (glow coronal → backglow → aura de ruido → el DISCO
+        /// del SunShader), recolor BLANCO-DORADO (la paleta pedida desde la
+        /// ronda pasada) que ENROJECE al hincharse en la GIGANTE. La
+        /// explosión NO cambia: la nuestra de siempre (cruz, ondas, esquirlas
+        /// y la BRUMA MASIVA nueva) — la StyleNova del arma NO se toca. El
+        /// disco se FUNDIENDO en 50 t al estallar (la estrella DESHACIÉNDOSE
+        /// en luz y humo).
+        /// Llamado desde el PreDraw tras el vuelco de la FASE MUNDO — con el
+        /// lote CERRADO (este método gestiona SUS lotes, balanceados de a
+        /// pares Begin→End; el catch de la casa cura cualquier media
+        /// emergencia).
+        /// </summary>
+        private void DibujarDiscoSolDios()
+        {
+            // El acto (la misma máquina de la IA, por edad).
+            bool estallo = _edad > 470f;
+            float fadeSol = estallo
+                ? Math.Max(0f, 1f - (_edad - 470f) / 50f) : 1f;
+            if (fadeSol <= 0f) return;   // el disco ya se deshizo en bruma
+
+            float g = _edad > 380f
+                ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f) : 0f;
+            float ease = g * g * (3f - 2f * g);
+
+            // Los shaders (el cacheo de la casa — una sola Request).
+            if (!_solDiscoFallo && _solDiscoShader == null)
+            {
+                try
+                {
+                    _solDiscoShader = new Ref<Effect>(ModContent.Request<Effect>(
+                        "AethonMod/Content/Effects/Shaders/SunShader",
+                        AssetRequestMode.ImmediateLoad).Value);
+                }
+                catch { _solDiscoFallo = true; }
+            }
+            if (!_solAuraFallo && _solAuraShader == null)
+            {
+                try
+                {
+                    _solAuraShader = new Ref<Effect>(ModContent.Request<Effect>(
+                        "AethonMod/Content/Effects/Shaders/RadialShineShader",
+                        AssetRequestMode.ImmediateLoad).Value);
+                }
+                catch { _solAuraFallo = true; }
+            }
+
+            try
+            {
+                Vector2 drawPos = Projectile.Center - Main.screenPosition;
+                // EL RADIO VISUAL (el del arma: width×scale×0.75 — aquí el
+                // cuerpo del sol nace a 96 y la escala lo hace TODO).
+                float starR = 96f * Math.Max(0.30f, Projectile.scale) * 0.75f;
+                float lifeT = Math.Min(1f, _edad / 470f);
+
+                // === 1. EL GLOW CORONAL (las dos capas del arma que crecen
+                //     con la vida — en la explosión ya no: el flash manda) ===
+                if (!estallo)
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                        SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    SunProjectile.DrawCoronalGlowSprites(drawPos, starR, lifeT, ease);
+                    Main.spriteBatch.End();
+                }
+
+                // === 2. EL BACKGLOW (dos discos de resplandor — DORADO en
+                //     el vuelo, BRASA en la gigante; escala proporcional al
+                //     disco: starR/69 = el ratio del arma base) ===
+                Texture2D bloomCircle = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/BloomCircleSmall").Value;
+                float escGlow = starR / 69f;
+                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                Color glowHot = Color.Lerp(new Color(255, 236, 170),
+                    new Color(255, 75, 25), ease);
+                glowHot.A = 0;
+                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
+                    glowHot * (0.7f * fadeSol), 0f,
+                    bloomCircle.Size() * 0.5f, escGlow * (0.95f + 0.35f * ease),
+                    SpriteEffects.None, 0f);
+                Color glowRed = Color.Lerp(new Color(255, 120, 40),
+                    new Color(255, 30, 10), ease);
+                glowRed.A = 0;
+                Main.spriteBatch.Draw(bloomCircle, drawPos, null,
+                    glowRed * (0.45f * fadeSol), 0f,
+                    bloomCircle.Size() * 0.5f, escGlow * (1.61f + 0.5f * ease),
+                    SpriteEffects.None, 0f);
+                Main.spriteBatch.End();
+
+                // === 3. EL AURA DE RUIDO (RadialShine — la nebulosa que
+                //     RUGE alrededor, girando con el sol) ===
+                Texture2D wavyBlotch = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Effects/Textures/WavyBlotchNoise").Value;
+                if (_solAuraShader != null && _solAuraShader.Value != null)
+                {
+                    Effect shineShader = _solAuraShader.Value;
+                    shineShader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
+                    Vector2 shineScale = Vector2.One * (starR * 2f) * 2.72f / wavyBlotch.Size();
+
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    shineShader.CurrentTechnique.Passes[0].Apply();
+                    Color shineColor = Color.Lerp(new Color(252, 226, 150),
+                        new Color(255, 95, 45), ease);
+                    Main.spriteBatch.Draw(wavyBlotch, drawPos, null,
+                        shineColor * (0.24f * fadeSol), Projectile.rotation,
+                        wavyBlotch.Size() * 0.5f, shineScale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+
+                // === 4. EL DISCO (el SunShader — la SUPERFICIE DE PLASMA de
+                //     verdad: BLANCO-DORADA que ENROJECE en la gigante) ===
+                if (_solDiscoShader != null && _solDiscoShader.Value != null)
+                {
+                    Effect shader = _solDiscoShader.Value;
+                    Texture2D psychedelicWing = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/PsychedelicWingTextureOffsetMap").Value;
+                    Texture2D dendritic = ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Effects/Textures/DendriticNoiseZoomedOut").Value;
+
+                    shader.Parameters["coronaIntensityFactor"].SetValue(0.05f);
+                    // LA PALETA DEL DIOS: blanco cálido + dorado profundo →
+                    // brasa en la gigante (el arma en blanco puro/naranja).
+                    shader.Parameters["mainColor"].SetValue(
+                        Color.Lerp(new Color(255, 250, 235), new Color(255, 160, 120), ease).ToVector3());
+                    shader.Parameters["darkerColor"].SetValue(
+                        Color.Lerp(new Color(212, 150, 70), new Color(150, 28, 12), ease).ToVector3());
+                    shader.Parameters["subtractiveAccentFactor"].SetValue(
+                        new Color(181, 0, 0).ToVector3());
+                    shader.Parameters["sphereSpinTime"].SetValue(
+                        Main.GlobalTimeWrappedHourly * 0.9f);
+                    shader.Parameters["globalTime"].SetValue(Main.GlobalTimeWrappedHourly);
+
+                    Main.graphics.GraphicsDevice.Textures[1] = wavyBlotch;
+                    Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+                    Main.graphics.GraphicsDevice.Textures[2] = psychedelicWing;
+                    Main.graphics.GraphicsDevice.SamplerStates[2] = SamplerState.LinearWrap;
+
+                    Vector2 drawScale = Vector2.One * (starR * 2f) / dendritic.Size();
+
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                        SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                        null, Main.GameViewMatrix.TransformationMatrix);
+                    shader.CurrentTechnique.Passes[0].Apply();
+                    Main.spriteBatch.Draw(dendritic, drawPos, null,
+                        Color.White * fadeSol, Projectile.rotation,
+                        dendritic.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+            }
+            catch
+            {
+                // la cura de la casa: si una capa murió a medias, se cierra
+                // lo que quedó vivo (cero first-chance — la sonda).
+                VFXCore.CerrarLoteSiAbierto();
+            }
         }
     }
 }
