@@ -1,10 +1,16 @@
 # ==================================================================
-#  AethonMod — .gitignore del repositorio (v6.50.14)
+#  AethonMod — .gitignore del repositorio (v6.50.57-post)
 #
 #  EL REPO: la subcarpeta AethonMod/ ES el mod (build.txt ahí dentro)
 #  + documentación y herramientas fuera de ella. Todo lo demás que
 #  viva en el directorio de trabajo es material del entorno de
 #  desarrollo y NO se publica.
+#
+#  NOTA v6.50.57-post: tools/ ya NO se ignora — la cabecera siempre
+#  dijo que las herramientas fuera del mod SE PUBLICAN (respaldo-
+#  partidas.bat es un entregable para el usuario). La línea tools/
+#  era un relicto defensivo del sandbox web, que vive en OTRO árbol
+#  (/home/z/my-project) y no puede filtrarse aquí.
 # ==================================================================
 
 # === El entorno web del sandbox (no forma parte del proyecto) ===
@@ -29,7 +35,6 @@ examples/
 mini-services/
 skills/
 tool-results/
-tools/
 Caddyfile
 components.json
 eslint.config.mjs
