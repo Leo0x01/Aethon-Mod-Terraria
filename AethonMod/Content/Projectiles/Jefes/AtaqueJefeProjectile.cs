@@ -97,6 +97,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloLanzaEterna = 21;    // v6.50.54 — LA LANZA ETERNA (Ethereal Lance — telegrafiada translúcida y hostil solo al volar)
         public const int EstiloCoronaEterna = 22;   // v6.50.54 — LA CORONA ETERNA (Everlasting Rainbow — 14 plumas prismáticas espiralando)
         public const int EstiloBolaFinal = 23;     // v6.50.56 — LA BOLA FINAL (la muerte del dios: su ÚLTIMO aliento — una bola de energía como el proyectil sol pero BLANCO-DORADA y con MUCHO brillo)
+        public const int EstiloSolJefe = 24;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción cabalgándolo — y luego LO LANZA a la presa: la persigue LENTO, GRAVITA, CRECE hasta la GIGANTE ROJA (×6) y estalla en LUZ, BRUMA y FORMAS que hacen daño)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -319,12 +320,26 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                 case EstiloBolaFinal:
                     // v6.50.56 — LA BOLA FINAL: el último aliento del dios
-                    // — 7 s de fuego blanco-dorado persiguiendo a su
-                    // asesino (la autocuración de la IA reconstruye talla/
+                    // — 7 s de fuego blanco-dorado en LÍNEA RECTA hacia donde
+                    // estaba su asesino (v6.50.57: YA NO PERSIGUE — la letra:
+                    // «la explocion final del jefe, no debe seguir al
+                    // jugador»; la autocuración de la IA reconstruye talla/
                     // hostil/daño: el msg 27 no lleva este OnSpawn).
                     Projectile.timeLeft = 420;
                     Projectile.width = 88;
                     Projectile.height = 88;
+                    break;
+
+                case EstiloSolJefe:
+                    // v6.50.57 — EL SOL DEL DIOS: nace EN el jefe (LA
+                    // ASUNCIÓN — lo cabalga mientras carga), se LANZA a la
+                    // presa, la persigue LENTO con GRAVEDAD, CRECE hasta la
+                    // GIGANTE ROJA (×6) y estalla en LUZ, BRUMA y FORMAS
+                    // (la autocuración de la IA reconstruye talla/daño: el
+                    // msg 27 no lleva este OnSpawn).
+                    Projectile.timeLeft = 520;
+                    Projectile.width = 96;
+                    Projectile.height = 96;
                     break;
             }
         }
@@ -531,6 +546,22 @@ namespace AethonMod.Content.Projectiles.Jefes
                     Projectile.Center = cB;
                 }
                 Projectile.hostile = true;
+                Projectile.damage = Math.Max(1, (int)Projectile.ai[1]);
+            }
+
+            // v6.50.57 — EL SOL DEL DIOS: la autocuración de la casa (talla
+            // + daño — ai[1] lleva el daño que el jefe le sopló al nacer; la
+            // HOSTILIDAD la administra la IA por fase: la carga abraza, el
+            // vuelo y la gigante queman, la explosión es AoE honesto).
+            if (Estilo == EstiloSolJefe)
+            {
+                if (Projectile.width < 96)
+                {
+                    Vector2 cS = Projectile.Center;
+                    Projectile.width = 96;
+                    Projectile.height = 96;
+                    Projectile.Center = cS;
+                }
                 Projectile.damage = Math.Max(1, (int)Projectile.ai[1]);
             }
 
@@ -1447,26 +1478,19 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //  de la muerte del jefe… debe lanzar un ataque de brillo
                 //  aun mayor creando una bola de energia similar al
                 //  proyectil sol pero de color blanco dorado y con mucho
-                //  brillo»). Nace del cuerpo del jefe al morir, persigue
-                //  a su asesino con suavidad (se esquiva: es un adiós, no
-                //  una ejecución), ALUMBRA como un pequeño sol y al
+                //  brillo»). Nace del cuerpo del jefe al morir y vuela EN
+                //  LÍNEA RECTA (v6.50.57: sin homing — la letra: «no debe
+                //  seguir al jugador»), ALUMBRA como un pequeño sol y al
                 //  apagarse suelta un ÚLTIMO destello.
                 // =============================================================
                 case EstiloBolaFinal:
                 {
-                    // LA CARRERA SERENA: deriva lenta + homing suave a la
-                    // presa (el sol del bastón también gravita — tope 5).
-                    Player presaB = Presa();
-                    if (presaB != null)
-                    {
-                        Vector2 hacia = presaB.Center - Projectile.Center;
-                        float d = hacia.Length();
-                        if (d > 40f)
-                            Projectile.velocity += hacia / d * 0.06f;
-                    }
-                    float velB = Projectile.velocity.Length();
-                    if (velB > 5f)
-                        Projectile.velocity *= 5f / velB;
+                    // v6.50.57 — LA CARRERA RECTA (la letra: «la explocion
+                    // final del jefe, NO debe seguir al jugador»): el
+                    // aliento vuela EN LÍNEA RECTA hacia donde estaba su
+                    // asesino al morir el dios — velocidad CONSTANTE, cero
+                    // homing: es un adiós que se esquiva a un lado, no una
+                    // ejecución que te persigue.
                     Projectile.rotation += 0.015f;
 
                     // LA LUZ QUE INUNDA (más que el estallido — es SU
@@ -1515,6 +1539,229 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                     break;
                 }
+
+                // =============================================================
+                //  v6.50.57 — EL SOL DEL DIOS (el ataque especial pedido:
+                //  «debe convertirse en solo y luego lanzar ese sol al
+                //  jugador… el sol que lanza el jefe debe perseguir
+                //  lentamente al jugador, tener gravedad y que cresca al
+                //  menos 5 a 10 veces su tamañao al convertirse en gigante
+                //  roja y explotar en luz, bruma y formas, la cual hace
+                //  daño»). CUATRO ACTOS:
+                //
+                //  ACTO 1 · LA ASUNCIÓN (0-80 t): el sol NACE EN el jefe
+                //  (ai[2] = su whoAmI) y lo VISTE — crece de una chispa a
+                //  un sol entero blanco-dorado MIENTRAS el dios se detiene:
+                //  el jefe SE CONVIERTE en sol. Inofensivo (es su propio
+                //  nacimiento) y TODAS las pantallas lo ven cabalgar.
+                //
+                //  ACTO 2 · EL LANZAMIENTO (t=80): el sol se DESTACHA del
+                //  dios rumbo a la presa (7.2 px/t) con el estampido del
+                //  cañonazo de luz — el jefe retrocede por el retroceso.
+                //
+                //  ACTO 3 · EL VUELO (80-380 t): PERSIGUE LENTO (homming
+                //  suave 0.05, tope 5.2 px/t) y GRAVITA (+0.055/t — la curva
+                //  del sol pesado: comba hacia el suelo mientras busca a su
+                //  presa). Tocarlo quema (hostil, contacto honesto).
+                //
+                //  ACTO 4 · LA GIGANTE ROJA (380-470 t): el sol se HINCHA
+                //  ×6 (96 → ~600 px de núcleo), BLANCO-DORADO → ROJO
+                //  BRASA, temblor de rayos y trueno grave — y al final
+                //  EXPLOTA: LA LUZ que inunda (4.2/2.4/1.4), LA BRUMA (nubes
+                //  de fuego translúcidas que derivan), LAS FORMAS (estrellas
+                //  giratorias y esquirlas que vuelan) y EL DAÑO honesto en
+                //  640 px (HerirJugador — el cauce del motor: iframes y
+                //  escudos respetados).
+                // =============================================================
+                case EstiloSolJefe:
+                {
+                    // === ACTO 1 · LA ASUNCIÓN: cabalga al jefe y crece ===
+                    if (_edad <= 80f)
+                    {
+                        int quienSol = (int)Projectile.ai[2];
+                        if (quienSol >= 0 && quienSol < Main.maxNPCs &&
+                            Main.npc[quienSol] != null && Main.npc[quienSol].active)
+                        {
+                            Projectile.Center = Main.npc[quienSol].Center;
+                            Projectile.velocity = Vector2.Zero;
+                        }
+                        Projectile.hostile = false;   // su nacimiento no quema
+                        Projectile.scale = 0.30f + 0.70f * (_edad / 80f);
+
+                        // LA LUZ QUE SUBE mientras el dios se convierte.
+                        float asc = _edad / 80f;
+                        Lighting.AddLight(Projectile.Center,
+                            new Vector3(1.2f, 1.05f, 0.75f) * (0.5f + asc));
+
+                        if (_edad >= 80f - 1f && !Main.dedServ)
+                        {
+                            // EL ESTAMPIDO DEL CAÑONAZO.
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(-0.35f), Projectile.Center);
+                            OndaLib.Kick(10f, 20);
+                        }
+                    }
+                    // === ACTO 2/3 · EL LANZAMIENTO y EL VUELO ===
+                    else if (_edad <= 380f)
+                    {
+                        Projectile.hostile = true;
+
+                        // EL LANZAMIENTO (una sola vez, determinista por edad).
+                        if (_edad <= 81f)
+                        {
+                            Vector2 rumbo = new Vector2(0f, -1f);
+                            Player presaS = Presa();
+                            if (presaS != null)
+                                rumbo = (presaS.Center - Projectile.Center)
+                                    .SafeNormalize(Vector2.UnitY);
+                            Projectile.velocity = rumbo * 7.2f;
+                            Projectile.netUpdate = true;
+                        }
+
+                        // LA PERSIGA LENTA + LA GRAVEDAD (la letra: «perseguir
+                        // lentamente al jugador, tener gravedad»).
+                        Player presaV = Presa();
+                        if (presaV != null)
+                        {
+                            Vector2 hacia = presaV.Center - Projectile.Center;
+                            float d = hacia.Length();
+                            if (d > 60f)
+                                Projectile.velocity += hacia / d * 0.05f;
+                        }
+                        Projectile.velocity.Y += 0.055f;         // EL PESO del sol
+                        float velS = Projectile.velocity.Length();
+                        if (velS > 5.2f)
+                            Projectile.velocity *= 5.2f / velS;
+                        Projectile.rotation += 0.012f;
+
+                        // LA ESTELA DE FUEGO BLANCO.
+                        if (!Main.dedServ && Main.rand.NextBool(2))
+                        {
+                            Dust dS = Dust.NewDustPerfect(
+                                Projectile.Center + new Vector2(
+                                    Main.rand.NextFloat(-26f, 26f),
+                                    Main.rand.NextFloat(-26f, 26f)),
+                                DustID.GoldFlame,
+                                new Vector2(Main.rand.NextFloat(-0.6f, 0.6f),
+                                    Main.rand.NextFloat(-1.2f, -0.3f)),
+                                190, new Color(255, 248, 220), 0.8f);
+                            dS.noGravity = true;
+                        }
+
+                        // LA LUZ DEL SOL EN VUELO.
+                        Lighting.AddLight(Projectile.Center,
+                            new Vector3(2.1f, 1.9f, 1.35f));
+                    }
+                    // === ACTO 4 · LA GIGANTE ROJA y LA EXPLOSIÓN ===
+                    else
+                    {
+                        float g = MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f);
+                        float ease = g * g * (3f - 2f * g);   // suave al hincharse
+
+                        // EL HINCHAZÓN ×6 (96 → ~590 px de núcleo: «5 a 10
+                        // veces su tamaño» — la talla del motor sigue con
+                        // honestidad: el NÚCLEO que quema, no el velo).
+                        float esc = 1f + 5.0f * ease;
+                        Projectile.scale = esc;
+                        int talla = Math.Min(300, (int)(96f * esc));
+                        if (talla != Projectile.width)
+                        {
+                            Vector2 cG = Projectile.Center;
+                            Projectile.Resize(talla, talla);
+                            Projectile.Center = cG;
+                        }
+
+                        // LA GIGANTE SE ELEVA (el sol moribundo se alza para
+                        // estallar) y el homming MUERE: crece, ya no caza.
+                        Projectile.velocity = Vector2.Lerp(Projectile.velocity,
+                            new Vector2(0f, -1.1f), 0.06f);
+                        Projectile.rotation += 0.028f;
+                        Projectile.hostile = g < 1f;   // quema mientras crece
+
+                        // EL TRUENO DEL HINCHAZÓN (una vez).
+                        if (_edad >= 381f && _edad < 382f && !Main.dedServ)
+                        {
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item117.WithPitchOffset(-0.45f), Projectile.Center);
+                            OndaLib.Kick(7f, 26);
+                        }
+
+                        // LA LUZ SE ENROJECE (blanco-dorado → brasa).
+                        Lighting.AddLight(Projectile.Center,
+                            new Vector3(
+                                2.4f + 1.8f * ease,
+                                1.9f - 0.6f * ease,
+                                1.3f - 0.7f * ease));
+
+                        // LA EXPLOSIÓN (t=470): LUZ + BRUMA + FORMAS + DAÑO.
+                        if (_edad >= 470f)
+                        {
+                            if (_edad < 471f)
+                            {
+                                // EL ESTALLIDO (una sola vez, en TODAS las
+                                // máquinas — visual) + EL DAÑO (solo la
+                                // autoridad — el cauce honesto de la casa).
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item74, Projectile.Center);
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item122.WithPitchOffset(0.35f), Projectile.Center);
+                                OndaLib.Kick(13f, 28);
+                                if (!Main.dedServ)
+                                {
+                                    for (int dX = 0; dX < 70; dX++)
+                                    {
+                                        float angX = Main.rand.NextFloat(MathHelper.TwoPi);
+                                        Dust dX2 = Dust.NewDustPerfect(Projectile.Center,
+                                            dX % 3 == 0 ? DustID.Torch : DustID.GoldFlame,
+                                            new Vector2(MathF.Cos(angX), MathF.Sin(angX)) *
+                                            Main.rand.NextFloat(4f, 13f),
+                                            220,
+                                            dX % 3 == 0
+                                                ? new Color(255, 120, 50)
+                                                : new Color(255, 235, 190), 1.6f);
+                                        dX2.noGravity = true;
+                                    }
+                                }
+                                if (Main.netMode != NetmodeID.MultiplayerClient)
+                                {
+                                    float radioX = 640f;
+                                    int danoX = Math.Max(1, (int)(Projectile.damage * 1.15f));
+                                    for (int ip = 0; ip < Main.maxPlayers; ip++)
+                                    {
+                                        Player pX = Main.player[ip];
+                                        if (pX == null || !pX.active || pX.dead) continue;
+                                        if (Vector2.Distance(pX.Center, Projectile.Center) > radioX)
+                                            continue;
+                                        HerirJugador(pX, danoX, Projectile.Center);
+                                    }
+                                }
+                                Projectile.hostile = false;
+                                Projectile.netUpdate = true;
+                            }
+
+                            // LA BRUMA residual que se derrite (el espectáculo
+                            // de los últimos ticks: la nube que se apaga).
+                            if (!Main.dedServ && Main.rand.NextBool(3))
+                            {
+                                float angB2 = Main.rand.NextFloat(MathHelper.TwoPi);
+                                Dust bruma = Dust.NewDustPerfect(
+                                    Projectile.Center + new Vector2(
+                                        MathF.Cos(angB2), MathF.Sin(angB2)) *
+                                        Main.rand.NextFloat(60f, 380f),
+                                    DustID.Smoke,
+                                    new Vector2(MathF.Cos(angB2), MathF.Sin(angB2)) * 1.1f,
+                                    120, new Color(255, 150, 80), 2.2f);
+                                bruma.noGravity = true;
+                            }
+                            // LA LUZ DE LA EXPLOSIÓN muriendo en grande.
+                            float apX = Math.Max(0f,
+                                (Projectile.timeLeft - 20f) / 30f);
+                            Lighting.AddLight(Projectile.Center,
+                                new Vector3(4.2f, 2.4f, 1.4f) * apX);
+                        }
+                    }
+                    break;
+                }
             }
 
             // La luz del diente (el color de su dueño).
@@ -1538,6 +1785,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloLanzaEterna => new Vector3(0.50f, 0.45f, 0.24f),  // v6.50.54 — el filo dorado
                 EstiloCoronaEterna => new Vector3(0.55f, 0.50f, 0.30f), // v6.50.54 — el prisma suave
                 EstiloBolaFinal => Vector3.Zero,     // v6.50.56 — su caso pone la suya (el cielo dorado)
+                EstiloSolJefe => Vector3.Zero,       // v6.50.57 — su caso pone la suya (el sol arde por actos)
                 _ => new Vector3(0.3f, 0.3f, 0.3f),
             };
             Lighting.AddLight(Projectile.Center, luz);
@@ -2201,6 +2449,147 @@ namespace AethonMod.Content.Projectiles.Jefes
                             0f, VFXCore.SoftGlow);
                         break;
                     }
+
+                    // === v6.50.57 — EL SOL DEL DIOS, FASE MUNDO (EL SOL QUE
+                    //     EL DIOS SE VUELVE y luego LANZA: el MISMO look del
+                    //     sol — rueda de 12 rayos + DOS coronas de perlas +
+                    //     núcleo — blanco-dorado en la asunción y el vuelo,
+                    //     y ENROJECIENDO al hincharse en LA GIGANTE, hasta
+                    //     LA EXPLOSIÓN de luz, bruma y formas) ===
+                    case EstiloSolJefe:
+                    {
+                        // EL ACTO (por edad — la misma máquina de la IA).
+                        float escSol = Math.Max(0.30f, Projectile.scale);
+                        bool gigante = _edad > 380f;
+                        bool estallo = _edad > 470f;
+                        float g = gigante
+                            ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f)
+                            : 0f;
+                        float ease = g * g * (3f - 2f * g);
+
+                        // LA PALETA DEL ACTO: blanco-dorado → brasa roja.
+                        Color rayoSol = Color.Lerp(BlancoCaliente,
+                            new Color(255, 74, 36), ease);
+                        Color perlaSol = Color.Lerp(OroGrimorio,
+                            new Color(255, 120, 50), ease);
+                        Color nucleoSol = Color.Lerp(BlancoCaliente,
+                            new Color(255, 150, 90), ease * 0.9f);
+
+                        if (!estallo)
+                        {
+                            float naceSol = Math.Min(1f, _edad / 40f);
+                            float latidoSol = 0.86f + 0.14f *
+                                MathF.Sin(t * (gigante ? 3.6f : 1.9f));
+
+                            // LA RUEDA DE RAYOS (12 — el sol del dios; en la
+                            // gigante TIEMBLAN: el largo jitterea al borde).
+                            float giroSol = t * (gigante ? 0.34f : 0.16f);
+                            for (int i = 0; i < 12; i++)
+                            {
+                                float angSol = giroSol + i * MathHelper.TwoPi / 12f;
+                                float jitter = gigante
+                                    ? 0.82f + 0.18f * VFXCore.Hash01(Seed, i, (int)(t * 1.5f))
+                                    : 0.80f + 0.20f * MathF.Sin(t * 2.2f + i * 1.7f);
+                                float largoSol = (120f + 60f * naceSol) * jitter * escSol;
+                                VFXCore.Quad(Projectile.Center, rayoSol * (0.34f * naceSol),
+                                    new Vector2(largoSol * 2f, 20f * escSol), angSol,
+                                    VFXCore.SoftGlow);
+                            }
+
+                            // LAS DOS CORONAS DE PERLAS (+ LA TERCERA CORONA
+                            // DE BRASA que solo la gigante trae).
+                            int coronas = gigante ? 3 : 2;
+                            for (int anilloS = 0; anilloS < coronas; anilloS++)
+                            {
+                                float rxS = (anilloS == 0 ? 118f :
+                                    anilloS == 1 ? 158f : 206f) * naceSol * escSol;
+                                float ryS = (anilloS == 0 ? 72f :
+                                    anilloS == 1 ? 48f : 86f) * naceSol * escSol;
+                                float wS = anilloS == 0 ? 0.55f :
+                                    anilloS == 1 ? -0.38f : 0.72f;
+                                Color cPS = anilloS == 2
+                                    ? new Color(255, 110, 50) : perlaSol;
+                                int nPerlas = anilloS == 2 ? 14 : 11;
+                                for (int i = 0; i < nPerlas; i++)
+                                {
+                                    float angPS = t * wS + i * MathHelper.TwoPi / nPerlas;
+                                    Vector2 perlaS = Projectile.Center + new Vector2(
+                                        MathF.Cos(angPS) * rxS, MathF.Sin(angPS) * ryS);
+                                    float twS = 0.5f + 0.5f *
+                                        MathF.Sin(t * 3f + i * 2.1f + anilloS);
+                                    VFXCore.Quad(perlaS,
+                                        cPS * (0.50f * naceSol * (0.5f + 0.5f * twS)),
+                                        new Vector2(16f, 16f) * escSol, 0f, VFXCore.SoftGlow);
+                                }
+                            }
+
+                            // EL NÚCLEO (el corazón — blanco-dorado ARDIENDO,
+                            // brasa al hincharse).
+                            float nucleoS = 84f * latidoSol * naceSol * escSol;
+                            VFXCore.Quad(Projectile.Center, nucleoSol * (1.0f * naceSol),
+                                new Vector2(nucleoS * 1.5f, nucleoS * 1.5f), 0f,
+                                VFXCore.SoftGlow);
+                            VFXCore.Quad(Projectile.Center,
+                                perlaSol * (0.65f * naceSol),
+                                new Vector2(nucleoS * 0.42f * 1.5f, nucleoS * 0.42f * 1.5f),
+                                0f, VFXCore.SoftGlow);
+                        }
+                        else
+                        {
+                            // === LA EXPLOSIÓN: LUZ + BRUMA + FORMAS ===
+                            float fp = MathHelper.Clamp((_edad - 470f) / 50f, 0f, 1f);
+                            float derrite = 1f - fp;
+
+                            // LA CRUZ ANAMÓRFICA (la firma del estallido —
+                            // BLANCA al principio, BRASA después).
+                            VFXCore.Quad(Projectile.Center, nucleoSol * (0.85f * derrite),
+                                new Vector2(760f, 60f), t * 0.02f, VFXCore.SoftGlow);
+                            VFXCore.Quad(Projectile.Center, nucleoSol * (0.85f * derrite),
+                                new Vector2(60f, 500f), t * 0.02f, VFXCore.SoftGlow);
+
+                            // LA BRUMA (nubes de fuego translúcidas derivando
+                            // hacia afuera — deterministas por semilla).
+                            for (int i = 0; i < 10; i++)
+                            {
+                                float hB = VFXCore.Hash01(Seed + 1, i, 7);
+                                float angB = hB * MathHelper.TwoPi;
+                                float distB = 80f + 340f * fp * (0.5f + hB);
+                                Vector2 brumaQ = Projectile.Center + new Vector2(
+                                    MathF.Cos(angB), MathF.Sin(angB) * 0.82f) * distB;
+                                float tamB = (180f + 240f * hB) * (0.6f + 0.4f * fp);
+                                Color cBruma = Color.Lerp(
+                                    new Color(255, 170, 90), new Color(200, 90, 60), hB);
+                                VFXCore.Quad(brumaQ, cBruma * (0.16f * derrite),
+                                    new Vector2(tamB, tamB * 0.8f), angB + fp * 0.4f,
+                                    VFXCore.SoftGlow);
+                            }
+
+                            // LAS FORMAS (esquirlas-estrella girando que vuelan
+                            // hacia afuera — cada una SU rumbo y SU giro).
+                            Texture2D destSol = VFXCore.DestelloFinal;
+                            if (destSol != null)
+                            {
+                                for (int i = 0; i < 12; i++)
+                                {
+                                    float hF = VFXCore.Hash01(Seed + 2, i, 11);
+                                    float angF = hF * MathHelper.TwoPi +
+                                        fp * (0.6f + hF * 0.8f) * (i % 2 == 0 ? 1f : -1f);
+                                    float distF = 120f + 420f * fp * (0.4f + hF * 0.6f);
+                                    Vector2 forma = Projectile.Center + new Vector2(
+                                        MathF.Cos(angF), MathF.Sin(angF)) * distF;
+                                    float tamF = (40f + 70f * hF) * derrite;
+                                    if (tamF < 2f) continue;
+                                    Color cF = i % 3 == 0
+                                        ? new Color(255, 90, 40)
+                                        : i % 3 == 1 ? OroGrimorio : BlancoCaliente;
+                                    VFXCore.Quad(forma, cF * (0.55f * derrite),
+                                        new Vector2(tamF, tamF), angF + t * 0.06f,
+                                        destSol);
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
                 VFXCore.FlushAdditive(null, false);
 
@@ -2671,6 +3060,71 @@ namespace AethonMod.Content.Projectiles.Jefes
                             LumenLib.Bloom(Main.spriteBatch, b2, 7f + 8f * h0B,
                                 (i % 2 == 0) ? BlancoCaliente : OroGrimorio,
                                 0.50f * naceS * fadeBS * twB, 2);
+                        }
+                        break;
+                    }
+
+                    // === v6.50.57 — EL SOL DEL DIOS, FASE PANTALLA (EL LENS-
+                    //     FLARE del sol: el bloom que crece con el acto —
+                    //     blanco-dorado → brasa — la estrella giratoria y,
+                    //     en LA EXPLOSIÓN, la ONDA que se expande) ===
+                    case EstiloSolJefe:
+                    {
+                        float escSol2 = Math.Max(0.30f, Projectile.scale);
+                        bool gigante2 = _edad > 380f;
+                        bool estallo2 = _edad > 470f;
+                        float g2 = gigante2
+                            ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f) : 0f;
+                        float ease2 = g2 * g2 * (3f - 2f * g2);
+                        float naceSol2 = Math.Min(1f, _edad / 40f);
+                        float fadeSol = estallo2
+                            ? Math.Max(0f, 1f - (_edad - 470f) / 50f)
+                            : 1f;
+
+                        // LA PALETA DEL ACTO.
+                        Color cSol2 = Color.Lerp(BlancoCaliente,
+                            new Color(255, 90, 40), ease2);
+                        Color cSolOro = Color.Lerp(OroGrimorio,
+                            new Color(255, 120, 50), ease2);
+
+                        // EL NÚCLEO (el corazón que crece con el acto: 130 en
+                        // el vuelo → ~780 en la gigante — un sol de verdad).
+                        float respiraS = 0.95f + 0.05f * MathF.Sin(t * (gigante2 ? 5.2f : 4.2f));
+                        LumenLib.Bloom(Main.spriteBatch, pos,
+                            (130f + 150f * naceSol2) * escSol2 * respiraS, cSol2,
+                            0.95f * naceSol2 * fadeSol, 4);
+                        LumenLib.BloomPulse(Main.spriteBatch, pos,
+                            (95f + 45f * naceSol2) * escSol2, cSolOro,
+                            0.60f * naceSol2 * fadeSol, t, gigante2 ? 4.6f : 2.4f);
+
+                        // LA ESTRELLA DE DESTELLO (el flare de 8 rayos ×2).
+                        Texture2D destS2 = VFXCore.DestelloFinal;
+                        if (destS2 != null)
+                        {
+                            float escS2 = (560f * naceSol2 * escSol2) / destS2.Width *
+                                (0.92f + 0.08f * MathF.Sin(t * 3.4f));
+                            Main.spriteBatch.Draw(destS2, pos, null,
+                                OrbitaLib.Tint(cSol2, 0.60f * naceSol2 * fadeSol),
+                                t * 0.10f,
+                                new Vector2(destS2.Width, destS2.Height) * 0.5f, escS2,
+                                SpriteEffects.None, 0f);
+                            Main.spriteBatch.Draw(destS2, pos, null,
+                                OrbitaLib.Tint(cSolOro, 0.40f * naceSol2 * fadeSol),
+                                -t * 0.07f + 0.4f,
+                                new Vector2(destS2.Width, destS2.Height) * 0.5f,
+                                escS2 * 0.6f, SpriteEffects.None, 0f);
+                        }
+
+                        // LA ONDA DE LA EXPLOSIÓN (el anillo que se expande
+                        // con el estallido — la promesa del daño ya pagado).
+                        if (estallo2)
+                        {
+                            OndaLib.Pulse(Main.spriteBatch, pos,
+                                (_edad - 470f) / 50f, 640f,
+                                new Color(255, 130, 60), 0.65f * fadeSol, Seed);
+                            OndaLib.Pulse(Main.spriteBatch, pos,
+                                Math.Max(0f, (_edad - 478f) / 50f), 460f,
+                                OroGrimorio, 0.45f * fadeSol, Seed + 3);
                         }
                         break;
                     }

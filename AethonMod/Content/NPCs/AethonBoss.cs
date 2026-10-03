@@ -168,6 +168,7 @@ namespace AethonMod.Content.NPCs
         private const int EST_DANZA = 14;      // v6.50.54 — LA DANZA SOLAR (la investigación EoL: SUN DANCE — la rueda de rayos del dios girando sobre la presa, el ataque que un dios-sol DEBÍA tener)
         private const int EST_LANZAS = 15;     // v6.50.54 — LAS LANZAS ETERNAS (ETHEREAL LANCE: la luz sembrada DETRÁS de tu carrera, telegrafiada y translúcida hasta volar — castiga la línea recta)
         private const int EST_CORONA = 16;     // v6.50.54 — LA CORONA ETERNA (EVERLASTING RAINBOW: el anillo de 14 plumas prismáticas espiralando alrededor de la presa)
+        private const int EST_SOL = 17;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción — y LUEGO LO LANZA a la presa: persiga lenta + gravedad + la GIGANTE ROJA que estalla en luz, bruma y formas)
         private const int EST_MURIENDO = 99;    // la contracción final
 
         // === LA ENTRADA — v6.50.52 — LA LETRA NUEVA: «el jefe no aparece,
@@ -272,8 +273,22 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private int _proximoEstallidoEn = 999;    // en P1/P2 no aplica (presupuesto)
         private float _proximaExplosion = 60f;    // viaja en ai[3]: el tick de la PRÓXIMA explosión (el telegrafo del cliente)
 
-        // === EL VOLTEO Y LAS RUNAS (heredados de la sierpe) ===
-        private int _tickGravedad = 0;
+        // === v6.50.57 — LA COREOGRAFÍA DEL DIOS (la mejora de IA pedida:
+        //     «investiga jefes de otros mods que sean similares o dioses,
+        //     y crea una coreografia con nuestro jefe» — la cadena de la
+        //     Emperatriz: los ataques se pasan el turno SIN volver a la
+        //     órbita) y LA MEMORIA DOBLE (nunca el mismo plato NI el de
+        //     atrás) ===
+        private readonly int[] _coreoCola = new int[6];
+        private int _coreoLargo = 0;
+        private int _ataquesDesdeCoreo = 0;
+        private int _proximoCoreoEn = 999;
+        private int _anteultimoAtaque = 0;
+
+        // === LAS RUNAS (heredadas de la sierpe). EL VOLTEO DE GRAVEDAD
+        //     MURIÓ en la v6.50.57 (la letra: «eso que hace el jefe de
+        //     cambiar la gravedad tiene que dejar de hacerlo») — el suelo
+        //     vuelve a ser tuyo PARA SIEMPRE ===
         private int _tickRunas = 0;
 
         // === v6.50.46 — EL TELAR: EL TRAZO DE LA ESTRELLA (qué punta
@@ -392,6 +407,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 Phase = newPhase;
                 OnPhaseChange();
+                _coreoLargo = 0;   // v6.50.57 — la danza muere con la fase
             }
 
             // === EL FADE DE NACIMIENTO (v6.50.50): la PRESENTACIÓN tomó el
@@ -421,6 +437,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 case EST_DANZA: EstadoDanza(target); break;
                 case EST_LANZAS: EstadoLanzas(target); break;
                 case EST_CORONA: EstadoCorona(target); break;
+                case EST_SOL: EstadoSol(target); break;
             }
 
             // === LOS ATAQUES DE FONDO (las runas recuerdan — heredado) ===
@@ -780,23 +797,34 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // patrulla un circuito muerto — se acerca y se aleja en olas)
             // y en la FURIA se APRIETA (la distancia de seguridad muere:
             // 320 → 260 con la misma ola encima).
-            float radio = Furia ? 260f : (Phase >= 4 ? 380f : 440f);
+            // v6.50.57 — LA ÓRBITA QUE LEE LA DISTANCIA (la mejora de IA
+            // pedida: «mejora su IA y movimiento» — como los god-bosses
+            // de los mods grandes): si la presa SE ALEJA la luz SE ACERCA
+            // y si se APEGA TOMA ESPACIO — el dios ya no patrulla un
+            // circuito muerto: MANTIENE su distancia de duelo.
+            float distF = Vector2.Distance(NPC.Center, target.Center);
+            float radioBase = Furia ? 260f : (Phase >= 4 ? 380f : 440f);
+            float radio = radioBase +
+                MathHelper.Clamp(distF - radioBase, -140f, 190f) * 0.35f;
             radio += MathF.Sin(_angOrbita * 3f) * 30f;
             Vector2 punto = target.Center + new Vector2(
                 MathF.Cos(_angOrbita) * radio,
                 -260f + MathF.Sin(_angOrbita) * 90f);
             NPC.velocity = Vector2.Lerp(NPC.velocity, (punto - NPC.Center) * 0.08f, 0.14f);
 
-            // EL VOLTEO (P3+, heredado): el suelo deja de ser tuyo.
-            if (Phase >= 3)
+            // v6.50.57 — EL QUIEBRO DEL DUELISTA (determinista — sin dados:
+            // lee el EMBISTE y cam bia de lado): si la presa viene
+            // DISPUESTA a cruzarse, la luz VOLTEA el sentido de giro — el
+            // dios que se esquiva vivo, no el patrón que se lee dormido.
+            if (_tickEstado > 0 && (_tickEstado % 45) == 0 && distF < 250f &&
+                Vector2.Dot(target.velocity, NPC.Center - target.Center) > 3f)
             {
-                _tickGravedad++;
-                if (_tickGravedad >= 480)
-                {
-                    _tickGravedad = 0;
-                    FlipGravity(target);
-                }
+                _sentidoOrbita = -_sentidoOrbita;
             }
+
+            // v6.50.57 — EL VOLTEO DE GRAVEDAD MURIÓ (la letra: «eso que
+            // hace el jefe de cambiar la gravedad tiene que dejar de
+            // hacerlo»): el suelo vuelve a ser tuyo PARA SIEMPRE.
 
             // LA PACIENCIA (heredada): cada fase flota MENOS… y la presa
             // quieta la derrite (anti-camping: el castigo llega YA).
@@ -821,6 +849,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// </summary>
         private void ElegirAtaque(Player target)
         {
+            // v6.50.57 — CADA ELECCIÓN CUENTA para el compás de la danza.
+            _ataquesDesdeCoreo++;
+
             // v6.50.54 — EL COMPÁS DEL ESTALLIDO (fase 3+, la letra del
             // usuario: «en la fase 3 debe hacerla cada un número de veces
             // aleatorio entre 1 a 9 ataques de otro tipo»): cuando el
@@ -838,6 +869,33 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 return;
             }
 
+            // v6.50.57 — EL COMPÁS DE LA COREOGRAFÍA (P3+): cada 6-9
+            // ataques la luz NO elige — DANZA (la mejora de IA pedida: la
+            // cadena de la Emperatriz de vanilla y los god-bosses de
+            // Fargo's/Calamity — los ataques se pasan el turno SIN
+            // respiro): EL SOL abre, las armas encadenan, EL ESTALLIDO
+            // cierra. La fase escribe la danza (P3 corta · P4 completa ·
+            // P5/FURIA entera).
+            if (Phase >= 3 && _coreoLargo == 0 && _ataquesDesdeCoreo >= _proximoCoreoEn)
+            {
+                _ataquesDesdeCoreo = 0;
+                _proximoCoreoEn = Main.rand.Next(6, 10);
+                EncadenarCoreografia();
+
+                // el PRIMER paso de la danza entra YA (la cola guarda el
+                // resto — el patrón de sacar la cabeza).
+                int primero = _coreoCola[0];
+                for (int i = 1; i < _coreoLargo; i++) _coreoCola[i - 1] = _coreoCola[i];
+                _coreoLargo--;
+
+                _anteultimoAtaque = _ultimoAtaque;
+                _ultimoAtaque = primero;
+                _estado = primero;
+                _tickEstado = 0;
+                NPC.netUpdate = true;
+                return;
+            }
+
             // el menú de la fase (v6.50.54 — EL ESTALLIDO SALE de los menús
             // de 3/4/5: su frecuencia la manda EL COMPÁS de arriba; en P1/P2
             // queda en el menú con su PRESUPUESTO — 1 y 2 usos por fase.
@@ -847,9 +905,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO },
                 2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO },
-                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA },
-                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA },
-                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA },
+                3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_SOL },
+                4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
+                _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
             };
 
             // LA LECTURA (v6.50.44): pesos por comportamiento.
@@ -896,12 +954,27 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 if (plato == EST_DANZA && alto) peso = 5;                    // el volador
                 if (plato == EST_LANZAS && velH > 7f) peso = 5;               // el corredor
                 if (plato == EST_CORONA && _ticksPresaQuieta > 30) peso = 5;  // el quieto
+                // v6.50.57 — EL SOL DEL DIOS es el plato FIRMA (peso alto
+                // en la FURIA: el ataque especial del dios lleno).
+                if (plato == EST_SOL) peso = 3;
+                if (plato == EST_SOL && Furia) peso = 4;
                 for (int w = 0; w < peso; w++) bolsa[n++] = plato;
             }
             int elegido = bolsa[Main.rand.Next(n)];
 
-            if (elegido == _ultimoAtaque && menu.Length > 1)
+            // v6.50.57 — LA MEMORIA DOBLE (la mejora de rotación): ni el
+            // ÚLTIMO plato NI el de atrás — la lectura del duelista no se
+            // repite ni se hace predecible.
+            if (menu.Length > 2)
+            {
+                int intentos = 0;
+                while ((elegido == _ultimoAtaque || elegido == _anteultimoAtaque) &&
+                    intentos++ < menu.Length)
+                    elegido = menu[(Array.IndexOf(menu, elegido) + 1) % menu.Length];
+            }
+            else if (elegido == _ultimoAtaque && menu.Length > 1)
                 elegido = menu[(Array.IndexOf(menu, elegido) + 1) % menu.Length];
+            _anteultimoAtaque = _ultimoAtaque;
             _ultimoAtaque = elegido;
 
             // v6.50.54 — EL COMPÁS: los ataques de OTRO tipo alimentan el
@@ -977,7 +1050,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
             }
 
-            if (_tickEstado >= 130) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 130) { CerrarEstado(); }
         }
 
         // ==================================================================
@@ -1004,8 +1077,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             if (_rayo == 0 && _tickEstado >= 120)
             {
-                _estado = EST_FLOTAR;
-                _tickEstado = 0;
+                CerrarEstado();
             }
         }
 
@@ -1164,7 +1236,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 OndaLib.Kick(9f, 18);
             }
 
-            if (_tickEstado >= 95) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 95) { CerrarEstado(); }
         }
 
         // ==================================================================
@@ -1236,7 +1308,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 if (_tickEstado < ticksDet[d]) { _proximaExplosion = ticksDet[d]; break; }
 
             int finEst = ticksDet[detonaciones - 1] + 45;
-            if (_tickEstado >= finEst) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= finEst) { CerrarEstado(); }
         }
 
         // ==================================================================
@@ -1286,7 +1358,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 580) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 580) { CerrarEstado(); }
         }
 
         /// <summary>
@@ -1322,7 +1394,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 175) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 175) { CerrarEstado(); }
         }
 
         /// <summary>LA SIEMBRA: n lanzas alrededor del ancla — cada una
@@ -1391,7 +1463,132 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 230) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 230) { CerrarEstado(); }
+        }
+
+        // ==================================================================
+        //  v6.50.57 — EL SOL DEL DIOS — EL ATAQUE ESPECIAL (la letra: «el
+        //  jefe debe tener un ataque especial, debe convertirse en solo y
+        //  luego lanzar ese sol al jugador… el sol que lanza el jefe debe
+        //  perseguir lentamente al jugador, tener gravedad y que cresca al
+        //  menos 5 a 10 veces su tamañao al convertirse en gigante roja y
+        //  explotar en luz, bruma y formas, la cual hace daño»)
+        // ==================================================================
+
+        /// <summary>
+        /// LA ASUNCIÓN: el dios SE DETIENE (no camina mientras es sol) y el
+        /// sol NACE EN ÉL — el proyectil (EstiloSolJefe) lo VISTE: crece de
+        /// chispa a sol entero blanco-dorado MIENTRAS el dios se convierte
+        /// en él (80 t); al soltarlo EL LANZAMIENTO lo despide rumbo a la
+        /// presa y el dios RETROCEDE por el retroceso (el cañón de luz
+        /// empuja hacia atrás al que lo dispara). El resto del acto vive en
+        /// el proyectil: la persiga LENTA con GRAVEDAD, LA GIGANTE ROJA ×6
+        /// y la explosión de luz, bruma y formas.
+        /// </summary>
+        private void EstadoSol(Player target)
+        {
+            if (_tickEstado == 1)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    int danoSol = Math.Max(1, (int)(NPC.damage * 1.05f));
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        danoSol, 3f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloSolJefe,
+                        danoSol, NPC.whoAmI);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item117.WithPitchOffset(-0.25f), NPC.Center);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Sol", OroLuz);
+                OndaLib.Kick(8f, 16);
+                NPC.netUpdate = true;
+            }
+
+            if (_tickEstado <= 80)
+            {
+                // SE DETIENE y SE ALZA: el dios no camina mientras se
+                // convierte — QUIETO mientras el sol lo viste.
+                NPC.velocity = Vector2.Lerp(NPC.velocity,
+                    new Vector2(0f, -0.35f), 0.18f);
+            }
+            else if (_tickEstado <= 106)
+            {
+                // EL RETROCESO del cañonazo (la luz devuelta lo empuja
+                // atrás — el dios siente SU propio disparo).
+                Vector2 atras = (NPC.Center - target.Center)
+                    .SafeNormalize(Vector2.UnitY) * 2.4f;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, atras, 0.10f);
+            }
+
+            if (_tickEstado >= 130) CerrarEstado();
+        }
+
+        /// <summary>
+        /// v6.50.57 — EL CIERRE CON COREOGRAFÍA: si la danza tiene pasos en
+        /// la cola, el SIGUIENTE entra YA — sin pasar por la órbita (la
+        /// cadena de la Emperatriz: los ataques se pasan el turno); si la
+        /// cola está vacía, la órbita de siempre.
+        /// </summary>
+        private void CerrarEstado()
+        {
+            if (_coreoLargo > 0)
+            {
+                int siguiente = _coreoCola[0];
+                for (int i = 1; i < _coreoLargo; i++) _coreoCola[i - 1] = _coreoCola[i];
+                _coreoLargo--;
+
+                _anteultimoAtaque = _ultimoAtaque;
+                _ultimoAtaque = siguiente;
+
+                // LA CONTABILIDAD DE CASA: el estallido encadenado gasta su
+                // presupuesto y re-arma su compás; el destello encadenado
+                // prepara su rumbo (los mismos deberes de ElegirAtaque).
+                if (siguiente == EST_ESTALLIDO)
+                {
+                    _estallidosUsadosEnFase++;
+                    _ataquesDesdeEstallido = 0;
+                    _proximoEstallidoEn = Main.rand.Next(1, 10);
+                }
+                if (siguiente == EST_DESTELLO)
+                {
+                    _cadenasDestello = 1;
+                    Player tD = Main.player[NPC.target];
+                    if (tD != null && tD.active && !tD.dead)
+                        PrepararDestello(tD);
+                }
+
+                _estado = siguiente;
+                _tickEstado = 0;
+                NPC.netUpdate = true;
+                return;
+            }
+            _estado = EST_FLOTAR;
+            _tickEstado = 0;
+        }
+
+        /// <summary>
+        /// v6.50.57 — LA DANZA ESCRITA (la investigación de los jefes-DIOS:
+        /// la Emperatriz de vanilla, el Mutante de Fargo's, la Supreme de
+        /// Calamity — TODOS encadenan ataques sin respiro): EL SOL abre la
+        /// danza (el ataque especial), las armas del dios se pasan el turno
+        /// SIN volver a la órbita y EL ESTALLIDO cierra con su firma. P3 la
+        /// corta · P4 la completa · P5 (LA FURIA) la larga entera.
+        /// </summary>
+        private void EncadenarCoreografia()
+        {
+            _coreoLargo = 0;
+            void Paso(int s)
+            {
+                if (_coreoLargo < _coreoCola.Length) _coreoCola[_coreoLargo++] = s;
+            }
+            Paso(EST_SOL);                       // el dios SE VUELVE sol y lo lanza
+            if (Phase >= 4) Paso(EST_TELAR);     // la jaula mientras el sol vuela
+            Paso(EST_DANZA);                     // la rueda de rayos de la EoL
+            if (Phase >= 4) Paso(EST_LANZAS);    // la sentencia sobre tu carrera
+            if (Phase >= 5) Paso(EST_CORONA);    // la furia: el prisma completo
+            Paso(EST_ESTALLIDO);                 // el cierre radiante SIEMPRE
         }
 
         // ==================================================================
@@ -1457,7 +1654,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9, NPC.Center);
             }
 
-            if (_tickEstado >= 240) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 240) { CerrarEstado(); }
         }
 
         // ==================================================================
@@ -1543,8 +1740,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     PrepararDestello(target);   // rumbo NUEVO a la presa
                     return;
                 }
-                _estado = EST_FLOTAR;
-                _tickEstado = 0;
+                CerrarEstado();
             }
         }
 
@@ -1594,7 +1790,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             if (_tickEstado == 40 || segunda || tercera)
                 SoltarGalaxia(target, _tickEstado == 40 ? 0 : (segunda ? 1 : 2));
 
-            if (_tickEstado >= 250) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 250) { CerrarEstado(); }
         }
 
         /// <summary>
@@ -1680,7 +1876,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 210) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 210) { CerrarEstado(); }
         }
 
         /// <summary>
@@ -1715,7 +1911,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 140) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 140) { CerrarEstado(); }
         }
 
         /// <summary>
@@ -1743,7 +1939,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 }
             }
 
-            if (_tickEstado >= 140) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 140) { CerrarEstado(); }
         }
 
         /// <summary>La jaula se abre: hasta 10 cazadores astrales vivos (la casa: NUNCA más).</summary>
@@ -1871,7 +2067,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 d.noGravity = true;
             }
 
-            if (_tickEstado >= 340) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= 340) { CerrarEstado(); }
         }
 
         /// <summary>
@@ -1947,6 +2143,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // v6.50.46 — MÁS GRANDE POR FASE: P2 600 → P3 720 → P4 840
             // → P5 960 (la fórmula gemela de la del proyectil).
             float radioMax = 600f + (Phase - 2) * 120f;
+            // EL DECRETO NO ENCADENA (la coreografía muere aquí: es el
+            // cambio de FASE — después del decreto viene el aire).
             int espera = 24 + (int)((radioMax - 80f) / 2f) + 25;
             if (_tickEstado >= espera) { _estado = EST_FLOTAR; _tickEstado = 0; }
         }
@@ -1975,22 +2173,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             }
         }
 
-        private void FlipGravity(Player player)
-        {
-            // v6.50.46 — LA GRAVEDAD DE VERDAD (la petición: «hay efectos
-            // y cosas que dice el jefe que no se hacen realmente, como lo
-            // de alterar la gravedad»): el anuncio prometía «EL SUELO YA
-            // NO ES TUYO» y lo único que pasaba era un buff silencioso
-            // que nadie notaba. AHORA el volteo es INMEDIATO y REAL —
-            // gravDir invertido EN EL ACTO (el mundo se da la vuelta de
-            // golpe) + el buff de gravitación 3 s para que el jugador
-            // tenga el control del aterrizaje.
-            player.AddBuff(BuffID.Gravitation, 180);
-            if (player.gravDir > 0f) player.gravDir = -1f;
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, player.Center);
-            OndaLib.Kick(6f, 12);
-            EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Gravedad", VioletaLuz);
-        }
+        // v6.50.57 — FLIPGRAVITY MURIÓ (la letra: «eso que hace el jefe de
+        // cambiar la gravedad tiene que dejar de hacerlo») — el método
+        // entero ELIMINADO: el suelo vuelve a ser tuyo PARA SIEMPRE.
 
         // ==================================================================
         //  LAS RUNAS MEMORIZADAS (heredadas: la luz LEE tu estilo)
@@ -2101,8 +2286,11 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void CineMuerte()
         {
             _tickMuerte++;
-            // LA RECOGIDA: el cuerpo se aquieta (la luz ya no camina).
-            NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
+            // v6.50.57 — DETENIDO DEL TODO (la letra: «el jefe debe
+            // quedarse detenido»): 20 t de aquietarse y queda CLAVADO —
+            // el dios arde QUIETO en su sitio hasta el estallido final.
+            if (_tickMuerte >= 20) NPC.velocity = Vector2.Zero;
+            else NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
 
             // v6.50.56 — LA AGONÍA YA NO SE OSCURECE (la letra: «al final
             // de la muerte del jefe, este se oscurece, no, lo que debe
@@ -2409,15 +2597,20 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     }
 
                     // === 10. LA MUERTE: EL ESTALLIDO FINAL (el flash) ===
-                    if (_muriendo && _tickMuerte >= 110 && _tickMuerte <= 135)
+                    // v6.50.57 — LA INUNDACIÓN MÁS LARGA Y MÁS GRANDE (la
+                    // letra: «explotar en brillo intenso»): 50 t de destello
+                    // que ENGORDA — el estallido final del dios detenido,
+                    // ARDIENDO en su sitio.
+                    if (_muriendo && _tickMuerte >= 110 && _tickMuerte <= 160)
                     {
-                        float fp = (_tickMuerte - 110) / 25f;   // 0→1: la inundación
+                        float fp = (_tickMuerte - 110) / 50f;   // 0→1: la inundación
+                        float engorda = 1f + 0.35f * MathF.Sin(fp * MathHelper.Pi);
                         LumenLib.Bloom(spriteBatch, posC,
-                            850f + 3300f * fp, NucleoBlanco,
-                            0.9f * (1f - fp * 0.6f), 3);
+                            (1000f + 3800f * fp) * engorda, NucleoBlanco,
+                            0.95f * (1f - fp * 0.55f), 4);
                         LumenLib.Bloom(spriteBatch, posC,
-                            560f + 2500f * fp, OroLuz,
-                            0.6f * (1f - fp * 0.5f), 2);
+                            (680f + 3000f * fp) * engorda, OroLuz,
+                            0.65f * (1f - fp * 0.45f), 3);
                     }
                 }
                 finally { spriteBatch.End(); }

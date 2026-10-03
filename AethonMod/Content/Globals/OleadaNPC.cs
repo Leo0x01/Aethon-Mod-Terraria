@@ -1136,7 +1136,9 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
-        //  SKELETRON - LOS ESQUELETOS + LOS HUESOS (el proyectil vanilla)
+        //  SKELETRON - LOS ESQUELETOS + LAS CALAVERAS DEL LIBRO POTENCIADAS
+        //  (v6.50.57 — el proyectil del Libro de las Calaveras, gigante,
+        //   veloz, brillante y con estela — el hueso simple MURIÓ)
         // ==================================================================
 
         private void CoroSkeletron(NPC npc, Player presa)
@@ -1150,24 +1152,33 @@ namespace AethonMod.Content.Globals
                 Convocar(npc, NPCID.Skeleton, pos, MathF.Cos(ang) * 3f, -2f);
             }
 
-            // (2) LOS HUESOS: el proyectil del ítem Hueso (vanilla, el
-            // abanico/arco/lluvia de toda la vida) en TRES figuras que
-            // rotan por ración.
+            // (2) v6.50.57 — LAS CALAVERAS DEL LIBRO, POTENCIADAS (la
+            //     letra: «el jefe esqueleto en la oleada debe lanzar los
+            //     proyectiles del libro de las calavera, pero esos
+            //     proyectiles deben estar potenciados de alguna forma»):
+            //     EL PROYECTIL 837 (BookOfSkullsSkull — EL del LIBRO DE
+            //     LAS CALAVERAS, aiStyle 1: frena y VUELVE a acelerar)
+            //     GIGANTE (escala ×2.1+), VELOZ (extraUpdates), BRILLANTE
+            //     (luz 0.9) y con ESTELA DE FUEGO DORADO-VIOLETA (el
+            //     GlobalProjectile CalaveraPotenciadaFX la pinta) — en
+            //     las TRES figuras de siempre que rotan por ración.
+            int danoCala = Math.Max(1, (int)(DanoRacion * 1.35f));
+            float escalaCala = Math.Min(2.8f, 2.1f + Oleada * 0.06f);
             int figura = (int)((Main.GameUpdateCount / 60u) % 3u);
             if (figura == 0)
             {
-                // EL ABANICO: cinco huesos en arco hacia la presa.
+                // EL ABANICO: cinco calaveras en arco hacia la presa.
                 Vector2 dir = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitY);
                 for (int i = -2; i <= 2; i++)
                 {
                     Vector2 vel = dir.RotatedBy(i * 0.18f) * Main.rand.NextFloat(8f, 11f);
-                    vel.Y -= 3f;                                   // el arco de los huesos
-                    LanzarHostil(npc, ProjectileID.Bone, npc.Center, vel, DanoRacion);
+                    vel.Y -= 3f;                                   // el arco de las calaveras
+                    CalaveraPotenciada(npc, npc.Center, vel, danoCala, escalaCala);
                 }
             }
             else if (figura == 1)
             {
-                // EL ANILLO CONVERGENTE: ocho huesos naciendo alrededor
+                // EL ANILLO CONVERGENTE: ocho calaveras naciendo alrededor
                 // de la presa y volando hacia ella.
                 for (int i = 0; i < 8; i++)
                 {
@@ -1175,20 +1186,43 @@ namespace AethonMod.Content.Globals
                     Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.7f) * 300f;
                     Vector2 vel = (presa.Center - pos).SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(9f, 12f);
                     vel.Y -= 3.5f;
-                    LanzarHostil(npc, ProjectileID.Bone, pos, vel, DanoRacion);
+                    CalaveraPotenciada(npc, pos, vel, danoCala, escalaCala);
                 }
             }
             else
             {
-                // LA LLUVIA: huesos del cielo sobre la presa.
+                // LA LLUVIA: calaveras del cielo sobre la presa.
                 for (int i = 0; i < 6; i++)
                 {
                     Vector2 pos = presa.Center + new Vector2(Main.rand.NextFloat(-260f, 260f), -430f);
                     Vector2 vel = new Vector2(Main.rand.NextFloat(-2.5f, 2.5f), Main.rand.NextFloat(7f, 10f));
-                    LanzarHostil(npc, ProjectileID.Bone, pos, vel, DanoRacion);
+                    CalaveraPotenciada(npc, pos, vel, danoCala, escalaCala);
                 }
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, npc.Center);
+        }
+
+        /// <summary>
+        /// v6.50.57 — LA CALAVERA DEL LIBRO, POTENCIADA (la letra: «esos
+        /// proyectiles deben estar potenciados de alguna forma»): el
+        /// proyectil vanilla del LIBRO DE LAS CALAVERAS (BookOfSkullsSkull,
+        /// 837 — verificado en el decompile: aiStyle 1, 26×26, fade-in de 5
+        /// t, 3 frames de animación) GIGANTE (×2.1+ con la oleada, hitbox
+        /// honesta de 50×50), VELOZ (extraUpdates 1 — el doble de rápida),
+        /// BRILLANTE (luz 0.9) y con estela de fuego DORADO-VIOLETA (la
+        /// pinta el GlobalProjectile CalaveraPotenciadaFX — solo las
+        /// hostiles: las del jugador quedan como siempre).
+        /// </summary>
+        private static void CalaveraPotenciada(NPC jefe, Vector2 pos, Vector2 vel,
+            int danio, float escala)
+        {
+            Projectile p = LanzarHostil(jefe, ProjectileID.BookOfSkullsSkull, pos, vel, danio);
+            if (p == null) return;
+            p.scale = escala;
+            p.extraUpdates = 1;        // vanilla 0 — la potenciada VUELA al doble
+            p.light = 0.9f;            // arde
+            p.Resize(50, 50);          // la talla honesta del gigante dibujado
+            p.netUpdate = true;
         }
 
         // ==================================================================

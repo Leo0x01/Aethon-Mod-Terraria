@@ -2240,7 +2240,8 @@ Jefe: {
 		Nombre3: The Gravity
 		Nombre4: The Loom
 		Nombre5: The Acknowledgment
-		Gravedad: Aethon bends gravity — THE FLOOR IS NO LONGER YOURS!
+		// v6.50.57 — GRAVITY DIED (the letter: the boss must STOP bending
+		// gravity) — its announce retired with it.
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
 		Reconocimiento: Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.
 		Muerte: The light EXPLODES and its radiance RETURNS to the world. The sun takes back its course.
@@ -2263,6 +2264,8 @@ Jefe: {
 		Danza: THE SUN DANCE — the god's rays spin: walk BETWEEN the light, with the turn.
 		Lanzas: THE ETHEREAL LANCES — light aims WHERE YOU'RE GOING: break the straight line.
 		Corona: THE EVERLASTING CROWN — the rainbow besieges you: move with the feathers.
+		// v6.50.57 — THE SPECIAL ATTACK: THE GOD BECOMES A SUN AND THROWS IT
+		Sol: THE SUN OF THE GOD — Aethon BECOMES a sun and HURLS it: get away from the red giant.
 	}
 }
 

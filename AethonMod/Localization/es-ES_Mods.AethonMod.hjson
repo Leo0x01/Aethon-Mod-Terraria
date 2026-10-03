@@ -2240,7 +2240,8 @@ Jefe: {
 		Nombre3: La Gravedad
 		Nombre4: El Telar
 		Nombre5: El Reconocimiento
-		Gravedad: Aethon distorsiona la gravedad — ¡EL SUELO YA NO ES TUYO!
+		// v6.50.57 — GRAVITY DIED (the letter: the boss must STOP bending
+		// gravity) — its announce retired with it.
 		Recordar: AETHON RECUERDA — las runas que memorizó de ti vuelven a su dueño.
 		Reconocimiento: Aethon te reconoce como un par. LA FORMA ASCENDIDA cae a tus pies.
 		Muerte: La luz ESTALLA y su resplandor REGRESA al mundo. El sol recupera su curso.
@@ -2263,6 +2264,8 @@ Jefe: {
 		Danza: LA DANZA SOLAR — los rayos del dios giran: camina ENTRE la luz, con el giro.
 		Lanzas: LAS LANZAS ETERNAS — la luz apunta DONDE VAS: rompe la línea recta.
 		Corona: LA CORONA ETERNA — el arcoíris te asedia: muévete con las plumas.
+		// v6.50.57 — THE SPECIAL ATTACK: THE GOD BECOMES A SUN AND THROWS IT
+		Sol: EL SOL DEL DIOS — Aethon SE CONVIERTE en sol y lo LANZA: aléjate del gigante roja.
 	}
 }
 

@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.56 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.57 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,34 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.56)
+## ¿Dónde estamos? (actualizado para v6.50.57)
+- **v6.50.57 - LA DECIMOCUARTA RONDA — EL SOL DEL DIOS + LA COREOGRAFÍA + LA IA
+  DEL DUELISTA + LAS CALAVERAS POTENCIADAS + EL VOLTEO DE GRAVEDAD MUERTO**:
+  (1) **EL SOL DEL DIOS (EL ATAQUE ESPECIAL)**: el jefe **SE CONVIERTE EN SOL**
+  (80 t de asunción: el sol nace EN él y lo viste) y **LO LANZA** al jugador:
+  el sol **PERSIGUE LENTO**, **TIENE GRAVEDAD** (comba hacia el suelo), se
+  hincha **×6 EN LA GIGANTE ROJA** y **EXPLOTA EN LUZ, BRUMA Y FORMAS** que
+  hacen daño (AoE honesto 640 px).
+  (2) **LA COREOGRAFÍA DEL DIOS** (la investigación de los jefes-DIOS: la
+  Emperatriz, el Mutante de Fargo's, la Supreme de Calamity): desde P3, cada
+  6-9 ataques el jefe **DANZA** — SOL → TELAR → DANZA → LANZAS → CORONA →
+  ESTALLIDO encadenados SIN pasar por la órbita (P3 corta · P4 completa ·
+  P5 entera).
+  (3) **LA IA DEL DUELISTA**: la órbita LEE la distancia (se acerca si huyes,
+  toma espacio si te pegas), EL QUIEBRO (voltea el sentido de giro si
+  embistes) y LA MEMORIA DOBLE (nunca repite ni el último ataque ni el de
+  atrás).
+  (4) **LA BOLA FINAL YA NO PERSIGUE** (línea recta al punto donde estaba el
+  asesino) y el jefe muere **DETENIDO DEL TODO**, con el flash final más
+  largo y más grande (50 t, hasta 4800 px de brillo).
+  (5) **EL SKELETRON DE LA OLEADA** lanza **LAS CALAVERAS DEL LIBRO DE LAS
+  CALAVERAS** (proyectil 837 real de vanilla) **POTENCIADAS**: gigantes
+  (×2.1-2.8), veloces (×2), brillantes y con ESTELA DE FUEGO DORADO-VIOLETA.
+  (6) **EL VOLTEO DE GRAVEDAD MURIÓ**: el jefe NUNCA MÁS invierte tu gravedad
+  — el suelo vuelve a ser tuyo PARA SIEMPRE (anuncio retirado en es+en).
+  (7) **EL client.log: LIMPIO** — las 2 únicas excepciones son .plr corruptos
+  de vanilla (archivos de jugador dañados, nada del mod); 1 h 50 min de
+  partida sin UNA excepción de AethonMod.
 - **v6.50.56 - LA DECIMOTERCERA RONDA — LOS 2 CRASHES DEL client.log + EL HALO
   PLANO Y MÁS CERCA + LA MINI-EXPLOSIÓN QUE SIGUE A LA MASCOTA + LA MUERTE QUE
   SE ENCIENDE Y DISPARA LA BOLA FINAL BLANCO-DORADA + EL REY GELATINA DE VERDAD + LA CHUSMA FUERA DE LOS MUROS**:

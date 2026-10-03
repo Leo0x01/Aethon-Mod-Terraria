@@ -1,11 +1,44 @@
-# AethonMod — ESTADO ACTUAL (v6.50.56)
+# AethonMod — ESTADO ACTUAL (v6.50.57)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.56 (LA DECIMOTERCERA RONDA — la .55 publicada con
-> release 402236002, md5 ad36780e…, CDN verificado byte a byte).
+> Última actualización: v6.50.57 (LA DECIMOCUARTA RONDA — la .56 publicada con
+> release 402301259, md5 b0be51a9…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.57 = LA DECIMOCUARTA RONDA — EL SOL DEL DIOS + LA COREOGRAFÍA + LA IA
+  DEL DUELISTA + LA BOLA FINAL SIN PERSECUCIÓN + LAS CALAVERAS POTENCIADAS +
+  EL VOLTEO DE GRAVEDAD MUERTO** (la letra de la .56):
+  (1) **EL SOL DEL DIOS** (el ataque especial pedido: «debe convertirse en
+  solo y luego lanzar ese sol al jugador»): EST_SOL + EstiloSolJefe en CUATRO
+  ACTOS — LA ASUNCIÓN (80 t: el sol nace EN el jefe y lo viste mientras el
+  dios se detiene), EL LANZAMIENTO (cañonazo + retroceso del dios), EL VUELO
+  (persiga LENTA 0.05 tope 5.2 + GRAVEDAD +0.055 — comba hacia el suelo,
+  contacto honesto 96×96, estela dorada), LA GIGANTE ROJA (×6 hasta ~590 px,
+  paleta blanco-dorado → brasa, tercera corona de 14 perlas, rayos con
+  jitter) y LA EXPLOSIÓN (luz 4.2/2.4/1.4, BRUMA de 10 nubes deterministas,
+  12 FORMAS-estrella volando, cruz anamórfica, dos ondas 640/460 px, AoE
+  honesto HerirJugador 640 px ×1.15 — iframes/escudos respetados).
+  (2) **LA COREOGRAFÍA** (la investigación de los god-bosses: la cadena de la
+  Emperatriz): desde P3, cada 6-9 ataques el jefe DANZA — SOL → TELAR →
+  DANZA → LANZAS → CORONA → ESTALLIDO según fase, encadenados por
+  CerrarEstado() SIN pasar por la órbita (la danza muere en el cambio de
+  fase; el decreto no encadena).
+  (3) **LA IA DEL DUELISTA**: órbita que LEE la distancia (se acerca si
+  huyes), EL QUIEBRO (voltea el sentido de giro ante la embestida —
+  determinista) y MEMORIA DOBLE (ni el último plato ni el de atrás).
+  (4) **LA BOLA FINAL SIN HOMING** (línea recta, velocidad constante) y el
+  dios DETENIDO DEL TODO en su muerte (velocidad CERO desde el t=20) con el
+  flash final MÁS LARGO Y GRANDE (50 t, blooms hasta 4800 px).
+  (5) **LAS CALAVERAS DEL LIBRO POTENCIADAS** (Skeletron de la oleada): el
+  proyectil 837 REAL de vanilla (verificado por decompile), gigante
+  (×2.1→2.8), veloz (extraUpdates 1), brillante (luz 0.9), daño ×1.35 y
+  ESTELA DORADO-VIOLETA por el GlobalProjectile CalaveraPotenciadaFX (solo
+  hostiles — las del jugador intactas).
+  (6) **EL VOLTEO DE GRAVEDAD MUERTO**: FlipGravity + contador + campo
+  eliminados; anuncio retirado en es+en (simétrico).
+  (7) **EL client.log LEÍDO**: LIMPIO — 2 FormatException de vanilla leyendo
+  .plr corruptos (ajeno al mod) y 1 h 50 min de partida SIN excepciones.
 - **v6.50.56 = LA DECIMOTERCERA RONDA — LOS 2 CRASHES + EL HALO PLANO + LA
   MINI-EXPLOSIÓN QUE CABALGA + LA MUERTE QUE SE ENCIENDE (LA BOLA FINAL) + EL
   REY GELATINA DE VERDAD + LA CHUSMA FUERA DE LOS MUROS** (la letra de la .55):
@@ -745,7 +778,34 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.56 está implementada y build-verificada. Checklist de la .56:
+La v6.50.57 está implementada y build-verificada. Checklist de la .57:
+
+1. **EL SOL DEL DIOS (EL ATAQUE ESPECIAL)**: en la pelea (P3+), esperar a que
+   el jefe SE DETENGA y UN SOL BLANCO-DORADO CREZCA SOBRE ÉL (~1.3 s — el
+   dios SE CONVIERTE en sol) — luego lo LANZA: el sol vuela hacia ti LENTO,
+   COMBA hacia el suelo (gravedad) y te persigue con calma; tras ~5 s se
+   HINCHA ×6 volviéndose ROJO y EXPLOTA en luz, bruma y formas — la explosión
+   DUELE si estás dentro (~640 px).
+2. **LA COREOGRAFÍA**: cada 6-9 ataques (P3+) el jefe encadena VARIOS ataques
+   SEGUIDOS sin volver a flotar tranquilo — EL SOL abre y EL ESTALLIDO cierra
+   (en P5 la cadena es la más larga: sol → telar → danza → lanzas → corona →
+   estallido).
+3. **LA IA NUEVA**: el jefe MANTIENE la distancia (se acerca si lo dejas),
+   VOLTEA el sentido de giro si lo embistes, y nunca repite el mismo ataque
+   dos veces (ni el de atrás).
+4. **LA MUERTE DEL JEFE**: el dios queda CLAVADO (quieto del todo) ardiendo —
+   y su bola final YA NO TE PERSIGUE: va en LÍNEA RECTA a donde estabas (se
+   esquiva a un lado) mientras el flash final es más largo y grande.
+5. **EL SKELETRON DE LA OLEADA**: sus proyectiles son LAS CALAVERAS DEL LIBRO
+   DE LAS CALAVERAS (las del arma vanilla) PERO GIGANTES, más rápidas,
+   brillantes y con estela de fuego dorado-violeta.
+6. **SIN VOLTEO DE GRAVEDAD**: pelear entero (P3+) y verificar que NUNCA MÁS
+   tu gravedad se invierte ni aparece el anuncio «EL SUELO YA NO ES TUYO».
+7. **REGRESIÓN**: todo lo de la .56/.55 sigue intacto (halo plano, mini-
+   explosión que sigue a la mascota, Rey Gelatina con limos desde su cuerpo +
+   gel visible, oleadas sin muros, saludo/compás de la mascota).
+
+Checklist de la .56 (vigente hasta que el usuario la recorra):
 
 1. **SIN CRASHES**: jugar con la oleada del Rey Gelatina (bolas de gel visibles
    volando/rebotando) y SALIR DEL MUNDO (guardar y salir) — el client.log NO
@@ -883,7 +943,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.56** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMOTERCERA RONDA — feedback de la .55 (SIETE frentes): (1) **EL GEL INVISIBLE** (crash 1: Draw sin Begin en la bola de gel — SU PROPIO LOTE ALFA) (2) **EL FUNERAL EN HILO AJENO** (crash 2: ThreadStateException al salir del mundo — QueueMainThreadAction + AprenderHiloPrincipal) (3) **EL HALO ARCOÍRIS PLANO Y MÁS CERCA** (13 px, rotación 0, giro en las perlas) (4) **LA MINI-EXPLOSIÓN CABALGA CON LA MASCOTA** (ai[1]=whoAmI) **SIN ARO CIRCULAR** (solo brillo) (5) **LA MASCOTA ALUMBRA ×1.6** (6) **LA MUERTE QUE SE ENCIENDE + LA BOLA FINAL BLANCO-DORADA** (EstiloBolaFinal=23: el proyectil sol en blanco-oro, 7 s, luz 2.6/2.35/1.7) (7) **EL REY GELATINA**: limos DESDE SU CUERPO + gel con cada salto Y teletransporte + LA CHUSMA sin muros ni subsuelo (SpawnTileY/WallType) |
+| **v6.50.57** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMOCUARTA RONDA — feedback de la .56 (SIETE frentes): (1) **EL SOL DEL DIOS** (el ataque especial: el jefe SE CONVIERTE en sol — asunción 80 t — y LO LANZA: persiga lenta + gravedad + GIGANTE ROJA ×6 + explosión de luz/bruma/formas con daño AoE 640 px honesto) (2) **LA COREOGRAFÍA** (la cadena de los god-bosses: SOL→TELAR→DANZA→LANZAS→CORONA→ESTALLIDO cada 6-9 ataques en P3+, sin pasar por la órbita) (3) **LA IA DEL DUELISTA** (órbita que lee distancia + quiebro del sentido + memoria doble) (4) **LA BOLA FINAL SIN PERSECUCIÓN** (línea recta) + **EL DIOS MUERE DETENIDO** (velocidad 0 desde t=20, flash final 50 t hasta 4800 px) (5) **LAS CALAVERAS DEL LIBRO POTENCIADAS** (proyectil 837 real: gigante ×2.1-2.8, veloz, brillante, ×1.35 daño, estela dorado-violeta por CalaveraPotenciadaFX) (6) **EL VOLTEO DE GRAVEDAD MUERTO** (FlipGravity eliminado, anuncio retirado es+en) (7) **EL client.log LIMPIO** (2 FormatException de .plr corruptos de vanilla, 1 h 50 min sin excepciones del mod) |
+| **v6.50.56** | ✅ Build-verificada, ✔ publicada (release 402301259, CDN byte a byte), ✔ probada (con feedback → .57) | LA DECIMOTERCERA RONDA — feedback de la .55 (SIETE frentes): (1) **EL GEL INVISIBLE** (crash 1: Draw sin Begin en la bola de gel — SU PROPIO LOTE ALFA) (2) **EL FUNERAL EN HILO AJENO** (crash 2: ThreadStateException al salir del mundo — QueueMainThreadAction + AprenderHiloPrincipal) (3) **EL HALO ARCOÍRIS PLANO Y MÁS CERCA** (13 px, rotación 0, giro en las perlas) (4) **LA MINI-EXPLOSIÓN CABALGA CON LA MASCOTA** (ai[1]=whoAmI) **SIN ARO CIRCULAR** (solo brillo) (5) **LA MASCOTA ALUMBRA ×1.6** (6) **LA MUERTE QUE SE ENCIENDE + LA BOLA FINAL BLANCO-DORADA** (EstiloBolaFinal=23: el proyectil sol en blanco-oro, 7 s, luz 2.6/2.35/1.7) (7) **EL REY GELATINA**: limos DESDE SU CUERPO + gel con cada salto Y teletransporte + LA CHUSMA sin muros ni subsuelo (SpawnTileY/WallType) |
 | **v6.50.55** | ✅ Build-verificada, ✔ publicada (release 402236002, CDN byte a byte), ⏳ probada (con feedback → .56) | LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA (un pedido): «la mascota seria aburrida si fuera un punto de luz constante» → EL SALUDO DE LUZ (lo primero al invocar: 45 t) + EL COMPÁS (base ~1/20 min, +1/60000 por enemigo cerca, tope 20; EL GARANTE de 1 hora) + EL ESTALLIDO DEL JEFE EN MINIATURA ~0.13× (las SIETE piezas de la .53: 14 rayos, anillo de 7 emisores, cruz, núcleo Bloom ~130 px, estrella, onda, 8 bokeh + chispas + luz pequeña + estampido bajito) + LA RECOGIDA translúcida (aro 135 px, 6 agujas, el pet ×1.45 mientras) + EL DAÑO SIMBÓLICO (15 plano, hitbox honesta 270×270 solo 8 t, 1 golpe por enemigo) + LA GRATITUD (cura 1% de vida máx por enemigo, tope 5%) — TODO determinista (semilla en ai[0]), CERO texturas nuevas |
 | **v6.50.54** | ✅ Build-verificada, ✔ publicada (release 402229633, CDN byte a byte), ⏳ en juego | LA UNDÉCIMA RONDA — feedback de la .53 (OCHO frentes): (1) **EL DECRETO CABALGA**: el ataque del cambio de fase centrado EN EL JEFE y moviéndose CON él (2) **EL ESTALLIDO CON COMPÁS**: 1×P1, 2×P2 + más grande, P3+ cada 1-9 ataques ALEATORIO, y 1/2/3 detonaciones por activación (3) **EL DASH CORTO Y CENTRADO** (4) **EL RELOJ ÚNICO GIGANTE** ×7.5 siguiendo al dios (5) **LAS TRES ARMAS DE LA EMPERATRIZ**: DANZA SOLAR + LANZAS ETERNAS + CORONA ETERNA (6) **EL HALO ARCOÍRIS** (ítem nuevo, la banda de la Forma 3 alrededor de la cabeza) (7) **LA FORMA 3 MÁS VIVA** (banda doble, perlas mayores, rayos del mandorla, luz de mundo) (8) **EL CRASH DEL REGALO MUERTO** (YaLoTiene con .Length — el IndexOutOfRange del client.log) |
 | **v6.50.53** | ✅ Build-verificada, ✔ publicada (release 402101571, CDN byte a byte), ⏳ en juego | LA DÉCIMA RONDA — feedback de la .52 (CINCO frentes): (1) **EL ARCOÍRIS DE LA FORMA 3** («el arcoíris debería estar en la forma ascendida 3»): BUG DE TRES VERSIONES — el dispatcher `DibujarJugadorAditivo` despachaba `Divino`/`Divino2` pero el caso `Divino3` NO EXISTÍA: `DibujarDivino3` compilaba y viajaba en la DLL… y NADIE lo llamaba (el trono entero — nimbo, cruz, mar de vidrio, lámparas, ofanim, alas prismáticas y EL ARCOÍRIS de Ap 4:3 — JAMÁS se dibujó en .49→.52); LA CURA = UNA línea de dispatcher · (2) **LA FORMA 4: EL SERAFÍN** («crea una 4 forma ascendida, asegúrate de que sea algo divino: alas, halo, corona, aura celestial, luz, bruma, más luz y destello, mejor iluminación» — Isaías 6): SEIS ALAS en tres pares (8+10+7, cálamo+punta), HALO TRIPLE trisagión, CORONA Ap 19:12, NIMBO Radio×3.4, RAYOS DE DIOS, BRUMA SANTA Is 6:4, CUERPO QUE ARDE, destello, plumas; Radio 140, luz 1.55/1.38/1.02, ítem horneado+anillo animado, regalo al entrar, vuelo infinito · (3) **EL FANTASMA DE LOS NPCS** («hay algún ataque que vuelve transparentes a los NPCs, creo que cuando lanza rayo»): el PerlinBolt dejaba el lote ABIERTO EN ADITIVO (RayoStrip reabría para sus gorros; ReabrirLoteVanilla = NO-OP) → todo NPC tras el jefe salía aditivo/transparente; el finally cierra y devuelve SIEMPRE el lote de vanilla · (4) **LA MASCOTA-JEFE** («que sea exactamente el jefe pero más pequeño»): las SEIS secciones del sol de código a escala 0.22 con el MISMO compás · (5) **EL ESTALLIDO RADIANTE** («te envié una imagen, crea por código un ataque igual a la imagen»): EST_ESTALLIDO (fase 3+, peso 5 al pegado) — 60 t de recogida (aro 600 px + 14 brasas en espiral + núcleo + agujas) y EL PUNTO DE LUZ (proyectil 19): onda 0,95× radio 600 (12 t, hitbox autocurada) + 152 t de 44 rayos 360° (250-980 px, núcleo blanco + halo oro→ámbar→brasa), anillo segmentado 14 emisores, cruz anamórfica, núcleo Bloom×4 ~950 px respirando, estrella 8 rayos, onda, 26 bokeh, 42 GoldFlame, LUZ QUE INUNDA 2,4/2,1/1,5, Item122+kick 13 px — TODO determinista (Hash01), anuncio `Jefe.Aethon.Estallido` es+en |
