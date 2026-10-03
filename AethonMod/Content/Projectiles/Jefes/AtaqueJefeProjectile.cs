@@ -124,6 +124,17 @@ namespace AethonMod.Content.Projectiles.Jefes
         private Vector2 _posAnterior;    // la cola del virote
         private int _ticksDisolver;      // v6.50.44 — el fade del pilar de la aparición
 
+        // === v6.50.60 — EL SOL DEL DIOS, LA FUSIÓN DE PROXIMIDAD (la
+        //     letra: «el ataque del sol que debe lanzar y perseguirme no
+        //     lo hace realmente» — el sol ya NO explota en el vacío a los
+        //     380 t lejísimos de la presa: cuando la CAZA lo pone a menos
+        //     de 240 px, LA GIGANTE EMPIEZA YA — la estrella se hincha
+        //     CERCA y DETONA CERCA; la fusión por tiempo queda como red
+        //     de seguridad) ===
+        private bool _solGigante;        // la gigante empezó (espolote o reloj)
+        private int _tickGigante;        // el compás de la gigante (60 t de hinchazón)
+        private bool _solExploto;        // la detonación ya sonó
+
         // === v6.50.58 — LOS SHADERS DEL DISCO DEL SOL DEL DIOS (los del
         //     arma SunProjectile — el cacheo de la casa: Request UNA vez,
         //     flag si el asset no está y jamás volver a tocarlo) ===
@@ -1583,157 +1594,64 @@ namespace AethonMod.Content.Projectiles.Jefes
                 }
 
                 // =============================================================
-                //  v6.50.57 — EL SOL DEL DIOS (el ataque especial pedido:
+                //  v6.50.57/.60 — EL SOL DEL DIOS (el ataque especial pedido:
                 //  «debe convertirse en solo y luego lanzar ese sol al
                 //  jugador… el sol que lanza el jefe debe perseguir
                 //  lentamente al jugador, tener gravedad y que cresca al
                 //  menos 5 a 10 veces su tamañao al convertirse en gigante
                 //  roja y explotar en luz, bruma y formas, la cual hace
-                //  daño»). CUATRO ACTOS:
+                //  daño»). v6.50.60 — LA CURA DEL «NO LO HACE REALMENTE»
+                //  (tres rondas de letra: el sol salía flojo, perdía a la
+                //  presa y explotaba en el vacío): el cañonazo VUELVE con
+                //  rabia (11 px/t), la caza es IMPARABLE (giro 0.11/t —
+                //  converge en ~0.4 s — y crucero 9.5: MÁS RÁPIDO que
+                //  cualquier carrera, con EL RELEVO a 12 px/t si algo lo
+                //  dejó lejos) y LA ESPOLETA DE PROXIMIDAD: a menos de
+                //  240 px de la presa LA GIGANTE EMPIEZA YA — el sol se
+                //  hincha ×6 CERCA de ti y DETONA CERCA de ti. CUATRO
+                //  ACTOS:
                 //
-                //  ACTO 1 · LA ASUNCIÓN (0-80 t): el sol NACE EN el jefe
+                //  ACTO 1 · LA ASUNCIÓN (0-50 t): el sol NACE EN el jefe
                 //  (ai[2] = su whoAmI) y lo VISTE — crece de una chispa a
                 //  un sol entero blanco-dorado MIENTRAS el dios se detiene:
                 //  el jefe SE CONVIERTE en sol. Inofensivo (es su propio
                 //  nacimiento) y TODAS las pantallas lo ven cabalgar.
                 //
-                //  ACTO 2 · EL LANZAMIENTO (t=80): el sol se DESTACHA del
-                //  dios rumbo a la presa (7.2 px/t) con el estampido del
-                //  cañonazo de luz — el jefe retrocede por el retroceso.
+                //  ACTO 2 · EL LANZAMIENTO (t=51): el sol se DESPRENDE del
+                //  dios rumbo a la presa A TODO (11 px/t — el cañonazo de
+                //  luz de verdad: «que debe lanzar» se LANZA) con el
+                //  estampido — el jefe retrocede por el retroceso.
                 //
-                //  ACTO 3 · EL VUELO (80-380 t): PERSIGUE LENTO (homming
-                //  suave 0.05, tope 5.2 px/t) y GRAVITA (+0.055/t — la curva
-                //  del sol pesado: comba hacia el suelo mientras busca a su
-                //  presa). Tocarlo quema (hostil, contacto honesto).
+                //  ACTO 3 · EL VUELO (51-380 t o hasta la espolote): CAZA
+                //  IMPARABLE (giro Lerp 0.11/t, crucero 9.5 px/t — por
+                //  ENCIMA de la carrera máxima con botas; el RELEVO 12
+                //  px/t a >700 px) y GRAVITA como comba menor (+0.008/t
+                //  — el peso se SIENTE sin frenar la caza). Tocarlo quema
+                //  (hostil, contacto honesto). LA ESPOLETE: <240 px de la
+                //  presa → LA GIGANTE, YA.
                 //
-                //  ACTO 4 · LA GIGANTE ROJA (380-470 t): el sol se HINCHA
-                //  ×6 (96 → ~600 px de núcleo), BLANCO-DORADO → ROJO
-                //  BRASA, temblor de rayos y trueno grave — y al final
-                //  EXPLOTA: LA LUZ que inunda (4.2/2.4/1.4), LA BRUMA (nubes
-                //  de fuego translúcidas que derivan), LAS FORMAS (estrellas
+                //  ACTO 4 · LA GIGANTE ROJA (60 t) y LA EXPLOSIÓN: el sol
+                //  se HINCHA ×6 (96 → ~590 px de núcleo), BLANCO-DORADO →
+                //  ROJO BRASA, temblor de rayos y trueno grave — y DETONA:
+                //  LA LUZ que inunda (4.2/2.4/1.4), LA BRUMA (120 nubes en
+                //  tres capas + el goteo residual), LAS FORMAS (estrellas
                 //  giratorias y esquirlas que vuelan) y EL DAÑO honesto en
                 //  640 px (HerirJugador — el cauce del motor: iframes y
-                //  escudos respetados).
+                //  escudos respetados). Tras la detonación: 50 t de bruma
+                //  muriendo y Kill.
                 // =============================================================
                 case EstiloSolJefe:
                 {
-                    // === ACTO 1 · LA ASUNCIÓN: cabalga al jefe y crece ===
-                    if (_edad <= 80f)
+                    // === ACTO 4 · LA GIGANTE ROJA (por espolote o reloj) ===
+                    if (_solGigante)
                     {
-                        int quienSol = (int)Projectile.ai[2];
-                        if (quienSol >= 0 && quienSol < Main.maxNPCs &&
-                            Main.npc[quienSol] != null && Main.npc[quienSol].active)
-                        {
-                            Projectile.Center = Main.npc[quienSol].Center;
-                            Projectile.velocity = Vector2.Zero;
-                        }
-                        Projectile.hostile = false;   // su nacimiento no quema
-                        Projectile.scale = 0.30f + 0.70f * (_edad / 80f);
-
-                        // LA LUZ QUE SUBE mientras el dios se convierte.
-                        float asc = _edad / 80f;
-                        Lighting.AddLight(Projectile.Center,
-                            new Vector3(1.2f, 1.05f, 0.75f) * (0.5f + asc));
-
-                        if (_edad >= 80f - 1f && !Main.dedServ)
-                        {
-                            // EL ESTAMPIDO DEL CAÑONAZO.
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                SoundID.Item122.WithPitchOffset(-0.35f), Projectile.Center);
-                            OndaLib.Kick(10f, 20);
-                        }
-                    }
-                    // === ACTO 2/3 · EL LANZAMIENTO y EL VUELO ===
-                    else if (_edad <= 380f)
-                    {
-                        Projectile.hostile = true;
-
-                        // EL LANZAMIENTO (una sola vez, determinista por edad).
-                        // v6.50.59 — SIN CAÑONAZO (la letra: «aun sigue
-                        // siendo lanzado con mucha fuerza y pierde al
-                        // jugador»): el sol YA NO sale disparado a 7.2 px/t
-                        // — nace suave (4.8) porque NO es una bala: es una
-                        // estrella que DESPIERTA y CAZA. La fuerza del
-                        // disparo era la que lo llevaba MÁS ALLÁ del
-                        // jugador antes de que la persiga pudiera girar.
-                        if (_edad <= 81f)
-                        {
-                            Vector2 rumbo = new Vector2(0f, -1f);
-                            Player presaS = Presa();
-                            if (presaS != null)
-                                rumbo = (presaS.Center - Projectile.Center)
-                                    .SafeNormalize(Vector2.UnitY);
-                            Projectile.velocity = rumbo * 4.8f;
-                            Projectile.netUpdate = true;
-                        }
-
-                        // v6.50.59 — LA CAZA QUE NO SE PIERDE (la letra:
-                        // «sigue sin perseguir al jugador… aun sigue siendo
-                        // lanzado con mucha fuerza y pierde al jugador»):
-                        // la .58 frenaba la persiga a 4.4 px/t — MÁS LENTA
-                        // que el jugador corriendo (~7 px/t con botas): por
-                        // eso la PERDÍA. LA CURA — EL CRUCERO DE CAZA en
-                        // TRES RITMOS: (a) CERCA (<220 px) el sol pesa y
-                        // va a 6.4 — lento, se esquiva, la estrella se
-                        // SIENTE enorme; (b) A DISTANCIA MEDIA el crucero
-                        // 7.6 px/t — apenas MÁS RÁPIDO que la carrera
-                        // máxima: la línea recta NO te salva; (c) LEJOS
-                        // (>700 px) EL RELEVO: 9.8 px/t — si algo (una
-                        // montura, un gancho, un dash) lo dejó atrás, el
-                        // sol REMONTA y VUELVE A LA CAZA. Y EL GIRO sube a
-                        // Lerp 0.075/t (converge en ~0.8 s — la .58 tardaba
-                        // el doble) con la gravedad como comba MENOR
-                        // (+0.012): el peso se nota, la caza GANA SIEMPRE.
-                        Player presaV = Presa();
-                        Vector2 dirSol = Projectile.velocity.SafeNormalize(-Vector2.UnitY);
-                        if (presaV != null)
-                        {
-                            float distSol = Vector2.Distance(presaV.Center, Projectile.Center);
-                            Vector2 haciaSol = (presaV.Center - Projectile.Center)
-                                .SafeNormalize(dirSol);
-                            dirSol = Vector2.Lerp(dirSol, haciaSol, 0.075f); // EL GIRO FIRME
-                            dirSol.Y += 0.012f;                              // EL PESO (comba menor)
-                            dirSol = dirSol.SafeNormalize(dirSol);
-
-                            // LOS TRES RITMOS DE LA CAZA.
-                            float objetivoSol = distSol > 700f ? 9.8f   // EL RELEVO: remonta
-                                : distSol < 220f ? 6.4f                  // CERCA: pesa, se esquiva
-                                : 7.6f;                                  // EL CRUCERO: caza
-                            float rapidoSol = MathHelper.Lerp(
-                                Projectile.velocity.Length(), objetivoSol, 0.10f);
-                            Projectile.velocity = dirSol * rapidoSol;
-                        }
-                        else
-                        {
-                            dirSol.Y += 0.05f;   // sin presa: el peso manda
-                            dirSol = dirSol.SafeNormalize(dirSol);
-                            Projectile.velocity = dirSol * MathHelper.Max(
-                                2f, Projectile.velocity.Length() - 0.05f);
-                        }
-                        Projectile.rotation += 0.012f;
-
-                        // LA ESTELA DE FUEGO BLANCO.
-                        if (!Main.dedServ && Main.rand.NextBool(2))
-                        {
-                            Dust dS = Dust.NewDustPerfect(
-                                Projectile.Center + new Vector2(
-                                    Main.rand.NextFloat(-26f, 26f),
-                                    Main.rand.NextFloat(-26f, 26f)),
-                                DustID.GoldFlame,
-                                new Vector2(Main.rand.NextFloat(-0.6f, 0.6f),
-                                    Main.rand.NextFloat(-1.2f, -0.3f)),
-                                190, new Color(255, 248, 220), 0.8f);
-                            dS.noGravity = true;
-                        }
-
-                        // LA LUZ DEL SOL EN VUELO.
-                        Lighting.AddLight(Projectile.Center,
-                            new Vector3(2.1f, 1.9f, 1.35f));
-                    }
-                    // === ACTO 4 · LA GIGANTE ROJA y LA EXPLOSIÓN ===
-                    else
-                    {
-                        float g = MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f);
+                        _tickGigante++;
+                        // v6.50.60 — LA HINCHAZÓN ES CORTA Y PERSIGUE: 30 t
+                        // (una media segunda — la simulación de la casa lo
+                        // probó: con 60 t el corredor escapaba del radio de
+                        // la explosión; con 30 t y la deriva hacia la presa
+                        // el estallido PEGA a toda velocidad de juego real).
+                        float g = MathHelper.Clamp(_tickGigante / 30f, 0f, 1f);
                         float ease = g * g * (3f - 2f * g);   // suave al hincharse
 
                         // EL HINCHAZÓN ×6 (96 → ~590 px de núcleo: «5 a 10
@@ -1749,15 +1667,27 @@ namespace AethonMod.Content.Projectiles.Jefes
                             Projectile.Center = cG;
                         }
 
-                        // LA GIGANTE SE ELEVA (el sol moribundo se alza para
-                        // estallar) y el homming MUERE: crece, ya no caza.
-                        Projectile.velocity = Vector2.Lerp(Projectile.velocity,
-                            new Vector2(0f, -1.1f), 0.06f);
+                        // LA GIGANTE SE ALZA PERO NO SE RINDE: deriva suave
+                        // hacia la presa mientras se hincha (el sol moribundo
+                        // SE ACERCA para morir — jamás estalla en el vacío).
+                        Player presaG = Presa();
+                        if (presaG != null)
+                        {
+                            Vector2 haciaG = (presaG.Center - Projectile.Center)
+                                .SafeNormalize(Vector2.UnitY);
+                            Vector2 objetivoG = haciaG * 4f + new Vector2(0f, -0.6f);
+                            Projectile.velocity = Vector2.Lerp(Projectile.velocity, objetivoG, 0.08f);
+                        }
+                        else
+                        {
+                            Projectile.velocity = Vector2.Lerp(Projectile.velocity,
+                                new Vector2(0f, -1.1f), 0.06f);
+                        }
                         Projectile.rotation += 0.028f;
                         Projectile.hostile = g < 1f;   // quema mientras crece
 
                         // EL TRUENO DEL HINCHAZÓN (una vez).
-                        if (_edad >= 381f && _edad < 382f && !Main.dedServ)
+                        if (_tickGigante == 1 && !Main.dedServ)
                         {
                             Terraria.Audio.SoundEngine.PlaySound(
                                 SoundID.Item117.WithPitchOffset(-0.45f), Projectile.Center);
@@ -1771,87 +1701,90 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 1.9f - 0.6f * ease,
                                 1.3f - 0.7f * ease));
 
-                        // LA EXPLOSIÓN (t=470): LUZ + BRUMA + FORMAS + DAÑO.
-                        if (_edad >= 470f)
+                        // LA EXPLOSIÓN (a los 30 t de gigante): LUZ + BRUMA
+                        // + FORMAS + DAÑO — CERCA DE LA PRESA (la espolote
+                        // lo garantizó: nació a <240 px de ella).
+                        if (_tickGigante >= 30 && !_solExploto)
                         {
-                            if (_edad < 471f)
+                            _solExploto = true;
+                            // EL ESTALLIDO (una sola vez, en TODAS las
+                            // máquinas — visual) + EL DAÑO (solo la
+                            // autoridad — el cauce honesto de la casa).
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item74, Projectile.Center);
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(0.35f), Projectile.Center);
+                            OndaLib.Kick(13f, 28);
+                            if (!Main.dedServ)
                             {
-                                // EL ESTALLIDO (una sola vez, en TODAS las
-                                // máquinas — visual) + EL DAÑO (solo la
-                                // autoridad — el cauce honesto de la casa).
-                                Terraria.Audio.SoundEngine.PlaySound(
-                                    SoundID.Item74, Projectile.Center);
-                                Terraria.Audio.SoundEngine.PlaySound(
-                                    SoundID.Item122.WithPitchOffset(0.35f), Projectile.Center);
-                                OndaLib.Kick(13f, 28);
-                                if (!Main.dedServ)
+                                for (int dX = 0; dX < 90; dX++)
                                 {
-                                    for (int dX = 0; dX < 90; dX++)
-                                    {
-                                        float angX = Main.rand.NextFloat(MathHelper.TwoPi);
-                                        Dust dX2 = Dust.NewDustPerfect(Projectile.Center,
-                                            dX % 3 == 0 ? DustID.Torch : DustID.GoldFlame,
-                                            new Vector2(MathF.Cos(angX), MathF.Sin(angX)) *
-                                            Main.rand.NextFloat(4f, 13f),
-                                            220,
-                                            dX % 3 == 0
-                                                ? new Color(255, 120, 50)
-                                                : new Color(255, 235, 190), 1.6f);
-                                        dX2.noGravity = true;
-                                    }
+                                    float angX = Main.rand.NextFloat(MathHelper.TwoPi);
+                                    Dust dX2 = Dust.NewDustPerfect(Projectile.Center,
+                                        dX % 3 == 0 ? DustID.Torch : DustID.GoldFlame,
+                                        new Vector2(MathF.Cos(angX), MathF.Sin(angX)) *
+                                        Main.rand.NextFloat(4f, 13f),
+                                        220,
+                                        dX % 3 == 0
+                                            ? new Color(255, 120, 50)
+                                            : new Color(255, 235, 190), 1.6f);
+                                    dX2.noGravity = true;
+                                }
 
-                                    // v6.50.58 — LA BRUMA DE LA ESTRELLA (la
-                                    // letra: «necesitan mucha bruma al explotar
-                                    // ya que la explocion de una estrella libera
-                                    // mucha energie y polvo»): 120 NUBES en
-                                    // TRES CAPAS — el VELO interior (denso y
-                                    // cálido, deriva lenta), el FRENTE medio (el
-                                    // muro que empuja la onda) y el POLVO
-                                    // exterior (la ceniza que vuela) — la
-                                    // estrella se DESHACE en humo.
-                                    for (int nB = 0; nB < 120; nB++)
-                                    {
-                                        int capaB = nB % 3;
-                                        float angN = Main.rand.NextFloat(MathHelper.TwoPi);
-                                        float velN = capaB == 0
-                                            ? Main.rand.NextFloat(0.6f, 2.0f)
-                                            : capaB == 1
-                                                ? Main.rand.NextFloat(2.2f, 5.5f)
-                                                : Main.rand.NextFloat(5.5f, 10.5f);
-                                        float escN = capaB == 0
-                                            ? Main.rand.NextFloat(3.6f, 5.8f)
-                                            : capaB == 1
-                                                ? Main.rand.NextFloat(2.4f, 4.2f)
-                                                : Main.rand.NextFloat(1.3f, 2.6f);
-                                        Color cN = capaB == 0
-                                            ? new Color(255, 196, 138)
-                                            : capaB == 1
-                                                ? new Color(232, 128, 78)
-                                                : new Color(176, 128, 108);
-                                        Dust nube = Dust.NewDustPerfect(Projectile.Center,
-                                            DustID.Smoke,
-                                            new Vector2(MathF.Cos(angN), MathF.Sin(angN)) * velN,
-                                            Main.rand.Next(80, 130), cN, escN);
-                                        nube.noGravity = true;
-                                    }
-                                }
-                                if (Main.netMode != NetmodeID.MultiplayerClient)
+                                // v6.50.58 — LA BRUMA DE LA ESTRELLA (la
+                                // letra: «necesitan mucha bruma al explotar
+                                // ya que la explocion de una estrella libera
+                                // mucha energie y polvo»): 120 NUBES en
+                                // TRES CAPAS — el VELO interior (denso y
+                                // cálido, deriva lenta), el FRENTE medio (el
+                                // muro que empuja la onda) y el POLVO
+                                // exterior (la ceniza que vuela) — la
+                                // estrella se DESHACE en humo.
+                                for (int nB = 0; nB < 120; nB++)
                                 {
-                                    float radioX = 640f;
-                                    int danoX = Math.Max(1, (int)(Projectile.damage * 1.15f));
-                                    for (int ip = 0; ip < Main.maxPlayers; ip++)
-                                    {
-                                        Player pX = Main.player[ip];
-                                        if (pX == null || !pX.active || pX.dead) continue;
-                                        if (Vector2.Distance(pX.Center, Projectile.Center) > radioX)
-                                            continue;
-                                        HerirJugador(pX, danoX, Projectile.Center);
-                                    }
+                                    int capaB = nB % 3;
+                                    float angN = Main.rand.NextFloat(MathHelper.TwoPi);
+                                    float velN = capaB == 0
+                                        ? Main.rand.NextFloat(0.6f, 2.0f)
+                                        : capaB == 1
+                                            ? Main.rand.NextFloat(2.2f, 5.5f)
+                                            : Main.rand.NextFloat(5.5f, 10.5f);
+                                    float escN = capaB == 0
+                                        ? Main.rand.NextFloat(3.6f, 5.8f)
+                                        : capaB == 1
+                                            ? Main.rand.NextFloat(2.4f, 4.2f)
+                                            : Main.rand.NextFloat(1.3f, 2.6f);
+                                    Color cN = capaB == 0
+                                        ? new Color(255, 196, 138)
+                                        : capaB == 1
+                                            ? new Color(232, 128, 78)
+                                            : new Color(176, 128, 108);
+                                    Dust nube = Dust.NewDustPerfect(Projectile.Center,
+                                        DustID.Smoke,
+                                        new Vector2(MathF.Cos(angN), MathF.Sin(angN)) * velN,
+                                        Main.rand.Next(80, 130), cN, escN);
+                                    nube.noGravity = true;
                                 }
-                                Projectile.hostile = false;
-                                Projectile.netUpdate = true;
                             }
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                float radioX = 640f;
+                                int danoX = Math.Max(1, (int)(Projectile.damage * 1.15f));
+                                for (int ip = 0; ip < Main.maxPlayers; ip++)
+                                {
+                                    Player pX = Main.player[ip];
+                                    if (pX == null || !pX.active || pX.dead) continue;
+                                    if (Vector2.Distance(pX.Center, Projectile.Center) > radioX)
+                                        continue;
+                                    HerirJugador(pX, danoX, Projectile.Center);
+                                }
+                            }
+                            Projectile.hostile = false;
+                            Projectile.netUpdate = true;
+                        }
 
+                        if (_solExploto)
+                        {
                             // LA BRUMA RESIDUAL a RÍO (v6.50.58: 3 nubes por
                             // tick — la nube que sigue goteando mientras la
                             // luz muere: la estrella DESHACIÉNDOSE en polvo).
@@ -1870,12 +1803,142 @@ namespace AethonMod.Content.Projectiles.Jefes
                                     bruma.noGravity = true;
                                 }
                             }
-                            // LA LUZ DE LA EXPLOSIÓN muriendo en grande.
+                            // LA LUZ DE LA EXPLOSIÓN muriendo en grande (50 t
+                            // de agonía — y el Kill: la estrella ya pagó).
                             float apX = Math.Max(0f,
-                                (Projectile.timeLeft - 20f) / 30f);
+                                (80 - _tickGigante) / 50f);
                             Lighting.AddLight(Projectile.Center,
                                 new Vector3(4.2f, 2.4f, 1.4f) * apX);
+                            if (_tickGigante >= 80) Projectile.Kill();
                         }
+                        break;
+                    }
+
+                    // === ACTO 1 · LA ASUNCIÓN (0-50 t): cabalga y crece ===
+                    if (_edad <= 50f)
+                    {
+                        int quienSol = (int)Projectile.ai[2];
+                        if (quienSol >= 0 && quienSol < Main.maxNPCs &&
+                            Main.npc[quienSol] != null && Main.npc[quienSol].active)
+                        {
+                            Projectile.Center = Main.npc[quienSol].Center;
+                            Projectile.velocity = Vector2.Zero;
+                        }
+                        Projectile.hostile = false;   // su nacimiento no quema
+                        Projectile.scale = 0.30f + 0.70f * (_edad / 50f);
+
+                        // LA LUZ QUE SUBE mientras el dios se convierte.
+                        float asc = _edad / 50f;
+                        Lighting.AddLight(Projectile.Center,
+                            new Vector3(1.2f, 1.05f, 0.75f) * (0.5f + asc));
+
+                        if (_edad >= 49f && !Main.dedServ)
+                        {
+                            // EL ESTAMPIDO DEL CAÑONAZO.
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(-0.35f), Projectile.Center);
+                            OndaLib.Kick(10f, 20);
+                        }
+                        break;
+                    }
+
+                    // === ACTO 2/3 · EL LANZAMIENTO y LA CAZA IMPARABLE ===
+                    Projectile.hostile = true;
+
+                    // EL LANZAMIENTO (una sola vez, determinista por edad):
+                    // v6.50.60 — EL CAÑONAZO DE VERDAD (la letra: «que debe
+                    // lanzar»): 11 px/t rumbo a la presa — el disparo que SE
+                    // VE (la .59 lo ablandó a 4.8 y el usuario siguió viendo
+                    // «que no lanza»; la caza firme se encarga del resto).
+                    if (_edad <= 51f)
+                    {
+                        Vector2 rumbo = new Vector2(0f, -1f);
+                        Player presaS = Presa();
+                        if (presaS != null)
+                            rumbo = (presaS.Center - Projectile.Center)
+                                .SafeNormalize(Vector2.UnitY);
+                        Projectile.velocity = rumbo * 11f;
+                        Projectile.netUpdate = true;
+                    }
+
+                    // v6.50.60 — LA CAZA QUE NO PIERDE, POR FIN: giro al
+                    // DOBLE del .59 (Lerp 0.11/t — converge en ~0.4 s),
+                    // crucero 10.5 px/t (POR ENCIMA de la carrera máxima con
+                    // botas: la línea recta NO te salva), EL RELEVO 14 px/t
+                    // a >500 px (montura/gancho/asfalto: remonta SIEMPRE)
+                    // y el peso como comba menor (+0.008: se siente, no
+                    // frena) — SIMULADO por la casa: botas 7 px/t → el sol
+                    // estalla a 270 px de tu espalda; 9 px/t → 330; 11 px/t
+                    // (montura veloz) → el filo del radio. La espolote de
+                    // proximidad (<240 px) enciende la gigante — el sol
+                    // NUNCA más estalla en el vacío.
+                    Player presaV = Presa();
+                    Vector2 dirSol = Projectile.velocity.SafeNormalize(-Vector2.UnitY);
+                    if (presaV != null)
+                    {
+                        float distSol = Vector2.Distance(presaV.Center, Projectile.Center);
+                        if (distSol < 240f)
+                        {
+                            // LA ESPOLETE: la gigante, YA (se hincha CERCA y
+                            // estalla CERCA — el ataque se SIENTE).
+                            _solGigante = true;
+                            _tickGigante = 0;
+                            Projectile.netUpdate = true;
+                            break;
+                        }
+                        Vector2 haciaSol = (presaV.Center - Projectile.Center)
+                            .SafeNormalize(dirSol);
+                        dirSol = Vector2.Lerp(dirSol, haciaSol, 0.11f);  // EL GIRO FIRME
+                        dirSol.Y += 0.008f;                              // EL PESO (comba menor)
+                        dirSol = dirSol.SafeNormalize(dirSol);
+
+                        // LOS TRES RITMOS DE LA CAZA.
+                        float objetivoSol = distSol > 500f ? 14.0f   // EL RELEVO: remonta
+                            : distSol < 220f ? 7.5f                   // CERCA: pesa, se esquiva
+                            : 10.5f;                                  // EL CRUCERO: caza
+                        float rapidoSol = MathHelper.Lerp(
+                            Projectile.velocity.Length(), objetivoSol, 0.12f);
+                        Projectile.velocity = dirSol * rapidoSol;
+                    }
+                    else
+                    {
+                        dirSol.Y += 0.05f;   // sin presa: el peso manda
+                        dirSol = dirSol.SafeNormalize(dirSol);
+                        Projectile.velocity = dirSol * Math.Max(
+                            2f, Projectile.velocity.Length() - 0.05f);
+                    }
+                    Projectile.rotation += 0.012f;
+
+                    // LA ESTELA DE FUEGO BLANCO.
+                    if (!Main.dedServ && Main.rand.NextBool(2))
+                    {
+                        Dust dS = Dust.NewDustPerfect(
+                            Projectile.Center + new Vector2(
+                                Main.rand.NextFloat(-26f, 26f),
+                                Main.rand.NextFloat(-26f, 26f)),
+                            DustID.GoldFlame,
+                            new Vector2(Main.rand.NextFloat(-0.6f, 0.6f),
+                                Main.rand.NextFloat(-1.2f, -0.3f)),
+                            190, new Color(255, 248, 220), 0.8f);
+                        dS.noGravity = true;
+                    }
+
+                    // LA LUZ DEL SOL EN VUELO.
+                    Lighting.AddLight(Projectile.Center,
+                        new Vector3(2.1f, 1.9f, 1.35f));
+
+                    // MP: la estrella respira por el cable (cada 15 t —
+                    // la caza se ve VIVA en las pantallas remotas).
+                    if ((Projectile.timeLeft % 15) == 0) Projectile.netUpdate = true;
+
+                    // LA RED DE SEGURIDAD DEL RELOJ: si la caza se eternizó
+                    // (380 t de vuelo), la gigante por tiempo — igual que
+                    // la espolote, cerca o lejos: la estrella MUERE explotando.
+                    if (_edad >= 380f)
+                    {
+                        _solGigante = true;
+                        _tickGigante = 0;
+                        Projectile.netUpdate = true;
                     }
                     break;
                 }
@@ -2575,12 +2638,15 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     LA EXPLOSIÓN de luz, bruma y formas) ===
                     case EstiloSolJefe:
                     {
-                        // EL ACTO (por edad — la misma máquina de la IA).
+                        // EL ACTO (v6.50.60 — por ESTADO, no por reloj: la
+                        // ESPOLOTE DE PROXIMIDAD puede encender la gigante
+                        // a los 120 t de vida igual que a los 380 — el
+                        // render lee la MISMA máquina de la IA).
                         float escSol = Math.Max(0.30f, Projectile.scale);
-                        bool gigante = _edad > 380f;
-                        bool estallo = _edad > 470f;
+                        bool gigante = _solGigante;
+                        bool estallo = _solExploto;
                         float g = gigante
-                            ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f)
+                            ? MathHelper.Clamp(_tickGigante / 30f, 0f, 1f)
                             : 0f;
                         float ease = g * g * (3f - 2f * g);
 
@@ -2654,7 +2720,11 @@ namespace AethonMod.Content.Projectiles.Jefes
                         else
                         {
                             // === LA EXPLOSIÓN: LUZ + BRUMA + FORMAS ===
-                            float fp = MathHelper.Clamp((_edad - 470f) / 50f, 0f, 1f);
+                            // v6.50.60 — el derrite lee el compás de la
+                            // gigante (la espolote puede encenderla a
+                            // CUALQUIER edad — el disco se funde igual).
+                            float fp = MathHelper.Clamp(
+                                (_tickGigante - 30f) / 50f, 0f, 1f);
                             float derrite = 1f - fp;
 
                             // LA CRUZ ANAMÓRFICA (la firma del estallido —
@@ -3197,15 +3267,18 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     en LA EXPLOSIÓN, la ONDA que se expande) ===
                     case EstiloSolJefe:
                     {
+                        // v6.50.60 — por ESTADO (la espolote de la IA),
+                        // no por reloj: el flare sigue a la gigante ESTÉ
+                        // donde ESTÉ la edad del sol.
                         float escSol2 = Math.Max(0.30f, Projectile.scale);
-                        bool gigante2 = _edad > 380f;
-                        bool estallo2 = _edad > 470f;
+                        bool gigante2 = _solGigante;
+                        bool estallo2 = _solExploto;
                         float g2 = gigante2
-                            ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f) : 0f;
+                            ? MathHelper.Clamp(_tickGigante / 30f, 0f, 1f) : 0f;
                         float ease2 = g2 * g2 * (3f - 2f * g2);
                         float naceSol2 = Math.Min(1f, _edad / 40f);
                         float fadeSol = estallo2
-                            ? Math.Max(0f, 1f - (_edad - 470f) / 50f)
+                            ? Math.Max(0f, 1f - (_tickGigante - 30f) / 50f)
                             : 1f;
 
                         // LA PALETA DEL ACTO.
@@ -3247,10 +3320,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                         if (estallo2)
                         {
                             OndaLib.Pulse(Main.spriteBatch, pos,
-                                (_edad - 470f) / 50f, 640f,
+                                (_tickGigante - 30f) / 50f, 640f,
                                 new Color(255, 130, 60), 0.65f * fadeSol, Seed);
                             OndaLib.Pulse(Main.spriteBatch, pos,
-                                Math.Max(0f, (_edad - 478f) / 50f), 460f,
+                                Math.Max(0f, (_tickGigante - 38f) / 50f), 460f,
                                 OroGrimorio, 0.45f * fadeSol, Seed + 3);
                         }
                         break;
@@ -3298,14 +3371,16 @@ namespace AethonMod.Content.Projectiles.Jefes
         /// </summary>
         private void DibujarDiscoSolDios()
         {
-            // El acto (la misma máquina de la IA, por edad).
-            bool estallo = _edad > 470f;
+            // El acto (v6.50.60 — la misma máquina de la IA, por ESTADO:
+            // la espolote de proximidad enciende la gigante cuando QUIERA
+            // — el disco se derrite con SU compás, no con el reloj).
+            bool estallo = _solExploto;
             float fadeSol = estallo
-                ? Math.Max(0f, 1f - (_edad - 470f) / 50f) : 1f;
+                ? Math.Max(0f, 1f - (_tickGigante - 30f) / 50f) : 1f;
             if (fadeSol <= 0f) return;   // el disco ya se deshizo en bruma
 
-            float g = _edad > 380f
-                ? MathHelper.Clamp((_edad - 380f) / 90f, 0f, 1f) : 0f;
+            float g = _solGigante
+                ? MathHelper.Clamp(_tickGigante / 30f, 0f, 1f) : 0f;
             float ease = g * g * (3f - 2f * g);
 
             // Los shaders (el cacheo de la casa — una sola Request).

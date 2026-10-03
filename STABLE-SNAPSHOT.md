@@ -1,11 +1,40 @@
-# AethonMod — ESTADO ACTUAL (v6.50.59)
+# AethonMod — ESTADO ACTUAL (v6.50.60)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.59 (LA DECIMASEXTA RONDA — la .58 publicada con
-> release 402604951, md5 67dbbe42…, CDN verificado byte a byte).
+> Última actualización: v6.50.60 (LA DECIMASÉPTIMA RONDA — la .59 publicada con
+> release 402633707, md5 a4e214fc…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.60 = LA DECIMASÉPTIMA RONDA — EL ATAQUE ESPECIAL DE CADA FASE +
+  EL SOL DE VERDAD + LA CUNA LIMPIA + LA NOCHE DEL GRIMORIO** (la letra de
+  la .59):
+  (1) **UN ESPECIAL POR FASE** (`EspecialDeFase` + `_especialPendiente` +
+  `EntrarEspecial`): P1 **EL SOL** (¡Y LA APERTURA DE TODA PELEA — al
+  materializarse, lo PRIMERO que hace el dios es volverse sol y
+  lanzarlo!), P2 **LA CATEDRAL** (el reloj permanente), P3 **EL TELAR**,
+  P4 **EL VÓRTICE**, P5 **LA CORONA**. La firma ABRE cada fase (tras el
+  decreto, directa, sin órbita) y EL SOL entra al menú de TODAS las fases
+  — el «no hace nada» era el arsenal encerrado en P3+ (960k de daño).
+  (2) **EL SOL DE VERDAD**: asunción 80→50 t, CAÑONAZO 11 px/t, caza
+  giro 0.11 + crucero 10.5 + relevo 14 (>500 px) y **ESPOLETA DE
+  PROXIMIDAD** (<240 px → gigante ×6 en 30 t que DERIVA hacia la presa →
+  detonación 640 px con toda la bruma; render por ESTADO no por reloj) —
+  SIMULADO: parado→51 px, botas→270, montura→636; fusión por tiempo a
+  los 380 t de red de seguridad.
+  (3) **LA CUNA LIMPIA** (`PosicionLimpia`): TODO convocado por la furia
+  nace en aire 3×3 validado (superficie: sin muro y sobre el suelo del
+  portador; subsuelo: muros OK, hueco siempre) — el ESCUPITajo del
+  Devorador (la causa: nacía dentro del terreno) + todas las
+  coreografías; y la CAPA DE TIERRA cierra el hueco de la .56 (nada nace
+  >10 tiles bajo el suelo del portador).
+  (4) **LA NOCHE DEL GRIMORIO**: `RegistrarKill(tipo, deOleada, esJefe)`
+  — la chusma nocturna NATURAL (`NPCID.Sets.Zombies` + ojos/licántropo/
+  luna de sangre) YA NO alimenta (la causa raíz: cada kill nocturna
+  borraba el hambre), la comida de la oleada no toca el reloj, el libro
+  FURIOSO solo admite bocados de 45 s con piso en el umbral, y EL RELOJ
+  DE LA FURIA reintenta cada 5 s: furioso + mundo libre = festín YA,
+  día o noche.
 - **v6.50.59 = LA DECIMASEXTA RONDA — EL RELOJ DE TODA LA FASE 2 + LA CAZA
   DEL SOL QUE NO SE PIERDE + EL TEMBLOR Y LA AURORA + LAS OLEADAS ×5 CON
   NIVELES Y MULTIBIOMA + EL DEVORADOR ESCUPE** (la letra de la .58):
@@ -863,7 +892,35 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.59 está implementada y build-verificada. Checklist de la .59:
+La v6.50.60 está implementada y build-verificada. Checklist de la .60:
+
+1. **LA APERTURA ES EL SOL**: invocar al jefe — apenas termine de aparecer
+   (unos segundos de órbita), lo PRIMERO que debe hacer es CONVERTIRSE EN
+   SOL y LANZARLO contra ti (el ataque pedido desde la .57, ahora en CADA
+   pelea). Y EL SOL SALE VIOLENTO (11 px/t de cañonazo), te CAZA más rápido
+   de lo que corres (correr en línea recta NO salva) y cuando te ALCANZA
+   (o se le acaba la vida) SE HINCHA ×6 rojo CERCA de ti y EXPLOTA con toda
+   la bruma — ya NUNCA estalla en el vacío lejísimos.
+2. **EL ESPECIAL DE CADA FASE**: al bajar al 80% (P2) sale el RELOJ
+   PERMANENTE (la catedral de toda la fase); al 60% (P3), tras el decreto,
+   EL TELAR (la jaula estrella) ARRANCA la fase; al 40% (P4) EL VÓRTICE
+   (la galaxia); al 20% (P5) LA CORONA (el prisma). Cada fase abre con SU
+   gala — el jefe «hace TODO lo que tiene que hacer» desde el minuto uno.
+3. **NI MUROS NI SÓTANO**: en una oleada con DEVORADOR, sus escupitajos y
+   TODAS las convocaciones (limos del Rey, sirvientes del Ojo, creepers del
+   Cerebro, esqueletos de Skeletron) deben nacer SIEMPRE en aire libre
+   —jamás dentro de un muro ni bajo el suelo— y en la capa de tierra nada
+   nace más de 10 tiles por debajo de tus pies.
+4. **LA NOCHE**: con el libro a nivel 25+, ESPERAR DE NOCHE sin matar nada
+   que no sea la chusma nocturna de siempre (zombies/ojos VALEN: matarlos
+   YA NO alimenta el libro) — a los ~5 min LA FURIA DEBE ESTALLAR DE
+   NOCHE igual que de día (antes jamás salía). Y si al momento justo hay
+   un jefe vivo, apenas muera el jefe el festín sale EN 5 s.
+5. **REGRESIÓN**: el reloj permanente de P2, la aurora y el temblor de la
+   presentación, los niveles de furia, el multibioma y la agresión de la
+   .59; el disco de plasma y la bruma del sol (.58) — todo intacto.
+
+Checklist de la .59 (vigente hasta que el usuario la recorra):
 
 1. **EL RELOJ DE TODA LA FASE 2**: pelear al jefe y esperar el RELOJ DE ARENA
    en fase 2 (80-60% de vida) — el reloj gigante debe quedarse CON EL JEFE
@@ -1093,7 +1150,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.59** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMASEXTA RONDA — feedback de la .58 (DIEZ frentes): (1) **EL RELOJ DE TODA LA FASE 2** (permanente ai[1]=2: inmortal mientras la fase 2 viva, disolución 40 t al pasar a fase 3; plato fuera del menú con el permanente vivo; el estado suelta a los 120 t) (2) **LA CAZA DEL SOL QUE NO SE PIERDE** (sin cañonazo 7.2→4.8, giro 0.075 converge ~0.8 s, gravedad comba +0.012, TRES RITMOS: 6.4 cerca / 7.6 crucero / 9.8 relevo lejos — la .58 frenaba a 4.4, MÁS LENTA que la carrera) (3) **EL TEMBLOR VUELVE** (Item161 EoL MUERTO → Item122 grave ×2 creciendo + kicks) (4) **LA AURORA EN TODO EL CIELO** (el VELO blanco-dorado de borde a borde + 11 CORTINAS de 4 tramos curvados + luz de mundo — no solo partículas) (5) **OLEADAS ×5** (spawn ×0.039, tope 50+20k techo 170, festín 25 min, puntos 60+30k) (6) **NIVELES DE FURIA** (ShardPlayer.FuriaNivel persistente: primera=1, vencer sube N+1 tope 10, morir congela; vida/daño ×(k+1)·(1+0.20(N−1)), defensa +2k+3(N−1)/+6k+8(N−1), anuncios e indicador con nivel) (7) **BIOMA EN TIEMPO REAL** (firma releída cada 30 t → pool reconstruido al vuelo) (8) **MULTIBIOMA POR NIVEL** (tu bioma peso doble + (N−1) acompañantes de la MESA DISPONIBLE — Santuario SOLO tras el Muro de Carne; nuevos principales Hallow y Meteorito) (9) **TODO MÁS AGRESIVO** (chusma 20 t/empuje 0.26/techo 13+; jefes 12 t/homing 0.09/embite y coreografía ≈×2) (10) **EL DEVORADOR ESCUPE** (cabeza <520 px de frente → 2-3 monstruos de la Corrupción DESDE LA BOCA cada 80 t + coreografía en abanico desde la boca) |
+| **v6.50.60** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas EOF exacto, headless 0 excepciones, caza del sol SIMULADA en 5 escenarios), ⏳ en juego | LA DECIMASÉPTIMA RONDA — feedback de la .59 (CUATRO frentes): (1) **EL ATAQUE ESPECIAL DE CADA FASE** (EspecialDeFase/EntrarEspecial/_especialPendiente: P1 SOL — también APERTURA de toda pelea — / P2 CATEDRAL / P3 TELAR / P4 VÓRTICE / P5 CORONA; la firma abre la fase tras el decreto con prioridad absoluta; EST_SOL en TODOS los menús — el arsenal estaba encerrado en P3+) (2) **EL SOL DE VERDAD** (asunción 50 t + cañonazo 11 px/t + giro 0.11 + crucero 10.5 + relevo 14 >500 px + ESPOLETE <240 px → gigante 30 t que deriva a la presa → explosión 640 px; render por _solGigante/_tickGigante/_solExploto; SIMULADO: botas→270 px, montura→636) (3) **LA CUNA LIMPIA** (PosicionLimpia: aire 3×3, sin muro en superficie, sobre el suelo — escupitajo del Devorador y TODAS las coreografías; capa de tierra: nada >10 tiles bajo el portador) (4) **LA NOCHE DEL GRIMORIO** (chusma nocturna natural NO alimenta — NPCID.Sets.Zombies + ojos/licántropo/luna de sangre; comida de oleada no toca el reloj; furioso = piso en el umbral con bocados de 45 s; reintento cada 5 s: furioso+mundo libre = festín YA) |
+| **v6.50.59** | ✅ Build-verificada, ✔ publicada (release 402633707, CDN byte a byte), ✔ probada (con feedback → .60) | LA DECIMASEXTA RONDA — feedback de la .58 (DIEZ frentes): (1) **EL RELOJ DE TODA LA FASE 2** (permanente ai[1]=2: inmortal mientras la fase 2 viva, disolución 40 t al pasar a fase 3; plato fuera del menú con el permanente vivo; el estado suelta a los 120 t) (2) **LA CAZA DEL SOL QUE NO SE PIERDE** (sin cañonazo 7.2→4.8, giro 0.075 converge ~0.8 s, gravedad comba +0.012, TRES RITMOS: 6.4 cerca / 7.6 crucero / 9.8 relevo lejos — la .58 frenaba a 4.4, MÁS LENTA que la carrera) (3) **EL TEMBLOR VUELVE** (Item161 EoL MUERTO → Item122 grave ×2 creciendo + kicks) (4) **LA AURORA EN TODO EL CIELO** (el VELO blanco-dorado de borde a borde + 11 CORTINAS de 4 tramos curvados + luz de mundo — no solo partículas) (5) **OLEADAS ×5** (spawn ×0.039, tope 50+20k techo 170, festín 25 min, puntos 60+30k) (6) **NIVELES DE FURIA** (ShardPlayer.FuriaNivel persistente: primera=1, vencer sube N+1 tope 10, morir congela; vida/daño ×(k+1)·(1+0.20(N−1)), defensa +2k+3(N−1)/+6k+8(N−1), anuncios e indicador con nivel) (7) **BIOMA EN TIEMPO REAL** (firma releída cada 30 t → pool reconstruido al vuelo) (8) **MULTIBIOMA POR NIVEL** (tu bioma peso doble + (N−1) acompañantes de la MESA DISPONIBLE — Santuario SOLO tras el Muro de Carne; nuevos principales Hallow y Meteorito) (9) **TODO MÁS AGRESIVO** (chusma 20 t/empuje 0.26/techo 13+; jefes 12 t/homing 0.09/embite y coreografía ≈×2) (10) **EL DEVORADOR ESCUPE** (cabeza <520 px de frente → 2-3 monstruos de la Corrupción DESDE LA BOCA cada 80 t + coreografía en abanico desde la boca) |
 | **v6.50.58** | ✅ Build-verificada, ✔ publicada (release 402604951, CDN byte a byte), ✔ probada (con feedback → .59) | LA DECIMOQUINTA RONDA — feedback de la .57 (CUATRO frentes): (1) **LA PERSIGA DE VERDAD** (steering: el rumbo GIRA hacia el jugador 0.045/t, rapidez 7.2→4.4 px/t, gravedad=comba +0.018 — la aceleración vieja quedaba enterrada bajo la inercia) (2) **EL DISCO DEL PROYECTIL SOL** (el pipeline del arma ENCIMA del sol del dios: glow coronal + backglow + RadialShine + EL DISCO SunShader, blanco-dorado→brasa, 144→860 px, fundido en 50 t al explotar — la explosión sigue siendo la de la casa) (3) **LA BRUMA MASIVA** (120 nubes en 3 capas + 3/tick de goteo + 90 chispas + 18 quads: la estrella LIBERA su materia) (4) **EL CRASH DE LA ARQUERA** (Begin-sobre-Begin cada frame: cadena correcta de lotes + SONDA INCONDICIONAL en FlushAdditive/FlushAlpha) |
 | **v6.50.57** | ✅ Build-verificada, ✔ publicada (release 402409678, CDN byte a byte), ✔ probada (con feedback → .58) | LA DECIMOCUARTA RONDA — feedback de la .56 (SIETE frentes): (1) **EL SOL DEL DIOS** (el ataque especial: el jefe SE CONVIERTE en sol — asunción 80 t — y LO LANZA: persiga lenta + gravedad + GIGANTE ROJA ×6 + explosión de luz/bruma/formas con daño AoE 640 px honesto) (2) **LA COREOGRAFÍA** (la cadena de los god-bosses: SOL→TELAR→DANZA→LANZAS→CORONA→ESTALLIDO cada 6-9 ataques en P3+, sin pasar por la órbita) (3) **LA IA DEL DUELISTA** (órbita que lee distancia + quiebro del sentido + memoria doble) (4) **LA BOLA FINAL SIN PERSECUCIÓN** (línea recta) + **EL DIOS MUERE DETENIDO** (velocidad 0 desde t=20, flash final 50 t hasta 4800 px) (5) **LAS CALAVERAS DEL LIBRO POTENCIADAS** (proyectil 837 real: gigante ×2.1-2.8, veloz, brillante, ×1.35 daño, estela dorado-violeta por CalaveraPotenciadaFX) (6) **EL VOLTEO DE GRAVEDAD MUERTO** (FlipGravity eliminado, anuncio retirado es+en) (7) **EL client.log LIMPIO** (2 FormatException de .plr corruptos de vanilla, 1 h 50 min sin excepciones del mod) |
 | **v6.50.56** | ✅ Build-verificada, ✔ publicada (release 402301259, CDN byte a byte), ✔ probada (con feedback → .57) | LA DECIMOTERCERA RONDA — feedback de la .55 (SIETE frentes): (1) **EL GEL INVISIBLE** (crash 1: Draw sin Begin en la bola de gel — SU PROPIO LOTE ALFA) (2) **EL FUNERAL EN HILO AJENO** (crash 2: ThreadStateException al salir del mundo — QueueMainThreadAction + AprenderHiloPrincipal) (3) **EL HALO ARCOÍRIS PLANO Y MÁS CERCA** (13 px, rotación 0, giro en las perlas) (4) **LA MINI-EXPLOSIÓN CABALGA CON LA MASCOTA** (ai[1]=whoAmI) **SIN ARO CIRCULAR** (solo brillo) (5) **LA MASCOTA ALUMBRA ×1.6** (6) **LA MUERTE QUE SE ENCIENDE + LA BOLA FINAL BLANCO-DORADA** (EstiloBolaFinal=23: el proyectil sol en blanco-oro, 7 s, luz 2.6/2.35/1.7) (7) **EL REY GELATINA**: limos DESDE SU CUERPO + gel con cada salto Y teletransporte + LA CHUSMA sin muros ni subsuelo (SpawnTileY/WallType) |

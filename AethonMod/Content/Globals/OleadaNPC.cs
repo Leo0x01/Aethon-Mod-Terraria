@@ -585,17 +585,35 @@ namespace AethonMod.Content.Globals
                 Player pl = spawnInfo.Player;
                 bool portadorEnSuperficie = !pl.ZoneDirtLayerHeight && !pl.ZoneRockLayerHeight &&
                                              !pl.ZoneUnderworldHeight && !pl.ZoneDungeon;
-                if (portadorEnSuperficie)
+                // v6.50.60 — LA CAPA DE TIERRA YA NO ES TIERRA DE NADIE (la
+                // letra: «en algunos niveles de la oleada los monstruos
+                // siguen apareciendo entre los muros y bajo tierra»): el
+                // chequeo de la .56 SOLO corría con el portador en la
+                // SUPERFICIE — en cuanto pisaba la capa de tierra
+                // (ZoneDirtLayerHeight: la entrada de la cueva, la casa
+                // cavada en la loma) la protección moría ENTERA y el motor
+                // sembraba bolsas de aire en la roca PROFUNDA. AHORA la
+                // capa de tierra tiene SU REGLA: los muros son su casa
+                // (cueva es cueva) PERO nada nace MÁS ABAJO de su propio
+                // suelo (margen 10 tiles — la chusma nace en TU nivel de
+                // cueva, no en bolsas bajo tus pies).
+                bool portadorEnTierra = pl.ZoneDirtLayerHeight && !pl.ZoneRockLayerHeight &&
+                                         !pl.ZoneUnderworldHeight && !pl.ZoneDungeon;
+                if (portadorEnSuperficie || portadorEnTierra)
                 {
                     int sx = spawnInfo.SpawnTileX, sy = spawnInfo.SpawnTileY;
-                    bool bajoTierra = sy > spawnInfo.PlayerFloorY + 6;
+                    bool bajoTierra = sy > spawnInfo.PlayerFloorY +
+                        (portadorEnSuperficie ? 6 : 10);
                     bool entreMuros = false;
                     if (sx > 5 && sx < Main.maxTilesX - 5 && sy > 5 && sy < Main.maxTilesY - 5)
                     {
                         Tile tl = Main.tile[sx, sy];
                         entreMuros = tl != null && tl.WallType != 0;  // muro natural o colocado = DENTRO de algo
                     }
-                    if (bajoTierra || entreMuros)
+                    // Superficie: ni muros ni sótano. Capa de tierra: SOLO
+                    // se veta lo que nace bajo tu propio suelo (la cueva al
+                    // nivel del portador es su casa).
+                    if (bajoTierra || (portadorEnSuperficie && entreMuros))
                     {
                         pool.Clear();   // este intento no nace: el motor prueba otro tile
                         return;
@@ -925,10 +943,90 @@ namespace AethonMod.Content.Globals
         }
 
         /// <summary>
+        /// v6.50.60 — LA CUNA LIMPIA (la letra: «en algunos niveles de la
+        /// oleada los monstruos siguen apareciendo entre los muros y bajo
+        /// tierra»). LA CAUSA: las convocaciones MANUALES (el escupitajo
+        /// del Devorador, los limos del Rey, los anillos del Ojo/Cerebro/
+        /// Skeletron) nacían en la posición CRUDA — y el Devorador VIVE
+        /// DENTRO del terreno: sus escupidos nacían ENTRE MUROS y BAJO
+        /// TIERRA (por eso era «en algunos niveles»: solo en las oleadas
+        /// cuyo guardián es el gusano). LA CURA: TODO monstruo convocado
+        /// por la furia nace en AIRE DE VERDAD — la cuna se valida
+        /// (hueco 3×3 sin sólidos) y, si el portador está en la
+        /// superficie, SIN MURO y SOBRE su suelo; si la posición cruda no
+        /// sirve, se busca la más cercana caminando HACIA la presa (y
+        /// luego hacia arriba — la boca del gusano escupe AL AIRE que
+        /// respira su comida); la red final es el aire de la propia
+        /// presa. En el subsuelo los muros son la casa (se permiten) —
+        /// pero el hueco de aire es ley SIEMPRE.
+        /// </summary>
+        private static Vector2 PosicionLimpia(NPC jefe, Player presa, Vector2 cruda)
+        {
+            try
+            {
+                // ¿El portador está AL AIRE LIBRE? (encima de la capa de
+                // tierra): los convocados nacen SIN MURO y SOBRE su suelo.
+                bool portadorArriba = presa == null ||
+                    (!presa.ZoneDirtLayerHeight && !presa.ZoneRockLayerHeight &&
+                     !presa.ZoneUnderworldHeight && !presa.ZoneDungeon);
+                int sueloPortador = presa != null
+                    ? (int)(presa.Bottom.Y + 8f) / 16 : int.MaxValue;
+
+                // EL RUMBO DE LA BÚSQUEDA: hacia la presa (el aire que
+                // respira la comida) — y si nada sirve, hacia arriba.
+                Vector2 haciaPresa = presa != null
+                    ? (presa.Center - cruda).SafeNormalize(Vector2.UnitX)
+                    : -Vector2.UnitY;
+
+                // 12 CANDIDATOS: la cruda · acercándose a la presa (6
+                // pasos de 28 px) · subiendo desde el rumbo (6 pasos de
+                // 32 px — la superficie está arriba).
+                for (int i = 0; i < 12; i++)
+                {
+                    Vector2 cand = i < 6
+                        ? cruda + haciaPresa * (28f * i)
+                        : cruda + haciaPresa * 140f + new Vector2(0f, -32f * (i - 5));
+                    int cx = (int)(cand.X / 16f), cy = (int)(cand.Y / 16f);
+                    if (cx < 5 || cx >= Main.maxTilesX - 5 ||
+                        cy < 5 || cy >= Main.maxTilesY - 5) continue;
+
+                    // EL HUECO: 3×3 de aire (la criatura NECESITA cuerpo).
+                    bool hueco = true;
+                    for (int tx = cx - 1; tx <= cx + 1 && hueco; tx++)
+                        for (int ty = cy - 1; ty <= cy + 1; ty++)
+                        {
+                            Tile t = Main.tile[tx, ty];
+                            if (t != null && t.HasTile && Main.tileSolid[t.TileType])
+                            { hueco = false; break; }
+                        }
+                    if (!hueco) continue;
+
+                    if (portadorArriba)
+                    {
+                        Tile tl = Main.tile[cx, cy];
+                        if (tl != null && tl.WallType != 0) continue;   // ENTRE MUROS: no
+                        if (cy > sueloPortador + 5) continue;            // BAJO TIERRA: no
+                    }
+                    return cand;   // LIMPIA: aquí nace
+                }
+
+                // LA RED: el aire de la propia presa (donde está la comida
+                // SIEMPRE hay aire de verdad).
+                if (presa != null && presa.active)
+                    return presa.Center + new Vector2(Main.rand.NextFloat(-70f, 70f), -50f);
+                return cruda;
+            }
+            catch { return cruda; }
+        }
+
+        /// <summary>
         /// v6.50.59 — EL ESCUPITajo DEL DEVORADOR: los monstruos de SU
         /// bioma (la Corrupción) salen DISPARADOS de su boca hacia la
         /// presa — son sus proyectiles vivos (nacen de la boca con
         /// velocidad heredada, como todo escupitajo que se respete).
+        /// v6.50.60 — LA BOCA SE LIMPIA: el gusano escupe desde DENTRO de
+        /// la tierra — la cuna pasa por PosicionLimpia (el escupitajo
+        /// sale AL AIRE, camino de su comida, jamás dentro del muro).
         /// </summary>
         private void EscupirDevorador(NPC npc, Player presa, int cuantos)
         {
@@ -936,7 +1034,7 @@ namespace AethonMod.Content.Globals
             {
                 bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
                 Vector2 rumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
-                Vector2 boca = npc.Center + rumbo * 30f;
+                Vector2 boca = PosicionLimpia(npc, presa, npc.Center + rumbo * 30f);
                 for (int i = 0; i < cuantos; i++)
                 {
                     int tipo = subsuelo
@@ -944,7 +1042,7 @@ namespace AethonMod.Content.Globals
                         : (Main.rand.NextBool() ? NPCID.EaterofSouls : NPCID.CorruptSlime);
                     Vector2 vel = rumbo.RotatedBy(Main.rand.NextFloat(-0.45f, 0.45f)) *
                         Main.rand.NextFloat(7f, 11f);
-                    Convocar(npc, tipo, boca, vel.X, vel.Y);
+                    Convocar(npc, tipo, boca + new Vector2(Main.rand.NextFloat(-18f, 18f), 0f), vel.X, vel.Y);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center); // el escupitajo
             }
@@ -1077,8 +1175,10 @@ namespace AethonMod.Content.Globals
                 Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) *
                     Main.rand.NextFloat(4f, 8f);
                 vel.Y -= 3f;   // el escupitajo se alza (nace del cuerpo y vuela)
+                // v6.50.60 — LA CUNA LIMPIA: el Rey puede saltar sobre un
+                // tejado o una colina — el limo nace en AIRE de verdad.
                 Convocar(npc, NPCID.BlueSlime,
-                    npc.Center + new Vector2(0f, -12f), vel.X, vel.Y);
+                    PosicionLimpia(npc, presa, npc.Center + new Vector2(0f, -12f)), vel.X, vel.Y);
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
         }
@@ -1103,6 +1203,10 @@ namespace AethonMod.Content.Globals
         /// </summary>
         private void ReyAterriza(NPC npc)
         {
+            // v6.50.60 — LA CUNA LIMPIA también aquí: la presa del Rey
+            // valida la cuna de sus limos de rebote.
+            Player presa = (npc.target >= 0 && npc.target < Main.maxPlayers)
+                ? Main.player[npc.target] : null;
             for (int i = 0; i < 12; i++)
             {
                 float ang = Main.rand.NextFloat(MathHelper.TwoPi);       // TODAS las direcciones
@@ -1112,7 +1216,8 @@ namespace AethonMod.Content.Globals
                 LanzarBolaGel(npc, npc.Center + new Vector2(0f, 30f), vel);
             }
             for (int i = 0; i < 3; i++)
-                Convocar(npc, NPCID.BlueSlime, npc.Center + new Vector2(Main.rand.NextFloat(-120f, 120f), -12f),
+                Convocar(npc, NPCID.BlueSlime,
+                    PosicionLimpia(npc, presa, npc.Center + new Vector2(Main.rand.NextFloat(-120f, 120f), -12f)),
                     Main.rand.NextFloat(-3f, 3f), -4f);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
         }
@@ -1163,7 +1268,10 @@ namespace AethonMod.Content.Globals
                 float ang = i * MathHelper.TwoPi / cantidad;
                 Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 300f;
                 pos.Y -= 60f;
-                Convocar(npc, NPCID.ServantofCthulhu, pos, MathF.Cos(ang) * 4f, -2f);
+                // v6.50.60 — LA CUNA LIMPIA: el anillo vive en el aire de
+                // la presa — pero un flanco puede caer en una colina
+                // maciza: se valida IGUAL (el sirviente nace en aire).
+                Convocar(npc, NPCID.ServantofCthulhu, PosicionLimpia(npc, presa, pos), MathF.Cos(ang) * 4f, -2f);
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Zombie104, npc.Center); // el nido abriendo
         }
@@ -1224,7 +1332,7 @@ namespace AethonMod.Content.Globals
             {
                 float ang = i * MathHelper.TwoPi / extra;
                 Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.5f) * 130f;
-                Convocar(npc, NPCID.Creeper, pos, MathF.Cos(ang) * 3f, -1f);
+                Convocar(npc, NPCID.Creeper, PosicionLimpia(npc, presa, pos), MathF.Cos(ang) * 3f, -1f);
             }
 
             // (2) LOS MONSTRUOS DE SU BIOMA: el Carmesí según la depth.
@@ -1238,7 +1346,7 @@ namespace AethonMod.Content.Globals
                 float ang = Main.rand.NextFloat(MathHelper.TwoPi);
                 Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 220f;
                 pos.Y -= 40f;
-                Convocar(npc, tipo, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+                Convocar(npc, tipo, PosicionLimpia(npc, presa, pos), Main.rand.NextFloat(-2f, 2f), -2f);
             }
         }
 
@@ -1257,10 +1365,13 @@ namespace AethonMod.Content.Globals
             // LA RACIÓN DE LA BOCA: los monstruos de la Corrupción salen
             // escupidos hacia la presa (sus proyectiles vivos) — el abanico
             // del escupitajo se abre rumbo al jugador.
+            // v6.50.60 — LA BOCA SE LIMPIA (el gusano escupe desde dentro
+            // de la tierra: la cuna pasa por PosicionLimpia — el abanico
+            // sale AL AIRE, jamás entre los muros).
             bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
             int cantidad = 3 + Math.Min(3, 1 + Oleada / 4);
             Vector2 rumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
-            Vector2 boca = npc.Center + rumbo * 30f;
+            Vector2 boca = PosicionLimpia(npc, presa, npc.Center + rumbo * 30f);
             for (int i = 0; i < cantidad; i++)
             {
                 int tipo = subsuelo
@@ -1268,7 +1379,7 @@ namespace AethonMod.Content.Globals
                     : (Main.rand.NextBool() ? NPCID.EaterofSouls : NPCID.CorruptSlime);
                 Vector2 vel = rumbo.RotatedBy((i - (cantidad - 1) * 0.5f) * 0.16f) *
                     Main.rand.NextFloat(7f, 11f);
-                Convocar(npc, tipo, boca, vel.X, vel.Y);
+                Convocar(npc, tipo, boca + new Vector2(Main.rand.NextFloat(-18f, 18f), 0f), vel.X, vel.Y);
             }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
         }
@@ -1287,7 +1398,9 @@ namespace AethonMod.Content.Globals
             {
                 float ang = i * MathHelper.TwoPi / cantidad;
                 Vector2 pos = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 280f;
-                Convocar(npc, NPCID.Skeleton, pos, MathF.Cos(ang) * 3f, -2f);
+                // v6.50.60 — LA CUNA LIMPIA: el anillo de la presa, validado
+                // (un flanco en la colina ya no se traga al esqueleto).
+                Convocar(npc, NPCID.Skeleton, PosicionLimpia(npc, presa, pos), MathF.Cos(ang) * 3f, -2f);
             }
 
             // (2) v6.50.57 — LAS CALAVERAS DEL LIBRO, POTENCIADAS (la

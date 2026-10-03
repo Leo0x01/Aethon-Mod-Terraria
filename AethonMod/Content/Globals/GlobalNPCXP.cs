@@ -203,8 +203,18 @@ namespace AethonMod.Content.Globals
                     // vuelven a su sitio). v6.49: el servidor manda el
                     // estado nuevo al portador (EcoRed.SincronizarHambre
                     // corre dentro de RegistrarKill).
+                    // v6.50.60 — LA CENA LLEVA SU NOMBRE (la cura del «por
+                    // la noche la oleada no se activa»): RegistrarKill
+                    // recibe QUÉ murió — la chusma nocturna NATURAL (los
+                    // zombies de siempre) ya no alimenta el libro (la
+                    // defensa de medianoche no es cena), la comida de la
+                    // PROPIA oleada no toca el reloj (es SU festín) y el
+                    // libro FURIOSO ya no se calma con bocados.
                     if (cobro || xp > 0)
-                        player.GetModPlayer<Players.ShardPlayer>()?.RegistrarKill();
+                        player.GetModPlayer<Players.ShardPlayer>()?.RegistrarKill(
+                            npc.type,
+                            sello != null && sello.EsDeOleada,
+                            npc.boss);
 
                     // La barra dorada late en la pantalla del dueño del libro
                     // (v6.49: en MP el latido viaja por EcoRed al portador).

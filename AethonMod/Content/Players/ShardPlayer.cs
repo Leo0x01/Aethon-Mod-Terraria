@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using AethonMod.Content.Systems;
@@ -407,6 +408,31 @@ namespace AethonMod.Content.Players
                         }
                     }
                     // guardado el libro: DUERME — la hambre se congela.
+
+                    // ============================================================
+                    // v6.50.60 — EL RELOJ DE LA FURIA (la letra: «analisa
+                    // bien el codigo de la oleada para que se pueda activar
+                    // SIEMPRE que el libro tenga hambre»): el intento viejo
+                    // vivía SOLO en el instante de cada momento nuevo (una
+                    // ventana de 1 tick cada 75 s — y NINGUNA tras el
+                    // momento 10): si en ese instante había un jefe vivo o
+                    // una invasión, la furia esperaba otro momento
+                    // completo… o moría de hambre para siempre. AHORA: libro
+                    // FURIOSO + mundo libre = festín EN CADA CHEQUEO (cada
+                    // 5 s, día o noche, siempre) — la oleada sale SIEMPRE
+                    // que el libro tenga hambre y el mundo pueda recibirla.
+                    // ============================================================
+                    if (MomentosHambre >= MomentosParaFuria && !Player.dead &&
+                        nivel >= NivelMinimoHambre &&
+                        ((Main.GameUpdateCount + (ulong)Player.whoAmI * 61ul) % 300u) == 0u)
+                    {
+                        var configR = ModContent.GetInstance<Content.AethonConfigServidor>();
+                        bool eventoR = configR == null || configR.EventoHambreGrimorio;
+                        if (eventoR && !GrimorioFuriaSistema.Activo &&
+                            GrimorioFuriaSistema.MundoLibre())
+                            GrimorioFuriaSistema.Provocar(Player,
+                                Math.Max(1, Math.Min(10, FuriaNivel)));
+                    }
                 }
 
                 // EL LIBRO CELOSO y EL AURA corren en el CLIENTE del
@@ -510,17 +536,75 @@ namespace AethonMod.Content.Players
         }
 
         /// <summary>
+        /// v6.50.60 — ¿Es CHUSMA NOCTURNA NATURAL? (la de vanilla, la de
+        /// siempre: zombies, ojos demoníacos, licántropos, los de luna de
+        /// sangre). LA LETRA: «por la noche la oleada parece no activarse
+        /// […] que se pueda activar siempre que el libro tenga hambre» —
+        /// LA CAUSA RAÍZ: de noche los monstruos NATURALES te obligan a
+        /// defenderte y CADA kill borraba el hambre de raíz (el reloj
+        /// volvía a cero una y otra vez: el 4º momento JAMÁS llegaba).
+        /// La defensa de medianoche NO es una cena: el libro no cuenta
+        /// esa chusma de siempre como comida (la oleada sí cuenta — es
+        /// SU comida, la que ÉL trajo a la mesa).
+        /// </summary>
+        private static bool EsChusmaNocturnaNatural(int tipo)
+        {
+            if (tipo <= 0) return false;
+            try
+            {
+                return NPCID.Sets.Zombies[tipo] ||        // TODA la familia zombie (la noche de siempre)
+                    tipo == NPCID.DemonEye ||               // el ojo que abre la noche
+                    tipo == NPCID.WanderingEye ||           // su primo del hardmode
+                    tipo == NPCID.Werewolf ||               // la luna llena
+                    tipo == NPCID.Drippler ||               // la luna de sangre
+                    tipo == NPCID.BloodZombie;              // la luna de sangre
+            }
+            catch { return false; }
+        }
+
+        /// <summary>
         /// El portador mató algo (lo llama GlobalNPCXP cuando el libro de
         /// su barra rápida ha comido): la hambre se perdona — la barra
         /// dorada recupera su color y los susurros callan. v6.49: el
         /// estado nuevo viaja al portador (EcoRed) — en MP la autoridad
         /// la perdona y el cliente del portador la VE perdonada.
-        /// v6.50.2 — FIX (bandwidth): SOLO cuando el hambre CAMBIA — el
-        /// kill que no toca el estado (hambre ya en 0, la mayoría en
-        /// combate) ya no dispara un paquete por kill.
+        /// v6.50.2 — FIX (bandwidth): SOLO cuando el hambre CAMBIA.
+        /// v6.50.60 — LAS CENAS DE VERDAD (la letra: «que la oleada se
+        /// pueda activar SIEMPRE que el libro tenga hambre» — la cura del
+        /// «por la noche no se activa»): (a) la chusma nocturna NATURAL
+        /// no alimenta NADA (defenderse de los zombies de siempre no es
+        /// cenar — el reloj del hambre sigue corriendo);
+        /// (b) el libro FURIOSO (MomentosHambre >= MomentosParaFuria)
+        /// ya no se calma con bocados: la kill solo le resta 45 s al
+        /// reloj y NUNCA por debajo del umbral — la furia está
+        /// DECLARADA, la oleada VA a salir; (c) la comida de la PROPIA
+        /// oleada no toca el reloj (es SU festín, no una cena); (d) lo
+        /// demás (la chusma del día, los monstruos de mazmorra/cuevas)
+        /// alimenta como siempre: hambre a cero — el sabor de siempre.
         /// </summary>
-        public void RegistrarKill()
+        public void RegistrarKill(int npcType = -1, bool deOleada = false, bool esJefe = false)
         {
+            // (c) LA COMIDA DE LA OLEADA: el festín ya está en marcha —
+            // matar a LOS SUYOS no cambia el reloj (la saciedad llega
+            // con el final del festín, PerdonarHambre).
+            if (deOleada) return;
+
+            // (a) LA DEFENSA DE MEDIANOCHE NO ES CENA: el zombie natural
+            // que te saltó a la garganta no alimenta el libro — el reloj
+            // sigue su marcha y la furia llega de noche IGUAL que de día.
+            if (!esJefe && EsChusmaNocturnaNatural(npcType)) return;
+
+            // (b) EL LIBRO FURIOSO NO SE CALMA CON BOCADOS: una vez
+            // declarada la furia, la kill solo muerde 45 s del reloj —
+            // y jamás baja del umbral (la oleada YA está prometida).
+            if (MomentosHambre >= MomentosParaFuria)
+            {
+                int suelo = MomentosParaFuria * 60 * SegundosPorMomento;
+                TicksSinMatar = Math.Max(suelo, TicksSinMatar - 45 * 60);
+                return;
+            }
+
+            // (d) LA CENA DE VERDAD: hambre a cero (el sabor de siempre).
             TicksSinMatar = 0;
             bool cambio = MomentosHambre != 0;
             MomentosHambre = 0;

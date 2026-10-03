@@ -285,6 +285,19 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private int _proximoCoreoEn = 999;
         private int _anteultimoAtaque = 0;
 
+        // === v6.50.60 — EL ATAQUE ESPECIAL DE CADA FASE (la letra:
+        //     «intenta que el jefe tenga en cada fase un ataque especial»
+        //     — la cura del «no hace nada de lo que tiene que hacer»):
+        //     cada fase del dios tiene SU firma — y la firma ABRE la fase
+        //     (el PRIMER ataque tras el decreto ES el especial, siempre):
+        //       P1 · EL SOL DEL DIOS (también APERTURA de la pelea — el
+        //            ataque pedido en .57 sale EN CADA combate, YA)
+        //       P2 · LA CATEDRAL DEL TIEMPO (el reloj permanente de .59)
+        //       P3 · EL TELAR DE CONSTELACIONES (la jaula estrella)
+        //       P4 · EL VÓRTICE PRIMORDIAL (la galaxia que colapsa)
+        //       P5 · LA CORONA ETERNA (el prisma de la furia) ===
+        private int _especialPendiente = -1;
+
         // === LAS RUNAS (heredadas de la sierpe). EL VOLTEO DE GRAVEDAD
         //     MURIÓ en la v6.50.57 (la letra: «eso que hace el jefe de
         //     cambiar la gravedad tiene que dejar de hacerlo») — el suelo
@@ -782,6 +795,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         _sentidoOrbita = Main.rand.NextBool() ? 1 : -1;
                         NPC.alpha = 0;
                         NPC.dontTakeDamage = false;
+                        // v6.50.60 — LA APERTURA ES EL SOL (la letra: «el
+                        // ataque del sol que debe lanzar y perseguirme no
+                        // lo hace realmente» — porque vivía encerrado en
+                        // fase 3+ y la pelea moría antes de verlo): el
+                        // PRIMER acto del dios al materializarse ES
+                        // convertirse en sol y LANZARLO — el ataque
+                        // especial sale EN CADA combate, desde el segundo
+                        // uno de la pelea.
+                        _especialPendiente = EST_SOL;
                         NPC.netUpdate = true;
                     }
                     break;
@@ -896,6 +918,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // v6.50.57 — CADA ELECCIÓN CUENTA para el compás de la danza.
             _ataquesDesdeCoreo++;
 
+            // v6.50.60 — EL ESPECIAL DE LA FASE MANDA SOBRE TODO (la
+            // letra: «intenta que el jefe tenga en cada fase un ataque
+            // especial»): si la fase acaba de abrirse y su firma está
+            // pendiente, LA FIRMA SALE — antes que el compás del
+            // estallido, antes que la coreografía, antes que la lectura.
+            // (El decreto lo consume al cerrar; esto cubre los cambios
+            // de fase encadenados y la apertura de la pelea.)
+            if (_especialPendiente >= 0 && EntrarEspecial()) return;
+
             // v6.50.54 — EL COMPÁS DEL ESTALLIDO (fase 3+, la letra del
             // usuario: «en la fase 3 debe hacerla cada un número de veces
             // aleatorio entre 1 a 9 ataques de otro tipo»): cuando el
@@ -945,10 +976,15 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // queda en el menú con su PRESUPUESTO — 1 y 2 usos por fase.
             // Y LAS TRES ARMAS NUEVAS DE LA INVESTIGACIÓN EoL: LA DANZA
             // SOLAR desde P3, LAS LANZAS y LA CORONA desde P4).
+            // v6.50.60 — EL SOL DEL DIOS EN TODAS LAS FASES (la cura del
+            // «no hace nada»: el ataque pedido en .57 estaba encerrado en
+            // fase 3+ — con 2,4 M de vida el usuario peleaba TODA la P1/P2
+            // sin verlo NUNCA; ahora es plato de TODA la carta, además de
+            // la APERTURA de la pelea y el especial de la fase 1).
             int[] menu = Phase switch
             {
-                1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO },
-                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO },
+                1 => new[] { EST_JUICIO, EST_RAYO, EST_ESTALLIDO, EST_SOL },
+                2 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_RELOJ, EST_CORO, EST_ESTALLIDO, EST_SOL },
                 3 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_RELOJ, EST_CORO, EST_MANADA, EST_DANZA, EST_SOL },
                 4 => new[] { EST_JUICIO, EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
                 _ => new[] { EST_RAYO, EST_NOVA, EST_CRUZ, EST_DESTELLO, EST_VORTICE, EST_JUICIO, EST_RELOJ, EST_CORO, EST_MANADA, EST_TELAR, EST_DANZA, EST_LANZAS, EST_CORONA, EST_SOL },
@@ -1557,14 +1593,17 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado <= 80)
+            if (_tickEstado <= 50)
             {
                 // SE DETIENE y SE ALZA: el dios no camina mientras se
                 // convierte — QUIETO mientras el sol lo viste.
+                // v6.50.60 — LA ASUNCIÓN ES MÁS CORTA (80→50 t): el
+                // lanzamiento llega ANTES y con más rabia (el proyectil
+                // del sol lleva el mismo compás).
                 NPC.velocity = Vector2.Lerp(NPC.velocity,
                     new Vector2(0f, -0.35f), 0.18f);
             }
-            else if (_tickEstado <= 106)
+            else if (_tickEstado <= 76)
             {
                 // EL RETROCESO del cañonazo (la luz devuelta lo empuja
                 // atrás — el dios siente SU propio disparo).
@@ -1573,7 +1612,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.velocity = Vector2.Lerp(NPC.velocity, atras, 0.10f);
             }
 
-            if (_tickEstado >= 130) CerrarEstado();
+            if (_tickEstado >= 100) CerrarEstado();
         }
 
         /// <summary>
@@ -2238,9 +2277,56 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // → P5 960 (la fórmula gemela de la del proyectil).
             float radioMax = 600f + (Phase - 2) * 120f;
             // EL DECRETO NO ENCADENA (la coreografía muere aquí: es el
-            // cambio de FASE — después del decreto viene el aire).
+            // cambio de FASE — pero v6.50.60: TRAS el decreto viene EL
+            // ESPECIAL DE LA FASE — la firma abre la fase SIEMPRE).
             int espera = 24 + (int)((radioMax - 80f) / 2f) + 25;
-            if (_tickEstado >= espera) { _estado = EST_FLOTAR; _tickEstado = 0; }
+            if (_tickEstado >= espera)
+            {
+                if (_especialPendiente >= 0 && EntrarEspecial()) return;
+                _estado = EST_FLOTAR;
+                _tickEstado = 0;
+            }
+        }
+
+        // ==================================================================
+        //  v6.50.60 — EL ESPECIAL DE CADA FASE (la letra: «intenta que el
+        //  jefe tenga en cada fase un ataque especial») — LA FIRMA abre
+        //  la fase: P1 el SOL, P2 la CATEDRAL, P3 el TELAR, P4 el VÓRTICE
+        //  y P5 la CORONA. El decreto lo suelta al cerrar; la apertura
+        //  de la pelea (P1) lo trae de nacimiento.
+        // ==================================================================
+
+        /// <summary>LA FIRMA de cada fase (el ataque especial que la abre).</summary>
+        private static int EspecialDeFase(int fase) => fase switch
+        {
+            1 => EST_SOL,       // EL SOL DEL DIOS — el especial de .57, POR FIN en su casa
+            2 => EST_RELOJ,     // LA CATEDRAL DEL TIEMPO — el reloj permanente de TODA la fase
+            3 => EST_TELAR,     // EL TELAR — la jaula de la estrella
+            4 => EST_VORTICE,   // EL VÓRTICE — la galaxia que colapsa
+            _ => EST_CORONA,    // LA CORONA — el prisma de la furia
+        };
+
+        /// <summary>
+        /// ENTRA al especial pendiente (lo consume). Devuelve false si el
+        /// especial ya no tiene sentido (la firma de P2 con el reloj
+        /// permanente YA vivo: la catedral está servida — la rotación
+        /// normal sigue su curso).
+        /// </summary>
+        private bool EntrarEspecial()
+        {
+            int especial = _especialPendiente;
+            _especialPendiente = -1;
+            if (especial < 0) return false;
+            if (especial == EST_RELOJ && Phase == 2 && RelojPermanenteVivo())
+                return false;   // la catedral de la fase 2 ya está en pie
+
+            _anteultimoAtaque = _ultimoAtaque;
+            _ultimoAtaque = especial;
+            _estado = especial;
+            _tickEstado = 0;
+            _coreoLargo = 0;        // la firma entra LIMPIA (sin cola vieja)
+            NPC.netUpdate = true;
+            return true;
         }
 
         // ==================================================================
@@ -2327,6 +2413,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             // ventana de escape se lee EN MOVIMIENTO. Solo si no está YA en
             // pleno decreto (los cambios encadenados por DPS no re-decretan:
             // un decreto a la vez).
+            // v6.50.60 — Y TRAS EL DECRETO, LA FIRMA (la letra: «que el
+            // jefe tenga en cada fase un ataque especial»): la fase nueva
+            // abre con SU especial — P2 la catedral, P3 el telar, P4 el
+            // vórtice, P5 la corona (P1 abre con el sol desde la propia
+            // aparición). El decreto anuncia, la firma CASTIGA. La firma
+            // se arma SIEMPRE con la fase MÁS NUEVA (dos cambios
+            // encadenados durante un decreto no dejan la firma vieja).
+            _especialPendiente = EspecialDeFase(Phase);
             if (Phase >= 2 && _estado != EST_DECRETO)
             {
                 _estado = EST_DECRETO;
