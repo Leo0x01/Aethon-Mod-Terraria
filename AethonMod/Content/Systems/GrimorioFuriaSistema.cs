@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -94,6 +95,33 @@ namespace AethonMod.Content.Systems
         private static int _oleadasTotales = 0;    // N (1..10, 11 = solo especial)
         private static int _oleadaActual = 0;      // k (1..N)
         private static int _ticksOleada = 0;       // reloj de la red de seguridad
+        // ==================================================================
+        //  v6.50.59 — EL SISTEMA DE NIVELES DE FURIA (la letra del usuario:
+        //  «cuando inicia la primera oleada natural siempre debe empezar
+        //  en nivel 1, luego si el jugador logra vencer el nivel 1 de esa
+        //  oleada, la siguiente sera de nivel 2, o sea 2 oleadas, si el
+        //  jugador logra vencer esa oleada, la siguiente sera de nivel 3,
+        //  o sea 3 oleadas, y la fuerza, poder, vida y defensa de los
+        //  monstruos aumenta en consecuencia del nivel de las oleadas»):
+        //  el festín de nivel N trae N OLEADAS CONSECUTIVAS y TODAS sus
+        //  criaturas escalan vida/daño/defensa/agresión con N (además de
+        //  la oleada interna k). El nivel VIVE en el portador
+        //  (ShardPlayer.FuriaNivel, persistente): nace en 1 y SOLO SUBE AL
+        //  VENCER el festín completo (morir lo congela: la próxima repite
+        //  el nivel — el libro no olvida, pero tampoco regala).
+        // ==================================================================
+        private static int _nivelFuria = 1;        // N (1..10) — el nivel del festín en marcha
+        // v6.50.59 — LA MEZCLA DE BIOMAS DEL NIVEL (la letra: «a mayor
+        // nivel de oleada mas monstruos de biomas diferentes aparecen,
+        // siempre usando los biomas disponibles en el momento»): el festín
+        // de nivel N mezcla el bioma ACTUAL del portador (peso doble, lo
+        // sigue en TIEMPO REAL) + (N−1) biomas acompañantes elegidos al
+        // arrancar cada oleada de la MESA DE BIOMAS DISPONIBLES del mundo
+        // (el Santuario SOLO tras el Muro de Carne — «cuando se mate el
+        // muro de carne los nuevos biomas son añadidos a las nuevas
+        // oleadas a partir de ese momento, pero antes no»).
+        private static List<int[]> _acompanantes = null; // los biomas extra de ESTA oleada
+        private static string _firmaBioma = "";         // el bioma principal del portador AHORA
         // v6.50.29 — LOS PUNTOS DE LA OLEADA (el waveKills de vanilla): cada
         // muerte de chusma sellada suma 1; al cruzar PuntosRequeridos(k) la
         // oleada avanza — LA PROGRESIÓN ES DE MUERTES, como las lunas de
@@ -102,10 +130,12 @@ namespace AethonMod.Content.Systems
         // seguridad (que el festín nunca se cuelgue si el portador no mata).
         private static int _puntosOleada = 0;
         // v6.50.29 — EL POOL DE LA OLEADA (caché): los tipos que el motor
-        // natural puede escupir durante ESTA oleada (el bioma del portador
-        // al arrancar la oleada — estable mientras dure; lo lee
-        // OleadaNPC.EditSpawnPool).
-        private static int[] _poolActual = null;
+        // natural puede escupir durante ESTA oleada — v6.50.59: ahora es un
+        // DICCIONARIO PONDERADO (el bioma del portador PESA EL DOBLE que
+        // los acompañantes del nivel) y VIVE EN TIEMPO REAL: cuando el
+        // portador CAMBIA DE BIOMA, el principal se reconstruye al vuelo
+        // (lo lee OleadaNPC.EditSpawnPool).
+        private static Dictionary<int, float> _poolActual = null;
         private static int _bossIdx = -1;          // whoAmI del jefe de la oleada
         private static int _jugador = -1;          // whoAmI del hambriento
         // v6.50.2 — FIX (carrera del slot reciclado en FaseJefe): el TYPE del
@@ -301,6 +331,13 @@ namespace AethonMod.Content.Systems
         /// <summary>¿Está corriendo LA OLEADA ESPECIAL (El Juicio)?</summary>
         public static bool EspecialActiva => Activo && _fase == Fase.Especial;
 
+        /// <summary>
+        /// v6.50.59 — EL NIVEL DE FURIA DEL FESTÍN EN MARCHA (lo leen el
+        /// sello OleadaNPC para escalar vida/daño/defensa/agresión y la
+        /// mesa de biomas para la mezcla).
+        /// </summary>
+        public static int NivelFuriaPublico => _nivelFuria;
+
         // ==================================================================
         //  v6.50.29 — LOS MANDOS DEL MOTOR NATURAL (lo que OleadaNPC lee)
         //  ==================================================================
@@ -315,35 +352,41 @@ namespace AethonMod.Content.Systems
         public static bool ChusmaEnMarcha => Activo && _fase == Fase.Monstruos && _poolActual != null;
 
         /// <summary>
-        /// EL POOL de la oleada en marcha (los tipos que el motor natural
-        /// puede escupir — el bioma del portador). null fuera de la fase de
-        /// chusma.
+        /// EL POOL PONDERADO de la oleada en marcha (los tipos que el motor
+        /// natural puede escupir — el bioma del portador con PESO DOBLE +
+        /// los acompañantes del nivel). null fuera de la fase de chusma.
         /// </summary>
-        public static int[] PoolDeOleada => ChusmaEnMarcha ? _poolActual : null;
+        public static IReadOnlyDictionary<int, float> PoolDeOleada => ChusmaEnMarcha ? _poolActual : null;
 
         /// <summary>EL PORTADOR del festín (a quien la horda converge).</summary>
         public static Player Portador => (_jugador >= 0 && _jugador < Main.maxPlayers)
             ? Main.player[_jugador] : null;
 
         /// <summary>
-        /// v6.50.29 — LOS PUNTOS REQUERIDOS por oleada (la tabla de vanilla,
-        /// con NUESTROS valores): la 1 se paga con 18 muertes, la 5 con 42,
-        /// la 10 con 72 — «solo es cambiar los valores para aumentarla a
-        /// medida que el nivel de oleada del grimorio aumente».
+        /// v6.50.59 — LOS PUNTOS REQUERIDOS por oleada — ×5 (la letra: «se
+        /// necesita que la aparicion de mosntruo aumente al menos 5 veces
+        /// mas por oleada al igual que el limite y la duracion» — TODO el
+        /// sistema ×5): la 1 se paga con 90 muertes, la 10 con 360 — con el
+        /// motor ×5 más denso la carnicería tarda lo SUYO (las oleadas son
+        /// un castigo: hacerlas faciles no sirve de nada).
         /// </summary>
-        public static int PuntosRequeridos(int k) => 12 + 6 * Math.Max(1, Math.Min(10, k));
+        public static int PuntosRequeridos(int k) => 60 + 30 * Math.Max(1, Math.Min(10, k));
 
         /// <summary>
-        /// v6.50.29 — LA DENSIDAD DEL MOTOR (los valores de vanilla):
-        /// spawnRate × (0.20 − 0.012k) — la 1 ×0.19, la 5 ×0.14, la 10 ×0.08
-        /// (la luna de calabaza usa ×0.2 fijo; la furia APRIETA con cada
-        /// oleada) y el tope de vivos 10+4k (la 1: 14, la 10: 50 — vanilla
-        /// dobla maxSpawns: 10; el libro hambriento lo CUADRUPLA al final).
+        /// v6.50.59 — LA DENSIDAD DEL MOTOR ×5: spawnRate × (0.04 −
+        /// 0.0012k) — la 1 ×0.039 (≈26× el motor natural ≈ CINCO VECES la
+        /// furia de la .58), la 10 ×0.028 (≈36× vanilla): LA CALLE SE LLENA
+        /// — la oleada se SIENTE como un castigo.
         /// </summary>
         public static float MultiplicadorSpawnRate(int k)
-            => MathF.Max(0.08f, 0.20f - 0.012f * Math.Max(1, Math.Min(10, k)));
-        /// <summary>El TOPE DE VIVOS del motor natural durante la oleada k.</summary>
-        public static int TopeVivos(int k) => 10 + 4 * Math.Max(1, Math.Min(10, k));
+            => MathF.Max(0.028f, 0.040f - 0.0012f * Math.Max(1, Math.Min(10, k)));
+
+        /// <summary>
+        /// v6.50.59 — EL TOPE DE VIVOS ×5: 50+20k con el TECHO DEL MOTOR
+        /// (170 — Main.maxNPCs es 200 y el mundo también tiene que vivir):
+        /// la 1 sostiene 70, la 5 150, la 8+ el CIELO ENTERO.
+        /// </summary>
+        public static int TopeVivos(int k) => Math.Min(170, 50 + 20 * Math.Max(1, Math.Min(10, k)));
 
         /// <summary>
         /// v6.50.29 — EL PUNTO DE MUERTE (el corazón de la progresión de
@@ -420,6 +463,10 @@ namespace AethonMod.Content.Systems
         /// el libro cruza el umbral — y la Carnada del Grimorio para las
         /// pruebas (salta la config: el cebo es la herramienta de test).
         /// Corre en el servidor del mundo (SP = el mismo proceso).
+        /// v6.50.59 — EL NIVEL: N es ahora EL NIVEL DE FURIA (la furia
+        /// natural usa el nivel persistente del portador — ShardPlayer.
+        /// FuriaNivel: la PRIMERA es SIEMPRE 1, vencer sube, morir
+        /// congela): todas las criaturas del festín escalan con él.
         /// </summary>
         public static void Provocar(Player jugador, int oleadas)
         {
@@ -436,6 +483,11 @@ namespace AethonMod.Content.Systems
             _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 11);
             _oleadaActual = 0;
             _jugador = jugador.whoAmI;
+            // v6.50.59 — EL NIVEL DEL FESTÍN: las oleadas que vienen SON el
+            // nivel (la especial 11 corre a nivel 10, el tope).
+            _nivelFuria = _oleadasTotales >= 11 ? 10 : Math.Max(1, Math.Min(10, _oleadasTotales));
+            _acompanantes = null;
+            _firmaBioma = "";
             _fase = Fase.Llamada;
             _ticksFase = 0;
             // v6.50.2 — EL FESTÍN CAMINA (cada cambio de fase): el estado
@@ -450,6 +502,12 @@ namespace AethonMod.Content.Systems
                 new Color(168, 96, 60), rugido: true, prioridad: true);
             EcoRed.HablarAlPortador(jugador, "Mods.AethonMod.Eco.Furia.Llamada",
                 new Color(226, 64, 64), rugido: true, prioridad: true);
+
+            // v6.50.59 — EL AVISO DEL NIVEL: cuando la furia es de nivel 2+
+            // el MUNDO entero sabe lo que viene (N oleadas de escalada).
+            if (_oleadasTotales <= 10 && _nivelFuria > 1)
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.NivelArranque",
+                    new Color(178, 26, 38), _nivelFuria, _oleadasTotales);
         }
 
         // ==================================================================
@@ -545,6 +603,30 @@ namespace AethonMod.Content.Systems
                 // la hambre del portador se perdona: el festín contó
                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                 sp?.PerdonarHambre(); // v6.50.2: PerdonarHambre ya viaja con el festín (MsgHambre)
+
+                // v6.50.59 — LA FURIA CRECE (la letra del sistema de
+                // niveles: «luego si el jugador logra vencer el nivel 1 de
+                // esa oleada, la siguiente sera de nivel 2, o sea 2
+                // oleadas…»): el portador VENCIÓ el festín COMPLETO de
+                // nivel N — el grimorio RECONOCE su fuerza: su próxima
+                // furia será de nivel N+1 (más oleadas, más fuerza, más
+                // biomas en la mesa). El nivel vive en SU ShardPlayer
+                // (persistente). Morir no sube nada: la próxima repite.
+                try
+                {
+                    var spVencedor = hambriento.GetModPlayer<Players.ShardPlayer>();
+                    if (spVencedor != null && _oleadasTotales <= 10 && _nivelFuria >= 1)
+                    {
+                        int proximoNivel = Math.Min(10, Math.Max(spVencedor.FuriaNivel, _nivelFuria + 1));
+                        if (proximoNivel > spVencedor.FuriaNivel)
+                        {
+                            spVencedor.FuriaNivel = proximoNivel;
+                            EcoRed.AnunciarMundo("Mods.AethonMod.Furia.NivelVencido",
+                                new Color(245, 196, 81), hambriento.name, _nivelFuria, proximoNivel);
+                        }
+                    }
+                }
+                catch { }
                 return;
             }
 
@@ -554,25 +636,39 @@ namespace AethonMod.Content.Systems
             _puntosOleada = 0;      // v6.50.29 — el waveKills de la oleada nueva
             _bossIdx = -1;
             _tipoJefeOleada = -1;
-            // v6.50.29 — EL POOL DE LA OLEADA (caché del bioma del portador
-            // al arrancar — lo lee OleadaNPC.EditSpawnPool en cada ciclo del
-            // motor natural; el pool estable evita recomputar zonas por tick).
-            _poolActual = PoolMonstruos(hambriento);
+            // v6.50.59 — EL POOL DE LA OLEADA, PERO DE VERDAD VIVO:
+            // (a) LOS ACOMPAÑANTES del nivel se reparten AL ARRANCAR la
+            // oleada (la mezcla varía de oleada en oleada — siempre de la
+            // MESA DE BIOMAS DISPONIBLES del mundo en ESTE momento: el
+            // Santuario solo si el Muro de Carne ya cayó), (b) el bioma
+            // PRINCIPAL se fotografia (su firma) y se relee CADA MEDIO
+            // SEGUNDO: si el portador SE MUDA de bioma, el pool se
+            // reconstruye al vuelo (la oleada TE SIGVE — la letra: «deberia
+            // adaptarse al momento en el que el jugador cambia de bioma»).
+            _acompanantes = ElegirAcompanantes(_nivelFuria);
+            _firmaBioma = FirmaBioma(hambriento);
+            _poolActual = ConstruirPool(hambriento);
 
             // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
             EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
 
             // EL ANUNCIO: la oleada k de N (la final se anuncia en negro y rojo)
+            // v6.50.59 — CON EL NIVEL: la furia de nivel 2+ anuncia SU
+            // nivel en cada oleada (el castigo con nombre).
             // v6.49 — EL FESTÍN ES DEL MUNDO: el anuncio viaja a TODOS
             // (ChatHelper en MP; el usuario lo pidió así — "el evento de
             // uno es el evento del mundo", la VOZ sigue siendo del
             // portador, el AVISO es del festín).
+            int xpOleada = _oleadaActual + Math.Min(10, _nivelFuria);
             if (_oleadaActual == _oleadasTotales && _oleadasTotales >= 5)
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.OleadaFinal", new Color(178, 26, 38),
                     _oleadaActual, _oleadasTotales);
+            else if (_nivelFuria > 1)
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.OleadaNivel",
+                    new Color(198, 200, 206), _oleadaActual, _oleadasTotales, _nivelFuria, xpOleada);
             else
-                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Oleada", new Color(198, 200, 206),
-                    _oleadaActual, _oleadasTotales, _oleadaActual + 1);
+                EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Oleada",
+                    new Color(198, 200, 206), _oleadaActual, _oleadasTotales, xpOleada);
 
             // v6.50.29 — NADA MÁS QUE ESPERAR: la horda la trae EL MOTOR
             // NATURAL DE VANILLA (OleadaNPC.EditSpawnRate/EditSpawnPool
@@ -598,10 +694,33 @@ namespace AethonMod.Content.Systems
             int requeridos = PuntosRequeridos(_oleadaActual);
             bool porMuertes = _puntosOleada >= requeridos;
 
-            // LA RED DE SEGURIDAD (el reparto de los 5 minutos — mínimo 10 s
-            // por oleada): si el portador no mata, la furia igual avanza.
-            int duracion = Math.Max(600, TicksEvento / Math.Max(1, _oleadasTotales));
+            // LA RED DE SEGURIDAD — v6.50.59 ×5 (la letra: «al igual que el
+            // limite y la duracion»): el TECHO del festín entero pasa de 5
+            // min a 25 (TicksEvento×5) y el MÍNIMO por oleada de 10 s a 50
+            // — la oleada DURA lo suyo (con 90-360 muertes que pagar, el
+            // reloj casi nunca manda: manda el machete).
+            int duracion = Math.Max(3000, TicksEvento * 5 / Math.Max(1, _oleadasTotales));
             bool porReloj = _ticksOleada >= duracion;
+
+            // v6.50.59 — LA OLEADA TE SIGVE AL BIOMA (la letra: «la oleada
+            // solo se adapta cuando inicia en ese bioma, pero deberia
+            // adaptarse al momento en el que el jugador cambia de bioma»):
+            // cada MEDIO SEGUNDO la FIRMA del bioma del portador se relee —
+            // si CAMBIÓ (estabas en el bosque y te fuiste al corrupto), el
+            // pool SE RECONSTRUYE al vuelo: el bioma PRINCIPAL pasa a ser
+            // el NUEVO (peso doble) y los acompañantes del nivel siguen en
+            // la mesa. Los que ya nacieron siguen siendo los que son — los
+            // NUEVOS nacen del bioma donde ESTÁS (también atardecer/amanecer
+            // y el hardmode cuentan: la firma los lleva).
+            if ((_ticksOleada % 30) == 0)
+            {
+                string firmaAhora = FirmaBioma(hambriento);
+                if (firmaAhora != _firmaBioma)
+                {
+                    _firmaBioma = firmaAhora;
+                    _poolActual = ConstruirPool(hambriento);
+                }
+            }
 
             // EL LATIDO MP: cada 60 t el estado camina al portador (el
             // indicador de oleada del cliente remoto lee los PUNTOS — sin
@@ -888,13 +1007,118 @@ namespace AethonMod.Content.Systems
 
         // ==================================================================
         //  LOS POOLS — el bioma decide la comida (la hora ya no manda)
+        //  v6.50.59 — LA MESA COMPLETA: bioma principal (peso doble, EN
+        //  TIEMPO REAL) + los acompañantes del nivel (la mezcla)
         // ==================================================================
 
         /// <summary>
-        /// Los monstruos que el bioma del portador ofrece. IDs verificados
-        /// contra el Terraria real (sondeo de reflexión).
+        /// LA FIRMA DEL BIOMA del portador AHORA (todas las zonas + la hora
+        /// + la era del mundo): se fotografía al arrancar la oleada y se
+        /// relee cada medio segundo — si CAMBIÓ, el pool se reconstruye
+        /// (la oleada sigue al portador a su bioma nuevo, y la superficie
+        /// cambia de turno día/noche en vivo).
         /// </summary>
-        private static int[] PoolMonstruos(Player p)
+        private static string FirmaBioma(Player p)
+        {
+            return
+                (p.ZoneUnderworldHeight ? "I" : "") + (p.ZoneDungeon ? "D" : "") +
+                (p.ZoneGranite ? "G" : "") + (p.ZoneMarble ? "M" : "") +
+                (p.ZoneSnow ? "N" : "") + (p.ZoneJungle ? "J" : "") +
+                (p.ZoneCorrupt ? "C" : "") + (p.ZoneCrimson ? "K" : "") +
+                (p.ZoneHallow ? "H" : "") + (p.ZoneDesert ? "S" : "") +
+                (p.ZoneBeach ? "P" : "") + (p.ZoneSkyHeight ? "Y" : "") +
+                (p.ZoneMeteor ? "T" : "") +
+                (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight ? "U" : "") +
+                (Main.hardMode ? "!" : "") + (Main.dayTime ? "@" : "");
+        }
+
+        /// <summary>
+        /// LA MESA DE BIOMAS DISPONIBLES del mundo — los acompañantes que
+        /// el nivel puede invitar a la mezcla. v6.50.59 (la letra: «a mayor
+        /// nivel de oleada mas monstruos de biomas diferentes aparecen,
+        /// siempre usando los biomas disponibles en el momento, por ejemplo
+        /// cuando se mata al muro de carne los nuevos biomas son añadidos
+        /// a las nuevas oleadas a partir de ese momento, pero antes no»):
+        /// · PRE-HARDMODE: los biomas de siempre (nieve, jungla, desierto,
+        ///   playa, cielo, subsuelo, granito, mármol y EL MAL DEL MUNDO —
+        ///   solo el que EXISTE: corrupción O carmesí).
+        /// · TRAS EL MURO DE CARNE: EL SANTUARIO SE UNE (el Hallow NACE
+        ///   con el hardmode — antes NO EXISTE en la mesa: pixies y
+        ///   unicornios solo desde que la carne cayó).
+        /// (El infierno, la mazmorra y el meteorito son biomas PRINCIPALES
+        /// — donde ESTÁS tú manda; como acompañantes sus criaturas no
+        /// cruzan bien el cielo abierto.)
+        /// </summary>
+        private static List<int[]> MesaDeBiomas()
+        {
+            var mesa = new List<int[]>();
+            mesa.Add(new int[] { NPCID.IceSlime, NPCID.SnowFlinx, NPCID.ZombieEskimo });     // la nieve
+            mesa.Add(new int[] { NPCID.JungleSlime, NPCID.JungleBat, NPCID.Hornet });        // la jungla
+            mesa.Add(new int[] { NPCID.SandSlime, NPCID.Antlion, NPCID.Antlion });          // el desierto
+            mesa.Add(new int[] { NPCID.Crab, NPCID.BlueSlime, NPCID.Crab });                 // la playa
+            mesa.Add(new int[] { NPCID.Harpy, NPCID.Harpy, NPCID.BlueSlime });               // el cielo
+            mesa.Add(new int[] { NPCID.CaveBat, NPCID.Skeleton, NPCID.BlueSlime });         // el subsuelo
+            mesa.Add(new int[] { NPCID.GraniteGolem, NPCID.GraniteFlyer });                  // el granito
+            mesa.Add(new int[] { NPCID.GreekSkeleton, NPCID.Medusa, NPCID.GreekSkeleton });// el mármol
+            // EL MAL DEL MUNDO — SOLO el bioma que EXISTE (el otro no está
+            // disponible: «siempre usando los biomas disponibles en el
+            // momento»).
+            mesa.Add(WorldGen.crimson
+                ? new int[] { NPCID.Crimera, NPCID.FaceMonster, NPCID.BloodCrawler }
+                : new int[] { NPCID.EaterofSouls, NPCID.EaterofSouls, NPCID.CorruptSlime });
+            // v6.50.59 — TRAS EL MURO DE CARNE: EL SANTUARIO EN LA MESA (el
+            // Hallow nace con el hardmode — ANTES no existe para el libro).
+            if (Main.hardMode)
+                mesa.Add(new int[] { NPCID.Pixie, NPCID.Pixie, NPCID.Unicorn });
+            return mesa;
+        }
+
+        /// <summary>
+        /// LOS ACOMPAÑANTES DE LA OLEADA: (nivel−1) biomas extra SIN
+        /// repetir, elegidos al azar de la MESA DISPONIBLE — nivel 1 = SOLO
+        /// tu bioma (la furia de aprendizaje), nivel 5 = TU bioma + 4 más,
+        /// nivel 10 = LA CIUDAD ENTERA a la vez.
+        /// </summary>
+        private static List<int[]> ElegirAcompanantes(int nivel)
+        {
+            var elegidos = new List<int[]>();
+            if (nivel <= 1) return elegidos;
+            var mesa = MesaDeBiomas();
+            int cuantos = Math.Min(nivel - 1, mesa.Count);
+            for (int i = 0; i < cuantos; i++)
+            {
+                int idx = Main.rand.Next(mesa.Count);
+                elegidos.Add(mesa[idx]);
+                mesa.RemoveAt(idx);
+            }
+            return elegidos;
+        }
+
+        /// <summary>
+        /// EL POOL PONDERADO DE LA OLEADA: el bioma PRINCIPAL del portador
+        /// (peso 2.0 — la comida local manda) + los ACOMPAÑANTES del nivel
+        /// (peso 1.0 — la mezcla que crece con el nivel).
+        /// </summary>
+        private static Dictionary<int, float> ConstruirPool(Player p)
+        {
+            var dic = new Dictionary<int, float>();
+            foreach (int id in BiomaPrincipal(p))
+                if (id > 0) dic[id] = 2.0f;
+            if (_acompanantes != null)
+                foreach (int[] grupo in _acompanantes)
+                    foreach (int id in grupo)
+                        if (id > 0 && !dic.ContainsKey(id))
+                            dic[id] = 1.0f;
+            return dic;
+        }
+
+        /// <summary>
+        /// Los monstruos que el bioma del portador ofrece (EL PRINCIPAL —
+        /// donde ESTÁS tú manda). IDs verificados contra el Terraria real
+        /// (sondeo de reflexión). v6.50.59: + EL SANTUARIO (ZoneHallow) y
+        /// + EL METEORITO (ZoneMeteor) como principales propios.
+        /// </summary>
+        private static int[] BiomaPrincipal(Player p)
         {
             // === INFIERNO ===
             if (p.ZoneUnderworldHeight)
@@ -910,6 +1134,10 @@ namespace AethonMod.Content.Systems
             if (p.ZoneMarble)
                 return new int[] { NPCID.GreekSkeleton, NPCID.Medusa, NPCID.GreekSkeleton };
 
+            // === METEORITO (v6.50.59 — el cielo caído también alimenta) ===
+            if (p.ZoneMeteor)
+                return new int[] { NPCID.MeteorHead, NPCID.MeteorHead, NPCID.BlueSlime };
+
             // === NIEVE ===
             if (p.ZoneSnow)
                 return new int[] { NPCID.IceSlime, NPCID.SnowFlinx, NPCID.ZombieEskimo };
@@ -923,6 +1151,10 @@ namespace AethonMod.Content.Systems
                 return new int[] { NPCID.EaterofSouls, NPCID.EaterofSouls, NPCID.CorruptSlime };
             if (p.ZoneCrimson)
                 return new int[] { NPCID.Crimera, NPCID.FaceMonster, NPCID.BloodCrawler };
+
+            // === SANTUARIO (v6.50.59 — el Hallow: pixies y unicornios) ===
+            if (p.ZoneHallow)
+                return new int[] { NPCID.Pixie, NPCID.Unicorn, NPCID.Pixie };
 
             // === DESIERTO ===
             if (p.ZoneDesert)
@@ -1079,7 +1311,7 @@ namespace AethonMod.Content.Systems
                 // ya no pasa por jefe del festín).
                 _tipoJefeOleada = tipo;
 
-                jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true);
+                jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 jefe.netUpdate = true;
 
                 // v6.50.48 - LA EXTENSION DEL DEVORADOR: la cabeza acaba
@@ -1133,7 +1365,7 @@ namespace AethonMod.Content.Systems
                 NPC raro = (idx >= 0 && idx < Main.maxNPCs) ? Main.npc[idx] : null;
                 if (raro == null || !raro.active) return;
 
-                raro.GetGlobalNPC<OleadaNPC>().Marcar(raro, _oleadaActual, jefe: true);
+                raro.GetGlobalNPC<OleadaNPC>().Marcar(raro, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 raro.netUpdate = true;
 
                 // EL ANUNCIO DE LA RAREZA (color propio: la escarcha).
@@ -1188,6 +1420,12 @@ namespace AethonMod.Content.Systems
             _jugador = -1;
             _spawneados = 0;
             _ticksSuma = 0;
+            // v6.50.59 — LA NUEVA MESA SE RECOGE: el nivel del festín y su
+            // mezcla de biomas mueren con el festín (el NIVEL del portador
+            // NO: vive en su ShardPlayer).
+            _nivelFuria = 1;
+            _acompanantes = null;
+            _firmaBioma = "";
 
             // v6.50.10 — FIX: también las RÉPLICAS de cliente (el F8 de
             // un remoto mostraba el último festín "en marcha" para
@@ -1345,7 +1583,14 @@ namespace AethonMod.Content.Systems
                 _iconoTitulo = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Weapons/GrimoireEternal").Value;
             Texture2D icono = _iconoTitulo;
-            string titulo = Language.GetTextValue("Mods.AethonMod.Furia.IndicadorTitulo");
+            // v6.50.59 — EL TÍTULO CON NIVEL: la furia de nivel 2+ se
+            // anuncia en SU cajita (el nivel es el nombre del castigo). En
+            // el cliente MP el nivel lo trae TotalesCliente (el TOTAL de
+            // oleadas ES el nivel — sin tocar el MsgHambre).
+            int nivelVisto = enCliente ? TotalesCliente : _oleadasTotales;
+            string titulo = nivelVisto > 1 && nivelVisto <= 10
+                ? Language.GetTextValue("Mods.AethonMod.Furia.IndicadorTituloNivel", nivelVisto)
+                : Language.GetTextValue("Mods.AethonMod.Furia.IndicadorTitulo");
             Vector2 medTitulo = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(titulo);
             float offX = 120f;
             if (medTitulo.X > 200f) offX += medTitulo.X - 200f;

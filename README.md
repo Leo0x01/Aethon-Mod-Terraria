@@ -1,7 +1,7 @@
 # AethonMod — Aethon, la Luz Primordial
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.58 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.59 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,7 +14,38 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
 `LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.58)
+## ¿Dónde estamos? (actualizado para v6.50.59)
+- **v6.50.59 - LA DECIMASEXTA RONDA — EL RELOJ DE TODA LA FASE 2 + LA CAZA
+  DEL SOL QUE NO SE PIERDE + EL TEMBLOR Y LA AURORA DE LA PRESENTACIÓN +
+  LAS OLEADAS ×5 CON NIVELES Y MULTIBIOMA + EL DEVORADOR ESCUPE**:
+  (1) **EL RELOJ DE TODA LA FASE 2**: en fase 2 el reloj gigante es
+  PERMANENTE — vive MIENTRAS la fase 2 viva (cabalga al jefe con la arena
+  cayendo) y se disuelve al primer tick de fase 3: dura la fase COMPLETA.
+  (2) **LA CAZA DEL SOL QUE NO SE PIERDE**: sin cañonazo (sale a 4.8 px/t),
+  giro el doble de rápido (converge en ~0.8 s) y CRUCERO DE CAZA EN TRES
+  RITMOS: cerca pesa (6.4), a media distancia CAZA (7.6 — más rápido que
+  tu carrera), lejos REMONTA (9.8 — ni la montura lo deja atrás).
+  (3) **EL TEMBLOR Y LA AURORA**: el sonido EoL (Item161) MURIÓ — vuelve el
+  RUGIDO DE TEMBLOR de la .48 (dos veces, creciendo); y la presentación
+  enciende EL CIELO ENTERO: el VELO blanco-dorado de borde a borde + LAS
+  ONCE CORTINAS DE AURORA ondulando + la luz de mundo bañando el suelo.
+  (4) **LAS OLEADAS ×5 CON NIVELES**: aparición, límite, duración y puntos
+  TODOS ×5 (la calle se LLENA — 70-170 vivos); y el festín natural ahora
+  es de NIVEL: la primera SIEMPRE nivel 1, VENCER la sube (N+1 → N
+  oleadas, tope 10), MORIR la congela — vida/daño/defensa/agresión escalan
+  con el nivel (×(k+1)·(1+0.20·(N−1))).
+  (5) **LA OLEADA TE SIGVE AL BIOMA EN TIEMPO REAL**: la firma del bioma se
+  relee cada medio segundo — te mudas al corrupto y los NUEVOS spawns son
+  de TU bioma nuevo (peso doble) + los acompañantes del nivel.
+  (6) **LA MEZCLA MULTIBIOMA POR NIVEL**: nivel N = tu bioma + (N−1) biomas
+  acompañantes de la MESA DISPONIBLE del mundo — y TRAS EL MURO DE CARNE
+  EL SANTUARIO SE UNE (pixies y unicornios: antes NO EXISTE para el libro).
+  (7) **TODO MÁS AGRESIVO**: chusma y jefes re-objetivan más rápido, corren
+  más, golpean más; los jefes de oleada con homing/embite/coreografía al
+  DOBLE de frecuencia.
+  (8) **EL DEVORADOR ESCUPE A LOS SUYOS**: su cabeza escupe monstruos de la
+  Corrupción DESDE LA BOCA hacia el jugador cada vez que pasa DELANTE —
+  proyectiles vivos, como pidió la letra.
 - **v6.50.58 - LA DECIMOQUINTA RONDA — EL SOL PERSIGUE DE VERDAD + EL DISCO
   DEL PROYECTIL SOL + LA BRUMA MASIVA + EL CRASH DE LA ARQUERA**:
   (1) **LA PERSIGA DE VERDAD**: la "persiga" de la .57 era una aceleración

@@ -2076,7 +2076,11 @@ Eco: {
 Furia: {
 	Indicador: Wave {0}: {1}
 	IndicadorTitulo: Grimoire's Fury
+	IndicadorTituloNivel: Grimoire's Fury · LEVEL {0}
 	Oleada: Wave {0} of {1} — the grimoire spits out its food. XP ×{2} this wave.
+	OleadaNivel: Wave {0} of {1} (fury LEVEL {2}) — the grimoire spits out its food. XP ×{3} this wave.
+	NivelArranque: THIS FEAST IS LEVEL {0}: {1} waves of hunger. Survive… and the fury will grow.
+	NivelVencido: "{0} DEFEATED the level {1} fury — the next one will be LEVEL {2}. The book takes note… and smiles."
 	OleadaFinal: FINAL WAVE {0} of {1} — the book is black with rage. The aura rots: black-gray, red edges.
 	Jefe: The hunger summons a guardian: {0} (XP ×{1})
 	JefeHuido: "{0} sinks away, unsatisfied…"

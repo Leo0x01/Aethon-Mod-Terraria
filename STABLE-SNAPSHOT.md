@@ -1,11 +1,62 @@
-# AethonMod — ESTADO ACTUAL (v6.50.58)
+# AethonMod — ESTADO ACTUAL (v6.50.59)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.58 (LA DECIMOQUINTA RONDA — la .57 publicada con
-> release 402409678, md5 c49221c0…, CDN verificado byte a byte).
+> Última actualización: v6.50.59 (LA DECIMASEXTA RONDA — la .58 publicada con
+> release 402604951, md5 67dbbe42…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.59 = LA DECIMASEXTA RONDA — EL RELOJ DE TODA LA FASE 2 + LA CAZA
+  DEL SOL QUE NO SE PIERDE + EL TEMBLOR Y LA AURORA + LAS OLEADAS ×5 CON
+  NIVELES Y MULTIBIOMA + EL DEVORADOR ESCUPE** (la letra de la .58):
+  (1) **EL RELOJ DE TODA LA FASE 2**: en fase 2 el reloj gigante nace
+  PERMANENTE (ai[1]=2) — INMORTAL mientras la fase 2 viva (cabalga al
+  jefe por TODA la fase: la arena cae en ciclos, el peso de 560 px
+  activo, los demás platos siguen saliendo CON el reloj encima) y se
+  DISUELVE en 40 t al primer tick de fase 3 o si el dios muere. Reloj
+  único respetado (no nace otro) y el plato SALE del menú de fase 2
+  mientras el permanente viva. En fases 3+ la catedral clásica de 620 t.
+  (2) **LA CAZA DEL SOL QUE NO SE PIERDE**: el diagnóstico de la .58 — la
+  persiga frenaba a 4.4 px/t, MÁS LENTA que el jugador corriendo: giraba
+  pero NUNCA ALCANZABA. CURA: lanzamiento suave 7.2→4.8 (sin cañonazo),
+  giro Lerp 0.075/t (converge ~0.8 s), gravedad comba +0.012 y CRUCERO
+  DE CAZA EN TRES RITMOS: cerca <220 px PESA a 6.4 (se esquiva), media
+  7.6 (más rápido que la carrera máxima), lejos >700 px EL RELEVO 9.8
+  (remonta tras montura/gancho/dash — NUNCA pierde).
+  (3) **EL TEMBLOR VUELVE + LA AURORA EN TODO EL CIELO**: el Item161 de
+  la Emperatriz MURIÓ — vuelve el Item122 grave de la .48 (t=11 pitch
+  −0.25 + t=130 pitch −0.40, kicks 9/22 y 11/24: el temblor CRECE). Y la
+  presentación enciende EL CIELO ENTERO en ColaSierpeSky: EL VELO
+  blanco-dorado cubriendo la pantalla COMPLETA + LAS ONCE CORTINAS DE
+  AURORA (cuatro tramos curvados cada una, blanco y oro alternos, el
+  brillo VIVE abajo) + Lighting.AddLight bañando el suelo del jugador.
+  (4) **LAS OLEADAS ×5 (EL CASTIGO)**: aparición ×0.039 (≈5× la furia de
+  la .58), tope de vivos 50+20k con techo del motor 170, duración del
+  festín 5→25 min (mínimo 50 s por oleada) y puntos 60+30k (90 la 1, 360
+  la 10) — la calle se LLENA.
+  (5) **EL SISTEMA DE NIVELES DE FURIA**: la furia natural trae EL NIVEL
+  DEL PORTADOR (ShardPlayer.FuriaNivel, persistente): la PRIMERA es
+  SIEMPRE nivel 1; VENCER el festín completo sube a N+1 (tope 10) con
+  anuncio al mundo; MORIR congela. Nivel N = N oleadas y TODO escala:
+  vida/daño ×(k+1)·(1+0.20·(N−1)), defensa +2k+3(N−1)/+6k+8(N−1), XP
+  ×(k+N), pago k+(N−1), el indicador canta el nivel y cada oleada lo
+  anuncia.
+  (6) **LA OLEADA SIGVE AL BIOMA EN TIEMPO REAL + MULTIBIOMA**: la firma
+  del bioma se relee cada 30 t — cambia el pool AL VUELO (el bioma nuevo
+  PESA EL DOBLE). Nivel N = tu bioma + (N−1) acompañantes de LA MESA
+  DISPONIBLE (nieve/jungla/desierto/playa/cielo/subsuelo/granito/
+  mármol/el mal del mundo EXISTENTE — y TRAS EL MURO DE CARNE EL
+  SANTUARIO: pixies y unicornios, antes NO EXISTE). Nuevos principales:
+  Santuario (ZoneHallow) y Meteorito (ZoneMeteor).
+  (7) **TODO MÁS AGRESIVO**: chusma re-objetiva 30→20 t, empuje
+  0.26+0.026k+0.02(N−1), techo 13+0.6k+0.4(N−1); jefes re-objetivan
+  cada 12 t, homing 0.09+0.012k+0.01(N−1), embite más frecuente y
+  fuerte, coreografía 240−24k−10(N−1) tope 40 (≈el DOBLE).
+  (8) **EL DEVORADOR ESCUPE**: la CABEZA escupe 2-3 monstruos de la
+  Corrupción DESDE SU BOCA hacia el jugador cada vez que pasa DELANTE
+  (<520 px y volando hacia él, cada 80 t) — y su coreografía periódica
+  también sale de la boca en abanico (ya no anillo lejano). En el Juicio
+  también.
 - **v6.50.58 = LA DECIMOQUINTA RONDA — EL SOL PERSIGUE DE VERDAD + EL DISCO
   DEL PROYECTIL SOL + LA BRUMA MASIVA + EL CRASH DE LA ARQUERA MUERTO** (la
   letra de la .57):
@@ -812,12 +863,53 @@
 
 ## 🎮 PENDIENTE DE VERIFICACIÓN EN JUEGO (por el usuario)
 
-La v6.50.58 está implementada y build-verificada. Checklist de la .58:
+La v6.50.59 está implementada y build-verificada. Checklist de la .59:
+
+1. **EL RELOJ DE TODA LA FASE 2**: pelear al jefe y esperar el RELOJ DE ARENA
+   en fase 2 (80-60% de vida) — el reloj gigante debe quedarse CON EL JEFE
+   DURANTE TODA LA FASE (los otros ataques siguen saliendo con el reloj
+   encima y la arena cayendo) y SOLO disolverse cuando el jefe pasa a fase 3.
+2. **EL SOL CAZA DE VERDAD**: provocar EL SOL DEL DIOS (P3+) y CORRER CON
+   BOTAS — el sol sale SUAVE (sin cañonazo), gira hacia ti RÁPIDO y NO TE
+   PIERDE: cerca va lento y pesado (se esquiva), a media distancia CAZA más
+   rápido que tu carrera, y si algo te lo quita de encima REMONTA. Correr en
+   línea recta ya NO salva.
+3. **EL TEMBLOR Y LA AURORA**: invocar al jefe — la presentación debe sonar
+   EL RUGIDO DE TEMBLOR de antes (NO el sonido de la Emperatriz; suena DOS
+   veces, creciendo) y EL CIELO ENTERO ILUMINARSE: velo blanco-dorado de
+   borde a borde + ONCE CORTINAS DE AURORA ondulando + el suelo bañado de
+   luz (no solo partículas).
+4. **LA OLEADA SIGVE AL BIOMA**: durante una oleada, CAMBIAR DE BIOMA (p.ej.
+   bosque → corrupto) — los NUEVOS monstruos deben ser DEL BIOMA NUEVO al
+   segundo (devoradores de almas, no más limos del bosque).
+5. **EL CASTIGO ×5**: la oleada 1 debe sentirse como UNA INVASIÓN: ~70
+   monstruos simultáneos, spawns casi continuos, y las muertes para pasar
+   de oleada MUCHAS más (90 en la 1). Si no abarrote la pantalla, algo falló.
+6. **LOS NIVEALES DE FURIA**: vencer la furia natural COMPLETA (nivel 1) →
+   el mundo anuncia «{tu nombre} VENCIÓ la furia de nivel 1 — la próxima
+   será de NIVEL 2»; la SIGUIENTE furia trae 2 OLEADAS y todo golpea más
+   duro (y el indicador dice «Furia del grimorio · NIVEL 2»). Morir NO
+   sube el nivel (repite).
+7. **EL MULTIBIOMA**: en furia de nivel 3+, la MISMA oleada mezcla
+   monstruos de VARIOS biomas (los de tu zona dominan); en hardmode deben
+   aparecer PIXIES/UNICORNIOS del Santuario en la mezcla (en pre-hardmode
+   JAMÁS).
+8. **EL DEVORADOR ESCUPE**: en una oleada con Devorador de Mundos, cuando
+   su CABEZA pase cerca y de frente, debe ESCUPIR monstruos de la
+   Corrupción DESDE LA BOCA hacia ti (2-3 por pasada, con sonido de
+   escupitajo).
+9. **REGRESIÓN**: el disco de plasma y la bruma masiva del sol siguen ahí
+   (.58); coreografía, calaveras del Libro, sin volteo de gravedad, bola
+   final en línea recta — todo intacto.
+
+Checklist de la .58 (vigente hasta que el usuario la recorra):
 
 1. **EL SOL PERSIGUE**: provocar EL SOL DEL DIOS (P3+; solo o en la danza) y
    CORRER — el sol debe GIRAR hacia ti y SEGUIRTE de verdad (lento, ~4.4
    px/t, con la comba del peso) durante los ~5 s de vuelo; ya NO te cruza
    de largo. Si estás quieto, llega en arco suave hacia el suelo.
+   *(NOTA .59: la persiga de la .58 era MÁS LENTA que tu carrera — este
+   punto quedó CURADO en la .59: el checklist nuevo de arriba manda.)*
 2. **EL DISCO DEL PROYECTIL SOL**: el sol que vuela ahora tiene LA
    SUPERFICIE DE PLASMA DEL ARMA (el mismo disco del proyectil Sol del
    bastón — con su textura convectiva y su aura de ruido) pero
@@ -1001,7 +1093,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.58** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMOQUINTA RONDA — feedback de la .57 (CUATRO frentes): (1) **LA PERSIGA DE VERDAD** (steering: el rumbo GIRA hacia el jugador 0.045/t, rapidez 7.2→4.4 px/t, gravedad=comba +0.018 — la aceleración vieja quedaba enterrada bajo la inercia) (2) **EL DISCO DEL PROYECTIL SOL** (el pipeline del arma ENCIMA del sol del dios: glow coronal + backglow + RadialShine + EL DISCO SunShader, blanco-dorado→brasa, 144→860 px, fundido en 50 t al explotar — la explosión sigue siendo la de la casa) (3) **LA BRUMA MASIVA** (120 nubes en 3 capas + 3/tick de goteo + 90 chispas + 18 quads: la estrella LIBERA su materia) (4) **EL CRASH DE LA ARQUERA** (Begin-sobre-Begin cada frame: cadena correcta de lotes + SONDA INCONDICIONAL en FlushAdditive/FlushAlpha) |
+| **v6.50.59** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas, headless 0 excepciones), ⏳ en juego | LA DECIMASEXTA RONDA — feedback de la .58 (DIEZ frentes): (1) **EL RELOJ DE TODA LA FASE 2** (permanente ai[1]=2: inmortal mientras la fase 2 viva, disolución 40 t al pasar a fase 3; plato fuera del menú con el permanente vivo; el estado suelta a los 120 t) (2) **LA CAZA DEL SOL QUE NO SE PIERDE** (sin cañonazo 7.2→4.8, giro 0.075 converge ~0.8 s, gravedad comba +0.012, TRES RITMOS: 6.4 cerca / 7.6 crucero / 9.8 relevo lejos — la .58 frenaba a 4.4, MÁS LENTA que la carrera) (3) **EL TEMBLOR VUELVE** (Item161 EoL MUERTO → Item122 grave ×2 creciendo + kicks) (4) **LA AURORA EN TODO EL CIELO** (el VELO blanco-dorado de borde a borde + 11 CORTINAS de 4 tramos curvados + luz de mundo — no solo partículas) (5) **OLEADAS ×5** (spawn ×0.039, tope 50+20k techo 170, festín 25 min, puntos 60+30k) (6) **NIVELES DE FURIA** (ShardPlayer.FuriaNivel persistente: primera=1, vencer sube N+1 tope 10, morir congela; vida/daño ×(k+1)·(1+0.20(N−1)), defensa +2k+3(N−1)/+6k+8(N−1), anuncios e indicador con nivel) (7) **BIOMA EN TIEMPO REAL** (firma releída cada 30 t → pool reconstruido al vuelo) (8) **MULTIBIOMA POR NIVEL** (tu bioma peso doble + (N−1) acompañantes de la MESA DISPONIBLE — Santuario SOLO tras el Muro de Carne; nuevos principales Hallow y Meteorito) (9) **TODO MÁS AGRESIVO** (chusma 20 t/empuje 0.26/techo 13+; jefes 12 t/homing 0.09/embite y coreografía ≈×2) (10) **EL DEVORADOR ESCUPE** (cabeza <520 px de frente → 2-3 monstruos de la Corrupción DESDE LA BOCA cada 80 t + coreografía en abanico desde la boca) |
+| **v6.50.58** | ✅ Build-verificada, ✔ publicada (release 402604951, CDN byte a byte), ✔ probada (con feedback → .59) | LA DECIMOQUINTA RONDA — feedback de la .57 (CUATRO frentes): (1) **LA PERSIGA DE VERDAD** (steering: el rumbo GIRA hacia el jugador 0.045/t, rapidez 7.2→4.4 px/t, gravedad=comba +0.018 — la aceleración vieja quedaba enterrada bajo la inercia) (2) **EL DISCO DEL PROYECTIL SOL** (el pipeline del arma ENCIMA del sol del dios: glow coronal + backglow + RadialShine + EL DISCO SunShader, blanco-dorado→brasa, 144→860 px, fundido en 50 t al explotar — la explosión sigue siendo la de la casa) (3) **LA BRUMA MASIVA** (120 nubes en 3 capas + 3/tick de goteo + 90 chispas + 18 quads: la estrella LIBERA su materia) (4) **EL CRASH DE LA ARQUERA** (Begin-sobre-Begin cada frame: cadena correcta de lotes + SONDA INCONDICIONAL en FlushAdditive/FlushAlpha) |
 | **v6.50.57** | ✅ Build-verificada, ✔ publicada (release 402409678, CDN byte a byte), ✔ probada (con feedback → .58) | LA DECIMOCUARTA RONDA — feedback de la .56 (SIETE frentes): (1) **EL SOL DEL DIOS** (el ataque especial: el jefe SE CONVIERTE en sol — asunción 80 t — y LO LANZA: persiga lenta + gravedad + GIGANTE ROJA ×6 + explosión de luz/bruma/formas con daño AoE 640 px honesto) (2) **LA COREOGRAFÍA** (la cadena de los god-bosses: SOL→TELAR→DANZA→LANZAS→CORONA→ESTALLIDO cada 6-9 ataques en P3+, sin pasar por la órbita) (3) **LA IA DEL DUELISTA** (órbita que lee distancia + quiebro del sentido + memoria doble) (4) **LA BOLA FINAL SIN PERSECUCIÓN** (línea recta) + **EL DIOS MUERE DETENIDO** (velocidad 0 desde t=20, flash final 50 t hasta 4800 px) (5) **LAS CALAVERAS DEL LIBRO POTENCIADAS** (proyectil 837 real: gigante ×2.1-2.8, veloz, brillante, ×1.35 daño, estela dorado-violeta por CalaveraPotenciadaFX) (6) **EL VOLTEO DE GRAVEDAD MUERTO** (FlipGravity eliminado, anuncio retirado es+en) (7) **EL client.log LIMPIO** (2 FormatException de .plr corruptos de vanilla, 1 h 50 min sin excepciones del mod) |
 | **v6.50.56** | ✅ Build-verificada, ✔ publicada (release 402301259, CDN byte a byte), ✔ probada (con feedback → .57) | LA DECIMOTERCERA RONDA — feedback de la .55 (SIETE frentes): (1) **EL GEL INVISIBLE** (crash 1: Draw sin Begin en la bola de gel — SU PROPIO LOTE ALFA) (2) **EL FUNERAL EN HILO AJENO** (crash 2: ThreadStateException al salir del mundo — QueueMainThreadAction + AprenderHiloPrincipal) (3) **EL HALO ARCOÍRIS PLANO Y MÁS CERCA** (13 px, rotación 0, giro en las perlas) (4) **LA MINI-EXPLOSIÓN CABALGA CON LA MASCOTA** (ai[1]=whoAmI) **SIN ARO CIRCULAR** (solo brillo) (5) **LA MASCOTA ALUMBRA ×1.6** (6) **LA MUERTE QUE SE ENCIENDE + LA BOLA FINAL BLANCO-DORADA** (EstiloBolaFinal=23: el proyectil sol en blanco-oro, 7 s, luz 2.6/2.35/1.7) (7) **EL REY GELATINA**: limos DESDE SU CUERPO + gel con cada salto Y teletransporte + LA CHUSMA sin muros ni subsuelo (SpawnTileY/WallType) |
 | **v6.50.55** | ✅ Build-verificada, ✔ publicada (release 402236002, CDN byte a byte), ⏳ probada (con feedback → .56) | LA DUODÉCIMA RONDA — LA MINI-EXPLOSIÓN DE LA MASCOTA (un pedido): «la mascota seria aburrida si fuera un punto de luz constante» → EL SALUDO DE LUZ (lo primero al invocar: 45 t) + EL COMPÁS (base ~1/20 min, +1/60000 por enemigo cerca, tope 20; EL GARANTE de 1 hora) + EL ESTALLIDO DEL JEFE EN MINIATURA ~0.13× (las SIETE piezas de la .53: 14 rayos, anillo de 7 emisores, cruz, núcleo Bloom ~130 px, estrella, onda, 8 bokeh + chispas + luz pequeña + estampido bajito) + LA RECOGIDA translúcida (aro 135 px, 6 agujas, el pet ×1.45 mientras) + EL DAÑO SIMBÓLICO (15 plano, hitbox honesta 270×270 solo 8 t, 1 golpe por enemigo) + LA GRATITUD (cura 1% de vida máx por enemigo, tope 5%) — TODO determinista (semilla en ai[0]), CERO texturas nuevas |

@@ -95,6 +95,12 @@ namespace AethonMod.Content.Globals
         public bool EsDeOleada = false;
         /// <summary>El número de oleada que lo convocó (1..11).</summary>
         public int Oleada = 0;
+        /// <summary>
+        /// v6.50.59 — EL NIVEL DE FURIA del festín que lo convocó (1..10):
+        /// el castigo del portador — TODAS las criaturas del festín escalan
+        /// vida/daño/defensa/agresión con ÉL, además de la oleada interna.
+        /// </summary>
+        public int Nivel = 1;
         /// <summary>¿Es la VERSIÓN ESPECIAL del jefe de la oleada?</summary>
         public bool EsJefeDeOleada = false;
         /// <summary>
@@ -108,6 +114,7 @@ namespace AethonMod.Content.Globals
         private int _tickAggro = 0;
         private int _tickAtaque = 0;   // el tempo de los dientes
         private int _tickLunge = 0;    // el tempo de los embites
+        private int _tickEscupe = 0;   // v6.50.59 — el tempo del escupitajo del Devorador
 
         // v6.50.10 — LAS BASES DEL SELLO (idempotencia de Marcar): las
         // stats capturadas en la PRIMERA marca; toda re-marca recalcula
@@ -153,8 +160,11 @@ namespace AethonMod.Content.Globals
         /// enfurecidos, aura y knockback resistido. Llamado por
         /// GrimorioFuriaSistema JUSTO DESPUÉS de NPC.NewNPC (OnSpawn
         /// corre DENTRO de NewNPC — todavía no existía la marca).
+        /// v6.50.59 — EL NIVEL: el festín de nivel N escala TODO con N
+        /// (la oleada interna k sigue escalando también — el castigo se
+        /// compone: la oleada 5 de un festín de nivel 5 pega ×6·×1.8).
         /// </summary>
-        public void Marcar(NPC npc, int oleada, bool jefe, bool especial = false)
+        public void Marcar(NPC npc, int oleada, bool jefe, bool especial = false, int nivel = 1)
         {
             try
             {
@@ -196,10 +206,17 @@ namespace AethonMod.Content.Globals
                 EsEspecial = especial;
                 Oleada = especial ? 11 : (oleada < 1 ? 1 : (oleada > 10 ? 10 : oleada));
                 EsJefeDeOleada = jefe;
+                // v6.50.59 — EL NIVEL DEL FESTÍN (1..10): la marca manda
+                // (la herencia y el convocador viajan con él).
+                Nivel = Math.Max(1, Math.Min(10, nivel));
 
-                // === STATS: LA LETRA DEL USUARIO (v6.48) ===
+                // === STATS: LA LETRA DEL USUARIO (v6.48 + v6.50.59) ===
                 // La oleada k: vida Y daño ×(k+1) — la 1 ×2, la 10 ×11,
                 // para chusma Y jefes. LA ESPECIAL: ×15.
+                // v6.50.59 — EL NIVEL ENCIMA (la letra: «la fuerza, poder,
+                // vida y defensa de los monstruos aumenta en consecuencia
+                // del nivel de las oleadas»): ×(1 + 0.20·(nivel−1)) — un
+                // festín de nivel 5 golpea ×1.8 MÁS, de nivel 10 ×2.8.
                 // (v6.50.10: siempre DESDE LAS BASES — jamás encadenado.)
                 float mult = MultiplicadorStats;
 
@@ -209,7 +226,11 @@ namespace AethonMod.Content.Globals
                 npc.life = nuevaVida;
                 if (_danoBase > 0)
                     npc.damage = (int)(_danoBase * mult);
-                npc.defense = _defensaBase + (jefe ? 6 * Oleada : 2 * Oleada);
+                // v6.50.59 — LA DEFENSA ESCALA CON LA OLEADA Y EL NIVEL (la
+                // letra: «todos los monstruos o jefes de las oleadas deben
+                // ver su defensa aumentada en consecuencia del numero de
+                // oleadas»): chusma +2k+3(n−1) · jefes +6k+8(n−1).
+                npc.defense = _defensaBase + DefensaExtra(jefe);
                 npc.knockBackResist = _kbBase * 0.35f; // la furia no se interrumpe
 
                 // === EL AURA ===
@@ -291,15 +312,40 @@ namespace AethonMod.Content.Globals
 
         /// <summary>
         /// EL MULTIPLICADOR DE STATS: ×(oleada+1) — la 1 ×2 … la 10 ×11;
-        /// la OLEADA ESPECIAL ×15 (la letra del usuario).
+        /// la OLEADA ESPECIAL ×15 (la letra del usuario). v6.50.59 — EL
+        /// NIVEL ENCIMA: ×(1 + 0.20·(nivel−1)) — la oleada 5 del festín de
+        /// nivel 5 pega ×6·×1.8 = ×10.8 (la especial se queda ×15 PLANO:
+        /// el Juicio es el Juicio).
         /// </summary>
-        public float MultiplicadorStats => EsEspecial ? 15f : Oleada + 1f;
+        public float MultiplicadorStats
+        {
+            get
+            {
+                if (EsEspecial) return 15f;
+                float porOleada = Oleada + 1f;
+                float porNivel = 1f + 0.20f * (Nivel - 1);
+                return porOleada * porNivel;
+            }
+        }
 
         /// <summary>
-        /// EL MULTIPLICADOR DE XP (lo lee GlobalNPCXP): ×(oleada+1) — la
-        /// 1 paga ×2 … la 10 ×11; la ESPECIAL ×15.
+        /// v6.50.59 — LA DEFENSA EXTRA DEL SELLO: crece con la OLEADA y con
+        /// EL NIVEL (la letra: «todos deben ver su defensa aumentada en
+        /// consecuencia del numero de oleadas… y la fuerza, poder, vida y
+        /// defensa aumenta en consecuencia del nivel»).
         /// </summary>
-        public int MultiplicadorXP => EsEspecial ? 15 : Oleada + 1;
+        public int DefensaExtra(bool jefe)
+        {
+            if (EsEspecial) return 6 * 11;              // el Juicio como siempre
+            int n = Math.Max(1, Nivel);
+            return jefe ? 6 * Oleada + 8 * (n - 1) : 2 * Oleada + 3 * (n - 1);
+        }
+
+        /// <summary>
+        /// EL MULTIPLICADOR DE XP (lo lee GlobalNPCXP): ×(oleada+nivel) — la
+        /// 1 de nivel 1 paga ×2, la 5 de nivel 5 ×10; la ESPECIAL ×15.
+        /// </summary>
+        public int MultiplicadorXP => EsEspecial ? 15 : Oleada + Math.Max(1, Nivel);
 
         /// <summary>El radio del aura según el tamaño del bicho (los jefes visten más grande).</summary>
         private static float RadioSegun(NPC npc, bool jefe)
@@ -332,24 +378,27 @@ namespace AethonMod.Content.Globals
                 if (EsDeOleada) return; // ya sellado por su convocador
 
                 // LA HERENCIA POR PADRE (segmentos de gusano, Creepers,
-                // Sirvientes): el sello del que los escupe.
+                // Sirvientes): el sello del que los escupe — v6.50.59:
+                // TAMBIÉN EL NIVEL (el castigo se hereda completo).
                 if (source is EntitySource_Parent padre && padre.Entity is NPC papi &&
                     papi.active)
                 {
                     var selloPapi = papi.GetGlobalNPC<OleadaNPC>();
                     if (selloPapi != null && selloPapi.EsDeOleada)
                     {
-                        Marcar(npc, selloPapi.Oleada, selloPapi.EsJefeDeOleada, selloPapi.EsEspecial);
+                        Marcar(npc, selloPapi.Oleada, selloPapi.EsJefeDeOleada, selloPapi.EsEspecial,
+                            selloPapi.Nivel);
                         return;
                     }
                 }
 
                 // EL SELLO DE LA FURIA (fase de chusma): todo hostil nuevo
-                // es comida del libro.
+                // es comida del libro (v6.50.59 — al NIVEL del festín).
                 if (GrimorioFuriaSistema.ChusmaEnMarcha &&
                     !npc.friendly && !npc.townNPC && !npc.boss && !npc.SpawnedFromStatue)
                 {
-                    Marcar(npc, GrimorioFuriaSistema.OleadaActual, jefe: false);
+                    Marcar(npc, GrimorioFuriaSistema.OleadaActual, jefe: false,
+                        nivel: GrimorioFuriaSistema.NivelFuriaPublico);
                 }
             }
             catch { }
@@ -387,6 +436,7 @@ namespace AethonMod.Content.Globals
                 bitWriter.WriteBit(EsJefeDeOleada);
                 bitWriter.WriteBit(EsDeOleada); // lleva stats: solo las bestias del festín
                 writer.Write((byte)Oleada);
+                writer.Write((byte)Math.Max(1, Nivel)); // v6.50.59 — el nivel del festín
                 if (EsDeOleada)
                 {
                     // Los stats ESCALADOS de la autoridad (tal cual los tiene).
@@ -424,6 +474,7 @@ namespace AethonMod.Content.Globals
                 EsJefeDeOleada = bitReader.ReadBit();
                 bool llevaStats = bitReader.ReadBit();
                 Oleada = reader.ReadByte();
+                Nivel = Math.Max(1, (int)reader.ReadByte()); // v6.50.59 — el nivel del festín
 
                 if (llevaStats)
                 {
@@ -446,6 +497,7 @@ namespace AethonMod.Content.Globals
                 EsEspecial = false;
                 EsJefeDeOleada = false;
                 Oleada = 0;
+                Nivel = 1;
                 Aura = null;
             }
         }
@@ -550,15 +602,18 @@ namespace AethonMod.Content.Globals
                     }
                 }
 
-                int[] menu = GrimorioFuriaSistema.PoolDeOleada;
-                if (menu == null || menu.Length == 0) return;
+                var menu = GrimorioFuriaSistema.PoolDeOleada;
+                if (menu == null || menu.Count == 0) return;
 
-                // EL MENÚ DEL FESTÍN (limpio y ponderado): el motor solo
-                // escupe la comida del libro mientras la oleada viva.
+                // EL MENÚ DEL FESTÍN (limpio y PONDERADO — v6.50.59: el
+                // bioma del portador pesa EL DOBLE que los acompañantes del
+                // nivel): el motor solo escupe la comida del libro mientras
+                // la oleada viva — y el menú CAMBIA EN VIVO cuando el
+                // portador se muda de bioma (GrimorioFuriaSistema reconstruye
+                // el pool cada medio segundo).
                 pool.Clear();
-                for (int i = 0; i < menu.Length; i++)
-                    if (menu[i] > 0)
-                        pool[menu[i]] = 1f;
+                foreach (var par in menu)
+                    pool[par.Key] = par.Value;
             }
             catch { }
         }
@@ -627,7 +682,10 @@ namespace AethonMod.Content.Globals
             if (EsDeOleada && !npc.boss)
             {
                 _tickAggro++;
-                if (_tickAggro >= 30)
+                // v6.50.59 — MÁS AGRESIVA (la letra: «todos deben ser mas
+                // agresivos»): la chusma re-objetiva cada 20 t (antes 30 —
+                // se distraían con cualquier cosa).
+                if (_tickAggro >= 20)
                 {
                     _tickAggro = 0;
                     npc.TargetClosest(false);
@@ -686,7 +744,7 @@ namespace AethonMod.Content.Globals
                 // bien), los numeros no.
                 if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.SkeletronHead && Main.dayTime)
                 {
-                    npc.defense = _defensaBase + 6 * Oleada;
+                    npc.defense = _defensaBase + DefensaExtra(true);
                     if (_danoBase > 0)
                         npc.damage = (int)(_danoBase * MultiplicadorStats);
                 }
@@ -761,12 +819,15 @@ namespace AethonMod.Content.Globals
                     // tras la colina y el festín leía como «no salen
                     // enemigos». El hambre los trae CORRIENDO desde donde
                     // nazcan (el libro los llama: vienen).
-                    // v6.50.27 — el empuje sube (0.16→0.20): con la
-                    // inmunidad de CheckActive ahora SÍ llegan — que lleguen
-                    // PRONTO.
+                    // v6.50.59 — MÁS AGRESIVA AÚN (la letra: «todos deben
+                    // ser mas agresivos»): el empuje base sube (0.20→0.26,
+                    // +0.026 por oleada y +0.02 por NIVEL) y el TECHO de
+                    // velocidad también (11→13, +0.6k, +0.4(n−1)) — la
+                    // chusma de nivel 10 CORRE a 19 px/t: la calle es suya.
                     if (d > 4600f || d < 1f) return;
-                    npc.velocity += dir / d * (0.20f + 0.02f * Oleada);
-                    float techo = 11f + 0.5f * Oleada;
+                    int nCh = Math.Max(1, Nivel);
+                    npc.velocity += dir / d * (0.26f + 0.026f * Oleada + 0.02f * (nCh - 1));
+                    float techo = 13f + 0.6f * Oleada + 0.4f * (nCh - 1);
                     float vel = npc.velocity.Length();
                     if (vel > techo)
                         npc.velocity = npc.velocity * (techo / vel);
@@ -776,9 +837,11 @@ namespace AethonMod.Content.Globals
                 // === LOS JEFES: la furia de verdad ===
                 if (!EsJefeDeOleada) return; // solo los convocados por el libro
 
-                // EL RE-OBJETIVO (cada 20 ticks — nunca se distraen).
+                // EL RE-OBJETIVO (v6.50.59 — cada 12 t: nunca se distraen,
+                // la letra: «haz que la IA de los jefes de oleada en la
+                // oleada sea mas agresiva»).
                 _tickAggro++;
-                if (_tickAggro >= 20)
+                if (_tickAggro >= 12)
                 {
                     _tickAggro = 0;
                     npc.TargetClosest(false);
@@ -788,20 +851,52 @@ namespace AethonMod.Content.Globals
 
                 // EL HOMING + EL EMBITE: solo los que surcan tiles (los
                 // demás ya persiguen por su cuenta — su AI usa el suelo).
+                // v6.50.59 — MÁS HAMBRIENTOS: homing 0.09+0.012k+0.01(n−1)
+                // (antes 0.05+0.008k — se dejaban llevar), el EMBITE más
+                // frecuente (260−26k−12(n−1), tope 70) y más FUERTE
+                // (2.6+0.42k+0.2(n−1)).
                 if (presaValida && npc.noTileCollide)
                 {
                     Vector2 dir = presa.Center - npc.Center;
                     float d = dir.Length();
+                    int nJ = Math.Max(1, Nivel);
                     if (d > 60f && d < 2200f)
-                        npc.velocity += dir / d * (0.05f + 0.008f * Oleada);
+                        npc.velocity += dir / d * (0.09f + 0.012f * Oleada + 0.01f * (nJ - 1));
 
                     _tickLunge++;
-                    int cadenciaLunge = EsEspecial ? 90 : Math.Max(120, 300 - 18 * Oleada);
+                    int cadenciaLunge = EsEspecial ? 70
+                        : Math.Max(70, 260 - 26 * Oleada - 12 * (nJ - 1));
                     if (_tickLunge >= cadenciaLunge)
                     {
                         _tickLunge = 0;
                         Vector2 embite = (presa.Center - npc.Center).SafeNormalize(Vector2.Zero);
-                        npc.velocity += embite * (2f + 0.35f * Oleada);
+                        npc.velocity += embite * (2.6f + 0.42f * Oleada + 0.2f * (nJ - 1));
+                    }
+                }
+
+                // v6.50.59 — EL DEVORADOR ESCUPE (la letra: «el jefe
+                // devorador de mundo en la oleada debe lanzar sus propios
+                // proyectiles estos son los mismos mosntruos de su bioma,
+                // el jefe los escupira cada vez que este delante del
+                // jugador»): cada vez que la CABEZA pasa DELANTE de la
+                // presa (cerca y volando hacia ella), escupe 2-3 monstruos
+                // de la Corrupción DESDE SU BOCA — proyectiles vivos que
+                // salen disparados hacia el jugador. Cadencia corta (80 t
+                // + la ración de la coreografía): el gusano-barra
+                // AMETRALLA comida.
+                if (presaValida && npc.type == NPCID.EaterofWorldsHead)
+                {
+                    _tickEscupe++;
+                    Vector2 rumboPresa = (presa.Center - npc.Center);
+                    float dPresa = rumboPresa.Length();
+                    Vector2 velNorm = npc.velocity.LengthSquared() > 0.01f
+                        ? Vector2.Normalize(npc.velocity) : Vector2.UnitX;
+                    bool delante = dPresa < 520f && dPresa > 40f &&
+                        Vector2.Dot(velNorm, rumboPresa / dPresa) > 0.35f;
+                    if (_tickEscupe >= 80 && delante && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        _tickEscupe = 0;
+                        EscupirDevorador(npc, presa, 2 + (Oleada >= 5 ? 1 : 0));
                     }
                 }
 
@@ -810,16 +905,48 @@ namespace AethonMod.Content.Globals
                 // («no combinan nada con el jefe»); ahora cada guardián
                 // convoca a LOS SUYOS con la misma cadencia de siempre
                 // (la 10 y la especial, sin pausa).
+                // v6.50.59 — LA CADENCIA SE APRIETA (la letra: «mas
+                // agresivos»): 240−24k−10(n−1) con tope 40 (antes
+                // 300−18k con tope 60 — casi el DOBLE de frecuente).
                 if (presaValida)
                 {
                     _tickAtaque++;
-                    int cadencia = EsEspecial ? 50 : Math.Max(60, 300 - 18 * Oleada);
+                    int nCo = Math.Max(1, Nivel);
+                    int cadencia = EsEspecial ? 36
+                        : Math.Max(40, 240 - 24 * Oleada - 10 * (nCo - 1));
                     if (_tickAtaque >= cadencia)
                     {
                         _tickAtaque = 0;
                         Coreografia(npc, presa);
                     }
                 }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.59 — EL ESCUPITajo DEL DEVORADOR: los monstruos de SU
+        /// bioma (la Corrupción) salen DISPARADOS de su boca hacia la
+        /// presa — son sus proyectiles vivos (nacen de la boca con
+        /// velocidad heredada, como todo escupitajo que se respete).
+        /// </summary>
+        private void EscupirDevorador(NPC npc, Player presa, int cuantos)
+        {
+            try
+            {
+                bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
+                Vector2 rumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+                Vector2 boca = npc.Center + rumbo * 30f;
+                for (int i = 0; i < cuantos; i++)
+                {
+                    int tipo = subsuelo
+                        ? (Main.rand.NextBool() ? NPCID.DevourerHead : NPCID.CorruptSlime)
+                        : (Main.rand.NextBool() ? NPCID.EaterofSouls : NPCID.CorruptSlime);
+                    Vector2 vel = rumbo.RotatedBy(Main.rand.NextFloat(-0.45f, 0.45f)) *
+                        Main.rand.NextFloat(7f, 11f);
+                    Convocar(npc, tipo, boca, vel.X, vel.Y);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center); // el escupitajo
             }
             catch { }
         }
@@ -1116,23 +1243,34 @@ namespace AethonMod.Content.Globals
         }
 
         // ==================================================================
-        //  EL DEVORADOR - LOS MONSTRUOS DE LA CORRUPCION (la cadena la
-        //  arma GrimorioFuriaSistema: 3 veces mas larga)
+        //  EL DEVORADOR - LOS MONSTRUOS DE SU BIOMA, ESCUPIDOS DE LA BOCA
+        //  (v6.50.59 — la letra: «el jefe devorador de mundo en la oleada
+        //  debe lanzar sus propios proyectiles estos son los mismos
+        //  mosntruos de su bioma, el jefe los escupira cada vez que este
+        //  delante del jugador» — ya no un anillo lejano: la ración sale
+        //  DISPARADA de su boca hacia la presa; la cadena 3 veces más
+        //  larga la arma GrimorioFuriaSistema)
         // ==================================================================
 
         private void CoroDevorador(NPC npc, Player presa)
         {
+            // LA RACIÓN DE LA BOCA: los monstruos de la Corrupción salen
+            // escupidos hacia la presa (sus proyectiles vivos) — el abanico
+            // del escupitajo se abre rumbo al jugador.
             bool subsuelo = npc.Center.Y > Main.worldSurface * 16f + 320f;
-            int cantidad = 2 + Math.Min(3, 1 + Oleada / 4);
+            int cantidad = 3 + Math.Min(3, 1 + Oleada / 4);
+            Vector2 rumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+            Vector2 boca = npc.Center + rumbo * 30f;
             for (int i = 0; i < cantidad; i++)
             {
                 int tipo = subsuelo
                     ? (Main.rand.NextBool() ? NPCID.DevourerHead : NPCID.CorruptSlime)
-                    : NPCID.EaterofSouls;
-                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                Vector2 pos = npc.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 240f;
-                Convocar(npc, tipo, pos, Main.rand.NextFloat(-2f, 2f), -2f);
+                    : (Main.rand.NextBool() ? NPCID.EaterofSouls : NPCID.CorruptSlime);
+                Vector2 vel = rumbo.RotatedBy((i - (cantidad - 1) * 0.5f) * 0.16f) *
+                    Main.rand.NextFloat(7f, 11f);
+                Convocar(npc, tipo, boca, vel.X, vel.Y);
             }
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center);
         }
 
         // ==================================================================
@@ -1276,7 +1414,9 @@ namespace AethonMod.Content.Globals
             if (Content.Systems.ShardLevelSystem.EsParteDeJefe(npc)) return;
             try
             {
-                int monedas = EsEspecial ? 15 : Oleada;
+                // v6.50.59 — EL PAGO DEL NIVEL: el festín de nivel N paga
+                // k+(N−1) monedas (la furia que crece paga lo que cuesta).
+                int monedas = EsEspecial ? 15 : Oleada + Math.Max(0, Nivel - 1);
                 var src = npc.GetSource_Loot();
 
                 if (EsJefeDeOleada)

@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using AethonMod.Content.VFX;
 using AethonMod.Content.Projectiles.Cosmic;
+using AethonMod.Content.NPCs; // v6.50.59 — el reloj permanente pregunta la FASE del jefe
 
 namespace AethonMod.Content.Projectiles.Jefes
 {
@@ -1040,7 +1041,38 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                     }
 
-                    if (_edad > 620f) Projectile.Kill();
+                    // v6.50.59 — EL RELOJ DE TODA LA FASE 2 (la letra:
+                    // «el ataque reloj de arena del jefe es muy corto,
+                    // deberia durar al menos toda la fase 2 completa»):
+                    // nacido con ai[1]=2 (el jefe lo lanza en fase 2), el
+                    // reloj es INMORTAL mientras SU jefe siga vivo y en
+                    // fase 2 — la catedral del tiempo cabalga con él por
+                    // TODA la fase (el resto de platos sigue saliendo con
+                    // el reloj encima). El día que la fase acaba (fase 3+ o
+                    // el dios muerto) el reloj SE DISUELVE en 40 t: dura
+                    // exacto toda la fase 2, ni un tick menos ni uno más.
+                    if (Projectile.ai[1] >= 2f)
+                    {
+                        bool fase2Viva = false;
+                        int dueno = (int)Projectile.ai[2];
+                        if (dueno >= 0 && dueno < Main.maxNPCs && Main.npc[dueno] != null &&
+                            Main.npc[dueno].active &&
+                            Main.npc[dueno].ModNPC is AethonBoss jefeReloj)
+                            fase2Viva = jefeReloj.FasePublica == 2;
+
+                        if (fase2Viva)
+                        {
+                            // INMORTAL: el timeLeft jamás baja del minuto.
+                            if (Projectile.timeLeft < 3600) Projectile.timeLeft = 3600;
+                        }
+                        else
+                        {
+                            // LA FASE ACABÓ — la disolución final (40 t).
+                            if (Projectile.timeLeft > 40) Projectile.timeLeft = 40;
+                            if (_edad > 620f) Projectile.Kill();
+                        }
+                    }
+                    else if (_edad > 620f) Projectile.Kill();
                     break;
                 }
 
@@ -1617,6 +1649,13 @@ namespace AethonMod.Content.Projectiles.Jefes
                         Projectile.hostile = true;
 
                         // EL LANZAMIENTO (una sola vez, determinista por edad).
+                        // v6.50.59 — SIN CAÑONAZO (la letra: «aun sigue
+                        // siendo lanzado con mucha fuerza y pierde al
+                        // jugador»): el sol YA NO sale disparado a 7.2 px/t
+                        // — nace suave (4.8) porque NO es una bala: es una
+                        // estrella que DESPIERTA y CAZA. La fuerza del
+                        // disparo era la que lo llevaba MÁS ALLÁ del
+                        // jugador antes de que la persiga pudiera girar.
                         if (_edad <= 81f)
                         {
                             Vector2 rumbo = new Vector2(0f, -1f);
@@ -1624,40 +1663,53 @@ namespace AethonMod.Content.Projectiles.Jefes
                             if (presaS != null)
                                 rumbo = (presaS.Center - Projectile.Center)
                                     .SafeNormalize(Vector2.UnitY);
-                            Projectile.velocity = rumbo * 7.2f;
+                            Projectile.velocity = rumbo * 4.8f;
                             Projectile.netUpdate = true;
                         }
 
-                        // v6.50.58 — LA PERSIGA DE VERDAD (la letra de la
-                        // ronda: «el sol que lanza el jefe, no persigue al
-                        // jugador»): la aceleración de 0.05/t quedaba
-                        // ENTERRADA bajo la inercia del cañonazo (7.2 px/t
-                        // en línea recta, con la gravedad ganándole la
-                        // pulse) — el sol cruzaba el cielo sin cazar NADA.
-                        // Ahora el RUMBO GIRA hacia la presa (steering:
-                        // converge en ~1.2 s), la rapidez decae del
-                        // cañonazo a la persiga lenta (7.2 → 4.4 px/t) y
-                        // la GRAVEDAD es la COMBA del rumbo (el peso se
-                        // nota, la caza GANA — «perseguir lentamente al
-                        // jugador, tener gravedad», de verdad esta vez).
+                        // v6.50.59 — LA CAZA QUE NO SE PIERDE (la letra:
+                        // «sigue sin perseguir al jugador… aun sigue siendo
+                        // lanzado con mucha fuerza y pierde al jugador»):
+                        // la .58 frenaba la persiga a 4.4 px/t — MÁS LENTA
+                        // que el jugador corriendo (~7 px/t con botas): por
+                        // eso la PERDÍA. LA CURA — EL CRUCERO DE CAZA en
+                        // TRES RITMOS: (a) CERCA (<220 px) el sol pesa y
+                        // va a 6.4 — lento, se esquiva, la estrella se
+                        // SIENTE enorme; (b) A DISTANCIA MEDIA el crucero
+                        // 7.6 px/t — apenas MÁS RÁPIDO que la carrera
+                        // máxima: la línea recta NO te salva; (c) LEJOS
+                        // (>700 px) EL RELEVO: 9.8 px/t — si algo (una
+                        // montura, un gancho, un dash) lo dejó atrás, el
+                        // sol REMONTA y VUELVE A LA CAZA. Y EL GIRO sube a
+                        // Lerp 0.075/t (converge en ~0.8 s — la .58 tardaba
+                        // el doble) con la gravedad como comba MENOR
+                        // (+0.012): el peso se nota, la caza GANA SIEMPRE.
                         Player presaV = Presa();
                         Vector2 dirSol = Projectile.velocity.SafeNormalize(-Vector2.UnitY);
                         if (presaV != null)
                         {
+                            float distSol = Vector2.Distance(presaV.Center, Projectile.Center);
                             Vector2 haciaSol = (presaV.Center - Projectile.Center)
                                 .SafeNormalize(dirSol);
-                            dirSol = Vector2.Lerp(dirSol, haciaSol, 0.045f); // EL GIRO
-                            dirSol.Y += 0.018f;                              // EL PESO
+                            dirSol = Vector2.Lerp(dirSol, haciaSol, 0.075f); // EL GIRO FIRME
+                            dirSol.Y += 0.012f;                              // EL PESO (comba menor)
                             dirSol = dirSol.SafeNormalize(dirSol);
+
+                            // LOS TRES RITMOS DE LA CAZA.
+                            float objetivoSol = distSol > 700f ? 9.8f   // EL RELEVO: remonta
+                                : distSol < 220f ? 6.4f                  // CERCA: pesa, se esquiva
+                                : 7.6f;                                  // EL CRUCERO: caza
+                            float rapidoSol = MathHelper.Lerp(
+                                Projectile.velocity.Length(), objetivoSol, 0.10f);
+                            Projectile.velocity = dirSol * rapidoSol;
                         }
                         else
                         {
                             dirSol.Y += 0.05f;   // sin presa: el peso manda
                             dirSol = dirSol.SafeNormalize(dirSol);
+                            Projectile.velocity = dirSol * MathHelper.Max(
+                                2f, Projectile.velocity.Length() - 0.05f);
                         }
-                        float rapidoSol = MathHelper.Clamp(
-                            Projectile.velocity.Length() - 0.055f, 4.4f, 7.2f);
-                        Projectile.velocity = dirSol * rapidoSol;
                         Projectile.rotation += 0.012f;
 
                         // LA ESTELA DE FUEGO BLANCO.

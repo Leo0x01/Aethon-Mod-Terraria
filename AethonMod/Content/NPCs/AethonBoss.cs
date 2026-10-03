@@ -299,6 +299,16 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // === LA FASE (los umbrales de siempre) ===
         private int Phase = 1;
 
+        /// <summary>
+        /// v6.50.59 — LA FASE PÚBLICA: el RELOJ PERMANENTE de fase 2 la
+        /// lee (el reloj vive mientras la fase 2 viva — el ataque que dura
+        /// TODA la fase, la letra de la decimasexta ronda).
+        /// </summary>
+        internal int FasePublica => Phase;
+
+        /// <summary>v6.50.59 — el whoAmI del RELOJ PERMANENTE de la fase 2 (−1 = sin reloj).</summary>
+        private int _relojPermanente = -1;
+
         /// <summary>LA FURIA: la fase final es MÁS RÁPIDA en todo.</summary>
         private bool Furia => Phase >= 5;
 
@@ -585,8 +595,42 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         NPC.velocity = new Vector2(0f, 5f);
 
                     // t=10 — EL SONIDO DE SU NACIMIENTO (en SU tick, palabra por palabra).
+                    // v6.50.59 — EL RUIDO DE TEMBLOR DE SIEMPRE (la letra:
+                    // «en la presentacion del jefe sale el sonido de la
+                    // emperatriz de la luz y esto esta mal, el ruido que
+                    // debe salir era el ruido de temblor que habia
+                    // anteriormente»): el Item161 de la Emperatriz MURIÓ —
+                    // vuelve el TEMBLOR de la casa (el Item122 grave de la
+                    // llegada de la .48, el que sacudía el mundo). Y
+                    // REFUERZOS: el temblor CRECE — el mismo rugido otra
+                    // vez a mitad de la carrera (más grave aún).
                     if (t == 11 && !Main.dedServ)
-                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(-0.25f), NPC.Center);
+                        OndaLib.Kick(9f, 22);
+                    }
+                    if (t == 130 && !Main.dedServ)
+                    {
+                        Terraria.Audio.SoundEngine.PlaySound(
+                            SoundID.Item122.WithPitchOffset(-0.4f), NPC.Center);
+                        OndaLib.Kick(11f, 24);
+                    }
+
+                    // v6.50.59 — EL CIELO ENTERO SE ENCIENDE (la letra: «el
+                    // cielo entero no se ilumina, solo salen particulas,
+                    // debe tambien iluminarce con aurora blanca y dorada»):
+                    // además de la lluvia de polvos, la LUZ DE MUNDO inunda
+                    // los alrededores de la presa mientras el dios desciende
+                    // — el SUELO también se baña de blanco-dorado (la aurora
+                    // del cielo la pinta ColaSierpeSky en TODAS las
+                    // pantallas).
+                    if (!Main.dedServ)
+                    {
+                        float encendido = MathHelper.Clamp(t / 180f, 0f, 1f);
+                        Lighting.AddLight(target.Center,
+                            new Vector3(1.6f, 1.42f, 1.0f) * (0.35f + 0.65f * encendido));
+                    }
 
                     // LA CAÍDA QUE SE FRENA (cada tick: ×0.95 — como la Emperatriz).
                     NPC.velocity *= 0.95f;
@@ -924,6 +968,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // del menú hasta la siguiente fase.
                 if (plato == EST_ESTALLIDO && Phase <= 2 &&
                     _estallidosUsadosEnFase >= Phase)
+                    continue;
+
+                // v6.50.59 — EL RELOJ PERMANENTE YA ESTÁ EN LA MESA: en
+                // fase 2, con el reloj de TODA la fase vivo, el plato SALE
+                // del menú (la catedral del tiempo cabalga con el jefe —
+                // re-invocarla no suma nada; los demás platos rotan).
+                if (plato == EST_RELOJ && Phase == 2 && RelojPermanenteVivo())
                     continue;
 
                 int peso = 2;                                              // base
@@ -1861,14 +1912,36 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    // EL RELOJ ÚNICO: nace EN EL JEFE y lo SIGUE — ai[2] =
-                    // su whoAmI (el caballo del reloj).
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        NPC.Center, Vector2.Zero,
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        (int)(NPC.damage * 0.60f), 0f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloRelojGigante,
-                        Furia ? 1f : 0f, NPC.whoAmI);
+                    // v6.50.59 — EL RELOJ DE TODA LA FASE 2 (la letra: «el
+                    // ataque reloj de arena del jefe es muy corto, deberia
+                    // durar al menos toda la fase 2 completa»): en fase 2 el
+                    // reloj nace PERMANENTE (ai[1]=2) — INMORTAL mientras
+                    // la fase 2 viva, cabalgando al jefe por TODA la fase
+                    // (los demás platos siguen saliendo CON el reloj encima)
+                    // y disuelto al primer tick de fase 3. En fases 3+ el
+                    // plato es el de siempre (la catedral de 620 t). EL
+                    // RELOJ ÚNICO: si el permanente YA está vivo, no nace
+                    // otro — solo el anuncio de que sigue allí.
+                    bool permanente = Phase == 2 && !Furia;
+                    if (permanente && !RelojPermanenteVivo())
+                    {
+                        int idxR = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.60f), 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloRelojGigante,
+                            2f, NPC.whoAmI);
+                        _relojPermanente = idxR;
+                    }
+                    else if (!permanente)
+                    {
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                            NPC.Center, Vector2.Zero,
+                            ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                            (int)(NPC.damage * 0.60f), 0f, Main.myPlayer,
+                            AtaqueJefeProjectile.EstiloRelojGigante,
+                            Furia ? 1f : 0f, NPC.whoAmI);
+                    }
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.4f), NPC.Center);
                 EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Reloj", OroLuz);
@@ -1876,7 +1949,28 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 NPC.netUpdate = true;
             }
 
-            if (_tickEstado >= 210) { CerrarEstado(); }
+            // v6.50.59 — LA FASE 2 SUELTA EL ESTADO ANTES (120 t): el reloj
+            // PERMANENTE ya vuela solo cabalgando al jefe — el dios vuelve
+            // a la pelea con la catedral del tiempo ENCIMA. Las fases 3+
+            // mantienen los 210 t de la catedral clásica.
+            int cierreReloj = Phase == 2 ? 120 : 210;
+            if (_tickEstado >= cierreReloj) { CerrarEstado(); }
+        }
+
+        /// <summary>
+        /// v6.50.59 — ¿El RELOJ PERMANENTE de la fase 2 sigue vivo? (el
+        /// menú lo lee: con el reloj de toda-la-fase en la mesa, el plato
+        /// EST_RELOJ SALE de la rotación — el jefe pelea CON él, no lo
+        /// re-invoca).
+        /// </summary>
+        private bool RelojPermanenteVivo()
+        {
+            if (_relojPermanente < 0 || _relojPermanente >= Main.maxProjectiles) return false;
+            Projectile r = Main.projectile[_relojPermanente];
+            return r != null && r.active &&
+                r.type == ModContent.ProjectileType<AtaqueJefeProjectile>() &&
+                r.ai[0] == AtaqueJefeProjectile.EstiloRelojGigante &&
+                r.ai[1] >= 2f;
         }
 
         /// <summary>

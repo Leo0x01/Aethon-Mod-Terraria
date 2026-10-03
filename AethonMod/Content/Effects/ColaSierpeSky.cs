@@ -214,6 +214,96 @@ namespace AethonMod.Content.Effects
                         new Vector2(w * 2.6f / glow.Width, h * 1.6f / glow.Height),
                         SpriteEffects.None, 0f);
 
+                    // =============================================================
+                    //  v6.50.59 — LA AURORA DE LA PRESENTACIÓN (la letra:
+                    //  «el cielo entero no se ilumina, solo salen particulas,
+                    //  debe tambien iluminarce con aurora blanca y dorada
+                    //  igual que la aurora de la emperatriz pero en todo el
+                    //  cielo»): durante la presentación (sub 9) TODO EL
+                    //  CIELO se enciende — (1) EL VELO ENTERO: un
+                    //  resplandor blanco-dorado que cubre la pantalla
+                    //  COMPLETA de borde a borde (no solo el horizonte) y
+                    //  (2) LAS ONCE CORTINAS DE AURORA: bandas verticales
+                    //  que ONDULAN de extremo a extremo — el borde inferior
+                    //  ondea con su propia ola y la luz TIEMBLA dentro,
+                    //  alternando el BLANCO y el ORO de la casa (la lluvia
+                    //  de polvos de la .51 sigue cayendo ENCIMA). Se funde
+                    //  al aparecer el jefe (sub 10) en ~¼ s.
+                    // =============================================================
+                    float objetivoAurora = sub == 9 ? 1f : 0f;
+                    float pasoAurora = objetivoAurora > _auroraVista ? (1f / 20f) : (1f / 14f);
+                    _auroraVista = MathHelper.Clamp(
+                        _auroraVista + MathF.Sign(objetivoAurora - _auroraVista) * pasoAurora,
+                        0f, 1f);
+
+                    if (_auroraVista > 0.02f)
+                    {
+                        float avA = _auroraVista;
+
+                        // (1) EL VELO ENTERO — el cielo COMPLETO bañado en
+                        //     blanco-dorado: DOS capas que cubren TODO.
+                        float latidoA = 0.86f + 0.14f * MathF.Sin(t * 1.15f);
+                        sb.Draw(glow, new Vector2(w * 0.5f, h * 0.30f), null,
+                            new Color(255, 248, 224) * (_alpha * avA * 0.16f * latidoA),
+                            0f, origen,
+                            new Vector2(w * 2.9f / glow.Width, h * 2.6f / glow.Height),
+                            SpriteEffects.None, 0f);
+                        sb.Draw(glow, new Vector2(w * 0.5f, h * 0.30f), null,
+                            new Color(255, 236, 176) * (_alpha * avA * 0.12f * latidoA),
+                            0f, origen,
+                            new Vector2(w * 2.2f / glow.Width, h * 2.0f / glow.Height),
+                            SpriteEffects.None, 0f);
+
+                        // (2) LAS ONCE CORTINAS — la aurora de borde a
+                        //     borde: cada cortina son CUATRO tramos apilados
+                        //     que se CURVAN (la ondulación arrastra el borde
+                        //     inferior) y el brillo VIVE abajo (la aurora
+                        //     arde donde corta el cielo).
+                        int cortinas = 11;
+                        for (int iC = 0; iC < cortinas; iC++)
+                        {
+                            float fase = iC * 1.93f;
+                            float xBase = w * (iC + 0.5f) / cortinas;
+                            float ondula = MathF.Sin(t * 0.55f + fase) * (w * 0.030f);
+                            float hCol = h * (0.52f + 0.10f * MathF.Sin(t * 0.80f + fase * 1.37f));
+                            float shimmer = 0.55f + 0.45f * MathF.Sin(t * 1.65f + fase * 2.61f);
+                            Color cCortina = (iC & 1) == 0
+                                ? new Color(255, 255, 250)      // la blanca
+                                : new Color(255, 238, 186);     // la dorada
+                            float anchoTop = 120f + 46f * MathF.Sin(fase * 3.1f);
+                            float anchoBot = 58f + 26f * MathF.Sin(fase * 1.7f + 1.2f);
+
+                            for (int seg = 0; seg < 4; seg++)
+                            {
+                                float u0 = seg * 0.25f;
+                                float u1 = (seg + 1f) * 0.25f;
+                                float x0 = xBase + ondula * u0 +
+                                    MathF.Sin(t * 0.9f + fase + u0 * 2.4f) * 26f;
+                                float x1 = xBase + ondula * u1 +
+                                    MathF.Sin(t * 0.9f + fase + u1 * 2.4f) * 26f;
+                                float y0 = -h * 0.06f + u0 * hCol;
+                                float y1 = -h * 0.06f + u1 * hCol;
+
+                                Vector2 p0 = new Vector2(x0, y0);
+                                Vector2 p1 = new Vector2(x1, y1);
+                                Vector2 centroSeg = (p0 + p1) * 0.5f;
+                                Vector2 dirSeg = p1 - p0;
+                                float largoSeg = dirSeg.Length();
+                                if (largoSeg < 1f) continue;
+                                // el eje Y del quad alineado con la dirección
+                                // del tramo (la cortina CUELGA hacia abajo).
+                                float angSeg = MathF.Atan2(dirSeg.Y, dirSeg.X) - MathHelper.PiOver2;
+                                float anchoSeg = MathHelper.Lerp(anchoTop, anchoBot, (u0 + u1) * 0.5f);
+                                float brilloSeg = (0.07f + 0.26f * u1) * shimmer;
+                                sb.Draw(glow, centroSeg, null,
+                                    cCortina * (_alpha * avA * brilloSeg), angSeg, origen,
+                                    new Vector2(anchoSeg / glow.Width,
+                                                largoSeg * 1.35f / glow.Height),
+                                    SpriteEffects.None, 0f);
+                            }
+                        }
+                    }
+
                     // === LA LLEGADA ===
                     if (_llegadaVista > 0.02f)
                     {
@@ -431,6 +521,10 @@ namespace AethonMod.Content.Effects
         // LA LLEGADA: la intensidad del encendido (vive mientras la luz
         // llega; se disuelve cuando la oscuridad toma el control).
         private float _llegadaVista = 0f;
+
+        // v6.50.59 — LA AURORA DE LA PRESENTACIÓN: el fundido propio de
+        // las cortinas (vive SOLO en sub 9 — la presentación pura).
+        private float _auroraVista = 0f;
     }
 
     // ======================================================================

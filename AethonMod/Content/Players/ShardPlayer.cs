@@ -69,6 +69,16 @@ namespace AethonMod.Content.Players
         /// </summary>
         public bool DerrotaOleada10 = false;
 
+        /// <summary>
+        /// v6.50.59 — EL NIVEL DE FURIA del portador (1..10, persistente):
+        /// «cuando inicia la primera oleada natural siempre debe empezar en
+        /// nivel 1, luego si el jugador logra vencer el nivel 1 de esa
+        /// oleada, la siguiente sera de nivel 2, o sea 2 oleadas…». El
+        /// festín de nivel N trae N oleadas y TODO escala con N — vencer
+        /// sube, morir congela.
+        /// </summary>
+        public int FuriaNivel = 1;
+
         /// <summary>Segundos por momento de hambre ("si pasas minutos sin matar").</summary>
         public const int SegundosPorMomento = 75;
         /// <summary>Momentos que tarden la furia (~5 minutos sin comer).</summary>
@@ -382,10 +392,17 @@ namespace AethonMod.Content.Players
                                 // vive en AethonConfigServidor (ServerSide):
                                 // en dedicado manda la config del server, no
                                 // la ilusión del cliente.
+                                // v6.50.59 — LA FURIA NATURAL ES DE NIVEL: ya
+                                // NO son los momentos de hambre acumulados —
+                                // es EL NIVEL DEL PORTADOR (la primera vez 1:
+                                // una oleada; vencer la sube a 2: DOS oleadas;
+                                // y así hasta 10). Los momentos siguen siendo
+                                // EL RELOJ que decide CUÁNDO estalla.
                                 var config = ModContent.GetInstance<Content.AethonConfigServidor>();
                                 bool evento = config == null || config.EventoHambreGrimorio;
                                 if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
-                                    GrimorioFuriaSistema.Provocar(Player, MomentosHambre);
+                                    GrimorioFuriaSistema.Provocar(Player,
+                                        Math.Max(1, Math.Min(10, FuriaNivel)));
                             }
                         }
                     }
@@ -661,6 +678,9 @@ namespace AethonMod.Content.Players
                 tag["cronicaJefes"] = CronicaJefes;
                 tag["cronicaNarrada"] = CronicaNarrada;
                 tag["derrotaOleada10"] = DerrotaOleada10;
+                // v6.50.59 — EL NIVEL DE FURIA (la progresión de las oleadas
+                // naturales: vencer sube, morir congela).
+                tag["furiaNivel"] = FuriaNivel;
             }
             catch { }
         }
@@ -674,6 +694,9 @@ namespace AethonMod.Content.Players
                 CronicaJefes = new System.Collections.Generic.List<int>(tag.GetList<int>("cronicaJefes"));
                 CronicaNarrada = tag.GetInt("cronicaNarrada");
                 DerrotaOleada10 = tag.GetBool("derrotaOleada10");
+                // v6.50.59 — EL NIVEL DE FURIA (clamp 1..10 — un guardado
+                // corrupto jamás rompe el sistema).
+                FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
             }
             catch { }
         }
