@@ -49,24 +49,25 @@ namespace AethonMod.Content.Players
         private int _ticksCelos = 0;
 
         /// <summary>
-        /// LA CRÓNICA DEL TESTIGO: los jefes que EL LIBRO ha devorado con
-        /// ESTE portador (los mata GlobalNPCXP al cobrar la kill). El
-        /// Testigo lee esta lista para contar SU versión humana de cada
-        /// derrota — dos narradores, un mismo hecho.
+        /// LA CRÓNICA DEL FESTÍN: los jefes que EL LIBRO ha devorado con
+        /// ESTE portador (los mata GlobalNPCXP al cobrar la kill).
+        /// v6.50.61 — LA PURGA: el Testigo murió — la crónica queda como
+        /// REGISTRO silencioso del festín (viaja con EcoRed.MsgCronica y
+        /// persiste en el .plr: los guardados viejos la conservan).
         /// </summary>
         public System.Collections.Generic.List<int> CronicaJefes = new System.Collections.Generic.List<int>();
 
         /// <summary>
-        /// v6.48 — EL CURSOR DE LA CRÓNICA: cuántas derrotas ya CONTÓ el
-        /// Testigo en su versión humana (GetChat consume de una en una:
-        /// cada charla nueva revela la siguiente página del cuento).
+        /// v6.48 — EL CURSOR DE LA CRÓNICA: cuántas derrotas ya están
+        /// registradas (dato histórico del Testigo — sin narrador hoy,
+        /// el contador sigue siendo el índice de la próxima página).
         /// </summary>
         public int CronicaNarrada = 0;
 
         /// <summary>
-        /// ¿El portador ya derrotó LA OLEADA 10 de la furia? El Testigo
-        /// solo vende las ESENCIAS de los jefes (10 de platino) a quien
-        /// ha sobrevivido al festín completo.
+        /// ¿El portador ya derrotó LA OLEADA 10 de la furia? La marca del
+        /// festín completo — v6.50.61: la tienda murió con el Testigo,
+        /// la marca queda como CONSTANCIA (persiste en el .plr).
         /// </summary>
         public bool DerrotaOleada10 = false;
 
@@ -84,7 +85,7 @@ namespace AethonMod.Content.Players
         public const int SegundosPorMomento = 75;
         /// <summary>Momentos que tarden la furia (~5 minutos sin comer).</summary>
         public const int MomentosParaFuria = 4;
-        /// <summary>El libro hambriento habla "a nivel alto" (25 = el segundo peldaño del Testigo).</summary>
+        /// <summary>El libro hambriento habla "a nivel alto" (25 = el segundo peldaño del festín).</summary>
         public const int NivelMinimoHambre = 25;
         /// <summary>Tope de momentos de hambre (= tope de oleadas).</summary>
         public const int MomentosMax = 10;
@@ -522,7 +523,8 @@ namespace AethonMod.Content.Players
         /// <summary>
         /// v6.48 — LA CRÓNICA: apunta que EL LIBRO devoró a este jefe con
         /// este portador (lo llama GlobalNPCXP al cobrar la kill — antes
-        /// de la voz). El Testigo contará su versión humana.
+        /// de la voz). El registro vive en el .plr (v6.50.61: sin
+        /// narrador, la crónica queda como constancia del festín).
         /// v6.50.3 — devuelve TRUE solo si la página es NUEVA (el llamador
         /// sincroniza por EcoRed únicamente entonces: antes el Devorador
         /// disparaba ~80 MsgCronica idénticos por una sola derrota).
@@ -758,7 +760,7 @@ namespace AethonMod.Content.Players
             {
                 tag["resonanceShards"] = ResonanceShards;
                 tag["firstLevelUpTriggered"] = FirstLevelUpTriggered;
-                // v6.48 — la crónica del Testigo y el derecho a las esencias.
+                // v6.48 — la crónica del festín y el derecho a las esencias.
                 tag["cronicaJefes"] = CronicaJefes;
                 tag["cronicaNarrada"] = CronicaNarrada;
                 tag["derrotaOleada10"] = DerrotaOleada10;

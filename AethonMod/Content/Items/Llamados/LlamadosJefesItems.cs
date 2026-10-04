@@ -8,21 +8,19 @@ using AethonMod.Content.NPCs;
 namespace AethonMod.Content.Items.Llamados
 {
     // ======================================================================
-    //  v6.47 — LOS LLAMADOS: los invocadores de los JEFES DEL MOD
+    //  v6.47 — LOS LLAMADOS: los invocadores de los JEFES DEL MOD.
     //
-    //  Petición del usuario: "para cada jefe un ítem invocador y que se
-    //  invoque de día". Los cinco jefes del mod eran FANTASMAS de código
-    //  (ningún spawn natural, ningún invocador: no había forma de verlos
-    //  en el juego). Ahora cada uno responde a su llamado — DE DÍA los
-    //  cuatro guardianes (la noche es del Ojo y de los muertos)…
-    //  Y A CUALQUIER HORA EL NOMBRE DE AETHON (v6.50.43): «no tiene
-    //  sentido eso ya que al invocar el jefe el tiempo pasa hasta que
-    //  el sol está en el centro del cielo, así que no importa la hora
-    //  de invocarlo» — su llegada trae el mediodía consigo.
+    //  v6.50.61 — LA PURGA DE NPC (la letra del usuario: «borra a todos
+    //  los NPC del mod, solo deja al jefe principal, Aethon, borra otros
+    //  jefes y al testigo»): los CUATRO llamados de los guardianes
+    //  murieron con sus jefes (Cristal del Titán Hueco, Sello del Rift,
+    //  Pluma de la Arquera, Sombra del Portador). SOLO queda EL NOMBRE
+    //  DE AETHON — el llamado del FINAL.
     //
     //  Contrato de la casa para todos: reutilizables (no consumibles —
     //  el mod entero es de pruebas), rugido al nacer, aviso de "ya vive
-    //  uno" si intentas doblar, y el mensaje localizado de noche.
+    //  uno" si intentas doblar, y el mensaje localizado de noche
+    //  (AETHON lo rompe: su llegada no conoce hora).
     // ======================================================================
 
     /// <summary>EL LLAMADO COMÚN: la maquinaria de los invocadores.</summary>
@@ -112,46 +110,10 @@ namespace AethonMod.Content.Items.Llamados
     }
 
     /// <summary>
-    /// El Cristal del Titán Hueco — convoca al guardián del Sagrario.
-    /// Fragmento del coloso cristalino que despertó bajo tierra.
-    /// </summary>
-    public class CristalDelTitanHueco : LlamadoDeJefe
-    {
-        protected override int NpcConvocado => ModContent.NPCType<HollowTitan>();
-    }
-
-    /// <summary>
-    /// El Sello del Rift — convoca al Guardián del Rift.
-    /// La llave del que existe mitad aquí, mitad entre mundos.
-    /// </summary>
-    public class SelloDelRift : LlamadoDeJefe
-    {
-        protected override int NpcConvocado => ModContent.NPCType<RiftKeeper>();
-    }
-
-    /// <summary>
-    /// La Pluma de la Arquera — convoca al Eco de la Arquera Estelar.
-    /// Cayó del cielo la vez que ella intentó derribar a Aethon.
-    /// </summary>
-    public class PlumaDeLaArquera : LlamadoDeJefe
-    {
-        protected override int NpcConvocado => ModContent.NPCType<EchoArcher>();
-    }
-
-    /// <summary>
-    /// La Sombra del Portador — convoca al Eco del Primer Portador.
-    /// La silueta del primer alma que se ató a un fragmento.
-    /// </summary>
-    public class SombraDelPortador : LlamadoDeJefe
-    {
-        protected override int NpcConvocado => ModContent.NPCType<EchoBlade>();
-    }
-
-    /// <summary>
-    /// El Nombre de Aethon — convoca AETHON, LA LUZ PRIMORDIAL.
-    /// "Ve al Sagrario Hueco y llama su nombre." El llamado del final:
-    /// no exige nivel 150 aquí porque el mod es de PRUEBAS — el lore
-    /// queda en el tooltip y el Testigo lo cuenta.
+    /// El Nombre de Aethon — convoca AETHON, EL GRIMORIO ETERNO.
+    /// "El libro que cargas tiene un nombre propio: pronúncialo y se
+    /// abrirá para probarte." El llamado del final: no exige nivel 150
+    /// aquí porque el mod es de PRUEBAS — el lore queda en el tooltip.
     ///
     /// v6.50.43 — A CUALQUIER HORA: la llegada corre el tiempo hasta el
     /// próximo mediodía (de noche: la noche entera + el amanecer, en un

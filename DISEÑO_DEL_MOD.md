@@ -1,8 +1,8 @@
-# 📜 DISEÑO y ARQUITECTURA del Mod — "Aethon, la Luz Primordial"
+# 📜 DISEÑO y ARQUITECTURA del Mod — "Aethon, el Grimorio Eterno"
 
-> **Documento de ARQUITECTURA REAL** (v6.50.30, commit `1d26716`). Describe cómo funciona HOY
+> **Documento de ARQUITECTURA REAL** (v6.50.61). Describe cómo funciona HOY
 > cada sistema del mod, con mapa de archivos y valores exactos — escrito para que un humano o
-> una IA puedan retomar el trabajo sin re-leer 297 `.cs`.
+> una IA puedan retomar el trabajo sin re-leer los ~290 `.cs`.
 > Inventario de QUÉ existe → `CARACTERISTICAS.md` · Estado/pendientes → `STABLE-SNAPSHOT.md` ·
 > Historial → `CHANGES.md`.
 
@@ -15,7 +15,7 @@
 3. [El Grimorio del Eterno](#3-el-grimorio-del-eterno)
 4. [El hambre y la voz del libro (EcoLib)](#4-el-hambre-y-la-voz-del-libro)
 5. [LA FURIA — el motor de oleadas](#5-la-furia--el-motor-de-oleadas)
-6. [Las 12 esencias y el Testigo](#6-las-12-esencias-y-el-testigo)
+6. [Las esencias y la economía](#6-las-esencias-y-la-economía)
 7. [Los jefes](#7-los-jefes)
 8. [El pipeline de rayos (100 % código)](#8-el-pipeline-de-rayos)
 9. [El destello (historia de la muerte del círculo plano)](#9-el-destello)
@@ -26,17 +26,24 @@
 
 ---
 
-## 1. Visión y lore
+## 1. Visión y lore (v6.50.61 — EL LORE NUEVO)
 
-**Aethon, la Luz Primordial** es un ser anterior al universo de Terraria; su cuerpo ES una
-galaxia. Hace eones se fragmentó para sembrar la creación — cada estrella es una astilla suya.
-Un fragmento de su consciencia quedó dormido bajo tierra (los **Altarenes Antiguos** lo adoraban);
-el jugador lo encuentra como **Fragmento Génesis** y lo convierte en el **Grimorio del Eterno**:
-un libro con vida propia que **come** la experiencia de cada kill, tiene **hambre**, susurra,
-se pone celoso y — si no lo alimentas — convoca a **LA FURIA**: un festín de oleadas para
-cebarse. Los jefes guardianes dejan **esencias**; devorarlas es lo que más nutre al libro.
-Cuando el libro crece lo suficiente, **Aethon despierta** para juzgar al portador. Derrotarla
-no la destruye: te *reconoce* (fase 5 = "El Reconocimiento").
+**Aethon, el Grimorio Eterno**: el libro que cargas NO es un arma — **ES AETHon**, una
+entidad primigenia atada en forma de tomo. Los **Altarenes Antiguos** lo adoraron bajo tierra
+donde dormía; el jugador lo encuentra como **Fragmento Génesis** (el altar lo entrega) y lo
+convierte en el **Grimorio del Eterno**: un libro con vida propia que **come** la experiencia
+de cada kill, tiene **hambre**, susurra, se pone celoso y — si no lo alimentas — convoca a
+**LA FURIA**: un festín de oleadas para cebarse (el libro se alimenta a sí mismo con el
+mundo que lo rodea). Los guardianes dejan **esencias**; devorarlas es lo que más nutre al
+libro. Y cuando pronuncias su nombre — **El Nombre de Aethon** — el libro **SE ABRE y se
+alza de sus propias páginas**: **AETHON, EL GRIMORIO ETERNO**, el jefe final de 5 fases,
+**LA PRUEBA DEL PROPIO GRIMORIO** (el libro juzga si su portador es digno de cargarlo).
+Derrotarlo no lo destruye: cierra la prueba con **«El Veredicto»** (fase 5) y te declara
+digno — La Forma Ascendida cae a tus pies y su **esencia** es la página que el libro se
+arranca a sí mismo al caer.
+
+(v6.50.61 — LA PURGA: los cuatro jefes guardianes del mod y el Testigo fueron BORRADOS
+del juego; solo queda Aethon. El lore anterior de "la Luz Primordial" quedó jubilado.)
 
 **Principios de diseño vigentes**: progresión infinita con curva suave · todo el arte visual
 **100 % por código** (los rayos sin NI UN sprite) · cero dependencias de otros mods · es-ES y
@@ -208,11 +215,12 @@ réplicas del cliente (viajan en `MsgHambre`).
 
 Chusma: k monedas de **oro** + 1 punto + XP ×(k+1). Jefe: k monedas de **platino** (Juicio: 15) +
 **SU ESENCIA**. Al caer el jefe de la oleada 10 de un festín 10×10: `DerrotaOleada10 = true`
-(persiste en el jugador) → derecho a la tienda del Testigo.
+(persiste en el jugador — v6.50.61: la marca queda como CONSTANCIA; la tienda del Testigo
+murió con él).
 
 ---
 
-## 6. Las 12 esencias y el Testigo
+## 6. Las esencias y la economía
 
 ### 6.1 Esencias — `Content/Items/Esencias/`
 
@@ -220,40 +228,40 @@ Chusma: k monedas de **oro** + 1 punto + XP ×(k+1). Jefe: k monedas de **platin
 `SubirNivelDirecto(1)` (+1 nivel) → **voz del sabor de SU jefe**
 (`Mods.AethonMod.Esencia.Sabor.<ClaveJefe>`, 3 variantes por jefe — v6.50.30, eran genéricas
 antes) → 18 chispas doradas. **7 vanilla** (KingSlime, Ojo, Deerclops, Abeja, Devorador,
-Cerebro, Skeletron — sin límite, de jefes de furia) + **5 del mod** (Titán, Guardián del Rift,
-Arquera, Primer Portador, Aethon — **límite 10 por mundo**, contador en el TagCompound del
-mundo, `EsenciasModSistema`). Valor 10 ORO (⚠ los comentarios dicen "platino" — doc-rot).
+Cerebro, Skeletron — sin límite, de jefes de furia) + **1 del mod** (Aethon — **límite 10 por
+mundo**, contador en el TagCompound del mundo, `EsenciasModSistema`; su índice de conteo
+conserva el slot 4 histórico para que los mundos viejos no pierdan su cuenta). Valor 10 ORO.
+(v6.50.61 — LA PURGA: las esencias de Titán, Guardián del Rift, Arquera y Primer Portador
+murieron con sus jefes.)
 
-### 6.2 El Testigo — `Content/NPCs/TheWitness.cs` + `Content/Systems/PresenciaNPCSystem.cs`
+### 6.2 El Testigo — MUERTO EN LA PURGA (v6.50.61)
 
-**QUÉ ES**: NPC ciudad amistoso, **inmortal** (200.000 PV, def 999), orbe violeta flotante con
-luz propia. **SIEMPRE ESTÁ** (v6.47): cada 600 t el server comprueba y, si no hay ninguno, nace
-uno cerca del primer jugador vivo (anuncio al mundo).
-**Su función (4 roles)**:
-1. **CRONISTA**: su chat cuenta la crónica de los jefes que el jugador ha matado
-   (`CronicaJefes`, una página por charla — el libro dice "me lo comí", el Testigo dice
-   "yo lo vi caer"). 23 entradas.
-2. **TIENDA DE ESENCIAS** (botón 2): vende las **7 esencias vanilla** a 10 ORO — SOLO si
-   `DerrotaOleada10` (sobrevivir la oleada 10 de la furia). Las 5 del mod no se venden
-   («son derrotas, no monedas»).
-3. **RESONANCIA** (botón 1): 10 de plata → `ResonanceShard`, requiere grimorio **nivel ≥ 50**
-   (el server revalida en MP antes de crear el ítem).
-4. **PRESENCIA/TUTORIAL**: burbujas de ambiente cada ~14 s si estás a <300 px; si no tienes
-   libro te manda a buscar el Sagrario Hueco; comenta tu nivel.
+**QUÉ ERA**: NPC ciudad amistoso, inmortal (orbe violeta), cronista y mercader de esencias —
+nacía solo cada 10 s (`PresenciaNPCSystem`, también borrado) y vendía las esencias vanilla a
+quien sobrevivía la oleada 10 + Fragmentos de Resonancia a nivel 50+. **LA PURGA** (la letra:
+«borra a todos los NPC del mod, solo deja al jefe principal, Aethon, borra otros jefes y al
+testigo») lo borró ENTERO: NPC, presencia, tienda (`NPCShop` + `Condition` + `MsgPedirResonancia`
+con su handler), anuncios y ~90 líneas de localización por idioma. LO QUE QUEDA VIVO DE SU
+HERENCIA: `ShardPlayer.CronicaJefes`/`CronicaNarrada`/`DerrotaOleada10` siguen registrándose
+y persistiendo (constancia silenciosa — los .plr viejos cargan igual) y `ResonanceShard`
+sigue cayendo de Aethon. La crónica ya no tiene narrador: el registro es historia.
 **Economía**: chusma = oro · jefes de furia = platino · ResonanceShard = moneda secundaria
-(caen de los 5 jefes del mod: 8/45/110/120/250).
+(cae de Aethon).
 
 ---
 
 ## 7. Los jefes
 
-**Archivos**: `Content/NPCs/` (AethonBoss 1.269 l · AethonSierpeSegmentos 256 l · HollowTitan 446 ·
-RiftKeeper 442 · EchoArcher 446 · EchoBlade 480) · proyectiles en
+**Archivos**: `Content/NPCs/` (AethonBoss 1.269 l · CazadorAstral — el cuerpo del ataque
+LA MANADA ASTRAL, vida corta, se apaga si Aethon muere) · proyectiles en
 `Content/Projectiles/Jefes/AtaqueJefeProjectile.cs` (959 l, 13 estilos) · fondo del jefe en
 `Content/Effects/ColaSierpeSky.cs` (499 l) · arte en `Content/VFX/AethonSierpeArte.cs` (350 l) ·
-invocadores en `Content/Items/Llamados/LlamadosJefesItems.cs`.
+invocador en `Content/Items/Llamados/LlamadosJefesItems.cs` (El Nombre de Aethon — el único
+que queda). **v6.50.61 — LA PURGA**: HollowTitan, RiftKeeper, EchoArcher y EchoBlade fueron
+BORRADOS con sus invocadores, esencias y textos.
 
-### 7.1 AETHON, LA LUZ PRIMORDIAL (el jefe final — 2.400.000 PV, daño 95)
+### 7.1 AETHON, EL GRIMORIO ETERNO (el jefe final — 2.400.000 PV, daño 95 — LA PRUEBA DEL
+PROPIO GRIMORIO: el libro se alza de sus páginas para juzgar a su portador)
 
 Invocación: **El Nombre de Aethon** (solo día, reutilizable). Nacimiento: se posiciona BAJO
 TIERRA (±560, +900) y asciende mientras el **leviatán de llegada** cruza el cielo (ColaSierpeSky).
@@ -414,17 +422,17 @@ AethonMod/                      ← EL MOD (build.txt aquí: versión 6.50.30)
 │   │                              LumenLib, EstelaLib, OndaLib, PyraLib, RiftLib, AuraLib,
 │   │                              AethonSierpeArte, BoltRenderer, …(67 archivos)
 │   ├── Systems/                ← GrimorioFuriaSistema, ShardLevel*, EcoRed/EcoSistema,
-│   │                              WeaponScaling, EsenciasModSistema, PresenciaNPCSystem,
+│   │                              WeaponScaling, EsenciasModSistema, AethonLlegadaSistema,
 │   │                              Onda/Ocaso/Bruma/Cielo/CalidadFps/DiagnosticoVFX…
 │   ├── Players/                ← ShardPlayer (hambre), TestingPlayer (bolsas), + 4
 │   ├── Globals/                ← OleadaNPC (el sello), GlobalNPCXP, ShardLevelItem, + 3
-│   ├── NPCs/                   ← AethonBoss, AethonSierpeSegmentos, HollowTitan, RiftKeeper,
-│   │                              EchoArcher, EchoBlade, TheWitness
+│   ├── NPCs/                   ← AethonBoss, CazadorAstral (la Manada del jefe) — v6.50.61:
+│   │                              SOLO Aethon queda (la purga borró a los otros 5)
 │   ├── Weapons/Cosmic/         ← ~100 armas por familias (Apuestas/Sierpes/Desgarros/
 │   │                              CodigosVivos/RuneSun/RealStar/BlackHole/IdeasGrimorio…)
 │   ├── Weapons/ (raíz + V20)   ← GrimoireEternal, 4 fundacionales, tests
 │   ├── Projectiles/Cosmic/     ← ~84 proyectiles (incl. Jefes/ y Oleadas/)
-│   ├── Items/                  ← Esencias/ (12), Llamados/ (5), Bolsas/ (18), Accessories/,
+│   ├── Items/                  ← Esencias/ (8), Llamados/ (1), Bolsas/ (18), Accessories/,
 │   │                              Cosmetics/, Placeables/, sueltos (SeerOrb, GenesisShard…)
 │   ├── Buffs/ (9) · Biomes/ (1) · Tiles/ (AncientAltar) · Effects/ (ColaSierpeSky, shaders,
 │   │                              Bruma/, BlackHoleLensSystem) · Particles/ (manager+presets)

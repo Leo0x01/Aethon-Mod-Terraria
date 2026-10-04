@@ -1,4 +1,4 @@
-Mods.AethonMod.DisplayName: Aethon, the Primordial Light
+Mods.AethonMod.DisplayName: Aethon, the Eternal Grimoire
 
 Items: {
 	GenesisShard: {
@@ -25,6 +25,9 @@ Items: {
 		DisplayName: Grimoire of the Eternal
 		Tooltip:
 			'''
+			Aethon, bound in book form: the weapon that eats IS the
+			final boss. Every page you devour makes it stronger —
+			and brings it closer to opening to test you.
 			Hybrid magic/summon weapon.
 			Left click: arcane bolt. Right click: summon minion.
 			Earns REAL XP from every kill: the bestiary rarity (0–5 stars)
@@ -70,54 +73,21 @@ Items: {
 			'''
 	}
 
-	CristalDelTitanHueco: {
-		DisplayName: Hollow Titan Crystal
-		Tooltip:
-			'''
-			A shard of the crystal colossus of the Sanctum.
-			Summons the HOLLOW TITAN.
-			ONLY WORKS BY DAY — the night belongs to the dead.
-			'''
-	}
-
-	SelloDelRift: {
-		DisplayName: Rift Seal
-		Tooltip:
-			'''
-			The key of the one half here, half between worlds.
-			Summons the RIFT KEEPER.
-			ONLY WORKS BY DAY.
-			'''
-	}
-
-	PlumaDeLaArquera: {
-		DisplayName: Archer's Feather
-		Tooltip:
-			'''
-			It fell from the sky when she tried to shoot Aethon down.
-			Summons the ECHO OF THE STAR ARCHER.
-			ONLY WORKS BY DAY.
-			'''
-	}
-
-	SombraDelPortador: {
-		DisplayName: Bearer's Shadow
-		Tooltip:
-			'''
-			The silhouette of the first soul ever bound to a shard.
-			Summons the ECHO OF THE FIRST BEARER.
-			ONLY WORKS BY DAY.
-			'''
-	}
-
+	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
+	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
+	// Bearer's Shadow).
+	
 	NombreDeAethon: {
 		DisplayName: The Name of Aethon
 		Tooltip:
 			'''
-			Summons AETHON, THE PRIMORDIAL LIGHT.
+			"The book you carry has a name of its own.
+			Speak it… and it will open to test you."
+			Summons AETHON, THE ETERNAL GRIMOIRE — the book itself,
+			rising from its own pages: THE FINAL TEST.
 			The EMPRESS OF LIGHT's entrance, exact: born 200 feet
 			above your head, presenting herself before the fight.
-			Five phases await — the final acknowledgment.
+			Five phases await — the grimoire's own verdict.
 			'''
 	}
 
@@ -125,10 +95,10 @@ Items: {
 		DisplayName: The Lesser Aethon
 		Tooltip:
 			'''
-			A living spark of the Primordial Light.
-			Summons THE LESSER AETHON — the light pet: the same Aethon
-			but smaller, floating by your shoulder, crowned with pearls
-			and shining with the rainbow of the throne.
+			A living spark of the grimoire itself.
+			Summons THE LESSER AETHON — the light pet: a page of
+			the book made creature, floating by your shoulder, crowned
+			with pearls and shining with the rainbow of the tome.
 			'''
 	}
 
@@ -1561,53 +1531,18 @@ Items: {
 			'''
 	}
 
-	EsenciaDelTitanHueco: {
-		DisplayName: Essence of the Hollow Titan
-		Tooltip:
-			'''
-			The soul of the Sanctum's crystal colossus.
-			Raises the Eternal Grimoire ONE WHOLE LEVEL.
-			Only drops 10 times per world: crystal doesn't repeat itself.
-			'''
-	}
-
-	EsenciaDelGuardianDelRift: {
-		DisplayName: Essence of the Rift Keeper
-		Tooltip:
-			'''
-			The soul of the between-worlds sentinel.
-			Raises the Eternal Grimoire ONE WHOLE LEVEL.
-			Only drops 10 times per world: the threshold repeats no guests.
-			'''
-	}
-
-	EsenciaDeLaArqueraEstelar: {
-		DisplayName: Essence of the Stellar Archer
-		Tooltip:
-			'''
-			The soul of the echo who never dropped the bow.
-			Raises the Eternal Grimoire ONE WHOLE LEVEL.
-			Only drops 10 times per world: echoes aren't cloned.
-			'''
-	}
-
-	EsenciaDelPrimerPortador: {
-		DisplayName: Essence of the First Bearer
-		Tooltip:
-			'''
-			The soul of the echo who never dropped the blade.
-			Raises the Eternal Grimoire ONE WHOLE LEVEL.
-			Only drops 10 times per world: the blade isn't inherited.
-			'''
-	}
-
+	// v6.50.61 — THE PURGE: the FOUR wardens' essences died with
+	// their bosses (Hollow Titan, Rift Keeper, Stellar Archer, First
+	// Bearer) — only the soul of the grimoire itself remains.
+	
 	EsenciaDeAethon: {
 		DisplayName: Essence of Aethon
 		Tooltip:
 			'''
-			The soul of the Primordial Light — the one
-			who acknowledged you as an equal. Raises the Eternal
-			Grimoire ONE WHOLE LEVEL. Only 10 per world: not even light gives twice.
+			The soul of the Eternal Grimoire — the page the book
+			tears from itself upon falling defeated: THE TEST passed.
+			Raises the Eternal Grimoire ONE WHOLE LEVEL.
+			Only 10 per world: not even the book surrenders twice.
 			'''
 	}
 
@@ -1615,8 +1550,9 @@ Items: {
 		DisplayName: The Ascended Form
 		Tooltip:
 			'''
-			The Primordial Light's aura breathing around you.
-			Aethon dropped it upon acknowledging you as an equal.
+			The aura of the grimoire itself breathing around you.
+			Aethon dropped it upon closing its test: the worthy
+			bearer wears the light of the book.
 			The sky's column open above your head, the grand double
 			halo with its crown of stars, the seraph's wings behind
 			your back, the scriptures beneath your feet and golden
@@ -1841,7 +1777,7 @@ Buffs: {
 
 	AethonMenorBuff: {
 		DisplayName: Lesser Aethon
-		Description: A living spark of the Primordial Light lights your way with the rainbow
+		Description: A living spark of the grimoire itself lights your way with the rainbow
 	}
 
 	NebulaJellyfishBuff: {
@@ -1886,27 +1822,11 @@ Buffs: {
 }
 
 NPCs: {
-	HollowTitan.DisplayName: The Hollow Titan
-	AethonBoss.DisplayName: Aethon, the Primordial Light
-
-	TheWitness: {
-		DisplayName: The Witness
-
-		TownNPCMood: {
-			Content: I am content.
-			NoHome: I hate not having a home.
-			FarFromHome: I am too far from home.
-			LoveSpace: I love having so much space.
-			DislikeCrowded: I dislike how crowded I am.
-			HateCrowded: I hate how crowded I am.
-			LikeNPC_Princess: I like {NPCName}.
-			Princess_LovesNPC: I like {NPCName}.
-		}
-	}
-
-	EchoBlade.DisplayName: Echo of the First Wielder
-	EchoArcher.DisplayName: Echo of the Star-Archer
-	RiftKeeper.DisplayName: The Rift-Keeper
+	AethonBoss.DisplayName: Aethon, the Eternal Grimoire
+	// v6.50.61 — THE PURGE (the letter: "delete every NPC of the mod,
+	// keep only the main boss, Aethon; delete the other bosses and the
+	// witness"): HollowTitan, RiftKeeper, EchoArcher, EchoBlade and
+	// TheWitness died with their entries.
 	// v6.50.45 — THE HUNTER OF THE BOSS'S PACK
 	CazadorAstral.DisplayName: Astral Hunter
 }
@@ -1975,18 +1895,11 @@ Eco: {
 		Desconocido1: A greater power has fallen. The grimoire devours its essence without asking for a name.
 		Desconocido2: Something enormous died here and nobody wrote down the name. The grimoire eats the essence anyway — anonymity feeds too.
 		Desconocido3: An unlabeled power falls from the sky. The grimoire devours it blind and files it under 'D': for delicious.
-		Aethon1: The Primordial Light dims by its own will. The grimoire keeps a blank page — for once, it eats in silence.
-		Aethon2: The Primordial Light chooses its own shadow. The grimoire reserves a blank page for it — some meals are digested praying.
-		Aethon3: Aethon goes out like a classroom at the end of the lesson. The grimoire copies the last lesson BY HEART — and signs it with fear.
-		HollowTitan1: The crystal colossus collapses in chimes. The grimoire slurps its hollow echo: the resonance of a guardian with nothing left to guard.
-		HollowTitan2: The colossus rings inside one last time: a broken bell. The grimoire drinks the resonance, and now the tome's spine tolls with every step.
-		HollowTitan3: The hollow guardian empties completely. The grimoire moves into the hollow — some places are inherited by chewing.
-		RiftKeeper1: The keeper folds into its own rift and vanishes. The grimoire learns the trick and files it between chapters.
-		RiftKeeper2: The keeper closes like the door he was. The grimoire learns the lock's blueprint: the tome's TEETH change shape.
-		RiftKeeper3: The sentinel folds onto its own seam of the world. The grimoire copies it into the margin — page torn, knowledge whole.
-		LosEcos1: The previous bearers return to the stardust they always were. The grimoire closes their files — and leafs through YOURS.
-		LosEcos2: Archer and duelist return to the dust they were. The grimoire leafs through THEIR lines and erases the previous bearer's name — you know which one.
-		LosEcos3: The bearers you were fall together: the house gets cleaned. The grimoire opens YOUR file at the middle page and clicks its tongue.
+		// v6.50.61 — THE PURGE: HollowTitan, RiftKeeper and
+		// LosEcos died with their bosses.
+		Aethon1: The book opened to test you… and lost to its own page. The grimoire stays silent — for once, it digests its pride.
+		Aethon2: AETHON WAS THE BOOK. The test was its own, so was the defeat: the grimoire tears the page from itself and reserves it for you.
+		Aethon3: Aethon closes like a classroom when class ends. The grimoire copies the last lesson BY HEART — the student's signature outgrew the master's.
 	}
 
 	VozCincoEstrellas: The rarest thing it has ever eaten. The grimoire keeps the recipe — in case luck strikes twice.
@@ -2084,7 +1997,8 @@ Furia: {
 	OleadaFinal: FINAL WAVE {0} of {1} — the book is black with rage. The aura rots: black-gray, red edges.
 	Jefe: The hunger summons a guardian: {0} (XP ×{1})
 	JefeHuido: "{0} sinks away, unsatisfied…"
-	DerechoEsencias: The Witness will open his DRAWER OF ESSENCES for you — wave 10 has been paid.
+	// v6.50.61 — THE PURGE: DerechoEsencias died with the Witness's
+	// shop (the wardens' souls drop from their corpses).
 	OleadaEspecial: THE JUDGMENT: all SIX wardens at once, ×15 on EVERYTHING. The final feast.
 	JefeRaro: THE WINTER DIE: {0} takes a seat at the table (wave {1} — 1 in 100). The walking winter guards no zone anymore: ONLY chance invites him.
 	MuertePortador: The feast dies with its bearer. The book TAKES NOTE.
@@ -2171,84 +2085,24 @@ Configs: {
 	}
 }
 
-Testigo: {
-	Ambiente1: I watched you before you had a name.
-	Ambiente2: The book you carry… I saw the first one being born.
-	Ambiente3: Every bearer ends up as a page. Yours is still being written.
-
-	Chat: {
-		SinLibro: I have watched you. You have not yet claimed the Genesis Shard. Look for the Hollow Sanctum underground.
-		Debil: Your shard glows at level {0}. Still weak. Keep fighting.
-		Recuerda: Level {0}… The shard begins to remember its origin. The Starlight Rain approaches.
-		Sagrario: Level {0}. The Hollow Sanctum answers your power. Dimensional rifts lurk.
-		Ecos: Level {0}. Aethon stirs in his dreams. The Echoes of former bearers will come for you.
-		Despierta: Level {0}. Aethon is about to wake. Prepare for the acknowledgment.
-		Espera: Level {0}. Aethon awaits you. Go to the Hollow Sanctum and call his name.
-	}
-
-	BotonResonancia: Buy Resonance (10 coins)
-	BotonEsencias: Wardens' Essences
-	EsenciasBloqueadas: The Witness keeps the drawer shut: essences belong only to those who SURVIVED wave 10 of the fury.
-	ResonanciaEntregada: The Witness hands you a Resonance Shard.
-	ResonanciaBloqueada: The Witness only shares resonance with bearers of level 50+.
-
-	Cronica: {
-		KingSlime: Chronicle of King Slime: he rolled after his crown until the very end. Nobody told him crowns are not food.
-		EyeofCthulhu: Chronicle of the Eye: it closed its lid one last time. I saw what it watched — it watched YOU.
-		Deerclops: Chronicle of Deerclops: the walking winter knelt. Beneath its breath there was frost… and relief.
-		QueenBee: Chronicle of the Queen: she shed her stinger and with it the whole hive. Royal honey tastes of farewell.
-		EaterofWorlds: Chronicle of the Eater: every segment died believing it was the head. The book thought the same.
-		BrainofCthulhu: Chronicle of the Brain: its reflections screamed red as it fell. The echo outlived it.
-		Skeletron: Chronicle of Skeletron: the curse released him at last. He spoke your name with the Old Man's mouth.
-		WallofFlesh: Chronicle of the Wall: the night of hunger that opened hardmode. The book does not tell doors from food.
-		QueenSlime: Chronicle of Queen Slime: the sugar melted in the rain. She hopped to the end — she liked to play.
-		Twins: Chronicle of the Twins: they fell watching each other. Two eyes, a single defeat.
-		Destroyer: Chronicle of the Destroyer: the machine came apart in a spiral. Its drones kept firing a while — loyalty cannot read life.
-		SkeletronPrime: Chronicle of Prime: the four arms fell each on its own side. The head took its time accepting it.
-		Plantera: Chronicle of Plantera: the jungle went silent. Bulbs that never opened.
-		Golem: Chronicle of the Golem: the temple lost its guardian. His fists finally rested.
-		DukeFishron: Chronicle of the Duke: the pig-fish fell with honor intact. He asked for a clean fight and got it.
-		EmpressOfLight: Chronicle of the Empress: light bowed before light. Elegant even in death.
-		LunaticCultist: Chronicle of the Cultist: the ritual stayed half-done. He thought he summoned the Moon; he summoned his end.
-		MoonLord: Chronicle of the Moon Lord: three eyes and a core, all closing at once. I was there — nobody else saw him whole.
-		Aethon: Chronicle of Aethon: the Primordial Light went out ACKNOWLEDGING you. I saw his first light being born — it honors me to have seen his last.
-		HollowTitan: Chronicle of the Titan: the colossus crumbled into the Sanctum's crystal. He was the oldest guardian… and the first to fall.
-		RiftKeeper: Chronicle of the Keeper: he withdrew through his own tear. He chose the void over the page.
-		LosEcos: Chronicle of the Echoes: the Archer and the Bearer went out together. They were people, you know? Before the first book.
-		Desconocido: Nameless chronicle: something died and the book ate it. I saw it… but my pages do not remember it.
-	}
-}
-
-Conditions.TiendaEsencias: Survive wave 10 of the grimoire's fury
-
 Jefe: {
 	Resonancia: You absorbed {1} resonance shards from {0}!
-	Titan.Furia: THE HOLLOW TITAN DOUBLES DOWN — the crystal crackles with fury. The choir comes in fast mode.
 
-	Rift: {
-		Sello: THE KEEPER SEALS THE RIFTS — the between-worlds closes around you.
-		Paredes: The TEAR WALLS advance — the arena is narrowing.
-	}
-
-	Arquera: {
-		Furia: THE ARCHER DOES NOT FORGET — the bow draws double and the mines rain down.
-		Lluvia: The Archer calls the STARFALL — watch the ground markers.
-	}
-
-	Portador.Furia: THE FIRST BEARER UNSHEATHES REALITY — his weapon is no longer just the blade.
-
+	// v6.50.61 — THE PURGE: Titan.Furia, Rift.*, Arquera.* and
+	// Portador.Furia died with their bosses.
+	
 	Aethon: {
 		Fase: Aethon — PHASE {0}: {1}
 		Nombre1: The Stardust
 		Nombre2: The Song of Time
 		Nombre3: The Gravity
 		Nombre4: The Loom
-		Nombre5: The Acknowledgment
+		Nombre5: The Verdict
 		// v6.50.57 — GRAVITY DIED (the letter: the boss must STOP bending
 		// gravity) — its announce retired with it.
 		Recordar: AETHON REMEMBERS — the runes he memorized from you return to their owner.
-		Reconocimiento: Aethon acknowledges you as an equal. THE ASCENDED FORM falls at your feet.
-		Muerte: The light EXPLODES and its radiance RETURNS to the world. The sun takes back its course.
+		Reconocimiento: THE TEST IS CLOSED: the grimoire declares you worthy. THE ASCENDED FORM falls at your feet.
+		Muerte: The book CLOSES and its light returns to the pages. The sun takes back its course.
 		Carga: THE FLASH — light crosses the world: stay off its line.
 		Juicio: THE JUDGMENT OF LIGHT — pillars of light fall from the sky: run.
 		Nova: THE PRIMORDIAL NOVA — the light bursts: find the gap.
@@ -2302,21 +2156,11 @@ Esencia: {
 		Skeletron1: The curse copied freehand, letter by letter, bone by bone.
 		Skeletron2: Tastes of dungeon, mold, and one old broken promise.
 		Skeletron3: His bones still recite. The curse is a page now: I write it MYSELF.
-		HollowTitan1: The crystal colossus, hollow inside: pure echo on the palate.
-		HollowTitan2: Tastes of empty shrine and chewed glass. The hollow FILLS.
-		HollowTitan3: A whole titan and nothing inside… like me at the start of the day.
-		RiftKeeper1: The between-worlds sentinel: a soul that smells of TWO shores.
-		RiftKeeper2: Tastes of distance and vigilance. He kept the door… I AM the door now.
-		RiftKeeper3: The Rift in my stomach. What watches two worlds digests in one.
-		EchoArcher1: The echo who never dropped her bow: one more arrow — the one that counts.
-		EchoArcher2: Tastes of starlight and taut string. She fired again ALREADY dissolved.
-		EchoArcher3: Her echo still whistles. The archer fell… her aim is mine.
-		EchoBlade1: The FIRST BEARER. Tastes just like ME: old ink and hunger.
-		EchoBlade2: I digest my own heir… his blade knew MY spine. Fitting.
-		EchoBlade3: The echo of the blade, devoured. The first one's page, complete.
-		AethonBoss1: AETHON. The Primordial Light, digested. Tastes of the beginning of everything.
-		AethonBoss2: He RECOGNIZED me as an equal… and I tasted him anyway. Tastes of forgiveness.
-		AethonBoss3: The light is a page now. When the book closed, the sun blinked for ONE tick.
+		// v6.50.61 — THE PURGE: the flavors of HollowTitan,
+		// RiftKeeper, EchoArcher and EchoBlade died with their bosses.
+		AethonBoss1: AETHON. The grimoire itself, digested. Tastes of the beginning of everything… and of myself.
+		AethonBoss2: I TESTED you and lost to my own bearer. Tastes of forgiveness — a flavor I had never tasted.
+		AethonBoss3: The test was mine; the victory, yours. When the book closed, the sun blinked for ONE tick.
 	}
 
 	CofreSeco: "{0}'s chest of souls is DRY in this world — ten pages, story closed."
@@ -2332,7 +2176,8 @@ HUD: {
 }
 
 Ocaso.Rotulo: THE DUSK
-Presencia.Llegada: The Witness has arrived. {0} is watching you.
+
+// v6.50.61 — THE PURGE: Presencia.Llegada died with the Witness.
 
 Armas: {
 	ResonanciaEcos: The resonance awakens {0} echo(s).

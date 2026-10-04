@@ -148,8 +148,6 @@ namespace AethonMod.Content.Systems
         /// · Los Gemelos son UN jefe con dos cuerpos: cuenta al caer el
         ///   ÚLTIMO (y solo el último escribe su página — ambos comparten la
         ///   clave "Twins" en ClaveDeVoz: una derrota, una página).
-        /// · Los Ecos del mod (Arquera + Primer Portador): idem, clave
-        ///   "LosEcos" compartida.
         /// · Partes en cascada (ShardLevelSystem.EsParteDeJefe): NUNCA son
         ///   derrota — la cabeza y las manos del SEÑOR DE LA LUNA son
         ///   boss=true en vanilla y morían como fases ANTES del núcleo
@@ -170,20 +168,6 @@ namespace AethonMod.Content.Systems
                     if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
                         (otro.type == NPCID.Retinazer || otro.type == NPCID.Spazmatism))
                         return false; // aún vive un gemelo
-                }
-                return true;
-            }
-            // Los Ecos del mod: dos cuerpos, la misma historia.
-            if (npc.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                npc.type == ModContent.NPCType<Content.NPCs.EchoBlade>())
-            {
-                for (int i = 0; i < Main.maxNPCs; i++)
-                {
-                    NPC otro = Main.npc[i];
-                    if (otro != null && otro.active && otro.whoAmI != npc.whoAmI &&
-                        (otro.type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                         otro.type == ModContent.NPCType<Content.NPCs.EchoBlade>()))
-                        return false; // aún vive un eco
                 }
                 return true;
             }
@@ -246,9 +230,9 @@ namespace AethonMod.Content.Systems
             catch { return ""; }
         }
 
-        /// <summary>La clave hjson de la voz de cada derrota (pública: el
-        /// Testigo cronista reutiliza la MISMA tabla para su versión
-        /// humana de la misma derrota — dos narradores, un hecho).</summary>
+        /// <summary>La clave hjson de la voz de cada derrota (pública:
+        /// la crónica de ShardPlayer reutiliza la MISMA tabla — un
+        /// narrador, un hecho).</summary>
         public static string ClaveDeVoz(int type)
         {
             if (type == NPCID.KingSlime) return "KingSlime";
@@ -269,14 +253,11 @@ namespace AethonMod.Content.Systems
             if (type == NPCID.HallowBoss) return "EmpressOfLight";
             if (type == NPCID.CultistBoss) return "LunaticCultist";
             if (type == NPCID.MoonLordCore) return "MoonLord";
-            // v6.47 — LOS JEFES DEL MOD, ahora que se pueden convocar:
+            // v6.47 — EL JEFE DEL MOD (v6.50.61 — LA PURGA: solo queda
+            // Aethon, el grimorio mismo — la prueba superada).
             try
             {
                 if (type == ModContent.NPCType<Content.NPCs.AethonBoss>()) return "Aethon";
-                if (type == ModContent.NPCType<Content.NPCs.HollowTitan>()) return "HollowTitan";
-                if (type == ModContent.NPCType<Content.NPCs.RiftKeeper>()) return "RiftKeeper";
-                if (type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                    type == ModContent.NPCType<Content.NPCs.EchoBlade>()) return "LosEcos";
             }
             catch { }
             return "Desconocido"; // jefes del mod desconocidos: la voz genérica
@@ -308,18 +289,12 @@ namespace AethonMod.Content.Systems
             if (type == NPCID.HallowBoss) return new Color(255, 230, 120);    // destello prisma
             if (type == NPCID.CultistBoss) return new Color(100, 240, 255);   // teletransporte
             if (type == NPCID.MoonLordCore) return new Color(200, 140, 255);  // luz lunar
-            // v6.47 — los colores de los jefes del mod
+            // v6.47 — el color del jefe del mod (v6.50.61 — LA PURGA:
+            // solo Aethon, la luz del propio grimorio)
             try
             {
                 if (type == ModContent.NPCType<Content.NPCs.AethonBoss>())
-                    return new Color(196, 150, 255);   // la luz primordial
-                if (type == ModContent.NPCType<Content.NPCs.HollowTitan>())
-                    return new Color(168, 232, 255);   // cristal del Sagrario
-                if (type == ModContent.NPCType<Content.NPCs.RiftKeeper>())
-                    return new Color(96, 224, 220);    // teal del entre-mundos
-                if (type == ModContent.NPCType<Content.NPCs.EchoArcher>() ||
-                    type == ModContent.NPCType<Content.NPCs.EchoBlade>())
-                    return new Color(255, 178, 96);    // ámbar de los portadores
+                    return new Color(196, 150, 255);   // la luz del grimorio mismo
             }
             catch { }
             return new Color(245, 196, 81);                                   // el dorado del grimorio

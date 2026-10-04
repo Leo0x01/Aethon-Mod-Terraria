@@ -728,6 +728,49 @@ namespace AethonMod.Content.Systems
             if ((_ticksOleada % 60) == 0)
                 EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
 
+            // ==============================================================
+            //  v6.50.61 — EL VIGÍA DEL FESTÍN (la letra del usuario:
+            //  «a veces cuando la activo en el spawn original está como
+            //  que no trae a monstruo hasta que no salga del spawn»).
+            //
+            //  LA CAUSA (decompile de NPC.SpawnNPC contra tModLoader
+            //  2026.08.3.0, verificado al IL): con UN solo townNPC cerca
+            //  del jugador (Player.townNPCs >= 1) el motor natural pone
+            //  su flag de bloqueo SIN CONDICIÓN — y con DOS o más ni
+            //  siquiera tira el dado: CERO spawns naturales mientras
+            //  el portador viva rodeado de gente. EL SPAWN ORIGINAL DEL
+            //  MUNDO ES EL PUEBLO (la casa del Guía y los suyos): la
+            //  furia aceleraba el motor todo lo que quisiera… y el
+            //  motor ni arrancaba. Al salir del pueblo la zona se
+            //  limpiaba y la comida volvía — el síntoma EXACTO de la
+            //  letra.
+            //
+            //  LA CURA: el VIGÍA. Cada 15 t cuenta la chusma sellada
+            //  VIVA; si tras la gracia de arranque (150 t) el festín
+            //  está AYUNANDO (menos de 3 vivos), el vigía SIRVE la
+            //  comida él mismo: nacimientos directos del pool de la
+            //  oleada, en el ANILLO de siempre (fuera del cuadro), en
+            //  la CUNA LIMPIA de siempre (PosicionLimpia — ni muros ni
+            //  subsuelo) y sellados por OnSpawn como toda la chusma
+            //  (stats del festín, aura, re-objetivado, XP y puntos).
+            //  El motor natural SIGUE mandando donde puede trabajar;
+            //  el vigía solo tapa el hambre que el pueblo apaga.
+            // ==============================================================
+            if ((_ticksOleada % 15) == 0 && _ticksOleada >= 150)
+            {
+                int vivos = 0;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC c = Main.npc[i];
+                    if (c == null || !c.active || c.townNPC) continue;
+                    var sello = c.GetGlobalNPC<Globals.OleadaNPC>();
+                    if (sello != null && sello.EsDeOleada && !sello.EsJefeDeOleada)
+                        vivos++;
+                }
+                if (vivos < 3)
+                    NacerChusmaVigia(hambriento, Math.Min(3, 3 - vivos));
+            }
+
             if (porMuertes || porReloj)
             {
                 _poolActual = null;  // el motor natural vuelve a lo suyo YA
@@ -738,6 +781,67 @@ namespace AethonMod.Content.Systems
                 // v6.50.2 — EL FESTÍN CAMINA: fase nueva al portador.
                 EcoRed.SincronizarHambre(hambriento); // no-op fuera del servidor
             }
+        }
+
+        /// <summary>
+        /// v6.50.61 — LA COMIDA DEL VIGÍA: nace `cuantos` monstruos del
+        /// pool de la oleada en el ANILLO alrededor del portador (el
+        /// mismo espíritu del motor natural: fuera del cuadro), cada
+        /// uno en su CUNA LIMPIA (OleadaNPC.PosicionLimpia: aire 3×3,
+        /// sin muros en superficie, jamás bajo el suelo del portador).
+        /// El sello lo pone OnSpawn al nacer (ChusmaEnMarcha vive):
+        /// stats ×(k+1)·nivel, aura del festín, re-objetivado al
+        /// portador, XP y puntos al caer — exactamente la chusma de
+        /// siempre. Solo la autoridad (server/SP).
+        /// </summary>
+        private static void NacerChusmaVigia(Player hambriento, int cuantos)
+        {
+            try
+            {
+                if (Main.netMode == NetmodeID.MultiplayerClient) return; // el servidor manda
+                var pool = _poolActual;
+                if (pool == null || pool.Count == 0 || hambriento == null) return;
+
+                // EL PLATILLO PONDERADO del menú de la oleada (el mismo
+                // reparto que EditSpawnPool sirve al motor natural).
+                float total = 0f;
+                foreach (var par in pool) total += par.Value;
+                if (total <= 0f) return;
+
+                for (int n = 0; n < cuantos; n++)
+                {
+                    // EL TIPO: la ruleta ponderada del festín.
+                    float dado = Main.rand.NextFloat(total);
+                    int tipo = 0;
+                    foreach (var par in pool)
+                    {
+                        dado -= par.Value;
+                        if (dado <= 0f) { tipo = par.Key; break; }
+                    }
+                    if (tipo <= 0) continue;
+
+                    // LA CUNA: el anillo de siempre (fuera del cuadro, el
+                    // mismo 0.52–0.7× pantalla que el motor natural usa —
+                    // aquí fijo en 640–960 px del portador) y la LIMPIEZA
+                    // de la casa encima (la red final de PosicionLimpia es
+                    // el aire de la presa: la comida SIEMPRE nace).
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    float dist = Main.rand.NextFloat(640f, 960f);
+                    Vector2 cruda = hambriento.Center + new Vector2(
+                        MathF.Cos(ang), MathF.Sin(ang) * 0.55f) * dist;
+                    cruda.Y = Math.Clamp(cruda.Y, Main.topWorld + 320f, Main.bottomWorld - 320f);
+                    Vector2 pos = Globals.OleadaNPC.PosicionLimpia(null, hambriento, cruda);
+
+                    // NACE: OnSpawn lo sella como chusma del festín al
+                    // volver de NewNPC (la fuente del jugador NO es padre
+                    // NPC: la herencia no aplica, el sello de la furia sí).
+                    int idx = NPC.NewNPC(hambriento.GetSource_FromAI(),
+                        (int)pos.X, (int)pos.Y, tipo);
+                    if (idx >= 0 && idx < Main.maxNPCs && Main.npc[idx].active)
+                        Main.npc[idx].netUpdate = true; // MP: la comida camina
+                }
+            }
+            catch { }
         }
 
         private static void FaseJefe(Player hambriento)
@@ -768,25 +872,20 @@ namespace AethonMod.Content.Systems
             if (esDelFestin && jefe.life <= 0)
             {
                 // v6.48 — LA OLEADA 10 VENCIDA: el portador gana el
-                // DERECHO A LAS ESENCIAS del Testigo (la tienda de 10
-                // de platino se abre) — y la ESPECIAL viene después.
+                // DERECHO A LAS ESENCIAS (la marca persiste en SU
+                // ShardPlayer — dato de la crónica del festín). v6.50.61 —
+                // LA PURGA: la TIENDA murió con el Testigo (el alma de
+                // los guardianes cae de sus cadáveres, como manda el
+                // festín); la marca queda como constancia silenciosa
+                // (viaja con EcoRed.MsgCronica, los guardados viejos la
+                // conservan).
                 if (_oleadaActual >= 10 && _oleadasTotales >= 10)
                 {
                     var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                     if (sp != null && !sp.DerrotaOleada10)
                     {
                         sp.DerrotaOleada10 = true;
-                        // v6.50 — el DERECHO CAMINA: la puerta de la tienda
-                        // la lee el Testigo en el CLIENTE del portador —
-                        // EcoRed.MsgCronica lleva la marca YA (antes vivía
-                        // solo en la réplica del server y el botón de las
-                        // esencias jamás se encendía en MP).
                         EcoRed.SincronizarCronica(hambriento);
-                        // v6.49 — EL AVISO PRIVADO: solo al portador (su
-                        // derecho, su pantalla).
-                        EcoRed.AnunciarAlPortador(hambriento,
-                            "Mods.AethonMod.Furia.DerechoEsencias",
-                            new Color(196, 150, 255));
                     }
                 }
                 _fase = Fase.Interludio;
@@ -814,7 +913,7 @@ namespace AethonMod.Content.Systems
             {
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.JefeHuido",
                     new Color(150, 140, 148), jefe.FullName);
-                jefe.active = false; // despawn limpio (patrón HollowTitan)
+                jefe.active = false; // despawn limpio (apagado directo de la autoridad)
                 // v6.50.1 — FIX (JEFE FANTASMA): este despawn corre en
                 // PostUpdateWorld (FUERA de la AI del NPC — vanilla difunde
                 // el 23 desde UpdateNetworkCode solo si el apagado pasa

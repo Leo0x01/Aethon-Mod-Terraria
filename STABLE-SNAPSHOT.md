@@ -1,11 +1,38 @@
-# AethonMod — ESTADO ACTUAL (v6.50.60)
+# AethonMod — ESTADO ACTUAL (v6.50.61)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.60 (LA DECIMASÉPTIMA RONDA — la .59 publicada con
-> release 402633707, md5 a4e214fc…, CDN verificado byte a byte).
+> Última actualización: v6.50.61 (LA PURGA DE NPC + EL VIGÍA + EL LORE NUEVO —
+> la .60 publicada con release 402716233, md5 321d414c…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.61 = LA PURGA DE NPC + EL VIGÍA DEL FESTÍN + EL LORE NUEVO** (la
+  letra de la .60):
+  (1) **EL VIGÍA DEL FESTÍN** (`NacerChusmaVigia` en `FaseMonstruos`): la
+  oleada ya NO llega vacía al SPAWN ORIGINAL — LA CAUSA (cazada al IL del
+  decompile de `NPC.SpawnNPC` con Mono.Cecil): con `Player.townNPCs >= 1`
+  el motor natural de spawns queda BLOQUEADO SIN CONDICIÓN (y el spawn
+  original del mundo ES el pueblo del Guía) — la furia aceleraba un motor
+  que ni arrancaba. LA CURA: cada 15 t se cuenta la chusma sellada viva;
+  si tras 150 t de gracia hay <3 vivos, el vigía SIRVE la comida del pool
+  ponderado de la oleada en el anillo 640–960 px, en cunas `PosicionLimpia`
+  (ahora `internal`) — sellados por OnSpawn como toda la chusma (stats,
+  aura, XP y puntos idénticos). El motor natural sigue mandando donde
+  puede trabajar.
+  (2) **LA PURGA DE NPC**: BORRADOS HollowTitan, RiftKeeper, EchoArcher,
+  EchoBlade y TheWitness + sus 4 llamados + sus 4 esencias +
+  PresenciaNPCSystem + la tienda del Testigo (Condition/MsgPedirResonancia/
+  handler) + el anuncio DerechoEsencias + ~90 líneas de localización por
+  idioma. SOLO QUEDA AETHON (el CazadorAstral vive: es el CUERPO del
+  ataque LA MANADA ASTRAL del jefe, no un NPC independiente). Los .plr
+  viejos cargan igual (DerrotaOleada10/Cronica siguen como constancia) y
+  el contador de esencias de Aethon conserva su índice (slot 4).
+  (3) **EL LORE NUEVO**: Aethon ES el propio grimorio — el arma que come
+  es el jefe final; la pelea de 5 fases es LA PRUEBA del libro (fase 5 =
+  «El Veredicto»); su esencia es la página que se arranca al caer. Mod
+  renombrado «Aethon, el Grimorio Eterno» + ~15 textos reescritos es+en
+  (tooltips del libro/llamado/esencia/forma/mascota, voces de derrota,
+  sabores, muerte y veredicto) + description.txt entera.
 - **v6.50.60 = LA DECIMASÉPTIMA RONDA — EL ATAQUE ESPECIAL DE CADA FASE +
   EL SOL DE VERDAD + LA CUNA LIMPIA + LA NOCHE DEL GRIMORIO** (la letra de
   la .59):
@@ -1116,10 +1143,17 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.55 en juego** con el checklist de arriba — LOS
-   TESTS CRÍTICOS: el SALUDO DE LUZ de la mascota al invocarla, el compás
-   (más enemigos = más a menudo, garante de 1 hora) y la gratitud que cura 1%
-   por enemigo golpeado (y el checklist de la .54 aún vigente).
+1. **El usuario prueba v6.50.61 en juego** — LOS TESTS CRÍTICOS de la .61:
+   (a) LA OLEADA EN EL SPAWN ORIGINAL: quédate EN el pueblo (junto a las
+   casas del Guía y compañía) y desata la furia con la Carnada — la chusma
+   debe LLEGAR sin moverte del sitio (el vigía tarda ~2,5 s en arrancar);
+   (b) LA PURGA: la Bolsa de Invocadores solo entrega el Nombre de Aethon,
+   el bestiario SIN los 5 NPC muertos, y matar a Aethon suelta SU esencia
+   (la única de jefe de mod que queda); (c) EL LORE: el tooltip del
+   Grimorio del Eterno cuenta que el libro ES Aethon, la fase 5 se anuncia
+   «El Veredicto» y la Forma Ascendida cae con «LA PRUEBA ESTÁ CERRADA».
+   (Y el checklist de la .60 aún vigente: firma de cada fase, sol con
+   espoleta, cuna limpia, furia nocturna.)
 2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
    calientes).
 3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
@@ -1150,7 +1184,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
-| **v6.50.60** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas EOF exacto, headless 0 excepciones, caza del sol SIMULADA en 5 escenarios), ⏳ en juego | LA DECIMASÉPTIMA RONDA — feedback de la .59 (CUATRO frentes): (1) **EL ATAQUE ESPECIAL DE CADA FASE** (EspecialDeFase/EntrarEspecial/_especialPendiente: P1 SOL — también APERTURA de toda pelea — / P2 CATEDRAL / P3 TELAR / P4 VÓRTICE / P5 CORONA; la firma abre la fase tras el decreto con prioridad absoluta; EST_SOL en TODOS los menús — el arsenal estaba encerrado en P3+) (2) **EL SOL DE VERDAD** (asunción 50 t + cañonazo 11 px/t + giro 0.11 + crucero 10.5 + relevo 14 >500 px + ESPOLETE <240 px → gigante 30 t que deriva a la presa → explosión 640 px; render por _solGigante/_tickGigante/_solExploto; SIMULADO: botas→270 px, montura→636) (3) **LA CUNA LIMPIA** (PosicionLimpia: aire 3×3, sin muro en superficie, sobre el suelo — escupitajo del Devorador y TODAS las coreografías; capa de tierra: nada >10 tiles bajo el portador) (4) **LA NOCHE DEL GRIMORIO** (chusma nocturna natural NO alimenta — NPCID.Sets.Zombies + ojos/licántropo/luna de sangre; comida de oleada no toca el reloj; furioso = piso en el umbral con bocados de 45 s; reintento cada 5 s: furioso+mundo libre = festín YA) |
+| **v6.50.61** | ✅ Build-verificada (0/0, .tmod auditado 387 entradas EOF exacto, 13 muertos AUSENTES, DLL con NacerChusmaVigia y SIN PedirResonancia, headless 0 excepciones), ⏳ en juego | LA PURGA DE NPC + EL VIGÍA + EL LORE NUEVO — feedback de la .60 (TRES frentes): (1) **EL VIGÍA DEL FESTÍN** (la oleada vacía en el spawn original: Player.townNPCs>=1 BLOQUEA el motor natural sin condición — decompile IL verificado; NacerChusmaVigia sirve la comida del pool en cunas PosicionLimpia cuando el festín ayuna <3 vivos tras 150 t, cada 15 t) (2) **LA PURGA** (borrados HollowTitan/RiftKeeper/EchoArcher/EchoBlade/TheWitness + 4 llamados + 4 esencias + PresenciaNPCSystem + tienda + MsgPedirResonancia + ~90 líneas de localización por idioma; SOLO Aethon — el CazadorAstral es su ataque Manada; .plr y contadores de esencias respetados) (3) **EL LORE** (Aethon ES el grimorio: pelea = LA PRUEBA, fase 5 «El Veredicto», esencia = la página arrancada, mod renombrado «Aethon, el Grimorio Eterno», ~15 textos es+en + description.txt) |
+| **v6.50.60** | ✅ Build-verificada, ✔ publicada (release 402716233, CDN byte a byte), ⏳ en juego | ✅ Build-verificada (0/0, .tmod auditado 400 entradas EOF exacto, headless 0 excepciones, caza del sol SIMULADA en 5 escenarios), ⏳ en juego | LA DECIMASÉPTIMA RONDA — feedback de la .59 (CUATRO frentes): (1) **EL ATAQUE ESPECIAL DE CADA FASE** (EspecialDeFase/EntrarEspecial/_especialPendiente: P1 SOL — también APERTURA de toda pelea — / P2 CATEDRAL / P3 TELAR / P4 VÓRTICE / P5 CORONA; la firma abre la fase tras el decreto con prioridad absoluta; EST_SOL en TODOS los menús — el arsenal estaba encerrado en P3+) (2) **EL SOL DE VERDAD** (asunción 50 t + cañonazo 11 px/t + giro 0.11 + crucero 10.5 + relevo 14 >500 px + ESPOLETE <240 px → gigante 30 t que deriva a la presa → explosión 640 px; render por _solGigante/_tickGigante/_solExploto; SIMULADO: botas→270 px, montura→636) (3) **LA CUNA LIMPIA** (PosicionLimpia: aire 3×3, sin muro en superficie, sobre el suelo — escupitajo del Devorador y TODAS las coreografías; capa de tierra: nada >10 tiles bajo el portador) (4) **LA NOCHE DEL GRIMORIO** (chusma nocturna natural NO alimenta — NPCID.Sets.Zombies + ojos/licántropo/luna de sangre; comida de oleada no toca el reloj; furioso = piso en el umbral con bocados de 45 s; reintento cada 5 s: furioso+mundo libre = festín YA) |
 | **v6.50.59** | ✅ Build-verificada, ✔ publicada (release 402633707, CDN byte a byte), ✔ probada (con feedback → .60) | LA DECIMASEXTA RONDA — feedback de la .58 (DIEZ frentes): (1) **EL RELOJ DE TODA LA FASE 2** (permanente ai[1]=2: inmortal mientras la fase 2 viva, disolución 40 t al pasar a fase 3; plato fuera del menú con el permanente vivo; el estado suelta a los 120 t) (2) **LA CAZA DEL SOL QUE NO SE PIERDE** (sin cañonazo 7.2→4.8, giro 0.075 converge ~0.8 s, gravedad comba +0.012, TRES RITMOS: 6.4 cerca / 7.6 crucero / 9.8 relevo lejos — la .58 frenaba a 4.4, MÁS LENTA que la carrera) (3) **EL TEMBLOR VUELVE** (Item161 EoL MUERTO → Item122 grave ×2 creciendo + kicks) (4) **LA AURORA EN TODO EL CIELO** (el VELO blanco-dorado de borde a borde + 11 CORTINAS de 4 tramos curvados + luz de mundo — no solo partículas) (5) **OLEADAS ×5** (spawn ×0.039, tope 50+20k techo 170, festín 25 min, puntos 60+30k) (6) **NIVELES DE FURIA** (ShardPlayer.FuriaNivel persistente: primera=1, vencer sube N+1 tope 10, morir congela; vida/daño ×(k+1)·(1+0.20(N−1)), defensa +2k+3(N−1)/+6k+8(N−1), anuncios e indicador con nivel) (7) **BIOMA EN TIEMPO REAL** (firma releída cada 30 t → pool reconstruido al vuelo) (8) **MULTIBIOMA POR NIVEL** (tu bioma peso doble + (N−1) acompañantes de la MESA DISPONIBLE — Santuario SOLO tras el Muro de Carne; nuevos principales Hallow y Meteorito) (9) **TODO MÁS AGRESIVO** (chusma 20 t/empuje 0.26/techo 13+; jefes 12 t/homing 0.09/embite y coreografía ≈×2) (10) **EL DEVORADOR ESCUPE** (cabeza <520 px de frente → 2-3 monstruos de la Corrupción DESDE LA BOCA cada 80 t + coreografía en abanico desde la boca) |
 | **v6.50.58** | ✅ Build-verificada, ✔ publicada (release 402604951, CDN byte a byte), ✔ probada (con feedback → .59) | LA DECIMOQUINTA RONDA — feedback de la .57 (CUATRO frentes): (1) **LA PERSIGA DE VERDAD** (steering: el rumbo GIRA hacia el jugador 0.045/t, rapidez 7.2→4.4 px/t, gravedad=comba +0.018 — la aceleración vieja quedaba enterrada bajo la inercia) (2) **EL DISCO DEL PROYECTIL SOL** (el pipeline del arma ENCIMA del sol del dios: glow coronal + backglow + RadialShine + EL DISCO SunShader, blanco-dorado→brasa, 144→860 px, fundido en 50 t al explotar — la explosión sigue siendo la de la casa) (3) **LA BRUMA MASIVA** (120 nubes en 3 capas + 3/tick de goteo + 90 chispas + 18 quads: la estrella LIBERA su materia) (4) **EL CRASH DE LA ARQUERA** (Begin-sobre-Begin cada frame: cadena correcta de lotes + SONDA INCONDICIONAL en FlushAdditive/FlushAlpha) |
 | **v6.50.57** | ✅ Build-verificada, ✔ publicada (release 402409678, CDN byte a byte), ✔ probada (con feedback → .58) | LA DECIMOCUARTA RONDA — feedback de la .56 (SIETE frentes): (1) **EL SOL DEL DIOS** (el ataque especial: el jefe SE CONVIERTE en sol — asunción 80 t — y LO LANZA: persiga lenta + gravedad + GIGANTE ROJA ×6 + explosión de luz/bruma/formas con daño AoE 640 px honesto) (2) **LA COREOGRAFÍA** (la cadena de los god-bosses: SOL→TELAR→DANZA→LANZAS→CORONA→ESTALLIDO cada 6-9 ataques en P3+, sin pasar por la órbita) (3) **LA IA DEL DUELISTA** (órbita que lee distancia + quiebro del sentido + memoria doble) (4) **LA BOLA FINAL SIN PERSECUCIÓN** (línea recta) + **EL DIOS MUERE DETENIDO** (velocidad 0 desde t=20, flash final 50 t hasta 4800 px) (5) **LAS CALAVERAS DEL LIBRO POTENCIADAS** (proyectil 837 real: gigante ×2.1-2.8, veloz, brillante, ×1.35 daño, estela dorado-violeta por CalaveraPotenciadaFX) (6) **EL VOLTEO DE GRAVEDAD MUERTO** (FlipGravity eliminado, anuncio retirado es+en) (7) **EL client.log LIMPIO** (2 FormatException de .plr corruptos de vanilla, 1 h 50 min sin excepciones del mod) |

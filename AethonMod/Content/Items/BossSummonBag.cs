@@ -32,12 +32,8 @@ namespace AethonMod.Content.Items
             ItemID.LihzahrdPowerCell,     // Golem
             ItemID.EmpressButterfly,      // Empress of Light
             ItemID.CelestialSigil,        // Moon Lord
-            // v6.47 — LOS LLAMADOS DE LOS JEFES DEL MOD (de día): los cinco
-            // jefes propios entran en la bolsa del probador de invocadores.
-            ModContent.ItemType<Items.Llamados.CristalDelTitanHueco>(),   // Titán Hueco
-            ModContent.ItemType<Items.Llamados.SelloDelRift>(),          // Guardián del Rift
-            ModContent.ItemType<Items.Llamados.PlumaDeLaArquera>(),      // Arquera Estelar
-            ModContent.ItemType<Items.Llamados.SombraDelPortador>(),     // Primer Portador
+            // v6.47 — EL LLAMADO DEL JEFE DEL MOD (v6.50.61 — LA PURGA:
+            // solo queda Aethon, el grimorio mismo).
             ModContent.ItemType<Items.Llamados.NombreDeAethon>(),        // Aethon
         };
 

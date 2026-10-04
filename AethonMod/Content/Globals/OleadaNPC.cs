@@ -959,8 +959,12 @@ namespace AethonMod.Content.Globals
         /// respira su comida); la red final es el aire de la propia
         /// presa. En el subsuelo los muros son la casa (se permiten) —
         /// pero el hueco de aire es ley SIEMPRE.
+        /// v6.50.61 — INTERNAL: el VIGÍA del festín (GrimorioFuriaSistema)
+        /// reutiliza ESTA MISMA cuna para sus nacimientos forzosos — una
+        /// sola definición de "posición limpia" en toda la casa (el
+        /// parámetro jefe jamás se leyó: el vigía lo pasa null).
         /// </summary>
-        private static Vector2 PosicionLimpia(NPC jefe, Player presa, Vector2 cruda)
+        internal static Vector2 PosicionLimpia(NPC jefe, Player presa, Vector2 cruda)
         {
             try
             {

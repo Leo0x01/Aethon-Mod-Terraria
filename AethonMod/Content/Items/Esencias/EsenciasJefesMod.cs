@@ -22,29 +22,23 @@ namespace AethonMod.Content.Items.Esencias
     //  (EsenciasModSistema cuenta, persiste en el TagCompound del
     //  mundo y calla el cofre cuando se seca).
     //
-    //  QUIÉNES: los CINCO (el Titán Hueco, el Guardián del Rift, la
-    //  Arquera Estelar, el Primer Portador y Aethon — cada alma con el
-    //  color de su jefe).
+    //  v6.50.61 — LA PURGA DE NPC: los cuatro guardianes murieron con
+    //  sus jefes — SOLO queda AETHON, el grimorio mismo (la letra: «el
+    //  lore cambia: Aethon ES el propio grimorio y el jefe final, la
+    //  prueba del propio grimorio»). Su alma es la última página del
+    //  cuento: la prueba superada.
     //
-    //  NOTA DE LA TIENDA: el Testigo NO vende estas — las de oleada sí
-    //  (10 de platino tras la oleada 10). Las almas de los jefes del
-    //  mod solo se GANAN matándolos: son derrotas, no monedas.
+    //  NOTA: el índice de Aethon NO se mueve (sigue siendo el 4º slot
+    //  del contador del mundo) — los mundos viejos conservan su cuenta
+    //  exacta de almas de Aethon ya pagadas.
     // ======================================================================
 
     /// <summary>EL MAPA jefe del mod → su esencia (lo usa EsenciasModSistema al soltar).</summary>
     public static class EsenciasJefesModMapa
     {
-        /// <summary>El ítem de esencia del jefe (0 si no es de los cinco).</summary>
+        /// <summary>El ítem de esencia del jefe (0 si no es Aethon).</summary>
         public static int DeNPC(int npcType)
         {
-            if (npcType == ModContent.NPCType<Content.NPCs.HollowTitan>())
-                return ModContent.ItemType<EsenciaDelTitanHueco>();
-            if (npcType == ModContent.NPCType<Content.NPCs.RiftKeeper>())
-                return ModContent.ItemType<EsenciaDelGuardianDelRift>();
-            if (npcType == ModContent.NPCType<Content.NPCs.EchoArcher>())
-                return ModContent.ItemType<EsenciaDeLaArqueraEstelar>();
-            if (npcType == ModContent.NPCType<Content.NPCs.EchoBlade>())
-                return ModContent.ItemType<EsenciaDelPrimerPortador>();
             if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>())
                 return ModContent.ItemType<EsenciaDeAethon>();
             return 0;
@@ -53,40 +47,15 @@ namespace AethonMod.Content.Items.Esencias
         /// <summary>El índice de conteo del jefe (para el límite de 10 por mundo).</summary>
         public static int IndiceDe(int npcType)
         {
-            if (npcType == ModContent.NPCType<Content.NPCs.HollowTitan>()) return 0;
-            if (npcType == ModContent.NPCType<Content.NPCs.RiftKeeper>()) return 1;
-            if (npcType == ModContent.NPCType<Content.NPCs.EchoArcher>()) return 2;
-            if (npcType == ModContent.NPCType<Content.NPCs.EchoBlade>()) return 3;
             if (npcType == ModContent.NPCType<Content.NPCs.AethonBoss>()) return 4;
             return -1;
         }
     }
 
-    /// <summary>EL TITÁN HUECO: el alma del coloso de cristal del Sagrario.</summary>
-    public class EsenciaDelTitanHueco : EsenciaDeJefeItem
-    {
-        protected override string ClaveJefe => "HollowTitan";
-    }
-
-    /// <summary>EL GUARDIÁN DEL RIFT: el alma del centinela del entre-mundos.</summary>
-    public class EsenciaDelGuardianDelRift : EsenciaDeJefeItem
-    {
-        protected override string ClaveJefe => "RiftKeeper";
-    }
-
-    /// <summary>LA ARQUERA ESTELAR: el alma del eco que no soltaba el arco.</summary>
-    public class EsenciaDeLaArqueraEstelar : EsenciaDeJefeItem
-    {
-        protected override string ClaveJefe => "EchoArcher";
-    }
-
-    /// <summary>EL PRIMER PORTADOR: el alma del eco que no soltaba la hoja.</summary>
-    public class EsenciaDelPrimerPortador : EsenciaDeJefeItem
-    {
-        protected override string ClaveJefe => "EchoBlade";
-    }
-
-    /// <summary>AETHON: el alma de la Luz Primordial, la que te reconoció.</summary>
+    /// <summary>
+    /// AETHON: el alma del Grimorio Eterno — la prueba superada, el
+    /// libro reconociendo a quien lo cargó hasta el final.
+    /// </summary>
     public class EsenciaDeAethon : EsenciaDeJefeItem
     {
         protected override string ClaveJefe => "AethonBoss";

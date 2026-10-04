@@ -1,20 +1,46 @@
-# AethonMod — Aethon, la Luz Primordial
+# AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.59 · **Target:** tModLoader 2026.07.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.61 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
 Un mod de contenido "final" para Terraria cuyo sello es que **todo el arte visual es 100% código**
 (cero sprites de rayos, jefes dibujados con quads del motor, destellos con degradados monotónicos).
-El corazón del mod es **el Grimorio del Eterno**: un arma-híbrido con **niveles infinitos** que
-gana XP con cada kill, **tiene hambre**, y cuando no lo alimentas provoca **LA FURIA** — un evento
-de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+1). Alrededor:
-**6 jefes propios**, **12 esencias de jefe** (devorarlas = +1 nivel), **~115 armas de prueba en
-18 bolsas**, y **el Testigo** (NPC cronista/tienda). Los rayos son el puerto 1:1 del
-`LightningGenerator` de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
+**EL LORE (v6.50.61)**: el **Grimorio del Eterno** que cargas NO es un arma: **ES AETHON**, una
+entidad primigenia atada en forma de libro. Come cada kill, sube de nivel, **tiene hambre** — y
+cuando pronuncias su nombre, el libro **SE ABRE y se alza de sus propias páginas** para probarte:
+**AETHON, EL GRIMORIO ETERNO**, el jefe final de 5 fases, **LA PRUEBA DEL PROPIO GRIMORIO**.
+Vence la prueba y el libro te declara digno (La Forma Ascendida cae a tus pies). Alrededor:
+**LAS OLEADAS DEL HAMBRE** (la furia del libro: oleadas estilo Pumpkin/Frost Moon con jefes
+guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 nivel) y
+**~115 armas de prueba en 18 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
+de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.60)
+## ¿Dónde estamos? (actualizado para v6.50.61)
+- **v6.50.61 - LA PURGA DE NPC + EL VIGÍA + EL LIBRO ERA EL JEFE**:
+  (1) **BORRADOS TODOS LOS NPC DEL MOD salvo el jefe principal**: el
+  Titán Hueco, el Guardián del Rift, la Arquera Estelar, el Primer
+  Portador y **El Testigo** murieron con sus ítems de llamado, sus
+  esencias, su tienda, su sistema de presencia y sus ~90 líneas de
+  localización. SOLO QUEDA AETHON (y su manada — el Cazador Astral es
+  un ATAQUE del jefe, no un NPC independiente).
+  (2) **EL LORE NUEVO**: **Aethon ES el propio grimorio** — el arma que
+  come es el jefe final; la pelea es LA PRUEBA del propio libro (la
+  fase 5 pasa a llamarse «El Veredicto»); su esencia es la página que
+  el libro se arranca al caer. Mod renombrado: «Aethon, el Grimorio
+  Eterno» (antes «la Luz Primordial»).
+  (3) **EL VIGÍA DEL FESTÍN** (fix de oleadas): en el SPAWN ORIGINAL del
+  mundo (donde viven los NPC del pueblo) el motor natural de spawns de
+  Terraria queda **BLOQUEADO POR COMPLETO** (verificado al IL del
+  decompile: 1+ townNPCs cerca = cero spawns) — la oleada «no traía
+  monstruos hasta que salías del spawn». AHORA un vigía cuenta la
+  chusma viva: si el festín ayuna (<3 vivos tras 2,5 s), el propio
+  sistema SIRVE la comida del pool de la oleada en cunas limpias
+  (PosicionLimpia) — la oleada llega SIEMPRE, en el pueblo o en el
+  desierto.
+
+- **v6.50.60 - LA DECIMASÉPTIMA RONDA**:
 - **v6.50.60 - LA DECIMASÉPTIMA RONDA — EL ATAQUE ESPECIAL DE CADA FASE +
   EL SOL DE VERDAD + LA CUNA LIMPIA + LA NOCHE DEL GRIMORIO**:
   (1) **UN ESPECIAL POR FASE, Y LA FIRMA ABRE LA FASE**: P1 **EL SOL DEL
@@ -47,8 +73,8 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 
 | Archivo | Contenido | Para quién |
 |---|---|---|
-| **STABLE-SNAPSHOT.md** | Estado exacto de v6.50.33: qué se entregó, qué falta verificar en juego, doc-rot conocida, próximos pasos | RETOMAR TRABAJO — leer primero |
-| **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de todos los sistemas (grimorio, hambre, furia/oleadas, esencias, Testigo, voz del libro, jefes, pipeline de rayos, stack VFX, red, persistencia) con mapa de archivos | Entender CÓMO funciona algo |
+| **STABLE-SNAPSHOT.md** | Estado exacto de la versión actual: qué se entregó, qué falta verificar en juego, doc-rot conocida, próximos pasos | RETOMAR TRABAJO — leer primero |
+| **DISEÑO_DEL_MOD.md** | Arquitectura COMPLETA de todos los sistemas (grimorio, hambre, furia/oleadas, esencias, voz del libro, jefes, pipeline de rayos, stack VFX, red, persistencia) con mapa de archivos | Entender CÓMO funciona algo |
 | **CARACTERISTICAS.md** | Inventario total de contenido: ~115 armas por familia, 18 bolsas, jefes, minions, buffs, cosméticos, sistemas, conteos | Saber QUÉ existe |
 | **COMPILACION.md** | Cómo instalar/compilar/actualizar (usuario) + pipeline de build headless y release (desarrollo) | Compilar / publicar |
 | **CHANGES.md** | Historial detallado versión a versión (150 entradas ricas, hasta v6.50.33) | Historia / qué cambió |
@@ -67,9 +93,9 @@ de oleadas estilo Pumpkin/Frost Moon con jefes guardianes que escalan ×(oleada+
 ```
 Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA del mod)
 ├── AethonMod/                 ← EL MOD (esto es lo que se compila/empaqueta)
-│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.50.33)
+│   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.50.61)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
-│   ├── Content/               # 296 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
+│   ├── Content/               # ~290 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
 │   └── Localization/          # es-ES / en-US (hjson simétricos, ~2290 líneas c/u)
 ├── README.md / COMPILACION.md / CHANGES.md / CARACTERISTICAS.md / DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md
 ├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh   # repo → ModSources (usuario final)

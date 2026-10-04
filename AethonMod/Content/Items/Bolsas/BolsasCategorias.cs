@@ -56,12 +56,8 @@ namespace AethonMod.Content.Items.Bolsas
             // oleadas del hambre (clic der prepara 1..10 oleadas, clic izq
             // desata la furia). Sin esperas: el festín a la carta.
             l.Add((ModContent.ItemType<Items.CarnadaDelGrimorio>(), 1));
-            // v6.47 — LOS LLAMADOS: los cinco invocadores de los jefes del
-            // mod (de día) — el Testigo ya aparece solo; los jefes, a llamar.
-            l.Add((ModContent.ItemType<Items.Llamados.CristalDelTitanHueco>(), 1));
-            l.Add((ModContent.ItemType<Items.Llamados.SelloDelRift>(), 1));
-            l.Add((ModContent.ItemType<Items.Llamados.PlumaDeLaArquera>(), 1));
-            l.Add((ModContent.ItemType<Items.Llamados.SombraDelPortador>(), 1));
+            // v6.47 — LOS LLAMADOS (v6.50.61 — LA PURGA: solo queda el
+            // llamado del FINAL — el grimorio mismo responde a su nombre).
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es

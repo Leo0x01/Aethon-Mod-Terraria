@@ -92,7 +92,10 @@ namespace AethonMod.Content.Systems
         // viaja ahora del cliente del portador a la AUTORIDAD y vive en
         // ShardPlayer.OleadasPreparadasRemoto (toda la sesión).
         public const byte MsgPrepararOleadas = 10; // cliente → server: la Carnada prepara N oleadas
-        public const byte MsgPedirResonancia = 11; // cliente → server: el Testigo vende la Resonancia (nivel 50+)
+        // v6.50.61 — LA PURGA: MsgPedirResonancia (11) murió con el
+        // Testigo — su único llamador era la tienda. El ID queda
+        // RETIRADO (no se reusa: los paquetes viejos en tránsito
+        // simplemente ya no encuentran receptor).
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -425,7 +428,7 @@ namespace AethonMod.Content.Systems
                 // del clic derecho viaja a la autoridad).
                 if (Main.netMode == NetmodeID.Server &&
                     (tipo == MsgPedirLibros || tipo == MsgPedirFragmento ||
-                     tipo == MsgPrepararOleadas || tipo == MsgPedirResonancia))
+                     tipo == MsgPrepararOleadas))
                 {
                     Player solicitante = quienEnvia >= 0 && quienEnvia < Main.player.Length
                         ? Main.player[quienEnvia] : null;
@@ -449,33 +452,6 @@ namespace AethonMod.Content.Systems
                             var spc = solicitante.GetModPlayer<Players.ShardPlayer>();
                             if (spc != null && oleadas >= 1 && oleadas <= 11)
                                 spc.OleadasPreparadasRemoto = oleadas;
-                        }
-                        else if (tipo == MsgPedirResonancia)
-                        {
-                            // v6.50.10 — EL TESTIGO VENDE (la compra camina):
-                            // el cliente pagó su BuyItem local; el FRAGMENTO
-                            // lo crea la autoridad (nunca un drop fantasma).
-                            // Revalidación del nivel 50 sobre el inventario
-                            // DEL SOLICITANTE (cualquier Grimorio de su barra
-                            // rápida — la puerta del Testigo, esta vez en el
-                            // lado del que manda).
-                            bool nivel50 = false;
-                            for (int k = 0; k < 10 && !nivel50; k++)
-                            {
-                                Item inv = solicitante.inventory[k];
-                                if (inv == null || inv.IsAir ||
-                                    inv.type != ModContent.ItemType<Content.Weapons.GrimoireEternal>())
-                                    continue;
-                                var sl = inv.GetGlobalItem<Globals.ShardLevelItem>();
-                                if (sl != null && sl.Level >= 50)
-                                    nivel50 = true;
-                            }
-                            if (nivel50)
-                            {
-                                Item.NewItem(solicitante.GetSource_GiftOrReward(),
-                                    solicitante.Center,
-                                    ModContent.ItemType<Content.Items.ResonanceShard>());
-                            }
                         }
                         else
                         {
@@ -758,26 +734,6 @@ namespace AethonMod.Content.Systems
                 if (Main.netMode != NetmodeID.MultiplayerClient) return;
                 ModPacket p = AethonMod.Instance.GetPacket();
                 p.Write(MsgPedirFragmento);
-                p.Send();
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// v6.50.10 — EL TESTIGO VENDE: la compra corre en el cliente que
-        /// clica (BuyItem local) pero el ítem debe nacer de la AUTORIDAD
-        /// — un Item.NewItem client-side en MP es un drop fantasma (el
-        /// mismo anti-patrón del Altar v6.50). El server revalida el
-        /// nivel 50 del grimorio del solicitante ANTES de crearlo.
-        /// Llamado desde TheWitness.OnChatButtonClicked (cliente MP).
-        /// </summary>
-        public static void PedirResonancia()
-        {
-            try
-            {
-                if (Main.netMode != NetmodeID.MultiplayerClient) return;
-                ModPacket p = AethonMod.Instance.GetPacket();
-                p.Write(MsgPedirResonancia);
                 p.Send();
             }
             catch { }
