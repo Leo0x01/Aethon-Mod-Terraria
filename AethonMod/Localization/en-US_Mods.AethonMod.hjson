@@ -73,6 +73,52 @@ Items: {
 			'''
 	}
 
+	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
+	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	
+	FauceDelGrimorio: {
+		DisplayName: The Grimoire's Maw
+		Tooltip:
+			'''
+			"Where there is shadow, the page is watching."
+			THE TENTACLE: a many-eyed maw is born from your shadow and
+			whips toward the boss — NO MATTER HOW FAR, the lash ALWAYS
+			reaches. The mouth bites and hunger drains its life away.
+			When the boss drops to 1 HP, its death STOPS: the maw
+			devours it whole — the death animation is OURS.
+			(Maw test weapon — v1.)
+			'''
+	}
+
+	TajoDeLasSombras: {
+		DisplayName: The Shadow Slash
+		Tooltip:
+			'''
+			"The edge cuts; the shadow keeps the piece."
+			THE SLASH: a crescent of shadows flies to the boss and
+			seals it inside a black SPHERE covered in eyes — all of
+			them staring at YOU while they feed. The equatorial
+			fanged mouth bites three times and drains it.
+			At 1 HP: the sphere devours it and it disintegrates
+			into mist and dust.
+			(Maw test weapon — v1.)
+			'''
+	}
+
+	SombraDeLaPagina: {
+		DisplayName: The Shadow of the Page
+		Tooltip:
+			'''
+			"Written in ink of the Gate: eyes and teeth."
+			The same tentacle maw, but 100% WRITTEN IN CODE — not a
+			single sprite: the mass, the eyes that snap open, the
+			fangs and the throat, ALL drawn by the engine.
+			It rises from the SHADOW AT YOUR FEET, hunts at any
+			distance, bites and drains. At 1 HP: the feast.
+			(Maw test weapon — v1.)
+			'''
+	}
+
 	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
 	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
 	// Bearer's Shadow).
@@ -1642,6 +1688,10 @@ Items: {
 }
 
 Projectiles: {
+	FaucesTentaculoProjectile.DisplayName: The Grimoire's Maw
+	TajoSombraProjectile.DisplayName: The Shadow Slash
+	SombraPaginaProjectile.DisplayName: The Shadow of the Page
+	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
 	GenesisLight.DisplayName: Genesis Light
 	CosmicOrbMinion.DisplayName: Cosmic Orb

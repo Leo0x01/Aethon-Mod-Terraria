@@ -17,7 +17,16 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~115 armas de prueba en 18 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.61)
+## ¿Dónde estamos? (actualizado para v6.50.62)
+
+**NOVEDAD .62 — LAS FAUCES DEL GRIMORIO**: tres armas de sombras devoradoras al
+estilo Pride (Selim Bradley, FMA:B) — **La Fauce del Grimorio** (tentáculo-latigazo
+que nace de tu sombra y SIEMPRE llega al jefe, con el gif del usuario como sprite),
+**El Tajo de las Sombras** (corte que encierra al jefe en una esfera negra con ojos
+que te miran y boca con colmillos) y **La Sombra de la Página** (la misma fauce
+100% escrita por código). **LA DEVORACIÓN**: cuando un jefe cae a 1 HP a manos de
+las fauces, su animación de muerte SE DETIENE y la sombra lo devora entero — y el
+loot cae dentro de la bruma (la kill es real: bestiario, flags, XP del libro).
 - **v6.50.61 - LA PURGA DE NPC + EL VIGÍA + EL LIBRO ERA EL JEFE**:
   (1) **BORRADOS TODOS LOS NPC DEL MOD salvo el jefe principal**: el
   Titán Hueco, el Guardián del Rift, la Arquera Estelar, el Primer

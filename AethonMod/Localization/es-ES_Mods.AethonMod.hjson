@@ -73,6 +73,53 @@ Items: {
 			'''
 	}
 
+	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
+	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	
+	FauceDelGrimorio: {
+		DisplayName: La Fauce del Grimorio
+		Tooltip:
+			'''
+			«Donde hay sombra, la página mira.»
+			EL TENTÁCULO: una fauce con ojos nace de tu sombra y lanza
+			el latigazo hacia el jefe — NO IMPORTA LO LEJOS que esté,
+			el látigo SIEMPRE llega. La boca muerde y el hambre drena
+			la vida a mordidas.
+			Cuando el jefe cae a 1 de vida, su muerte SE DETIENE:
+			la fauce lo devora entero — la animación de muerte es NUESTRA.
+			(Arma de prueba de las fauces — v1.)
+			'''
+	}
+
+	TajoDeLasSombras: {
+		DisplayName: El Tajo de las Sombras
+		Tooltip:
+			'''
+			«El filo corta; la sombra se queda con el trozo.»
+			EL TAJO: una media luna de sombras vuela al jefe y lo
+			encierra en una ESFERA negra cubierta de ojos — todos te
+			miran mientras comen. La boca ecuatorial de colmillos
+			muerde tres veces y lo drena.
+			Al caer a 1 de vida: la esfera lo devora y lo desintegra
+			en bruma y polvo.
+			(Arma de prueba de las fauces — v1.)
+			'''
+	}
+
+	SombraDeLaPagina: {
+		DisplayName: La Sombra de la Página
+		Tooltip:
+			'''
+			«Escrita con tinta de la Puerta: ojos y dientes.»
+			La misma fauce del tentáculo, pero 100% ESCRITA POR CÓDIGO —
+			ni un sprite: la masa, los ojos que se abren de golpe, los
+			colmillos y la garganta, TODO dibujado por el motor.
+			Nace de la SOMBRA DE TUS PIES, caza a cualquier distancia,
+			muerde y drena. A 1 de vida: el festín.
+			(Arma de prueba de las fauces — v1.)
+			'''
+	}
+
 	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
 	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
 	// Bearer's Shadow).
@@ -1641,6 +1688,10 @@ Items: {
 }
 
 Projectiles: {
+	FaucesTentaculoProjectile.DisplayName: La Fauce del Grimorio
+	TajoSombraProjectile.DisplayName: El Tajo de las Sombras
+	SombraPaginaProjectile.DisplayName: La Sombra de la Página
+	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	GenesisLight.DisplayName: Luz del Génesis
 	CosmicOrbMinion.DisplayName: Orbe Cósmico
