@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.61 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.63 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,13 +14,16 @@ cuando pronuncias su nombre, el libro **SE ABRE y se alza de sus propias página
 Vence la prueba y el libro te declara digno (La Forma Ascendida cae a tus pies). Alrededor:
 **LAS OLEADAS DEL HAMBRE** (la furia del libro: oleadas estilo Pumpkin/Frost Moon con jefes
 guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 nivel) y
-**~115 armas de prueba en 18 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
+**~115 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.62)
+## ¿Dónde estamos? (actualizado para v6.50.63)
 
-**NOVEDAD .62 — LAS FAUCES DEL GRIMORIO**: tres armas de sombras devoradoras al
-estilo Pride (Selim Bradley, FMA:B) — **La Fauce del Grimorio** (tentáculo-latigazo
+**NOVEDAD .63 — LA BOLSA DE LAS SOMBRAS**: las tres fauces de la .62 ahora
+**LLEGAN SOLAS al entrar al mundo** (bolsa 19 del kit — clic derecho y las
+tienes; nacieron solo con receta y el kit las olvidó). **NOVEDAD .62 — LAS
+FAUCES DEL GRIMORIO**: tres armas de sombras devoradoras al estilo Pride
+(Selim Bradley, FMA:B) — **La Fauce del Grimorio** (tentáculo-latigazo
 que nace de tu sombra y SIEMPRE llega al jefe, con el gif del usuario como sprite),
 **El Tajo de las Sombras** (corte que encierra al jefe en una esfera negra con ojos
 que te miran y boca con colmillos) y **La Sombra de la Página** (la misma fauce
