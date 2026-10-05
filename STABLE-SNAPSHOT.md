@@ -1,9 +1,9 @@
-# AethonMod — ESTADO ACTUAL (v6.50.62)
+# AethonMod — ESTADO ACTUAL (v6.50.63)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.62 (LAS FAUCES DEL GRIMORIO — publicada con
-> release 403485786, md5 aff34d9e…, CDN verificado byte a byte). La .61 fue
-> release 403243039, md5 2228b216…, también CDN verificado byte a byte.
+> Última actualización: v6.50.63 (LA BOLSA DE LAS SOMBRAS — publicada con
+> release 403588914, md5 6c443618…, CDN verificado byte a byte). La .62 fue
+> release 403485786, md5 aff34d9e…, también CDN verificado byte a byte.
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
@@ -1144,16 +1144,18 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.62 en juego** — LOS TESTS CRÍTICOS de la .62 (LAS FAUCES):
-   (a) LAS ARMAS: 5 de madera cada una (La Fauce del Grimorio, El Tajo de las
-   Sombras, La Sombra de la Página); (b) EL LATIGAZO QUE SIEMPRE LLEGA: invoca
-   un jefe, aléjate AL OTRO LADO DEL MAPA y dispara — el tentáculo cruza el
-   mundo; (c) EL DREN: la barra del jefe baja A MORDIDAS; (d) LA DEVORACIÓN:
-   al 1 HP el jefe se POSA (ni IA ni muerte) y el festín lo come (bruma,
-   almas, y el LOOT CAE dentro de la bruma — la kill cuenta: bestiario,
-   downed flags, XP del grimorio); (e) LA ESFERA del tajo: los ojos TE MIRAN
-   a TI mientras comen; (f) Aethon (el del mod) muere con SU cine de siempre;
-   (g) la chusma muere normal (solo jefes se devoran).
+1. **El usuario prueba v6.50.63 en juego** — LA ENTREGA + LOS TESTS CRÍTICOS de la .62 (LAS FAUCES):
+   (a) LA BOLSA DE LAS SOMBRAS LLEGA SOLA al entrar al mundo (bolsa 19,
+   junto a las otras 18) — clic derecho y despliega las 3 fauces: La Fauce
+   del Grimorio, El Tajo de las Sombras, La Sombra de la Página (la receta
+   de 5 madera sigue como vía alternativa); (b) EL LATIGAZO QUE SIEMPRE
+   LLEGA: invoca un jefe, aléjate AL OTRO LADO DEL MAPA y dispara — el
+   tentáculo cruza el mundo; (c) EL DREN: la barra del jefe baja A MORDIDAS;
+   (d) LA DEVORACIÓN: al 1 HP el jefe se POSA (ni IA ni muerte) y el festín
+   lo come (bruma, almas, y el LOOT CAE dentro de la bruma — la kill cuenta:
+   bestiario, downed flags, XP del grimorio); (e) LA ESFERA del tajo: los
+   ojos TE MIRAN a TI mientras comen; (f) Aethon (el del mod) muere con SU
+   cine de siempre; (g) la chusma muere normal (solo jefes se devoran).
    (Y el checklist .61 aún vigente: oleada en el spawn, la purga, el lore.)
 2. **El usuario prueba v6.50.61 en juego** — LOS TESTS CRÍTICOS de la .61:
    (a) LA OLEADA EN EL SPAWN ORIGINAL: quédate EN el pueblo (junto a las
@@ -1196,6 +1198,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.63** | ✅ Build-verificada (0/0 oráculo + build real ×3, .tmod auditado 393 entradas EOF exacto, hjson empaquetado idéntico a la fuente, headless 0 excepciones), ✔ publicada (release 403588914, CDN byte a byte), ⏳ en juego | LA BOLSA DE LAS SOMBRAS — el kit olvidó a las 3 fauces de la .62 (feedback: "te olvidaste darle las armas al jugador", 2ª vez — precedente v6.14.2): las armas nacieron SOLO con receta de 5 madera. LA CURA: **BolsaSombras** (bolsa 19 — las 3 armas, clic derecho, solo lo que falte, permanente/reabrible) registrada en TestingPlayer.OnEnterWorld como las 18 anteriores + icono 30×30 (masa negro-violeta, ojo blanco con pupila roja Tsurime, garganta con colmillos y brillo rojo — VLM SHIP) + hjson es+en; la receta de madera queda como vía alternativa. LECCIÓN anti-recurrencia re-activada: cada arma nueva se registra en DOS sitios (su archivo Y el kit) |
 | **v6.50.62** | ✅ Build-verificada (0/0, .tmod auditado 392 entradas EOF/dataLength exactos, DLL con las 9 clases nuevas vía Cecil, headless 0 excepciones), ✔ publicada (release 403485786, CDN byte a byte), ⏳ en juego | LAS FAUCES DEL GRIMORIO — la letra del usuario (armas de sombras estilo Pride de FMA:B que devoran jefes): (1) **LA DEVORACIÓN** (FaucesGlobalNPC: CheckDead 1ª pasada → life=1+dontTakeDamage+return false — la muerte vanilla NUNCA arranca; PreAI false = jefe POSADO sin IA ni animación; motor 210 t: FauceDevoradorProjectile con erupción→envolver→festín (mordidas+oscuridad+almas)→bruma y polvo; final: life=0 + 2ª checkDead = muerte REAL con loot íntegro; AethonBoss excluido — su CheckDead propio corre antes; worms via DueñoDelPool; MP: BitWriter en SendExtraAI, 1 bit por paquete) (2) **ARMA 1 LA FAUCE DEL GRIMORIO** (el gif del usuario como spritesheet 6×3 re-troceado limpio: emergencia f0-5 → caza a CUALQUIER distancia (22-56 px/t escalado) → mordisco que drena 2.5%/6t → 1 HP = festín) (3) **ARMA 2 EL TAJO DE LAS SOMBRAS** (tajo.png del usuario vuela → ESFERA negra con 11-14 ojos que TE MIRAN + boca ecuatorial de colmillos, 3 mordidas de 12% → bruma y polvo) (4) **ARMA 3 LA SOMBRA DE LA PÁGINA** (100% código: masa/olas/fauces/garganta por quads, nace de la sombra del SUELO) (5) **SOMBRASLIB** (Columna Bézier viva, Masa con picos de sierra, Ojo con pupila roja, OjosDeMasa de reparto áureo, Fauces procedurales, DeGolpe k=4, Bruma alfa) |
 | **v6.50.61** | ✅ Build-verificada (0/0, .tmod auditado 387 entradas EOF exacto, 13 muertos AUSENTES, DLL con NacerChusmaVigia y SIN PedirResonancia, headless 0 excepciones), ✔ publicada (release 403243039, CDN byte a byte), ⏳ en juego | LA PURGA DE NPC + EL VIGÍA + EL LORE NUEVO — feedback de la .60 (TRES frentes): (1) **EL VIGÍA DEL FESTÍN** (la oleada vacía en el spawn original: Player.townNPCs>=1 BLOQUEA el motor natural sin condición — decompile IL verificado; NacerChusmaVigia sirve la comida del pool en cunas PosicionLimpia cuando el festín ayuna <3 vivos tras 150 t, cada 15 t) (2) **LA PURGA** (borrados HollowTitan/RiftKeeper/EchoArcher/EchoBlade/TheWitness + 4 llamados + 4 esencias + PresenciaNPCSystem + tienda + MsgPedirResonancia + ~90 líneas de localización por idioma; SOLO Aethon — el CazadorAstral es su ataque Manada; .plr y contadores de esencias respetados) (3) **EL LORE** (Aethon ES el grimorio: pelea = LA PRUEBA, fase 5 «El Veredicto», esencia = la página arrancada, mod renombrado «Aethon, el Grimorio Eterno», ~15 textos es+en + description.txt) |
 | **v6.50.60** | ✅ Build-verificada (0/0, .tmod auditado 400 entradas EOF exacto, headless 0 excepciones, caza del sol SIMULADA en 5 escenarios), ✔ publicada (release 402696157, CDN byte a byte), ⏳ en juego | LA DECIMASÉPTIMA RONDA — feedback de la .59 (CUATRO frentes): (1) **EL ATAQUE ESPECIAL DE CADA FASE** (EspecialDeFase/EntrarEspecial/_especialPendiente: P1 SOL — también APERTURA de toda pelea — / P2 CATEDRAL / P3 TELAR / P4 VÓRTICE / P5 CORONA; la firma abre la fase tras el decreto con prioridad absoluta; EST_SOL en TODOS los menús — el arsenal estaba encerrado en P3+) (2) **EL SOL DE VERDAD** (asunción 50 t + cañonazo 11 px/t + giro 0.11 + crucero 10.5 + relevo 14 >500 px + ESPOLETE <240 px → gigante 30 t que deriva a la presa → explosión 640 px; render por _solGigante/_tickGigante/_solExploto; SIMULADO: botas→270 px, montura→636) (3) **LA CUNA LIMPIA** (PosicionLimpia: aire 3×3, sin muro en superficie, sobre el suelo — escupitajo del Devorador y TODAS las coreografías; capa de tierra: nada >10 tiles bajo el portador) (4) **LA NOCHE DEL GRIMORIO** (chusma nocturna natural NO alimenta — NPCID.Sets.Zombies + ojos/licántropo/luna de sangre; comida de oleada no toca el reloj; furioso = piso en el umbral con bocados de 45 s; reintento cada 5 s: furioso+mundo libre = festín YA) |

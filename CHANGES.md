@@ -1,5 +1,48 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.63 — LA BOLSA DE LAS SOMBRAS: las 3 fauces de la .62 LLEGAN AL JUGADOR (el kit de pruebas las olvidó — nacieron solo con receta y nadie las recibió)
+
+**Feedback del usuario**: "te olvidaste darle las armas al jugador".
+
+**Causa**: las tres armas de sombras devoradoras de la v6.50.62 (La Fauce del
+Grimorio, El Tajo de las Sombras, La Sombra de la Página) se crearon SOLO con
+receta de 5 de madera — pero el kit de pruebas del mod (el sistema que
+ENTREGA el arsenal al jugador en cada entrada al mundo, la arquitectura que
+el propio usuario pidió en la v6.29: "crea varias bolsas para todas las armas
+que me tienes que dar… una categoría por bolsa") **jamás las registró**.
+Entrabas al mundo y no llegaba ninguna. Es la SEGUNDA vez que ocurre (la
+primera: v6.14.2, «te olvidaste que debes darselo al jugador», con los
+agujeros negros de fusión y olvido) — la lección anti-recurrencia de la casa
+vuelve al checklist: **cada arma nueva se registra en DOS sitios: su archivo
+Y el kit de entrega**.
+
+**El fix** (la arquitectura de la casa, no un parche):
+
+- **BolsaSombras** — LA BOLSA DE LAS SOMBRAS, **bolsa 19 del kit**
+  (`BolsasCategorias.cs`): clic derecho despliega las tres fauces, solo
+  entrega lo que falte, permanente y reabrible (recupera las armas perdidas).
+  Color de fiesta violeta (196, 90, 255) — la penumbra de las sombras.
+- **TestingPlayer.OnEnterWorld** la entrega garantizada en cada entrada al
+  mundo, como las 18 anteriores (mundo nuevo o viejo, la bolsa llega sola).
+- **Icono 30×30 de la casa** (`tools/gen_bolsa_sombras_v65063.py`, la
+  silueta de las demás bolsas recolorida): masa negro-violeta con dither
+  diagonal, el **ojo blanco de pupila roja** que te mira (Tsurime — Pride
+  tras devorar a Gluttony), la **garganta** (boca negra semitransparente con
+  brillo rojo al fondo y colmillos de aguja) y dos ojitos laterales — la
+  firma de las sombras con MUCHOS ojos. Verificación VLM: SHIP a la primera.
+- **hjson es+en**: DisplayName + tooltip de la bolsa.
+- **La receta de 5 madera SIGUE como vía alternativa** (protocolo v6.14.2:
+  "la receta de 5 de madera sigue como vía alternativa").
+
+**VERIFICACIÓN**: oráculo verify.csproj **0/0** · `-build` REAL **0/0 ×3**
+· .tmod v6.50.63 (7.852.449 bytes, md5 6c443618…): **393 entradas**
+(392 + 1 nueva: `BolsaSombras.rawimg` 3612 B en formato raw tML 30×30 —
+mismo formato exacto que BolsaArmasRayo), 393/393 blobs OK, EOF EXACTO,
+**hjson empaquetado IDÉNTICO a la fuente es+en**, DLL con la clase
+BolsaSombras y su registro en TestingPlayer · **headless: Server started,
+0 EXCEPCIONES** · publicada: release **403588914**, CDN verificado byte a
+byte.
+
 ## Commit v6.50.62 — LAS FAUCES DEL GRIMORIO: las tres armas de sombras devoradoras al estilo Pride (Selim Bradley, FMA:B) + LA MECÁNICA DE LA DEVORACIÓN (el jefe llega a 1 HP → su animación de muerte SE DETIENE → la sombra LO DEVORA — con loot completo)
 
 **Petición del usuario**: "ya ves que el libro se alimenta de los jefes… mi idea es crear algun tipo de tentaculo animado con boca y ojos al estilo del poder de las sombras de Selim Bradley (Pride) de Fullmetal Alchemist: Brotherhood, este tentaculo o fauces nacen del jugador y lanzan un latigazo en direccion al jefe, no importa lo lejos que este, el latigazo llegara al jefe y se lo comera, esto debe funcionar con todos los jefes, en el momento en el que el jefe llege a 1 punto de vida, su animacion original de muerte se detiene y no avanza, en su lugar se activa la nueva animacion de muerte, y es que este tentaculo sale del libro y debora al jefe… la primera es el tentaculo que sale y devora, el tentaculo se puede estirar y siempre llega al jefe, la segunda es un tajo con las formas del poder de sombras que se lanza al jefe, lo encierra en una esfera de sombras con ojos y boca con dientes y lo deboran luego este se desintegra en bruma y polvo… crea 2 armas… y tambien crea una tercera arma que haga lo mismo que las otras 2 pero solo por codigo… no toques el libro para hacer esto".
