@@ -33,6 +33,10 @@ namespace AethonMod.Content.Players
     ///      15. La Bolsa de los Huéspedes   (v6.41 — las réplicas de prueba)
     ///      16. La Bolsa de las Apuestas   (v6.42 — las 5 apuestas + el Verbo)
     ///      17. La Bolsa de las Ideas del Grimorio (v6.50.19 — los 6 futuros del proyectil)
+    ///      18. La Bolsa de las Armas de Rayo   (v6.50.18+24 — las armas de rayo)
+    ///      19. La Bolsa de las Sombras         (v6.50.63 — LAS FAUCES: las 3 armas
+    ///          devoradoras de la v6.50.62 que nacieron sin kit — el feedback
+    ///          "te olvidaste darle las armas al jugador", la lección v6.14.2 otra vez)
     ///   · 99 DUMMIES DE PRUEBA (Target Dummy de vanilla — el campo de
     ///     entrenamiento directo en el inventario).
     ///
@@ -54,7 +58,7 @@ namespace AethonMod.Content.Players
             if (Main.netMode != Terraria.ID.NetmodeID.SinglePlayer) return;
             if (Player.whoAmI != Main.myPlayer) return;
 
-            // === LAS DIECIOCHO BOLSAS (garantizadas en cada entrada) ===
+            // === LAS DIECINUEVE BOLSAS (garantizadas en cada entrada) ===
             int bolsas = 0;
             bolsas += Entregar(ModContent.ItemType<BolsaProbador>());
             bolsas += Entregar(ModContent.ItemType<BolsaFundacionales>());
@@ -74,6 +78,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaApuestas>());        // v6.42: LAS 5 APUESTAS + EL VERBO
             bolsas += Entregar(ModContent.ItemType<BolsaIdeasGrimorio>());   // v6.50.19: LAS 6 IDEAS DEL GRIMORIO
             bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
+            bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63: LAS FAUCES DEL GRIMORIO (las sombras de la .62 — el kit las olvidó)
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;

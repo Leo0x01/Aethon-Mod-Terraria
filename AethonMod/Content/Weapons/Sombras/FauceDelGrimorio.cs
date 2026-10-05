@@ -16,8 +16,10 @@ namespace AethonMod.Content.Weapons.Sombras
     /// jefe, NO IMPORTA LO LEJOS: el latigazo llega, muerde y se lo
     /// come. A 1 HP la muerte del jefe se DETIENE y la sombra lo devora.»
     ///
-    /// ARMA DE PRUEBA (no toca el grimorio): madera ×5, como las demás
-    /// herramientas de test de la casa.
+    /// ARMA DE PRUEBA (no toca el grimorio): se entrega en LA BOLSA DE
+    /// LAS SOMBRAS del kit de pruebas (v6.50.63 — la .62 la dejó fuera
+    /// del kit: "te olvidaste darle las armas al jugador"); la receta de
+    /// 5 madera queda como vía alternativa (protocolo v6.14.2).
     /// </summary>
     public class FauceDelGrimorio : ModItem
     {

@@ -17,8 +17,10 @@ namespace AethonMod.Content.Weapons.Sombras
     /// portador (donde hay sombra, la página mira) y devora igual:
     /// a 1 HP la muerte se detiene y la sombra se lo come.»
     ///
-    /// ARMA DE PRUEBA (no toca el grimorio): madera ×5, como las demás
-    /// herramientas de test de la casa.
+    /// ARMA DE PRUEBA (no toca el grimorio): se entrega en LA BOLSA DE
+    /// LAS SOMBRAS del kit de pruebas (v6.50.63 — la .62 la dejó fuera
+    /// del kit: "te olvidaste darle las armas al jugador"); la receta de
+    /// 5 madera queda como vía alternativa (protocolo v6.14.2).
     /// </summary>
     public class SombraDeLaPagina : ModItem
     {

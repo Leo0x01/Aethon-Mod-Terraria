@@ -737,6 +737,19 @@ Items: {
 			'''
 	}
 
+	BolsaSombras: {
+		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
+		DisplayName: Bag of Shadows
+		Tooltip:
+			'''
+			The grimoire's three devouring shadow maws (Pride style).
+			The tentacle that ALWAYS arrives (The Grimoire's Maw), the eyed
+			sphere that devours (The Shadow Slash) and the 100% code-drawn
+			maw (The Page's Shadow). At 1 HP: the feast begins.
+			Right-click to deploy them. Only delivers what you're missing.
+			'''
+	}
+
 	BolsaIdeasGrimorio: {
 		// v6.50.19: THE SIX GRIMOIRE PROJECTILE IDEAS — bag 17
 		DisplayName: Grimoire Ideas Bag

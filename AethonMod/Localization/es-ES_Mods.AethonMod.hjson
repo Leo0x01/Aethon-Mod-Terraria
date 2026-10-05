@@ -738,6 +738,19 @@ Items: {
 			'''
 	}
 
+	BolsaSombras: {
+		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
+		DisplayName: Bolsa de las Sombras
+		Tooltip:
+			'''
+			Las tres fauces devoradoras de sombras del grimorio (estilo Pride).
+			El tentáculo que SIEMPRE llega (La Fauce del Grimorio), la esfera
+			de ojos que devora (El Tajo de las Sombras) y la fauce 100% escrita
+			por código (La Sombra de la Página). A 1 de vida: el festín.
+			Clic derecho para desplegarlas. Solo entrega lo que te falte.
+			'''
+	}
+
 	BolsaIdeasGrimorio: {
 		// v6.50.19: THE SIX GRIMOIRE PROJECTILE IDEAS — bag 17
 		DisplayName: Bolsa de las Ideas del Grimorio

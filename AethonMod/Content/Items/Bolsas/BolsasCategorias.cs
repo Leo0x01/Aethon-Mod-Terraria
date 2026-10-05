@@ -523,4 +523,34 @@ namespace AethonMod.Content.Items.Bolsas
             return l;
         }
     }
+
+    /// <summary>19 — LAS FAUCES DEL GRIMORIO (v6.50.63): LAS TRES ARMAS DE
+    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B) de la
+    /// v6.50.62 — que nacieron SOLO CON RECETA y el jugador NUNCA las
+    /// recibió (feedback: "te olvidaste darle las armas al jugador"; la
+    /// lección anti-recurrencia de la v6.14.2, OTRA VEZ: cada arma nueva
+    /// debe registrarse en el kit de entrega). El tentáculo que SIEMPRE
+    /// llega (La Fauce del Grimorio), el tajo que encierra al jefe en la
+    /// esfera de ojos que devora y desintegra (El Tajo de las Sombras) y
+    /// la fauce 100% escrita por código (La Sombra de la Página). Las
+    /// tres disparan LA DEVORACIÓN: jefe a 1 de vida → su muerte se
+    /// DETIENE → la sombra se lo come. La receta de 5 madera sigue como
+    /// vía alternativa (protocolo v6.14.2).</summary>
+    public class BolsaSombras : BolsaCategoria
+    {
+        protected override string Titulo => "La Bolsa de las Sombras";
+        protected override string NombreCorto => "Bolsa de las Sombras";
+        protected override Color ColorFiesta => new(196, 90, 255);
+        protected override string Nota => "Las fauces que devoran jefes — donde hay sombra, la página mira";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // v6.50.62 — LAS FAUCES (la prueba del usuario, ahora en el kit)
+            l.Add((ModContent.ItemType<Weapons.Sombras.FauceDelGrimorio>(), 1));   // EL TENTÁCULO: el latigazo que SIEMPRE llega
+            l.Add((ModContent.ItemType<Weapons.Sombras.TajoDeLasSombras>(), 1));   // LA ESFERA: ojos que miran, boca de colmillos
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // EL CÓDIGO VIVO: 100% procedural
+            return l;
+        }
+    }
 }
