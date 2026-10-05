@@ -75,19 +75,24 @@ Items: {
 
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
+	// ("the gif doubled at the tip, one per corner, so it behaves like
+	// teeth" + "black mist on every tentacle and mouth").
 	
 	FauceDelGrimorio: {
 		DisplayName: La Fauce del Grimorio
 		Tooltip:
 			'''
 			«Donde hay sombra, la página mira.»
-			EL TENTÁCULO: una fauce con ojos nace de tu sombra y lanza
-			el latigazo hacia el jefe — NO IMPORTA LO LEJOS que esté,
-			el látigo SIEMPRE llega. La boca muerde y el hambre drena
-			la vida a mordidas.
+			LA PINZA: el tentáculo nace de tu sombra con DOS CABEZAS-BOCA
+			en la punta — una en cada esquina, desplegadas como DIENTES.
+			Juntas lanzan el latigazo hacia el jefe — NO IMPORTA LO LEJOS
+			que esté, el látigo SIEMPRE llega. Las dos bocas CIERRAN la
+			pinza sobre el jefe y el hambre drena su vida a mordidas,
+			mientras TODO el cuerpo y las dos bocas exhalan BRUMA NEGRA.
 			Cuando el jefe cae a 1 de vida, su muerte SE DETIENE:
-			la fauce lo devora entero — la animación de muerte es NUESTRA.
-			(Arma de prueba de las fauces — v1.)
+			la pinza lo devora entero — la animación de muerte es NUESTRA.
+			(Arma de prueba de las fauces — v2.)
 			'''
 	}
 
@@ -96,13 +101,13 @@ Items: {
 		Tooltip:
 			'''
 			«El filo corta; la sombra se queda con el trozo.»
-			EL TAJO: una media luna de sombras vuela al jefe y lo
-			encierra en una ESFERA negra cubierta de ojos — todos te
-			miran mientras comen. La boca ecuatorial de colmillos
-			muerde tres veces y lo drena.
+			EL TAJO: una media luna de sombras vuela al jefe dejando un
+			rastro de BRUMA NEGRA y lo encierra en una ESFERA negra cubierta
+			de ojos — todos te miran mientras comen. La boca ecuatorial de
+			colmillos muerde tres veces, respira bruma y lo drena.
 			Al caer a 1 de vida: la esfera lo devora y lo desintegra
 			en bruma y polvo.
-			(Arma de prueba de las fauces — v1.)
+			(Arma de prueba de las fauces — v2.)
 			'''
 	}
 
@@ -115,7 +120,31 @@ Items: {
 			ni un sprite: la masa, los ojos que se abren de golpe, los
 			colmillos y la garganta, TODO dibujado por el motor.
 			Nace de la SOMBRA DE TUS PIES, caza a cualquier distancia,
-			muerde y drena. A 1 de vida: el festín.
+			muerde y drena — y el cuerpo entero y la boca EXHALAN
+			BRUMA NEGRA. A 1 de vida: el festín.
+			(Arma de prueba de las fauces — v2.)
+			'''
+	}
+
+	// v6.50.64 — WEAPON 4: THE FINAL PAGE (the AAA evolution of the
+	// Shadow of the Page). 100% code.
+	
+	PaginaFinal: {
+		DisplayName: La Página Final
+		Tooltip:
+			'''
+			«La última página del grimorio: la que se escribe
+			con cada jefe devorado.»
+			EL RITUAL EN CUATRO ACTOS (la evolución de La Sombra de la
+			Página — 100% código, ni un sprite):
+			LA APERTURA — el libro despliega su ojo sobre ti y la sala
+			se apaga; LOS TRES VERSOS — tres zarpos parten de tu sombra
+			por ángulos distintos y CONVERGEN en el jefe; LA JAULA DE
+			TINTA — el anillo de púas de punta blanca se cierra a
+			mordidas (el dren más fuerte de las cuatro fauces);
+			EL FESTÍN — a 1 de vida el libro GIGANTE se abre en el cielo,
+			sus zarpos lo agarran, la oscuridad SUBE comiéndoselo…
+			y el libro se sella con una onda de choque.
 			(Arma de prueba de las fauces — v1.)
 			'''
 	}
@@ -740,13 +769,16 @@ Items: {
 
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
+		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
 		DisplayName: Bolsa de las Sombras
 		Tooltip:
 			'''
-			Las tres fauces devoradoras de sombras del grimorio (estilo Pride).
-			El tentáculo que SIEMPRE llega (La Fauce del Grimorio), la esfera
-			de ojos que devora (El Tajo de las Sombras) y la fauce 100% escrita
-			por código (La Sombra de la Página). A 1 de vida: el festín.
+			Las cuatro fauces devoradoras de sombras del grimorio (estilo Pride).
+			La pinza de dos cabezas que SIEMPRE llega (La Fauce del Grimorio), la
+			esfera de ojos que devora (El Tajo de las Sombras), la fauce 100%
+			escrita por código (La Sombra de la Página) y su evolución: el ritual
+			del libro (La Página Final). Todas exhalan bruma negra.
+			A 1 de vida: el festín comienza.
 			Clic derecho para desplegarlas. Solo entrega lo que te falte.
 			'''
 	}
@@ -1830,6 +1862,7 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
 	// AethonMenorPet.DisplayName: Aethon Menor Pet
 	// MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	// PaginaFinalProjectile.DisplayName: Pagina Final Projectile
 }
 
 Buffs: {

@@ -201,6 +201,17 @@ namespace AethonMod.Content.Projectiles.Sombras
                 new Vector2(radio * 2.05f, radio * 2.05f), 0f, VFXCore.GlowOrb);
             VFXCore.FlushAlpha();
 
+            // === LA BRUMA DEL ANILLO (v6.50.64): la esfera EXHALA bruma
+            // negra por toda su circunferencia — un anillo de puﬀs vivos
+            // que deriva hacia fuera (la masa respira por los poros) ===
+            Vector2[] anillo = new Vector2[14];
+            for (int i = 0; i < 14; i++)
+            {
+                float aI = i / 13f * MathHelper.TwoPi;
+                anillo[i] = Projectile.Center + new Vector2(MathF.Cos(aI), MathF.Sin(aI) * 0.88f) * radio;
+            }
+            SombrasLib.BrumaColumna(anillo, radio * 0.5f, 0.4f * apertura, tiempo, semilla, 12);
+
             // === EL VELO OSCURO que crece DENTRO (el jefe se apaga) ===
             if (fase == FASE_DEVORAR)
             {
@@ -243,6 +254,12 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.Fauces(Projectile.Center + rumbo * radio * 0.15f, rumbo, boca,
                 radio * 0.85f, semilla);
 
+            // === EL ALIENTO DE LA BOCA (v6.50.64): la boca ecuatorial
+            // respira bruma negra cuando está abierta — gateado por la
+            // apertura del ciclo de mordida ===
+            SombrasLib.BrumaBoca(Projectile.Center + rumbo * radio * 0.15f, rumbo, boca,
+                0.5f * apertura, tiempo, semilla + 5, 5);
+
             // === ALMAS: la vida vuela al portador durante el devorar ===
             if (fase == FASE_DEVORAR && presa != null && presa.active)
             {
@@ -268,9 +285,19 @@ namespace AethonMod.Content.Projectiles.Sombras
             return 0.3f + 0.15f * MathF.Sin(m * 0.8f);                       // mastica
         }
 
-        /// <summary>EL TAJO en vuelo: la media luna del usuario + su velo.</summary>
+        /// <summary>EL TAJO en vuelo: la media luna del usuario + su velo + SU BRUMA.</summary>
         private void DrawTajoVuelo(float tiempo)
         {
+            int semilla = Projectile.whoAmI * 29 + 3;
+
+            // === LA BRUMA DEL RASTRO (v6.50.64 — «a todo el tentáculo y
+            // boca ponle bruma negra»): el tajo corta y el corte HUMEA —
+            // puﬀs vivos a lo largo del rastro de los últimos metros ===
+            Vector2[] rastro = new Vector2[8];
+            for (int i = 0; i < 8; i++)
+                rastro[i] = Projectile.Center - Projectile.velocity * (3.4f * (1f - i / 7f));
+            SombrasLib.BrumaColumna(rastro, 92f, 0.42f, tiempo, semilla, 8);
+
             // el velo rojo del filo (la energía del corte)
             VFXCore.Begin();
             VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Rojo, 0.30f),
@@ -292,7 +319,6 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             // ojos sueltos que asoman del rastro del tajo
             VFXCore.Begin();
-            int semilla = Projectile.whoAmI * 29 + 3;
             for (int k = 0; k < 4; k++)
             {
                 float f = SombrasLib.Frac(SombrasLib.semille(semilla) * 0.51f + k * 0.31f);

@@ -11,27 +11,36 @@ namespace AethonMod.Content.Projectiles.Sombras
 {
     /// <summary>
     /// FAUCESTENTACULOPROJECTILE — v6.50.62 — ARMA 1: EL TENTÁCULO.
+    /// v6.50.64 — LA PINZA DOBLE: el gif del usuario va DOS veces en la
+    /// punta — una cabeza en cada esquina, desplegadas en V, y MUERDEN
+    /// como DIENTES (la petición: «has que el gif esté doble en la punta,
+    /// uno en cada esquina, así se comporta como dientes»). Y LA BRUMA
+    /// NEGRA en todo el cuerpo y en las dos bocas (la misma petición).
     ///
     /// La letra del usuario: «este tentáculo o fauces nacen del jugador
     /// y lanzan un latigazo en dirección al jefe, NO IMPORTA LO LEJOS QUE
     /// ESTÉ, el latigazo llegará al jefe y se lo comerá… el tentáculo se
     /// puede estirar y SIEMPRE llega al jefe».
     ///
-    /// · FASE 0 — EMERGER (24 t): el tentáculo se alza de la sombra del
-    ///   portador (frames 0-5 del gif del usuario), apuntando a su presa.
-    /// · FASE 1 — CAZA: la CABEZA-BOCA viaja al jefe a velocidad que
-    ///   ESCALA CON LA DISTANCIA (22-56 px/t) — no hay rango: el jefe
-    ///   está en este mundo, el látigo llega. El CUERPO es la columna
-    ///   Bézier viva (SombrasLib) del jugador a la cabeza, con ojos que
-    ///   se abren de golpe y MIRAN al jefe.
-    /// · FASE 2 — MORDISCO: enganchada la boca al jefe, DRENA su vida
-    ///   (2.5% cada 6 t — la barra baja A MORDIDAS). Al tocar 1 HP:
+    /// · FASE 0 — EMERGER (24 t): la pinza brota PLEGADA de la sombra del
+    ///   portador (frames 0-5 del gif, ×2), apuntando a su presa.
+    /// · FASE 1 — CAZA: las DOS CABEZAS-BOCA viajan al jefe abiertas en
+    ///   pinza, a velocidad que ESCALA CON LA DISTANCIA (22-56 px/t) — no
+    ///   hay rango: el jefe está en este mundo, el látigo llega. El CUERPO
+    ///   es la columna Bézier viva (SombrasLib) del jugador a la
+    ///   horquilla, con ojos que se abren de golpe y MIRAN al jefe, y
+    ///   TODO el cuerpo EXHALA BRUMA NEGRA (BrumaColumna).
+    /// · FASE 2 — MORDISCO: las dos cabezas CIERRAN la pinza sobre el
+    ///   jefe desde esquinas opuestas y DRENAN su vida (2.5% cada 6 t —
+    ///   la barra baja A MORDIDAS). Al tocar 1 HP:
     ///   FaucesGlobalNPC.Iniciar(estilo 1) → EL FESTÍN (la muerte
     ///   devoradora del motor: el jefe queda POSADO mientras lo comen).
-    /// · FASE 3 — DISIPACIÓN (42 t): frames 12-16, la masa se deshace.
+    /// · FASE 3 — DISIPACIÓN (42 t): frames 12-16, la pinza se pliega y
+    ///   la masa se deshace en bruma.
     ///
     /// EL SPRITE: el spritesheet 6×3 del usuario (FaucesTentaculo.png,
-    /// 17 frames de 462×482, cortados con rectángulo a mano).
+    /// 17 frames de 462×482, cortados con rectángulo a mano) — dibujado
+    /// DOS veces, una por esquina de la pinza.
     /// </summary>
     public class FaucesTentaculoProjectile : ModProjectile
     {
@@ -217,10 +226,14 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.Charco(dueño.MountedCenter + new Vector2(0, dueño.height * 0.4f),
                 40f, 0.75f, tiempo, semilla);
 
-            // === LA COLUMNA (del jugador a la cabeza) + LA MASA ===
+            // === LA COLUMNA (del jugador a la HORQUILLA de la pinza) + LA MASA ===
             Vector2[] col = SombrasLib.Columna(dueño.MountedCenter, Projectile.Center, tiempo, semilla, 18, 0.22f);
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 42f, 0f, 1f) : 1f;
             SombrasLib.Masa(col, 46f, 16f, 0.95f * disipa, semilla, tiempo);
+
+            // === LA BRUMA NEGRA DEL CUERPO (v6.50.64 — «a todo el tentáculo
+            // ponle bruma negra»): la masa EXHALA puﬀs vivos todo el rato ===
+            SombrasLib.BrumaColumna(col, 44f, 0.45f * disipa, tiempo, semilla, 10);
 
             // === LOS OJOS de la masa (miran TODOS a la presa) ===
             Vector2 objetivo = presa != null && presa.active
@@ -229,37 +242,86 @@ namespace AethonMod.Content.Projectiles.Sombras
             float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 24f) : 1f;
             SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 5);
 
-            // === LA CABEZA-BOCA: el frame 6×3 del usuario ===
+            // ==============================================================
+            //  LA PINZA DOBLE (v6.50.64): el gif del usuario, DOS veces en
+            //  la punta — una cabeza en cada esquina, mordiendo como
+            //  DIENTES. La columna termina en la HORQUILLA; de ahí salen
+            //  las dos cabezas abiertas en V (caza) o cerradas sobre el
+            //  jefe desde esquinas opuestas (mordisco).
+            // ==============================================================
             Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
             int frame = FrameDeFase(fase, t);
             Rectangle src = new Rectangle((frame % 6) * (tex.Width / 6),
                 (frame / 6) * (tex.Height / 3), tex.Width / 6, tex.Height / 3);
 
-            float escala = 0.62f;
-            if (fase == FASE_MORDISCO) escala *= 1f + 0.07f * MathF.Sin(tiempo * 9f);   // la boca APRIETA
+            float escala = 0.56f;
+            if (fase == FASE_MORDISCO) escala *= 1f + 0.07f * MathF.Sin(tiempo * 9f);   // la pinza APRIETA
             if (fase == FASE_DISIPAR) escala *= 0.8f + 0.2f * disipa;
 
             // EL ORIGEN: la base del tentáculo (abajo del frame — donde
             // aterriza la columna); el arte golpea hacia +X
             Vector2 origen = new Vector2(src.Width * 0.42f, src.Height * 0.94f);
             float rot = Projectile.rotation;
+            Vector2 eje = new Vector2(MathF.Cos(rot), MathF.Sin(rot));
+            Vector2 perp = new Vector2(-eje.Y, eje.X);
+
+            // LA APERTURA de la pinza según la fase (cómo se despliegan los dientes)
+            float abre = fase switch
+            {
+                FASE_EMERGER => 0.12f + 0.16f * (t / 24f),                                // brota plegada
+                FASE_CAZA => 0.34f + 0.08f * MathF.Sin(tiempo * 6f),                     // abierta, viva
+                FASE_MORDISCO => 0.09f + 0.06f * (0.5f + 0.5f * MathF.Sin(tiempo * 9f)), // MASTICA apretando
+                _ => 0.05f * disipa,
+            };
+
+            // cada cabeza muerde desde SU esquina: las bases en la
+            // horquilla, separadas a lo ancho del jefe cuando está enganchada
+            float agarre = fase == FASE_MORDISCO && presa != null
+                ? MathHelper.Clamp(presa.width * 0.16f, 8f, 24f) : 0f;
+            Vector2 baseA = Projectile.Center + perp * agarre;
+            Vector2 baseB = Projectile.Center - perp * agarre;
+
             Color luz = Lighting.GetColor(Projectile.Center.ToTileCoordinates());
             Color tint = new Color(luz.R, luz.G, luz.B, 255) * disipa;
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
                 null, Main.Transform);
-            Main.EntitySpriteDraw(tex, Projectile.Center - Main.screenPosition, src,
-                tint, rot, origen, escala, SpriteEffects.None, 0f);
+            Main.EntitySpriteDraw(tex, baseA - Main.screenPosition, src,
+                tint, rot + abre, origen, escala, SpriteEffects.None, 0f);
+            Main.EntitySpriteDraw(tex, baseB - Main.screenPosition, src,
+                tint, rot - abre, origen, escala, SpriteEffects.None, 0f);
             Main.spriteBatch.End();
 
-            // === EL VELO ROJO de la boca (la luz que mata la sombra) ===
+            // === LA SOLDADURA de la horquilla (la carne donde la columna
+            // se parte en dos cabezas — tapa la costura) ===
+            VFXCore.Begin();
+            VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Negro, 0.95f * disipa),
+                new Vector2(64f, 64f), 0f, VFXCore.GlowOrb);
+            VFXCore.FlushAlpha();
+
+            // === EL ALIENTO de las dos bocas (bruma negra de las fauces) ===
+            float aliento = fase switch
+            {
+                FASE_EMERGER => 0.5f,
+                FASE_CAZA => 0.95f,
+                FASE_MORDISCO => 0.6f,
+                _ => 0.4f,
+            } * disipa;
+            Vector2 dirA = new Vector2(MathF.Cos(rot + abre), MathF.Sin(rot + abre));
+            Vector2 dirB = new Vector2(MathF.Cos(rot - abre), MathF.Sin(rot - abre));
+            SombrasLib.BrumaBoca(baseA + dirA * (src.Width * 0.46f * escala), dirA,
+                aliento, 0.5f * disipa, tiempo, semilla + 3, 4);
+            SombrasLib.BrumaBoca(baseB + dirB * (src.Width * 0.46f * escala), dirB,
+                aliento, 0.5f * disipa, tiempo, semilla + 9, 4);
+
+            // === EL VELO ROJO entre los dos dientes (la luz que mata la sombra) ===
             if (fase == FASE_CAZA || fase == FASE_MORDISCO)
             {
                 VFXCore.Begin();
                 float a = (fase == FASE_CAZA ? 0.42f : 0.62f) * disipa;
-                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Rojo, a),
-                    new Vector2(160f, 160f), rot);
+                VFXCore.Quad(Projectile.Center + eje * (src.Width * 0.18f * escala),
+                    SombrasLib.Alfa(SombrasLib.Rojo, a), new Vector2(160f, 160f), rot);
                 VFXCore.FlushAdditive();
             }
         }

@@ -1,9 +1,9 @@
-# AethonMod — ESTADO ACTUAL (v6.50.63)
+# AethonMod — ESTADO ACTUAL (v6.50.64)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.63 (LA BOLSA DE LAS SOMBRAS — publicada con
-> release 403588914, md5 6c443618…, CDN verificado byte a byte). La .62 fue
-> release 403485786, md5 aff34d9e…, también CDN verificado byte a byte.
+> Última actualización: v6.50.64 (LA PINZA DOBLE + LA BRUMA NEGRA + EL ARMA 4:
+> LA PÁGINA FINAL). La .63 fue LA BOLSA DE LAS SOMBRAS (release 403588914, md5
+> 6c443618…, CDN verificado byte a byte).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
@@ -1144,7 +1144,23 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.63 en juego** — LA ENTREGA + LOS TESTS CRÍTICOS de la .62 (LAS FAUCES):
+1. **El usuario prueba v6.50.64 en juego** — LA PINZA + LA BRUMA + EL ARMA 4:
+   (a) LA PINZA DOBLE: disparar LA FAUCE DEL GRIMORIO — el gif del usuario va
+   DOS veces en la punta, una cabeza por esquina, abiertas en V durante la
+   caza y CERRANDO sobre el jefe como DIENTES en el mordisco (y en el festín
+   del estilo 1 el sprite gigante también muerde de ambos lados);
+   (b) LA BRUMA NEGRA: las 3 armas exhalan puﬀs negros vivos — el tentáculo
+   entero, el rastro del tajo en vuelo, el anillo de la esfera y TODAS las
+   bocas respiran; (c) EL ARMA 4 (LA PÁGINA FINAL, en la Bolsa de las
+   Sombras — ahora son CUATRO): al usarla LA SALA SE APAGA (bordes), el
+   LIBRO despliega su ojo sobre tu cabeza, TRES zarpos convergen en el jefe
+   desde ángulos distintos, la JAULA DE PÚAS se cierra a mordidas (el dren
+   más fuerte: 4%/7t) con ojos que te miran y almas que vuelan a ti;
+   (d) EL FESTÍN DE LA PÁGINA: al 1 HP el LIBRO GIGANTE se abre en el cielo,
+   sus zarpos agarran al jefe, la oscuridad SUBE comiéndoselo con una boca
+   de colmillos en el borde, las almas suben al libro… y al final se sella
+   con una ONDA DE CHOQUE y te paga (el loot cae dentro de la bruma).
+2. **El usuario prueba v6.50.63 en juego** — LA ENTREGA + LOS TESTS CRÍTICOS de la .62 (LAS FAUCES):
    (a) LA BOLSA DE LAS SOMBRAS LLEGA SOLA al entrar al mundo (bolsa 19,
    junto a las otras 18) — clic derecho y despliega las 3 fauces: La Fauce
    del Grimorio, El Tajo de las Sombras, La Sombra de la Página (la receta
@@ -1198,6 +1214,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.64** | ✅ Build-verificada (0/0 oráculo, build real ×2, .tmod auditado 394 entradas EOF exacto, hjson empaquetado idéntico a la fuente, DLL con PaginaFinal + PaginaFinalProjectile, headless 0 excepciones), ⏳ publicación | LA PINZA DOBLE + LA BRUMA NEGRA + EL ARMA 4 — la letra del usuario: (1) **LA PINZA** (arma 1: el gif DOBLE en la punta, una cabeza por esquina = dientes; también en el festín estilo 1 ×2 gigante) (2) **LA BRUMA NEGRA** en las 3 armas + los festines (SombrasLib: BrumaColumna — puﬀs vivos que nacen de la masa, derivan y mueren, vale para tentáculo/rastro/anillo; BrumaBoca — el aliento gateado por la apertura; Vignette — el velo de cine) (3) **ARMA 4: LA PÁGINA FINAL** (la evolución AAA de La Sombra de la Página, 100% código; investigación web: anticipación/staging/juice/follow-through — Calamity, Stars Above «exóticas de Destiny 2», los 12 principios): APERTURA (libro + ojo + vignette) → TRES VERSOS convergentes → JAULA DE TINTA (12 púas de punta blanca, snap cada 28t, dren 4%/7t, ojos que miran, almas) → FESTÍN ESTILO 4 (libro gigante en el cielo, 4 zarpos, el plano negro que SUBE comiendo con boca de colmillos, almas al libro, cierre con OndaChoque y pago al portador) + BolsaSombras ahora con las CUATRO + tooltips v2 es/en + icono VLM SHIP |
 | **v6.50.63** | ✅ Build-verificada (0/0 oráculo + build real ×3, .tmod auditado 393 entradas EOF exacto, hjson empaquetado idéntico a la fuente, headless 0 excepciones), ✔ publicada (release 403588914, CDN byte a byte), ⏳ en juego | LA BOLSA DE LAS SOMBRAS — el kit olvidó a las 3 fauces de la .62 (feedback: "te olvidaste darle las armas al jugador", 2ª vez — precedente v6.14.2): las armas nacieron SOLO con receta de 5 madera. LA CURA: **BolsaSombras** (bolsa 19 — las 3 armas, clic derecho, solo lo que falte, permanente/reabrible) registrada en TestingPlayer.OnEnterWorld como las 18 anteriores + icono 30×30 (masa negro-violeta, ojo blanco con pupila roja Tsurime, garganta con colmillos y brillo rojo — VLM SHIP) + hjson es+en; la receta de madera queda como vía alternativa. LECCIÓN anti-recurrencia re-activada: cada arma nueva se registra en DOS sitios (su archivo Y el kit) |
 | **v6.50.62** | ✅ Build-verificada (0/0, .tmod auditado 392 entradas EOF/dataLength exactos, DLL con las 9 clases nuevas vía Cecil, headless 0 excepciones), ✔ publicada (release 403485786, CDN byte a byte), ⏳ en juego | LAS FAUCES DEL GRIMORIO — la letra del usuario (armas de sombras estilo Pride de FMA:B que devoran jefes): (1) **LA DEVORACIÓN** (FaucesGlobalNPC: CheckDead 1ª pasada → life=1+dontTakeDamage+return false — la muerte vanilla NUNCA arranca; PreAI false = jefe POSADO sin IA ni animación; motor 210 t: FauceDevoradorProjectile con erupción→envolver→festín (mordidas+oscuridad+almas)→bruma y polvo; final: life=0 + 2ª checkDead = muerte REAL con loot íntegro; AethonBoss excluido — su CheckDead propio corre antes; worms via DueñoDelPool; MP: BitWriter en SendExtraAI, 1 bit por paquete) (2) **ARMA 1 LA FAUCE DEL GRIMORIO** (el gif del usuario como spritesheet 6×3 re-troceado limpio: emergencia f0-5 → caza a CUALQUIER distancia (22-56 px/t escalado) → mordisco que drena 2.5%/6t → 1 HP = festín) (3) **ARMA 2 EL TAJO DE LAS SOMBRAS** (tajo.png del usuario vuela → ESFERA negra con 11-14 ojos que TE MIRAN + boca ecuatorial de colmillos, 3 mordidas de 12% → bruma y polvo) (4) **ARMA 3 LA SOMBRA DE LA PÁGINA** (100% código: masa/olas/fauces/garganta por quads, nace de la sombra del SUELO) (5) **SOMBRASLIB** (Columna Bézier viva, Masa con picos de sierra, Ojo con pupila roja, OjosDeMasa de reparto áureo, Fauces procedurales, DeGolpe k=4, Bruma alfa) |
 | **v6.50.61** | ✅ Build-verificada (0/0, .tmod auditado 387 entradas EOF exacto, 13 muertos AUSENTES, DLL con NacerChusmaVigia y SIN PedirResonancia, headless 0 excepciones), ✔ publicada (release 403243039, CDN byte a byte), ⏳ en juego | LA PURGA DE NPC + EL VIGÍA + EL LORE NUEVO — feedback de la .60 (TRES frentes): (1) **EL VIGÍA DEL FESTÍN** (la oleada vacía en el spawn original: Player.townNPCs>=1 BLOQUEA el motor natural sin condición — decompile IL verificado; NacerChusmaVigia sirve la comida del pool en cunas PosicionLimpia cuando el festín ayuna <3 vivos tras 150 t, cada 15 t) (2) **LA PURGA** (borrados HollowTitan/RiftKeeper/EchoArcher/EchoBlade/TheWitness + 4 llamados + 4 esencias + PresenciaNPCSystem + tienda + MsgPedirResonancia + ~90 líneas de localización por idioma; SOLO Aethon — el CazadorAstral es su ataque Manada; .plr y contadores de esencias respetados) (3) **EL LORE** (Aethon ES el grimorio: pelea = LA PRUEBA, fase 5 «El Veredicto», esencia = la página arrancada, mod renombrado «Aethon, el Grimorio Eterno», ~15 textos es+en + description.txt) |

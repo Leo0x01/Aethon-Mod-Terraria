@@ -10,6 +10,8 @@ namespace AethonMod.Content.Projectiles.Sombras
 {
     /// <summary>
     /// SOMBrapaginaPROJECTILE — v6.50.62 — ARMA 3: LA SOMBRA DE LA PÁGINA.
+    /// v6.50.64 — LA BRUMA NEGRA: todo el cuerpo y la boca exhalan puﬀs
+    /// vivos (BrumaColumna + BrumaBoca) — la petición del usuario.
     ///
     /// «La misma arma, pero SOLO POR CÓDIGO»: cero sprites — ni uno.
     /// El tentáculo COMPLETO nace, caza, muerde y disipa dibujado con
@@ -209,6 +211,10 @@ namespace AethonMod.Content.Projectiles.Sombras
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
             SombrasLib.Masa(col, 40f, 12f, 0.95f * disipa, semilla, tiempo);
 
+            // === LA BRUMA NEGRA DEL CUERPO (v6.50.64): el tentáculo
+            // 100% código también EXHALA — puﬀs vivos a lo largo ===
+            SombrasLib.BrumaColumna(col, 38f, 0.45f * disipa, tiempo, semilla, 10);
+
             // === LOS OJOS (más ojos que el arma 1: la página es TODA ojos) ===
             Vector2 objetivo = presa != null && presa.active
                 ? presa.Center
@@ -226,6 +232,11 @@ namespace AethonMod.Content.Projectiles.Sombras
             };
             Vector2 rumbo = Projectile.rotation.ToRotationVector2();
             SombrasLib.Fauces(Projectile.Center, rumbo, apertura * disipa, 74f, semilla);
+
+            // === EL ALIENTO DE LA BOCA (v6.50.64): las fauces
+            // procedurales respiran bruma negra al abrirse ===
+            SombrasLib.BrumaBoca(Projectile.Center, rumbo, apertura * disipa,
+                0.5f * disipa, tiempo, semilla + 5, 5);
 
             // el brillo rojo de la garganta cuando muerde
             if (fase == FASE_MORDISCO)

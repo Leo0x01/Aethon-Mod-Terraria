@@ -300,6 +300,121 @@ namespace AethonMod.Content.VFX
             VFXCore.FlushAlpha();
         }
 
+        // ==================================================================
+        //  v6.50.64 — LA BRUMA NEGRA CONTINUA Y LA SALA DE CINE
+        //  («a todo el tentáculo y boca ponle bruma negra» + el diseño
+        //   AAA del arma 4: anticipación, staging, follow-through)
+        // ==================================================================
+
+        /// <summary>
+        /// LA BRUMA VIVA DEL CUERPO (v6.50.64): puﬀs que nacen PEGADOS a
+        /// la masa del tentáculo, derivan hacia fuera y hacia arriba,
+        /// crecen y se deshacen — la exhalación continua de la sombra.
+        /// Cada puﬀ ancla a un punto de la columna (reparto áureo), su
+        /// vida es CÍCLICA (nace→respira→muere, alpha en seno) y todo es
+        /// determinista por semilla: la bruma es parte del cuerpo, no
+        /// ruido. Funciona con CUALQUIER polilínea — un tentáculo, el
+        /// rastro de un tajo o el ANILLO de una esfera.
+        /// </summary>
+        /// <param name="col">La polilínea que respira (columna, rastro, anillo).</param>
+        /// <param name="grosor">Grosor de la masa que la exhala (escala los puﬀs).</param>
+        /// <param name="alfa">0..1 — cuánta bruma hay.</param>
+        public static void BrumaColumna(Vector2[] col, float grosor, float alfa, float tiempo, int semilla, int cantidad = 9)
+        {
+            if (alfa <= 0.02f || col == null || col.Length < 3) return;
+            int n = col.Length;
+            VFXCore.Begin();
+            for (int k = 0; k < cantidad; k++)
+            {
+                float f0 = Frac(semille(semilla) * 0.83f + k * 0.618034f);  // el ancla en la columna
+                float ritmo = 0.16f + 0.13f * Frac(f0 * 9.7f);              // cada puﬀ respira a su ritmo
+                float edad = Frac(tiempo * ritmo + f0 * 4.1f + k * 0.233f); // vida cíclica 0→1
+                int idx = (int)(f0 * (n - 1));
+                // la dirección local de la columna (para derivar DE LADO)
+                Vector2 seg = col[Math.Min(idx + 1, n - 1)] - col[Math.Max(idx - 1, 0)];
+                Vector2 perp = seg.LengthSquared() < 0.01f ? Vector2.UnitY
+                    : new Vector2(-seg.Y, seg.X) * (1f / MathF.Sqrt(seg.LengthSquared()));
+                float lado = Frac(f0 * 13.7f) > 0.5f ? 1f : -1f;
+                float deriva = edad * (26f + 34f * Frac(f0 * 5.9f));
+                Vector2 pos = col[idx]
+                    + perp * (lado * (grosor * 0.35f + deriva * 0.45f))
+                    + new Vector2(0f, -12f * edad - deriva * 0.22f);        // sube, como humo frío
+                float r = grosor * (0.5f + 0.75f * edad);
+                float a = alfa * MathF.Sin(edad * MathF.PI) * (0.5f + 0.28f * Frac(f0 * 7.3f));
+                if (a <= 0.02f) continue;
+                VFXCore.Quad(pos, Alfa(Negro, a), new Vector2(r * 1.45f, r * 0.9f),
+                    perp.ToRotation() + lado * 0.4f, VFXCore.SoftGlow);
+            }
+            VFXCore.FlushAlpha();
+        }
+
+        /// <summary>
+        /// EL ALIENTO DE LA BOCA (v6.50.64): la bruma que EXHALA una fauce
+        /// abierta — sale de la garganta hacia <paramref name="dir"/>, se
+        /// abre en abanico y muere. Gateada por <paramref name="apertura"/>:
+        /// la boca cerrada no respira (el aliento escala con el bostezo).
+        /// </summary>
+        public static void BrumaBoca(Vector2 garganta, Vector2 dir, float apertura, float alfa, float tiempo, int semilla, int puffs = 5)
+        {
+            if (alfa <= 0.02f || apertura <= 0.1f) return;
+            Vector2 d = dir.LengthSquared() < 0.01f ? Vector2.UnitX : Vector2.Normalize(dir);
+            Vector2 perp = new(-d.Y, d.X);
+            VFXCore.Begin();
+            for (int k = 0; k < puffs; k++)
+            {
+                float f0 = Frac(semille(semilla) * 0.47f + k * 0.618034f);
+                float edad = Frac(tiempo * (0.2f + 0.12f * f0) + f0 * 5.3f);
+                float alcance = (14f + 46f * f0) * (0.35f + 0.65f * apertura);
+                float lado = (Frac(f0 * 11.3f) > 0.5f ? 1f : -1f) * (0.3f + 0.7f * edad);
+                Vector2 pos = garganta + d * (alcance * (0.3f + 0.7f * edad))
+                            + perp * (lado * alcance * 0.35f)
+                            + new Vector2(0f, -8f * edad);
+                float r = (16f + 22f * f0) * (0.5f + 0.7f * edad) * (0.4f + 0.6f * apertura);
+                float a = alfa * apertura * MathF.Sin(edad * MathF.PI) * 0.75f;
+                if (a <= 0.02f) continue;
+                VFXCore.Quad(pos, Alfa(Negro, a), new Vector2(r * 1.4f, r * 0.95f),
+                    d.ToRotation() + lado * 0.5f, VFXCore.SoftGlow);
+            }
+            VFXCore.FlushAlpha();
+        }
+
+        /// <summary>
+        /// EL VELO DE LA SALA (v6.50.64 — diseño AAA, la anticipación de
+        /// cine): oscurece los CUATRO BORDES de la pantalla con velos
+        /// suaves anclados FUERA de cámara — el centro queda limpio, los
+        /// bordes se apagan y la mirada va sola al centro del cuadro.
+        /// La penumbra de Pride hecha sala de proyección.
+        /// </summary>
+        public static void Vignette(float alfa)
+        {
+            if (alfa <= 0.02f) return;
+            float w = Main.screenWidth, h = Main.screenHeight;
+            Vector2 o = Main.screenPosition;
+            Color c = Alfa(Negro, alfa);
+            VFXCore.Begin();
+            VFXCore.Quad(new Vector2(o.X - w * 0.30f, o.Y + h * 0.5f), c, new Vector2(w * 1.0f, h * 2.1f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 1.30f, o.Y + h * 0.5f), c, new Vector2(w * 1.0f, h * 2.1f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y - h * 0.32f), c, new Vector2(w * 2.1f, h * 1.0f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y + h * 1.32f), c, new Vector2(w * 2.1f, h * 1.0f), 0f, VFXCore.SoftGlow);
+            VFXCore.FlushAlpha();
+        }
+
+        /// <summary>
+        /// LA ONDA DE CHOQUE (v6.50.64 — el «juice» del impacto): anillo
+        /// doble que se expande y muere — el CRUJIDO del golpe hecho
+        /// imagen. En rojo visceral (la luz que mata la sombra) o en
+        /// blanco de hueso.
+        /// </summary>
+        public static void OndaChoque(Vector2 pos, float radio, float alfa, bool roja = true)
+        {
+            if (alfa <= 0.02f || radio < 4f) return;
+            VFXCore.Begin();
+            Color c = roja ? Rojo : Blanco;
+            VFXCore.Quad(pos, Alfa(c, alfa), VFXCore.RingQuadSize(radio), 0f, VFXCore.Ring);
+            VFXCore.Quad(pos, Alfa(c, alfa * 0.45f), VFXCore.RingQuadSize(radio * 0.74f), 0f, VFXCore.Ring);
+            VFXCore.FlushAdditive();
+        }
+
         /// <summary>Un alma (partícula blanca pequeña, aditivo): lo que vuela de la presa al portador.</summary>
         public static void Alma(Vector2 pos, float tamaño, float alfa)
         {

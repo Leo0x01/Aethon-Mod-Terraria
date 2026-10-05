@@ -1,5 +1,78 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.64 — LA PINZA DOBLE + LA BRUMA NEGRA + EL ARMA 4: LA PÁGINA FINAL (la evolución AAA de La Sombra de la Página)
+
+**Feedback del usuario**: "en el arma, las fauces del grimorio, has que el gif
+esté doble en la punta, uno en cada esquina, así se comporta como dientes;
+además a todo el tentáculo y boca en las 3 armas ponle bruma negra; luego crea
+una cuarta arma como La Sombra de la Página, pero mejorada mucho mucho mucho,
+investiga en internet cómo mejorarla hasta ser un mod AAA en el diseño".
+
+**La investigación** (web): el diseño de armas AAA de mods — Calamity, Fargo's,
+Stars Above («como armas exóticas de Destiny 2»: cada arma con SU mecánica
+única) y los 12 principios de la animación de Disney aplicados al VFX de
+combate: **anticipación** (el golpe se anuncia), **staging** (la imagen se lee
+desde cualquier esquina), **follow-through/secondary action** (todo sigue vivo
+después del golpe) y el «juice» del impacto (hitstop/flash/onda). La cuarta
+arma traduce TODO eso al lenguaje de Pride.
+
+**Las tres mejoras**:
+
+- **LA PINZA DOBLE (arma 1, La Fauce del Grimorio)**: el gif del usuario va
+  DOS veces en la punta — una cabeza-BOCA en cada esquina, desplegadas en V
+  durante la caza y CERRANDO sobre el jefe desde esquinas opuestas en el
+  mordisco (bases separadas a lo ancho del jefe, apriete oscilante con el
+  ciclo de masticado). La columna del tentáculo termina en la HORQUILLA; una
+  soldadura de masa negra tapa la costura. El festín del estilo 1 también:
+  el sprite GIGANTE ×2 mordiendo al jefe de ambos lados.
+- **LA BRUMA NEGRA (las 3 armas + los 4 festines)**: tres pinceles nuevos en
+  SombrasLib — **BrumaColumna** (puﬀs vivos que nacen pegados a la masa,
+  derivan hacia fuera y hacia arriba, crecen y mueren; funciona con
+  cualquier polilínea: tentáculo, rastro del tajo, anillo de la esfera),
+  **BrumaBoca** (el aliento de las fauces abiertas, gateado por la apertura
+  de la boca) y **Vignette** (el velo de cine). Aplicados a: la columna y
+  las DOS bocas del arma 1, el rastro del tajo en vuelo + el anillo de la
+  esfera + la boca ecuatorial del arma 2, la columna y las fauces del arma
+  3, y todos los estilos del festín (tentáculo gigante, esfera, página).
+- **EL ARMA 4 — LA PÁGINA FINAL** (`PaginaFinal.cs` + `PaginaFinalProjectile.cs`,
+  100% código como su madre el arma 3 — ni un sprite): el ritual en cuatro
+  actos. **LA APERTURA** (anticipación): la sala se apaga (vignette creciente
+  en los 4 bordes), el libro despliega sus dos hojas sobre el portador con el
+  lomo rojo y su OJO se abre DE GOLPE mirando a la presa; tres tallitos de
+  sombra se alzan del charco. **LOS TRES VERSOS** (staging): tres zarpos
+  parten de la sombra del portador por ÁNGULOS DISTINTOS (izquierda, derecha
+  y un salto por arriba — Bézier con controles propios) y CONVERGEN en el
+  jefe, cada uno con masa, ojos, bruma y (el central) fauces procedurales.
+  **EL JUICE**: onda de choque + destello rojo + crujido en el impacto.
+  **LA JAULA DE TINTA** (la mecánica única): anillo de 12 púas negras de
+  punta blanca que gira lento y se CIERRA de golpe cada 28 t al ritmo de las
+  mordidas — el dren más fuerte de las cuatro fauces (4% cada 7 t) — con
+  ojos entre las púas que miran al portador y almas volando a casa.
+  **EL FESTÍN — estilo 4** (nuevo en FauceDevoradorProjectile): a 1 HP el
+  libro GIGANTE se abre en el cielo sobre el jefe (dos hojas + lomo rojo +
+  ojo colosal), cuatro ZARPOS bajan y lo agarran, el PLANO NEGRO SUBE por el
+  cuerpo comiéndoselo de abajo arriba con una boca horizontal de colmillos
+  masticando en el borde, ojos sobre lo ya tragado, las almas SUBEN AL LIBRO
+  (él digiere)… y al final el libro se PLEGRA con una onda de choque, estalla
+  en bruma y PAGA al portador (la tinta digerida vuela a su dueño).
+
+**El registro** (la lección v6.14.2/.63 — cada arma en DOS sitios):
+BolsaSombras entrega ahora las CUATRO fauces (icono de bolsa actualizado en
+tooltips es/en), receta de 5 madera como vía alternativa, tooltips de las
+tres armas viejas reescritos (pinza + bruma) + el arma 4 completa, icono
+30×30 del libro (`tools/gen_pagina_final_v65064.py`, verificación VLM:
+FIX→FIX→**SHIP**) y `OndaChoque` (anillo doble del impacto) entra a
+SombrasLib.
+
+**Verificación**: oráculo 0 errores 0 warnings · -build REAL 0/0 ×2 (diff
+hjson --ignore-all-space = exactamente las ediciones, la normalización de la
+.55) · .tmod v6.50.64 (7.864.114 B, md5 2f826c76…): 394 ENTRADAS (393 +
+PaginaFinal.rawimg), 394/394 blobs OK, EOF EXACTO, hjson empaquetado
+IDÉNTICO a la fuente es+en, DLL con PaginaFinal + PaginaFinalProjectile ·
+headless: Sandboxing → Finalizing → Server started, 0 EXCEPCIONES.
+
+---
+
 ## Commit v6.50.63 — LA BOLSA DE LAS SOMBRAS: las 3 fauces de la .62 LLEGAN AL JUGADOR (el kit de pruebas las olvidó — nacieron solo con receta y nadie las recibió)
 
 **Feedback del usuario**: "te olvidaste darle las armas al jugador".

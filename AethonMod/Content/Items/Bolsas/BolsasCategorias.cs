@@ -524,32 +524,40 @@ namespace AethonMod.Content.Items.Bolsas
         }
     }
 
-    /// <summary>19 — LAS FAUCES DEL GRIMORIO (v6.50.63): LAS TRES ARMAS DE
-    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B) de la
-    /// v6.50.62 — que nacieron SOLO CON RECETA y el jugador NUNCA las
-    /// recibió (feedback: "te olvidaste darle las armas al jugador"; la
-    /// lección anti-recurrencia de la v6.14.2, OTRA VEZ: cada arma nueva
-    /// debe registrarse en el kit de entrega). El tentáculo que SIEMPRE
-    /// llega (La Fauce del Grimorio), el tajo que encierra al jefe en la
-    /// esfera de ojos que devora y desintegra (El Tajo de las Sombras) y
-    /// la fauce 100% escrita por código (La Sombra de la Página). Las
-    /// tres disparan LA DEVORACIÓN: jefe a 1 de vida → su muerte se
-    /// DETIENE → la sombra se lo come. La receta de 5 madera sigue como
-    /// vía alternativa (protocolo v6.14.2).</summary>
+    /// <summary>19 — LAS FAUCES DEL GRIMORIO (v6.50.63): LAS CUATRO ARMAS DE
+    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B) — las
+    /// tres de la v6.50.62 (que nacieron SOLO CON RECETA y el jugador
+    /// NUNCA las recibió: feedback "te olvidaste darle las armas al
+    /// jugador"; la lección anti-recurrencia de la v6.14.2, OTRA VEZ:
+    /// cada arma nueva debe registrarse en el kit de entrega) + LA
+    /// PÁGINA FINAL de la v6.50.64 (el arma 4 — la evolución AAA del
+    /// arma 3: apertura de libro → tres versos convergentes → jaula de
+    /// tinta → el festín del libro gigante). El tentáculo-pinza que
+    /// SIEMPRE llega (La Fauce del Grimorio — v6.50.64: el gif DOBLE en
+    /// la punta, una cabeza por esquina, mordiendo como dientes), el
+    /// tajo que encierra al jefe en la esfera de ojos que devora y
+    /// desintegra (El Tajo de las Sombras), la fauce 100% escrita por
+    /// código (La Sombra de la Página) y su evolución (La Página Final).
+    /// Las cuatro disparan LA DEVORACIÓN: jefe a 1 de vida → su muerte
+    /// se DETIENE → la sombra se lo come. TODAS exhalan BRUMA NEGRA
+    /// (v6.50.64). Las recetas de 5 madera siguen como vía alternativa
+    /// (protocolo v6.14.2).</summary>
     public class BolsaSombras : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Sombras";
         protected override string NombreCorto => "Bolsa de las Sombras";
         protected override Color ColorFiesta => new(196, 90, 255);
-        protected override string Nota => "Las fauces que devoran jefes — donde hay sombra, la página mira";
+        protected override string Nota => "Las cuatro fauces que devoran jefes — donde hay sombra, la página mira";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
             // v6.50.62 — LAS FAUCES (la prueba del usuario, ahora en el kit)
-            l.Add((ModContent.ItemType<Weapons.Sombras.FauceDelGrimorio>(), 1));   // EL TENTÁCULO: el latigazo que SIEMPRE llega
+            l.Add((ModContent.ItemType<Weapons.Sombras.FauceDelGrimorio>(), 1));   // EL TENTÁCULO-PINZA: el latigazo que SIEMPRE llega
             l.Add((ModContent.ItemType<Weapons.Sombras.TajoDeLasSombras>(), 1));   // LA ESFERA: ojos que miran, boca de colmillos
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // EL CÓDIGO VIVO: 100% procedural
+            // v6.50.64 — EL ARMA 4: LA PÁGINA FINAL (la evolución AAA del arma 3)
+            l.Add((ModContent.ItemType<Weapons.Sombras.PaginaFinal>(), 1));      // EL LIBRO: apertura → 3 versos → jaula de tinta → festín
             return l;
         }
     }

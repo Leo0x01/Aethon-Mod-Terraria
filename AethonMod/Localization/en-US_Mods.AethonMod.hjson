@@ -75,18 +75,24 @@ Items: {
 
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
+	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
+	// ("the gif doubled at the tip, one per corner, so it behaves like
+	// teeth" + "black mist on every tentacle and mouth").
 	
 	FauceDelGrimorio: {
 		DisplayName: The Grimoire's Maw
 		Tooltip:
 			'''
 			"Where there is shadow, the page is watching."
-			THE TENTACLE: a many-eyed maw is born from your shadow and
-			whips toward the boss — NO MATTER HOW FAR, the lash ALWAYS
-			reaches. The mouth bites and hunger drains its life away.
-			When the boss drops to 1 HP, its death STOPS: the maw
+			THE PINCER: the tentacle is born from your shadow with TWO
+			MAW-HEADS at its tip — one on each corner, spread like
+			TEETH. Together they lash toward the boss — NO MATTER HOW
+			FAR, the whip ALWAYS reaches. Both mouths CLOSE the pincer
+			on the boss and hunger drains its life bite by bite, while
+			the whole body and both mouths exhale BLACK MIST.
+			When the boss drops to 1 HP, its death STOPS: the pincer
 			devours it whole — the death animation is OURS.
-			(Maw test weapon — v1.)
+			(Maw test weapon — v2.)
 			'''
 	}
 
@@ -95,13 +101,14 @@ Items: {
 		Tooltip:
 			'''
 			"The edge cuts; the shadow keeps the piece."
-			THE SLASH: a crescent of shadows flies to the boss and
-			seals it inside a black SPHERE covered in eyes — all of
-			them staring at YOU while they feed. The equatorial
-			fanged mouth bites three times and drains it.
+			THE SLASH: a crescent of shadows flies to the boss trailing
+			BLACK MIST and seals it inside a black SPHERE covered in
+			eyes — all of them staring at YOU while they feed. The
+			equatorial fanged mouth bites three times, breathes mist
+			and drains it.
 			At 1 HP: the sphere devours it and it disintegrates
 			into mist and dust.
-			(Maw test weapon — v1.)
+			(Maw test weapon — v2.)
 			'''
 	}
 
@@ -114,7 +121,31 @@ Items: {
 			single sprite: the mass, the eyes that snap open, the
 			fangs and the throat, ALL drawn by the engine.
 			It rises from the SHADOW AT YOUR FEET, hunts at any
-			distance, bites and drains. At 1 HP: the feast.
+			distance, bites and drains — and the whole body and
+			mouth exhale BLACK MIST. At 1 HP: the feast.
+			(Maw test weapon — v2.)
+			'''
+	}
+
+	// v6.50.64 — WEAPON 4: THE FINAL PAGE (the AAA evolution of the
+	// Shadow of the Page). 100% code.
+	
+	PaginaFinal: {
+		DisplayName: The Final Page
+		Tooltip:
+			'''
+			"The grimoire's last page: the one that writes itself
+			with every devoured boss."
+			THE RITUAL IN FOUR ACTS (the evolution of the Shadow of
+			the Page — 100% code, not a single sprite):
+			THE OPENING — the book unfolds its eye above you and the
+			room goes dark; THE THREE VERSES — three tendrils leave
+			your shadow from different angles and CONVERGE on the
+			boss; THE INK CAGE — the ring of white-tipped spikes
+			snaps shut bite after bite (the strongest drain of the
+			four maws); THE FEAST — at 1 HP the GIANT book opens
+			in the sky, its tendrils seize the boss, darkness RISES
+			eating it… and the book seals with a shockwave.
 			(Maw test weapon — v1.)
 			'''
 	}
@@ -739,13 +770,16 @@ Items: {
 
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
+		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
 		DisplayName: Bag of Shadows
 		Tooltip:
 			'''
-			The grimoire's three devouring shadow maws (Pride style).
-			The tentacle that ALWAYS arrives (The Grimoire's Maw), the eyed
-			sphere that devours (The Shadow Slash) and the 100% code-drawn
-			maw (The Page's Shadow). At 1 HP: the feast begins.
+			The grimoire's four devouring shadow maws (Pride style).
+			The twin-headed pincer that ALWAYS arrives (The Grimoire's Maw),
+			the eyed sphere that devours (The Shadow Slash), the 100%
+			code-drawn maw (The Page's Shadow) and its evolution: the
+			book ritual (The Final Page). All of them breathe black mist.
+			At 1 HP: the feast begins.
 			Right-click to deploy them. Only delivers what you're missing.
 			'''
 	}
@@ -1830,6 +1864,7 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	PaginaFinalProjectile.DisplayName: Pagina Final Projectile
 }
 
 Buffs: {

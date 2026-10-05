@@ -78,7 +78,7 @@ namespace AethonMod.Content.Players
             bolsas += Entregar(ModContent.ItemType<BolsaApuestas>());        // v6.42: LAS 5 APUESTAS + EL VERBO
             bolsas += Entregar(ModContent.ItemType<BolsaIdeasGrimorio>());   // v6.50.19: LAS 6 IDEAS DEL GRIMORIO
             bolsas += Entregar(ModContent.ItemType<BolsaArmasRayo>());      // v6.50.18+24: LAS ARMAS DE RAYO
-            bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63: LAS FAUCES DEL GRIMORIO (las sombras de la .62 — el kit las olvidó)
+            bolsas += Entregar(ModContent.ItemType<BolsaSombras>());         // v6.50.63+: LAS FAUCES DEL GRIMORIO (las 3 sombras de la .62 + LA PÁGINA FINAL de la .64 — el arma 4)
 
             // === LAS 99 DUMMIES DE PRUEBA (el campo de entrenamiento) ===
             int dummies = 0;
