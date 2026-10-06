@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using AethonMod.Content.Effects.Bruma;
 
 namespace AethonMod.Content.VFX
 {
@@ -112,6 +113,20 @@ namespace AethonMod.Content.VFX
             }
             VFXCore.FlushAlpha(VFXCore.Pixel);
 
+            // v6.50.65 — EL RIM VIOLETA (la cura del «no se ve nada»): la
+            // masa negra sobre fondo negro era INVISIBLE — un borde
+            // aditivo violeta tenue (1.35× el grosor) le da a la silueta
+            // un aura de sombra mágica que se lee en CUALQUIER fondo.
+            VFXCore.Begin();
+            for (int i = 1; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f) * 1.35f;
+                g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
+                VFXCore.Line(col[i - 1], col[i], Alfa(Violeta, alfa * 0.16f), g);
+            }
+            VFXCore.FlushAdditive();
+
             // EL BORDE SUAVE (velo oscuro ×1.7)
             VFXCore.Begin();
             for (int i = 1; i < n; i++)
@@ -162,17 +177,33 @@ namespace AethonMod.Content.VFX
         //  LOS OJOS — blancos, se abren DE GOLPE y MIRAN
         // ==================================================================
 
+        /// <summary>El violeta del RIM de la masa y las venas de bruma: la
+        /// sombra mágica se LEE sobre cualquier fondo (v6.50.65).</summary>
+        public static readonly Color Violeta = new(118, 74, 190);
+
+        /// <summary>El humo base de la bruma negra: negro con un fulgor
+        /// violáceo (v6.50.65 — el negro puro era invisible).</summary>
+        public static readonly Color HumoNegro = new(18, 10, 28);
+
+        /// <summary>El color al que SE ENFRÍA la bruma al disolverse: el
+        /// borde violáceo-gris que hace visible cada puff (v6.50.65).</summary>
+        public static readonly Color HumoVioleta = new(64, 42, 96);
+
         /// <summary>
         /// UN OJO: esclerótica blanca elíptica (aditivo), pupila roja
         /// desplazada hacia <paramref name="mirada"/>. El tamaño late
         /// con <paramref name="abierto"/> (0 = cerrado, 1 = bien abierto):
         /// los ojos de Pride NO parpadean suaves — SE ABREN de golpe, y
         /// la apertura se anima con un ease-out violento en el llamador.
+        /// v6.50.65 — EL HALO: un resplandor blanco suave detrás de la
+        /// esclerótica para que el ojo PRENDA en cualquier fondo.
         /// </summary>
         public static void Ojo(Vector2 pos, float tamaño, Vector2 mirada, float abierto, bool pupila = true)
         {
             if (abierto <= 0.03f || tamaño <= 0.5f) return;
             float a = MathHelper.Clamp(abierto, 0f, 1f);
+            // EL HALO (v6.50.65): el ojo BRILLA antes de existir
+            VFXCore.Quad(pos, Alfa(Blanco, 0.20f * a), new Vector2(tamaño * 2.1f, tamaño * 1.5f));
             VFXCore.Quad(pos, Alfa(Blanco, 0.92f * a), new Vector2(tamaño, tamaño * 0.62f));
             if (pupila)
             {
@@ -280,41 +311,92 @@ namespace AethonMod.Content.VFX
 
         // ==================================================================
         //  LA BRUMA Y LAS ALMAS
-        // ==================================================================
-
-        /// <summary>Nube de bruma oscura que TAPA (lote alfa): la desintegración.</summary>
-        public static void Bruma(Vector2 pos, float radio, float alfa, float tiempo, int semilla, Vector2 deriva = default)
-        {
-            if (alfa <= 0.02f || radio <= 1f) return;
-            VFXCore.Begin();
-            int nubes = 3;
-            for (int k = 0; k < nubes; k++)
-            {
-                float f = Frac(semille(semilla) * 0.31f + k * 0.443f);
-                float ang = f * MathHelper.TwoPi + tiempo * (0.14f + f * 0.12f);
-                float d = radio * (0.25f + 0.55f * Frac(f * 7.3f));
-                Vector2 p = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.6f) * d + deriva * f;
-                float r = radio * (0.42f + 0.4f * Frac(f * 11.7f));
-                VFXCore.Quad(p, Alfa(Negro, alfa * (0.5f + 0.5f * Frac(f * 5.1f))), new Vector2(r * 1.3f, r), ang, VFXCore.SoftGlow);
-            }
-            VFXCore.FlushAlpha();
-        }
-
-        // ==================================================================
-        //  v6.50.64 — LA BRUMA NEGRA CONTINUA Y LA SALA DE CINE
-        //  («a todo el tentáculo y boca ponle bruma negra» + el diseño
-        //   AAA del arma 4: anticipación, staging, follow-through)
+        //  v6.50.65 — LA BRUMA DE VERDAD: la bruma de la .64 (quads
+        //  SoftGlow casi negros al 30%) era INVISIBLE — negro sobre
+        //  negro, puffs minúsculos, cero textura. AHORA usa BrumaFX (la
+        //  librería de humo de la casa: flipbooks de ruido fBm horneados,
+        //  sub-blobs que respiran, invariancia de escala) en el lote de
+        //  MASA (AlphaBlend — humo que OCLUYE) con la RAMPA DE
+        //  ENFRIAMIENTO violácea: cada puff NACE negro, se DESGARRA y se
+        //  disuelve en gris-violeta — el borde SIEMPRE se lee — más una
+        //  segunda pasada aditiva de ALIENTO VIOLETA entre los puffs
+        //  (la magia de la sombra PRENDE en cualquier fondo).
         // ==================================================================
 
         /// <summary>
-        /// LA BRUMA VIVA DEL CUERPO (v6.50.64): puﬀs que nacen PEGADOS a
-        /// la masa del tentáculo, derivan hacia fuera y hacia arriba,
-        /// crecen y se deshacen — la exhalación continua de la sombra.
-        /// Cada puﬀ ancla a un punto de la columna (reparto áureo), su
-        /// vida es CÍCLICA (nace→respira→muere, alpha en seno) y todo es
-        /// determinista por semilla: la bruma es parte del cuerpo, no
-        /// ruido. Funciona con CUALQUIER polilínea — un tentáculo, el
-        /// rastro de un tajo o el ANILLO de una esfera.
+        /// EL PATRÓN COMPARTIDO: abre el lote de masa de BrumaFX, dibuja
+        /// los puffs que el callback pida (en coords de PANTALLA) y lo
+        /// cierra — blindado con try/finally para no dejar jamás un Begin
+        /// vivo (la lección de la .58).
+        /// </summary>
+        private static void LoteDeBruma(Action dibujar)
+        {
+            VFXCore.CerrarLoteSiAbierto();
+            try
+            {
+                BrumaFX.BeginMass();
+                dibujar();
+            }
+            catch { }
+            finally
+            {
+                try { Main.spriteBatch.End(); } catch { }
+                VFXCore.CerrarLoteSiAbierto();
+            }
+        }
+
+        /// <summary>
+        /// EL Aliento violeta (la segunda capa): puffs aditivos violáceos
+        /// MUY tenues entre la bruma — la lectura garantizada de noche y
+        /// en cueva. Va por VFXCore (lote aditivo de la casa).
+        /// </summary>
+        private static void AlientoVioleta(Vector2 pos, float radio, float alfa, float tiempo, int semilla, int k)
+        {
+            float f0 = Frac(semille(semilla) * 0.61f + k * 0.618034f);
+            float late = 0.7f + 0.3f * MathF.Sin(tiempo * (1.1f + f0) + k * 2.4f);
+            VFXCore.Quad(pos + new Vector2(MathF.Sin(tiempo * 0.8f + k * 2.1f) * radio * 0.5f,
+                                           -radio * 0.35f * f0),
+                Alfa(Violeta, alfa * 0.11f * late), new Vector2(radio * 1.9f, radio * 1.5f));
+        }
+
+        /// <summary>
+        /// LA NUBE DE BRUMA que desintegra (la muerte del festín): racimo
+        /// BrumaFX.Cloud (masa que ocluye + rampa violácea) + aliento
+        /// violeta. Coordenadas de MUNDO.
+        /// </summary>
+        public static void Bruma(Vector2 pos, float radio, float alfa, float tiempo, int semilla, Vector2 deriva = default)
+        {
+            if (alfa <= 0.02f || radio <= 1f) return;
+            if (Main.netMode == NetmodeID.Server) return;
+
+            Vector2 o = Main.screenPosition;
+            LoteDeBruma(() =>
+            {
+                BrumaFX.Cloud(pos - o, radio, HumoNegro, semilla,
+                    tiempo, Math.Max(3, (int)(radio / 30f)), alpha: 0.62f * alfa);
+                BrumaFX.Cloud(pos - o + deriva * 0.5f, radio * 0.66f, HumoVioleta, semilla + 31,
+                    tiempo * 0.85f, 3, alpha: 0.30f * alfa);
+            });
+
+            // la lectura nocturna: el aliento violeta
+            VFXCore.Begin();
+            for (int k = 0; k < 4; k++)
+                AlientoVioleta(pos, radio * 0.55f, alfa, tiempo, semilla + 5, k);
+            VFXCore.FlushAdditive();
+        }
+
+        // ==================================================================
+        //  v6.50.65 — LA BRUMA NEGRA CONTINUA (BrumaFX) + LAS GARRAS
+        // ==================================================================
+
+        /// <summary>
+        /// LA BRUMA VIVA DEL CUERPO: puﬀs de humo fBm (flipbook que se
+        /// DESGARRA de verdad) que nacen PEGADOS a la masa del tentáculo,
+        /// crecen ×1.5, derivan hacia fuera y hacia arriba y se enfrían
+        /// de negro a violeta-gris al morir — la exhalación continua de
+        /// la sombra. Cada puﬀ ancla a un punto de la columna (reparto
+        /// áureo), su vida es CÍCLICA y todo determinista por semilla.
+        /// Funciona con CUALQUIER polilínea — tentáculo, rastro o anillo.
         /// </summary>
         /// <param name="col">La polilínea que respira (columna, rastro, anillo).</param>
         /// <param name="grosor">Grosor de la masa que la exhala (escala los puﬀs).</param>
@@ -322,81 +404,171 @@ namespace AethonMod.Content.VFX
         public static void BrumaColumna(Vector2[] col, float grosor, float alfa, float tiempo, int semilla, int cantidad = 9)
         {
             if (alfa <= 0.02f || col == null || col.Length < 3) return;
+            if (Main.netMode == NetmodeID.Server) return;
             int n = col.Length;
-            VFXCore.Begin();
-            for (int k = 0; k < cantidad; k++)
+            Vector2 o = Main.screenPosition;
+
+            LoteDeBruma(() =>
             {
-                float f0 = Frac(semille(semilla) * 0.83f + k * 0.618034f);  // el ancla en la columna
-                float ritmo = 0.16f + 0.13f * Frac(f0 * 9.7f);              // cada puﬀ respira a su ritmo
-                float edad = Frac(tiempo * ritmo + f0 * 4.1f + k * 0.233f); // vida cíclica 0→1
+                for (int k = 0; k < cantidad; k++)
+                {
+                    float f0 = Frac(semille(semilla) * 0.83f + k * 0.618034f);  // el ancla en la columna
+                    float ritmo = 0.10f + 0.09f * Frac(f0 * 9.7f);              // cada puﬀ respira a su ritmo
+                    float edad = Frac(tiempo * ritmo + f0 * 4.1f + k * 0.233f); // vida cíclica 0→1
+                    int idx = (int)(f0 * (n - 1));
+                    // la dirección local de la columna (para derivar DE LADO)
+                    Vector2 seg = col[Math.Min(idx + 1, n - 1)] - col[Math.Max(idx - 1, 0)];
+                    Vector2 perp = seg.LengthSquared() < 0.01f ? Vector2.UnitY
+                        : new Vector2(-seg.Y, seg.X) * (1f / MathF.Sqrt(seg.LengthSquared()));
+                    float lado = Frac(f0 * 13.7f) > 0.5f ? 1f : -1f;
+                    float deriva = edad * (26f + 34f * Frac(f0 * 5.9f));
+                    Vector2 pos = col[idx]
+                        + perp * (lado * (grosor * 0.3f + deriva * 0.5f))
+                        + new Vector2(0f, -14f * edad);                          // sube, como humo frío
+                    float r = grosor * (0.5f + 0.85f * edad);                    // nace chico, crece ×1.35
+                    // LA ENVOLVENTE y LA RAMPA (a mano — BrumaFX.Puff expone quality):
+                    float a = alfa * MathF.Sin(edad * MathF.PI) * (0.75f + 0.25f * Frac(f0 * 7.3f));
+                    Color c = edad > 0.55f
+                        ? Color.Lerp(HumoNegro, HumoVioleta, (edad - 0.55f) / 0.45f)
+                        : HumoNegro;
+                    BrumaFX.Puff(pos - o, r, c, semilla * 31 + k, tiempo + f0 * 7f,
+                        MathHelper.Clamp(a, 0.04f, 0.85f), quality: 0.5f,
+                        velocity: perp * (lado * deriva * 0.4f));
+                }
+            });
+
+            // el aliento violeta entre puffs (lectura nocturna)
+            VFXCore.Begin();
+            for (int k = 0; k < Math.Min(cantidad, 5); k++)
+            {
+                float f0 = Frac(semille(semilla) * 0.83f + k * 0.618034f);
                 int idx = (int)(f0 * (n - 1));
-                // la dirección local de la columna (para derivar DE LADO)
-                Vector2 seg = col[Math.Min(idx + 1, n - 1)] - col[Math.Max(idx - 1, 0)];
-                Vector2 perp = seg.LengthSquared() < 0.01f ? Vector2.UnitY
-                    : new Vector2(-seg.Y, seg.X) * (1f / MathF.Sqrt(seg.LengthSquared()));
-                float lado = Frac(f0 * 13.7f) > 0.5f ? 1f : -1f;
-                float deriva = edad * (26f + 34f * Frac(f0 * 5.9f));
-                Vector2 pos = col[idx]
-                    + perp * (lado * (grosor * 0.35f + deriva * 0.45f))
-                    + new Vector2(0f, -12f * edad - deriva * 0.22f);        // sube, como humo frío
-                float r = grosor * (0.5f + 0.75f * edad);
-                float a = alfa * MathF.Sin(edad * MathF.PI) * (0.5f + 0.28f * Frac(f0 * 7.3f));
-                if (a <= 0.02f) continue;
-                VFXCore.Quad(pos, Alfa(Negro, a), new Vector2(r * 1.45f, r * 0.9f),
-                    perp.ToRotation() + lado * 0.4f, VFXCore.SoftGlow);
+                AlientoVioleta(col[idx], grosor * 0.9f, alfa, tiempo, semilla + k * 3, k);
             }
-            VFXCore.FlushAlpha();
+            VFXCore.FlushAdditive();
         }
 
         /// <summary>
-        /// EL ALIENTO DE LA BOCA (v6.50.64): la bruma que EXHALA una fauce
-        /// abierta — sale de la garganta hacia <paramref name="dir"/>, se
-        /// abre en abanico y muere. Gateada por <paramref name="apertura"/>:
-        /// la boca cerrada no respira (el aliento escala con el bostezo).
+        /// EL ALIENTO DE LA BOCA: la bruma que EXHALA una fauce abierta —
+        /// sale de la garganta hacia <paramref name="dir"/> en abanico,
+        /// crece y se enfría violáceo al disolverse. Gateada por
+        /// <paramref name="apertura"/>: la boca cerrada no respira.
         /// </summary>
         public static void BrumaBoca(Vector2 garganta, Vector2 dir, float apertura, float alfa, float tiempo, int semilla, int puffs = 5)
         {
             if (alfa <= 0.02f || apertura <= 0.1f) return;
+            if (Main.netMode == NetmodeID.Server) return;
             Vector2 d = dir.LengthSquared() < 0.01f ? Vector2.UnitX : Vector2.Normalize(dir);
             Vector2 perp = new(-d.Y, d.X);
-            VFXCore.Begin();
-            for (int k = 0; k < puffs; k++)
+            Vector2 o = Main.screenPosition;
+
+            LoteDeBruma(() =>
             {
-                float f0 = Frac(semille(semilla) * 0.47f + k * 0.618034f);
-                float edad = Frac(tiempo * (0.2f + 0.12f * f0) + f0 * 5.3f);
-                float alcance = (14f + 46f * f0) * (0.35f + 0.65f * apertura);
-                float lado = (Frac(f0 * 11.3f) > 0.5f ? 1f : -1f) * (0.3f + 0.7f * edad);
-                Vector2 pos = garganta + d * (alcance * (0.3f + 0.7f * edad))
-                            + perp * (lado * alcance * 0.35f)
-                            + new Vector2(0f, -8f * edad);
-                float r = (16f + 22f * f0) * (0.5f + 0.7f * edad) * (0.4f + 0.6f * apertura);
-                float a = alfa * apertura * MathF.Sin(edad * MathF.PI) * 0.75f;
-                if (a <= 0.02f) continue;
-                VFXCore.Quad(pos, Alfa(Negro, a), new Vector2(r * 1.4f, r * 0.95f),
-                    d.ToRotation() + lado * 0.5f, VFXCore.SoftGlow);
-            }
-            VFXCore.FlushAlpha();
+                for (int k = 0; k < puffs; k++)
+                {
+                    float f0 = Frac(semille(semilla) * 0.47f + k * 0.618034f);
+                    float edad = Frac(tiempo * (0.16f + 0.10f * f0) + f0 * 5.3f);
+                    float alcance = (18f + 56f * f0) * (0.35f + 0.65f * apertura);
+                    float lado = (Frac(f0 * 11.3f) > 0.5f ? 1f : -1f) * (0.3f + 0.7f * edad);
+                    Vector2 pos = garganta + d * (alcance * (0.3f + 0.7f * edad))
+                                + perp * (lado * alcance * 0.4f)
+                                + new Vector2(0f, -10f * edad);
+                    float r = (18f + 26f * f0) * (0.55f + 0.8f * edad) * (0.4f + 0.6f * apertura);
+                    float a = alfa * apertura * MathF.Sin(edad * MathF.PI) * 0.85f;
+                    Color c = edad > 0.55f
+                        ? Color.Lerp(HumoNegro, HumoVioleta, (edad - 0.55f) / 0.45f)
+                        : HumoNegro;
+                    BrumaFX.Puff(pos - o, r, c, semilla * 17 + k * 3, tiempo + f0 * 9f,
+                        MathHelper.Clamp(a, 0.04f, 0.8f), quality: 0.5f,
+                        velocity: d * (alcance * 0.25f));
+                }
+            });
+
+            // la lectura nocturna del aliento
+            VFXCore.Begin();
+            for (int k = 0; k < 3; k++)
+                AlientoVioleta(garganta + d * (30f + k * 26f) * apertura, 26f * apertura,
+                    alfa * apertura, tiempo, semilla + k * 5, k);
+            VFXCore.FlushAdditive();
         }
 
         /// <summary>
-        /// EL VELO DE LA SALA (v6.50.64 — diseño AAA, la anticipación de
-        /// cine): oscurece los CUATRO BORDES de la pantalla con velos
-        /// suaves anclados FUERA de cámara — el centro queda limpio, los
-        /// bordes se apagan y la mirada va sola al centro del cuadro.
-        /// La penumbra de Pride hecha sala de proyección.
+        /// EL VELO DE LA SALA (la anticipación de cine): oscurece los
+        /// CUATRO BORDES con doble velo (uno ancho y denso + otro corto y
+        /// profundo) que RESPIRA lento — la penumbra de Pride hecha sala
+        /// de proyección. v6.50.65: ×2 capas + pulso — antes era un velo
+        /// tan tenue que nadie lo veía.
         /// </summary>
         public static void Vignette(float alfa)
         {
             if (alfa <= 0.02f) return;
+            if (Main.netMode == NetmodeID.Server) return;
             float w = Main.screenWidth, h = Main.screenHeight;
             Vector2 o = Main.screenPosition;
-            Color c = Alfa(Negro, alfa);
+            float pulso = 0.90f + 0.10f * MathF.Sin(Main.GlobalTimeWrappedHourly * 1.7f);
+
+            // CAPA 1 — el velo ancho (cubre media pantalla hacia adentro)
+            Color c1 = Alfa(Negro, alfa * 0.62f * pulso);
             VFXCore.Begin();
-            VFXCore.Quad(new Vector2(o.X - w * 0.30f, o.Y + h * 0.5f), c, new Vector2(w * 1.0f, h * 2.1f), 0f, VFXCore.SoftGlow);
-            VFXCore.Quad(new Vector2(o.X + w * 1.30f, o.Y + h * 0.5f), c, new Vector2(w * 1.0f, h * 2.1f), 0f, VFXCore.SoftGlow);
-            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y - h * 0.32f), c, new Vector2(w * 2.1f, h * 1.0f), 0f, VFXCore.SoftGlow);
-            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y + h * 1.32f), c, new Vector2(w * 2.1f, h * 1.0f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X - w * 0.34f, o.Y + h * 0.5f), c1, new Vector2(w * 1.1f, h * 2.4f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 1.34f, o.Y + h * 0.5f), c1, new Vector2(w * 1.1f, h * 2.4f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y - h * 0.36f), c1, new Vector2(w * 2.4f, h * 1.1f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y + h * 1.36f), c1, new Vector2(w * 2.4f, h * 1.1f), 0f, VFXCore.SoftGlow);
             VFXCore.FlushAlpha();
+
+            // CAPA 2 — el velo profundo de la esquina (más corto, más negro)
+            Color c2 = Alfa(Negro, alfa * 0.80f * pulso);
+            VFXCore.Begin();
+            VFXCore.Quad(new Vector2(o.X - w * 0.22f, o.Y + h * 0.5f), c2, new Vector2(w * 0.8f, h * 1.9f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 1.22f, o.Y + h * 0.5f), c2, new Vector2(w * 0.8f, h * 1.9f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y - h * 0.24f), c2, new Vector2(w * 1.9f, h * 0.8f), 0f, VFXCore.SoftGlow);
+            VFXCore.Quad(new Vector2(o.X + w * 0.5f, o.Y + h * 1.24f), c2, new Vector2(w * 1.9f, h * 0.8f), 0f, VFXCore.SoftGlow);
+            VFXCore.FlushAlpha();
+        }
+
+        /// <summary>
+        /// UNA GARRA (v6.50.65 — la cura de las «púas rectangulares»):
+        /// zarpo AFILADO de tres segmentos que se ESTRECHA de la base a
+        /// la punta y se CURVA en gancho hacia <paramref name="gancho"/>
+        /// (−1/−1 izquierda, +1 derecha…) — con la punta BLANCA de hueso.
+        /// Se lee como garra de sombra, no como barra.
+        /// </summary>
+        /// <param name="basePos">La base gruesa de la garra (la más alejada del jefe).</param>
+        /// <param name="hacia">Dirección de la punta (hacia el jefe).</param>
+        /// <param name="largo">Largo total en px.</param>
+        /// <param name="alfa">0..1.</param>
+        /// <param name="gancho">−1..1 — cuánto y hacia dónde se curva.</param>
+        public static void Garra(Vector2 basePos, Vector2 hacia, float largo, float alfa, float gancho = 0f)
+        {
+            if (largo <= 3f || alfa <= 0.02f) return;
+            if (hacia.LengthSquared() < 0.01f) hacia = -Vector2.UnitY;
+            Vector2 dir = Vector2.Normalize(hacia);
+            Vector2 perp = new(-dir.Y, dir.X);
+
+            // tres segmentos: grueso → medio → aguja, cada uno MÁS corto
+            // y desviado hacia el gancho (la curva del zarpo)
+            float g1 = largo * 0.30f, g2 = largo * 0.20f, g3 = largo * 0.11f;
+            Vector2 p1 = basePos + dir * (largo * 0.40f) + perp * (gancho * largo * 0.06f);
+            Vector2 p2 = p1 + dir * (largo * 0.38f) + perp * (gancho * largo * 0.14f);
+            Vector2 p3 = p2 + dir * (largo * 0.22f) + perp * (gancho * largo * 0.20f);
+
+            VFXCore.Begin();
+            VFXCore.Line(basePos, p1, Alfa(Negro, alfa), g1);
+            VFXCore.Line(p1, p2, Alfa(Negro, alfa), g2);
+            VFXCore.Line(p2, p3, Alfa(Negro, alfa), g3);
+            VFXCore.FlushAlpha(VFXCore.Pixel);
+
+            // el rim violeta de la garra (lectura nocturna)
+            VFXCore.Begin();
+            VFXCore.Line(basePos, p1, Alfa(Violeta, alfa * 0.14f), g1 * 1.5f);
+            VFXCore.Line(p1, p2, Alfa(Violeta, alfa * 0.14f), g2 * 1.5f);
+            VFXCore.Line(p2, p3, Alfa(Violeta, alfa * 0.14f), g3 * 1.5f);
+            VFXCore.FlushAdditive();
+
+            // LA PUNTA DE HUESO — blanca, afilada, brillando
+            VFXCore.Begin();
+            VFXCore.Line(p2, p3 + dir * (largo * 0.10f), Alfa(Blanco, 0.85f * alfa), g3 * 0.45f);
+            VFXCore.FlushAdditive(VFXCore.Pixel);
         }
 
         /// <summary>

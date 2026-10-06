@@ -1,5 +1,88 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.65 — EL ARREGLO DE LOS DIÁLOGOS + EL ESPAÑOL LATAM + LA BRUMA QUE SÍ SE VE + EL ARMA 4 DE VERDAD
+
+**Feedback del usuario**: "arreglar los dialogos y asegurate de que tengan
+sentido, ademas la palabra Bumerangues no es correcta en español, otra cosa
+el idioma del juego debe ser español latinoamerica, no español españa, y en
+el ultimo cambio no veo los efectos de bruma ni ningun efecto sobre las
+armas nuevas, ademas la 4ta arma es horrible sin efecto y solo son
+rectangulos — que paso con la gran investigacion que hiciste para que no
+fue aplicada correctamente".
+
+**La autopsia honesta de la .64** (la pregunta «qué pasó con la gran
+investigación»): la investigación SÍ se aplicó — pero en PRIMITIVAS que no
+se VEÍAN. La bruma eran 3-9 quads `SoftGlow` casi negros (RGB 8,4,7) al
+30-45% de alfa con falloff radial: negro sobre negro = INVISIBLE de noche
+y en cueva, y un velo apenas perceptible de día. El arma 4 dibujaba el
+libro como DOS RECTÁNGULOS `Pixel` y las púas de la jaula como BARRAS —
+el mock de la propia casa lo confesó (VLM: "plain rectangles without
+effects, programmer's placeholder aesthetic"). Curas de raíz:
+
+- **LA BRUMA DE VERDAD (SombrasLib reescrito sobre BrumaFX)**: la casa YA
+  TENÍA una librería de humo de investigación propia (BrumaFX v6.25:
+  flipbooks de ruido fBm horneados en runtime que se DESGARRAN, sub-blobs
+  que respiran desfasados, invariancia de escala, presupuesto LOD) — pero
+  la .64 no la usó. AHORA BrumaColumna/BrumaBoca/Bruma exhalan puffs fBm
+  en el lote de MASA (AlphaBlend — humo que OCLUYE) con RAMPA DE
+  ENFRIAMIENTO violácea (cada puff nace negro y se disuelve en
+  gris-violeta: el borde SIEMPRE se lee) + una segunda capa aditiva de
+  ALIENTO VIOLETA entre los puffs (la magia de la sombra prende en
+  cualquier fondo). Masa() gana RIM VIOLETA aditivo (la silueta negra se
+  lee sobre fondo negro), Ojo() gana HALO blanco, Vignette() es ahora
+  DOBLE CAPA con pulso (antes un velo tan tenue que nadie lo veía).
+- **EL ARMA 4 DE VERDAD (La Página Final)**: el libro ya NO son dos
+  rectángulos — es EL SPRITE REAL del Grimorio del Eterno (el ítem del
+  propio mod) flotando sobre el portador: grande, con vaivén e
+  inclinación, envuelto en AURA violeta, la GARGANTA roja latiendo en el
+  lomo, EL OJO COLOSAL desplegado encima mirando a la presa y un HILO DE
+  BRUMA bajando de sus páginas. LA JAULA DE TINTA: las 12 púas-barra son
+  ahora 12 GARRAS AFILADAS (SombrasLib.Garra: tres segmentos que se
+  estrechan + curva de gancho alternada + punta de hueso blanca +
+  rim violeta). El juice del impacto ×2 (destello 460px + doble onda de
+  choque). EL FESTÍN estilo 4: el libro gigante también es el sprite real
+  a escala colosal, y el PLANO NEGRO que sube comiendo al jefe termina en
+  un BORDE DENTADO de 9 garras mordiendo hacia arriba (antes: rectángulo
+  plano). Icono del arma regenerado (pixel art limpio: ojo almendrado,
+  libro, tres garras — VLM 7/10 lectura, 8/10 atractivo tras 3 iteraciones).
+- **LOS DIÁLOGOS ARREGLADOS (es-MX + es-ES + en-US en paralelo)**: la
+  auditoría completa de las 7 familias (~150 líneas) con sus
+  disparadores. 23 correcciones: KingSlime2 "todo el reino, ninguno el
+  hueso" (gramática rota — la reportada por el usuario), Deerclops2
+  "vera"→"verá", BrainofCthulhu3 "marginatura" (palabra inventada)→"los
+  márgenes", Arco1 refería a LA ARQUERA (jefa PURGADA en .61 — el jugador
+  no sabe quién es), Arco3 "estoy tensa" (el grimorio es masculino),
+  Venganza1 "me dejaste morir de hambre" (el que muere es el PORTADOR),
+  JuicioFin1 "PAGADO"→"SERVIDO", QueenSlime3 redundancia TODO/también,
+  Twins3 "extintos a la vez" (la voz dispara al caer el ÚLTIMO gemelo),
+  Destroyer3/DukeFishron2 solapadas con sus hermanas, Mazmorra3
+  "añejo…pero añejo" circular, Cielo2 "harpastos" (no existe)→"arpías",
+  Infierno3 "Sal del infierno" ambiguo, Carmesi3 leísmo, la carnada
+  decía "los 7 guardianes" (son SEIS desde la purga).
+- **EL ANGLICISMO-PURGA + EL ESPAÑOL LATINOAMÉRICA**: "Bumerangues"→
+  "Bumeranes" (Arrojadiza2), "Unicorns"→"Unicornios", "Minions"→
+  "Esbirros" (el término oficial de Terraria en español), "Boomerangs",
+  "Dropea de King Slime"→"Se obtiene al vencer al Rey Slime", "craftear"→
+  "fabricar", "Click"→"Clic", "bolt arcano"→"descarga arcana", "minion"→
+  "esbirro", "la PRIMERA kill"→"la PRIMERA baja", "hardmode"→"modo
+  difícil", "gauge"→"medidor", "tier alto"→"nivel alto", "afterimages"→
+  "estelas fantasma", "BEAM"→"HAZ", "Item de testing—release"→"Objeto de
+  pruebas—publicar", "bufet"→"bufé", "imploden"→"implosionan",
+  "Slots de minion"→"Espacios de esbirro". Y LA MIGRACIÓN DE CULTURA: el
+  mod ahora habla **es-MX (español Latinoamérica) como idioma PRIMARIO**
+  — nuevo `es-MX_Mods.AethonMod.hjson` (el juego en «Español
+  (Latinoamérica)» ya levanta el mod EN ESPAÑOL; antes solo había es-ES y
+  el juego LatAm caía al inglés) con es-ES como espejo sincronizado.
+
+**Verificación**: oráculo /home/z/.verify 0 errores/0 warnings (cazó 1:
+`semille` sin clase en el borde dentado) · `-build` REAL 0/0 · `.tmod`
+v6.50.65 7.886.630 B: **395 entradas** (394 + es-MX hjson), 377/377
+rawimgs empaquetados, EOF exacto, headless «Aethon, the Eternal Grimoire
+v6.50.65» Finalizing → Adding Recipes → Server started con **0
+excepciones**.
+
+---
+
 ## Commit v6.50.64 — LA PINZA DOBLE + LA BRUMA NEGRA + EL ARMA 4: LA PÁGINA FINAL (la evolución AAA de La Sombra de la Página)
 
 **Feedback del usuario**: "en el arma, las fauces del grimorio, has que el gif

@@ -415,33 +415,63 @@ namespace AethonMod.Content.Projectiles.Sombras
             // === 1. LA SALA DE CINE: los bordes se apagan (la penumbra de Pride) ===
             SombrasLib.Vignette(0.55f * manifiesta * vivo);
 
-            // === 2. EL LIBRO GIGANTE: suspendido sobre el jefe, dos hojas
-            // negras que se abren con el LOMO ROJO entreabierto (la garganta) ===
+            // === 2. EL LIBRO GIGANTE (v6.50.65 — EL SPRITE REAL del
+            // Grimorio del Eterno, colosal, envuelto en su aura violeta;
+            // antes eran dos rectángulos negros) suspendido sobre el jefe,
+            // con el LOMO ROJO latiendo y su ojo colosal encima ===
             float tam = MathHelper.Clamp(jefe.Size.Length() * 0.55f, 130f, 300f);
             Vector2 pagina = jefe.Center + new Vector2(0f, -(tam * 1.35f + 120f));
-            float anchoHoja = tam * 1.3f;
-            float alto = tam * 1.15f;
             // el libro: cerrado al brotar → abierto → se PLEGRA al cierre
             float abreLibro = manifiesta * (1f - SombrasLib.DeGolpe(cierre));
-            float lomo = 12f + 18f * abreLibro;
+            float bob = MathF.Sin(tiempo * 1.3f) * 10f * manifiesta;
+            Vector2 posLibro = pagina + new Vector2(0f, -bob);
 
+            // 2a. EL AURA violeta del libro gigante
             VFXCore.Begin();
-            Color cHoja = SombrasLib.Alfa(SombrasLib.Negro, 0.97f * vivo);
-            VFXCore.Quad(pagina + new Vector2(-lomo * 0.5f - anchoHoja * 0.5f * abreLibro, 0f),
-                cHoja, new Vector2(anchoHoja * abreLibro + 8f, alto), 0f, VFXCore.Pixel);
-            VFXCore.Quad(pagina + new Vector2(lomo * 0.5f + anchoHoja * 0.5f * abreLibro, 0f),
-                cHoja, new Vector2(anchoHoja * abreLibro + 8f, alto), 0f, VFXCore.Pixel);
-            VFXCore.FlushAlpha(VFXCore.Pixel);
+            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.Violeta,
+                (0.16f + 0.06f * MathF.Sin(tiempo * 2.2f)) * manifiesta * vivo),
+                new Vector2(tam * 2.6f, tam * 3.0f));
+            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.RojoGarganta, 0.10f * abreLibro * vivo),
+                new Vector2(tam * 1.2f, tam * 1.8f));
+            VFXCore.FlushAdditive();
 
-            // el lomo rojo: la garganta del libro entre las hojas
+            // 2b. EL LIBRO DE VERDAD: el sprite del Grimorio del Eterno,
+            //     GIGANTE (crece con tam), ligeramente inclinado
+            Texture2D texLibro;
+            try
+            {
+                texLibro = Terraria.GameContent.TextureAssets.Item[
+                    ModContent.ItemType<Content.Weapons.GrimoireEternal>()].Value;
+            }
+            catch { texLibro = null; }
+            if (texLibro != null)
+            {
+                float escalaLibro = (tam * 2.6f / texLibro.Width) * (0.65f + 0.35f * abreLibro) * vivo;
+                VFXCore.CerrarLoteSiAbierto();
+                try
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
+                    Main.spriteBatch.Draw(texLibro, posLibro - Main.screenPosition, null,
+                        new Color(225, 218, 240, (byte)(255 * vivo)), MathF.Sin(tiempo * 0.7f) * 0.06f,
+                        texLibro.Size() * 0.5f, escalaLibro, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
+            }
+
+            // 2c. el lomo rojo: la garganta del libro late entreabierto
             VFXCore.Begin();
-            VFXCore.Quad(pagina, SombrasLib.Alfa(SombrasLib.RojoGarganta, 0.55f * abreLibro * vivo),
-                new Vector2(lomo * 2.2f, alto * 0.85f));
+            VFXCore.Quad(posLibro + new Vector2(0f, tam * 0.1f),
+                SombrasLib.Alfa(SombrasLib.Rojo, (0.28f + 0.14f * MathF.Sin(tiempo * 5f)) * abreLibro * vivo),
+                new Vector2(tam * 0.5f * abreLibro, tam * 1.6f * abreLibro));
             VFXCore.FlushAdditive();
 
             // === 3. EL OJO DEL LIBRO: se abre DE GOLPE y MIRA AL JEFE mientras lo come ===
             VFXCore.Begin();
-            SombrasLib.Ojo(pagina, alto * 0.36f, jefe.Center - pagina,
+            SombrasLib.Ojo(posLibro + new Vector2(0f, -tam * 0.85f), tam * 0.42f, jefe.Center - pagina,
                 MathHelper.Clamp(abreLibro * 1.4f, 0f, 1f) * vivo);
             VFXCore.FlushAdditive();
 
@@ -449,7 +479,7 @@ namespace AethonMod.Content.Projectiles.Sombras
             // al jefe (cada uno con su masa, sus ojos y SU BRUMA NEGRA) ===
             for (int k = 0; k < 4; k++)
             {
-                Vector2 raizZ = pagina + new Vector2((k - 1.5f) * anchoHoja * 0.34f * abreLibro, alto * 0.42f);
+                Vector2 raizZ = posLibro + new Vector2((k - 1.5f) * tam * 0.42f * abreLibro, tam * 0.55f);
                 Vector2 puntoAgarre = jefe.Center + new Vector2(
                     MathF.Cos(k * MathHelper.PiOver2 + 0.7f),
                     MathF.Sin(k * MathHelper.PiOver2 + 0.7f) * 0.7f) * jefe.Size.Length() * 0.34f;
@@ -475,6 +505,22 @@ namespace AethonMod.Content.Projectiles.Sombras
                     VFXCore.Quad(new Vector2(jefe.Center.X, (baseY + bordeY) * 0.5f),
                         SombrasLib.Alfa(SombrasLib.Negro, 0.97f * vivo), new Vector2(w, h), 0f, VFXCore.Pixel);
                     VFXCore.FlushAlpha(VFXCore.Pixel);
+                }
+
+                // v6.50.65 — EL BORDE DENTADO: el plano ya no termina recto —
+                // picos negros alternados SOBRE el borde (la boca del vacío
+                // MORDIENDO hacia arriba) con su punta de hueso: se lee como
+                // una GARGANTA que sube comiendo, no como un rectángulo.
+                int nDientes = 9;
+                for (int k = 0; k < nDientes; k++)
+                {
+                    float fx = (k + 0.5f) / nDientes - 0.5f;
+                    float altoD = (16f + 22f * SombrasLib.Frac(SombrasLib.semille(semilla) * 0.77f + k * 0.618f))
+                                  * (0.8f + 0.4f * MathF.Sin(tiempo * 9f + k * 1.9f));
+                    Vector2 baseD = new(jefe.Center.X + fx * w, bordeY + 4f);
+                    Vector2 puntaD = baseD + new Vector2(MathF.Sin(k * 2.1f) * 6f, -altoD);
+                    SombrasLib.Garra(baseD, puntaD - baseD, altoD * 1.05f, 0.95f * vivo,
+                        (k % 2 == 0 ? 1f : -1f) * 0.35f);
                 }
 
                 // la boca del borde (come SUBIENDO) + su aliento de bruma

@@ -46,7 +46,7 @@ Items: {
 		Tooltip:
 			'''
 			Contains 999 of every boss summoner.
-			Testing item — remove before release.
+			Testing item — remove before publishing.
 			'''
 	}
 
@@ -57,7 +57,7 @@ Items: {
 			Grants +10 levels to the Grimoire of the Eternal.
 			Reusable — not consumed.
 			Searches the whole inventory.
-			Testing item — remove before release.
+			Testing item — remove before publishing.
 			'''
 	}
 
@@ -67,9 +67,9 @@ Items: {
 			'''
 			Triggers the WAVES OF HUNGER without waiting.
 			Left click: unleash the fury (prepared waves).
-			Right click: cycle 1..11 waves (11 = THE JUDGMENT: all 7 wardens ×15).
+			Right click: cycle 1..11 waves (11 = THE JUDGMENT: all 6 wardens ×15).
 			Everything dying in wave k pays XP ×(k+1); the special, ×15.
-			Testing item — remove before release.
+			Testing item — remove before publishing.
 			'''
 	}
 
@@ -1426,7 +1426,7 @@ Items: {
 		Tooltip:
 			'''
 			The tome that feels nothing spits void tentacles:
-			they gestate for 2 seconds without harming (imploding pulses),
+			they mature for 2 seconds without harming (imploding pulses),
 			then lash out in three curves toward your cursor, teleporting
 			between curves. Hits everything it touches (90×90) · each
 			successive hit weighs less.
@@ -1439,7 +1439,7 @@ Items: {
 		Tooltip:
 			'''
 			The winged singularity made servant: the winged eye with
-			afterimages orbiting and breathing around it (its signature).
+			phantom echoes orbiting and breathing around it (its signature).
 			VOLLEY of 5 nova bursts in a fan · TELEGRAPHED beam of 900px (×2.5)
 			· fire flower when each burst dies · no mana cost.
 			MINION: takes 1 minion slot · never expires.
@@ -1937,7 +1937,7 @@ Common: {
 Eco: {
 	VozJefe: {
 		KingSlime1: The crown rolls across the floor. The grimoire slurps the King Slime's essence: sweet, hollow, from a throne that was never his.
-		KingSlime2: A king of gelatin: all the kingdom, none of the bone. The grimoire drinks him in one gulp and burps a blue thunder.
+		KingSlime2: A king of gelatin: a whole kingdom in his body, not a single bone in his throne. The grimoire drinks him in one gulp and burps a blue thunder.
 		KingSlime3: The slime king dissolves into the grass. The grimoire chews the crown separately — metal tastes of nothing, but it keeps it out of politeness.
 		EyeofCthulhu1: The eye closes forever. The grimoire devours its hungry vigil — now it knows how to dream of what you see.
 		EyeofCthulhu2: The great eye goes dark without closing its eyelids — it never had any. The grimoire crumbles it and learns to weep inward.
@@ -1950,7 +1950,7 @@ Eco: {
 		EaterofWorlds3: The devourer, devoured: that is how guilt tastes. The grimoire licks the corruption from the plate and leaves the fork clean.
 		BrainofCthulhu1: The crimson brain falls silent. The grimoire bites into its reflections and learns to scream in red.
 		BrainofCthulhu2: The crimson brain thought it could take everything. The grimoire does its thinking now — and thinks it HUNGRY.
-		BrainofCthulhu3: The thinking mass dissolves into pink reflections. The grimoire copies its nerves into the margin: calligraphic, taut, alive.
+		BrainofCthulhu3: The thinking mass dissolves into pink reflections. The grimoire copies its nerves into the margins: calligraphic, taut, alive.
 		QueenBee1: The hive mourns. The grimoire licks the royal honey from the Queen Bee — sweetness with a sting: its favorite flavor.
 		QueenBee2: The queen dies and the hive forgets her name. The grimoire takes notes for her: 'sweet, with anger, brief as summer.'
 		QueenBee3: The royal bee's last hum. The grimoire keeps the stinger as a clasp — it closes the chapter and pricks the next one.
@@ -1962,13 +1962,13 @@ Eco: {
 		WallofFlesh3: The wall fell and the world took its first deep breath. The grimoire too: now it knows what dawn tastes like.
 		QueenSlime1: The crystal queen melts into sugar. The grimoire tastes her fleeting essence — so light it nearly slips between the pages.
 		QueenSlime2: Sugar and crystal: the queen melts into her own carnival. The grimoire quietly asks for a second dessert.
-		QueenSlime3: The bouncing queen deflates into confetti. The grimoire sweeps it ALL up with its tongue — the confetti included.
+		QueenSlime3: The bouncing queen deflates into confetti. The grimoire sweeps it with its tongue — ALL of it, down to the last confetti.
 		Twins1: The twins fall from the sky like broken stars. The grimoire plucks their burning lenses and, at last, sees double.
 		Twins2: Two eyes, a single way of looking: yours, burning. The grimoire keeps them on facing pages and makes them compete.
-		Twins3: Retinazer and Spazmatism, extinguished together. The grimoire blinks with both and sees twice the future.
+		Twins3: Retinazer and Spazmatism, both burned out. The grimoire blinks with them and sees twice the future.
 		Destroyer1: The steel serpent roars and goes dark; a thousand probes fall with it. The grimoire winds its metal soul like thread and harvests it.
 		Destroyer2: A thousand red eyes go dark in a row, like a city at night. The grimoire drinks the light of each one: a toast per probe.
-		Destroyer3: The steel serpent no longer pierces the sky. The grimoire spins its metal soul into thread and stitches the tome's spine with it.
+		Destroyer3: The steel serpent no longer pierces the sky. The grimoire folds it and wears it as a clasp — the fastening of the next page.
 		SkeletronPrime1: The Prime returns to its tomb, headless. The grimoire takes its four arms apart and signs with the saw.
 		SkeletronPrime2: Four arms and not one head to drive them. The grimoire inherits the tools and gets to work.
 		SkeletronPrime3: The Prime fits its pieces together one last time. The grimoire scribbles over its tomb with the drill — the final underline.
@@ -1979,7 +1979,7 @@ Eco: {
 		Golem2: The stone guardian stops burning. The grimoire drinks the core like a sip of sun — and burps warm sand.
 		Golem3: Stone that walked, sun it kept. The grimoire takes the sun, leaves the stone — it is learning to choose.
 		DukeFishron1: The Duke dies far from his storm. The grimoire savors his salty essence — pig, dragon and hurricane in a single bite.
-		DukeFishron2: The Duke dies with the storm far from home. The grimoire serves him in three courses: pig, dragon, cold tornado.
+		DukeFishron2: The grimoire serves him in three courses — pig, dragon, cold tornado — with the storm to drink.
 		DukeFishron3: Shark-boar of the winds: a rare recipe. The grimoire files it among the delicacies — 'cook with rage,' it notes.
 		EmpressOfLight1: The Empress dissolves into a flash. The grimoire cannot devour pure light — so it PRESSES it between two pages, forever.
 		EmpressOfLight2: The Empress of Light did not fall: she surrendered to the prism. The grimoire keeps a gleam of her gown as the cover illustration.
@@ -2014,10 +2014,10 @@ Eco: {
 		Llamada: The grimoire calls its food…
 		Saciado: The grimoire is sated… for now.
 		Juicio: THE FINAL WAVE: ALL THE WARDENS AT ONCE. The book's judgment begins…
-		JuicioFin1: Sated… for now. The judgment has been PAID.
+		JuicioFin1: Sated… for now. The judgment has been SERVED.
 		JuicioFin2: The six fell. The judgment's last page is written.
 		JuicioFin3: Full feast. The book closes its mouth… and smiles.
-		Venganza1: You let me starve. I WILL REMEMBER.
+		Venganza1: You died mid-meal. Nobody cleared the table.
 		Venganza2: The bearer fell… and the feast was left without an owner. What WASTE.
 		Venganza3: You died BEFORE feeding me. Double insult.
 		Venganza4: One more page that begins with your name.
@@ -2036,9 +2036,9 @@ Eco: {
 		Arrojadiza1: Throwing things… that's how it all started, you know?
 		Arrojadiza2: Boomerangs. I already ate the guy who invented them.
 		Arrojadiza3: You waste arm and style. I only have hunger.
-		Arco1: A bow? The Archer used one. She ended up as a page.
+		Arco1: A bow? I've devoured better archers. They all ended up as pages.
 		Arco2: Arrows… the liquid diet of poor weapons.
-		Arco3: Draw that string all you want. I'm already drawn.
+		Arco3: Draw that string all you want. I'm already wound tight.
 		Bala1: Noise and metal. No taste.
 		Bala2: Bullets leave no SOUL. Only holes.
 		Bala3: Gunpowder at dusk… and then, nothing. I eat the then.
@@ -2047,7 +2047,7 @@ Eco: {
 	Bioma: {
 		Infierno1: The grimoire is hungry… and down here everything tastes of sulfur.
 		Infierno2: Fire-flesh. Plenty. It burns the page.
-		Infierno3: Hell-salt on the edge of my mouth.
+		Infierno3: Even my mouth tastes of hell-salt.
 		Mazmorra1: Old bones: the dungeon tastes of mold and broken promises.
 		Mazmorra2: This tower's curse no longer feeds even its owners.
 		Mazmorra3: Centuries-old skulls. Vintage, yes… but vintage.
@@ -2056,7 +2056,7 @@ Eco: {
 		Corrupcion3: The eaters here taste of themselves. Food circle.
 		Carmesi1: The crimson seeps. Better drunk than chewed.
 		Carmesi2: Even the walls have a pulse here. Fresh.
-		Carmesi3: They call this rain blood. I call it WEATHER.
+		Carmesi3: They call this rain blood. I call it CLIMATE.
 		Nieve1: The snow is quiet. Even the food is silent here.
 		Nieve2: Frost on the palate: cold, slow, patient.
 		Nieve3: The walking winter passed by here. Smells of Deerclops.
@@ -2234,7 +2234,7 @@ Esencia: {
 	// never repeats the last one).
 	Sabor: {
 		KingSlime1: The King goes down sweet and whole: a gelatin throne digested in three swallows.
-		KingSlime2: Tastes of crown and damp sugar. Royalty ALWAYS falls soft.
+		KingSlime2: Tastes of crown and melted sugar. Royalty ALWAYS falls soft.
 		KingSlime3: The King digested: his crown is my page now. Next?
 		EyeofCthulhu1: The Eye finally closes its lid… inside me. Tastes of tired vigilance.
 		EyeofCthulhu2: A whole eye: the closest thing to drinking the moon in one gulp.

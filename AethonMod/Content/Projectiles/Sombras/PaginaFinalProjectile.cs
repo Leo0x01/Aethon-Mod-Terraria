@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -382,36 +383,91 @@ namespace AethonMod.Content.Projectiles.Sombras
                 DibujarJaula(presa, dueño, t, disipa, tiempo, semilla);
         }
 
-        /// <summary>EL LIBRO del portador: dos hojas negras, el lomo rojo y el ojo que MIRA a la presa.</summary>
+        /// <summary>
+        /// EL LIBRO DEL PORTADOR (v6.50.65 — LA CURA DE LOS RECTÁNGULOS):
+        /// el sprite REAL del Grimorio del Eterno flotando sobre la cabeza
+        /// (grande, con vaivén e inclinación) envuelto en su AURA violeta,
+        /// con EL OJO colosal desplegado encima (mirando a la presa), la
+        /// GARGANTA roja latiendo en el lomo y un hilo de BRUMA que baja
+        /// de sus páginas — el libro de verdad, no dos barras negras.
+        /// </summary>
         private static void DibujarLibro(Vector2 pos, NPC presa, byte fase, float t, float disipa, float tiempo)
         {
             float despliegue = fase == FASE_APERTURA ? SombrasLib.DeGolpe(t / 34f) : 1f;
-            float ancho = 84f * despliegue;
-            float alto = 132f;
-            if (fase == FASE_JAULA) ancho *= 1.12f + 0.06f * MathF.Sin(tiempo * 9f);   // la página se ensancha: hora de comer
-            float lomo = 10f + 10f * despliegue;
 
-            // las dos hojas
-            VFXCore.Begin();
-            Color cHoja = SombrasLib.Alfa(SombrasLib.Negro, 0.96f * disipa);
-            VFXCore.Quad(pos + new Vector2(-lomo * 0.5f - ancho * 0.25f, 0f), cHoja, new Vector2(ancho * 0.5f + 4f, alto), 0f, VFXCore.Pixel);
-            VFXCore.Quad(pos + new Vector2(lomo * 0.5f + ancho * 0.25f, 0f), cHoja, new Vector2(ancho * 0.5f + 4f, alto), 0f, VFXCore.Pixel);
-            VFXCore.FlushAlpha(VFXCore.Pixel);
+            // EL VAIVÉN del libro flotante (nada flota quieto)
+            float bob = MathF.Sin(tiempo * 1.6f) * 7f * despliegue;
+            float inclina = MathF.Sin(tiempo * 0.9f) * 0.09f;
+            Vector2 posLibro = pos + new Vector2(0f, -bob);
 
-            // el lomo rojo (la garganta del libro)
+            // === 1. EL AURA: el resplandor violeta que enmarca al libro ===
             VFXCore.Begin();
-            VFXCore.Quad(pos, SombrasLib.Alfa(SombrasLib.RojoGarganta, 0.5f * despliegue * disipa),
-                new Vector2(lomo * 2f, alto * 0.8f));
+            float pulsoAura = 0.16f + 0.07f * MathF.Sin(tiempo * 2.6f);
+            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.Violeta, pulsoAura * despliegue * disipa),
+                new Vector2(210f * despliegue, 230f * despliegue));
+            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.RojoGarganta, 0.10f * despliegue * disipa),
+                new Vector2(120f * despliegue, 160f * despliegue));
             VFXCore.FlushAdditive();
 
-            // EL OJO: cerrado hasta la mitad de la apertura… abre DE GOLPE
+            // === 2. EL LIBRO DE VERDAD: el sprite del Grimorio del Eterno ===
+            Texture2D tex;
+            try
+            {
+                tex = Terraria.GameContent.TextureAssets.Item[
+                    ModContent.ItemType<Content.Weapons.GrimoireEternal>()].Value;
+            }
+            catch { tex = null; }
+            if (tex != null)
+            {
+                float escala = (2.5f + 0.55f * despliegue) * disipa;
+                if (fase == FASE_JAULA) escala *= 1.16f + 0.05f * MathF.Sin(tiempo * 9f);  // hora de comer: CRECE
+
+                VFXCore.CerrarLoteSiAbierto();
+                try
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                        null, Main.Transform);
+                    Main.spriteBatch.Draw(tex, posLibro - Main.screenPosition, null,
+                        new Color(222, 214, 240, (byte)(255 * disipa)), inclina,
+                        tex.Size() * 0.5f, escala, SpriteEffects.None, 0f);
+                    Main.spriteBatch.End();
+                }
+                catch { VFXCore.CerrarLoteSiAbierto(); }
+                VFXCore.ReabrirLoteVanilla();
+            }
+
+            // === 3. LA GARGANTA ROJA: el lomo late entre las páginas ===
+            if (despliegue > 0.5f)
+            {
+                VFXCore.Begin();
+                float late = 0.30f + 0.16f * MathF.Sin(tiempo * 5.2f);
+                VFXCore.Quad(posLibro + new Vector2(0f, 6f),
+                    SombrasLib.Alfa(SombrasLib.Rojo, late * despliegue * disipa),
+                    new Vector2(58f * despliegue, 108f * despliegue));
+                VFXCore.FlushAdditive();
+            }
+
+            // === 4. EL OJO COLOSAL: desplegado SOBRE el libro, mirando a la presa ===
             float abre = fase == FASE_APERTURA
                 ? MathHelper.Clamp(SombrasLib.DeGolpe((t - 26f) / 8f), 0f, 1f)
                 : 1f;
-            Vector2 mira = presa != null && presa.active ? presa.Center - pos : new Vector2(0f, 200f);
+            Vector2 posOjo = posLibro + new Vector2(0f, -(64f + 26f * despliegue) + bob * 0.5f);
+            Vector2 mira = presa != null && presa.active ? presa.Center - posOjo : new Vector2(0f, 200f);
+            float tamOjo = (30f + 12f * despliegue) * (fase == FASE_JAULA ? 1.35f : 1f);
             VFXCore.Begin();
-            SombrasLib.Ojo(pos, alto * 0.3f * despliegue, mira, abre * disipa);
+            SombrasLib.Ojo(posOjo, tamOjo, mira, abre * disipa);
             VFXCore.FlushAdditive();
+
+            // === 5. LA BRUMA DEL LIBRO: un hilo de sombra que baja de las
+            // páginas al charco — el libro respira hacia la raíz ===
+            if (despliegue > 0.6f)
+            {
+                Vector2 arriba = posLibro + new Vector2(0f, -14f);
+                Vector2 abajo = posLibro + new Vector2(0f, 78f);
+                Vector2[] hilo = SombrasLib.Columna(arriba, abajo, tiempo, 7, 6, 0.10f);
+                SombrasLib.BrumaColumna(hilo, 24f, 0.35f * disipa, tiempo, 7, 3);
+            }
         }
 
         /// <summary>
@@ -433,42 +489,32 @@ namespace AethonMod.Content.Projectiles.Sombras
                 : MathHelper.Lerp(0.7f, 1f, (m - 17f) / 11f);                               // reabre
 
             float rActual = radio * contracción;
-            float largoPúa = radio * 0.36f;
-
-            // LAS PÚAS (negras, gruesas, apuntando al centro)
-            VFXCore.Begin();
+            float largoPúa = radio * 0.44f;
             int nPúas = 12;
+
+            // === LAS GARRAS (v6.50.65 — la cura de las «púas rectangulares»):
+            // 12 zarpos AFILADOS de tres segmentos que se estrechan y se
+            // curvan en gancho alternado hacia el jefe, con la punta de
+            // HUESO blanca — leen como zarpas de sombra, no como barras ===
             for (int k = 0; k < nPúas; k++)
             {
                 float ang = k / (float)nPúas * MathHelper.TwoPi + tiempo * 0.12f;   // la jaula gira lenta
                 Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang) * 0.86f);
-                Vector2 fuera = presa.Center + dir * rActual;
-                Vector2 dentro = presa.Center + dir * (rActual - largoPúa);
-                VFXCore.Line(fuera, dentro, SombrasLib.Alfa(SombrasLib.Negro, 0.95f * disipa), 9f);
+                Vector2 fuera = presa.Center + dir * (rActual + largoPúa * 0.18f);
+                float gancho = (k % 2 == 0 ? 1f : -1f) * 0.55f;
+                SombrasLib.Garra(fuera, -dir, largoPúa, 0.95f * disipa, gancho);
             }
-            VFXCore.FlushAlpha(VFXCore.Pixel);
 
-            // LAS PUNTAS BLANCAS (dientes de hueso apuntando al jefe)
-            VFXCore.Begin();
-            for (int k = 0; k < nPúas; k++)
-            {
-                float ang = k / (float)nPúas * MathHelper.TwoPi + tiempo * 0.12f;
-                Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang) * 0.86f);
-                Vector2 dentro = presa.Center + dir * (rActual - largoPúa);
-                Vector2 masDentro = presa.Center + dir * (rActual - largoPúa - 12f);
-                VFXCore.Line(dentro, masDentro, SombrasLib.Alfa(SombrasLib.Blanco, 0.7f * disipa), 4f);
-            }
-            VFXCore.FlushAdditive(VFXCore.Pixel);
-
-            // LOS OJOS ENTRE LAS PÚAS: la jaula TE MIRA mientras come
+            // LOS OJOS ENTRE LAS GARRAS: la jaula TE MIRA mientras come
+            // (v6.50.65 — MÁS GRANDES y con el halo de la casa: PRENDEN)
             VFXCore.Begin();
             for (int k = 0; k < 6; k++)
             {
                 float ang = (k + 0.5f) / 6f * MathHelper.TwoPi + tiempo * 0.12f;
                 Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang) * 0.86f);
-                Vector2 pos = presa.Center + dir * (rActual + 26f);
+                Vector2 pos = presa.Center + dir * (rActual + 30f);
                 float abierto = 0.75f + 0.25f * MathF.Sin(tiempo * 3.5f + k * 1.9f);
-                SombrasLib.Ojo(pos, 13f + 7f * (k % 3), dueño.MountedCenter - pos, abierto * disipa);
+                SombrasLib.Ojo(pos, 18f + 9f * (k % 3), dueño.MountedCenter - pos, abierto * disipa);
             }
             VFXCore.FlushAdditive();
 
@@ -481,16 +527,23 @@ namespace AethonMod.Content.Projectiles.Sombras
             }
             SombrasLib.BrumaColumna(anillo, radio * 0.5f, 0.4f * disipa, tiempo, semilla + 19, 12);
 
-            // === EL JUICE DEL IMPACTO (los primeros 14 t): destello rojo + onda de choque ===
-            if (t < 8f)
+            // === EL JUICE DEL IMPACTO (los primeros 18 t — v6.50.65 ×2):
+            // destello rojo GRANDE + doble onda de choque + destello blanco ===
+            if (t < 10f)
             {
                 VFXCore.Begin();
-                VFXCore.Quad(presa.Center, SombrasLib.Alfa(SombrasLib.Rojo, 0.35f * (1f - t / 8f) * disipa),
-                    new Vector2(300f, 300f));
+                VFXCore.Quad(presa.Center, SombrasLib.Alfa(SombrasLib.Rojo, 0.40f * (1f - t / 10f) * disipa),
+                    new Vector2(460f, 460f));
+                VFXCore.Quad(presa.Center, SombrasLib.Alfa(SombrasLib.Blanco, 0.25f * (1f - t / 10f) * disipa),
+                    new Vector2(220f, 220f));
                 VFXCore.FlushAdditive();
             }
-            if (t < 14f)
-                SombrasLib.OndaChoque(presa.Center, 60f + t * 26f, 0.55f * (1f - t / 14f) * disipa);
+            if (t < 18f)
+            {
+                SombrasLib.OndaChoque(presa.Center, 70f + t * 32f, 0.60f * (1f - t / 18f) * disipa);
+                if (t > 4f)
+                    SombrasLib.OndaChoque(presa.Center, 40f + (t - 4f) * 26f, 0.45f * (1f - t / 18f) * disipa, false);
+            }
 
             // LAS ALMAS: la vida vuela al portador mientras la jaula aprieta
             VFXCore.Begin();
