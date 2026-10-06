@@ -547,17 +547,19 @@ namespace AethonMod.Content.Items.Bolsas
         protected override string Titulo => "La Bolsa de las Sombras";
         protected override string NombreCorto => "Bolsa de las Sombras";
         protected override Color ColorFiesta => new(196, 90, 255);
-        protected override string Nota => "Las cuatro fauces que devoran jefes — donde hay sombra, la página mira";
+        protected override string Nota => "Las cuatro páginas de la sombra — donde hay sombra, la página mira";
 
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.50.62 — LAS FAUCES (la prueba del usuario, ahora en el kit)
-            l.Add((ModContent.ItemType<Weapons.Sombras.FauceDelGrimorio>(), 1));   // EL TENTÁCULO-PINZA: el latigazo que SIEMPRE llega
-            l.Add((ModContent.ItemType<Weapons.Sombras.TajoDeLasSombras>(), 1));   // LA ESFERA: ojos que miran, boca de colmillos
-            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // EL CÓDIGO VIVO: 100% procedural
-            // v6.50.64 — EL ARMA 4: LA PÁGINA FINAL (la evolución AAA del arma 3)
-            l.Add((ModContent.ItemType<Weapons.Sombras.PaginaFinal>(), 1));      // EL LIBRO: apertura → 3 versos → jaula de tinta → festín
+            // v6.50.66 — LA FAMILIA DE LA PÁGINA: el usuario jubiló a las
+            // 3 armas viejas (pinza del gif, tajo-esfera y libro) y pidió
+            // que las 4 armas sean la Sombra de la Página y sus 3 hermanas
+            // (copias con MÁS personalidad, más bruma, más alma)
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA BASE: intacta, como pidió el usuario
+            l.Add((ModContent.ItemType<Weapons.Sombras.MareaDeLaPagina>(), 1));   // HERMANA 1: el océano — tres cabezas en oleada, anillos, niebla
+            l.Add((ModContent.ItemType<Weapons.Sombras.MiradaDeLaPagina>(), 1));  // HERMANA 2: la que te mira — pared de ojos + el ojo colosal
+            l.Add((ModContent.ItemType<Weapons.Sombras.NidoDeLaPagina>(), 1));    // HERMANA 3: la madre — huevos, jaula de garras, almas
             return l;
         }
     }

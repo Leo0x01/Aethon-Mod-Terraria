@@ -77,7 +77,11 @@ namespace AethonMod.Content.Effects.Bruma
         /// Techo de quads de bruma por frame: superado esto, los puffs
         /// NUEVOS degradan su calidad (menos sub-blobs) automáticamente.
         /// </summary>
-        private const int PresupuestoQuads = 500;
+        // v6.50.66 — 500→800: el usuario pidió MÁS BRUMA («la bruma es
+        // muy poca, se necesita más bruma»); con el lote Deferred de
+        // VFXCore y los lotes de masa de BrumaFX (1 Map por volcado,
+        // no por quad — el fix del crash) el presupuesto sobra.
+        private const int PresupuestoQuads = 800;
 
         private static int _frameQuads;
         private static uint _frameId;

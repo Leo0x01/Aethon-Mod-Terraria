@@ -381,7 +381,16 @@ namespace AethonMod.Content.VFX
                 // del juego se corrompía hasta relogear, y el búfer nunca se
                 // limpiaba (los cuadros muertos se re-volcaban cada frame).
                 // Ahora: el End y la limpieza se garantizan pase lo que pase.
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                // v6.50.66 — EL FIX DEL CRASH DEL CLIENT.LOG (OutOfMemory
+                // 0x8007000E al mapear el vertex buffer): Immediate hacía
+                // UN Map(Discard) del vertex buffer POR CADA quad — con los
+                // cientos de quads de sombra por frame eran ~millones de
+                // Maps en minutos y el pool de staging del driver se agotaba
+                // (~7,5 min de juego → crash). Deferred acumula TODOS los
+                // cuadros del volcado y sube el buffer UNA sola vez (FNA
+                // corta el lote solo si cambia la textura — mezclar Pixel,
+                // SoftGlow, GlowOrb y Ring sigue siendo gratis).
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
@@ -441,7 +450,9 @@ namespace AethonMod.Content.VFX
                 // 12:31:33).
                 CerrarLoteSiAbierto();
 
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                // v6.50.66 — mismo fix del crash que FlushAdditive:
+                // Deferred = 1 Map por volcado (antes: 1 Map POR QUAD).
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 

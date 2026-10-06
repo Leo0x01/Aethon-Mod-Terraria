@@ -79,39 +79,8 @@ Items: {
 	// ("the gif doubled at the tip, one per corner, so it behaves like
 	// teeth" + "black mist on every tentacle and mouth").
 	
-	FauceDelGrimorio: {
-		DisplayName: The Grimoire's Maw
-		Tooltip:
-			'''
-			"Where there is shadow, the page is watching."
-			THE PINCER: the tentacle is born from your shadow with TWO
-			MAW-HEADS at its tip — one on each corner, spread like
-			TEETH. Together they lash toward the boss — NO MATTER HOW
-			FAR, the whip ALWAYS reaches. Both mouths CLOSE the pincer
-			on the boss and hunger drains its life bite by bite, while
-			the whole body and both mouths exhale BLACK MIST.
-			When the boss drops to 1 HP, its death STOPS: the pincer
-			devours it whole — the death animation is OURS.
-			(Maw test weapon — v2.)
-			'''
-	}
-
-	TajoDeLasSombras: {
-		DisplayName: The Shadow Slash
-		Tooltip:
-			'''
-			"The edge cuts; the shadow keeps the piece."
-			THE SLASH: a crescent of shadows flies to the boss trailing
-			BLACK MIST and seals it inside a black SPHERE covered in
-			eyes — all of them staring at YOU while they feed. The
-			equatorial fanged mouth bites three times, breathes mist
-			and drains it.
-			At 1 HP: the sphere devours it and it disintegrates
-			into mist and dust.
-			(Maw test weapon — v2.)
-			'''
-	}
-
+	
+	
 	SombraDeLaPagina: {
 		DisplayName: The Shadow of the Page
 		Tooltip:
@@ -127,26 +96,60 @@ Items: {
 			'''
 	}
 
-	// v6.50.64 — WEAPON 4: THE FINAL PAGE (the AAA evolution of the
-	// Shadow of the Page). 100% code.
-	
-	PaginaFinal: {
-		DisplayName: The Final Page
+	MareaDeLaPagina: {
+		// v6.50.66 — SISTER 1 of the Shadow of the Page (takes the Grimoire's Maw slot)
+		DisplayName: The Tide of the Page
 		Tooltip:
 			'''
-			"The grimoire's last page: the one that writes itself
-			with every devoured boss."
-			THE RITUAL IN FOUR ACTS (the evolution of the Shadow of
-			the Page — 100% code, not a single sprite):
-			THE OPENING — the book unfolds its eye above you and the
-			room goes dark; THE THREE VERSES — three tendrils leave
-			your shadow from different angles and CONVERGE on the
-			boss; THE INK CAGE — the ring of white-tipped spikes
-			snaps shut bite after bite (the strongest drain of the
-			four maws); THE FEAST — at 1 HP the GIANT book opens
-			in the sky, its tendrils seize the boss, darkness RISES
-			eating it… and the book seals with a shockwave.
-			(Maw test weapon — v1.)
+			"Where there is shadow, the page is sea."
+			THE TIDE: the same ground shadow, but made LIVING WATER —
+			not one tendril: THREE CREST-HEADS biting in a WAVE, each on
+			its own shifted rhythm (the tide doesn't chew: it SWALLOWS
+			in waves). The pool carries expanding RIPPLE RINGS, fog
+			CRAWLS along the ground like on a shore, pulses climb the
+			body like the sea's swell... and when the jaws SNAP, black
+			SPRAY flies. It hunts WEAVING through the air.
+			It nibbles fast and soft (2.2% every 5 ticks).
+			At 1 HP: THE RISING WAVE — the feast with a crest of mouths.
+			(Sister of the shadows — 100% code, not a single sprite.)
+			'''
+	}
+
+	MiradaDeLaPagina: {
+		// v6.50.66 — SISTER 2 of the Shadow of the Page (takes the Shadow Slash slot)
+		DisplayName: The Gaze of the Page
+		Tooltip:
+			'''
+			"The page is watching you. It always was."
+			THE GAZE: the same ground shadow, but ALL EYES — a WALL OF
+			FOURTEEN EYES blinking in WAVES, every pupil LOCKED on the
+			prey. Three GAZE LINES stretch to the target (the violet
+			promise)... and on the bite, THE COLOSSAL EYE opens above
+			the head: half-lidded while hunting, WIDE OPEN at the
+			sentence, its PUPIL GROWING with every swallow. The eyes
+			squint with fury, weep INK TEARS, and the room becomes EDGE.
+			It bites slow and deep (2.8% every 7 ticks): the gaze doesn't
+			devour — it SENTENCES. At 1 HP: THE EYE OF JUDGMENT.
+			(Sister of the shadows — 100% code, not a single sprite.)
+			'''
+	}
+
+	NidoDeLaPagina: {
+		// v6.50.66 — SISTER 3 of the Shadow of the Page (takes the Final Page slot — NO book sprite)
+		DisplayName: The Nest of the Page
+		Tooltip:
+			'''
+			"The page broods. Its children are hungry."
+			THE NEST: the same ground shadow, but HEAVY WITH YOUNG — the
+			pool is full of red-cored EGGS that pulse slowly... and on
+			the bite they HATCH: mini-jaws that open and release a SOUL
+			each. The head wears the CROWN OF SIX CLAWS, folded like a
+			bud while hunting... which OPENS AND CLOSES INTO A CAGE on
+			the prey, squeezing in rhythm with the bite. Four SOULS orbit
+			the head at all times (the ones already living in the page)
+			and spin faster when the mother feeds. The deepest drain of
+			the sisters (3.2% every 8 ticks). At 1 HP: THE CAGE.
+			(Sister of the shadows — 100% code, no sprites, no book.)
 			'''
 	}
 
@@ -771,15 +774,16 @@ Items: {
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
 		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
-		DisplayName: Bag of Shadows
+		// v6.50.66: THE PAGE FAMILY — the 3 old weapons retired by the user; now the Shadow + its 3 SISTERS
+		DisplayName: Shadows Bag
 		Tooltip:
 			'''
-			The grimoire's four devouring shadow maws (Pride style).
-			The twin-headed pincer that ALWAYS arrives (The Grimoire's Maw),
-			the eyed sphere that devours (The Shadow Slash), the 100%
-			code-drawn maw (The Page's Shadow) and its evolution: the
-			book ritual (The Final Page). All of them breathe black mist.
-			At 1 HP: the feast begins.
+			The four pages of the shadow (Pride style).
+			The untouched base (The Shadow of the Page) and its THREE
+			SISTERS: the three-headed ocean (The Tide), the wall of eyes
+			with its colossal eye (The Gaze) and the mother of eggs and
+			claws (The Nest). All of them breathe black mist.
+			At 1 HP: the feast begins — each with her own signature.
 			Right-click to deploy them. Only delivers what you're missing.
 			'''
 	}
@@ -1735,9 +1739,10 @@ Items: {
 }
 
 Projectiles: {
-	FaucesTentaculoProjectile.DisplayName: The Grimoire's Maw
-	TajoSombraProjectile.DisplayName: The Shadow Slash
 	SombraPaginaProjectile.DisplayName: The Shadow of the Page
+	MareaPaginaProjectile.DisplayName: The Tide of the Page
+	MiradaPaginaProjectile.DisplayName: The Gaze of the Page
+	NidoPaginaProjectile.DisplayName: The Nest of the Page
 	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
 	GenesisLight.DisplayName: Genesis Light
@@ -1864,7 +1869,6 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
-	PaginaFinalProjectile.DisplayName: Pagina Final Projectile
 }
 
 Buffs: {

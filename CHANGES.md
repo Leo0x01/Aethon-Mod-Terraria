@@ -1,5 +1,98 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.66 — LAS TRES HERMANAS DE LA PÁGINA + EL FIX DEL CRASH + MÁS BRUMA
+
+**Feedback del usuario**: "no uses el sprite del libro, y la bruma es muy
+poca se necesita mas bruma, ahora de las 4 armas borra 3 y deja la Sombra
+de la Pagina, parece ser la mejor pero le falta personalidad y mas efectos
+visuales, primero, deja la Sombra de Pagina tal como esta, y usa las otras
+3 armas para copiar la Sombra de la Pagina y darle mas personalidad, mas
+efectos visuales, mas sabor, mas alma, mas de todo a esas 3 copias,
+entiendes — tambien aparecio un error y el juego se cerro, te mando el
+log".
+
+**(0) EL CRASH DEL CLIENT.LOG — OutOfMemory 0x8007000E al mapear el vertex
+buffer, ~7,5 min de juego.** La víctima visible era el `MapHeadRenderer`
+(el ícono del mapa de vanilla), pero el asesino era NUESTRO:
+`VFXCore.FlushAdditive/FlushAlpha` abrían sus lotes en
+`SpriteSortMode.Immediate` — y en FNA, Immediate hace **UN Map(Discard)
+del vertex buffer POR CADA quad**. Con los cientos de quads de sombra por
+frame que metió la .65 (rim + halo + aliento + ojos + garras + bruma en
+masa), eran ~millones de Map(Discard) en minutos: el pool de staging del
+driver se agotaba y FNA moría con `Could not map vertex buffer for
+writing`. LA CURA: **Deferred** en ambos vuelcos — el lote completo sube
+al buffer UNA sola vez (FNA corta solo si cambia la textura, así que
+mezclar Pixel/SoftGlow/GlowOrb/Ring sigue gratis). De 1 Map POR QUAD a 1
+Map POR VOLCADO. (Los lotes de BrumaFX ya eran Deferred; el presupuesto
+de puffs sube 500→800 para pagar el «más bruma».)
+
+**(1) LAS TRES HERMANAS** — La Sombra de la Página queda **INTACTA** (la
+base, como pidió el usuario) y las 3 armas viejas MUEREN con sus sprites
+(La Fauce del Grimorio con el gif del usuario, El Tajo de las Sombras con
+su esfera, La Página Final con el libro — el sprite del libro además
+QUEDÓ VETADO). En su lugar: TRES COPIAS de la Sombra con el mismo
+esqueleto (nace del charco del suelo → columna Bézier → masa de sierra →
+ojos → fauces → mordida → festín) y un HAMBRE distinto cada una:
+
+- **LA MAREA DE LA PÁGINA** (hermana 1, el puesto de la Fauce): el OCÉANO
+  de la página. TRES CABEZAS-CRESTA mordiendo en OLEADA (ciclos
+  desfasados 0/7,3/14,6 — la marea no mastica: TRAGA), el charco con
+  ANILLOS DE OLEAJE que se expanden, NIEBLA RASANTE pegada al suelo (el
+  banco de bruma de la orilla), PULSOS que suben por el cuerpo (el vaivén
+  del mar), SPRAY de gotas negras cuando las fauces cierran y un
+  serpenteo de ola al volar. Dren 2,2%/5t (mordisquea rápido y suave).
+  Festín ESTILO 5: LA OLA QUE SUBE — el plano negro trepa por el cuerpo
+  del jefe con una CRESTA de cinco mini-fauces masticando a lo ancho.
+- **LA MIRADA DE LA PÁGINA** (hermana 2, el puesto del Tajo): la página
+  que TE MIRA. UNA PARED DE 14 OJOS en dos filas que parpadean EN OLEADAS
+  (ciclo propio por ojo), TRES LÍNEAS DE MIRADA violeta tendidas hasta la
+  presa (el telegraph), y encima de la cabeza EL OJO COLOSAL — medio
+  cerrado en la caza (te vigila), ABIERTO DE GOLPE al morder (te juzga)
+  con LA PUPILA QUE ENGORDA con cada tragada. Al morder: los ojos
+  ENTRECIERRAN de furia, lloran LÁGRIMAS DE TINTA y la sala se apaga con
+  la VIÑETA DE LA SENTENCIA. Dren 2,8%/7t (muerde lento y hondo). Festín
+  ESTILO 6: EL OJO DEL JUICIO — el ojo colosal sobre el jefe que
+  parpadea con cada mordida.
+- **EL NIDO DE LA PÁGINA** (hermana 3, el puesto de la Página Final —
+  SIN el sprite del libro): la MADRE de las sombras. El charco lleno de
+  CINCO HUEVOS de núcleo rojo que laten despacio… y al morder SE
+  ECLOSIONAN: mini-fauces que abren la boca y sueltan un ALMA cada una.
+  La cabeza coronada por SEIS GARRAS plegadas en capullo que al morder SE
+  ABIEN Y CIERRAN EN JAULA sobre la presa (apretando al compás de la
+  mordida), CUATRO ALMAS orbitando la cabeza en todo momento (giran más
+  rápido cuando la madre come). Dren 3,2%/8t (el más hondo de las
+  hermanas). Festín ESTILO 7: LA JAULA — ocho garras cerrándose sobre el
+  jefe + las almas de las crías orbitando la comida.
+
+**Cirugía del motor del festín** (`FauceDevoradorProjectile`, 619→382
+líneas): los estilos MUERTOS (1-sprite de la pinza, 2-esfera, 4-libro) se
+BORRARON con sus armas — incluidos `DrawEsfera`, `DrawPagina` (el libro
+gigante) y `FrameFestin`; el estilo por defecto de `FaucesGlobalNPC` pasa
+de 1 a 3 (la sombra); NUEVO `DrawAdorno(jefe, estilo)` añade la firma de
+cada hermana sobre el festín común de tentáculo (el estilo 3 queda
+exactamente como era). La Bolsa de las Sombras entrega ahora la Sombra +
+las TRES HERMANAS ( tooltips nuevos es-MX/es-ES/en-US, simétricos).
+
+**(2) MÁS BRUMA** — «la bruma es muy poca»: presupuesto de puffs 500→800
+y cada hermana exhala MÁS que la base (Marea: 16 puffs + 3 nubes
+rasantes · Mirada: 14 + 2 nubes envolventes · Nido: 15 + la nube del
+nido); el festín de cada hermana añade su propia humareda.
+
+**Verificación**: oráculo 0 errores/0 warnings (cazó 3: `jefe.Height` no
+existe → `jefe.Size.Y`) · build real 0/0 · .tmod 6.414.883 B md5
+d709d8693ffd9c2aec13efb1f78b131e, 393 entradas (395 − 5 pngs muertos + 3
+iconos de hermanas), 3/3 hjson byte-idénticos a la fuente, EOF exacto ·
+DLL: MareaPaginaProjectile/MiradaPaginaProjectile/NidoPaginaProjectile/
+MareaDeLaPagina/MiradaDeLaPagina/NidoDeLaPagina/DrawAdorno VIVOS,
+FaucesTentaculoProjectile/TajoSombraProjectile/PaginaFinalProjectile/
+FauceDelGrimorio/TajoDeLasSombras/PaginaFinal AUSENTES · headless 0
+excepciones (cazó ANTES del fix: el hjson en-US malformed — la cirugía
+de la bolsa había borrado la línea `BolsaSombras: {` en los 3 idiomas;
+reparado + balance de llaves 0 en los 3) · iconos de las 3 hermanas
+generados en pixel art y pasados por VLM (3 iteraciones: Marea espuma +
+gargantas, Mirada tallo del ojo + ojos grandes, Nido garras hueso —
+todos SHIP).
+
 ## Commit v6.50.65 — EL ARREGLO DE LOS DIÁLOGOS + EL ESPAÑOL LATAM + LA BRUMA QUE SÍ SE VE + EL ARMA 4 DE VERDAD
 
 **Feedback del usuario**: "arreglar los dialogos y asegurate de que tengan

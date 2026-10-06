@@ -161,7 +161,9 @@ namespace AethonMod.Content.Globals
                 && caduca > 0;
             if (!marcado) return true;                            // muerte ajena: normal
 
-            byte estilo = _marcasEstilo.TryGetValue(npc.whoAmI, out byte e) ? e : (byte)1;
+            // v6.50.66 — el estilo 1 (la pinza del gif) murió con su arma:
+            // el festín por defecto es la sombra (3).
+            byte estilo = _marcasEstilo.TryGetValue(npc.whoAmI, out byte e) ? e : (byte)3;
             _marcas.Remove(npc.whoAmI);
             _marcasEstilo.Remove(npc.whoAmI);
 

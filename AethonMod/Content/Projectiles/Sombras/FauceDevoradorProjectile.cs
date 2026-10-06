@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -16,35 +15,34 @@ namespace AethonMod.Content.Projectiles.Sombras
     /// animación original de muerte SE DETIENE y no avanza; en su lugar
     /// se activa la nueva: la sombra sale y LO DEVORA.»
     ///
-    /// v6.50.64 — dos añadidos: (a) LA BRUMA NEGRA en todos los estilos
-    /// (el tentáculo gigante, la esfera y la página exhalan puﬀs vivos
-    /// — la petición del usuario); (b) el ESTILO 4 — LA PÁGINA FINAL del
-    /// arma 4: el festín de CINE (libro gigante que se abre sobre el
-    /// jefe, zarpos que lo agarran, el plano negro que SUBE comiéndoselo
-    /// con una boca de colmillos en el borde, almas al libro y al final
-    /// el libro se PLEGRA y estalla).
+    /// v6.50.66 — LAS TRES HERMANAS: el usuario jubiló a las 3 armas
+    /// viejas (la pinza del gif, la esfera del tajo y el libro de la
+    /// página final) y pidió copiar a La Sombra de la Página con más
+    /// personalidad. LOS ESTILOS MUERTOS (1-sprite, 2-esfera, 4-libro)
+    /// se BORRARON con sus armas — el sprite del libro quedó VETADO por
+    /// el usuario («no uses el sprite del libro»). Los estilos vivos:
+    /// 3 = La Sombra de la Página (la base, INTACTA), 5 = LA MAREA
+    /// (ola que sube + cresta de fauces), 6 = LA MIRADA (el ojo del
+    /// juicio + viñeta), 7 = EL NIDO (jaula de garras + almas). Cada
+    /// hermana añade su FIRMA sobre el festín común (DrawAdorno).
     ///
     /// Lo spawnea FaucesGlobalNPC al interceptar la muerte (o al clavar
     /// la vida en 1 con el drain). El jefe queda POSADO (PreAI false —
     /// ni IA ni animación) mientras ESTE proyectil ejecuta el festín:
     ///
     ///   0-30   MANIFESTACIÓN — la sombra ERUPCIONA del portador
-    ///          (estilo 1/3: el tentáculo GIGANTE se alza del charco;
-    ///           estilo 2: la esfera se cierra alrededor del jefe;
-    ///           estilo 4: LA PÁGINA se abre en el cielo como un libro).
+    ///          (el tentáculo GIGANTE se alza del charco).
     ///   30-60  ENVOLVER — el tentáculo SERPENTEA hasta el jefe y lo
-    ///          enrosca / la esfera aprieta (los ojos se abren TODOS) /
-    ///          los ZARPOS bajan de la página y agarran.
+    ///          enrosca.
     ///   60-160 EL FESTÍN — las fauces MASTICAN (3 mordidas sonoras),
     ///          la OSCURIDAD crece sobre el jefe hasta taparlo, las
-    ///          ALMAS vuelan al portador (estilo 4: al LIBRO — y del
-    ///          libro al portador al cierre).
+    ///          ALMAS vuelan al portador… y cada hermana añade su firma
+    ///          (5: la ola que sube · 6: el ojo del juicio · 7: la jaula).
     ///   160-210 LA DISIPACIÓN — bruma negra y polvo: el jefe se
-    ///          desintegra (estilo 4: el libro se sella con una onda
-    ///          de choque). A los 210 el motor mata de verdad (el loot
+    ///          desintegra. A los 210 el motor mata de verdad (el loot
     ///          cae DENTRO de la bruma: el festín lo digiere todo).
     ///
-    /// ai[0] = whoAmI del jefe · ai[1] = estilo (1/2/3/4) · ai[2] = tick.
+    /// ai[0] = whoAmI del jefe · ai[1] = estilo (3/5/6/7) · ai[2] = tick.
     /// </summary>
     public class FauceDevoradorProjectile : ModProjectile
     {
@@ -97,14 +95,18 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             if (Main.netMode == NetmodeID.Server) return;   // el server no dibuja
 
-            // === LOS SONIDOS DEL FESTÍN DE LA PÁGINA (estilo 4 — v6.50.64):
-            // suenan en SP y en los clientes (el server no tiene oídos) ===
-            if ((byte)Projectile.ai[1] == 4)
+            // === LOS SONIDOS DEL FESTÍN DE LAS TRES HERMANAS (v6.50.66 —
+            // estilos 5/6/7: la MAREA, la MIRADA y el NIDO; suenan en SP
+            // y en los clientes — el server no tiene oídos. El estilo 3
+            // (La Sombra de la Página) queda EXACTAMENTE como era) ===
+            byte estiloSonido = (byte)Projectile.ai[1];
+            if (estiloSonido >= 5)
             {
-                if (t == 28) Sonar(SoundID.Item74.WithPitchOffset(-0.5f).WithVolumeScale(0.7f), Projectile.Center);   // el libro se abre
-                if (t == 62) Sonar(SoundID.Item122.WithPitchOffset(-0.35f).WithVolumeScale(0.85f), Projectile.Center); // los zarpos caen
-                if (t == 96 || t == 136) Sonar(SoundID.NPCHit9.WithPitchOffset(-0.3f).WithVolumeScale(0.7f), Projectile.Center); // mastica
-                if (t == 168) Sonar(SoundID.Item122.WithPitchOffset(0.2f).WithVolumeScale(0.7f), Projectile.Center);  // se sella
+                float tono = estiloSonido == 5 ? -0.50f : estiloSonido == 6 ? -0.28f : -0.62f;
+                if (t == 28) Sonar(SoundID.Item122.WithPitchOffset(tono).WithVolumeScale(0.8f), Projectile.Center);    // la sombra se alza
+                if (t == 62) Sonar(SoundID.Item74.WithPitchOffset(tono).WithVolumeScale(0.75f), Projectile.Center);    // el abrazo cae
+                if (t == 96 || t == 136) Sonar(SoundID.NPCHit9.WithPitchOffset(tono * 0.5f).WithVolumeScale(0.7f), Projectile.Center); // mastica
+                if (t == 168) Sonar(SoundID.Item122.WithPitchOffset(0.2f).WithVolumeScale(0.7f), Projectile.Center);   // se disuelve
             }
 
             // === POLVO Y AMBIENTE (el cliente lo genera local, determinista basta) ===
@@ -143,9 +145,8 @@ namespace AethonMod.Content.Projectiles.Sombras
             try
             {
                 byte estilo = (byte)Projectile.ai[1];
-                if (estilo == 2) DrawEsfera(jefe);
-                else if (estilo == 4) DrawPagina(jefe);
-                else DrawTentaculo(jefe, estilo == 3);
+                DrawTentaculo(jefe);
+                DrawAdorno(jefe, estilo);
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.ReabrirLoteVanilla();
@@ -153,10 +154,11 @@ namespace AethonMod.Content.Projectiles.Sombras
         }
 
         // ==================================================================
-        //  ESTILOS 1 y 3 — EL TENTÁCULO GIGANTE (sprite / 100% código)
+        //  EL TENTÁCULO GIGANTE (100% código — el estilo de sprite murió
+        //  con su arma en la v6.50.66)
         // ==================================================================
 
-        private void DrawTentaculo(NPC jefe, bool procedural)
+        private void DrawTentaculo(NPC jefe)
         {
             float tiempo = Main.GlobalTimeWrappedHourly;
             int semilla = Projectile.whoAmI * 31 + jefe.whoAmI;
@@ -199,10 +201,10 @@ namespace AethonMod.Content.Projectiles.Sombras
                 VFXCore.FlushAlpha();
             }
 
-            // === LA CABEZA-BOCA ===
-            if (procedural)
+            // === LA CABEZA-BOCA (100% código — la pinza de sprite murió
+            // con su arma en la v6.50.66) ===
             {
-                // estilo 3: FAUCES 100% CÓDIGO — mastica el ciclo del festín
+                // FAUCES PROCEDURALES — mastica el ciclo del festín
                 Vector2 rumbo = (jefe.Center - col[col.Length - 4]).SafeNormalize(Vector2.UnitX);
                 float apertura = t < 60f
                     ? 0.9f * manifiesta
@@ -212,63 +214,6 @@ namespace AethonMod.Content.Projectiles.Sombras
                 // v6.50.64 — EL ALIENTO: las fauces del festín respiran bruma
                 SombrasLib.BrumaBoca(destino, rumbo, apertura * vivo, 0.5f * vivo, tiempo, semilla + 5, 5);
             }
-            else
-            {
-                // estilo 1: EL SPRITE GIGANTE del usuario ×2 — LA PINZA
-                // DOBLE (v6.50.64: «el gif doble en la punta, uno en cada
-                // esquina, se comporta como dientes») a escala ~0.95/cabeza
-                Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[
-                    ModContent.ProjectileType<FaucesTentaculoProjectile>()].Value;
-                int frame = FrameFestin(t);
-                Rectangle src = new Rectangle((frame % 6) * (tex.Width / 6),
-                    (frame / 6) * (tex.Height / 3), tex.Width / 6, tex.Height / 3);
-                float escala = 0.95f * manifiesta;
-                if (t > 60f) escala *= 1f + 0.05f * MathF.Sin(tiempo * 8f);     // la pinza APRIETA
-                escala *= 0.85f + 0.15f * vivo;
-
-                float rot = (jefe.Center - raiz).ToRotation();
-                Vector2 eje = new(MathF.Cos(rot), MathF.Sin(rot));
-                Vector2 perp = new(-eje.Y, eje.X);
-
-                // la pinza del festín: plegada al brotar · ABIERTA al
-                // envolver · MASTICA apretando durante el festín
-                float abre = t < 30f ? 0.14f
-                    : t < 60f ? 0.36f
-                    : 0.09f + 0.06f * (0.5f + 0.5f * MathF.Sin(tiempo * 8f));
-
-                // las bases: en la punta del cuerpo; separadas a lo ancho
-                // del jefe mientras lo comen (muerden desde esquinas opuestas)
-                float agarre = t > 60f ? MathHelper.Clamp(jefe.width * 0.18f, 10f, 30f) : 0f;
-                Vector2 baseA = destino + perp * agarre;
-                Vector2 baseB = destino - perp * agarre;
-
-                Vector2 origen = new Vector2(src.Width * 0.42f, src.Height * 0.94f);
-                Color luz = Lighting.GetColor(destino.ToTileCoordinates());
-                Color tint = new Color(luz.R, luz.G, luz.B, 255) * vivo;
-
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                    null, Main.Transform);
-                Main.EntitySpriteDraw(tex, baseA - Main.screenPosition, src, tint, rot + abre,
-                    origen, escala, SpriteEffects.None, 0f);
-                Main.EntitySpriteDraw(tex, baseB - Main.screenPosition, src, tint, rot - abre,
-                    origen, escala, SpriteEffects.None, 0f);
-                Main.spriteBatch.End();
-
-                // la soldadura de la horquilla gigante + EL ALIENTO de las
-                // dos bocas (v6.50.64 — la bruma negra de las fauces)
-                VFXCore.Begin();
-                VFXCore.Quad(destino, SombrasLib.Alfa(SombrasLib.Negro, 0.95f * vivo),
-                    new Vector2(120f, 120f), 0f, VFXCore.GlowOrb);
-                VFXCore.FlushAlpha();
-                Vector2 dirA = new(MathF.Cos(rot + abre), MathF.Sin(rot + abre));
-                Vector2 dirB = new(MathF.Cos(rot - abre), MathF.Sin(rot - abre));
-                SombrasLib.BrumaBoca(baseA + dirA * (src.Width * 0.42f * escala), dirA,
-                    0.85f, 0.5f * vivo, tiempo, semilla + 3, 4);
-                SombrasLib.BrumaBoca(baseB + dirB * (src.Width * 0.42f * escala), dirB,
-                    0.85f, 0.5f * vivo, tiempo, semilla + 9, 4);
-            }
-
             // === LAS ALMAS: la vida del jefe vuela al portador ===
             if (t > 55f)
             {
@@ -296,292 +241,125 @@ namespace AethonMod.Content.Projectiles.Sombras
         }
 
         // ==================================================================
-        //  ESTILO 2 — LA ESFERA (la boca cerrada que desintegra)
+        // ==================================================================
+        //  v6.50.66 — LOS ADORNOS DE LAS TRES HERMANAS (estilos 5/6/7):
+        //  el festín de sombra (el tentáculo común de arriba) + LA FIRMA
+        //  de cada arma nueva. El estilo 3 (La Sombra de la Página, la
+        //  base que el usuario pidió dejar INTACTA) no lleva adorno.
         // ==================================================================
 
-        private void DrawEsfera(NPC jefe)
+        /// <summary>
+        /// LA FIRMA DE CADA HERMANA sobre el festín común de tentáculo:
+        /// estilo 5 (LA MAREA) — la OLA QUE SUBE: un plano negro ancho
+        /// que TREPA por el cuerpo del jefe con una CRESTA de cinco
+        /// mini-fauces masticando a lo ancho, más la humareda de la
+        /// resaca. Estilo 6 (LA MIRADA) — EL OJO DEL JUICIO: un ojo
+        /// colosal se abre sobre el jefe (parpadea con cada mordida, la
+        /// pupila ENGORDA con el festín) y la sala se hace borde.
+        /// Estilo 7 (EL NIDO) — LA JAULA DE GARRAS: ocho zarpos se
+        /// cierran sobre el jefe apretando al compás, con las almas de
+        /// las crías orbitando la comida.
+        /// </summary>
+        private void DrawAdorno(NPC jefe, byte estilo)
         {
+            if (estilo < 5) return;
             float tiempo = Main.GlobalTimeWrappedHourly;
-            int semilla = Projectile.whoAmI * 29 + jefe.whoAmI;
+            int semilla = Projectile.whoAmI * 31 + jefe.whoAmI;
             float t = Projectile.ai[2];
-            Player portador = Portador(jefe);
 
-            float manifiesta = SombrasLib.DeGolpe(MathHelper.Clamp(t / 26f, 0f, 1f));
-            float festin = MathHelper.Clamp((t - 45f) / 115f, 0f, 1f);
+            float envuelve = MathHelper.Clamp((t - 30f) / 30f, 0f, 1f);
+            float festin = MathHelper.Clamp((t - 60f) / 100f, 0f, 1f);
             float disipa = MathHelper.Clamp((t - 160f) / 45f, 0f, 1f);
             float vivo = 1f - disipa;
+            float radio = MathHelper.Clamp(jefe.Size.Length() * 0.7f, 90f, 300f);
 
-            float radio = MathHelper.Clamp(jefe.Size.Length() * 0.68f, 95f, 280f) * manifiesta;
-
-            // === EL DISCO NEGRO ===
-            VFXCore.Begin();
-            VFXCore.Quad(jefe.Center, SombrasLib.Alfa(SombrasLib.Negro, 0.97f * manifiesta * vivo),
-                new Vector2(radio * 2.1f, radio * 2.1f), 0f, VFXCore.GlowOrb);
-            VFXCore.FlushAlpha();
-
-            // === LA BRUMA DEL ANILLO (v6.50.64): la esfera del festín
-            // también EXHALA bruma por toda la circunferencia ===
-            Vector2[] anillo = new Vector2[14];
-            for (int i = 0; i < 14; i++)
+            switch (estilo)
             {
-                float aI = i / 13f * MathHelper.TwoPi;
-                anillo[i] = jefe.Center + new Vector2(MathF.Cos(aI), MathF.Sin(aI) * 0.88f) * radio;
-            }
-            SombrasLib.BrumaColumna(anillo, radio * 0.48f, 0.4f * manifiesta * vivo, tiempo, semilla, 12);
-
-            // === LOS OJOS: TODOS, MIRANDO AL PORTADOR ===
-            VFXCore.Begin();
-            for (int k = 0; k < 14; k++)
-            {
-                float f = SombrasLib.Frac(SombrasLib.semille(semilla) * 0.43f + k * 0.618034f);
-                float ang = f * MathHelper.TwoPi;
-                float rr = radio * (0.2f + 0.66f * SombrasLib.Frac(f * 8.1f));
-                Vector2 pos = jefe.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.85f) * rr;
-                float abierto = MathHelper.Clamp(manifiesta * 14f * 0.75f - k * 0.75f, 0f, 1f);
-                abierto *= 0.85f + 0.15f * MathF.Sin(tiempo * 3.9f + k * 1.7f);
-                if (abierto <= 0.05f) continue;
-                SombrasLib.Ojo(pos, 14f + 13f * SombrasLib.Frac(f * 6.2f), portador.Center - pos, abierto);
-            }
-            VFXCore.FlushAdditive();
-
-            // === LA BOCA: muerde el ciclo y se lo COME entero ===
-            Vector2 rumbo = new(MathF.Cos(tiempo * 0.45f), MathF.Sin(tiempo * 0.3f));
-            rumbo = rumbo.LengthSquared() < 0.01f ? Vector2.UnitX : Vector2.Normalize(rumbo);
-            float apertura = t < 45f ? 0.9f : CicloMasticar(t);
-            SombrasLib.Fauces(jefe.Center + rumbo * radio * 0.12f, rumbo, apertura * vivo,
-                radio * 0.95f * manifiesta, semilla);
-
-            // v6.50.64 — EL ALIENTO: la boca de la esfera respira bruma negra
-            SombrasLib.BrumaBoca(jefe.Center + rumbo * radio * 0.12f, rumbo, apertura * vivo,
-                0.5f * vivo, tiempo, semilla + 5, 5);
-
-            // === EL INTERIOR: el jefe se APAGA (oscuro creciente dentro) ===
-            if (festin > 0.02f)
-            {
-                VFXCore.Begin();
-                VFXCore.Quad(jefe.Center, SombrasLib.Alfa(SombrasLib.Negro, 0.9f * festin * vivo),
-                    new Vector2(radio * 1.6f * (0.5f + 0.5f * festin), radio * 1.6f * (0.5f + 0.5f * festin)));
-                VFXCore.FlushAlpha();
-            }
-
-            // === LAS ALMAS vuelan al portador ===
-            if (t > 50f)
-            {
-                VFXCore.Begin();
-                for (int k = 0; k < 6; k++)
+                case 5: // LA MAREA — la ola que sube con cresta de fauces
                 {
-                    float prog = SombrasLib.Frac(t * 0.015f + k * 0.1667f);
-                    Vector2 a = jefe.Center + new Vector2(MathF.Cos(k * 2.6f + tiempo), MathF.Sin(k * 2.2f)) * radio * 0.5f;
-                    Vector2 b = portador.MountedCenter;
-                    Vector2 ctrl = (a + b) * 0.5f + new Vector2(0, -150f);
-                    float u = 1f - prog;
-                    Vector2 pos = u * u * a + 2f * u * prog * ctrl + prog * prog * b;
-                    SombrasLib.Alma(pos, 11f, 0.85f);
+                    float sube = MathHelper.Clamp((t - 40f) / 90f, 0f, 0.94f);
+                    if (sube > 0.02f)
+                    {
+                        Vector2 abajo = jefe.Center + new Vector2(0f, jefe.Size.Y * 0.55f);
+                        VFXCore.Begin();
+                        for (int capa = 0; capa < 3; capa++)
+                        {
+                            float y = abajo.Y - jefe.Size.Y * 1.1f * sube * (1f - capa * 0.18f);
+                            float ancho = radio * (2.4f - capa * 0.5f) * (0.7f + 0.3f * sube);
+                            VFXCore.Quad(new Vector2(abajo.X, y),
+                                SombrasLib.Alfa(SombrasLib.Negro, (0.85f - capa * 0.18f) * vivo),
+                                new Vector2(ancho, radio * (0.9f - capa * 0.2f)), 0f, VFXCore.GlowOrb);
+                        }
+                        VFXCore.FlushAlpha();
+
+                        // LA CRESTA: cinco mini-fauces masticando a lo ancho
+                        float abreCresta = CicloMasticar(t);
+                        for (int k = 0; k < 5; k++)
+                        {
+                            float x = jefe.Center.X + (k - 2f) / 2f * radio * 1.5f;
+                            Vector2 pos = new Vector2(x, abajo.Y - jefe.Size.Y * 1.1f * sube);
+                            SombrasLib.Fauces(pos, -Vector2.UnitY, abreCresta * vivo, 42f, semilla + k * 5);
+                        }
+                    }
+                    // la humareda de la resaca (más bruma en el festín)
+                    if (festin > 0.1f)
+                        SombrasLib.Bruma(jefe.Center + new Vector2(-radio * 0.8f, 0f),
+                            radio * 0.7f, 0.5f * festin * vivo, tiempo, semilla + 23);
+                    break;
                 }
-                VFXCore.FlushAdditive();
-            }
-
-            // === LA DISIPACIÓN: bruma y polvo ===
-            if (disipa > 0.02f)
-                SombrasLib.Bruma(jefe.Center, radio * 1.35f, 0.9f * disipa, tiempo, semilla,
-                    new Vector2(MathF.Sin(tiempo * 0.8f) * 26f, -20f * disipa));
-        }
-
-        // ==================================================================
-        //  ESTILO 4 — LA PÁGINA FINAL (v6.50.64 — el arma 4): EL FESTÍN
-        //  DE CINE. La muerte del jefe como un ritual de libro: LA SALA
-        //  SE APAGA (vignette) → EL LIBRO GIGANTE se abre en el cielo
-        //  sobre el jefe con su ojo colosal y el lomo rojo → LOS ZARPOS
-        //  bajan de sus páginas y lo AGARRAN → EL PLANO NEGRO SUBE por
-        //  el cuerpo comiéndoselo de abajo arriba (el borde es una boca
-        //  horizontal de colmillos que mastica) → LAS ALMAS suben al
-        //  libro (él digiere) → EL LIBRO SE SELLA con una onda de choque
-        //  y estalla en bruma. A los 210 el motor mata de verdad.
-        // ==================================================================
-
-        private void DrawPagina(NPC jefe)
-        {
-            float tiempo = Main.GlobalTimeWrappedHourly;
-            int semilla = Projectile.whoAmI * 37 + jefe.whoAmI;
-            float t = Projectile.ai[2];
-            Player portador = Portador(jefe);
-
-            float manifiesta = SombrasLib.DeGolpe(MathHelper.Clamp(t / 28f, 0f, 1f));
-            float agarre = MathHelper.Clamp((t - 28f) / 34f, 0f, 1f);
-            float tragado = MathHelper.Clamp((t - 62f) / 100f, 0f, 1f);
-            float cierre = MathHelper.Clamp((t - 168f) / 40f, 0f, 1f);
-            float vivo = 1f - cierre;
-
-            // === 1. LA SALA DE CINE: los bordes se apagan (la penumbra de Pride) ===
-            SombrasLib.Vignette(0.55f * manifiesta * vivo);
-
-            // === 2. EL LIBRO GIGANTE (v6.50.65 — EL SPRITE REAL del
-            // Grimorio del Eterno, colosal, envuelto en su aura violeta;
-            // antes eran dos rectángulos negros) suspendido sobre el jefe,
-            // con el LOMO ROJO latiendo y su ojo colosal encima ===
-            float tam = MathHelper.Clamp(jefe.Size.Length() * 0.55f, 130f, 300f);
-            Vector2 pagina = jefe.Center + new Vector2(0f, -(tam * 1.35f + 120f));
-            // el libro: cerrado al brotar → abierto → se PLEGRA al cierre
-            float abreLibro = manifiesta * (1f - SombrasLib.DeGolpe(cierre));
-            float bob = MathF.Sin(tiempo * 1.3f) * 10f * manifiesta;
-            Vector2 posLibro = pagina + new Vector2(0f, -bob);
-
-            // 2a. EL AURA violeta del libro gigante
-            VFXCore.Begin();
-            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.Violeta,
-                (0.16f + 0.06f * MathF.Sin(tiempo * 2.2f)) * manifiesta * vivo),
-                new Vector2(tam * 2.6f, tam * 3.0f));
-            VFXCore.Quad(posLibro, SombrasLib.Alfa(SombrasLib.RojoGarganta, 0.10f * abreLibro * vivo),
-                new Vector2(tam * 1.2f, tam * 1.8f));
-            VFXCore.FlushAdditive();
-
-            // 2b. EL LIBRO DE VERDAD: el sprite del Grimorio del Eterno,
-            //     GIGANTE (crece con tam), ligeramente inclinado
-            Texture2D texLibro;
-            try
-            {
-                texLibro = Terraria.GameContent.TextureAssets.Item[
-                    ModContent.ItemType<Content.Weapons.GrimoireEternal>()].Value;
-            }
-            catch { texLibro = null; }
-            if (texLibro != null)
-            {
-                float escalaLibro = (tam * 2.6f / texLibro.Width) * (0.65f + 0.35f * abreLibro) * vivo;
-                VFXCore.CerrarLoteSiAbierto();
-                try
+                case 6: // LA MIRADA — el ojo del juicio
                 {
-                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                        Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                        null, Main.Transform);
-                    Main.spriteBatch.Draw(texLibro, posLibro - Main.screenPosition, null,
-                        new Color(225, 218, 240, (byte)(255 * vivo)), MathF.Sin(tiempo * 0.7f) * 0.06f,
-                        texLibro.Size() * 0.5f, escalaLibro, SpriteEffects.None, 0f);
-                    Main.spriteBatch.End();
+                    if (envuelve > 0.05f)
+                    {
+                        Vector2 pos = jefe.Center + new Vector2(0f, -radio * 0.95f);
+                        float abre = SombrasLib.DeGolpe(envuelve) * (0.8f + 0.2f * MathF.Sin(tiempo * 2.4f));
+                        // el parpadeo del juicio: se cierra con cada mordida
+                        if (t > 60f)
+                        {
+                            float m = (t - 60f) % 32f;
+                            if (m < 4f) abre *= 0.15f;
+                        }
+                        SombrasLib.Ojo(pos, radio * 0.5f, jefe.Center - pos, abre * vivo);
+
+                        // la pupila del juicio ENGORDA conforme devora
+                        if (festin > 0.1f)
+                        {
+                            Vector2 dirP = Vector2.Normalize(jefe.Center - pos) * radio * 0.09f;
+                            VFXCore.Begin();
+                            VFXCore.Quad(pos + dirP, SombrasLib.Alfa(SombrasLib.Rojo, 0.85f * vivo),
+                                new Vector2(radio * (0.10f + 0.14f * festin),
+                                            radio * (0.11f + 0.15f * festin)));
+                            VFXCore.FlushAdditive();
+                        }
+                    }
+                    // la sala se hace borde alrededor del juicio
+                    SombrasLib.Vignette(0.22f * festin * vivo);
+                    break;
                 }
-                catch { VFXCore.CerrarLoteSiAbierto(); }
-                VFXCore.ReabrirLoteVanilla();
-            }
-
-            // 2c. el lomo rojo: la garganta del libro late entreabierto
-            VFXCore.Begin();
-            VFXCore.Quad(posLibro + new Vector2(0f, tam * 0.1f),
-                SombrasLib.Alfa(SombrasLib.Rojo, (0.28f + 0.14f * MathF.Sin(tiempo * 5f)) * abreLibro * vivo),
-                new Vector2(tam * 0.5f * abreLibro, tam * 1.6f * abreLibro));
-            VFXCore.FlushAdditive();
-
-            // === 3. EL OJO DEL LIBRO: se abre DE GOLPE y MIRA AL JEFE mientras lo come ===
-            VFXCore.Begin();
-            SombrasLib.Ojo(posLibro + new Vector2(0f, -tam * 0.85f), tam * 0.42f, jefe.Center - pagina,
-                MathHelper.Clamp(abreLibro * 1.4f, 0f, 1f) * vivo);
-            VFXCore.FlushAdditive();
-
-            // === 4. LOS ZARPOS: cuatro tentáculos bajan de la página y AGARRAN
-            // al jefe (cada uno con su masa, sus ojos y SU BRUMA NEGRA) ===
-            for (int k = 0; k < 4; k++)
-            {
-                Vector2 raizZ = posLibro + new Vector2((k - 1.5f) * tam * 0.42f * abreLibro, tam * 0.55f);
-                Vector2 puntoAgarre = jefe.Center + new Vector2(
-                    MathF.Cos(k * MathHelper.PiOver2 + 0.7f),
-                    MathF.Sin(k * MathHelper.PiOver2 + 0.7f) * 0.7f) * jefe.Size.Length() * 0.34f;
-                Vector2 punta = Vector2.Lerp(raizZ + new Vector2(0f, 34f), puntoAgarre, agarre);
-                Vector2[] colZ = SombrasLib.Columna(raizZ, punta, tiempo, semilla + k * 7, 12, 0.2f);
-                SombrasLib.Masa(colZ, 36f, 10f, 0.95f * vivo, semilla + k * 7, tiempo);
-                SombrasLib.BrumaColumna(colZ, 30f, 0.42f * vivo, tiempo, semilla + k * 7, 6);
-                SombrasLib.OjosDeMasa(colZ, jefe.Center, agarre * vivo, semilla + k * 7, tiempo, 2);
-            }
-
-            // === 5. EL TRAGADO: el plano negro que SUBE por el jefe — el
-            // borde es una BOCA horizontal de colmillos que mastica comiendo
-            // hacia arriba; lo tragado TE MIRA (ojos en el plano) ===
-            if (tragado > 0.01f)
-            {
-                float baseY = jefe.Bottom.Y + 90f;
-                float bordeY = MathHelper.Lerp(jefe.Bottom.Y + 70f, jefe.Top.Y - 100f, tragado);
-                float h = bordeY - baseY;
-                float w = MathF.Max(jefe.width * 1.5f, 320f);
-                if (h > 6f)
+                case 7: // EL NIDO — la jaula de garras + las almas de las crías
                 {
-                    VFXCore.Begin();
-                    VFXCore.Quad(new Vector2(jefe.Center.X, (baseY + bordeY) * 0.5f),
-                        SombrasLib.Alfa(SombrasLib.Negro, 0.97f * vivo), new Vector2(w, h), 0f, VFXCore.Pixel);
-                    VFXCore.FlushAlpha(VFXCore.Pixel);
+                    if (envuelve > 0.05f)
+                    {
+                        float apriete = 0.6f + 0.4f * MathF.Sin(t * 0.22f);
+                        for (int k = 0; k < 8; k++)
+                        {
+                            float ang = k / 8f * MathHelper.TwoPi + tiempo * 0.2f;
+                            Vector2 dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f);
+                            Vector2 pos = jefe.Center + dir * radio * 1.02f;
+                            SombrasLib.Garra(pos, -dir,
+                                radio * (0.6f + 0.25f * apriete) * vivo, 0.9f * vivo,
+                                0.4f * (k % 2 == 0 ? 1f : -1f));
+                        }
+                        // las almas de las crías orbitando la comida
+                        for (int k = 0; k < 4; k++)
+                        {
+                            float angA = tiempo * 2.2f + k * MathHelper.PiOver2;
+                            Vector2 pos = jefe.Center + new Vector2(MathF.Cos(angA), MathF.Sin(angA) * 0.72f) * radio * 0.72f;
+                            SombrasLib.Alma(pos, 10f, 0.75f * vivo);
+                        }
+                    }
+                    break;
                 }
-
-                // v6.50.65 — EL BORDE DENTADO: el plano ya no termina recto —
-                // picos negros alternados SOBRE el borde (la boca del vacío
-                // MORDIENDO hacia arriba) con su punta de hueso: se lee como
-                // una GARGANTA que sube comiendo, no como un rectángulo.
-                int nDientes = 9;
-                for (int k = 0; k < nDientes; k++)
-                {
-                    float fx = (k + 0.5f) / nDientes - 0.5f;
-                    float altoD = (16f + 22f * SombrasLib.Frac(SombrasLib.semille(semilla) * 0.77f + k * 0.618f))
-                                  * (0.8f + 0.4f * MathF.Sin(tiempo * 9f + k * 1.9f));
-                    Vector2 baseD = new(jefe.Center.X + fx * w, bordeY + 4f);
-                    Vector2 puntaD = baseD + new Vector2(MathF.Sin(k * 2.1f) * 6f, -altoD);
-                    SombrasLib.Garra(baseD, puntaD - baseD, altoD * 1.05f, 0.95f * vivo,
-                        (k % 2 == 0 ? 1f : -1f) * 0.35f);
-                }
-
-                // la boca del borde (come SUBIENDO) + su aliento de bruma
-                Vector2 borde = new(jefe.Center.X, bordeY);
-                SombrasLib.Fauces(borde, -Vector2.UnitY, CicloMasticar(t) * vivo, w * 0.4f, semilla);
-                SombrasLib.BrumaBoca(borde, -Vector2.UnitY, 0.9f, 0.5f * vivo, tiempo, semilla + 11, 5);
-                SombrasLib.Bruma(borde, w * 0.5f, 0.45f * vivo, tiempo, semilla + 13);
-
-                // ojos sobre el plano: lo ya tragado te mira
-                VFXCore.Begin();
-                for (int k = 0; k < 4; k++)
-                {
-                    float f = SombrasLib.Frac(SombrasLib.semille(semilla) * 0.29f + k * 0.618034f);
-                    Vector2 pos = new(jefe.Center.X + (f - 0.5f) * w * 0.8f, baseY + f * h);
-                    SombrasLib.Ojo(pos, 15f + 10f * f, portador.Center - pos,
-                        vivo * MathHelper.Clamp(tragado * 2f - f, 0f, 1f));
-                }
-                VFXCore.FlushAdditive();
-            }
-
-            // === 6. LAS ALMAS: primero SUBEN AL LIBRO (él digiere)… ===
-            if (tragado > 0.05f && cierre < 0.4f)
-            {
-                VFXCore.Begin();
-                for (int k = 0; k < 5; k++)
-                {
-                    float prog = SombrasLib.Frac(t * 0.016f + k * 0.2f);
-                    Vector2 a = jefe.Center + new Vector2(MathF.Cos(k * 2.5f + tiempo * 0.8f), MathF.Sin(k * 2.1f)) * 60f;
-                    Vector2 b = pagina;
-                    Vector2 ctrl = (a + b) * 0.5f + new Vector2(MathF.Sin(k * 2.3f) * 90f, -40f);
-                    float u = 1f - prog;
-                    Vector2 pos = u * u * a + 2f * u * prog * ctrl + prog * prog * b;
-                    SombrasLib.Alma(pos, 10f + 5f * MathF.Sin(tiempo * 5f + k), 0.8f * vivo);
-                }
-                VFXCore.FlushAdditive();
-            }
-            // === …y al final el libro PAGA al portador (la tinta digerida) ===
-            if (cierre > 0.1f)
-            {
-                VFXCore.Begin();
-                for (int k = 0; k < 4; k++)
-                {
-                    float prog = SombrasLib.Frac((cierre - 0.1f) * 1.6f + k * 0.25f);
-                    Vector2 a = pagina;
-                    Vector2 b = portador.MountedCenter;
-                    Vector2 ctrl = (a + b) * 0.5f + new Vector2(MathF.Sin(k * 2.1f) * 110f, 60f);
-                    float u = 1f - prog;
-                    Vector2 pos = u * u * a + 2f * u * prog * ctrl + prog * prog * b;
-                    SombrasLib.Ojo(pos, 7f, b - pos, 1f);     // el alma ES un ojo que mira a casa
-                }
-                VFXCore.FlushAdditive();
-            }
-
-            // === 7. EL CIERRE: el libro se sella con su ONDA DE CHOQUE
-            // y estalla en bruma negra (el loot cae DENTRO de la nube) ===
-            if (cierre > 0.05f)
-            {
-                SombrasLib.OndaChoque(pagina, tam * (0.4f + cierre * 1.8f), 0.5f * (1f - cierre), false);
-                SombrasLib.Bruma(jefe.Center, tam * 1.3f,
-                    0.9f * MathF.Sin(cierre * MathF.PI), tiempo, semilla + 17,
-                    new Vector2(0f, -26f * cierre));
             }
         }
 
@@ -598,21 +376,6 @@ namespace AethonMod.Content.Projectiles.Sombras
             if (m < 16f) return MathHelper.Lerp(1f, 0.03f, SombrasLib.DeGolpe((m - 10f) / 6f)); // ¡CIERRA!
             if (m < 26f) return 0.15f + 0.1f * MathF.Sin(m * 1.4f);                          // mastica
             return MathHelper.Lerp(0.15f, 0.85f, (m - 26f) / 6f);                            // reabre
-        }
-
-        /// <summary>El frame del sprite gigante según el momento del festín.</summary>
-        private static int FrameFestin(float t)
-        {
-            if (t < 30f) return (int)MathHelper.Clamp(t / 30f * 5f, 0f, 5f);        // erupción (0-5)
-            if (t < 60f) return 6 + (int)((t - 30f) / 30f * 4f);                     // el latigazo (6-10)
-            if (t < 160f)                                                           // muerde (10↔12)
-            {
-                float m = (t - 60f) % 24f;
-                if (m < 10f) return 10;
-                if (m < 20f) return 11;
-                return 12;
-            }
-            return 12 + (int)MathHelper.Clamp((t - 160f) / 45f * 4f, 0f, 4f);        // disipa (12-16)
         }
     }
 }
