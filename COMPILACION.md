@@ -153,7 +153,8 @@ y el worklog del entorno de desarrollo):
 4. **Inspección de la DLL** — extraer el ensamblado del `.tmod` (magic MZ) y
    verificar que las firmas nuevas de la versión están presentes (y las
    muertas, ausentes).
-5. **hjson simétricos** — es-ES y en-US con las mismas claves en el paquete.
+5. **hjson simétricos** — es-MX y en-US con las mismas claves en el paquete
+   (es-ES borrado en la v6.50.70).
 6. **Servidor headless** — arrancar el server dedicado con el mod: debe cargar
    SIN excepciones (Sandboxing → Adding → Configuring → Finalizing → menú de
    mundos).
@@ -223,7 +224,7 @@ Aethon-Mod-Terraria/      <- raíz del repo (docs y herramientas FUERA del mod)
 │   ├── AethonMod.cs        # Punto de entrada + guardián de identidad
 │   ├── AethonMod.csproj    # Solo IDE
 │   ├── Content/            # 296 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
-│   └── Localization/       # es-ES / en-US (hjson, ~2290 líneas c/u)
+│   └── Localization/       # es-MX / en-US (hjson, ~2300 líneas c/u — es-ES borrado en la v6.50.70)
 ├── README.md / COMPILACION.md / CHANGES.md / CARACTERISTICAS.md /
 │   DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md        # Documentación del repo
 ├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh  # repo -> ModSources

@@ -46,8 +46,8 @@ arranca a sí mismo al caer.
 del juego; solo queda Aethon. El lore anterior de "la Luz Primordial" quedó jubilado.)
 
 **Principios de diseño vigentes**: progresión infinita con curva suave · todo el arte visual
-**100 % por código** (los rayos sin NI UN sprite) · cero dependencias de otros mods · es-ES y
-en-US siempre simétricos · "arsenal de pruebas": las armas no cuestan maná y se entregan en bolsas.
+**100 % por código** (los rayos sin NI UN sprite) · cero dependencias de otros mods · es-MX y
+en-US siempre simétricos (es-ES borrado en la v6.50.70) · "arsenal de pruebas": las armas no cuestan maná y se entregan en bolsas.
 
 ---
 
@@ -400,7 +400,7 @@ client-host); `SyncResonance` en ShardSyncSystem es un stub heredado.
 4. **Color premultiplicado** en lotes aditivos; soft-add para acumulación sin clipping.
 5. **`Hash01` determinista** en TODO render (cero `Main.rand`, cero alocaciones por frame).
 6. **Lote del llamador** (el que abre el SpriteBatch, lo cierra).
-7. **hjson es-ES + en-US simétricos SIEMPRE** (verificación de paquete antes de release).
+7. **hjson es-MX + en-US simétricos SIEMPRE** (verificación de paquete antes de release; es-ES borrado en la v6.50.70).
 8. **Sin maná** en el arsenal de pruebas; ítems de prueba marcados "eliminar antes de release".
 9. **Mock 1:1 + VLM** para validar VFX nuevos ANTES de integrar (patrón `tools/mock_*.py`,
    umbral 7/10 de la casa).
@@ -436,7 +436,7 @@ AethonMod/                      ← EL MOD (build.txt aquí: versión 6.50.30)
 │   │                              Cosmetics/, Placeables/, sueltos (SeerOrb, GenesisShard…)
 │   ├── Buffs/ (9) · Biomes/ (1) · Tiles/ (AncientAltar) · Effects/ (ColaSierpeSky, shaders,
 │   │                              Bruma/, BlackHoleLensSystem) · Particles/ (manager+presets)
-│   └── Localization/           ← es-ES + en-US (hjson, ~2290 líneas c/u)
+│   └── Localization/           ← es-MX + en-US (hjson, ~2300 líneas c/u — es-ES borrado en la v6.50.70)
 └── (raíz del repo: README, CHANGES, COMPILACION, DISEÑO, CARACTERISTICAS, STABLE-SNAPSHOT,
     _masters/ sprites maestros, tools/ generadores+mocks, ACTUALIZAR-FUENTE.bat/.sh)
 ```

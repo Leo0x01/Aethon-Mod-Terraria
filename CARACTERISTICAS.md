@@ -13,7 +13,8 @@
 - **Registrado en tML**: 115 ModItem · 119 ModProjectile · 8 ModNPC · 9 ModBuff · 23 ModSystem ·
   1 ModTile · 1 ModBiome · 1 ModDust · 6 ModPlayer · 2 ModConfig · 6 Global · 3 PlayerDrawLayer
   (≈281 clases de contenido + soporte) · **297 archivos .cs** · 67 archivos VFX
-- **Localización**: es-ES (2.289 líneas) + en-US (2.290 líneas), hjson SIMÉTRICOS
+- **Localización**: es-MX (2.307 líneas, idioma PRIMARIO) + en-US (2.305 líneas), hjson SIMÉTRICOS
+  (es-ES BORRADO en la v6.50.70 por decreto del usuario)
 - **Dependencias**: NINGUNA (`modReferences` vacío — auditoría v6.26)
 
 ---

@@ -1,5 +1,51 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.70 — EL ESPAÑOL ESPAÑA BORRADO + LA ESPAÑOL LATAM COMPLETA
+
+**Feedback del usuario**: "algo que también debes hacer es borrar el idioma
+español españa" (+ PAT nuevo de GitHub entregado para publicar la .69
+acumulada, que quedó bloqueada por el wipe del sandbox).
+
+**(1) EL ESPAÑOL ESPAÑA (es-ES) BORRADO POR DECRETO.**
+`es-ES_Mods.AethonMod.hjson` ELIMINADO del mod (81.885 B, 2.305 líneas de
+espejo muerto). El mod habla **es-MX (Latinoamérica, idioma PRIMARIO) + en-US
+y nada más**: el juego en «Español (España)» ahora cae al inglés, tal como
+lo ordenó el usuario. CERO referencias al es-ES sobreviven en el estado
+actual: README, CARACTERISTICAS, COMPILACION, DISEÑO y el comentario de
+cabecera del es-MX actualizados (los históricos de CHANGES/STABLE-SNAPSHOT
+quedan como historia, no se reescribe el pasado). El paquete pasa de 393 a
+**392 entradas** (−1 hjson).
+
+**(2) BONUS — LA DEUDA DE SIMETRÍA es-MX LIQUIDADA (el registro completo de
+la casa ahora es 771/771).** La auditoría hjson de la .70 destapó deuda
+preexistente de la v6.50.65 (cuando nació el es-MX como espejo): **50 claves**
+que vivían en en-US pero NO en es-MX (y tampoco en el es-ES recién borrado —
+la deuda era anterior al espejo): 48 `Tooltip` vacías de las armas viejas del
+arsenal de pruebas (agujeros negros, soles rúnicos 1-20, anillos de test…)
+que el generador de la .65 dejó COMENTADAS en vez de activas, y los
+`DisplayName` de las 2 mascotas. Todo activado en el es-MX con la indentación
+de tabs intacta (reconstruido byte a byte desde HEAD — la lección: verificar
+el `git diff --stat` tras cada cirugía hjson, un editor puede expandir los
+tabs a espacios y voltear el archivo entero) y las mascotas traducidas sin
+anglicismos (purga .65): **Aethon Menor (mascota)** / **Mini Estallido
+(mascota)**. Verificado con parser hjson real (no regex): es-MX **771 claves
+== en-US 771 claves**, dentro del paquete byte a byte.
+
+**(3) LA PUBLICACIÓN ACUMULADA.** La v6.50.69 quedó verificada pero SIN
+PUBLICAR (el token GitHub murió con el wipe del sandbox); la .70 hereda TODO
+su contenido (la cobertura total, el acto de devoración en bruma, la familia
+de tentáculos, la marca continua) y sale como UNA SOLA versión: commit
+ce0e984 (la .69) + este commit viajan juntos en el release v6.50.70.
+
+**[VERIFICACIÓN]** Oráculo 0/0 · build real **0 errores / 0 warnings** ·
+.tmod **4.195.283 B** (md5 `b2165d4e5bc1da5a1ee62761a8a4cec6`): 392
+entradas, EOF exacto (22.161 + 4.173.122 = 4.195.283), es-ES AUSENTE, 2/2
+hjson byte-idénticos a la fuente con tabs intactos, claves del PAQUETE es-MX
+771 == en-US 771 (parser hjson), `Info` con `version 6.50.70`, DLL con los 9
+símbolos de la .69 VIVOS y los 6 muertos AUSENTES, 24 entradas planas ·
+servidor headless: Configuring → Finalizing → Recipes → Mod Load Completed →
+**Server started**, 0 excepciones.
+
 ## Commit v6.50.69 — LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS
 
 **Feedback del usuario**: "esas tres armas nuevas se ven y funcionan

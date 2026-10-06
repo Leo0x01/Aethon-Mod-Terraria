@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.69 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.70 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-MX + en-US (español España BORRADO en la v6.50.70)
 
 ## Qué es (en 30 segundos)
 
@@ -17,27 +17,29 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~116 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.69)
+## ¿Dónde estamos? (actualizado para v6.50.70)
 
-**NOVEDAD .64 — LA PINZA DOBLE + LA BRUMA NEGRA + LA PÁGINA FINAL**: la
-Fauce del Grimorio ahora muerde con **DOS CABEZAS** (el gif del usuario
-duplicado en la punta, una por esquina, cerrando como una pinza de dientes),
-las tres fauces **exhalan BRUMA NEGRA** por todo el cuerpo y las bocas, y
-llega el **ARMA 4: LA PÁGINA FINAL** — la evolución AAA de La Sombra de la
-Página (100% código): el libro despliega su ojo mientras la sala se apaga,
-**tres zarpos convergen** en el jefe desde ángulos distintos, la **JAULA DE
-TINTA** (anillo de púas de punta blanca) se cierra a mordidas — el dren más
-fuerte de las cuatro — y a 1 HP **el libro GIGANTE se abre en el cielo**,
-agarra al jefe con sus zarpos y la oscuridad SUBE comiéndoselo hasta que el
-libro se sella con una onda de choque. **NOVEDAD .63 — LA BOLSA DE LAS
-SOMBRAS**: las fauces LLEGAN SOLAS al entrar al mundo (bolsa 19 del kit —
-clic derecho y las tienes; ahora son CUATRO). **NOVEDAD .62 — LAS FAUCES
-DEL GRIMORIO**: armas de sombras devoradoras al estilo Pride (Selim
-Bradley, FMA:B) — el tentáculo-latigazo que SIEMPRE llega al jefe, la esfera
-de ojos que te miran mientras comen y la fauce 100% escrita por código.
-**LA DEVORACIÓN**: cuando un jefe cae a 1 HP a manos de las fauces, su
-animación de muerte SE DETIENE y la sombra lo devora entero — y el loot cae
-dentro de la bruma (la kill es real: bestiario, flags, XP del libro).
+**NOVEDAD .70 — EL ESPAÑOL ESPAÑA BORRADO**: el mod habla **es-MX
+(Latinoamérica) + en-US** y nada más — `es-ES_Mods.AethonMod.hjson`
+eliminado por decreto del usuario (el juego en «Español (España)» cae al
+inglés; el **Español (Latinoamérica) sigue siendo el idioma PRIMARIO**).
+**NOVEDAD .69 — LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA +
+LA FAMILIA DE TENTÁCULOS**: la bruma del tragado cubre al jefe **ENTERO**
+(la elipse real de su hitbox — al Rey Slime completo, corona y pies);
+cuando al jefe le queda **1 de vida** el tentáculo GIGANTE sale del
+jugador, ENVUELVE al jefe (su sprite DESAPARECE bajo la bruma), lo TRAGA
+(la elipse encoge hacia la punta y la corriente vuelve por el cuerpo del
+tentáculo) y muere DENTRO de la bruma — **sin gore ni animación de muerte
+vanilla**: el loot cae solo y la kill ES REAL (logros, flags, bestiario).
+La Sombra exhala DOS capas de bruma y la marca continua dispara el
+festín con el golpe mortal de CUALQUIER fuente. LAS 3 ARMAS NUEVAS SON
+UNA FAMILIA DE TENTÁCULOS: **EL AZOTE** (el látigo que cruje atravesando
+todo en línea), **LA MORDIDA** (el glotón que se cuelga y mastica de
+verdad) y **LA CRÍA** (la camada de 3 que cazan solas orbitando al
+portador) — cada una con su festín propio. **NOVEDAD .68 — LA BOCA ES
+BRUMA**: la punta del tentáculo ES una cabeza de bruma (boca y tentáculo
+son un solo cuerpo, nace del jugador) y al morder la masa de bruma negra
+y espesa cubre la totalidad del jefe con las almas volviendo al portador.
 - **v6.50.61 - LA PURGA DE NPC + EL VIGÍA + EL LIBRO ERA EL JEFE**:
   (1) **BORRADOS TODOS LOS NPC DEL MOD salvo el jefe principal**: el
   Titán Hueco, el Guardián del Rift, la Arquera Estelar, el Primer
@@ -105,7 +107,7 @@ dentro de la bruma (la kill es real: bestiario, flags, XP del libro).
 2. **Leer el worklog** (`/home/z/my-project/worklog.md` en el entorno de desarrollo): contiene el historial de sesiones (R1…R64 + exploraciones 3-a…3-d) con decisiones y trampas documentadas.
 3. **Leer STABLE-SNAPSHOT.md** de este repo: pendientes de verificación en juego + doc-rot.
 4. **Entorno de build**: `/tmp/tml` (tModLoader 2026.07.3.0 re-descargable), `/tmp/sdk` (dotnet SDK 8.0.404), `/home/z/.verify/verify.csproj` (los 297 `.cs` con las 9 referencias). Detalle completo en COMPILACION.md §"Pipeline de verificación de la casa".
-5. **Reglas de la casa** (no negociables): cero sprites de rayo (todo `RayoLib`/`RayoStrip`); destellos SIEMPRE con degradado monotónico (nunca círculos planos); color premultiplicado en lotes aditivos; `Hash01` determinista (cero `Main.rand` en render); convención del lote del llamador; hjson es-ES y en-US SIMÉTRICOS siempre.
+5. **Reglas de la casa** (no negociables): cero sprites de rayo (todo `RayoLib`/`RayoStrip`); destellos SIEMPRE con degradado monotónico (nunca círculos planos); color premultiplicado en lotes aditivos; `Hash01` determinista (cero `Main.rand` en render); convención del lote del llamador; hjson es-MX y en-US SIMÉTRICOS siempre.
 6. **Al terminar**: build 0/0, auditoría del `.tmod`, commit con mensaje detallado, tag, push, GitHub release con el `.tmod` adjunto, entrada en worklog, y este README/STABLE-SNAPSHOT actualizados.
 
 ## Estructura del repo
@@ -116,7 +118,7 @@ Aethon-Mod-Terraria/           ← raíz del repo (docs y herramientas, FUERA de
 │   ├── build.txt              # ← ¡AQUÍ vive la versión! (6.50.61)
 │   ├── AethonMod.cs           # Punto de entrada + guardián de identidad de carpeta
 │   ├── Content/               # ~290 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
-│   └── Localization/          # es-ES / en-US (hjson simétricos, ~2290 líneas c/u)
+│   └── Localization/          # es-MX / en-US (hjson simétricos — es-ES borrado en la v6.50.70)
 ├── README.md / COMPILACION.md / CHANGES.md / CARACTERISTICAS.md / DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md
 ├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh   # repo → ModSources (usuario final)
 ├── _masters/                  # Sprites maestros de referencia (NO del mod)

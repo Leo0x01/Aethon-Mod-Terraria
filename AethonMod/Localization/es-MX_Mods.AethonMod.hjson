@@ -1,6 +1,7 @@
 // v6.50.65 — ESPAÑOL LATINOAMÉRICA (es-MX): el idioma PRIMARIO del mod
 // (la letra del usuario: «el idioma del juego debe ser español latinoamérica,
-// no español españa»). es-ES es su espejo — toda edición va en AMBOS.
+// no español españa»). v6.50.70 — el idioma español españa (es-ES) fue
+// BORRADO por decreto del usuario: el mod habla es-MX y en-US, nada más.
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
@@ -16,7 +17,7 @@ Items: {
 
 	AncientAltarItem: {
 		DisplayName: Altar Antiguo
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	ResonanceShard: {
@@ -370,110 +371,110 @@ Items: {
 
 	TestMagicRing: {
 		DisplayName: Anillo Mágico de Prueba
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	TestSparkle: {
 		DisplayName: Destello de Prueba
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	ProjBeam: {
 		DisplayName: Rayo de Prueba
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	TestMagicRingV2: {
 		DisplayName: Anillo Mágico de Prueba V2
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SeerOrb: {
 		DisplayName: Orbe del Vidente
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	BlackHoleStaff: {
 		DisplayName: Agujero Negro
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SunStaff: {
 		DisplayName: Sol
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SupernovaStaff: {
 		DisplayName: Supernova
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	PlasmaStormStaff: {
 		DisplayName: Tormenta de Plasma
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	PhoenixNovaStaff: {
 		DisplayName: Nova del Fénix
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	QuantumSplitStaff: {
 		DisplayName: División Cuántica
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	CosmicBlackHoleStaff: {
 		// v6.18: the 4 black holes that remain
 		DisplayName: Bastón del Agujero Cósmico
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	UmbralBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Umbral
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	BrumaBlackHoleStaff: {
 		DisplayName: Bastón del Agujero de la Bruma
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	OlvidoBlackHoleStaff: {
 		DisplayName: Bastón del Agujero del Olvido
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SupremoBlackHoleStaff: {
 		// v6.18: the FIVE new ones
 		DisplayName: Bastón del Agujero Negro Supremo
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SupremoAuroraBlackHoleStaff: {
 		// v6.20: the AURORA sibling of the Supreme (black→purple→blue→gold gradient)
 		DisplayName: Bastón del Agujero Supremo Aurora
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	UmbralAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Umbral Ascendido
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	BrumaAscendidoBlackHoleStaff: {
 		DisplayName: Bastón de la Bruma Ascendida
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	CosmicAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Cósmico Ascendido
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	OlvidoAscendidoBlackHoleStaff: {
 		DisplayName: Bastón del Olvido Ascendido
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	VoidCrownItem: {
@@ -581,52 +582,52 @@ Items: {
 		// Sun stays untouched) with N rune rings on orbital planes with
 		// alternating spins, progressive upgrades per copy.
 		DisplayName: Bastón del Sol Rúnico I
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico2Staff: {
 		DisplayName: Bastón del Sol Rúnico II
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico3Staff: {
 		DisplayName: Bastón del Sol Rúnico III
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico4Staff: {
 		DisplayName: Bastón del Sol Rúnico IV
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico5Staff: {
 		DisplayName: Bastón del Sol Rúnico V
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico6Staff: {
 		DisplayName: Bastón del Sol Rúnico VI
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico7Staff: {
 		DisplayName: Bastón del Sol Rúnico VII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico8Staff: {
 		DisplayName: Bastón del Sol Rúnico VIII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico9Staff: {
 		DisplayName: Bastón del Sol Rúnico IX
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico10Staff: {
 		DisplayName: Bastón del Sol Rúnico X
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico11Staff: {
@@ -635,59 +636,59 @@ Items: {
 		// storm, the prismatic crown and lances, the nova heart and THE
 		// GRAND SEAL of copy XX)
 		DisplayName: Bastón del Sol Rúnico XI
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico12Staff: {
 		DisplayName: Bastón del Sol Rúnico XII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico13Staff: {
 		DisplayName: Bastón del Sol Rúnico XIII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico14Staff: {
 		DisplayName: Bastón del Sol Rúnico XIV
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico15Staff: {
 		DisplayName: Bastón del Sol Rúnico XV
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico16Staff: {
 		DisplayName: Bastón del Sol Rúnico XVI
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico17Staff: {
 		DisplayName: Bastón del Sol Rúnico XVII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico18Staff: {
 		DisplayName: Bastón del Sol Rúnico XVIII
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico19Staff: {
 		DisplayName: Bastón del Sol Rúnico XIX
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SolRunico20Staff: {
 		DisplayName: Bastón del Sol Rúnico XX
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	EclipsePrimordialStaff: {
 		// v6.22: THE PRIMORDIAL ECLIPSE — the Sun of the 20 Rings fused
 		// with ALL the black holes (light + mist + smoke + lightning)
 		DisplayName: Bastón del Eclipse Primordial
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	SinfoniaPrimordialStaff: {
@@ -695,29 +696,29 @@ Items: {
 		// v6.24: THE THREE LIBRARY WEAPONS — each one uses ALL of them
 		// (StormLib lightning + BrumaFX smoke + LumenLib light + runes)
 		DisplayName: Bastón de la Sinfonía Primordial
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	TormentaNebularStaff: {
 		DisplayName: Cetro de la Tormenta Nebular
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	LanzaAlbaStaff: {
 		DisplayName: Lanza del Alba Rúnica
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	StormRuneStaff: {
 		// v6.19: THE THUNDER SCEPTER — the lightning weapon (LightningCore)
 		DisplayName: Cetro del Trueno Rúnico
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	TruenoPerlinStaff: {
 		// v6.50.17: THE PERLIN THUNDER SCEPTER — the noise-generated arc weapon
 		DisplayName: Cetro del Trueno Perlin
-		// Tooltip: ""
+		Tooltip: ""
 	}
 
 	RayoPrimordialStaff: {
@@ -1864,8 +1865,8 @@ Projectiles: {
 	ArcoSobretensionProjectile.DisplayName: Arco de Sobretensión
 	RayoPrimordialProjectile.DisplayName: Rayo Primordial
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
-	// AethonMenorPet.DisplayName: Aethon Menor Pet
-	// MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	AethonMenorPet.DisplayName: Aethon Menor (mascota)
+	MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
 }
 
 Buffs: {
