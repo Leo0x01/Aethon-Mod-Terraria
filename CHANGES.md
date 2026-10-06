@@ -1,5 +1,133 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.68 — LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS (la raíz nace del jugador)
+
+**Feedback del usuario**: "los bastones estan interesante, pero me gusta mas
+el aspecto de La sombra de la pagina, asi que ya sabes, cambia los otros
+bastones por conceptos diferentes pero deja tal y como esta La Sombra de la
+Pagina, no lo toques ni cambies nada… ahora mismo los tentaculos estan
+geniales, son justo lo que queria, pero la boca deja mucho que desear…
+la boca esta separada del tentaculo… la base del tentaculo nace en el suelo
+bajo el jugador y no sobre el jugador como debe ser… la boca y el tentaculo
+deben ser uno solo, aunque tambien puedes probar en vez de boca una masa de
+bruma negra cubre la totalidad de un jefe y esta bruma negra y espesa nace
+del tentaculo hacia el jefe".
+
+**(1) EL FIX DE LA RAÍZ — el tentáculo nace DEL JUGADOR.** La .62 había
+nacido con el concepto "la sombra del suelo" (`RaizDeSombra` hacía un
+raycast hacia ABAJO desde el portador hasta el primer tile sólido): con el
+jugador en el aire, la base del tentáculo brotaba del SUELO a decenas de
+pixeles debajo (el bug reportado, presente en las 4 armas). LA CURA: la
+raíz es ahora el `MountedCenter` del portador — el tentáculo SALE DEL
+CUERPO del jugador, vuele, salte o camine. El charco de siempre queda
+como SOMBRA PROYECTADA decorativa en el suelo (`SombraProyectada`, el
+mismo raycast, más sutil: 44 px y alfa 0,55): ya no es el origen, es la
+sombra que el portador echa al volar. `Colliding` usa la misma raíz nueva
+(la columna determinista jugador→presa coincide con el visual). La física
+de ColumnaViva quedó INTACTA (el usuario: «los tentáculos están geniales,
+son justo lo que quería»).
+
+**(2) LA BOCA ES BRUMA — el devorador que cubre al jefe ENTERO.** El
+diagnóstico de la separación: las Fauces procedurales se dibujaban en
+`Projectile.Center` (el objetivo), mientras la PUNTA REAL del tentáculo
+(la cadena verlet, con su resorte subamortiguado y su cuerda) viajaba por
+su cuenta — la boca FLOTABA adelantada decenas de px, despegada del
+cuerpo. LA CURA (la sugerencia del usuario, adoptada): LA BOCA PROCEDURAL
+FUERON RETIRADAS de La Sombra de la Página. Dos piezas nuevas en
+SombrasLib:
+
+- **LA CABEZA DE BRUMA** (`CabezaDeBruma`): mientras caza, la punta se
+  DISUELVE en una cabeza de humo (racimo denso EN la punta + el aliento
+  hacia la presa) — como se dibuja EN la punta real de la columna, cabeza
+  y tentáculo son EL MISMO CUERPO por construcción: la separación es
+  geométricamente imposible.
+- **EL DEVORADOR** (`Devorador`): al morder, la masa de bruma negra y
+  espesa que CUBRE LA TOTALIDAD del jefe (radio por `jefe.Size`, 84–260
+  px): (A) EL PUENTE — puffs alineados de la punta real al centro del
+  jefe con radios crecientes (la bruma NACE del tentáculo, la letra del
+  usuario); (B) LA MASA — dos racimos BrumaFX.Cloud que tapan el sprite
+  entero; (C) EL TRAGADO — la masa se CONTRAE con pulso (bocanadas de
+  4,6 Hz) mientras LAS ALMAS vuelan del jefe al portador POR el cuerpo
+  del tentáculo (la vida fluye por la columna); (D) EL BORDE violeta-rojo
+  aditivo (la lectura nocturna) + la HERIDA roja donde la punta está
+  enterrada. La punta queda SIEMPRE dentro de la masa: boca y tentáculo,
+  UNO SOLO para siempre.
+
+El FESTÍN (la animación de muerte, todas las armas) recibió la misma
+cirugía de conexión: sus Fauces ahora se dibujan ANCLADAS A LA PUNTA REAL
+del tentáculo gigante (antes: en `destino`, flotando adelante).
+
+**(3) LOS CUATRO CONCEPTOS — las Tres Hermanas jubiladas, tres armas
+NUEVAS de verdad.** El usuario: «me gusta más el aspecto de La Sombra de
+la Página… cambia los otros bastones por conceptos diferentes». La Marea,
+la Mirada y el Nido (copias del tentáculo) MUEREN con sus 6 .cs y 3
+iconos. En su puesto, TRES CONCEPTOS DISTINTOS (nada de agarrar ni
+drenar), cada uno con SU firma de festín:
+
+- **LA PLUMA DE LA PÁGINA** (95 daño, `PlumaPaginaProjectile`): la pluma
+  del escriba — cada disparo es un TRAZO DE TINTA: tres agujas de hueso
+  (Colmillo) en abanico estrecho con guía suave (la tinta busca la
+  palabra, giro acotado 0,55 rad), el RASTRO DE TINTA (la cinta de carne
+  ondulando detrás, borde violeta), colisión de SEGMENTO (la punta a la
+  cola — acertar con el rastro cuenta), atraviesa hasta 4 enemigos y al
+  clavarse SALPICA (anillo violeta + bruma + gotas). Festín estilo 8:
+  **LA LLUVIA DE TINTA** — agujas cayendo del cielo sobre el jefe,
+  clavándose escalonadas con destellos y gotas que escurren.
+- **LA HOJA DE LA PÁGINA** (105 daño, `HojaPaginaProjectile`): el juego
+  de palabras de la casa («hoja» = página Y filo). EL MOLINO: cuatro
+  hojas-crescente (el talón de Garra reutilizado como hoja, filo
+  violeta→rojo y punta de hueso) se materializan en bruma y ORBITAN al
+  portador acelerando (radio 34→94, cortan al contacto)… y a los 44 t SE
+  DISPARAN en abanico hacia el cursor con after-images y estelas. La
+  posición de cada hoja es FUNCIÓN PURA del tick (determinismo gratis en
+  cliente/server/dibujo; el ancla se congela al disparar). Festín estilo
+  9: **EL MOLINO DE FILOS** — dos anillos de crescentes contrarrotantes
+  que SE CIÑEN sobre el jefe conforme avanza el festín.
+- **EL SELLO DE LA PÁGINA** (190 daño, `SelloPaginaProjectile`): lo que
+  APRISIONA la página. No persigue ni perfora — MARCA EL TERRENO donde
+  apunta el cursor (máx 700 px): TRAZADO 36 t (el círculo rúnico se
+  dibuja solo: anillos dobles contrarrotantes + 8 marcas radiales
+  parpadeando + el piso de sombra) → ERUPCIÓN 28 t (SEIS GARRAS brotan
+  del perímetro hacia el centro escalonadas + la bruma estalla + la
+  herida roja — golpe fuerte a TODO lo de dentro del círculo, margen
+  para jefes grandes) → POSO 116 t (la bruma negra queda MORDIENDO el
+  terreno con daño de contacto lento mientras el círculo se apaga).
+  Festín estilo 10: **EL SELLO DEL JUICIO** — el círculo rúnico se dibuja
+  alrededor del jefe, gira en sentidos contrarios y SE CIÑE mientras
+  exhala bruma del suelo.
+
+Los estilos muertos 5/6/7 (las hermanas) fueron BORRADOS del
+`DrawAdorno`; los nuevos 8/9/10 llevan sus sonidos propios. Las tres
+marcan al jefe para LA DEVORACIÓN cuando su golpe es mortal
+(`FaucesGlobalNPC.Marcar` con su estilo — las armas de daño directo
+ahora también disparan el festín, no solo los drains).
+
+**(4) LA BOLSA + LA LOCALIZACIÓN + LOS ICONOS.** BolsaSombras = La Sombra
+(intacta) + los tres conceptos nuevos; tooltips de las 4 armas y de la
+bolsa reescritos en es-MX/es-ES/en-US (cirugía hjson con script Python
+con tabs literales — la lección de la .66: 9 operaciones por idioma,
+llaves 283/283, cero residuos de las hermanas). El tooltip de La Sombra
+actualizado a la nueva realidad (nace del cuerpo, la boca es bruma). Tres
+iconos 30×30 pixel-art (PIL): la pluma (raquis blanco + bandera de lobos
+sólidos violeta + gota gorda con brillo), la hoja (crescente con filo
+blanco/crema continuo y borde rojo de 1px) y el sello (anillos violetas +
+8 diamantes rúnicos + DOS ZARPOS de hueso con brasa) — 4 rondas de
+verificación VLM hasta el «Ship them» (pluma 7,5 · hoja 8 · sello 6,5:
+la garra ya se lee como GARRA y no como manecilla de reloj).
+
+**VERIFICACIÓN**: oráculo 0/0 (cazó 5 míos: Colliding debe devolver
+`bool?`, `Rectangle.Center()` devuelve Vector2 en FNA, `MathHelper.PiOver8`
+no existe, y el using de BrumaFX faltaba ×2) · build real 0/0 · .tmod
+4.220.672 B md5 da515d5ea17585a17f150a3c3351c572: 393 entradas (393 − 9
+hermanas + 9 nuevos), EOF exacto, 3/3 hjson byte-idénticos a la fuente,
+375 rawimg (377 PNGs − 2 iconos top-level), DLL con
+PlumaPaginaProjectile/HojaPaginaProjectile/SelloPaginaProjectile/
+PlumaDeLaPagina/HojaDeLaPagina/SelloDeLaPagina/CabezaDeBruma/Devorador/
+SombraProyectada VIVOS (9/9) y los 6 muertos de las hermanas AUSENTES ·
+headless (mundo nuevo 6400×1800, puerto 14777): Sandboxing→Finalizing
+v6.50.68→Adding Recipes→world gen→Settling liquids→**Server started**,
+0 EXCEPCIONES (server.log limpio).
+
 ## Commit v6.50.67 — LA CARNE DE VERDAD + EL FIX DEL OOM DE CARGA
 
 **Feedback del usuario**: "hay varios errores y ademas las armas se siguen

@@ -1,16 +1,58 @@
 # AethonMod — ESTADO ACTUAL (v6.50.65)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.67 (LA CARNE DE VERDAD + EL FIX DEL OOM DE
-> CARGA; release pendiente de ID al publicar, md5
-> e7cb554281ed0ef4200cb99671a76112). La .66 fue LAS TRES HERMANAS + EL FIX
-> DEL CRASH DEL VERTEX BUFFER (release 404542832, md5
-> d709d8693ffd9c2aec13efb1f78b131e, CDN verificado byte a byte) — PERO EN
-> LA MÁQUINA DEL USUARIO FALLÓ AL CARGAR: el OOM de texturas de la .67
-> (Ring 1024² ×3) la desactivaba sola.
+> Última actualización: v6.50.68 (LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS;
+> release pendiente de ID al publicar, md5
+> da515d5ea17585a17f150a3c3351c572). La .67 fue LA CARNE DE VERDAD + EL
+> FIX DEL OOM DE CARGA (release 404581716, md5 e7cb554281ed0ef4200cb99671a76112,
+> CDN verificado byte a byte) — el usuario CONFIRMÓ los tentáculos
+> («están geniales, son justo lo que quería») pero reportó la boca
+> separada del tentáculo y la base naciendo del suelo (ambos curados en
+> la .68, junto con el reemplazo de las 3 hermanas por conceptos nuevos).
 
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.68 = LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS** (la letra del
+  usuario: «los tentáculos están geniales… pero la boca deja mucho que
+  desear… la boca está separada del tentáculo… la base del tentáculo nace
+  en el suelo bajo el jugador y no sobre el jugador como debe ser…
+  cambia los otros bastones por conceptos diferentes pero deja tal y
+  como está La Sombra de la Página»):
+  (1) **EL FIX DE LA RAÍZ**: `RaizDeSombra` devolvía el raycast al SUELO
+  → ahora es el `MountedCenter` del portador (el tentáculo SALE DEL
+  JUGADOR, vuele o camine); el charco queda como SOMBRA PROYECTADA
+  decorativa (`SombraProyectada`); `Colliding` usa la raíz nueva; la
+  física de ColumnaViva INTACTA.
+  (2) **LA BOCA ES BRUMA**: las Fauces procedurales RETIRADAS de La
+  Sombra (se dibujaban en `Projectile.Center`, adelante de la punta
+  verlet → la separación de la imagen del usuario). NUEVAS PIEZAS en
+  SombrasLib: `CabezaDeBruma` (la punta disuelta en humo que respira —
+  dibujada EN la punta real, unión geométricamente imposible de
+  romper) y `Devorador` (al morder: la masa de bruma negra que CUBRE
+  LA TOTALIDAD del jefe — puente de puffs punta→jefe + 2 Clouds + el
+  TRAGADO con pulso + LAS ALMAS volviendo por el cuerpo + borde
+  violeta/rojo + la herida). El FESTÍN también: sus Fauces ancladas a
+  la PUNTA REAL (antes en `destino`).
+  (3) **LOS CUATRO CONCEPTOS**: la Marea/Mirada/Nido MUERTAS (6 .cs + 3
+  png); NUEVAS — LA PLUMA DE LA PÁGINA (95: 3 agujas de hueso
+  perforantes ×4 con rastro de tinta, homing suave, salpicaduras;
+  festín 8 = LA LLUVIA DE TINTA), LA HOJA DE LA PÁGINA (105: el molino
+  de 4 crescentes que orbitan acelerando y salen en abanico;
+  posición de cada hoja = FUNCIÓN PURA del tick; festín 9 = EL MOLINO
+  DE FILOS que se ciñe) y EL SELLO DE LA PÁGINA (190: TRAZADO 36t del
+  círculo rúnico → ERUPCIÓN de 6 garras + bruma → POSO 116t que
+  muerde; festín 10 = EL SELLO DEL JUICIO). Las 3 marcan al jefe con
+  `FaucesGlobalNPC.Marcar` si su golpe es mortal (el festín ya no es
+  solo de los drains).
+  (4) **BOLSA + hjson ×3 (script Python con tabs — 9 ops/idioma,
+  llaves 283/283, cero residuos) + 3 iconos 30×30 con 4 rondas VLM
+  hasta «Ship them»**.
+  VERIFICACIÓN: oráculo 0/0 (cazó 5: bool? en Colliding,
+  Rectangle.Center()→Vector2 en FNA, MathHelper.PiOver8 inexistente,
+  using BrumaFX ×2) · build real 0/0 · .tmod 4.220.672 B md5
+  da515d5ea17585a17f150a3c3351c572, 393 entradas, 3/3 hjson
+  byte-idénticos, 375 rawimg, DLL 9/9 símbolos nuevos VIVOS + 6 muertos
+  AUSENTES · headless: Server started, 0 EXCEPCIONES.
 - **v6.50.61 = LA PURGA DE NPC + EL VIGÍA DEL FESTÍN + EL LORE NUEVO** (la
   letra de la .60):
   (1) **EL VIGÍA DEL FESTÍN** (`NacerChusmaVigia` en `FaseMonstruos`): la
@@ -1148,8 +1190,30 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.67 en juego** — LA CARNE DE VERDAD + EL FIX
-   DEL OOM DE CARGA: (a) LA CARGA: el mod ya NO debe desactivarse solo al
+1. **El usuario prueba v6.50.68 en juego** — LA BOCA ES BRUMA + LOS CUATRO
+   CONCEPTOS: (a) LA RAÍZ: usar La Sombra de la Página SALTANDO o VOLANDO
+   — el tentáculo tiene que salir DEL CUERPO del jugador (el charco del
+   suelo queda solo como su sombra proyectada, ya no es el origen); (b)
+   LA BOCA: al morder a un jefe, la masa de bruma negra tiene que CUBRIR
+   ENTERO al jefe — NACE del tentáculo (puffs del puente), PULSA
+   tragando y las ALMAS vuelven al jugador por el cuerpo del tentáculo;
+   mientras caza, la punta se disuelve en una cabeza de bruma (ya NO hay
+   mandíbulas flotantes separadas — ni puede haberlas: todo vive en la
+   punta real); (c) LA PLUMA: tres agujas de hueso por disparo que
+   atraviesan hasta 4 enemigos con rastro de tinta y salpicadura; matar
+   un jefe con la pluma = festín LA LLUVIA DE TINTA; (d) LA HOJA: el
+   molino — 4 filos orbitan acelerando ~0,7 s y salen en abanico al
+   cursor; matar un jefe = festín EL MOLINO DE FILOS; (e) EL SELLO: el
+   círculo rúnico se traza donde apunta el cursor (máx 700 px), ERUPCIONA
+   en 6 garras + bruma y deja un poso que muerde ~2 s; matar un jefe =
+   festín EL SELLO DEL JUICIO; (f) LA BOLSA: reabrirla y recoger las 3
+   armas nuevas (las hermanas ya no existen — si quedaban en el
+   inventario se vuelven «unloaded item»: borrarlas); (g) el idioma
+   Español (Latinoamérica) con los tooltips nuevos de las 4 armas.
+
+2. **(Reemplazado por la .68 — el usuario pidió conceptos diferentes)**
+   El usuario prueba v6.50.67 en juego — LA CARNE DE VERDAD + EL FIX DEL
+   OOM DE CARGA: (a) LA CARGA: el mod ya NO debe desactivarse solo al
    entrar (el «error al cargar Unknown / mods desactivados automáticamente»
    de la .66 murió con el downscale de las 7 texturas gigantes — Ring y
    FireRing de 1024² a 256², RingShieldNebula a 512², 4 ruidos a 256²;
@@ -1169,7 +1233,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    «Expected Re-Logic file format» de su log son .plr corruptos SUYOS (no
    es del mod — borrarlos de Players/).
 
-2. **(Reemplazado por la .67 — la .66 falló al cargar en la máquina del
+3. **(Reemplazado por la .67 — la .66 falló al cargar en la máquina del
    usuario: OOM de texturas)** El usuario prueba v6.50.66 en juego — LAS HERMANAS + EL FIX DEL
    CRASH + MÁS BRUMA: (a) EL CRASH: usar las sombras ~10 min seguidos —
    el juego NO debe cerrarse más (el fix: Deferred = 1 Map por volcado
@@ -1243,6 +1307,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.68** | ✅ Build-verificada (oráculo 0/0 — cazó 5: `bool?` en Colliding, `Rectangle.Center()`→Vector2 en FNA, `MathHelper.PiOver8` inexistente, using BrumaFX ×2 —, build real 0/0, .tmod 4.220.672 B 393 entradas, EOF exacto, 3/3 hjson byte-idénticos, 375 rawimg, DLL con PlumaPaginaProjectile/HojaPaginaProjectile/SelloPaginaProjectile/PlumaDeLaPagina/HojaDeLaPagina/SelloDeLaPagina/CabezaDeBruma/Devorador/SombraProyectada VIVOS (9/9) y los 6 muertos de las hermanas AUSENTES, headless Server started 0 excepciones), ⏳ publicación | LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS — la letra del usuario: «los tentáculos están geniales… pero la boca deja mucho que desear… la boca está separada del tentáculo… la base nace en el suelo bajo el jugador y no sobre el jugador… cambia los otros bastones por conceptos diferentes pero deja tal y como está La Sombra de la Página». (1) **EL FIX DE LA RAÍZ**: RaizDeSombra (raycast al suelo) → MountedCenter del portador — el tentáculo SALE DEL JUGADOR; el charco queda como SOMBRA PROYECTADA decorativa (SombraProyectada, 44 px alfa 0,55); Colliding con la raíz nueva; física de ColumnaViva INTACTA. (2) **LA BOCA ES BRUMA**: Fauces retiradas de La Sombra (se dibujaban en Projectile.Center, ADELANTE de la punta verlet = la separación de la imagen); NUEVO SombrasLib.CabezaDeBruma (la punta disuelta en humo, dibujada EN la punta real — unión por construcción) + SombrasLib.Devorador (al morder: la masa de bruma negra que CUBRE LA TOTALIDAD del jefe — puente de puffs punta→jefe + 2 Clouds + TRAGADO con pulso 4,6 Hz + ALMAS volviendo por el cuerpo + borde violeta/rojo + la herida); el festín también: Fauces ancladas a la PUNTA REAL (antes en destino). (3) **LOS CUATRO CONCEPTOS**: Marea/Mirada/Nido BORRADAS (6 .cs + 3 png, estilos 5/6/7 muertos) → LA PLUMA DE LA PÁGINA (95 daño: 3 agujas de hueso perforantes ×4, homing suave 0,55 rad, rastro de tinta (Ribbon), colisión de segmento, salpicaduras; festín 8 = LA LLUVIA DE TINTA), LA HOJA DE LA PÁGINA (105: EL MOLINO — 4 crescentes orbitan acelerando 34→94 px y salen en abanico al cursor; posición = FUNCIÓN PURA del tick, ancla congelada al disparar; festín 9 = EL MOLINO DE FILOS contrarrotante que se ciñe) y EL SELLO DE LA PÁGINA (190: TRAZADO 36 t del círculo rúnico → ERUPCIÓN 28 t con 6 garras + bruma + herida roja → POSO 116 t mordiendo; festín 10 = EL SELLO DEL JUICIO); las 3 marcan con FaucesGlobalNPC.Marcar si su golpe mata (el festín ya no es solo de los drains). (4) BolsaSombras con los 4 conceptos + tooltips es×2/en reescritos (script Python tabs literales: 9 ops/idioma, llaves 283/283, cero residuos) + 3 iconos 30×30 (pluma 7,5 / hoja 8 / sello 6,5 — 4 rondas VLM hasta «Ship them»). |
 | **v6.50.67** | ✅ Build-verificada (oráculo 0/0 — cazó Vector2·int en las fauces —, build real 0/0 ×2, .tmod 4.220.530 B 393 entradas (369+24), EOF exacto, 3/3 hjson byte-idénticos, Ring 256² confirmado dentro, DLL con ColumnaViva/Ribbon/RibbonTinted/QuadSrc/HornearCarne/HornearColmillo/HornearVentosa/HornearOjoRasgado/EspinaViva VIVOS, headless 0 excepciones), ✔ publicada (release 404581716, CDN byte a byte md5 e7cb554281ed0ef4200cb99671a76112), ⏳ en juego | LA CARNE DE VERDAD + EL FIX DEL OOM DE CARGA — la letra del usuario: «hay varios errores y las armas se siguen viendo simples, solo son líneas geométricas, nada de tentáculos fluidos». (0) **EL OOM DE CARGA** (client.log: Texture2D creation failed 0x8007000E en Effects/Procedural/Ring → «Los mods se han desactivado automáticamente»): Ring/FireRing/RingShieldNebula eran 1024² (4 MB VRAM c/u, Ring es LA textura más pedida del mod) + 4 ruidos 512² — downscale Ring/FireRing→256², RingShieldNebula→512², ruidos→256² (degradados/ruido: 256 sobra, RingQuadSize normaliza, el tamaño visual NO cambia) = −13,5 MB VRAM, .tmod 6,41→4,22 MB. (1) **LA CINTA (VFXCore.Ribbon/RibbonTinted + Source en GlowQuad)**: espina+perfil de anchos → quads tangentes SOLAPADOS (extensión medio-ancho por extremo tapa las curvas) muestreando BANDAS de la textura larga — la carne FLUYE raíz→punta. (2) **LAS TEXTURAS HORNEADAS** (patrón Arcoiris, cero assets): CARNE 128×512 (7 fibras musculares, 3 vetas carmesí, 6 anillos, bordes que respiran), COLMILLO 48² (aguja de hueso curva), VENTOSA 32² (aro con agujero — el spritesheet del usuario), OJO RASGADO 64² (rendija vertical con alpha 0: en aditivo añade cero = se lee NEGRA en cualquier fondo). (3) **LA MASA ×5 CAPAS**: carne con PERFIL MUSCULAR (bulbo+S-taper+respiración) + velo + BORDE DE ENERGÍA violeta→rojo sangre con PULSO VIAJERO + espinas de hueso curvas + fila de ventosas. (4) **FAUCES NUEVAS**: corona de bulbo orgánico (4 blobs por semilla) + mandíbulas-cinta que SE ENROLLAN + colmillos de hueso + el ojo rasgado de la cabeza (~60%). (5) **GARRA NUEVA**: talón en S que se enrolla + punta de hueso alineada a la tangente. (6) **COLUMNA VIVA (verlet)**: onda viajera base→punta, resorte subamortiguado de la cabeza (OVERSHOOT de látigo), gancho en la punta, follow-through — un paso/frame, poda por edad, Colliding se queda con la Columna determinista; el gancho por arma: Sombra 0,5 · Marea −0,6 · Mirada 0,35 · Nido 0,7 · festín 0,45. (7) **OJOS RASGADOS**: la pared de la Mirada mezcla humanos+dracónicos (1/3), el ojo del juicio del festín rasgado. NOTA del log: los 2 «Expected Re-Logic file format» = .plr corruptos del usuario (no es del mod) |
 | **v6.50.66** | ✅ Build-verificada (0/0 oráculo — cazó jefe.Height→Size.Y —, build real 0/0, .tmod 6.414.883 B 393 entradas (395 − 5 pngs muertos + 3 iconos), 3/3 hjson byte-idénticos, EOF exacto, DLL con las 7 clases nuevas vivas y las 6 muertas ausentes, headless 0 excepciones — cazó y curó el hjson en-US malformed por la BolsaSombras sin apertura), ✔ publicada (release 404542832, CDN byte a byte md5 d709d8693ffd9c2aec13efb1f78b131e), ⏳ en juego | LAS TRES HERMANAS DE LA PÁGINA + EL FIX DEL CRASH + MÁS BRUMA — la letra del usuario: (0) **EL CRASH DEL CLIENT.LOG**: OutOfMemory 0x8007000E al mapear el vertex buffer a los ~7,5 min — la causa era NUESTRA: VFXCore.FlushAdditive/FlushAlpha en SpriteSortMode.Immediate = UN Map(Discard) del vertex buffer POR QUAD (la .65 metió cientos por frame → millones de Maps → el pool de staging del driver agotado); LA CURA: Deferred = 1 Map por VOLCADO completo. (1) **LAS TRES HERMANAS**: la Sombra de la Página INTACTA como base y las 3 armas viejas BORRADAS con sus sprites (la pinza del gif, la esfera del tajo y el libro — sprite VETADO): LA MAREA (3 cabezas-cresta en oleada desfasada + anillos de oleaje + niebla rasante + pulsos + spray; dren 2,2%/5t; festín estilo 5 LA OLA QUE SUBE con cresta de 5 mini-fauces), LA MIRADA (pared de 14 ojos que parpadean en oleadas + 3 líneas de mirada + EL OJO COLOSAL que se abre al morder con la pupila que ENGORDA + lágrimas de tinta + viñeta de la sentencia; dren 2,8%/7t; festín estilo 6 EL OJO DEL JUICIO), EL NIDO (5 huevos de núcleo rojo que SE ECLOSIONAN al morder soltando almas + corona de 6 garras que se abre en JAULA + 4 almas orbitando; dren 3,2%/8t; festín estilo 7 LA JAULA). (2) **MÁS BRUMA**: presupuesto de puffs 500→800 + cada hermana exhala más que la base (16+3 / 14+2 / 15+1) + la humareda del festín propio. (3) **CIRUGÍA DEL FESTÍN**: estilos muertos 1/2/4 BORRADOS (DrawEsfera, DrawPagina el libro, FrameFestin; 619→382 líneas), estilo por defecto 1→3, NUEVO DrawAdorno con la firma de cada hermana, la base estilo 3 EXACTAMENTE igual. BolsaSombras = la Sombra + las 3 hermanas, tooltips es-MX/es-ES/en-US simétricos. Iconos pixel-art de las 3 hermanas (VLM ×3 iteraciones, SHIP) |
 | **v6.50.65** | ✅ Build-verificada (0/0 oráculo, build real ×2, .tmod auditado 395 entradas (394 + es-MX) EOF exacto, claves es-MX == es-ES (435), headless 0 excepciones), ✔ publicada (release 404420190, CDN byte a byte md5 50486113436c6500d33da2b3c2263c8a), ⏳ en juego | LOS DIÁLOGOS ARREGLADOS + EL ESPAÑOL LATAM + LA BRUMA QUE SÍ SE VE + EL ARMA 4 DE VERDAD — la letra del usuario: (1) **LA AUTOPSIA de la .64**: la investigación se aplicó en primitivas INVISIBLES (la bruma eran quads SoftGlow casi negros al 30-45% = negro sobre negro; el arma 4 eran DOS RECTÁNGULOS Pixel con púas-barra — el mock propio confesó «plain rectangles, programmer's placeholder») (2) **LA BRUMA DE VERDAD**: SombrasLib reescrito sobre BrumaFX (la librería de humo fBm de la investigación v6.25 que la .64 ignoró) — BrumaColumna/BrumaBoca/Bruma exhalan puffs fBn en lote de MASA con rampa violácea HumoNegro(18,10,28)→HumoVioleta(64,42,96) + capa aditiva AlientoVioleta; Masa gana rim violeta ×1.35, Ojo gana halo, Vignette doble capa con pulso; NUEVA SombrasLib.Garra (zarpo de 3 segmentos + gancho + punta de hueso); aplica a las 4 armas + los 4 festines (misma API) (3) **ARMA 4 DE VERDAD** (PaginaFinalProjectile): el SPRITE REAL del Grimorio del Eterno flotando (escala 2.5-3×, vaivén+inclinación, aura violeta, garganta roja latiendo, OJO COLOSAL encima, hilo de bruma); jaula con 12 GARRAS AFILADAS (antes barras) + ojos ×1.4 con halo + juice ×2 (destello 460px + doble onda); festín estilo 4: libro gigante = sprite real colosal (escala tam*2.6/width) + borde dentado de 9 garras sobre el plano que sube; icono PaginaFinal.png regenerado pixel art limpio (VLM 7/10 lectura 8/10 tras 3 iteraciones) (4) **DIÁLOGOS**: 23 correcciones es+en en paralelo (KingSlime2 «todo el reino, ninguno el hueso»→«todo el reino en el cuerpo, ni un hueso en el trono»; Deerclops2 vera→verá; marginatura→los márgenes; La Arquera purgada→arqueros; género tensa→tenso; Venganza1 desajuste con disparador→«Moriste a media comida. Nadie recogió la mesa.»; PAGADO→SERVIDO; redundancias; solapamientos Twins/Destroyer/DukeFishron; 7→6 guardianes) (5) **ESPAÑOL LATAM**: es-MX idioma PRIMARIO (nuevo es-MX_Mods.AethonMod.hjson — el juego en Español (Latinoamérica) ya levanta el mod EN ESPAÑOL; antes caía al inglés; es-ES queda espejo) + PURGA DE ANGLICISMOS: Bumerangues/Boomerangs→Bumeranes, Unicorns→Unicornios, Minions→Esbirros, Dropea→Se obtiene al vencer, craftear→fabricar, Click→Clic, hardmode→modo difícil, BEAM→HAZ, bufet→bufé, kill→baja, tier→nivel, gauge→medidor, afterimages→estelas |

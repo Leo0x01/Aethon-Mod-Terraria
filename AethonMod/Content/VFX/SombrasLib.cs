@@ -800,6 +800,147 @@ namespace AethonMod.Content.VFX
             VFXCore.FlushAdditive();
         }
 
+        // ==================================================================
+        //  v6.50.68 — LA CABEZA DE BRUMA + EL DEVORADOR (la letra del
+        //  usuario: «la boca deja mucho que desear… la boca y el
+        //  tentáculo deben ser uno solo… en vez de boca una masa de
+        //  bruma negra cubre la totalidad de un jefe y esta bruma negra
+        //  y espesa nace del tentáculo hacia el jefe»).
+        // ==================================================================
+
+        /// <summary>
+        /// LA CABEZA DE BRUMA — la boca procedural RETIRADA: la punta del
+        /// tentáculo NO termina en mandíbulas dibujadas aparte (que se
+        /// despegaban del cuerpo): termina DISOLVIÉNDOSE en una cabeza de
+        /// humo que respira hacia <paramref name="dir"/>. Como se dibuja
+        /// EN la punta real de la columna (la pasa el llamador), cabeza y
+        /// tentáculo son EL MISMO CUERPO por construcción — jamás puede
+        /// haber separación. Mientras caza: una masa mediana que abre el
+        /// rumbo; al emerger: el capullo que estalla.
+        /// </summary>
+        /// <param name="punta">LA PUNTA REAL de la columna (col[n−1]).</param>
+        /// <param name="dir">Rumbo de caza (la tangente final de la columna).</param>
+        /// <param name="vigor">0..1 — cuánta cabeza hay (crece al emerger, late al cazar).</param>
+        public static void CabezaDeBruma(Vector2 punta, Vector2 dir, float vigor, float alfa, float tiempo, int semilla)
+        {
+            if (alfa <= 0.02f || vigor <= 0.03f) return;
+            if (Main.netMode == NetmodeID.Server) return;
+            vigor = MathHelper.Clamp(vigor, 0f, 1f);
+
+            Vector2 o = Main.screenPosition;
+            // LA MASA DE LA CABEZA: un racimo denso EN la punta — el
+            // humo que REEMPLAZA la boca: nace pegado, crece y respira
+            LoteDeBruma(() =>
+            {
+                float late = 0.85f + 0.15f * MathF.Sin(tiempo * 3.1f + semille(semilla));
+                float r = (30f + 22f * vigor) * late;
+                BrumaFX.Puff(punta - o, r, HumoNegro, semilla * 13 + 1, tiempo,
+                    MathHelper.Clamp(0.55f * alfa * vigor, 0.05f, 0.85f), quality: 0.6f);
+                BrumaFX.Puff(punta - o + new Vector2(MathF.Sin(tiempo * 1.7f + semille(semilla + 3)) * 10f,
+                    -6f - 4f * MathF.Sin(tiempo * 2.2f)), r * 0.62f, HumoVioleta,
+                    semilla * 13 + 2, tiempo * 0.9f,
+                    MathHelper.Clamp(0.30f * alfa * vigor, 0.04f, 0.5f), quality: 0.45f);
+            });
+
+            // el aliento hacia adelante (la nariz del cazador)
+            BrumaBoca(punta, dir, vigor, alfa, tiempo, semilla + 5, 4);
+        }
+
+        /// <summary>
+        /// EL DEVORADOR — LA LETRA DEL USUARIO: «en vez de boca, una masa
+        /// de bruma negra que CUBRE LA TOTALIDAD de un jefe, y esa bruma
+        /// negra y espesa NACE del tentáculo hacia el jefe». Cuatro
+        /// capas: (A) EL PUENTE — puffs alineados de la PUNTA REAL del
+        /// tentáculo al centro del jefe, creciendo (la bruma EMANA del
+        /// tentáculo); (B) LA MASA — dos racimos que cubren TODO el
+        /// sprite del jefe (radio por jefe.Size); (C) EL TRAGADO — la
+        /// masa entera se CONTRAE rítmico hacia la punta (el jefe siendo
+        /// succionado) mientras las ALMAS del jefe vuelan al portador
+        /// POR la columna del tentáculo (la vida fluye por el cuerpo);
+        /// (D) EL BORDE violeta aditivo — la lectura nocturna. La punta
+        /// queda ENTERRADA en la masa: boca y tentáculo, UNO SOLO para
+        /// siempre.
+        /// </summary>
+        /// <param name="punta">LA PUNTA REAL de la columna (col[n−1]).</param>
+        /// <param name="jefe">La presa mordida (su Size manda en el radio).</param>
+        /// <param name="intensidad">0..1 — cuánta masa hay (crece en el primer segundo del mordisco).</param>
+        /// <param name="col">La columna del tentáculo (por donde vuelan las almas). Opcional.</param>
+        public static void Devorador(Vector2 punta, NPC jefe, float intensidad, float alfa, float tiempo, int semilla, Vector2[] col = null)
+        {
+            if (alfa <= 0.02f || intensidad <= 0.02f || jefe == null || !jefe.active) return;
+            if (Main.netMode == NetmodeID.Server) return;
+            intensidad = MathHelper.Clamp(intensidad, 0f, 1f);
+
+            Vector2 centro = jefe.Center;
+            float radio = MathHelper.Clamp(jefe.Size.Length() * 0.62f, 84f, 260f);
+            // (C) EL TRAGADO: la masa se CIÑE a la presa con cada bocanada
+            float traga = 1f - 0.10f * MathF.Sin(tiempo * 4.6f + semille(semilla)) * intensidad;
+            radio *= traga;
+            Vector2 o = Main.screenPosition;
+
+            LoteDeBruma(() =>
+            {
+                // (A) EL PUENTE — del tentáculo al jefe: la bruma NACE de
+                // la punta (puffs alineados, radios crecientes)
+                Vector2 eje = centro - punta;
+                float len = eje.Length();
+                if (len > 24f)
+                {
+                    Vector2 dir = eje * (1f / len);
+                    int pasos = Math.Clamp((int)(len / 42f), 2, 6);
+                    for (int k = 0; k <= pasos; k++)
+                    {
+                        float f = k / (float)pasos;
+                        float r = MathHelper.Lerp(24f, radio * 0.5f, f) * traga;
+                        BrumaFX.Puff((punta + dir * (len * f)) - o, r, HumoNegro,
+                            semilla * 7 + k, tiempo + f * 3f,
+                            MathHelper.Clamp(0.50f * alfa * intensidad, 0.05f, 0.8f), quality: 0.5f,
+                            velocity: dir * 12f);
+                    }
+                }
+
+                // (B) LA MASA — cubre la TOTALIDAD del jefe: racimo ancho
+                // + racimo de densidad al centro (dos capas, la segunda
+                // más violeta: el centro aún RESPIRA)
+                BrumaFX.Cloud(centro - o, radio * 0.92f, HumoNegro, semilla * 17 + 5, tiempo,
+                    Math.Max(4, (int)(radio / 46f)), alpha: MathHelper.Clamp(0.62f * alfa * intensidad, 0.05f, 0.85f));
+                BrumaFX.Cloud(centro - o, radio * 0.55f, HumoVioleta, semilla * 17 + 6, tiempo * 0.9f,
+                    4, alpha: MathHelper.Clamp(0.34f * alfa * intensidad, 0.04f, 0.5f));
+            });
+
+            // (D) EL BORDE violeta — la masa PRENDE en la noche (detrás,
+            // en aditivo tenue: no tapa, HACE LEER)
+            VFXCore.Begin();
+            float late = 0.75f + 0.25f * MathF.Sin(tiempo * 3.8f + semille(semilla));
+            VFXCore.Quad(centro, Alfa(Violeta, 0.10f * alfa * intensidad * late),
+                new Vector2(radio * 2.5f, radio * 2.5f) * traga, 0f);
+            VFXCore.Quad(centro, Alfa(Rojo, 0.07f * alfa * intensidad * late),
+                new Vector2(radio * 1.5f, radio * 1.5f) * traga, 0f);
+            VFXCore.FlushAdditive();
+
+            // (C) LAS ALMAS — la vida del jefe vuelve al portador POR el
+            // cuerpo del tentáculo (la columna es el camino)
+            if (col != null && col.Length >= 3)
+            {
+                VFXCore.Begin();
+                int nAlmas = 4;
+                for (int k = 0; k < nAlmas; k++)
+                {
+                    float prog = Frac(tiempo * 0.42f + k * (1f / nAlmas) + semille(semilla + k) * 0.2f);
+                    float idxF = (1f - prog) * (col.Length - 1);
+                    int idx = (int)idxF;
+                    float resto = Frac(idxF);
+                    if (idx >= col.Length - 1) { idx = col.Length - 2; resto = 1f; }
+                    if (idx < 0) idx = 0;
+                    Vector2 pos = Vector2.Lerp(col[idx], col[idx + 1], resto)
+                        + new Vector2(MathF.Sin(prog * 9f + k * 2.4f) * 14f,
+                                      MathF.Cos(prog * 7f + k * 1.7f) * 10f);
+                    Alma(pos, 12f + 5f * MathF.Sin(tiempo * 5f + k), 0.8f * alfa * intensidad);
+                }
+                VFXCore.FlushAdditive();
+            }
+        }
+
         /// <summary>
         /// EL VELO DE LA SALA (la anticipación de cine): oscurece los
         /// CUATRO BORDES con doble velo (uno ancho y denso + otro corto y

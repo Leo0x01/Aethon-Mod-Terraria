@@ -87,69 +87,67 @@ Items: {
 			'''
 			"Written in ink of the Gate: eyes and teeth."
 			The same tentacle maw, but 100% WRITTEN IN CODE — not a
-			single sprite: the mass, the eyes that snap open, the
-			fangs and the throat, ALL drawn by the engine.
-			It rises from the SHADOW AT YOUR FEET, hunts at any
-			distance, bites and drains — and the whole body and
-			mouth exhale BLACK MIST. At 1 HP: the feast.
+			single sprite: the muscled mass, the eyes that snap open,
+			the flesh that flows, ALL drawn by the engine.
+			It rises FROM YOUR OWN BODY — fly or walk, the shadow goes
+			WITH YOU —, hunts at any distance, bites and drains: the tip
+			dissolves into BLACK MIST, and on the bite THE DEVOURER — the
+			mass that COVERS the whole boss — swallows in pulse while its
+			souls travel back to you through the body. At 1 HP: the feast.
 			(Maw test weapon — v2.)
 			'''
 	}
 
-	MareaDeLaPagina: {
-		// v6.50.66 — SISTER 1 of the Shadow of the Page (takes the Grimoire's Maw slot)
-		DisplayName: The Tide of the Page
+	PlumaDeLaPagina: {
+		// v6.50.68 — NEW WEAPON 1 (replaces The Tide of the Page — "different concepts", the user's word)
+		DisplayName: The Quill of the Page
 		Tooltip:
 			'''
-			"Where there is shadow, the page is sea."
-			THE TIDE: the same ground shadow, but made LIVING WATER —
-			not one tendril: THREE CREST-HEADS biting in a WAVE, each on
-			its own shifted rhythm (the tide doesn't chew: it SWALLOWS
-			in waves). The pool carries expanding RIPPLE RINGS, fog
-			CRAWLS along the ground like on a shore, pulses climb the
-			body like the sea's swell... and when the jaws SNAP, black
-			SPRAY flies. It hunts WEAVING through the air.
-			It nibbles fast and soft (2.2% every 5 ticks).
-			At 1 HP: THE RISING WAVE — the feast with a crest of mouths.
-			(Sister of the shadows — 100% code, not a single sprite.)
+			"The page is written with what it pierces."
+			THE SCRIBE'S QUILL: every shot is a STROKE OF INK — THREE
+			BONE NEEDLES in a tight fan, with gentle homing (the ink
+			seeks its word) and the INK TRAIL rippling behind the flight.
+			They pierce up to 4 enemies; on impact they SPLATTER: violet
+			ring, black mist and ink drops.
+			If your ink kills a boss: THE INK RAIN — the feast of needles
+			falling from the sky.
+			(New shadow concept — 100% code, not a single sprite.)
 			'''
 	}
 
-	MiradaDeLaPagina: {
-		// v6.50.66 — SISTER 2 of the Shadow of the Page (takes the Shadow Slash slot)
-		DisplayName: The Gaze of the Page
+	HojaDeLaPagina: {
+		// v6.50.68 — NEW WEAPON 2 (replaces The Gaze of the Page — "hoja": page AND blade)
+		DisplayName: The Blade of the Page
 		Tooltip:
 			'''
-			"The page is watching you. It always was."
-			THE GAZE: the same ground shadow, but ALL EYES — a WALL OF
-			FOURTEEN EYES blinking in WAVES, every pupil LOCKED on the
-			prey. Three GAZE LINES stretch to the target (the violet
-			promise)... and on the bite, THE COLOSSAL EYE opens above
-			the head: half-lidded while hunting, WIDE OPEN at the
-			sentence, its PUPIL GROWING with every swallow. The eyes
-			squint with fury, weep INK TEARS, and the room becomes EDGE.
-			It bites slow and deep (2.8% every 7 ticks): the gaze doesn't
-			devour — it SENTENCES. At 1 HP: THE EYE OF JUDGMENT.
-			(Sister of the shadows — 100% code, not a single sprite.)
+			A "hoja" is a page. A "hoja" is a blade. This weapon is both.
+			THE MILL: FOUR SHADOW BLADES materialize in mist and ORBIT
+			their bearer, spinning faster and faster (they cut anything
+			that comes close)... and when the mill is full, IT FIRES: all
+			four launch in a fan toward the cursor, piercing everything in
+			their path with trails and their spinning ghost behind. The
+			page, folded until it cuts.
+			If your blade kills a boss: THE BLADE MILL — the feast of the
+			circle that tightens.
+			(New shadow concept — 100% code, not a single sprite.)
 			'''
 	}
 
-	NidoDeLaPagina: {
-		// v6.50.66 — SISTER 3 of the Shadow of the Page (takes the Final Page slot — NO book sprite)
-		DisplayName: The Nest of the Page
+	SelloDeLaPagina: {
+		// v6.50.68 — NEW WEAPON 3 (replaces The Nest of the Page — the seal that binds the page)
+		DisplayName: The Seal of the Page
 		Tooltip:
 			'''
-			"The page broods. Its children are hungry."
-			THE NEST: the same ground shadow, but HEAVY WITH YOUNG — the
-			pool is full of red-cored EGGS that pulse slowly... and on
-			the bite they HATCH: mini-jaws that open and release a SOUL
-			each. The head wears the CROWN OF SIX CLAWS, folded like a
-			bud while hunting... which OPENS AND CLOSES INTO A CAGE on
-			the prey, squeezing in rhythm with the bite. Four SOULS orbit
-			the head at all times (the ones already living in the page)
-			and spin faster when the mother feeds. The deepest drain of
-			the sisters (3.2% every 8 ticks). At 1 HP: THE CAGE.
-			(Sister of the shadows — 100% code, no sprites, no book.)
+			"Every contract is signed twice: once in ink, once in blood."
+			THE SEAL: it doesn't chase or pierce — it MARKS THE GROUND.
+			The RUNIC CIRCLE draws itself wherever you aim (counter-
+			rotating twin rings, blinking marks, the shadow floor)...
+			and when complete, IT ERUPTS: SIX CLAWS sprout from the rim
+			toward the center and the mist bursts. Afterwards, the black
+			mist POOL keeps BITING the ground for a good while.
+			If your seal kills a boss: THE SEAL OF JUDGMENT — the feast of
+			the circle that tightens over the condemned.
+			(New shadow concept — 100% code, not a single sprite.)
 			'''
 	}
 
@@ -774,15 +772,16 @@ Items: {
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
 		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
-		// v6.50.66: THE PAGE FAMILY — the 3 old weapons retired by the user; now the Shadow + its 3 SISTERS
+		// v6.50.68: THE FOUR CONCEPTS — the 3 sisters retired by the user ("different concepts"); now the Shadow + Quill/Blade/Seal
 		DisplayName: Shadows Bag
 		Tooltip:
 			'''
 			The four pages of the shadow (Pride style).
-			The untouched base (The Shadow of the Page) and its THREE
-			SISTERS: the three-headed ocean (The Tide), the wall of eyes
-			with its colossal eye (The Gaze) and the mother of eggs and
-			claws (The Nest). All of them breathe black mist.
+			The untouched base (The Shadow of the Page) and the THREE NEW
+			CONCEPTS: the ink stroke that pierces (The Quill), the blade
+			mill that orbits and fires (The Blade) and the runic circle
+			that marks and claims the ground (The Seal). All of them
+			breathe black mist.
 			At 1 HP: the feast begins — each with her own signature.
 			Right-click to deploy them. Only delivers what you're missing.
 			'''
@@ -1740,9 +1739,9 @@ Items: {
 
 Projectiles: {
 	SombraPaginaProjectile.DisplayName: The Shadow of the Page
-	MareaPaginaProjectile.DisplayName: The Tide of the Page
-	MiradaPaginaProjectile.DisplayName: The Gaze of the Page
-	NidoPaginaProjectile.DisplayName: The Nest of the Page
+	PlumaPaginaProjectile.DisplayName: The Quill of the Page
+	HojaPaginaProjectile.DisplayName: The Blade of the Page
+	SelloPaginaProjectile.DisplayName: The Seal of the Page
 	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
 	GenesisLight.DisplayName: Genesis Light

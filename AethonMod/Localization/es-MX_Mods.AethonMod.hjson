@@ -90,68 +90,64 @@ Items: {
 			'''
 			«Escrita con tinta de la Puerta: ojos y dientes.»
 			La misma fauce del tentáculo, pero 100% ESCRITA POR CÓDIGO —
-			ni un sprite: la masa, los ojos que se abren de golpe, los
-			colmillos y la garganta, TODO dibujado por el motor.
-			Nace de la SOMBRA DE TUS PIES, caza a cualquier distancia,
-			muerde y drena — y el cuerpo entero y la boca EXHALAN
-			BRUMA NEGRA. A 1 de vida: el festín.
+			ni un sprite: la masa muscular, los ojos que se abren de
+			golpe, la carne que fluye, TODO dibujado por el motor.
+			Nace DE TU CUERPO — vueles o camines, la sombra va CONTIGO —,
+			caza a cualquier distancia, muerde y drena: la punta se
+			disuelve en BRUMA NEGRA y al clavarse, EL DEVORADOR — la masa
+			que CUBRE ENTERO al jefe — traga con pulso mientras las almas
+			vuelven a ti por el cuerpo. A 1 de vida: el festín.
 			(Arma de prueba de las fauces — v2.)
 			'''
 	}
-	MareaDeLaPagina: {
-		// v6.50.66 — HERMANA 1 de La Sombra de la Página (ocupa el puesto de La Fauce del Grimorio)
-		DisplayName: La Marea de la Página
+	PlumaDeLaPagina: {
+		// v6.50.68 — ARMA NUEVA 1 (reemplaza a La Marea de la Página — «conceptos diferentes», la letra del usuario)
+		DisplayName: La Pluma de la Página
 		Tooltip:
 			'''
-			«Donde hay sombra, la página es mar.»
-			LA MAREA: la misma sombra del suelo, pero hecha AGUA VIVA —
-			no un tentáculo: TRES CABEZAS-CRESTA mordiendo en OLEADA,
-			con el ciclo desfasado (la marea no mastica: TRAGA por olas).
-			El charco lleva ANILLOS DE OLEAJE que se expanden, la niebla
-			RASTRA el suelo como en la orilla, pulsos suben por el cuerpo
-			como el vaivén del mar… y al cerrar las fauces salta el
-			SPRAY de gotas negras. Caza TEJIÉNDOSE por el aire.
-			Mordisquea rápido y suave (2,2% cada 5 t).
-			A 1 de vida: LA OLA QUE SUBE — el festín con cresta de bocas.
-			(Hermana de las sombras — 100% código, ni un sprite.)
+			«La página se escribe con lo que atraviesa.»
+			LA PLUMA DEL ESCRIBA: cada disparo es un TRAZO DE TINTA —
+			TRES AGUJAS DE HUESO en abanico estrecho, con guía suave
+			(la tinta busca la palabra) y el RASTRO DE TINTA ondulando
+			detrás del vuelo. Atraviesan hasta 4 enemigos; al clavarse
+			SALPICAN: anillo violeta, bruma negra y gotas de tinta.
+			Si tu tinta mata a un jefe: LA LLUVIA DE TINTA — el festín
+			de las agujas que caen del cielo.
+			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
 			'''
 	}
-	MiradaDeLaPagina: {
-		// v6.50.66 — HERMANA 2 de La Sombra de la Página (ocupa el puesto de El Tajo de las Sombras)
-		DisplayName: La Mirada de la Página
+	HojaDeLaPagina: {
+		// v6.50.68 — ARMA NUEVA 2 (reemplaza a La Mirada de la Página — «hoja»: página Y filo)
+		DisplayName: La Hoja de la Página
 		Tooltip:
 			'''
-			«La página te mira. Siempre te miró.»
-			LA MIRADA: la misma sombra del suelo, pero TODA OJOS — una
-			PARED DE CATORCE OJOS que parpadean EN OLEADAS, todos con la
-			pupila CLAVADA en la presa. Tres LÍNEAS DE MIRADA se tienden
-			hasta el objetivo (la promesa violeta)… y al morder se abre
-			EL OJO COLOSAL sobre la cabeza: medio cerrado mientras caza,
-			ABIERTO DE GOLPE al sentenciar, con la PUPILA QUE ENGORDA
-			con cada tragada. Los ojos entrecierran de furia, lloran
-			LÁGRIMAS DE TINTA y la sala se hace BORDE.
-			Muerde lento y hondo (2,8% cada 7 t): la mirada no devora — SENTENCIA.
-			A 1 de vida: EL OJO DEL JUICIO — el festín que te observa.
-			(Hermana de las sombras — 100% código, ni un sprite.)
+			«Hoja» es página. «Hoja» es filo. Esta arma es las dos cosas.
+			EL MOLINO: CUATRO HOJAS-FILO de sombra se materializan en
+			bruma y ORBITAN a su portador, girando cada vez más rápido
+			(cortan a cualquiera que se acerque)… y al llenarse, SE
+			DISPARAN en abanico hacia el cursor, atravesiendo todo a su
+			paso con estelas y su fantasma de giro detrás. La página,
+			doblada hasta cortar.
+			Si tu filo mata a un jefe: EL MOLINO DE FILOS — el festín
+			del círculo que se ciñe.
+			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
 			'''
 	}
-	NidoDeLaPagina: {
-		// v6.50.66 — HERMANA 3 de La Sombra de la Página (ocupa el puesto de La Página Final — SIN el sprite del libro)
-		DisplayName: El Nido de la Página
+	SelloDeLaPagina: {
+		// v6.50.68 — ARMA NUEVA 3 (reemplaza a El Nido de la Página — el sello que aprisiona la página)
+		DisplayName: El Sello de la Página
 		Tooltip:
 			'''
-			«La página anida. Sus crías tienen hambre.»
-			EL NIDO: la misma sombra del suelo, pero PREÑADA — el charco
-			lleno de HUEVOS de núcleo rojo que laten despacio… y al
-			morder SE ECLOSIONAN: mini-fauces que abren la boca y sueltan
-			un ALMA cada una. La cabeza lleva la CORONA DE SEIS GARRAS,
-			plegada en capullo en la caza… que al morder SE ABRE Y
-			CIERRA EN JAULA sobre la presa, apretando al compás de la
-			mordida. Cuatro ALMAS orbitan la cabeza en todo momento (las
-			que ya viven en la página) y giran más rápido cuando la madre
-			come. El dren más hondo de las hermanas (3,2% cada 8 t).
-			A 1 de vida: LA JAULA — el festín que aprieta.
-			(Hermana de las sombras — 100% código, ni un sprite, ni un libro.)
+			«Todo contrato se firma dos veces: una en tinta, otra en sangre.»
+			EL SELLO: no persigue ni perfora — MARCA EL TERRENO. El
+			CÍRCULO RÚNICO se dibuja solo donde apuntas (anillos dobles
+			contrarrotantes, marcas que parpadean, el piso de sombra)…
+			y al completarse, ERUPCIONA: SEIS GARRAS brotan del perímetro
+			hacia el centro y la bruma estalla. Después, el POSO de
+			bruma negra queda MORDIENDO el terreno un buen rato.
+			Si tu sello mata a un jefe: EL SELLO DEL JUICIO — el festín
+			del círculo que se ciñe sobre el reo.
+			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
 			'''
 	}
 
@@ -777,15 +773,16 @@ Items: {
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
 		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
-		// v6.50.66: THE PAGE FAMILY — the 3 old weapons retired by the user; now the Shadow + its 3 SISTERS
+		// v6.50.68: THE FOUR CONCEPTS — the 3 sisters retired by the user ("different concepts"); now the Shadow + Quill/Blade/Seal
 		DisplayName: Bolsa de las Sombras
 		Tooltip:
 			'''
 			Las cuatro páginas de la sombra (estilo Pride).
-			La base intacta (La Sombra de la Página) y sus TRES HERMANAS:
-			el océano de tres cabezas (La Marea), la pared de ojos con su
-			ojo colosal (La Mirada) y la madre de huevos y garras (El
-			Nido). Todas exhalan bruma negra.
+			La base intacta (La Sombra de la Página) y los TRES CONCEPTOS
+			nuevos: el trazo de tinta que atraviesa (La Pluma), el molino
+			de filos que orbita y se dispara (La Hoja) y el círculo rúnico
+			que marca y reclama el terreno (El Sello). Todas exhalan
+			bruma negra.
 			A 1 de vida: el festín comienza — cada una con su firma.
 			Clic derecho para desplegarlas. Solo entrega lo que te falte.
 			'''
@@ -1742,9 +1739,9 @@ Items: {
 
 Projectiles: {
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
-	MareaPaginaProjectile.DisplayName: La Marea de la Página
-	MiradaPaginaProjectile.DisplayName: La Mirada de la Página
-	NidoPaginaProjectile.DisplayName: El Nido de la Página
+	PlumaPaginaProjectile.DisplayName: La Pluma de la Página
+	HojaPaginaProjectile.DisplayName: La Hoja de la Página
+	SelloPaginaProjectile.DisplayName: El Sello de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	GenesisLight.DisplayName: Luz del Génesis

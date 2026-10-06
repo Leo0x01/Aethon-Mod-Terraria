@@ -525,22 +525,22 @@ namespace AethonMod.Content.Items.Bolsas
     }
 
     /// <summary>19 — LAS FAUCES DEL GRIMORIO (v6.50.63): LAS CUATRO ARMAS DE
-    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B) — las
-    /// tres de la v6.50.62 (que nacieron SOLO CON RECETA y el jugador
-    /// NUNCA las recibió: feedback "te olvidaste darle las armas al
-    /// jugador"; la lección anti-recurrencia de la v6.14.2, OTRA VEZ:
-    /// cada arma nueva debe registrarse en el kit de entrega) + LA
-    /// PÁGINA FINAL de la v6.50.64 (el arma 4 — la evolución AAA del
-    /// arma 3: apertura de libro → tres versos convergentes → jaula de
-    /// tinta → el festín del libro gigante). El tentáculo-pinza que
-    /// SIEMPRE llega (La Fauce del Grimorio — v6.50.64: el gif DOBLE en
-    /// la punta, una cabeza por esquina, mordiendo como dientes), el
-    /// tajo que encierra al jefe en la esfera de ojos que devora y
-    /// desintegra (El Tajo de las Sombras), la fauce 100% escrita por
-    /// código (La Sombra de la Página) y su evolución (La Página Final).
-    /// Las cuatro disparan LA DEVORACIÓN: jefe a 1 de vida → su muerte
-    /// se DETIENE → la sombra se lo come. TODAS exhalan BRUMA NEGRA
-    /// (v6.50.64). Las recetas de 5 madera siguen como vía alternativa
+    /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B). La
+    /// lección anti-recurrencia de la v6.14.2 (cada arma nueva debe
+    /// registrarse en el kit de entrega — el jugador NUNCA vuelve a
+    /// quedarse sin sus armas). v6.50.68 — LOS CUATRO CONCEPTOS (la
+    /// letra del usuario: «me gusta más el aspecto de La Sombra de la
+    /// Página… cambia los otros bastones por conceptos diferentes»):
+    /// LA SOMBRA DE LA PÁGINA (la base, INTACTA — el tentáculo de
+    /// carne que nace del jugador y devora con bruma), LA PLUMA DE LA
+    /// PÁGINA (el trazo de tinta: agujas de hueso que atraviesan con
+    /// rastro de tinta), LA HOJA DE LA PÁGINA (el molino: cuatro
+    /// hojas-filo que orbitan y salen en abanico) y EL SELLO DE LA
+    /// PÁGINA (el círculo rúnico que se traza, erupciona en garras y
+    /// deja un poso que muerde). Las cuatro disparan LA DEVORACIÓN:
+    /// jefe a 1 de vida → su muerte se DETIENE → la sombra se lo come,
+    /// CADA UNA con su firma de festín (3/8/9/10). TODAS exhalan
+    /// BRUMA NEGRA. Las recetas de 5 madera siguen como vía alternativa
     /// (protocolo v6.14.2).</summary>
     public class BolsaSombras : BolsaCategoria
     {
@@ -552,14 +552,17 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.50.66 — LA FAMILIA DE LA PÁGINA: el usuario jubiló a las
-            // 3 armas viejas (pinza del gif, tajo-esfera y libro) y pidió
-            // que las 4 armas sean la Sombra de la Página y sus 3 hermanas
-            // (copias con MÁS personalidad, más bruma, más alma)
+            // v6.50.68 — LOS CUATRO CONCEPTOS: el usuario jubiló a las 3
+            // hermanas-tentáculo («me gusta más el aspecto de La Sombra
+            // de la Página… cambia los otros bastones por conceptos
+            // diferentes») — su puesto lo toman LA PLUMA (el trazo de
+            // tinta que atraviesa), LA HOJA (el molino de filos) y EL
+            // SELLO (el círculo rúnico que marca el terreno). La Sombra
+            // de la Página queda INTACTA como pidió el usuario.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA BASE: intacta, como pidió el usuario
-            l.Add((ModContent.ItemType<Weapons.Sombras.MareaDeLaPagina>(), 1));   // HERMANA 1: el océano — tres cabezas en oleada, anillos, niebla
-            l.Add((ModContent.ItemType<Weapons.Sombras.MiradaDeLaPagina>(), 1));  // HERMANA 2: la que te mira — pared de ojos + el ojo colosal
-            l.Add((ModContent.ItemType<Weapons.Sombras.NidoDeLaPagina>(), 1));    // HERMANA 3: la madre — huevos, jaula de garras, almas
+            l.Add((ModContent.ItemType<Weapons.Sombras.PlumaDeLaPagina>(), 1));   // NUEVA 1: el trazo de tinta — agujas perforantes que escriben el vuelo
+            l.Add((ModContent.ItemType<Weapons.Sombras.HojaDeLaPagina>(), 1));    // NUEVA 2: el molino de filos — cuatro hojas que orbitan y se disparan
+            l.Add((ModContent.ItemType<Weapons.Sombras.SelloDeLaPagina>(), 1));   // NUEVA 3: el círculo rúnico — garras que brotan del terreno marcado
             return l;
         }
     }

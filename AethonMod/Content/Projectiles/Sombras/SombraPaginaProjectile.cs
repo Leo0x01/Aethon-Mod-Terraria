@@ -13,18 +13,30 @@ namespace AethonMod.Content.Projectiles.Sombras
     /// v6.50.64 — LA BRUMA NEGRA: todo el cuerpo y la boca exhalan puﬀs
     /// vivos (BrumaColumna + BrumaBoca) — la petición del usuario.
     ///
+    /// v6.50.68 — LA LETRA DEL USUARIO, DOS CIRUGÍAS (el resto INTACTO):
+    /// (1) «la base del tentáculo nace en el suelo bajo el jugador y no
+    /// sobre el jugador como debe ser» → LA RAÍZ ES EL CUERPO DEL
+    /// PORTADOR (MountedCenter): el tentáculo SALE DEL JUGADOR esté donde
+    /// esté — el charco queda como su SOMBRA proyectada en el suelo
+    /// (mero decorado, ya no es el origen). (2) «la boca deja mucho que
+    /// desear… la boca y el tentáculo deben ser uno solo… en vez de boca
+    /// una masa de bruma negra cubre la totalidad de un jefe y nace del
+    /// tentáculo hacia el jefe» → LAS FAUCES PROCEDURALES FUERON
+    /// RETIRADAS: la punta se disuelve en LA CABEZA DE BRUMA (caza) y al
+    /// morder EL DEVORADOR — la masa de bruma negra y espesa que cubre
+    /// TODO el jefe, nace de la punta REAL de la columna y traga con
+    /// pulso mientras las almas vuelven al portador por el cuerpo.
+    ///
     /// «La misma arma, pero SOLO POR CÓDIGO»: cero sprites — ni uno.
     /// El tentáculo COMPLETO nace, caza, muerde y disipa dibujado con
-    /// los pinceles del motor (Pixel + GlowOrb + SoftGlow vía la
-    /// SombrasLib): la masa negra con borde de sierra, los ojos que se
-    /// abren DE GOLPE y miran, las FAUCES procedurales (mandíbulas en
-    /// cuña con colmillos blancos) y la garganta roja.
+    /// los pinceles del motor (Carne + Colmillo + Ventosa + BrumaFX vía
+    /// la SombrasLib): la masa negra muscular, los ojos que se abren DE
+    /// GOLPE y miran, el borde de energía que fluye y la bruma que come
+    /// la luz.
     ///
     /// Mismo comportamiento que el ARMA 1 (emerge del jugador → caza al
     /// jefe a cualquier distancia → muerde y drena 2.5%/6t → a 1 HP el
-    /// motor del festín, estilo 3) — pero nace de la SOMBRA DEL SUELO
-    /// del portador (raycast hacia abajo: donde hay sombra, la página
-    /// mira), no de su pecho.
+    /// motor del festín, estilo 3).
     /// </summary>
     public class SombraPaginaProjectile : ModProjectile
     {
@@ -53,8 +65,23 @@ namespace AethonMod.Content.Projectiles.Sombras
             Projectile.extraUpdates = 2;
         }
 
-        /// <summary>La sombra del suelo: raycast hacia abajo desde el portador.</summary>
+        /// <summary>
+        /// v6.50.68 — LA RAÍZ ES EL JUGADOR (la letra del usuario: «la base
+        /// del tentáculo nace en el suelo bajo el jugador y no sobre el
+        /// jugador como debe ser»). El tentáculo SALE DEL CUERPO del
+        /// portador — vuela, salta o camine: la base SIEMPRE está en él.
+        /// </summary>
         private Vector2 RaizDeSombra(Player dueño)
+        {
+            return dueño.MountedCenter;
+        }
+
+        /// <summary>
+        /// v6.50.68 — LA SOMBRA PROYECTADA del portador en el suelo (solo
+        /// decorado: el charco de siempre, pero YA NO ES el origen del
+        /// tentáculo — es la sombra que el portador echa al volar).
+        /// </summary>
+        private Vector2 SombraProyectada(Player dueño)
         {
             Vector2 c = dueño.MountedCenter + new Vector2(0, dueño.height * 0.45f);
             int tx = (int)(c.X / 16f), ty = (int)(c.Y / 16f);
@@ -203,8 +230,10 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             Vector2 raiz = RaizDeSombra(dueño);
 
-            // === EL CHARCO RAÍZ (la sombra del suelo, más grande que el arma 1) ===
-            SombrasLib.Charco(raiz, 52f, 0.8f, tiempo, semilla);
+            // === EL CHARCO — v6.50.68: ya NO es la raíz (el tentáculo nace
+            // DEL JUGADOR): es la SOMBRA que el portador proyecta al suelo —
+            // sutil, viva, pero decorado ===
+            SombrasLib.Charco(SombraProyectada(dueño), 44f, 0.55f, tiempo, semilla);
 
             // === LA COLUMNA y LA MASA ===
             // v6.50.67 — LA COLUMNA VIVA: física de verlet con inercia y
@@ -225,38 +254,41 @@ namespace AethonMod.Content.Projectiles.Sombras
             float presencia = fase == FASE_EMERGER ? SombrasLib.DeGolpe(t / 26f) : 1f;
             SombrasLib.OjosDeMasa(col, objetivo, presencia * disipa, semilla, tiempo, 7);
 
-            // === LA CABEZA: FAUCES PROCEDURALES (cero sprites) ===
-            float apertura = fase switch
-            {
-                FASE_EMERGER => 0.35f + 0.4f * SombrasLib.DeGolpe(t / 26f),
-                FASE_CAZA => 0.85f + 0.15f * MathF.Sin(tiempo * 8f),           // bien abierta, viva
-                FASE_MORDISCO => CicloMordida(t),
-                _ => 0.5f * disipa,
-            };
-            Vector2 rumbo = Projectile.rotation.ToRotationVector2();
-            SombrasLib.Fauces(Projectile.Center, rumbo, apertura * disipa, 74f, semilla);
+            // === v6.50.68 — LA CABEZA ES BRUMA (la boca procedural RETIRADA
+            // por la letra del usuario): TODO lo que era boca ahora vive EN LA
+            // PUNTA REAL de la columna — cabeza y tentáculo son EL MISMO
+            // CUERPO por construcción, jamás vuelve a haber separación ===
+            Vector2 punta = col[col.Length - 1];
+            Vector2 rumbo = (col[col.Length - 1] - col[Math.Max(col.Length - 4, 0)])
+                .SafeNormalize(Projectile.rotation.ToRotationVector2());
 
-            // === EL ALIENTO DE LA BOCA (v6.50.64): las fauces
-            // procedurales respiran bruma negra al abrirse ===
-            SombrasLib.BrumaBoca(Projectile.Center, rumbo, apertura * disipa,
-                0.5f * disipa, tiempo, semilla + 5, 5);
-
-            // el brillo rojo de la garganta cuando muerde
-            if (fase == FASE_MORDISCO)
+            if (fase == FASE_MORDISCO && presa != null && presa.active)
             {
+                // EL DEVORADOR — la masa de bruma negra y espesa que CUBRE
+                // LA TOTALIDAD del jefe, NACE del tentáculo y TRAGA con
+                // pulso (las almas vuelven por el cuerpo)
+                float hambre = MathHelper.Clamp(t / 26f, 0f, 1f);
+                SombrasLib.Devorador(punta, presa, hambre, disipa, tiempo, semilla, col);
+
+                // la HERIDA: el punto donde el tentáculo ENTERRÓ la punta
+                // brilla rojo DENTRO de la bruma (la digestión)
                 VFXCore.Begin();
-                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Rojo, 0.5f * disipa),
-                    new Vector2(120f, 120f), Projectile.rotation);
+                VFXCore.Quad(punta, SombrasLib.Alfa(SombrasLib.Rojo, 0.42f * disipa),
+                    new Vector2(110f, 110f), rumbo.ToRotation());
                 VFXCore.FlushAdditive();
             }
-        }
-
-        private static float CicloMordida(float t)
-        {
-            float m = t % 22f;
-            if (m < 5f) return MathHelper.Lerp(0.9f, 0.12f, SombrasLib.DeGolpe(m / 5f));  // ¡CIERRA!
-            if (m < 12f) return MathHelper.Lerp(0.12f, 0.95f, (m - 5f) / 7f);             // reabre
-            return 0.9f + 0.1f * MathF.Sin(m * 1.1f);                                     // sostiene
+            else
+            {
+                // LA CABEZA DE BRUMA — la punta disuelta en humo que respira
+                // hacia la presa (el capullo al emerger, la nariz al cazar)
+                float vigor = fase switch
+                {
+                    FASE_EMERGER => 0.35f + 0.55f * SombrasLib.DeGolpe(t / 26f),
+                    FASE_CAZA => 0.85f + 0.15f * MathF.Sin(tiempo * 8f),
+                    _ => 0.5f * disipa,
+                };
+                SombrasLib.CabezaDeBruma(punta, rumbo, vigor * disipa, disipa, tiempo, semilla);
+            }
         }
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
