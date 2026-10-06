@@ -552,17 +552,19 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.50.68 — LOS CUATRO CONCEPTOS: el usuario jubiló a las 3
-            // hermanas-tentáculo («me gusta más el aspecto de La Sombra
-            // de la Página… cambia los otros bastones por conceptos
-            // diferentes») — su puesto lo toman LA PLUMA (el trazo de
-            // tinta que atraviesa), LA HOJA (el molino de filos) y EL
-            // SELLO (el círculo rúnico que marca el terreno). La Sombra
-            // de la Página queda INTACTA como pidió el usuario.
+            // v6.50.69 — LA FAMILIA DE TENTÁCULOS: el usuario jubiló a la
+            // Pluma/Hoja/Sello de la .68 («se ven y funcionan horrible») —
+            // la familia vuelve al ADN que AMA (el tentáculo de carne +
+            // bruma de La Sombra) con UN OFICIO distinto por hermana:
+            // EL AZOTE (el látigo que cruja atravesándolo todo en línea),
+            // LA MORDIDA (el glotón que se cuelga y mastica a mordidas de
+            // verdad) y LA CRÍA (la camada de tres que viven en el
+            // portador y cazan solas). La Sombra de la Página queda
+            // INTACTA como pidió el usuario.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA BASE: intacta, como pidió el usuario
-            l.Add((ModContent.ItemType<Weapons.Sombras.PlumaDeLaPagina>(), 1));   // NUEVA 1: el trazo de tinta — agujas perforantes que escriben el vuelo
-            l.Add((ModContent.ItemType<Weapons.Sombras.HojaDeLaPagina>(), 1));    // NUEVA 2: el molino de filos — cuatro hojas que orbitan y se disparan
-            l.Add((ModContent.ItemType<Weapons.Sombras.SelloDeLaPagina>(), 1));   // NUEVA 3: el círculo rúnico — garras que brotan del terreno marcado
+            l.Add((ModContent.ItemType<Weapons.Sombras.AzoteDeLaPagina>(), 1));   // HERMANA 1: el látigo — largo, fino, CRUJE atravesándolo todo en línea
+            l.Add((ModContent.ItemType<Weapons.Sombras.MordidaDeLaPagina>(), 1)); // HERMANA 2: el glotón — corto, gordo, se cuelga y mastica cada 16 t
+            l.Add((ModContent.ItemType<Weapons.Sombras.CriaDeLaPagina>(), 1));    // HERMANA 3: la camada — tres crías que orbitan al portador y cazan solas
             return l;
         }
     }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -209,6 +210,16 @@ namespace AethonMod.Content.Globals
             else npc.velocity *= 0f;
             if (npc.lifeRegen < 0) npc.lifeRegen = 0;
 
+            // v6.50.69 — LA FASE VISUAL DEL FESTÍN (0 manifestación ·
+            // 1 envolver · 2 EL TRAGADO · 3 la disipación): la calcula el
+            // motor (server/SP) y viaja por SendExtraAI — el PreDraw de
+            // ABAJO la usa para retirar el sprite a su tiempo y el
+            // proyectil-festín para sincronizar su animación en MP
+            FaseFestin = DevorarTick < 30 ? (byte)0
+                : DevorarTick < 60 ? (byte)1
+                : DevorarTick < 160 ? (byte)2
+                : (byte)3;
+
             // === EL MOTOR DEL FESTÍN ===
             if (DevorarTick < ushort.MaxValue - 2) DevorarTick++;
 
@@ -248,6 +259,22 @@ namespace AethonMod.Content.Globals
         {
             if (DevorarEstado == 1) return false;
             return base.CheckActive(npc);
+        }
+
+        /// <summary>
+        /// v6.50.69 — LA BRUMA ES LA ANIMACIÓN (la letra del usuario:
+        /// «toda esa bruma que se traga al jefe debe animarse para que
+        /// sustituya cualquier animación»): desde la fase 2 (la cobertura
+        /// YA es total) el sprite del jefe SE RETIRA del mundo — lo que
+        /// se ve es SOLO la masa de bruma tragándoselo. La fase viaja por
+        /// la red (FaseFestin en SendExtraAI): todos los clientes retiran
+        /// el sprite al mismo tick. Si el festín se interrumpe, el estado
+        /// vuelve a 0 y el sprite REGRESA (nada queda invisible y vivo).
+        /// </summary>
+        public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
+        {
+            if (DevorarEstado == 1 && FaseFestin >= 2) return false;
+            return true;
         }
 
         /// <summary>Los DoT no pueden matarlo durante el festín.</summary>

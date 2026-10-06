@@ -136,6 +136,18 @@ namespace AethonMod.Content.Projectiles.Sombras
                         Projectile.velocity = (actual + MathHelper.Clamp(giro, -0.26f, 0.26f)).ToRotationVector2() * vel;
                         Projectile.rotation = deseado;
 
+                        // v6.50.69 — LA MARCA CONTINUA (la letra: «a veces La
+                        // Sombra de la Página no se activa y no hace el acto
+                        // de devoración con los jefes»): mientras el tentáculo
+                        // TIENE UN JEFE como presa, la marca se REFRESCA — si
+                        // OTRA cosa (esbirro, otro jugador, un DoT) le inflige
+                        // el golpe mortal, la muerte SIGE SIENDO NUESTRA y el
+                        // festín arranca igual. Antes la marca solo vivía en el
+                        // golpe mortal NUESTRO: si otro lo mataba, el jefe se
+                        // moría «normal» y el usuario veía que NO se activaba
+                        if (t % 15f == 0f && FaucesGlobalNPC.EsJefe(presa))
+                            FaucesGlobalNPC.Marcar(presa, 3);
+
                         if (Projectile.Hitbox.Intersects(presa.Hitbox))
                         {
                             Projectile.ai[1] = FASE_MORDISCO;
@@ -152,6 +164,12 @@ namespace AethonMod.Content.Projectiles.Sombras
                     {
                         Projectile.Center = presa.Center;
                         Projectile.rotation = (presa.Center - RaizDeSombra(dueño)).ToRotation();
+
+                        // v6.50.69 — LA MARCA CONTINUA mientras MUERDE (cada
+                        // 5 t): el golpe mortal de CUALQUIER fuente durante la
+                        // mordida también dispara la devoración
+                        if (t % 5f == 0f && FaucesGlobalNPC.EsJefe(presa))
+                            FaucesGlobalNPC.Marcar(presa, 3);
 
                         if (Main.netMode != NetmodeID.MultiplayerClient && t > 18 && t % 6 == 0)
                         {
@@ -245,7 +263,13 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             // === LA BRUMA NEGRA DEL CUERPO (v6.50.64): el tentáculo
             // 100% código también EXHALA — puﬀs vivos a lo largo ===
-            SombrasLib.BrumaColumna(col, 38f, 0.45f * disipa, tiempo, semilla, 10);
+            // v6.50.69 — MÁS BRUMA (la letra: «la cantidad de bruma en el
+            // tentáculo no es suficiente, necesita más»): DOS CAPAS (16
+            // puffs gruesos + 12 finos desfasados — antes una sola de 10)
+            // y cada puff nace más gordo y crece más (BrumaColumna v2:
+            // ×1.6 de crecimiento, 7 halos de aliento)
+            SombrasLib.BrumaColumna(col, 46f, 0.62f * disipa, tiempo, semilla, 16);
+            SombrasLib.BrumaColumna(col, 30f, 0.46f * disipa, tiempo, semilla + 97, 12);
 
             // === LOS OJOS (más ojos que el arma 1: la página es TODA ojos) ===
             Vector2 objetivo = presa != null && presa.active

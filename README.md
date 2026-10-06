@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.65 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
+> **Versión actual:** 6.50.69 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** es-ES + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,7 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~116 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.65)
+## ¿Dónde estamos? (actualizado para v6.50.69)
 
 **NOVEDAD .64 — LA PINZA DOBLE + LA BRUMA NEGRA + LA PÁGINA FINAL**: la
 Fauce del Grimorio ahora muerde con **DOS CABEZAS** (el gif del usuario

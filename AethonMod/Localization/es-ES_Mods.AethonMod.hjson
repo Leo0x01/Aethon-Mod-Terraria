@@ -98,56 +98,54 @@ Items: {
 			'''
 	}
 
-	PlumaDeLaPagina: {
-		// v6.50.68 — NEW WEAPON 1 (replaces The Tide of the Page — "different concepts", the user's word)
-		DisplayName: La Pluma de la Página
+	AzoteDeLaPagina: {
+		// v6.50.69 — SISTER 1 (the .68 Quill/Blade/Seal "look and work horrible" —
+		// back to the meat-tentacle + bruma DNA, each with her own job)
+		DisplayName: El Azote de la Página
 		Tooltip:
 			'''
-			«La página se escribe con lo que atraviesa.»
-			LA PLUMA DEL ESCRIBA: cada disparo es un TRAZO DE TINTA —
-			TRES AGUJAS DE HUESO en abanico estrecho, con guía suave
-			(la tinta busca la palabra) y el RASTRO DE TINTA ondulando
-			detrás del vuelo. Atraviesan hasta 4 enemigos; al clavarse
-			SALPICAN: anillo violeta, bruma negra y gotas de tinta.
-			Si tu tinta mata a un jefe: LA LLUVIA DE TINTA — el festín
-			de las agujas que caen del cielo.
-			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
+			«La página también sabe castigar.»
+			EL LÁTIGO DE LA FAMILIA: un tentáculo LARGO y fino que sale
+			DE TU CUERPO y CRUJE en línea recta — atraviesa TODO lo que
+			encuentra en su camino, con la punta de hueso por delante y
+			el filo rojo corriendo por el cuerpo. Lanza, cruje y recoge:
+			el chasquido de la sombra.
+			Si tu azote mata a un jefe: EL LATIGAZO TRIPLE — el festín
+			de los tres golpes que cruzan al reo.
+			(La hermana rápida de La Sombra — 100% código.)
 			'''
 	}
 
-	HojaDeLaPagina: {
-		// v6.50.68 — NEW WEAPON 2 (replaces The Gaze of the Page — "hoja": page AND blade)
-		DisplayName: La Hoja de la Página
+	MordidaDeLaPagina: {
+		// v6.50.69 — SISTER 2 (the glutton: latches on and chews with real bites)
+		DisplayName: La Mordida de la Página
 		Tooltip:
 			'''
-			«Hoja» es página. «Hoja» es filo. Esta arma es las dos cosas.
-			EL MOLINO: CUATRO HOJAS-FILO de sombra se materializan en
-			bruma y ORBITAN a su portador, girando cada vez más rápido
-			(cortan a cualquiera que se acerque)… y al llenarse, SE
-			DISPARAN en abanico hacia el cursor, atravesiendo todo a su
-			paso con estelas y su fantasma de giro detrás. La página,
-			doblada hasta cortar.
-			Si tu filo mata a un jefe: EL MOLINO DE FILOS — el festín
-			del círculo que se ciñe.
-			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
+			«No comparte. No suelta. No se apura.»
+			EL GLOTÓN DE LA FAMILIA: un tentáculo CORTO y GORDO con una
+			cabeza de bruma ENORME y TRES GARRAS DE HUESO que cierran de
+			golpe. Caza lento, se CUELGA de una presa y le da MORDIDAS de
+			verdad, una cada suspiro — mastica, traga y vuelve por más.
+			Cuando al jefe le queda UNA mordida de vida: LA DEVORACIÓN —
+			el festín de LA MASTICACIÓN GIGANTE.
+			(La hermana paciente de La Sombra — 100% código.)
 			'''
 	}
 
-	SelloDeLaPagina: {
-		// v6.50.68 — NEW WEAPON 3 (replaces The Nest of the Page — the seal that binds the page)
-		DisplayName: El Sello de la Página
+	CriaDeLaPagina: {
+		// v6.50.69 — SISTER 3 (the brood: three tentacles living on you, hunting alone)
+		DisplayName: La Cría de la Página
 		Tooltip:
 			'''
-			«Todo contrato se firma dos veces: una en tinta, otra en sangre.»
-			EL SELLO: no persigue ni perfora — MARCA EL TERRENO. El
-			CÍRCULO RÚNICO se dibuja solo donde apuntas (anillos dobles
-			contrarrotantes, marcas que parpadean, el piso de sombra)…
-			y al completarse, ERUPCIONA: SEIS GARRAS brotan del perímetro
-			hacia el centro y la bruma estalla. Después, el POSO de
-			bruma negra queda MORDIENDO el terreno un buen rato.
-			Si tu sello mata a un jefe: EL SELLO DEL JUICIO — el festín
-			del círculo que se ciñe sobre el reo.
-			(Concepto nuevo de las sombras — 100% código, ni un sprite.)
+			«No estás solo. Nunca lo estuviste.»
+			LA CAMADA DE LA FAMILIA: TRES tentáculos pequeños que VIVEN
+			contigo — orbitan tu cuerpo, colgados de él, y CAZAN SOLOS:
+			lo que se acerca, recibe el latigazo. Cada cría tiene su ojo
+			rasgado MIRÁNDOTE… y mirando a su presa.
+			Una cría por uso, hasta tres. No se apunta: se invoca.
+			Si su mordisco mata a un jefe: LA MENADA — el festín de las
+			tres hermanas gigantes.
+			(La hermana guardiana de La Sombra — 100% código.)
 			'''
 	}
 
@@ -772,16 +770,16 @@ Items: {
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
 		// v6.50.64: + THE FINAL PAGE (weapon 4 — the AAA evolution of the Shadow of the Page)
-		// v6.50.68: THE FOUR CONCEPTS — the 3 sisters retired by the user ("different concepts"); now the Shadow + Quill/Blade/Seal
+		// v6.50.69: THE TENTACLE FAMILY — the .68 concepts retired ("horrible"); now the Shadow + Lash/Bite/Brood
 		DisplayName: Bolsa de las Sombras
 		Tooltip:
 			'''
 			Las cuatro páginas de la sombra (estilo Pride).
-			La base intacta (La Sombra de la Página) y los TRES CONCEPTOS
-			nuevos: el trazo de tinta que atraviesa (La Pluma), el molino
-			de filos que orbita y se dispara (La Hoja) y el círculo rúnico
-			que marca y reclama el terreno (El Sello). Todas exhalan
-			bruma negra.
+			La base intacta (La Sombra de la Página) y sus TRES HERMANAS
+			de tentáculos: EL AZOTE (el látigo que cruje atravesándolo
+			todo), LA MORDIDA (el glotón que mastica a mordidas de
+			verdad) y LA CRÍA (la camada que vive en ti y caza sola).
+			Todas exhalan bruma negra.
 			A 1 de vida: el festín comienza — cada una con su firma.
 			Clic derecho para desplegarlas. Solo entrega lo que te falte.
 			'''
@@ -1738,9 +1736,9 @@ Items: {
 
 Projectiles: {
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
-	PlumaPaginaProjectile.DisplayName: La Pluma de la Página
-	HojaPaginaProjectile.DisplayName: La Hoja de la Página
-	SelloPaginaProjectile.DisplayName: El Sello de la Página
+	AzotePaginaProjectile.DisplayName: El Azote de la Página
+	MordidaPaginaProjectile.DisplayName: La Mordida de la Página
+	CriaPaginaProjectile.DisplayName: La Cría de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	GenesisLight.DisplayName: Luz del Génesis

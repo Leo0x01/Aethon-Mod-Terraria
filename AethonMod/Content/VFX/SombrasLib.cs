@@ -473,149 +473,13 @@ namespace AethonMod.Content.VFX
         }
 
         // ==================================================================
-        //  LAS FAUCES — mandíbulas con dientes (100% procedural)
+        //  v6.50.69 — LAS FAUCES PROCEDURALES JUBILADAS: la letra del
+        //  usuario («en el acto de devoración solo está la versión
+        //  anterior de La Sombra… debes cambiar la boca por la forma
+        //  actual») — TODO lo que era boca es ahora CABEZA DE BRUMA +
+        //  EL DEVORADOR (abajo). El método murió con su último
+        //  llamador (el festín de la .68).
         // ==================================================================
-
-        /// <summary>
-        /// v6.50.67 — UNA CABEZA DE VERDAD: la v6.50.66 eran «dos cuñas
-        /// negras en ángulo + dientes-línea» — líneas geométricas otra
-        /// vez. AHORA: LA CORONA (un bulbo de carne orgánico — 4 blobs
-        /// negros irregulares alrededor del gozne, cada uno distinto por
-        /// semilla), LAS MANDÍBULAS (mini-CINTAS curvas con la textura
-        /// Carne que se abren y SE ENROSCAN hacia dentro en la punta —
-        /// crescentes musculosos, no cuñas), LOS COLMILLOS (agujas de
-        /// hueso curvas apuntando al interior, tamaño decreciente — la
-        /// textura Colmillo), LA GARGANTA (resplandor rojo con núcleo
-        /// oscuro + las cuerdas) y EL OJO DE LA CABEZA (un ojo rasgado
-        /// pequeño sobre la corona mirando a la presa — la firma
-        /// eldritch, determinista: ~6 de cada 10 cabezas lo llevan).
-        /// </summary>
-        /// <param name="centro">El gozne de la mandíbula.</param>
-        /// <param name="dir">Rumbo de la boca (adónde muerde).</param>
-        /// <param name="apertura">0..1.</param>
-        /// <param name="largo">Largo de las mandíbulas en px.</param>
-        public static void Fauces(Vector2 centro, Vector2 dir, float apertura, float largo, int semilla)
-        {
-            if (largo <= 2f) return;
-            apertura = MathHelper.Clamp(apertura, 0f, 1f);
-            float ang = dir.LengthSquared() < 0.01f ? 0f : MathF.Atan2(dir.Y, dir.X);
-            float sep = apertura * 0.85f + 0.06f;   // ángulo de cada mandíbula
-            var carne = VFXCore.Carne;
-
-            // --- LA GARGANTA (el fondo rojo, solo si está abierta) ---
-            if (apertura > 0.15f)
-            {
-                VFXCore.Begin();
-                VFXCore.Quad(centro, Alfa(RojoGarganta, 0.55f * apertura),
-                    new Vector2(largo * 0.85f, largo * 0.9f), ang, VFXCore.SoftGlow);
-                VFXCore.FlushAdditive();
-            }
-
-            // --- LA CORONA: el bulbo orgánico de la cabeza (4 blobs
-            // irregulares — la cabeza NO es un punto: tiene MASA) ---
-            VFXCore.Begin();
-            for (int b = 0; b < 4; b++)
-            {
-                float fb = semille(semilla * 7 + b * 13);
-                float fb2 = Frac(fb * 7.31f + b * 0.37f);
-                float angB = ang + MathHelper.Pi + (fb - 0.5f) * 2.6f;   // detrás del gozne
-                float rad = largo * (0.30f + 0.34f * fb2);
-                Vector2 posB = centro + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rad * 0.55f;
-                float tam = largo * (0.52f + 0.38f * fb) * (0.9f + 0.1f * MathF.Sin(fb2 * 9f));
-                VFXCore.Quad(posB, Alfa(Negro, 0.96f), new Vector2(tam, tam * 0.88f),
-                    angB + fb2, VFXCore.GlowOrb);
-            }
-            VFXCore.FlushAlpha();
-
-            // --- LAS MANDÍBULAS: mini-cintas curvas (crescentes) ---
-            for (int lado = -1; lado <= 1; lado += 2)
-            {
-                float aMand = ang + lado * sep;
-
-                // la curva del crescente: nace girado, se endereza al rumbo
-                // y la punta se ENROLLA hacia dentro (el gancho de la boca)
-                var pts = new Vector2[4];
-                var anchos = new float[4];
-                pts[0] = centro;
-                for (int k = 1; k < 4; k++)
-                {
-                    float fk = k / 3f;
-                    float aCurva = aMand * (1f - 0.50f * fk) + ang * 0.50f * fk
-                                 - lado * 0.34f * fk * fk;              // el enrollado de la punta
-                    pts[k] = pts[k - 1] + new Vector2(MathF.Cos(aCurva), MathF.Sin(aCurva)) * (largo / 3f);
-                    anchos[k - 1] = largo * (0.34f - 0.20f * fk);       // afila raíz→punta
-                }
-                anchos[3] = anchos[2] * 0.55f;
-
-                if (carne != null)
-                {
-                    // LA CARNE de la mandíbula (lote alfa — el músculo que TAPA)
-                    VFXCore.Begin();
-                    VFXCore.Ribbon(pts, anchos, Alfa(Blanco, 0.97f), carne, uvFlow: 0.35f + semille(semilla) * 0.3f);
-                    VFXCore.FlushAlpha();
-
-                    // EL FILO de energía de la mandíbula (aditivo, rojo — el borde que muerde)
-                    var filo = new Color[4];
-                    for (int k = 0; k < 4; k++)
-                        filo[k] = Alfa(Rojo, 0.14f * apertura + 0.08f);
-                    VFXCore.Begin();
-                    VFXCore.RibbonTinted(pts, anchos, filo, carne, uvFlow: 0.35f, edgeInset: 0.38f);
-                    VFXCore.FlushAdditive();
-                }
-                else
-                {
-                    VFXCore.Begin();
-                    for (int k = 1; k < 4; k++)
-                        VFXCore.Line(pts[k - 1], pts[k], Alfa(Negro, 0.97f), anchos[k - 1]);
-                    VFXCore.FlushAlpha(VFXCore.Pixel);
-                }
-
-                // --- LOS COLMILLOS DE HUESO (agujas curvas hacia dentro) ---
-                if (VFXCore.Colmillo != null)
-                {
-                    VFXCore.Begin();
-                    for (int k = 0; k < 4; k++)
-                    {
-                        float t = 0.30f + k * 0.21f;
-                        float tamaño = largo * (0.26f - k * 0.035f);
-                        if (tamaño < 3f) continue;
-
-                        // el punto sobre la curva del crescente
-                        int idx = Math.Min((int)(t * 3f), 2);
-                        float ft = Frac(t * 3f);
-                        Vector2 baseD = Vector2.Lerp(pts[idx], pts[idx + 1], ft);
-
-                        // el colmillo apunta hacia el INTERIOR de la boca
-                        // (perpendicular a la mandíbula, contra el lado)
-                        Vector2 tang = pts[idx + 1] - pts[idx];
-                        if (tang.LengthSquared() < 0.01f) continue;
-                        tang = Vector2.Normalize(tang);
-                        Vector2 haciaDentro = new Vector2(-tang.Y, tang.X) * (-lado / 1f);
-                        // y se curva un pelo hacia atrás (el gancho del diente)
-                        Vector2 rumbo = haciaDentro - tang * 0.30f;
-
-                        VFXCore.Quad(baseD + haciaDentro * tamaño * 0.10f,
-                            Alfa(Blanco, 0.95f),
-                            new Vector2(tamaño * 0.52f, tamaño),
-                            rumbo.ToRotation() + MathHelper.PiOver2, VFXCore.Colmillo);
-                    }
-                    VFXCore.FlushAdditive();
-                }
-            }
-
-            // --- EL OJO DE LA CABEZA (la firma eldritch — el dragón de
-            // la idea central mira antes de morder; ~60% de las cabezas) ---
-            if (semille(semilla * 3 + 11) < 0.6f && VFXCore.OjoRasgado != null)
-            {
-                float fb = semille(semilla * 5 + 3);
-                float angOjo = ang + MathHelper.Pi + (fb - 0.5f) * 1.4f;
-                Vector2 posOjo = centro + new Vector2(MathF.Cos(angOjo), MathF.Sin(angOjo)) * largo * 0.30f;
-                float abre = 0.55f + 0.45f * apertura;
-                VFXCore.Begin();
-                Ojo(posOjo, largo * (0.30f + 0.14f * fb), dir, abre, rasgada: true);
-                VFXCore.FlushAdditive();
-            }
-        }
 
         // ==================================================================
         //  LA BRUMA Y LAS ALMAS
@@ -729,25 +593,29 @@ namespace AethonMod.Content.VFX
                     Vector2 perp = seg.LengthSquared() < 0.01f ? Vector2.UnitY
                         : new Vector2(-seg.Y, seg.X) * (1f / MathF.Sqrt(seg.LengthSquared()));
                     float lado = Frac(f0 * 13.7f) > 0.5f ? 1f : -1f;
-                    float deriva = edad * (26f + 34f * Frac(f0 * 5.9f));
+                    float deriva = edad * (30f + 44f * Frac(f0 * 5.9f));
                     Vector2 pos = col[idx]
-                        + perp * (lado * (grosor * 0.3f + deriva * 0.5f))
-                        + new Vector2(0f, -14f * edad);                          // sube, como humo frío
-                    float r = grosor * (0.5f + 0.85f * edad);                    // nace chico, crece ×1.35
+                        + perp * (lado * (grosor * 0.32f + deriva * 0.5f))
+                        + new Vector2(0f, -20f * edad);                          // sube, como humo frío
+                    // v6.50.69 — MÁS BRUMA (la letra: «la cantidad de bruma en
+                    // el tentáculo no es suficiente, necesita más»): el puff
+                    // nace más gordo y CRECE hasta ×1.6 (era ×1.35)
+                    float r = grosor * (0.58f + 1.02f * edad);                    // nace chico, crece ×1.6
                     // LA ENVOLVENTE y LA RAMPA (a mano — BrumaFX.Puff expone quality):
-                    float a = alfa * MathF.Sin(edad * MathF.PI) * (0.75f + 0.25f * Frac(f0 * 7.3f));
+                    float a = alfa * MathF.Sin(edad * MathF.PI) * (0.82f + 0.18f * Frac(f0 * 7.3f));
                     Color c = edad > 0.55f
                         ? Color.Lerp(HumoNegro, HumoVioleta, (edad - 0.55f) / 0.45f)
                         : HumoNegro;
                     BrumaFX.Puff(pos - o, r, c, semilla * 31 + k, tiempo + f0 * 7f,
-                        MathHelper.Clamp(a, 0.04f, 0.85f), quality: 0.5f,
+                        MathHelper.Clamp(a, 0.04f, 0.88f), quality: 0.55f,
                         velocity: perp * (lado * deriva * 0.4f));
                 }
             });
 
-            // el aliento violeta entre puffs (lectura nocturna)
+            // el aliento violeta entre puffs (lectura nocturna) — v6.50.69:
+            // hasta 7 halos (eran 5: MÁS BRUMA)
             VFXCore.Begin();
-            for (int k = 0; k < Math.Min(cantidad, 5); k++)
+            for (int k = 0; k < Math.Min(cantidad + 2, 7); k++)
             {
                 float f0 = Frac(semille(semilla) * 0.83f + k * 0.618034f);
                 int idx = (int)(f0 * (n - 1));
@@ -829,17 +697,29 @@ namespace AethonMod.Content.VFX
 
             Vector2 o = Main.screenPosition;
             // LA MASA DE LA CABEZA: un racimo denso EN la punta — el
-            // humo que REEMPLAZA la boca: nace pegado, crece y respira
+            // humo que REEMPLAZA la boca: nace pegado, crece y respira.
+            // v6.50.69 — MÁS BRUMA: el racimo principal CRECE y gana DOS
+            // PUFFS ORBITANDO la punta (la cabeza es una NUBE, no una bola)
             LoteDeBruma(() =>
             {
                 float late = 0.85f + 0.15f * MathF.Sin(tiempo * 3.1f + semille(semilla));
-                float r = (30f + 22f * vigor) * late;
+                float r = (36f + 28f * vigor) * late;
                 BrumaFX.Puff(punta - o, r, HumoNegro, semilla * 13 + 1, tiempo,
-                    MathHelper.Clamp(0.55f * alfa * vigor, 0.05f, 0.85f), quality: 0.6f);
+                    MathHelper.Clamp(0.60f * alfa * vigor, 0.05f, 0.88f), quality: 0.6f);
                 BrumaFX.Puff(punta - o + new Vector2(MathF.Sin(tiempo * 1.7f + semille(semilla + 3)) * 10f,
-                    -6f - 4f * MathF.Sin(tiempo * 2.2f)), r * 0.62f, HumoVioleta,
+                    -6f - 4f * MathF.Sin(tiempo * 2.2f)), r * 0.7f, HumoVioleta,
                     semilla * 13 + 2, tiempo * 0.9f,
-                    MathHelper.Clamp(0.30f * alfa * vigor, 0.04f, 0.5f), quality: 0.45f);
+                    MathHelper.Clamp(0.32f * alfa * vigor, 0.04f, 0.5f), quality: 0.5f);
+                // LOS ORBITANTES: dos puffs menores girando alrededor de la
+                // punta (la cabeza VIVA — nace, gira y se deshace)
+                for (int k = 0; k < 2; k++)
+                {
+                    float ang = tiempo * (1.35f + 0.4f * k) + k * MathHelper.Pi + semille(semilla + 7) * 6.28f;
+                    float rad = r * (0.62f + 0.14f * MathF.Sin(tiempo * 2.4f + k));
+                    BrumaFX.Puff(punta - o + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * rad,
+                        r * 0.52f, HumoNegro, semilla * 13 + 3 + k, tiempo * 1.1f + k,
+                        MathHelper.Clamp(0.34f * alfa * vigor, 0.04f, 0.55f), quality: 0.45f);
+                }
             });
 
             // el aliento hacia adelante (la nariz del cazador)
@@ -847,41 +727,75 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// EL DEVORADOR — LA LETRA DEL USUARIO: «en vez de boca, una masa
-        /// de bruma negra que CUBRE LA TOTALIDAD de un jefe, y esa bruma
-        /// negra y espesa NACE del tentáculo hacia el jefe». Cuatro
-        /// capas: (A) EL PUENTE — puffs alineados de la PUNTA REAL del
-        /// tentáculo al centro del jefe, creciendo (la bruma EMANA del
-        /// tentáculo); (B) LA MASA — dos racimos que cubren TODO el
-        /// sprite del jefe (radio por jefe.Size); (C) EL TRAGADO — la
-        /// masa entera se CONTRAE rítmico hacia la punta (el jefe siendo
-        /// succionado) mientras las ALMAS del jefe vuelan al portador
-        /// POR la columna del tentáculo (la vida fluye por el cuerpo);
-        /// (D) EL BORDE violeta aditivo — la lectura nocturna. La punta
-        /// queda ENTERRADA en la masa: boca y tentáculo, UNO SOLO para
-        /// siempre.
+        /// EL DEVORADOR v6.50.69 — LA COBERTURA TOTAL + EL TRAGO.
+        ///
+        /// La letra del usuario (.68): «en vez de boca, una masa de bruma
+        /// negra que CUBRE LA TOTALIDAD de un jefe, y esa bruma negra y
+        /// espesa NACE del tentáculo hacia el jefe». Y la de la .69: «la
+        /// bruma que se traga al jefe no cubre realmente al jefe, solo
+        /// cubre una parte… la bruma debe cubrir a TODO el jefe, por
+        /// ejemplo al salir el rey slime la bruma no lo cubre completo».
+        ///
+        /// LA CAUSA de la cobertura parcial: la .68 usaba un RADIO CIRCULAR
+        /// (jefe.Size.Length()*0.62, tope 260) — un círculo sobre un jefe
+        /// ALTO (King Slime ~200×250) deja la corona y los pies AL AIRE.
+        /// LA CURA: LA ELIPSE REAL DEL JEFE — rx/ry de su hitbox + 24% de
+        /// margen, y encima una REJILLA DE PUFFS que la rellena entera
+        /// (2-7 columnas × 2-8 filas según tamaño, jitter determinista:
+        /// humo, jamás una parrilla) sobre EL VELO (un GlowOrb ESTIRADO a
+        /// la elipse — la base casi opaca que NADA atraviesa).
+        ///
+        /// EL TRAGO (<paramref name="trago"/>): 0..1 — el festín pasa el
+        /// parámetro conforme INHALA: la elipse entera SE ENCOGE hacia la
+        /// punta del tentáculo, los puffs MIGRAN hacia ella muriendo en
+        /// volutas (el jefe siendo succionado por el cuerpo) y el velo se
+        /// disuelve. Es LA ANIMACIÓN QUE REEMPLAZA la muerte del jefe (la
+        /// letra de la .69: «toda esa bruma que se traga al jefe debe
+        /// animarse para que sustituya cualquier animación»).
+        ///
+        /// Capas: (0) EL VELO elíptico · (A) EL PUENTE punta→jefe ·
+        /// (B) LA REJILLA que cubre TODO · (C) EL TRAGADO rítmico (pulso
+        /// 4,6 Hz) + LAS ALMAS volviendo al portador POR la columna ·
+        /// (D) EL BORDE violeta/rojo — la lectura nocturna.
         /// </summary>
         /// <param name="punta">LA PUNTA REAL de la columna (col[n−1]).</param>
-        /// <param name="jefe">La presa mordida (su Size manda en el radio).</param>
-        /// <param name="intensidad">0..1 — cuánta masa hay (crece en el primer segundo del mordisco).</param>
+        /// <param name="jefe">La presa mordida (su hitbox manda en la elipse).</param>
+        /// <param name="intensidad">0..1 — cuánta masa hay (crece al morder).</param>
         /// <param name="col">La columna del tentáculo (por donde vuelan las almas). Opcional.</param>
-        public static void Devorador(Vector2 punta, NPC jefe, float intensidad, float alfa, float tiempo, int semilla, Vector2[] col = null)
+        /// <param name="trago">0..1 — el avance del tragado (0 = cubierto, 1 = inhalado).</param>
+        public static void Devorador(Vector2 punta, NPC jefe, float intensidad, float alfa, float tiempo, int semilla, Vector2[] col = null, float trago = 0f)
         {
             if (alfa <= 0.02f || intensidad <= 0.02f || jefe == null || !jefe.active) return;
             if (Main.netMode == NetmodeID.Server) return;
             intensidad = MathHelper.Clamp(intensidad, 0f, 1f);
+            trago = MathHelper.Clamp(trago, 0f, 1f);
 
             Vector2 centro = jefe.Center;
-            float radio = MathHelper.Clamp(jefe.Size.Length() * 0.62f, 84f, 260f);
-            // (C) EL TRAGADO: la masa se CIÑE a la presa con cada bocanada
-            float traga = 1f - 0.10f * MathF.Sin(tiempo * 4.6f + semille(semilla)) * intensidad;
-            radio *= traga;
+            // === LA ELIPSE REAL DEL JEFE (la cura del Rey Slime a medias):
+            // semianchos del hitbox + 24% de margen — CUBRE LA CORONA y
+            // los pies, sea alto, ancho o cuadrado ===
+            float rx = MathHelper.Clamp(jefe.width * 0.62f, 76f, 330f);
+            float ry = MathHelper.Clamp(jefe.height * 0.62f, 76f, 350f);
+
+            // (C) EL TRAGADO: la masa se CIÑE con cada bocanada (4,6 Hz) y
+            // TODO el conjunto ENCOGE hacia la punta conforme trago→1
+            float mordisco = 1f - 0.07f * (0.5f + 0.5f * MathF.Sin(tiempo * 4.6f + semille(semilla))) * intensidad;
+            float ciñe = mordisco * (1f - 0.72f * trago);
             Vector2 o = Main.screenPosition;
+            Vector2 sorbe = Vector2.Lerp(centro, punta, trago);   // el embudo del tragado
+
+            // === (0) EL VELO — la base que NADA atraviesa: un GlowOrb
+            // ESTIRADO a la ELIPSE completa (la .68 era un círculo: la
+            // corona del Rey Slime quedaba fuera) ===
+            VFXCore.Begin();
+            VFXCore.Quad(sorbe, Alfa(Negro, 0.88f * intensidad * (1f - 0.55f * trago)),
+                new Vector2(rx * 2.28f * ciñe, ry * 2.28f * ciñe), 0f, VFXCore.GlowOrb);
+            VFXCore.FlushAlpha();
 
             LoteDeBruma(() =>
             {
                 // (A) EL PUENTE — del tentáculo al jefe: la bruma NACE de
-                // la punta (puffs alineados, radios crecientes)
+                // la punta (puffs alineados, radios hasta la elipse)
                 Vector2 eje = centro - punta;
                 float len = eje.Length();
                 if (len > 24f)
@@ -891,42 +805,87 @@ namespace AethonMod.Content.VFX
                     for (int k = 0; k <= pasos; k++)
                     {
                         float f = k / (float)pasos;
-                        float r = MathHelper.Lerp(24f, radio * 0.5f, f) * traga;
+                        float r = MathHelper.Lerp(24f, MathF.Min(rx, ry) * 0.85f, f) * mordisco;
                         BrumaFX.Puff((punta + dir * (len * f)) - o, r, HumoNegro,
                             semilla * 7 + k, tiempo + f * 3f,
-                            MathHelper.Clamp(0.50f * alfa * intensidad, 0.05f, 0.8f), quality: 0.5f,
+                            MathHelper.Clamp(0.52f * alfa * intensidad, 0.05f, 0.8f), quality: 0.5f,
                             velocity: dir * 12f);
                     }
                 }
 
-                // (B) LA MASA — cubre la TOTALIDAD del jefe: racimo ancho
-                // + racimo de densidad al centro (dos capas, la segunda
-                // más violeta: el centro aún RESPIRA)
-                BrumaFX.Cloud(centro - o, radio * 0.92f, HumoNegro, semilla * 17 + 5, tiempo,
-                    Math.Max(4, (int)(radio / 46f)), alpha: MathHelper.Clamp(0.62f * alfa * intensidad, 0.05f, 0.85f));
-                BrumaFX.Cloud(centro - o, radio * 0.55f, HumoVioleta, semilla * 17 + 6, tiempo * 0.9f,
-                    4, alpha: MathHelper.Clamp(0.34f * alfa * intensidad, 0.04f, 0.5f));
+                // (B) LA REJILLA DE LA CUBIERTA TOTAL — puffs que rellenan
+                // LA ELIPSE ENTERA del jefe: nace del tamaño REAL (más
+                // rejilla = jefes más grandes), jitter determinista para
+                // que sea humo y no una parrilla, y TODO ciñe/migra con el
+                // tragado (los del borde mueren primero: la nube se cierra
+                // sobre la boca)
+                float rPuff = MathHelper.Clamp(MathF.Min(rx, ry) * 0.66f, 48f, 130f);
+                int nx = Math.Clamp((int)MathF.Ceiling(2f * rx / (rPuff * 1.04f)), 2, 7);
+                int ny = Math.Clamp((int)MathF.Ceiling(2f * ry / (rPuff * 1.04f)), 2, 8);
+                for (int gy = 0; gy < ny; gy++)
+                {
+                    for (int gx = 0; gx < nx; gx++)
+                    {
+                        float fx = nx == 1 ? 0.5f : gx / (float)(nx - 1);
+                        float fy = ny == 1 ? 0.5f : gy / (float)(ny - 1);
+                        // el jitter de humo (determinista por semilla+celda)
+                        float jx = (Frac(semille(semilla + gx * 31 + gy * 7) * 3.7f) - 0.5f) * rPuff * 0.6f;
+                        float jy = (Frac(semille(semilla + gy * 13 + gx * 3) * 5.9f) - 0.5f) * rPuff * 0.6f;
+                        Vector2 local = new((fx - 0.5f) * 2f * rx + jx, (fy - 0.5f) * 2f * ry + jy);
+                        // fuera de la elipse (+8%): se RECOGE hacia dentro
+                        float ex = local.X / (rx * 1.08f), ey = local.Y / (ry * 1.08f);
+                        float dE = ex * ex + ey * ey;
+                        if (dE > 1f) local *= 0.80f;
+
+                        // la respiración de la masa (cada celda a su ritmo)
+                        float respira = 1f + 0.06f * MathF.Sin(tiempo * 3.2f + gx * 1.7f + gy * 2.3f);
+                        Vector2 pos = centro + local * respira * ciñe;
+                        // LA MIGRACIÓN DEL TRAGO: cada puff corre hacia el
+                        // embudo (los del borde PRIMERO — la nube se cierra)
+                        pos = Vector2.Lerp(centro + local * respira * ciñe, sorbe, trago * (0.45f + 0.55f * MathHelper.Clamp(dE, 0.1f, 1f)));
+
+                        float r = rPuff * (0.86f + 0.30f * Frac(semille(semilla + gx * 5 + gy * 11) * 2.3f))
+                                * (1f - 0.42f * trago);
+                        // el alfa: nace con la intensidad, muere con el trago
+                        float a = alfa * intensidad
+                                * MathHelper.Clamp(1.15f - 0.25f * dE, 0.55f, 1f)
+                                * (1f - trago * (0.35f + 0.55f * MathHelper.Clamp(dE, 0f, 1f)));
+                        // LA RAMPA de enfriamiento (la firma de la casa)
+                        Color c = dE > 0.55f || trago > 0.5f
+                            ? Color.Lerp(HumoNegro, HumoVioleta, MathHelper.Clamp((dE - 0.55f) / 0.45f + trago * 0.4f, 0f, 1f))
+                            : HumoNegro;
+                        BrumaFX.Puff(pos - o, r, c, semilla * 17 + gx * 3 + gy * 5, tiempo + fx * 4f + fy * 2f,
+                            MathHelper.Clamp(a, 0.04f, 0.88f), quality: 0.5f,
+                            velocity: (sorbe - pos) * 0.045f);
+                    }
+                }
+
+                // EL NÚCLEO VIOLETA — el centro aún RESPIRA (la digestión)
+                if (trago < 0.75f)
+                    BrumaFX.Cloud(sorbe - o, MathF.Min(rx, ry) * 0.5f * ciñe, HumoVioleta, semilla * 17 + 6, tiempo * 0.9f,
+                        4, alpha: MathHelper.Clamp(0.34f * alfa * intensidad * (1f - trago), 0.04f, 0.5f));
             });
 
-            // (D) EL BORDE violeta — la masa PRENDE en la noche (detrás,
-            // en aditivo tenue: no tapa, HACE LEER)
+            // (D) EL BORDE violeta/rojo — la masa PRENDE en la noche (detrás,
+            // en aditivo tenue: no tapa, HACE LEER) — ahora ELÍPTICO
             VFXCore.Begin();
             float late = 0.75f + 0.25f * MathF.Sin(tiempo * 3.8f + semille(semilla));
-            VFXCore.Quad(centro, Alfa(Violeta, 0.10f * alfa * intensidad * late),
-                new Vector2(radio * 2.5f, radio * 2.5f) * traga, 0f);
-            VFXCore.Quad(centro, Alfa(Rojo, 0.07f * alfa * intensidad * late),
-                new Vector2(radio * 1.5f, radio * 1.5f) * traga, 0f);
+            VFXCore.Quad(sorbe, Alfa(Violeta, 0.10f * alfa * intensidad * late),
+                new Vector2(rx * 2.5f * ciñe, ry * 2.5f * ciñe), 0f);
+            VFXCore.Quad(sorbe, Alfa(Rojo, 0.07f * alfa * intensidad * late),
+                new Vector2(rx * 1.5f * ciñe, ry * 1.5f * ciñe), 0f);
             VFXCore.FlushAdditive();
 
             // (C) LAS ALMAS — la vida del jefe vuelve al portador POR el
-            // cuerpo del tentáculo (la columna es el camino)
+            // cuerpo del tentáculo (la columna es el camino); durante el
+            // trago son un RÍO (el festín se lleva todo)
             if (col != null && col.Length >= 3)
             {
                 VFXCore.Begin();
-                int nAlmas = 4;
+                int nAlmas = 4 + (int)(4f * trago);
                 for (int k = 0; k < nAlmas; k++)
                 {
-                    float prog = Frac(tiempo * 0.42f + k * (1f / nAlmas) + semille(semilla + k) * 0.2f);
+                    float prog = Frac(tiempo * (0.42f + 0.30f * trago) + k * (1f / nAlmas) + semille(semilla + k) * 0.2f);
                     float idxF = (1f - prog) * (col.Length - 1);
                     int idx = (int)idxF;
                     float resto = Frac(idxF);
@@ -935,9 +894,44 @@ namespace AethonMod.Content.VFX
                     Vector2 pos = Vector2.Lerp(col[idx], col[idx + 1], resto)
                         + new Vector2(MathF.Sin(prog * 9f + k * 2.4f) * 14f,
                                       MathF.Cos(prog * 7f + k * 1.7f) * 10f);
-                    Alma(pos, 12f + 5f * MathF.Sin(tiempo * 5f + k), 0.8f * alfa * intensidad);
+                    Alma(pos, 12f + 5f * MathF.Sin(tiempo * 5f + k), (0.8f + 0.2f * trago) * alfa * intensidad);
                 }
                 VFXCore.FlushAdditive();
+            }
+        }
+
+        /// <summary>
+        /// v6.50.69 — LA PURGA DE LA MUERTE VANILLA (la letra del usuario:
+        /// «no se activa la opción de muerte predeterminada del jefe…
+        /// lo que sucede es el arma devora al jefe, quedando solo su
+        /// loot»). Cuando el motor del festín ejecuta la muerte REAL (la
+        /// 2ª pasada de CheckDead — la que suelta el loot, los logros y
+        /// las flags), vanilla también escupe su GORE y su polvo: esta
+        /// purga los DESACTIVA en la zona del tragado mientras la bruma
+        /// aún la ocupa — el jefe se lo lleva el libro ENTERO, sin un
+        /// hueso fuera de la nube. Los ITEMS no se tocan (el loot cae
+        /// dentro de la bruma, como manda la letra). Solo cliente.
+        /// </summary>
+        /// <param name="centro">El último centro conocido del jefe.</param>
+        /// <param name="radio">El radio de la purga (gore completo; el polvo solo en el núcleo).</param>
+        public static void PurgaVisualMuerte(Vector2 centro, float radio)
+        {
+            if (Main.netMode == NetmodeID.Server) return;
+            float r2 = radio * radio;
+            for (int i = 0; i < Main.gore.Length; i++)
+            {
+                Gore g = Main.gore[i];
+                if (g == null || !g.active) continue;
+                if (Vector2.DistanceSquared(g.position, centro) < r2) g.active = false;
+            }
+            float rNucleo = radio * 0.55f;
+            float r2n = rNucleo * rNucleo;
+            for (int i = 0; i < Main.dust.Length; i++)
+            {
+                Dust d = Main.dust[i];
+                if (d == null || !d.active) continue;
+                if (d.type == DustID.Shadowflame || d.type == DustID.Smoke) continue;  // los nuestros viven
+                if (Vector2.DistanceSquared(d.position, centro) < r2n) d.active = false;
             }
         }
 

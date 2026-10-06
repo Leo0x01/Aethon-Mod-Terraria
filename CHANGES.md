@@ -1,5 +1,134 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.69 — LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS
+
+**Feedback del usuario**: "esas tres armas nuevas se ven y funcionan
+horrible, en cuanto a La Sombra de la Pagina actualmente esta quedando
+genial, solo quedan pequeños detalles, como por ejemplo, la cantidad de
+bruma en el tentaculo no es suficiente, necesita mas; la bruma que se
+traga al jefe no cubre realmente al jefe, solo cubre una parte; el acto
+de Devoracion se debe activar cuando al jefe le quede 1 de salud, el
+tentaculo sale del jugador y devora a ese jefe… no se activa la opcion
+de muerte predeterminada del jefe… el arma devora al jefe, quedando
+solo su loot; para el juego debe contar como que el jefe si murio, por
+eso se libera el loot y todos los logros y mecanicas; otra cosa es que
+a veces La Sombra de la Pagina no se activa y no hace el acto de
+devoracion con los jefes; en el acto de devoracion solo esta la version
+anterior de La Sombra de la Pagina, esta version con la bruma es mucho
+mejor, asi que debes cambiar la boca por la forma actual y toda esa
+bruma que se traga al jefe debe animarse para que sustituya cualquier
+animacion; la bruma debe cubrir a todo el jefe, por ejemplo al salir el
+rey slime la bruma no lo cubre completo".
+
+**(1) MÁS BRUMA EN EL TENTÁCULO (La Sombra de la Página, intacta en
+todo lo demás).** `BrumaColumna` v2: cada puff nace más gordo (×0,58 del
+grosor) y CRECE hasta ×1,6 (era ×1,35), deriva más lejos y sube más, y
+el aliento violeta sube de 5 a 7 halos. Y La Sombra ahora exhala DOS
+CAPAS: 16 puffs gruesos + 12 finos desfasados (antes una sola capa de
+10). `CabezaDeBruma` también crece: el racimo principal engorda (36+28·vigor)
+y ganan DOS PUFFS ORBITANDO la punta (la cabeza es una NUBE viva, no
+una bola).
+
+**(2) LA COBERTURA TOTAL — la bruma cubre al jefe ENTERO (la cura del
+Rey Slime a medias).** LA CAUSA: el Devorador de la .68 usaba un RADIO
+CIRCULAR (`jefe.Size.Length()·0,62`, tope 260 px) — un círculo sobre un
+jefe ALTO (King Slime ~200×250) dejaba la corona y los pies AL AIRE
+(«la bruma no lo cubre completo»). LA CURA — `Devorador` v2: LA ELIPSE
+REAL DEL JEFE: semianchos de su hitbox + 24% de margen, y encima (0) EL
+VELO — un GlowOrb ESTIRADO a la elipse completa (la base casi opaga que
+NADA atraviesa) + (B) LA REJILLA — 2-7 × 2-8 puffs que rellenan la
+elipse ENTERA con jitter determinista (humo, no una parrilla) + el
+núcleo violeta que respira. La cobertura ya no depende de que el jefe
+sea redondo: sea alto, ancho o cuadrado, queda DENTERO dentro.
+
+**(3) EL ACTO DE DEVORACIÓN, VERSIÓN BRUMA — la boca murió en el
+festín.** El festín (`FauceDevoradorProjectile`) dibujaba las FAUCES
+PROCEDURALES de la .67 («en el acto de devoración solo está la versión
+anterior») y su cobertura era un disco GlowOrb redondo. REESCRITO con
+la forma actual: la punta del tentáculo gigante es LA CABEZA DE BRUMA
+(IGUAL que el arma en juego — el festín y el arma por fin se ven
+IGUALES) y la cobertura es EL DEVORADOR v2 de elipse completa.
+
+**(4) LA BRUMA ES LA ANIMACIÓN (sustituye la muerte del jefe).** El
+festín ahora TIENE FASES y todas son bruma en movimiento:
+MANIFESTACIÓN (0-30, el tentáculo gigante sale DEL JUGADOR) → ENVOLVER
+(30-60, la cobertura crece hasta ser TOTAL) → EL FESTÍN (60-150, la
+masa muerde con pulso de 4,6 Hz, las almas vuelan al portador por el
+cuerpo y la herida roja late en la punta) → **EL TRAGO (150-210)**: la
+elipse entera ENCOGE hacia la punta, los puffs MIGRAN al embudo
+muriendo en volutas (los del borde primero — la nube se CIERRA sobre la
+boca), la CORRIENTE de bruma vuelve POR el tentáculo al portador y el
+tentáculo mismo RECOGE su punta a casa — el jefe ENTRA AL CUERPO de la
+sombra → **LA MUERTE REAL (210)**: el motor ejecuta la 2ª pasada de
+CheckDead (loot, logros, bestiario, flags — TODO el pipeline vanilla:
+el jefe MURIÓ de verdad, solo que DENTRO del libro) → EL POSO (+60): las
+últimas volutas sobre el botín y la onda final. Y para que la muerte
+predeterminada NO SE VEA: `FaucesGlobalNPC.PreDraw` RETIRA el sprite
+del jefe desde la fase 2 (la bruma ya lo tapa: no hay pop) y
+`SombrasLib.PurgaVisualMuerte` DESACTIVA el gore y el polvo vanilla en
+la zona del tragado mientras la bruma la ocupa («quedando solo su
+loot» — los items NO se tocan) — corre en TODOS los clientes (AI del
+dueño + PreDraw del festín, que vive donde se ve).
+
+**(5) LA MARCA CONTINUA — la cura del «a veces no se activa».** LA
+CAUSA: la marca de devoración solo vivía en el GOLPE MORTAL de nuestra
+arma — si el jefe moría por OTRA cosa (un esbirro, otro jugador, un
+DoT) mientras el tentáculo lo mordía, la muerte era «ajena»: muerte
+vanilla normal, CERO festín. LA CURA: mientras La Sombra (y las dos
+hermanas que ligan presa) tiene un JEFE como presa, la marca se
+REFRESCA sola — cada 15 t en caza y cada 5 t mordiendo: el golpe mortal
+de CUALQUIER fuente durante la caza/mordida dispara la devoración. La
+vida a 1 sigue siendo la línea del drain (Iniciar) como siempre.
+
+**(6) LA FAMILIA DE TENTÁCULOS — la Pluma/Hoja/Sello MURIERON («se ven
+y funcionan horrible»), el ADN que el usuario ama vuelve con OFICIOS
+propios.** Tres hermanas de carne+bruma (ColumnaViva + Masa + Bruma
++ CabezaDeBruma, todas nacen DEL JUGADOR — regla .68):
+- **EL AZOTE DE LA PÁGINA (daño 90, uso 15):** EL LÁTIGO — tentáculo
+  LARGO y FINO (17→4 px de grosor, gancho 0,7) que sale del portador al
+  cursor, LANZA (la punta vuela DeGolpe hasta 640 px), CRUJE (el
+  overshoot +6% y su onda) y RECOGE — atraviesa TODO en línea (Colliding
+  por la columna, pierce infinito, 12 t de cooldown local); la punta es
+  cabeza de bruma + TRES PÚAS de hueso en abanico; el filo rojo corre
+  por el lomo. Festín 8: EL LATIGAZO TRIPLE (tres azotes gigantes
+  cruzan al reo, uno por mordida, con ondas y cuerdas vivas).
+- **LA MORDIDA DE LA PÁGINA (daño 235, uso 42):** EL GLOTÓN — tentáculo
+  CORTO Y GORDO (62→28 px, sin gancho) con cabeza de bruma ENORME y
+  TRES GARRAS DE HUESO que CIERRAN de golpe (CicloModer 16 t: abre… ¡CIERRA!
+  …masca); caza LENTO (13-30 px/t — el glotón rema) y al alcanzar a la
+  presa SE CUELGA: cada 16 ticks UNA MORDIDA DE VERDAD (golpe real con
+  su número, no drain) — y cuando al jefe le queda UNA mordida de vida
+  (`life <= damage+2`): NO se la da — arranca LA DEVORACIÓN directo
+  (estilo 9, la letra del «cuando le quede 1 de salud»). Festín 9: LA
+  MASTICACIÓN GIGANTE (cuatro garras de hueso cierran desde las
+  diagonales al ritmo del masticar + esquirlas al apretar).
+- **LA CRÍA DE LA PÁGINA (daño 75, uso 26):** LA CAMADA — TRES
+  tentáculos pequeños (15→5 px) que VIVEN en el portador (orbitan su
+  cuerpo a 46 px, 120° entre hermanas, colgadas de él) y CAZAN SOLAS:
+  cada 12 t la vigilia mira si algo entró al radio de 440 px del
+  PORTADOR y la cría libre SALTA (27 px/t, giro 0,34) — latigazo,
+  mordisco (golpe real), y vuelve a su puesto en un resorte. Cada una
+  tiene su OJO RASGADO (la textura de la casa) MIRANDO a su presa… y al
+  portador cuando descansa. 30 s de vida por invocación, una cría por
+  uso, hasta tres. Festín 10: LA MENADA (las tres hermanas GIGANTES
+  azotan al reo por turnos desde tres ángulos, con sus ojos rasgados).
+- Bolsa de las Sombras actualizada (Sombra + Azote + Mordida + Cría),
+  tooltips nuevos es-MX/es-ES/en-US simétricos, 3 iconos 30×30 pixel-art
+  (Azote SHIP · Mordida SHIP · Cría v3 SHIP tras 3 rondas VLM: jerarquía
+  de UNA cabeza grande con ojo 5×3 + dos pequeñas detrás), recetas de 5
+  madera como siempre.
+
+**VERIFICACIÓN**: oráculo 0/0 (a la primera, API cazada contra el XML
+antes de escribir) · build real 0 errores 0 warnings · .tmod 4.223.695 B
+(3,5% menos que la .68 — murieron 6 .cs y 3 png de la Pluma/Hoja/Sello):
+393 entradas, EOF EXACTO (22209+4.201.486), 393/393 legibles (24 planas),
+los 3 hjson EMPAQUETADOS byte-idénticos a la fuente, 0 entradas muertas,
+DLL 1.253.376 B con los 9 símbolos nuevos VIVOS y los 6 muertos AUSENTES,
+los 3 iconos rawimg 30×30×4+12 exactos · servidor headless: Sandboxing →
+Adding → Configuring → Finalizing v6.50.69 → Recipes → **Server started,
+0 EXCEPCIONES**.
+
+---
 ## Commit v6.50.68 — LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS (la raíz nace del jugador)
 
 **Feedback del usuario**: "los bastones estan interesante, pero me gusta mas

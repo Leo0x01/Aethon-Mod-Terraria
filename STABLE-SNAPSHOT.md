@@ -1,15 +1,11 @@
-# AethonMod — ESTADO ACTUAL (v6.50.65)
+# AethonMod — ESTADO ACTUAL (v6.50.69)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.68 (LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS;
-> release 404680686, md5 da515d5ea17585a17f150a3c3351c572, CDN verificado
-> byte a byte). La .67 fue LA CARNE DE VERDAD + EL
-> FIX DEL OOM DE CARGA (release 404581716, md5 e7cb554281ed0ef4200cb99671a76112,
-> CDN verificado byte a byte) — el usuario CONFIRMÓ los tentáculos
-> («están geniales, son justo lo que quería») pero reportó la boca
-> separada del tentáculo y la base naciendo del suelo (ambos curados en
-> la .68, junto con el reemplazo de las 3 hermanas por conceptos nuevos).
-
+> Última actualización: v6.50.69 (LA COBERTURA TOTAL + EL ACTO DE
+> DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS; compilada y verificada
+> 0/0, headless 0 excepciones — **PUBLICACIÓN PENDIENTE DE TOKEN**, ver
+> Próximos pasos). La .68 fue LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS
+> (release 404680686, md5 da515d5e…, CDN verificado byte a byte).
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **v6.50.68 = LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS** (la letra del
@@ -1190,27 +1186,40 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **El usuario prueba v6.50.68 en juego** — LA BOCA ES BRUMA + LOS CUATRO
-   CONCEPTOS: (a) LA RAÍZ: usar La Sombra de la Página SALTANDO o VOLANDO
-   — el tentáculo tiene que salir DEL CUERPO del jugador (el charco del
-   suelo queda solo como su sombra proyectada, ya no es el origen); (b)
-   LA BOCA: al morder a un jefe, la masa de bruma negra tiene que CUBRIR
-   ENTERO al jefe — NACE del tentáculo (puffs del puente), PULSA
-   tragando y las ALMAS vuelven al jugador por el cuerpo del tentáculo;
-   mientras caza, la punta se disuelve en una cabeza de bruma (ya NO hay
-   mandíbulas flotantes separadas — ni puede haberlas: todo vive en la
-   punta real); (c) LA PLUMA: tres agujas de hueso por disparo que
-   atraviesan hasta 4 enemigos con rastro de tinta y salpicadura; matar
-   un jefe con la pluma = festín LA LLUVIA DE TINTA; (d) LA HOJA: el
-   molino — 4 filos orbitan acelerando ~0,7 s y salen en abanico al
-   cursor; matar un jefe = festín EL MOLINO DE FILOS; (e) EL SELLO: el
-   círculo rúnico se traza donde apunta el cursor (máx 700 px), ERUPCIONA
-   en 6 garras + bruma y deja un poso que muerde ~2 s; matar un jefe =
-   festín EL SELLO DEL JUICIO; (f) LA BOLSA: reabrirla y recoger las 3
-   armas nuevas (las hermanas ya no existen — si quedaban en el
-   inventario se vuelven «unloaded item»: borrarlas); (g) el idioma
-   Español (Latinoamérica) con los tooltips nuevos de las 4 armas.
+1. **PUBLICAR v6.50.69 (BLOQUEADO: el token GitHub se perdió con el wipe
+   del sandbox)** — el commit + tag v6.50.69 están LOCALES y verificados;
+   cuando el usuario entregue un PAT nuevo: `git push origin main v6.50.69`
+   + release con `AethonMod.tmod` (4.223.695 B, md5
+   b87ae4fd063e065edf4588b3e4d06e33 — respaldado en
+   /home/sync/AethonMod-v6.50.69.tmod y en el bundle) + verificar el CDN
+   byte a byte + actualizar esta fila con el release ID real (la lección
+   de la .65: el ID solo se conoce DESPUÉS de crear el release).
 
+2. **El usuario prueba v6.50.69 en juego** — LA COBERTURA TOTAL + EL
+   FESTÍN EN BRUMA + LA FAMILIA: (a) MÁS BRUMA: La Sombra exhala DOS
+   capas de puffs (más gordo y creciendo ×1,6 cada uno) y la cabeza son
+   cuatro puffs orbitando — de día Y de noche; (b) LA COBERTURA TOTAL:
+   al morder, la bruma cubre al jefe ENTERO (la elipse de su hitbox +
+   margen — al REY SLIME entero, corona y pies: era el caso reportado);
+   (c) EL FESTÍN NUEVO: a 1 de vida el tentáculo GIGANTE sale del
+   jugador, ENVUELVE al jefe (su sprite DESAPARECE bajo la bruma —
+   fase 2), lo TRAGA (la elipse encoje hacia la punta, la corriente
+   vuelve por el tentáculo), y al final MUERE DE VERDAD dentro de la
+   bruma: el loot cae SOLO (sin gore, sin polvo, sin animación de
+   muerte vanilla) y los logros/flags/bestiario cuentan la baja; (d) LA
+   CONFIABILIDAD: matar al jefe con un ESBIRRO o cualquier otra fuente
+   MIENTRAS el tentáculo lo caza/muerde — el festín tiene que arrancar
+   IGUAL (la marca continua); (e) EL AZOTE: el látigo largo que cruje
+   atravesando todo en línea (rápido, uso 15); (f) LA MORDIDA: el
+   glotón — se cuelga y mastica a mordidas de verdad (los números de
+   golpe saltan cada 16 t) y a un jefe le arranca la devoración cuando
+   le queda UNA mordida; (g) LA CRÍA: invocar 3 veces — tres
+   tentáculos pequeños orbitan al jugador y cazan solos lo que se
+   acerca (sus ojos rasgados siguen a la presa); (h) LOS FESTINES DE
+   LAS HERMANAS: matar un jefe con cada hermana — EL LATIGAZO TRIPLE,
+   LA MASTICACIÓN GIGANTE y LA MENADA; (i) LA BOLSA: reabrir y recoger
+   las 3 hermanas nuevas (Pluma/Hoja/Sello ya no existen — si quedaban
+   en el inventario se vuelven «unloaded item»: borrarlas).
 2. **(Reemplazado por la .68 — el usuario pidió conceptos diferentes)**
    El usuario prueba v6.50.67 en juego — LA CARNE DE VERDAD + EL FIX DEL
    OOM DE CARGA: (a) LA CARGA: el mod ya NO debe desactivarse solo al
@@ -1304,6 +1313,8 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ---
 
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
+| **v6.50.69** | ⏳ **PENDIENTE DE PUBLICAR** (token GitHub perdido — commit+tag locales listos) · LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS: Devorador v2 con LA ELIPSE REAL del jefe (velo estirado + rejilla de puffs — el Rey Slime queda ENTERO), el festín REESCRITO con la forma actual (CabezaDeBruma — las Fauces murieron) y EL TRAGO animado (la bruma encoje hacia la punta y vuelve por el cuerpo = LA ANIMACIÓN que sustituye la muerte), PreDraw retira el sprite bajo la cobertura + PURGA de gore/polvo (muerte sin animación predeterminada, loot+logros intactos), LA MARCA CONTINUA (el golpe mortal de CUALQUIER fuente durante caza/mordida dispara el festín), más bruma en La Sombra (2 capas + BrumaColumna v2) y las 3 hermanas nuevas de tentáculos: EL AZOTE (el látigo), LA MORDIDA (el glotón que mastica de verdad), LA CRÍA (la camada autónoma de 3) + festines 8/9/10 nuevos · .tmod 4.223.695 B, 393 entradas, EOF exacto, 3/3 hjson byte-idénticos, DLL 9 vivos/0 muertos, headless 0 excepciones |
+
 
 | Versión | Estado | Notas |
 |---|---|---|
