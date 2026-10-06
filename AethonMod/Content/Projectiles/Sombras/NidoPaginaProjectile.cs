@@ -250,7 +250,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             VFXCore.FlushAdditive();
 
             // === LA COLUMNA (la madre) ===
-            Vector2[] col = SombrasLib.Columna(raiz, Projectile.Center, tiempo, semilla, 20, 0.25f);
+            // v6.50.67 — VIVA: el cuello de la madre, el gancho MÁS
+            // ENROLLADO de las cuatro (la madre se ABARCA sobre las crías)
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 20, 0.25f, gancho: 0.7f);
             SombrasLib.Masa(col, 48f * presencia, 14f, 0.95f * disipa, semilla, tiempo);
 
             // === LA BRUMA — la más densa de las tres hermanas: 15

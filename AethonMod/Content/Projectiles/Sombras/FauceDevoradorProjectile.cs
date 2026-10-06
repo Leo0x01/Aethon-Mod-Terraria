@@ -180,7 +180,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             // (a media caza la cabeza VIAJA; ya envuelto, MUERDE en el sitio)
             float alcance = manifiesta * 0.35f + envuelve * 0.65f;
             Vector2 destino = Vector2.Lerp(raiz + new Vector2(0, -160f), jefe.Center, alcance);
-            Vector2[] col = SombrasLib.Columna(raiz, destino, tiempo, semilla, 22, 0.20f);
+            // v6.50.67 — LA COLUMNA VIVA del festín: el tentáculo GIGANTE
+            // también cobra inercia de látigo + el gancho del depredador
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 22, 0.20f, gancho: 0.45f);
             SombrasLib.Masa(col, 58f, 20f, 0.96f * vivo, semilla, tiempo);
 
             // === LA BRUMA DEL CUERPO GIGANTE (v6.50.64): el tentáculo del
@@ -319,7 +321,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                             float m = (t - 60f) % 32f;
                             if (m < 4f) abre *= 0.15f;
                         }
-                        SombrasLib.Ojo(pos, radio * 0.5f, jefe.Center - pos, abre * vivo);
+                        SombrasLib.Ojo(pos, radio * 0.5f, jefe.Center - pos, abre * vivo, rasgada: true);
 
                         // la pupila del juicio ENGORDA conforme devora
                         if (festin > 0.1f)

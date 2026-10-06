@@ -207,7 +207,10 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.Charco(raiz, 52f, 0.8f, tiempo, semilla);
 
             // === LA COLUMNA y LA MASA ===
-            Vector2[] col = SombrasLib.Columna(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f);
+            // v6.50.67 — LA COLUMNA VIVA: física de verlet con inercia y
+            // ONDA VIAJERA (la letra del GIF del usuario) + el GANCHO de
+            // la punta — la base también se hace FLUIDA
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f, gancho: 0.5f);
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
             SombrasLib.Masa(col, 40f, 12f, 0.95f * disipa, semilla, tiempo);
 

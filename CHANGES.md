@@ -1,5 +1,97 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.67 — LA CARNE DE VERDAD + EL FIX DEL OOM DE CARGA
+
+**Feedback del usuario**: "hay varios errores y ademas las armas se siguen
+viendo simples, solo son lineas geometricas, nada de tentaculos fluidos ni
+nada de visuales impresionantes" (con el client.log de la v6.50.66).
+
+**(0) EL ERROR DE CARGA — OutOfMemory 0x8007000E AL CREAR
+`Effects/Procedural/Ring` (el mod se DESACTIVABA SOLO: «Se ha producido un
+error al cargar Unknown — Los mods se han desactivado automáticamente»).**
+La autopsia del client.log: la creación de la Texture2D de Ring reventaba
+en la máquina del usuario (con su lista gigante de mods — Calamity,
+Fargo's, CalValEX, Thorium, Spirit… la VRAM ya estaba al límite cuando
+AethonMod cargó SUS texturas). EL ASESINO: **Ring.png, FireRing.png y
+RingShieldNebula.png eran 1024×1024 (4 MB RGBA CADA UNA en VRAM)** — Ring
+es la textura MÁS PEDIDA del mod (OndaChoque + decenas de renderers) y
+cargaba entera al primer uso; más 4 ruidos de 512² (1 MB c/u). Total: 34,2
+MB de VRAM solo en texturas del mod. LA CURA: **downscale de las 7
+gigantes** — Ring/FireRing 1024²→256², RingShieldNebula 1024²→512², y los
+4 ruidos 512²→256² (todos son degradados radiales/ruido que tilea: 256 es
+de sobra y `RingQuadSize` normaliza la escala — el tamaño visual NO cambia)
+= **−13,5 MB de VRAM** (el .tmod bajó de 6,41 a 4,22 MB). Los dos
+`FormatException: Expected Re-Logic file format` del log son DOS ARCHIVOS
+DE JUGADOR CORRUPTOS en la carpeta Players del usuario (no es del mod).
+
+**(1) LA CARNE DE VERDAD — el fin de las «líneas geométricas».** El
+diagnóstico: SombrasLib dibujaba TODO con `VFXCore.Line` — el tentáculo
+era una CADENA DE LÍNEAS GORDAS (palos), las fauces DOS CUÑAS de 3 líneas,
+los dientes LÍNEAS CORTAS y las garras TRES BARRAS. La cura es una capa
+nueva de motor completa:
+
+- **LA CINTA (VFXCore.Ribbon/RibbonTinted)**: la espina + el perfil de
+  anchos se convierten en una SERIE DE QUADS TANGENTES QUE SE SOLAPAN en
+  las juntas (extensión de medio ancho por extremo: las curvas quedan
+  TAPADAS por fuera y FUNDIDAS por dentro) — cuerpo continuo, curvo, con
+  músculo. Cada segmento muestrea su BANDA de una textura larga (el
+  rectángulo fuente nuevo de GlowQuad) para que la textura FLUYA continua
+  raíz→punta.
+- **LAS TEXTURAS HORNEADAS (el patrón Arcoiris — cero assets nuevos, el
+  set del .tmod NO se toca)**: LA CARNE (128×512, periódica en V: bordes
+  suaves que respiran, 7 FIBRAS MUSCULARES verticales, 3 VETAS CARMESÍ
+  sinusoidales que corren por dentro, 6 anillos de segmentación — el
+  negro de vacío con un pelo violeta), EL COLMILLO (48²: aguja de hueso
+  curva, base oscura → punta blanca), LA VENTOSA (32²: aro de hueso con
+  agujero — la fila blanca del spritesheet de referencia del usuario) y
+  EL OJO RASGADO (64²: esclerótica cálida + iris carmesí + LA RENDIJA
+  VERTICAL del dragón de la idea central — horneada con alpha 0: en el
+  lote aditivo añade CERO y se lee NEGRA sobre cualquier fondo).
+- **LA MASA NUEVA — cinco capas**: (1) la cinta de CARNE con PERFIL
+  MUSCULAR (bulbo en la base + S-taper a la punta + la respiración), (2)
+  el VELO que respira (×1,7 tenue), (3) EL BORDE DE ENERGÍA — cintas
+  aditivas finas a cada lado: VIOLETA en la raíz → ROJO SANGRE en la
+  punta con un PULSO que VIAJA (el filo luminoso del tajo.png), (4) LAS
+  ESPINAS DE HUESO — colmillos curvos alternando lados (no púas-barra),
+  (5) LA FILA DE VENTOSAS del lomo.
+- **LAS FAUCES NUEVAS — la cabeza de verdad**: LA CORONA (bulbo orgánico
+  de 4 blobs irregulares por semilla), LAS MANDÍBULAS (mini-cintas curvas
+  con carne que SE ENROLLAN hacia dentro — crescentes musculosos), LOS
+  COLMILLOS (agujas de hueso curvas hacia el interior, decrecientes) y EL
+  OJO DE LA CABEZA (un ojo rasgado pequeño que mira a la presa — ~6 de
+  cada 10 cabezas: la firma eldritch).
+- **LA GARRA NUEVA**: el talón curvo en S que se ENROLLA hacia el gancho
+  + la PUNTA DE HUESO alineada con la tangente final + el filo rojo tenue.
+
+**(2) LA FÍSICA DEL GIF — ColumnaViva (verlet).** La Columna de la .66
+era una Bézier recalculada cada frame: cero memoria, cero inercia. La
+COLUMNA VIVA guarda posición y velocidad por junta (verlet): la ONDA
+VIAJERA empuja en perpendicular con fase que viaja raíz→punta, la RAÍZ va
+anclada, la CABEZA persigue su objetivo con resorte SUBAMORTIGUADO (el
+OVERSHOOT del látigo sale solo), la punta se ENROLLA en GANCHO y la
+cuerda reparte el resto — la letra del GIF de referencia del usuario:
+«onda viajera base→punta, desenrollado explosivo, overshoot, retractación
+con ondulación, follow-through (la punta sigue moviéndose 2-3 frames
+después de que la base paró)». Un paso por frame (compuerta), estados
+pódridos por edad, tope de 128 espinas, y el COLLIDING se queda con la
+Columna determinista (la física visual NO afecta gameplay ni viaja por la
+red). CADA ARMA CON SU GANCHO: la Sombra 0,5 · la Marea −0,6 (la cresta
+que se derrama) · la Mirada 0,35 (flota, no teletransporta) · el Nido 0,7
+(la madre se abarca) · el festín 0,45 (el depredador).
+
+**(3) LOS OJOS RASGADOS**: la pared de la Mirada ahora mezcla HUMANOS y
+DRACÓNICOS (un tercio rasgados) y EL OJO DEL JUICIO del festín estilo 6
+es rasgado — el ojo del dragón de la idea central.
+
+**Verificación**: oráculo 0/0 (cazó 1: Vector2·int en el haciaDentro de
+las fauces) · build real 0/0 ×2 · .tmod 4.220.530 B md5
+e7cb554281ed0ef4200cb99671a76112: 393 entradas (369 deflate + 24 stored),
+EOF exacto, 3/3 hjson byte-idénticos a la fuente, Ring 256² confirmado
+DENTRO del paquete, DLL con ColumnaViva/Ribbon/RibbonTinted/QuadSrc/
+HornearCarne/HornearColmillo/HornearVentosa/HornearOjoRasgado/EspinaViva
+VIVOS · headless 0 excepciones (Sandboxing→Finalizing→Server started).
+
+---
 ## Commit v6.50.66 — LAS TRES HERMANAS DE LA PÁGINA + EL FIX DEL CRASH + MÁS BRUMA
 
 **Feedback del usuario**: "no uses el sprite del libro, y la bruma es muy

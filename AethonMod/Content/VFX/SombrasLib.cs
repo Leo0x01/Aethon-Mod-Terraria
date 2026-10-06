@@ -89,72 +89,283 @@ namespace AethonMod.Content.VFX
             return col;
         }
 
+        // ==================================================================
+        //  v6.50.67 — LA COLUMNA VIVA: la física del GIF del usuario
+        //  (emerge → golpea con OVERSHOOT → ondula al retraer).
+        // ==================================================================
+
         /// <summary>
-        /// DIBUJA LA MASA: cada segmento de la columna es un LOTE ALFA de
-        /// negro sólido (Pixel) con grosor decreciente raíz→punta, y una
-        /// segunda pasada SoftGlow oscura ×1.7 con alpha baja — el borde
-        /// SUAVE de la sombra (la masa no termina en cuchillo: respira).
-        /// La punta (últimos 15%) lleva un abanicado de PICOS: el borde
-        /// DENTADO de Pride (la sombra afilada como sierra).
+        /// EL ESTADO FÍSICO de un tentáculo (verlet): posición y posición
+        /// previa por junta — la inercia VIVE aquí (la v6.50.66 era una
+        /// Bézier recalculada: cero memoria, cero látigo).
+        /// </summary>
+        private class EspinaViva
+        {
+            public Vector2[] Pos;
+            public Vector2[] Prev;
+            public uint UltimoFrame;
+            public uint UltimoUso;
+        }
+
+        /// <summary>Las espinas vivas cacheadas por semilla (poda por edad).</summary>
+        private static readonly System.Collections.Generic.Dictionary<int, EspinaViva> _espinas = new();
+
+        /// <summary>
+        /// v6.50.67 — LA COLUMNA VIVA: la misma firma que
+        /// <see cref="Columna"/> pero con FÍSICA DE VERLET — la letra del
+        /// GIF de referencia del usuario: «onda viajera base→punta, desenrollado
+        /// explosivo, OVERSHOOT de látigo, retractación con ondulación
+        /// secundaria, inercia de follow-through (la punta sigue moviéndose
+        /// 2-3 frames después de que la base paró)».
+        ///
+        /// LA RECETA: cada junta recuerda su posición anterior (VERLET —
+        /// la velocidad es la resta, gratis), la RAÍZ va anclada dura, la
+        /// CABEZA persigue su objetivo con resorte SUBAMORTIGUADO (el
+        /// overshoot sale SOLO), la ONDA VIAJERA empuja en perpendicular
+        /// con fase que viaja raíz→punta, el GANCHO curva el último
+        /// cuarto y la cuerda (constraint de distancia) reparte el resto.
+        /// Dos pasos jamás por frame (compuerta por GameUpdateCount) y
+        /// estados huérfanos podidos por edad.
+        ///
+        /// SOLO PARA DIBUJAR: el COLLIDING se queda con la Columna
+        /// determinista (misma forma en cliente y servidor — la física
+        /// visual no viaja por la red y no debe afectar gameplay).
+        /// </summary>
+        /// <param name="gancho">−1..1 — cuánto y hacia qué lado se curva la punta (el gancho del GIF).</param>
+        public static Vector2[] ColumnaViva(Vector2 raiz, Vector2 cabeza, float tiempo, int semilla,
+            int puntos = 18, float amplitud = 0.22f, float gancho = 0f)
+        {
+            puntos = Math.Max(puntos, 4);
+            if (Main.netMode == NetmodeID.Server) return Columna(raiz, cabeza, tiempo, semilla, puntos, amplitud);
+
+            // === el estado (crece si cambia el tamaño pedido) ===
+            if (!_espinas.TryGetValue(semilla, out EspinaViva esp) || esp.Pos.Length != puntos)
+            {
+                // nace sobre la Bézier estática: arranque orgánico, sin salto
+                Vector2[] inicial = Columna(raiz, cabeza, tiempo, semilla, puntos, amplitud);
+                esp = new EspinaViva
+                {
+                    Pos = (Vector2[])inicial.Clone(),
+                    Prev = (Vector2[])inicial.Clone(),
+                    UltimoFrame = 0,
+                    UltimoUso = Main.GameUpdateCount,
+                };
+                _espinas[semilla] = esp;
+
+                // LA PODA (barata, solo al insertar): fuera estados sin
+                // uso hace 600 frames + tope duro de 128 espinas vivas
+                if (_espinas.Count > 128)
+                {
+                    var muertas = new System.Collections.Generic.List<int>();
+                    foreach (var kv in _espinas)
+                        if (Main.GameUpdateCount - kv.Value.UltimoUso > 600) muertas.Add(kv.Key);
+                    for (int i = 0; i < muertas.Count; i++) _espinas.Remove(muertas[i]);
+                    if (_espinas.Count > 128) _espinas.Clear();   // red de seguridad
+                }
+            }
+            esp.UltimoUso = Main.GameUpdateCount;
+
+            // === LA COMPUERTA: un solo paso de física por frame de juego ===
+            if (esp.UltimoFrame == Main.GameUpdateCount)
+                return esp.Pos;
+            esp.UltimoFrame = Main.GameUpdateCount;
+
+            int n = puntos;
+            Vector2[] pos = esp.Pos, prev = esp.Prev;
+
+            // === 1 · LA INERCIA (verlet): la velocidad es la resta ===
+            float dist = Vector2.Distance(raiz, cabeza);
+            Vector2 eje = dist < 1f ? -Vector2.UnitY : (cabeza - raiz) * (1f / dist);
+            Vector2 perp = new(-eje.Y, eje.X);
+            float escala = Math.Min(dist / 420f, 2.2f);           // el látigo largo ondea MÁS
+            float ladoGancho = semille(semilla) > 0.5f ? 1f : -1f;
+
+            for (int i = 1; i < n; i++)
+            {
+                float f = i / (float)(n - 1);
+                Vector2 vel = pos[i] - prev[i];
+
+                // LA ONDA VIAJERA — la fase RESTA hacia la punta: la cresta
+                // VIAJA raíz→punta con el tiempo (la letra del GIF)
+                float onda = MathF.Sin(tiempo * 2.6f - f * 5.5f + semille(semilla) * 6.28f) * 0.62f
+                           + MathF.Sin(tiempo * 4.9f - f * 9.2f + semille(semilla + 7) * 6.28f) * 0.38f;
+
+                // EL GANCHO — el último cuarto se curva hacia su lado
+                float ganchoF = gancho != 0f
+                    ? MathF.Max(0f, f - 0.72f) / 0.28f * gancho * ladoGancho
+                    : 0f;
+
+                Vector2 acel = perp * (onda * dist * amplitud * escala * 0.020f + ganchoF * 1.6f)
+                             + new Vector2(0f, 0.42f);            // el peso (cae un pelo)
+
+                prev[i] = pos[i];
+                pos[i] += vel * 0.88f + acel;                     // damping 0.88: vivo sin ser eterno
+            }
+
+            // === 2 · LAS ANCLAS: la raíz DURA, la cabeza con resorte ===
+            prev[0] = pos[0] = raiz;
+            // el resorte del cabeza: SUBAMORTIGUADO (k 0.30) — el overshoot del látigo
+            pos[n - 1] += (cabeza - pos[n - 1]) * 0.30f;
+
+            // === 3 · LA CUERDA (constraint de distancia ×3 pasadas) ===
+            float segLen = MathF.Max(dist, 110f) / (n - 1);        // holgura mínima: cerca, la sombra SE ENROSCA
+            for (int pasada = 0; pasada < 3; pasada++)
+            {
+                for (int i = 1; i < n; i++)
+                {
+                    Vector2 d = pos[i] - pos[i - 1];
+                    float len = d.Length();
+                    if (len < 0.001f) continue;
+                    float corr = (len - segLen) / len;
+
+                    if (i == 1) pos[i] -= d * corr;                // la raíz no se mueve
+                    else if (i == n - 1)
+                    {
+                        // la punta cede la mitad (su resorte también tira)
+                        pos[i] -= d * corr * 0.5f;
+                        pos[i - 1] += d * corr * 0.5f;
+                    }
+                    else
+                    {
+                        pos[i] -= d * corr * 0.5f;
+                        pos[i - 1] += d * corr * 0.5f;
+                    }
+                }
+            }
+
+            return pos;
+        }
+
+        /// <summary>
+        /// v6.50.67 — DIBUJA LA MASA DE VERDAD: la v6.50.66 era una CADENA
+        /// DE LÍNEAS GORDAS («solo son líneas geométricas» — la letra del
+        /// usuario). AHORA es un CUERPO: la CINTA de carne texturizada
+        /// (fibras musculares + vetas carmesí que FLUYEN raíz→punta, la
+        /// textura horneada Carne de VFXCore muestreada por bandas), con
+        /// PERFIL MUSCULAR (bulbo en la base, S-taper a la punta — no una
+        /// recta), el VELO que respira, EL BORDE DE ENERGÍA (cintas
+        /// aditivas finas a cada lado: violeta en la base → ROJO SANGRE
+        /// en la punta, con un PULSO que viaja — la lectura garantizada
+        /// sobre cualquier fondo), ESPINAS DE HUESO curvas alternando
+        /// lados (colmillos de verdad, no púas-barra) y la FILA DE
+        /// VENTOSAS del lomo (la referencia del spritesheet del usuario).
         /// </summary>
         public static void Masa(Vector2[] col, float grosorRaiz, float grosorPunta, float alfa, int semilla, float tiempo)
         {
             if (col == null || col.Length < 2 || alfa <= 0.02f) return;
 
-            VFXCore.Begin();
+            var carne = VFXCore.Carne;
             int n = col.Length;
-            for (int i = 1; i < n; i++)
-            {
-                float f = i / (float)(n - 1);           // 0 raíz → 1 punta
-                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f);
-                // el latido: la masa RESPIRA a lo largo (la ondulación de energía viva)
-                g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
-                VFXCore.Line(col[i - 1], col[i], Alfa(Negro, alfa), g);
-            }
-            VFXCore.FlushAlpha(VFXCore.Pixel);
 
-            // v6.50.65 — EL RIM VIOLETA (la cura del «no se ve nada»): la
-            // masa negra sobre fondo negro era INVISIBLE — un borde
-            // aditivo violeta tenue (1.35× el grosor) le da a la silueta
-            // un aura de sombra mágica que se lee en CUALQUIER fondo.
-            VFXCore.Begin();
-            for (int i = 1; i < n; i++)
+            // === EL PERFIL MUSCULAR: bulbo + S-taper + la respiración ===
+            var anchos = new float[n];
+            for (int i = 0; i < n; i++)
             {
                 float f = i / (float)(n - 1);
-                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f) * 1.35f;
+                // el S-taper (smoothstep: la masa NO se afila en línea recta)
+                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f * f * (3f - 2f * f));
+                // EL BULBO — el bíceps del tentáculo a un quinto del nacimiento
+                g *= 1f + 0.16f * MathF.Exp(-((f - 0.18f) / 0.16f) * ((f - 0.18f) / 0.16f));
+                // la respiración a lo largo (la ondulación de energía viva)
                 g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
-                VFXCore.Line(col[i - 1], col[i], Alfa(Violeta, alfa * 0.16f), g);
+                anchos[i] = g;
             }
-            VFXCore.FlushAdditive();
 
-            // EL BORDE SUAVE (velo oscuro ×1.7)
-            VFXCore.Begin();
-            for (int i = 1; i < n; i++)
+            // === CAPA 1 · LA CARNE (la cinta que TAPA — lote alfa) ===
+            if (carne != null)
             {
-                float f = i / (float)(n - 1);
-                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f) * 1.7f;
-                VFXCore.Line(col[i - 1], col[i], Alfa(Negro, alfa * 0.35f), g);
+                VFXCore.Begin();
+                VFXCore.Ribbon(col, anchos, Alfa(Blanco, alfa), carne,
+                    uvFlow: tiempo * 0.05f);
+                VFXCore.FlushAlpha();
             }
+            else
+            {
+                // fallback (sin dispositivo): la cadena clásica
+                VFXCore.Begin();
+                for (int i = 1; i < n; i++)
+                    VFXCore.Line(col[i - 1], col[i], Alfa(Negro, alfa), anchos[i]);
+                VFXCore.FlushAlpha(VFXCore.Pixel);
+            }
+
+            // === CAPA 2 · EL VELO (el borde que respira — ×1.7, tenue) ===
+            VFXCore.Begin();
+            VFXCore.Ribbon(col, anchos, Alfa(Negro, alfa * 0.35f), carne,
+                uvFlow: tiempo * 0.05f, edgeOutset: 0.35f);
             VFXCore.FlushAlpha();
 
-            // LOS PICOS DE LA SIERRA en la mitad final de la columna
-            VFXCore.Begin();
-            for (int i = 1; i < n - 2; i++)
+            // === CAPA 3 · EL BORDE DE ENERGÍA (aditivo, por segmento):
+            // violeta en la raíz → ROJO SANGRE en la punta + el PULSO que
+            // VIAJA raíz→punta — el filo del tajo.png: «luminous red edge» ===
+            var bordes = new Color[n];
+            for (int i = 0; i < n; i++)
             {
                 float f = i / (float)(n - 1);
-                if (f < 0.45f) continue;
-                // picos alternando lado, deterministas
-                float fase = MathF.Sin(i * 2.399f + Frac(semille(semilla) * 5.9f) * MathHelper.TwoPi);
-                if (fase < 0.35f) continue;
-                Vector2 dir = col[i + 1] - col[i - 1];
-                if (dir.LengthSquared() < 0.01f) continue;
-                dir = Vector2.Normalize(dir);
-                Vector2 perp = new(-dir.Y, dir.X);
-                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f) * 0.5f;
-                Vector2 pico = col[i] + perp * g * (fase > 0 ? 1f : -1f);
-                VFXCore.Line(col[i], pico, Alfa(Negro, alfa * 0.9f), g * 0.35f);
+                Color c = Color.Lerp(Violeta, Rojo, MathF.Pow(f, 1.3f));
+                // EL PULSO — dos crestas que suben por el cuerpo (fase viajera)
+                float pulso = 0.55f + 0.45f * MathF.Sin(tiempo * 4.2f - f * 9f + semille(semilla) * 6.28f);
+                bordes[i] = Alfa(c, (0.10f + 0.16f * f) * alfa * pulso);
             }
-            VFXCore.FlushAlpha(VFXCore.Pixel);
+            VFXCore.Begin();
+            VFXCore.RibbonTinted(col, anchos, bordes, carne,
+                uvFlow: tiempo * 0.05f, edgeInset: 0.40f);
+            VFXCore.FlushAdditive();
+
+            // === CAPA 4 · LAS ESPINAS DE HUESO (colmillos curvos
+            // alternando lado — la sierra afilada de la v6.50.66 ahora
+            // con dientes DE VERDAD) ===
+            if (VFXCore.Colmillo != null)
+            {
+                VFXCore.Begin();
+                for (int i = 2; i < n - 2; i++)
+                {
+                    float f = i / (float)(n - 1);
+                    if (f < 0.42f) continue;
+                    float fase = MathF.Sin(i * 2.399f + Frac(semille(semilla) * 5.9f) * MathHelper.TwoPi);
+                    if (fase < 0.35f) continue;
+
+                    Vector2 dir = col[Math.Min(i + 1, n - 1)] - col[Math.Max(i - 1, 0)];
+                    if (dir.LengthSquared() < 0.01f) continue;
+                    dir = Vector2.Normalize(dir);
+                    Vector2 perp = new(-dir.Y, dir.X);
+                    float lado = fase > 0 ? 1f : -1f;
+
+                    // el colmillo apunta hacia FUERA y se curva hacia atrás
+                    float tamaño = anchos[i] * (0.85f + 0.3f * Frac(semille(semilla + i) * 3.1f));
+                    Vector2 punta = col[i] + perp * lado * (anchos[i] * 0.5f + tamaño * 0.4f);
+                    Vector2 rumbo = perp * lado - dir * 0.45f;      // el curvado hacia atrás
+                    // (la textura Colmillo apunta ARRIBA: rot = angulo(rumbo) + π/2)
+                    VFXCore.Quad(col[i] + perp * lado * anchos[i] * 0.42f,
+                        Alfa(Blanco, 0.9f * alfa),
+                        new Vector2(tamaño * 0.55f, tamaño),
+                        rumbo.ToRotation() + MathHelper.PiOver2, VFXCore.Colmillo);
+                }
+                VFXCore.FlushAdditive();
+            }
+
+            // === CAPA 5 · LAS VENTOSAS DEL LOMO (la fila blanca del
+            // spritesheet de referencia — «white circular suckers along
+            // its length»: la panza del tentáculo, el lado que SUJETA) ===
+            if (VFXCore.Ventosa != null)
+            {
+                VFXCore.Begin();
+                int cada = Math.Max(2, n / 8);
+                for (int i = 3; i < n - 3; i += cada)
+                {
+                    float f = i / (float)(n - 1);
+                    Vector2 dir = col[Math.Min(i + 1, n - 1)] - col[Math.Max(i - 1, 0)];
+                    if (dir.LengthSquared() < 0.01f) continue;
+                    dir = Vector2.Normalize(dir);
+                    Vector2 perp = new(-dir.Y, dir.X);
+                    // el lado del lomo: el que MIRA ABAJO (la ventosa sujeta)
+                    if (perp.Y > 0f) perp = -perp;
+                    float tamaño = anchos[i] * 0.34f;
+                    VFXCore.Quad(col[i] + perp * anchos[i] * 0.30f,
+                        Alfa(Blanco, 0.55f * alfa),
+                        new Vector2(tamaño, tamaño), 0f, VFXCore.Ventosa);
+                }
+                VFXCore.FlushAdditive();
+            }
         }
 
         /// <summary>El charco de sombra del que nace todo (el ancla en el suelo).</summary>
@@ -197,13 +408,34 @@ namespace AethonMod.Content.VFX
         /// la apertura se anima con un ease-out violento en el llamador.
         /// v6.50.65 — EL HALO: un resplandor blanco suave detrás de la
         /// esclerótica para que el ojo PRENDA en cualquier fondo.
+        /// v6.50.67 — EL OJO RASGADO: con <paramref name="rasgada"/> el
+        /// ojo es el DRAGÓN de la idea central del usuario — esclerótica
+        /// cálida + iris carmesí + LA RENDIJA VERTICAL (la textura
+        /// horneada OjoRasgado: la rendija va con alpha 0 y en el lote
+        /// aditivo añade CERO — se lee NEGRA sobre cualquier fondo).
         /// </summary>
-        public static void Ojo(Vector2 pos, float tamaño, Vector2 mirada, float abierto, bool pupila = true)
+        public static void Ojo(Vector2 pos, float tamaño, Vector2 mirada, float abierto, bool pupila = true, bool rasgada = false)
         {
             if (abierto <= 0.03f || tamaño <= 0.5f) return;
             float a = MathHelper.Clamp(abierto, 0f, 1f);
+
             // EL HALO (v6.50.65): el ojo BRILLA antes de existir
             VFXCore.Quad(pos, Alfa(Blanco, 0.20f * a), new Vector2(tamaño * 2.1f, tamaño * 1.5f));
+
+            if (rasgada && VFXCore.OjoRasgado != null)
+            {
+                // EL OJO DEL DRAGÓN — la rendija vertical, inclinada un
+                // pelo hacia donde MIRA (la textura apunta con la rendija
+                // VERTICAL: la inclinación es el gesto)
+                float inclinacion = mirada.LengthSquared() < 0.01f ? 0f
+                    : MathHelper.Clamp(mirada.X * 0.0006f, -0.35f, 0.35f);
+                Vector2 m = mirada.LengthSquared() < 0.01f ? Vector2.Zero
+                    : Vector2.Normalize(mirada) * tamaño * 0.10f;
+                VFXCore.Quad(pos + m, Alfa(Blanco, 0.95f * a),
+                    new Vector2(tamaño, tamaño * 0.62f), inclinacion, VFXCore.OjoRasgado);
+                return;
+            }
+
             VFXCore.Quad(pos, Alfa(Blanco, 0.92f * a), new Vector2(tamaño, tamaño * 0.62f));
             if (pupila)
             {
@@ -245,12 +477,18 @@ namespace AethonMod.Content.VFX
         // ==================================================================
 
         /// <summary>
-        /// UNA BOCA PROCEDURAL: dos mandíbulas negras en cuña que se
-        /// abren en ángulo alrededor de <paramref name="dir"/> (la
-        /// apertura 0 = cerrada, 1 = bien abierta), con colmillos
-        /// blancos triangulares apuntando al interior y la GARGANTA roja
-        /// al fondo. La boca de Pride: se abre DE GOLPE en cualquier
-        /// punto de la sombra.
+        /// v6.50.67 — UNA CABEZA DE VERDAD: la v6.50.66 eran «dos cuñas
+        /// negras en ángulo + dientes-línea» — líneas geométricas otra
+        /// vez. AHORA: LA CORONA (un bulbo de carne orgánico — 4 blobs
+        /// negros irregulares alrededor del gozne, cada uno distinto por
+        /// semilla), LAS MANDÍBULAS (mini-CINTAS curvas con la textura
+        /// Carne que se abren y SE ENROSCAN hacia dentro en la punta —
+        /// crescentes musculosos, no cuñas), LOS COLMILLOS (agujas de
+        /// hueso curvas apuntando al interior, tamaño decreciente — la
+        /// textura Colmillo), LA GARGANTA (resplandor rojo con núcleo
+        /// oscuro + las cuerdas) y EL OJO DE LA CABEZA (un ojo rasgado
+        /// pequeño sobre la corona mirando a la presa — la firma
+        /// eldritch, determinista: ~6 de cada 10 cabezas lo llevan).
         /// </summary>
         /// <param name="centro">El gozne de la mandíbula.</param>
         /// <param name="dir">Rumbo de la boca (adónde muerde).</param>
@@ -262,51 +500,121 @@ namespace AethonMod.Content.VFX
             apertura = MathHelper.Clamp(apertura, 0f, 1f);
             float ang = dir.LengthSquared() < 0.01f ? 0f : MathF.Atan2(dir.Y, dir.X);
             float sep = apertura * 0.85f + 0.06f;   // ángulo de cada mandíbula
+            var carne = VFXCore.Carne;
 
             // --- LA GARGANTA (el fondo rojo, solo si está abierta) ---
             if (apertura > 0.15f)
             {
                 VFXCore.Begin();
-                VFXCore.Quad(centro + dir * 0f, Alfa(RojoGarganta, 0.55f * apertura),
+                VFXCore.Quad(centro, Alfa(RojoGarganta, 0.55f * apertura),
                     new Vector2(largo * 0.85f, largo * 0.9f), ang, VFXCore.SoftGlow);
                 VFXCore.FlushAdditive();
             }
 
-            // --- LAS MANDÍBULAS (dos cuñas negras gruesas) ---
+            // --- LA CORONA: el bulbo orgánico de la cabeza (4 blobs
+            // irregulares — la cabeza NO es un punto: tiene MASA) ---
             VFXCore.Begin();
-            for (int lado = -1; lado <= 1; lado += 2)
+            for (int b = 0; b < 4; b++)
             {
-                float aMand = ang + lado * sep;
-                Vector2 rumbo = new(MathF.Cos(aMand), MathF.Sin(aMand));
-                // la cuña: dos líneas desde el goyne divergentes + relleno central
-                Vector2 punta = centro + rumbo * largo;
-                Vector2 perp = new Vector2(-rumbo.Y, rumbo.X) * (largo * 0.30f * lado);
-                VFXCore.Line(centro, punta + perp, Alfa(Negro, 0.97f), largo * 0.34f);
-                VFXCore.Line(centro, punta, Alfa(Negro, 0.97f), largo * 0.22f);
-                VFXCore.Line(centro, punta - perp * 0.4f, Alfa(Negro, 0.97f), largo * 0.16f);
+                float fb = semille(semilla * 7 + b * 13);
+                float fb2 = Frac(fb * 7.31f + b * 0.37f);
+                float angB = ang + MathHelper.Pi + (fb - 0.5f) * 2.6f;   // detrás del gozne
+                float rad = largo * (0.30f + 0.34f * fb2);
+                Vector2 posB = centro + new Vector2(MathF.Cos(angB), MathF.Sin(angB)) * rad * 0.55f;
+                float tam = largo * (0.52f + 0.38f * fb) * (0.9f + 0.1f * MathF.Sin(fb2 * 9f));
+                VFXCore.Quad(posB, Alfa(Negro, 0.96f), new Vector2(tam, tam * 0.88f),
+                    angB + fb2, VFXCore.GlowOrb);
             }
-            VFXCore.FlushAlpha(VFXCore.Pixel);
+            VFXCore.FlushAlpha();
 
-            // --- LOS COLMILLOS (blanco hueso, aditivo): 4 arriba, 4 abajo ---
-            VFXCore.Begin();
+            // --- LAS MANDÍBULAS: mini-cintas curvas (crescentes) ---
             for (int lado = -1; lado <= 1; lado += 2)
             {
                 float aMand = ang + lado * sep;
-                Vector2 rumbo = new(MathF.Cos(aMand), MathF.Sin(aMand));
-                for (int k = 0; k < 4; k++)
+
+                // la curva del crescente: nace girado, se endereza al rumbo
+                // y la punta se ENROLLA hacia dentro (el gancho de la boca)
+                var pts = new Vector2[4];
+                var anchos = new float[4];
+                pts[0] = centro;
+                for (int k = 1; k < 4; k++)
                 {
-                    float t = 0.30f + k * 0.21f;
-                    float tamaño = largo * (0.20f - k * 0.028f);
-                    if (tamaño < 3f) continue;
-                    Vector2 baseD = centro + rumbo * (largo * t);
-                    // el colmillo apunta hacia el interior de la boca (contra el lado)
-                    Vector2 haciaDentro = new(MathF.Cos(ang - lado * 0.24f), MathF.Sin(ang - lado * 0.24f));
-                    Vector2 puntaD = baseD + haciaDentro * tamaño;
-                    // dibujado como línea gruesa blanca rotada (el triángulo del colmillo)
-                    VFXCore.Line(baseD, puntaD, Alfa(Blanco, 0.95f), tamaño * 0.42f);
+                    float fk = k / 3f;
+                    float aCurva = aMand * (1f - 0.50f * fk) + ang * 0.50f * fk
+                                 - lado * 0.34f * fk * fk;              // el enrollado de la punta
+                    pts[k] = pts[k - 1] + new Vector2(MathF.Cos(aCurva), MathF.Sin(aCurva)) * (largo / 3f);
+                    anchos[k - 1] = largo * (0.34f - 0.20f * fk);       // afila raíz→punta
+                }
+                anchos[3] = anchos[2] * 0.55f;
+
+                if (carne != null)
+                {
+                    // LA CARNE de la mandíbula (lote alfa — el músculo que TAPA)
+                    VFXCore.Begin();
+                    VFXCore.Ribbon(pts, anchos, Alfa(Blanco, 0.97f), carne, uvFlow: 0.35f + semille(semilla) * 0.3f);
+                    VFXCore.FlushAlpha();
+
+                    // EL FILO de energía de la mandíbula (aditivo, rojo — el borde que muerde)
+                    var filo = new Color[4];
+                    for (int k = 0; k < 4; k++)
+                        filo[k] = Alfa(Rojo, 0.14f * apertura + 0.08f);
+                    VFXCore.Begin();
+                    VFXCore.RibbonTinted(pts, anchos, filo, carne, uvFlow: 0.35f, edgeInset: 0.38f);
+                    VFXCore.FlushAdditive();
+                }
+                else
+                {
+                    VFXCore.Begin();
+                    for (int k = 1; k < 4; k++)
+                        VFXCore.Line(pts[k - 1], pts[k], Alfa(Negro, 0.97f), anchos[k - 1]);
+                    VFXCore.FlushAlpha(VFXCore.Pixel);
+                }
+
+                // --- LOS COLMILLOS DE HUESO (agujas curvas hacia dentro) ---
+                if (VFXCore.Colmillo != null)
+                {
+                    VFXCore.Begin();
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float t = 0.30f + k * 0.21f;
+                        float tamaño = largo * (0.26f - k * 0.035f);
+                        if (tamaño < 3f) continue;
+
+                        // el punto sobre la curva del crescente
+                        int idx = Math.Min((int)(t * 3f), 2);
+                        float ft = Frac(t * 3f);
+                        Vector2 baseD = Vector2.Lerp(pts[idx], pts[idx + 1], ft);
+
+                        // el colmillo apunta hacia el INTERIOR de la boca
+                        // (perpendicular a la mandíbula, contra el lado)
+                        Vector2 tang = pts[idx + 1] - pts[idx];
+                        if (tang.LengthSquared() < 0.01f) continue;
+                        tang = Vector2.Normalize(tang);
+                        Vector2 haciaDentro = new Vector2(-tang.Y, tang.X) * (-lado / 1f);
+                        // y se curva un pelo hacia atrás (el gancho del diente)
+                        Vector2 rumbo = haciaDentro - tang * 0.30f;
+
+                        VFXCore.Quad(baseD + haciaDentro * tamaño * 0.10f,
+                            Alfa(Blanco, 0.95f),
+                            new Vector2(tamaño * 0.52f, tamaño),
+                            rumbo.ToRotation() + MathHelper.PiOver2, VFXCore.Colmillo);
+                    }
+                    VFXCore.FlushAdditive();
                 }
             }
-            VFXCore.FlushAdditive(VFXCore.Pixel);
+
+            // --- EL OJO DE LA CABEZA (la firma eldritch — el dragón de
+            // la idea central mira antes de morder; ~60% de las cabezas) ---
+            if (semille(semilla * 3 + 11) < 0.6f && VFXCore.OjoRasgado != null)
+            {
+                float fb = semille(semilla * 5 + 3);
+                float angOjo = ang + MathHelper.Pi + (fb - 0.5f) * 1.4f;
+                Vector2 posOjo = centro + new Vector2(MathF.Cos(angOjo), MathF.Sin(angOjo)) * largo * 0.30f;
+                float abre = 0.55f + 0.45f * apertura;
+                VFXCore.Begin();
+                Ojo(posOjo, largo * (0.30f + 0.14f * fb), dir, abre, rasgada: true);
+                VFXCore.FlushAdditive();
+            }
         }
 
         // ==================================================================
@@ -527,11 +835,14 @@ namespace AethonMod.Content.VFX
         }
 
         /// <summary>
-        /// UNA GARRA (v6.50.65 — la cura de las «púas rectangulares»):
-        /// zarpo AFILADO de tres segmentos que se ESTRECHA de la base a
-        /// la punta y se CURVA en gancho hacia <paramref name="gancho"/>
-        /// (−1/−1 izquierda, +1 derecha…) — con la punta BLANCA de hueso.
-        /// Se lee como garra de sombra, no como barra.
+        /// v6.50.67 — UN ZARPO DE VERDAD: la v6.50.66 eran «tres barras
+        /// decrecientes + una línea blanca» — la «púa rectangular» que el
+        /// usuario enterró dos versiones atrás, vuelta. AHORA: un TALÓN
+        /// curvo (la mini-cinta de carne que nace gruesa y se afila en
+        /// S, curvándose hacia <paramref name="gancho"/> — el crescente
+        /// del zarpo), LA PUNTA DE HUESO (la aguja Colmillo alineada con
+        /// la tangente final — blanca, afilada, brillando) y EL FILO
+        /// rojo tenue (el borde que corta).
         /// </summary>
         /// <param name="basePos">La base gruesa de la garra (la más alejada del jefe).</param>
         /// <param name="hacia">Dirección de la punta (hacia el jefe).</param>
@@ -544,31 +855,63 @@ namespace AethonMod.Content.VFX
             if (hacia.LengthSquared() < 0.01f) hacia = -Vector2.UnitY;
             Vector2 dir = Vector2.Normalize(hacia);
             Vector2 perp = new(-dir.Y, dir.X);
+            var carne = VFXCore.Carne;
 
-            // tres segmentos: grueso → medio → aguja, cada uno MÁS corto
-            // y desviado hacia el gancho (la curva del zarpo)
-            float g1 = largo * 0.30f, g2 = largo * 0.20f, g3 = largo * 0.11f;
-            Vector2 p1 = basePos + dir * (largo * 0.40f) + perp * (gancho * largo * 0.06f);
-            Vector2 p2 = p1 + dir * (largo * 0.38f) + perp * (gancho * largo * 0.14f);
-            Vector2 p3 = p2 + dir * (largo * 0.22f) + perp * (gancho * largo * 0.20f);
+            // === LA CURVA DEL TALÓN: nace recta y se ENROLLA hacia el
+            // gancho (el zarpo del cangrejo — S-taper, no tres barras) ===
+            var pts = new Vector2[5];
+            var anchos = new float[5];
+            pts[0] = basePos;
+            for (int k = 1; k < 5; k++)
+            {
+                float f = k / 4f;
+                float desvio = gancho * (0.18f * f + 0.55f * f * f);   // el enrollado acelera
+                Vector2 paso = dir + perp * desvio;
+                paso.Normalize();
+                pts[k] = pts[k - 1] + paso * (largo * 0.26f);
+                anchos[k - 1] = largo * (0.24f * (1f - f * 0.72f));    // afila raíz→punta
+            }
+            anchos[4] = anchos[3] * 0.5f;
 
-            VFXCore.Begin();
-            VFXCore.Line(basePos, p1, Alfa(Negro, alfa), g1);
-            VFXCore.Line(p1, p2, Alfa(Negro, alfa), g2);
-            VFXCore.Line(p2, p3, Alfa(Negro, alfa), g3);
-            VFXCore.FlushAlpha(VFXCore.Pixel);
+            if (carne != null)
+            {
+                // LA CARNE del talón (lote alfa)
+                VFXCore.Begin();
+                VFXCore.Ribbon(pts, anchos, Alfa(Blanco, alfa), carne, uvFlow: 0.6f);
+                VFXCore.FlushAlpha();
 
-            // el rim violeta de la garra (lectura nocturna)
-            VFXCore.Begin();
-            VFXCore.Line(basePos, p1, Alfa(Violeta, alfa * 0.14f), g1 * 1.5f);
-            VFXCore.Line(p1, p2, Alfa(Violeta, alfa * 0.14f), g2 * 1.5f);
-            VFXCore.Line(p2, p3, Alfa(Violeta, alfa * 0.14f), g3 * 1.5f);
-            VFXCore.FlushAdditive();
+                // EL FILO rojo tenue (aditivo — la lectura nocturna)
+                var filo = new Color[5];
+                for (int k = 0; k < 5; k++)
+                    filo[k] = Alfa(k > 2 ? Rojo : Violeta, 0.13f * alfa);
+                VFXCore.Begin();
+                VFXCore.RibbonTinted(pts, anchos, filo, carne, uvFlow: 0.6f, edgeInset: 0.36f);
+                VFXCore.FlushAdditive();
+            }
+            else
+            {
+                VFXCore.Begin();
+                for (int k = 1; k < 5; k++)
+                    VFXCore.Line(pts[k - 1], pts[k], Alfa(Negro, alfa), anchos[k - 1]);
+                VFXCore.FlushAlpha(VFXCore.Pixel);
+            }
 
-            // LA PUNTA DE HUESO — blanca, afilada, brillando
-            VFXCore.Begin();
-            VFXCore.Line(p2, p3 + dir * (largo * 0.10f), Alfa(Blanco, 0.85f * alfa), g3 * 0.45f);
-            VFXCore.FlushAdditive(VFXCore.Pixel);
+            // === LA PUNTA DE HUESO — la aguja alineada con la tangente
+            // final del talón (la parte que MATA es blanca) ===
+            if (VFXCore.Colmillo != null)
+            {
+                Vector2 tang = pts[4] - pts[3];
+                if (tang.LengthSquared() > 0.01f)
+                {
+                    tang.Normalize();
+                    VFXCore.Begin();
+                    VFXCore.Quad(pts[4] - tang * largo * 0.02f,
+                        Alfa(Blanco, 0.88f * alfa),
+                        new Vector2(largo * 0.085f, largo * 0.34f),
+                        tang.ToRotation() + MathHelper.PiOver2, VFXCore.Colmillo);
+                    VFXCore.FlushAdditive();
+                }
+            }
         }
 
         /// <summary>

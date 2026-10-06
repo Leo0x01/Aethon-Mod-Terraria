@@ -223,7 +223,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             SombrasLib.Charco(raiz, 54f, 0.8f * disipa, tiempo, semilla);
 
             // === LA COLUMNA ===
-            Vector2[] col = SombrasLib.Columna(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f);
+            // v6.50.67 — VIVA: la mirada se DESLIZA con inercia (el ojo
+            // flota, no teletransporta) + gancho suave
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f, gancho: 0.35f);
             SombrasLib.Masa(col, 42f, 13f, 0.95f * disipa, semilla, tiempo);
 
             // === LA BRUMA — columna ALTA (14 puffs) + DOS NUBES que
@@ -264,7 +266,11 @@ namespace AethonMod.Content.Projectiles.Sombras
                 abierto *= enojada;
                 abierto *= 0.85f + 0.15f * MathF.Sin(tiempo * 3.1f + k * 2.4f);
                 if (abierto <= 0.05f) continue;
-                SombrasLib.Ojo(posOjos[k], 13f + 7f * SombrasLib.Frac(f0 * 6.8f), objetivo - posOjos[k], abierto);
+                // v6.50.67 — UN TERCIO DE LOS OJOS SON RASGADOS (el dragón
+                // de la idea central): la pared no repite el mismo ojo —
+                // HUMANOS y DRACÓNICOS mirando a la presa
+                SombrasLib.Ojo(posOjos[k], 13f + 7f * SombrasLib.Frac(f0 * 6.8f), objetivo - posOjos[k], abierto,
+                    rasgada: k % 3 == 0);
             }
             VFXCore.FlushAdditive();
 

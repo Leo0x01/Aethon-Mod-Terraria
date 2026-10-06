@@ -43,6 +43,11 @@ namespace AethonMod.Content.VFX
         /// rotación y textura propia (null = SoftGlow). En modo Inmediato el
         /// SpriteBatch envía cada Draw al momento: mezclar texturas en un
         /// mismo volcado es gratis.
+        /// v6.50.67 — Source: el rectángulo de la textura a muestrear (null
+        /// = textura entera, el comportamiento clásico). LA LLAVE DE LAS
+        /// CINTAS: una misma textura larga (la carne del tentáculo) se
+        /// muestrea POR BANDAS para que la textura FLUYA continua a lo
+        /// largo del cuerpo.
         /// </summary>
         public struct GlowQuad
         {
@@ -51,6 +56,8 @@ namespace AethonMod.Content.VFX
             public Vector2 Scale;
             public float Rotation;
             public Texture2D Texture;
+            /// <summary>v6.50.67 — Rectángulo fuente (null = textura entera).</summary>
+            public Rectangle? Source;
         }
 
         /// <summary>Buffer reutilizable de cuadros (evita GC por frame).</summary>
@@ -65,7 +72,17 @@ namespace AethonMod.Content.VFX
         /// <summary>Añade un cuadro de luz (posición en coords de mundo).</summary>
         public static void Quad(Vector2 position, Color color, Vector2 scale, float rotation = 0f)
         {
-            _quads.Add(new GlowQuad { Position = position, Color = color, Scale = scale, Rotation = rotation, Texture = null });
+            _quads.Add(new GlowQuad { Position = position, Color = color, Scale = scale, Rotation = rotation, Texture = null, Source = null });
+        }
+
+        /// <summary>v6.50.67 — Añade un cuadro con RECTÁNGULO FUENTE (para
+        /// muestrear BANDAS de una textura larga — las cintas de carne que
+        /// FLUYEN). La escala sigue siendo px FINALES en pantalla; el origen
+        /// del muestreo es el centro del rectángulo fuente.</summary>
+        public static void QuadSrc(Vector2 position, Color color, Vector2 scale, float rotation, Texture2D texture, Rectangle source)
+        {
+            if (texture == null || source.Width <= 0 || source.Height <= 0) return;
+            _quads.Add(new GlowQuad { Position = position, Color = color, Scale = scale, Rotation = rotation, Texture = texture, Source = source });
         }
 
         /// <summary>Añade un cuadro con TEXTURA propia (Ring, GlowOrb...).</summary>
@@ -114,6 +131,122 @@ namespace AethonMod.Content.VFX
 
         /// <summary>Cuántos cuadros lleva el buffer (diagnóstico).</summary>
         public static int QuadCount => _quads.Count;
+
+        // ==================================================================
+        //  v6.50.67 — LA CINTA (EL RIBBON): el cuerpo orgánico de verdad
+        // ==================================================================
+
+        /// <summary>
+        /// v6.50.67 — LA CINTA: convierte una polilínea (la espina) + un
+        /// perfil de anchos en una SERIE DE QUADS TANGENTES que se
+        /// SOLAPAN en las juntas — el cuerpo continuo, curvo y con
+        /// MÚSCULO que las líneas rectas de la v6.50.66 jamás dieron.
+        /// Cada segmento es un quad rotado a la tangente, estirado medio
+        /// ancho por cada extremo (la extensión TAPA el hueco exterior de
+        /// las curvas y se funde en el interior), muestreando su BANDA de
+        /// la textura larga para que la carne FLUYA continua raíz→punta.
+        /// </summary>
+        /// <param name="spine">La espina (raíz→punta, coords de MUNDO).</param>
+        /// <param name="widths">Ancho px por PUNTO de la espina.</param>
+        /// <param name="color">Tinte (con alfa) de TODA la cinta.</param>
+        /// <param name="texture">La textura larga (Carne, Colmillo…).</param>
+        /// <param name="uvFlow">0..1 — el desplazamiento del flujo (tiempo·velocidad): la carne AVANZA raíz→punta.</param>
+        /// <param name="edgeInset">0..0.5 — cuánto se ENCOGE la cinta por lado (para la cinta de BORDE: pasar ~0.42 dibuja una franja fina pegada al borde).</param>
+        /// <param name="edgeOutset">0..1 — cuánto se ENSANCHA por lado (el halo que respira: ~0.5 = ×2 de ancho).</param>
+        public static void Ribbon(Vector2[] spine, float[] widths, Color color, Texture2D texture,
+            float uvFlow = 0f, float edgeInset = 0f, float edgeOutset = 0f)
+        {
+            if (spine == null || spine.Length < 2 || texture == null || texture.IsDisposed) return;
+            if (color.A == 0) return;
+            int n = spine.Length;
+            int bandas = Math.Min(texture.Height, 64);          // cuántas bandas-V tiene la textura lógica
+
+            for (int i = 1; i < n; i++)
+        {
+                Vector2 a = spine[i - 1], b = spine[i];
+                Vector2 delta = b - a;
+                float len = delta.Length();
+                if (len < 0.1f) continue;
+
+                float wIzq = i - 1 < widths.Length ? widths[i - 1] : widths[widths.Length - 1];
+                float wDer = i < widths.Length ? widths[i] : widths[widths.Length - 1];
+                float w = (wIzq + wDer) * 0.5f * (1f + edgeOutset * 2f) * (1f - edgeInset * 2f);
+                if (w < 1.5f) continue;
+
+                // LA EXTENSIÓN: medio ancho por extremo a lo largo de la
+                // tangente — las curvas quedan TAPADAS (hueco exterior) y
+                // fundidas (solape interior). Acotado para no inflar.
+                float ext = MathHelper.Clamp(w * 0.55f, 5f, 30f);
+                Vector2 tang = delta * (1f / len);
+                Vector2 centro = (a + b) * 0.5f;
+
+                // LA BANDA de la textura: el flujo AVANZA raíz→punta con
+                // uvFlow; el propio segmento fija su posición V por su
+                // índice — la carne fluye CONTINUA por el cuerpo entero.
+                float v01 = ((i - 1) / (float)(n - 1) + uvFlow) % 1f;
+                if (v01 < 0f) v01 += 1f;
+                int y0 = (int)(v01 * (texture.Height - bandas));
+                var src = new Rectangle(0, y0, texture.Width, bandas);
+
+                _quads.Add(new GlowQuad
+                {
+                    Position = centro,
+                    Color = color,
+                    // escala en px finales: largo (con extensión) × ancho
+                    Scale = new Vector2(len + ext * 2f, w),
+                    Rotation = tang.ToRotation(),
+                    Texture = texture,
+                    Source = src,
+                });
+            }
+        }
+
+        /// <summary>
+        /// v6.50.67 — LA CINTA EXTRUIDA: la misma cinta pero con anchos y
+        /// colores POR SEGMENTO (el borde de energía que se aviva hacia
+        /// la punta) — una cinta por cada segmento con su tinte propio.
+        /// </summary>
+        public static void RibbonTinted(Vector2[] spine, float[] widths, Color[] tints, Texture2D texture,
+            float uvFlow = 0f, float edgeInset = 0f, float edgeOutset = 0f)
+        {
+            if (spine == null || spine.Length < 2 || tints == null || texture == null) return;
+            int n = spine.Length;
+            for (int i = 1; i < n; i++)
+            {
+                Color c = i - 1 < tints.Length ? tints[i - 1] : tints[tints.Length - 1];
+                if (c.A == 0) continue;
+
+                Vector2 a = spine[i - 1], b = spine[i];
+                Vector2 delta = b - a;
+                float len = delta.Length();
+                if (len < 0.1f) continue;
+
+                float wIzq = i - 1 < widths.Length ? widths[i - 1] : widths[widths.Length - 1];
+                float wDer = i < widths.Length ? widths[i] : widths[widths.Length - 1];
+                float w = (wIzq + wDer) * 0.5f * (1f + edgeOutset * 2f) * (1f - edgeInset * 2f);
+                if (w < 1.5f) continue;
+
+                float ext = MathHelper.Clamp(w * 0.55f, 5f, 30f);
+                Vector2 tang = delta * (1f / len);
+                Vector2 centro = (a + b) * 0.5f;
+
+                float v01 = ((i - 1) / (float)(n - 1) + uvFlow) % 1f;
+                if (v01 < 0f) v01 += 1f;
+                int bandas = Math.Min(texture.Height, 64);
+                int y0 = (int)(v01 * (texture.Height - bandas));
+                var src = new Rectangle(0, y0, texture.Width, bandas);
+
+                _quads.Add(new GlowQuad
+                {
+                    Position = centro,
+                    Color = c,
+                    Scale = new Vector2(len + ext * 2f, w),
+                    Rotation = tang.ToRotation(),
+                    Texture = texture,
+                    Source = src,
+                });
+            }
+        }
 
         // ------------------------------------------------------------------
         //  TEXTURAS COMPARTIDAS (resolución diferida: Asset, no .Value)
@@ -301,6 +434,290 @@ namespace AethonMod.Content.VFX
             return t * t * (3f - 2f * t);
         }
 
+        // ==================================================================
+        //  v6.50.67 — LAS TEXTURAS DE LA CARNE (horreadas, el patrón
+        //  Arcoiris: cero assets nuevos, el set del .tmod NO se toca)
+        // ==================================================================
+
+        private static Texture2D _carne;
+
+        /// <summary>
+        /// v6.50.67 — LA CARNE DEL TENTÁCULO (128×512, horneada): la
+        /// textura que convierte la cadena de líneas de la v6.50.66 en
+        /// CUERPO ORGÁNICO. U = a lo ancho (bordes suaves que respiran,
+        /// fibras musculares verticales, vetas carmesí tenues), V = a lo
+        /// largo (PERIÓDICA — la cinta la muestrea por bandas y la carne
+        /// FLUYE raíz→punta con uvFlow). Todo PREMULTIPLICADO (la
+        /// convención (q,q,q,q) de la casa: el lote alfa es
+        /// One/InverseSourceAlpha). Null-safe (servidor / sin dispositivo).
+        /// </summary>
+        public static Texture2D Carne
+        {
+            get
+            {
+                try
+                {
+                    if (_carne == null || _carne.IsDisposed)
+                        _carne = HornearCarne();
+                    return _carne;
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>El horneado de la carne: 128 de ancho × 512 de largo.</summary>
+        private static Texture2D HornearCarne()
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return null;
+            var device = Main.graphics?.GraphicsDevice;
+            if (device == null) return null;
+
+            const int W = 128, H = 512;
+            var data = new Color[W * H];
+
+            // LAS FIBRAS (posiciones U fijas, oscuras/claras alternando)
+            float[] fibU = { 0.16f, 0.26f, 0.38f, 0.50f, 0.62f, 0.74f, 0.84f };
+            float[] fibF = { 1.00f, 0.90f, 1.06f, 0.88f, 1.04f, 0.92f, 1.00f };
+
+            // LAS VETAS CARMESÍ (sinusoides en U según V — periódicas en V)
+            float[] vetaU = { 0.30f, 0.58f, 0.78f };
+            float[] vetaF = { 3f, 2f, 4f };
+
+            for (int y = 0; y < H; y++)
+            {
+                float v = y / (float)(H - 1);
+                float vv = v * MathHelper.TwoPi;    // período EXACTO del alto
+                for (int x = 0; x < W; x++)
+                {
+                    float u = x / (float)(W - 1);
+
+                    // LA MÁSCARA — bordes suaves: nada en 0/1, casi opaco
+                    // en 0.2..0.8 (la silueta respira, no corta a cuchillo)
+                    float m = Suave(u, 0.02f, 0.20f) * (1f - Suave(u, 0.80f, 0.98f));
+                    if (m <= 0.003f) continue;
+
+                    // EL CUERPO — negro de vacío con un pelo violeta
+                    float cuerpo = 1f;
+
+                    // LAS FIBRAS MUSCULARES — estrías verticales vivas
+                    for (int f = 0; f < fibU.Length; f++)
+                    {
+                        float d = MathF.Abs(u - fibU[f]);
+                        cuerpo *= 1f + (fibF[f] - 1f) * 0.10f * MathF.Exp(-d * d * 900f)
+                            * (0.8f + 0.2f * MathF.Sin(vv * 2f + f));
+                    }
+
+                    // LOS ANILLOS — segmentación orgánica cada 64 px (6 anillos)
+                    float anillo = 1f - 0.07f * MathF.Pow(MathF.Abs(MathF.Sin(vv * 3f)), 8f);
+
+                    // EL COLOR BASE — carne de vacío (10,6,14) · todo lo de arriba
+                    float r = 10f * cuerpo * anillo, g = 6f * cuerpo * anillo, b = 14f * cuerpo * anillo;
+
+                    // LAS VETAS CARMESÍ — la sangre que corre por dentro
+                    for (int k = 0; k < vetaU.Length; k++)
+                    {
+                        float uu = vetaU[k] + 0.045f * MathF.Sin(vv * vetaF[k] + k * 2.1f);
+                        float d = MathF.Abs(u - uu);
+                        float ven = MathF.Exp(-d * d * 2600f)
+                                  * (0.55f + 0.45f * MathF.Sin(vv * 2f + k * 1.7f));
+                        r += 118f * ven; g += 10f * ven; b += 16f * ven;
+                    }
+
+                    data[y * W + x] = new Color(
+                        (byte)(r * m), (byte)(g * m), (byte)(b * m), (byte)(255f * m));
+                }
+            }
+
+            var tex = new Texture2D(device, W, H);
+            tex.SetData(data);
+            return tex;
+        }
+
+        private static Texture2D _colmillo;
+
+        /// <summary>
+        /// v6.50.67 — EL COLMILLO DE HUESO (48×48, horneado): aguja curva
+        /// blanca con base oscura — los dientes de las fauces y las puntas
+        /// de las garras de la v6.50.66 eran LÍNEAS GORDAS; esto es un
+        /// diente de verdad. Apunta ARRIBA (base ancha abajo, punta arriba,
+        /// curvado a la derecha). PREMULTIPLICADO. Null-safe.
+        /// </summary>
+        public static Texture2D Colmillo
+        {
+            get
+            {
+                try
+                {
+                    if (_colmillo == null || _colmillo.IsDisposed)
+                        _colmillo = HornearColmillo();
+                    return _colmillo;
+                }
+                catch { return null; }
+            }
+        }
+
+        private static Texture2D HornearColmillo()
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return null;
+            var device = Main.graphics?.GraphicsDevice;
+            if (device == null) return null;
+
+            const int L = 48;
+            var data = new Color[L * L];
+            for (int y = 0; y < L; y++)
+            {
+                float v = y / (float)(L - 1);          // 0 punta … 1 base
+                for (int x = 0; x < L; x++)
+                {
+                    float u = x / (float)(L - 1);
+
+                    // EL EJE del diente (curvado a la derecha al bajar)
+                    float eje = 0.5f + 0.16f * (1f - v) * (1f - v);
+                    // EL ANCHO — huso: 0 en la punta, máximo en la base
+                    float ancho = 0.42f * MathF.Pow(v, 0.65f);
+                    float d = MathF.Abs(u - eje);
+                    if (d > ancho) continue;
+
+                    float m = 1f - Suave(d / ancho, 0.55f, 1f);
+                    if (m <= 0.003f) continue;
+
+                    // HUESO — blanco cálido, la raíz se ensombrece
+                    float hueso = 0.55f + 0.45f * v;
+                    byte r = (byte)(250 * hueso * m);
+                    byte g = (byte)(244 * hueso * m);
+                    byte b = (byte)(230 * hueso * m);
+                    data[y * L + x] = new Color(r, g, b, (byte)(255f * m));
+                }
+            }
+
+            var tex = new Texture2D(device, L, L);
+            tex.SetData(data);
+            return tex;
+        }
+
+        private static Texture2D _ventosa;
+
+        /// <summary>
+        /// v6.50.67 — LA VENTOSA (32×32, horneada): anillo de hueso con
+        /// el agujero oscuro al centro — la fila de ventosas del lomo del
+        /// tentáculo (la referencia del spritesheet del usuario: «white
+        /// circular suckers along its length»). PREMULTIPLICADO. Null-safe.
+        /// </summary>
+        public static Texture2D Ventosa
+        {
+            get
+            {
+                try
+                {
+                    if (_ventosa == null || _ventosa.IsDisposed)
+                        _ventosa = HornearVentosa();
+                    return _ventosa;
+                }
+                catch { return null; }
+            }
+        }
+
+        private static Texture2D HornearVentosa()
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return null;
+            var device = Main.graphics?.GraphicsDevice;
+            if (device == null) return null;
+
+            const int L = 32;
+            var data = new Color[L * L];
+            float c = (L - 1) * 0.5f;
+            for (int y = 0; y < L; y++)
+            {
+                for (int x = 0; x < L; x++)
+                {
+                    float r = MathF.Sqrt(((x - c) * (x - c) + (y - c) * (y - c))) / c;
+
+                    // EL ANILLO — aro de hueso entre 0.28 y 0.72, agujero dentro
+                    float aro = Suave(r, 0.24f, 0.34f) * (1f - Suave(r, 0.66f, 0.80f));
+                    if (aro <= 0.003f) continue;
+
+                    // el agujero central — la sombra de la succión
+                    float agujero = 1f - Suave(r, 0.30f, 0.48f);
+                    float hueso = 0.85f - 0.35f * agujero;
+
+                    data[y * L + x] = new Color(
+                        (byte)(246 * hueso * aro), (byte)(240 * hueso * aro),
+                        (byte)(228 * hueso * aro), (byte)(255f * aro));
+                }
+            }
+
+            var tex = new Texture2D(device, L, L);
+            tex.SetData(data);
+            return tex;
+        }
+
+        private static Texture2D _ojoRasgado;
+
+        /// <summary>
+        /// v6.50.67 — EL OJO RASGADO (64×64, horneado): esclerótica blanca
+        /// cálida + iris carmesí + LA RENDIJA VERTICAL NEGRA del ojo
+        /// dracónico de la idea central del usuario. EL TRUCO DEL LOTE
+        /// ADITIVO: la rendija se hornea con alpha 0 — en aditivo añade
+        /// CERO, así que se lee NEGRA sobre cualquier fondo sin salir
+        /// jamás del lote. PREMULTIPLICADO. Null-safe.
+        /// </summary>
+        public static Texture2D OjoRasgado
+        {
+            get
+            {
+                try
+                {
+                    if (_ojoRasgado == null || _ojoRasgado.IsDisposed)
+                        _ojoRasgado = HornearOjoRasgado();
+                    return _ojoRasgado;
+                }
+                catch { return null; }
+            }
+        }
+
+        private static Texture2D HornearOjoRasgado()
+        {
+            if (Main.netMode == Terraria.ID.NetmodeID.Server || Main.dedServ) return null;
+            var device = Main.graphics?.GraphicsDevice;
+            if (device == null) return null;
+
+            const int L = 64;
+            var data = new Color[L * L];
+            float c = (L - 1) * 0.5f;
+            for (int y = 0; y < L; y++)
+            {
+                float fy = (y - c) / c;
+                for (int x = 0; x < L; x++)
+                {
+                    float fx = (x - c) / c;
+
+                    // LA ELIPSE DEL OJO (ancha, como el ojo de la casa)
+                    float e = MathF.Sqrt(fx * fx / (0.78f * 0.78f) + fy * fy / (0.46f * 0.46f));
+                    if (e > 1f) continue;
+                    float m = 1f - Suave(e, 0.72f, 1f);          // borde suave
+
+                    // LA RENDIJA — vertical, gruesa al centro, se afina arriba/abajo
+                    float rendija = MathF.Exp(-fx * fx * 190f) * (1f - 0.35f * fy * fy);
+                    // el iris carmesí — anillo alrededor de la rendija
+                    float iris = MathF.Exp(-fx * fx * 26f) * (0.35f + 0.65f * (1f - MathF.Abs(fy)));
+
+                    // esclerótica blanca cálida de fondo
+                    float r = 244f, g = 238f, b = 226f;
+                    // el iris TIÑE de rojo el centro
+                    r = MathHelper.Lerp(r, 214f, iris); g = MathHelper.Lerp(g, 26f, iris); b = MathHelper.Lerp(b, 34f, iris);
+                    // la rendija NO dibuja (alpha 0 — en aditivo añade cero)
+                    m *= 1f - Suave(rendija, 0.55f, 0.85f);
+                    if (m <= 0.004f) continue;
+
+                    data[y * L + x] = new Color((byte)(r * m), (byte)(g * m), (byte)(b * m), (byte)(255f * m));
+                }
+            }
+
+            var tex = new Texture2D(device, L, L);
+            tex.SetData(data);
+            return tex;
+        }
+
         private static Texture2D _pixel;
 
         /// <summary>
@@ -401,9 +818,15 @@ namespace AethonMod.Content.VFX
                     if (q.Color.A == 0) continue;
 
                     Texture2D tex = q.Texture ?? defaultTex;
-                    Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
-                    Main.spriteBatch.Draw(tex, q.Position - screen, null,
-                        q.Color, q.Rotation, tex.Size() * 0.5f, q.Scale * invTex, SpriteEffects.None, 0f);
+                    // v6.50.67 — LA BANDA: si hay rectángulo fuente, la
+                    // escala y el origen se miden contra ÉL (la textura
+                    // larga se muestrea por bandas que fluyen).
+                    Vector2 srcSize = q.Source.HasValue
+                        ? new Vector2(q.Source.Value.Width, q.Source.Value.Height)
+                        : tex.Size();
+                    Vector2 escala = q.Scale / srcSize;
+                    Main.spriteBatch.Draw(tex, q.Position - screen, q.Source,
+                        q.Color, q.Rotation, srcSize * 0.5f, escala, SpriteEffects.None, 0f);
                 }
             }
             finally
@@ -463,9 +886,13 @@ namespace AethonMod.Content.VFX
                     if (q.Color.A == 0) continue;
 
                     Texture2D tex = q.Texture ?? defaultTex;
-                    Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
-                    Main.spriteBatch.Draw(tex, q.Position - screen, null,
-                        q.Color, q.Rotation, tex.Size() * 0.5f, q.Scale * invTex, SpriteEffects.None, 0f);
+                    // v6.50.67 — LA BANDA (mismo trato que FlushAdditive).
+                    Vector2 srcSize = q.Source.HasValue
+                        ? new Vector2(q.Source.Value.Width, q.Source.Value.Height)
+                        : tex.Size();
+                    Vector2 escala = q.Scale / srcSize;
+                    Main.spriteBatch.Draw(tex, q.Position - screen, q.Source,
+                        q.Color, q.Rotation, srcSize * 0.5f, escala, SpriteEffects.None, 0f);
                 }
             }
             finally
@@ -502,14 +929,17 @@ namespace AethonMod.Content.VFX
                 if (q.Color.A == 0) continue;
 
                 Texture2D tex = q.Texture ?? defaultTex;
-                Vector2 invTex = new Vector2(1f / tex.Width, 1f / tex.Height);
+                // v6.50.67 — LA BANDA (mismo trato que los volcados).
+                Vector2 srcSize = q.Source.HasValue
+                    ? new Vector2(q.Source.Value.Width, q.Source.Value.Height)
+                    : tex.Size();
 
                 // La posición de DrawData vive en coords de PANTALLA.
                 Vector2 pos = q.Position - screen;
 
                 drawInfo.DrawDataCache.Add(new DrawData(
-                    tex, pos, null, q.Color, q.Rotation,
-                    tex.Size() * 0.5f, q.Scale * invTex, effects));
+                    tex, pos, q.Source, q.Color, q.Rotation,
+                    srcSize * 0.5f, q.Scale / srcSize, effects));
             }
 
             _quads.Clear();

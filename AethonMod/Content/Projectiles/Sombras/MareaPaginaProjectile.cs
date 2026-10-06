@@ -241,7 +241,9 @@ namespace AethonMod.Content.Projectiles.Sombras
             }
 
             // === LA COLUMNA GORDA (el oleaje entero, no una soga) ===
-            Vector2[] col = SombrasLib.Columna(raiz, Projectile.Center, tiempo, semilla, 22, 0.26f);
+            // v6.50.67 — VIVA: la ola con inercia de verdad + el gancho
+            // que SE ENROLLA (la cresta de la ola que se derrama)
+            Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 22, 0.26f, gancho: -0.6f);
             SombrasLib.Masa(col, 56f * presencia, 15f, 0.95f * disipa, semilla, tiempo);
 
             // === LOS PULSOS DE LA MAREA: dos brillos que SUBEN por el
