@@ -79,7 +79,7 @@ mientras el festín viva:
     5 s; SP y host lo leen directo del sistema (mismo proceso).
 
 **Verificación**: build real 0 errores / 0 warnings · .tmod 4.435.018 B
-(md5 3ac330396047272808fa43a3b1aa9a4d): 394 entradas, EOF EXACTO, es-ES ==
+(md5 ae7c7baa40de023507ab89f62dde007f): 394 entradas, EOF EXACTO, es-ES ==
 es-MX byte a byte (128 DisplayName · 177 Tooltip en las tres lenguas), los
 4 strips presentes y con medidas exactas (Sol 200×200 · Luna 200×1600 ·
 ítem del Códice 48×384 · proyectil 128×1024), símbolos nuevos VIVOS
