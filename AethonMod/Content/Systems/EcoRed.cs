@@ -96,6 +96,10 @@ namespace AethonMod.Content.Systems
         // Testigo — su único llamador era la tienda. El ID queda
         // RETIRADO (no se reusa: los paquetes viejos en tránsito
         // simplemente ya no encuentran receptor).
+        // v6.50.74 — EL AMBIENTE DE LA OLEADA (server → TODOS: el festín
+        // es del mundo y su cielo también). Un solo byte: ¿hay festín?
+        // Con esto cada cliente viste SU cielo sin sondear al server.
+        public const byte MsgAmbienteOleada = 12;
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -421,6 +425,17 @@ namespace AethonMod.Content.Systems
             try
             {
                 byte tipo = reader.ReadByte();
+
+                // v6.50.74 — EL AMBIENTE DE LA OLEADA: el BROADCAST del
+                // servidor (llega a TODOS los clientes — sin doble puerta:
+                // el festín es del mundo y el cielo se viste igual para
+                // todos). El host no lo necesita por red (mismo proceso:
+                // lee GrimorioFuriaSistema.Activo directo).
+                if (tipo == MsgAmbienteOleada)
+                {
+                    AmbienteOleadaSistema.Recibir(reader.ReadBoolean());
+                    return;
+                }
 
                 // EL PEDIDO DE ENTRADA: el cliente recién llegado pide sus
                 // libros — el server contesta con la foto completa.

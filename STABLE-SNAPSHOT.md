@@ -1,14 +1,56 @@
-# AethonMod — ESTADO ACTUAL (v6.50.73)
+# AethonMod — ESTADO ACTUAL (v6.50.74)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.73 (LA OLEADA ES SU PROPIO AMBIENTE — IA de
-> modo maestro para los guardianes + sin limitación de día/noche/bioma +
-> el Ojo que ya no se despega —; compilada y verificada 0/0, .tmod 392
-> entradas auditado, headless Server started 0 excepciones — PUBLICADA:
-> release 406088036, CDN verificado byte a byte). Reglas vivas: es-ES es
+> Última actualización: v6.50.74 (EL CIELO DE LA OLEADA — eclipse+cementerio
+> +toque morado de día, luna de sangre+cementerio+morado de noche, sol y
+> luna con sprite propio, dinámico al atardecer/amanecer, muere con el
+> festín — + LA CURA TRIPLE: icono del Códice (ticks PRIMERO en
+> DrawAnimationVertical), ataque invisible (Begin sobre el lote vivo) y
+> nivel natural plagado por la carnada (solo victorias naturales suben +
+> reset legacy a 1); compilada y verificada 0/0, .tmod 394 entradas
+> auditado, headless Server started 0 excepciones). Reglas vivas: es-ES es
 > ESPEJO GENERADO de es-MX (editar SOLO es-MX + tools/sync_es_es_v65071.py)
 > y la Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
+
+- **v6.50.74 = EL CIELO DE LA OLEADA + LA CURA TRIPLE** (la letra: «la
+  imagen esta cortada ademas se mueve de abajo hacia arriba… el ataque no
+  se ve y salta un error… la oleada natural siempre empieza por el nivel
+  3… combinas el ambiente de el eclipse solar mas el ambiente de
+  cementerio… un toque morado… un nuevo estado… el sol debe cambiar su
+  sprite y en el de noche en la luna roja, esta tambien debe cambiar su
+  sprite… dinamicos… se acaban en el momento en el que la oleada
+  termine»):
+  (1) **EL CIELO** (`AmbienteOleadaSistema`, ModSystem nuevo — un ESTADO
+  que NO toca Main.eclipse/Main.bloodMoon/ZoneGraveyard): LA LUZ por
+  `ModifySunLightColor` (tinta cielo+tiles juntos; día = eclipse
+  naranja-morado, noche = carmesí-morado), LA NIEBLA por
+  `Main.GraveyardVisualIntensity` (solo visual: filtro, oscuridad,
+  estrellas y relámpago esporádico), LOS ASTROS por swap reversible de
+  `TextureAssets.Sun/Sun2/Sun3` + `Moon[0..8]` con DOS sprites
+  procedurales (SolDeLaOleada 200×200 · LunaDeLaOleada 200×1600 con las
+  8 fases de vanilla, menguante iluminada a la IZQUIERDA); dinámico al
+  atardecer/amanecer (cruce suave por reloj) y TODO muere con el festín
+  (fade ~3 s + astros devueltos + Unload limpio). MP: broadcast
+  EcoRed.MsgAmbienteOleada (12) al cambio + latido 5 s.
+  (2) **LA CURA TRIPLE**: el icono del Códice vivía cortado y
+  "subiendo" porque `DrawAnimationVertical(ticksperframe, frameCount)`
+  lleva TICKS PRIMERO — el (8,6) partía el strip de 384 px en 6 rodajas
+  de 64 px; (6,8) = 8 frames exactos de 48. El ataque no se veía por un
+  `spriteBatch.Begin` sobre el lote ya abierto (InvalidOperationException
+  todos los frames del client.log) — ahora dibuja EN el lote vivo. El
+  nivel natural nacía en 3 porque TODA victoria (también la de la
+  CARNADA de pruebas) subía el FuriaNivel persistente — ahora solo las
+  victorias NATURALES suben (Provocar natural:true), la carnada no toca
+  nada (default 1) y los guardados viejos se resetean a 1 una única vez
+  (marcador furiaV2).
+  VERIFICACIÓN: build real 0/0 · .tmod 4.435.018 B md5
+  3ac330396047272808fa43a3b1aa9a4d, 394 entradas, EOF EXACTO, es-ES ==
+  es-MX byte a byte (128 DisplayName · 177 Tooltip ×3 lenguas), strips
+  200×200/200×1600/48×384/128×1024 EXACTOS, símbolos nuevos VIVOS y los
+  de .73 PERSISTEN · headless language=5: Server started, 0 EXCEPCIONES ·
+  sprites QA por visión (sol 9/10 · ciclo lunar 8.5/10 · armonía 9/10 ·
+  estilo Terraria 9/10).
 
 - **v6.50.68 = LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS** (la letra del
   usuario: «los tentáculos están geniales… pero la boca deja mucho que
@@ -1188,28 +1230,31 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **PUBLICAR v6.50.73 — HECHO** — push de main (e470098) + tag v6.50.73 +
-   release 406088036 con `AethonMod.tmod` (4.270.759 B, md5
-   ca36bd780f740ef1349ce800747bc64a) + CDN verificado byte a byte +
-   /releases/latest = v6.50.73 + fila .73 con el release ID real.
+1. **PUBLICAR v6.50.74 — HECHO** — push de main + tag v6.50.74 +
+   release con `AethonMod.tmod` (4.435.018 B, md5
+   3ac330396047272808fa43a3b1aa9a4d) + CDN verificado byte a byte +
+   /releases/latest = v6.50.74 + fila .74 con el release ID real.
 
-2. **El usuario prueba v6.50.73 en juego** — (a) LAS OLEADAS: cada jefe
-   de oleada pelea con SU IA DE MODO MAESTRO (Skeletron lanza HUESOS y
-   gana +25 de defensa por mano viva; el Cerebro teje ILUSIONES; el Rey
-   escupe limos con PÚAS; el Ojo transforma al 65% y acelera por
-   distancia; la Reina encadena más cargas; el Devorador cría voladores)
-   PERO con las stats del sello (×(k+1)·nivel — ahora también en
-   defDamage/defDefense: el daño/defensa de contacto YA NO se resetea a
-   vanilla); (b) SIN LÍMITES AMBIENTALES: el Ojo y Skeletron nacen y
-   pelean DE DÍA (el Ojo vuelve al sorteo diurno; el guardián de 9999
-   jamás despierta), la Reina fuera de la jungla y a plena superficie
-   SIN encorarse, Deerclops sin nieve sin irse; (c) EL OJO PEGADO AL
-   JUGADOR: en oleadas/niveles altos ya no se va a 600-1000 px — su IA
-   maestra + EL ANCLA (más de 900 px = tirón de vuelta); (d) REGRESIÓN:
-   La Sombra de la Página, el Códice Vivo y el festín siguen intactos;
-   el mundo conserva SU día y SU dificultad tras cada combate (el
-   préstamo se devuelve cada tick — vigilar en juego que el ciclo
-   día/noche nunca se congele).
+2. **El usuario prueba v6.50.74 en juego** — (a) EL CÓDICE VIVO DE LA
+   BOLSA DEL PROBADOR: el icono del inventario ya NO está cortado ni
+   "sube" (8 frames exactos — el libro respira, la onda de tinta viaja,
+   el ojo parpadea) y AL ATACAR el códice SE VE volando al punto de la
+   mira con sus andanadas de chispas (sin ningún error en consola);
+   (b) EL NIVEL NATURAL: la primera oleada natural del libro empieza en
+   NIVEL 1 (el guardado viejo se resetea una única vez — la carnada ya
+   NO contamina: ganarle a un festín de carnada no sube nada, solo
+   vencer OLEADAS NATURALES sube al siguiente nivel); (c) EL CIELO DE
+   LA OLEADA: al arrancar un festín (carnada o natural) el mundo se
+   viste — DE DÍA cielo naranja-eclipse con toque morado + niebla de
+   cementerio + relámpagos esporádicos + EL SOL ECLIPSADO (disco
+   violeta con anillo de fuego); DE NOCHE carmesí-morado + LA LUNA
+   CARMESÍ con halo violeta (en todas sus fases); al caer la noche a
+   media oleada la transición es SUAVE, igual al amanecer; al MORIR el
+   festín todo vuelve a la normalidad (fade + sol/luna originales);
+   confirmar que el eclipse/luna de sangre/cementerio REALES no se
+   activan (es solo visual); (d) REGRESIÓN: La Sombra, el festín, las
+   IA maestras de la .73 y el ciclo día/noche del mundo siguen intactos
+   tras cada combate.
 
 
 ## 🔒 REGLAS INVIOLABLES AL RETOMAR
@@ -1234,6 +1279,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.74** | ✅ Build-verificada (build real 0/0, .tmod 4.435.018 B md5 3ac330396047272808fa43a3b1aa9a4d 394 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte — 128 DisplayName · 177 Tooltip en las tres lenguas —, strips EXACTOS Sol 200×200 · Luna 200×1600 · Códice ítem 48×384 · proyectil 128×1024 (rawimg con header w×h verificado), símbolos nuevos VIVOS — AmbienteOleadaSistema/ModifySunLightColor/GraveyardVisualIntensity/MsgAmbienteOleada/SolDeLaOleada/LunaDeLaOleada/FestinVisible/_esNatural/furiaV2 — y los de .73 PERSISTEN, headless language=5 «Sandboxing/Finalizing Aethon, the Eternal Grimoire v6.50.74 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release con asset 4.435.018 B, CDN verificado byte a byte), ⏳ en juego | LA LETRA: «la imagen [del libro] esta cortada ademas se mueve de abajo hacia arriba constantemente, aunque si tiene su animacion… el ataque no se ve y salta un error… si el libro genera una oleada natural, esta siempre empieza por el nivel 3… combinas el ambiente de el eclipse solar mas el ambiente de cementerio… un toque morado a la iluminacion naranja del eclipse… un nuevo estado… mientras es de dia; si pasa a la noche, una mezcla de lunar de sangre mas el cementerio… el sol debe cambiar su sprite y en el de noche en la luna roja, esta tambien debe cambiar su sprite… dinamicos… se acaban en el momento en el que la oleada termine». (1) EL CIELO DE LA OLEADA (AmbienteOleadaSistema — ESTADO NUEVO que NO toca Main.eclipse/bloodMoon/ZoneGraveyard): LA LUZ por ModifySunLightColor (cielo ColorOfTheSkies + tiles en un pase; día eclipse-morado, noche carmesí-morado), LA NIEBLA por Main.GraveyardVisualIntensity (solo visual: filtro Graveyard + oscuridad + estrellas apagadas + relámpago esporádico ≥0.9 — el tira-y-afloja con Player.Update queda en 0.90-0.92), LOS ASTROS por swap reversible (Sun/Sun2/Sun3 + Moon[0..8]) con SolDeLaOleada (disco violeta + anillo de fuego naranja + llamaradas moradas) y LunaDeLaOleada (carmesí con cráteres, cara oculta FANTASMA y halo violeta, 8 fases del enum MoonPhase — menguante iluminada a la IZQUIERDA); DINÁMICO (16:30→19:30 cae a noche, 4:00→4:30 amanece, cruce suave _diaSuave; sin festín pegado al reloj) y TODO muere con el festín (fade 3 s + astros devueltos + Unload/OnWorldUnload limpios); MP: broadcast EcoRed.MsgAmbienteOleada (12, 1 byte) al cambio + latido 300 t — SP/host leen Activo directo. (2) LA CURA TRIPLE: DrawAnimationVertical lleva TICKS PRIMERO — el (8,6) de la .72 partía el strip de 384 px en 6 rodajas de 64 px (ventana entre dos frames = el libro cortado + fantasma + "subiendo"); (6,8) = 8 frames de 48 EXACTOS. El PreDraw llamaba spriteBatch.Begin con el lote de vanilla YA abierto (client.log «Begin has been called before calling End» todos los frames → el códice jamás se dibujaba en vuelo); ahora dibuja EN el lote vivo tras ReabrirLoteVanilla. El nivel natural nacía en 3 porque TODA victoria (también las de la CARNADA de pruebas) subía el FuriaNivel persistente — Provocar(natural:) distingue el origen, SOLO las victorias naturales suben, la carnada default 1 y los guardados viejos se resetean a 1 una única vez (marcador furiaV2). |
 | **v6.50.73** | ✅ Build-verificada (build real 0/0, .tmod 4.270.759 B md5 ca36bd780f740ef1349ce800747bc64a 392 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte — 182/182 DisplayName · 177/177 Tooltip en las tres lenguas —, vivos PRESENTES en la DLL: VigilarPrestamo/DevolverAmbiente/PrepararReflexion/_prestamoAbierto/_overrideForExpertMode/_overrideForMasterMode/defDamage/defDefense, muertos AUSENTES — Mano/Tijeras/Página + JefeDelLugar —, headless language=5 «Sandboxing/Adding/Configuring/Finalizing Aethon, the Eternal Grimoire v6.50.73 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 406088036, asset 619583123 4.270.759 B, CDN verificado byte a byte md5 ca36bd780f740ef1349ce800747bc64a, /releases/latest = v6.50.73), ⏳ en juego | LA LETRA: «tanto el Ojo de Cthulhu como otros jefes, en las oleadas no tienen limitacion de dia, noche o bioma, la oleada es su propio ambiente ya que son jefes modificados… en niveles altos el ojo se separa mucho del jugador… a cada jefe de oleada dale la IA que usa Terraria en el modo maestro, pero con las mejoras actuales que tiene». (1) EL AMBIENTE PRESTADO (OleadaNPC.PreAI→PostAI): durante el AI de cada guardián (los SEIS + Deerclops) se prestan POR REFLEXIÓN los overrides _overrideForExpertMode/_overrideForMasterMode (Main.expertMode/masterMode son propiedades de solo lectura en tML — en vanilla LA IA MAESTRA ES LA RAMA EXPERTA, master escala stats y afina lerps al 100%): huesos+25/mano del Skeletron, ilusiones del Cerebro, limos con púas del Rey, manos de sombra de Deerclops, acelerones/65% del Ojo, rampa de la Reina, crías del Devorador — red de seguridad TRIPLE (auto-curado en PreAI + vigía en PostUpdateWorld + restauración defensiva) para que el mundo NUNCA quede vestido; (2) SIN DÍA/NOCHE/BIOMA: Main.dayTime prestado en falso para Ojo (ya no huye del sol) y Skeletron (el guardián de 9999 jamás despierta — el veto diurno del sorteo MUERE: el Ojo compite las 24 h), JUNGLA prestada a la Reina (+NIEVE a Deerclops — sin encoraje ni huida por bioma) y Main.worldSurface prestado (la Reina jamás «sobre la superficie»); (3) LA TALLA EN LOS DEFAULTS DE LA IA: Marcar ahora también sella defDamage/defDefense (las IA que se re-visten cada tick ya no borran el sello — Skeletron/Reina peleaban con stats vanilla) + el daño LITERAL de la fase 2 del Ojo se restaura a la talla del sello tras su IA; (4) EL OJO YA NO SE DESPEGA: exento del homing/embite inyectado (a +8.6 px/t en oleada alta lo sobre-empujaba a 600-1000 px de la presa) y con EL ANCLA (>900 px = tirón suave + techo 22 px/t); (5) DE PROPINA: el es-ES del REPO estaba DESCUADRADO (espejo .71 con tabs — el release .72 llevaba el correcto pero el commit no lo capturó) — regenerado con sync_es_es_v65071.py. |
 | **v6.50.72** | ✅ Build-verificada (oráculo 0/0 ×3, build real 0/0, .tmod 4.270.876 B md5 fb71616272c9be7f64269bd6cf466230 392 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte, DisplayName 310 == 310 · Tooltip 177 == 177, strips del Códice 128×1024 y 48×384 verificados, muertos AUSENTES — 3 ítems + 3 proyectiles + DrawAdorno + JefeDelLugar + claves Azote/Mordida/Cría de los hjson —, vivos PRESENTES — JefeDeLaOleada + _jefeOleadaPrevio1/2 + familia Códice —, headless language=5 «Finalizing Aethon, the Eternal Grimoire v6.50.72 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 405996619, asset 4.270.876 B, CDN verificado byte a byte md5 fb71616272c9be7f64269bd6cf466230, /releases/latest = v6.50.72), ⏳ en juego | LA LETRA: «el sprite del codice vivo esta mal hecho, solo es la imagen fija subiendo en vertical sin animaciones ni nada… no tiene ningún ataque… las 3 armas nuevas ya no son necesarias, solo nos quedamos con La Sombra de la Página… en las oleadas se repiten mucho los mismos jefes, el que salió no debe repetir en las 2 siguientes, todos con la misma probabilidad, menos el deerclop». (1) EL CÓDICE VIVO v2 (la prueba, A PARTE): re-nacido de la MISMA matriz de codigo.txt con TRES efectos visibles — EL ALIENTO (triangular 0.76..1.24), LA ONDA (anillo de tinta viva #f0a9f6 desde el ojo, radio 30→345) y EL PARPADEO COMPLETO (5/6/7: media, rendija 8%, media; 62→6 px claros) — 8.2–36.9% de píxeles cambian por frame (.71: 3.3–6.3%), VLM «VIVA»; EL ATAQUE SIEMPRE SE VE: pose Shoot, vuela AL PUNTO DE LA MIRA (280 px, frena al llegar), vela ahí disparando 4 ANDANADAS × 3 chispas autoguiadas cada 26 t (al enemigo en 900 px O hacia la mira si no hay nadie) y vuelve de bumerán; icono animado a 6 t/frame. (2) LAS 3 ARMAS BORRADAS (Mano/Tijeras/Página): ítems+PNG+proyectiles+festines 11/12/13+BolsaSombras+tooltips es/en + claves muertas .69 de los hjson; La Sombra de la Página ÚNICA en la bolsa; asimetría liquidada (CodiceVivoProjectile/CodiceVivoChispa vivían solo en en-US → 310==310). (3) LAS OLEADAS: reparto por BIOMA muere → JefeDeLaOleada: PIZARRA de los SEIS con MISMA probabilidad + REGLA DE LOS ÚLTIMOS DOS (jefe de la oleada k vetado en k+1 y k+2; pizarra limpia al arrancar la furia); el Ojo fuera del sorteo de DÍA (huye del sol); Deerclops APARTE (su dado del 1%). |
 | **v6.50.71** | ✅ Build-verificada (oráculo 0/0 — cazó 1: `new(float,float)*float` sin tipo objetivo —, build real 0/0, .tmod 4.275.638 B md5 ab2a1f9be0bcc293384beb4542f21525 395 entradas, EOF exacto, 3/3 hjson en el paquete con es-ES espejo de es-MX CUERPOS BYTE-IDÉNTICOS (DisplayName 314 == 314 · Tooltip 180 == 180), 6 sprites presentes (3 iconos nuevos + Sombra + 2 strips del Códice Vivo) + sprites muertos AUSENTES, DLL 9 vivos/6 muertos ausentes, headless language=5 «Finalizing AethonMod v6.50.71 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 405688120, asset 4.275.638 B subido, CDN verificado byte a byte md5 ab2a1f9be0bcc293384beb4542f21525, /releases/latest = v6.50.71), ⏳ en juego | LA LETRA: «las 3 nuevas armas se ven mal… la base del tentáculo debe ser muy fina, se engorda en el centro y fina en la punta, y en esa punta más bruma… el juego sale en inglés, haz que todas las variantes de español caigan en la nuestra… rediseñar las 3 armas… toma la versión de código y conviértela en el sprite de una nueva arma (como prueba) y anímala, completamente a parte». (1) ESPAÑOL UNIFICADO: es-ES REGRESA como ESPEJO GENERADO de es-MX (tools/sync_es_es_v65071.py — editar SOLO es-MX y correr el script; la .70 lo había borrado y el juego del usuario en «Español» caía al inglés). (2) TENTÁCULO FUSIFORME: Masa gana grosorCentro (9→44→13 px: fina-gorda-fina; el festín 14→62→22) + punta con MÁS BRUMA (3 orbitantes, aliento 6, nube propia en la punta real). (3) LOS ÚTILES DEL ESCRIBA (Azote/Mordida/Cría BORRADOS, estilos 8/9/10 muertos): LA MANO DEL ESCRIBA (la garra que CAMINA en sus dedos con paso de araña, ojo rasgado en la palma, jaula de cinco + charco que HUNDE; festín 11 EL PUÑO DEL ESCRIBA — la garra baja del techo), LAS TIJERAS DE LA PÁGINA (hojas curvas con filo de hueso que TIJERETEAN rebanadas + tajo blanco; festín 12 EL CORTE FINAL) y LA PÁGINA ARRANCADA (el marco de cuaderno — renglones + margen rojo + folio — que ciñe, tiembla y ARRRANCA; festín 13 EL ARREBATO); iconos 38×38 VLM 8-9/10 ronda 1. (4) EL CÓDICE VIVO (la prueba, A PARTE): sprite nacido de codigo.txt ANIMADO por código (pulso de energía + parpadeo del ojo central) — proyectil strip 128×1024 (8 frames) + ITEM strip 48×384 con Main.RegisterItemAnimation + AnimatesAsSoul (el icono ANIMA EN EL INVENTARIO como las almas vanilla); el códice vuela, vela y dispara 3 volas de chispas autoguiadas (CodiceVivoChispa) y vuelve de bumerán; en LA BOLSA DEL PROBADOR. |

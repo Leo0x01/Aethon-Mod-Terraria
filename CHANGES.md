@@ -1,5 +1,94 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.74 — EL CIELO DE LA OLEADA (ECLIPSE+Cementerio+MORADO) + LA CURA TRIPLE DEL CÓDICE Y EL NIVEL
+
+**Feedback del usuario**: "la imagen [del libro] esta cortada ademas se mueve
+de abajo hacia arriba constantemente, aunque si tiene su animacion… el ataque
+no se ve y salta un error… si el libro genera una oleada natural, esta siempre
+empieza por el nivel 3, al parecer se salta el nivel 1 y 2… para las oleadas
+tambien seria bueno darles su propio ambiente, que tal si combinas el ambiente
+de el eclipse solar mas el ambiente de cementerio original de terraria, le das
+un toque morado a la iluminacion naranja del eclipse y ademas conviertes esto
+en un nuevo estado por lo tanto no tiene nada que ver ni con el eclipse solar
+verdadero ni con el cementerio real… eso mientras es de dia, si el evento
+oleada pasa a la noche… se activa el ambiente que es una mezcla de lunar de
+sangre mas el cementerio con el mismo toque morado… el sol debe cambiar su
+sprite y en el de noche en la luna roja, esta tambien debe cambiar su sprite…
+estos ambientes son dinamicos… estos ambientes se acaban en el momento en el
+que la oleada termine".
+
+**(1) EL ICONO DEL CÓDICE YA NO ESTÁ CORTADO (la cura de la imagen que se
+movía de abajo hacia arriba).** Diagnóstico en el decompile: el constructor
+es `DrawAnimationVertical(int ticksperframe, int frameCount)` — ¡TICKS
+PRIMERO! El `(8, 6)` de la .72 se leía como "8 ticks, **6 frames**": el juego
+partía el strip de 384 px en SEIS rodajas de 64 px (el strip tiene OCHO
+frames de 48) — la ventana se deslizaba ENTRE dos frames a la vez (el libro
+cortado con el "fantasma" del frame vecino) y avanzaba hacia abajo del strip
+→ el contenido parecía SUBIR sin parar. Ahora es `(6, 8)`: 6 ticks por
+frame, 8 frames — cada rodaja es EXACTAMENTE un frame del libro (respira,
+onda de tinta, parpadeo).
+
+**(2) EL ATAQUE VUELVE A VERSE (la cura del error).** El client.log decía
+`InvalidOperationException: Begin has been called before calling End` en
+`CodiceVivoProjectile.PreDraw` línea 218: el PreDraw llamaba a su propio
+`spriteBatch.Begin(...)` con el lote de vanilla YA ABIERTO (VFXCore.
+ReabrirLoteVanilla lo acababa de dejar listo) → excepción TODOS los frames
+→ el códice JAMÁS se dibujaba en vuelo (la andanada de chispas nacía de la
+nada). El contrato correcto: tras ReabrirLoteVanilla se dibuja EN el lote
+vivo (`Main.EntitySpriteDraw`) — sin tocar Begin/End.
+
+**(3) LA OLEADA NATURAL VUELVE A EMPEZAR EN EL NIVEL 1 (la cura del nivel
+3).** La causa: la Carnada (el ítem de pruebas) y la furia natural
+compartían EL MISMO `FuriaNivel` persistente y TODA victoria lo subía —
+ganar festines de prueba con la carnada había llevado el nivel natural a 3
+sin una sola oleada natural vencida. La cura en tres piezas: (a) `Provocar`
+ahora distingue el ORIGEN del festín (`natural: true` solo del hambre real
+del libro); (b) **SOLO las victorias de festines NATURALES suben el nivel**
+— probar con la carnada ya no progresa nada (y su selección por defecto
+nace en 1); (c) los guardados viejos se resetean A 1 una única vez (el
+marcador `furiaV2` — la era nueva queda sellada).
+
+**(4) EL CIELO DE LA OLEADA — UN ESTADO NUEVO (ni eclipse real ni
+cementerio real ni luna de sangre real: NADA de `Main.eclipse`,
+`Main.bloodMoon` ni `ZoneGraveyard`).** `AmbienteOleadaSistema` (ModSystem
+nuevo) viste el mundo con TRES piezas que viven SOLO en la pantalla,
+mientras el festín viva:
+  · **LA LUZ** — `ModifySunLightColor` (el hook oficial que tinta el cielo
+    `ColorOfTheSkies` y la luz de los tiles en el mismo pase, verificado en
+    el decompile): **DE DÍA**, eclipse + cementerio + **TOQUE MORADO** sobre
+    el naranja (cielo cobre-violeta); **DE NOCHE**, luna de sangre +
+    cementerio + el mismo morado (cielo carmesí-violeta).
+  · **LA NIEBLA DEL CEMENTERIO** — `Main.GraveyardVisualIntensity` (solo
+    visual, verificado en el decompile): el filtro de niebla "Graveyard",
+    el oscurecimiento del cielo, las estrellas apagadas y el RELÁMPAGO
+    esporádico se encienden TODOS solos desde ese campo — sin tocar las
+    zonas del cementerio real (enemigos/música).
+  · **LOS ASTROS** — swap reversible de las ranuras de vanilla
+    (`TextureAssets.Sun/Sun2/Sun3` y las 9 de `TextureAssets.Moon`):
+    **EL SOL ECLIPSADO** (disco violeta oscuro con anillo de fuego naranja
+    y llamaradas moradas, 200×200) de día y **LA LUNA CARMESÍ** (la luna
+    roja con cráteres, cara oculta FANTASMA y halo violeta — 200×1600 con
+    las 8 fases de vanilla: llena→menguante→nueva→creciente) de noche. Los
+    originales se guardan y se DEVUELVEN al terminar (y en Unload).
+  · **LA DINÁMICA**: el amanecer y el atardecer dentro de una MISMA
+    oleada cruzan suave entre los dos ambientes (el último tramo del día ya
+    cae hacia la noche; la madrugada amanece) — y TODO (fade de ~3 s +
+    astros devueltos) termina en el mismo tick en que el festín muere.
+  · **LA RED**: el festín es del mundo — el servidor hace BROADCAST del
+    estado (`EcoRed.MsgAmbienteOleada`, 1 byte) al cambiar y un latido cada
+    5 s; SP y host lo leen directo del sistema (mismo proceso).
+
+**Verificación**: build real 0 errores / 0 warnings · .tmod 4.435.018 B
+(md5 3ac330396047272808fa43a3b1aa9a4d): 394 entradas, EOF EXACTO, es-ES ==
+es-MX byte a byte (128 DisplayName · 177 Tooltip en las tres lenguas), los
+4 strips presentes y con medidas exactas (Sol 200×200 · Luna 200×1600 ·
+ítem del Códice 48×384 · proyectil 128×1024), símbolos nuevos VIVOS
+(AmbienteOleadaSistema/ModifySunLightColor/MsgAmbienteOleada/furiaV2/
+_esNatural) y los de la .73 PERSISTEN · headless language=5:
+"Sandboxing/Finalizing/Adding Recipes → Server started", 0 EXCEPCIONES ·
+sprites QA con ojo de modelo de visión (sol 9/10 · ciclo lunar 8.5/10 ·
+armonía 9/10 · estilo Terraria 9/10).
+
 ## Commit v6.50.73 — LA OLEADA ES SU PROPIO AMBIENTE (IA DE MODO MAESTRO + SIN DÍA/NOCHE/BIOMA) + EL OJO QUE YA NO SE DESPEGA
 
 **Feedback del usuario**: "tanto el Ojo de Cthulhu como otros jefes, en las

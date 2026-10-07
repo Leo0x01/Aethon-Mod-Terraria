@@ -404,7 +404,7 @@ namespace AethonMod.Content.Players
                                 bool evento = config == null || config.EventoHambreGrimorio;
                                 if (evento && !GrimorioFuriaSistema.Activo && GrimorioFuriaSistema.MundoLibre())
                                     GrimorioFuriaSistema.Provocar(Player,
-                                        Math.Max(1, Math.Min(10, FuriaNivel)));
+                                        Math.Max(1, Math.Min(10, FuriaNivel)), natural: true);
                             }
                         }
                     }
@@ -432,7 +432,7 @@ namespace AethonMod.Content.Players
                         if (eventoR && !GrimorioFuriaSistema.Activo &&
                             GrimorioFuriaSistema.MundoLibre())
                             GrimorioFuriaSistema.Provocar(Player,
-                                Math.Max(1, Math.Min(10, FuriaNivel)));
+                                Math.Max(1, Math.Min(10, FuriaNivel)), natural: true);
                     }
                 }
 
@@ -766,7 +766,11 @@ namespace AethonMod.Content.Players
                 tag["derrotaOleada10"] = DerrotaOleada10;
                 // v6.50.59 — EL NIVEL DE FURIA (la progresión de las oleadas
                 // naturales: vencer sube, morir congela).
+                // v6.50.74 — EL MARCADOR furiaV2: distingue los guardados
+                // de la era en la que TODA victoria (incluidas las de la
+                // CARNADA de pruebas) subía el nivel natural.
                 tag["furiaNivel"] = FuriaNivel;
+                tag["furiaV2"] = true;
             }
             catch { }
         }
@@ -782,7 +786,16 @@ namespace AethonMod.Content.Players
                 DerrotaOleada10 = tag.GetBool("derrotaOleada10");
                 // v6.50.59 — EL NIVEL DE FURIA (clamp 1..10 — un guardado
                 // corrupto jamás rompe el sistema).
-                FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
+                // v6.50.74 — LA MIGRACIÓN DE UNA SOLA VEZ: los guardados
+                // sin el marcador furiaV2 traen un nivel PLAGADO por las
+                // victorias de la carnada (la letra: «la oleada natural
+                // siempre empieza por el nivel 3, se salta el 1 y el 2») —
+                // se resetea a 1 y el marcador sella la era nueva (solo
+                // las victorias NATURALES suben desde ahora).
+                if (!tag.ContainsKey("furiaV2"))
+                    FuriaNivel = 1;
+                else
+                    FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
             }
             catch { }
         }

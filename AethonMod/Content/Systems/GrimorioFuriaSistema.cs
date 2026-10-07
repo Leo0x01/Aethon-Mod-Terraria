@@ -111,6 +111,10 @@ namespace AethonMod.Content.Systems
         //  el nivel — el libro no olvida, pero tampoco regala).
         // ==================================================================
         private static int _nivelFuria = 1;        // N (1..10) — el nivel del festín en marcha
+        // v6.50.74 — EL ORIGEN: true si ESTE festín lo provocó el HAMBRE
+        // del libro (no la Carnada). Solo las victorias naturales suben
+        // el FuriaNivel persistente del portador.
+        private static bool _esNatural = false;
         // v6.50.59 — LA MEZCLA DE BIOMAS DEL NIVEL (la letra: «a mayor
         // nivel de oleada mas monstruos de biomas diferentes aparecen,
         // siempre usando los biomas disponibles en el momento»): el festín
@@ -467,8 +471,19 @@ namespace AethonMod.Content.Systems
         /// natural usa el nivel persistente del portador — ShardPlayer.
         /// FuriaNivel: la PRIMERA es SIEMPRE 1, vencer sube, morir
         /// congela): todas las criaturas del festín escalan con él.
+        /// v6.50.74 — EL ORIGEN DEL FESTÍN (la letra: «si el libro genera
+        /// una oleada natural, esta siempre empieza por el nivel 3, al
+        /// parecer se salta el nivel 1 y 2»): el diagnóstico — la Carnada
+        /// y la furia natural compartían EL MISMO FuriaNivel persistente
+        /// y TODA victoria lo subía: las pruebas con la carnada (vencer
+        /// festines de nivel 1 y 2) habían PLAGADO el nivel natural a 3
+        /// sin que el jugador hubiera ganado UNA sola oleada natural.
+        /// LA CURA: solo las victorias de festines NATURALES suben el
+        /// nivel; la carnada (la herramienta de pruebas) JAMÁS lo toca
+        /// — y los guardados viejos se resetean a 1 una única vez (el
+        /// marcador furiaV2 de ShardPlayer).
         /// </summary>
-        public static void Provocar(Player jugador, int oleadas)
+        public static void Provocar(Player jugador, int oleadas, bool natural = false)
         {
             if (Main.netMode == NetmodeID.MultiplayerClient) return; // el servidor manda
             if (Activo) return;                                      // un festín a la vez
@@ -482,6 +497,7 @@ namespace AethonMod.Content.Systems
 
             _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 11);
             _oleadaActual = 0;
+            _esNatural = natural;   // v6.50.74 — el origen del festín (para la victoria)
             // v6.50.72 — LA PIZARRA LIMPIA: cada furia arranca sin vetos
             // (la regla de los últimos DOS vive dentro de UNA furia)
             _jefeOleadaPrevio1 = -1;
@@ -622,10 +638,15 @@ namespace AethonMod.Content.Systems
                 // furia será de nivel N+1 (más oleadas, más fuerza, más
                 // biomas en la mesa). El nivel vive en SU ShardPlayer
                 // (persistente). Morir no sube nada: la próxima repite.
+                // v6.50.74 — SOLO LOS FESTINES NATURALES: las victorias
+                // con la Carnada (la herramienta de pruebas) ya NO suben
+                // el FuriaNivel — probar no es progresar (la cura del
+                // «la oleada natural empieza en el nivel 3»).
                 try
                 {
                     var spVencedor = hambriento.GetModPlayer<Players.ShardPlayer>();
-                    if (spVencedor != null && _oleadasTotales <= 10 && _nivelFuria >= 1)
+                    if (spVencedor != null && _esNatural &&
+                        _oleadasTotales <= 10 && _nivelFuria >= 1)
                     {
                         int proximoNivel = Math.Min(10, Math.Max(spVencedor.FuriaNivel, _nivelFuria + 1));
                         if (proximoNivel > spVencedor.FuriaNivel)
@@ -1527,6 +1548,7 @@ namespace AethonMod.Content.Systems
             // mezcla de biomas mueren con el festín (el NIVEL del portador
             // NO: vive en su ShardPlayer).
             _nivelFuria = 1;
+            _esNatural = false;  // v6.50.74 — el origen muere con el festín
             _acompanantes = null;
             _firmaBioma = "";
 

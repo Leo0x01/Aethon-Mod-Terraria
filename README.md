@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.73 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.74 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,8 +17,38 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.73)
+## ¿Dónde estamos? (actualizado para v6.50.74)
 
+**NOVEDAD .74 — EL CIELO DE LA OLEADA (ECLIPSE+CEMENTERIO+MORADO) + LA CURA
+TRIPLE DEL CÓDICE Y EL NIVEL**: la letra del usuario: «la imagen [del libro]
+esta cortada ademas se mueve de abajo hacia arriba… el ataque no se ve y
+salta un error… la oleada natural siempre empieza por el nivel 3… que tal
+si combinas el ambiente de el eclipse solar mas el ambiente de cementerio,
+le das un toque morado a la iluminacion naranja del eclipse… un nuevo
+estado… mientras es de dia; si pasa a la noche, una mezcla de lunar de
+sangre mas el cementerio… el sol debe cambiar su sprite y la luna roja
+tambien… dinamicos… se acaban cuando la oleada termine». **EL CIELO DE LA
+OLEADA** (AmbienteOleadaSistema, un ESTADO NUEVO que no toca ni el eclipse
+real ni la luna de sangre real ni el cementerio real): **LA LUZ** por el
+hook oficial `ModifySunLightColor` — de DÍA eclipse+cementerio+**toque
+morado** sobre el naranja; de NOCHE luna de sangre+cementerio+el mismo
+morado — **LA NIEBLA DEL CEMENTERIO** (filtro de niebla, oscuridad,
+estrellas apagadas y relámpago esporádico, todo desde un solo campo
+visual) — **LOS ASTROS**: swap reversible con **EL SOL ECLIPSADO** (disco
+violeta + anillo de fuego naranja + llamaradas moradas) de día y **LA LUNA
+CARMESÍ** (roja, cráteres, cara oculta FANTASMA, halo violeta, 8 fases
+como vanilla) de noche — **DINÁMICO**: atardecer/amanecer cruzan suave
+dentro de una MISMA oleada y todo muere con el festín (fade + astros
+devueltos) — y en MP el estado viaja por BROADCAST a todos los clientes.
+**LA CURA TRIPLE**: (1) el icono del Códice estaba cortado y "subía" porque
+el constructor de la animación lleva **TICKS PRIMERO** — `(8,6)` partía el
+strip en 6 rodajas de 64 px; ahora `(6,8)` = 8 frames exactos; (2) el
+ataque no se veía por un `spriteBatch.Begin` sobre el lote vivo de vanilla
+(excepción todos los frames) — ahora dibuja EN el lote; (3) la oleada
+natural nacía en nivel 3 porque las victorias de la CARNADA de pruebas
+también subían el `FuriaNivel` persistente — ahora SOLO las victorias
+naturales suben, la carnada no toca nada y los guardados viejos se
+resetean a 1 una única vez.
 **NOVEDAD .73 — LA OLEADA ES SU PROPIO AMBIENTE (IA DE MODO MAESTRO) + EL
 OJO QUE YA NO SE DESPEGA**: la letra del usuario: «tanto el Ojo de Cthulhu
 como otros jefes, en las oleadas no tienen limitacion de dia, noche o

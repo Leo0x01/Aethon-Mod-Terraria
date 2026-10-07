@@ -208,6 +208,14 @@ namespace AethonMod.Content.Projectiles.CodiceVivo
             VFXCore.ReabrirLoteVanilla();
 
             // === LAS ESTELAS + EL SPRITE (el strip animado: el frame actual) ===
+            // v6.50.74 — FIX DEL ATAQUE INVISIBLE («el ataque no se ve y
+            // salta un error»): aquí había un spriteBatch.Begin(...) propio
+            // — pero el lote de vanilla YA ESTABA ABIERTO (ReabrirLoteVanilla
+            // lo dejó listo): Begin sobre Begin → InvalidOperationException
+            // TODOS los frames (client.log: «Begin has been called before
+            // calling End») → el códice JAMÁS se dibujaba en vuelo. El
+            // contrato correcto: tras ReabrirLoteVanilla se dibuja EN el
+            // lote vivo (Main.EntitySpriteDraw) — sin tocar Begin/End.
             Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
             int alto = tex.Height / Main.projFrames[Projectile.type];
             Rectangle src = new(0, Projectile.frame * alto, tex.Width, alto);
@@ -215,27 +223,19 @@ namespace AethonMod.Content.Projectiles.CodiceVivo
             Vector2 pantalla = Projectile.Center - Main.screenPosition;
             Color luz = Lighting.GetColor(Projectile.Center.ToTileCoordinates());
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                null, Main.Transform);
-            try
+            // DOS ESTELAS del propio sprite (los frames recientes, tenues)
+            for (int k = 2; k <= 4; k += 2)
             {
-                // DOS ESTELAS del propio sprite (los frames recientes, tenues)
-                for (int k = 2; k <= 4; k += 2)
-                {
-                    if (Projectile.oldPos.Length <= k) break;
-                    Vector2 vieja = Projectile.oldPos[k];
-                    if (vieja == Vector2.Zero) continue;
-                    Vector2 posV = vieja + new Vector2(Projectile.width, Projectile.height) * 0.5f - Main.screenPosition;
-                    Main.EntitySpriteDraw(tex, posV, src, luz * (0.30f - k * 0.06f),
-                        Projectile.rotation * 0.6f, origen, 1f - k * 0.06f, SpriteEffects.None, 0f);
-                }
-                // EL CÓDICE
-                Main.EntitySpriteDraw(tex, pantalla, src, luz,
-                    Projectile.rotation, origen, 1f, SpriteEffects.None, 0f);
+                if (Projectile.oldPos.Length <= k) break;
+                Vector2 vieja = Projectile.oldPos[k];
+                if (vieja == Vector2.Zero) continue;
+                Vector2 posV = vieja + new Vector2(Projectile.width, Projectile.height) * 0.5f - Main.screenPosition;
+                Main.EntitySpriteDraw(tex, posV, src, luz * (0.30f - k * 0.06f),
+                    Projectile.rotation * 0.6f, origen, 1f - k * 0.06f, SpriteEffects.None, 0f);
             }
-            catch { }
-            Main.spriteBatch.End();
+            // EL CÓDICE
+            Main.EntitySpriteDraw(tex, pantalla, src, luz,
+                Projectile.rotation, origen, 1f, SpriteEffects.None, 0f);
             return false;
         }
 

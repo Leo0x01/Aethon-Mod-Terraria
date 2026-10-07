@@ -24,8 +24,11 @@ namespace AethonMod.Content.Items
     /// </summary>
     public class CarnadaDelGrimorio : ModItem
     {
-        /// <summary>Las oleadas preparadas para el próximo uso (1..11 — 11 = LA ESPECIAL).</summary>
-        public static int OleadasPreparadas = 3;
+        /// <summary>Las oleadas preparadas para el próximo uso (1..11 — 11 = LA ESPECIAL).
+        /// v6.50.74 — nace en 1 (antes 3): coherente con «la primera es
+        /// SIEMPRE nivel 1» — y las victorias de la carnada ya NO suben el
+        /// FuriaNivel natural (probar no es progresar).</summary>
+        public static int OleadasPreparadas = 1;
 
         public override void SetStaticDefaults() { }
 

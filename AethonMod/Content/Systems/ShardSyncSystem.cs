@@ -54,6 +54,7 @@ namespace AethonMod.Content.Systems
                     case EcoRed.MsgPedirLibros:
                     case EcoRed.MsgPedirFragmento:
                     case EcoRed.MsgPrepararOleadas:
+                    case EcoRed.MsgAmbienteOleada:
                         // v6.50.1 — FIX: MsgPedirFragmento (9) no estaba en
                         // el switch — el paquete del Altar moría en silencio
                         // y el Fragmento Génesis era inobtenible en MP (el
