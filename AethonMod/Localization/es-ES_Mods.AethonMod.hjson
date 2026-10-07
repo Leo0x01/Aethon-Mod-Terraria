@@ -1,8 +1,3 @@
-// v6.50.65 — ESPAÑOL LATINOAMÉRICA (es-MX): el idioma PRIMARIO del mod
-// (la letra del usuario: «el idioma del juego debe ser español latinoamérica,
-// no español españa»). v6.50.71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN AQUÍ:
-// el juego en «Español (España)» y en «Español (Latinoamérica)» lee ESTE
-// archivo (es-ES es un ESPEJO GENERADO de este — tools/sync_es_es_v65071.py).
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
@@ -83,9 +78,9 @@ Items: {
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
 	// ("the gif doubled at the tip, one per corner, so it behaves like
 	// teeth" + "black mist on every tentacle and mouth").
-
-
-
+	
+	
+	
 	SombraDeLaPagina: {
 		DisplayName: La Sombra de la Página
 		Tooltip:
@@ -102,9 +97,10 @@ Items: {
 			(Arma de prueba de las fauces — v2.)
 			'''
 	}
+
 	ManoDelEscriba: {
-		// v6.50.71 — ÚTIL 1 DEL ESCRIBA (la Mano reemplaza al Azote: conceptos
-		// COMPLETAMENTE distintos, nada de hermanas-tentáculo)
+		// v6.50.71 — SCRIBE'S TOOL 1 (the Hand replaces the Lash: completely
+		// different concepts, no more tentacle sisters)
 		DisplayName: La Mano del Escriba
 		Tooltip:
 			'''
@@ -120,8 +116,9 @@ Items: {
 			(Útil de pruebas del escriba — 100% código.)
 			'''
 	}
+
 	TijerasDeLaPagina: {
-		// v6.50.71 — ÚTIL 2 DEL ESCRIBA (las Tijeras reemplazan a la Mordida)
+		// v6.50.71 — SCRIBE'S TOOL 2 (the Scissors replace the Bite)
 		DisplayName: Las Tijeras de la Página
 		Tooltip:
 			'''
@@ -137,8 +134,9 @@ Items: {
 			(Útil de pruebas del escriba — 100% código.)
 			'''
 	}
+
 	PaginaArrancada: {
-		// v6.50.71 — ÚTIL 3 DEL ESCRIBA (la Página reemplaza a la Cría)
+		// v6.50.71 — SCRIBE'S TOOL 3 (the Page replaces the Brood)
 		DisplayName: La Página Arrancada
 		Tooltip:
 			'''
@@ -153,9 +151,10 @@ Items: {
 			(Útil de pruebas del escriba — 100% código.)
 			'''
 	}
+
 	CodiceVivo: {
-		// v6.50.71 — LA PRUEBA DEL USUARIO: un sprite nacido de CÓDIGO convertido
-		// en arma ANIMADA, completamente a parte de las demás (la Bolsa del Probador)
+		// v6.50.71 — THE USER'S TEST: a sprite born from CODE turned into an
+		// ANIMATED weapon, completely separate from the rest (Tester's Bag)
 		DisplayName: El Códice Vivo
 		Tooltip:
 			'''
@@ -173,7 +172,7 @@ Items: {
 	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
 	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
 	// Bearer's Shadow).
-
+	
 	NombreDeAethon: {
 		DisplayName: El Nombre de Aethon
 		Tooltip:
@@ -787,7 +786,6 @@ Items: {
 			Clic derecho para desplegarlas. Solo entrega lo que te falte.
 			'''
 	}
-
 
 	BolsaSombras: {
 		// v6.50.63: THE SHADOWS BAG — bag 19 (THE GRIMOIRE'S MAWS — the 3 weapons the kit forgot)
@@ -1649,7 +1647,7 @@ Items: {
 	// v6.50.61 — THE PURGE: the FOUR wardens' essences died with
 	// their bosses (Hollow Titan, Rift Keeper, Stellar Archer, First
 	// Bearer) — only the soul of the grimoire itself remains.
-
+	
 	EsenciaDeAethon: {
 		DisplayName: Esencia de Aethon
 		Tooltip:
@@ -1782,7 +1780,7 @@ Projectiles: {
 	OjoTextoProjectile.DisplayName: Ojo del Texto
 	VersoVivoProjectile.DisplayName: Glifo Vivo
 	// v6.18: wings were removed from the mod (user request).
-
+	
 	BlackHoleProjectile.DisplayName: Agujero Negro
 	SunProjectile.DisplayName: Sol
 	CosmicShockwaveProjectile.DisplayName: Onda de Choque Cósmica
@@ -1887,6 +1885,11 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
 	AethonMenorPet.DisplayName: Aethon Menor (mascota)
 	MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
+	// CodiceVivoChispa.DisplayName: Codice Vivo Chispa
+	// CodiceVivoProjectile.DisplayName: Codice Vivo Projectile
+	// ManoEscribaProjectile.DisplayName: Mano Escriba Projectile
+	// PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
+	// TijerasPaginaProjectile.DisplayName: Tijeras Pagina Projectile
 }
 
 Buffs: {
@@ -2210,7 +2213,7 @@ Jefe: {
 
 	// v6.50.61 — THE PURGE: Titan.Furia, Rift.*, Arquera.* and
 	// Portador.Furia died with their bosses.
-
+	
 	Aethon: {
 		Fase: Aethon — FASE {0}: {1}
 		Nombre1: El Polvo Estelar

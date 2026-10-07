@@ -46,7 +46,7 @@ namespace AethonMod.Content.Globals
         // === EL ESTADO (por NPC) ===
         /// <summary>0 = normal · 1 = DEVORADO (congelado en 1 HP) · 2 = muerte real ya ejecutada.</summary>
         public byte DevorarEstado;
-        /// <summary>1 = tentáculo del grimorio · 2 = tajo/esfera · 3 = sombra de la página · 4 = LA PÁGINA FINAL (el arma 4 de la v6.50.64 — el festín de cine del libro).</summary>
+        /// <summary>3 = sombra de la página (la base) · 11 = LA MANO DEL ESCRIBA · 12 = LAS TIJERAS DE LA PÁGINA · 13 = LA PÁGINA ARRANCADA (v6.50.71 — los útiles del escriba).</summary>
         public byte DevorarEstilo;
         /// <summary>El reloj del festín (el motor lo alimenta en server; el cliente lo cuenta local).</summary>
         public ushort DevorarTick;

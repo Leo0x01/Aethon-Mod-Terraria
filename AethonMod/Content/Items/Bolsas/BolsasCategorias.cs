@@ -59,6 +59,10 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.47 — LOS LLAMADOS (v6.50.61 — LA PURGA: solo queda el
             // llamado del FINAL — el grimorio mismo responde a su nombre).
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
+            // v6.50.71 — EL CÓDICE VIVO: la PRUEBA del usuario (un sprite
+            // nacido de CÓDIGO convertido en arma ANIMADA — el icono parpadea
+            // en el inventario) — completamente a parte de las demás.
+            l.Add((ModContent.ItemType<Weapons.CodiceVivo.CodiceVivo>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.
@@ -528,20 +532,18 @@ namespace AethonMod.Content.Items.Bolsas
     /// LAS SOMBRAS DEVORADORAS estilo Pride (Selim Bradley, FMA:B). La
     /// lección anti-recurrencia de la v6.14.2 (cada arma nueva debe
     /// registrarse en el kit de entrega — el jugador NUNCA vuelve a
-    /// quedarse sin sus armas). v6.50.68 — LOS CUATRO CONCEPTOS (la
-    /// letra del usuario: «me gusta más el aspecto de La Sombra de la
-    /// Página… cambia los otros bastones por conceptos diferentes»):
-    /// LA SOMBRA DE LA PÁGINA (la base, INTACTA — el tentáculo de
-    /// carne que nace del jugador y devora con bruma), LA PLUMA DE LA
-    /// PÁGINA (el trazo de tinta: agujas de hueso que atraviesan con
-    /// rastro de tinta), LA HOJA DE LA PÁGINA (el molino: cuatro
-    /// hojas-filo que orbitan y salen en abanico) y EL SELLO DE LA
-    /// PÁGINA (el círculo rúnico que se traza, erupciona en garras y
-    /// deja un poso que muerde). Las cuatro disparan LA DEVORACIÓN:
-    /// jefe a 1 de vida → su muerte se DETIENE → la sombra se lo come,
-    /// CADA UNA con su firma de festín (3/8/9/10). TODAS exhalan
-    /// BRUMA NEGRA. Las recetas de 5 madera siguen como vía alternativa
-    /// (protocolo v6.14.2).</summary>
+    /// quedarse sin sus armas). v6.50.71 — LOS ÚTILES DEL ESCRIBA (la
+    /// letra del usuario: «las 3 nuevas armas se ven mal… volver a
+    /// rediseñar las 3 armas nuevas»): LA SOMBRA DE LA PÁGINA (la base,
+    /// INTACTA — el tentáculo fusiforme de carne que nace del jugador y
+    /// devora con bruma), LA MANO DEL ESCRIBA (la garra colosal que
+    /// CAMINA sobre sus dedos, agarra y hunde), LAS TIJERAS DE LA PÁGINA
+    /// (las hojas curvas de filo de hueso que tijeretean) y LA PÁGINA
+    /// ARRANCADA (el marco de cuaderno que ciñe, tiembla y arranca).
+    /// Las cuatro disparan LA DEVORACIÓN: jefe a 1 de vida → su muerte
+    /// se DETIENE → la sombra se lo come, CADA UNA con su firma de
+    /// festín (3/11/12/13). TODAS exhalan BRUMA NEGRA. Las recetas de 5
+    /// madera siguen como vía alternativa (protocolo v6.14.2).</summary>
     public class BolsaSombras : BolsaCategoria
     {
         protected override string Titulo => "La Bolsa de las Sombras";
@@ -552,19 +554,20 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.50.69 — LA FAMILIA DE TENTÁCULOS: el usuario jubiló a la
-            // Pluma/Hoja/Sello de la .68 («se ven y funcionan horrible») —
-            // la familia vuelve al ADN que AMA (el tentáculo de carne +
-            // bruma de La Sombra) con UN OFICIO distinto por hermana:
-            // EL AZOTE (el látigo que cruja atravesándolo todo en línea),
-            // LA MORDIDA (el glotón que se cuelga y mastica a mordidas de
-            // verdad) y LA CRÍA (la camada de tres que viven en el
-            // portador y cazan solas). La Sombra de la Página queda
+            // v6.50.71 — LOS ÚTILES DEL ESCRIBA: el usuario jubiló a la
+            // familia de tentáculos de la .69 («las 3 nuevas armas se ven
+            // mal») y pidió conceptos COMPLETAMENTE distintos — nada de
+            // hermanas-tentáculo: LA MANO DEL ESCRIBA (la garra colosal
+            // que CAMINA sobre sus dedos, agarra y hunde al reo en el
+            // charco), LAS TIJERAS DE LA PÁGINA (las hojas curvas que
+            // tijeretean a rebanadas de la realidad) y LA PÁGINA
+            // ARRANCADA (el marco de hoja de cuaderno que ciñe, tiembla y
+            // arranca al reo de la página). La Sombra de la Página queda
             // INTACTA como pidió el usuario.
             l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA BASE: intacta, como pidió el usuario
-            l.Add((ModContent.ItemType<Weapons.Sombras.AzoteDeLaPagina>(), 1));   // HERMANA 1: el látigo — largo, fino, CRUJE atravesándolo todo en línea
-            l.Add((ModContent.ItemType<Weapons.Sombras.MordidaDeLaPagina>(), 1)); // HERMANA 2: el glotón — corto, gordo, se cuelga y mastica cada 16 t
-            l.Add((ModContent.ItemType<Weapons.Sombras.CriaDeLaPagina>(), 1));    // HERMANA 3: la camada — tres crías que orbitan al portador y cazan solas
+            l.Add((ModContent.ItemType<Weapons.Sombras.ManoDelEscriba>(), 1));    // ÚTIL 1: la mano que camina, agarra y hunde (festín 11, EL PUÑO DEL ESCRIBA)
+            l.Add((ModContent.ItemType<Weapons.Sombras.TijerasDeLaPagina>(), 1)); // ÚTIL 2: las tijeras que cortan rebanadas (festín 12, EL CORTE FINAL)
+            l.Add((ModContent.ItemType<Weapons.Sombras.PaginaArrancada>(), 1));   // ÚTIL 3: la página que encierra y arranca (festín 13, EL ARREBATO)
             return l;
         }
     }

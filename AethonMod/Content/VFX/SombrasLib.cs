@@ -249,23 +249,42 @@ namespace AethonMod.Content.VFX
         /// sobre cualquier fondo), ESPINAS DE HUESO curvas alternando
         /// lados (colmillos de verdad, no púas-barra) y la FILA DE
         /// VENTOSAS del lomo (la referencia del spritesheet del usuario).
+        /// v6.50.71 — EL PERFIL FUSIFORME (la letra del usuario): «la base
+        /// del tentáculo, la que está pegada al jugador, debe ser MUY
+        /// FINA, luego se ENGORDA en el centro y luego se vuelve FINA
+        /// otra vez en la punta que toca al enemigo» — pasar
+        /// <paramref name="grosorCentro"/> activa la panza del látigo
+        /// (fina → gorda → fina); sin él queda el perfil muscular clásico.
         /// </summary>
-        public static void Masa(Vector2[] col, float grosorRaiz, float grosorPunta, float alfa, int semilla, float tiempo)
+        public static void Masa(Vector2[] col, float grosorRaiz, float grosorPunta, float alfa, int semilla, float tiempo, float grosorCentro = -1f)
         {
             if (col == null || col.Length < 2 || alfa <= 0.02f) return;
 
             var carne = VFXCore.Carne;
             int n = col.Length;
 
-            // === EL PERFIL MUSCULAR: bulbo + S-taper + la respiración ===
+            // === EL PERFIL: FUSIFORME (panza) o MUSCULAR (bulbo + S-taper) ===
             var anchos = new float[n];
             for (int i = 0; i < n; i++)
             {
                 float f = i / (float)(n - 1);
-                // el S-taper (smoothstep: la masa NO se afila en línea recta)
-                float g = MathHelper.Lerp(grosorRaiz, grosorPunta, f * f * (3f - 2f * f));
-                // EL BULBO — el bíceps del tentáculo a un quinto del nacimiento
-                g *= 1f + 0.16f * MathF.Exp(-((f - 0.18f) / 0.16f) * ((f - 0.18f) / 0.16f));
+                float g;
+                if (grosorCentro > 0f)
+                {
+                    // v6.50.71 — EL FUSIFORME (la letra del usuario): MUY
+                    // FINA en la base pegada al jugador, GORDA al centro
+                    // (la panza del látigo), FINA otra vez en la punta que
+                    // toca al enemigo — la sinusoide respira, sin cuchillo
+                    float lineal = MathHelper.Lerp(grosorRaiz, grosorPunta, f);
+                    g = MathHelper.Lerp(lineal, grosorCentro, MathF.Sin(MathF.PI * f));
+                }
+                else
+                {
+                    // el S-taper (smoothstep: la masa NO se afila en línea recta)
+                    g = MathHelper.Lerp(grosorRaiz, grosorPunta, f * f * (3f - 2f * f));
+                    // EL BULBO — el bíceps del tentáculo a un quinto del nacimiento
+                    g *= 1f + 0.16f * MathF.Exp(-((f - 0.18f) / 0.16f) * ((f - 0.18f) / 0.16f));
+                }
                 // la respiración a lo largo (la ondulación de energía viva)
                 g *= 0.9f + 0.1f * MathF.Sin(tiempo * 6.2f + f * 7f + semille(semilla));
                 anchos[i] = g;
@@ -710,11 +729,12 @@ namespace AethonMod.Content.VFX
                     -6f - 4f * MathF.Sin(tiempo * 2.2f)), r * 0.7f, HumoVioleta,
                     semilla * 13 + 2, tiempo * 0.9f,
                     MathHelper.Clamp(0.32f * alfa * vigor, 0.04f, 0.5f), quality: 0.5f);
-                // LOS ORBITANTES: dos puffs menores girando alrededor de la
-                // punta (la cabeza VIVA — nace, gira y se deshace)
-                for (int k = 0; k < 2; k++)
+                // LOS ORBITANTES: tres puffs menores girando alrededor de
+                // la punta (la cabeza VIVA — nace, gira y se deshace;
+                // v6.50.71: eran dos — la punta pidió MÁS bruma)
+                for (int k = 0; k < 3; k++)
                 {
-                    float ang = tiempo * (1.35f + 0.4f * k) + k * MathHelper.Pi + semille(semilla + 7) * 6.28f;
+                    float ang = tiempo * (1.35f + 0.4f * k) + k * (MathHelper.TwoPi / 3f) + semille(semilla + 7) * 6.28f;
                     float rad = r * (0.62f + 0.14f * MathF.Sin(tiempo * 2.4f + k));
                     BrumaFX.Puff(punta - o + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.82f) * rad,
                         r * 0.52f, HumoNegro, semilla * 13 + 3 + k, tiempo * 1.1f + k,
@@ -722,8 +742,9 @@ namespace AethonMod.Content.VFX
                 }
             });
 
-            // el aliento hacia adelante (la nariz del cazador)
-            BrumaBoca(punta, dir, vigor, alfa, tiempo, semilla + 5, 4);
+            // el aliento hacia adelante (la nariz del cazador — v6.50.71:
+            // seis puffs: la punta que toca al enemigo HUMEA más)
+            BrumaBoca(punta, dir, vigor, alfa, tiempo, semilla + 5, 6);
         }
 
         /// <summary>

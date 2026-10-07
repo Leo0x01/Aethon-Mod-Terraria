@@ -1,12 +1,13 @@
-# AethonMod — ESTADO ACTUAL (v6.50.70)
+# AethonMod — ESTADO ACTUAL (v6.50.71)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.70 (EL ESPAÑOL ESPAÑA BORRADO + LA ESPAÑOL LATAM
-> COMPLETA; compilada y verificada 0/0, headless Server started 0 excepciones,
-> es-MX 771 == en-US 771 claves — PUBLICADA junto con toda la .69 acumulada,
-> ver Próximos pasos). La .69 (LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN
-> BRUMA + LA FAMILIA DE TENTÁCULOS) nunca tuvo release propio: su commit
-> ce0e984 viaja DENTRO del release v6.50.70.
+> Última actualización: v6.50.71 (TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA
+> NUESTRA + EL TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO;
+> compilada y verificada 0/0, .tmod 395 entradas auditado, headless Server
+> started 0 excepciones — release PENDIENTE al momento de esta fila, el ID se
+> rellena tras publicar, la lección de la .65). La .70 (el es-ES borrado) fue
+> REVERTIDA por la .71: el juego del usuario vive en «Español» (es-ES) y le
+> salía en inglés — ahora es-ES es ESPEJO GENERADO de es-MX.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **v6.50.68 = LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS** (la letra del
@@ -1187,116 +1188,28 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **PUBLICAR v6.50.70 — HECHO (pendiente solo la verificación en juego)** —
-   el usuario entregó el PAT nuevo y la .69 acumulada salió COMO UNA SOLA
-   VERSIÓN con la .70: push de main (commit ce0e984 de la .69 + 6828113
-   de la .70) + tag v6.50.70 + release 405094321 con `AethonMod.tmod`
-   (4.195.283 B, md5 b2165d4e5bc1da5a1ee62761a8a4cec6) + CDN verificado byte a byte +
-   fila de la tabla con el release ID real (la lección de la .65: el ID
-   solo se conoce DESPUÉS de crear el release — ya actualizado abajo).
+1. **PUBLICAR v6.50.71** — push de main + tag v6.50.71 + release con
+   `AethonMod.tmod` (4.275.638 B, md5 ab2a1f9be0bcc293384beb4542f21525) +
+   CDN verificado byte a byte + RELLENAR el release ID real en la fila .71
+   (la lección de la .65: el ID solo se conoce DESPUÉS de crear el release).
 
-2. **El usuario prueba v6.50.70 en juego** — TODO lo de la .69 acumulada
-   + LA PURGA DEL IDIOMA: (0) EL IDIOMA: el juego en «Español
-   (Latinoamérica)» levanta el mod EN ESPAÑOL como siempre (es-MX sigue
-   siendo el idioma PRIMARIO y ahora COMPLETO: las 2 mascotas ya tienen
-   nombre en español); el juego en «Español (España)» ya NO tiene
-   traducción — cae al inglés (el es-ES fue BORRADO por decreto);
-   (a) MÁS BRUMA: La Sombra exhala DOS
-   capas de puffs (más gordo y creciendo ×1,6 cada uno) y la cabeza son
-   cuatro puffs orbitando — de día Y de noche; (b) LA COBERTURA TOTAL:
-   al morder, la bruma cubre al jefe ENTERO (la elipse de su hitbox +
-   margen — al REY SLIME entero, corona y pies: era el caso reportado);
-   (c) EL FESTÍN NUEVO: a 1 de vida el tentáculo GIGANTE sale del
-   jugador, ENVUELVE al jefe (su sprite DESAPARECE bajo la bruma —
-   fase 2), lo TRAGA (la elipse encoje hacia la punta, la corriente
-   vuelve por el tentáculo), y al final MUERE DE VERDAD dentro de la
-   bruma: el loot cae SOLO (sin gore, sin polvo, sin animación de
-   muerte vanilla) y los logros/flags/bestiario cuentan la baja; (d) LA
-   CONFIABILIDAD: matar al jefe con un ESBIRRO o cualquier otra fuente
-   MIENTRAS el tentáculo lo caza/muerde — el festín tiene que arrancar
-   IGUAL (la marca continua); (e) EL AZOTE: el látigo largo que cruje
-   atravesando todo en línea (rápido, uso 15); (f) LA MORDIDA: el
-   glotón — se cuelga y mastica a mordidas de verdad (los números de
-   golpe saltan cada 16 t) y a un jefe le arranca la devoración cuando
-   le queda UNA mordida; (g) LA CRÍA: invocar 3 veces — tres
-   tentáculos pequeños orbitan al jugador y cazan solos lo que se
-   acerca (sus ojos rasgados siguen a la presa); (h) LOS FESTINES DE
-   LAS HERMANAS: matar un jefe con cada hermana — EL LATIGAZO TRIPLE,
-   LA MASTICACIÓN GIGANTE y LA MENADA; (i) LA BOLSA: reabrir y recoger
-   las 3 hermanas nuevas (Pluma/Hoja/Sello ya no existen — si quedaban
-   en el inventario se vuelven «unloaded item»: borrarlas).
-2. **(Reemplazado por la .68 — el usuario pidió conceptos diferentes)**
-   El usuario prueba v6.50.67 en juego — LA CARNE DE VERDAD + EL FIX DEL
-   OOM DE CARGA: (a) LA CARGA: el mod ya NO debe desactivarse solo al
-   entrar (el «error al cargar Unknown / mods desactivados automáticamente»
-   de la .66 murió con el downscale de las 7 texturas gigantes — Ring y
-   FireRing de 1024² a 256², RingShieldNebula a 512², 4 ruidos a 256²;
-   −13,5 MB de VRAM); (b) LA CARNE: los tentáculos ya NO son líneas
-   geométricas — cuerpo de cinta con FIBRAS MUSCULARES, VETAS CARMESÍ que
-   FLUYEN raíz→punta, bulbo en la base, S-taper, ESPINAS DE HUESO curvas,
-   VENTOSAS blancas en el lomo y EL BORDE DE ENERGÍA violeta→rojo sangre
-   con pulso viajero; (c) EL MOVIMIENTO: inercia de verdad (verlet) — la
-   onda VIAJA base→punta, la cabeza muerde con OVERSHOOT de látigo y la
-   punta se ENROLLA en gancho (cada arma con su gancho: Marea −0,6,
-   Nido 0,7…); (d) LAS CABEZAS: bulbo orgánico + mandíbulas curvas que se
-   enrollan + COLMILLOS de hueso de verdad + el OJO RASGADO del dragón
-   (la pared de la Mirada mezcla ojos humanos y dracónicos; el ojo del
-   juicio del festín estilo 6, rasgado); (e) LAS GARRAS del Nido: talones
-   curvos en S con punta de hueso. NOTA: el OOM de la .66 SOLO pasaba con
-   la lista gigante de mods del usuario (Calamity+Fargo's+…); los dos
-   «Expected Re-Logic file format» de su log son .plr corruptos SUYOS (no
-   es del mod — borrarlos de Players/).
+2. **El usuario prueba v6.50.71 en juego** — (0) EL IDIOMA: con el juego en
+   «Español (España)» Y en «Español (Latinoamérica)» el mod sale EN
+   ESPAÑOL (nuestro es-MX — el espejo); (a) EL TENTÁCULO: la base pegada
+   al jugador MUY FINA, engordando al centro y fina en la punta + la
+   punta HUMEANDO más bruma (3 puffs orbitantes + nube propia); (b) LAS 3
+   ARMAS NUEVAS de la Bolsa de las Sombras: LA MANO DEL ESCRIBA (camina
+   en sus dedos, agarra y hunde — mira el paso de araña), LAS TIJERAS DE
+   LA PÁGINA (los tijeretazos con el tajo blanco y la rebanada que se
+   separa) y LA PÁGINA ARRANCADA (el marco de cuaderno con renglones y
+   margen rojo, los tiemblas y el arranque final); cada una con SU festín
+   a 1 de vida (EL PUÑO DEL ESCRIBA / EL CORTE FINAL / EL ARREBATO);
+   (c) EL CÓDICE VIVO de la Bolsa del Probador: el icono PARPADEA en el
+   inventario, y al usarlo vuela, flota disparando chispas violetas
+   autoguiadas y vuelve de bumerán; (d) REGRESIÓN: La Sombra de la Página
+   sigue intacta en su comportamiento (solo cambió el perfil y la bruma de
+   punta).
 
-3. **(Reemplazado por la .67 — la .66 falló al cargar en la máquina del
-   usuario: OOM de texturas)** El usuario prueba v6.50.66 en juego — LAS HERMANAS + EL FIX DEL
-   CRASH + MÁS BRUMA: (a) EL CRASH: usar las sombras ~10 min seguidos —
-   el juego NO debe cerrarse más (el fix: Deferred = 1 Map por volcado
-   en vez de 1 por quad); (b) LA BOLSA DE LAS SOMBRAS ahora entrega la
-   Sombra + las TRES HERMANAS (Marea/Mirada/Nido) — los nombres y
-   tooltips nuevos en español; (c) LA MAREA: tres cabezas mordiendo en
-   oleada, anillos en el charco, niebla rasante en el suelo, spray al
-   cerrar; (d) LA MIRADA: la pared de ojos que parpadea, las líneas de
-   mirada, el OJO COLOSAL que se abre al morder y su pupila que engorda;
-   (e) EL NIDO: los huevos rojos que laten y SE ECLOSIONAN al morder,
-   la jaula de garras, las almas orbitando; (f) LOS FESTINES con firma:
-   estilo 5 la ola que sube, estilo 6 el ojo del juicio, estilo 7 la
-   jaula de garras; (g) MÁS BRUMA en general (presupuesto ×1,6).
-
-2. **El usuario prueba v6.50.63 en juego** — LA ENTREGA + LOS TESTS CRÍTICOS de la .62 (LAS FAUCES):
-   (a) LA BOLSA DE LAS SOMBRAS LLEGA SOLA al entrar al mundo (bolsa 19,
-   junto a las otras 18) — clic derecho y despliega las 3 fauces: La Fauce
-   del Grimorio, El Tajo de las Sombras, La Sombra de la Página (la receta
-   de 5 madera sigue como vía alternativa); (b) EL LATIGAZO QUE SIEMPRE
-   LLEGA: invoca un jefe, aléjate AL OTRO LADO DEL MAPA y dispara — el
-   tentáculo cruza el mundo; (c) EL DREN: la barra del jefe baja A MORDIDAS;
-   (d) LA DEVORACIÓN: al 1 HP el jefe se POSA (ni IA ni muerte) y el festín
-   lo come (bruma, almas, y el LOOT CAE dentro de la bruma — la kill cuenta:
-   bestiario, downed flags, XP del grimorio); (e) LA ESFERA del tajo: los
-   ojos TE MIRAN a TI mientras comen; (f) Aethon (el del mod) muere con SU
-   cine de siempre; (g) la chusma muere normal (solo jefes se devoran).
-   (Y el checklist .61 aún vigente: oleada en el spawn, la purga, el lore.)
-2. **El usuario prueba v6.50.61 en juego** — LOS TESTS CRÍTICOS de la .61:
-   (a) LA OLEADA EN EL SPAWN ORIGINAL: quédate EN el pueblo (junto a las
-   casas del Guía y compañía) y desata la furia con la Carnada — la chusma
-   debe LLEGAR sin moverte del sitio (el vigía tarda ~2,5 s en arrancar);
-   (b) LA PURGA: la Bolsa de Invocadores solo entrega el Nombre de Aethon,
-   el bestiario SIN los 5 NPC muertos, y matar a Aethon suelta SU esencia
-   (la única de jefe de mod que queda); (c) EL LORE: el tooltip del
-   Grimorio del Eterno cuenta que el libro ES Aethon, la fase 5 se anuncia
-   «El Veredicto» y la Forma Ascendida cae con «LA PRUEBA ESTÁ CERRADA».
-   (Y el checklist de la .60 aún vigente: firma de cada fase, sol con
-   espoleta, cuna limpia, furia nocturna.)
-2. Según lo que reporte: pulir lo que falle (rayos/oleadas/diálogos/destello son los frentes
-   calientes).
-3. Limpieza de doc-rot (la lista de arriba, ~1 sesión pequeña).
-4. Ideas ya investigadas y LISTAS para implementar (material en `research/`):
-   - **5 ideas de Coralite** (worklog 2-a): rayo-trío (YA hecho = Vena Trueno), cañón
-     electromagnético, rayo persecutor de ReverseFlash, dash-relámpago de la ThunderveinBlade,
-     capa "flow" ¼ de ancho.
-   - **Eventos cósmicos por nivel** (esqueleto en ShardLevelSystem: "Lluvia de luz estelar,
-     Rifts… Fase 10").
-   - Accesorio con aura que evoluciona negro→dorado→rojo (idea antigua del usuario;
-     AuraLib ya soporta perfiles).
 
 ## 🔒 REGLAS INVIOLABLES AL RETOMAR
 
@@ -1320,6 +1233,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.71** | ✅ Build-verificada (oráculo 0/0 — cazó 1: `new(float,float)*float` sin tipo objetivo —, build real 0/0, .tmod 4.275.638 B md5 ab2a1f9be0bcc293384beb4542f21525 395 entradas, EOF exacto, 3/3 hjson en el paquete con es-ES espejo de es-MX CUERPOS BYTE-IDÉNTICOS (DisplayName 314 == 314 · Tooltip 180 == 180), 6 sprites presentes (3 iconos nuevos + Sombra + 2 strips del Códice Vivo) + sprites muertos AUSENTES, DLL 9 vivos/6 muertos ausentes, headless language=5 «Finalizing AethonMod v6.50.71 → Adding Recipes → Server started» 0 excepciones), ⏳ publicación (release + CDN pendientes al escribir la fila — RELLENAR el ID real tras crearlo), ⏳ en juego | LA LETRA: «las 3 nuevas armas se ven mal… la base del tentáculo debe ser muy fina, se engorda en el centro y fina en la punta, y en esa punta más bruma… el juego sale en inglés, haz que todas las variantes de español caigan en la nuestra… rediseñar las 3 armas… toma la versión de código y conviértela en el sprite de una nueva arma (como prueba) y anímala, completamente a parte». (1) ESPAÑOL UNIFICADO: es-ES REGRESA como ESPEJO GENERADO de es-MX (tools/sync_es_es_v65071.py — editar SOLO es-MX y correr el script; la .70 lo había borrado y el juego del usuario en «Español» caía al inglés). (2) TENTÁCULO FUSIFORME: Masa gana grosorCentro (9→44→13 px: fina-gorda-fina; el festín 14→62→22) + punta con MÁS BRUMA (3 orbitantes, aliento 6, nube propia en la punta real). (3) LOS ÚTILES DEL ESCRIBA (Azote/Mordida/Cría BORRADOS, estilos 8/9/10 muertos): LA MANO DEL ESCRIBA (la garra que CAMINA en sus dedos con paso de araña, ojo rasgado en la palma, jaula de cinco + charco que HUNDE; festín 11 EL PUÑO DEL ESCRIBA — la garra baja del techo), LAS TIJERAS DE LA PÁGINA (hojas curvas con filo de hueso que TIJERETEAN rebanadas + tajo blanco; festín 12 EL CORTE FINAL) y LA PÁGINA ARRANCADA (el marco de cuaderno — renglones + margen rojo + folio — que ciñe, tiembla y ARRRANCA; festín 13 EL ARREBATO); iconos 38×38 VLM 8-9/10 ronda 1. (4) EL CÓDICE VIVO (la prueba, A PARTE): sprite nacido de codigo.txt ANIMADO por código (pulso de energía + parpadeo del ojo central) — proyectil strip 128×1024 (8 frames) + ITEM strip 48×384 con Main.RegisterItemAnimation + AnimatesAsSoul (el icono ANIMA EN EL INVENTARIO como las almas vanilla); el códice vuela, vela y dispara 3 volas de chispas autoguiadas (CodiceVivoChispa) y vuelve de bumerán; en LA BOLSA DEL PROBADOR. |
 | **v6.50.70** | ✅ Build-verificada (oráculo 0/0, build real 0/0, .tmod 4.195.283 B 392 entradas (393 − 1 hjson: el es-ES BORRADO), EOF exacto, es-ES AUSENTE, 2/2 hjson byte-idénticos con tabs intactos, claves del PAQUETE es-MX 771 == en-US 771 con parser hjson real — la deuda de 50 claves de la .65 liquidada: 48 tooltips vacías activadas + 2 mascotas traducidas «Aethon Menor (mascota)»/«Mini Estallido (mascota)» —, Info con 6.50.70, DLL 9 vivos/6 muertos ausentes, headless Server started 0 excepciones), ✔ publicada (release 405094321, CDN byte a byte md5 b2165d4e5bc1da5a1ee62761a8a4cec6 — ver fila .69: su contenido viaja TODO en este release), ⏳ en juego | EL ESPAÑOL ESPAÑA BORRADO + LA ESPAÑOL LATAM COMPLETA — la letra del usuario: «algo que también debes hacer es borrar el idioma español españa». (1) `es-ES_Mods.AethonMod.hjson` ELIMINADO (81.885 B de espejo muerto): el mod habla **es-MX (PRIMARIO) + en-US** — el juego en «Español (España)» cae al inglés; docs de estado actual (README/CARACTERISTICAS/COMPILACION/DISEÑO) sin rastro del es-ES. (2) BONUS SIMETRÍA: 50 claves que existían SOLO en en-US (48 tooltips vacías del arsenal de pruebas + 2 DisplayName de mascotas, deuda de la .65 anterior incluso al espejo) activadas/traducidas en es-MX — el registro queda 771/771. (3) LA PUBLICACIÓN ACUMULADA: la .69 verificada pero bloqueada por el token muerto sale ENTERA dentro de la .70 (commit ce0e984 + el de la .70, un solo release). Lección nueva: tras cada cirugía hjson verificar `git diff --stat` — un editor expandió tabs→espacios y volteó el archivo entero (reconstruido byte a byte desde HEAD). |
 | **v6.50.69** | ✅ Build-verificada (oráculo 0/0 A LA PRIMERA, build real 0/0, .tmod 4.223.695 B 393 entradas, EOF exacto, 3/3 hjson byte-idénticos, DLL 9 símbolos nuevos VIVOS/6 muertos AUSENTES, headless Server started 0 excepciones), ✔ publicada DENTRO de la v6.50.70 (release 405094321 — sin release propio: el usuario jamás recibió la .69; su commit ce0e984 + TODO su contenido viajan en el release v6.50.70), ⏳ en juego (junto con la .70) | LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS: Devorador v2 con LA ELIPSE REAL del jefe (velo estirado + rejilla de puffs — el Rey Slime queda ENTERO), el festín REESCRITO con la forma actual (CabezaDeBruma — las Fauces murieron) y EL TRAGO animado (la bruma encoje hacia la punta y vuelve por el cuerpo = LA ANIMACIÓN que sustituye la muerte), PreDraw retira el sprite bajo la cobertura + PURGA de gore/polvo (muerte sin animación predeterminada, loot+logros intactos), LA MARCA CONTINUA (el golpe mortal de CUALQUIER fuente durante caza/mordida dispara el festín), más bruma en La Sombra (2 capas + BrumaColumna v2) y las 3 hermanas nuevas de tentáculos: EL AZOTE (el látigo), LA MORDIDA (el glotón que mastica de verdad), LA CRÍA (la camada autónoma de 3) + festines 8/9/10 nuevos |
 | **v6.50.68** | ✅ Build-verificada (oráculo 0/0 — cazó 5: `bool?` en Colliding, `Rectangle.Center()`→Vector2 en FNA, `MathHelper.PiOver8` inexistente, using BrumaFX ×2 —, build real 0/0, .tmod 4.220.672 B 393 entradas, EOF exacto, 3/3 hjson byte-idénticos, 375 rawimg, DLL con PlumaPaginaProjectile/HojaPaginaProjectile/SelloPaginaProjectile/PlumaDeLaPagina/HojaDeLaPagina/SelloDeLaPagina/CabezaDeBruma/Devorador/SombraProyectada VIVOS (9/9) y los 6 muertos de las hermanas AUSENTES, headless Server started 0 excepciones), ✔ publicada (release 404680686, CDN byte a byte md5 da515d5ea17585a17f150a3c3351c572), ⏳ en juego | LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS — la letra del usuario: «los tentáculos están geniales… pero la boca deja mucho que desear… la boca está separada del tentáculo… la base nace en el suelo bajo el jugador y no sobre el jugador… cambia los otros bastones por conceptos diferentes pero deja tal y como está La Sombra de la Página». (1) **EL FIX DE LA RAÍZ**: RaizDeSombra (raycast al suelo) → MountedCenter del portador — el tentáculo SALE DEL JUGADOR; el charco queda como SOMBRA PROYECTADA decorativa (SombraProyectada, 44 px alfa 0,55); Colliding con la raíz nueva; física de ColumnaViva INTACTA. (2) **LA BOCA ES BRUMA**: Fauces retiradas de La Sombra (se dibujaban en Projectile.Center, ADELANTE de la punta verlet = la separación de la imagen); NUEVO SombrasLib.CabezaDeBruma (la punta disuelta en humo, dibujada EN la punta real — unión por construcción) + SombrasLib.Devorador (al morder: la masa de bruma negra que CUBRE LA TOTALIDAD del jefe — puente de puffs punta→jefe + 2 Clouds + TRAGADO con pulso 4,6 Hz + ALMAS volviendo por el cuerpo + borde violeta/rojo + la herida); el festín también: Fauces ancladas a la PUNTA REAL (antes en destino). (3) **LOS CUATRO CONCEPTOS**: Marea/Mirada/Nido BORRADAS (6 .cs + 3 png, estilos 5/6/7 muertos) → LA PLUMA DE LA PÁGINA (95 daño: 3 agujas de hueso perforantes ×4, homing suave 0,55 rad, rastro de tinta (Ribbon), colisión de segmento, salpicaduras; festín 8 = LA LLUVIA DE TINTA), LA HOJA DE LA PÁGINA (105: EL MOLINO — 4 crescentes orbitan acelerando 34→94 px y salen en abanico al cursor; posición = FUNCIÓN PURA del tick, ancla congelada al disparar; festín 9 = EL MOLINO DE FILOS contrarrotante que se ciñe) y EL SELLO DE LA PÁGINA (190: TRAZADO 36 t del círculo rúnico → ERUPCIÓN 28 t con 6 garras + bruma + herida roja → POSO 116 t mordiendo; festín 10 = EL SELLO DEL JUICIO); las 3 marcan con FaucesGlobalNPC.Marcar si su golpe mata (el festín ya no es solo de los drains). (4) BolsaSombras con los 4 conceptos + tooltips es×2/en reescritos (script Python tabs literales: 9 ops/idioma, llaves 283/283, cero residuos) + 3 iconos 30×30 (pluma 7,5 / hoja 8 / sello 6,5 — 4 rondas VLM hasta «Ship them»). |

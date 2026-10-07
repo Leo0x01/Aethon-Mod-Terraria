@@ -8,47 +8,51 @@ using AethonMod.Content.Projectiles.Sombras;
 namespace AethonMod.Content.Weapons.Sombras
 {
     /// <summary>
-    /// MORDIDADELAPAGINA — v6.50.69 — ARMA NUEVA 2: LA MORDIDA DE LA PÁGINA.
+    /// PAGINAARRANCADA — v6.50.71 — ARMA NUEVA 3 (la que ocupa el lugar de
+    /// la Cría: conceptos COMPLETAMENTE distintos, nada de tentáculos).
     ///
-    /// La Hoja murió («se ven y funcionan horrible»). LA MORDIDA es el
-    /// glotón de la familia: tentáculo CORTO Y GORDO con cabeza de bruma
-    /// ENORME y TRES GARRAS DE HUESO que cierran de golpe — se cuelga de
-    /// UNA presa y le da MORDIDAS de verdad cada 16 ticks. A un jefe le
-    /// queda una mordida de vida → LA DEVORACIÓN (festín estilo 9, LA
-    /// MASTICACIÓN GIGANTE). Arma de prueba: LA BOLSA DE LAS SOMBRAS
-    /// (receta de 5 madera — protocolo v6.14.2). 100% código.
+    /// «Lo que el libro escribe, el libro lo arranca.» LA PÁGINA
+    /// ARRANCADA: un MARCO de sombra se traza alrededor del enemigo —con
+    /// SUS RENGLONES y su MARGEN ROJO, como una hoja de cuaderno— y CADA
+    /// TIEMBLA se ciñe más: un arranque, un desgarro, un bocado. Cuando
+    /// la hoja ya no puede encogerse, lo que quedó dentro ES PÁRRAFO: la
+    /// página se arranca y se lo lleva al libro. A 1 de vida: LA
+    /// DEVORACIÓN — el festín estilo 13, EL ARREBATO.
+    ///
+    /// ARMA DE PRUEBA: LA BOLSA DE LAS SOMBRAS + receta de 5 madera
+    /// (protocolo v6.14.2). 100% código: ni un sprite.
     /// </summary>
-    public class MordidaDeLaPagina : ModItem
+    public class PaginaArrancada : ModItem
     {
         public override void SetStaticDefaults() { }
 
         public override void SetDefaults()
         {
-            Item.damage = 235;
+            Item.damage = 230;
             Item.DamageType = DamageClass.Generic;
             Item.width = 30;
             Item.height = 30;
-            Item.useTime = 42;
-            Item.useAnimation = 42;
+            Item.useTime = 55;
+            Item.useAnimation = 55;
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<MordidaPaginaProjectile>();
+            Item.shoot = ModContent.ProjectileType<PaginaArrancadaProjectile>();
             Item.shootSpeed = 14f;
             Item.mana = 0;
             Item.noMelee = true;
             Item.rare = ItemRarityID.Quest;
             Item.value = Item.buyPrice(0, 0, 0, 0);
-            Item.UseSound = SoundID.Item122;
+            Item.UseSound = SoundID.Item74;
         }
 
         public override bool CanUseItem(Player player)
         {
-            // UNA sola mordida viva por portador
+            // UNA sola página viva por portador (el libro arranca de a una hoja)
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile p = Main.projectile[i];
                 if (p != null && p.active && p.owner == player.whoAmI &&
-                    p.type == ModContent.ProjectileType<MordidaPaginaProjectile>())
+                    p.type == ModContent.ProjectileType<PaginaArrancadaProjectile>())
                     return false;
             }
             return true;
@@ -57,9 +61,8 @@ namespace AethonMod.Content.Weapons.Sombras
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // LA PRESA: el jefe más cercano a CUALQUIER distancia; sin
-            // jefes, el enemigo más cercano en 1800 px (buscador de La
-            // Sombra — el glotón cena igual)
+            // LA PRESA: el jefe más cercano (a CUALQUIER distancia); sin
+            // jefes, el enemigo más cercano en 1800 px (la chusma también cena)
             NPC presa = SombraDeLaPagina.BuscarPresa(player.Center, true)
                      ?? SombraDeLaPagina.BuscarPresa(player.Center, false);
             Vector2 rumbo = presa != null

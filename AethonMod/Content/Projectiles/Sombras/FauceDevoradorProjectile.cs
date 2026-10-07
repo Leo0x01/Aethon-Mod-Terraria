@@ -40,7 +40,7 @@ namespace AethonMod.Content.Projectiles.Sombras
     ///   +60    EL POSO — las últimas volutas sobre el botín y el
     ///          tentáculo regresa al portador.
     ///
-    /// ai[0] = whoAmI del jefe · ai[1] = estilo (3/8/9/10) · ai[2] = tick.
+    /// ai[0] = whoAmI del jefe · ai[1] = estilo (3/11/12/13) · ai[2] = tick.
     /// localAI[0] = whoAmI del portador (capturado en vida del jefe).
     /// </summary>
     public class FauceDevoradorProjectile : ModProjectile
@@ -123,13 +123,18 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             if (Main.netMode == NetmodeID.Server) return;   // el server no dibuja
 
-            // === LOS SONIDOS DEL FESTÍN (los estilos 8/9/10 traen los
+            // === LOS SONIDOS DEL FESTÍN (los estilos 11/12/13 traen los
             // suyos; el 3 — La Sombra de la Página — queda como siempre:
             // rugido + los tres golpes del NPC) ===
             byte estiloSonido = (byte)Projectile.ai[1];
-            if (estiloSonido >= 8)
+            if (estiloSonido >= 11)
             {
-                float tono = estiloSonido == 8 ? -0.40f : estiloSonido == 9 ? -0.52f : -0.26f;
+                float tono = estiloSonido switch
+                {
+                    11 => -0.46f,   // LA MANO: el puño que sepulta
+                    12 => -0.16f,   // LAS TIJERAS: el filo que arranca
+                    _ => -0.34f,    // LA PÁGINA: el papel que se rasga
+                };
                 if (t == 28) Sonar(SoundID.Item122.WithPitchOffset(tono).WithVolumeScale(0.8f), Projectile.Center);    // la sombra se alza
                 if (t == 62) Sonar(SoundID.Item74.WithPitchOffset(tono).WithVolumeScale(0.75f), Projectile.Center);    // el abrazo cae
                 if (t == 96 || t == 136) Sonar(SoundID.NPCHit9.WithPitchOffset(tono * 0.5f).WithVolumeScale(0.7f), Projectile.Center); // mastica
@@ -205,7 +210,10 @@ namespace AethonMod.Content.Projectiles.Sombras
             Vector2 destino = Vector2.Lerp(raiz + new Vector2(0, -160f), jefe.Center, alcance);
             destino = Vector2.Lerp(destino, raiz + new Vector2(0f, -50f), inhala * 0.85f);
             Vector2[] col = SombrasLib.ColumnaViva(raiz, destino, tiempo, semilla, 22, 0.20f, gancho: 0.45f);
-            SombrasLib.Masa(col, 58f, 20f, 0.96f * vivoF, semilla, tiempo);
+            // v6.50.71 — EL PERFIL FUSIFORME (la letra del usuario): fina en
+            // el jugador, GORDA al centro, fina en la punta — el tentáculo
+            // GIGANTE del festín luce igual que el arma que lo invocó
+            SombrasLib.Masa(col, 14f, 22f, 0.96f * vivoF, semilla, tiempo, grosorCentro: 62f);
 
             // === LA BRUMA DEL CUERPO GIGANTE — v6.50.69: DOS CAPAS (más
             // bruma en todo — la letra del usuario para la familia entera)
@@ -304,25 +312,29 @@ namespace AethonMod.Content.Projectiles.Sombras
 
         // ==================================================================
         // ==================================================================
-        //  v6.50.69 — LAS FIRMAS DE LAS ARMAS NUEVAS (estilos 8/9/10 — la
-        //  familia de tentáculos: EL AZOTE, LA MORDIDA y LA CRÍA) sobre el
-        //  festín común (tentáculo gigante + DEVORADOR de cobertura total).
-        //  El estilo 3 (La Sombra de la Página) no lleva adorno: es la base.
+        //  v6.50.71 — LAS FIRMAS DE LAS ARMAS NUEVAS (estilos 11/12/13 —
+        //  LOS ÚTILES DEL ESCRIBA: LA MANO, LAS TIJERAS y LA PÁGINA
+        //  ARRANCADA) sobre el festín común (tentáculo gigante + DEVORADOR
+        //  de cobertura total). El estilo 3 (La Sombra de la Página) no
+        //  lleva adorno: es la base.
         // ==================================================================
 
         /// <summary>
-        /// Estilo 8 (EL AZOTE) — EL LATIGAZO TRIPLE: tres azotes GIGANTES
-        /// cruzan al jefe (uno por cada mordida del festín), cada uno una
-        /// cuerda viva que barre un arco completo con su onda de choque.
-        /// Estilo 9 (LA MORDIDA) — LA MASTICACIÓN GIGANTE: cuatro garras
-        /// de hueso cierran desde las diagonales sobre la bruma, al ritmo
-        /// del masticar, con esquirlas al apretar. Estilo 10 (LA CRÍA) —
-        /// LA MENADA: las tres crías se vuelven GIGANTES y azotan al jefe
-        /// POR TURNOS desde tres ángulos, con su ojo rasgado mirándolo.
+        /// Estilo 11 (LA MANO DEL ESCRIBA) — EL PUÑO DEL ESCRIBA: la garra
+        /// COLOSAL baja del techo (el brazo vive fuera de pantalla), su ojo
+        /// de palma mira FIJO al reo y sus cinco dedos envuelven la elipse
+        /// CIÑENDO al ritmo del masticar; en EL TRAGO el puño se CIERRA y
+        /// SUBE con la nube. Estilo 12 (LAS TIJERAS DE LA PÁGINA) — EL
+        /// CORTE FINAL: las hojas gigantes tijeretean al reo con cada
+        /// mordida (cada cierre, un TAJO BLANCO que lo cruza) y en EL TRAGO
+        /// quedan CERRADAS. Estilo 13 (LA PÁGINA ARRANCADA) — EL ARREBATO:
+        /// el MARCO de hoja de cuaderno (renglones + margen rojo + sellos
+        /// rúnicos) ciñe la elipse, tiembla con cada mordida y en EL TRAGO
+        /// SE ARRANCA — vuela al portador dejando el hueco blanco.
         /// </summary>
         private void DrawAdorno(NPC jefe, byte estilo)
         {
-            if (estilo < 8) return;
+            if (estilo < 11) return;
             float tiempo = Main.GlobalTimeWrappedHourly;
             int semilla = Projectile.whoAmI * 31 + jefe.whoAmI;
             float t = Projectile.ai[2];
@@ -332,109 +344,210 @@ namespace AethonMod.Content.Projectiles.Sombras
             float inhala = MathHelper.Clamp((t - 150f) / 55f, 0f, 1f);
             float vivo = 1f;
             float radio = MathHelper.Clamp(jefe.Size.Length() * 0.7f, 90f, 300f);
+            // LA ELIPSE REAL DEL JEFE (la lección del Rey Slime — como EL DEVORADOR)
+            float rx = MathHelper.Clamp(jefe.width * 0.62f, 76f, 330f);
+            float ry = MathHelper.Clamp(jefe.height * 0.62f, 76f, 350f);
 
             switch (estilo)
             {
-                case 8: // EL AZOTE — el latigazo triple
+                case 11: // LA MANO DEL ESCRIBA — el puño que sepulta
                 {
                     if (envuelve <= 0.05f) break;
-                    // los tres azotes: centrados en las mordidas del festín
-                    float[] marcas = { 78f, 118f, 158f };
-                    for (int k = 0; k < 3; k++)
+
+                    // LA PALMA COLOSAL cuelga del techo sobre el reo (el
+                    // brazo vive FUERA de pantalla: el escriba ESCRIBE desde arriba)
+                    float muerde = CicloMasticar(t);
+                    float cuelga = 70f + ry * 0.95f - 30f * inhala;   // en el trago RECOGE
+                    Vector2 palma = jefe.Center + new Vector2(0f, -cuelga);
+                    Vector2 haciaReo = (jefe.Center - palma).SafeNormalize(Vector2.UnitY);
+
+                    // el brazo que sube al techo (la muñeca colosal)
+                    VFXCore.Begin();
+                    VFXCore.Line(palma, palma + new Vector2(0f, -260f),
+                        SombrasLib.Alfa(SombrasLib.Negro, 0.95f * envuelve * vivo), 58f);
+                    VFXCore.FlushAlpha(VFXCore.Pixel);
+
+                    // LA PALMA + su OJO rasgado MIRANDO FIJO al reo
+                    VFXCore.Begin();
+                    VFXCore.Quad(palma, SombrasLib.Alfa(SombrasLib.Negro, 0.95f * envuelve * vivo),
+                        new Vector2(rx * 1.7f, ry * 0.95f), 0f, VFXCore.GlowOrb);
+                    VFXCore.FlushAlpha();
+                    VFXCore.Begin();
+                    SombrasLib.Ojo(palma + haciaReo * 6f, 34f, jefe.Center - palma,
+                        envuelve * vivo, pupila: true, rasgada: true);
+                    VFXCore.FlushAdditive();
+
+                    // LOS CINCO DEDOS envuelven la elipse — CIÑEN al masticar
+                    for (int k = 0; k < 5; k++)
                     {
-                        float dt = t - marcas[k];
-                        if (dt < -6f || dt > 20f) continue;
+                        float u = (k - 2f) / 2f;                        // −1..1
+                        bool pulgar = k == 4;
+                        float lado = pulgar ? 1.45f : u;
+                        Vector2 raiz = palma + new Vector2(lado * rx * 0.62f, 12f);
 
-                        // EL ORIGEN del azote (fijo por golpe: arriba-izq,
-                        // arriba-der y cenit — el triangulo del castigo)
-                        float angO = MathHelper.PiOver2 + (k - 1) * 0.9f;
-                        Vector2 origen = jefe.Center + new Vector2(MathF.Cos(angO), MathF.Sin(angO)) * radio * 2.1f;
+                        // el punto de la jaula: el arco SUPERIOR de la elipse,
+                        // ciñe al morder (y en el trago CIERRA el puño)
+                        float jj = pulgar ? 1.18f : u * 0.92f;
+                        float yy = MathF.Sqrt(MathF.Max(0f, 1f - jj * jj));
+                        Vector2 jaula = jefe.Center + new Vector2(jj * rx,
+                            -yy * ry * (1.02f - 0.22f * muerde) + 8f);
+                        jaula = Vector2.Lerp(jaula, jefe.Center, inhala * 0.8f);
 
-                        // LA PUNTA barre un arco que CRUZA el centro del jefe
-                        float barrido = SombrasLib.DeGolpe(MathHelper.Clamp((dt + 6f) / 20f, 0f, 1f));
-                        float angB0 = angO + MathHelper.Pi + 0.95f;
-                        float angB = angB0 - 1.9f * barrido;
-                        Vector2 punta = jefe.Center + new Vector2(MathF.Cos(angB), MathF.Sin(angB) * 0.8f) * radio * 1.15f;
+                        Vector2[] dedo = SombrasLib.ColumnaViva(raiz, jaula, tiempo, semilla + 511 + k * 13,
+                            9, 0.12f, gancho: 0f);
+                        SombrasLib.Masa(dedo, 6f, 4f, 0.92f * envuelve * vivo, semilla + k * 13, tiempo, grosorCentro: 20f);
+                        SombrasLib.Garra(dedo[dedo.Length - 1], (jaula - raiz).SafeNormalize(Vector2.UnitY),
+                            34f * envuelve, 0.9f * vivo, 0.6f);
+                    }
 
-                        // LA CUERDA viva del azote (fina, con gancho)
-                        Vector2[] azote = SombrasLib.ColumnaViva(origen, punta, tiempo, semilla + 801 + k * 3,
-                            14, 0.26f, gancho: 0.6f);
-                        SombrasLib.Masa(azote, 26f, 7f, 0.9f * vivo, semilla + k, tiempo);
-                        SombrasLib.BrumaColumna(azote, 22f, 0.5f * vivo, tiempo, semilla + 41 + k, 6);
+                    // la bruma entre los dedos al apretar
+                    if (muerde < 0.25f)
+                        SombrasLib.Bruma(jefe.Center + new Vector2(0f, -ry * 0.7f), 46f,
+                            0.4f * vivo * (1f - muerde), tiempo, semilla + 88);
+                    break;
+                }
+                case 12: // LAS TIJERAS DE LA PÁGINA — el corte final
+                {
+                    if (envuelve <= 0.05f) break;
 
-                        // EL CRUJE — la onda al cruzar el centro
-                        if (dt >= 0f && dt < 14f)
-                            SombrasLib.OndaChoque(jefe.Center, radio * (0.5f + 0.8f * dt / 14f), 0.5f * (1f - dt / 14f), roja: true);
+                    // EL GOZNE en la diagonal; las hojas GIGANTES cruzan al reo
+                    float muerde = CicloMasticar(t);
+                    Vector2 gozne = jefe.Center + new Vector2(-rx * 1.25f, -ry * 1.25f) * (1f - 0.3f * inhala);
+                    float bisagra = (jefe.Center - gozne).ToRotation();
+                    float largo = Vector2.Distance(gozne, jefe.Center) * 2.35f;
+                    // abre con el masticar; en EL TRAGO quedan CERRADAS del todo
+                    float ap = inhala > 0.45f ? 0.02f : 0.22f + 0.68f * muerde;
+
+                    for (int lado = -1; lado <= 1; lado += 2)
+                    {
+                        float ang = bisagra + lado * (0.12f + ap * 0.58f);
+                        // LA HOJA CURVA — el arco desde el gozne (la misma
+                        // matemática del arma, GIGANTE)
+                        Vector2[] hoja = new Vector2[10];
+                        for (int i = 0; i < 10; i++)
+                        {
+                            float f = i / 9f;
+                            float r = MathHelper.Lerp(30f, largo, f * f * (3f - 2f * f));
+                            float aA = ang - lado * 0.40f * f * f;
+                            hoja[i] = gozne + new Vector2(MathF.Cos(aA), MathF.Sin(aA)) * r;
+                        }
+                        SombrasLib.Masa(hoja, 10f, 5f, 0.94f * envuelve * vivo, semilla + lado * 17, tiempo, grosorCentro: 26f);
+
+                        // EL FILO BLANCO — el canto interior de hueso
+                        VFXCore.Begin();
+                        Vector2 adentro = new(MathF.Cos(ang - lado * 0.30f), MathF.Sin(ang - lado * 0.30f));
+                        for (int i = 2; i < hoja.Length; i++)
+                            VFXCore.Line(hoja[i - 1] + adentro * 7f, hoja[i] + adentro * 7f,
+                                SombrasLib.Alfa(SombrasLib.Blanco, 0.85f * envuelve * vivo), 4.5f);
+                        VFXCore.FlushAdditive(VFXCore.Pixel);
+                    }
+
+                    // EL REMACHE violeta del gozne
+                    VFXCore.Begin();
+                    VFXCore.Quad(gozne, SombrasLib.Alfa(SombrasLib.Violeta, 0.35f * envuelve * vivo),
+                        new Vector2(90f, 90f));
+                    VFXCore.FlushAdditive();
+
+                    // EL TAJO: al cerrar, la línea blanca CRUZA al reo a lo
+                    // largo de las hojas (la línea de corte) + su onda
+                    if (muerde < 0.12f)
+                    {
+                        Vector2 eje = bisagra.ToRotationVector2();
+                        float fuerza = 1f - muerde / 0.12f;
+                        VFXCore.Begin();
+                        VFXCore.Line(jefe.Center - eje * (rx + 40f), jefe.Center + eje * (rx + 40f),
+                            SombrasLib.Alfa(SombrasLib.Blanco, 0.9f * fuerza * vivo), 12f * fuerza);
+                        VFXCore.FlushAdditive(VFXCore.Pixel);
+                        SombrasLib.OndaChoque(jefe.Center, radio * (0.6f + 0.5f * fuerza),
+                            0.45f * fuerza * vivo, roja: false);
                     }
                     break;
                 }
-                case 9: // LA MORDIDA — la masticación gigante
+                case 13: // LA PÁGINA ARRANCADA — el arrebato
                 {
                     if (envuelve <= 0.05f) break;
-                    // LAS CUATRO GARRAS cierran desde las diagonales, al
-                    // ritmo del masticar del festín (CicloMasticar)
+
+                    // EL MARCO alrededor de la elipse: ciñe conforme come
                     float muerde = CicloMasticar(t);
-                    float cierra = MathHelper.Clamp(festin * 1.2f, 0f, 1f);
+                    float esc = MathHelper.Lerp(1.55f, 1.04f, festin);
+                    Vector2 c = jefe.Center;
+                    Vector2 a = c - new Vector2(rx * esc, ry * esc);
+                    Vector2 b = c + new Vector2(rx * esc, ry * esc);
+                    Vector2[] esq = { new(a.X, a.Y), new(b.X, a.Y), new(b.X, b.Y), new(a.X, b.Y) };
+
+                    // en EL TRAGO la hoja SE ARRANCA: vuela al portador
+                    Player portador = Portador(jefe);
+                    float vuela = inhala;
+                    if (vuela > 0.05f)
+                    {
+                        Vector2 posHoja = Vector2.Lerp(c, portador.MountedCenter, SombrasLib.DeGolpe(vuela));
+                        float encoge = (1f - 0.8f * vuela) * esc;
+                        Vector2 nA = posHoja - new Vector2(rx * encoge, ry * encoge);
+                        Vector2 nB = posHoja + new Vector2(rx * encoge, ry * encoge);
+                        esq[0] = new(nA.X, nA.Y); esq[1] = new(nB.X, nA.Y);
+                        esq[2] = new(nB.X, nB.Y); esq[3] = new(nA.X, nB.Y);
+
+                        // EL VOODO — el hueco blanco donde estaba el reo
+                        if (vuela < 0.6f)
+                        {
+                            VFXCore.Begin();
+                            VFXCore.Quad(c, SombrasLib.Alfa(SombrasLib.Blanco, 0.5f * (1f - vuela / 0.6f) * vivo),
+                                new Vector2(rx * 2f, ry * 2f), 0f, VFXCore.Pixel);
+                            VFXCore.FlushAlpha(VFXCore.Pixel);
+                        }
+                    }
+
+                    // LAS CUATRO BARRAS del marco + su rim
+                    VFXCore.Begin();
                     for (int k = 0; k < 4; k++)
                     {
-                        float ang = MathHelper.PiOver4 + k * MathHelper.PiOver2 + tiempo * 0.12f;
-                        Vector2 dir = new(MathF.Cos(ang), MathF.Sin(ang));
-                        Vector2 baseG = jefe.Center + dir * radio * (1.45f - 0.35f * muerde) * (1f - 0.25f * inhala);
-                        SombrasLib.Garra(baseG, -dir, radio * (0.75f + 0.35f * muerde) * cierra,
-                            0.92f * vivo, (k % 2 == 0 ? 1f : -1f) * 0.55f);
+                        VFXCore.Line(esq[k], esq[(k + 1) % 4], SombrasLib.Alfa(SombrasLib.Negro, 0.95f * envuelve * vivo), 22f);
+                        VFXCore.Line(esq[k], esq[(k + 1) % 4], SombrasLib.Alfa(SombrasLib.Violeta, 0.16f * vivo), 30f);
                     }
+                    VFXCore.FlushAlpha(VFXCore.Pixel);
 
-                    // LAS ESQUIRLAS — hueso que salta al apretar
-                    if (muerde < 0.2f && VFXCore.Colmillo != null)
+                    // RENGLONES + MARGEN ROJO + sellos rúnicos (la hoja)
+                    VFXCore.Begin();
+                    for (int k = 1; k <= 6; k++)
                     {
+                        float f = k / 7f;
+                        float y = MathHelper.Lerp(esq[0].Y, esq[2].Y, f);
+                        VFXCore.Line(new Vector2(esq[0].X + 8f, y), new Vector2(esq[1].X - 8f, y),
+                            SombrasLib.Alfa(SombrasLib.Violeta, 0.12f * envuelve * vivo * (1f - vuela)), 2f);
+                    }
+                    float xM = MathHelper.Lerp(esq[0].X, esq[1].X, 0.24f);
+                    VFXCore.Line(new Vector2(xM, esq[0].Y + 6f), new Vector2(xM, esq[3].Y - 6f),
+                        SombrasLib.Alfa(SombrasLib.Rojo, 0.16f * envuelve * vivo * (1f - vuela)), 2.5f);
+                    for (int k = 0; k < 4; k++)
+                        VFXCore.Quad(esq[k], SombrasLib.Alfa(SombrasLib.Blanco, 0.5f * envuelve * vivo),
+                            VFXCore.RingQuadSize(16f), 0f, VFXCore.Ring);
+                    VFXCore.FlushAdditive();
+
+                    // EL TIEMBLA: zigzag blanco en las esquinas con cada mordida
+                    if (muerde < 0.2f && vuela <= 0.05f)
+                    {
+                        float fuerza = 1f - muerde / 0.2f;
                         VFXCore.Begin();
-                        for (int k = 0; k < 6; k++)
+                        for (int k = 0; k < 4; k++)
                         {
-                            float f0 = SombrasLib.Frac(SombrasLib.semille(semilla + k * 5) * 0.91f + k * 0.618f);
-                            float ang = f0 * MathHelper.TwoPi + tiempo * 0.5f;
-                            Vector2 pos = jefe.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * radio * 1.15f;
-                            VFXCore.Quad(pos, SombrasLib.Alfa(SombrasLib.Blanco, 0.65f * vivo),
-                                new Vector2(7f, 22f), ang + MathHelper.PiOver2, VFXCore.Colmillo);
+                            Vector2 e = esq[k];
+                            Vector2 adentro = (c - e).SafeNormalize(Vector2.UnitX) * 30f;
+                            for (int j = -1; j <= 1; j += 2)
+                                VFXCore.Line(e + adentro * 0.4f,
+                                    e + adentro + new Vector2(-adentro.Y, adentro.X) * (j * 0.8f),
+                                    SombrasLib.Alfa(SombrasLib.Blanco, 0.85f * fuerza * vivo), 3.5f);
                         }
-                        VFXCore.FlushAdditive();
+                        VFXCore.FlushAdditive(VFXCore.Pixel);
                     }
-                    break;
-                }
-                case 10: // LA CRÍA — la menada gigante
-                {
-                    if (envuelve <= 0.05f) break;
-                    Player portador = Portador(jefe);
-                    Vector2 raiz = portador.MountedCenter;
-                    // LAS TRES CRÍAS GIGANTES: azotan POR TURNOS (una cada
-                    // 40 t, empezando con el festín) — y en el trago las
-                    // tres RECOGEN al portador
-                    for (int k = 0; k < 3; k++)
+
+                    // la bruma del perímetro de la hoja
+                    Vector2[] perim = new Vector2[16];
+                    for (int k = 0; k < 16; k++)
                     {
-                        float turno = MathHelper.Clamp((t - 66f - k * 40f) / 40f, 0f, 1f);
-                        if (turno <= 0f) continue;
-
-                        // el origen: alrededor del portador (la camada
-                        // vuelve a nacer de él — 120° entre hermanas)
-                        float angO = k * 2.0944f + tiempo * 0.35f;
-                        Vector2 origen = raiz + new Vector2(MathF.Cos(angO), MathF.Sin(angO)) * 52f;
-
-                        // el destino: orbita AL JEFE y SE CIÑE con su turno
-                        float angD = tiempo * (1.6f + 0.3f * k) + k * 2.1f;
-                        float rad = radio * (1.5f - 0.85f * turno) * (1f - 0.5f * inhala);
-                        Vector2 destino = Vector2.Lerp(jefe.Center + new Vector2(MathF.Cos(angD), MathF.Sin(angD)) * rad,
-                            raiz + new Vector2(0f, -40f), inhala * 0.8f);
-
-                        Vector2[] cria = SombrasLib.ColumnaViva(origen, destino, tiempo, semilla + 811 + k * 7,
-                            12, 0.3f, gancho: 0.35f);
-                        SombrasLib.Masa(cria, 30f, 9f, 0.9f * vivo, semilla + k * 3, tiempo);
-                        SombrasLib.BrumaColumna(cria, 26f, 0.5f * vivo, tiempo, semilla + 61 + k, 6);
-
-                        // EL OJO RASGADO de la cría — mira FIJO al jefe
-                        Vector2 puntaC = cria[cria.Length - 1];
-                        Vector2 mira = jefe.Center - puntaC;
-                        SombrasLib.Ojo(puntaC + mira.SafeNormalize(Vector2.UnitX) * 10f,
-                            16f, mira, 0.9f, pupila: true, rasgada: true);
+                        float f = k / 16f * 4f;
+                        perim[k] = Vector2.Lerp(esq[(int)f % 4], esq[((int)f + 1) % 4], SombrasLib.Frac(f));
                     }
+                    SombrasLib.BrumaColumna(perim, 24f, 0.36f * envuelve * vivo, tiempo, semilla + 97, 10);
                     break;
                 }
             }

@@ -259,7 +259,12 @@ namespace AethonMod.Content.Projectiles.Sombras
             // la punta — la base también se hace FLUIDA
             Vector2[] col = SombrasLib.ColumnaViva(raiz, Projectile.Center, tiempo, semilla, 20, 0.24f, gancho: 0.5f);
             float disipa = fase == FASE_DISIPAR ? MathHelper.Clamp(1f - t / 44f, 0f, 1f) : 1f;
-            SombrasLib.Masa(col, 40f, 12f, 0.95f * disipa, semilla, tiempo);
+            // v6.50.71 — EL PERFIL FUSIFORME (la letra del usuario): la base
+            // pegada al jugador MUY FINA (9 px) → se ENGORDA al centro (la
+            // panza de 44 px) → vuelve a ser FINA en la punta que toca al
+            // enemigo (13 px) — antes era un bíceps de 40 px naciendo del
+            // cuerpo: un garrote, no un látigo
+            SombrasLib.Masa(col, 9f, 13f, 0.95f * disipa, semilla, tiempo, grosorCentro: 44f);
 
             // === LA BRUMA NEGRA DEL CUERPO (v6.50.64): el tentáculo
             // 100% código también EXHALA — puﬀs vivos a lo largo ===
@@ -312,6 +317,13 @@ namespace AethonMod.Content.Projectiles.Sombras
                     _ => 0.5f * disipa,
                 };
                 SombrasLib.CabezaDeBruma(punta, rumbo, vigor * disipa, disipa, tiempo, semilla);
+
+                // v6.50.71 — MÁS BRUMA JUSTO EN LA PUNTA (la letra del
+                // usuario): la punta que toca al enemigo exhala SU PROPIA
+                // nube — más densa que la del cuerpo (el punto de
+                // contacto HUMEA: es donde la página MUERDE)
+                SombrasLib.Bruma(punta, 40f, 0.5f * disipa, tiempo, semilla + 31,
+                    new Vector2(MathF.Sin(tiempo * 0.9f) * 10f, -14f));
             }
         }
 

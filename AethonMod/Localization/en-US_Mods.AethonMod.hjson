@@ -98,53 +98,75 @@ Items: {
 			'''
 	}
 
-	AzoteDeLaPagina: {
-		// v6.50.69 — SISTER 1 (the .68 Quill/Blade/Seal "look and work horrible" —
-		// back to the meat-tentacle + bruma DNA, each with her own job)
-		DisplayName: The Lash of the Page
+	ManoDelEscriba: {
+		// v6.50.71 — SCRIBE'S TOOL 1 (the Hand replaces the Lash: completely
+		// different concepts, no more tentacle sisters)
+		DisplayName: The Scribe's Hand
 		Tooltip:
 			'''
-			"The page knows how to punish, too."
-			THE FAMILY'S WHIP: a LONG, thin tentacle that bursts FROM
-			YOUR BODY and CRACKS in a straight line — piercing EVERYTHING
-			in its path, bone tip first and a red edge running down the
-			body. Lash, crack, retract: the shadow's snap.
-			If your lash kills a boss: THE TRIPLE LASH — the feast of
-			the three strikes that cross the condemned.
-			(The Shadow's fast sister — 100% code.)
+			"Every book needs a hand to write it."
+			THE HAND THAT WALKS: a COLOSSAL shadow claw rises from your
+			pool, tethered by the wrist, and WALKS on its five fingers —
+			like a spider, like a scribe — toward your enemy. The palm
+			carries ONE slitted eye that never blinks; on arrival the
+			fingers CAGE it, the fist SQUEEZES in rhythm, and the POOL
+			beneath its feet grows with every grip: it is SINKING it
+			into shadow.
+			If your hand kills a boss: THE SCRIBE'S FIST — the feast of
+			the colossal claw that descends and buries it whole.
+			(The scribe's test tool — 100% code.)
 			'''
 	}
 
-	MordidaDeLaPagina: {
-		// v6.50.69 — SISTER 2 (the glutton: latches on and chews with real bites)
-		DisplayName: The Bite of the Page
+	TijerasDeLaPagina: {
+		// v6.50.71 — SCRIBE'S TOOL 2 (the Scissors replace the Bite)
+		DisplayName: The Page Scissors
 		Tooltip:
 			'''
-			"Doesn't share. Doesn't let go. Doesn't hurry."
-			THE FAMILY'S GLUTTON: a SHORT, THICK tentacle with an ENORMOUS
-			bruma head and THREE BONE CLAWS that snap shut. It hunts
-			slowly, LATCHES onto one prey and takes REAL BITES, one per
-			breath — chews, swallows, comes back for more.
-			When the boss is one bite from death: THE DEVOURING — the
-			feast of THE GIANT MAW.
-			(The Shadow's patient sister — 100% code.)
+			"Every fate is a sheet: these are the scissors."
+			THE SCISSORS THAT CUT: two curved shadow blades with a BONE
+			EDGE fly OPEN at the enemy —violet rivet at the hinge— and
+			SNIP: every close is a WHITE CUT that crosses the condemned,
+			and the severed slice drifts away and dissolves into bruma.
+			They cut slow but deep: every snip takes a FAT bite of life.
+			If your scissors kill a boss: THE FINAL CUT — the feast of
+			the snip that tears it off the page.
+			(The scribe's test tool — 100% code.)
 			'''
 	}
 
-	CriaDeLaPagina: {
-		// v6.50.69 — SISTER 3 (the brood: three tentacles living on you, hunting alone)
-		DisplayName: The Brood of the Page
+	PaginaArrancada: {
+		// v6.50.71 — SCRIBE'S TOOL 3 (the Page replaces the Brood)
+		DisplayName: The Torn Page
 		Tooltip:
 			'''
-			"You are not alone. You never were."
-			THE FAMILY'S LITTER: THREE small tentacles that LIVE with you —
-			they orbit your body, hanging from it, and HUNT ON THEIR OWN:
-			whatever comes close gets the lash. Each brood has its slit
-			eye WATCHING you… and watching its prey.
-			One brood per use, up to three. No aiming: just summon.
-			If their bite kills a boss: THE PACK — the feast of the three
-			giant sisters.
-			(The Shadow's guardian sister — 100% code.)
+			"What the book writes, the book tears out."
+			THE PAGE THAT TRAPS: a shadow FRAME draws itself around the
+			enemy —with its RULED LINES, its RED MARGIN and its folio: a
+			HUGE notebook sheet— and with every SHUDDER it cinches
+			tighter: one tear, one white rip at the corners, one bite.
+			The inner VEIL darkens the condemned: what stays inside is
+			BECOMING PARAGRAPH.
+			If your page kills a boss: THE SNATCH — the feast of the
+			sheet torn out boss and all, flying home to the book.
+			(The scribe's test tool — 100% code.)
+			'''
+	}
+
+	CodiceVivo: {
+		// v6.50.71 — THE USER'S TEST: a sprite born from CODE turned into an
+		// ANIMATED weapon, completely separate from the rest (Tester's Bag)
+		DisplayName: The Living Codex
+		Tooltip:
+			'''
+			"A book that drew itself — one line of code at a time."
+			THE TEST SPRITE: this codex has no hand-drawn sprite — it was BORN
+			FROM CODE (the pixel matrix, 26 colors) and that's why it can
+			ANIMATE: ITS INK PULSES, ITS EYE BLINKS — watch it in your
+			inventory. When used, the codex LEAPS from your hands, flies to
+			the cursor and HOVERS over the field firing GUIDED VIOLET SPARKS
+			at nearby enemies… then returns to you like a boomerang.
+			(A standalone test weapon — 100% code-born sprite.)
 			'''
 	}
 
@@ -1865,6 +1887,11 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	CodiceVivoChispa.DisplayName: Codice Vivo Chispa
+	CodiceVivoProjectile.DisplayName: Codice Vivo Projectile
+	ManoEscribaProjectile.DisplayName: Mano Escriba Projectile
+	PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
+	TijerasPaginaProjectile.DisplayName: Tijeras Pagina Projectile
 }
 
 Buffs: {

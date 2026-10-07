@@ -69,6 +69,18 @@ namespace AethonMod
             BackgroundTextureLoader.AddBackgroundTexture(this, $"{Name}/{SanctumBackgroundStyle.RutaClose}");
         }
 
+        public override void PostSetupContent()
+        {
+            // v6.50.71 — EL CÓDICE VIVO (la prueba del sprite-de-código del
+            // usuario): el sprite del ITEM es un STRIP ANIMADO (8 frames de
+            // 48 px — la tinta late y el ojo PARPADEA). Se registra AQUÍ (ya
+            // con todos los tipos cargados) para que el icono ANIME en el
+            // inventario y el objeto tirado en el mundo — como las almas de
+            // vanilla (ItemID.Sets.AnimatesAsSoul está en el propio item).
+            Main.RegisterItemAnimation(ModContent.ItemType<Content.Weapons.CodiceVivo.CodiceVivo>(),
+                new Terraria.DataStructures.DrawAnimationVertical(8, 7));
+        }
+
         public override void Unload()
         {
             // v6.50.1 — EL BARRENDERO DE MEMORIA (el warning del client.log:

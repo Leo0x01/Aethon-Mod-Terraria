@@ -154,7 +154,9 @@ y el worklog del entorno de desarrollo):
    verificar que las firmas nuevas de la versión están presentes (y las
    muertas, ausentes).
 5. **hjson simétricos** — es-MX y en-US con las mismas claves en el paquete
-   (es-ES borrado en la v6.50.70).
+   (y es-ES = espejo GENERADO de es-MX: correr
+   `python3 tools/sync_es_es_v65071.py` tras CADA edición del es-MX —
+   v6.50.71: todas las variantes de español caen en la nuestra).
 6. **Servidor headless** — arrancar el server dedicado con el mod: debe cargar
    SIN excepciones (Sandboxing → Adding → Configuring → Finalizing → menú de
    mundos).
@@ -224,7 +226,7 @@ Aethon-Mod-Terraria/      <- raíz del repo (docs y herramientas FUERA del mod)
 │   ├── AethonMod.cs        # Punto de entrada + guardián de identidad
 │   ├── AethonMod.csproj    # Solo IDE
 │   ├── Content/            # 296 .cs: Items, Weapons, NPCs, Projectiles, VFX, Systems…
-│   └── Localization/       # es-MX / en-US (hjson, ~2300 líneas c/u — es-ES borrado en la v6.50.70)
+│   └── Localization/       # es-MX (PRIMARIO) / en-US / es-ES espejo generado (~2300 líneas c/u)
 ├── README.md / COMPILACION.md / CHANGES.md / CARACTERISTICAS.md /
 │   DISEÑO_DEL_MOD.md / STABLE-SNAPSHOT.md        # Documentación del repo
 ├── ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh  # repo -> ModSources

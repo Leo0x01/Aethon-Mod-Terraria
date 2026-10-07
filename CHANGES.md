@@ -1,5 +1,110 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO
+
+**Feedback del usuario**: "las 3 nuevas armas se ven mal, pero La Sombra de
+la Página se ve bien; un detalle que debes agregar es que la base del
+tentáculo, la que está pegada al jugador, debe ser muy fina, luego se
+engorda en el centro y luego se vuelve fina otra vez en la punta que toca
+al enemigo, y justo en esa punta debería de haber un poco más de bruma…
+tengo el juego en español, pero el juego sale en inglés, haz que todas las
+variantes de español caigan en nuestra versión en español… bueno, volver a
+rediseñar las 3 armas nuevas… te tengo una propuesta: tengo un archivo png
+y también esa misma imagen creada con código; quiero que tomes la versión
+de código y la conviertas en el sprite de una nueva arma, esto como prueba,
+y quiero que animes ese sprite; el arma creada con este método deberá ser
+completamente a parte de las otras" (+ `codigo.txt`, la matriz de píxeles
+313×313 de 26 colores del grimorio vivo).
+
+**(1) TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA.** LA CAUSA: la
+.70 BORRÓ el es-ES por decreto — pero el juego del propio usuario vive en
+«Español» (cultura es-ES) y el mod le caía AL INGLÉS. LA CURA: `es-ES
+_Mods.AethonMod.hjson` REGRESA como **ESPEJO GENERADO de es-MX** —
+mismas claves, mismos textos (el español LATINOAMÉRICA, el idioma
+PRIMARIO): «Español (España)» y «Español (Latinoamérica)» ven EL MISMO
+español nuestro. El espejo lo produce `tools/sync_es_es_v65071.py`
+(idempotente, con verificación de cuerpo byte a byte + conteo de claves):
+**la regla de la casa nueva: editar SOLO es-MX y correr el script** —
+jamás editar el espejo a mano. El paquete pasa de 392 a **395 entradas**
+(+1 hjson del espejo +2 sprites del Códice Vivo −0: los 3 iconos nuevos
+reemplazan a los 3 viejos).
+
+**(2) EL TENTÁCULO FUSIFORME (La Sombra de la Página — la letra literal).**
+`SombrasLib.Masa` gana `grosorCentro`: el perfil pasa de bíceps (bulbo en
+la base + S-taper) a **PANZA DE LÁTIGO** — base pegada al jugador MUY FINA
+(9 px) → se ENGORDA al centro (44 px) → vuelve a ser FINA en la punta que
+toca al enemigo (13 px), con la sinusoide respirando (sin cuchillos). El
+tentáculo GIGANTE del festín luce IGUAL (14 → 62 → 22). Y **MÁS BRUMA
+JUSTO EN LA PUNTA**: la cabeza de bruma sube de 2 a 3 puffs orbitantes,
+el aliento de la boca de 4 a 6 puffs, y la punta gana SU PROPIA nube
+(`SombrasLib.Bruma` en la punta real: el punto de contacto HUMEA).
+
+**(3) LOS ÚTILES DEL ESCRIBA — LAS 3 ARMAS REDISEÑADAS DE CERO.** El
+Azote/Mordida/Cría de la .69 BORRADOS (6 .cs + 3 png; estilos de festín
+8/9/10 muertos) — el usuario pidió conceptos COMPLETAMENTE distintos, no
+más hermanas-tentáculo. NACE **LA MANO DEL ESCRIBA** (110 daño / 30 t): la
+garra colosal que NACE DEL CHARCO atada por la muñeca (cuerda fusiforme
+que se engorda hacia la palma) y **CAMINA SOBRE SUS DEDOS** — el paso de
+araña: 4 dedos + pulgar, cada uno fusiforme con GARRA de hueso, avanzando
+desfasados; la palma lleva EL OJO RASGADO que no parpadea; al alcanzar al
+reo LOS DEDOS LO ENCIERRAN (la jaula de cinco alrededor de su elipse), la
+palma APRIETA al ritmo del CicloApretar (el drain cae JUSTO al cierre) y
+el CHARCO bajo sus pies crece con cada apretón — lo está HUNDIENDO;
+festín 11 = **EL PUÑO DEL ESCRIBA** (la garra gigante baja del techo, el
+brazo vive fuera de pantalla, el ojo de palma mira FIJO y en el trago el
+puño se CIERRA y sube con la nube). **LAS TIJERAS DE LA PÁGINA** (190 / 38):
+dos HOJAS CURVAS de sombra con FILO DE HUESO blanco en el canto interior
+y remache violeta — vuelan ABIERTAS con homing y TIJERETEAN: cada cierre
+DE GOLPE es un TAJO BLANCO que cruza al reo, con LA REBANADA cortada
+separándose y disolviéndose en bruma (drain 6% por tijeretada); festín 12
+= **EL CORTE FINAL** (las hojas gigantes tijeretean con cada mordida y en
+el trago quedan CERRADAS). **LA PÁGINA ARRANCADA** (230 / 55): el MARCO de
+sombra que se traza alrededor del reo — una HOJA DE CUADERNO ENORME con
+sus RENGLONES violeta, su MARGEN ROJO, sus esquinas rúnicas y su folio —
+y CADA TIEMBLA (cada 14 t) ciñe más: desgarro blanco en zigzag en las
+esquinas, resorte de la hoja, el VELO oscureciendo al reo (SE VA
+VOLVIENDO PÁRRAFO) y drain 4%; festín 13 = **EL ARREBATO** (el marco
+ciñe la elipse y en el trago SE ARRANCA — vuela al portador dejando el
+hueco blanco donde estaba el reo). Las tres con LA MARCA CONTINUA y el
+drain→`Iniciar` de la casa. Iconos 38×38 pixel-art VLM-aprobados a la
+primera (mano 8/9 · tijeras 9/8 · página 9/8 — tools/v65071_iconos.py).
+
+**(4) EL CÓDICE VIVO — LA PRUEBA DEL USUARIO (completamente a parte).**
+El sprite nace de CÓDIGO: `tools/gen_codice_vivo_v65071.py` parsea la
+matriz de píxeles (`codigo.txt`), la renderiza y LA ANIMA — 8 frames con
+EL PULSO DE ENERGÍA (una onda de brillo recorre la rampa violeta de la
+paleta, frame a frame) y EL PARPADEO (el ojo central — la mayor componente
+conexa casi-blanca de forma almendrada, 17×29 — cierra con el color de
+párpado del anillo y abre). DOS sprites animados salen de ahí: el
+PROYECTIL (strip 128×1024, `Main.projFrames = 8`, un frame cada 7 t) y el
+ITEM (strip 48×384 registrado con `Main.RegisterItemAnimation` +
+`ItemID.Sets.AnimatesAsSoul` — **el icono ANIMA EN EL INVENTARIO**: la
+tinta late y el ojo PARPADEA en tu mochila, como las almas de vanilla —
+hallazgo del oráculo de entorno: tML 2026.08 expone
+`Terraria.Main.RegisterItemAnimation(int, DrawAnimation)`). EL ARMA
+(85 daño / 14 maná, mágica, en LA BOLSA DEL PROBADOR + receta 5 madera):
+el códice SALTA de tus manos, vuela al cursor frenando, VELA flotando con
+su vaivén y dispara TRES VOLAS de CHISPAS VIOLETAS autoguiadas al enemigo
+más cercano (CodiceVivoChispa — 100% código) y vuelve como bumerán; con
+DOS ESTELAS del propio sprite animado (oldPos) y el halo violeta que
+respira. Downscale BOX + alfa binario + SNAP a la paleta original de 26
+colores (pixel-art limpio).
+
+**[VERIFICACIÓN]** Oráculo 0/0 (cazó 1: `new(float,float) * float` sin
+tipo objetivo en el operador) · build real **0 errores / 0 warnings** ·
+.tmod v6.50.71 (4.275.638 B, md5 ab2a1f9be0bcc293384beb4542f21525):
+**395 entradas**, EOF EXACTO, 3/3 hjson en el paquete (es-ES espejo de
+es-MX con CUERPOS BYTE-IDÉNTICOS, DisplayName 314 == 314, Tooltip 180 ==
+180), los 6 sprites presentes (3 iconos nuevos + Sombra + 2 strips del
+códice), los sprites muertos AUSENTES, DLL con los 9 símbolos nuevos
+VIVOS (ManoEscribaProjectile/TijerasPaginaProjectile/
+PaginaArrancadaProjectile/ManoDelEscriba/TijerasDeLaPagina/PaginaArrancada/
+CodiceVivo/CodiceVivoProjectile/CodiceVivoChispa) y los 6 muertos
+AUSENTES · headless (language=5): «Finalizing AethonMod v6.50.71 → Adding
+Recipes → Server started», **0 EXCEPCIONES**.
+
+---
+
 ## Commit v6.50.70 — EL ESPAÑOL ESPAÑA BORRADO + LA ESPAÑOL LATAM COMPLETA
 
 **Feedback del usuario**: "algo que también debes hacer es borrar el idioma
