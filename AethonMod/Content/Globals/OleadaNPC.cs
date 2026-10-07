@@ -86,6 +86,24 @@ namespace AethonMod.Content.Globals
     /// zona (el Devorador y el Cerebro ya NO SE VAN), el día ya no
     /// encierra a Skeletron en 9999 de defensa, y la BARRA DE VIDA de
     /// los jefes multi-pieza vuelve a caber en su marco.
+    ///
+    /// v6.50.73 — EL AMBIENTE PROPIO (la petición literal): «tanto el
+    /// Ojo de Cthulhu como otros jefes, en las oleadas no tienen
+    /// limitacion de dia, noche o bioma, la oleada es su propio ambiente
+    /// ya que son jefes modificados... a cada jefe de oleada dale la IA
+    /// que usa Terraria en el modo maestro, pero con las mejoras
+    /// actuales que tiene». EL AMBIENTE PRESTADO (PreAI→PostAI): la IA
+    /// de cada guardián corre con LOS OVERRIDES DE EXPERTO+MAESTRO (la
+    /// IA maestra de vanilla ES la rama experta — master escala stats,
+    /// y las stats ya las pone el sello), NOCHE PERPETUA para el Ojo y
+    /// Skeletron (ya no huye del sol ni despierta el guardián de 9999),
+    /// la JUNGLA prestada a la Reina, la NIEVE a Deerclops, la
+    /// SUPERFICIE prestada para que la Reina jamás se encore, y la
+    /// talla del sello ahora TAMBIÉN en defDamage/defDefense (las IA
+    /// que se re-visten cada tick ya no borran la oleada). EL OJO YA NO
+    /// SE DESPEGA: fuera del homing/embite inyectado (que lo
+    /// sobre-empujaba a 600-1000 px de la presa en oleadas altas) y con
+    /// EL ANCLA — más de 900 px y el libro lo trae de la mano.
     /// </summary>
     public class OleadaNPC : GlobalNPC
     {
@@ -138,6 +156,69 @@ namespace AethonMod.Content.Globals
         private bool _zonaPrestada = false;
         private bool _zonaCrimsonOriginal = false;
         private bool _zonaCorruptOriginal = false;
+
+        // ==================================================================
+        //  v6.50.73 — EL AMBIENTE PRESTADO DE LA OLEADA (la letra: «tanto
+        //  el Ojo de Cthulhu como otros jefes, en las oleadas no tienen
+        //  limitacion de dia, noche o bioma, la oleada es su propio
+        //  ambiente ya que son jefes modificados... a cada jefe de oleada
+        //  dale la IA que usa Terraria en el modo maestro, pero con las
+        //  mejoras actuales que tiene»).
+        //
+        //  Durante el AI de un JEFE DE OLEADA el mundo se VISTE de SU
+        //  ambiente y PostAI lo devuelve TODO (el préstamo dura
+        //  exactamente UN AI):
+        //  · LA IA DEL MODO MAESTRO — Main.expertMode/masterMode son en
+        //    tML PROPIEDADES de solo lectura respaldadas por los campos
+        //    PRIVADOS _overrideForExpertMode/_overrideForMasterMode (el
+        //    mecanismo del slider del modo viaje — decompile
+        //    confirmado). El préstamo escribe ESOS overrides: la IA
+        //    vanilla del jefe corre sus ramas EXPERTAS (en vanilla LA IA
+        //    MAESTRA ES LA RAMA EXPERTA — master solo escala stats y
+        //    afina los lerps de daño al 100%) y el mundo real queda
+        //    intocado al devolverlos.
+        //  · LA NOCHE PERPETUA — el Ojo huye del sol (velocity.Y-0.04 +
+        //    EncourageDespawn al leer Main.IsItDay()) y Skeletron se
+        //    viste de guardián (damage 1000/defense 9999, el giro
+        //    eterno): para SU IA siempre es de noche (Main.dayTime
+        //    prestado — nace y pelea a cualquier hora).
+        //  · LA COLMENA FLOTANTE — la Reina se encoraja (+1 nivel de
+        //    furia) cuando su cuerpo cruza Main.worldSurface: prestamos
+        //    la línea para que NUNCA esté «sobre la superficie».
+        //  · LAS ZONAS DEL GUARDIÁN — Carmesí para el Cerebro,
+        //    Corrupción para el Devorador (v6.50.48) y NUEVAS: Jungla
+        //    para la Reina, Nieve para Deerclops: la IA de vanilla lee
+        //    SU bioma y ni se van ni se encoran.
+        // ==================================================================
+        private bool _prestaDia = false;         // ¿prestó Main.dayTime?
+        private bool _diaOriginal = true;
+        private bool _prestaSuperficie = false;  // ¿prestó Main.worldSurface?
+        private double _superficieOriginal = 0.0;
+        private bool _prestaModo = false;        // ¿prestó experto/maestro?
+        private bool? _expertoOriginal = null;   // _overrideForExpertMode
+        private bool? _maestroOriginal = null;   // _overrideForMasterMode
+        private bool _junglaOriginal = false;    // las zonas nuevas
+        private bool _nieveOriginal = false;
+        private Player _presaDeZonas = null;     // la dueña de las zonas prestadas
+
+        // v6.50.73 — LA RED DEL PRÉSTAMO ATASCADO: si la IA vanilla TRUENA
+        // entre PreAI y PostAI (tML traga la excepción y sigue), el mundo
+        // quedaría vestido de ambiente prestado PARA SIEMPRE (día robado =
+        // noche eterna). EL AUTO-CURADO: el préstamo vive en UN SOLO SLOT
+        // estático — el próximo PreAI de cualquier jefe devuelve el
+        // préstamo viejo ANTES de vestir el nuevo, y el vigía del festín
+        // (GrimorioFuriaSistema.PostUpdateWorld → VigilarPrestamo) lo
+        // revisa cada tick. Los préstamos son SECUENCIALES por
+        // construcción (la IA de cada NPC corre completa antes de la del
+        // siguiente): jamás hay dos abiertos a la vez.
+        private static OleadaNPC _prestamoAbierto = null;
+
+        // v6.50.73 — LA REFLEXIÓN DEL MODO (cacheada una sola vez): los
+        // campos privados bool? de Terraria.Main que respaldan las
+        // propiedades expertMode/masterMode.
+        private static System.Reflection.FieldInfo _campoExperto = null;
+        private static System.Reflection.FieldInfo _campoMaestro = null;
+        private static bool _reflexionLista = false;
 
         // v6.50.48 — EL RITMO DEL REY (la física del salto leída de la
         // velocidad, no de su ai[]): la caída y el aterrizaje del Rey
@@ -232,6 +313,22 @@ namespace AethonMod.Content.Globals
                 // oleadas»): chusma +2k+3(n−1) · jefes +6k+8(n−1).
                 npc.defense = _defensaBase + DefensaExtra(jefe);
                 npc.knockBackResist = _kbBase * 0.35f; // la furia no se interrumpe
+
+                // v6.50.73 — LA TALLA DEL SELLO EN LOS DEFAULTS DE LA IA:
+                // las IA vanilla se re-visten cada tick desde
+                // defDamage/defDefense (Skeletron: «defense = defDefense;
+                // damage = defDamage» al tope de su AI; la Reina experta:
+                // «defense = defDefense + rampa») — esos defaults nacían
+                // VAINILLA (ScaleStats solo los llena en mundos
+                // experto/maestro) y BORRABAN el sello cada tick: el
+                // Skeletron de la oleada 10 peleaba con SU daño de
+                // siempre. Ahora los defaults SON el sello y las
+                // modificaciones de estado de la IA (el −10 del giro, el
+                // +25 por mano del experto, la rampa de la Reina) se
+                // aplican ENCIMA de la talla de la oleada — la IA
+                // maestra CON las mejoras actuales, como pidió la letra.
+                npc.defDamage = _danoBase > 0 ? (int)(_danoBase * mult) : npc.damage;
+                npc.defDefense = npc.defense;
 
                 // === EL AURA ===
                 Aura = AuraPerfil.OleadaGrimorio(Oleada);
@@ -659,43 +756,241 @@ namespace AethonMod.Content.Globals
             return true;
         }
 
+        // ==================================================================
+        //  v6.50.73 — LA MAQUINARIA DEL PRÉSTAMO
+        // ==================================================================
+
         /// <summary>
-        /// PreAI v6.50.48 - EL PRESTAMO DE ZONA (el fix de los dos jefes
-        /// que SE VAN) + el ritmo del Rey.
+        /// v6.50.73 — LA REFLEXIÓN DEL MODO MAESTRO (una sola vez):Main.
+        /// expertMode/masterMode son PROPIEDADES de solo lectura en tML,
+        /// respaldadas por los campos PRIVADOS _overrideForExpertMode/
+        /// _overrideForMasterMode (bool? — el mecanismo del slider de
+        /// dificultad del modo viaje). Si la reflexión fallara (tML de un
+        /// futuro que los renombrara), el préstamo del modo simplemente
+        /// no ocurre — TODO lo demás del mod sigue igual.
+        /// </summary>
+        private static void PrepararReflexion()
+        {
+            if (_reflexionLista) return;
+            _reflexionLista = true;
+            try
+            {
+                _campoExperto = typeof(Main).GetField("_overrideForExpertMode",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                _campoMaestro = typeof(Main).GetField("_overrideForMasterMode",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            }
+            catch { _campoExperto = null; _campoMaestro = null; }
+        }
+
+        /// <summary>
+        /// v6.50.73 — LA DEVOLUCIÓN DEL AMBIENTE (idempotente y global-
+        /// segura): devuelve el día robado, la línea de la superficie, el
+        /// modo REAL del mundo y las zonas del jugador. La llama PostAI
+        /// (el camino de siempre) y la red del préstamo atascado (el
+        /// auto-curado del PreAI + el vigía del festín).
+        /// </summary>
+        private static void DevolverAmbiente()
+        {
+            OleadaNPC p = _prestamoAbierto;
+            if (p == null) return;
+            _prestamoAbierto = null;
+            try
+            {
+                if (p._prestaModo)
+                {
+                    p._prestaModo = false;
+                    if (_campoExperto != null) _campoExperto.SetValue(null, p._expertoOriginal);
+                    if (_campoMaestro != null) _campoMaestro.SetValue(null, p._maestroOriginal);
+                }
+                if (p._prestaDia)
+                {
+                    p._prestaDia = false;
+                    Main.dayTime = p._diaOriginal;
+                }
+                if (p._prestaSuperficie)
+                {
+                    p._prestaSuperficie = false;
+                    Main.worldSurface = p._superficieOriginal;
+                }
+                if (p._presaDeZonas != null)
+                {
+                    Player pl = p._presaDeZonas;
+                    p._presaDeZonas = null;
+                    p._zonaPrestada = false;
+                    if (pl != null && pl.active)
+                    {
+                        pl.ZoneCrimson = p._zonaCrimsonOriginal;
+                        pl.ZoneCorrupt = p._zonaCorruptOriginal;
+                        pl.ZoneJungle = p._junglaOriginal;
+                        pl.ZoneSnow = p._nieveOriginal;
+                    }
+                }
+            }
+            catch
+            {
+                // la devolución NUNCA puede fallar a medias sin dejar rastro:
+                // se apagan los flags y el vigía del próximo tick re-ensaya
+                p._prestaModo = false;
+                p._prestaDia = false;
+                p._prestaSuperficie = false;
+                p._presaDeZonas = null;
+                p._zonaPrestada = false;
+            }
+        }
+
+        /// <summary>
+        /// v6.50.73 — EL VIGÍA DEL PRÉSTAMO (lo llama GrimorioFuriaSistema
+        /// cada tick del mundo): si una IA truena entre PreAI y PostAI, el
+        /// préstamo puede quedar VESTIDO — aquí se devuelve. El auto-curado
+        /// del PreAI cubre el caso común; esta es la red del mundo entero.
+        /// </summary>
+        internal static void VigilarPrestamo()
+        {
+            if (_prestamoAbierto != null) DevolverAmbiente();
+        }
+
+        /// <summary>
+        /// PreAI v6.50.73 — EL AMBIENTE PRESTADO DE LA OLEADA (la letra:
+        /// «la oleada es su propio ambiente ya que son jefes modificados»
+        /// + «dale la IA que usa Terraria en el modo maestro, pero con
+        /// las mejoras actuales que tiene»).
         ///
-        /// LA CAUSA (decompile): la IA vanilla del Cerebro (aiStyle 26)
-        /// sube al jefe hacia el cielo y lo hace FANTASMA (alpha 10)
-        /// cuando su presa NO esta en el Carmesi, y la IA del Devorador
-        /// (aiStyle 6) MATA toda la cadena si NINGUN jugador vive en la
-        /// Corrupcion. La oleada los convoca donde ESTE el portador (la
-        /// letra del sistema: el guardian del bioma del festin) - y a los
-        /// dos ticks de nacer, el jefe SE IBA («son invocados pero se
-        /// van»). EL FIX: durante el AI de esta pieza, la presa lleva
-        /// PRESTADA la zona de su guardián (Carmesí para el Cerebro,
-        /// Corrupción para el Devorador): la IA de vanilla lee SU bioma,
-        /// el jefe se queda. PostAI devuelve el flag original al
-        /// jugador (el prestamo dura lo que dura UN AI de esta pieza).
+        /// v6.50.48 — EL PRÉSTAMO DE ZONA (el fix de los dos jefes que SE
+        /// VAN): la IA vanilla del Cerebro (aiStyle 26) sube al jefe hacia
+        /// el cielo y lo hace FANTASMA cuando su presa NO está en el
+        /// Carmesí, y la del Devorador (aiStyle 6) MATA la cadena si
+        /// NINGÚN jugador vive en la Corrupción — el préstamo les da la
+        /// zona de su guardián. v6.50.73 LE SUMA: la JUNGLA para la Reina
+        /// (sin ella se encora fuera de su colmena) y la NIEVE para
+        /// Deerclops (sin ella «debería irse a casa»).
+        ///
+        /// v6.50.73 — LA NOCHE PERPETUA: el Ojo de Cthulhu HUYE del sol
+        /// (velocity.Y −= 0.04 + EncourageDespawn al leer Main.IsItDay())
+        /// y Skeletron se VISTE DE GUARDIÁN de día (damage 1000 / defense
+        /// 9999, el giro eterno — su aiStyle 11 fuerza ai[1]=2 al amanecer).
+        /// La oleada ES su propio ambiente: durante el AI de esos dos,
+        /// Main.dayTime se presta en FALSO — nacen, pelean y CAEN a
+        /// cualquier hora. (El sorteo de JefeDeLaOleada ya no veta al Ojo
+        /// de día — ver GrimorioFuriaSistema.)
+        ///
+        /// v6.50.73 — LA COLMENA FLOTANTE: la Reina se encora (+1 nivel de
+        /// furia: más y más rápidas cargas) cuando su cuerpo está sobre la
+        /// línea de la superficie — se presta Main.worldSurface para que su
+        /// IA nunca la cruce.
+        ///
+        /// v6.50.73 — LA IA DEL MODO MAESTRO: se prestan los overrides de
+        /// experto+maestro y la IA vanilla del jefe corre SUS RAMAS EXPERTAS
+        /// con los lerps de daño al 100% (en vanilla la IA maestra ES la
+        /// rama experta — el decompile no tiene UNA sola rama masterMode en
+        /// estas IA; master escala stats, que aquí ya pone el sello): el
+        /// Ojo acelera sus sirvientes/embestidas y transforma al 65% con
+        /// acelerones por distancia; Skeletron lanza HUESOS y gana defensa
+        /// por mano viva; la Reina sube defensa con cada golpe y carga más
+        /// y más rápido; el Rey escupe limos con PÚAS; el Devorador cría a
+        /// los voladores de su bioma; el Cerebro teje SUS ILUSIONES;
+        /// Deerclops suelta las MANOS DE SOMBRA. LAS MEJORAS ACTUALES
+        /// VIVEN ENCIMA: el sello (stats ×(k+1)·nivel, defensa, aura,
+        /// coreografías) y, desde hoy, la talla también en
+        /// defDamage/defDefense (ver Marcar) — la IA maestra de un jefe
+        /// MODIFICADO, no la de un jefe de museo.
         /// </summary>
         public override bool PreAI(NPC npc)
         {
             try
             {
-                if (EsDeOleada && EsJefeDeOleada && _zonaPrestada == false &&
-                    (npc.type == NPCID.BrainofCthulhu || npc.type == NPCID.EaterofWorldsHead) &&
+                // v6.50.73 — EL AUTO-CURADO (por si una IA truena entre
+                // PreAI y PostAI): el préstamo viejo se devuelve ANTES de
+                // vestir el nuevo — el mundo jamás queda vestido.
+                if (_prestamoAbierto != null) DevolverAmbiente();
+
+                if (EsDeOleada && EsJefeDeOleada &&
                     npc.target >= 0 && npc.target < Main.maxPlayers)
                 {
                     Player presa = Main.player[npc.target];
                     if (presa != null && presa.active && !presa.dead)
                     {
-                        _zonaCrimsonOriginal = presa.ZoneCrimson;
-                        _zonaCorruptOriginal = presa.ZoneCorrupt;
-                        if (npc.type == NPCID.BrainofCthulhu) presa.ZoneCrimson = true;
-                        else presa.ZoneCorrupt = true;
-                        _zonaPrestada = true;
+                        // LOS GUARDIANES DE VERDAD (los tipos del festín —
+                        // ni las manos de Skeletron ni las piezas en
+                        // cascada, aunque hereden el sello de jefe)
+                        bool esGuardian =
+                            npc.type == NPCID.KingSlime ||
+                            npc.type == NPCID.EyeofCthulhu ||
+                            npc.type == NPCID.QueenBee ||
+                            npc.type == NPCID.BrainofCthulhu ||
+                            npc.type == NPCID.EaterofWorldsHead ||
+                            npc.type == NPCID.SkeletronHead ||
+                            npc.type == NPCID.Deerclops;
+                        if (esGuardian)
+                        {
+                            bool algoPrestado = false;
+
+                            // === LAS ZONAS DEL GUARDIÁN ===
+                            bool prestaCrimson = npc.type == NPCID.BrainofCthulhu && !presa.ZoneCrimson;
+                            bool prestaCorrupt = npc.type == NPCID.EaterofWorldsHead && !presa.ZoneCorrupt;
+                            bool prestaJungla = npc.type == NPCID.QueenBee && !presa.ZoneJungle;
+                            bool prestaNieve = npc.type == NPCID.Deerclops && !presa.ZoneSnow;
+                            if (prestaCrimson || prestaCorrupt || prestaJungla || prestaNieve)
+                            {
+                                _zonaCrimsonOriginal = presa.ZoneCrimson;
+                                _zonaCorruptOriginal = presa.ZoneCorrupt;
+                                _junglaOriginal = presa.ZoneJungle;
+                                _nieveOriginal = presa.ZoneSnow;
+                                if (prestaCrimson) presa.ZoneCrimson = true;
+                                if (prestaCorrupt) presa.ZoneCorrupt = true;
+                                if (prestaJungla) presa.ZoneJungle = true;
+                                if (prestaNieve) presa.ZoneSnow = true;
+                                _presaDeZonas = presa;
+                                _zonaPrestada = true;
+                                algoPrestado = true;
+                            }
+
+                            // === LA NOCHE PERPETUA (solo los que leen el
+                            // día: el Ojo que huye y el guardián que gira)
+                            if ((npc.type == NPCID.EyeofCthulhu || npc.type == NPCID.SkeletronHead) &&
+                                Main.dayTime)
+                            {
+                                _diaOriginal = Main.dayTime;
+                                Main.dayTime = false;
+                                _prestaDia = true;
+                                algoPrestado = true;
+                            }
+
+                            // === LA COLMENA FLOTANTE (la Reina jamás
+                            // «sobre la superficie») ===
+                            if (npc.type == NPCID.QueenBee && Main.worldSurface > 0.0)
+                            {
+                                _superficieOriginal = Main.worldSurface;
+                                Main.worldSurface = 0.0; // su Y/16 jamás será «sobre» 0
+                                _prestaSuperficie = true;
+                                algoPrestado = true;
+                            }
+
+                            // === LA IA DEL MODO MAESTRO (los overrides) ===
+                            if (!_prestaModo)
+                            {
+                                PrepararReflexion();
+                                if (_campoExperto != null && _campoMaestro != null)
+                                {
+                                    _expertoOriginal = (bool?)_campoExperto.GetValue(null);
+                                    _maestroOriginal = (bool?)_campoMaestro.GetValue(null);
+                                    _campoExperto.SetValue(null, (bool?)true);
+                                    _campoMaestro.SetValue(null, (bool?)true);
+                                    _prestaModo = true;
+                                    algoPrestado = true;
+                                }
+                            }
+
+                            if (algoPrestado)
+                            {
+                                _prestamoAbierto = this;
+                            }
+                        }
                     }
                 }
             }
             catch { }
+
 
             if (EsDeOleada && !npc.boss)
             {
@@ -732,20 +1027,24 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                // v6.50.48 - LA DEVOLUCION DEL PRESTAMO (lo primero de
-                // todo: el AI de esta pieza ya corrio; el jugador recupera
-                // SU zona. El prestamo dura exactamente un AI).
-                if (_zonaPrestada)
+                // v6.50.73 — LA DEVOLUCIÓN DEL AMBIENTE (lo primero de
+                // todo: la IA de este jefe ya corrió vestida de MODO
+                // MAESTRO y de SU ambiente — la noche prestada del
+                // Ojo/Skeletron, la superficie prestada de la Reina, las
+                // zonas del guardián y los overrides del modo). El mundo
+                // recupera SU día, SU línea y SU modo real: el préstamo
+                // dura exactamente UN AI. (La red del préstamo atascado
+                // está en VigilarPrestamo — esto es el camino limpio.)
+                if (_prestamoAbierto == this || _zonaPrestada ||
+                    _prestaDia || _prestaSuperficie || _prestaModo)
                 {
-                    _zonaPrestada = false;
-                    if (npc.target >= 0 && npc.target < Main.maxPlayers)
+                    if (_prestamoAbierto == this) DevolverAmbiente();
+                    else
                     {
-                        Player pl = Main.player[npc.target];
-                        if (pl != null && pl.active)
-                        {
-                            pl.ZoneCrimson = _zonaCrimsonOriginal;
-                            pl.ZoneCorrupt = _zonaCorruptOriginal;
-                        }
+                        // (red defensiva: un préstamo huérfano sin slot —
+                        // imposible por construcción — se devuelve a mano)
+                        _prestamoAbierto = this;
+                        DevolverAmbiente();
                     }
                 }
 
@@ -754,17 +1053,33 @@ namespace AethonMod.Content.Globals
                 // pasa a veces, solo le hago 1 de daño»). LA CAUSA
                 // (decompile de su aiStyle 11): cuando Main.IsItDay(), su
                 // IA lo viste de damage 1000 / defense 9999 (el modo
-                // guardian) - y la oleada puede convocarlo de DIA (el
-                // sorteo de JefeDeLaOleada no vetaba a Skeletron de dia:
-                // solo el Ojo duerme). De noche el daño era normal y de
-                // dia UNO: «solo pasa a veces». EL FIX: despues de su AI,
-                // la oleada lo devuelve a SU talla (las bases de su sello)
-                // - el giro visual queda (le queda bien), los numeros no.
+                // guardian). v6.50.73 — LA NOCHE PERPETUA (PreAI) ya le
+                // presta la noche: el guardián NUNCA despierta. Este bloque
+                // queda como RED DEFENSIVA (si la reflexión del préstamo
+                // no existiera, la talla del sello sigue mandando):
+                // después de su AI, la oleada lo devuelve a SU talla (las
+                // bases de su sello) — el giro visual queda (le queda
+                // bien), los números no.
                 if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.SkeletronHead && Main.dayTime)
                 {
                     npc.defense = _defensaBase + DefensaExtra(true);
                     if (_danoBase > 0)
                         npc.damage = (int)(_danoBase * MultiplicadorStats);
+                }
+
+                // v6.50.73 — LA TALLA DEL SELLO TRAS LA IA DEL OJO: su
+                // fase 2 escribe el daño con LITERALES vanilla cada tick
+                // (damage = lerp(23, 18/20) — no lee defDamage como
+                // Skeletron o la Reina), y esos literales no conocen la
+                // oleada. La oleada lo devuelve a LA TALLA DEL SELLO
+                // (×(k+1)·nivel — las mejoras actuales); la defensa 0 de
+                // la fase 2 queda (es su diseño: el ojo abierto es el ojo
+                // vulnerable, y en la ia maestra la furia final le BAJA la
+                // defensa a −15/−30 — eso también queda).
+                if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.EyeofCthulhu &&
+                    npc.ai[0] >= 3f && _danoBase > 0)
+                {
+                    npc.damage = (int)(_danoBase * MultiplicadorStats);
                 }
 
                 // v6.50.48 - EL RITMO DEL REY (la coreografia del salto):
@@ -867,13 +1182,44 @@ namespace AethonMod.Content.Globals
                     presaValida = presa != null && presa.active && !presa.dead;
                 }
 
+                // v6.50.73 — EL OJO YA NO SE DESPEGA (la letra: «en el Ojo
+                // de Cthulhu ... en niveles altos el ojo se separa mucho
+                // del jugador»). LA CAUSA: el homing+embite de la furia
+                // INYECTABA velocidad sobre un jefe que ya corre con
+                // rumbo FIJO (su IA maestra lo dispara a 6.8-8.8 px/t
+                // durante 90-130 t): el embite de la oleada alta (+8.6
+                // px/t cada 70 t) lo EMPUJABA MÁS ALLÁ de la presa y su
+                // propio freno (×0.97/t) tardaba medio minuto en
+                // recuperar — el ojo pasaba media pelea a 600-1000 px.
+                // LA CURA: el Ojo corre SOLO con su IA maestra (que ya
+                // trae ACELERONES por distancia: +velocidad a 400/600/800
+                // px) y la furia le pone EL ANCLA — si se pasa de 900 px,
+                // un tirón suave de vuelta y un techo de velocidad (el
+                // libro lo trae de la mano).
+                if (npc.type == NPCID.EyeofCthulhu)
+                {
+                    if (presaValida)
+                    {
+                        Vector2 dirOjo = presa.Center - npc.Center;
+                        float dOjo = dirOjo.Length();
+                        if (dOjo > 900f)
+                        {
+                            npc.velocity += dirOjo / dOjo * 0.18f; // EL ANCLA
+                            float velOjo = npc.velocity.Length();
+                            if (velOjo > 22f)
+                                npc.velocity = npc.velocity * (22f / velOjo);
+                        }
+                    }
+                }
                 // EL HOMING + EL EMBITE: solo los que surcan tiles (los
-                // demás ya persiguen por su cuenta — su AI usa el suelo).
+                // demás ya persiguen por su cuenta — su AI usa el suelo)
+                // — y desde v6.50.73 SIN EL OJO (él tiene SU IA maestra y
+                // EL ANCLA: las inyecciones lo despegaban de la presa).
                 // v6.50.59 — MÁS HAMBRIENTOS: homing 0.09+0.012k+0.01(n−1)
                 // (antes 0.05+0.008k — se dejaban llevar), el EMBITE más
                 // frecuente (260−26k−12(n−1), tope 70) y más FUERTE
                 // (2.6+0.42k+0.2(n−1)).
-                if (presaValida && npc.noTileCollide)
+                else if (presaValida && npc.noTileCollide)
                 {
                     Vector2 dir = presa.Center - npc.Center;
                     float d = dir.Length();

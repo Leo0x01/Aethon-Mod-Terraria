@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.72 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.73 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,8 +17,29 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.72)
+## ¿Dónde estamos? (actualizado para v6.50.73)
 
+**NOVEDAD .73 — LA OLEADA ES SU PROPIO AMBIENTE (IA DE MODO MAESTRO) + EL
+OJO QUE YA NO SE DESPEGA**: la letra del usuario: «tanto el Ojo de Cthulhu
+como otros jefes, en las oleadas no tienen limitacion de dia, noche o
+bioma, la oleada es su propio ambiente ya que son jefes modificados…
+en niveles altos el ojo se separa mucho del jugador… a cada jefe de
+oleada dale la IA que usa Terraria en el modo maestro, pero con las
+mejoras actuales que tiene». **EL AMBIENTE PRESTADO**: durante el AI de
+cada guardián el mundo se viste de SU ambiente y se devuelve al terminar
+el tick — **IA DE MODO MAESTRO** para los SEIS + Deerclops (en vanilla la
+IA maestra ES la rama experta; se prestan los overrides de
+experto+maestro por reflexión: huesos y +25 de defensa por mano del
+Skeletron, ilusiones del Cerebro, limos con púas del Rey, manos de sombra
+de Deerclops, acelerones del Ojo…), **NOCHE PERPETUA** para el Ojo y
+Skeletron (ya no huye del sol ni despierta el guardián de 9999 de
+defensa — nacen y pelean a CUALQUIER hora, y el Ojo vuelve al sorteo de
+día), **JUNGLA** prestada a la Reina y **NIEVE** a Deerclops (sin
+encorajes ni huidas por bioma), y la talla del sello ahora también en
+`defDamage`/`defDefense` (las IA que se re-visten cada tick ya no borran
+la oleada). **EL OJO YA NO SE DESPEGA**: fuera del homing/embite
+inyectado (lo sobre-empujaba a 600-1000 px de la presa en oleadas altas)
+y con **EL ANCLA** — a más de 900 px, el libro lo trae de la mano.
 **NOVEDAD .72 — EL CÓDICE VIVO REHECHO + LAS 3 ARMAS BORRADAS + LAS
 OLEADAS SIN JEFE REPETIDO**: la letra del usuario: «el sprite del codice
 vivo esta mal hecho, solo es la imagen fija subiendo en vertical sin
@@ -37,9 +58,8 @@ enemigos o SIN ellos, el ataque SIEMPRE se ve — y vuelve de bumerán.
 inaquilina — **La Sombra de la Página**, la aprobada. **LAS OLEADAS**: el
 reparto por bioma MUERE — el guardián de cada oleada sale de LA PIZARRA
 de los SEIS pre-hardmode **todos con la MISMA probabilidad**, y el que
-salió **no repite en las DOS oleadas siguientes** (el Ojo no entra al
-sorteo de día porque huye del sol; Deerclops sigue aparte, en su dado del
-1%). **NOVEDAD .71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL
+salió **no repite en las DOS oleadas siguientes** (Deerclops sigue
+aparte, en su dado del 1%). **NOVEDAD .71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL
 TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO**: la letra
 del usuario: «tengo el juego en español, pero el juego sale en inglés» —
 la .70 BORRÓ el es-ES y su juego (en «Español») caía al inglés; AHORA

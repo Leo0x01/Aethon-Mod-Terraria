@@ -1,5 +1,91 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.73 — LA OLEADA ES SU PROPIO AMBIENTE (IA DE MODO MAESTRO + SIN DÍA/NOCHE/BIOMA) + EL OJO QUE YA NO SE DESPEGA
+
+**Feedback del usuario**: "tanto el Ojo de Cthulhu como otros jefes, en las
+oleadas no tienen limitacion de dia, noche o bioma, la oleada es su propio
+ambiente ya que son jefes modificados, ademas algo que note en el Ojo de
+Cthulhu es que en niveles altos el ojo se separa mucho del jugador, algo
+mas, a cada jefe de oleada dale la IA que usa Terraria en el modo maestro,
+pero con las mejoras actuales que tiene".
+
+**(1) LA IA DEL MODO MAESTRO PARA TODOS LOS GUARDIANES (con las mejoras
+actuales).** Verificado en el decompile de tML 2026.08: **en vanilla LA IA
+MAESTRA ES LA RAMA EXPERTA** — no existe UNA sola rama `masterMode` en las
+IA de estos jefes (master solo escala stats y afina los lerps de daño al
+100%); y `Main.expertMode`/`masterMode` son en tML PROPIEDADES de solo
+lectura respaldadas por los campos PRIVADOS `_overrideForExpertMode`/
+`_overrideForMasterMode` (el mecanismo del slider del modo viaje). **EL
+AMBIENTE PRESTADO** (`OleadaNPC.PreAI`→`PostAI`): durante el AI de cada
+JEFE DE OLEADA (los SEIS guardianes + Deerclops, el invitado del 1%) se
+prestan esos dos overrides por reflexión (cacheada; si un tML futuro los
+renombrara, el préstamo simplemente no ocurre y todo lo demás sigue) — la
+IA vanilla del jefe corre **SUS RAMAS EXPERTAS con los lerps de daño al
+100%**: el **Ojo** acelera sirvientes/embestidas, transforma al 65% (no
+al 50%) y gana ACELERONES por distancia (400/600/800 px); **Skeletron**
+lanza HUESOS con las manos muertas y gana +25 de defensa por mano viva;
+la **Reina** sube defensa con cada golpe perdido y encadena más cargas
+más rápido; el **Rey** escupe limos con PÚAS; el **Devorador** cría a los
+voladores de su bioma; el **Cerebro** teje SUS ILUSIONES a 66/33/5% de
+vida; **Deerclops** suelta las MANOS DE SOMBRA. **LAS MEJORAS ACTUALES
+VIVEN ENCIMA** — y ahora de verdad: `Marcar` también sella
+**`defDamage`/`defDefense`** (las IA vanilla se re-visten cada tick desde
+esos defaults — Skeletron: «defense = defDefense; damage = defDamage», la
+Reina: «defense = defDefense + rampa» — y como venían VAINILLA, BORRABAN
+el sello de la oleada cada tick: el Skeletron de la oleada 10 peleaba con
+su daño de siempre; ahora los defaults SON el sello y las modificaciones
+de estado de la IA (el −10 del giro, el +25 por mano) se aplican ENCIMA).
+La fase 2 del Ojo escribe daño con LITERALES vanilla (no lee defDamage) —
+tras su IA, la oleada lo devuelve a LA TALLA DEL SELLO (×(k+1)·nivel).
+
+**(2) SIN LIMITACIÓN DE DÍA, NOCHE O BIOMA — la oleada es su propio
+ambiente.** Durante el AI de cada guardián el mundo se VISTE de SU
+ambiente y `PostAI` lo devuelve TODO (el préstamo dura exactamente UN AI;
+red de seguridad triple: auto-curado en el `PreAI` siguiente + vigía cada
+tick en `GrimorioFuriaSistema.PostUpdateWorld` + restauración defensiva):
+  - **NOCHE PERPETUA** para el **Ojo** (huye del sol: velocity.Y −0.04 +
+    EncourageDespawn al leer `Main.IsItDay()`) y **Skeletron** (su aiStyle
+    11 lo viste de GUARDIÁN de día: damage 1000 / defense 9999, el giro
+    eterno): `Main.dayTime` prestado en falso — **nacen, pelean y caen a
+    cualquier hora**. El sorteo de `JefeDeLaOleada` YA NO VETA AL OJO DE
+    DÍA (el veto de la .72 murió: compite las 24 horas).
+  - **LA JUNGLA PRESTADA** a la **Reina** (se encoraba +1 nivel de furia
+    fuera de la jungla) y **LA NIEVE** a **Deerclops** («debería irse a
+    casa» sin ella) — mismas zonas del guardián que ya llevaban el
+    Cerebro (Carmesí) y el Devorador (Corrupción) desde la .48.
+  - **LA COLMENA FLOTANTE**: la Reina también se encoraba cuando su
+    cuerpo cruzaba la línea de `Main.worldSurface` — prestamos la línea:
+    jamás está «sobre la superficie».
+
+**(3) EL OJO YA NO SE SEPARA DEL JUGADOR.** LA CAUSA (decompile + aritmética):
+el homing+embite de la furia INYECTABA velocidad sobre un jefe que ya corre
+con rumbo FIJO (embestida 6.8–8.8 px/t durante 90–130 t): el embite de la
+oleada alta (+8.6 px/t cada 70 t) lo empujaba MÁS ALLÁ de la presa y su
+propio freno (×0.97/t) tardaba en recuperar — el ojo pasaba media pelea a
+600–1000 px. LA CURA: el Ojo queda FUERA del homing/embite inyectado (su
+IA maestra ya es un rastreador completo) y gana **EL ANCLA** — a más de
+900 px de la presa, un tirón suave de vuelta y un techo de 22 px/t.
+
+**(4) DE PROPINA — EL ESPEJO es-ES DESCUADRADO EN EL REPO.** La auditoría
+del `.tmod` destapó que el `es-ES_Mods.AethonMod.hjson` del REPO seguía
+siendo el espejo VIEJO de la .71 (tabs, 2274 líneas) mientras el es-MX era
+el nuevo — el release .72 llevaba el espejo CORRECTO pero el commit nunca
+lo capturó; regenerado con `tools/sync_es_es_v65071.py` (cuerpos
+byte-idénticos, DisplayName 310 == 310, Tooltip 177 == 177).
+
+**VERIFICACIÓN**: oráculo (build real) 0/0 · `.tmod` v6.50.73 (4.270.759 B,
+md5 ca36bd780f740ef1349ce800747bc64a): **392 entradas**, EOF EXACTO, cuerpo
+es-ES == es-MX BYTE A BYTE (182/182 DisplayName · 177/177 Tooltip en las
+tres lenguas), VIVOS PRESENTES en la DLL (`VigilarPrestamo`,
+`DevolverAmbiente`, `PrepararReflexion`, `_prestamoAbierto`,
+`_overrideForExpertMode`/`_overrideForMasterMode` como literales de
+reflexión, `defDamage`/`defDefense`) y MUERTOS AUSENTES (Mano/Tijeras/
+Página + JefeDelLugar) · headless (language=5): «Sandboxing/Adding/
+Configuring/Finalizing Aethon, the Eternal Grimoire v6.50.73 → Adding
+Recipes → Server started», **0 EXCEPCIONES**.
+
+---
+
 ## Commit v6.50.72 — EL CÓDICE VIVO REHECHO (ANIMACIÓN DE VERDAD + ATAQUE SIEMPRE VISIBLE) + LAS 3 ARMAS BORRADAS + LAS OLEADAS SIN JEFE REPETIDO
 
 **Feedback del usuario**: "el sprite del codice vivo esta mal hecho, solo es

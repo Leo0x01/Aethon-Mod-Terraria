@@ -520,6 +520,12 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateWorld()
         {
+            // v6.50.73 — EL VIGÍA DEL AMBIENTE PRESTADO (la red del mundo:
+            // si una IA de jefe truena entre PreAI y PostAI, el préstamo
+            // del ambiente queda VESTIDO y el mundo perdería SU día/SU
+            // modo — aquí se devuelve. Camino limpio: OleadaNPC.PostAI;
+            // esta es la red de seguridad de cada tick).
+            try { Globals.OleadaNPC.VigilarPrestamo(); } catch { }
             // v6.50.48 - LA EXTENSION DEL DEVORADOR corre siempre que haya
             // un pendiente (la fase puede cambiar debajo).
             try { ProcesarExtensionDevorador(); } catch { _pendCabeza = -1; }
@@ -1318,11 +1324,13 @@ namespace AethonMod.Content.Systems
         ///     de candidatos lo excluye; con 6 en la pizarra quedan ≥4
         ///     candidatos por sorteo, y todos los presentes son
         ///     equiprobables).
-        ///   · EL OJO DUERME DE DÍA — única excepción técnica (no de
-        ///     gusto): el Ojo de Cthulhu HUYE DEL SOL (su IA de vanilla lo
-        ///     manda a despegar y des-spawnear al amanecer: nacer de día =
-        ///     oleada sin guardián). De día no entra al sorteo; de noche
-        ///     compite igual que todos.
+        ///   · v6.50.73 — EL OJO YA ENTRA DE DÍA (la letra: «tanto el Ojo
+        ///     de Cthulhu como otros jefes, en las oleadas no tienen
+        ///     limitacion de dia, noche o bioma, la oleada es su propio
+        ///     ambiente ya que son jefes modificados»): el veto diurno de
+        ///     la .72 MURIÓ — OleadaNPC le presta LA NOCHE a su IA
+        ///     (Main.dayTime=false durante su AI: ya no huye del sol ni
+        ///     des-spawnea al amanecer). Nace y pelea a CUALQUIER hora.
         ///   · DEERCLOPS SIGUE APARTE (la letra: «menos el deerclop») — NO
         ///     está en la pizarra: sigue siendo EL DADO del 1% (el invitado
         ///     raro de SpawnJefeOleada), nunca un guardián probable.
@@ -1336,11 +1344,9 @@ namespace AethonMod.Content.Systems
             foreach (int id in pizarra)
             {
                 if (id == _jefeOleadaPrevio1 || id == _jefeOleadaPrevio2) continue; // LOS ÚLTIMOS DOS, FUERA
-                if (id == NPCID.EyeofCthulhu && Main.dayTime) continue;             // el ojo huye del sol
                 candidatos.Add(id);
             }
-            // (la pizarra son 6 y se vetan a lo sumo 2: siempre quedan ≥3 —
-            // el hueco es solo una red de seguridad para futuras ediciones)
+            // (la pizarra son 6 y se vetan a lo sumo 2: siempre quedan ≥4)
             if (candidatos.Count == 0) candidatos.AddRange(pizarra);
             return candidatos[Main.rand.Next(candidatos.Count)];
         }
@@ -1376,13 +1382,14 @@ namespace AethonMod.Content.Systems
             return new Vector2(x, y);
         }
 
-        /// <summary>Convoca al JEFE (versión especial de la oleada) — v6.50.72: SORTEADO (JefeDeLaOleada: pizarra de seis, sin los últimos dos).</summary>
+        /// <summary>Convoca al JEFE (versión especial de la oleada) — v6.50.72: SORTEADO (JefeDeLaOleada: pizarra de seis, sin los últimos dos; v6.50.73: el Ojo ya compite de día — su IA corre con la noche prestada).</summary>
         private static void SpawnJefeOleada(Player hambriento)
         {
             try
             {
                 // v6.50.72 — EL SORTEO (la pizarra de los seis, sin los
-                // últimos DOS y con el ojo fuera de día — JefeDeLaOleada)
+                // últimos DOS — JefeDeLaOleada; v6.50.73: sin veto
+                // diurno, el Ojo pelea a cualquier hora)
                 int tipo = JefeDeLaOleada();
                 // v6.50.29 — EL BORDE DEL CUADRO (lado trasero preferido):
                 // el jefe llega CAMINANDO/VOLANDO al cuadro como las
