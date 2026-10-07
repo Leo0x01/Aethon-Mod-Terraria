@@ -73,7 +73,7 @@ deerclops»): NO está en la pizarra — sigue siendo EL DADO del 1% de
 siempre, el invitado raro.
 
 **VERIFICACIÓN**: oráculo 0/0 (×3 durante la cirugía) · build real 0/0 ·
-.tmod v6.50.72 (4.270.946 B, md5 fb71616272c9be7f64269bd6cf466230):
+.tmod v6.50.72 (4.270.876 B, md5 fb71616272c9be7f64269bd6cf466230):
 **392 entradas**, EOF EXACTO, cuerpo es-ES == es-MX BYTE A BYTE,
 DisplayName 310 == 310, Tooltip 177 == 177, los 2 strips del códice
 presentes y con su tamaño correcto (128×1024 y 48×384), MUERTOS AUSENTES

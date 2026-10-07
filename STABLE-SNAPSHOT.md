@@ -1,13 +1,13 @@
-# AethonMod — ESTADO ACTUAL (v6.50.71)
+# AethonMod — ESTADO ACTUAL (v6.50.72)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.71 (TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA
-> NUESTRA + EL TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO;
-> compilada y verificada 0/0, .tmod 395 entradas auditado, headless Server
-> started 0 excepciones — PUBLICADA: release 405688120, CDN verificado byte
-> a byte). La .70 (el es-ES borrado) fue
-> REVERTIDA por la .71: el juego del usuario vive en «Español» (es-ES) y le
-> salía en inglés — ahora es-ES es ESPEJO GENERADO de es-MX.
+> Última actualización: v6.50.72 (EL CÓDICE VIVO REHECHO — animación de
+> verdad + ataque siempre visible — + LAS 3 ARMAS BORRADAS + LAS OLEADAS
+> SIN JEFE REPETIDO; compilada y verificada 0/0, .tmod 392 entradas
+> auditado, headless Server started 0 excepciones — PUBLICADA: release
+> 405996619, CDN verificado byte a byte). Reglas vivas: es-ES es ESPEJO
+> GENERADO de es-MX (editar SOLO es-MX + tools/sync_es_es_v65071.py) y la
+> Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
 - **v6.50.68 = LA BOCA ES BRUMA + LOS CUATRO CONCEPTOS** (la letra del
@@ -1188,27 +1188,24 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **PUBLICAR v6.50.71 — HECHO** — push de main (89a7fed) + tag v6.50.71 +
-   release 405688120 con `AethonMod.tmod` (4.275.638 B, md5
-   ab2a1f9be0bcc293384beb4542f21525) + CDN verificado byte a byte +
-   /releases/latest = v6.50.71 + fila .71 con el release ID real.
+1. **PUBLICAR v6.50.72 — HECHO** — push de main (2df4d96) + tag v6.50.72 +
+   release 405996619 con `AethonMod.tmod` (4.270.876 B, md5
+   fb71616272c9be7f64269bd6cf466230) + CDN verificado byte a byte +
+   /releases/latest = v6.50.72 + fila .72 con el release ID real.
 
-2. **El usuario prueba v6.50.71 en juego** — (0) EL IDIOMA: con el juego en
-   «Español (España)» Y en «Español (Latinoamérica)» el mod sale EN
-   ESPAÑOL (nuestro es-MX — el espejo); (a) EL TENTÁCULO: la base pegada
-   al jugador MUY FINA, engordando al centro y fina en la punta + la
-   punta HUMEANDO más bruma (3 puffs orbitantes + nube propia); (b) LAS 3
-   ARMAS NUEVAS de la Bolsa de las Sombras: LA MANO DEL ESCRIBA (camina
-   en sus dedos, agarra y hunde — mira el paso de araña), LAS TIJERAS DE
-   LA PÁGINA (los tijeretazos con el tajo blanco y la rebanada que se
-   separa) y LA PÁGINA ARRANCADA (el marco de cuaderno con renglones y
-   margen rojo, los tiemblas y el arranque final); cada una con SU festín
-   a 1 de vida (EL PUÑO DEL ESCRIBA / EL CORTE FINAL / EL ARREBATO);
-   (c) EL CÓDICE VIVO de la Bolsa del Probador: el icono PARPADEA en el
-   inventario, y al usarlo vuela, flota disparando chispas violetas
-   autoguiadas y vuelve de bumerán; (d) REGRESIÓN: La Sombra de la Página
-   sigue intacta en su comportamiento (solo cambió el perfil y la bruma de
-   punta).
+2. **El usuario prueba v6.50.72 en juego** — (a) EL CÓDICE VIVO de la Bolsa
+   del Probador: la animación ahora SE VE (todo el libro RESPIRA + el
+   ANILLO de tinta viajando desde el ojo + el PARPADEO COMPLETO con la
+   rendija — en el inventario Y en vuelo); al usarlo, el códice vuela AL
+   PUNTO DONDE CLICAS, se queda ahí velando y dispara CUATRO ANDANADAS de
+   TRES chispas autoguiadas — AUN SIN ENEMIGOS (dispara hacia la mira) —
+   y vuelve de bumerán; (b) LA BOLSA DE LAS SOMBRAS: solo La Sombra de la
+   Página (las 3 armas de la .71 BORRADAS — que ya no aparezcan NI en la
+   bolsa NI en recetas NI en tooltips); (c) LAS OLEADAS: provocar varias
+   (Carnada clic der) y ver que el jefe de cada oleada NO repite en las
+   DOS siguientes y que van rotando los SEIS (el Ojo solo de noche;
+   Deerclops sigue siendo el raro del 1%); (d) REGRESIÓN: La Sombra de la
+   Página y el festín de la devoración siguen intactos.
 
 
 ## 🔒 REGLAS INVIOLABLES AL RETOMAR
@@ -1233,6 +1230,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.72** | ✅ Build-verificada (oráculo 0/0 ×3, build real 0/0, .tmod 4.270.876 B md5 fb71616272c9be7f64269bd6cf466230 392 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte, DisplayName 310 == 310 · Tooltip 177 == 177, strips del Códice 128×1024 y 48×384 verificados, muertos AUSENTES — 3 ítems + 3 proyectiles + DrawAdorno + JefeDelLugar + claves Azote/Mordida/Cría de los hjson —, vivos PRESENTES — JefeDeLaOleada + _jefeOleadaPrevio1/2 + familia Códice —, headless language=5 «Finalizing Aethon, the Eternal Grimoire v6.50.72 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 405996619, asset 4.270.876 B, CDN verificado byte a byte md5 fb71616272c9be7f64269bd6cf466230, /releases/latest = v6.50.72), ⏳ en juego | LA LETRA: «el sprite del codice vivo esta mal hecho, solo es la imagen fija subiendo en vertical sin animaciones ni nada… no tiene ningún ataque… las 3 armas nuevas ya no son necesarias, solo nos quedamos con La Sombra de la Página… en las oleadas se repiten mucho los mismos jefes, el que salió no debe repetir en las 2 siguientes, todos con la misma probabilidad, menos el deerclop». (1) EL CÓDICE VIVO v2 (la prueba, A PARTE): re-nacido de la MISMA matriz de codigo.txt con TRES efectos visibles — EL ALIENTO (triangular 0.76..1.24), LA ONDA (anillo de tinta viva #f0a9f6 desde el ojo, radio 30→345) y EL PARPADEO COMPLETO (5/6/7: media, rendija 8%, media; 62→6 px claros) — 8.2–36.9% de píxeles cambian por frame (.71: 3.3–6.3%), VLM «VIVA»; EL ATAQUE SIEMPRE SE VE: pose Shoot, vuela AL PUNTO DE LA MIRA (280 px, frena al llegar), vela ahí disparando 4 ANDANADAS × 3 chispas autoguiadas cada 26 t (al enemigo en 900 px O hacia la mira si no hay nadie) y vuelve de bumerán; icono animado a 6 t/frame. (2) LAS 3 ARMAS BORRADAS (Mano/Tijeras/Página): ítems+PNG+proyectiles+festines 11/12/13+BolsaSombras+tooltips es/en + claves muertas .69 de los hjson; La Sombra de la Página ÚNICA en la bolsa; asimetría liquidada (CodiceVivoProjectile/CodiceVivoChispa vivían solo en en-US → 310==310). (3) LAS OLEADAS: reparto por BIOMA muere → JefeDeLaOleada: PIZARRA de los SEIS con MISMA probabilidad + REGLA DE LOS ÚLTIMOS DOS (jefe de la oleada k vetado en k+1 y k+2; pizarra limpia al arrancar la furia); el Ojo fuera del sorteo de DÍA (huye del sol); Deerclops APARTE (su dado del 1%). |
 | **v6.50.71** | ✅ Build-verificada (oráculo 0/0 — cazó 1: `new(float,float)*float` sin tipo objetivo —, build real 0/0, .tmod 4.275.638 B md5 ab2a1f9be0bcc293384beb4542f21525 395 entradas, EOF exacto, 3/3 hjson en el paquete con es-ES espejo de es-MX CUERPOS BYTE-IDÉNTICOS (DisplayName 314 == 314 · Tooltip 180 == 180), 6 sprites presentes (3 iconos nuevos + Sombra + 2 strips del Códice Vivo) + sprites muertos AUSENTES, DLL 9 vivos/6 muertos ausentes, headless language=5 «Finalizing AethonMod v6.50.71 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 405688120, asset 4.275.638 B subido, CDN verificado byte a byte md5 ab2a1f9be0bcc293384beb4542f21525, /releases/latest = v6.50.71), ⏳ en juego | LA LETRA: «las 3 nuevas armas se ven mal… la base del tentáculo debe ser muy fina, se engorda en el centro y fina en la punta, y en esa punta más bruma… el juego sale en inglés, haz que todas las variantes de español caigan en la nuestra… rediseñar las 3 armas… toma la versión de código y conviértela en el sprite de una nueva arma (como prueba) y anímala, completamente a parte». (1) ESPAÑOL UNIFICADO: es-ES REGRESA como ESPEJO GENERADO de es-MX (tools/sync_es_es_v65071.py — editar SOLO es-MX y correr el script; la .70 lo había borrado y el juego del usuario en «Español» caía al inglés). (2) TENTÁCULO FUSIFORME: Masa gana grosorCentro (9→44→13 px: fina-gorda-fina; el festín 14→62→22) + punta con MÁS BRUMA (3 orbitantes, aliento 6, nube propia en la punta real). (3) LOS ÚTILES DEL ESCRIBA (Azote/Mordida/Cría BORRADOS, estilos 8/9/10 muertos): LA MANO DEL ESCRIBA (la garra que CAMINA en sus dedos con paso de araña, ojo rasgado en la palma, jaula de cinco + charco que HUNDE; festín 11 EL PUÑO DEL ESCRIBA — la garra baja del techo), LAS TIJERAS DE LA PÁGINA (hojas curvas con filo de hueso que TIJERETEAN rebanadas + tajo blanco; festín 12 EL CORTE FINAL) y LA PÁGINA ARRANCADA (el marco de cuaderno — renglones + margen rojo + folio — que ciñe, tiembla y ARRRANCA; festín 13 EL ARREBATO); iconos 38×38 VLM 8-9/10 ronda 1. (4) EL CÓDICE VIVO (la prueba, A PARTE): sprite nacido de codigo.txt ANIMADO por código (pulso de energía + parpadeo del ojo central) — proyectil strip 128×1024 (8 frames) + ITEM strip 48×384 con Main.RegisterItemAnimation + AnimatesAsSoul (el icono ANIMA EN EL INVENTARIO como las almas vanilla); el códice vuela, vela y dispara 3 volas de chispas autoguiadas (CodiceVivoChispa) y vuelve de bumerán; en LA BOLSA DEL PROBADOR. |
 | **v6.50.70** | ✅ Build-verificada (oráculo 0/0, build real 0/0, .tmod 4.195.283 B 392 entradas (393 − 1 hjson: el es-ES BORRADO), EOF exacto, es-ES AUSENTE, 2/2 hjson byte-idénticos con tabs intactos, claves del PAQUETE es-MX 771 == en-US 771 con parser hjson real — la deuda de 50 claves de la .65 liquidada: 48 tooltips vacías activadas + 2 mascotas traducidas «Aethon Menor (mascota)»/«Mini Estallido (mascota)» —, Info con 6.50.70, DLL 9 vivos/6 muertos ausentes, headless Server started 0 excepciones), ✔ publicada (release 405094321, CDN byte a byte md5 b2165d4e5bc1da5a1ee62761a8a4cec6 — ver fila .69: su contenido viaja TODO en este release), ⏳ en juego | EL ESPAÑOL ESPAÑA BORRADO + LA ESPAÑOL LATAM COMPLETA — la letra del usuario: «algo que también debes hacer es borrar el idioma español españa». (1) `es-ES_Mods.AethonMod.hjson` ELIMINADO (81.885 B de espejo muerto): el mod habla **es-MX (PRIMARIO) + en-US** — el juego en «Español (España)» cae al inglés; docs de estado actual (README/CARACTERISTICAS/COMPILACION/DISEÑO) sin rastro del es-ES. (2) BONUS SIMETRÍA: 50 claves que existían SOLO en en-US (48 tooltips vacías del arsenal de pruebas + 2 DisplayName de mascotas, deuda de la .65 anterior incluso al espejo) activadas/traducidas en es-MX — el registro queda 771/771. (3) LA PUBLICACIÓN ACUMULADA: la .69 verificada pero bloqueada por el token muerto sale ENTERA dentro de la .70 (commit ce0e984 + el de la .70, un solo release). Lección nueva: tras cada cirugía hjson verificar `git diff --stat` — un editor expandió tabs→espacios y volteó el archivo entero (reconstruido byte a byte desde HEAD). |
 | **v6.50.69** | ✅ Build-verificada (oráculo 0/0 A LA PRIMERA, build real 0/0, .tmod 4.223.695 B 393 entradas, EOF exacto, 3/3 hjson byte-idénticos, DLL 9 símbolos nuevos VIVOS/6 muertos AUSENTES, headless Server started 0 excepciones), ✔ publicada DENTRO de la v6.50.70 (release 405094321 — sin release propio: el usuario jamás recibió la .69; su commit ce0e984 + TODO su contenido viajan en el release v6.50.70), ⏳ en juego (junto con la .70) | LA COBERTURA TOTAL + EL ACTO DE DEVORACIÓN EN BRUMA + LA FAMILIA DE TENTÁCULOS: Devorador v2 con LA ELIPSE REAL del jefe (velo estirado + rejilla de puffs — el Rey Slime queda ENTERO), el festín REESCRITO con la forma actual (CabezaDeBruma — las Fauces murieron) y EL TRAGO animado (la bruma encoje hacia la punta y vuelve por el cuerpo = LA ANIMACIÓN que sustituye la muerte), PreDraw retira el sprite bajo la cobertura + PURGA de gore/polvo (muerte sin animación predeterminada, loot+logros intactos), LA MARCA CONTINUA (el golpe mortal de CUALQUIER fuente durante caza/mordida dispara el festín), más bruma en La Sombra (2 capas + BrumaColumna v2) y las 3 hermanas nuevas de tentáculos: EL AZOTE (el látigo), LA MORDIDA (el glotón que mastica de verdad), LA CRÍA (la camada autónoma de 3) + festines 8/9/10 nuevos |
