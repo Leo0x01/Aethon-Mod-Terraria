@@ -8,7 +8,7 @@ using AethonMod.Content.Projectiles.CodiceVivo;
 namespace AethonMod.Content.Weapons.CodiceVivo
 {
     /// <summary>
-    /// CODICEVIVO — v6.50.71 — EL ARMA DE LA PRUEBA DEL USUARIO (completamente
+    /// CODICEVIVO — v6.50.72 — EL ARMA DE LA PRUEBA DEL USUARIO (completamente
     /// a parte de las demás: la petición literal).
     ///
     /// «Tengo un archivo png, y también tengo esa misma imagen creada con
@@ -16,24 +16,18 @@ namespace AethonMod.Content.Weapons.CodiceVivo
     /// sprite de una nueva arma, esto como prueba y quiero que animes ese
     /// sprite.»
     ///
-    /// EL SPRITE NACE DE CÓDIGO: la matriz de píxeles del usuario
-    /// (codigo.txt — 313×313, 26 colores) se renderizó y se ANIMÓ por
-    /// código (tools/gen_codice_vivo_v65071.py): 8 frames con EL PULSO DE
-    /// ENERGÍA (una onda de brillo recorre la rampa violeta del grimorio)
-    /// y EL PARPADEO (el ojo central cierra y abre). Esos frames viven en
-    /// DOS sprites animados:
-    ///
-    ///   · EL ITEM (48×384, 8 frames): registrado con
-    ///     Main.RegisterItemAnimation + AnimatesAsSoul — el icono ANIMA EN
-    ///     EL INVENTARIO (la tinta late, el ojo parpadea) y el objeto
-    ///     tirado también (como las almas de vanilla).
-    ///   · EL PROYECTIL (128×1024, 8 frames): el códice VUELA.
-    ///
-    /// EL ARMA: al usarlo, el códice SALTA de tus manos, vuela al cursor,
-    /// VELA flotando sobre el campo (su ojo buscando presas) y dispara
-    /// TRES VOLAS de chispas violetas autoguiadas a los enemigos cercanos;
-    /// luego VUELVE a ti como un bumerán. Arma mágica de la familia
-    /// NINGUNA: es la prueba del sprite-de-código, aparte de las demás.
+    /// v6.50.72 — LA CURA de «solo es la imagen fija subiendo en vertical
+    /// sin animaciones ni nada… no tiene ningún ataque»:
+    ///   · EL SPRITE nace OTRA VEZ de la matriz de codigo.txt (313×313, 26
+    ///     colores) pero animado de verdad (tools/gen_codice_vivo_v65072.py):
+    ///     EL ALIENTO (todo el libro respira), LA ONDA (anillo de tinta
+    ///     violeta viajando desde el ojo) y EL PARPADEO COMPLETO (5/6/7:
+    ///     media, rendija, media).
+    ///   · EL ATAQUE SIEMPRE SE VE: al usarlo, el códice VUELA AL PUNTO DE
+    ///     LA MIRA (donde clicaste: ahí se queda velando, ya no pasa de
+    ///     largo hacia arriba) y escupa CUATRO ANDANADAS de TRES chispas
+    ///     autoguiadas — con enemigo o SIN él (sin presa, dispara hacia la
+    ///     mira) — y luego vuelve como bumerán.
     ///
     /// Entrega: LA BOLSA DEL PROBADOR del kit de pruebas (lección
     /// v6.14.2/.63 — cada arma nueva se registra en DOS sitios) + receta
@@ -55,9 +49,9 @@ namespace AethonMod.Content.Weapons.CodiceVivo
             Item.DamageType = DamageClass.Magic;
             Item.width = 30;
             Item.height = 30;
-            Item.useTime = 34;
-            Item.useAnimation = 34;
-            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.useTime = 30;
+            Item.useAnimation = 30;
+            Item.useStyle = ItemUseStyleID.Shoot;   // pose de lanzar: la mira MANDA
             Item.autoReuse = true;
             Item.shoot = ModContent.ProjectileType<CodiceVivoProjectile>();
             Item.shootSpeed = 17f;
@@ -72,12 +66,13 @@ namespace AethonMod.Content.Weapons.CodiceVivo
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // al cursor (o al rumbo del disparo): el códice despega de las manos
-            Vector2 rumbo = velocity.LengthSquared() > 0.1f
-                ? velocity.SafeNormalize(Vector2.UnitX)
-                : (Main.MouseWorld - player.MountedCenter).SafeNormalize(Vector2.UnitX);
-            Projectile.NewProjectile(source, player.MountedCenter, rumbo * 17f, type,
-                damage, knockback, player.whoAmI, 0f, 0f);
+            // LA MIRA: el ángulo hacia el cursor viaja en ai[0] — el códice
+            // vuela AL PUNTO donde clicaste (a 280 px de ti en esa
+            // dirección) y AHÍ se queda velando y disparando.
+            Vector2 mira = Main.MouseWorld - player.MountedCenter;
+            float ang = mira.LengthSquared() > 4f ? mira.ToRotation() : -MathHelper.PiOver2;
+            Projectile.NewProjectile(source, player.MountedCenter, ang.ToRotationVector2() * 4f,
+                type, damage, knockback, player.whoAmI, ang, 0f, 0f);
             return false;
         }
 

@@ -98,73 +98,23 @@ Items: {
 			'''
 	}
 
-	ManoDelEscriba: {
-		// v6.50.71 — SCRIBE'S TOOL 1 (the Hand replaces the Lash: completely
-		// different concepts, no more tentacle sisters)
-		DisplayName: La Mano del Escriba
-		Tooltip:
-			'''
-			«Todo libro necesita una mano que lo escriba.»
-			LA MANO QUE CAMINA: una garra de sombra COLOSAL nace de tu charco
-			atada por la muñeca y CAMINA sobre sus cinco dedos —de araña,
-			de escriba— hasta el enemigo. La palma lleva UN OJO rasgado que
-			no parpadea; al alcanzarlo, los dedos lo ENCIERRAN, lo APRIETAN
-			al ritmo del puño y el CHARCO que se abre bajo sus pies crece
-			con cada apretón: lo está HUNDIENDO en la sombra.
-			Si tu mano mata a un jefe: EL PUÑO DEL ESCRIBA — el festín de
-			la garra colosal que baja del cielo y lo sepulta entero.
-			(Útil de pruebas del escriba — 100% código.)
-			'''
-	}
-
-	TijerasDeLaPagina: {
-		// v6.50.71 — SCRIBE'S TOOL 2 (the Scissors replace the Bite)
-		DisplayName: Las Tijeras de la Página
-		Tooltip:
-			'''
-			«Cada destino es una hoja: estas son las tijeras.»
-			LAS TIJERAS QUE CORTAN: dos hojas curvas de sombra con FILO DE
-			HUESO vuelan ABIERTAS al enemigo —remache violeta en el gozne—
-			y TIJERETEAN: cada cierre es un TAJO BLANCO que cruza al reo, y
-			la rebanada cortada se separa, deriva y se disuelve en bruma.
-			Cortan lento pero hondo: cada tijeretada se lleva un bocado
-			GORDO de vida.
-			Si tus tijeras matan a un jefe: EL CORTE FINAL — el festín del
-			tijeretazo que lo arranca de la página.
-			(Útil de pruebas del escriba — 100% código.)
-			'''
-	}
-
-	PaginaArrancada: {
-		// v6.50.71 — SCRIBE'S TOOL 3 (the Page replaces the Brood)
-		DisplayName: La Página Arrancada
-		Tooltip:
-			'''
-			«Lo que el libro escribe, el libro lo arranca.»
-			LA PÁGINA QUE ENCIERRA: un MARCO de sombra se traza alrededor del
-			enemigo —con SUS RENGLONES, su MARGEN ROJO y su folio: una hoja
-			de cuaderno ENORME— y CADA TIEMBLA se ciñe más: un arranque, un
-			desgarro blanco en las esquinas, un bocado. El VELO interior
-			oscurece al reo: lo que queda dentro SE VA VOLVIENDO PÁRRAFO.
-			Si tu página mata a un jefe: EL ARREBATO — el festín de la hoja
-			que se arranca con jefe y todo, y vuela al libro.
-			(Útil de pruebas del escriba — 100% código.)
-			'''
-	}
-
 	CodiceVivo: {
-		// v6.50.71 — THE USER'S TEST: a sprite born from CODE turned into an
-		// ANIMATED weapon, completely separate from the rest (Tester's Bag)
+		// v6.50.72 — THE USER'S TEST v2: a sprite born from CODE turned into
+		// an ANIMATED weapon, completely separate from the rest (Tester's
+		// Bag). The .71 animation read as static — this one BREATHES.
 		DisplayName: El Códice Vivo
 		Tooltip:
 			'''
 			«Un libro que se dibujó a sí mismo — línea por línea de código.»
 			EL SPRITE DE PRUEBA: este códice no tiene sprite dibujado — NACIÓ DE
-			CÓDIGO (la matriz de píxeles, 26 colores) y por eso PUEDE ANIMARSE:
-			SU TINTA LATE, SU OJO PARPADEA — míralo en el inventario. Al usarlo,
-			el códice SALTA de tus manos, vuela al cursor y VELA sobre el campo
-			disparando CHISPAS VIOLETAS autoguiadas a los enemigos cercanos…
-			y luego vuelve a ti como un bumerán.
+			CÓDIGO (la matriz de píxeles, 26 colores) y por eso puede ANIMARSE
+			DE VERDAD: TODO EL LIBRO RESPIRA, una ONDA de tinta viva viaja
+			desde su ojo hacia afuera y EL OJO PARPADEA Y SE CIERRA — míralo
+			en el inventario. Al usarlo, el códice SALTA de tus manos, VUELA
+			A DONDE CLICASTE y ahí VELA disparando CUATRO ANDANADAS de TRES
+			CHISPAS VIOLETAS autoguiadas cada una — con enemigos o SIN
+			ellos, el ataque SIEMPRE se ve — y luego vuelve a ti como
+			un bumerán.
 			(Arma de prueba aparte — sprite 100% nacido de código.)
 			'''
 	}
@@ -1756,9 +1706,6 @@ Items: {
 
 Projectiles: {
 	SombraPaginaProjectile.DisplayName: La Sombra de la Página
-	AzotePaginaProjectile.DisplayName: El Azote de la Página
-	MordidaPaginaProjectile.DisplayName: La Mordida de la Página
-	CriaPaginaProjectile.DisplayName: La Cría de la Página
 	FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
 	ArcaneBolt.DisplayName: Bolt Arcano
 	GenesisLight.DisplayName: Luz del Génesis
@@ -1885,11 +1832,8 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena de Trueno
 	AethonMenorPet.DisplayName: Aethon Menor (mascota)
 	MiniEstallidoPet.DisplayName: Mini Estallido (mascota)
-	// CodiceVivoChispa.DisplayName: Codice Vivo Chispa
-	// CodiceVivoProjectile.DisplayName: Codice Vivo Projectile
-	// ManoEscribaProjectile.DisplayName: Mano Escriba Projectile
-	// PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
-	// TijerasPaginaProjectile.DisplayName: Tijeras Pagina Projectile
+	CodiceVivoChispa.DisplayName: Chispa del Códice Vivo
+	CodiceVivoProjectile.DisplayName: El Códice Vivo
 }
 
 Buffs: {

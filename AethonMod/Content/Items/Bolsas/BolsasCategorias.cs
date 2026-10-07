@@ -554,20 +554,11 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.50.71 — LOS ÚTILES DEL ESCRIBA: el usuario jubiló a la
-            // familia de tentáculos de la .69 («las 3 nuevas armas se ven
-            // mal») y pidió conceptos COMPLETAMENTE distintos — nada de
-            // hermanas-tentáculo: LA MANO DEL ESCRIBA (la garra colosal
-            // que CAMINA sobre sus dedos, agarra y hunde al reo en el
-            // charco), LAS TIJERAS DE LA PÁGINA (las hojas curvas que
-            // tijeretean a rebanadas de la realidad) y LA PÁGINA
-            // ARRANCADA (el marco de hoja de cuaderno que ciñe, tiembla y
-            // arranca al reo de la página). La Sombra de la Página queda
-            // INTACTA como pidió el usuario.
-            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA BASE: intacta, como pidió el usuario
-            l.Add((ModContent.ItemType<Weapons.Sombras.ManoDelEscriba>(), 1));    // ÚTIL 1: la mano que camina, agarra y hunde (festín 11, EL PUÑO DEL ESCRIBA)
-            l.Add((ModContent.ItemType<Weapons.Sombras.TijerasDeLaPagina>(), 1)); // ÚTIL 2: las tijeras que cortan rebanadas (festín 12, EL CORTE FINAL)
-            l.Add((ModContent.ItemType<Weapons.Sombras.PaginaArrancada>(), 1));   // ÚTIL 3: la página que encierra y arranca (festín 13, EL ARREBATO)
+            // v6.50.72 — LA SOMBRA SOLA: el usuario jubiló a los ÚTILES DEL
+            // ESCRIBA de la .71 («las 3 armas nuevas ya no son necesarias,
+            // solo nos quedamos con La Sombra de la Página») — la familia
+            // vuelve a ser UNA: la fauce tentacular aprobada.
+            l.Add((ModContent.ItemType<Weapons.Sombras.SombraDeLaPagina>(), 1));  // LA ÚNICA: la aprobada por el usuario
             return l;
         }
     }

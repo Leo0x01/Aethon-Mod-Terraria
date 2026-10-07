@@ -754,12 +754,12 @@ namespace AethonMod.Content.Globals
                 // pasa a veces, solo le hago 1 de daño»). LA CAUSA
                 // (decompile de su aiStyle 11): cuando Main.IsItDay(), su
                 // IA lo viste de damage 1000 / defense 9999 (el modo
-                // guardian) - y la oleada lo convoca de DIA a proposito
-                // (la paridad Rey/Skeletron de JefeDelLugar). De noche el
-                // daño era normal y de dia UNO: «solo pasa a veces». EL
-                // FIX: despues de su AI, la oleada lo devuelve a SU talla
-                // (las bases de su sello) - el giro visual queda (le queda
-                // bien), los numeros no.
+                // guardian) - y la oleada puede convocarlo de DIA (el
+                // sorteo de JefeDeLaOleada no vetaba a Skeletron de dia:
+                // solo el Ojo duerme). De noche el daño era normal y de
+                // dia UNO: «solo pasa a veces». EL FIX: despues de su AI,
+                // la oleada lo devuelve a SU talla (las bases de su sello)
+                // - el giro visual queda (le queda bien), los numeros no.
                 if (EsDeOleada && EsJefeDeOleada && npc.type == NPCID.SkeletronHead && Main.dayTime)
                 {
                     npc.defense = _defensaBase + DefensaExtra(true);

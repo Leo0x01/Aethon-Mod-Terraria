@@ -8,14 +8,14 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.CodiceVivo
 {
     /// <summary>
-    /// CODICEVIVOCHISPA — v6.50.71 — LA CHISPA DEL CÓDICE (la prueba del
+    /// CODICEVIVOCHISPA — v6.50.72 — LA CHISPA DEL CÓDICE (la prueba del
     /// sprite-de-código del usuario).
     ///
     /// La mirada hecha bala: una chispa VIOLETA autoguiada que el Códice
-    /// Vivo escupe desde su ojo (en VELA) al enemigo más cercano — 100%
-    /// dibujada por código (SoftGlow + VFXCore: el núcleo blanco, el halo
-    /// violeta y la estela), persigue con giro suave y muere en un
-    /// microdestello.
+    /// Vivo escupe desde su ojo (en VELA, en ANDANADAS de tres) al enemigo
+    /// más cercano — 100% dibujada por código (SoftGlow + VFXCore: el
+    /// núcleo blanco, el halo violeta y la estela), persigue con giro suave
+    /// y muere en un microdestello.
     /// </summary>
     public class CodiceVivoChispa : ModProjectile
     {
@@ -90,13 +90,13 @@ namespace AethonMod.Content.Projectiles.CodiceVivo
                 // LA ESTELA — la línea violeta que deja
                 VFXCore.Begin();
                 Vector2 cola = Projectile.Center - Projectile.velocity * 2.4f;
-                VFXCore.Line(cola, Projectile.Center, SombrasLib.Alfa(SombrasLib.Violeta, 0.55f), 7f);
+                VFXCore.Line(cola, Projectile.Center, SombrasLib.Alfa(SombrasLib.Violeta, 0.6f), 9f);
                 VFXCore.FlushAdditive();
 
                 // EL NÚCLEO — blanco con su halo violeta
                 VFXCore.Begin();
-                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Violeta, 0.5f), new Vector2(34f, 34f));
-                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Blanco, 0.9f), new Vector2(13f, 13f));
+                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Violeta, 0.55f), new Vector2(46f, 46f));
+                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Blanco, 0.95f), new Vector2(16f, 16f));
                 VFXCore.FlushAdditive();
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }

@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.71 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.72 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -14,12 +14,32 @@ cuando pronuncias su nombre, el libro **SE ABRE y se alza de sus propias página
 Vence la prueba y el libro te declara digno (La Forma Ascendida cae a tus pies). Alrededor:
 **LAS OLEADAS DEL HAMBRE** (la furia del libro: oleadas estilo Pumpkin/Frost Moon con jefes
 guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 nivel) y
-**~117 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
+**~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.71)
+## ¿Dónde estamos? (actualizado para v6.50.72)
 
-**NOVEDAD .71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL
+**NOVEDAD .72 — EL CÓDICE VIVO REHECHO + LAS 3 ARMAS BORRADAS + LAS
+OLEADAS SIN JEFE REPETIDO**: la letra del usuario: «el sprite del codice
+vivo esta mal hecho, solo es la imagen fija subiendo en vertical sin
+animaciones ni nada… no tiene ningún ataque… las 3 armas nuevas ya no son
+necesarias, solo nos quedamos con La Sombra de la Página… en las oleadas
+se repiten mucho los mismos jefes». **EL CÓDICE VIVO** vuelve a nacer de
+la MISMA matriz de `codigo.txt` pero animado DE VERDAD: **EL ALIENTO**
+(todo el libro respira), **LA ONDA** (un anillo de tinta viva viajando
+desde el ojo) y **EL PARPADEO COMPLETO** (el ojo cierra en rendija) —
+8.2–36.9% de píxeles cambian por frame (la .71: 3.3–6.3%) y el VLM lo
+certificó "VIVA". Al usarlo, **vuela AL PUNTO DONDE CLICAS** y ahí vela
+disparando **CUATRO ANDANADAS de TRES chispas autoguiadas** — con
+enemigos o SIN ellos, el ataque SIEMPRE se ve — y vuelve de bumerán.
+**LAS 3 ARMAS DE LA .71 BORRADAS** (Mano/Tijeras/Página, con sus festines
+11/12/13 y sus tooltips): la Bolsa de las Sombras vuelve a tener UNA sola
+inaquilina — **La Sombra de la Página**, la aprobada. **LAS OLEADAS**: el
+reparto por bioma MUERE — el guardián de cada oleada sale de LA PIZARRA
+de los SEIS pre-hardmode **todos con la MISMA probabilidad**, y el que
+salió **no repite en las DOS oleadas siguientes** (el Ojo no entra al
+sorteo de día porque huye del sol; Deerclops sigue aparte, en su dado del
+1%). **NOVEDAD .71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL
 TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO**: la letra
 del usuario: «tengo el juego en español, pero el juego sale en inglés» —
 la .70 BORRÓ el es-ES y su juego (en «Español») caía al inglés; AHORA

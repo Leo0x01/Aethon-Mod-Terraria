@@ -482,6 +482,10 @@ namespace AethonMod.Content.Systems
 
             _oleadasTotales = (int)MathHelper.Clamp(oleadas, 1, 11);
             _oleadaActual = 0;
+            // v6.50.72 — LA PIZARRA LIMPIA: cada furia arranca sin vetos
+            // (la regla de los últimos DOS vive dentro de UNA furia)
+            _jefeOleadaPrevio1 = -1;
+            _jefeOleadaPrevio2 = -1;
             _jugador = jugador.whoAmI;
             // v6.50.59 — EL NIVEL DEL FESTÍN: las oleadas que vienen SON el
             // nivel (la especial 11 corre a nivel 10, el tope).
@@ -934,9 +938,11 @@ namespace AethonMod.Content.Systems
         // ==================================================================
 
         /// <summary>
-        /// LOS SEIS GUARDIANES de las oleadas (el reparto de zonas sin el
-        /// invierno caminante) — TODOS juntos en la ESPECIAL, cada uno
-        /// vestido de ×15 y con el aura del JUICIO.
+        /// LOS SEIS GUARDIANES de las oleadas — TODOS juntos en la
+        /// ESPECIAL (cada uno vestido de ×15 y con el aura del JUICIO) y,
+        /// desde la v6.50.72, LA PIZARRA DEL SORTEO de cada oleada normal
+        /// (JefeDeLaOleada: todos con la MISMA probabilidad, sin los
+        /// últimos DOS — el reparto por zonas MURIÓ).
         /// v6.50.30 — DEERCLOPS FUERA (la letra del usuario: «quita al
         /// Derrclops como jefe probable»): el Juicio son SEIS. Su esencia
         /// sigue siendo de los guardianes (la rareza la hace CARA) y su
@@ -1294,71 +1300,55 @@ namespace AethonMod.Content.Systems
         }
 
         /// <summary>
-        /// El JEFE PRE-HARDMODE que cierra la oleada según el bioma.
+        /// v6.50.72 — EL JEFE QUE CIERRA LA OLEADA, SORTEADO (la letra del
+        /// usuario: «en las oleadas se repiten mucho los mismos jefes,
+        /// debes hacer que el jefe que salió en una oleada no se repita en
+        /// las 2 siguiente y que todos tengan las mismas probabilidades de
+        /// aparecer, menos el deerclop»).
         ///
-        /// v6.48 — LA REGLA NUEVA DEL USUARIO: los jefes de oleada NO se
-        /// ven afectados por la HORA — cada ZONA tiene su guardián fijo
-        /// (aparecen en su zona predeterminada), y las zonas que no
-        /// tenían guardián YA TIENEN UNO:
-        ///   · superficie → alterna Rey Gelatina / Ojo por PARIDAD de
-        ///     oleada (variedad sin hora: la 1 Rey, la 2 Ojo, la 3 Rey…)
-        ///   · desierto → REY GELATINA (la corona de la arena)
-        ///   · playa y cielo → OJO DE CTHULHU (el vigía que vuela)
-        ///   · granito/mármol/subsuelo → el MAL DEL MUNDO (Devorador o
-        ///     Cerebro según el mundo)
-        ///   · nieve → Skeletron (el hueso congelado) · jungla → Abeja
-        ///     Reina · corrupción → Devorador · carmesí → Cerebro ·
-        ///     mazmorra → Skeletron · infierno → el Ojo los caza.
-        /// v6.50.30 — DEERCLOPS YA NO ES GUARDIÁN PROBABLE (la letra del
-        ///     usuario: «quita al Derrclops como jefe probable, has que
-        ///     sea un jefe que salga con una probalidad de 1% en
-        ///     oleadas»): salió del reparto de zonas y del Juicio — el
-        ///     invierno caminante AHORA solo llega por EL DADO: 1% por
-        ///     oleada (NacerJefeRaro, anunciado aparte).
+        /// EL REPARTO VIEJO (por BIOMA desde v6.48) era la causa de la
+        /// repetición: quedarse en una zona = el MISMO guardián oleada tras
+        /// oleada. AHORA el guardián de CADA oleada sale del SORTEO:
+        ///   · LA PIZARRA — los SEIS pre-hardmode (los mismos guardianes
+        ///     del Juicio: Rey Gelatina, Ojo de Cthulhu, Abeja Reina,
+        ///     Devorador de Mundos, Cerebro de Cthulhu y Skeletron), TODOS
+        ///     con la MISMA probabilidad.
+        ///   · LA REGLA DE LOS ÚLTIMOS DOS — el jefe que salió en la
+        ///     oleada k NO puede repetir en la k+1 NI en la k+2 (la lista
+        ///     de candidatos lo excluye; con 6 en la pizarra quedan ≥4
+        ///     candidatos por sorteo, y todos los presentes son
+        ///     equiprobables).
+        ///   · EL OJO DUERME DE DÍA — única excepción técnica (no de
+        ///     gusto): el Ojo de Cthulhu HUYE DEL SOL (su IA de vanilla lo
+        ///     manda a despegar y des-spawnear al amanecer: nacer de día =
+        ///     oleada sin guardián). De día no entra al sorteo; de noche
+        ///     compite igual que todos.
+        ///   · DEERCLOPS SIGUE APARTE (la letra: «menos el deerclop») — NO
+        ///     está en la pizarra: sigue siendo EL DADO del 1% (el invitado
+        ///     raro de SpawnJefeOleada), nunca un guardián probable.
         /// El Muro de Carne sigue EXCLUIDO a propósito (una furia
         /// involuntaria no abre el hardmode).
         /// </summary>
-        private static int JefeDelLugar(Player p)
+        private static int JefeDeLaOleada()
         {
-            // v6.50.25 — LOS JEFES NO VEN LA HORA (el reporte del usuario:
-            // «en los jefes estos no se pueden ver afectados por el dia»).
-            // EL OJO DE CTHULHU HUYE DEL SOL (su IA de vanilla lo manda a
-            // despegar en cuanto amanece y se des-spawnea): DE DÍA el
-            // guardián es uno que NO duerme — donde el ojo no puede, la
-            // CORONA manda. v6.50.30 — DEERCLOPS FUERA DEL REPARTO (la
-            // letra del usuario): la nieve la guarda ahora el HUESO
-            // CONGELADO (Skeletron: no duerme, no huye del sol) y la
-            // paridad de superficie de día pasa a REY/SKELETRON. El
-            // invierno caminante SOLO llega por EL DADO: 1% por oleada
-            // (NacerJefeRaro).
-            bool deDia = Main.dayTime;
-
-            if (p.ZoneUnderworldHeight)
-                return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu; // el ojo los caza en el infierno; de día la corona reina en el fuego
-            if (p.ZoneDungeon) return NPCID.SkeletronHead;          // v6.48: SIN hora — el guardián no duerme
-            if (p.ZoneSnow) return NPCID.SkeletronHead;             // v6.50.30: el hueso congelado — la nieve no duerme
-            if (p.ZoneJungle) return NPCID.QueenBee;                 // la colmena no duerme
-            if (p.ZoneCorrupt) return NPCID.EaterofWorldsHead;
-            if (p.ZoneCrimson) return NPCID.BrainofCthulhu;
-
-            // DESIERTO (v6.48 — zona SIN guardián, ahora con el Rey).
-            if (p.ZoneDesert) return NPCID.KingSlime;
-
-            // PLAYA y CIELO (v6.48 — zonas sin guardián, ahora con el Ojo
-            // — de día, el Rey: el vigía no puede volar bajo el sol).
-            if (p.ZoneBeach) return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu;
-            if (p.ZoneSkyHeight) return deDia ? NPCID.KingSlime : NPCID.EyeofCthulhu;
-
-            // SUBSUELO sin bioma: el mal del mundo (o el Rey, en mundos limpios)
-            if (p.ZoneRockLayerHeight || p.ZoneDirtLayerHeight)
-                return WorldGen.crimson ? NPCID.BrainofCthulhu : NPCID.EaterofWorldsHead;
-
-            // SUPERFICIE: por PARIDAD de oleada (sin hora — la 1 Rey, la 2 Ojo…
-            // de día la paridad sigue VIVA: Rey/Skeletron, los que no huyen).
-            if (deDia)
-                return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.SkeletronHead;
-            return (_oleadaActual % 2 == 1) ? NPCID.KingSlime : NPCID.EyeofCthulhu;
+            int[] pizarra = LosSeis();
+            var candidatos = new System.Collections.Generic.List<int>(pizarra.Length);
+            foreach (int id in pizarra)
+            {
+                if (id == _jefeOleadaPrevio1 || id == _jefeOleadaPrevio2) continue; // LOS ÚLTIMOS DOS, FUERA
+                if (id == NPCID.EyeofCthulhu && Main.dayTime) continue;             // el ojo huye del sol
+                candidatos.Add(id);
+            }
+            // (la pizarra son 6 y se vetan a lo sumo 2: siempre quedan ≥3 —
+            // el hueco es solo una red de seguridad para futuras ediciones)
+            if (candidatos.Count == 0) candidatos.AddRange(pizarra);
+            return candidatos[Main.rand.Next(candidatos.Count)];
         }
+
+        /// <summary>v6.50.72 — El guardián de la oleada ANTERIOR (el que no puede repetir en la siguiente).</summary>
+        private static int _jefeOleadaPrevio1 = -1;
+        /// <summary>v6.50.72 — El guardián de hace DOS oleadas (el segundo veto del sorteo).</summary>
+        private static int _jefeOleadaPrevio2 = -1;
 
         // ==================================================================
         //  LOS SPAWNS DE LOS GUARDIANES (los jefes NO salen del motor
@@ -1386,12 +1376,14 @@ namespace AethonMod.Content.Systems
             return new Vector2(x, y);
         }
 
-        /// <summary>Convoca al JEFE (versión especial de la oleada) del bioma.</summary>
+        /// <summary>Convoca al JEFE (versión especial de la oleada) — v6.50.72: SORTEADO (JefeDeLaOleada: pizarra de seis, sin los últimos dos).</summary>
         private static void SpawnJefeOleada(Player hambriento)
         {
             try
             {
-                int tipo = JefeDelLugar(hambriento);
+                // v6.50.72 — EL SORTEO (la pizarra de los seis, sin los
+                // últimos DOS y con el ojo fuera de día — JefeDeLaOleada)
+                int tipo = JefeDeLaOleada();
                 // v6.50.29 — EL BORDE DEL CUADRO (lado trasero preferido):
                 // el jefe llega CAMINANDO/VOLANDO al cuadro como las
                 // invasiones de vanilla — visible en segundos, sin la
@@ -1412,6 +1404,11 @@ namespace AethonMod.Content.Systems
 
                 jefe.GetGlobalNPC<OleadaNPC>().Marcar(jefe, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 jefe.netUpdate = true;
+                // v6.50.72 — LA REGLA DE LOS ÚLTIMOS DOS: el guardián que
+                // acaba de nacer queda VETADO para las DOS oleadas que
+                // siguen (el sorteo lo excluye; la historia se desplaza)
+                _jefeOleadaPrevio2 = _jefeOleadaPrevio1;
+                _jefeOleadaPrevio1 = tipo;
 
                 // v6.50.48 - LA EXTENSION DEL DEVORADOR: la cabeza acaba
                 // de nacer; cuando su cadena de vanilla este completa

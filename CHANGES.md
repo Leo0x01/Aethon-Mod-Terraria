@@ -1,5 +1,90 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.72 — EL CÓDICE VIVO REHECHO (ANIMACIÓN DE VERDAD + ATAQUE SIEMPRE VISIBLE) + LAS 3 ARMAS BORRADAS + LAS OLEADAS SIN JEFE REPETIDO
+
+**Feedback del usuario**: "el sprite del codice vivo esta mal hecho, solo es
+la imagen fija subiendo en vertical sin animaciones ni nada, estoy seguro
+que no usaste el codigo que te di para crear una animacion, ademas no tiene
+ningun ataque… las 3 armas nuevas, las puedes borrar ya no son necesarias,
+solo nos quedamos con La Sombra de la Página… en las oleadas se repiten
+mucho los mismos jefes, debes hacer que el jefe que salio en una oleada no
+se repita en las 2 siguiente y que todos tengan las mismas probabilidades
+de aparecer, menos el deerclop".
+
+**(1) EL CÓDICE VIVO REHECHO — LA ANIMACIÓN QUE SE VE.** La .71 SÍ usó la
+matriz de `codigo.txt` (313×313, 26 colores), pero su animación era un
+pulso de brillo en 9 tonos de la rampa (3.3–6.3% de los píxeles por frame)
++ un parpadeo de 2 frames: **en juego se leía ESTATICA**. La .72 vuelve a
+nacer de la MISMA MATRIZ con TRES efectos que no se pueden dejar de ver
+(`tools/gen_codice_vivo_v65072.py`):
+  - **EL ALIENTO** — TODO el libro respira: onda TRIANGULAR de brillo
+    0.76..1.24 con paso CONSTANTE por frame (el seno dejaba frames gemelos
+    en el pico y el snap a paleta se los comía).
+  - **LA ONDA** — un ANILLO de TINTA VIVA (violeta claro #f0a9f6) nace en
+    el ojo y VIAJA hacia afuera (radio 30→345 px por ciclo): la ola
+    moviéndose se ve a cualquier tamaño.
+  - **EL PARPADEO COMPLETO** — frames 5/6/7: media, **RENDIJA del 8%**,
+    media: el ojo cierra de verdad (62 px claros abiertos → 6 en la
+    rendija, verificado sobre el strip final).
+  - Verificación: **8.2–36.9% de los píxeles cambian entre frames
+    consecutivos** (la .71: 3.3–6.3%) y el VLM sobre la hoja de contacto:
+    **"VIVA — no pasaría desapercibida en el juego"**.
+
+**(2) EL CÓDICE VIVO — EL ATAQUE SIEMPRE SE VE.** La .71 solo disparaba si
+había un enemigo en 760 px y el vuelo era de paso (de ahí lo de «subiendo
+en vertical sin ataque»). Ahora: al usarlo (pose Shoot — la mira manda),
+el códice **VUELA AL PUNTO DONDE CLICASTE** (280 px en la dirección de la
+mira; persigue el punto y FRENA al llegar — ya no pasa de largo), **vela
+ahí** flotando con vaivén y dispara **CUATRO ANDANADAS de TRES chispas
+autoguiadas** cada 26 t — **al enemigo más cercano en 900 px… o hacia la
+MIRA si no hay nadie: con enemigos o sin ellos, el ataque SIEMPRE se
+dispara** — y luego vuelve como bumerán. Las chispas más grandes y
+brillantes (núcleo 16 px + halo 46 px), el icono del inventario anima más
+rápido (6 t/frame).
+
+**(3) LAS 3 ARMAS BORRADAS — SOLO LA SOMBRA.** «Las 3 armas nuevas ya no
+son necesarias, solo nos quedamos con La Sombra de la Página»: LA MANO
+DEL ESCRIBA, LAS TIJERAS DE LA PÁGINA y LA PÁGINA ARRANCADA eliminadas por
+completo — los 3 ítems (.cs+.png), los 3 proyectiles, los festines
+11/12/13 (DrawAdorno entero + sus sonidos propios + comentarios), sus
+filas en la Bolsa de las Sombras, los tooltips es/en… **y de propina las
+claves muertas de la .69** (Azote/Mordida/Cría) que habían sobrevivido en
+los hjson. La Sombra de la Página queda como la ÚNICA inquilina de la
+Bolsa de las Sombras. La Bolsa del Probador sigue entregando el Códice
+Vivo. Cazada y liquidada una ASIMETRÍA heredada: CodiceVivoProjectile y
+CodiceVivoChispa solo tenían DisplayName en en-US — ahora es/en están
+clavados (310 == 310).
+
+**(4) LAS OLEADAS — EL JEFE QUE SALIÓ NO REPITE EN LAS DOS SIGUIENTES.**
+La causa de la repetición era el reparto POR BIOMA (v6.48: misma zona =
+el MISMO guardián oleada tras oleada). **El reparto por zonas MUERE**:
+`JefeDeLaOleada` lo reemplaza con **LA PIZARRA de los SEIS** pre-hardmode
+(Rey Gelatina, Ojo de Cthulhu, Abeja Reina, Devorador de Mundos, Cerebro
+de Cthulhu, Skeletron — los mismos del Juicio) **todos con la MISMA
+probabilidad**, y **LA REGLA DE LOS ÚLTIMOS DOS**: el guardián que salió
+en la oleada k queda VETADO en la k+1 y la k+2 (historial que se desplaza
+al nacer cada jefe; siempre quedan ≥3 candidatos, todos equiprobables; la
+pizarra se limpia al arrancar cada furia). Dos excepciones documentadas:
+**el OJO no entra al sorteo DE DÍA** (su IA de vanilla huye del sol y
+des-spawnea: nacer de día = oleada sin guardián; de noche compite igual —
+Skeletron sí puede nacer de día porque el fix v6.50.48 le devuelve su
+talla tras el modo guardián) y **DEERCLOPS SIGUE APARTE** («menos el
+deerclops»): NO está en la pizarra — sigue siendo EL DADO del 1% de
+siempre, el invitado raro.
+
+**VERIFICACIÓN**: oráculo 0/0 (×3 durante la cirugía) · build real 0/0 ·
+.tmod v6.50.72 (4.270.946 B, md5 fb71616272c9be7f64269bd6cf466230):
+**392 entradas**, EOF EXACTO, cuerpo es-ES == es-MX BYTE A BYTE,
+DisplayName 310 == 310, Tooltip 177 == 177, los 2 strips del códice
+presentes y con su tamaño correcto (128×1024 y 48×384), MUERTOS AUSENTES
+(los 3 ítems + 3 proyectiles + DrawAdorno + JefeDelLugar + las claves
+Azote/Mordida/Cría de los hjson) y VIVOS PRESENTES (JefeDeLaOleada +
+_jefeOleadaPrevio1/2 + la familia Códice) · headless (language=5):
+«Finalizing Aethon, the Eternal Grimoire v6.50.72 → Adding Recipes →
+Server started», **0 EXCEPCIONES**.
+
+---
+
 ## Commit v6.50.71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN EN LA NUESTRA + EL TENTÁCULO FUSIFORME + LOS ÚTILES DEL ESCRIBA + EL CÓDICE VIVO
 
 **Feedback del usuario**: "las 3 nuevas armas se ven mal, pero La Sombra de

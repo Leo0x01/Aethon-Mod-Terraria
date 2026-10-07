@@ -98,74 +98,22 @@ Items: {
 			'''
 	}
 
-	ManoDelEscriba: {
-		// v6.50.71 — SCRIBE'S TOOL 1 (the Hand replaces the Lash: completely
-		// different concepts, no more tentacle sisters)
-		DisplayName: The Scribe's Hand
-		Tooltip:
-			'''
-			"Every book needs a hand to write it."
-			THE HAND THAT WALKS: a COLOSSAL shadow claw rises from your
-			pool, tethered by the wrist, and WALKS on its five fingers —
-			like a spider, like a scribe — toward your enemy. The palm
-			carries ONE slitted eye that never blinks; on arrival the
-			fingers CAGE it, the fist SQUEEZES in rhythm, and the POOL
-			beneath its feet grows with every grip: it is SINKING it
-			into shadow.
-			If your hand kills a boss: THE SCRIBE'S FIST — the feast of
-			the colossal claw that descends and buries it whole.
-			(The scribe's test tool — 100% code.)
-			'''
-	}
-
-	TijerasDeLaPagina: {
-		// v6.50.71 — SCRIBE'S TOOL 2 (the Scissors replace the Bite)
-		DisplayName: The Page Scissors
-		Tooltip:
-			'''
-			"Every fate is a sheet: these are the scissors."
-			THE SCISSORS THAT CUT: two curved shadow blades with a BONE
-			EDGE fly OPEN at the enemy —violet rivet at the hinge— and
-			SNIP: every close is a WHITE CUT that crosses the condemned,
-			and the severed slice drifts away and dissolves into bruma.
-			They cut slow but deep: every snip takes a FAT bite of life.
-			If your scissors kill a boss: THE FINAL CUT — the feast of
-			the snip that tears it off the page.
-			(The scribe's test tool — 100% code.)
-			'''
-	}
-
-	PaginaArrancada: {
-		// v6.50.71 — SCRIBE'S TOOL 3 (the Page replaces the Brood)
-		DisplayName: The Torn Page
-		Tooltip:
-			'''
-			"What the book writes, the book tears out."
-			THE PAGE THAT TRAPS: a shadow FRAME draws itself around the
-			enemy —with its RULED LINES, its RED MARGIN and its folio: a
-			HUGE notebook sheet— and with every SHUDDER it cinches
-			tighter: one tear, one white rip at the corners, one bite.
-			The inner VEIL darkens the condemned: what stays inside is
-			BECOMING PARAGRAPH.
-			If your page kills a boss: THE SNATCH — the feast of the
-			sheet torn out boss and all, flying home to the book.
-			(The scribe's test tool — 100% code.)
-			'''
-	}
-
 	CodiceVivo: {
-		// v6.50.71 — THE USER'S TEST: a sprite born from CODE turned into an
-		// ANIMATED weapon, completely separate from the rest (Tester's Bag)
+		// v6.50.72 — THE USER'S TEST v2: a sprite born from CODE turned into
+		// an ANIMATED weapon, completely separate from the rest (Tester's
+		// Bag). The .71 animation read as static — this one BREATHES.
 		DisplayName: The Living Codex
 		Tooltip:
 			'''
 			"A book that drew itself — one line of code at a time."
 			THE TEST SPRITE: this codex has no hand-drawn sprite — it was BORN
 			FROM CODE (the pixel matrix, 26 colors) and that's why it can
-			ANIMATE: ITS INK PULSES, ITS EYE BLINKS — watch it in your
-			inventory. When used, the codex LEAPS from your hands, flies to
-			the cursor and HOVERS over the field firing GUIDED VIOLET SPARKS
-			at nearby enemies… then returns to you like a boomerang.
+			ANIMATE for real: THE WHOLE BOOK BREATHES, a WAVE of living ink
+			travels from its eye outwards, and THE EYE BLINKS SHUT — watch it
+			in your inventory. When used, the codex LEAPS from your hands,
+			FLIES TO WHERE YOU CLICK and hovers THERE, firing FOUR VOLLEYS of
+			THREE GUIDED VIOLET SPARKS each — enemies or no enemies, the
+			attack ALWAYS shows — then returns to you like a boomerang.
 			(A standalone test weapon — 100% code-born sprite.)
 			'''
 	}
@@ -1758,9 +1706,6 @@ Items: {
 
 Projectiles: {
 	SombraPaginaProjectile.DisplayName: The Shadow of the Page
-	AzotePaginaProjectile.DisplayName: The Lash of the Page
-	MordidaPaginaProjectile.DisplayName: The Bite of the Page
-	CriaPaginaProjectile.DisplayName: The Brood of the Page
 	FauceDevoradorProjectile.DisplayName: The Feast of Shadows
 	ArcaneBolt.DisplayName: Arcane Bolt
 	GenesisLight.DisplayName: Genesis Light
@@ -1889,9 +1834,6 @@ Projectiles: {
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
 	CodiceVivoChispa.DisplayName: Codice Vivo Chispa
 	CodiceVivoProjectile.DisplayName: Codice Vivo Projectile
-	ManoEscribaProjectile.DisplayName: Mano Escriba Projectile
-	PaginaArrancadaProjectile.DisplayName: Pagina Arrancada Projectile
-	TijerasPaginaProjectile.DisplayName: Tijeras Pagina Projectile
 }
 
 Buffs: {
