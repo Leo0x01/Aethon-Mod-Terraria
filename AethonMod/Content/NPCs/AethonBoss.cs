@@ -2612,9 +2612,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     }
                 }
 
-                // v6.50.79 — LO QUE SOLO LA AUTORIDAD DECIDE: la bola
-                // final, el botín y la manada disuelta — el cliente NUNCA
-                // dropea (nada de botín fantasma local: los ítems ya
+                // v6.50.79 — LO QUE SOLO LA AUTORIDAD DECIDE: el estallido
+                // de la muerte, el botín y la manada disuelta — el cliente
+                // NUNCA dropea (nada de botín fantasma local: los ítems ya
                 // llegan por su propio sync desde el servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
@@ -2625,35 +2625,29 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // rayos, el anillo segmentado, la cruz anamórfica, 80
                     // chispas y la luz que INUNDA el mundo… y PURA LUZ:
                     // jamás daña (la victoria no se cobra con un golpe de
-                    // gracia a quemarropa — el aliento letal sigue siendo
-                    // LA BOLA FINAL de siempre). Nace de la AUTORIDAD y el
+                    // gracia a quemarropa). Nace de la AUTORIDAD y el
                     // cable la lleva a TODAS las pantallas: el estallido
                     // VIVE mientras el dios ya no está — así la explosión y
                     // la desaparición son EL MISMO INSTANTE, en todas las
                     // máquinas.
+                    //
+                    // v6.50.81 — EL ESTALLIDO ES EL ADIÓS (la letra: «el
+                    // sol explota, pero se sigue disparando una bola de
+                    // luz hacia algun lado, esa bola de luz dura varios
+                    // segundos antes de desaparecer»): LA BOLA FINAL de la
+                    // v6.50.56 — el último aliento que salía volando 7 s
+                    // hacia el asesino — RETIRADA del cine de muerte. La
+                    // muerte del dios es UN SOLO ACTO: la GRAN EXPLOSIÓN
+                    // DE LUZ y desaparecer — nada sale disparado, nada
+                    // queda brillando por ahí varios segundos después de
+                    // la victoria. El que mató al dios se queda con el
+                    // cielo limpio.
                     Projectile.NewProjectile(NPC.GetSource_FromAI(),
                         NPC.Center, Vector2.Zero,
                         ModContent.ProjectileType<AtaqueJefeProjectile>(),
                         0, 0f, Main.myPlayer,
                         AtaqueJefeProjectile.EstiloMuerteFinal,
                         0f, NPC.whoAmI * 79 + 999);
-
-                    // v6.50.56 — EL ÚLTIMO ALIENTO: LA BOLA FINAL (la letra:
-                    // «creando una bola de energia similar al proyectil sol
-                    // pero de color blanco dorado y con mucho brillo») — nace
-                    // del corazón del dios y va rumbo a su asesino: 7 s de
-                    // fuego blanco-dorado que ALUMBRA el cielo entero.
-                    int danoBola = Math.Max(1, (int)(NPC.damage * 1.3f));
-                    Vector2 rumbo = -Vector2.UnitY * 6.5f;
-                    Player presa = Main.player[NPC.target];
-                    if (presa != null && presa.active && !presa.dead)
-                        rumbo = (presa.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 6.5f;
-                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        NPC.Center, rumbo,
-                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
-                        danoBola, 3f, Main.myPlayer,
-                        AtaqueJefeProjectile.EstiloBolaFinal,
-                        danoBola, 0f);
 
                     DropBotin();
                     DisolverManada();   // v6.50.45 — sin luz que los mande, los cazadores se apagan
@@ -2791,7 +2785,8 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // de la muerte del jefe, este se oscurece, NO»): el disco
                 // oscuro y el apagón del cine de muerte FUERA — el dios
                 // muerto JAMÁS se apaga; su luz CRECE (brilloMuerte) hasta
-                // el disparo de LA BOLA FINAL, su ataque más brillante.
+                // LA GRAN EXPLOSIÓN DE LUZ (v6.50.81: el estallido ES el
+                // adiós — ya no hay bola final que la suceda).
                 float faseInt = 0.55f + 0.45f * (Phase - 1) / 4f;   // la furia brilla más
 
                 // === LA MUERTE: LA CARGA (todo se recoge al punto que
