@@ -1,6 +1,5 @@
 using Terraria;
 using Terraria.ModLoader;
-using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.Biomes
 {
@@ -22,17 +21,12 @@ namespace AethonMod.Content.Biomes
         public override SceneEffectPriority Priority =>
             SceneEffectPriority.BiomeHigh;
 
-        // v6.43 — CIELOLIB: EL PAISAJE DEL SAGRARIO. El bioma enchufa sus
-        // fondos al sistema de escenas del juego: el estilo de SUPERFICIE
-        // (nebulosa lejana · montañas rúnicas · columnas cercanas) y el de
-        // SUBSUELO (el bioma vive en la capa de tierra y de roca — su
-        // paisaje de cueva también habla del Sagrario). Ambos están cargados
-        // de forma diferida en CieloLib.
-        public override ModSurfaceBackgroundStyle SurfaceBackgroundStyle =>
-            CieloLib.EstiloSanctum;
-
-        public override ModUndergroundBackgroundStyle UndergroundBackgroundStyle =>
-            CieloLib.EstiloSanctuSubsuelo;
+        // v6.50.76 — LOS FONDOS DE BIOMA FUERON RETIRADOS (CieloLib
+        // eliminada): el estilo de SUBSUELO del Sagrario era el culpable
+        // del fondo de cuevas roto (metía paisajes 1024×256 en slots que
+        // exigen miniaturas 160×16/160×96 y dejaba los slots 3-6 en 0,
+        // con el bioma activo en TODAS las cuevas por la bandera de
+        // pruebas). El fondo de cuevas vuelve a ser 100% vanilla.
 
         public override bool IsBiomeActive(Player player)
         {

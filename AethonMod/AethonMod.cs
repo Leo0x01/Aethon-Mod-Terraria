@@ -53,20 +53,17 @@ namespace AethonMod
             // constante del código.
             Logger.Info($"AethonMod {Version} (tML {TModLoaderVersion}) — build oficial de github.com/Leo0x01/Aethon-Mod-Terraria");
 
-            // v6.43 — CIELOLIB: EL REGISTRO DE LAS TEXTURAS DE FONDO DEL
-            // SAGRARIO (los slots de fondo de esta versión se dan de alta
-            // aquí — el estilo de bioma las pide por su ruta relativa).
-            // v6.50.1 — FIX: AddBackgroundTexture(Mod, string) recibe la ruta
-            // COMPLETA con el prefijo del mod (lo pide tal cual vía
-            // ModContent.Request y la guarda como clave del diccionario), a
-            // diferencia de GetBackgroundSlot(Mod, string), que añade el
-            // prefijo él solo. Sin el prefijo, el mod crashea en Load() con
-            // MissingResourceException ("no se encontró un mod con el nombre
-            // 'Content'"). Las constantes siguen siendo relativas porque así
-            // las pide el estilo de bioma.
-            BackgroundTextureLoader.AddBackgroundTexture(this, $"{Name}/{SanctumBackgroundStyle.RutaFar}");
-            BackgroundTextureLoader.AddBackgroundTexture(this, $"{Name}/{SanctumBackgroundStyle.RutaMiddle}");
-            BackgroundTextureLoader.AddBackgroundTexture(this, $"{Name}/{SanctumBackgroundStyle.RutaClose}");
+            // v6.50.76 — CIELOLIB FUE ELIMINADA: su estilo de fondo de
+            // SUBSUELO (SanctumUndergroundBackgroundStyle) metía las
+            // texturas de cielo del Sagrario (1024×256) en los slots del
+            // fondo de cueva — que exigen miniaturas 160×16/160×96
+            // rebanadas en 16×16 — y dejaba los slots 3-6 en 0; con el
+            // bioma activo en TODAS las cuevas (bandera de pruebas ON),
+            // TODO fondo de cueva quedó roto (void negro + shards de las
+            // columnas). La librería completa (CieloLib/CieloEscenas/
+            // SanctumBackgroundStyle/Prisma de Paisajes + sus 12 texturas)
+            // se retiró — el registro de slots de fondo que vivía aquí
+            // murió con ella.
         }
 
         public override void PostSetupContent()
@@ -120,7 +117,8 @@ namespace AethonMod
             // nulo-seguros (?. y guards) y sus llamadas van envueltas: una
             // excepción que escape de un Unload de ModSystem la escala tML
             // a FATAL y reinicia el juego. Auditado en v6.50.6:
-            // CieloLib.Reiniciar (?.), BrumaBrushes.Unload (guards),
+            // CieloLib.Reiniciar (?. — la librería fue ELIMINADA en
+            // v6.50.76), BrumaBrushes.Unload (guards),
             // AuraLib/MediaResLib/BlackHoleLens (ya nulo-seguros) y
             // EcoLib/AudioLib/PyraLib/EstelaLib/OcasoBurstFX/PulsoLib/
             // PantallaLib (contenedores readonly no-ancla, nunca barridos).

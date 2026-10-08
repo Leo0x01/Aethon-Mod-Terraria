@@ -43,9 +43,9 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.TestSparkle>(), 1));
             l.Add((ModContent.ItemType<Weapons.ProjBeam>(), 1));
             l.Add((ModContent.ItemType<Weapons.TestMagicRingV2>(), 1));
-            // v6.43 — CieloLib: el prisma que despliega los paisajes de la
-            // librería del cielo (el tester del fondo del juego).
-            l.Add((ModContent.ItemType<Cosmetics.PrismaDePaisajesItem>(), 1));
+            // v6.50.76 — EL PRISMA DE PAISAJES FUE RETIRADO: era el tester
+            // de CieloLib (la librería del fondo eliminada — la que rompía
+            // el fondo de las cuevas).
             // v6.44 — EL LUGAR, COLÓCALO DONDE QUIERAS: el Altar Antiguo
             // colocable (5) para montar un Sagrario de pruebas en cualquier
             // mundo — los altares naturales solo generan en mundos NUEVOS,

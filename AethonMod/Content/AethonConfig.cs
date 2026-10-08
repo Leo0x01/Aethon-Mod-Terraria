@@ -45,10 +45,12 @@ namespace AethonMod.Content
 
         /// <summary>
         /// ¿El Sagrario Hueco baja su puerta de 400 PV al máximo? ON por
-        /// defecto: todo el mod es de PRUEBAS y el paisaje del Sagrario
-        /// (los fondos de CieloLib) debe poder verse descendiendo al
-        /// subsuelo con cualquier jugador de pruebas. Apágalo para
-        /// restaurar la puerta real de los 400 PV.
+        /// defecto: todo el mod es de PRUEBAS y el bioma del Sagrario
+        /// debe poder activarse descendiendo al subsuelo con cualquier
+        /// jugador de pruebas. Apágalo para restaurar la puerta real de
+        /// los 400 PV. (v6.50.76 — los FONDOS de bioma de CieloLib ya no
+        /// existen: la bandera ya no cambia el paisaje de las cuevas,
+        /// solo la música y demás efectos de escena del bioma.)
         /// </summary>
         [DefaultValue(true)]
         public bool SagrarioAccesibleEnPruebas = true;

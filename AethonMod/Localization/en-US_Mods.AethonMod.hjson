@@ -1524,28 +1524,6 @@ Items: {
 			'''
 	}
 
-	PrismaDePaisajesItem: {
-		DisplayName: The Landscape Prism
-		Tooltip:
-			'''
-			The sky library tester: each use unfurls AN ENTIRE LANDSCAPE
-			over the world's background — layers with their own parallax, drift,
-			depth and their sky, light and brightness tints.
-			Cycle: Umbral Eclipse → Starfall Rain → Primordial Dawn → Violet Sanctum → clear sky.
-			THE VIOLET SANCTUM: the place's landscape, unfurled wherever you stand.
-			TEST WEAPON — no mana cost.
-			'''
-		Titulo: "[c/BE8CFF:═══ THE LANDSCAPE PRISM ═══]"
-		Linea1:
-			'''
-			[c/78788C:The sky library's tester: it unfurls entire landscapes
-			over the world's background — layers with parallax, drift and tints
-			(v6.44: includes THE VIOLET SANCTUM, the place turned into a scene)]
-			'''
-		MensajeApagado: The prism goes dark: the sky returns to its owner.
-		MensajeEscena: The prism unfurls: {0}.
-	}
-
 	EsenciaDelReyGelatina: {
 		DisplayName: Essence of King Slime
 		Tooltip:

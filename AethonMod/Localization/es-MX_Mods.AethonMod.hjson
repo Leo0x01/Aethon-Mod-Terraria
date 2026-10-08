@@ -100,7 +100,6 @@ Items: {
         // teeth" + "black mist on every tentacle and mouth").
 
 
-
         SombraDeLaPagina: {
                 DisplayName: La Sombra de la Página
                 Tooltip:
@@ -1530,27 +1529,6 @@ Items: {
                         '''
         }
 
-        PrismaDePaisajesItem: {
-                DisplayName: El Prisma de Paisajes
-                Tooltip:
-                        '''
-                        El probador de la librería del cielo: cada uso despliega UN PAISAJE
-                        entero sobre el fondo del mundo — capas con su parallax, su deriva,
-                        su profundidad y sus tintes de cielo, luz y brillo.
-                        Ciclo: Eclipse Umbral → Lluvia Estelar → Amanecer Primordial → Sagrario Violeta → cielo limpio.
-                        EL SAGRARIO VIOLETA: el paisaje del lugar, desplegable donde quieras.
-                        ARMA DE PRUEBAS — sin coste de maná.
-                        '''
-                Titulo: "[c/BE8CFF:═══ EL PRISMA DE PAISAJES ═══]"
-                Linea1:
-                        '''
-                        [c/78788C:El probador de la librería del cielo: despliega paisajes enteros
-                        sobre el fondo del mundo — capas con parallax, deriva y tintes
-                        (v6.44: incluye EL SAGRARIO VIOLETA, el lugar hecho escena)]
-                        '''
-                MensajeApagado: El prisma se apaga: el cielo vuelve a su dueño.
-                MensajeEscena: El prisma despliega: {0}.
-        }
 
         EsenciaDelReyGelatina: {
                 DisplayName: Esencia del Rey Gelatina
