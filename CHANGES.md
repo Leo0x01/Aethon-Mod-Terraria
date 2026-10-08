@@ -1,5 +1,40 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.77 — EL DIÁLOGO DE LOS ZOMBIS
+
+**Feedback del usuario**: "me acabo de dar cuenta de un dialogo del libro,
+,,hierba ladrones decia o algo aso, pero ladrones, que ladrones eso esta
+mal, deberia decir zombis".
+
+**(1) EL ERROR.** Entre los comentarios de bioma del grimorio (lo que el
+libro dice según dónde estás), el de la superficie decía «Hierba,
+**ladrones** y ojos nocturnos. Menú de todos los días.» — pero en la
+superficie de Terraria NO HAY LADRONES: el menú nocturno de verdad son
+**ZOMBIS** y ojos demoníacos (Demon Eye). Corregido en las **tres
+lenguas**: es-MX y es-ES «Hierba, **zombis** y ojos nocturnos. Menú de
+todos los días.» + en-US «Grass, **zombies** and night eyes. An everyday
+menu.» (el inglés heredaba el mismo error: decía *bandits*).
+
+**(2) EL ESPEJO es-ES REGENERADO (la lección .73, REINCIDENTE en .76).**
+La auditoría del paquete cazó que el cuerpo es-ES != es-MX: el sandbox
+había REVERTIDO el es-ES entre el build de la v6.50.76 y su commit — el
+RELEASE .76 llevó el espejo correcto (verificado byte a byte contra el
+CDN), pero el REPO quedó con la variante vieja (indentación con tabs,
+comentarios en inglés y 2 líneas de CodiceVivo invertidas de orden).
+`tools/sync_es_es_v65077.py` restaura el invariante de la casa: cuerpo
+es-ES **BYTE-IDÉNTICO** al cuerpo de es-MX (310/310 DisplayName ·
+177/177 Tooltip). REGLA: editar SOLO es-MX y correr el script.
+
+**(3) VERIFICACIÓN.** Build real 0 errores/0 warnings · .tmod 2.565.336 B
+md5 `d23390b20ed1360ea69b45476aea54f6` · 380 entradas (idénticas a la
+.76 — el cambio es solo de texto) · EOF exacto · 364 PNG intactos (362
+rawimg + 2 iconos) · «ladrones»/«bandits» AUSENTES del paquete y la
+línea corregida PRESENTE en las 3 lenguas · 15/15 símbolos muertos de la
+.76 ausentes · 16/16 símbolos vivos .73-.76 persistentes · es-ES == es-MX
+**byte a byte EN EL PAQUETE** · headless con mundo nuevo (autocreate,
+language=5): «Sandboxing/Finalizing v6.50.77 → Server started»,
+0 EXCEPCIONES.
+
 ## Commit v6.50.76 — LA LIMPIEZA DEL FONDO ROTO + EL SOL ECLIPSE PRESTADO
 
 **Feedback del usuario**: "acabo de detectar un error que esta en el fondo

@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.76 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.77 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,18 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.76)
+## ¿Dónde estamos? (actualizado para v6.50.77)
+
+**NOVEDAD .77 — EL DIÁLOGO DE LOS ZOMBIS**: el usuario se dio cuenta de
+que un comentario del libro (el de bioma de superficie) hablaba de
+«hierba, **ladrones** y ojos nocturnos» — pero en la superficie de
+Terraria no hay ladrones: el menú nocturno de verdad son **ZOMBIS** y
+ojos demoníacos. Corregido en las 3 lenguas (es-MX/es-ES «zombis», en-US
+«zombies» — antes decía *bandits*). De paso, la auditoría cazó que el
+sandbox había revertido el espejo es-ES entre el build .76 y su commit:
+`tools/sync_es_es_v65077.py` lo regenera (cuerpo es-ES byte-idéntico al
+es-MX, verificado en el paquete). Nada más cambia: todo lo de la .76
+sigue igual.
 
 **NOVEDAD .76 — LA LIMPIEZA DEL FONDO ROTO + EL SOL ECLIPSE PRESTADO**: el
 usuario detectó el fondo de las cuevas ROTO (void negro + shards magenta).
