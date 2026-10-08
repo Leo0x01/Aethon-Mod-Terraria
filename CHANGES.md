@@ -1,5 +1,71 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.78 — LA LUNA DE SANGRE + EL CROSSFADE + LA BRUMA DEL GRIMORIO
+
+**Feedback del usuario**: "con respecto al evento de oleadas, la luna no es
+la luna roja, solo dejas la luna normal y no es asi, debe ser el sprite de
+la luna de sangre, y luego teñirla de morado lo mismo con el sol, y algo
+mas, en el momento en el que comienza el evento tanto el sol como la luna
+no deben simplemente cambiar de un frame a otro eso es muy brusco, para
+mejorar eso intenta que el cambio sea con un degradado de un sprite a otro
+y para mejorarlo aun mas es buena idea hacer que durante todo el evento una
+masa de bruma morada y negra crubra tanto el sol como la luna, ya que este
+evento es algo creado por el propio grimorio". (Y la confirmación: **el
+fondo de las cuevas de la v6.50.76 quedó ARREGLADO** — verificado en juego
+por el usuario.)
+
+**(1) LA LUNA DE SANGRE DE VERDAD (investigación decompile).** En Terraria
+la luna de sangre **no cambia el sprite**: `SetBackColor` (rama
+`BloodMoonActive`, líneas 82756-82780) **PINTA** la luna del mundo de rojo
+(R=205 fijo, G/B respirando con la noche 55→225/255). La luna de la oleada
+ahora es exactamente eso: **el sprite de la luna del mundo** (su tipo, su
+fase exacta — el sub-rectángulo vertical de vanilla) con ese **color
+replicado fórmula a fórmula** (`ColorLunaDeSangreVanilla`), empujado al
+morado (`Lerp 0.55` hacia `(196,112,255)` — «teñirla de morado lo mismo
+con el sol»).
+
+**(2) EL CROSSFADE (el degradado de un sprite a otro).** Nada de cambios de
+un frame a otro: `_transicionAstros` — rampa lineal de ~1.4 s. EL SOL: el
+sol de siempre se dibuja ENCIMA del eclipse (Sun3) DESVANECIÉNDOSE con
+alpha 1−t (las DOS pasadas de vanilla replicadas: resplandor + núcleo con
+los colores ORIGINALES pre-tinte) — el eclipse EMERGE de debajo. LA LUNA:
+la vanilla se desvanece (`moonColor.A → 0`) mientras la de sangre nace con
+alpha t. Al morir el festín, el MISMO crossfade devuelve los astros SIN
+COSTURA.
+
+**(3) EL PRÉSTAMO DEL SOL ENGANCHADO AL CROSSFADE.** `PonerSolPrestado`/
+`DevolverSolPrestado` viven AHORA dentro del hook del dibujo, atados a
+t>0 — jamás un frame de sol eclipse sin su velo, jamás el swap huérfano en
+el menú (mejora sobre la .76).
+
+**(4) LA BRUMA DEL GRIMORIO.** Durante TODO el evento, una MASA de bruma
+morada y negra cubre el astro activo (sol de día, luna de noche) — la
+librería de la casa **BrumaFX** (puffs procedurales con flipbook de ruido,
+CERO texturas nuevas): NÚCLEO morado que cubre + VELO negro de la tinta
+descentrado + 5 SATÉLITES que orbitan y respiran desfasados.
+
+**(5) LA MATEMÁTICA EXACTA.** Posiciones/rotaciones/escalas replicadas
+píxel a píxel del decompile de `Main.DrawSunAndMoon` (81905-81944): la
+parábola de 250 px, `bgTopY+180`, `ForcedMinimumZoom`, el ×1.1 del sol,
+`sunModY/moonModY`, `SceneLocalScreenPositionOffset`. El remix world
+(drunk) respeta el guard de vanilla (sin sol de día).
+
+**(6) EL 4º INCIDENTE DEL ESPEJO es-ES — cazado y curado.** El commit
+2b74fee de la .77 capturó el es-ES REVERTIDO por el sandbox (la reversión
+cayó ENTRE la auditoría del paquete y el commit: el RELEASE .77 llevaba el
+espejo bueno verificado byte a byte, el REPO no). En esta .78 el sandbox
+volvió a revertir EN VIVO (entre el sync y el commit). LA CURA DEFINITIVA:
+el es-ES bueno se estagea como **BLOB INMUTABLE** (`git hash-object` +
+`git update-index`) desde un backup fuera del repo, y el commit VERIFICA
+el blob commiteado (`git show HEAD:...`).
+
+**VERIFICACIÓN.** Build real 0/0 · .tmod 2.565.010 B md5
+`f29605aca5201538c72449306ce4acbe` · 380 entradas (CERO PNGs nuevos — la
+bruma es 100% librería) · EOF exacto · 6 símbolos nuevos VIVOS · 19
+persistentes OK · 15/15 muertos ausentes · es-ES == es-MX byte a byte EN
+EL PAQUETE · fix zombis .77 presente · headless mundo nuevo:
+«Sandboxing/Finalizing v6.50.78 → Server started», 0 EXCEPCIONES.
+
 ## Commit v6.50.77 — EL DIÁLOGO DE LOS ZOMBIS
 
 **Feedback del usuario**: "me acabo de dar cuenta de un dialogo del libro,

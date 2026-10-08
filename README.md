@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.77 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.78 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,19 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.77)
+## ¿Dónde estamos? (actualizado para v6.50.78)
+
+**NOVEDAD .78 — LA LUNA DE SANGRE + EL CROSSFADE + LA BRUMA DEL GRIMORIO**:
+el usuario confirmó que el fondo de las cuevas quedó ARREGLADO, y pidió tres
+cosas para el evento de oleadas — (1) la luna debe ser LA LUNA DE SANGRE de
+Terraria teñida de morado (investigación decompile: la luna de sangre del
+juego NO cambia el sprite — `SetBackColor` PINTA la luna del mundo de rojo;
+esa fórmula exacta es la que usamos, empujada al morado); (2) los astros NO
+deben cambiar de un frame a otro: **degradado de un sprite a otro** (~1.4 s
+— el sol de siempre se desvanece sobre el eclipse que emerge; la luna normal
+se funde en la de sangre); (3) durante TODO el evento una **masa de bruma
+morada y negra** cubre el sol y la luna (la librería BrumaFX de la casa,
+cero texturas nuevas) — el festín es algo creado por el propio grimorio.
 
 **NOVEDAD .77 — EL DIÁLOGO DE LOS ZOMBIS**: el usuario se dio cuenta de
 que un comentario del libro (el de bioma de superficie) hablaba de
