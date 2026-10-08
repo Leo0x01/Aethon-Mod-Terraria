@@ -14,6 +14,34 @@ namespace AethonMod.Content.NPCs
     /// <summary>
     /// AETHON, LA LUZ PRIMORDIAL — LA ENCARNACIÓN (v6.50.36).
     ///
+    /// v6.50.79 — EL DIOS QUE NO SE DESPEDÍA (el fix del jefe fantasma:
+    /// «al matar a Aethon este explota pero no desaparece, sigue
+    /// presente y comienza a caer bajo el mapa en vez de desaparecer
+    /// apenas muere»). CAUSA RAÍZ (decompile tML 2026.08): el flush del
+    /// NPC por el cable vive DENTRO de NPC.UpdateNPC — que ARRANCA con
+    /// «if (!active) return;» — así que el «NPC.netUpdate = true» que el
+    /// cine de muerte ponía DESPUÉS de apagar al jefe era CÓDIGO MUERTO:
+    /// el mensaje 23 (SyncNPC) JAMÁS salía y los clientes (el host de
+    /// «Host & Play» incluido — su pantalla es un cliente) se quedaban
+    /// con una COPIA VIVA del dios corriendo su propia IA de combate,
+    /// sin correcciones del servidor, atravesando el mundo hasta caer
+    /// bajo el mapa. LA MISMA ENFERMEDAD que GrimorioFuriaSistema curó
+    /// en la v6.50.1 («sin el 23 explícito, los clientes conservaban un
+    /// jefe congelado/invulnerable») — pero nadie la había aplicado AL
+    /// CINE DE MUERTE. LA CURA TRIPLE: (1) LA DESPEDIDA DE VERDAD — el
+    /// apagado del cine difunde el 23 A MANO (el patrón vanilla:
+    /// SendData(SyncNPC) tras active=false — el msg 23 de un slot
+    /// inactivo viaja a TODOS los clientes, verificado en el decompile);
+    /// (2) LA MUERTE VIAJA — el cine escribe ai[0]=99/ai[1]=tickMuerte
+    /// cada tick y el cliente ADOPTA la muerte en AI (contrato MP de la
+    /// casa: los remotos ven la contracción y el estallido, no un jefe
+    /// peleando contra nadie) con RED DE SEGURIDAD a 200 t (jamás un
+    /// fantasma aunque se pierda un paquete); (3) el estallido final se
+    /// parte en VISUAL (todas las máquinas: kick, truenos, polvo dorado)
+    /// y AUTORIDAD (bola final, botín, manada disuelta) — el cliente ya
+    /// no intenta dropear botín fantasma. El despawn sin presa y la
+    /// manada reciben EL MISMO 23 explícito.
+    ///
     /// v6.50.46 — LAS ARMAS QUE NO FUNCIONABAN (el fix que despertó tres
     /// ataques muertos) + EL ECLIPSE MUERE: la ronda de feedback sobre
     /// la v6.50.45 reveló que EL CORO, EL TELAR y EL DECRETO NUNCA
@@ -369,6 +397,22 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         // ==================================================================
         public override void AI()
         {
+            // === LA ADOPCIÓN DE LA MUERTE (v6.50.79 — el contrato MP de la
+            //     casa): la autoridad apagó al dios por CheckDead, pero el
+            //     cine vive en ai[0]=99/ai[1]=tickMuerte — el cliente que
+            //     recibe el sync ADOPTA la agonía y corre SU cine (la
+            //     contracción, el estallido) en vez de pelear contra
+            //     nadie. Sin esto, el cliente seguía con la IA de combate
+            //     hasta que el 23 de la despedida lo apagaba. ===
+            if (!_muriendo && NPC.ai[0] == EST_MURIENDO)
+            {
+                _muriendo = true;
+                _estado = EST_MURIENDO;
+                _tickMuerte = Math.Max(0, (int)NPC.ai[1]);
+                NPC.dontTakeDamage = true;
+                NPC.velocity = Vector2.Zero;
+            }
+
             // === EL CINE DE MUERTE (CheckDead manda aquí) ===
             if (_muriendo) { CineMuerte(); return; }
 
@@ -382,6 +426,13 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 {
                     NPC.life = 0;
                     NPC.active = false;
+                    // v6.50.79 — LA DESPEDIDA TAMBIÉN EN EL DESPAWN: sin
+                    // presa no hay pelea — y sin el 23 explícito, los
+                    // clientes se quedaban con el dios huérfano (el
+                    // fantasma de la muerte, en versión silenciosa).
+                    if (Main.netMode == NetmodeID.Server)
+                        Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                            -1, -1, null, NPC.whoAmI);
                     return;
                 }
             }
@@ -2465,6 +2516,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
             NPC.dontTakeDamage = true;
             _estado = EST_MURIENDO;
             _rayo = 0;
+            // v6.50.79 — LA MUERTE NACE EN EL CABLE (el contrato MP): el
+            // 99 viaja DESDE EL PRIMER TICK — el cliente remoto adopta la
+            // agonía en su próxima IA sin esperar el primer netUpdate del
+            // cine (y el reloj del sistema de llegada la ve venir).
+            NPC.ai[0] = EST_MURIENDO;
+            NPC.ai[1] = 0f;
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
             EcoRed.AnunciarMundo("Mods.AethonMod.Jefe.Aethon.Muerte", OroLuz);
             NPC.netUpdate = true;
@@ -2474,6 +2531,32 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         private void CineMuerte()
         {
             _tickMuerte++;
+
+            // v6.50.79 — LA MUERTE VIAJA (el contrato MP de la casa): el
+            // 99 y el tick de la agonía van POR EL CABLE cada tick — el
+            // cliente remoto que aún no ha adoptado la ve AQUÍ, y el reloj
+            // del sistema de llegada (que lee ai[0]==99) suelta el mediodía
+            // eterno CUANDO el dios muere, no dos segundos después. La
+            // difusión respira cada 6 t (la pelea usa 12 — la muerte es
+            // más urgente).
+            NPC.ai[0] = EST_MURIENDO;
+            NPC.ai[1] = _tickMuerte;
+            if (Main.netMode == NetmodeID.Server && (Main.GameUpdateCount % 6u) == 0u)
+                NPC.netUpdate = true;
+
+            // v6.50.79 — LA RED DE SEGURIDAD DEL CLIENTE: si el remoto
+            // lleva MÁS de 200 t agonizando (el estallido fue a los 120
+            // — sobran 80 de margen para cualquier desfase del cable),
+            // se apaga SOLO: jamás un fantasma, aunque el 23 de la
+            // despedida se perdiera por el camino (nunca pasa — TCP es
+            // fiable — pero el seguro es gratis). SOLO el cliente: la
+            // autoridad manda y su apagado es el de los 120 t de siempre.
+            if (Main.netMode == NetmodeID.MultiplayerClient && _tickMuerte > 200)
+            {
+                NPC.active = false;
+                return;
+            }
+
             // v6.50.57 — DETENIDO DEL TODO (la letra: «el jefe debe
             // quedarse detenido»): 20 t de aquietarse y queda CLAVADO —
             // el dios arde QUIETO en su sitio hasta el estallido final.
@@ -2503,17 +2586,36 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             if (_tickMuerte >= 120)
             {
+                // v6.50.79 — EL ESTALLIDO, EN TODAS LAS MÁQUINAS (el visual
+                // del dios muriendo es de TODOS: el temblor, los truenos y
+                // la lluvia dorada corren también en los clientes — cada
+                // pantalla ve el final EN VIVO, no un jefe que desaparece
+                // sin decir nada).
                 OndaLib.Kick(14f, 30);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath55, NPC.Center);
 
-                // v6.50.56 — EL ÚLTIMO ALIENTO: LA BOLA FINAL (la letra:
-                // «creando una bola de energia similar al proyectil sol
-                // pero de color blanco dorado y con mucho brillo») — nace
-                // del corazón del dios y va rumbo a su asesino: 7 s de
-                // fuego blanco-dorado que ALUMBRA el cielo entero.
+                if (!Main.dedServ)
+                {
+                    for (int d = 0; d < 90; d++)
+                    {
+                        int idx = Dust.NewDust(NPC.Center, 160, 160, DustID.GoldFlame,
+                            Main.rand.NextFloat(-13f, 13f), Main.rand.NextFloat(-15f, 4f));
+                        Main.dust[idx].noGravity = true;
+                    }
+                }
+
+                // v6.50.79 — LO QUE SOLO LA AUTORIDAD DECIDE: la bola
+                // final, el botín y la manada disuelta — el cliente NUNCA
+                // dropea (nada de botín fantasma local: los ítems ya
+                // llegan por su propio sync desde el servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
+                    // v6.50.56 — EL ÚLTIMO ALIENTO: LA BOLA FINAL (la letra:
+                    // «creando una bola de energia similar al proyectil sol
+                    // pero de color blanco dorado y con mucho brillo») — nace
+                    // del corazón del dios y va rumbo a su asesino: 7 s de
+                    // fuego blanco-dorado que ALUMBRA el cielo entero.
                     int danoBola = Math.Max(1, (int)(NPC.damage * 1.3f));
                     Vector2 rumbo = -Vector2.UnitY * 6.5f;
                     Player presa = Main.player[NPC.target];
@@ -2525,21 +2627,29 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                         danoBola, 3f, Main.myPlayer,
                         AtaqueJefeProjectile.EstiloBolaFinal,
                         danoBola, 0f);
+
+                    DropBotin();
+                    DisolverManada();   // v6.50.45 — sin luz que los mande, los cazadores se apagan
                 }
 
-                if (!Main.dedServ)
-                {
-                    for (int d = 0; d < 90; d++)
-                    {
-                        int idx = Dust.NewDust(NPC.Center, 160, 160, DustID.GoldFlame,
-                            Main.rand.NextFloat(-13f, 13f), Main.rand.NextFloat(-15f, 4f));
-                        Main.dust[idx].noGravity = true;
-                    }
-                }
-                DropBotin();
-                DisolverManada();   // v6.50.45 — sin luz que los mande, los cazadores se apagan
+                // v6.50.79 — LA DESPEDIDA DE VERDAD (la cura del jefe
+                // fantasma): el flush del cable vive DENTRO de UpdateNPC
+                // — que vuelve ANTES de tocar un NPC inactivo — así que
+                // el netUpdate que aquí se ponía era CÓDIGO MUERTO y los
+                // clientes se quedaban con el dios VIVO corriendo su
+                // propia IA, atravesando el mundo hasta caer bajo el
+                // mapa. EL PATRÓN VANILLA (el mismo de la v6.50.1 de
+                // GrimorioFuria y del decompile): apagar y DIFUNDIR EL 23
+                // A MANO — el SyncNPC de un slot apagado viaja a TODOS
+                // los clientes (verificado en NetMessage: «boss ||
+                // netAlways || townNPC || !active → broadcast») y cada
+                // pantalla despide a su dios. En SP es un no-op (no hay
+                // cable); en el host de «Host & Play» el servidor interno
+                // difunde y la pantalla del host ve la despedida.
                 NPC.active = false;
-                NPC.netUpdate = true;
+                if (Main.netMode == NetmodeID.Server)
+                    Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                        -1, -1, null, NPC.whoAmI);
             }
         }
 
@@ -2568,7 +2678,12 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     }
                 }
                 c.active = false;
-                c.netUpdate = true;
+                // v6.50.79 — LA MANADA TAMBIÉN SE DESPIDE (la misma cura del
+                //     jefe fantasma: sin el 23 explícito, los clientes
+                //     seguían viendo cazadores orbitando a un dios muerto).
+                if (Main.netMode == NetmodeID.Server)
+                    Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                        -1, -1, null, c.whoAmI);
             }
         }
 

@@ -87,7 +87,12 @@ namespace AethonMod.Content.NPCs
                 if (presa == null || !presa.active || presa.dead)
                 {
                     NPC.active = false;     // sin presa no hay caza
-                    NPC.netUpdate = true;
+                    // v6.50.79 — LA DESPEDIDA (la cura del fantasma, la
+                    // misma del cine de muerte de Aethon: el netUpdate
+                    // tras el apagado es código muerto — el 23 va A MANO).
+                    if (Main.netMode == NetmodeID.Server)
+                        Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                            -1, -1, null, NPC.whoAmI);
                     return;
                 }
             }
@@ -184,7 +189,12 @@ namespace AethonMod.Content.NPCs
                 }
             }
             NPC.active = false;
-            NPC.netUpdate = true;
+            // v6.50.79 — EL POLVO TAMBIÉN SE DESPIDE (misma cura: sin el
+            // 23 explícito, los clientes veían cazadores fantasma
+            // volando para siempre tras su apagado silencioso).
+            if (Main.netMode == NetmodeID.Server)
+                Terraria.NetMessage.SendData(MessageID.SyncNPC,
+                    -1, -1, null, NPC.whoAmI);
         }
 
         public override void OnKill()
