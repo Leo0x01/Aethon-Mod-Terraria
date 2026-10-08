@@ -1,5 +1,53 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.76 — LA LIMPIEZA DEL FONDO ROTO + EL SOL ECLIPSE PRESTADO
+
+**Feedback del usuario**: "acabo de detectar un error que esta en el fondo
+del mapa, o sea el background, todo el fondo esta roto en las cuevas, al
+parecer algo en nuestro mod rompe con el fondo, analiza eso y revisa si es
+la libreria de fondos que intentamos crear para la sierpe jefe que ya no
+se usa de ser asi elimina esa libreria" · "el sprite de sol en eclisipe
+debes usar el original del juego con un tinte morado al igual que en el
+caso de la luna es lo mismo, el original del juego con un tinte y siempre
+respetando el mismo tamaño que los originales ya que el sol eclipse que
+creaste es mucho mas grande que el original".
+
+**(1) EL DIAGNÓSTICO (contra el código decompilado del juego).** El fondo
+de las cuevas lo dibuja `Main.DrawBG` rebanando `TextureAssets.Background[slots]`
+en trozos de 16×16. La API de tML (`ModUndergroundBackgroundStyle.FillTextureArray`)
+exige **miniaturas de 160×16 / 160×96** hechas para ese rebanado. Nuestro
+estilo del Sagrario (`SanctumUndergroundBackgroundStyle`) metía los
+**paisajes de cielo de 1024×256** en esos slots y dejaba los 3–6 **en 0**.
+Como el bioma estaba activo en TODAS las cuevas (la bandera de pruebas
+`SagrarioAccesibleEnPruebas` ON por defecto) con prioridad `BiomeHigh`
+pisando todos los biomas, TODO fondo de cueva quedó roto: **void negro**
+(las regiones transparentes de la nebulosa) + **shards magenta** (pedazos
+de las columnas brillantes) — exactamente la captura del usuario.
+
+**(2) LA ELIMINACIÓN — la librería de fondos v6.43 COMPLETA.** Fuera:
+`CieloLib.cs` (la librería del fondo y su hook de render, 657 líneas),
+`CieloEscenas.cs` (las 4 escenas de demo), `SanctumBackgroundStyle.cs`
+(los estilos de fondo de superficie y subsuelo — LOS CULPABLES), el
+Prisma de Paisajes (su ítem de pruebas + la entrada de La Bolsa del
+Probador), las 12 texturas de `Content/Effects/Cielo/` y los 2 sprites
+de sol/luna de la .74. **El fondo de las cuevas vuelve a ser 100% vanilla.**
+
+**(3) EL SOL ECLIPSE PRESTADO DE VERDAD.** Cero sprites de la casa: la
+ranura `TextureAssets.Sun` pasa a apuntar **al mismo asset vanilla de
+`Sun3`** — EL SOL ECLIPSE ORIGINAL del juego (el que dibuja en sus
+eclipses reales): mismo sprite, **mismo tamaño exacto**, devolución
+limpia por pura referencia. LA LUNA NO SE TOCA (el sprite original,
+cualquier tipo y fase). EL TINTE vive en el hook del color de dibujo
+(`On_Main.DrawSunAndMoon` — sunColor/moonColor SOLO alimentan a los
+astros, verificado): el sol se tiñe de **morado** y la luna de
+**carmesí con toque morado** por la MISMA vía que vanilla tiñe el sol
+del amanecer o la luna de sangre.
+
+**Verificación**: build 0/0 · `.tmod` 2.563.858 B md5 `4508d407d805bba313c476396a612ffa`
+· 380 entradas (−15 exactas) · EOF exacto · 364/364 PNG empaquetados ·
+15/15 símbolos muertos ausentes · 6 nuevos vivos · es-ES==es-MX byte a
+byte en el paquete · headless mundo nuevo: 0 excepciones.
+
 ## Commit v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA (un clic: día ⇄ noche)
 
 **Feedback del usuario**: "deberias incluir algo para cambiar el dia y la

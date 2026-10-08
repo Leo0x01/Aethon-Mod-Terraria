@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.75 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.76 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,9 +17,20 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.75)
+## ¿Dónde estamos? (actualizado para v6.50.76)
 
-**NOVEDAD .75 — EL RELOJ DE ARENA DEL ESCRIBA (un clic: día ⇄ noche)**: la
+**NOVEDAD .76 — LA LIMPIEZA DEL FONDO ROTO + EL SOL ECLIPSE PRESTADO**: el
+usuario detectó el fondo de las cuevas ROTO (void negro + shards magenta).
+Diagnóstico contra el decompile: el estilo de subsuelo del Sagrario (la
+librería de fondos v6.43) metía paisajes de cielo 1024×256 en slots que
+exigen miniaturas 160×16/160×96 — y el bioma estaba activo en TODAS las
+cuevas. LA LIBRERÍA COMPLETA FUE ELIMINADA (CieloLib, escenas, estilos,
+Prisma de Paisajes y 15 texturas): **el fondo de las cuevas vuelve a ser
+100% vanilla**. Y el sol eclipse de la oleada ahora es **EL ORIGINAL DEL
+JUEGO** (`Sun3`, el de los eclipses reales) prestado por referencia pura —
+mismo sprite, mismo tamaño — con el tinte morado aplicado por el hook
+nativo del color de dibujo; la luna queda **original, solo teñida** de
+carmesí-morado. **La .75 trajo EL RELOJ DE ARENA DEL ESCRIBA (un clic: día ⇄ noche)**: la
 letra del usuario: «deberías incluir algo para cambiar el día y la noche,
 un clic y es de día, otro clic y es de noche». Un ítem de pruebas nuevo en
 **La Bolsa del Probador**: UN CLIC gira el reloj del mundo — si es de día,

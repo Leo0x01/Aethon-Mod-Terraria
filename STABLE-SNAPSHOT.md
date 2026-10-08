@@ -1,20 +1,74 @@
-# AethonMod — ESTADO ACTUAL (v6.50.75)
+# AethonMod — ESTADO ACTUAL (v6.50.76)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.75 (EL RELOJ DE ARENA DEL ESCRIBA — un clic
-gira día⇄noche: de día cae la noche 7:30 PM, de noche amanece 4:30 AM;
-> ítem de pruebas en La Bolsa del Probador, reutilizable, con la arena
-> hecha TINTA del Códice Vivo — funciona A MEDIA OLEADA (el cielo del
-> festín cruza suave al nuevo ambiente) y en MP el servidor difunde el
-> giro a todos (EcoRed.MsgCambiarHorario: 13); compilada y verificada
-> 0/0, .tmod 395 entradas auditado con píxeles del rawimg IDÉNTICOS al
-> PNG fuente, headless Server started 0 excepciones — PUBLICADA: release
-> 406266533, CDN verificado byte a byte md5
-> 2c423b1be2bf1429cbbbd9aadfc38ab6).
+> Última actualización: v6.50.76 (LA LIMPIEZA DEL FONDO ROTO + EL SOL
+> ECLIPSE PRESTADO: el fondo de las cuevas estaba ROTO — void negro +
+> shards magenta — porque el estilo de subsuelo del Sagrario (la librería
+> de fondos v6.43) metía paisajes de cielo 1024×256 en slots que exigen
+> miniaturas 160×16/160×96, con el bioma activo en TODAS las cuevas; LA
+> LIBRERÍA COMPLETA ELIMINADA (CieloLib + escenas + estilos + Prisma de
+> Paisajes + 15 texturas) y el fondo de cuevas vuelve a ser 100% vanilla;
+> el SOL ECLIPSE de la oleada ahora es EL ORIGINAL DEL JUEGO (Sun3, el de
+> los eclipses reales) prestado por referencia pura — mismo sprite, mismo
+> tamaño — teñido de MORADO por el hook nativo del color de dibujo
+> (On_Main.DrawSunAndMoon), y la LUNA queda original, solo teñida de
+> carmesí-morado; compilada y verificada 0/0, .tmod 380 entradas (−15
+> exactas) auditado, headless Server started 0 excepciones — PUBLICADA:
+> release 406283382, CDN verificado byte a byte md5
+> 4508d407d805bba313c476396a612ffa).
 > Reglas vivas: es-ES es
 > ESPEJO GENERADO de es-MX (editar SOLO es-MX + tools/sync_es_es_v65071.py)
 > y la Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
+
+- **v6.50.76 = LA LIMPIEZA DEL FONDO ROTO + EL SOL ECLIPSE PRESTADO** (la
+  letra: «todo el fondo esta roto en las cuevas… revisa si es la libreria
+  de fondos que intentamos crear para la sierpe jefe que ya no se usa de
+  ser asi elimina esa libreria» + «el sprite de sol en eclipse debes usar
+  el original del juego con un tinte morado… respetando el mismo tamaño
+  que los originales»):
+  (1) **EL DIAGNÓSTICO (decompile verificado)**: `Main.DrawBG` rebana
+  `TextureAssets.Background[slots]` en 16×16 con tiling por
+  `backgroundHeight[2]`; la doc de tML `ModUndergroundBackgroundStyle.
+  FillTextureArray` exige miniaturas **160×16 (bordes) / 160×96 (capas)**;
+  `SanctumUndergroundBackgroundStyle` metía los PAISAJES 1024×256 del
+  cielo en los slots 0-2 y dejaba **3-6 EN 0**; `HollowSanctumBiome.
+  IsBiomeActive` = (capa tierra O roca) && (400 PV O bandera
+  `SagrarioAccesibleEnPruebas` ON por defecto) con `BiomeHigh` forzando
+  el estilo → TODAS las cuevas con el fondo roto: VOID NEGRO (alfa-0 de
+  la nebulosa) + SHARDS MAGENTA (pedazos de las columnas SanctumClose) —
+  exacto a la captura del usuario.
+  (2) **LA ELIMINACIÓN (la librería v6.43 COMPLETA)**: `CieloLib.cs`
+  (657 líneas con el hook `On_Main.DrawBG`), `CieloEscenas.cs`,
+  `SanctumBackgroundStyle.cs`, `PrismaDePaisajesItem.cs`+`.png`, las 12
+  texturas de `Content/Effects/Cielo/`, `Content/Ambientes/` (los 2
+  sprites de la .74) + las refs: `AddBackgroundTexture×3` en
+  `AethonMod.cs`, los 2 overrides de fondo en `HollowSanctumBiome`, la
+  línea del prisma en La Bolsa del Probador, el bloque hjson en las 3
+  lenguas y `tools/gen_ambiente_v65074.py`. El fondo de cuevas vuelve a
+  ser 100% vanilla (el bioma sigue existiendo para música/escena, sin
+  fondos).
+  (3) **EL SOL ECLIPSE PRESTADO DE VERDAD** (`AmbienteOleadaSistema`
+  v6.50.76): cero sprites de la casa — `TextureAssets.Sun` pasa a
+  apuntar **al mismo asset vanilla de `Sun3`** (EL SOL ECLIPSE ORIGINAL,
+  decompile línea 81995) por pura REFERENCIA (mismo sprite, mismo tamaño
+  exacto, devolución limpia); LA LUNA NO SE TOCA (sprite original,
+  cualquier tipo/fase); EL TINTE en el hook `Terraria.On_Main.
+  DrawSunAndMoon` (firma verificada en TerrariaHooks — `sunColor`/
+  `moonColor` son locales de `SetBackColor` que SOLO alimentan el dibujo
+  de los astros): lerp hacia morado `(196,112,255)` / carmesí-morado
+  `(255,64,132)` por `_intensidad` — la MISMA vía que vanilla tiñe el
+  sol del amanecer y la luna de sangre; BORRADOS `SolDeLaOleada.png`,
+  `LunaDeLaOleada.png` y TODA la maquinaria de swap .74 (los 9 slots de
+  luna, `PonerTexturas`/`RestaurarTexturas`).
+  (4) **PIPELINE**: build real 0/0 · .tmod 2.563.858 B md5
+  `4508d407d805bba313c476396a612ffa`: 380 entradas (−15 EXACTAS), EOF
+  exacto, los 364/364 PNG del fuente empaquetados (362 rawimg + 2
+  iconos), 15/15 símbolos muertos AUSENTES de la DLL, 6 nuevos VIVOS
+  (TintarAstros/PonerSolPrestado/DevolverSolPrestado/TinteSolEclipse/
+  TinteLunaOleada/DrawSunAndMoon), los de .73-.75 PERSISTEN, es-ES==es-MX
+  byte a byte EN EL PAQUETE, headless mundo nuevo autocreate:
+  «Sandboxing/Finalizing v6.50.76 → Server started», 0 EXCEPCIONES.
 
 - **v6.50.75 = EL RELOJ DE ARENA DEL ESCRIBA** (la letra: «deberias
   incluir algo para cambiar el dia y la noche, un clic y es de dia, otra
@@ -1259,29 +1313,28 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **PUBLICAR v6.50.75 — HECHO** — push de main + tag v6.50.75 +
-   release 406266533 con `AethonMod.tmod` (4.438.303 B, md5
-   2c423b1be2bf1429cbbbd9aadfc38ab6, asset 620189194) + CDN verificado
-   byte a byte + /releases/latest = v6.50.75 + fila .75 con el release
+1. **PUBLICAR v6.50.76 — HECHO** — push de main + tag v6.50.76 +
+   release 406283382 con `AethonMod.tmod` (2.563.858 B, md5
+   4508d407d805bba313c476396a612ffa, asset 620239990) + CDN verificado
+   byte a byte + /releases/latest = v6.50.76 + fila .76 con el release
    ID real.
 
-2. **El usuario prueba v6.50.75 en juego** — (a) EL RELOJ DE ARENA DEL
-   ESCRIBA (La Bolsa del Probador): un clic de DÍA → cae la noche al
-   instante (7:30 PM, luna recién nacida); otro clic de NOCHE → amanece
-   (4:30 AM, sol naciente) — sin esperas, reutilizable, con el aviso del
-   escriba en el chat y la lluvia de tinta (dorada al amanecer / violeta
-   al anochecer); (b) A MEDIA OLEADA: desatar un festín de DÍA, girar el
-   reloj a noche y ver el cielo cruzar SUAVE del eclipse morado a la
-   luna carmesí (y viceversa) — el festín sigue intacto; (c) REGRESIÓN:
-   el Códice Vivo (icono + ataque), el nivel natural desde 1, las IA
-   maestras de la .73, el cielo dinámico de la .74, La Sombra y el
-   ciclo día/noche del mundo siguen intactos tras cada giro (el reloj
-   NO congela el tiempo del mundo: tras girar, el tiempo sigue corriendo
-   normal).
+2. **El usuario prueba v6.50.76 en juego** — (a) EL FONDO DE LAS CUEVAS:
+   entrar a cualquier cueva (cualquier personaje, con o sin 400 PV) y
+   ver el fondo de tierra/roca INTACTO como el juego original — sin
+   voids negros ni shards magenta, también en desierto/jungla/nieve/
+   corrupción/carmesí; (b) EL SOL ECLIPSE: arrancar un festín de DÍA y
+   ver EL SOL ECLIPSE ORIGINAL del juego (Sun3) teñido de MORADO, del
+   TAMAÑO ORIGINAL (nada del disco gigante de la .74); (c) LA LUNA:
+   girar el reloj del escriba a media oleada y ver la LUNA ORIGINAL
+   teñida de carmesí-morado, con su fase correcta; (d) al morir el
+   festín: sol y luna vuelven INTACTOS a su sprite original y el cielo
+   desvanece en ~3 s; (e) REGRESIÓN: reloj del escriba, Códice Vivo,
+   nivel natural desde 1, IA maestras de la .73 y La Sombra intactos.
 
-3. **Lo que quedó en el tintero** — el checklist .74(a)-(d) de la fila
-   anterior sigue VIGENTE para lo suyo (códice/nivel/cielo): el usuario
-   aún no reporta su verificación en juego.
+3. **Lo que quedó en el tintero** — los checklist .74-.75 siguen
+   VIGENTES para lo suyo (códice/nivel/reloj): el usuario aún no reporta
+   su verificación en juego.
 
 
 ## 🔒 REGLAS INVIOLABLES AL RETOMAR
@@ -1306,6 +1359,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.76** | ✅ Build-verificada (build real 0/0, .tmod 2.563.858 B md5 4508d407d805bba313c476396a612ffa 380 entradas (−15 EXACTAS: las de la librería eliminada), EOF exacto, los 364/364 PNG del fuente empaquetados (362 rawimg + 2 iconos — el WARN «Image loading failed» del packaging headless es BENIGNO: sin GPU; todos los PNG verificados presentes), 15/15 símbolos muertos AUSENTES de la DLL (CieloLib/CieloSistema/CieloEscenas/EscenaDeCielo/SanctumBackgroundStyle/SanctumUndergroundBackgroundStyle/PrismaDePaisajesItem/SolDeLaOleada/LunaDeLaOleada/EstiloSanctum/EstiloSanctuSubsuelo/DibujarCapas/DibujarFondoDelCielo/SagrarioVioleta/EclipseUmbral), 6 símbolos nuevos VIVOS (TintarAstros/PonerSolPrestado/DevolverSolPrestado/TinteSolEclipse/TinteLunaOleada/DrawSunAndMoon) y los de .73-.75 PERSISTEN, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, headless autocreate mundo nuevo language=5 «Sandboxing/Finalizing Aethon, the Eternal Grimoire v6.50.76 → Server started» 0 excepciones), ✔ publicada (release 406283382, asset 620239990 2.563.858 B, CDN verificado byte a byte md5 4508d407d805bba313c476396a612ffa, /releases/latest = v6.50.76), ⏳ en juego | LA LETRA: «todo el fondo esta roto en las cuevas… revisa si es la libreria de fondos que intentamos crear para la sierpe jefe que ya no se usa de ser asi elimina esa libreria» + «el sprite de sol en eclipse debes usar el original del juego con un tinte morado… respetando el mismo tamaño». (1) DIAGNÓSTICO (decompile): Main.DrawBG rebana TextureAssets.Background[slots] en 16×16 con tiling por backgroundHeight[2]; FillTextureArray exige 160×16/160×96; SanctumUndergroundBackgroundStyle metía paisajes 1024×256 + dejaba slots 3-6 EN 0; HollowSanctumBiome activo en TODAS las cuevas (SagrarioAccesibleEnPruebas ON) con BiomeHigh → VOID NEGRO + SHARDS MAGENTA (exacto a la captura del usuario). (2) ELIMINACIÓN COMPLETA de la librería v6.43: CieloLib.cs (657 líneas, hook On_Main.DrawBG), CieloEscenas.cs, SanctumBackgroundStyle.cs, PrismaDePaisajesItem+.png, 12 texturas Cielo/, Ambientes/ (2 sprites .74) + refs (AddBackgroundTexture×3, overrides del bioma, bolsa, hjson×3, generador muerto) — el fondo de cuevas vuelve a ser 100% VANILLA. (3) EL SOL PRESTADO: TextureAssets.Sun ← el MISMO asset vanilla de Sun3 (EL SOL ECLIPSE ORIGINAL, decompile 81995) por pura referencia (mismo sprite/tamaño, devolución limpia); LA LUNA intacta (cualquier tipo/fase); TINTE por el hook On_Main.DrawSunAndMoon (sunColor/moonColor = locales de SetBackColor que SOLO alimentan los astros): lerp a morado (196,112,255) / carmesí-morado (255,64,132) por _intensidad — la MISMA vía que vanilla tiñe el sol del amanecer y la luna de sangre. HALLAZGO del build: `-build AethonMod` (nombre corto) resuelve una ruta CWD inexistente y empaqueta un STUB versión 1.0 de 3 entradas — SIEMPRE la ruta COMPLETA a la carpeta del mod. |
 | **v6.50.75** | ✅ Build-verificada (oráculo 0/0, build real 0/0, .tmod 4.438.303 B md5 2c423b1be2bf1429cbbbd9aadfc38ab6 395 entradas (+1 el sprite nuevo), EOF exacto, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE — 311/311 DisplayName · 178/178 Tooltip en las tres lenguas —, píxeles del rawimg IDÉNTICOS al PNG fuente (verificación NUEVA — reloj 28×28 + Sol/Luna/Códice de la .74), símbolos nuevos VIVOS — RelojDeArenaDelEscriba/GiroLocal/DifundirGiroReloj/MsgCambiarHorario — y los de .73/.74 PERSISTEN, headless autocreate mundo nuevo language=5 «Sandboxing/Finalizing Aethon, the Eternal Grimoire v6.50.75 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 406266533, asset 620189194 4.438.303 B, CDN verificado byte a byte md5 2c423b1be2bf1429cbbbd9aadfc38ab6, /releases/latest = v6.50.75), ⏳ en juego | LA LETRA: «deberias incluir algo para cambiar el dia y la noche, un clic y es de dia, otra clic y es de noche». (1) EL ÍTEM (Content/Items/RelojDeArenaDelEscriba.cs, en La Bolsa del Probador): UN CLIC gira Main.dayTime + Main.time=0 — de día CAE LA NOCHE (7:30 PM), de noche AMANECE (4:30 AM); reutilizable (patrón Carnada: pila 1, HoldUp, no se consume). (2) SINERGÍA CON EL CIELO DE LA OLEADA: funciona A MEDIA OLEADA — el ambiente del festín es dinámico (AmbienteOleadaSistema cruza suave _diaSuave hacia el nuevo ambiente) y el préstamo de OleadaNPC NO se entera (viste el mundo solo durante el AI de cada guardián); la vía rápida para las DOS caras del festín (eclipse morado / luna carmesí) sin esperar el atardecer real. (3) LA RED (EcoRed.MsgCambiarHorario: 13 — la hora es del mundo): en MP el uso sincronizado corre UseItem en el SERVER (autoridad gira) + BROADCAST {día, tiempo, quiénGiró} a TODOS — cada cliente aplica el cielo y siente el giro (aviso del escriba «la tinta reescribe el cielo y AMANECE»/«la tinta derrama la noche y CAEN LAS SOMBRAS» + lluvia de tinta GoldFlame dorada/Shadowflame violeta alrededor de quien giró); SP giro directo, HOST lo canta en su UseItem (sin loopback). (4) EL SPRITE (tools/gen_reloj_v65075.py): pixel-art directo 28×28, paleta cerrada 11 tonos — madera VIOLETA del grimorio, TINTA VIVA #f0a9f6 del Códice (charco arriba + hilo en la cintura + montón abajo = el reloj A MEDIA VUELTA), vidrio lavanda, remate ORO; autoverificación (bbox 18×25, simetría arquitectura 0, tinta en 3 sitios, alfa binario) + QA visión 8/9/9/7. HALLAZGOS del auditor: 24 blobs van SIN compresión cuando el deflate no ayuda (comp==raw — PNGs ya comprimidos) y el rawimg lleva header [fmt:i32][w:i32][h:i32] LE de 12 B. |
 | **v6.50.74** | ✅ Build-verificada (build real 0/0, .tmod 4.435.018 B md5 ae7c7baa40de023507ab89f62dde007f 394 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte — 128 DisplayName · 177 Tooltip en las tres lenguas —, strips EXACTOS Sol 200×200 · Luna 200×1600 · Códice ítem 48×384 · proyectil 128×1024 (rawimg con header w×h verificado), símbolos nuevos VIVOS — AmbienteOleadaSistema/ModifySunLightColor/GraveyardVisualIntensity/MsgAmbienteOleada/SolDeLaOleada/LunaDeLaOleada/FestinVisible/_esNatural/furiaV2 — y los de .73 PERSISTEN, headless language=5 «Sandboxing/Finalizing Aethon, the Eternal Grimoire v6.50.74 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 406143168, asset 619756925 4.435.018 B, CDN verificado byte a byte md5 ae7c7baa40de023507ab89f62dde007f), ⏳ en juego | LA LETRA: «la imagen [del libro] esta cortada ademas se mueve de abajo hacia arriba constantemente, aunque si tiene su animacion… el ataque no se ve y salta un error… si el libro genera una oleada natural, esta siempre empieza por el nivel 3… combinas el ambiente de el eclipse solar mas el ambiente de cementerio… un toque morado a la iluminacion naranja del eclipse… un nuevo estado… mientras es de dia; si pasa a la noche, una mezcla de lunar de sangre mas el cementerio… el sol debe cambiar su sprite y en el de noche en la luna roja, esta tambien debe cambiar su sprite… dinamicos… se acaban en el momento en el que la oleada termine». (1) EL CIELO DE LA OLEADA (AmbienteOleadaSistema — ESTADO NUEVO que NO toca Main.eclipse/bloodMoon/ZoneGraveyard): LA LUZ por ModifySunLightColor (cielo ColorOfTheSkies + tiles en un pase; día eclipse-morado, noche carmesí-morado), LA NIEBLA por Main.GraveyardVisualIntensity (solo visual: filtro Graveyard + oscuridad + estrellas apagadas + relámpago esporádico ≥0.9 — el tira-y-afloja con Player.Update queda en 0.90-0.92), LOS ASTROS por swap reversible (Sun/Sun2/Sun3 + Moon[0..8]) con SolDeLaOleada (disco violeta + anillo de fuego naranja + llamaradas moradas) y LunaDeLaOleada (carmesí con cráteres, cara oculta FANTASMA y halo violeta, 8 fases del enum MoonPhase — menguante iluminada a la IZQUIERDA); DINÁMICO (16:30→19:30 cae a noche, 4:00→4:30 amanece, cruce suave _diaSuave; sin festín pegado al reloj) y TODO muere con el festín (fade 3 s + astros devueltos + Unload/OnWorldUnload limpios); MP: broadcast EcoRed.MsgAmbienteOleada (12, 1 byte) al cambio + latido 300 t — SP/host leen Activo directo. (2) LA CURA TRIPLE: DrawAnimationVertical lleva TICKS PRIMERO — el (8,6) de la .72 partía el strip de 384 px en 6 rodajas de 64 px (ventana entre dos frames = el libro cortado + fantasma + "subiendo"); (6,8) = 8 frames de 48 EXACTOS. El PreDraw llamaba spriteBatch.Begin con el lote de vanilla YA abierto (client.log «Begin has been called before calling End» todos los frames → el códice jamás se dibujaba en vuelo); ahora dibuja EN el lote vivo tras ReabrirLoteVanilla. El nivel natural nacía en 3 porque TODA victoria (también las de la CARNADA de pruebas) subía el FuriaNivel persistente — Provocar(natural:) distingue el origen, SOLO las victorias naturales suben, la carnada default 1 y los guardados viejos se resetean a 1 una única vez (marcador furiaV2). |
 | **v6.50.73** | ✅ Build-verificada (build real 0/0, .tmod 4.270.759 B md5 ca36bd780f740ef1349ce800747bc64a 392 entradas, EOF exacto, cuerpo es-ES == es-MX byte a byte — 182/182 DisplayName · 177/177 Tooltip en las tres lenguas —, vivos PRESENTES en la DLL: VigilarPrestamo/DevolverAmbiente/PrepararReflexion/_prestamoAbierto/_overrideForExpertMode/_overrideForMasterMode/defDamage/defDefense, muertos AUSENTES — Mano/Tijeras/Página + JefeDelLugar —, headless language=5 «Sandboxing/Adding/Configuring/Finalizing Aethon, the Eternal Grimoire v6.50.73 → Adding Recipes → Server started» 0 excepciones), ✔ publicada (release 406088036, asset 619583123 4.270.759 B, CDN verificado byte a byte md5 ca36bd780f740ef1349ce800747bc64a, /releases/latest = v6.50.73), ⏳ en juego | LA LETRA: «tanto el Ojo de Cthulhu como otros jefes, en las oleadas no tienen limitacion de dia, noche o bioma, la oleada es su propio ambiente ya que son jefes modificados… en niveles altos el ojo se separa mucho del jugador… a cada jefe de oleada dale la IA que usa Terraria en el modo maestro, pero con las mejoras actuales que tiene». (1) EL AMBIENTE PRESTADO (OleadaNPC.PreAI→PostAI): durante el AI de cada guardián (los SEIS + Deerclops) se prestan POR REFLEXIÓN los overrides _overrideForExpertMode/_overrideForMasterMode (Main.expertMode/masterMode son propiedades de solo lectura en tML — en vanilla LA IA MAESTRA ES LA RAMA EXPERTA, master escala stats y afina lerps al 100%): huesos+25/mano del Skeletron, ilusiones del Cerebro, limos con púas del Rey, manos de sombra de Deerclops, acelerones/65% del Ojo, rampa de la Reina, crías del Devorador — red de seguridad TRIPLE (auto-curado en PreAI + vigía en PostUpdateWorld + restauración defensiva) para que el mundo NUNCA quede vestido; (2) SIN DÍA/NOCHE/BIOMA: Main.dayTime prestado en falso para Ojo (ya no huye del sol) y Skeletron (el guardián de 9999 jamás despierta — el veto diurno del sorteo MUERE: el Ojo compite las 24 h), JUNGLA prestada a la Reina (+NIEVE a Deerclops — sin encoraje ni huida por bioma) y Main.worldSurface prestado (la Reina jamás «sobre la superficie»); (3) LA TALLA EN LOS DEFAULTS DE LA IA: Marcar ahora también sella defDamage/defDefense (las IA que se re-visten cada tick ya no borran el sello — Skeletron/Reina peleaban con stats vanilla) + el daño LITERAL de la fase 2 del Ojo se restaura a la talla del sello tras su IA; (4) EL OJO YA NO SE DESPEGA: exento del homing/embite inyectado (a +8.6 px/t en oleada alta lo sobre-empujaba a 600-1000 px de la presa) y con EL ANCLA (>900 px = tirón suave + techo 22 px/t); (5) DE PROPINA: el es-ES del REPO estaba DESCUADRADO (espejo .71 con tabs — el release .72 llevaba el correcto pero el commit no lo capturó) — regenerado con sync_es_es_v65071.py. |
