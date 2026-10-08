@@ -2,7 +2,7 @@
 // (la letra del usuario: «el idioma del juego debe ser español latinoamérica,
 // no español españa»). v6.50.71 — TODAS LAS VARIANTES DE ESPAÑOL CAEN AQUÍ:
 // el juego en «Español (España)» y en «Español (Latinoamérica)» lee ESTE
-// archivo (es-ES es un ESPEJO GENERADO de este — tools/sync_es_es_v65071.py).
+// archivo (es-ES es un ESPEJO GENERADO de este — tools/sync_es_es_v65077.py).
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
@@ -2047,7 +2047,7 @@ Eco: {
                 Cielo2: Islas flotantes: arpías con vista al cielo. MENÚ CON VISTA.
                 Cielo3: Comer en las alturas da vértigo… y apetito.
                 Superficie1: El grimorio tiene hambre… y la superficie es el bufé.
-                Superficie2: Hierba, ladrones y ojos nocturnos. Menú de todos los días.
+                Superficie2: Hierba, zombis y ojos nocturnos. Menú de todos los días.
                 Superficie3: El sol calienta la carne de arriba. Ven que la pruebo.
         }
 }
