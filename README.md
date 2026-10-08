@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.74 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.75 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,24 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.74)
+## ¿Dónde estamos? (actualizado para v6.50.75)
+
+**NOVEDAD .75 — EL RELOJ DE ARENA DEL ESCRIBA (un clic: día ⇄ noche)**: la
+letra del usuario: «deberías incluir algo para cambiar el día y la noche,
+un clic y es de día, otro clic y es de noche». Un ítem de pruebas nuevo en
+**La Bolsa del Probador**: UN CLIC gira el reloj del mundo — si es de día,
+**cae la noche** (7:30 PM); si es de noche, **amanece** (4:30 AM).
+Reutilizable (nunca se consume) y con la arena hecha **TINTA** (la del
+Códice Vivo: charco arriba, hilo en la cintura, montón creciendo abajo —
+el sprite pixel-art 28×28 nacido de código). **La sinergía**: funciona
+incluso A MEDIA OLEADA — el cielo del festín (v6.50.74) es dinámico, así
+que girar día/noche a mitad de un festín cruza suave entre el eclipse
+morado y la luna carmesí: la vía rápida para ver las DOS caras del festín
+sin esperar al atardecer real. En MP la hora es del mundo: el servidor
+gira el reloj y lo difunde a todos al instante (nuevo mensaje de red
+`MsgCambiarHorario`), con el aviso del escriba en el chat y lluvia de
+tinta (dorada al amanecer / violeta al anochecer) alrededor de quien lo
+giró.
 
 **NOVEDAD .74 — EL CIELO DE LA OLEADA (ECLIPSE+CEMENTERIO+MORADO) + LA CURA
 TRIPLE DEL CÓDICE Y EL NIVEL**: la letra del usuario: «la imagen [del libro]

@@ -1,5 +1,62 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA (un clic: día ⇄ noche)
+
+**Feedback del usuario**: "deberias incluir algo para cambiar el dia y la
+noche, un clic y es de dia, otra clic y es de noche".
+
+**(1) EL ÍTEM.** `El Reloj de Arena del Escriba` llega a **La Bolsa del
+Probador**: UN CLIC gira el reloj del mundo — si es de día, **cae la noche**
+(7:30 PM); si es de noche, **amanece** (4:30 AM). Es la hora cero de cada
+mitad del reloj de Terraria (`Main.dayTime` girado + `Main.time = 0`):
+amanecer y anochecer perfectamente limpios, sin restos de la mitad anterior.
+Reutilizable (el patrón de la Carnada: pila 1, HoldUp, nunca se consume).
+La arena es TINTA — con ella el escriba escribió el alba y el ocaso del
+mundo, y girarla reescribe la página del cielo.
+
+**(2) SINERGÍA CON EL CIELO DE LA OLEADA (v6.50.74).** Funciona incluso
+**a media oleada**: el ambiente del festín es dinámico (el reloj manda —
+`AmbienteOleadaSistema` cruza suave hacia el nuevo ambiente, como en un
+atardecer real). Es la vía rápida para ver las DOS caras del festín (el
+eclipse morado de día / la luna carmesí de noche) sin esperar al atardecer
+real del mundo. El préstamo ambiental de los jefes (`OleadaNPC`) no se
+entera: viste el mundo SOLO durante el AI de cada guardián y lo devuelve
+intacto.
+
+**(3) LA RED (la hora es del mundo).** Nuevo mensaje `EcoRed.MsgCambiarHorario`
+(ID 13): en MP el uso sincronizado corre el `UseItem` en el SERVER (la
+autoridad gira el reloj) y hace BROADCAST `{día, tiempo, quiénLoGiró}` a
+TODOS los clientes — cada uno aplica el cielo nuevo al instante y siente el
+giro: el aviso del escriba en el chat («la tinta reescribe el cielo y
+AMANECE» / «la tinta derrama la noche y CAEN LAS SOMBRAS») + lluvia de
+tinta alrededor de quien giró el reloj (dorada `GoldFlame` al amanecer /
+violeta `Shadowflame` — la misma tinta del Códice Vivo — al anochecer).
+SP: giro directo; el HOST lo canta en su propio `UseItem` (mismo proceso,
+sin loopback).
+
+**(4) EL SPRITE (nacido de código, como toda la casa).** Pixel-art directo
+28×28 con paleta cerrada de 11 tonos: madera VIOLETA del grimorio (tapas +
+columnas con nudos), TINTA VIVA en lugar de arena (la `#f0a9f6` del Códice
+Vivo: un charco en el bulbo superior, el hilo cayendo por la cintura y un
+montón creciendo abajo — el reloj está A MEDIA VUELTA), vidrio lavanda con
+reflejos y el remate ORO de los probadores. Autoverificación completa
+(bbox 18×25, simetría izquierda-derecha de la arquitectura con 0
+asimetrías, tinta presente en los TRES sitios, alfa binario) + QA de
+visión 8/9/9/7 — «un icono sólido, legible y estilísticamente coherente».
+
+**Verificación**: oráculo 0/0 · build real 0/0 · .tmod 4.438.303 B md5
+`2c423b1be2bf1429cbbbd9aadfc38ab6` (395 entradas, +1 el sprite nuevo; EOF
+exacto; es-ES == es-MX byte a byte EN EL PAQUETE — 311/311 DisplayName ·
+178/178 Tooltip en las tres lenguas; píxeles del rawimg IDÉNTICOS al PNG
+fuente — verificación nueva; símbolos de la .73/.74 persisten) · headless
+con mundo nuevo (autocreate): «Sandboxing/Finalizing v6.50.75 → Adding
+Recipes → Server started», 0 excepciones. **Hallazgos del auditor**: el
+.tmod guarda SIN comprimir los blobs donde el deflate no ayuda (comp==raw
+— 24 entradas: PNGs ya comprimidos, etc.) y el rawimg lleva header
+`[fmt:i32][w:i32][h:i32]` little-endian de 12 B.
+
+---
+
 ## Commit v6.50.74 — EL CIELO DE LA OLEADA (ECLIPSE+Cementerio+MORADO) + LA CURA TRIPLE DEL CÓDICE Y EL NIVEL
 
 **Feedback del usuario**: "la imagen [del libro] esta cortada ademas se mueve
