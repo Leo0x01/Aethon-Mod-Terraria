@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.79 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.80 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,22 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.79)
+## ¿Dónde estamos? (actualizado para v6.50.80)
+
+**NOVEDAD .80 — LA MUERTE QUE MERECE UN DIOS**: «debe hacer una gran
+explosión de luz y desaparecer, así es como debe ser su muerte». El dios
+ahora muere con **su propio Estallido Radiante** (el ataque que el
+usuario diseñó) en su versión definitiva: **escala 1.85 — la luz más
+grande de toda la pelea** (44 rayos, anillo segmentado, cruz anamórfica,
+80 chispas, y el mundo BAÑADO en luz 2.5 s)… y es PURA LUZ: no daña (la
+victoria no se cobra con un golpe barato). La explosión nace del
+servidor y viaja por el cable: **todas las pantallas ven el mismo
+estallido y el dios desaparece en el MISMO instante**. Además: parada
+dura a los 4 ticks (ni un píxel de caída tras morir), terremoto y lluvia
+dorada doble. Y el diagnóstico del client.log: las sesiones del usuario
+corrían .76/.78 (con el fantasma que la .79 curó) y la sesión .79 se
+cerró sola por **RAM agotada** (~100 mods, 1 GB libre) — el fix .79
+nunca llegó a probarse; la .80 sella la muerte para que no quede duda.
 
 **NOVEDAD .79 — EL FIX DEL JEFE FANTASMA**: al matar a Aethon «explota
 pero no desaparece, sigue presente y comienza a caer bajo el mapa». Causa

@@ -1,5 +1,73 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.80 — LA MUERTE QUE MERECE UN DIOS (LA GRAN EXPLOSIÓN DE LUZ)
+
+**Feedback del usuario**: "el jefe Aethon sigue moviendose hacia abajo
+despues de morir, en vez de explotar, solo explota de forma pequeña lo cual
+no es correcto, debe hacer una gran explosion de luz y desaparecer, asi es
+como debe ser su muerte" (+ "que raro el juego se cerro" — con el
+client.log adjunto).
+
+**EL DIAGNÓSTICO DEL client.log (leído sesión a sesión).** Las tres
+sesiones del día del usuario corrían **v6.50.76** (1 h), **v6.50.78**
+(15 min) y **v6.50.79** (< 10 min): el FANTASMA que la .79 curó vivía en
+las DOS primeras — **el fix .79 nunca llegó a probarse**, porque la sesión
+.79 se cerró sola minutos después de entrar al mundo. El cierre: CERO
+excepciones en el log (cierre seco del proceso) y en CADA arranque el
+propio tML avisaba *"Total system memory usage exceeds installed physical
+memory… frequent page file access"* — ~1.0-1.1 GB libres de 7.9 con ~100
+mods activos (el nuestro pesa 14.5 MB): **el sistema agotó la RAM y
+Windows mató el proceso**. No fue el mod — fue la memoria. (Nota: el WARN
+"Image loading failed: unknown image type" del empaquetado aparece TAMBIÉN
+en los builds de la casa — es una peculiaridad benigna del packer de tML
+con los .fx de shaders; los 364 PNGs del repo verifican limpios con PIL.)
+
+**(1) LA GRAN EXPLOSIÓN DE LUZ — EstiloMuerteFinal (25).** El dios muere
+con **SU PROPIO Estallido Radiante** (el ataque de la v6.50.53) en su
+versión definitiva: **ESCALA 1.85 PLANO** (la luz más grande de TODA la
+pelea — un 45 % más grande que su máximo de combate): los 44 rayos de
+hasta ~1.800 px, el anillo segmentado de 14 emisores, la cruz
+anamórfica, el destello de 8 puntas, las 26 bokeh, la onda expansiva y
+LA LUZ QUE INUNDA EL MUNDO (2.4/2.1/1.5 × 1.85, 2.5 s de día). Nace de
+la AUTORIDAD y viaja por el cable (netImportant): el estallido VIVE en
+todas las pantallas mientras el dios ya no está — **la explosión y la
+desaparición son EL MISMO INSTANTE, en todas las máquinas**. Y es PURA
+LUZ: `hostile=false`, `damage=0` desde OnSpawn y autocurado cada tick de
+IA en TODAS las máquinas (el patrón del msg 27 de la casa) — la victoria
+no se cobra con un golpe de gracia barato a quemarropa; el aliento letal
+sigue siendo LA BOLA FINAL de la v6.50.56.
+
+**(2) PARADA DURA A t4.** La v6.50.57 dejaba 20 t de aquietarse — a un
+dios en pleno picado eso se VEÍA como «sigue moviéndose tras morir»:
+ahora la mitad de la velocidad cada tick y a la cuarta tick NI UN PÍXEL —
+el dios muere DONDE murió.
+
+**(3) EL ESTALLIDO LOCAL EN GRANDE.** Temblor de terremoto
+(Kick 14→20, 30→45) y la lluvia dorada DOBLE (90→160 polvos, caja
+200×200, escala 1.1-2.1) en TODAS las máquinas; el nacimiento del
+estallido de muerte: 80 chispas (42) al doble de velocidad (9-24) y
+estruendo Kick(20, 40).
+
+**(4) EL CONTRATO .79 INTACTO** — despedida SendData(23), adopción
+ai[0]=99, red de seguridad 200 t, gameplay solo-autoridad: la auditoría
+de regresión lo verifica 10/10.
+
+**EL 6º INCIDENTE DEL ESPEJO es-ES** (el revert cayó OTRA VEZ entre el
+build y el commit — el PAQUETE .80 llevaba el espejo bueno, auditado
+[4] True): checkout de HEAD + verificación del blob commiteado (HEAD ya
+era bueno — el es-ES ni entró al commit).
+
+**VERIFICACIÓN.** Build real 0/0 · .tmod 2.565.398 B md5
+`9641c995b4071688ad593640bc697f34` · 380 entradas · EOF exacto ·
+**DECOMPILE DEL PAQUETE: 11/11 checks del fix nuevo + 10/10 de
+regresión** (constante 25 en metadatos, escala 1.85 con rama, case 25 en
+los 5 cauces — OnSpawn/IA/luz/2 renders —, autocuración pura luz,
+ternarias del nacimiento, 9f-24f, parada t4, Kick(20,45), 160 polvos,
+spawn estilo 25 semilla 999) · 30/30 símbolos persistentes vivos · 15/15
+muertos ausentes · es-ES == es-MX byte a byte EN EL PAQUETE · fix zombis
+.77 presente · headless mundo nuevo Aethon80 puerto 7788: «Sandboxing:
+Aethon, the Eternal Grimoire v6.50.80 → Server started», 0 EXCEPCIONES.
+
 ## Commit v6.50.79 — EL DIOS QUE NO SE DESPEDÍA (EL FIX DEL JEFE FANTASMA)
 
 **Feedback del usuario**: "algo que sucede al matar a Aethon es que una vez

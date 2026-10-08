@@ -1,22 +1,44 @@
-# AethonMod — ESTADO ACTUAL (v6.50.79)
+# AethonMod — ESTADO ACTUAL (v6.50.80)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.79 (EL FIX DEL JEFE FANTASMA:
-> «al matar a Aethon este explota pero no desaparece, sigue presente y
-> comienza a caer bajo el mapa» — decompile: el netUpdate tras apagar
-> un NPC es CÓDIGO MUERTO, los clientes MP quedaban con el dios VIVO
-> corriendo su propia IA; cura triple verificada por DECOMPILE DEL
-> PAQUETE 10/10: SendData(SyncNPC) explícito en TODOS los apagados,
-> la muerte viaja por ai[0]=99 con adopción en cliente + red de
-> seguridad a 200 t, y el estallido repartido visuales/autoridad;
-> compilada 0/0, .tmod 380 entradas auditadas, headless Server started
-> 0 excepciones — PUBLICADA: release 406372130, CDN verificado byte a
-> byte md5 7ccfc1b4bc2649fef0bd28cd526259fb).
+> Última actualización: v6.50.80 (LA MUERTE QUE MERECE UN
+> DIOS: «debe hacer una gran explosión de luz y desaparecer, así es
+> como debe ser su muerte» — el dios muere con SU PROPIO Estallido
+> Radiante a ESCALA 1.85, la luz más grande de toda la pelea, PURA LUZ
+> que no daña, nacida de la autoridad y viviendo en TODAS las pantallas
+> por el cable: explosión y desaparición son EL MISMO INSTANTE; parada
+> dura a t4 — ni un píxel de caída tras morir; diagnóstico del
+> client.log: las sesiones del usuario corrían .76/.78 — el fix .79
+> nunca se probó porque la sesión .79 murió por RAM AGOTADA (~100 mods,
+> 1 GB libre, cierre seco sin excepción); compilada 0/0, decompile del
+> paquete 11/11 + 10/10 de regresión, headless Server started 0
+> excepciones — PUBLICADA: release 406395281, CDN verificado byte a
+> byte md5 9641c995b4071688ad593640bc697f34).
 > Reglas vivas: es-ES es
 > ESPEJO GENERADO de es-MX (editar SOLO es-MX + tools/sync_es_es_v65077.py)
 > y la Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.80 = LA MUERTE QUE MERECE UN DIOS (LA GRAN EXPLOSIÓN DE
+  LUZ)** (la letra: «el jefe Aethon sigue moviendose hacia abajo despues
+  de morir, en vez de explotar, solo explota de forma pequeña lo cual no
+  es correcto, debe hacer una gran explosion de luz y desaparecer, asi es
+  como debe ser su muerte»): (1) **EL DIAGNÓSTICO DEL client.log** — las
+  sesiones del usuario corrían .76 (1 h) y .78 (15 min) con el fantasma
+  que la .79 curó, y la sesión .79 (< 10 min) se cerró sola al entrar al
+  mundo: CERO excepciones + warning de page-file en cada arranque con
+  1.0-1.1 GB libres de 7.9 — RAM agotada por ~100 mods (el nuestro pesa
+  14.5 MB); el fix .79 NUNCA se probó. (2) **LA GRAN EXPLOSIÓN** —
+  EstiloMuerteFinal (25): el Estallido Radiante del propio dios a ESCALA
+  1.85 plano (45 % más grande que su máximo de combate), 44 rayos ~1.800
+  px, anillo segmentado, cruz anamórfica, 80 chispas 9-24, luz que
+  inunda el mundo 2.5 s; PURA LUZ (hostile=false, damage=0 en OnSpawn +
+  autocuración de IA en todas las máquinas); nace de la autoridad y
+  viaja por el cable — explosión y desaparición son el MISMO instante en
+  todas las pantallas. (3) **PARADA DURA A t4** (la .57 dejaba 20 t que a
+  un dios en picado se veían como «sigue moviéndose tras morir»).
+  (4) **TERREMOTO + LLUVIA DOBLE** (Kick 20/45, 160 polvos caja 200×200
+  en todas las máquinas). (5) **CONTRATO .79 INTACTO** (regresión 10/10).
 - **v6.50.79 = EL DIOS QUE NO SE DESPEDÍA (EL FIX DEL JEFE
   FANTASMA)** (la letra: «algo que sucede al matar a Aethon es que una
   vez muere este explota pero no desaparece, sigue presente y comienza a
@@ -1418,18 +1440,22 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
-1. **PUBLICAR v6.50.79 — HECHO** — push de main + tag v6.50.79 +
-   release 406372130 con `AethonMod.tmod` (2.565.144 B, md5
-   7ccfc1b4bc2649fef0bd28cd526259fb, asset 620574911) + CDN verificado
-   byte a byte + /releases/latest = v6.50.79 + fila .79 con el release
+1. **PUBLICAR v6.50.80 — HECHO** — push de main + tag v6.50.80 +
+   release 406395281 con `AethonMod.tmod` (2.565.398 B, md5
+   9641c995b4071688ad593640bc697f34, asset 620648266) + CDN verificado
+   byte a byte + /releases/latest = v6.50.80 + fila .80 con el release
    ID real.
 
-2. **El usuario prueba v6.50.79 en juego** — (a) EN MULTIJUGADOR (Host &
-   Play o servidor): matar a Aethon → el jefe hace su contracción, su
-   estallido final… y DESAPARECE EN TODAS LAS PANTALLAS (nadie ve un
-   Aethon extra cayéndose bajo el mapa); (b) EN UN JUGADOR: la muerte
-   igual que siempre + el reloj del mundo se suelta al morir el dios;
-   (c) los cazadores astrales también se disuelven limpio en MP.
+2. **El usuario prueba v6.50.80 en juego** — (a) matar a Aethon: 2 s de
+   contracción → **LA GRAN EXPLOSIÓN DE LUZ** (la más grande de toda la
+   pelea, el propio Estallido Radiante del dios a escala 1.85, sin daño)
+   → el dios DESAPARECE EN EL MISMO INSTANTE — y NI UN PÍXEL de caída
+   tras morir (parada dura a t4); (b) EN MULTIJUGADOR: TODAS las
+   pantallas ven la misma explosión (viaja por el cable) y nadie ve un
+   Aethon extra cayéndose bajo el mapa (el contrato .79 + el estallido
+   .80); (c) OJO CON LA RAM: si el juego se cierra solo, no es el mod —
+   el client.log mostró ~100 mods con 1 GB libre: desactivar mods pesados
+   o cerrar apps de fondo.
 
 3. **CONFIRMADO — v6.50.78 «el evento esta perfecto»** (palabra del
    usuario): la luna de sangre + el crossfade de astros + la bruma del
@@ -1472,6 +1498,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.80** | ✅ Build-verificada (build real 0/0, .tmod 2.565.398 B md5 9641c995b4071688ad593640bc697f34, 380 entradas, EOF exacto, **DECOMPILE DEL PAQUETE: 11/11 checks del fix + 10/10 de REGRESIÓN .79** (constante EstiloMuerteFinal=25 en metadatos; escala 1.85 con rama para el 25; case 25 en los 5 cauces OnSpawn/IA/luz/2 renders; autocuración pura luz ==25 → hostile=false/damage=0; nacimiento grande 80 chispas 9f-24f Kick(20,40); parada dura _tickMuerte>=4 ×0.5f; Kick(20f,45); 160 polvos caja 200×200; NewProjectile estilo 25 semilla whoAmI*79+999; y TODO el contrato .79: SendData 23 en cine/despawn/manada/cazadores, ai[0]=99/ai[1]=tick, adopción, red 200 t, DropBotin autoridad-only), 30/30 símbolos persistentes VIVOS (nuevos: EstiloMuerteFinal/EstiloEstallidoRadiante/EscalaEstallido), 15/15 muertos .76 ausentes, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (el 6º revert del sandbox cayó entre build y commit — checkout de HEAD, el es-ES ni entró al commit, blob de HEAD verificado), fix zombis .77 presente, headless config mundo nuevo Aethon80 language=5 puerto 7788 «Sandboxing: Aethon, the Eternal Grimoire v6.50.80 → Server started» 0 excepciones), ✔ publicada (release 406395281, asset 620648266 2.565.398 B, CDN verificado byte a byte md5 9641c995b4071688ad593640bc697f34, /releases/latest = v6.50.80), ⏳ en juego | LA LETRA: «el jefe Aethon sigue moviendose hacia abajo despues de morir, en vez de explotar, solo explota de forma pequeña lo cual no es correcto, debe hacer una gran explosion de luz y desaparecer, asi es como debe ser su muerte» + «que raro el juego se cerro» (client.log adjunto). DIAGNÓSTICO DEL LOG: sesiones del día = .76 (1 h), .78 (15 min), .79 (< 10 min) — el fantasma vivía en las 2 primeras, el fix .79 NUNCA se probó; la sesión .79 murió al entrar al mundo SIN excepción + warnings de page-file (1.0-1.1 GB libres de 7.9, ~100 mods) = RAM AGOTADA, cierre seco de Windows — no el mod (14.5 MB); también verificado: el WARN «Image loading failed» del empaquetado aparece IGUAL en los builds de la casa (peculiaridad benigna del packer con los .fx — los 364 PNGs verifican limpios). LA CURA: (1) EstiloMuerteFinal(25) — el Estallido Radiante del propio dios a ESCALA 1.85 PLANO (la luz más grande de la pelea, 45 % sobre el máximo de combate), PURA LUZ (jamás daña — hostile=false/damage=0 en OnSpawn + autocuración de IA en TODAS las máquinas, patrón msg 27), nace de la AUTORIDAD y viaja por el cable (netImportant) — el estallido VIVE mientras el dios ya no está: explosión y desaparición = EL MISMO INSTANTE en todas las pantallas; (2) PARADA DURA a t4 (×0.5f/tick → Zero — la .57 dejaba 20 t que se veían como «sigue moviéndose»); (3) TERREMOTO Kick(20,45) + 160 polvos (90) caja 200×200 en todas las máquinas + nacimiento del estallido 80 chispas (42) a 9-24 (6-17); (4) el aliento letal sigue siendo LA BOLA FINAL (.56) — la victoria no se cobra con daño de gracia. |
 | **v6.50.79** | ✅ Build-verificada (build real 0/0, .tmod 2.565.144 B md5 7ccfc1b4bc2649fef0bd28cd526259fb, 380 entradas, EOF exacto, **DECOMPILE DEL PAQUETE: 10/10 checks del fix** (SendData SyncNPC en cine t120 + despawn + DisolverManada + los 2 de CazadorAstral; ai[0]=99/ai[1]=tick del cine; adopción en AI; red de seguridad 200 t netMode==1; estallido autoridad-only), 27/27 símbolos persistentes VIVOS, 15/15 muertos .76 ausentes, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (el 5º revert del sandbox cazado ENTRE build y commit — el paquete llevaba el espejo bueno; cura del blob inmutable re-aplicada), fix zombis .77 presente, headless autocreate mundo nuevo Aethon79 language=5 puerto 7787 «Sandboxing: Aethon, the Eternal Grimoire v6.50.79 → Server started» 0 excepciones), ✔ publicada (release 406372130, asset 620574911 2.565.144 B, CDN verificado byte a byte md5 7ccfc1b4bc2649fef0bd28cd526259fb, /releases/latest = v6.50.79), ⏳ en juego | LA LETRA: «algo que sucede al matar a Aethon es que una vez muere este explota pero no desaparece, sigue presente y comienza a caer bajo el mapa en vez de desaparecer a penas muere». CAUSA RAÍZ (decompile): el flush del sync de NPC vive DENTRO de NPC.UpdateNPC (que arranca con if (!active) return;) — el netUpdate tras apagar al jefe era CÓDIGO MUERTO; en MP los clientes (host de «Host & Play» incluido) quedaban con una COPIA VIVA del dios corriendo su IA sin correcciones hasta caer bajo el mapa (la enfermedad de GrimorioFuria v6.50.1, jamás aplicada al cine de muerte ni a los cazadores). CURA TRIPLE: (1) DESPEDIDA SendData(MessageID.SyncNPC) a mano en TODOS los apagados (cine/despawn/manada/cazadores ×2 — el msg 23 de slot inactivo viaja a TODOS: NetMessage «boss || netAlways || townNPC || !active → broadcast»); (2) LA MUERTE VIAJA ai[0]=99/ai[1]=tick cada tick + adopción del cliente en AI + RED DE SEGURIDAD 200 t; (3) ESTALLIDO REPARTIDO visuales-todas-máquinas / gameplay-solo-autoridad (sin botín fantasma). BONUS: el mediodía eterno se suelta CUANDO muere el dios (ai[0]==99 en AethonLlegadaSistema). |
 | **v6.50.78** | ✅ Build-verificada (build real 0/0, .tmod 2.565.010 B md5 f29605aca5201538c72449306ce4acbe, 380 entradas — CERO PNGs nuevos, la bruma es 100% librería BrumaFX de la casa, EOF exacto, 6 símbolos nuevos VIVOS (DibujarAstrosDeLaOleada/DibujarBrumaDelAstro/ColorLunaDeSangreVanilla/_transicionAstros/BrumaMorada/BrumaNegra) + 19 persistentes OK, 15/15 muertos .76 ausentes, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (el 4º revert del sandbox cazado y curado con blob INMUTABLE: hash-object + update-index + verificación del commit), fix zombis .77 presente, headless autocreate mundo nuevo language=5 «Sandboxing/Finalizing v6.50.78 → Server started» 0 excepciones), ✔ publicada (release 406333947, asset 620428983 2.565.010 B, CDN verificado byte a byte md5 f29605aca5201538c72449306ce4acbe, /releases/latest = v6.50.78), ✔ CONFIRMADA en juego («el evento esta perfecto» — luna de sangre + crossfade + bruma verificados por el usuario) | LA LETRA: «la luna no es la luna roja, solo dejas la luna normal y no es asi, debe ser el sprite de la luna de sangre, y luego teñirla de morado lo mismo con el sol… no deben simplemente cambiar de un frame a otro… que el cambio sea con un degradado de un sprite a otro… una masa de bruma morada y negra crubra tanto el sol como la luna, ya que este evento es algo creado por el propio grimorio» + CONFIRMACIÓN «el fondo ya esta arreglado» (.76 cuevas ✔). (1) LA LUNA DE SANGRE: decompile — bloodMoon NO cambia sprite, SetBackColor PINTA la luna del mundo de rojo (82756-82780: R=205, G/B 55→225/255); ColorLunaDeSangreVanilla() replica la fórmula sobre el sprite DEL MUNDO (tipo+fase exacta), Lerp 0.55 al morado. (2) EL CROSSFADE _transicionAstros ~1.4 s lineal: sol viejo ENCIMA del eclipse desvaneciéndose (las 2 pasadas val3/val4 replicadas, colores ORIGINALES), luna vanilla moonColor.A→0 mientras la de sangre nace alpha t; devolución SIN COSTURA al morir el festín. (3) PRÉSTAMO ENGANCHADO al hook (t>0 — jamás eclipse sin velo ni swap en menú). (4) BRUMA: BrumaFX (núcleo morado + velo negro + 5 satélites orbitando) sobre el astro activo TODO el evento. (5) MATEMÁTICA EXACTA de 81905-81944 (parábola 250, bgTopY+180, ForcedMinimumZoom, ×1.1 sol, sunModY/moonModY, offset; guard remix world). (6) EL 4º INCIDENTE DEL ESPEJO: 2b74fee capturó el revert (release .77 bueno, repo malo) + otro revert EN VIVO en .78 — CURA DEFINITIVA: blob INMUTABLE hash-object+update-index + verificación del blob commiteado. |
 | **v6.50.77** | ✅ Build-verificada (build real 0/0, .tmod 2.565.336 B md5 d23390b20ed1360ea69b45476aea54f6, 380 entradas — idénticas a .76, cambio solo de texto, EOF exacto, 364 PNG intactos, la línea corregida PRESENTE y «ladrones»/«bandits» AUSENTES del paquete en las 3 lenguas, 15/15 símbolos muertos .76 ausentes, 16/16 vivos .73-.76 persistentes, cuerpo es-ES == es-MX byte a byte EN EL PAQUETE — el espejo REGENERADO con tools/sync_es_es_v65077.py tras caer el revert del sandbox entre el build .76 y su commit, headless autocreate mundo nuevo language=5 «Sandboxing/Finalizing v6.50.77 → Server started» 0 excepciones), ✔ publicada (release 406323571, asset 620373103 2.565.336 B, CDN verificado byte a byte md5 d23390b20ed1360ea69b45476aea54f6, /releases/latest = v6.50.77), ⏳ en juego | LA LETRA: «me acabo de dar cuenta de un dialogo del libro, ,,hierba ladrones decia o algo aso, pero ladrones, que ladrones eso esta mal, deberia decir zombis». (1) EL FIX: el comentario de bioma Superficie2 del grimorio decía «Hierba, ladrones y ojos nocturnos. Menú de todos los días.» — LADRONES no existe en la superficie de Terraria: el menú nocturno real son ZOMBIS + ojos demoníacos; corregido en las TRES lenguas (es-MX/es-ES «Hierba, zombis y ojos nocturnos.», en-US «Grass, zombies and night eyes.» — antes BANDITS). (2) EL ESPEJO REGENERADO: la auditoría del paquete cazó cuerpo es-ES != es-MX → el sandbox revirtió el es-ES ENTRE el build .76 y su commit (el release .76 llevó el espejo correcto; el REPO quedó con la variante vieja: tabs + comentarios en inglés + 2 líneas CodiceVivo invertidas); sync_es_es_v65077.py restaura el invariante byte a byte (310/310 · 177/177). REGLA: editar SOLO es-MX + script. |
