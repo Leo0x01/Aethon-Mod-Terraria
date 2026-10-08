@@ -1,5 +1,71 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.81 — EL ESTALLIDO ES EL ADIÓS (LA BOLA FINAL RETIRADA)
+
+**Feedback del usuario**: "el sol explota, pero se sigue disparando una
+bola de luz hacia algun lado, esa bola de luz dura varios segundos antes
+de desaparecer".
+
+**EL DIAGNÓSTICO.** La GRAN EXPLOSIÓN de la v6.50.80 FUNCIONA — «el sol
+explota» ✔. Pero el cine de muerte todavía disparaba **LA BOLA FINAL**
+de la v6.50.56 (el «último aliento»): una bola de energía
+blanco-dorada que salía volando en LÍNEA RECTA hacia donde estaba el
+asesino y ardía **420 t = 7 segundos** antes de apagarse con su último
+destello — eso era la bola que seguía brillando por ahí después de la
+victoria. La muerte de un dios debe ser **UN SOLO ACTO**: la gran
+explosión de luz y desaparecer. NADA sale disparado. NADA queda
+flotando.
+
+**(1) EL ADIÓS ES LA EXPLOSIÓN (AethonBoss).** El t120 del cine de
+muerte tiene ahora **UN ÚNICO NewProjectile**: EL ESTALLIDO DE LA MUERTE
+(estilo 25, escala 1.85, pura luz). El cálculo del aliento DEMOLIDO:
+`damage * 1.3f`, el rumbo al asesino (`SafeNormalize * 6.5f`, knockback
+3) — todo fuera. La explosión y la desaparición son TODO lo que pasa.
+
+**(2) EL ESTILO 23 DEMOLIDO (AtaqueJefeProjectile — 8 sitios).** No
+bastaba con quitar el disparo: la constante `EstiloBolaFinal = 23`, el
+case de OnSpawn (timeLeft 420, talla 88×88), la autocuración de la IA
+(talla + hostil + daño desde ai[1]), el case completo de la IA (la
+carrera recta sin homing, la luz que inundaba el cielo 2.6/2.35/1.7, la
+estela de fuego blanco, el estampido del nacimiento y el último
+destello de 26 polvos), el brazo de luz del switch y los DOS renders
+(fase mundo: la rueda de 12 rayos + las dos coronas de perlas + el
+núcleo que late; fase pantalla: el bloom blanco-dorado + la estrella de
+destello doble + las 8 chispas orbitantes) — **DEMOLEDO DE RAÍZ**. El
+número 23 queda RETIRADO como los de camiseta (documentado en el sitio
+de la constante con la letra del usuario).
+
+**(3) LOS COMENTARIOS HISTÓRICOS ACTUALIZADOS.** La nota de la .80 que
+decía «el aliento letal sigue siendo LA BOLA FINAL de siempre» y la del
+PreDraw «hasta el disparo de LA BOLA FINAL, su ataque más brillante» —
+ahora cuentan la verdad de la .81: la muerte es el estallido y el
+silencio.
+
+**(4) TODO LO DEMÁS INTACTO.** La gran explosión de la .80 (9/9:
+constante 25, escala 1.85, case 25 en los 5 cauces, pura luz, parada
+dura t4, terremoto, 160 polvos) y el contrato del fantasma de la .79
+(10/10: despedida 23, adopción 99, red 200 t, autoridad-only).
+
+**EL 7º INCIDENTE DEL ESPEJO es-ES** (el revert cayó entre el build de
+las 04:40 y el commit — el PAQUETE llevaba el espejo bueno, auditado
+[4] True): checkout de HEAD (blob bueno verificado: cabecera ESPEJO +
+fix zombis), el es-ES NI ENTRÓ al commit (solo 3 archivos de código).
+
+**VERIFICACIÓN.** Build real 0/0 · .tmod 2.564.258 B md5
+`ba861546015c074a2f62c545f7fb1f5d` · 380 entradas · EOF exacto ·
+**DECOMPILE DEL PAQUETE: 8/8 checks del fix nuevo** (constante
+EstiloBolaFinal AUSENTE de metadatos; case 23 SOLO VACÍO — el artefacto
+del jump table del compilador para el hueco del 23 en el switch denso
+0-25, en la .80 eran 3 cases CON CUERPO; CERO comparación == 23; UN
+SOLO NewProjectile en el cine; sin 1.3f ni 6.5f) **+ 9/9 regresión .80
++ 10/10 contrato .79 + 6 SendData(23)** · 31/31 símbolos persistentes
+vivos (nuevo en la lista: EstiloSolJefe) · **16/16 muertos ausentes
+(EstiloBolaFinal se une a la lista)** · es-ES == es-MX byte a byte EN
+EL PAQUETE · fix zombis .77 presente · 2 PNGs · headless config mundo
+nuevo Aethon81 language=5 puerto 7789: «Sandboxing: Aethon, the Eternal
+Grimoire v6.50.81 → Adding Recipes → Server started», 0 EXCEPCIONES,
+guardado limpio.
+
 ## Commit v6.50.80 — LA MUERTE QUE MERECE UN DIOS (LA GRAN EXPLOSIÓN DE LUZ)
 
 **Feedback del usuario**: "el jefe Aethon sigue moviendose hacia abajo

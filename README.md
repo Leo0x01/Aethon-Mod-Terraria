@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.80 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.81 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,19 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.80)
+## ¿Dónde estamos? (actualizado para v6.50.81)
+
+**NOVEDAD .81 — EL ESTALLIDO ES EL ADIÓS**: «el sol explota, pero se
+sigue disparando una bola de luz hacia algun lado, esa bola de luz dura
+varios segundos antes de desaparecer». La gran explosión de la .80
+**funciona** — pero la muerte aún disparaba LA BOLA FINAL de la
+v6.50.56 (el «último aliento»: 7 segundos de bola blanco-dorada volando
+hacia el asesino). **Retirada de raíz**: el cine de muerte tiene ahora
+UN ÚNICO disparo (el Estallido de la Muerte, la luz más grande de la
+pelea) y el estilo completo de la bola demolido en sus 8 sitios — el
+número 23 queda retirado como los de camiseta. La muerte del dios es
+**un solo acto**: la gran explosión de luz y desaparecer — el cielo
+queda limpio.
 
 **NOVEDAD .80 — LA MUERTE QUE MERECE UN DIOS**: «debe hacer una gran
 explosión de luz y desaparecer, así es como debe ser su muerte». El dios
