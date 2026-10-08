@@ -2505,7 +2505,9 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         /// CheckDead → false: la luz NO muere por el camino normal —
         /// COLAPSA: 120 t de contracción total (TODO el brillo se
         /// recoge hacia el punto — el render lo dibuja) y EL ESTALLIDO:
-        /// el flash que inunda la pantalla y la lluvia dorada.
+        /// v6.50.80 — LA GRAN EXPLOSIÓN DE LUZ: su PROPIO Estallido
+        /// Radiante a escala 1.85 (la luz más grande de toda la pelea)
+        /// y el dios DESAPARECE en el mismo instante.
         /// </summary>
         public override bool CheckDead()
         {
@@ -2557,11 +2559,14 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 return;
             }
 
-            // v6.50.57 — DETENIDO DEL TODO (la letra: «el jefe debe
-            // quedarse detenido»): 20 t de aquietarse y queda CLAVADO —
-            // el dios arde QUIETO en su sitio hasta el estallido final.
-            if (_tickMuerte >= 20) NPC.velocity = Vector2.Zero;
-            else NPC.velocity = Vector2.Lerp(NPC.velocity, Vector2.Zero, 0.10f);
+            // v6.50.80 — DETENIDO EN EL ACTO (la letra: «sigue moviéndose
+            // hacia abajo después de morir»): la v6.50.57 dejaba 20 t de
+            // aquietarse — a un dios en pleno picado eso se VEÍA como
+            // «sigue moviéndose tras morir». AHORA: 4 t y CLAVADO — la
+            // mitad de la velocidad cada tick y a la cuarta tick ni un
+            // píxel: el dios muere DONDE murió.
+            if (_tickMuerte >= 4) NPC.velocity = Vector2.Zero;
+            else NPC.velocity *= 0.5f;
 
             // v6.50.56 — LA AGONÍA YA NO SE OSCURECE (la letra: «al final
             // de la muerte del jefe, este se oscurece, no, lo que debe
@@ -2586,21 +2591,23 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
 
             if (_tickMuerte >= 120)
             {
-                // v6.50.79 — EL ESTALLIDO, EN TODAS LAS MÁQUINAS (el visual
-                // del dios muriendo es de TODOS: el temblor, los truenos y
-                // la lluvia dorada corren también en los clientes — cada
-                // pantalla ve el final EN VIVO, no un jefe que desaparece
-                // sin decir nada).
-                OndaLib.Kick(14f, 30);
+                // v6.50.80 — LA GRAN EXPLOSIÓN DE LUZ (la letra: «debe
+                // hacer una gran explosión de luz y desaparecer, así es
+                // como debe ser su muerte»): el estallido de la v6.50.79
+                // (90 polvos + truenos) se quedaba PEQUEÑO — la muerte de
+                // un dios tiene que ser LA MÁS GRANDE LUZ DE LA PELEA.
+                // Temblor de terremoto, la lluvia dorada duplicada…
+                OndaLib.Kick(20f, 45);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCDeath55, NPC.Center);
 
                 if (!Main.dedServ)
                 {
-                    for (int d = 0; d < 90; d++)
+                    for (int d = 0; d < 160; d++)
                     {
-                        int idx = Dust.NewDust(NPC.Center, 160, 160, DustID.GoldFlame,
-                            Main.rand.NextFloat(-13f, 13f), Main.rand.NextFloat(-15f, 4f));
+                        int idx = Dust.NewDust(NPC.Center, 200, 200, DustID.GoldFlame,
+                            Main.rand.NextFloat(-17f, 17f), Main.rand.NextFloat(-18f, 6f),
+                            0, default, Main.rand.NextFloat(1.1f, 2.1f));
                         Main.dust[idx].noGravity = true;
                     }
                 }
@@ -2611,6 +2618,26 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                 // llegan por su propio sync desde el servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
+                    // v6.50.80 — …Y EL ESTALLIDO RADIANTE DE SU PROPIA
+                    // MUERTE: el ataque que el dios llevaba desde la
+                    // v6.50.53, en su versión definitiva — ESCALA 1.85
+                    // (un 45 % más grande que su máximo de combate), los 44
+                    // rayos, el anillo segmentado, la cruz anamórfica, 80
+                    // chispas y la luz que INUNDA el mundo… y PURA LUZ:
+                    // jamás daña (la victoria no se cobra con un golpe de
+                    // gracia a quemarropa — el aliento letal sigue siendo
+                    // LA BOLA FINAL de siempre). Nace de la AUTORIDAD y el
+                    // cable la lleva a TODAS las pantallas: el estallido
+                    // VIVE mientras el dios ya no está — así la explosión y
+                    // la desaparición son EL MISMO INSTANTE, en todas las
+                    // máquinas.
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                        NPC.Center, Vector2.Zero,
+                        ModContent.ProjectileType<AtaqueJefeProjectile>(),
+                        0, 0f, Main.myPlayer,
+                        AtaqueJefeProjectile.EstiloMuerteFinal,
+                        0f, NPC.whoAmI * 79 + 999);
+
                     // v6.50.56 — EL ÚLTIMO ALIENTO: LA BOLA FINAL (la letra:
                     // «creando una bola de energia similar al proyectil sol
                     // pero de color blanco dorado y con mucho brillo») — nace

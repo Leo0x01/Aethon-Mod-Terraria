@@ -101,6 +101,7 @@ namespace AethonMod.Content.Projectiles.Jefes
         public const int EstiloCoronaEterna = 22;   // v6.50.54 — LA CORONA ETERNA (Everlasting Rainbow — 14 plumas prismáticas espiralando)
         public const int EstiloBolaFinal = 23;     // v6.50.56 — LA BOLA FINAL (la muerte del dios: su ÚLTIMO aliento — una bola de energía como el proyectil sol pero BLANCO-DORADA y con MUCHO brillo)
         public const int EstiloSolJefe = 24;       // v6.50.57 — EL SOL DEL DIOS (el ataque especial: el jefe SE CONVIERTE en sol — la asunción cabalgándolo — y luego LO LANZA a la presa: la persigue LENTO, GRAVITA, CRECE hasta la GIGANTE ROJA (×6) y estalla en LUZ, BRUMA y FORMAS que hacen daño)
+        public const int EstiloMuerteFinal = 25;  // v6.50.80 — LA MUERTE DEL DIOS (la letra: «debe hacer una gran explosion de luz y desaparecer, asi es como debe ser su muerte»): el Estallido Radiante en SU versión final — la MISMA luz que el dios usaba como ataque, pero a ESCALA 1.85 (la más grande de toda la pelea) y PURA LUZ: jamás daña (la victoria no se cobra con un golpe de gracia barato a quemarropa)
 
         /// <summary>El estilo del diente (ai[0]).</summary>
         private int Estilo => (int)Projectile.ai[0];
@@ -114,7 +115,12 @@ namespace AethonMod.Content.Projectiles.Jefes
         //     ai[2]%9973 y la fase se lee ai[2]/8192; 0 si no vino) —
         //     «un poco más grande» con la ira del dios ===
         private int FaseEstallido => (int)(Projectile.ai[2] / 8192f);
-        private float EscalaEstallido => 1.15f + 0.06f * Math.Max(0, FaseEstallido - 1);
+        // v6.50.80 — LA ESCALA DE LA MUERTE: la última luz es LA MÁS GRANDE
+        //     de la pelea — 1.85 plano (el estallido de combate llega a 1.27
+        //     en fase 3: la muerte es un 45 % más grande que su máximo ataque).
+        private float EscalaEstallido => Estilo == EstiloMuerteFinal
+            ? 1.85f
+            : 1.15f + 0.06f * Math.Max(0, FaseEstallido - 1);
 
         // === EL ESTADO (por estilo) ===
         private float _edad;
@@ -340,6 +346,17 @@ namespace AethonMod.Content.Projectiles.Jefes
                     Projectile.timeLeft = 152;
                     break;
 
+                case EstiloMuerteFinal:
+                    // v6.50.80 — LA MUERTE DEL DIOS: mismo espectáculo (152 t
+                    // derritiéndose) pero PURA LUZ — hostil y daño a CERO
+                    // desde el nacimiento (la autocuración de la IA lo
+                    // mantiene así en TODAS las máquinas: el msg 27 no lleva
+                    // este OnSpawn).
+                    Projectile.timeLeft = 152;
+                    Projectile.hostile = false;
+                    Projectile.damage = 0;
+                    break;
+
                 case EstiloBolaFinal:
                     // v6.50.56 — LA BOLA FINAL: el último aliento del dios
                     // — 7 s de fuego blanco-dorado en LÍNEA RECTA hacia donde
@@ -553,6 +570,19 @@ namespace AethonMod.Content.Projectiles.Jefes
                 bool ventana = _edad <= 12f;
                 Projectile.hostile = ventana;
                 Projectile.damage = ventana ? Math.Max(1, (int)Projectile.ai[1]) : 0;
+            }
+
+            // v6.50.80 — LA MUERTE DEL DIOS: la autocuración de la casa para
+            // el estallido final — PURA LUZ SIEMPRE, en TODAS las máquinas
+            // (hostil NUNCA, daño NUNCA: el que mató al dios se lleva el
+            // espectáculo entero, no un golpe de gracia a quemarropa — el
+            // ÚLTIMO ALIENTO letal sigue siendo LA BOLA FINAL, su diseño de
+            // la v6.50.56).
+            if (Estilo == EstiloMuerteFinal)
+            {
+                Projectile.velocity = Vector2.Zero;
+                Projectile.hostile = false;
+                Projectile.damage = 0;
             }
 
             // v6.50.56 — LA BOLA FINAL: la autocuración de la casa (talla,
@@ -1326,39 +1356,53 @@ namespace AethonMod.Content.Projectiles.Jefes
                 //  360°, chispas y el destello que inunda)
                 // =============================================================
                 case EstiloEstallidoRadiante:
+                case EstiloMuerteFinal:
                 {
+                    // v6.50.80 — LA MUERTE comparte el cauce del ataque (el
+                    // estallido del dios muriendo ES su propio ataque, en su
+                    // versión más grande) — solo el NACIMIENTO cambia de
+                    // talla: más chispas, más fuerte, el estruendo final.
+                    bool esLaMuerte = Estilo == EstiloMuerteFinal;
+
                     // CLAVADO donde nació (estalló donde estaba el jefe) —
                     // la autocuración del inicio ya puso hostil/daño de la
                     // ventana de la ONDA (los primeros 12 t: el radio 600
-                    // TELEGRAFEADO por el aro de la carga).
+                    // TELEGRAFEADO por el aro de la carga). LA MUERTE no
+                    // tiene ventana: es pura luz, jamás daña.
                     Projectile.velocity = Vector2.Zero;
 
                     // LA LUZ QUE INUNDA EL MUNDO (el flash de la imagen: la
                     // escena entera queda BAÑADA en blanco-oro — 2,5 s de
                     // día dentro de la pelea) — VIVO, no el 0.5 plano del
                     // SetDefaults: la luz de un dios que se enciende (y que
-                    // CRECE con la fase — la escala de la .54).
+                    // CRECE con la fase — la escala de la .54; en la muerte,
+                    // la escala 1.85 la hace LA INUNDACIÓN definitiva).
                     float luzE = Math.Max(0f, 1f - _edad / 150f);
                     Lighting.AddLight(Projectile.Center,
                         new Vector3(2.4f, 2.1f, 1.5f) * luzE * EscalaEstallido);
 
                     // EL NACIMIENTO (t=1): el estampido + LAS CHISPAS QUE
                     // VUELAN (los streaks radiales de la imagen — cada
-                    // cliente ve las suyas: es polvo, pura decoración).
+                    // cliente ve las suyas: es polvo, pura decoración). EN
+                    // LA MUERTE: 80 chispas al doble de velocidad — la
+                    // despedida arrasa.
                     if (_edad <= 1f)
                     {
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122, Projectile.Center);
-                        OndaLib.Kick(13f, 26);
-                        for (int i = 0; i < 42; i++)
+                        OndaLib.Kick(esLaMuerte ? 20f : 13f, esLaMuerte ? 40 : 26);
+                        int rachas = esLaMuerte ? 80 : 42;
+                        for (int i = 0; i < rachas; i++)
                         {
-                            float ang = i * MathHelper.TwoPi / 42f +
+                            float ang = i * MathHelper.TwoPi / rachas +
                                 Main.rand.NextFloat(-0.06f, 0.06f);
-                            float v = Main.rand.NextFloat(6f, 17f);
+                            float v = esLaMuerte
+                                ? Main.rand.NextFloat(9f, 24f)
+                                : Main.rand.NextFloat(6f, 17f);
                             Dust d = Dust.NewDustPerfect(Projectile.Center,
                                 DustID.GoldFlame,
                                 new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * v);
                             d.noGravity = true;
-                            d.scale = Main.rand.NextFloat(1.1f, 1.9f);
+                            d.scale = Main.rand.NextFloat(1.1f, esLaMuerte ? 2.2f : 1.9f);
                         }
                     }
                     break;
@@ -1961,6 +2005,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 EstiloTelarJefe => new Vector3(0.26f, 0.26f, 0.44f),
                 EstiloDecretoJefe => Vector3.Zero,       // su caso pone la suya (el eclipse)
                 EstiloEstallidoRadiante => Vector3.Zero, // v6.50.53 — su caso pone la suya (el flash que inunda)
+                EstiloMuerteFinal => Vector3.Zero,        // v6.50.80 — su caso pone la suya (LA INUNDACIÓN de la muerte)
                 EstiloDanzaSolar => new Vector3(1.05f, 0.95f, 0.62f),   // v6.50.54 — la rueda alumbra
                 EstiloLanzaEterna => new Vector3(0.50f, 0.45f, 0.24f),  // v6.50.54 — el filo dorado
                 EstiloCoronaEterna => new Vector3(0.55f, 0.50f, 0.30f), // v6.50.54 — el prisma suave
@@ -2376,7 +2421,12 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     ANAMÓRFICA (el bloom que estira H y V — el
                     //     lens-flare del cine) ===
                     case EstiloEstallidoRadiante:
+                    case EstiloMuerteFinal:
                     {
+                        // v6.50.80 — LA MUERTE comparte TODO el dibujo del
+                        // estallido (los 44 rayos, el anillo segmentado, la
+                        // cruz anamórfica) — su escala 1.85 hace el resto.
+
                         // EL TEMPO: crece (0-14 t), ARDE (14-55) y se
                         // disuelve (55-150) — la rotación LENTA de la
                         // imagen (~0.5 RPM).
@@ -3150,6 +3200,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     //     expansiva y LAS BOKEH (los puntos de luz dispersos
                     //     de la imagen — deterministas, como todo lo demás) ===
                     case EstiloEstallidoRadiante:
+                    case EstiloMuerteFinal:
                     {
                         float crecS = Math.Min(1f, _edad / 16f);
                         float fadeS = _edad < 55f ? 1f :
