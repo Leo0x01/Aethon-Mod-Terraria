@@ -100,6 +100,12 @@ namespace AethonMod.Content.Systems
         // es del mundo y su cielo también). Un solo byte: ¿hay festín?
         // Con esto cada cliente viste SU cielo sin sondear al server.
         public const byte MsgAmbienteOleada = 12;
+        // v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA (server → TODOS: la hora
+        // es del mundo). El server giró Main.dayTime/time por el uso
+        // sincronizado y BROADCASTEA el nuevo cielo: {bool día, double
+        // tiempo, byte quiénLoGiró} — cada cliente aplica el reloj y siente
+        // el giro (aviso + lluvia de tinta) en su propia pantalla.
+        public const byte MsgCambiarHorario = 13;
 
         // ================================================================
         //  LA VOZ — al portador correcto y a NADIE más
@@ -434,6 +440,23 @@ namespace AethonMod.Content.Systems
                 if (tipo == MsgAmbienteOleada)
                 {
                     AmbienteOleadaSistema.Recibir(reader.ReadBoolean());
+                    return;
+                }
+
+                // v6.50.75 — EL GIRO DEL RELOJ: el broadcast del server
+                // con el cielo nuevo (llega a TODOS los clientes — la hora
+                // es del mundo). Cada quien aplica Main.dayTime/time y
+                // siente el giro: aviso del escriba + lluvia de tinta
+                // alrededor de quien giró el reloj. (El HOST no lo recibe
+                // por red: su mismo proceso ya giró y lo cantó en UseItem.)
+                if (tipo == MsgCambiarHorario)
+                {
+                    bool dia = reader.ReadBoolean();
+                    double tiempo = reader.ReadDouble();
+                    byte quien = reader.ReadByte();
+                    Main.dayTime = dia;
+                    Main.time = tiempo;
+                    Content.Items.RelojDeArenaDelEscriba.GiroLocal(dia, quien);
                     return;
                 }
 
@@ -772,6 +795,28 @@ namespace AethonMod.Content.Systems
                 p.Write(MsgPrepararOleadas);
                 p.Write((byte)System.Math.Max(1, System.Math.Min(oleadas, 11)));
                 p.Send();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// v6.50.75 — EL RELOJ GIRA (server → TODOS): el Reloj de Arena
+        /// del Escriba cambió la hora del mundo en el server (uso
+        /// sincronizado) y el cielo nuevo viaja a todos los clientes de
+        /// golpe — sin esperar al pulso de sincronización de vanilla.
+        /// Llamado desde RelojDeArenaDelEscriba.UseItem (rama server).
+        /// </summary>
+        public static void DifundirGiroReloj(bool dia, double tiempo, byte quien)
+        {
+            try
+            {
+                if (Main.netMode != NetmodeID.Server) return;
+                ModPacket p = AethonMod.Instance.GetPacket();
+                p.Write(MsgCambiarHorario);
+                p.Write(dia);
+                p.Write(tiempo);
+                p.Write(quien);
+                p.Send(); // broadcast: TODOS los clientes
             }
             catch { }
         }

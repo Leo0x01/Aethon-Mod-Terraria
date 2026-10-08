@@ -56,6 +56,12 @@ namespace AethonMod.Content.Items.Bolsas
             // oleadas del hambre (clic der prepara 1..10 oleadas, clic izq
             // desata la furia). Sin esperas: el festín a la carta.
             l.Add((ModContent.ItemType<Items.CarnadaDelGrimorio>(), 1));
+            // v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA: el probador del
+            // cielo («un clic y es de día, otro clic y es de noche») —
+            // para ver el ambiente de la oleada en sus dos caras (el
+            // eclipse morado de día / la luna carmesí de noche) sin
+            // esperar al atardecer real del mundo.
+            l.Add((ModContent.ItemType<Items.RelojDeArenaDelEscriba>(), 1));
             // v6.47 — LOS LLAMADOS (v6.50.61 — LA PURGA: solo queda el
             // llamado del FINAL — el grimorio mismo responde a su nombre).
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));

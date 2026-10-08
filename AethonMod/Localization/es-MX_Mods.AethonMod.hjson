@@ -78,6 +78,21 @@ Items: {
                         '''
         }
 
+        // v6.50.75 — EL RELOJ DE ARENA DEL ESCRIBA: un clic cambia el día
+        // por la noche y la noche por el día (la petición del usuario:
+        // «un clic y es de día, otro clic y es de noche»).
+
+        RelojDeArenaDelEscriba: {
+                DisplayName: El Reloj de Arena del Escriba
+                Tooltip:
+                        '''
+                        Un clic: si es de día, cae la noche; si es de noche, amanece.
+                        La arena es tinta: con ella el escriba escribió el alba y el ocaso.
+                        Funciona incluso a media oleada: el cielo del festín cruza suave.
+                        Objeto de pruebas — eliminar antes de publicar.
+                        '''
+        }
+
         // v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
         // weapons (test — the book is NOT touched). Pride's power (FMA:B).
         // v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
@@ -2101,6 +2116,11 @@ Tiles.AncientAltar.MapEntry: Altar Antiguo
 LevelUpTester: {
         Subida: ✦ {0} subió +{1} niveles (ahora nivel {2}).
         SinGrimorio: No se encontró un Grimorio del Eterno en el inventario.
+}
+
+RelojDeArena: {
+        AlAmanecer: ✦ El Reloj de Arena del Escriba se gira: la tinta reescribe el cielo y AMANECE.
+        AlAnochecer: ✦ El Reloj de Arena del Escriba se gira: la tinta derrama la noche y CAEN LAS SOMBRAS.
 }
 
 TestingPlayer: {

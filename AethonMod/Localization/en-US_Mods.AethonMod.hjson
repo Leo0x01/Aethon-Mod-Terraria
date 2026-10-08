@@ -73,6 +73,21 @@ Items: {
 			'''
 	}
 
+	// v6.50.75 — THE SCRIBE'S HOURGLASS: one click swaps day for night
+	// and night for day (the user's request: "one click and it's day,
+	// another click and it's night").
+	
+	RelojDeArenaDelEscriba: {
+		DisplayName: The Scribe's Hourglass
+		Tooltip:
+			'''
+			One click: if it's day, night falls; if it's night, dawn breaks.
+			The sand is ink: the scribe wrote dawn and dusk with it.
+			Works even mid-feast: the wave's sky crosses smoothly.
+			Testing item — remove before publishing.
+			'''
+	}
+
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
@@ -2095,6 +2110,11 @@ Tiles.AncientAltar.MapEntry: Ancient Altar
 LevelUpTester: {
 	Subida: ✦ {0} gained +{1} levels (now level {2}).
 	SinGrimorio: No Grimoire of the Eternal found in the inventory.
+}
+
+RelojDeArena: {
+	AlAmanecer: ✦ The Scribe's Hourglass turns: the ink rewrites the sky and DAWN BREAKS.
+	AlAnochecer: ✦ The Scribe's Hourglass turns: the ink spills the night and THE SHADOWS FALL.
 }
 
 TestingPlayer: {
