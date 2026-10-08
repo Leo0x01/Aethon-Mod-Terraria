@@ -1,7 +1,7 @@
 # AethonMod — Aethon, el Grimorio Eterno
 
 > **Mod de Terraria para tModLoader** · Repo oficial: <https://github.com/Leo0x01/Aethon-Mod-Terraria>
-> **Versión actual:** 6.50.78 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
+> **Versión actual:** 6.50.79 · **Target:** tModLoader 2026.08.3.0 (Terraria 1.4.4.9, .NET 8) · **Idioma:** TODAS las variantes de español caen en el es-MX (es-ES es un espejo GENERADO de es-MX — v6.50.71) + en-US
 
 ## Qué es (en 30 segundos)
 
@@ -17,7 +17,22 @@ guardianes que escalan por nivel y bioma), **las esencias** (devorarlas = +1 niv
 **~114 armas de prueba en 19 bolsas**. Los rayos son el puerto 1:1 del `LightningGenerator`
 de vanilla 1.4.5 (el sistema del clima y del arma Arc Surge).
 
-## ¿Dónde estamos? (actualizado para v6.50.78)
+## ¿Dónde estamos? (actualizado para v6.50.79)
+
+**NOVEDAD .79 — EL FIX DEL JEFE FANTASMA**: al matar a Aethon «explota
+pero no desaparece, sigue presente y comienza a caer bajo el mapa». Causa
+raíz (decompile): el aviso de eliminación de un NPC viaja por el cable
+SOLO mientras está activo — el `netUpdate` que el cine de muerte ponía
+DESPUÉS de apagar al jefe era CÓDIGO MUERTO, y en multijugador (el host de
+«Host & Play» incluido) los clientes se quedaban con una COPIA VIVA del
+dios corriendo su propia IA hasta caer bajo el mapa. La cura: la
+eliminación se difunde a mano (el patrón vanilla `SendData(SyncNPC)`), la
+muerte VIAJA por `ai[0]=99` (los clientes remotos ven la contracción y el
+estallido EN VIVO, con red de seguridad anti-fantasma), y el estallido
+final reparte visuales (todas las pantallas) de gameplay (solo el
+servidor: bola final, botín, manada). Mismo 23 explícito en el despawn y
+en los cazadores astrales. En un jugador la muerte se ve igual que
+siempre — ahora con el reloj del mundo soltándose al morir el dios.
 
 **NOVEDAD .78 — LA LUNA DE SANGRE + EL CROSSFADE + LA BRUMA DEL GRIMORIO**:
 el usuario confirmó que el fondo de las cuevas quedó ARREGLADO, y pidió tres

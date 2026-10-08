@@ -1,5 +1,68 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.79 — EL DIOS QUE NO SE DESPEDÍA (EL FIX DEL JEFE FANTASMA)
+
+**Feedback del usuario**: "algo que sucede al matar a Aethon es que una vez
+muere este explota pero no desaparece, sigue presente y comienza a caer bajo
+el mapa en vez de desaparecer a penas muere".
+
+**LA CAUSA RAÍZ (decompile tML 2026.08 — NPC.cs + NetMessage.cs + Main.cs
+verificados).** El aviso de sincronización de un NPC viaja por el cable
+SOLO mientras el NPC está activo: `NPC.UpdateNPC` arranca con
+`if (!active) return;`, así que el `NPC.netUpdate = true` que el
+`CineMuerte` ponía DESPUÉS de `NPC.active = false` era **CÓDIGO MUERTO** —
+el mensaje 23 (SyncNPC) JAMÁS salía. En SP nada se notaba (active=false →
+ni update ni render: el dios muere limpio). Pero en MULTIJUGADOR (el host
+de «Host & Play» incluido — su pantalla ES un cliente del servidor interno)
+los clientes NUNCA se enteraban: se quedaban con una COPIA VIVA del dios
+corriendo su PROPIA IA de combate sin correcciones del servidor — atacando,
+atravesando el mundo en sus patrones (círculos del telar, picados del
+destello), hasta CAER BAJO EL MAPA. La MISMA enfermedad que
+GrimorioFuriaSistema documentó y curó en la v6.50.1 («sin el 23 explícito,
+los clientes conservaban un jefe congelado/invulnerable») — pero jamás
+aplicada al CINE DE MUERTE del jefe final (ni a CazadorAstral: los cazadores
+fantasma tenían la misma fuga).
+
+**(1) LA DESPEDIDA DE VERDAD.** El apagado del cine difunde el SyncNPC A
+MANO tras `active = false` (el patrón vanilla del decompile:
+`NetMessage.SendData(MessageID.SyncNPC)` — y NetMessage confirma que el msg
+23 de un slot INACTIVO viaja a TODOS los clientes: «boss || netAlways ||
+townNPC || !active → broadcast»). El MISMO 23 explícito en el DESPAWN sin
+presa, en `DisolverManada` (por cada cazador) y en los DOS apagados de
+CazadorAstral (despawn y MorirEnPolvo).
+
+**(2) LA MUERTE VIAJA.** El cine escribe `ai[0]=99` (EST_MURIENDO) y
+`ai[1]=tickMuerte` CADA TICK (netUpdate cada 6 t en servidor); CheckDead
+los planta desde el primer tick. El cliente ADOPTA la agonía en AI
+(`ai[0]==99 → _muriendo`): los remotos corren SU cine (contracción +
+estallido EN VIVO) en vez de pelear contra nadie. RED DE SEGURIDAD: si un
+cliente pasa de 200 t agonizando (el estallido es a los 120 — 80 de
+margen) se apaga SOLO: jamás otro fantasma.
+
+**(3) EL ESTALLIDO REPARTIDO.** Visuales (temblor OndaLib, truenos
+Item74+NPCDeath55, 90 polvos dorados) en TODAS las máquinas; gameplay (LA
+BOLA FINAL, DropBotin, DisolverManada) SOLO en la autoridad — el cliente ya
+no intenta dropear botín fantasma local.
+
+**BONUS LATERAL.** El reloj del sistema de llegada lee `ai[0]==99` — antes
+el cine nunca actualizaba ai[0] (retorno temprano) y el mediodía eterno
+seguía CLAVADO durante los 2 s de la agonía; ahora suelta el reloj CUANDO
+el dios muere.
+
+**EL 5º INCIDENTE DEL ESPEJO es-ES** (cazado ENTRE el build y el commit —
+el PAQUETE .79 llevaba el espejo bueno, auditado [4] True): cura del blob
+inmutable aplicada de nuevo (checkout + hash-object + update-index +
+verificación del blob de HEAD).
+
+**VERIFICACIÓN.** Build real 0/0 · .tmod 2.565.144 B md5
+`7ccfc1b4bc2649fef0bd28cd526259fb` · 380 entradas · EOF exacto ·
+**DECOMPILE DEL PAQUETE: 10/10 checks del fix** (despedida, adopción, red
+de seguridad, reparto autoridad/visuales, manada y cazadores) · 27/27
+símbolos persistentes vivos · 15/15 muertos ausentes · es-ES == es-MX byte
+a byte EN EL PAQUETE · fix zombis .77 presente · headless mundo nuevo
+Aethon79 puerto 7787: «Sandboxing: Aethon, the Eternal Grimoire v6.50.79 →
+Server started», 0 EXCEPCIONES.
+
 ## Commit v6.50.78 — LA LUNA DE SANGRE + EL CROSSFADE + LA BRUMA DEL GRIMORIO
 
 **Feedback del usuario**: "con respecto al evento de oleadas, la luna no es
