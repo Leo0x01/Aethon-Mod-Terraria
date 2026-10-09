@@ -1,15 +1,7 @@
-# AethonMod — ESTADO ACTUAL (v6.50.85)
+# AethonMod — ESTADO ACTUAL (v6.50.86)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.85 (LA BASE LIMPIA + EL
-> ROJO SOLO EN EL IRIS: «cuando recortas el iris toda la esclerotica
-> queda con el agujero del iris en ves de estar completamente blanco
-> como el resto de la esclerotica, aunque no es con el agujero es mas
-> bien con una sombra del irirs… lo que se pone rojo es solo el iris,
-> el libro se debe quedar de color normal… cuando remuevas el iris has
-> que los pixeles donde estaba el iris tomen el color de la
-> esclerotica» — con sprite libro v3 - sin iris + codigo sin iris.txt.
-> DOBLE CURA: (1) LA BASE — la .82 rellenaba el socket con RUIDO
+> Última actualización: v6.50.86 (LOS PÁRPADOS PUROS DE CÓDIGO + las copias RÚNICA y ESTELAR) LA BASE — la .82 rellenaba el socket con RUIDO
 > GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
 > vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
 > MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
@@ -1911,6 +1903,40 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ PUBLICAR v6.50.86 — HECHO** — el usuario pidió los PÁRPADOS
+   PUROS de código («el codigo puro da mejor calidad ya que al ser codigo
+   puedes recrear los pixeles fielmente») + UNA COPIA con la animación del
+   autor + OTRA con las estrellas de la tapa y las venas de luz morada
+   animadas. Entregado TODO: (a) los párpados = LANCZOS puro de la MISMA
+   corrida que la base (|Δ|=0,0000 y 0 px distintos fuera del ojo — el GIF
+   RETIRADO del pipeline; continuidad |Δ|=0,05 medida EN EL PAQUETE);
+   (b) EstadoGrimorio POR CLASE (las tres copias pasan hambre por
+   separado); (c) EL RÚNICO — 3 runas doradas orbitando el ojo + aura que
+   respira morado→rojo, órbita 5,2→2,6 s con el hambre; (d) EL ESTELAR —
+   las estrellas de la tapa (cruces doradas + signos + morados sobre la
+   tapa negra, calibrado con QA VLM) titilando en 3 grupos desfasados y
+   las venas moradas pulsando en 4 bandas radiales (la ola NACE en el ojo,
+   3,4→1,7 s con el hambre; máscaras de píxeles del arte + halo, 0 px
+   invade el viaje del iris); (e) la Bolsa del Probador entrega los TRES
+   (CECIL IL_00F2/IL_0103/IL_0114). .tmod 2.608.476 B md5
+   07af7bad8cdf4fa6342f9e13a0220a57 (397 entradas, EOF exacto, Iris/IrisRojo
+   byte-idénticos a .85, CECIL completo, espejo es-ES==es-MX, headless
+   Server started 7792 0 excepciones, VLM QA aprobado). PUBLICADO: release
+   407742907 + asset 624455614 2.608.476 B, CDN verificado byte a byte,
+   /releases/latest = v6.50.86. EL 13º INCIDENTE DEL ESPEJO cayó antes del
+   commit (es-ES revertido al pre-espejo tras el build; cura sync + commit
+   atómico).
+
+1b. **El usuario prueba v6.50.86 en juego** — LA COMPARACIÓN DE LAS TRES
+   COPIAS: (a) el PARPADEO con calidad IDÉNTICA al ojo abierto (sin el
+   salto del GIF — el libro es el mismo píxel a píxel); (b) el RÚNICO:
+   runas doradas orbitando + aura respirando, acelerando con el hambre;
+   (c) el ESTELAR: estrellas titilando + venas moradas con la luz naciendo
+   del ojo y viajando por el libro; (d) cada libro con SU PROPIA barra de
+   hambre (clic derecho reinicia cada uno). Los checklists previos siguen
+   vigentes (.85 el socket blanco + el rojo solo en el iris; .84 los tres
+   estados del ojo; .81 la Gran Explosión).
+
 1. **✅ PUBLICAR v6.50.85 — HECHO** — el usuario reportó la SOMBRA del
    iris en la esclerótica y el libro tiñéndose de rojo; regaló su
    propia limpieza (sprite sin iris + código). Base = el sprite sin
@@ -2043,6 +2069,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.86** | ✅ Build-verificada (build real 0/0, .tmod 2.608.476 B md5 07af7bad8cdf4fa6342f9e13a0220a57, 397 entradas — 385+12 texturas nuevas exactas, EOF exacto, SOLO cambian Medio/Cerrado + 3 hjson + dll/pdb/Info, base/Iris/IrisRojo BYTE-IDÉNTICOS a .85, **CONTINUIDAD DEL PARPADEO EN EL PAQUETE** (|Δ|=0,05 fuera del ojo al parpadear — el GIF retirado, párpados LANCZOS puro de la MISMA corrida), las copias base == base byte a byte, 3 grupos de estrellas equilibrados (50/47/47) y 4 bandas de venas (50/61/59/51) con 0 px invadiendo el viaje del iris, venas MORADAS RGB (206,71,226), CECIL v65086 completo (herencia + get_Estado por clase + ModifyItemDraw de las copias + entrega ×3 en IL_00F2/IL_0103/IL_0114), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7792 «Sandboxing v6.50.86 → Adding Recipes → Creating world → Listening → Server started» 0 excepciones, QA VLM: libro idéntico base/medio/cerrado sin costuras + estrellas titilando + venas en ola viajera + 3 runas doradas orbitando), ✔ PUBLICADA (release 407742907 + asset 624455614 2.608.476 B, CDN verificado byte a byte md5 07af7bad8cdf4fa6342f9e13a0220a57, /releases/latest = v6.50.86), ⏳ en juego | LA LETRA: «al usar el gif para abrir y cerrar el ojo hace que se note el cambio en cuanto a calidad, el codigo puro da mejor calidad ya que al ser codigo puedes recrear los pixeles fielmente, asi que te dare el codigo del ojo entrecerrado y cerrado… haz una copia del grimorio pero con alguna animacion que creas que sea correcta, luego has otra copida pero en esta tercera copia quiero que animes las estrellas que tiene el grimorio en la tapa y animes las venas de luz morada que recorren el libro» + los 4 códigos v3 |
 | **v6.50.85** | ✅ Build-verificada (build real 0/0, .tmod 2.589.707 B md5 dcbac74a8455a33fcf8851817b948fd5, 385 entradas — SET = .84 MENOS exactamente Rojo_Medio/Rojo_Cerrado; SOLO cambian base/Medio/Cerrado, Iris/IrisRojo byte-idénticos a .84, EOF exacto, **BLANCURA DEL SOCKET VERIFICADA EN EL PAQUETE** (rawimg decodificado: luminancia 176→233 en r<3 del ojo, 0 píxeles oscuros — la sombra gaussiana de la .82, muerta), **la DLL ya NO menciona Rojo_Medio/Rojo_Cerrado** (literales UTF-16 ausentes) y mantiene IrisRojo, constantes OJO nuevas en el IL (19.09f/22.45f presentes, 19.27f/22.70f ausentes — recentrado al iris del ARTE), CECIL de punta a punta (entrega IL_00F2 + ModifyItemDraw + PostDrawInWorld(Item.Bottom) + IRIS_ESC), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7791 «Sandboxing v6.50.85 → Server started» 0 excepciones, QA VLM: esclerótica blanca + iris circular + SOLO el iris rojo + sin costuras), ✔ PUBLICADA (release 407657845 + asset 624257189 2.589.707 B, CDN verificado byte a byte md5 dcbac74a8455a33fcf8851817b948fd5, /releases/latest = v6.50.85), ⏳ en juego | LA LETRA: «cuando recortas el iris toda la esclerotica queda con el agujero del iris en ves de estar completamente blanco como el resto de la esclerotica, aunque no es con el agujero es mas bien con una sombra del irirs, pero hay algo mas, lo que se pone rojo es solo el iris, el libro se debe quedar de color normal… cuando remuevas el iris has que los pixeles donde estaba el iris tomen el color de la esclerotica» + sprite libro v3 - sin iris.png + codigo sin iris.txt |
 | **v6.50.84** | ✅ Build-verificada (build real 0/0, .tmod 2.597.781 B md5 4bfd5395aae89c9e55faf51a228a47b7, 387 entradas — SET idéntico al de la .83 y SOLO cambian las 2 capas del iris (base, párpados, hjson y demás byte-idénticos), EOF exacto, **CIRCULARIDAD VERIFICADA EN EL PAQUETE** (decodificación del rawimg tML — cabecera 12 B + RGBA crudo: 32×32, esquinas α=0, pluma α media 208 en anillo r13-16, pupila oscura (5,1,10), disco DORADO (252,211,130)/ROJO (252,133,142)), **CECIL: el iris cableado en INVENTARIO + MUNDO + MANO verificado en el IL de la DLL del paquete** (entrega intacta ItemType<GrimorioHambriento> en IL_00F2; ModifyItemDraw presente que agrega a DrawDataCache y retorna false; PostDrawInWorld llama Item.Bottom + GetItemDrawFrame — la convención vanilla; constante IRIS_ESC en el tipo), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (sin cambios — heredado de la .83), «ladrones»/«bandits» ausentes, headless mundo nuevo Aethon84 puerto 7790 «Sandboxing: Aethon, the Eternal Grimoire v6.50.84 → Adding Recipes → Server started» 0 excepciones, QA de visión VLM del preview: círculo limpio sin esquinas + disco concéntrico + rojo coherente + sin artefactos), ✔ PUBLICADA (release 407461384 + asset 623750338 2.597.781 B, CDN verificado byte a byte md5 4bfd5395aae89c9e55faf51a228a47b7, /releases/latest = v6.50.84), ⏳ en juego | LA LETRA: «cuando el item esta en el mundo no se ve bien el ojo, pero cuando el item esta en el inventario si se ve bien y el movimiento es definido, pero cuando esta en la mano se ve mal al igual que cuando esta en el mundo suelto… te dare el mismo sprite y te lo dare en codigo para que uses la tecnica y puedas recortar bien el ojo, ya que lo recortaste en un cuadrado en ves de un circulo» (+ codigo 2.txt: el sprite EXACTO 706×967 en RLE base64 [count,R,G,B,A], 682.702 px sin pérdida). DIAGNÓSTICO TRIPLE: (1) el iris .82/.83 era un recorte CUADRADO 166×166 (las esquinas arrastraban esclera y fragmentos del anillo dorado — el borde se leía cuadrado); (2) PostDrawInWorld usaba Item.position como esquina — la convención vanilla (decompile de Main.DrawItem con ilspycmd 8.2) es CENTRADO en el hitbox y ASENTADO EN EL FONDO: pivote = Item.Bottom − (0, altoFrame/2) con origen en el centro del frame y rotación item.velocity.X·0,2 → el ojo caía (+3,+7) px fuera del socket en el mundo; (3) el libro EN MANO se dibuja en DrawPlayer_27_HeldItem (proceso del JUGADOR) donde NO corren los hooks de ítem → socket VACÍO. LA CURA: (1) tools/gen_iris_circular_v65084.py decodifica el RLE del usuario → ajuste de círculo por mínimos cuadrados del borde dorado→esclera en 24 direcciones (centro (374.3,443.1), R=84, residuo 3,8) → máscara circular con pluma 5 px → DISCO 32×32 (4× supermuestreo, IRIS_ESC=0.2773 mapea la caja 174 px → 8,87 px de juego) — VLM QA del preview aprobado; (2) PostDrawInWorld reescrito con la convención vanilla (el párpado replica el draw del libro píxel sobre píxel; el iris GIRA con el libro al volar); (3) ModifyItemDraw (el hook tML del held item): agrega la DrawData vanilla él mismo (return false) y monta el párpado/iris con la MISMA transform — incluido el espejo itemEffect (el desplazamiento del iris se NIEGA bajo FlipHorizontally para que siga mirando al cursor mirando a la izquierda; FlipVertically para gravedad invertida) y _posOjoPantalla se alimenta en mano. NOTA de uso: el libro solo aparece en mano DURANTE el uso (useStyle HoldUp sin holdStyle — comportamiento vanilla: los ítems sin holdStyle no se ven al caminar); el ojo anima igual (UpdateInventory corre con el ítem en la hotbar). LECCIONES: rawimg tML = 12 B (versión,w,h) + RGBA crudo (audit píxel a píxel sin PIL); ModifyItemDraw return false = control del orden de capas; el sprite en código del usuario es la fuente autoritativa (GIF/v3 difieren ~10/canal por cuantización). |
 | **v6.50.83** | ✅ Build-verificada (build real 0/0 ×2, .tmod 2.593.374 B md5 d512c78c9f466a58c695dfc5a69ed84b, 387 entradas (SET idéntico al de la .82 — rawimg byte-idénticos, hjson por cuerpos, Info/pdb en whitelist como metadatos de build), EOF exacto, 7/7 texturas del Grimorio Hambriento infladas, **CECIL: la entrega verificada EN EL IL DE LA DLL DEL PAQUETE** (BolsaProbador.Contenido llama ItemType<GrimorioHambriento> en IL_00F2, 14 ItemType<T> en total; OnEnterWorld→BolsaProbador intacta — cableado de punta a punta), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless «Sandboxing v6.50.83 → Server started» 0 excepciones), ✅ PUBLICADA (release 407420766 + asset 623580888 2.593.374 B, CDN verificado byte a byte, /releases/latest = v6.50.83), ⏳ en juego | LA LETRA: «recuerda que debes darle el arma al jugador» — la .82 nació con receta de 5 madera pero SIN entrega al kit (la lección .63 otra vez). CURA: BolsaProbador.Contenido incluye ItemType<GrimorioHambriento>() junto a su padre el Códice Vivo (la .71 lo puso «completamente a parte de las demás»; su hijo demo hereda el lugar) — al entrar al mundo el kit entrega la Bolsa del Probador y el arma viene dentro; la bolsa da SOLO lo que falte. NUEVO ESLABÓN: CECIL (tools/cecil_check, Mono.Cecil de las libs del tML) verifica cableados EN EL IL DEL PAQUETE — reutilizable. EL 9º INCIDENTE DEL ESPEJO: el COMMIT de la .82 (3eba7a5) capturó la variante REVERTIDA (tabs, sin cabecera, 81.359 B) mientras el .tmod .82 publicado lleva el espejo correcto (111.265 B) — el sandbox golpeó entre el build auditado y el git add; la .83 construyó el fuente malo y la sección 3 de la auditoría (diff de blobs contra la .82) lo cazó; cura sync_es_es_v65083.py con cabecera canónica EXPLÍCITA (el .82 heredaba la cabecera del archivo actual, que podía no tenerla). EL 10º: el sandbox revirtió OTRA VEZ entre el sync+build+audit y el git add de la .83 — la verificación POST-COMMIT del BLOB lo delató; cura = ciclo atómico regenerar→verificar→estagear→amendar con ventana ~1 s. |

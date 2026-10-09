@@ -1,5 +1,68 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.86 — LOS PÁRPADOS PUROS DE CÓDIGO + LAS DOS COPIAS ANIMADAS
+
+**Petición del usuario**: "al usar el gif para abrir y cerrar el ojo
+hace que se note el cambio en cuanto a calidad, el codigo puro da mejor
+calidad ya que al ser codigo puedes recrear los pixeles fielmente, asi
+que te dare el codigo del ojo entrecerrado y cerrado… te pido que hagas
+una copia del grimorio pero con alguna animacion que creas que sea
+correcta, luego has otra copia pero en esta tercera copia quiero que
+animes las estrellas que tiene el grimorio en la tapa y animes las
+venas de luz morada que recorren el libro" — con los 4 códigos del
+sprite v3 (el completo, el sin iris, el ojo medio cerrado y el cerrado:
+RLE base64 706×967 sin pérdida).
+
+**Cinco piezas**:
+1. **LOS PÁRPADOS PUROS DE CÓDIGO**: los códigos del ojo medio cerrado
+   y del cerrado son la MISMA corrida de arte que la base sin iris
+   (verificado: |Δ|=0,0000 y 0 píxeles distintos fuera del ojo, byte a
+   byte). Los párpados son ahora LANCZOS puro de la MISMA fuente — el
+   GIF queda RETIRADO del pipeline (la .85 compostaba su zona con pluma
+   gaussiana: esa costura era el salto de calidad). Continuidad medida
+   EN EL PAQUETE: |Δ|=0,05 fuera del ojo al parpadear.
+2. **EL ESTADO POR CLASE (EstadoGrimorio)**: las statics de la .82
+   compartían el ciclo de hambre entre copias; ahora cada grimorio
+   declara su static propia expuesta vía la virtual `Estado` — las tres
+   copias pasan hambre POR SEPARADO.
+3. **LA COPIA RÚNICA** (`GrimorioHambrientoRunico` — la animación del
+   autor): 3 runas doradas procedurales 11×11 (sigilo diamante, ojo
+   menor, chispa) orbitan el ojo en elipse 11,5×8 (por fuera del anillo
+   dorado), se atenúan al pasar por detrás (profundidad) y pulsan cada
+   una con su fase; debajo, un AURA que RESPIRA (×1,05, morado→rojo con
+   el hambre, BAJO el iris — el ojo jamás se entinta); la órbita acelera
+   5,2 s→2,6 s con el hambre. En inventario/mundo/mano.
+4. **LA COPIA ESTELAR** (`GrimorioHambrientoEstelar`): LAS ESTRELLAS de
+   la tapa — las de verdad (cruces doradas + signos + morados sobre la
+   tapa NEGRA; el criterio exige fondo local oscuro — los remaches del
+   anillo r~210 y los brillos del marco dorado quedan FUERA, calibrado
+   con QA VLM) titilan en 3 grupos desfasados 120° (brillo base 14 % →
+   92 %, onda² — un cielo que respira); LAS VENAS DE LUZ MORADA — 4
+   bandas por distancia radial al OJO, la onda NACE en el ojo y VIAJA
+   hacia afuera (3,4 s→1,7 s con el hambre); las máscaras llevan los
+   PÍXELES DEL ARTE ×1,6-1,8 + halo y 0 px invade el viaje del iris.
+5. **LA ENTREGA**: BolsaProbador.Contenido suma las dos copias (16
+   ItemType<T> en total, CECIL: IL_00F2/IL_0103/IL_0114); receta de 5
+   madera HEREDADA; hjson ×3 idiomas (es-MX fuente + en-US + espejo).
+
+**Verificación**: oráculo 0 errores · build real 0/0 · .tmod 2.608.476 B
+md5 07af7bad8cdf4fa6342f9e13a0220a57: 397 entradas (385+12 exactas), EOF
+exacto, SOLO cambian Medio/Cerrado + 3 hjson + dll/pdb/Info (whitelist) —
+base/Iris/IrisRojo BYTE-IDÉNTICOS a .85, CONTINUIDAD DEL PARPADEO en el
+paquete, las copias base == base byte a byte, 3 grupos de estrellas
+equilibrados (50/47/47) y 4 bandas de venas (50/61/59/51), venas MORADAS
+RGB (206,71,226), CECIL v65086 completo (herencia + get_Estado por clase
++ ModifyItemDraw de las copias + entrega ×3), espejo es-ES==es-MX byte a
+byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless «Sandboxing
+v6.50.86 → Adding Recipes → Creating world → Listening 7792 → Server
+started» 0 EXCEPCIONES, VLM QA del preview 6× APROBADO.
+
+**El 13º incidente del espejo** (cazado ANTES del commit): el árbol
+amanece con el es-ES REVERTIDO al pre-espejo (82.581 B sin cabecera)
+DESPUÉS del build auditado — el paquete llevaba el espejo bueno; cura
+sync + verificación de cuerpo + commit atómico en un solo comando.
+
+---
 ## Commit v6.50.85 — LA BASE LIMPIA + EL ROJO SOLO EN EL IRIS
 
 **Petición del usuario**: "cuando recortas el iris toda la esclerotica
