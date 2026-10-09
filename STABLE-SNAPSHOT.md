@@ -1,49 +1,29 @@
-# AethonMod — ESTADO ACTUAL (v6.50.84)
+# AethonMod — ESTADO ACTUAL (v6.50.85)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.84 (EL IRIS CIRCULAR + EL
-> OJO EN TODAS PARTES: «cuando el item esta en el mundo no se ve bien el
-> ojo, pero cuando el item esta en el inventario si se ve bien… cuando
-> esta en la mano se ve mal… te dare el mismo sprite y te lo dare en
-> codigo para que uses la tecnica y puedas recortar bien el ojo, ya que
-> lo recortaste en un cuadrado en ves de un circulo» — TRIPLE CURA:
-> (1) el iris ahora es un DISCO 32×32 recortado CIRCULARMENTE del sprite
-> EXACTO en código del usuario (codigo 2.txt — RLE de 682.702 px), con
-> centro ajustado por mínimos cuadrados (374.3,443.1) R=84 y pluma de
-> borde; (2) EN EL MUNDO la convención vanilla (decompile de
-> Main.DrawItem): pivote = Item.Bottom − (0, altoFrame/2), rotación
-> velocity.X·0,2 — la .83 caía (+3,+7) px fuera del socket; (3) EN LA
-> MANO ModifyItemDraw monta las capas sobre la DrawData final del libro
-> sostenido (el hook del held item — ahí no corrían los hooks de ítem y
-> el ojo quedaba VACÍO), con el espejo de mirar a la izquierda aplicado
-> AL DESPLAZAMIENTO para seguir mirando al cursor; compilada 0/0,
-> circularidad verificada EN EL PAQUETE (rawimg: esquinas α=0, pluma
-> α=208, pupila (5,1,10), oro (252,211,130)/rojo (252,133,142)), CECIL
-> de punta a punta (entrega IL_00F2 + ModifyItemDraw + Item.Bottom +
-> IRIS_ESC), headless Server started 0 excepciones. La espera anterior:
-> v6.50.83 (LA ENTREGA: el Grimorio
-> Hambriento llega dentro de la Bolsa del Probador — la .82 lo dejó
-> con receta pero sin kit, la lección .63 otra vez. La entrega quedó
-> verificada por CECIL en el IL de la DLL del paquete (IL_00F2). La
-> espera anterior: v6.50.82 (EL GRIMORIO HAMBRIENTO:
-> el ojo del Códice Vivo te mira, parpadea y se enciende de rojo en un
-> ciclo de hambre de 60 s — la espera anterior: EL ESTALLIDO ES EL ADIÓS:
-> «el sol explota, pero se sigue disparando una bola de luz hacia
-> algun lado, esa bola de luz dura varios segundos antes de
-> desaparecer» — LA BOLA FINAL de la v6.50.56 RETIRADA del cine de
-> muerte: el t120 tiene UN ÚNICO disparo (el Estallido de la Muerte,
-> escala 1.85, pura luz) y el estilo 23 demolido en sus 8 sitios
-> (constante, OnSpawn, autocuración, IA, luz, 2 renders) — el número
-> retirado como los de camiseta; la muerte del dios es UN SOLO ACTO:
-> gran explosión de luz y desaparecer, el cielo queda LIMPIO;
-> compilada 0/0, decompile del paquete 8/8 + 9/9 regresión .80 + 10/10
-> contrato .79, headless Server started 0 excepciones — PUBLICADA:
-> release 406422543, CDN verificado byte a byte md5
-> ba861546015c074a2f62c545f7fb1f5d).
-> Reglas vivas: es-ES es
-> ESPEJO GENERADO de es-MX (editar SOLO es-MX + tools/sync_es_es_v65077.py)
-> y la Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
-## 🏷️ CANAL ESTABLE — v6.50.81 (marcada por el usuario)
+> Última actualización: v6.50.85 (LA BASE LIMPIA + EL
+> ROJO SOLO EN EL IRIS: «cuando recortas el iris toda la esclerotica
+> queda con el agujero del iris en ves de estar completamente blanco
+> como el resto de la esclerotica, aunque no es con el agujero es mas
+> bien con una sombra del irirs… lo que se pone rojo es solo el iris,
+> el libro se debe quedar de color normal… cuando remuevas el iris has
+> que los pixeles donde estaba el iris tomen el color de la
+> esclerotica» — con sprite libro v3 - sin iris + codigo sin iris.txt.
+> DOBLE CURA: (1) LA BASE — la .82 rellenaba el socket con RUIDO
+> GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
+> vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
+> MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
+> |Δ|=0,009), socket blanco 247,235,220 σ5, luminancia 176→233 con 0
+> píxeles oscuros (verificado EN EL PAQUETE); OJO recentrado al iris
+> del ARTE (19.09, 22.45). (2) EL ROJO — SOLO la capa IrisRojo (hue
+> −45°, byte-idéntica a la .84): Rojo_Medio/Rojo_Cerrado ELIMINADAS —
+> el libro (párpados incluidos) queda SIEMPRE a color normal. Además:
+> LOS PÁRPADOS COMPUESTOS — la zona animada del GIF pegada sobre la
+> base limpia con pluma gaussiana (el cuerpo del libro no titila entre
+> corridas al parpadear, |Δ|=0,04 fuera de la zona). .tmod 2.589.707 B
+> md5 dcbac74a8455a33fcf8851817b948fd5, 385 entradas, auditoría TODO
+> OK, headless 0 excepciones, VLM QA aprobado. EL 12º INCIDENTE DEL
+> ESPEJO cayó antes del commit — cura sync + blob == HEAD.)
 
 > «la .81 es una version muy estable» — la palabra del usuario. La .81 es
 > EL ESTALLIDO ES EL ADIÓS: LA BOLA FINAL retirada del cine de muerte del
@@ -1931,6 +1911,29 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ PUBLICAR v6.50.85 — HECHO** — el usuario reportó la SOMBRA del
+   iris en la esclerótica y el libro tiñéndose de rojo; regaló su
+   propia limpieza (sprite sin iris + código). Base = el sprite sin
+   iris EXACTO (misma corrida que codigo 2.txt — byte-idénticos fuera
+   del ojo); rojo SOLO en la capa IrisRojo (byte-idéntica a la .84);
+   párpados compuestos (zona del GIF + pluma sobre la base limpia).
+   .tmod 2.589.707 B md5 dcbac74a8455a33fcf8851817b948fd5, auditoría
+   TODO OK (blancura del socket EN EL PAQUETE: luminancia 176→233, 0
+   píxeles oscuros; la DLL sin Rojo_Medio/Rojo_Cerrado; constantes OJO
+   nuevas en el IL). PUBLICADA: release 407657845 + asset 624257189
+   (2.589.707 B, CDN verificado byte a byte, /releases/latest =
+   v6.50.85). EL 12º INCIDENTE DEL ESPEJO cayó antes del commit (el
+   es-ES revertido tras el build — el paquete llevaba el espejo
+   bueno); cura sync + blob verificado == HEAD.
+
+1b. **El usuario prueba v6.50.85 en juego** — el socket BLANCO y el
+   rojo SOLO en el iris: (a) MUNDO/MANO: el libro suelto o en uso
+   muestra la esclerótica COMPLETAMENTE BLANCA (sin la sombra gris
+   donde estaba el iris); (b) el ciclo del minuto: con TIENE HAMBRE el
+   IRIS se enciende rojo pero el libro y su anillo dorado quedan a
+   color NORMAL (también al parpadear); (c) el parpadeo sin titilar
+   (los párpados compuestos sobre la base limpia).
+
 1. **✅ PUBLICAR v6.50.84 — HECHO** — el usuario reportó el ojo feo en
    mundo/mano y regaló el sprite exacto en código (codigo 2.txt): iris
    CIRCULAR 32×32 + fix de la convención vanilla en el mundo
@@ -2040,6 +2043,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.85** | ✅ Build-verificada (build real 0/0, .tmod 2.589.707 B md5 dcbac74a8455a33fcf8851817b948fd5, 385 entradas — SET = .84 MENOS exactamente Rojo_Medio/Rojo_Cerrado; SOLO cambian base/Medio/Cerrado, Iris/IrisRojo byte-idénticos a .84, EOF exacto, **BLANCURA DEL SOCKET VERIFICADA EN EL PAQUETE** (rawimg decodificado: luminancia 176→233 en r<3 del ojo, 0 píxeles oscuros — la sombra gaussiana de la .82, muerta), **la DLL ya NO menciona Rojo_Medio/Rojo_Cerrado** (literales UTF-16 ausentes) y mantiene IrisRojo, constantes OJO nuevas en el IL (19.09f/22.45f presentes, 19.27f/22.70f ausentes — recentrado al iris del ARTE), CECIL de punta a punta (entrega IL_00F2 + ModifyItemDraw + PostDrawInWorld(Item.Bottom) + IRIS_ESC), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7791 «Sandboxing v6.50.85 → Server started» 0 excepciones, QA VLM: esclerótica blanca + iris circular + SOLO el iris rojo + sin costuras), ✔ PUBLICADA (release 407657845 + asset 624257189 2.589.707 B, CDN verificado byte a byte md5 dcbac74a8455a33fcf8851817b948fd5, /releases/latest = v6.50.85), ⏳ en juego | LA LETRA: «cuando recortas el iris toda la esclerotica queda con el agujero del iris en ves de estar completamente blanco como el resto de la esclerotica, aunque no es con el agujero es mas bien con una sombra del irirs, pero hay algo mas, lo que se pone rojo es solo el iris, el libro se debe quedar de color normal… cuando remuevas el iris has que los pixeles donde estaba el iris tomen el color de la esclerotica» + sprite libro v3 - sin iris.png + codigo sin iris.txt |
 | **v6.50.84** | ✅ Build-verificada (build real 0/0, .tmod 2.597.781 B md5 4bfd5395aae89c9e55faf51a228a47b7, 387 entradas — SET idéntico al de la .83 y SOLO cambian las 2 capas del iris (base, párpados, hjson y demás byte-idénticos), EOF exacto, **CIRCULARIDAD VERIFICADA EN EL PAQUETE** (decodificación del rawimg tML — cabecera 12 B + RGBA crudo: 32×32, esquinas α=0, pluma α media 208 en anillo r13-16, pupila oscura (5,1,10), disco DORADO (252,211,130)/ROJO (252,133,142)), **CECIL: el iris cableado en INVENTARIO + MUNDO + MANO verificado en el IL de la DLL del paquete** (entrega intacta ItemType<GrimorioHambriento> en IL_00F2; ModifyItemDraw presente que agrega a DrawDataCache y retorna false; PostDrawInWorld llama Item.Bottom + GetItemDrawFrame — la convención vanilla; constante IRIS_ESC en el tipo), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (sin cambios — heredado de la .83), «ladrones»/«bandits» ausentes, headless mundo nuevo Aethon84 puerto 7790 «Sandboxing: Aethon, the Eternal Grimoire v6.50.84 → Adding Recipes → Server started» 0 excepciones, QA de visión VLM del preview: círculo limpio sin esquinas + disco concéntrico + rojo coherente + sin artefactos), ✔ PUBLICADA (release 407461384 + asset 623750338 2.597.781 B, CDN verificado byte a byte md5 4bfd5395aae89c9e55faf51a228a47b7, /releases/latest = v6.50.84), ⏳ en juego | LA LETRA: «cuando el item esta en el mundo no se ve bien el ojo, pero cuando el item esta en el inventario si se ve bien y el movimiento es definido, pero cuando esta en la mano se ve mal al igual que cuando esta en el mundo suelto… te dare el mismo sprite y te lo dare en codigo para que uses la tecnica y puedas recortar bien el ojo, ya que lo recortaste en un cuadrado en ves de un circulo» (+ codigo 2.txt: el sprite EXACTO 706×967 en RLE base64 [count,R,G,B,A], 682.702 px sin pérdida). DIAGNÓSTICO TRIPLE: (1) el iris .82/.83 era un recorte CUADRADO 166×166 (las esquinas arrastraban esclera y fragmentos del anillo dorado — el borde se leía cuadrado); (2) PostDrawInWorld usaba Item.position como esquina — la convención vanilla (decompile de Main.DrawItem con ilspycmd 8.2) es CENTRADO en el hitbox y ASENTADO EN EL FONDO: pivote = Item.Bottom − (0, altoFrame/2) con origen en el centro del frame y rotación item.velocity.X·0,2 → el ojo caía (+3,+7) px fuera del socket en el mundo; (3) el libro EN MANO se dibuja en DrawPlayer_27_HeldItem (proceso del JUGADOR) donde NO corren los hooks de ítem → socket VACÍO. LA CURA: (1) tools/gen_iris_circular_v65084.py decodifica el RLE del usuario → ajuste de círculo por mínimos cuadrados del borde dorado→esclera en 24 direcciones (centro (374.3,443.1), R=84, residuo 3,8) → máscara circular con pluma 5 px → DISCO 32×32 (4× supermuestreo, IRIS_ESC=0.2773 mapea la caja 174 px → 8,87 px de juego) — VLM QA del preview aprobado; (2) PostDrawInWorld reescrito con la convención vanilla (el párpado replica el draw del libro píxel sobre píxel; el iris GIRA con el libro al volar); (3) ModifyItemDraw (el hook tML del held item): agrega la DrawData vanilla él mismo (return false) y monta el párpado/iris con la MISMA transform — incluido el espejo itemEffect (el desplazamiento del iris se NIEGA bajo FlipHorizontally para que siga mirando al cursor mirando a la izquierda; FlipVertically para gravedad invertida) y _posOjoPantalla se alimenta en mano. NOTA de uso: el libro solo aparece en mano DURANTE el uso (useStyle HoldUp sin holdStyle — comportamiento vanilla: los ítems sin holdStyle no se ven al caminar); el ojo anima igual (UpdateInventory corre con el ítem en la hotbar). LECCIONES: rawimg tML = 12 B (versión,w,h) + RGBA crudo (audit píxel a píxel sin PIL); ModifyItemDraw return false = control del orden de capas; el sprite en código del usuario es la fuente autoritativa (GIF/v3 difieren ~10/canal por cuantización). |
 | **v6.50.83** | ✅ Build-verificada (build real 0/0 ×2, .tmod 2.593.374 B md5 d512c78c9f466a58c695dfc5a69ed84b, 387 entradas (SET idéntico al de la .82 — rawimg byte-idénticos, hjson por cuerpos, Info/pdb en whitelist como metadatos de build), EOF exacto, 7/7 texturas del Grimorio Hambriento infladas, **CECIL: la entrega verificada EN EL IL DE LA DLL DEL PAQUETE** (BolsaProbador.Contenido llama ItemType<GrimorioHambriento> en IL_00F2, 14 ItemType<T> en total; OnEnterWorld→BolsaProbador intacta — cableado de punta a punta), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless «Sandboxing v6.50.83 → Server started» 0 excepciones), ✅ PUBLICADA (release 407420766 + asset 623580888 2.593.374 B, CDN verificado byte a byte, /releases/latest = v6.50.83), ⏳ en juego | LA LETRA: «recuerda que debes darle el arma al jugador» — la .82 nació con receta de 5 madera pero SIN entrega al kit (la lección .63 otra vez). CURA: BolsaProbador.Contenido incluye ItemType<GrimorioHambriento>() junto a su padre el Códice Vivo (la .71 lo puso «completamente a parte de las demás»; su hijo demo hereda el lugar) — al entrar al mundo el kit entrega la Bolsa del Probador y el arma viene dentro; la bolsa da SOLO lo que falte. NUEVO ESLABÓN: CECIL (tools/cecil_check, Mono.Cecil de las libs del tML) verifica cableados EN EL IL DEL PAQUETE — reutilizable. EL 9º INCIDENTE DEL ESPEJO: el COMMIT de la .82 (3eba7a5) capturó la variante REVERTIDA (tabs, sin cabecera, 81.359 B) mientras el .tmod .82 publicado lleva el espejo correcto (111.265 B) — el sandbox golpeó entre el build auditado y el git add; la .83 construyó el fuente malo y la sección 3 de la auditoría (diff de blobs contra la .82) lo cazó; cura sync_es_es_v65083.py con cabecera canónica EXPLÍCITA (el .82 heredaba la cabecera del archivo actual, que podía no tenerla). EL 10º: el sandbox revirtió OTRA VEZ entre el sync+build+audit y el git add de la .83 — la verificación POST-COMMIT del BLOB lo delató; cura = ciclo atómico regenerar→verificar→estagear→amendar con ventana ~1 s. |
 | **v6.50.82** | ✅ Build-verificada (build real 0/0 ×2, .tmod 2.593.349 B md5 eede0670aedcd4e839817e6f7f1de95f, 387 entradas (380 + 7 PNGs), EOF exacto doble fórmula, 7/7 rawimgs del Grimorio Hambriento (base 36×49 socket vacío + iris 8×8 ×2 + párpado Medio/Cerrado ×2 + Rojo_Medio/Rojo_Cerrado) inflados, DLL: 9/9 símbolos UTF-8 (GrimorioHambriento/ElegirMirada/SnapDireccion/NivelRojo/UpdateInventory/PostDrawInInventory/PostDrawInWorld/ModifyTooltips/AddRecipes) + 12/12 literales UTF-16 #US (rutas de capas + Hambre.* + piezas Calmado/Inquieto/Furioso/Maximo — el código concatena «Mods.AethonMod.Hambre.»+estado), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE (el 8º revert del sandbox cayó ENTRE build y rebuild — divergencia en byte 65: tabs; regenerado con tools/sync_es_es_v65082.py + cabecera restaurada) con las claves nuevas presentes en es-MX Y es-ES («Grimorio Hambriento»/«TIENE HAMBRE»/«Hambre {0}»), «ladrones»/«bandits» ausentes (invariante .77), headless autocreate mundo nuevo «Sandboxing: Aethon, the Eternal Grimoire v6.50.82 → Adding Recipes → Server started» 0 excepciones), ✅ PUBLICADA (release 407411952 + asset 623546525 AethonMod.tmod 2.593.349 B md5 eede0670aedcd4e839817e6f7f1de95f, CDN verificado byte a byte, /releases/latest = v6.50.82; token repuesto en .env + credential store tras el wipe), ⏳ en juego | LA LETRA: «el libro esta normal y parpadea cada 10 a 20 segundos, cuando tiene hambre el parpadeo es mas rapido, ademas se agrega el movimiento del ojo el cual te lo dare en imagenes png, cuanto mas hambre mas rapido se mueve el ojo y mas rapido parpadea hasta alcanzar un parpadeo cada 2 segundos ademas el grimorio hace que el ojo se vuelva rojo. ahora con todos los recursos crea un arma nueva y agregale las mecanicas de hambre pero hazlo que sea algo que suceda en solo 1 minutos para ver el efecto» (+7 PNGs de direcciones + GIF de parpadeo). DIAGNÓSTICO (QA de visión): los 8 sprites son generaciones IA independientes — difieren en TODO el libro entre sí y el iris viaja 10-15 px en 706 px = 0,7 px a 36×49 (INVISIBLE; veredicto: «el 90 % no lo notará»); el swap completo de sprite estaba condenado. CURA (el diseño de capas): (1) LA BASE = socket VACÍO (iris r 75+8 px rellenado con esclera del arte, banda r 75-115 (200,175,163) σ54 + ruido gaussiano semilla 65.082); (2) EL IRIS = capa 8×8 recortada del arte (r 83 px fuente, el disco dorado + la pupila estrella dentro) que EL CÓDIGO desliza ±3,5 px en 8 direcciones + centro con LERP 0,10/tick — sigue al cursor si está a la vista (<480 px), el cursor ENCIMA (<34 px) = te mira fijo, si no vaga (peso 1/10 al centro); (3) EL PÁRPADO = frames 2/3 del GIF del usuario (4t media · 4t sellado · 3t media ≈ 0,18 s) tapando el socket; (4) EL ROJO = hue −45° en el dorado (el oro 45° cae en 0° puro) SOLO en la zona del ojo (diff interno del GIF f01/f03 — la MISMA corrida de generación, consistente; los 8 PNG cruzados diferían en todo) — el aro dorado del libro queda DORADO; rampa (h−0,2)/0,6; (5) EL MINUTO: Hambre 0→1 en 3600 ticks — parpadeo lerp 15 s→2 s ×jitter ±33 %·(1−h) (10-20 s → 2 s EXACTOS), mirada lerp 4 s→0,35 s, tooltip VIVO (se re-render cada frame al señalar: barra ✦/— + % + estado Calmado/Inquieto/Furioso/TIENE HAMBRE con color lerp dorado→rojo); (6) EL ARMA: clic izq 931 (Item.shoot>0 + spawn manual anti-doble v5.18), clic der reinicia el apetito, receta 5 madera, sin maná, 100 % visual LOCAL (guardas netMode!=Server + whoAmI==myPlayer + GameUpdateCount anti-doble-copia); (7) herramientas nuevas: gen_grimorio_hambriento_v65082.py (5 iteraciones: v1 diff cruzado contaminado por el ruido IA → v2 zona del GIF → v3 bbox dorado diluido → v4 iris geométrico r75 + banda esclera corregida de (145,62,56) a (200,175,163) — la banda 150-190 muestreaba la portada NEGRA del libro), sync_es_es_v65082.py, audit_v65082.py. |

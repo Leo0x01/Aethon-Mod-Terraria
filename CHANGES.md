@@ -1,5 +1,72 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.85 — LA BASE LIMPIA + EL ROJO SOLO EN EL IRIS
+
+**Petición del usuario**: "cuando recortas el iris toda la esclerotica
+queda con el agujero del iris en ves de estar completamente blanco como
+el resto de la esclerotica, aunque no es con el agujero es mas bien con
+una sombra del irirs, pero hay algo mas, lo que se pone rojo es solo el
+iris, el libro se debe quedar de color normal por lo tanto deja el
+libro normal, para mejorar la situacion te dare un consejo, cuando
+remuevas el iris has que los pixeles donde estaba el iris tomen el
+color de la esclerotica" — con `sprite libro v3 - sin iris.png` y su
+código exacto (`codigo sin iris.txt`: RLE base64 706×967 sin pérdida).
+
+**Doble cura**:
+1. **LA BASE LIMPIA**: la .82 rellenaba el socket del iris con RUIDO
+   GAUSSIANO alrededor de la media de la esclera ((200,175,163) σ54) —
+   a 36×49 ese ruido se leía como la SOMBRA gris que el usuario vio en
+   el mundo y en la mano. Ahora la base ES el sprite sin iris EXACTO
+   del usuario (`tools/gen_grimorio_hambriento_v65085.py`): verificado
+   que es la MISMA corrida de `codigo 2.txt` (byte-idénticos fuera del
+   ojo, |Δ|=0,009 — la fuente autoritativa), socket completamente
+   blanco (247,235,220 σ5). `OJO` se recentra al iris del ARTE:
+   centroide de la máscara cálida (374.0,445.3) → (19.09, 22.45) —
+   antes (19.27, 22.70) apuntaba al centro del ojo del GIF (otra
+   corrida de generación).
+2. **EL ROJO SOLO EN EL IRIS**: las `Rojo_Medio`/`Rojo_Cerrado` teñían
+   de rojo TODO el dorado del libro al parpadear con hambre —
+   ELIMINADAS (387→385 entradas): el libro (párpados incluidos) queda
+   SIEMPRE a color normal; el rojo vive SOLO en la capa `IrisRojo`
+   (hue −45°), BYTE-IDÉNTICA a la .84 (la capa aprobada: «el movimiento
+   es definido»).
+3. **LOS PÁRPADOS COMPUESTOS**: los frames del GIF son otra corrida de
+   cuantización (Δ~17/canal en todo el libro) — usados tal cual, el
+   libro TITILABA entre corridas en cada parpadeo. La zona animada del
+   GIF (diff f01/f03, MaxFilter 15 + pluma gaussiana σ5) se PEGA sobre
+   la base limpia: el cuerpo queda de la corrida del código (|Δ|=0,04
+   fuera de la zona al parpadear).
+
+**Verificación**: oráculo 0/0 · build real 0/0 · .tmod 2.589.707 B md5
+dcbac74a8455a33fcf8851817b948fd5: 385 entradas (SET = .84 MENOS
+exactamente las 2 texturas rojas del libro), EOF exacto, SOLO cambian
+base/Medio/Cerrado (Iris/IrisRojo byte-idénticos a .84), **LA BLANCURA
+DEL SOCKET VERIFICADA EN EL PAQUETE** (rawimg decodificado: luminancia
+176→233 en r<3 del ojo, 0 píxeles oscuros — la .84 cargaba la sombra),
+la DLL ya NO menciona Rojo_Medio/Rojo_Cerrado (literales UTF-16
+ausentes) y mantiene IrisRojo, constantes OJO nuevas en el IL (19.09f /
+22.45f presentes, las viejas 19.27f/22.70f ausentes), CECIL de punta a
+punta (entrega IL_00F2 + ModifyItemDraw + PostDrawInWorld(Item.Bottom)
++ IRIS_ESC), espejo es-ES == es-MX byte a byte EN EL PAQUETE,
+«ladrones»/«bandits» ausentes, headless "Sandboxing v6.50.85 → Adding
+Recipes → Server started" 0 excepciones, QA de visión (VLM) del
+preview: esclerótica blanca y limpia, iris circular, SOLO el iris rojo,
+párpados a color normal, sin costuras. **EL 12º INCIDENTE DEL ESPEJO**
+(cazado antes del commit): el árbol amaneció con el es-ES REVERTIDO
+(tabs, sin cabecera, 81.359 B) DESPUÉS del build — el paquete llevaba
+el espejo bueno; cura sync + blob verificado == HEAD (0ab412e9).
+
+**Lecciones nuevas**:
+- La limpieza del ARTE del usuario > cualquier relleno programático:
+  el ruido gaussiano σ54 que "promediaba" la esclera era LA SOMBRA —
+  el usuario la vio a escala de mundo/mano donde el sprite se agranda.
+- El centro del ojo debe medirse en la MISMA corrida del sprite de la
+  base: el centro del GIF (19.27, 22.70) ≠ el centro del código
+  (19.09, 22.45) — 0,25 px de error heredado de mezclar corridas.
+- Los párpados de OTRA corrida se compostan: zona animada (diff
+  f01/f03 dilatado) + pluma gaussiana sobre la base buena — el cuerpo
+  del libro no titila (|Δ|=0,04 fuera de la zona).
+
 ## Commit v6.50.84 — EL IRIS CIRCULAR + EL OJO EN TODAS PARTES
 
 **Petición del usuario**: "cuando el item esta en el mundo no se ve bien el
