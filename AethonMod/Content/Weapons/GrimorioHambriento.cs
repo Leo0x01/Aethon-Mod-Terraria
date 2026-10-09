@@ -55,11 +55,34 @@ namespace AethonMod.Content.Weapons
     /// no corren los hooks de inventario ni mundo — ModifyItemDraw recibe la
     /// DrawData final y ahí se montan las capas, pegadas a la MISMA
     /// transform (incluido el espejo de mirar a la izquierda).
+    ///
+    /// v6.50.85 — LA BASE LIMPIA + EL ROJO SOLO EN EL IRIS. La letra del
+    /// usuario: «cuando recortas el iris toda la esclerotica queda con el
+    /// agujero del iris en ves de estar completamente blanco como el resto
+    /// de la esclerotica, aunque no es con el agujero es mas bien con una
+    /// sombra del iris, pero hay algo mas, lo que se pone rojo es solo el
+    /// iris, el libro se debe quedar de color normal… cuando remuevas el
+    /// iris has que los pixeles donde estaba el iris tomen el color de la
+    /// esclerotica» + sprite libro v3 - sin iris.png + codigo sin iris.txt.
+    /// DOS CURAS: (1) LA BASE — la .82 rellenaba el socket con RUIDO GAUSSIANO
+    /// alrededor de la media de la esclera (σ54): al reducir a 36×49 ese
+    /// ruido se leía como una SOMBRA gris (lo que el usuario vio en el mundo
+    /// y en la mano). Ahora la base ES el sprite sin iris EXACTO del usuario
+    /// — la MISMA corrida de codigo 2.txt (verificado: byte-idénticos fuera
+    /// del ojo, |Δ|=0,009) con el socket completamente blanco (247,235,220
+    /// σ5). OJO se recentra al iris del ARTE (19.09, 22.45 — antes apuntaba
+    /// al centro del ojo del GIF, otra corrida). Los PÁRPADOS se COMPONEN:
+    /// la zona animada del GIF (diff f01/f03 dilatado) se pega sobre la base
+    /// limpia con pluma gaussiana — el cuerpo del libro no titila entre
+    /// corridas al parpadear (|Δ|=0,04 fuera de la zona). (2) EL ROJO —
+    /// SOLO la capa IrisRojo; las Rojo_Medio/Rojo_Cerrado teñían de rojo
+    /// TODO el dorado del libro al parpadear con hambre: ELIMINADAS — el
+    /// libro (párpados incluidos) queda SIEMPRE a color normal.
     /// </summary>
     public class GrimorioHambriento : ModItem
     {
-        // === GEOMETRÍA (medida del arte: tools/gen_grimorio_hambriento_v65082.py) ===
-        private static readonly Vector2 OJO = new Vector2(19.27f, 22.70f);   // centro del ojo en 36×49
+        // === GEOMETRÍA (v6.50.85: el iris del ARTE — tools/gen_grimorio_hambriento_v65085.py) ===
+        private static readonly Vector2 OJO = new Vector2(19.09f, 22.45f);   // centro del ojo en 36×49
         private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);  // viaje del iris (px de textura)
         private const float LERP_MIRADA = 0.10f;
 
@@ -262,14 +285,8 @@ namespace AethonMod.Content.Weapons
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
                 spriteBatch.Draw(tex, position, frame, drawColor, 0f, origin, scale,
                     SpriteEffects.None, 0f);
-                if (rojo > 0f)
-                {
-                    var texRojo = ModContent.Request<Texture2D>(medio
-                        ? "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Medio"
-                        : "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Cerrado").Value;
-                    spriteBatch.Draw(texRojo, position, frame, Alfa(rojo), 0f, origin, scale,
-                        SpriteEffects.None, 0f);
-                }
+                // v6.50.85: el libro queda a color normal al parpadear — el
+                // rojo vive SOLO en la capa del iris (la .82 teñía el libro).
                 return;
             }
 
@@ -313,14 +330,7 @@ namespace AethonMod.Content.Weapons
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
                 spriteBatch.Draw(tex, pivote, frame, lightColor, rotation, origen, scale,
                     SpriteEffects.None, 0f);
-                if (rojo > 0f)
-                {
-                    var texRojo = ModContent.Request<Texture2D>(medio
-                        ? "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Medio"
-                        : "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Cerrado").Value;
-                    spriteBatch.Draw(texRojo, pivote, frame, Alfa(rojo), rotation, origen,
-                        scale, SpriteEffects.None, 0f);
-                }
+                // v6.50.85: el libro queda a color normal al parpadear.
                 return;
             }
 
@@ -365,7 +375,6 @@ namespace AethonMod.Content.Weapons
 
             bool espejoX = (drawData.effect & SpriteEffects.FlipHorizontally) != 0;
             bool espejoY = (drawData.effect & SpriteEffects.FlipVertically) != 0;
-            float rojo = NivelRojo();
 
             if (_fase > 0)
             {
@@ -377,21 +386,14 @@ namespace AethonMod.Content.Weapons
                 drawInfo.DrawDataCache.Add(new DrawData(tex, drawData.position,
                     drawData.sourceRect, drawData.color, drawData.rotation,
                     drawData.origin, drawData.scale, drawData.effect));
-                if (rojo > 0f)
-                {
-                    var texRojo = ModContent.Request<Texture2D>(medio
-                        ? "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Medio"
-                        : "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Cerrado").Value;
-                    drawInfo.DrawDataCache.Add(new DrawData(texRojo, drawData.position,
-                        drawData.sourceRect, Alfa(rojo), drawData.rotation,
-                        drawData.origin, drawData.scale, drawData.effect));
-                }
+                // v6.50.85: el libro queda a color normal al parpadear.
                 return false;
             }
 
             // el iris: el texel del ojo, con el espejo aplicado AL DESPLAZA-
             // MIENTO para que SIGA mirando al cursor aunque el libro esté
             // reflejado (XNA espeja la textura alrededor del origen)
+            float rojo = NivelRojo(); // v6.50.85: SOLO el iris se tiñe, nunca el libro
             Rectangle fr = drawData.sourceRect ?? new Rectangle(0, 0, 36, 49);
             Vector2 texel = OJO + new Vector2(
                 _despActual.X * (espejoX ? -1f : 1f),
