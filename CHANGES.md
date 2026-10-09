@@ -1,5 +1,65 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.87 — LOS EFECTOS SUAVES: EL ERRÁTICO (GLITCH) Y EL TEMBLOROSO
+
+**Petición del usuario**: "bueno las animaciones de efectos se ven bastante
+mal y exageradas, deja solo el grimorio hambriento normal y modifica las
+dos copias con otros efectos, borra los anteriores, esta vez que sean mas
+suave los efectos… te dire como animar una de las copias, has que una de
+las copias se vuelva erratica al tener hambre, cuanta mas hambre mas
+erratica y que tenga un efecto glish, que la otra lo que haga sea temblar".
+
+**Cinco piezas**:
+1. **EL LIBRO NORMAL QUEDA TAL CUAL**: el archivo base solo GANA aditivos
+   (IRIS_ESC/Alfa protected, el draw en mundo extraído a
+   PostDrawInWorldCore — con Zero es bit-idéntico, PivoteEnMundo/Capa
+   exponen la convención vanilla .84). Verificado EN EL PAQUETE:
+   base/Medio/Cerrado/Iris/IrisRojo BYTE-IDÉNTICOS a .86.
+2. **LOS EFECTOS DE LA .86 BORRADOS**: las 10 texturas de efecto fuera
+   (3 runas + 3 máscaras estrellas + 4 venas) y las dos copias
+   RENOMBRADAS (Runico→Erratico, Estelar→Tembloroso, git mv de .cs/.png)
+   con el MISMO arte — los efectos de la .87 son 100 % CÓDIGO
+   (397→387 entradas).
+3. **EL ERRÁTICO** (`GrimorioHambrientoErratico`): (a) LA MIRADA ERRÁTICA
+   — `EstadoGrimorio.Erratico=true`: dwell 3 s→0,16 s, lerp 0,10→0,36
+   con el hambre, tic de meta ±0,35/±0,28 px·hambre (ninguna mirada se
+   repite); (b) EL GLITCH — ráfagas de 7-14 ticks separadas 22 s→3,2 s,
+   GATE al 12 % de hambre (saciado = libro limpio el 96 % del tiempo);
+   1-2 TIRAS horizontales desfasadas ±1,3→±3 px regenerándose cada 3
+   frames; layout DETERMINISTA por tick (hash de la semilla — hotbar y
+   mano muestran el MISMO glitch) y el IRIS VIAJA CON SU TIRA.
+4. **EL TEMBLOROSO** (`GrimorioHambrientoTembloroso`): EL TEMBLOR — dos
+   senos incommensurables por eje (9,3+17,3 Hz X, 11,9+19,1 Hz Y), el
+   batido es un escalofrío ORGÁNICO (el ruido titila, los senos respiran);
+   amplitud 0,2 px saciado → 1,3 px famélico (pico 1,78, media 1,03);
+   el corrimiento alcanza al libro Y sus capas (párpado/iris tiemblan
+   JUNTO al libro) en inventario/mundo/mano.
+5. **LA ENTREGA**: BolsaProbador.Contenido referencia las dos copias
+   nuevas (16 ItemType<T>, CECIL: IL_00F2/IL_0103/IL_0114); hjson ×3
+   (es-MX fuente + en-US + espejo es-ES regenerado).
+
+**Verificación**: oráculo 0 errores · build real 0/0 · .tmod 2.605.625 B
+md5 d1e14a9b0546753c849ba96b8579172e: 387 entradas (397 − 12 + 2
+EXACTAS), EOF exacto, SOLO cambian 3 hjson (esperado) + dll/pdb/Info
+(whitelist), base/Medio/Cerrado/Iris/IrisRojo BYTE-IDÉNTICOS a .86, las
+copias nuevas == base byte a byte, la DLL ya no menciona
+Runico/Estelar/Runa/Estrellas/Venas (por PREFIJO de ruta — TopeEstrellas
+del Telar y EstrellasCamino del RiftLib son de OTROS ítems), CECIL v65087
+completo (Erratico=true con Ldc_I4_1+Stfld SOLO en el Errático + senos
+del temblor + máquina de glitch 22f/3.2f/0.12f + PreDraw false ×4 +
+Tembloroso llama base + Errático en franjas con ancla Vector2.Zero — FNA
+lo compila como call get_Zero), espejo es-ES==es-MX byte a byte EN EL
+PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7794
+«Sandboxing v6.50.87 → Server started» 0 EXCEPCIONES, VLM QA del preview
+6× APROBADO (panel limpio idéntico al normal; tear sutil con el ojo
+coherente montado en su tira; temblor suave creciente; sin ghosting).
+
+**El 14º incidente del espejo** (cazado ANTES del commit): el árbol
+amanece con el es-ES REVERTIDO al pre-espejo (tabs, sin cabecera)
+DESPUÉS del build auditado — el paquete llevaba el espejo bueno; cura
+sync + verificación y commit atómico en un solo comando.
+
+---
 ## Commit v6.50.86 — LOS PÁRPADOS PUROS DE CÓDIGO + LAS DOS COPIAS ANIMADAS
 
 **Petición del usuario**: "al usar el gif para abrir y cerrar el ojo
