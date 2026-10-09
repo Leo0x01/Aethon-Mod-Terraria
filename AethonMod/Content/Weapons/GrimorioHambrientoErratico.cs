@@ -10,39 +10,31 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
-    /// v6.50.87 — LA COPIA ERRÁTICA DEL GRIMORIO HAMBRIENTO (nació Rúnico en
-    /// la .86; el usuario: «deja solo el grimorio hambriento normal y
-    /// modifica las dos copias con otros efectos, borra los anteriores, esta
-    /// vez que sean mas suave los efectos… has que una de las copias se
-    /// vuelva erratica al tener hambre, cuanta mas hambre mas erratica y que
-    /// tenga un efecto glish»). Las runas y el aura quedaron BORRADAS — el
-    /// usuario las vio «bastante mal y exageradas».
+    /// v6.50.88 — LA COPIA ERRÁTICA, SUBIDA DE INTENSIDAD. El usuario probó
+    /// el glitch de la .87 y lo vio tímido: «el efecto glish es muy suave,
+    /// aumente el efecto glish al menos un 70 %». La receta NO cambia —
+    /// ráfagas breves, layout determinista, el iris viaja con su tira — solo
+    /// se le SUBE EL VOLUMEN a cada perilla, todas de golpe:
     ///
-    /// DOS COSAS VIVEN AQUÍ y las dos crecen con el apetito:
+    /// · EL DESFASE ±1,3 → ±3 px pasa a ±3,3 → ±6 px (media |off| 1,71 →
+    ///   3,23 px a hambre total: +88 %; el máximo se DOBLA — un sexto del
+    ///   ancho del libro).
+    /// · LAS TIRAS 1-2 pasan a 2-4 (el libro se rompe en más pedazos).
+    /// · LA RÁFAGA 7-14 ticks pasa a 12-24 (0,20-0,40 s) y se regenera cada
+    ///   2 frames (era cada 3) — el tearing vive más y se rehace más rápido.
+    /// · EL INTERVALO 22 s → 3,2 s pasa a 15 s → 2,1 s: a hambre total el
+    ///   libro está roto ~12 % del tiempo (era ~5 %) y la primera ráfaga
+    ///   llega a los 2 s (era 4 s).
+    /// · EL GATE se queda en 12 %: saciado = libro limpio (la lección de la
+    ///   .86 sigue viva — los efectos permanentes gritan, los breves
+    ///   susurran; esto es el mismo susurro, MÁS FUERTE).
     ///
-    /// · LA MIRADA ERRÁTICA (EstadoGrimorio.Erratico): el ojo deja de
-    ///   vigilar tranquilo — sus cambios de mirada pasan de 3 s a 0,16 s, el
-    ///   resbalón se vuelve brusco (LERP 0,10 → 0,36) y cada meta lleva un
-    ///   tic que ninguna repetición comparte. Saciado es apenas más
-    ///   inquieto que el original; famélico es un ojo que no se queda quieto.
-    ///
-    /// · EL GLITCH — RÁFAGAS cortas y suaves, nada de ruido por frame: el
-    ///   96 % del tiempo el libro está LIMPIO (la lección de la .86: los
-    ///   efectos permanentes gritan; los breves susurran). Cada ráfaga dura
-    ///   7-14 ticks (0,12-0,23 s); entre ráfagas pasan 22 s → 3,2 s con el
-    ///   hambre y abajo del 12 % de hambre NO HAY GLITCH (saciado, el libro
-    ///   está entero). Dentro de la ráfaga el libro se rompe en 1-2 TIRAS
-    ///   horizontales desfasadas ±1,3 → ±3 px que se regeneran cada 3
-    ///   frames: el «tearing» de señal perdida. El layout es DETERMINISTA
-    ///   por tick (hash de la semilla de la ráfaga): el hotbar y la mano
-    ///   muestran el MISMO glitch, y el iris VIAJA CON SU TIRA — el ojo
-    ///   nunca se desprende del libro roto.
-    ///
-    /// Las tiras se dibujan como el libro mismo: la MISMA transform vanilla
-    /// en inventario, mundo (con la rotación de vuelo) y mano (espejo y
-    /// gravedad incluidos) — v6.50.84. El ciclo del original queda INTACTO
-    /// (mismo ojo, mismo parpadeo PURO de código, misma descarga, mismo clic
-    /// derecho) con SU PROPIO EstadoGrimorio.
+    /// Lo demás es la .87 intacta: LA MIRADA ERRÁTICA
+    /// (EstadoGrimorio.Erratico: cambios de mirada 3 s → 0,16 s, LERP
+    /// 0,10 → 0,36, tic de meta por repetición) y las tiras dibujadas con la
+    /// MISMA transform vanilla en inventario, mundo (rotación de vuelo) y
+    /// mano (espejo y gravedad) — v6.50.84. El ciclo del original queda
+    /// INTACTO con SU PROPIO EstadoGrimorio.
     /// </summary>
     public class GrimorioHambrientoErratico : GrimorioHambriento
     {
@@ -55,7 +47,7 @@ namespace AethonMod.Content.Weapons
         // === LA MÁQUINA DE RÁFAGAS (avanza UNA vez por tick — lo dibujan
         //     las tres vías: inventario, mundo y mano comparten el glitch) ===
         private static uint _tickGlitch;
-        private static int _tHastaRafaga = 240;    // 4 s hasta la primera
+        private static int _tHastaRafaga = 120;    // 2 s hasta la primera (era 4)
         private static int _tRafaga;               // >0: ticks que le quedan a la ráfaga
         private static uint _semillaRafaga;
 
@@ -80,8 +72,9 @@ namespace AethonMod.Content.Weapons
             {
                 if (--_tRafaga == 0)
                 {
-                    // la próxima ráfaga: 22 s → 3,2 s con el hambre (±25 %)
-                    _tHastaRafaga = (int)(60f * MathHelper.Lerp(22f, 3.2f, h)
+                    // la próxima ráfaga: 15 s → 2,1 s con el hambre (±25 %)
+                    // (.87: 22 s → 3,2 s — el +70 % de frecuencia)
+                    _tHastaRafaga = (int)(60f * MathHelper.Lerp(15f, 2.1f, h)
                         * (0.75f + 0.5f * (Hash(t) & 255u) / 255f));
                 }
             }
@@ -89,7 +82,8 @@ namespace AethonMod.Content.Weapons
             {
                 if (h >= HAMBRE_MIN_GLITCH)
                 {
-                    _tRafaga = 7 + (int)(Hash(t ^ 0x5BD1E995u) & 7u);   // 7-14 ticks
+                    // 12-24 ticks — la ráfaga vive +71 % más que la de la .87
+                    _tRafaga = 12 + (int)(Hash(t ^ 0x5BD1E995u) % 13u);
                     _semillaRafaga = t * 2654435761u;
                 }
                 else
@@ -106,22 +100,25 @@ namespace AethonMod.Content.Weapons
             if (_tRafaga <= 0)
                 return null;
 
-            // las tiras se REGENERAN cada 3 frames — el tearing vivo
-            uint fase = Main.GameUpdateCount / 3u;
+            // las tiras se REGENERAN cada 2 frames (era cada 3) — el tearing
+            // vivo y más frenético
+            uint fase = Main.GameUpdateCount / 2u;
             uint sd = Hash(_semillaRafaga ^ (fase * 0x9E3779B9u));
             float h = _estadoErratico.Hambre;
 
-            int n = 1 + (int)(Hash(sd) % 2u);            // 1-2 tiras (SUAVE)
+            int n = 2 + (int)(Hash(sd) % 3u);            // 2-4 tiras (era 1-2)
             var tiras = new Tira[n];
             int hechos = 0;
-            int y = 3 + (int)(Hash(sd ^ 0xA5A5u) % 34u); // la primera nace en y=3..36
+            // la primera nace en y=3..24 (más arriba que la .87): deja
+            // sitio para que vivan las 2-4 tiras de la ráfaga
+            int y = 3 + (int)(Hash(sd ^ 0xA5A5u) % 22u);
             while (hechos < n && y <= 41)
             {
-                int alto = 4 + (int)(Hash(sd ^ (uint)(hechos * 97 + 1)) % 8u);      // 4-11 px
-                float off = ((int)(Hash(sd ^ (uint)(hechos * 131 + 3)) % 7u) - 3)
-                    * (0.45f + 0.55f * h);                                          // ±1,3 → ±3 px
+                int alto = 4 + (int)(Hash(sd ^ (uint)(hechos * 97 + 1)) % 9u);      // 4-12 px
+                float off = ((int)(Hash(sd ^ (uint)(hechos * 131 + 3)) % 13u) - 6)
+                    * (0.55f + 0.45f * h);                                          // ±3,3 → ±6 px
                 tiras[hechos++] = new Tira { Y0 = y, Y1 = Math.Min(46, y + alto), Off = off };
-                y = tiras[hechos - 1].Y1 + 2 + (int)(Hash(sd ^ (uint)(hechos * 17 + 5)) % 6u);
+                y = tiras[hechos - 1].Y1 + 1 + (int)(Hash(sd ^ (uint)(hechos * 17 + 5)) % 5u);
             }
             if (hechos < n)
                 Array.Resize(ref tiras, hechos);
