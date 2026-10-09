@@ -35,6 +35,26 @@ namespace AethonMod.Content.Weapons
     /// · ARMA: clic izq dispara la descarga perseguidora (Nightglow 931, la
     ///   del Grimorio del Eterno); clic der REINICIA el apetito (demo
     ///   repetible). Sin maná (objeto de pruebas).
+    ///
+    /// v6.50.84 — EL IRIS CIRCULAR + EL OJO EN TODAS PARTES. La letra del
+    /// usuario: «cuando el item esta en el mundo no se ve bien el ojo, pero
+    /// cuando el item esta en el inventario si se ve bien… cuando esta en la
+    /// mano se ve mal al igual que cuando esta en el mundo suelto… te dare
+    /// el mismo sprite y te lo dare en codigo para que uses la tecnica y
+    /// puedas recortar bien el ojo, ya que lo recortaste en un cuadrado en
+    /// ves de un circulo». TRES CURAS: (1) el iris ahora es un DISCO de 32×32
+    /// recortado CIRCULARMENTE del sprite EXACTO en código del usuario
+    /// (tools/gen_iris_circular_v65084.py — la .82 recortaba un cuadrado y
+    /// las esquinas arrastraban esclera y fragmentos del anillo); (2) EN EL
+    /// MUNDO la .83 dibujaba desde Item.position como si fuera la esquina de
+    /// la textura — la convención vanilla (decompile de Main.DrawItem) es
+    /// CENTRADO en el hitbox y ASENTADO EN EL FONDO: pivote = Item.Bottom −
+    /// (0, altoFrame/2), con rotación item.velocity.X·0,2 (¡gira al volar!) —
+    /// el ojo caía (+3, +7) px fuera del socket; (3) EN LA MANO el libro se
+    /// dibuja dentro del proceso del JUGADOR (DrawPlayer_27_HeldItem) donde
+    /// no corren los hooks de inventario ni mundo — ModifyItemDraw recibe la
+    /// DrawData final y ahí se montan las capas, pegadas a la MISMA
+    /// transform (incluido el espejo de mirar a la izquierda).
     /// </summary>
     public class GrimorioHambriento : ModItem
     {
@@ -42,6 +62,11 @@ namespace AethonMod.Content.Weapons
         private static readonly Vector2 OJO = new Vector2(19.27f, 22.70f);   // centro del ojo en 36×49
         private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);  // viaje del iris (px de textura)
         private const float LERP_MIRADA = 0.10f;
+
+        // v6.50.84 — la capa del iris es un DISCO 32×32 (recorte circular del
+        // sprite exacto) que vive en una caja fuente de 174 px → 8,87 px de
+        // juego: esta constante mapea la textura al espacio del libro.
+        private const float IRIS_ESC = 0.2773f;
 
         // === ESTADO DEMO (por máquina — objeto de pruebas, sin red) ===
         public static float Hambre;
@@ -254,11 +279,11 @@ namespace AethonMod.Content.Weapons
                 "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
             var irisRojo = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo").Value;
-            spriteBatch.Draw(iris, posIris, null, drawColor, 0f, iris.Size() * 0.5f, scale,
-                SpriteEffects.None, 0f);
+            spriteBatch.Draw(iris, posIris, null, drawColor, 0f, iris.Size() * 0.5f,
+                scale * IRIS_ESC, SpriteEffects.None, 0f);
             if (rojo > 0f)
                 spriteBatch.Draw(irisRojo, posIris, null, Alfa(rojo), 0f,
-                    irisRojo.Size() * 0.5f, scale, SpriteEffects.None, 0f);
+                    irisRojo.Size() * 0.5f, scale * IRIS_ESC, SpriteEffects.None, 0f);
         }
 
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor,
@@ -267,45 +292,137 @@ namespace AethonMod.Content.Weapons
             if (Main.netMode == NetmodeID.Server)
                 return;
 
-            // Aproximación: el ojo a OJO·escala desde la esquina del ítem
-            // (el bob de vanilla en el suelo es ±2 px — imperceptible aquí).
-            Vector2 posOjo = Item.position - Main.screenPosition + OJO * scale;
-            _posOjoPantalla = posOjo;
-            _posValida = true;
+            // v6.50.84 — LA CONVENCIÓN VANILLA (decompile de Main.DrawItem): el
+            // ítem en el suelo se dibuja CENTRADO en el hitbox y ASENTADO EN SU
+            // FONDO — pivote = Item.Bottom − (0, altoFrame/2), origen en el
+            // centro del frame, rotación = item.velocity.X·0,2 (¡los ítems
+            // giran mientras vuelan!). La .83 usaba Item.position como esquina:
+            // el ojo caía (+3, +7) px fuera del socket.
+            Main.GetItemDrawFrame(Item.type, out var _, out var frame);
+            Vector2 origen = frame.Size() * 0.5f;
+            Vector2 pivote = Item.Bottom - Main.screenPosition - new Vector2(0f, origen.Y);
 
             float rojo = NivelRojo();
 
             if (_fase > 0)
             {
+                // el párpado REPLICA el draw vanilla del libro (píxel sobre píxel)
                 bool medio = _fase > 7 || _fase < 4;
                 var tex = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
-                Vector2 o = tex.Size() * 0.5f;
-                Vector2 p = Item.position - Main.screenPosition;
-                spriteBatch.Draw(tex, p, null, lightColor, rotation, o, scale,
+                spriteBatch.Draw(tex, pivote, frame, lightColor, rotation, origen, scale,
                     SpriteEffects.None, 0f);
                 if (rojo > 0f)
                 {
                     var texRojo = ModContent.Request<Texture2D>(medio
                         ? "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Medio"
                         : "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Cerrado").Value;
-                    spriteBatch.Draw(texRojo, p, null, Alfa(rojo), rotation, o, scale,
-                        SpriteEffects.None, 0f);
+                    spriteBatch.Draw(texRojo, pivote, frame, Alfa(rojo), rotation, origen,
+                        scale, SpriteEffects.None, 0f);
                 }
                 return;
             }
 
-            Vector2 posIris = posOjo + _despActual * scale;
+            // el iris: el texel del ojo GIRA con el libro mientras vuela
+            Vector2 alOjo = (OJO + _despActual - origen) * scale;
+            Vector2 posOjo = pivote + alOjo.RotatedBy(rotation);
+            _posOjoPantalla = posOjo;
+            _posValida = true;
+
             var iris = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
             var irisRojo = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo").Value;
-            spriteBatch.Draw(iris, posIris, null, lightColor, rotation, iris.Size() * 0.5f, scale,
-                SpriteEffects.None, 0f);
+            spriteBatch.Draw(iris, posOjo, null, lightColor, rotation, iris.Size() * 0.5f,
+                scale * IRIS_ESC, SpriteEffects.None, 0f);
             if (rojo > 0f)
-                spriteBatch.Draw(irisRojo, posIris, null, Alfa(rojo), rotation,
-                    irisRojo.Size() * 0.5f, scale, SpriteEffects.None, 0f);
+                spriteBatch.Draw(irisRojo, posOjo, null, Alfa(rojo), rotation,
+                    irisRojo.Size() * 0.5f, scale * IRIS_ESC, SpriteEffects.None, 0f);
+        }
+
+        // =================================================================
+        // v6.50.84 — EN LA MANO. El libro sostenido se dibuja dentro del
+        // proceso del JUGADOR (DrawPlayer_27_HeldItem): ahí NO corren ni
+        // PostDrawInInventory ni PostDrawInWorld — el ojo quedaba VACÍO.
+        // ModifyItemDraw recibe la DrawData FINAL del libro: la agregamos
+        // nosotros (return false) y encima van el párpado o el iris, pegados
+        // a la MISMA transform — incluido el espejo de mirar a la izquierda
+        // (itemEffect) y la gravedad invertida (FlipVertically).
+        // =================================================================
+        public override bool ModifyItemDraw(ref PlayerDrawSet drawInfo, ref DrawData drawData,
+            ref DrawData? coloredDrawData, ref DrawData? glowMaskDrawData)
+        {
+            if (Main.netMode == NetmodeID.Server)
+                return true; // el servidor no dibuja: que vanilla haga lo suyo
+
+            // el libro primero (la base es el socket vacío), las capas encima
+            drawInfo.DrawDataCache.Add(drawData);
+            if (coloredDrawData.HasValue)
+                drawInfo.DrawDataCache.Add(coloredDrawData.Value);
+            if (glowMaskDrawData.HasValue)
+                drawInfo.DrawDataCache.Add(glowMaskDrawData.Value);
+
+            bool espejoX = (drawData.effect & SpriteEffects.FlipHorizontally) != 0;
+            bool espejoY = (drawData.effect & SpriteEffects.FlipVertically) != 0;
+            float rojo = NivelRojo();
+
+            if (_fase > 0)
+            {
+                // el párpado: MISMA transform que el libro — píxel sobre píxel
+                bool medio = _fase > 7 || _fase < 4;
+                var tex = ModContent.Request<Texture2D>(medio
+                    ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
+                    : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
+                drawInfo.DrawDataCache.Add(new DrawData(tex, drawData.position,
+                    drawData.sourceRect, drawData.color, drawData.rotation,
+                    drawData.origin, drawData.scale, drawData.effect));
+                if (rojo > 0f)
+                {
+                    var texRojo = ModContent.Request<Texture2D>(medio
+                        ? "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Medio"
+                        : "AethonMod/Content/Weapons/GrimorioHambriento_Rojo_Cerrado").Value;
+                    drawInfo.DrawDataCache.Add(new DrawData(texRojo, drawData.position,
+                        drawData.sourceRect, Alfa(rojo), drawData.rotation,
+                        drawData.origin, drawData.scale, drawData.effect));
+                }
+                return false;
+            }
+
+            // el iris: el texel del ojo, con el espejo aplicado AL DESPLAZA-
+            // MIENTO para que SIGA mirando al cursor aunque el libro esté
+            // reflejado (XNA espeja la textura alrededor del origen)
+            Rectangle fr = drawData.sourceRect ?? new Rectangle(0, 0, 36, 49);
+            Vector2 texel = OJO + new Vector2(
+                _despActual.X * (espejoX ? -1f : 1f),
+                _despActual.Y * (espejoY ? -1f : 1f));
+            Vector2 q = new Vector2(
+                (espejoX ? fr.Width - texel.X : texel.X) - drawData.origin.X,
+                (espejoY ? fr.Height - texel.Y : texel.Y) - drawData.origin.Y);
+            Vector2 posOjo = drawData.position + new Vector2(
+                q.X * drawData.scale.X, q.Y * drawData.scale.Y).RotatedBy(drawData.rotation);
+
+            var iris = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+            drawInfo.DrawDataCache.Add(new DrawData(iris, posOjo, null, drawData.color,
+                drawData.rotation, iris.Size() * 0.5f, drawData.scale * IRIS_ESC,
+                drawData.effect));
+            if (rojo > 0f)
+            {
+                var irisRojo = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo").Value;
+                drawInfo.DrawDataCache.Add(new DrawData(irisRojo, posOjo, null, Alfa(rojo),
+                    drawData.rotation, irisRojo.Size() * 0.5f, drawData.scale * IRIS_ESC,
+                    drawData.effect));
+            }
+
+            if (drawInfo.drawPlayer.whoAmI == Main.myPlayer)
+            {
+                _posOjoPantalla = posOjo; // el ojo en mano también sigue al cursor
+                _posValida = true;
+            }
+
+            return false; // ya agregamos la DrawData nosotros, con las capas en orden
         }
 
         // =================================================================

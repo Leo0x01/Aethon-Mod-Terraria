@@ -1,5 +1,74 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.84 — EL IRIS CIRCULAR + EL OJO EN TODAS PARTES
+
+**Petición del usuario**: "cuando el item esta en el mundo no se ve bien el
+ojo, pero cuando el item esta en el inventario si se ve bien y el movimiento
+es definido, pero cuando esta en la mano se ve mal al igual que cuando esta
+en el mundo suelto… veo tu tecnica es muy buena y te lo hare mas facil, te
+dare el mismo sprite y te lo dare en codigo para que uses la tecnica y
+puedas recortar bien el ojo, ya que lo recortaste en un cuadrado en ves de
+un circulo" — con `codigo 2.txt`: el sprite EXACTO 706×967 en código (RLE
+base64 de tuplas [count,R,G,B,A], 682.702 px, sin pérdida).
+
+**Triple cura**:
+1. **EL IRIS CIRCULAR**: la .82 recortaba un CUADRADO 166×166 — las
+   esquinas arrastraban esclera y fragmentos del anillo dorado. Ahora es
+   un DISCO 32×32 recortado del sprite exacto (`tools/gen_iris_circular_
+   v65084.py`): ajuste de círculo por mínimos cuadrados sobre el borde
+   dorado→esclera en 24 direcciones (centro (374.3,443.1), R=84, residuo
+   3,8 px — el arte es orgánico), máscara circular con pluma de 5 px,
+   4× supermuestreo; `IRIS_ESC = 0.2773` mapea la caja fuente de 174 px a
+   8,87 px de juego. La base y los párpados NO se tocan (byte-idénticos).
+2. **EN EL MUNDO**: la .83 dibujaba desde `Item.position` como si fuera la
+   esquina de la textura — la convención vanilla (decompile de
+   `Main.DrawItem`) es CENTRADO en el hitbox y ASENTADO EN EL FONDO:
+   pivote = `Item.Bottom − (0, altoFrame/2)`, origen = centro del frame,
+   rotación = `item.velocity.X·0,2` (¡los ítems giran mientras vuelan!).
+   El ojo caía **(+3, +7) px** fuera del socket. Ahora el iris GIRA con
+   el libro y el párpado replica el draw vanilla píxel sobre píxel.
+3. **EN LA MANO**: el libro sostenido se dibuja dentro del proceso del
+   JUGADOR (`DrawPlayer_27_HeldItem`), donde NO corren ni
+   `PostDrawInInventory` ni `PostDrawInWorld` — el ojo quedaba VACÍO.
+   `ModifyItemDraw` (el hook tML del held item) recibe la DrawData FINAL
+   del libro: la agregamos nosotros (`return false`) y encima van el
+   párpado o el iris pegados a la MISMA transform — incluido el espejo de
+   mirar a la izquierda (`itemEffect` = FlipHorizontally; el
+   desplazamiento del iris se niega bajo espejo para que SIGA mirando al
+   cursor) y la gravedad invertida (FlipVertically). El ojo en mano
+   también alimenta `_posOjoPantalla` (el cursor-follow funciona en mano).
+
+**Verificación**: oráculo 0/0 · build real 0/0 · .tmod 2.597.781 B md5
+4bfd5395aae89c9e55faf51a228a47b7: 387 entradas (SET idéntico al de la
+.83; SOLO cambian las 2 capas del iris — base, párpados, hjson y todo lo
+demás byte-idénticos), EOF exacto, **CIRCULARIDAD VERIFICADA EN EL
+PAQUETE** (decodificación del rawimg tML — cabecera 12 B + RGBA crudo:
+32×32, esquinas α=0, pluma α media 208 en el anillo r13-16, pupila
+oscura (5,1,10), disco DORADO (252,211,130) / ROJO (252,133,142)),
+CECIL: la entrega intacta (ItemType<GrimorioHambriento> sigue en
+IL_00F2) + `ModifyItemDraw` presente (agrega a DrawDataCache y retorna
+false) + `PostDrawInWorld` llama `Item.Bottom`/`GetItemDrawFrame` +
+constante `IRIS_ESC` en el tipo — el iris cableado en inventario + mundo
++ mano, verificado en el IL de la DLL del paquete · espejo es-ES ==
+es-MX byte a byte · «ladrones»/«bandits» ausentes · headless
+"Sandboxing v6.50.84 → Adding Recipes → Server started" 0 excepciones ·
+QA de visión (VLM) del preview: círculo limpio sin esquinas, disco
+concéntrico en el socket, variante roja coherente, sin artefactos de
+borde.
+
+**Lecciones nuevas**:
+- El rawimg de tML = cabecera de 12 B (versión, ancho, alto) + RGBA
+  crudo (32×32×4+12 = 4108 B exacto) — las texturas del paquete son
+  auditables píxel a píxel SIN PIL.
+- `ModifyItemDraw` es EL hook del ítem sostenido: `return false` te da
+  el control del orden (agregas la DrawData vanilla tú mismo y las capas
+  encima).
+- El sprite "en código" del usuario (RLE base64) es la fuente autoritativa
+  de color: el GIF y el PNG v3 difieren de él en ~10 de media por canal
+  (cuantización de paleta) — recortar el iris del EXACTO mantiene el oro
+  fiel; el iris es una capa que se mueve, así que su frontera con la
+  esclera no necesita casar con la base.
+
 ## Commit v6.50.83 — LA ENTREGA DEL GRIMORIO HAMBRIENTO
 
 **Petición del usuario**: "recuerda que debes darle el arma al jugador" —
