@@ -1,5 +1,48 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.83 — LA ENTREGA DEL GRIMORIO HAMBRIENTO
+
+**Petición del usuario**: "recuerda que debes darle el arma al jugador" —
+la .82 nació con receta de 5 madera pero SIN entrega al kit; la lección
+v6.50.63 otra vez ("te olvidaste darle las armas al jugador").
+
+**La cura**: `BolsaProbador.Contenido` ahora incluye
+`ItemType<GrimorioHambriento>()` — junto a su padre el Códice Vivo
+(la .71 lo puso "completamente a parte de las demás"; su hijo demo
+hereda el lugar). Al entrar al mundo, el kit entrega la Bolsa del
+Probador; el Grimorio Hambriento llega dentro.
+
+**Verificación** (nuevo eslabón: CECIL en la cadena — la entrega
+verificada EN EL IL DE LA DLL DEL PAQUETE, no solo en el fuente):
+`BolsaProbador.Contenido` llama `ItemType<GrimorioHambriento>`
+(instrucción IL_00F2, 14 ItemType<T> en total) y `OnEnterWorld` sigue
+entregando la BolsaProbador — cableado de punta a punta. Oráculo 0/0 ·
+build real 0/0 ×2 · .tmod 2.593.374 B md5 d512c78c9f466a58c695dfc5a69ed84b:
+387 entradas (SET idéntico al de la .82, rawimg byte-idénticos, hjson por
+cuerpos, Info/pdb whitelist), EOF exacto, 7/7 texturas del Hambriento
+infladas, espejo es-ES == es-MX byte a byte, «ladrones»/«bandits»
+ausentes · headless "Sandboxing v6.50.83 → Adding Recipes → Server
+started" 0 excepciones.
+
+**El 9º y 10º incidente del espejo es-ES** (cazados en vivo):
+- #9: el COMMIT de la .82 (3eba7a5) capturó la variante REVERTIDA (tabs,
+  SIN cabecera, 81.359 B) mientras el .tmod .82 publicado lleva el espejo
+  correcto (111.265 B) — el sandbox golpeó ENTRE el build final auditado
+  y el git add de la .82; la .83 construyó fielmente el fuente malo y la
+  sección 3 de la auditoría (diff de blobs contra la .82) lo cazó. Cura:
+  tools/sync_es_es_v65083.py — la cabecera canónica es EXPLÍCITA (el .82
+  heredaba la cabecera del archivo actual, que podía no tenerla).
+- #10: el sandbox revirtió OTRA VEZ entre el sync+build+audit (01:51) y
+  el git add (~01:56) de la .83 — el primer commit .83 capturó la
+  variante tabs; la verificación POST-COMMIT (comparando el BLOB
+  comprometido, no el árbol de trabajo) lo delató. Cura: ciclo atómico
+  regenerar → verificar prefijo ESPEJO + tabs==0 → hash-object →
+  update-index → commit --amend en UN SOLO COMANDO (ventana ~1 s).
+
+**Publicación**: commit 88fd6ba + tag v6.50.83 + release 407420766 +
+asset 623580888 (2.593.374 B, md5 d512c78c9f466a58c695dfc5a69ed84b),
+CDN verificado byte a byte, /releases/latest = v6.50.83.
+
 ## Commit v6.50.82 — EL GRIMORIO HAMBRIENTO (EL OJO QUE TE MIRA)
 
 **Feedback del usuario**: "el libro esta normal y parpadea cada 10 a 20

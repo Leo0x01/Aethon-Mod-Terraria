@@ -1,7 +1,11 @@
-# AethonMod — ESTADO ACTUAL (v6.50.82)
+# AethonMod — ESTADO ACTUAL (v6.50.83)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.82 (EL GRIMORIO HAMBRIENTO:
+> Última actualización: v6.50.83 (LA ENTREGA: el Grimorio
+> Hambriento llega dentro de la Bolsa del Probador — la .82 lo dejó
+> con receta pero sin kit, la lección .63 otra vez. La entrega quedó
+> verificada por CECIL en el IL de la DLL del paquete (IL_00F2). La
+> espera anterior: v6.50.82 (EL GRIMORIO HAMBRIENTO:
 > el ojo del Códice Vivo te mira, parpadea y se enciende de rojo en un
 > ciclo de hambre de 60 s — la espera anterior: EL ESTALLIDO ES EL ADIÓS:
 > «el sol explota, pero se sigue disparando una bola de luz hacia
@@ -21,6 +25,28 @@
 > y la Bolsa de las Sombras tiene UNA sola inquilina: La Sombra de la Página.
 ## ✅ ESTADO VERIFICADO (build/forense, NO en juego)
 
+- **v6.50.83 = LA ENTREGA DEL GRIMORIO HAMBRIENTO** (la letra:
+  «recuerda que debes darle el arma al jugador» — la .82 lo dejó con
+  receta de 5 madera pero fuera del kit). La cura:
+  BolsaProbador.Contenido incluye ItemType<GrimorioHambriento>() junto
+  a su padre el Códice Vivo. VERIFICADA: build real 0/0 ×2, .tmod
+  2.593.374 B md5 d512c78c9f466a58c695dfc5a69ed84b, 387 entradas (SET
+  idéntico al de la .82, rawimg byte-idénticos, hjson por cuerpos con
+  Info/pdb en whitelist, EOF exacto, 7/7 texturas del Hambriento
+  infladas, DLL 14 ItemType<T> en Contenido), CECIL: la llamada
+  ItemType<GrimorioHambriento> verificada EN EL IL DEL PAQUETE
+  (IL_00F2) + OnEnterWorld→BolsaProbador intacta, headless
+  «Sandboxing v6.50.83 → Server started» 0 excepciones, ✅ PUBLICADA
+  (release 407420766 + asset 623580888 2.593.374 B md5
+  d512c78c9f466a58c695dfc5a69ed84b, CDN verificado byte a byte,
+  /releases/latest = v6.50.83), ⏳ en juego. EL 9º INCIDENTE: el commit
+  .82 (3eba7a5) capturó el es-ES REVERTIDO (tabs, sin cabecera) — el
+  sandbox golpeó entre build y git add de la .82; el .tmod .82
+  publicado lleva el correcto; la .83 construyó el fuente malo y la
+  auditoría lo cazó (sección 3: diff de blobs vs .82). EL 10º: el
+  sandbox revirtió OTRA VEZ entre el sync+build+audit y el git add de
+  la .83 — la verificación POST-COMMIT del BLOB lo delató; cura =
+  ciclo atómico de ~1 s (regenerar→verificar→estagear→amendar).
 - **v6.50.82 = EL GRIMORIO HAMBRIENTO (EL OJO QUE TE MIRA)**
   (la letra: «el libro esta normal y parpadea cada 10 a 20 segundos,
   cuando tiene hambre el parpadeo es mas rapido, ademas se agrega el
@@ -1471,6 +1497,19 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    `CarnadaDelGrimorio`, `RelojDeArenaDelEscriba`, `BossSummonBag`, los 4 tests de VFX.
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
+
+1. **✅ PUBLICAR v6.50.83 — HECHO** — el usuario pidió la entrega del
+   arma («recuerda que debes darle el arma al jugador»): .83 publicada
+   (release 407420766, CDN byte a byte, CECIL en el IL). El commit .83
+   (88fd6ba) además CURA el 9º/10º incidente del espejo: el es-ES del
+   commit .82 era la variante revertida; el fuente y el commit .83 ya
+   llevan el espejo regenerado (blob 03df8bed, verificado post-amend).
+
+1b. **El usuario prueba v6.50.83 en juego** — entrar al mundo: el kit
+   entrega la Bolsa del Probador → abrirla → el Grimorio Hambriento
+   dentro. Ojo: la bolsa entrega SOLO lo que falte (si ya había uno
+   fabricado, no duplica). Luego el ciclo del minuto (parpadeo 10-20 s
+   → 2 s, iris→rojo, tooltip vivo, clic der reinicia, clic izq dispara).
 
 1. **✅ PUBLICAR v6.50.82 — HECHO** — el usuario entregó el PAT
    nuevo en el chat: token repuesto (.env + ~/.git-credentials formato
