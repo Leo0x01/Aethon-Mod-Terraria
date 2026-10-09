@@ -104,32 +104,34 @@ Items: {
 			'''
 	}
 
-	// v6.50.86 — THE TWO GRIMOIRE COPIES (the user compares
-	// animations): the RUNIC one with the author's animation (golden
-	// runes orbiting the eye + a breathing aura) and the STELLAR one
-	// with the cover stars and the purple light veins animated.
-	GrimorioHambrientoRunico: {
-		DisplayName: Runic Hungry Grimoire
+	// v6.50.87 — THE TWO COPIES, ROUND TWO: the user returned the .86
+	// animations ("they look quite bad and exaggerated") and asked for
+	// MUCH SOFTER effects — the ERRATIC one turns erratic with hunger
+	// (more hunger = more erratic) plus a soft glitch; the TREMBLING
+	// one, what it does is tremble.
+	GrimorioHambrientoErratico: {
+		DisplayName: Erratic Hungry Grimoire
 		Tooltip:
 			'''
-			The RUNIC copy — the same hungry eye, plus the author's
-			animation: three golden runes orbit the eye and an aura
-			breathes over the book. The orbit speeds up and everything
-			turns RED as hunger grows.
+			The ERRATIC copy — the same hungry eye, but this book
+			grows nervous with its appetite: the gaze turns erratic
+			(the more hunger, the more erratic) and the book suffers
+			brief interference — strips of it sliding out of phase,
+			like a signal breaking up.
 			Left click: homing bolt (testing, no mana).
 			Right click: resets the appetite to replay the demo.
 			Testing item — compare against the original.
 			'''
 	}
 
-	GrimorioHambrientoEstelar: {
-		DisplayName: Stellar Hungry Grimoire
+	GrimorioHambrientoTembloroso: {
+		DisplayName: Trembling Hungry Grimoire
 		Tooltip:
 			'''
-			The STELLAR copy — the same hungry eye, plus the cover
-			stars twinkling and the purple light veins flowing across
-			the book in waves born from the eye. The whole sky grows
-			restless as hunger grows.
+			The TREMBLING copy — the same hungry eye, but this book
+			shivers: a soft shudder that grows with hunger, from a
+			sated whisper to the tremble of a full appetite. The
+			book and its eye tremble together.
 			Left click: homing bolt (testing, no mana).
 			Right click: resets the appetite to replay the demo.
 			Testing item — compare against the original.

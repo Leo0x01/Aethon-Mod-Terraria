@@ -109,32 +109,34 @@ Items: {
                         '''
         }
 
-        // v6.50.86 — LAS DOS COPIAS DEL GRIMORIO (el usuario compara
-        // animaciones): el RÚNICO con la animación del autor (runas doradas
-        // orbitando el ojo + aura que respira) y el ESTELAR con las
-        // estrellas de la tapa y las venas de luz morada animadas.
-        GrimorioHambrientoRunico: {
-                DisplayName: Grimorio Hambriento Rúnico
+        // v6.50.87 — LAS DOS COPIAS, SEGUNDA RONDA: el usuario devolvió las
+        // animaciones de la .86 («se ven bastante mal y exageradas») y pidió
+        // efectos MÁS SUAVES — el ERRÁTICO se vuelve errático con el hambre
+        // (más hambre = más errático) y sufre un glitch suave; el
+        // TEMBLOROSO lo que hace es temblar.
+        GrimorioHambrientoErratico: {
+                DisplayName: Grimorio Hambriento Errático
                 Tooltip:
                         '''
-                        La copia RÚNICA — el mismo ojo hambriento, más la
-                        animación del autor: tres runas doradas orbitan el ojo
-                        y un aura respira sobre el libro. La órbita se acelera
-                        y todo vira a ROJO cuanto más hambre.
+                        La copia ERRÁTICA — el mismo ojo hambriento, pero este
+                        libro se pone nervioso con el apetito: la mirada se
+                        vuelve errática (cada vez más cuanto más hambre) y el
+                        libro sufre interferencias breves, tiras que se
+                        desfasan como una señal que se pierde.
                         Clic izq: descarga perseguidora (pruebas, sin maná).
                         Clic der: reinicia el apetito para repetir la demo.
                         Objeto de pruebas — comparar con el original.
                         '''
         }
 
-        GrimorioHambrientoEstelar: {
-                DisplayName: Grimorio Hambriento Estelar
+        GrimorioHambrientoTembloroso: {
+                DisplayName: Grimorio Hambriento Tembloroso
                 Tooltip:
                         '''
-                        La copia ESTELAR — el mismo ojo hambriento, más las
-                        estrellas de la tapa titilando y las venas de luz
-                        morada recorriendo el libro en oleadas que nacen del
-                        ojo. El cielo entero se agita cuanto más hambre.
+                        La copia TEMBLOROSA — el mismo ojo hambriento, pero
+                        este libro tiembla: un escalofrío suave que crece con
+                        el hambre, del susurro saciado al temblor del apetito
+                        total. El libro y su ojo tiemblan juntos.
                         Clic izq: descarga perseguidora (pruebas, sin maná).
                         Clic der: reinicia el apetito para repetir la demo.
                         Objeto de pruebas — comparar con el original.

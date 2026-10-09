@@ -14,10 +14,9 @@ namespace AethonMod.Content.Weapons
     /// <summary>
     /// EL ESTADO DE UN GRIMORIO (v6.50.86) — cada COPIA del libro anima su
     /// PROPIO ojo. La .82 guardaba el ciclo en statics de la CLASE: al llegar
-    /// la tercera copia (el original, el Rúnico y el Estelar) habría UN solo
-    /// hambre compartido y los tres ojos marcarían el mismo paso. Ahora el
-    /// estado vive en una instancia POR CLASE de ítem (GrimorioHambriento,
-    /// GrimorioHambrientoRunico y GrimorioHambrientoEstelar declaran cada uno
+    /// la tercera copia habría UN solo hambre compartido y los tres ojos
+    /// marcarían el mismo paso. Ahora el estado vive en una instancia POR
+    /// CLASE de ítem (GrimorioHambriento y sus dos copias declaran cada uno
     /// su `static EstadoGrimorio` y lo exponen vía la propiedad virtual
     /// `Estado`) — cada libro pasa hambre por su cuenta.
     ///
@@ -27,6 +26,13 @@ namespace AethonMod.Content.Weapons
     /// rápido se mueve el ojo y más rápido parpadea, hasta alcanzar un
     /// parpadeo cada 2 segundos; además el grimorio hace que el ojo se vuelva
     /// rojo» — comprimido a UN MINUTO para la demo.
+    ///
+    /// v6.50.87 — LA MIRADA ERRÁTICA (la copia Errático marca su instancia
+    /// con `Erratico = true`): sus cambios de mirada pasan de 3 s a 0,16 s,
+    /// el resbalón se vuelve brusco (LERP 0,10 → 0,36 con el hambre) y cada
+    /// meta lleva un tic que ninguna repetición comparte. Saciado es apenas
+    /// más inquieto que el original; famélico es un ojo que no se queda quieto.
+    /// El libro NORMAL no marca la bandera: su ciclo queda intacto.
     /// </summary>
     public class EstadoGrimorio
     {
@@ -35,6 +41,7 @@ namespace AethonMod.Content.Weapons
         private const float LERP_MIRADA = 0.10f;
 
         public float Hambre;
+        public bool Erratico;        // v6.50.87 — la copia ERRÁTICA (mirada nerviosa)
         public uint TickMarcado;
         public int TParpadeo = 180;
         public int Fase;                    // >0: secuencia del párpado (11→1)
@@ -78,14 +85,19 @@ namespace AethonMod.Content.Weapons
                 TParpadeo = Math.Max(20, (int)periodo);
             }
 
-            // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético) ---
+            // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético);
+            //     errática (v6.50.87): 3 s → 0,16 s — la mirada nerviosa ---
             if (--TMirada <= 0)
             {
                 ElegirMirada();
                 float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
+                if (Erratico)
+                    dwell = MathHelper.Lerp(3f * 60f, 0.16f * 60f, h);
                 TMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
             }
-            DespActual = Vector2.Lerp(DespActual, DespMeta, LERP_MIRADA);
+            // v6.50.87 — la errática resbala MÁS BRUSCO con el hambre (0,10 → 0,36)
+            DespActual = Vector2.Lerp(DespActual, DespMeta,
+                Erratico ? 0.10f + 0.26f * h : LERP_MIRADA);
         }
 
         private void ElegirMirada()
@@ -119,6 +131,11 @@ namespace AethonMod.Content.Weapons
                            * new Vector2(3.5f, 2.8f);
                 }
             }
+            // v6.50.87 — el tic errático: ninguna mirada se repite
+            // (±0,35 / ±0,28 px escalados por el hambre — un temblor de meta)
+            if (Erratico)
+                meta += new Vector2((Main.rand.NextFloat() - 0.5f) * 0.7f,
+                                    (Main.rand.NextFloat() - 0.5f) * 0.56f) * Hambre;
             DespMeta = meta;
         }
 
@@ -200,7 +217,17 @@ namespace AethonMod.Content.Weapons
     /// la zona del GIF con pluma sobre la base: esa costura era el salto de
     /// calidad). El parpadeo queda píxel sobre píxel con el libro. Además el
     /// estado pasó a EstadoGrimorio POR CLASE (ver arriba) para que las
-    /// copias Rúnico y Estelar animen cada una su ojo.
+    /// copias animen cada una su ojo.
+    ///
+    /// v6.50.87 — EL LIBRO NORMAL QUEDA TAL CUAL (la letra del usuario:
+    /// «deja solo el grimorio hambriento normal y modifica las dos copias
+    /// con otros efectos, borra los anteriores, esta vez que sean mas suave
+    /// los efectos»). Este archivo SOLO GANA aditivos para las copias: las
+    /// constantes pasan a protected (las copias anclan sus capas al mismo
+    /// socket y al mismo iris), el draw en mundo se extrae a
+    /// PostDrawInWorldCore (recibe un corrimiento: la Temblorosa le pasa su
+    /// temblor — con Zero el dibujo del libro NORMAL es bit-idéntico) y
+    /// PivoteEnMundo/Capa exponen la convención vanilla v6.50.84.
     /// </summary>
     public class GrimorioHambriento : ModItem
     {
@@ -211,7 +238,8 @@ namespace AethonMod.Content.Weapons
         // v6.50.84 — la capa del iris es un DISCO 32×32 (recorte circular del
         // sprite exacto) que vive en una caja fuente de 174 px → 8,87 px de
         // juego: esta constante mapea la textura al espacio del libro.
-        private const float IRIS_ESC = 0.2773f;
+        // v6.50.87: protected — las copias dibujan su iris con la misma escala.
+        protected const float IRIS_ESC = 0.2773f;
 
         // === EL ESTADO POR COPIA (v6.50.86) ===
         private static readonly EstadoGrimorio _estado = new EstadoGrimorio();
@@ -296,7 +324,23 @@ namespace AethonMod.Content.Weapons
             Estado.Paso();
         }
 
-        private static Color Alfa(float a) => new Color(255, 255, 255, (int)(255 * a));
+        // v6.50.87 — protected: las copias tiñen su capa IrisRojo igual que el original.
+        protected static Color Alfa(float a) => new Color(255, 255, 255, (int)(255 * a));
+
+        /// <summary>Una capa del grimorio (Medio/Cerrado/Iris/IrisRojo) — el
+        /// asset compartido de la familia.</summary>
+        protected static Texture2D Capa(string nombre) =>
+            ModContent.Request<Texture2D>("AethonMod/Content/Weapons/GrimorioHambriento_" + nombre).Value;
+
+        /// <summary>LA CONVENCIÓN VANILLA del ítem en el suelo (v6.50.84):
+        /// centrado en el hitbox y asentado en su fondo — la usan las copias
+        /// para dibujar su libro en el mismo lugar exacto.</summary>
+        protected Vector2 PivoteEnMundo(out Rectangle frame, out Vector2 origen)
+        {
+            Main.GetItemDrawFrame(Item.type, out var _, out frame);
+            origen = frame.Size() * 0.5f;
+            return Item.Bottom - Main.screenPosition - new Vector2(0f, origen.Y);
+        }
 
         // =================================================================
         // EL DIBUJO — la vanilla ya dibujó la base (el socket vacío es la
@@ -346,6 +390,15 @@ namespace AethonMod.Content.Weapons
 
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor,
             Color alphaColor, float rotation, float scale, int whoAmI)
+            => PostDrawInWorldCore(spriteBatch, lightColor, alphaColor, rotation, scale, whoAmI,
+                Vector2.Zero);
+
+        /// <summary>v6.50.87 — el corazón del draw en mundo CON CORRIMIENTO:
+        /// las capas del ojo (párpado o iris) van a pivote + corr. El libro
+        /// normal llama con Zero (dibujo bit-idéntico al de la .86); la copia
+        /// Temblorosa le pasa su temblor — el ojo tiembla JUNTO al libro.</summary>
+        protected void PostDrawInWorldCore(SpriteBatch spriteBatch, Color lightColor,
+            Color alphaColor, float rotation, float scale, int whoAmI, Vector2 corr)
         {
             if (Main.netMode == NetmodeID.Server)
                 return;
@@ -368,7 +421,7 @@ namespace AethonMod.Content.Weapons
                 var tex = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
-                spriteBatch.Draw(tex, pivote, frame, lightColor, rotation, origen, scale,
+                spriteBatch.Draw(tex, pivote + corr, frame, lightColor, rotation, origen, scale,
                     SpriteEffects.None, 0f);
                 // v6.50.85: el libro queda a color normal al parpadear.
                 return;
@@ -376,7 +429,7 @@ namespace AethonMod.Content.Weapons
 
             // el iris: el texel del ojo GIRA con el libro mientras vuela
             Vector2 alOjo = (OJO + Estado.DespActual - origen) * scale;
-            Vector2 posOjo = pivote + alOjo.RotatedBy(rotation);
+            Vector2 posOjo = pivote + corr + alOjo.RotatedBy(rotation);
             Estado.PosOjoPantalla = posOjo;
             Estado.PosValida = true;
 
