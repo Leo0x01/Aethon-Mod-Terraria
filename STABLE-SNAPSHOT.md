@@ -1,7 +1,7 @@
-# AethonMod — ESTADO ACTUAL (v6.50.88)
+# AethonMod — ESTADO ACTUAL (v6.50.89)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.88 (EL GLITCH +70 %: el Errático sube de volumen) LA BASE — la .82 rellenaba el socket con RUIDO
+> Última actualización: v6.50.89 (EL GRIMORIO INESTABLE: el glitch y el temblor unidos + el aura roja pequeña) LA BASE — la .82 rellenaba el socket con RUIDO
 > GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
 > vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
 > MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
@@ -1903,6 +1903,39 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ PUBLICAR v6.50.89 — HECHO** — el usuario pidió «un cuarto
+   grimorio donde el efecto glish y el temblor este unidos, ademas
+   ponle un aura pequeña roja». Entregado EL INESTABLE: la unión de las
+   dos copias aprobadas (glitch .88 INTACTO con máquina PROPIA +
+   temblor .87 con SU hambre) + el AURA ROJA PEQUEÑA nueva (SoftGlow
+   teñido (255,64,48), 1,55× el ancho, alfa 0,30→0,42, respiración
+   ±12 % a 0,45 Hz, piso de luz 35 % en el mundo — detrás del libro en
+   inventario/mundo/mano); el ojo queda del ciclo NORMAL (sereno en un
+   cuerpo que se descompone); icono = copia byte a byte de la base
+   (familia); entrega en la Bolsa del Probador (los CUATRO libros, cada
+   uno con SU EstadoGrimorio). .tmod 2.613.722 B md5
+   209e39489aaf987875abf1208aa1a66a (388 entradas = 387 + el rawimg
+   nuevo, EOF exacto, blob diff whitelist exacto, CECIL con las dos
+   recetas + 11 constantes del aura y Errático/Tembloroso/base IL
+   IDÉNTICO a .88, espejo es-ES==es-MX paquete+árbol, headless 7796 0
+   excepciones, VLM QA 6/6). PUBLICADO: release 408419661 + asset
+   626451043 2.613.722 B, CDN verificado byte a byte, /releases/latest
+   = v6.50.89. EL 17º INCIDENTE DEL ESPEJO (es-ES del árbol
+   re-serializado durante la sesión headless — la .tmod siempre sana,
+   experimentos controlados sin reproducir; cura sync + chequeo
+   pre-commit).
+
+1c. **El usuario prueba v6.50.89 en juego** — EL INESTABLE: (a) al
+   principio solo el AURA ROJA respirando tras el libro (pequeña: halo
+   ~10 px por lado) y un temblor casi invisible; (b) la primera ráfaga
+   llega a los 2 s de hambre: el libro se rompe en 2-4 TIRAS hasta ±6
+   px QUE A LA VEZ TIEMBLA entero (la unión — cada tira con el temblor
+   del cuerpo y su desfase); (c) a hambre total: roto ~12 % del tiempo,
+   ráfagas cada ~2 s, temblor 1,3 px y el aura ardiendo (0,42) — de
+   noche NO se apaga (piso 35 %); (d) el ojo queda SERENO (ciclo
+   normal) mientras el cuerpo se descompone; (e) los otros tres libros
+   EXACTAMENTE igual que en la .88. Checklists previos vigentes.
+
 1. **✅ PUBLICAR v6.50.88 — HECHO** — el usuario probó el glitch de
    la .87 y lo vio tímido: «el efecto glish es muy suave, aumente el
    efecto glish al menos un 70 %». La receta NO cambia (ráfagas breves,
@@ -2141,6 +2174,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.89** | ✅ Build-verificada (build real 0/0, .tmod 2.613.722 B md5 209e39489aaf987875abf1208aa1a66a, 388 entradas = 387 + el rawimg del Inestable — entra SOLO eso, EOF exacto, blob diff vs .88 con SOLO dll/pdb/Info + 3 hjson + el rawimg nuevo, TODO el arte byte-idéntico, el icono del Inestable == base, CECIL: receta .88 COMPLETA (15f/2.1f/12-24/%13/%9/%22/%5/0.55/0.45/120) + temblor .87 (9.3/17.3/11.9/19.1/0.2/1.1/1.7/0.6/0.8/0.25) + 11 constantes del aura (1.55/0.30/0.42/0.45/0.88/0.12/0.35/0.04/255/64/48), Errático/Tembloroso/base con IL IDÉNTICO a .88, espejo es-ES==es-MX EN PAQUETE Y ÁRBOL, en-US tabs, headless «Sandboxing v6.50.89 → Listening 7796 → Server started» 0 excepciones, VLM QA 6/6 APROBADO), ✔ PUBLICADA (release 408419661 + asset 626451043 2.613.722 B, CDN verificado byte a byte md5 209e39489aaf987875abf1208aa1a66a, /releases/latest = v6.50.89), ⏳ en juego | LA LETRA: «crea un cuarto grimorio donde el efecto glish y el temblor este unidos, ademas ponle un aura pequeña roja». LA UNIÓN con firma propia: glitch .88 (máquina PROPIA — jamás sincronizado con el Errático) + temblor .87 (SU hambre) + AURA ROJA PEQUEÑA nueva (1,55×, 0,30→0,42, respiración 0,45 Hz, piso de luz 35 %) + ojo del ciclo NORMAL (sereno en un cuerpo que se descompone). LECCIONES: (1) el espejo se chequea ANTES DE CADA COMMIT (el 17º incidente: el ÁRBOL se corrompió con el paquete sano); (2) una máquina de ráfagas POR LIBRO (la sincronía delataría el truco); (3) el aura VIVA se ve hasta en la cuadrícula del inventario — mejor que un halo horneado que no cabe; (4) el piso de luz 35 % es lo que la hace AURA: de noche sigue ardiendo |
 | **v6.50.88** | ✅ Build-verificada (build real 0/0, .tmod 2.604.110 B md5 3eabd357129e85706a024be7691a4363, 387 entradas — SET IDÉNTICO a .87, EOF exacto, SOLO cambian dll/pdb/Info (esperado) + el en-US con diff COSMÉTICO documentado (el 15º incidente: el paquete .87 llevaba un en-US con espacios jamás commiteado; la .88 vuelve a ser IGUAL AL ÁRBOL — probado parseando ambos con hjson, contenido IDÉNTICO), todo el arte byte-idéntico, las copias == base byte a byte, CECIL v65088 completo (15f/2.1f presentes con **22f/3.2f de la .87 AUSENTES** + ráfaga 12-24 [Ldc_I4_S 12/13 — lección: Roslyn emite 9..127 como Ldc_I4_S sbyte] + desfase ±6 px [% 13 en Layout] + tiras 2-4 + alto 4-12 [% 9] + entrega ×3 IL_00F2/IL_0103/IL_0114 + el libro normal delega en PostDrawInWorldCore), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless «Sandboxing v6.50.88 → Generating World Aethon88 → Listening 7795 → Server started» 0 excepciones, QA VLM: ráfagas visiblemente más violentas que la .87 con el iris coherente en su tira y sin ghosting, métricas simuladas 500 ráfagas (h=1): media |off| 1,75→3,24 px (+85 %) · máx 3→6 (+100 %) · tiras 1,38→2,56 (+86 %) · presencia 5,2→12,5 % (×2,41), ✔ PUBLICADA (release 407818865 + asset 624679554 2.604.110 B, CDN verificado byte a byte md5 3eabd357129e85706a024be7691a4363, /releases/latest = v6.50.88), ⏳ en juego | LA LETRA: «el efecto glish es muy suave, aumente el efecto glish al menos un 70 %». LECCIONES: (1) Roslyn emite los enteros 9..127 como Ldc_I4_S con operando sbyte — el TieneInt del cecil_check cubre Ldc_I4, Ldc_I4_S Y las formas cortas 0-8/-1; (2) INVARIANTE NUEVO: el PAQUETE debe ser IGUAL AL ÁRBOL — todo diff de blobs contra el release anterior tiene que explicarse (la .87 lo perdió en en-US sin que nadie lo notara); (3) al subir de volumen un efecto se ajustan TODAS las perillas juntas (desfase+tiras+vida+intervalo+cadencia) para que la percepción escale ≥ la suma pedida |
 | **v6.50.87** | ✅ Build-verificada (build real 0/0, .tmod 2.605.625 B md5 d1e14a9b0546753c849ba96b8579172e, 387 entradas — 397 − 12 efectos de la .86 + 2 copias renombradas EXACTAS, EOF exacto, SET exacto, SOLO cambian 3 hjson (esperado) + dll/pdb/Info (whitelist), **base/Medio/Cerrado/Iris/IrisRojo BYTE-IDÉNTICOS a .86 — el libro NORMAL intacto**, las copias nuevas == base byte a byte, la DLL ya no menciona Runico/Estelar/Runa/Estrellas/Venas (por PREFIJO de ruta — TopeEstrellas del Telar y EstrellasCamino del RiftLib son de OTROS ítems), CECIL v65087 completo (herencia + get_Estado ×2 + **Erratico=true con Ldc_I4_1+Stfld SOLO en el Errático** + senos del temblor 9,3/17,3/11,9/19,1 + máquina de glitch 22f/3.2f/0.12f + PreDraw false ×4 + Tembloroso inyecta el temblor en drawData.position y llama a la base + Errático en franjas con ancla Vector2.Zero [FNA lo compila como call get_Zero] + el libro normal delega en PostDrawInWorldCore con Item.Bottom/GetItemDrawFrame), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7794 «Sandboxing v6.50.87 → Adding Recipes → Server started» 0 excepciones, QA VLM: panel limpio idéntico al normal + tear sutil con el ojo coherente montado en su tira + temblor suave creciente (métricas: temblor pico 1,78 px/media 1,03 a h=1; glitch |off| tiras máx 3,00 px/media 1,82), ✔ PUBLICADA (release 407784207 + asset 624575936 2.605.625 B, CDN verificado byte a byte md5 d1e14a9b0546753c849ba96b8579172e, /releases/latest = v6.50.87), ⏳ en juego | LA LETRA: «bueno las animaciones de efectos se ven bastante mal y exageradas, deja solo el grimorio hambriento normal y modifica las dos copias con otros efectos, borra los anteriores, esta vez que sean mas suave los efectos… te dire como animar una de las copias, has que una de las copias se vuelva erratica al tener hambre, cuanta mas hambre mas erratica y que tenga un efecto glish, que la otra lo que haga sea temblar». LECCIONES: (1) SUAVE = presencia por ausencia — ráfagas breves con libro limpio el 96 % del tiempo > ruido permanente por frame (la .86 gritaba, la .87 susurra); (2) el temblor orgánico son DOS SENOS INCOMMENSURABLES por eje, jamás ruido aleatorio (el ruido titila, los senos respiran); (3) el glitch determinista por tick (hash de la semilla) hace que hotbar y mano muestren el MISMO desfase; (4) la franja bajo espejo: FlipHorizontally NO cambia el ancla (la franja se voltea dentro de su propio quad) pero FlipVertically ancla por el borde INFERIOR (fr.Height − b); (5) FNA compila Vector2.Zero como call get_Zero (property), no ldsfld — los checks de IL deben cubrir ambas formas |
 | **v6.50.86** | ✅ Build-verificada (build real 0/0, .tmod 2.608.476 B md5 07af7bad8cdf4fa6342f9e13a0220a57, 397 entradas — 385+12 texturas nuevas exactas, EOF exacto, SOLO cambian Medio/Cerrado + 3 hjson + dll/pdb/Info, base/Iris/IrisRojo BYTE-IDÉNTICOS a .85, **CONTINUIDAD DEL PARPADEO EN EL PAQUETE** (|Δ|=0,05 fuera del ojo al parpadear — el GIF retirado, párpados LANCZOS puro de la MISMA corrida), las copias base == base byte a byte, 3 grupos de estrellas equilibrados (50/47/47) y 4 bandas de venas (50/61/59/51) con 0 px invadiendo el viaje del iris, venas MORADAS RGB (206,71,226), CECIL v65086 completo (herencia + get_Estado por clase + ModifyItemDraw de las copias + entrega ×3 en IL_00F2/IL_0103/IL_0114), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7792 «Sandboxing v6.50.86 → Adding Recipes → Creating world → Listening → Server started» 0 excepciones, QA VLM: libro idéntico base/medio/cerrado sin costuras + estrellas titilando + venas en ola viajera + 3 runas doradas orbitando), ✔ PUBLICADA (release 407742907 + asset 624455614 2.608.476 B, CDN verificado byte a byte md5 07af7bad8cdf4fa6342f9e13a0220a57, /releases/latest = v6.50.86), ⏳ en juego | LA LETRA: «al usar el gif para abrir y cerrar el ojo hace que se note el cambio en cuanto a calidad, el codigo puro da mejor calidad ya que al ser codigo puedes recrear los pixeles fielmente, asi que te dare el codigo del ojo entrecerrado y cerrado… haz una copia del grimorio pero con alguna animacion que creas que sea correcta, luego has otra copida pero en esta tercera copia quiero que animes las estrellas que tiene el grimorio en la tapa y animes las venas de luz morada que recorren el libro» + los 4 códigos v3 |

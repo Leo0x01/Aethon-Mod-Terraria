@@ -1,5 +1,70 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.89 — EL GRIMORIO INESTABLE: EL GLITCH Y EL TEMBLOR UNIDOS + EL AURA ROJA PEQUEÑA
+
+**Petición del usuario**: "crea un cuarto grimorio donde el efecto glish y
+el temblor este unidos, ademas ponle un aura pequeña roja".
+
+**La unión de las dos copias aprobadas, con una firma propia.** El
+Grimorio Hambriento Inestable junta las dos personalidades en un solo
+libro — cada efecto conserva SU receta intacta:
+
+1. **EL GLITCH del Errático** — la receta v6.50.88 ÍNTEGRA (el volumen
+   aprobado tras el +70 %): tiras 2-4 desfasándose hasta ±6 px, ráfagas
+   de 12-24 ticks que se regeneran cada 2 frames, intervalo 15 s → 2,1 s
+   con el hambre, gate 12 % — con MÁQUINA PROPIA (estado estático
+   propio): el Inestable rompe a SU hora, jamás sincronizado con el
+   Errático del mismo inventario.
+2. **EL TEMBLOR del Tembloroso** — los dos senos incommensurables por
+   eje (9,3/17,3 Hz en X · 11,9/19,1 Hz en Y), amplitud 0,2 px saciado →
+   1,3 px famélico leyendo SU PROPIA hambre. El libro entero tiembla y a
+   la vez se rompe: cada tira lleva el temblor del cuerpo y su desfase
+   de ráfaga; el iris viaja con su tira y tiembla con el libro.
+3. **EL AURA ROJA PEQUEÑA** (lo nuevo de la casa) — el SoftGlow 64×64
+   de la librería de efectos teñido (255, 64, 48) RESPIRANDO detrás del
+   libro en los TRES estados: inventario (aura → libro → ojo), mundo
+   (aura en PreDrawInWorld con la convención vanilla del pivote-centro
+   v6.50.84) y mano (el aura es la PRIMERA DrawData del cache; el
+   temblor se inyecta en la DrawData del libro). PEQUEÑA de verdad:
+   1,55× el ancho del libro (halo ~10 px por lado), alfa 0,30 saciado →
+   0,42 famélico, respiración lenta ±12 % a 0,45 Hz con hinchado ±4 %,
+   y EN EL MUNDO la luz no la apaga: piso de 35 % de brillo — de noche
+   el libro sigue ardiendo.
+4. **EL OJO queda del ciclo NORMAL** (mirada 4 s → 0,35 s, SIN el tic
+   errático): la personalidad de la cuarta copia es un ojo sereno en un
+   cuerpo que se descompone — poseído por dentro, roto por fuera.
+5. **EL ICONO** es copia BYTE A BYTE de la base (la convención de la
+   familia): el sprite es un rectángulo lleno sin margen para un halo
+   horneado, y el aura VIVA del código se ve hasta en la cuadrícula del
+   inventario, latiendo.
+6. **ENTREGA**: la Bolsa del Probador gana el cuarto libro (la lección
+   v6.50.63/.83 viva — cada copia pasa hambre POR SEPARADO).
+
+**Verificación**: oráculo 0/0 (309 .cs) · build real 0/0 · .tmod 2.613.722
+B md5 209e39489aaf987875abf1208aa1a66a: 388 entradas (387 + el rawimg del
+Inestable — entra SOLO eso), EOF exacto, blob diff vs .88 con SOLO
+dll/pdb/Info + 3 hjson (claves nuevas) + el rawimg nuevo, TODO el arte
+byte-idéntico, espejo es-ES == es-MX EN EL PAQUETE Y EN EL ÁRBOL, en-US
+con tabs, CECIL: la receta .88 COMPLETA + la del temblor .87 + las 11
+constantes del aura en el IL del Inestable, y Errático/Tembloroso/base
+con IL IDÉNTICO al de la .88 (la .89 no los toca) · headless
+«Sandboxing v6.50.89 → Listening 7796 → Server started» 0 excepciones ·
+VLM QA del preview 6×/6 APROBADO. **EL 17º INCIDENTE DEL ESPEJO** (nuevo,
+cazado ANTES del commit): el es-ES del ÁRBOL amaneció RE-SERIALIZADO
+(tabs, sin comentarios) durante la sesión headless con el primer run
+colgado en el prompt de contraseña; la .tmod (buildead ANTES) siempre
+llevó el espejo correcto y los experimentos controlados NO lo
+reproducen — cura sync_es_es + chequeo pre-commit (cabecera/cuerpo/tabs)
+y paquete == árbol verificado byte a byte.
+
+**Lecciones**: (1) el invariante del espejo se chequea ANTES DE CADA
+COMMIT — el paquete puede estar perfecto mientras el árbol se corrompe;
+(2) la unión de efectos gana con UNA máquina por libro: sincronizar las
+ráfagas de dos copias del mismo inventario delataría el truco; (3) un
+aura de código VIVO late hasta en la cuadrícula del inventario — mejor
+que un halo horneado que no cabe; (4) el piso de luz del aura (35 %) es
+lo que la hace AURA y no una mancha: de noche sigue ardiendo.
+
 ## Commit v6.50.88 — EL GLITCH +70 %: EL ERRÁTICO SUBE DE VOLUMEN
 
 **Petición del usuario**: "el efecto glish es muy suave, aumente el
