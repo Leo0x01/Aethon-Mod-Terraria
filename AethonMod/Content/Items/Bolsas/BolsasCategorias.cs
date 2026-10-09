@@ -69,6 +69,13 @@ namespace AethonMod.Content.Items.Bolsas
             // nacido de CÓDIGO convertido en arma ANIMADA — el icono parpadea
             // en el inventario) — completamente a parte de las demás.
             l.Add((ModContent.ItemType<Weapons.CodiceVivo.CodiceVivo>(), 1));
+            // v6.50.83 — EL GRIMORIO HAMBRIENTO: la DEMO del hambre (v6.50.82
+            // nació con receta de 5 madera pero SIN entrega — la lección
+            // v6.50.63 otra vez: "te olvidaste darle las armas al jugador").
+            // El ciclo completo en UN MINUTO: parpadeo 10-20 s → 2 s, el iris
+            // persigue el cursor cada vez más rápido y vira de dorado a rojo;
+            // clic derecho reinicia el apetito.
+            l.Add((ModContent.ItemType<GrimorioHambriento>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.
