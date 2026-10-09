@@ -109,6 +109,38 @@ Items: {
                         '''
         }
 
+        // v6.50.86 — LAS DOS COPIAS DEL GRIMORIO (el usuario compara
+        // animaciones): el RÚNICO con la animación del autor (runas doradas
+        // orbitando el ojo + aura que respira) y el ESTELAR con las
+        // estrellas de la tapa y las venas de luz morada animadas.
+        GrimorioHambrientoRunico: {
+                DisplayName: Grimorio Hambriento Rúnico
+                Tooltip:
+                        '''
+                        La copia RÚNICA — el mismo ojo hambriento, más la
+                        animación del autor: tres runas doradas orbitan el ojo
+                        y un aura respira sobre el libro. La órbita se acelera
+                        y todo vira a ROJO cuanto más hambre.
+                        Clic izq: descarga perseguidora (pruebas, sin maná).
+                        Clic der: reinicia el apetito para repetir la demo.
+                        Objeto de pruebas — comparar con el original.
+                        '''
+        }
+
+        GrimorioHambrientoEstelar: {
+                DisplayName: Grimorio Hambriento Estelar
+                Tooltip:
+                        '''
+                        La copia ESTELAR — el mismo ojo hambriento, más las
+                        estrellas de la tapa titilando y las venas de luz
+                        morada recorriendo el libro en oleadas que nacen del
+                        ojo. El cielo entero se agita cuanto más hambre.
+                        Clic izq: descarga perseguidora (pruebas, sin maná).
+                        Clic der: reinicia el apetito para repetir la demo.
+                        Objeto de pruebas — comparar con el original.
+                        '''
+        }
+
         // v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
         // weapons (test — the book is NOT touched). Pride's power (FMA:B).
         // v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three

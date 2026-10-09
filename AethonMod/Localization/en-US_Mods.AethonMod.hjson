@@ -104,6 +104,38 @@ Items: {
 			'''
 	}
 
+	// v6.50.86 — THE TWO GRIMOIRE COPIES (the user compares
+	// animations): the RUNIC one with the author's animation (golden
+	// runes orbiting the eye + a breathing aura) and the STELLAR one
+	// with the cover stars and the purple light veins animated.
+	GrimorioHambrientoRunico: {
+		DisplayName: Runic Hungry Grimoire
+		Tooltip:
+			'''
+			The RUNIC copy — the same hungry eye, plus the author's
+			animation: three golden runes orbit the eye and an aura
+			breathes over the book. The orbit speeds up and everything
+			turns RED as hunger grows.
+			Left click: homing bolt (testing, no mana).
+			Right click: resets the appetite to replay the demo.
+			Testing item — compare against the original.
+			'''
+	}
+
+	GrimorioHambrientoEstelar: {
+		DisplayName: Stellar Hungry Grimoire
+		Tooltip:
+			'''
+			The STELLAR copy — the same hungry eye, plus the cover
+			stars twinkling and the purple light veins flowing across
+			the book in waves born from the eye. The whole sky grows
+			restless as hunger grows.
+			Left click: homing bolt (testing, no mana).
+			Right click: resets the appetite to replay the demo.
+			Testing item — compare against the original.
+			'''
+	}
+
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three

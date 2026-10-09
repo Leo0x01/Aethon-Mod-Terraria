@@ -76,6 +76,15 @@ namespace AethonMod.Content.Items.Bolsas
             // persigue el cursor cada vez más rápido y vira de dorado a rojo;
             // clic derecho reinicia el apetito.
             l.Add((ModContent.ItemType<GrimorioHambriento>(), 1));
+            // v6.50.86 — LAS DOS COPIAS DEL GRIMORIO: el usuario compara
+            // animaciones sobre el MISMO arte — el RÚNICO (la animación del
+            // autor: runas doradas orbitando el ojo + aura que respira) y el
+            // ESTELAR (las estrellas de la tapa titilando + las venas de luz
+            // morada recorriendo el libro). Cada copia pasa hambre POR
+            // SEPARADO (EstadoGrimorio por clase) — los tres ciclos viven a
+            // la vez en el inventario.
+            l.Add((ModContent.ItemType<GrimorioHambrientoRunico>(), 1));
+            l.Add((ModContent.ItemType<GrimorioHambrientoEstelar>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.

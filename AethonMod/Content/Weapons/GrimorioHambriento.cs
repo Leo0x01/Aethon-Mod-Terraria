@@ -12,10 +12,134 @@ using AethonMod.Content.Systems;
 namespace AethonMod.Content.Weapons
 {
     /// <summary>
+    /// EL ESTADO DE UN GRIMORIO (v6.50.86) — cada COPIA del libro anima su
+    /// PROPIO ojo. La .82 guardaba el ciclo en statics de la CLASE: al llegar
+    /// la tercera copia (el original, el Rúnico y el Estelar) habría UN solo
+    /// hambre compartido y los tres ojos marcarían el mismo paso. Ahora el
+    /// estado vive en una instancia POR CLASE de ítem (GrimorioHambriento,
+    /// GrimorioHambrientoRunico y GrimorioHambrientoEstelar declaran cada uno
+    /// su `static EstadoGrimorio` y lo exponen vía la propiedad virtual
+    /// `Estado`) — cada libro pasa hambre por su cuenta.
+    ///
+    /// El ciclo es el de la .82 (la letra del usuario): «el libro está normal
+    /// y parpadea cada 10 a 20 segundos; cuando tiene hambre el parpadeo es
+    /// más rápido; se agrega el movimiento del ojo; cuanto más hambre más
+    /// rápido se mueve el ojo y más rápido parpadea, hasta alcanzar un
+    /// parpadeo cada 2 segundos; además el grimorio hace que el ojo se vuelva
+    /// rojo» — comprimido a UN MINUTO para la demo.
+    /// </summary>
+    public class EstadoGrimorio
+    {
+        // el viaje del iris (px de textura 36×49) y el resbalón de la mirada
+        private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);
+        private const float LERP_MIRADA = 0.10f;
+
+        public float Hambre;
+        public uint TickMarcado;
+        public int TParpadeo = 180;
+        public int Fase;                    // >0: secuencia del párpado (11→1)
+        public int TMirada = 90;
+        public Vector2 DespMeta = Vector2.Zero;
+        public Vector2 DespActual = Vector2.Zero;
+        public Vector2 PosOjoPantalla = Vector2.Zero;
+        public bool PosValida;
+        public uint UltimoDisparo;
+
+        /// <summary>EL REINICIO del apetito (clic derecho — la demo se repite).</summary>
+        public void Reiniciar()
+        {
+            Hambre = 0f;
+            Fase = 0;
+            TParpadeo = 60;
+            TMirada = 30;
+            DespMeta = DespActual = Vector2.Zero;
+        }
+
+        /// <summary>
+        /// EL MINUTO — un tick de la simulación (el llamador ya filtró
+        /// servidor / jugador ajeno / doble tick de copias del mismo ítem).
+        /// Hambre 0→1 en 60 s; parpadeo 10-20 s → 2 s; mirada 4 s → 0,35 s.
+        /// </summary>
+        public void Paso()
+        {
+            Hambre = Math.Min(1f, Hambre + 1f / 3600f);
+            float h = Hambre;
+
+            // --- PARPADEO: 10-20 s (saciado) → 2 s exactos (hambre total) ---
+            if (Fase > 0)
+            {
+                Fase--;
+            }
+            else if (--TParpadeo <= 0)
+            {
+                Fase = 11; // 4t medio · 4t cerrado · 3t medio (≈0,18 s)
+                float periodo = MathHelper.Lerp(15f * 60f, 2f * 60f, h);
+                periodo *= 1f + (Main.rand.NextFloat() - 0.5f) * 0.66f * (1f - h); // ±33 % → 10-20 s
+                TParpadeo = Math.Max(20, (int)periodo);
+            }
+
+            // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético) ---
+            if (--TMirada <= 0)
+            {
+                ElegirMirada();
+                float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
+                TMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
+            }
+            DespActual = Vector2.Lerp(DespActual, DespMeta, LERP_MIRADA);
+        }
+
+        private void ElegirMirada()
+        {
+            Vector2 meta = Vector2.Zero;
+            bool seguir = false;
+            if (PosValida)
+            {
+                Vector2 delta = Main.MouseScreen - PosOjoPantalla;
+                float d = delta.Length();
+                if (d < 34f)
+                {
+                    meta = Vector2.Zero;      // el cursor ENCIMA: te mira fijo a los ojos
+                    seguir = true;
+                }
+                else if (d < 480f)
+                {
+                    meta = SnapDireccion(delta) * new Vector2(3.5f, 2.8f);  // te sigue por la pantalla
+                    seguir = true;
+                }
+            }
+            if (!seguir)
+            {
+                // vaga: el ojo explora solo (el centro entra con peso bajo)
+                if (Main.rand.Next(10) == 0)
+                    meta = Vector2.Zero;
+                else
+                {
+                    double ang = Main.rand.NextDouble() * Math.PI * 2.0;
+                    meta = SnapDireccion(new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 100f)
+                           * new Vector2(3.5f, 2.8f);
+                }
+            }
+            DespMeta = meta;
+        }
+
+        // 8 sectores de 45°: 0=D · 1=AbD · 2=Ab · 3=AbI · 4=I · 5=ArI · 6=Ar · 7=ArD
+        private static Vector2 SnapDireccion(Vector2 delta)
+        {
+            int s = (int)Math.Round(Math.Atan2(delta.Y, delta.X) / (Math.PI / 4.0));
+            s &= 7;
+            return new Vector2((float)Math.Cos(s * Math.PI / 4.0), (float)Math.Sin(s * Math.PI / 4.0));
+        }
+
+        /// <summary>La rampa del rojo: 20 %→80 % de hambre.</summary>
+        public float NivelRojo() =>
+            Math.Max(0f, Math.Min(1f, (Hambre - 0.2f) / 0.6f));
+    }
+
+    /// <summary>
     /// EL GRIMORIO HAMBRIENTO (v6.50.82) — el arma DEMO del Códice Vivo: los
     /// sprites del usuario convertidos en CAPAS (la base es el socket VACÍO;
-    /// el iris es una capa 8×8 recortada de su arte; el párpado son los
-    /// frames de su GIF de parpadeo).
+    /// el iris es una capa 32×32 recortada de su arte; el párpado son sus
+    /// sprites de ojo medio cerrado y cerrado).
     ///
     /// LA LETRA DEL USUARIO: «el libro está normal y parpadea cada 10 a 20
     /// segundos; cuando tiene hambre el parpadeo es más rápido; se agrega el
@@ -59,49 +183,39 @@ namespace AethonMod.Content.Weapons
     /// v6.50.85 — LA BASE LIMPIA + EL ROJO SOLO EN EL IRIS. La letra del
     /// usuario: «cuando recortas el iris toda la esclerotica queda con el
     /// agujero del iris en ves de estar completamente blanco como el resto
-    /// de la esclerotica, aunque no es con el agujero es mas bien con una
-    /// sombra del iris, pero hay algo mas, lo que se pone rojo es solo el
-    /// iris, el libro se debe quedar de color normal… cuando remuevas el
-    /// iris has que los pixeles donde estaba el iris tomen el color de la
-    /// esclerotica» + sprite libro v3 - sin iris.png + codigo sin iris.txt.
-    /// DOS CURAS: (1) LA BASE — la .82 rellenaba el socket con RUIDO GAUSSIANO
-    /// alrededor de la media de la esclera (σ54): al reducir a 36×49 ese
-    /// ruido se leía como una SOMBRA gris (lo que el usuario vio en el mundo
-    /// y en la mano). Ahora la base ES el sprite sin iris EXACTO del usuario
-    /// — la MISMA corrida de codigo 2.txt (verificado: byte-idénticos fuera
-    /// del ojo, |Δ|=0,009) con el socket completamente blanco (247,235,220
-    /// σ5). OJO se recentra al iris del ARTE (19.09, 22.45 — antes apuntaba
-    /// al centro del ojo del GIF, otra corrida). Los PÁRPADOS se COMPONEN:
-    /// la zona animada del GIF (diff f01/f03 dilatado) se pega sobre la base
-    /// limpia con pluma gaussiana — el cuerpo del libro no titila entre
-    /// corridas al parpadear (|Δ|=0,04 fuera de la zona). (2) EL ROJO —
-    /// SOLO la capa IrisRojo; las Rojo_Medio/Rojo_Cerrado teñían de rojo
-    /// TODO el dorado del libro al parpadear con hambre: ELIMINADAS — el
-    /// libro (párpados incluidos) queda SIEMPRE a color normal.
+    /// de la esclerotica… lo que se pone rojo es solo el iris, el libro se
+    /// debe quedar de color normal… cuando remuevas el iris has que los
+    /// pixeles donde estaba el iris tomen el color de la esclerotica» + el
+    /// sprite sin iris en código. La base ES el sprite sin iris EXACTO
+    /// (socket blanco); el rojo vive SOLO en la capa IrisRojo.
+    ///
+    /// v6.50.86 — LOS PÁRPADOS PUROS DE CÓDIGO. La letra del usuario: «al
+    /// usar el gif para abrir y cerrar el ojo hace que se note el cambio en
+    /// cuanto a calidad, el codigo puro da mejor calidad ya que al ser
+    /// codigo puedes recrear los pixeles fielmente, asi que te dare el
+    /// codigo del ojo entrecerrado y cerrado». Verificado: los códigos del
+    /// ojo medio cerrado y del cerrado son la MISMA corrida que la base
+    /// (|Δ| = 0,0000 y 0 px distintos fuera del ojo) — los párpados son
+    /// ahora LANCZOS puro de la MISMA fuente que la base (la .85 compostaba
+    /// la zona del GIF con pluma sobre la base: esa costura era el salto de
+    /// calidad). El parpadeo queda píxel sobre píxel con el libro. Además el
+    /// estado pasó a EstadoGrimorio POR CLASE (ver arriba) para que las
+    /// copias Rúnico y Estelar animen cada una su ojo.
     /// </summary>
     public class GrimorioHambriento : ModItem
     {
         // === GEOMETRÍA (v6.50.85: el iris del ARTE — tools/gen_grimorio_hambriento_v65085.py) ===
-        private static readonly Vector2 OJO = new Vector2(19.09f, 22.45f);   // centro del ojo en 36×49
-        private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);  // viaje del iris (px de textura)
-        private const float LERP_MIRADA = 0.10f;
+        // protected: las copias anclan sus capas al MISMO socket (v6.50.86).
+        protected static readonly Vector2 OJO = new Vector2(19.09f, 22.45f);   // centro del ojo en 36×49
 
         // v6.50.84 — la capa del iris es un DISCO 32×32 (recorte circular del
         // sprite exacto) que vive en una caja fuente de 174 px → 8,87 px de
         // juego: esta constante mapea la textura al espacio del libro.
         private const float IRIS_ESC = 0.2773f;
 
-        // === ESTADO DEMO (por máquina — objeto de pruebas, sin red) ===
-        public static float Hambre;
-        private static uint _tickMarcado;
-        private static int _tParpadeo = 180;
-        private static int _fase;                    // >0: secuencia del párpado (11→1)
-        private static int _tMirada = 90;
-        private static Vector2 _despMeta = Vector2.Zero;
-        private static Vector2 _despActual = Vector2.Zero;
-        private static Vector2 _posOjoPantalla = Vector2.Zero;
-        private static bool _posValida;
-        private static uint _ultimoDisparo;
+        // === EL ESTADO POR COPIA (v6.50.86) ===
+        private static readonly EstadoGrimorio _estado = new EstadoGrimorio();
+        protected virtual EstadoGrimorio Estado => _estado;
 
         public override void SetStaticDefaults() { }
 
@@ -135,11 +249,7 @@ namespace AethonMod.Content.Weapons
             {
                 if (Main.myPlayer == player.whoAmI)
                 {
-                    Hambre = 0f;
-                    _fase = 0;
-                    _tParpadeo = 60;
-                    _tMirada = 30;
-                    _despMeta = _despActual = Vector2.Zero;
+                    Estado.Reiniciar();
                     Main.NewText(Language.GetTextValue("Mods.AethonMod.Hambre.Reinicio"),
                         new Color(198, 200, 206));
                 }
@@ -155,9 +265,9 @@ namespace AethonMod.Content.Weapons
                 return false; // el clic derecho no dispara
 
             // v5.18 (lección del Grimorio del Eterno): anti-doble por frame.
-            if (Main.GameUpdateCount == _ultimoDisparo)
+            if (Main.GameUpdateCount == Estado.UltimoDisparo)
                 return false;
-            _ultimoDisparo = Main.GameUpdateCount;
+            Estado.UltimoDisparo = Main.GameUpdateCount;
 
             // La descarga perseguidora del Grimorio del Eterno (931 — homing vanilla).
             Projectile.NewProjectile(source, position, velocity, 931,
@@ -180,81 +290,11 @@ namespace AethonMod.Content.Weapons
                 return;                       // el servidor no anima ojos
             if (player.whoAmI != Main.myPlayer)
                 return;                       // solo el dueño local del libro
-            if (Main.GameUpdateCount == _tickMarcado)
-                return;                       // 2 copias del ítem: 1 tick total
-            _tickMarcado = Main.GameUpdateCount;
-
-            // --- EL MINUTO: hambre 0→1 en 3600 ticks ---
-            Hambre = Math.Min(1f, Hambre + 1f / 3600f);
-            float h = Hambre;
-
-            // --- PARPADEO: 10-20 s (saciado) → 2 s exactos (hambre total) ---
-            if (_fase > 0)
-            {
-                _fase--;
-            }
-            else if (--_tParpadeo <= 0)
-            {
-                _fase = 11; // 4t medio · 4t cerrado · 3t medio (≈0,18 s)
-                float periodo = MathHelper.Lerp(15f * 60f, 2f * 60f, h);
-                periodo *= 1f + (Main.rand.NextFloat() - 0.5f) * 0.66f * (1f - h); // ±33 % → 10-20 s
-                _tParpadeo = Math.Max(20, (int)periodo);
-            }
-
-            // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético) ---
-            if (--_tMirada <= 0)
-            {
-                ElegirMirada();
-                float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
-                _tMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
-            }
-            _despActual = Vector2.Lerp(_despActual, _despMeta, LERP_MIRADA);
+            if (Main.GameUpdateCount == Estado.TickMarcado)
+                return;                       // 2 copias del mismo ítem: 1 tick total
+            Estado.TickMarcado = Main.GameUpdateCount;
+            Estado.Paso();
         }
-
-        private static void ElegirMirada()
-        {
-            Vector2 meta = Vector2.Zero;
-            bool seguir = false;
-            if (_posValida)
-            {
-                Vector2 delta = Main.MouseScreen - _posOjoPantalla;
-                float d = delta.Length();
-                if (d < 34f)
-                {
-                    meta = Vector2.Zero;      // el cursor ENCIMA: te mira fijo a los ojos
-                    seguir = true;
-                }
-                else if (d < 480f)
-                {
-                    meta = SnapDireccion(delta) * DESP_MAX;  // te sigue por la pantalla
-                    seguir = true;
-                }
-            }
-            if (!seguir)
-            {
-                // vaga: el ojo explora solo (el centro entra con peso bajo)
-                if (Main.rand.Next(10) == 0)
-                    meta = Vector2.Zero;
-                else
-                {
-                    double ang = Main.rand.NextDouble() * Math.PI * 2.0;
-                    meta = SnapDireccion(new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 100f)
-                           * DESP_MAX;
-                }
-            }
-            _despMeta = meta;
-        }
-
-        private static Vector2 SnapDireccion(Vector2 delta)
-        {
-            // 8 sectores de 45°: 0=D · 1=AbD · 2=Ab · 3=AbI · 4=I · 5=ArI · 6=Ar · 7=ArD
-            int s = (int)Math.Round(Math.Atan2(delta.Y, delta.X) / (Math.PI / 4.0));
-            s &= 7;
-            return new Vector2((float)Math.Cos(s * Math.PI / 4.0), (float)Math.Sin(s * Math.PI / 4.0));
-        }
-
-        private static float NivelRojo() =>
-            Math.Max(0f, Math.Min(1f, (Hambre - 0.2f) / 0.6f));
 
         private static Color Alfa(float a) => new Color(255, 255, 255, (int)(255 * a));
 
@@ -271,27 +311,28 @@ namespace AethonMod.Content.Weapons
             // El centro del ojo en pantalla: el texel OJO apunta a position
             // (XNA: el origin del draw es el pivote — mismo cálculo que vanilla).
             Vector2 posOjo = position + (OJO - origin) * scale;
-            _posOjoPantalla = posOjo;
-            _posValida = true;
+            Estado.PosOjoPantalla = posOjo;
+            Estado.PosValida = true;
 
-            float rojo = NivelRojo();
+            float rojo = Estado.NivelRojo();
 
-            // --- PARPADEANDO: el párpado tapa el socket (frames del GIF) ---
-            if (_fase > 0)
+            // --- PARPADEANDO: el párpado tapa el socket (v6.50.86: los
+            //     sprites PUROS del usuario — misma corrida que la base) ---
+            if (Estado.Fase > 0)
             {
-                bool medio = _fase > 7 || _fase < 4;
+                bool medio = Estado.Fase > 7 || Estado.Fase < 4;
                 var tex = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
                 spriteBatch.Draw(tex, position, frame, drawColor, 0f, origin, scale,
                     SpriteEffects.None, 0f);
                 // v6.50.85: el libro queda a color normal al parpadear — el
-                // rojo vive SOLO en la capa del iris (la .82 teñía el libro).
+                // rojo vive SOLO en la capa del iris.
                 return;
             }
 
             // --- ABIERTO: el iris (capa del arte) se desliza por el socket ---
-            Vector2 posIris = posOjo + _despActual * scale;
+            Vector2 posIris = posOjo + Estado.DespActual * scale;
             var iris = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
             var irisRojo = ModContent.Request<Texture2D>(
@@ -313,18 +354,17 @@ namespace AethonMod.Content.Weapons
             // ítem en el suelo se dibuja CENTRADO en el hitbox y ASENTADO EN SU
             // FONDO — pivote = Item.Bottom − (0, altoFrame/2), origen en el
             // centro del frame, rotación = item.velocity.X·0,2 (¡los ítems
-            // giran mientras vuelan!). La .83 usaba Item.position como esquina:
-            // el ojo caía (+3, +7) px fuera del socket.
+            // giran mientras vuelan!).
             Main.GetItemDrawFrame(Item.type, out var _, out var frame);
             Vector2 origen = frame.Size() * 0.5f;
             Vector2 pivote = Item.Bottom - Main.screenPosition - new Vector2(0f, origen.Y);
 
-            float rojo = NivelRojo();
+            float rojo = Estado.NivelRojo();
 
-            if (_fase > 0)
+            if (Estado.Fase > 0)
             {
                 // el párpado REPLICA el draw vanilla del libro (píxel sobre píxel)
-                bool medio = _fase > 7 || _fase < 4;
+                bool medio = Estado.Fase > 7 || Estado.Fase < 4;
                 var tex = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
@@ -335,10 +375,10 @@ namespace AethonMod.Content.Weapons
             }
 
             // el iris: el texel del ojo GIRA con el libro mientras vuela
-            Vector2 alOjo = (OJO + _despActual - origen) * scale;
+            Vector2 alOjo = (OJO + Estado.DespActual - origen) * scale;
             Vector2 posOjo = pivote + alOjo.RotatedBy(rotation);
-            _posOjoPantalla = posOjo;
-            _posValida = true;
+            Estado.PosOjoPantalla = posOjo;
+            Estado.PosValida = true;
 
             var iris = ModContent.Request<Texture2D>(
                 "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
@@ -376,10 +416,10 @@ namespace AethonMod.Content.Weapons
             bool espejoX = (drawData.effect & SpriteEffects.FlipHorizontally) != 0;
             bool espejoY = (drawData.effect & SpriteEffects.FlipVertically) != 0;
 
-            if (_fase > 0)
+            if (Estado.Fase > 0)
             {
                 // el párpado: MISMA transform que el libro — píxel sobre píxel
-                bool medio = _fase > 7 || _fase < 4;
+                bool medio = Estado.Fase > 7 || Estado.Fase < 4;
                 var tex = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
@@ -393,11 +433,11 @@ namespace AethonMod.Content.Weapons
             // el iris: el texel del ojo, con el espejo aplicado AL DESPLAZA-
             // MIENTO para que SIGA mirando al cursor aunque el libro esté
             // reflejado (XNA espeja la textura alrededor del origen)
-            float rojo = NivelRojo(); // v6.50.85: SOLO el iris se tiñe, nunca el libro
+            float rojo = Estado.NivelRojo(); // v6.50.85: SOLO el iris se tiñe, nunca el libro
             Rectangle fr = drawData.sourceRect ?? new Rectangle(0, 0, 36, 49);
             Vector2 texel = OJO + new Vector2(
-                _despActual.X * (espejoX ? -1f : 1f),
-                _despActual.Y * (espejoY ? -1f : 1f));
+                Estado.DespActual.X * (espejoX ? -1f : 1f),
+                Estado.DespActual.Y * (espejoY ? -1f : 1f));
             Vector2 q = new Vector2(
                 (espejoX ? fr.Width - texel.X : texel.X) - drawData.origin.X,
                 (espejoY ? fr.Height - texel.Y : texel.Y) - drawData.origin.Y);
@@ -420,8 +460,8 @@ namespace AethonMod.Content.Weapons
 
             if (drawInfo.drawPlayer.whoAmI == Main.myPlayer)
             {
-                _posOjoPantalla = posOjo; // el ojo en mano también sigue al cursor
-                _posValida = true;
+                Estado.PosOjoPantalla = posOjo; // el ojo en mano también sigue al cursor
+                Estado.PosValida = true;
             }
 
             return false; // ya agregamos la DrawData nosotros, con las capas en orden
@@ -433,14 +473,14 @@ namespace AethonMod.Content.Weapons
         // =================================================================
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
-            float h = Hambre;
+            float h = Estado.Hambre;
             int llenos = (int)Math.Round(h * 10f);
             char[] barra = new char[10];
             for (int i = 0; i < 10; i++)
                 barra[i] = i < llenos ? '✦' : '—';
             string textoBarra = $"[{new string(barra)}] {(int)(h * 100f)}%";
 
-            float rojo = NivelRojo();
+            float rojo = Estado.NivelRojo();
             var color = Color.Lerp(new Color(198, 160, 78), new Color(235, 70, 55),
                 Math.Max(0.25f, rojo));
 
