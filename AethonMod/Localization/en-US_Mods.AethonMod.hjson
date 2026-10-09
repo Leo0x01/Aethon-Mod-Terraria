@@ -88,6 +88,22 @@ Items: {
 			'''
 	}
 
+	// v6.50.82 — THE HUNGRY GRIMOIRE: the Living Codex DEMO weapon.
+	// User's letter: the hunger cycle compressed to 60 s.
+	GrimorioHambriento: {
+		DisplayName: Hungry Grimoire
+		Tooltip:
+			'''
+			The Living Codex's eye: it watches, blinks and gets hungry.
+			In 60 seconds the appetite grows from zero to FULL: blinking
+			speeds up (from 10-20 s to every 2 s), the gaze grows restless
+			and the golden iris ignites RED.
+			Left click: homing bolt (testing, no mana).
+			Right click: resets the appetite to replay the demo.
+			Testing item — remove before publishing.
+			'''
+	}
+
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
@@ -2073,6 +2089,15 @@ Carnada: {
 	Preparadas: The bait will serve {0} waves. (Right click to change)
 	YaActivo: The fury is ALREADY unleashed — feed it or survive.
 	Ocupado: The world is busy (a boss or an invasion). The bait waits its turn.
+}
+
+Hambre: {
+	Barra: Hunger {0}
+	Calmado: The eye watches you, serene. It blinks when it wants.
+	Inquieto: It blinks faster and faster… something is missing.
+	Furioso: The iris ignites RED. The fury is coming.
+	Maximo: IT IS HUNGRY. It never stops staring.
+	Reinicio: The grimoire's appetite has calmed down.
 }
 
 Bolsa.Abierta: Bag opened: {0} types of summoners received (999 each).

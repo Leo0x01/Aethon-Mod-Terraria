@@ -1,5 +1,64 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.82 — EL GRIMORIO HAMBRIENTO (EL OJO QUE TE MIRA)
+
+**Feedback del usuario**: "el libro esta normal y parpadea cada 10 a 20
+segundos, cuando tiene hambre el parpadeo es mas rapido, ademas se agrega
+el movimiento del ojo el cual te lo dare en imagenes png, cuanto mas
+hambre mas rapido se mueve el ojo y mas rapido parpadea hasta alcanzar
+un parpadeo cada 2 segundos ademas el grimorio hace que el ojo se vuelva
+rojo. ahora con todos los recursos crea un arma nueva y agregale las
+mecanicas de hambre pero hazlo que sea algo que suceda en solo 1 minutos
+para ver el efecto" (+ 7 PNGs de direcciones del ojo y el GIF de
+parpadeo).
+
+**EL DIAGNÓSTICO (QA de visión).** Los 8 sprites del usuario (base + 7
+direcciones) son generaciones IA independientes: entre ellos difieren en
+TODO el libro y el iris solo viaja 10-15 px en 706 px de imagen = 0,7 px
+a escala de juego (36×49) — INVISIBLE. Veredicto del análisis: «el 90 %
+de los jugadores no notará el movimiento». El swap de sprite completo
+estaba condenado.
+
+**(1) LA ANATOMÍA EN CAPAS (la cura).** El ojo del arte se convirtió en
+CAPAS: LA BASE es el socket VACÍO (el iris rellenado con esclera del
+propio arte, banda r 75-115 px); EL IRIS es una capa 8×8 recortada del
+arte original (disco dorado r 75 px + la pupila estrella) que EL CÓDIGO
+desliza ±3,5 px con suavizado LERP 0,10/tick — resbala, nunca salta; EL
+PÁRPADO son los frames 2/3 del GIF del usuario (media/sellado) tapando
+el socket entero. 7 texturas (36×49 y 8×8) + variantes rojas de iris y
+párpado (hue −45°: el oro cae en el rojo puro; el aro dorado del libro
+NO está en la zona del ojo — queda dorado).
+
+**(2) EL MINUTO (el ciclo comprimido).** Hambre 0→1 en 3600 ticks:
+PARPADEO lerp 15 s→2 s con jitter ±33 % ×(1−h) — 10-20 s saciado, 2 s
+EXACTOS a hambre total; MIRADA lerp 4 s→0,35 s entre cambios (8
+direcciones + centro; sigue al cursor si está a la vista, si no vaga; el
+cursor ENCIMA = te mira fijo); el ROJO rampa 20 %→80 %: el tooltip
+cruza-fade en vivo con la barra ✦/— y el color dorado→rojo. El estado
+por letra: Calmado/Inquieto/Furioso/TIENE HAMBRE.
+
+**(3) EL ARMA.** Clic izq: la descarga perseguidora del Grimorio del
+Eterno (931, Item.shoot>0 para que el hook dispare + spawn manual
+anti-doble); clic der: REINICIA el apetito (la demo se repite); receta
+de 5 madera; sin maná (objeto de pruebas). El hambre es 100 % visual y
+local (nunca corre en servidor) — en MP cada cliente ve su propio ojo.
+
+**(4) LA VERIFICACIÓN.** Oráculo 0/0 (cazó ProjectileID.Nightglow →
+literal 931 como la casa) · build real 0/0 ×2 · .tmod 2.593.349 B md5
+eede0670aedcd4e839817e6f7f1de95f: 387 entradas (380 + 7 rawimgs), EOF
+exacto doble fórmula, DLL 9/9 símbolos UTF-8 + 12/12 literales UTF-16,
+cuerpo es-ES == es-MX byte a byte EN EL PAQUETE con las claves nuevas en
+AMBOS es, «ladrones»/«bandits» ausentes · headless «Sandboxing v6.50.82
+→ Adding Recipes → Server started» 0 excepciones.
+
+**(5) EL 8º INCIDENTE DEL ESPEJO (cazado en vivo).** Entre el primer
+build (auditado ✓) y el rebuild, el sandbox revirtió el es-ES a una
+variante con tabs: la auditoría del paquete lo cazó en la divergencia
+byte 65. Cura: tools/sync_es_es_v65082.py (regenera el cuerpo desde
+es-MX) + cabecera del espejo restaurada + auditoría ahora exige las
+claves nuevas en es-MX **Y** es-ES.
+
+
 ## Commit v6.50.81 — EL ESTALLIDO ES EL ADIÓS (LA BOLA FINAL RETIRADA)
 
 **Feedback del usuario**: "el sol explota, pero se sigue disparando una

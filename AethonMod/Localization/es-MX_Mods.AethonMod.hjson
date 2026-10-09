@@ -93,6 +93,22 @@ Items: {
                         '''
         }
 
+        // v6.50.82 — EL GRIMORIO HAMBRIENTO: el arma DEMO del Códice Vivo.
+        // La letra del usuario: el ciclo de hambre comprimido a 60 s.
+        GrimorioHambriento: {
+                DisplayName: Grimorio Hambriento
+                Tooltip:
+                        '''
+                        El ojo del Códice Vivo: te mira, parpadea y pasa hambre.
+                        En 60 segundos el apetito crece de cero a TOTAL: el parpadeo
+                        se acelera (de 10-20 s a cada 2 s), la mirada se agita y el
+                        iris dorado se enciende ROJO.
+                        Clic izq: descarga perseguidora (pruebas, sin maná).
+                        Clic der: reinicia el apetito para repetir la demo.
+                        Objeto de pruebas — eliminar antes de publicar.
+                        '''
+        }
+
         // v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
         // weapons (test — the book is NOT touched). Pride's power (FMA:B).
         // v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
@@ -2079,6 +2095,15 @@ Carnada: {
         Preparadas: La carnada repartirá {0} oleadas. (Clic derecho para cambiar)
         YaActivo: La furia YA está desatada — aliméntala o sobrevive.
         Ocupado: El mundo está ocupado (un jefe o una invasión). La carnada espera su turno.
+}
+
+Hambre: {
+        Barra: Hambre {0}
+        Calmado: El ojo te observa, sereno. Parpadea cuando quiere.
+        Inquieto: Parpadea cada vez más rápido… algo le falta.
+        Furioso: El iris se enciende ROJO. La furia se acerca.
+        Maximo: TIENE HAMBRE. No deja de mirarte.
+        Reinicio: El apetito del grimorio se ha calmado.
 }
 
 Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).
