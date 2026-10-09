@@ -138,6 +138,26 @@ Items: {
 			'''
 	}
 
+	// v6.50.89 — THE FOURTH COPY: THE UNSTABLE ONE — the union the
+	// user asked for: the Erratic's glitch + the Trembling's shudder,
+	// with a small red aura breathing behind the book.
+	GrimorioHambrientoInestable: {
+		DisplayName: Unstable Hungry Grimoire
+		Tooltip:
+			'''
+			The UNSTABLE copy — the union of both: the same hungry
+			eye, but this book falls apart with appetite. It
+			trembles like the Trembling one and suffers the
+			Erratic's interference: strips slipping in ever more
+			frequent, violent bursts.
+			A small red aura wraps it, breathing: the book burns
+			inside while it breaks outside.
+			Left click: homing bolt (testing, no mana).
+			Right click: resets the appetite to replay the demo.
+			Testing item — compare against the original.
+			'''
+	}
+
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
 	// weapons (test — the book is NOT touched). Pride's power (FMA:B).
 	// v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three

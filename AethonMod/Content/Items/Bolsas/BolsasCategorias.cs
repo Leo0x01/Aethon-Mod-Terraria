@@ -87,6 +87,14 @@ namespace AethonMod.Content.Items.Bolsas
             // la vez en el inventario.
             l.Add((ModContent.ItemType<GrimorioHambrientoErratico>(), 1));
             l.Add((ModContent.ItemType<GrimorioHambrientoTembloroso>(), 1));
+            // v6.50.89 — LA CUARTA COPIA: EL INESTABLE — la unión que pidió
+            // el usuario («crea un cuarto grimorio donde el efecto glish y
+            // el temblor este unidos, ademas ponle un aura pequeña roja»):
+            // el glitch del Errático (receta .88) + el temblor del
+            // Tembloroso, con un AURA ROJA PEQUEÑA respirando detrás del
+            // libro en inventario, mundo y mano. Su propio EstadoGrimorio:
+            // las cuatro copias pasan hambre por separado.
+            l.Add((ModContent.ItemType<Weapons.GrimorioHambrientoInestable>(), 1));
             // v6.50.49 — EL INVOCADOR NUMERO 2 MURIÓ con su jefe («borra
             // al segundo jefe, se ve horrible, dejemos al primero, es
             // mucho mejor») — la bolsa solo sirve al primero.

@@ -143,6 +143,26 @@ Items: {
                         '''
         }
 
+        // v6.50.89 — LA CUARTA COPIA: EL INESTABLE — la unión que pidió el
+        // usuario: el glitch del Errático + el temblor del Tembloroso, con
+        // un aura roja pequeña respirando detrás del libro.
+        GrimorioHambrientoInestable: {
+                DisplayName: Grimorio Hambriento Inestable
+                Tooltip:
+                        '''
+                        La copia INESTABLE — la unión de las dos: el mismo ojo
+                        hambriento, pero este libro se descompone con el
+                        apetito. Tiembla como el Tembloroso y sufre las
+                        interferencias del Errático: tiras que se desfasan en
+                        ráfagas cada vez más frecuentes y violentas.
+                        Un aura roja pequeña lo envuelve, respirando: el
+                        libro arde por dentro mientras se rompe por fuera.
+                        Clic izq: descarga perseguidora (pruebas, sin maná).
+                        Clic der: reinicia el apetito para repetir la demo.
+                        Objeto de pruebas — comparar con el original.
+                        '''
+        }
+
         // v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
         // weapons (test — the book is NOT touched). Pride's power (FMA:B).
         // v6.50.64 — the TWIN-HEAD pincer + the BLACK MIST on all three
