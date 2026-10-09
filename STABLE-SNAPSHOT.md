@@ -1,7 +1,7 @@
-# AethonMod — ESTADO ACTUAL (v6.50.87)
+# AethonMod — ESTADO ACTUAL (v6.50.88)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.87 (LOS EFECTOS SUAVES: el Errático con glitch y el Tembloroso) LA BASE — la .82 rellenaba el socket con RUIDO
+> Última actualización: v6.50.88 (EL GLITCH +70 %: el Errático sube de volumen) LA BASE — la .82 rellenaba el socket con RUIDO
 > GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
 > vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
 > MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
@@ -1903,6 +1903,40 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **✅ PUBLICAR v6.50.88 — HECHO** — el usuario probó el glitch de
+   la .87 y lo vio tímido: «el efecto glish es muy suave, aumente el
+   efecto glish al menos un 70 %». La receta NO cambia (ráfagas breves,
+   layout determinista, iris con su tira) — SOLO se sube el VOLUMEN de
+   cada perilla: desfase ±1,3→±3 pasa a ±3,3→±6 px (media +85 %, máx
+   +100 %), tiras 1-2 → 2-4 (media +86 %), ráfaga 7-14 → 12-24 ticks
+   (+71 %), regeneración cada 3 → cada 2 frames, intervalo 22→3,2 s pasa
+   a 15→2,1 s (presencia ×2,4), primera ráfaga a los 2 s. El GATE se
+   queda en 12 % (saciado = libro limpio). Tembloroso y normal SIN
+   CAMBIOS (SET 387 IDÉNTICO — la .88 es 100 % código). .tmod 2.604.110
+   B md5 3eabd357129e85706a024be7691a4363 (EOF exacto, SOLO cambian
+   dll/pdb/Info + el en-US cosmético del 15º incidente, CECIL completo
+   con 22f/3.2f AUSENTES, espejo es-ES==es-MX, headless Server started
+   7795 0 excepciones, VLM QA aprobado, métricas simuladas 500 ráfagas:
+   +85/+100/+86 %/×2,41). PUBLICADO: release 407818865 + asset
+   624679554 2.604.110 B, CDN verificado byte a byte, /releases/latest =
+   v6.50.88. DOS incidentes de localización: el 15º (en-US — el paquete
+   .87 llevaba una variante con espacios jamás commiteada; la .88 vuelve
+   a ser igual al árbol, PROBADO parseando ambos con hjson) y el 16º
+   (es-ES revertido tras el build, cazado antes del commit).
+
+1b. **El usuario prueba v6.50.88 en juego** — EL ERRÁTICO CON EL GLITCH
+   SUBIDO: (a) al principio limpio (gate 12 % — clic derecho reinicia la
+   demo); (b) con hambre subiendo, la primera ráfaga llega a los 2 s y
+   el libro se rompe en 2-4 TIRAS desfasadas hasta ±6 px que se
+   rehacen cada 2 frames — un sexto del ancho del libro se desplaza;
+   (c) a hambre total las ráfagas vuelven cada ~2 s y el libro está
+   roto ~12 % del tiempo (era ~5 % en la .87) — el ojo SIEMPRE viaja
+   con su tira; (d) el Tembloroso y el normal siguen EXACTAMENTE igual
+   que en la .87. Los checklists previos siguen vigentes (.87 las dos
+   copias suaves; .86 la comparación de los párpados; .85 el socket
+   blanco + el rojo solo en el iris; .84 los tres estados del ojo; .81
+   la Gran Explosión).
+
 1. **✅ PUBLICAR v6.50.87 — HECHO** — el usuario devolvió las
    animaciones de la .86 («se ven bastante mal y exageradas») y pidió
    efectos MÁS SUAVES con diseño propio: «has que una de las copias se
@@ -2107,6 +2141,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.88** | ✅ Build-verificada (build real 0/0, .tmod 2.604.110 B md5 3eabd357129e85706a024be7691a4363, 387 entradas — SET IDÉNTICO a .87, EOF exacto, SOLO cambian dll/pdb/Info (esperado) + el en-US con diff COSMÉTICO documentado (el 15º incidente: el paquete .87 llevaba un en-US con espacios jamás commiteado; la .88 vuelve a ser IGUAL AL ÁRBOL — probado parseando ambos con hjson, contenido IDÉNTICO), todo el arte byte-idéntico, las copias == base byte a byte, CECIL v65088 completo (15f/2.1f presentes con **22f/3.2f de la .87 AUSENTES** + ráfaga 12-24 [Ldc_I4_S 12/13 — lección: Roslyn emite 9..127 como Ldc_I4_S sbyte] + desfase ±6 px [% 13 en Layout] + tiras 2-4 + alto 4-12 [% 9] + entrega ×3 IL_00F2/IL_0103/IL_0114 + el libro normal delega en PostDrawInWorldCore), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless «Sandboxing v6.50.88 → Generating World Aethon88 → Listening 7795 → Server started» 0 excepciones, QA VLM: ráfagas visiblemente más violentas que la .87 con el iris coherente en su tira y sin ghosting, métricas simuladas 500 ráfagas (h=1): media |off| 1,75→3,24 px (+85 %) · máx 3→6 (+100 %) · tiras 1,38→2,56 (+86 %) · presencia 5,2→12,5 % (×2,41), ✔ PUBLICADA (release 407818865 + asset 624679554 2.604.110 B, CDN verificado byte a byte md5 3eabd357129e85706a024be7691a4363, /releases/latest = v6.50.88), ⏳ en juego | LA LETRA: «el efecto glish es muy suave, aumente el efecto glish al menos un 70 %». LECCIONES: (1) Roslyn emite los enteros 9..127 como Ldc_I4_S con operando sbyte — el TieneInt del cecil_check cubre Ldc_I4, Ldc_I4_S Y las formas cortas 0-8/-1; (2) INVARIANTE NUEVO: el PAQUETE debe ser IGUAL AL ÁRBOL — todo diff de blobs contra el release anterior tiene que explicarse (la .87 lo perdió en en-US sin que nadie lo notara); (3) al subir de volumen un efecto se ajustan TODAS las perillas juntas (desfase+tiras+vida+intervalo+cadencia) para que la percepción escale ≥ la suma pedida |
 | **v6.50.87** | ✅ Build-verificada (build real 0/0, .tmod 2.605.625 B md5 d1e14a9b0546753c849ba96b8579172e, 387 entradas — 397 − 12 efectos de la .86 + 2 copias renombradas EXACTAS, EOF exacto, SET exacto, SOLO cambian 3 hjson (esperado) + dll/pdb/Info (whitelist), **base/Medio/Cerrado/Iris/IrisRojo BYTE-IDÉNTICOS a .86 — el libro NORMAL intacto**, las copias nuevas == base byte a byte, la DLL ya no menciona Runico/Estelar/Runa/Estrellas/Venas (por PREFIJO de ruta — TopeEstrellas del Telar y EstrellasCamino del RiftLib son de OTROS ítems), CECIL v65087 completo (herencia + get_Estado ×2 + **Erratico=true con Ldc_I4_1+Stfld SOLO en el Errático** + senos del temblor 9,3/17,3/11,9/19,1 + máquina de glitch 22f/3.2f/0.12f + PreDraw false ×4 + Tembloroso inyecta el temblor en drawData.position y llama a la base + Errático en franjas con ancla Vector2.Zero [FNA lo compila como call get_Zero] + el libro normal delega en PostDrawInWorldCore con Item.Bottom/GetItemDrawFrame), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7794 «Sandboxing v6.50.87 → Adding Recipes → Server started» 0 excepciones, QA VLM: panel limpio idéntico al normal + tear sutil con el ojo coherente montado en su tira + temblor suave creciente (métricas: temblor pico 1,78 px/media 1,03 a h=1; glitch |off| tiras máx 3,00 px/media 1,82), ✔ PUBLICADA (release 407784207 + asset 624575936 2.605.625 B, CDN verificado byte a byte md5 d1e14a9b0546753c849ba96b8579172e, /releases/latest = v6.50.87), ⏳ en juego | LA LETRA: «bueno las animaciones de efectos se ven bastante mal y exageradas, deja solo el grimorio hambriento normal y modifica las dos copias con otros efectos, borra los anteriores, esta vez que sean mas suave los efectos… te dire como animar una de las copias, has que una de las copias se vuelva erratica al tener hambre, cuanta mas hambre mas erratica y que tenga un efecto glish, que la otra lo que haga sea temblar». LECCIONES: (1) SUAVE = presencia por ausencia — ráfagas breves con libro limpio el 96 % del tiempo > ruido permanente por frame (la .86 gritaba, la .87 susurra); (2) el temblor orgánico son DOS SENOS INCOMMENSURABLES por eje, jamás ruido aleatorio (el ruido titila, los senos respiran); (3) el glitch determinista por tick (hash de la semilla) hace que hotbar y mano muestren el MISMO desfase; (4) la franja bajo espejo: FlipHorizontally NO cambia el ancla (la franja se voltea dentro de su propio quad) pero FlipVertically ancla por el borde INFERIOR (fr.Height − b); (5) FNA compila Vector2.Zero como call get_Zero (property), no ldsfld — los checks de IL deben cubrir ambas formas |
 | **v6.50.86** | ✅ Build-verificada (build real 0/0, .tmod 2.608.476 B md5 07af7bad8cdf4fa6342f9e13a0220a57, 397 entradas — 385+12 texturas nuevas exactas, EOF exacto, SOLO cambian Medio/Cerrado + 3 hjson + dll/pdb/Info, base/Iris/IrisRojo BYTE-IDÉNTICOS a .85, **CONTINUIDAD DEL PARPADEO EN EL PAQUETE** (|Δ|=0,05 fuera del ojo al parpadear — el GIF retirado, párpados LANCZOS puro de la MISMA corrida), las copias base == base byte a byte, 3 grupos de estrellas equilibrados (50/47/47) y 4 bandas de venas (50/61/59/51) con 0 px invadiendo el viaje del iris, venas MORADAS RGB (206,71,226), CECIL v65086 completo (herencia + get_Estado por clase + ModifyItemDraw de las copias + entrega ×3 en IL_00F2/IL_0103/IL_0114), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7792 «Sandboxing v6.50.86 → Adding Recipes → Creating world → Listening → Server started» 0 excepciones, QA VLM: libro idéntico base/medio/cerrado sin costuras + estrellas titilando + venas en ola viajera + 3 runas doradas orbitando), ✔ PUBLICADA (release 407742907 + asset 624455614 2.608.476 B, CDN verificado byte a byte md5 07af7bad8cdf4fa6342f9e13a0220a57, /releases/latest = v6.50.86), ⏳ en juego | LA LETRA: «al usar el gif para abrir y cerrar el ojo hace que se note el cambio en cuanto a calidad, el codigo puro da mejor calidad ya que al ser codigo puedes recrear los pixeles fielmente, asi que te dare el codigo del ojo entrecerrado y cerrado… haz una copia del grimorio pero con alguna animacion que creas que sea correcta, luego has otra copida pero en esta tercera copia quiero que animes las estrellas que tiene el grimorio en la tapa y animes las venas de luz morada que recorren el libro» + los 4 códigos v3 |
 | **v6.50.85** | ✅ Build-verificada (build real 0/0, .tmod 2.589.707 B md5 dcbac74a8455a33fcf8851817b948fd5, 385 entradas — SET = .84 MENOS exactamente Rojo_Medio/Rojo_Cerrado; SOLO cambian base/Medio/Cerrado, Iris/IrisRojo byte-idénticos a .84, EOF exacto, **BLANCURA DEL SOCKET VERIFICADA EN EL PAQUETE** (rawimg decodificado: luminancia 176→233 en r<3 del ojo, 0 píxeles oscuros — la sombra gaussiana de la .82, muerta), **la DLL ya NO menciona Rojo_Medio/Rojo_Cerrado** (literales UTF-16 ausentes) y mantiene IrisRojo, constantes OJO nuevas en el IL (19.09f/22.45f presentes, 19.27f/22.70f ausentes — recentrado al iris del ARTE), CECIL de punta a punta (entrega IL_00F2 + ModifyItemDraw + PostDrawInWorld(Item.Bottom) + IRIS_ESC), cuerpo es-ES == es-MX byte a byte EN EL PAQUETE, «ladrones»/«bandits» ausentes, headless puerto 7791 «Sandboxing v6.50.85 → Server started» 0 excepciones, QA VLM: esclerótica blanca + iris circular + SOLO el iris rojo + sin costuras), ✔ PUBLICADA (release 407657845 + asset 624257189 2.589.707 B, CDN verificado byte a byte md5 dcbac74a8455a33fcf8851817b948fd5, /releases/latest = v6.50.85), ⏳ en juego | LA LETRA: «cuando recortas el iris toda la esclerotica queda con el agujero del iris en ves de estar completamente blanco como el resto de la esclerotica, aunque no es con el agujero es mas bien con una sombra del irirs, pero hay algo mas, lo que se pone rojo es solo el iris, el libro se debe quedar de color normal… cuando remuevas el iris has que los pixeles donde estaba el iris tomen el color de la esclerotica» + sprite libro v3 - sin iris.png + codigo sin iris.txt |

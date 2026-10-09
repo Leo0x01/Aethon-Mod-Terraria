@@ -1,5 +1,70 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.88 — EL GLITCH +70 %: EL ERRÁTICO SUBE DE VOLUMEN
+
+**Petición del usuario**: "el efecto glish es muy suave, aumente el
+efecto glish al menos un 70 %".
+
+**La receta NO cambia — solo el volumen**. Sigue siendo la .87 aprobada
+(ráfagas breves, layout determinista por tick, el iris viaja con su
+tira, la misma transform vanilla en inventario/mundo/mano); lo que
+cambia es que CADA perilla se subió, todas de golpe y todas ≥ +70 % en
+las métricas clave:
+
+1. **EL DESFASE**: ±1,3 → ±3 px pasa a **±3,3 → ±6 px** (media |off| a
+   h=1: 1,75 → 3,24 px = **+85 %**; máximo 3 → 6 px = **+100 %** — un
+   sexto del ancho del libro).
+2. **LAS TIRAS**: 1-2 pasan a **2-4** (media 1,38 → 2,56 = **+86 %**);
+   la primera nace en y=3..24 (era 3..36) para que las 2-4 quepan en el
+   libro, y las alturas 4-12 px (era 4-11).
+3. **LA RÁFAGA**: 7-14 ticks pasa a **12-24** (+71 % de vida: 0,20-0,40
+   s) y el tearing se **REGENERA cada 2 frames** (era cada 3, +50 % de
+   cadencia).
+4. **EL INTERVALO**: 22 s → 3,2 s pasa a **15 s → 2,1 s** (presencia a
+   h=1: 5,2 % → 12,5 % = **×2,4**) y la PRIMERA ráfaga llega a los 2 s
+   (era 4 s).
+5. **EL GATE se queda en 12 %**: saciado sigue siendo libro limpio (la
+   lección de la .86 intacta — el mismo susurro, MÁS FUERTE).
+
+**Sin cambios**: el Tembloroso y el normal (byte a byte — solo
+`GrimorioHambrientoErratico.cs` y `build.txt` cambian; SET de 387
+entradas IDÉNTICO: la .88 es 100 % código) y la mirada errática
+(dwell 3 s→0,16 s, lerp 0,10→0,36, tic de meta).
+
+**Verificación**: oráculo 0 errores · build real 0/0 · .tmod 2.604.110 B
+md5 3eabd357129e85706a024be7691a4363: 387 entradas, EOF exacto, SOLO
+cambian dll/pdb/Info (esperado) + el en-US con diff COSMÉTICO
+documentado, todo el arte byte-idéntico, CECIL v65088 completo (15f/2.1f
+presentes con 22f/3.2f AUSENTES + ráfaga 12-24 [Ldc_I4_S 12/13] +
+desfase ±6 [% 13 en Layout] + tiras 2-4 + alto 4-12 [% 9] + entrega ×3
+IL_00F2/IL_0103/IL_0114), espejo es-ES==es-MX byte a byte EN EL
+PAQUETE, headless «Sandboxing v6.50.88 → Generating World Aethon88 →
+Listening 7795 → Server started» 0 EXCEPCIONES, VLM QA del preview 6×
+APROBADO (ráfagas visiblemente más violentas que la .87, iris coherente
+en su tira, sin ghosting), métricas simuladas 500 ráfagas: h=1 media
+|off| +85 % · máx +100 % · tiras +86 % · presencia ×2,41.
+
+**El 15º incidente del espejo (nuevo, en-US — cazado por la
+auditoría)**: el PAQUETE .87 publicado llevaba un en-US con ESPACIOS
+(109.543 B) que JAMÁS se commiteó — el árbol git de la .87 (y los
+paquetes .85/.86) siempre usaron TABS (79.422 B); el paquete .88 vuelve
+a ser IGUAL AL ÁRBOL (reproducible desde el commit) y la auditoría lo
+DEMUESTRA parseando ambos con hjson: contenido IDÉNTICO (74.957 chars)
+— el diff era solo indentación. **El 16º (es-ES de nuevo, cazado ANTES
+del commit)**: el árbol amaneció con el espejo revertido (sin cabecera,
+2257/2263 líneas) DESPUÉS del build auditado; cura git checkout HEAD +
+verificación cuerpo+cabecera + commit atómico.
+
+**Lecciones**: (1) Roslyn emite los enteros 9..127 como Ldc_I4_S con
+operando sbyte — el TieneInt del cecil_check cubre Ldc_I4, Ldc_I4_S y
+las formas cortas 0-8/-1; (2) INVARIANTE NUEVO del auditor: el PAQUETE
+debe ser IGUAL AL ÁRBOL — el diff de blobs contra el release anterior
+tiene que explicarse TODO (la .87 perdió la igualdad en en-US sin que
+nadie lo notara); (3) al subir de volumen un efecto, se ajustan TODAS
+las perillas juntas (desfase + tiras + vida + intervalo + cadencia) para
+que la percepción escale ≥ la suma pedida, no solo un número.
+
+---
 ## Commit v6.50.87 — LOS EFECTOS SUAVES: EL ERRÁTICO (GLITCH) Y EL TEMBLOROSO
 
 **Petición del usuario**: "bueno las animaciones de efectos se ven bastante
