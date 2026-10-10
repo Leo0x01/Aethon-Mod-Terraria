@@ -120,14 +120,20 @@ Items: {
                         '''
                         La copia HAMBRIENTA — el mismo ojo, pero este libro
                         es APETITO CON CUERPO: intranquilo, enojado, con
-                        hambre. Debajo del 50% es EL CAZADOR: si te quedas
-                        quieto, sale a flotar sobre ti y su Sombra de la
-                        Página devora a la criatura que se mueva cerca
-                        (sin botín; la XP sí es del grimorio) — cada presa
-                        lo sacia 1% y, mientras come, el ojo se clava en su
-                        comida. Del 50% en adelante es EL IMPACIENTE
-                        (habla, tiembla, provoca oleadas); al 100%, SE ESCAPA.
-                        El hambre sólo sube si pasan 10 segundos sin comer.
+                        hambre. Desde el 25% de hambre es EL CAZADOR: si te
+                        quedas quieto, sale a flotar sobre ti y su Sombra
+                        de la Página devora a la criatura que se mueva
+                        cerca (sin botín; la XP sí es del grimorio) — un
+                        SOLO ataque por criatura, con su pausa de digestión
+                        entre presa y presa; cada presa lo sacia 1% y,
+                        mientras come, el ojo se clava en su comida.
+                        Mientras está fuera, sus ataques salen DEL LIBRO
+                        (tu mano ataca vacía) y su hambre NO se congela:
+                        sube coma o no coma — ahora es prueba (rápida);
+                        la versión real irá más lenta. Del 50% en adelante
+                        es EL IMPACIENTE (habla, tiembla, provoca oleadas);
+                        al 100%, SE ESCAPA (cazando o no). El hambre sólo
+                        sube si pasan 10 segundos sin comer.
                         Clic izq: descarga perseguidora (pruebas, sin maná).
                         Clic der: reinicia el apetito (y lo calma 10 s).
                         Objeto de pruebas — comparar con el original.
@@ -2117,6 +2123,7 @@ Hambre: {
         // comer y tiene hambre». No es miedo: es apetito con voz.
         Nervioso: {
                 Tranquilo: El cazador espera. Vigila, paciente, con apetito.
+                Hambriento: HAMBRIENTO — con el 25% ya quiere salir a cazar.
                 Cazando: FUERA DE CAZA — flota sobre ti buscando su propia comida.
                 Impaciente: IMPACIENTE — tiene hambre y no deja de repetirlo.
                 Fugitivo: ¡SE ESCAPÓ! La hartura de hambre lo alejó de ti.

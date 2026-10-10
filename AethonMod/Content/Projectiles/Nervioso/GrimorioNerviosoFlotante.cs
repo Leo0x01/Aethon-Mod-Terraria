@@ -130,6 +130,21 @@ namespace AethonMod.Content.Projectiles.Nervioso
             Sonar(SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.4f), Projectile.Center);
         }
 
+        /// <summary>v6.50.93 — LA CAZA SE HARTA: con el hambre al MÁXIMO
+        /// el espíritu QUE YA ESTÁ FUERA rompe y huye Él MISMO (la fuga
+        /// de la .91 sólo nacía del inventario — un libro cazando que
+        /// llegaba al 100% seguía patrullando para siempre). Ahora la
+        /// caza se convierte en fuga EN VIVO: mismo espíritu, otro modo.</summary>
+        private void IrAFuga()
+        {
+            GrimorioHambrientoNervioso.DecirLocal("Escapa", new Color(235, 70, 55));
+            Projectile.ai[0] = MODO_FUGA;
+            Projectile.ai[1] = 0f;
+            _tHastaQuiebre = 20;
+            Projectile.netUpdate = true;
+            Sonar(SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(0.7f), Projectile.Center);
+        }
+
         public override void AI()
         {
             Projectile.ai[1]++;
@@ -154,6 +169,10 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 {
                     // la caza termina AL 0% («saciado»)…
                     if (hambre <= 0f) IrAVolver();
+                    // v6.50.93 — …y al 100% SE HARTA Y HUYE (la letra del
+                    // hambre que SIEMPRE sube: un espíritu que no come lo
+                    // suficiente llega al tope CAZANDO — rompe en VIVO)
+                    else if (hambre >= 1f) IrAFuga();
                 }
                 else if (Modo == MODO_FUGA)
                 {
@@ -180,8 +199,16 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 float lado = atento.X < Projectile.Center.X ? -1f : 1f;
                 Projectile.rotation = MathF.Sin(t * 0.045f) * 0.12f + lado * 0.10f;
 
-                // LA CAZA (autoridad): algo se mueve cerca → la sombra
-                if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva())
+                // LA CAZA (autoridad): algo se mueve cerca → la sombra.
+                // v6.50.93 — UN ATAQUE POR CRIATURA (la letra: «solo se
+                // debe lanzar una vez su ataque hasta que la criatura
+                // muere»): la sombra activa ya bloquea lanzamientos
+                // paralelos (SombraActiva) y ahora la DIGESTIÓN bloquea
+                // la cadena instantánea — tras comer una presa, el
+                // espíritu espera TICKS_DIGESTION antes de lanzar la
+                // siguiente (el re-loj lo marca AbsorberPresa).
+                if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
+                    SombraPaginaCaza.DigestionLista(Projectile.owner))
                 {
                     NPC presa = PresaCercana();
                     if (presa != null)

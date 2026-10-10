@@ -39,6 +39,33 @@ namespace AethonMod.Content.Projectiles.Nervioso
         /// <summary>EL MORDISCO: cada cuántos ticks la sombra drena su 10%.</summary>
         private const int CADENCIA_MORDIDA = 30;
 
+        // v6.50.93 — LA DIGESTIÓN (la letra: «cuando el libro ataca y se
+        // alimenta, su ataque vuelve a lanzarce justo cuando mata a la
+        // criatura, esto no debe pasar, solo se debe lanzar una vez su
+        // ataque hasta que la criatura muere»): el ataque es UNO por
+        // criatura — nace, muerde y se la come ENTERA; el siguiente NO se
+        // lanza en el instante del último mordisco, sino tras esta pausa
+        // de digestión (2 s — valor de PRUEBA como el resto de la demo).
+        // El reloj vive AQUÍ (por dueño) y lo marca AbsorberPresa con cada
+        // presa comida; GrimorioNerviosoFlotante lo respeta antes de
+        // lanzar la siguiente sombra.
+        internal const int TICKS_DIGESTION = 120;
+        private static readonly uint[] _digestionHasta = new uint[Main.maxPlayers];
+
+        /// <summary>v6.50.93 — UN bocado acaba de subir: el dueño digiere
+        /// hasta TICKS_DIGESTION — ninguna sombra nueva mientras tanto.</summary>
+        internal static void MarcarDigestion(int dueño)
+        {
+            if (dueño >= 0 && dueño < _digestionHasta.Length)
+                _digestionHasta[dueño] = Main.GameUpdateCount + (uint)TICKS_DIGESTION;
+        }
+
+        /// <summary>v6.50.93 — ¿Ya digirió su último bocado? (sin bocado
+        /// reciente, digiere al instante — la primera caza no espera).</summary>
+        internal static bool DigestionLista(int dueño) =>
+            dueño < 0 || dueño >= _digestionHasta.Length ||
+            Main.GameUpdateCount >= _digestionHasta[dueño];
+
         private NPC Presa => Projectile.ai[0] <= 0 ? null : Main.npc[(int)Projectile.ai[0] - 1];
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";

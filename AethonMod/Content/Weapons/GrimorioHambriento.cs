@@ -230,17 +230,13 @@ namespace AethonMod.Content.Weapons
         /// bandera; el resto de la familia no cambia ni un tiro de dado.</summary>
         public bool NerviosoActivo() => Nervioso && Hambre >= 0.5f;
 
-        /// <summary>v6.50.91 — UN PASO DEL OJO SIN HAMBRE: para el Nervioso
-        /// en caza — el parpadeo y la mirada siguen vivos, el reloj del
-        /// apetito NO avanza (sólo las presas lo bajan). Implementado como
-        /// rescate del valor tras el Paso canónico: CERO duplicación del
-        /// ciclo probado de la .82.</summary>
-        public void PasoSinHambre()
-        {
-            float hambre = Hambre;
-            Paso();
-            Hambre = hambre;
-        }
+        // v6.50.93 — PASO SIN HAMBRE ELIMINADO (la letra del usuario:
+        // «el nivel de hambre debe subir independientemente el libro case
+        // o no […] esto es porque el libro esta fuera y su hambre se
+        // congela, el hambre no debe congelarse"): el reloj del apetito
+        // corre SIEMPRE (tras la gracia de los 10 s de la .92) — cace o
+        // no cace, el libro fuera o dentro. El método PasoSinHambre()
+        // murió con su diseño: ya nadie rescata el valor de Hambre.
     }
 
     /// <summary>
@@ -361,6 +357,14 @@ namespace AethonMod.Content.Weapons
 
         public override bool CanUseItem(Player player) => true;
 
+        /// <summary>v6.50.93 — ¿DE DÓNDE NACE EL DISPARO? La base dispara
+        /// desde donde vanilla apunta (el jugador). El Nervioso lo
+        /// re-escribe: mientras su ESPÍRITU está FUERA flotando, los
+        /// ataques del libro salen DEL LIBRO (la letra: «si el jugador
+        /// ataque y el libro esta fuera sus ataques salen del libro no
+        /// del jugador»).</summary>
+        protected virtual Vector2 OrigenDelDisparo(Player player, Vector2 position) => position;
+
         public override bool? UseItem(Player player)
         {
             // === CLIC DERECHO: REINICIAR EL APETITO (la demo se repite) ===
@@ -389,7 +393,9 @@ namespace AethonMod.Content.Weapons
             Estado.UltimoDisparo = Main.GameUpdateCount;
 
             // La descarga perseguidora del Grimorio del Eterno (931 — homing vanilla).
-            Projectile.NewProjectile(source, position, velocity, 931,
+            // v6.50.93 — el ORIGEN es virtual: el Nervioso con el libro
+            // FUERA dispara DESDE el libro flotante, no desde el jugador.
+            Projectile.NewProjectile(source, OrigenDelDisparo(player, position), velocity, 931,
                 damage, knockback, player.whoAmI);
             return false; // ya la spawneé yo: nada de doble vanilla
         }

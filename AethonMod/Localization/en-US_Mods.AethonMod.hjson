@@ -115,14 +115,20 @@ Items: {
 		Tooltip:
 			'''
 			The HUNGRY copy — the same eye, but this book is
-			APPETITE WITH A BODY: restless, angry, starving. Below
-			50% it is THE HUNTER: stand still and it floats out
-			over you, and its Page Shadow devours whatever creature
-			moves nearby (no loot; the XP still goes to the grimoire)
-			— each prey eases it 1%, and while it eats, its eye
-			locks onto its food. From 50% on it is THE IMPATIENT one
-			(it talks, trembles, summons waves); at 100%, IT ESCAPES.
-			Hunger only rises if 10 seconds pass without eating.
+			APPETITE WITH A BODY: restless, angry, starving. From
+			25% hunger on it is THE HUNTER: stand still and it
+			floats out over you, and its Page Shadow devours
+			whatever creature moves nearby (no loot; the XP still
+			goes to the grimoire) — ONE attack per creature, with
+			a digesting pause between prey; each prey eases it 1%,
+			and while it eats, its eye locks onto its food. While
+			it is out, its attacks come FROM THE BOOK (your hand
+			swings empty) and its hunger does NOT freeze: it rises
+			whether it eats or not — this is a test build (fast);
+			the real one will be slower. From 50% on it is THE
+			IMPATIENT one (it talks, trembles, summons waves); at
+			100%, IT ESCAPES (hunting or not). Hunger only rises
+			if 10 seconds pass without eating.
 			Left click: homing bolt (testing, no mana).
 			Right click: resets the appetite (and calms it 10 s).
 			Testing item — compare against the original.
@@ -2114,6 +2120,7 @@ Hambre: {
 	// eat and it's hungry". Not fear: appetite with a voice.
 	Nervioso: {
 		Tranquilo: The hunter waits. It watches, patient, hungry.
+		Hambriento: HUNGRY — at 25% it already wants out to hunt.
 		Cazando: OUT HUNTING — it floats above you, seeking its own food.
 		Impaciente: IMPATIENT — it's hungry and won't stop saying so.
 		Fugitivo: IT ESCAPED! Sick of hunger, it keeps away from you.

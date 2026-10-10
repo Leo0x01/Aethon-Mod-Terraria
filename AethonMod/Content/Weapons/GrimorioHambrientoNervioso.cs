@@ -86,6 +86,10 @@ namespace AethonMod.Content.Weapons
         //     cazar su propia comida); del 50% en adelante EL IMPACIENTE
         //     (efectos visuales + voz + probabilidades de oleadas) ===
         internal const float UMBRAL_IMPACIENCIA = 0.5f;
+        // v6.50.93 — EL UMBRAL DE LA CAZA (la letra: «el libro solo sale
+        // a cazar de 25% de hambre en adelante»): debajo del 25% el libro
+        // NO sale ni con el jugador quieto — el apetito aún no aprieta.
+        internal const float UMBRAL_CACERIA = 0.25f;
         // LA ESPERA: los segundos de quietud del jugador que sacan al libro
         // a cazar (5 s AHORA QUE ES UNA PRUEBA — la letra lo marcó como
         // valor de prueba; ajustable cuando el sistema esté listo)
@@ -449,6 +453,16 @@ namespace AethonMod.Content.Weapons
             if (Main.netMode == NetmodeID.Server)
                 return base.ModifyItemDraw(ref drawInfo, ref drawData, ref coloredDrawData, ref glowMaskDrawData);
 
+            // v6.50.93 — LA MANO VACÍA (la letra: «si el jugador ataca con
+            // el libro este no tendra el sprite del libro en su mano, pero
+            // solo cuando el libro esta fuera ya que esta flotando»):
+            // mientras el ESPÍRITU está fuera, el libro REAL es el que
+            // flota — en la mano no se dibuja NADA (ni cuerpo, ni tiras,
+            // ni ojo: la mano ataca vacía). Al volver el espíritu, el
+            // libro de siempre (temblor, glitch y capas).
+            if (LibroFuera(drawInfo.drawPlayer))
+                return false;
+
             PasoMaquina();
             Tira[] tiras = Layout(out float offOjo);
 
@@ -547,8 +561,8 @@ namespace AethonMod.Content.Weapons
             return false;
         }
 
-        /// <summary>¿Está fuera EN PATRULLA DE CAZA? (modo caza — mientras
-        /// esto sea verdad, el reloj del hambre se congela).</summary>
+        /// <summary>¿Está fuera EN PATRULLA DE CAZA? (modo caza — el
+        /// espíritu vela sobre su dueño esperando presas).</summary>
         internal static bool CaceriaActiva()
         {
             int tipo = ModContent.ProjectileType<GrimorioNerviosoFlotante>();
@@ -583,6 +597,31 @@ namespace AethonMod.Content.Weapons
             }
             return null;
         }
+
+        /// <summary>v6.50.93 — ¿DÓNDE ESTÁ EL ESPÍRITU? Mientras el libro
+        /// está FUERA, éste es el punto del que nacen SUS ataques (la
+        /// letra: «si el jugador ataque y el libro esta fuera sus ataques
+        /// salen del libro no del jugador»). Null = el libro está en
+        /// casa (los ataques salen del jugador, como siempre).</summary>
+        internal static Vector2? PosicionDelLibro(int dueño)
+        {
+            int tipo = ModContent.ProjectileType<GrimorioNerviosoFlotante>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile p = Main.projectile[i];
+                if (p != null && p.active && p.type == tipo && p.owner == dueño)
+                    return p.Center;
+            }
+            return null;
+        }
+
+        /// <summary>v6.50.93 — EL DISPARO NACE DEL LIBRO FLOTANTE (la
+        /// letra: «mientras el libro este fuera todos los ataques que
+        /// pertenecen al libro salen del libro»): la descarga perseguidora
+        /// parte del ESPÍRITU cuando está fuera — el jugador apunta, el
+        /// libro dispara.</summary>
+        protected override Vector2 OrigenDelDisparo(Player player, Vector2 position) =>
+            PosicionDelLibro(player.whoAmI) is Vector2 libro ? libro : position;
 
         /// <summary>EL PASO DE LAS DOS VIDAS — una vez por tick desde
         /// UpdateInventory (el guard del tick vale por TODAS las copias del
@@ -629,8 +668,13 @@ namespace AethonMod.Content.Weapons
 
             if (!fuera)
             {
-                // LA SALIDA A CAZA: apetito (0–50%) + jugador QUIETO 5 s
-                if (h > 0f && h < UMBRAL_IMPACIENCIA)
+                // v6.50.93 — LA SALIDA A CAZA: del 25% EN ADELANTE (la
+                // letra: «el libro solo sale a cazar de 25% de hambre en
+                // adelante») + jugador QUIETO 5 s — hasta el 100%, que
+                // ya es cosa de la FUGA (si está fuera cazando y el
+                // apetito llega al tope, el espíritu rompe y huye ÉL
+                // solo — GrimorioNerviosoFlotante cambia de modo).
+                if (h >= UMBRAL_CACERIA && h < 1f)
                 {
                     bool quieto = !player.dead && player.velocity.LengthSquared() < 0.02f;
                     _ticksQuieto = quieto ? _ticksQuieto + 1 : 0;
@@ -760,6 +804,15 @@ namespace AethonMod.Content.Weapons
             // congela el reloj del apetito 10 s — el libro acaba de comer.
             _estadoNervioso.UltimaComida = Main.GameUpdateCount;
 
+            // v6.50.93 — LA DIGESTIÓN (la letra: «cuando el libro ataca y
+            // se alimenta, su ataque vuelve a lanzarce justo cuando mata
+            // a la criatura, esto no debe pasar, solo se debe lanzar una
+            // vez su ataque hasta que la criatura muera»): cada presa
+            // comida le sigue una PAUSA — el espíritu no lanza SU SIGUIENTE
+            // sombra hasta digerir este bocado (SombraPaginaCaza guarda el
+            // reloj; GrimorioNerviosoFlotante lo respeta).
+            SombraPaginaCaza.MarcarDigestion(dueño.whoAmI);
+
             // LA XP — el pipeline de siempre (el Grimorio del Eterno visible
             // cobra: la muerte no es del jugador, pero el libro sí comió)
             CobrarXPLibro(dueño, paraXP);
@@ -836,15 +889,18 @@ namespace AethonMod.Content.Weapons
             if (local && Main.GameUpdateCount != Estado.TickMarcado)
             {
                 Estado.TickMarcado = Main.GameUpdateCount;
-                // LA CAZA CONGELA EL RELOJ: «el libro se mantendrá cazando su
-                // propia comida hasta llegar a 0% de hambre» — mientras
-                // patrulla, sólo las presas mueven el apetito (el ojo sigue
-                // vivo: PasoSinHambre). Y el anfitrión de un listen server
-                // también pasa hambre (el guard viejo lo dejaba ciego).
-                if (CaceriaActiva())
-                    Estado.PasoSinHambre();
-                else
-                    Estado.Paso();
+                // v6.50.93 — EL RELOJ CORRE SIEMPRE (la letra: «el nivel
+                // de hambre debe subir independientemente el libro case o
+                // no […] esto es porque el libro esta fuera y su hambre se
+                // congela, el hambre no debe congelarse»): el PASO SIN
+                // HAMBRE de la .91 quedó ELIMINADO — el apetito avanza lo
+                // cace o no cace, el libro fuera o dentro (la tasa sigue
+                // siendo la de PRUEBA: 0→100% en un minuto tras la gracia;
+                // la versión real irá más lenta). Sólo las presas lo
+                // bajan (−1% + 10 s de gracia) y el clic derecho lo
+                // reinicia. Y el anfitrión de un listen server también
+                // pasa hambre (el guard viejo lo dejaba ciego).
+                Estado.Paso();
             }
 
             PasoCaza(player);
@@ -860,6 +916,7 @@ namespace AethonMod.Content.Weapons
             string clave = CaceriaActiva() ? "Cazando"
                 : h >= 1f ? "Fugitivo"
                 : h >= UMBRAL_IMPACIENCIA ? "Impaciente"
+                : h >= UMBRAL_CACERIA ? "Hambriento"   // v6.50.93 — listo para cazar
                 : "Tranquilo";
             for (int i = 0; i < tooltips.Count; i++)
             {

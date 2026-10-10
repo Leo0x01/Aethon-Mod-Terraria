@@ -153,9 +153,53 @@ namespace AethonMod.Content.Globals
         // v6.50.48 — EL PRÉSTAMO DE ZONA (el fix del jefe que SE VA):
         // el estado del flag original del jugador mientras dura el AI
         // de esta pieza (PreAI lo presta, PostAI lo devuelve).
+        // v6.50.93 — EL PRÉSTAMO ES A TODA LA MESA (la letra del usuario:
+        // «los jefes y monstruos invocados en las oleadas no se vean
+        // afectados por los parametros de biomas o climas que sus
+        // versiones originales, ten en cuenta que las versiones de oleada
+        // son entidades separadas de las originales por lo tanto no se ven
+        // afectadas"): la IA vanilla del Devorador pregunta «¿ALGUIEN vive
+        // en la Corrupción?» (barrido por TODOS los jugadores) y su
+        // chequeo puede correr con target=255 (el primer tick de un
+        // recién nacido) o con el target muerto — el préstamo ya NO
+        // depende del npc.target: se prestan las zonas a TODOS los vivos
+        // y el chequeo de vanilla SIEMPRE encuentra a su gente. (A un
+        // jugador muerto no se le presta nada: ni vanilla ni nosotros lo
+        // contamos — que el jefe espere al resucitado.)
         private bool _zonaPrestada = false;
-        private bool _zonaCrimsonOriginal = false;
-        private bool _zonaCorruptOriginal = false;
+        private readonly List<Player> _presasDeZonas = new List<Player>(8);
+        private readonly List<bool> _zoCrimson = new List<bool>(8);
+        private readonly List<bool> _zoCorrupt = new List<bool>(8);
+        private readonly List<bool> _zoJungla = new List<bool>(8);
+        private readonly List<bool> _zoNieve = new List<bool>(8);
+
+        // v6.50.93 — EL REGISTRO DE LOS QUE MUTAN (LA CURA DEL DEVORADOR
+        // QUE SE FUE — la letra: «en la oleada el devorador de mundo
+        // aparecio y se fue»). LA CAUSA RAÍZ (decompile de NPC.cs): al
+        // PARTIR al gusano, vanilla MUTA el cuerpo huérfano en CABEZA
+        // («type = 13; SetDefaultsKeepPlayerInteraction(13)») — y
+        // NPC.SetDefaults ARRANCA CON «_globals = null»: los globals del
+        // NPC se DESTRUYEN y se re-instancian FRESCOS. El sello de la
+        // oleada muere con la instancia: la cabeza nueva nace SIN
+        // EsDeOleada (sin CheckActive, sin stats del festín, sin aura),
+        // SIN préstamo de zona — y su IA vanilla («¿nadie vive en la
+        // Corrupción?») la entierra hacia abajo y, pasada la mitad de la
+        // roca, APAGA LA CADENA ENTERA con active=false DIRECTO (ningún
+        // hook lo detiene). El jugador mata la cabeza, el resto del
+        // gusano «se va». LA CURA: este registro recuerda el sello POR
+        // SLOT (whoAmI) y SetDefaults lo RE-ADOPTA al ver la mutación —
+        // la cabeza partida vuelve al festín en el MISMO tick.
+        private sealed class SelloVivo
+        {
+            public int Oleada;
+            public bool Jefe;
+            public bool Especial;
+            public int Nivel;
+            public uint Tick;
+        }
+        private static readonly Dictionary<int, SelloVivo> _sellados = new Dictionary<int, SelloVivo>(64);
+        // 15 s sin refresco (un NPC muerto no corre PreAI) = el slot ya no es del festín
+        private const uint TTL_SELLO = 900u;
 
         // ==================================================================
         //  v6.50.73 — EL AMBIENTE PRESTADO DE LA OLEADA (la letra: «tanto
@@ -197,9 +241,6 @@ namespace AethonMod.Content.Globals
         private bool _prestaModo = false;        // ¿prestó experto/maestro?
         private bool? _expertoOriginal = null;   // _overrideForExpertMode
         private bool? _maestroOriginal = null;   // _overrideForMasterMode
-        private bool _junglaOriginal = false;    // las zonas nuevas
-        private bool _nieveOriginal = false;
-        private Player _presaDeZonas = null;     // la dueña de las zonas prestadas
 
         // v6.50.73 — LA RED DEL PRÉSTAMO ATASCADO: si la IA vanilla TRUENA
         // entre PreAI y PostAI (tML traga la excepción y sigue), el mundo
@@ -347,6 +388,18 @@ namespace AethonMod.Content.Globals
                     GrimorioFuriaSistema.PiezaDevoradorNacio(MultiplicadorStats);
                 else if (npc.type == NPCID.Creeper)
                     GrimorioFuriaSistema.PiezaCerebroNacio(MultiplicadorStats);
+
+                // v6.50.93 — EL REGISTRO DEL SELLO (por SLOT): si vanilla
+                // MUTA esta pieza (cuerpo→cabeza al partir al Devorador),
+                // SetDefaults borra este global y re-adopta desde aquí.
+                _sellados[npc.whoAmI] = new SelloVivo
+                {
+                    Oleada = Oleada,
+                    Jefe = EsJefeDeOleada,
+                    Especial = EsEspecial,
+                    Nivel = Nivel,
+                    Tick = Main.GameUpdateCount
+                };
             }
             catch { EsDeOleada = false; }
         }
@@ -379,6 +432,29 @@ namespace AethonMod.Content.Globals
         {
             try
             {
+                // v6.50.93 — LA RE-ADOPCIÓN DEL SELLO (LA MUTACIÓN DEL
+                // DEVORADOR — la letra: «el devorador de mundo aparecio y
+                // se fue»). Al partir al gusano, vanilla corre
+                // «type = 13; SetDefaultsKeepPlayerInteraction(13)» — y
+                // SetDefaults DESTRUYE los globals del NPC (_globals =
+                // null en el decompile) para re-instanciarlos FRESCOS:
+                // ESTE hook corre sobre la instancia fresca de la cabeza
+                // mutada (el NPC sigue ACTIVO y con SU whoAmI — los
+                // NewNPC normales pasan por aquí con active=false y la
+                // referencia efímera de la barra viene apagada: jamás
+                // adoptan). El registro devuelve el sello en el MISMO
+                // tick: stats del festín, CheckActive, aura, préstamo de
+                // zona — la cabeza partida SIGUE SIENDO DE LA OLEADA (y
+                // vanilla ya no la entierra: su chequeo de Corrupción
+                // siempre encuentra a la mesa prestada).
+                if (npc.active && npc.whoAmI >= 0 && npc.whoAmI < Main.maxNPCs &&
+                    npc.type == NPCID.EaterofWorldsHead && GrimorioFuriaSistema.Activo &&
+                    _sellados.TryGetValue(npc.whoAmI, out SelloVivo previo) &&
+                    Main.GameUpdateCount - previo.Tick <= TTL_SELLO)
+                {
+                    Marcar(npc, previo.Oleada, previo.Jefe, previo.Especial, previo.Nivel);
+                }
+
                 // EL DEVORADOR: la barra referencia un CUERPO fresco (14)
                 // y asume GetEaterOfWorldsSegmentsCount()+2 piezas.
                 if (npc.type == NPCID.EaterofWorldsBody)
@@ -813,18 +889,27 @@ namespace AethonMod.Content.Globals
                     p._prestaSuperficie = false;
                     Main.worldSurface = p._superficieOriginal;
                 }
-                if (p._presaDeZonas != null)
+                // v6.50.93 — LA MESA ENTERA: cada jugador prestado recobra
+                // SUS cuatro zonas (el préstamo ya no es del target solo)
+                if (p._presasDeZonas.Count > 0)
                 {
-                    Player pl = p._presaDeZonas;
-                    p._presaDeZonas = null;
-                    p._zonaPrestada = false;
-                    if (pl != null && pl.active)
+                    for (int i = 0; i < p._presasDeZonas.Count; i++)
                     {
-                        pl.ZoneCrimson = p._zonaCrimsonOriginal;
-                        pl.ZoneCorrupt = p._zonaCorruptOriginal;
-                        pl.ZoneJungle = p._junglaOriginal;
-                        pl.ZoneSnow = p._nieveOriginal;
+                        Player pl = p._presasDeZonas[i];
+                        if (pl != null && pl.active)
+                        {
+                            pl.ZoneCrimson = p._zoCrimson[i];
+                            pl.ZoneCorrupt = p._zoCorrupt[i];
+                            pl.ZoneJungle = p._zoJungla[i];
+                            pl.ZoneSnow = p._zoNieve[i];
+                        }
                     }
+                    p._presasDeZonas.Clear();
+                    p._zoCrimson.Clear();
+                    p._zoCorrupt.Clear();
+                    p._zoJungla.Clear();
+                    p._zoNieve.Clear();
+                    p._zonaPrestada = false;
                 }
             }
             catch
@@ -834,7 +919,11 @@ namespace AethonMod.Content.Globals
                 p._prestaModo = false;
                 p._prestaDia = false;
                 p._prestaSuperficie = false;
-                p._presaDeZonas = null;
+                p._presasDeZonas.Clear();
+                p._zoCrimson.Clear();
+                p._zoCorrupt.Clear();
+                p._zoJungla.Clear();
+                p._zoNieve.Clear();
                 p._zonaPrestada = false;
             }
         }
@@ -904,88 +993,134 @@ namespace AethonMod.Content.Globals
                 // vestir el nuevo — el mundo jamás queda vestido.
                 if (_prestamoAbierto != null) DevolverAmbiente();
 
-                if (EsDeOleada && EsJefeDeOleada &&
-                    npc.target >= 0 && npc.target < Main.maxPlayers)
+                // v6.50.93 — EL REGISTRO VIVO: el sello de ESTE slot
+                // refresca su hora (un NPC muerto ya no corre PreAI) y,
+                // cada ~8,5 s, los sellos sin frescura expiran (slots
+                // reciclados por NewNPC — el barrido los olvida antes de
+                // que alguien ajeno herede un sello por accidente).
+                if (EsDeOleada && _sellados.TryGetValue(npc.whoAmI, out SelloVivo vivo))
+                    vivo.Tick = Main.GameUpdateCount;
+                if ((Main.GameUpdateCount & 511u) == 0u && _sellados.Count > 0)
                 {
-                    Player presa = Main.player[npc.target];
-                    if (presa != null && presa.active && !presa.dead)
+                    List<int> vencidos = null;
+                    foreach (var par in _sellados)
                     {
-                        // LOS GUARDIANES DE VERDAD (los tipos del festín —
-                        // ni las manos de Skeletron ni las piezas en
-                        // cascada, aunque hereden el sello de jefe)
-                        bool esGuardian =
-                            npc.type == NPCID.KingSlime ||
-                            npc.type == NPCID.EyeofCthulhu ||
-                            npc.type == NPCID.QueenBee ||
-                            npc.type == NPCID.BrainofCthulhu ||
-                            npc.type == NPCID.EaterofWorldsHead ||
-                            npc.type == NPCID.SkeletronHead ||
-                            npc.type == NPCID.Deerclops;
-                        if (esGuardian)
+                        if (Main.GameUpdateCount - par.Value.Tick > TTL_SELLO)
                         {
-                            bool algoPrestado = false;
+                            if (vencidos == null) vencidos = new List<int>();
+                            vencidos.Add(par.Key);
+                        }
+                    }
+                    if (vencidos != null)
+                        for (int i = 0; i < vencidos.Count; i++)
+                            _sellados.Remove(vencidos[i]);
+                }
 
-                            // === LAS ZONAS DEL GUARDIÁN ===
-                            bool prestaCrimson = npc.type == NPCID.BrainofCthulhu && !presa.ZoneCrimson;
-                            bool prestaCorrupt = npc.type == NPCID.EaterofWorldsHead && !presa.ZoneCorrupt;
-                            bool prestaJungla = npc.type == NPCID.QueenBee && !presa.ZoneJungle;
-                            bool prestaNieve = npc.type == NPCID.Deerclops && !presa.ZoneSnow;
-                            if (prestaCrimson || prestaCorrupt || prestaJungla || prestaNieve)
-                            {
-                                _zonaCrimsonOriginal = presa.ZoneCrimson;
-                                _zonaCorruptOriginal = presa.ZoneCorrupt;
-                                _junglaOriginal = presa.ZoneJungle;
-                                _nieveOriginal = presa.ZoneSnow;
-                                if (prestaCrimson) presa.ZoneCrimson = true;
-                                if (prestaCorrupt) presa.ZoneCorrupt = true;
-                                if (prestaJungla) presa.ZoneJungle = true;
-                                if (prestaNieve) presa.ZoneSnow = true;
-                                _presaDeZonas = presa;
-                                _zonaPrestada = true;
-                                algoPrestado = true;
-                            }
+                if (EsDeOleada)
+                {
+                    // LOS GUARDIANES DE VERDAD (los tipos del festín —
+                    // ni las manos de Skeletron ni las piezas en
+                    // cascada, aunque hereden el sello de jefe)
+                    bool esGuardian =
+                        npc.type == NPCID.KingSlime ||
+                        npc.type == NPCID.EyeofCthulhu ||
+                        npc.type == NPCID.QueenBee ||
+                        npc.type == NPCID.BrainofCthulhu ||
+                        npc.type == NPCID.EaterofWorldsHead ||
+                        npc.type == NPCID.SkeletronHead ||
+                        npc.type == NPCID.Deerclops;
+                    bool algoPrestado = false;
 
-                            // === LA NOCHE PERPETUA (solo los que leen el
-                            // día: el Ojo que huye y el guardián que gira)
-                            if ((npc.type == NPCID.EyeofCthulhu || npc.type == NPCID.SkeletronHead) &&
-                                Main.dayTime)
-                            {
-                                _diaOriginal = Main.dayTime;
-                                Main.dayTime = false;
-                                _prestaDia = true;
-                                algoPrestado = true;
-                            }
+                    // === v6.50.93 — LAS ZONAS DE LA OLEADA, A TODA LA MESA
+                    //     (la letra del usuario: «los jefes y monstruos
+                    //     invocados en las oleadas no se vean afectados por
+                    //     los parametros de biomas o climas que sus
+                    //     versiones originales, ten en cuenta que las
+                    //     versiones de oleada son entidades separadas de
+                    //     las originales por lo tanto no se ven afectadas»).
+                    //     EL DEVORADOR DE OLEADA — y los Devoradores que
+                    //     escupe en el subsuelo — NO leen la Corrupción
+                    //     del mundo: su IA vanilla pregunta «¿ALGUIEN vive
+                    //     en la Corrupción?» y, sin respuesta, lo entierra
+                    //     y APAGA la cadena entera (active=false directo,
+                    //     que ningún hook detiene). Se presta la zona a
+                    //     TODOS los vivos durante su AI, SIN target (su
+                    //     chequeo nace con target=255 en el primer tick y
+                    //     con el target muerto cuando alguien cae). El
+                    //     Cerebro su Carmesí, la Reina su Jungla, Deerclops
+                    //     su Nieve: la oleada ES su propio ambiente. ===
+                    bool prestaCorrupt = npc.type == NPCID.EaterofWorldsHead ||
+                                         npc.type == NPCID.DevourerHead;
+                    bool prestaCrimson = esGuardian && EsJefeDeOleada && npc.type == NPCID.BrainofCthulhu;
+                    bool prestaJungla = esGuardian && EsJefeDeOleada && npc.type == NPCID.QueenBee;
+                    bool prestaNieve = esGuardian && EsJefeDeOleada && npc.type == NPCID.Deerclops;
+                    if (prestaCorrupt || prestaCrimson || prestaJungla || prestaNieve)
+                    {
+                        for (int i = 0; i < Main.maxPlayers; i++)
+                        {
+                            Player pl = Main.player[i];
+                            if (pl == null || !pl.active || pl.dead) continue;
+                            _presasDeZonas.Add(pl);
+                            _zoCrimson.Add(pl.ZoneCrimson);
+                            _zoCorrupt.Add(pl.ZoneCorrupt);
+                            _zoJungla.Add(pl.ZoneJungle);
+                            _zoNieve.Add(pl.ZoneSnow);
+                            if (prestaCrimson) pl.ZoneCrimson = true;
+                            if (prestaCorrupt) pl.ZoneCorrupt = true;
+                            if (prestaJungla) pl.ZoneJungle = true;
+                            if (prestaNieve) pl.ZoneSnow = true;
+                        }
+                        _zonaPrestada = _presasDeZonas.Count > 0;
+                        if (_zonaPrestada) algoPrestado = true;
+                    }
 
-                            // === LA COLMENA FLOTANTE (la Reina jamás
-                            // «sobre la superficie») ===
-                            if (npc.type == NPCID.QueenBee && Main.worldSurface > 0.0)
-                            {
-                                _superficieOriginal = Main.worldSurface;
-                                Main.worldSurface = 0.0; // su Y/16 jamás será «sobre» 0
-                                _prestaSuperficie = true;
-                                algoPrestado = true;
-                            }
+                    if (esGuardian && EsJefeDeOleada)
+                    {
+                        bool algoDelGuardian = false;
 
-                            // === LA IA DEL MODO MAESTRO (los overrides) ===
-                            if (!_prestaModo)
-                            {
-                                PrepararReflexion();
-                                if (_campoExperto != null && _campoMaestro != null)
-                                {
-                                    _expertoOriginal = (bool?)_campoExperto.GetValue(null);
-                                    _maestroOriginal = (bool?)_campoMaestro.GetValue(null);
-                                    _campoExperto.SetValue(null, (bool?)true);
-                                    _campoMaestro.SetValue(null, (bool?)true);
-                                    _prestaModo = true;
-                                    algoPrestado = true;
-                                }
-                            }
+                        // === LA NOCHE PERPETUA (solo los que leen el
+                        // día: el Ojo que huye y el guardián que gira)
+                        if ((npc.type == NPCID.EyeofCthulhu || npc.type == NPCID.SkeletronHead) &&
+                            Main.dayTime)
+                        {
+                            _diaOriginal = Main.dayTime;
+                            Main.dayTime = false;
+                            _prestaDia = true;
+                            algoDelGuardian = true;
+                        }
 
-                            if (algoPrestado)
+                        // === LA COLMENA FLOTANTE (la Reina jamás
+                        // «sobre la superficie») ===
+                        if (npc.type == NPCID.QueenBee && Main.worldSurface > 0.0)
+                        {
+                            _superficieOriginal = Main.worldSurface;
+                            Main.worldSurface = 0.0; // su Y/16 jamás será «sobre» 0
+                            _prestaSuperficie = true;
+                            algoDelGuardian = true;
+                        }
+
+                        // === LA IA DEL MODO MAESTRO (los overrides) ===
+                        if (!_prestaModo)
+                        {
+                            PrepararReflexion();
+                            if (_campoExperto != null && _campoMaestro != null)
                             {
-                                _prestamoAbierto = this;
+                                _expertoOriginal = (bool?)_campoExperto.GetValue(null);
+                                _maestroOriginal = (bool?)_campoMaestro.GetValue(null);
+                                _campoExperto.SetValue(null, (bool?)true);
+                                _campoMaestro.SetValue(null, (bool?)true);
+                                _prestaModo = true;
+                                algoDelGuardian = true;
                             }
                         }
+
+                        if (algoDelGuardian)
+                            algoPrestado = true;
+                    }
+
+                    if (algoPrestado)
+                    {
+                        _prestamoAbierto = this;
                     }
                 }
             }
