@@ -101,6 +101,12 @@ incluido por eso el libro recibe la exp y el jugador nada".
    «Sandboxing v6.50.94 → Adding Recipes → Server started» **0
    EXCEPCIONES**.
 
+**Publicada**: https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.50.94
+(release 408947983) — asset AethonMod.tmod (627959141) 2.555.191 B, md5
+`52004cee59ef7c79ef4da32c19ea593f`, CDN verificado byte a byte,
+`/releases/latest` = v6.50.94. Respaldo `/home/sync/AethonMod-v6.50.94.tmod`.
+Push `c6f1817..80d4d7b` + tag v6.50.94.
+
 ---
 ## Commit v6.50.93 — LA OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE + LOS ATAQUES DEL LIBRO SALEN DEL LIBRO + UN ATAQUE POR CRIATURA
 
