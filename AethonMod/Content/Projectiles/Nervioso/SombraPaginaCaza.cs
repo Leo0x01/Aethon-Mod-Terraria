@@ -20,8 +20,17 @@ namespace AethonMod.Content.Projectiles.Nervioso
     /// la MUELDE — un 10% de la vida MÁXIMA por golpe (cada 30 t: diez
     /// golpes y la criatura cae). Al último golpe NO hay muerte de vanilla:
     /// el libro ABSORBE a su presa (GrimorioHambrientoNervioso.AbsorberPresa
-    /// — sin loot, sin gore, sin crédito del jugador; la XP SÍ cobra) y su
-    /// hambre baja 1%.
+    /// — sin loot, sin gore, sin crédito del jugador) y su hambre baja 1%.
+    ///
+    /// v6.50.94 — EL FESTÍN EGOÍSTA Y EL COMPÁS. La letra: «el festin
+    /// compartido no tiene sentido […] el libro debe ser egoista y comer
+    /// toda la criatura loot incluido por eso el libro recibe la exp y el
+    /// jugador nada» — la XP de la presa es DEL NERVIOSO (AbsorberPresa),
+    /// no del Grimorio del Eterno; y «su ataque de la sombra de la pagina
+    /// una vez cada 10 segundo o algo asi, o poniendo por codigo que no
+    /// puede lanzar un ataque 2 segundos despues de terminar el primero»
+    /// — el compás vive aquí: MarcarAtaque al nacer, SombraTerminada al
+    /// morir (véase el bloque de constantes).
     ///
     /// El cuerpo es el lenguaje de la casa (SombrasLib): la columna viva de
     /// verlet, la masa negra, los ojos que miran, la bruma que come la luz
@@ -39,32 +48,48 @@ namespace AethonMod.Content.Projectiles.Nervioso
         /// <summary>EL MORDISCO: cada cuántos ticks la sombra drena su 10%.</summary>
         private const int CADENCIA_MORDIDA = 30;
 
-        // v6.50.93 — LA DIGESTIÓN (la letra: «cuando el libro ataca y se
-        // alimenta, su ataque vuelve a lanzarce justo cuando mata a la
-        // criatura, esto no debe pasar, solo se debe lanzar una vez su
-        // ataque hasta que la criatura muere»): el ataque es UNO por
-        // criatura — nace, muerde y se la come ENTERA; el siguiente NO se
-        // lanza en el instante del último mordisco, sino tras esta pausa
-        // de digestión (2 s — valor de PRUEBA como el resto de la demo).
-        // El reloj vive AQUÍ (por dueño) y lo marca AbsorberPresa con cada
-        // presa comida; GrimorioNerviosoFlotante lo respeta antes de
-        // lanzar la siguiente sombra.
-        internal const int TICKS_DIGESTION = 120;
-        private static readonly uint[] _digestionHasta = new uint[Main.maxPlayers];
+        // v6.50.94 — EL COMPÁS DEL ATAQUE (la letra: «eso del ataque se
+        // puede arreglar haciendo que el libro en ese estado solo pueda
+        // lanzar su ataque de la sombra de la pagina una vez cada 10
+        // segundo o algo asi, o poniendo por codigo que no puede lanzar
+        // un ataque 2 segundos despues de terminar el primero»): LAS DOS
+        // reglas a la vez — un lanzamiento cada 10 s (marcado al NACER la
+        // sombra) y NINGÚN ataque hasta 2 s después de TERMINAR la
+        // anterior (marcado al morir). El re-lanzamiento justo al matar
+        // murió con la digestión corta de la .93: su reloj nacía en la
+        // ABSORCIÓN — a mitad del ataque — y la sombra moría 84 t
+        // después, con apenas 0,6 s de pausa real.
+        internal const int TICKS_ENTRE_ATAQUES = 600;   // 10 s entre lanzamientos
+        internal const int TICKS_TRAS_TERMINAR = 120;   // 2 s tras terminar
+        private static readonly uint[] _proximoAtaque = new uint[Main.maxPlayers];
 
-        /// <summary>v6.50.93 — UN bocado acaba de subir: el dueño digiere
-        /// hasta TICKS_DIGESTION — ninguna sombra nueva mientras tanto.</summary>
-        internal static void MarcarDigestion(int dueño)
+        /// <summary>v6.50.94 — LA SOMBRA NACE: el siguiente ataque no
+        /// puede salir hasta dentro de TICKS_ENTRE_ATAQUES (lo llama el
+        /// espíritu al lanzar esta sombra).</summary>
+        internal static void MarcarAtaque(int dueño)
         {
-            if (dueño >= 0 && dueño < _digestionHasta.Length)
-                _digestionHasta[dueño] = Main.GameUpdateCount + (uint)TICKS_DIGESTION;
+            if (dueño >= 0 && dueño < _proximoAtaque.Length)
+                _proximoAtaque[dueño] = Main.GameUpdateCount + (uint)TICKS_ENTRE_ATAQUES;
         }
 
-        /// <summary>v6.50.93 — ¿Ya digirió su último bocado? (sin bocado
-        /// reciente, digiere al instante — la primera caza no espera).</summary>
-        internal static bool DigestionLista(int dueño) =>
-            dueño < 0 || dueño >= _digestionHasta.Length ||
-            Main.GameUpdateCount >= _digestionHasta[dueño];
+        /// <summary>v6.50.94 — ¿Ya puede lanzarse la siguiente sombra?
+        /// (sin ataque previo, al instante — la primera caza no espera).</summary>
+        internal static bool AtaqueListo(int dueño) =>
+            dueño < 0 || dueño >= _proximoAtaque.Length ||
+            Main.GameUpdateCount >= _proximoAtaque[dueño];
+
+        /// <summary>v6.50.94 — LA SOMBRA MURIÓ: la regla de los 2 s tras
+        /// terminar (si el compás de 10 s venciera antes, manda el de 2 s
+        /// — el ataque NUEVO jamás sale pegado al FINAL del anterior).</summary>
+        internal static void SombraTerminada(int dueño)
+        {
+            if (dueño >= 0 && dueño < _proximoAtaque.Length)
+            {
+                uint trasTerminar = Main.GameUpdateCount + (uint)TICKS_TRAS_TERMINAR;
+                if (trasTerminar > _proximoAtaque[dueño])
+                    _proximoAtaque[dueño] = trasTerminar;
+            }
+        }
 
         private NPC Presa => Projectile.ai[0] <= 0 ? null : Main.npc[(int)Projectile.ai[0] - 1];
 
@@ -100,6 +125,15 @@ namespace AethonMod.Content.Projectiles.Nervioso
             }
             Player dueño = Main.player[Projectile.owner];
             return dueño != null && dueño.active ? dueño.MountedCenter : Projectile.Center;
+        }
+
+        /// <summary>v6.50.94 — AL MORIR LA SOMBRA: el compás cuenta desde
+        /// el FINAL del ataque (la letra: «no puede lanzar un ataque 2
+        /// segundos despues de terminar el primero») — pase lo que pase
+        /// con la presa (absorbida, perdida, muerta por otra vía).</summary>
+        public override void OnKill(int timeLeft)
+        {
+            SombraTerminada(Projectile.owner);
         }
 
         public override void AI()

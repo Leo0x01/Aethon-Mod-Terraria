@@ -1,5 +1,107 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.94 — EL RELOJ SIEMPRE + EL COMPÁS DE LA SOMBRA + LA FUGA MUERTA + EL FESTÍN EGOÍSTA + EL ESPÍRITU ÚNICO
+
+**Petición del usuario**: "el grimorio hambriento nervioso no ha hecho
+nada de lo que dije que tenia que hacer, o sea el hambre se pausa, su
+ataque sigue relanzandose al matar a una criatura, eso del ataque se
+puede arreglar haciendo que el libro en ese estado solo pueda lanzar su
+ataque de la sombra de la pagina una vez cada 10 segundo o algo asi, o
+poniendo por codigo que no puede lanzar un ataque 2 segundos despues de
+terminar el primero / ademas los proyectiles del libro no salen del
+libro cuando esta flotando, salen de una copia del sprite del libro que
+el jugador muestra en su mano / esto de la fuga no tiene mucho sentido,
+el jugador se quedaria sin el libro, la fuga simplemente la quitamos el
+libro no se fuga, solo queda flotando cerca del jugador cazando por si
+mismo, esto de la caza por su cuenta es cuando el jugador esta en afk o
+simplemente lleva mucho tiempo sin atacar criaturas con el libro / el
+festin compartido no tiene sentido, el libro caza por estar hambriento,
+en este caso el libro debe ser egoista y comer toda la criatura loot
+incluido por eso el libro recibe la exp y el jugador nada".
+
+1. **EL RELOJ SIEMPRE — LA GRACIA DE LOS 10 s MURIÓ** (la letra: «el
+   hambre se pausa»): la "gracia" de la .92 (10 s de reloj congelado
+   tras cada bocado, `UltimaComida` + `TICKS_GRACIA_COMIDA`) era LA
+   PAUSA que el usuario veía — mientras el libro cazaba y comía, el
+   apetito jamás corría. `EstadoGrimorio.Paso()` ahora suma **SIEMPRE**
+   (`ldc.r4 0.00027777778` = 1/3600 por tick, plegado por Roslyn), coma
+   o no coma, cace o no cace: el bocado sólo RESTA (−1%) y el clic
+   derecho reinicia. La gracia, el campo `UltimaComida` y su marca en
+   `AbsorberPresa` quedan **ELIMINADOS**.
+2. **EL COMPÁS DE LA SOMBRA — EL RE-LANZAMIENTO AL MATAR MURIÓ** (la
+   letra: «una vez cada 10 segundo o algo asi, o poniendo por codigo que
+   no puede lanzar un ataque 2 segundos despues de terminar el
+   primero»): LAS DOS reglas a la vez. La "digestión" de la .93 marcaba
+   su reloj en la ABSORCIÓN — a mitad del ataque — y la sombra moría 84
+   ticks después: apenas 0,6 s de pausa real (ESA era la brecha del
+   re-lanzamiento). Ahora el compás nace al NACER la sombra
+   (`MarcarAtaque`, `TICKS_ENTRE_ATAQUES 600` = 10 s entre lanzamientos)
+   y se refuerza al MORIR (`SombraTerminada` en `OnKill`,
+   `TICKS_TRAS_TERMINAR 120` = 2 s tras terminar — si el de 10 s venciera
+   antes, manda el de 2 s): el ataque NUEVO jamás sale pegado al final
+   del anterior, mate o no mate.
+3. **LA FUGA MURIÓ** (la letra: «esto de la fuga no tiene mucho sentido,
+   el jugador se quedaria sin el libro, la fuga simplemente la quitamos
+   el libro no se fuga, solo queda flotando cerca del jugador cazando
+   por si mismo»): `MODO_FUGA`, `IrAFuga`, el bloque de huida (380–640
+   px + quiebres nerviosos), el spawn de fuga de `PasoCaza`, el halo
+   rojo y las tiras rotas del espíritu, y las frases «Escapa» /
+   «Fugitivo» — TODO ELIMINADO. Al 100% de hambre el libro se queda
+   flotando cerca del jugador, cazando por su cuenta (vuelve sólo al 0%
+   «saciado» o si dejan de llevarlo).
+4. **LA CAZA POR SU CUENTA — DEL AUSENTE** (la letra: «esto de la caza
+   por su cuenta es cuando el jugador esta en afk o simplemente lleva
+   mucho tiempo sin atacar criaturas con el libro»): el espíritu sale
+   del 25% en adelante cuando el jugador está quieto 5 s (AFK, la regla
+   de la .91) **O** lleva `TICKS_SIN_ATAQUE_LIBRO 1800` (30 s) sin
+   disparar con el libro — aunque se esté moviendo. Cada disparo del
+   jugador reinicia ese reloj (`Shoot` del Nervioso), y mientras el
+   dueño disparó hace menos de `TICKS_MARGEN_ATAQUE 300` (5 s) el
+   espíritu NO lanza sombras por su cuenta (`JugadorAtacoReciente`): la
+   caza solitaria es del ausente.
+5. **EL FESTÍN EGOÍSTA** (la letra: «el festin compartido no tiene
+   sentido […] el libro debe ser egoista y comer toda la criatura loot
+   incluido por eso el libro recibe la exp y el jugador nada»): la XP de
+   cada presa de la sombra ya NO va al Grimorio del Eterno (el festín
+   compartido de la .91–.93): `CobrarXPLibro` cobra al **NERVIOSO** —
+   `ShardLevelItem` ahora también vive en este ítem (nivel + XP por
+   copia, persistidos con SaveData/NetSend) y el tooltip muestra SU
+   nivel («Nivel N · XP x/y», clave nueva `Hambre.Nervioso.Nivel`). Sin
+   latido dorado del HUD, sin `SincronizarLibros`: el jugador no recibe
+   NADA (la presa se apaga sin loot desde la .91 — botín incluido en la
+   panza del libro).
+6. **EL ESPÍRITU ÚNICO — LA COPIA MURIÓ** (la letra: «los proyectiles
+   del libro no salen del libro cuando esta flotando, salen de una copia
+   del sprite del libro que el jugador muestra en su mano»): la captura
+   del usuario mostraba DOS libros idénticos (el espíritu en la vela y
+   una copia junto a la mano, con el destello de la descarga naciendo de
+   la copia — `PosicionDelLibro` devolvía al primero del array). Cura
+   por construcción: `SoyDuplicado()` — el espíritu revisa cada 30 ticks
+   si hay OTRO espíritu de su dueño y el perdedor se disuelve (gana el
+   `MODO_CAZA`; a igual modo, el de `whoAmI` más bajo): **jamas** dos
+   libros flotando, los ataques salen del que es (el
+   `OrigenDelDisparo` de la .93 ya apuntaba al libro — ahora siempre hay
+   UNO solo al que apuntar).
+7. **VERIFICACIÓN**: oráculo 0/0 (306 .cs) · build real 0/0 · .tmod
+   2.555.191 B md5 `52004cee59ef7c79ef4da32c19ea593f`: 384 entradas (el
+   MISMO set de la .93), EOF exacto, blob diff whitelist exacto
+   (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 378 restantes,
+   CECIL: `UltimaComida`/`TICKS_GRACIA_COMIDA`/`PasoSinHambre`
+   ELIMINADOS de EstadoGrimorio + la tasa 1/3600 plegada en `Paso` +
+   `MarcarAtaque`/`AtaqueListo`/`SombraTerminada`/`OnKill` con 600 y 120
+   plegados en la sombra + `IrAFuga`/`MODO_FUGA` ELIMINADOS del
+   espíritu + `SoyDuplicado` presente + `Shoot`/`JugadorAtacoReciente`
+   con 1800/300 plegados en el Nervioso + `ShardLevelItem` adopta al
+   Nervioso + «Fugitivo»/«Escapa»/«MarcarDigestion» purgados del IL +
+   **GrimorioHambriento (clase-ítem), OleadaNPC y GrimorioFuriaSistema
+   IL IDÉNTICOS a la .93** (la .94 no los tocó) · hjson: es-ES espejo de
+   es-MX por contenido, familia de DOS + **13 claves del Nervioso** (con
+   «Nivel», sin fuga), 785 hojas simétricas es↔en, en-US con sus tabs
+   (4235), paquete == árbol byte a byte en los 3 idiomas · headless
+   «Sandboxing v6.50.94 → Adding Recipes → Server started» **0
+   EXCEPCIONES**.
+
+---
 ## Commit v6.50.93 — LA OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE + LOS ATAQUES DEL LIBRO SALEN DEL LIBRO + UN ATAQUE POR CRIATURA
 
 **Petición del usuario**: "en la oleada el devorador de mundo aparecio y se

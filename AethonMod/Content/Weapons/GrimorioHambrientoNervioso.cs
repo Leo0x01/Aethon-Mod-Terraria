@@ -68,11 +68,27 @@ namespace AethonMod.Content.Weapons
     ///   CERO al 50% y escalan al máximo, el libro HABLA (FrasesDeHambre) y
     ///   comienzan las PROBABILIDADES de las OLEADAS DE HAMBRE (4% → 20%
     ///   cada 5 s, GrimorioFuriaSistema.Provocar natural).
-    /// · AL 100%: EL FUGITIVO. «Cuando su hambre llegue a 100, hagamos que
-    ///   escape del jugador algo así a como se usa El Codice Vivo» — el
-    ///   libro se desprende y HUYE flotando (la levitación del difunto
-    ///   Códice Vivo), con el ojo ROJO al máximo y el cuerpo roto en tiras,
-    ///   hasta que lo alimenten o lo reinicien (clic derecho).
+    /// · AL 100%: YA NO HAY FUGITIVO (v6.50.94 — la letra del usuario:
+    ///   «esto de la fuga no tiene mucho sentido, el jugador se quedaria
+    ///   sin el libro, la fuga simplemente la quitamos el libro no se
+    ///   fuga, solo queda flotando cerca del jugador cazando por si
+    ///   mismo»): el libro NUNCA se escapa — al 100% se queda flotando
+    ///   cerca del jugador, CAZANDO POR SU CUENTA.
+    ///
+    /// v6.50.94 — LAS CUATRO REGLAS NUEVAS DE LA LETRA:
+    /// · EL RELOJ SIEMPRE: el hambre sube coma o no coma (la gracia de
+    ///   los 10 s de la .92 murió — «el hambre se pausa» era ella).
+    /// · LA CAZA POR SU CUENTA: sale del 25% en adelante si el jugador
+    ///   está en AFK (quieto 5 s) O lleva mucho tiempo sin atacar
+    ///   criaturas con el libro (30 s) — y mientras el jugador dispara
+    ///   con el libro, el espíritu NO lanza sombras (la caza solitaria
+    ///   es del ausente).
+    /// · EL COMPÁS DE LA SOMBRA: un ataque cada 10 s (y nunca antes de
+    ///   2 s de terminar el anterior) — el re-lanzamiento al matar murió.
+    /// · EL FESTÍN EGOÍSTA: el libro se come a la presa ENTERA (botín
+    ///   incluido) y la XP es DE EL LIBRO (sube SU nivel) — el jugador
+    ///   no recibe NADA (el festín compartido con el Grimorio del Eterno
+    ///   murió con la .93).
     /// </summary>
     public class GrimorioHambrientoNervioso : GrimorioHambriento
     {
@@ -94,6 +110,18 @@ namespace AethonMod.Content.Weapons
         // a cazar (5 s AHORA QUE ES UNA PRUEBA — la letra lo marcó como
         // valor de prueba; ajustable cuando el sistema esté listo)
         internal const int TICKS_QUIETUD_PRUEBA = 300;
+        // v6.50.94 — LA CAZA DEL AUSENTE (la letra: «esto de la caza por su
+        // cuenta es cuando el jugador esta en afk o simplemente lleva
+        // mucho tiempo sin atacar criaturas con el libro»): 30 s sin
+        // disparar con el libro también lo sacan a cazar — aunque el
+        // jugador se esté moviendo (no es AFK, pero el libro tiene hambre
+        // y su dueño no le está dando uso)
+        internal const int TICKS_SIN_ATAQUE_LIBRO = 1800;
+        // v6.50.94 — EL MARGEN DEL CAZADOR ACTIVO: mientras el jugador
+        // disparó con el libro hace menos de 5 s, el espíritu NO lanza
+        // sombras por su cuenta (el jugador está cazando ÉL — la caza
+        // solitaria es del ausente)
+        internal const int TICKS_MARGEN_ATAQUE = 300;
         // LAS OLEADAS: la tirada de dados cada 5 s con hambre ≥ 50%
         private const int TICKS_ENTRE_OLEADAS = 300;
 
@@ -533,10 +561,21 @@ namespace AethonMod.Content.Weapons
 
         // LA CAZA: la quietud contada del jugador
         private static int _ticksQuieto;
+        // v6.50.94 — LA CAZA DEL AUSENTE: el tiempo sin que el jugador
+        // ataque criaturas con el libro (cada disparo lo pone a cero)
+        private static int _ticksSinAtaqueLibro;
         // LA VOZ: el frío entre frases del hambre
         private static int _ticksHastaFrase = 420;
         // EL GUARD DEL TICK: un PasoCaza por tick, TODAS las copias juntas
         private static uint _tickPasoCaza;
+
+        /// <summary>v6.50.94 — ¿EL JUGADOR ESTÁ CAZANDO ÉL? (disparó con el
+        /// libro hace menos de 5 s): mientras el dueño usa el libro, el
+        /// espíritu NO lanza sombras por su cuenta — la caza solitaria es
+        /// del ausente (la letra: «esto de la caza por su cuenta es cuando
+        /// el jugador esta en afk o simplemente lleva mucho tiempo sin
+        /// atacar criaturas con el libro»).</summary>
+        internal static bool JugadorAtacoReciente() => _ticksSinAtaqueLibro < TICKS_MARGEN_ATAQUE;
 
         /// <summary>El estado compartido del Nervioso (lo leen el grimorio
         /// flotante y su sombra para saber de qué hambre viven).</summary>
@@ -548,7 +587,7 @@ namespace AethonMod.Content.Weapons
         internal static float IrisEscala => IRIS_ESC;
         internal static Color AlfaCapa(float a) => Alfa(a);
 
-        /// <summary>¿El espíritu del libro está FUERA? (caza o fuga).</summary>
+        /// <summary>¿El espíritu del libro está FUERA? (caza o vuelta).</summary>
         internal static bool LibroFuera(Player jugador)
         {
             int tipo = ModContent.ProjectileType<GrimorioNerviosoFlotante>();
@@ -623,11 +662,26 @@ namespace AethonMod.Content.Weapons
         protected override Vector2 OrigenDelDisparo(Player player, Vector2 position) =>
             PosicionDelLibro(player.whoAmI) is Vector2 libro ? libro : position;
 
+        /// <summary>v6.50.94 — EL JUGADOR DISPARÓ CON EL LIBRO: cada ataque
+        /// del dueño pone a cero el reloj de la caza del ausente (la letra:
+        /// «esto de la caza por su cuenta es cuando el jugador esta en afk
+        /// o simplemente lleva mucho tiempo sin atacar criaturas con el
+        /// libro» — disparar con el libro ES darle uso; el espíritu además
+        /// calla sus sombras mientras el dueño caza él, 5 s por disparo).</summary>
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
+            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            bool r = base.Shoot(player, source, position, velocity, type, damage, knockback);
+            if (player.altFunctionUse != 2)
+                _ticksSinAtaqueLibro = 0;
+            return r;
+        }
+
         /// <summary>EL PASO DE LAS DOS VIDAS — una vez por tick desde
         /// UpdateInventory (el guard del tick vale por TODAS las copias del
         /// Nervioso en el inventario: la quietud se cuenta UNA vez). La VOZ
-        /// suena en la pantalla del dueño; la caza, las oleadas y la fuga
-        /// sólo donde el jugador local MANDA.</summary>
+        /// suena en la pantalla del dueño; la caza y las oleadas sólo donde
+        /// el jugador local MANDA.</summary>
         private static void PasoCaza(Player player)
         {
             // otros jugadores: la demo del Nervioso es del dueño LOCAL (el
@@ -643,6 +697,11 @@ namespace AethonMod.Content.Weapons
             _tickPasoCaza = Main.GameUpdateCount;
 
             float h = _estadoNervioso.Hambre;
+
+            // v6.50.94 — EL RELOJ DEL AUSENTE: un tick más sin que el
+            // jugador ataque criaturas con el libro (cada disparo lo
+            // reinicia — ver Shoot)
+            _ticksSinAtaqueLibro++;
 
             // === LA VOZ DEL HAMBRE — «comienza a decir que tiene hambre»:
             //     suena en la pantalla del dueño, en cualquier máquina ===
@@ -668,19 +727,26 @@ namespace AethonMod.Content.Weapons
 
             if (!fuera)
             {
-                // v6.50.93 — LA SALIDA A CAZA: del 25% EN ADELANTE (la
-                // letra: «el libro solo sale a cazar de 25% de hambre en
-                // adelante») + jugador QUIETO 5 s — hasta el 100%, que
-                // ya es cosa de la FUGA (si está fuera cazando y el
-                // apetito llega al tope, el espíritu rompe y huye ÉL
-                // solo — GrimorioNerviosoFlotante cambia de modo).
-                if (h >= UMBRAL_CACERIA && h < 1f)
+                // v6.50.94 — LA SALIDA A CAZA POR SU CUENTA: del 25% EN
+                // ADELANTE (la letra .93: «el libro solo sale a cazar de
+                // 25% de hambre en adelante» — el 100% YA NO EXCLUYE:
+                // la fuga murió) cuando el jugador está AUSENTE: quieto
+                // 5 s (AFK — la letra .91) O 30 s sin atacar criaturas
+                // con el libro (la letra .94: «o simplemente lleva mucho
+                // tiempo sin atacar criaturas con el libro»). AL 100% NO
+                // SE ESCAPA — se queda flotando cerca, cazando (la
+                // letra: «la fuga simplemente la quitamos el libro no se
+                // fuga, solo queda flotando cerca del jugador cazando
+                // por si mismo»).
+                if (h >= UMBRAL_CACERIA)
                 {
                     bool quieto = !player.dead && player.velocity.LengthSquared() < 0.02f;
                     _ticksQuieto = quieto ? _ticksQuieto + 1 : 0;
-                    if (_ticksQuieto >= TICKS_QUIETUD_PRUEBA)
+                    if (_ticksQuieto >= TICKS_QUIETUD_PRUEBA ||
+                        _ticksSinAtaqueLibro >= TICKS_SIN_ATAQUE_LIBRO)
                     {
                         _ticksQuieto = 0;
+                        _ticksSinAtaqueLibro = 0;
                         Projectile.NewProjectile(player.GetSource_Misc("NerviosoCaza"),
                             player.Center - new Vector2(0f, 60f), Vector2.Zero,
                             ModContent.ProjectileType<GrimorioNerviosoFlotante>(),
@@ -694,16 +760,6 @@ namespace AethonMod.Content.Weapons
                         }
                         catch { }
                     }
-                }
-
-                // LA FUGA: hambre al MÁXIMO — «que escape del jugador»
-                if (h >= 1f)
-                {
-                    Projectile.NewProjectile(player.GetSource_Misc("NerviosoFuga"),
-                        player.Center + new Vector2(Main.rand.NextFloat(-80f, 80f), -90f), Vector2.Zero,
-                        ModContent.ProjectileType<GrimorioNerviosoFlotante>(),
-                        0, 0f, player.whoAmI, GrimorioNerviosoFlotante.MODO_FUGA, 0f, 0f);
-                    DecirLocal("Escapa", new Color(235, 70, 55));
                 }
             }
 
@@ -769,7 +825,15 @@ namespace AethonMod.Content.Weapons
         /// libro la mato». Sin checkDead: la criatura se APAGA bajo la
         /// sombra (sin loot, sin gore, sin crédito) y el hambre baja 1%
         /// (50% → 49%). La llama la sombra (SombraPaginaCaza) en la
-        /// AUTORIDAD con el último mordisco.</summary>
+        /// AUTORIDAD con el último mordisco.
+        /// v6.50.94 — SIN GRACIA Y SIN MARCA DE DIGESTIÓN: el bocado ya no
+        /// congela el reloj del apetito (la letra: «el hambre se pausa» —
+        /// la gracia de la .92 moría aquí) y el compás de la sombra ya no
+        /// nace en la absorción (la .93 lo marcaba A MITAD del ataque — la
+        /// sombra moría 84 t después y apenas quedaban 0,6 s de pausa
+        /// real: el re-lanzamiento al matar era ESA brecha). Ahora el
+        /// compás vive en el NACER (MarcarAtaque) y el MORIR
+        /// (SombraTerminada) de la sombra.</summary>
         internal static void AbsorberPresa(NPC presa, Player dueño)
         {
             if (presa == null || !presa.active)
@@ -796,25 +860,17 @@ namespace AethonMod.Content.Weapons
                     NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
             }
 
-            // EL APETITO: −1% por presa (la letra: 50% → 49%)
+            // EL APETITO: −1% por presa (la letra: 50% → 49%) — y el reloj
+            // SIGUE corriendo (v6.50.94: sin gracia, el hambre sube SIEMPRE)
             _estadoNervioso.Hambre = Math.Max(0f, _estadoNervioso.Hambre - 0.01f);
 
-            // v6.50.92 — LA COMIDA MARCA LA HORA (la letra: «el hambre debe
-            // subir si es que en 10 segundos no come nada»): este bocado
-            // congela el reloj del apetito 10 s — el libro acaba de comer.
-            _estadoNervioso.UltimaComida = Main.GameUpdateCount;
-
-            // v6.50.93 — LA DIGESTIÓN (la letra: «cuando el libro ataca y
-            // se alimenta, su ataque vuelve a lanzarce justo cuando mata
-            // a la criatura, esto no debe pasar, solo se debe lanzar una
-            // vez su ataque hasta que la criatura muera»): cada presa
-            // comida le sigue una PAUSA — el espíritu no lanza SU SIGUIENTE
-            // sombra hasta digerir este bocado (SombraPaginaCaza guarda el
-            // reloj; GrimorioNerviosoFlotante lo respeta).
-            SombraPaginaCaza.MarcarDigestion(dueño.whoAmI);
-
-            // LA XP — el pipeline de siempre (el Grimorio del Eterno visible
-            // cobra: la muerte no es del jugador, pero el libro sí comió)
+            // v6.50.94 — EL FESTÍN EGOÍSTA (la letra: «el festin compartido
+            // no tiene sentido, el libro casa por estar hambriento, en este
+            // caso el libro debe ser egoista y comer toda la criatura loot
+            // incluido por eso el libro recibe la exp y el jugador nada»):
+            // la presa se ha comido ENTERA (sin loot — la desactivación de
+            // arriba ya lo aseguró) y la XP es DEL NERVIOSO — el Grimorio
+            // del Eterno, el latido dorado y el jugador NO reciben NADA.
             CobrarXPLibro(dueño, paraXP);
 
             // el grito silencioso del apetito satisfecho
@@ -829,50 +885,51 @@ namespace AethonMod.Content.Weapons
             }
         }
 
-        /// <summary>LA XP DE LA PRESA — el mismo cobro del pipeline de la
-        /// casa (GlobalNPCXP.OnKill), sin FindKiller: el que come es EL
-        /// LIBRO, y cobra al Grimorio del Eterno de la barra rápida.</summary>
+        /// <summary>v6.50.94 — LA XP ES DEL LIBRO QUE COME (la letra: «el
+        /// libro debe ser egoista y comer toda la criatura loot incluido
+        /// por eso el libro recibe la exp y el jugador nada»): el festín
+        /// compartido con el Grimorio del Eterno MURIÓ — cada presa de LA
+        /// SOMBRA sube el nivel DEL NERVIOSO (ShardLevelItem ahora también
+        /// vive en este ítem); el jugador no cobra NI latido.</summary>
         private static void CobrarXPLibro(Player dueño, NPC presa)
         {
             try
             {
-                int nivelGrimorio = 0;
-                bool libroVisible = false;
-                for (int i = 0; i < 10; i++)
+                // el nivel del NERVIOSO que está comiendo (la primera copia manda)
+                int nivelLibro = 1;
+                bool hayLibro = false;
+                for (int i = 0; i < 59; i++)
                 {
                     Item inv = dueño.inventory[i];
-                    if (inv == null || inv.type != ModContent.ItemType<GrimoireEternal>())
+                    if (inv == null || inv.type != ModContent.ItemType<GrimorioHambrientoNervioso>())
                         continue;
-                    if (!libroVisible)
+                    if (!hayLibro)
                     {
                         var slx = inv.GetGlobalItem<ShardLevelItem>();
                         if (slx != null)
-                            nivelGrimorio = slx.Level;
-                        libroVisible = true;
+                            nivelLibro = slx.Level;
+                        hayLibro = true;
                     }
                 }
-                if (!libroVisible)
+                if (!hayLibro)
                     return;
 
                 int xp = ShardLevelSystem.ApplyXPMultiplier(
-                    ShardLevelSystem.XPForNPC(presa, nivelGrimorio));
+                    ShardLevelSystem.XPForNPC(presa, nivelLibro));
                 if (xp <= 0)
                     return;
 
-                for (int i = 0; i < 10; i++)
+                // TODAS las copias del Nervioso cobran (comparten el mismo
+                // hambre estático — son el mismo apetito)
+                for (int i = 0; i < 59; i++)
                 {
                     Item inv = dueño.inventory[i];
-                    if (inv == null || inv.type != ModContent.ItemType<GrimoireEternal>())
+                    if (inv == null || inv.type != ModContent.ItemType<GrimorioHambrientoNervioso>())
                         continue;
                     var sl = inv.GetGlobalItem<ShardLevelItem>();
                     if (sl != null)
                         sl.GrantXP(inv, xp);
                 }
-
-                if (Main.netMode != NetmodeID.MultiplayerClient && dueño.whoAmI == Main.myPlayer)
-                    ShardHUDSystem.MarcarGanancia(xp);   // SP: el latido dorado
-                if (Main.netMode == NetmodeID.Server)
-                    EcoRed.SincronizarLibros(dueño);     // MP: la foto al portador
             }
             catch { }
         }
@@ -889,17 +946,13 @@ namespace AethonMod.Content.Weapons
             if (local && Main.GameUpdateCount != Estado.TickMarcado)
             {
                 Estado.TickMarcado = Main.GameUpdateCount;
-                // v6.50.93 — EL RELOJ CORRE SIEMPRE (la letra: «el nivel
-                // de hambre debe subir independientemente el libro case o
-                // no […] esto es porque el libro esta fuera y su hambre se
-                // congela, el hambre no debe congelarse»): el PASO SIN
-                // HAMBRE de la .91 quedó ELIMINADO — el apetito avanza lo
-                // cace o no cace, el libro fuera o dentro (la tasa sigue
-                // siendo la de PRUEBA: 0→100% en un minuto tras la gracia;
-                // la versión real irá más lenta). Sólo las presas lo
-                // bajan (−1% + 10 s de gracia) y el clic derecho lo
-                // reinicia. Y el anfitrión de un listen server también
-                // pasa hambre (el guard viejo lo dejaba ciego).
+                // v6.50.94 — EL RELOJ CORRE SIEMPRE, SIN GRACIA (la letra:
+                // «el hambre se pausa» — la gracia de los 10 s de la .92
+                // congelaba el apetito tras cada bocado): el apetito avanza
+                // lo cace o no cace, el libro fuera o dentro, coma o no
+                // coma (tasa de PRUEBA: 0→100% en un minuto; la versión
+                // real irá más lenta). Sólo las presas lo bajan (−1%) y el
+                // clic derecho lo reinicia.
                 Estado.Paso();
             }
 
@@ -907,14 +960,14 @@ namespace AethonMod.Content.Weapons
         }
 
         /// <summary>LA FASE DEL NERVIOSO en el tooltip — sus estados NO son
-        /// los del resto de la familia (cazador / impaciente / fugitivo).</summary>
+        /// los del resto de la familia (cazador / impaciente — el FUGITIVO
+        /// murió con la fuga en la .94).</summary>
         public override void ModifyTooltips(List<TooltipLine> tooltips)
         {
             base.ModifyTooltips(tooltips);
 
             float h = Estado.Hambre;
             string clave = CaceriaActiva() ? "Cazando"
-                : h >= 1f ? "Fugitivo"
                 : h >= UMBRAL_IMPACIENCIA ? "Impaciente"
                 : h >= UMBRAL_CACERIA ? "Hambriento"   // v6.50.93 — listo para cazar
                 : "Tranquilo";
@@ -926,6 +979,21 @@ namespace AethonMod.Content.Weapons
                     break;
                 }
             }
+
+            // v6.50.94 — EL NIVEL DEL LIBRO: la XP de sus presas es SUYA (el
+            // festín egoísta — la letra: «el libro recibe la exp y el
+            // jugador nada»): el nivel vive en el ítem (ShardLevelItem) y
+            // se muestra junto al apetito.
+            try
+            {
+                var sl = Item.GetGlobalItem<ShardLevelItem>();
+                if (sl != null)
+                    tooltips.Add(new TooltipLine(Mod, "NivelNervioso",
+                        Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso.Nivel",
+                            sl.Level, sl.XP, sl.XPForNextLevel()))
+                        { OverrideColor = new Color(198, 160, 78) });
+            }
+            catch { }
         }
     }
 }

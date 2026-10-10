@@ -10,51 +10,44 @@ using AethonMod.Content.Weapons;
 namespace AethonMod.Content.Projectiles.Nervioso
 {
     /// <summary>
-    /// GRIMORIONERVIOSOFLOTANTE — v6.50.91 — EL LIBRO QUE SALE A CAZAR (y el
-    /// que SE ESCAPA). Dos letras del usuario:
+    /// GRIMORIONERVIOSOFLOTANTE — v6.50.91 — EL LIBRO QUE SALE A CAZAR.
+    /// La letra del usuario: «este nuevo libro si tiene hambre y el jugador
+    /// deja de moverse por ejemplo 5 segundos ahora que es una prueba, el
+    /// grimorio sale y comienza a flotar encima del jugador mirando al
+    /// jugador hasta que algo se mueva cerca de el, cualquier criatura no
+    /// hostil u hostil sera atacada por el libro, todas menos los NPC que
+    /// viven en las casas» — el grimorio SE MANIFIESTA flotando encima del
+    /// portador (la levitación del difunto Códice Vivo, su homenaje), el
+    /// OJO clavado en su dueño, esperando presas. Cuando algo SE MUEVE
+    /// cerca (≤480 px), del libro sale LA SOMBRA DE LA PÁGINA
+    /// (SombraPaginaCaza) a morderla: 10% por golpe, absorción, −1% de
+    /// hambre — hasta el 0% («saciado. Por ahora.»).
     ///
-    /// · LA CAZA: «este nuevo libro si tiene hambre y el jugador deja de
-    ///   moverse por ejemplo 5 segundos ahora que es una prueba, el grimorio
-    ///   sale y comienza a flotar encima del jugador mirando al jugador
-    ///   hasta que algo se mueva cerca de el, cualquier criatura no hostil u
-    ///   hostil sera atacada por el libro, todas menos los NPC que viven en
-    ///   las casas» — con hambre por debajo del 50%, el grimorio SE MANIFIESTA
-    ///   flotando encima del portador (la levitación del difunto Códice Vivo,
-    ///   su homenaje), el OJO clavado en su dueño, esperando presas. Cuando
-    ///   algo SE MUEVE cerca (≤480 px), del libro sale LA SOMBRA DE LA
-    ///   PÁGINA (SombraPaginaCaza) a morderla: 10% por golpe, absorción,
-    ///   −1% de hambre — hasta el 0% («saciado. Por ahora.»).
-    ///
-    /// · LA FUGA: «cuando su hambre llegue a 100, hagamos que escape del
-    ///   jugador algo así a como se usa El Codice Vivo, que al atacar el
-    ///   item hace una animación donde comienza a flotar» — con el hambre al
-    ///   MÁXIMO el libro se desprende y HUYE: guarda distancia (380–640 px),
-    ///   quiebra nervioso, el ojo ROJO al máximo y el cuerpo ROTO en tiras
-    ///   (todo el repertorio del Nervioso). Vuelve cuando lo alimentan o lo
-    ///   reinician (clic derecho).
+    /// v6.50.94 — LA FUGA MURIÓ (la letra: «esto de la fuga no tiene mucho
+    /// sentido, el jugador se quedaria sin el libro, la fuga simplemente
+    /// la quitamos el libro no se fuga, solo queda flotando cerca del
+    /// jugador cazando por si mismo»): YA NO HAY MODO FUGA — con el hambre
+    /// al 100% el espíritu se queda flotando cerca del jugador CAZANDO POR
+    /// SU CUENTA. Y EL ESPÍRITU ÚNICO: si por cualquier vía nace un
+    /// segundo espíritu del mismo dueño (la «copia» de la .93 — el sprite
+    /// duplicado junto a la mano del que salían los ataques), SOBREVIVE
+    /// UNO: el que caza; a igual modo, el más antiguo.
     ///
     /// El ítem NO desaparece del inventario: lo que flota es su ESPÍRITU —
     /// el sprite real del libro con sus capas (ojo, iris rojo, párpados) y
-    /// el halo del alma (violeta en caza, ROJO en fuga).
+    /// el halo violeta del alma.
     /// </summary>
     public class GrimorioNerviosoFlotante : ModProjectile
     {
         internal const float MODO_CAZA = 0f;
-        internal const float MODO_FUGA = 1f;
         internal const float MODO_VOLVER = 2f;
 
         // LA VELA: a cuántos px sobre el jugador flota el libro
         private const float ALTURA_VELA = 64f;
         // EL RADIO DE CAZA: «hasta que algo se mueva cerca de él»
         private const float RADIO_CAZA = 480f;
-        // LA FUGA: la distancia que guarda el libro escapado
-        private const float FUGA_MIN = 380f;
-        private const float FUGA_MAX = 640f;
         // LA BUSCA: cada cuántos ticks mira si algo se mueve cerca
         private const int TICKS_BUSCA = 20;
-
-        // el reloj de los quiebres de la fuga (vive en la máquina que corre la AI)
-        private int _tHastaQuiebre = 30;
 
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
@@ -99,6 +92,27 @@ namespace AethonMod.Content.Projectiles.Nervioso
             return false;
         }
 
+        /// <summary>v6.50.94 — ¿SOY UN DUPLICADO? El espíritu único: si hay
+        /// OTRO espíritu de este dueño, gana el MODO_CAZA (el que caza);
+        /// a igual modo, el de whoAmI más bajo (el más antiguo). El
+        /// perdedor se disuelve — jamás dos libros flotando (la «copia» de
+        /// la .93: dos sprites y los ataques saliendo de la equivocada).</summary>
+        private bool SoyDuplicado()
+        {
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                if (i == Projectile.whoAmI)
+                    continue;
+                Projectile p = Main.projectile[i];
+                if (p == null || !p.active || p.type != Projectile.type || p.owner != Projectile.owner)
+                    continue;
+                // él caza y yo no: él gana; ambos igual: gana el más antiguo
+                if (p.ai[0] == MODO_CAZA && Projectile.ai[0] != MODO_CAZA) return true;
+                if (p.ai[0] == Projectile.ai[0] && i < Projectile.whoAmI) return true;
+            }
+            return false;
+        }
+
         /// <summary>LA PRESA: la criatura MÁS CERCANA QUE SE MUEVA alrededor
         /// del libro — hostil o no, TODAS («cualquier criatura no hostil u
         /// hostil») menos los NPC que viven en las casas.</summary>
@@ -130,21 +144,6 @@ namespace AethonMod.Content.Projectiles.Nervioso
             Sonar(SoundID.Item122.WithPitchOffset(0.3f).WithVolumeScale(0.4f), Projectile.Center);
         }
 
-        /// <summary>v6.50.93 — LA CAZA SE HARTA: con el hambre al MÁXIMO
-        /// el espíritu QUE YA ESTÁ FUERA rompe y huye Él MISMO (la fuga
-        /// de la .91 sólo nacía del inventario — un libro cazando que
-        /// llegaba al 100% seguía patrullando para siempre). Ahora la
-        /// caza se convierte en fuga EN VIVO: mismo espíritu, otro modo.</summary>
-        private void IrAFuga()
-        {
-            GrimorioHambrientoNervioso.DecirLocal("Escapa", new Color(235, 70, 55));
-            Projectile.ai[0] = MODO_FUGA;
-            Projectile.ai[1] = 0f;
-            _tHastaQuiebre = 20;
-            Projectile.netUpdate = true;
-            Sonar(SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(0.7f), Projectile.Center);
-        }
-
         public override void AI()
         {
             Projectile.ai[1]++;
@@ -165,19 +164,19 @@ namespace AethonMod.Content.Projectiles.Nervioso
             {
                 if (!TieneElLibro(dueño)) { Projectile.Kill(); return; }
 
+                // v6.50.94 — EL ESPÍRITU ÚNICO (cada 30 t, barato): jamás
+                // dos libros del mismo dueño — véase SoyDuplicado()
+                if (t % 30f == 0f && SoyDuplicado()) { Projectile.Kill(); return; }
+
                 if (Modo == MODO_CAZA)
                 {
-                    // la caza termina AL 0% («saciado»)…
+                    // la caza termina AL 0% («saciado»)… y YA NO HAY FUGA:
+                    // al 100% el libro NO rompe — se queda flotando cerca
+                    // del jugador, cazando por su cuenta (la letra .94:
+                    // «la fuga simplemente la quitamos el libro no se fuga,
+                    // solo queda flotando cerca del jugador cazando por si
+                    // mismo»)
                     if (hambre <= 0f) IrAVolver();
-                    // v6.50.93 — …y al 100% SE HARTA Y HUYE (la letra del
-                    // hambre que SIEMPRE sube: un espíritu que no come lo
-                    // suficiente llega al tope CAZANDO — rompe en VIVO)
-                    else if (hambre >= 1f) IrAFuga();
-                }
-                else if (Modo == MODO_FUGA)
-                {
-                    // …y la fuga termina cuando lo alimentan o lo reinician
-                    if (hambre < 1f) IrAVolver();
                 }
             }
 
@@ -200,52 +199,32 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 Projectile.rotation = MathF.Sin(t * 0.045f) * 0.12f + lado * 0.10f;
 
                 // LA CAZA (autoridad): algo se mueve cerca → la sombra.
-                // v6.50.93 — UN ATAQUE POR CRIATURA (la letra: «solo se
-                // debe lanzar una vez su ataque hasta que la criatura
-                // muere»): la sombra activa ya bloquea lanzamientos
-                // paralelos (SombraActiva) y ahora la DIGESTIÓN bloquea
-                // la cadena instantánea — tras comer una presa, el
-                // espíritu espera TICKS_DIGESTION antes de lanzar la
-                // siguiente (el re-loj lo marca AbsorberPresa).
+                // v6.50.94 — EL COMPÁS DE LA SOMBRA (la letra: «haciendo
+                // que el libro en ese estado solo pueda lanzar su ataque
+                // de la sombra de la pagina una vez cada 10 segundo o algo
+                // asi, o poniendo por codigo que no puede lanzar un ataque
+                // 2 segundos despues de terminar el primero»): UN ataque
+                // cada 10 s (MarcarAtaque al NACER la sombra) y jamás
+                // antes de 2 s de TERMINAR la anterior (SombraTerminada al
+                // morir) — el re-lanzamiento en el instante de la muerte
+                // murió. Y mientras el jugador dispara con el libro, el
+                // espíritu NO lanza sombras por su cuenta (la caza
+                // solitaria es del ausente: AFK o mucho tiempo sin
+                // atacar criaturas con el libro).
                 if (autoridad && t % TICKS_BUSCA == 0f && !SombraActiva() &&
-                    SombraPaginaCaza.DigestionLista(Projectile.owner))
+                    SombraPaginaCaza.AtaqueListo(Projectile.owner) &&
+                    !GrimorioHambrientoNervioso.JugadorAtacoReciente())
                 {
                     NPC presa = PresaCercana();
                     if (presa != null)
                     {
+                        SombraPaginaCaza.MarcarAtaque(Projectile.owner);
                         Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
                             Vector2.Zero, ModContent.ProjectileType<SombraPaginaCaza>(),
                             0, 0f, Projectile.owner, presa.whoAmI + 1, 0f, 0f);
                         Sonar(SoundID.Item122.WithPitchOffset(-0.3f).WithVolumeScale(0.6f), Projectile.Center);
                     }
                 }
-            }
-            else if (Modo == MODO_FUGA)
-            {
-                // LA FUGA: guarda distancia del jugador (380–640 px) y
-                // quiebra NERVIOSO — es un libro HARTO, no un pajarito
-                Vector2 delJugador = Projectile.Center - dueño.MountedCenter;
-                float dist = delJugador.Length();
-                Vector2 rumbo = dist > 1f ? delJugador / dist : -Vector2.UnitY;
-                // sesgo hacia arriba: en la superficie vuela, no se entierra
-                Vector2 huida = new Vector2(rumbo.X * 1.25f, rumbo.Y - 0.35f);
-                huida = huida.SafeNormalize(Vector2.UnitX);
-
-                if (dist < FUGA_MIN)
-                    Projectile.velocity += huida * 0.55f;          // ¡aléjate!
-                else if (dist > FUGA_MAX)
-                    Projectile.velocity -= huida * 0.30f;          // pero no te pierdas de vista
-
-                // EL QUIEBRE: cada 30–55 t un tirón lateral al azar
-                if (--_tHastaQuiebre <= 0)
-                {
-                    _tHastaQuiebre = 30 + Main.rand.Next(26);
-                    float ang = rumbo.ToRotation() + (Main.rand.Next(2) == 0 ? 1f : -1f) * MathHelper.PiOver2;
-                    Projectile.velocity += ang.ToRotationVector2() * 3.2f;
-                }
-
-                Projectile.velocity *= 0.94f;
-                Projectile.rotation = MathF.Sin(t * 0.09f) * 0.18f + rumbo.X * 0.10f;
             }
             else
             {
@@ -288,23 +267,24 @@ namespace AethonMod.Content.Projectiles.Nervioso
 
             float t = Projectile.ai[1];
             var estado = GrimorioHambrientoNervioso.EstadoCompartido;
-            bool fuga = Modo == MODO_FUGA;
 
-            // === EL HALO DEL ESPÍRITU (violeta en caza, ROJO en fuga) ===
+            // === EL HALO DEL ESPÍRITU (violeta — el rojo de la fuga murió
+            //     con ella: este libro ya no se va) ===
             VFXCore.CerrarLoteSiAbierto();
             try
             {
                 VFXCore.Begin();
-                Color alma = fuga ? SombrasLib.Rojo : SombrasLib.Violeta;
                 float pulso = 0.16f + 0.07f * MathF.Sin(Main.GlobalTimeWrappedHourly * 2.6f);
-                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(alma, fuga ? pulso + 0.08f : pulso),
+                VFXCore.Quad(Projectile.Center, SombrasLib.Alfa(SombrasLib.Violeta, pulso),
                     new Vector2(170f, 170f));
                 VFXCore.FlushAdditive();
             }
             catch { VFXCore.CerrarLoteSiAbierto(); }
             VFXCore.ReabrirLoteVanilla();
 
-            // === EL LIBRO — el sprite REAL del ítem con sus capas ===
+            // === EL LIBRO — el sprite REAL del ítem con sus capas. El
+            //     cazador flota SERENO (las tiras de glitch eran el
+            //     repertorio de la fuga, y la fuga murió) ===
             Texture2D tex = Terraria.GameContent.TextureAssets.Item[
                 ModContent.ItemType<GrimorioHambrientoNervioso>()].Value;
             Rectangle frame = new Rectangle(0, 0, tex.Width, tex.Height);
@@ -313,22 +293,8 @@ namespace AethonMod.Content.Projectiles.Nervioso
             Color luz = Lighting.GetColor(Projectile.Center.ToTileCoordinates());
             float esc = 1.15f;
 
-            // EL CORRIMIENTO y EL GLITCH: en fuga tiembla, brinca Y se rompe
-            // (todo el repertorio); en caza flota SERENO — el cazador paciente
-            Vector2 corr = fuga ? GrimorioHambrientoNervioso.Corrimiento() * esc : Vector2.Zero;
-            float offOjo = 0f;
-            GrimorioHambrientoNervioso.Tira[] tiras = null;
-            if (fuga)
-            {
-                tiras = GrimorioHambrientoNervioso.Layout(out offOjo);
-                GrimorioHambrientoNervioso.DibujarTiras(Main.spriteBatch, tex,
-                    pos + corr, frame, luz, Projectile.rotation, origen, esc, tiras);
-            }
-            else
-            {
-                Main.spriteBatch.Draw(tex, pos, frame, luz, Projectile.rotation, origen, esc,
-                    SpriteEffects.None, 0f);
-            }
+            Main.spriteBatch.Draw(tex, pos, frame, luz, Projectile.rotation, origen, esc,
+                SpriteEffects.None, 0f);
 
             // EL PÁRPADO o EL IRIS — las capas del libro, mismo lenguaje
             if (estado.Fase > 0)
@@ -337,40 +303,26 @@ namespace AethonMod.Content.Projectiles.Nervioso
                 var parpado = ModContent.Request<Texture2D>(medio
                     ? "AethonMod/Content/Weapons/GrimorioHambriento_Medio"
                     : "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado").Value;
-                if (tiras != null && tiras.Length > 0)
-                    GrimorioHambrientoNervioso.DibujarTiras(Main.spriteBatch, parpado,
-                        pos + corr, frame, luz, Projectile.rotation, origen, esc, tiras);
-                else
-                    Main.spriteBatch.Draw(parpado, pos, frame, luz, Projectile.rotation, origen, esc,
-                        SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(parpado, pos, frame, luz, Projectile.rotation, origen, esc,
+                    SpriteEffects.None, 0f);
             }
             else
             {
-                // LA MIRADA: en caza, clavada en su dueño («mirando al
-                // jugador»)… salvo mientras COME: entonces en su COMIDA
-                // (v6.50.92 — la letra: «el libro debe mirar lo que esta
-                // comiendo»: la presa que la sombra muerde, o las almas
-                // subiendo mientras las absorbe); en fuga, los dardos
-                // ansiosos del Estado
-                Vector2 mirada;
-                if (fuga)
-                {
-                    mirada = estado.DespActual;
-                }
-                else
-                {
-                    Vector2 objetivo = GrimorioHambrientoNervioso.FocoDelFestin(Projectile.owner)
-                        ?? Main.player[Projectile.owner].MountedCenter;
-                    Vector2 d = objetivo - Projectile.Center;
-                    mirada = d.LengthSquared() > 4f
-                        ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
-                        : Vector2.Zero;
-                }
+                // LA MIRADA: clavada en su dueño («mirando al jugador»)…
+                // salvo mientras COME: entonces en su COMIDA (v6.50.92 —
+                // la letra: «el libro debe mirar lo que esta comiendo»:
+                // la presa que la sombra muerde, o las almas subiendo
+                // mientras las absorbe)
+                Vector2 objetivo = GrimorioHambrientoNervioso.FocoDelFestin(Projectile.owner)
+                    ?? Main.player[Projectile.owner].MountedCenter;
+                Vector2 d = objetivo - Projectile.Center;
+                Vector2 mirada = d.LengthSquared() > 4f
+                    ? Vector2.Normalize(d) * new Vector2(3.5f, 2.8f) * 0.9f
+                    : Vector2.Zero;
 
                 // el texel del ojo, ROTADO con el libro (la convención .84)
                 Vector2 alOjo = (GrimorioHambrientoNervioso.OjoTexel + mirada - origen) * esc;
-                Vector2 posOjo = pos + corr + alOjo.RotatedBy(Projectile.rotation)
-                    + new Vector2(offOjo * esc, 0f).RotatedBy(Projectile.rotation);
+                Vector2 posOjo = pos + alOjo.RotatedBy(Projectile.rotation);
 
                 var iris = ModContent.Request<Texture2D>(
                     "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;

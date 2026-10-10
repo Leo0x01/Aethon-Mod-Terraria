@@ -41,7 +41,13 @@ namespace AethonMod.Content.Globals
         public bool PrimeraCincoEstrellas = false;
 
         /// <summary>
-        /// Solo aplica a las 2 armas Aethon (Grimorio + Fragmento Génesis).
+        /// Solo aplica a las armas Aethon (Grimorio + Fragmento Génesis).
+        /// v6.50.94 — EL NERVIOSO TAMBIÉN: la letra del usuario («el libro
+        /// debe ser egoista y comer toda la criatura loot incluido por eso
+        /// el libro recibe la exp y el jugador nada») — la XP de las presas
+        /// de LA SOMBRA sube el nivel DEL GRIMORIO NERVIOSO (el festín
+        /// compartido con el Grimorio del Eterno murió: cada libro come
+        /// para SÍ).
         /// DEFENSIVO: envuelto en try/catch porque se llama durante la carga del mod
         /// y ModContent.ItemType puede fallar si los items aún no están registrados.
         /// </summary>
@@ -50,6 +56,7 @@ namespace AethonMod.Content.Globals
             try
             {
                 return item.type == ModContent.ItemType<Weapons.GrimoireEternal>() ||
+                       item.type == ModContent.ItemType<Weapons.GrimorioHambrientoNervioso>() ||
                        item.type == ModContent.ItemType<Items.GenesisShard>();
             }
             catch

@@ -1,24 +1,24 @@
-# AethonMod — ESTADO ACTUAL (v6.50.93)
+# AethonMod — ESTADO ACTUAL (v6.50.94)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.93 (LA OLEADA ES OTRA ENTIDAD: el Devorador de oleada ya NO se va — su cabeza mutada al partirlo perdía el sello (SetDefaults borra los globals del NPC) y su IA lo enterraba: REGISTRO de sellos por slot + re-adopción + préstamo de zona a TODOS los vivos; EL UMBRAL DE LA CAZA 25%: el libro sólo sale del 25% en adelante y al 100% estando fuera HUYE él solo; LOS ATAQUES DEL LIBRO SALEN DEL LIBRO mientras flota (la mano ataca VACÍA); EL RELOJ DEL APETITO CORRE SIEMPRE: PasoSinHambre eliminado — el hambre suba cace o no cace; LA DIGESTIÓN: un ataque por criatura, sin re-lanzamiento al matar) LA BASE — la .82 rellenaba el socket con RUIDO
-> GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
-> vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
-> MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
-> |Δ|=0,009), socket blanco 247,235,220 σ5, luminancia 176→233 con 0
-> píxeles oscuros (verificado EN EL PAQUETE); OJO recentrado al iris
-> del ARTE (19.09, 22.45). (2) EL ROJO — SOLO la capa IrisRojo (hue
-> −45°, byte-idéntica a la .84): Rojo_Medio/Rojo_Cerrado ELIMINADAS —
-> el libro (párpados incluidos) queda SIEMPRE a color normal. Además:
-> LOS PÁRPADOS COMPUESTOS — la zona animada del GIF pegada sobre la
-> base limpia con pluma gaussiana (el cuerpo del libro no titila entre
-> corridas al parpadear, |Δ|=0,04 fuera de la zona). .tmod 2.589.707 B
-> md5 dcbac74a8455a33fcf8851817b948fd5, 385 entradas, auditoría TODO
-> OK, headless 0 excepciones, VLM QA aprobado. EL 12º INCIDENTE DEL
-> ESPEJO cayó antes del commit — cura sync + blob == HEAD.)
-
-> «la .81 es una version muy estable» — la palabra del usuario. La .81 es
-> EL ESTALLIDO ES EL ADIÓS: LA BOLA FINAL retirada del cine de muerte del
+> Última actualización: v6.50.94 (LA LETRA DEL NERVIOSO que la .93 prometía
+> y no cumplió en juego: EL RELOJ SIEMPRE — la gracia de los 10 s de la
+> .92 era LA PAUSA que el usuario veía («el hambre se pausa»): muerta,
+> Paso() suma SIEMPRE, el bocado sólo resta −1%; EL COMPÁS DE LA SOMBRA —
+> un ataque cada 10 s (marcado al NACER) y NADA antes de 2 s de TERMINAR
+> la anterior (marcado en OnKill): la digestión .93 marcaba a mitad del
+> ataque y la sombra moría 84 t después — 0,6 s de pausa real era ESA la
+> brecha del re-lanzamiento al matar; LA FUGA MUERTA — MODO_FUGA/IrAFuga/
+> frases/purgados: al 100% el libro se queda flotando cerca cazando por
+> sí mismo; LA CAZA DEL AUSENTE — sale del 25% con AFK 5 s O 30 s sin
+> atacar con el libro, y mientras el dueño dispara (5 s) el espíritu
+> calla sus sombras; EL FESTÍN EGOÍSTA — la XP de cada presa es DEL
+> NERVIOSO (ShardLevelItem lo adopta, tooltip con SU nivel, sin Eterno ni
+> latido: el jugador NADA); EL ESPÍRITU ÚNICO — SoyDuplicado() disuelve
+> al segundo espíritu del dueño: jamás DOS libros flotando (la «copia» de
+> la captura del usuario con el destello naciendo de la equivocada).
+> .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f, 384 entradas,
+> auditoría TODO OK, headless 0 excepciones.)
 > dios (la muerte de Aethon es UN SOLO ACTO: gran explosión de luz y
 > desaparecer, el cielo queda LIMPIO, en MP en TODAS las pantallas) —
 > decompile del paquete 8/8 + 9/9 regresión .80 + 10/10 contrato .79.
@@ -1903,6 +1903,64 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
 
+1. **⏳ v6.50.94 LISTA — pendiente release** — EL RELOJ SIEMPRE + EL
+   COMPÁS DE LA SOMBRA + LA FUGA MUERTA + EL FESTÍN EGOÍSTA + EL ESPÍRITU
+   ÚNICO. La letra: «el hambre se pausa / su ataque sigue relanzandose al
+   matar […] una vez cada 10 segundo o algo asi, o poniendo por codigo
+   que no puede lanzar un ataque 2 segundos despues de terminar el
+   primero / los proyectiles del libro no salen del libro cuando esta
+   flotando, salen de una copia del sprite / esto de la fuga no tiene
+   mucho sentido […] la fuga simplemente la quitamos el libro no se
+   fuga, solo queda flotando cerca del jugador cazando por si mismo,
+   esto de la caza por su cuenta es cuando el jugador esta en afk o
+   simplemente lleva mucho tiempo sin atacar criaturas con el libro / el
+   festin compartido no tiene sentido […] el libro debe ser egoista y
+   comer toda la criatura loot incluido por eso el libro recibe la exp y
+   el jugador nada». (1) LA GRACIA DE LOS 10 s MUERTA: Paso() suma
+   SIEMPRE (1/3600 por tick plegado ldc.r4 0.00027777778) — UltimaComida
+   y TICKS_GRACIA_COMIDA ELIMINADOS; el bocado resta −1% sin congelar
+   nada. (2) EL COMPÁS: MarcarAtaque (600 t = 10 s) al nacer la sombra +
+   SombraTerminada (120 t = 2 s) en OnKill — la digestión .93 (marcada
+   en la ABSORCIÓN, a mitad del ataque) murió con su brecha de 0,6 s.
+   (3) LA FUGA: MODO_FUGA/IrAFuga/bloque de huida/spawn/frases
+   «Escapa»+«Fugitivo» ELIMINADOS — al 100% sigue cazando cerca del
+   jugador. (4) LA CAZA DEL AUSENTE: TICKS_SIN_ATAQUE_LIBRO 1800 (30 s
+   sin disparar con el libro TAMBIÉN lo saca, aunque el jugador se
+   mueva) + TICKS_MARGEN_ATAQUE 300 (mientras el dueño dispara hace <5 s,
+   JugadorAtacoReciente() calla las sombras). (5) EL FESTÍN EGOÍSTA:
+   CobrarXPLibro cobra al NERVIOSO (ShardLevelItem lo adopta — nivel+XP
+   por copia, tooltip con «Nivel N · XP x/y» vía Hambre.Nervioso.Nivel),
+   sin MarcarGanancia ni SincronizarLibros: el jugador NADA. (6) EL
+   ESPÍRITU ÚNICO: SoyDuplicado() cada 30 t — gana el MODO_CAZA, a igual
+   modo el whoAmI más bajo: jamás dos libros (la copia de la captura
+   murió por construcción). VERIFICACIÓN: oráculo 0/0 (306 .cs) · build
+   real 0/0 · .tmod 2.555.191 B md5 52004cee59ef7c79ef4da32c19ea593f:
+   384 entradas (el MISMO set de la .93), EOF exacto, blob diff
+   whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378),
+   CECIL: UltimaComida/TICKS_GRACIA_COMIDA/PasoSinHambre/
+   MarcarDigestion/IrAFuga/MODO_FUGA/«Fugitivo»/«Escapa» ELIMINADOS +
+   MarcarAtaque/AtaqueListo/SombraTerminada/OnKill (600 y 120 plegados)
+   + SoyDuplicado + Shoot/JugadorAtacoReciente (1800/300 plegados) +
+   ShardLevelItem adopta al Nervioso + GrimorioHambriento (clase-ítem)/
+   OleadaNPC/GrimorioFuriaSistema IL IDÉNTICOS a la .93 · hjson: es-ES
+   espejo, 13 claves Nervioso (con «Nivel», sin fuga), 785 hojas es↔en,
+   en-US tabs 4235, paquete == árbol ×3 · headless «Sandboxing
+   v6.50.94 → Adding Recipes → Server started» 0 EXCEPCIONES.
+   CHECKLIST DEL USUARIO (la prueba EN JUEGO): (a) con el libro QUIETO
+   en el inventario el hambre sube SIEMPRE (un minuto 0→100%), coma o no
+   coma — sin pausas de 10 s; (b) AFK 5 s (o 30 s sin disparar con el
+   libro) con hambre ≥25% → «Si no me alimentas, salgo yo mismo a
+   cazar»; (c) la sombra mata a una criatura y NO se relanza al instante
+   — el siguiente ataque tarda 10 s (y jamás <2 s tras terminar el
+   anterior); (d) al 100% el libro NO se escapa: sigue flotando y
+   cazando; (e) UN solo libro flotando — si aparecía una copia junto a
+   la mano, ya no: los proyectiles salen del libro REAL; (f) con el
+   espíritu fuera, el jugador ataca con la mano VACÍA y la descarga nace
+   del libro; (g) la presa comida NO deja loot y el NERVIOSO sube de
+   nivel (tooltip «Nivel N · XP x/y») — el Grimorio del Eterno y el
+   jugador NO reciben nada; (h) mientras el jugador dispara con el libro
+   (<5 s), el espíritu NO lanza sombras por su cuenta.
+
 1. **✅ v6.50.93 PUBLICADA — release 408895980** — LA
    OLEADA ES OTRA ENTIDAD + EL APETITO SIEMPRE CORRE. La letra: «en la
    oleada el devorador de mundo aparecio y se fue, debes asegurarte de que
@@ -2334,6 +2392,7 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
 ## 📜 HISTORIAL DE ESTADO (contexto de versiones)
 | Versión | Estado | Notas |
 |---|---|---|
+| **v6.50.93** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs, build real 0/0, .tmod 2.555.354 B md5 363932e16d8ce060736497bbfabcc2d1, 384 entradas (el MISMO set de la .92), EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico (378), CECIL: PasoSinHambre ELIMINADO de EstadoGrimorio + OrigenDelDisparo ×2 (base y Nervioso) + PosicionDelLibro + UMBRAL_CACERIA 0.25 plegada + MarcarDigestion/DigestionLista (ldc.i4.s 120) + IrAFuga en el espíritu + SelloVivo/_sellados/TTL_SELLO 900 + el chequeo 7|13 del préstamo de corrupción DENTRO del IL de PreAI + GrimorioFuriaSistema IL IDÉNTICO a la .92, hjson: es-ES espejo por contenido, 786 hojas es↔en, en-US tabs 4293, paquete==árbol ×3, headless «Sandboxing v6.50.93 → Adding Recipes → Server started» 0 excepciones), ✔ PUBLICADA (release 408895980 + asset AethonMod.tmod 627773875 2.555.354 B, CDN verificado byte a byte md5 363932e1…, /releases/latest = v6.50.93), ⏳ en juego (la .94 corrige lo que la prueba reveló: el hambre aún se pausaba por la gracia, el re-lanzamiento al matar seguía, la copia del sprite junto a la mano) | LA LETRA: «en la oleada el devorador de mundo aparecio y se fue […] las versiones de oleada son entidades separadas de las originales […] el libro solo sale a cazar de 25% de hambre en adelante […] si el jugador ataque y el libro esta fuera sus ataques salen del libro no del jugador […] el nivel de hambre debe subir independientemente el libro case o no […] su ataque vuelve a lanzarce justo cuando mata a la criatura, esto no debe pasar». (1) EL DEVORADOR QUE SE FUE: la causa raíz en el decompile — al PARTIR al gusano vanilla MUTA el cuerpo en cabeza (SetDefaultsKeepPlayerInteraction(13)) y NPC.SetDefaults borra los globals (_globals=null): el sello moría con la instancia y la cabeza nueva era enterrada por su IA hasta active=false; CURA DOBLE: registro SelloVivo por whoAmI (TTL 15 s, re-adoptado en el propio SetDefaults) + préstamo de zona a TODA la mesa viva (incluidos los DevourerHead escupidos, 7|13 en PreAI). (2) UMBRAL_CACERIA 0.25 + IrAFuga al 100% estando fuera. (3) OrigenDelDisparo virtual + LA MANO VACÍA (ModifyItemDraw return false sin agregar nada). (4) PasoSinHambre eliminado (el reloj corría tras la gracia de 10 s). (5) LA DIGESTIÓN 120 t marcada en la absorción. LECCIONES: (1) un GlobalNPC NO sobrevive al cambio de type de su propio NPC — los sellos que sobreviven a una mutación viven en un REGISTRO externo por whoAmI; (2) los préstamos a vanilla no dependen del npc.target: TODA la mesa viva; (3) los const NPCID llegan PLEGADOS (ldc.i4.7): auditar por el literal DENTRO del bloque IL; (4) el cuerpo JSON de un release con newlines+unicode va por ARCHIVO (-d @file) |
 | **v6.50.92** | ✅ Build-verificada (oráculo 0/0 sobre 306 .cs = 308 − 2 difuntos, build real 0/0, .tmod 2.553.604 B md5 96a68ef512886dca01335abb16fb4d7f, 384 entradas = 386 de .91 − 2 rawimg de los difuntos, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en las 378 restantes, CECIL: GrimorioHambrientoErratico/GrimorioHambrientoInestable AUSENTES + la bandera Erratico muerta en EstadoGrimorio + FocoDelFestin/UltimaComida/FocoPantalla/TICKS_GRACIA_COMIDA presentes + la GRACIA 600 plegada en el IL de Paso + SombraPaginaCaza y la clase-ítem GrimorioHambriento con IL IDÉNTICO a .91 + el espíritu CAMBIA documentado (se inclina y mira su comida), espejo es-ES==es-MX por CONTENIDO (regenerado con sync_es_es_v65092), familia de DOS en los 3 idiomas + 13 claves del Nervioso + difuntos purgados del hjson, 785 hojas simétricas es↔en, en-US con tabs, headless «Sandboxing v6.50.92 → Adding Recipes → menú de mundos» 0 excepciones), ✔ PUBLICADA (release 408824648 + asset 627492527 2.553.604 B, CDN verificado byte a byte md5 96a68ef512886dca01335abb16fb4d7f, /releases/latest = v6.50.92), ⏳ en juego | LA LETRA: «el ACTUALIZAR-FUENTE.bat tiene que borrar y copiar, pero solo borra y no copia, arreglar eso […] borra al grimorio hambriento inestable y al erratico, deja el original y al nervioso […] el hambre debe subir si es que en 10 segundos no come nada, el libro debe mirar lo que esta comiendo». (1) EL .BAT: la .91 tenía finales LF + bloques if multilinea — cmd.exe descarrila al parsear bloques que cruzan sus fronteras de lectura de 512 bytes con LF (el rmdir corría, el robocopy no); cura CRLF + CERO bloques (if de una línea + goto) + conteo «[OK] N archivos copiados» + .gitattributes *.bat -text (el blob conserva el CRLF también en los ZIP de GitHub). (2) LA FAMILIA DE DOS: Errático (.87) e Inestable (.89) borrados (clases+sprites+bolsa+localización ×3; la bandera Erratico murió con su dueño). (3) LA GRACIA DE LOS 10 s: el reloj del hambre sólo corre tras 10 s sin comer (UltimaComida — presas absorbidas y el clic derecho marcan la hora; tasa 0→100% en un minuto intacta). (4) EL FOCO DEL FESTÍN: mientras la sombra devora, el espíritu se INCLINA hacia la presa y clava el iris (o en las almas subiendo); el ojo del ítem (hotbar/mano/mundo) persigue el festín vía FocoPantalla en Paso (LERP 0,10 suave). LECCIONES: (1) los .bat de la casa NACEN con CRLF y SIN bloques multilinea — cmd.exe lee en bloques de 512 bytes y los finales LF desplazan el parseo (el bug podía aparecer y desaparecer con cualquier edición que moviera bytes); (2) .gitattributes *.bat -text protege el blob para clones Y descargas ZIP; (3) el hambre condicionado a comer convierte el reinicio de la demo en «alimentar» — el clic derecho calma 10 s; (4) una mirada nueva no vive en el draw: vive en el ESTADO (FocoPantalla en Paso) para que hotbar, mano, mundo y espíritu la compartan |
 | **v6.50.91** | ✅ Build-verificada (oráculo 0/0 sobre 308 .cs, build real 0/0, .tmod 2.564.967 B md5 ce511c4ea682c4012603fe390a0ad537, 386 entradas = 388 de .90 − 2 rawimg del Códice Vivo, EOF exacto, blob diff whitelist exacto (dll/pdb/Info + 3 hjson + los 2 rawimg salientes), arte byte-idéntico, CECIL: CodiceVivo/CodiceVivoProjectile/CodiceVivoChispa AUSENTES + GrimorioNerviosoFlotante/SombraPaginaCaza presentes + las 11 firmas del Nervioso (PasoCaza/AbsorberPresa/HambreEfectos/FrasesDeHambre/DecirLocal/CobrarXPLibro/LibroFuera/CaceriaActiva/UpdateInventory/ModifyTooltips/get_EstadoCompartido + constantes 0.5/300/0.01) + Errático/Inestable/GrimorioHambriento(clase ítem) con IL IDÉNTICO a .90 + EstadoGrimorio CAMBIA documentado (NerviosoActivo + PasoSinHambre + las 3 ramas del ojo), espejo es-ES==es-MX por CONTENIDO (789 hojas simétricas es↔en), en-US con tabs, headless «Sandboxing v6.50.91 → Adding Recipes → menú de mundos» 0 excepciones), ✔ PUBLICADA (release 408797774 + asset 627400987 2.564.967 B, CDN verificado byte a byte md5 ce511c4ea682c4012603fe390a0ad537, /releases/latest = v6.50.91), ⏳ en juego | LA LETRA: «no es que este nervioso por tener miedo, esta mas bien intranquilo, hambriento, enojado, inquieto, quiero comer y tiene hambre […] cuando su hambre llegue a 100, hagamos que escape del jugador algo asi a como se usa El Codice Vivo […] El Codice Vivo lo puedes borrar por completo ya no es necesario». LAS DOS VIDAS DEL NERVIOSO (umbral 50%): EL CAZADOR (quieto 5 s → el libro flota encima MIRANDO al jugador; algo se mueve ≤480 px → LA SOMBRA DE LA PÁGINA muerde 10% de la vida máxima por golpe hasta ABSORBER: sin loot/gore/crédito, XP sí, −1% hambre por presa, hasta el 0% con el reloj CONGELADO — PasoSinHambre), EL IMPACIENTE (≥50%: efectos desde cero vía HambreEfectos + el libro HABLA + oleadas probables 4%→20% cada 5 s) y EL FUGITIVO (100%: escapa flotando con la levitación del difunto Códice Vivo). EL CÓDICE VIVO BORRADO por completo (ítem + 2 proyectiles + 2 rawimg + registraciones + localización ×3). ACTUALIZAR-FUENTE.bat/.sh ahora BORRA la versión anterior antes de copiar. LECCIONES: (1) el 19º incidente del espejo — la herramienta de edición NORMALIZA tabs→espacios el en-US entero: restaurar de git + parche por script Python byte-exacto; (2) el paquete re-serializa el es-ES — el espejo se verifica por CONTENIDO parseado (hjson), no por bytes; (3) los const internal viajan como FIELD en el dump Cecil, no en el IL de los métodos; (4) una muerte sin loot ni crédito = desactivación directa + SyncNPC en cadena, JAMÁS checkDead |
 | **v6.50.90** | ✅ Build-verificada (build real 0/0, .tmod 2.615.131 B md5 28533185710832833532d7149f39fe21, 388 entradas = 388 de .89 − Tembloroso.rawimg + Nervioso.rawimg, EOF exacto, blob diff whitelist exacto, arte byte-idéntico, CECIL: Nervioso con receta .88 (glitch) + temblor .87 + constantes del sobresalto (6,5/1,8/1,2/2,2/7 + sales 1759714724/625341585) SIN el 1,55 del aura, Errático/Inestable/base IL IDÉNTICO a .89, EstadoGrimorio cambia DOCUMENTADO (bandera + 3 ramas, secuencia de Main.rand intacta con la bandera apagada), clase del Tembloroso AUSENTE + sin referencias zombies, el tooltip del Inestable ya no cita al difunto, espejo es-ES==es-MX paquete+árbol, headless «Sandboxing v6.50.90 → Listening 7777 → Server started» 0 excepciones, VLM QA 6/6 APROBADO), ✔ PUBLICADA (release 408445793 + asset 626548192 2.615.131 B, CDN verificado byte a byte md5 28533185710832833532d7149f39fe21, /releases/latest = v6.50.90), ⏳ en juego | LA LETRA: «el tercer libro borralo, y crea otro con las mismas caracteristicas, temblor, glisheado, y nervioso». EL TERCER ASIENTO CAMBIA DE DUEÑO: el Tembloroso BORRADO, entra EL NERVIOSO — temblor .87 (dos senos incommensurables 0,2→1,3 px con SU hambre) + glitch .88 (máquina PROPIA: tiras 2-4 ±6 px, ráfagas 12-24 t cada 15 s→2,1 s, gate 12 %) + EL OJO ANSIOSO (revisa 2,4 s→0,42 s, miradas que SALTAN LERP 0,22, 1/3 al centro, 1/2 dardo lateral — miedo, no caos, sin el tic del Errático) + EL SOBRESALTO (6,5 s→1,8 s con el hambre, brinco 1,2→2,2 px que se asienta en 7 ticks; con hambre ≥12 % EL SUSTO ROMPE EL LIBRO — ráfaga corta 8-14 t con cada susto). SIN aura roja (firma del Inestable). La familia: SERENO/CAÓTICO/ASUSTADIZO/POSEÍDO. LECCIONES: (1) el chequeo pre-commit del espejo salvó el commit 2ª vez consecutiva; (2) cambiar de dueño un asiento toca TRES capas (ítem + bolsa + citas vivas en tooltips ajenos); (3) personalidades = PATRÓN no intensidad; (4) Roslyn PLEGA constantes (2.4f·60→144) — auditar el valor plegado; (5) sales hex del C# → Ldc_I4 DECIMAL en el dump |

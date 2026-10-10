@@ -114,25 +114,27 @@ Items: {
 		DisplayName: Nervous Hungry Grimoire
 		Tooltip:
 			'''
-			The HUNGRY copy — the same eye, but this book is
-			APPETITE WITH A BODY: restless, angry, starving. From
-			25% hunger on it is THE HUNTER: stand still and it
-			floats out over you, and its Page Shadow devours
-			whatever creature moves nearby (no loot; the XP still
-			goes to the grimoire) — ONE attack per creature, with
-			a digesting pause between prey; each prey eases it 1%,
-			and while it eats, its eye locks onto its food. While
-			it is out, its attacks come FROM THE BOOK (your hand
-			swings empty) and its hunger does NOT freeze: it rises
-			whether it eats or not — this is a test build (fast);
-			the real one will be slower. From 50% on it is THE
-			IMPATIENT one (it talks, trembles, summons waves); at
-			100%, IT ESCAPES (hunting or not). Hunger only rises
-			if 10 seconds pass without eating.
-			Left click: homing bolt (testing, no mana).
-			Right click: resets the appetite (and calms it 10 s).
-			Testing item — compare against the original.
-			'''
+The HUNGRY copy — the same eye, but this book is
+APPETITE WITH A BODY: restless, angry, starving. Its
+hunger ALWAYS rises (test rate; the real one will be
+slower): only a devoured prey lowers it (−1%) and
+right click resets it.
+From 25% hunger on it hunts ON ITS OWN whenever you
+step away (AFK 5 s, or 30 s without attacking
+creatures with the book): it floats near you and its
+Page Shadow devours whatever creature moves nearby —
+its attack fires ONCE every 10 s (and never sooner
+than 2 s after the previous one ends).
+The feast is SELFISH: it eats the prey WHOLE, loot
+included — the XP belongs to THIS book (it raises its
+own level); you get nothing. While it is out, its
+attacks come FROM THE BOOK (your hand swings empty).
+It NEVER escapes: at 100% it just keeps floating
+near you, hunting on its own.
+Left click: homing bolt (testing, no mana).
+Right click: resets the appetite.
+Testing item — compare against the original.
+'''
 	}
 
 	// v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
@@ -163,7 +165,8 @@ Items: {
 	// v6.50.91 — THE LIVING CODEX WAS DELETED ENTIRELY (the user's word:
 	// "El Codice Vivo lo puedes borrar por completo ya no es necesario").
 	// Its levitation — the book that leaves your hands and hovers — now
-	// lives in the NERVOUS GRIMOIRE's spirit (hunt and escape).
+	// lives in the NERVOUS GRIMOIRE's spirit (hunt — the escape died
+	// in .94: the book never runs away).
 	
 	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
 	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
@@ -2123,7 +2126,6 @@ Hambre: {
 		Hambriento: HUNGRY — at 25% it already wants out to hunt.
 		Cazando: OUT HUNTING — it floats above you, seeking its own food.
 		Impaciente: IMPATIENT — it's hungry and won't stop saying so.
-		Fugitivo: IT ESCAPED! Sick of hunger, it keeps away from you.
 		Frase1: I'm hungry…
 		Frase2: I want to eat. NOW.
 		Frase3: Are you feeding me today… or what?
@@ -2131,8 +2133,8 @@ Hambre: {
 		Frase5: HUNGER! HUNGER! HUNGER!
 		SaleACazar: If you won't feed me, I'll go hunt for myself.
 		Saciado: …satiated. For now.
-		Escapa: I've HAD IT! I'm off!
 		Absorbe: −1% hunger
+		Nivel: Level {0} · XP {1}/{2}
 	}
 }
 

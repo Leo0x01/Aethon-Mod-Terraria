@@ -118,26 +118,27 @@ Items: {
                 DisplayName: Grimorio Hambriento Nervioso
                 Tooltip:
                         '''
-                        La copia HAMBRIENTA — el mismo ojo, pero este libro
-                        es APETITO CON CUERPO: intranquilo, enojado, con
-                        hambre. Desde el 25% de hambre es EL CAZADOR: si te
-                        quedas quieto, sale a flotar sobre ti y su Sombra
-                        de la Página devora a la criatura que se mueva
-                        cerca (sin botín; la XP sí es del grimorio) — un
-                        SOLO ataque por criatura, con su pausa de digestión
-                        entre presa y presa; cada presa lo sacia 1% y,
-                        mientras come, el ojo se clava en su comida.
-                        Mientras está fuera, sus ataques salen DEL LIBRO
-                        (tu mano ataca vacía) y su hambre NO se congela:
-                        sube coma o no coma — ahora es prueba (rápida);
-                        la versión real irá más lenta. Del 50% en adelante
-                        es EL IMPACIENTE (habla, tiembla, provoca oleadas);
-                        al 100%, SE ESCAPA (cazando o no). El hambre sólo
-                        sube si pasan 10 segundos sin comer.
-                        Clic izq: descarga perseguidora (pruebas, sin maná).
-                        Clic der: reinicia el apetito (y lo calma 10 s).
-                        Objeto de pruebas — comparar con el original.
-                        '''
+La copia HAMBRIENTA — el mismo ojo, pero este libro
+es APETITO CON CUERPO: intranquilo, enojado, con
+hambre. Su hambre sube SIEMPRE (tasa de prueba; la
+versión real irá más lenta): sólo la presa comida la
+baja (−1%) y el clic derecho la reinicia.
+Desde el 25% sale a cazar POR SU CUENTA si te ausentas
+(AFK 5 s, o 30 s sin atacar criaturas con el libro):
+flota cerca de ti y su Sombra de la Página devora a
+la criatura que se mueva cerca — su ataque se lanza
+UNA vez cada 10 s (y nunca antes de 2 s de terminar
+el anterior).
+El festín es EGOÍSTA: se come a la presa ENTERA, botín
+incluido — la XP es de ESTE libro (sube su nivel);
+tú no recibes nada. Mientras está fuera, sus ataques
+salen DEL LIBRO (tu mano ataca vacía).
+NUNCA se escapa: al 100% se queda flotando cerca de
+ti, cazando por sí mismo.
+Clic izq: descarga perseguidora (pruebas, sin maná).
+Clic der: reinicia el apetito.
+Objeto de pruebas — comparar con el original.
+'''
         }
 
         // v6.50.62 — THE GRIMOIRE'S MAWS: the three shadow-devouring
@@ -166,7 +167,8 @@ Items: {
         // v6.50.91 — EL CÓDICE VIVO FUE BORRADO POR COMPLETO (la letra del
         // usuario: «El Codice Vivo lo puedes borrar por completo ya no es
         // necesario»). Su levitación — el libro que se suelta y vela flotando
-        // — vive ahora en el ESPÍRITU del Grimorio Nervioso (caza y fuga).
+        // — vive ahora en el ESPÍRITU del Grimorio Nervioso (caza — la
+        // fuga murió en la .94: el libro nunca se escapa).
 
         // v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
         // their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
@@ -2126,7 +2128,6 @@ Hambre: {
                 Hambriento: HAMBRIENTO — con el 25% ya quiere salir a cazar.
                 Cazando: FUERA DE CAZA — flota sobre ti buscando su propia comida.
                 Impaciente: IMPACIENTE — tiene hambre y no deja de repetirlo.
-                Fugitivo: ¡SE ESCAPÓ! La hartura de hambre lo alejó de ti.
                 Frase1: Tengo hambre…
                 Frase2: Quiero comer. ¡YA!
                 Frase3: ¿Piensas alimentarme hoy… o qué?
@@ -2134,8 +2135,8 @@ Hambre: {
                 Frase5: ¡HAMBRE! ¡HAMBRE! ¡HAMBRE!
                 SaleACazar: Si no me alimentas, salgo yo mismo a cazar.
                 Saciado: …saciado. Por ahora.
-                Escapa: ¡ESTOY HARTO! ¡Me largo!
                 Absorbe: −1% hambre
+                Nivel: Nivel {0} · XP {1}/{2}
         }
 }
 

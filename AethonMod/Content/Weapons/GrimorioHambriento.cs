@@ -49,19 +49,17 @@ namespace AethonMod.Content.Weapons
     /// hambre (la letra: el libro «se mantendrá cazando su propia comida
     /// hasta llegar a 0% de hambre»).
     ///
-    /// v6.50.92 — LA GRACIA DE LOS 10 s + EL FOCO DEL FESTÍN + LA FAMILIA
-    /// SE ENCOGE A DOS. La letra del usuario: «el hambre debe subir si es
-    /// que en 10 segundos no come nada, el libro debe mirar lo que esta
-    /// comiendo» y «borra al grimorio hambriento inestable y al erratico,
-    /// deja el original y al nervioso». (1) EL RELOJ DEL APETITO sólo
-    /// corre cuando el libro lleva 10 s SIN COMER: cada bocado (presa
-    /// absorbida por la caza del Nervioso, o el reinicio de la demo)
-    /// marca la hora del último bocado (UltimaComida). (2) Mientras la
-    /// sombra devora a una presa, el ojo del libro se CLAVA en su comida
-    /// (FocoPantalla — hotbar, mano y mundo persiguen el festín). (3) El
-    /// Errático (.87) y el Inestable (.89) quedan BORRADOS: la bandera
-    /// Erratico murió con su dueño — quedan el original SERENO y el
-    /// Nervioso HAMBRIENTO.
+    /// v6.50.92 — LA FAMILIA SE ENCOGE A DOS. La letra del usuario:
+    /// «borra al grimorio hambriento inestable y al erratico, deja el
+    /// original y al nervioso».
+    ///
+    /// v6.50.94 — LA GRACIA DE LOS 10 s MURIÓ. La letra del usuario: «el
+    /// hambre se pausa» — la gracia de la .92 (el reloj congelado 10 s
+    /// tras cada bocado) PAUSABA el apetito de facto: mientras el libro
+    /// cazaba y comía, el reloj nunca corría. Ahora el hambre sube
+    /// SIEMPRE (tasa de prueba: 0→100% en un minuto) — coma o no coma,
+    /// cace o no cace. Sólo la presa comida la baja (−1%) y el clic
+    /// derecho la reinicia.
     /// </summary>
     public class EstadoGrimorio
     {
@@ -69,17 +67,8 @@ namespace AethonMod.Content.Weapons
         private static readonly Vector2 DESP_MAX = new Vector2(3.5f, 2.8f);
         private const float LERP_MIRADA = 0.10f;
 
-        // v6.50.92 — 10 s de gracia tras el último bocado antes de que el
-        // apetito vuelva a correr (la letra: «el hambre debe subir si es
-        // que en 10 segundos no come nada»)
-        private const uint TICKS_GRACIA_COMIDA = 600u;
-
         public float Hambre;
         public bool Nervioso;        // v6.50.90 — la copia NERVIOSA (mirada ansiosa)
-        // v6.50.92 — LA HORA DEL ÚLTIMO BOCADO: el reloj del hambre sólo
-        // avanza cuando pasan 10 s sin comer (0 = el libro aún no ha
-        // probado bocado — el primer tick arranca la gracia)
-        public uint UltimaComida;
         // v6.50.92 — EL FOCO DEL FESTÍN (pantalla-px): mientras la sombra
         // devora a una presa, el ojo mira SU COMIDA en vez de vagar
         // (null = no hay festín: el ciclo de miradas de siempre)
@@ -95,12 +84,10 @@ namespace AethonMod.Content.Weapons
         public uint UltimoDisparo;
 
         /// <summary>EL REINICIO del apetito (clic derecho — la demo se repite).
-        /// v6.50.92: reiniciar TAMBIÉN alimenta la gracia — el apetito se
-        /// calma 10 s antes de volver a correr (la letra del usuario).</summary>
+        /// v6.50.94: sin gracia — el reloj vuelve a correr EN EL ACTO.</summary>
         public void Reiniciar()
         {
             Hambre = 0f;
-            UltimaComida = Main.GameUpdateCount;
             Fase = 0;
             TParpadeo = 60;
             TMirada = 30;
@@ -114,14 +101,11 @@ namespace AethonMod.Content.Weapons
         /// </summary>
         public void Paso()
         {
-            // v6.50.92 — LA GRACIA DE LOS 10 s (la letra: «el hambre debe
-            // subir si es que en 10 segundos no come nada»): el reloj del
-            // apetito sólo corre cuando el libro lleva 10 s sin probar
-            // bocado. Un libro recién creado arranca su gracia ahora.
-            if (UltimaComida == 0u)
-                UltimaComida = Main.GameUpdateCount;
-            if (Main.GameUpdateCount - UltimaComida >= TICKS_GRACIA_COMIDA)
-                Hambre = Math.Min(1f, Hambre + 1f / 3600f);
+            // v6.50.94 — EL RELOJ CORRE SIEMPRE (la letra: «el hambre se
+            // pausa» — la gracia de los 10 s de la .92 moría aquí): el
+            // apetito avanza lo coma o no lo coma, cace o no cace — sólo
+            // la presa comida lo baja y el clic derecho lo reinicia.
+            Hambre = Math.Min(1f, Hambre + 1f / 3600f);
             float h = Hambre;
 
             // --- PARPADEO: 10-20 s (saciado) → 2 s exactos (hambre total) ---
