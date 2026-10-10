@@ -1,15 +1,21 @@
 @echo off
 setlocal
 REM ================================================================
-REM  AethonMod v6.50.14 - ACTUALIZADOR DE FUENTES (Windows)
+REM  AethonMod v6.50.91 - ACTUALIZADOR DE FUENTES (Windows)
 REM
-REM  Que hace: git pull del repo + copia espejo de la subcarpeta
-REM  AethonMod (EL MOD) hacia ModSources\AethonMod, que es la
-REM  carpeta que tModLoader compila (Develop Mods > Build & Reload).
+REM  Que hace: git pull del repo + BORRADO de la version anterior +
+REM  copia de la subcarpeta AethonMod (EL MOD) hacia
+REM  ModSources\AethonMod, que es la carpeta que tModLoader compila
+REM  (Develop Mods > Build & Reload).
 REM
-REM  Por que /MIR: la copia es ESPEJO exacto de la carpeta del repo
-REM  (borra archivos que ya no existen). No pongas cambios tuyos
-REM  dentro de ModSources\AethonMod: ponlos en el repo y ejecuta esto.
+REM  v6.50.91 - PRIMERO BORRA LA VERSION ANTERIOR (la letra del
+REM  usuario: "hacer que el ACTUALIZAR-FUENTE.bat primero borre la
+REM  version anterior para copiar la nueva version"): una copia
+REM  LIMPIA garantiza que los archivos muertos de versiones viejas
+REM  (renombrados, borrados - como El Codice Vivo) no queden
+REM  colgando dentro de ModSources confundiendo al compilador.
+REM  robocopy /MIR queda como red de seguridad por si el borrado
+REM  encuentra algo abierto.
 REM ================================================================
 cd /d "%~dp0"
 
@@ -22,6 +28,14 @@ if %errorlevel%==0 (
 )
 
 set "DEST=%USERPROFILE%\Documents\My Games\Terraria\tModLoader\ModSources\AethonMod"
+
+echo [borrando] la version anterior de ModSources\AethonMod...
+if exist "%DEST%" (
+    rmdir /s /q "%DEST%"
+)
+if exist "%DEST%" (
+    echo [aviso] no se pudo borrar del todo ^(algo abierto^?): robocopy /MIR completara la limpieza.
+)
 
 echo [copiando] AethonMod -^> "%DEST%"
 robocopy "AethonMod" "%DEST%" /MIR /NFL /NDL /NJH /NJS >nul
@@ -39,6 +53,6 @@ if %errorlevel% GEQ 8 (
 echo.
 echo [hecho] Fuente actualizada en ModSources\AethonMod
 echo Ahora en el juego:  Mods -^> Develop Mods -^> AethonMod -^> Build + Reload
-echo Comprueba que el numero de VERSION del menu Mods sube (6.50.14, ...^).
+echo Comprueba que el numero de VERSION del menu Mods sube (6.50.91, ...^).
 echo.
 pause

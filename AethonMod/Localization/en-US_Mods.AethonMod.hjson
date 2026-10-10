@@ -186,26 +186,11 @@ Items: {
 			'''
 	}
 
-	CodiceVivo: {
-		// v6.50.72 — THE USER'S TEST v2: a sprite born from CODE turned into
-		// an ANIMATED weapon, completely separate from the rest (Tester's
-		// Bag). The .71 animation read as static — this one BREATHES.
-		DisplayName: The Living Codex
-		Tooltip:
-			'''
-			"A book that drew itself — one line of code at a time."
-			THE TEST SPRITE: this codex has no hand-drawn sprite — it was BORN
-			FROM CODE (the pixel matrix, 26 colors) and that's why it can
-			ANIMATE for real: THE WHOLE BOOK BREATHES, a WAVE of living ink
-			travels from its eye outwards, and THE EYE BLINKS SHUT — watch it
-			in your inventory. When used, the codex LEAPS from your hands,
-			FLIES TO WHERE YOU CLICK and hovers THERE, firing FOUR VOLLEYS of
-			THREE GUIDED VIOLET SPARKS each — enemies or no enemies, the
-			attack ALWAYS shows — then returns to you like a boomerang.
-			(A standalone test weapon — 100% code-born sprite.)
-			'''
-	}
-
+	// v6.50.91 — THE LIVING CODEX WAS DELETED ENTIRELY (the user's word:
+	// "El Codice Vivo lo puedes borrar por completo ya no es necesario").
+	// Its levitation — the book that leaves your hands and hovers — now
+	// lives in the NERVOUS GRIMOIRE's spirit (hunt and escape).
+	
 	// v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
 	// their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
 	// Bearer's Shadow).
@@ -1898,8 +1883,9 @@ Projectiles: {
 	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	MiniEstallidoPet.DisplayName: Mini Estallido Pet
-	CodiceVivoChispa.DisplayName: Codice Vivo Chispa
-	CodiceVivoProjectile.DisplayName: Codice Vivo Projectile
+	// v6.50.91 — the Nervous One's spirit and its hunting shadow
+	GrimorioNerviosoFlotante.DisplayName: The Nervous Grimoire
+	SombraPaginaCaza.DisplayName: The Nervous Grimoire's Shadow of the Page
 }
 
 Buffs: {
@@ -2155,6 +2141,24 @@ Hambre: {
 	Furioso: The iris ignites RED. The fury is coming.
 	Maximo: IT IS HUNGRY. It never stops staring.
 	Reinicio: The grimoire's appetite has calmed down.
+
+	// v6.50.91 — THE NERVOUS ONE: restless, hungry, angry — "I want to
+	// eat and it's hungry". Not fear: appetite with a voice.
+	Nervioso: {
+		Tranquilo: The hunter waits. It watches, patient, hungry.
+		Cazando: OUT HUNTING — it floats above you, seeking its own food.
+		Impaciente: IMPATIENT — it's hungry and won't stop saying so.
+		Fugitivo: IT ESCAPED! Sick of hunger, it keeps away from you.
+		Frase1: I'm hungry…
+		Frase2: I want to eat. NOW.
+		Frase3: Are you feeding me today… or what?
+		Frase4: I'm starving! HUNGRY!
+		Frase5: HUNGER! HUNGER! HUNGER!
+		SaleACazar: If you won't feed me, I'll go hunt for myself.
+		Saciado: …satiated. For now.
+		Escapa: I've HAD IT! I'm off!
+		Absorbe: −1% hunger
+	}
 }
 
 Bolsa.Abierta: Bag opened: {0} types of summoners received (999 each).

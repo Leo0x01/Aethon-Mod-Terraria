@@ -68,28 +68,13 @@ namespace AethonMod
 
         public override void PostSetupContent()
         {
-            // v6.50.72 — EL CÓDICE VIVO (la prueba del sprite-de-código del
-            // usuario): el sprite del ITEM es un STRIP ANIMADO (8 frames de
-            // 48 px — el libro RESPIRA, la ONDA de tinta viaja desde el ojo
-            // y el ojo PARPADEA COMPLETO). Se registra AQUÍ (ya con todos
-            // los tipos cargados) para que el icono ANIME en el inventario
-            // y el objeto tirado en el mundo — como las almas de vanilla
-            // (ItemID.Sets.AnimatesAsSoul está en el propio item).
-            // v6.50.74 — FIX DEL ICONO CORTADO (la letra: «la imagen está
-            // cortada además se mueve de abajo hacia arriba constantemente,
-            // aunque si tiene su animación»): EL ORDEN DE PARÁMETROS del
-            // constructor es (ticksPorFrame, numFrames) — ¡TICKS PRIMERO!
-            // El (8, 6) de la .72 leía 8 ticks / 6 FRAMES: el juego partía
-            // el strip de 384 px en SEIS rodajas de 64 px (el strip tiene
-            // OCHO frames de 48) — la ventana de 64 px se DESLIZABA entre
-            // dos frames a la vez (el libro cortado con un «fantasma» del
-            // frame vecino debajo) y avanzaba hacia abajo del strip → el
-            // contenido parecía SUBIR sin parar. Con (6, 8) — 6 ticks por
-            // frame, 8 frames — cada rodaja es EXACTAMENTE un frame del
-            // libro. (Verificado en el decompile: DrawAnimationVertical(
-            // int ticksperframe, int frameCount, ...).)
-            Main.RegisterItemAnimation(ModContent.ItemType<Content.Weapons.CodiceVivo.CodiceVivo>(),
-                new Terraria.DataStructures.DrawAnimationVertical(6, 8));
+            // v6.50.91 — EL CÓDICE VIVO FUE BORRADO POR COMPLETO (la letra
+            // del usuario: «El Codice Vivo lo puedes borrar por completo ya
+            // no es necesario»): su registro de animación de ítem — el strip
+            // de 8 frames que respiraba, el fix del orden (6, 8) de la .74 —
+            // murió con él. Su levitación (el libro que se suelta y vela
+            // flotando) vive ahora en el ESPÍRITU del Grimorio Nervioso
+            // (Content/Projectiles/Nervioso/GrimorioNerviosoFlotante).
         }
 
         public override void Unload()

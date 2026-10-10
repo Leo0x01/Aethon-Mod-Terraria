@@ -36,9 +36,18 @@ namespace AethonMod.Content.Weapons
     /// v6.50.90 — LA MIRADA NERVIOSA (la copia Nerviosa marca `Nervioso =
     /// true`): revisa cada 2,4 s → 0,42 s, sus miradas SALTAN a la meta
     /// (LERP 0,22 fijo — aterrizan de golpe), una de cada tres vuelve al
-    /// CENTRO y la mitad de las demás se va de DARDO LATERAL. Miedo, no
-    /// caos — sin el tic del Errático. El libro NORMAL tampoco marca esta
-    /// bandera: su ciclo sigue intacto.
+    /// CENTRO y la mitad de las demás se va de DARDO LATERAL. Inquietud con
+    /// patrón, no caos — sin el tic del Errático. El libro NORMAL tampoco
+    /// marca esta bandera: su ciclo sigue intacto.
+    ///
+    /// v6.50.91 — EL NERVIOSO SE ENCIENDE AL 50%: bajo el umbral de la
+    /// impaciencia su ojo corre el ciclo SERENO del original (el CAZADOR
+    /// paciente — la letra del usuario: «no es que este nervioso por tener
+    /// miedo, esta mas bien intranquilo, hambriento, enojado, inquieto»);
+    /// al 50% el patrón ansioso despierta (NerviosoActivo()). Y LA CAZA
+    /// CONGELA EL RELOJ: PasoSinHambre() avanza el ojo sin tocar el
+    /// hambre (la letra: el libro «se mantendrá cazando su propia comida
+    /// hasta llegar a 0% de hambre»).
     /// </summary>
     public class EstadoGrimorio
     {
@@ -102,7 +111,7 @@ namespace AethonMod.Content.Weapons
                 float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
                 if (Erratico)
                     dwell = MathHelper.Lerp(3f * 60f, 0.16f * 60f, h);
-                else if (Nervioso)
+                else if (NerviosoActivo())   // v6.50.91 — bajo el 50%: ciclo sereno
                     dwell = MathHelper.Lerp(2.4f * 60f, 0.42f * 60f, h);
                 TMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
             }
@@ -112,7 +121,7 @@ namespace AethonMod.Content.Weapons
             // brutalidad creciente de la errática
             DespActual = Vector2.Lerp(DespActual, DespMeta,
                 Erratico ? 0.10f + 0.26f * h
-                : Nervioso ? 0.22f
+                : NerviosoActivo() ? 0.22f   // v6.50.91 — el salto sólo con impaciencia
                 : LERP_MIRADA);
         }
 
@@ -144,14 +153,14 @@ namespace AethonMod.Content.Weapons
                 // izquierda-derecha del susto). Con la bandera apagada la
                 // secuencia de Main.rand es la MISMA de la .89 (los otros
                 // libros no cambian ni un tiro de dado).
-                bool alCentro = Nervioso ? Main.rand.Next(3) == 0
+                bool alCentro = NerviosoActivo() ? Main.rand.Next(3) == 0
                                           : Main.rand.Next(10) == 0;
                 if (alCentro)
                     meta = Vector2.Zero;
                 else
                 {
                     double ang = Main.rand.NextDouble() * Math.PI * 2.0;
-                    if (Nervioso && Main.rand.Next(2) == 0)
+                    if (NerviosoActivo() && Main.rand.Next(2) == 0)
                         ang = Main.rand.Next(2) == 0 ? 0.0 : Math.PI; // el dardo lateral
                     meta = SnapDireccion(new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 100f)
                            * new Vector2(3.5f, 2.8f);
@@ -176,6 +185,24 @@ namespace AethonMod.Content.Weapons
         /// <summary>La rampa del rojo: 20 %→80 % de hambre.</summary>
         public float NivelRojo() =>
             Math.Max(0f, Math.Min(1f, (Hambre - 0.2f) / 0.6f));
+
+        /// <summary>v6.50.91 — el nerviosismo del ojo VIVE sobre el umbral
+        /// de la impaciencia (50% de hambre): debajo, el ciclo sereno del
+        /// original — el cazador paciente. Sólo el Nervioso marca la
+        /// bandera; el resto de la familia no cambia ni un tiro de dado.</summary>
+        public bool NerviosoActivo() => Nervioso && Hambre >= 0.5f;
+
+        /// <summary>v6.50.91 — UN PASO DEL OJO SIN HAMBRE: para el Nervioso
+        /// en caza — el parpadeo y la mirada siguen vivos, el reloj del
+        /// apetito NO avanza (sólo las presas lo bajan). Implementado como
+        /// rescate del valor tras el Paso canónico: CERO duplicación del
+        /// ciclo probado de la .82.</summary>
+        public void PasoSinHambre()
+        {
+            float hambre = Hambre;
+            Paso();
+            Hambre = hambre;
+        }
     }
 
     /// <summary>

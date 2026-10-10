@@ -190,27 +190,10 @@ Items: {
                         (Arma de prueba de las fauces — v2.)
                         '''
         }
-        CodiceVivo: {
-                // v6.50.72 — LA PRUEBA DEL USUARIO v2: un sprite nacido de CÓDIGO
-                // convertido en arma ANIMADA, completamente a parte de las demás
-                // (la Bolsa del Probador). La animación de la .71 se leía estática
-                // — esta RESPIRA de verdad.
-                DisplayName: El Códice Vivo
-                Tooltip:
-                        '''
-                        «Un libro que se dibujó a sí mismo — línea por línea de código.»
-                        EL SPRITE DE PRUEBA: este códice no tiene sprite dibujado — NACIÓ DE
-                        CÓDIGO (la matriz de píxeles, 26 colores) y por eso puede ANIMARSE
-                        DE VERDAD: TODO EL LIBRO RESPIRA, una ONDA de tinta viva viaja
-                        desde su ojo hacia afuera y EL OJO PARPADEA Y SE CIERRA — míralo
-                        en el inventario. Al usarlo, el códice SALTA de tus manos, VUELA
-                        A DONDE CLICASTE y ahí VELA disparando CUATRO ANDANADAS de TRES
-                        CHISPAS VIOLETAS autoguiadas cada una — con enemigos o SIN
-                        ellos, el ataque SIEMPRE se ve — y luego vuelve a ti como
-                        un bumerán.
-                        (Arma de prueba aparte — sprite 100% nacido de código.)
-                        '''
-        }
+        // v6.50.91 — EL CÓDICE VIVO FUE BORRADO POR COMPLETO (la letra del
+        // usuario: «El Codice Vivo lo puedes borrar por completo ya no es
+        // necesario»). Su levitación — el libro que se suelta y vela flotando
+        // — vive ahora en el ESPÍRITU del Grimorio Nervioso (caza y fuga).
 
         // v6.50.61 — THE PURGE: the FOUR wardens' summon items died with
         // their bosses (Hollow Titan Crystal, Rift Seal, Archer's Feather,
@@ -1780,8 +1763,9 @@ Items: {
 Projectiles: {
         SombraPaginaProjectile.DisplayName: La Sombra de la Página
         FauceDevoradorProjectile.DisplayName: El Festín de las Sombras
-        CodiceVivoProjectile.DisplayName: El Códice Vivo
-        CodiceVivoChispa.DisplayName: Chispa del Códice Vivo
+        // v6.50.91 — el espíritu del Nervioso y su sombra cazadora
+        GrimorioNerviosoFlotante.DisplayName: El Grimorio Nervioso
+        SombraPaginaCaza.DisplayName: La Sombra de la Página del Nervioso
         ArcaneBolt.DisplayName: Bolt Arcano
         GenesisLight.DisplayName: Luz del Génesis
         CosmicOrbMinion.DisplayName: Orbe Cósmico
@@ -2162,6 +2146,23 @@ Hambre: {
         Furioso: El iris se enciende ROJO. La furia se acerca.
         Maximo: TIENE HAMBRE. No deja de mirarte.
         Reinicio: El apetito del grimorio se ha calmado.
+        // v6.50.91 — EL NERVIOSO: intranquilo, hambriento, enojado — «quiero
+        // comer y tiene hambre». No es miedo: es apetito con voz.
+        Nervioso: {
+                Tranquilo: El cazador espera. Vigila, paciente, con apetito.
+                Cazando: FUERA DE CAZA — flota sobre ti buscando su propia comida.
+                Impaciente: IMPACIENTE — tiene hambre y no deja de repetirlo.
+                Fugitivo: ¡SE ESCAPÓ! La hartura de hambre lo alejó de ti.
+                Frase1: Tengo hambre…
+                Frase2: Quiero comer. ¡YA!
+                Frase3: ¿Piensas alimentarme hoy… o qué?
+                Frase4: ¡Me muero de hambre! ¡HAMBRE!
+                Frase5: ¡HAMBRE! ¡HAMBRE! ¡HAMBRE!
+                SaleACazar: Si no me alimentas, salgo yo mismo a cazar.
+                Saciado: …saciado. Por ahora.
+                Escapa: ¡ESTOY HARTO! ¡Me largo!
+                Absorbe: −1% hambre
+        }
 }
 
 Bolsa.Abierta: Bolsa abierta: {0} tipos de invocadores recibidos (999 c/u).

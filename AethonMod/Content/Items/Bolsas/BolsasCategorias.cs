@@ -65,10 +65,10 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.47 — LOS LLAMADOS (v6.50.61 — LA PURGA: solo queda el
             // llamado del FINAL — el grimorio mismo responde a su nombre).
             l.Add((ModContent.ItemType<Items.Llamados.NombreDeAethon>(), 1));
-            // v6.50.71 — EL CÓDICE VIVO: la PRUEBA del usuario (un sprite
-            // nacido de CÓDIGO convertido en arma ANIMADA — el icono parpadea
-            // en el inventario) — completamente a parte de las demás.
-            l.Add((ModContent.ItemType<Weapons.CodiceVivo.CodiceVivo>(), 1));
+            // v6.50.91 — EL CÓDICE VIVO FUE BORRADO por completo (la letra
+            // del usuario: «El Codice Vivo lo puedes borrar por completo ya
+            // no es necesario»): su levitación vive en el espíritu flotante
+            // del Grimorio Nervioso.
             // v6.50.83 — EL GRIMORIO HAMBRIENTO: la DEMO del hambre (v6.50.82
             // nació con receta de 5 madera pero SIN entrega — la lección
             // v6.50.63 otra vez: "te olvidaste darle las armas al jugador").
