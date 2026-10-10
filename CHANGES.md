@@ -92,8 +92,9 @@ sprite del usuario desde entonces).
    vive, la lágrima murió, espejo por contenido, 787 hojas simétricas,
    en-US tabs 4288, paquete == árbol ×3 · headless «Sandboxing v6.50.96
    → Adding Recipes → Server started» 0 EXCEPCIONES.
-   PUBLICACIÓN: tag v6.50.96 + release (make_latest) + asset
-   AethonMod.tmod, CDN VERIFICADO, /releases/latest = v6.50.96, respaldo
+   PUBLICACIÓN: tag v6.50.96 + release 409188065 (make_latest) + asset
+   AethonMod.tmod 628922496 2.579.444 B (md5 d0d8df7882cc80530cc6e4613bfa0023),
+   CDN VERIFICADO BYTE A BYTE, /releases/latest = v6.50.96, respaldo
    /home/sync/AethonMod-v6.50.96.tmod.
 
    CHECKLIST DEL USUARIO (la prueba EN JUEGO): (a) el clic izq del
