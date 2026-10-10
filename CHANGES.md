@@ -1,5 +1,83 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.90 — EL GRIMORIO NERVIOSO: EL TERCER ASIENTO CAMBIA DE DUEÑO (temblor + glitch + nervios)
+
+**Petición del usuario**: "el tercer libro borralo, y crea otro con las
+mismas caracteristicas, temblor, glisheado, y nervioso".
+
+**El Tembloroso (v6.50.87) queda BORRADO** — en su tercer asiento entra
+EL NERVIOSO: un libro que vive asustado. Tres capas, cada receta intacta:
+
+1. **EL TEMBLOR** heredado del difunto — la receta .87 ÍNTEGRA: los dos
+   senos incommensurables por eje (9,3/17,3 Hz en X · 11,9/19,1 Hz en Y,
+   fases 1,7/0,6), amplitud 0,2 px saciado → 1,3 px famélico leyendo SU
+   PROPIA hambre. El escalofrío continuo del Tembloroso, ahora con
+   dueño nuevo.
+2. **EL GLITCH del Errático** — la receta .88 ÍNTEGRA (tiras 2-4 hasta
+   ±6 px, ráfagas 12-24 ticks regenerándose cada 2 frames, 15 s → 2,1 s,
+   gate 12 %) con MÁQUINA PROPIA: el Nervioso rompe a SU hora, jamás
+   sincronizado con el Errático o el Inestable del mismo inventario.
+3. **EL NERVIOSO** (lo nuevo de la casa, DOS capas):
+   - **EL OJO ANSIOSO** (`EstadoGrimorio.Nervioso`): revisa cada 2,4 s →
+     0,42 s (más inquieto que el original 4→0,35, menos frenético que la
+     errática 3→0,16 — miedo, no caos), sus miradas SALTAN a la meta
+     (LERP 0,22 fijo — aterrizan de golpe, sin el resbalón suave del
+     original), 1 de cada 3 miradas vuelve al CENTRO (la revisada
+     ansiosa de la casa) y la mitad de las demás se va de DARDO LATERAL
+     (el barrido izquierda-derecha del susto). SIN el tic del Errático.
+   - **EL SOBRESALTO**: cada 6,5 s → 1,8 s con el hambre (±25 %), el
+     libro da un BRINCO de 1,2 px → 2,2 px en una dirección al azar que
+     se asienta linealmente en 7 ticks. Y **EL SUSTO ROMPE EL LIBRO**:
+     con hambre ≥ 12 % cada sobresalto trae una ráfaga corta de glitch
+     (8-14 ticks) — el libro se asusta, brinca Y se rompe. El momento
+     firma de la copia.
+4. **SIN aura roja** — esa es la firma del Inestable. La familia queda
+   con CUATRO TEMPERAMENTOS: normal SERENO, Errático CAÓTICO, Nervioso
+   ASUSTADIZO, Inestable POSEÍDO.
+5. **LIMPIEZA**: el tooltip del Inestable ya no cita al difunto («tiembla
+   sin descanso» en vez de «como el Tembloroso») — un jugador nuevo no
+   puede comparar con un libro que no existe.
+6. **ENTREGA**: la Bolsa del Probador cambia el tercer libro (Nervioso
+   por Tembloroso); icono = copia byte a byte de la base (familia).
+
+**Verificación**: oráculo 0/0 (309 .cs) · build real 0/0 · .tmod 2.615.131
+B md5 28533185710832833532d7149f39fe21: 388 entradas (388 de .89 − el
+rawimg del Tembloroso + el del Nervioso), EOF exacto, blob diff vs .89
+con SOLO dll/pdb/Info + 3 hjson + el rawimg entrante/saliente, TODO el
+arte byte-idéntico, espejo es-ES == es-MX EN EL PAQUETE Y EN EL ÁRBOL,
+en-US con tabs, CECIL: el Nervioso lleva la receta .88 COMPLETA + el
+temblor .87 + las constantes del sobresalto (6,5/1,8/1,2/2,2/7 + las
+sales 0x68E31DA4 y 0x2545F491 en decimal) y SIN el 1,55 del aura;
+Errático/Inestable/base con IL IDÉNTICO a .89; EstadoGrimorio CAMBIA
+(documentado: bandera Nervioso + 3 ramas — con la bandera apagada la
+secuencia de Main.rand y la matemática son las de .89); la clase del
+Tembloroso AUSENTE de la DLL y sin referencias zombies · headless
+«Sandboxing v6.50.90 → Listening 7777 → Server started» 0 excepciones ·
+VLM QA del preview 6×/6 APROBADO. **EL 18º INCIDENTE DEL ESPEJO**
+(nuevo, cazado ANTES del commit): el es-ES del ÁRBOL amaneció
+RE-SERIALIZADO (82152 B, tabs, sin comentarios) durante la sesión
+headless colgada en el prompt de Choose World — la .tmod (buildeada
+ANTES) siempre llevó el espejo correcto (paquete == árbol verificado
+byte a byte tras la cura: sync_es_es + chequeo pre-commit).
+
+**Lecciones**: (1) el chequeo pre-commit del espejo SALVÓ el commit otra
+vez — la sesión headless colgada re-serializa el es-ES del árbol (2ª
+vez: incidentes 17 y 18); (2) un cambio de dueño de un asiento toca
+TRES capas de limpieza: el ítem, la bolsa y las CITAS VIVAS en tooltips
+ajenos (el Inestable hablaba del difunto); (3) las personalidades se
+distinguen por PATRÓN, no por intensidad: errático = caos aleatorio con
+tic, nervioso = patrón ansioso (centro + lateral) con saccades de
+golpe; (4) Roslyn PLEGA las constantes aritméticas (2.4f·60 → 144 en el
+IL) — el auditor debe buscar el valor plegado, no el fuente (la lección
+Ldc_I4_S de la .88, reloaded); (5) los saltos hex del C# aparecen en el
+dump CECIL como Ldc_I4 DECIMAL (0x2545F491 = 625341585).
+
+**Pendiente**: PUBLICAR (push + release + CDN) — el token de GitHub
+expiró con el wipe del sandbox; cuando el usuario dé uno nuevo:
+escribirlo en `.env` + `~/.config/git/credentials`, push main + tag
+v6.50.90, crear el release con el .tmod respaldado en
+/home/sync/AethonMod-v6.50.90.tmod y verificar CDN byte a byte.
+
 ## Commit v6.50.89 — EL GRIMORIO INESTABLE: EL GLITCH Y EL TEMBLOR UNIDOS + EL AURA ROJA PEQUEÑA
 
 **Petición del usuario**: "crea un cuarto grimorio donde el efecto glish y

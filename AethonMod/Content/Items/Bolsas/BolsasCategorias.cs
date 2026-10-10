@@ -86,7 +86,15 @@ namespace AethonMod.Content.Items.Bolsas
             // SEPARADO (EstadoGrimorio por clase) — los tres ciclos viven a
             // la vez en el inventario.
             l.Add((ModContent.ItemType<GrimorioHambrientoErratico>(), 1));
-            l.Add((ModContent.ItemType<GrimorioHambrientoTembloroso>(), 1));
+            // v6.50.90 — EL TERCER ASIENTO CAMBIA DE DUEÑO: el Tembloroso
+            // quedó BORRADO (la letra del usuario: «el tercer libro
+            // borralo, y crea otro con las mismas caracteristicas,
+            // temblor, glisheado, y nervioso») y entra EL NERVIOSO —
+            // temblor .87 + glitch .88 + nerviosismo: ojo ansioso (miradas
+            // que saltan, revisa el centro, dardos laterales) y
+            // sobresaltos que BRINCAN el libro y lo ROMPEN en tiras. Sin
+            // aura roja — esa es la firma del Inestable.
+            l.Add((ModContent.ItemType<GrimorioHambrientoNervioso>(), 1));
             // v6.50.89 — LA CUARTA COPIA: EL INESTABLE — la unión que pidió
             // el usuario («crea un cuarto grimorio donde el efecto glish y
             // el temblor este unidos, ademas ponle un aura pequeña roja»):

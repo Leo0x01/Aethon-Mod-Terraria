@@ -1,7 +1,7 @@
-# AethonMod — ESTADO ACTUAL (v6.50.89)
+# AethonMod — ESTADO ACTUAL (v6.50.90)
 
 > **Este documento = "¿por dónde nos quedamos?"** — se actualiza en cada entrega.
-> Última actualización: v6.50.89 (EL GRIMORIO INESTABLE: el glitch y el temblor unidos + el aura roja pequeña) LA BASE — la .82 rellenaba el socket con RUIDO
+> Última actualización: v6.50.90 (EL GRIMORIO NERVIOSO: el tercer asiento cambia de dueño — temblor + glitch + nervios; el Tembloroso BORRADO) LA BASE — la .82 rellenaba el socket con RUIDO
 > GAUSSIANO (σ54) que a 36×49 se leía como la SOMBRA que el usuario
 > vio en mundo/mano; ahora la base ES el sprite sin iris EXACTO (la
 > MISMA corrida de codigo 2.txt — byte-idénticos fuera del ojo,
@@ -1902,6 +1902,51 @@ Prioridad baja — arreglar en la próxima sesión de código si el usuario apru
    `CarnadaDelGrimorio`, `RelojDeArenaDelEscriba`, `BossSummonBag`, los 4 tests de VFX.
 
 ## 🚧 PRÓXIMOS PASOS SUGERIDOS (en orden)
+
+1. **🔧 v6.50.90 COMPLETA Y VERIFICADA — PUBLICACIÓN PENDIENTE (token
+   de GitHub expirado con el wipe)** — el usuario pidió «el tercer libro
+   borralo, y crea otro con las mismas caracteristicas, temblor,
+   glisheado, y nervioso». Entregado EL NERVIOSO: temblor .87 heredado
+   del difunto + glitch .88 con máquina PROPIA + EL NERVIOSISMO nuevo
+   (ojo ansioso: revisa cada 2,4 s→0,42 s, miradas que SALTAN (LERP
+   0,22), 1/3 al centro, 1/2 dardo lateral · sobresaltos: brinco
+   1,2→2,2 px cada 6,5 s→1,8 s que se asienta en 7 ticks y CON
+   HAMBRE ROMPE EL LIBRO — ráfaga corta 8-14 t con cada susto). El
+   Tembloroso BORRADO (clase AUSENTE de la DLL, sin referencias
+   zombies); el tooltip del Inestable ya no cita al difunto; SIN aura
+   roja (firma del Inestable). .tmod 2.615.131 B md5
+   28533185710832833532d7149f39fe21 (388 entradas = 388 de .89 − el
+   rawimg del Tembloroso + el del Nervioso, EOF exacto, blob diff
+   whitelist exacto, CECIL con las dos recetas + constantes del
+   sobresalto, Errático/Inestable/base IL IDÉNTICO a .89,
+   EstadoGrimorio documentado con la bandera nueva, espejo
+   es-ES==es-MX paquete+árbol, headless 7777 0 excepciones, VLM QA
+   6/6). Respaldo: /home/sync/AethonMod-v6.50.90.tmod. CUANDO HAYA
+   TOKEN: (1) .env + ~/.config/git/credentials (formato
+   https://Leo0x01:<token>@github.com, chmod 600), (2) git push origin
+   main v6.50.90, (3) release v6.50.90 con el .tmod del respaldo
+   (make_latest), (4) CDN byte a byte + /releases/latest, (5) fila .89
+   del snapshot con el release ID real. EL 18º INCIDENTE DEL ESPEJO
+   (es-ES del árbol re-serializado durante la sesión headless colgada
+   en Choose World — la .tmod siempre sana; cura sync + chequeo
+   pre-commit, paquete==árbol verificado).
+
+1a. **El usuario prueba v6.50.90 en juego** — EL NERVIOSO: (a) al
+   principio quieto pero con la MIRADA INQUIETA (miradas que saltan de
+   golpe, cada ~2,4 s revisa — 1 de cada 3 al centro, el resto dardos
+   laterales izquierda-derecha) y un temblor casi invisible; (b) el
+   primer SOBRESALTO llega a los 5 s: el libro BRINCA entero (1,2 px
+   saciado) en una dirección al azar y se asienta en un abrir y cerrar
+   de ojos (~0,12 s); (c) con hambre ≥12 % CADA SUSTO ROMPE EL LIBRO:
+   el brinco llega JUNTO con una ráfaga corta de tiras (el momento
+   firma — se asusta, salta Y se rompe); (d) a hambre total: sustos
+   cada ~1,8 s con brincos de 2,2 px, ráfagas de glitch cada ~2 s
+   además de las de los sustos, temblor 1,3 px; (e) el Errático, el
+   Inestable (aura roja) y el normal EXACTAMENTE igual que en la .89;
+   (f) el Tembloroso YA NO EXISTE (ni en la bolsa ni crafteable).
+   Checklists previos vigentes. NOTA: la .90 es la primera versión que
+   queda SIN publicar por el token expirado — el usuario la recibirá
+   como release v6.50.90 apenas haya token nuevo.
 
 1. **✅ PUBLICAR v6.50.89 — HECHO** — el usuario pidió «un cuarto
    grimorio donde el efecto glish y el temblor este unidos, ademas

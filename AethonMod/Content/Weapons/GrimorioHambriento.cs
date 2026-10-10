@@ -33,6 +33,12 @@ namespace AethonMod.Content.Weapons
     /// meta lleva un tic que ninguna repetición comparte. Saciado es apenas
     /// más inquieto que el original; famélico es un ojo que no se queda quieto.
     /// El libro NORMAL no marca la bandera: su ciclo queda intacto.
+    /// v6.50.90 — LA MIRADA NERVIOSA (la copia Nerviosa marca `Nervioso =
+    /// true`): revisa cada 2,4 s → 0,42 s, sus miradas SALTAN a la meta
+    /// (LERP 0,22 fijo — aterrizan de golpe), una de cada tres vuelve al
+    /// CENTRO y la mitad de las demás se va de DARDO LATERAL. Miedo, no
+    /// caos — sin el tic del Errático. El libro NORMAL tampoco marca esta
+    /// bandera: su ciclo sigue intacto.
     /// </summary>
     public class EstadoGrimorio
     {
@@ -41,7 +47,8 @@ namespace AethonMod.Content.Weapons
         private const float LERP_MIRADA = 0.10f;
 
         public float Hambre;
-        public bool Erratico;        // v6.50.87 — la copia ERRÁTICA (mirada nerviosa)
+        public bool Erratico;        // v6.50.87 — la copia ERRÁTICA (mirada caótica)
+        public bool Nervioso;        // v6.50.90 — la copia NERVIOSA (mirada ansiosa)
         public uint TickMarcado;
         public int TParpadeo = 180;
         public int Fase;                    // >0: secuencia del párpado (11→1)
@@ -86,18 +93,27 @@ namespace AethonMod.Content.Weapons
             }
 
             // --- MIRADA: 4 s (perezoso) → 0,35 s (frenético);
-            //     errática (v6.50.87): 3 s → 0,16 s — la mirada nerviosa ---
+            //     errática (v6.50.87): 3 s → 0,16 s — la mirada desenfrenada;
+            //     nerviosa (v6.50.90): 2,4 s → 0,42 s — revisa seguido, sin
+            //     llegar al frenesí de la errática: es miedo, no caos ---
             if (--TMirada <= 0)
             {
                 ElegirMirada();
                 float dwell = MathHelper.Lerp(4f * 60f, 0.35f * 60f, h);
                 if (Erratico)
                     dwell = MathHelper.Lerp(3f * 60f, 0.16f * 60f, h);
+                else if (Nervioso)
+                    dwell = MathHelper.Lerp(2.4f * 60f, 0.42f * 60f, h);
                 TMirada = Math.Max(8, (int)(dwell * (0.7f + Main.rand.NextFloat() * 0.7f)));
             }
-            // v6.50.87 — la errática resbala MÁS BRUSCO con el hambre (0,10 → 0,36)
+            // v6.50.87 — la errática resbala MÁS BRUSCO con el hambre (0,10 → 0,36);
+            // v6.50.90 — la nerviosa SALTA a su meta (0,22 fijo): miradas que
+            // aterrizan de golpe — sin el resbalón suave del original ni la
+            // brutalidad creciente de la errática
             DespActual = Vector2.Lerp(DespActual, DespMeta,
-                Erratico ? 0.10f + 0.26f * h : LERP_MIRADA);
+                Erratico ? 0.10f + 0.26f * h
+                : Nervioso ? 0.22f
+                : LERP_MIRADA);
         }
 
         private void ElegirMirada()
@@ -122,11 +138,21 @@ namespace AethonMod.Content.Weapons
             if (!seguir)
             {
                 // vaga: el ojo explora solo (el centro entra con peso bajo)
-                if (Main.rand.Next(10) == 0)
+                // v6.50.90 — la nerviosa: 1 de cada 3 miradas vuelve al
+                // CENTRO (la revisada ansiosa de la casa) y la mitad de las
+                // otras se va de DARDO LATERAL (el barrido
+                // izquierda-derecha del susto). Con la bandera apagada la
+                // secuencia de Main.rand es la MISMA de la .89 (los otros
+                // libros no cambian ni un tiro de dado).
+                bool alCentro = Nervioso ? Main.rand.Next(3) == 0
+                                          : Main.rand.Next(10) == 0;
+                if (alCentro)
                     meta = Vector2.Zero;
                 else
                 {
                     double ang = Main.rand.NextDouble() * Math.PI * 2.0;
+                    if (Nervioso && Main.rand.Next(2) == 0)
+                        ang = Main.rand.Next(2) == 0 ? 0.0 : Math.PI; // el dardo lateral
                     meta = SnapDireccion(new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 100f)
                            * new Vector2(3.5f, 2.8f);
                 }

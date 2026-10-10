@@ -124,14 +124,17 @@ Items: {
 			'''
 	}
 
-	GrimorioHambrientoTembloroso: {
-		DisplayName: Trembling Hungry Grimoire
+	// v6.50.90 — THE THIRD SEAT CHANGES HANDS: the Trembling one is
+	// DELETED and THE NERVOUS ONE enters (shudder + glitch + nerves).
+	GrimorioHambrientoNervioso: {
+		DisplayName: Nervous Hungry Grimoire
 		Tooltip:
 			'''
-			The TREMBLING copy — the same hungry eye, but this book
-			shivers: a soft shudder that grows with hunger, from a
-			sated whisper to the tremble of a full appetite. The
-			book and its eye tremble together.
+			The NERVOUS copy — the same hungry eye, but this book
+			lives frightened: it shivers nonstop, flinches out of
+			nowhere (and each startle breaks it into strips for a
+			beat), and its gaze darts side to side, checking. The
+			more hunger, the more startles — and the more it breaks.
 			Left click: homing bolt (testing, no mana).
 			Right click: resets the appetite to replay the demo.
 			Testing item — compare against the original.
@@ -147,7 +150,7 @@ Items: {
 			'''
 			The UNSTABLE copy — the union of both: the same hungry
 			eye, but this book falls apart with appetite. It
-			trembles like the Trembling one and suffers the
+			trembles without rest and suffers the
 			Erratic's interference: strips slipping in ever more
 			frequent, violent bursts.
 			A small red aura wraps it, breathing: the book burns
