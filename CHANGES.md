@@ -1,5 +1,81 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.91 — EL NERVIOSO CAZA POR SU CUENTA: LA CAZA, LA FUGA Y EL CÓDICE VIVO MUERE
+
+**Petición del usuario**: "no es que este nervioso por tener miedo, esta mas
+bien intranquilo, hambriento, enojado, inquieto, quiero comer y tiene hambre
+[…] cuando su hambre llegue a 100, hagamos que escape del jugador algo asi
+a como se usa El Codice Vivo […] El Codice Vivo lo puedes borrar por
+completo ya no es necesario […] si tiene hambre y el jugador deja de moverse
+por ejemplo 5 segundos ahora que es una prueba, el grimorio sale y comienza
+a flotar encima del jugador mirando al jugador hasta que algo se mueva cerca
+de el, cualquier criatura no hostil u hostil sera atacada por el libro,
+todas menos los NPC que viven en las casas […] del libro sale La Sombra de
+la Pagina haciendo un 10% de daño a la criatura hasta que la mata y la
+absorbe, esta muerte no cuenta como que la hizo el jugador y la criatura no
+deja loot, pero si cuenta como exp […] ademas hacer que el
+ACTUALIZAR-FUENTE.bat que esta dentro del proyecto primero borre la version
+anterior para copiar la nueva version".
+
+1. **NO ES MIEDO — ES HAMBRE**: el temperamento del Nervioso se relee tal
+   como pidió el usuario: UN APETITO CON CUERPO (intranquilo, hambriento,
+   enojado). La familia queda con CUATRO TEMPERAMENTOS: normal SERENO,
+   Errático CAÓTICO, Nervioso HAMBRIENTO, Inestable POSEÍDO (su aura roja
+   de firma NO se hereda).
+2. **LAS DOS VIDAS DEL NERVIOSO (el umbral es el 50%)**:
+   - **DEBAJO DEL 50% — EL CAZADOR**: tranquilo y paciente — SIN temblor,
+     SIN glitch, SIN sobresaltos (los efectos ahora nacen AL 50% y escalan
+     al 100% vía `HambreEfectos`; el ojo ansioso se enciende al cruzar
+     `NerviosoActivo()`, debajo corre el ciclo SERENO del original). Si el
+     jugador queda QUIETO 5 s (valor de PRUEBA), el libro SALE y flota
+     encima de él MIRÁNDOLO (`GrimorioNerviosoFlotante`: la levitación del
+     difunto Códice Vivo — muelle suave + vaivén + halo violeta, el ojo
+     clavado en su dueño). Cuando algo SE MUEVE cerca (≤480 px — cualquier
+     criatura hostil o no, MENOS los NPC que viven en las casas), del
+     libro sale **LA SOMBRA DE LA PÁGINA** (`SombraPaginaCaza`: la columna
+     viva de verlet NACIENDO DEL LIBRO, la masa negra, los ojos que miran,
+     la bruma y EL DEVORADOR cubriendo a la presa) y muerde: **10% de la
+     vida MÁXIMA por golpe** cada 30 t (diez golpes) hasta matarla y
+     **ABSORBERLA** — sin loot, sin gore, sin crédito del jugador (la
+     criatura se APAGA bajo la sombra: `checkDead` jamás corre; los jefes
+     multi-segmento caen EN CADENA); la **XP SÍ cobra** (el pipeline de la
+     casa al Grimorio del Eterno visible); el hambre **baja 1% por presa**
+     (50% → 49%) y el libro CAZA HASTA EL 0% — el reloj del hambre se
+     CONGELA mientras patrulla (`EstadoGrimorio.PasoSinHambre`: el ojo
+     vive, el apetito no avanza).
+   - **DEL 50% EN ADELANTE — EL IMPACIENTE**: «el libro se vuelve inquieto
+     y muy hambriento, comienza a decir que tiene hambre» — el libro
+     HABLA (`FrasesDeHambre`: «Tengo hambre…» → «¡Quiero comer. ¡YA!» →
+     «¡HAMBRE! ¡HAMBRE! ¡HAMBRE!», cada vez más seguido y más desesperado,
+     en la pantalla del dueño) y **comienzan las PROBABILIDADES de las
+     OLEADAS DE HAMBRE** (4% → 20% cada 5 s según la urgencia,
+     `GrimorioFuriaSistema.Provocar` natural con el nivel del portador).
+   - **AL 100% — EL FUGITIVO**: «que escape del jugador» — el libro se
+     desprende y HUYE flotando (modo fuga: guarda 380–640 px de
+     distancia, quiebres nerviosos cada 30–55 t, sesgo hacia arriba, ojo
+     ROJO al máximo, cuerpo ROTO en tiras — todo el repertorio) hasta que
+     lo alimenten o lo reinicien (clic derecho).
+3. **EL CÓDICE VIVO BORRADO POR COMPLETO**: ítem + 2 proyectiles + 2
+   rawimg + sus registraciones (la animación del ítem en
+   `PostSetupContent`, la entrada de la Bolsa del Probador) + localización
+   ×3. Su levitación — el libro que se suelta y vela flotando — vive ahora
+   en el ESPÍRITU del Grimorio Nervioso (caza y fuga).
+4. **ACTUALIZAR-FUENTE.bat / actualizar-fuente.sh**: ahora PRIMERO BORRAN
+   la versión anterior de `ModSources\AethonMod` antes de copiar la nueva
+   (rmdir + robocopy /MIR y rm -rf) — copia LIMPIA, sin archivos muertos
+   de versiones viejas colgando del compilador (como los del difunto).
+5. **VERIFICACIÓN**: oráculo 0/0 (308 .cs) · build real 0/0 · .tmod
+   2.564.967 B md5 `ce511c4ea682c4012603fe390a0ad537`: 386 entradas
+   (388 de la .90 − 2 rawimg del Códice), EOF exacto, blob diff whitelist
+   exacto, arte byte-idéntico, CECIL: los 3 difuntos AUSENTES + los 2
+   nuevos presentes + las 11 firmas del Nervioso + Errático/Inestable/
+   clase-ítem-base con IL IDÉNTICO a .90 + EstadoGrimorio documentado ·
+   hjson: es-ES espejo de es-MX por CONTENIDO, 789 hojas simétricas
+   es↔en, en-US con sus tabs · headless «Sandboxing v6.50.91 → menú de
+   mundos» 0 excepciones · EL 19º INCIDENTE DEL ESPEJO cazado por la
+   auditoría (la herramienta de edición normalizó tabs→espacios el en-US
+   entero — cura: restaurar de git + parche byte-exacto por script).
+
 ## Commit v6.50.90 — EL GRIMORIO NERVIOSO: EL TERCER ASIENTO CAMBIA DE DUEÑO (temblor + glitch + nervios)
 
 **Petición del usuario**: "el tercer libro borralo, y crea otro con las
