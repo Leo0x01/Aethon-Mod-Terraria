@@ -1,5 +1,64 @@
 # AethonMod — Historial de Cambios
 
+## Commit v6.50.92 — LA FAMILIA SE ENCOGE A DOS + LA GRACIA DE LOS 10 s + EL LIBRO MIRA SU COMIDA (+ el ACTUALIZAR-FUENTE arreglado)
+
+**Petición del usuario**: "el ACTUALIZAR-FUENTE.bat tiene que borrar y copiar,
+pero solo borra y no copia, arreglar eso / borra al grimorio hambriento
+inestable y al erratico, deja el original y al nervioso / ahora, el hambre
+debe subir si es que en 10 segundos no come nada, el libro debe mirar lo
+que esta comiendo".
+
+1. **EL .BAT QUE BORRABA Y NO COPIABA — LA CAUSA RAÍZ**: la versión .91
+   tenía finales de línea LF (solo `\n`) y bloques `if` de varias líneas —
+   cmd.exe puede DESCARRILAR al parsear bloques multilinea cuando cruzan
+   sus fronteras internas de lectura de 512 bytes con finales LF (por eso
+   el `rmdir` SÍ corría pero el `robocopy` no: los ~400 bytes que añadí al
+   bloque de borrado desplazaron cada línea posterior a través de esas
+   fronteras — la .90 con la MISMA lógica copiaba porque sus fronteras
+   caían en lugares inofensivos). CURA DEFINITIVA: finales **CRLF**
+   (`\r\n`) + **CERO bloques entre paréntesis** (todo `if` de una sola
+   línea + etiquetas `goto`) + conteo de archivos copiados como
+   verificación visible («[OK] Fuente actualizada: N archivos copiados») +
+   `.gitattributes` con `*.bat -text` para que git JAMÁS normalice sus
+   finales de línea (los ZIP de GitHub descargan el blob crudo — el CRLF
+   viaja dentro). El `.sh` hereda el conteo y el typo `echo]` muere.
+2. **LA FAMILIA SE ENCOGE A DOS**: el Grimorio Hambriento **Errático**
+   (.87) y el **Inestable** (.89) BORRADOS por completo — clases, sprites,
+   entradas de la Bolsa del Probador y localización ×3 (la bandera
+   `Erratico` de `EstadoGrimorio` murió con su dueño). Quedan el original
+   SERENO y el Nervioso HAMBRIENTO — cada uno con su `EstadoGrimorio`
+   propio, pasando hambre por separado como desde la .86.
+3. **LA GRACIA DE LOS 10 s** (la letra: «el hambre debe subir si es que en
+   10 segundos no come nada»): el reloj del apetito SOLO corre cuando el
+   libro lleva 10 s SIN COMER. Cada comida marca la hora del último bocado
+   (`UltimaComida`): las presas absorbidas por la caza del Nervioso
+   (−1% hambre + 10 s de paz) y el reinicio de la demo (clic derecho:
+   hambre a 0 + 10 s de calma). Un libro recién creado arranca su gracia
+   en el primer tick. La tasa no cambia (0→100% en un minuto tras la
+   gracia); lo que cambia es QUE SOLO SUBE SI NO COME.
+4. **EL LIBRO MIRA LO QUE ESTÁ COMIENDO** (la letra: «el libro debe mirar
+   lo que esta comiendo»): mientras la Sombra de la Página devora a una
+   presa, TODO el libro mira su comida — el ESPÍRITU flotante se INCLINA
+   hacia la presa y clava el iris en ella (o en las almas subiendo mientras
+   las absorbe, en vez de mirar fijamente al dueño), y el ojo del ÍTEM
+   (hotbar, mano, mundo) persigue el festín con seguimiento suave
+   (`FocoPantalla` en `EstadoGrimorio::Paso` — LERP 0,10, seguimiento
+   continuo, no saltos sobre la comida). Al acabar el festín, el ciclo de
+   miradas de siempre.
+5. **VERIFICACIÓN**: oráculo 0/0 (306 .cs = 308 − 2 difuntos) · build real
+   0/0 · .tmod 2.553.604 B md5 `96a68ef512886dca01335abb16fb4d7f`: 384
+   entradas (386 de la .91 − 2 rawimg de los difuntos), EOF exacto, blob
+   diff whitelist exacto (dll/pdb/Info + 3 hjson), arte byte-idéntico en
+   las 378 restantes, CECIL: los 2 difuntos AUSENTES + FocoDelFestin/
+   UltimaComida/FocoPantalla/TICKS_GRACIA_COMIDA presentes + la GRACIA
+   600 plegada en el IL de `Paso` + SombraPaginaCaza y la clase-ítem
+   GrimorioHambriento con IL IDÉNTICO a la .91 + el espíritu CAMBIA
+   documentado (se inclina y mira) · hjson: es-ES espejo de es-MX por
+   contenido (regenerado), familia de DOS en los 3 idiomas + 13 claves del
+   Nervioso vivas + difuntos purgados, 785 hojas simétricas es↔en, en-US
+   con sus tabs · headless «Sandboxing v6.50.92 → Adding Recipes → menú
+   de mundos» 0 excepciones.
+
 ## Commit v6.50.91 — EL NERVIOSO CAZA POR SU CUENTA: LA CAZA, LA FUGA Y EL CÓDICE VIVO MUERE
 
 **Petición del usuario**: "no es que este nervioso por tener miedo, esta mas
