@@ -76,6 +76,13 @@ anterior para copiar la nueva version".
    auditoría (la herramienta de edición normalizó tabs→espacios el en-US
    entero — cura: restaurar de git + parche byte-exacto por script).
 
+**Publicada**: release 408797774 (make_latest) + asset 627400987
+2.564.967 B · CDN verificado byte a byte (md5
+`ce511c4ea682c4012603fe390a0ad537`) · /releases/latest = v6.50.91 ·
+respaldo /home/sync/AethonMod-v6.50.91.tmod. (El token de la .90 murió
+con el wipe del sandbox; el usuario entregó uno nuevo — repuesto en
+`.env` + `~/.config/git/credentials`, las 2 ubicaciones de la casa.)
+
 ## Commit v6.50.90 — EL GRIMORIO NERVIOSO: EL TERCER ASIENTO CAMBIA DE DUEÑO (temblor + glitch + nervios)
 
 **Petición del usuario**: "el tercer libro borralo, y crea otro con las
